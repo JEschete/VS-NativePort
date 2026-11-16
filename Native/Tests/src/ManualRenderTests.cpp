@@ -9,12 +9,12 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Legacy/Psx.h"
+#include "Menu/TextBoxStateLive.hpp"
 
 extern "C" {
 #include "Core/Text/TextCode.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Manual.h"
-#include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -128,12 +128,12 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
     line[1] = static_cast<char>(40 + index);
     line[2] = static_cast<char>(Core_TextCode_Terminator);
   }
-  const auto saved_box = *Menu_TextBox(0);
+  const auto saved_box = *VS::Menu::LiveTextBox(0);
   auto* saved_help = Menu_Manual_helpText;
   const int saved_scroll = Menu_Manual_scrollPosition;
   Menu_Manual_helpText = help.data();
   Menu_Manual_scrollPosition = scroll;
-  Menu_TextBox(0)->flags.speakerTexture = 32;
+  VS::Menu::LiveTextBox(0)->flags.speakerTexture = 32;
   Menu_Manual_CopyPageText();
   ReuseReturnedStack();
   std::string expected{static_cast<char>(Core_TextCode_ChunkSize),
@@ -146,8 +146,9 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
     expected.push_back(static_cast<char>(Core_TextCode_Newline));
   }
   expected.back() = static_cast<char>(Core_TextCode_Terminator);
-  CHECK(std::string(Menu_TextBox(0)->string, expected.size()) == expected);
-  *Menu_TextBox(0) = saved_box;
+  CHECK(std::string(VS::Menu::LiveTextBox(0)->string, expected.size()) ==
+        expected);
+  *VS::Menu::LiveTextBox(0) = saved_box;
   Menu_Manual_helpText = saved_help;
   Menu_Manual_scrollPosition = saved_scroll;
 }

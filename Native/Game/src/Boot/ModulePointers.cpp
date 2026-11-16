@@ -116,6 +116,7 @@
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -349,18 +350,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009695Cu, 0u, (void*)&Battle_DrawEquipmentStatChange, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800971D4u, 0u, (void*)&Battle_CommitEquipmentStatChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009EA14u, 0u, (void*)&Battle_PlayActorDamageReaction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&Menu_SetTextBoxText, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&Menu_SelectTextBoxChoice, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB268u, 0u, (void*)&Menu_DismissAllTextBoxes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB2B8u, 0u, (void*)&Menu_ShowSceneNotification, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&Menu_IsSceneNotificationPending, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&Menu_ReleaseSceneNotification, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&Menu_UpdateTextBoxes, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCDF4u, 0u, (void*)&Menu_TextBox, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCE10u, 0u, (void*)&Menu_TextBoxAnchor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCF08u, 0u, (void*)&Menu_InitTextBox, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CD064u, 0u, (void*)&Menu_DismissTextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CD0FCu, 0u, (void*)&Menu_DrawInformationBoxHeader, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CD158u, 0u, (void*)&Menu_DrawInformationBoxBackdrop, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CD3A0u, 0u, (void*)&Menu_FlipTextBoxShapePoint, 0u, 0u, 0u},
@@ -2089,6 +2082,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU0.PRG", 0x80103464u, 0u, (void*)&VS::Menu::Magic::UpdateShamanMenuLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x801037A8u, 0u, (void*)&VS::Menu::Magic::UpdateSorcererMenuLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x80103AECu, 0u, (void*)&VS::Menu::Magic::UpdateEnchanterMenuLive, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&VS::Menu::SetLiveTextBoxText, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&VS::Menu::SelectLiveTextBoxChoice, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&VS::Menu::InitLiveInformationTextBox, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB268u, 0u, (void*)&VS::Menu::DismissAllLiveTextBoxes, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CCDF4u, 0u, (void*)&VS::Menu::LiveTextBox, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CCE10u, 0u, (void*)&VS::Menu::LiveTextBoxAnchor, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CCF08u, 0u, (void*)&VS::Menu::InitLiveTextBox, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CD064u, 0u, (void*)&VS::Menu::DismissLiveTextBox, 0u, 0u, 0u},
     {"EFFECT/PLG128.BIN", 0x800FDEC4u, 0u, (void*)&VS::Effects::Plg128::UpdateLiveEffectCamera, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CA97Cu, 0u, (void*)&VS::Effects::ScreenDistortion::ResetLiveScreenOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB708u, 0u, (void*)&VS::Effects::ScreenDistortion::DrawLiveScreenOverlay, 0u, 0u, 0u},

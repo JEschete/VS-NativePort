@@ -16,6 +16,7 @@
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
@@ -127,7 +128,7 @@ const char* RefusalText(event::ScriptDialogRefusal refusal) {
 
 // The core checks every box against kTextBoxCount before it reaches the host.
 Menu_TextBoxState& Box(int box) {
-  Menu_TextBoxState* state = Menu_TextBox(box);
+  Menu_TextBoxState* state = VS::Menu::LiveTextBox(box);
   Require(state != nullptr, "Script dialog text box is missing");
   return *state;
 }
@@ -154,9 +155,9 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
   void InitTextBox(int box, const event::TextBoxLayout& layout) override {
     ClearRetainedDialogText(Box(box));
     PruneDialogOwners();
-    Menu_InitTextBox(box, layout.flags, layout.x, layout.y,
-                     layout.chars_per_line, layout.line_count, layout.center_x,
-                     layout.center_y);
+    VS::Menu::InitLiveTextBox(box, layout.flags, layout.x, layout.y,
+                              layout.chars_per_line, layout.line_count,
+                              layout.center_x, layout.center_y);
   }
   [[nodiscard]] event::TextBoxFrame Frame(int box) const override {
     const Menu_TextBoxState& state = Box(box);
@@ -185,7 +186,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
                                                   int columns,
                                                   int lines) override {
     const Menu_TextAnchorWord word =
-        Menu_TextBoxAnchor(preset, orientation, columns, lines);
+        VS::Menu::LiveTextBoxAnchor(preset, orientation, columns, lines);
     return {.x = word.x,
             .y = word.y,
             .alignment = static_cast<int>(word.alignment),
@@ -213,7 +214,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
         RefuseNativeDialog(box, string_id);
         return;
       }
-      static_cast<void>(Menu_SetTextBoxText(
+      static_cast<void>(VS::Menu::SetLiveTextBoxText(
           box, const_cast<char*>(reinterpret_cast<const char*>(text->data()))));
       PruneDialogOwners();
       return;
@@ -225,17 +226,17 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     Require(Event_dialogStrings != nullptr,
             "Script dialog strings are missing");
     const std::uint16_t offset = Event_dialogStrings[string_id];
-    static_cast<void>(Menu_SetTextBoxText(
+    static_cast<void>(VS::Menu::SetLiveTextBoxText(
         box, reinterpret_cast<char*>(&Event_dialogStrings[offset])));
   }
   [[nodiscard]] int PollTextBox(int box) override {
-    return Menu_SetTextBoxText(box, nullptr);
+    return VS::Menu::SetLiveTextBoxText(box, nullptr);
   }
   void SetTextBoxSelection(int selection) override {
     Audio_Seq_unusedStateFlags.textBoxSelection = static_cast<char>(selection);
   }
   [[nodiscard]] int DismissTextBox(int box) override {
-    const int result = Menu_DismissTextBox(box);
+    const int result = VS::Menu::DismissLiveTextBox(box);
     PruneDialogOwners();
     return result;
   }
@@ -246,7 +247,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     Event_isTextSelectionActive = active ? 1 : 0;
   }
   [[nodiscard]] int SelectTextBoxChoice(std::uint8_t box_mask) override {
-    return Menu_SelectTextBoxChoice(box_mask);
+    return VS::Menu::SelectLiveTextBoxChoice(box_mask);
   }
 
   [[nodiscard]] std::uint8_t ScriptFlag(int id) override {

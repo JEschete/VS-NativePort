@@ -1625,6 +1625,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Magic::UpdateShamanMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Menu::Magic::UpdateSorcererMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Menu::Magic::UpdateEnchanterMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
+    "VS::Menu::SetLiveTextBoxText": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
+    "VS::Menu::SelectLiveTextBoxChoice": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
+    "VS::Menu::InitLiveInformationTextBox": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
+    "VS::Menu::DismissAllLiveTextBoxes": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
+    "VS::Menu::LiveTextBox": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
+    "VS::Menu::LiveTextBoxAnchor": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
+    "VS::Menu::InitLiveTextBox": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
+    "VS::Menu::DismissLiveTextBox": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
     "VS::Effects::Plg128::UpdateLiveEffectCamera": r"Native\Game\include\Effects\Plugins\Plg128CameraLive.hpp",
     "VS::Effects::LiveQueueActionHitEffect": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
     "VS::Effects::LiveQueueActionImpactEffects": r"Native\Game\include\Effects\SecondaryEffectRequestsLive.hpp",
@@ -2793,6 +2801,14 @@ OWNED_CALL_BINDINGS["F02604"] = "VS::Menu::Magic::UpdateWarlockMenuLive"
 OWNED_CALL_BINDINGS["F02605"] = "VS::Menu::Magic::UpdateShamanMenuLive"
 OWNED_CALL_BINDINGS["F02606"] = "VS::Menu::Magic::UpdateSorcererMenuLive"
 OWNED_CALL_BINDINGS["F02607"] = "VS::Menu::Magic::UpdateEnchanterMenuLive"
+OWNED_CALL_BINDINGS["F01329"] = "VS::Menu::SetLiveTextBoxText"
+OWNED_CALL_BINDINGS["F01330"] = "VS::Menu::SelectLiveTextBoxChoice"
+OWNED_CALL_BINDINGS["F01343"] = "VS::Menu::InitLiveInformationTextBox"
+OWNED_CALL_BINDINGS["F01378"] = "VS::Menu::DismissAllLiveTextBoxes"
+OWNED_CALL_BINDINGS["F01409"] = "VS::Menu::LiveTextBox"
+OWNED_CALL_BINDINGS["F01410"] = "VS::Menu::LiveTextBoxAnchor"
+OWNED_CALL_BINDINGS["F01411"] = "VS::Menu::InitLiveTextBox"
+OWNED_CALL_BINDINGS["F01412"] = "VS::Menu::DismissLiveTextBox"
 OWNED_CALL_BINDINGS["F01516"] = "VS::Effects::LiveBranchEffectScriptIf"
 OWNED_CALL_BINDINGS["F01517"] = "VS::Effects::LiveYieldEffectScriptAtOffset"
 OWNED_CALL_BINDINGS["F01518"] = "VS::Effects::LiveJumpEffectScript"
@@ -4721,6 +4737,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU0.PRG", 0x80103464, "VS::Menu::Magic::UpdateShamanMenuLive"),  # F02605
     ("MENU/MENU0.PRG", 0x801037A8, "VS::Menu::Magic::UpdateSorcererMenuLive"),  # F02606
     ("MENU/MENU0.PRG", 0x80103AEC, "VS::Menu::Magic::UpdateEnchanterMenuLive"),  # F02607
+    ("BATTLE/BATTLE.PRG", 0x800C6BF0, "VS::Menu::SetLiveTextBoxText"),  # F01329
+    ("BATTLE/BATTLE.PRG", 0x800C6C8C, "VS::Menu::SelectLiveTextBoxChoice"),  # F01330
+    ("BATTLE/BATTLE.PRG", 0x800C8E04, "VS::Menu::InitLiveInformationTextBox"),  # F01343
+    ("BATTLE/BATTLE.PRG", 0x800CB268, "VS::Menu::DismissAllLiveTextBoxes"),  # F01378
+    ("BATTLE/BATTLE.PRG", 0x800CCDF4, "VS::Menu::LiveTextBox"),  # F01409
+    ("BATTLE/BATTLE.PRG", 0x800CCE10, "VS::Menu::LiveTextBoxAnchor"),  # F01410
+    ("BATTLE/BATTLE.PRG", 0x800CCF08, "VS::Menu::InitLiveTextBox"),  # F01411
+    ("BATTLE/BATTLE.PRG", 0x800CD064, "VS::Menu::DismissLiveTextBox"),  # F01412
     ("EFFECT/PLG128.BIN", 0x800FDEC4, "VS::Effects::Plg128::UpdateLiveEffectCamera"),  # F02068
     ("BATTLE/BATTLE.PRG", 0x800CA97C, "VS::Effects::ScreenDistortion::ResetLiveScreenOverlay"),  # F01363
     ("BATTLE/BATTLE.PRG", 0x800CB708, "VS::Effects::ScreenDistortion::DrawLiveScreenOverlay"),  # F01389
@@ -7238,9 +7262,6 @@ REGEX_FIXES += [
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
     for name, bindings, evidence in (
-        ("Menu::SelectTextBoxChoice",
-         (('v0', 'previous_choice_index'),),
-         "F01330 src\\BATTLE\\BATTLE.PRG\\5BF94.c:1559-1650 (vs_battle_selectTextBox). Named roles: previous choice index."),
         ("Menu::Framework::LoadMenuOverlay",
          (('arg0', 'packed_menu_state'),),
          "F01342 src\\BATTLE\\BATTLE.PRG\\5BF94.c:2576-2651 (vs_battle_loadMenuPrg). Named roles: packed menu state."),
@@ -7271,15 +7292,9 @@ REGEX_FIXES += [
         ("Menu::Framework::OpenChestStorageMenu",
          (('arg0', 'chest_location_id'),),
          "F01375 src\\BATTLE\\BATTLE.PRG\\5BF94.c:3737-3742 (func_800CB1C0). Named roles: chest location id."),
-        ("Menu::DismissAllTextBoxes",
-         (('var_s1', 'all_text_boxes_dismissed'),),
-         "F01378 src\\BATTLE\\BATTLE.PRG\\5BF94.c:3757-3769 (_dismissAllTextBoxes). Named roles: all text boxes dismissed."),
         ("Menu::ShowSceneNotification",
          (('arg0', 'notification_kind'), ('arg1', 'notification_subject_id'), ('arg2', 'timed_notification')),
          "F01379 src\\BATTLE\\BATTLE.PRG\\5BF94.c:3771-3800 (vs_battle_displaySceneMessage). Named roles: notification kind, notification subject id, timed notification."),
-        ("Menu::TextBoxAnchor",
-         (('arg0', 'anchor_preset_index'), ('arg1', 'orientation_flags'), ('arg2', 'text_column_count'), ('arg3', 'text_line_count'), ('unk24', 'anchor_alignment')),
-         "F01410 src\\BATTLE\\BATTLE.PRG\\5BF94.c:4546-4565 (func_800CCE10). Named roles: anchor preset index, orientation flags, text column count, text line count, anchor alignment."),
         ("Menu::DrawInformationBoxHeader",
          (('arg0', 'header_y'), ('arg1', 'header_kind')),
          "F01413 src\\BATTLE\\BATTLE.PRG\\5BF94.c:4633-4639 (func_800CD0FC). Named roles: header y, header kind."),

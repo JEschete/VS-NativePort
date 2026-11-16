@@ -11,6 +11,7 @@
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -209,7 +210,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
         Menu_Inventory_discardMenuItemCategory = params >> 8;
         Menu_Inventory_discardMenuSelectedItem = params & 0xFF;
 
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
+        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));
         VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                     [Menu_Inventory_discardType + Text_Menu_ITEMHELP_BIN_Index_discardConfirm]]);

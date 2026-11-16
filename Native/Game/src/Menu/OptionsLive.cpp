@@ -14,6 +14,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Options.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -113,7 +114,7 @@ class LiveHost final : public Host {
     Framework::SetLiveCommandLabel(action);
   }
   void InitInformationTextBox(Framework::InformationHeader header) override {
-    Menu_InitInformationTextBox(
+    VS::Menu::InitLiveInformationTextBox(
         static_cast<enum Menu_InformationBoxHeader>(header));
   }
   void SetInformationTextBoxState(int state) override {

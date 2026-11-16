@@ -41,6 +41,7 @@
 #include "Menu/RenameLive.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
@@ -735,7 +736,8 @@ class LiveHost final : public Host {
 
   void InitInformationBox(InformationHeader header) override {
     const CallOutScope scope;
-    Menu_InitInformationTextBox(static_cast<Menu_InformationBoxHeader>(header));
+    VS::Menu::InitLiveInformationTextBox(
+        static_cast<Menu_InformationBoxHeader>(header));
   }
 
   void SetInformationBoxState(std::uint8_t state) override {
@@ -748,7 +750,7 @@ class LiveHost final : public Host {
       return;
     }
     const CallOutScope scope;
-    Menu_SetTextBoxText(kInformationBox, Mutable(text));
+    VS::Menu::SetLiveTextBoxText(kInformationBox, Mutable(text));
   }
 
   void ShowInformationMessage(std::span<const std::uint8_t> text) override {
@@ -758,12 +760,12 @@ class LiveHost final : public Host {
     }
     Menu_textBoxes[kInformationBox].flags.speakerTexture = kInformationPortrait;
     const CallOutScope scope;
-    Menu_SetTextBoxText(kInformationBox, Mutable(text));
+    VS::Menu::SetLiveTextBoxText(kInformationBox, Mutable(text));
   }
 
   void DismissInformationBox() override {
     const CallOutScope scope;
-    Menu_DismissTextBox(kInformationBox);
+    VS::Menu::DismissLiveTextBox(kInformationBox);
   }
 
   void SetStringArgument(std::span<const std::uint8_t> text) override {

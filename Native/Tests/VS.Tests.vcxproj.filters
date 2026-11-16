@@ -1038,6 +1038,9 @@
     <ClCompile Include="src\TextBoxFrameTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TextBoxStateTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TextTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

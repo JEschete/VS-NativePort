@@ -10,6 +10,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -41,7 +42,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
-#include "Menu/TextBox.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
@@ -578,8 +578,8 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_Map_backgroundBrightness -= 16;
             Menu_Map_geomOffsetX += 64;
         } else {
-            Menu_InitTextBox(0, 0, 60, 224, 16, 1, 60, 224);
-            Menu_SetTextBoxText(0, Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].name);
+            VS::Menu::InitLiveTextBox(0, 0, 60, 224, 16, 1, 60, 224);
+            VS::Menu::SetLiveTextBoxText(0, Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].name);
             ++Menu_Map_menuState;
         }
 
@@ -618,7 +618,7 @@ int Menu_Map_UpdateMapMenu(void)
 
             Menu_Map_menuState = Menu_Map_MapMenuState_Quit;
 
-            Menu_DismissTextBox(0);
+            VS::Menu::DismissLiveTextBox(0);
 
         } else if (Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene] != 0) {
             controls_state = 5;
@@ -797,7 +797,7 @@ int Menu_Map_UpdateMapMenu(void)
                     }
 
                     if (roomIndex != Menu_Map_currentRoomIndex) {
-                        Menu_SetTextBoxText(0, Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].name);
+                        VS::Menu::SetLiveTextBoxText(0, Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].name);
                     }
                 }
             }
@@ -820,7 +820,7 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_Map_menuState = Menu_Map_MapMenuState_Quit;
             Menu_Map_quitState = 2;
 
-            Menu_DismissTextBox(0);
+            VS::Menu::DismissLiveTextBox(0);
 
         } else if (area_selection_result == -2) {
             Menu_Map_menuState = Menu_Map_MapMenuState_ProcessInput;
@@ -886,7 +886,7 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
 
             Menu_Map_CenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
-            Menu_SetTextBoxText(0, Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].name);
+            VS::Menu::SetLiveTextBoxText(0, Menu_Map_roomNamesTable[Menu_Map_currentRoomIndex].name);
 
             Menu_Map_geomOffsetX = -384;
             Menu_Map_geomOffsetY = 0;
@@ -940,7 +940,7 @@ void Menu_Map_DrawFrame(void)
 
     if (flags->mapPaling[scene] != 0) {
         Menu_Map_DrawPalingDistortion();
-        Menu_SetTextBoxText(0, (char*)&Menu_Map_framePaling[Menu_Map_framePaling[0]]);
+        VS::Menu::SetLiveTextBoxText(0, (char*)&Menu_Map_framePaling[Menu_Map_framePaling[0]]);
         return;
     }
 
@@ -1953,7 +1953,7 @@ void Menu_Map_DrawControls(void)
 {
     static int Menu_Map_controlsUiXOffset;
 
-    Menu_TextBoxState* textBox = Menu_TextBox(0);
+    Menu_TextBoxState* textBox = VS::Menu::LiveTextBox(0);
 
     if (Menu_Map_uiAnimationState == 0) {
 

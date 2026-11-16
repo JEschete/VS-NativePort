@@ -18,6 +18,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -80,7 +81,8 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
     return Framework::AreLiveMenuRowsIdle();
   }
   void InitializeInformationBox() override {
-    Menu_InitInformationTextBox(static_cast<Menu_InformationBoxHeader>(1));
+    VS::Menu::InitLiveInformationTextBox(
+        static_cast<Menu_InformationBoxHeader>(1));
   }
   bool InformationDone() override {
     return Menu_textBoxes[kInformationBox].flags.done != 0;

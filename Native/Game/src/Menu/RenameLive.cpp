@@ -19,6 +19,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Rename.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -36,7 +37,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/RenameLiveState.h"
-#include "Menu/TextBox.h"
 }
 
 // decomp: _renderRenameMenuStrings (src/MENU/MENU8.PRG/21A0.c)
@@ -153,8 +153,9 @@ class LiveHost final : public Host {
   }
   void ShowConfirmPrompt(std::span<const std::uint8_t> name,
                          std::span<const std::uint8_t> prompt) override {
-    Menu_InitInformationTextBox(static_cast<enum Menu_InformationBoxHeader>(
-        Framework::InformationHeader::kCaution));
+    VS::Menu::InitLiveInformationTextBox(
+        static_cast<enum Menu_InformationBoxHeader>(
+            Framework::InformationHeader::kCaution));
     g_prompt_name.fill(Render::kTextTerminator);
     std::memcpy(g_prompt_name.data(), name.data(),
                 std::min(name.size(), kNameBytes));
@@ -175,7 +176,7 @@ class LiveHost final : public Host {
     Framework::SetLiveInformationMessage(Menu_Framework_stringBuf);
   }
   void DismissConfirmPrompt() override {
-    Menu_DismissTextBox(kInformationTextBox);
+    VS::Menu::DismissLiveTextBox(kInformationTextBox);
   }
   void ReturnToMenu() override {
     Menu_Framework_menuState.currentMenu = kWeaponMenu;

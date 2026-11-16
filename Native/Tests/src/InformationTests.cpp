@@ -7,6 +7,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 
 extern "C" {
@@ -54,7 +55,7 @@ struct InformationFixture {
     Menu_Framework_rowTypeBuf = row_types.data();
     Input_buttonsState = 0;
     Menu_textBoxes[7] = {};
-    Menu_InitInformationTextBox(Menu_InformationBoxHeader_Information);
+    VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
     ResetPackets();
   }
 

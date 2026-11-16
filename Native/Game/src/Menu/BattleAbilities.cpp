@@ -5,6 +5,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -114,7 +115,7 @@ int Menu_BattleAbilities_UpdateBreakArtUnlock(int init)
             return 1;
         }
 
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(3));
+        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));
 
         Audio_Seq_unusedArtsStatus.artsLearned[weaponCategoryMod] = actionId + 1;
         actionId = 184 + ((weaponCategory - 1) * 4) + actionId;
@@ -407,7 +408,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
                 break;
             }
 
-            Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(3));
+            VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));
 
             action = Menu_BattleAbilities_abilityUnlockRemainingChainAbilities[row];
             Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
@@ -433,7 +434,7 @@ int Menu_BattleAbilities_UpdateAbilityUnlock(int initialize)
                 break;
             }
 
-            Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(3));
+            VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));
 
             action = Menu_BattleAbilities_abilityUnlockRemainingDefenseAbilities[row];
             Battle_stringContext.strings[1] = Battle_actionDefinitions[action].name;
@@ -506,7 +507,7 @@ int Menu_BattleAbilities_UpdateUnlockNotifications(char* state)
         break;
 
     case Menu_BattleAbilities_UnlockNotificationState_Exit:
-        if (Menu_DismissTextBox(7) == 0) {
+        if (VS::Menu::DismissLiveTextBox(7) == 0) {
             *state = Menu_BattleAbilities_UnlockNotificationState_Init;
             return 1;
         }

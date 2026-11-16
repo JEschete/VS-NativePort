@@ -46,6 +46,7 @@
 #include "Items/LootLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -1106,7 +1107,7 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
 
   void InitInformationBox() override {
-    Menu_InitInformationTextBox(Menu_InformationBoxHeader_None);
+    VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_None);
   }
   void ShowNoTargetsMessage() override {
     const int offset = Battle_doorStrings[0];
@@ -1115,8 +1116,9 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
       return;
     }
     Menu_textBoxes[kInformationTextBox].flags.frameShape = kNoTargetsFrameShape;
-    Menu_SetTextBoxText(kInformationTextBox,
-                        reinterpret_cast<char*>(&Battle_doorStrings[offset]));
+    VS::Menu::SetLiveTextBoxText(
+        kInformationTextBox,
+        reinterpret_cast<char*>(&Battle_doorStrings[offset]));
   }
   void SetContextText(int slot, battle::TargetText text) override {
     if (!InRange(Battle_stringContext.strings, slot)) {
@@ -1136,10 +1138,10 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     auto* view = reinterpret_cast<Battle_TargetSphereLabelView*>(&sphere_);
     VS::Render::FormatLiveEncodedText(view->textBuffer,
                                       Battle_targetInfoTemplate);
-    Menu_SetTextBoxText(kInformationTextBox, view->textBuffer);
+    VS::Menu::SetLiveTextBoxText(kInformationTextBox, view->textBuffer);
   }
   void DismissInformationBox() override {
-    Menu_DismissTextBox(kInformationTextBox);
+    VS::Menu::DismissLiveTextBox(kInformationTextBox);
   }
 
  private:

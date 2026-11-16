@@ -337,28 +337,28 @@
 [
 116,
 [
-"        Menu_InitInformationTextBox(3);"
+"        VS::Menu::InitLiveInformationTextBox(3);"
 ],
 [
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(3));"
+"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));"
 ]
 ],
 [
 409,
 [
-"            Menu_InitInformationTextBox(3);"
+"            VS::Menu::InitLiveInformationTextBox(3);"
 ],
 [
-"            Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(3));"
+"            VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));"
 ]
 ],
 [
 435,
 [
-"            Menu_InitInformationTextBox(3);"
+"            VS::Menu::InitLiveInformationTextBox(3);"
 ],
 [
-"            Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(3));"
+"            VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));"
 ]
 ],
 [
@@ -501,10 +501,10 @@
 [
 211,
 [
-"        Menu_InitInformationTextBox(1);"
+"        VS::Menu::InitLiveInformationTextBox(1);"
 ],
 [
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
+"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
 ]
 ],
 [
@@ -599,37 +599,37 @@
 [
 380,
 [
-"        Menu_InitInformationTextBox(1);"
+"        VS::Menu::InitLiveInformationTextBox(1);"
 ],
 [
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
+"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
 ]
 ],
 [
 614,
 [
-"        Menu_InitInformationTextBox(1);"
+"        VS::Menu::InitLiveInformationTextBox(1);"
 ],
 [
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
+"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
 ]
 ],
 [
 1052,
 [
-"        Menu_InitInformationTextBox(1);"
+"        VS::Menu::InitLiveInformationTextBox(1);"
 ],
 [
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
+"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
 ]
 ],
 [
 1106,
 [
-"        Menu_InitInformationTextBox(1);"
+"        VS::Menu::InitLiveInformationTextBox(1);"
 ],
 [
-"        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
+"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
 ]
 ],
 [
@@ -657,10 +657,10 @@
 [
 1603,
 [
-"                Menu_InitInformationTextBox(1);"
+"                VS::Menu::InitLiveInformationTextBox(1);"
 ],
 [
-"                Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));"
+"                VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
 ]
 ]
 ],

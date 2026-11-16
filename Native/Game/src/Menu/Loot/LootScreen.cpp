@@ -14,6 +14,7 @@
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -378,7 +379,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
             Menu_Loot_disassembleItemCategory == 0
                 ? Menu_Loot_inventory->weapons[i].name
                 : Menu_Framework_itemNames[Menu_Loot_inventory->shields[i].base.id];
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
+        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));
         VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_disassembleConfirm]);
         Menu_Loot_disassemblyState = Menu_Loot_DisassemblyState_WaitInit;
@@ -612,7 +613,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
         menuItem->targetPosition0 = 194;
         Battle_stringContext.strings[0] = Menu_Framework_itemNames[Menu_Loot_stackConsolidationItemId];
 
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
+        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));
         VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_organizeConfirm]);
 
@@ -1050,7 +1051,7 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
         menuItem->state = 2;
         menuItem->targetPosition0 = 0xC2;
 
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
+        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));
         VS::Menu::Framework::SetLiveInformationMessage(
             Menu_Loot_lootClaimed == 0 ? (char*)(&Menu_Inventory_menuText[Text_Menub_menuText_Offset_discardAllConfirm])
                               : (char*)(&Menu_Inventory_menuText[Text_Menub_menuText_Offset_itemsRemaining]));
@@ -1104,7 +1105,7 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
     case 6:
         Battle_stringContext.strings[0] = Menu_Loot_leaveConfirmationItemName;
 
-        Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
+        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));
         VS::Menu::Framework::SetLiveInformationMessage(
             (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_invalidDiscard]);
 
@@ -1601,7 +1602,7 @@ int Menu_Loot_Update(u_char* state)
 
             if (Menu_Loot_lootListCount == 0) {
 
-                Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
+                VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));
                 VS::Menu::Framework::SetLiveInformationMessage(
                     (char*)&Menu_Inventory_menuText[Text_Menub_menuText_Offset_emptyChest]);
 
@@ -1647,7 +1648,7 @@ int Menu_Loot_Update(u_char* state)
         Menu_Loot_showInventory = 0;
         Menu_Loot_showLoot = 0;
 
-        if ((Menu_DismissTextBox(7) != 0)
+        if ((VS::Menu::DismissLiveTextBox(7) != 0)
             || (VS::Menu::Framework::UnloadLiveItemTextWhenReady() == 0)) {
             break;
         }

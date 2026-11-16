@@ -3973,26 +3973,6 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
             encoding="utf-8"
         )
 
-    def test_menu_names_preserve_choice_arithmetic_and_retained_speed_member(self):
-        examples = {
-            "Menu::SelectTextBoxChoice": (
-                "int v0 = selectedIndex - 1; selectedIndex = v0 + count;",
-                "int previous_choice_index = selectedIndex - 1; "
-                "selectedIndex = previous_choice_index + count;",
-            ),
-            "Menu::SetTextBoxText": (
-                "box->speed = 1; if (box->speed != 0) Continue();",
-                "box->speed = 1; if (box->speed != 0) Continue();",
-            ),
-        }
-        for name, (original, expected) in examples.items():
-            with self.subTest(name=name):
-                source = original
-                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
-                        source = re.sub(pattern, replacement, source)
-                self.assertEqual(source, expected)
-
     def test_menu_matrix_aliases_apply_each_binding_rule_once(self):
         for name in ("Menu::Framework::BuildYawMatrix",
                      "Menu::Framework::BuildPitchMatrix"):

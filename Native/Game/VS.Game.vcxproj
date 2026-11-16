@@ -2006,6 +2006,10 @@
     <ClCompile Include="src\Menu\TextBoxFramesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxState.cpp" />
+    <ClCompile Include="src\Menu\TextBoxStateLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Save\FileMenu.cpp" />
     <ClCompile Include="src\Save\FileMenuLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2867,6 +2871,8 @@
     <ClInclude Include="include\Menu\Sounds.hpp" />
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp" />
     <ClInclude Include="include\Menu\TextBoxFrames.hpp" />
+    <ClInclude Include="include\Menu\TextBoxState.hpp" />
+    <ClInclude Include="include\Menu\TextBoxStateLive.hpp" />
     <ClInclude Include="include\Save\FileMenu.hpp" />
     <ClInclude Include="include\Save\FileMenuLive.hpp" />
     <ClInclude Include="include\Save\MemoryCard\GameFilesLive.hpp" />

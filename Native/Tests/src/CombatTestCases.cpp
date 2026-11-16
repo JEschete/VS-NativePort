@@ -40,6 +40,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -1137,7 +1138,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     Menu_Framework_menuItems = menu_rows.data();
     Menu_Framework_itemNames = item_names;
     Menu_textBoxes[7] = {};
-    Menu_InitInformationTextBox(Menu_InformationBoxHeader_Information);
+    VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
     sfx_offsets.fill(UINT32_MAX);
     Input_settings.information = 0;
     Menu_Loot_lootClaimed = 0;

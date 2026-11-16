@@ -28,6 +28,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -615,7 +616,7 @@ class LiveHost : public LiveCardHost {
     return Menu_Framework_backgroundFadeStep;
   }
   void InitInformationBox(Framework::InformationHeader header) override {
-    Menu_InitInformationTextBox(
+    VS::Menu::InitLiveInformationTextBox(
         static_cast<enum Menu_InformationBoxHeader>(header));
   }
   void SetInformationBoxState(int state) override {

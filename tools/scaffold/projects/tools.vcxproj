@@ -904,6 +904,16 @@
     <None Include="..\..\port\differentials\target_approach_driver.cpp" />
     <None Include="..\..\port\differentials\temporary_awareness.py" />
     <None Include="..\..\port\differentials\temporary_awareness_driver.cpp" />
+    <None Include="..\..\port\differentials\text_box_state_common.py" />
+    <None Include="..\..\port\differentials\text_box_state_driver.cpp" />
+    <None Include="..\..\port\differentials\text_box_state_f01329.py" />
+    <None Include="..\..\port\differentials\text_box_state_f01330.py" />
+    <None Include="..\..\port\differentials\text_box_state_f01343.py" />
+    <None Include="..\..\port\differentials\text_box_state_f01378.py" />
+    <None Include="..\..\port\differentials\text_box_state_f01409.py" />
+    <None Include="..\..\port\differentials\text_box_state_f01410.py" />
+    <None Include="..\..\port\differentials\text_box_state_f01411.py" />
+    <None Include="..\..\port\differentials\text_box_state_f01412.py" />
     <None Include="..\..\port\differentials\timeline_commands_brightness.py" />
     <None Include="..\..\port\differentials\timeline_commands_defense.py" />
     <None Include="..\..\port\differentials\timeline_commands_driver.cpp" />

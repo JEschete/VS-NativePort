@@ -14,6 +14,7 @@
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Save/FileMenu.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
 #include "Save/MemoryCard/GameFiles.h"
@@ -90,7 +90,8 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void OpenInformationBox() override {
-    Menu_InitInformationTextBox(static_cast<Menu_InformationBoxHeader>(1));
+    VS::Menu::InitLiveInformationTextBox(
+        static_cast<Menu_InformationBoxHeader>(1));
   }
 
   void ShowPrompt(ContainerPrompt prompt) override {
@@ -215,7 +216,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   bool InformationBoxClosed() override {
-    return Menu_DismissTextBox(kContainerInformationBox) == 0 &&
+    return VS::Menu::DismissLiveTextBox(kContainerInformationBox) == 0 &&
            Menu_Framework_backgroundFadeStep == 0;
   }
 

@@ -1,25 +1,22 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/TextureAnimationLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Hud.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
@@ -31,7 +28,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/StateFlags.h"
 #include "State/Timers.h"
 
 // decomp: D_800EB9D8 (D_800EB9D8@BATTLE/BATTLE.PRG)
@@ -58,145 +54,6 @@ Menu_TextBoxState Menu_textBoxes[8];
 // decomp: D_800F51B8 (D_800F51B8@BATTLE/BATTLE.PRG)
 u_long* Menu_activeTextBoxOrderingTable;
 
-// decomp: BATTLE.PRG vs_battle_setTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1536)
-int Menu_SetTextBoxText(int boxId, char* str)
-{
-    Menu_TextBoxState* box = &Menu_textBoxes[boxId];
-
-    if (str != NULL) {
-        box->string = str;
-        box->speed = 1;
-        box->opaque4 = 0;
-        box->prevChunksPrinted = 0;
-        if (!(box->flags.speakerTexture & 0x20)) {
-            VS::Actors::SetLiveActorTextureAnimation(box->flags.speakerTexture, 0, box->opaque2E + 1, 1);
-            box->opaque2C = 1;
-        }
-        return 0;
-    }
-
-    if ((box->speed != 0xFFFF) && (box->speed != 0)) {
-        return -1;
-    }
-
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_selectTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1559)
-int Menu_SelectTextBoxChoice(u_char boxMask)
-{
-    Menu_TextBoxState tempBox;
-    short yPositions[8];
-    int i;
-    int j;
-    int tempOrder;
-    int selectedIndex;
-    u_int count = 0;
-
-    if (Menu_textBoxSelector.count == 0) {
-
-        for (i = 0; i < 8; ++i) {
-            yPositions[i] = 0x7FFF;
-            if ((boxMask >> i) & 1) {
-                ++count;
-                yPositions[i] = Menu_textBoxes[i].y;
-            }
-        }
-
-        for (i = 0; i < count; ++i) {
-            int sortedIndex = 0;
-            for (j = 0; j < 8; ++j) {
-                if (yPositions[sortedIndex] > yPositions[j]) {
-                    sortedIndex = j;
-                }
-            }
-            Menu_textBoxSelector.order[i] = sortedIndex;
-            yPositions[sortedIndex] = 0x7FFF;
-        }
-
-        selectedIndex = Audio_Seq_unusedStateFlags.opaque11 - 1;
-
-        if (selectedIndex >= count) {
-            selectedIndex = 0;
-        }
-
-        Menu_textBoxSelector.selectedIndex = 0;
-        Menu_textBoxSelector.count = count;
-    } else {
-        selectedIndex = Menu_textBoxSelector.selectedIndex;
-        count = Menu_textBoxSelector.count;
-
-        if (Input_buttonsPressed.allButtons
-            & (PADL2 | PADR2 | PADL1 | PADR1 | PADRup | PADRright | PADRdown
-                | PADRleft)) {
-            VS::Menu::PlaySelectSound();
-            Menu_textBoxSelector.count = 0;
-            return selectedIndex + 1;
-        }
-
-        if (Input_buttonsPressed.allButtons & PADLup) {
-            int previous_choice_index = selectedIndex - 1;
-            selectedIndex = previous_choice_index + count;
-        }
-
-        if (Input_buttonsPressed.allButtons & PADLdown) {
-            ++selectedIndex;
-        }
-
-        selectedIndex %= count;
-    }
-
-    if (selectedIndex != Menu_textBoxSelector.selectedIndex) {
-        VS::Menu::PlayChangeSound();
-        Menu_textBoxSelector.selectedIndex = selectedIndex;
-    }
-
-    j = selectedIndex;
-
-    for (i = 0; i < count; ++i) {
-        if (Menu_textBoxSelector.order[j] < Menu_textBoxSelector.order[i]) {
-            j = i;
-        }
-    }
-
-    tempOrder = Menu_textBoxSelector.order[selectedIndex];
-    Menu_textBoxSelector.order[selectedIndex] = Menu_textBoxSelector.order[j];
-    Menu_textBoxSelector.order[j] = tempOrder;
-
-    tempBox = Menu_textBoxes[tempOrder];
-    Menu_textBoxes[tempOrder] =
-        Menu_textBoxes[Menu_textBoxSelector.order[selectedIndex]];
-    Menu_textBoxes[Menu_textBoxSelector.order[selectedIndex]] = tempBox;
-
-    for (i = 0; i < count; ++i) {
-        Menu_textBoxes[Menu_textBoxSelector.order[i]].brightness =
-            i == selectedIndex ? 0x80 : 0x40;
-    }
-
-    return 0;
-}
-
-// decomp: BATTLE.PRG vs_battle_initInformationTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:2653)
-void Menu_InitInformationTextBox(enum Menu_InformationBoxHeader header)
-{
-    Menu_InitTextBox(7, (header << 8) | 4, 0, 1, 0, 4, 0, 0);
-}
-
-// decomp: BATTLE.PRG _dismissAllTextBoxes (src/BATTLE/BATTLE.PRG/5BF94.c:3757)
-int Menu_DismissAllTextBoxes(void)
-{
-    int i;
-    int all_text_boxes_dismissed = 1;
-
-    for (i = 0; i < 8; ++i) {
-        if (Menu_DismissTextBox(i) != 0) {
-            all_text_boxes_dismissed = 0;
-        }
-    }
-
-    return all_text_boxes_dismissed;
-}
-
 // decomp: BATTLE.PRG vs_battle_displaySceneMessage (src/BATTLE/BATTLE.PRG/5BF94.c:3771)
 void Menu_ShowSceneNotification(int notification_kind, int notification_subject_id, int timed_notification)
 {
@@ -206,7 +63,7 @@ void Menu_ShowSceneNotification(int notification_kind, int notification_subject_
         Menu_sceneNotificationTimer = 0x78;
     }
 
-    Menu_InitTextBox(7, 0x304, 0, 1, 0, 3, 0, 0);
+    VS::Menu::InitLiveTextBox(7, 0x304, 0, 1, 0, 3, 0, 0);
 
     Menu_sceneNotificationBuffer[0] = 0x00F8 | (0x04FB << 16);
     Battle_stringContext.strings[0] = Battle_actionDefinitions[notification_subject_id].name;
@@ -226,7 +83,7 @@ void Menu_ShowSceneNotification(int notification_kind, int notification_subject_
         VS::Render::FormatLiveEncodedText((char*)Menu_sceneNotificationBuffer, (char*)&Battle_doorStrings[Battle_doorStrings[notification_kind]]);
     }
 
-    Menu_SetTextBoxText(7, (char*)Menu_sceneNotificationBuffer);
+    VS::Menu::SetLiveTextBoxText(7, (char*)Menu_sceneNotificationBuffer);
 }
 
 // decomp: BATTLE.PRG func_800CB45C (src/BATTLE/BATTLE.PRG/5BF94.c:3802)
@@ -247,12 +104,12 @@ int Menu_IsSceneNotificationPending(void)
             }
 
             if (Menu_sceneNotificationTimer != 0) {
-                return -Menu_SetTextBoxText(7, NULL);
+                return -VS::Menu::SetLiveTextBoxText(7, NULL);
             }
 
             return 0;
         }
-        return -Menu_SetTextBoxText(7, NULL);
+        return -VS::Menu::SetLiveTextBoxText(7, NULL);
     }
     return 0;
 }
@@ -261,7 +118,7 @@ int Menu_IsSceneNotificationPending(void)
 void Menu_ReleaseSceneNotification(void)
 {
     if (Menu_sceneNotificationBuffer != NULL) {
-        Menu_DismissTextBox(7);
+        VS::Menu::DismissLiveTextBox(7);
         VS::Core::Memory::FreeLiveFromHighEnd(Menu_sceneNotificationBuffer);
         Menu_sceneNotificationBuffer = NULL;
     }
@@ -384,99 +241,6 @@ void Menu_UpdateTextBoxes(void)
 
     VS::Effects::ScreenDistortion::DrawLiveScreenOverlay();
     VS::Core::NextLiveInterfaceRandomBits(0);
-}
-
-// decomp: BATTLE.PRG vs_battle_getTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4544)
-Menu_TextBoxState* Menu_TextBox(int id) { return &Menu_textBoxes[id]; }
-
-// decomp: BATTLE.PRG func_800CCE10 (src/BATTLE/BATTLE.PRG/5BF94.c:4546)
-Menu_TextAnchorWord Menu_TextBoxAnchor(int anchor_preset_index, int orientation_flags, int text_column_count, int text_line_count)
-{
-    Menu_TextAnchorWord ret;
-    Menu_TextAnchorWord* p =
-        &Menu_textBoxAnchors[anchor_preset_index][((orientation_flags >> 2) & 3) == 1 || ((orientation_flags >> 2) & 3) == 2];
-    int offsetX = p->x;
-    int offsetY = p->y;
-    int anchor_alignment = p->alignment;
-
-    if ((orientation_flags >> 2) & 1) {
-        offsetX = -offsetX;
-        anchor_alignment ^= 2;
-    }
-
-    ret.x = offsetX - ((text_column_count * 12 + 10) >> 1);
-    ret.y = offsetY - ((text_line_count * 13 + 4) >> 1);
-    ret.alignment = anchor_alignment;
-    ret.opaque3Bit2 = p->opaque3Bit2;
-    return ret;
-}
-
-// decomp: BATTLE.PRG vs_battle_initTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4567)
-void Menu_InitTextBox(
-    int id, int flags, int x, int y, int charsPerLine, int h, int centerX, int centerY)
-{
-    Menu_TextBoxState* box = &Menu_textBoxes[id];
-
-    *(int*)&box->flags = flags & 0xFFFF;
-    box->flags.speakerTexture = 32;
-    box->x = x;
-    box->y = y;
-    box->opaque4 = 0;
-    box->opaque6 = 0;
-    box->speed = 0;
-    box->xIndent = x + 5;
-    box->yIndent = y + 3;
-    box->opaque2E = 0;
-    box->brightness = 0x80;
-    box->charsPerLine = charsPerLine;
-    box->lineCount = h;
-    box->centerX = centerX;
-    box->centerY = centerY;
-    // looks up { 10, 20, 10, 8 };
-    box->openDuration = ((0x45A5 >> ((box->flags.openStyle * 4))) & 0xF) * 2;
-
-    if (box->state <= 0) {
-        box->state = 1;
-    }
-
-    switch (box->flags.kind) {
-    case 1:
-        box->flags.kind = 7;
-        box->flags.frameShape = 0;
-        return;
-    case 4:
-        box->charsPerLine = 0x18;
-        box->centerX = 0xA0;
-        box->centerY = 0xF0;
-        box->xIndent = 0x10;
-        box->yIndent = 0xF2 - (h * 0xD);
-        return;
-    case 5:
-        box->flags.kind = 7;
-        box->flags.frameShape = 2;
-        return;
-    }
-}
-
-// decomp: BATTLE.PRG vs_battle_dismissTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4613)
-int Menu_DismissTextBox(int id)
-{
-    Menu_TextBoxState* box = &Menu_textBoxes[id];
-
-    if (!(box->flags.speakerTexture & 0x20)) {
-        VS::Actors::SetLiveActorTextureAnimation(box->flags.speakerTexture, 0, 0, 0);
-    }
-
-    if (box->state != 0) {
-        if (box->state > 0) {
-            box->openDuration = 8;
-            box->state = -1;
-            box->flags.openStyle = 0;
-        }
-        return -1;
-    }
-
-    return 0;
 }
 
 // decomp: BATTLE.PRG func_800CD0FC (src/BATTLE/BATTLE.PRG/5BF94.c:4633)

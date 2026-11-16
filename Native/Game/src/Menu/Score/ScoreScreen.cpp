@@ -8,6 +8,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -41,7 +42,6 @@ extern "C" {
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
@@ -513,8 +513,8 @@ int Menu_Score_Update(void)
         Menu_Score_cameraAngles.vy = 0xE47;
         Menu_Score_cameraAngles.vz = 0;
 
-        Menu_InitTextBox(0, 0, 0xB, 0xF8, 0x10, 1, 0xB, 0xF8);
-        Menu_SetTextBoxText(0, (char*)&Menu_Score_rankText[Menu_Score_rankText[Menu_Score_characterRank]]);
+        VS::Menu::InitLiveTextBox(0, 0, 0xB, 0xF8, 0x10, 1, 0xB, 0xF8);
+        VS::Menu::SetLiveTextBoxText(0, (char*)&Menu_Score_rankText[Menu_Score_rankText[Menu_Score_characterRank]]);
         Menu_Score_UpdateTopMenu(1);
 
         Menu_Score_updateMenuAnimState = 0;
@@ -525,7 +525,7 @@ int Menu_Score_Update(void)
         Menu_Score_RenderOverview(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState < 8) {
-            textBox = Menu_TextBox(0);
+            textBox = VS::Menu::LiveTextBox(0);
             textBox->y -= 6;
             textBox->yIndent -= 6;
             ++Menu_Score_updateMenuAnimState;
@@ -559,7 +559,7 @@ int Menu_Score_Update(void)
         Battle_unusedMenu9CursorMemory.gazetteRow =
             Menu_Framework_menuMemory.cursorMemories[2] + Menu_Framework_menuMemory.cursorMemories[3];
 
-        Menu_DismissTextBox(0);
+        VS::Menu::DismissLiveTextBox(0);
 
         ++Menu_Score_menuState;
         break;
@@ -569,7 +569,7 @@ int Menu_Score_Update(void)
 
         if (Menu_Score_updateMenuAnimState > 0) {
 
-            textBox = Menu_TextBox(0);
+            textBox = VS::Menu::LiveTextBox(0);
 
             if (textBox != NULL) {
                 textBox->y += 6;
@@ -1220,7 +1220,7 @@ int Menu_Score_Update(void)
         Menu_Score_RenderEnemyViewer(Menu_Score_updateMenuAnimState, 0);
 
         if (Menu_Score_updateMenuAnimState < 8) {
-            textBox = Menu_TextBox(0);
+            textBox = VS::Menu::LiveTextBox(0);
             textBox->x -= 0x10;
             textBox->xIndent -= 0x10;
             ++Menu_Score_updateMenuAnimState;
@@ -1248,7 +1248,7 @@ int Menu_Score_Update(void)
 
         if (Menu_Score_updateMenuAnimState > 0) {
 
-            textBox = Menu_TextBox(0);
+            textBox = VS::Menu::LiveTextBox(0);
 
             if (textBox != NULL) {
                 textBox->x += 0x10;

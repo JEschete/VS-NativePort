@@ -17,6 +17,7 @@
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "TestSupport/ScriptSources.hpp"
 
 extern "C" {
@@ -297,7 +298,7 @@ TEST_CASE("Native dialog ownership follows actual text box selection swaps",
   ShowNativeDialog(1);
   Menu_textBoxes[0].y = 0;
   Menu_textBoxes[1].y = 100;
-  CHECK(Menu_SelectTextBoxChoice(3) == 0);
+  CHECK(VS::Menu::SelectLiveTextBoxChoice(3) == 0);
   CHECK(Menu_textBoxes[1].string == selected_text);
   event::ResetLiveScriptRuntime();
   CHECK_FALSE(first.expired());

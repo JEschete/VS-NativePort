@@ -32,6 +32,7 @@
 #include "Menu/Setup/Combination.hpp"  // NOLINT(build/include): typed API
 #include "Menu/Setup/SetupScreen.hpp"  // NOLINT(build/include): typed API
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -341,7 +342,7 @@ class LiveHost final : public Host {
   }
 
   void InitInformationTextBox(int header) override {
-    Menu_InitInformationTextBox(
+    VS::Menu::InitLiveInformationTextBox(
         static_cast<enum Menu_InformationBoxHeader>(header));
   }
   void InitializeInformationBox() override {

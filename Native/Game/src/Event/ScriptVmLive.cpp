@@ -49,6 +49,7 @@
 #include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -77,7 +78,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/TextBox.h"
 }
 
 namespace VS::Event {
@@ -486,7 +486,7 @@ class LiveVmHost final : public ScriptVmHost {
   void ResetSceneTimer() override { State::ResetLiveSceneTimer(); }
   void SetTickSpeed(int speed) override { State::SetLiveTickSpeed(speed); }
   bool DismissTextBox(int box) override {
-    return Menu_DismissTextBox(box) != 0;
+    return VS::Menu::DismissLiveTextBox(box) != 0;
   }
   bool UpdateRewardSequence() override {
     return Battle::UpdateLiveRewardSequence() != 0;

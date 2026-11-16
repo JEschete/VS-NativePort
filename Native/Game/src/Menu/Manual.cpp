@@ -6,12 +6,12 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Hud.h"
-#include "Battle/TextBoxes.h"
 #include "Content/DiscLayout.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -20,9 +20,7 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/TextBoxes.h"
 #include "Menu/Manual.h"
-#include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -314,7 +312,7 @@ int Menu_Manual_UpdateHelpPages(void)
             break;
         }
         VS::Content::ReleaseLiveDiscRequest(Menu_Manual_helpTextCdQueue);
-        Menu_InitTextBox(0, 0, 8, 0x34, 0x19, 0xA, 8, 0x34);
+        VS::Menu::InitLiveTextBox(0, 0, 8, 0x34, 0x19, 0xA, 8, 0x34);
         Menu_Manual_scrollPosition =
             Field_manualDisplayState
                 .scrollPositions[Field_manualDisplayState.currentManual];
@@ -393,7 +391,7 @@ int Menu_Manual_UpdateHelpPages(void)
             } else {
                 VS::Audio::LivePlaySfxCentered(0x7E, VS_SFX_MENULEAVE);
             }
-            Menu_TextBox(0)->state = 0;
+            VS::Menu::LiveTextBox(0)->state = 0;
             if (Menu_Manual_helpText != NULL) {
                 VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpText);
             }
@@ -550,7 +548,7 @@ void Menu_Manual_CopyPageText(void)
     }
 
     pBuffer[-1] = Core_TextCode_Terminator;
-    Menu_SetTextBoxText(0, buffer);
+    VS::Menu::SetLiveTextBoxText(0, buffer);
 }
 
 // decomp: MENUE.PRG _vsStrcpy (src/MENU/MENUE.PRG/494.c:561)

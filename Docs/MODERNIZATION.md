@@ -30,17 +30,17 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 12 | 2,646 | 756 | 11 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 5 | 268 | 18,890 | 429 | 216 | 0 |
+| 34: #60 Menu screens and workspaces | 5 | 260 | 18,682 | 432 | 213 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 288 | 22,272 | 3505 | 229 | 0 |
+| **Total** | 5 | 280 | 22,064 | 3508 | 226 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,441 |
+| done | 3,449 |
 | in-progress | 4 |
-| todo | 289 |
+| todo | 281 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (5 active, 47 done, 2 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (6 active, 47 done, 1 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -95,17 +95,17 @@ architecture changes rather than per-function work, so this ledger is what track
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | planned | - | 6 | 103 | 5,020 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
-| 52 | menu-map-manual-text | planned | - | 4 | 75 | 3,576 |
+| 52 | menu-map-manual-text | active | - | 4 | 67 | 3,368 |
 | 53 | title | done | self | 4 | 0 | 0 |
 | 54 | ending | done | self | 5 | 0 | 0 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 61 |
-| Referenced by the original-address module table | 1 | 24 |
+| Called from generated code | 1 | 56 |
+| Referenced by the original-address module table | 1 | 16 |
 | Calls an SDK shim | 0 | 59 |
-| Signature uses SDK integer types or `void*` | 0 | 31 |
-| Compiled with relaxed settings | 0 | 288 |
+| Signature uses SDK integer types or `void*` | 0 | 30 |
+| Compiled with relaxed settings | 0 | 280 |
 
 Function bodies: 3,734 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 
