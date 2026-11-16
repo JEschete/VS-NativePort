@@ -510,7 +510,7 @@
 ],
 "Native\\Game\\src\\Menu\\Inventory\\ItemList.cpp": [
 [
-212,
+209,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -519,7 +519,7 @@
 ]
 ],
 [
-396,
+393,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, Render_frameScratch.overlayOrderingTable - 12);"
 ],
@@ -528,7 +528,7 @@
 ]
 ],
 [
-398,
+395,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, Render_frameScratch.overlayOrderingTable - 12);",
 "        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, Render_frameScratch.overlayOrderingTable - 12);"
@@ -539,16 +539,7 @@
 ]
 ],
 [
-500,
-[
-"    char* indices = Menu_Inventory_inventoryIndices[itemCategory];"
-],
-[
-"    char* indices = (char *)(Menu_Inventory_inventoryIndices[itemCategory]);"
-]
-],
-[
-695,
+520,
 [
 "    indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -557,7 +548,7 @@
 ]
 ],
 [
-701,
+526,
 [
 "        rowTypes = textBuf + 0x1800;",
 "        menuText = textBuf + 0x1900;"
@@ -568,16 +559,16 @@
 ]
 ],
 [
-725,
+550,
 [
-"            rowCount = Menu_Inventory_BuildItemRows(itemCategory, menuText, rowTypes, textBuf);"
+"            rowCount = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, menuText, rowTypes, textBuf);"
 ],
 [
-"            rowCount = Menu_Inventory_BuildItemRows(itemCategory, menuText, rowTypes, (char *)(textBuf));"
+"            rowCount = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, menuText, rowTypes, (char *)(textBuf));"
 ]
 ],
 [
-829,
+654,
 [
 "                sp310 = textBuf + 0x1900;",
 "                rowTypes = textBuf + 0x1800;"
@@ -588,16 +579,16 @@
 ]
 ],
 [
-832,
+657,
 [
-"                count = Menu_Inventory_BuildItemRows(itemCategory, sp310, rowTypes, textBuf);"
+"                count = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, sp310, rowTypes, textBuf);"
 ],
 [
-"                count = Menu_Inventory_BuildItemRows(itemCategory, sp310, rowTypes, (char *)(textBuf));"
+"                count = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, sp310, rowTypes, (char *)(textBuf));"
 ]
 ],
 [
-1357,
+1182,
 [
 "        static const char initial[8];"
 ],
@@ -955,7 +946,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\Results.cpp": [
 [
-343,
+344,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeGameClearTimData + i * 0x8220, &tim);"
 ],
@@ -964,7 +955,7 @@
 ]
 ],
 [
-1003,
+1004,
 [
 "        area = p[0];"
 ],
@@ -973,7 +964,7 @@
 ]
 ],
 [
-1006,
+1007,
 [
 "        AddPrim(p[1] - 0x1C, area++);"
 ],
@@ -982,7 +973,7 @@
 ]
 ],
 [
-1078,
+1079,
 [
 "        area = q[0];"
 ],
@@ -991,7 +982,7 @@
 ]
 ],
 [
-1081,
+1082,
 [
 "        AddPrim(q[1] - 0x1C, area++);"
 ],
@@ -1000,7 +991,7 @@
 ]
 ],
 [
-1093,
+1094,
 [
 "    POLY_FT4* poly = p[0];"
 ],
@@ -1009,7 +1000,7 @@
 ]
 ],
 [
-1116,
+1117,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1018,7 +1009,7 @@
 ]
 ],
 [
-1131,
+1132,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1027,7 +1018,7 @@
 ]
 ],
 [
-1146,
+1147,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1036,7 +1027,7 @@
 ]
 ],
 [
-1160,
+1161,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1045,7 +1036,7 @@
 ]
 ],
 [
-1168,
+1169,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1141,7 +1132,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Records.cpp": [
 [
-176,
+173,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -1150,7 +1141,7 @@
 ]
 ],
 [
-211,
+208,
 [
 "        p->title = (void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]];",
 "        p->description = (void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]];"
@@ -1161,7 +1152,7 @@
 ]
 ],
 [
-513,
+510,
 [
 "        \"PLAYER TIME\", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, p[1] + 0x1C);"
 ],
@@ -1170,7 +1161,7 @@
 ]
 ],
 [
-516,
+513,
 [
 "        \"1ST\", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, p[1] + 0x1C);"
 ],
@@ -1179,7 +1170,7 @@
 ]
 ],
 [
-518,
+515,
 [
 "        \"2ND\", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, p[1] + 0x1C);"
 ],
@@ -1188,7 +1179,7 @@
 ]
 ],
 [
-520,
+517,
 [
 "        \"3RD\", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, p[1] + 0x1C);"
 ],
@@ -1197,7 +1188,7 @@
 ]
 ],
 [
-532,
+529,
 [
 "                q[1] + 0x1C);"
 ],
@@ -1206,7 +1197,7 @@
 ]
 ],
 [
-537,
+534,
 [
 "                q[1] + 0x1C);"
 ],
@@ -1215,7 +1206,7 @@
 ]
 ],
 [
-542,
+539,
 [
 "                q[1] + 0x1C);"
 ],
@@ -1224,7 +1215,7 @@
 ]
 ],
 [
-549,
+546,
 [
 "        vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -1233,7 +1224,7 @@
 ]
 ],
 [
-555,
+552,
 [
 "                \"$--:--:--\", vs_getXY(88, 158), vs_getRGB(80, 80, 80), r[1] + 0x1C);"
 ],
@@ -1242,7 +1233,7 @@
 ]
 ],
 [
-558,
+555,
 [
 "                vs_getXY(88, 158), vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -1253,7 +1244,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-168,
+165,
 [
 "    menuText = menuItem->text;"
 ],
@@ -1262,7 +1253,7 @@
 ]
 ],
 [
-176,
+173,
 [
 "    before = Render_frameScratch.overlayOrderingTable + 8;"
 ],
@@ -1271,7 +1262,7 @@
 ]
 ],
 [
-224,
+221,
 [
 "    prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -1280,7 +1271,7 @@
 ]
 ],
 [
-544,
+482,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
@@ -1289,7 +1280,7 @@
 ]
 ],
 [
-1429,
+1367,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -1298,7 +1289,7 @@
 ]
 ],
 [
-1439,
+1377,
 [
 "        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
 ],
@@ -1307,7 +1298,7 @@
 ]
 ],
 [
-1450,
+1388,
 [
 "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
 ],
@@ -1316,7 +1307,7 @@
 ]
 ],
 [
-1473,
+1411,
 [
 "    polyG4 = scratch[0];"
 ],
@@ -1325,7 +1316,7 @@
 ]
 ],
 [
-1488,
+1426,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -1334,7 +1325,7 @@
 ]
 ],
 [
-1498,
+1436,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -1343,7 +1334,7 @@
 ]
 ],
 [
-1510,
+1448,
 [
 "    POLY_G4* polyG4 = scratch[0];"
 ],
@@ -1352,7 +1343,7 @@
 ]
 ],
 [
-1520,
+1458,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -1361,7 +1352,7 @@
 ]
 ],
 [
-1528,
+1466,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -1370,7 +1361,7 @@
 ]
 ],
 [
-1563,
+1501,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -1379,7 +1370,7 @@
 ]
 ],
 [
-1565,
+1503,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -1388,7 +1379,7 @@
 ]
 ],
 [
-1570,
+1508,
 [
 "        scratch[1] + 0x1C);"
 ],
@@ -1397,7 +1388,7 @@
 ]
 ],
 [
-1580,
+1518,
 [
 "    POLY_G4* poly = scratch[0];"
 ],
@@ -1406,7 +1397,7 @@
 ]
 ],
 [
-1590,
+1528,
 [
 "    AddPrim(scratch[1] + 0x20, poly++);"
 ],
@@ -1415,7 +1406,7 @@
 ]
 ],
 [
-1600,
+1538,
 [
 "    AddPrim(scratch[1] + 32, poly++);"
 ],

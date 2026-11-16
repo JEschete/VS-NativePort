@@ -113,6 +113,7 @@
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
+#include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
@@ -2035,6 +2036,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUB.PRG", 0x8010439Cu, 0u, (void*)&VS::Menu::Inventory::CopyLiveEquipmentStats, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x8010439Cu, 0u, (void*)&VS::Menu::Inventory::SortLiveEquipment, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80104474u, 0u, (void*)&VS::Menu::Inventory::SortLiveEquipment, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80104EC0u, 0u, (void*)&VS::Menu::Inventory::LiveParentWeaponIndex, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80104FB4u, 0u, (void*)&VS::Menu::Inventory::LiveParentWeaponIndex, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80104F50u, 0u, (void*)&VS::Menu::Inventory::LiveParentShieldIndex, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80105044u, 0u, (void*)&VS::Menu::Inventory::LiveParentShieldIndex, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80104F94u, 0u, (void*)&VS::Menu::Inventory::LiveBuildItemRows, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80105088u, 0u, (void*)&VS::Menu::Inventory::LiveBuildLootItemRows, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80105314u, 0u, (void*)&VS::Menu::Inventory::LiveRestoreItemRows, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x8010537Cu, 0u, (void*)&VS::Menu::Inventory::LiveRestoreItemRows, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102A34u, 0u, (void*)&VS::Menu::container::BuildLiveWeaponStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102BB0u, 0u, (void*)&VS::Menu::container::BuildLiveShieldStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103D50u, 0u, (void*)&VS::Menu::container::SetLivePanelVisibility, 0u, 0u, 0u},

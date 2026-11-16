@@ -416,6 +416,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\Inventory\EquipmentDetailControllersLive.cpp",
                 r"src\Menu\Inventory\ItemDetailDispatchLive.cpp",
                 r"src\Menu\Inventory\InventorySortingLive.cpp",
+                r"src\Menu\Inventory\ItemListRowsLive.cpp",
                 r"src\Menu\Container\ContainerDetailHelpersLive.cpp",
                 r"src\Menu\Container\ContainerDetailControllersLive.cpp",
                 r"src\Menu\Container\ContainerSortingLive.cpp",

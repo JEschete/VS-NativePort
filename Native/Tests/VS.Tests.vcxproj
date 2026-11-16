@@ -290,6 +290,7 @@
     <ClCompile Include="src\ItemDetailDispatchLiveTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchModuleTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchTests.cpp" />
+    <ClCompile Include="src\ItemListRowsTests.cpp" />
     <ClCompile Include="src\ItemsTests.cpp" />
     <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LauncherTests.cpp" />

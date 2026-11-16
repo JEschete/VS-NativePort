@@ -13,11 +13,6 @@ extern char Menu_Inventory_freezeTabArrows;
 extern u_char* Menu_Inventory_inventoryIndices[];
 int Menu_Inventory_UpdateSortMenu(int initItemCategory);
 int Menu_Inventory_UpdateDiscardMenu(int params);
-int Menu_Inventory_ParentWeaponIndex(int itemCategory, int index);
-int Menu_Inventory_ParentShieldIndex(int itemCategory, int itemIndex);
-int Menu_Inventory_BuildItemRows(
-    int itemCategory, char* menuText[], int rowTypes[], char* textBuf);
-void Menu_Inventory_RestoreItemRows(int itemCategory);
 int Menu_Inventory_UpdateItemList(int initialize);
 void Menu_Inventory_ItemList_ResetMainMenuStatics(void);
 void Menu_Inventory_ItemList_ResetMenu3Statics(void);

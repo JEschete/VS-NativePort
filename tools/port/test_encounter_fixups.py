@@ -4877,6 +4877,17 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertIn("menuText = (char **)(((u_char*)(buf)) + 0x1900);", source)
         self.assertNotIn("AllocateLiveFromHighEnd(0x1B00)", source)
 
+    def test_item_list_reserves_all_native_text_pointers(self):
+        # #404: both _itemNavigation row blocks keep text at 0, row types at 0x1800 and
+        # 128 native text pointers at 0x1900.
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Inventory/ItemList.cpp").read_text()
+        allocation = "VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(char*))"
+        self.assertEqual(source.count(allocation), 2)
+        self.assertEqual(source.count("(((u_char*)(textBuf)) + 0x1900)"), 2)
+        self.assertEqual(source.count("(((u_char*)(textBuf)) + 0x1800)"), 2)
+        self.assertNotIn("AllocateLiveFromHighEnd(72 * 96)", source)
+
     def test_plugin_table_never_binds_the_development_dispatcher(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Effects/PurgeTables.cpp").read_text()

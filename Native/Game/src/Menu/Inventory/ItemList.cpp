@@ -6,10 +6,10 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
+#include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -20,13 +20,10 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/InventoryLiveState.h"
 #include "Items/Loadout.h"
@@ -453,178 +450,6 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
 #pragma vsstring(end)
 }
 
-// decomp: MENU _getParentWeaponIndex (src/MENU/items2.h:11)
-int Menu_Inventory_ParentWeaponIndex(int itemCategory, int index)
-{
-    int parentIndex = 0;
-
-    if (itemCategory == Items_ItemCategory_Blade) {
-        parentIndex = Audio_Seq_unusedInventory.blades[index].assembledWeaponIndex;
-    }
-
-    if (itemCategory == Items_ItemCategory_Grip) {
-        parentIndex = Audio_Seq_unusedInventory.grips[index].assembledWeaponIndex;
-    }
-
-    if (itemCategory == Items_ItemCategory_Gem) {
-        parentIndex = Audio_Seq_unusedInventory.gems[index].setItemIndex;
-        if (parentIndex & Items_GemTarget_Shield) {
-            parentIndex = 0;
-        }
-    }
-
-    return parentIndex;
-}
-
-// decomp: MENU _getParentShieldIndex (src/MENU/items2.h:38)
-int Menu_Inventory_ParentShieldIndex(int itemCategory, int itemIndex)
-{
-    u_short index = 0;
-
-    if (itemCategory == Items_ItemCategory_Gem) {
-
-        index = Audio_Seq_unusedInventory.gems[itemIndex].setItemIndex;
-
-        if (!(index & Items_GemTarget_Shield)) {
-            index = 0;
-        }
-    }
-
-    return index & 0x7F;
-}
-
-// decomp: MENU _populateItemRows (src/MENU/items2.h:60)
-int Menu_Inventory_BuildItemRows(
-    int itemCategory, char* menuText[], int rowTypes[], char* textBuf)
-{
-    int i;
-    char* indices = (char *)(Menu_Inventory_inventoryIndices[itemCategory]);
-    int count = 0;
-
-    for (i = 0; i < Items_Inventory_inventoryItemCapacities[itemCategory];
-        ++count, ++i, textBuf += 96) {
-
-        int parentItem;
-        int rowType;
-        int index = indices[i];
-
-        if (index == 0) {
-            break;
-        }
-
-        index = indices[i] - 1;
-        rowType = 0;
-
-        switch (itemCategory) {
-        case Items_ItemCategory_Weapon:
-            VS::Menu::Framework::FormatLiveInventoryWeaponRow(&Audio_Seq_unusedInventory.weapons[index],
-                &menuText[count * 2], &rowTypes[i], textBuf);
-
-            if (Audio_Seq_unusedInventory.weapons[index].isEquipped != 0) {
-                rowType = 0xCA00;
-            }
-            break;
-
-        case Items_ItemCategory_Blade:
-            VS::Menu::Framework::FormatLiveBladeRow(&Audio_Seq_unusedInventory.blades[index],
-                &menuText[count * 2], &rowTypes[i], textBuf);
-            break;
-
-        case Items_ItemCategory_Grip:
-            VS::Menu::Framework::FormatLiveGripRow(&Audio_Seq_unusedInventory.grips[index], &menuText[count * 2],
-                &rowTypes[i], textBuf);
-            break;
-
-        case Items_ItemCategory_Shield:
-            VS::Menu::Framework::FormatLiveInventoryShieldRow(&Audio_Seq_unusedInventory.shields[index],
-                &menuText[count * 2], &rowTypes[i], textBuf);
-
-            if (Audio_Seq_unusedInventory.shields[index].isEquipped != 0) {
-                rowType = 0xCA00;
-            }
-            break;
-
-        case Items_ItemCategory_Armor:
-            VS::Menu::Framework::FormatLiveInventoryArmorRow(&Audio_Seq_unusedInventory.armor[index],
-                &menuText[count * 2], &rowTypes[i], textBuf);
-
-            if (Audio_Seq_unusedInventory.armor[index].limb != 0) {
-                rowType = 0xCA00;
-            }
-            break;
-
-        case Items_ItemCategory_Gem:
-            VS::Menu::Framework::FormatLiveGemRow(&Audio_Seq_unusedInventory.gems[index], &menuText[count * 2],
-                &rowTypes[i], textBuf);
-            break;
-
-        case Items_ItemCategory_Misc: {
-            u_int actionId;
-            VS::Menu::Framework::FormatLiveMiscItemRow(&Audio_Seq_unusedInventory.misc[index], &menuText[count * 2],
-                &rowTypes[i], textBuf);
-            actionId =
-                Menu_Inventory_miscItemToActionMap[Audio_Seq_unusedInventory.misc[index].id - 323];
-
-            if ((actionId - 106) < 28) {
-                int j;
-                for (j = 0; j < 3; ++j) {
-                    if (Battle_actionDefinitions[actionId].unlocked) {
-                        ++actionId;
-                    }
-                }
-            }
-
-            Menu_Inventory_unusedMiscActions[count] = actionId;
-            break;
-        }
-        }
-
-        parentItem = Menu_Inventory_ParentWeaponIndex(itemCategory, index);
-
-        if (parentItem != 0) {
-            rowType = 0xCA00;
-            if (Audio_Seq_unusedInventory.weapons[parentItem - 1].isEquipped == 0) {
-                rowType = 0xCC00;
-            }
-        }
-
-        parentItem = Menu_Inventory_ParentShieldIndex(itemCategory, index);
-
-        if (parentItem != 0) {
-            rowType = 0xCA00;
-            if (Audio_Seq_unusedInventory.shields[parentItem - 1].isEquipped == 0) {
-                rowType = 0xCC00;
-            }
-        }
-
-        rowTypes[i] |= rowType;
-    }
-
-    return count;
-}
-
-// decomp: MENU _restoreItemMenu (src/MENU/items2.h:175)
-void Menu_Inventory_RestoreItemRows(int itemCategory)
-{
-    int i;
-
-    while (Menu_Framework_itemsListRow < 16) {
-        VS::Menu::Framework::UpdateLiveRowSelection();
-    }
-
-    for (i = 20; i < 40; ++i) {
-        Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::LiveMenuItem(i);
-
-        if (menuItem->state == 2) {
-            menuItem->state = 1;
-            menuItem->x = menuItem->targetPosition0;
-        }
-
-        menuItem->selected =
-            (i ^ (Menu_Framework_menuMemory.cursorMemories[(itemCategory + 30) * 2] + 20)) == 0;
-    }
-}
-
 // decomp: MENU _itemNavigation (src/MENU/items2.h:201)
 int Menu_Inventory_UpdateItemList(int initialize)
 {
@@ -698,7 +523,7 @@ loop_1:
     switch (Menu_Inventory_itemListState) {
     case Menu_Inventory_ItemListState_None:
     case Menu_Inventory_ItemListState_Init: {
-        void* textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(72 * 96);
+        void* textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(char*));
         rowTypes = (int *)(((u_char*)(textBuf)) + 0x1800);
         menuText = (char **)(((u_char*)(textBuf)) + 0x1900);
 
@@ -723,7 +548,7 @@ loop_1:
             }
             rowCount = 2;
         } else {
-            rowCount = Menu_Inventory_BuildItemRows(itemCategory, menuText, rowTypes, (char *)(textBuf));
+            rowCount = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, menuText, rowTypes, (char *)(textBuf));
         }
 
         if (Menu_Framework_actionRestrictions & 7) {
@@ -758,7 +583,7 @@ loop_1:
             VS::Menu::Framework::CreateLiveMenuRows(rowCount, var_a1_2, menuText, rowTypes);
 
             if (Menu_Inventory_itemListState == Menu_Inventory_ItemListState_None) {
-                Menu_Inventory_RestoreItemRows(itemCategory);
+                VS::Menu::Inventory::LiveRestoreItemRows(itemCategory);
             }
 
             Input_settings.cursorMemory = i;
@@ -826,11 +651,11 @@ loop_1:
                     return Menu_Inventory_itemListSelectedRow;
                 }
 
-                textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(72 * 96);
+                textBuf = VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(char*));
                 sp310 = (char **)(((u_char*)(textBuf)) + 0x1900);
                 rowTypes = (int *)(((u_char*)(textBuf)) + 0x1800);
 
-                count = Menu_Inventory_BuildItemRows(itemCategory, sp310, rowTypes, (char *)(textBuf));
+                count = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, sp310, rowTypes, (char *)(textBuf));
 
                 rowTypes[Menu_Inventory_itemListSelectedRow - 1] |= 8;
                 i = Input_settings.cursorMemory;
@@ -841,7 +666,7 @@ loop_1:
 
                 Input_settings.cursorMemory = i;
 
-                Menu_Inventory_RestoreItemRows(itemCategory);
+                VS::Menu::Inventory::LiveRestoreItemRows(itemCategory);
 
                 Menu_Inventory_statusCommandState = 1;
                 Menu_Inventory_freezeTabArrows = 0;
@@ -1057,8 +882,8 @@ loop_1:
             sp310[rowCount * 2 + 1] =
                 (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_searchItemDesc];
 
-            if ((Menu_Inventory_ParentWeaponIndex(base_item_category, index) == 0)
-                && (Menu_Inventory_ParentShieldIndex(base_item_category, index) == 0)) {
+            if ((VS::Menu::Inventory::LiveParentWeaponIndex(base_item_category, index) == 0)
+                && (VS::Menu::Inventory::LiveParentShieldIndex(base_item_category, index) == 0)) {
                 sp310[rowCount * 2 + 1] =
                     (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_invalidSearch];
                 Menu_Framework_rowTypeBuf[rowCount] = 1;
@@ -1091,7 +916,7 @@ loop_1:
             break;
         }
 
-        var_a1_2 = Menu_Inventory_ParentWeaponIndex(itemCategory, index);
+        var_a1_2 = VS::Menu::Inventory::LiveParentWeaponIndex(itemCategory, index);
 
         if (var_a1_2 != 0) {
             rowType = 1;
@@ -1100,7 +925,7 @@ loop_1:
             }
         }
 
-        var_a1_2 = Menu_Inventory_ParentShieldIndex(itemCategory, index);
+        var_a1_2 = VS::Menu::Inventory::LiveParentShieldIndex(itemCategory, index);
 
         if (var_a1_2 != 0) {
             rowType = 1;
@@ -1240,10 +1065,10 @@ loop_1:
             break;
         }
 
-        i = Menu_Inventory_ParentWeaponIndex(itemCategory, indices[Menu_Inventory_itemListSelectedRow - 1] - 1);
+        i = VS::Menu::Inventory::LiveParentWeaponIndex(itemCategory, indices[Menu_Inventory_itemListSelectedRow - 1] - 1);
 
         if (i == 0) {
-            i = Menu_Inventory_ParentShieldIndex(itemCategory, indices[Menu_Inventory_itemListSelectedRow - 1] - 1);
+            i = VS::Menu::Inventory::LiveParentShieldIndex(itemCategory, indices[Menu_Inventory_itemListSelectedRow - 1] - 1);
             itemCategory = 3;
         } else {
             itemCategory = 0;

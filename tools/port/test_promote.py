@@ -230,6 +230,27 @@ class PromoteTests(unittest.TestCase):
         self.assertEqual(solution, self.read(self.repository.solution))
         self.assertNotIn("F01818 keeps", self.read(self.repository.fixups))
 
+    def test_register_keys_a_header_function_to_the_named_overlay(self) -> None:
+        catalog = self.repository.ledger("FUNCTION_CATALOG")
+        write(catalog, CATALOG + catalog_row("F02593", 0x80104EC0).replace(
+            "BATTLE/BATTLE.PRG/7CD68.c", "MENU/items2.h") + "\n")
+        arguments = ["register", "F02593", "--typed", "VS::Menu::Inventory::ParentWeaponIndex",
+                     "--source", r"Native\Game\src\Menu\Inventory\ItemListRows.cpp",
+                     "--live", "VS::Menu::Inventory::LiveParentWeaponIndex", "--notes", "items2.h"]
+        before = self.snapshot()
+        for module in ([], ["--module", "MENU"]):
+            with self.assertRaises(SystemExit):
+                run(self.repository, *arguments, *module)
+            self.assertEqual(before, self.snapshot())
+        run(self.repository, *arguments, "--module", "MENU/MENU3.PRG")
+        run(self.repository, *arguments, "--module", "MENU/MENUB.PRG", "--address", "0x80104FB4")
+        lines = self.read(self.repository.fixups).split("\r\n")
+        self.assertIn('    ("MENU/MENU3.PRG", 0x80104EC0, "VS::Menu::Inventory::LiveParentWeaponIndex"),  # F02593',
+                      lines)
+        self.assertIn('    ("MENU/MENUB.PRG", 0x80104FB4, "VS::Menu::Inventory::LiveParentWeaponIndex"),  # F02593',
+                      lines)
+        self.assertFalse(any(line.startswith('    ("MENU",') for line in lines))
+
     def test_csv_table_keeps_untouched_rows(self) -> None:
         table = promote.CsvTable(self.repository.owned)
         self.assertEqual(table.get("id", "F00920")["notes"], "legacy, unquoted, notes")

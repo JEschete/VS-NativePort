@@ -1542,6 +1542,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Inventory::SortLiveMisc": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
     "VS::Menu::Inventory::CopyLiveEquipmentStats": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
     "VS::Menu::Inventory::SortLiveEquipment": r"Native\Game\include\Menu\Inventory\InventorySortingLive.hpp",
+    "VS::Menu::Inventory::LiveParentWeaponIndex": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
+    "VS::Menu::Inventory::LiveParentShieldIndex": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
+    "VS::Menu::Inventory::LiveBuildItemRows": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
+    "VS::Menu::Inventory::LiveBuildLootItemRows": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
+    "VS::Menu::Inventory::LiveRestoreItemRows": r"Native\Game\include\Menu\Inventory\ItemListRowsLive.hpp",
     "VS::Items::LiveContainerCategoryIndices": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::FindLiveContainerItemRow": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::AppendLiveContainerItemIndex": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
@@ -2789,6 +2794,10 @@ OWNED_CALL_BINDINGS["F02585"] = "VS::Menu::Inventory::SortLiveShields"
 OWNED_CALL_BINDINGS["F02587"] = "VS::Menu::Inventory::SortLiveMisc"
 OWNED_CALL_BINDINGS["F02589"] = "VS::Menu::Inventory::CopyLiveEquipmentStats"
 OWNED_CALL_BINDINGS["F02590"] = "VS::Menu::Inventory::SortLiveEquipment"
+OWNED_CALL_BINDINGS["F02593"] = "VS::Menu::Inventory::LiveParentWeaponIndex"
+OWNED_CALL_BINDINGS["F02594"] = "VS::Menu::Inventory::LiveParentShieldIndex"
+OWNED_CALL_BINDINGS["F02595"] = "VS::Menu::Inventory::LiveBuildItemRows"
+OWNED_CALL_BINDINGS["F02596"] = "VS::Menu::Inventory::LiveRestoreItemRows"
 OWNED_CALL_BINDINGS["F02927"] = "VS::Items::LiveContainerCategoryIndices"
 OWNED_CALL_BINDINGS["F02928"] = "VS::Items::FindLiveContainerItemRow"
 OWNED_CALL_BINDINGS["F02929"] = "VS::Items::AppendLiveContainerItemIndex"
@@ -4820,6 +4829,15 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x8010439C, "VS::Menu::Inventory::CopyLiveEquipmentStats"),  # F02589
     ("MENU/MENU3.PRG", 0x8010439C, "VS::Menu::Inventory::SortLiveEquipment"),  # F02590
     ("MENU/MENUB.PRG", 0x80104474, "VS::Menu::Inventory::SortLiveEquipment"),  # F02590
+    ("MENU/MENU3.PRG", 0x80104EC0, "VS::Menu::Inventory::LiveParentWeaponIndex"),  # F02593
+    ("MENU/MENUB.PRG", 0x80104FB4, "VS::Menu::Inventory::LiveParentWeaponIndex"),  # F02593
+    ("MENU/MENU3.PRG", 0x80104F50, "VS::Menu::Inventory::LiveParentShieldIndex"),  # F02594
+    ("MENU/MENUB.PRG", 0x80105044, "VS::Menu::Inventory::LiveParentShieldIndex"),  # F02594
+    ("MENU/MENU3.PRG", 0x80104F94, "VS::Menu::Inventory::LiveBuildItemRows"),  # F02595
+    # MENUB.PRG compiles items2.h without _ITEMMENU: its rows record no misc actions.
+    ("MENU/MENUB.PRG", 0x80105088, "VS::Menu::Inventory::LiveBuildLootItemRows"),  # F02595
+    ("MENU/MENU3.PRG", 0x80105314, "VS::Menu::Inventory::LiveRestoreItemRows"),  # F02596
+    ("MENU/MENUB.PRG", 0x8010537C, "VS::Menu::Inventory::LiveRestoreItemRows"),  # F02596
     ("MENU/MENUD.PRG", 0x80102A34, "VS::Menu::container::BuildLiveWeaponStats"),  # F02925
     ("MENU/MENUD.PRG", 0x80102BB0, "VS::Menu::container::BuildLiveShieldStats"),  # F02926
     ("MENU/MENUD.PRG", 0x80103D50, "VS::Menu::container::SetLivePanelVisibility"),  # F02942
@@ -5136,6 +5154,11 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("VS::Core::Memory::AllocateFromHighEnd(0x1B00)",
          "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
          "C48.c:546 scratch ends with 128 text pointers; reserve native pointer width, not the PS1 512 bytes"),
+    ],
+    "F02597": [
+        ("VS::Core::Memory::AllocateFromHighEnd(72 * 96)",
+         "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(char*))",
+         "#404: items2.h:281,440 row text pointers start at 0x1900; reserve 128 native pointers, not the PS1 512 bytes"),
     ],
     "F02985": [
         ("VS::Core::Memory::AllocateFromHighEnd(0x6C00)",

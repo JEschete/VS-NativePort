@@ -744,6 +744,16 @@
     <None Include="..\..\port\differentials\inventory_detail_helpers_common.py" />
     <None Include="..\..\port\differentials\inventory_detail_helpers_driver.cpp" />
     <None Include="..\..\port\differentials\inventory_detail_helpers_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\inventory_rows_common.py" />
+    <None Include="..\..\port\differentials\inventory_rows_driver.cpp" />
+    <None Include="..\..\port\differentials\inventory_rows_f02593.py" />
+    <None Include="..\..\port\differentials\inventory_rows_f02593_menub.py" />
+    <None Include="..\..\port\differentials\inventory_rows_f02594.py" />
+    <None Include="..\..\port\differentials\inventory_rows_f02594_menub.py" />
+    <None Include="..\..\port\differentials\inventory_rows_f02595.py" />
+    <None Include="..\..\port\differentials\inventory_rows_f02595_menub.py" />
+    <None Include="..\..\port\differentials\inventory_rows_f02596.py" />
+    <None Include="..\..\port\differentials\inventory_rows_f02596_menub.py" />
     <None Include="..\..\port\differentials\inventory_sorting_common.py" />
     <None Include="..\..\port\differentials\inventory_sorting_driver.cpp" />
     <None Include="..\..\port\differentials\inventory_sorting_f02583.py" />

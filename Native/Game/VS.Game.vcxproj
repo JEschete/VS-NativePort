@@ -1873,6 +1873,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\ItemListRows.cpp" />
+    <ClCompile Include="src\Menu\Inventory\ItemListRowsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Legacy.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2900,6 +2904,8 @@
     <ClInclude Include="include\Menu\Inventory\InventorySortingLive.hpp" />
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatch.hpp" />
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatchLive.hpp" />
+    <ClInclude Include="include\Menu\Inventory\ItemListRows.hpp" />
+    <ClInclude Include="include\Menu\Inventory\ItemListRowsLive.hpp" />
     <ClInclude Include="include\Menu\Loot\LootRows.hpp" />
     <ClInclude Include="include\Menu\Loot\LootRowsLive.hpp" />
     <ClInclude Include="include\Menu\Loot\LootStaging.hpp" />

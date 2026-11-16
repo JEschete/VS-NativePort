@@ -219,6 +219,8 @@ class Function:
         self.id, self.name, self.row = row["id"], row["name"], row
         self.file, self.line = row["file"], row["line"]
         self.module = str(PureWindowsPath(self.file.replace("/", "\\")).parent).replace("\\", "/")
+        # A shared header's directory (MENU/items2.h -> MENU) is not a loadable module (#406).
+        self.header = PureWindowsPath(self.file).suffix in (".h", ".hpp")
         match = ADDRESS_NAME.match(self.name)
         self.address = int(match.group(1), 16) if match else None
         self.end = None
@@ -347,6 +349,10 @@ def register(repository: Repository, args: argparse.Namespace) -> int:
     function = catalog_function(repository, args.id)
     if args.address:
         function.address = int(args.address, 16)
+    if args.module:
+        if not PureWindowsPath(args.module).suffix:
+            raise SystemExit(f"--module {args.module}: name the overlay file, e.g. MENU/MENU3.PRG")
+        function.module = args.module
     header = args.header or include_path(args.source)
     fixups = TextFile(repository.fixups)
     results = {}
@@ -356,6 +362,9 @@ def register(repository: Repository, args: argparse.Namespace) -> int:
         if function.address is None and not args.inline:
             raise SystemExit(f"{args.id} {function.name}: no address in the name; pass --address, or --inline "
                              "when the original only inlined it")
+        if function.header and not args.inline and not args.module:
+            raise SystemExit(f"{args.id} {function.name}: {function.file} is a shared header; pass --module with "
+                             "the overlay holding the address, e.g. MENU/MENU3.PRG, and register again per overlay")
         live_header = args.live_header or str(PureWindowsPath(include_path(args.source)).with_name(
             PureWindowsPath(args.source).stem + "Live.hpp"))
         results["NATIVE_HELPER_HEADERS"] = add_helper_header(fixups, args.live, live_header)
@@ -782,6 +791,8 @@ def main(argv: list[str] | None = None, repository: Repository | None = None) ->
     command.add_argument("--live-header", help="Live adapter header (default: <source stem>Live.hpp)")
     command.add_argument("--no-c-headers", action="store_true", help="do not list the Live source for C headers")
     command.add_argument("--address", help="hex module address when the catalog name has none")
+    command.add_argument("--module", help="overlay holding --address, e.g. MENU/MENU3.PRG; required for functions "
+                                          "defined in a shared header")
     command.add_argument("--inline", action="store_true",
                          help="the original only inlined the function: bind calls but add no module entry")
     command.add_argument("--notes", required=True, help="owned.csv notes")
