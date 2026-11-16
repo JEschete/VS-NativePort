@@ -9,7 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_CONTAINER_ITEMVIEW_H_DECLS)
 #define VS_MENU_CONTAINER_ITEMVIEW_H_DECLS
 #include "Items/Inventory.h"
-#include "Items/Weapons.h"
 
 extern char const* Menu_Container_kStorageNames[];
 extern char const* Menu_Container_kCategoryLabels[];
@@ -25,13 +24,5 @@ extern int Menu_Container_detailsClosedWithTriangle;;
 extern Items_Container* Menu_Container_otherStorage;;
 extern u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData.cpp) */;
 extern Items_Container* Menu_Container_containerData;;
-void Menu_Container_BuildWeaponRow(Items_ContainerData* container, char** rowStrings,
-    int* rowTypes, char* buf, int index);
-void Menu_Container_BuildShieldRow(Items_ContainerData* container, char** rowStrings,
-    int* rowTypes, char* buf, int index);
-int Menu_Container_UpdateItemList(int transfer_direction_selection);
-int Menu_Container_UpdateTransferDirection(int initialize_direction_menu);
-int Menu_Container_UpdateScreen(u_char* screen_step);
-void Menu_Container_ItemView_ResetMenudStatics(void);
 
 #endif // VS_MENU_CONTAINER_ITEMVIEW_H_DECLS

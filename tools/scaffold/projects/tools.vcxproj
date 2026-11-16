@@ -490,6 +490,14 @@
     <None Include="..\..\port\differentials\container_sorting_f02968.py" />
     <None Include="..\..\port\differentials\container_sorting_keys.hpp" />
     <None Include="..\..\port\differentials\container_sorting_live_driver.cpp" />
+    <None Include="..\..\port\differentials\container_transfer_common.py" />
+    <None Include="..\..\port\differentials\container_transfer_driver.cpp" />
+    <None Include="..\..\port\differentials\container_transfer_f02951.py" />
+    <None Include="..\..\port\differentials\container_transfer_f02952.py" />
+    <None Include="..\..\port\differentials\container_transfer_f02985.py" />
+    <None Include="..\..\port\differentials\container_transfer_f02986.py" />
+    <None Include="..\..\port\differentials\container_transfer_f02987.py" />
+    <None Include="..\..\port\differentials\container_transfer_list.py" />
     <None Include="..\..\port\differentials\container_transfers_common.py" />
     <None Include="..\..\port\differentials\container_transfers_driver.cpp" />
     <None Include="..\..\port\differentials\container_transfers_f02934.py" />

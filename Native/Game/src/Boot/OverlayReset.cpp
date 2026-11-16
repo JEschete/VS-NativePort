@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
@@ -6,7 +7,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
 #include "Menu/BattleAbilities.h"
-#include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
@@ -75,9 +75,9 @@ void Boot_ResetMenubStatics(void)
 // Call where the original loads MENUD.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenudStatics(void)
 {
-    Menu_Container_ItemView_ResetMenudStatics();
     Menu_Container_Storage_ResetMenudStatics();
     VS::Menu::container::ResetLiveContainerDialogStatics();
+    VS::Menu::container::ResetLiveContainerTransferStatics();
 }
 
 // Call where the original loads MENUE.PRG: restores the statics its reload re-read from the disc.

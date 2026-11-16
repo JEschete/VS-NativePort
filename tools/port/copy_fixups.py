@@ -1606,6 +1606,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::container::AppendLivePendingTransfer": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
     "VS::Menu::container::RebuildLivePendingTransfers": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
     "VS::Menu::container::BuildLiveItemRows": r"Native\Game\include\Menu\Container\ContainerPendingRowsLive.hpp",
+    "VS::Menu::container::LiveBuildWeaponRow": r"Native\Game\include\Menu\Container\ContainerListTransferLive.hpp",
+    "VS::Menu::container::LiveBuildShieldRow": r"Native\Game\include\Menu\Container\ContainerListTransferLive.hpp",
+    "VS::Menu::container::LiveUpdateItemList": r"Native\Game\include\Menu\Container\ContainerListTransferLive.hpp",
+    "VS::Menu::container::LiveUpdateTransferDirection": r"Native\Game\include\Menu\Container\ContainerListTransferLive.hpp",
+    "VS::Menu::container::LiveUpdateScreen": r"Native\Game\include\Menu\Container\ContainerListTransferLive.hpp",
     "VS::Menu::Loot::Live::StageBlade": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
     "VS::Menu::Loot::Live::StageGrip": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
     "VS::Menu::Loot::Live::StageGem": r"Native\Game\include\Menu\Loot\LootStagingLive.hpp",
@@ -2864,6 +2869,11 @@ OWNED_CALL_BINDINGS["F02979"] = "VS::Menu::container::FindLivePendingTransfer"
 OWNED_CALL_BINDINGS["F02980"] = "VS::Menu::container::AppendLivePendingTransfer"
 OWNED_CALL_BINDINGS["F02981"] = "VS::Menu::container::RebuildLivePendingTransfers"
 OWNED_CALL_BINDINGS["F02982"] = "VS::Menu::container::BuildLiveItemRows"
+OWNED_CALL_BINDINGS["F02951"] = "VS::Menu::container::LiveBuildWeaponRow"
+OWNED_CALL_BINDINGS["F02952"] = "VS::Menu::container::LiveBuildShieldRow"
+OWNED_CALL_BINDINGS["F02985"] = "VS::Menu::container::LiveUpdateItemList"
+OWNED_CALL_BINDINGS["F02986"] = "VS::Menu::container::LiveUpdateTransferDirection"
+OWNED_CALL_BINDINGS["F02987"] = "VS::Menu::container::LiveUpdateScreen"
 OWNED_CALL_BINDINGS["F02846"] = "VS::Menu::Loot::Live::StageBlade"
 OWNED_CALL_BINDINGS["F02847"] = "VS::Menu::Loot::Live::StageGrip"
 OWNED_CALL_BINDINGS["F02848"] = "VS::Menu::Loot::Live::StageGem"
@@ -4894,6 +4904,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUD.PRG", 0x80106A04, "VS::Menu::container::AppendLivePendingTransfer"),  # F02980
     ("MENU/MENUD.PRG", 0x80106A50, "VS::Menu::container::RebuildLivePendingTransfers"),  # F02981
     ("MENU/MENUD.PRG", 0x80106C64, "VS::Menu::container::BuildLiveItemRows"),  # F02982
+    ("MENU/MENUD.PRG", 0x801041E0, "VS::Menu::container::LiveBuildWeaponRow"),  # F02951
+    ("MENU/MENUD.PRG", 0x8010425C, "VS::Menu::container::LiveBuildShieldRow"),  # F02952
+    ("MENU/MENUD.PRG", 0x80107490, "VS::Menu::container::LiveUpdateItemList"),  # F02985
+    ("MENU/MENUD.PRG", 0x801089BC, "VS::Menu::container::LiveUpdateTransferDirection"),  # F02986
+    ("MENU/MENUD.PRG", 0x80108C6C, "VS::Menu::container::LiveUpdateScreen"),  # F02987
     ("MENU/MENUB.PRG", 0x80107C54, "VS::Menu::Loot::Live::StageBlade"),  # F02846
     ("MENU/MENUB.PRG", 0x80107CE8, "VS::Menu::Loot::Live::StageGrip"),  # F02847
     ("MENU/MENUB.PRG", 0x80107D7C, "VS::Menu::Loot::Live::StageGem"),  # F02848
@@ -5180,14 +5195,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("VS::Core::Memory::AllocateFromHighEnd(72 * 96)",
          "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(char*))",
          "#404: items2.h:281,440 row text pointers start at 0x1900; reserve 128 native pointers, not the PS1 512 bytes"),
-    ],
-    "F02985": [
-        ("VS::Core::Memory::AllocateFromHighEnd(0x6C00)",
-         "VS::Core::Memory::AllocateFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace))",
-         "#370: 234.c:2393 container rows own 512 native pointers after their fixed text/type fields"),
-        ("VS::Core::Memory::AllocateFromHighEnd(0x6C00U)",
-         "VS::Core::Memory::AllocateFromHighEnd(sizeof(VS::Menu::container::ItemRowsWorkspace))",
-         "#370: both rebuilt and pending row workspaces require the native pointer-width extent"),
     ],
     "F02699": [
         ("    u_long* pScratch1;\n    u_long* pScratch2;\n", "",
@@ -7920,15 +7927,6 @@ REGEX_FIXES += [
         ("Menu::Container::UpdateTransferConfirmation",
          (('arg0', 'initialize_confirmation'), ('sp10', 'confirmation_row_text'), ('sp20', 'confirmation_row_types'), ('temp_s0', 'confirmation_step')),
          "F02984 src\\MENU\\MENUD.PRG\\234.c:2332-2391 (func_801072B0). Named roles: initialize confirmation, confirmation row text, confirmation row types, confirmation step."),
-        ("Menu::Container::UpdateItemList",
-         (('arg0', 'transfer_direction_selection'), ('s6', 'details_index_bias'), ('sp10', 'action_row_text'), ('temp_s0_2', 'rebuilt_row_text'), ('temp_s1_3', 'rebuilt_row_types'), ('temp_s1_4', 'pending_row_types'), ('temp_s3_7', 'pending_row_text'), ('temp_s5', 'initial_row_text'), ('temp_s6', 'initial_row_types'), ('temp_v0_11', 'category_title_row'), ('temp_v0_17', 'parent_item_row'), ('temp_v0_18', 'category_cursor_memory_offset'), ('temp_v0_19', 'pending_rows_allocation'), ('temp_v0_7', 'rebuilt_rows_allocation'), ('temp_v0_8', 'previous_category_buttons_held'), ('var_s4', 'selected_category_id'), ('var_v0_3', 'next_category_buttons_repeated')),
-         "F02985 src\\MENU\\MENUD.PRG\\234.c:2393-3035 (func_80107490). Named roles: transfer-direction input; action text; initial/rebuilt/pending row text, types and allocations; category/title/cursor state and button inputs. Retained: temp_a0/temp_s0: separate shadowed counters, scrolling and item-state locals; temp_s1: category indices versus allocated row buffer; temp_s2/temp_s3/var_a2: preserved count/input/item/selection/result lifetimes; var_a1: unread writes."),
-        ("Menu::Container::UpdateTransferDirection",
-         (('arg0', 'initialize_direction_menu'), ('a0', 'direction_help_text'), ('temp_v0_2', 'selected_direction_row'), ('var_s1', 'selected_direction')),
-         "F02986 src\\MENU\\MENUD.PRG\\234.c:3037-3126 (func_801089BC). Named roles: initialize direction menu, direction help text, selected direction row, selected direction."),
-        ("Menu::Container::UpdateScreen",
-         (('arg0', 'screen_step'), ('temp_a2', 'projected_category_count'), ('temp_s0', 'control_icon_x'), ('temp_s0_2', 'destination_category_count'), ('var_a0', 'category_capacity'), ('var_s6', 'packed_capacity_row_position'), ('var_v0', 'capacity_slide_offset')),
-         "F02987 src\\MENU\\MENUD.PRG\\234.c:3130-3352 (vs_menuD_exec). Named roles: screen step, projected category count, control icon x, destination category count, category capacity, packed capacity row position, capacity slide offset. Retained: s3: Merged control-label X coordinate and later category loop index 0..6."),
         ("Menu::Manual::CopyEncodedLine",
          (('arg0', 'destination_text'), ('arg1', 'source_text')),
          "F02996 src\\MENU\\MENUE.PRG\\494.c:561-575 (_vsStrcpy). Named roles: destination text, source text."),

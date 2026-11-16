@@ -32,6 +32,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/BreakArtsLive.hpp"
+#include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -960,7 +961,7 @@ class LiveHost final : public Host {
       case Submenu::kUnlockNotifications:
         return Menu_BattleAbilities_UpdateUnlockNotifications(&state);
       case Submenu::kContainer:
-        return Menu_Container_UpdateScreen(bytes);
+        return VS::Menu::container::LiveUpdateScreen(bytes);
       case Submenu::kRename:
         return VS::Menu::Rename::UpdateLiveRename(*bytes);
       case Submenu::kSetup:

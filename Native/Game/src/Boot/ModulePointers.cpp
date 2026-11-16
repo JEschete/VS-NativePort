@@ -106,6 +106,7 @@
 #include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
+#include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
@@ -2087,6 +2088,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUD.PRG", 0x80106A04u, 0u, (void*)&VS::Menu::container::AppendLivePendingTransfer, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80106A50u, 0u, (void*)&VS::Menu::container::RebuildLivePendingTransfers, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80106C64u, 0u, (void*)&VS::Menu::container::BuildLiveItemRows, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801041E0u, 0u, (void*)&VS::Menu::container::LiveBuildWeaponRow, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x8010425Cu, 0u, (void*)&VS::Menu::container::LiveBuildShieldRow, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80107490u, 0u, (void*)&VS::Menu::container::LiveUpdateItemList, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x801089BCu, 0u, (void*)&VS::Menu::container::LiveUpdateTransferDirection, 0u, 0u, 0u},
+    {"MENU/MENUD.PRG", 0x80108C6Cu, 0u, (void*)&VS::Menu::container::LiveUpdateScreen, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80107C54u, 0u, (void*)&VS::Menu::Loot::Live::StageBlade, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80107CE8u, 0u, (void*)&VS::Menu::Loot::Live::StageGrip, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80107D7Cu, 0u, (void*)&VS::Menu::Loot::Live::StageGem, 0u, 0u, 0u},

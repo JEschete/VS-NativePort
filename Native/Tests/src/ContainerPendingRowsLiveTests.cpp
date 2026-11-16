@@ -7,6 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
 
 extern "C" {
@@ -176,10 +177,10 @@ TEST_CASE("F02985 controller allocates the full native row workspace",
     item.id = data::kMiscId;
     item.count = 1;
   }
-  REQUIRE(Menu_Container_UpdateItemList(1) == 0);
+  REQUIRE(VS::Menu::container::LiveUpdateItemList(1) == 0);
   Menu_Framework_menuMemory.opaqueA0[0] = 7;
   const auto guard_before = VS::Core::Memory::DamagedLiveHeapGuardCount();
-  REQUIRE(Menu_Container_UpdateItemList(0) == 0);
+  REQUIRE(VS::Menu::container::LiveUpdateItemList(0) == 0);
   CHECK(VS::Core::Memory::DamagedLiveHeapGuardCount() == guard_before);
   CHECK(std::ranges::all_of(std::span(backing).subspan(tests::kHeapBytes),
                             [](std::byte value) { return value == kCanary; }));

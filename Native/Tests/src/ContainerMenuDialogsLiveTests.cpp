@@ -206,9 +206,10 @@ TEST_CASE("F02970 production-equipped gadget-bag weapons cannot select discard",
       fixture.containers.storage->gadgetBag.items.weapons[0]);
   REQUIRE(before.is_equipped != 0);
   REQUIRE(fixture.rows[33].unselectable != 0);
-  fixture.Frame(Menu_Container_UpdateItemList, input::Down);
-  fixture.Frame(Menu_Container_UpdateItemList);
-  REQUIRE(fixture.Frame(Menu_Container_UpdateItemList, input::Circle) == 0);
+  fixture.Frame(VS::Menu::container::LiveUpdateItemList, input::Down);
+  fixture.Frame(VS::Menu::container::LiveUpdateItemList);
+  REQUIRE(fixture.Frame(VS::Menu::container::LiveUpdateItemList,
+                        input::Circle) == 0);
   REQUIRE(framework::LiveActionSelectionResult() == -1);
   REQUIRE(VS::Items::Live::Typed(
               fixture.containers.storage->gadgetBag.items.weapons[0]) ==

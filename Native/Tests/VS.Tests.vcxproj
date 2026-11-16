@@ -148,6 +148,7 @@
     <ClCompile Include="src\ContainerIndexingLiveTests.cpp" />
     <ClCompile Include="src\ContainerIndexingModuleTests.cpp" />
     <ClCompile Include="src\ContainerIndexingTests.cpp" />
+    <ClCompile Include="src\ContainerListTransferTests.cpp" />
     <ClCompile Include="src\ContainerMenuDialogsLiveTests.cpp" />
     <ClCompile Include="src\ContainerMenuDialogsModuleTests.cpp" />
     <ClCompile Include="src\ContainerMenuDialogsTests.cpp" />
@@ -474,6 +475,7 @@
     <ClInclude Include="include\Menu\ContainerDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailHelpersSamples.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailHelpersWorld.hpp" />
+    <ClInclude Include="include\Menu\ContainerListTransferWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerMenuDialogsLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ContainerMenuDialogsWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerPendingRowsLiveFixture.hpp" />

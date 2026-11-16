@@ -7,6 +7,7 @@
 
 #include "Items/ContainerTransfers.hpp"
 #include "Menu/Container/ContainerDetailHelpers.hpp"
+#include "Menu/Container/ContainerListTransfer.hpp"
 
 namespace VS::Menu::container {
 namespace {
@@ -67,13 +68,11 @@ std::optional<Framework::ItemRowText> FormatRow(Items::ItemCategory category,
   const auto buffer = world.Description(row);
   switch (category) {
     case Category::kWeapon: {
-      const auto weapon = Read<Items::InventoryWeapon>(category, slot, records);
-      Items::WeaponLoadout loadout{};
-      world.ReportItemStatus(BuildWeaponStats(loadout, &weapon, records));
-      auto text = Framework::FormatWeaponRow(host, loadout, buffer);
-      text.name =
-          Framework::TextRef{.source = Framework::TextSource::kWeaponName};
-      return text;
+      const auto row = BuildWeaponRow(
+          host, Read<Items::InventoryWeapon>(category, slot, records), records,
+          buffer);
+      world.ReportItemStatus(row.status);
+      return row.text;
     }
     case Category::kBlade:
       return Framework::FormatBladeRow(
@@ -82,10 +81,9 @@ std::optional<Framework::ItemRowText> FormatRow(Items::ItemCategory category,
       return Framework::FormatGripRow(
           host, Read<Items::InventoryGrip>(category, slot, records), buffer);
     case Category::kShield: {
-      const auto shield = Read<Items::InventoryShield>(category, slot, records);
-      Items::ShieldLoadout loadout{};
-      BuildShieldStats(loadout, &shield, records);
-      return Framework::FormatShieldRow(host, loadout, buffer);
+      return BuildShieldRow(
+          host, Read<Items::InventoryShield>(category, slot, records), records,
+          buffer);
     }
     case Category::kArmor:
       return Framework::FormatInventoryArmorRow(

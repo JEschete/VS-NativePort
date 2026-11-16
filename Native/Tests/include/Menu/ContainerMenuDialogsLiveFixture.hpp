@@ -16,6 +16,7 @@
 #include "Input/LegacyPad.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
+#include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -257,17 +258,17 @@ struct EquippedFixture : DialogLiveFixture {
   }
   void OpenEquippedContainerActions() {
     framework::ClearLiveMenuExcept(framework::kNoRow);
-    if (Menu_Container_UpdateItemList(2) != 0) {
+    if (VS::Menu::container::LiveUpdateItemList(2) != 0) {
       throw std::runtime_error(
           "container list initializer unexpectedly completed");
     }
-    RunFrames(Menu_Container_UpdateItemList);
-    Frame(Menu_Container_UpdateItemList, VS::Input::Right);
-    RunFrames(Menu_Container_UpdateItemList);
-    Frame(Menu_Container_UpdateItemList, VS::Input::Circle);
-    RunFrames(Menu_Container_UpdateItemList);
-    Frame(Menu_Container_UpdateItemList, VS::Input::Circle);
-    RunFrames(Menu_Container_UpdateItemList);
+    RunFrames(VS::Menu::container::LiveUpdateItemList);
+    Frame(VS::Menu::container::LiveUpdateItemList, VS::Input::Right);
+    RunFrames(VS::Menu::container::LiveUpdateItemList);
+    Frame(VS::Menu::container::LiveUpdateItemList, VS::Input::Circle);
+    RunFrames(VS::Menu::container::LiveUpdateItemList);
+    Frame(VS::Menu::container::LiveUpdateItemList, VS::Input::Circle);
+    RunFrames(VS::Menu::container::LiveUpdateItemList);
   }
 };
 }  // namespace container_dialog_live_tests

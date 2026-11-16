@@ -131,6 +131,7 @@ def configuration(kind: int) -> dict:
         "INCLUDES": (r"Native\Game\src", r"Native\Tests\include"),
         "SOURCES": (
             r"Native\Game\src\Menu\Container\ContainerPendingRows.cpp",
+            r"Native\Game\src\Menu\Container\ContainerListTransfer.cpp",
             r"Native\Game\src\Items\ContainerIndexing.cpp",
             r"Native\Game\src\Items\ContainerTransfers.cpp",
             r"Native\Game\src\Menu\Container\ContainerDetailHelpers.cpp",

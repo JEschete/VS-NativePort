@@ -2499,6 +2499,12 @@
     <ClCompile Include="src\Menu\Container\ContainerDetailHelpersLive.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerListTransfer.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Container\ContainerListTransferLive.cpp">
+      <Filter>src\Menu\Container</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Container\ContainerMenuDialogs.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
@@ -4240,6 +4246,12 @@
       <Filter>include\Menu\Container</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Container\ContainerDetailHelpersLive.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerListTransfer.hpp">
+      <Filter>include\Menu\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Container\ContainerListTransferLive.hpp">
       <Filter>include\Menu\Container</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Container\ContainerMenuDialogs.hpp">
