@@ -30,15 +30,15 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 8 | 2,385 | 760 | 7 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 5 | 94 | 10,755 | 564 | 79 | 0 |
+| 34: #60 Menu screens and workspaces | 4 | 91 | 10,505 | 566 | 77 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 103 | 13,257 | 3646 | 86 | 0 |
+| **Total** | 4 | 100 | 13,007 | 3648 | 84 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,624 |
+| done | 3,628 |
 | in-progress | 4 |
-| todo | 104 |
+| todo | 100 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (6 active, 48 done); open functions in no slice: 0.
 
@@ -95,19 +95,19 @@ architecture changes rather than per-function work, so this ledger is what track
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | active | - | 6 | 30 | 2,707 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
-| 52 | menu-map-manual-text | active | - | 4 | 14 | 1,115 |
+| 52 | menu-map-manual-text | active | - | 4 | 10 | 865 |
 | 53 | title | done | self | 4 | 0 | 0 |
 | 54 | ending | done | self | 5 | 0 | 0 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 27 |
-| Referenced by the original-address module table | 1 | 9 |
+| Called from generated code | 0 | 27 |
+| Referenced by the original-address module table | 0 | 6 |
 | Calls an SDK shim | 0 | 24 |
-| Signature uses SDK integer types or `void*` | 0 | 18 |
-| Compiled with relaxed settings | 0 | 103 |
+| Signature uses SDK integer types or `void*` | 0 | 17 |
+| Compiled with relaxed settings | 0 | 100 |
 
-Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
+Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 0 of 4 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 33.
 

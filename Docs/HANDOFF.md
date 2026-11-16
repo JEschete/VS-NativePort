@@ -1,18 +1,18 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest integrated #276 group is A39-05, the four
-overlay-specific Analyze-grid functions. Its full local group gate passed;
+Updated 2026-11-16. The latest integrated #276 group is the text-frame group,
+functions F01413-F01416. Its full local group gate passed;
 the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **792 resolved (780 promoted,
-12 retired) and 108 remaining**; see
+The original 900-function cohort has **796 resolved (784 promoted,
+12 retired) and 104 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 8, 47: 5,
-  48: 50, 50: 30, 52: 14. Five ledger entries are WIP: F02604-F02607 and
-  F01416; do not count these as completed promotions.
+  48: 50, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
+  do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
   junction to the root data and delivers one local commit (typed cores, Live
@@ -20,7 +20,25 @@ The original 900-function cohort has **792 resolved (780 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
-- A39-05 evidence (`VR-EFFECTS-ANALYZE-GRID`): F01893, F01926, F01928 and
+- Text-frame evidence (`VR-MENU-TEXT-FRAME-PROMOTION`): F01413-F01416, including
+  completing the previously owned F01416 WIP. Each original passed 1,024
+  vectors with zero mismatches; all ten original instruction mutants and
+  four native broken variants were detected. Drawing comparisons include
+  150,267 complete packet words, cursors and chain heads; the reflection
+  compares all 32 result bits. Resident drawing callees run without stubs.
+  Debug and Release each passed 8,768 cases / 12,951,006 assertions,
+  20 focused cases / 39,736 assertions and both canonical replays.
+  Generation stability, copier tests and changed-file tidy passed with zero
+  new findings. Evidence: `build\promotion-check\group-20261116-181001\summary.json`
+  and `D:\Dev\NativePort\wt\batch-text-frame-b4b11beb0\build\scratch\text-frame\verification.json`.
+  Live tests cover packet capacity and retained native VM frame leases.
+  Arbitrary prior unwritten packet contents and PS1 temporary point storage
+  are outside the differential. Compatibility style lookup remains; no
+  EC retirement is claimed.
+- A39-05 was published in [`3401e5e8b`](https://github.com/JEschete/VS-NativePort/commit/3401e5e8bc6b24f5696c961ad137c13c58bd5da6);
+  exact-revision [Source Quality 43974821676](https://github.com/JEschete/VS-NativePort/actions/runs/43974821676)
+  passed; [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6932216999).
+  Evidence (`VR-EFFECTS-ANALYZE-GRID`): F01893, F01926, F01928 and
   F01996. Each independently loaded original passed 1,024 vectors, zero
   mismatches and 48 detected original mutants; all four native variants were
   detected. Debug and Release each passed 8,762 regression cases /
@@ -63,13 +81,17 @@ The original 900-function cohort has **792 resolved (780 promoted,
 
 Next steps:
 
-1. Finish the active isolated emitter/rings and inventory-terminal packets.
-   The four-function text-frame packet is isolated at
-   `D:\Dev\NativePort\wt\batch-text-frame-b4b11beb0`; do not count its local
-   focused tests or differentials as final integration. Continue the
-   dependency-ordered remaining-function plan, coordinating existing WIP
-   ledger entries. F00830 remains blocked on the actual climbing-hit contract
-   in #296, not a guessed blend constant.
+1. Integrate emitter/rings packet `ebb6f4e54134507183ce52bad59010ed170b3e9f`
+   from `D:\Dev\NativePort\wt\batch-emitter-rings-69396c5e`. Its eight
+   per-ID 2,048-vector comparisons and local 33-case suite are not final
+   integration. Expose the existing shared ring Live host, migrate callers,
+   register, regenerate and gate the packet. Inventory-terminal and
+   ability-foundation workers remain active. Continue the dependency-ordered
+   plan, including text-box updates after the frame group.
+   The emitter investigation logged the shared ApplyRotMatrix saturation
+   defect in #411; the shared helper is unchanged, and no shared-helper
+   repair or gameplay completion is claimed. F00830 remains blocked on the
+   actual climbing-hit contract in #296, not a guessed blend constant.
 2. Keep #410 open until the loader and reward caller paths are reproduced; do
    not present B50-05 as a completed promotion.
 3. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md),

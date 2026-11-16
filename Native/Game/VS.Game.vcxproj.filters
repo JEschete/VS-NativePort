@@ -2988,9 +2988,6 @@
     <ClCompile Include="src\Menu\TextBoxFramesLive.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\TextBoxFramesLive.h">
-      <Filter>src\Menu</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\TextBoxState.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -4642,6 +4639,9 @@
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\TextBoxFrames.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\TextBoxFramesLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\TextBoxState.hpp">

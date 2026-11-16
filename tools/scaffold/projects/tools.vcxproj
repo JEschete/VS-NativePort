@@ -1122,6 +1122,12 @@
     <None Include="..\..\port\differentials\target_approach_driver.cpp" />
     <None Include="..\..\port\differentials\temporary_awareness.py" />
     <None Include="..\..\port\differentials\temporary_awareness_driver.cpp" />
+    <None Include="..\..\port\differentials\text_box_frames_common.py" />
+    <None Include="..\..\port\differentials\text_box_frames_driver.cpp" />
+    <None Include="..\..\port\differentials\text_box_frames_f01413.py" />
+    <None Include="..\..\port\differentials\text_box_frames_f01414.py" />
+    <None Include="..\..\port\differentials\text_box_frames_f01415.py" />
+    <None Include="..\..\port\differentials\text_box_frames_f01416.py" />
     <None Include="..\..\port\differentials\text_box_state_common.py" />
     <None Include="..\..\port\differentials\text_box_state_driver.cpp" />
     <None Include="..\..\port\differentials\text_box_state_f01329.py" />

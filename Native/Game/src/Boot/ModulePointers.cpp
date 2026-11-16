@@ -145,6 +145,7 @@
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
+#include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -314,7 +315,6 @@ extern "C" {
 #include "Menu/Magic.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Menu/TextBox.h"
-#include "Menu/TextBoxFramesLive.h"
 #include "ModelLoading.h"
 #include "Movie/Intro.h"
 #include "OverlayWorkspaceLiveState.h"
@@ -376,10 +376,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&Menu_IsSceneNotificationPending, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&Menu_ReleaseSceneNotification, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&Menu_UpdateTextBoxes, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CD0FCu, 0u, (void*)&Menu_DrawInformationBoxHeader, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CD158u, 0u, (void*)&Menu_DrawInformationBoxBackdrop, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CD3A0u, 0u, (void*)&Menu_FlipTextBoxShapePoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CD3E4u, 0u, (void*)&Menu_DrawTextBoxFrame, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D2ADCu, 0u, (void*)&Effects_EmitParticleEvent, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8184u, 16u, (void*)&Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8194u, 32u, (void*)&Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget, 1u, 1u},
@@ -2324,6 +2320,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUE.PRG", 0x80102EDCu, 0u, (void*)&VS::Menu::manual::LiveUpdateScreen, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x801030A4u, 0u, (void*)&VS::Menu::manual::LiveInitHelpState, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103110u, 0u, (void*)&VS::Menu::manual::LiveUpdateHelpPages, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CD0FCu, 0u, (void*)&VS::Menu::DrawLiveInformationBoxHeader, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CD158u, 0u, (void*)&VS::Menu::DrawLiveInformationBoxBackdrop, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CD3A0u, 0u, (void*)&VS::Menu::FlipLiveTextBoxShapePoint, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CD3E4u, 0u, (void*)&VS::Menu::DrawLiveTextBoxFrame, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

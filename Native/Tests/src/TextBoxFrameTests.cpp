@@ -12,7 +12,8 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Menu/TextBoxFrames.hpp"
-#include "Menu/TextBoxFramesLive.h"
+#include "Menu/TextBoxFramesLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 
 extern "C" {
 #include "Event/ScriptVm.h"
@@ -44,6 +45,53 @@ class FrameQueue final : public VS::Render::PacketQueue {
     packets.emplace_back(packet.begin(), packet.end());
     if (emitted != nullptr) {
       emitted->push_back(packets.back());
+    }
+    return true;
+  }
+};
+
+struct InformationCommand {
+  enum class Kind : std::uint8_t { kHeader, kRow, kFill };
+  Kind kind;
+  std::array<std::int32_t, 5> values{};
+  friend bool operator==(const InformationCommand&,
+                         const InformationCommand&) = default;
+};
+
+class InformationWorld final : public VS::Menu::InformationBoxWorld {
+ public:
+  VS::Menu::TextBox box;
+  bool alternate = false;
+  bool open_when_drawn = false;
+  std::size_t capacity = std::numeric_limits<std::size_t>::max();
+  std::vector<InformationCommand> commands;
+
+  VS::Menu::TextBox ReadBox() const override { return box; }
+  bool AlternateFramebuffer() const override { return alternate; }
+  bool DrawHeader(std::size_t kind, std::int32_t x, std::int32_t y) override {
+    return Record({InformationCommand::Kind::kHeader,
+                   {static_cast<std::int32_t>(kind), x, y}});
+  }
+  bool DrawFramebufferRow(std::int32_t x, std::int32_t y, std::int32_t width,
+                          std::int32_t source_x,
+                          std::uint8_t brightness) override {
+    return Record(
+        {InformationCommand::Kind::kRow, {x, y, width, source_x, brightness}});
+  }
+  bool DrawBlackFill(std::int32_t x, std::int32_t y, std::int32_t width,
+                     std::int32_t height) override {
+    return Record({InformationCommand::Kind::kFill, {x, y, width, height}});
+  }
+
+ private:
+  bool Record(const InformationCommand& command) {
+    if (commands.size() == capacity) {
+      return false;
+    }
+    commands.push_back(command);
+    if (open_when_drawn) {
+      box.state = static_cast<std::int16_t>(
+          static_cast<std::uint8_t>(box.open_duration) + 1);
     }
     return true;
   }
@@ -99,10 +147,32 @@ class LiveFrameFixture {
     box.frameHeight = static_cast<std::int16_t>(request.height);
     box.brightness = request.brightness;
     Event_textBoxFrameStyles[style] = const_cast<std::uint8_t*>(source);
+    const auto* start = BeginDraw(capacity_words);
+    VS::Menu::DrawLiveTextBoxFrame(0);
+    return ReadPackets(start);
+  }
+
+  std::vector<std::vector<std::uint32_t>> DrawBackdrop(
+      const VS::Menu::TextBox& box,
+      std::size_t capacity_words = kPrimitiveWords) {
+    VS::Menu::WriteLiveTextBox(0, box);
+    const auto* start = BeginDraw(capacity_words);
+    VS::Menu::DrawLiveInformationBoxBackdrop(0);
+    return ReadPackets(start);
+  }
+
+ private:
+  std::uint32_t* BeginDraw(std::size_t capacity_words) {
+    REQUIRE(capacity_words <= kPrimitiveWords);
     ordering_.fill(0xFFFFFF);
     auto* start = storage_.data() + kPrimitiveWords - capacity_words;
     Render_frameScratch.primitiveCursor = start;
-    Menu_DrawTextBoxFrame(0);
+    Render_frameScratch.overlayOrderingTable = ordering_.data();
+    return start;
+  }
+
+  std::vector<std::vector<std::uint32_t>> ReadPackets(
+      const std::uint32_t* start) {
     std::vector<std::vector<std::uint32_t>> packets;
     const auto* end =
         static_cast<const std::uint32_t*>(Render_frameScratch.primitiveCursor);
@@ -117,7 +187,6 @@ class LiveFrameFixture {
     return packets;
   }
 
- private:
   static constexpr std::size_t kPrimitiveWords =
       0x20000 / sizeof(std::uint32_t);
   static constexpr std::size_t kArenaBytes = 4096;
@@ -190,6 +259,126 @@ struct FrameVmScope {
 };
 
 }  // namespace
+
+TEST_CASE("Information headers select only the three artwork entries",
+          "[text-box-frame][information-box]") {
+  InformationWorld world;
+  for (std::uint32_t kind = 0; kind < 3; ++kind) {
+    REQUIRE(VS::Menu::DrawInformationBoxHeader(world, -17, kind));
+    CHECK(world.commands.back() ==
+          InformationCommand{InformationCommand::Kind::kHeader,
+                             {static_cast<std::int32_t>(kind), 10, -17}});
+  }
+  for (const auto absent : {3U, 255U, 0xFFFFFFFFU}) {
+    CHECK(VS::Menu::DrawInformationBoxHeader(world, 42, absent));
+  }
+  CHECK(world.commands.size() == 3);
+  world.capacity = world.commands.size();
+  CHECK_FALSE(VS::Menu::DrawInformationBoxHeader(world, 42, 1));
+}
+
+TEST_CASE("Information backdrops shade both framebuffer strips toward the edge",
+          "[text-box-frame][information-box]") {
+  InformationWorld world;
+  world.box.line_count = 1;
+  world.box.frame_height = 10;
+  REQUIRE(VS::Menu::DrawInformationBoxBackdrop(world));
+  REQUIRE(world.commands.size() == 15);
+  CHECK(world.commands[0] == InformationCommand{InformationCommand::Kind::kRow,
+                                                {256, 10, 64, 576, 112}});
+  CHECK(world.commands[1] == InformationCommand{InformationCommand::Kind::kRow,
+                                                {0, 10, 256, 320, 112}});
+  CHECK(world.commands[13].values ==
+        std::array<std::int32_t, 5>{0, 4, 256, 320, 16});
+  CHECK(world.commands.back() ==
+        InformationCommand{InformationCommand::Kind::kFill, {0, 0, 320, 4}});
+}
+
+TEST_CASE("Information backdrops clamp unsigned rows and reread header state",
+          "[text-box-frame][information-box]") {
+  InformationWorld world;
+  world.alternate = true;
+  world.open_when_drawn = true;
+  world.box.y = 1;
+  world.box.line_count = 1;
+  world.box.frame_height = 20;
+  world.box.open_duration = -1;
+  world.box.flags.frame_shape = 2;
+  REQUIRE(VS::Menu::DrawInformationBoxBackdrop(world));
+  REQUIRE(world.commands.size() == 34);
+  CHECK(world.commands.front().values ==
+        std::array<std::int32_t, 5>{256, 220, 64, 256, 120});
+  CHECK(world.commands[32] ==
+        InformationCommand{InformationCommand::Kind::kFill, {0, 236, 320, 4}});
+  CHECK(world.commands.back() ==
+        InformationCommand{InformationCommand::Kind::kHeader, {1, 10, 229}});
+
+  world.commands.clear();
+  world.open_when_drawn = false;
+  world.box.y = 0;
+  world.box.line_count = -3;
+  world.box.frame_height = 3289;
+  world.box.state = 0;
+  REQUIRE(VS::Menu::DrawInformationBoxBackdrop(world));
+  REQUIRE(world.commands.size() == 2);
+  CHECK(world.commands.front().values[4] == 102);
+}
+
+TEST_CASE("Information backdrops stop at screen and output capacity boundaries",
+          "[text-box-frame][information-box]") {
+  InformationWorld world;
+  world.box.line_count = 4;
+  REQUIRE(VS::Menu::DrawInformationBoxBackdrop(world));
+  REQUIRE(world.commands.size() == 2);
+  CHECK(world.commands[0].values[1] == 0);
+
+  world.commands.clear();
+  world.capacity = 1;
+  CHECK_FALSE(VS::Menu::DrawInformationBoxBackdrop(world));
+  CHECK(world.commands.size() == 1);
+}
+
+TEST_CASE("Text box shape reflection preserves packed coordinate word behavior",
+          "[text-box-frame]") {
+  using VS::Menu::FlipTextBoxShapePoint;
+  CHECK(FlipTextBoxShapePoint(0x0102, 0) == 0x0102);
+  CHECK(FlipTextBoxShapePoint(0x0102, 1) == 0xFE02);
+  CHECK(FlipTextBoxShapePoint(0x0102, 2) == 0x01FD);
+  CHECK(FlipTextBoxShapePoint(0x0102, 3) == 0xFEFD);
+  CHECK(FlipTextBoxShapePoint(0x89ABCDEF, 0xFFFFFFFC) == 0x89ABCDEF);
+  CHECK(FlipTextBoxShapePoint(0x89ABCDEF, 2) == 0xCD10);
+  CHECK(FlipTextBoxShapePoint(0xFFFFFFFF, 1) == 0x100FF);
+  CHECK(VS::Menu::FlipLiveTextBoxShapePoint(-1, 1) == 0x100FF);
+}
+
+TEST_CASE("Live information backdrops emit bounded strips fill and header",
+          "[text-box-frame][information-box]") {
+  LiveFrameFixture frame;
+  VS::Menu::TextBox box;
+  box.y = 1;
+  box.frame_height = 20;
+  box.line_count = 1;
+  box.open_duration = 3;
+  box.state = 4;
+  box.flags.frame_shape = 2;
+  const auto packets = frame.DrawBackdrop(box);
+  REQUIRE(packets.size() == 34);
+  CHECK(packets[0][3] == 0x00DC0100);
+  CHECK(packets[0][4] == 0x0000DC00);
+  CHECK(packets[32][1] == 0x60000000);
+  CHECK(packets[32][3] == 0x00040140);
+  CHECK(packets[33][3] == 0x00E5000A);
+  for (std::size_t capacity = 0; capacity <= 202; ++capacity) {
+    const auto bounded = frame.DrawBackdrop(box, capacity);
+    std::size_t written = 0;
+    for (const auto& packet : bounded) {
+      written += packet.size();
+    }
+    CHECK(written <= capacity);
+  }
+  VS::Menu::DrawLiveInformationBoxBackdrop(-1);
+  VS::Menu::DrawLiveInformationBoxBackdrop(8);
+}
 
 TEST_CASE("Text box frames decode owned geometry", "[text-box-frame]") {
   std::vector<std::uint8_t> bytes{3, 0, 3,   1, 0, 0, 255,
@@ -405,8 +594,8 @@ TEST_CASE("Live text box frames refuse untracked style bytes",
           "[text-box-frame]") {
   LiveFrameFixture frame;
   CHECK(frame.DrawSource(kTriangle.data(), {}).empty());
-  Menu_DrawTextBoxFrame(-1);
-  Menu_DrawTextBoxFrame(8);
+  VS::Menu::DrawLiveTextBoxFrame(-1);
+  VS::Menu::DrawLiveTextBoxFrame(8);
   CHECK(frame.DrawSource(nullptr, {}).empty());
 }
 

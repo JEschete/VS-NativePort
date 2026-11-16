@@ -1160,7 +1160,7 @@
 ],
 "Native\\Game\\src\\Menu\\TextBox.cpp": [
 [
-59,
+53,
 [
 "    Menu_sceneNotificationBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(112);"
 ],
@@ -1169,7 +1169,7 @@
 ]
 ],
 [
-232,
+226,
 [
 "    AddPrims(Render_frameScratch.orderingTable - 24, Menu_activeTextBoxOrderingTable, Menu_activeTextBoxOrderingTable + 33);"
 ],

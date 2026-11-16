@@ -7,9 +7,29 @@
 #include <span>
 #include <vector>
 
+#include "Menu/TextBoxState.hpp"
 #include "Render/UiPackets.hpp"
 
 namespace VS::Menu {
+
+class InformationBoxWorld {
+ public:
+  virtual ~InformationBoxWorld() = default;
+  [[nodiscard]] virtual TextBox ReadBox() const = 0;
+  [[nodiscard]] virtual bool AlternateFramebuffer() const = 0;
+  virtual bool DrawHeader(std::size_t kind, std::int32_t x, std::int32_t y) = 0;
+  virtual bool DrawFramebufferRow(std::int32_t x, std::int32_t y,
+                                  std::int32_t width, std::int32_t source_x,
+                                  std::uint8_t brightness) = 0;
+  virtual bool DrawBlackFill(std::int32_t x, std::int32_t y, std::int32_t width,
+                             std::int32_t height) = 0;
+};
+
+[[nodiscard]] bool DrawInformationBoxHeader(InformationBoxWorld& world,
+                                            std::int32_t y, std::uint32_t kind);
+[[nodiscard]] bool DrawInformationBoxBackdrop(InformationBoxWorld& world);
+[[nodiscard]] std::uint32_t FlipTextBoxShapePoint(
+    std::uint32_t packed_shape_point, std::uint32_t flip_axes);
 
 inline constexpr std::size_t kFrameFaceCorners = 4;
 using FrameFace = std::array<std::uint8_t, kFrameFaceCorners>;

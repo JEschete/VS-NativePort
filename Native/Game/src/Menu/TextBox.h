@@ -23,8 +23,5 @@ void Menu_ShowSceneNotification(int notification_kind, int notification_subject_
 int Menu_IsSceneNotificationPending(void);
 void Menu_ReleaseSceneNotification(void);
 void Menu_UpdateTextBoxes(void);
-void Menu_DrawInformationBoxHeader(int header_y, u_int header_kind);
-void Menu_DrawInformationBoxBackdrop(int id);
-int Menu_FlipTextBoxShapePoint(int packed_shape_point, int flip_axes);
 
 #endif // VS_MENU_TEXTBOX_H_DECLS

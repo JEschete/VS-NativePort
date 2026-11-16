@@ -1837,6 +1837,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::manual::LiveUpdateScreen": r"Native\Game\include\Menu\ManualScreenLive.hpp",
     "VS::Menu::manual::LiveInitHelpState": r"Native\Game\include\Menu\ManualScreenLive.hpp",
     "VS::Menu::manual::LiveUpdateHelpPages": r"Native\Game\include\Menu\ManualScreenLive.hpp",
+    "VS::Menu::DrawLiveInformationBoxHeader": r"Native\Game\include\Menu\TextBoxFramesLive.hpp",
+    "VS::Menu::DrawLiveInformationBoxBackdrop": r"Native\Game\include\Menu\TextBoxFramesLive.hpp",
+    "VS::Menu::FlipLiveTextBoxShapePoint": r"Native\Game\include\Menu\TextBoxFramesLive.hpp",
+    "VS::Menu::DrawLiveTextBoxFrame": r"Native\Game\include\Menu\TextBoxFramesLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3317,6 +3321,10 @@ OWNED_CALL_BINDINGS["F04160"] = "VS::Menu::manual::LivePollMenuReady"
 OWNED_CALL_BINDINGS["F04161"] = "VS::Menu::manual::LiveUpdateScreen"
 OWNED_CALL_BINDINGS["F04162"] = "VS::Menu::manual::LiveInitHelpState"
 OWNED_CALL_BINDINGS["F04163"] = "VS::Menu::manual::LiveUpdateHelpPages"
+OWNED_CALL_BINDINGS["F01413"] = "VS::Menu::DrawLiveInformationBoxHeader"
+OWNED_CALL_BINDINGS["F01414"] = "VS::Menu::DrawLiveInformationBoxBackdrop"
+OWNED_CALL_BINDINGS["F01415"] = "VS::Menu::FlipLiveTextBoxShapePoint"
+OWNED_CALL_BINDINGS["F01416"] = "VS::Menu::DrawLiveTextBoxFrame"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -5307,6 +5315,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUE.PRG", 0x80102EDC, "VS::Menu::manual::LiveUpdateScreen"),  # F04161
     ("MENU/MENUE.PRG", 0x801030A4, "VS::Menu::manual::LiveInitHelpState"),  # F04162
     ("MENU/MENUE.PRG", 0x80103110, "VS::Menu::manual::LiveUpdateHelpPages"),  # F04163
+    ("BATTLE/BATTLE.PRG", 0x800CD0FC, "VS::Menu::DrawLiveInformationBoxHeader"),  # F01413
+    ("BATTLE/BATTLE.PRG", 0x800CD158, "VS::Menu::DrawLiveInformationBoxBackdrop"),  # F01414
+    ("BATTLE/BATTLE.PRG", 0x800CD3A0, "VS::Menu::FlipLiveTextBoxShapePoint"),  # F01415
+    ("BATTLE/BATTLE.PRG", 0x800CD3E4, "VS::Menu::DrawLiveTextBoxFrame"),  # F01416
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5686,8 +5698,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
            ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
             "scrolling-row gradient links retain native packet handles"),
         ],
-    "F01416": [("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-                 "textbox ordering entries hold native link handles, never truncated address bits")],
     **{fid: [("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
               "shared primitive helpers use the native link table")] for fid in ("F01405", "F01406")},
     "F03423": [

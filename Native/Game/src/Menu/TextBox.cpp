@@ -4,11 +4,10 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
+#include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Action.h"
@@ -20,12 +19,7 @@ extern "C" {
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Score/Records.h"
-#include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
-#include "Menu/TextBoxFramesLive.h"
-#include "Render/Display.h"
-#include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
@@ -203,7 +197,7 @@ void Menu_UpdateTextBoxes(void)
 
             goto text;
         case 4:
-            Menu_DrawInformationBoxBackdrop(id);
+            VS::Menu::DrawLiveInformationBoxBackdrop(id);
 
             if (state < 0) {
                 break;
@@ -215,7 +209,7 @@ void Menu_UpdateTextBoxes(void)
             break;
         case 2:
         case 7:
-            Menu_DrawTextBoxFrame(id);
+            VS::Menu::DrawLiveTextBoxFrame(id);
 
         default:
         text:
@@ -241,87 +235,6 @@ void Menu_UpdateTextBoxes(void)
 
     VS::Effects::ScreenDistortion::DrawLiveScreenOverlay();
     VS::Core::NextLiveInterfaceRandomBits(0);
-}
-
-// decomp: BATTLE.PRG func_800CD0FC (src/BATTLE/BATTLE.PRG/5BF94.c:4633)
-void Menu_DrawInformationBoxHeader(int header_y, u_int header_kind)
-{
-    if (header_kind < 3) {
-        VS::Render::QueueLiveDefaultSprite(Menu_informationHeaderPositions[header_kind], (header_y << 0x10) | 0xA)[4] =
-            Menu_kInformationHeaderSpriteWords[header_kind];
-    }
-}
-
-// decomp: BATTLE.PRG func_800CD158 (src/BATTLE/BATTLE.PRG/5BF94.c:4642)
-void Menu_DrawInformationBoxBackdrop(int id)
-{
-    Menu_TextBoxState* box = &Menu_textBoxes[id];
-    int y = box->y;
-    u_long* ot = Menu_activeTextBoxOrderingTable + id * 4 + 1;
-    int edge = box->frameHeight;
-    int offset = Render_frameBuf ? 0 : 320;
-    u_int i;
-    u_int count;
-
-    if (y == 0) {
-        y = edge;
-    } else {
-        y = 240 - edge;
-    }
-    count = box->lineCount * 13 + 4 - edge;
-    if (count > 16) {
-        count = 16;
-    } else if (count < 4) {
-        count = 4;
-    }
-    for (i = 0; i < count; ++i) {
-        u_int brightness = ((count - i) * 128) / (count + 1);
-        u_long* prim =
-            VS::Render::QueueLiveSprite(brightness, vs_getXY(256, y), vs_getWH(64, 1), ot);
-        u_int page = ((u_int)(offset + 256) >> 6) | 0x100;
-        prim[1] = _get_mode(0, 0, page);
-        prim[4] = y << 8;
-        prim = VS::Render::QueueLiveSprite(brightness, vs_getXY(0, y), vs_getWH(256, 1), ot);
-        brightness = ((u_int)offset >> 6) | 0x100;
-        prim[1] = _get_mode(0, 0, brightness);
-        prim[4] = y << 8;
-        if (y < 128) {
-            if (--y < 0) {
-                break;
-            }
-        } else if (++y >= 240) {
-            break;
-        }
-    }
-    if (y < 128) {
-        if (y >= 0) {
-            VS::Render::InsertLiveThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), 0, vs_getWH(320, y + 1));
-        }
-        return;
-    }
-    if (y < 240) {
-        VS::Render::InsertLiveThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), vs_getXY(0, y),
-            (0xF00000 - (y << 16)) | 320);
-    }
-    if (box->state == box->openDuration + 1) {
-        Menu_DrawInformationBoxHeader(y - 7, box->flags.frameShape - 1);
-    }
-}
-
-// decomp: BATTLE.PRG func_800CD3A0 (src/BATTLE/BATTLE.PRG/5BF94.c:4697)
-int Menu_FlipTextBoxShapePoint(int packed_shape_point, int flip_axes)
-{
-    int flipped_shape_point = packed_shape_point;
-
-    if (flip_axes & 1) {
-        flipped_shape_point = (flipped_shape_point & 0xFF) | ((0xFF - (flipped_shape_point >> 8)) << 8);
-    }
-
-    if (flip_axes & 2) {
-        flipped_shape_point = (~flipped_shape_point & 0xFF) | (flipped_shape_point & 0xFF00);
-    }
-
-    return flipped_shape_point;
 }
 
 }  // extern "C"

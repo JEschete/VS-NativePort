@@ -10,6 +10,7 @@ extern "C++" {
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/TextBoxFramesLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/ScaledFont.hpp"
@@ -31,7 +32,6 @@ extern "C++" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
-#include "Menu/TextBoxFramesLive.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -118,7 +118,7 @@ static bool DrawTrackedFrameFixture(int index, const void* shape,
   }
   memcpy(source, shape, shape_bytes);
   Event_textBoxFrameStyles[0] = static_cast<u_char*>(source);
-  Menu_DrawTextBoxFrame(index);
+  VS::Menu::DrawLiveTextBoxFrame(index);
   VS::Core::Memory::FreeLiveFromHighEnd(source);
   return true;
 }

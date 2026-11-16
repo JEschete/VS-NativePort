@@ -56,14 +56,12 @@ std::int16_t ScalePoint(std::int32_t origin, int coordinate,
 
 std::array<int, 2> AlignedPoint(std::array<std::uint8_t, 2> point,
                                 std::uint8_t alignment) {
-  constexpr int kByteMaximum = 255;
-  if ((alignment & 1) != 0) {
-    point[1] = static_cast<std::uint8_t>(kByteMaximum - point[1]);
-  }
-  if ((alignment & 2) != 0) {
-    point[0] = static_cast<std::uint8_t>(kByteMaximum - point[0]);
-  }
-  return {point[0], point[1]};
+  constexpr std::uint32_t kByteMask = 255;
+  const auto flipped = FlipTextBoxShapePoint(
+      point[0] | (static_cast<std::uint32_t>(point[1]) << kByteBits),
+      alignment);
+  return {static_cast<int>(flipped & kByteMask),
+          static_cast<int>(flipped >> kByteBits)};
 }
 
 FramePoints TransformPoints(const FrameDefinition& frame,
@@ -206,6 +204,85 @@ bool ValidFace(const FrameFace& face, std::size_t initialized_vertices) {
 }
 
 }  // namespace
+
+// decomp: F01413 func_800CD0FC (BATTLE/BATTLE.PRG/5BF94.c:4633).
+bool DrawInformationBoxHeader(InformationBoxWorld& world, std::int32_t y,
+                              std::uint32_t kind) {
+  constexpr std::size_t kHeaderCount = 3;
+  constexpr std::int32_t kHeaderX = 10;
+  return kind >= kHeaderCount || world.DrawHeader(kind, kHeaderX, y);
+}
+
+// decomp: F01414 func_800CD158 (BATTLE/BATTLE.PRG/5BF94.c:4642).
+bool DrawInformationBoxBackdrop(InformationBoxWorld& world) {
+  constexpr std::int32_t kScreenWidth = 320;
+  constexpr std::int32_t kScreenHeight = 240;
+  constexpr std::int32_t kTextureBoundary = 256;
+  constexpr std::int32_t kDirectionBoundary = 128;
+  constexpr std::uint32_t kMinimumRows = 4;
+  constexpr std::uint32_t kMaximumRows = 16;
+  constexpr std::uint32_t kFullBrightness = 128;
+  constexpr std::int32_t kLineHeight = 13;
+  constexpr std::int32_t kMargin = 4;
+  constexpr std::int32_t kHeaderOffset = 7;
+  const auto box = world.ReadBox();
+  const auto edge = box.frame_height;
+  std::int32_t y = box.y == 0 ? edge : kScreenHeight - edge;
+  const auto source_x = world.AlternateFramebuffer() ? 0 : kScreenWidth;
+  // The original loads these byte fields unsigned, then clamps an unsigned
+  // count.
+  const auto requested = static_cast<std::uint32_t>(
+      static_cast<std::uint8_t>(box.line_count) * kLineHeight + kMargin - edge);
+  const auto count = std::clamp(requested, kMinimumRows, kMaximumRows);
+  for (std::uint32_t row = 0; row < count; ++row) {
+    const auto brightness = static_cast<std::uint8_t>(
+        ((count - row) * kFullBrightness) / (count + 1));
+    if (!world.DrawFramebufferRow(kTextureBoundary, y,
+                                  kScreenWidth - kTextureBoundary,
+                                  source_x + kTextureBoundary, brightness) ||
+        !world.DrawFramebufferRow(0, y, kTextureBoundary, source_x,
+                                  brightness)) {
+      return false;
+    }
+    if (y < kDirectionBoundary) {
+      if (--y < 0) {
+        break;
+      }
+    } else if (++y >= kScreenHeight) {
+      break;
+    }
+  }
+  if (y < kDirectionBoundary) {
+    return y < 0 || world.DrawBlackFill(0, 0, kScreenWidth, y + 1);
+  }
+  if (y < kScreenHeight &&
+      !world.DrawBlackFill(0, y, kScreenWidth, kScreenHeight - y)) {
+    return false;
+  }
+  const auto current = world.ReadBox();
+  if (current.state == static_cast<std::uint8_t>(current.open_duration) + 1) {
+    return DrawInformationBoxHeader(
+        world, y - kHeaderOffset,
+        static_cast<std::uint32_t>(current.flags.frame_shape) - 1);
+  }
+  return true;
+}
+
+// decomp: F01415 func_800CD3A0 (BATTLE/BATTLE.PRG/5BF94.c:4697).
+std::uint32_t FlipTextBoxShapePoint(std::uint32_t packed_shape_point,
+                                    std::uint32_t flip_axes) {
+  constexpr std::uint32_t kByteMask = 255;
+  constexpr std::uint32_t kSecondByteMask = 0xFF00;
+  auto point = packed_shape_point;
+  if ((flip_axes & 1) != 0) {
+    point =
+        (point & kByteMask) | ((kByteMask - (point >> kByteBits)) << kByteBits);
+  }
+  if ((flip_axes & 2) != 0) {
+    point = (~point & kByteMask) | (point & kSecondByteMask);
+  }
+  return point;
+}
 
 // decomp: BATTLE.PRG func_800CD3E4 (src/BATTLE/BATTLE.PRG/5BF94.c:4715).
 std::expected<FrameDefinition, FrameDecodeError> DecodeTextBoxFrame(
