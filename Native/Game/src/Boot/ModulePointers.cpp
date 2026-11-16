@@ -124,6 +124,7 @@
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPageLive.hpp"
+#include "Menu/ManualScreenLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
@@ -2290,6 +2291,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUE.PRG", 0x80104620u, 0u, (void*)&VS::Menu::manual::LiveDrawLowerScrollFade, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80104908u, 0u, (void*)&VS::Menu::manual::LiveDrawPageArrow, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80104CC4u, 0u, (void*)&VS::Menu::manual::LiveDrawControlsBackground, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80102E9Cu, 0u, (void*)&VS::Menu::manual::LiveClearMenuExceptRow8, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80102EBCu, 0u, (void*)&VS::Menu::manual::LivePollMenuReady, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80102EDCu, 0u, (void*)&VS::Menu::manual::LiveUpdateScreen, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x801030A4u, 0u, (void*)&VS::Menu::manual::LiveInitHelpState, 0u, 0u, 0u},
+    {"MENU/MENUE.PRG", 0x80103110u, 0u, (void*)&VS::Menu::manual::LiveUpdateHelpPages, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

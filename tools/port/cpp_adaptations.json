@@ -11,12 +11,13 @@
 "#include \"Menu/Container/ContainerMenuDialogsLive.hpp\"",
 "#include \"Menu/Inventory/EquipmentRowsLive.hpp\"",
 "#include \"Menu/Loot/LootPoliciesLive.hpp\"",
+"#include \"Menu/ManualScreenLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\""
 ]
 ],
 [
-35,
+34,
 [
 "    Menu_Inventory_ItemList_ResetMenu3Statics();"
 ],
@@ -26,7 +27,7 @@
 ]
 ],
 [
-42,
+41,
 [
 "    Menu_Status_EquipmentDetails_ResetMenu4Statics();"
 ],
@@ -36,7 +37,7 @@
 ]
 ],
 [
-55,
+54,
 [
 "    Menu_Score_Records_ResetMenu9Statics();"
 ],
@@ -46,7 +47,7 @@
 ]
 ],
 [
-62,
+61,
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();"
 ],
@@ -56,14 +57,32 @@
 ]
 ],
 [
-68,
+67,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
 [
 "    Menu_Container_Storage_ResetMenudStatics();",
 "    VS::Menu::container::ResetLiveContainerDialogStatics();",
-"    VS::Menu::container::ResetLiveContainerTransferStatics();"
+"    VS::Menu::container::ResetLiveContainerTransferStatics();",
+"}",
+"",
+"// Call where the original loads MENUE.PRG: restores the statics its reload re-read from the disc.",
+"void Boot_ResetMenueStatics(void)",
+"{",
+"    VS::Menu::manual::ResetLiveManualScreenStatics();"
+]
+]
+],
+"Native\\Game\\src\\Boot\\OverlayReset.h": [
+[
+18,
+[
+"void Boot_ResetMenudStatics(void);"
+],
+[
+"void Boot_ResetMenudStatics(void);",
+"void Boot_ResetMenueStatics(void);"
 ]
 ]
 ],
@@ -518,19 +537,6 @@
 ],
 [
 "                VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Manual.cpp": [
-[
-230,
-[
-"            Menu_Manual_helpText = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size);",
-"            Menu_Manual_helpAssets = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size);"
-],
-[
-"            Menu_Manual_helpText = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size));",
-"            Menu_Manual_helpAssets = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size));"
 ]
 ]
 ],
@@ -1027,7 +1033,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-284,
+283,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
@@ -1036,7 +1042,7 @@
 ]
 ],
 [
-1130,
+1129,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -1045,7 +1051,7 @@
 ]
 ],
 [
-1140,
+1139,
 [
 "        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
 ],
@@ -1054,7 +1060,7 @@
 ]
 ],
 [
-1151,
+1150,
 [
 "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
 ],
@@ -1063,7 +1069,7 @@
 ]
 ],
 [
-1174,
+1173,
 [
 "    polyG4 = scratch[0];"
 ],
@@ -1072,7 +1078,7 @@
 ]
 ],
 [
-1189,
+1188,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -1081,7 +1087,7 @@
 ]
 ],
 [
-1199,
+1198,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -1090,7 +1096,7 @@
 ]
 ],
 [
-1211,
+1210,
 [
 "    POLY_G4* polyG4 = scratch[0];"
 ],
@@ -1099,7 +1105,7 @@
 ]
 ],
 [
-1221,
+1220,
 [
 "    AddPrim(scratch[1] + 0x1C, polyG4++);"
 ],
@@ -1108,7 +1114,7 @@
 ]
 ],
 [
-1229,
+1228,
 [
 "    AddPrim(scratch[1] + 0x1C, polyF4++);"
 ],
@@ -1117,7 +1123,7 @@
 ]
 ],
 [
-1264,
+1263,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -1126,7 +1132,7 @@
 ]
 ],
 [
-1266,
+1265,
 [
 "        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
 ],
@@ -1135,7 +1141,7 @@
 ]
 ],
 [
-1271,
+1270,
 [
 "        scratch[1] + 0x1C);"
 ],
@@ -1144,7 +1150,7 @@
 ]
 ],
 [
-1281,
+1280,
 [
 "    POLY_G4* poly = scratch[0];"
 ],
@@ -1153,7 +1159,7 @@
 ]
 ],
 [
-1291,
+1290,
 [
 "    AddPrim(scratch[1] + 0x20, poly++);"
 ],
@@ -1162,7 +1168,7 @@
 ]
 ],
 [
-1301,
+1300,
 [
 "    AddPrim(scratch[1] + 32, poly++);"
 ],

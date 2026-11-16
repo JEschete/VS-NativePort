@@ -3613,12 +3613,15 @@ class EncounterFixupTests(unittest.TestCase):
         # MapLoading.cpp LoadBackground and LoadSceneMap (#276 row 52), whose MapLoadingLive.cpp
         # EnqueueBackgroundRead and EnqueueSceneRead keep the guard below. F02839 left it for the owned
         # EncyclopediaPreview.cpp QueueEnemyModelRead (#276 row 50), which completes a refused read through the
-        # host's ReadRefused (EncyclopediaPreviewLive.cpp).
-        self.assertGreaterEqual(len(guarded), 15)
+        # host's ReadRefused (EncyclopediaPreviewLive.cpp). F04163 (two reads) left it for the owned
+        # ManualScreen.cpp UpdateHelpPages (#276 row 52), whose ManualScreenLive.cpp RequestHelpFile keeps the
+        # guard below.
+        self.assertGreaterEqual(len(guarded), 13)
         owned = self.owned_items()
         self.assertEqual(owned["F04148"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F04150"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F02839"]["path"], r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp")
+        self.assertEqual(owned["F04163"]["path"], r"Native\Game\src\Menu\ManualScreen.cpp")
         self.assertEqual(owned["F03526"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03547"]["path"], r"Native\Engine\src\Audio\SoundBanksCore.cpp")
         self.assertEqual(owned["F03496"]["path"], r"Native\Engine\src\Audio\MusicCore.cpp")
@@ -3675,6 +3678,8 @@ class EncounterFixupTests(unittest.TestCase):
             "Menu_Map_sceneCdQueueSlot=Content::CompleteLiveRefusedDiscRequest(file_,Battle_unusedSceneBuffer);",
             map_loading_live,
         )
+        manual_live = "".join((root / r"Native\Game\src\Menu\ManualScreenLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("request=Content::CompleteLiveRefusedDiscRequest(&disc_file,HelpBuffer(file));", manual_live)
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
         self.assertIn('"CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"', background_tests)
         effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
@@ -3728,7 +3733,8 @@ class EncounterFixupTests(unittest.TestCase):
         # overlay load into the owned ScreenOverlayLifetime.cpp LoadScreenOverlay, whose ScreenOverlaysLive.cpp
         # EnqueueOverlayRead runs only for an allocated read. Row 52 moved Map.cpp's background and scene ARM
         # reads into MapLoadingLive.cpp EnqueueBackgroundRead and EnqueueSceneRead. Row 50 moved Encyclopedia.cpp's
-        # ZUD read into the owned EncyclopediaPreview.cpp QueueEnemyModelRead.
+        # ZUD read into the owned EncyclopediaPreview.cpp QueueEnemyModelRead, and row 52 moved Manual.cpp's help
+        # asset and text reads into ManualScreenLive.cpp RequestHelpFile.
         event_source = (root / r"Native\Game\src\Event\ScriptVmLive.cpp").read_text(encoding="utf-8")
         event = "".join(re.sub(r"//[^\n]*", "", event_source).split())
         self.assertIn(
@@ -3741,7 +3747,7 @@ class EncounterFixupTests(unittest.TestCase):
             event,
         )
         sites += 1
-        self.assertGreaterEqual(sites, 10)
+        self.assertGreaterEqual(sites, 8)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)

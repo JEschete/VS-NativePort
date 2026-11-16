@@ -3,6 +3,7 @@
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
+#include "Menu/ManualScreenLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 extern "C" {
@@ -13,7 +14,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Manual.h"
 #include "Menu/Map.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
@@ -84,7 +84,7 @@ void Boot_ResetMenudStatics(void)
 // Call where the original loads MENUE.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenueStatics(void)
 {
-    Menu_Manual_ResetMenueStatics();
+    VS::Menu::manual::ResetLiveManualScreenStatics();
 }
 
 // Call where the original loads MENUF.PRG: restores the statics its reload re-read from the disc.

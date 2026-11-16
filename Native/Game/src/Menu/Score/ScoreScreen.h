@@ -8,6 +8,9 @@ typedef struct Menu_Score_EnemyEntry Menu_Score_EnemyEntry;
 typedef struct Menu_Score_Row Menu_Score_Row;
 typedef struct Menu_Score_ZudHeader Menu_Score_ZudHeader;
 
+// decomp: src/SLUS_010.40/sfx.h:3
+#define VS_SFX_MENUCHANGE 4
+
 // decomp: _gazetteRow (src/MENU/MENU9.PRG/238.c:363)
 typedef struct Menu_Score_Row {
     char selected;

@@ -446,6 +446,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\ManualTopicsLive.cpp",
                 r"src\Menu\Score\GazetteRowsLive.cpp",
                 r"src\Menu\ManualPageLive.cpp",
+                r"src\Menu\ManualScreenLive.cpp",
             ))
 
 

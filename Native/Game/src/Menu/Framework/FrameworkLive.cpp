@@ -38,6 +38,7 @@
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/ManualScreenLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
 #include "Menu/Setup/SetupLive.hpp"
@@ -955,7 +956,7 @@ class LiveHost final : public Host {
       case Submenu::kScore:
         return Menu_Score_UpdateScreen(bytes);
       case Submenu::kManual:
-        return Menu_Manual_UpdateScreen(bytes);
+        return VS::Menu::manual::LiveUpdateScreen(bytes);
       case Submenu::kResults:
         return Menu_Results_UpdateScreen(bytes);
       case Submenu::kUnlockNotifications:

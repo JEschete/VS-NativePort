@@ -882,6 +882,13 @@
     <None Include="..\..\port\differentials\manual_page_f03003.py" />
     <None Include="..\..\port\differentials\manual_page_f03004.py" />
     <None Include="..\..\port\differentials\manual_page_f03007.py" />
+    <None Include="..\..\port\differentials\manual_screen_common.py" />
+    <None Include="..\..\port\differentials\manual_screen_driver.cpp" />
+    <None Include="..\..\port\differentials\manual_screen_f04159.py" />
+    <None Include="..\..\port\differentials\manual_screen_f04160.py" />
+    <None Include="..\..\port\differentials\manual_screen_f04161.py" />
+    <None Include="..\..\port\differentials\manual_screen_f04162.py" />
+    <None Include="..\..\port\differentials\manual_screen_f04163.py" />
     <None Include="..\..\port\differentials\manual_topics_common.py" />
     <None Include="..\..\port\differentials\manual_topics_driver.cpp" />
     <None Include="..\..\port\differentials\manual_topics_f02989.py" />

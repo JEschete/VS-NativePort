@@ -1808,6 +1808,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::manual::LiveDrawLowerScrollFade": r"Native\Game\include\Menu\ManualPageLive.hpp",
     "VS::Menu::manual::LiveDrawPageArrow": r"Native\Game\include\Menu\ManualPageLive.hpp",
     "VS::Menu::manual::LiveDrawControlsBackground": r"Native\Game\include\Menu\ManualPageLive.hpp",
+    "VS::Menu::manual::LiveClearMenuExceptRow8": r"Native\Game\include\Menu\ManualScreenLive.hpp",
+    "VS::Menu::manual::LivePollMenuReady": r"Native\Game\include\Menu\ManualScreenLive.hpp",
+    "VS::Menu::manual::LiveUpdateScreen": r"Native\Game\include\Menu\ManualScreenLive.hpp",
+    "VS::Menu::manual::LiveInitHelpState": r"Native\Game\include\Menu\ManualScreenLive.hpp",
+    "VS::Menu::manual::LiveUpdateHelpPages": r"Native\Game\include\Menu\ManualScreenLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3259,6 +3264,11 @@ OWNED_CALL_BINDINGS["F03002"] = "VS::Menu::manual::LiveDrawUpperScrollFade"
 OWNED_CALL_BINDINGS["F03003"] = "VS::Menu::manual::LiveDrawLowerScrollFade"
 OWNED_CALL_BINDINGS["F03004"] = "VS::Menu::manual::LiveDrawPageArrow"
 OWNED_CALL_BINDINGS["F03007"] = "VS::Menu::manual::LiveDrawControlsBackground"
+OWNED_CALL_BINDINGS["F04159"] = "VS::Menu::manual::LiveClearMenuExceptRow8"
+OWNED_CALL_BINDINGS["F04160"] = "VS::Menu::manual::LivePollMenuReady"
+OWNED_CALL_BINDINGS["F04161"] = "VS::Menu::manual::LiveUpdateScreen"
+OWNED_CALL_BINDINGS["F04162"] = "VS::Menu::manual::LiveInitHelpState"
+OWNED_CALL_BINDINGS["F04163"] = "VS::Menu::manual::LiveUpdateHelpPages"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -5220,6 +5230,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUE.PRG", 0x80104620, "VS::Menu::manual::LiveDrawLowerScrollFade"),  # F03003
     ("MENU/MENUE.PRG", 0x80104908, "VS::Menu::manual::LiveDrawPageArrow"),  # F03004
     ("MENU/MENUE.PRG", 0x80104CC4, "VS::Menu::manual::LiveDrawControlsBackground"),  # F03007
+    ("MENU/MENUE.PRG", 0x80102E9C, "VS::Menu::manual::LiveClearMenuExceptRow8"),  # F04159
+    ("MENU/MENUE.PRG", 0x80102EBC, "VS::Menu::manual::LivePollMenuReady"),  # F04160
+    ("MENU/MENUE.PRG", 0x80102EDC, "VS::Menu::manual::LiveUpdateScreen"),  # F04161
+    ("MENU/MENUE.PRG", 0x801030A4, "VS::Menu::manual::LiveInitHelpState"),  # F04162
+    ("MENU/MENUE.PRG", 0x80103110, "VS::Menu::manual::LiveUpdateHelpPages"),  # F04163
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5635,11 +5650,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                  "3B8.c:1162 _texture_t[127]; the typed texture draws take bounds-checked atlas spans")],
     # Animation-header outputs are native pointers, not PS1-sized integers.
     # MENUE 494.c:577-988 shares the native frame, not two four-byte scratch words.
-    "F04163": [
-        ("    u_long** s0;", "    Render_FrameScratch* s0;", "typed manual frame"),
-        ("s0 = (u_long**)Core_ScratchAddr(0);", "s0 = &Render_frameScratch;", "native frame owner"),
-        ("s0[1]", "((u_long*)s0->orderingTable)", "manual control-label ordering"),
-    ],
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
     "F04146": [
         ("VS::Menu::Files::UpdateContainerSave(submenuState);",
@@ -6725,12 +6735,6 @@ for _row, _fixup in (
         " " * 4, _EVENT_FILE_REQUEST, "arg1", "&Event_eventFileDiscLocation")),
     ("F02503", _refused_disc_request(
         " " * 8, "Menu_Framework_loadItemTextItemNamesCdQueueSlot", "Menu_Framework_itemNames", "&cdFile")),
-    ("F04163", _refused_disc_request(
-        " " * 12, "Menu_Manual_helpAssetsCdQueue", "Menu_Manual_helpAssets",
-        "&Menu_Manual_kHelpFileCdFiles[selectedRow * 2]")),
-    ("F04163", _refused_disc_request(
-        " " * 12, "Menu_Manual_helpTextCdQueue", "Menu_Manual_helpText",
-        "&Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1]")),
     ("F04151", _refused_disc_request(
         " " * 12, "Menu_Map_sceneCdQueueSlot", "Menu_Map_armFileBuff",
         "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
@@ -8055,9 +8059,6 @@ REGEX_FIXES += [
         ("Menu::Map::UpdateMapMenu",
          (('new_var2', 'area_selection_result'), ('var_s2', 'controls_state')),
          "F04151 src\\MENU\\MENU5.PRG\\4D8.c:523-893 (_menuManager). Named roles: area selection result, controls state."),
-        ("Menu::Manual::UpdateHelpPages",
-         (('s0', 'frame_scratch'),),
-         "F04163 src\\MENU\\MENUE.PRG\\494.c:245-448 (_showMenu). Named roles: frame scratch."),
     )
     for old, new in bindings
 ]

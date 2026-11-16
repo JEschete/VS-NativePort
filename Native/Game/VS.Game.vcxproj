@@ -1948,6 +1948,10 @@
     <ClCompile Include="src\Menu\ManualPageLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\ManualScreen.cpp" />
+    <ClCompile Include="src\Menu\ManualScreenLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\ManualTopics.cpp" />
     <ClCompile Include="src\Menu\ManualTopicsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2971,6 +2975,8 @@
     <ClInclude Include="include\Menu\ManualIllustrationLive.hpp" />
     <ClInclude Include="include\Menu\ManualPage.hpp" />
     <ClInclude Include="include\Menu\ManualPageLive.hpp" />
+    <ClInclude Include="include\Menu\ManualScreen.hpp" />
+    <ClInclude Include="include\Menu\ManualScreenLive.hpp" />
     <ClInclude Include="include\Menu\ManualTopics.hpp" />
     <ClInclude Include="include\Menu\ManualTopicsLive.hpp" />
     <ClInclude Include="include\Menu\MapDrawing.hpp" />

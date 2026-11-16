@@ -765,6 +765,9 @@
     <ClCompile Include="src\ManualRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ManualScreenTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ManualTopicsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
