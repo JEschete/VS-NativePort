@@ -1,78 +1,61 @@
 # Current Handoff
 
-Updated 2026-11-15. The latest published MA-04 batch is the 13-function
-battle-sphere lifecycle/geometry promotion. The cohort has 471 resolved (462
-promoted, nine retired) and 429 remaining; see the CSV and issue #276 for
-current status.
+Updated 2026-11-16. The latest published #276 group is A32-02, floating label
+placement and equipment feedback
+([`c6cc76db8`](https://github.com/JEschete/VS-NativePort/commit/c6cc76db8)),
+which completes plan row 32 (93/93). The original 900-function cohort has
+**763 resolved and 137 remaining**; see
+[REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
+[#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6920227987).
 
 ## Current status and next steps
 
-- Commits on `imp/01-ma04-gates`:
-  - [`54f4f6ab2`](https://github.com/JEschete/VS-NativePort/commit/54f4f6ab2512f91a8a6943c83dfc217c11c0bafb)
-    zeroes AI engagement roster fields in live test fixtures (#393).
-  - [`e4ed84c8f`](https://github.com/JEschete/VS-NativePort/commit/e4ed84c8f7b3b3d061f512e337bc2a5f5beba1eb)
-    lists `test_build_symbol_ledgers.py` in the generated tools project.
-  - [`4dc191b04`](https://github.com/JEschete/VS-NativePort/commit/4dc191b04c586ad212d8c982ca8bb094779d99e2)
-    promotes F01279-F01286, F01297, F01303-F01305 and F01312 and carries the
-    copier layout reconciliation needed to render them (#391, #392).
-  - [`22d6112a0`](https://github.com/JEschete/VS-NativePort/commit/22d6112a01cbb0923e4e30caf4bd77515c2f3943)
-    makes the new T00532 layout-merge test independent of git-ignored indexes;
-    Source Quality failed on `4dc191b04` only for that test (#394).
-- Sphere batch: lifecycle F01279-F01284, F01297 and F01312 in
-  `SphereLifecycle(Live)`, with the F01280 release entry isolated in
-  `SphereReleaseLive.cpp` so its registered file has no bridge-header
-  dependency; geometry F01285, F01286 and F01303-F01305 in `SphereGeometry(Live)`.
-  Callers and module bindings use the `VS::Battle::*Entry` wrappers.
-- Evidence (worktree based on `de9e8aeca`, recorded in
-  `VR-BATTLE-SPHERE-LIFECYCLE-GEOMETRY`): Debug and Release each pass 7,436
-  regression cases/12,933,460 assertions and 1,093 focused `[ai],[battle][sphere]`
-  cases/3,189,693 assertions; both canonical replays match. Differentials
-  `sphere_lifecycle` and `sphere_geometry_f01285/f01286/f01303/f01304/f01305`:
-  10,752 vectors, zero mismatches, 13/13 original mutants detected. Each
-  function's native `--replace` broken variant was detected (1,024 vectors);
-  F01280's was rerun in `SphereReleaseLive.cpp` (61 mismatching vectors).
-  Copier render is byte-stable on a second run; changed-file tidy has zero new
-  findings; ledger gates, modernization and hazard checks pass.
-- Copier blockers resolved for this render: T00527 is emitted as its 12-byte
-  `ModelStatePrefix` with wider reads through `Actors_ActorRecord`; T00532 uses
-  ledger-typed emission and rebasing (planned-tile union at 0x132 made
-  sequential); T00255 keeps its 16-bit Gimmick rotation fields; T00271's alias
-  fixup matches. #391 and #392 stay open until their own fresh-index ledger
-  and stability acceptance is checked.
+- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 12, 47: 11,
+  48: 50, 50: 44, 52: 19. Five of the 137 are owned WIP entries (`in progress`).
+- Process: one coordinator and at most two isolated workers. Each worker uses
+  `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
+  junction to the root data and delivers one local commit (typed cores, Live
+  entries, focused tests, per-function differentials with mutants). The
+  coordinator owns registration (`promote.py`), copier output, caller switches,
+  golden digests for Live tests whose generated bodies are retired, ledgers,
+  the group gate, the commit and push, and exact-revision CI.
+- A32-02 evidence (`VR-BATTLE-FLOATING-PLACEMENT`): F00719, F00720, F00722,
+  F00725, F00738, F00739 and F00742. Differentials: 7,168 vectors over 1,688
+  original instructions, 0 mismatches; 57/57 mutants and all seven native
+  `--replace` variants detected. Debug and Release each pass 8,516/8,516
+  regression cases with matching canonical replays and 24/24 focused cases.
+- Active worker lanes (not promotions until integrated and verified):
+  - B52-07 manual help loading and screen lifecycle in
+    `batch-manual-lifecycle-6d37725d`.
+  - B50-10 cube-puzzle initialization and transitions (F03024, F03046-F03051)
+    in `batch-cube-lifecycle-e1b2d0e8`.
+- Ready after those: B50-13 Gazette camera panels (#371 is fixed), B50-05
+  game-clear initialization (gates B50-08/B50-11), B47-03/B47-04 inventory and
+  equipment controllers, B52-02 frame-owner completion, and row 39's A39-05
+  analyze grids, A39-04 particle emitter (F01515) and A39-06 rings.
+- Blocked: A30-01 F00830 (#296), B48-01 (#378), B48-08 (#376), B48-06/07
+  (#373), B48-10 (#381), B52-12/B52-13 (#383). #384 (packet-local index
+  preflight) waits on #377.
 - No interactive combat verification, gameplay completion or compatibility
-  retirement is claimed. F00830 (#296) remains blocked; #390 remains open.
-- #371 fixed: `Core_Gte` RTPS now uses the GTE's unsigned Newton-Raphson
-  perspective divide (`Core::Math::DividePerspective`), derives IR0 and SX2/SY2
-  from the wide sums, wraps MAC1-3 to 44 bits and sets per-row FLAG bits with
-  the bit-31 summary. The `gte_projection` differential runs SDK `RotTransPers`
-  (0x80041814): 8,192 vectors including the ten issue vectors, 0 mismatches,
-  7 mutants and 7 native variants detected. `RotTransPers4` still runs four
-  RTPS steps rather than one RTPT (not modelled by the interpreter).
-- Active isolated worker lanes, both based on `4dc191b04` with a read-only
-  `Native\data` junction to the root data:
-  - A32-06 sphere target labels (F01298-F01302, F01310) in
-    `D:\Dev\NativePort\wt\batch-sphere-labels-4dc191b0`.
-  - A35-01 event camera ownership (F01195, F01214-F01218) in
-    `D:\Dev\NativePort\wt\batch-event-camera-own-4dc191b0`.
-  Workers deliver typed code, tests and differentials as a local commit; the
-  coordinator owns registration, copier output, ledgers, gates and publication.
-  Their preparation is not a promotion until integrated and verified.
-- The paused row-39 ActionEffects packet remains in
-  `batch-action-effects-f00058-f00069-5c3a6242`; preserve it and the other
-  older worktrees as unverified prior art.
+  retirement is claimed.
 
 Next steps:
 
-1. Confirm Source Quality on `22d6112a0` and close #394; close #393 with its
-   evidence.
-2. Integrate A32-06 and A35-01 as they arrive: registration through
-   `promote.py`, copier regeneration and stability, Debug/Release builds,
-   regressions, focused tests, differentials with mutants and native variants,
-   ledgers, scoped commit and push, exact-revision CI.
-3. Continue the ordered plan: remaining row-32 groups A32-01/02/03/07 no
-   longer wait on #371 (fixed); row 35 continues with A35-02 through
-   A35-06 in camera-chain order.
+1. Confirm Source Quality on `c6cc76db8`.
+2. Integrate B52-07 and B50-10 as they report, then dispatch the next ready
+   packets in dependency order.
+3. Resolve the copier gates #381 and #383 so B48-10 and B52-12/B52-13 can proceed.
 4. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
+
+### Previous: battle-sphere lifecycle/geometry (2026-11-15)
+
+[`4dc191b04`](https://github.com/JEschete/VS-NativePort/commit/4dc191b04c586ad212d8c982ca8bb094779d99e2)
+promoted F01279-F01286, F01297, F01303-F01305 and F01312 with the copier layout
+reconciliation they needed (#391, #392); evidence is in
+`VR-BATTLE-SPHERE-LIFECYCLE-GEOMETRY`. #371 was fixed in `b20053f3a`: `Core_Gte`
+RTPS uses the GTE's unsigned Newton-Raphson perspective divide and derives IR0
+and SX2/SY2 from the wide sums (`gte_projection` differential: 8,192 vectors,
+0 mismatches). `RotTransPers4` still runs four RTPS steps rather than one RTPT.
 
 ### Previous published batch (Group O)
 
