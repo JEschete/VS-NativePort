@@ -14,7 +14,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Results/Results.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Render.h"

@@ -5,6 +5,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Framework/Framework.hpp"
+#include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/TimImageLive.hpp"
@@ -283,7 +284,7 @@ int Menu_Results_UpdateCubePuzzleStart(void)
     Menu_Results_DrawEvolveOrDie(160, 64, Menu_Results_screenTimer);
     Menu_Results_DrawAverageTimeHeading(128, 116, Menu_Results_screenTimer - 15);
     Menu_Results_DrawCubePuzzleParTime(192, 144, Menu_Results_screenTimer - 30);
-    Menu_Results_DrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 30, Menu_Results_screenTimer);
+    VS::Menu::Results::LiveDrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 30, Menu_Results_screenTimer);
 
     if (Menu_Results_screenTimer < 32767) {
         ++Menu_Results_screenTimer;
@@ -365,7 +366,7 @@ int Menu_Results_UpdateCubePuzzleResults(void)
         Menu_Results_DrawCountingCubePuzzleTime(88, 64, Menu_Results_screenTimer);
         Menu_Results_DrawFoodChain(160, 100, Menu_Results_screenTimer - 75);
         Menu_Results_DrawCubePuzzleRank(160, 124, Menu_Results_screenTimer - 90, rank);
-        Menu_Results_DrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 90, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 90, Menu_Results_screenTimer);
 
         if (Menu_Results_screenTimer < 32767) {
             ++Menu_Results_screenTimer;
@@ -414,7 +415,7 @@ int Menu_Results_UpdateCubePuzzleQuit(void)
 
     Menu_Results_DrawGivingUp(64, Menu_Results_screenTimer);
     Menu_Results_DrawChicken(100, Menu_Results_screenTimer - 15);
-    Menu_Results_DrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 15, Menu_Results_screenTimer);
+    VS::Menu::Results::LiveDrawPressButtonPrompt(214, 187, Menu_Results_screenTimer - 15, Menu_Results_screenTimer);
 
     if (Menu_Results_screenTimer < 0x7FFF) {
         ++Menu_Results_screenTimer;
@@ -448,8 +449,8 @@ void Menu_Results_DrawGivingUp(int draw_y, int fade_timer)
         fade_timer = 64;
     }
     if (fade_timer > 0) {
-        Menu_Results_DrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0GivingUp, fade_timer);
-        Menu_Results_DrawFadingTexture(160, draw_y, Menu_Results_DisIndex_Esc0GivingUp + 1, fade_timer);
+        VS::Menu::Results::LiveDrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0GivingUp, fade_timer);
+        VS::Menu::Results::LiveDrawFadingTexture(160, draw_y, Menu_Results_DisIndex_Esc0GivingUp + 1, fade_timer);
     }
 }
 
@@ -465,8 +466,8 @@ void Menu_Results_DrawChicken(int draw_y, int fade_timer)
     }
 
     if (fade_timer > 0) {
-        Menu_Results_DrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0Chicken, fade_timer);
-        Menu_Results_DrawFadingTexture(0xA0, draw_y, Menu_Results_DisIndex_Esc0Chicken + 1, fade_timer);
+        VS::Menu::Results::LiveDrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0Chicken, fade_timer);
+        VS::Menu::Results::LiveDrawFadingTexture(0xA0, draw_y, Menu_Results_DisIndex_Esc0Chicken + 1, fade_timer);
     }
 }
 
@@ -524,7 +525,7 @@ void Menu_Results_DrawAverageTimeHeading(int x, int y, int timer)
     }
 
     if (timer > 0) {
-        Menu_Results_DrawFadingTexture(x - (Menu_Results_disMap[Menu_Results_DisIndex_Iq0AverageTime].w >> 1), y,
+        VS::Menu::Results::LiveDrawFadingTexture(x - (Menu_Results_disMap[Menu_Results_DisIndex_Iq0AverageTime].w >> 1), y,
             Menu_Results_DisIndex_Iq0AverageTime, timer);
     }
 }
@@ -539,7 +540,7 @@ void Menu_Results_DrawCubePuzzleParTime(int x, int y, int timer)
     if (timer > 0) {
         int seconds_shifted_for_packing = (Menu_Results_puzzleParTime % 60) << 0x10;
 
-        Menu_Results_DrawTime(x, y, timer, ((Menu_Results_puzzleParTime / 60) << 0x10) | (seconds_shifted_for_packing >> 8), 0);
+        VS::Menu::Results::LiveDrawTime(x, y, timer, ((Menu_Results_puzzleParTime / 60) << 0x10) | (seconds_shifted_for_packing >> 8), 0);
     }
 }
 
@@ -583,7 +584,7 @@ void Menu_Results_DrawCountingCubePuzzleTime(int x, int y, int timer)
         return;
     }
 
-    Menu_Results_DrawFadingTexture(x, y, 72, timer);
+    VS::Menu::Results::LiveDrawFadingTexture(x, y, 72, timer);
 
     x += Menu_Results_disMap[72].w;
 
@@ -603,7 +604,7 @@ void Menu_Results_DrawCountingCubePuzzleTime(int x, int y, int timer)
         time = 0;
     }
 
-    Menu_Results_DrawTime(x, y + 2, timer, time, 0);
+    VS::Menu::Results::LiveDrawTime(x, y + 2, timer, time, 0);
 }
 
 // MENUF.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

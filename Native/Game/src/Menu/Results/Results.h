@@ -5,9 +5,6 @@
 
 typedef struct Menu_Results_BuffReel Menu_Results_BuffReel;
 
-// decomp: src/include/gpu.h:96
-#define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
-
 // decomp: BuffReelStats (src/MENU/MENUF.PRG/3B8.c:708)
 enum Menu_Results_BuffReelStat {
     Menu_Results_BuffReelStat_Str = 13,
@@ -135,11 +132,7 @@ void Menu_Results_DrawCountingMapCompletion(
     int draw_x, int draw_y, int animation_timer, int arg3 __attribute__((unused)));
 void Menu_Results_DrawRiskbreakerRankHeading(int x, int y, int timer);
 void Menu_Results_DrawRiskbreakerRank(int x, int y, int timer);
-void Menu_Results_DrawFadingTexture(int x, int y, int texIndex, int brightness);
-void Menu_Results_DrawFadingTextureClut(int x, int y, int texIndex, int brightness, int clut);
-void Menu_Results_DrawTime(int x, int y, int timer, int time, int isNewRecord);
 void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_state);
-void Menu_Results_DrawPressButtonPrompt(int x, int y, int slide_timer, int bounce_timer);
 void Menu_Results_DrawBonusReelTexture(int x, int y, int texId);
 void Menu_Results_DetermineRiskbreakerRank(void);
 void Menu_Results_CalculateScore(void);

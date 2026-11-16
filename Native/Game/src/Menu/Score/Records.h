@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:96
+#define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
+
 #endif // VS_MENU_SCORE_RECORDS_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_RECORDS_H_DECLS)

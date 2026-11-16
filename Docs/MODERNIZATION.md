@@ -30,15 +30,15 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 12 | 2,646 | 756 | 11 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 5 | 204 | 17,061 | 480 | 163 | 0 |
+| 34: #60 Menu screens and workspaces | 5 | 200 | 16,903 | 484 | 159 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 224 | 20,443 | 3556 | 176 | 0 |
+| **Total** | 5 | 220 | 20,285 | 3560 | 172 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,503 |
+| done | 3,507 |
 | in-progress | 4 |
-| todo | 225 |
+| todo | 221 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (7 active, 47 done); open functions in no slice: 0.
 
@@ -93,7 +93,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 47 | menu-inventory-container | active | self | 5 | 27 | 4,007 |
 | 48 | menu-loot-status-abilities | active | - | 8 | 55 | 5,776 |
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
-| 50 | menu-results-score | active | - | 6 | 89 | 4,781 |
+| 50 | menu-results-score | active | - | 6 | 85 | 4,623 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
 | 52 | menu-map-manual-text | active | - | 4 | 38 | 2,497 |
 | 53 | title | done | self | 4 | 0 | 0 |
@@ -101,11 +101,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 1 | 49 |
+| Called from generated code | 1 | 45 |
 | Referenced by the original-address module table | 1 | 16 |
-| Calls an SDK shim | 0 | 52 |
+| Calls an SDK shim | 0 | 49 |
 | Signature uses SDK integer types or `void*` | 0 | 26 |
-| Compiled with relaxed settings | 0 | 224 |
+| Compiled with relaxed settings | 0 | 220 |
 
 Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 

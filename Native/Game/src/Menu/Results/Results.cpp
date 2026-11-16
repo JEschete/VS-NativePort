@@ -4,8 +4,8 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
+#include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
-#include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/TimImageLive.hpp"
@@ -17,7 +17,6 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.h"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
@@ -534,7 +533,7 @@ int Menu_Results_UpdateGameClear(void)
                 if (Menu_Results_screenTimer > 288) {
                     ++Menu_Results_elementAnimationState;
 
-                    Menu_Results_DrawPressButtonPrompt(
+                    VS::Menu::Results::LiveDrawPressButtonPrompt(
                         214, 187, Menu_Results_elementAnimationState, Menu_Results_screenTimer);
                 }
             } else {
@@ -553,7 +552,7 @@ int Menu_Results_UpdateGameClear(void)
                     VS::Audio::LiveFadeSfxPitch(0x7E, 0x75, -0x10, 0x30);
                 }
 
-                Menu_Results_DrawPressButtonPrompt(214, 187, 48, Menu_Results_screenTimer);
+                VS::Menu::Results::LiveDrawPressButtonPrompt(214, 187, 48, Menu_Results_screenTimer);
             }
         } else if (Input_buttonsPressed.allButtons & PADRright) {
 
@@ -570,7 +569,7 @@ int Menu_Results_UpdateGameClear(void)
         int prompt_slide_step = 48 - Menu_Results_gameClearStateTimer;
 
         if (prompt_slide_step > 0) {
-            Menu_Results_DrawPressButtonPrompt(0xD6, 0xBB, prompt_slide_step, Menu_Results_screenTimer);
+            VS::Menu::Results::LiveDrawPressButtonPrompt(0xD6, 0xBB, prompt_slide_step, Menu_Results_screenTimer);
         }
 
         updated_reel_phase = Menu_Results_buffReelSelection + (Menu_Results_elementAnimationState >> 3);
@@ -965,126 +964,6 @@ void Menu_Results_DrawRiskbreakerRank(int x, int y, int timer)
     }
 }
 
-// decomp: MENUF.PRG _renderTextureFadeIn (src/MENU/MENUF.PRG/3B8.c:1877)
-void Menu_Results_DrawFadingTexture(int x, int y, int texIndex, int brightness)
-{
-    Render_TextureRegion* texture;
-    POLY_FT4* poly;
-    void** scratch;
-
-    if (brightness <= 0) {
-        return;
-    }
-
-    poly = (POLY_FT4 *)(*(void**)Core_ScratchAddr(0));
-    texture = &Menu_Results_disMap[texIndex];
-
-    setPolyFT4(poly);
-    setXY4(
-        poly, x, y, texture->w + x, y, x, texture->h + y, texture->w + x, texture->h + y);
-    setUV4(poly, texture->x, texture->y, texture->x + texture->w, texture->y, texture->x,
-        texture->y + texture->h, texture->x + texture->w, texture->y + texture->h);
-    setSemiTrans(poly, 1);
-
-    if (brightness < 8) {
-        setRGB0(poly, brightness * 16, brightness * 16, brightness * 16);
-        poly->tpage = texture->tpage | getTPage(0, Render_BlendMode_Add, 0, 0);
-        poly->clut = texture->clut + 1;
-    } else {
-        setRGB0(poly, 128, 128, 128);
-        poly->tpage = texture->tpage;
-        poly->clut = texture->clut;
-    }
-
-    scratch = (void**)Core_ScratchAddr(0);
-
-    AddPrim(((u_char*)(scratch[1])) - 0x1C, poly++);
-
-    scratch[0] = poly;
-}
-
-// decomp: MENUF.PRG _renderTextureFadeInClut (src/MENU/MENUF.PRG/3B8.c:1914)
-void Menu_Results_DrawFadingTextureClut(int x, int y, int texIndex, int brightness, int clut)
-{
-    Render_TextureRegion* texture;
-    POLY_FT4* poly;
-    void** scratch;
-
-    if (brightness <= 0) {
-        return;
-    }
-
-    poly = (POLY_FT4 *)(*(void**)Core_ScratchAddr(0));
-    texture = &Menu_Results_disMap[texIndex];
-
-    setPolyFT4(poly);
-    setXY4(
-        poly, x, y, texture->w + x, y, x, texture->h + y, texture->w + x, texture->h + y);
-    setUV4(poly, texture->x, texture->y, texture->x + texture->w, texture->y, texture->x,
-        texture->y + texture->h, texture->x + texture->w, texture->y + texture->h);
-    setSemiTrans(poly, 1);
-
-    if (brightness < 8) {
-        setRGB0(poly, brightness * 16, brightness * 16, brightness * 16);
-        poly->tpage = texture->tpage | getTPage(0, Render_BlendMode_Add, 0, 0);
-        poly->clut = clut + 1;
-    } else {
-        setRGB0(poly, 128, 128, 128);
-        poly->tpage = texture->tpage;
-        poly->clut = clut;
-    }
-
-    scratch = (void**)Core_ScratchAddr(0);
-
-    AddPrim(((u_char*)(scratch[1])) - 0x1C, poly++);
-
-    scratch[0] = poly;
-}
-
-// decomp: MENUF.PRG _renderTime (src/MENU/MENUF.PRG/3B8.c:1951)
-void Menu_Results_DrawTime(int x, int y, int timer, int time, int isNewRecord)
-{
-    char buf[16];
-    int i;
-    int time_digits_clut;
-
-    if (time == 0x800000) {
-        sprintf(buf, "------");
-    } else {
-        sprintf(
-            buf, "%02d%02d%02d", (time >> 0x10) & 0xFF, (time >> 8) & 0xFF, time & 0xFF);
-    }
-
-    time_digits_clut = getClut(800, 511);
-
-    if (isNewRecord != 0) {
-        time_digits_clut = getClut(896, 511);
-    }
-
-    for (i = 0; i < 6; ++i) {
-        if (buf[i] == '-') {
-            Menu_Results_DrawFadingTextureClut(x, y, Menu_Results_DisIndex_Time0Dash, timer, time_digits_clut);
-
-            x += 12;
-        } else {
-            Menu_Results_DrawFadingTextureClut(x, y - 3, buf[i] - '0', timer, time_digits_clut);
-
-            x += 12;
-        }
-
-        if (i == 1) {
-            Menu_Results_DrawFadingTextureClut(x, y - 2, Menu_Results_DisIndex_Time0Prime, timer, time_digits_clut);
-
-            x += 6;
-
-        } else if (i == 3) {
-            Menu_Results_DrawFadingTextureClut(x, y - 2, Menu_Results_DisIndex_Time0DoublePrime, timer, time_digits_clut);
-
-            x += 6;
-        }
-    }
-}
-
 // decomp: MENUF.PRG _renderStatWheel (src/MENU/MENUF.PRG/3B8.c:1996)
 void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_state)
 {
@@ -1175,12 +1054,12 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_stat
         } else {
             temp = (char)Menu_Results_buffReelSelection / 16;
 
-            Menu_Results_DrawFadingTextureClut(x, y - 1, Menu_Results_buffReels[Menu_Results_buffReelIndex][temp].stat,
+            VS::Menu::Results::LiveDrawFadingTextureClut(x, y - 1, Menu_Results_buffReels[Menu_Results_buffReelIndex][temp].stat,
                 timer, getClut(800, 511));
 
             x += Menu_Results_disMap[Menu_Results_buffReels[Menu_Results_buffReelIndex][temp].stat].w;
 
-            Menu_Results_DrawFadingTextureClut(
+            VS::Menu::Results::LiveDrawFadingTextureClut(
                 x, y + 4, Menu_Results_DisIndex_Rank0Plus, timer, getClut(800, 511));
 
             x += Menu_Results_disMap[24].w;
@@ -1190,7 +1069,7 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_stat
             len = strlen(buf);
 
             for (j = 0; j < len; ++j) {
-                Menu_Results_DrawFadingTextureClut(
+                VS::Menu::Results::LiveDrawFadingTextureClut(
                     x, y - 1, buf[j] - '0', timer, getClut(800, 511));
                 x += 0xC;
             }
@@ -1204,56 +1083,6 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_stat
 
         q[0] = area;
     }
-}
-
-// decomp: MENUF.PRG _renderPressButtonPrompt (src/MENU/MENUF.PRG/3B8.c:2117)
-void Menu_Results_DrawPressButtonPrompt(int x, int y, int slide_timer, int bounce_timer)
-{
-    POLY_FT4* poly;
-    void** p;
-    int v1;
-
-    if (slide_timer < 0) {
-        return;
-    }
-
-    v1 = x + 288;
-
-    if (slide_timer > 48) {
-        slide_timer = 48;
-    }
-
-    x = (v1 - (slide_timer * 6));
-
-    VS::Render::DrawLiveCompactTextColor(
-        "PRESS", vs_getXY_2(x + 18, y), vs_getRGB888(255, 128, 128), NULL);
-    VS::Render::DrawLiveCompactTextColor(
-        "BUTTON", vs_getXY_2(x + 18, y + 10), vs_getRGB888(255, 128, 128), NULL);
-
-    y += 22;
-
-    if ((bounce_timer & 0xF) < 9) {
-        v1 = y - 16;
-        y = v1 + ((bounce_timer & 0xF) >> 1);
-    } else {
-        v1 = y - 10;
-        y = v1 - ((bounce_timer & 0xF) >> 2);
-    }
-
-    poly = (POLY_FT4 *)(*(void**)((uintptr_t)Core_ScratchBase() + 0x000));
-
-    setPolyFT4(poly);
-    setShadeTex(poly, 1);
-    setXY4(poly, x, y - 2, x + 16, y - 2, x, y + 14, x + 16, y + 0xE);
-    setUV4(poly, 32, 128, 48, 128, 32, 144, 48, 144);
-    setTPage(poly, 0, 0, 768, 0);
-    setClut(poly, 944, 223);
-
-    p = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-
-    AddPrim(((u_char*)(p[1])) - 0x1C, poly++);
-
-    p[0] = poly;
 }
 
 // decomp: MENUF.PRG _renderAnimatedStatWheel (src/MENU/MENUF.PRG/3B8.c:2168)

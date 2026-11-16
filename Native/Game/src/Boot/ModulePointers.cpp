@@ -121,6 +121,7 @@
 #include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
+#include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
@@ -2145,6 +2146,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x80109028u, 0u, (void*)&VS::Menu::Results::ApplyLiveAgilityBonus, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x801090B8u, 0u, (void*)&VS::Menu::Results::ApplyLiveHpBonus, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80109148u, 0u, (void*)&VS::Menu::Results::ApplyLiveMpBonus, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80105C34u, 0u, (void*)&VS::Menu::Results::LiveDrawFadingTexture, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80105DD8u, 0u, (void*)&VS::Menu::Results::LiveDrawFadingTextureClut, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80105F6Cu, 0u, (void*)&VS::Menu::Results::LiveDrawTime, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801064D4u, 0u, (void*)&VS::Menu::Results::LiveDrawPressButtonPrompt, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},

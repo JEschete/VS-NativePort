@@ -5,6 +5,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -518,11 +519,11 @@ void Menu_Results_DrawCourseNumber(int x, int y, int timer)
     if (timer > 0) {
         x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0Course].w + 24) >> 1;
 
-        Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0Course, timer);
+        VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0Course, timer);
 
         course_number_base_x = x + 12;
 
-        Menu_Results_DrawFadingTextureClut(course_number_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0Course].w, y - 1,
+        VS::Menu::Results::LiveDrawFadingTextureClut(course_number_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0Course].w, y - 1,
             Audio_Seq_unusedStateFlags.timeAttackBoss + 1, timer, 0x7FF4);
     }
 }
@@ -537,7 +538,7 @@ void Menu_Results_DrawBossName(int x, int y, int timer)
     if (timer > 0) {
         if (Audio_Seq_unusedStateFlags.timeAttackBoss != 6) {
 
-            Menu_Results_DrawFadingTexture(x
+            VS::Menu::Results::LiveDrawFadingTexture(x
                                      - (Menu_Results_disMap[Audio_Seq_unusedStateFlags.timeAttackBoss
                                                 + Menu_Results_DisIndex_Attack0Minotaur]
                                              .w
@@ -548,11 +549,11 @@ void Menu_Results_DrawBossName(int x, int y, int timer)
             x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0Death].w + Menu_Results_disMap[Menu_Results_DisIndex_Attack0OgreZombie].w)
               >> 1;
 
-            Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0Death, timer);
+            VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0Death, timer);
 
             x += Menu_Results_disMap[Menu_Results_DisIndex_Attack0Death].w;
 
-            Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0OgreZombie, timer);
+            VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0OgreZombie, timer);
         }
     }
 }
@@ -568,12 +569,12 @@ void Menu_Results_DrawBestTime(int x, int y, int timer)
         int best_time_base_x;
         x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w + 96) >> 1;
 
-        Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0BestTime, timer);
+        VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0BestTime, timer);
 
         x++;
         best_time_base_x = x + 11;
 
-        Menu_Results_DrawTime(best_time_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w, y + 2, timer,
+        VS::Menu::Results::LiveDrawTime(best_time_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w, y + 2, timer,
             Audio_Seq_unusedScoredata.bossTimeTrialScores[Audio_Seq_unusedStateFlags.timeAttackBoss][0]
                 .time,
             0);
@@ -585,7 +586,7 @@ void Menu_Results_DrawStartCountdown(int x, int y, int timer)
 {
     int countdown_texture_id = (timer / 15) + Menu_Results_DisIndex_Attack0Three;
 
-    Menu_Results_DrawFadingTexture(
+    VS::Menu::Results::LiveDrawFadingTexture(
         x - (Menu_Results_disMap[countdown_texture_id].w / 2), y - (Menu_Results_disMap[countdown_texture_id].h / 2), countdown_texture_id, timer % 15);
 }
 
@@ -680,7 +681,7 @@ void Menu_Results_DrawTimeAttackRating(int x, int y, int fade_timer)
         rating_texture_offset = 4;
     }
 
-    Menu_Results_DrawFadingTexture(x, y, rating_texture_offset + Menu_Results_DisIndex_Time0Excellent, fade_timer);
+    VS::Menu::Results::LiveDrawFadingTexture(x, y, rating_texture_offset + Menu_Results_DisIndex_Time0Excellent, fade_timer);
 }
 
 // decomp: MENUF.PRG _renderTimeAttackRatingWipe (src/MENU/MENUF.PRG/3B8.c:1708)
@@ -730,11 +731,11 @@ void Menu_Results_DrawTimeAttackTime(int draw_x, int draw_y, int fade_timer)
     }
 
     if (fade_timer > 0) {
-        Menu_Results_DrawFadingTexture(draw_x, draw_y, Menu_Results_DisIndex_Time0Time, fade_timer);
+        VS::Menu::Results::LiveDrawFadingTexture(draw_x, draw_y, Menu_Results_DisIndex_Time0Time, fade_timer);
 
         draw_x += Menu_Results_disMap[Menu_Results_DisIndex_Time0Time].w;
 
-        Menu_Results_DrawTime(draw_x, draw_y + 2, fade_timer, Menu_Results_timeTrialTime, 0);
+        VS::Menu::Results::LiveDrawTime(draw_x, draw_y + 2, fade_timer, Menu_Results_timeTrialTime, 0);
     }
 }
 
@@ -754,7 +755,7 @@ void Menu_Results_DrawCountingTimeAttackTime(int x, int y, int timer)
     }
 
     if (timer > 0) {
-        Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Time0Time, timer);
+        VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Time0Time, timer);
 
         x += Menu_Results_disMap[Menu_Results_DisIndex_Time0Time].w;
 
@@ -774,7 +775,7 @@ void Menu_Results_DrawCountingTimeAttackTime(int x, int y, int timer)
             var_a3 = 0;
         }
 
-        Menu_Results_DrawTime(x, y + 2, timer, var_a3, 0);
+        VS::Menu::Results::LiveDrawTime(x, y + 2, timer, var_a3, 0);
     }
 }
 
@@ -790,7 +791,7 @@ void Menu_Results_DrawNewRecord(int x, int y, int timer)
     }
 
     if (timer > 0) {
-        Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Time0NewRecord, timer);
+        VS::Menu::Results::LiveDrawFadingTexture(x, y, Menu_Results_DisIndex_Time0NewRecord, timer);
     }
 }
 
@@ -818,12 +819,12 @@ void Menu_Results_DrawLeaderboard(int x, int y, int timer)
             leaderboard_clut = getClut(896, 511);
         }
 
-        Menu_Results_DrawTime(x - 84, y + i * 20 + 2, timer,
+        VS::Menu::Results::LiveDrawTime(x - 84, y + i * 20 + 2, timer,
             Audio_Seq_unusedScoredata
                 .bossTimeTrialScores[0][Audio_Seq_unusedStateFlags.timeAttackBoss * 3 + i]
                 .time,
             isNewRecord);
-        Menu_Results_DrawFadingTextureClut((x - Menu_Results_disMap[Menu_Results_DisIndex_Time0First + i].w) - 88, y + i * 20,
+        VS::Menu::Results::LiveDrawFadingTextureClut((x - Menu_Results_disMap[Menu_Results_DisIndex_Time0First + i].w) - 88, y + i * 20,
             Menu_Results_DisIndex_Time0First + i, timer, leaderboard_clut);
     }
 }
@@ -849,11 +850,11 @@ void Menu_Results_DrawLeaderboardEntry(int x, int y, int slot, int timer)
         clut = getClut(896, 511);
     }
 
-    Menu_Results_DrawTime(x - 84, y + (slot * 20) + 2, timer,
+    VS::Menu::Results::LiveDrawTime(x - 84, y + (slot * 20) + 2, timer,
         Audio_Seq_unusedScoredata.bossTimeTrialScores[Audio_Seq_unusedStateFlags.timeAttackBoss][slot]
             .time,
         isCurrentTime);
-    Menu_Results_DrawFadingTextureClut((x - Menu_Results_disMap[slot + Menu_Results_DisIndex_Time0First].w) - 88,
+    VS::Menu::Results::LiveDrawFadingTextureClut((x - Menu_Results_disMap[slot + Menu_Results_DisIndex_Time0First].w) - 88,
         y + (slot * 20), slot + Menu_Results_DisIndex_Time0First, timer, clut);
 }
 

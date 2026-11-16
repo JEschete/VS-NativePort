@@ -356,6 +356,7 @@
     <ClCompile Include="src\RenderDisplayTests.cpp" />
     <ClCompile Include="src\RenderPaletteTests.cpp" />
     <ClCompile Include="src\RenderScreenOverlayTests.cpp" />
+    <ClCompile Include="src\ResultsDrawingTests.cpp" />
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\ResultsStatsTests.cpp" />
     <ClCompile Include="src\ResultsTextureTests.cpp" />

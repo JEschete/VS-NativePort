@@ -1675,6 +1675,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::ApplyLiveAgilityBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::ApplyLiveHpBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::ApplyLiveMpBonus": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
+    "VS::Menu::Results::LiveDrawFadingTexture": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
+    "VS::Menu::Results::LiveDrawFadingTextureClut": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
+    "VS::Menu::Results::LiveDrawTime": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
+    "VS::Menu::Results::LiveDrawPressButtonPrompt": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -3035,6 +3039,10 @@ OWNED_CALL_BINDINGS["F03070"] = "VS::Menu::Results::ApplyLiveIntelligenceBonus"
 OWNED_CALL_BINDINGS["F03071"] = "VS::Menu::Results::ApplyLiveAgilityBonus"
 OWNED_CALL_BINDINGS["F03072"] = "VS::Menu::Results::ApplyLiveHpBonus"
 OWNED_CALL_BINDINGS["F03073"] = "VS::Menu::Results::ApplyLiveMpBonus"
+OWNED_CALL_BINDINGS["F03040"] = "VS::Menu::Results::LiveDrawFadingTexture"
+OWNED_CALL_BINDINGS["F03041"] = "VS::Menu::Results::LiveDrawFadingTextureClut"
+OWNED_CALL_BINDINGS["F03042"] = "VS::Menu::Results::LiveDrawTime"
+OWNED_CALL_BINDINGS["F03044"] = "VS::Menu::Results::LiveDrawPressButtonPrompt"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -4900,6 +4908,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x80109028, "VS::Menu::Results::ApplyLiveAgilityBonus"),  # F03071
     ("MENU/MENUF.PRG", 0x801090B8, "VS::Menu::Results::ApplyLiveHpBonus"),  # F03072
     ("MENU/MENUF.PRG", 0x80109148, "VS::Menu::Results::ApplyLiveMpBonus"),  # F03073
+    ("MENU/MENUF.PRG", 0x80105C34, "VS::Menu::Results::LiveDrawFadingTexture"),  # F03040
+    ("MENU/MENUF.PRG", 0x80105DD8, "VS::Menu::Results::LiveDrawFadingTextureClut"),  # F03041
+    ("MENU/MENUF.PRG", 0x80105F6C, "VS::Menu::Results::LiveDrawTime"),  # F03042
+    ("MENU/MENUF.PRG", 0x801064D4, "VS::Menu::Results::LiveDrawPressButtonPrompt"),  # F03044
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -7933,15 +7945,9 @@ REGEX_FIXES += [
         ("Menu::Results::DrawLeaderboard",
          (('var_s3', 'leaderboard_clut'),),
          "F03038 src\\MENU\\MENUF.PRG\\3B8.c:1816-1847 (_renderAllStoredTimes). Named roles: leaderboard clut."),
-        ("Menu::Results::DrawTime",
-         (('s2', 'time_digits_clut'),),
-         "F03042 src\\MENU\\MENUF.PRG\\3B8.c:1951-1992 (_renderTime). Named roles: time digits clut."),
         ("Menu::Results::DrawBonusReel",
          (('a0', 'reel_origin_x'), ('arg3', 'results_screen_state'), ('new_var', 'reel_row_offset'), ('new_var2', 'reel_base_clip_height'), ('sp18', 'reel_clip_rect'), ('v1', 'reel_entry_index')),
          "F03043 src\\MENU\\MENUF.PRG\\3B8.c:1996-2115 (_renderStatWheel). Named roles: reel origin x, results screen state, reel row offset, reel base clip height, reel clip rect, reel entry index."),
-        ("Menu::Results::DrawPressButtonPrompt",
-         (('arg2', 'slide_timer'), ('arg3', 'bounce_timer')),
-         "F03044 src\\MENU\\MENUF.PRG\\3B8.c:2117-2164 (_renderPressButtonPrompt). Named roles: slide timer, bounce timer. Retained: v1: Merged pre-slide X origin and two bounce Y baselines."),
         ("Menu::Results::UpdateCubePuzzleResults",
          (('var_v0', 'rank_index_bias'),),
          "F03050 src\\MENU\\MENUF.PRG\\3B8.c:2477-2561 (_renderCubePuzzleEnd). Named roles: rank index bias."),

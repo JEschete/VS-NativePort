@@ -873,6 +873,9 @@
     <ClCompile Include="src\RenderScreenOverlayTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ResultsDrawingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ResultsRouletteTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

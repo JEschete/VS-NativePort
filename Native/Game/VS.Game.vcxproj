@@ -1965,6 +1965,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\ResultsDrawing.cpp" />
+    <ClCompile Include="src\Menu\Results\ResultsDrawingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\ResultsStats.cpp" />
     <ClCompile Include="src\Menu\Results\ResultsStatsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2906,6 +2910,8 @@
     <ClInclude Include="include\Menu\OptionsLive.hpp" />
     <ClInclude Include="include\Menu\Rename.hpp" />
     <ClInclude Include="include\Menu\RenameLive.hpp" />
+    <ClInclude Include="include\Menu\Results\ResultsDrawing.hpp" />
+    <ClInclude Include="include\Menu\Results\ResultsDrawingLive.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsStats.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp" />

@@ -873,6 +873,12 @@
     <None Include="..\..\port\differentials\resource_dispatch_guard_driver.cpp" />
     <None Include="..\..\port\differentials\resource_recovery.py" />
     <None Include="..\..\port\differentials\resource_recovery_driver.cpp" />
+    <None Include="..\..\port\differentials\results_drawing_common.py" />
+    <None Include="..\..\port\differentials\results_drawing_driver.cpp" />
+    <None Include="..\..\port\differentials\results_drawing_f03040.py" />
+    <None Include="..\..\port\differentials\results_drawing_f03041.py" />
+    <None Include="..\..\port\differentials\results_drawing_f03042.py" />
+    <None Include="..\..\port\differentials\results_drawing_f03044.py" />
     <None Include="..\..\port\differentials\results_stats_common.py" />
     <None Include="..\..\port\differentials\results_stats_driver.cpp" />
     <None Include="..\..\port\differentials\results_stats_f03066.py" />
