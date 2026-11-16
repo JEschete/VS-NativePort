@@ -4420,24 +4420,6 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertEqual(owned["F01014"]["path"], r"Native\Game\src\Field\GimmickReactions.cpp")
         self.assertEqual(owned["F01013"]["path"], r"Native\Game\src\Field\GimmickDynamics.cpp")
 
-    def test_score_viewer_banner_uses_native_frame_pointers(self):
-        source = """    void** scratch = (void**)Core_ScratchAddr(0);
-
-    line = scratch[0];
-AddPrim(*((void**)Core_ScratchAddr(1)) + 0x1C, line++);
-    scratch = (void**)Core_ScratchAddr(0);
-
-    AddPrim(scratch[1] + 0x1C, poly++);
-
-    scratch[0] = (void*)poly;
-"""
-        for old, new, _ in copy_fixups.FIXES["F02810"]:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertEqual(source.count("Render_frameScratch.orderingTable + 0x1C"), 2)
-        self.assertIn("Render_frameScratch.primitiveCursor = poly;", source)
-        self.assertNotIn("Core_ScratchAddr", source)
-
     def test_score_number_buffers_include_all_digits_and_terminators(self):
         cases = (
             (

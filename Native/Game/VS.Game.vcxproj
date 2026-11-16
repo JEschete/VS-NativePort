@@ -2051,6 +2051,10 @@
     <ClCompile Include="src\Menu\Score\EncyclopediaPreviewLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteCamera.cpp" />
+    <ClCompile Include="src\Menu\Score\GazetteCameraLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\GazetteRows.cpp" />
     <ClCompile Include="src\Menu\Score\GazetteRowsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -3014,6 +3018,8 @@
     <ClInclude Include="include\Menu\Results\TimeAttackRatingLive.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp" />
+    <ClInclude Include="include\Menu\Score\GazetteCamera.hpp" />
+    <ClInclude Include="include\Menu\Score\GazetteCameraLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRows.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRowsLive.hpp" />
     <ClInclude Include="include\Menu\Score\ScoreRank.hpp" />

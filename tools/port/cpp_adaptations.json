@@ -838,7 +838,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Encyclopedia.cpp": [
 [
-214,
+215,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -847,7 +847,7 @@
 ]
 ],
 [
-437,
+438,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, scratch[1] + 24);"
 ],
@@ -856,7 +856,7 @@
 ]
 ],
 [
-442,
+443,
 [
 "            \"ROTATION\", control_label_x | (18 << 16), Menu_Score_rotationColor, scratch[1] + 24);"
 ],
@@ -865,7 +865,7 @@
 ]
 ],
 [
-447,
+448,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, scratch[1] + 24);"
 ],
@@ -874,7 +874,7 @@
 ]
 ],
 [
-449,
+450,
 [
 "            \"ZOOM\", control_label_x | (36 << 16), Menu_Score_zoomColor, scratch[1] + 24);"
 ],
@@ -883,7 +883,7 @@
 ]
 ],
 [
-453,
+454,
 [
 "            enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, scratch[1] + 0x1C);"
 ],
@@ -892,7 +892,7 @@
 ]
 ],
 [
-502,
+503,
 [
 "        poly = scratch[0];"
 ],
@@ -903,7 +903,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Records.cpp": [
 [
-174,
+175,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -912,7 +912,7 @@
 ]
 ],
 [
-209,
+210,
 [
 "        p->title = (void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]];",
 "        p->description = (void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]];"
@@ -923,7 +923,7 @@
 ]
 ],
 [
-511,
+512,
 [
 "        \"PLAYER TIME\", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, p[1] + 0x1C);"
 ],
@@ -932,7 +932,7 @@
 ]
 ],
 [
-514,
+515,
 [
 "        \"1ST\", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, p[1] + 0x1C);"
 ],
@@ -941,7 +941,7 @@
 ]
 ],
 [
-516,
+517,
 [
 "        \"2ND\", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, p[1] + 0x1C);"
 ],
@@ -950,7 +950,7 @@
 ]
 ],
 [
-518,
+519,
 [
 "        \"3RD\", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, p[1] + 0x1C);"
 ],
@@ -959,7 +959,7 @@
 ]
 ],
 [
-530,
+531,
 [
 "                q[1] + 0x1C);"
 ],
@@ -968,7 +968,7 @@
 ]
 ],
 [
-535,
+536,
 [
 "                q[1] + 0x1C);"
 ],
@@ -977,7 +977,7 @@
 ]
 ],
 [
-540,
+541,
 [
 "                q[1] + 0x1C);"
 ],
@@ -986,7 +986,7 @@
 ]
 ],
 [
-547,
+548,
 [
 "        vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -995,7 +995,7 @@
 ]
 ],
 [
-553,
+554,
 [
 "                \"$--:--:--\", vs_getXY(88, 158), vs_getRGB(80, 80, 80), r[1] + 0x1C);"
 ],
@@ -1004,7 +1004,7 @@
 ]
 ],
 [
-556,
+557,
 [
 "                vs_getXY(88, 158), vs_getRGB(128, 128, 128), r[1] + 0x1C);"
 ],
@@ -1015,147 +1015,12 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-283,
+277,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],
 [
 "            Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size));"
-]
-],
-[
-1129,
-[
-"    line = Render_frameScratch.primitiveCursor;"
-],
-[
-"    line = (LINE_G2 *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-1139,
-[
-"        AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);"
-],
-[
-"        AddPrim(((u_char*)(Render_frameScratch.orderingTable)) + 0x1C, line++);"
-]
-],
-[
-1150,
-[
-"    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);"
-],
-[
-"    AddPrim(((u_char*)(Render_frameScratch.orderingTable)) + 0x1C, poly++);"
-]
-],
-[
-1173,
-[
-"    polyG4 = scratch[0];"
-],
-[
-"    polyG4 = (POLY_G4 *)(scratch[0]);"
-]
-],
-[
-1188,
-[
-"    AddPrim(scratch[1] + 0x1C, polyG4++);"
-],
-[
-"    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyG4++);"
-]
-],
-[
-1198,
-[
-"    AddPrim(scratch[1] + 0x1C, polyF4++);"
-],
-[
-"    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyF4++);"
-]
-],
-[
-1210,
-[
-"    POLY_G4* polyG4 = scratch[0];"
-],
-[
-"    POLY_G4* polyG4 = (POLY_G4 *)(scratch[0]);"
-]
-],
-[
-1220,
-[
-"    AddPrim(scratch[1] + 0x1C, polyG4++);"
-],
-[
-"    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyG4++);"
-]
-],
-[
-1228,
-[
-"    AddPrim(scratch[1] + 0x1C, polyF4++);"
-],
-[
-"    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyF4++);"
-]
-],
-[
-1263,
-[
-"        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
-],
-[
-"        vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));"
-]
-],
-[
-1265,
-[
-"        vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);"
-],
-[
-"        vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));"
-]
-],
-[
-1270,
-[
-"        scratch[1] + 0x1C);"
-],
-[
-"        (u_long *)(((u_char*)(scratch[1])) + 0x1C));"
-]
-],
-[
-1280,
-[
-"    POLY_G4* poly = scratch[0];"
-],
-[
-"    POLY_G4* poly = (POLY_G4 *)(scratch[0]);"
-]
-],
-[
-1290,
-[
-"    AddPrim(scratch[1] + 0x20, poly++);"
-],
-[
-"    AddPrim(((u_char*)(scratch[1])) + 0x20, poly++);"
-]
-],
-[
-1300,
-[
-"    AddPrim(scratch[1] + 32, poly++);"
-],
-[
-"    AddPrim(((u_char*)(scratch[1])) + 32, poly++);"
 ]
 ]
 ],

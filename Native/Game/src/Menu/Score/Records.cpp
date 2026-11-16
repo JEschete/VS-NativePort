@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/String/GameTextLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -510,7 +511,7 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
     p = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
     VS::Render::DrawLiveCompactTextColor(
         "PLAYER TIME", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
-    Menu_Score_DrawGradientPanel((selected * 0x10) - 0x80, 0x20, 0x60, 0xC, 1);
+    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x80, 0x20, 0x60, 0xC, 1);
     VS::Render::DrawLiveCompactTextColor(
         "1ST", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
     VS::Render::DrawLiveCompactTextColor(
@@ -542,11 +543,11 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
         }
     }
 
-    Menu_Score_DrawGradientPanel((selected * 0x10) - 0x70, 0x32, 0x80, 0x54, 2);
+    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x70, 0x32, 0x80, 0x54, 2);
     r = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
     VS::Render::DrawLiveCompactTextColor("REFERENCE TIME", vs_getXY(selected * 16 - 0x78, 0x8C),
         vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));
-    Menu_Score_DrawGradientPanel((selected * 0x10) - 0x80, 0x8C, 0x70, 0xC, 1);
+    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x80, 0x8C, 0x70, 0xC, 1);
 
     if ((settled_row_count == 8) && (selected == settled_row_count)) {
         if (selected_trial_row->disabled != 0) {
@@ -557,7 +558,7 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
                 vs_getXY(88, 158), vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));
         }
     }
-    Menu_Score_DrawGradientPanel((selected * 0x10) - 0x70, 0x9E, 0x80, 0xC, 2);
+    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x70, 0x9E, 0x80, 0xC, 2);
 }
 
 // MENU9.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

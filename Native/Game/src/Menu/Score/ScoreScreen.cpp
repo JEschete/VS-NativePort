@@ -2,18 +2,15 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
+#include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -33,13 +30,10 @@ extern "C" {
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Map.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Palette.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
 
 // decomp: _0 (_0@src/MENU/MENU9.PRG/238.c)
 int Menu_Score_layoutPadding1;
@@ -261,7 +255,7 @@ int Menu_Score_Update(void)
         break;
 
     case Menu_Score_ScoreMenuState_TopMenu:
-        Menu_Score_RenderOverview(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveOverview(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState < 8) {
             textBox = VS::Menu::LiveTextBox(0);
@@ -304,7 +298,7 @@ int Menu_Score_Update(void)
         break;
 
     case 3:
-        Menu_Score_RenderOverview(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveOverview(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState > 0) {
 
@@ -326,7 +320,7 @@ int Menu_Score_Update(void)
             break;
         }
 
-        Menu_Score_RestoreCamera();
+        VS::Menu::Score::RestoreLiveCamera();
 
         return Menu_Score_nextState;
 
@@ -427,7 +421,7 @@ int Menu_Score_Update(void)
                 break;
             }
 
-            Menu_Score_RestoreCamera();
+            VS::Menu::Score::RestoreLiveCamera();
 
             return 2;
         }
@@ -536,7 +530,7 @@ int Menu_Score_Update(void)
                 Menu_Score_menuState = 1;
                 break;
             }
-            Menu_Score_RestoreCamera();
+            VS::Menu::Score::RestoreLiveCamera();
             return 2;
         }
 
@@ -611,7 +605,7 @@ int Menu_Score_Update(void)
             break;
         }
 
-        Menu_Score_RestoreCamera();
+        VS::Menu::Score::RestoreLiveCamera();
         return 2;
 
     case 13:
@@ -736,7 +730,7 @@ int Menu_Score_Update(void)
             }
 
             VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_monBinData);
-            Menu_Score_RestoreCamera();
+            VS::Menu::Score::RestoreLiveCamera();
             return 2;
         }
 
@@ -1001,7 +995,7 @@ int Menu_Score_Update(void)
 
         if (Menu_Score_nextState != 0) {
             VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_monBinData);
-            Menu_Score_RestoreCamera();
+            VS::Menu::Score::RestoreLiveCamera();
             return 2;
         }
 
@@ -1070,239 +1064,6 @@ int Menu_Score_Update(void)
     }
 
     return 0;
-}
-
-// decomp: MENU9.PRG _restoreCamera (src/MENU/MENU9.PRG/238.c:1402)
-void Menu_Score_RestoreCamera(void)
-{
-    VS::Core::Memory::CopyLiveAlignedWords(&((Render_FrameScratch*)Core_ScratchAddr(0))->camera.position,
-        &Menu_Score_cameraPositionBackup, sizeof Menu_Score_cameraPositionBackup);
-    VS::Core::Memory::CopyLiveAlignedWords(&((Render_FrameScratch*)Core_ScratchAddr(0))->camera.angles.vx,
-        &Menu_Score_cameraAnglesBackup, sizeof Menu_Score_cameraAnglesBackup);
-}
-
-// decomp: MENU9.PRG _buildCameraMatrix (src/MENU/MENU9.PRG/238.c:1474)
-void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix)
-{
-    SVECTOR negPosition;
-    SVECTOR position;
-    MATRIX pitchMatrix;
-    int angle0;
-    int angle1;
-    int angle2;
-    Render_FrameScratch* scratch;
-
-    angle0 = (angle1 = VS::Core::Math::Sine(Menu_Score_cameraAngles.vy));
-    angle1 = VS::Core::Math::Cosine(Menu_Score_cameraAngles.vx);
-    position.vx = (((angle0 * Menu_Score_cameraDistance) / ONE) * angle1) / ONE;
-
-    angle0 = VS::Core::Math::Cosine(Menu_Score_cameraAngles.vy);
-    angle1 = VS::Core::Math::Cosine(Menu_Score_cameraAngles.vx);
-    position.vz = (((angle0 * -Menu_Score_cameraDistance) / ONE) * angle1) / ONE;
-
-    angle2 = VS::Core::Math::Sine(Menu_Score_cameraAngles.vx) * -Menu_Score_cameraDistance;
-    position.vy = (angle2 / ONE) - (Menu_Score_cameraHeightOffset / 2);
-
-    scratch = (Render_FrameScratch*)Core_ScratchAddr(0);
-    setVector(&scratch->camera.position, position.vx * ONE, position.vy * ONE,
-        position.vz * ONE);
-    scratch->camera.angles.vx = Menu_Score_cameraAngles.vx;
-    scratch->camera.angles.vy = Menu_Score_cameraAngles.vy;
-    scratch->camera.angles.vz = Menu_Score_cameraAngles.vz;
-
-    VS::Menu::Framework::BuildLiveYawMatrix(cameraMatrix, Menu_Score_cameraAngles.vy);
-    VS::Menu::Framework::BuildLivePitchMatrix(&pitchMatrix, Menu_Score_cameraAngles.vx);
-    VS::Core::Math::ApplyMultiplyMatrixIntoRight(pitchMatrix, *cameraMatrix);
-
-    applyVector(&negPosition, position.vx, position.vy, position.vz, = -);
-
-    Core_Gte_ApplyMatrix(cameraMatrix, &negPosition, (VECTOR*)&cameraMatrix->t);
-}
-
-// decomp: MENU9.PRG _renderEnemyInfoBg (src/MENU/MENU9.PRG/238.c:1552)
-void Menu_Score_DrawEnemyBanner(int x, int y, int w, int h, int color)
-{
-    int i;
-    int scanline_width;
-    LINE_G2* line;
-    POLY_F4* poly;
-
-    line = (LINE_G2 *)(Render_frameScratch.primitiveCursor);
-
-    for (i = y, scanline_width = w; i < ((y + h) - 1); ++i, --scanline_width) {
-        setLineG2(line);
-        setXY2(line, x, i, (x + scanline_width) - 1, i);
-        setRGB0(line, Menu_Score_kBgColorStops0[color].r, Menu_Score_kBgColorStops0[color].g,
-            Menu_Score_kBgColorStops0[color].b);
-        setRGB1(line, Menu_Score_kBgColorStops1[color].r, Menu_Score_kBgColorStops1[color].g,
-            Menu_Score_kBgColorStops1[color].b);
-
-        AddPrim(((u_char*)(Render_frameScratch.orderingTable)) + 0x1C, line++);
-    }
-
-    x += 2;
-    y += 2;
-    poly = (POLY_F4*)line;
-
-    setPolyF4(poly);
-    setXY4(poly, x, y, (x + w) - 1, y, x, (y + h) - 1, (x + w) - h, (y + h) - 1);
-    setRGB0(poly, 0, 0, 0);
-
-    AddPrim(((u_char*)(Render_frameScratch.orderingTable)) + 0x1C, poly++);
-
-    Render_frameScratch.primitiveCursor = poly;
-
-    _insertTPage(7, getTPage(0, 3, 0, 0));
-}
-
-// decomp: MENU9.PRG _renderGradientQuad (src/MENU/MENU9.PRG/238.c:1594)
-void Menu_Score_DrawGradientPanel(int x, int y, int w, int h, int color)
-{
-    char b1;
-    char g0;
-    char r1;
-    char g1;
-    char r0;
-    char b0;
-    POLY_G4* polyG4;
-    POLY_F4* polyF4;
-    void** scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-
-    int right_x = (x + w) - 1;
-    int bottom_y = (y + h) - 1;
-
-    polyG4 = (POLY_G4 *)(scratch[0]);
-    setPolyG4(polyG4);
-    r0 = Menu_Score_kBgColorStops0[color].r;
-    g0 = Menu_Score_kBgColorStops0[color].g;
-    b0 = Menu_Score_kBgColorStops0[color].b;
-    r1 = Menu_Score_kBgColorStops1[color].r;
-    g1 = Menu_Score_kBgColorStops1[color].g;
-    b1 = Menu_Score_kBgColorStops1[color].b;
-
-    setXY4(polyG4, x, y, right_x, y, x, bottom_y, right_x, bottom_y);
-    setRGB0(polyG4, r0, g0, b0);
-    setRGB1(polyG4, r1, g1, b1);
-    setRGB2(polyG4, r0, g0, b0);
-    setRGB3(polyG4, r1, g1, b1);
-
-    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyG4++);
-
-    x += 2;
-    y += 2;
-
-    polyF4 = (POLY_F4*)polyG4;
-    setPolyF4(polyF4);
-    setXY4(polyF4, x, y, (x + w) - 1, y, x, (y + h) - 1, (x + w) - 1, (y + h) - 1);
-    setRGB0(polyF4, 0, 0, 0);
-
-    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyF4++);
-
-    scratch[0] = polyF4;
-
-    _insertTPage(7, getTPage(0, 3, 0, 0));
-}
-
-// decomp: MENU9.PRG _renderFooterBg (src/MENU/MENU9.PRG/238.c:1645)
-void Menu_Score_DrawFooterBackground(int x)
-{
-    POLY_F4* polyF4;
-    void** scratch = (void**)Core_ScratchAddr(0);
-    POLY_G4* polyG4 = (POLY_G4 *)(scratch[0]);
-
-    setPolyG4(polyG4);
-    setXY4(polyG4, 0, x, 320, x, 0, x + 8, 320, x + 8);
-    setRGB0(polyG4, 0, 0, 0);
-    setRGB1(polyG4, 0, 0, 0);
-    setRGB2(polyG4, 128, 128, 128);
-    setRGB3(polyG4, 128, 128, 128);
-    setSemiTrans(polyG4, 1);
-
-    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyG4++);
-
-    polyF4 = (POLY_F4*)polyG4;
-
-    setPolyF4(polyF4);
-    setXY4(polyF4, 0, x + 8, 320, x + 8, 0, 240, 320, 240);
-    setRGB0(polyF4, 0, 0, 0);
-
-    AddPrim(((u_char*)(scratch[1])) + 0x1C, polyF4++);
-
-    scratch[0] = polyF4;
-
-    _insertTPage(7, getTPage(0, 2, 0, 0));
-}
-
-// decomp: MENU9.PRG _renderTopMenu (src/MENU/MENU9.PRG/238.c:1679)
-void Menu_Score_RenderOverview(int animStep)
-{
-    Render_ScreenOffset saved_projection_offset;
-    Render_ScreenOffset overview_projection_offset;
-    char score_text[128];
-    MATRIX viewer_camera_matrix;
-    void** scratch;
-
-    if (animStep < 8) {
-        Menu_Score_DrawViewerEdgeFade();
-    }
-
-    saved_projection_offset = VS::Render::GetLiveProjectionScreenOffset();
-
-    overview_projection_offset.x = 0x80 - ((8 - animStep) << 5);
-    overview_projection_offset.y = 0xF0;
-
-    VS::Render::SetLiveProjectionScreenOffset(overview_projection_offset);
-    Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
-    VS::Menu::Framework::DrawLiveActorPreview(&viewer_camera_matrix);
-    VS::Render::SetLiveProjectionScreenOffset(saved_projection_offset);
-
-    sprintf(score_text, "#%ld", Menu_Score_score);
-
-    scratch = (void**)Core_ScratchAddr(0);
-
-    VS::Render::DrawLiveCompactTextColor("SCORE", (((animStep * 16) - 120) & 0xFFFF) | (16 << 16),
-        vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));
-    VS::Render::DrawLiveCompactTextColor(score_text, ((animStep * 16) & 0xFFFF) | (16 << 16),
-        vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));
-
-    Menu_Score_DrawGradientPanel((animStep * 16) - 128, 16, 136, 12, 2);
-    VS::Render::DrawLiveCompactTextColor("RISK   BREAKER   RANK",
-        (((animStep * 16) - 120) & 0xFFFF) | (184 << 16), vs_getRGB888(128, 128, 128),
-        (u_long *)(((u_char*)(scratch[1])) + 0x1C));
-
-    Menu_Score_DrawGradientPanel((animStep * 16) - 128, 184, 136, 12, 1);
-    Menu_Score_DrawFooterBackground(236 - (animStep * 6));
-}
-
-// decomp: MENU9.PRG _renderScreenEdgeFade (src/MENU/MENU9.PRG/238.c:2146)
-void Menu_Score_DrawViewerEdgeFade(void)
-{
-    void** scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-    POLY_G4* poly = (POLY_G4 *)(scratch[0]);
-
-    setPolyG4(poly);
-    setXY4(poly, 0, 0, 64, 0, 0, 240, 64, 240);
-    setRGB0(poly, 128, 128, 128);
-    setRGB1(poly, 0, 0, 0);
-    setRGB2(poly, 128, 128, 128);
-    setRGB3(poly, 0, 0, 0);
-    setSemiTrans(poly, 1);
-
-    AddPrim(((u_char*)(scratch[1])) + 0x20, poly++);
-
-    setPolyG4(poly);
-    setXY4(poly, 256, 0, 320, 0, 256, 240, 320, 240);
-    setRGB0(poly, 0, 0, 0);
-    setRGB1(poly, 128, 128, 128);
-    setRGB2(poly, 0, 0, 0);
-    setRGB3(poly, 128, 128, 128);
-    setSemiTrans(poly, 1);
-
-    AddPrim(((u_char*)(scratch[1])) + 32, poly++);
-
-    scratch[0] = poly;
-
-    _insertTPage(8, getTPage(0, 2, 0, 0));
 }
 
 }  // extern "C"

@@ -747,6 +747,15 @@
     <None Include="..\..\port\differentials\gameclear_score_f03029.py" />
     <None Include="..\..\port\differentials\gameclear_score_f03030.py" />
     <None Include="..\..\port\differentials\gameclear_score_f03031.py" />
+    <None Include="..\..\port\differentials\gazette_camera_common.py" />
+    <None Include="..\..\port\differentials\gazette_camera_driver.cpp" />
+    <None Include="..\..\port\differentials\gazette_camera_f02804.py" />
+    <None Include="..\..\port\differentials\gazette_camera_f02807.py" />
+    <None Include="..\..\port\differentials\gazette_camera_f02810.py" />
+    <None Include="..\..\port\differentials\gazette_camera_f02811.py" />
+    <None Include="..\..\port\differentials\gazette_camera_f02812.py" />
+    <None Include="..\..\port\differentials\gazette_camera_f02813.py" />
+    <None Include="..\..\port\differentials\gazette_camera_f02821.py" />
     <None Include="..\..\port\differentials\gazette_rows_common.py" />
     <None Include="..\..\port\differentials\gazette_rows_driver.cpp" />
     <None Include="..\..\port\differentials\gazette_rows_f02799.py" />

@@ -111,12 +111,5 @@ extern char Menu_Score_unusedYesString[] __attribute__((unused));
 extern int Menu_Score_zoomColor;;
 int Menu_Score_UpdateScreen(u_char* state);
 int Menu_Score_Update(void);
-void Menu_Score_RestoreCamera(void);
-void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix);
-void Menu_Score_DrawEnemyBanner(int x, int y, int w, int h, int color);
-void Menu_Score_DrawGradientPanel(int x, int y, int w, int h, int color);
-void Menu_Score_DrawFooterBackground(int x);
-void Menu_Score_RenderOverview(int animStep);
-void Menu_Score_DrawViewerEdgeFade(void);
 
 #endif // VS_MENU_SCORE_SCORESCREEN_H_DECLS

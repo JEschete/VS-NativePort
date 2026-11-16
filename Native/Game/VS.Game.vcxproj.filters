@@ -2901,6 +2901,12 @@
     <ClCompile Include="src\Menu\Score\EncyclopediaPreviewLive.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteCamera.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteCameraLive.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\GazetteRows.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
@@ -4570,6 +4576,12 @@
       <Filter>include\Menu\Score</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp">
+      <Filter>include\Menu\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\GazetteCamera.hpp">
+      <Filter>include\Menu\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\GazetteCameraLive.hpp">
       <Filter>include\Menu\Score</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Score\GazetteRows.hpp">

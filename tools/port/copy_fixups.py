@@ -1799,6 +1799,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Score::UpdateLiveTopMenu": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
     "VS::Menu::Score::ClearLiveMenuExceptRow8": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
     "VS::Menu::Score::PollLiveMenuReady": r"Native\Game\include\Menu\Score\GazetteRowsLive.hpp",
+    "VS::Menu::Score::RestoreLiveCamera": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
+    "VS::Menu::Score::BuildLiveViewerCamera": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
+    "VS::Menu::Score::DrawLiveEnemyBanner": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
+    "VS::Menu::Score::DrawLiveGradientPanel": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
+    "VS::Menu::Score::DrawLiveFooterBackground": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
+    "VS::Menu::Score::RenderLiveOverview": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
+    "VS::Menu::Score::DrawLiveViewerEdgeFade": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
     "VS::Menu::manual::LiveUploadSpriteTiles": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveUploadCluts": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
@@ -3262,6 +3269,13 @@ OWNED_CALL_BINDINGS["F02801"] = "VS::Menu::Score::LiveSelectedTopMenuRow"
 OWNED_CALL_BINDINGS["F02806"] = "VS::Menu::Score::UpdateLiveTopMenu"
 OWNED_CALL_BINDINGS["F04154"] = "VS::Menu::Score::ClearLiveMenuExceptRow8"
 OWNED_CALL_BINDINGS["F04155"] = "VS::Menu::Score::PollLiveMenuReady"
+OWNED_CALL_BINDINGS["F02804"] = "VS::Menu::Score::RestoreLiveCamera"
+OWNED_CALL_BINDINGS["F02807"] = "VS::Menu::Score::BuildLiveViewerCamera"
+OWNED_CALL_BINDINGS["F02810"] = "VS::Menu::Score::DrawLiveEnemyBanner"
+OWNED_CALL_BINDINGS["F02811"] = "VS::Menu::Score::DrawLiveGradientPanel"
+OWNED_CALL_BINDINGS["F02812"] = "VS::Menu::Score::DrawLiveFooterBackground"
+OWNED_CALL_BINDINGS["F02813"] = "VS::Menu::Score::RenderLiveOverview"
+OWNED_CALL_BINDINGS["F02821"] = "VS::Menu::Score::DrawLiveViewerEdgeFade"
 OWNED_CALL_BINDINGS["F02992"] = "VS::Menu::manual::LiveUploadSpriteTiles"
 OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
 OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
@@ -5235,6 +5249,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU9.PRG", 0x80104BD0, "VS::Menu::Score::UpdateLiveTopMenu"),  # F02806
     ("MENU/MENU9.PRG", 0x80102FB8, "VS::Menu::Score::ClearLiveMenuExceptRow8"),  # F04154
     ("MENU/MENU9.PRG", 0x80102FD8, "VS::Menu::Score::PollLiveMenuReady"),  # F04155
+    ("MENU/MENU9.PRG", 0x80104AF8, "VS::Menu::Score::RestoreLiveCamera"),  # F02804
+    ("MENU/MENU9.PRG", 0x80104CBC, "VS::Menu::Score::BuildLiveViewerCamera"),  # F02807
+    ("MENU/MENU9.PRG", 0x80104F74, "VS::Menu::Score::DrawLiveEnemyBanner"),  # F02810
+    ("MENU/MENU9.PRG", 0x801051AC, "VS::Menu::Score::DrawLiveGradientPanel"),  # F02811
+    ("MENU/MENU9.PRG", 0x8010539C, "VS::Menu::Score::DrawLiveFooterBackground"),  # F02812
+    ("MENU/MENU9.PRG", 0x8010552C, "VS::Menu::Score::RenderLiveOverview"),  # F02813
+    ("MENU/MENU9.PRG", 0x80106528, "VS::Menu::Score::DrawLiveViewerEdgeFade"),  # F02821
     ("MENU/MENUE.PRG", 0x80103A24, "VS::Menu::manual::LiveUploadSpriteTiles"),  # F02992
     ("MENU/MENUE.PRG", 0x80103AD8, "VS::Menu::manual::LiveUploadCluts"),  # F02993
     ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000
@@ -5342,21 +5363,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                 }""",
          "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
          "without changing nonzero scaling, particle emission or RNG consumption."),
-    ],
-    "F02810": [
-        ("    void** scratch = (void**)Core_ScratchAddr(0);\n\n"
-         "    line = scratch[0];",
-         "    line = Render_frameScratch.primitiveCursor;",
-         "238.c:1552 Score viewer banners borrow the typed native packet cursor"),
-        ("AddPrim(*((void**)Core_ScratchAddr(1)) + 0x1C, line++);",
-         "AddPrim(Render_frameScratch.orderingTable + 0x1C, line++);",
-         "PS1 scratch word1 must not read a native pointer at byte4"),
-        ("    scratch = (void**)Core_ScratchAddr(0);\n\n"
-         "    AddPrim(scratch[1] + 0x1C, poly++);\n\n"
-         "    scratch[0] = (void*)poly;",
-         "    AddPrim(Render_frameScratch.orderingTable + 0x1C, poly++);\n\n"
-         "    Render_frameScratch.primitiveCursor = poly;",
-         "Publish viewer banner and shadow packets through native frame fields"),
     ],
     "F02816": [
         ("char digits[2];", 'char digits[sizeof "00"];',
@@ -7813,15 +7819,6 @@ REGEX_FIXES += [
         ("Menu::Score::Update",
          (('temp_v1_10', 'reselected_enemy_camera_distance'), ('temp_v1_4', 'initial_enemy_camera_distance'), ('var_s0', 'gazette_row_cursor')),
          "F02803 src\\MENU\\MENU9.PRG\\238.c:548-1397 (_menuInput). Named roles: reselected enemy camera distance, initial enemy camera distance, gazette row cursor."),
-        ("Menu::Score::DrawEnemyBanner",
-         (('var_s7', 'scanline_width'),),
-         "F02810 src\\MENU\\MENU9.PRG\\238.c:1552-1589 (_renderEnemyInfoBg). Named roles: scanline width."),
-        ("Menu::Score::DrawGradientPanel",
-         (('a2', 'bottom_y'), ('a3', 'right_x')),
-         "F02811 src\\MENU\\MENU9.PRG\\238.c:1594-1639 (_renderGradientQuad). Named roles: bottom y, right x."),
-        ("Menu::Score::RenderOverview",
-         (('sp18', 'saved_projection_offset'), ('sp20', 'overview_projection_offset'), ('sp28', 'score_text'), ('spA8', 'viewer_camera_matrix')),
-         "F02813 src\\MENU\\MENU9.PRG\\238.c:1679-1717 (_renderTopMenu). Named roles: saved projection offset, overview projection offset, score text, viewer camera matrix."),
         ("Menu::Score::CreateTitleRows",
          (('new_var', 'title_flag_bit'),),
          "F02814 src\\MENU\\MENU9.PRG\\238.c:1722-1747 (_setTitleRows). Named roles: title flag bit."),

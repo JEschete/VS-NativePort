@@ -12,6 +12,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
+#include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 
 extern "C" {
@@ -355,7 +356,7 @@ TEST_CASE("Score viewer banners use the native main ordering pointer",
   ClockFixture fixture;
   const auto* first =
       static_cast<const LINE_G2*>(Render_frameScratch.primitiveCursor);
-  Menu_Score_DrawEnemyBanner(8, 18, 96, 12, 3);
+  VS::Menu::Score::DrawLiveEnemyBanner(8, 18, 96, 12, 3);
   const size_t bytes =
       11 * sizeof(LINE_G2) + sizeof(POLY_F4) + 3 * sizeof(u_long);
   CHECK(Render_frameScratch.primitiveCursor ==

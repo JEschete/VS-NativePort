@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -400,7 +401,7 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
     void** scratch;
 
     if (animState < 8) {
-        Menu_Score_DrawViewerEdgeFade();
+        VS::Menu::Score::DrawLiveViewerEdgeFade();
     }
 
     if (state != 3) {
@@ -416,7 +417,7 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
         viewer_projection_offset.y = 0x68;
 
         VS::Render::SetLiveProjectionScreenOffset(viewer_projection_offset);
-        Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
+        VS::Menu::Score::BuildLiveViewerCamera(&viewer_camera_matrix);
         VS::Menu::Framework::DrawLiveActorPreview(&viewer_camera_matrix);
         VS::Render::SetLiveProjectionScreenOffset(saved_projection_offset);
     }
@@ -444,18 +445,18 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
 
         control_banner_x = controls_slide_x - 112;
 
-        Menu_Score_DrawEnemyBanner(control_banner_x, 18, 96, 12, 3);
+        VS::Menu::Score::DrawLiveEnemyBanner(control_banner_x, 18, 96, 12, 3);
         VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, (u_long *)(((u_char*)(scratch[1])) + 24));
         VS::Render::DrawLiveCompactTextColor(
             "ZOOM", control_label_x | (36 << 16), Menu_Score_zoomColor, (u_long *)(((u_char*)(scratch[1])) + 24));
-        Menu_Score_DrawEnemyBanner(control_banner_x, 36, 78, 12, 3);
+        VS::Menu::Score::DrawLiveEnemyBanner(control_banner_x, 36, 78, 12, 3);
         sprintf(enemy_number_text, "NO.   %03d/%03d", Menu_Score_selectedEnemy + 1, 78);
         VS::Render::DrawLiveCompactTextColor(
             enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, (u_long *)(((u_char*)(scratch[1])) + 0x1C));
-        Menu_Score_DrawGradientPanel(controls_slide_x - 128, 160, 100, 12, 2);
+        VS::Menu::Score::DrawLiveGradientPanel(controls_slide_x - 128, 160, 100, 12, 2);
         VS::Render::DrawLiveCompactTextColor(enemyClassName[Menu_Score_monBinData[Menu_Score_selectedEnemy].classId],
             ((name_panel_slide_x + 188) & 0xFFFF) | 0x9B0000, 0x808080, NULL);
-        Menu_Score_DrawGradientPanel(name_panel_slide_x + 180, 155, 140, 26, 1);
+        VS::Menu::Score::DrawLiveGradientPanel(name_panel_slide_x + 180, 155, 140, 26, 1);
     }
 }
 

@@ -139,6 +139,7 @@
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
+#include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
@@ -2283,6 +2284,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU9.PRG", 0x80104BD0u, 0u, (void*)&VS::Menu::Score::UpdateLiveTopMenu, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80102FB8u, 0u, (void*)&VS::Menu::Score::ClearLiveMenuExceptRow8, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80102FD8u, 0u, (void*)&VS::Menu::Score::PollLiveMenuReady, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80104AF8u, 0u, (void*)&VS::Menu::Score::RestoreLiveCamera, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80104CBCu, 0u, (void*)&VS::Menu::Score::BuildLiveViewerCamera, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80104F74u, 0u, (void*)&VS::Menu::Score::DrawLiveEnemyBanner, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x801051ACu, 0u, (void*)&VS::Menu::Score::DrawLiveGradientPanel, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x8010539Cu, 0u, (void*)&VS::Menu::Score::DrawLiveFooterBackground, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x8010552Cu, 0u, (void*)&VS::Menu::Score::RenderLiveOverview, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80106528u, 0u, (void*)&VS::Menu::Score::DrawLiveViewerEdgeFade, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103A24u, 0u, (void*)&VS::Menu::manual::LiveUploadSpriteTiles, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103AD8u, 0u, (void*)&VS::Menu::manual::LiveUploadCluts, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103E6Cu, 0u, (void*)&VS::Menu::manual::LiveDrawIllustration, 0u, 0u, 0u},

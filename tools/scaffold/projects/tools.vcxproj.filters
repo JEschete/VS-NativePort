@@ -3213,6 +3213,33 @@
     <None Include="..\..\port\differentials\gameclear_score_f03031.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\gazette_camera_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_f02804.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_f02807.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_f02810.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_f02811.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_f02812.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_f02813.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\gazette_camera_f02821.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\gazette_rows_common.py">
       <Filter>tools\port\differentials</Filter>
     </None>
