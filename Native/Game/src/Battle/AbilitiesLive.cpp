@@ -13,6 +13,7 @@
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/ActionPreviewLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
@@ -227,12 +228,14 @@ class LiveAbilityHost final : public battle::AbilityHost {
     VS::Battle::ResolveLiveActionTargets(action_id, &Queued(),
                                          &state_->selection, 1);
   }
-  void QueueChainCount(int count) override { Battle_QueueChainCount(count); }
+  void QueueChainCount(int count) override {
+    battle::LiveQueueChainCount(count);
+  }
   void ShowAbilityTimingCue(int frames) override {
     Battle_ShowAbilityTimingCue(frames);
   }
   void QueueAbilityTimingResult(int result) override {
-    Battle_QueueAbilityTimingResult(result);
+    battle::LiveQueueAbilityTimingResult(result);
   }
   void ClearAbilityInputResult() override { Battle_abilityInputResult = 0; }
   [[nodiscard]] std::uint32_t PressedButtons() const override {

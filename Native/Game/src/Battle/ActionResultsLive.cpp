@@ -13,6 +13,7 @@
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActorVitalsLive.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
@@ -161,7 +162,7 @@ class LiveActorActionResultWorld final : public ActorActionResultWorld {
                                    label);
   }
   void StatusLabel(int slot, std::uint32_t mask, bool removing) override {
-    Battle_QueueActorStatusLabels(slot, 0, std::bit_cast<int>(mask), removing);
+    LiveQueueActorStatusLabels(slot, 0, std::bit_cast<int>(mask), removing);
   }
   void RemoveStatuses(ActorVitalsAccess& stats, std::uint32_t mask) override {
     auto& owner = static_cast<LiveActorVitalsAccess&>(stats).Owner();

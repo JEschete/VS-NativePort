@@ -801,6 +801,12 @@
     <ClInclude Include="src\Battle\Feedback.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\FloatingLabelProducers.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Battle\FloatingLabelProducersLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\FloatingLabelQueue.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3358,6 +3364,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Enemy.h">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\FloatingLabelProducers.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\FloatingLabelProducersLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\FloatingLabelQueue.hpp">

@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
@@ -376,7 +377,7 @@ class LiveEquipStatusHost final : public EquipStatusHost {
   }
   void QueueStatusLabels(std::int32_t statuses) override {
     CommitOnce();
-    Battle_QueueActorStatusLabels(ashley_.actorId, 0, statuses, 1);
+    VS::Battle::LiveQueueActorStatusLabels(ashley_.actorId, 0, statuses, 1);
   }
   void RemoveStatuses(std::int32_t statuses) override {
     CommitOnce();

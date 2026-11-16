@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycle.hpp"
 #include "Core/RandomLive.hpp"
@@ -144,13 +145,13 @@ class LiveStatusWorld final : public StatusLifecycleWorld {
   }
   void ValueLabel(StatusLifecycleState& state, std::uint32_t amount) override {
     Call(state,
-         [&] { Battle_QueueActorValueLabel(stats_.actorId, 0, amount, 0); });
+         [&] { LiveQueueActorValueLabel(stats_.actorId, 0, amount, 0); });
   }
   void StatusLabels(StatusLifecycleState& state,
                     std::uint32_t statuses) override {
     Call(state, [&] {
-      Battle_QueueActorStatusLabels(stats_.actorId, 0,
-                                    std::bit_cast<int>(statuses), 1);
+      LiveQueueActorStatusLabels(stats_.actorId, 0,
+                                 std::bit_cast<int>(statuses), 1);
     });
   }
   void RebuildWeapon(StatusLifecycleState& state) override {

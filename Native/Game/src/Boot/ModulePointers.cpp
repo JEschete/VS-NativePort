@@ -43,6 +43,7 @@
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/DamageRecoveryEffectsLive.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Battle/HitCalculationsLive.hpp"
@@ -338,11 +339,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C18u, 4u, (void*)&Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x80093B68u, 0u, (void*)&Battle_QueueActorValueLabel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80093E64u, 0u, (void*)&Battle_QueueAbilityTimingResult, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80093F24u, 0u, (void*)&Battle_QueueChainCount, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80093FECu, 0u, (void*)&Battle_QueueActorStatusLabels, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009406Cu, 0u, (void*)&Battle_QueueActorStatusLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800941FCu, 0u, (void*)&Battle_UpdateAndDrawFloatingLabels, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80094844u, 0u, (void*)&Battle_PlaceActorValueLabel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80094B0Cu, 0u, (void*)&Battle_DrawActorValueLabel, 0u, 0u, 0u},
@@ -1664,6 +1660,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C1DC4u, 0u, (void*)&VS::Battle::DrawSphereTargetLabelEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C20B4u, 0u, (void*)&VS::Battle::UpdateSphereTargetLabelsEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4650u, 0u, (void*)&VS::Battle::UpdateSphereTargetHighlightsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80093B68u, 0u, (void*)&VS::Battle::LiveQueueActorValueLabel, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80093E64u, 0u, (void*)&VS::Battle::LiveQueueAbilityTimingResult, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80093F24u, 0u, (void*)&VS::Battle::LiveQueueChainCount, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80093FECu, 0u, (void*)&VS::Battle::LiveQueueActorStatusLabels, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009406Cu, 0u, (void*)&VS::Battle::LiveQueueActorStatusLabel, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

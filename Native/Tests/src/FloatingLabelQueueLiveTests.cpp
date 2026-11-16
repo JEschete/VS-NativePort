@@ -5,6 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "TestSupport/FloatingLabelQueueLiveFixture.hpp"
 
@@ -147,8 +148,8 @@ TEST_CASE(
     "Production timing-result replacement uses reserve removal and commit",
     "[floating-label-queue-live][F00734][F00736]") {
   f::State state;
-  CHECK(Battle_QueueAbilityTimingResult(12) == 0);
-  CHECK(Battle_QueueAbilityTimingResult(34) == 0);
+  CHECK(b::LiveQueueAbilityTimingResult(12) == 0);
+  CHECK(b::LiveQueueAbilityTimingResult(34) == 0);
   CHECK(Battle_floatingLabelCount == 1);
   CHECK(state.labels[0][0].key.halfword == 4);
   CHECK(state.labels[0][0].value == 34);
@@ -157,12 +158,12 @@ TEST_CASE(
 TEST_CASE("Production zero-chain removal precedes its early return",
           "[floating-label-queue-live][F00734][F00736]") {
   f::State state;
-  CHECK(Battle_QueueChainCount(1001) == 0);
+  CHECK(b::LiveQueueChainCount(1001) == 0);
   CHECK(state.labels[0][0].value == 999);
-  CHECK(Battle_QueueChainCount(0) == 0);
+  CHECK(b::LiveQueueChainCount(0) == 0);
   CHECK(Battle_floatingLabelCount == 0);
   CHECK(f::Words(state.labels[0][0]) == f::LabelWords{});
-  CHECK(Battle_QueueChainCount(0) == 0);
+  CHECK(b::LiveQueueChainCount(0) == 0);
   CHECK(Battle_floatingLabelCount == 0);
 }
 
@@ -225,12 +226,12 @@ TEST_CASE("Full actor projection early returns do not publish or undo reserve",
   Battle_floatingLabelCount = 32;
   inputs.actor.instance.reactionState = 1;
   const auto before = f::Snapshot(state);
-  CHECK(Battle_QueueActorStatusLabel(1, 251, 3, 128) == 0);
+  CHECK(b::LiveQueueActorStatusLabel(1, 251, 3, 128) == 0);
   const auto after = f::Snapshot(state);
   CHECK(Battle_floatingLabelCount == 32);
   CHECK(std::equal(after.begin(), after.end() - 1, before.begin() + 1));
   CHECK(after.back() == f::LabelWords{});
-  CHECK(Battle_QueueActorValueLabel(1, -1, 123, 128) == 0);
+  CHECK(b::LiveQueueActorValueLabel(1, -1, 123, 128) == 0);
   CHECK(Battle_floatingLabelCount == 32);
   CHECK(state.labels[0][31].key.bytes[0] == 0);
 }

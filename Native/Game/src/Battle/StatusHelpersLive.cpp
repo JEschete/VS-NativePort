@@ -10,6 +10,7 @@
 #include <optional>
 #include <type_traits>
 
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusHelpers.hpp"
 #include "Items/ItemRecordsLive.hpp"
 extern "C" {
@@ -52,8 +53,8 @@ class LiveStatNumberWorld final : public StatNumberWorld {
     return Battle_actors[slot]->roomSpawnIndex;
   }
   void QueueValueLabel(const StatNumberRequest& request) override {
-    Battle_QueueActorValueLabel(request.actor_slot, request.limb_tag,
-                                request.encoded_amount, request.label_flags);
+    LiveQueueActorValueLabel(request.actor_slot, request.limb_tag,
+                             request.encoded_amount, request.label_flags);
   }
 };
 

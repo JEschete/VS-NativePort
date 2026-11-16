@@ -658,6 +658,13 @@
     <None Include="..\..\port\differentials\floating_label_chain.py" />
     <None Include="..\..\port\differentials\floating_label_cue.py" />
     <None Include="..\..\port\differentials\floating_label_locked.py" />
+    <None Include="..\..\port\differentials\floating_label_producers_common.py" />
+    <None Include="..\..\port\differentials\floating_label_producers_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_label_producers_f00714.py" />
+    <None Include="..\..\port\differentials\floating_label_producers_f00715.py" />
+    <None Include="..\..\port\differentials\floating_label_producers_f00716.py" />
+    <None Include="..\..\port\differentials\floating_label_producers_f00717.py" />
+    <None Include="..\..\port\differentials\floating_label_producers_f00718.py" />
     <None Include="..\..\port\differentials\floating_label_queue_advance.py" />
     <None Include="..\..\port\differentials\floating_label_queue_compact.py" />
     <None Include="..\..\port\differentials\floating_label_queue_driver.cpp" />

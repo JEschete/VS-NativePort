@@ -27,7 +27,7 @@ constexpr int kNoFollowUp = 0;
 constexpr int kChainFollowUp = 1;
 constexpr int kDefenseFollowUp = 2;
 
-// Ability timing results (Battle_QueueAbilityTimingResult).
+// Ability timing results (QueueAbilityTimingResult, FloatingLabelProducers).
 constexpr int kTimingEarly = 0;
 constexpr int kTimingNearlyEarly = 1;
 constexpr int kTimingHit = 2;

@@ -10,6 +10,7 @@
 #include <string_view>
 #include <utility>
 
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Log.hpp"
 #include "TestSupport/FloatingLabelQueueLiveFixture.hpp"
@@ -152,7 +153,7 @@ bool OtherProbe(std::string_view selected, f::State& state) {
              state.labels[0][31].value == 99 &&
              state.labels[0][0].key.bytes[1] == 1;
     };
-    static_cast<void>(Battle_QueueChainCount(99));
+    static_cast<void>(b::LiveQueueChainCount(99));
     return expected_state();
   }
   if (selected == "producer-overcount" || selected == "consumer-overcount" ||
@@ -167,7 +168,7 @@ bool OtherProbe(std::string_view selected, f::State& state) {
              state.canary.key.bytes[0] == 7;
     };
     if (selected == "producer-overcount") {
-      static_cast<void>(Battle_QueueChainCount(99));
+      static_cast<void>(b::LiveQueueChainCount(99));
     } else if (selected == "consumer-overcount") {
       Battle_CommitEquipmentStatChanges();
     } else {
@@ -204,7 +205,7 @@ bool RandomCallbackProbe(std::string_view selected, f::State& state) {
       static_cast<void>(b::QueueLiveWorldLockedLabel(first));
       static_cast<void>(b::QueueLiveWorldLockedLabel(second));
     };
-    const int result = Battle_QueueAbilityTimingResult(99);
+    const int result = b::LiveQueueAbilityTimingResult(99);
     return result == 0 && Battle_floatingLabelCount == 2 &&
            state.labels[0][0].key.bytes[0] == 3 &&
            state.labels[0][0].value == 99 &&
@@ -219,7 +220,7 @@ bool RandomCallbackProbe(std::string_view selected, f::State& state) {
              state.labels[0][31].value == 0;
     };
     during_random = [] { b::ResetLiveFloatingLabels(); };
-    static_cast<void>(Battle_QueueAbilityTimingResult(99));
+    static_cast<void>(b::LiveQueueAbilityTimingResult(99));
     return false;
   }
   Battle_FloatingLabel rebound[1][32]{};
@@ -231,7 +232,7 @@ bool RandomCallbackProbe(std::string_view selected, f::State& state) {
     Battle_floatingLabels = rebound;
     Battle_floatingLabelCount = 0;
   };
-  static_cast<void>(Battle_QueueAbilityTimingResult(99));
+  static_cast<void>(b::LiveQueueAbilityTimingResult(99));
   return false;
 }
 

@@ -1067,6 +1067,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawSphereTargetLabelEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
     "VS::Battle::UpdateSphereTargetLabelsEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
     "VS::Battle::UpdateSphereTargetHighlightsEntry": r"Native\Game\include\Battle\SphereTargetLabelsLive.hpp",
+    "VS::Battle::LiveQueueActorValueLabel": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
+    "VS::Battle::LiveQueueAbilityTimingResult": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
+    "VS::Battle::LiveQueueChainCount": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
+    "VS::Battle::LiveQueueActorStatusLabels": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
+    "VS::Battle::LiveQueueActorStatusLabel": r"Native\Game\include\Battle\FloatingLabelProducersLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -2064,6 +2069,11 @@ OWNED_CALL_BINDINGS["F01300"] = "VS::Battle::AreTargetLabelsSettledEntry"
 OWNED_CALL_BINDINGS["F01301"] = "VS::Battle::DrawSphereTargetLabelEntry"
 OWNED_CALL_BINDINGS["F01302"] = "VS::Battle::UpdateSphereTargetLabelsEntry"
 OWNED_CALL_BINDINGS["F01310"] = "VS::Battle::UpdateSphereTargetHighlightsEntry"
+OWNED_CALL_BINDINGS["F00714"] = "VS::Battle::LiveQueueActorValueLabel"
+OWNED_CALL_BINDINGS["F00715"] = "VS::Battle::LiveQueueAbilityTimingResult"
+OWNED_CALL_BINDINGS["F00716"] = "VS::Battle::LiveQueueChainCount"
+OWNED_CALL_BINDINGS["F00717"] = "VS::Battle::LiveQueueActorStatusLabels"
+OWNED_CALL_BINDINGS["F00718"] = "VS::Battle::LiveQueueActorStatusLabel"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -4257,6 +4267,11 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800C1DC4, "VS::Battle::DrawSphereTargetLabelEntry"),  # F01301
     ("BATTLE/BATTLE.PRG", 0x800C20B4, "VS::Battle::UpdateSphereTargetLabelsEntry"),  # F01302
     ("BATTLE/BATTLE.PRG", 0x800C4650, "VS::Battle::UpdateSphereTargetHighlightsEntry"),  # F01310
+    ("BATTLE/BATTLE.PRG", 0x80093B68, "VS::Battle::LiveQueueActorValueLabel"),  # F00714
+    ("BATTLE/BATTLE.PRG", 0x80093E64, "VS::Battle::LiveQueueAbilityTimingResult"),  # F00715
+    ("BATTLE/BATTLE.PRG", 0x80093F24, "VS::Battle::LiveQueueChainCount"),  # F00716
+    ("BATTLE/BATTLE.PRG", 0x80093FEC, "VS::Battle::LiveQueueActorStatusLabels"),  # F00717
+    ("BATTLE/BATTLE.PRG", 0x8009406C, "VS::Battle::LiveQueueActorStatusLabel"),  # F00718
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -6397,10 +6412,6 @@ NATIVE_HELPER_HEADERS |= {
     "VS::Battle::LiveFloatingLabelCount": r"Native\Game\include\Battle\FloatingLabelQueueLive.hpp",
 }
 for _fid, _pointer in {
-    "F00714": "p",
-    "F00715": "p",
-    "F00716": "q",
-    "F00718": "p",
     "F00738": "p",
 }.items():
     FIXES.setdefault(_fid, []).append((
@@ -6408,7 +6419,7 @@ for _fid, _pointer in {
         f"VS::Battle::CommitLiveFloatingLabel({_pointer});",
         "#365: publish the reserved slot at the original final increment point",
     ))
-for _fid in ("F00714", "F00715", "F00716", "F00718", "F00719", "F00738", "F00742"):
+for _fid in ("F00719", "F00738", "F00742"):
     FIXES.setdefault(_fid, []).append((
         " < Battle_floatingLabelCount;",
         " < VS::Battle::LiveFloatingLabelCount();",
@@ -8271,21 +8282,6 @@ REGEX_FIXES += [
         ("Battle::QueueWorldLockedLabel",
          (('arg0', 'world_position'), ('temp_v0', 'label_spec')),
          "F00713 F00713 Battle::QueueWorldLockedLabel: original func_80093B04 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1475 (function lines 1475-1487). arg0 -> world_position (world position). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1475-1484. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:135-144. temp_v0 -> label_spec (label spec). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1477-1484. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:137-144. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
-        ("Battle::QueueActorValueLabel",
-         (('arg0', 'actor_slot'), ('arg1', 'limb_tag'), ('arg2', 'encoded_amount'), ('arg3', 'label_flags')),
-         "F00714 F00714 Battle::QueueActorValueLabel: original func_80093B68 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1544 (function lines 1544-1641). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1544-1626. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:150-232. arg1 -> limb_tag (limb tag). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1544-1557. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:150-163. arg2 -> encoded_amount (encoded amount). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1544-1634. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:150-240. arg3 -> label_flags (label flags). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1544-1628. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:150-234. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
-        ("Battle::QueueAbilityTimingResult",
-         (('arg0', 'timing_result'),),
-         "F00715 F00715 Battle::QueueAbilityTimingResult: original vs_battle_renderBattleAbilityTimingResult at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1643 (function lines 1643-1664). arg0 -> timing_result (timing result). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1643-1660. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:250-267. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
-        ("Battle::QueueChainCount",
-         (('arg0', 'chain_count'),),
-         "F00716 F00716 Battle::QueueChainCount: original func_80093F24 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1666 (function lines 1666-1693). arg0 -> chain_count (chain count). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1666-1687. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:274-295. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
-        ("Battle::QueueActorStatusLabels",
-         (('arg0', 'actor_slot'), ('arg2', 'status_mask'), ('arg3', 'label_flags'), ('var_s1', 'status_bit')),
-         "F00717 F00717 Battle::QueueActorStatusLabels: original func_80093FEC at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1695 (function lines 1695-1706). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1695-1702. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:304-311. arg1 intentionally retained: Original func_80093FEC formal never used; each emitted status label hard-codes bone tag 0xFB instead. Keep ignored slot, not a purported active limb selector. Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1695. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:304. arg2 -> status_mask (status mask). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1695-1701. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:304-310. arg3 -> label_flags (label flags). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1695-1702. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:304-311. var_s1 -> status_bit (status bit). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1698-1701. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:307-310. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
-        ("Battle::QueueActorStatusLabel",
-         (('arg0', 'actor_slot'), ('arg1', 'bone_tag'), ('arg2', 'status_index'), ('arg3', 'label_flags'), ('sp10', 'screen_position')),
-         "F00718 F00718 Battle::QueueActorStatusLabel: original func_8009406C at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1708 (function lines 1708-1755). arg0 -> actor_slot (actor slot). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1708-1749. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:318-359. arg1 -> bone_tag (bone tag). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1708-1750. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:318-360. arg2 -> status_index (status index). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1708-1752. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:318-362. arg3 -> label_flags (label flags). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1708-1751. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:318-361. sp10 -> screen_position (screen position). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:1710-1735. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:320-345. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),
         ("Battle::AdvanceFloatingLabelQueue",
          (('arg0', 'label'),),
          "F00721 F00721 Battle::AdvanceFloatingLabelQueue: original func_80094AF8 at resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2067 (function lines 2067-2071). arg0 -> label (label). Original references: resources\\rood-reverseWin\\src\\BATTLE\\BATTLE.PRG\\2842C.c:2067-2070. Native references: Native\\Game\\src\\Battle\\Feedback.cpp:680-683. Review context: Original/native candidate statements individually reviewed: actual label key, bone tag, queue count, packed amount/flags, sprite XY/UV/brightness, HUD restriction result and timer component consumers establish these names."),

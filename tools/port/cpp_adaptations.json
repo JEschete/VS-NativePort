@@ -1,18 +1,7 @@
 {
 "Native\\Game\\src\\Battle\\Feedback.cpp": [
 [
-213,
-[
-"    sprintf(p->text, \"%d\", p->value & 0x7FFF);",
-"    p->textLength = strlen(p->text);"
-],
-[
-"    sprintf((char*)p->text, \"%d\", p->value & 0x7FFF);",
-"    p->textLength = strlen((const char *)(p->text));"
-]
-],
-[
-689,
+471,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -21,7 +10,7 @@
 ]
 ],
 [
-709,
+491,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -30,7 +19,7 @@
 ]
 ],
 [
-775,
+557,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -39,7 +28,7 @@
 ]
 ],
 [
-809,
+591,
 [
 "            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
 ],
@@ -48,7 +37,7 @@
 ]
 ],
 [
-926,
+708,
 [
 "        prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -57,7 +46,7 @@
 ]
 ],
 [
-970,
+752,
 [
 "            ot = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable;"
 ],
@@ -66,7 +55,7 @@
 ]
 ],
 [
-1040,
+822,
 [
 "    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -75,7 +64,7 @@
 ]
 ],
 [
-1059,
+841,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 16, prim++);"
 ],
@@ -84,7 +73,7 @@
 ]
 ],
 [
-1127,
+909,
 [
 "        sprintf(p->text, \"%d\", p->value & 0x7FFF);",
 "        p->textLength = strlen(p->text);"
@@ -95,7 +84,7 @@
 ]
 ],
 [
-1142,
+924,
 [
 "    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -104,7 +93,7 @@
 ]
 ],
 [
-1159,
+941,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -113,7 +102,7 @@
 ]
 ],
 [
-1173,
+955,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -122,7 +111,7 @@
 ]
 ],
 [
-1183,
+965,
 [
 "    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],
@@ -131,7 +120,7 @@
 ]
 ],
 [
-1203,
+985,
 [
 "        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
 ],

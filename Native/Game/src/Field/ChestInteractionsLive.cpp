@@ -19,6 +19,7 @@
 #include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -272,7 +273,8 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
     const auto* record = TileTriggerActor(static_cast<std::size_t>(actor));
     if (record == nullptr || record->stats == nullptr) return;
     constexpr std::uint32_t kFallValueLabel = 0x80000014;
-    Battle_QueueActorValueLabel(record->stats->actorId, 0, kFallValueLabel, 0);
+    VS::Battle::LiveQueueActorValueLabel(record->stats->actorId, 0,
+                                         kFallValueLabel, 0);
   }
   void SetHp(std::int32_t actor, std::int16_t hp) override {
     auto* record = TileTriggerActor(static_cast<std::size_t>(actor));

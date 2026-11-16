@@ -9,6 +9,7 @@
 #include <span>
 
 #include "Actors/SkeletonLiveState.h"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 
 extern "C" {
@@ -125,14 +126,14 @@ class Producers {
         return Battle::QueueLiveWorldLockedLabel(position);
       }
       case 1:
-        return Battle_QueueActorValueLabel(kActor, -1,
-                                           static_cast<unsigned>(value), 0);
+        return Battle::LiveQueueActorValueLabel(
+            kActor, -1, static_cast<unsigned>(value), 0);
       case 2:
-        return Battle_QueueAbilityTimingResult(value);
+        return Battle::LiveQueueAbilityTimingResult(value);
       case 3:
-        return Battle_QueueChainCount(value);
+        return Battle::LiveQueueChainCount(value);
       case 4:
-        return Battle_QueueActorStatusLabel(kActor, 251, value % 29, 0);
+        return Battle::LiveQueueActorStatusLabel(kActor, 251, value % 29, 0);
       case 5:
         return Battle_QueueEquipmentStatChange(240, 0, value);
       default:

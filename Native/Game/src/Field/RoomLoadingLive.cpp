@@ -25,6 +25,7 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Encounter.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
@@ -1105,8 +1106,8 @@ class LiveRoomLoadHost final
       return;
     }
     Battle_ActorStats* stats = Battle_characterState->stats;
-    static_cast<void>(
-        Battle_QueueActorStatusLabels(0, 0, stats->statuses & statuses, 1));
+    static_cast<void>(VS::Battle::LiveQueueActorStatusLabels(
+        0, 0, stats->statuses & statuses, 1));
     VS::Battle::RemoveLiveActorStatuses(statuses, stats);
   }
 
