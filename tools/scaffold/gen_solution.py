@@ -405,6 +405,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\ActorMarkersLive.cpp",
                 r"src\Battle\FloatingLabelQueueLive.cpp",
                 r"src\Battle\FloatingLabelProducersLive.cpp",
+                r"src\Battle\FloatingLabelPlacementLive.cpp",
                 r"src\Battle\SphereContainmentLive.cpp",
                 r"src\Battle\FloatingLabelRenderingLive.cpp",
                 r"src\Battle\SphereLifecycleLive.cpp",

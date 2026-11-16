@@ -9,6 +9,7 @@
 #include <span>
 
 #include "Actors/SkeletonLiveState.h"
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 
@@ -135,7 +136,7 @@ class Producers {
       case 4:
         return Battle::LiveQueueActorStatusLabel(kActor, 251, value % 29, 0);
       case 5:
-        return Battle_QueueEquipmentStatChange(240, 0, value);
+        return Battle::LiveQueueEquipmentStatChange(240, 0, value);
       default:
         return -1;
     }

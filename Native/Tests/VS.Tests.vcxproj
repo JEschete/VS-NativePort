@@ -244,6 +244,8 @@
     <ClCompile Include="src\FileMenuTests.cpp" />
     <ClCompile Include="src\FilesTests.cpp" />
     <ClCompile Include="src\FlightTerrainTests.cpp" />
+    <ClCompile Include="src\FloatingLabelPlacementLiveTests.cpp" />
+    <ClCompile Include="src\FloatingLabelPlacementTests.cpp" />
     <ClCompile Include="src\FloatingLabelProducersTests.cpp" />
     <ClCompile Include="src\FloatingLabelQueueLiveTests.cpp" />
     <ClCompile Include="src\FloatingLabelQueueModuleTests.cpp" />

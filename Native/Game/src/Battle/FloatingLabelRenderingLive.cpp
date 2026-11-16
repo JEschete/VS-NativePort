@@ -174,14 +174,7 @@ class LiveLabelRenderWorld final : public FloatingLabelRenderWorld {
     return Atlas(std::span(Battle_lockedLabelPieces)[piece]);
   }
   bool DrawQuad(const FloatingLabelQuad& quad) override {
-    Render::UiTexturedQuadPacket storage{};
-    std::ranges::copy(std::span(Primitive(Render::kUiTexturedQuadWords),
-                                Render::kUiTexturedQuadWords),
-                      storage.begin());
-    CheckedLabelQueue queue(kQuadLayer);
-    const auto packet =
-        Render::BuildUiTexturedQuadPacket(quad, storage, queue.ChainLink());
-    return queue.Emit(packet);
+    return DrawLiveFloatingLabelQuad(quad, kQuadLayer);
   }
   bool DrawText(std::string_view text, FloatingLabelScreenPoint origin,
                 std::uint32_t color) override {
@@ -199,6 +192,22 @@ class LiveLabelRenderWorld final : public FloatingLabelRenderWorld {
   }
 };
 }  // namespace
+
+bool DrawLiveFloatingLabelQuad(const FloatingLabelQuad& quad, int layer) {
+  Render::UiTexturedQuadPacket storage{};
+  std::ranges::copy(std::span(Primitive(Render::kUiTexturedQuadWords),
+                              Render::kUiTexturedQuadWords),
+                    storage.begin());
+  CheckedLabelQueue queue(layer);
+  const auto packet =
+      Render::BuildUiTexturedQuadPacket(quad, storage, queue.ChainLink());
+  return queue.Emit(packet);
+}
+
+FloatingLabelRenderWorld& LiveFloatingLabelRenderer() {
+  static LiveLabelRenderWorld world;
+  return world;
+}
 
 // decomp: F00723 func_80094E18 (src/BATTLE/BATTLE.PRG/2842C.c:2138).
 int DrawLiveValueLabelCaption(int x, int y, Battle_FloatingLabel* label) {

@@ -35,12 +35,5 @@ extern struct Battle_StatusLabelLayout const Battle_kStatusLabelLayouts[];
 extern CVECTOR const Battle_kStatusLabelColors[];
 extern RECT const Battle_kStatChangeFirstWordRects[];
 extern RECT const Battle_kStatChangeSecondWordRects[];
-void Battle_UpdateAndDrawFloatingLabels(void);
-void Battle_PlaceActorValueLabel(short* pos, Battle_FloatingLabel* label);
-void Battle_DrawActorValueLabel(int x, int y, Battle_FloatingLabel* p);
-void Battle_DrawActorStatusLabel(int x, int y, Battle_FloatingLabel* p);
-int Battle_QueueEquipmentStatChange(int arg0, int stat_label_kind, int encoded_amount);
-void Battle_DrawEquipmentStatChange(int x, int y, Battle_FloatingLabel* p);
-void Battle_CommitEquipmentStatChanges(void);
 
 #endif // VS_BATTLE_FEEDBACK_H_DECLS

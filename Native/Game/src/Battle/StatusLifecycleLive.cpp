@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycle.hpp"
@@ -140,7 +141,7 @@ class LiveStatusWorld final : public StatusLifecycleWorld {
   void EquipmentLabel(StatusLifecycleState& state, int label, int stat,
                       std::uint32_t amount) override {
     Call(state, [&] {
-      Battle_QueueEquipmentStatChange(label, stat, std::bit_cast<int>(amount));
+      LiveQueueEquipmentStatChange(label, stat, std::bit_cast<int>(amount));
     });
   }
   void ValueLabel(StatusLifecycleState& state, std::uint32_t amount) override {
@@ -182,7 +183,7 @@ class LiveStatusWorld final : public StatusLifecycleWorld {
     });
   }
   void RefreshEquipmentDisplay(StatusLifecycleState& state) override {
-    Call(state, [] { Battle_CommitEquipmentStatChanges(); });
+    Call(state, [] { LiveCommitEquipmentStatChanges(); });
   }
 
  private:

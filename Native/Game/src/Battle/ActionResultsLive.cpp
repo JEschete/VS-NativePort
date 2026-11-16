@@ -13,6 +13,7 @@
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActorVitalsLive.hpp"
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/StatusHelpersLive.hpp"
@@ -147,7 +148,7 @@ ActorActionResult ReadResult(const Battle_HitResult& hit) {
 class LiveActorActionResultWorld final : public ActorActionResultWorld {
  public:
   explicit LiveActorActionResultWorld(Battle_HitResult& hit) : hit_(hit) {}
-  void CommitEquipmentStats() override { Battle_CommitEquipmentStatChanges(); }
+  void CommitEquipmentStats() override { LiveCommitEquipmentStatChanges(); }
   ActorActionResult ReadHit() override { return ReadResult(hit_); }
   ActorVitalsAccess* TargetStats(std::uint8_t slot) override {
     if (slot >= std::size(Battle_actors) || Battle_actors[slot] == nullptr ||

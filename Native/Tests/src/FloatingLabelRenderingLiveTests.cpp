@@ -6,6 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Render/GameFont.hpp"
@@ -200,7 +201,7 @@ TEST_CASE("F00722 dependency draws digits after the promoted F00723 caption",
   label.textLength = 1;
   label.text[0] = kOne;
   const auto before = f::Words(label);
-  Battle_DrawActorValueLabel(kX, kY, &label);
+  b::LiveDrawActorValueLabel(kX, kY, &label);
   const auto packets = frame.Traversal(f::kQuadBucket);
   REQUIRE(packets.size() == kPacketCount);
   CHECK(Command(packets.front()) == kDigitCommand);
@@ -218,7 +219,7 @@ TEST_CASE("F00725 dependency submits removal marker before its status caption",
   label.colorFlags = 1;
   label.frame = kMarkerFrame;
   const auto before = f::Words(label);
-  Battle_DrawActorStatusLabel(kX, kY, &label);
+  b::LiveDrawActorStatusLabel(kX, kY, &label);
   const auto packets = frame.Traversal(f::kQuadBucket);
   REQUIRE(packets.size() == 2);
   CHECK(Command(packets.front()) == kStatusCommand);
@@ -232,7 +233,7 @@ TEST_CASE("F00719 dependency decrements cue timing before the F00741 leaf",
   f::LiveFrame frame;
   Battle_floatingLabelCount = 0;
   Battle_abilityTimingCueFrames = 1;
-  Battle_UpdateAndDrawFloatingLabels();
+  b::LiveUpdateAndDrawFloatingLabels();
   const auto packets = frame.Traversal(f::kQuadBucket);
   REQUIRE(packets.size() == 1);
   CHECK(Battle_abilityTimingCueFrames == 0);

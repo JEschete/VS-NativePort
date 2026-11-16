@@ -463,6 +463,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\FloatingLabelPlacement.cpp" />
+    <ClCompile Include="src\Battle\FloatingLabelPlacementLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\FloatingLabelProducers.cpp" />
     <ClCompile Include="src\Battle\FloatingLabelProducersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2661,6 +2665,8 @@
     <ClInclude Include="include\Battle\DamageRecoveryEffectsLive.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />
     <ClInclude Include="include\Battle\Enemy.h" />
+    <ClInclude Include="include\Battle\FloatingLabelPlacement.hpp" />
+    <ClInclude Include="include\Battle\FloatingLabelPlacementLive.hpp" />
     <ClInclude Include="include\Battle\FloatingLabelProducers.hpp" />
     <ClInclude Include="include\Battle\FloatingLabelProducersLive.hpp" />
     <ClInclude Include="include\Battle\FloatingLabelQueue.hpp" />

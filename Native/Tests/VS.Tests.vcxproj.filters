@@ -573,6 +573,12 @@
     <ClCompile Include="src\FlightTerrainTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FloatingLabelPlacementLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FloatingLabelPlacementTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\FloatingLabelProducersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -5,6 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "TestSupport/FloatingLabelQueueLiveFixture.hpp"
@@ -244,7 +245,7 @@ TEST_CASE("F00734 actual pending consumer touches exactly the full32 prefix",
   for (auto& label : state.Labels()) label.key.bytes[0] = 7;
   state.canary.key.bytes[0] = 7;
   const auto canary = f::Words(state.canary);
-  Battle_CommitEquipmentStatChanges();
+  b::LiveCommitEquipmentStatChanges();
   CHECK(std::ranges::all_of(state.Labels(), [](const auto& label) {
     return label.key.bytes[0] == 6;
   }));
@@ -267,7 +268,7 @@ TEST_CASE("F00734 actual update consumes all32 waiting labels without a33rd",
   Battle_abilityTimingCueFrames = 0;
   Battle_statusLabelStepTimer = 21;
   Field_areRoomUpdatesPaused = 1;
-  Battle_UpdateAndDrawFloatingLabels();
+  b::LiveUpdateAndDrawFloatingLabels();
   CHECK(std::ranges::all_of(state.Labels(), [](const auto& label) {
     return label.position.pad == 1;
   }));

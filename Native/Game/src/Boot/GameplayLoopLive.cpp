@@ -19,6 +19,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
@@ -495,7 +496,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     static_cast<void>(VS::Content::UpdateLiveActorAssetQueue());
     Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
     Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
-    Battle_UpdateAndDrawFloatingLabels();
+    Battle::LiveUpdateAndDrawFloatingLabels();
   }
   void UpdateEffectRuntime() override {
     Effects_effectBusyFlags = VS::Effects::LiveUpdateEffectRuntime();

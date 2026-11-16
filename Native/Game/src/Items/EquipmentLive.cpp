@@ -12,6 +12,7 @@
 #include <span>
 #include <utility>
 
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/EquipmentWear.hpp"
@@ -51,7 +52,7 @@ class LiveGrowthHost final : public EquipmentGrowthHost {
   void QueueStatChange(std::int32_t label, std::int32_t stat,
                        StatChange change) override {
     constexpr auto kLowered = static_cast<std::int32_t>(0x80000001U);
-    Battle_QueueEquipmentStatChange(
+    Battle::LiveQueueEquipmentStatChange(
         label, stat, change == StatChange::kIncrease ? 1 : kLowered);
   }
 

@@ -192,6 +192,28 @@ def stack_or_label(machine: Machine, address: int) -> None:
         raise Fault(f"point output {address:#x} is outside the labels and the stack")
 
 
+def stub_decimal_text(machine: Machine) -> None:
+    """Stubs the SLUS sprintf("%d") into the label table and strlen."""
+
+    def sprintf(m: Machine) -> None:
+        if m.r[5] != DECIMAL_FORMAT or m.bytes(DECIMAL_FORMAT, 3) != b"%d\0":
+            raise Fault("sprintf without the %d format")
+        text = str(s32(m.r[6])).encode() + b"\0"
+        if not (m.r[4] >= LABELS and m.r[4] + len(text) <= LABELS + STRIDE * CAPACITY):
+            raise Fault(f"sprintf destination {m.r[4]:#x} is outside the labels")
+        m.store(m.r[4], text)
+        m.r[2] = len(text) - 1
+
+    def strlen(m: Machine) -> None:
+        length = 0
+        while m.byte(m.r[4] + length):
+            length += 1
+        m.r[2] = length
+
+    machine.stub(SPRINTF, sprintf)
+    machine.stub(STRLEN, strlen)
+
+
 def run(machine: Machine, value: dict, entry: int) -> tuple[dict, list[int]]:
     calls: list[list[int]] = []
     machine.map_zero(LABELS, STRIDE * (CAPACITY + OVERFLOW_RECORDS))
@@ -223,21 +245,6 @@ def run(machine: Machine, value: dict, entry: int) -> tuple[dict, list[int]]:
 
         return handler
 
-    def sprintf(m: Machine) -> None:
-        if m.r[5] != DECIMAL_FORMAT or m.bytes(DECIMAL_FORMAT, 3) != b"%d\0":
-            raise Fault("sprintf without the %d format")
-        text = str(s32(m.r[6])).encode() + b"\0"
-        if not (m.r[4] >= LABELS and m.r[4] + len(text) <= LABELS + STRIDE * CAPACITY):
-            raise Fault(f"sprintf destination {m.r[4]:#x} is outside the labels")
-        m.store(m.r[4], text)
-        m.r[2] = len(text) - 1
-
-    def strlen(m: Machine) -> None:
-        length = 0
-        while m.byte(m.r[4] + length):
-            length += 1
-        m.r[2] = length
-
     def rand(m: Machine) -> None:
         calls.append([RANDOM_CALL, 0, 0, 0])
         m.r[2] = value["random"]
@@ -246,8 +253,7 @@ def run(machine: Machine, value: dict, entry: int) -> tuple[dict, list[int]]:
     machine.stub(BONE_POSITION, point(BONE_CALL))
     machine.stub(TAGGED_POSITION, point(TAGGED_CALL))
     machine.stub(PROJECT, point(PROJECT_CALL))
-    machine.stub(SPRINTF, sprintf)
-    machine.stub(STRLEN, strlen)
+    stub_decimal_text(machine)
     machine.stub(RAND, rand)
     for register, argument in zip((4, 5, 6, 7), value["arguments"], strict=True):
         machine.r[register] = argument & 0xFFFFFFFF

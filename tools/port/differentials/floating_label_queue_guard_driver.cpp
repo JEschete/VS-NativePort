@@ -10,6 +10,7 @@
 #include <string_view>
 #include <utility>
 
+#include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Log.hpp"
@@ -170,9 +171,9 @@ bool OtherProbe(std::string_view selected, f::State& state) {
     if (selected == "producer-overcount") {
       static_cast<void>(b::LiveQueueChainCount(99));
     } else if (selected == "consumer-overcount") {
-      Battle_CommitEquipmentStatChanges();
+      b::LiveCommitEquipmentStatChanges();
     } else {
-      Battle_UpdateAndDrawFloatingLabels();
+      b::LiveUpdateAndDrawFloatingLabels();
     }
   }
   if (selected == "empty-lazy") {

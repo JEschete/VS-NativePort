@@ -720,6 +720,15 @@
     <None Include="..\..\port\differentials\floating_label_rendering_guard_driver.cpp" />
     <None Include="..\..\port\differentials\floating_label_rendering_support.py" />
     <None Include="..\..\port\differentials\floating_label_timing.py" />
+    <None Include="..\..\port\differentials\floating_placement_common.py" />
+    <None Include="..\..\port\differentials\floating_placement_driver.cpp" />
+    <None Include="..\..\port\differentials\floating_placement_f00719.py" />
+    <None Include="..\..\port\differentials\floating_placement_f00720.py" />
+    <None Include="..\..\port\differentials\floating_placement_f00722.py" />
+    <None Include="..\..\port\differentials\floating_placement_f00725.py" />
+    <None Include="..\..\port\differentials\floating_placement_f00738.py" />
+    <None Include="..\..\port\differentials\floating_placement_f00739.py" />
+    <None Include="..\..\port\differentials\floating_placement_f00742.py" />
     <None Include="..\..\port\differentials\gameclear_score_common.py" />
     <None Include="..\..\port\differentials\gameclear_score_driver.cpp" />
     <None Include="..\..\port\differentials\gameclear_score_f03025.py" />

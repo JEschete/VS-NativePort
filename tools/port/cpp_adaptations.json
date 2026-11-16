@@ -1,98 +1,4 @@
 {
-"Native\\Game\\src\\Battle\\Feedback.cpp": [
-[
-467,
-[
-"    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"    prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-487,
-[
-"        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
-],
-[
-"        AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);"
-]
-],
-[
-553,
-[
-"    prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"    prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-587,
-[
-"            AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);"
-],
-[
-"            AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 20, prim++);"
-]
-],
-[
-660,
-[
-"        sprintf(p->text, \"%d\", p->value & 0x7FFF);",
-"        p->textLength = strlen(p->text);"
-],
-[
-"        sprintf((char *)(p->text), \"%d\", p->value & 0x7FFF);",
-"        p->textLength = strlen((const char *)(p->text));"
-]
-],
-[
-675,
-[
-"    POLY_FT4* prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"    POLY_FT4* prim = (POLY_FT4 *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-],
-[
-692,
-[
-"    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
-],
-[
-"    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) + 8, prim++);"
-]
-],
-[
-706,
-[
-"    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
-],
-[
-"    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) + 8, prim++);"
-]
-],
-[
-716,
-[
-"    AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
-],
-[
-"    AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) + 8, prim++);"
-]
-],
-[
-736,
-[
-"        AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 8, prim++);"
-],
-[
-"        AddPrim(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) + 8, prim++);"
-]
-]
-],
 "Native\\Game\\src\\Boot\\OverlayReset.cpp": [
 [
 0,
@@ -110,7 +16,7 @@
 ]
 ],
 [
-36,
+35,
 [
 "    Menu_Inventory_ItemList_ResetMenu3Statics();"
 ],
@@ -120,7 +26,7 @@
 ]
 ],
 [
-43,
+42,
 [
 "    Menu_Status_EquipmentDetails_ResetMenu4Statics();"
 ],
@@ -130,7 +36,7 @@
 ]
 ],
 [
-56,
+55,
 [
 "    Menu_Score_Records_ResetMenu9Statics();"
 ],
@@ -140,7 +46,7 @@
 ]
 ],
 [
-63,
+62,
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();"
 ],
@@ -150,7 +56,7 @@
 ]
 ],
 [
-69,
+68,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
@@ -794,7 +700,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\CubePuzzle.cpp": [
 [
-125,
+115,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleStartIqDisData + i * 0x8220, &tim);"
 ],
@@ -803,7 +709,7 @@
 ]
 ],
 [
-152,
+142,
 [
 "            puzzleData = Menu_Results_initializeCubePuzzleStartIqDisData + 0x10440;"
 ],
@@ -812,7 +718,7 @@
 ]
 ],
 [
-226,
+216,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleQuitEscDisData + i * 0x8220, &tim);"
 ],
@@ -924,7 +830,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\TimeAttack.cpp": [
 [
-85,
+75,
 [
 "            VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackResultsTimData, &tim);"
 ],
@@ -933,7 +839,7 @@
 ]
 ],
 [
-204,
+194,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackStartTimData + i * 0x8220, &tim);"
 ],
