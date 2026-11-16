@@ -1561,6 +1561,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Inventory::ReloadLiveEquipmentModels": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
     "VS::Menu::Inventory::LiveIsTwoHandedWeapon": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
     "VS::Menu::Inventory::QueueLiveEquipmentModel": r"Native\Game\include\Menu\Inventory\EquipmentRowsLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveAccessoryMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveWeaponMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveShieldMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveArmorMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
+    "VS::Menu::Inventory::DispatchLiveEquipmentMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveEquipmentMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
     "VS::Items::LiveContainerCategoryIndices": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::FindLiveContainerItemRow": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::AppendLiveContainerItemIndex": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
@@ -2901,6 +2907,12 @@ OWNED_CALL_BINDINGS["F02629"] = "VS::Menu::Inventory::SetLiveAccessoryPreviewSta
 OWNED_CALL_BINDINGS["F02637"] = "VS::Menu::Inventory::ReloadLiveEquipmentModels"
 OWNED_CALL_BINDINGS["F02638"] = "VS::Menu::Inventory::LiveIsTwoHandedWeapon"
 OWNED_CALL_BINDINGS["F02639"] = "VS::Menu::Inventory::QueueLiveEquipmentModel"
+OWNED_CALL_BINDINGS["F02630"] = "VS::Menu::Inventory::UpdateLiveAccessoryMenu"
+OWNED_CALL_BINDINGS["F02631"] = "VS::Menu::Inventory::UpdateLiveWeaponMenu"
+OWNED_CALL_BINDINGS["F02632"] = "VS::Menu::Inventory::UpdateLiveShieldMenu"
+OWNED_CALL_BINDINGS["F02633"] = "VS::Menu::Inventory::UpdateLiveArmorMenu"
+OWNED_CALL_BINDINGS["F02634"] = "VS::Menu::Inventory::DispatchLiveEquipmentMenu"
+OWNED_CALL_BINDINGS["F02635"] = "VS::Menu::Inventory::UpdateLiveEquipmentMenu"
 OWNED_CALL_BINDINGS["F02927"] = "VS::Items::LiveContainerCategoryIndices"
 OWNED_CALL_BINDINGS["F02928"] = "VS::Items::FindLiveContainerItemRow"
 OWNED_CALL_BINDINGS["F02929"] = "VS::Items::AppendLiveContainerItemIndex"
@@ -5030,6 +5042,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU3.PRG", 0x801090C4, "VS::Menu::Inventory::ReloadLiveEquipmentModels"),  # F02637
     ("MENU/MENU3.PRG", 0x80109320, "VS::Menu::Inventory::LiveIsTwoHandedWeapon"),  # F02638
     ("MENU/MENU3.PRG", 0x80109344, "VS::Menu::Inventory::QueueLiveEquipmentModel"),  # F02639
+    ("MENU/MENU3.PRG", 0x80106C94, "VS::Menu::Inventory::UpdateLiveAccessoryMenu"),  # F02630
+    ("MENU/MENU3.PRG", 0x80107148, "VS::Menu::Inventory::UpdateLiveWeaponMenu"),  # F02631
+    ("MENU/MENU3.PRG", 0x80107620, "VS::Menu::Inventory::UpdateLiveShieldMenu"),  # F02632
+    ("MENU/MENU3.PRG", 0x80107B14, "VS::Menu::Inventory::UpdateLiveArmorMenu"),  # F02633
+    ("MENU/MENU3.PRG", 0x80108010, "VS::Menu::Inventory::DispatchLiveEquipmentMenu"),  # F02634
+    ("MENU/MENU3.PRG", 0x80108088, "VS::Menu::Inventory::UpdateLiveEquipmentMenu"),  # F02635
     ("MENU/MENUD.PRG", 0x80102A34, "VS::Menu::container::BuildLiveWeaponStats"),  # F02925
     ("MENU/MENUD.PRG", 0x80102BB0, "VS::Menu::container::BuildLiveShieldStats"),  # F02926
     ("MENU/MENUD.PRG", 0x80103D50, "VS::Menu::container::SetLivePanelVisibility"),  # F02942

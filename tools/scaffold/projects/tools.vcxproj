@@ -621,6 +621,14 @@
     <None Include="..\..\port\differentials\equipment_detail_b_f02578.py" />
     <None Include="..\..\port\differentials\equipment_detail_b_f02578_menub.py" />
     <None Include="..\..\port\differentials\equipment_detail_b_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\equipment_menus_common.py" />
+    <None Include="..\..\port\differentials\equipment_menus_driver.cpp" />
+    <None Include="..\..\port\differentials\equipment_menus_f02630.py" />
+    <None Include="..\..\port\differentials\equipment_menus_f02631.py" />
+    <None Include="..\..\port\differentials\equipment_menus_f02632.py" />
+    <None Include="..\..\port\differentials\equipment_menus_f02633.py" />
+    <None Include="..\..\port\differentials\equipment_menus_f02634.py" />
+    <None Include="..\..\port\differentials\equipment_menus_f02635.py" />
     <None Include="..\..\port\differentials\equipment_rows_common.py" />
     <None Include="..\..\port\differentials\equipment_rows_driver.cpp" />
     <None Include="..\..\port\differentials\equipment_rows_f02626.py" />

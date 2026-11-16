@@ -2,6 +2,7 @@
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
+#include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
@@ -42,6 +43,7 @@ void Boot_ResetMenu3Statics(void)
     Menu_Inventory_ResetMenu3Statics();
     Menu_Inventory_ItemList_ResetMenu3Statics();
     VS::Menu::Inventory::ResetEquipmentRowsLive();
+    VS::Menu::Inventory::ResetEquipmentMenusLive();
 }
 
 // Call where the original loads MENU4.PRG: restores the statics its reload re-read from the disc.

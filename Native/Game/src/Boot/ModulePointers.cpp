@@ -113,6 +113,7 @@
 #include "Menu/Container/ContainerSortingLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
+#include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
@@ -2065,6 +2066,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU3.PRG", 0x801090C4u, 0u, (void*)&VS::Menu::Inventory::ReloadLiveEquipmentModels, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80109320u, 0u, (void*)&VS::Menu::Inventory::LiveIsTwoHandedWeapon, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80109344u, 0u, (void*)&VS::Menu::Inventory::QueueLiveEquipmentModel, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80106C94u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveAccessoryMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80107148u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveWeaponMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80107620u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveShieldMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80107B14u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveArmorMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80108010u, 0u, (void*)&VS::Menu::Inventory::DispatchLiveEquipmentMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80108088u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveEquipmentMenu, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102A34u, 0u, (void*)&VS::Menu::container::BuildLiveWeaponStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102BB0u, 0u, (void*)&VS::Menu::container::BuildLiveShieldStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103D50u, 0u, (void*)&VS::Menu::container::SetLivePanelVisibility, 0u, 0u, 0u},

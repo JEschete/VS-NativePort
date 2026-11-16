@@ -30,15 +30,15 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 12 | 2,646 | 756 | 11 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 5 | 100 | 11,605 | 558 | 85 | 0 |
+| 34: #60 Menu screens and workspaces | 5 | 94 | 10,755 | 564 | 79 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 5 | 113 | 14,368 | 3636 | 96 | 0 |
+| **Total** | 5 | 107 | 13,518 | 3642 | 90 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,614 |
+| done | 3,620 |
 | in-progress | 4 |
-| todo | 114 |
+| todo | 108 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (6 active, 48 done); open functions in no slice: 0.
 
@@ -90,7 +90,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 44 | effects-surface-templates | done | self | 7 | 0 | 0 |
 | 45 | menu-framework | done | self | 2 | 0 | 0 |
 | 46 | menu-framework-rows-details | done | self | 6 | 0 | 0 |
-| 47 | menu-inventory-container | active | self | 5 | 11 | 2,487 |
+| 47 | menu-inventory-container | active | self | 5 | 5 | 1,637 |
 | 48 | menu-loot-status-abilities | active | - | 8 | 50 | 5,296 |
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | active | - | 6 | 30 | 2,707 |
@@ -105,7 +105,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | Referenced by the original-address module table | 1 | 9 |
 | Calls an SDK shim | 0 | 28 |
 | Signature uses SDK integer types or `void*` | 0 | 22 |
-| Compiled with relaxed settings | 0 | 113 |
+| Compiled with relaxed settings | 0 | 107 |
 
 Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 1 of 5 open owned functions have generated callers.
 

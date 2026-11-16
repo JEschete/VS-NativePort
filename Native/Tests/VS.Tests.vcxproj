@@ -209,6 +209,7 @@
     <ClCompile Include="src\EquipmentDetailControllersModuleTests.cpp" />
     <ClCompile Include="src\EquipmentDetailControllersTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
+    <ClCompile Include="src\EquipmentMenusTests.cpp" />
     <ClCompile Include="src\EquipmentRowsTests.cpp" />
     <ClCompile Include="src\EventCameraControlTests.cpp" />
     <ClCompile Include="src\EventCameraFrameTests.cpp" />

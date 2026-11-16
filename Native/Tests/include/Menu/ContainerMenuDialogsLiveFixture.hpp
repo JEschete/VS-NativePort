@@ -20,6 +20,7 @@
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
@@ -242,14 +243,14 @@ struct EquippedFixture : DialogLiveFixture {
     }
   }
   void EquipThroughProductionMenu() {
-    if (Menu_Inventory_UpdateWeaponMenu(1) != 0) {
+    if (VS::Menu::Inventory::UpdateLiveWeaponMenu(1) != 0) {
       throw std::runtime_error(
           "weapon menu initializer unexpectedly completed");
     }
-    RunFrames(Menu_Inventory_UpdateWeaponMenu);
-    Frame(Menu_Inventory_UpdateWeaponMenu, VS::Input::Down);
-    Frame(Menu_Inventory_UpdateWeaponMenu);
-    Frame(Menu_Inventory_UpdateWeaponMenu, VS::Input::Circle);
+    RunFrames(VS::Menu::Inventory::UpdateLiveWeaponMenu);
+    Frame(VS::Menu::Inventory::UpdateLiveWeaponMenu, VS::Input::Down);
+    Frame(VS::Menu::Inventory::UpdateLiveWeaponMenu);
+    Frame(VS::Menu::Inventory::UpdateLiveWeaponMenu, VS::Input::Circle);
     if (Audio_Seq_unusedInventory.weapons[0].isEquipped == 0) {
       throw std::runtime_error(
           "real equipment-menu input did not equip the weapon");
