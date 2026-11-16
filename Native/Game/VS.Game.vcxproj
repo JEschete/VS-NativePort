@@ -1364,6 +1364,10 @@
     <ClCompile Include="src\Event\EventCameraTrackLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Event\EventSceneTransition.cpp" />
+    <ClCompile Include="src\Event\EventSceneTransitionLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Event\EventScreenTweens.cpp" />
     <ClCompile Include="src\Event\EventScreenTweensLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2692,6 +2696,8 @@
     <ClInclude Include="include\Event\EventCameraOwnershipLive.hpp" />
     <ClInclude Include="include\Event\EventCameraTrack.hpp" />
     <ClInclude Include="include\Event\EventCameraTrackLive.hpp" />
+    <ClInclude Include="include\Event\EventSceneTransition.hpp" />
+    <ClInclude Include="include\Event\EventSceneTransitionLive.hpp" />
     <ClInclude Include="include\Event\EventScreenTweens.hpp" />
     <ClInclude Include="include\Event\EventScreenTweensLive.hpp" />
     <ClInclude Include="include\Event\RoomTriggers.hpp" />

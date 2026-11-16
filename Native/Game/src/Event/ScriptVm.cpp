@@ -6,7 +6,6 @@ extern "C" {
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptEffectOpcodes.h"
-#include "Event/ScriptField.h"
 #include "Event/ScriptVm.h"
 #include "Event/WeaponModeOpcode.h"
 
@@ -134,12 +133,12 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptNoOperationOpcode, Event_ScriptSetLoopCounterOpcode, Event_ScriptLoopBackwardOpcode, Event_ScriptJumpForwardOpcode,
     Event_ScriptJumpForwardOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptApplyImmediateFlagOperationOpcode, Event_ScriptApplyFlagPairOperationOpcode,
-    Event_ScriptStoreInventoryItemPresenceOpcode, Event_ScriptClearRoomActorCache, Event_ScriptNoOperationOpcode,
-    Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonStateOpcode, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisible,
-    Event_ScriptRunMenuTransition, Event_ScriptConfigureTimerOpcode, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
+    Event_ScriptStoreInventoryItemPresenceOpcode, Event_ScriptClearRoomActorCacheOpcode, Event_ScriptNoOperationOpcode,
+    Event_ScriptSetNpcUpdatesEnabledOpcode, Event_ScriptStoreButtonStateOpcode, Event_ScriptRestoreActorVitalsOpcode, Event_ScriptSetHudVisibleOpcode,
+    Event_ScriptRunMenuTransitionOpcode, Event_ScriptConfigureTimerOpcode, Event_ScriptSetDialogSpeakerOpcode, Event_ScriptSetActorEquipmentModelsOpcode, Event_ScriptSetActorYawOscillationOpcode,
     Event_ScriptYieldFrameOpcode, Event_ScriptConfigureEasingCurveOpcode, Event_ScriptSetGimmickVisibilityOpcode, Event_ScriptOverrideDepthCueDistanceOpcode, Event_ScriptSetRoomLightingModeOpcode,
     Event_ScriptClearAshleyStatusEffectsOpcode, Event_ScriptShowGeometryGroupOpcode, Event_ScriptHideGeometryGroupOpcode, Event_ScriptSwapGeometryGroupFlagsOpcode, Event_ScriptSetCollisionTileModeOpcode,
-    Event_ScriptChangeRoom, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetWipeAngleOpcode, Event_ScriptConfigureScreenTransitionOpcode,
+    Event_ScriptChangeRoomOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetWipeAngleOpcode, Event_ScriptConfigureScreenTransitionOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptTogglePaletteHookOpcode, Event_ScriptTransformPalettesOpcode, Event_ScriptSetActorRenderModeOpcode,
     Event_ScriptSetAshleyBattleModeOpcode, Event_ScriptSetRoomBackgroundVisibleOpcode, Event_ScriptLoadRoomBackgroundOpcode, Event_ScriptWaitForRoomBackgroundOpcode, Event_ScriptFreeRoomBackgroundOpcode,
     Event_ScriptSetEnvironmentParticlesOpcode, Event_ScriptSetParticleVariationEnabledOpcode, Event_ScriptControlRoomAnimationOpcode, Event_ScriptMuteEnvironmentSoundOpcode, Event_ScriptSetBackgroundOffsetOpcode,

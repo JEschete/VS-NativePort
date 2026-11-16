@@ -1830,6 +1830,12 @@
     <ClCompile Include="src\Event\EventCameraTrackLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
+    <ClCompile Include="src\Event\EventSceneTransition.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event\EventSceneTransitionLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
     <ClCompile Include="src\Event\EventScreenTweens.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -3784,6 +3790,12 @@
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\EventCameraTrackLive.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventSceneTransition.hpp">
+      <Filter>include\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\EventSceneTransitionLive.hpp">
       <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\EventScreenTweens.hpp">

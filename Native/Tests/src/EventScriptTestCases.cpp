@@ -9,7 +9,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Event/ScriptField.h"
+#include "Event/ScriptControlOpcodes.h"
 #include "State/RoomMemory.h"
 }
 
@@ -90,15 +90,15 @@ TEST_CASE("Room cache opcode clears matching room and zone without loading",
           "[event][room-cache]") {
   RoomActorCacheFixture fixture;
   std::array<u_char, 3> command{0, 31, 7};
-  CHECK(Event_ScriptClearRoomActorCache(command.data(), 2) == 0);
+  CHECK(Event_ScriptClearRoomActorCacheOpcode(command.data(), 2) == 0);
   CheckRoomActorCache(0, 7, 31, std::byte{0});
   CheckRoomActorCache(1, 7, 32, std::byte{0x5A});
   CheckRoomActorCache(2, 8, 31, std::byte{0x5A});
   CheckRoomActorCache(3, 7, 31, std::byte{0});
   CHECK(State_currentRoomStateSlot == 1);
-  CHECK(Event_ScriptClearRoomActorCache(command.data(), 0) == 0);
+  CHECK(Event_ScriptClearRoomActorCacheOpcode(command.data(), 0) == 0);
   command = {0, 255, 255};
-  CHECK(Event_ScriptClearRoomActorCache(command.data(), 3) == 0);
+  CHECK(Event_ScriptClearRoomActorCacheOpcode(command.data(), 3) == 0);
   CheckRoomActorCache(0, 7, 31, std::byte{0});
   CheckRoomActorCache(1, 7, 32, std::byte{0x5A});
 }

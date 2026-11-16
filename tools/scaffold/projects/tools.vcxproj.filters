@@ -2823,6 +2823,12 @@
     <None Include="..\..\port\differentials\event_room_commands_f01142.py">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\event_scene_transition.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\event_scene_transition_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\event_screen_commands_common.py">
       <Filter>tools\port\differentials</Filter>
     </None>

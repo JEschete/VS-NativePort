@@ -3460,6 +3460,12 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01229", 0x800BD6C4, "CommandScreenTransform"),
     # #276 row 35 A35-06 camera wait opcode 0xE0 (Event/EventCameraFrameLive.cpp)
     ("F01197", 0x800BB41C, "CommandWaitCameraTracks"),
+    # #276 row 35 A35-10 room enemy memory, HUD, menu transition and room change opcodes 0x53, 0x58, 0x59 and 0x68
+    # (Event/EventSceneTransitionLive.cpp)
+    ("F01099", 0x800B91C4, "ScriptClearRoomActorCache"),
+    ("F01104", 0x800B92D0, "ScriptSetHudVisible"),
+    ("F01105", 0x800B92F4, "ScriptRunMenuTransition"),
+    ("F01120", 0x800B98C0, "ScriptChangeRoom"),
 )
 NATIVE_HELPER_HEADERS |= {
     f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
@@ -6490,9 +6496,6 @@ REGEX_FIXES += [
         ("Event::ScriptOverrideDepthCueDistance",
          (('temp_v0', 'depth_cue_operand'),),
          "F01113 4A0A8.c:1972-1980 reads temp_v0 as short+1. Its sign controls D_800F4C6A, while low11bits feed func_80098194 only when enabled. The name covers the packed flag-and-distance operand, not simply distance; no sign/mask change."),
-        ("Event::ScriptChangeRoom",
-         (('sp10', 'door_record'),),
-         "F01120 4A0A8.c:2018-2047 fills sp10 as _mpdRoomDoorSection_t from room/zone, entry tile/direction/elevation, and flags, then passes it to func_8007C580 or func_8007C654. State0 creates the transition, state2 acknowledges it. Native Field_MpdDoorRecord preserves this relationship and partially initialized layout."),
         ("Event::CommandSpecialOperation",
          (('sp10', 'diagnostic_message'),),
          "F01187 4A0A8.c:2651-2731 declares sp10[32] and uses it only as sprintf destination for the undefined-special-operation diagnostic. Other switch branches never access it. This names an existing diagnostic staging role without adding output or changing side effects."),

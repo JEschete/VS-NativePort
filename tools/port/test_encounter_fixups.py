@@ -4261,16 +4261,25 @@ int arg01 = arg0;'''
                        if item["id"] == "F01099")
         self.assertEqual(row["name"], "func_800B91C4")
         self.assertEqual(row["final_name"], "Event::ScriptClearRoomActorCache")
+        self.assertEqual(
+            row["final_location"], r"Native\Game\src\Event\EventSceneTransition.cpp"
+        )
         source = (root / row["final_location"]).read_text(encoding="utf-8")
         self.assertIn("func_800B91C4", source)
-        self.assertIn("Event_ScriptClearRoomActorCache", source)
+        self.assertIn("ScriptStep ScriptClearRoomActorCache(", source)
+        self.assertIn("host.ForgetRoomEnemies(room, zone);", source)
         self.assertNotIn("Event_ScriptPreloadRoom", source)
-        # F00231 duplicates ForgetRoomEnemies, so the copy calls the typed core.
-        self.assertIn(
-            "VS::Actors::ForgetLiveRoomEnemies(instruction[2], instruction[1]);",
-            source,
-        )
-        self.assertNotIn("Field_ClearSavedRoomEnemies", source)
+        # F00231 duplicates ForgetRoomEnemies, so the opcode calls the typed core.
+        live = (
+            root / r"Native\Game\src\Event\EventSceneTransitionLive.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Event_ScriptClearRoomActorCacheOpcode(", live)
+        self.assertIn("Actors::ForgetLiveRoomEnemies(room, zone);", live)
+        self.assertNotIn("Field_ClearSavedRoomEnemies", live)
+        generated = (
+            root / r"Native\Game\src\Event\ScriptField.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("Event_ScriptClearRoomActorCache(", generated)
 
     def test_event_parameter_scope_matches_registered_opcode_handlers(self):
         root = Path(__file__).resolve().parents[2]

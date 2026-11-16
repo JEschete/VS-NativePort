@@ -22,7 +22,6 @@
 
 extern "C" {
 #include "Event/ScriptControlOpcodes.h"
-#include "Event/ScriptField.h"
 #include "Event/ScriptVm.h"
 }
 
@@ -102,7 +101,7 @@ SceneOpcodes ProductionOpcodes() {
     }
     if (handler == Event_CommandLoadNextEventOpcode) {
       opcode.operation = SceneOperation::kChainEvent;
-    } else if (handler == Event_ScriptChangeRoom) {
+    } else if (handler == Event_ScriptChangeRoomOpcode) {
       opcode.operation = SceneOperation::kChangeRoom;
     }
   }

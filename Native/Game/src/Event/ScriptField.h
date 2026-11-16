@@ -12,9 +12,5 @@
 
 extern u_char Event_kMenuTransitionModes[320];
 extern Event_WeatherTween Event_weatherTween;
-intptr_t Event_ScriptClearRoomActorCache(u_char* instruction, short thread_index);
-intptr_t Event_ScriptSetHudVisible(u_char* instruction, short thread_index);
-intptr_t Event_ScriptRunMenuTransition(u_char* script, short thread_index);
-intptr_t Event_ScriptChangeRoom(u_char* instruction, short thread_index);
 
 #endif // VS_EVENT_SCRIPTFIELD_H_DECLS

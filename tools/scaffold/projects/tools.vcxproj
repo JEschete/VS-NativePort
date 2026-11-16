@@ -617,6 +617,8 @@
     <None Include="..\..\port\differentials\event_room_commands_f01140.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01141.py" />
     <None Include="..\..\port\differentials\event_room_commands_f01142.py" />
+    <None Include="..\..\port\differentials\event_scene_transition.py" />
+    <None Include="..\..\port\differentials\event_scene_transition_driver.cpp" />
     <None Include="..\..\port\differentials\event_screen_commands_common.py" />
     <None Include="..\..\port\differentials\event_screen_commands_driver.cpp" />
     <None Include="..\..\port\differentials\event_screen_commands_f01121.py" />

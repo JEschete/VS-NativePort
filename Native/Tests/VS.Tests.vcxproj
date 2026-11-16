@@ -210,6 +210,7 @@
     <ClCompile Include="src\EventCameraOwnershipTests.cpp" />
     <ClCompile Include="src\EventCameraTrackTests.cpp" />
     <ClCompile Include="src\EventRetentionPredicateTests.cpp" />
+    <ClCompile Include="src\EventSceneTransitionTests.cpp" />
     <ClCompile Include="src\EventScreenTweensTests.cpp" />
     <ClCompile Include="src\EventScriptActorCommandsTests.cpp" />
     <ClCompile Include="src\EventScriptAudioCommandsTests.cpp" />

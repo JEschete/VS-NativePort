@@ -153,6 +153,14 @@ intptr_t Event_CommandSetCameraFollowingOpcode(uint8_t* instruction,
                                                int16_t thread_index);
 intptr_t Event_CommandRestoreFieldCameraOpcode(uint8_t* instruction,
                                                int16_t thread_index);
+intptr_t Event_ScriptClearRoomActorCacheOpcode(uint8_t* instruction,
+                                               int16_t thread_index);
+intptr_t Event_ScriptSetHudVisibleOpcode(uint8_t* instruction,
+                                         int16_t thread_index);
+intptr_t Event_ScriptRunMenuTransitionOpcode(uint8_t* instruction,
+                                             int16_t thread_index);
+intptr_t Event_ScriptChangeRoomOpcode(uint8_t* instruction,
+                                      int16_t thread_index);
 
 #ifdef __cplusplus
 }

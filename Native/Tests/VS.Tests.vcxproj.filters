@@ -489,6 +489,9 @@
     <ClCompile Include="src\EventRetentionPredicateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventSceneTransitionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EventScreenTweensTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

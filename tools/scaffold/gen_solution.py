@@ -259,6 +259,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Event\EventCameraControlLive.cpp",
                 r"src\Event\EventCameraFrameLive.cpp",
                 r"src\Event\EventCameraLensLive.cpp",
+                r"src\Event\EventSceneTransitionLive.cpp",
                 r"src\Event\EventScreenTweensLive.cpp",
                 r"src\Event\ScriptVmLive.cpp",
                 r"src\Effects\ScreenEffectState.cpp",
