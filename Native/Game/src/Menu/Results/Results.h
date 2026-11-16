@@ -124,14 +124,6 @@ int Menu_Results_InitializeGameClear(void);
 void Menu_Results_QueueResultsMusic(void);
 int Menu_Results_UpdatePresentation(void);
 int Menu_Results_UpdateGameClear(void);
-void Menu_Results_DrawCongratulations(int x, int y, int timer);
-void Menu_Results_DrawScore(int x, int y, int timer, int arg3 __attribute__((unused)));
-void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribute__((unused)));
-void Menu_Results_DrawMapCompletion(int x, int y, int timer, int arg3 __attribute__((unused)));
-void Menu_Results_DrawCountingMapCompletion(
-    int draw_x, int draw_y, int animation_timer, int arg3 __attribute__((unused)));
-void Menu_Results_DrawRiskbreakerRankHeading(int x, int y, int timer);
-void Menu_Results_DrawRiskbreakerRank(int x, int y, int timer);
 void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_state);
 void Menu_Results_DrawBonusReelTexture(int x, int y, int texId);
 void Menu_Results_ApplyHealingScoreBonus(void);

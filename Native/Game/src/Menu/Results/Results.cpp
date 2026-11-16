@@ -4,6 +4,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
+#include "Menu/Results/GameClearScoreLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
@@ -227,27 +228,6 @@ u_char Menu_Results_riskbreakerRanks[][4] = { { 3, Menu_Results_DisIndex_Rank1Gr
 
 // decomp: _score (_score@src/MENU/MENUF.PRG/3B8.c)
 u_int Menu_Results_score;
-
-// decomp: local static of _renderCongratulations, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_congratulationsColors[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
-
-// decomp: local static of _renderIncrementalMapCompletion, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_countingMapCompletionColors[] = { { 100, 180, 220 }, { 100, 180, 220 } };
-
-// decomp: local static of _renderIncrementalScore, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_countingScoreColors[] = { { 100, 180, 220 }, { 100, 180, 220 } };
-
-// decomp: local static of _renderMapCompletion, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_mapCompletionColors[] = { { 100, 180, 220 }, { 100, 180, 220 } };
-
-// decomp: local static of _renderRiskbreakerRank, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_riskbreakerRankColors[] = { { 128, 128, 128 }, { 128, 128, 128 } };
-
-// decomp: local static of _renderRiskbreakerRankHeader, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_riskbreakerRankHeadingColors[] = { { 200, 80, 20 }, { 200, 80, 20 } };
-
-// decomp: local static of _renderScore, at file scope so the module reset reaches it
-static CVECTOR Menu_Results_scoreColors[] = { { 100, 180, 220 }, { 100, 180, 220 } };
 
 // decomp: local static of _renderStatWheel, at file scope so the module reset reaches it
 static CVECTOR Menu_Results_bonusReelColors[] = { { 128, 96, 64 }, { 200, 180, 160 } };
@@ -513,11 +493,11 @@ int Menu_Results_UpdateGameClear(void)
             VS::Audio::LivePlaySfxCentered(0x7E, 0x78);
         }
 
-        Menu_Results_DrawCongratulations(160, 40, Menu_Results_screenTimer);
-        Menu_Results_DrawCountingScore(160, 80, Menu_Results_screenTimer - 32, Menu_Results_screenState);
-        Menu_Results_DrawCountingMapCompletion(160, 102, Menu_Results_screenTimer - 112, Menu_Results_screenState);
-        Menu_Results_DrawRiskbreakerRankHeading(160, 138, Menu_Results_screenTimer - 192);
-        Menu_Results_DrawRiskbreakerRank(160, 154, Menu_Results_screenTimer - 208);
+        VS::Menu::Results::LiveDrawCongratulations(160, 40, Menu_Results_screenTimer);
+        VS::Menu::Results::LiveDrawCountingScore(160, 80, Menu_Results_screenTimer - 32, Menu_Results_screenState);
+        VS::Menu::Results::LiveDrawCountingMapCompletion(160, 102, Menu_Results_screenTimer - 112, Menu_Results_screenState);
+        VS::Menu::Results::LiveDrawRiskbreakerRankHeading(160, 138, Menu_Results_screenTimer - 192);
+        VS::Menu::Results::LiveDrawRiskbreakerRank(160, 154, Menu_Results_screenTimer - 208);
         Menu_Results_DrawBonusReel(130, 190, Menu_Results_screenTimer - 272, Menu_Results_screenState);
     }
 
@@ -599,11 +579,11 @@ int Menu_Results_UpdateGameClear(void)
         }
     } else {
 
-        Menu_Results_DrawCongratulations(160, 40, 8 - Menu_Results_gameClearStateTimer);
-        Menu_Results_DrawScore(160, 80, 8 - Menu_Results_gameClearStateTimer, 3);
-        Menu_Results_DrawMapCompletion(160, 102, 8 - Menu_Results_gameClearStateTimer, 3);
-        Menu_Results_DrawRiskbreakerRankHeading(160, 138, 8 - Menu_Results_gameClearStateTimer);
-        Menu_Results_DrawRiskbreakerRank(160, 154, 8 - Menu_Results_gameClearStateTimer);
+        VS::Menu::Results::LiveDrawCongratulations(160, 40, 8 - Menu_Results_gameClearStateTimer);
+        VS::Menu::Results::LiveDrawScore(160, 80, 8 - Menu_Results_gameClearStateTimer, 3);
+        VS::Menu::Results::LiveDrawMapCompletion(160, 102, 8 - Menu_Results_gameClearStateTimer, 3);
+        VS::Menu::Results::LiveDrawRiskbreakerRankHeading(160, 138, 8 - Menu_Results_gameClearStateTimer);
+        VS::Menu::Results::LiveDrawRiskbreakerRank(160, 154, 8 - Menu_Results_gameClearStateTimer);
         Menu_Results_DrawBonusReel(130, 190, 8 - Menu_Results_gameClearStateTimer, 3);
 
         if (Menu_Results_gameClearStateTimer >= 8) {
@@ -641,328 +621,6 @@ int Menu_Results_UpdateGameClear(void)
     ++Menu_Results_gameClearStateTimer;
     ++Menu_Results_screenTimer;
     return 0;
-}
-
-// decomp: MENUF.PRG _renderCongratulations (src/MENU/MENUF.PRG/3B8.c:1332)
-void Menu_Results_DrawCongratulations(int x, int y, int timer)
-{
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        Menu_Results_congratulationsColors[0].cd = timer;
-        Menu_Results_congratulationsColors[1].cd = timer;
-        x -= (Menu_Results_disMap[Menu_Results_DisIndex_Rank0Congratulations].w
-                 + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Congratulations + 1].w)
-          >> 1;
-
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Congratulations, Menu_Results_congratulationsColors);
-        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Congratulations].w, y,
-            Menu_Results_DisIndex_Rank0Congratulations + 1, std::span(Menu_Results_congratulationsColors).subspan(1));
-    }
-}
-
-// decomp: MENUF.PRG _renderScore (src/MENU/MENUF.PRG/3B8.c:1357)
-void Menu_Results_DrawScore(int x, int y, int timer, int arg3 __attribute__((unused)))
-{
-
-    char buf[16];
-    int i;
-    int score_label_and_colon_width;
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        Menu_Results_scoreColors[0].cd = timer;
-
-        sprintf(buf, "%09d", Menu_Results_score);
-
-        score_label_and_colon_width = Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
-        x -= (((Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w * 2)
-                  + (score_label_and_colon_width + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Pts].w))
-                 + 116)
-          >> 1;
-
-        VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_scoreColors);
-
-        x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w;
-
-        VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_scoreColors);
-
-        i = 2;
-        x = (x + i) + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
-
-        for (i = 0; i < 9; ++i) {
-            VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y + 3, buf[i] - '0', Menu_Results_scoreColors);
-
-            x += 0xC;
-
-            if ((i == 2) || (i == 5)) {
-                VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y + 14, 10, Menu_Results_scoreColors);
-
-                x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w + 3;
-            }
-        }
-
-        VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y + 8, Menu_Results_DisIndex_Rank0Pts, Menu_Results_scoreColors);
-    }
-}
-
-// decomp: MENUF.PRG _renderIncrementalScore (src/MENU/MENUF.PRG/3B8.c:1409)
-void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribute__((unused)))
-{
-
-    char buf[16];
-    int wipe_edge_x;
-    int i;
-    int v;
-
-    if (timer < 0) {
-        timer = 0;
-    }
-    if (timer > 64) {
-        timer = 64;
-    }
-    if (timer <= 0) {
-        return;
-    }
-
-    wipe_edge_x = x + (timer * 8);
-
-    if ((Menu_Results_score != 0) && (timer >= 32)) {
-
-        if (Menu_Results_onScreenScore == 0) {
-
-            Menu_Results_incrementingScore = 1;
-
-            VS::Audio::LivePlaySfxCentered(0x7E, 0x72);
-        }
-
-        if ((Menu_Results_onScreenScore == Menu_Results_score) && (Menu_Results_incrementingScore != 0)) {
-
-            Menu_Results_incrementingScore = 0;
-
-            VS::Audio::LiveStopSfx(0x7E, 0x72);
-            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
-        }
-    }
-
-    if (timer >= 32) {
-        Menu_Results_onScreenScore = (Menu_Results_score >> 5) * (timer - 32);
-    }
-
-    if (timer == 64) {
-        Menu_Results_onScreenScore = Menu_Results_score;
-    }
-
-    sprintf(buf, "%09d", Menu_Results_onScreenScore);
-
-    v = Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w
-      + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Pts].w;
-    x -= (((Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w * 2) + v) + 116) >> 1;
-
-    VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_countingScoreColors, wipe_edge_x);
-
-    x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w;
-
-    VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingScoreColors, wipe_edge_x);
-
-    i = 2;
-    x = x + i + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
-
-    for (i = 0; i < 9; ++i) {
-        VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, x, y + 3, buf[i] - '0', Menu_Results_countingScoreColors, wipe_edge_x);
-
-        x += 12;
-
-        if ((i == 2) || (i == 5)) {
-            VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, x, y + 14, Menu_Results_DisIndex_Rank0Comma, Menu_Results_countingScoreColors, wipe_edge_x);
-
-            x += 3 + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w;
-        }
-    }
-
-    VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, x, y + 8, 0x14, Menu_Results_countingScoreColors, wipe_edge_x);
-}
-
-// decomp: MENUF.PRG _renderMapCompletion (src/MENU/MENUF.PRG/3B8.c:1486)
-void Menu_Results_DrawMapCompletion(int x, int y, int timer, int arg3 __attribute__((unused)))
-{
-
-    char buf[4];
-    int i;
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        Menu_Results_mapCompletionColors[0].cd = timer;
-
-        sprintf(buf, "%03d", Menu_Results_mapCompletion);
-
-        x -= (Menu_Results_disMap[21].w + Menu_Results_disMap[26].w + Menu_Results_disMap[19].w + 0x26) >> 1;
-        i = 2;
-
-        VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y, 0x15, Menu_Results_mapCompletionColors);
-
-        x += Menu_Results_disMap[21].w;
-
-        VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y + 7, 0x1A, Menu_Results_mapCompletionColors);
-
-        x = x + i + Menu_Results_disMap[26].w;
-
-        for (i = 0; i < 3; ++i) {
-            VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y + 3, buf[i] - '0', Menu_Results_mapCompletionColors);
-
-            x += 0xC;
-        }
-
-        VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x, y + 8, 0x13, Menu_Results_mapCompletionColors);
-    }
-}
-
-// decomp: MENUF.PRG _renderIncrementalMapCompletion (src/MENU/MENUF.PRG/3B8.c:1527)
-void Menu_Results_DrawCountingMapCompletion(
-    int draw_x, int draw_y, int animation_timer, int arg3 __attribute__((unused)))
-{
-
-    char buf[8];
-    int wipe_edge_x;
-    int i;
-
-    if (animation_timer < 0) {
-        animation_timer = 0;
-    }
-
-    if (animation_timer > 64) {
-        animation_timer = 64;
-    }
-
-    if (animation_timer <= 0) {
-        return;
-    }
-
-    wipe_edge_x = draw_x + (animation_timer * 8);
-
-    if ((Menu_Results_mapCompletion != 0) && (animation_timer >= 32)) {
-
-        if (Menu_Results_onScreenMapCompletion == 0) {
-            Menu_Results_incrementingMapCompletion = 1;
-
-            VS::Audio::LivePlaySfxCentered(0x7E, 0x72);
-        }
-
-        if ((Menu_Results_onScreenMapCompletion == Menu_Results_mapCompletion)
-            && (Menu_Results_incrementingMapCompletion != 0)) {
-            Menu_Results_incrementingMapCompletion = 0;
-
-            VS::Audio::LiveStopSfx(0x7E, 0x72);
-            VS::Audio::LivePlaySfxCentered(0x7E, 0x73);
-        }
-    }
-
-    if (animation_timer >= 32) {
-        if (Menu_Results_mapCompletion >= 32) {
-            Menu_Results_onScreenMapCompletion = (Menu_Results_mapCompletion * (animation_timer - 32)) >> 5;
-        } else if (Menu_Results_onScreenMapCompletion < Menu_Results_mapCompletion) {
-            ++Menu_Results_onScreenMapCompletion;
-        }
-    }
-
-    sprintf(buf, "%03d", Menu_Results_onScreenMapCompletion);
-
-    draw_x -= (Menu_Results_disMap[Menu_Results_DisIndex_Rank0MapCompleted].w + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w
-                + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Percent].w + 38)
-         >> 1;
-
-    VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, draw_x, draw_y, Menu_Results_DisIndex_Rank0MapCompleted, Menu_Results_countingMapCompletionColors, wipe_edge_x);
-
-    draw_x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0MapCompleted].w;
-    i = 2;
-
-    VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, draw_x, draw_y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingMapCompletionColors, wipe_edge_x);
-    draw_x = draw_x + i + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
-
-    for (i = 0; i < 3; ++i) {
-        VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, draw_x, draw_y + 3, buf[i] - '0', Menu_Results_countingMapCompletionColors, wipe_edge_x);
-
-        draw_x += 12;
-    }
-
-    VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, draw_x, draw_y + 8, Menu_Results_DisIndex_Rank0Percent, Menu_Results_countingMapCompletionColors, wipe_edge_x);
-}
-
-// decomp: MENUF.PRG _renderRiskbreakerRankHeader (src/MENU/MENUF.PRG/3B8.c:1598)
-void Menu_Results_DrawRiskbreakerRankHeading(int x, int y, int timer)
-{
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    if (timer > 0) {
-        Menu_Results_riskbreakerRankHeadingColors[0].cd = timer;
-
-        VS::Render::DrawLiveTextureTintFade(Menu_Results_disMap, x - (Menu_Results_disMap[Menu_Results_DisIndex_Rank0RiskbreakerRank].w >> 1), y,
-            Menu_Results_DisIndex_Rank0RiskbreakerRank, Menu_Results_riskbreakerRankHeadingColors);
-    }
-}
-
-// decomp: MENUF.PRG _renderRiskbreakerRank (src/MENU/MENUF.PRG/3B8.c:1618)
-void Menu_Results_DrawRiskbreakerRank(int x, int y, int timer)
-{
-
-    int xInset;
-    int i;
-
-    if (timer < 0) {
-        timer = 0;
-    }
-
-    if (timer > 64) {
-        timer = 64;
-    }
-
-    xInset = 0;
-
-    if (timer > 0) {
-
-        Menu_Results_riskbreakerRankColors[0].cd = timer;
-
-        for (i = 0; i < Menu_Results_riskbreakerRanks[Menu_Results_rank][0]; ++i) {
-            xInset += Menu_Results_disMap[Menu_Results_riskbreakerRanks[Menu_Results_rank][i + 1]].w;
-        }
-
-        xInset /= 2;
-        x -= xInset;
-
-        for (i = 0; i < Menu_Results_riskbreakerRanks[Menu_Results_rank][0]; ++i) {
-            VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_riskbreakerRanks[Menu_Results_rank][i + 1], Menu_Results_riskbreakerRankColors);
-
-            x += Menu_Results_disMap[Menu_Results_riskbreakerRanks[Menu_Results_rank][i + 1]].w;
-        }
-    }
 }
 
 // decomp: MENUF.PRG _renderStatWheel (src/MENU/MENUF.PRG/3B8.c:1996)
@@ -1191,34 +849,6 @@ void Menu_Results_ApplyHealingScoreBonus(void)
 // MENUF.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Results_ResetMenufStatics(void)
 {
-    {
-        static const CVECTOR initial[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
-        memcpy((void*)&Menu_Results_congratulationsColors, &initial, sizeof Menu_Results_congratulationsColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 100, 180, 220 }, { 100, 180, 220 } };
-        memcpy((void*)&Menu_Results_scoreColors, &initial, sizeof Menu_Results_scoreColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 100, 180, 220 }, { 100, 180, 220 } };
-        memcpy((void*)&Menu_Results_countingScoreColors, &initial, sizeof Menu_Results_countingScoreColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 100, 180, 220 }, { 100, 180, 220 } };
-        memcpy((void*)&Menu_Results_mapCompletionColors, &initial, sizeof Menu_Results_mapCompletionColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 100, 180, 220 }, { 100, 180, 220 } };
-        memcpy((void*)&Menu_Results_countingMapCompletionColors, &initial, sizeof Menu_Results_countingMapCompletionColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 200, 80, 20 }, { 200, 80, 20 } };
-        memcpy((void*)&Menu_Results_riskbreakerRankHeadingColors, &initial, sizeof Menu_Results_riskbreakerRankHeadingColors);
-    }
-    {
-        static const CVECTOR initial[] = { { 128, 128, 128 }, { 128, 128, 128 } };
-        memcpy((void*)&Menu_Results_riskbreakerRankColors, &initial, sizeof Menu_Results_riskbreakerRankColors);
-    }
     {
         static const CVECTOR initial[] = { { 128, 96, 64 }, { 200, 180, 160 } };
         memcpy((void*)&Menu_Results_bonusReelColors, &initial, sizeof Menu_Results_bonusReelColors);

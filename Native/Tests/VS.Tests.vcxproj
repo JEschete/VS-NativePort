@@ -253,6 +253,7 @@
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\FrameTimingTests.cpp" />
     <ClCompile Include="src\FrameUpdateTests.cpp" />
+    <ClCompile Include="src\GameClearScoreTests.cpp" />
     <ClCompile Include="src\GameFontTests.cpp" />
     <ClCompile Include="src\GameplayLoopTests.cpp" />
     <ClCompile Include="src\GimImagesTests.cpp" />

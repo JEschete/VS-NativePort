@@ -710,6 +710,15 @@
     <None Include="..\..\port\differentials\floating_label_rendering_guard_driver.cpp" />
     <None Include="..\..\port\differentials\floating_label_rendering_support.py" />
     <None Include="..\..\port\differentials\floating_label_timing.py" />
+    <None Include="..\..\port\differentials\gameclear_score_common.py" />
+    <None Include="..\..\port\differentials\gameclear_score_driver.cpp" />
+    <None Include="..\..\port\differentials\gameclear_score_f03025.py" />
+    <None Include="..\..\port\differentials\gameclear_score_f03026.py" />
+    <None Include="..\..\port\differentials\gameclear_score_f03027.py" />
+    <None Include="..\..\port\differentials\gameclear_score_f03028.py" />
+    <None Include="..\..\port\differentials\gameclear_score_f03029.py" />
+    <None Include="..\..\port\differentials\gameclear_score_f03030.py" />
+    <None Include="..\..\port\differentials\gameclear_score_f03031.py" />
     <None Include="..\..\port\differentials\gte_projection.py" />
     <None Include="..\..\port\differentials\gte_projection_driver.cpp" />
     <None Include="..\..\port\differentials\height_filter.py" />

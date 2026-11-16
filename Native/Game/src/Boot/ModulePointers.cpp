@@ -126,6 +126,7 @@
 #include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
+#include "Menu/Results/GameClearScoreLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
@@ -2179,6 +2180,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x801064D4u, 0u, (void*)&VS::Menu::Results::LiveDrawPressButtonPrompt, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108A0Cu, 0u, (void*)&VS::Menu::Results::DetermineLiveRiskbreakerRank, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108AB0u, 0u, (void*)&VS::Menu::Results::CalculateLiveScore, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80104B8Cu, 0u, (void*)&VS::Menu::Results::LiveDrawCongratulations, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80104C40u, 0u, (void*)&VS::Menu::Results::LiveDrawScore, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80104DBCu, 0u, (void*)&VS::Menu::Results::LiveDrawCountingScore, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80105020u, 0u, (void*)&VS::Menu::Results::LiveDrawMapCompletion, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010516Cu, 0u, (void*)&VS::Menu::Results::LiveDrawCountingMapCompletion, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801053B0u, 0u, (void*)&VS::Menu::Results::LiveDrawRiskbreakerRankHeading, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010540Cu, 0u, (void*)&VS::Menu::Results::LiveDrawRiskbreakerRank, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},

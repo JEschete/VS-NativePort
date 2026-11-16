@@ -1698,6 +1698,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::LiveDrawPressButtonPrompt": r"Native\Game\include\Menu\Results\ResultsDrawingLive.hpp",
     "VS::Menu::Results::DetermineLiveRiskbreakerRank": r"Native\Game\include\Menu\Results\ResultsRankLive.hpp",
     "VS::Menu::Results::CalculateLiveScore": r"Native\Game\include\Menu\Results\ResultsRankLive.hpp",
+    "VS::Menu::Results::LiveDrawCongratulations": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
+    "VS::Menu::Results::LiveDrawScore": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
+    "VS::Menu::Results::LiveDrawCountingScore": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
+    "VS::Menu::Results::LiveDrawMapCompletion": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
+    "VS::Menu::Results::LiveDrawCountingMapCompletion": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
+    "VS::Menu::Results::LiveDrawRiskbreakerRankHeading": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
+    "VS::Menu::Results::LiveDrawRiskbreakerRank": r"Native\Game\include\Menu\Results\GameClearScoreLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -3096,6 +3103,13 @@ OWNED_CALL_BINDINGS["F03042"] = "VS::Menu::Results::LiveDrawTime"
 OWNED_CALL_BINDINGS["F03044"] = "VS::Menu::Results::LiveDrawPressButtonPrompt"
 OWNED_CALL_BINDINGS["F03060"] = "VS::Menu::Results::DetermineLiveRiskbreakerRank"
 OWNED_CALL_BINDINGS["F03061"] = "VS::Menu::Results::CalculateLiveScore"
+OWNED_CALL_BINDINGS["F03025"] = "VS::Menu::Results::LiveDrawCongratulations"
+OWNED_CALL_BINDINGS["F03026"] = "VS::Menu::Results::LiveDrawScore"
+OWNED_CALL_BINDINGS["F03027"] = "VS::Menu::Results::LiveDrawCountingScore"
+OWNED_CALL_BINDINGS["F03028"] = "VS::Menu::Results::LiveDrawMapCompletion"
+OWNED_CALL_BINDINGS["F03029"] = "VS::Menu::Results::LiveDrawCountingMapCompletion"
+OWNED_CALL_BINDINGS["F03030"] = "VS::Menu::Results::LiveDrawRiskbreakerRankHeading"
+OWNED_CALL_BINDINGS["F03031"] = "VS::Menu::Results::LiveDrawRiskbreakerRank"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -5004,6 +5018,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x801064D4, "VS::Menu::Results::LiveDrawPressButtonPrompt"),  # F03044
     ("MENU/MENUF.PRG", 0x80108A0C, "VS::Menu::Results::DetermineLiveRiskbreakerRank"),  # F03060
     ("MENU/MENUF.PRG", 0x80108AB0, "VS::Menu::Results::CalculateLiveScore"),  # F03061
+    ("MENU/MENUF.PRG", 0x80104B8C, "VS::Menu::Results::LiveDrawCongratulations"),  # F03025
+    ("MENU/MENUF.PRG", 0x80104C40, "VS::Menu::Results::LiveDrawScore"),  # F03026
+    ("MENU/MENUF.PRG", 0x80104DBC, "VS::Menu::Results::LiveDrawCountingScore"),  # F03027
+    ("MENU/MENUF.PRG", 0x80105020, "VS::Menu::Results::LiveDrawMapCompletion"),  # F03028
+    ("MENU/MENUF.PRG", 0x8010516C, "VS::Menu::Results::LiveDrawCountingMapCompletion"),  # F03029
+    ("MENU/MENUF.PRG", 0x801053B0, "VS::Menu::Results::LiveDrawRiskbreakerRankHeading"),  # F03030
+    ("MENU/MENUF.PRG", 0x8010540C, "VS::Menu::Results::LiveDrawRiskbreakerRank"),  # F03031
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -7971,15 +7992,6 @@ REGEX_FIXES += [
         ("Menu::Results::PulseCubePuzzleClut",
          (('arg0', 'blend_weight'), ('new_var3', 'packed_blue'), ('new_var4', 'packed_red_green'), ('var_a1', 'weighted_red'), ('var_a2', 'weighted_green')),
          "F03024 src\\MENU\\MENUF.PRG\\3B8.c:1294-1330 (_pulseCubePuzzleEnd). Named roles: blend weight, packed blue, packed red green, weighted red, weighted green."),
-        ("Menu::Results::DrawScore",
-         (('new_var', 'score_label_and_colon_width'),),
-         "F03026 src\\MENU\\MENUF.PRG\\3B8.c:1357-1407 (_renderScore). Named roles: score label and colon width. Retained: arg3: Explicitly unused fourth results-render parameter; callers pass screen state for the shared rendering convention."),
-        ("Menu::Results::DrawCountingScore",
-         (('temp_s2', 'wipe_edge_x'),),
-         "F03027 src\\MENU\\MENUF.PRG\\3B8.c:1409-1484 (_renderIncrementalScore). Named roles: wipe edge x. Retained: arg3: Explicitly unused screen-state slot in the common results rendering call shape."),
-        ("Menu::Results::DrawCountingMapCompletion",
-         (('arg0', 'draw_x'), ('arg1', 'draw_y'), ('arg2', 'animation_timer'), ('temp_s4', 'wipe_edge_x')),
-         "F03029 src\\MENU\\MENUF.PRG\\3B8.c:1527-1596 (_renderIncrementalMapCompletion). Named roles: draw x, draw y, animation timer, wipe edge x. Retained: arg3: Explicitly unused fourth results-render parameter."),
         ("Menu::Results::DrawTimeAttackRating",
          (('arg2', 'fade_timer'), ('var_a2', 'rating_texture_offset')),
          "F03033 src\\MENU\\MENUF.PRG\\3B8.c:1678-1706 (_renderTimeAttackRating). Named roles: fade timer, rating texture offset."),

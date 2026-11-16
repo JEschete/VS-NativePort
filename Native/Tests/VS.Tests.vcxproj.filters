@@ -600,6 +600,9 @@
     <ClCompile Include="src\FrameUpdateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameClearScoreTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GameFontTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

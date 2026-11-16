@@ -5,7 +5,18 @@
 // the atlas, a missing ordering entry or a full primitive buffer draws nothing
 // for that quad and logs a throttled warning.
 
+#include <array>
+#include <cstddef>
+
+#include "Render/TextureRegionDraw.hpp"
+
 namespace VS::Menu::Results {
+inline constexpr std::size_t kResultsAtlasEntries = 127;
+
+// A typed copy of Menu_Results_disMap.
+[[nodiscard]] std::array<Render::TextureRegion, kResultsAtlasEntries>
+LiveResultsAtlas();
+
 void LiveDrawFadingTexture(int x, int y, int texture_index, int brightness);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveDrawFadingTextureClut(int x, int y, int texture_index, int brightness,

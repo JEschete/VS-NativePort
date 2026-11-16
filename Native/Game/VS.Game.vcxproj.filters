@@ -2805,6 +2805,12 @@
     <ClInclude Include="src\Menu\Results\CubePuzzle.h">
       <Filter>src\Menu\Results</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Results\GameClearScore.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Results\GameClearScoreLive.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\Results.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
@@ -4430,6 +4436,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\RenameLive.hpp">
       <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\GameClearScore.hpp">
+      <Filter>include\Menu\Results</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\GameClearScoreLive.hpp">
+      <Filter>include\Menu\Results</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Results\ResultsDrawing.hpp">
       <Filter>include\Menu\Results</Filter>
