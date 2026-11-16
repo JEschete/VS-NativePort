@@ -1,17 +1,18 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest published #276 group is A32-02, floating label
-placement and equipment feedback
-([`c6cc76db8`](https://github.com/JEschete/VS-NativePort/commit/c6cc76db8)),
-which completes plan row 32 (93/93). The original 900-function cohort has
-**763 resolved and 137 remaining**; see
+Updated 2026-11-16. The latest published #276 group is B47-04, equipment-menu
+controllers ([`6ac956aaa`](https://github.com/JEschete/VS-NativePort/commit/6ac956aaa7c3c9ef722a9387cc8dd84c27adf1d1));
+exact-revision [Source Quality CI 43935352653](https://github.com/JEschete/VS-NativePort/actions/runs/43935352653)
+passed. The original 900-function cohort has **788 resolved (776 promoted,
+12 retired) and 112 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
-[#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6920227987).
+[#276 checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6926467609).
 
 ## Current status and next steps
 
-- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 12, 47: 11,
-  48: 50, 50: 44, 52: 19. Five of the 137 are owned WIP entries (`in progress`).
+- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 12, 47: 5,
+  48: 50, 50: 30, 52: 14. Five ledger entries are WIP: F02604-F02607 and
+  F01416; do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
   junction to the root data and delivers one local commit (typed cores, Live
@@ -19,33 +20,37 @@ which completes plan row 32 (93/93). The original 900-function cohort has
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
-- A32-02 evidence (`VR-BATTLE-FLOATING-PLACEMENT`): F00719, F00720, F00722,
-  F00725, F00738, F00739 and F00742. Differentials: 7,168 vectors over 1,688
-  original instructions, 0 mismatches; 57/57 mutants and all seven native
-  `--replace` variants detected. Debug and Release each pass 8,516/8,516
-  regression cases with matching canonical replays and 24/24 focused cases.
-- Active worker lanes (not promotions until integrated and verified):
-  - B52-07 manual help loading and screen lifecycle in
-    `batch-manual-lifecycle-6d37725d`.
-  - B50-10 cube-puzzle initialization and transitions (F03024, F03046-F03051)
-    in `batch-cube-lifecycle-e1b2d0e8`.
-- Ready after those: B50-13 Gazette camera panels (#371 is fixed), B50-05
-  game-clear initialization (gates B50-08/B50-11), B47-03/B47-04 inventory and
-  equipment controllers, B52-02 frame-owner completion, and row 39's A39-05
-  analyze grids, A39-04 particle emitter (F01515) and A39-06 rings.
-- Blocked: A30-01 F00830 (#296), B48-01 (#378), B48-08 (#376), B48-06/07
-  (#373), B48-10 (#381), B52-12/B52-13 (#383). #384 (packet-local index
-  preflight) waits on #377.
+- B47-04 evidence (`VR-MENU-EQUIPMENT-MENUS`): F02630-F02635. Each differential
+  passed 1,024 vectors with zero mismatches; all 92 original mutants and six
+  native broken variants were detected. Debug and Release group checks each
+  passed 8,705 regression cases / 12,943,256 assertions, matching canonical
+  replays and 69 focused cases / 392 assertions. Full Debug and Release test
+  suites passed sequentially with the same case/assertion totals. The group
+  gate passed after ledger synchronization; the integrated worker worktree was
+  removed after push and exact-revision CI.
+- B50-05 game-clear initialization stopped without an implementation commit,
+  tests, or differentials. Its clean worker worktree remains at
+  `D:\Dev\NativePort\wt\batch-game-clear-init-c8f3e2b4`; the preserved source
+  snapshot is outside the repository at
+  `C:\Users\judee\.copilot\session-state\8cb283b1-2d32-4344-87de-bccc86d8748a\files\b50-05-backup\`.
+  [#410](https://github.com/JEschete/VS-NativePort/issues/410) records two
+  unconfirmed lifecycle hypotheses; reproduce them separately before
+  classifying or fixing either one.
+- Remaining order and blockers are tracked in issue #4, the plan, and the
+  ledgers. F00830 remains blocked by #296; honor the listed dependencies before
+  dispatching later slices.
 - No interactive combat verification, gameplay completion or compatibility
   retirement is claimed.
 
 Next steps:
 
-1. Confirm Source Quality on `c6cc76db8`.
-2. Integrate B52-07 and B50-10 as they report, then dispatch the next ready
-   packets in dependency order.
-3. Resolve the copier gates #381 and #383 so B48-10 and B52-12/B52-13 can proceed.
-4. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md).
+1. Continue with the next unblocked tracker-priority slice, coordinating the
+   five existing WIP ledger entries and honoring their dependencies.
+2. Keep #410 open until the loader and reward caller paths are reproduced; do
+   not present B50-05 as a completed promotion.
+3. For each group, follow [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md),
+   then commit, push, and verify exact-revision CI before closing its tracker
+   checkpoint.
 
 ### Previous: battle-sphere lifecycle/geometry (2026-11-15)
 
