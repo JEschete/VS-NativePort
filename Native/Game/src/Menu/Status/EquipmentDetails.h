@@ -24,7 +24,6 @@ char* Menu_Status_ArmorDescription(Items_ArmorLoadout* armor_loadout);
 char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* accessory_loadout);
 int Menu_Status_IsDetailElementSelectable(int newSelection, int flags);
 int Menu_Status_NavigateDetailElements(u_int newSelection, int flags);
-int Menu_Status_EquipmentRowCount(void);
 void Menu_Status_HoistEquipmentRow(int row);
 void Menu_Status_BeginDetailTransition(int selectedRow);
 void Menu_Status_InitializeDetailPanel(int selectedRow, int classAffinity);

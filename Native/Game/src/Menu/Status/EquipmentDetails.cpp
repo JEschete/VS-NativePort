@@ -6,6 +6,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -288,13 +289,6 @@ int Menu_Status_NavigateDetailElements(u_int newSelection, int flags)
     return newSelection;
 }
 
-// decomp: MENU4.PRG _getEquipmentListRowCount (src/MENU/MENU4.PRG/120.c:1132)
-int Menu_Status_EquipmentRowCount(void)
-{
-    return Menu_Status_LimbCount(Menu_Status_selectedActor - 1) + 2
-         + (Battle_actors[Menu_Status_selectedActor - 1]->stats->accessory.accessory.id != 0);
-}
-
 // decomp: MENU4.PRG _setActiveRow (src/MENU/MENU4.PRG/120.c:1299)
 void Menu_Status_HoistEquipmentRow(int row)
 {
@@ -500,7 +494,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         return 0;
     }
 
-    limbs = Menu_Status_LimbCount(Menu_Status_selectedActor - 1);
+    limbs = VS::Menu::Status::LiveLimbCount(Menu_Status_selectedActor - 1);
 
     state = Menu_Status_equipmentDetailState;
 
@@ -577,7 +571,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         if ((Input_buttonsState & (PADL1 | PADR1)) != (PADL1 | PADR1)) {
             int previous_equipment_row;
             equipment_row_advance = 0;
-            equipmentCount = Menu_Status_EquipmentRowCount();
+            equipmentCount = VS::Menu::Status::LiveEquipmentRowCount();
             selected_equipment_row = Menu_Status_equipmentDetailsSelectedEquipmentRow;
 
             if (Input_buttonRepeat & PADL1) {
@@ -831,7 +825,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         }
 
         if (Input_buttonsPressed.allButtons & PADRdown) {
-            Menu_Status_BeginVitalsTransition(Menu_Status_selectedActor - 1);
+            VS::Menu::Status::LiveBeginVitalsTransition(Menu_Status_selectedActor - 1);
             Menu_Status_ExitEquipmentDetails(1);
             VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
             return Menu_Status_equipmentDetailsSelectedEquipmentRow + 1;
@@ -878,8 +872,8 @@ int Menu_Status_UpdateEquipmentList(int element)
     Battle_ActorStats* selected_actor_stats = Battle_actors[Menu_Status_selectedActor - 1]->stats;
     Battle_LimbStats* limbs = selected_actor_stats->limbs;
 
-    limbCount = Menu_Status_LimbCount(Menu_Status_selectedActor - 1);
-    rowCount = Menu_Status_EquipmentRowCount();
+    limbCount = VS::Menu::Status::LiveLimbCount(Menu_Status_selectedActor - 1);
+    rowCount = VS::Menu::Status::LiveEquipmentRowCount();
 
     if (element != 0) {
         Menu_Framework_menuMemory.selectedEquipment = element + 1;
@@ -990,12 +984,12 @@ int Menu_Status_UpdateEquipmentList(int element)
             i = Menu_Status_selectedActor - 1;
 
             if (Input_buttonsPressed.allButtons & PADL1) {
-                i = Menu_Status_FindNextInspectableActor(i, 14);
+                i = VS::Menu::Status::LiveFindNextInspectableActor(i, 14);
                 temp_s5 = 1;
             }
 
             if (Input_buttonsPressed.allButtons & PADR1) {
-                i = Menu_Status_FindNextInspectableActor(i, 1);
+                i = VS::Menu::Status::LiveFindNextInspectableActor(i, 1);
                 temp_s5 = 1 | (1 << 4);
             }
 
@@ -1003,8 +997,8 @@ int Menu_Status_UpdateEquipmentList(int element)
 
                 Menu_Status_previousActor = Menu_Status_selectedActor;
 
-                Menu_Status_BeginVitalsTransition(i);
-                Menu_Status_AnimateActorSwitch(i + temp_s5);
+                VS::Menu::Status::LiveBeginVitalsTransition(i);
+                VS::Menu::Status::LiveAnimateActorSwitch(i + temp_s5);
                 VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
                 VS::Menu::Framework::ClearLiveMenuExcept(4);
 
@@ -1014,7 +1008,7 @@ int Menu_Status_UpdateEquipmentList(int element)
         break;
 
     case Menu_Status_EquipmentListState_WaitChangeActor:
-        if (Menu_Status_AnimateActorSwitch(0)) {
+        if (VS::Menu::Status::LiveAnimateActorSwitch(0)) {
             Menu_Status_equipmentScreenState = Menu_Status_EquipmentListState_WaitActorInit;
         }
         break;

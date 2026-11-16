@@ -121,6 +121,7 @@
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
+#include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -2164,6 +2165,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU5.PRG", 0x8010815Cu, 0u, (void*)&VS::Menu::map::LiveDrawConnectingAreaLabel, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80108274u, 0u, (void*)&VS::Menu::map::LiveQueueLabel, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010839Cu, 0u, (void*)&VS::Menu::map::LiveShouldDrawDoorStateMarker, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103608u, 0u, (void*)&VS::Menu::Status::LiveBeginVitalsTransition, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103688u, 0u, (void*)&VS::Menu::Status::LiveFindNextInspectableActor, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103744u, 0u, (void*)&VS::Menu::Status::LiveAnimateActorSwitch, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x8010399Cu, 0u, (void*)&VS::Menu::Status::LiveDrawUnanalyzedValue, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103A6Cu, 0u, (void*)&VS::Menu::Status::LiveDrawVitalBar, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103AC8u, 0u, (void*)&VS::Menu::Status::LiveDrawVitals, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80104514u, 0u, (void*)&VS::Menu::Status::LiveLimbCount, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x8010455Cu, 0u, (void*)&VS::Menu::Status::LiveEquipmentRowCount, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

@@ -1697,6 +1697,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::map::LiveDrawConnectingAreaLabel": r"Native\Game\include\Menu\MapMarkersLive.hpp",
     "VS::Menu::map::LiveQueueLabel": r"Native\Game\include\Menu\MapMarkersLive.hpp",
     "VS::Menu::map::LiveShouldDrawDoorStateMarker": r"Native\Game\include\Menu\MapMarkersLive.hpp",
+    "VS::Menu::Status::LiveBeginVitalsTransition": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::LiveFindNextInspectableActor": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::LiveAnimateActorSwitch": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::LiveDrawUnanalyzedValue": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::LiveDrawVitalBar": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::LiveDrawVitals": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::LiveLimbCount": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::LiveEquipmentRowCount": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3038,6 +3046,14 @@ OWNED_CALL_BINDINGS["F02708"] = "VS::Menu::map::LiveAppendLabelLine"
 OWNED_CALL_BINDINGS["F02711"] = "VS::Menu::map::LiveDrawConnectingAreaLabel"
 OWNED_CALL_BINDINGS["F02712"] = "VS::Menu::map::LiveQueueLabel"
 OWNED_CALL_BINDINGS["F02714"] = "VS::Menu::map::LiveShouldDrawDoorStateMarker"
+OWNED_CALL_BINDINGS["F02656"] = "VS::Menu::Status::LiveBeginVitalsTransition"
+OWNED_CALL_BINDINGS["F02657"] = "VS::Menu::Status::LiveFindNextInspectableActor"
+OWNED_CALL_BINDINGS["F02658"] = "VS::Menu::Status::LiveAnimateActorSwitch"
+OWNED_CALL_BINDINGS["F02659"] = "VS::Menu::Status::LiveDrawUnanalyzedValue"
+OWNED_CALL_BINDINGS["F02660"] = "VS::Menu::Status::LiveDrawVitalBar"
+OWNED_CALL_BINDINGS["F02661"] = "VS::Menu::Status::LiveDrawVitals"
+OWNED_CALL_BINDINGS["F02666"] = "VS::Menu::Status::LiveLimbCount"
+OWNED_CALL_BINDINGS["F02667"] = "VS::Menu::Status::LiveEquipmentRowCount"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4884,6 +4900,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU5.PRG", 0x8010815C, "VS::Menu::map::LiveDrawConnectingAreaLabel"),  # F02711
     ("MENU/MENU5.PRG", 0x80108274, "VS::Menu::map::LiveQueueLabel"),  # F02712
     ("MENU/MENU5.PRG", 0x8010839C, "VS::Menu::map::LiveShouldDrawDoorStateMarker"),  # F02714
+    ("MENU/MENU4.PRG", 0x80103608, "VS::Menu::Status::LiveBeginVitalsTransition"),  # F02656
+    ("MENU/MENU4.PRG", 0x80103688, "VS::Menu::Status::LiveFindNextInspectableActor"),  # F02657
+    ("MENU/MENU4.PRG", 0x80103744, "VS::Menu::Status::LiveAnimateActorSwitch"),  # F02658
+    ("MENU/MENU4.PRG", 0x8010399C, "VS::Menu::Status::LiveDrawUnanalyzedValue"),  # F02659
+    ("MENU/MENU4.PRG", 0x80103A6C, "VS::Menu::Status::LiveDrawVitalBar"),  # F02660
+    ("MENU/MENU4.PRG", 0x80103AC8, "VS::Menu::Status::LiveDrawVitals"),  # F02661
+    ("MENU/MENU4.PRG", 0x80104514, "VS::Menu::Status::LiveLimbCount"),  # F02666
+    ("MENU/MENU4.PRG", 0x8010455C, "VS::Menu::Status::LiveEquipmentRowCount"),  # F02667
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5178,9 +5202,9 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("        Menu_Status_updateScreenEnabled = 1;\n        Menu_Status_updateAnimWait = 1;",
          "        Menu_Status_updateAnimWait = 1;",
          "the native preview slot is not initialized until the actor-switch producer runs"),
-        ("        if (Menu_Status_updateAnimWait != 0) {\n            if (Menu_Status_AnimateActorSwitch(0)) {",
+        ("        if (Menu_Status_updateAnimWait != 0) {\n            if (VS::Menu::Status::LiveAnimateActorSwitch(0)) {",
          "        if (Menu_Status_updateAnimWait != 0) {\n"
-         "            int preview_ready = Menu_Status_AnimateActorSwitch(0);\n"
+         "            int preview_ready = VS::Menu::Status::LiveAnimateActorSwitch(0);\n"
          "            Menu_Status_updateScreenEnabled = 1;\n"
          "            if (preview_ready) {",
          "enable Status drawing only after the actor-switch producer has loaded its native preview"),
@@ -7516,9 +7540,6 @@ REGEX_FIXES += [
         ("Menu::Status::IsDetailElementSelectable",
          (('v0', 'maximum_component_selection'), ('v1', 'component_selection_index')),
          "F02654 src\\MENU\\MENU4.PRG\\120.c:401-454 (_equipmentDetailElementSelectable). Named roles: maximum component selection, component selection index."),
-        ("Menu::Status::FindNextInspectableActor",
-         (('temp_a0', 'candidate_actor_state_flags'),),
-         "F02657 src\\MENU\\MENU4.PRG\\120.c:548-565 (_getNextValidActor). Named roles: candidate actor state flags."),
         ("Menu::Status::DrawLimbConditionIndicator",
          (('temp_t1', 'limb_indicator_ordering_table'),),
          "F02662 src\\MENU\\MENU4.PRG\\120.c:847-865 (_drawStatusIndicator). Named roles: limb indicator ordering table."),

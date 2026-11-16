@@ -101,7 +101,18 @@
 ],
 [
 "// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.",
-"#include \"Menu/Container/ContainerMenuDialogsLive.hpp\""
+"#include \"Menu/Container/ContainerMenuDialogsLive.hpp\"",
+"#include \"Menu/Status/ActorSwitchingLive.hpp\""
+]
+],
+[
+45,
+[
+"    Menu_Status_EquipmentDetails_ResetMenu4Statics();"
+],
+[
+"    Menu_Status_EquipmentDetails_ResetMenu4Statics();",
+"    VS::Menu::Status::ResetLiveActorSwitchPhase();"
 ]
 ],
 [
@@ -1936,25 +1947,7 @@
 ],
 "Native\\Game\\src\\Menu\\Status\\ActorStatus.cpp": [
 [
-314,
-[
-"        colorIndex & 0xFF, ((current + max) - 1) / max, Render_frameScratch.orderingTable - 0xC, xy);"
-],
-[
-"        colorIndex & 0xFF, ((current + max) - 1) / max, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC), xy);"
-]
-],
-[
-323,
-[
-"    u_long* insertBefore = Render_frameScratch.orderingTable - 0xC;"
-],
-[
-"    u_long* insertBefore = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC);"
-]
-],
-[
-426,
+134,
 [
 "    limb_indicator_ordering_table = Render_frameScratch.overlayOrderingTable;",
 "    prim = Render_frameScratch.primitiveCursor;"
@@ -1965,7 +1958,7 @@
 ]
 ],
 [
-454,
+162,
 [
 "    prim = Render_frameScratch.primitiveCursor;",
 "    leader_line_ordering_table = Render_frameScratch.orderingTable;"
@@ -1976,7 +1969,7 @@
 ]
 ],
 [
-505,
+213,
 [
 "                    128, ((x + 8) & 0xFFFF) | y, vs_getWH(8, 8), Render_frameScratch.orderingTable - 8)[4] ="
 ],
@@ -1985,7 +1978,7 @@
 ]
 ],
 [
-511,
+219,
 [
 "                128, (x & 0xFFFF) | y, vs_getWH(16, 16), Render_frameScratch.orderingTable - 8);"
 ],
@@ -1994,7 +1987,7 @@
 ]
 ],
 [
-839,
+533,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;",
 "    u_long* model_fade_ordering_table = Render_frameScratch.orderingTable;"
@@ -2005,7 +1998,7 @@
 ]
 ],
 [
-878,
+572,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -2014,7 +2007,7 @@
 ]
 ],
 [
-880,
+574,
 [
 "    u_int* background_ordering_table_entry = ordering_table_base + 0x1FF4;"
 ],
@@ -2023,7 +2016,7 @@
 ]
 ],
 [
-883,
+577,
 [
 "        background_ordering_table_entry = ordering_table_base - 4;"
 ],
@@ -2032,7 +2025,7 @@
 ]
 ],
 [
-1658,
+1352,
 [
 "        static const int initial[6];"
 ],
@@ -2043,7 +2036,7 @@
 ],
 "Native\\Game\\src\\Menu\\Status\\EquipmentDetails.cpp": [
 [
-359,
+353,
 [
 "        VS::Menu::Framework::FormatLiveBladeRow(&blade, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -2052,7 +2045,7 @@
 ]
 ],
 [
-363,
+357,
 [
 "        VS::Menu::Framework::FormatLiveGripRow(&grip, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -2061,7 +2054,7 @@
 ]
 ],
 [
-377,
+371,
 [
 "                VS::Menu::Framework::FormatLiveGemRow(&gem, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -2070,7 +2063,7 @@
 ]
 ],
 [
-646,
+640,
 [
 "                        &actor->weapon, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -2079,7 +2072,7 @@
 ]
 ],
 [
-660,
+654,
 [
 "                        &actor->shield, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -2088,7 +2081,7 @@
 ]
 ],
 [
-667,
+661,
 [
 "                            Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -2097,7 +2090,7 @@
 ]
 ],
 [
-670,
+664,
 [
 "                            &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -2106,7 +2099,7 @@
 ]
 ],
 [
-673,
+667,
 [
 "                            Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -2115,7 +2108,7 @@
 ]
 ],
 [
-677,
+671,
 [
 "                            &armor, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],

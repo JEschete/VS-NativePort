@@ -2007,6 +2007,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\Status\ActorSwitching.cpp" />
+    <ClCompile Include="src\Menu\Status\ActorSwitchingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Status\EquipmentDetails.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2899,6 +2903,8 @@
     <ClInclude Include="include\Menu\Setup\SetupLive.hpp" />
     <ClInclude Include="include\Menu\Setup\SetupScreen.hpp" />
     <ClInclude Include="include\Menu\Sounds.hpp" />
+    <ClInclude Include="include\Menu\Status\ActorSwitching.hpp" />
+    <ClInclude Include="include\Menu\Status\ActorSwitchingLive.hpp" />
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp" />
     <ClInclude Include="include\Menu\TextBoxFrames.hpp" />
     <ClInclude Include="include\Menu\TextBoxState.hpp" />

@@ -39,18 +39,11 @@ extern char Menu_Status_selectedStatRow;;
 extern u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Status_xPos;
 extern int Menu_Status_yPos;
-void Menu_Status_BeginVitalsTransition(int actor);
-int Menu_Status_FindNextInspectableActor(int currentActor, int targetActor);
-int Menu_Status_AnimateActorSwitch(int init);
-void Menu_Status_DrawUnanalyzedValue(int xy, int withMax, u_long* before);
-void Menu_Status_DrawVitalBar(int colorIndex, int current, int max, int xy);
-void Menu_Status_DrawVitals(void);
 void Menu_Status_DrawLimbConditionIndicator(int colorIndex, int xy, int subdued);
 void Menu_Status_DrawLimbLeaderLine(
     int limb, int xy, int arg2 __attribute__((unused)), int opaque);
 void Menu_Status_DrawStatusEffectIcons(Battle_ActorStats* actor, int animationStep);
 int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_active);
-int Menu_Status_LimbCount(int actor);
 int Menu_Status_UpdateLimbPanel(int init);
 void Menu_Status_DrawModelSlideFade(void);
 void Menu_Status_DrawBackground(void);

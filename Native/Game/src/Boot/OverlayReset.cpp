@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
+#include "Menu/Status/ActorSwitchingLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
@@ -45,6 +46,7 @@ void Boot_ResetMenu4Statics(void)
 {
     Menu_Status_ActorStatus_ResetMenu4Statics();
     Menu_Status_EquipmentDetails_ResetMenu4Statics();
+    VS::Menu::Status::ResetLiveActorSwitchPhase();
 }
 
 // Call where the original loads MENU5.PRG: restores the statics its reload re-read from the disc.

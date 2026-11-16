@@ -2823,6 +2823,12 @@
     <ClInclude Include="src\Menu\Status\ActorStatus.h">
       <Filter>src\Menu\Status</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\Status\ActorSwitching.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\ActorSwitchingLive.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Status\EquipmentDetails.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
@@ -4349,6 +4355,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Sounds.hpp">
       <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\ActorSwitching.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\ActorSwitchingLive.hpp">
+      <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp">
       <Filter>include\Menu\Status</Filter>
