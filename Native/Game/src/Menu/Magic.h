@@ -27,11 +27,6 @@ extern char Menu_Magic_availableWarlockSpells[18];;
 extern u_short Menu_Magic_magicStrings[2462]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Magic_savePointData[];
 extern u_short Menu_Magic_teleportationStrings[1599]; /* contents: disc string table (ModuleData.cpp) */;
-int Menu_Magic_UpdateTeleportMenu(int init);
-void Menu_Magic_CreateHeader(void);
 int Menu_Magic_Update(u_char* state);
-void Menu_Magic_SetSpellMpCost(int id);
-void Menu_Magic_SetTeleportMpCost(int costDecimal, int disabled);
-int Menu_Magic_TeleportMpCost(int targetSavePointId);
 
 #endif // VS_MENU_MAGIC_H_DECLS

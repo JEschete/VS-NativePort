@@ -335,7 +335,7 @@
 ],
 "Native\\Game\\src\\Menu\\BattleAbilities.cpp": [
 [
-116,
+117,
 [
 "        VS::Menu::InitLiveInformationTextBox(3);"
 ],
@@ -344,7 +344,7 @@
 ]
 ],
 [
-409,
+410,
 [
 "            VS::Menu::InitLiveInformationTextBox(3);"
 ],
@@ -353,7 +353,7 @@
 ]
 ],
 [
-435,
+436,
 [
 "            VS::Menu::InitLiveInformationTextBox(3);"
 ],
@@ -362,7 +362,7 @@
 ]
 ],
 [
-610,
+611,
 [
 "    Menu_BattleAbilities_abilityText = VS::Core::Memory::AllocateLiveFromHighEnd(abilityCount * 128);"
 ],
@@ -371,7 +371,7 @@
 ]
 ],
 [
-703,
+704,
 [
 "    u_long* scratch = Render_frameScratch.overlayOrderingTable + 8;"
 ],
@@ -380,7 +380,7 @@
 ]
 ],
 [
-1341,
+1342,
 [
 "        static const u_char initial[16];"
 ],
@@ -389,7 +389,7 @@
 ]
 ],
 [
-1345,
+1346,
 [
 "        static const u_char initial[11];"
 ],
@@ -398,7 +398,7 @@
 ]
 ],
 [
-1349,
+1350,
 [
 "        static const char initial[16];"
 ],
@@ -499,7 +499,7 @@
 ],
 "Native\\Game\\src\\Menu\\Inventory\\ItemList.cpp": [
 [
-211,
+212,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -508,7 +508,7 @@
 ]
 ],
 [
-395,
+396,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, Render_frameScratch.overlayOrderingTable - 12);"
 ],
@@ -517,7 +517,7 @@
 ]
 ],
 [
-397,
+398,
 [
 "        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, Render_frameScratch.overlayOrderingTable - 12);",
 "        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, Render_frameScratch.overlayOrderingTable - 12);"
@@ -528,7 +528,7 @@
 ]
 ],
 [
-499,
+500,
 [
 "    char* indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -537,7 +537,7 @@
 ]
 ],
 [
-694,
+695,
 [
 "    indices = Menu_Inventory_inventoryIndices[itemCategory];"
 ],
@@ -546,7 +546,7 @@
 ]
 ],
 [
-700,
+701,
 [
 "        rowTypes = textBuf + 0x1800;",
 "        menuText = textBuf + 0x1900;"
@@ -557,7 +557,7 @@
 ]
 ],
 [
-724,
+725,
 [
 "            rowCount = Menu_Inventory_BuildItemRows(itemCategory, menuText, rowTypes, textBuf);"
 ],
@@ -566,7 +566,7 @@
 ]
 ],
 [
-828,
+829,
 [
 "                sp310 = textBuf + 0x1900;",
 "                rowTypes = textBuf + 0x1800;"
@@ -577,7 +577,7 @@
 ]
 ],
 [
-831,
+832,
 [
 "                count = Menu_Inventory_BuildItemRows(itemCategory, sp310, rowTypes, textBuf);"
 ],
@@ -586,7 +586,7 @@
 ]
 ],
 [
-1356,
+1357,
 [
 "        static const char initial[8];"
 ],
@@ -597,7 +597,7 @@
 ],
 "Native\\Game\\src\\Menu\\Loot\\LootScreen.cpp": [
 [
-380,
+381,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -606,7 +606,7 @@
 ]
 ],
 [
-614,
+615,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -615,7 +615,7 @@
 ]
 ],
 [
-1052,
+1053,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -624,7 +624,7 @@
 ]
 ],
 [
-1106,
+1107,
 [
 "        VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -633,7 +633,7 @@
 ]
 ],
 [
-1575,
+1576,
 [
 "        Menu_Loot_inventory = buf;",
 "        Menu_Loot_inventoryBackup = buf + sizeof *Menu_Loot_inventory;",
@@ -646,7 +646,7 @@
 ]
 ],
 [
-1579,
+1580,
 [
 "            buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity;"
 ],
@@ -655,7 +655,7 @@
 ]
 ],
 [
-1603,
+1604,
 [
 "                VS::Menu::InitLiveInformationTextBox(1);"
 ],
@@ -664,20 +664,9 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Menu\\Magic.cpp": [
-[
-613,
-[
-"        0, &Menu_Magic_mpCostTextBuffer[i], variableCost * 4 + 72, (flags >> 1) & 1);"
-],
-[
-"        0, (const char *)(&Menu_Magic_mpCostTextBuffer[i]), variableCost * 4 + 72, (flags >> 1) & 1);"
-]
-]
-],
 "Native\\Game\\src\\Menu\\Manual.cpp": [
 [
-276,
+274,
 [
 "            Menu_Manual_helpText = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size);",
 "            Menu_Manual_helpAssets = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size);"
@@ -688,7 +677,7 @@
 ]
 ],
 [
-583,
+581,
 [
 "    area = p->primitiveCursor;"
 ],
@@ -697,7 +686,7 @@
 ]
 ],
 [
-597,
+595,
 [
 "        Menu_Manual_DrawIllustration(&spriteData[spriteData[i + 1]]);"
 ],
@@ -706,7 +695,7 @@
 ]
 ],
 [
-609,
+607,
 [
 "    area = q->primitiveCursor;"
 ],
@@ -715,7 +704,7 @@
 ]
 ],
 [
-686,
+684,
 [
 "            sprite = Render_frameScratch.primitiveCursor;"
 ],
@@ -724,7 +713,7 @@
 ]
 ],
 [
-721,
+719,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -733,7 +722,7 @@
 ]
 ],
 [
-757,
+755,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -742,7 +731,7 @@
 ]
 ],
 [
-783,
+781,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
@@ -751,7 +740,7 @@
 ]
 ],
 [
-810,
+808,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -760,7 +749,7 @@
 ]
 ],
 [
-837,
+835,
 [
 "    Render_frameScratch.primitiveCursor = (void*)poly + 16 * sizeof(TILE);"
 ],
@@ -769,7 +758,7 @@
 ]
 ],
 [
-897,
+895,
 [
 "    line = Render_frameScratch.primitiveCursor;"
 ],
@@ -1539,7 +1528,7 @@
 ],
 "Native\\Game\\src\\Menu\\Results\\Results.cpp": [
 [
-351,
+344,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeGameClearTimData + i * 0x8220, &tim);"
 ],
@@ -1548,7 +1537,7 @@
 ]
 ],
 [
-985,
+978,
 [
 "    poly = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1557,7 +1546,7 @@
 ]
 ],
 [
-1007,
+1000,
 [
 "    AddPrim(scratch[1] - 0x1C, poly++);"
 ],
@@ -1566,7 +1555,7 @@
 ]
 ],
 [
-1023,
+1016,
 [
 "    poly = *(void**)Core_ScratchAddr(0);"
 ],
@@ -1575,7 +1564,7 @@
 ]
 ],
 [
-1045,
+1038,
 [
 "    AddPrim(scratch[1] - 0x1C, poly++);"
 ],
@@ -1584,7 +1573,7 @@
 ]
 ],
 [
-1131,
+1124,
 [
 "        area = p[0];"
 ],
@@ -1593,7 +1582,7 @@
 ]
 ],
 [
-1134,
+1127,
 [
 "        AddPrim(p[1] - 0x1C, area++);"
 ],
@@ -1602,7 +1591,7 @@
 ]
 ],
 [
-1206,
+1199,
 [
 "        area = q[0];"
 ],
@@ -1611,7 +1600,7 @@
 ]
 ],
 [
-1209,
+1202,
 [
 "        AddPrim(q[1] - 0x1C, area++);"
 ],
@@ -1620,7 +1609,7 @@
 ]
 ],
 [
-1249,
+1242,
 [
 "    poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);"
 ],
@@ -1629,7 +1618,7 @@
 ]
 ],
 [
-1260,
+1253,
 [
 "    AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1638,7 +1627,7 @@
 ]
 ],
 [
-1271,
+1264,
 [
 "    POLY_FT4* poly = p[0];"
 ],
@@ -1647,7 +1636,7 @@
 ]
 ],
 [
-1294,
+1287,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1656,7 +1645,7 @@
 ]
 ],
 [
-1309,
+1302,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1665,7 +1654,7 @@
 ]
 ],
 [
-1324,
+1317,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1674,7 +1663,7 @@
 ]
 ],
 [
-1338,
+1331,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -1683,7 +1672,7 @@
 ]
 ],
 [
-1346,
+1339,
 [
 "            AddPrim(p[1] - 0x1C, poly++);"
 ],
@@ -2272,7 +2261,7 @@
 ],
 "Native\\Game\\src\\Menu\\TextBox.cpp": [
 [
-202,
+59,
 [
 "    Menu_sceneNotificationBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(112);"
 ],
@@ -2281,7 +2270,7 @@
 ]
 ],
 [
-375,
+232,
 [
 "    AddPrims(Render_frameScratch.orderingTable - 24, Menu_activeTextBoxOrderingTable, Menu_activeTextBoxOrderingTable + 33);"
 ],

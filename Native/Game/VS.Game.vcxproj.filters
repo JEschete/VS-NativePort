@@ -2694,6 +2694,12 @@
     <ClInclude Include="src\Menu\Magic.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\MagicCosts.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\MagicCostsLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\MagicMenus.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -4259,6 +4265,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Loot\LootStagingLive.hpp">
       <Filter>include\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MagicCosts.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MagicCostsLive.hpp">
+      <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\MagicMenus.hpp">
       <Filter>include\Menu</Filter>

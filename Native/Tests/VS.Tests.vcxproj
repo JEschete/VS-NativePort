@@ -304,6 +304,7 @@
     <ClCompile Include="src\LogTests.cpp" />
     <ClCompile Include="src\LootRowsTests.cpp" />
     <ClCompile Include="src\LootStagingTests.cpp" />
+    <ClCompile Include="src\MagicCostsTests.cpp" />
     <ClCompile Include="src\MagicSpellMenuTests.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ManualRenderTests.cpp" />

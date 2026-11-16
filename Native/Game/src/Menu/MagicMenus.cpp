@@ -30,6 +30,7 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicSpellMenu.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -319,7 +320,7 @@ void HandleWarlockMenuInput(WarlockMenuState& menu_state, int& selected_row) {
       break;
     }
   }
-  Menu_Magic_SetSpellMpCost(action_id);
+  SetSpellMpCostLive(action_id);
 }
 
 void InitializeWarlockLevelMenu(WarlockMenuState& menu_state,
@@ -562,7 +563,7 @@ void UpdateWarlockLevelMenu(WarlockMenuState& menu_state, int& selected_row) {
         static_cast<char>(selected_level);
   }
 
-  Menu_Magic_SetSpellMpCost(selected_row + selected_level);
+  SetSpellMpCostLive(selected_row + selected_level);
   DrawWarlockLevelMenu(selected_level, available_level_count);
 }
 
@@ -672,7 +673,7 @@ int UpdateShamanMenu(unsigned int init_shortcut_invoked) {
         }
         shaman_menu_state = kReturnIfReady;
       } else {
-        Menu_Magic_SetSpellMpCost(
+        SetSpellMpCostLive(
             ReadSpellId(Menu_Magic_availableShamanSpells
                             [VS::Menu::Framework::LiveHighlightedRow()]));
       }
@@ -756,7 +757,7 @@ int UpdateSorcererMenu(unsigned int init_shortcut_invoked) {
         }
         sorcerer_menu_state = kReturnIfReady;
       } else {
-        Menu_Magic_SetSpellMpCost(
+        SetSpellMpCostLive(
             ReadSpellId(Menu_Magic_availableSorcererSpells
                             [VS::Menu::Framework::LiveHighlightedRow()]));
       }
@@ -839,7 +840,7 @@ int UpdateEnchanterMenu(unsigned int init_shortcut_invoked) {
         }
         enchanter_menu_state = kReturnIfReady;
       } else {
-        Menu_Magic_SetSpellMpCost(
+        SetSpellMpCostLive(
             ReadSpellId(Menu_Magic_availableEnchanterSpells
                             [VS::Menu::Framework::LiveHighlightedRow()]));
       }

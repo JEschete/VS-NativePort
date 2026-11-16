@@ -5,6 +5,7 @@
 
 #include "Battle/ActionCostsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenus.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -37,7 +38,6 @@ int Menu_Framework_actionRestrictions{};
 Menu_Framework_MenuMemory Menu_Framework_menuMemory{};
 char Menu_Framework_displayActionCost{};
 
-void Menu_Magic_SetSpellMpCost(int) {}
 void* Core_ScratchBase(void) {
   static std::array<std::uint32_t, 256> scratch{};
   return scratch.data();
@@ -80,6 +80,10 @@ void PlaySelectSound() {}
 void PlayInvalidSound() {}
 void PlayChangeSound() {}
 }  // namespace VS::Menu
+
+namespace VS::Menu::Magic {
+void SetSpellMpCostLive(int) {}
+}  // namespace VS::Menu::Magic
 
 namespace VS::Render {
 void DrawLiveCompactText(const char*, int, void*) {}

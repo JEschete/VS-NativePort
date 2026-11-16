@@ -115,6 +115,7 @@
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
+#include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -2083,6 +2084,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU0.PRG", 0x80103464u, 0u, (void*)&VS::Menu::Magic::UpdateShamanMenuLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x801037A8u, 0u, (void*)&VS::Menu::Magic::UpdateSorcererMenuLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x80103AECu, 0u, (void*)&VS::Menu::Magic::UpdateEnchanterMenuLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x80103E30u, 0u, (void*)&VS::Menu::Magic::UpdateTeleportMenuLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x80104254u, 0u, (void*)&VS::Menu::Magic::CreateHeaderLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x80102884u, 0u, (void*)&VS::Menu::Magic::SetSpellMpCostLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x801029B8u, 0u, (void*)&VS::Menu::Magic::SetTeleportMpCostLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x80102A68u, 0u, (void*)&VS::Menu::Magic::TeleportMpCostLive, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&VS::Menu::SetLiveTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&VS::Menu::SelectLiveTextBoxChoice, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&VS::Menu::InitLiveInformationTextBox, 0u, 0u, 0u},

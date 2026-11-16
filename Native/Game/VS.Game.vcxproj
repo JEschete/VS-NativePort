@@ -1902,6 +1902,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\MagicCosts.cpp" />
+    <ClCompile Include="src\Menu\MagicCostsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\MagicMenus.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -2861,6 +2865,8 @@
     <ClInclude Include="include\Menu\Loot\LootRowsLive.hpp" />
     <ClInclude Include="include\Menu\Loot\LootStaging.hpp" />
     <ClInclude Include="include\Menu\Loot\LootStagingLive.hpp" />
+    <ClInclude Include="include\Menu\MagicCosts.hpp" />
+    <ClInclude Include="include\Menu\MagicCostsLive.hpp" />
     <ClInclude Include="include\Menu\MagicMenus.hpp" />
     <ClInclude Include="include\Menu\MagicMenusLive.hpp" />
     <ClInclude Include="include\Menu\MagicSpellMenu.hpp" />

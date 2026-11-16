@@ -1625,6 +1625,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Magic::UpdateShamanMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Menu::Magic::UpdateSorcererMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
     "VS::Menu::Magic::UpdateEnchanterMenuLive": r"Native\Game\include\Menu\MagicMenusLive.hpp",
+    "VS::Menu::Magic::UpdateTeleportMenuLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
+    "VS::Menu::Magic::CreateHeaderLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
+    "VS::Menu::Magic::SetSpellMpCostLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
+    "VS::Menu::Magic::SetTeleportMpCostLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
+    "VS::Menu::Magic::TeleportMpCostLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
     "VS::Menu::SetLiveTextBoxText": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
     "VS::Menu::SelectLiveTextBoxChoice": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
     "VS::Menu::InitLiveInformationTextBox": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
@@ -2809,6 +2814,11 @@ OWNED_CALL_BINDINGS["F02604"] = "VS::Menu::Magic::UpdateWarlockMenuLive"
 OWNED_CALL_BINDINGS["F02605"] = "VS::Menu::Magic::UpdateShamanMenuLive"
 OWNED_CALL_BINDINGS["F02606"] = "VS::Menu::Magic::UpdateSorcererMenuLive"
 OWNED_CALL_BINDINGS["F02607"] = "VS::Menu::Magic::UpdateEnchanterMenuLive"
+OWNED_CALL_BINDINGS["F02598"] = "VS::Menu::Magic::UpdateTeleportMenuLive"
+OWNED_CALL_BINDINGS["F02599"] = "VS::Menu::Magic::CreateHeaderLive"
+OWNED_CALL_BINDINGS["F02601"] = "VS::Menu::Magic::SetSpellMpCostLive"
+OWNED_CALL_BINDINGS["F02602"] = "VS::Menu::Magic::SetTeleportMpCostLive"
+OWNED_CALL_BINDINGS["F02603"] = "VS::Menu::Magic::TeleportMpCostLive"
 OWNED_CALL_BINDINGS["F01329"] = "VS::Menu::SetLiveTextBoxText"
 OWNED_CALL_BINDINGS["F01330"] = "VS::Menu::SelectLiveTextBoxChoice"
 OWNED_CALL_BINDINGS["F01343"] = "VS::Menu::InitLiveInformationTextBox"
@@ -4753,6 +4763,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU0.PRG", 0x80103464, "VS::Menu::Magic::UpdateShamanMenuLive"),  # F02605
     ("MENU/MENU0.PRG", 0x801037A8, "VS::Menu::Magic::UpdateSorcererMenuLive"),  # F02606
     ("MENU/MENU0.PRG", 0x80103AEC, "VS::Menu::Magic::UpdateEnchanterMenuLive"),  # F02607
+    ("MENU/MENU0.PRG", 0x80103E30, "VS::Menu::Magic::UpdateTeleportMenuLive"),  # F02598
+    ("MENU/MENU0.PRG", 0x80104254, "VS::Menu::Magic::CreateHeaderLive"),  # F02599
+    ("MENU/MENU0.PRG", 0x80102884, "VS::Menu::Magic::SetSpellMpCostLive"),  # F02601
+    ("MENU/MENU0.PRG", 0x801029B8, "VS::Menu::Magic::SetTeleportMpCostLive"),  # F02602
+    ("MENU/MENU0.PRG", 0x80102A68, "VS::Menu::Magic::TeleportMpCostLive"),  # F02603
     ("BATTLE/BATTLE.PRG", 0x800C6BF0, "VS::Menu::SetLiveTextBoxText"),  # F01329
     ("BATTLE/BATTLE.PRG", 0x800C6C8C, "VS::Menu::SelectLiveTextBoxChoice"),  # F01330
     ("BATTLE/BATTLE.PRG", 0x800C8E04, "VS::Menu::InitLiveInformationTextBox"),  # F01343
@@ -7409,9 +7424,6 @@ REGEX_FIXES += [
         ("Menu::Inventory::UpdateItemList",
          (('var_s2', 'base_item_category'),),
          "F02597 src\\MENU\\items2.h:201-965 (_itemNavigation). Named roles: base item category. Retained: sp310: Two distinct block bindings: heap-backed item-row text pointer and action-menu local text array[12]; var_a1_2: Merged packed row-creation options, category-navigation button masks, swapped inventory ID and parent equipment ID."),
-        ("Menu::Magic::UpdateTeleportMenu",
-         (('a0', 'packed_destination_tile_z'), ('a2', 'selected_save_point_index'), ('v0', 'packed_location_and_tile_x')),
-         "F02598 src\\MENU\\MENU0.PRG\\15AC.c:22-143 (_teleportMenu). Named roles: packed destination tile z, selected save point index, packed location and tile x. Retained: v1: Merged packed location field (bits0..8), tile-X field (bits9..13), and MP-cost field (bits19..31)."),
         ("Menu::Magic::UpdateWarlockMenu",
          (('temp_s6', 'spell_level_ordering_table'), ('var_s7_2', 'level_locked')),
          "F02604 src\\MENU\\MENU0.PRG\\84.c:164-498 (_warlockMagicMenu). Named roles: spell level ordering table, level locked."),
