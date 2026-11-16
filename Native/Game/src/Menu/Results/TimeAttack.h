@@ -19,14 +19,6 @@ int Menu_Results_InitializeTimeAttackResults(void);
 int Menu_Results_InitializeTimeAttackStart(void);
 int Menu_Results_UpdateTimeAttackResults(void);
 int Menu_Results_UpdateTimeAttackStart(void);
-void Menu_Results_DrawTimeAttackResultsHeading(int x, int y, int timer);
-void Menu_Results_DrawTimeAttackRating(int x, int y, int fade_timer);
-void Menu_Results_DrawTimeAttackRatingWipe(int x, int y, int arg2);
-void Menu_Results_DrawTimeAttackTime(int draw_x, int draw_y, int fade_timer);
-void Menu_Results_DrawCountingTimeAttackTime(int x, int y, int timer);
-void Menu_Results_DrawNewRecord(int x, int y, int timer);
-void Menu_Results_DrawLeaderboard(int x, int y, int timer);
-void Menu_Results_DrawLeaderboardEntry(int x, int y, int slot, int timer);
 void Menu_Results_TimeAttack_ResetMenufStatics(void);
 
 #endif // VS_MENU_RESULTS_TIMEATTACK_H_DECLS

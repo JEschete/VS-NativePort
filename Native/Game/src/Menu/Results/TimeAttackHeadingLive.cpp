@@ -105,6 +105,11 @@ std::array<std::uint32_t, kTimeAttackCourses> LiveFirstPlaceScores() {
 }
 }  // namespace
 
+TimeAttackDrawHost& LiveTimeAttackDrawHost() {
+  static LiveTimeAttackHost host;
+  return host;
+}
+
 // decomp: MENUF.PRG _renderTimeAttackHeader (src/MENU/MENUF.PRG/3B8.c:1146),
 // 0x8010459C
 void LiveDrawTimeAttackHeading(int x, int y, int timer) {

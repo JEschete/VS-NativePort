@@ -2019,6 +2019,10 @@
     <ClCompile Include="src\Menu\Results\TimeAttackHeadingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\TimeAttackRating.cpp" />
+    <ClCompile Include="src\Menu\Results\TimeAttackRatingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\Encyclopedia.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2980,6 +2984,8 @@
     <ClInclude Include="include\Menu\Results\ResultsStatsLive.hpp" />
     <ClInclude Include="include\Menu\Results\TimeAttackHeading.hpp" />
     <ClInclude Include="include\Menu\Results\TimeAttackHeadingLive.hpp" />
+    <ClInclude Include="include\Menu\Results\TimeAttackRating.hpp" />
+    <ClInclude Include="include\Menu\Results\TimeAttackRatingLive.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRows.hpp" />

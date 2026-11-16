@@ -6,7 +6,13 @@
 // name or countdown number outside the atlas, or a course without a best time,
 // draws nothing and logs a throttled warning.
 
+#include "Menu/Results/TimeAttackHeading.hpp"
+
 namespace VS::Menu::Results {
+// The stateless host these entries draw through, for the other time-attack
+// Live bindings.
+TimeAttackDrawHost& LiveTimeAttackDrawHost();
+
 void LiveDrawTimeAttackHeading(int x, int y, int timer);
 void LiveDrawCourseNumber(int x, int y, int timer);
 void LiveDrawBossName(int x, int y, int timer);

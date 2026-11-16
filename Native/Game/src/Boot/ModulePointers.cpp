@@ -133,6 +133,7 @@
 #include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
+#include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
@@ -2202,6 +2203,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x801047D4u, 0u, (void*)&VS::Menu::Results::LiveDrawBestTime, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x8010489Cu, 0u, (void*)&VS::Menu::Results::LiveDrawStartCountdown, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80104914u, 0u, (void*)&VS::Menu::Results::LivePulseTimeAttackClut, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010559Cu, 0u, (void*)&VS::Menu::Results::LiveDrawTimeAttackResultsHeading, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010564Cu, 0u, (void*)&VS::Menu::Results::LiveDrawTimeAttackRating, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801056E8u, 0u, (void*)&VS::Menu::Results::LiveDrawTimeAttackRatingWipe, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80105790u, 0u, (void*)&VS::Menu::Results::LiveDrawTimeAttackTime, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010581Cu, 0u, (void*)&VS::Menu::Results::LiveDrawCountingTimeAttackTime, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801059B8u, 0u, (void*)&VS::Menu::Results::LiveDrawNewRecord, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801059FCu, 0u, (void*)&VS::Menu::Results::LiveDrawLeaderboard, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80105B30u, 0u, (void*)&VS::Menu::Results::LiveDrawLeaderboardEntry, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},

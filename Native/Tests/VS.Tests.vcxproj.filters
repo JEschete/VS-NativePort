@@ -1116,6 +1116,9 @@
     <ClCompile Include="src\TimeAttackHeadingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TimeAttackRatingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TimelineCommandsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1282,6 +1285,9 @@
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\SphereContainmentLiveFixture.hpp">
+      <Filter>include\TestSupport</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TestSupport\TimeAttackDrawRecorder.hpp">
       <Filter>include\TestSupport</Filter>
     </ClInclude>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">

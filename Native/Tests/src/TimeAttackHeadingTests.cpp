@@ -15,6 +15,7 @@
 #include "Render/DisplayControl.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
+#include "TestSupport/TimeAttackDrawRecorder.hpp"
 extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Menu/Results/CubePuzzle.h"
@@ -31,63 +32,10 @@ extern "C" {
 namespace {
 namespace r = VS::Menu::Results;
 namespace render = VS::Render;
-
-enum class Kind : std::uint8_t { kFlash, kFade, kFadeClut, kTime };
-
-struct Call {
-  Kind kind = Kind::kFlash;
-  std::int32_t x = 0;
-  std::int32_t y = 0;
-  std::size_t index = 0;
-  std::int32_t brightness = 0;
-  std::int32_t clut = 0;
-  std::int32_t time = 0;
-  r::TimeAttackColors colors{};
-
-  [[nodiscard]] bool At(std::int32_t at_x, std::int32_t at_y,
-                        std::size_t at_index) const {
-    return x == at_x && y == at_y && index == at_index;
-  }
-};
-
-class RecordHost final : public r::TimeAttackDrawHost {
- public:
-  std::vector<Call> calls;
-
-  void DrawFlashFade(r::ResultsPoint origin, std::size_t texture_index,
-                     const r::TimeAttackColors& colors) override {
-    calls.push_back({.kind = Kind::kFlash,
-                     .x = origin.x,
-                     .y = origin.y,
-                     .index = texture_index,
-                     .colors = colors});
-  }
-  void DrawFade(r::ResultsPoint origin, std::size_t texture_index,
-                std::int32_t brightness) override {
-    calls.push_back({.kind = Kind::kFade,
-                     .x = origin.x,
-                     .y = origin.y,
-                     .index = texture_index,
-                     .brightness = brightness});
-  }
-  void DrawFadeClut(r::ResultsPoint origin, std::size_t texture_index,
-                    std::int32_t brightness, std::int32_t clut) override {
-    calls.push_back({.kind = Kind::kFadeClut,
-                     .x = origin.x,
-                     .y = origin.y,
-                     .index = texture_index,
-                     .brightness = brightness,
-                     .clut = clut});
-  }
-  void DrawTime(r::ResultsPoint origin, std::int32_t timer,
-                std::int32_t time) override {
-    calls.push_back({.kind = Kind::kTime,
-                     .x = origin.x,
-                     .y = origin.y,
-                     .brightness = timer,
-                     .time = time});
-  }
-};
+using VS::test_support::time_attack::Kind;
+using VS::test_support::time_attack::LiveTimeAttackFixture;
+using VS::test_support::time_attack::RecordHost;
+using VS::test_support::time_attack::Replay;
 
 class RecordClut final : public r::ResultsClutTarget {
  public:
@@ -420,95 +368,6 @@ TEST_CASE("F03023 pulse truncates a negative weighted sum toward zero",
 }
 
 // ---------------------------------------------------------------- Live
-
-constexpr std::size_t kLivePrimitiveWords = 0x20000 / sizeof(u_long);
-constexpr std::size_t kLiveOrderingWords = 0x2088 / sizeof(u_long);
-constexpr std::size_t kLiveSceneHead = 16;
-constexpr std::size_t kLiveOverlayHead = 2;
-constexpr u_long kLiveEnd = 0xFFFFFF;
-
-// A frame whose primitives land in `storage`, and the time-attack state the
-// Live entries read, restored afterwards.
-struct LiveTimeAttackFixture {
-  Render_FrameScratch saved_frame = Render_frameScratch;
-  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
-  void* saved_ordering = Render_legacyOrderingTables[0];
-  int saved_framebuffer = Render_frameBuf;
-  u_char saved_course = Audio_Seq_unusedStateFlags.timeAttackBoss;
-  State_ScoreData saved_scores = Audio_Seq_unusedScoredata;
-  std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
-  std::vector<u_long> ordering =
-      std::vector<u_long>(kLiveOrderingWords, kLiveEnd);
-
-  LiveTimeAttackFixture() { Reset(); }
-  ~LiveTimeAttackFixture() {
-    Render_frameScratch = saved_frame;
-    Render_legacyPrimitiveBuffers[0] = saved_buffer;
-    Render_legacyOrderingTables[0] = saved_ordering;
-    Render_frameBuf = saved_framebuffer;
-    Audio_Seq_unusedStateFlags.timeAttackBoss = saved_course;
-    Audio_Seq_unusedScoredata = saved_scores;
-  }
-  LiveTimeAttackFixture(const LiveTimeAttackFixture&) = delete;
-  LiveTimeAttackFixture& operator=(const LiveTimeAttackFixture&) = delete;
-  LiveTimeAttackFixture(LiveTimeAttackFixture&&) = delete;
-  LiveTimeAttackFixture& operator=(LiveTimeAttackFixture&&) = delete;
-
-  void Reset() {
-    std::ranges::fill(storage, 0);
-    std::ranges::fill(ordering, kLiveEnd);
-    Render_frameBuf = 0;
-    Render_legacyOrderingTables[0] = ordering.data();
-    Render_legacyPrimitiveBuffers[0] = storage.data();
-    Render_frameScratch = {};
-    Render_frameScratch.primitiveCursor = storage.data();
-    Render_frameScratch.orderingTable = ordering.data() + kLiveSceneHead;
-    Render_frameScratch.overlayOrderingTable =
-        ordering.data() + kLiveOverlayHead;
-  }
-  // The primitives written so far followed by the whole ordering table, so a
-  // replay must also link them into the same entries.
-  [[nodiscard]] std::vector<u_long> Frame() const {
-    const auto* const cursor =
-        static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
-    std::vector<u_long> words(storage.data(), cursor);
-    words.insert(words.end(), ordering.begin(), ordering.end());
-    return words;
-  }
-  [[nodiscard]] bool Empty() const {
-    return Render_frameScratch.primitiveCursor == storage.data();
-  }
-};
-
-// Draws a host's recorded calls with the shared live atlas draws.
-void Replay(const RecordHost& host) {
-  for (const auto& call : host.calls) {
-    const auto index = static_cast<int>(call.index);
-    switch (call.kind) {
-      case Kind::kFlash: {
-        const std::array<CVECTOR, 2> colors{{
-            {call.colors[0].r, call.colors[0].g, call.colors[0].b,
-             call.colors[0].step},
-            {call.colors[1].r, call.colors[1].g, call.colors[1].b,
-             call.colors[1].step},
-        }};
-        render::DrawLiveTextureFlashFade(Menu_Results_disMap, call.x, call.y,
-                                         index, colors);
-        break;
-      }
-      case Kind::kFade:
-        r::LiveDrawFadingTexture(call.x, call.y, index, call.brightness);
-        break;
-      case Kind::kFadeClut:
-        r::LiveDrawFadingTextureClut(call.x, call.y, index, call.brightness,
-                                     call.clut);
-        break;
-      case Kind::kTime:
-        r::LiveDrawTime(call.x, call.y, call.brightness, call.time, 0);
-        break;
-    }
-  }
-}
 
 TEST_CASE("F03018 live heading flashes the results atlas heading entries",
           "[timeattack-heading-live]") {

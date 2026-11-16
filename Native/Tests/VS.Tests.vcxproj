@@ -443,6 +443,7 @@
     <ClCompile Include="src\TexturePagesTests.cpp" />
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
     <ClCompile Include="src\TimeAttackHeadingTests.cpp" />
+    <ClCompile Include="src\TimeAttackRatingTests.cpp" />
     <ClCompile Include="src\TimelineCommandsTests.cpp" />
     <ClCompile Include="src\TimelinePlaybackTests.cpp" />
     <ClCompile Include="src\TimelineTracksTests.cpp" />
@@ -509,6 +510,7 @@
     <ClInclude Include="include\TestSupport\ScriptSources.hpp" />
     <ClInclude Include="include\TestSupport\ScriptSteps.hpp" />
     <ClInclude Include="include\TestSupport\SphereContainmentLiveFixture.hpp" />
+    <ClInclude Include="include\TestSupport\TimeAttackDrawRecorder.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">

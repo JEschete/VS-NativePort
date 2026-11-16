@@ -1716,6 +1716,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::LiveDrawBestTime": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
     "VS::Menu::Results::LiveDrawStartCountdown": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
     "VS::Menu::Results::LivePulseTimeAttackClut": r"Native\Game\include\Menu\Results\TimeAttackHeadingLive.hpp",
+    "VS::Menu::Results::LiveDrawTimeAttackResultsHeading": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawTimeAttackRating": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawTimeAttackRatingWipe": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawTimeAttackTime": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawCountingTimeAttackTime": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawNewRecord": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawLeaderboard": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
+    "VS::Menu::Results::LiveDrawLeaderboardEntry": r"Native\Game\include\Menu\Results\TimeAttackRatingLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -3144,6 +3152,14 @@ OWNED_CALL_BINDINGS["F03020"] = "VS::Menu::Results::LiveDrawBossName"
 OWNED_CALL_BINDINGS["F03021"] = "VS::Menu::Results::LiveDrawBestTime"
 OWNED_CALL_BINDINGS["F03022"] = "VS::Menu::Results::LiveDrawStartCountdown"
 OWNED_CALL_BINDINGS["F03023"] = "VS::Menu::Results::LivePulseTimeAttackClut"
+OWNED_CALL_BINDINGS["F03032"] = "VS::Menu::Results::LiveDrawTimeAttackResultsHeading"
+OWNED_CALL_BINDINGS["F03033"] = "VS::Menu::Results::LiveDrawTimeAttackRating"
+OWNED_CALL_BINDINGS["F03034"] = "VS::Menu::Results::LiveDrawTimeAttackRatingWipe"
+OWNED_CALL_BINDINGS["F03035"] = "VS::Menu::Results::LiveDrawTimeAttackTime"
+OWNED_CALL_BINDINGS["F03036"] = "VS::Menu::Results::LiveDrawCountingTimeAttackTime"
+OWNED_CALL_BINDINGS["F03037"] = "VS::Menu::Results::LiveDrawNewRecord"
+OWNED_CALL_BINDINGS["F03038"] = "VS::Menu::Results::LiveDrawLeaderboard"
+OWNED_CALL_BINDINGS["F03039"] = "VS::Menu::Results::LiveDrawLeaderboardEntry"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -5082,6 +5098,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x801047D4, "VS::Menu::Results::LiveDrawBestTime"),  # F03021
     ("MENU/MENUF.PRG", 0x8010489C, "VS::Menu::Results::LiveDrawStartCountdown"),  # F03022
     ("MENU/MENUF.PRG", 0x80104914, "VS::Menu::Results::LivePulseTimeAttackClut"),  # F03023
+    ("MENU/MENUF.PRG", 0x8010559C, "VS::Menu::Results::LiveDrawTimeAttackResultsHeading"),  # F03032
+    ("MENU/MENUF.PRG", 0x8010564C, "VS::Menu::Results::LiveDrawTimeAttackRating"),  # F03033
+    ("MENU/MENUF.PRG", 0x801056E8, "VS::Menu::Results::LiveDrawTimeAttackRatingWipe"),  # F03034
+    ("MENU/MENUF.PRG", 0x80105790, "VS::Menu::Results::LiveDrawTimeAttackTime"),  # F03035
+    ("MENU/MENUF.PRG", 0x8010581C, "VS::Menu::Results::LiveDrawCountingTimeAttackTime"),  # F03036
+    ("MENU/MENUF.PRG", 0x801059B8, "VS::Menu::Results::LiveDrawNewRecord"),  # F03037
+    ("MENU/MENUF.PRG", 0x801059FC, "VS::Menu::Results::LiveDrawLeaderboard"),  # F03038
+    ("MENU/MENUF.PRG", 0x80105B30, "VS::Menu::Results::LiveDrawLeaderboardEntry"),  # F03039
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -7993,21 +8017,6 @@ REGEX_FIXES += [
         ("Menu::Results::PulseCubePuzzleClut",
          (('arg0', 'blend_weight'), ('new_var3', 'packed_blue'), ('new_var4', 'packed_red_green'), ('var_a1', 'weighted_red'), ('var_a2', 'weighted_green')),
          "F03024 src\\MENU\\MENUF.PRG\\3B8.c:1294-1330 (_pulseCubePuzzleEnd). Named roles: blend weight, packed blue, packed red green, weighted red, weighted green."),
-        ("Menu::Results::DrawTimeAttackRating",
-         (('arg2', 'fade_timer'), ('var_a2', 'rating_texture_offset')),
-         "F03033 src\\MENU\\MENUF.PRG\\3B8.c:1678-1706 (_renderTimeAttackRating). Named roles: fade timer, rating texture offset."),
-        ("Menu::Results::DrawTimeAttackRatingWipe",
-         (('arg3', 'wipe_edge_x'),),
-         "F03034 src\\MENU\\MENUF.PRG\\3B8.c:1708-1741 (_renderTimeAttackRatingWipe). Named roles: wipe edge x. Retained: arg2: Merged input fade/wipe timer clamped to 0..64 and later rating texture offset 0..4."),
-        ("Menu::Results::DrawTimeAttackTime",
-         (('arg0', 'draw_x'), ('arg1', 'draw_y'), ('arg2', 'fade_timer')),
-         "F03035 src\\MENU\\MENUF.PRG\\3B8.c:1743-1760 (_renderHeaderAndTime). Named roles: draw x, draw y, fade timer."),
-        ("Menu::Results::DrawCountingTimeAttackTime",
-         (('new_var4', 'time_accumulator_address'), ('temp_a3', 'total_centiseconds')),
-         "F03036 src\\MENU\\MENUF.PRG\\3B8.c:1762-1799 (_renderHeaderAndIncrementalTime). Named roles: time accumulator address, total centiseconds. Retained: var_a3: Merged interpolated total centiseconds, remainder below a minute, remainder below a second and final packed minutes/seconds/centiseconds display word."),
-        ("Menu::Results::DrawLeaderboard",
-         (('var_s3', 'leaderboard_clut'),),
-         "F03038 src\\MENU\\MENUF.PRG\\3B8.c:1816-1847 (_renderAllStoredTimes). Named roles: leaderboard clut."),
         ("Menu::Results::DrawBonusReel",
          (('a0', 'reel_origin_x'), ('arg3', 'results_screen_state'), ('new_var', 'reel_row_offset'), ('new_var2', 'reel_base_clip_height'), ('sp18', 'reel_clip_rect'), ('v1', 'reel_entry_index')),
          "F03043 src\\MENU\\MENUF.PRG\\3B8.c:1996-2115 (_renderStatWheel). Named roles: reel origin x, results screen state, reel row offset, reel base clip height, reel clip rect, reel entry index."),

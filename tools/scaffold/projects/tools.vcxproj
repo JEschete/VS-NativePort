@@ -1082,6 +1082,16 @@
     <None Include="..\..\port\differentials\timeattack_heading_f03021.py" />
     <None Include="..\..\port\differentials\timeattack_heading_f03022.py" />
     <None Include="..\..\port\differentials\timeattack_heading_f03023.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_common.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_driver.cpp" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03032.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03033.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03034.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03035.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03036.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03037.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03038.py" />
+    <None Include="..\..\port\differentials\timeattack_rating_f03039.py" />
     <None Include="..\..\port\differentials\timeline_commands_brightness.py" />
     <None Include="..\..\port\differentials\timeline_commands_defense.py" />
     <None Include="..\..\port\differentials\timeline_commands_driver.cpp" />

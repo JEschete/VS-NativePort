@@ -9,6 +9,7 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Legacy/Psx.h"
+#include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 
 extern "C" {
@@ -214,7 +215,7 @@ TEST_CASE("Time-attack rating wipes use MENUF for full and partial strips",
   constexpr std::array kTimes{0, 7680, 65536, 73216, 131072};
   ResultsTextureFixture fixture;
   Menu_Results_timeTrialTime = kTimes[rating];
-  Menu_Results_DrawTimeAttackRatingWipe(10, 20, fade);
+  VS::Menu::Results::LiveDrawTimeAttackRatingWipe(10, 20, fade);
   const auto& region = Menu_Results_disMap[78 + rating];
   const int count = fade == 64 ? 1 : (region.w + 11) / 12;
   fixture.CheckCount(count);
