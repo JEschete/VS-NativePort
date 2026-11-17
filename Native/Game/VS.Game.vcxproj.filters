@@ -3000,6 +3000,12 @@
     <ClCompile Include="src\Menu\Status\ActorSwitchingLive.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Status\ComponentDescriptions.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\ComponentDescriptionsLive.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Status\EquipmentDetails.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
@@ -4708,6 +4714,12 @@
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Status\ActorSwitchingLive.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\ComponentDescriptions.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\ComponentDescriptionsLive.hpp">
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp">

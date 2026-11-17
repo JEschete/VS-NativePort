@@ -1159,6 +1159,16 @@
     <None Include="..\..\port\differentials\stat_factors.py" />
     <None Include="..\..\port\differentials\stat_factors_driver.cpp" />
     <None Include="..\..\port\differentials\stat_factors_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\status_components_common.py" />
+    <None Include="..\..\port\differentials\status_components_driver.cpp" />
+    <None Include="..\..\port\differentials\status_components_f02647.py" />
+    <None Include="..\..\port\differentials\status_components_f02648.py" />
+    <None Include="..\..\port\differentials\status_components_f02649.py" />
+    <None Include="..\..\port\differentials\status_components_f02650.py" />
+    <None Include="..\..\port\differentials\status_components_f02651.py" />
+    <None Include="..\..\port\differentials\status_components_f02652.py" />
+    <None Include="..\..\port\differentials\status_components_f02653.py" />
+    <None Include="..\..\port\differentials\status_components_f02654.py" />
     <None Include="..\..\port\differentials\status_helpers.py" />
     <None Include="..\..\port\differentials\status_helpers_driver.cpp" />
     <None Include="..\..\port\differentials\status_lifecycle.py" />

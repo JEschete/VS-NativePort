@@ -1,19 +1,19 @@
 # Current Handoff
 
-Updated 2026-11-17. The latest integrated #276 group is magic terminal,
-F02600/F02604-F02607, including school state, rank drawing and the outer screen,
-plus the production submenu reload dispatcher (#423).
+Updated 2026-11-17. The latest integrated #276 group is status components,
+F02647-F02654, including production module entries, description formatting,
+selection predicates and empty-accessory refusal (#418).
 Its shared Debug/Release gates passed;
 the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **831 resolved (819 promoted,
-12 retired) and 69 remaining**; see
+The original 900-function cohort has **839 resolved (827 promoted,
+12 retired) and 61 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 28, 50: 30, 52: 10. F02604-F02607 now meet the no-bridge gate;
+  48: 20, 50: 30, 52: 10. F02647-F02654 now meet the no-bridge gate;
   no WIP function is counted as a completed promotion.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
@@ -22,6 +22,24 @@ The original 900-function cohort has **831 resolved (819 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Status-components evidence (`VR-MENU-STATUS-COMPONENTS`): eight original
+  spans pass 8,192 vectors, zero mismatches; 65 instruction mutants and eight
+  compiled native variants are detected. Debug and Release each pass 8,993
+  cases / 12,956,714 assertions, 26 focused cases / 307 assertions and both
+  canonical replays. `group-20261117-005949` passes in 454 seconds;
+  second generation changes zero Native files (`127b8e79be106b34`),
+  copier tests pass and tidy reports four existing findings, zero new.
+  Final ledger sync/check passes. Evidence:
+  `build\scratch\status-components\integration.json`.
+  All eight actual module entries, real formatting/conversion, complete
+  96-byte gem copy, stat callbacks and current-page selection are covered.
+  Empty accessory refusal preserves buffer/context/rows (#418); occupied
+  accessories use the actual conversion and inventory row formatter.
+  A completed allocated MENU4 request preserves borrowed text and rows.
+  These functions introduce no new reset or allocation owner.
+  Original external display/stat/row boundaries are doubled; no interactive
+  gameplay, empty-accessory reachability or EC retirement is claimed.
+  Publication and exact-revision CI remain required for #418 closure.
 - Production reload dispatch (#423): a completed, pool-owned MENU2 request
   passed through `LoadLiveMenuOverlay` without calling its reset hook.
   `iterate-20261116-235431` fails two of six assertions: learned action 24
@@ -29,8 +47,8 @@ The original 900-function cohort has **831 resolved (819 promoted,
   this producer. The magic integration adds loaded-program dispatch, including MAINMENU shortcut
   redirection, plus MENU0 school/teleport cold and ordinary resets. Its real
   module/renderer and production completion controls pass 285 assertions in
-  12 cases (`iterate-20261117-001709`) and the full group below. #415/#417
-  lifecycle acceptance remains reopened until exact-revision publication CI.
+  12 cases (`iterate-20261117-001709`) and the full group below. Exact-revision
+  CI now passes; #415/#417/#423 are closed with production-boundary evidence.
 - Magic-terminal evidence (`VR-MENU-MAGIC-TERMINAL`): all five original
   instruction spans pass 1,024 vectors each, zero mismatches; 153 original
   instruction mutants and five compiled native variants are detected.
@@ -52,8 +70,17 @@ The original 900-function cohort has **831 resolved (819 promoted,
   program identity. Requests are allocated from the real queue; controlled
   completion is not an interactive disc-read replay. Original external
   endpoints remain doubled; no gameplay completion or EC retirement claim.
-  Exact-revision publication CI remains required for #373/#413/#414/#423
-  and reopened #415/#417 acceptance.
+  Published in `52630eacd0e5bd027ec3ec68649e397b20066857`.
+  Exact-revision [Source Quality 44026652046](https://github.com/JEschete/VS-NativePort/actions/runs/44026652046)
+  passes on the unchanged-revision retry. Its initial header-positive-control
+  timeout is #424: profiling measured 51.675 seconds in repeated full-repository
+  clone scans. Bounded fixture discovery and isolated reports preserve real
+  tools, header findings and the unchanged production scope; both controls
+  now pass in 1.262 seconds and detect the runtime scope-alias mutant.
+  The scoped fix `6b44ee153961832683cac9d96fe8267f0dce2ae0` passes
+  [Source Quality 44028951991](https://github.com/JEschete/VS-NativePort/actions/runs/44028951991).
+  #373/#413/#415/#417/#423/#424 are closed. #414 remains open for an explicit
+  blink-reset observation; no private-blink assertion is claimed.
 - Ability-terminal evidence (`VR-MENU-ABILITY-TERMINAL`): six originals and
   the supplemental actual-Live assignment entry each passed 1,024 vectors,
   zero mismatches; 184 distinct primary instruction mutants, 60 repeated
@@ -118,7 +145,8 @@ The original 900-function cohort has **831 resolved (819 promoted,
   gameplay completion or EC retirement claim. Published in
   [`3599873728`](https://github.com/JEschete/VS-NativePort/commit/3599873728c03510dc884ff74ddd5f8932f5c076);
   exact-revision [Source Quality 44014438394](https://github.com/JEschete/VS-NativePort/actions/runs/44014438394)
-  passed. #412 is closed; #417 lifecycle acceptance is reopened under #423;
+  passed. #412 is closed; #417's later production-dispatch acceptance is
+  completed by the magic checkpoint above;
   [acceptance checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6938117160).
 - Ability-foundation evidence (`VR-MENU-ABILITY-FOUNDATION`): six originals
   and the supplemental actual-Live row entry independently passed 1,024
@@ -144,7 +172,8 @@ The original 900-function cohort has **831 resolved (819 promoted,
   claim. Published in
   [`221343948`](https://github.com/JEschete/VS-NativePort/commit/221343948342a84512b1e318838a51ffcc11a61c);
   exact-revision [Source Quality 44001392919](https://github.com/JEschete/VS-NativePort/actions/runs/44001392919)
-  passed. #378 is closed; #415 lifecycle acceptance is reopened under #423;
+  passed. #378 is closed; #415's later production-dispatch acceptance is
+  completed by the magic checkpoint above;
   [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6936114927).
 - Inventory-terminal evidence (`VR-MENU-INVENTORY-TERMINAL`): eight original
   contexts independently passed 1,024 vectors in current root, zero mismatches;
@@ -260,34 +289,37 @@ The original 900-function cohort has **831 resolved (819 promoted,
   36 cases / 13,783 assertions, 6,144 original vectors, 80 instruction
   mutants and six compiled native variants. #421 covers its verified
   file-backed MENUF reset omissions, not either #410 hypothesis.
-- Keep the promotion plan order and dependencies aligned with issue #4. Current
-  blockers are F00830 (#296), B48-08 (#376), and B48-06/07
-  (#373); #384 waits on #377. The copier gates #381 and #383 are closed.
+- Keep the promotion plan order and dependencies aligned with issue #4.
+  F00830 remains blocked by #296. #373 is resolved; status integration
+  and its remaining issue acceptance continue below. #384 waits on #377.
+  The copier gates #381 and #383 are closed.
 - No interactive combat verification, gameplay completion or compatibility
   retirement is claimed.
 
 Next steps:
 
-1. Confirm magic-terminal publication CI, then integrate the delivered status
-   groups in dependency order.
-   Magic-terminal packet `4b74650bc58564b4652020683d75682dd276f985`
-   is integrated, with 5,120 fresh original vectors, zero
-   mismatches, 153 detected instruction mutants and five detected native
-   variants. Its shared group passes; exact publication CI remains.
-   Status-components
-   `7bd797a55e77bcd7c84c75768f7e24313f7b6f0e`, status-limbs
+1. Confirm status-components publication CI, then integrate the remaining
+   delivered status groups in dependency order. Magic publication/CI and
+   its eligible issue closures are complete; the remaining #414 observation
+   is explicit above. Status-components packet
+   `7bd797a55e77bcd7c84c75768f7e24313f7b6f0e` is integrated.
+   Status-limbs
    `f682bd35b5814988f36f5c37fecb4a4bb767f1fd` and status-transitions
-   `fea43799d892e4fee1ead0a50a8232846583d63b` are also delivered; no packet
+   `fea43799d892e4fee1ead0a50a8232846583d63b` are delivered; no packet
    alone is a root promotion. Status-terminal packet
    `981252c35ea77ad877221db67ee7bf5c9c9f6654` is delivered: 31 cases /
    186 assertions, 6,144 original vectors, 68 instruction mutants and six
    native variants. Gazette-time packet
    `a841342b54a8362a3e2ad38d34ae154058e78d14` is delivered: 23 cases /
    165 assertions per configuration, 4,096 original vectors, 64 instruction
-   mutants and four native variants. Time-attack and Gazette-statistics
-   workers are active in
-   `D:\Dev\NativePort\wt\batch-time-attack-terminal-6b9c330d` and
-   `D:\Dev\NativePort\wt\batch-gazette-statistics-a841342b`.
+   mutants and four native variants. Time-attack packet
+   `26c6c2b52d5969fdffa4e28e6192a057eba80bb7` is delivered: 53 cases /
+   1,011 assertions, 7,168 vectors, 93 mutants and seven native variants.
+   Gazette-statistics packet `0343f605887247accb573494b14edbe2df518219`
+   is delivered: 30 cases / 749 assertions in each configuration,
+   5,120 vectors, 122 mutants and five native variants. Active workers are
+   Gazette-terminal in `D:\Dev\NativePort\wt\batch-gazette-terminal-0343f605`
+   and map-terminal in `D:\Dev\NativePort\wt\batch-map-terminal-52630eac`.
    #418, #419, #420, #421 and #422 retain their bounded acceptance and
    root integration/CI gates.
    The coordinator's text-update worktree is
@@ -303,7 +335,8 @@ Next steps:
    for its compilation database; do not import those old-base shared registry
    edits wholesale. Notification cores have been strictly rebuilt after the
    final test refactor: 10 cases / 104 assertions, zero new quality findings.
-   The notification Live adapter strictly compiles; its actual Live tests,
+   The notification Live adapter and actual Live tests strictly compile;
+   core/Live suites pass 19 cases / 164 assertions. Final Live lint,
    original/native proofs and cold cleanup producer wiring remain pending.
    The partial packet is not promoted.
    Continue the dependency-ordered plan.

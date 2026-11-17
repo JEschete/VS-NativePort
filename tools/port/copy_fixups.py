@@ -1808,6 +1808,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Status::LiveDrawVitals": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveLimbCount": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveEquipmentRowCount": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
+    "VS::Menu::Status::FormatLiveBladeDescription": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::FormatLiveGripDescription": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::CopyLiveGemDescription": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::SelectLiveWeaponComponent": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::SelectLiveShieldComponent": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::LiveArmorDescription": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::LiveAccessoryDescription": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::IsLiveDetailElementSelectable": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
     "VS::Menu::Score::LoadLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::FreeLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::InitializeLiveAshleyPreviewPose": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
@@ -3323,6 +3331,14 @@ OWNED_CALL_BINDINGS["F02660"] = "VS::Menu::Status::LiveDrawVitalBar"
 OWNED_CALL_BINDINGS["F02661"] = "VS::Menu::Status::LiveDrawVitals"
 OWNED_CALL_BINDINGS["F02666"] = "VS::Menu::Status::LiveLimbCount"
 OWNED_CALL_BINDINGS["F02667"] = "VS::Menu::Status::LiveEquipmentRowCount"
+OWNED_CALL_BINDINGS["F02647"] = "VS::Menu::Status::FormatLiveBladeDescription"
+OWNED_CALL_BINDINGS["F02648"] = "VS::Menu::Status::FormatLiveGripDescription"
+OWNED_CALL_BINDINGS["F02649"] = "VS::Menu::Status::CopyLiveGemDescription"
+OWNED_CALL_BINDINGS["F02650"] = "VS::Menu::Status::SelectLiveWeaponComponent"
+OWNED_CALL_BINDINGS["F02651"] = "VS::Menu::Status::SelectLiveShieldComponent"
+OWNED_CALL_BINDINGS["F02652"] = "VS::Menu::Status::LiveArmorDescription"
+OWNED_CALL_BINDINGS["F02653"] = "VS::Menu::Status::LiveAccessoryDescription"
+OWNED_CALL_BINDINGS["F02654"] = "VS::Menu::Status::IsLiveDetailElementSelectable"
 OWNED_CALL_BINDINGS["F02836"] = "VS::Menu::Score::LoadLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02837"] = "VS::Menu::Score::FreeLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02838"] = "VS::Menu::Score::InitializeLiveAshleyPreviewPose"
@@ -5358,6 +5374,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU4.PRG", 0x80103AC8, "VS::Menu::Status::LiveDrawVitals"),  # F02661
     ("MENU/MENU4.PRG", 0x80104514, "VS::Menu::Status::LiveLimbCount"),  # F02666
     ("MENU/MENU4.PRG", 0x8010455C, "VS::Menu::Status::LiveEquipmentRowCount"),  # F02667
+    ("MENU/MENU4.PRG", 0x80102F64, "VS::Menu::Status::FormatLiveBladeDescription"),  # F02647
+    ("MENU/MENU4.PRG", 0x80103080, "VS::Menu::Status::FormatLiveGripDescription"),  # F02648
+    ("MENU/MENU4.PRG", 0x80103118, "VS::Menu::Status::CopyLiveGemDescription"),  # F02649
+    ("MENU/MENU4.PRG", 0x8010317C, "VS::Menu::Status::SelectLiveWeaponComponent"),  # F02650
+    ("MENU/MENU4.PRG", 0x801032C4, "VS::Menu::Status::SelectLiveShieldComponent"),  # F02651
+    ("MENU/MENU4.PRG", 0x801033A4, "VS::Menu::Status::LiveArmorDescription"),  # F02652
+    ("MENU/MENU4.PRG", 0x801033D4, "VS::Menu::Status::LiveAccessoryDescription"),  # F02653
+    ("MENU/MENU4.PRG", 0x8010341C, "VS::Menu::Status::IsLiveDetailElementSelectable"),  # F02654
     ("MENU/MENU9.PRG", 0x80107FBC, "VS::Menu::Score::LoadLiveEnemyPreview"),  # F02836
     ("MENU/MENU9.PRG", 0x80108098, "VS::Menu::Score::FreeLiveEnemyPreview"),  # F02837
     ("MENU/MENU9.PRG", 0x801080C8, "VS::Menu::Score::InitializeLiveAshleyPreviewPose"),  # F02838

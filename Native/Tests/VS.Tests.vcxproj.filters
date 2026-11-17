@@ -1134,6 +1134,12 @@
     <ClCompile Include="src\StatusBehaviorTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusComponentDescriptionsLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatusComponentDescriptionsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\StatusHelpersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1324,6 +1330,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\StatusComponentsWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp">

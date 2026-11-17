@@ -1,13 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/HudStateLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
-#include "Render/EncodedTextLive.hpp"
+#include "Menu/Status/ComponentDescriptionsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -15,7 +14,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
@@ -28,7 +26,6 @@ extern "C" {
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/Menus.h"
-#include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
@@ -36,208 +33,6 @@ extern "C" {
 
 // decomp: local static of _equipmentDetailScreen, at file scope so the module reset reaches it
 static char Menu_Status_equipmentDetailsCursorAnimState = 0;
-
-// decomp: MENU4.PRG _initBladeDescription (src/MENU/MENU4.PRG/120.c:228)
-void Menu_Status_FormatBladeDescription(Items_EquipmentPartStats* blade, char* menuText[],
-    int rowTypes[] __attribute__((unused)))
-{
-    char* str;
-
-    Battle_stringContext.strings[9] =
-        Menu_Framework_itemNames[blade->material - 1 + Text_Menu_ITEMNAME_BIN_Index_wood];
-    Battle_stringContext.strings[8] = (char*)&Menu_Framework_itemHelp
-        [Menu_Framework_itemHelp[blade->category + Text_Menu_ITEMHELP_BIN_Index_dagger - 1]];
-    Battle_stringContext.strings[7] = (char*)&Menu_Framework_itemHelp
-        [Menu_Framework_itemHelp[blade->damageType + Text_Menu_ITEMHELP_BIN_Index_blunt - 1]];
-    Battle_stringContext.strings[6] = (char*)&Menu_Framework_itemHelp
-        [Menu_Framework_itemHelp[Menu_Framework_weaponHands[blade->category - 1]
-                              + Text_Menu_ITEMHELP_BIN_Index_oneHanded]];
-
-    str = VS::Render::FormatLiveEncodedText(Menu_Framework_stringBuf,
-        (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp[blade->id - 1]]);
-    VS::Render::FormatLiveEncodedText(
-        str, (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_weaponDescTemplate]);
-
-    menuText[1] = Menu_Framework_stringBuf;
-}
-
-// decomp: MENU4.PRG _initGripInfo (src/MENU/MENU4.PRG/120.c:254)
-void Menu_Status_FormatGripDescription(
-    Items_EquipmentPartStats* grip, char* menuText[], int rowTypes[] __attribute__((unused)))
-{
-    char* str;
-
-    u_short* gripId = &grip->id;
-
-    Battle_stringContext.strings[5] = (char*)&Menu_Framework_itemHelp
-        [Menu_Framework_itemHelp[grip->category + Text_Menu_ITEMHELP_BIN_Index_shortGrip - 1]];
-
-    str = VS::Render::FormatLiveEncodedText(Menu_Framework_stringBuf,
-        (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp[*gripId - 6]]);
-    VS::Render::FormatLiveEncodedText(
-        str, (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_gripTemplate]);
-
-    menuText[1] = Menu_Framework_stringBuf;
-}
-
-// decomp: MENU4.PRG _initGemInfo (src/MENU/MENU4.PRG/120.c:275)
-void Menu_Status_CopyGemDescription(
-    Items_EquipmentPartStats* gem, char* menuText[], int rowTypes[] __attribute__((unused)))
-{
-    VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_stringBuf,
-        &Menu_Framework_itemHelp[Menu_Framework_itemHelp[gem->id - 261
-                                                   + Text_Menu_ITEMHELP_BIN_Index_gemFeldspar]],
-        96);
-
-    menuText[1] = Menu_Framework_stringBuf;
-}
-
-// decomp: MENU4.PRG _drawWeaponInfoRow (src/MENU/MENU4.PRG/120.c:293)
-char* Menu_Status_SelectWeaponComponent(int row, Items_WeaponLoadout* weapon)
-{
-    char* menuText[2];
-    int rowType;
-
-    menuText[1] = (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_noGems];
-
-    switch (row) {
-    case 0:
-        VS::Menu::Framework::FormatLiveWeaponRow(weapon, menuText, &rowType, Menu_Framework_stringBuf);
-        menuText[0] = weapon->name;
-        break;
-
-    case 1:
-        Menu_Status_FormatBladeDescription(&weapon->blade, menuText, &rowType);
-        VS::Menu::Framework::PopulateLiveBladeStats(weapon);
-        break;
-
-    case 2:
-        Menu_Status_FormatGripDescription(&weapon->grip, menuText, &rowType);
-        VS::Menu::Framework::PopulateLiveGripStats(&weapon->grip);
-        break;
-
-    case 3:
-    case 4:
-    case 5:
-        if (weapon->gems[row - 3].id != 0) {
-            Menu_Status_CopyGemDescription(&weapon->gems[row - 3], menuText, &rowType);
-            VS::Menu::Framework::PopulateLiveGemStats(&weapon->gems[row - 3]);
-        } else {
-            VS::Menu::Framework::UpdateLiveDpPpBars(8);
-            VS::Menu::Framework::ResetLiveEquipmentStats();
-        }
-        break;
-    }
-
-    VS::Menu::Framework::LiveMenuItem(row + 0x14)->selected = 1;
-
-    return menuText[1];
-}
-
-// decomp: MENU4.PRG _drawShieldInfoRow (src/MENU/MENU4.PRG/120.c:339)
-char* Menu_Status_SelectShieldComponent(int row, Items_ShieldLoadout* shield)
-{
-    char* menuText[2];
-    int rowType;
-
-    menuText[1] = (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_noGems];
-
-    if (row == 0) {
-        VS::Menu::Framework::FormatLiveShieldRow(shield, menuText, &rowType, Menu_Framework_stringBuf);
-    } else if (row < 0) {
-
-    } else if (row < 4) {
-        if (shield->gems[row - 1].id != 0) {
-            Menu_Status_CopyGemDescription(&shield->gems[row - 1], (char**)&menuText, &rowType);
-            VS::Menu::Framework::PopulateLiveGemStats(&shield->gems[row - 1]);
-        } else {
-            VS::Menu::Framework::UpdateLiveDpPpBars(8);
-            VS::Menu::Framework::ResetLiveEquipmentStats();
-        }
-    }
-    VS::Menu::Framework::LiveMenuItem(row + 20)->selected = 1;
-    return menuText[1];
-}
-
-// decomp: MENU4.PRG _drawArmorInfoRow (src/MENU/MENU4.PRG/120.c:368)
-char* Menu_Status_ArmorDescription(Items_ArmorLoadout* armor_loadout)
-{
-    char* menuText[2];
-    int rowType;
-
-    VS::Menu::Framework::FormatLiveArmorRow(armor_loadout, menuText, &rowType, Menu_Framework_stringBuf);
-
-    return menuText[1];
-}
-
-// decomp: MENU4.PRG _drawAccessoryInfoRow (src/MENU/MENU4.PRG/120.c:383)
-char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* accessory_loadout)
-{
-    char* menuText[2];
-    Items_InventoryArmor armor;
-    int rowType[2];
-
-    VS::Items::StoreLiveInventoryAccessoryStats(&armor, accessory_loadout);
-    VS::Menu::Framework::FormatLiveInventoryArmorRow(&armor, menuText, rowType, Menu_Framework_stringBuf);
-
-    return menuText[1];
-}
-
-// decomp: MENU4.PRG _equipmentDetailElementSelectable (src/MENU/MENU4.PRG/120.c:401)
-int Menu_Status_IsDetailElementSelectable(int newSelection, int flags)
-{
-    int maximum_component_selection;
-    int component_selection_index;
-    int ret = 0;
-
-    switch (newSelection) {
-    case 0:
-        ret = (flags >> 5) & 1;
-        break;
-
-    case 1:
-        ret = (flags >> 6) & 1;
-        break;
-
-    case 5:
-    case 6:
-    case 7:
-        ret = Menu_Framework_itemStatPage != Menu_Framework_StatPage_Type;
-        break;
-
-    case 8:
-        ret = Menu_Framework_itemStatPage == Menu_Framework_StatPage_Affinity;
-        break;
-
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-    case 14:
-    case 15:
-        component_selection_index = newSelection - 9;
-        maximum_component_selection = flags & 0xF;
-        ret = (maximum_component_selection < component_selection_index) ^ 1;
-        break;
-
-    case 16:
-    case 17:
-        ret = (flags >> 4) & 1;
-        break;
-
-    case 2:
-    case 3:
-    case 4:
-    case 18:
-    case 19:
-    case 20:
-        ret = 1;
-        break;
-    }
-
-    return ret;
-}
 
 // decomp: MENU4.PRG _updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:462)
 int Menu_Status_NavigateDetailElements(u_int newSelection, int flags)
@@ -260,7 +55,7 @@ int Menu_Status_NavigateDetailElements(u_int newSelection, int flags)
     }
 
     while (1) {
-        if (Menu_Status_IsDetailElementSelectable(newSelection, flags)) {
+        if (VS::Menu::Status::IsLiveDetailElementSelectable(newSelection, flags)) {
             break;
         }
 
@@ -269,14 +64,14 @@ int Menu_Status_NavigateDetailElements(u_int newSelection, int flags)
             if ((newSelection - 2) < 14) {
                 do {
                     --newSelection;
-                } while (!Menu_Status_IsDetailElementSelectable(newSelection, flags));
+                } while (!VS::Menu::Status::IsLiveDetailElementSelectable(newSelection, flags));
 
                 return newSelection;
             }
 
             do {
                 ++newSelection;
-            } while (!Menu_Status_IsDetailElementSelectable(newSelection, flags));
+            } while (!VS::Menu::Status::IsLiveDetailElementSelectable(newSelection, flags));
 
             return newSelection;
         }
@@ -775,19 +570,19 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         } else if (newSelection < 16) {
             switch (Menu_Status_equipmentDetailsSelectedEquipmentRow) {
             case 0:
-                detail_help_text = Menu_Status_SelectWeaponComponent(newSelection - 9, &actor->weapon);
+                detail_help_text = VS::Menu::Status::SelectLiveWeaponComponent(newSelection - 9, &actor->weapon);
                 break;
 
             case 1:
-                detail_help_text = Menu_Status_SelectShieldComponent(newSelection - 9, &actor->shield);
+                detail_help_text = VS::Menu::Status::SelectLiveShieldComponent(newSelection - 9, &actor->shield);
                 break;
 
             default:
                 if ((Menu_Status_equipmentDetailsSelectedEquipmentRow - 2) < limbs) {
                     detail_help_text =
-                        Menu_Status_ArmorDescription(&actor->limbs[Menu_Status_equipmentDetailsSelectedEquipmentRow - 2].armor);
+                        VS::Menu::Status::LiveArmorDescription(&actor->limbs[Menu_Status_equipmentDetailsSelectedEquipmentRow - 2].armor);
                 } else {
-                    detail_help_text = Menu_Status_AccessoryDescription(&actor->accessory);
+                    detail_help_text = VS::Menu::Status::LiveAccessoryDescription(&actor->accessory);
                 }
                 break;
             }
