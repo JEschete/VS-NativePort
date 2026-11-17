@@ -13,8 +13,12 @@ The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
 The locally verified original 900-function cohort has **899 resolved
 (887 promoted, 12 retired) and 1 remaining**. **111 of the requested final
-112** are published and accepted. F00830 remains
-blocked by #296. See
+112** are published and accepted. Independent-index issues #376/#377/#384
+are closed at `1d891ceb0b369a09f2083fa3c9d2569d297e81af` with
+[Source Quality 44134309733](https://github.com/JEschete/VS-NativePort/actions/runs/44134309733).
+F00830 remains blocked by #296. The final audit also records a separate,
+pre-existing 72-function slice-registration gap in #434; those functions
+are outside the requested 112. Neither #276 nor #296 is closed. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
@@ -31,7 +35,7 @@ blocked by #296. See
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
-- Independent-index acceptance (#376/#377/#384) now has fresh source evidence
+- Independent-index acceptance (#376/#377/#384) is complete, with fresh evidence
   in the coordinator and `D:\Dev\NativePort\wt\audit-final-index-20261117`,
   both at `be3f8e1e`. Primary and upstream references are independent Git
   checkouts, not source junctions; only runtime disc/extracted data is shared.
@@ -58,10 +62,51 @@ blocked by #296. See
   reference bytes nor their offset indexes were normalized/copied.
   Evidence is in each root's `build\scratch\final-index`, especially
   `context-receipt.json` and `render-receipt.json`.
-  Native group acceptance and the new regression's exact CI remain pending.
+  The test/document-only `1d891ceb0` follow-up preserves those Native and
+  reference inputs and passes exact CI. Fresh isolated
+  `group-20261117-121319` passes both builds, 9,460 full cases / 12,979,675
+  assertions and 140 focused cases / 892 assertions per configuration, both
+  canonical replays and copier controls. Its aggregate remains **failed** only
+  because local quality infrastructure lacked the clone checker. After
+  `npm ci --prefix tools\lint --ignore-scripts` restored the unchanged lockfile,
+  the exact failed command
+  `python tools\lint\quality.py --changed --tidy --jobs 4` passes with zero
+  findings / zero new. Native bytes retain `3295ea6aa5641d52`; the passed
+  builds/replays were not discarded or repeated. The restore reports five
+  high dependency advisories; no forced dependency upgrade was made.
+  The combined receipt is `build\scratch\final-index\acceptance.json`.
   Historical tags `[equipment-status-details]` and `[loot-screen]` are absent;
   the verified current equipment/loot selection includes 140 cases and the
   original F02856/F02860/F02865 obligations, not only 30 staging cases.
+- Final requested-cohort audit reconstructs the 112 pending rows at
+  `b4b11beb058400b4f31a3c52d1ba145637854b29` (before the first Analyze group).
+  All 111 resolved rows have six CPP marks, passing Debug/Release verification
+  records and recorded slices with zero remaining old-symbol consumers:
+  19 verification records and 19 slices. Across the entire catalog, 3,731 of
+  3,732 `copy=yes` rows derive CPP marks; only F00830 is unmarked and only its
+  original body is still copied. Seventeen generated module-reset helpers
+  have no original catalog function ID and remain data/module scaffolding,
+  not additional unfinished original functions.
+  The broader #276 acceptance is still incomplete: 72 earlier promoted rows
+  have no `GATE_SLICES.csv` membership (#434), despite valid CPP/behavior
+  evidence and zero ordinary gate violations. All 72 belonged to #276's
+  original generated cohort, but none belongs to these final 112.
+  No historical before counts or missing slices were invented, and no
+  existing CPP mark was changed. Historical instrumentation columns
+  `tests_execute`/`replay_execute` remain preserved, not relabeled as fresh
+  coverage; current behavior evidence comes from the linked verification
+  records and actual runs. Reproduction and the explicit incomplete-parent
+  result are in `build\scratch\final-index\audit_cohort.py`,
+  `cohort-audit.log` and `cohort-receipt.json`.
+- F00830/#296 needs an evidenced climbing-hit contract before promotion.
+  The target path's visited-hit count (observed 1/3) is not the source
+  effect path's inherited `s4` (primary VM address or secondary next-instance
+  pointer). The consumer distinguishes a nonzero word from its narrowed
+  duration, so zero is not an evidenced equivalent. Next observation:
+  aligned reference climbing-hit behavior/reachability for the source path,
+  or an explicit owner decision for the typed native behavior. Do not
+  repeat unchanged probes, guess a blend constant or expose pointer bits
+  as the native API.
 - Map-terminal evidence (`VR-MENU-MAP-TERMINAL`): six original spans pass
   6,144 vectors, zero mismatches; 58 instruction mutants and six compiled
   native variants are detected. `group-20261117-113440` passes both builds,
@@ -671,17 +716,18 @@ blocked by #296. See
   mutants and six compiled native variants. #421 covers its verified
   file-backed MENUF reset omissions, not either #410 hypothesis.
 - Keep the promotion plan order and dependencies aligned with issue #4.
-  F00830 remains blocked by #296. #373 is resolved; status integration
-  and its remaining issue acceptance continue below. #384 waits on #377.
+  F00830 remains blocked by #296. #373 and the status integration are
+  accepted; #376/#377/#384 are closed. The older slice gap remains #434.
   The copier gates #381 and #383 are closed.
 - No interactive combat verification, gameplay completion or compatibility
   retirement is claimed.
 
-Next steps: finish #376/#377/#384 with independently rebuilt
-coordinator and isolated indexes, correct/stable type output and the required
-equipment/loot gates. Reconcile the final audit and keep F00830/#296 open unless
-new evidence establishes its climbing-hit contract. Do not begin unrelated
-gameplay work or claim all 112 complete.
+Next steps: obtain the missing reference/owner decision for F00830/#296;
+the other 111 requested functions and their integration prerequisites are
+accepted. Repair #434's earlier slice records as a separate follow-up without
+relabeling them as additional members of the final 112 or inventing evidence.
+Keep #276 open for both obligations. Do not begin unrelated gameplay work,
+guess a climbing blend constant or claim all 112 complete.
 
 ### Earlier packet planning (superseded)
 
