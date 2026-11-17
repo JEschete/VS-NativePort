@@ -3006,6 +3006,12 @@
     <ClCompile Include="src\Menu\Status\ComponentDescriptionsLive.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Status\DetailTransitions.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\DetailTransitionsLive.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Status\EquipmentDetails.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
@@ -4726,6 +4732,12 @@
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Status\ComponentDescriptionsLive.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\DetailTransitions.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\DetailTransitionsLive.hpp">
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp">

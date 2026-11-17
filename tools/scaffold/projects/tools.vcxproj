@@ -1196,6 +1196,15 @@
     <None Include="..\..\port\differentials\status_switching_f02661.py" />
     <None Include="..\..\port\differentials\status_switching_f02666.py" />
     <None Include="..\..\port\differentials\status_switching_f02667.py" />
+    <None Include="..\..\port\differentials\status_transitions_common.py" />
+    <None Include="..\..\port\differentials\status_transitions_driver.cpp" />
+    <None Include="..\..\port\differentials\status_transitions_f02655.py" />
+    <None Include="..\..\port\differentials\status_transitions_f02669.py" />
+    <None Include="..\..\port\differentials\status_transitions_f02670.py" />
+    <None Include="..\..\port\differentials\status_transitions_f02671.py" />
+    <None Include="..\..\port\differentials\status_transitions_f02672.py" />
+    <None Include="..\..\port\differentials\status_transitions_f02673.py" />
+    <None Include="..\..\port\differentials\status_transitions_f02674.py" />
     <None Include="..\..\port\differentials\target_approach.py" />
     <None Include="..\..\port\differentials\target_approach_driver.cpp" />
     <None Include="..\..\port\differentials\temporary_awareness.py" />

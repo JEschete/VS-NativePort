@@ -451,6 +451,8 @@
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\StatusComponentDescriptionsLiveTests.cpp" />
     <ClCompile Include="src\StatusComponentDescriptionsTests.cpp" />
+    <ClCompile Include="src\StatusDetailTransitionsLiveTests.cpp" />
+    <ClCompile Include="src\StatusDetailTransitionsTests.cpp" />
     <ClCompile Include="src\StatusHelpersTests.cpp" />
     <ClCompile Include="src\StatusLifecycleTests.cpp" />
     <ClCompile Include="src\StatusLimbControllersLiveTests.cpp" />
@@ -529,6 +531,7 @@
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp" />
     <ClInclude Include="include\Menu\StatusComponentsWorld.hpp" />
     <ClInclude Include="include\Menu\StatusLimbControllersWorld.hpp" />
+    <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />

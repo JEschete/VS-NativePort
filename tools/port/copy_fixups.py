@@ -1823,6 +1823,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Status::LiveUpdateLimbPanel": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
     "VS::Menu::Status::LiveShowSelectedLimbCondition": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
     "VS::Menu::Status::LivePopulateSelectedLimbDefense": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
+    "VS::Menu::Status::NavigateLiveDetailElements": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
+    "VS::Menu::Status::HoistLiveEquipmentRow": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
+    "VS::Menu::Status::BeginLiveDetailTransition": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
+    "VS::Menu::Status::InitializeLiveDetailPanel": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
+    "VS::Menu::Status::SetLiveWeaponComponentRow": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
+    "VS::Menu::Status::SetLiveShieldGemRow": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
+    "VS::Menu::Status::ExitLiveEquipmentDetails": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
     "VS::Menu::Score::LoadLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::FreeLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::InitializeLiveAshleyPreviewPose": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
@@ -3353,6 +3360,13 @@ OWNED_CALL_BINDINGS["F02665"] = "VS::Menu::Status::LiveNavigateStatusEffects"
 OWNED_CALL_BINDINGS["F02668"] = "VS::Menu::Status::LiveUpdateLimbPanel"
 OWNED_CALL_BINDINGS["F02680"] = "VS::Menu::Status::LiveShowSelectedLimbCondition"
 OWNED_CALL_BINDINGS["F02681"] = "VS::Menu::Status::LivePopulateSelectedLimbDefense"
+OWNED_CALL_BINDINGS["F02655"] = "VS::Menu::Status::NavigateLiveDetailElements"
+OWNED_CALL_BINDINGS["F02669"] = "VS::Menu::Status::HoistLiveEquipmentRow"
+OWNED_CALL_BINDINGS["F02670"] = "VS::Menu::Status::BeginLiveDetailTransition"
+OWNED_CALL_BINDINGS["F02671"] = "VS::Menu::Status::InitializeLiveDetailPanel"
+OWNED_CALL_BINDINGS["F02672"] = "VS::Menu::Status::SetLiveWeaponComponentRow"
+OWNED_CALL_BINDINGS["F02673"] = "VS::Menu::Status::SetLiveShieldGemRow"
+OWNED_CALL_BINDINGS["F02674"] = "VS::Menu::Status::ExitLiveEquipmentDetails"
 OWNED_CALL_BINDINGS["F02836"] = "VS::Menu::Score::LoadLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02837"] = "VS::Menu::Score::FreeLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02838"] = "VS::Menu::Score::InitializeLiveAshleyPreviewPose"
@@ -5403,6 +5417,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU4.PRG", 0x801045B8, "VS::Menu::Status::LiveUpdateLimbPanel"),  # F02668
     ("MENU/MENU4.PRG", 0x80106308, "VS::Menu::Status::LiveShowSelectedLimbCondition"),  # F02680
     ("MENU/MENU4.PRG", 0x801063F8, "VS::Menu::Status::LivePopulateSelectedLimbDefense"),  # F02681
+    ("MENU/MENU4.PRG", 0x801034BC, "VS::Menu::Status::NavigateLiveDetailElements"),  # F02655
+    ("MENU/MENU4.PRG", 0x80104AEC, "VS::Menu::Status::HoistLiveEquipmentRow"),  # F02669
+    ("MENU/MENU4.PRG", 0x80104B38, "VS::Menu::Status::BeginLiveDetailTransition"),  # F02670
+    ("MENU/MENU4.PRG", 0x80104C0C, "VS::Menu::Status::InitializeLiveDetailPanel"),  # F02671
+    ("MENU/MENU4.PRG", 0x80104C40, "VS::Menu::Status::SetLiveWeaponComponentRow"),  # F02672
+    ("MENU/MENU4.PRG", 0x80104DFC, "VS::Menu::Status::SetLiveShieldGemRow"),  # F02673
+    ("MENU/MENU4.PRG", 0x80104F2C, "VS::Menu::Status::ExitLiveEquipmentDetails"),  # F02674
     ("MENU/MENU9.PRG", 0x80107FBC, "VS::Menu::Score::LoadLiveEnemyPreview"),  # F02836
     ("MENU/MENU9.PRG", 0x80108098, "VS::Menu::Score::FreeLiveEnemyPreview"),  # F02837
     ("MENU/MENU9.PRG", 0x801080C8, "VS::Menu::Score::InitializeLiveAshleyPreviewPose"),  # F02838

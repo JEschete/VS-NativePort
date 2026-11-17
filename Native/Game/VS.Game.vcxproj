@@ -2117,6 +2117,10 @@
     <ClCompile Include="src\Menu\Status\ComponentDescriptionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Status\DetailTransitions.cpp" />
+    <ClCompile Include="src\Menu\Status\DetailTransitionsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Status\EquipmentDetails.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -3074,6 +3078,8 @@
     <ClInclude Include="include\Menu\Status\ActorSwitchingLive.hpp" />
     <ClInclude Include="include\Menu\Status\ComponentDescriptions.hpp" />
     <ClInclude Include="include\Menu\Status\ComponentDescriptionsLive.hpp" />
+    <ClInclude Include="include\Menu\Status\DetailTransitions.hpp" />
+    <ClInclude Include="include\Menu\Status\DetailTransitionsLive.hpp" />
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp" />
     <ClInclude Include="include\Menu\Status\LimbControllers.hpp" />
     <ClInclude Include="include\Menu\Status\LimbControllersLive.hpp" />

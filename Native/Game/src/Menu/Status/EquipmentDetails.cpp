@@ -7,6 +7,7 @@
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
+#include "Menu/Status/DetailTransitionsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveState.h"
-#include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Status/ActorStatus.h"
@@ -33,219 +33,6 @@ extern "C" {
 
 // decomp: local static of _equipmentDetailScreen, at file scope so the module reset reaches it
 static char Menu_Status_equipmentDetailsCursorAnimState = 0;
-
-// decomp: MENU4.PRG _updateEquipmentDetailSelection (src/MENU/MENU4.PRG/120.c:462)
-int Menu_Status_NavigateDetailElements(u_int newSelection, int flags)
-{
-    int direction = 0;
-    int previousSelection = newSelection;
-
-    if (Input_buttonRepeat & PADLup) {
-        direction = 1;
-    } else if (Input_buttonRepeat & PADLdown) {
-        direction = 2;
-    } else if (Input_buttonRepeat & PADLleft) {
-        direction = 3;
-    } else if (Input_buttonRepeat & PADLright) {
-        direction = 4;
-    }
-    if (direction != 0) {
-        newSelection =
-            Menu_Framework_statusViewNavigationMap[previousSelection][direction - 1];
-    }
-
-    while (1) {
-        if (VS::Menu::Status::IsLiveDetailElementSelectable(newSelection, flags)) {
-            break;
-        }
-
-        if (previousSelection == newSelection) {
-
-            if ((newSelection - 2) < 14) {
-                do {
-                    --newSelection;
-                } while (!VS::Menu::Status::IsLiveDetailElementSelectable(newSelection, flags));
-
-                return newSelection;
-            }
-
-            do {
-                ++newSelection;
-            } while (!VS::Menu::Status::IsLiveDetailElementSelectable(newSelection, flags));
-
-            return newSelection;
-        }
-
-        previousSelection = newSelection;
-        newSelection =
-            Menu_Framework_statusViewNavigationMap[previousSelection][direction - 1];
-    }
-
-    return newSelection;
-}
-
-// decomp: MENU4.PRG _setActiveRow (src/MENU/MENU4.PRG/120.c:1299)
-void Menu_Status_HoistEquipmentRow(int row)
-{
-    Menu_Framework_MenuRow* menuItem;
-
-    VS::Menu::Framework::FlyOutLiveRowRight(4);
-
-    menuItem = VS::Menu::Framework::LiveMenuItem(row + 10);
-    menuItem->state = Menu_Framework_MenuItemState_SlideX;
-    menuItem->targetPosition0 = 155;
-    menuItem->selected = 1;
-    menuItem->subText = NULL;
-}
-
-// decomp: MENU4.PRG _animateEquipmentDetailTransition (src/MENU/MENU4.PRG/120.c:1318)
-void Menu_Status_BeginDetailTransition(int selectedRow)
-{
-    char icon;
-    Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::SetLiveMenuItem(32, -164, 18, 164, 8,
-        (char*)&Menu_Status_statusStrings[Menu_Status_statusStrings[selectedRow < 2
-                                                  ? selectedRow + Text_Menu4_status_Index_weapon
-                                                  : Text_Menu4_status_Index_armor]]);
-
-    menuItem->state = 5;
-    menuItem->targetPosition0 = 16;
-    menuItem->selected = 1;
-
-    icon = 28;
-
-    if (selectedRow == 0) {
-        icon = 24;
-    } else if (selectedRow == 1) {
-        icon = 27;
-    }
-
-    menuItem->rowIcon = icon;
-
-    menuItem = VS::Menu::Framework::LiveMenuItem(selectedRow + 10);
-    menuItem->state = 3;
-    menuItem->targetPosition0 = 18;
-}
-
-// decomp: MENU4.PRG _initUi (src/MENU/MENU4.PRG/120.c:1348)
-void Menu_Status_InitializeDetailPanel(int selectedRow, int classAffinity)
-{
-    Menu_Status_BeginDetailTransition(selectedRow);
-    VS::Menu::Framework::UpdateLiveEquipmentStatPages(classAffinity);
-    VS::Menu::Framework::UpdateLivePrimaryStatPanel(1);
-}
-
-// decomp: MENU4.PRG _setWeaponRow (src/MENU/MENU4.PRG/120.c:1358)
-void Menu_Status_SetWeaponComponentRow(int row, Items_WeaponLoadout* weapon, int init)
-{
-    char* menuText[2];
-    u_int rowType;
-
-    int xOffset = 158;
-    int gemSlots = weapon->grip.gemSlots;
-
-    if (row == 1) {
-        Items_InventoryBlade blade;
-        VS::Items::WriteLiveInventoryBladeStats(&blade, &weapon->blade);
-        VS::Menu::Framework::FormatLiveBladeRow(&blade, menuText, (int *)(&rowType), Menu_Framework_stringBuf);
-    } else if (row == 2) {
-        Items_InventoryGrip grip;
-        VS::Items::WriteLiveInventoryGripStats(&grip, &weapon->grip);
-        VS::Menu::Framework::FormatLiveGripRow(&grip, menuText, (int *)(&rowType), Menu_Framework_stringBuf);
-    } else {
-
-        // xOffset temporarily reused as the gem index
-        xOffset = row - 3;
-
-        if (xOffset < gemSlots) {
-            menuText[1] = 0;
-            menuText[0] = (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_none];
-            rowType = 0x58000000;
-
-            if (weapon->gems[xOffset].id != 0) {
-                Items_InventoryGem gem;
-                VS::Items::WriteLiveInventoryGemStats(&gem, &weapon->gems[xOffset]);
-                VS::Menu::Framework::FormatLiveGemRow(&gem, menuText, (int *)(&rowType), Menu_Framework_stringBuf);
-            }
-
-            xOffset = 151;
-        } else {
-            xOffset = 0;
-        }
-    }
-
-    VS::Menu::Framework::DeactivateLiveRow(row + 20);
-
-    if (xOffset != 0) {
-        Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::SetLiveMenuItem(
-            row + 20, 320 - xOffset, (row * 16) + 18, xOffset, 0, menuText[0]);
-
-        menuItem->unselectable = menuText[1] == 0;
-
-        if (init & 1) {
-            menuItem->x = 320;
-            menuItem->state = 2;
-            menuItem->targetPosition0 = 320 - xOffset;
-        }
-
-        menuItem->rowIcon = rowType >> 26;
-        menuItem->material = ((rowType & 0xFFFF0000) >> 16) & 7;
-    }
-}
-
-// decomp: MENU4.PRG _setShieldRow (src/MENU/MENU4.PRG/120.c:1418)
-void Menu_Status_SetShieldGemRow(int row, Items_ShieldLoadout* shield, int init)
-{
-    char* menuText[2];
-    int rowType;
-    int gemSlot = row - 1;
-
-    if (gemSlot < shield->base.gemSlots) {
-
-        menuText[1] = NULL;
-        menuText[0] = (char*)(&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_none]);
-        rowType = 0x58000000;
-
-        if (shield->gems[gemSlot].id != 0) {
-            Items_InventoryGem gem;
-            VS::Items::WriteLiveInventoryGemStats(&gem, &shield->gems[gemSlot]);
-            VS::Menu::Framework::FormatLiveGemRow(&gem, menuText, &rowType, Menu_Framework_stringBuf);
-        }
-
-        gemSlot = 151;
-    } else {
-        gemSlot = 0;
-    }
-
-    VS::Menu::Framework::DeactivateLiveRow(row + 20);
-
-    if (gemSlot != 0) {
-        Menu_Framework_MenuRow* meuItem = VS::Menu::Framework::SetLiveMenuItem(
-            row + 20, 320 - gemSlot, (row * 16) + 18, gemSlot, 0, menuText[0]);
-        meuItem->unselectable = menuText[1] == 0;
-
-        if (init & 1) {
-            meuItem->x = 320;
-            meuItem->state = 2;
-            meuItem->targetPosition0 = 320 - gemSlot;
-        }
-
-        meuItem->rowIcon = 22;
-    }
-}
-
-// decomp: MENU4.PRG _exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1463)
-void Menu_Status_ExitEquipmentDetails(int clearDpPp)
-{
-    VS::Menu::PlayLeaveSound();
-    VS::Menu::Framework::ClearLiveMenuExcept(Menu_Framework_MenuItemId_None);
-    VS::Menu::Framework::FlyOutLiveRowLeft(0);
-    VS::Menu::Framework::UpdateLiveEquipmentStatPages(-1);
-    VS::Menu::Framework::UpdateLivePrimaryStatPanel(2);
-
-    if (clearDpPp != 0) {
-        VS::Menu::Framework::UpdateLiveDpPpBars(4);
-    }
-}
 
 // decomp: MENU4.PRG _equipmentDetailScreen (src/MENU/MENU4.PRG/120.c:1482)
 int Menu_Status_UpdateEquipmentDetails(int row)
@@ -279,7 +66,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         Menu_Status_renderBasicStatsState = 0;
 
         VS::Battle::SetLiveHudHidden(1);
-        Menu_Status_HoistEquipmentRow(Menu_Status_equipmentDetailsSelectedEquipmentRow);
+        VS::Menu::Status::HoistLiveEquipmentRow(Menu_Status_equipmentDetailsSelectedEquipmentRow);
         VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_None);
 
         Menu_Status_equipmentDetailSelectedElement = 9;
@@ -303,7 +90,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
             break;
         }
 
-        Menu_Status_InitializeDetailPanel(Menu_Status_equipmentDetailsSelectedEquipmentRow, 7);
+        VS::Menu::Status::InitializeLiveDetailPanel(Menu_Status_equipmentDetailsSelectedEquipmentRow, 7);
 
         switch (Menu_Status_equipmentDetailsSelectedEquipmentRow) {
         case 0:
@@ -351,9 +138,9 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                 }
 
                 if (Menu_Status_equipmentDetailsSelectedEquipmentRow == 0) {
-                    Menu_Status_SetWeaponComponentRow(Menu_Status_equipmentDetailRowToRender, &actor->weapon, 1);
+                    VS::Menu::Status::SetLiveWeaponComponentRow(Menu_Status_equipmentDetailRowToRender, &actor->weapon, 1);
                 } else if (Menu_Status_equipmentDetailsSelectedEquipmentRow == 1) {
-                    Menu_Status_SetShieldGemRow(Menu_Status_equipmentDetailRowToRender, &actor->shield, 1);
+                    VS::Menu::Status::SetLiveShieldGemRow(Menu_Status_equipmentDetailRowToRender, &actor->shield, 1);
                 }
             }
             break;
@@ -429,7 +216,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                     VS::Menu::Framework::PopulateLiveWeaponStats(&actor->weapon);
 
                     for (i = 1; i < 6; ++i) {
-                        Menu_Status_SetWeaponComponentRow(i, &actor->weapon, 0);
+                        VS::Menu::Status::SetLiveWeaponComponentRow(i, &actor->weapon, 0);
                     }
 
                     VS::Menu::Framework::FormatLiveWeaponRow(
@@ -443,7 +230,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                     VS::Menu::Framework::PopulateLiveShieldStats(&actor->shield);
 
                     for (i = 1; i < 4; ++i) {
-                        Menu_Status_SetShieldGemRow(i, &actor->shield, 0);
+                        VS::Menu::Status::SetLiveShieldGemRow(i, &actor->shield, 0);
                     }
 
                     VS::Menu::Framework::FormatLiveShieldRow(
@@ -515,7 +302,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
             VS::Menu::Framework::UpdateLiveDpPpBars(11);
             VS::Menu::Framework::PopulateLiveWeaponStats(&actor->weapon);
 
-            newSelection = Menu_Status_NavigateDetailElements(
+            newSelection = VS::Menu::Status::NavigateLiveDetailElements(
                 previousSelection, actor->weapon.grip.gemSlots + 114);
 
             break;
@@ -524,7 +311,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
             VS::Menu::Framework::UpdateLiveDpPpBars(11);
             VS::Menu::Framework::PopulateLiveShieldStats(&actor->shield);
 
-            newSelection = Menu_Status_NavigateDetailElements(
+            newSelection = VS::Menu::Status::NavigateLiveDetailElements(
                 previousSelection, actor->shield.base.gemSlots + 96);
 
             break;
@@ -536,7 +323,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
             }
 
             VS::Menu::Framework::UpdateLiveDpPpBars(dp_pp_panel_command);
-            newSelection = Menu_Status_NavigateDetailElements(
+            newSelection = VS::Menu::Status::NavigateLiveDetailElements(
                 previousSelection, ((Menu_Status_equipmentDetailsSelectedEquipmentRow - 2) < limbs) << 6);
 
             break;
@@ -615,13 +402,13 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         Menu_Status_equipmentDetailsCursorAnimState = VS::Menu::Framework::DrawLiveCursor(Menu_Status_equipmentDetailsCursorAnimState, i);
 
         if (Input_buttonsPressed.allButtons & PADRup) {
-            Menu_Status_ExitEquipmentDetails(1);
+            VS::Menu::Status::ExitLiveEquipmentDetails(1);
             return -1;
         }
 
         if (Input_buttonsPressed.allButtons & PADRdown) {
             VS::Menu::Status::LiveBeginVitalsTransition(Menu_Status_selectedActor - 1);
-            Menu_Status_ExitEquipmentDetails(1);
+            VS::Menu::Status::ExitLiveEquipmentDetails(1);
             VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
             return Menu_Status_equipmentDetailsSelectedEquipmentRow + 1;
         }

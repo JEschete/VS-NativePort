@@ -1140,6 +1140,12 @@
     <ClCompile Include="src\StatusComponentDescriptionsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusDetailTransitionsLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatusDetailTransitionsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\StatusHelpersTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1342,6 +1348,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\StatusLimbControllersWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp">
