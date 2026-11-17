@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
@@ -35,6 +36,7 @@ void Boot_ResetMainMenuStatics(void)
 void Boot_ResetMenu2Statics(void)
 {
     Menu_BattleAbilities_ResetMenu2Statics();
+    VS::Menu::BattleAbilities::ResetLiveAbilityFoundationState();
 }
 
 // Call where the original loads MENU3.PRG: restores the statics its reload re-read from the disc.

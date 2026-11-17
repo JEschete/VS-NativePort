@@ -38,6 +38,7 @@
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -1753,7 +1754,7 @@ TEST_CASE("Ineligible ability reward menus leave progression unchanged",
   progress.kills.totalKills = static_cast<u_short>(
       unlocked == 22 ? 65535 : kAbilityThresholds[unlocked] - 1);
   const auto before = progress;
-  CHECK(Menu_BattleAbilities_UpdateAbilityUnlock(1) == 1);
+  CHECK(VS::Menu::BattleAbilities::LiveUpdateAbilityUnlock(1) == 1);
   CheckAbilityProgress(before);
 }
 

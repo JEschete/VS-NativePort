@@ -258,6 +258,12 @@
     <ClCompile Include="src\BasicActionEffectsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\BattleAbilityFoundationLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BattleAbilityFoundationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\BattleTargetingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1226,6 +1232,9 @@
     </ClInclude>
     <ClInclude Include="include\Items\ContainerTransfersWorld.hpp">
       <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\AbilityFoundationWorld.hpp">
+      <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ContainerCapacityLiveFixture.hpp">
       <Filter>include\Menu</Filter>

@@ -1,18 +1,18 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest integrated #276 group is inventory terminal,
-F02591, F02592, F02597, F02553 and F02636, including three distinct MENUB
-contexts. Its shared Debug/Release gates passed;
+Updated 2026-11-16. The latest integrated #276 group is ability foundation,
+F02614-F02619, including actual Live row ownership and original MENU2
+reload semantics. Its shared Debug/Release gates passed;
 the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **809 resolved (797 promoted,
-12 retired) and 91 remaining**; see
+The original 900-function cohort has **815 resolved (803 promoted,
+12 retired) and 85 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 50, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
+  48: 44, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
   do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
@@ -21,6 +21,28 @@ The original 900-function cohort has **809 resolved (797 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Ability-foundation evidence (`VR-MENU-ABILITY-FOUNDATION`): six originals
+  and the supplemental actual-Live row entry independently passed 1,024
+  vectors each, zero mismatches; 154 distinct original instruction mutants
+  (the row proof repeats 32) and seven compiled native variants were detected.
+  Debug and Release each passed 8,859 cases / 12,954,776 assertions,
+  41 focused cases / 6,201 assertions and both canonical replays.
+  Generation stability, copier tests and changed-file tidy passed with zero
+  new findings. Evidence: `build\promotion-check\group-20261116-205439\summary.json`
+  and `build\scratch\abilities-foundation\integration.json`.
+  The first group failed one new Live tidy literal; proper-size array extents
+  fixed it, followed by fresh Live proof, focused tests and the full group.
+  Seven stale adaptations were pruned for #378. F02619's module/caller ABI
+  uses the pointer-array adapter, with bounded action-name staging and a full
+  16-byte unsigned Risk header. Actual Live tests cover module entries,
+  row allocation/copying and two failing-before/passing-after MENU2 reset
+  regressions (#415). The original image physically includes all foundation
+  state through `0x8010511F`: uninitialized C declarations are not evidence
+  of persistent BSS. Existing row owners retain cleanup responsibility.
+  Original external rendering/allocation/dispatch/BCD endpoints are doubled;
+  the supplemental Live proof doubles framework/heap/logging, with actual
+  integration tested separately. No interactive presentation or EC retirement
+  claim. #378/#415 remain open until exact-revision publication CI passes.
 - Inventory-terminal evidence (`VR-MENU-INVENTORY-TERMINAL`): eight original
   contexts independently passed 1,024 vectors in current root, zero mismatches;
   all 92 original instruction mutants and eight compiled native variants were
@@ -30,8 +52,8 @@ The original 900-function cohort has **809 resolved (797 promoted,
   new findings. Evidence: `build\promotion-check\group-20261116-201034\summary.json`
   and `build\scratch\inventory-terminal\integration.json`.
   Live tests exercise all eight module entries, real row creation, separate
-  MENU3/MENUB text and Manage/restriction behavior, ordinary overlay versus cold
-  reset, and original MENUB text loading after cold reset. Loot callers now use
+  MENU3/MENUB text and Manage/restriction behavior, and original MENUB text
+  loading after cold reset. Loot callers now use
   MENUB navigation and native-owned MENUB text (#405); row 47 is complete,
   98/98 promoted. Original callees are endpoint doubles; renderer packets and
   unused workspace bytes are excluded. No interactive/visual gameplay or EC
@@ -41,8 +63,16 @@ The original 900-function cohort has **809 resolved (797 promoted,
   exposed #416: metadata-only differential listing eagerly imported optional
   Capstone, absent on CI. The correction defers that import until proof
   disassembly and makes the listing regression block Capstone explicitly;
-  original checks are unchanged. #405 and #416 remain open until the
-  fixing revision has successful CI.
+  original checks are unchanged. The correction
+  [`0c79a09a4`](https://github.com/JEschete/VS-NativePort/commit/0c79a09a4f5a399ba55db18b4296de1f12cf493b)
+  passed exact-revision [Source Quality 43996700466](https://github.com/JEschete/VS-NativePort/actions/runs/43996700466);
+  #405 and #416 are closed; [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6935470143).
+  Subsequent physical-image evidence invalidated the inventory packet's
+  persistent-BSS assumption and its corresponding reload test. #417 remains
+  open: MAINMENU shortcut, MENU3 inventory/screen and MENUB inventory/loot
+  controller fields lie inside their original PRG files and must reset when
+  their own overlay reloads. Preserve immutable text and distinct cold-owned
+  storage cleanup; do not retain the old reload assertion as valid evidence.
 - Emitter/ring evidence (`VR-EFFECTS-EMITTER-RINGS`): all eight original
   spans independently passed 2,048 vectors in current root, zero mismatches;
   79 original instruction mutants and eight compiled native variants were
@@ -131,20 +161,22 @@ The original 900-function cohort has **809 resolved (797 promoted,
 
 Next steps:
 
-1. Integrate ability-foundation packet `75c4b990e1d02815b9d377d35e9b521aec5feee8`
-   from `D:\Dev\NativePort\wt\batch-abilities-foundation-3401e5e8`:
-   F02614-F02619, 6,144 original vectors, 154 original mutants, six native
-   variants and 29 local cases / 2,662 assertions, plus an actual-Live row
-   entry differential. Preserve the F02619 pointer-array entry ABI; reconcile
-   #378's stale adaptations and prove per-field MENU2 reload semantics before
-   wiring the reset hook. Loot-terminal packet
-   `2e17d454c3a9c77791d2c35fe2c7e000ed26af1c` is also delivered and awaits
-   review/integration, including quantity-loss issue #412. Ability-terminal
-   and magic-terminal workers are active; no worker packet is a completed
-   root promotion.
+1. Confirm ability-foundation publication CI and reconcile #378/#415.
+   Integrate loot-terminal packet
+   `2e17d454c3a9c77791d2c35fe2c7e000ed26af1c` with the confirmed quantity
+   defect #412 and directly related overlay-reset correction #417. Its old
+   three-byte-only MENUB reset is also wrong; use original loaded extents,
+   production reset hooks and real ownership tests.
+   Ability-terminal packet `db0051375876c18be86933ced4f3dd027b6e977e`
+   and magic-terminal packet `4b74650bc58564b4652020683d75682dd276f985`
+   are delivered, awaiting serial root integration. Status-components and
+   status-limbs workers are active; no packet alone is a root promotion.
    The coordinator's text-update worktree is
-   `D:\Dev\NativePort\wt\batch-text-update-b88a6b2c`; its initial frame-update
-   core is unverified, with notifications, Live binding and proof still to do.
+   `D:\Dev\NativePort\wt\batch-text-update-b88a6b2c`; its frame-update core
+   has nine passing cases / 70 assertions, 1,024 original vectors, 42 detected
+   instruction mutants and a detected compiled native variant. Its shared
+   word-codec extraction also preserves all eight earlier text-box cases.
+   Notifications and Live integration remain.
    Continue the dependency-ordered plan.
    The emitter investigation logged the shared ApplyRotMatrix saturation
    defect in #411; the shared helper is unchanged, and no shared-helper

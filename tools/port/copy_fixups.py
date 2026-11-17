@@ -1857,6 +1857,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::Templates::UpdateLivePlg263TransposedRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
     "VS::Effects::Templates::UpdateLivePlg300RepeatingRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
     "VS::Effects::Templates::UpdateLivePlg300ForegroundRepeatingRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUpdateBreakArtUnlock": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUnlockDescription": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUpdateAbilityUnlock": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUpdateUnlockNotifications": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
+    "VS::Menu::BattleAbilities::LiveSetRiskCost": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
+    "VS::Menu::BattleAbilities::LiveCreateAbilityRowsEntry": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3354,6 +3360,12 @@ OWNED_CALL_BINDINGS["F02289"] = "VS::Effects::Templates::UpdateLivePlg236Transpo
 OWNED_CALL_BINDINGS["F02323"] = "VS::Effects::Templates::UpdateLivePlg263TransposedRing"
 OWNED_CALL_BINDINGS["F02397"] = "VS::Effects::Templates::UpdateLivePlg300RepeatingRing"
 OWNED_CALL_BINDINGS["F02398"] = "VS::Effects::Templates::UpdateLivePlg300ForegroundRepeatingRing"
+OWNED_CALL_BINDINGS["F02614"] = "VS::Menu::BattleAbilities::LiveUpdateBreakArtUnlock"
+OWNED_CALL_BINDINGS["F02615"] = "VS::Menu::BattleAbilities::LiveUnlockDescription"
+OWNED_CALL_BINDINGS["F02616"] = "VS::Menu::BattleAbilities::LiveUpdateAbilityUnlock"
+OWNED_CALL_BINDINGS["F02617"] = "VS::Menu::BattleAbilities::LiveUpdateUnlockNotifications"
+OWNED_CALL_BINDINGS["F02618"] = "VS::Menu::BattleAbilities::LiveSetRiskCost"
+OWNED_CALL_BINDINGS["F02619"] = "VS::Menu::BattleAbilities::LiveCreateAbilityRowsEntry"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -5364,6 +5376,12 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800CD158, "VS::Menu::DrawLiveInformationBoxBackdrop"),  # F01414
     ("BATTLE/BATTLE.PRG", 0x800CD3A0, "VS::Menu::FlipLiveTextBoxShapePoint"),  # F01415
     ("BATTLE/BATTLE.PRG", 0x800CD3E4, "VS::Menu::DrawLiveTextBoxFrame"),  # F01416
+    ("MENU/MENU2.PRG", 0x80103C3C, "VS::Menu::BattleAbilities::LiveUpdateBreakArtUnlock"),  # F02614
+    ("MENU/MENU2.PRG", 0x80103DD8, "VS::Menu::BattleAbilities::LiveUnlockDescription"),  # F02615
+    ("MENU/MENU2.PRG", 0x80103E20, "VS::Menu::BattleAbilities::LiveUpdateAbilityUnlock"),  # F02616
+    ("MENU/MENU2.PRG", 0x80104578, "VS::Menu::BattleAbilities::LiveUpdateUnlockNotifications"),  # F02617
+    ("MENU/MENU2.PRG", 0x80102864, "VS::Menu::BattleAbilities::LiveSetRiskCost"),  # F02618
+    ("MENU/MENU2.PRG", 0x80102928, "VS::Menu::BattleAbilities::LiveCreateAbilityRowsEntry"),  # F02619
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

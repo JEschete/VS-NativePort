@@ -7,6 +7,7 @@
 ],
 [
 "// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.",
+"#include \"Menu/BattleAbilitiesUnlockLive.hpp\"",
 "#include \"Menu/Container/ContainerListTransferLive.hpp\"",
 "#include \"Menu/Container/ContainerMenuDialogsLive.hpp\"",
 "#include \"Menu/Inventory/EquipmentRowsLive.hpp\"",
@@ -20,7 +21,17 @@
 ]
 ],
 [
-35,
+26,
+[
+"    Menu_BattleAbilities_ResetMenu2Statics();"
+],
+[
+"    Menu_BattleAbilities_ResetMenu2Statics();",
+"    VS::Menu::BattleAbilities::ResetLiveAbilityFoundationState();"
+]
+],
+[
+32,
 [
 "    Menu_Inventory_ResetMenu3Statics();"
 ],
@@ -115,75 +126,12 @@
 ],
 "Native\\Game\\src\\Menu\\BattleAbilities.cpp": [
 [
-117,
-[
-"        VS::Menu::InitLiveInformationTextBox(3);"
-],
-[
-"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));"
-]
-],
-[
-410,
-[
-"            VS::Menu::InitLiveInformationTextBox(3);"
-],
-[
-"            VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));"
-]
-],
-[
-436,
-[
-"            VS::Menu::InitLiveInformationTextBox(3);"
-],
-[
-"            VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(3));"
-]
-],
-[
-611,
-[
-"    Menu_BattleAbilities_abilityText = VS::Core::Memory::AllocateLiveFromHighEnd(abilityCount * 128);"
-],
-[
-"    Menu_BattleAbilities_abilityText = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(abilityCount * 128));"
-]
-],
-[
-704,
+131,
 [
 "    u_long* scratch = Render_frameScratch.overlayOrderingTable + 8;"
 ],
 [
 "    u_long* scratch = (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 8);"
-]
-],
-[
-1342,
-[
-"        static const u_char initial[16];"
-],
-[
-"        static const u_char initial[16] = {};"
-]
-],
-[
-1346,
-[
-"        static const u_char initial[11];"
-],
-[
-"        static const u_char initial[11] = {};"
-]
-],
-[
-1350,
-[
-"        static const char initial[16];"
-],
-[
-"        static const char initial[16] = {};"
 ]
 ]
 ],
