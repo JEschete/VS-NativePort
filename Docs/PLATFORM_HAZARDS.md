@@ -57,16 +57,16 @@ there would have hidden the defect and left the wrong behavior in place.
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 82 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
-| `BYTE-OFFSET` | Field reached by a literal byte offset | 3 | 0 | 0 | 3 | 0 | 3 |
+| `BYTE-OFFSET` | Field reached by a literal byte offset | 2 | 0 | 0 | 2 | 0 | 2 |
 | `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 0 | 0 | 0 | 0 | 0 | 0 |
 | `PS1-ADDRESS` | Original memory address used as a value | 0 | 0 | 0 | 0 | 0 | 0 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 2 | 2 | 2 | 0 | 0 | 2 |
 | `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 4 | 0 | 0 | 4 | 0 | 4 |
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
-| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 3 | 0 | 0 | 3 | 0 | 3 |
+| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 0 | 0 | 0 | 0 | 0 | 0 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 489 | 239 | 239 | 228 | 22 | 479 |
+| **Total** | | 485 | 239 | 239 | 224 | 22 | 475 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -91,8 +91,8 @@ there would have hidden the defect and left the wrong behavior in place.
 | Roadmap issue | Sites |
 | --- | ---: |
 | #56 | 92 |
-| #60 | 81 |
 | no roadmap issue | 79 |
+| #60 | 77 |
 | #253 | 50 |
 | #61 | 45 |
 | #55 | 34 |

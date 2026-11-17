@@ -1,18 +1,18 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest integrated #276 group is ability foundation,
-F02614-F02619, including actual Live row ownership and original MENU2
-reload semantics. Its shared Debug/Release gates passed;
+Updated 2026-11-16. The latest integrated #276 group is loot terminal,
+F02843-F02845/F02864/F02865, including quantity conservation and the
+related inventory/loot overlay-reset correction. Its shared Debug/Release gates passed;
 the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **815 resolved (803 promoted,
-12 retired) and 85 remaining**; see
+The original 900-function cohort has **820 resolved (808 promoted,
+12 retired) and 80 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 44, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
+  48: 39, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
   do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
@@ -21,6 +21,36 @@ The original 900-function cohort has **815 resolved (803 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Loot-terminal evidence (`VR-MENU-LOOT-TERMINAL`): five originals each
+  passed 1,024 vectors, zero mismatches; all 56 original instruction mutants
+  and five compiled native variants were detected. Fresh verification of all
+  eight inventory contexts adds 8,192 vectors, zero mismatches and 92
+  detected original mutants; the unchanged inventory core retains its prior
+  native-variant evidence. Debug and Release each passed 8,889 cases /
+  12,955,080 assertions, 79 focused cases / 688,511 assertions and both
+  canonical replays. Second generation changed zero Native files
+  (`e828be46e17aa505`); copier tests and changed-file tidy passed with six
+  existing findings and zero new findings.
+  Evidence: `build\promotion-check\group-20261116-224554\summary.json`
+  and `build\scratch\loot-terminal\integration.json`.
+  #412's original five-unit preview manufactured 6,320 units when Ashley
+  had room for 20. The native correction caps each stack by remaining loot;
+  typed boundary tests and actual Live preview/confirm/cancel tests verify
+  conservation and complete inventory/176-row rollback. That defective
+  input domain is excluded explicitly from original parity.
+  #417's actual MENU3/MENUB navigation reload tests failed before the
+  correction (`iterate-20261116-212739`) and pass afterward. MAINMENU
+  shortcut, MENU3 countdown and MENUB inventory/loot controllers now reset
+  on their own overlay loads. Immutable MENUB text and the owned workspace
+  survive ordinary reload; actual cold session invalidation resets paging,
+  clears borrowed views/substitutions and releases storage before heap
+  replacement. Real teardown and subsequent reentry pass.
+  The existing paging fixture now binds both scene and overlay ordering
+  tables; the focused run has no unexpected renderer diagnostics.
+  Original callee endpoints are doubled; native pointer layout, expanded
+  capacity and lifetime are checked separately. No interactive presentation,
+  gameplay completion or EC retirement claim. #412/#417 remain open until
+  exact-revision publication CI passes.
 - Ability-foundation evidence (`VR-MENU-ABILITY-FOUNDATION`): six originals
   and the supplemental actual-Live row entry independently passed 1,024
   vectors each, zero mismatches; 154 distinct original instruction mutants
@@ -42,7 +72,11 @@ The original 900-function cohort has **815 resolved (803 promoted,
   Original external rendering/allocation/dispatch/BCD endpoints are doubled;
   the supplemental Live proof doubles framework/heap/logging, with actual
   integration tested separately. No interactive presentation or EC retirement
-  claim. #378/#415 remain open until exact-revision publication CI passes.
+  claim. Published in
+  [`221343948`](https://github.com/JEschete/VS-NativePort/commit/221343948342a84512b1e318838a51ffcc11a61c);
+  exact-revision [Source Quality 44001392919](https://github.com/JEschete/VS-NativePort/actions/runs/44001392919)
+  passed. #378/#415 are closed;
+  [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6936114927).
 - Inventory-terminal evidence (`VR-MENU-INVENTORY-TERMINAL`): eight original
   contexts independently passed 1,024 vectors in current root, zero mismatches;
   all 92 original instruction mutants and eight compiled native variants were
@@ -68,11 +102,11 @@ The original 900-function cohort has **815 resolved (803 promoted,
   passed exact-revision [Source Quality 43996700466](https://github.com/JEschete/VS-NativePort/actions/runs/43996700466);
   #405 and #416 are closed; [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6935470143).
   Subsequent physical-image evidence invalidated the inventory packet's
-  persistent-BSS assumption and its corresponding reload test. #417 remains
-  open: MAINMENU shortcut, MENU3 inventory/screen and MENUB inventory/loot
-  controller fields lie inside their original PRG files and must reset when
-  their own overlay reloads. Preserve immutable text and distinct cold-owned
-  storage cleanup; do not retain the old reload assertion as valid evidence.
+  persistent-BSS assumption and its corresponding reload test. The loot
+  group above supplies fresh #417 evidence and supersedes that assertion,
+  including the corrected F02592 promotion note and verification references.
+  The original inventory gate slice retains its historical bridge counts;
+  historical test totals are not the fresh reload verification.
 - Emitter/ring evidence (`VR-EFFECTS-EMITTER-RINGS`): all eight original
   spans independently passed 2,048 vectors in current root, zero mismatches;
   79 original instruction mutants and eight compiled native variants were
@@ -145,38 +179,44 @@ The original 900-function cohort has **815 resolved (803 promoted,
   suites passed sequentially with the same case/assertion totals. The group
   gate passed after ledger synchronization; the integrated worker worktree was
   removed after push and exact-revision CI.
-- B50-05 game-clear initialization stopped without an implementation commit,
+- The earlier B50-05 game-clear initialization stopped without an implementation commit,
   tests, or differentials. Its clean worker worktree remains at
   `D:\Dev\NativePort\wt\batch-game-clear-init-c8f3e2b4`; the preserved source
   snapshot is outside the repository at
   `C:\Users\judee\.copilot\session-state\8cb283b1-2d32-4344-87de-bccc86d8748a\files\b50-05-backup\`.
   [#410](https://github.com/JEschete/VS-NativePort/issues/410) records two
   unconfirmed lifecycle hypotheses; reproduce them separately before
-  classifying or fixing either one.
+  classifying or fixing either one. The current six-function game-clear
+  worker is active separately. It logged #421 for verified file-backed MENUF
+  reset omissions, not either #410 hypothesis.
 - Keep the promotion plan order and dependencies aligned with issue #4. Current
-  blockers are F00830 (#296), B48-01 (#378), B48-08 (#376), and B48-06/07
+  blockers are F00830 (#296), B48-08 (#376), and B48-06/07
   (#373); #384 waits on #377. The copier gates #381 and #383 are closed.
 - No interactive combat verification, gameplay completion or compatibility
   retirement is claimed.
 
 Next steps:
 
-1. Confirm ability-foundation publication CI and reconcile #378/#415.
-   Integrate loot-terminal packet
-   `2e17d454c3a9c77791d2c35fe2c7e000ed26af1c` with the confirmed quantity
-   defect #412 and directly related overlay-reset correction #417. Its old
-   three-byte-only MENUB reset is also wrong; use original loaded extents,
-   production reset hooks and real ownership tests.
+1. Confirm loot-terminal publication CI and reconcile #412/#417.
    Ability-terminal packet `db0051375876c18be86933ced4f3dd027b6e977e`
    and magic-terminal packet `4b74650bc58564b4652020683d75682dd276f985`
-   are delivered, awaiting serial root integration. Status-components and
-   status-limbs workers are active; no packet alone is a root promotion.
+   are delivered, awaiting serial root integration. Status-components
+   `7bd797a55e77bcd7c84c75768f7e24313f7b6f0e`, status-limbs
+   `f682bd35b5814988f36f5c37fecb4a4bb767f1fd` and status-transitions
+   `fea43799d892e4fee1ead0a50a8232846583d63b` are also delivered; no packet
+   alone is a root promotion. Status-terminal and game-clear workers remain
+   active. #418, #419, #420 and #422 retain their bounded acceptance and
+   root integration/CI gates.
    The coordinator's text-update worktree is
    `D:\Dev\NativePort\wt\batch-text-update-b88a6b2c`; its frame-update core
-   has nine passing cases / 70 assertions, 1,024 original vectors, 42 detected
+   has 1,024 original vectors, 42 detected
    instruction mutants and a detected compiled native variant. Its shared
    word-codec extraction also preserves all eight earlier text-box cases.
-   Notifications and Live integration remain.
+   The actual frame-update Live adapter strictly compiles and its core/Live
+   suite passes 11 cases / 106 assertions, including the original scene
+   ordering slot, three-buffer rotation and invalid-binding refusals.
+   Live tidy configuration, notification implementations/proofs and root
+   integration remain; the partial packet is not promoted.
    Continue the dependency-ordered plan.
    The emitter investigation logged the shared ApplyRotMatrix saturation
    defect in #411; the shared helper is unchanged, and no shared-helper

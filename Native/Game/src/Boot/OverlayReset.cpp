@@ -6,6 +6,7 @@
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
+#include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
@@ -30,6 +31,7 @@ extern "C" {
 void Boot_ResetMainMenuStatics(void)
 {
     Menu_Inventory_ItemList_ResetMainMenuStatics();
+    VS::Menu::Inventory::ResetMiscItemShortcutModuleData();
 }
 
 // Call where the original loads MENU2.PRG: restores the statics its reload re-read from the disc.
@@ -76,6 +78,7 @@ void Boot_ResetMenubStatics(void)
     Menu_Inventory_ResetMenubStatics();
     Menu_Loot_LootScreen_ResetMenubStatics();
     VS::Menu::Loot::Live::ResetPolicyStatics();
+    VS::Menu::Loot::ResetLootTerminalModuleData();
     VS::Menu::Inventory::ResetLootInventoryTerminalModuleData();
 }
 

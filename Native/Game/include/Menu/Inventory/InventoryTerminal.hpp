@@ -125,7 +125,7 @@ struct InventoryDiscardState {
   std::uint8_t quantity = 0;
   std::uint8_t maximum = 0;
 };
-// Only these initialized data bytes reset on an ordinary overlay reload.
+// Restored with the other file-backed controller fields on overlay reload.
 struct InventoryDiscardPresentation {
   std::array<std::uint8_t, kDiscardTemplateBytes> text = kDiscardInitialText;
   std::uint8_t cursor_animation = 0;
@@ -153,7 +153,7 @@ struct MiscShortcutState {
   std::uint8_t no_force_cursor_memory = 0;
 };
 struct InventoryScreenState {
-  // Initialized module data; the countdown is BSS.
+  // Both bytes are included in MENU3's loaded image.
   std::uint8_t resume_without_cursor_reset = 0;
   std::uint8_t quit_countdown = 0;
 };

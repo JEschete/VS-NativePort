@@ -4833,12 +4833,16 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
 
     def test_loot_pages_share_row_capacity_and_reset_before_source_release(self):
         root = Path(__file__).resolve().parents[2]
-        screen = (root / "Native/Game/src/Menu/Loot/LootScreen.cpp").read_text()
-        self.assertNotIn("160 * sizeof", screen)
-        self.assertNotIn("sizeof *Menu_Loot_lootList * 160", screen)
-        self.assertEqual(screen.count("kMenuLootRowCapacity"), 6)
-        selection = screen.split("int Menu_Loot_UpdateLootSelection(", 1)[1]
-        self.assertIn("} else if (Menu_Loot_AdvanceStagedInventory()) {", selection)
+        screen = (root / "Native/Game/src/Menu/Loot/LootTerminal.cpp").read_text()
+        for path in ("Native/Game/include/Menu/Loot/LootTerminal.hpp",
+                     "Native/Game/src/Menu/Loot/LootTerminalLive.cpp"):
+            storage = (root / path).read_text()
+            self.assertIn("kLootRowCapacity> rows{}", storage)
+            self.assertIn("kLootRowCapacity> working_rows{}", storage)
+        self.assertIn("host.AdvanceBatch()", screen)
+        teardown = screen.split("std::int32_t UpdateLootScreen(", 1)[1]
+        self.assertLess(teardown.index("host.ResetPaging();"),
+                        teardown.index("host.ReleaseWorkspace();"))
         cleanup = (root / "Native/Game/src/Items/Loot.cpp").read_text()
         cleanup = cleanup.split("void ClearRoomLootList(", 1)[1]
         self.assertLess(
@@ -4895,9 +4899,9 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
 
     def test_loot_transition_uses_the_menub_inventory_controller(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Loot/LootScreen.cpp").read_text()
-        self.assertEqual(source.count("VS::Menu::Inventory::UpdateLiveLootItemList("), 2)
-        self.assertNotIn("VS::Menu::Inventory::UpdateLiveItemList(", source)
+        source = (root / "Native/Game/src/Menu/Loot/LootTerminalLive.cpp").read_text()
+        self.assertEqual(source.count("Inventory::UpdateLiveLootItemList("), 1)
+        self.assertNotIn("Inventory::UpdateLiveItemList(", source)
         self.assertIn(("MENU/MENUB.PRG", 0x80105454,
                        "VS::Menu::Inventory::UpdateLiveLootItemList"),
                       copy_fixups.MODULE_BINDING_ENTRIES)

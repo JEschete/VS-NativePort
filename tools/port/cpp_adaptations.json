@@ -14,10 +14,21 @@
 "#include \"Menu/Inventory/EquipmentMenusLive.hpp\"",
 "#include \"Menu/Inventory/InventoryTerminalLive.hpp\"",
 "#include \"Menu/Loot/LootPoliciesLive.hpp\"",
+"#include \"Menu/Loot/LootTerminalLive.hpp\"",
 "#include \"Menu/ManualScreenLive.hpp\"",
 "#include \"Menu/Results/CubePuzzleLifecycleLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\""
+]
+],
+[
+20,
+[
+"    Menu_Inventory_ItemList_ResetMainMenuStatics();"
+],
+[
+"    Menu_Inventory_ItemList_ResetMainMenuStatics();",
+"    VS::Menu::Inventory::ResetMiscItemShortcutModuleData();"
 ]
 ],
 [
@@ -70,6 +81,7 @@
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();",
 "    VS::Menu::Loot::Live::ResetPolicyStatics();",
+"    VS::Menu::Loot::ResetLootTerminalModuleData();",
 "    VS::Menu::Inventory::ResetLootInventoryTerminalModuleData();"
 ]
 ],
@@ -132,57 +144,6 @@
 ],
 [
 "    u_long* scratch = (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 8);"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Loot\\LootScreen.cpp": [
-[
-376,
-[
-"        VS::Menu::InitLiveInformationTextBox(1);"
-],
-[
-"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-],
-[
-610,
-[
-"        VS::Menu::InitLiveInformationTextBox(1);"
-],
-[
-"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-],
-[
-1078,
-[
-"        Menu_Loot_inventory = buf;",
-"        Menu_Loot_inventoryBackup = buf + sizeof *Menu_Loot_inventory;",
-"        Menu_Loot_lootList = buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup;"
-],
-[
-"        Menu_Loot_inventory = (Items_Inventory *)(buf);",
-"        Menu_Loot_inventoryBackup = (Items_Inventory *)(((u_char*)(buf)) + sizeof *Menu_Loot_inventory);",
-"        Menu_Loot_lootList = (Menu_Loot_LootListItem *)(((u_char*)(buf)) + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup);"
-]
-],
-[
-1082,
-[
-"            buf + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity;"
-],
-[
-"            (Menu_Loot_LootListItem *)(((u_char*)(buf)) + sizeof *Menu_Loot_inventory + sizeof *Menu_Loot_inventoryBackup + sizeof *Menu_Loot_lootList * kMenuLootRowCapacity);"
-]
-],
-[
-1106,
-[
-"                VS::Menu::InitLiveInformationTextBox(1);"
-],
-[
-"                VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
 ]
 ]
 ],

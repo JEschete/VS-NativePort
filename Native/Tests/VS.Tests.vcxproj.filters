@@ -777,6 +777,9 @@
     <ClCompile Include="src\LootStagingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\LootTerminalTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MagicCostsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1294,6 +1297,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\LootTerminalWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp">

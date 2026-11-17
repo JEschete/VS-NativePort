@@ -324,6 +324,7 @@
     <ClCompile Include="src\LootPoliciesTests.cpp" />
     <ClCompile Include="src\LootRowsTests.cpp" />
     <ClCompile Include="src\LootStagingTests.cpp" />
+    <ClCompile Include="src\LootTerminalTests.cpp" />
     <ClCompile Include="src\MagicCostsTests.cpp" />
     <ClCompile Include="src\MagicSpellMenuTests.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -513,6 +514,7 @@
     <ClInclude Include="include\Menu\InventoryTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\ItemDetailDispatchLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp" />
+    <ClInclude Include="include\Menu\LootTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />

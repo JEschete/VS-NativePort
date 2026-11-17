@@ -1651,6 +1651,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Loot::Live::ShowLootDescription": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
     "VS::Menu::Loot::Live::UpdateLeaveConfirmation": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
     "VS::Menu::Loot::Live::UpdateOrganizationMenu": r"Native\Game\include\Menu\Loot\LootPoliciesLive.hpp",
+    "VS::Menu::Loot::UpdateLiveInventoryTransition": r"Native\Game\include\Menu\Loot\LootTerminalLive.hpp",
+    "VS::Menu::Loot::UpdateLiveDisassembly": r"Native\Game\include\Menu\Loot\LootTerminalLive.hpp",
+    "VS::Menu::Loot::UpdateLiveStackConsolidation": r"Native\Game\include\Menu\Loot\LootTerminalLive.hpp",
+    "VS::Menu::Loot::UpdateLiveLootSelection": r"Native\Game\include\Menu\Loot\LootTerminalLive.hpp",
+    "VS::Menu::Loot::UpdateLiveLootScreen": r"Native\Game\include\Menu\Loot\LootTerminalLive.hpp",
     "VS::Menu::Framework::PopulateLiveWeaponStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveShieldStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
     "VS::Menu::Framework::PopulateLiveArmorStats": r"Native\Game\include\Menu\Framework\EquipmentDetailsLive.hpp",
@@ -3024,6 +3029,11 @@ OWNED_CALL_BINDINGS["F02860"] = "VS::Menu::Loot::Live::RenderLootRows"
 OWNED_CALL_BINDINGS["F02861"] = "VS::Menu::Loot::Live::ShowLootDescription"
 OWNED_CALL_BINDINGS["F02862"] = "VS::Menu::Loot::Live::UpdateLeaveConfirmation"
 OWNED_CALL_BINDINGS["F02863"] = "VS::Menu::Loot::Live::UpdateOrganizationMenu"
+OWNED_CALL_BINDINGS["F02843"] = "VS::Menu::Loot::UpdateLiveInventoryTransition"
+OWNED_CALL_BINDINGS["F02844"] = "VS::Menu::Loot::UpdateLiveDisassembly"
+OWNED_CALL_BINDINGS["F02845"] = "VS::Menu::Loot::UpdateLiveStackConsolidation"
+OWNED_CALL_BINDINGS["F02864"] = "VS::Menu::Loot::UpdateLiveLootSelection"
+OWNED_CALL_BINDINGS["F02865"] = "VS::Menu::Loot::UpdateLiveLootScreen"
 OWNED_CALL_BINDINGS["F02640"] = "VS::Menu::Framework::PopulateLiveWeaponStats"
 OWNED_CALL_BINDINGS["F02641"] = "VS::Menu::Framework::PopulateLiveShieldStats"
 OWNED_CALL_BINDINGS["F02642"] = "VS::Menu::Framework::PopulateLiveArmorStats"
@@ -5179,6 +5189,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUB.PRG", 0x80108E78, "VS::Menu::Loot::Live::ShowLootDescription"),  # F02861
     ("MENU/MENUB.PRG", 0x801090A4, "VS::Menu::Loot::Live::UpdateLeaveConfirmation"),  # F02862
     ("MENU/MENUB.PRG", 0x80109444, "VS::Menu::Loot::Live::UpdateOrganizationMenu"),  # F02863
+    ("MENU/MENUB.PRG", 0x801066CC, "VS::Menu::Loot::UpdateLiveInventoryTransition"),  # F02843
+    ("MENU/MENUB.PRG", 0x80106B80, "VS::Menu::Loot::UpdateLiveDisassembly"),  # F02844
+    ("MENU/MENUB.PRG", 0x801073E0, "VS::Menu::Loot::UpdateLiveStackConsolidation"),  # F02845
+    ("MENU/MENUB.PRG", 0x80109750, "VS::Menu::Loot::UpdateLiveLootSelection"),  # F02864
+    ("MENU/MENUB.PRG", 0x80109E90, "VS::Menu::Loot::UpdateLiveLootScreen"),  # F02865
     ("MENU/MENU1.PRG", 0x80102830, "VS::Menu::break_arts::SetHpCostLive"),  # F02608
     ("MENU/MENU1.PRG", 0x80102914, "VS::Menu::break_arts::DrawNextUnlockPointsLive"),  # F02609
     ("MENU/MENU1.PRG", 0x80102A4C, "VS::Menu::break_arts::UpdateArtListLive"),  # F02610
@@ -5408,37 +5423,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "offsetof(Field_GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
     ],
-    "F02864": [
-        ("""            } else {
-                return i;
-            }""",
-         """            } else if (Menu_Loot_AdvanceStagedInventory()) {
-                Menu_Loot_controlsEnabled = 0;
-                Menu_Loot_showLoot = 1;
-                Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_Init;
-            } else {
-                return i;
-            }""",
-         "Claims or confirmed departure resolve only the visible batch; cancel and key protection stay original."),
-    ],
-    "F02865": [
-        (" * 160", " * kMenuLootRowCapacity",
-         "Reserve metadata for every original inventory slot, including rows created by disassembly."),
-        ("        VS::Core::Memory::FreeFromHighEnd(Menu_Loot_inventory);",
-         "        Menu_Loot_ResetPaging();\n"
-         "        VS::Core::Memory::FreeFromHighEnd(Menu_Loot_inventory);",
-         "Discard page source references before the working inventory and pending nodes are released."),
-    ],
-    "F02844": [
-        ("160 * sizeof", "kMenuLootRowCapacity * sizeof",
-         "Disassembly backup/restore must use the complete native row allocation."),
-    ],
-    "F02845": [
-        ("160 * sizeof", "kMenuLootRowCapacity * sizeof",
-         "Consolidation backup uses the same row allocation as the live screen."),
-        ("sizeof *Menu_Loot_lootList * 160", "sizeof *Menu_Loot_lootList * kMenuLootRowCapacity",
-         "Consolidation restoration includes every supported row."),
-    ],
     "F02816": [
         ("char digits[2];", 'char digits[sizeof "00"];',
          "238.c:1835 two title digits also need the native sprintf terminator"),
@@ -5464,11 +5448,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("*(void**)Core_ScratchAddr(0) = poly;",
          "Render_frameScratch.primitiveCursor = poly;",
          "Publish the advanced encyclopedia-digit cursor through the native frame"),
-    ],
-    "F02843": [
-        ("VS::Menu::Inventory::UpdateLiveItemList(",
-         "VS::Menu::Inventory::UpdateLiveLootItemList(",
-         "#405 MENUB inventory transitions require the original loot context, not MENU3"),
     ],
     "F02820": [
         ("char sp60[12];", 'char sp60[sizeof "NO.   000/000"];',

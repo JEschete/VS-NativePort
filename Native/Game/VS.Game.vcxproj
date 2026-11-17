@@ -1925,6 +1925,10 @@
     <ClCompile Include="src\Menu\Loot\LootStagingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Loot\LootTerminal.cpp" />
+    <ClCompile Include="src\Menu\Loot\LootTerminalLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Magic.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2995,6 +2999,8 @@
     <ClInclude Include="include\Menu\Loot\LootRowsLive.hpp" />
     <ClInclude Include="include\Menu\Loot\LootStaging.hpp" />
     <ClInclude Include="include\Menu\Loot\LootStagingLive.hpp" />
+    <ClInclude Include="include\Menu\Loot\LootTerminal.hpp" />
+    <ClInclude Include="include\Menu\Loot\LootTerminalLive.hpp" />
     <ClInclude Include="include\Menu\MagicCosts.hpp" />
     <ClInclude Include="include\Menu\MagicCostsLive.hpp" />
     <ClInclude Include="include\Menu\MagicMenus.hpp" />

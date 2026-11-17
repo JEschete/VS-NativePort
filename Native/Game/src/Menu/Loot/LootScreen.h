@@ -28,11 +28,6 @@ extern Menu_Loot_LootListItem* Menu_Loot_lootListWorkingCopy;;
 extern char Menu_Loot_selectedLoot;;
 extern char Menu_Loot_showInventory;;
 extern char Menu_Loot_showLoot;;
-int Menu_Loot_UpdateInventoryTransition(int category);
-int Menu_Loot_UpdateDisassembly(int itemIndex);
-int Menu_Loot_UpdateStackConsolidation(int lootIndex);
-int Menu_Loot_UpdateLootSelection(int initialize);
-int Menu_Loot_Update(u_char* state);
 void Menu_Loot_LootScreen_ResetMenubStatics(void);
 
 #endif // VS_MENU_LOOT_LOOTSCREEN_H_DECLS

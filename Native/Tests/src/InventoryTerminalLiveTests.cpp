@@ -1,8 +1,11 @@
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -10,30 +13,59 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/SoundPlaybackLive.hpp"
+#include "Boot/SessionLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
+#include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
+#include "Menu/Loot/LootTerminal.hpp"
+#include "Menu/Loot/LootTerminalLive.hpp"
 
 extern "C" {
+#include "Audio/Sfx.h"
 #include "Battle/Actor.h"
+#include "Battle/Hud.h"
 #include "Boot/OverlayReset.h"
+#include "Core/Diagnostics.h"
+#include "DiscQueue.h"
+#include "Field/RoomRenderingLiveState.h"
+#include "Items/Loot.h"
+#include "Menu/Framework/Menus.h"
+#include "Menu/Loot/LootScreen.h"
 }
 
 namespace {
 namespace inventory = VS::Menu::Inventory;
 namespace framework = VS::Menu::Framework;
 namespace content = VS::Content;
+namespace loot = VS::Menu::Loot;
 using equipment_detail_tests::ArrayRestore;
 using equipment_detail_tests::ValueRestore;
 constexpr std::string_view kItemModule = "MENU/MENU3.PRG";
 constexpr std::string_view kLootModule = "MENU/MENUB.PRG";
 constexpr unsigned kItemNavigation = 0x801053EC;
 constexpr unsigned kLootNavigation = 0x80105454;
+constexpr std::size_t kReadBudget = 32;
+constexpr std::size_t kAnimationBudget = 32;
+constexpr std::uint8_t kLootTeardown = 5;
+constexpr std::uint8_t kContainerReturn = 8;
+constexpr std::uint8_t kInventoryCountdown = 11;
+constexpr unsigned kConfirm = 0x20;
+constexpr unsigned kCancel = 0x40;
+constexpr std::size_t kSoundSlots = 0x180;
+constexpr std::size_t kAshleyActor = 0;
+constexpr std::int32_t kLootTitleRow = 3;
+constexpr std::uint8_t kBattleMenu = 4;
+constexpr loot::LootRow kTail{5, 47, 9, 5};
 
 template <typename Entry>
 bool IsBound(std::string_view module, unsigned address, Entry entry) {
@@ -49,6 +81,12 @@ int Navigate(std::string_view module, unsigned address, int initialize) {
   return reinterpret_cast<int (*)(int)>(entry)(initialize);
 }
 
+void EnterEmptyNavigation(std::string_view module, unsigned address) {
+  REQUIRE(Navigate(module, address, 2) == 0);
+  REQUIRE(Navigate(module, address, 0) == 0);
+  REQUIRE(Menu_Framework_itemsText == nullptr);
+}
+
 struct TerminalSession {
   TerminalSession() { inventory::ResetInventoryTerminalSession(); }
   ~TerminalSession() { inventory::ResetInventoryTerminalSession(); }
@@ -60,9 +98,21 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   TerminalSession session;
   ValueRestore<decltype(Battle_characterState)> saved_actor{
       Battle_characterState};
+  ValueRestore<Battle_Actor*> saved_ashley{Battle_actors[kAshleyActor]};
+  ValueRestore<int> saved_sound_group{Audio_nextSfxChannelGroup7E};
   ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_flags{
       Audio_Seq_unusedStateFlags};
   ValueRestore<decltype(Input_settings)> saved_settings{Input_settings};
+  ValueRestore<decltype(Menu_Framework_menuState)> saved_control{
+      Menu_Framework_menuState};
+  ValueRestore<decltype(Menu_Framework_actionSelection)> saved_action{
+      Menu_Framework_actionSelection};
+  ValueRestore<decltype(Battle_hudHidden)> saved_hud{Battle_hudHidden};
+  ValueRestore<decltype(Battle_hudSlideOffset)> saved_hud_offset{
+      Battle_hudSlideOffset};
+  ValueRestore<decltype(Field_isFieldRenderingEnabled)> saved_field{
+      Field_isFieldRenderingEnabled};
+  ValueRestore<int> saved_background{Menu_Framework_backgroundFadeStep};
   ValueRestore<int> saved_restrictions{Menu_Framework_actionRestrictions};
   ValueRestore<u_short*> saved_items{Menu_Framework_itemsText};
   ValueRestore<int*> saved_types{Menu_Framework_rowTypeBuf};
@@ -75,26 +125,53 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
       Menu_Inventory_statusCommandAnimationStep};
   ArrayRestore<u_short, std::size(Menu_Inventory_menuText)> saved_menu_text{
       Menu_Inventory_menuText};
+  ArrayRestore<u_short, std::size(Menu_menuStrings)> saved_titles{
+      Menu_menuStrings};
   std::array<int, framework::kRowTypeCount> row_types{};
   std::remove_pointer_t<decltype(Battle_characterState)> actor{};
   std::remove_pointer_t<decltype(actor.stats)> stats{};
+  std::array<std::uint32_t, kSoundSlots> sound_offsets{};
+  std::array<std::uint16_t, kSoundSlots> sound_banks{};
+  VS::Audio::Playback::ScopedLiveEffectTables sounds{
+      {.program_offsets = sound_offsets,
+       .bank_selectors = sound_banks,
+       .program_data = {}}};
 
   TerminalFixture() {
+    framework::ResetLiveMainMenuStatics();
+    BindInventory();
     Battle_characterState = &actor;
+    Battle_actors[kAshleyActor] = &actor;
     actor.stats = &stats;
+    sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     Audio_Seq_unusedStateFlags.introState = 3;
     Input_settings.cursorMemory = 0;
+    Menu_Framework_menuState = {};
+    Menu_Framework_actionSelection = {};
+    Menu_Framework_backgroundFadeStep = 0;
     Menu_Framework_menuMemory = {};
     Menu_Framework_actionRestrictions = 0;
     Menu_Framework_itemsText = nullptr;
     Menu_Framework_rowTypeBuf = row_types.data();
-    std::ranges::fill(Menu_Inventory_menuText, u_short{0xE7E7});
-    std::fill_n(Menu_Inventory_menuText, 32, u_short{32});
-    Menu_Inventory_menuText[32] = 0xE701;
+    Menu_Inventory_secondaryTitleEnabled = 0;
+    Menu_Inventory_itemCategoryIconsEnabled = 0;
+    Menu_Inventory_statusCommandState = 0;
+    Menu_Inventory_secondaryTitleAnimationStep = 0;
+    Menu_Inventory_itemCategoryIconsAnimationStep = 0;
+    Menu_Inventory_statusCommandAnimationStep = 0;
+    for (auto text : {std::span<u_short>(Menu_Inventory_menuText),
+                      std::span<u_short>(Menu_menuStrings)}) {
+      std::ranges::fill(text, u_short{0xE7E7});
+      std::fill_n(text.begin(), 32, u_short{32});
+      text[32] = 0xE701;
+    }
     inventory::BindLiveLootInventoryText(
         VS::tests::inventory_terminal::LootText(2));
   }
-  ~TerminalFixture() { CloseList(); }
+  ~TerminalFixture() {
+    CloseList();
+    framework::ResetLiveMainMenuStatics();
+  }
 
   void CloseList() {
     if (Menu_Framework_itemsText != nullptr) {
@@ -111,6 +188,157 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     framework::ItemText result;
     std::memcpy(&result, Menu_Framework_itemsText, sizeof result);
     return result;
+  }
+};
+
+struct TextLoadingFixture : TerminalFixture {
+  content::DataStore::ScopedOverride store;
+  ArrayRestore<Content_DiscQueueSlot, std::size(Content_discRequestSlots)>
+      saved_requests{Content_discRequestSlots};
+  ValueRestore<Content_DiscRequestCounts> saved_request_counts{
+      Content_discRequestCounts};
+  ValueRestore<Content_DiscDrive> saved_drive{Content_discDriveState};
+  ValueRestore<u_short*> saved_menu12{Menu_Framework_menu12Text};
+
+  TextLoadingFixture() {
+    if (!content::DataStore::Open(R"(Native\data)")) {
+      throw std::runtime_error(
+          "menu terminal integration needs extracted data");
+    }
+    content::ResetLiveDiscDrive();
+    content::InitializeLiveDiscQueue();
+  }
+  ~TextLoadingFixture() {
+    if (VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemNames) &&
+        !UnloadText()) {
+      Core_Errorf("tests",
+                  "menu terminal fixture could not drain its item text");
+      std::abort();
+    }
+    content::ResetLiveDiscDrive();
+  }
+  bool CompleteTextRead() {
+    for (std::size_t tick = 0; tick < kReadBudget; ++tick) {
+      content::UpdateLiveDiscQueue();
+      if (framework::LoadLiveItemText(0) != 0) return true;
+    }
+    return false;
+  }
+  bool UnloadText() {
+    return CompleteTextRead() && framework::UnloadLiveItemTextWhenReady() != 0;
+  }
+  bool SettleRows() {
+    for (std::size_t tick = 0; tick < kAnimationBudget; ++tick) {
+      if (framework::AreLiveMenuRowsIdle() != 0) return true;
+      ResetFrame();
+      framework::UpdateLiveScreen();
+    }
+    return false;
+  }
+};
+
+struct LootFixture : TextLoadingFixture {
+  static constexpr std::array kConsolidationRows{loot::LootRow{1, 0, 0, 0},
+                                                 loot::LootRow{6, 0, 0, 0},
+                                                 loot::LootRow{6, 1, 0, 0}};
+  ValueRestore<Items_Inventory*> saved_loot_inventory{Menu_Loot_inventory};
+  ValueRestore<Items_Inventory*> saved_backup{Menu_Loot_inventoryBackup};
+  ValueRestore<Menu_Loot_LootListItem*> saved_loot_rows{Menu_Loot_lootList};
+  ValueRestore<Menu_Loot_LootListItem*> saved_working{
+      Menu_Loot_lootListWorkingCopy};
+  ValueRestore<decltype(Menu_Framework_lootLists)> saved_room_loot{
+      Menu_Framework_lootLists};
+  ValueRestore<decltype(Menu_Framework_lootEntry)> saved_chest{
+      Menu_Framework_lootEntry};
+  std::remove_pointer_t<decltype(Menu_Framework_lootEntry)> chest{};
+  ValueRestore<u_char> saved_count{Menu_Loot_lootListCount};
+  ValueRestore<u_char> saved_offset{Menu_Loot_lootListOffset};
+  ValueRestore<char> saved_selected{Menu_Loot_selectedLoot};
+  ValueRestore<char> saved_previewed{Menu_Loot_previewedLoot};
+  ValueRestore<char> saved_claimed{Menu_Loot_lootClaimed};
+  ValueRestore<char> saved_controls{Menu_Loot_controlsEnabled};
+  ValueRestore<char> saved_show_inventory{Menu_Loot_showInventory};
+  ValueRestore<char> saved_show_loot{Menu_Loot_showLoot};
+  ValueRestore<u_char> saved_inventory_step{
+      Menu_Loot_inventoryCapacityFlyinTimer};
+  ValueRestore<u_char> saved_loot_step{Menu_Loot_lootLeftEdge};
+
+  LootFixture() {
+    if (Menu_Loot_inventory != nullptr ||
+        Menu_Loot_inventoryBackup != nullptr || Menu_Loot_lootList != nullptr ||
+        Menu_Loot_lootListWorkingCopy != nullptr) {
+      throw std::runtime_error("loot integration requires an unused workspace");
+    }
+    loot::ResetLootTerminalSession();
+    Menu_Framework_lootLists = nullptr;
+    Menu_Framework_lootEntry = &chest;
+    std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
+  }
+  ~LootFixture() { loot::ResetLootTerminalSession(); }
+  int Open() {
+    ResetFrame();
+    std::uint8_t step = 0;
+    auto* entry = content::ResolveModuleAddress(
+        {Content_moduleSymbols, Content_moduleSymbolCount}, kLootModule,
+        0x80109E90);
+    if (entry == nullptr) throw std::runtime_error("missing loot screen entry");
+    return reinterpret_cast<int (*)(unsigned char*)>(entry)(&step);
+  }
+  void OpenAndLoad() {
+    REQUIRE(Open() == 0);
+    REQUIRE(CompleteTextRead());
+    REQUIRE(Menu_Loot_inventory != nullptr);
+    REQUIRE(Menu_Loot_inventoryBackup != nullptr);
+    REQUIRE(Menu_Loot_lootList != nullptr);
+    REQUIRE(Menu_Loot_lootListWorkingCopy != nullptr);
+  }
+  void BeginInventoryTransition() {
+    REQUIRE(loot::UpdateLiveInventoryTransition(1) == 0);
+    REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
+  }
+  static void CheckReleased() {
+    CHECK(Menu_Loot_inventory == nullptr);
+    CHECK(Menu_Loot_inventoryBackup == nullptr);
+    CHECK(Menu_Loot_lootList == nullptr);
+    CHECK(Menu_Loot_lootListWorkingCopy == nullptr);
+    CHECK(Battle_stringContext.strings[0] == nullptr);
+  }
+  static void SeedConsolidation() {
+    auto& staged = *Menu_Loot_inventory;
+    staged.misc[0] = {323, 2, 1};
+    staged.misc[1] = {323, 3, 1};
+    staged.blades[0].id = 17;
+    Audio_Seq_unusedInventory.misc[0] = {323, 80, 1};
+    Menu_Loot_lootListCount = static_cast<u_char>(kConsolidationRows.size());
+    for (std::size_t index = 0; index < kConsolidationRows.size(); ++index) {
+      Menu_Loot_lootList[index] =
+          std::bit_cast<Menu_Loot_LootListItem>(kConsolidationRows[index]);
+    }
+    Menu_Loot_lootList[loot::kLootRowCapacity - 1] =
+        std::bit_cast<Menu_Loot_LootListItem>(kTail);
+    REQUIRE(loot::UpdateLiveStackConsolidation(2) == 0);
+    Menu_Loot_lootLeftEdge = 6;
+  }
+  void OpenConsolidationPrompt() {
+    REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
+    REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
+    REQUIRE(SettleRows());
+    REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
+  }
+  static void AnswerConsolidation(bool confirm) {
+    Input_buttonsPressed.allButtons = confirm ? kConfirm : kCancel;
+    REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
+    Input_buttonsPressed.allButtons = 0;
+    Menu_Loot_lootLeftEdge = 6;
+    REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
+  }
+  static void CheckRestoredRows() {
+    for (std::size_t index = 0; index < kConsolidationRows.size(); ++index) {
+      CHECK(std::bit_cast<loot::LootRow>(Menu_Loot_lootList[index]) ==
+            kConsolidationRows[index]);
+    }
+    CHECK(std::bit_cast<loot::LootRow>(
+              Menu_Loot_lootList[loot::kLootRowCapacity - 1]) == kTail);
   }
 };
 }  // namespace
@@ -166,19 +394,22 @@ TEST_CASE("F02597 Live loot does not inherit item-menu global restrictions",
 }
 
 TEST_CASE(
-    "F02597 overlay reload preserves navigation BSS but cold reset clears it",
-    "[inventory-terminal-live][F02597]") {
+    "F02597 overlay reload resets only its file-backed navigation controller",
+    "[inventory-terminal-live][inventory-reload][F02597]") {
+  const bool loot = GENERATE(false, true);
   TerminalFixture fixture;
+  const auto module = loot ? kLootModule : kItemModule;
+  const auto address = loot ? kLootNavigation : kItemNavigation;
+  const auto other_module = loot ? kItemModule : kLootModule;
+  const auto other_address = loot ? kItemNavigation : kLootNavigation;
   Menu_Framework_menuMemory.opaque3A.currentCategory = 1;
-  REQUIRE(Navigate(kItemModule, kItemNavigation, 2) == 0);
-  REQUIRE(Navigate(kItemModule, kItemNavigation, 0) == 0);
-  REQUIRE(Menu_Framework_itemsText == nullptr);
+  EnterEmptyNavigation(other_module, other_address);
+  EnterEmptyNavigation(module, address);
   fixture.AddWeapon();
-  Boot_ResetMenu3Statics();
-  REQUIRE(Navigate(kItemModule, kItemNavigation, 0) == 0);
+  (loot ? Boot_ResetMenubStatics : Boot_ResetMenu3Statics)();
+  CHECK(Navigate(other_module, other_address, 0) == 0);
   CHECK(Menu_Framework_itemsText == nullptr);
-  inventory::ResetInventoryTerminalSession();
-  REQUIRE(Navigate(kItemModule, kItemNavigation, 0) == 0);
+  REQUIRE(Navigate(module, address, 0) == 0);
   CHECK(Menu_Framework_itemsText != nullptr);
 }
 
@@ -202,6 +433,121 @@ TEST_CASE("MENUB text loads its original module bytes again after a cold reset",
   CHECK(std::ranges::equal(inventory::LiveLootInventoryText(), expected));
   inventory::BindLiveLootInventoryText(
       VS::tests::inventory_terminal::LootText());
+  Boot_ResetMenubStatics();
+  CHECK(std::ranges::equal(inventory::LiveLootInventoryText(),
+                           VS::tests::inventory_terminal::LootText()));
   inventory::ResetInventoryTerminalSession();
   CHECK(std::ranges::equal(inventory::LiveLootInventoryText(), expected));
+}
+
+TEST_CASE("F02553 MAINMENU reload restarts the live shortcut title phase",
+          "[inventory-terminal-live][inventory-reload][F02553]") {
+  TextLoadingFixture fixture;
+  inventory::UpdateLiveMiscItemShortcut(0);
+  REQUIRE(fixture.UnloadText());
+  framework::ClearLiveMenuExcept(framework::kNoRow);
+  REQUIRE(fixture.SettleRows());
+  Boot_ResetMenu3Statics();
+  inventory::UpdateLiveMiscItemShortcut(0);
+  CHECK(Menu_Framework_itemNames == nullptr);
+  Boot_ResetMainMenuStatics();
+  inventory::UpdateLiveMiscItemShortcut(0);
+  CHECK(VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemNames)
+            .has_value());
+}
+
+TEST_CASE("F02636 only MENU3 reload clears the live exit countdown",
+          "[inventory-terminal-live][inventory-reload][F02636]") {
+  TerminalFixture fixture;
+  Menu_Framework_itemNames = nullptr;
+  Menu_Framework_menuState.returnState = 1;
+  std::uint8_t step = kContainerReturn;
+  REQUIRE(inventory::UpdateLiveInventoryScreen(&step) == 0);
+  REQUIRE(step == kInventoryCountdown);
+  Boot_ResetMenubStatics();
+  CHECK(inventory::UpdateLiveInventoryScreen(&step) == 0);
+  Boot_ResetMenu3Statics();
+  CHECK(inventory::UpdateLiveInventoryScreen(&step) == 1);
+  CHECK(Menu_Framework_menuState.currentMenu == kBattleMenu);
+}
+
+TEST_CASE("Loot terminal module entries retain their distinct call shapes",
+          "[loot-terminal-live][F02843][F02844][F02845][F02864][F02865]") {
+  CHECK(IsBound(kLootModule, 0x801066CC, &loot::UpdateLiveInventoryTransition));
+  CHECK(IsBound(kLootModule, 0x80106B80, &loot::UpdateLiveDisassembly));
+  CHECK(IsBound(kLootModule, 0x801073E0, &loot::UpdateLiveStackConsolidation));
+  CHECK(IsBound(kLootModule, 0x80109750, &loot::UpdateLiveLootSelection));
+  CHECK(IsBound(kLootModule, 0x80109E90, &loot::UpdateLiveLootScreen));
+}
+
+TEST_CASE(
+    "F02843 MENUB reload restarts its controller without releasing storage",
+    "[loot-terminal-live][inventory-reload][F02843]") {
+  LootFixture fixture;
+  fixture.OpenAndLoad();
+  auto* const owned = Menu_Loot_inventory;
+  fixture.BeginInventoryTransition();
+  Boot_ResetMenu3Statics();
+  Menu_Inventory_selectedItemCategoryIconOnTop = 1;
+  REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
+  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 0);
+  framework::ClearLiveMenuExcept(framework::kNoRow);
+  REQUIRE(fixture.SettleRows());
+  Boot_ResetMenubStatics();
+  CHECK(Menu_Loot_inventory == owned);
+  REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
+  CHECK(framework::LiveMenuRow(kLootTitleRow).state ==
+        framework::RowState::kSlideX);
+  CHECK(std::ranges::equal(inventory::LiveLootInventoryText(),
+                           VS::tests::inventory_terminal::LootText(2)));
+}
+
+TEST_CASE(
+    "F02865 live teardown and cold session permit another owned workspace",
+    "[loot-terminal-live][F02865]") {
+  const bool cold = GENERATE(false, true);
+  LootFixture fixture;
+  const auto refusals = loot::LootTerminalLiveRefusalCount();
+  for (int visit = 0; visit < 2; ++visit) {
+    fixture.OpenAndLoad();
+    Battle_stringContext.strings[0] = Menu_Loot_inventory->weapons[0].name;
+    if (cold) {
+      const auto entry = +[] { return 0; };
+      CHECK(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
+      REQUIRE(fixture.UnloadText());
+    } else {
+      std::uint8_t step = kLootTeardown;
+      REQUIRE(loot::UpdateLiveLootScreen(&step) == 1);
+      CHECK(step == 0);
+    }
+    fixture.CheckReleased();
+  }
+  CHECK(loot::LootTerminalLiveRefusalCount() == refusals);
+}
+
+TEST_CASE(
+    "F02845 live consolidation conserves small loot on confirm and cancel",
+    "[loot-terminal-live][F02845][issue-412]") {
+  const bool confirm = GENERATE(false, true);
+  LootFixture fixture;
+  fixture.OpenAndLoad();
+  fixture.SeedConsolidation();
+  auto& staged = *Menu_Loot_inventory;
+  const auto before = VS::Items::Live::Typed(staged);
+  REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
+  CHECK(Menu_Loot_lootListCount == 1);
+  CHECK(staged.misc[0].count == 5);
+  fixture.OpenConsolidationPrompt();
+  fixture.AnswerConsolidation(confirm);
+  const auto after = VS::Items::Live::Typed(staged);
+  std::uint32_t total = 0;
+  for (const auto& item : after.misc) {
+    if (item.id == 323) total += item.count;
+  }
+  CHECK(total == 5);
+  CHECK(after.blades == before.blades);
+  if (!confirm) {
+    CHECK(after == before);
+    fixture.CheckRestoredRows();
+  }
 }

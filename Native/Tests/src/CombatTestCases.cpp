@@ -39,8 +39,11 @@
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
+#include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
+#include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -1116,6 +1119,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
   Render_FrameScratch saved_frame = Render_frameScratch;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  void* saved_ordering = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   int saved_sound_group = Audio_nextSfxChannelGroup7E;
   decltype(Menu_Loot_lootClaimed) saved_claimed = Menu_Loot_lootClaimed;
@@ -1136,6 +1140,10 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
        .program_data = {}}};
 
   LootPagingMenuFixture() {
+    VS::Menu::Inventory::ResetInventoryTerminalSession();
+    VS::Menu::Inventory::BindLiveLootInventoryText(
+        VS::tests::inventory_terminal::LootText());
+    VS::Menu::Loot::ResetLootTerminalModuleData();
     Menu_Framework_menuItems = menu_rows.data();
     Menu_Framework_itemNames = item_names;
     Menu_textBoxes[7] = {};
@@ -1146,13 +1154,17 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     Menu_Loot_lootLeftEdge = 0;
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
+    Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch.primitiveCursor = storage.data() + 1;
     Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
+    Render_frameScratch.orderingTable = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Menu_Loot_UpdateLootSelection(1);
+    VS::Menu::Loot::UpdateLiveLootSelection(1);
   }
 
   ~LootPagingMenuFixture() {
+    VS::Menu::Loot::ResetLootTerminalModuleData();
+    VS::Menu::Inventory::ResetInventoryTerminalSession();
     Input_settings = saved_settings;
     Input_buttonsPressed = saved_buttons;
     Input_buttonRepeat = saved_repeat;
@@ -1162,6 +1174,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     Menu_textBoxes[7] = saved_box;
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_legacyOrderingTables[0] = saved_ordering;
     Render_frameBuf = saved_framebuffer;
     Audio_nextSfxChannelGroup7E = saved_sound_group;
     Menu_Loot_lootClaimed = saved_claimed;
@@ -1174,7 +1187,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   static int Tick(int buttons = 0) {
     Input_buttonsPressed.allButtons = static_cast<u_short>(buttons);
     Input_buttonRepeat = static_cast<u_short>(buttons);
-    return Menu_Loot_UpdateLootSelection(0);
+    return VS::Menu::Loot::UpdateLiveLootSelection(0);
   }
 
   static void Step(int buttons = 0) { CHECK(Tick(buttons) == 0); }

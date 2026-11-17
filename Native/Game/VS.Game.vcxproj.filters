@@ -2745,6 +2745,12 @@
     <ClCompile Include="src\Menu\Loot\LootStagingLive.cpp">
       <Filter>src\Menu\Loot</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Loot\LootTerminal.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Loot\LootTerminalLive.cpp">
+      <Filter>src\Menu\Loot</Filter>
+    </ClCompile>
     <ClInclude Include="src\Menu\Loot\Paging.h">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>
@@ -4507,6 +4513,12 @@
       <Filter>include\Menu\Loot</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Loot\LootStagingLive.hpp">
+      <Filter>include\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootTerminal.hpp">
+      <Filter>include\Menu\Loot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Loot\LootTerminalLive.hpp">
       <Filter>include\Menu\Loot</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\MagicCosts.hpp">

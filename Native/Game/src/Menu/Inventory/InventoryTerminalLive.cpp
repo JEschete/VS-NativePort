@@ -111,6 +111,11 @@ std::uint64_t g_refusals = 0;
               static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
+void RequireIdleContext(const ContextState& context) {
+  if (std::ranges::find(context.active, true) != context.active.end()) {
+    Refuse("reset during an active inventory terminal call");
+  }
+}
 void RequireRows() {
   if (Menu_Framework_menuItems == nullptr) Refuse("missing menu row workspace");
 }
@@ -981,16 +986,23 @@ int UpdateLiveInventoryScreen(unsigned char* step) {
                  });
 }
 void ResetInventoryTerminalModuleData() {
-  g_contexts[0].presentation = {};
-  g_screen.resume_without_cursor_reset = 0;
+  RequireIdleContext(g_contexts[0]);
+  g_contexts[0] = {};
+  g_screen = {};
 }
-void ResetLootInventoryTerminalModuleData() { g_contexts[1].presentation = {}; }
+void ResetLootInventoryTerminalModuleData() {
+  RequireIdleContext(g_contexts[1]);
+  g_contexts[1] = {};
+}
+void ResetMiscItemShortcutModuleData() {
+  if (g_contexts[0].active[static_cast<std::size_t>(Controller::kShortcut)]) {
+    Refuse("MAINMENU reload during an active shortcut call");
+  }
+  g_shortcut = {};
+}
 void ResetInventoryTerminalSession() {
   for (const auto& context : g_contexts) {
-    if (std::ranges::any_of(context.active,
-                            [](bool active) { return active; })) {
-      Refuse("cold reset during an active inventory terminal call");
-    }
+    RequireIdleContext(context);
   }
   g_contexts = {};
   g_shortcut = {};

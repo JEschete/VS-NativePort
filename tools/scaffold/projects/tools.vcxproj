@@ -895,6 +895,13 @@
     <None Include="..\..\port\differentials\loot_rows_stage.py" />
     <None Include="..\..\port\differentials\loot_shield_staging.py" />
     <None Include="..\..\port\differentials\loot_staging_driver.cpp" />
+    <None Include="..\..\port\differentials\loot_terminal_common.py" />
+    <None Include="..\..\port\differentials\loot_terminal_driver.cpp" />
+    <None Include="..\..\port\differentials\loot_terminal_f02843.py" />
+    <None Include="..\..\port\differentials\loot_terminal_f02844.py" />
+    <None Include="..\..\port\differentials\loot_terminal_f02845.py" />
+    <None Include="..\..\port\differentials\loot_terminal_f02864.py" />
+    <None Include="..\..\port\differentials\loot_terminal_f02865.py" />
     <None Include="..\..\port\differentials\loot_weapon_staging.py" />
     <None Include="..\..\port\differentials\magic_costs_common.py" />
     <None Include="..\..\port\differentials\magic_costs_driver.cpp" />

@@ -23,6 +23,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
+#include "Menu/Loot/LootTerminalLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/GameClockLive.hpp"
@@ -78,6 +79,7 @@ class LiveSessionHost final : public SessionHost {
     Menu_sceneNotificationBuffer = nullptr;
     Menu_sceneNotificationTimer = 0;
     Menu_sceneNotificationTimed = 0;
+    Menu::Loot::ResetLootTerminalSession();
     Menu::Inventory::ResetInventoryTerminalSession();
     Event::ResetLiveScriptRuntime();
   }

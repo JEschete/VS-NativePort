@@ -40,6 +40,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
+#include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
@@ -970,7 +971,7 @@ class LiveHost final : public Host {
       case Submenu::kSetup:
         return VS::Menu::Setup::UpdateLiveSetup(*bytes);
       case Submenu::kLoot:
-        return Menu_Loot_Update(bytes);
+        return Loot::UpdateLiveLootScreen(bytes);
       case Submenu::kContainerSave:
         return VS::Menu::Files::UpdateLiveContainerSave(state);
       case Submenu::kGameOver:

@@ -126,6 +126,7 @@
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
+#include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
@@ -2146,6 +2147,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUB.PRG", 0x80108E78u, 0u, (void*)&VS::Menu::Loot::Live::ShowLootDescription, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x801090A4u, 0u, (void*)&VS::Menu::Loot::Live::UpdateLeaveConfirmation, 0u, 0u, 0u},
     {"MENU/MENUB.PRG", 0x80109444u, 0u, (void*)&VS::Menu::Loot::Live::UpdateOrganizationMenu, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x801066CCu, 0u, (void*)&VS::Menu::Loot::UpdateLiveInventoryTransition, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80106B80u, 0u, (void*)&VS::Menu::Loot::UpdateLiveDisassembly, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x801073E0u, 0u, (void*)&VS::Menu::Loot::UpdateLiveStackConsolidation, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80109750u, 0u, (void*)&VS::Menu::Loot::UpdateLiveLootSelection, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80109E90u, 0u, (void*)&VS::Menu::Loot::UpdateLiveLootScreen, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x80102830u, 0u, (void*)&VS::Menu::break_arts::SetHpCostLive, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x80102914u, 0u, (void*)&VS::Menu::break_arts::DrawNextUnlockPointsLive, 0u, 0u, 0u},
     {"MENU/MENU1.PRG", 0x80102A4Cu, 0u, (void*)&VS::Menu::break_arts::UpdateArtListLive, 0u, 0u, 0u},

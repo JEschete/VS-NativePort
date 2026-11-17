@@ -19,9 +19,10 @@ int UpdateLiveLootItemList(int initialize);
 void UpdateLiveMiscItemShortcut(int initialize);
 int UpdateLiveInventoryScreen(unsigned char* step);
 
-// Overlay reloads reset initialized data only, preserving original BSS.
+// Each overlay restores its own file-backed controller state.
 void ResetInventoryTerminalModuleData();
 void ResetLootInventoryTerminalModuleData();
+void ResetMiscItemShortcutModuleData();
 // Explicit cold-session/test reset, not an ordinary overlay-load hook.
 void ResetInventoryTerminalSession();
 [[nodiscard]] std::uint64_t InventoryTerminalLiveRefusalCount() noexcept;
