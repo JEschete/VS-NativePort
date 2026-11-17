@@ -1,9 +1,10 @@
 # Current Handoff
 
 Updated 2026-11-17. Map terminals F02689/F02690/F02699/F02702/F04149/F04151
-pass the complete shared Debug/Release gate on the worktree based on
-`ba5646edd16adb906bb601c38c4122d99eec62f7`; publication and exact-revision CI
-are pending. Scene notifications/text-box update F01379-F01381/F01392 are accepted in
+are accepted in `be3f8e1e33f478e3967dd1d53c30d4064b0ca7ee`.
+[Source Quality 44130430409](https://github.com/JEschete/VS-NativePort/actions/runs/44130430409)
+succeeds on that exact revision; #425/#426/#427/#433 are closed.
+Scene notifications/text-box update F01379-F01381/F01392 are accepted in
 `ba5646edd16adb906bb601c38c4122d99eec62f7`.
 [Source Quality 44113400775](https://github.com/JEschete/VS-NativePort/actions/runs/44113400775)
 succeeds at that exact revision; #432 is closed. The preview-ownership prerequisite
@@ -12,8 +13,7 @@ The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
 The locally verified original 900-function cohort has **899 resolved
 (887 promoted, 12 retired) and 1 remaining**. **111 of the requested final
-112** pass integrated promotion gates; **105** are published and accepted,
-with the final map six awaiting publication/CI. F00830 remains
+112** are published and accepted. F00830 remains
 blocked by #296. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
@@ -31,6 +31,37 @@ blocked by #296. See
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Independent-index acceptance (#376/#377/#384) now has fresh source evidence
+  in the coordinator and `D:\Dev\NativePort\wt\audit-final-index-20261117`,
+  both at `be3f8e1e`. Primary and upstream references are independent Git
+  checkouts, not source junctions; only runtime disc/extracted data is shared.
+  Both roots rebuilt headers, primary/upstream/data indexes and symbol context,
+  then their own reference, declaration and hazard indexes. Each resolves
+  100,172 occurrences with zero unresolved; the 22 old-C diagnostic TUs have
+  no unresolved occurrences. Each declaration index has 9,647 declarations
+  and 63 unmapped declaration entries (not unresolved reference occurrences).
+  Maintained DATA/TYPE/FIELD ledgers were preserved; context hashes match.
+  Strict 486-file rendering and the second generation pass independently,
+  preserving all 770 registered owned paths, including F02856. No adaptation
+  guard was changed. T00123's three original members resolve to the ledger's
+  `weaponCategoryKills`, `battleAbilitiesUnlocked` and `totalKills` in the
+  actual inline `State_ArtsStatus::kills`. T00796 emits `word`/`bytes` in
+  `Native\Engine\src\Audio\Cutscene\Stream.h`; its SHA-256 is the historical
+  `a9c280622a6519a178c149812631d3753fc86d1d3aa887b25d768e6b1b4f4ef8`
+  in both roots. A focused real generated-type regression covers both roots
+  and a different-source decoy: 28 naming/ledger tests pass, zero quality
+  findings, and disabling canonical key matching makes the new control fail.
+  The 2,593 common Native files differ only in 189 text line endings;
+  coordinator-only files are ignored user settings and Python caches.
+  Raw fingerprints are `8efdddf7a648e17d` / `3295ea6aa5641d52`.
+  The original `146C.c` stays 554,148 LF bytes / 572,405 CRLF bytes; neither
+  reference bytes nor their offset indexes were normalized/copied.
+  Evidence is in each root's `build\scratch\final-index`, especially
+  `context-receipt.json` and `render-receipt.json`.
+  Native group acceptance and the new regression's exact CI remain pending.
+  Historical tags `[equipment-status-details]` and `[loot-screen]` are absent;
+  the verified current equipment/loot selection includes 140 cases and the
+  original F02856/F02860/F02865 obligations, not only 30 staging cases.
 - Map-terminal evidence (`VR-MENU-MAP-TERMINAL`): six original spans pass
   6,144 vectors, zero mismatches; 58 instruction mutants and six compiled
   native variants are detected. `group-20261117-113440` passes both builds,
@@ -58,7 +89,7 @@ blocked by #296. See
   owned MAPBG file identity, idle memory-card assets and actual Gazette score/
   rank recalculation. The full group revalidates these corrections without
   changing production dispatch or retained asset assertions. #425/#426/#427/
-  #433 remain open until exact pushed CI. No physical-CD, hardware-GPU,
+  #433 are closed after exact pushed CI. No physical-CD, hardware-GPU,
   interactive-gameplay, data/type or EC-retirement completion is claimed.
 - Text-update evidence (`VR-MENU-TEXT-UPDATE`): four original spans pass
   4,096 vectors, zero mismatches; 86 instruction mutants (256 vectors each)
@@ -646,8 +677,7 @@ blocked by #296. See
 - No interactive combat verification, gameplay completion or compatibility
   retirement is claimed.
 
-Next steps: publish the verified map-six milestone and confirm exact CI before
-closing #425/#426/#427/#433. Finish #376/#377/#384 with independently rebuilt
+Next steps: finish #376/#377/#384 with independently rebuilt
 coordinator and isolated indexes, correct/stable type output and the required
 equipment/loot gates. Reconcile the final audit and keep F00830/#296 open unless
 new evidence establishes its climbing-hit contract. Do not begin unrelated

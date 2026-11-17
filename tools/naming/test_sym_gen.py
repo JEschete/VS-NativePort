@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
 from common import Gen, canonical_type_key  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "port"))
+from copy_to_native import Copier  # noqa: E402
 from ref_index import Ledgers, ledger_layout_type, norm_key  # noqa: E402
 
 
@@ -179,6 +180,46 @@ class ReviewedConsumerTests(unittest.TestCase):
         }
 
         self.assertIs(gen.layout("T00123"), layout)
+
+    def test_generated_union_preserves_renamed_fields_across_checkout_roots(self):
+        coordinator = r"D:\Dev\NativePort\VS-NativePort"
+        suffix = r"\resources\rood-reverseWin\src\include\sound.h:589:16)"
+        row = {"id": "T00796", "kind": "union", "key": "union:(unnamed at " + coordinator + suffix}
+        gen = Gen.__new__(Gen)
+        gen.types = {"T00796": row}
+        gen.members = {"T00796": [
+            {"id": "T00796.000", "name": "s32"},
+            {"id": "T00796.001", "name": "u8"},
+        ]}
+        copier = Copier.__new__(Copier)
+        copier._gen = gen
+        copier._tname = {}
+        copier.ptr_fields = set()
+        copier.fields = {
+            "T00796.000": {"final_name": "word", "type": "int"},
+            "T00796.001": {"final_name": "bytes", "type": "u_char[4]"},
+        }
+        expected = (
+            "typedef union Audio_StreamWordBytes {\n"
+            "    /* 0x00 */ int word;\n"
+            "    /* 0x00 */ u_char bytes[4];\n"
+            "} Audio_StreamWordBytes;"
+        )
+        for checkout in (coordinator, r"D:\Dev\NativePort\wt\equipment-status"):
+            with self.subTest(checkout=checkout):
+                layout = {"key": "union:(unnamed at " + checkout + suffix, "fields": [
+                    {"name": "s32", "offset": 0, "type": "int"},
+                    {"name": "u8", "offset": 0, "type": "u_char[4]"},
+                ]}
+                decoy = {"key": layout["key"].replace("sound.h", "other.h"), "fields": [
+                    {"name": "s32", "offset": 0, "type": "short"},
+                    {"name": "u8", "offset": 0, "type": "u_char[2]"},
+                ]}
+                gen.trees = {
+                    "": SimpleNamespace(ix={"types": {"decoy": decoy, "target": layout}}),
+                    "upstream:": SimpleNamespace(ix={"types": {}}),
+                }
+                self.assertEqual(copier.generated_type(row, "Audio_StreamWordBytes"), expected)
 
     def test_adopted_ai_state_layout_uses_upstream_member_spans(self):
         key = "struct:AiState"
