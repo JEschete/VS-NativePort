@@ -2,8 +2,10 @@
 
 Updated 2026-11-17. The latest locally verified #276 group is Gazette
 statistics, F02814-F02816/F02824/F02825, including actual module/caller and
-MENU9/cold-session cursor controls. Publication and exact-revision CI are
-pending. Latest accepted checkpoint: Gazette times,
+MENU9/cold-session cursor controls. It is published in
+`14c933a40923d9996894e5364d36b286a6fa4dbc`; exact-revision CI is blocked by
+the production clone scanner's repeated 120-second deadline (#431).
+Latest accepted checkpoint: Gazette times,
 `37a4dc7bf4ecbb1138b14c547b17651b93160d45`, with successful exact-revision CI.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
@@ -50,7 +52,22 @@ The locally verified original 900-function cohort has **881 resolved
   temporary F02825 caller adapter retire. Native row/time reset hooks move
   to the surviving Encyclopedia anchor as generated Records statics disappear.
   No physical-CD, hardware-GPU, interactive gameplay or EC-retirement
-  completion is claimed. Publication and exact-revision CI remain.
+  completion is claimed. Published in `14c933a40923d9996894e5364d36b286a6fa4dbc`.
+  Source Quality 44081921447 fails both the original attempt and an unchanged
+  retry at the production clone subprocess's 120-second limit; preceding
+  controls pass. The #431 follow-up gives that full-scope subprocess the
+  existing expensive-tool budget of 600 seconds. Both clone controls and
+  Ruff pass; the local complete scan examines 2,578 sources from 2,021 native
+  and 938 Python inputs in 48.036 seconds, with zero clone findings.
+  No scope, threshold or baseline changes. Exact fixing-revision CI remains.
+- Gazette preview prerequisite #430: an actual cold-session reproduction
+  fails five of thirteen assertions at the statistics revision, leaving the
+  ZUD read, file, model buffer, native state and load step alive. Evidence:
+  `build\promotion-check\iterate-20261117-072800`. Initial local checked
+  cleanup fixes that pending-read control, but queued/partial parsers,
+  companion file loading, MENU9 and pre-heap integration still require
+  focused verification before publication. This does not change the
+  normal completed-preview release contract or advance promotion counts.
 - Gazette-time evidence (`VR-MENU-GAZETTE-TIMES`): four original spans pass
   4,096 vectors, zero mismatches; 64 instruction mutants (128 vectors each)
   and four compiled native variants are detected. `group-20261117-064018`

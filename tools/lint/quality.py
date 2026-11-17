@@ -30,6 +30,7 @@ NATIVE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".inl"}
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx"}
 INCLUDE_DIRECTIVE = re.compile(r'^[ \t]*#[ \t]*include[ \t]*[<"]([^">]+)[">]', re.M)
 TIDY_TIMEOUT = 600
+CLONE_TIMEOUT = 600
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
     "Native/Engine/include/Core/Gte.h": "EC-03",
@@ -286,7 +287,10 @@ def check_clones(files: list[str]) -> list[Finding]:
     sources = directory / "files.json"
     sources.write_text(json.dumps(files), encoding="utf-8")
     report.unlink(missing_ok=True)
-    run([node, str(HERE / "jscpd_files.js"), str(sources), "--config", str(config)])
+    run(
+        [node, str(HERE / "jscpd_files.js"), str(sources), "--config", str(config)],
+        timeout=CLONE_TIMEOUT,
+    )
     document = json.loads(report.read_text(encoding="utf-8"))
     if files and document["statistics"]["total"]["sources"] == 0:
         raise RuntimeError("Clone checker analyzed no files")

@@ -54,7 +54,9 @@ units that include it directly or transitively (resolved over all native sources
 including copied ones); ambiguous include names over-select rather than skip.
 Translation units run in parallel; `--jobs N` limits the worker count (default:
 logical processors). Clone detection always scans the complete first-party scope
-so duplication with an unchanged file is still caught.
+so duplication with an unchanged file is still caught. Its subprocess has a
+600-second budget, like each tidy invocation; a timeout remains an infrastructure
+failure, never a successful scan (#431).
 
 The runner generates compile commands from the solution generator's project table
 and shared compiler properties; do not hand-maintain a second include-path list.
