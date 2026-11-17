@@ -23,8 +23,12 @@ void QueueLiveEnemyModelRead(int zud_id);
 int LoadLiveEnemyModelParts();
 void FreeLiveEnemyModelBuffer();
 
-// Call where MENU9.PRG loads: its reload zeroes the state (592C.c's statics
-// are bss). Releases nothing, as the reload released nothing.
+// Abandon a stopped preview at any loading phase. Refuses invalid ownership
+// before freeing its backing buffers; foreign requests/records survive.
+[[nodiscard]] bool CleanupLiveEnemyPreviewOwnedState();
+
+// State reset only (592C.c's bss). At MENU9 reload, checked cleanup must
+// succeed before this reset can discard the native resource identities.
 void ResetLiveEnemyPreview();
 // The bound state, for the reset and tests.
 [[nodiscard]] EnemyPreviewState& LiveEnemyPreviewState() noexcept;

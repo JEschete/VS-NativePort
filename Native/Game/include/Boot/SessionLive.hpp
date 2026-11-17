@@ -25,7 +25,7 @@ void EnterBattleLive();
 void RunEndingAndReturnToTitleLive();
 void InitializePlatformServicesLive();
 void InitializeTitleSessionLive();
-// After the old frame producer stops, cancel results-owned writes and abandon
+// After the old frame producer stops, drain preview/results owners and abandon
 // frame bindings/packets before heap replacement. Refused cleanup is fatal.
 void ResetLiveSessionHeap();
 void InitializeGameplayOverlayLive(int start_state);

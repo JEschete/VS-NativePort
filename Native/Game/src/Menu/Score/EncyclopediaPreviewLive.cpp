@@ -7,6 +7,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <optional>
 #include <span>
 #include <string_view>
 
@@ -24,6 +26,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
@@ -46,6 +49,11 @@ constexpr std::size_t kEquippedBufferBytes = kRecordBytes + (2 * kWeaponBytes);
 
 EnemyPreviewState live_state;
 std::uint64_t refusals = 0;
+
+void Report(std::string_view what) {
+  ++refusals;
+  VS_LOG_WARN("menu.score", "encyclopedia preview: {}", what);
+}
 
 AssetAddress Address(const void* pointer) {
   return static_cast<AssetAddress>(reinterpret_cast<std::uintptr_t>(pointer));
@@ -107,7 +115,9 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   [[nodiscard]] AssetAddress AllocateRead(
       const EnemyPreviewFile& file) override {
     const Content_DiscFile disc = DiscFile(file);
-    return Address(Content::AllocateLiveDiscRequest(&disc));
+    auto* request = Content::AllocateLiveDiscRequest(&disc);
+    live_state.read_generation = Content::LiveDiscRequestGeneration(request);
+    return Address(request);
   }
 
   void EnqueueRead(AssetAddress read, AssetAddress destination) override {
@@ -118,8 +128,10 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   [[nodiscard]] AssetAddress ReadRefused(const EnemyPreviewFile& file,
                                          AssetAddress destination) override {
     const Content_DiscFile disc = DiscFile(file);
-    return Address(
-        Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination)));
+    auto* request =
+        Content::CompleteLiveRefusedDiscRequest(&disc, Pointer(destination));
+    live_state.read_generation = Content::LiveDiscRequestGeneration(request);
+    return Address(request);
   }
 
   [[nodiscard]] bool ReadLoaded(AssetAddress read) const override {
@@ -130,6 +142,7 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
 
   void ReleaseRead(AssetAddress read) override {
     Content::ReleaseLiveDiscRequest(Pointer<Content_DiscQueueSlot>(read));
+    live_state.read_generation = 0;
   }
 
   [[nodiscard]] AssetAddress AllocateFile(std::uint32_t bytes) override {
@@ -137,7 +150,14 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   }
 
   void FreeFile(AssetAddress file) override {
-    Core::Memory::FreeLiveFromHighEnd(Pointer(file));
+    auto* pointer = Pointer<std::byte>(file);
+    const auto capacity = Core::Memory::LivePayloadCapacity(pointer);
+    if (!capacity.has_value() ||
+        !Content::CancelLiveActorAssetBorrows({pointer, *capacity}, {})) {
+      Report("ZUD borrow cleanup refused before file release");
+      std::abort();
+    }
+    Core::Memory::FreeLiveFromHighEnd(pointer);
   }
 
   [[nodiscard]] AssetAddress AllocateModelBuffer(
@@ -224,11 +244,6 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
   void Refuse(std::string_view what) override { Report(what); }
 
  private:
-  static void Report(std::string_view what) {
-    ++refusals;
-    VS_LOG_WARN("menu.score", "encyclopedia preview: {}", what);
-  }
-
   [[nodiscard]] static Actors_ActorRecord* Record(int slot) {
     if (slot < 0 ||
         static_cast<std::size_t>(slot) >= std::size(Actors_actorRecords)) {
@@ -245,6 +260,68 @@ class LiveEnemyPreviewHost final : public EnemyPreviewHost {
 LiveEnemyPreviewHost& Host() {
   static LiveEnemyPreviewHost host;
   return host;
+}
+
+std::optional<std::span<std::byte>> PreviewAllocation(AssetAddress address,
+                                                      std::size_t minimum) {
+  if (address == AssetAddress::kNone) return std::span<std::byte>{};
+  auto* pointer = Pointer<std::byte>(address);
+  const auto capacity = Core::Memory::LivePayloadCapacity(pointer);
+  if (!capacity.has_value() || *capacity < minimum) {
+    Report("cleanup allocation no longer belongs to the preview");
+    return std::nullopt;
+  }
+  return std::span<std::byte>{pointer, *capacity};
+}
+
+bool InPreviewBuffer(std::span<const std::byte> buffer, const void* pointer) {
+  const auto begin = reinterpret_cast<std::uintptr_t>(buffer.data());
+  const auto value = reinterpret_cast<std::uintptr_t>(pointer);
+  return !buffer.empty() && value >= begin && value - begin < buffer.size();
+}
+
+bool ValidatePreviewRecords(std::span<const std::byte> buffer) {
+  for (std::size_t slot = 0; slot < std::size(Actors_actorRecords); ++slot) {
+    const auto* actor = Actors_actorRecords[slot];
+    if (!InPreviewBuffer(buffer, actor)) continue;
+    const auto offset = reinterpret_cast<std::uintptr_t>(actor) -
+                        reinterpret_cast<std::uintptr_t>(buffer.data());
+    if (sizeof(*actor) > buffer.size() - offset) {
+      Report("cleanup actor record extends past the preview");
+      return false;
+    }
+    if (slot >= std::size(Actors_weaponModels) / 2) continue;
+    for (const auto weapon_slot : {slot * 2, (slot * 2) | 1}) {
+      const auto* weapon = Actors_weaponModels[weapon_slot];
+      if (weapon != nullptr && !InPreviewBuffer(buffer, weapon)) {
+        Report("cleanup actor has a foreign weapon owner");
+        return false;
+      }
+    }
+  }
+  for (const auto* weapon : Actors_weaponModels) {
+    if (!InPreviewBuffer(buffer, weapon)) continue;
+    const auto offset = reinterpret_cast<std::uintptr_t>(weapon) -
+                        reinterpret_cast<std::uintptr_t>(buffer.data());
+    if (sizeof(*weapon) > buffer.size() - offset) {
+      Report("cleanup weapon record extends past the preview");
+      return false;
+    }
+  }
+  return true;
+}
+
+void ReleasePreviewRecords(std::span<const std::byte> buffer) {
+  for (std::size_t slot = 0; slot < std::size(Actors_actorRecords); ++slot) {
+    if (InPreviewBuffer(buffer, Actors_actorRecords[slot])) {
+      Content::ReleaseLiveActorModel(static_cast<int>(slot));
+    }
+  }
+  for (std::size_t slot = 0; slot < std::size(Actors_weaponModels); ++slot) {
+    if (InPreviewBuffer(buffer, Actors_weaponModels[slot])) {
+      Content::ReleaseLiveWeaponModel(static_cast<int>(slot));
+    }
+  }
 }
 }  // namespace
 
@@ -274,6 +351,29 @@ int LoadLiveEnemyModelParts() {
 // decomp: MENU9.PRG vs_menu9_freeZudFile (F02841,
 // src/MENU/MENU9.PRG/592C.c:295)
 void FreeLiveEnemyModelBuffer() { FreeEnemyModelBuffer(Host(), live_state); }
+
+bool CleanupLiveEnemyPreviewOwnedState() {
+  const bool owned = live_state.read != AssetAddress::kNone ||
+                     live_state.file != AssetAddress::kNone ||
+                     live_state.model_buffer != AssetAddress::kNone;
+  const auto file = PreviewAllocation(live_state.file, live_state.file_bytes);
+  const auto model = PreviewAllocation(live_state.model_buffer, kRecordBytes);
+  if (!file || !model || !ValidatePreviewRecords(*model)) return false;
+  if (!file->empty() && !Content::CancelLiveDiscWrites(*file)) return false;
+  if (!Content::CancelLiveActorAssetBorrows(*file, *model)) return false;
+  auto* request = Pointer<Content_DiscQueueSlot>(live_state.read);
+  if (live_state.read_generation != 0 &&
+      Content::LiveDiscRequestGeneration(request) ==
+          live_state.read_generation) {
+    Content::ReleaseLiveDiscRequest(request);
+  }
+  ReleasePreviewRecords(*model);
+  if (!file->empty()) Core::Memory::FreeLiveFromHighEnd(file->data());
+  if (!model->empty()) Core::Memory::FreeLiveFromHighEnd(model->data());
+  live_state = {};
+  if (owned) Host().SetLoadStep(0);
+  return true;
+}
 
 void ResetLiveEnemyPreview() { live_state = {}; }
 

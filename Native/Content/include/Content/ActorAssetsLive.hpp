@@ -1,7 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstddef>
 #include <cstdint>
+#include <span>
 
 struct Content_ActorAssetRequest;
 struct Content_SequenceBuffer;
@@ -26,6 +28,11 @@ int QueueLiveActorAssetRequest(const Content_ActorAssetRequest* request);
 // The typed request's entry for promoted callers; the same result.
 int QueueLiveActorAsset(const ActorAssetRequest& request);
 int UpdateLiveActorAssetQueue();
+// Between queue updates, abandon model/weapon/battle-sequence parsing and
+// actor-model reads borrowing either allocation. Drain a matching head first;
+// other request kinds refuse, and unrelated requests/loader state survive.
+[[nodiscard]] bool CancelLiveActorAssetBorrows(
+    std::span<std::byte> source, std::span<std::byte> destination);
 // Adds the texture offsets to the UVs of `count` polygons in a game heap
 // block; polygons running past the block are refused.
 void OffsetLiveModelTextureCoordinates(void* polygons, int count, int colored,

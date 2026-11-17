@@ -126,6 +126,8 @@ struct EnemyPreviewState {
   AssetAddress model_buffer = AssetAddress::kNone;
   std::uint8_t variant = 0;
   std::uint8_t palette_flag = 0;
+  // Native queue identity; an address can be reused after a read is released.
+  std::uint64_t read_generation = 0;
 
   friend bool operator==(const EnemyPreviewState&,
                          const EnemyPreviewState&) = default;

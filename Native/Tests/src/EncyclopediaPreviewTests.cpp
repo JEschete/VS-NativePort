@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -12,18 +13,32 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Boot/SessionLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Menu/GameClearLifecycleLiveFixture.hpp"
+#include "Menu/GazetteTimesLiveFixture.hpp"
+#include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 
 extern "C" {
 #include "ActorAssets.h"
+#include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
+#include "Actors/SkeletonLiveState.h"
+#include "Battle/TargetingState.h"
+#include "Content/DiscLayout.h"
 #include "DiscQueue.h"
+#include "Event/ScriptVm.h"
 #include "Legacy/Psx.h"
+#include "LegacyFiles.h"
 #include "Menu/Inventory/Inventory.h"
+#include "Menu/Score/Encyclopedia.h"
+#include "Menu/TextBox.h"
 #include "ModelLoading.h"
 }
 
@@ -565,6 +580,202 @@ void CheckAttachmentStrides(bool companion, const u_char* buffer) {
     CHECK(shield.targetSlot == 3);
   }
 }
+
+void CheckColdPreviewRelease(const score::EnemyPreviewState& before,
+                             std::uint64_t expected_read_generation = 0) {
+  CHECK(score::LiveEnemyPreviewState() == score::EnemyPreviewState{});
+  CHECK_FALSE(
+      VS::Core::Memory::LivePayloadCapacity(Pointer(before.file)).has_value());
+  CHECK_FALSE(
+      VS::Core::Memory::LivePayloadCapacity(Pointer(before.model_buffer))
+          .has_value());
+  CHECK(VS::Content::LiveDiscRequestGeneration(Pointer<Content_DiscQueueSlot>(
+            before.read)) == expected_read_generation);
+  CHECK(Menu_Inventory_equipmentModelLoadStep == 0);
+}
+
+void DiscardUnparsedPreview(const score::EnemyPreviewState& before,
+                            std::uint64_t generation) {
+  auto* file = Pointer(before.file);
+  const bool owns_file =
+      VS::Core::Memory::LivePayloadCapacity(file).has_value();
+  if (owns_file) {
+    REQUIRE(VS::Content::CancelLiveDiscWrites({file, before.file_bytes}));
+  }
+  auto* request = Pointer<Content_DiscQueueSlot>(before.read);
+  if (VS::Content::LiveDiscRequestGeneration(request) == generation) {
+    VS::Content::ReleaseLiveDiscRequest(request);
+  }
+  if (owns_file) VS::Core::Memory::FreeLiveFromHighEnd(file);
+  auto* model = Pointer(before.model_buffer);
+  if (VS::Core::Memory::LivePayloadCapacity(model).has_value()) {
+    VS::Core::Memory::FreeLiveFromHighEnd(model);
+  }
+  score::ResetLiveEnemyPreview();
+  Menu_Inventory_equipmentModelLoadStep = 0;
+}
+
+struct PreviewLifecycleFixture : LivePreviewFixture {
+  game_clear_live_tests::SavedModuleData saved_module;
+  game_clear_live_tests::SavedRuntime saved_runtime;
+  game_clear_live_tests::SavedGlobals<
+      Actors_actorRecords, Actors_weaponModels, Content_legacyModelLoadPhase,
+      Content_modelParseResetFlag, Content_legacySequenceParsePhase,
+      Content_legacyShpFileBuffer, Content_legacyShpAllocated,
+      Content_legacyShpFileLocation, Content_legacyShpDiscRequest,
+      Content_legacyShpParseCursor, Content_legacyShpCopiedWordCount,
+      Content_legacyShpHeaderWord, Content_legacyShpTextureWidth,
+      Content_legacyShpTextureHeight, Content_legacyWeaponParseCursor,
+      Content_legacySequenceParseData, Content_legacyShpDiscOffsets,
+      Content_legacyShpSectorCounts>
+      saved_loader;
+  equipment_detail_tests::ValueRestore<int> saved_zud_size{
+      Menu_Score_zudSizes[7]};
+
+  PreviewLifecycleFixture() {
+    std::ranges::fill(Actors_actorRecords, nullptr);
+    std::ranges::fill(Actors_weaponModels, nullptr);
+    Content_legacyModelLoadPhase = 0;
+    Content_modelParseResetFlag = 0;
+    Content_legacySequenceParsePhase = 0;
+    Content_legacyShpAllocated = 0;
+    Content_legacyShpFileBuffer = nullptr;
+    Content_legacyShpParseCursor = nullptr;
+    Content_legacyWeaponParseCursor = nullptr;
+    Content_legacySequenceParseData = nullptr;
+  }
+  ~PreviewLifecycleFixture() {
+    CHECK(score::CleanupLiveEnemyPreviewOwnedState());
+  }
+};
+
+score::EnemyPreviewState QueuePreviewParts(bool companion,
+                                           bool modelless = false) {
+  REQUIRE(score::LoadLiveEnemyPreview(companion ? 31 : 7) == 1);
+  const auto before = score::LiveEnemyPreviewState();
+  auto bytes = ZudFile();
+  if (modelless) bytes[0] = std::byte{0x7F};
+  std::ranges::copy(bytes, Pointer(before.file));
+  auto* request = Pointer<Content_DiscQueueSlot>(before.read);
+  request->state = Content_DiscRequestState_Loaded;
+  REQUIRE(score::LoadLiveEnemyModelParts() == 1);
+  REQUIRE(VS::Content::LiveDiscRequestGeneration(request) == 0);
+  return before;
+}
+
+score::EnemyPreviewState QueueOriginalPreview() {
+  const auto image = gazette_times_live_tests::ReadImage(
+      R"(Native\data\disc\MAP\Z031U00.ZUD)");
+  REQUIRE(image.size() < 0x400000);
+  Menu_Score_zudSizes[7] = static_cast<int>(image.size());
+  REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
+  const auto before = score::LiveEnemyPreviewState();
+  std::ranges::copy(image, Pointer<unsigned char>(before.file));
+  Pointer<Content_DiscQueueSlot>(before.read)->state =
+      Content_DiscRequestState_Loaded;
+  REQUIRE(score::LoadLiveEnemyModelParts() == 1);
+  return before;
+}
+
+score::EnemyPreviewState StartCompanionRead() {
+  const auto before = QueuePreviewParts(true, true);
+  const auto model =
+      static_cast<std::uint16_t>(Content_legacyActorAssetRequests[1].modelId);
+  REQUIRE(model < std::size(Content_legacyShpDiscOffsets));
+  if (model >= std::size(Content_legacyShpDiscOffsets)) {
+    throw std::runtime_error("companion model is outside its file table");
+  }
+  Content_legacyShpSectorCounts[model] = 1;
+  Content_legacyShpDiscOffsets[model] = 7;
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  REQUIRE(Content_legacyActorAssetRequests[0].targetSlot == 16);
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  REQUIRE(Content_legacyModelLoadPhase == 1);
+  REQUIRE(Content_legacyShpAllocated == 1);
+  return before;
+}
+
+void CheckEmptyPreviewQueue() {
+  CHECK(std::ranges::all_of(
+      Content_legacyActorAssetRequests,
+      [](const auto& item) { return item.assetKind == 0; }));
+  CHECK(Content_modelParseResetFlag == 0);
+  CHECK(Content_legacyShpParseCursor == nullptr);
+  CHECK(Content_legacySequenceParseData == nullptr);
+}
+
+std::span<std::byte> StartForeignModelRead() {
+  auto* foreign = static_cast<std::byte*>(
+      VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));
+  REQUIRE(foreign != nullptr);
+  Content_legacyShpSectorCounts[20] = 1;
+  Content_legacyShpDiscOffsets[20] = 7;
+  ActorAssetRequest request;
+  request.kind =
+      static_cast<std::uint8_t>(VS::Content::ActorAssetKind::kActorModelLoad);
+  request.model_id = 20;
+  request.destination = At(reinterpret_cast<std::uintptr_t>(foreign));
+  REQUIRE(VS::Content::QueueLiveActorAsset(request) == 0);
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  return {foreign, sizeof(Actors_ActorRecord)};
+}
+
+void CheckForeignModelRead(const void* file, const Content_DiscQueueSlot* read,
+                           std::uint64_t generation) {
+  CHECK(Content_legacyModelLoadPhase == 1);
+  CHECK(Content_legacyShpFileBuffer == file);
+  CHECK(VS::Content::LiveDiscRequestGeneration(read) == generation);
+  CHECK(VS::Content::FindLiveFreeActorAssetRequest() == 1);
+  CHECK(VS::Core::Memory::LivePayloadCapacity(file).has_value());
+}
+
+const void* BeginPreviewParser() {
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  REQUIRE(Content_modelParseResetFlag == 1);
+  auto* actor = Actors_actorRecords[1];
+  if (actor == nullptr) throw std::runtime_error("preview actor was not bound");
+  const auto* geometry = actor->instance.model;
+  REQUIRE(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
+  return geometry;
+}
+
+void FinishPreviewParts() {
+  for (int step = 0;
+       step < 32 && VS::Content::FindLiveFreeActorAssetRequest() != 0; ++step) {
+    REQUIRE(score::LoadLiveEnemyModelParts() == 1);
+  }
+  REQUIRE(VS::Content::FindLiveFreeActorAssetRequest() == 0);
+}
+
+std::span<std::byte> BindForeignPreviewActor() {
+  auto* record = static_cast<std::byte*>(
+      VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Actors_ActorRecord)));
+  REQUIRE(record != nullptr);
+  ActorAssetRequest request;
+  request.kind =
+      static_cast<std::uint8_t>(VS::Content::ActorAssetKind::kActorModelParse);
+  request.target_slot = 1;
+  request.model_id = 0x7F;
+  request.destination = At(reinterpret_cast<std::uintptr_t>(record));
+  REQUIRE(VS::Content::QueueLiveActorAsset(request) == 0);
+  REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
+  REQUIRE(static_cast<void*>(Actors_actorRecords[1]) == record);
+  return {record, sizeof(Actors_ActorRecord)};
+}
+
+void FillForeignPreviewQueue(std::span<std::byte> record) {
+  ActorAssetRequest request;
+  request.kind =
+      static_cast<std::uint8_t>(VS::Content::ActorAssetKind::kActorModelParse);
+  request.target_slot = 1;
+  request.model_id = 0x7F;
+  request.destination = At(reinterpret_cast<std::uintptr_t>(record.data()));
+  const int first = VS::Content::FindLiveFreeActorAssetRequest();
+  for (int slot = first; slot < VS::Content::kActorAssetRequestCount; ++slot) {
+    request.variant = static_cast<std::uint8_t>(slot);
+    REQUIRE(VS::Content::QueueLiveActorAsset(request) == slot);
+  }
+}
 }  // namespace
 
 TEST_CASE("Live enemy preview releases the read after queueing parts",
@@ -637,4 +848,204 @@ TEST_CASE("Live enemy preview refuses ids past the file table",
   CHECK(std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
     return slot.state == Content_DiscRequestState_Free;
   }));
+}
+
+TEST_CASE("Actual cold session drains the pending enemy preview owner",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  const game_clear_live_tests::SavedModuleData saved_module;
+  const game_clear_live_tests::SavedGlobals<
+      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
+      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
+      Menu_sceneNotificationTimed>
+      saved_ui;
+  LivePreviewFixture fixture;
+  REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
+  const auto before = score::LiveEnemyPreviewState();
+  REQUIRE(before.read != AssetAddress::kNone);
+  const auto generation = VS::Content::LiveDiscRequestGeneration(
+      Pointer<Content_DiscQueueSlot>(before.read));
+  const Content_DiscFile foreign_file{1, 16};
+  auto* foreign_request = VS::Content::AllocateLiveDiscRequest(&foreign_file);
+  REQUIRE(foreign_request != nullptr);
+  const auto foreign_generation =
+      VS::Content::LiveDiscRequestGeneration(foreign_request);
+  void* const foreign = VS::Core::Memory::AllocateLiveFromLowEnd(64);
+  REQUIRE(foreign != nullptr);
+  const auto entry = +[] { return 0; };
+  CHECK(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
+  CheckColdPreviewRelease(before);
+  CHECK(VS::Content::LiveDiscRequestGeneration(foreign_request) ==
+        foreign_generation);
+  CHECK(VS::Core::Memory::LivePayloadCapacity(foreign).has_value());
+  DiscardUnparsedPreview(before, generation);
+  VS::Content::ReleaseLiveDiscRequest(foreign_request);
+  VS::Core::Memory::FreeLiveFromLowEnd(foreign);
+}
+
+TEST_CASE("Only completed MENU9 abandons a pending or loaded preview read",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  const bool loaded = GENERATE(false, true);
+  PreviewLifecycleFixture fixture;
+  REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
+  const auto before = score::LiveEnemyPreviewState();
+  if (loaded) {
+    Pointer<Content_DiscQueueSlot>(before.read)->state =
+        Content_DiscRequestState_Loaded;
+  }
+  {
+    menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+    REQUIRE(other.Complete() == 1);
+    CHECK(score::LiveEnemyPreviewState() == before);
+  }
+  {
+    menu_overlay_tests::Load menu(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    REQUIRE(menu.Poll() == 0);
+    CHECK(score::LiveEnemyPreviewState() == before);
+    REQUIRE(menu.Complete() == 1);
+  }
+  CheckColdPreviewRelease(before);
+}
+
+TEST_CASE("Actual heap replacement abandons queued preview borrows",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  PreviewLifecycleFixture fixture;
+  const auto before = QueuePreviewParts(true);
+  const auto refusals = VS::Core::Memory::RefusedLiveHeapRequestCount();
+  VS::Boot::ResetLiveSessionHeap();
+  CheckColdPreviewRelease(before);
+  CheckEmptyPreviewQueue();
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+  CHECK(VS::Core::Memory::RefusedLiveHeapRequestCount() == refusals);
+}
+
+TEST_CASE("Preview cleanup preserves a foreign active model read",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  PreviewLifecycleFixture fixture;
+  const auto foreign = StartForeignModelRead();
+  const auto* file = Content_legacyShpFileBuffer;
+  auto* read = Content_legacyShpDiscRequest;
+  const auto generation = VS::Content::LiveDiscRequestGeneration(read);
+  const auto before = QueuePreviewParts(false);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CheckForeignModelRead(file, read, generation);
+  REQUIRE(VS::Content::CancelLiveActorAssetBorrows({}, foreign));
+  VS::Core::Memory::FreeLiveFromLowEnd(foreign.data());
+}
+
+TEST_CASE("Preview cleanup cancels the companion model-file owner",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  const bool loaded = GENERATE(false, true);
+  PreviewLifecycleFixture fixture;
+  const auto before = StartCompanionRead();
+  auto* request = Content_legacyShpDiscRequest;
+  const auto* file = Content_legacyShpFileBuffer;
+  REQUIRE(VS::Content::LiveDiscRequestGeneration(request) != 0);
+  if (loaded) request->state = Content_DiscRequestState_Loaded;
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CheckEmptyPreviewQueue();
+  CHECK(VS::Content::LiveDiscRequestGeneration(request) == 0);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
+  CHECK(Content_legacyModelLoadPhase == 0);
+  CHECK(Content_legacyShpAllocated == 0);
+  CHECK(Actors_actorRecords[1] == nullptr);
+}
+
+TEST_CASE("Preview cleanup releases partial and completed original model parts",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  const bool complete = GENERATE(false, true);
+  PreviewLifecycleFixture fixture;
+  const auto before = QueueOriginalPreview();
+  const auto refused = VS::Content::LiveActorAssetRefusals();
+  const auto* geometry = BeginPreviewParser();
+  if (complete) FinishPreviewParts();
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CheckEmptyPreviewQueue();
+  CHECK(Actors_actorRecords[1] == nullptr);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(geometry).has_value());
+  CHECK(VS::Content::LiveActorAssetRefusals() == refused);
+}
+
+TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  PreviewLifecycleFixture fixture;
+  REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
+  const auto before = score::LiveEnemyPreviewState();
+  auto* old = Pointer<Content_DiscQueueSlot>(before.read);
+  VS::Content::ReleaseLiveDiscRequest(old);
+  const Content_DiscFile location{1, 16};
+  auto* foreign = VS::Content::AllocateLiveDiscRequest(&location);
+  REQUIRE(foreign == old);
+  const auto generation = VS::Content::LiveDiscRequestGeneration(foreign);
+  REQUIRE(generation != before.read_generation);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CHECK(VS::Content::LiveDiscRequestGeneration(foreign) == generation);
+  CHECK_FALSE(
+      VS::Core::Memory::LivePayloadCapacity(Pointer(before.file)).has_value());
+  Menu_Inventory_equipmentModelLoadStep = 7;
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CHECK(Menu_Inventory_equipmentModelLoadStep == 7);
+  VS::Content::ReleaseLiveDiscRequest(foreign);
+}
+
+TEST_CASE("Preview cleanup refuses an invalid allocation before losing owners",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  PreviewLifecycleFixture fixture;
+  REQUIRE(score::LoadLiveEnemyPreview(7) == 1);
+  auto& state = score::LiveEnemyPreviewState();
+  const auto before = state;
+  const auto refused = score::LiveEnemyPreviewRefusals();
+  state.model_buffer = At(4);
+  CHECK_FALSE(score::CleanupLiveEnemyPreviewOwnedState());
+  CHECK(score::LiveEnemyPreviewRefusals() == refused + 1);
+  CHECK(VS::Content::LiveDiscRequestGeneration(Pointer<Content_DiscQueueSlot>(
+            before.read)) == before.read_generation);
+  CHECK(
+      VS::Core::Memory::LivePayloadCapacity(Pointer(before.file)).has_value());
+  state = before;
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+}
+
+TEST_CASE("Preview cleanup preserves foreign actors queue order and tail",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  PreviewLifecycleFixture fixture;
+  const auto foreign = BindForeignPreviewActor();
+  const auto before = QueuePreviewParts(false);
+  const int first_foreign = VS::Content::FindLiveFreeActorAssetRequest();
+  FillForeignPreviewQueue(foreign);
+  const auto tail = Content_legacyActorAssetRequests[15];
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(before);
+  CHECK(static_cast<void*>(Actors_actorRecords[1]) == foreign.data());
+  CHECK(VS::Core::Memory::LivePayloadCapacity(foreign.data()).has_value());
+  CHECK(Content_legacyActorAssetRequests[0].variant == first_foreign);
+  CHECK(Content_legacyActorAssetRequests[15].variant == tail.variant);
+  CHECK(Content_legacyActorAssetRequests[15].destination == tail.destination);
+  REQUIRE(VS::Content::CancelLiveActorAssetBorrows({}, foreign));
+  CHECK(VS::Content::ReleaseLiveActorModel(1) == 0);
+  VS::Core::Memory::FreeLiveFromLowEnd(foreign.data());
+}
+
+TEST_CASE("Preview cleanup preserves a reused companion read generation",
+          "[encyclopedia-preview][gazette-preview-lifecycle]") {
+  PreviewLifecycleFixture fixture;
+  const auto before = StartCompanionRead();
+  auto* original = Content_legacyShpDiscRequest;
+  const auto* file = Content_legacyShpFileBuffer;
+  VS::Content::ReleaseLiveDiscRequest(original);
+  const Content_DiscFile location{1, 16};
+  auto* foreign = VS::Content::AllocateLiveDiscRequest(&location);
+  REQUIRE(foreign == original);
+  const auto generation = VS::Content::LiveDiscRequestGeneration(foreign);
+  REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
+  CheckColdPreviewRelease(
+      before,
+      Pointer<Content_DiscQueueSlot>(before.read) == foreign ? generation : 0);
+  CHECK(VS::Content::LiveDiscRequestGeneration(foreign) == generation);
+  CHECK_FALSE(VS::Core::Memory::LivePayloadCapacity(file).has_value());
+  CHECK(Content_legacyShpAllocated == 0);
+  VS::Content::ReleaseLiveDiscRequest(foreign);
 }

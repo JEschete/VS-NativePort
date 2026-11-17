@@ -29,6 +29,7 @@
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
+#include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
@@ -74,7 +75,11 @@ constexpr int kSecondPadPortId = 0x10;
 constexpr std::int16_t kVramWidth = 1024;
 constexpr std::int16_t kVramHeight = 512;
 
-void CleanupResultsOwners() {
+void CleanupMenuOwners() {
+  if (!Menu::Score::CleanupLiveEnemyPreviewOwnedState()) {
+    Core_Errorf("boot", "enemy-preview cleanup refused before session reset");
+    std::abort();
+  }
   if (!Menu::Results::CleanupLiveGameClearOwnedState()) {
     Core_Errorf("boot", "game-clear cleanup refused before session reset");
     std::abort();
@@ -91,7 +96,7 @@ class LiveSessionHost final : public SessionHost {
   // title/battle initialization replaces the game heap (SLUS main.c:8119,
   // 8344).
   void InvalidateSceneUi() override {
-    CleanupResultsOwners();
+    CleanupMenuOwners();
     Event::ReleaseLiveScriptDialogText();
     std::memset(Menu_textBoxes, 0, sizeof Menu_textBoxes);
     std::memset(&Menu_textBoxSelector, 0, sizeof Menu_textBoxSelector);
@@ -326,7 +331,7 @@ class LiveGameHost final : public GameHost {
 }  // namespace
 
 void ResetLiveSessionHeap() {
-  CleanupResultsOwners();
+  CleanupMenuOwners();
   if (!Render::AbandonLiveFrameBeforeHeapReset()) {
     Core_Errorf("boot", "frame cleanup refused before heap replacement");
     std::abort();

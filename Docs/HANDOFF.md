@@ -1,17 +1,16 @@
 # Current Handoff
 
-Updated 2026-11-17. The latest locally verified #276 group is Gazette
+Updated 2026-11-17. The latest accepted #276 group is Gazette
 statistics, F02814-F02816/F02824/F02825, including actual module/caller and
 MENU9/cold-session cursor controls. It is published in
-`14c933a40923d9996894e5364d36b286a6fa4dbc`; exact-revision CI is blocked by
-the production clone scanner's repeated 120-second deadline (#431).
-Latest accepted checkpoint: Gazette times,
-`37a4dc7bf4ecbb1138b14c547b17651b93160d45`, with successful exact-revision CI.
+`14c933a40923d9996894e5364d36b286a6fa4dbc`, accepted through the unchanged-Native
+quality-budget follow-up `39c16835ee73e7ca1fc1e349f1759fc561cb122f`.
+Exact Source Quality 44085868536 succeeds; #431 is closed.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
 The locally verified original 900-function cohort has **881 resolved
 (869 promoted, 12 retired) and 19 remaining**; **93 of the requested final
-112** pass local integration, with **88 published and accepted**. See
+112** are published and accepted. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
@@ -59,15 +58,32 @@ The locally verified original 900-function cohort has **881 resolved
   existing expensive-tool budget of 600 seconds. Both clone controls and
   Ruff pass; the local complete scan examines 2,578 sources from 2,021 native
   and 938 Python inputs in 48.036 seconds, with zero clone findings.
-  No scope, threshold or baseline changes. Exact fixing-revision CI remains.
+  No scope, threshold or baseline changes. The unchanged-Native follow-up
+  `39c16835ee73e7ca1fc1e349f1759fc561cb122f` passes exact
+  [Source Quality 44085868536](https://github.com/JEschete/VS-NativePort/actions/runs/44085868536).
+  Its hosted clone scan completes in 110.936 seconds; final quality has zero
+  findings, zero new. #431 is closed and all 93 functions are now accepted.
 - Gazette preview prerequisite #430: an actual cold-session reproduction
   fails five of thirteen assertions at the statistics revision, leaving the
   ZUD read, file, model buffer, native state and load step alive. Evidence:
-  `build\promotion-check\iterate-20261117-072800`. Initial local checked
-  cleanup fixes that pending-read control, but queued/partial parsers,
-  companion file loading, MENU9 and pre-heap integration still require
-  focused verification before publication. This does not change the
-  normal completed-preview release contract or advance promotion counts.
+  `build\promotion-check\iterate-20261117-072800`. Checked cleanup now drains
+  pending/completed reads, queued/partial parsers, the companion's separate
+  SHP read and owned actor/weapon records at actual MENU9/cold/pre-heap
+  boundaries. Foreign active loaders, queue order and immobile slot 15,
+  foreign actor owners and reused request generations survive. Unsafe
+  ownership refuses before buffers or heap identity are discarded.
+  The original-model completed path exposed two inactive parser cursors
+  into its freed ZUD; the normal Live file-release boundary now clears those
+  borrows before the core forgets its extent. `group-20261117-081007`
+  passes both builds, Debug/Release full suites (9,289 cases / 12,976,568
+  assertions each), 118 focused cases / 2,069 assertions each, both canonical
+  replays, stable generation and copier controls, with 125 existing tidy
+  findings and zero new. Six unchanged original preview functions also pass
+  1,536 fresh preservation vectors without mutants. A subsequent header-only
+  comment clarifies that raw reset is not cleanup; no runtime tokens change.
+  Evidence: `build\scratch\gazette-preview\integration.json`.
+  Publication/exact-revision CI remain pending. No new promotion,
+  physical-CD, hardware-GPU, gameplay or EC-retirement completion is claimed.
 - Gazette-time evidence (`VR-MENU-GAZETTE-TIMES`): four original spans pass
   4,096 vectors, zero mismatches; 64 instruction mutants (128 vectors each)
   and four compiled native variants are detected. `group-20261117-064018`

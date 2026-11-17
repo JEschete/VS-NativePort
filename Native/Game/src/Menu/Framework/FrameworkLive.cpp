@@ -10,6 +10,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <iterator>
 #include <optional>
@@ -49,6 +50,7 @@
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
+#include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -483,6 +485,11 @@ void ResetLoadedSubmenu(int lba) {
       Boot_ResetMenu5Statics();
       break;
     case VS_MENU9_PRG_LBA:
+      if (!Score::CleanupLiveEnemyPreviewOwnedState()) {
+        VS_LOG_ERROR("menu.framework",
+                     "enemy-preview cleanup refused before MENU9 reload");
+        std::abort();
+      }
       Boot_ResetMenu9Statics();
       break;
     case VS_MENUB_PRG_LBA:
