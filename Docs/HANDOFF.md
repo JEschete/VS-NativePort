@@ -1,22 +1,22 @@
 # Current Handoff
 
-Updated 2026-11-17. The latest locally verified #276 group is Gazette times,
-F02828-F02831, including actual module, bounded statistics-caller and
+Updated 2026-11-17. The latest locally verified #276 group is Gazette
+statistics, F02814-F02816/F02824/F02825, including actual module/caller and
 MENU9/cold-session cursor controls. Publication and exact-revision CI are
-pending. The latest published checkpoint is time attack,
-`430f4636c04633092b60ae9a453e03e1c60c785e`, with successful exact-revision CI.
+pending. Latest accepted checkpoint: Gazette times,
+`37a4dc7bf4ecbb1138b14c547b17651b93160d45`, with successful exact-revision CI.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The locally verified original 900-function cohort has **876 resolved
-(864 promoted, 12 retired) and 24 remaining**; **88 of the requested final
-112** pass local integration, with **84 published and accepted**. See
+The locally verified original 900-function cohort has **881 resolved
+(869 promoted, 12 retired) and 19 remaining**; **93 of the requested final
+112** pass local integration, with **88 published and accepted**. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 0, 50: 13, 52: 10. The seven time-attack functions meet the no-bridge
+  48: 0, 50: 8, 52: 10. The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
@@ -25,6 +25,32 @@ The locally verified original 900-function cohort has **876 resolved
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Gazette-statistics evidence (`VR-MENU-GAZETTE-STATISTICS`): five original
+  spans pass 5,120 vectors, zero mismatches; 122 instruction mutants (128
+  vectors each) and five compiled native variants are detected.
+  `group-20261117-070353` passes both builds, Debug/Release full suites
+  (9,279 cases / 12,976,330 assertions each), 120 focused cases / 4,014
+  assertions each, both canonical replays, stable second generation (zero
+  Native changes, `a9c92e32abf9293d`) and tidy with five existing findings,
+  zero new. Its original aggregate remains failed for one stale Python
+  control indexing the retired F02816 fixup. That control now verifies
+  the native binding/retirement and retains generated F02817/F02820 checks;
+  its targeted rerun and scoped quality pass. The entire Native fingerprint
+  is unchanged, so passing native gates were not duplicated.
+  Evidence: `build\scratch\gazette-statistics\integration.json`.
+  The original 30 cases / 749 assertions and 12 genuine-service cases /
+  282 assertions remain. Test-only helpers and the distinct `StatisticsFixture`
+  name resolve preflight statement-size/destructor-name findings without
+  removing assertions. All five actual module entries, generated callers
+  and every-digit/link tests use the new APIs. Actual pre-hook testing fails
+  four cursor assertions: titles/statistics at completed MENU9 and cold
+  boundaries. All pass after wiring, with pending/other overlay, resident
+  row, score/progress, BATTLE memory and foreign allocation controls intact.
+  Five old-symbol files, two obsolete casts, the F02816 pointer fixup and
+  temporary F02825 caller adapter retire. Native row/time reset hooks move
+  to the surviving Encyclopedia anchor as generated Records statics disappear.
+  No physical-CD, hardware-GPU, interactive gameplay or EC-retirement
+  completion is claimed. Publication and exact-revision CI remain.
 - Gazette-time evidence (`VR-MENU-GAZETTE-TIMES`): four original spans pass
   4,096 vectors, zero mismatches; 64 instruction mutants (128 vectors each)
   and four compiled native variants are detected. `group-20261117-064018`
@@ -48,7 +74,9 @@ The locally verified original 900-function cohort has **876 resolved
   conversions. Three old-symbol files and ten obsolete cast adaptations
   retire; existing generated title/statistics cursor resets survive.
   No physical-CD, hardware-GPU, interactive gameplay or EC-retirement
-  completion is claimed. Publication and exact-revision CI remain.
+  completion is claimed. Published in `37a4dc7bf4ecbb1138b14c547b17651b93160d45`;
+  [Source Quality 44078000825](https://github.com/JEschete/VS-NativePort/actions/runs/44078000825)
+  passes. This completes 88 of the final 112 functions.
 - Time-attack evidence (`VR-MENU-TIMEATTACK-TERMINAL`): seven original spans
   pass 7,168 vectors, zero mismatches; 93 instruction mutants (256 vectors
   each) and seven compiled native variants are detected.
@@ -482,8 +510,8 @@ The locally verified original 900-function cohort has **876 resolved
 
 Next steps:
 
-1. Gazette-time local gates pass; publish and verify exact-revision CI, then
-   integrate the delivered Gazette-statistics/terminal and text/map
+1. Gazette-statistics local gates pass; publish and verify exact-revision CI,
+   then integrate the delivered Gazette-terminal and text/map
    groups. Status-terminal publication/CI and #422 closure are complete.
    Game-clear packet `6b9c330d36c12741b3f0284dd3a86d6478674110` is imported
    and registered locally: six original spans pass 6,144 vectors, 80
@@ -532,7 +560,9 @@ Next steps:
    1,031 assertions in both configurations, including 12 actual-Live cases /
    282 assertions, with zero tidy findings and all original assertions,
    implementation and proofs unchanged. Root registration/caller/module/cold
-   integration remains. Gazette-terminal
+   integration and shared native gates now pass as recorded above; the
+   test-only fixture class is named `StatisticsFixture` after combined tidy.
+   Gazette-terminal
    packet `86b1223d99d572d8d916a8a713bf74a228aa7e0d` is delivered: 53 tests /
    363 assertions per configuration, 11,264 parity vectors, 145 instruction
    mutants and eight compiled variants. Production integration remains.

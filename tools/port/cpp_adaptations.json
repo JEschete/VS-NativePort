@@ -21,6 +21,7 @@
 "#include \"Menu/Results/GameClearLifecycleLive.hpp\"",
 "#include \"Menu/Results/TimeAttackTerminalLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
+"#include \"Menu/Score/GazetteStatisticsLive.hpp\"",
 "#include \"Menu/Score/GazetteTimesLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\"",
 "#include \"Menu/Status/LimbControllersLive.hpp\"",
@@ -28,7 +29,7 @@
 ]
 ],
 [
-17,
+16,
 [
 "    Menu_Inventory_ItemList_ResetMainMenuStatics();"
 ],
@@ -38,7 +39,7 @@
 ]
 ],
 [
-23,
+22,
 [
 "    Menu_BattleAbilities_ResetMenu2Statics();"
 ],
@@ -49,7 +50,7 @@
 ]
 ],
 [
-29,
+28,
 [
 "    Menu_Inventory_ResetMenu3Statics();"
 ],
@@ -61,7 +62,7 @@
 ]
 ],
 [
-35,
+34,
 [
 "    Menu_Status_ActorStatus_ResetMenu4Statics();"
 ],
@@ -73,18 +74,19 @@
 ]
 ],
 [
-48,
+46,
 [
-"    Menu_Score_Records_ResetMenu9Statics();"
+"    Menu_Score_Encyclopedia_ResetMenu9Statics();"
 ],
 [
-"    Menu_Score_Records_ResetMenu9Statics();",
+"    Menu_Score_Encyclopedia_ResetMenu9Statics();",
 "    VS::Menu::Score::ResetGazetteRowsLive();",
+"    VS::Menu::Score::ResetLiveGazetteStatisticsStatics();",
 "    VS::Menu::Score::ResetLiveTimeTrialStatics();"
 ]
 ],
 [
-55,
+53,
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();"
 ],
@@ -96,7 +98,7 @@
 ]
 ],
 [
-61,
+59,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
@@ -374,31 +376,9 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Menu\\Score\\Records.cpp": [
-[
-169,
-[
-"    poly = Render_frameScratch.primitiveCursor;"
-],
-[
-"    poly = (POLY_FT4 *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-204,
-[
-"        p->title = (void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]];",
-"        p->description = (void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]];"
-],
-[
-"        p->title = (char *)((void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]]);",
-"        p->description = (char *)((void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]]);"
-]
-]
-],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-277,
+278,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],

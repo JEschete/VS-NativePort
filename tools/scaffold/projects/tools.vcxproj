@@ -787,6 +787,13 @@
     <None Include="..\..\port\differentials\gazette_rows_f02806.py" />
     <None Include="..\..\port\differentials\gazette_rows_f04154.py" />
     <None Include="..\..\port\differentials\gazette_rows_f04155.py" />
+    <None Include="..\..\port\differentials\gazette_statistics_common.py" />
+    <None Include="..\..\port\differentials\gazette_statistics_driver.cpp" />
+    <None Include="..\..\port\differentials\gazette_statistics_f02814.py" />
+    <None Include="..\..\port\differentials\gazette_statistics_f02815.py" />
+    <None Include="..\..\port\differentials\gazette_statistics_f02816.py" />
+    <None Include="..\..\port\differentials\gazette_statistics_f02824.py" />
+    <None Include="..\..\port\differentials\gazette_statistics_f02825.py" />
     <None Include="..\..\port\differentials\gazette_times_common.py" />
     <None Include="..\..\port\differentials\gazette_times_driver.cpp" />
     <None Include="..\..\port\differentials\gazette_times_f02828.py" />

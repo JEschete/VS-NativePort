@@ -4,9 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/include/gpu.h:96
-#define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
-
 #endif // VS_MENU_SCORE_RECORDS_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_RECORDS_H_DECLS)
@@ -24,11 +21,5 @@ extern char const* Menu_Score_kTimeAttackReferenceTimes[];
 extern u_short Menu_Score_timeAttacks[58]; /* contents: disc string table (ModuleData.cpp) */;
 extern u_short Menu_Score_titleDescriptions[784]; /* contents: disc string table (ModuleData.cpp) */;
 extern u_short Menu_Score_titleText[364]; /* contents: disc string table (ModuleData.cpp) */;
-void Menu_Score_CreateTitleRows(void);
-void Menu_Score_RenderTitles(int animState);
-void Menu_Score_DrawTitleNumber(int x, int y, int titleNo, int dimmed);
-void Menu_Score_CreateStatisticRows(void);
-void Menu_Score_RenderStatistics(int animState);
-void Menu_Score_Records_ResetMenu9Statics(void);
 
 #endif // VS_MENU_SCORE_RECORDS_H_DECLS

@@ -1876,6 +1876,11 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Score::CreateLiveTimeTrialRows": r"Native\Game\include\Menu\Score\GazetteTimesLive.hpp",
     "VS::Menu::Score::LeaveLiveTimeTrialMenu": r"Native\Game\include\Menu\Score\GazetteTimesLive.hpp",
     "VS::Menu::Score::RenderLiveTimeTrialRecords": r"Native\Game\include\Menu\Score\GazetteTimesLive.hpp",
+    "VS::Menu::Score::CreateLiveTitleRows": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
+    "VS::Menu::Score::RenderLiveTitles": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
+    "VS::Menu::Score::DrawLiveTitleNumber": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
+    "VS::Menu::Score::CreateLiveStatisticRows": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
+    "VS::Menu::Score::RenderLiveStatistics": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
     "VS::Menu::manual::LiveUploadSpriteTiles": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveUploadCluts": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
@@ -3436,6 +3441,11 @@ OWNED_CALL_BINDINGS["F02828"] = "VS::Menu::Score::FormatLiveFastestClearTime"
 OWNED_CALL_BINDINGS["F02829"] = "VS::Menu::Score::CreateLiveTimeTrialRows"
 OWNED_CALL_BINDINGS["F02830"] = "VS::Menu::Score::LeaveLiveTimeTrialMenu"
 OWNED_CALL_BINDINGS["F02831"] = "VS::Menu::Score::RenderLiveTimeTrialRecords"
+OWNED_CALL_BINDINGS["F02814"] = "VS::Menu::Score::CreateLiveTitleRows"
+OWNED_CALL_BINDINGS["F02815"] = "VS::Menu::Score::RenderLiveTitles"
+OWNED_CALL_BINDINGS["F02816"] = "VS::Menu::Score::DrawLiveTitleNumber"
+OWNED_CALL_BINDINGS["F02824"] = "VS::Menu::Score::CreateLiveStatisticRows"
+OWNED_CALL_BINDINGS["F02825"] = "VS::Menu::Score::RenderLiveStatistics"
 OWNED_CALL_BINDINGS["F02992"] = "VS::Menu::manual::LiveUploadSpriteTiles"
 OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
 OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
@@ -5516,6 +5526,11 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU9.PRG", 0x80106F9C, "VS::Menu::Score::CreateLiveTimeTrialRows"),  # F02829
     ("MENU/MENU9.PRG", 0x80107090, "VS::Menu::Score::LeaveLiveTimeTrialMenu"),  # F02830
     ("MENU/MENU9.PRG", 0x80107120, "VS::Menu::Score::RenderLiveTimeTrialRecords"),  # F02831
+    ("MENU/MENU9.PRG", 0x801056B8, "VS::Menu::Score::CreateLiveTitleRows"),  # F02814
+    ("MENU/MENU9.PRG", 0x8010579C, "VS::Menu::Score::RenderLiveTitles"),  # F02815
+    ("MENU/MENU9.PRG", 0x80105A0C, "VS::Menu::Score::DrawLiveTitleNumber"),  # F02816
+    ("MENU/MENU9.PRG", 0x80106780, "VS::Menu::Score::CreateLiveStatisticRows"),  # F02824
+    ("MENU/MENU9.PRG", 0x80106808, "VS::Menu::Score::RenderLiveStatistics"),  # F02825
     ("MENU/MENUE.PRG", 0x80103A24, "VS::Menu::manual::LiveUploadSpriteTiles"),  # F02992
     ("MENU/MENUE.PRG", 0x80103AD8, "VS::Menu::manual::LiveUploadCluts"),  # F02993
     ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000
@@ -5578,19 +5593,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], "
          "offsetof(Field_GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
-    ],
-    "F02816": [
-        ("char digits[2];", 'char digits[sizeof "00"];',
-         "238.c:1835 two title digits also need the native sprintf terminator"),
-        ("poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);",
-         "poly = Render_frameScratch.primitiveCursor;",
-         "Title digits use the typed native packet cursor"),
-        ("AddPrim(*(void**)((uintptr_t)Core_ScratchBase() + 0x008), poly++);",
-         "AddPrim(Render_frameScratch.overlayOrderingTable, poly++);",
-         "PS1 scratch offset8 is the overlay ordering pointer, not native offset8"),
-        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;",
-         "Render_frameScratch.primitiveCursor = poly;",
-         "Publish the advanced title-digit cursor through the native frame"),
     ],
     "F02817": [
         ("char digits[2];", 'char digits[sizeof "000"];',
@@ -5986,15 +5988,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                ("*(int*)((char*)object + 0x34) = 0;", "object->slideX = 0;\n            object->velocityY = 0;",
                 "clear at 0x34")],
 }
-
-FIXES.setdefault("F02825", []).append((
-    "VS::Menu::Score::FormatLiveFastestClearTime(intBuf, Audio_Seq_unusedScoredata.clearCount,\n"
-    "                Audio_Seq_unusedScoredata.completionTimeMinutes);",
-    "VS::Menu::Score::FormatLiveFastestClearTime(std::span(sp18).subspan(2),\n"
-    "                static_cast<std::int32_t>(Audio_Seq_unusedScoredata.clearCount),\n"
-    "                static_cast<std::int32_t>(Audio_Seq_unusedScoredata.completionTimeMinutes));",
-    "F02828 requires the actual remaining 30-byte output span; C++20 signed conversions preserve the original words."
-))
 
 # #269: model geometry projection and polygon walks read only a model's recorded extent. Each loader records the
 # bytes it placed; each release forgets them before the memory goes back to the heap.

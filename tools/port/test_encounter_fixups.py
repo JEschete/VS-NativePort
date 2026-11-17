@@ -4501,13 +4501,10 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertEqual(owned["F01013"]["path"], r"Native\Game\src\Field\GimmickDynamics.cpp")
 
     def test_score_number_buffers_include_all_digits_and_terminators(self):
+        self.assertNotIn("F02816", copy_fixups.FIXES)
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F02816"],
+                         "VS::Menu::Score::DrawLiveTitleNumber")
         cases = (
-            (
-                "F02816",
-                'char digits[2];\nsprintf(digits, "%02d", titleNo);',
-                'char digits[sizeof "00"];',
-                '"%02d"',
-            ),
             (
                 "F02817",
                 'char digits[2];\nsprintf(digits, "%03d", enemyNo);',
@@ -4523,13 +4520,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         )
         for function, source, declaration, format_string in cases:
             with self.subTest(function=function):
-                if function == "F02816":
-                    source += """
-poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
-AddPrim(*(void**)((uintptr_t)Core_ScratchBase() + 0x008), poly++);
-*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;
-"""
-                elif function == "F02817":
+                if function == "F02817":
                     source += """
 poly = *(void**)Core_ScratchAddr(0);
 AddPrim(*(void**)Core_ScratchAddr(2), poly++);

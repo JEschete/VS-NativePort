@@ -12,6 +12,7 @@
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTimesLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
+#include "Menu/Score/GazetteStatisticsLive.hpp"
 
 extern "C" {
 #include "Content/DiscLayout.h"
@@ -138,17 +139,17 @@ TEST_CASE("Production statistics caller supplies the remaining time text span",
   Audio_Seq_unusedScoredata.completionTimeMinutes = 6000;
   Battle_unusedMenu9CursorMemory.recordTimePage = 0;
   Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
-  Menu_Score_CreateStatisticRows();
+  score::CreateLiveStatisticRows();
   const auto refusals = score::LiveTimeTrialRefusals();
-  Menu_Score_RenderStatistics(7);
+  score::RenderLiveStatistics(7);
   const auto first = fixture.Packets();
   REQUIRE_FALSE(first.empty());
   fixture.ResetFrame();
-  Menu_Score_RenderStatistics(7);
+  score::RenderLiveStatistics(7);
   CHECK(fixture.Packets() == first);
   Audio_Seq_unusedScoredata.completionTimeMinutes = 60;
   fixture.ResetFrame();
-  Menu_Score_RenderStatistics(7);
+  score::RenderLiveStatistics(7);
   CHECK(fixture.Packets() != first);
   CHECK(fixture.GuardsIntact());
   CHECK(score::LiveTimeTrialRefusals() == refusals);

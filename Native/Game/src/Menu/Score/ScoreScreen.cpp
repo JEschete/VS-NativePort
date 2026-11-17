@@ -9,6 +9,7 @@
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -326,7 +327,7 @@ int Menu_Score_Update(void)
 
     case 4:
         VS::Menu::Framework::InitializeLiveInformationBox();
-        Menu_Score_CreateTitleRows();
+        VS::Menu::Score::CreateLiveTitleRows();
 
         Menu_Score_updateMenuAnimState = 0;
         ++Menu_Score_menuState;
@@ -404,7 +405,7 @@ int Menu_Score_Update(void)
             }
         }
 
-        Menu_Score_RenderTitles(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveTitles(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState < 8) {
             ++Menu_Score_updateMenuAnimState;
@@ -413,7 +414,7 @@ int Menu_Score_Update(void)
         break;
 
     case 6:
-        Menu_Score_RenderTitles(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveTitles(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState <= 0) {
             if (Menu_Score_nextState == 0) {
@@ -431,7 +432,7 @@ int Menu_Score_Update(void)
 
     case 7:
         VS::Menu::Framework::InitializeLiveInformationBox();
-        Menu_Score_CreateStatisticRows();
+        VS::Menu::Score::CreateLiveStatisticRows();
 
         Menu_Score_updateMenuAnimState = 0;
         ++Menu_Score_menuState;
@@ -515,7 +516,7 @@ int Menu_Score_Update(void)
             }
         }
 
-        Menu_Score_RenderStatistics(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveStatistics(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState < 8) {
             ++Menu_Score_updateMenuAnimState;
@@ -523,7 +524,7 @@ int Menu_Score_Update(void)
         break;
 
     case 9:
-        Menu_Score_RenderStatistics(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveStatistics(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState <= 0) {
             if (Menu_Score_nextState == 0) {

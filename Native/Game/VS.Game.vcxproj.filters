@@ -2967,6 +2967,12 @@
     <ClCompile Include="src\Menu\Score\GazetteRowsLive.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteStatistics.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteStatisticsLive.cpp">
+      <Filter>src\Menu\Score</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\GazetteTimes.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
@@ -4744,6 +4750,12 @@
       <Filter>include\Menu\Score</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Score\GazetteRowsLive.hpp">
+      <Filter>include\Menu\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\GazetteStatistics.hpp">
+      <Filter>include\Menu\Score</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Score\GazetteStatisticsLive.hpp">
       <Filter>include\Menu\Score</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Score\GazetteTimes.hpp">

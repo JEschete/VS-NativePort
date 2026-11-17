@@ -14,6 +14,7 @@
 #include "Menu/FilesLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteStatisticsLive.hpp"
 
 extern "C" {
 #include "Core/Random.h"
@@ -253,7 +254,7 @@ TEST_CASE("Score list numbers retain every original digit and native link",
     if (enemy) {
       Menu_Score_DrawEnemyNumber(100, 50, number, dimmed);
     } else {
-      Menu_Score_DrawTitleNumber(100, 50, number, dimmed);
+      VS::Menu::Score::DrawLiveTitleNumber(100, 50, number, dimmed);
     }
     CHECK(Render_frameScratch.primitiveCursor == first + digits);
     CHECK(nextPrim(fixture.ordering.data() + 2) == first + digits - 1);
