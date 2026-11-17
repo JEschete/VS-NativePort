@@ -157,8 +157,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     }
     framework::ClearLiveMenuExcept(framework::kNoRow);
   }
-  void OpenSchool(std::size_t school) {
-    REQUIRE(kSchoolEntries[school](1) == 0);
+  void OpenSchool(std::size_t school, unsigned init = 1) {
+    REQUIRE(kSchoolEntries[school](init) == 0);
     IdleRows();
     REQUIRE(kSchoolEntries[school](0) == 0);
     REQUIRE(Menu_Framework_subMenuRowCount == 1);
@@ -188,9 +188,9 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     IdleRows();
     REQUIRE(magic::UpdateTeleportMenuLive(0) > 0);
   }
-  void EnterRanks() {
+  void EnterRanks(unsigned init = 1) {
     Battle_actionDefinitions[kActions[0] + 1].unlocked = 1;
-    OpenSchool(0);
+    OpenSchool(0, init);
     Menu_Framework_selectedRow = 0;
     static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
     REQUIRE(magic::UpdateWarlockMenuLive(0) == 0);
@@ -324,4 +324,28 @@ TEST_CASE("Warlock rank drawing preserves native packet chains and glyph style",
   REQUIRE(magic::UpdateWarlockMenuLive(0) == 0);
   CheckRankPackets(fixture);
   CHECK(magic::RefusedMagicMenuCount() == refusals);
+}
+
+TEST_CASE("MENU0 reload and cold entry restart visible rank blinking",
+          "[magic-terminal-live][magic-reload-blink]") {
+  MagicLiveFixture fixture;
+  const bool cold = GENERATE(false, true);
+  for (std::size_t step = 0;
+       step < std::size(Menu_Framework_cursorBrightnessAnimation); ++step) {
+    Menu_Framework_cursorBrightnessAnimation[step] =
+        static_cast<char>(step + 1);
+  }
+  fixture.EnterRanks();
+  fixture.ResetFrame();
+  REQUIRE(magic::UpdateWarlockMenuLive(0) == 0);
+  const auto initial = fixture.Sprites();
+  REQUIRE_FALSE(initial.empty());
+  fixture.ResetFrame();
+  REQUIRE(magic::UpdateWarlockMenuLive(0) == 0);
+  CHECK(fixture.Sprites() != initial);
+  fixture.ResetThroughBoundary(cold);
+  fixture.EnterRanks(0);
+  fixture.ResetFrame();
+  REQUIRE(magic::UpdateWarlockMenuLive(0) == 0);
+  CHECK(fixture.Sprites() == initial);
 }
