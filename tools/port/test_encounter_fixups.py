@@ -508,8 +508,6 @@ int func_800F9800(void) {
     def test_status_packet_links_accept_root_and_worktree_forms(self):
         copier = object.__new__(copy_to_native.Copier)
         cases = (
-            ("F02663", "Menu::Status::DrawLimbLeaderLine",
-             "temp_t0", "leader_line_ordering_table"),
             ("F02677", "Menu::Status::DrawModelSlideFade",
              "temp_t1", "model_fade_ordering_table"),
         )

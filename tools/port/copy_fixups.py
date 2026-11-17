@@ -1816,6 +1816,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Status::LiveArmorDescription": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
     "VS::Menu::Status::LiveAccessoryDescription": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
     "VS::Menu::Status::IsLiveDetailElementSelectable": r"Native\Game\include\Menu\Status\ComponentDescriptionsLive.hpp",
+    "VS::Menu::Status::LiveDrawLimbConditionIndicator": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
+    "VS::Menu::Status::LiveDrawLimbLeaderLine": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
+    "VS::Menu::Status::LiveDrawStatusEffectIcons": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
+    "VS::Menu::Status::LiveNavigateStatusEffects": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
+    "VS::Menu::Status::LiveUpdateLimbPanel": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
+    "VS::Menu::Status::LiveShowSelectedLimbCondition": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
+    "VS::Menu::Status::LivePopulateSelectedLimbDefense": r"Native\Game\include\Menu\Status\LimbControllersLive.hpp",
     "VS::Menu::Score::LoadLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::FreeLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::InitializeLiveAshleyPreviewPose": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
@@ -3339,6 +3346,13 @@ OWNED_CALL_BINDINGS["F02651"] = "VS::Menu::Status::SelectLiveShieldComponent"
 OWNED_CALL_BINDINGS["F02652"] = "VS::Menu::Status::LiveArmorDescription"
 OWNED_CALL_BINDINGS["F02653"] = "VS::Menu::Status::LiveAccessoryDescription"
 OWNED_CALL_BINDINGS["F02654"] = "VS::Menu::Status::IsLiveDetailElementSelectable"
+OWNED_CALL_BINDINGS["F02662"] = "VS::Menu::Status::LiveDrawLimbConditionIndicator"
+OWNED_CALL_BINDINGS["F02663"] = "VS::Menu::Status::LiveDrawLimbLeaderLine"
+OWNED_CALL_BINDINGS["F02664"] = "VS::Menu::Status::LiveDrawStatusEffectIcons"
+OWNED_CALL_BINDINGS["F02665"] = "VS::Menu::Status::LiveNavigateStatusEffects"
+OWNED_CALL_BINDINGS["F02668"] = "VS::Menu::Status::LiveUpdateLimbPanel"
+OWNED_CALL_BINDINGS["F02680"] = "VS::Menu::Status::LiveShowSelectedLimbCondition"
+OWNED_CALL_BINDINGS["F02681"] = "VS::Menu::Status::LivePopulateSelectedLimbDefense"
 OWNED_CALL_BINDINGS["F02836"] = "VS::Menu::Score::LoadLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02837"] = "VS::Menu::Score::FreeLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02838"] = "VS::Menu::Score::InitializeLiveAshleyPreviewPose"
@@ -5382,6 +5396,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU4.PRG", 0x801033A4, "VS::Menu::Status::LiveArmorDescription"),  # F02652
     ("MENU/MENU4.PRG", 0x801033D4, "VS::Menu::Status::LiveAccessoryDescription"),  # F02653
     ("MENU/MENU4.PRG", 0x8010341C, "VS::Menu::Status::IsLiveDetailElementSelectable"),  # F02654
+    ("MENU/MENU4.PRG", 0x80103E58, "VS::Menu::Status::LiveDrawLimbConditionIndicator"),  # F02662
+    ("MENU/MENU4.PRG", 0x80103EF8, "VS::Menu::Status::LiveDrawLimbLeaderLine"),  # F02663
+    ("MENU/MENU4.PRG", 0x80103FEC, "VS::Menu::Status::LiveDrawStatusEffectIcons"),  # F02664
+    ("MENU/MENU4.PRG", 0x80104134, "VS::Menu::Status::LiveNavigateStatusEffects"),  # F02665
+    ("MENU/MENU4.PRG", 0x801045B8, "VS::Menu::Status::LiveUpdateLimbPanel"),  # F02668
+    ("MENU/MENU4.PRG", 0x80106308, "VS::Menu::Status::LiveShowSelectedLimbCondition"),  # F02680
+    ("MENU/MENU4.PRG", 0x801063F8, "VS::Menu::Status::LivePopulateSelectedLimbDefense"),  # F02681
     ("MENU/MENU9.PRG", 0x80107FBC, "VS::Menu::Score::LoadLiveEnemyPreview"),  # F02836
     ("MENU/MENU9.PRG", 0x80108098, "VS::Menu::Score::FreeLiveEnemyPreview"),  # F02837
     ("MENU/MENU9.PRG", 0x801080C8, "VS::Menu::Score::InitializeLiveAshleyPreviewPose"),  # F02838
@@ -5581,16 +5602,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("static u_short Menu_BreakArts_artListActionIds[4];",
          "static u_short Menu_BreakArts_artListActionIds[5];",
          "MENU1/30.c weapon arts need four action IDs plus View Arts; adapt before hoisting so the reload initializer has the same extent"),
-    ],
-    "F02662": [
-        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "Status limb indicator packets retain native link handles"),
-    ],
-    "F02663": [
-        ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "Status limb leader-line link must not terminate traversal before the lower UI entries"),
-        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "Status limb leader-line link must not terminate traversal before the lower UI entries"),
     ],
     "F02677": [
         ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
@@ -5983,7 +5994,6 @@ for _row, _decl, _where in (
         ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
 
 FIXUP_VARIANT_COUNTS: dict[str, int] = {
-    "F02663": 1,
     "F02677": 1,
     "F02699": 9,
 }

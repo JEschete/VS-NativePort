@@ -19,7 +19,8 @@
 "#include \"Menu/ManualScreenLive.hpp\"",
 "#include \"Menu/Results/CubePuzzleLifecycleLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
-"#include \"Menu/Status/ActorSwitchingLive.hpp\""
+"#include \"Menu/Status/ActorSwitchingLive.hpp\"",
+"#include \"Menu/Status/LimbControllersLive.hpp\""
 ]
 ],
 [
@@ -62,7 +63,8 @@
 ],
 [
 "    Menu_Status_EquipmentDetails_ResetMenu4Statics();",
-"    VS::Menu::Status::ResetLiveActorSwitchPhase();"
+"    VS::Menu::Status::ResetLiveActorSwitchPhase();",
+"    VS::Menu::Status::ResetLiveLimbControllersModuleData();"
 ]
 ],
 [
@@ -613,47 +615,7 @@
 ],
 "Native\\Game\\src\\Menu\\Status\\ActorStatus.cpp": [
 [
-133,
-[
-"    limb_indicator_ordering_table = Render_frameScratch.overlayOrderingTable;",
-"    prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"    limb_indicator_ordering_table = (u_long *)(Render_frameScratch.overlayOrderingTable);",
-"    prim = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-161,
-[
-"    prim = Render_frameScratch.primitiveCursor;",
-"    leader_line_ordering_table = Render_frameScratch.orderingTable;"
-],
-[
-"    prim = (u_long *)(Render_frameScratch.primitiveCursor);",
-"    leader_line_ordering_table = (u_long *)(Render_frameScratch.orderingTable);"
-]
-],
-[
-212,
-[
-"                    128, ((x + 8) & 0xFFFF) | y, vs_getWH(8, 8), Render_frameScratch.orderingTable - 8)[4] ="
-],
-[
-"                    128, ((x + 8) & 0xFFFF) | y, vs_getWH(8, 8), (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 8))[4] ="
-]
-],
-[
-218,
-[
-"                128, (x & 0xFFFF) | y, vs_getWH(16, 16), Render_frameScratch.orderingTable - 8);"
-],
-[
-"                128, (x & 0xFFFF) | y, vs_getWH(16, 16), (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 8));"
-]
-],
-[
-532,
+112,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;",
 "    u_long* model_fade_ordering_table = Render_frameScratch.orderingTable;"
@@ -664,7 +626,7 @@
 ]
 ],
 [
-571,
+151,
 [
 "    u_long* prim = Render_frameScratch.primitiveCursor;"
 ],
@@ -673,7 +635,7 @@
 ]
 ],
 [
-573,
+153,
 [
 "    u_int* background_ordering_table_entry = ordering_table_base + 0x1FF4;"
 ],
@@ -682,27 +644,18 @@
 ]
 ],
 [
-576,
+156,
 [
 "        background_ordering_table_entry = ordering_table_base - 4;"
 ],
 [
 "        background_ordering_table_entry = (u_int *)(((u_char*)(ordering_table_base)) - 4);"
 ]
-],
-[
-1351,
-[
-"        static const int initial[6];"
-],
-[
-"        static const int initial[6] = {};"
-]
 ]
 ],
 "Native\\Game\\src\\Menu\\Status\\EquipmentDetails.cpp": [
 [
-353,
+148,
 [
 "        VS::Menu::Framework::FormatLiveBladeRow(&blade, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -711,7 +664,7 @@
 ]
 ],
 [
-357,
+152,
 [
 "        VS::Menu::Framework::FormatLiveGripRow(&grip, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -720,7 +673,7 @@
 ]
 ],
 [
-371,
+166,
 [
 "                VS::Menu::Framework::FormatLiveGemRow(&gem, menuText, &rowType, Menu_Framework_stringBuf);"
 ],
@@ -729,7 +682,7 @@
 ]
 ],
 [
-640,
+435,
 [
 "                        &actor->weapon, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -738,7 +691,7 @@
 ]
 ],
 [
-654,
+449,
 [
 "                        &actor->shield, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -747,7 +700,7 @@
 ]
 ],
 [
-661,
+456,
 [
 "                            Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -756,7 +709,7 @@
 ]
 ],
 [
-664,
+459,
 [
 "                            &equipment_row_flags, Menu_Framework_stringBuf);"
 ],
@@ -765,7 +718,7 @@
 ]
 ],
 [
-667,
+462,
 [
 "                            Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);"
 ],
@@ -774,7 +727,7 @@
 ]
 ],
 [
-671,
+466,
 [
 "                            &armor, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
 ],

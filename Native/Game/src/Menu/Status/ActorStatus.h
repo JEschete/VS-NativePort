@@ -29,11 +29,6 @@ typedef enum Menu_Status_LimbUiMode Menu_Status_LimbUiMode;
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_STATUS_ACTORSTATUS_H_DECLS)
 #define VS_MENU_STATUS_ACTORSTATUS_H_DECLS
-#include "Battle/Actor.h"
-#include "Items/Equipment.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Weapons.h"
 
 extern char Menu_Status_layoutPadding1[24];;
 extern int Menu_Status_animationStep;
@@ -52,17 +47,9 @@ extern char Menu_Status_selectedStatRow;;
 extern u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Status_xPos;
 extern int Menu_Status_yPos;
-void Menu_Status_DrawLimbConditionIndicator(int colorIndex, int xy, int subdued);
-void Menu_Status_DrawLimbLeaderLine(
-    int limb, int xy, int arg2 __attribute__((unused)), int opaque);
-void Menu_Status_DrawStatusEffectIcons(Battle_ActorStats* actor, int animationStep);
-int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_active);
-int Menu_Status_UpdateLimbPanel(int init);
 void Menu_Status_DrawModelSlideFade(void);
 void Menu_Status_DrawBackground(void);
 void Menu_Status_DrawFrame(void);
-void Menu_Status_ShowSelectedLimbCondition(void);
-void Menu_Status_PopulateSelectedLimbDefense(void);
 int Menu_Status_Update(u_char* state);
 void Menu_Status_ActorStatus_ResetMenu4Statics(void);
 

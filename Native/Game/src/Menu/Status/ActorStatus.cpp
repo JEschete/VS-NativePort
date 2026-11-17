@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/SkeletonLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -10,10 +9,9 @@
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
+#include "Menu/Status/LimbControllersLive.hpp"
 #include "Render/CameraViewLive.hpp"
-#include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -28,19 +26,15 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
-#include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Items/Weapons.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/Menus.h"
-#include "Menu/Framework/TextBoxes.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Status/ActorStatus.h"
@@ -109,422 +103,8 @@ int Menu_Status_yPos = 0;
 // decomp: local static of vs_menu4_exec, at file scope so the module reset reaches it
 static int Menu_Status_updateAnimWait = 0;
 
-// decomp: local static of _navigateStatusModifiers, at file scope so the module reset reaches it
-static char Menu_Status_navigateStatusEffectsAnimationState = 0;
-
-// decomp: local static of _renderLimbUi, at file scope so the module reset reaches it
-static int Menu_Status_limbPanelLimbAnimSteps[6];
-
 // decomp: local static of vs_menu4_exec, at file scope so the module reset reaches it
 static int Menu_Status_updateScreenEnabled = 0;
-
-// decomp: local static of _renderLimbUi, at file scope so the module reset reaches it
-static char Menu_Status_limbPanelState = 0;
-
-// decomp: local static of _renderLimbUi, at file scope so the module reset reaches it
-static u_char Menu_Status_limbPanelActor = 0;
-
-// decomp: MENU4.PRG _drawStatusIndicator (src/MENU/MENU4.PRG/120.c:847)
-void Menu_Status_DrawLimbConditionIndicator(int colorIndex, int xy, int subdued)
-{
-    u_int color;
-    u_long* prim;
-    u_long* limb_indicator_ordering_table;
-
-    limb_indicator_ordering_table = (u_long *)(Render_frameScratch.overlayOrderingTable);
-    prim = (u_long *)(Render_frameScratch.primitiveCursor);
-    color = Battle_limbStatusColors[colorIndex] >> subdued;
-    prim[0] = (*limb_indicator_ordering_table & 0xFFFFFF) | 0x06000000;
-    prim[1] = color | (Render_LegacyPrimitiveCode_Tile << 24);
-    prim[2] = xy;
-    prim[3] = vs_getWH(7, 7);
-    prim[4] = (color * 2) | (Render_LegacyPrimitiveCode_Tile << 24);
-    prim[5] = xy + vs_getXY(1, 1);
-    prim[6] = vs_getWH(5, 5);
-    *limb_indicator_ordering_table = LegacyGpu_Handle(prim);
-    Render_frameScratch.primitiveCursor = prim + 7;
-}
-
-// decomp: MENU4.PRG _drawLimbLeaderLine (src/MENU/MENU4.PRG/120.c:870)
-void Menu_Status_DrawLimbLeaderLine(
-    int limb, int xy, int arg2 __attribute__((unused)), int opaque)
-{
-    int limb_row_y;
-    int packed_leader_elbow;
-    u_long* prim;
-    u_long* leader_line_ordering_table;
-    int x;
-
-    opaque = (0x687018 << opaque) | ((33 - opaque) << 25);
-    limb_row_y = limb * 16 + 42;
-    limb = ((xy >> 16) - limb_row_y);
-
-    prim = (u_long *)(Render_frameScratch.primitiveCursor);
-    leader_line_ordering_table = (u_long *)(Render_frameScratch.orderingTable);
-
-    x = (short)xy;
-
-    if (limb < 0) {
-        limb = -limb;
-    }
-
-    limb = (limb * 3) >> 1;
-
-    prim[0] = (leader_line_ordering_table[-1] & 0xFFFFFF) | 0x08000000;
-    prim[1] = 0xE1000000;
-    prim[2] = opaque;
-    prim[3] = xy;
-    packed_leader_elbow = ((x + ((limb * 2) / 3)) & 0xFFFF) | (limb_row_y << 0x10);
-    prim[4] = packed_leader_elbow;
-    prim[5] = (leader_line_ordering_table[-1] & 0xFFFFFF) | 0x03000000;
-    prim[6] = opaque;
-    prim[7] = packed_leader_elbow;
-    prim[8] = (limb_row_y << 0x10) | 216;
-    leader_line_ordering_table[-1] = (LegacyGpu_Handle(prim));
-    prim += 9;
-    Render_frameScratch.primitiveCursor = prim;
-}
-
-// decomp: MENU4.PRG _renderStatusIcons (src/MENU/MENU4.PRG/120.c:913)
-void Menu_Status_DrawStatusEffectIcons(Battle_ActorStats* actor, int animationStep)
-{
-    int i;
-
-    u_int flags = VS::Battle::LiveStatusIconFlags(actor);
-    int statusCount = 0;
-
-    for (i = 0; i < 32; ++i) {
-
-        int column = statusCount & 7;
-
-        if ((flags >> i) & 1) {
-            int x;
-            int y;
-            int new_var = 16;
-            int row = statusCount >> 3;
-            ++statusCount;
-            column *= 16;
-            x = column - (animationStep - new_var);
-            y = ((row * new_var) + 144) << new_var;
-
-            if (i >= new_var) {
-                // Element indicator
-                VS::Render::QueueLiveSpriteWithTexturePage(
-                    128, ((x + 8) & 0xFFFF) | y, vs_getWH(8, 8), (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 8))[4] =
-                    ((((i & 3) * 8) + 0x3068) | (getClut(1008, 223) << 16));
-            }
-
-            // Nasty match hack
-            actor = (Battle_ActorStats*)VS::Render::QueueLiveSpriteWithTexturePage(
-                128, (x & 0xFFFF) | y, vs_getWH(16, 16), (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 8));
-
-            // 0x0F0F906A = Flags for toggling the icon palette
-            ((u_long*)actor)[4] =
-                (Battle_statusIconTexOffsets[i]
-                    | (((0x0F0F906A >> i) & 1) ? (getClut(912, 223) << 16)
-                                               : (getClut(896, 223) << 16)));
-            // 0x37F90000 : 0x37F80000
-        }
-    }
-}
-
-// decomp: MENU4.PRG _navigateStatusModifiers (src/MENU/MENU4.PRG/120.c:961)
-int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_active)
-{
-    static char Menu_Status_navigateStatusEffectsActiveStatusModifiers[32];
-    static u_char Menu_Status_navigateStatusEffectsSelectedStatusModifier;
-    static u_char Menu_Status_navigateStatusEffectsStatusModifierCount;
-    static char Menu_Status_navigateStatusEffectsLayoutPadding[2] __attribute__((unused));
-    static Battle_ActorStats* Menu_Status_navigateStatusEffectsStatusModifersCurrentTarget;
-
-    int yPos;
-    int xPos;
-
-    if (actor != NULL) {
-
-        xPos = VS::Battle::LiveStatusIconFlags(actor);
-
-        if (xPos == 0) {
-            return 1;
-        }
-
-        Menu_Status_navigateStatusEffectsStatusModifersCurrentTarget = actor;
-        Menu_Status_navigateStatusEffectsStatusModifierCount = 0;
-
-        for (yPos = 0; yPos < 32; ++yPos) {
-            if ((xPos >> yPos) & 1) {
-                Menu_Status_navigateStatusEffectsActiveStatusModifiers[Menu_Status_navigateStatusEffectsStatusModifierCount++] = yPos;
-            }
-        }
-
-        if (selection_active == 0) {
-            if (Menu_Status_navigateStatusEffectsSelectedStatusModifier >= Menu_Status_navigateStatusEffectsStatusModifierCount) {
-                Menu_Status_navigateStatusEffectsSelectedStatusModifier = Menu_Status_navigateStatusEffectsStatusModifierCount - 1;
-            }
-        } else if (Menu_Status_selectedElement == 11) {
-            Menu_Status_navigateStatusEffectsSelectedStatusModifier = 0;
-        } else {
-            if (Menu_Status_navigateStatusEffectsStatusModifierCount < 8) {
-                Menu_Status_navigateStatusEffectsSelectedStatusModifier = Menu_Status_navigateStatusEffectsStatusModifierCount - 1;
-            } else {
-                Menu_Status_navigateStatusEffectsSelectedStatusModifier = 7;
-            }
-        }
-
-    } else {
-
-        selection_active = 1;
-
-        if (Input_buttonsPressed.allButtons & PADRup) {
-            return 2;
-        }
-
-        if (Input_buttonsPressed.allButtons & PADRdown) {
-            return 3;
-        }
-
-        if (Input_buttonsState & PADRleft) {
-
-            xPos = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickX);
-            yPos = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickY);
-
-            if (xPos == 0) {
-                if (yPos == 0) {
-                    if (Input_buttonsState & PADLup) {
-                        yPos = -64;
-                    }
-                    if (Input_buttonsState & PADLdown) {
-                        yPos = 64;
-                    }
-                    if (Input_buttonsState & PADLleft) {
-                        xPos = -64;
-                    }
-                    if (Input_buttonsState & PADLright) {
-                        xPos = 64;
-                    }
-                }
-            }
-
-            Menu_Status_xPos += xPos;
-            Menu_Status_yPos -= yPos;
-
-            if (Menu_Status_yPos < 0) {
-                Menu_Status_yPos = 0;
-            }
-
-            if (Menu_Status_yPos > 896) {
-                Menu_Status_yPos = 896;
-            }
-
-            return 0;
-        }
-
-        yPos = Menu_Status_navigateStatusEffectsSelectedStatusModifier;
-
-        if (Input_buttonRepeat & PADLup) {
-            if (yPos < 8) {
-                VS::Menu::PlayChangeSound();
-                Menu_Status_selectedElement = 11;
-                return 1;
-            }
-            yPos -= 8;
-        }
-
-        if (Input_buttonRepeat & PADLdown) {
-            if ((Menu_Status_navigateStatusEffectsStatusModifierCount >= 8) && (yPos < 8)) {
-                yPos += 8;
-                if (yPos >= Menu_Status_navigateStatusEffectsStatusModifierCount) {
-                    yPos = Menu_Status_navigateStatusEffectsStatusModifierCount - 1;
-                }
-            }
-        }
-
-        if (Input_buttonRepeat & PADLleft) {
-            if (yPos & 7) {
-                --yPos;
-            }
-        }
-
-        if (Input_buttonRepeat & PADLright) {
-
-            if (((yPos & 7) == 7) || (yPos == Menu_Status_navigateStatusEffectsStatusModifierCount - 1)) {
-                VS::Menu::PlayChangeSound();
-                Menu_Status_selectedElement = 6;
-                return 1;
-            }
-
-            if (++yPos >= Menu_Status_navigateStatusEffectsStatusModifierCount) {
-                yPos = Menu_Status_navigateStatusEffectsStatusModifierCount - 1;
-            }
-        }
-
-        if (yPos != Menu_Status_navigateStatusEffectsSelectedStatusModifier) {
-            VS::Menu::PlayChangeSound();
-            Menu_Status_navigateStatusEffectsSelectedStatusModifier = yPos;
-        }
-    }
-
-    VS::Menu::Framework::SetLiveInformationMessage((
-        char*)&Menu_Status_statusStrings[Menu_Status_statusStrings[Menu_Status_navigateStatusEffectsActiveStatusModifiers[Menu_Status_navigateStatusEffectsSelectedStatusModifier]
-                                             + Text_Menu4_status_Index_strDown]]);
-
-    if (selection_active != 0) {
-        Menu_Status_navigateStatusEffectsAnimationState = VS::Menu::Framework::DrawLiveCursor(
-            Menu_Status_navigateStatusEffectsAnimationState, (((Menu_Status_navigateStatusEffectsSelectedStatusModifier & 7) * 16) + 2)
-                                | ((((Menu_Status_navigateStatusEffectsSelectedStatusModifier >> 3) * 16) + 136) << 0x10));
-        Menu_Framework_cursorColor = 1;
-    }
-
-    return 0;
-}
-
-// decomp: MENU4.PRG _renderLimbUi (src/MENU/MENU4.PRG/120.c:1146)
-int Menu_Status_UpdateLimbPanel(int init)
-{
-    static char Menu_Status_limbPanelLayoutPadding[8] __attribute__((unused));
-
-    int lineXy[2];
-    Battle_ActorStats* actor;
-    Battle_LimbStats* limb;
-    int limbCount;
-    int highlighted_limb_index;
-    int highlight_dimming_shift;
-    int panel_dimming_shift;
-    int limbStatus;
-    int i;
-    int step;
-
-    actor = Battle_actors[Menu_Status_limbPanelActor]->stats;
-    limbCount = VS::Menu::Status::LiveLimbCount(Menu_Status_limbPanelActor);
-
-    if (init != 0) {
-        if (init > 0) {
-            Menu_Framework_menuMemory.opaque51[49] = init - 1;
-            return 0;
-        }
-
-        if (init == -3) {
-            return Menu_Status_limbPanelState;
-        }
-
-        if (init == -2) {
-            Menu_Status_limbPanelState = 3;
-        } else {
-            Menu_Status_limbPanelActor = Menu_Status_selectedActor - 1;
-            VS::Menu::Framework::SetLiveActorComparisonStats(Menu_Status_limbPanelActor);
-            for (i = 0; i < 6; ++i) {
-                Menu_Status_limbPanelLimbAnimSteps[i] = 12 + i;
-            }
-            Menu_Status_limbPanelState = 1;
-        }
-
-        return 0;
-    }
-
-    switch (Menu_Status_limbPanelState) {
-    case Menu_Status_LimbUiMode_None:
-        break;
-
-    case Menu_Status_LimbUiMode_Init:
-        Menu_Status_DrawStatusEffectIcons(actor, Menu_Framework_rowAnimationSteps[Menu_Status_limbPanelLimbAnimSteps[0]]);
-
-        for (i = 0; i < limbCount; ++i) {
-
-            limb = &actor->limbs[i];
-            step = Menu_Status_limbPanelLimbAnimSteps[i];
-
-            VS::Render::DrawLiveCompactText(Battle_limbNames[limb->nameIndex],
-                (Menu_Framework_rowAnimationSteps[step] + 216) | ((34 + i * 16) << 16), NULL);
-
-            limbStatus = VS::Battle::LiveLimbCondition(limb);
-
-            Menu_Status_DrawLimbConditionIndicator(limbStatus,
-                (Menu_Framework_rowAnimationSteps[step] + 216) | ((36 + i * 16) << 16), 0);
-            VS::Render::DrawLiveCompactText(Menu_Status_limbStatuses[limbStatus],
-                (Menu_Framework_rowAnimationSteps[step] + 224) | ((34 + i * 16) << 16), 0);
-
-            if (step < 8) {
-                VS::Actors::ProjectLiveActorBone(1, limb->anchorBone, lineXy, 0);
-                Menu_Status_DrawLimbLeaderLine(i, lineXy[0], 8 - step, 0);
-            }
-
-            limbStatus = 0;
-
-            if (step != 0) {
-                Menu_Status_limbPanelLimbAnimSteps[i] = step - 1;
-            } else {
-                limbStatus = 1;
-            }
-        }
-
-        if (limbStatus != 0) {
-            Menu_Status_limbPanelState = 2;
-        }
-
-        break;
-
-    case 2:
-        Menu_Status_DrawStatusEffectIcons(actor, 0);
-
-        step = Menu_Framework_menuMemory.opaque51[49];
-
-        for (i = 0; i < limbCount; ++i) {
-
-            limb = &actor->limbs[i];
-            panel_dimming_shift = step >> 7;
-            highlighted_limb_index = step - 128;
-            highlight_dimming_shift = panel_dimming_shift - 1;
-
-            VS::Render::DrawLiveCompactTextColor(Battle_limbNames[limb->nameIndex],
-                216 | ((34 + i * 16) << 16),
-                i == highlighted_limb_index ? vs_getRGB888(128, 128, 128) >> highlight_dimming_shift
-                          : vs_getRGB888(128, 128, 128) >> panel_dimming_shift,
-                0);
-
-            limbStatus = VS::Battle::LiveLimbCondition(limb);
-
-            Menu_Status_DrawLimbConditionIndicator(
-                limbStatus, (0x24 + i * 0x10) * 0x10000 | 0xD8, panel_dimming_shift - (i == highlighted_limb_index));
-            VS::Render::DrawLiveCompactTextColor(Menu_Status_limbStatuses[limbStatus],
-                224 | ((34 + i * 16) << 16),
-                i == highlighted_limb_index ? vs_getRGB888(128, 128, 128) >> highlight_dimming_shift
-                          : vs_getRGB888(128, 128, 128) >> panel_dimming_shift,
-                0);
-
-            VS::Actors::ProjectLiveActorBone(1, limb->anchorBone, lineXy, 0);
-
-            if (!(step & 0x80) && ((Menu_Status_fadeScreen | Menu_Status_drawBackgroundFirst) == 0)) {
-                Menu_Status_DrawLimbLeaderLine(i, lineXy[0], 8, i == step);
-            }
-        }
-        break;
-
-    case 3:
-        Menu_Status_DrawStatusEffectIcons(actor, Menu_Status_limbPanelLimbAnimSteps[0] << 5);
-
-        for (i = 0; i < limbCount; ++i) {
-            if (Menu_Status_limbPanelLimbAnimSteps[i] < 8) {
-
-                limb = &actor->limbs[i];
-                ++Menu_Status_limbPanelLimbAnimSteps[i];
-
-                VS::Render::DrawLiveCompactText(Battle_limbNames[limb->nameIndex],
-                    ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 216) | ((34 + i * 16) << 16), 0);
-
-                limbStatus = VS::Battle::LiveLimbCondition(limb);
-
-                Menu_Status_DrawLimbConditionIndicator(limbStatus,
-                    ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 216) | ((36 + i * 16) << 16), 0);
-                VS::Render::DrawLiveCompactText(Menu_Status_limbStatuses[limbStatus],
-                    ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 224) | ((34 + i * 16) << 16), 0);
-            } else {
-                Menu_Status_limbPanelState = 0;
-            }
-        }
-        break;
-    }
-    return 0;
-}
 
 // decomp: MENU4.PRG _fadeScreenLeft (src/MENU/MENU4.PRG/120.c:2081)
 void Menu_Status_DrawModelSlideFade(void)
@@ -663,41 +243,8 @@ void Menu_Status_DrawFrame(void)
 
     Menu_Status_DrawBackground();
     Menu_Status_DrawModelSlideFade();
-    Menu_Status_UpdateLimbPanel(0);
+    VS::Menu::Status::LiveUpdateLimbPanel(0);
     VS::Menu::Status::LiveDrawVitals();
-}
-
-// decomp: MENU4.PRG _renderSelectedLimbCondition (src/MENU/MENU4.PRG/120.c:2228)
-void Menu_Status_ShowSelectedLimbCondition(void)
-{
-    Battle_LimbStats* limb =
-        &Battle_actors[Menu_Status_selectedActor - 1]->stats->limbs[Menu_Status_selectedElement];
-    Battle_stringContext.strings[0] =
-        (char*)&Battle_statusStrings[Battle_statusStrings[limb->nameIndex]];
-    Battle_stringContext.strings[1] =
-        (char*)&Menu_Status_statusStrings[Menu_Status_statusStrings[VS::Battle::LiveLimbCondition(limb)
-                                              + Text_Menu4_status_Index_critical]];
-    VS::Render::FormatLiveEncodedText(
-        Menu_Framework_stringBuf, (char*)&Menu_Status_statusStrings[Text_Menu4_status_Offset_values]);
-    VS::Menu::Framework::SetLiveInformationMessage(Menu_Framework_stringBuf);
-    Menu_Status_UpdateLimbPanel(Menu_Status_selectedElement + 1);
-}
-
-// decomp: MENU4.PRG _renderSelectedLimbStats (src/MENU/MENU4.PRG/120.c:2246)
-void Menu_Status_PopulateSelectedLimbDefense(void)
-{
-    int i;
-    Battle_LimbStats* limb =
-        &Battle_actors[Menu_Status_selectedActor - 1]->stats->limbs[Menu_Status_selectedElement];
-
-    for (i = 0; i < 16; ++i) {
-        Menu_Framework_equipmentStats[i + 16] = limb->affinities[i & 7];
-    }
-    for (i = 0; i < 4; ++i) {
-        Menu_Framework_equipmentStats[i + 32] = limb->types[i];
-    }
-
-    Menu_Status_UpdateLimbPanel(Menu_Status_selectedElement + 0x81);
 }
 
 // decomp: MENU4.PRG vs_menu4_exec (src/MENU/MENU4.PRG/120.c:2270)
@@ -785,7 +332,7 @@ int Menu_Status_Update(u_char* state)
             Menu_Status_selectedElement = 0;
             Menu_Framework_enabledStatPages = 0;
 
-            Menu_Status_ShowSelectedLimbCondition();
+            VS::Menu::Status::LiveShowSelectedLimbCondition();
 
             *state = 5;
         }
@@ -796,12 +343,12 @@ int Menu_Status_Update(u_char* state)
 
             --Menu_Status_updateAnimWait;
 
-            Menu_Status_UpdateLimbPanel(-1);
+            VS::Menu::Status::LiveUpdateLimbPanel(-1);
             VS::Menu::Framework::UpdateLivePrimaryStatPanel(1);
 
         } else {
 
-            Menu_Status_ShowSelectedLimbCondition();
+            VS::Menu::Status::LiveShowSelectedLimbCondition();
 
             *state = 5;
         }
@@ -822,7 +369,7 @@ int Menu_Status_Update(u_char* state)
 
                 Menu_Status_updateAnimWait = 0;
 
-                Menu_Status_UpdateLimbPanel(-1);
+                VS::Menu::Status::LiveUpdateLimbPanel(-1);
                 VS::Menu::Framework::UpdateLivePrimaryStatPanel(1);
 
                 userInput = Menu_Status_selectedElement;
@@ -833,14 +380,14 @@ int Menu_Status_Update(u_char* state)
                         Menu_Status_selectedElement = limbs;
                     }
 
-                    Menu_Status_ShowSelectedLimbCondition();
+                    VS::Menu::Status::LiveShowSelectedLimbCondition();
                 } else {
                     VS::Menu::Framework::SetLiveInformationMessage((char*)&Menu_Status_statusStrings
                             [Menu_Status_statusStrings[userInput - Text_Menu4_status_Index_statDesc]]);
                 }
             }
         } else if (VS::Menu::Framework::LoadLiveItemText(0) != 0) {
-            if (Menu_Status_UpdateLimbPanel(-3) == 2) {
+            if (VS::Menu::Status::LiveUpdateLimbPanel(-3) == 2) {
                 if (Input_buttonsPressed.allButtons & PADRup) {
 
                     VS::Menu::PlayLeaveSound();
@@ -861,7 +408,7 @@ int Menu_Status_Update(u_char* state)
 
                     VS::Menu::PlaySelectSound();
                     VS::Menu::Framework::UpdateLivePrimaryStatPanel(2);
-                    Menu_Status_UpdateLimbPanel(-2);
+                    VS::Menu::Status::LiveUpdateLimbPanel(-2);
 
                     Menu_Status_updateAnimWait = 8;
                     *state = Menu_Status_StatusMenuState_ViewEquipment;
@@ -879,7 +426,7 @@ int Menu_Status_Update(u_char* state)
                     if (limb_status_available != 0) {
 
                         VS::Menu::PlaySelectSound();
-                        Menu_Status_PopulateSelectedLimbDefense();
+                        VS::Menu::Status::LivePopulateSelectedLimbDefense();
                         VS::Menu::Framework::UpdateLiveEquipmentStatPages(6);
 
                         Menu_Status_selectedStatRow = 0;
@@ -941,10 +488,10 @@ int Menu_Status_Update(u_char* state)
 
                     userInput &= 0xFF;
 
-                    Menu_Status_UpdateLimbPanel(7);
+                    VS::Menu::Status::LiveUpdateLimbPanel(7);
 
                     if (userInput == 13) {
-                        if (Menu_Status_NavigateStatusEffects(
+                        if (VS::Menu::Status::LiveNavigateStatusEffects(
                                 Battle_actors[Menu_Status_selectedActor - 1]->stats, 1)
                             == 0) {
                             VS::Menu::PlayChangeSound();
@@ -959,7 +506,7 @@ int Menu_Status_Update(u_char* state)
                         limbs = VS::Menu::Status::LiveLimbCount(Menu_Status_selectedActor - 1);
 
                         if (userInput < limbs) {
-                            Menu_Status_UpdateLimbPanel(userInput + 1);
+                            VS::Menu::Status::LiveUpdateLimbPanel(userInput + 1);
                         } else {
                             userInput = 6;
                             if (!(Input_buttonRepeat & PADLdown)) {
@@ -986,7 +533,7 @@ int Menu_Status_Update(u_char* state)
                     }
 
                     if (userInput < 6) {
-                        Menu_Status_ShowSelectedLimbCondition();
+                        VS::Menu::Status::LiveShowSelectedLimbCondition();
                     } else {
                         VS::Menu::Framework::SetLiveInformationMessage((char*)&Menu_Status_statusStrings
                                 [Menu_Status_statusStrings[userInput - Text_Menu4_status_Index_statDesc]]);
@@ -1009,7 +556,7 @@ int Menu_Status_Update(u_char* state)
 
                 Menu_Status_previousActor = Menu_Status_selectedActor;
 
-                Menu_Status_UpdateLimbPanel(-2);
+                VS::Menu::Status::LiveUpdateLimbPanel(-2);
                 VS::Menu::Framework::UpdateLivePrimaryStatPanel(2);
                 VS::Menu::Status::LiveBeginVitalsTransition(userInput);
                 VS::Menu::Status::LiveAnimateActorSwitch(userInput + limbs);
@@ -1035,17 +582,17 @@ int Menu_Status_Update(u_char* state)
             Menu_Status_updateScreenEnabled = 1;
             if (preview_ready) {
 
-                Menu_Status_NavigateStatusEffects(Battle_actors[Menu_Status_selectedActor - 1]->stats, 0);
+                VS::Menu::Status::LiveNavigateStatusEffects(Battle_actors[Menu_Status_selectedActor - 1]->stats, 0);
 
                 Menu_Status_updateAnimWait = 0;
 
-                Menu_Status_UpdateLimbPanel(-1);
+                VS::Menu::Status::LiveUpdateLimbPanel(-1);
                 VS::Menu::Framework::UpdateLivePrimaryStatPanel(1);
             }
         } else {
-            if (Menu_Status_UpdateLimbPanel(-3) == 2) {
+            if (VS::Menu::Status::LiveUpdateLimbPanel(-3) == 2) {
 
-                userInput = Menu_Status_NavigateStatusEffects(0, 1);
+                userInput = VS::Menu::Status::LiveNavigateStatusEffects(0, 1);
 
                 if (userInput != 0) {
                     switch (userInput) {
@@ -1080,7 +627,7 @@ int Menu_Status_Update(u_char* state)
 
                 Menu_Status_previousActor = Menu_Status_selectedActor;
 
-                Menu_Status_UpdateLimbPanel(-2);
+                VS::Menu::Status::LiveUpdateLimbPanel(-2);
                 VS::Menu::Framework::UpdateLivePrimaryStatPanel(2);
                 VS::Menu::Status::LiveBeginVitalsTransition(userInput);
                 VS::Menu::Status::LiveAnimateActorSwitch(userInput + limbs);
@@ -1156,7 +703,7 @@ int Menu_Status_Update(u_char* state)
 
                     Menu_Status_selectedElement = userInput;
 
-                    Menu_Status_PopulateSelectedLimbDefense();
+                    VS::Menu::Status::LivePopulateSelectedLimbDefense();
                 }
             }
 
@@ -1201,7 +748,7 @@ int Menu_Status_Update(u_char* state)
         if (Menu_Status_updateAnimWait != 0) {
             Menu_Status_animationStep = Menu_Framework_rowAnimationSteps[--Menu_Status_updateAnimWait];
         } else {
-            Menu_Status_UpdateLimbPanel(Menu_Status_selectedElement + 1);
+            VS::Menu::Status::LiveUpdateLimbPanel(Menu_Status_selectedElement + 1);
             *state = 5;
         }
         break;
@@ -1209,8 +756,8 @@ int Menu_Status_Update(u_char* state)
     case Menu_Status_StatusMenuState_WaitQuitToMenu:
     case Menu_Status_StatusMenuState_WaitQuitToBattle:
         VS::Menu::Framework::UpdateLivePrimaryStatPanel(2);
-        Menu_Status_UpdateLimbPanel(-2);
-        Menu_Status_UpdateLimbPanel(0);
+        VS::Menu::Status::LiveUpdateLimbPanel(-2);
+        VS::Menu::Status::LiveUpdateLimbPanel(0);
         VS::Menu::Status::LiveBeginVitalsTransition(0);
         VS::Menu::Status::LiveDrawVitals();
         VS::Render::SetLiveCameraProjectionDistance(Menu_Status_savedProjectionDistance);
@@ -1231,7 +778,7 @@ int Menu_Status_Update(u_char* state)
         break;
 
     case Menu_Status_StatusMenuState_QuitToMenu:
-        Menu_Status_UpdateLimbPanel(0);
+        VS::Menu::Status::LiveUpdateLimbPanel(0);
         VS::Menu::Status::LiveDrawVitals();
         VS::Menu::Framework::SetLiveBackgroundFade(0);
         VS::Menu::Framework::DismissLiveInformationBox();
@@ -1247,7 +794,7 @@ int Menu_Status_Update(u_char* state)
         break;
 
     case Menu_Status_StatusMenuState_QuitToBattle:
-        Menu_Status_UpdateLimbPanel(0);
+        VS::Menu::Status::LiveUpdateLimbPanel(0);
         VS::Menu::Status::LiveDrawVitals();
         VS::Menu::Framework::SetLiveBackgroundFade(0);
         VS::Menu::Framework::DismissLiveInformationBox();
@@ -1343,22 +890,6 @@ void Menu_Status_ActorStatus_ResetMenu4Statics(void)
     {
         static const int initial = 0;
         memcpy((void*)&Menu_Status_yPos, &initial, sizeof Menu_Status_yPos);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Status_navigateStatusEffectsAnimationState, &initial, sizeof Menu_Status_navigateStatusEffectsAnimationState);
-    }
-    {
-        static const int initial[6] = {};
-        memcpy((void*)&Menu_Status_limbPanelLimbAnimSteps, &initial, sizeof Menu_Status_limbPanelLimbAnimSteps);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Status_limbPanelState, &initial, sizeof Menu_Status_limbPanelState);
-    }
-    {
-        static const u_char initial = 0;
-        memcpy((void*)&Menu_Status_limbPanelActor, &initial, sizeof Menu_Status_limbPanelActor);
     }
     {
         static const int initial = 0;

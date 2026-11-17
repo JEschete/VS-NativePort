@@ -10,6 +10,7 @@ extern "C++" {
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -519,10 +520,14 @@ int CheckStatusPacketLinks(int background_first) {
   Render_frameScratch.orderingTable = ordering + 18;
   Render_frameScratch.overlayOrderingTable = ordering + 2;
   Menu_Status_drawBackgroundFirst = background_first;
+  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  void* const saved_table = Render_legacyOrderingTables[Render_frameBuf & 1];
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage + 1;
+  Render_legacyOrderingTables[Render_frameBuf & 1] = ordering;
 
   Menu_Status_DrawBackground();
-  Menu_Status_DrawLimbConditionIndicator(0, 0, 0);
-  Menu_Status_DrawLimbLeaderLine(0, 0, 0, 0);
+  VS::Menu::Status::LiveDrawLimbConditionIndicator(0, 0, 0);
+  VS::Menu::Status::LiveDrawLimbLeaderLine(0, 0, 0, 0);
 
   int count = 0;
   void* packet = ordering + kOrderingWords - 1;
@@ -536,6 +541,8 @@ int CheckStatusPacketLinks(int background_first) {
       Render_frameScratch.primitiveCursor == storage + 1 + kWrittenWords &&
       storage[0] == guard && storage[1 + kWrittenWords] == guard;
   Menu_Status_drawBackgroundFirst = saved_background;
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
+  Render_legacyOrderingTables[Render_frameBuf & 1] = saved_table;
   Render_frameScratch = saved_frame;
   return passed;
 }

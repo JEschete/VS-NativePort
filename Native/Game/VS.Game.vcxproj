@@ -2125,6 +2125,10 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Menu\Status\EquipmentStats.cpp" />
+    <ClCompile Include="src\Menu\Status\LimbControllers.cpp" />
+    <ClCompile Include="src\Menu\Status\LimbControllersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\TextBox.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -3071,6 +3075,8 @@
     <ClInclude Include="include\Menu\Status\ComponentDescriptions.hpp" />
     <ClInclude Include="include\Menu\Status\ComponentDescriptionsLive.hpp" />
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp" />
+    <ClInclude Include="include\Menu\Status\LimbControllers.hpp" />
+    <ClInclude Include="include\Menu\Status\LimbControllersLive.hpp" />
     <ClInclude Include="include\Menu\TextBoxFrames.hpp" />
     <ClInclude Include="include\Menu\TextBoxFramesLive.hpp" />
     <ClInclude Include="include\Menu\TextBoxState.hpp" />

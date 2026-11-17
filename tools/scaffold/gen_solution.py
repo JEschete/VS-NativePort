@@ -362,6 +362,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\MapMarkersLive.cpp",
                 r"src\Menu\Status\ActorSwitchingLive.cpp",
                 r"src\Menu\Status\ComponentDescriptionsLive.cpp",
+                r"src\Menu\Status\LimbControllersLive.cpp",
                 r"src\Menu\MapDrawingLive.cpp",
                 r"src\Effects\ParticleMotionLive.cpp",
                 r"src\Effects\ParticleTextureAnimationLive.cpp",

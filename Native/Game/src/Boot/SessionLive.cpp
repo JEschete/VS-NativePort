@@ -27,6 +27,7 @@
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
+#include "Menu/Status/LimbControllersLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/GameClockLive.hpp"
@@ -87,6 +88,7 @@ class LiveSessionHost final : public SessionHost {
     Menu::Inventory::ResetInventoryTerminalSession();
     Menu::Magic::ResetMagicMenusLiveState();
     Menu::Magic::ResetTeleportMenuLiveState();
+    Menu::Status::ResetLiveLimbControllersModuleData();
     Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }

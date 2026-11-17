@@ -12,6 +12,7 @@
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
+#include "Menu/Status/LimbControllersLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
@@ -58,6 +59,7 @@ void Boot_ResetMenu4Statics(void)
     Menu_Status_ActorStatus_ResetMenu4Statics();
     Menu_Status_EquipmentDetails_ResetMenu4Statics();
     VS::Menu::Status::ResetLiveActorSwitchPhase();
+    VS::Menu::Status::ResetLiveLimbControllersModuleData();
 }
 
 // Call where the original loads MENU5.PRG: restores the statics its reload re-read from the disc.

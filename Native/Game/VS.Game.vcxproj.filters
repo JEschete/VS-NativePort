@@ -3015,6 +3015,12 @@
     <ClCompile Include="src\Menu\Status\EquipmentStats.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Status\LimbControllers.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\LimbControllersLive.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\TextBox.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -4723,6 +4729,12 @@
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\LimbControllers.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\LimbControllersLive.hpp">
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\TextBoxFrames.hpp">

@@ -153,6 +153,7 @@
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
+#include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
@@ -2313,6 +2314,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU4.PRG", 0x801033A4u, 0u, (void*)&VS::Menu::Status::LiveArmorDescription, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x801033D4u, 0u, (void*)&VS::Menu::Status::LiveAccessoryDescription, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x8010341Cu, 0u, (void*)&VS::Menu::Status::IsLiveDetailElementSelectable, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103E58u, 0u, (void*)&VS::Menu::Status::LiveDrawLimbConditionIndicator, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103EF8u, 0u, (void*)&VS::Menu::Status::LiveDrawLimbLeaderLine, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80103FECu, 0u, (void*)&VS::Menu::Status::LiveDrawStatusEffectIcons, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80104134u, 0u, (void*)&VS::Menu::Status::LiveNavigateStatusEffects, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x801045B8u, 0u, (void*)&VS::Menu::Status::LiveUpdateLimbPanel, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80106308u, 0u, (void*)&VS::Menu::Status::LiveShowSelectedLimbCondition, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x801063F8u, 0u, (void*)&VS::Menu::Status::LivePopulateSelectedLimbDefense, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80107FBCu, 0u, (void*)&VS::Menu::Score::LoadLiveEnemyPreview, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80108098u, 0u, (void*)&VS::Menu::Score::FreeLiveEnemyPreview, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x801080C8u, 0u, (void*)&VS::Menu::Score::InitializeLiveAshleyPreviewPose, 0u, 0u, 0u},
