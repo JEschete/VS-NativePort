@@ -16,6 +16,7 @@
 #include "Core/Log.hpp"
 #include "Field/MinimapScene.hpp"
 #include "Menu/MapNavigation.hpp"
+#include "Menu/MapSceneStorageLive.hpp"
 
 extern "C" {
 #include "Battle/StatusEffects.h"
@@ -83,6 +84,7 @@ void Write(std::span<std::byte> bytes, std::size_t offset, T value) {
     const void* scene) {
   if (scene == nullptr) return std::nullopt;
   if (scene == Battle_unusedSceneBuffer) {
+    if (const auto loaded = BoundLiveMapScene(scene)) return loaded;
     if (Menu_Map_currentScene < 0 ||
         Menu_Map_currentScene >= kSceneArmFileCount) {
       return std::nullopt;

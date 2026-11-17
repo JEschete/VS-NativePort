@@ -30,16 +30,16 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 0 | 0 | 767 | 0 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 0 | 6 | 686 | 638 | 5 | 0 |
+| 34: #60 Menu screens and workspaces | 0 | 0 | 0 | 643 | 0 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 0 | 7 | 803 | 3727 | 5 | 0 |
+| **Total** | 0 | 1 | 117 | 3732 | 0 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,725 |
-| todo | 7 |
+| done | 3,731 |
+| todo | 1 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (2 active, 52 done); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 53 done); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -94,7 +94,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
 | 50 | menu-results-score | done | - | 6 | 0 | 0 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
-| 52 | menu-map-manual-text | active | - | 4 | 6 | 686 |
+| 52 | menu-map-manual-text | done | - | 4 | 0 | 0 |
 | 53 | title | done | self | 4 | 0 | 0 |
 | 54 | ending | done | self | 5 | 0 | 0 |
 
@@ -102,9 +102,9 @@ architecture changes rather than per-function work, so this ledger is what track
 | --- | ---: | ---: |
 | Called from generated code | 0 | 0 |
 | Referenced by the original-address module table | 0 | 1 |
-| Calls an SDK shim | 0 | 4 |
-| Signature uses SDK integer types or `void*` | 0 | 1 |
-| Compiled with relaxed settings | 0 | 7 |
+| Calls an SDK shim | 0 | 0 |
+| Signature uses SDK integer types or `void*` | 0 | 0 |
+| Compiled with relaxed settings | 0 | 1 |
 
 Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 

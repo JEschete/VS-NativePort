@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <span>
 
 #include "Core/Log.hpp"
@@ -12,6 +13,7 @@
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
+#include "Menu/MapTerminalLive.hpp"
 
 extern "C" {
 #include "Battle/Feedback.h"
@@ -260,6 +262,10 @@ void LiveHidePrimaryRoomGeometry() {
 }
 
 void LiveInitializeRoomRuntimeState() {
+  if (!Menu::map::DrainMapTerminalLive()) {
+    VS_LOG_ERROR(kChannel, "map cleanup refused before room runtime reset");
+    std::abort();
+  }
   LiveRoomRuntimeHost host;
   InitializeRoomRuntimeState(host);
 }

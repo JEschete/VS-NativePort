@@ -27,6 +27,7 @@
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
+#include "Menu/MapTerminalLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
@@ -78,6 +79,10 @@ constexpr std::int16_t kVramWidth = 1024;
 constexpr std::int16_t kVramHeight = 512;
 
 void CleanupMenuOwners() {
+  if (!Menu::map::ResetMapTerminalColdState()) {
+    Core_Errorf("boot", "map cleanup refused before session reset");
+    std::abort();
+  }
   if (!Menu::CleanupLiveSceneNotificationOwnedState()) {
     Core_Errorf("boot",
                 "scene-notification cleanup refused before session reset");

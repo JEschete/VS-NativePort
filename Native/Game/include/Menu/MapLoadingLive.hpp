@@ -11,6 +11,10 @@
 // refused and logged, where the original reads or writes unchecked.
 
 namespace VS::Menu::map {
+struct SceneMapView;
+// Shared by the loader and terminal; callbacks can update the same view.
+[[nodiscard]] SceneMapView ReadLiveMapView();
+void WriteLiveMapView(const SceneMapView& view);
 void LiveConfigureAreaList(int row_count, int current_map, char* menu_text[]);
 int LivePollAreaSelection();
 void LiveShowAreaName(char* map_name, char font_color);
@@ -20,4 +24,10 @@ void LivePollMenuReady();
 int LiveLoadBackground(int begin_background_load);
 int LiveLoadSceneMap();
 int LiveUpdateAreaSelection(int initialize);
+// Cancel writes before freeing their buffers; false retains ownership.
+// Call before a MENU5 reload or heap replacement, not after heap reset.
+[[nodiscard]] bool DrainMapLoadingLive();
+// Requires successful drainage; restores the file-backed chooser/background
+// controllers without touching progression, text or the active scene owner.
+[[nodiscard]] bool ResetMapLoadingModuleData();
 }  // namespace VS::Menu::map

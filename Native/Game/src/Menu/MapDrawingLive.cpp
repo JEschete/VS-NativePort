@@ -18,6 +18,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapMarkersLive.hpp"
+#include "Menu/MapSceneStorageLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -143,6 +144,7 @@ void StoreCompassBounds(const CompassCorners& corners) {
     const void* scene) {
   if (scene == nullptr) return std::nullopt;
   if (scene == Battle_unusedSceneBuffer) {
+    if (const auto loaded = BoundLiveMapScene(scene)) return *loaded;
     if (Menu_Map_currentScene < 0 ||
         Menu_Map_currentScene >= kSceneArmFileCount) {
       return std::nullopt;
@@ -591,4 +593,6 @@ void ResetMapDrawingLive() {
   legend_offset = kHiddenLegendOffset;
   room_workspace = {};
 }
+
+void ResetMapDrawingModuleData() { legend_offset = 0; }
 }  // namespace VS::Menu::map

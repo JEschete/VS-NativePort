@@ -2847,6 +2847,15 @@
     <ClCompile Include="src\Menu\MapNavigationLive.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\MapSceneStorageLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\MapTerminal.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\MapTerminalLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Options.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -4681,6 +4690,15 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\MapNavigationLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MapSceneStorageLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MapTerminal.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MapTerminalLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Options.hpp">

@@ -10,6 +10,7 @@
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
+#include "Menu/MapTerminalLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
@@ -68,6 +69,9 @@ void Boot_ResetMenu4Statics(void)
 // Call where the original loads MENU5.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenu5Statics(void)
 {
+    if (!VS::Menu::map::ResetMapTerminalModuleData()) {
+        std::abort();
+    }
     Menu_Map_ResetMenu5Statics();
 }
 

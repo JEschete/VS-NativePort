@@ -47,6 +47,7 @@
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
+#include "Menu/MapTerminalLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
@@ -1029,7 +1030,7 @@ class LiveHost final : public Host {
       case Submenu::kStatus:
         return Status::LiveUpdateStatusTerminal(bytes);
       case Submenu::kMap:
-        return Menu_Map_UpdateScreen(bytes);
+        return map::LiveUpdateScreen(bytes);
       case Submenu::kData:
         return VS::Menu::Files::UpdateLiveDataMenu(*bytes);
       case Submenu::kOptions:

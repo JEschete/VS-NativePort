@@ -867,6 +867,12 @@
     <ClCompile Include="src\MapRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MapTerminalLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MapTerminalTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MemoryTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

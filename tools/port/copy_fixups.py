@@ -1813,6 +1813,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::map::LiveDrawCompass": r"Native\Game\include\Menu\MapDrawingLive.hpp",
     "VS::Menu::map::LiveComputeCompassCorners": r"Native\Game\include\Menu\MapDrawingLive.hpp",
     "VS::Menu::map::LiveDrawLabels": r"Native\Game\include\Menu\MapDrawingLive.hpp",
+    "VS::Menu::map::LiveDrawFrame": r"Native\Game\include\Menu\MapTerminalLive.hpp",
+    "VS::Menu::map::LiveApplyCamera": r"Native\Game\include\Menu\MapTerminalLive.hpp",
+    "VS::Menu::map::LiveDarkenBackground": r"Native\Game\include\Menu\MapTerminalLive.hpp",
+    "VS::Menu::map::LiveDrawPalingDistortion": r"Native\Game\include\Menu\MapTerminalLive.hpp",
+    "VS::Menu::map::LiveUpdateScreen": r"Native\Game\include\Menu\MapTerminalLive.hpp",
+    "VS::Menu::map::LiveUpdateMapMenu": r"Native\Game\include\Menu\MapTerminalLive.hpp",
     "VS::Menu::Status::LiveBeginVitalsTransition": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveFindNextInspectableActor": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
     "VS::Menu::Status::LiveAnimateActorSwitch": r"Native\Game\include\Menu\Status\ActorSwitchingLive.hpp",
@@ -3390,6 +3396,12 @@ OWNED_CALL_BINDINGS["F02704"] = "VS::Menu::map::LiveDrawControls"
 OWNED_CALL_BINDINGS["F02709"] = "VS::Menu::map::LiveDrawCompass"
 OWNED_CALL_BINDINGS["F02710"] = "VS::Menu::map::LiveComputeCompassCorners"
 OWNED_CALL_BINDINGS["F02713"] = "VS::Menu::map::LiveDrawLabels"
+OWNED_CALL_BINDINGS["F02689"] = "VS::Menu::map::LiveDrawFrame"
+OWNED_CALL_BINDINGS["F02690"] = "VS::Menu::map::LiveApplyCamera"
+OWNED_CALL_BINDINGS["F02699"] = "VS::Menu::map::LiveDarkenBackground"
+OWNED_CALL_BINDINGS["F02702"] = "VS::Menu::map::LiveDrawPalingDistortion"
+OWNED_CALL_BINDINGS["F04149"] = "VS::Menu::map::LiveUpdateScreen"
+OWNED_CALL_BINDINGS["F04151"] = "VS::Menu::map::LiveUpdateMapMenu"
 OWNED_CALL_BINDINGS["F02656"] = "VS::Menu::Status::LiveBeginVitalsTransition"
 OWNED_CALL_BINDINGS["F02657"] = "VS::Menu::Status::LiveFindNextInspectableActor"
 OWNED_CALL_BINDINGS["F02658"] = "VS::Menu::Status::LiveAnimateActorSwitch"
@@ -5487,6 +5499,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU5.PRG", 0x80107B10, "VS::Menu::map::LiveDrawCompass"),  # F02709
     ("MENU/MENU5.PRG", 0x8010800C, "VS::Menu::map::LiveComputeCompassCorners"),  # F02710
     ("MENU/MENU5.PRG", 0x801082A8, "VS::Menu::map::LiveDrawLabels"),  # F02713
+    ("MENU/MENU5.PRG", 0x801042B0, "VS::Menu::map::LiveDrawFrame"),  # F02689
+    ("MENU/MENU5.PRG", 0x80104384, "VS::Menu::map::LiveApplyCamera"),  # F02690
+    ("MENU/MENU5.PRG", 0x8010625C, "VS::Menu::map::LiveDarkenBackground"),  # F02699
+    ("MENU/MENU5.PRG", 0x801066E0, "VS::Menu::map::LiveDrawPalingDistortion"),  # F02702
+    ("MENU/MENU5.PRG", 0x801030F4, "VS::Menu::map::LiveUpdateScreen"),  # F04149
+    ("MENU/MENU5.PRG", 0x80103684, "VS::Menu::map::LiveUpdateMapMenu"),  # F04151
     ("MENU/MENU4.PRG", 0x80103608, "VS::Menu::Status::LiveBeginVitalsTransition"),  # F02656
     ("MENU/MENU4.PRG", 0x80103688, "VS::Menu::Status::LiveFindNextInspectableActor"),  # F02657
     ("MENU/MENU4.PRG", 0x80103744, "VS::Menu::Status::LiveAnimateActorSwitch"),  # F02658
@@ -5630,35 +5648,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "offsetof(Field_GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
     ],
-    "F02699": [
-        ("    u_long* pScratch1;\n    u_long* pScratch2;\n", "",
-         "4D8.c:1788 use native frame fields instead of two32-bit scratch words"),
-        ("    pScratch1 = Core_ScratchAddr(0);\n", "",
-         "native primitive cursor does not need a word-pointer view"),
-        ("sprt = (SPRT*)pScratch1[0];",
-         "sprt = Render_frameScratch.primitiveCursor;",
-         "preserve all pointer bits on the first framebuffer strip"),
-        ("(void*)(pScratch1[1] + 0x7FE * 4)",
-         "(u_long*)Render_frameScratch.orderingTable + 0x7FE",
-         "first framebuffer strip uses the native scene ordering table"),
-        ("*Core_ScratchAddr(0) = (u_long)sprt;",
-         "Render_frameScratch.primitiveCursor = sprt;",
-         "store the complete native cursor after the first strip"),
-        ("sprt = (SPRT*)*Core_ScratchAddr(0);",
-         "sprt = Render_frameScratch.primitiveCursor;",
-         "preserve all pointer bits on the second framebuffer strip"),
-        ("    pScratch2 = Core_ScratchAddr(0);\n", "",
-         "second strip also uses typed native frame fields"),
-        ("(void*)(pScratch2[1] + 0x7FE * 4)",
-         "(u_long*)Render_frameScratch.orderingTable + 0x7FE",
-         "second framebuffer strip uses the native scene ordering table"),
-        ("pScratch2[0] = (uintptr_t)sprt;",
-         "Render_frameScratch.primitiveCursor = sprt;",
-         "do not truncate the second strip cursor through a32-bit lvalue"),
-        ("pScratch2[0] = (u_long)sprt;",
-         "Render_frameScratch.primitiveCursor = sprt;",
-         "do not truncate the second strip cursor through a32-bit lvalue"),
-    ],
     "G00864": [
         ("char Menu_Framework_comparisonStatTotals[8]",
          "short Menu_Framework_comparisonStatTotals[4]",
@@ -5690,17 +5679,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "{ [0] = Core_TextCode_ChunkSize, [98] = Core_TextCode_Terminator,\n"
          "          [99] = Core_TextCode_Terminator, [100] = 0 }",
          "58EC.c:475 pragma vsstring encodes |!0| as F8 00; retain 96-byte payload and both E7 guards"),
-    ],
-    "F04151": [
-        ("VS::Field::ResolveSceneRoomData(Battle_unusedSceneBuffer)",
-         "VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
-         "bound ARM scene decoding to its loaded file extent"),
-        ("VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer)",
-         "VS::Field::RestoreLiveSceneRoomVisits(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
-         "bound the room visit restore to the loaded ARM file extent"),
-        ("*(u_short*)Core_ScratchAddr(22)",
-         "(u_short)Render_frameScratch.camera.angles.vy",
-         "map camera initialization/reset must follow native yaw, not original scratch byte88"),
     ],
     "G00620": [
         (r'"Ashley|>6|Riot\0"',
@@ -6076,9 +6054,7 @@ for _row, _decl, _where in (
     FIXES.setdefault(_row, []).extend(
         ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
 
-FIXUP_VARIANT_COUNTS: dict[str, int] = {
-    "F02699": 9,
-}
+FIXUP_VARIANT_COUNTS: dict[str, int] = {}
 
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
                         "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")
@@ -6928,9 +6904,6 @@ for _row, _fixup in (
         " " * 4, _EVENT_FILE_REQUEST, "arg1", "&Event_eventFileDiscLocation")),
     ("F02503", _refused_disc_request(
         " " * 8, "Menu_Framework_loadItemTextItemNamesCdQueueSlot", "Menu_Framework_itemNames", "&cdFile")),
-    ("F04151", _refused_disc_request(
-        " " * 12, "Menu_Map_sceneCdQueueSlot", "Menu_Map_armFileBuff",
-        "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
 ):
     FIXES.setdefault(_row, []).append(_fixup)
 

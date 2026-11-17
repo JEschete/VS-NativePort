@@ -26,4 +26,7 @@ void LiveDrawLabels();
 // Clears what the original kept in MENU5.PRG statics and the scratchpad:
 // _drawUIControls' slide offset and _renderRoom's projected vertex rows.
 void ResetMapDrawingLive();
+// Ordinary MENU5 reload restores only its file-backed slide offset. The
+// scratch workspace is not part of the overlay image.
+void ResetMapDrawingModuleData();
 }  // namespace VS::Menu::map

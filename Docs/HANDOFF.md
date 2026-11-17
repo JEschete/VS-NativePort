@@ -1,18 +1,19 @@
 # Current Handoff
 
-Updated 2026-11-17. Scene notifications/text-box update
-F01379-F01381/F01392 pass local shared acceptance; publication and exact CI
-are pending. The last accepted Gazette terminal revision is
-`cccdea168034360e6f464edcda774713c18ec6f4`
-(implementation `f0d7cc23b1d3613e251e39377f4934190ec85639`).
-Its exact Source Quality 44102189713 succeeds. The preview-ownership prerequisite
+Updated 2026-11-17. Map terminals F02689/F02690/F02699/F02702/F04149/F04151
+pass the complete shared Debug/Release gate on the worktree based on
+`ba5646edd16adb906bb601c38c4122d99eec62f7`; publication and exact-revision CI
+are pending. Scene notifications/text-box update F01379-F01381/F01392 are accepted in
+`ba5646edd16adb906bb601c38c4122d99eec62f7`.
+[Source Quality 44113400775](https://github.com/JEschete/VS-NativePort/actions/runs/44113400775)
+succeeds at that exact revision; #432 is closed. The preview-ownership prerequisite
 `0a440855871c2b7a49eef73a821316b744c3d8f4` also passed exact CI; #430 is closed.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The locally verified original 900-function cohort has **893 resolved
-(881 promoted, 12 retired) and 7 remaining**. **101 of the requested final
-112** are published and accepted; four more are locally verified but await
-publication/CI. Map6 is next; F00830 remains
+The locally verified original 900-function cohort has **899 resolved
+(887 promoted, 12 retired) and 1 remaining**. **111 of the requested final
+112** pass integrated promotion gates; **105** are published and accepted,
+with the final map six awaiting publication/CI. F00830 remains
 blocked by #296. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
@@ -20,7 +21,7 @@ blocked by #296. See
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 0, 50: 0, 52: 6.
+  48: 0, 50: 0, 52: 0.
   The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -30,6 +31,35 @@ blocked by #296. See
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Map-terminal evidence (`VR-MENU-MAP-TERMINAL`): six original spans pass
+  6,144 vectors, zero mismatches; 58 instruction mutants and six compiled
+  native variants are detected. `group-20261117-113440` passes both builds,
+  9,460 full cases / 12,979,675 assertions and 201 focused cases / 2,857
+  assertions in each configuration, both canonical replays, copier controls,
+  zero-change second generation (`8efdddf7a648e17d`) and tidy (five existing,
+  zero new). Final ledger sync/checks pass; row 52 is 73 promoted, two retired,
+  zero remaining. Evidence: `build\scratch\map-terminal\integration.json`.
+  The original encoded caption comes from bounded DataStore bytes (#425).
+  Both 8192/2048 scene transitions retain the immutable loaded extent while
+  selection changes (#426). Checked MENU5, cold, stopped-frame heap and
+  pre-room-initialization boundaries drain the actual owners before invalidation
+  (#427), including pending/consumed reads, alias loss, foreign ownership and
+  retry. Cancellation uses the shared exact-destination-base contract and
+  retains foreign request generations for their owner; no interval-cancellation
+  change is claimed. Full32 queue fallback, controller reentry, original module
+  entries and the next genuine field draw after ordinary exit pass.
+  Four old-symbol consumer files reduce to zero; 18 obsolete adaptations and
+  the F02699/F04151 fixups retire without lowering copier guard minima.
+  The first shared group `111315` failed two retained menu-asset cases.
+  #433 identifies a false-positive caller test: selector 7 opens Data, not Map;
+  the previous Gazette selector 10 similarly opened Manual. Strengthened
+  controls `112938` fail five assertions across both cases. Correct selectors
+  derive from `Submenu + 1` (Map 6, Gazette 9), and verify seeded map-row reset,
+  owned MAPBG file identity, idle memory-card assets and actual Gazette score/
+  rank recalculation. The full group revalidates these corrections without
+  changing production dispatch or retained asset assertions. #425/#426/#427/
+  #433 remain open until exact pushed CI. No physical-CD, hardware-GPU,
+  interactive-gameplay, data/type or EC-retirement completion is claimed.
 - Text-update evidence (`VR-MENU-TEXT-UPDATE`): four original spans pass
   4,096 vectors, zero mismatches; 86 instruction mutants (256 vectors each)
   and four compiled native variants are detected. Eight existing word-codec
@@ -59,7 +89,7 @@ blocked by #296. See
   group pass. No production guard or baseline was weakened.
   Evidence: `build\scratch\text-update\integration.json`.
   No physical-CD, hardware-GPU, interactive-gameplay, data/type or
-  EC-retirement completion is claimed. #432 stays open until exact pushed CI.
+  EC-retirement completion is claimed. #432 is closed after exact pushed CI.
 - Gazette-terminal evidence (`VR-MENU-GAZETTE-TERMINAL`): eight original
   spans pass 11,264 vectors, zero mismatches; 145 instruction mutants and
   eight compiled native variants are detected. `group-20261117-090220`
@@ -80,11 +110,12 @@ blocked by #296. See
   807 assertions remain. Bounded test helpers fix eleven oversized cases
   without removing assertions; borrowed-MON teardown now validates its
   allocation directly instead of calling a throwing view from a destructor.
-  Actual pre-hook testing fails 24 ownership/counter assertions; the four
-  module/Framework cases already pass. Checked preview-then-MON cleanup
+  Actual pre-hook testing fails 24 ownership/counter assertions. The original
+  module controls pass; the old Framework phase-only assertion was a false
+  positive corrected by #433 in the map group above. Checked preview-then-MON cleanup
   fixes completed MENU9, cold-session and common pre-heap interruption.
-  Nine integration cases cover all eight module entries, actual ordinary
-  Framework dispatch, pending/consumed and combined ZUD/MON cleanup,
+  Nine integration cases cover all eight module entries, pending/consumed
+  and combined ZUD/MON cleanup,
   foreign/reused ownership and controller reentry with observable cursor
   packets. The existing full32 fallback passes twice through genuine
   consumption and reentry. The shared controlled-overlay fixture retains
@@ -615,7 +646,17 @@ blocked by #296. See
 - No interactive combat verification, gameplay completion or compatibility
   retirement is claimed.
 
-Next steps:
+Next steps: publish the verified map-six milestone and confirm exact CI before
+closing #425/#426/#427/#433. Finish #376/#377/#384 with independently rebuilt
+coordinator and isolated indexes, correct/stable type output and the required
+equipment/loot gates. Reconcile the final audit and keep F00830/#296 open unless
+new evidence establishes its climbing-hit contract. Do not begin unrelated
+gameplay work or claim all 112 complete.
+
+### Earlier packet planning (superseded)
+
+The following packet inventory is historical. Use the current status and next
+steps above, not its pending/publication wording, to resume work.
 
 1. Gazette-statistics local gates pass; publish and verify exact-revision CI,
    then integrate the delivered Gazette-terminal and text/map

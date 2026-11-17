@@ -27,6 +27,7 @@ namespace score = VS::Menu::Score;
 namespace fw = VS::Menu::Framework;
 namespace content = VS::Content;
 namespace memory = VS::Core::Memory;
+constexpr int kGazetteScreen = static_cast<int>(fw::Submenu::kScore) + 1;
 
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
@@ -182,17 +183,23 @@ TEST_CASE(
       Menu_Framework_openedWithoutMainMenu, Menu_Framework_actionRestrictions,
       Menu_Framework_submenuStates>
       saved;
-  Menu_Framework_loadedSubMenu = 10;
+  Menu_Framework_loadedSubMenu = kGazetteScreen;
   Menu_Framework_openedWithoutMainMenu = 1;
-  Menu_Framework_menuState.currentMenu = 10;
+  Menu_Framework_menuState.currentMenu = kGazetteScreen;
   Menu_Framework_menuState.loading = 0;
   Menu_Framework_actionRestrictions = 0;
-  Menu_Framework_submenuStates[10] = 3;
-  Menu_Framework_submenuStates[9] = static_cast<char>(0xAA);
-  fw::UpdateLiveMainMenu(10);
-  CHECK(Menu_Framework_submenuStates[10] == 4);
-  CHECK(static_cast<unsigned char>(Menu_Framework_submenuStates[9]) == 0xAA);
+  Menu_Framework_submenuStates[kGazetteScreen] = 3;
+  Menu_Framework_submenuStates[kGazetteScreen - 1] = static_cast<char>(0xAA);
+  Menu_Score_score = 12345;
+  Menu_Score_characterRank = 0xFF;
+  fw::UpdateLiveMainMenu(kGazetteScreen);
+  CHECK(Menu_Framework_submenuStates[kGazetteScreen] == 4);
+  CHECK(static_cast<unsigned char>(
+            Menu_Framework_submenuStates[kGazetteScreen - 1]) == 0xAA);
   CHECK(Menu_Framework_backgroundFadeStep > 0);
+  fw::UpdateLiveMainMenu(kGazetteScreen);
+  CHECK(Menu_Score_score == 0);
+  CHECK(Menu_Score_characterRank == 15);
   CHECK(fixture.GuardsIntact());
 }
 
@@ -209,7 +216,8 @@ TEST_CASE("Only completed MENU9 drains the real pending or consumed MON owner",
     CHECK(Menu_Score_monBinData == owner.buffer);
   }
   {
-    menu_overlay_tests::Load menu(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    menu_overlay_tests::Load menu(kGazetteScreen,
+                                  {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
     REQUIRE(menu.Poll() == 0);
     CHECK(Menu_Score_monBinData == owner.buffer);
     REQUIRE(menu.Complete() == 1);
@@ -263,7 +271,8 @@ void ResetAtBoundary(bool cold) {
     const auto entry = +[] { return 0; };
     REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
   } else {
-    menu_overlay_tests::Load menu(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    menu_overlay_tests::Load menu(kGazetteScreen,
+                                  {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
     REQUIRE(menu.Complete() == 1);
   }
 }

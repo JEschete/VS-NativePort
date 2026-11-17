@@ -354,6 +354,8 @@
     <ClCompile Include="src\MapMarkersTests.cpp" />
     <ClCompile Include="src\MapNavigationTests.cpp" />
     <ClCompile Include="src\MapRenderTests.cpp" />
+    <ClCompile Include="src\MapTerminalLiveTests.cpp" />
+    <ClCompile Include="src\MapTerminalTests.cpp" />
     <ClCompile Include="src\MemoryTests.cpp" />
     <ClCompile Include="src\MenuActorPreviewTests.cpp" />
     <ClCompile Include="src\MenuAssetsTests.cpp" />

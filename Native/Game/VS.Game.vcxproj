@@ -1997,6 +1997,13 @@
     <ClCompile Include="src\Menu\MapNavigationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\MapSceneStorageLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Menu\MapTerminal.cpp" />
+    <ClCompile Include="src\Menu\MapTerminalLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Options.cpp" />
     <ClCompile Include="src\Menu\OptionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -3075,6 +3082,9 @@
     <ClInclude Include="include\Menu\MapMarkersLive.hpp" />
     <ClInclude Include="include\Menu\MapNavigation.hpp" />
     <ClInclude Include="include\Menu\MapNavigationLive.hpp" />
+    <ClInclude Include="include\Menu\MapSceneStorageLive.hpp" />
+    <ClInclude Include="include\Menu\MapTerminal.hpp" />
+    <ClInclude Include="include\Menu\MapTerminalLive.hpp" />
     <ClInclude Include="include\Menu\Options.hpp" />
     <ClInclude Include="include\Menu\OptionsLive.hpp" />
     <ClInclude Include="include\Menu\Rename.hpp" />

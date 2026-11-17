@@ -6,18 +6,6 @@
 typedef struct Menu_Map_CompassBound Menu_Map_CompassBound;
 typedef struct Menu_Map_MapLabel Menu_Map_MapLabel;
 
-// decomp: src/include/insertTPage.h:3
-#define _insertTPage(after, texture_page_mode)                                                              \
-    do {                                                                                        \
-        u_long* ot_ = (u_long*)Render_frameScratch.orderingTable + (after);                    \
-        u_long* p_ = (u_long*)Render_frameScratch.primitiveCursor;                             \
-        p_[1] = 0xE1000200 | ((texture_page_mode) & 0x1FF);                                                 \
-        p_[2] = 0;                                                                             \
-        p_[0] = 0x02000000 | (*ot_ & 0xFFFFFF);                                                \
-        *ot_ = (*ot_ & 0xFF000000) | LegacyGpu_Handle(p_);                                     \
-        Render_frameScratch.primitiveCursor = p_ + 3;                                          \
-    } while (0)
-
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8) (src/MENU/MENU5.PRG/4D8.c:1064)
 struct Menu_Map_CompassBound {
     int x;
@@ -83,12 +71,6 @@ extern int Menu_Map_sceneRowIdMap[32];;
 extern int Menu_Map_selectedMap;;
 extern int Menu_Map_triggerHideUi;;
 extern short Menu_Map_uiAnimationState;;
-int Menu_Map_UpdateScreen(u_char* state);
-int Menu_Map_UpdateMapMenu(void);
-void Menu_Map_DrawFrame(void);
-void Menu_Map_ApplyCamera(void);
-void Menu_Map_DarkenBackground(void);
-void Menu_Map_DrawPalingDistortion(void);
 void Menu_Map_ResetMenu5Statics(void);
 
 #endif // VS_MENU_MAP_H_DECLS

@@ -505,32 +505,16 @@ int func_800F9800(void) {
             source = source.replace(old, new)
         self.assertTrue(source.endswith("    }\n    return arg0;\n}"))
 
-    def test_map_darken_background_accepts_both_cursor_store_forms(self):
-        copier = object.__new__(copy_to_native.Copier)
-        row = {"id": "F02699", "final_name": "Menu::Map::DarkenBackground"}
-        for cursor_store in ("pScratch2[0] = (uintptr_t)sprt;",
-                             "pScratch2[0] = (u_long)sprt;"):
-            source = (
-                "void f(void)\n{\n"
-                "    u_long* pScratch1;\n"
-                "    u_long* pScratch2;\n"
-                "    SPRT* sprt;\n"
-                "    pScratch1 = Core_ScratchAddr(0);\n"
-                "    sprt = (SPRT*)pScratch1[0];\n"
-                "    AddPrim((void*)(pScratch1[1] + 0x7FE * 4), sprt++);\n"
-                "    *Core_ScratchAddr(0) = (u_long)sprt;\n"
-                "    sprt = (SPRT*)*Core_ScratchAddr(0);\n"
-                "    pScratch2 = Core_ScratchAddr(0);\n"
-                "    AddPrim((void*)(pScratch2[1] + 0x7FE * 4), sprt++);\n"
-                f"    {cursor_store}\n"
-                "}\n"
-            )
-            with self.subTest(cursor_store=cursor_store):
-                copier.used_fixups = set()
-                output = copier.apply_fixups(row, source)
-                self.assertEqual(output.count("Render_frameScratch.primitiveCursor = sprt;"), 2)
-                self.assertEqual(output.count("(u_long*)Render_frameScratch.orderingTable + 0x7FE"), 2)
-                self.assertNotIn("pScratch2[0]", output)
+    def test_map_darken_background_owns_bounded_native_packet_chains(self):
+        self.assertNotIn("F02699", copy_fixups.FIXES)
+        self.assertNotIn("F02699", copy_fixups.FIXUP_VARIANT_COUNTS)
+        self.assertEqual(self.owned_items()["F02699"]["path"], r"Native\Game\src\Menu\MapTerminal.cpp")
+        root = Path(__file__).resolve().parents[2]
+        live = (root / r"Native\Game\src\Menu\MapTerminalLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Render::LivePacketQueue queue_;", live)
+        self.assertIn("if (!queue_.Emit(words)) return false;", live)
+        self.assertIn("*entry_ = length | (*entry_ & Render::kPacketLinkMask);", live)
+        self.assertNotIn("Core_ScratchAddr", live)
 
     def test_absent_model_effect_targets_empty_slot_without_deferred_proof(self):
         for fixup_id in ("F01433", "F01438"):
@@ -3674,8 +3658,9 @@ int func_800F9800(void) {
         # and InitializeCubePuzzleQuit (#276 row 50), whose CubePuzzleLifecycleLive.cpp disc read keeps the guard
         # below. F03010 moved to GameClearLifecycleLive.cpp and F03011/F03012 to TimeAttackTerminalLive.cpp,
         # preserving their completed-request fallbacks (#429). F02803 now owns its MON fallback in
-        # GazetteTerminalLive.cpp; count its checked native obligation instead of a retired fixup.
-        migrated_guarded = {"F02803"}
+        # GazetteTerminalLive.cpp; F04151 owns its scene-swap fallback in MapTerminalLive.cpp.
+        # Count both checked native obligations instead of their retired fixups.
+        migrated_guarded = {"F02803", "F04151"}
         self.assertGreaterEqual(len(guarded) + len(migrated_guarded), 8)
         self.assertTrue(
             ({"F03010", "F03011", "F03012"} | migrated_guarded).isdisjoint(fid for fid, _, _ in guarded)
@@ -3688,6 +3673,8 @@ int func_800F9800(void) {
             self.assertEqual(owned[fid]["path"], r"Native\Game\src\Menu\Results\TimeAttackTerminal.cpp")
         self.assertEqual(owned["F04148"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F04150"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
+        self.assertNotIn("F04151", copy_fixups.FIXES)
+        self.assertEqual(owned["F04151"]["path"], r"Native\Game\src\Menu\MapTerminal.cpp")
         self.assertEqual(owned["F02839"]["path"], r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp")
         self.assertEqual(owned["F04163"]["path"], r"Native\Game\src\Menu\ManualScreen.cpp")
         self.assertEqual(owned["F03046"]["path"], r"Native\Game\src\Menu\Results\CubePuzzleLifecycle.cpp")
@@ -3747,6 +3734,14 @@ int func_800F9800(void) {
         self.assertIn(
             "Menu_Map_sceneCdQueueSlot=Content::CompleteLiveRefusedDiscRequest(file_,Battle_unusedSceneBuffer);",
             map_loading_live,
+        )
+        map_terminal_live = "".join(
+            (root / r"Native\Game\src\Menu\MapTerminalLive.cpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "if(request!=nullptr){Content::EnqueueLiveDiscRequest(request,destination);}"
+            "else{request=Content::CompleteLiveRefusedDiscRequest(original_file,destination);}",
+            map_terminal_live,
         )
         manual_live = "".join((root / r"Native\Game\src\Menu\ManualScreenLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("request=Content::CompleteLiveRefusedDiscRequest(&disc_file,HelpBuffer(file));", manual_live)

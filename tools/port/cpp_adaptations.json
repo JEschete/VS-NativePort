@@ -18,6 +18,7 @@
 "#include \"Menu/Loot/LootPoliciesLive.hpp\"",
 "#include \"Menu/Loot/LootTerminalLive.hpp\"",
 "#include \"Menu/ManualScreenLive.hpp\"",
+"#include \"Menu/MapTerminalLive.hpp\"",
 "#include \"Menu/Results/CubePuzzleLifecycleLive.hpp\"",
 "#include \"Menu/Results/GameClearLifecycleLive.hpp\"",
 "#include \"Menu/Results/TimeAttackTerminalLive.hpp\"",
@@ -73,6 +74,18 @@
 "    VS::Menu::Status::ResetLiveActorSwitchPhase();",
 "    VS::Menu::Status::ResetLiveLimbControllersModuleData();",
 "    VS::Menu::Status::ResetLiveTerminalControllersModuleData();"
+]
+],
+[
+40,
+[
+"    Menu_Map_ResetMenu5Statics();"
+],
+[
+"    if (!VS::Menu::map::ResetMapTerminalModuleData()) {",
+"        std::abort();",
+"    }",
+"    Menu_Map_ResetMenu5Statics();"
 ]
 ],
 [
@@ -149,170 +162,6 @@
 ],
 [
 "Effects_EffectRenderer Effects_rendererTableAlias[1];"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Map.cpp": [
-[
-211,
-[
-"        Menu_Map_screenMenuBgBackup = VS::Core::Memory::AllocateLiveFromHighEnd(0xB600);"
-],
-[
-"        Menu_Map_screenMenuBgBackup = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(0xB600));"
-]
-],
-[
-518,
-[
-"                    Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex(Battle_unusedSceneBuffer);"
-],
-[
-"                    Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));"
-]
-],
-[
-520,
-[
-"                    VS::Menu::map::LiveCenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
-],
-[
-"                    VS::Menu::map::LiveCenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);"
-]
-],
-[
-577,
-[
-"                            VS::Menu::map::LiveSetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
-],
-[
-"                            VS::Menu::map::LiveSetRoomCenterTarget((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);"
-]
-],
-[
-580,
-[
-"                            VS::Menu::map::LiveSetRoomCenterTarget(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
-],
-[
-"                            VS::Menu::map::LiveSetRoomCenterTarget((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);"
-]
-],
-[
-669,
-[
-"            VS::Menu::map::LiveScaleRoomVertices(Battle_unusedSceneBuffer, sizeof(Field_MapScene));"
-],
-[
-"            VS::Menu::map::LiveScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));"
-]
-],
-[
-671,
-[
-"            Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex(Battle_unusedSceneBuffer);"
-],
-[
-"            Menu_Map_currentRoomIndex = VS::Menu::map::LiveInitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));"
-]
-],
-[
-673,
-[
-"            VS::Menu::map::LiveCenterOnRoom(Battle_unusedSceneBuffer, Menu_Map_currentRoomIndex);"
-],
-[
-"            VS::Menu::map::LiveCenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);"
-]
-],
-[
-697,
-[
-"    VS::Menu::map::LiveAnimateCentering(Battle_unusedSceneBuffer);"
-],
-[
-"    VS::Menu::map::LiveAnimateCentering((Field_MapScene *)(Battle_unusedSceneBuffer));"
-]
-],
-[
-716,
-[
-"    AddPrim((DR_STP*)(pScratch[1] + 0x1FFC), stp++);"
-],
-[
-"    AddPrim((DR_STP*)(((u_char*)(pScratch[1])) + 0x1FFC), stp++);"
-]
-],
-[
-736,
-[
-"        VS::Menu::map::LiveDrawVisitedRooms(Battle_unusedSceneBuffer);"
-],
-[
-"        VS::Menu::map::LiveDrawVisitedRooms((Field_MapScene *)(Battle_unusedSceneBuffer));"
-]
-],
-[
-773,
-[
-"    sprt = Render_frameScratch.primitiveCursor;"
-],
-[
-"    sprt = (SPRT *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-790,
-[
-"    sprt = Render_frameScratch.primitiveCursor;"
-],
-[
-"    sprt = (SPRT *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-820,
-[
-"        SPRT* sprt = *(void**)Core_ScratchAddr(0);"
-],
-[
-"        SPRT* sprt = (SPRT *)(*(void**)Core_ScratchAddr(0));"
-]
-],
-[
-848,
-[
-"        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
-],
-[
-"        AddPrim(((u_char*)(legacy_render_scratch[1])) + 0x20, sprt++);"
-]
-],
-[
-858,
-[
-"        sprt = *(void**)Core_ScratchAddr(0);"
-],
-[
-"        sprt = (SPRT *)(*(void**)Core_ScratchAddr(0));"
-]
-],
-[
-883,
-[
-"        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);"
-],
-[
-"        AddPrim(((u_char*)(legacy_render_scratch[1])) + 0x20, sprt++);"
-]
-],
-[
-909,
-[
-"        static const RECT initial[2];"
-],
-[
-"        static const RECT initial[2] = {};"
 ]
 ]
 ],

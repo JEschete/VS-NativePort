@@ -1018,6 +1018,14 @@
     <None Include="..\..\port\differentials\map_navigation_f02696.py" />
     <None Include="..\..\port\differentials\map_navigation_f02700.py" />
     <None Include="..\..\port\differentials\map_navigation_f02701.py" />
+    <None Include="..\..\port\differentials\map_terminal_common.py" />
+    <None Include="..\..\port\differentials\map_terminal_driver.cpp" />
+    <None Include="..\..\port\differentials\map_terminal_f02689.py" />
+    <None Include="..\..\port\differentials\map_terminal_f02690.py" />
+    <None Include="..\..\port\differentials\map_terminal_f02699.py" />
+    <None Include="..\..\port\differentials\map_terminal_f02702.py" />
+    <None Include="..\..\port\differentials\map_terminal_f04149.py" />
+    <None Include="..\..\port\differentials\map_terminal_f04151.py" />
     <None Include="..\..\port\differentials\menu2_ability_description.py" />
     <None Include="..\..\port\differentials\menu2_ability_description_driver.cpp" />
     <None Include="..\..\port\differentials\menu2_ability_foundation.py" />

@@ -139,6 +139,7 @@
 #include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
+#include "Menu/MapTerminalLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
@@ -2316,6 +2317,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU5.PRG", 0x80107B10u, 0u, (void*)&VS::Menu::map::LiveDrawCompass, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010800Cu, 0u, (void*)&VS::Menu::map::LiveComputeCompassCorners, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x801082A8u, 0u, (void*)&VS::Menu::map::LiveDrawLabels, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801042B0u, 0u, (void*)&VS::Menu::map::LiveDrawFrame, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80104384u, 0u, (void*)&VS::Menu::map::LiveApplyCamera, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x8010625Cu, 0u, (void*)&VS::Menu::map::LiveDarkenBackground, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801066E0u, 0u, (void*)&VS::Menu::map::LiveDrawPalingDistortion, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x801030F4u, 0u, (void*)&VS::Menu::map::LiveUpdateScreen, 0u, 0u, 0u},
+    {"MENU/MENU5.PRG", 0x80103684u, 0u, (void*)&VS::Menu::map::LiveUpdateMapMenu, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80103608u, 0u, (void*)&VS::Menu::Status::LiveBeginVitalsTransition, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80103688u, 0u, (void*)&VS::Menu::Status::LiveFindNextInspectableActor, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80103744u, 0u, (void*)&VS::Menu::Status::LiveAnimateActorSwitch, 0u, 0u, 0u},

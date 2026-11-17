@@ -11,6 +11,7 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Menu/MapDrawingLive.hpp"
+#include "Menu/MapTerminalLive.hpp"
 #include "Render/DepthCueLive.hpp"
 
 extern "C" {
@@ -129,7 +130,7 @@ TEST_CASE("Map framebuffer darkening preserves both native strip chains",
           "[render][map][framebuffer]") {
   const int framebuffer = GENERATE(0, 1);
   MapFixture fixture(framebuffer);
-  Menu_Map_DarkenBackground();
+  VS::Menu::map::LiveDarkenBackground();
   const auto* bytes =
       reinterpret_cast<const unsigned char*>(fixture.storage.data() + 1);
   const auto* first = reinterpret_cast<const SPRT*>(bytes + sizeof(DR_MODE));
