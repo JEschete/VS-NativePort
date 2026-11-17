@@ -7,13 +7,6 @@
 // decomp: src/include/gpu.h:96
 #define vs_getXY_2(x, y) (((x) & 0xFFFF) | ((y) << 16))
 
-// decomp: src/include/gpu.h:102
-#define vs_getRGB(r, g, b) vs_getRGB0(0, (r), (g), (b))
-
-// decomp: src/include/gpu.h:103
-#define vs_getRGB0(code, r, g, b)                                                        \
-    (((code) << 24) | (((b) & 0xFF) << 16) | (((g) & 0xFF) << 8) | ((r) & 0xFF))
-
 #endif // VS_MENU_SCORE_RECORDS_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_RECORDS_H_DECLS)
@@ -36,10 +29,6 @@ void Menu_Score_RenderTitles(int animState);
 void Menu_Score_DrawTitleNumber(int x, int y, int titleNo, int dimmed);
 void Menu_Score_CreateStatisticRows(void);
 void Menu_Score_RenderStatistics(int animState);
-void Menu_Score_FormatFastestClearTime(char* buf, int rounds, int totalSeconds);
-void Menu_Score_CreateTimeTrialRows(void);
-void Menu_Score_LeaveTimeTrialMenu(void);
-void Menu_Score_RenderTimeTrialRecords(int selected);
 void Menu_Score_Records_ResetMenu9Statics(void);
 
 #endif // VS_MENU_SCORE_RECORDS_H_DECLS

@@ -2085,6 +2085,10 @@
     <ClCompile Include="src\Menu\Score\GazetteRowsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteTimes.cpp" />
+    <ClCompile Include="src\Menu\Score\GazetteTimesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\Records.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -3084,6 +3088,8 @@
     <ClInclude Include="include\Menu\Score\GazetteCameraLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRows.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRowsLive.hpp" />
+    <ClInclude Include="include\Menu\Score\GazetteTimes.hpp" />
+    <ClInclude Include="include\Menu\Score\GazetteTimesLive.hpp" />
     <ClInclude Include="include\Menu\Score\ScoreRank.hpp" />
     <ClInclude Include="include\Menu\Score\ScoreRankLive.hpp" />
     <ClInclude Include="include\Menu\Setup\Assembly.hpp" />

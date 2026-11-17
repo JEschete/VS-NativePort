@@ -9,6 +9,7 @@
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
@@ -538,7 +539,7 @@ int Menu_Score_Update(void)
 
     case 10:
         VS::Menu::Framework::InitializeLiveInformationBox();
-        Menu_Score_CreateTimeTrialRows();
+        VS::Menu::Score::CreateLiveTimeTrialRows();
 
         ++Menu_Score_menuState;
         break;
@@ -564,7 +565,7 @@ int Menu_Score_Update(void)
 
             VS::Audio::LivePlaySfxCentered(0x7E, 6);
             VS::Menu::Framework::DismissLiveInformationBox();
-            Menu_Score_LeaveTimeTrialMenu();
+            VS::Menu::Score::LeaveLiveTimeTrialMenu();
 
             ++Menu_Score_menuState;
 
@@ -575,7 +576,7 @@ int Menu_Score_Update(void)
             }
         }
 
-        Menu_Score_RenderTimeTrialRecords(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveTimeTrialRecords(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState < 8) {
             ++Menu_Score_updateMenuAnimState;
@@ -583,7 +584,7 @@ int Menu_Score_Update(void)
         break;
 
     case 12:
-        Menu_Score_RenderTimeTrialRecords(Menu_Score_updateMenuAnimState);
+        VS::Menu::Score::RenderLiveTimeTrialRecords(Menu_Score_updateMenuAnimState);
 
         if (Menu_Score_updateMenuAnimState > 0) {
             --Menu_Score_updateMenuAnimState;

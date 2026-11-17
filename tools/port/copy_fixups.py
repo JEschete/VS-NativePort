@@ -1872,6 +1872,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Score::DrawLiveFooterBackground": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
     "VS::Menu::Score::RenderLiveOverview": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
     "VS::Menu::Score::DrawLiveViewerEdgeFade": r"Native\Game\include\Menu\Score\GazetteCameraLive.hpp",
+    "VS::Menu::Score::FormatLiveFastestClearTime": r"Native\Game\include\Menu\Score\GazetteTimesLive.hpp",
+    "VS::Menu::Score::CreateLiveTimeTrialRows": r"Native\Game\include\Menu\Score\GazetteTimesLive.hpp",
+    "VS::Menu::Score::LeaveLiveTimeTrialMenu": r"Native\Game\include\Menu\Score\GazetteTimesLive.hpp",
+    "VS::Menu::Score::RenderLiveTimeTrialRecords": r"Native\Game\include\Menu\Score\GazetteTimesLive.hpp",
     "VS::Menu::manual::LiveUploadSpriteTiles": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveUploadCluts": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
@@ -3428,6 +3432,10 @@ OWNED_CALL_BINDINGS["F02811"] = "VS::Menu::Score::DrawLiveGradientPanel"
 OWNED_CALL_BINDINGS["F02812"] = "VS::Menu::Score::DrawLiveFooterBackground"
 OWNED_CALL_BINDINGS["F02813"] = "VS::Menu::Score::RenderLiveOverview"
 OWNED_CALL_BINDINGS["F02821"] = "VS::Menu::Score::DrawLiveViewerEdgeFade"
+OWNED_CALL_BINDINGS["F02828"] = "VS::Menu::Score::FormatLiveFastestClearTime"
+OWNED_CALL_BINDINGS["F02829"] = "VS::Menu::Score::CreateLiveTimeTrialRows"
+OWNED_CALL_BINDINGS["F02830"] = "VS::Menu::Score::LeaveLiveTimeTrialMenu"
+OWNED_CALL_BINDINGS["F02831"] = "VS::Menu::Score::RenderLiveTimeTrialRecords"
 OWNED_CALL_BINDINGS["F02992"] = "VS::Menu::manual::LiveUploadSpriteTiles"
 OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
 OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
@@ -5504,6 +5512,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU9.PRG", 0x8010539C, "VS::Menu::Score::DrawLiveFooterBackground"),  # F02812
     ("MENU/MENU9.PRG", 0x8010552C, "VS::Menu::Score::RenderLiveOverview"),  # F02813
     ("MENU/MENU9.PRG", 0x80106528, "VS::Menu::Score::DrawLiveViewerEdgeFade"),  # F02821
+    ("MENU/MENU9.PRG", 0x80106DE0, "VS::Menu::Score::FormatLiveFastestClearTime"),  # F02828
+    ("MENU/MENU9.PRG", 0x80106F9C, "VS::Menu::Score::CreateLiveTimeTrialRows"),  # F02829
+    ("MENU/MENU9.PRG", 0x80107090, "VS::Menu::Score::LeaveLiveTimeTrialMenu"),  # F02830
+    ("MENU/MENU9.PRG", 0x80107120, "VS::Menu::Score::RenderLiveTimeTrialRecords"),  # F02831
     ("MENU/MENUE.PRG", 0x80103A24, "VS::Menu::manual::LiveUploadSpriteTiles"),  # F02992
     ("MENU/MENUE.PRG", 0x80103AD8, "VS::Menu::manual::LiveUploadCluts"),  # F02993
     ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000
@@ -5974,6 +5986,15 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
                ("*(int*)((char*)object + 0x34) = 0;", "object->slideX = 0;\n            object->velocityY = 0;",
                 "clear at 0x34")],
 }
+
+FIXES.setdefault("F02825", []).append((
+    "VS::Menu::Score::FormatLiveFastestClearTime(intBuf, Audio_Seq_unusedScoredata.clearCount,\n"
+    "                Audio_Seq_unusedScoredata.completionTimeMinutes);",
+    "VS::Menu::Score::FormatLiveFastestClearTime(std::span(sp18).subspan(2),\n"
+    "                static_cast<std::int32_t>(Audio_Seq_unusedScoredata.clearCount),\n"
+    "                static_cast<std::int32_t>(Audio_Seq_unusedScoredata.completionTimeMinutes));",
+    "F02828 requires the actual remaining 30-byte output span; C++20 signed conversions preserve the original words."
+))
 
 # #269: model geometry projection and polygon walks read only a model's recorded extent. Each loader records the
 # bytes it placed; each release forgets them before the memory goes back to the heap.

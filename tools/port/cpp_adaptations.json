@@ -21,6 +21,7 @@
 "#include \"Menu/Results/GameClearLifecycleLive.hpp\"",
 "#include \"Menu/Results/TimeAttackTerminalLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
+"#include \"Menu/Score/GazetteTimesLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\"",
 "#include \"Menu/Status/LimbControllersLive.hpp\"",
 "#include \"Menu/Status/TerminalControllersLive.hpp\""
@@ -78,7 +79,8 @@
 ],
 [
 "    Menu_Score_Records_ResetMenu9Statics();",
-"    VS::Menu::Score::ResetGazetteRowsLive();"
+"    VS::Menu::Score::ResetGazetteRowsLive();",
+"    VS::Menu::Score::ResetLiveTimeTrialStatics();"
 ]
 ],
 [
@@ -374,7 +376,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Records.cpp": [
 [
-175,
+169,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -383,7 +385,7 @@
 ]
 ],
 [
-210,
+204,
 [
 "        p->title = (void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]];",
 "        p->description = (void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]];"
@@ -392,101 +394,11 @@
 "        p->title = (char *)((void*)&Menu_Score_statHeaders[Menu_Score_statHeaders[i]]);",
 "        p->description = (char *)((void*)&Menu_Score_statDescriptions[Menu_Score_statDescriptions[i]]);"
 ]
-],
-[
-512,
-[
-"        \"PLAYER TIME\", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, p[1] + 0x1C);"
-],
-[
-"        \"PLAYER TIME\", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));"
-]
-],
-[
-515,
-[
-"        \"1ST\", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, p[1] + 0x1C);"
-],
-[
-"        \"1ST\", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));"
-]
-],
-[
-517,
-[
-"        \"2ND\", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, p[1] + 0x1C);"
-],
-[
-"        \"2ND\", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));"
-]
-],
-[
-519,
-[
-"        \"3RD\", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, p[1] + 0x1C);"
-],
-[
-"        \"3RD\", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));"
-]
-],
-[
-531,
-[
-"                q[1] + 0x1C);"
-],
-[
-"                (u_long *)(((u_char*)(q[1])) + 0x1C));"
-]
-],
-[
-536,
-[
-"                q[1] + 0x1C);"
-],
-[
-"                (u_long *)(((u_char*)(q[1])) + 0x1C));"
-]
-],
-[
-541,
-[
-"                q[1] + 0x1C);"
-],
-[
-"                (u_long *)(((u_char*)(q[1])) + 0x1C));"
-]
-],
-[
-548,
-[
-"        vs_getRGB(128, 128, 128), r[1] + 0x1C);"
-],
-[
-"        vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));"
-]
-],
-[
-554,
-[
-"                \"$--:--:--\", vs_getXY(88, 158), vs_getRGB(80, 80, 80), r[1] + 0x1C);"
-],
-[
-"                \"$--:--:--\", vs_getXY(88, 158), vs_getRGB(80, 80, 80), (u_long *)(((u_char*)(r[1])) + 0x1C));"
-]
-],
-[
-557,
-[
-"                vs_getXY(88, 158), vs_getRGB(128, 128, 128), r[1] + 0x1C);"
-],
-[
-"                vs_getXY(88, 158), vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));"
-]
 ]
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-276,
+277,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],

@@ -152,6 +152,7 @@
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
@@ -2374,6 +2375,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU9.PRG", 0x8010539Cu, 0u, (void*)&VS::Menu::Score::DrawLiveFooterBackground, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x8010552Cu, 0u, (void*)&VS::Menu::Score::RenderLiveOverview, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80106528u, 0u, (void*)&VS::Menu::Score::DrawLiveViewerEdgeFade, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80106DE0u, 0u, (void*)&VS::Menu::Score::FormatLiveFastestClearTime, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80106F9Cu, 0u, (void*)&VS::Menu::Score::CreateLiveTimeTrialRows, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80107090u, 0u, (void*)&VS::Menu::Score::LeaveLiveTimeTrialMenu, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80107120u, 0u, (void*)&VS::Menu::Score::RenderLiveTimeTrialRecords, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103A24u, 0u, (void*)&VS::Menu::manual::LiveUploadSpriteTiles, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103AD8u, 0u, (void*)&VS::Menu::manual::LiveUploadCluts, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103E6Cu, 0u, (void*)&VS::Menu::manual::LiveDrawIllustration, 0u, 0u, 0u},

@@ -273,6 +273,9 @@
     <ClCompile Include="src\GameplayLoopTests.cpp" />
     <ClCompile Include="src\GazetteCameraTests.cpp" />
     <ClCompile Include="src\GazetteRowsTests.cpp" />
+    <ClCompile Include="src\GazetteTimesIntegrationTests.cpp" />
+    <ClCompile Include="src\GazetteTimesLiveTests.cpp" />
+    <ClCompile Include="src\GazetteTimesTests.cpp" />
     <ClCompile Include="src\GimImagesTests.cpp" />
     <ClCompile Include="src\GimmickPlacementTests.cpp" />
     <ClCompile Include="src\GimRenderTestCases.cpp" />
@@ -531,6 +534,7 @@
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\GameClearLifecycleLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\GazetteTimesLiveFixture.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
     <ClInclude Include="include\Menu\InventorySortingLiveFixture.hpp" />
     <ClInclude Include="include\Menu\InventorySortingWorld.hpp" />

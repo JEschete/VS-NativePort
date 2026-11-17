@@ -13,6 +13,7 @@
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -74,6 +75,7 @@ void Boot_ResetMenu9Statics(void)
     Menu_Score_Encyclopedia_ResetMenu9Statics();
     Menu_Score_Records_ResetMenu9Statics();
     VS::Menu::Score::ResetGazetteRowsLive();
+    VS::Menu::Score::ResetLiveTimeTrialStatics();
 }
 
 // Call where the original loads MENUB.PRG: restores the statics its reload re-read from the disc.

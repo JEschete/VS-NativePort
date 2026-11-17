@@ -1,17 +1,14 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/String/GameTextLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteTimesLive.hpp"
 #include "Render/EncodedTextLive.hpp"
-#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
-#include "Core/Text/TextCode.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Score/Records.h"
@@ -59,9 +56,6 @@ static char Menu_Score_titlesCursorAnimState = 0;
 
 // decomp: local static of _renderBossRushDetails, at file scope so the module reset reaches it
 static char Menu_Score_statisticsCursorAnimStep = 0;
-
-// decomp: local static of _renderBossRushRecords, at file scope so the module reset reaches it
-static char Menu_Score_timeTrialRecordsCursorAnimStep = 0;
 
 // decomp: MENU9.PRG _setTitleRows (src/MENU/MENU9.PRG/238.c:1722)
 void Menu_Score_CreateTitleRows(void)
@@ -290,8 +284,9 @@ void Menu_Score_RenderStatistics(int animState)
         if (v1 == 0) {
             VS::Core::String::FormatLiveGameInteger(intBuf, Menu_Score_clearCount);
         } else if (v1 == 1) {
-            Menu_Score_FormatFastestClearTime(intBuf, Audio_Seq_unusedScoredata.clearCount,
-                Audio_Seq_unusedScoredata.completionTimeMinutes);
+            VS::Menu::Score::FormatLiveFastestClearTime(std::span(aligned_value_text).subspan(2),
+                static_cast<std::int32_t>(Audio_Seq_unusedScoredata.clearCount),
+                static_cast<std::int32_t>(Audio_Seq_unusedScoredata.completionTimeMinutes));
         } else if (v1 == 2) {
             VS::Core::String::FormatLiveGamePercent(intBuf, (Menu_Score_openedChestCount * 100) / 52);
         } else if (v1 == 3) {
@@ -337,230 +332,6 @@ void Menu_Score_RenderStatistics(int animState)
     VS::Menu::Framework::LiveMenuItem(0)->state = 0;
 }
 
-// decomp: MENU9.PRG _printFastestClearTime (src/MENU/MENU9.PRG/238.c:2400)
-void Menu_Score_FormatFastestClearTime(char* buf, int rounds, int totalSeconds)
-{
-    int len;
-    int i;
-    int minutes;
-    int seconds;
-    char* str;
-
-    if (Menu_Score_clearCount == 0) {
-        VS::Core::String::CopyLiveGameText(
-            (u_char*)buf, (u_char*)&Menu_Score_miscInfo[Menu_Score_miscInfo[Text_Menu9_miscInfo_Index_noneClear]]);
-        return;
-    }
-
-    minutes = totalSeconds / 60;
-
-    if (minutes >= 100) {
-        minutes = 99;
-        seconds = 59;
-    } else {
-        seconds = totalSeconds % 60;
-    }
-
-    *buf = Core_TextCode_UpperR;
-    str = buf + 1;
-
-    sprintf(str, "%d", rounds + 1);
-    len = strlen(str);
-
-    for (i = 0; i < len; ++i) {
-        str[i] -= '0';
-    }
-
-    str = &str[len];
-    *str++ = Core_TextCode_Spacing;
-    *str++ = 12;
-
-    sprintf(str, "%02d", minutes);
-    len = strlen(str);
-
-    for (i = 0; i < len; ++i) {
-        str[i] -= '0';
-    }
-
-    str = &str[len];
-    *str++ = Core_TextCode_Colon;
-
-    sprintf(str, "%02d", seconds);
-    len = strlen(str);
-
-    for (i = 0; i < len; ++i) {
-        str[i] -= '0';
-    }
-
-    str += len;
-    *str = Core_TextCode_Terminator;
-}
-
-// decomp: MENU9.PRG _printBossRushMenuRow (src/MENU/MENU9.PRG/238.c:2461)
-void Menu_Score_CreateTimeTrialRows(void)
-{
-    int i;
-    Menu_Score_Row* row;
-
-    for (i = 0, row = Menu_Score_gazetteRows; i < 8; ++i, ++row) {
-        row->x = 194;
-        if ((Audio_Seq_unusedScoredata.bossTimeTrialScores[i][0].time) == 0x800000) {
-            row->disabled = 1;
-            row->title = (char*)&Menu_Score_miscInfo[Menu_Score_miscInfo[Text_Menu9_miscInfo_Index_noneBossRush]];
-            row->description =
-                (char*)&Menu_Score_miscInfo[Menu_Score_miscInfo[Text_Menu9_miscInfo_Index_noneBossRushDesc]];
-        } else {
-            row->disabled = 0;
-            row->title = (char*)&Menu_Score_timeAttacks[Menu_Score_timeAttacks[i]];
-            row->description =
-                (char*)&Menu_Score_timeAttackDescriptions[Menu_Score_timeAttackDescriptions[i]];
-        }
-        row->selected = 0;
-        row->animationState = i + 1;
-        row->opaque1 = 1;
-    }
-}
-
-// decomp: MENU9.PRG _leaveBossRushMenu (src/MENU/MENU9.PRG/238.c:2488)
-void Menu_Score_LeaveTimeTrialMenu(void)
-{
-    int i;
-    Menu_Score_Row* p = Menu_Score_gazetteRows;
-
-    for (i = 0; i < 8; ++i, ++p) {
-        if (p->animationState == 0) {
-            Menu_Framework_MenuRow* menuItem = VS::Menu::Framework::LiveMenuItem(i);
-            menuItem->state = 2;
-            menuItem->targetPosition0 = 320;
-        } else {
-            p->animationState = -1;
-        }
-    }
-}
-
-// decomp: MENU9.PRG _renderBossRushRecords (src/MENU/MENU9.PRG/238.c:2507)
-void Menu_Score_RenderTimeTrialRecords(int selected)
-{
-
-    char* difficulty[] __attribute__((unused)) = { "EASY", "NORMAL" };
-    int difficultyColors[]
-        __attribute__((unused)) = { vs_getRGB(0, 128, 128), vs_getRGB(128, 128, 0) };
-
-    char record_value_text[16];
-    int selected_trial_index;
-    Menu_Score_Row* selected_trial_row;
-    Menu_Score_Row* trial_row_cursor;
-    int packed_trial_cursor_position;
-    int i;
-    int j;
-    int settled_row_count;
-    int time;
-    Menu_Framework_MenuRow* menuItem;
-    void** p;
-    void** r;
-    void** q;
-
-    trial_row_cursor = Menu_Score_gazetteRows;
-    settled_row_count = 0;
-    selected_trial_index = Battle_unusedMenu9CursorMemory.gazettePage;
-
-    for (i = 0; i < 8; ++i, ++trial_row_cursor) {
-        if (trial_row_cursor->animationState != 0) {
-            if (!(--trial_row_cursor->animationState)) {
-                menuItem = VS::Menu::Framework::SetLiveMenuItem(
-                    i, 0x140, 0x32 + i * 0x10, 0x88, 0, trial_row_cursor->title);
-                menuItem->unselectable = trial_row_cursor->disabled;
-                menuItem->state = 2;
-                menuItem->targetPosition0 = 0xC2;
-            }
-        } else if (VS::Menu::Framework::LiveMenuItem(i)->state == 1) {
-            ++settled_row_count;
-        }
-    }
-
-    trial_row_cursor = Menu_Score_gazetteRows;
-
-    for (i = 0; i < 8; ++trial_row_cursor, ++i) {
-
-        if ((settled_row_count != 8) || (selected != settled_row_count)) {
-            continue;
-        }
-
-        menuItem = VS::Menu::Framework::LiveMenuItem(i);
-
-        if (i == selected_trial_index) {
-
-            if (trial_row_cursor->selected == 0) {
-                VS::Menu::Framework::SetLiveInformationMessage(trial_row_cursor->description);
-            }
-
-            trial_row_cursor->selected = 1;
-            menuItem->selected = 1;
-            packed_trial_cursor_position = (((selected_trial_index * 0x10) + 0x2A) << 0x10) | 0xB6;
-
-            Menu_Score_timeTrialRecordsCursorAnimStep = VS::Menu::Framework::DrawLiveCursor(Menu_Score_timeTrialRecordsCursorAnimStep, packed_trial_cursor_position);
-
-            selected_trial_row = trial_row_cursor;
-
-        } else {
-            trial_row_cursor->selected = 0;
-            menuItem->selected = 0;
-        }
-    }
-
-    p = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-    VS::Render::DrawLiveCompactTextColor(
-        "PLAYER TIME", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
-    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x80, 0x20, 0x60, 0xC, 1);
-    VS::Render::DrawLiveCompactTextColor(
-        "1ST", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
-    VS::Render::DrawLiveCompactTextColor(
-        "2ND", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
-    VS::Render::DrawLiveCompactTextColor(
-        "3RD", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
-
-    for (j = 0; j < 3; ++j) {
-
-        time = Audio_Seq_unusedScoredata.bossTimeTrialScores[selected_trial_index][j].time;
-
-        if (time != 0x800000) {
-            sprintf(
-                record_value_text, "$%02d:%02d:%02d", time >> 0x10, (time >> 8) & 0xFF, time & 0xFF);
-            q = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-            VS::Render::DrawLiveCompactTextColor(record_value_text,
-                vs_getXY_2((selected * 16) - 40, 50 + j * 30), vs_getRGB(128, 128, 128),
-                (u_long *)(((u_char*)(q[1])) + 0x1C));
-            sprintf(record_value_text, "ROUND    %d",
-                Audio_Seq_unusedScoredata.bossTimeTrialScores[selected_trial_index][j].round + 1);
-            VS::Render::DrawLiveCompactTextColor(record_value_text,
-                vs_getXY_2((selected * 16) - 60, 62 + j * 30), vs_getRGB(128, 128, 128),
-                (u_long *)(((u_char*)(q[1])) + 0x1C));
-        } else {
-            q = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-            VS::Render::DrawLiveCompactTextColor("$--:--:--",
-                vs_getXY_2((selected * 16) - 40, 50 + j * 30), vs_getRGB(80, 80, 80),
-                (u_long *)(((u_char*)(q[1])) + 0x1C));
-        }
-    }
-
-    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x70, 0x32, 0x80, 0x54, 2);
-    r = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-    VS::Render::DrawLiveCompactTextColor("REFERENCE TIME", vs_getXY(selected * 16 - 0x78, 0x8C),
-        vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));
-    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x80, 0x8C, 0x70, 0xC, 1);
-
-    if ((settled_row_count == 8) && (selected == settled_row_count)) {
-        if (selected_trial_row->disabled != 0) {
-            VS::Render::DrawLiveCompactTextColor(
-                "$--:--:--", vs_getXY(88, 158), vs_getRGB(80, 80, 80), (u_long *)(((u_char*)(r[1])) + 0x1C));
-        } else {
-            VS::Render::DrawLiveCompactTextColor(Menu_Score_kTimeAttackReferenceTimes[selected_trial_index],
-                vs_getXY(88, 158), vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));
-        }
-    }
-    VS::Menu::Score::DrawLiveGradientPanel((selected * 0x10) - 0x70, 0x9E, 0x80, 0xC, 2);
-}
-
 // MENU9.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).
 void Menu_Score_Records_ResetMenu9Statics(void)
 {
@@ -571,10 +342,6 @@ void Menu_Score_Records_ResetMenu9Statics(void)
     {
         static const char initial = 0;
         memcpy((void*)&Menu_Score_statisticsCursorAnimStep, &initial, sizeof Menu_Score_statisticsCursorAnimStep);
-    }
-    {
-        static const char initial = 0;
-        memcpy((void*)&Menu_Score_timeTrialRecordsCursorAnimStep, &initial, sizeof Menu_Score_timeTrialRecordsCursorAnimStep);
     }
 }
 

@@ -29,6 +29,7 @@
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
+#include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Render/DisplayControlLive.hpp"
@@ -108,6 +109,7 @@ class LiveSessionHost final : public SessionHost {
     Menu::Status::ResetLiveTerminalControllersModuleData();
     Menu::Results::ResetLiveGameClearModuleData();
     Menu::Results::ResetLiveTimeAttackModuleData();
+    Menu::Score::ResetLiveTimeTrialStatics();
     Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }

@@ -1,25 +1,23 @@
 # Current Handoff
 
-Updated 2026-11-17. The latest integrated #276 group is time-attack terminal,
-F03008/F03009/F03011/F03012/F03014/F03016/F03017, including actual module,
-Framework, MENUF/cold-session and stopped-frame pre-heap ownership controls.
-Local verification passes with the explicitly recorded tooling follow-up
-below; publication and exact-revision CI remain pending.
-The preceding accepted revision
-`3cb6225029dd398b5da9bc77a8722ad9113cef3d` passes exact-revision CI.
+Updated 2026-11-17. The latest locally verified #276 group is Gazette times,
+F02828-F02831, including actual module, bounded statistics-caller and
+MENU9/cold-session cursor controls. Publication and exact-revision CI are
+pending. The latest published checkpoint is time attack,
+`430f4636c04633092b60ae9a453e03e1c60c785e`, with successful exact-revision CI.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The local original 900-function cohort has **872 resolved (860 promoted,
-12 retired) and 28 remaining**; published acceptance remains 77 of the
-requested final 112 until this seven-function group's CI passes. See
+The locally verified original 900-function cohort has **876 resolved
+(864 promoted, 12 retired) and 24 remaining**; **88 of the requested final
+112** pass local integration, with **84 published and accepted**. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 0, 50: 17, 52: 10. The seven time-attack functions meet the local
-  no-bridge gate; they are not yet counted as published acceptance.
+  48: 0, 50: 13, 52: 10. The seven time-attack functions meet the no-bridge
+  and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
   junction to the root data and delivers one local commit (typed cores, Live
@@ -27,6 +25,30 @@ requested final 112 until this seven-function group's CI passes. See
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Gazette-time evidence (`VR-MENU-GAZETTE-TIMES`): four original spans pass
+  4,096 vectors, zero mismatches; 64 instruction mutants (128 vectors each)
+  and four compiled native variants are detected. `group-20261117-064018`
+  passes both builds, Debug/Release full suites (9,234 cases / 12,975,124
+  assertions each), 71 focused cases / 628 assertions each, both canonical
+  replays, copier controls and second-generation stability (zero Native
+  changes, `eade84127782d7e5`). The original aggregate remains failed for
+  one namespace spelling diagnostic: both new headers now follow the
+  existing eight Score headers' scoped naming exemption, with no runtime
+  token or baseline changes. Full changed-file tidy then passes with five
+  existing findings, zero new; no fresh native rerun is claimed after
+  comments. Evidence: `build\scratch\gazette-times\integration.json`.
+  The original 23 cases / 165 assertions remain, supplemented by six
+  genuine-service cases / 190 assertions and four root integration cases.
+  Actual pre-hook tests fail exactly two cursor assertions at completed
+  MENU9 and cold-session boundaries. Both pass after wiring the native
+  reset, observed through actual rendered packets rather than a state getter.
+  Other/pending overlays, BATTLE cursor memory, scores, row/text owners and
+  foreign heap allocations remain separate. The actual statistics caller
+  passes its remaining 30-byte output span, preserving source word
+  conversions. Three old-symbol files and ten obsolete cast adaptations
+  retire; existing generated title/statistics cursor resets survive.
+  No physical-CD, hardware-GPU, interactive gameplay or EC-retirement
+  completion is claimed. Publication and exact-revision CI remain.
 - Time-attack evidence (`VR-MENU-TIMEATTACK-TERMINAL`): seven original spans
   pass 7,168 vectors, zero mismatches; 93 instruction mutants (256 vectors
   each) and seven compiled native variants are detected.
@@ -58,7 +80,9 @@ requested final 112 until this seven-function group's CI passes. See
   out-of-pool full-queue fallback. Five old-symbol files, two cast adaptations
   and two generated queue guards retire; the cube/game-clear reset hooks
   survive the last generated MENUF local-static reset.
-  #421/#429 await exact-revision CI; #410 is not classified. Controlled asset
+  [Source Quality 44073792680](https://github.com/JEschete/VS-NativePort/actions/runs/44073792680)
+  passes for `430f4636c04633092b60ae9a453e03e1c60c785e`; #421/#429 are closed
+  with their bounded acceptance verified. #410 is not classified. Controlled asset
   completion is not physical-CD, audible-output, hardware-GPU or gameplay
   verification. SFX tables remain unbound.
 - Game-clear evidence (`VR-MENU-GAMECLEAR-LIFECYCLE`): six original spans
@@ -85,7 +109,7 @@ requested final 112 until this seven-function group's CI passes. See
   fixup and all four old-symbol files retire. Original roulette assertions
   remain; teardown now restores public fields and the native private timer.
   No physical-CD, audible-output, hardware-GPU or gameplay completion is
-  claimed. #421/#429 remain open for time-attack integration. This is the
+  claimed. #421/#429 were subsequently closed after time-attack acceptance. This is the
   published 77-of-112 milestone, with 35 remaining.
   [Source Quality 44066568507](https://github.com/JEschete/VS-NativePort/actions/runs/44066568507)
   passes for `3cb6225029dd398b5da9bc77a8722ad9113cef3d`.
@@ -458,8 +482,8 @@ requested final 112 until this seven-function group's CI passes. See
 
 Next steps:
 
-1. Publish time attack, confirm exact-revision CI and reconcile #421/#429;
-   then integrate the delivered Gazette/text/map
+1. Gazette-time local gates pass; publish and verify exact-revision CI, then
+   integrate the delivered Gazette-statistics/terminal and text/map
    groups. Status-terminal publication/CI and #422 closure are complete.
    Game-clear packet `6b9c330d36c12741b3f0284dd3a86d6478674110` is imported
    and registered locally: six original spans pass 6,144 vectors, 80
@@ -497,11 +521,18 @@ Next steps:
    `d1900a9e61fc3a7c56fc6371df2c1773ff58d7de` passes 29 cases / 355 assertions
    per configuration (six actual-Live cases / 190 assertions), zero new
    tidy findings, with production/proof files and original assertions
-   unchanged. Root registration, bounded formatter callers and actual
-   MENU9/cold reset controls remain.
+   unchanged. Root registration, bounded formatter callers, actual
+   MENU9/cold reset controls and shared gates now pass as recorded above.
+   The only production-header follow-up is the comment-only namespace
+   naming exemption.
    Gazette-statistics packet `0343f605887247accb573494b14edbe2df518219`
    is delivered: 30 cases / 749 assertions in each configuration,
-   5,120 vectors, 122 mutants and five native variants. Gazette-terminal
+   5,120 vectors, 122 mutants and five native variants. Test-only genuine-service
+   follow-up `f7b01abb359fb09b0b787d58b2ad56b7a5e6ec1d` passes 42 cases /
+   1,031 assertions in both configurations, including 12 actual-Live cases /
+   282 assertions, with zero tidy findings and all original assertions,
+   implementation and proofs unchanged. Root registration/caller/module/cold
+   integration remains. Gazette-terminal
    packet `86b1223d99d572d8d916a8a713bf74a228aa7e0d` is delivered: 53 tests /
    363 assertions per configuration, 11,264 parity vectors, 145 instruction
    mutants and eight compiled variants. Production integration remains.
@@ -511,10 +542,10 @@ Next steps:
    native variants; quality/tidy has zero new findings and metadata guards
    pass. Its #425 caption, #426 scene extent and #427 lifecycle issues remain
    open for actual root integration and exact-revision CI. All initial packets
-   have been delivered; Gazette-statistics and Gazette-terminal
-   production-service test follow-ups are active, reusing the time fixture.
+   have been delivered; the Gazette-terminal production-service test follow-up
+   is active, reusing the shared time/statistics fixtures.
    No isolated packet alone establishes production-linked acceptance.
-   #421 retains its bounded acceptance and root integration/CI gates.
+   #421/#429 are closed after their actual results integration/CI gates.
    The coordinator's text-update worktree is
    `D:\Dev\NativePort\wt\batch-text-update-b88a6b2c`; complete packet
    `7ae1cde9cfc5803fe64846f045e9668d91589dd7` is committed locally and clean.

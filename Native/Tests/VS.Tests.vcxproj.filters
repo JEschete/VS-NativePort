@@ -660,6 +660,15 @@
     <ClCompile Include="src\GazetteRowsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GazetteTimesIntegrationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GazetteTimesLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GazetteTimesTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GimImagesTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1348,6 +1357,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\GameClearLifecycleLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\GazetteTimesLiveFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp">
