@@ -669,6 +669,15 @@
     <ClCompile Include="src\GazetteStatisticsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GazetteTerminalIntegrationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GazetteTerminalLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GazetteTerminalTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GazetteTimesIntegrationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1369,6 +1378,15 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\GazetteStatisticsLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\GazetteTerminalFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\GazetteTerminalLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\GazetteTerminalPreviewFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\GazetteTimesLiveFixture.hpp">

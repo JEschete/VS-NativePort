@@ -51,6 +51,7 @@
 #include "Menu/RenameLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
+#include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -107,7 +108,6 @@ extern "C" {
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
 #include "Menu/Results/Results.h"
-#include "Menu/Score/ScoreScreen.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "Render/Camera.h"
@@ -1035,7 +1035,7 @@ class LiveHost final : public Host {
       case Submenu::kOptions:
         return VS::Menu::Options::UpdateLiveOptions(*bytes);
       case Submenu::kScore:
-        return Menu_Score_UpdateScreen(bytes);
+        return VS::Menu::Score::UpdateLiveGazetteScreen(bytes);
       case Submenu::kManual:
         return VS::Menu::manual::LiveUpdateScreen(bytes);
       case Submenu::kResults:

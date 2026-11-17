@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include <cstdlib>
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
@@ -14,6 +15,7 @@
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
+#include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
@@ -72,6 +74,9 @@ void Boot_ResetMenu5Statics(void)
 // Call where the original loads MENU9.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenu9Statics(void)
 {
+    if (!VS::Menu::Score::ResetLiveGazetteTerminalModuleState()) {
+        std::abort();
+    }
     Menu_Score_Encyclopedia_ResetMenu9Statics();
     VS::Menu::Score::ResetGazetteRowsLive();
     VS::Menu::Score::ResetLiveGazetteStatisticsStatics();

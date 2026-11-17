@@ -4,9 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/include/gpu.h:108
-#define vs_getRGB888(r, g, b) (((r) & 0xFF) | (((g) & 0xFF) << 8) | (((b) & 0xFF) << 16))
-
 #endif // VS_MENU_SCORE_ENCYCLOPEDIA_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_ENCYCLOPEDIA_H_DECLS)
@@ -25,12 +22,6 @@ extern Content_DiscQueueSlot* Menu_Score_zudCdSlot;;
 extern Menu_Score_ZudHeader* Menu_Score_zudData;;
 extern int Menu_Score_zudLbas[];
 extern int Menu_Score_zudSizes[];
-void Menu_Score_ShowEnemyDescription(void);
-void Menu_Score_DrawEnemyNumber(int x, int y, int enemyNo, int dimmed);
-void Menu_Score_InitializeEnemyList(void);
-void Menu_Score_RenderEnemyList(int animState);
-void Menu_Score_RenderEnemyViewer(int animState, int state);
-void Menu_Score_UpdateEnemyNavigation(int direction);
 void Menu_Score_Encyclopedia_ResetMenu9Statics(void);
 
 #endif // VS_MENU_SCORE_ENCYCLOPEDIA_H_DECLS

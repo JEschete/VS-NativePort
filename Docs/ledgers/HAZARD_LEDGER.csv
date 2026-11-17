@@ -227,11 +227,6 @@ ccfdd7f9d2bb,NARROW-ID,medium,pattern,,Items_ArmorInit,Native/Game/src/Items/Equ
 6d3ee4c20cfe,NULL-TABLE,medium,pattern,,UnlinkLiveActorFromRoomList,Native/Game/src/Actors/ActorRosterLive.cpp,164,Battle_actors[decision.slot],55,14,open,
 eef5c236b70d,NULL-TABLE,medium,pattern,,TriggerLiveActorTrap,Native/Game/src/Field/ChestInteractionsLive.cpp,1060,Battle_actors[actor],45,3,open,
 7ffa8d1c6ccd,NULL-TABLE,medium,pattern,,SnapLiveRoomActorsToSupport,Native/Game/src/Field/CollisionMapLive.cpp,310,Actors_actorRecords[slot],57,23,guarded,"the write loop only touches slots whose optional was filled by the read loop, which skips null actor records; the typed core between the loops does not change the actor table"
-03ce6d3c05d0,NULL-TABLE,low,pattern,F02803,Menu_Score_Update,Native/Game/src/Menu/Score/ScoreScreen.cpp,245,Actors_actorRecords[1],60,34,open,
-314d9d142b6f,NULL-TABLE,low,pattern,F02803,Menu_Score_Update,Native/Game/src/Menu/Score/ScoreScreen.cpp,245,Actors_actorRecords[1],60,34,open,
-473d14a595cf,NULL-TABLE,low,pattern,F02803,Menu_Score_Update,Native/Game/src/Menu/Score/ScoreScreen.cpp,245,Actors_actorRecords[1],60,34,open,
-4a8728280138,NULL-TABLE,low,pattern,F02803,Menu_Score_Update,Native/Game/src/Menu/Score/ScoreScreen.cpp,245,Actors_actorRecords[1],60,34,open,
-a66df177f40f,NULL-TABLE,low,pattern,F02803,Menu_Score_Update,Native/Game/src/Menu/Score/ScoreScreen.cpp,245,Actors_actorRecords[1],60,34,open,
 3fae018290a8,OUT-OF-BOUNDS,high,compiler,F00501,Battle_AccumulateWeaponDpRestoration,Native/Game/src/Battle/ActionResolution.cpp,128,-Warray-bounds: array index 6 is past the end of the array (that has type 'union (unnamed at D:\Dev\NativePort\VS-NativePort\Native\Game,56,24,open,
 2be04a340e5a,OUT-OF-BOUNDS,high,compiler,F02944,Menu_Container_DrawCategoryIcons,Native/Game/src/Menu/Container/ItemView.cpp,142,-Warray-bounds: array index 27 is past the end of the array (that has type 'char[25]'),60,34,open,
 4f31b39fd81d,POINTER-INT,high,compiler,F00788,Content_ParseWeaponModel,Native/Content/src/ActorAssets.cpp,376,-Wpointer-to-int-cast: cast to smaller integer type 'unsigned long' from 'unsigned char *',47,6,open,

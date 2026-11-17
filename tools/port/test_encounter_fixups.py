@@ -3675,10 +3675,16 @@ int func_800F9800(void) {
         # guard below. F03046 and F03048 left it for the owned CubePuzzleLifecycle.cpp InitializeCubePuzzleStart
         # and InitializeCubePuzzleQuit (#276 row 50), whose CubePuzzleLifecycleLive.cpp disc read keeps the guard
         # below. F03010 moved to GameClearLifecycleLive.cpp and F03011/F03012 to TimeAttackTerminalLive.cpp,
-        # preserving their completed-request fallbacks (#429).
-        self.assertGreaterEqual(len(guarded), 8)
-        self.assertTrue({"F03010", "F03011", "F03012"}.isdisjoint(fid for fid, _, _ in guarded))
+        # preserving their completed-request fallbacks (#429). F02803 now owns its MON fallback in
+        # GazetteTerminalLive.cpp; count its checked native obligation instead of a retired fixup.
+        migrated_guarded = {"F02803"}
+        self.assertGreaterEqual(len(guarded) + len(migrated_guarded), 8)
+        self.assertTrue(
+            ({"F03010", "F03011", "F03012"} | migrated_guarded).isdisjoint(fid for fid, _, _ in guarded)
+        )
         owned = self.owned_items()
+        self.assertNotIn("F02803", copy_fixups.FIXES)
+        self.assertEqual(owned["F02803"]["path"], r"Native\Game\src\Menu\Score\GazetteTerminal.cpp")
         self.assertEqual(owned["F03010"]["path"], r"Native\Game\src\Menu\Results\GameClearLifecycle.cpp")
         for fid in ("F03011", "F03012"):
             self.assertEqual(owned[fid]["path"], r"Native\Game\src\Menu\Results\TimeAttackTerminal.cpp")
@@ -3768,6 +3774,16 @@ int func_800F9800(void) {
         )
         self.assertIn("LiveLoadhost(TimeAttackAsset::kResults);", time_attack_live)
         self.assertIn("LiveLoadhost(TimeAttackAsset::kStart);", time_attack_live)
+        gazette_live = "".join(
+            (root / r"Native\Game\src\Menu\Score\GazetteTerminalLive.cpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "if(request!=nullptr){Menu_Score_monBinCdQueueSlot=request;"
+            "Content::EnqueueLiveDiscRequest(request,data);}"
+            "else{request=Content::CompleteLiveRefusedDiscRequest(&Menu_Score_kMonBinFile,data);"
+            "Menu_Score_monBinCdQueueSlot=request;}",
+            gazette_live,
+        )
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
         self.assertIn('"CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"', background_tests)
         effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
@@ -3836,6 +3852,7 @@ int func_800F9800(void) {
             event,
         )
         sites += 4  # Owned event/game-clear and both checked time-attack entry sites.
+        sites += len(migrated_guarded)
         self.assertGreaterEqual(sites, 6)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)
@@ -4500,43 +4517,17 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertEqual(owned["F01014"]["path"], r"Native\Game\src\Field\GimmickReactions.cpp")
         self.assertEqual(owned["F01013"]["path"], r"Native\Game\src\Field\GimmickDynamics.cpp")
 
-    def test_score_number_buffers_include_all_digits_and_terminators(self):
-        self.assertNotIn("F02816", copy_fixups.FIXES)
-        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F02816"],
-                         "VS::Menu::Score::DrawLiveTitleNumber")
-        cases = (
-            (
-                "F02817",
-                'char digits[2];\nsprintf(digits, "%03d", enemyNo);',
-                'char digits[sizeof "000"];',
-                '"%03d"',
-            ),
-            (
-                "F02820",
-                'char sp60[12];\nsprintf(sp60, "NO.   %03d/%03d", selected + 1, 78);',
-                'char sp60[sizeof "NO.   000/000"];',
-                '"NO.   %03d/%03d"',
-            ),
-        )
-        for function, source, declaration, format_string in cases:
+    def test_score_number_renderers_use_owned_bindings(self):
+        bindings = {
+            "F02816": "DrawLiveTitleNumber",
+            "F02817": "DrawLiveEnemyNumber",
+            "F02820": "RenderLiveEnemyViewer",
+        }
+        for function, binding in bindings.items():
             with self.subTest(function=function):
-                if function == "F02817":
-                    source += """
-poly = *(void**)Core_ScratchAddr(0);
-AddPrim(*(void**)Core_ScratchAddr(2), poly++);
-*(void**)Core_ScratchAddr(0) = poly;
-"""
-                for old, new, _ in copy_fixups.FIXES[function]:
-                    self.assertEqual(source.count(old), 1)
-                    source = source.replace(old, new)
-                self.assertIn(declaration, source)
-                self.assertIn(format_string, source)
-                if function != "F02820":
-                    self.assertIn(
-                        "AddPrim(Render_frameScratch.overlayOrderingTable, poly++);",
-                        source,
-                    )
-                    self.assertNotIn("Core_Scratch", source)
+                self.assertNotIn(function, copy_fixups.FIXES)
+                self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[function],
+                                 f"VS::Menu::Score::{binding}")
 
     def test_npc_area_filter_keeps_geometry_without_creating_player_ui(self):
         # #276 row 31: Battle_FilterAreaActionTargets (F00103) is typed C++ in Battle/Targeting.cpp.

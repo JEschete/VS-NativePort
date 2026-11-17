@@ -7,6 +7,7 @@
 ],
 [
 "// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.",
+"#include <cstdlib>",
 "#include \"Menu/BattleAbilitiesTerminalLive.hpp\"",
 "#include \"Menu/BattleAbilitiesUnlockLive.hpp\"",
 "#include \"Menu/Container/ContainerListTransferLive.hpp\"",
@@ -22,6 +23,7 @@
 "#include \"Menu/Results/TimeAttackTerminalLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
 "#include \"Menu/Score/GazetteStatisticsLive.hpp\"",
+"#include \"Menu/Score/GazetteTerminalLive.hpp\"",
 "#include \"Menu/Score/GazetteTimesLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\"",
 "#include \"Menu/Status/LimbControllersLive.hpp\"",
@@ -79,6 +81,9 @@
 "    Menu_Score_Encyclopedia_ResetMenu9Statics();"
 ],
 [
+"    if (!VS::Menu::Score::ResetLiveGazetteTerminalModuleState()) {",
+"        std::abort();",
+"    }",
 "    Menu_Score_Encyclopedia_ResetMenu9Statics();",
 "    VS::Menu::Score::ResetGazetteRowsLive();",
 "    VS::Menu::Score::ResetLiveGazetteStatisticsStatics();",
@@ -308,82 +313,6 @@
 ],
 [
 "        static const RECT initial[2] = {};"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Score\\Encyclopedia.cpp": [
-[
-214,
-[
-"    poly = Render_frameScratch.primitiveCursor;"
-],
-[
-"    poly = (POLY_FT4 *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-437,
-[
-"        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, scratch[1] + 24);"
-],
-[
-"        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, (u_long *)(((u_char*)(scratch[1])) + 24));"
-]
-],
-[
-442,
-[
-"            \"ROTATION\", control_label_x | (18 << 16), Menu_Score_rotationColor, scratch[1] + 24);"
-],
-[
-"            \"ROTATION\", control_label_x | (18 << 16), Menu_Score_rotationColor, (u_long *)(((u_char*)(scratch[1])) + 24));"
-]
-],
-[
-447,
-[
-"        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, scratch[1] + 24);"
-],
-[
-"        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, (u_long *)(((u_char*)(scratch[1])) + 24));"
-]
-],
-[
-449,
-[
-"            \"ZOOM\", control_label_x | (36 << 16), Menu_Score_zoomColor, scratch[1] + 24);"
-],
-[
-"            \"ZOOM\", control_label_x | (36 << 16), Menu_Score_zoomColor, (u_long *)(((u_char*)(scratch[1])) + 24));"
-]
-],
-[
-453,
-[
-"            enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, scratch[1] + 0x1C);"
-],
-[
-"            enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, (u_long *)(((u_char*)(scratch[1])) + 0x1C));"
-]
-],
-[
-502,
-[
-"        poly = scratch[0];"
-],
-[
-"        poly = (POLY_FT4 *)(scratch[0]);"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
-[
-278,
-[
-"            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
-],
-[
-"            Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size));"
 ]
 ]
 ],

@@ -31,6 +31,7 @@
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
+#include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -78,6 +79,10 @@ constexpr std::int16_t kVramHeight = 512;
 void CleanupMenuOwners() {
   if (!Menu::Score::CleanupLiveEnemyPreviewOwnedState()) {
     Core_Errorf("boot", "enemy-preview cleanup refused before session reset");
+    std::abort();
+  }
+  if (!Menu::Score::ResetLiveGazetteTerminalModuleState()) {
+    Core_Errorf("boot", "Gazette cleanup refused before session reset");
     std::abort();
   }
   if (!Menu::Results::CleanupLiveGameClearOwnedState()) {

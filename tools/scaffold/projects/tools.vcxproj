@@ -794,6 +794,17 @@
     <None Include="..\..\port\differentials\gazette_statistics_f02816.py" />
     <None Include="..\..\port\differentials\gazette_statistics_f02824.py" />
     <None Include="..\..\port\differentials\gazette_statistics_f02825.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_common.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_control.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_driver.cpp" />
+    <None Include="..\..\port\differentials\gazette_terminal_f02803.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_f02805.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_f02817.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_f02818.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_f02819.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_f02820.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_f02834.py" />
+    <None Include="..\..\port\differentials\gazette_terminal_f04156.py" />
     <None Include="..\..\port\differentials\gazette_times_common.py" />
     <None Include="..\..\port\differentials\gazette_times_driver.cpp" />
     <None Include="..\..\port\differentials\gazette_times_f02828.py" />

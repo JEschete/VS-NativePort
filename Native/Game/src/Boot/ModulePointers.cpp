@@ -153,6 +153,7 @@
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
+#include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
@@ -2385,6 +2386,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU9.PRG", 0x80105A0Cu, 0u, (void*)&VS::Menu::Score::DrawLiveTitleNumber, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80106780u, 0u, (void*)&VS::Menu::Score::CreateLiveStatisticRows, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80106808u, 0u, (void*)&VS::Menu::Score::RenderLiveStatistics, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80104B40u, 0u, (void*)&VS::Menu::Score::ShowLiveEnemyDescription, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80105BCCu, 0u, (void*)&VS::Menu::Score::DrawLiveEnemyNumber, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80105D8Cu, 0u, (void*)&VS::Menu::Score::InitializeLiveEnemyList, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80105F00u, 0u, (void*)&VS::Menu::Score::RenderLiveEnemyList, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x801061F8u, 0u, (void*)&VS::Menu::Score::RenderLiveEnemyViewer, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80107A98u, 0u, (void*)&VS::Menu::Score::DrawLiveEnemyNavigation, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x8010337Cu, 0u, (void*)&VS::Menu::Score::UpdateLiveGazette, 0u, 0u, 0u},
+    {"MENU/MENU9.PRG", 0x80102FF8u, 0u, (void*)&VS::Menu::Score::UpdateLiveGazetteScreen, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103A24u, 0u, (void*)&VS::Menu::manual::LiveUploadSpriteTiles, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103AD8u, 0u, (void*)&VS::Menu::manual::LiveUploadCluts, 0u, 0u, 0u},
     {"MENU/MENUE.PRG", 0x80103E6Cu, 0u, (void*)&VS::Menu::manual::LiveDrawIllustration, 0u, 0u, 0u},

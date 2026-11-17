@@ -1,0 +1,331 @@
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <span>
+#include <stdexcept>
+#include <vector>
+
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+
+#include "Boot/SessionLive.hpp"
+#include "Menu/GameClearLifecycleLiveFixture.hpp"
+#include "Menu/GazetteTerminalLiveFixture.hpp"
+#include "Menu/GazetteTerminalPreviewFixture.hpp"
+#include "Menu/OverlayLoadFixture.hpp"
+
+extern "C" {
+#include "Content/DiscLayout.h"
+#include "Event/ScriptVm.h"
+}
+
+namespace {
+namespace live = gazette_terminal_live_tests;
+namespace shared = gazette_times_live_tests;
+namespace score = VS::Menu::Score;
+namespace fw = VS::Menu::Framework;
+namespace content = VS::Content;
+namespace memory = VS::Core::Memory;
+
+template <typename Entry>
+Entry ModuleEntry(unsigned address, Entry expected) {
+  auto* resolved = content::ResolveModuleAddress(
+      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENU9.PRG",
+      address);
+  CHECK(resolved == reinterpret_cast<void*>(expected));
+  if (resolved != reinterpret_cast<void*>(expected)) {
+    throw std::runtime_error("incorrect Gazette terminal module entry");
+  }
+  return reinterpret_cast<Entry>(resolved);
+}
+
+struct MonOwner {
+  void* buffer;
+  Content_DiscQueueSlot* request;
+  std::uint64_t generation;
+
+  void CheckReleased() const {
+    CHECK(Menu_Score_monBinData == nullptr);
+    CHECK(Menu_Score_monBinCdQueueSlot == nullptr);
+    CHECK(Menu_Score_enemyDescriptions == nullptr);
+    CHECK(Menu_Score_menuState == 0);
+    CHECK_FALSE(memory::LivePayloadCapacity(buffer).has_value());
+    CHECK(content::LiveDiscRequestGeneration(request) != generation);
+  }
+};
+
+MonOwner BeginMon(live::PreviewFixture& fixture, bool loaded) {
+  fixture.LoadSourceActor();
+  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+  fixture.SelectPage(3, false);
+  fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kWaitForEnemies),
+                    false);
+  const MonOwner owner{
+      Menu_Score_monBinData, Menu_Score_monBinCdQueueSlot,
+      content::LiveDiscRequestGeneration(Menu_Score_monBinCdQueueSlot)};
+  REQUIRE(owner.buffer != nullptr);
+  REQUIRE(owner.request != nullptr);
+  REQUIRE(owner.generation != 0);
+  if (loaded) {
+    fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kEnemies));
+  } else {
+    REQUIRE(content::BeginLiveDiscRead(
+        Menu_Score_kMonBinFile.lba,
+        static_cast<std::uint32_t>(Menu_Score_kMonBinFile.size), owner.buffer));
+    REQUIRE(Content_discDriveState.destination == owner.buffer);
+  }
+  return owner;
+}
+
+struct ForeignOwner {
+  std::vector<std::byte> cursor;
+  void* actor = Actors_actorRecords[0];
+  void* allocation = memory::AllocateLiveFromLowEnd(64);
+  Content_DiscQueueSlot* request = nullptr;
+  std::uint64_t generation = 0;
+
+  ForeignOwner() {
+    const auto bytes = live::BytesOf(Battle_unusedMenu9CursorMemory);
+    cursor.assign(bytes.begin(), bytes.end());
+    const Content_DiscFile file{Menu_Score_kMonBinFile.lba, 2048};
+    request = content::AllocateLiveDiscRequest(&file);
+    generation = content::LiveDiscRequestGeneration(request);
+    if (allocation == nullptr || request == nullptr || generation == 0) {
+      throw std::runtime_error("terminal foreign-owner control unavailable");
+    }
+  }
+  ~ForeignOwner() {
+    if (content::LiveDiscRequestGeneration(request) == generation) {
+      content::ReleaseLiveDiscRequest(request);
+    }
+    if (memory::LivePayloadCapacity(allocation)) {
+      memory::FreeLiveFromLowEnd(allocation);
+    }
+  }
+  ForeignOwner(const ForeignOwner&) = delete;
+  ForeignOwner& operator=(const ForeignOwner&) = delete;
+
+  void Check() const {
+    CHECK(content::LiveDiscRequestGeneration(request) == generation);
+    CHECK(memory::LivePayloadCapacity(allocation).has_value());
+    CHECK(Actors_actorRecords[0] == actor);
+    CHECK(std::ranges::equal(live::BytesOf(Battle_unusedMenu9CursorMemory),
+                             cursor));
+    CHECK(Content_discRequestCounts.reading == 0);
+    CHECK(Content_discRequestCounts.waiting == 0);
+  }
+};
+
+TEST_CASE("Gazette enemy module entries use real links descriptions and digits",
+          "[gazette-terminal-integration][gazette-terminal-module]"
+          "[F02805][F02817][F02818]") {
+  live::Fixture fixture;
+  fixture.BorrowMon();
+  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+  ModuleEntry(0x80105D8C, &score::InitializeLiveEnemyList)();
+  fw::InitializeLiveInformationBox();
+  Menu_Score_selectedEnemy = 0;
+  ModuleEntry(0x80104B40, &score::ShowLiveEnemyDescription)();
+  CHECK(fixture.InformationText() == live::Fixture::Description(0));
+  fixture.ResetFrame();
+  ModuleEntry(0x80105BCC, &score::DrawLiveEnemyNumber)(32, 48, 78, 0);
+  CHECK(fixture.Packets().size() == 3);
+  CHECK(fixture.GuardsIntact());
+}
+
+TEST_CASE(
+    "Gazette render module entries emit production list viewer and arrows",
+    "[gazette-terminal-integration][gazette-terminal-module]"
+    "[F02819][F02820][F02834]") {
+  live::Fixture fixture;
+  fixture.BorrowMon();
+  live::Fixture::UnlockAll();
+  fw::InitializeLiveInformationBox();
+  const auto refusals = score::LiveGazetteTerminalRefusals();
+  ModuleEntry(0x80105F00, &score::RenderLiveEnemyList)(8);
+  CHECK(fixture.InformationText() == live::Fixture::Description(0));
+  fixture.ResetFrame();
+  ModuleEntry(0x801061F8, &score::RenderLiveEnemyViewer)(8, 3);
+  CHECK_FALSE(fixture.Packets().empty());
+  fixture.ResetFrame();
+  ModuleEntry(0x80107A98, &score::DrawLiveEnemyNavigation)(0);
+  CHECK_FALSE(fixture.Packets().empty());
+  CHECK(score::LiveGazetteTerminalRefusals() == refusals);
+  CHECK(fixture.GuardsIntact());
+}
+
+TEST_CASE("Gazette terminal module entries initialize real preview and screen",
+          "[gazette-terminal-integration][gazette-terminal-module]"
+          "[F02803][F04156]") {
+  live::PreviewFixture fixture;
+  fixture.LoadSourceActor();
+  CHECK(ModuleEntry(0x8010337C, &score::UpdateLiveGazette)() == 0);
+  CHECK(Menu_Score_menuState == 1);
+  CHECK(ModuleEntry(0x8010337C, &score::UpdateLiveGazette)() == 0);
+  CHECK(Menu_Score_menuState == 2);
+  CHECK(Actors_actorRecords[1] != nullptr);
+  std::array<std::uint8_t, 2> phase{3, 0xAA};
+  CHECK(ModuleEntry(0x80102FF8,
+                    &score::UpdateLiveGazetteScreen)(phase.data()) == 0);
+  CHECK(phase == std::array<std::uint8_t, 2>{4, 0xAA});
+  CHECK(fixture.GuardsIntact());
+}
+
+TEST_CASE(
+    "Production framework dispatch consumes the actual Gazette state byte",
+    "[gazette-terminal-integration][gazette-terminal-framework]"
+    "[F04156]") {
+  live::Fixture fixture;
+  const game_clear_live_tests::SavedGlobals<
+      Menu_Framework_menuState, Menu_Framework_loadedSubMenu,
+      Menu_Framework_openedWithoutMainMenu, Menu_Framework_actionRestrictions,
+      Menu_Framework_submenuStates>
+      saved;
+  Menu_Framework_loadedSubMenu = 10;
+  Menu_Framework_openedWithoutMainMenu = 1;
+  Menu_Framework_menuState.currentMenu = 10;
+  Menu_Framework_menuState.loading = 0;
+  Menu_Framework_actionRestrictions = 0;
+  Menu_Framework_submenuStates[10] = 3;
+  Menu_Framework_submenuStates[9] = static_cast<char>(0xAA);
+  fw::UpdateLiveMainMenu(10);
+  CHECK(Menu_Framework_submenuStates[10] == 4);
+  CHECK(static_cast<unsigned char>(Menu_Framework_submenuStates[9]) == 0xAA);
+  CHECK(Menu_Framework_backgroundFadeStep > 0);
+  CHECK(fixture.GuardsIntact());
+}
+
+TEST_CASE("Only completed MENU9 drains the real pending or consumed MON owner",
+          "[gazette-terminal-integration][gazette-terminal-reload]"
+          "[F02803][F04156]") {
+  const bool loaded = GENERATE(false, true);
+  live::PreviewFixture fixture;
+  const auto owner = BeginMon(fixture, loaded);
+  const ForeignOwner foreign;
+  {
+    menu_overlay_tests::Load other(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+    REQUIRE(other.Complete() == 1);
+    CHECK(Menu_Score_monBinData == owner.buffer);
+  }
+  {
+    menu_overlay_tests::Load menu(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    REQUIRE(menu.Poll() == 0);
+    CHECK(Menu_Score_monBinData == owner.buffer);
+    REQUIRE(menu.Complete() == 1);
+  }
+  owner.CheckReleased();
+  foreign.Check();
+  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(fixture.GuardsIntact());
+}
+
+TEST_CASE("Actual cold session drains the real pending or consumed MON owner",
+          "[gazette-terminal-integration][gazette-terminal-reload]"
+          "[F02803][F04156]") {
+  const bool loaded = GENERATE(false, true);
+  const game_clear_live_tests::SavedModuleData saved_module;
+  const game_clear_live_tests::SavedGlobals<
+      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
+      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
+      Menu_sceneNotificationTimed>
+      saved_ui;
+  live::PreviewFixture fixture;
+  const auto owner = BeginMon(fixture, loaded);
+  const ForeignOwner foreign;
+  const auto entry = +[] { return 0; };
+  CHECK(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
+  owner.CheckReleased();
+  foreign.Check();
+  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(fixture.GuardsIntact());
+}
+
+TEST_CASE("Actual pre-heap boundary drains MON before replacing heap identity",
+          "[gazette-terminal-integration][gazette-terminal-heap]"
+          "[F02803][F04156]") {
+  const bool loaded = GENERATE(false, true);
+  live::PreviewFixture fixture;
+  const auto owner = BeginMon(fixture, loaded);
+  static_cast<void>(content::ReleaseLiveActorModel(0));
+  const auto refusals = memory::RefusedLiveHeapRequestCount();
+  VS::Boot::ResetLiveSessionHeap();
+  owner.CheckReleased();
+  CHECK(Content_discDriveState.destination == nullptr);
+  CHECK(Content_discRequestCounts.reading == 0);
+  CHECK(Content_discRequestCounts.waiting == 0);
+  CHECK(memory::GameHeap().Empty());
+  CHECK(memory::RefusedLiveHeapRequestCount() == refusals);
+}
+
+void ResetAtBoundary(bool cold) {
+  if (cold) {
+    const auto entry = +[] { return 0; };
+    REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
+  } else {
+    menu_overlay_tests::Load menu(10, {VS_MENU9_PRG_LBA, VS_MENU9_PRG_SIZE});
+    REQUIRE(menu.Complete() == 1);
+  }
+}
+
+TEST_CASE("Actual Gazette boundaries drain pending ZUD before its MON owner",
+          "[gazette-terminal-integration][gazette-terminal-reload]"
+          "[F02803][F04156]") {
+  const bool cold = GENERATE(false, true);
+  const game_clear_live_tests::SavedModuleData saved_module;
+  const game_clear_live_tests::SavedGlobals<
+      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
+      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
+      Menu_sceneNotificationTimed>
+      saved_ui;
+  live::PreviewFixture fixture;
+  const auto owner = BeginMon(fixture, true);
+  REQUIRE(fixture.TickGazette() == 0);
+  live::Fixture::Input(live::kCircle);
+  REQUIRE(fixture.TickGazette(false) == 0);
+  const auto preview = score::LiveEnemyPreviewState();
+  REQUIRE(preview.file != content::AssetAddress::kNone);
+  REQUIRE(preview.model_buffer != content::AssetAddress::kNone);
+  const ForeignOwner foreign;
+  ResetAtBoundary(cold);
+  owner.CheckReleased();
+  CHECK(score::LiveEnemyPreviewState() == score::EnemyPreviewState{});
+  CHECK_FALSE(memory::LivePayloadCapacity(reinterpret_cast<void*>(preview.file))
+                  .has_value());
+  CHECK_FALSE(
+      memory::LivePayloadCapacity(reinterpret_cast<void*>(preview.model_buffer))
+          .has_value());
+  foreign.Check();
+}
+
+shared::Sprite DrawEnemyCursor(live::PreviewFixture& fixture) {
+  fixture.ResetFrame();
+  score::RenderLiveEnemyList(8);
+  return fixture.Cursor();
+}
+
+TEST_CASE(
+    "Actual Gazette reset restores the private cursor through real reentry",
+    "[gazette-terminal-integration][gazette-terminal-reload]"
+    "[F02819][F02803]") {
+  const bool cold = GENERATE(false, true);
+  const game_clear_live_tests::SavedModuleData saved_module;
+  const game_clear_live_tests::SavedGlobals<
+      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
+      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
+      Menu_sceneNotificationTimed>
+      saved_ui;
+  live::PreviewFixture fixture;
+  const auto owner = BeginMon(fixture, true);
+  std::array<shared::Sprite, 4> cursors{};
+  for (auto& cursor : cursors) cursor = DrawEnemyCursor(fixture);
+  REQUIRE(cursors[0] != cursors[1]);
+  ResetAtBoundary(cold);
+  owner.CheckReleased();
+  fixture.SelectPage(3);
+  fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kEnemies));
+  CHECK(DrawEnemyCursor(fixture) == cursors[0]);
+  CHECK(DrawEnemyCursor(fixture) == cursors[1]);
+  CHECK(fixture.GuardsIntact());
+}
+}  // namespace

@@ -2081,12 +2081,17 @@
     <ClCompile Include="src\Menu\Score\GazetteCameraLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteEncyclopedia.cpp" />
     <ClCompile Include="src\Menu\Score\GazetteRows.cpp" />
     <ClCompile Include="src\Menu\Score\GazetteRowsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Menu\Score\GazetteStatistics.cpp" />
     <ClCompile Include="src\Menu\Score\GazetteStatisticsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Score\GazetteTerminal.cpp" />
+    <ClCompile Include="src\Menu\Score\GazetteTerminalLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Menu\Score\GazetteTimes.cpp" />
@@ -3090,10 +3095,13 @@
     <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteCamera.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteCameraLive.hpp" />
+    <ClInclude Include="include\Menu\Score\GazetteEncyclopedia.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRows.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteRowsLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteStatistics.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteStatisticsLive.hpp" />
+    <ClInclude Include="include\Menu\Score\GazetteTerminal.hpp" />
+    <ClInclude Include="include\Menu\Score\GazetteTerminalLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteTimes.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteTimesLive.hpp" />
     <ClInclude Include="include\Menu\Score\ScoreRank.hpp" />

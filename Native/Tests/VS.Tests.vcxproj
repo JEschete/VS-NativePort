@@ -276,6 +276,9 @@
     <ClCompile Include="src\GazetteStatisticsIntegrationTests.cpp" />
     <ClCompile Include="src\GazetteStatisticsLiveTests.cpp" />
     <ClCompile Include="src\GazetteStatisticsTests.cpp" />
+    <ClCompile Include="src\GazetteTerminalIntegrationTests.cpp" />
+    <ClCompile Include="src\GazetteTerminalLiveTests.cpp" />
+    <ClCompile Include="src\GazetteTerminalTests.cpp" />
     <ClCompile Include="src\GazetteTimesIntegrationTests.cpp" />
     <ClCompile Include="src\GazetteTimesLiveTests.cpp" />
     <ClCompile Include="src\GazetteTimesTests.cpp" />
@@ -538,6 +541,9 @@
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
     <ClInclude Include="include\Menu\GameClearLifecycleLiveFixture.hpp" />
     <ClInclude Include="include\Menu\GazetteStatisticsLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\GazetteTerminalFixture.hpp" />
+    <ClInclude Include="include\Menu\GazetteTerminalLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\GazetteTerminalPreviewFixture.hpp" />
     <ClInclude Include="include\Menu\GazetteTimesLiveFixture.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
     <ClInclude Include="include\Menu\InventorySortingLiveFixture.hpp" />

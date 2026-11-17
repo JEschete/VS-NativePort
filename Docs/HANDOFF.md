@@ -1,23 +1,24 @@
 # Current Handoff
 
-Updated 2026-11-17. The latest accepted #276 group is Gazette
-statistics, F02814-F02816/F02824/F02825, including actual module/caller and
-MENU9/cold-session cursor controls. It is published in
-`14c933a40923d9996894e5364d36b286a6fa4dbc`, accepted through the unchanged-Native
-quality-budget follow-up `39c16835ee73e7ca1fc1e349f1759fc561cb122f`.
-Exact Source Quality 44085868536 succeeds; #431 is closed.
+Updated 2026-11-17. Gazette terminal F02803/F02805/F02817-F02820/F02834/F04156
+now meets local native, original-differential and integration gates; scoped
+publication and exact-revision CI are next. The latest accepted revision is
+the preview-ownership prerequisite `0a440855871c2b7a49eef73a821316b744c3d8f4`,
+with Source Quality 44091746436 successful and #430 closed.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The locally verified original 900-function cohort has **881 resolved
-(869 promoted, 12 retired) and 19 remaining**; **93 of the requested final
-112** are published and accepted. See
+The locally verified original 900-function cohort has **889 resolved
+(877 promoted, 12 retired) and 11 remaining**. **93 of the requested final
+112** are published and accepted; the eight terminal functions are locally
+verified but are not counted as accepted until exact-revision CI succeeds. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 0, 50: 8, 52: 10. The seven time-attack functions meet the no-bridge
+  48: 0, 50: 0 locally (eight awaiting publication), 52: 10.
+  The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
@@ -26,6 +27,40 @@ The locally verified original 900-function cohort has **881 resolved
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Gazette-terminal evidence (`VR-MENU-GAZETTE-TERMINAL`): eight original
+  spans pass 11,264 vectors, zero mismatches; 145 instruction mutants and
+  eight compiled native variants are detected. `group-20261117-090220`
+  passes both builds, Debug/Release full suites (9,366 cases / 12,977,955
+  assertions each), 114 focused cases / 5,036 assertions each, both canonical
+  replays and second-generation stability (zero Native changes,
+  `3b31b6fb285c4dfe`). Changed-file tidy reports 32 existing findings, zero new.
+  The original aggregate remains failed for one stale full-queue copier
+  control that counted the retired F02803 fixup. Its replacement retains
+  both numeric coverage minima and checks the native MON ownership,
+  enqueue guard and completed-request fallback. Both affected controls and
+  scoped Python quality pass; all Native bytes retain the passing fingerprint.
+  Three stale catalog core names were corrected through the promotion spec;
+  all final ledger sync/checks pass, and another two-run generation remains
+  stable at the same Native fingerprint.
+  Evidence: `build\scratch\gazette-terminal\integration.json`.
+  All 53 core cases / 363 assertions and 15 genuine-service cases /
+  807 assertions remain. Bounded test helpers fix eleven oversized cases
+  without removing assertions; borrowed-MON teardown now validates its
+  allocation directly instead of calling a throwing view from a destructor.
+  Actual pre-hook testing fails 24 ownership/counter assertions; the four
+  module/Framework cases already pass. Checked preview-then-MON cleanup
+  fixes completed MENU9, cold-session and common pre-heap interruption.
+  Nine integration cases cover all eight module entries, actual ordinary
+  Framework dispatch, pending/consumed and combined ZUD/MON cleanup,
+  foreign/reused ownership and controller reentry with observable cursor
+  packets. The existing full32 fallback passes twice through genuine
+  consumption and reentry. The shared controlled-overlay fixture retains
+  an Allocated request until completion and no longer overwrites real
+  cancellation counters. Original digit/link and full ID-header assertions
+  remain. Eight generated original bodies, eight adaptations and obsolete
+  buffer fixes retire; the surviving MENU9 model-variant data reset and
+  native row/statistics/time hooks remain. No physical-CD, hardware-GPU,
+  interactive gameplay, data/type or EC-retirement completion is claimed.
 - Gazette-statistics evidence (`VR-MENU-GAZETTE-STATISTICS`): five original
   spans pass 5,120 vectors, zero mismatches; 122 instruction mutants (128
   vectors each) and five compiled native variants are detected.
@@ -82,7 +117,9 @@ The locally verified original 900-function cohort has **881 resolved
   1,536 fresh preservation vectors without mutants. A subsequent header-only
   comment clarifies that raw reset is not cleanup; no runtime tokens change.
   Evidence: `build\scratch\gazette-preview\integration.json`.
-  Publication/exact-revision CI remain pending. No new promotion,
+  Published in `0a440855871c2b7a49eef73a821316b744c3d8f4`; exact
+  [Source Quality 44091746436](https://github.com/JEschete/VS-NativePort/actions/runs/44091746436)
+  succeeds and #430 is closed. No new promotion,
   physical-CD, hardware-GPU, gameplay or EC-retirement completion is claimed.
 - Gazette-time evidence (`VR-MENU-GAZETTE-TIMES`): four original spans pass
   4,096 vectors, zero mismatches; 64 instruction mutants (128 vectors each)

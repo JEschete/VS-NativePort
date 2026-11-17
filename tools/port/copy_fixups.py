@@ -1881,6 +1881,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Score::DrawLiveTitleNumber": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
     "VS::Menu::Score::CreateLiveStatisticRows": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
     "VS::Menu::Score::RenderLiveStatistics": r"Native\Game\include\Menu\Score\GazetteStatisticsLive.hpp",
+    "VS::Menu::Score::ShowLiveEnemyDescription": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
+    "VS::Menu::Score::DrawLiveEnemyNumber": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
+    "VS::Menu::Score::InitializeLiveEnemyList": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
+    "VS::Menu::Score::RenderLiveEnemyList": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
+    "VS::Menu::Score::RenderLiveEnemyViewer": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
+    "VS::Menu::Score::DrawLiveEnemyNavigation": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
+    "VS::Menu::Score::UpdateLiveGazette": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
+    "VS::Menu::Score::UpdateLiveGazetteScreen": r"Native\Game\include\Menu\Score\GazetteTerminalLive.hpp",
     "VS::Menu::manual::LiveUploadSpriteTiles": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveUploadCluts": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
     "VS::Menu::manual::LiveDrawIllustration": r"Native\Game\include\Menu\ManualIllustrationLive.hpp",
@@ -3446,6 +3454,14 @@ OWNED_CALL_BINDINGS["F02815"] = "VS::Menu::Score::RenderLiveTitles"
 OWNED_CALL_BINDINGS["F02816"] = "VS::Menu::Score::DrawLiveTitleNumber"
 OWNED_CALL_BINDINGS["F02824"] = "VS::Menu::Score::CreateLiveStatisticRows"
 OWNED_CALL_BINDINGS["F02825"] = "VS::Menu::Score::RenderLiveStatistics"
+OWNED_CALL_BINDINGS["F02805"] = "VS::Menu::Score::ShowLiveEnemyDescription"
+OWNED_CALL_BINDINGS["F02817"] = "VS::Menu::Score::DrawLiveEnemyNumber"
+OWNED_CALL_BINDINGS["F02818"] = "VS::Menu::Score::InitializeLiveEnemyList"
+OWNED_CALL_BINDINGS["F02819"] = "VS::Menu::Score::RenderLiveEnemyList"
+OWNED_CALL_BINDINGS["F02820"] = "VS::Menu::Score::RenderLiveEnemyViewer"
+OWNED_CALL_BINDINGS["F02834"] = "VS::Menu::Score::DrawLiveEnemyNavigation"
+OWNED_CALL_BINDINGS["F02803"] = "VS::Menu::Score::UpdateLiveGazette"
+OWNED_CALL_BINDINGS["F04156"] = "VS::Menu::Score::UpdateLiveGazetteScreen"
 OWNED_CALL_BINDINGS["F02992"] = "VS::Menu::manual::LiveUploadSpriteTiles"
 OWNED_CALL_BINDINGS["F02993"] = "VS::Menu::manual::LiveUploadCluts"
 OWNED_CALL_BINDINGS["F03000"] = "VS::Menu::manual::LiveDrawIllustration"
@@ -5531,6 +5547,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU9.PRG", 0x80105A0C, "VS::Menu::Score::DrawLiveTitleNumber"),  # F02816
     ("MENU/MENU9.PRG", 0x80106780, "VS::Menu::Score::CreateLiveStatisticRows"),  # F02824
     ("MENU/MENU9.PRG", 0x80106808, "VS::Menu::Score::RenderLiveStatistics"),  # F02825
+    ("MENU/MENU9.PRG", 0x80104B40, "VS::Menu::Score::ShowLiveEnemyDescription"),  # F02805
+    ("MENU/MENU9.PRG", 0x80105BCC, "VS::Menu::Score::DrawLiveEnemyNumber"),  # F02817
+    ("MENU/MENU9.PRG", 0x80105D8C, "VS::Menu::Score::InitializeLiveEnemyList"),  # F02818
+    ("MENU/MENU9.PRG", 0x80105F00, "VS::Menu::Score::RenderLiveEnemyList"),  # F02819
+    ("MENU/MENU9.PRG", 0x801061F8, "VS::Menu::Score::RenderLiveEnemyViewer"),  # F02820
+    ("MENU/MENU9.PRG", 0x80107A98, "VS::Menu::Score::DrawLiveEnemyNavigation"),  # F02834
+    ("MENU/MENU9.PRG", 0x8010337C, "VS::Menu::Score::UpdateLiveGazette"),  # F02803
+    ("MENU/MENU9.PRG", 0x80102FF8, "VS::Menu::Score::UpdateLiveGazetteScreen"),  # F04156
     ("MENU/MENUE.PRG", 0x80103A24, "VS::Menu::manual::LiveUploadSpriteTiles"),  # F02992
     ("MENU/MENUE.PRG", 0x80103AD8, "VS::Menu::manual::LiveUploadCluts"),  # F02993
     ("MENU/MENUE.PRG", 0x80103E6C, "VS::Menu::manual::LiveDrawIllustration"),  # F03000
@@ -5593,23 +5617,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], "
          "offsetof(Field_GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
-    ],
-    "F02817": [
-        ("char digits[2];", 'char digits[sizeof "000"];',
-         "238.c:1878 three encyclopedia digits also need the native sprintf terminator"),
-        ("poly = *(void**)Core_ScratchAddr(0);",
-         "poly = Render_frameScratch.primitiveCursor;",
-         "Encyclopedia digits use the typed native packet cursor"),
-        ("AddPrim(*(void**)Core_ScratchAddr(2), poly++);",
-         "AddPrim(Render_frameScratch.overlayOrderingTable, poly++);",
-         "PS1 scratch word2 is the overlay ordering pointer, not native word2"),
-        ("*(void**)Core_ScratchAddr(0) = poly;",
-         "Render_frameScratch.primitiveCursor = poly;",
-         "Publish the advanced encyclopedia-digit cursor through the native frame"),
-    ],
-    "F02820": [
-        ("char sp60[12];", 'char sp60[sizeof "NO.   000/000"];',
-         "238.c:2069 preserve the complete valid encyclopedia header and its terminator"),
     ],
     "F02699": [
         ("    u_long* pScratch1;\n    u_long* pScratch2;\n", "",
@@ -6919,8 +6926,6 @@ for _row, _fixup in (
     ("F04151", _refused_disc_request(
         " " * 12, "Menu_Map_sceneCdQueueSlot", "Menu_Map_armFileBuff",
         "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
-    ("F02803", _refused_disc_request(
-        " " * 12, "Menu_Score_monBinCdQueueSlot", "Menu_Score_monBinData", "&Menu_Score_kMonBinFile")),
 ):
     FIXES.setdefault(_row, []).append(_fixup)
 

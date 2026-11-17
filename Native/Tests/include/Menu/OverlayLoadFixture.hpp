@@ -14,8 +14,6 @@ extern "C" {
 namespace menu_overlay_tests {
 
 struct Load {
-  equipment_detail_tests::ValueRestore<Content_DiscRequestCounts> saved_counts{
-      Content_discRequestCounts};
   equipment_detail_tests::ValueRestore<decltype(Menu_Framework_menuState)>
       saved_control{Menu_Framework_menuState};
   equipment_detail_tests::ValueRestore<decltype(Menu_Framework_loadedSubMenu)>
@@ -38,7 +36,8 @@ struct Load {
       throw std::runtime_error("overlay fixture could not own a disc request");
     }
     generation = VS::Content::LiveDiscRequestGeneration(request);
-    request->state = Content_DiscRequestState_Enqueued;
+    // This controlled completion has no queued destination. Leave it allocated
+    // so genuine owner cleanup can update queue counts without restoration.
     Menu_Framework_loadedSubMenu = static_cast<signed char>(menu);
     Menu_Framework_shortcutInvoked = 0;
     Menu_Framework_openedWithoutMainMenu = 1;

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <string>
@@ -12,9 +13,11 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
+#include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
+#include "Menu/Score/GazetteTerminalLive.hpp"
 
 extern "C" {
 #include "Core/Random.h"
@@ -252,7 +255,7 @@ TEST_CASE("Score list numbers retain every original digit and native link",
         static_cast<const POLY_FT4*>(Render_frameScratch.primitiveCursor);
     const void* initial_next = nextPrim(fixture.ordering.data() + 2);
     if (enemy) {
-      Menu_Score_DrawEnemyNumber(100, 50, number, dimmed);
+      VS::Menu::Score::DrawLiveEnemyNumber(100, 50, number, dimmed);
     } else {
       VS::Menu::Score::DrawLiveTitleNumber(100, 50, number, dimmed);
     }
@@ -314,29 +317,10 @@ TEST_CASE("Score scroll fades keep every packet in its native ordering chain",
 }
 
 namespace {
-struct ScoreViewerFixture : ClockFixture {
-  decltype(Menu_Framework_menuItems) saved_items = Menu_Framework_menuItems;
-  decltype(Menu_Score_monBinData) saved_enemies = Menu_Score_monBinData;
-  decltype(Menu_Score_selectedEnemy) saved_selected = Menu_Score_selectedEnemy;
-  decltype(Menu_Score_hideUi) saved_hidden = Menu_Score_hideUi;
-  std::array<Menu_Framework_MenuRow, 40> items{};
-  std::array<Menu_Score_EnemyEntry, 78> enemies{};
+struct ScoreViewerFixture : gazette_terminal_live_tests::TerminalFixture {
+  ClockFixture clock;
 
-  ScoreViewerFixture() {
-    Menu_Framework_menuItems = items.data();
-    Menu_Score_monBinData = enemies.data();
-    Menu_Score_hideUi = 0;
-    for (auto& enemy : enemies) {
-      enemy.name[2] = static_cast<char>(Core_TextCode_PrintString);
-    }
-  }
-
-  ~ScoreViewerFixture() {
-    Menu_Framework_menuItems = saved_items;
-    Menu_Score_monBinData = saved_enemies;
-    Menu_Score_selectedEnemy = saved_selected;
-    Menu_Score_hideUi = saved_hidden;
-  }
+  ScoreViewerFixture() { BorrowMon(); }
 };
 }  // namespace
 
@@ -345,11 +329,17 @@ TEST_CASE("Score encyclopedia viewer retains the complete original ID header",
   const int selected = GENERATE(0, 77);
   ScoreViewerFixture fixture;
   Menu_Score_selectedEnemy = static_cast<int16_t>(selected);
-  fixture.enemies[selected].classId = GENERATE(0, 1, 2, 3, 4, 5);
-  Menu_Score_RenderEnemyViewer(8, 3);
-  CHECK(fixture.Clock(160) == std::format("NO.   {:03}/078", selected + 1));
-  CHECK(fixture.storage.front() == 0xDEADBEEF);
-  CHECK(fixture.storage.back() == 0xDEADBEEF);
+  const auto enemy =
+      fixture.MonBytes().subspan(static_cast<std::size_t>(selected) *
+                                     gazette_terminal_live_tests::kEnemyStride,
+                                 gazette_terminal_live_tests::kEnemyStride);
+  enemy[2] = static_cast<std::byte>(GENERATE(0, 1, 2, 3, 4, 5));
+  enemy[3] = std::byte{};
+  VS::Menu::Score::RenderLiveEnemyViewer(8, 3);
+  CHECK(fixture.clock.Clock(160) ==
+        std::format("NO.   {:03}/078", selected + 1));
+  CHECK(fixture.clock.storage.front() == 0xDEADBEEF);
+  CHECK(fixture.clock.storage.back() == 0xDEADBEEF);
 }
 
 TEST_CASE("Score viewer banners use the native main ordering pointer",
