@@ -11,6 +11,7 @@
 "#include \"Menu/Container/ContainerMenuDialogsLive.hpp\"",
 "#include \"Menu/Inventory/EquipmentRowsLive.hpp\"",
 "#include \"Menu/Inventory/EquipmentMenusLive.hpp\"",
+"#include \"Menu/Inventory/InventoryTerminalLive.hpp\"",
 "#include \"Menu/Loot/LootPoliciesLive.hpp\"",
 "#include \"Menu/ManualScreenLive.hpp\"",
 "#include \"Menu/Results/CubePuzzleLifecycleLive.hpp\"",
@@ -19,18 +20,19 @@
 ]
 ],
 [
-34,
+35,
 [
-"    Menu_Inventory_ItemList_ResetMenu3Statics();"
+"    Menu_Inventory_ResetMenu3Statics();"
 ],
 [
-"    Menu_Inventory_ItemList_ResetMenu3Statics();",
+"    Menu_Inventory_ResetMenu3Statics();",
 "    VS::Menu::Inventory::ResetEquipmentRowsLive();",
-"    VS::Menu::Inventory::ResetEquipmentMenusLive();"
+"    VS::Menu::Inventory::ResetEquipmentMenusLive();",
+"    VS::Menu::Inventory::ResetInventoryTerminalModuleData();"
 ]
 ],
 [
-41,
+39,
 [
 "    Menu_Status_EquipmentDetails_ResetMenu4Statics();"
 ],
@@ -40,7 +42,7 @@
 ]
 ],
 [
-54,
+52,
 [
 "    Menu_Score_Records_ResetMenu9Statics();"
 ],
@@ -50,17 +52,18 @@
 ]
 ],
 [
-61,
+59,
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();"
 ],
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();",
-"    VS::Menu::Loot::Live::ResetPolicyStatics();"
+"    VS::Menu::Loot::Live::ResetPolicyStatics();",
+"    VS::Menu::Inventory::ResetLootInventoryTerminalModuleData();"
 ]
 ],
 [
-67,
+65,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
@@ -77,7 +80,7 @@
 ]
 ],
 [
-74,
+72,
 [
 "    Menu_Results_TimeAttack_ResetMenufStatics();"
 ],
@@ -181,117 +184,6 @@
 ],
 [
 "        static const char initial[16] = {};"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Inventory\\Inventory.cpp": [
-[
-179,
-[
-"        rowTypes = buf + 0x1800;",
-"        menuText = buf + 0x1900;"
-],
-[
-"        rowTypes = (int *)(((u_char*)(buf)) + 0x1800);",
-"        menuText = (char **)(((u_char*)(buf)) + 0x1900);"
-]
-],
-[
-193,
-[
-"            VS::Menu::Framework::FormatLiveMiscItemRow(misc, &menuText[i * 2], rowTypes - -i, buf + i * 96);"
-],
-[
-"            VS::Menu::Framework::FormatLiveMiscItemRow(misc, &menuText[i * 2], rowTypes - -i, ((u_char*)(buf)) + i * 96);"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Inventory\\ItemList.cpp": [
-[
-209,
-[
-"        VS::Menu::InitLiveInformationTextBox(1);"
-],
-[
-"        VS::Menu::InitLiveInformationTextBox((enum Menu_InformationBoxHeader)(1));"
-]
-],
-[
-393,
-[
-"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, Render_frameScratch.overlayOrderingTable - 12);"
-],
-[
-"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));"
-]
-],
-[
-395,
-[
-"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, Render_frameScratch.overlayOrderingTable - 12);",
-"        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, Render_frameScratch.overlayOrderingTable - 12);"
-],
-[
-"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));",
-"        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));"
-]
-],
-[
-520,
-[
-"    indices = Menu_Inventory_inventoryIndices[itemCategory];"
-],
-[
-"    indices = (char *)(Menu_Inventory_inventoryIndices[itemCategory]);"
-]
-],
-[
-526,
-[
-"        rowTypes = textBuf + 0x1800;",
-"        menuText = textBuf + 0x1900;"
-],
-[
-"        rowTypes = (int *)(((u_char*)(textBuf)) + 0x1800);",
-"        menuText = (char **)(((u_char*)(textBuf)) + 0x1900);"
-]
-],
-[
-550,
-[
-"            rowCount = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, menuText, rowTypes, textBuf);"
-],
-[
-"            rowCount = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, menuText, rowTypes, (char *)(textBuf));"
-]
-],
-[
-654,
-[
-"                sp310 = textBuf + 0x1900;",
-"                rowTypes = textBuf + 0x1800;"
-],
-[
-"                sp310 = (char **)(((u_char*)(textBuf)) + 0x1900);",
-"                rowTypes = (int *)(((u_char*)(textBuf)) + 0x1800);"
-]
-],
-[
-657,
-[
-"                count = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, sp310, rowTypes, textBuf);"
-],
-[
-"                count = VS::Menu::Inventory::LiveBuildItemRows(itemCategory, sp310, rowTypes, (char *)(textBuf));"
-]
-],
-[
-1182,
-[
-"        static const char initial[8];"
-],
-[
-"        static const char initial[8] = {};"
 ]
 ]
 ],
@@ -633,7 +525,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\Encyclopedia.cpp": [
 [
-215,
+214,
 [
 "    poly = Render_frameScratch.primitiveCursor;"
 ],
@@ -642,7 +534,7 @@
 ]
 ],
 [
-438,
+437,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, scratch[1] + 24);"
 ],
@@ -651,7 +543,7 @@
 ]
 ],
 [
-443,
+442,
 [
 "            \"ROTATION\", control_label_x | (18 << 16), Menu_Score_rotationColor, scratch[1] + 24);"
 ],
@@ -660,7 +552,7 @@
 ]
 ],
 [
-448,
+447,
 [
 "        VS::Menu::Framework::DrawLiveButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, scratch[1] + 24);"
 ],
@@ -669,7 +561,7 @@
 ]
 ],
 [
-450,
+449,
 [
 "            \"ZOOM\", control_label_x | (36 << 16), Menu_Score_zoomColor, scratch[1] + 24);"
 ],
@@ -678,7 +570,7 @@
 ]
 ],
 [
-454,
+453,
 [
 "            enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, scratch[1] + 0x1C);"
 ],
@@ -687,7 +579,7 @@
 ]
 ],
 [
-503,
+502,
 [
 "        poly = scratch[0];"
 ],
@@ -810,7 +702,7 @@
 ],
 "Native\\Game\\src\\Menu\\Score\\ScoreScreen.cpp": [
 [
-277,
+276,
 [
 "            Menu_Score_monBinData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size);"
 ],

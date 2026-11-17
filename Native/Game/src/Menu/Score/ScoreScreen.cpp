@@ -29,7 +29,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"

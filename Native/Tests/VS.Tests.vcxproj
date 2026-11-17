@@ -300,6 +300,8 @@
     <ClCompile Include="src\InventorySortingLiveTests.cpp" />
     <ClCompile Include="src\InventorySortingModuleTests.cpp" />
     <ClCompile Include="src\InventorySortingTests.cpp" />
+    <ClCompile Include="src\InventoryTerminalLiveTests.cpp" />
+    <ClCompile Include="src\InventoryTerminalTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchLiveTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchModuleTests.cpp" />
     <ClCompile Include="src\ItemDetailDispatchTests.cpp" />
@@ -505,6 +507,7 @@
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
     <ClInclude Include="include\Menu\InventorySortingLiveFixture.hpp" />
     <ClInclude Include="include\Menu\InventorySortingWorld.hpp" />
+    <ClInclude Include="include\Menu\InventoryTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\ItemDetailDispatchLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp" />
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp" />

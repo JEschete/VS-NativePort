@@ -3,6 +3,7 @@
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
@@ -27,7 +28,6 @@ extern "C" {
 // Call where the original loads MAINMENU.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMainMenuStatics(void)
 {
-    Menu_Inventory_ResetMainMenuStatics();
     Menu_Inventory_ItemList_ResetMainMenuStatics();
 }
 
@@ -41,9 +41,9 @@ void Boot_ResetMenu2Statics(void)
 void Boot_ResetMenu3Statics(void)
 {
     Menu_Inventory_ResetMenu3Statics();
-    Menu_Inventory_ItemList_ResetMenu3Statics();
     VS::Menu::Inventory::ResetEquipmentRowsLive();
     VS::Menu::Inventory::ResetEquipmentMenusLive();
+    VS::Menu::Inventory::ResetInventoryTerminalModuleData();
 }
 
 // Call where the original loads MENU4.PRG: restores the statics its reload re-read from the disc.
@@ -74,6 +74,7 @@ void Boot_ResetMenubStatics(void)
     Menu_Inventory_ResetMenubStatics();
     Menu_Loot_LootScreen_ResetMenubStatics();
     VS::Menu::Loot::Live::ResetPolicyStatics();
+    VS::Menu::Inventory::ResetLootInventoryTerminalModuleData();
 }
 
 // Call where the original loads MENUD.PRG: restores the statics its reload re-read from the disc.

@@ -1876,6 +1876,10 @@
     <ClCompile Include="src\Menu\Inventory\InventorySortingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\InventoryTerminal.cpp" />
+    <ClCompile Include="src\Menu\Inventory\InventoryTerminalLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Inventory\ItemDetailDispatch.cpp" />
     <ClCompile Include="src\Menu\Inventory\ItemDetailDispatchLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2973,6 +2977,8 @@
     <ClInclude Include="include\Menu\Inventory\EquipmentRowsLive.hpp" />
     <ClInclude Include="include\Menu\Inventory\InventorySorting.hpp" />
     <ClInclude Include="include\Menu\Inventory\InventorySortingLive.hpp" />
+    <ClInclude Include="include\Menu\Inventory\InventoryTerminal.hpp" />
+    <ClInclude Include="include\Menu\Inventory\InventoryTerminalLive.hpp" />
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatch.hpp" />
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatchLive.hpp" />
     <ClInclude Include="include\Menu\Inventory\ItemListRows.hpp" />

@@ -119,6 +119,7 @@
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
@@ -2077,6 +2078,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU3.PRG", 0x80107B14u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveArmorMenu, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80108010u, 0u, (void*)&VS::Menu::Inventory::DispatchLiveEquipmentMenu, 0u, 0u, 0u},
     {"MENU/MENU3.PRG", 0x80108088u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveEquipmentMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80104530u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveSortMenu, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80104608u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveLootSortMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80104788u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveDiscardMenu, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80104860u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveLootDiscardMenu, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x801053ECu, 0u, (void*)&VS::Menu::Inventory::UpdateLiveItemList, 0u, 0u, 0u},
+    {"MENU/MENUB.PRG", 0x80105454u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveLootItemList, 0u, 0u, 0u},
+    {"MENU/MAINMENU.PRG", 0x800FAEBCu, 0u, (void*)&VS::Menu::Inventory::UpdateLiveMiscItemShortcut, 0u, 0u, 0u},
+    {"MENU/MENU3.PRG", 0x80108970u, 0u, (void*)&VS::Menu::Inventory::UpdateLiveInventoryScreen, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102A34u, 0u, (void*)&VS::Menu::container::BuildLiveWeaponStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80102BB0u, 0u, (void*)&VS::Menu::container::BuildLiveShieldStats, 0u, 0u, 0u},
     {"MENU/MENUD.PRG", 0x80103D50u, 0u, (void*)&VS::Menu::container::SetLivePanelVisibility, 0u, 0u, 0u},

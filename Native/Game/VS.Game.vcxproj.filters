@@ -2679,6 +2679,12 @@
     <ClCompile Include="src\Menu\Inventory\InventorySortingLive.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\InventoryTerminal.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\InventoryTerminalLive.cpp">
+      <Filter>src\Menu\Inventory</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Inventory\ItemDetailDispatch.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
@@ -4453,6 +4459,12 @@
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\InventorySortingLive.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\InventoryTerminal.hpp">
+      <Filter>include\Menu\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Inventory\InventoryTerminalLive.hpp">
       <Filter>include\Menu\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Inventory\ItemDetailDispatch.hpp">

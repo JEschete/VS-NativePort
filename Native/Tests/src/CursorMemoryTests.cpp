@@ -22,6 +22,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/Setup/Assembly.hpp"
 #include "Menu/Setup/Combination.hpp"
@@ -227,7 +228,7 @@ struct EquipmentGateFixture {
   Battle_ActorStats stats{};
 
   EquipmentGateFixture() {
-    Menu_Inventory_ItemList_ResetMenu3Statics();
+    VS::Menu::Inventory::ResetInventoryTerminalSession();
     std::fill_n(Menu_Inventory_menuText, saved_strings.size(), 0xE7E7);
     std::fill_n(Menu_Inventory_menuText, 128, 128);
     Audio_Seq_unusedInventory = {};
@@ -237,7 +238,7 @@ struct EquipmentGateFixture {
   }
 
   ~EquipmentGateFixture() {
-    Menu_Inventory_ItemList_ResetMenu3Statics();
+    VS::Menu::Inventory::ResetInventoryTerminalSession();
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_Inventory_menuText);
     Audio_Seq_unusedStateFlags = saved_flags;
@@ -1033,8 +1034,8 @@ TEST_CASE("Equipment management obeys progression tarnish and action gates",
   Audio_Seq_unusedStateFlags.introState = static_cast<char>(intro);
   fixture.stats.statuses = tarnished ? 0x80000 : 0;
   Menu_Framework_actionRestrictions = restrictions;
-  REQUIRE(Menu_Inventory_UpdateItemList(1) == 0);
-  REQUIRE(Menu_Inventory_UpdateItemList(0) == 0);
+  REQUIRE(VS::Menu::Inventory::UpdateLiveItemList(1) == 0);
+  REQUIRE(VS::Menu::Inventory::UpdateLiveItemList(0) == 0);
   REQUIRE(Menu_Framework_subMenuRowCount == 2);
   REQUIRE(Menu_Framework_itemsText != nullptr);
   const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(

@@ -11,6 +11,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
@@ -34,7 +35,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
@@ -157,13 +157,13 @@ int Menu_Loot_UpdateInventoryTransition(int category)
         }
 
         VS::Menu::Framework::RenderLiveAshley(1);
-        Menu_Inventory_UpdateItemList(1);
+        VS::Menu::Inventory::UpdateLiveLootItemList(1);
 
         Menu_Loot_inventoryTransitionState = 2;
         break;
 
     case 2:
-        if (Menu_Inventory_UpdateItemList(0) == 0) {
+        if (VS::Menu::Inventory::UpdateLiveLootItemList(0) == 0) {
             break;
         }
 

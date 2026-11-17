@@ -1,18 +1,17 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest integrated #276 group is particle emission and
-seven repeating-ring identities, F01515, F01920, F01998, F02209, F02289,
-F02323, F02397 and F02398. Its local gates passed after the Python-only
-copier-test recovery described below;
+Updated 2026-11-16. The latest integrated #276 group is inventory terminal,
+F02591, F02592, F02597, F02553 and F02636, including three distinct MENUB
+contexts. Its shared Debug/Release gates passed;
 the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **804 resolved (792 promoted,
-12 retired) and 96 remaining**; see
+The original 900-function cohort has **809 resolved (797 promoted,
+12 retired) and 91 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
-- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 5,
+- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
   48: 50, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
   do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -22,6 +21,21 @@ The original 900-function cohort has **804 resolved (792 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Inventory-terminal evidence (`VR-MENU-INVENTORY-TERMINAL`): eight original
+  contexts independently passed 1,024 vectors in current root, zero mismatches;
+  all 92 original instruction mutants and eight compiled native variants were
+  detected. Debug and Release each passed 8,826 cases / 12,952,091 assertions,
+  33 focused cases / 657 assertions and both canonical replays.
+  Generation stability, copier tests and changed-file tidy passed with zero
+  new findings. Evidence: `build\promotion-check\group-20261116-201034\summary.json`
+  and `build\scratch\inventory-terminal\integration.json`.
+  Live tests exercise all eight module entries, real row creation, separate
+  MENU3/MENUB text and Manage/restriction behavior, ordinary overlay versus cold
+  reset, and original MENUB text loading after cold reset. Loot callers now use
+  MENUB navigation and native-owned MENUB text (#405); row 47 is complete,
+  98/98 promoted. Original callees are endpoint doubles; renderer packets and
+  unused workspace bytes are excluded. No interactive/visual gameplay or EC
+  retirement is claimed.
 - Emitter/ring evidence (`VR-EFFECTS-EMITTER-RINGS`): all eight original
   spans independently passed 2,048 vectors in current root, zero mismatches;
   79 original instruction mutants and eight compiled native variants were
@@ -43,6 +57,9 @@ The original 900-function cohort has **804 resolved (792 promoted,
   explicit; no interactive gameplay or EC retirement is claimed.
   Row 39 is 80/80 promoted. Shared GTE saturation defect #411 and broader
   effect-safety investigation #271 remain open.
+  Published in [`5502ab8c6f`](https://github.com/JEschete/VS-NativePort/commit/5502ab8c6f3e77da4d26b38e6b42302393ff519e);
+  exact-revision [Source Quality 43988564883](https://github.com/JEschete/VS-NativePort/actions/runs/43988564883)
+  passed; [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6934137024).
 - Text-frame evidence (`VR-MENU-TEXT-FRAME-PROMOTION`): F01413-F01416, including
   completing the previously owned F01416 WIP. Each original passed 1,024
   vectors with zero mismatches; all ten original instruction mutants and
@@ -107,13 +124,17 @@ The original 900-function cohort has **804 resolved (792 promoted,
 
 Next steps:
 
-1. Integrate inventory-terminal packet `62c7fac315e1269a3e70059c77f79ffe2fbbe808`
-   from `D:\Dev\NativePort\wt\batch-inventory-b4b11beb0`. Five IDs plus three
-   distinct MENUB contexts passed 8,192 original vectors, 92 original mutants,
-   eight native variants and 15 local cases / 83 assertions. Registration,
-   MENUB caller/text binding (#405), reset hooks, full integration and CI
-   remain pending. Ability-foundation and loot-terminal workers are active;
-   loot depends on this inventory implementation.
+1. Integrate ability-foundation packet `75c4b990e1d02815b9d377d35e9b521aec5feee8`
+   from `D:\Dev\NativePort\wt\batch-abilities-foundation-3401e5e8`:
+   F02614-F02619, 6,144 original vectors, 154 original mutants, six native
+   variants and 29 local cases / 2,662 assertions, plus an actual-Live row
+   entry differential. Preserve the F02619 pointer-array entry ABI; reconcile
+   #378's stale adaptations and prove per-field MENU2 reload semantics before
+   wiring the reset hook. Loot-terminal packet
+   `2e17d454c3a9c77791d2c35fe2c7e000ed26af1c` is also delivered and awaits
+   review/integration, including quantity-loss issue #412. Ability-terminal
+   and magic-terminal workers are active; no worker packet is a completed
+   root promotion.
    The coordinator's text-update worktree is
    `D:\Dev\NativePort\wt\batch-text-update-b88a6b2c`; its initial frame-update
    core is unverified, with notifications, Live binding and proof still to do.

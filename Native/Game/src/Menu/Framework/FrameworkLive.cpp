@@ -38,6 +38,7 @@
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
@@ -929,7 +930,7 @@ class LiveHost final : public Host {
 
   void UpdateMiscItemShortcut(int mode) override {
     const CallOutScope scope;
-    Menu_Inventory_UpdateMiscItemShortcut(mode);
+    Inventory::UpdateLiveMiscItemShortcut(mode);
   }
 
   int RunSubmenu(Submenu submenu, int state_index) override {
@@ -944,7 +945,7 @@ class LiveHost final : public Host {
       case Submenu::kBattleAbilities:
         return Menu_BattleAbilities_Update(bytes);
       case Submenu::kInventory:
-        return Menu_Inventory_Update(bytes);
+        return Inventory::UpdateLiveInventoryScreen(bytes);
       case Submenu::kStatus:
         return Menu_Status_Update(bytes);
       case Submenu::kMap:

@@ -11,6 +11,8 @@
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
+#include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootPolicies.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootRows.hpp"
@@ -253,6 +255,9 @@ struct LivePoliciesFixture {
   char previous_claimed{Menu_Loot_lootClaimed};
 
   LivePoliciesFixture() {
+    VS::Menu::Inventory::ResetInventoryTerminalSession();
+    VS::Menu::Inventory::BindLiveLootInventoryText(
+        VS::tests::inventory_terminal::LootText());
     live::ResetPolicyStatics();
     Menu_Framework_menuItems = menu_rows.data();
     Menu_Loot_inventory = &staged;
@@ -265,6 +270,7 @@ struct LivePoliciesFixture {
   }
 
   ~LivePoliciesFixture() {
+    VS::Menu::Inventory::ResetInventoryTerminalSession();
     live::ResetPolicyStatics();
     Menu_Framework_menuItems = previous_menu_rows;
     Menu_Loot_inventory = previous_inventory;

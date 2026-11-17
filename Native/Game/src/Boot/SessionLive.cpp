@@ -22,6 +22,7 @@
 #include "Event/ScriptDialogCommandsLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/GameClockLive.hpp"
@@ -77,6 +78,7 @@ class LiveSessionHost final : public SessionHost {
     Menu_sceneNotificationBuffer = nullptr;
     Menu_sceneNotificationTimer = 0;
     Menu_sceneNotificationTimed = 0;
+    Menu::Inventory::ResetInventoryTerminalSession();
     Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }

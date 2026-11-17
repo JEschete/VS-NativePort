@@ -1567,6 +1567,14 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Inventory::UpdateLiveArmorMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
     "VS::Menu::Inventory::DispatchLiveEquipmentMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
     "VS::Menu::Inventory::UpdateLiveEquipmentMenu": r"Native\Game\include\Menu\Inventory\EquipmentMenusLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveSortMenu": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveLootSortMenu": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveLootDiscardMenu": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveLootItemList": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveDiscardMenu": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveItemList": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveMiscItemShortcut": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
+    "VS::Menu::Inventory::UpdateLiveInventoryScreen": r"Native\Game\include\Menu\Inventory\InventoryTerminalLive.hpp",
     "VS::Items::LiveContainerCategoryIndices": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::FindLiveContainerItemRow": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
     "VS::Items::AppendLiveContainerItemIndex": r"Native\Game\include\Items\ContainerIndexingLive.hpp",
@@ -2929,6 +2937,11 @@ OWNED_CALL_BINDINGS["F02632"] = "VS::Menu::Inventory::UpdateLiveShieldMenu"
 OWNED_CALL_BINDINGS["F02633"] = "VS::Menu::Inventory::UpdateLiveArmorMenu"
 OWNED_CALL_BINDINGS["F02634"] = "VS::Menu::Inventory::DispatchLiveEquipmentMenu"
 OWNED_CALL_BINDINGS["F02635"] = "VS::Menu::Inventory::UpdateLiveEquipmentMenu"
+OWNED_CALL_BINDINGS["F02591"] = "VS::Menu::Inventory::UpdateLiveSortMenu"
+OWNED_CALL_BINDINGS["F02592"] = "VS::Menu::Inventory::UpdateLiveDiscardMenu"
+OWNED_CALL_BINDINGS["F02597"] = "VS::Menu::Inventory::UpdateLiveItemList"
+OWNED_CALL_BINDINGS["F02553"] = "VS::Menu::Inventory::UpdateLiveMiscItemShortcut"
+OWNED_CALL_BINDINGS["F02636"] = "VS::Menu::Inventory::UpdateLiveInventoryScreen"
 OWNED_CALL_BINDINGS["F02927"] = "VS::Items::LiveContainerCategoryIndices"
 OWNED_CALL_BINDINGS["F02928"] = "VS::Items::FindLiveContainerItemRow"
 OWNED_CALL_BINDINGS["F02929"] = "VS::Items::AppendLiveContainerItemIndex"
@@ -5087,6 +5100,14 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU3.PRG", 0x80107B14, "VS::Menu::Inventory::UpdateLiveArmorMenu"),  # F02633
     ("MENU/MENU3.PRG", 0x80108010, "VS::Menu::Inventory::DispatchLiveEquipmentMenu"),  # F02634
     ("MENU/MENU3.PRG", 0x80108088, "VS::Menu::Inventory::UpdateLiveEquipmentMenu"),  # F02635
+    ("MENU/MENU3.PRG", 0x80104530, "VS::Menu::Inventory::UpdateLiveSortMenu"),  # F02591
+    ("MENU/MENUB.PRG", 0x80104608, "VS::Menu::Inventory::UpdateLiveLootSortMenu"),  # F02591
+    ("MENU/MENU3.PRG", 0x80104788, "VS::Menu::Inventory::UpdateLiveDiscardMenu"),  # F02592
+    ("MENU/MENUB.PRG", 0x80104860, "VS::Menu::Inventory::UpdateLiveLootDiscardMenu"),  # F02592
+    ("MENU/MENU3.PRG", 0x801053EC, "VS::Menu::Inventory::UpdateLiveItemList"),  # F02597
+    ("MENU/MENUB.PRG", 0x80105454, "VS::Menu::Inventory::UpdateLiveLootItemList"),  # F02597
+    ("MENU/MAINMENU.PRG", 0x800FAEBC, "VS::Menu::Inventory::UpdateLiveMiscItemShortcut"),  # F02553
+    ("MENU/MENU3.PRG", 0x80108970, "VS::Menu::Inventory::UpdateLiveInventoryScreen"),  # F02636
     ("MENU/MENUD.PRG", 0x80102A34, "VS::Menu::container::BuildLiveWeaponStats"),  # F02925
     ("MENU/MENUD.PRG", 0x80102BB0, "VS::Menu::container::BuildLiveShieldStats"),  # F02926
     ("MENU/MENUD.PRG", 0x80103D50, "VS::Menu::container::SetLivePanelVisibility"),  # F02942
@@ -5426,22 +5447,14 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "Render_frameScratch.primitiveCursor = poly;",
          "Publish the advanced encyclopedia-digit cursor through the native frame"),
     ],
+    "F02843": [
+        ("VS::Menu::Inventory::UpdateLiveItemList(",
+         "VS::Menu::Inventory::UpdateLiveLootItemList(",
+         "#405 MENUB inventory transitions require the original loot context, not MENU3"),
+    ],
     "F02820": [
         ("char sp60[12];", 'char sp60[sizeof "NO.   000/000"];',
          "238.c:2069 preserve the complete valid encyclopedia header and its terminator"),
-    ],
-    "F02553": [
-        (r'"MISC\00000|0xF8|"',
-         r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"',
-         "C48.c:485 pragma vsstring encodes MISC then E7 termination; preserve reset bytes and avoid runaway glyph packets"),
-        ("VS::Core::Memory::AllocateFromHighEnd(0x1B00)",
-         "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
-         "C48.c:546 scratch ends with 128 text pointers; reserve native pointer width, not the PS1 512 bytes"),
-    ],
-    "F02597": [
-        ("VS::Core::Memory::AllocateFromHighEnd(72 * 96)",
-         "VS::Core::Memory::AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(char*))",
-         "#404: items2.h:281,440 row text pointers start at 0x1900; reserve 128 native pointers, not the PS1 512 bytes"),
     ],
     "F02699": [
         ("    u_long* pScratch1;\n    u_long* pScratch2;\n", "",

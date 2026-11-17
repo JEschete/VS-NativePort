@@ -852,6 +852,16 @@
     <None Include="..\..\port\differentials\inventory_sorting_f02590.py" />
     <None Include="..\..\port\differentials\inventory_sorting_f02590_menub.py" />
     <None Include="..\..\port\differentials\inventory_sorting_live_driver.cpp" />
+    <None Include="..\..\port\differentials\inventory_terminal_common.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_driver.cpp" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02553.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02591.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02591_menub.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02592.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02592_menub.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02597.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02597_menub.py" />
+    <None Include="..\..\port\differentials\inventory_terminal_f02636.py" />
     <None Include="..\..\port\differentials\item_detail_dispatch_common.py" />
     <None Include="..\..\port\differentials\item_detail_dispatch_driver.cpp" />
     <None Include="..\..\port\differentials\item_detail_dispatch_f02568.py" />

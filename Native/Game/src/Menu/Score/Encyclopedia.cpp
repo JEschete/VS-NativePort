@@ -14,7 +14,6 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"

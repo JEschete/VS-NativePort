@@ -25,6 +25,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
 #include "Menu/Loot/LootPolicies.hpp"
 #include "Menu/Loot/LootRows.hpp"
@@ -43,7 +44,6 @@ extern "C" {
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
 }
@@ -59,7 +59,6 @@ constexpr std::uint32_t kRefusalLogLimit = 16;
 constexpr std::uint32_t kRefusalLogInterval = 1024;
 constexpr std::size_t kNameTableBytes = Framework::kItemNamesBytes;
 constexpr std::size_t kItemNameCount = kNameTableBytes / kMenuItemNameRowBytes;
-constexpr std::size_t kMenuTextEntries = std::size(Menu_Inventory_menuText);
 // decomp: _menuText[(availableAction + 4) * 2] names the action's row text.
 constexpr std::size_t kActionTextBase = 4;
 constexpr int kDiscardSoundGroup = 0x7E;
@@ -127,17 +126,24 @@ void StoreRows(std::span<const LootRow> rows) {
 }
 
 [[nodiscard]] std::span<const std::uint8_t> MenuText(std::size_t offset) {
-  if (offset >= kMenuTextEntries) {
+  const auto bytes = Inventory::LiveLootInventoryText();
+  const auto text = Framework::ItemHelpText(bytes, offset);
+  if (!text) {
     Refuse("a prompt text outside _menuText");
     return {};
   }
-  const auto* text =
-      reinterpret_cast<const std::uint8_t*>(&Menu_Inventory_menuText[offset]);
-  return {text, (kMenuTextEntries - offset) * sizeof(u_short)};
+  return bytes.subspan(text->offset);
 }
 
-[[nodiscard]] std::size_t ActionTextOffset(std::size_t action) {
-  return Menu_Inventory_menuText[(action + kActionTextBase) * 2];
+[[nodiscard]] std::span<const std::uint8_t> ActionText(std::size_t action) {
+  const auto bytes = Inventory::LiveLootInventoryText();
+  const auto text = Framework::ItemHelpEntry(
+      bytes, static_cast<std::int32_t>((action + kActionTextBase) * 2));
+  if (!text) {
+    Refuse("an action text outside _menuText");
+    return {};
+  }
+  return bytes.subspan(text->offset);
 }
 
 [[nodiscard]] std::span<const std::uint8_t> PromptTextBytes(PromptText text) {
@@ -153,9 +159,9 @@ void StoreRows(std::span<const LootRow> rows) {
     case PromptText::kDiscardAllConfirm:
       return MenuText(Text_Menub_menuText_Offset_discardAllConfirm);
     case PromptText::kDisassemble:
-      return MenuText(ActionTextOffset(1));
+      return ActionText(1);
     case PromptText::kOrganize:
-      return MenuText(ActionTextOffset(2));
+      return ActionText(2);
     case PromptText::kOrganizeInventory:
       return MenuText(Text_Menub_menuText_Offset_organizeInventory);
     case PromptText::kDisassembleInfo:

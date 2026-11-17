@@ -475,7 +475,7 @@ TEST_CASE("Inventory RestoreItemRows refuses stalls missing rows and cursors",
 
 namespace {
 constexpr std::size_t kHeapBytes = 0x20000;
-// Menu_Inventory_UpdateItemList's block (#404): 64 rows of text, 64 row types
+// Retained legacy caller layout (#404): 64 rows of text, 64 row types
 // at 0x1800 and 128 native row text pointers at 0x1900.
 constexpr std::size_t kCallerTypes = 0x1800;
 constexpr std::size_t kCallerTexts = 0x1900;

@@ -4878,23 +4878,29 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertIn("std::uint16_t blade_material = 0;", equipment)
         self.assertIn("std::uint16_t shield_material = 0;", equipment)
 
-    def test_misc_shortcut_label_is_encoded_before_reset_capture(self):
-        old, new, _ = copy_fixups.FIXES["F02553"][0]
-        declaration = "static char Menu_Inventory_miscItemShortcutMisc[] = " + old + ";"
-        encoded = declaration.replace(old, new)
-        self.assertIn(r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"', encoded)
-        self.assertNotIn("MISC", encoded)
-        self.assertNotIn("|0xF8|", encoded)
+    def test_misc_shortcut_label_is_owned_encoded_text(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Inventory/InventoryTerminalLive.cpp").read_text()
+        self.assertNotIn("F02553", copy_fixups.FIXES)
+        self.assertIn(r'constexpr char kMiscTitle[] = "\x16\x12\x1C\x0C\xE7\0\0\xF8";', source)
+        self.assertIn("return ByteView(kMiscTitle);", source)
 
-    def test_generated_label_and_reload_initializer_both_terminate(self):
+    def test_misc_shortcut_reload_no_longer_restores_an_unencoded_label(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
-        label = r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"'
-        self.assertIn(
-            "static char Menu_Inventory_miscItemShortcutMisc[] = " + label, source
-        )
-        self.assertIn("static const char initial[] = " + label, source)
+        self.assertNotIn("Menu_Inventory_miscItemShortcutMisc", source)
         self.assertNotIn(r'"MISC\00000|0xF8|"', source)
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F02553"],
+                         "VS::Menu::Inventory::UpdateLiveMiscItemShortcut")
+
+    def test_loot_transition_uses_the_menub_inventory_controller(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "Native/Game/src/Menu/Loot/LootScreen.cpp").read_text()
+        self.assertEqual(source.count("VS::Menu::Inventory::UpdateLiveLootItemList("), 2)
+        self.assertNotIn("VS::Menu::Inventory::UpdateLiveItemList(", source)
+        self.assertIn(("MENU/MENUB.PRG", 0x80105454,
+                       "VS::Menu::Inventory::UpdateLiveLootItemList"),
+                      copy_fixups.MODULE_BINDING_ENTRIES)
 
     def test_title_settings_retains_original_defaults_in_shared_helper(self):
         # #276 slice 53: _initEnvironment (F03669) is the typed VS::Title::InitializeSettings, whose
@@ -4913,24 +4919,22 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
 
     def test_misc_shortcut_reserves_all_native_text_pointers(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
-        self.assertIn(
-            "VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
-            source,
-        )
-        self.assertIn("menuText = (char **)(((u_char*)(buf)) + 0x1900);", source)
-        self.assertNotIn("AllocateLiveFromHighEnd(0x1B00)", source)
+        source = (root / "Native/Game/src/Menu/Inventory/InventoryTerminalLive.cpp").read_text()
+        self.assertIn("std::array<char*, kTerminalRows * 2> text{};", source)
+        self.assertIn("std::array<int, kTerminalRows> types{};", source)
+        self.assertIn("storage_ = std::make_unique<RowStorage>();", source)
+        self.assertNotIn("0x1900", source)
 
     def test_item_list_reserves_all_native_text_pointers(self):
-        # #404: both _itemNavigation row blocks keep text at 0, row types at 0x1800 and
-        # 128 native text pointers at 0x1900.
+        # #404: both navigation row phases now use the same typed owned workspace.
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Inventory/ItemList.cpp").read_text()
-        allocation = "VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(char*))"
-        self.assertEqual(source.count(allocation), 2)
-        self.assertEqual(source.count("(((u_char*)(textBuf)) + 0x1900)"), 2)
-        self.assertEqual(source.count("(((u_char*)(textBuf)) + 0x1800)"), 2)
-        self.assertNotIn("AllocateLiveFromHighEnd(72 * 96)", source)
+        source = (root / "Native/Game/src/Menu/Inventory/InventoryTerminal.cpp").read_text()
+        for function in ("InitializeList", "SelectListRow"):
+            body = source.split(f"void {function}(", 1)[1].split("\n}", 1)[0]
+            self.assertIn("const RowLease lease(host);", body)
+            self.assertIn("TerminalRows rows{};", body)
+            self.assertIn("host.PopulateRows(context, category, rows)", body)
+        self.assertNotIn("0x1900", source)
 
     def test_plugin_table_never_binds_the_development_dispatcher(self):
         root = Path(__file__).resolve().parents[2]

@@ -4,9 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/include/gpu.h:108
-#define vs_getRGB888(r, g, b) (((r) & 0xFF) | (((g) & 0xFF) << 8) | (((b) & 0xFF) << 16))
-
 #endif // VS_MENU_INVENTORY_INVENTORY_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_INVENTORY_INVENTORY_H_DECLS)
@@ -32,9 +29,6 @@ extern u_short Menu_Inventory_menuText[472]; /* contents: disc string table (Mod
 extern char Menu_Inventory_unusedMiscActions[64];;
 extern int Menu_Inventory_selectedItemRow;;
 extern u_char Menu_Inventory_equipListStep;;
-void Menu_Inventory_UpdateMiscItemShortcut(int initialize);
-int Menu_Inventory_Update(u_char* state);
-void Menu_Inventory_ResetMainMenuStatics(void);
 void Menu_Inventory_ResetMenu3Statics(void);
 void Menu_Inventory_ResetMenubStatics(void);
 
