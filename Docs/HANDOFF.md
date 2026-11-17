@@ -36,6 +36,13 @@ The original 900-function cohort has **809 resolved (797 promoted,
   98/98 promoted. Original callees are endpoint doubles; renderer packets and
   unused workspace bytes are excluded. No interactive/visual gameplay or EC
   retirement is claimed.
+  Published in [`1275c6a72b`](https://github.com/JEschete/VS-NativePort/commit/1275c6a72bba310a954bfddf8bbd4201eca1d784).
+  Its exact-revision [Source Quality 43995551631](https://github.com/JEschete/VS-NativePort/actions/runs/43995551631)
+  exposed #416: metadata-only differential listing eagerly imported optional
+  Capstone, absent on CI. The correction defers that import until proof
+  disassembly and makes the listing regression block Capstone explicitly;
+  original checks are unchanged. #405 and #416 remain open until the
+  fixing revision has successful CI.
 - Emitter/ring evidence (`VR-EFFECTS-EMITTER-RINGS`): all eight original
   spans independently passed 2,048 vectors in current root, zero mismatches;
   79 original instruction mutants and eight compiled native variants were

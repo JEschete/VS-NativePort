@@ -10,7 +10,6 @@ from __future__ import annotations
 import functools
 import random
 
-from capstone import CS_ARCH_MIPS, CS_MODE_LITTLE_ENDIAN, CS_MODE_MIPS32, Cs
 from differential import DEFAULT_STACK, MODULE_BASES, Fault, s32, store_problems
 
 MODULE_BASES.update({r"MENU\MENU3.PRG": 0x80102800, r"MENU\MENUB.PRG": 0x80102800,
@@ -793,6 +792,8 @@ def check(image, item, observation, native, reference):
 
 
 def describe(kind, overlay, image, results):
+    from capstone import CS_ARCH_MIPS, CS_MODE_LITTLE_ENDIAN, CS_MODE_MIPS32, Cs
+
     entry, end = RANGES[overlay][kind]
     body = bytes(image.read(address, 1) for address in range(entry, end))
     decoder = Cs(CS_ARCH_MIPS, CS_MODE_MIPS32 | CS_MODE_LITTLE_ENDIAN)

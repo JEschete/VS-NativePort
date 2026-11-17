@@ -1810,6 +1810,7 @@ class Harness(unittest.TestCase):
         self.assertTrue(all((root / source).is_file() for source in case.SOURCES))
         with (
             mock.patch("sys.stdout") as output,
+            mock.patch.dict(sys.modules, {"capstone": None}),
             mock.patch.object(Image, "load", side_effect=AssertionError("case metadata reads a disc image")),
         ):
             self.assertEqual(differential.main(["--list"]), 0)
