@@ -96,6 +96,13 @@ These tests use isolated fixtures, not disc data, reference indexes or live
 ledgers. Actual generator-output correctness, ownership preservation and repeat
 generation are separate required checks when changing generator behavior.
 
+The CLI quality positive controls run the real formatter, lint, clone and tidy
+pipeline over their fixture files with isolated reports. Discovery is bounded
+in those tests so repository growth does not consume their command deadline
+(#424); ordinary quality commands still scan the full first-party clone scope.
+The controls retain the new-finding exit code, header diagnostic and unchanged
+baseline assertions.
+
 ## What a green run establishes
 
 A green Source Quality run establishes only that, at that exact revision, the

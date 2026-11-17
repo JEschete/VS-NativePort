@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import ast
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -417,6 +419,26 @@ class ToolControlTests(unittest.TestCase):
         path.write_text(content, encoding="utf-8")
         return quality.relative(path)
 
+    def run_cli(self, path: str, *headers: str) -> tuple[int, str]:
+        output = io.StringIO()
+        # jscpd emits no report if every input is below its token/line minimum.
+        clone_source = self.source(
+            "clone_scope.cpp",
+            "".join(f"int CloneScopeValue{index}();\n" for index in range(24)),
+        )
+        # Exercise the real pipeline over the fixture, not every project clone.
+        with (
+            tempfile.TemporaryDirectory(dir=quality.OUTPUT) as directory,
+            patch.object(quality, "OUTPUT", Path(directory)),
+            patch.object(
+                quality, "discover_files", return_value=([path, *headers, clone_source], [])
+            ),
+            patch.object(sys, "argv", ["quality.py", "--files", path, "--tidy"]),
+            redirect_stdout(output),
+        ):
+            result = quality.main()
+        return result, output.getvalue()
+
     def test_formatter_and_cpplint_reject_bad_style(self) -> None:
         path = self.source(
             "format_control.cc",
@@ -515,22 +537,9 @@ class ToolControlTests(unittest.TestCase):
     def test_cli_rejects_new_debt_without_updating_the_baseline(self) -> None:
         before = quality.BASELINE.read_bytes()
         path = self.source("new_debt.cc", "int CalculateValue() { return 37; }\n")
-        result = subprocess.run(
-            [
-                sys.executable,
-                str(quality.HERE / "quality.py"),
-                "--files",
-                path,
-                "--tidy",
-            ],
-            cwd=quality.ROOT,
-            capture_output=True,
-            text=True,
-            timeout=120,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("readability-magic-numbers", result.stdout)
+        result, output = self.run_cli(path)
+        self.assertEqual(result, 1, output)
+        self.assertIn("readability-magic-numbers", output)
         self.assertEqual(quality.BASELINE.read_bytes(), before)
 
     def test_selected_files_still_report_header_findings(self) -> None:
@@ -544,23 +553,10 @@ class ToolControlTests(unittest.TestCase):
             '#include "scope/control.hpp"\n\n'
             "int ReadHeaderValue() { return CalculateHeaderValue(); }\n",
         )
-        result = subprocess.run(
-            [
-                sys.executable,
-                str(quality.HERE / "quality.py"),
-                "--files",
-                path,
-                "--tidy",
-            ],
-            cwd=quality.ROOT,
-            capture_output=True,
-            text=True,
-            timeout=120,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        result, output = self.run_cli(path, header)
+        self.assertEqual(result, 1, output)
         self.assertIn(
-            f"{header}:1: [tidy/readability-magic-numbers]", result.stdout
+            f"{header}:1: [tidy/readability-magic-numbers]", output
         )
         self.assertEqual(quality.BASELINE.read_bytes(), before)
 
