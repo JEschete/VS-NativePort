@@ -11,6 +11,7 @@ extern "C++" {
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
+#include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -525,7 +526,7 @@ int CheckStatusPacketLinks(int background_first) {
   Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage + 1;
   Render_legacyOrderingTables[Render_frameBuf & 1] = ordering;
 
-  Menu_Status_DrawBackground();
+  VS::Menu::Status::LiveDrawBackground();
   VS::Menu::Status::LiveDrawLimbConditionIndicator(0, 0, 0);
   VS::Menu::Status::LiveDrawLimbLeaderLine(0, 0, 0, 0);
 

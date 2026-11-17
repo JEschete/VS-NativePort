@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:95
+#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
+
 // decomp: src/include/gpu.h:112
 #define vs_getUV(u, v) ((u) | ((v) << 8))
 

@@ -20,11 +20,12 @@
 "#include \"Menu/Results/CubePuzzleLifecycleLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\"",
-"#include \"Menu/Status/LimbControllersLive.hpp\""
+"#include \"Menu/Status/LimbControllersLive.hpp\"",
+"#include \"Menu/Status/TerminalControllersLive.hpp\""
 ]
 ],
 [
-20,
+19,
 [
 "    Menu_Inventory_ItemList_ResetMainMenuStatics();"
 ],
@@ -34,7 +35,7 @@
 ]
 ],
 [
-26,
+25,
 [
 "    Menu_BattleAbilities_ResetMenu2Statics();"
 ],
@@ -45,7 +46,7 @@
 ]
 ],
 [
-32,
+31,
 [
 "    Menu_Inventory_ResetMenu3Statics();"
 ],
@@ -57,18 +58,19 @@
 ]
 ],
 [
-39,
+37,
 [
-"    Menu_Status_EquipmentDetails_ResetMenu4Statics();"
+"    Menu_Status_ActorStatus_ResetMenu4Statics();"
 ],
 [
-"    Menu_Status_EquipmentDetails_ResetMenu4Statics();",
+"    Menu_Status_ActorStatus_ResetMenu4Statics();",
 "    VS::Menu::Status::ResetLiveActorSwitchPhase();",
-"    VS::Menu::Status::ResetLiveLimbControllersModuleData();"
+"    VS::Menu::Status::ResetLiveLimbControllersModuleData();",
+"    VS::Menu::Status::ResetLiveTerminalControllersModuleData();"
 ]
 ],
 [
-52,
+50,
 [
 "    Menu_Score_Records_ResetMenu9Statics();"
 ],
@@ -78,7 +80,7 @@
 ]
 ],
 [
-59,
+57,
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();"
 ],
@@ -90,7 +92,7 @@
 ]
 ],
 [
-65,
+63,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
@@ -107,7 +109,7 @@
 ]
 ],
 [
-72,
+70,
 [
 "    Menu_Results_TimeAttack_ResetMenufStatics();"
 ],
@@ -610,102 +612,6 @@
 ],
 [
 "            Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size));"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Status\\ActorStatus.cpp": [
-[
-112,
-[
-"    u_long* prim = Render_frameScratch.primitiveCursor;",
-"    u_long* model_fade_ordering_table = Render_frameScratch.orderingTable;"
-],
-[
-"    u_long* prim = (u_long *)(Render_frameScratch.primitiveCursor);",
-"    u_long* model_fade_ordering_table = (u_long *)(Render_frameScratch.orderingTable);"
-]
-],
-[
-151,
-[
-"    u_long* prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"    u_long* prim = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-153,
-[
-"    u_int* background_ordering_table_entry = ordering_table_base + 0x1FF4;"
-],
-[
-"    u_int* background_ordering_table_entry = (u_int *)(((u_char*)(ordering_table_base)) + 0x1FF4);"
-]
-],
-[
-156,
-[
-"        background_ordering_table_entry = ordering_table_base - 4;"
-],
-[
-"        background_ordering_table_entry = (u_int *)(((u_char*)(ordering_table_base)) - 4);"
-]
-]
-],
-"Native\\Game\\src\\Menu\\Status\\EquipmentDetails.cpp": [
-[
-222,
-[
-"                        &actor->weapon, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
-],
-[
-"                        &actor->weapon, equipment_row_text, (int *)(&equipment_row_flags), Menu_Framework_stringBuf);"
-]
-],
-[
-236,
-[
-"                        &actor->shield, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
-],
-[
-"                        &actor->shield, equipment_row_text, (int *)(&equipment_row_flags), Menu_Framework_stringBuf);"
-]
-],
-[
-243,
-[
-"                            Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);"
-],
-[
-"                            (int)Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);"
-]
-],
-[
-246,
-[
-"                            &equipment_row_flags, Menu_Framework_stringBuf);"
-],
-[
-"                            (int *)(&equipment_row_flags), Menu_Framework_stringBuf);"
-]
-],
-[
-249,
-[
-"                            Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);"
-],
-[
-"                            (int)Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);"
-]
-],
-[
-253,
-[
-"                            &armor, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);"
-],
-[
-"                            &armor, equipment_row_text, (int *)(&equipment_row_flags), Menu_Framework_stringBuf);"
 ]
 ]
 ],

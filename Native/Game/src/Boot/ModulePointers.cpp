@@ -155,6 +155,7 @@
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
 #include "Menu/Status/DetailTransitionsLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
+#include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 extern "C" {
@@ -2329,6 +2330,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU4.PRG", 0x80104C40u, 0u, (void*)&VS::Menu::Status::SetLiveWeaponComponentRow, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80104DFCu, 0u, (void*)&VS::Menu::Status::SetLiveShieldGemRow, 0u, 0u, 0u},
     {"MENU/MENU4.PRG", 0x80104F2Cu, 0u, (void*)&VS::Menu::Status::ExitLiveEquipmentDetails, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80104F80u, 0u, (void*)&VS::Menu::Status::LiveUpdateEquipmentDetails, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80105970u, 0u, (void*)&VS::Menu::Status::LiveUpdateEquipmentList, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80105E94u, 0u, (void*)&VS::Menu::Status::LiveDrawModelSlideFade, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80105F60u, 0u, (void*)&VS::Menu::Status::LiveDrawBackground, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x80106150u, 0u, (void*)&VS::Menu::Status::LiveDrawFrame, 0u, 0u, 0u},
+    {"MENU/MENU4.PRG", 0x801064D4u, 0u, (void*)&VS::Menu::Status::LiveUpdateStatusTerminal, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80107FBCu, 0u, (void*)&VS::Menu::Score::LoadLiveEnemyPreview, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x80108098u, 0u, (void*)&VS::Menu::Score::FreeLiveEnemyPreview, 0u, 0u, 0u},
     {"MENU/MENU9.PRG", 0x801080C8u, 0u, (void*)&VS::Menu::Score::InitializeLiveAshleyPreviewPose, 0u, 0u, 0u},

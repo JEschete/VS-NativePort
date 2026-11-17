@@ -458,6 +458,11 @@
     <ClCompile Include="src\StatusLimbControllersLiveTests.cpp" />
     <ClCompile Include="src\StatusLimbControllersTests.cpp" />
     <ClCompile Include="src\StatusQueueTests.cpp" />
+    <ClCompile Include="src\StatusTerminalEquipmentTests.cpp" />
+    <ClCompile Include="src\StatusTerminalIntegrationTests.cpp" />
+    <ClCompile Include="src\StatusTerminalLiveTests.cpp" />
+    <ClCompile Include="src\StatusTerminalRenderingTests.cpp" />
+    <ClCompile Include="src\StatusTerminalScreenTests.cpp" />
     <ClCompile Include="src\StreamControlTests.cpp" />
     <ClCompile Include="src\TargetingDrawSliceTests.cpp" />
     <ClCompile Include="src\TargetPagePartitionTests.cpp" />
@@ -531,6 +536,8 @@
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp" />
     <ClInclude Include="include\Menu\StatusComponentsWorld.hpp" />
     <ClInclude Include="include\Menu\StatusLimbControllersWorld.hpp" />
+    <ClInclude Include="include\Menu\StatusTerminalLiveFixture.hpp" />
+    <ClInclude Include="include\Menu\StatusTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />

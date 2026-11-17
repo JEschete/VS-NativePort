@@ -1196,6 +1196,17 @@
     <None Include="..\..\port\differentials\status_switching_f02661.py" />
     <None Include="..\..\port\differentials\status_switching_f02666.py" />
     <None Include="..\..\port\differentials\status_switching_f02667.py" />
+    <None Include="..\..\port\differentials\status_terminal_common.py" />
+    <None Include="..\..\port\differentials\status_terminal_driver.cpp" />
+    <None Include="..\..\port\differentials\status_terminal_f02675.py" />
+    <None Include="..\..\port\differentials\status_terminal_f02676.py" />
+    <None Include="..\..\port\differentials\status_terminal_f02677.py" />
+    <None Include="..\..\port\differentials\status_terminal_f02678.py" />
+    <None Include="..\..\port\differentials\status_terminal_f02679.py" />
+    <None Include="..\..\port\differentials\status_terminal_f02682.py" />
+    <None Include="..\..\port\differentials\status_terminal_live_stubs.cpp" />
+    <None Include="..\..\port\differentials\status_terminal_live_test.cmd" />
+    <None Include="..\..\port\differentials\status_terminal_metadata_test.py" />
     <None Include="..\..\port\differentials\status_transitions_common.py" />
     <None Include="..\..\port\differentials\status_transitions_driver.cpp" />
     <None Include="..\..\port\differentials\status_transitions_f02655.py" />

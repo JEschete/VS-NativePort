@@ -1830,6 +1830,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Status::SetLiveWeaponComponentRow": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
     "VS::Menu::Status::SetLiveShieldGemRow": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
     "VS::Menu::Status::ExitLiveEquipmentDetails": r"Native\Game\include\Menu\Status\DetailTransitionsLive.hpp",
+    "VS::Menu::Status::LiveUpdateEquipmentDetails": r"Native\Game\include\Menu\Status\TerminalControllersLive.hpp",
+    "VS::Menu::Status::LiveUpdateEquipmentList": r"Native\Game\include\Menu\Status\TerminalControllersLive.hpp",
+    "VS::Menu::Status::LiveDrawModelSlideFade": r"Native\Game\include\Menu\Status\TerminalControllersLive.hpp",
+    "VS::Menu::Status::LiveDrawBackground": r"Native\Game\include\Menu\Status\TerminalControllersLive.hpp",
+    "VS::Menu::Status::LiveDrawFrame": r"Native\Game\include\Menu\Status\TerminalControllersLive.hpp",
+    "VS::Menu::Status::LiveUpdateStatusTerminal": r"Native\Game\include\Menu\Status\TerminalControllersLive.hpp",
     "VS::Menu::Score::LoadLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::FreeLiveEnemyPreview": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
     "VS::Menu::Score::InitializeLiveAshleyPreviewPose": r"Native\Game\include\Menu\Score\EncyclopediaPreviewLive.hpp",
@@ -3367,6 +3373,12 @@ OWNED_CALL_BINDINGS["F02671"] = "VS::Menu::Status::InitializeLiveDetailPanel"
 OWNED_CALL_BINDINGS["F02672"] = "VS::Menu::Status::SetLiveWeaponComponentRow"
 OWNED_CALL_BINDINGS["F02673"] = "VS::Menu::Status::SetLiveShieldGemRow"
 OWNED_CALL_BINDINGS["F02674"] = "VS::Menu::Status::ExitLiveEquipmentDetails"
+OWNED_CALL_BINDINGS["F02675"] = "VS::Menu::Status::LiveUpdateEquipmentDetails"
+OWNED_CALL_BINDINGS["F02676"] = "VS::Menu::Status::LiveUpdateEquipmentList"
+OWNED_CALL_BINDINGS["F02677"] = "VS::Menu::Status::LiveDrawModelSlideFade"
+OWNED_CALL_BINDINGS["F02678"] = "VS::Menu::Status::LiveDrawBackground"
+OWNED_CALL_BINDINGS["F02679"] = "VS::Menu::Status::LiveDrawFrame"
+OWNED_CALL_BINDINGS["F02682"] = "VS::Menu::Status::LiveUpdateStatusTerminal"
 OWNED_CALL_BINDINGS["F02836"] = "VS::Menu::Score::LoadLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02837"] = "VS::Menu::Score::FreeLiveEnemyPreview"
 OWNED_CALL_BINDINGS["F02838"] = "VS::Menu::Score::InitializeLiveAshleyPreviewPose"
@@ -5424,6 +5436,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU4.PRG", 0x80104C40, "VS::Menu::Status::SetLiveWeaponComponentRow"),  # F02672
     ("MENU/MENU4.PRG", 0x80104DFC, "VS::Menu::Status::SetLiveShieldGemRow"),  # F02673
     ("MENU/MENU4.PRG", 0x80104F2C, "VS::Menu::Status::ExitLiveEquipmentDetails"),  # F02674
+    ("MENU/MENU4.PRG", 0x80104F80, "VS::Menu::Status::LiveUpdateEquipmentDetails"),  # F02675
+    ("MENU/MENU4.PRG", 0x80105970, "VS::Menu::Status::LiveUpdateEquipmentList"),  # F02676
+    ("MENU/MENU4.PRG", 0x80105E94, "VS::Menu::Status::LiveDrawModelSlideFade"),  # F02677
+    ("MENU/MENU4.PRG", 0x80105F60, "VS::Menu::Status::LiveDrawBackground"),  # F02678
+    ("MENU/MENU4.PRG", 0x80106150, "VS::Menu::Status::LiveDrawFrame"),  # F02679
+    ("MENU/MENU4.PRG", 0x801064D4, "VS::Menu::Status::LiveUpdateStatusTerminal"),  # F02682
     ("MENU/MENU9.PRG", 0x80107FBC, "VS::Menu::Score::LoadLiveEnemyPreview"),  # F02836
     ("MENU/MENU9.PRG", 0x80108098, "VS::Menu::Score::FreeLiveEnemyPreview"),  # F02837
     ("MENU/MENU9.PRG", 0x801080C8, "VS::Menu::Score::InitializeLiveAshleyPreviewPose"),  # F02838
@@ -5623,27 +5641,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("static u_short Menu_BreakArts_artListActionIds[4];",
          "static u_short Menu_BreakArts_artListActionIds[5];",
          "MENU1/30.c weapon arts need four action IDs plus View Arts; adapt before hoisting so the reload initializer has the same extent"),
-    ],
-    "F02677": [
-        ("((uintptr_t)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "Status model fade packets retain native link handles"),
-        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "Status model fade packets retain native link handles"),
-    ],
-    "F02678": [
-        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
-         "Status background packets retain native link handles instead of hiding the remaining frame chain"),
-    ],
-    "F02682": [
-        ("        Menu_Status_updateScreenEnabled = 1;\n        Menu_Status_updateAnimWait = 1;",
-         "        Menu_Status_updateAnimWait = 1;",
-         "the native preview slot is not initialized until the actor-switch producer runs"),
-        ("        if (Menu_Status_updateAnimWait != 0) {\n            if (VS::Menu::Status::LiveAnimateActorSwitch(0)) {",
-         "        if (Menu_Status_updateAnimWait != 0) {\n"
-         "            int preview_ready = VS::Menu::Status::LiveAnimateActorSwitch(0);\n"
-         "            Menu_Status_updateScreenEnabled = 1;\n"
-         "            if (preview_ready) {",
-         "enable Status drawing only after the actor-switch producer has loaded its native preview"),
     ],
     "F02467": [
         ("        int* p = (int*)((uintptr_t)Core_ScratchBase() + 0x000);\n", "",
@@ -6015,7 +6012,6 @@ for _row, _decl, _where in (
         ([(*_decl, _evidence)] if _decl else []) + [(*_CELL_OR_ABSENT, _evidence)])
 
 FIXUP_VARIANT_COUNTS: dict[str, int] = {
-    "F02677": 1,
     "F02699": 9,
 }
 

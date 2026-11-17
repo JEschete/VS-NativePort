@@ -50,6 +50,7 @@
 #include "Menu/RenameLive.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/EncodedText.hpp"
@@ -1018,7 +1019,7 @@ class LiveHost final : public Host {
       case Submenu::kInventory:
         return Inventory::UpdateLiveInventoryScreen(bytes);
       case Submenu::kStatus:
-        return Menu_Status_Update(bytes);
+        return Status::LiveUpdateStatusTerminal(bytes);
       case Submenu::kMap:
         return Menu_Map_UpdateScreen(bytes);
       case Submenu::kData:

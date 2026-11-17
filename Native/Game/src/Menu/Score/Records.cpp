@@ -8,6 +8,7 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
+#include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Menu/Status/ActorStatus.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"

@@ -1161,6 +1161,21 @@
     <ClCompile Include="src\StatusQueueTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusTerminalEquipmentTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatusTerminalIntegrationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatusTerminalLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatusTerminalRenderingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StatusTerminalScreenTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\StreamControlTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1348,6 +1363,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\StatusLimbControllersWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\StatusTerminalLiveFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\StatusTerminalWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp">

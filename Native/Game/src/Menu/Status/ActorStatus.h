@@ -4,23 +4,6 @@
 #include "Legacy/Psx.h"
 
 
-// decomp: src/include/gpu.h:95
-#define vs_getXY(x, y) (((y) << 16) | ((x) & 0xFFFF))
-
-// decomp: src/include/gpu.h:97
-#define vs_getWH(w, h) vs_getXY((w), (h))
-
-// decomp: src/include/gpu.h:99
-#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
-    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
-
-// decomp: src/include/gpu.h:109
-#define vs_getUV0Clut(u, v, x, y) (((u) | ((v) << 8)) | (getClut((x), (y)) << 16))
-
-// decomp: src/include/gpu.h:110
-#define vs_getUV1Tpage(u, v, x, y, tp, abr)                                              \
-    (((u) | ((v) << 8)) | (getTPage((tp), (abr), (x), (y)) << 16))
-
 // decomp: _renderLimbUiState (src/MENU/MENU4.PRG/120.c:1138)
 enum Menu_Status_LimbUiMode { Menu_Status_LimbUiMode_None, Menu_Status_LimbUiMode_Init };
 typedef enum Menu_Status_LimbUiMode Menu_Status_LimbUiMode;
@@ -47,10 +30,6 @@ extern char Menu_Status_selectedStatRow;;
 extern u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Status_xPos;
 extern int Menu_Status_yPos;
-void Menu_Status_DrawModelSlideFade(void);
-void Menu_Status_DrawBackground(void);
-void Menu_Status_DrawFrame(void);
-int Menu_Status_Update(u_char* state);
 void Menu_Status_ActorStatus_ResetMenu4Statics(void);
 
 #endif // VS_MENU_STATUS_ACTORSTATUS_H_DECLS

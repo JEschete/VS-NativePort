@@ -3,7 +3,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
-#include "Menu/Status/ActorStatus.h"
 
 // decomp: D_800E861C (D_800E861C@BATTLE/BATTLE.PRG)
 int Battle_valueCaptionRects[17]; /* contents: module image (ModuleData.cpp) */

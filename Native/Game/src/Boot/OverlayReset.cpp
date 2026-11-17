@@ -13,6 +13,7 @@
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
+#include "Menu/Status/TerminalControllersLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Status/ActorStatus.h"
-#include "Menu/Status/EquipmentDetails.h"
 
 // Call where the original loads MAINMENU.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMainMenuStatics(void)
@@ -57,9 +57,9 @@ void Boot_ResetMenu3Statics(void)
 void Boot_ResetMenu4Statics(void)
 {
     Menu_Status_ActorStatus_ResetMenu4Statics();
-    Menu_Status_EquipmentDetails_ResetMenu4Statics();
     VS::Menu::Status::ResetLiveActorSwitchPhase();
     VS::Menu::Status::ResetLiveLimbControllersModuleData();
+    VS::Menu::Status::ResetLiveTerminalControllersModuleData();
 }
 
 // Call where the original loads MENU5.PRG: restores the statics its reload re-read from the disc.

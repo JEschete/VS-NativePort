@@ -28,6 +28,7 @@
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
+#include "Menu/Status/TerminalControllersLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/GameClockLive.hpp"
@@ -89,6 +90,7 @@ class LiveSessionHost final : public SessionHost {
     Menu::Magic::ResetMagicMenusLiveState();
     Menu::Magic::ResetTeleportMenuLiveState();
     Menu::Status::ResetLiveLimbControllersModuleData();
+    Menu::Status::ResetLiveTerminalControllersModuleData();
     Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }

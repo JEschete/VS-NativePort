@@ -3012,12 +3012,6 @@
     <ClCompile Include="src\Menu\Status\DetailTransitionsLive.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
-    <ClCompile Include="src\Menu\Status\EquipmentDetails.cpp">
-      <Filter>src\Menu\Status</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Menu\Status\EquipmentDetails.h">
-      <Filter>src\Menu\Status</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Status\EquipmentStats.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
@@ -3025,6 +3019,27 @@
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
     <ClCompile Include="src\Menu\Status\LimbControllersLive.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalController.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalControllersLive.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Menu\Status\TerminalControllersLiveInternal.hpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Menu\Status\TerminalEquipment.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalEquipmentLive.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalRendering.cpp">
+      <Filter>src\Menu\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalScreenLive.cpp">
       <Filter>src\Menu\Status</Filter>
     </ClCompile>
     <ClCompile Include="src\Menu\TextBox.cpp">
@@ -4747,6 +4762,12 @@
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Status\LimbControllersLive.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\TerminalControllers.hpp">
+      <Filter>include\Menu\Status</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Status\TerminalControllersLive.hpp">
       <Filter>include\Menu\Status</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\TextBoxFrames.hpp">

@@ -505,25 +505,6 @@ int func_800F9800(void) {
             source = source.replace(old, new)
         self.assertTrue(source.endswith("    }\n    return arg0;\n}"))
 
-    def test_status_packet_links_accept_root_and_worktree_forms(self):
-        copier = object.__new__(copy_to_native.Copier)
-        cases = (
-            ("F02677", "Menu::Status::DrawModelSlideFade",
-             "temp_t1", "model_fade_ordering_table"),
-        )
-        for fid, name, source_table, output_table in cases:
-            row = {"id": fid, "final_name": name}
-            for link in ("((uintptr_t)prim << 8) >> 8", "((u_long)prim << 8) >> 8"):
-                with self.subTest(fid=fid, link=link):
-                    copier.used_fixups = set()
-                    source = f"{source_table}[-1] = {link};\n"
-                    expected = f"{output_table}[-1] = LegacyGpu_Handle(prim);\n"
-                    self.assertEqual(copier.apply_fixups(row, source), expected)
-                    self.assertEqual(
-                        sum(source.count(old) for used_fid, old in copier.used_fixups if used_fid == fid),
-                        1,
-                    )
-
     def test_map_darken_background_accepts_both_cursor_store_forms(self):
         copier = object.__new__(copy_to_native.Copier)
         row = {"id": "F02699", "final_name": "Menu::Map::DarkenBackground"}

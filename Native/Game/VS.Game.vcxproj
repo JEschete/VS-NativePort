@@ -2121,16 +2121,21 @@
     <ClCompile Include="src\Menu\Status\DetailTransitionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Menu\Status\EquipmentDetails.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Menu\Status\EquipmentStats.cpp" />
     <ClCompile Include="src\Menu\Status\LimbControllers.cpp" />
     <ClCompile Include="src\Menu\Status\LimbControllersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalController.cpp" />
+    <ClCompile Include="src\Menu\Status\TerminalControllersLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalEquipment.cpp" />
+    <ClCompile Include="src\Menu\Status\TerminalEquipmentLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Status\TerminalRendering.cpp" />
+    <ClCompile Include="src\Menu\Status\TerminalScreenLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Menu\TextBox.cpp">
@@ -2546,7 +2551,7 @@
     <ClInclude Include="src\Menu\Score\Records.h" />
     <ClInclude Include="src\Menu\Score\ScoreScreen.h" />
     <ClInclude Include="src\Menu\Status\ActorStatus.h" />
-    <ClInclude Include="src\Menu\Status\EquipmentDetails.h" />
+    <ClInclude Include="src\Menu\Status\TerminalControllersLiveInternal.hpp" />
     <ClInclude Include="src\Menu\TextBox.h" />
     <ClInclude Include="src\State\Ashley.h" />
     <ClInclude Include="src\State\Location.h" />
@@ -3083,6 +3088,8 @@
     <ClInclude Include="include\Menu\Status\EquipmentStats.hpp" />
     <ClInclude Include="include\Menu\Status\LimbControllers.hpp" />
     <ClInclude Include="include\Menu\Status\LimbControllersLive.hpp" />
+    <ClInclude Include="include\Menu\Status\TerminalControllers.hpp" />
+    <ClInclude Include="include\Menu\Status\TerminalControllersLive.hpp" />
     <ClInclude Include="include\Menu\TextBoxFrames.hpp" />
     <ClInclude Include="include\Menu\TextBoxFramesLive.hpp" />
     <ClInclude Include="include\Menu\TextBoxState.hpp" />

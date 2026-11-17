@@ -1,19 +1,19 @@
 # Current Handoff
 
-Updated 2026-11-17. The latest integrated #276 group is status transitions,
-F02655/F02669-F02674, including actual module, navigation, row/formatter and
-DP/PP-consumer integration without new allocation or reset ownership.
-Its shared Debug/Release gates and original comparisons passed;
-the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **853 resolved (841 promoted,
-12 retired) and 47 remaining**; see
+Updated 2026-11-17. The latest integrated #276 group is status terminals,
+F02675-F02679/F02682, including actual module/render/row entries, production
+preview resources and completed MENU4/cold-session reset and reentry.
+All local verification steps pass after the isolated #428 copier-test repair;
+terminal publication and exact-revision CI remain pending.
+The original 900-function cohort has **859 resolved (847 promoted,
+12 retired) and 41 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 6, 50: 30, 52: 10. The seven transition functions meet the no-bridge gate;
+  48: 0, 50: 30, 52: 10. The six terminal functions meet the no-bridge gate;
   no WIP function is counted as a completed promotion.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
@@ -22,6 +22,41 @@ The original 900-function cohort has **853 resolved (841 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Status-terminal evidence (`VR-MENU-STATUS-TERMINAL`): six original spans
+  pass 6,144 vectors, zero mismatches; 68 instruction mutants (128 vectors
+  each) and six compiled native variants are detected. Debug and Release
+  each pass 9,090 cases / 12,957,654 assertions, 37 focused cases / 293
+  assertions and both canonical replays. `group-20261117-033418` preserves
+  its original failed aggregate: only a Python 3.10 copier-test observer
+  failed on the private `re._compiler` attribute (#428). All other steps
+  passed, including unchanged second generation (`e7440f99af73da38`) and
+  tidy with 19 existing findings, zero new. Prerequisite `3fb4554038e038912797c2601c14e4ade617c06e`
+  observes public `re.compile` instead, preserving exact 600/0 counts.
+  Its focused control passes on Python 3.10.11, all 226 encounter copier
+  controls pass on Python 3.14.3, and scoped quality has zero findings.
+  Exact [Source Quality 44049663010](https://github.com/JEschete/VS-NativePort/actions/runs/44049663010)
+  passes and #428 is closed.
+  The complete Native fingerprint is unchanged after that Python-only
+  repair; passing native gates were not duplicated.
+  Final ledger sync/check passes. Completing row 48 records the historical
+  Break Arts/equipment-stat bridge reductions against their existing
+  accepted proofs and replaces an obsolete magic placeholder with its
+  recorded successors; these are not additional promotions.
+  Evidence: `build\scratch\status-terminal\integration.json`.
+  The actual completed MENU4 and cold-session controls first failed eight
+  reset assertions, then pass after wiring the terminal hook. Other/pending
+  overlays preserve terminal state; reset clears private controllers,
+  selected stat row and saved view without restoring an inactive camera.
+  Actual framework dispatch uses the BATTLE state byte, not a local copy.
+  Actor, preview, MAINMENU workspace/text and current camera owners remain
+  separate. Fresh reentry exercises original model/sequence parsing and
+  real preview, font, audio and frame services. Test-only follow-up
+  `52442f1882d41960f55dd21f8afbeb19ef539d53` retains all 64 original Live
+  assertions and restores every native module binding byte-for-byte.
+  Six old-symbol files, ten obsolete adaptations and F02677 pointer-form
+  controls retire. No interactive gameplay or EC-retirement completion
+  is claimed. Publication/CI and #422 closure remain pending; 65 of the
+  requested 112 are published, with these six locally verified.
 - Status-transitions evidence (`VR-MENU-STATUS-TRANSITIONS`): seven original
   spans pass 7,168 vectors, zero mismatches; 98 instruction mutants (256
   vectors each) and seven compiled variants are detected. Debug and Release
@@ -39,7 +74,10 @@ The original 900-function cohort has **853 resolved (841 promoted,
   adaptations are retired. Existing MENU4/MAINMENU/BATTLE owners remain;
   no new persistent state, allocation or reset hook is introduced.
   Original external row/audio/stat services are doubled; no gameplay or
-  EC-retirement completion is claimed. Publication CI remains required.
+  EC-retirement completion is claimed.
+  Published in `a0e8cb79fb935bb362ead5ffc7ed533b020939ba`;
+  [Source Quality 44041383172](https://github.com/JEschete/VS-NativePort/actions/runs/44041383172)
+  passes. This completes 65 of the final 112 functions, with 47 remaining.
 - Status-limbs evidence (`VR-MENU-STATUS-LIMBS`): seven original spans pass
   7,168 vectors, zero mismatches; 96 instruction mutants and seven compiled
   native variants are detected. Debug and Release each pass 9,025 cases /
@@ -351,18 +389,24 @@ The original 900-function cohort has **853 resolved (841 promoted,
 
 Next steps:
 
-1. Confirm status-components publication CI, then integrate the remaining
-   delivered status groups in dependency order. Magic publication/CI and
-   its eligible issue closures are complete; #414 acceptance evidence and
-   its publication gate are explicit above. Status-components packet
+1. Publish the locally verified status-terminal checkpoint, confirm exact
+   CI and close #422, then integrate game clear and time attack before the
+   delivered Gazette/text/map groups. Earlier status publication/CI and
+   eligible issue closures are complete. Status-components packet
    `7bd797a55e77bcd7c84c75768f7e24313f7b6f0e` is integrated.
    Status-limbs `f682bd35b5814988f36f5c37fecb4a4bb767f1fd` is integrated.
    Status-transitions
    `fea43799d892e4fee1ead0a50a8232846583d63b` is integrated; no packet
    alone is a root promotion. Status-terminal packet
-   `981252c35ea77ad877221db67ee7bf5c9c9f6654` is delivered: 31 cases /
-   186 assertions, 6,144 original vectors, 68 instruction mutants and six
-   native variants. Gazette-time packet
+   `981252c35ea77ad877221db67ee7bf5c9c9f6654` is integrated but not published.
+   Fresh root evidence passes 6,144 original vectors, 68 instruction mutants
+   and six native variants. Actual MENU4/cold-boundary controls initially
+   fail eight reset assertions, then pass after wiring the terminal hook.
+   Production-fixture follow-up `52442f1882d41960f55dd21f8afbeb19ef539d53`
+   is adopted. Root Debug/Release each pass 37 focused cases / 293 assertions
+   and the shared native gates above; #428's isolated copier observer
+   repair passes the targeted retry without changing Native inputs.
+   Publication remains. Gazette-time packet
    `a841342b54a8362a3e2ad38d34ae154058e78d14` is delivered: 23 cases /
    165 assertions per configuration, 4,096 original vectors, 64 instruction
    mutants and four native variants. Time-attack packet
@@ -374,11 +418,14 @@ Next steps:
    packet `86b1223d99d572d8d916a8a713bf74a228aa7e0d` is delivered: 53 tests /
    363 assertions per configuration, 11,264 parity vectors, 145 instruction
    mutants and eight compiled variants. Production integration remains.
-   Map-terminal remains active in
-   `D:\Dev\NativePort\wt\batch-map-terminal-52630eac`. The existing status
-   terminal worker is preparing a test-only production bootstrap follow-up:
-   its isolated main-entry tests used service doubles and must not be
-   counted as production-linked acceptance without actual initialization.
+   Map-terminal packet `7c098e73d33d7b3e4aefdd8d4f9b0721e1752469` is delivered
+   from `D:\Dev\NativePort\wt\batch-map-terminal-52630eac`: 131 scoped cases /
+   1,559 assertions, 6,144 original vectors, 58 instruction mutants and six
+   native variants; quality/tidy has zero new findings and metadata guards
+   pass. Its #425 caption, #426 scene extent and #427 lifecycle issues remain
+   open for actual root integration and exact-revision CI. All isolated
+   workers have delivered and are idle; no isolated packet alone establishes
+   production-linked acceptance.
    #421 and #422 retain their bounded acceptance and
    root integration/CI gates.
    The coordinator's text-update worktree is
