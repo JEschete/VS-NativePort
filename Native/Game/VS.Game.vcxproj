@@ -723,6 +723,10 @@
     <ClCompile Include="src\Effects\PackageExtentsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Effects\ParticleEmitter.cpp" />
+    <ClCompile Include="src\Effects\ParticleEmitterLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\ParticleMotion.cpp" />
     <ClCompile Include="src\Effects\ParticleMotionLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -782,13 +786,6 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Effects\Plugins\Plg051.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Effects\Plugins\Plg052.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
@@ -1250,6 +1247,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Effects\Templates\ParticleTarget.cpp" />
+    <ClCompile Include="src\Effects\Templates\RepeatingRings.cpp" />
+    <ClCompile Include="src\Effects\Templates\RepeatingRingsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\Templates\Ring.cpp" />
     <ClCompile Include="src\Effects\Templates\RingCore.cpp" />
     <ClCompile Include="src\Effects\Templates\RingsLive.cpp">
@@ -2326,7 +2327,6 @@
     <ClInclude Include="src\Effects\Plugins\Plg049.h" />
     <ClInclude Include="src\Effects\Plugins\Plg050.h" />
     <ClInclude Include="src\Effects\Plugins\Plg051.h" />
-    <ClInclude Include="src\Effects\Plugins\Plg052.h" />
     <ClInclude Include="src\Effects\Plugins\Plg053.h" />
     <ClInclude Include="src\Effects\Plugins\Plg057.h" />
     <ClInclude Include="src\Effects\Plugins\Plg061.h" />
@@ -2751,6 +2751,8 @@
     <ClInclude Include="include\Effects\EffectScript.hpp" />
     <ClInclude Include="include\Effects\EffectScriptLive.hpp" />
     <ClInclude Include="include\Effects\PackageExtents.hpp" />
+    <ClInclude Include="include\Effects\ParticleEmitter.hpp" />
+    <ClInclude Include="include\Effects\ParticleEmitterLive.hpp" />
     <ClInclude Include="include\Effects\ParticleMotion.hpp" />
     <ClInclude Include="include\Effects\ParticleMotionLive.hpp" />
     <ClInclude Include="include\Effects\ParticlePool.hpp" />
@@ -2784,6 +2786,8 @@
     <ClInclude Include="include\Effects\Templates\ParticleRender.hpp" />
     <ClInclude Include="include\Effects\Templates\ParticlesLive.hpp" />
     <ClInclude Include="include\Effects\Templates\ParticleTarget.hpp" />
+    <ClInclude Include="include\Effects\Templates\RepeatingRings.hpp" />
+    <ClInclude Include="include\Effects\Templates\RepeatingRingsLive.hpp" />
     <ClInclude Include="include\Effects\Templates\Ring.hpp" />
     <ClInclude Include="include\Effects\Templates\RingCore.hpp" />
     <ClInclude Include="include\Effects\Templates\RingsLive.hpp" />

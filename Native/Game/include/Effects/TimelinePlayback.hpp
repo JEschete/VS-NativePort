@@ -168,7 +168,7 @@ class TimelinePlaybackHost {
   [[nodiscard]] virtual bool FrameHeld() = 0;
   // LiveSampleAllEffectCurves.
   virtual void SampleCurves(std::int16_t curve_frame) = 0;
-  // Effects_EmitParticleEvent, without a parent plugin.
+  // EmitLiveParticleEvent, without a parent plugin.
   virtual void EmitParticles(const ParticleEmission& emission) = 0;
   // LivePlayCutsceneStreamSlotCentered.
   virtual void PlayStream(std::int32_t handle) = 0;

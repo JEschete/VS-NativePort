@@ -23,6 +23,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
@@ -488,6 +489,8 @@ struct EmissionFixture : ParticleFixture {
 
   EmissionFixture() {
     package.block5Data = reinterpret_cast<Effects_PackageBlock5*>(&definitions);
+    VS::Effects::RecordLiveParticleDefinitions(
+        std::as_bytes(std::span(&definitions, 1)));
     package.block2Data = programs.data();
     VS::Effects::RecordLiveAnimationTable(
         std::as_writable_bytes(std::span(programs)));
@@ -780,7 +783,7 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
   Core_Random_Seed(1234);
   const bool emits = requested > 0 && !full;
 
-  Effects_EmitParticleEvent(&fixture.instance, 0, 0, 0, nullptr);
+  VS::Effects::EmitLiveParticleEvent(&fixture.instance, 0, 0, 0, nullptr);
 
   fixture.CheckEmissionPool(full || emits);
   if (!emits) {
@@ -910,7 +913,7 @@ TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
           : (((48 * VS::Core::Math::Sine(angle)) >> 12) * vertical) / height;
   Core_Random_Seed(seed);
 
-  Effects_EmitParticleEvent(&fixture.instance, 0, 0, 0, nullptr);
+  VS::Effects::EmitLiveParticleEvent(&fixture.instance, 0, 0, 0, nullptr);
 
   fixture.CheckEmissionPool(true);
   const auto& position = fixture.particle.motion.position;

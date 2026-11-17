@@ -1706,6 +1706,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::UpdateLivePlg054AnalyzeGrid": r"Native\Game\include\Effects\AnalyzeGridLive.hpp",
     "VS::Effects::UpdateLivePlg055AnalyzeGrid": r"Native\Game\include\Effects\AnalyzeGridLive.hpp",
     "VS::Effects::UpdateLivePlg074AnalyzeGrid": r"Native\Game\include\Effects\AnalyzeGridLive.hpp",
+    "VS::Effects::EmitLiveParticleEvent": r"Native\Game\include\Effects\ParticleEmitterLive.hpp",
     "VS::Menu::Results::AshleyLiveTotalStrength": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::AshleyLiveTotalIntelligence": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
     "VS::Menu::Results::AshleyLiveTotalAgility": r"Native\Game\include\Menu\Results\ResultsStatsLive.hpp",
@@ -1841,6 +1842,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::DrawLiveInformationBoxBackdrop": r"Native\Game\include\Menu\TextBoxFramesLive.hpp",
     "VS::Menu::FlipLiveTextBoxShapePoint": r"Native\Game\include\Menu\TextBoxFramesLive.hpp",
     "VS::Menu::DrawLiveTextBoxFrame": r"Native\Game\include\Menu\TextBoxFramesLive.hpp",
+    "VS::Effects::Templates::UpdateLivePlg052RepeatingRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
+    "VS::Effects::Templates::UpdateLivePlg077RepeatingRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
+    "VS::Effects::Templates::UpdateLivePlg162TransposedRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
+    "VS::Effects::Templates::UpdateLivePlg236TransposedRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
+    "VS::Effects::Templates::UpdateLivePlg263TransposedRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
+    "VS::Effects::Templates::UpdateLivePlg300RepeatingRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
+    "VS::Effects::Templates::UpdateLivePlg300ForegroundRepeatingRing": r"Native\Game\include\Effects\Templates\RepeatingRingsLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3190,6 +3198,7 @@ OWNED_CALL_BINDINGS["F01893"] = "VS::Effects::UpdateLivePlg005AnalyzeGrid"
 OWNED_CALL_BINDINGS["F01926"] = "VS::Effects::UpdateLivePlg054AnalyzeGrid"
 OWNED_CALL_BINDINGS["F01928"] = "VS::Effects::UpdateLivePlg055AnalyzeGrid"
 OWNED_CALL_BINDINGS["F01996"] = "VS::Effects::UpdateLivePlg074AnalyzeGrid"
+OWNED_CALL_BINDINGS["F01515"] = "VS::Effects::EmitLiveParticleEvent"
 OWNED_CALL_BINDINGS["F03066"] = "VS::Menu::Results::AshleyLiveTotalStrength"
 OWNED_CALL_BINDINGS["F03067"] = "VS::Menu::Results::AshleyLiveTotalIntelligence"
 OWNED_CALL_BINDINGS["F03068"] = "VS::Menu::Results::AshleyLiveTotalAgility"
@@ -3325,6 +3334,13 @@ OWNED_CALL_BINDINGS["F01413"] = "VS::Menu::DrawLiveInformationBoxHeader"
 OWNED_CALL_BINDINGS["F01414"] = "VS::Menu::DrawLiveInformationBoxBackdrop"
 OWNED_CALL_BINDINGS["F01415"] = "VS::Menu::FlipLiveTextBoxShapePoint"
 OWNED_CALL_BINDINGS["F01416"] = "VS::Menu::DrawLiveTextBoxFrame"
+OWNED_CALL_BINDINGS["F01920"] = "VS::Effects::Templates::UpdateLivePlg052RepeatingRing"
+OWNED_CALL_BINDINGS["F01998"] = "VS::Effects::Templates::UpdateLivePlg077RepeatingRing"
+OWNED_CALL_BINDINGS["F02209"] = "VS::Effects::Templates::UpdateLivePlg162TransposedRing"
+OWNED_CALL_BINDINGS["F02289"] = "VS::Effects::Templates::UpdateLivePlg236TransposedRing"
+OWNED_CALL_BINDINGS["F02323"] = "VS::Effects::Templates::UpdateLivePlg263TransposedRing"
+OWNED_CALL_BINDINGS["F02397"] = "VS::Effects::Templates::UpdateLivePlg300RepeatingRing"
+OWNED_CALL_BINDINGS["F02398"] = "VS::Effects::Templates::UpdateLivePlg300ForegroundRepeatingRing"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -4885,6 +4901,13 @@ MODULE_BINDING_ENTRIES = (
     ("EFFECT/PLG074.BIN", 0x800F98F8, "VS::Effects::Templates::UpdateLivePlg073TiledRing"),  # F01986
     ("EFFECT/PLG074.BIN", 0x800FA7F0, "VS::Effects::Templates::UpdateLivePlg073Ring"),  # F01987
     ("EFFECT/PLG074.BIN", 0x800FD534, "VS::Effects::Templates::UpdateLivePlg073RotatingSurface"),  # F01995
+    ("EFFECT/PLG052.BIN", 0x800F9800, "VS::Effects::Templates::UpdateLivePlg052RepeatingRing"),  # F01920
+    ("EFFECT/PLG077.BIN", 0x800FA324, "VS::Effects::Templates::UpdateLivePlg077RepeatingRing"),  # F01998
+    ("EFFECT/PLG162.BIN", 0x800F9800, "VS::Effects::Templates::UpdateLivePlg162TransposedRing"),  # F02209
+    ("EFFECT/PLG236.BIN", 0x800FB62C, "VS::Effects::Templates::UpdateLivePlg236TransposedRing"),  # F02289
+    ("EFFECT/PLG263.BIN", 0x800FB0CC, "VS::Effects::Templates::UpdateLivePlg263TransposedRing"),  # F02323
+    ("EFFECT/PLG300.BIN", 0x800FC228, "VS::Effects::Templates::UpdateLivePlg300RepeatingRing"),  # F02397
+    ("EFFECT/PLG300.BIN", 0x800FD198, "VS::Effects::Templates::UpdateLivePlg300ForegroundRepeatingRing"),  # F02398
     ("BATTLE/BATTLE.PRG", 0x800D46DC, "VS::Effects::LiveBranchEffectScriptIf"),  # F01516
     ("BATTLE/BATTLE.PRG", 0x800D4720, "VS::Effects::LiveYieldEffectScriptAtOffset"),  # F01517
     ("BATTLE/BATTLE.PRG", 0x800D474C, "VS::Effects::LiveJumpEffectScript"),  # F01518
@@ -5184,6 +5207,7 @@ MODULE_BINDING_ENTRIES = (
     ("EFFECT/PLG054.BIN", 0x800F9818, "VS::Effects::UpdateLivePlg054AnalyzeGrid"),  # F01926
     ("EFFECT/PLG055.BIN", 0x800F9818, "VS::Effects::UpdateLivePlg055AnalyzeGrid"),  # F01928
     ("EFFECT/PLG074.BIN", 0x800FE3EC, "VS::Effects::UpdateLivePlg074AnalyzeGrid"),  # F01996
+    ("BATTLE/BATTLE.PRG", 0x800D2ADC, "VS::Effects::EmitLiveParticleEvent"),  # F01515
     ("MENU/MENUF.PRG", 0x80108EA8, "VS::Menu::Results::AshleyLiveTotalStrength"),  # F03066
     ("MENU/MENUF.PRG", 0x80108EC8, "VS::Menu::Results::AshleyLiveTotalIntelligence"),  # F03067
     ("MENU/MENUF.PRG", 0x80108EE8, "VS::Menu::Results::AshleyLiveTotalAgility"),  # F03068
@@ -5375,36 +5399,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "Consolidation backup uses the same row allocation as the live screen."),
         ("sizeof *Menu_Loot_lootList * 160", "sizeof *Menu_Loot_lootList * kMenuLootRowCapacity",
          "Consolidation restoration includes every supported row."),
-    ],
-    "F01515": [
-        ("    for (i = 0; i < count; ++i) {\n        node = VS::Effects::LiveAllocateEffectParticle(arg0);",
-         '    if (count <= 0) {\n'
-         '        Core_Debugf("effects", "particle emission skipped: count=%d used=%d capacity=%d",\n'
-         '            count, Effects_usedParticleCount, Effects_particleCapacity);\n'
-         '        return;\n'
-         '    }\n\n'
-         '    for (i = 0; i < count; ++i) {\n        node = VS::Effects::LiveAllocateEffectParticle(arg0);',
-         "zero/full-capacity bursts have no first particle; avoid the copied C's uninitialized node"),
-        ("""                scratch->vector.vx =
-                    (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
-                    / scratch->extent.vy;
-                scratch->vector.vz =
-                    (((scratch->vector.vz * scratch->sinAngle0) >> 12) * scratch->vector.vy)
-                    / scratch->extent.vy;""",
-         """                if (scratch->extent.vy == 0) {
-                    // BATTLE.PRG, DIV at 0x800D34BC/0x800D34F8:
-                    // zero height makes both dividends zero; the original LO is -1.
-                    scratch->vector.vx = scratch->vector.vz = -1;
-                } else {
-                    scratch->vector.vx =
-                        (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
-                        / scratch->extent.vy;
-                    scratch->vector.vz =
-                        (((scratch->vector.vz * scratch->sinAngle0) >> 12) * scratch->vector.vy)
-                        / scratch->extent.vy;
-                }""",
-         "Preserve the original cone's nontrapping 0/0 quotient when its height is zero, "
-         "without changing nonzero scaling, particle emission or RNG consumption."),
     ],
     "F02816": [
         ("char digits[2];", 'char digits[sizeof "00"];',
@@ -5631,21 +5625,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "                (unsigned)effect->ringSegments, (unsigned)effect->ringPositions);\n"
          "        }",
          "capture the exact closed-ring definition and packed arguments for an unavailable texture group without changing rendering"),
-    ],
-    "F01920": [
-        ("VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));",
-         "VS::Effects::LiveClearParticleTextureState(&state->texture);",
-         "F01590 is typed: the ring clears its texture-animation record, not int storage"),
-    ],
-    "F02209": [
-        ("VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));",
-         "VS::Effects::LiveClearParticleTextureState(&state->texture);",
-         "F01590 is typed: the ring clears its texture-animation record, not int storage"),
-    ],
-    "F02398": [
-        ("VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));",
-         "VS::Effects::LiveClearParticleTextureState(&state->texture);",
-         "F01590 is typed: the ring clears its texture-animation record, not int storage"),
     ],
     "F00836": [
         ("    i = 0;\n\n    while ((temp_v0_2 = func_800A3C00",

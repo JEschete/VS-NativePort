@@ -17,8 +17,10 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/ClosedRing.hpp"
+#include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/Ring.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TiledRing.hpp"
@@ -568,8 +570,7 @@ void LiveRingHost::EmitParticleEvent(std::uint8_t event, Vec3 position) {
   Effects_PluginEffectState context{};
   context.transparency = 0;
   math::StoreVector(context.position, position);
-  // Cross-slice calls: retarget when those rows are promoted.
-  Effects_EmitParticleEvent(instance_, event, 0, 0, &context);
+  EmitLiveParticleEvent(instance_, event, 0, 0, &context);
 }
 
 using RingInstance = bool (*)(RingCommand, std::int32_t,
@@ -586,6 +587,12 @@ int RunRing(Effects_RendererSlot* slot, unsigned int command, int packed,
                                                                             : 0;
 }
 }  // namespace
+
+int RunLiveRing(Effects_RendererSlot* slot, unsigned int command, int packed,
+                std::span<const RingPaletteEntry> palette,
+                LiveRingInstance instance) {
+  return RunRing(slot, command, packed, palette, instance);
+}
 
 // Each entry passes its overlay's palette to the instance in Ring.cpp,
 // ClosedRing.cpp or TiledRing.cpp, which carries the decomp provenance.

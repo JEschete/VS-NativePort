@@ -19,6 +19,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/Grid.hpp"
 #include "Effects/Templates/Mesh10.hpp"
@@ -508,7 +509,7 @@ void LiveSurfaceServices::EmitParticleEvent(std::uint8_t event,
   Effects_PluginEffectState context{};
   math::StoreVector(context.position, position);
   // Cross-slice calls: retarget when those rows are promoted.
-  Effects_EmitParticleEvent(instance_, event, 0, 0, &context);
+  EmitLiveParticleEvent(instance_, event, 0, 0, &context);
 }
 
 void* LiveSurfaceServices::AllocateState(std::size_t bytes) const {

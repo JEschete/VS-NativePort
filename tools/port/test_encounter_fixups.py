@@ -2706,7 +2706,7 @@ int func_800F9800(void) {
         self.assertIn("StoreWide(parent.position, Wide(particle.motion.position));", emit)
         self.assertIn("parent.transparency = particle.transparency;", emit)
         self.assertIn("parent.variant = particle.opaque61Bit0;", emit)
-        self.assertIn("Effects_EmitParticleEvent(instance_, event, 0, 0, &parent);", emit)
+        self.assertIn("EmitLiveParticleEvent(instance_, event, 0, 0, &parent);", emit)
 
     def test_original_occlusion_queries_use_the_owned_terrain_decoder(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
@@ -3276,15 +3276,17 @@ int func_800F9800(void) {
         live = (root / r"Native\Game\src\Effects\ParticleTextureAnimationLive.cpp").read_text(encoding="utf-8")
         clear = live[live.index("void LiveClearParticleTextureState("):]
         self.assertIn("*animation = {};", clear[:clear.index("\n}\n")])
-        source = "        VS::Effects::LiveClearParticleTextureState((int*)(&state->texture));"
-        for fid in ("F01920", "F02209", "F02398"):
+        for fid in ("F01920", "F01998", "F02209", "F02289", "F02323", "F02397", "F02398"):
             with self.subTest(fid=fid):
-                fixed = source
-                for old, new, _ in copy_fixups.FIXES[fid]:
-                    self.assertIn(old, fixed)
-                    fixed = fixed.replace(old, new)
-                self.assertEqual(
-                    fixed, "        VS::Effects::LiveClearParticleTextureState(&state->texture);")
+                self.assertNotIn(fid, copy_fixups.FIXES)
+                self.assertIn(fid, copy_fixups.OWNED_CALL_BINDINGS)
+        rings = (root / r"Native\Game\src\Effects\Templates\RingsLive.cpp").read_text(encoding="utf-8")
+        create = rings.split("void LiveRingHost::Create(", 1)[1].split("\n}\n", 1)[0]
+        self.assertIn("AllocateLiveFromHighEnd(sizeof(LiveRingState))", create)
+        self.assertLess(
+            create.index("*live = LiveRingState{};"),
+            create.index("LiveInitializeParticleTextureAnimation(&live->texture, table, program);"),
+        )
 
     def test_unbound_texture_diagnostics_do_not_invent_a_frame(self):
         # #276 Group N: the restart (F01591) is owned; its Live binding
@@ -4857,16 +4859,15 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertNotIn("F02511", copy_fixups.FIXES)
 
     def test_particle_cone_preserves_original_zero_height_quotient(self):
-        _, new, _ = copy_fixups.FIXES["F01515"][1]
+        self.assertNotIn("F01515", copy_fixups.FIXES)
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01515"],
+                         "VS::Effects::EmitLiveParticleEvent")
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Effects/Particles.cpp").read_text()
-        self.assertTrue(
-            new in source, "cone fix missing from generated particle emitter"
-        )
-        self.assertIn("scratch->vector.vx = scratch->vector.vz = -1;", new)
-        self.assertIn("0x800D34BC/0x800D34F8", new)
-        self.assertEqual(new.count("/ scratch->extent.vy;"), 2)
-        self.assertNotIn("Core_Random_Rand", new)
+        source = (root / r"Native\Game\src\Effects\ParticleEmitter.cpp").read_text()
+        cone = source.split("if (shape == SpawnShape::kCone) {", 1)[1].split("} else {", 1)[0]
+        self.assertEqual(cone.count("math::R3000Quotient("), 2)
+        self.assertEqual(cone.count("scratch_.extent.y));"), 2)
+        self.assertNotIn("/ scratch_.extent.y", cone)
 
     def test_ashley_spawn_initializes_materials_for_empty_equipment_slots(self):
         # 18.c:func_800F9CCC passes both materials even when their model IDs are zero (#276 slice 19c).

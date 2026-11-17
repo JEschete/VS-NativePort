@@ -263,8 +263,6 @@ _Static_assert(sizeof(Effects_PluginEffectState) == 0x78, "Effects_PluginEffectS
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PARTICLES_H_DECLS)
 #define VS_EFFECTS_PARTICLES_H_DECLS
-#include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
 
 extern int Effects_emissionCounter;
 extern u_char Effects_pairedParticleColorPresets[2727][2][4];
@@ -276,7 +274,5 @@ extern Effects_Particle* Effects_particlePool;
 extern int Effects_particlePoolReferences;
 extern int Effects_particleDrag;
 extern Effects_ParticleGravity Effects_particleGravity;
-void Effects_EmitParticleEvent(
-    Effects_EffectInstance* effect_instance, int event, int transparency_override, int particle_variant, Effects_PluginEffectState* parent);
 
 #endif // VS_EFFECTS_PARTICLES_H_DECLS

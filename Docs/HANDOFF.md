@@ -1,16 +1,18 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest integrated #276 group is the text-frame group,
-functions F01413-F01416. Its full local group gate passed;
+Updated 2026-11-16. The latest integrated #276 group is particle emission and
+seven repeating-ring identities, F01515, F01920, F01998, F02209, F02289,
+F02323, F02397 and F02398. Its local gates passed after the Python-only
+copier-test recovery described below;
 the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **796 resolved (784 promoted,
-12 retired) and 104 remaining**; see
+The original 900-function cohort has **804 resolved (792 promoted,
+12 retired) and 96 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
-- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 8, 47: 5,
+- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 5,
   48: 50, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
   do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -20,6 +22,27 @@ The original 900-function cohort has **796 resolved (784 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Emitter/ring evidence (`VR-EFFECTS-EMITTER-RINGS`): all eight original
+  spans independently passed 2,048 vectors in current root, zero mismatches;
+  79 original instruction mutants and eight compiled native variants were
+  detected. The seven original ring comparisons observed 148,176 complete
+  submitted quads. Independent module identities and all ten corresponding
+  EFFPURGE entries have checked create/tick/expiry/refusal/owner-cleanup tests.
+  Debug and Release each passed 8,805 cases / 12,951,975 assertions,
+  60 focused cases / 1,306 assertions and both canonical replays.
+  `build\promotion-check\group-20261116-190031\summary.json` retains its
+  initial copier-test failure: old assertions referred to retired fixups,
+  and ring-case metadata read disc images during listing. After those
+  Python-only fixes, all 226 encounter-fixup and 69 differential-tool tests
+  passed with zero new quality findings; unchanged native builds/replays
+  were not duplicated. Generation stability, changed-file tidy and final
+  ledger checks passed. Recovery and proof paths:
+  `build\scratch\emitter-rings\integration.json` and
+  `D:\Dev\NativePort\wt\batch-emitter-rings-69396c5e\build\scratch\emitter-rings\verification.json`.
+  Original allocation, texture, bone and recursive-child boundaries remain
+  explicit; no interactive gameplay or EC retirement is claimed.
+  Row 39 is 80/80 promoted. Shared GTE saturation defect #411 and broader
+  effect-safety investigation #271 remain open.
 - Text-frame evidence (`VR-MENU-TEXT-FRAME-PROMOTION`): F01413-F01416, including
   completing the previously owned F01416 WIP. Each original passed 1,024
   vectors with zero mismatches; all ten original instruction mutants and
@@ -35,6 +58,9 @@ The original 900-function cohort has **796 resolved (784 promoted,
   Arbitrary prior unwritten packet contents and PS1 temporary point storage
   are outside the differential. Compatibility style lookup remains; no
   EC retirement is claimed.
+  Published in [`b88a6b2cf3`](https://github.com/JEschete/VS-NativePort/commit/b88a6b2cf312e2cc7bbcd27d58a9af3f6c983ec2);
+  exact-revision [Source Quality 43978677859](https://github.com/JEschete/VS-NativePort/actions/runs/43978677859)
+  passed; [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6932733860).
 - A39-05 was published in [`3401e5e8b`](https://github.com/JEschete/VS-NativePort/commit/3401e5e8bc6b24f5696c961ad137c13c58bd5da6);
   exact-revision [Source Quality 43974821676](https://github.com/JEschete/VS-NativePort/actions/runs/43974821676)
   passed; [tracker checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6932216999).
@@ -81,13 +107,17 @@ The original 900-function cohort has **796 resolved (784 promoted,
 
 Next steps:
 
-1. Integrate emitter/rings packet `ebb6f4e54134507183ce52bad59010ed170b3e9f`
-   from `D:\Dev\NativePort\wt\batch-emitter-rings-69396c5e`. Its eight
-   per-ID 2,048-vector comparisons and local 33-case suite are not final
-   integration. Expose the existing shared ring Live host, migrate callers,
-   register, regenerate and gate the packet. Inventory-terminal and
-   ability-foundation workers remain active. Continue the dependency-ordered
-   plan, including text-box updates after the frame group.
+1. Integrate inventory-terminal packet `62c7fac315e1269a3e70059c77f79ffe2fbbe808`
+   from `D:\Dev\NativePort\wt\batch-inventory-b4b11beb0`. Five IDs plus three
+   distinct MENUB contexts passed 8,192 original vectors, 92 original mutants,
+   eight native variants and 15 local cases / 83 assertions. Registration,
+   MENUB caller/text binding (#405), reset hooks, full integration and CI
+   remain pending. Ability-foundation and loot-terminal workers are active;
+   loot depends on this inventory implementation.
+   The coordinator's text-update worktree is
+   `D:\Dev\NativePort\wt\batch-text-update-b88a6b2c`; its initial frame-update
+   core is unverified, with notifications, Live binding and proof still to do.
+   Continue the dependency-ordered plan.
    The emitter investigation logged the shared ApplyRotMatrix saturation
    defect in #411; the shared helper is unchanged, and no shared-helper
    repair or gameplay completion is claimed. F00830 remains blocked on the

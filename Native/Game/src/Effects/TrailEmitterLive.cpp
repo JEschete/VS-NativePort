@@ -18,6 +18,7 @@
 #include "Core/RandomLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailInit.hpp"
@@ -490,8 +491,7 @@ void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
     Effects_PluginEffectState context{};
     context.transparency = 0;
     Store(context.position, TrailEventPosition(point));
-    Effects_EmitParticleEvent(instance_, static_cast<int>(event), 0, 0,
-                              &context);
+    EmitLiveParticleEvent(instance_, static_cast<int>(event), 0, 0, &context);
   }
 }
 

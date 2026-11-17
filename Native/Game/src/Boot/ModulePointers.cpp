@@ -76,6 +76,7 @@
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
@@ -84,6 +85,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScriptedEffectTriggersLive.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
+#include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
@@ -376,7 +378,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&Menu_IsSceneNotificationPending, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&Menu_ReleaseSceneNotification, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&Menu_UpdateTextBoxes, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D2ADCu, 0u, (void*)&Effects_EmitParticleEvent, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8184u, 16u, (void*)&Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8194u, 32u, (void*)&Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81B4u, 16u, (void*)&Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor, 1u, 1u},
@@ -1891,6 +1892,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073TiledRing, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FA7F0u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073Ring, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg073RotatingSurface, 0u, 0u, 0u},
+    {"EFFECT/PLG052.BIN", 0x800F9800u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg052RepeatingRing, 0u, 0u, 0u},
+    {"EFFECT/PLG077.BIN", 0x800FA324u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg077RepeatingRing, 0u, 0u, 0u},
+    {"EFFECT/PLG162.BIN", 0x800F9800u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg162TransposedRing, 0u, 0u, 0u},
+    {"EFFECT/PLG236.BIN", 0x800FB62Cu, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg236TransposedRing, 0u, 0u, 0u},
+    {"EFFECT/PLG263.BIN", 0x800FB0CCu, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg263TransposedRing, 0u, 0u, 0u},
+    {"EFFECT/PLG300.BIN", 0x800FC228u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg300RepeatingRing, 0u, 0u, 0u},
+    {"EFFECT/PLG300.BIN", 0x800FD198u, 0u, (void*)&VS::Effects::Templates::UpdateLivePlg300ForegroundRepeatingRing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D46DCu, 0u, (void*)&VS::Effects::LiveBranchEffectScriptIf, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D4720u, 0u, (void*)&VS::Effects::LiveYieldEffectScriptAtOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D474Cu, 0u, (void*)&VS::Effects::LiveJumpEffectScript, 0u, 0u, 0u},
@@ -2189,6 +2197,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"EFFECT/PLG054.BIN", 0x800F9818u, 0u, (void*)&VS::Effects::UpdateLivePlg054AnalyzeGrid, 0u, 0u, 0u},
     {"EFFECT/PLG055.BIN", 0x800F9818u, 0u, (void*)&VS::Effects::UpdateLivePlg055AnalyzeGrid, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FE3ECu, 0u, (void*)&VS::Effects::UpdateLivePlg074AnalyzeGrid, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D2ADCu, 0u, (void*)&VS::Effects::EmitLiveParticleEvent, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108EA8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalStrength, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108EC8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalIntelligence, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108EE8u, 0u, (void*)&VS::Menu::Results::AshleyLiveTotalAgility, 0u, 0u, 0u},

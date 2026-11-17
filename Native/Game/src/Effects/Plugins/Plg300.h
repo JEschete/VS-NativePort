@@ -8,12 +8,10 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PLUGINS_PLG300_H_DECLS)
 #define VS_EFFECTS_PLUGINS_PLG300_H_DECLS
-#include "Effects/Runtime.h"
 
 extern SVECTOR Effects_Plg300_mirrorSurfaceVertices[5][16];
 extern int Effects_Plg300_particleEmissionCounter;
 extern u_char Effects_Plg300_ringColorFactors[8][4];
 extern u_char Effects_Plg300_ringColorFactors2[8][4];
-int Effects_Plg300_UpdateForegroundRepeatingRing(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_PLUGINS_PLG300_H_DECLS

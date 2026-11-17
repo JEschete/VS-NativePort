@@ -2,6 +2,7 @@
 #include "Effects/AnalyzeGridLive.hpp"
 #include "Effects/Plugins/Plg128CameraLive.hpp"
 #include "Effects/Templates/ParticlesLive.hpp"
+#include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Effects/Templates/TrailsLive.hpp"
@@ -10,9 +11,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "Effects/Loading.h"
-#include "Effects/Plugins/Plg052.h"
-#include "Effects/Plugins/Plg162.h"
-#include "Effects/Plugins/Plg300.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
 
@@ -73,7 +71,7 @@ u_short Effects_effectEntryPointIndices[400] = { 0x000, 0x000, 0x000, 0x000, 0x0
 Effects_EffectRenderer Effects_effectEntryPoints[] = { VS::Effects::UpdateLivePlg005AnalyzeGrid, VS::Effects::Templates::UpdateLivePlg044TiledRing,
     VS::Effects::Templates::UpdateLivePlg045ParticleDispatch, VS::Effects::Templates::UpdateLivePlg047ClosedRing, VS::Effects::Templates::UpdateLivePlg044TiledRing, VS::Effects::Templates::UpdateLivePlg049TrailNine,
     VS::Effects::Templates::UpdateLivePlg049Ring, VS::Effects::Templates::UpdateLivePlg049TiledRing, VS::Effects::Templates::UpdateLivePlg049RotatingSurface, VS::Effects::Templates::UpdateLivePlg050Ring, VS::Effects::Templates::UpdateLivePlg050TrailNine, NULL,
-    VS::Effects::Templates::UpdateLivePlg051ClosedRing, Effects_Plg052_UpdateRepeatingRing, VS::Effects::Templates::UpdateLivePlg053Grid, VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::UpdateLivePlg054AnalyzeGrid,
+    VS::Effects::Templates::UpdateLivePlg051ClosedRing, VS::Effects::Templates::UpdateLivePlg052RepeatingRing, VS::Effects::Templates::UpdateLivePlg053Grid, VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::UpdateLivePlg054AnalyzeGrid,
     VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::UpdateLivePlg055AnalyzeGrid, VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg053Grid, VS::Effects::Templates::UpdateLivePlg053ClosedRing,
     VS::Effects::Templates::UpdateLivePlg057ParticleDispatch, NULL, VS::Effects::Templates::UpdateLivePlg057TrailNine, VS::Effects::Templates::UpdateLivePlg057Trail, VS::Effects::Templates::UpdateLivePlg057ParticleDispatch, NULL, VS::Effects::Templates::UpdateLivePlg057TrailNine,
     VS::Effects::Templates::UpdateLivePlg057Trail, VS::Effects::Templates::UpdateLivePlg057ParticleDispatch, NULL, VS::Effects::Templates::UpdateLivePlg057TrailNine, VS::Effects::Templates::UpdateLivePlg057Trail, VS::Effects::Templates::UpdateLivePlg057ParticleDispatch, NULL,
@@ -90,10 +88,10 @@ Effects_EffectRenderer Effects_effectEntryPoints[] = { VS::Effects::UpdateLivePl
     VS::Effects::Templates::UpdateLivePlg073Grid, VS::Effects::Templates::UpdateLivePlg073TiledRing, VS::Effects::Templates::UpdateLivePlg073Ring, VS::Effects::UpdateLivePlg074TrailEmitter, VS::Effects::Templates::UpdateLivePlg073RotatingSurface,
     VS::Effects::UpdateLivePlg074AnalyzeGrid, VS::Effects::Templates::UpdateLivePlg073TiledRing, VS::Effects::Templates::UpdateLivePlg073Ring, VS::Effects::Templates::UpdateLivePlg073Trail, VS::Effects::Templates::UpdateLivePlg073RotatingSurface,
     VS::Effects::Templates::UpdateLivePlg073Grid, VS::Effects::Templates::UpdateLivePlg073TiledRing, VS::Effects::Templates::UpdateLivePlg073Ring, VS::Effects::Templates::UpdateLivePlg073Trail, VS::Effects::Templates::UpdateLivePlg073RotatingSurface,
-    VS::Effects::Templates::UpdateLivePlg073Grid, VS::Effects::Templates::UpdateLivePlg077Mesh10, Effects_Plg052_UpdateRepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
-    VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg077Mesh10, Effects_Plg052_UpdateRepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
-    VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg077Mesh10, Effects_Plg052_UpdateRepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
-    VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg077Mesh10, Effects_Plg052_UpdateRepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
+    VS::Effects::Templates::UpdateLivePlg073Grid, VS::Effects::Templates::UpdateLivePlg077Mesh10, VS::Effects::Templates::UpdateLivePlg077RepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
+    VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg077Mesh10, VS::Effects::Templates::UpdateLivePlg077RepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
+    VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg077Mesh10, VS::Effects::Templates::UpdateLivePlg077RepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
+    VS::Effects::Templates::UpdateLivePlg053ClosedRing, VS::Effects::Templates::UpdateLivePlg077Mesh10, VS::Effects::Templates::UpdateLivePlg077RepeatingRing, VS::Effects::Templates::UpdateLivePlg077Grid, VS::Effects::Templates::UpdateLivePlg077Surface,
     VS::Effects::Templates::UpdateLivePlg053ClosedRing, NULL, NULL, VS::Effects::Templates::UpdateLivePlg081RotatingSurface, VS::Effects::Templates::UpdateLivePlg081Ring, VS::Effects::Templates::UpdateLivePlg081ClosedRing, VS::Effects::Templates::UpdateLivePlg082ParticleDispatch,
     VS::Effects::Templates::UpdateLivePlg082Grid, VS::Effects::Templates::UpdateLivePlg082ClosedRing, VS::Effects::Templates::UpdateLivePlg044TiledRing, VS::Effects::Templates::UpdateLivePlg053Grid, VS::Effects::Templates::UpdateLivePlg053ClosedRing,
     VS::Effects::Templates::UpdateLivePlg085Grid, VS::Effects::Templates::UpdateLivePlg085TiledRing, VS::Effects::Templates::UpdateLivePlg086ClosedRing, VS::Effects::Templates::UpdateLivePlg086RotatingSurface, VS::Effects::Templates::UpdateLivePlg086Grid,
@@ -115,25 +113,25 @@ Effects_EffectRenderer Effects_effectEntryPoints[] = { VS::Effects::UpdateLivePl
     VS::Effects::Templates::UpdateLivePlg156Grid, VS::Effects::Templates::UpdateLivePlg149Ring, VS::Effects::Templates::UpdateLivePlg158Surface, VS::Effects::Templates::UpdateLivePlg158MirrorSurface, VS::Effects::Templates::UpdateLivePlg158ClosedRing,
     VS::Effects::Templates::UpdateLivePlg158RotatingSurface, VS::Effects::Templates::UpdateLivePlg139TiledRing, VS::Effects::Templates::UpdateLivePlg139Grid, VS::Effects::Templates::UpdateLivePlg160TiledRing, VS::Effects::Templates::UpdateLivePlg160Ring, NULL,
     VS::Effects::Templates::UpdateLivePlg161RotatingSurface, VS::Effects::Templates::UpdateLivePlg161Ring, VS::Effects::Templates::UpdateLivePlg161TrailNine, VS::Effects::Templates::UpdateLivePlg161Grid, VS::Effects::Templates::UpdateLivePlg161Ring2, NULL,
-    Effects_Plg162_UpdateTransposedRing, VS::Effects::Templates::UpdateLivePlg162RotatingSurface, VS::Effects::Templates::UpdateLivePlg162Ring, VS::Effects::Templates::UpdateLivePlg162ClosedRing, VS::Effects::Templates::UpdateLivePlg045ParticleDispatch,
+    VS::Effects::Templates::UpdateLivePlg162TransposedRing, VS::Effects::Templates::UpdateLivePlg162RotatingSurface, VS::Effects::Templates::UpdateLivePlg162Ring, VS::Effects::Templates::UpdateLivePlg162ClosedRing, VS::Effects::Templates::UpdateLivePlg045ParticleDispatch,
     VS::Effects::Templates::UpdateLivePlg165TrailNine, NULL, VS::Effects::Templates::UpdateLivePlg165RotatingSurface, VS::Effects::Templates::UpdateLivePlg165Grid, VS::Effects::Templates::UpdateLivePlg165ClosedRing, VS::Effects::Templates::UpdateLivePlg166RotatingSurface,
     VS::Effects::Templates::UpdateLivePlg166MirrorSurface, VS::Effects::Templates::UpdateLivePlg166ClosedRing, VS::Effects::Templates::UpdateLivePlg166Ring, NULL, VS::Effects::Templates::UpdateLivePlg167ClosedRing, VS::Effects::Templates::UpdateLivePlg167RotatingSurface,
     VS::Effects::Templates::UpdateLivePlg167TrailNine, NULL, VS::Effects::Templates::UpdateLivePlg168TrailNine, VS::Effects::Templates::UpdateLivePlg168ParticleDispatch, VS::Effects::Templates::UpdateLivePlg168Grid, VS::Effects::Templates::UpdateLivePlg169TrailNine, NULL,
     VS::Effects::Templates::UpdateLivePlg169Ring, VS::Effects::Templates::UpdateLivePlg169ClosedRing, VS::Effects::Templates::UpdateLivePlg170MirrorSurface, VS::Effects::Templates::UpdateLivePlg170RotatingSurface, VS::Effects::Templates::UpdateLivePlg170Ring,
     VS::Effects::Templates::UpdateLivePlg170Grid, VS::Effects::Templates::UpdateLivePlg170Surface, VS::Effects::Templates::UpdateLivePlg170ClosedRing, VS::Effects::Templates::UpdateLivePlg198Ring, VS::Effects::Templates::UpdateLivePlg198Ring,
     VS::Effects::Templates::UpdateLivePlg139TiledRing, VS::Effects::Templates::UpdateLivePlg139Grid, VS::Effects::Templates::UpdateLivePlg224ParticleDispatch, VS::Effects::Templates::UpdateLivePlg232TrailNine, VS::Effects::Templates::UpdateLivePlg236ClosedRing,
-    VS::Effects::Templates::UpdateLivePlg236RotatingSurface, Effects_Plg162_UpdateTransposedRing, VS::Effects::Templates::UpdateLivePlg236Ring, VS::Effects::Templates::UpdateLivePlg224ParticleDispatch, VS::Effects::Templates::UpdateLivePlg224ParticleDispatch,
+    VS::Effects::Templates::UpdateLivePlg236RotatingSurface, VS::Effects::Templates::UpdateLivePlg236TransposedRing, VS::Effects::Templates::UpdateLivePlg236Ring, VS::Effects::Templates::UpdateLivePlg224ParticleDispatch, VS::Effects::Templates::UpdateLivePlg224ParticleDispatch,
     VS::Effects::Templates::UpdateLivePlg242TiledRing, VS::Effects::Templates::UpdateLivePlg242Grid, VS::Effects::Templates::UpdateLivePlg242Trail, NULL, NULL, VS::Effects::Templates::UpdateLivePlg141Trail, VS::Effects::Templates::UpdateLivePlg051ClosedRing,
     NULL, NULL, VS::Effects::Templates::UpdateLivePlg246RotatingSurface, NULL, NULL, VS::Effects::Templates::UpdateLivePlg081RotatingSurface, VS::Effects::Templates::UpdateLivePlg081Ring, VS::Effects::Templates::UpdateLivePlg081ClosedRing,
     VS::Effects::Templates::UpdateLivePlg047ClosedRing, VS::Effects::Templates::UpdateLivePlg250RotatingSurface, VS::Effects::Templates::UpdateLivePlg250ClosedRing, VS::Effects::Templates::UpdateLivePlg047ClosedRing, VS::Effects::Templates::UpdateLivePlg255Trail,
     VS::Effects::Templates::UpdateLivePlg255ParticleDispatch, VS::Effects::Templates::UpdateLivePlg047ClosedRing, VS::Effects::Templates::UpdateLivePlg051ClosedRing, VS::Effects::Templates::UpdateLivePlg260Mesh10, NULL, VS::Effects::Templates::UpdateLivePlg263Surface,
-    VS::Effects::Templates::UpdateLivePlg263Ring, Effects_Plg162_UpdateTransposedRing, VS::Effects::Templates::UpdateLivePlg263ParticleDispatch, VS::Effects::Templates::UpdateLivePlg265TiledRing, VS::Effects::Templates::UpdateLivePlg265ParticleDispatch,
+    VS::Effects::Templates::UpdateLivePlg263Ring, VS::Effects::Templates::UpdateLivePlg263TransposedRing, VS::Effects::Templates::UpdateLivePlg263ParticleDispatch, VS::Effects::Templates::UpdateLivePlg265TiledRing, VS::Effects::Templates::UpdateLivePlg265ParticleDispatch,
     VS::Effects::Templates::UpdateLivePlg265Trail, VS::Effects::Templates::UpdateLivePlg265ParticleDispatch2, VS::Effects::Templates::UpdateLivePlg266ParticleDispatch, VS::Effects::Templates::UpdateLivePlg266ParticleDispatch2, VS::Effects::Templates::UpdateLivePlg266Trail, NULL, NULL,
     VS::Effects::Templates::UpdateLivePlg141Trail, VS::Effects::Templates::UpdateLivePlg255Trail, VS::Effects::Templates::UpdateLivePlg255ParticleDispatch, VS::Effects::Templates::UpdateLivePlg272Grid, VS::Effects::Templates::UpdateLivePlg272ClosedRing,
     VS::Effects::Templates::UpdateLivePlg272Surface, VS::Effects::Templates::UpdateLivePlg273MirrorSurface, VS::Effects::Templates::UpdateLivePlg082ParticleDispatch, VS::Effects::Templates::UpdateLivePlg082Grid, VS::Effects::Templates::UpdateLivePlg082ClosedRing,
     VS::Effects::Templates::UpdateLivePlg045ParticleDispatch, VS::Effects::Templates::UpdateLivePlg291Trail, VS::Effects::Templates::UpdateLivePlg291Grid, VS::Effects::Templates::UpdateLivePlg291ClosedRing, VS::Effects::Templates::UpdateLivePlg297MirrorSurface,
     VS::Effects::Templates::UpdateLivePlg297ClosedRing, VS::Effects::Templates::UpdateLivePlg297Grid, VS::Effects::Templates::UpdateLivePlg297Ring, VS::Effects::Templates::UpdateLivePlg300MirrorSurface, VS::Effects::Templates::UpdateLivePlg300ParticleDispatch,
-    Effects_Plg052_UpdateRepeatingRing, Effects_Plg300_UpdateForegroundRepeatingRing, VS::Effects::Templates::UpdateLivePlg301ParticleDispatch, NULL, VS::Effects::Templates::UpdateLivePlg301ClosedRing };
+    VS::Effects::Templates::UpdateLivePlg300RepeatingRing, VS::Effects::Templates::UpdateLivePlg300ForegroundRepeatingRing, VS::Effects::Templates::UpdateLivePlg301ParticleDispatch, NULL, VS::Effects::Templates::UpdateLivePlg301ClosedRing };
 
 // decomp: src/EFFECT/EFFPURGE.BIN/0.c:175
 #define FBC_DEFAULT { VS_E000_0_FBC_LBA - VS_E000_P_LBA, VS_E000_0_FBC_SIZE }

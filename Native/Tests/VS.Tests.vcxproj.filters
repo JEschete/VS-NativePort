@@ -456,6 +456,9 @@
     <ClCompile Include="src\EffectTrailTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EmitterRingLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EncounterProfileTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -873,6 +876,9 @@
     <ClCompile Include="src\OptionsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ParticleEmitterTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ParticleMotionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -925,6 +931,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\RenderScreenOverlayTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RepeatingRingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ResultsDrawingTests.cpp">

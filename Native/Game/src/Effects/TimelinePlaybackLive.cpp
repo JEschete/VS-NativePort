@@ -23,6 +23,7 @@
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
 #include "Effects/TimelinePlayback.hpp"
@@ -113,8 +114,8 @@ class LivePlaybackHost final : public TimelinePlaybackHost {
     LiveSampleAllEffectCurves(curve_frame);
   }
   void EmitParticles(const ParticleEmission& emission) override {
-    Effects_EmitParticleEvent(instance_, emission.event, emission.transparency,
-                              emission.variant, nullptr);
+    EmitLiveParticleEvent(instance_, emission.event, emission.transparency,
+                          emission.variant, nullptr);
   }
   void PlayStream(std::int32_t handle) override {
     Audio::LivePlayCutsceneStreamSlotCentered(handle);

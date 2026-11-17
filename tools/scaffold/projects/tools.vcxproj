@@ -969,6 +969,8 @@
     <None Include="..\..\port\differentials\native_compile_support.py" />
     <None Include="..\..\port\differentials\obstacle_detour.py" />
     <None Include="..\..\port\differentials\obstacle_detour_driver.cpp" />
+    <None Include="..\..\port\differentials\particle_emitter.py" />
+    <None Include="..\..\port\differentials\particle_emitter_driver.cpp" />
     <None Include="..\..\port\differentials\particle_motion_advance.py" />
     <None Include="..\..\port\differentials\particle_motion_clear.py" />
     <None Include="..\..\port\differentials\particle_motion_driver.cpp" />
@@ -988,8 +990,15 @@
     <None Include="..\..\port\differentials\particle_pool_reset.py" />
     <None Include="..\..\port\differentials\perception.py" />
     <None Include="..\..\port\differentials\perception_driver.cpp" />
+    <None Include="..\..\port\differentials\plg052_repeating_ring.py" />
+    <None Include="..\..\port\differentials\plg077_repeating_ring.py" />
     <None Include="..\..\port\differentials\plg128_camera.py" />
     <None Include="..\..\port\differentials\plg128_camera_driver.cpp" />
+    <None Include="..\..\port\differentials\plg162_transposed_ring.py" />
+    <None Include="..\..\port\differentials\plg236_transposed_ring.py" />
+    <None Include="..\..\port\differentials\plg263_transposed_ring.py" />
+    <None Include="..\..\port\differentials\plg300_foreground_ring.py" />
+    <None Include="..\..\port\differentials\plg300_repeating_ring.py" />
     <None Include="..\..\port\differentials\primary_effect_allocate_token.py" />
     <None Include="..\..\port\differentials\primary_effect_can_start.py" />
     <None Include="..\..\port\differentials\primary_effect_driver.cpp" />
@@ -1004,6 +1013,8 @@
     <None Include="..\..\port\differentials\random_stat_effects.py" />
     <None Include="..\..\port\differentials\random_stat_effects_driver.cpp" />
     <None Include="..\..\port\differentials\random_stat_effects_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\repeating_rings_common.py" />
+    <None Include="..\..\port\differentials\repeating_rings_driver.cpp" />
     <None Include="..\..\port\differentials\resource_dispatch_guard_driver.cpp" />
     <None Include="..\..\port\differentials\resource_recovery.py" />
     <None Include="..\..\port\differentials\resource_recovery_driver.cpp" />

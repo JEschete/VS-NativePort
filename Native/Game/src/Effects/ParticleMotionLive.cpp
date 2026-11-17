@@ -7,6 +7,7 @@
 
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
@@ -119,7 +120,7 @@ class LiveTickHost final : public ParticleTickHost {
     StoreWide(parent.position, Wide(particle.motion.position));
     parent.transparency = particle.transparency;
     parent.variant = particle.opaque61Bit0;
-    Effects_EmitParticleEvent(instance_, event, 0, 0, &parent);
+    EmitLiveParticleEvent(instance_, event, 0, 0, &parent);
   }
   void Release(Particle& particle) override {
     LiveReleaseEffectParticle(&particle, instance_);

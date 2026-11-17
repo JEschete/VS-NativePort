@@ -22,6 +22,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
@@ -380,7 +381,7 @@ class InstanceEffectHost final : public ScriptEffectHost {
   }
   void UpdateRenderers() override { LiveUpdateEffectRenderers(instance_); }
   void EmitParticles(std::uint8_t event) override {
-    Effects_EmitParticleEvent(instance_, event, 0, 0, nullptr);
+    EmitLiveParticleEvent(instance_, event, 0, 0, nullptr);
   }
 
  private:
