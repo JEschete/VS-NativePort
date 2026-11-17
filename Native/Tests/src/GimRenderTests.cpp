@@ -20,6 +20,7 @@ extern "C++" {
 #include "Actors/Spawning.h"
 #include "Battle/TargetingState.h"
 #include "Boot/OverlayReset.h"
+#include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -458,6 +459,7 @@ int CheckMenuReloadClosingDelay(void) {
 
   for (int visit = 0; visit < kVisits; ++visit) {
     request->state = Content_DiscRequestState_Loaded;
+    request->cdFile = {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE};
     Menu_Framework_menuState.loading = 1;
     passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1 &&
               request->state == Content_DiscRequestState_Free &&

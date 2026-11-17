@@ -130,6 +130,7 @@
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
+#include "Menu/MagicTerminalLive.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
@@ -2168,6 +2169,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU0.PRG", 0x80102884u, 0u, (void*)&VS::Menu::Magic::SetSpellMpCostLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x801029B8u, 0u, (void*)&VS::Menu::Magic::SetTeleportMpCostLive, 0u, 0u, 0u},
     {"MENU/MENU0.PRG", 0x80102A68u, 0u, (void*)&VS::Menu::Magic::TeleportMpCostLive, 0u, 0u, 0u},
+    {"MENU/MENU0.PRG", 0x801042C8u, 0u, (void*)&VS::Menu::Magic::UpdateLive, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&VS::Menu::SetLiveTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&VS::Menu::SelectLiveTextBoxChoice, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&VS::Menu::InitLiveInformationTextBox, 0u, 0u, 0u},

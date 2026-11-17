@@ -25,6 +25,8 @@
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
+#include "Menu/MagicCostsLive.hpp"
+#include "Menu/MagicMenusLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/GameClockLive.hpp"
@@ -83,6 +85,8 @@ class LiveSessionHost final : public SessionHost {
     Menu::BattleAbilities::ResetLiveAbilityTerminalColdState();
     Menu::Loot::ResetLootTerminalSession();
     Menu::Inventory::ResetInventoryTerminalSession();
+    Menu::Magic::ResetMagicMenusLiveState();
+    Menu::Magic::ResetTeleportMenuLiveState();
     Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }

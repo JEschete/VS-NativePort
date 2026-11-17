@@ -1945,13 +1945,12 @@
     <ClCompile Include="src\Menu\MagicCostsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Menu\MagicMenus.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
+    <ClCompile Include="src\Menu\MagicMenus.cpp" />
     <ClCompile Include="src\Menu\MagicMenusLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Menu\MagicSpellMenu.cpp" />
+    <ClCompile Include="src\Menu\MagicTerminal.cpp" />
     <ClCompile Include="src\Menu\Manual.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2524,7 +2523,6 @@
     <ClInclude Include="src\Menu\Loot\LootScreen.h" />
     <ClInclude Include="src\Menu\Loot\Paging.h" />
     <ClInclude Include="src\Menu\Magic.h" />
-    <ClInclude Include="src\Menu\MagicMenus.h" />
     <ClInclude Include="src\Menu\Manual.h" />
     <ClInclude Include="src\Menu\Map.h" />
     <ClInclude Include="src\Menu\OptionsLiveState.h" />
@@ -3013,6 +3011,8 @@
     <ClInclude Include="include\Menu\MagicMenus.hpp" />
     <ClInclude Include="include\Menu\MagicMenusLive.hpp" />
     <ClInclude Include="include\Menu\MagicSpellMenu.hpp" />
+    <ClInclude Include="include\Menu\MagicTerminal.hpp" />
+    <ClInclude Include="include\Menu\MagicTerminalLive.hpp" />
     <ClInclude Include="include\Menu\ManualIllustration.hpp" />
     <ClInclude Include="include\Menu\ManualIllustrationLive.hpp" />
     <ClInclude Include="include\Menu\ManualPage.hpp" />

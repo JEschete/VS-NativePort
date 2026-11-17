@@ -12,14 +12,6 @@
 namespace {
 
 using MagicMenuEntryPoint = int (*)(unsigned int);
-static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateWarlockMenu),
-                             MagicMenuEntryPoint>);
-static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateShamanMenu),
-                             MagicMenuEntryPoint>);
-static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateSorcererMenu),
-                             MagicMenuEntryPoint>);
-static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateEnchanterMenu),
-                             MagicMenuEntryPoint>);
 static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateWarlockMenuLive),
                              MagicMenuEntryPoint>);
 static_assert(std::is_same_v<decltype(&VS::Menu::Magic::UpdateShamanMenuLive),

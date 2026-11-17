@@ -1678,6 +1678,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Magic::SetSpellMpCostLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
     "VS::Menu::Magic::SetTeleportMpCostLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
     "VS::Menu::Magic::TeleportMpCostLive": r"Native\Game\include\Menu\MagicCostsLive.hpp",
+    "VS::Menu::Magic::UpdateLive": r"Native\Game\include\Menu\MagicTerminalLive.hpp",
     "VS::Menu::SetLiveTextBoxText": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
     "VS::Menu::SelectLiveTextBoxChoice": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
     "VS::Menu::InitLiveInformationTextBox": r"Native\Game\include\Menu\TextBoxStateLive.hpp",
@@ -3062,6 +3063,7 @@ OWNED_CALL_BINDINGS["F02599"] = "VS::Menu::Magic::CreateHeaderLive"
 OWNED_CALL_BINDINGS["F02601"] = "VS::Menu::Magic::SetSpellMpCostLive"
 OWNED_CALL_BINDINGS["F02602"] = "VS::Menu::Magic::SetTeleportMpCostLive"
 OWNED_CALL_BINDINGS["F02603"] = "VS::Menu::Magic::TeleportMpCostLive"
+OWNED_CALL_BINDINGS["F02600"] = "VS::Menu::Magic::UpdateLive"
 OWNED_CALL_BINDINGS["F01329"] = "VS::Menu::SetLiveTextBoxText"
 OWNED_CALL_BINDINGS["F01330"] = "VS::Menu::SelectLiveTextBoxChoice"
 OWNED_CALL_BINDINGS["F01343"] = "VS::Menu::InitLiveInformationTextBox"
@@ -5221,6 +5223,7 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU0.PRG", 0x80102884, "VS::Menu::Magic::SetSpellMpCostLive"),  # F02601
     ("MENU/MENU0.PRG", 0x801029B8, "VS::Menu::Magic::SetTeleportMpCostLive"),  # F02602
     ("MENU/MENU0.PRG", 0x80102A68, "VS::Menu::Magic::TeleportMpCostLive"),  # F02603
+    ("MENU/MENU0.PRG", 0x801042C8, "VS::Menu::Magic::UpdateLive"),  # F02600
     ("BATTLE/BATTLE.PRG", 0x800C6BF0, "VS::Menu::SetLiveTextBoxText"),  # F01329
     ("BATTLE/BATTLE.PRG", 0x800C6C8C, "VS::Menu::SelectLiveTextBoxChoice"),  # F01330
     ("BATTLE/BATTLE.PRG", 0x800C8E04, "VS::Menu::InitLiveInformationTextBox"),  # F01343
@@ -7770,9 +7773,6 @@ REGEX_FIXES += [
         ("Menu::Inventory::UpdateItemList",
          (('var_s2', 'base_item_category'),),
          "F02597 src\\MENU\\items2.h:201-965 (_itemNavigation). Named roles: base item category. Retained: sp310: Two distinct block bindings: heap-backed item-row text pointer and action-menu local text array[12]; var_a1_2: Merged packed row-creation options, category-navigation button masks, swapped inventory ID and parent equipment ID."),
-        ("Menu::Magic::UpdateWarlockMenu",
-         (('temp_s6', 'spell_level_ordering_table'), ('var_s7_2', 'level_locked')),
-         "F02604 src\\MENU\\MENU0.PRG\\84.c:164-498 (_warlockMagicMenu). Named roles: spell level ordering table, level locked."),
         ("Menu::BattleAbilities::UpdateBreakArtUnlock",
          (('new_var', 'learned_arts_by_weapon_category'),),
          "F02614 src\\MENU\\MENU2.PRG\\143C.c:27-71 (_breakArtUnlocked). Named roles: learned arts by weapon category."),

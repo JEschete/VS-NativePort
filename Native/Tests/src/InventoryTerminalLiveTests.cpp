@@ -29,12 +29,14 @@
 #include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootTerminal.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
+#include "Menu/OverlayLoadFixture.hpp"
 
 extern "C" {
 #include "Audio/Sfx.h"
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Boot/OverlayReset.h"
+#include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
 #include "Field/RoomRenderingLiveState.h"
@@ -65,6 +67,7 @@ constexpr std::size_t kSoundSlots = 0x180;
 constexpr std::size_t kAshleyActor = 0;
 constexpr std::int32_t kLootTitleRow = 3;
 constexpr std::uint8_t kBattleMenu = 4;
+constexpr char kItemShortcut = 5;
 constexpr loot::LootRow kTail{5, 47, 9, 5};
 
 template <typename Entry>
@@ -178,16 +181,6 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
       static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
     }
     framework::ClearLiveMenuExcept(framework::kNoRow);
-  }
-  framework::ItemText FirstItem() const {
-    const auto capacity =
-        VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemsText);
-    if (!capacity || *capacity < sizeof(framework::ItemText)) {
-      throw std::runtime_error("inventory did not produce an owned row");
-    }
-    framework::ItemText result;
-    std::memcpy(&result, Menu_Framework_itemsText, sizeof result);
-    return result;
   }
 };
 
@@ -395,18 +388,26 @@ TEST_CASE("F02597 Live loot does not inherit item-menu global restrictions",
 
 TEST_CASE(
     "F02597 overlay reload resets only its file-backed navigation controller",
-    "[inventory-terminal-live][inventory-reload][F02597]") {
+    "[inventory-terminal-live][inventory-reload][F02597][menu-overlay-"
+    "reload]") {
   const bool loot = GENERATE(false, true);
   TerminalFixture fixture;
   const auto module = loot ? kLootModule : kItemModule;
   const auto address = loot ? kLootNavigation : kItemNavigation;
   const auto other_module = loot ? kItemModule : kLootModule;
   const auto other_address = loot ? kItemNavigation : kLootNavigation;
+  menu_overlay_tests::Load load(
+      loot ? 12 : 4,
+      loot ? Content_DiscFile{VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE}
+           : Content_DiscFile{VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
   Menu_Framework_menuMemory.opaque3A.currentCategory = 1;
   EnterEmptyNavigation(other_module, other_address);
   EnterEmptyNavigation(module, address);
   fixture.AddWeapon();
-  (loot ? Boot_ResetMenubStatics : Boot_ResetMenu3Statics)();
+  CHECK(load.Poll() == 0);
+  CHECK(Navigate(module, address, 0) == 0);
+  CHECK(Menu_Framework_itemsText == nullptr);
+  CHECK(load.Complete() == 1);
   CHECK(Navigate(other_module, other_address, 0) == 0);
   CHECK(Menu_Framework_itemsText == nullptr);
   REQUIRE(Navigate(module, address, 0) == 0);
@@ -441,19 +442,28 @@ TEST_CASE("MENUB text loads its original module bytes again after a cold reset",
 }
 
 TEST_CASE("F02553 MAINMENU reload restarts the live shortcut title phase",
-          "[inventory-terminal-live][inventory-reload][F02553]") {
+          "[inventory-terminal-live][inventory-reload][F02553][menu-overlay-"
+          "reload]") {
   TextLoadingFixture fixture;
+  const int logical_submenu = GENERATE(0, 4);
   inventory::UpdateLiveMiscItemShortcut(0);
   REQUIRE(fixture.UnloadText());
   framework::ClearLiveMenuExcept(framework::kNoRow);
   REQUIRE(fixture.SettleRows());
-  Boot_ResetMenu3Statics();
+  {
+    menu_overlay_tests::Load load(4, {VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
+    CHECK(load.Complete() == 1);
+  }
   inventory::UpdateLiveMiscItemShortcut(0);
   CHECK(Menu_Framework_itemNames == nullptr);
-  Boot_ResetMainMenuStatics();
+  menu_overlay_tests::Load load(logical_submenu,
+                                {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE});
+  Menu_Framework_shortcutInvoked = kItemShortcut;
+  CHECK(load.Complete() == 0);
   inventory::UpdateLiveMiscItemShortcut(0);
   CHECK(VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemNames)
             .has_value());
+  REQUIRE(fixture.UnloadText());
 }
 
 TEST_CASE("F02636 only MENU3 reload clears the live exit countdown",
@@ -482,18 +492,22 @@ TEST_CASE("Loot terminal module entries retain their distinct call shapes",
 
 TEST_CASE(
     "F02843 MENUB reload restarts its controller without releasing storage",
-    "[loot-terminal-live][inventory-reload][F02843]") {
+    "[loot-terminal-live][inventory-reload][F02843][menu-overlay-reload]") {
   LootFixture fixture;
   fixture.OpenAndLoad();
   auto* const owned = Menu_Loot_inventory;
   fixture.BeginInventoryTransition();
-  Boot_ResetMenu3Statics();
+  {
+    menu_overlay_tests::Load load(4, {VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
+    CHECK(load.Complete() == 1);
+  }
   Menu_Inventory_selectedItemCategoryIconOnTop = 1;
   REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 0);
   framework::ClearLiveMenuExcept(framework::kNoRow);
   REQUIRE(fixture.SettleRows());
-  Boot_ResetMenubStatics();
+  menu_overlay_tests::Load load(12, {VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE});
+  CHECK(load.Complete() == 1);
   CHECK(Menu_Loot_inventory == owned);
   REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
   CHECK(framework::LiveMenuRow(kLootTitleRow).state ==

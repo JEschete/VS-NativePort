@@ -329,6 +329,8 @@
     <ClCompile Include="src\LootTerminalTests.cpp" />
     <ClCompile Include="src\MagicCostsTests.cpp" />
     <ClCompile Include="src\MagicSpellMenuTests.cpp" />
+    <ClCompile Include="src\MagicTerminalLiveTests.cpp" />
+    <ClCompile Include="src\MagicTerminalTests.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ManualIllustrationTests.cpp" />
     <ClCompile Include="src\ManualPageTests.cpp" />
@@ -518,6 +520,8 @@
     <ClInclude Include="include\Menu\ItemDetailDispatchLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ItemDetailDispatchWorld.hpp" />
     <ClInclude Include="include\Menu\LootTerminalWorld.hpp" />
+    <ClInclude Include="include\Menu\MagicMenusTestWorld.hpp" />
+    <ClInclude Include="include\Menu\OverlayLoadFixture.hpp" />
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />

@@ -27,6 +27,5 @@ extern char Menu_Magic_availableWarlockSpells[18];;
 extern u_short Menu_Magic_magicStrings[2462]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Magic_savePointData[];
 extern u_short Menu_Magic_teleportationStrings[1599]; /* contents: disc string table (ModuleData.cpp) */;
-int Menu_Magic_Update(u_char* state);
 
 #endif // VS_MENU_MAGIC_H_DECLS

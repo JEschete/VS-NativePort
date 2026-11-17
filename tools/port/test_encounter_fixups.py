@@ -4950,16 +4950,15 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         self.assertNotIn("InvokeAllPluginUpdates", table)
         self.assertIn("VS::Effects::Templates::UpdateLivePlg198Ring", table)
 
-    def test_rank_menu_preserves_native_packet_link(self):
+    def test_rank_menu_uses_native_packet_queue_links(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/MagicMenus.cpp").read_text()
-        menu = source.split("int UpdateWarlockMenu(", 1)[1]
-        menu = menu.split("int UpdateShamanMenu(", 1)[0]
-        arrow = source.split("void DrawWarlockLevelArrow(", 1)[1]
-        arrow = arrow.split("void DrawWarlockLevelMenu(", 1)[0]
-        self.assertIn("InitializeWarlockLevelMenu(menu_state, selected_row);", menu)
-        self.assertIn("*spell_level_ordering_table = LegacyGpu_Handle(prim);", arrow)
-        self.assertNotIn("*spell_level_ordering_table = ((u_int)prim << 8) >> 8;", arrow)
+        arrow = source.split("bool DrawRankArrows(", 1)[1].split("\n}", 1)[0]
+        self.assertIn("queue.ChainLink()", arrow)
+        self.assertIn("queue.Emit(left)", arrow)
+        self.assertIn("queue.Emit(right)", arrow)
+        self.assertNotIn("spell_level_ordering_table", source)
+        self.assertNotIn("LegacyGpu_Handle", source)
 
     def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
         root = Path(__file__).resolve().parents[2]

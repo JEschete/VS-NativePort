@@ -42,6 +42,9 @@
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
+#include "Menu/MagicCostsLive.hpp"
+#include "Menu/MagicMenusLive.hpp"
+#include "Menu/MagicTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
@@ -97,7 +100,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Magic.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
 #include "Menu/Results/Results.h"
@@ -454,6 +456,56 @@ class CallOutScope {
   CallOutScope(CallOutScope&&) = delete;
   CallOutScope& operator=(CallOutScope&&) = delete;
 };
+
+// Original vs_battle_loadMenuPrg (5BF94.c:2576) replaces image-backed
+// statics with the program bytes. Native owners live outside that image.
+void ResetLoadedSubmenu(int lba) {
+  switch (lba) {
+    case VS_MENU0_PRG_LBA:
+      Magic::ResetMagicMenusLiveState();
+      Magic::ResetTeleportMenuLiveState();
+      break;
+    case VS_MENU1_PRG_LBA:
+      break_arts::ResetLiveStatics();
+      break;
+    case VS_MENU2_PRG_LBA:
+      Boot_ResetMenu2Statics();
+      break;
+    case VS_MENU3_PRG_LBA:
+      Boot_ResetMenu3Statics();
+      break;
+    case VS_MENU4_PRG_LBA:
+      Boot_ResetMenu4Statics();
+      break;
+    case VS_MENU5_PRG_LBA:
+      Boot_ResetMenu5Statics();
+      break;
+    case VS_MENU9_PRG_LBA:
+      Boot_ResetMenu9Statics();
+      break;
+    case VS_MENUB_PRG_LBA:
+      Boot_ResetMenubStatics();
+      break;
+    case VS_MENUD_PRG_LBA:
+      Boot_ResetMenudStatics();
+      break;
+    case VS_MENUE_PRG_LBA:
+      Boot_ResetMenueStatics();
+      break;
+    case VS_MENUF_PRG_LBA:
+      Boot_ResetMenufStatics();
+      break;
+    case VS_MENU7_PRG_LBA:
+    case VS_MENU8_PRG_LBA:
+    case VS_MENUA_PRG_LBA:
+    case VS_MENUC_PRG_LBA:
+      break;
+    default:
+      VS_LOG_WARN("menu.framework", "unknown completed menu program LBA {}",
+                  lba);
+      break;
+  }
+}
 
 // _renderAshley's camera backups (MENU _renderAshley.h:27).
 struct PreviewBackup {
@@ -874,10 +926,26 @@ class LiveHost final : public Host {
   }
 
   void FinishOverlayLoad() override {
-    if (Menu_Framework_menuState.cdQueue != nullptr) {
-      VS::Content::ReleaseLiveDiscRequest(Menu_Framework_menuState.cdQueue);
+    std::optional<int> loaded_lba;
+    if (auto* request = Menu_Framework_menuState.cdQueue) {
+      loaded_lba = request->cdFile.lba;
+      VS::Content::ReleaseLiveDiscRequest(request);
     }
     VS::Boot::WaitForOverlayReadyLive();
+    if (!loaded_lba) {
+      return;
+    }
+    if (*loaded_lba == VS_MAINMENU_PRG_LBA) {
+      // The core handles ordinary MAINMENU loads; the item shortcut can
+      // load that same program for a nonzero logical submenu.
+      if (g_state.loaded_sub_menu != 0) {
+        g_state.main_menu = {};
+        ResetMainMenuOverlay();
+      }
+      return;
+    }
+    const CallOutScope scope;
+    ResetLoadedSubmenu(*loaded_lba);
   }
 
   void ForgetOverlayLoad() override {
@@ -942,7 +1010,7 @@ class LiveHost final : public Host {
     const CallOutScope scope;
     switch (submenu) {
       case Submenu::kMagic:
-        return Menu_Magic_Update(bytes);
+        return Magic::UpdateLive(bytes);
       case Submenu::kBreakArts:
         return VS::Menu::break_arts::UpdateLive(bytes);
       case Submenu::kBattleAbilities:

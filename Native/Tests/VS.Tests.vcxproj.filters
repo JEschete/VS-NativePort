@@ -792,6 +792,12 @@
     <ClCompile Include="src\MagicSpellMenuTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MagicTerminalLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MagicTerminalTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1309,6 +1315,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\LootTerminalWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\MagicMenusTestWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\OverlayLoadFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp">

@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iterator>
 #include <span>
@@ -14,6 +15,7 @@
 #include <vector>
 
 #include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
@@ -295,6 +297,16 @@ struct LiveFixture {
         row.state = Menu_Framework_MenuItemState_Idle;
       }
     }
+  }
+  fw::ItemText FirstItem() const {
+    const auto capacity =
+        VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemsText);
+    if (!capacity || *capacity < sizeof(fw::ItemText)) {
+      throw std::runtime_error("menu did not produce an owned row");
+    }
+    fw::ItemText result;
+    std::memcpy(&result, Menu_Framework_itemsText, sizeof result);
+    return result;
   }
   void AddParts() {
     VS::Items::InventoryBlade blade{.id = 1,

@@ -20,6 +20,7 @@
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/OverlayLoadFixture.hpp"
 
 extern "C" {
 #include "Battle/AbilityState.h"
@@ -27,6 +28,8 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Boot/OverlayReset.h"
+#include "Content/DiscLayout.h"
+#include "DiscQueue.h"
 #include "Menu/BattleAbilities.h"
 }
 
@@ -160,6 +163,17 @@ struct LiveTerminalFixture : LiveFoundationFixture {
     return defense ? abilities::LiveUpdateDefenseAbilityMenu(0)
                    : abilities::LiveUpdateChainAbilityMenu(0);
   }
+  static void CompleteAndCheckReset(menu_overlay_tests::Load& load,
+                                    u_short* owner, char& learned) {
+    CHECK(load.Complete() == 1);
+    CHECK(load.request->state == Content_DiscRequestState_Free);
+    CHECK(learned == 0);
+    CHECK(Menu_BattleAbilities_abilityText == nullptr);
+    CHECK(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
+    if (Menu_BattleAbilities_abilityText == nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(owner);
+    }
+  }
 };
 }  // namespace
 
@@ -175,22 +189,24 @@ TEST_CASE(
 }
 
 TEST_CASE("MENU2 reload restores the file-backed Break Art timeout",
-          "[battle-abilities-live][F02614][reload]") {
+          "[battle-abilities-live][F02614][reload][menu-overlay-reload]") {
   LiveFoundationFixture fixture;
+  menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
   REQUIRE(abilities::LiveUpdateBreakArtUnlock(1) == 0);
   CHECK(Battle_actionDefinitions[kArtAction].unlocked == 1);
   Menu_textBoxes[7].flags.done = 1;
   REQUIRE(abilities::LiveUpdateBreakArtUnlock(0) == 0);
-  Boot_ResetMenu2Statics();
+  CHECK(load.Complete() == 1);
   CHECK(abilities::LiveUpdateBreakArtUnlock(0) == 1);
 }
 
 TEST_CASE("MENU2 reload restores unlock counts and phase without progression",
-          "[battle-abilities-live][F02616][reload]") {
+          "[battle-abilities-live][F02616][reload][menu-overlay-reload]") {
   LiveFoundationFixture fixture;
+  menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
   REQUIRE(abilities::LiveUpdateAbilityUnlock(1) == 0);
   CHECK(Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked == 1);
-  Boot_ResetMenu2Statics();
+  CHECK(load.Complete() == 1);
   REQUIRE(abilities::LiveUpdateAbilityUnlock(0) == 0);
   Menu_textBoxes[7].flags.done = 1;
   CHECK(abilities::LiveUpdateAbilityUnlock(0) == 1);
@@ -283,4 +299,23 @@ TEST_CASE("Ability terminal cold reset preserves foundation row ownership",
   CHECK(Menu_BattleAbilities_abilityCount == 1);
   CHECK(Menu_BattleAbilities_unlockedChainAbilities[0] == 0);
   CHECK(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
+}
+
+TEST_CASE("Loaded MENU2 requests dispatch the image reset before menu reentry",
+          "[battle-ability-terminal-live][menu-overlay-reload]") {
+  LiveTerminalFixture fixture;
+  menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
+  const bool defense = GENERATE(false, true);
+  auto& learned = defense ? Menu_BattleAbilities_unlockedDefenseAbilities
+                          : Menu_BattleAbilities_unlockedChainAbilities;
+  const int action = defense ? kDefenseAction : kAction;
+  REQUIRE(fixture.OpenList(defense) == 0);
+  auto* owner = Menu_BattleAbilities_abilityText;
+  CHECK(load.Poll() == 0);
+  CHECK(learned[0] == action);
+  CHECK(Menu_BattleAbilities_abilityText == owner);
+  fixture.CompleteAndCheckReset(load, owner, learned[0]);
+  learned[0] = static_cast<char>(action);
+  CHECK(load.Poll() == 1);
+  CHECK(learned[0] == action);
 }
