@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <exception>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
@@ -18,6 +19,8 @@
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/SceneNotifications.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "TestSupport/ScriptSources.hpp"
 
 extern "C" {
@@ -170,6 +173,10 @@ struct EventCameraFixture {
 };
 
 struct UiSessionFixture {
+  static constexpr std::size_t kArenaBytes = std::size_t{16} * 1024;
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, kArenaBytes> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   std::array<Menu_TextBoxState, 8> saved_boxes = std::to_array(Menu_textBoxes);
   Menu_Framework_TextBoxSelector saved_selector = Menu_textBoxSelector;
   Menu_StringContext saved_context = Battle_stringContext;
@@ -179,7 +186,10 @@ struct UiSessionFixture {
   char saved_timer = Menu_sceneNotificationTimer;
   char saved_timed = Menu_sceneNotificationTimed;
 
+  UiSessionFixture() { Menu_sceneNotificationBuffer = nullptr; }
+
   ~UiSessionFixture() {
+    if (!VS::Menu::CleanupLiveSceneNotificationOwnedState()) std::terminate();
     std::copy(saved_boxes.begin(), saved_boxes.end(), Menu_textBoxes);
     Menu_textBoxSelector = saved_selector;
     Battle_stringContext = saved_context;
@@ -193,7 +203,11 @@ struct UiSessionFixture {
 
 void BorrowSessionUiText() {
   static char text[] = {'A', 0};
-  static int notification[4]{};
+  REQUIRE(Menu_sceneNotificationBuffer == nullptr);
+  auto* notification =
+      static_cast<int*>(VS::Core::Memory::AllocateLiveFromHighEnd(
+          VS::Menu::kSceneNotificationBytes));
+  REQUIRE(notification != nullptr);
   for (auto& box : Menu_textBoxes) {
     box.state = 4;
     box.openDuration = 3;

@@ -31,6 +31,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -193,7 +194,7 @@ class LiveWorld final : public ActionPresentationWorld {
     constexpr int kBattleBank = 0x7E;
     Audio::LiveStopSfx(kBattleBank, sound);
   }
-  void ReleaseNotification() override { Menu_ReleaseSceneNotification(); }
+  void ReleaseNotification() override { Menu::ReleaseLiveSceneNotification(); }
   void ClearEffectMode() override { Effects::LiveClearActionEffectMode(); }
   void PrepareCamera() override {
     Field::LiveStorePreferredActionCameraDistance();
@@ -308,7 +309,7 @@ class LiveWorld final : public ActionPresentationWorld {
   bool InformationEnabled() override { return Input_settings.information != 0; }
   void ShowAction(std::uint16_t action) override {
     constexpr int kActionNotification = 0xB;
-    Menu_ShowSceneNotification(kActionNotification, action, 1);
+    Menu::ShowLiveSceneNotification(kActionNotification, action, 1);
   }
 
  private:

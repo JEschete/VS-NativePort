@@ -149,6 +149,7 @@
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
@@ -163,6 +164,7 @@
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
+#include "Menu/TextBoxUpdateLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -388,10 +390,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80069C1Cu, 32u, (void*)&Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069C3Cu, 48u, (void*)&Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x8009EA14u, 0u, (void*)&Battle_PlayActorDamageReaction, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB2B8u, 0u, (void*)&Menu_ShowSceneNotification, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&Menu_IsSceneNotificationPending, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&Menu_ReleaseSceneNotification, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&Menu_UpdateTextBoxes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8184u, 16u, (void*)&Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8194u, 32u, (void*)&Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E81B4u, 16u, (void*)&Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor, 1u, 1u},
@@ -2431,6 +2429,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU2.PRG", 0x80103670u, 0u, (void*)&VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu, 0u, 0u, 0u},
     {"MENU/MENU2.PRG", 0x801037E4u, 0u, (void*)&VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints, 0u, 0u, 0u},
     {"MENU/MENU2.PRG", 0x801038D4u, 0u, (void*)&VS::Menu::BattleAbilities::LiveUpdateAbilityScreen, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB2B8u, 0u, (void*)&VS::Menu::ShowLiveSceneNotification, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&VS::Menu::IsLiveSceneNotificationPending, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&VS::Menu::ReleaseLiveSceneNotification, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&VS::Menu::UpdateLiveTextBoxes, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

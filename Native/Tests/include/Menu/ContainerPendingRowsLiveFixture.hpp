@@ -16,6 +16,7 @@
 #include "Menu/ContainerPendingRowsWorld.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
@@ -58,6 +59,9 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
       Input_buttonHeldFrames};
   equipment::ValueRestore<u_long*> saved_text_ordering{
       Menu_activeTextBoxOrderingTable};
+  equipment::ValueRestore<char> saved_text_index{Menu_textBoxBufferIndex};
+  equipment::ArrayRestore<u_long, std::size(Menu_textBoxOrderingTables)>
+      saved_text_tables{Menu_textBoxOrderingTables};
   std::array<int, framework::kRowTypeCount> row_types{};
   RowWorkspace workspace;
 
@@ -74,6 +78,7 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     Input_previousButtons = 0;
     std::ranges::fill(Input_buttonHeldFrames, 0U);
     State_tickSpeed = 2;
+    Menu_textBoxBufferIndex = 0;
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable, kTextOrderingEntries);
     PadInitDirect(
@@ -115,7 +120,7 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     ResetFrame();
     Buttons(buttons);
     framework::UpdateLiveScreen();
-    Menu_UpdateTextBoxes();
+    VS::Menu::UpdateLiveTextBoxes();
     return framework::LiveSelectedRow();
   }
   void Settle() {

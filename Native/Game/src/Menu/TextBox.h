@@ -19,9 +19,5 @@ extern char Menu_sceneNotificationTimed;
 extern Menu_Framework_TextBoxSelector Menu_textBoxSelector;
 extern Menu_TextBoxState Menu_textBoxes[8];
 extern u_long* Menu_activeTextBoxOrderingTable;
-void Menu_ShowSceneNotification(int notification_kind, int notification_subject_id, int timed_notification);
-int Menu_IsSceneNotificationPending(void);
-void Menu_ReleaseSceneNotification(void);
-void Menu_UpdateTextBoxes(void);
 
 #endif // VS_MENU_TEXTBOX_H_DECLS

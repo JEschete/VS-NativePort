@@ -417,6 +417,8 @@
     <ClCompile Include="src\SaveStoreTests.cpp" />
     <ClCompile Include="src\ScaledFontLayoutTests.cpp" />
     <ClCompile Include="src\SceneCatalogTests.cpp" />
+    <ClCompile Include="src\SceneNotificationsLiveTests.cpp" />
+    <ClCompile Include="src\SceneNotificationTests.cpp" />
     <ClCompile Include="src\ScenePlaybackTests.cpp" />
     <ClCompile Include="src\ScoreRankTests.cpp" />
     <ClCompile Include="src\ScreenEffectStateTests.cpp" />
@@ -481,6 +483,8 @@
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\TextBoxFrameTests.cpp" />
     <ClCompile Include="src\TextBoxStateTests.cpp" />
+    <ClCompile Include="src\TextBoxUpdateLiveTests.cpp" />
+    <ClCompile Include="src\TextBoxUpdateTests.cpp" />
     <ClCompile Include="src\TextTransitionTests.cpp" />
     <ClCompile Include="src\TextureAnimationTests.cpp" />
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />
@@ -554,6 +558,7 @@
     <ClInclude Include="include\Menu\LootTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\MagicMenusTestWorld.hpp" />
     <ClInclude Include="include\Menu\OverlayLoadFixture.hpp" />
+    <ClInclude Include="include\Menu\SceneNotificationWorld.hpp" />
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp" />
     <ClInclude Include="include\Menu\StatusComponentsWorld.hpp" />
     <ClInclude Include="include\Menu\StatusLimbControllersWorld.hpp" />

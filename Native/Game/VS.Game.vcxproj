@@ -2066,6 +2066,10 @@
     <ClCompile Include="src\Menu\Results\TimeAttackTerminalLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\SceneNotifications.cpp" />
+    <ClCompile Include="src\Menu\SceneNotificationsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\Encyclopedia.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2172,6 +2176,10 @@
     </ClCompile>
     <ClCompile Include="src\Menu\TextBoxState.cpp" />
     <ClCompile Include="src\Menu\TextBoxStateLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxUpdate.cpp" />
+    <ClCompile Include="src\Menu\TextBoxUpdateLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Save\FileMenu.cpp" />
@@ -3091,6 +3099,8 @@
     <ClInclude Include="include\Menu\Results\TimeAttackRatingLive.hpp" />
     <ClInclude Include="include\Menu\Results\TimeAttackTerminal.hpp" />
     <ClInclude Include="include\Menu\Results\TimeAttackTerminalLive.hpp" />
+    <ClInclude Include="include\Menu\SceneNotifications.hpp" />
+    <ClInclude Include="include\Menu\SceneNotificationsLive.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp" />
     <ClInclude Include="include\Menu\Score\EncyclopediaPreviewLive.hpp" />
     <ClInclude Include="include\Menu\Score\GazetteCamera.hpp" />
@@ -3126,6 +3136,8 @@
     <ClInclude Include="include\Menu\TextBoxFramesLive.hpp" />
     <ClInclude Include="include\Menu\TextBoxState.hpp" />
     <ClInclude Include="include\Menu\TextBoxStateLive.hpp" />
+    <ClInclude Include="include\Menu\TextBoxUpdate.hpp" />
+    <ClInclude Include="include\Menu\TextBoxUpdateLive.hpp" />
     <ClInclude Include="include\Save\FileMenu.hpp" />
     <ClInclude Include="include\Save\FileMenuLive.hpp" />
     <ClInclude Include="include\Save\MemoryCard\GameFilesLive.hpp" />

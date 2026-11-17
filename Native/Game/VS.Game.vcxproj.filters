@@ -2943,6 +2943,12 @@
     <ClCompile Include="src\Menu\Results\TimeAttackTerminalLive.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\SceneNotifications.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\SceneNotificationsLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Score\Encyclopedia.cpp">
       <Filter>src\Menu\Score</Filter>
     </ClCompile>
@@ -3091,6 +3097,12 @@
       <Filter>src\Menu</Filter>
     </ClCompile>
     <ClCompile Include="src\Menu\TextBoxStateLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxUpdate.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\TextBoxUpdateLive.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
     <ClCompile Include="src\Save\FileMenu.cpp">
@@ -4743,6 +4755,12 @@
     <ClInclude Include="include\Menu\Results\TimeAttackTerminalLive.hpp">
       <Filter>include\Menu\Results</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\SceneNotifications.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\SceneNotificationsLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\Score\EncyclopediaPreview.hpp">
       <Filter>include\Menu\Score</Filter>
     </ClInclude>
@@ -4846,6 +4864,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\TextBoxStateLive.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\TextBoxUpdate.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\TextBoxUpdateLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\FileMenu.hpp">

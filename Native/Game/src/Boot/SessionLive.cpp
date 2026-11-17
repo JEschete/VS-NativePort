@@ -29,6 +29,7 @@
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/GazetteTerminalLive.hpp"
@@ -77,6 +78,11 @@ constexpr std::int16_t kVramWidth = 1024;
 constexpr std::int16_t kVramHeight = 512;
 
 void CleanupMenuOwners() {
+  if (!Menu::CleanupLiveSceneNotificationOwnedState()) {
+    Core_Errorf("boot",
+                "scene-notification cleanup refused before session reset");
+    std::abort();
+  }
   if (!Menu::Score::CleanupLiveEnemyPreviewOwnedState()) {
     Core_Errorf("boot", "enemy-preview cleanup refused before session reset");
     std::abort();

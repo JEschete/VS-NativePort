@@ -1122,6 +1122,11 @@
     <None Include="..\..\port\differentials\reward_flow.py" />
     <None Include="..\..\port\differentials\reward_flow_driver.cpp" />
     <None Include="..\..\port\differentials\reward_flow_guard_driver.cpp" />
+    <None Include="..\..\port\differentials\scene_notifications_common.py" />
+    <None Include="..\..\port\differentials\scene_notifications_driver.cpp" />
+    <None Include="..\..\port\differentials\scene_notifications_f01379.py" />
+    <None Include="..\..\port\differentials\scene_notifications_f01380.py" />
+    <None Include="..\..\port\differentials\scene_notifications_f01381.py" />
     <None Include="..\..\port\differentials\score_rank_common.py" />
     <None Include="..\..\port\differentials\score_rank_driver.cpp" />
     <None Include="..\..\port\differentials\score_rank_f02832.py" />
@@ -1269,6 +1274,9 @@
     <None Include="..\..\port\differentials\text_box_state_f01410.py" />
     <None Include="..\..\port\differentials\text_box_state_f01411.py" />
     <None Include="..\..\port\differentials\text_box_state_f01412.py" />
+    <None Include="..\..\port\differentials\text_box_update_driver.cpp" />
+    <None Include="..\..\port\differentials\text_box_update_f01392.py" />
+    <None Include="..\..\port\differentials\text_box_words.hpp" />
     <None Include="..\..\port\differentials\time_attack_terminal_common.py" />
     <None Include="..\..\port\differentials\time_attack_terminal_driver.cpp" />
     <None Include="..\..\port\differentials\time_attack_terminal_f03008.py" />

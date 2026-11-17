@@ -63,7 +63,7 @@ void ReportTextBox(const Menu_TextBoxState* box, const char* problem) {
 }
 
 // The box's layers: its index in Menu_textBoxes selects them (the original
-// kept the index in D_800F4E80 while Menu_UpdateTextBoxes drew the box).
+// kept the index in D_800F4E80 while drawing the box).
 u_long* TextBoxLayers(const Menu_TextBoxState* box) {
   const std::span boxes(Menu_textBoxes);
   for (std::size_t index = 0; index < boxes.size(); ++index) {

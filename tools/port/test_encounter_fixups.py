@@ -3107,14 +3107,12 @@ int func_800F9800(void) {
         for field in ("seconds", "minutes", "hours"):
             self.assertIn(f"timer->{field}", source)
         self.assertNotIn("*(int*)sp10", source)
-        source = (
-            "        Render_activeTextBoxIndex = id;\n\n"
-            "VS::Battle::DrawLivePuzzleTimer(&Battle_puzzleTimer);"
-        )
-        for old, new, _ in copy_fixups.FIXES["F01392"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertEqual(source, "VS::Battle::DrawLivePuzzleTimer(&State_sceneTimer);")
+        self.assertNotIn("F01392", copy_fixups.FIXES)
+        self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01392"], "VS::Menu::UpdateLiveTextBoxes")
+        source = (root / r"Native\Game\src\Menu\TextBoxUpdateLive.cpp").read_text(encoding="utf-8")
+        self.assertIn("Battle::DrawLivePuzzleTimer(&State_sceneTimer);", source)
+        self.assertNotIn("&Battle_puzzleTimer", source)
+        self.assertNotIn("Render_activeTextBoxIndex", source)
 
     def test_orbit_return_globals_preserve_complete_command_objects(self):
         for gid, name, extent in (

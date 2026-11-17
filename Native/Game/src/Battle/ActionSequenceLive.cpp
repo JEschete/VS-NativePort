@@ -22,6 +22,7 @@
 #include "Field/CameraLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Items/LootLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Render/CameraViewLive.hpp"
 extern "C" {
 #include "Battle/Action.h"
@@ -90,7 +91,7 @@ class LiveWorld final : public ActionSequenceWorld {
   }
   std::uint32_t ChainCount() override { return State().chainStep; }
   int NotificationPending() override {
-    return Menu_IsSceneNotificationPending();
+    return Menu::IsLiveSceneNotificationPending();
   }
   std::uint32_t ActorFlags(int actor) override {
     return Actors::LiveActorStateFlags(actor);

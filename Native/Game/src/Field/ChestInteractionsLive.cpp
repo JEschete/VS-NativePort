@@ -41,6 +41,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
@@ -471,7 +472,7 @@ class LiveInteractionCameraHost final
     return VS::Actors::LiveActorStateFlags(0);
   }
   bool NotificationPending() override {
-    return Menu_IsSceneNotificationPending() != 0;
+    return VS::Menu::IsLiveSceneNotificationPending() != 0;
   }
   bool AshleyTransitionPose() override {
     return VS::Actors::IsLiveAshleyTransitionPose() != 0;
@@ -626,7 +627,7 @@ class LiveRoomObjectInteractionHost final
     return true;
   }
   void ShowNotification(std::int32_t kind, std::int16_t item) override {
-    Menu_ShowSceneNotification(kind, item, 1);
+    VS::Menu::ShowLiveSceneNotification(kind, item, 1);
   }
   void PlayPose(const VS::Field::RoomObjectLockState& state,
                 std::uint8_t pose) override {
@@ -702,7 +703,7 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
     return true;
   }
   void ShowUnlocked(std::int16_t item) override {
-    Menu_ShowSceneNotification(kUnlockedNotification, item, 1);
+    VS::Menu::ShowLiveSceneNotification(kUnlockedNotification, item, 1);
   }
   void PlayPose(const VS::Field::ChestLockState& chest,
                 std::uint8_t pose) override {
@@ -753,10 +754,12 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
       Battle_actionState->selection.actionId = 0;
     }
   }
-  void ReleaseNotification() override { Menu_ReleaseSceneNotification(); }
+  void ReleaseNotification() override {
+    VS::Menu::ReleaseLiveSceneNotification();
+  }
   void ShowLocked(std::int32_t notification, std::int16_t item) override {
     Battle_actionFlowMode = kContentsActionFlow;
-    Menu_ShowSceneNotification(notification, item, 1);
+    VS::Menu::ShowLiveSceneNotification(notification, item, 1);
   }
   void OpenChestLoot(VS::Field::ChestTarget target) override {
     auto* chest = VS::Field::ResolveLiveChestTarget(target);
@@ -774,7 +777,7 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
   }
   void PauseForMenu() override { VS::Field::LivePauseFieldForMenu(); }
   bool NotificationPending() override {
-    return Menu_IsSceneNotificationPending() != 0;
+    return VS::Menu::IsLiveSceneNotificationPending() != 0;
   }
   VS::Field::ChestSelectionResult UpdateContentsSelection() override {
     VS::Menu::Framework::UpdateLiveMenuOverlay();
@@ -840,7 +843,9 @@ class LiveTrapFinishHost final : public VS::Field::TrapFinishHost {
     Battle_actionFlowMode = kFinishedActionFlow;
     State_tickSpeed = 2;
   }
-  void ReleaseNotification() override { Menu_ReleaseSceneNotification(); }
+  void ReleaseNotification() override {
+    VS::Menu::ReleaseLiveSceneNotification();
+  }
   void ClearTarget() override {
     VS::Field::LiveInteractionTargetState().Clear();
   }
@@ -871,8 +876,8 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
   void ShowInformation(VS::Field::TrapTarget target) override {
     const auto* trap = VS::Field::ResolveLiveTrapTarget(target);
     if (trap != nullptr && Input_settings.information != 0) {
-      Menu_ShowSceneNotification(kTrapNotification,
-                                 trap->kind + kTrapActionOffset, 1);
+      VS::Menu::ShowLiveSceneNotification(kTrapNotification,
+                                          trap->kind + kTrapActionOffset, 1);
     }
   }
   void ResetActionSelection() override {
@@ -895,7 +900,9 @@ class LiveObjectInteractionWaitHost final
   void PauseField() override {
     VS::Field::LivePauseFieldForObjectInteraction();
   }
-  void ReleaseNotification() override { Menu_ReleaseSceneNotification(); }
+  void ReleaseNotification() override {
+    VS::Menu::ReleaseLiveSceneNotification();
+  }
   void ResumeField() override { VS::Field::LiveResumeFieldAfterMenu(); }
   void EnterExploration() override {
     VS::Field::LiveEnterFieldExplorationMode();

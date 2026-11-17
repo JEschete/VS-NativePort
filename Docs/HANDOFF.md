@@ -1,23 +1,26 @@
 # Current Handoff
 
-Updated 2026-11-17. Gazette terminal F02803/F02805/F02817-F02820/F02834/F04156
-now meets local native, original-differential and integration gates; scoped
-publication and exact-revision CI are next. The latest accepted revision is
-the preview-ownership prerequisite `0a440855871c2b7a49eef73a821316b744c3d8f4`,
-with Source Quality 44091746436 successful and #430 closed.
+Updated 2026-11-17. Scene notifications/text-box update
+F01379-F01381/F01392 pass local shared acceptance; publication and exact CI
+are pending. The last accepted Gazette terminal revision is
+`cccdea168034360e6f464edcda774713c18ec6f4`
+(implementation `f0d7cc23b1d3613e251e39377f4934190ec85639`).
+Its exact Source Quality 44102189713 succeeds. The preview-ownership prerequisite
+`0a440855871c2b7a49eef73a821316b744c3d8f4` also passed exact CI; #430 is closed.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The locally verified original 900-function cohort has **889 resolved
-(877 promoted, 12 retired) and 11 remaining**. **93 of the requested final
-112** are published and accepted; the eight terminal functions are locally
-verified but are not counted as accepted until exact-revision CI succeeds. See
+The locally verified original 900-function cohort has **893 resolved
+(881 promoted, 12 retired) and 7 remaining**. **101 of the requested final
+112** are published and accepted; four more are locally verified but await
+publication/CI. Map6 is next; F00830 remains
+blocked by #296. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 0, 50: 0 locally (eight awaiting publication), 52: 10.
+  48: 0, 50: 0, 52: 6.
   The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -27,6 +30,36 @@ verified but are not counted as accepted until exact-revision CI succeeds. See
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Text-update evidence (`VR-MENU-TEXT-UPDATE`): four original spans pass
+  4,096 vectors, zero mismatches; 86 instruction mutants (256 vectors each)
+  and four compiled native variants are detected. Eight existing word-codec
+  cases retain parity over 2,048 additional vectors.
+  `group-20261117-100634` passes both builds, Debug/Release full suites
+  (9,402 cases / 12,978,455 assertions each), 155 focused cases / 41,288
+  assertions each, both canonical replays, copier controls and stable second
+  generation (zero Native changes, `c44da32785458bdf`). Changed-file tidy:
+  six existing findings, zero new. All four original module entries, six
+  production caller files and retained container callers use the new bindings.
+  Checked notification cleanup fixes #432 before actual cold alias clearing
+  and stopped-frame heap replacement; invalid/undersized ownership refuses,
+  while ordinary release, timed/untimed behavior, foreign text/allocations and
+  reentry survive. Four original bodies, two adaptations and the F01392
+  current-box-byte/timer fixup retire; its retained copier control verifies
+  the owned replacement without removing the preceding HUD assertions.
+  Pre-hook `092811` fails three ownership assertions; its mistaken plural
+  selector omitted ten core cases and is not presented as full coverage.
+  `093926` reproduces two retained container pointer/index mismatches; both
+  fixtures now save/pin/restore their complete ordering binding.
+  The original `group-20261117-094631` remains interrupted: a retained
+  event-session static 16-byte notification reaches checked cleanup and a
+  CRT abort. Its preserved report is not a passing result. A no-refusal
+  assertion in `100249` also exposes a reward-fixture false positive.
+  Both fixture families now use complete native-heap ownership, retaining
+  all prior assertions and control flow; expanded `100432` and the final
+  group pass. No production guard or baseline was weakened.
+  Evidence: `build\scratch\text-update\integration.json`.
+  No physical-CD, hardware-GPU, interactive-gameplay, data/type or
+  EC-retirement completion is claimed. #432 stays open until exact pushed CI.
 - Gazette-terminal evidence (`VR-MENU-GAZETTE-TERMINAL`): eight original
   spans pass 11,264 vectors, zero mismatches; 145 instruction mutants and
   eight compiled native variants are detected. `group-20261117-090220`
@@ -61,6 +94,10 @@ verified but are not counted as accepted until exact-revision CI succeeds. See
   buffer fixes retire; the surviving MENU9 model-variant data reset and
   native row/statistics/time hooks remain. No physical-CD, hardware-GPU,
   interactive gameplay, data/type or EC-retirement completion is claimed.
+  Published in `f0d7cc23b1d3613e251e39377f4934190ec85639`, with generated-report
+  follow-up `cccdea168034360e6f464edcda774713c18ec6f4`.
+  [Source Quality 44102189713](https://github.com/JEschete/VS-NativePort/actions/runs/44102189713)
+  passes on that exact pushed revision.
 - Gazette-statistics evidence (`VR-MENU-GAZETTE-STATISTICS`): five original
   spans pass 5,120 vectors, zero mismatches; 122 instruction mutants (128
   vectors each) and five compiled native variants are detected.

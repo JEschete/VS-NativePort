@@ -14,6 +14,7 @@
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -119,7 +120,7 @@ class LiveWorld final : public RewardDispatchWorld {
   }
   void ShowActionLearned(std::uint16_t action) override {
     constexpr int kLearnedNotice = 0xC;
-    Menu_ShowSceneNotification(kLearnedNotice, action, 1);
+    Menu::ShowLiveSceneNotification(kLearnedNotice, action, 1);
   }
   void OpenAbilityUnlocks(std::uint16_t art, std::uint16_t ability) override {
     Menu::Framework::OpenLiveAbilityUnlockMenu(art, ability);
@@ -144,11 +145,13 @@ class LiveWorld final : public RewardDispatchWorld {
     return static_cast<std::uint32_t>(Effects_effectBusyFlags);
   }
   std::int32_t SceneNotificationPending() override {
-    return Menu_IsSceneNotificationPending();
+    return Menu::IsLiveSceneNotificationPending();
   }
   std::int32_t LootMenuOpened() override { return Battle_lootMenuOpened; }
   void ResumeFieldAfterMenu() override { Field::LiveResumeFieldAfterMenu(); }
-  void ReleaseSceneNotification() override { Menu_ReleaseSceneNotification(); }
+  void ReleaseSceneNotification() override {
+    Menu::ReleaseLiveSceneNotification();
+  }
   void BeginPendingAbilityReward() override { LiveBeginPendingAbilityReward(); }
   void GrantPendingAbilityUnlock() override { LiveGrantPendingAbilityUnlock(); }
   std::uint32_t CurrentPhase() override { return Battle_actionFlowMode; }

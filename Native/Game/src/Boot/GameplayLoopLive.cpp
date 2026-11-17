@@ -50,6 +50,8 @@
 #include "Input/ControllerLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
+#include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/GimImagesLive.hpp"
@@ -299,9 +301,11 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Field_EndObjectInteractionWaitEntry();
   }
   [[nodiscard]] bool IsSceneNotificationPending() override {
-    return Menu_IsSceneNotificationPending() != 0;
+    return VS::Menu::IsLiveSceneNotificationPending() != 0;
   }
-  void ReleaseSceneNotification() override { Menu_ReleaseSceneNotification(); }
+  void ReleaseSceneNotification() override {
+    VS::Menu::ReleaseLiveSceneNotification();
+  }
   void PlayCenteredSound(int channel_group, int sound) override {
     VS::Audio::LivePlaySfxCentered(channel_group, sound);
   }
@@ -502,7 +506,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Effects_effectBusyFlags = VS::Effects::LiveUpdateEffectRuntime();
   }
   void DrawBattleHud() override { VS::Battle::DrawLiveBattleHud(); }
-  void UpdateTextBoxes() override { Menu_UpdateTextBoxes(); }
+  void UpdateTextBoxes() override { VS::Menu::UpdateLiveTextBoxes(); }
   void UpdateTickTransitions() override {
     VS::Input::UpdateLiveVibrationPatterns();
     VS::Render::UpdateLiveBackgroundGradientTransition();

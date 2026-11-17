@@ -41,7 +41,7 @@ def input_lease_permitted(frame: Frame, buttons: frozenset[str]) -> bool:
         frame.control in (1, 2, 5, 6)
         or (frame.control == 3 and frame.dialogue_waiting
             and buttons == frozenset({"Circle"}))
-        # GameLoop control 11 only polls Menu_IsSceneNotificationPending; a face button dismisses it.
+        # GameLoop control 11 polls IsLiveSceneNotificationPending; a face button dismisses it.
         or (frame.control == 11 and buttons == frozenset({"Circle"}))
         or (loot_menu_ready(frame) and buttons == frozenset({"Square"}))
         or (reward_menu_ready(frame) and buttons in (
@@ -413,7 +413,7 @@ class CombatController:
             return None
         if (frame.ready and frame.control == 11 and frame.event_phase == 0
                 and frame.tick - self.last_action_tick >= self.input_gap):
-            # Key/sigil unlock notices (Menu_ShowSceneNotification) pause the field until a button at
+            # Key/sigil unlock notices (ShowLiveSceneNotification) pause the field until a button at
             # their arrow; dismissing one is not a strategy choice, so settled combat cannot block it.
             if frame.tick % 30 < 2:
                 return self._action(frame, ("Circle",), 2, "dismiss the native door/lock notification")

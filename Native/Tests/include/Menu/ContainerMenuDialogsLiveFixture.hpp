@@ -21,6 +21,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
+#include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
@@ -72,6 +73,9 @@ struct DialogLiveFixture : equipment::LiveFixture {
   equipment::ValueRestore<char> saved_animation{Menu_Framework_itemsListRow};
   equipment::ValueRestore<u_long*> saved_text_ordering{
       Menu_activeTextBoxOrderingTable};
+  equipment::ValueRestore<char> saved_text_index{Menu_textBoxBufferIndex};
+  equipment::ArrayRestore<u_long, std::size(Menu_textBoxOrderingTables)>
+      saved_text_tables{Menu_textBoxOrderingTables};
 
   DialogLiveFixture() {
     framework::ResetLiveMainMenuStatics();
@@ -83,6 +87,7 @@ struct DialogLiveFixture : equipment::LiveFixture {
     Input_previousButtons = 0;
     std::ranges::fill(Input_buttonHeldFrames, 0U);
     State_tickSpeed = 2;
+    Menu_textBoxBufferIndex = 0;
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable, kTextOrderingTags);
     PadInitDirect(
@@ -130,7 +135,7 @@ struct DialogLiveFixture : equipment::LiveFixture {
     Buttons(buttons);
     const int result = update(0);
     framework::UpdateLiveScreen();
-    Menu_UpdateTextBoxes();
+    VS::Menu::UpdateLiveTextBoxes();
     return result;
   }
   int RunFrames(TickFunction update, int frames = kDialogFrames) {

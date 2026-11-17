@@ -4338,6 +4338,21 @@
     <None Include="..\..\port\differentials\reward_flow_guard_driver.cpp">
       <Filter>tools\port\differentials</Filter>
     </None>
+    <None Include="..\..\port\differentials\scene_notifications_common.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scene_notifications_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scene_notifications_f01379.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scene_notifications_f01380.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\scene_notifications_f01381.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
     <None Include="..\..\port\differentials\score_rank_common.py">
       <Filter>tools\port\differentials</Filter>
     </None>
@@ -4777,6 +4792,15 @@
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\text_box_state_f01412.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\text_box_update_driver.cpp">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\text_box_update_f01392.py">
+      <Filter>tools\port\differentials</Filter>
+    </None>
+    <None Include="..\..\port\differentials\text_box_words.hpp">
       <Filter>tools\port\differentials</Filter>
     </None>
     <None Include="..\..\port\differentials\time_attack_terminal_common.py">

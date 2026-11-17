@@ -20,6 +20,7 @@
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
@@ -66,7 +67,7 @@ using battle::AbilityKind;
 
 // The pose the player plays while learning an ability.
 constexpr int kAbilityLearnedPose = 6;
-// Menu_ShowSceneNotification kind of the "learned" notice.
+// The scene notification kind for the "learned" notice.
 constexpr int kActionLearnedNotification = 0xC;
 // The action availability word keeps its flags in the top byte.
 constexpr std::uint32_t kActionAvailableMask = 0xFF000000u;
@@ -213,7 +214,8 @@ class LiveAbilityHost final : public battle::AbilityHost {
   }
   void PauseFieldForMenu() override { VS::Field::LivePauseFieldForMenu(); }
   void ShowActionLearnedNotification(int action_id) override {
-    Menu_ShowSceneNotification(kActionLearnedNotification, action_id, 1);
+    VS::Menu::ShowLiveSceneNotification(kActionLearnedNotification, action_id,
+                                        1);
   }
   void OpenAbilityUnlockMenu(battle::PendingAbilityUnlocks unlocks) override {
     VS::Menu::Framework::OpenLiveAbilityUnlockMenu(

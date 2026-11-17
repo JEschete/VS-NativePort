@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <exception>
 #include <iterator>
 #include <span>
 
@@ -9,9 +11,12 @@
 
 #include "Battle/RewardFlowLive.hpp"
 #include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GameMode.hpp"
 #include "Field/RoomEffectsLive.hpp"
+#include "Menu/SceneNotifications.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
@@ -154,6 +159,8 @@ struct LiveMenuFixture : LiveFixture {
 };
 
 struct LiveDialogFixture : LiveMenuFixture {
+  alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 4096> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   u_int saved_control = Field_controlMode;
   int saved_recovery = Battle_recoveryRewardMode;
   int saved_effects = Effects_effectBusyFlags;
@@ -162,15 +169,24 @@ struct LiveDialogFixture : LiveMenuFixture {
   Menu_TextBoxState saved_notice_box = Menu_textBoxes[7];
   char saved_notice_timer = Menu_sceneNotificationTimer;
   char saved_notice_timed = Menu_sceneNotificationTimed;
-  std::array<int, 4> notice{};
+  std::span<int> notice;
 
   LiveDialogFixture() {
+    auto* allocation =
+        static_cast<int*>(VS::Core::Memory::AllocateLiveFromHighEnd(
+            VS::Menu::kSceneNotificationBytes));
+    REQUIRE(allocation != nullptr);
+    notice = {allocation, VS::Menu::kSceneNotificationBytes / sizeof(int)};
     Battle_recoveryRewardMode = 0;
     Effects_effectBusyFlags = 0;
     Battle_lootMenuOpened = 0;
     Menu_sceneNotificationBuffer = nullptr;
   }
   ~LiveDialogFixture() {
+    if (!VS::Menu::CleanupLiveSceneNotificationOwnedState()) std::terminate();
+    if (VS::Core::Memory::LivePayloadCapacity(notice.data())) {
+      VS::Core::Memory::FreeLiveFromHighEnd(notice.data());
+    }
     Field_controlMode = saved_control;
     Battle_recoveryRewardMode = saved_recovery;
     Effects_effectBusyFlags = saved_effects;
@@ -345,7 +361,9 @@ TEST_CASE("F00198 live notice blocks field restoration and ability recovery",
   Menu_sceneNotificationBuffer = fixture.notice.data();
   Menu_textBoxes[7].flags.done = 0;
   Battle_actionState = nullptr;
+  const auto refusals = VS::Menu::RefusedLiveSceneNotificationCount();
   b::UpdateLiveAbilityUnlockResults();
+  CHECK(VS::Menu::RefusedLiveSceneNotificationCount() == refusals);
   CHECK(Menu_Framework_actionSelection.menuStatus == 2);
   CHECK(Menu_sceneNotificationBuffer == fixture.notice.data());
   CHECK(Field_isInteractionPaused == 77);

@@ -9,7 +9,7 @@
 
 // The menu text boxes' state, selection, anchors and lifecycle (BATTLE.PRG
 // 5BF94.c): the text-box consumer ABI. Eight boxes are drawn by
-// Menu_UpdateTextBoxes; these functions open, fill, select, anchor and
+// UpdateTextBoxes; these functions open, fill, select, anchor and
 // dismiss them without reaching global state (TextBoxStateLive.hpp binds
 // them to Menu_textBoxes and Menu_textBoxSelector).
 namespace VS::Menu {
@@ -26,7 +26,7 @@ inline constexpr std::uint8_t kOtherChoiceBrightness = 0x40;
 // Anchor presets addressable by the script's 4-bit preset field.
 inline constexpr std::size_t kTextAnchorPresetCount = 16;
 
-// The box kinds Menu_UpdateTextBoxes draws (5BF94.c:3936) and the two
+// The box kinds UpdateTextBoxes draws (5BF94.c:3936) and the two
 // aliases InitTextBox rewrites to a shaped frame.
 enum class TextBoxKind : std::uint8_t {
   kPlain = 0,
@@ -50,7 +50,7 @@ struct TextBoxFlags {
   std::uint8_t arrow_frame = 0;      // bits 16-23
   std::uint8_t speaker_texture = 0;  // bits 24-29
   bool done = false;                 // bit 30
-  bool frozen = false;               // bit 31: Menu_UpdateTextBoxes skips it
+  bool frozen = false;               // bit 31: UpdateTextBoxes skips it
 
   [[nodiscard]] static TextBoxFlags FromWord(std::uint32_t word);
   [[nodiscard]] std::uint32_t Word() const;
@@ -232,7 +232,7 @@ void InitTextBox(TextBox& box, const TextBoxLayout& layout);
 // Stops the speaker's animation and starts closing an open box over 8 ticks
 // (open style 0). Returns true while the box is still visible (opening, open
 // or closing), false once closed. Closing is asynchronous:
-// Menu_UpdateTextBoxes counts the state down to 0. decomp: F01412
+// UpdateTextBoxes counts the state down to 0. decomp: F01412
 // vs_battle_dismissTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4613,
 // 0x800CD064-0x800CD0FC).
 [[nodiscard]] bool DismissTextBox(TextBox& box, TextBoxHost& host);

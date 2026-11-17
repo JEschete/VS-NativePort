@@ -1933,6 +1933,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
     "VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
     "VS::Menu::BattleAbilities::LiveUpdateAbilityScreen": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
+    "VS::Menu::ShowLiveSceneNotification": r"Native\Game\include\Menu\SceneNotificationsLive.hpp",
+    "VS::Menu::IsLiveSceneNotificationPending": r"Native\Game\include\Menu\SceneNotificationsLive.hpp",
+    "VS::Menu::ReleaseLiveSceneNotification": r"Native\Game\include\Menu\SceneNotificationsLive.hpp",
+    "VS::Menu::UpdateLiveTextBoxes": r"Native\Game\include\Menu\TextBoxUpdateLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3506,6 +3510,10 @@ OWNED_CALL_BINDINGS["F02622"] = "VS::Menu::BattleAbilities::LiveUpdateChainAbili
 OWNED_CALL_BINDINGS["F02623"] = "VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu"
 OWNED_CALL_BINDINGS["F02624"] = "VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints"
 OWNED_CALL_BINDINGS["F02625"] = "VS::Menu::BattleAbilities::LiveUpdateAbilityScreen"
+OWNED_CALL_BINDINGS["F01379"] = "VS::Menu::ShowLiveSceneNotification"
+OWNED_CALL_BINDINGS["F01380"] = "VS::Menu::IsLiveSceneNotificationPending"
+OWNED_CALL_BINDINGS["F01381"] = "VS::Menu::ReleaseLiveSceneNotification"
+OWNED_CALL_BINDINGS["F01392"] = "VS::Menu::UpdateLiveTextBoxes"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -5592,6 +5600,10 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU2.PRG", 0x80103670, "VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu"),  # F02623
     ("MENU/MENU2.PRG", 0x801037E4, "VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints"),  # F02624
     ("MENU/MENU2.PRG", 0x801038D4, "VS::Menu::BattleAbilities::LiveUpdateAbilityScreen"),  # F02625
+    ("BATTLE/BATTLE.PRG", 0x800CB2B8, "VS::Menu::ShowLiveSceneNotification"),  # F01379
+    ("BATTLE/BATTLE.PRG", 0x800CB45C, "VS::Menu::IsLiveSceneNotificationPending"),  # F01380
+    ("BATTLE/BATTLE.PRG", 0x800CB50C, "VS::Menu::ReleaseLiveSceneNotification"),  # F01381
+    ("BATTLE/BATTLE.PRG", 0x800CB83C, "VS::Menu::UpdateLiveTextBoxes"),  # F01392
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only
@@ -5744,13 +5756,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "    case 2:\n        return arg0;\n    }\n    return arg0;\n}",
          "#303: 573B8.c:156 has no return after the switch; the PS1 epilogue (func_800BFE50) returns the reference "
          "in v0 unchanged for types 3-15, so the native path returns it instead of an indeterminate value"),
-    ],
-    "F01392": [
-        ("VS::Battle::DrawLivePuzzleTimer(&Battle_puzzleTimer);",
-         "VS::Battle::DrawLivePuzzleTimer(&State_sceneTimer);",
-         "SLUS 0x8005046C is the time-field subobject of the authoritative timer at 0x80050468, not independent native storage"),
-        ("        Render_activeTextBoxIndex = id;\n\n", "",
-         "#276 row 6: the text box drawers take the box's layers from its index in Menu_textBoxes (D_800F4E80 retired)"),
     ],
     "F01861": [
         ("        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);",

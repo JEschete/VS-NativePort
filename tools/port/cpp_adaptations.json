@@ -316,26 +316,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Menu\\TextBox.cpp": [
-[
-53,
-[
-"    Menu_sceneNotificationBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(112);"
-],
-[
-"    Menu_sceneNotificationBuffer = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(112));"
-]
-],
-[
-226,
-[
-"    AddPrims(Render_frameScratch.orderingTable - 24, Menu_activeTextBoxOrderingTable, Menu_activeTextBoxOrderingTable + 33);"
-],
-[
-"    AddPrims(((u_char*)(Render_frameScratch.orderingTable)) - 24, Menu_activeTextBoxOrderingTable, Menu_activeTextBoxOrderingTable + 33);"
-]
-]
-],
 "Native\\Game\\src\\Title\\NewGame.cpp": [
 [
 8,

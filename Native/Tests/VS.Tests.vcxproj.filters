@@ -1056,6 +1056,12 @@
     <ClCompile Include="src\SceneCatalogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SceneNotificationsLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SceneNotificationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ScenePlaybackTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1228,6 +1234,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\TextBoxStateTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextBoxUpdateLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextBoxUpdateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\TextTransitionTests.cpp">
@@ -1417,6 +1429,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\OverlayLoadFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\SceneNotificationWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\SortingKeysFixture.hpp">
