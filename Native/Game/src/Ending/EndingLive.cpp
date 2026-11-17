@@ -18,6 +18,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Audio/StreamLive.hpp"
+#include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -429,7 +430,7 @@ class LiveDisplay : public Host {
     ClearOTagR(base, layout.entries);
   }
 
-  void ResetHeap() override { Core::Memory::ResetLiveGameHeap(); }
+  void ResetHeap() override { Boot::ResetLiveSessionHeap(); }
 
   void AllocateFrameBuffer(FrameBufferKind kind, int buffer,
                            std::size_t bytes) override {

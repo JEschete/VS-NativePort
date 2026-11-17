@@ -11,6 +11,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Core/BiosRand.h"
 #include "Legacy/Psx.h"
+#include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 
 extern "C" {
@@ -44,6 +45,11 @@ struct RouletteFixture {
   int saved_counting_map = Menu_Results_incrementingMapCompletion;
   int saved_visible_score = Menu_Results_onScreenScore;
   int saved_visible_map = Menu_Results_onScreenMapCompletion;
+  decltype(Menu_Results_score) saved_score = Menu_Results_score;
+  decltype(Menu_Results_mapCompletion) saved_completion =
+      Menu_Results_mapCompletion;
+  decltype(Menu_Results_rank) saved_rank = Menu_Results_rank;
+  decltype(Menu_Results_clearCount) saved_clear_count = Menu_Results_clearCount;
   VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
   decltype(std::to_array(Audio_Mixer_kCommandHandlers)) saved_handlers =
       std::to_array(Audio_Mixer_kCommandHandlers);
@@ -58,6 +64,7 @@ struct RouletteFixture {
        .program_data = {}}};
 
   RouletteFixture() {
+    REQUIRE(VS::Menu::Results::InspectLiveGameClear().state_timer == 0);
     std::memset(&stats, 0, sizeof stats);
     actor.stats = &stats;
     Battle_characterState = &actor;
@@ -70,6 +77,7 @@ struct RouletteFixture {
   }
 
   ~RouletteFixture() {
+    VS::Menu::Results::ResetLiveGameClearModuleData();
     Battle_characterState = saved_actor;
     Core_Random_Seed(saved_random);
     Input_buttonsPressed.allButtons = saved_input;
@@ -82,6 +90,10 @@ struct RouletteFixture {
     Menu_Results_incrementingMapCompletion = saved_counting_map;
     Menu_Results_onScreenScore = saved_visible_score;
     Menu_Results_onScreenMapCompletion = saved_visible_map;
+    Menu_Results_score = saved_score;
+    Menu_Results_mapCompletion = saved_completion;
+    Menu_Results_rank = saved_rank;
+    Menu_Results_clearCount = saved_clear_count;
     VS::Render::LiveTexturePages() = saved_pages;
     std::copy(saved_handlers.begin(), saved_handlers.end(),
               Audio_Mixer_kCommandHandlers);
@@ -96,11 +108,11 @@ struct RouletteFixture {
     Menu_Results_screenTimer = -4096;
     Menu_Results_screenState = 2;
     Input_buttonsPressed.allButtons = PADRright;
-    REQUIRE(Menu_Results_UpdateGameClear() == 0);
+    REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
     Input_buttonsPressed.allButtons = 0;
     for (int tick = 1; tick < ticks; ++tick) {
       Menu_Results_screenState = 2;
-      REQUIRE(Menu_Results_UpdateGameClear() == 0);
+      REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
     }
   }
 };
@@ -161,7 +173,7 @@ TEST_CASE("Native reel deceleration preserves original per-call stop alignment",
     const auto expected_calls = 40 + alignment;
     unsigned calls = 0;
     while (Menu_Results_screenState == 1 && calls < 56) {
-      REQUIRE(Menu_Results_UpdateGameClear() == 0);
+      REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
       ++calls;
     }
     INFO("starting byte " << start);
@@ -184,7 +196,7 @@ TEST_CASE(
   Menu_Results_buffReelSelection = 248;
   Input_buttonsPressed.allButtons = PADRright;
   const auto random = Core_Random_State();
-  CHECK(Menu_Results_UpdateGameClear() == 0);
+  CHECK(VS::Menu::Results::LiveUpdateGameClear() == 0);
   CHECK(Menu_Results_screenState == 0);
   CHECK(Menu_Results_screenTimer == 273);
   CHECK(Menu_Results_elementAnimationState == 0);
@@ -245,7 +257,7 @@ TEST_CASE("Native roulette awards every original slot and caps only its stat",
     Menu_Results_buffReelIndex = reel;
     Menu_Results_buffReelSelection = slot * 16 + 8;
     INFO("reel " << reel << " slot " << slot << " cap " << near_cap);
-    CHECK(Menu_Results_UpdateGameClear() == 1);
+    CHECK(VS::Menu::Results::LiveUpdateGameClear() == 1);
     CHECK(std::memcmp(&stats, &expected, sizeof stats) == 0);
   }
 }

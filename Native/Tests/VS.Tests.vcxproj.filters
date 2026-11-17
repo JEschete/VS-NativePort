@@ -636,6 +636,15 @@
     <ClCompile Include="src\FrameUpdateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameClearLifecycleIntegrationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameClearLifecycleLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameClearLifecycleTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GameClearScoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1327,6 +1336,9 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\GameClearLifecycleLiveFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp">

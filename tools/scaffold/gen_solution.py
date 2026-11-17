@@ -449,6 +449,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Menu\Results\CubePuzzleLifecycleLive.cpp",
                 r"src\Menu\Results\CubePuzzleTextLive.cpp",
                 r"src\Menu\Results\ResultsRankLive.cpp",
+                r"src\Menu\Results\GameClearLifecycleLive.cpp",
                 r"src\Menu\Score\ScoreRankLive.cpp",
                 r"src\Menu\MagicCostsLive.cpp",
                 r"src\Menu\ManualIllustrationLive.cpp",

@@ -5,6 +5,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -95,7 +96,7 @@ int Menu_Results_InitializeTimeAttackResults(void)
             }
 
             VS::Content::ReleaseLiveDiscRequest(Menu_Results_initializeTimeAttackResultsCdSlot);
-            Menu_Results_QueueResultsMusic();
+            VS::Menu::Results::LiveQueueResultsMusic();
 
             ++Battle_unusedSubmenuState;
         }

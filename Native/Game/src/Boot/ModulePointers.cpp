@@ -141,6 +141,7 @@
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
+#include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
@@ -2271,6 +2272,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x80107FC0u, 0u, (void*)&VS::Menu::Results::LiveUpdateCubePuzzleStart, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x801080E4u, 0u, (void*)&VS::Menu::Results::LiveUpdateCubePuzzleResults, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x801083ACu, 0u, (void*)&VS::Menu::Results::LiveUpdateCubePuzzleQuit, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80102D10u, 0u, (void*)&VS::Menu::Results::LiveInitializeGameClear, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80103748u, 0u, (void*)&VS::Menu::Results::LiveQueueResultsMusic, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010384Cu, 0u, (void*)&VS::Menu::Results::LiveUpdateGameClear, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801060A8u, 0u, (void*)&VS::Menu::Results::LiveDrawBonusReel, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80107698u, 0u, (void*)&VS::Menu::Results::LiveDrawBonusReelTexture, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80108E48u, 0u, (void*)&VS::Menu::Results::LiveApplyHealingScoreBonus, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},

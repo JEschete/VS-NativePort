@@ -18,6 +18,7 @@
 "#include \"Menu/Loot/LootTerminalLive.hpp\"",
 "#include \"Menu/ManualScreenLive.hpp\"",
 "#include \"Menu/Results/CubePuzzleLifecycleLive.hpp\"",
+"#include \"Menu/Results/GameClearLifecycleLive.hpp\"",
 "#include \"Menu/Score/GazetteRowsLive.hpp\"",
 "#include \"Menu/Status/ActorSwitchingLive.hpp\"",
 "#include \"Menu/Status/LimbControllersLive.hpp\"",
@@ -25,7 +26,7 @@
 ]
 ],
 [
-19,
+18,
 [
 "    Menu_Inventory_ItemList_ResetMainMenuStatics();"
 ],
@@ -35,7 +36,7 @@
 ]
 ],
 [
-25,
+24,
 [
 "    Menu_BattleAbilities_ResetMenu2Statics();"
 ],
@@ -46,7 +47,7 @@
 ]
 ],
 [
-31,
+30,
 [
 "    Menu_Inventory_ResetMenu3Statics();"
 ],
@@ -58,7 +59,7 @@
 ]
 ],
 [
-37,
+36,
 [
 "    Menu_Status_ActorStatus_ResetMenu4Statics();"
 ],
@@ -70,7 +71,7 @@
 ]
 ],
 [
-50,
+49,
 [
 "    Menu_Score_Records_ResetMenu9Statics();"
 ],
@@ -80,7 +81,7 @@
 ]
 ],
 [
-57,
+56,
 [
 "    Menu_Loot_LootScreen_ResetMenubStatics();"
 ],
@@ -92,7 +93,7 @@
 ]
 ],
 [
-63,
+62,
 [
 "    Menu_Container_Storage_ResetMenudStatics();"
 ],
@@ -109,13 +110,14 @@
 ]
 ],
 [
-70,
+68,
 [
 "    Menu_Results_TimeAttack_ResetMenufStatics();"
 ],
 [
 "    Menu_Results_TimeAttack_ResetMenufStatics();",
-"    VS::Menu::Results::ResetLiveCubePuzzleLifecycleStatics();"
+"    VS::Menu::Results::ResetLiveCubePuzzleLifecycleStatics();",
+"    VS::Menu::Results::ResetLiveGameClearModuleData();"
 ]
 ]
 ],
@@ -306,110 +308,9 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Menu\\Results\\Results.cpp": [
-[
-324,
-[
-"                VS::Render::ParseLiveTim(Menu_Results_initializeGameClearTimData + i * 0x8220, &tim);"
-],
-[
-"                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeGameClearTimData)) + i * 0x8220), &tim);"
-]
-],
-[
-662,
-[
-"        area = p[0];"
-],
-[
-"        area = (DR_AREA *)(p[0]);"
-]
-],
-[
-665,
-[
-"        AddPrim(p[1] - 0x1C, area++);"
-],
-[
-"        AddPrim(((u_char*)(p[1])) - 0x1C, area++);"
-]
-],
-[
-737,
-[
-"        area = q[0];"
-],
-[
-"        area = (DR_AREA *)(q[0]);"
-]
-],
-[
-740,
-[
-"        AddPrim(q[1] - 0x1C, area++);"
-],
-[
-"        AddPrim(((u_char*)(q[1])) - 0x1C, area++);"
-]
-],
-[
-752,
-[
-"    POLY_FT4* poly = p[0];"
-],
-[
-"    POLY_FT4* poly = (POLY_FT4 *)(p[0]);"
-]
-],
-[
-775,
-[
-"            AddPrim(p[1] - 0x1C, poly++);"
-],
-[
-"            AddPrim(((u_char*)(p[1])) - 0x1C, poly++);"
-]
-],
-[
-790,
-[
-"            AddPrim(p[1] - 0x1C, poly++);"
-],
-[
-"            AddPrim(((u_char*)(p[1])) - 0x1C, poly++);"
-]
-],
-[
-805,
-[
-"            AddPrim(p[1] - 0x1C, poly++);"
-],
-[
-"            AddPrim(((u_char*)(p[1])) - 0x1C, poly++);"
-]
-],
-[
-819,
-[
-"            AddPrim(p[1] - 0x1C, poly++);"
-],
-[
-"            AddPrim(((u_char*)(p[1])) - 0x1C, poly++);"
-]
-],
-[
-827,
-[
-"            AddPrim(p[1] - 0x1C, poly++);"
-],
-[
-"            AddPrim(((u_char*)(p[1])) - 0x1C, poly++);"
-]
-]
-],
 "Native\\Game\\src\\Menu\\Results\\TimeAttack.cpp": [
 [
-75,
+76,
 [
 "            VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackResultsTimData, &tim);"
 ],
@@ -418,7 +319,7 @@
 ]
 ],
 [
-194,
+195,
 [
 "                VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackStartTimData + i * 0x8220, &tim);"
 ],

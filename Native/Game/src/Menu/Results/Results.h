@@ -120,13 +120,6 @@ extern u_char Menu_Results_riskbreakerRanks[][4];
 extern u_int Menu_Results_score;;
 int Menu_Results_UpdateScreen(u_char* state);
 int Menu_Results_InitializeScreen(void);
-int Menu_Results_InitializeGameClear(void);
-void Menu_Results_QueueResultsMusic(void);
 int Menu_Results_UpdatePresentation(void);
-int Menu_Results_UpdateGameClear(void);
-void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_state);
-void Menu_Results_DrawBonusReelTexture(int x, int y, int texId);
-void Menu_Results_ApplyHealingScoreBonus(void);
-void Menu_Results_ResetMenufStatics(void);
 
 #endif // VS_MENU_RESULTS_RESULTS_H_DECLS

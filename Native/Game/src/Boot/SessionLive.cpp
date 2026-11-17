@@ -27,6 +27,7 @@
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
+#include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Render/DisplayControlLive.hpp"
@@ -69,12 +70,20 @@ constexpr int kSecondPadPortId = 0x10;
 constexpr std::int16_t kVramWidth = 1024;
 constexpr std::int16_t kVramHeight = 512;
 
+void CleanupResultsOwners() {
+  if (!Menu::Results::CleanupLiveGameClearOwnedState()) {
+    Core_Errorf("boot", "game-clear cleanup refused before session reset");
+    std::abort();
+  }
+}
+
 class LiveSessionHost final : public SessionHost {
  public:
   // Native sessions can interrupt original event text. Drop UI borrows before
   // title/battle initialization replaces the game heap (SLUS main.c:8119,
   // 8344).
   void InvalidateSceneUi() override {
+    CleanupResultsOwners();
     Event::ReleaseLiveScriptDialogText();
     std::memset(Menu_textBoxes, 0, sizeof Menu_textBoxes);
     std::memset(&Menu_textBoxSelector, 0, sizeof Menu_textBoxSelector);
@@ -91,6 +100,7 @@ class LiveSessionHost final : public SessionHost {
     Menu::Magic::ResetTeleportMenuLiveState();
     Menu::Status::ResetLiveLimbControllersModuleData();
     Menu::Status::ResetLiveTerminalControllersModuleData();
+    Menu::Results::ResetLiveGameClearModuleData();
     Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }
@@ -242,7 +252,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   }
   void EnableReverb() override { Audio_Native_EnableReverb(1); }
   void RegisterVSyncCallback() override { VSyncCallback(VS::Core::IgnoreCall); }
-  void ResetGameHeap() override { VS::Core::Memory::ResetLiveGameHeap(); }
+  void ResetGameHeap() override { ResetLiveSessionHeap(); }
   void InvalidateAiBindings() override {
     Battle_Ai_InvalidateSessionBindings();
   }
@@ -303,6 +313,11 @@ class LiveGameHost final : public GameHost {
   }
 };
 }  // namespace
+
+void ResetLiveSessionHeap() {
+  CleanupResultsOwners();
+  Core::Memory::ResetLiveGameHeap();
+}
 
 int RunLiveSessionLoop(SessionEntry title, SessionEntry battle) {
   if (!BeginSession(live_state, live_host,

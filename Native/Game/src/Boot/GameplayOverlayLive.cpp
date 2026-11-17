@@ -54,7 +54,7 @@ namespace {
 class LiveGameplayOverlayHost final : public GameplayOverlayHost {
  public:
   void ResetAudioSlots() override { VS::Audio::LiveResetSoundSlots(); }
-  void ResetGameHeap() override { VS::Core::Memory::ResetLiveGameHeap(); }
+  void ResetGameHeap() override { ResetLiveSessionHeap(); }
   void InitializeOrderingTables(
       const GameplayOverlayDefaults& defaults) override {
     Render_legacyPrimitiveBuffers[1] = nullptr;

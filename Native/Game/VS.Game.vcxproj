@@ -2020,6 +2020,10 @@
     <ClCompile Include="src\Menu\Results\CubePuzzleTextLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\GameClearLifecycle.cpp" />
+    <ClCompile Include="src\Menu\Results\GameClearLifecycleLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\GameClearScore.cpp" />
     <ClCompile Include="src\Menu\Results\GameClearScoreLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -3054,6 +3058,8 @@
     <ClInclude Include="include\Menu\Results\CubePuzzleLifecycleLive.hpp" />
     <ClInclude Include="include\Menu\Results\CubePuzzleText.hpp" />
     <ClInclude Include="include\Menu\Results\CubePuzzleTextLive.hpp" />
+    <ClInclude Include="include\Menu\Results\GameClearLifecycle.hpp" />
+    <ClInclude Include="include\Menu\Results\GameClearLifecycleLive.hpp" />
     <ClInclude Include="include\Menu\Results\GameClearScore.hpp" />
     <ClInclude Include="include\Menu\Results\GameClearScoreLive.hpp" />
     <ClInclude Include="include\Menu\Results\ResultsDrawing.hpp" />

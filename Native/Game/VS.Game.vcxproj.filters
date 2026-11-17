@@ -2883,6 +2883,12 @@
     <ClCompile Include="src\Menu\Results\CubePuzzleTextLive.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
+    <ClCompile Include="src\Menu\Results\GameClearLifecycle.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\Results\GameClearLifecycleLive.cpp">
+      <Filter>src\Menu\Results</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\Results\GameClearScore.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
@@ -4660,6 +4666,12 @@
       <Filter>include\Menu\Results</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Results\CubePuzzleTextLive.hpp">
+      <Filter>include\Menu\Results</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\GameClearLifecycle.hpp">
+      <Filter>include\Menu\Results</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\Results\GameClearLifecycleLive.hpp">
       <Filter>include\Menu\Results</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Results\GameClearScore.hpp">

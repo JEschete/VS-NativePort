@@ -265,6 +265,9 @@
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\FrameTimingTests.cpp" />
     <ClCompile Include="src\FrameUpdateTests.cpp" />
+    <ClCompile Include="src\GameClearLifecycleIntegrationTests.cpp" />
+    <ClCompile Include="src\GameClearLifecycleLiveTests.cpp" />
+    <ClCompile Include="src\GameClearLifecycleTests.cpp" />
     <ClCompile Include="src\GameClearScoreTests.cpp" />
     <ClCompile Include="src\GameFontTests.cpp" />
     <ClCompile Include="src\GameplayLoopTests.cpp" />
@@ -524,6 +527,7 @@
     <ClInclude Include="include\Menu\ContainerSortingWorld.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersLiveFixture.hpp" />
     <ClInclude Include="include\Menu\EquipmentDetailControllersWorld.hpp" />
+    <ClInclude Include="include\Menu\GameClearLifecycleLiveFixture.hpp" />
     <ClInclude Include="include\Menu\InventoryDetailHelpersWorld.hpp" />
     <ClInclude Include="include\Menu\InventorySortingLiveFixture.hpp" />
     <ClInclude Include="include\Menu\InventorySortingWorld.hpp" />

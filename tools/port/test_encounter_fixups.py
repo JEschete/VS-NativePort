@@ -3674,9 +3674,11 @@ int func_800F9800(void) {
         # ManualScreen.cpp UpdateHelpPages (#276 row 52), whose ManualScreenLive.cpp RequestHelpFile keeps the
         # guard below. F03046 and F03048 left it for the owned CubePuzzleLifecycle.cpp InitializeCubePuzzleStart
         # and InitializeCubePuzzleQuit (#276 row 50), whose CubePuzzleLifecycleLive.cpp disc read keeps the guard
-        # below.
-        self.assertGreaterEqual(len(guarded), 11)
+        # below. F03010 moved to GameClearLifecycleLive.cpp, preserving the completed-request fallback (#429).
+        self.assertGreaterEqual(len(guarded), 10)
+        self.assertNotIn("F03010", {fid for fid, _, _ in guarded})
         owned = self.owned_items()
+        self.assertEqual(owned["F03010"]["path"], r"Native\Game\src\Menu\Results\GameClearLifecycle.cpp")
         self.assertEqual(owned["F04148"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F04150"]["path"], r"Native\Game\src\Menu\MapLoading.cpp")
         self.assertEqual(owned["F02839"]["path"], r"Native\Game\src\Menu\Score\EncyclopediaPreview.cpp")
@@ -3745,6 +3747,14 @@ int func_800F9800(void) {
             (root / r"Native\Game\src\Menu\Results\CubePuzzleLifecycleLive.cpp").read_text(encoding="utf-8").split()
         )
         self.assertIn("load_.request=Content::CompleteLiveRefusedDiscRequest(&file_,load_.buffer);", cube_live)
+        game_clear_live = "".join(
+            (root / r"Native\Game\src\Menu\Results\GameClearLifecycleLive.cpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "if(owner.request!=nullptr){Content::EnqueueLiveDiscRequest(owner.request,owner.buffer);}"
+            "else{owner.request=Content::CompleteLiveRefusedDiscRequest(&file,owner.buffer);}",
+            game_clear_live,
+        )
         background_tests = (root / r"Native\Tests\src\FieldBackgroundTests.cpp").read_text(encoding="utf-8")
         self.assertIn('"CompleteRefusedRead 100 1", "CompleteRefusedRead 200 2"', background_tests)
         effects = "".join((root / r"Native\Game\src\Effects\EffectResources.cpp").read_text(encoding="utf-8").split())
@@ -3812,7 +3822,7 @@ int func_800F9800(void) {
             "}else{request_=Content::CompleteLiveRefusedDiscRequest(&pending_file_,pending_buffer_->data());",
             event,
         )
-        sites += 1
+        sites += 2  # Owned event and game-clear guards checked above.
         self.assertGreaterEqual(sites, 6)
         session = "".join((root / r"Native\Game\src\Boot\SessionLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){VS::Content::EnqueueLivePriorityDiscRequest(", session)

@@ -25,6 +25,9 @@ void EnterBattleLive();
 void RunEndingAndReturnToTitleLive();
 void InitializePlatformServicesLive();
 void InitializeTitleSessionLive();
+// Cancel results-owned writes before replacing heap identities. Refused
+// cleanup is fatal rather than discarding an outstanding resource owner.
+void ResetLiveSessionHeap();
 void InitializeGameplayOverlayLive(int start_state);
 // Runs the gameplay loop over the live field, battle and render state; it
 // is left only by a session transition.

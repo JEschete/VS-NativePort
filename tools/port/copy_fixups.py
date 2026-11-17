@@ -1771,6 +1771,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::LiveUpdateCubePuzzleStart": r"Native\Game\include\Menu\Results\CubePuzzleLifecycleLive.hpp",
     "VS::Menu::Results::LiveUpdateCubePuzzleResults": r"Native\Game\include\Menu\Results\CubePuzzleLifecycleLive.hpp",
     "VS::Menu::Results::LiveUpdateCubePuzzleQuit": r"Native\Game\include\Menu\Results\CubePuzzleLifecycleLive.hpp",
+    "VS::Menu::Results::LiveInitializeGameClear": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
+    "VS::Menu::Results::LiveQueueResultsMusic": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
+    "VS::Menu::Results::LiveUpdateGameClear": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
+    "VS::Menu::Results::LiveDrawBonusReel": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
+    "VS::Menu::Results::LiveDrawBonusReelTexture": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
+    "VS::Menu::Results::LiveApplyHealingScoreBonus": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -3314,6 +3320,12 @@ OWNED_CALL_BINDINGS["F03048"] = "VS::Menu::Results::LiveInitializeCubePuzzleQuit
 OWNED_CALL_BINDINGS["F03049"] = "VS::Menu::Results::LiveUpdateCubePuzzleStart"
 OWNED_CALL_BINDINGS["F03050"] = "VS::Menu::Results::LiveUpdateCubePuzzleResults"
 OWNED_CALL_BINDINGS["F03051"] = "VS::Menu::Results::LiveUpdateCubePuzzleQuit"
+OWNED_CALL_BINDINGS["F03010"] = "VS::Menu::Results::LiveInitializeGameClear"
+OWNED_CALL_BINDINGS["F03013"] = "VS::Menu::Results::LiveQueueResultsMusic"
+OWNED_CALL_BINDINGS["F03015"] = "VS::Menu::Results::LiveUpdateGameClear"
+OWNED_CALL_BINDINGS["F03043"] = "VS::Menu::Results::LiveDrawBonusReel"
+OWNED_CALL_BINDINGS["F03045"] = "VS::Menu::Results::LiveDrawBonusReelTexture"
+OWNED_CALL_BINDINGS["F03064"] = "VS::Menu::Results::LiveApplyHealingScoreBonus"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -5377,6 +5389,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x80107FC0, "VS::Menu::Results::LiveUpdateCubePuzzleStart"),  # F03049
     ("MENU/MENUF.PRG", 0x801080E4, "VS::Menu::Results::LiveUpdateCubePuzzleResults"),  # F03050
     ("MENU/MENUF.PRG", 0x801083AC, "VS::Menu::Results::LiveUpdateCubePuzzleQuit"),  # F03051
+    ("MENU/MENUF.PRG", 0x80102D10, "VS::Menu::Results::LiveInitializeGameClear"),  # F03010
+    ("MENU/MENUF.PRG", 0x80103748, "VS::Menu::Results::LiveQueueResultsMusic"),  # F03013
+    ("MENU/MENUF.PRG", 0x8010384C, "VS::Menu::Results::LiveUpdateGameClear"),  # F03015
+    ("MENU/MENUF.PRG", 0x801060A8, "VS::Menu::Results::LiveDrawBonusReel"),  # F03043
+    ("MENU/MENUF.PRG", 0x80107698, "VS::Menu::Results::LiveDrawBonusReelTexture"),  # F03045
+    ("MENU/MENUF.PRG", 0x80108E48, "VS::Menu::Results::LiveApplyHealingScoreBonus"),  # F03064
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -6866,9 +6884,6 @@ for _row, _fixup in (
     ("F04151", _refused_disc_request(
         " " * 12, "Menu_Map_sceneCdQueueSlot", "Menu_Map_armFileBuff",
         "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
-    ("F03010", _refused_disc_request(
-        " " * 8, "Menu_Results_initializeGameClearCdSlot", "Menu_Results_initializeGameClearTimData",
-        "&Menu_Results_kDisFiles[Menu_Results_DisFile_Rank]")),
     ("F03011", _refused_disc_request(
         " " * 8, "Menu_Results_initializeTimeAttackResultsCdSlot", "Menu_Results_initializeTimeAttackResultsTimData",
         "&Menu_Results_kDisFiles[1]")),
