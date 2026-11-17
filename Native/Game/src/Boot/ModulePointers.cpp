@@ -106,6 +106,7 @@
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/EquipmentLive.hpp"
+#include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ContainerCapacityLive.hpp"
@@ -2355,6 +2356,12 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENU2.PRG", 0x80104578u, 0u, (void*)&VS::Menu::BattleAbilities::LiveUpdateUnlockNotifications, 0u, 0u, 0u},
     {"MENU/MENU2.PRG", 0x80102864u, 0u, (void*)&VS::Menu::BattleAbilities::LiveSetRiskCost, 0u, 0u, 0u},
     {"MENU/MENU2.PRG", 0x80102928u, 0u, (void*)&VS::Menu::BattleAbilities::LiveCreateAbilityRowsEntry, 0u, 0u, 0u},
+    {"MENU/MENU2.PRG", 0x80102B5Cu, 0u, (void*)&VS::Menu::BattleAbilities::LiveToggleButtonAssignment, 0u, 0u, 0u},
+    {"MENU/MENU2.PRG", 0x80102CACu, 0u, (void*)&VS::Menu::BattleAbilities::LiveUpdateAssignments, 0u, 0u, 0u},
+    {"MENU/MENU2.PRG", 0x801034FCu, 0u, (void*)&VS::Menu::BattleAbilities::LiveUpdateChainAbilityMenu, 0u, 0u, 0u},
+    {"MENU/MENU2.PRG", 0x80103670u, 0u, (void*)&VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu, 0u, 0u, 0u},
+    {"MENU/MENU2.PRG", 0x801037E4u, 0u, (void*)&VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints, 0u, 0u, 0u},
+    {"MENU/MENU2.PRG", 0x801038D4u, 0u, (void*)&VS::Menu::BattleAbilities::LiveUpdateAbilityScreen, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

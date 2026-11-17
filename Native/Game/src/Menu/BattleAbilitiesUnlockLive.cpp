@@ -31,10 +31,10 @@ extern "C" {
 namespace VS::Menu::BattleAbilities {
 namespace {
 constexpr int kInformationBox = 7;
-constexpr int kCategoryMenuId = 10;
+constexpr int kCategoryRowInfo = 0x1A;
 constexpr int kAbilityCategoryCount = 2;
-constexpr int kChainMenuId = 11;
-constexpr int kDefenseMenuId = 12;
+constexpr int kChainRowInfo = 0x11B;
+constexpr int kDefenseRowInfo = 0x11C;
 constexpr std::size_t kPointersPerRow = 2;
 BreakArtUnlockState g_break_art;
 AbilityUnlockState g_ability_unlock;
@@ -175,8 +175,7 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     std::array<int, kAbilityCategoryCount> types{};
     const auto saved_cursor = Input_settings.cursorMemory;
     Input_settings.cursorMemory = 1;
-    Framework::CreateLiveMenuRows(kAbilityCategoryCount,
-                                  menuRowInfo(kCategoryMenuId, 1, 0),
+    Framework::CreateLiveMenuRows(kAbilityCategoryCount, kCategoryRowInfo,
                                   strings.data(), types.data());
     Input_settings.cursorMemory = saved_cursor;
   }
@@ -193,10 +192,10 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     }
     const auto saved_cursor = Input_settings.cursorMemory;
     if (force_cursor) Input_settings.cursorMemory = 1;
-    const int menu_id =
-        kind == AbilityKind::kChain ? kChainMenuId : kDefenseMenuId;
-    Framework::CreateLiveMenuRows(visible_rows, menuRowInfo(menu_id, 1, 1),
-                                  strings.data(), types.data());
+    const int row_info =
+        kind == AbilityKind::kChain ? kChainRowInfo : kDefenseRowInfo;
+    Framework::CreateLiveMenuRows(visible_rows, row_info, strings.data(),
+                                  types.data());
     Input_settings.cursorMemory = saved_cursor;
     return true;
   }

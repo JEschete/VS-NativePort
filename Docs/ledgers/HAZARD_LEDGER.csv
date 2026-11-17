@@ -160,7 +160,7 @@ d8458bba03bf,DIV-ZERO,medium,pattern,,PlatformRecords,Native/Game/src/Field/Plat
 2150acc97d9c,DIV-ZERO,medium,pattern,,RoomDoorRecords,Native/Game/src/Field/RoomSwitchesLive.cpp,46,alignof(Field_MpdLockTrigger),45,3,open,
 254d310e4e9a,DIV-ZERO,medium,pattern,,QuarterPercent,Native/Game/src/Field/Traps.cpp,38,denominator,45,3,guarded,"all three callers (ApplyLimbDefense, ApplyShieldDefense) call QuarterPercent only after checking that the max DP or PP denominator is nonzero"
 e90dfbe21c21,DIV-ZERO,low,pattern,,PanelDefense,Native/Game/src/Field/Traps.cpp,100,((risk / 2) + kRiskDefenseBase),45,3,false-positive,"risk is an unsigned 16-bit value, so the divisor (risk / 2) + kRiskDefenseBase is at least 100"
-d621538737a1,DIV-ZERO,medium,pattern,F02609,DrawNextUnlockPoints,Native/Game/src/Menu/BreakArtsCore.cpp,277,static_cast,60,34,open,
+d621538737a1,DIV-ZERO,medium,pattern,F02624,DrawNextUnlockPoints,Native/Game/src/Menu/BreakArtsCore.cpp,277,static_cast,60,34,open,
 39dbe2e87246,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2207,divisor,60,34,open,
 ee5c5f5527d7,DIV-ZERO,medium,pattern,F03610,DrawHpMpSummary,Native/Game/src/Menu/Files.cpp,2212,divisor,60,34,open,
 30c226fb9e82,DIV-ZERO,medium,pattern,,CopyPartClassAffinity,Native/Game/src/Menu/Framework/EquipmentDetails.cpp,244,classes.size(),60,34,open,

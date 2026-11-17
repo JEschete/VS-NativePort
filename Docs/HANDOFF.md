@@ -1,18 +1,18 @@
 # Current Handoff
 
-Updated 2026-11-16. The latest integrated #276 group is loot terminal,
-F02843-F02845/F02864/F02865, including quantity conservation and the
-related inventory/loot overlay-reset correction. Its shared Debug/Release gates passed;
+Updated 2026-11-16. The latest integrated #276 group is ability terminal,
+F02620-F02625, including assignments, learned lists and the outer screen.
+Its shared Debug/Release gates passed;
 the publication and exact-revision CI checkpoint is recorded on [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The original 900-function cohort has **820 resolved (808 promoted,
-12 retired) and 80 remaining**; see
+The original 900-function cohort has **826 resolved (814 promoted,
+12 retired) and 74 remaining**; see
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv).
 
 ## Current status and next steps
 
 - Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
-  48: 39, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
+  48: 33, 50: 30, 52: 10. Four ledger entries are WIP: F02604-F02607;
   do not count these as completed promotions.
 - Process: one coordinator and at most two isolated workers. Each worker uses
   `D:\Dev\NativePort\wt\batch-<name>-<base8>` with a read-only `Native\data`
@@ -21,6 +21,32 @@ The original 900-function cohort has **820 resolved (808 promoted,
   coordinator owns registration (`promote.py`), copier output, caller switches,
   golden digests for Live tests whose generated bodies are retired, ledgers,
   the group gate, the commit and push, and exact-revision CI.
+- Ability-terminal evidence (`VR-MENU-ABILITY-TERMINAL`): six originals and
+  the supplemental actual-Live assignment entry each passed 1,024 vectors,
+  zero mismatches; 184 distinct primary instruction mutants, 60 repeated
+  through the Live comparison and all seven compiled native variants were
+  detected. Debug and Release each passed 8,926 cases / 12,955,612
+  assertions, 70 focused cases / 3,217 assertions and both canonical replays.
+  Second generation changed zero Native files (`28dd19a2ad012f41`);
+  copier tests and changed-file tidy passed with five existing findings
+  and zero new findings. Group duration: 448 seconds.
+  Evidence: `build\promotion-check\group-20261116-232059\summary.json`
+  and `build\scratch\abilities-terminal\integration.json`.
+  The six module entries and the framework's pointer-byte dispatch now
+  use the native Live adapters. Actual MENU2 reload failed in both learned
+  lists before the new reset hook (`iterate-20261116-231418`) and passes
+  afterward. Learned arrays, cursor/list phases and animation state reset
+  according to the original image, separately from mappings/progression
+  and row ownership. The full Boot hook clears the shared row borrow,
+  not its heap allocation; terminal-only and actual cold-session resets
+  preserve the external owner. Real screen/category construction and
+  reentry pass. The retired generated row-info macro's original packed
+  values are retained in both dependent Live adapters.
+  Metadata listing also passes with Capstone and pefile explicitly blocked.
+  Original external services are doubled; actual production module, heap,
+  framework and lifecycle tests independently check integration.
+  No interactive presentation, gameplay completion or EC retirement claim.
+  Exact-revision publication CI remains required.
 - Loot-terminal evidence (`VR-MENU-LOOT-TERMINAL`): five originals each
   passed 1,024 vectors, zero mismatches; all 56 original instruction mutants
   and five compiled native variants were detected. Fresh verification of all
@@ -49,8 +75,11 @@ The original 900-function cohort has **820 resolved (808 promoted,
   tables; the focused run has no unexpected renderer diagnostics.
   Original callee endpoints are doubled; native pointer layout, expanded
   capacity and lifetime are checked separately. No interactive presentation,
-  gameplay completion or EC retirement claim. #412/#417 remain open until
-  exact-revision publication CI passes.
+  gameplay completion or EC retirement claim. Published in
+  [`3599873728`](https://github.com/JEschete/VS-NativePort/commit/3599873728c03510dc884ff74ddd5f8932f5c076);
+  exact-revision [Source Quality 44014438394](https://github.com/JEschete/VS-NativePort/actions/runs/44014438394)
+  passed. #412/#417 are closed;
+  [acceptance checkpoint](https://github.com/JEschete/VS-NativePort/issues/276#issuecomment-6938117160).
 - Ability-foundation evidence (`VR-MENU-ABILITY-FOUNDATION`): six originals
   and the supplemental actual-Live row entry independently passed 1,024
   vectors each, zero mismatches; 154 distinct original instruction mutants
@@ -197,10 +226,10 @@ The original 900-function cohort has **820 resolved (808 promoted,
 
 Next steps:
 
-1. Confirm loot-terminal publication CI and reconcile #412/#417.
-   Ability-terminal packet `db0051375876c18be86933ced4f3dd027b6e977e`
-   and magic-terminal packet `4b74650bc58564b4652020683d75682dd276f985`
-   are delivered, awaiting serial root integration. Status-components
+1. Confirm ability-terminal publication CI. Its integrated packet is
+   `db0051375876c18be86933ced4f3dd027b6e977e`.
+   Magic-terminal packet `4b74650bc58564b4652020683d75682dd276f985`
+   is delivered, awaiting serial root integration. Status-components
    `7bd797a55e77bcd7c84c75768f7e24313f7b6f0e`, status-limbs
    `f682bd35b5814988f36f5c37fecb4a4bb767f1fd` and status-transitions
    `fea43799d892e4fee1ead0a50a8232846583d63b` are also delivered; no packet
@@ -215,8 +244,12 @@ Next steps:
    The actual frame-update Live adapter strictly compiles and its core/Live
    suite passes 11 cases / 106 assertions, including the original scene
    ordering slot, three-buffer rotation and invalid-binding refusals.
-   Live tidy configuration, notification implementations/proofs and root
-   integration remain; the partial packet is not promoted.
+   The final Live comparison fix was rebuilt and retested; scoped tidy has
+   five existing findings and zero new findings. F01392 is locally registered
+   for its compilation database; do not import those old-base shared registry
+   edits wholesale. Notification typed cores and tests are written but remain
+   under isolated preflight; Live implementations/proofs and root integration
+   remain. The partial packet is not promoted.
    Continue the dependency-ordered plan.
    The emitter investigation logged the shared ApplyRotMatrix saturation
    defect in #411; the shared helper is unchanged, and no shared-helper

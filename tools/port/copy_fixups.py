@@ -1868,6 +1868,12 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::BattleAbilities::LiveUpdateUnlockNotifications": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
     "VS::Menu::BattleAbilities::LiveSetRiskCost": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
     "VS::Menu::BattleAbilities::LiveCreateAbilityRowsEntry": r"Native\Game\include\Menu\BattleAbilitiesUnlockLive.hpp",
+    "VS::Menu::BattleAbilities::LiveToggleButtonAssignment": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUpdateAssignments": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUpdateChainAbilityMenu": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
+    "VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
+    "VS::Menu::BattleAbilities::LiveUpdateAbilityScreen": r"Native\Game\include\Menu\BattleAbilitiesTerminalLive.hpp",
 }
 
 NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
@@ -3376,6 +3382,12 @@ OWNED_CALL_BINDINGS["F02616"] = "VS::Menu::BattleAbilities::LiveUpdateAbilityUnl
 OWNED_CALL_BINDINGS["F02617"] = "VS::Menu::BattleAbilities::LiveUpdateUnlockNotifications"
 OWNED_CALL_BINDINGS["F02618"] = "VS::Menu::BattleAbilities::LiveSetRiskCost"
 OWNED_CALL_BINDINGS["F02619"] = "VS::Menu::BattleAbilities::LiveCreateAbilityRowsEntry"
+OWNED_CALL_BINDINGS["F02620"] = "VS::Menu::BattleAbilities::LiveToggleButtonAssignment"
+OWNED_CALL_BINDINGS["F02621"] = "VS::Menu::BattleAbilities::LiveUpdateAssignments"
+OWNED_CALL_BINDINGS["F02622"] = "VS::Menu::BattleAbilities::LiveUpdateChainAbilityMenu"
+OWNED_CALL_BINDINGS["F02623"] = "VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu"
+OWNED_CALL_BINDINGS["F02624"] = "VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints"
+OWNED_CALL_BINDINGS["F02625"] = "VS::Menu::BattleAbilities::LiveUpdateAbilityScreen"
 
 # #276 slice 25c (field-room-loading): the generated battle flow, event, interaction and menu callers keep the
 # original zone and room loading call shapes (146C.c:14766-17331); the live bindings load the zone context, the loaded
@@ -5397,6 +5409,12 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENU2.PRG", 0x80104578, "VS::Menu::BattleAbilities::LiveUpdateUnlockNotifications"),  # F02617
     ("MENU/MENU2.PRG", 0x80102864, "VS::Menu::BattleAbilities::LiveSetRiskCost"),  # F02618
     ("MENU/MENU2.PRG", 0x80102928, "VS::Menu::BattleAbilities::LiveCreateAbilityRowsEntry"),  # F02619
+    ("MENU/MENU2.PRG", 0x80102B5C, "VS::Menu::BattleAbilities::LiveToggleButtonAssignment"),  # F02620
+    ("MENU/MENU2.PRG", 0x80102CAC, "VS::Menu::BattleAbilities::LiveUpdateAssignments"),  # F02621
+    ("MENU/MENU2.PRG", 0x801034FC, "VS::Menu::BattleAbilities::LiveUpdateChainAbilityMenu"),  # F02622
+    ("MENU/MENU2.PRG", 0x80103670, "VS::Menu::BattleAbilities::LiveUpdateDefenseAbilityMenu"),  # F02623
+    ("MENU/MENU2.PRG", 0x801037E4, "VS::Menu::BattleAbilities::LiveDrawNextUnlockPoints"),  # F02624
+    ("MENU/MENU2.PRG", 0x801038D4, "VS::Menu::BattleAbilities::LiveUpdateAbilityScreen"),  # F02625
 )
 
 # #276 effects-trail-templates: PLG074's trail stages (F01989-F01993) are typed VS::Effects::Plg073 stages that only

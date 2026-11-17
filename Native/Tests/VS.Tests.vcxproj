@@ -121,8 +121,10 @@
     <ClCompile Include="src\AudioTests.cpp" />
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />
     <ClCompile Include="src\BasicActionEffectsTests.cpp" />
+    <ClCompile Include="src\BattleAbilityAssignmentTests.cpp" />
     <ClCompile Include="src\BattleAbilityFoundationLiveTests.cpp" />
     <ClCompile Include="src\BattleAbilityFoundationTests.cpp" />
+    <ClCompile Include="src\BattleAbilityTerminalTests.cpp" />
     <ClCompile Include="src\BattleTargetingTests.cpp" />
     <ClCompile Include="src\BoneTrailTests.cpp" />
     <ClCompile Include="src\BreakArtsTests.cpp" />
@@ -494,6 +496,7 @@
     <ClInclude Include="include\Items\ContainerTransfersLiveFixture.hpp" />
     <ClInclude Include="include\Items\ContainerTransfersWorld.hpp" />
     <ClInclude Include="include\Menu\AbilityFoundationWorld.hpp" />
+    <ClInclude Include="include\Menu\AbilityTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerCapacityLiveFixture.hpp" />
     <ClInclude Include="include\Menu\ContainerCapacityWorld.hpp" />
     <ClInclude Include="include\Menu\ContainerDetailControllersLiveFixture.hpp" />

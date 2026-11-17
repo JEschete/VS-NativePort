@@ -2484,10 +2484,19 @@
     <ClInclude Include="src\Menu\BattleAbilities.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Menu\BattleAbilitiesTerminal.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\BattleAbilitiesTerminalLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
     <ClCompile Include="src\Menu\BattleAbilitiesUnlock.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
     <ClCompile Include="src\Menu\BattleAbilitiesUnlockLive.cpp">
+      <Filter>src\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu\BattleAbilityAssignments.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
     <ClCompile Include="src\Menu\BreakArts.cpp">
@@ -4354,6 +4363,12 @@
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\BattleAbilities.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\BattleAbilitiesTerminal.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\BattleAbilitiesTerminalLive.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\BattleAbilitiesUnlockLive.hpp">

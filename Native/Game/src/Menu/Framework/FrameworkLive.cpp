@@ -31,6 +31,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Items/InventoryLive.hpp"
+#include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
@@ -945,7 +946,7 @@ class LiveHost final : public Host {
       case Submenu::kBreakArts:
         return VS::Menu::break_arts::UpdateLive(bytes);
       case Submenu::kBattleAbilities:
-        return Menu_BattleAbilities_Update(bytes);
+        return BattleAbilities::LiveUpdateAbilityScreen(bytes);
       case Submenu::kInventory:
         return Inventory::UpdateLiveInventoryScreen(bytes);
       case Submenu::kStatus:

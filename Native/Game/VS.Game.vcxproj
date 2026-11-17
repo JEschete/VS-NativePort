@@ -1761,10 +1761,15 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Menu\BattleAbilitiesTerminal.cpp" />
+    <ClCompile Include="src\Menu\BattleAbilitiesTerminalLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Menu\BattleAbilitiesUnlock.cpp" />
     <ClCompile Include="src\Menu\BattleAbilitiesUnlockLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Menu\BattleAbilityAssignments.cpp" />
     <ClCompile Include="src\Menu\BreakArts.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2946,6 +2951,8 @@
     <ClInclude Include="include\Items\LootLive.hpp" />
     <ClInclude Include="include\Items\Recovery.hpp" />
     <ClInclude Include="include\Menu\BattleAbilities.hpp" />
+    <ClInclude Include="include\Menu\BattleAbilitiesTerminal.hpp" />
+    <ClInclude Include="include\Menu\BattleAbilitiesTerminalLive.hpp" />
     <ClInclude Include="include\Menu\BattleAbilitiesUnlockLive.hpp" />
     <ClInclude Include="include\Menu\BreakArts.hpp" />
     <ClInclude Include="include\Menu\BreakArtsLive.hpp" />

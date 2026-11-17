@@ -7,6 +7,7 @@
 ],
 [
 "// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.",
+"#include \"Menu/BattleAbilitiesTerminalLive.hpp\"",
 "#include \"Menu/BattleAbilitiesUnlockLive.hpp\"",
 "#include \"Menu/Container/ContainerListTransferLive.hpp\"",
 "#include \"Menu/Container/ContainerMenuDialogsLive.hpp\"",
@@ -38,7 +39,8 @@
 ],
 [
 "    Menu_BattleAbilities_ResetMenu2Statics();",
-"    VS::Menu::BattleAbilities::ResetLiveAbilityFoundationState();"
+"    VS::Menu::BattleAbilities::ResetLiveAbilityFoundationState();",
+"    VS::Menu::BattleAbilities::ResetLiveAbilityTerminalModuleState();"
 ]
 ],
 [
@@ -133,17 +135,6 @@
 ],
 [
 "Effects_EffectRenderer Effects_rendererTableAlias[1];"
-]
-]
-],
-"Native\\Game\\src\\Menu\\BattleAbilities.cpp": [
-[
-131,
-[
-"    u_long* scratch = Render_frameScratch.overlayOrderingTable + 8;"
-],
-[
-"    u_long* scratch = (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 8);"
 ]
 ]
 ],
