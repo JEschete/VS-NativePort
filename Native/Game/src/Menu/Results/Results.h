@@ -118,8 +118,5 @@ extern int Menu_Results_onScreenScore;;
 extern int Menu_Results_rank;;
 extern u_char Menu_Results_riskbreakerRanks[][4];
 extern u_int Menu_Results_score;;
-int Menu_Results_UpdateScreen(u_char* state);
-int Menu_Results_InitializeScreen(void);
-int Menu_Results_UpdatePresentation(void);
 
 #endif // VS_MENU_RESULTS_RESULTS_H_DECLS

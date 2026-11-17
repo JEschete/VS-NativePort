@@ -48,6 +48,7 @@
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -1031,7 +1032,7 @@ class LiveHost final : public Host {
       case Submenu::kManual:
         return VS::Menu::manual::LiveUpdateScreen(bytes);
       case Submenu::kResults:
-        return Menu_Results_UpdateScreen(bytes);
+        return Results::LiveUpdateResultsScreen(bytes);
       case Submenu::kUnlockNotifications:
         return BattleAbilities::LiveUpdateUnlockNotifications(&state);
       case Submenu::kContainer:

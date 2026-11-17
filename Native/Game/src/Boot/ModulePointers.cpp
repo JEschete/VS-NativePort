@@ -148,6 +148,7 @@
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
@@ -2278,6 +2279,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"MENU/MENUF.PRG", 0x801060A8u, 0u, (void*)&VS::Menu::Results::LiveDrawBonusReel, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80107698u, 0u, (void*)&VS::Menu::Results::LiveDrawBonusReelTexture, 0u, 0u, 0u},
     {"MENU/MENUF.PRG", 0x80108E48u, 0u, (void*)&VS::Menu::Results::LiveApplyHealingScoreBonus, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010310Cu, 0u, (void*)&VS::Menu::Results::LiveInitializeTimeAttackResults, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80103530u, 0u, (void*)&VS::Menu::Results::LiveInitializeTimeAttackStart, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80103D88u, 0u, (void*)&VS::Menu::Results::LiveUpdateTimeAttackResults, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x8010412Cu, 0u, (void*)&VS::Menu::Results::LiveUpdateTimeAttackStart, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80102BB8u, 0u, (void*)&VS::Menu::Results::LiveUpdateResultsScreen, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x80102C54u, 0u, (void*)&VS::Menu::Results::LiveInitializeResultsScreen, 0u, 0u, 0u},
+    {"MENU/MENUF.PRG", 0x801037A0u, 0u, (void*)&VS::Menu::Results::LiveUpdateResultsPresentation, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x8010467Cu, 0u, (void*)&VS::Menu::map::LiveMarkAllRoomsVisited, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105B18u, 0u, (void*)&VS::Menu::map::LiveCenterOnRoom, 0u, 0u, 0u},
     {"MENU/MENU5.PRG", 0x80105D3Cu, 0u, (void*)&VS::Menu::map::LiveSetRoomCenterTarget, 0u, 0u, 0u},

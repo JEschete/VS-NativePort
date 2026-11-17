@@ -479,6 +479,9 @@
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
     <ClCompile Include="src\TimeAttackHeadingTests.cpp" />
     <ClCompile Include="src\TimeAttackRatingTests.cpp" />
+    <ClCompile Include="src\TimeAttackTerminalIntegrationTests.cpp" />
+    <ClCompile Include="src\TimeAttackTerminalLiveTests.cpp" />
+    <ClCompile Include="src\TimeAttackTerminalTests.cpp" />
     <ClCompile Include="src\TimelineCommandsTests.cpp" />
     <ClCompile Include="src\TimelinePlaybackTests.cpp" />
     <ClCompile Include="src\TimelineTracksTests.cpp" />
@@ -543,6 +546,8 @@
     <ClInclude Include="include\Menu\StatusTerminalLiveFixture.hpp" />
     <ClInclude Include="include\Menu\StatusTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp" />
+    <ClInclude Include="include\Menu\TimeAttackTerminalFixture.hpp" />
+    <ClInclude Include="include\Menu\TimeAttackTerminalLiveFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionCameraSelectionFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionPresentationFixture.hpp" />

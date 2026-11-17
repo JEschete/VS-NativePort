@@ -1245,6 +1245,16 @@
     <None Include="..\..\port\differentials\text_box_state_f01410.py" />
     <None Include="..\..\port\differentials\text_box_state_f01411.py" />
     <None Include="..\..\port\differentials\text_box_state_f01412.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_common.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_driver.cpp" />
+    <None Include="..\..\port\differentials\time_attack_terminal_f03008.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_f03009.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_f03011.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_f03012.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_f03014.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_f03016.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_f03017.py" />
+    <None Include="..\..\port\differentials\time_attack_terminal_live_endpoints.cpp" />
     <None Include="..\..\port\differentials\timeattack_heading_common.py" />
     <None Include="..\..\port\differentials\timeattack_heading_driver.cpp" />
     <None Include="..\..\port\differentials\timeattack_heading_f03018.py" />

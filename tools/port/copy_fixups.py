@@ -1777,6 +1777,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Menu::Results::LiveDrawBonusReel": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
     "VS::Menu::Results::LiveDrawBonusReelTexture": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
     "VS::Menu::Results::LiveApplyHealingScoreBonus": r"Native\Game\include\Menu\Results\GameClearLifecycleLive.hpp",
+    "VS::Menu::Results::LiveInitializeTimeAttackResults": r"Native\Game\include\Menu\Results\TimeAttackTerminalLive.hpp",
+    "VS::Menu::Results::LiveInitializeTimeAttackStart": r"Native\Game\include\Menu\Results\TimeAttackTerminalLive.hpp",
+    "VS::Menu::Results::LiveUpdateTimeAttackResults": r"Native\Game\include\Menu\Results\TimeAttackTerminalLive.hpp",
+    "VS::Menu::Results::LiveUpdateTimeAttackStart": r"Native\Game\include\Menu\Results\TimeAttackTerminalLive.hpp",
+    "VS::Menu::Results::LiveUpdateResultsScreen": r"Native\Game\include\Menu\Results\TimeAttackTerminalLive.hpp",
+    "VS::Menu::Results::LiveInitializeResultsScreen": r"Native\Game\include\Menu\Results\TimeAttackTerminalLive.hpp",
+    "VS::Menu::Results::LiveUpdateResultsPresentation": r"Native\Game\include\Menu\Results\TimeAttackTerminalLive.hpp",
     "VS::Menu::map::LiveMarkAllRoomsVisited": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveCenterOnRoom": r"Native\Game\include\Menu\MapNavigationLive.hpp",
     "VS::Menu::map::LiveSetRoomCenterTarget": r"Native\Game\include\Menu\MapNavigationLive.hpp",
@@ -3326,6 +3333,13 @@ OWNED_CALL_BINDINGS["F03015"] = "VS::Menu::Results::LiveUpdateGameClear"
 OWNED_CALL_BINDINGS["F03043"] = "VS::Menu::Results::LiveDrawBonusReel"
 OWNED_CALL_BINDINGS["F03045"] = "VS::Menu::Results::LiveDrawBonusReelTexture"
 OWNED_CALL_BINDINGS["F03064"] = "VS::Menu::Results::LiveApplyHealingScoreBonus"
+OWNED_CALL_BINDINGS["F03011"] = "VS::Menu::Results::LiveInitializeTimeAttackResults"
+OWNED_CALL_BINDINGS["F03012"] = "VS::Menu::Results::LiveInitializeTimeAttackStart"
+OWNED_CALL_BINDINGS["F03016"] = "VS::Menu::Results::LiveUpdateTimeAttackResults"
+OWNED_CALL_BINDINGS["F03017"] = "VS::Menu::Results::LiveUpdateTimeAttackStart"
+OWNED_CALL_BINDINGS["F03008"] = "VS::Menu::Results::LiveUpdateResultsScreen"
+OWNED_CALL_BINDINGS["F03009"] = "VS::Menu::Results::LiveInitializeResultsScreen"
+OWNED_CALL_BINDINGS["F03014"] = "VS::Menu::Results::LiveUpdateResultsPresentation"
 OWNED_CALL_BINDINGS["F02692"] = "VS::Menu::map::LiveMarkAllRoomsVisited"
 OWNED_CALL_BINDINGS["F02693"] = "VS::Menu::map::LiveCenterOnRoom"
 OWNED_CALL_BINDINGS["F02694"] = "VS::Menu::map::LiveSetRoomCenterTarget"
@@ -5395,6 +5409,13 @@ MODULE_BINDING_ENTRIES = (
     ("MENU/MENUF.PRG", 0x801060A8, "VS::Menu::Results::LiveDrawBonusReel"),  # F03043
     ("MENU/MENUF.PRG", 0x80107698, "VS::Menu::Results::LiveDrawBonusReelTexture"),  # F03045
     ("MENU/MENUF.PRG", 0x80108E48, "VS::Menu::Results::LiveApplyHealingScoreBonus"),  # F03064
+    ("MENU/MENUF.PRG", 0x8010310C, "VS::Menu::Results::LiveInitializeTimeAttackResults"),  # F03011
+    ("MENU/MENUF.PRG", 0x80103530, "VS::Menu::Results::LiveInitializeTimeAttackStart"),  # F03012
+    ("MENU/MENUF.PRG", 0x80103D88, "VS::Menu::Results::LiveUpdateTimeAttackResults"),  # F03016
+    ("MENU/MENUF.PRG", 0x8010412C, "VS::Menu::Results::LiveUpdateTimeAttackStart"),  # F03017
+    ("MENU/MENUF.PRG", 0x80102BB8, "VS::Menu::Results::LiveUpdateResultsScreen"),  # F03008
+    ("MENU/MENUF.PRG", 0x80102C54, "VS::Menu::Results::LiveInitializeResultsScreen"),  # F03009
+    ("MENU/MENUF.PRG", 0x801037A0, "VS::Menu::Results::LiveUpdateResultsPresentation"),  # F03014
     ("MENU/MENU5.PRG", 0x8010467C, "VS::Menu::map::LiveMarkAllRoomsVisited"),  # F02692
     ("MENU/MENU5.PRG", 0x80105B18, "VS::Menu::map::LiveCenterOnRoom"),  # F02693
     ("MENU/MENU5.PRG", 0x80105D3C, "VS::Menu::map::LiveSetRoomCenterTarget"),  # F02694
@@ -6884,12 +6905,6 @@ for _row, _fixup in (
     ("F04151", _refused_disc_request(
         " " * 12, "Menu_Map_sceneCdQueueSlot", "Menu_Map_armFileBuff",
         "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
-    ("F03011", _refused_disc_request(
-        " " * 8, "Menu_Results_initializeTimeAttackResultsCdSlot", "Menu_Results_initializeTimeAttackResultsTimData",
-        "&Menu_Results_kDisFiles[1]")),
-    ("F03012", _refused_disc_request(
-        " " * 8, "Menu_Results_initializeTimeAttackStartCdSlot", "Menu_Results_initializeTimeAttackStartTimData",
-        "&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack]")),
     ("F02803", _refused_disc_request(
         " " * 12, "Menu_Score_monBinCdQueueSlot", "Menu_Score_monBinData", "&Menu_Score_kMonBinFile")),
 ):

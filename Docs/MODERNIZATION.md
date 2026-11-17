@@ -30,14 +30,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 30A: #253 Typed voices and owned audio playback | 0 | 0 | 0 | 398 | 0 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 0 | 0 | 767 | 0 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
-| 34: #60 Menu screens and workspaces | 0 | 34 | 3,079 | 615 | 28 | 0 |
+| 34: #60 Menu screens and workspaces | 0 | 27 | 2,581 | 622 | 21 | 0 |
 | 39: #62 Title and ending progression | 0 | 0 | 0 | 75 | 0 | 0 |
-| **Total** | 0 | 35 | 3,196 | 3704 | 28 | 0 |
+| **Total** | 0 | 28 | 2,698 | 3711 | 21 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 3,697 |
-| todo | 35 |
+| done | 3,704 |
+| todo | 28 |
 
 54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 51 done); open functions in no slice: 0.
 
@@ -92,7 +92,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 47 | menu-inventory-container | done | self | 5 | 0 | 0 |
 | 48 | menu-loot-status-abilities | done | - | 8 | 0 | 0 |
 | 49 | menu-setup | done | self | 4 | 0 | 0 |
-| 50 | menu-results-score | active | - | 6 | 24 | 2,214 |
+| 50 | menu-results-score | active | - | 6 | 17 | 1,716 |
 | 51 | menu-files-options | done | self | 6 | 0 | 0 |
 | 52 | menu-map-manual-text | active | - | 4 | 10 | 865 |
 | 53 | title | done | self | 4 | 0 | 0 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 16 |
+| Called from generated code | 0 | 12 |
 | Referenced by the original-address module table | 0 | 5 |
-| Calls an SDK shim | 0 | 10 |
-| Signature uses SDK integer types or `void*` | 0 | 3 |
-| Compiled with relaxed settings | 0 | 35 |
+| Calls an SDK shim | 0 | 8 |
+| Signature uses SDK integer types or `void*` | 0 | 2 |
+| Compiled with relaxed settings | 0 | 28 |
 
 Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 

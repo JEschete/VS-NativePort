@@ -1,14 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Results/CubePuzzleLifecycleLive.hpp"
-#include "Menu/Results/GameClearLifecycleLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Audio/Seq/Channel.h"
 #include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
 #include "Render/Images.h"
-#include "State/StateFlags.h"
 
 // decomp: _buffReelIndex (_buffReelIndex@src/MENU/MENUF.PRG/3B8.c)
 int Menu_Results_buffReelIndex;
@@ -210,105 +204,5 @@ u_char Menu_Results_riskbreakerRanks[][4] = { { 3, Menu_Results_DisIndex_Rank1Gr
 
 // decomp: _score (_score@src/MENU/MENUF.PRG/3B8.c)
 u_int Menu_Results_score;
-
-// decomp: MENUF.PRG vs_menuF_exec (src/MENU/MENUF.PRG/3B8.c:23)
-int Menu_Results_UpdateScreen(u_char* state)
-{
-    switch (*state) {
-    case 0:
-        *state = 1;
-        // Fallthrough
-    case 1:
-        *state += (Menu_Results_InitializeScreen() != 0);
-        break;
-    case 2:
-        if (Menu_Results_UpdatePresentation() != 0) {
-            *state = 0;
-            return 1;
-        }
-        break;
-    }
-    return 0;
-}
-
-// decomp: MENUF.PRG _initMenu (src/MENU/MENUF.PRG/3B8.c:59)
-int Menu_Results_InitializeScreen(void)
-{
-    int ret;
-
-    switch (Audio_Seq_unusedStateFlags.menuFSubmenu) {
-    case 0:
-        ret = VS::Menu::Results::LiveInitializeGameClear();
-        break;
-
-    case 1:
-        ret = Menu_Results_InitializeTimeAttackStart();
-        break;
-
-    case 2:
-        ret = Menu_Results_InitializeTimeAttackResults();
-        break;
-
-    case 3:
-        VS::Menu::Results::LiveApplyHealingScoreBonus();
-        VS::Menu::Framework::NoOperation();
-
-        ret = 1;
-        break;
-
-    case 4:
-        ret = VS::Menu::Results::LiveInitializeCubePuzzleStart();
-        break;
-
-    case 5:
-        ret = VS::Menu::Results::LiveInitializeCubePuzzleResults();
-        break;
-
-    case 6:
-        ret = VS::Menu::Results::LiveInitializeCubePuzzleQuit();
-        break;
-    }
-
-    return ret;
-}
-
-// decomp: MENUF.PRG _execMenu (src/MENU/MENUF.PRG/3B8.c:453)
-int Menu_Results_UpdatePresentation(void)
-{
-    int ret;
-
-    switch (Audio_Seq_unusedStateFlags.menuFSubmenu) {
-    case 0:
-        ret = VS::Menu::Results::LiveUpdateGameClear();
-        break;
-
-    case 1:
-        ret = Menu_Results_UpdateTimeAttackStart();
-        break;
-
-    case 2:
-        ret = Menu_Results_UpdateTimeAttackResults();
-        break;
-
-    case 3:
-        ret = 1;
-        break;
-
-    case 4:
-        ret = VS::Menu::Results::LiveUpdateCubePuzzleStart();
-        break;
-
-    case 5:
-        ret = VS::Menu::Results::LiveUpdateCubePuzzleResults();
-        break;
-
-    case 6:
-        ret = VS::Menu::Results::LiveUpdateCubePuzzleQuit();
-        break;
-    }
-
-    // BUG: potential garbage
-    return ret;
-}
 
 }  // extern "C"

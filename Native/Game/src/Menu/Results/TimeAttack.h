@@ -15,10 +15,5 @@ extern int Menu_Results_newTimeSlot;;
 extern int Menu_Results_screenState;;
 extern int Menu_Results_screenTimer;;
 extern int Menu_Results_timeTrialTime;;
-int Menu_Results_InitializeTimeAttackResults(void);
-int Menu_Results_InitializeTimeAttackStart(void);
-int Menu_Results_UpdateTimeAttackResults(void);
-int Menu_Results_UpdateTimeAttackStart(void);
-void Menu_Results_TimeAttack_ResetMenufStatics(void);
 
 #endif // VS_MENU_RESULTS_TIMEATTACK_H_DECLS

@@ -2,6 +2,7 @@
 // Live binding for the screen overlays (ScreenOverlay.cpp).
 #include "Render/ScreenOverlayLive.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cinttypes>
@@ -17,8 +18,11 @@ extern "C" {
 #include "Core/Gte.h"
 #include "Field/TransitionsLiveState.h"
 #include "Render/Display.h"
+#include "Render/Frame.h"
 #include "Render/FramebufferEffects.h"
+#include "Render/Render.h"
 #include "Render/ScreenTransition.h"
+#include "Render/UiPrimitives.h"
 }
 
 namespace VS::Render {
@@ -270,6 +274,26 @@ void ResetLiveFramebufferEffect() { ResetFramebufferEffect(live_effect); }
 void InitializeLiveFramebufferEffect() {
   LiveEffectPackets packets;
   InitializeFramebufferEffect(live_effect, packets);
+}
+
+bool AbandonLiveFrameBeforeHeapReset() {
+  if (live_packets != nullptr) {
+    const auto capacity = Core::Memory::LivePayloadCapacity(live_packets);
+    if (!capacity.has_value() || *capacity < sizeof(EffectPacketBlock)) {
+      ReportRefusal("framebuffer packets no longer belong to the live heap");
+      return false;
+    }
+  }
+  std::ranges::fill(Render_legacyOrderingTables, nullptr);
+  std::ranges::fill(Render_legacyPrimitiveBuffers, nullptr);
+  Render_legacyCurrentOrderingTable = nullptr;
+  Render_frameScratch.orderingTable = nullptr;
+  Render_frameScratch.overlayOrderingTable = nullptr;
+  Render_frameScratch.primitiveCursor = nullptr;
+  LiveEffectPackets packets;
+  packets.Release();
+  ResetFramebufferEffect(live_effect);
+  return true;
 }
 
 // decomp: BATTLE.PRG func_8007D734 (src/BATTLE/BATTLE.PRG/146C.c:9311).

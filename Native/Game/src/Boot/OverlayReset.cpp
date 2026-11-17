@@ -11,6 +11,7 @@
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Map.h"
-#include "Menu/Results/TimeAttack.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Status/ActorStatus.h"
@@ -103,9 +103,9 @@ void Boot_ResetMenueStatics(void)
 // Call where the original loads MENUF.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMenufStatics(void)
 {
-    Menu_Results_TimeAttack_ResetMenufStatics();
     VS::Menu::Results::ResetLiveCubePuzzleLifecycleStatics();
     VS::Menu::Results::ResetLiveGameClearModuleData();
+    VS::Menu::Results::ResetLiveTimeAttackModuleData();
 }
 
 }  // extern "C"

@@ -28,9 +28,11 @@
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/ScreenOverlayLive.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/GameClockLive.hpp"
 #include "Title/TitleMenuLive.hpp"
@@ -75,6 +77,10 @@ void CleanupResultsOwners() {
     Core_Errorf("boot", "game-clear cleanup refused before session reset");
     std::abort();
   }
+  if (!Menu::Results::CleanupLiveTimeAttackOwnedState()) {
+    Core_Errorf("boot", "time-attack cleanup refused before session reset");
+    std::abort();
+  }
 }
 
 class LiveSessionHost final : public SessionHost {
@@ -101,6 +107,7 @@ class LiveSessionHost final : public SessionHost {
     Menu::Status::ResetLiveLimbControllersModuleData();
     Menu::Status::ResetLiveTerminalControllersModuleData();
     Menu::Results::ResetLiveGameClearModuleData();
+    Menu::Results::ResetLiveTimeAttackModuleData();
     Event::ResetLiveScriptRuntime();
   }
   void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }
@@ -316,6 +323,10 @@ class LiveGameHost final : public GameHost {
 
 void ResetLiveSessionHeap() {
   CleanupResultsOwners();
+  if (!Render::AbandonLiveFrameBeforeHeapReset()) {
+    Core_Errorf("boot", "frame cleanup refused before heap replacement");
+    std::abort();
+  }
   Core::Memory::ResetLiveGameHeap();
 }
 

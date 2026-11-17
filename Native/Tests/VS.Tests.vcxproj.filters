@@ -1224,6 +1224,15 @@
     <ClCompile Include="src\TimeAttackRatingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TimeAttackTerminalIntegrationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TimeAttackTerminalLiveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TimeAttackTerminalTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TimelineCommandsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -1384,6 +1393,12 @@
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\TimeAttackTerminalFixture.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Menu\TimeAttackTerminalLiveFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp">

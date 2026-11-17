@@ -18,6 +18,10 @@ void DrawLiveScreenTransition(void* ordering_table);
 void ResetLiveFramebufferEffect();
 // Start-up, over a fresh heap: drops the packet block without freeing it.
 void InitializeLiveFramebufferEffect();
+// Only after the old frame producer has stopped, before its heap is replaced.
+// Submitted commands are synchronous; abandon unsubmitted frame bindings and
+// free the effect packets. Refusal preserves both owner and bindings.
+[[nodiscard]] bool AbandonLiveFrameBeforeHeapReset();
 void DrawLiveFramebufferEffect(void* ordering_table);
 void SetLiveFramebufferEffectEnabled(int enabled);
 void SetLiveFramebufferEffectRotation(int roll_angle);
