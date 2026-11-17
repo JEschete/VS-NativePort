@@ -4235,7 +4235,7 @@ int func_800F9800(void) {
         re.purge()
         with (
             mock.patch.object(copy_fixups, "REGEX_FIXES", rules),
-            mock.patch("re._compiler.compile", wraps=re._compiler.compile) as compile_regex,
+            mock.patch("copy_to_native.re.compile", wraps=re.compile) as compile_regex,
         ):
             for _ in range(3):
                 self.assertEqual(copier.apply_fixups(row, "arg0"), "arg0")
