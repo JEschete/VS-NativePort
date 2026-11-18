@@ -138,7 +138,7 @@ as evidence (#46):
 | C++ promotion | `CPP_PROMOTION.csv`, source, projects | a §8.2 claim that does not verify, a missing record for an owned C++ function, catalog `cpp` differing from the derived value, remaining consumers of the old symbol |
 | Quality | generated `.vcxproj` files, `baseline.json` | owned C++ or any promotion claim compiled relaxed, `strict_clean` on a file with baseline debt |
 | Behavior | `VERIFY_LEDGER.csv`, Catch2 sources | `verified=x` without a passing record, unresolved references, missing revision, configuration or limits, invalid values |
-| Retirement | `EC_BRIDGES.csv`, `GATE_SLICES.csv`, include graph | `modernized` on unowned rows, `modernized=x` reaching a bridge directly or indirectly, a listed bridge that no longer exists, a slice whose measured consumers differ from its record |
+| Retirement | `EC_BRIDGES.csv`, `GATE_SLICES.csv`, include graph | `modernized` on unowned rows, `modernized=x` reaching a bridge directly or indirectly, a listed bridge that no longer exists, a slice whose measured consumers differ from its record, or a `copy=yes`/`cpp=x` row missing from all slices |
 
 Source classes come from each file's actual compiler settings in the generated
 projects and `tools\port\relaxed_sources.txt`: `generated-cpp` (relaxed, outside quality scope),

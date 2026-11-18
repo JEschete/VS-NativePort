@@ -785,6 +785,15 @@ class Gates:
             if "/Legacy/" in path and path.endswith(".h"):
                 near, _ = self.sources.consumers(path)
                 report.legacy_consumers[path] = self.consumer_groups(near)
+        sliced_ids = {
+            identifier for record in self.slices for identifier in split_list(record["ids"])
+        }
+        for row in self.catalog:
+            if row["copy"] == "yes" and row["cpp"] == "x" and row["id"] not in sliced_ids:
+                report.add(
+                    "retirement", "slice-missing-promoted-copy", row["id"],
+                    "copy=yes/cpp=x requires GATE_SLICES.csv membership",
+                )
         for row in self.catalog:
             marker = row["modernized"]
             identifier = row["id"]

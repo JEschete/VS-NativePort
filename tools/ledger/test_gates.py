@@ -120,6 +120,7 @@ class Fixture:
         self.catalog[2]["modernized"] = "x"
         self.catalog[2]["cpp"] = "x"
         self.promotion = [transitional_record(), promotion_row(**claims)]
+        self.slices = [slice_record()]
 
     def relax(self, relative: str) -> None:
         self.relaxed.add(relative)
@@ -824,6 +825,15 @@ class RetirementGateTests(GateTestCase):
     def test_slice_cannot_cover_an_unowned_row(self) -> None:
         self.fixture.slices = [slice_record(ids="F00001", after="0")]
         self.assertIn("slice-not-owned", self.rules("retirement"))
+
+    def test_promoted_copy_requires_slice_coverage(self) -> None:
+        self.fixture.catalog[2]["cpp"] = "x"
+        self.assertIn("slice-missing-promoted-copy", self.rules("retirement"))
+
+    def test_promoted_copy_with_slice_coverage_satisfies_requirement(self) -> None:
+        self.fixture.catalog[2]["cpp"] = "x"
+        self.fixture.slices = [slice_record()]
+        self.assertNotIn("slice-missing-promoted-copy", self.rules("retirement"))
 
 
 def slice_record(**values: str) -> dict[str, str]:
