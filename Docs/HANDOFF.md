@@ -1,5 +1,31 @@
 # Current Handoff
 
+## Exception boundary investigation (#267), 2026-11-18
+
+Starting revision: `b91767928`. Two scoped commits are pushed:
+`76ffe7ffb` adds a hidden child-process regression test, and `79e93cd0f` moves
+it into the already tracked C-linkage test source so the C++ header migration
+ledger remains clean. Exact-revision Source Quality run `44255993303` passed;
+the first commit's ledger failure was corrected without refreshing the
+baseline. Debug and Release focused tests and changed-file quality checks pass.
+
+The current runtime grep reports 63 `throw` statements in 16 files, up from
+the 61 recorded in the issue's November 2 comment. The issue comment lists
+the per-file counts. A catch-site/reachability audit is not complete.
+
+The hidden test installs the production crash handler, creates a missing-AI
+state invariant, then calls `std::terminate()` from its catch; its parent
+verifies `uncaught exception: battle actor has no AI state` in Debug and
+Release. This proves the handler logs the invariant reason, but it does not
+execute a real copied `extern "C"` caller and does not satisfy the latest
+remaining acceptance criterion. Ghidra MCP was unavailable (no backend or open
+program), so the original caller could not be traced there.
+
+Keep #267 open. Next, complete the throw/catch reachability classification and
+identify an executable copied caller for the hidden test. If no such path is
+available in the current native tree, ask the owner for the exact callsite or
+test setup before claiming acceptance.
+
 ## Connected-controller handover (#438), 2026-11-18
 
 Starting revision: `aa41806e6`, clean worktree. The active-controller removal
