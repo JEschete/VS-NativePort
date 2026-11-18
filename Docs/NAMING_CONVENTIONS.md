@@ -338,8 +338,11 @@ fields.csv   id,final_name,meaning,confidence,notes
   contain the exact `Type.member`, so `actor->unk0.x` is found for the header type even when the function never
   names that type. `evidence.py` and `symbol_support.Gen` both do this. Auto-citations still land on reset lines (`= 0`) that
   prove identity but not meaning; pin meaning-bearing lines explicitly for every name above `low`.
-- Upstream refresh, after `resources\rood-reverse` moves: `python tools\port\decomp_index.py --root
-  resources\rood-reverse --out build\port\index_upstream.json`, then `python tools\naming\upstream_layout.py report
+- Upstream refresh *(retired by D24, 2026-11-18: the pinned `rood-reverseWin` index that the generator merged
+  against was removed in `6b20016f0`, so the DATA/TYPE/FIELD ledgers are no longer regenerated; edit their rows in
+  place and cite upstream source directly)*. As formerly run, after `resources\rood-reverse` moved: `python
+  tools\port\decomp_index.py --root resources\rood-reverse --out build\port\index_upstream.json`, then `python
+  tools\naming\upstream_layout.py report
   --out build\port\upstream_layout\all.md` (classes: same / type-only / layout / fork-only; identical struct source
   counts as same, since shared effect headers differ only by per-overlay macros such as `TRAIL_SAMPLE_COUNT`),
   `upstream_layout.py adopt --all` (refuses a type whose filled rows would move), `python
