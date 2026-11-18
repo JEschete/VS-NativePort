@@ -43,7 +43,7 @@
 #include "Effects/Runtime.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/CollisionSampling.hpp"
 #include "Field/Gimmicks.h"
@@ -806,13 +806,13 @@ int Tests_EventScriptNativeBranches(int skip) {
                                          sizeof skipCopy);
   passed = memcmp(skipCopy, Event_kSkipOpcodeHandlers, sizeof skipCopy) == 0;
   skipCopy[0] = Event_kSkipOpcodeHandlers[0] = Event_kOpcodeHandlers[0] =
-      Event_ScriptJumpForwardOpcode;
+      VS::Event::ScriptJumpForwardOpcode;
   skipCopy[1] = Event_kSkipOpcodeHandlers[1] = Event_kOpcodeHandlers[1] =
-      Event_ScriptReturnToSavedAddressOpcode;
+      VS::Event::ScriptReturnToSavedAddressOpcode;
   skipCopy[2] = Event_kSkipOpcodeHandlers[2] = Event_kOpcodeHandlers[2] =
-      Event_ScriptYieldFrameOpcode;
+      VS::Event::ScriptYieldFrameOpcode;
   skipCopy[3] = Event_kSkipOpcodeHandlers[3] = Event_kOpcodeHandlers[3] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_legacySkipHandlerCopy = skipCopy;
   Event_skipState = skip ? 2 : 0;
   host.SetSubroutineReturn({script.region, 8, script.generation});
@@ -862,8 +862,8 @@ int Tests_EventScriptBranchHandlers(void) {
   const auto context =
       VS::test_support::MountLiveEventScript({0xE0, 2, 5, 0, 0xF0, 0xE1, 2});
   Event_skipState = 0;
-  Event_kOpcodeHandlers[0xE0] = Event_CommandStartScriptContextOpcode;
-  Event_kOpcodeHandlers[0xE1] = Event_CommandWaitScriptContextOpcode;
+  Event_kOpcodeHandlers[0xE0] = VS::Event::CommandStartScriptContextOpcode;
+  Event_kOpcodeHandlers[0xE1] = VS::Event::CommandWaitScriptContextOpcode;
   Event_kOpcodeSizes[0xE0] = 4;
   Event_kOpcodeSizes[0xE1] = 2;
   host.SetThreadCursor(1, context);

@@ -17,7 +17,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
-#include "Event/ScriptDialogOpcodes.h"
+#include "Event/ScriptDialogOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -82,13 +82,13 @@ void BindDialogTable(Bytes bytes,
 
 void ShowNativeDialog(std::uint8_t box) {
   std::array<std::uint8_t, 4> command{0x11, box, 0, 1};
-  CHECK(Event_ScriptShowDialogTextOpcode(command.data(), 0) == 0);
+  CHECK(VS::Event::ScriptShowDialogTextOpcode(command.data(), 0) == 0);
 }
 
 void DismissNativeDialog(std::uint8_t box) {
   Menu_textBoxes[box].state = 0;
   std::array<std::uint8_t, 2> command{0x12, box};
-  CHECK(Event_ScriptDismissDialogBoxOpcode(command.data(), 0) == 0);
+  CHECK(VS::Event::ScriptDismissDialogBoxOpcode(command.data(), 0) == 0);
 }
 
 std::weak_ptr<const Bytes> session_dialog_owner;
@@ -277,7 +277,7 @@ TEST_CASE("Native dialog reinitialization releases the previous text owner",
   CHECK_FALSE(lifetime.expired());
   std::array<std::uint8_t, event::kInitDialogBoxLength> command{
       0x10, 0, 7, 0, 0, 0, 20, 2, 0, 0, 0};
-  CHECK(Event_ScriptInitDialogBoxOpcode(command.data(), 0) == 0);
+  CHECK(VS::Event::ScriptInitDialogBoxOpcode(command.data(), 0) == 0);
   CHECK(lifetime.expired());
   CHECK(Menu_textBoxes[0].string == nullptr);
   CHECK(Menu_textBoxes[0].speed == 0);

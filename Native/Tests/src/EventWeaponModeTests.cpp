@@ -23,7 +23,7 @@
 #include "Event/Actors.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/WeaponModeOpcode.hpp"
 #include "Legacy/Psx.h"
@@ -324,11 +324,11 @@ TEST_CASE("Production event dispatch holds then advances the weapon opcode",
   const auto weapon =
       WeaponModeFixture::Opcode(VS::Event::ScriptSetAshleyBattleModeOpcode);
   const auto stop =
-      WeaponModeFixture::Opcode(Event_CommandStopScriptContextOpcode);
+      WeaponModeFixture::Opcode(VS::Event::CommandStopScriptContextOpcode);
   Event_kSkipOpcodeHandlers[weapon] = Event_kOpcodeHandlers[weapon] =
       WeaponModeFixture::ResolveHandler();
   Event_kSkipOpcodeHandlers[stop] = Event_kOpcodeHandlers[stop] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[weapon] = 3;
   Event_kOpcodeSizes[stop] = 1;
   const auto script = VS::test_support::MountLiveEventScript(

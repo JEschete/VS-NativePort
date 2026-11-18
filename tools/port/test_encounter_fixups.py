@@ -397,7 +397,7 @@ int func_800F9800(void) {
                     self.assertEqual(copy_fixups.EVENT_OPCODE_BINDINGS[fid], binding)
                     self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
                     self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
-                                     r"Native\Game\src\Event\ScriptActorOpcodes.h")
+                                     r"Native\Game\src\Event\ScriptActorOpcodes.hpp")
                 else:
                     live = copy_fixups.OWNED_CALL_BINDINGS[fid]
                     self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[live],
@@ -3131,7 +3131,7 @@ int func_800F9800(void) {
             self.assertNotRegex(generated, rf"\bEvent_{name}\(")
         vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
         for name in ("CommandStopCameraMotion", "CommandSetCameraFollowing", "CommandRestoreFieldCamera"):
-            self.assertIn(f"Event_{name}Opcode", vm)
+            self.assertIn(f"VS::Event::{name}Opcode", vm)
 
     def test_camera_lens_and_shake_are_owned_by_the_typed_lens(self):
         # #276 row 35 A35-05: the typed lens (EventCameraLens.cpp) replaces the lens/shake opcode and the
@@ -3146,7 +3146,7 @@ int func_800F9800(void) {
         self.assertIn("UpdateEventLensTweenEntry(&camera.far_clip);", frame)
         self.assertIn("UpdateEventCameraShakeEntry();", frame)
         vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
-        self.assertEqual(vm.count("Event_CommandCameraLensOrShakeOpcode"), 5)
+        self.assertEqual(vm.count("VS::Event::CommandCameraLensOrShakeOpcode"), 5)
 
     def test_script_actor_tile_store_reads_a_typed_placement(self):
         # #276 slice 19b, then row 34: the tile bytes come from the typed placement view, not a 12-byte stack buffer.
@@ -3416,7 +3416,7 @@ int func_800F9800(void) {
         self.assertEqual(source.count("Battle_Ai_InvalidateSessionBindings"), 1)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["Battle_Ai_InvalidateSessionBindings"],
-            r"Native\Game\src\Battle\Ai\RoomState.h",
+            r"Native\Game\src\Battle\Ai\RoomState.hpp",
         )
 
     def test_perception_uses_owned_model_prefixes_for_auxiliary_targets(self):
@@ -4361,7 +4361,7 @@ int arg01 = arg0;'''
         live = (
             root / r"Native\Game\src\Event\EventSceneTransitionLive.cpp"
         ).read_text(encoding="utf-8")
-        self.assertIn("Event_ScriptClearRoomActorCacheOpcode(", live)
+        self.assertIn("ScriptClearRoomActorCacheOpcode(", live)
         self.assertIn("Actors::ForgetLiveRoomEnemies(room, zone);", live)
         self.assertNotIn("Field_ClearSavedRoomEnemies", live)
         generated = (

@@ -12,7 +12,7 @@
 #include "Battle/ActionFlow.h"
 #include "Event/EventSceneTransition.hpp"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptStep.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/DoorRecord.hpp"
@@ -180,7 +180,7 @@ TEST_CASE("ScriptClearRoomActorCache opcode clears the live room records",
   State_recentRoomEnemyStates[2].mapId = 8;
   State_currentRoomStateSlot = 0;
   std::array<std::uint8_t, 3> bytes{0x53, 12, 9};
-  CHECK(Event_ScriptClearRoomActorCacheOpcode(bytes.data(), 0) == 0);
+  CHECK(VS::Event::ScriptClearRoomActorCacheOpcode(bytes.data(), 0) == 0);
   const auto first_byte = [](const State_RoomEnemyStates& record) {
     unsigned char value = 0;
     std::memcpy(&value, record.actorStates, sizeof(value));
@@ -400,7 +400,7 @@ TEST_CASE(
   Event_isMenuTransitionActive = 5;
   std::array<std::uint8_t, event::kRunMenuTransitionLength> bytes =
       MenuCommand(event::kTimeAttackStartMode);
-  CHECK(Event_ScriptRunMenuTransitionOpcode(bytes.data(), 0) == 4);
+  CHECK(VS::Event::ScriptRunMenuTransitionOpcode(bytes.data(), 0) == 4);
   CHECK(Event_isMenuTransitionActive == 0);
   Event_isMenuTransitionActive = saved_active;
   Battle_actionFlowMode = saved_phase;
@@ -518,10 +518,10 @@ TEST_CASE("ScriptChangeRoom opcode maps the live room change state",
   std::array<std::uint8_t, event::kChangeRoomLength> bytes{0x68, 3, 4,    5, 1,
                                                            6,    2, 0x04, 0, 0};
   Event_roomChangeState = event::kRoomChangeKeepsEvent;
-  CHECK(Event_ScriptChangeRoomOpcode(bytes.data(), 0) == 1);
+  CHECK(VS::Event::ScriptChangeRoomOpcode(bytes.data(), 0) == 1);
   CHECK(Event_roomChangeState == event::kRoomChangeKeepsEvent);
   Event_roomChangeState = event::kRoomChangeArrived;
-  CHECK(Event_ScriptChangeRoomOpcode(bytes.data(), 0) == 0);
+  CHECK(VS::Event::ScriptChangeRoomOpcode(bytes.data(), 0) == 0);
   CHECK(Event_roomChangeState == event::kRoomChangeIdle);
   Event_roomChangeState = saved;
 }

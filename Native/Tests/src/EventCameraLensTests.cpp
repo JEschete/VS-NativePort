@@ -14,7 +14,7 @@
 #include "Event/EventCameraLensLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -380,7 +380,7 @@ TEST_CASE("Live camera lens opcode writes the workspace",
   const LiveLensFixture fixture;
   Event_camera->near_clip.value = 0x20;
   std::array<std::uint8_t, 4> lens{0xEB, 0x60, 2, 6};
-  CHECK(Event_CommandCameraLensOrShakeOpcode(lens.data(), 0) == 0);
+  CHECK(VS::Event::CommandCameraLensOrShakeOpcode(lens.data(), 0) == 0);
   CHECK(Event_camera->near_clip.start_value == 0x20);
   CHECK(Event_camera->near_clip.delta_value == 0x40);
   CHECK(Event_camera->near_clip.duration_frames == 6);
@@ -390,7 +390,7 @@ TEST_CASE("Live camera shake opcode fills the first idle oscillator",
           "[event][camera][lens]") {
   const LiveLensFixture fixture;
   std::array<std::uint8_t, 6> start{0xEF, 2, 0x40, 0x07, 1, 30};
-  CHECK(Event_CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
+  CHECK(VS::Event::CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
   const VS::Event::ShakeOscillator& first =
       Event_camera->shake_oscillators.at(0);
   CHECK(first.cycles == 2);
@@ -407,7 +407,7 @@ TEST_CASE("Live camera shake entry updates the workspace and scratch",
   const LiveLensFixture fixture;
   VS::State::tickSpeed = 2;
   std::array<std::uint8_t, 6> start{0xEF, 0, 0x40, (2 << 2) | 1, 0, 30};
-  REQUIRE(Event_CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
+  REQUIRE(VS::Event::CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
   SetScratchWord(0x88, 5);
   VS::Event::UpdateEventCameraShakeEntry();
   CHECK(Event_camera->shake_active_count == 1);
@@ -429,8 +429,8 @@ TEST_CASE("Live camera shake routes each axis bit to its workspace offset",
       0xEF, 1, 0x40, (2 << 2) | (1 << 4) | (1 << 6) | 1, 0, 4};
   std::array<std::uint8_t, 6> eye{
       0xEF, 1, 0x20, (1 << 2) | (2 << 4) | (1 << 6) | 2, 0, 4};
-  REQUIRE(Event_CommandCameraLensOrShakeOpcode(look_at.data(), 0) == 0);
-  REQUIRE(Event_CommandCameraLensOrShakeOpcode(eye.data(), 0) == 0);
+  REQUIRE(VS::Event::CommandCameraLensOrShakeOpcode(look_at.data(), 0) == 0);
+  REQUIRE(VS::Event::CommandCameraLensOrShakeOpcode(eye.data(), 0) == 0);
   VS::Event::UpdateEventCameraShakeEntry();
   CHECK(Event_camera->shake_active_count == 2);
   CHECK(Event_camera->shake_look_at_offset == Position3{.x = 0x40});

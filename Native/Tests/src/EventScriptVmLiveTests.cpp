@@ -21,7 +21,7 @@
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -59,40 +59,40 @@ struct ControlEntry {
 };
 
 constexpr auto kControlEntries = std::to_array<ControlEntry>({
-    {0x800B66E4, Event_ScriptNoOperationOpcode},
-    {0x800B66EC, Event_ScriptYieldFrameOpcode},
-    {0x800BB474, Event_CommandWaitFramesOpcode},
-    {0x800BB4CC, Event_CommandSetTickSpeedOpcode},
-    {0x800BB504, Event_CommandWaitScriptContextOpcode},
-    {0x800BB554, Event_CommandStartScriptContextOpcode},
-    {0x800BB5A4, Event_CommandStopScriptContextOpcode},
-    {0x800B8BC4, Event_ScriptCacheFlagValueOpcode},
-    {0x800B8BF8, Event_ScriptBranchOnCachedFlagOpcode},
-    {0x800B8C54, Event_ScriptSetLoopCounterOpcode},
-    {0x800B8C7C, Event_ScriptLoopBackwardOpcode},
-    {0x800B8D50, Event_ScriptApplyImmediateFlagOperationOpcode},
-    {0x800B8EDC, Event_ScriptApplyFlagPairOperationOpcode},
-    {0x800B88D4, Event_ScriptBranchOnFlagImmediateOpcode},
-    {0x800B8A10, Event_ScriptBranchOnFlagPairOpcode},
-    {0x800B8B5C, Event_ScriptJumpForwardOpcode},
-    {0x800B8B90, Event_ScriptJumpForwardOpcode},
-    {0x800B8CE8, Event_ScriptJumpForwardOpcode},
-    {0x800B8D1C, Event_ScriptJumpForwardOpcode},
-    {0x800B8C44, Event_ScriptReturnToSavedAddressOpcode},
-    {0x800B9170, Event_ScriptStoreInventoryItemPresenceOpcode},
-    {0x800B9254, Event_ScriptStoreButtonStateOpcode},
-    {0x800B6744, Event_ScriptBeginSkippableCutsceneOpcode},
-    {0x800B6868, Event_ScriptEndCutsceneAndJumpOpcode},
-    {0x800B68C4, Event_ScriptEndCutsceneOpcode},
-    {0x800B6FB0, Event_ScriptWaitForButtonAndYieldOpcode},
-    {0x800B96B0, Event_ScriptWaitForButtonOrTimeoutOpcode},
-    {0x800B94D8, Event_ScriptConfigureTimerOpcode},
-    {0x800B9724, Event_ScriptConfigureEasingCurveOpcode},
-    {0x800B66A8, Event_ScriptReportInvalidOpcodeOpcode},
-    {0x800B66F4, Event_ScriptWaitForEventFileOpcode},
-    {0x800BB5AC, Event_CommandLoadNextEventOpcode},
-    {0x800BB604, Event_CommandFinishEventOpcode},
-    {0x800BB028, Event_CommandSpecialOperationOpcode},
+    {0x800B66E4, VS::Event::ScriptNoOperationOpcode},
+    {0x800B66EC, VS::Event::ScriptYieldFrameOpcode},
+    {0x800BB474, VS::Event::CommandWaitFramesOpcode},
+    {0x800BB4CC, VS::Event::CommandSetTickSpeedOpcode},
+    {0x800BB504, VS::Event::CommandWaitScriptContextOpcode},
+    {0x800BB554, VS::Event::CommandStartScriptContextOpcode},
+    {0x800BB5A4, VS::Event::CommandStopScriptContextOpcode},
+    {0x800B8BC4, VS::Event::ScriptCacheFlagValueOpcode},
+    {0x800B8BF8, VS::Event::ScriptBranchOnCachedFlagOpcode},
+    {0x800B8C54, VS::Event::ScriptSetLoopCounterOpcode},
+    {0x800B8C7C, VS::Event::ScriptLoopBackwardOpcode},
+    {0x800B8D50, VS::Event::ScriptApplyImmediateFlagOperationOpcode},
+    {0x800B8EDC, VS::Event::ScriptApplyFlagPairOperationOpcode},
+    {0x800B88D4, VS::Event::ScriptBranchOnFlagImmediateOpcode},
+    {0x800B8A10, VS::Event::ScriptBranchOnFlagPairOpcode},
+    {0x800B8B5C, VS::Event::ScriptJumpForwardOpcode},
+    {0x800B8B90, VS::Event::ScriptJumpForwardOpcode},
+    {0x800B8CE8, VS::Event::ScriptJumpForwardOpcode},
+    {0x800B8D1C, VS::Event::ScriptJumpForwardOpcode},
+    {0x800B8C44, VS::Event::ScriptReturnToSavedAddressOpcode},
+    {0x800B9170, VS::Event::ScriptStoreInventoryItemPresenceOpcode},
+    {0x800B9254, VS::Event::ScriptStoreButtonStateOpcode},
+    {0x800B6744, VS::Event::ScriptBeginSkippableCutsceneOpcode},
+    {0x800B6868, VS::Event::ScriptEndCutsceneAndJumpOpcode},
+    {0x800B68C4, VS::Event::ScriptEndCutsceneOpcode},
+    {0x800B6FB0, VS::Event::ScriptWaitForButtonAndYieldOpcode},
+    {0x800B96B0, VS::Event::ScriptWaitForButtonOrTimeoutOpcode},
+    {0x800B94D8, VS::Event::ScriptConfigureTimerOpcode},
+    {0x800B9724, VS::Event::ScriptConfigureEasingCurveOpcode},
+    {0x800B66A8, VS::Event::ScriptReportInvalidOpcodeOpcode},
+    {0x800B66F4, VS::Event::ScriptWaitForEventFileOpcode},
+    {0x800BB5AC, VS::Event::CommandLoadNextEventOpcode},
+    {0x800BB604, VS::Event::CommandFinishEventOpcode},
+    {0x800BB028, VS::Event::CommandSpecialOperationOpcode},
 });
 
 struct LiveVmFixture {
@@ -727,155 +727,156 @@ std::intptr_t PointerResult(std::uint8_t*, std::int16_t) { return 0x12345678; }
 
 std::intptr_t NoOperationSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_ScriptNoOperationOpcode(instruction, thread);
+  return VS::Event::ScriptNoOperationOpcode(instruction, thread);
 }
 
 std::intptr_t YieldSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
-  return Event_ScriptYieldFrameOpcode(instruction, thread);
+  return VS::Event::ScriptYieldFrameOpcode(instruction, thread);
 }
 
 std::intptr_t WaitSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
-  return Event_CommandWaitFramesOpcode(instruction, thread);
+  return VS::Event::CommandWaitFramesOpcode(instruction, thread);
 }
 
 std::intptr_t TickSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
-  return Event_CommandSetTickSpeedOpcode(instruction, thread);
+  return VS::Event::CommandSetTickSpeedOpcode(instruction, thread);
 }
 
 std::intptr_t StartContextSlotBridge(std::uint8_t* instruction,
                                      std::int16_t thread) {
-  return Event_CommandStartScriptContextOpcode(instruction, thread);
+  return VS::Event::CommandStartScriptContextOpcode(instruction, thread);
 }
 
 std::intptr_t WaitContextSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_CommandWaitScriptContextOpcode(instruction, thread);
+  return VS::Event::CommandWaitScriptContextOpcode(instruction, thread);
 }
 
 std::intptr_t StopContextSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_CommandStopScriptContextOpcode(instruction, thread);
+  return VS::Event::CommandStopScriptContextOpcode(instruction, thread);
 }
 
 std::intptr_t CacheSlotBridge(std::uint8_t* instruction, std::int16_t thread) {
-  return Event_ScriptCacheFlagValueOpcode(instruction, thread);
+  return VS::Event::ScriptCacheFlagValueOpcode(instruction, thread);
 }
 
 std::intptr_t CachedBranchSlotBridge(std::uint8_t* instruction,
                                      std::int16_t thread) {
-  return Event_ScriptBranchOnCachedFlagOpcode(instruction, thread);
+  return VS::Event::ScriptBranchOnCachedFlagOpcode(instruction, thread);
 }
 
 std::intptr_t SetLoopSlotBridge(std::uint8_t* instruction,
                                 std::int16_t thread) {
-  return Event_ScriptSetLoopCounterOpcode(instruction, thread);
+  return VS::Event::ScriptSetLoopCounterOpcode(instruction, thread);
 }
 
 std::intptr_t LoopBackSlotBridge(std::uint8_t* instruction,
                                  std::int16_t thread) {
-  return Event_ScriptLoopBackwardOpcode(instruction, thread);
+  return VS::Event::ScriptLoopBackwardOpcode(instruction, thread);
 }
 
 std::intptr_t ImmediateFlagSlotBridge(std::uint8_t* instruction,
                                       std::int16_t thread) {
-  return Event_ScriptApplyImmediateFlagOperationOpcode(instruction, thread);
+  return VS::Event::ScriptApplyImmediateFlagOperationOpcode(instruction,
+                                                            thread);
 }
 
 std::intptr_t PairFlagSlotBridge(std::uint8_t* instruction,
                                  std::int16_t thread) {
-  return Event_ScriptApplyFlagPairOperationOpcode(instruction, thread);
+  return VS::Event::ScriptApplyFlagPairOperationOpcode(instruction, thread);
 }
 
 std::intptr_t ImmediateBranchSlotBridge(std::uint8_t* instruction,
                                         std::int16_t thread) {
-  return Event_ScriptBranchOnFlagImmediateOpcode(instruction, thread);
+  return VS::Event::ScriptBranchOnFlagImmediateOpcode(instruction, thread);
 }
 
 std::intptr_t PairBranchSlotBridge(std::uint8_t* instruction,
                                    std::int16_t thread) {
-  return Event_ScriptBranchOnFlagPairOpcode(instruction, thread);
+  return VS::Event::ScriptBranchOnFlagPairOpcode(instruction, thread);
 }
 
 std::intptr_t NativeJumpSlotBridge(std::uint8_t* instruction,
                                    std::int16_t thread) {
-  return Event_ScriptJumpForwardOpcode(instruction, thread);
+  return VS::Event::ScriptJumpForwardOpcode(instruction, thread);
 }
 
 std::intptr_t NativeReturnSlotBridge(std::uint8_t* instruction,
                                      std::int16_t thread) {
-  return Event_ScriptReturnToSavedAddressOpcode(instruction, thread);
+  return VS::Event::ScriptReturnToSavedAddressOpcode(instruction, thread);
 }
 
 std::intptr_t ButtonStoreSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_ScriptStoreButtonStateOpcode(instruction, thread);
+  return VS::Event::ScriptStoreButtonStateOpcode(instruction, thread);
 }
 
 std::intptr_t BeginCutsceneSlotBridge(std::uint8_t* instruction,
                                       std::int16_t thread) {
-  return Event_ScriptBeginSkippableCutsceneOpcode(instruction, thread);
+  return VS::Event::ScriptBeginSkippableCutsceneOpcode(instruction, thread);
 }
 
 std::intptr_t EndCutsceneJumpSlotBridge(std::uint8_t* instruction,
                                         std::int16_t thread) {
-  return Event_ScriptEndCutsceneAndJumpOpcode(instruction, thread);
+  return VS::Event::ScriptEndCutsceneAndJumpOpcode(instruction, thread);
 }
 
 std::intptr_t EndCutsceneSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_ScriptEndCutsceneOpcode(instruction, thread);
+  return VS::Event::ScriptEndCutsceneOpcode(instruction, thread);
 }
 
 std::intptr_t ButtonYieldSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_ScriptWaitForButtonAndYieldOpcode(instruction, thread);
+  return VS::Event::ScriptWaitForButtonAndYieldOpcode(instruction, thread);
 }
 
 std::intptr_t ButtonTimeoutSlotBridge(std::uint8_t* instruction,
                                       std::int16_t thread) {
-  return Event_ScriptWaitForButtonOrTimeoutOpcode(instruction, thread);
+  return VS::Event::ScriptWaitForButtonOrTimeoutOpcode(instruction, thread);
 }
 
 std::intptr_t TimerConfigSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_ScriptConfigureTimerOpcode(instruction, thread);
+  return VS::Event::ScriptConfigureTimerOpcode(instruction, thread);
 }
 
 std::intptr_t EasingConfigSlotBridge(std::uint8_t* instruction,
                                      std::int16_t thread) {
-  return Event_ScriptConfigureEasingCurveOpcode(instruction, thread);
+  return VS::Event::ScriptConfigureEasingCurveOpcode(instruction, thread);
 }
 
 std::intptr_t InvalidOpcodeSlotBridge(std::uint8_t* instruction,
                                       std::int16_t thread) {
-  return Event_ScriptReportInvalidOpcodeOpcode(instruction, thread);
+  return VS::Event::ScriptReportInvalidOpcodeOpcode(instruction, thread);
 }
 
 std::intptr_t FileWaitSlotBridge(std::uint8_t* instruction,
                                  std::int16_t thread) {
-  return Event_ScriptWaitForEventFileOpcode(instruction, thread);
+  return VS::Event::ScriptWaitForEventFileOpcode(instruction, thread);
 }
 
 std::intptr_t LoadEventSlotBridge(std::uint8_t* instruction,
                                   std::int16_t thread) {
-  return Event_CommandLoadNextEventOpcode(instruction, thread);
+  return VS::Event::CommandLoadNextEventOpcode(instruction, thread);
 }
 
 std::intptr_t FinishEventSlotBridge(std::uint8_t* instruction,
                                     std::int16_t thread) {
-  return Event_CommandFinishEventOpcode(instruction, thread);
+  return VS::Event::CommandFinishEventOpcode(instruction, thread);
 }
 
 std::intptr_t SpecialSlotBridge(std::uint8_t* instruction,
                                 std::int16_t thread) {
-  return Event_CommandSpecialOperationOpcode(instruction, thread);
+  return VS::Event::CommandSpecialOperationOpcode(instruction, thread);
 }
 
 void BindLiveSpecialSlot(bool guarded, int skip) {
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
-      guarded ? SpecialSlotBridge : Event_CommandSpecialOperationOpcode;
+      guarded ? SpecialSlotBridge : VS::Event::CommandSpecialOperationOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 3;
   Event_skipState = static_cast<char>(skip);
 }
@@ -937,11 +938,11 @@ void CheckLiveFileWait(bool guarded, int skip, int state) {
   const LiveVmFixture fixture;
   const auto start = MountScript({0xE9, 0xE3, 4, 0xE6});
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
-      guarded ? FileWaitSlotBridge : Event_ScriptWaitForEventFileOpcode;
+      guarded ? FileWaitSlotBridge : VS::Event::ScriptWaitForEventFileOpcode;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
-      Event_CommandSetTickSpeedOpcode;
+      VS::Event::CommandSetTickSpeedOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE3] = 2;
   Event_skipState = static_cast<char>(skip);
   VS::State::tickSpeed = 2;
@@ -962,9 +963,9 @@ void CheckLiveChainedLoad(bool guarded, int skip) {
   const LiveVmFixture fixture;
   const auto start = MountScript({0xE9, 1, 0, 0xE6});
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
-      guarded ? LoadEventSlotBridge : Event_CommandLoadNextEventOpcode;
+      guarded ? LoadEventSlotBridge : VS::Event::CommandLoadNextEventOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 3;
   Event_skipState = static_cast<char>(skip);
   auto& host = event::LiveScriptVm();
@@ -987,7 +988,7 @@ void CheckLiveFinishEvent(bool guarded, int skip) {
   const LiveVmFixture fixture;
   const auto start = MountScript({0xE9});
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
-      guarded ? FinishEventSlotBridge : Event_CommandFinishEventOpcode;
+      guarded ? FinishEventSlotBridge : VS::Event::CommandFinishEventOpcode;
   Event_skipState = static_cast<char>(skip);
   VS::State::tickSpeed = 4;
   auto& host = event::LiveScriptVm();
@@ -1000,9 +1001,10 @@ void CheckLiveFinishEvent(bool guarded, int skip) {
 void CheckLiveEasingConfiguration(bool guarded, int skip) {
   const LiveVmFixture fixture;
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
-      guarded ? EasingConfigSlotBridge : Event_ScriptConfigureEasingCurveOpcode;
+      guarded ? EasingConfigSlotBridge
+              : VS::Event::ScriptConfigureEasingCurveOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 2;
   auto& host = event::LiveScriptVm();
   for (int operand = 0; operand < 256; ++operand) {
@@ -1075,9 +1077,9 @@ void CheckLiveTimerConfiguration(TimerConfigScenario scenario) {
        static_cast<std::uint8_t>(scenario.time >> 8), 0xE6});
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
       scenario.guarded ? TimerConfigSlotBridge
-                       : Event_ScriptConfigureTimerOpcode;
+                       : VS::Event::ScriptConfigureTimerOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 7;
   Event_skipState = static_cast<char>(scenario.skip);
   VS::State::sceneTimer = {.mode = 2,
@@ -1119,12 +1121,12 @@ void CheckLiveButtonWait(ButtonWaitSample sample, bool guarded, int skip) {
   const auto start = MountScript({0xE9, sample.mask, sample.duration, 0xE6});
   const Handler handler =
       sample.timeout ? (guarded ? ButtonTimeoutSlotBridge
-                                : Event_ScriptWaitForButtonOrTimeoutOpcode)
+                                : VS::Event::ScriptWaitForButtonOrTimeoutOpcode)
                      : (guarded ? ButtonYieldSlotBridge
-                                : Event_ScriptWaitForButtonAndYieldOpcode);
+                                : VS::Event::ScriptWaitForButtonAndYieldOpcode);
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] = handler;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = sample.timeout ? 3 : 2;
   Event_skipState = static_cast<char>(skip);
   auto& host = event::LiveScriptVm();
@@ -1169,9 +1171,9 @@ void CheckLiveCutsceneBegin(bool guarded, int skip) {
   const LiveVmFixture fixture;
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
       guarded ? BeginCutsceneSlotBridge
-              : Event_ScriptBeginSkippableCutsceneOpcode;
+              : VS::Event::ScriptBeginSkippableCutsceneOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 2;
   auto& host = event::LiveScriptVm();
   for (int value = 0; value < 256; ++value) {
@@ -1245,10 +1247,11 @@ void CheckLiveCutsceneEnd(CutsceneEndScenario scenario) {
   auto start = MountScript(std::move(bytes));
   start.offset = 32;
   const Handler handler =
-      scenario.jump ? (scenario.guarded ? EndCutsceneJumpSlotBridge
-                                        : Event_ScriptEndCutsceneAndJumpOpcode)
-                    : (scenario.guarded ? EndCutsceneSlotBridge
-                                        : Event_ScriptEndCutsceneOpcode);
+      scenario.jump
+          ? (scenario.guarded ? EndCutsceneJumpSlotBridge
+                              : VS::Event::ScriptEndCutsceneAndJumpOpcode)
+          : (scenario.guarded ? EndCutsceneSlotBridge
+                              : VS::Event::ScriptEndCutsceneOpcode);
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] = handler;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] = StopBridge;
   Event_kOpcodeSizes[0xE9] = scenario.jump ? 3 : 1;
@@ -1283,9 +1286,9 @@ void CheckLiveButtonStore(int operand, bool guarded, int skip) {
       MountScript({0xE9, static_cast<std::uint8_t>(operand),
                    static_cast<std::uint8_t>(operand >> 8), 0xE6});
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
-      guarded ? ButtonStoreSlotBridge : Event_ScriptStoreButtonStateOpcode;
+      guarded ? ButtonStoreSlotBridge : VS::Event::ScriptStoreButtonStateOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 3;
   Event_skipState = static_cast<char>(skip);
   auto& host = event::LiveScriptVm();
@@ -1312,7 +1315,7 @@ void CheckNativeJumpTarget(int displacement, bool guarded, int skip) {
   start.offset = 32;
   Event_skipState = static_cast<char>(skip);
   Event_kSkipOpcodeHandlers[0xE7] = Event_kOpcodeHandlers[0xE7] =
-      guarded ? NativeJumpSlotBridge : Event_ScriptJumpForwardOpcode;
+      guarded ? NativeJumpSlotBridge : VS::Event::ScriptJumpForwardOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] = StopBridge;
   Event_kOpcodeSizes[0xE7] = 3;
   observations = 0;
@@ -1338,16 +1341,16 @@ void CheckLiveFlagBranch(FlagComparison sample, bool guarded, int skip) {
   const bool fallthrough = FrozenFlagBranchHolds(sample);
   const Handler handler =
       sample.pair ? (guarded ? PairBranchSlotBridge
-                             : Event_ScriptBranchOnFlagPairOpcode)
+                             : VS::Event::ScriptBranchOnFlagPairOpcode)
                   : (guarded ? ImmediateBranchSlotBridge
-                             : Event_ScriptBranchOnFlagImmediateOpcode);
+                             : VS::Event::ScriptBranchOnFlagImmediateOpcode);
   Event_skipState = static_cast<char>(skip);
   VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xEF] = Event_kOpcodeHandlers[0xEF] = handler;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
-      Event_CommandSetTickSpeedOpcode;
+      VS::Event::CommandSetTickSpeedOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xEF] = 6;
   Event_kOpcodeSizes[0xE3] = 2;
   event::LiveScriptVm().SetThreadCursor(0, start);
@@ -1385,14 +1388,15 @@ void CheckLiveFlagOperation(FlagComparison sample, bool guarded, int skip) {
   InitializeFlagSample(sample);
   const auto expected = FrozenFlagResult(sample);
   const Handler handler =
-      sample.pair ? (guarded ? PairFlagSlotBridge
-                             : Event_ScriptApplyFlagPairOperationOpcode)
-                  : (guarded ? ImmediateFlagSlotBridge
-                             : Event_ScriptApplyImmediateFlagOperationOpcode);
+      sample.pair
+          ? (guarded ? PairFlagSlotBridge
+                     : VS::Event::ScriptApplyFlagPairOperationOpcode)
+          : (guarded ? ImmediateFlagSlotBridge
+                     : VS::Event::ScriptApplyImmediateFlagOperationOpcode);
   Event_skipState = static_cast<char>(skip);
   Event_kSkipOpcodeHandlers[0xED] = Event_kOpcodeHandlers[0xED] = handler;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xED] = 4;
   event::LiveScriptVm().SetThreadCursor(0, start);
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
@@ -1424,15 +1428,17 @@ event::ScriptLocation PrepareLoopScenario(LoopScenario scenario) {
   Event_skipState = static_cast<char>(scenario.skip);
   VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
-      scenario.guarded ? SetLoopSlotBridge : Event_ScriptSetLoopCounterOpcode;
+      scenario.guarded ? SetLoopSlotBridge
+                       : VS::Event::ScriptSetLoopCounterOpcode;
   Event_kSkipOpcodeHandlers[0xEA] = Event_kOpcodeHandlers[0xEA] =
-      scenario.guarded ? LoopBackSlotBridge : Event_ScriptLoopBackwardOpcode;
+      scenario.guarded ? LoopBackSlotBridge
+                       : VS::Event::ScriptLoopBackwardOpcode;
   Event_kSkipOpcodeHandlers[0xE1] = Event_kOpcodeHandlers[0xE1] =
-      Event_ScriptYieldFrameOpcode;
+      VS::Event::ScriptYieldFrameOpcode;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
-      Event_CommandSetTickSpeedOpcode;
+      VS::Event::CommandSetTickSpeedOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 3;
   Event_kOpcodeSizes[0xEA] = 4;
   Event_kOpcodeSizes[0xE3] = 2;
@@ -1453,13 +1459,14 @@ event::ScriptLocation PrepareCachedScenario(int skip, bool guarded,
   Event_skipState = static_cast<char>(skip);
   VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE7] = Event_kOpcodeHandlers[0xE7] =
-      guarded ? CacheSlotBridge : Event_ScriptCacheFlagValueOpcode;
+      guarded ? CacheSlotBridge : VS::Event::ScriptCacheFlagValueOpcode;
   Event_kSkipOpcodeHandlers[0xE8] = Event_kOpcodeHandlers[0xE8] =
-      guarded ? CachedBranchSlotBridge : Event_ScriptBranchOnCachedFlagOpcode;
+      guarded ? CachedBranchSlotBridge
+              : VS::Event::ScriptBranchOnCachedFlagOpcode;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
-      Event_CommandSetTickSpeedOpcode;
+      VS::Event::CommandSetTickSpeedOpcode;
   Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE7] = 3;
   Event_kOpcodeSizes[0xE8] = 4;
   Event_kOpcodeSizes[0xE3] = 2;
@@ -1478,15 +1485,18 @@ event::ScriptLocation PrepareContextScenario(int skip, bool guarded) {
   Event_skipState = static_cast<char>(skip);
   VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE4] = Event_kOpcodeHandlers[0xE4] =
-      guarded ? StartContextSlotBridge : Event_CommandStartScriptContextOpcode;
+      guarded ? StartContextSlotBridge
+              : VS::Event::CommandStartScriptContextOpcode;
   Event_kSkipOpcodeHandlers[0xE5] = Event_kOpcodeHandlers[0xE5] =
-      guarded ? WaitContextSlotBridge : Event_CommandWaitScriptContextOpcode;
+      guarded ? WaitContextSlotBridge
+              : VS::Event::CommandWaitScriptContextOpcode;
   Event_kSkipOpcodeHandlers[0xE6] = Event_kOpcodeHandlers[0xE6] =
-      guarded ? StopContextSlotBridge : Event_CommandStopScriptContextOpcode;
+      guarded ? StopContextSlotBridge
+              : VS::Event::CommandStopScriptContextOpcode;
   Event_kSkipOpcodeHandlers[0xE2] = Event_kOpcodeHandlers[0xE2] =
-      Event_CommandWaitFramesOpcode;
+      VS::Event::CommandWaitFramesOpcode;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
-      Event_CommandSetTickSpeedOpcode;
+      VS::Event::CommandSetTickSpeedOpcode;
   Event_kOpcodeSizes[0xE4] = 4;
   Event_kOpcodeSizes[0xE5] = Event_kOpcodeSizes[0xE2] =
       Event_kOpcodeSizes[0xE3] = 2;
@@ -1499,9 +1509,10 @@ event::ScriptLocation PrepareContextScenario(int skip, bool guarded) {
 event::ScriptLocation PrepareContextRelease(int operand, bool guarded) {
   const auto start =
       MountScript({0xE5, static_cast<std::uint8_t>(operand), 0xE6, 0xE6});
-  Event_kOpcodeHandlers[0xE5] =
-      guarded ? WaitContextSlotBridge : Event_CommandWaitScriptContextOpcode;
-  Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeHandlers[0xE5] = guarded
+                                    ? WaitContextSlotBridge
+                                    : VS::Event::CommandWaitScriptContextOpcode;
+  Event_kOpcodeHandlers[0xE6] = VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE5] = 2;
   auto& host = event::LiveScriptVm();
   const event::ScriptLocation target{start.region, 3, start.generation};
@@ -1570,11 +1581,11 @@ void CheckWaitScenario(WaitScenario scenario) {
   Event_skipState = static_cast<char>(scenario.skip);
   VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE2] = Event_kOpcodeHandlers[0xE2] =
-      scenario.guarded ? WaitSlotBridge : Event_CommandWaitFramesOpcode;
+      scenario.guarded ? WaitSlotBridge : VS::Event::CommandWaitFramesOpcode;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
-      scenario.guarded ? TickSlotBridge : Event_CommandSetTickSpeedOpcode;
+      scenario.guarded ? TickSlotBridge : VS::Event::CommandSetTickSpeedOpcode;
   Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE2] = Event_kOpcodeSizes[0xE3] = 2;
   auto& host = event::LiveScriptVm();
   host.SetWaitFrames(scenario.thread, 0);
@@ -1832,11 +1843,11 @@ TEST_CASE("Native control bindings preserve normal and skip yield behavior",
       const auto start = MountScript({0xE0, 0xE1, 0xF0});
       Event_skipState = static_cast<char>(skip);
       Event_kSkipOpcodeHandlers[0xE0] = Event_kOpcodeHandlers[0xE0] =
-          guarded ? NoOperationSlotBridge : Event_ScriptNoOperationOpcode;
+          guarded ? NoOperationSlotBridge : VS::Event::ScriptNoOperationOpcode;
       Event_kSkipOpcodeHandlers[0xE1] = Event_kOpcodeHandlers[0xE1] =
-          guarded ? YieldSlotBridge : Event_ScriptYieldFrameOpcode;
+          guarded ? YieldSlotBridge : VS::Event::ScriptYieldFrameOpcode;
       Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
-          Event_CommandStopScriptContextOpcode;
+          VS::Event::CommandStopScriptContextOpcode;
       auto& host = event::LiveScriptVm();
       host.SetThreadCursor(0, start);
       CHECK_FALSE(event::ExecuteLiveScriptThread(0));
@@ -1863,25 +1874,25 @@ TEST_CASE("Native control opcode bindings refuse detached command borrows",
 namespace {
 // The room opcode adapters with their original handlers' addresses.
 constexpr auto kRoomControlEntries = std::to_array<ControlEntry>({
-    {0x800B9770, Event_ScriptSetGimmickVisibilityOpcode},
-    {0x800B979C, Event_ScriptOverrideDepthCueDistanceOpcode},
-    {0x800B97E4, Event_ScriptSetRoomLightingModeOpcode},
-    {0x800B9818, Event_ScriptShowGeometryGroupOpcode},
-    {0x800B983C, Event_ScriptHideGeometryGroupOpcode},
-    {0x800B9860, Event_ScriptSwapGeometryGroupFlagsOpcode},
-    {0x800B988C, Event_ScriptSetCollisionTileModeOpcode},
-    {0x800BA288, Event_ScriptAdjustGeometryDepthBiasOpcode},
-    {0x800B9F28, Event_ScriptSetRoomBackgroundVisibleOpcode},
-    {0x800B9F4C, Event_ScriptLoadRoomBackgroundOpcode},
-    {0x800B9F70, Event_ScriptWaitForRoomBackgroundOpcode},
-    {0x800B9F90, Event_ScriptFreeRoomBackgroundOpcode},
-    {0x800BA218, Event_ScriptSetBackgroundOffsetOpcode},
-    {0x800BA264, Event_ScriptSetFirstPersonViewOpcode},
-    {0x800BA2B4, Event_ScriptSetBackgroundParallaxOpcode},
-    {0x800B9FC0, Event_ScriptSetEnvironmentParticlesOpcode},
-    {0x800BA0E4, Event_ScriptSetParticleVariationEnabledOpcode},
-    {0x800BA108, Event_ScriptMuteEnvironmentSoundOpcode},
-    {0x800BA194, Event_ScriptControlRoomAnimationOpcode},
+    {0x800B9770, VS::Event::ScriptSetGimmickVisibilityOpcode},
+    {0x800B979C, VS::Event::ScriptOverrideDepthCueDistanceOpcode},
+    {0x800B97E4, VS::Event::ScriptSetRoomLightingModeOpcode},
+    {0x800B9818, VS::Event::ScriptShowGeometryGroupOpcode},
+    {0x800B983C, VS::Event::ScriptHideGeometryGroupOpcode},
+    {0x800B9860, VS::Event::ScriptSwapGeometryGroupFlagsOpcode},
+    {0x800B988C, VS::Event::ScriptSetCollisionTileModeOpcode},
+    {0x800BA288, VS::Event::ScriptAdjustGeometryDepthBiasOpcode},
+    {0x800B9F28, VS::Event::ScriptSetRoomBackgroundVisibleOpcode},
+    {0x800B9F4C, VS::Event::ScriptLoadRoomBackgroundOpcode},
+    {0x800B9F70, VS::Event::ScriptWaitForRoomBackgroundOpcode},
+    {0x800B9F90, VS::Event::ScriptFreeRoomBackgroundOpcode},
+    {0x800BA218, VS::Event::ScriptSetBackgroundOffsetOpcode},
+    {0x800BA264, VS::Event::ScriptSetFirstPersonViewOpcode},
+    {0x800BA2B4, VS::Event::ScriptSetBackgroundParallaxOpcode},
+    {0x800B9FC0, VS::Event::ScriptSetEnvironmentParticlesOpcode},
+    {0x800BA0E4, VS::Event::ScriptSetParticleVariationEnabledOpcode},
+    {0x800BA108, VS::Event::ScriptMuteEnvironmentSoundOpcode},
+    {0x800BA194, VS::Event::ScriptControlRoomAnimationOpcode},
 });
 
 // Restores the draw mode, the texture LOD preserve flag and the room clip
@@ -1905,9 +1916,9 @@ struct RoomOpcodeStateFixture {
 
 void RunRoomScript(Bytes bytes) {
   const auto start = MountScript(std::move(bytes));
-  Event_kOpcodeHandlers[0x61] = Event_ScriptOverrideDepthCueDistanceOpcode;
-  Event_kOpcodeHandlers[0x62] = Event_ScriptSetRoomLightingModeOpcode;
-  Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeHandlers[0x61] = VS::Event::ScriptOverrideDepthCueDistanceOpcode;
+  Event_kOpcodeHandlers[0x62] = VS::Event::ScriptSetRoomLightingModeOpcode;
+  Event_kOpcodeHandlers[0xF0] = VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0x61] = 3;
   Event_kOpcodeSizes[0x62] = 2;
   auto& host = event::LiveScriptVm();
@@ -1983,19 +1994,19 @@ event::ScriptLocation MountBackgroundScript(Bytes bytes) {
   const auto start = MountScript(std::move(bytes));
   const std::array bindings{
       std::pair<std::uint8_t, Handler>{
-          0x73, Event_ScriptSetRoomBackgroundVisibleOpcode},
-      std::pair<std::uint8_t, Handler>{0x75,
-                                       Event_ScriptWaitForRoomBackgroundOpcode},
-      std::pair<std::uint8_t, Handler>{0x76,
-                                       Event_ScriptFreeRoomBackgroundOpcode},
-      std::pair<std::uint8_t, Handler>{0x7B,
-                                       Event_ScriptSetBackgroundOffsetOpcode},
-      std::pair<std::uint8_t, Handler>{0x7C,
-                                       Event_ScriptSetFirstPersonViewOpcode},
-      std::pair<std::uint8_t, Handler>{0x7E,
-                                       Event_ScriptSetBackgroundParallaxOpcode},
-      std::pair<std::uint8_t, Handler>{0xF0,
-                                       Event_CommandStopScriptContextOpcode},
+          0x73, VS::Event::ScriptSetRoomBackgroundVisibleOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0x75, VS::Event::ScriptWaitForRoomBackgroundOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0x76, VS::Event::ScriptFreeRoomBackgroundOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0x7B, VS::Event::ScriptSetBackgroundOffsetOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0x7C, VS::Event::ScriptSetFirstPersonViewOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0x7E, VS::Event::ScriptSetBackgroundParallaxOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0xF0, VS::Event::CommandStopScriptContextOpcode},
   };
   for (const auto& [opcode, handler] : bindings) {
     Event_kOpcodeHandlers[opcode] = handler;
@@ -2071,14 +2082,14 @@ namespace {
 // The fade, display and palette opcode adapters with their original
 // handlers' addresses.
 constexpr auto kScreenControlEntries = std::to_array<ControlEntry>({
-    {0x800B9A40, Event_ScriptFadeOutAndWaitOpcode},
-    {0x800B9A94, Event_ScriptFadeInOpcode},
-    {0x800B9AC4, Event_ScriptSetWipeAngleOpcode},
-    {0x800B9AE8, Event_ScriptConfigureScreenTransitionOpcode},
-    {0x800B9B18, Event_ScriptSetRoomDisplayFlagsOpcode},
-    {0x800B9BF8, Event_ScriptWaitForScreenTransitionOpcode},
-    {0x800B9C18, Event_ScriptTogglePaletteHookOpcode},
-    {0x800B9C58, Event_ScriptTransformPalettesOpcode},
+    {0x800B9A40, VS::Event::ScriptFadeOutAndWaitOpcode},
+    {0x800B9A94, VS::Event::ScriptFadeInOpcode},
+    {0x800B9AC4, VS::Event::ScriptSetWipeAngleOpcode},
+    {0x800B9AE8, VS::Event::ScriptConfigureScreenTransitionOpcode},
+    {0x800B9B18, VS::Event::ScriptSetRoomDisplayFlagsOpcode},
+    {0x800B9BF8, VS::Event::ScriptWaitForScreenTransitionOpcode},
+    {0x800B9C18, VS::Event::ScriptTogglePaletteHookOpcode},
+    {0x800B9C58, VS::Event::ScriptTransformPalettesOpcode},
 });
 
 // Restores the screen transition and the palette animation the screen
@@ -2110,12 +2121,13 @@ void SetTransitionStep(VS::Field::TransitionStep step) {
 // thread 0 at it.
 void MountScreenScript(Bytes bytes) {
   const auto start = MountScript(std::move(bytes));
-  Event_kOpcodeHandlers[0x69] = Event_ScriptFadeOutAndWaitOpcode;
-  Event_kOpcodeHandlers[0x6B] = Event_ScriptSetWipeAngleOpcode;
-  Event_kOpcodeHandlers[0x6C] = Event_ScriptConfigureScreenTransitionOpcode;
-  Event_kOpcodeHandlers[0x6E] = Event_ScriptWaitForScreenTransitionOpcode;
-  Event_kOpcodeHandlers[0x70] = Event_ScriptTransformPalettesOpcode;
-  Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContextOpcode;
+  Event_kOpcodeHandlers[0x69] = VS::Event::ScriptFadeOutAndWaitOpcode;
+  Event_kOpcodeHandlers[0x6B] = VS::Event::ScriptSetWipeAngleOpcode;
+  Event_kOpcodeHandlers[0x6C] =
+      VS::Event::ScriptConfigureScreenTransitionOpcode;
+  Event_kOpcodeHandlers[0x6E] = VS::Event::ScriptWaitForScreenTransitionOpcode;
+  Event_kOpcodeHandlers[0x70] = VS::Event::ScriptTransformPalettesOpcode;
+  Event_kOpcodeHandlers[0xF0] = VS::Event::CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0x69] = 4;
   Event_kOpcodeSizes[0x6B] = 2;
   Event_kOpcodeSizes[0x6C] = 4;
@@ -2221,12 +2233,12 @@ TEST_CASE("Native palette binding transforms the live background colours",
 namespace {
 // The splash opcode adapters with their original handlers' addresses.
 constexpr auto kSplashControlEntries = std::to_array<ControlEntry>({
-    {0x800B6724, Event_ScriptWaitForSplashFileOpcode},
-    {0x800B6FD8, Event_ScriptLoadSplashImageOpcode},
-    {0x800B7014, Event_ScriptConfigureSplashLayerOpcode},
-    {0x800B70E8, Event_ScriptTweenSplashLayerOpcode},
-    {0x800B71C4, Event_ScriptFreeSplashImageOpcode},
-    {0x800B71F4, Event_ScriptWaitForSplashTweenOpcode},
+    {0x800B6724, VS::Event::ScriptWaitForSplashFileOpcode},
+    {0x800B6FD8, VS::Event::ScriptLoadSplashImageOpcode},
+    {0x800B7014, VS::Event::ScriptConfigureSplashLayerOpcode},
+    {0x800B70E8, VS::Event::ScriptTweenSplashLayerOpcode},
+    {0x800B71C4, VS::Event::ScriptFreeSplashImageOpcode},
+    {0x800B71F4, VS::Event::ScriptWaitForSplashTweenOpcode},
 });
 
 // The six tween records the native array keeps.
@@ -2285,7 +2297,7 @@ int RunSplashScript(Bytes bytes) {
     Event_kOpcodeSizes[opcode] = size;
   }
   Event_kSkipOpcodeHandlers[0xF0] = Event_kOpcodeHandlers[0xF0] =
-      Event_CommandStopScriptContextOpcode;
+      VS::Event::CommandStopScriptContextOpcode;
   auto& host = event::LiveScriptVm();
   host.SetThreadCursor(0, start);
   static_cast<void>(event::ExecuteLiveScriptThread(0));
@@ -2434,13 +2446,13 @@ void RunEnvironmentScript(Bytes bytes) {
   const auto start = MountScript(std::move(bytes));
   const std::array bindings{
       std::pair<std::uint8_t, Handler>{
-          0x77, Event_ScriptSetEnvironmentParticlesOpcode},
+          0x77, VS::Event::ScriptSetEnvironmentParticlesOpcode},
       std::pair<std::uint8_t, Handler>{
-          0x78, Event_ScriptSetParticleVariationEnabledOpcode},
-      std::pair<std::uint8_t, Handler>{0x7A,
-                                       Event_ScriptMuteEnvironmentSoundOpcode},
-      std::pair<std::uint8_t, Handler>{0xF0,
-                                       Event_CommandStopScriptContextOpcode},
+          0x78, VS::Event::ScriptSetParticleVariationEnabledOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0x7A, VS::Event::ScriptMuteEnvironmentSoundOpcode},
+      std::pair<std::uint8_t, Handler>{
+          0xF0, VS::Event::CommandStopScriptContextOpcode},
   };
   for (const auto& [opcode, handler] : bindings) {
     Event_kOpcodeHandlers[opcode] = handler;
@@ -2522,8 +2534,8 @@ TEST_CASE("Native tick binding preserves the existing byte selector policy",
           MountScript({0xE3, static_cast<std::uint8_t>(operand), 0xF0});
       VS::State::tickSpeed = 2;
       Event_kOpcodeHandlers[0xE3] =
-          guarded ? TickSlotBridge : Event_CommandSetTickSpeedOpcode;
-      Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContextOpcode;
+          guarded ? TickSlotBridge : VS::Event::CommandSetTickSpeedOpcode;
+      Event_kOpcodeHandlers[0xF0] = VS::Event::CommandStopScriptContextOpcode;
       Event_kOpcodeSizes[0xE3] = 2;
       auto& host = event::LiveScriptVm();
       host.SetThreadCursor(0, start);
@@ -2870,11 +2882,11 @@ TEST_CASE("Native invalid opcode bindings preserve diagnostic continuation",
   for (const bool guarded : {false, true}) {
     const LiveVmFixture fixture;
     const auto start = MountScript({0xE9, 0xE3, 4, 0xE6});
-    Event_kOpcodeHandlers[0xE9] = guarded
-                                      ? InvalidOpcodeSlotBridge
-                                      : Event_ScriptReportInvalidOpcodeOpcode;
-    Event_kOpcodeHandlers[0xE3] = Event_CommandSetTickSpeedOpcode;
-    Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
+    Event_kOpcodeHandlers[0xE9] =
+        guarded ? InvalidOpcodeSlotBridge
+                : VS::Event::ScriptReportInvalidOpcodeOpcode;
+    Event_kOpcodeHandlers[0xE3] = VS::Event::CommandSetTickSpeedOpcode;
+    Event_kOpcodeHandlers[0xE6] = VS::Event::CommandStopScriptContextOpcode;
     Event_kOpcodeSizes[0xE3] = 2;
     VS::State::tickSpeed = 2;
     event::LiveScriptVm().SetThreadCursor(0, start);
@@ -3126,9 +3138,9 @@ TEST_CASE("Native saved return binding preserves missing and stale locations",
       const auto start = MountScript({0xE8, 0xE3, 4, 0xE6});
       Event_kOpcodeHandlers[0xE8] =
           guarded ? NativeReturnSlotBridge
-                  : Event_ScriptReturnToSavedAddressOpcode;
-      Event_kOpcodeHandlers[0xE3] = Event_CommandSetTickSpeedOpcode;
-      Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
+                  : VS::Event::ScriptReturnToSavedAddressOpcode;
+      Event_kOpcodeHandlers[0xE3] = VS::Event::CommandSetTickSpeedOpcode;
+      Event_kOpcodeHandlers[0xE6] = VS::Event::CommandStopScriptContextOpcode;
       Event_kOpcodeSizes[0xE3] = 2;
       VS::State::tickSpeed = 2;
       auto& host = event::LiveScriptVm();
@@ -3166,7 +3178,7 @@ TEST_CASE("Live VM routes the original control handler through typed dispatch",
   const LiveVmFixture fixture;
   const auto start = MountScript({0x42, 3, 0, 0xF0});
   observations = 0;
-  Event_kOpcodeHandlers[0x42] = Event_ScriptJumpForwardOpcode;
+  Event_kOpcodeHandlers[0x42] = VS::Event::ScriptJumpForwardOpcode;
   Event_kOpcodeHandlers[0xF0] = StopBridge;
   Event_kOpcodeSizes[0x42] = 3;
   event::LiveScriptVm().SetThreadCursor(0, start);
@@ -3183,7 +3195,7 @@ TEST_CASE("Live VM selects typed control handlers from the skip table",
   observations = 0;
   Event_skipState = 2;
   Event_kOpcodeHandlers[0x42] = PointerResult;
-  Event_kSkipOpcodeHandlers[0x42] = Event_ScriptJumpForwardOpcode;
+  Event_kSkipOpcodeHandlers[0x42] = VS::Event::ScriptJumpForwardOpcode;
   Event_kSkipOpcodeHandlers[0xF0] = StopBridge;
   Event_kOpcodeSizes[0x42] = 3;
   event::LiveScriptVm().SetThreadCursor(0, start);
@@ -3199,7 +3211,7 @@ TEST_CASE("Live VM original loop handler obeys the bounded counter contract",
   const auto start = MountScript({0xE1, 20, 7, 0xF0});
   observations = 0;
   Event_loopCounters[20] = 0x55;
-  Event_kOpcodeHandlers[0xE1] = Event_ScriptSetLoopCounterOpcode;
+  Event_kOpcodeHandlers[0xE1] = VS::Event::ScriptSetLoopCounterOpcode;
   Event_kOpcodeHandlers[0xF0] = StopBridge;
   Event_kOpcodeSizes[0xE1] = 3;
   event::LiveScriptVm().SetThreadCursor(0, start);
@@ -3214,7 +3226,7 @@ TEST_CASE("Live VM original return handler uses the owned native location",
   const auto start = MountScript({0xE1, 0xF3, 0xF0});
   observations = 0;
   Event_subroutineReturnCursor = 0;
-  Event_kOpcodeHandlers[0xE1] = Event_ScriptReturnToSavedAddressOpcode;
+  Event_kOpcodeHandlers[0xE1] = VS::Event::ScriptReturnToSavedAddressOpcode;
   Event_kOpcodeHandlers[0xF3] = StopBridge;
   Event_kOpcodeHandlers[0xF0] = StopBridge;
   auto& host = event::LiveScriptVm();

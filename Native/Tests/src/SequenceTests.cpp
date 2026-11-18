@@ -39,9 +39,9 @@
 #include "Effects/Camera.h"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.h"
-#include "Event/ScriptActorOpcodes.h"
+#include "Event/ScriptActorOpcodes.hpp"
 #include "Event/ScriptActors.h"
-#include "Event/ScriptEffectOpcodes.h"
+#include "Event/ScriptEffectOpcodes.hpp"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
 #include "Field/CameraLiveState.hpp"
@@ -273,8 +273,8 @@ int TestSharedSequenceRetirementControl(int scenario) {
   int status;
   if (scenario == 4) {
     u_char instruction[] = {0x82, 3};
-    status =
-        static_cast<int>(Event_ScriptReleaseObjectModelOpcode(instruction, 0));
+    status = static_cast<int>(
+        VS::Event::ScriptReleaseObjectModelOpcode(instruction, 0));
   } else {
     status = VS::Actors::UnloadLiveSharedSequence(scenario == 3 ? 0 : 3);
   }
@@ -951,7 +951,7 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
   Event_skipState = skip ? 2 : 0;
   Event_scriptControlledActors[kSlot] = 0;
   const intptr_t status =
-      Event_ScriptSlideActorToWorldPosOpcode(instruction, 0);
+      VS::Event::ScriptSlideActorToWorldPosOpcode(instruction, 0);
   int passed = status == 0 && Event_scriptControlledActors[kSlot] == 1;
   if (present) {
     passed &= actor.moveRate == kDefaultRate;
@@ -1047,7 +1047,8 @@ int TestScriptedEffectTargetBinding(int scenario) {
       0xA0, static_cast<u_char>(effect), static_cast<u_char>(effect >> 8),
       static_cast<u_char>(selector), static_cast<u_char>(selector >> 8)};
   Effects_primaryPhase = 3;
-  const intptr_t result = Event_CommandPlayActorEffectOpcode(instruction, 0);
+  const intptr_t result =
+      VS::Event::CommandPlayActorEffectOpcode(instruction, 0);
   memcpy(request_after, &Effects_actionRequest, sizeof request_after);
   // Absent model (3) and direct slot references to an empty slot (4, 10) start
   // like the original: func_800BFE50 returns type-1 slots unchecked.

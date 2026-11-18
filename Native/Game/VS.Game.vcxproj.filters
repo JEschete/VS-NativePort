@@ -1902,7 +1902,7 @@
     <ClCompile Include="src\Event\ScriptActorCommandsLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptActorOpcodes.h">
+    <ClInclude Include="src\Event\ScriptActorOpcodes.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptActors.cpp">
@@ -1923,7 +1923,7 @@
     <ClCompile Include="src\Event\ScriptAudioCommandsLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptAudioOpcodes.h">
+    <ClInclude Include="src\Event\ScriptAudioOpcodes.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptCamera.cpp">
@@ -1935,7 +1935,7 @@
     <ClCompile Include="src\Event\ScriptControl.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptControlOpcodes.h">
+    <ClInclude Include="src\Event\ScriptControlOpcodes.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptDialog.cpp">
@@ -1950,7 +1950,7 @@
     <ClCompile Include="src\Event\ScriptDialogCommandsLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptDialogOpcodes.h">
+    <ClInclude Include="src\Event\ScriptDialogOpcodes.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptEffectCommands.cpp">
@@ -1959,7 +1959,7 @@
     <ClCompile Include="src\Event\ScriptEffectCommandsLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\ScriptEffectOpcodes.h">
+    <ClInclude Include="src\Event\ScriptEffectOpcodes.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\ScriptEffects.cpp">

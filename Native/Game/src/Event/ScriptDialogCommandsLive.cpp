@@ -19,7 +19,7 @@
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptDialogCommands.hpp"
-#include "Event/ScriptDialogOpcodes.h"
+#include "Event/ScriptDialogOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
@@ -285,68 +285,68 @@ void ReleaseLiveScriptDialogText() noexcept {
 
 // decomp: vs_battle_script_initTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:672),
 // opcode 0x10
-intptr_t Event_ScriptInitDialogBoxOpcode(u_char* command,
-                                         int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptInitDialogBoxOpcode(std::uint8_t* command,
+                                                   std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptInitDialogBox, command,
                     event::kInitDialogBoxLength);
 }
 
 // decomp: vs_battle_script_showTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:707),
 // opcode 0x11
-intptr_t Event_ScriptShowDialogTextOpcode(u_char* command,
-                                          int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptShowDialogTextOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptShowDialogText, command,
                     event::kShowDialogTextLength);
 }
 
 // decomp: vs_battle_script_dismissTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:733),
 // opcode 0x12
-intptr_t Event_ScriptDismissDialogBoxOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptDismissDialogBoxOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptDismissDialogBox, command,
                     event::kDismissDialogBoxLength);
 }
 
 // decomp: func_800B6D48 (src/BATTLE/BATTLE.PRG/4A0A8.c:794), opcode 0x13
-intptr_t Event_ScriptInitActorDialogBoxOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptInitActorDialogBoxOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptInitActorDialogBox, command,
                     event::kInitActorDialogBoxLength);
 }
 
 // decomp: func_800B6F8C (src/BATTLE/BATTLE.PRG/4A0A8.c:838), opcode 0x14
-intptr_t Event_ScriptWaitForDialogDismissalOpcode(u_char* command,
-                                                  int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptWaitForDialogDismissalOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptWaitForDialogDismissal, command,
                     event::kWaitForDialogDismissalLength);
 }
 
 // decomp: vs_battle_script_setStringContextInt
 // (src/BATTLE/BATTLE.PRG/4A0A8.c:916), opcode 0x1B
-intptr_t Event_ScriptSetDialogIntegerOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetDialogIntegerOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetDialogInteger, command,
                     event::kSetDialogIntegerLength);
 }
 
 // decomp: func_800B7358 (src/BATTLE/BATTLE.PRG/4A0A8.c:941), opcode 0x1D
-intptr_t Event_ScriptSetDialogTransitionDurationOpcode(u_char* command,
-                                                       int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetDialogTransitionDurationOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetDialogTransitionDuration, command,
                     event::kSetDialogTransitionDurationLength);
 }
 
 // decomp: vs_battle_script_selectTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:947),
 // opcode 0x1C
-intptr_t Event_ScriptSelectDialogChoiceOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSelectDialogChoiceOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSelectDialogChoice, command,
                     event::kSelectDialogChoiceLength);
 }
 
 // decomp: func_800B9564 (src/BATTLE/BATTLE.PRG/4A0A8.c:1897), opcode 0x5B
-intptr_t Event_ScriptSetDialogSpeakerOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetDialogSpeakerOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetDialogSpeaker, command,
                     event::kSetDialogSpeakerLength);
 }

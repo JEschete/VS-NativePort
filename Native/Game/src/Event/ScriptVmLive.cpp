@@ -42,7 +42,7 @@
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptCamera.h"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptEffectCommandsLive.hpp"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptField.h"
@@ -94,112 +94,93 @@ struct ControlBinding {
 // decomp: INITBTL.PRG _initScriptFunctionTable (12AC.c:69), BATTLE.PRG
 // control handlers in 4A0A8.c and 573B8.c. Match the selected table's target.
 constexpr std::array kControlBindings{
-    ControlBinding{Event_ScriptReportInvalidOpcodeOpcode,
-                   ScriptReportInvalidOpcode},
-    ControlBinding{Event_ScriptNoOperationOpcode, ScriptNoOperation},
-    ControlBinding{Event_ScriptYieldFrameOpcode, ScriptYieldFrame},
-    ControlBinding{Event_ScriptWaitForEventFileOpcode, ScriptWaitForEventFile},
-    ControlBinding{Event_ScriptBeginSkippableCutsceneOpcode,
+    ControlBinding{ScriptReportInvalidOpcodeOpcode, ScriptReportInvalidOpcode},
+    ControlBinding{ScriptNoOperationOpcode, ScriptNoOperation},
+    ControlBinding{ScriptYieldFrameOpcode, ScriptYieldFrame},
+    ControlBinding{ScriptWaitForEventFileOpcode, ScriptWaitForEventFile},
+    ControlBinding{ScriptBeginSkippableCutsceneOpcode,
                    ScriptBeginSkippableCutscene},
-    ControlBinding{Event_ScriptEndCutsceneAndJumpOpcode,
-                   ScriptEndCutsceneAndJump},
-    ControlBinding{Event_ScriptEndCutsceneOpcode, ScriptEndCutscene},
-    ControlBinding{Event_ScriptWaitForButtonAndYieldOpcode,
+    ControlBinding{ScriptEndCutsceneAndJumpOpcode, ScriptEndCutsceneAndJump},
+    ControlBinding{ScriptEndCutsceneOpcode, ScriptEndCutscene},
+    ControlBinding{ScriptWaitForButtonAndYieldOpcode,
                    ScriptWaitForButtonAndYield},
-    ControlBinding{Event_ScriptBranchOnFlagImmediateOpcode,
+    ControlBinding{ScriptBranchOnFlagImmediateOpcode,
                    ScriptBranchOnFlagImmediate},
-    ControlBinding{Event_ScriptBranchOnFlagPairOpcode, ScriptBranchOnFlagPair},
-    ControlBinding{Event_ScriptJumpForwardOpcode, ScriptJumpForward},
-    ControlBinding{Event_ScriptCacheFlagValueOpcode, ScriptCacheFlagValue},
-    ControlBinding{Event_ScriptBranchOnCachedFlagOpcode,
-                   ScriptBranchOnCachedFlag},
-    ControlBinding{Event_ScriptReturnToSavedAddressOpcode,
+    ControlBinding{ScriptBranchOnFlagPairOpcode, ScriptBranchOnFlagPair},
+    ControlBinding{ScriptJumpForwardOpcode, ScriptJumpForward},
+    ControlBinding{ScriptCacheFlagValueOpcode, ScriptCacheFlagValue},
+    ControlBinding{ScriptBranchOnCachedFlagOpcode, ScriptBranchOnCachedFlag},
+    ControlBinding{ScriptReturnToSavedAddressOpcode,
                    ScriptReturnToSavedAddress},
-    ControlBinding{Event_ScriptSetLoopCounterOpcode, ScriptSetLoopCounter},
-    ControlBinding{Event_ScriptLoopBackwardOpcode, ScriptLoopBackward},
-    ControlBinding{Event_ScriptApplyImmediateFlagOperationOpcode,
+    ControlBinding{ScriptSetLoopCounterOpcode, ScriptSetLoopCounter},
+    ControlBinding{ScriptLoopBackwardOpcode, ScriptLoopBackward},
+    ControlBinding{ScriptApplyImmediateFlagOperationOpcode,
                    ScriptApplyImmediateFlagOperation},
-    ControlBinding{Event_ScriptApplyFlagPairOperationOpcode,
+    ControlBinding{ScriptApplyFlagPairOperationOpcode,
                    ScriptApplyFlagPairOperation},
-    ControlBinding{Event_ScriptStoreInventoryItemPresenceOpcode,
+    ControlBinding{ScriptStoreInventoryItemPresenceOpcode,
                    ScriptStoreInventoryItemPresence},
-    ControlBinding{Event_ScriptStoreButtonStateOpcode, ScriptStoreButtonState},
-    ControlBinding{Event_ScriptConfigureTimerOpcode, ScriptConfigureTimer},
-    ControlBinding{Event_ScriptWaitForButtonOrTimeoutOpcode,
+    ControlBinding{ScriptStoreButtonStateOpcode, ScriptStoreButtonState},
+    ControlBinding{ScriptConfigureTimerOpcode, ScriptConfigureTimer},
+    ControlBinding{ScriptWaitForButtonOrTimeoutOpcode,
                    ScriptWaitForButtonOrTimeout},
-    ControlBinding{Event_ScriptConfigureEasingCurveOpcode,
+    ControlBinding{ScriptConfigureEasingCurveOpcode,
                    ScriptConfigureEasingCurve},
-    ControlBinding{Event_CommandSpecialOperationOpcode,
-                   CommandSpecialOperation},
-    ControlBinding{Event_CommandWaitFramesOpcode, CommandWaitFrames},
-    ControlBinding{Event_CommandSetTickSpeedOpcode, CommandSetTickSpeed},
-    ControlBinding{Event_CommandWaitScriptContextOpcode,
-                   CommandWaitScriptContext},
-    ControlBinding{Event_CommandStartScriptContextOpcode,
-                   CommandStartScriptContext},
-    ControlBinding{Event_CommandStopScriptContextOpcode,
-                   CommandStopScriptContext},
-    ControlBinding{Event_CommandLoadNextEventOpcode, CommandLoadNextEvent},
-    ControlBinding{Event_CommandFinishEventOpcode, CommandFinishEvent},
-    ControlBinding{Event_ScriptSetGimmickVisibilityOpcode,
+    ControlBinding{CommandSpecialOperationOpcode, CommandSpecialOperation},
+    ControlBinding{CommandWaitFramesOpcode, CommandWaitFrames},
+    ControlBinding{CommandSetTickSpeedOpcode, CommandSetTickSpeed},
+    ControlBinding{CommandWaitScriptContextOpcode, CommandWaitScriptContext},
+    ControlBinding{CommandStartScriptContextOpcode, CommandStartScriptContext},
+    ControlBinding{CommandStopScriptContextOpcode, CommandStopScriptContext},
+    ControlBinding{CommandLoadNextEventOpcode, CommandLoadNextEvent},
+    ControlBinding{CommandFinishEventOpcode, CommandFinishEvent},
+    ControlBinding{ScriptSetGimmickVisibilityOpcode,
                    ScriptSetGimmickVisibility},
-    ControlBinding{Event_ScriptOverrideDepthCueDistanceOpcode,
+    ControlBinding{ScriptOverrideDepthCueDistanceOpcode,
                    ScriptOverrideDepthCueDistance},
-    ControlBinding{Event_ScriptSetRoomLightingModeOpcode,
-                   ScriptSetRoomLightingMode},
-    ControlBinding{Event_ScriptShowGeometryGroupOpcode,
-                   ScriptShowGeometryGroup},
-    ControlBinding{Event_ScriptHideGeometryGroupOpcode,
-                   ScriptHideGeometryGroup},
-    ControlBinding{Event_ScriptSwapGeometryGroupFlagsOpcode,
+    ControlBinding{ScriptSetRoomLightingModeOpcode, ScriptSetRoomLightingMode},
+    ControlBinding{ScriptShowGeometryGroupOpcode, ScriptShowGeometryGroup},
+    ControlBinding{ScriptHideGeometryGroupOpcode, ScriptHideGeometryGroup},
+    ControlBinding{ScriptSwapGeometryGroupFlagsOpcode,
                    ScriptSwapGeometryGroupFlags},
-    ControlBinding{Event_ScriptSetCollisionTileModeOpcode,
+    ControlBinding{ScriptSetCollisionTileModeOpcode,
                    ScriptSetCollisionTileMode},
-    ControlBinding{Event_ScriptAdjustGeometryDepthBiasOpcode,
+    ControlBinding{ScriptAdjustGeometryDepthBiasOpcode,
                    ScriptAdjustGeometryDepthBias},
-    ControlBinding{Event_ScriptSetRoomBackgroundVisibleOpcode,
+    ControlBinding{ScriptSetRoomBackgroundVisibleOpcode,
                    ScriptSetRoomBackgroundVisible},
-    ControlBinding{Event_ScriptLoadRoomBackgroundOpcode,
-                   ScriptLoadRoomBackground},
-    ControlBinding{Event_ScriptWaitForRoomBackgroundOpcode,
+    ControlBinding{ScriptLoadRoomBackgroundOpcode, ScriptLoadRoomBackground},
+    ControlBinding{ScriptWaitForRoomBackgroundOpcode,
                    ScriptWaitForRoomBackground},
-    ControlBinding{Event_ScriptFreeRoomBackgroundOpcode,
-                   ScriptFreeRoomBackground},
-    ControlBinding{Event_ScriptSetBackgroundOffsetOpcode,
-                   ScriptSetBackgroundOffset},
-    ControlBinding{Event_ScriptSetFirstPersonViewOpcode,
-                   ScriptSetFirstPersonView},
-    ControlBinding{Event_ScriptSetBackgroundParallaxOpcode,
+    ControlBinding{ScriptFreeRoomBackgroundOpcode, ScriptFreeRoomBackground},
+    ControlBinding{ScriptSetBackgroundOffsetOpcode, ScriptSetBackgroundOffset},
+    ControlBinding{ScriptSetFirstPersonViewOpcode, ScriptSetFirstPersonView},
+    ControlBinding{ScriptSetBackgroundParallaxOpcode,
                    ScriptSetBackgroundParallax},
-    ControlBinding{Event_ScriptFadeOutAndWaitOpcode, ScriptFadeOutAndWait},
-    ControlBinding{Event_ScriptFadeInOpcode, ScriptFadeIn},
-    ControlBinding{Event_ScriptSetWipeAngleOpcode, ScriptSetWipeAngle},
-    ControlBinding{Event_ScriptConfigureScreenTransitionOpcode,
+    ControlBinding{ScriptFadeOutAndWaitOpcode, ScriptFadeOutAndWait},
+    ControlBinding{ScriptFadeInOpcode, ScriptFadeIn},
+    ControlBinding{ScriptSetWipeAngleOpcode, ScriptSetWipeAngle},
+    ControlBinding{ScriptConfigureScreenTransitionOpcode,
                    ScriptConfigureScreenTransition},
-    ControlBinding{Event_ScriptSetRoomDisplayFlagsOpcode,
-                   ScriptSetRoomDisplayFlags},
-    ControlBinding{Event_ScriptWaitForScreenTransitionOpcode,
+    ControlBinding{ScriptSetRoomDisplayFlagsOpcode, ScriptSetRoomDisplayFlags},
+    ControlBinding{ScriptWaitForScreenTransitionOpcode,
                    ScriptWaitForScreenTransition},
-    ControlBinding{Event_ScriptTogglePaletteHookOpcode,
-                   ScriptTogglePaletteHook},
-    ControlBinding{Event_ScriptTransformPalettesOpcode,
-                   ScriptTransformPalettes},
-    ControlBinding{Event_ScriptWaitForSplashFileOpcode,
-                   ScriptWaitForSplashFile},
-    ControlBinding{Event_ScriptLoadSplashImageOpcode, ScriptLoadSplashImage},
-    ControlBinding{Event_ScriptConfigureSplashLayerOpcode,
+    ControlBinding{ScriptTogglePaletteHookOpcode, ScriptTogglePaletteHook},
+    ControlBinding{ScriptTransformPalettesOpcode, ScriptTransformPalettes},
+    ControlBinding{ScriptWaitForSplashFileOpcode, ScriptWaitForSplashFile},
+    ControlBinding{ScriptLoadSplashImageOpcode, ScriptLoadSplashImage},
+    ControlBinding{ScriptConfigureSplashLayerOpcode,
                    ScriptConfigureSplashLayer},
-    ControlBinding{Event_ScriptTweenSplashLayerOpcode, ScriptTweenSplashLayer},
-    ControlBinding{Event_ScriptFreeSplashImageOpcode, ScriptFreeSplashImage},
-    ControlBinding{Event_ScriptWaitForSplashTweenOpcode,
-                   ScriptWaitForSplashTween},
-    ControlBinding{Event_ScriptSetEnvironmentParticlesOpcode,
+    ControlBinding{ScriptTweenSplashLayerOpcode, ScriptTweenSplashLayer},
+    ControlBinding{ScriptFreeSplashImageOpcode, ScriptFreeSplashImage},
+    ControlBinding{ScriptWaitForSplashTweenOpcode, ScriptWaitForSplashTween},
+    ControlBinding{ScriptSetEnvironmentParticlesOpcode,
                    ScriptSetEnvironmentParticles},
-    ControlBinding{Event_ScriptSetParticleVariationEnabledOpcode,
+    ControlBinding{ScriptSetParticleVariationEnabledOpcode,
                    ScriptSetParticleVariationEnabled},
-    ControlBinding{Event_ScriptMuteEnvironmentSoundOpcode,
+    ControlBinding{ScriptMuteEnvironmentSoundOpcode,
                    ScriptMuteEnvironmentSound},
-    ControlBinding{Event_ScriptControlRoomAnimationOpcode,
+    ControlBinding{ScriptControlRoomAnimationOpcode,
                    ScriptControlRoomAnimation},
 };
 
@@ -1218,448 +1199,448 @@ int ResolveLiveScriptActorReference(std::uint16_t reference) {
 }  // namespace VS::Event
 
 // decomp: BATTLE.PRG func_800B66E4 (4A0A8.c:597).
-std::intptr_t Event_ScriptNoOperationOpcode(std::uint8_t* instruction,
-                                            std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptNoOperationOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptNoOperation);
 }
 
 // decomp: BATTLE.PRG func_800B66EC (4A0A8.c:599).
-std::intptr_t Event_ScriptYieldFrameOpcode(std::uint8_t* instruction,
-                                           std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptYieldFrameOpcode(std::uint8_t* instruction,
+                                                std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptYieldFrame);
 }
 
 // decomp: BATTLE.PRG func_800BB474 (4A0A8.c:2799).
-std::intptr_t Event_CommandWaitFramesOpcode(std::uint8_t* instruction,
-                                            std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandWaitFramesOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandWaitFrames);
 }
 
 // decomp: BATTLE.PRG func_800BB4CC (4A0A8.c:2815).
-std::intptr_t Event_CommandSetTickSpeedOpcode(std::uint8_t* instruction,
-                                              std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandSetTickSpeedOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandSetTickSpeed);
 }
 
 // decomp: BATTLE.PRG func_800BB504 (4A0A8.c:2827).
-std::intptr_t Event_CommandWaitScriptContextOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandWaitScriptContextOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandWaitScriptContext);
 }
 
 // decomp: BATTLE.PRG func_800BB554 (4A0A8.c:2837).
-std::intptr_t Event_CommandStartScriptContextOpcode(std::uint8_t* instruction,
-                                                    std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandStartScriptContextOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandStartScriptContext);
 }
 
 // decomp: BATTLE.PRG func_800BB5A4 (4A0A8.c:2843).
-std::intptr_t Event_CommandStopScriptContextOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandStopScriptContextOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandStopScriptContext);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (4A0A8.c:1640).
-std::intptr_t Event_ScriptCacheFlagValueOpcode(std::uint8_t* instruction,
-                                               std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptCacheFlagValueOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptCacheFlagValue);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlagContext (4A0A8.c:1646).
-std::intptr_t Event_ScriptBranchOnCachedFlagOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptBranchOnCachedFlagOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptBranchOnCachedFlag);
 }
 
 // decomp: BATTLE.PRG func_800B8C54 (4A0A8.c:1656).
-std::intptr_t Event_ScriptSetLoopCounterOpcode(std::uint8_t* instruction,
-                                               std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptSetLoopCounterOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetLoopCounter);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpBackIf (4A0A8.c:1664).
-std::intptr_t Event_ScriptLoopBackwardOpcode(std::uint8_t* instruction,
-                                             std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptLoopBackwardOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptLoopBackward);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagImm (4A0A8.c:1685).
-std::intptr_t Event_ScriptApplyImmediateFlagOperationOpcode(
+std::intptr_t VS::Event::ScriptApplyImmediateFlagOperationOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptApplyImmediateFlagOperation);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlag (4A0A8.c:1720).
-std::intptr_t Event_ScriptApplyFlagPairOperationOpcode(
+std::intptr_t VS::Event::ScriptApplyFlagPairOperationOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptApplyFlagPairOperation);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag (4A0A8.c:1543).
-std::intptr_t Event_ScriptBranchOnFlagImmediateOpcode(
+std::intptr_t VS::Event::ScriptBranchOnFlagImmediateOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptBranchOnFlagImmediate);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (4A0A8.c:1589).
-std::intptr_t Event_ScriptBranchOnFlagPairOpcode(std::uint8_t* instruction,
-                                                 std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptBranchOnFlagPairOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptBranchOnFlagPair);
 }
 
 // decomp: BATTLE.PRG jumpFwd aliases (4A0A8.c:1630/1635/1675/1680).
-std::intptr_t Event_ScriptJumpForwardOpcode(std::uint8_t* instruction,
-                                            std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptJumpForwardOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptJumpForward);
 }
 
 // decomp: BATTLE.PRG func_800B8C44 (4A0A8.c:1654).
-std::intptr_t Event_ScriptReturnToSavedAddressOpcode(
+std::intptr_t VS::Event::ScriptReturnToSavedAddressOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptReturnToSavedAddress);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (4A0A8.c:1773).
-std::intptr_t Event_ScriptStoreInventoryItemPresenceOpcode(
+std::intptr_t VS::Event::ScriptStoreInventoryItemPresenceOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptStoreInventoryItemPresence);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfButton (4A0A8.c:1798).
-std::intptr_t Event_ScriptStoreButtonStateOpcode(std::uint8_t* instruction,
-                                                 std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptStoreButtonStateOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptStoreButtonState);
 }
 
 // decomp: BATTLE.PRG func_800B6744 (4A0A8.c:611).
-std::intptr_t Event_ScriptBeginSkippableCutsceneOpcode(
+std::intptr_t VS::Event::ScriptBeginSkippableCutsceneOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptBeginSkippableCutscene);
 }
 
 // decomp: BATTLE.PRG func_800B6868 (4A0A8.c:642).
-std::intptr_t Event_ScriptEndCutsceneAndJumpOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptEndCutsceneAndJumpOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptEndCutsceneAndJump);
 }
 
 // decomp: BATTLE.PRG func_800B68C4 (4A0A8.c:653).
-std::intptr_t Event_ScriptEndCutsceneOpcode(std::uint8_t* instruction,
-                                            std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptEndCutsceneOpcode(std::uint8_t* instruction,
+                                                 std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptEndCutscene);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_buttonPressed (4A0A8.c:843).
-std::intptr_t Event_ScriptWaitForButtonAndYieldOpcode(
+std::intptr_t VS::Event::ScriptWaitForButtonAndYieldOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForButtonAndYield);
 }
 
 // decomp: BATTLE.PRG func_800B96B0 (4A0A8.c:1934).
-std::intptr_t Event_ScriptWaitForButtonOrTimeoutOpcode(
+std::intptr_t VS::Event::ScriptWaitForButtonOrTimeoutOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForButtonOrTimeout);
 }
 
 // decomp: BATTLE.PRG func_800B94D8 (4A0A8.c:1886).
-std::intptr_t Event_ScriptConfigureTimerOpcode(std::uint8_t* instruction,
-                                               std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptConfigureTimerOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptConfigureTimer);
 }
 
 // decomp: BATTLE.PRG func_800B9724 (4A0A8.c:1948).
-std::intptr_t Event_ScriptConfigureEasingCurveOpcode(
+std::intptr_t VS::Event::ScriptConfigureEasingCurveOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptConfigureEasingCurve);
 }
 
 // decomp: BATTLE.PRG vs_battle_invalidOpcode (4A0A8.c:588).
-std::intptr_t Event_ScriptReportInvalidOpcodeOpcode(std::uint8_t* instruction,
-                                                    std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptReportInvalidOpcodeOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptReportInvalidOpcode);
 }
 
 // decomp: BATTLE.PRG func_800B66F4 (4A0A8.c:601).
-std::intptr_t Event_ScriptWaitForEventFileOpcode(std::uint8_t* instruction,
-                                                 std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptWaitForEventFileOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForEventFile);
 }
 
 // decomp: BATTLE.PRG func_800BB5AC (4A0A8.c:2845).
-std::intptr_t Event_CommandLoadNextEventOpcode(std::uint8_t* instruction,
-                                               std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandLoadNextEventOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandLoadNextEvent);
 }
 
 // decomp: BATTLE.PRG func_800BB604 (4A0A8.c:2854).
-std::intptr_t Event_CommandFinishEventOpcode(std::uint8_t* instruction,
-                                             std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandFinishEventOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandFinishEvent);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_specialOp (4A0A8.c:2651).
-std::intptr_t Event_CommandSpecialOperationOpcode(std::uint8_t* instruction,
-                                                  std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandSpecialOperationOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::CommandSpecialOperation);
 }
 
 // decomp: BATTLE.PRG func_800B9770 (4A0A8.c:1966).
-std::intptr_t Event_ScriptSetGimmickVisibilityOpcode(
+std::intptr_t VS::Event::ScriptSetGimmickVisibilityOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetGimmickVisibility);
 }
 
 // decomp: BATTLE.PRG func_800B979C (4A0A8.c:1972).
-std::intptr_t Event_ScriptOverrideDepthCueDistanceOpcode(
+std::intptr_t VS::Event::ScriptOverrideDepthCueDistanceOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptOverrideDepthCueDistance);
 }
 
 // decomp: BATTLE.PRG func_800B97E4 (4A0A8.c:1982).
-std::intptr_t Event_ScriptSetRoomLightingModeOpcode(std::uint8_t* instruction,
-                                                    std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptSetRoomLightingModeOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetRoomLightingMode);
 }
 
 // decomp: BATTLE.PRG func_800B9818 (4A0A8.c:1994).
-std::intptr_t Event_ScriptShowGeometryGroupOpcode(std::uint8_t* instruction,
-                                                  std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptShowGeometryGroupOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptShowGeometryGroup);
 }
 
 // decomp: BATTLE.PRG func_800B983C (4A0A8.c:2000).
-std::intptr_t Event_ScriptHideGeometryGroupOpcode(std::uint8_t* instruction,
-                                                  std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptHideGeometryGroupOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptHideGeometryGroup);
 }
 
 // decomp: BATTLE.PRG func_800B9860 (4A0A8.c:2006).
-std::intptr_t Event_ScriptSwapGeometryGroupFlagsOpcode(
+std::intptr_t VS::Event::ScriptSwapGeometryGroupFlagsOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSwapGeometryGroupFlags);
 }
 
 // decomp: BATTLE.PRG func_800B988C (4A0A8.c:2012).
-std::intptr_t Event_ScriptSetCollisionTileModeOpcode(
+std::intptr_t VS::Event::ScriptSetCollisionTileModeOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetCollisionTileMode);
 }
 
 // decomp: BATTLE.PRG func_800BA288 (4A0A8.c:2268).
-std::intptr_t Event_ScriptAdjustGeometryDepthBiasOpcode(
+std::intptr_t VS::Event::ScriptAdjustGeometryDepthBiasOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptAdjustGeometryDepthBias);
 }
 
 // decomp: BATTLE.PRG func_800B9F28 (4A0A8.c:2160).
-std::intptr_t Event_ScriptSetRoomBackgroundVisibleOpcode(
+std::intptr_t VS::Event::ScriptSetRoomBackgroundVisibleOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetRoomBackgroundVisible);
 }
 
 // decomp: BATTLE.PRG func_800B9F4C (4A0A8.c:2166).
-std::intptr_t Event_ScriptLoadRoomBackgroundOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptLoadRoomBackgroundOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptLoadRoomBackground);
 }
 
 // decomp: BATTLE.PRG func_800B9F70 (4A0A8.c:2172).
-std::intptr_t Event_ScriptWaitForRoomBackgroundOpcode(
+std::intptr_t VS::Event::ScriptWaitForRoomBackgroundOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForRoomBackground);
 }
 
 // decomp: BATTLE.PRG func_800B9F90 (4A0A8.c:2174).
-std::intptr_t Event_ScriptFreeRoomBackgroundOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptFreeRoomBackgroundOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptFreeRoomBackground);
 }
 
 // decomp: BATTLE.PRG func_800BA218 (4A0A8.c:2256).
-std::intptr_t Event_ScriptSetBackgroundOffsetOpcode(std::uint8_t* instruction,
-                                                    std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptSetBackgroundOffsetOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetBackgroundOffset);
 }
 
 // decomp: BATTLE.PRG func_800BA264 (4A0A8.c:2262).
-std::intptr_t Event_ScriptSetFirstPersonViewOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptSetFirstPersonViewOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetFirstPersonView);
 }
 
 // decomp: BATTLE.PRG func_800BA2B4 (4A0A8.c:2274).
-std::intptr_t Event_ScriptSetBackgroundParallaxOpcode(
+std::intptr_t VS::Event::ScriptSetBackgroundParallaxOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetBackgroundParallax);
 }
 
 // decomp: BATTLE.PRG func_800B9A40 (4A0A8.c:2049).
-std::intptr_t Event_ScriptFadeOutAndWaitOpcode(std::uint8_t* instruction,
-                                               std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptFadeOutAndWaitOpcode(std::uint8_t* instruction,
+                                                    std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptFadeOutAndWait);
 }
 
 // decomp: BATTLE.PRG func_800B9A94 (4A0A8.c:2061).
-std::intptr_t Event_ScriptFadeInOpcode(std::uint8_t* instruction,
-                                       std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptFadeInOpcode(std::uint8_t* instruction,
+                                            std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(instruction, thread_index,
                                                     VS::Event::ScriptFadeIn);
 }
 
 // decomp: BATTLE.PRG func_800B9AC4 (4A0A8.c:2067).
-std::intptr_t Event_ScriptSetWipeAngleOpcode(std::uint8_t* instruction,
-                                             std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptSetWipeAngleOpcode(std::uint8_t* instruction,
+                                                  std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetWipeAngle);
 }
 
 // decomp: BATTLE.PRG func_800B9AE8 (4A0A8.c:2073).
-std::intptr_t Event_ScriptConfigureScreenTransitionOpcode(
+std::intptr_t VS::Event::ScriptConfigureScreenTransitionOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptConfigureScreenTransition);
 }
 
 // decomp: BATTLE.PRG func_800B9B18 (4A0A8.c:2079).
-std::intptr_t Event_ScriptSetRoomDisplayFlagsOpcode(std::uint8_t* instruction,
-                                                    std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptSetRoomDisplayFlagsOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetRoomDisplayFlags);
 }
 
 // decomp: BATTLE.PRG func_800B9BF8 (4A0A8.c:2110).
-std::intptr_t Event_ScriptWaitForScreenTransitionOpcode(
+std::intptr_t VS::Event::ScriptWaitForScreenTransitionOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForScreenTransition);
 }
 
 // decomp: BATTLE.PRG func_800B9C18 (4A0A8.c:2112).
-std::intptr_t Event_ScriptTogglePaletteHookOpcode(std::uint8_t* instruction,
-                                                  std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptTogglePaletteHookOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptTogglePaletteHook);
 }
 
 // decomp: BATTLE.PRG func_800B9C58 (4A0A8.c:2122).
-std::intptr_t Event_ScriptTransformPalettesOpcode(std::uint8_t* instruction,
-                                                  std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptTransformPalettesOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptTransformPalettes);
 }
 
 // decomp: BATTLE.PRG func_800B6724 (4A0A8.c:609).
-std::intptr_t Event_ScriptWaitForSplashFileOpcode(std::uint8_t* instruction,
-                                                  std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptWaitForSplashFileOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForSplashFile);
 }
 
 // decomp: BATTLE.PRG vs_battle_script_loadGim (4A0A8.c:851).
-std::intptr_t Event_ScriptLoadSplashImageOpcode(std::uint8_t* instruction,
-                                                std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptLoadSplashImageOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptLoadSplashImage);
 }
 
 // decomp: BATTLE.PRG func_800B7014 (4A0A8.c:857).
-std::intptr_t Event_ScriptConfigureSplashLayerOpcode(
+std::intptr_t VS::Event::ScriptConfigureSplashLayerOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptConfigureSplashLayer);
 }
 
 // decomp: BATTLE.PRG func_800B70E8 (4A0A8.c:879).
-std::intptr_t Event_ScriptTweenSplashLayerOpcode(std::uint8_t* instruction,
-                                                 std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptTweenSplashLayerOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptTweenSplashLayer);
 }
 
 // decomp: BATTLE.PRG func_800B71C4 (4A0A8.c:905).
-std::intptr_t Event_ScriptFreeSplashImageOpcode(std::uint8_t* instruction,
-                                                std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptFreeSplashImageOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptFreeSplashImage);
 }
 
 // decomp: BATTLE.PRG func_800B71F4 (4A0A8.c:911).
-std::intptr_t Event_ScriptWaitForSplashTweenOpcode(std::uint8_t* instruction,
-                                                   std::int16_t thread_index) {
+std::intptr_t VS::Event::ScriptWaitForSplashTweenOpcode(
+    std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptWaitForSplashTween);
 }
 
 // decomp: BATTLE.PRG func_800B9FC0 (4A0A8.c:2180).
-std::intptr_t Event_ScriptSetEnvironmentParticlesOpcode(
+std::intptr_t VS::Event::ScriptSetEnvironmentParticlesOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetEnvironmentParticles);
 }
 
 // decomp: BATTLE.PRG func_800BA0E4 (4A0A8.c:2211).
-std::intptr_t Event_ScriptSetParticleVariationEnabledOpcode(
+std::intptr_t VS::Event::ScriptSetParticleVariationEnabledOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptSetParticleVariationEnabled);
 }
 
 // decomp: BATTLE.PRG func_800BA108 (4A0A8.c:2217).
-std::intptr_t Event_ScriptMuteEnvironmentSoundOpcode(
+std::intptr_t VS::Event::ScriptMuteEnvironmentSoundOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptMuteEnvironmentSound);
 }
 
 // decomp: BATTLE.PRG func_800BA194 (4A0A8.c:2238).
-std::intptr_t Event_ScriptControlRoomAnimationOpcode(
+std::intptr_t VS::Event::ScriptControlRoomAnimationOpcode(
     std::uint8_t* instruction, std::int16_t thread_index) {
   return VS::Event::DispatchLiveScriptControlOpcode(
       instruction, thread_index, VS::Event::ScriptControlRoomAnimation);

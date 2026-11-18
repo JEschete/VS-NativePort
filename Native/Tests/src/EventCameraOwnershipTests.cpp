@@ -14,7 +14,7 @@
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Field/CameraLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 
@@ -417,7 +417,8 @@ TEST_CASE("Event camera origin command entry resolves a world reference",
           "[event][camera][ownership]") {
   LiveOriginWorkspace workspace;
   std::array<std::uint8_t, 3> instruction{0xE8, 0x00, 0x20};
-  CHECK(Event_CommandSetCameraOriginActorOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandSetCameraOriginActorOpcode(instruction.data(), 0) ==
+        0);
   workspace.RequireWorldWithOffsetApplied();
 }
 

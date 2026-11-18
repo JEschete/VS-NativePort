@@ -13,7 +13,7 @@
 #include "Event/EventSceneTransition.hpp"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptStep.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/DoorRecord.hpp"
@@ -117,7 +117,7 @@ SceneTransitionHost& LiveSceneTransitionHost() {
 
 // decomp: BATTLE.PRG func_800B91C4 (F01099, src/BATTLE/BATTLE.PRG/4A0A8.c:1780,
 // 0x800B91C4-0x800B91F0), opcode 0x53 in the normal and skip tables.
-std::intptr_t Event_ScriptClearRoomActorCacheOpcode(
+std::intptr_t VS::Event::ScriptClearRoomActorCacheOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   const event::ScriptCommand command =
@@ -129,8 +129,8 @@ std::intptr_t Event_ScriptClearRoomActorCacheOpcode(
 
 // decomp: BATTLE.PRG func_800B92D0 (F01104, src/BATTLE/BATTLE.PRG/4A0A8.c:1813,
 // 0x800B92D0-0x800B92F4), opcode 0x58 in the normal and skip tables.
-std::intptr_t Event_ScriptSetHudVisibleOpcode(std::uint8_t* instruction,
-                                              std::int16_t /*thread_index*/) {
+std::intptr_t VS::Event::ScriptSetHudVisibleOpcode(
+    std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   const event::ScriptCommand command = event::RequiredCommand(
       instruction, event::kSetHudVisibleLength, "ScriptSetHudVisible");
@@ -142,7 +142,7 @@ std::intptr_t Event_ScriptSetHudVisibleOpcode(std::uint8_t* instruction,
 // 0x800B92F4-0x800B94D8), opcode 0x59 in the normal and skip tables. The
 // active flag is written only when the opcode sets or clears it, as the
 // original wrote it, so a hold keeps whatever nonzero byte it found.
-std::intptr_t Event_ScriptRunMenuTransitionOpcode(
+std::intptr_t VS::Event::ScriptRunMenuTransitionOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   const event::ScriptCommand command = event::RequiredCommand(
@@ -157,8 +157,8 @@ std::intptr_t Event_ScriptRunMenuTransitionOpcode(
 
 // decomp: BATTLE.PRG func_800B98C0 (F01120, src/BATTLE/BATTLE.PRG/4A0A8.c:2018,
 // 0x800B98C0-0x800B9A40), opcode 0x68 in the normal and skip tables.
-std::intptr_t Event_ScriptChangeRoomOpcode(std::uint8_t* instruction,
-                                           std::int16_t /*thread_index*/) {
+std::intptr_t VS::Event::ScriptChangeRoomOpcode(std::uint8_t* instruction,
+                                                std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   const event::ScriptCommand command = event::RequiredCommand(
       instruction, event::kChangeRoomLength, "ScriptChangeRoom");

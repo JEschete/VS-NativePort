@@ -18,7 +18,7 @@
 
 #include "CombatLab/DoorTests.hpp"
 #include "Content/DataStore.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Legacy/Psx.h"
 
@@ -66,39 +66,39 @@ SceneOpcodes ProductionOpcodes() {
     auto& opcode = result[index];
     opcode.size = Event_kOpcodeSizes[index];
     const auto handler = Event_kOpcodeHandlers[index];
-    if (handler == Event_ScriptReportInvalidOpcodeOpcode ||
+    if (handler == VS::Event::ScriptReportInvalidOpcodeOpcode ||
         handler == nullptr) {
       opcode.size = 0;
-    } else if (handler == Event_ScriptBranchOnFlagImmediateOpcode ||
-               handler == Event_ScriptBranchOnFlagPairOpcode) {
+    } else if (handler == VS::Event::ScriptBranchOnFlagImmediateOpcode ||
+               handler == VS::Event::ScriptBranchOnFlagPairOpcode) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = kFlagBranchOperand;
-    } else if (handler == Event_ScriptBranchOnCachedFlagOpcode) {
+    } else if (handler == VS::Event::ScriptBranchOnCachedFlagOpcode) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = 2;
-    } else if (handler == Event_ScriptEndCutsceneAndJumpOpcode) {
+    } else if (handler == VS::Event::ScriptEndCutsceneAndJumpOpcode) {
       opcode.flow = SceneFlow::kBranch;
       opcode.branch_operand = 1;
-    } else if (handler == Event_ScriptJumpForwardOpcode) {
+    } else if (handler == VS::Event::ScriptJumpForwardOpcode) {
       opcode.flow = SceneFlow::kJump;
       opcode.branch_operand = 1;
-    } else if (handler == Event_ScriptLoopBackwardOpcode) {
+    } else if (handler == VS::Event::ScriptLoopBackwardOpcode) {
       opcode.flow = SceneFlow::kLoop;
       opcode.branch_operand = 2;
-    } else if (handler == Event_CommandStartScriptContextOpcode) {
+    } else if (handler == VS::Event::CommandStartScriptContextOpcode) {
       opcode.flow = SceneFlow::kThread;
       opcode.branch_operand = 2;
-    } else if (handler == Event_ScriptReturnToSavedAddressOpcode) {
+    } else if (handler == VS::Event::ScriptReturnToSavedAddressOpcode) {
       opcode.flow = SceneFlow::kReturn;
-    } else if (handler == Event_CommandFinishEventOpcode ||
-               handler == Event_CommandStopScriptContextOpcode) {
+    } else if (handler == VS::Event::CommandFinishEventOpcode ||
+               handler == VS::Event::CommandStopScriptContextOpcode) {
       opcode.flow = SceneFlow::kFinish;
-    } else if (handler == Event_CommandSpecialOperationOpcode) {
+    } else if (handler == VS::Event::CommandSpecialOperationOpcode) {
       opcode.flow = SceneFlow::kSpecial;
     }
-    if (handler == Event_CommandLoadNextEventOpcode) {
+    if (handler == VS::Event::CommandLoadNextEventOpcode) {
       opcode.operation = SceneOperation::kChainEvent;
-    } else if (handler == Event_ScriptChangeRoomOpcode) {
+    } else if (handler == VS::Event::ScriptChangeRoomOpcode) {
       opcode.operation = SceneOperation::kChangeRoom;
     }
   }

@@ -13,8 +13,8 @@ struct LensTween;
 struct ShakeOscillator;
 
 // decomp: BATTLE.PRG func_800BDC9C (F01232, 4A0A8.c:3862), opcodes 0xEA-0xEC
-// and 0xEF are bound by Event_CommandCameraLensOrShakeOpcode
-// (ScriptControlOpcodes.h).
+// and 0xEF are bound by VS::Event::CommandCameraLensOrShakeOpcode
+// (ScriptControlOpcodes.hpp).
 
 // decomp: BATTLE.PRG func_800BDF6C (F01233, 4A0A8.c:3927)
 void UpdateEventLensTweenEntry(LensTween* lens_tween);

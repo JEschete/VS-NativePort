@@ -16,7 +16,7 @@
 #include "Event/EventCameraTrack.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
 
 namespace {
@@ -200,7 +200,7 @@ TEST_CASE("Camera stop opcode rests the workspace without reading an operand",
   SetMoving(workspace.camera.look_at, event::kCameraMotionOrbit);
   SetMoving(workspace.camera.eye, event::kCameraMotionBone);
 
-  CHECK(Event_CommandStopCameraMotionOpcode(nullptr, 0) == 0);
+  CHECK(VS::Event::CommandStopCameraMotionOpcode(nullptr, 0) == 0);
 
   CHECK(workspace.camera.look_at.motion_mode == event::kEventCameraTrackIdle);
   CHECK(workspace.camera.eye.motion_mode == event::kEventCameraTrackIdle);
@@ -213,8 +213,8 @@ TEST_CASE("Camera stop opcode repeats on a resting workspace",
   LiveControlWorkspace workspace;
   std::array<std::uint8_t, 2> instruction{0xDE, 0x03};
 
-  CHECK(Event_CommandStopCameraMotionOpcode(instruction.data(), 0) == 0);
-  CHECK(Event_CommandStopCameraMotionOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandStopCameraMotionOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandStopCameraMotionOpcode(instruction.data(), 0) == 0);
 
   CHECK(workspace.camera.look_at.motion_mode == event::kEventCameraTrackIdle);
   CHECK(workspace.camera.eye.motion_mode == event::kEventCameraTrackIdle);
@@ -299,7 +299,7 @@ TEST_CASE("Camera following opcode entry writes the workspace and returns 0",
   SetMoving(workspace.camera.look_at, event::kCameraMotionLinear);
   std::array<std::uint8_t, 2> instruction{0xDF, 0x02};
 
-  CHECK(Event_CommandSetCameraFollowingOpcode(instruction.data(), 3) == 0);
+  CHECK(VS::Event::CommandSetCameraFollowingOpcode(instruction.data(), 3) == 0);
 
   CHECK(workspace.camera.look_at.follow_request == 0);
   CHECK(workspace.camera.look_at.is_following == 0);
@@ -365,7 +365,7 @@ TEST_CASE("Field camera restore opcode marks the restore scripted if skipped",
   Event_isFieldCameraRestoreScripted = 0;
   std::array<std::uint8_t, 3> instruction{0xE9, 0x02, 0x01};
 
-  CHECK(Event_CommandRestoreFieldCameraOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandRestoreFieldCameraOpcode(instruction.data(), 0) == 0);
 
   CHECK(Event_skipNextFieldCameraRestore == 0);
   CHECK(Event_isFieldCameraRestoreScripted == 1);

@@ -10,8 +10,8 @@
 
 namespace VS::Event {
 // decomp: BATTLE.PRG func_800BB41C (F01197, 4A0A8.c:2788), opcode 0xE0 (the
-// camera wait), is bound by Event_CommandWaitCameraTracksOpcode
-// (ScriptControlOpcodes.h).
+// camera wait), is bound by VS::Event::CommandWaitCameraTracksOpcode
+// (ScriptControlOpcodes.hpp).
 
 // decomp: BATTLE.PRG vs_battle_applyCameraState (F01219, 4A0A8.c:3117)
 void ApplyEventCameraStateEntry();

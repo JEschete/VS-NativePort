@@ -13,7 +13,7 @@
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/CameraLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -113,7 +113,7 @@ void StartEventCameraOrbitReturnEntry(char orbit_side) {
 // decomp: BATTLE.PRG func_800BB33C (F01193, src/BATTLE/BATTLE.PRG/4A0A8.c:2761,
 // 0x800BB33C-0x800BB35C), opcode 0xDE in the normal and skip tables. It reads
 // no operand.
-std::intptr_t Event_CommandStopCameraMotionOpcode(
+std::intptr_t VS::Event::CommandStopCameraMotionOpcode(
     std::uint8_t* /*instruction*/, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   VS::Event::CameraState& camera =
@@ -126,7 +126,7 @@ std::intptr_t Event_CommandStopCameraMotionOpcode(
 
 // decomp: BATTLE.PRG func_800BB35C (F01194, src/BATTLE/BATTLE.PRG/4A0A8.c:2767,
 // 0x800BB35C-0x800BB38C), opcode 0xDF in the normal and skip tables.
-std::intptr_t Event_CommandSetCameraFollowingOpcode(
+std::intptr_t VS::Event::CommandSetCameraFollowingOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandSetCameraFollowing";
@@ -143,7 +143,7 @@ std::intptr_t Event_CommandSetCameraFollowingOpcode(
 // decomp: BATTLE.PRG func_800BB3BC (F01196, src/BATTLE/BATTLE.PRG/4A0A8.c:2780,
 // 0x800BB3BC-0x800BB41C), opcode 0xE9 in the normal and skip tables. Marks the
 // restore as scripted even when the field camera override skipped it.
-std::intptr_t Event_CommandRestoreFieldCameraOpcode(
+std::intptr_t VS::Event::CommandRestoreFieldCameraOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   if (instruction == nullptr) {

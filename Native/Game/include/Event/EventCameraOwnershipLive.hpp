@@ -10,8 +10,9 @@
 
 namespace VS::Event {
 // decomp: BATTLE.PRG func_800BB38C (F01195, 4A0A8.c:2774), opcode 0xE8 is
-// bound by Event_CommandSetCameraOriginActorOpcode (ScriptControlOpcodes.h).
-// decomp: BATTLE.PRG func_800BBDDC (F01215, 4A0A8.c:3082) only forwarded to
+// bound by VS::Event::CommandSetCameraOriginActorOpcode
+// (ScriptControlOpcodes.hpp). decomp: BATTLE.PRG func_800BBDDC (F01215,
+// 4A0A8.c:3082) only forwarded to
 // Core::Memory::FreeLiveFromHighEnd(Event_camera) and is retired.
 
 // decomp: BATTLE.PRG func_800BBBE8 (F01214, 4A0A8.c:3014)

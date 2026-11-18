@@ -20,7 +20,7 @@
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "State/Timers.hpp"
@@ -300,7 +300,7 @@ VECTOR* ReadScriptFixedVectorEntry(VECTOR* destination,
 // src/BATTLE/BATTLE.PRG/4A0A8.c:3200), opcodes 0xC0-0xDF in the normal and
 // skip tables and the field camera and orbit return commands ScriptCamera.cpp
 // issues.
-std::intptr_t Event_CommandCameraMotionOpcode(std::uint8_t* instruction,
-                                              std::int16_t thread_index) {
+std::intptr_t VS::Event::CommandCameraMotionOpcode(std::uint8_t* instruction,
+                                                   std::int16_t thread_index) {
   return VS::Event::CommandCameraMotionEntry(instruction, thread_index);
 }

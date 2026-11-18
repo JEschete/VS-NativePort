@@ -230,7 +230,7 @@ void SceneTrial::Observe(const Game::EncounterState& state,
   // Producer menus before the first expected event belong to the scripted
   // setup selection; confirming them would accept the default row instead.
   // Room scripts open the MENUF cube-puzzle start/result/quit screens through
-  // Event_ScriptRunMenuTransitionOpcode (op 0x59 10..12); each waits for
+  // VS::Event::ScriptRunMenuTransitionOpcode (op 0x59 10..12); each waits for
   // Circle (CubePuzzle.c _renderCubePuzzleStart/End/Quit).
   constexpr int kResultsMenu = 15;
   constexpr int kCubePuzzleStart = 4;

@@ -17,7 +17,7 @@
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Event {
@@ -244,7 +244,7 @@ void UpdateEventCameraShakeEntry() {
 // 0x800BDC9C-0x800BDF6C), opcodes 0xEA-0xEC, 0xEE and 0xEF in the normal and
 // skip tables. 0xEE returns the original's fall-through value 0xEF, which the
 // script VM refuses as a pointer result.
-std::intptr_t Event_CommandCameraLensOrShakeOpcode(
+std::intptr_t VS::Event::CommandCameraLensOrShakeOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandCameraLensOrShake";

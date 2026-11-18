@@ -30,7 +30,7 @@
 #include "Core/Gte.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActorCommands.hpp"
-#include "Event/ScriptActorOpcodes.h"
+#include "Event/ScriptActorOpcodes.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -472,323 +472,327 @@ int LiveActorDialogAnchor(int actor_id, SVECTOR* dialog_anchor) {
 }  // namespace VS::Event
 
 // decomp: func_800B7428 (src/BATTLE/BATTLE.PRG/4A0A8.c:967), opcode 0x1E
-intptr_t Event_ScriptResetActorGroupStateOpcode(u_char* command,
-                                                int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptResetActorGroupStateOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptResetActorGroupState, command,
                     event::kResetActorGroupStateLength);
 }
 
 // decomp: func_800B7490 (src/BATTLE/BATTLE.PRG/4A0A8.c:983), opcode 0x1F
-intptr_t Event_ScriptStoreActorTileOpcode(u_char* command,
-                                          int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptStoreActorTileOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptStoreActorTile, command,
                     event::kStoreActorTileLength);
 }
 
 // decomp: func_800B7574 (src/BATTLE/BATTLE.PRG/4A0A8.c:1009), opcode 0x20
-intptr_t Event_ScriptSpawnActorOpcode(u_char* command, int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSpawnActorOpcode(std::uint8_t* command,
+                                                std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSpawnActor, command, event::kSpawnActorLength);
 }
 
 // decomp: func_800B75F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1022), opcode 0x21
-intptr_t Event_ScriptNavigateActorToTileOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptNavigateActorToTileOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptNavigateActorToTile, command,
                     event::kNavigateActorToTileLength);
 }
 
 // decomp: func_800B76A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1040), opcode 0x22
-intptr_t Event_ScriptPlayActorAnimationOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptPlayActorAnimationOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptPlayActorAnimation, command,
                     event::kPlayActorAnimationLength);
 }
 
 // decomp: func_800B770C (src/BATTLE/BATTLE.PRG/4A0A8.c:1047), opcode 0x23
-intptr_t Event_ScriptSetActorGroupFlagsOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorGroupFlagsOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorGroupFlags, command,
                     event::kSetActorGroupFlagsLength);
 }
 
 // decomp: func_800B77DC (src/BATTLE/BATTLE.PRG/4A0A8.c:1080), opcode 0x24
-intptr_t Event_ScriptSetActorSoundMixOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorSoundMixOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorSoundMix, command,
                     event::kSetActorSoundMixLength);
 }
 
 // decomp: func_800B784C (src/BATTLE/BATTLE.PRG/4A0A8.c:1097), opcode 0x25
-intptr_t Event_ScriptWalkActorToTileOpcode(u_char* command,
-                                           int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptWalkActorToTileOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptWalkActorToTile, command,
                     event::kWalkActorToTileLength);
 }
 
 // decomp: func_800B792C (src/BATTLE/BATTLE.PRG/4A0A8.c:1116), opcode 0x26
-intptr_t Event_ScriptWalkActorToWorldPosOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptWalkActorToWorldPosOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptWalkActorToWorldPos, command,
                     event::kWalkActorToWorldPosLength);
 }
 
 // decomp: func_800B7A98 (src/BATTLE/BATTLE.PRG/4A0A8.c:1148), opcode 0x27
-intptr_t Event_ScriptSlideActorToTileOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSlideActorToTileOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSlideActorToTile, command,
                     event::kSlideActorToTileLength);
 }
 
 // decomp: func_800B7B58 (src/BATTLE/BATTLE.PRG/4A0A8.c:1167), opcode 0x28
-intptr_t Event_ScriptSlideActorToWorldPosOpcode(u_char* command,
-                                                int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSlideActorToWorldPosOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSlideActorToWorldPos, command,
                     event::kSlideActorToWorldPosLength);
 }
 
 // decomp: func_800B7C90 (src/BATTLE/BATTLE.PRG/4A0A8.c:1200), opcode 0x29
-intptr_t Event_ScriptSetActorAttachmentOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorAttachmentOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorAttachment, command,
                     event::kSetActorAttachmentLength);
 }
 
 // decomp: func_800B7D10 (src/BATTLE/BATTLE.PRG/4A0A8.c:1212), opcode 0x2A
-intptr_t Event_ScriptNavigateActorToWorldPosOpcode(u_char* command,
-                                                   int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptNavigateActorToWorldPosOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptNavigateActorToWorldPos, command,
                     event::kNavigateActorToWorldPosLength);
 }
 
 // decomp: func_800B7DC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1230), opcode 0x2B
-intptr_t Event_ScriptTurnActorToFacingOpcode(u_char* command,
-                                             int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptTurnActorToFacingOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptTurnActorToFacing, command,
                     event::kTurnActorToFacingLength);
 }
 
 // decomp: func_800B7EF0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1266), opcode 0x2C
-intptr_t Event_ScriptFaceOtherActorOpcode(u_char* command,
-                                          int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptFaceOtherActorOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptFaceOtherActor, command,
                     event::kFaceOtherActorLength);
 }
 
 // decomp: func_800B7F84 (src/BATTLE/BATTLE.PRG/4A0A8.c:1285), opcode 0x2D
-intptr_t Event_ScriptFaceTileOpcode(u_char* command, int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptFaceTileOpcode(std::uint8_t* command,
+                                              std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptFaceTile, command, event::kFaceTileLength);
 }
 
 // decomp: func_800B804C (src/BATTLE/BATTLE.PRG/4A0A8.c:1299), opcode 0x2E
-intptr_t Event_ScriptScaleActorOpcode(u_char* command, int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptScaleActorOpcode(std::uint8_t* command,
+                                                std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptScaleActor, command, event::kScaleActorLength);
 }
 
 // decomp: func_800B80B4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1309), opcode 0x2F
-intptr_t Event_ScriptRemoveActorGroupOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptRemoveActorGroupOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptRemoveActorGroup, command,
                     event::kRemoveActorGroupLength);
 }
 
 // decomp: func_800B810C (src/BATTLE/BATTLE.PRG/4A0A8.c:1324), opcode 0x30
-intptr_t Event_ScriptWaitForActorFlagsOpcode(u_char* command,
-                                             int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptWaitForActorFlagsOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptWaitForActorFlags, command,
                     event::kWaitForActorFlagsLength);
 }
 
 // decomp: func_800B81A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1344), opcode 0x31
-intptr_t Event_ScriptSetActorColorOverrideOpcode(u_char* command,
-                                                 int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorColorOverrideOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorColorOverride, command,
                     event::kSetActorColorOverrideLength);
 }
 
 // decomp: func_800B822C (src/BATTLE/BATTLE.PRG/4A0A8.c:1360), opcode 0x32
-intptr_t Event_ScriptQueueActorAnimationOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptQueueActorAnimationOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptQueueActorAnimation, command,
                     event::kQueueActorAnimationLength);
 }
 
 // decomp: func_800B8290 (src/BATTLE/BATTLE.PRG/4A0A8.c:1367), opcode 0x33
-intptr_t Event_ScriptRotateActorAxesOpcode(u_char* command,
-                                           int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptRotateActorAxesOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptRotateActorAxes, command,
                     event::kRotateActorAxesLength);
 }
 
 // decomp: func_800B8360 (src/BATTLE/BATTLE.PRG/4A0A8.c:1390), opcode 0x34
-intptr_t Event_ScriptSetActorHeadAnglesOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorHeadAnglesOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorHeadAngles, command,
                     event::kSetActorHeadAnglesLength);
 }
 
 // decomp: func_800B83D4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1408), opcode 0x35
-intptr_t Event_ScriptPlayActorAnimationAtFrameOpcode(u_char* command,
-                                                     int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptPlayActorAnimationAtFrameOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptPlayActorAnimationAtFrame, command,
                     event::kPlayActorAnimationAtFrameLength);
 }
 
 // decomp: func_800B8438 (src/BATTLE/BATTLE.PRG/4A0A8.c:1415), opcode 0x36
-intptr_t Event_ScriptQueueActorAnimationAtFrameOpcode(u_char* command,
-                                                      int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptQueueActorAnimationAtFrameOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptQueueActorAnimationAtFrame, command,
                     event::kQueueActorAnimationAtFrameLength);
 }
 
 // decomp: func_800B849C (src/BATTLE/BATTLE.PRG/4A0A8.c:1422), opcode 0x37
-intptr_t Event_ScriptSetActorIdleAnimationOpcode(u_char* command,
-                                                 int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorIdleAnimationOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorIdleAnimation, command,
                     event::kSetActorIdleAnimationLength);
 }
 
 // decomp: func_800B8510 (src/BATTLE/BATTLE.PRG/4A0A8.c:1434), opcode 0x38
-intptr_t Event_ScriptLookAtActorOpcode(u_char* command, int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptLookAtActorOpcode(std::uint8_t* command,
+                                                 std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptLookAtActor, command,
                     event::kLookAtActorLength);
 }
 
 // decomp: func_800B8590 (src/BATTLE/BATTLE.PRG/4A0A8.c:1454), opcode 0x39
-intptr_t Event_ScriptLookAtWorldPosOpcode(u_char* command,
-                                          int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptLookAtWorldPosOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptLookAtWorldPos, command,
                     event::kLookAtWorldPosLength);
 }
 
 // decomp: func_800B860C (src/BATTLE/BATTLE.PRG/4A0A8.c:1471), opcode 0x3A
-intptr_t Event_ScriptLoadObjectModelOpcode(u_char* command,
-                                           int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptLoadObjectModelOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptLoadObjectModel, command,
                     event::kLoadObjectModelLength);
 }
 
 // decomp: func_800B86E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1488), opcode 0x3B
-intptr_t Event_ScriptWaitForObjectLoadOpcode(u_char* command,
-                                             int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptWaitForObjectLoadOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptWaitForObjectLoad, command,
                     event::kWaitForObjectLoadLength);
 }
 
 // decomp: func_800B8708 (src/BATTLE/BATTLE.PRG/4A0A8.c:1490), opcode 0x3C
-intptr_t Event_ScriptReleaseObjectModelOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptReleaseObjectModelOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptReleaseObjectModel, command,
                     event::kReleaseObjectModelLength);
 }
 
 // decomp: func_800B8764 (src/BATTLE/BATTLE.PRG/4A0A8.c:1500), opcode 0x3D
-intptr_t Event_ScriptSelectObjectTextureBankOpcode(u_char* command,
-                                                   int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSelectObjectTextureBankOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSelectObjectTextureBank, command,
                     event::kSelectObjectTextureBankLength);
 }
 
 // decomp: func_800B8788 (src/BATTLE/BATTLE.PRG/4A0A8.c:1506), opcode 0x3E
-intptr_t Event_ScriptSetActorOverlayPassOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorOverlayPassOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorOverlayPass, command,
                     event::kSetActorOverlayPassLength);
 }
 
 // decomp: func_800B884C (src/BATTLE/BATTLE.PRG/4A0A8.c:1526), opcode 0x3F
-intptr_t Event_ScriptSetActorWeaponDrawnOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorWeaponDrawnOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorWeaponDrawn, command,
                     event::kSetActorWeaponDrawnLength);
 }
 
 // decomp: func_800B91F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1786), opcode 0x54
-intptr_t Event_ScriptPlayActorAnimationSoundOpcode(u_char* command,
-                                                   int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptPlayActorAnimationSoundOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptPlayActorAnimationSound, command,
                     event::kPlayActorAnimationSoundLength);
 }
 
 // decomp: func_800B9230 (src/BATTLE/BATTLE.PRG/4A0A8.c:1792), opcode 0x55
-intptr_t Event_ScriptSetNpcUpdatesEnabledOpcode(u_char* command,
-                                                int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetNpcUpdatesEnabledOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetNpcUpdatesEnabled, command,
                     event::kSetNpcUpdatesEnabledLength);
 }
 
 // decomp: func_800B92A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1807), opcode 0x57
-intptr_t Event_ScriptRestoreActorVitalsOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptRestoreActorVitalsOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptRestoreActorVitals, command,
                     event::kRestoreActorVitalsLength);
 }
 
 // decomp: func_800B9608 (src/BATTLE/BATTLE.PRG/4A0A8.c:1916), opcode 0x5C
-intptr_t Event_ScriptSetActorEquipmentModelsOpcode(u_char* command,
-                                                   int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorEquipmentModelsOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorEquipmentModels, command,
                     event::kSetActorEquipmentModelsLength);
 }
 
 // decomp: func_800B9670 (src/BATTLE/BATTLE.PRG/4A0A8.c:1928), opcode 0x5D
-intptr_t Event_ScriptSetActorYawOscillationOpcode(u_char* command,
-                                                  int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorYawOscillationOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorYawOscillation, command,
                     event::kSetActorYawOscillationLength);
 }
 
 // decomp: func_800B97F8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1988), opcode 0x63
-intptr_t Event_ScriptClearAshleyStatusEffectsOpcode(u_char* command,
-                                                    int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptClearAshleyStatusEffectsOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptClearAshleyStatusEffects, command,
                     event::kClearAshleyStatusEffectsLength);
 }
 
 // decomp: func_800B9D74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2151), opcode 0x71
-intptr_t Event_ScriptSetActorRenderModeOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::ScriptSetActorRenderModeOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::ScriptSetActorRenderMode, command,
                     event::kSetActorRenderModeLength);
 }
 
 // decomp: func_800BAC38 (src/BATTLE/BATTLE.PRG/4A0A8.c:2549), opcode 0xB1
-intptr_t Event_CommandSetEnteredDoorOpcode(u_char* command,
-                                           int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandSetEnteredDoorOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSetEnteredDoor, command,
                     event::kSetEnteredDoorLength);
 }
 
 // decomp: func_800BAC5C (src/BATTLE/BATTLE.PRG/4A0A8.c:2555), opcode 0xB2
-intptr_t Event_CommandStoreActorRangeBearingOpcode(u_char* command,
-                                                   int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandStoreActorRangeBearingOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandStoreActorRangeBearing, command,
                     event::kStoreActorRangeBearingLength);
 }
 
 // decomp: func_800BAD78 (src/BATTLE/BATTLE.PRG/4A0A8.c:2575), opcode 0xB3
-intptr_t Event_CommandSetActorActivityOpcode(u_char* command,
-                                             int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandSetActorActivityOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSetActorActivity, command,
                     event::kSetActorActivityLength);
 }
 
 // decomp: func_800BADE0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2590), opcode 0xB4
-intptr_t Event_CommandAwardMiscLootOpcode(u_char* command,
-                                          int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandAwardMiscLootOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandAwardMiscLoot, command,
                     event::kAwardMiscLootLength);
 }
 
 // decomp: func_800BAE74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2606), opcode 0xB5
-intptr_t Event_CommandConsumeMiscItemOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandConsumeMiscItemOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandConsumeMiscItem, command,
                     event::kConsumeMiscItemLength);
 }
 
 // decomp: func_800BAEA0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2612), opcode 0xB6
-intptr_t Event_CommandStoreActorDistanceOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandStoreActorDistanceOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandStoreActorDistance, command,
                     event::kStoreActorDistanceLength);
 }

@@ -28,7 +28,7 @@
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffectCommands.hpp"
-#include "Event/ScriptEffectOpcodes.h"
+#include "Event/ScriptEffectOpcodes.hpp"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptField.h"
 #include "Event/ScriptScreen.h"
@@ -407,106 +407,106 @@ void StoreLiveWeatherTween(const WeatherTween& tween) {
 }  // namespace VS::Event
 
 // decomp: func_800BA8BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2454), opcode 0xA0
-intptr_t Event_CommandPlayActorEffectOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandPlayActorEffectOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandPlayActorEffect, command,
                     event::kPlayActorEffectLength);
 }
 
 // decomp: func_800BA90C (src/BATTLE/BATTLE.PRG/4A0A8.c:2461), opcode 0xA1
-intptr_t Event_CommandAdvanceEffectStageOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandAdvanceEffectStageOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandAdvanceEffectStage, command,
                     event::kAdvanceEffectStageLength);
 }
 
 // decomp: func_800BA94C (src/BATTLE/BATTLE.PRG/4A0A8.c:2470), opcode 0xA2
-intptr_t Event_CommandWaitEffectStateOpcode(u_char* command,
-                                            int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandWaitEffectStateOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitEffectState, command,
                     event::kWaitEffectStateLength);
 }
 
 // decomp: func_800BAA04 (src/BATTLE/BATTLE.PRG/4A0A8.c:2487), opcode 0xA3
-intptr_t Event_CommandYieldEffectReleaseOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandYieldEffectReleaseOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandYieldEffectRelease, command,
                     event::kYieldEffectReleaseLength);
 }
 
 // decomp: func_800BAA34 (src/BATTLE/BATTLE.PRG/4A0A8.c:2493), opcode 0xA4
-intptr_t Event_CommandWaitEffectContinuationOpcode(u_char* command,
-                                                   int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandWaitEffectContinuationOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitEffectContinuation, command,
                     event::kWaitEffectContinuationLength);
 }
 
 // decomp: func_800BAA58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2495), opcode 0xA5
-intptr_t Event_CommandWaitEffectReleaseOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandWaitEffectReleaseOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitEffectRelease, command,
                     event::kWaitEffectReleaseLength);
 }
 
 // decomp: func_800BAACC (src/BATTLE/BATTLE.PRG/4A0A8.c:2507), opcode 0xA6
-intptr_t Event_CommandMarkEffectStageReadyOpcode(u_char* command,
-                                                 int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandMarkEffectStageReadyOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandMarkEffectStageReady, command,
                     event::kMarkEffectStageReadyLength);
 }
 
 // decomp: func_800BAB14 (src/BATTLE/BATTLE.PRG/4A0A8.c:2519), opcode 0xA9
-intptr_t Event_CommandPlayVibrationPatternOpcode(u_char* command,
-                                                 int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandPlayVibrationPatternOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandPlayVibrationPattern, command,
                     event::kPlayVibrationPatternLength);
 }
 
 // decomp: func_800BABCC (src/BATTLE/BATTLE.PRG/4A0A8.c:2537), opcode 0xAA
-intptr_t Event_CommandSetActorTrailOpcode(u_char* command,
-                                          int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandSetActorTrailOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSetActorTrail, command,
                     event::kSetActorTrailLength);
 }
 
 // decomp: func_800BB288 (src/BATTLE/BATTLE.PRG/4A0A8.c:2733), opcode 0xB8
-intptr_t Event_CommandWaitScreenEffectLoadOpcode(u_char* command,
-                                                 int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandWaitScreenEffectLoadOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandWaitScreenEffectLoad, command,
                     event::kWaitScreenEffectLoadLength);
 }
 
 // decomp: func_800BB2B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2741), opcode 0xBB
-intptr_t Event_CommandSetScreenDistortionOpcode(u_char* command,
-                                                int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandSetScreenDistortionOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSetScreenDistortion, command,
                     event::kSetScreenDistortionLength);
 }
 
 // decomp: func_800BB2E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2747), opcode 0xBC
-intptr_t Event_CommandLoadScreenEffectsOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandLoadScreenEffectsOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandLoadScreenEffects, command,
                     event::kLoadScreenEffectsLength);
 }
 
 // decomp: func_800BB304 (src/BATTLE/BATTLE.PRG/4A0A8.c:2753), opcode 0xBD
-intptr_t Event_CommandReservedScreenEffectOpcode(u_char* command,
-                                                 int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandReservedScreenEffectOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandReservedScreenEffect, command,
                     event::kReservedScreenEffectLength);
 }
 
 // decomp: func_800BB30C (src/BATTLE/BATTLE.PRG/4A0A8.c:2755), opcode 0xBE
-intptr_t Event_CommandFreeScreenEffectsOpcode(u_char* command,
-                                              int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandFreeScreenEffectsOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandFreeScreenEffects, command,
                     event::kFreeScreenEffectsLength);
 }
 
 // decomp: func_800BB4F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2821), opcode 0xF3
-intptr_t Event_CommandSetScanlineOverlayOpcode(u_char* command,
-                                               int16_t /*thread_id*/) {
+std::intptr_t VS::Event::CommandSetScanlineOverlayOpcode(
+    std::uint8_t* command, std::int16_t /*thread_id*/) {
   return RunCommand(event::CommandSetScanlineOverlay, command,
                     event::kSetScanlineOverlayLength);
 }

@@ -14,7 +14,7 @@
 #include "Event/EventCameraFrameLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Field/CameraLive.hpp"
 
 namespace {
@@ -280,8 +280,8 @@ TEST_CASE("Live camera frame entries skip a missing camera or instruction",
   Event_camera = nullptr;
   const std::uint64_t before = ev::RefusedEventCameraFrameCount();
   std::array<std::uint8_t, 2> instruction{0xE0, 0x01};
-  CHECK(Event_CommandWaitCameraTracksOpcode(instruction.data(), 0) == 0);
-  CHECK(Event_CommandWaitCameraTracksOpcode(nullptr, 0) == 0);
+  CHECK(VS::Event::CommandWaitCameraTracksOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandWaitCameraTracksOpcode(nullptr, 0) == 0);
   ev::ApplyEventCameraStateEntry();
   ev::UpdateEventCameraTracksEntry();
   CHECK(ev::EventCameraCompletionMaskEntry() == 0);
@@ -303,9 +303,9 @@ TEST_CASE("Live camera completion reads the workspace bytes unsigned",
   camera.screen_effect_tween.duration_frames = 0x100;
   CHECK(ev::EventCameraCompletionMaskEntry() == 0x1F);
   std::array<std::uint8_t, 2> instruction{0xE0, 0x1F};
-  CHECK(Event_CommandWaitCameraTracksOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandWaitCameraTracksOpcode(instruction.data(), 0) == 0);
   instruction[1] = 0x9F;
-  CHECK(Event_CommandWaitCameraTracksOpcode(instruction.data(), 0) == 1);
+  CHECK(VS::Event::CommandWaitCameraTracksOpcode(instruction.data(), 0) == 1);
   Event_camera = saved;
 }
 

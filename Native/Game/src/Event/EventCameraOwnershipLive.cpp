@@ -16,7 +16,7 @@
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -201,7 +201,7 @@ void UpdateEventCameraOriginEntry() {
 
 // decomp: BATTLE.PRG func_800BB38C (F01195, src/BATTLE/BATTLE.PRG/4A0A8.c:2774,
 // 0x800BB38C-0x800BB3BC), opcode 0xE8 in the normal and skip tables.
-std::intptr_t Event_CommandSetCameraOriginActorOpcode(
+std::intptr_t VS::Event::CommandSetCameraOriginActorOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandSetCameraOriginActor";

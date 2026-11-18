@@ -1507,7 +1507,7 @@ NATIVE_HELPER_HEADERS = {
            "Boot_EncounterPollStop",
        )},
     "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.hpp",
-    "Battle_Ai_InvalidateSessionBindings": r"Native\Game\src\Battle\Ai\RoomState.h",
+    "Battle_Ai_InvalidateSessionBindings": r"Native\Game\src\Battle\Ai\RoomState.hpp",
     **{name: r"Native\Engine\include\Core\Diagnostics.hpp"
        for name in ("Core_Warnf", "Core_Errorf")},
     **{name: r"Native\Game\src\Menu\Loot\Paging.hpp"
@@ -1524,7 +1524,7 @@ NATIVE_HELPER_HEADERS = {
            "ResetLiveVibrationPatterns", "UpdateLiveVibrationPatterns",
            "PlayLiveVibrationPreset", "UpdateLiveControllers",
        )},
-    **{name: r"Native\Engine\include\Input\ControllerLiveState.h"
+    **{name: r"Native\Engine\include\Input\ControllerLiveState.hpp"
        for name in (
            "Input_controllerPorts", "Input_releasedButtons",
            "Input_buttonHeldFrames", "Input_stickPosBuf", "Input_buttonRepeat",
@@ -4072,7 +4072,7 @@ EVENT_SCRIPT_CONTROL_OPCODES = (
     ("F01120", 0x800B98C0, "ScriptChangeRoom"),
 )
 NATIVE_HELPER_HEADERS |= {
-    f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.h"
+    f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptControlOpcodes.hpp"
     for _, _, name in EVENT_SCRIPT_CONTROL_OPCODES
 }
 
@@ -4090,7 +4090,7 @@ NATIVE_HELPER_HEADERS |= {
 
 # #276 row 34 (event script actor opcodes): the 47 BATTLE.PRG actor opcode handlers of 4A0A8.c are typed C++
 # (Event/ScriptActorCommands.cpp) behind a ScriptActorHost. Each opcode table slot holds a C binding with the dispatch
-# ABI (Event/ScriptActorOpcodes.h) at the handler's module-image address. The generated script VM, screen and dialog
+# ABI (Event/ScriptActorOpcodes.hpp) at the handler's module-image address. The generated script VM, screen and dialog
 # callers of the selection, activity and dialog-anchor helpers keep the original call shapes through
 # ScriptActorCommandsLive.hpp.
 EVENT_SCRIPT_ACTOR_OPCODES = (
@@ -4143,7 +4143,7 @@ EVENT_SCRIPT_ACTOR_OPCODES = (
     ("F01185", 0x800BAEA0, "CommandStoreActorDistance"),
 )
 NATIVE_HELPER_HEADERS |= {
-    f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptActorOpcodes.h" for _, _, name in EVENT_SCRIPT_ACTOR_OPCODES
+    f"Event_{name}Opcode": r"Native\Game\src\Event\ScriptActorOpcodes.hpp" for _, _, name in EVENT_SCRIPT_ACTOR_OPCODES
 }
 EVENT_SCRIPT_ACTOR_LIVE_BINDINGS = {
     "F01186": "SetLiveEventActorActivity",
@@ -4223,9 +4223,9 @@ EVENT_SCRIPT_EFFECT_OPCODES = (
     ("F01201", 0x800BB4F0, "CommandSetScanlineOverlay"),
 )
 EVENT_SCRIPT_MEDIA_OPCODE_HEADERS = (
-    (r"Native\Game\src\Event\ScriptAudioOpcodes.h", EVENT_SCRIPT_AUDIO_OPCODES),
-    (r"Native\Game\src\Event\ScriptDialogOpcodes.h", EVENT_SCRIPT_DIALOG_OPCODES),
-    (r"Native\Game\src\Event\ScriptEffectOpcodes.h", EVENT_SCRIPT_EFFECT_OPCODES),
+    (r"Native\Game\src\Event\ScriptAudioOpcodes.hpp", EVENT_SCRIPT_AUDIO_OPCODES),
+    (r"Native\Game\src\Event\ScriptDialogOpcodes.hpp", EVENT_SCRIPT_DIALOG_OPCODES),
+    (r"Native\Game\src\Event\ScriptEffectOpcodes.hpp", EVENT_SCRIPT_EFFECT_OPCODES),
 )
 EVENT_SCRIPT_MEDIA_OPCODES = EVENT_SCRIPT_AUDIO_OPCODES + EVENT_SCRIPT_DIALOG_OPCODES + EVENT_SCRIPT_EFFECT_OPCODES
 NATIVE_HELPER_HEADERS |= {

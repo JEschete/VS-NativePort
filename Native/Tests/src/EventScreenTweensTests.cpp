@@ -16,7 +16,7 @@
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -354,9 +354,9 @@ TEST_CASE("Live screen tween entries skip a missing camera or tween",
   Event_camera = nullptr;
   const std::uint64_t before = ev::RefusedEventScreenTweenCount();
   std::array<std::uint8_t, 5> instruction{0xE4, 1, 2, 3, 0};
-  CHECK(Event_CommandScreenTransformOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandScreenTransformOpcode(instruction.data(), 0) == 0);
   instruction[0] = 0xE2;
-  CHECK(Event_CommandTweenCameraRollOpcode(instruction.data(), 0) == 0);
+  CHECK(VS::Event::CommandTweenCameraRollOpcode(instruction.data(), 0) == 0);
   ev::UpdateEventScreenTransformsEntry();
   ev::UpdateEventAngleTweenEntry(nullptr);
   CHECK(ev::UpdateEventTripleTweenEntry(nullptr) == 0);
@@ -372,7 +372,7 @@ TEST_CASE("Live screen tween entries keep the workspace layout",
   Event_camera = &camera;
   camera.captured_screen_roll.angle = 0x700;
   std::array<std::uint8_t, 5> roll{0xE3, 0x00, 0x01, 0x2F, 4};
-  CHECK(Event_CommandTweenCameraRollOpcode(roll.data(), 0) == 0);
+  CHECK(VS::Event::CommandTweenCameraRollOpcode(roll.data(), 0) == 0);
   CHECK(camera.captured_screen_roll.delta_angle == -0x600 + 0x1000);
   CHECK(camera.captured_screen_roll.easing_mode == 0xF);
   VS::State::tickSpeed = 4;

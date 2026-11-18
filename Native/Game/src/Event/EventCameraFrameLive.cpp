@@ -19,7 +19,7 @@
 #include "Event/EventScreenTweensLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/CameraLive.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -278,7 +278,7 @@ std::uint64_t RefusedEventCameraFrameCount() noexcept {
 
 // decomp: BATTLE.PRG func_800BB41C (F01197, src/BATTLE/BATTLE.PRG/4A0A8.c:2788,
 // 0x800BB41C-0x800BB450), opcode 0xE0.
-std::intptr_t Event_CommandWaitCameraTracksOpcode(
+std::intptr_t VS::Event::CommandWaitCameraTracksOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandWaitCameraTracks";

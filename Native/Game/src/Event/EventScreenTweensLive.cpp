@@ -16,7 +16,7 @@
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptControlOpcodes.hpp"
 #include "Render/FramebufferEffects.h"
 #include "Render/ScreenOverlayLive.hpp"
 #include "State/Timers.hpp"
@@ -216,7 +216,7 @@ std::uint64_t RefusedEventScreenTweenCount() noexcept {
 
 // decomp: BATTLE.PRG func_800BB450 (F01198, src/BATTLE/BATTLE.PRG/4A0A8.c:2793,
 // 0x800BB450-0x800BB474), opcode 0xE1.
-std::intptr_t Event_CommandSetScreenCaptureOpcode(
+std::intptr_t VS::Event::CommandSetScreenCaptureOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   if (instruction == nullptr) {
@@ -232,7 +232,7 @@ std::intptr_t Event_CommandSetScreenCaptureOpcode(
 
 // decomp: BATTLE.PRG func_800BD444 (F01226, src/BATTLE/BATTLE.PRG/4A0A8.c:3601,
 // 0x800BD444-0x800BD57C), opcodes 0xE2 and 0xE3.
-std::intptr_t Event_CommandTweenCameraRollOpcode(
+std::intptr_t VS::Event::CommandTweenCameraRollOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandTweenCameraRoll";
@@ -259,7 +259,7 @@ std::intptr_t Event_CommandTweenCameraRollOpcode(
 
 // decomp: BATTLE.PRG func_800BD6C4 (F01229, src/BATTLE/BATTLE.PRG/4A0A8.c:3691,
 // 0x800BD6C4-0x800BDAB4), opcodes 0xB9, 0xBA, 0xBF, 0xE4-0xE7 and 0xED.
-std::intptr_t Event_CommandScreenTransformOpcode(
+std::intptr_t VS::Event::CommandScreenTransformOpcode(
     std::uint8_t* instruction, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandScreenTransform";
