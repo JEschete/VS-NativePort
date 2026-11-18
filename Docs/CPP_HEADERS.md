@@ -140,7 +140,7 @@ compile settings, is part of #248.
 | `macros` | 69 | 10,519 |
 | `global_decls` | 368 | 3,206 |
 | `c_wrapped` | 0 | 0 |
-| `baseline` | 23 | 581 |
+| `baseline` | 19 | 308 |
 
 | Source origin | Sources | Done | Remaining | `c_linkage` sites remaining |
 | --- | ---: | ---: | ---: | ---: |
