@@ -16,15 +16,16 @@ the per-file counts. A catch-site/reachability audit is not complete.
 The hidden test installs the production crash handler, creates a missing-AI
 state invariant, then calls `std::terminate()` from its catch; its parent
 verifies `uncaught exception: battle actor has no AI state` in Debug and
-Release. This proves the handler logs the invariant reason, but it does not
-execute a real copied `extern "C"` caller and does not satisfy the latest
-remaining acceptance criterion. Ghidra MCP was unavailable (no backend or open
-program), so the original caller could not be traced there.
+Release. It does not execute a copied caller. Per the owner's authorization,
+use this local invariant test together with the owner-commented clang-cl probe
+through two `extern "C"` frames as the alternate evidence for the logging
+criterion; do not claim the local test exercises that caller. Ghidra MCP was
+unavailable (no backend or open program), so the original caller could not be
+traced there.
 
-Keep #267 open. Next, complete the throw/catch reachability classification and
-identify an executable copied caller for the hidden test. If no such path is
-available in the current native tree, ask the owner for the exact callsite or
-test setup before claiming acceptance.
+Keep #267 open. Next, complete the throw/catch reachability classification
+and evaluate the reason at each confirmed reachable site. The issue's latest
+comments record the selected alternate verification and remaining limits.
 
 ## Connected-controller handover (#438), 2026-11-18
 
