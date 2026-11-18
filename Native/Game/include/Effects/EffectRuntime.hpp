@@ -160,8 +160,7 @@ class PrimaryEffectRuntime : public EffectInstancePlayback {
 
   // Copies the action request into the runtime's.
   virtual void StoreActionRequest() = 0;
-  virtual void SetActionVariant(std::uint8_t variant,
-                                std::uint8_t argument) = 0;
+  virtual void SetActionVariant(std::uint8_t variant) = 0;
   // A free effect token; 0 when the pool is full.
   [[nodiscard]] virtual std::uint8_t AllocateToken() = 0;
   // Captures the camera into the saved action camera, then into the effect
@@ -198,13 +197,13 @@ enum class TrackStart : std::uint8_t {
 struct ActionEffectStart {
   std::uint16_t source_type{};
   std::int32_t variant{};
-  std::int32_t argument{};
 };
 
 // func_800CF0E8 (5BF94.c:5444): stores the action request, keeps a nonzero
-// variant's low byte and its argument's for an actor-bone source, takes a
-// token, selects the action package, captures both cameras and starts
-// loading. Returns the token.
+// variant's low byte for an actor-bone source, takes a token, selects the
+// action package, captures both cameras and starts loading. Returns the
+// token. The original also kept the third argument's low byte at D_800F54A9,
+// which nothing reads (#445).
 [[nodiscard]] std::uint8_t BeginActionEffect(const ActionEffectStart& start,
                                              PrimaryEffectRuntime& runtime);
 

@@ -231,9 +231,8 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
       Effects_actionRequest = *request_;
     }
   }
-  void SetActionVariant(std::uint8_t variant, std::uint8_t argument) override {
+  void SetActionVariant(std::uint8_t variant) override {
     Effects_actionVariant = variant;
-    Effects_actionVariantArgument = static_cast<char>(argument);
   }
   std::uint8_t AllocateToken() override {
     return static_cast<std::uint8_t>(LiveAllocateEffectToken());
@@ -440,16 +439,15 @@ int LiveUpdateEffectRuntime() {
 }
 
 int LiveBeginActionEffect(Effects_ActionEffectRequest* request,
-                          int action_variant, int variant_argument) {
+                          int action_variant, int /*variant_argument*/) {
   if (request == nullptr) {
     Refuse("action effect", "no action request");
     return 0;
   }
   LivePrimary primary(*request);
-  return BeginActionEffect({.source_type = request->source.type,
-                            .variant = action_variant,
-                            .argument = variant_argument},
-                           primary);
+  return BeginActionEffect(
+      {.source_type = request->source.type, .variant = action_variant},
+      primary);
 }
 
 void LiveClearPrimaryEffects() {

@@ -3,11 +3,9 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Legacy.h"
 
-// decomp: D_8005DBF4 (D_8005DBF4@SLUS_010.40)
-int Core_legacyUnreferencedBlock[5][6];
-
-// decomp: D_8005E040 (D_8005E040@SLUS_010.40)
-u_int Core_legacyUnreferencedWord;
+// D_8005DBF4 was clutState.bgColors (+0x7E9C), owned by
+// VS::Render::PaletteAnimation; D_8005E040 was Audio_soundState.currentMusicId
+// (+8). Both are retired (#445).
 
 // decomp: _buildTimestamp (_buildTimestamp@SLUS_010.40)
 char Core_legacyBuildTimestamp[] = "Mar 28 00:09\0\0";

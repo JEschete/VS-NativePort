@@ -132,7 +132,7 @@ compile settings, is part of #248.
 | `void_params` | 39 | 107 |
 | `gnu_attributes` | 5 | 7 |
 | `macros` | 69 | 10,521 |
-| `global_decls` | 368 | 3,209 |
+| `global_decls` | 368 | 3,206 |
 | `c_wrapped` | 357 | 5,681 |
 | `baseline` | 23 | 581 |
 

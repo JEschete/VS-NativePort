@@ -27,6 +27,7 @@ int LiveStartEffectTrack(int track);
 // func_800CF060 (5BF94.c:5427).
 int LiveUpdateEffectRuntime();
 // func_800CF0E8 (5BF94.c:5444): the action's effect token; 0 when refused.
+// The third argument only reached the write-only D_800F54A9 and is unused.
 int LiveBeginActionEffect(Effects_ActionEffectRequest* request,
                           int action_variant, int variant_argument);
 // func_800CF1A8 (5BF94.c:5462).

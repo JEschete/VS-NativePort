@@ -323,7 +323,6 @@ extern Effects_EffectInstance* Effects_primaryInstances;
 extern Effects_EffectInstance* Effects_currentInstance;
 extern Effects_ActionEffectRequest Effects_secondaryRequest;
 extern char Effects_primaryLoaded;
-extern char Effects_actionVariantArgument;
 extern Effects_EffectInstance* Effects_secondaryInstances;
 extern int Effects_scriptSelector;
 extern Effects_EffectPackage* Effects_savedPackage;

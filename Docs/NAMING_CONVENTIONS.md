@@ -289,6 +289,33 @@ used by several systems goes to that system's `State.c` (e.g. `Native\Game\src\B
 - Fields that are on-disc offsets or raw pointers in the original become typed natively: note `handle:<Type>` (a
   pointer that becomes a `Handle<T>`) or `index:<Type>` where it applies.
 
+### 10.1 Native evidence and trace results (#445)
+
+The native tree is the source of truth (D24). `tools\naming\trace_queue.py` builds `TRACE_QUEUE.csv` from the
+ledgers, the libclang index of the native tree (`tools\naming\native_refs.py`) and the read-only upstream
+`resources\rood-reverse` symbol files; it does not use `rood-reverseWin`, the copier or the name-merge pipeline.
+Settle a row by editing its ledger row directly, then regenerate the queue. Each settled row cites its evidence in
+`notes`:
+
+- `native-refs:<class>`: how production native code uses the item (`Native\Tests\` and layout assertions do not
+  count). `none`: never used; `write-only`: only written; `copy-only`: only copied into members that are themselves
+  never read; `read`: read. `trace_queue.py --resolve` records the first three at `med` with the meanings it sets;
+  a meaning that already says what the item is in the original is kept, with the native finding appended.
+- `source:native:<path>:<line>`: the native line behind that class (the first writer or copier, else the
+  declaration).
+- `trace:<scenario>:<observation>`: a runtime result. `<scenario>` names the log
+  `tools\naming\traces\<scenario>.md`, `<observation>` is a short kebab-case result
+  (`trace:map009-door:read-on-open`). A trace that establishes the meaning raises the row to `med` or `high`.
+- `disc-refs:` or a free-text disc citation: accesses found in the disc executables with
+  `tools\naming\disc_refs.py <Gid|0xADDR:size>`, which reports access-width overlaps. A base address formed with
+  `addiu` and used with an offset reaches a neighbour, not the target: check the surrounding range and disassemble
+  the sites before calling an item unread.
+
+A global that the disc shows is only written is retired like G01961 (91f560147): remove the hooks that exist only
+for the write, leave a provenance comment at the original write and mark the row `copied=retired` with a
+`retired-by:` note. A global that is really a member of another record is retired with `retired-by:<owner>
+<member>`. A `reserved` member confirmed unread in its scenarios becomes padding or a drop candidate.
+
 ## 11. Output format (symbol batches)
 
 `tools\naming\make_symbol_batches.py` writes `tools\naming\sym_batches\<batch>\{globals,types,fields}.csv` plus
@@ -580,7 +607,7 @@ copy-time naming fixes (2026-10-17) and the #148 native semantic sweep (2026-10-
   canonical ledgers. Review new findings against source and update the applicable
   ledger rows; do not replay the retired sanity-fix script or historical batches.
 - **Low and opaque rows need tracing, not renaming.** Most low fields are `reserved` (never read) or `opaque` (read, but
-  the meaning is not established). See #347 and `tools\naming\trace_queue.py`.
+  the meaning is not established). See §10.1, #445 and `tools\naming\trace_queue.py`.
 - **Catalog additions.** `tools\ledger\add_missing_functions.py --batch <name>` catalogs functions the scanner missed:
   `glabel`/`alabel` inline-assembly entry points in `.c` files, `jumpFunc NAME, TARGET` lines and `.s` alternate entry
   points that C code references. It never overwrites an existing batch. Do not re-run `build_ledgers.py`, which

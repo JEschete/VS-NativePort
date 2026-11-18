@@ -309,8 +309,9 @@ std::uint8_t BeginActionEffect(const ActionEffectStart& start,
                                PrimaryEffectRuntime& runtime) {
   runtime.StoreActionRequest();
   if (start.variant != 0 && start.source_type == kActorBoneEndpoint) {
-    runtime.SetActionVariant(static_cast<std::uint8_t>(start.variant),
-                             static_cast<std::uint8_t>(start.argument));
+    // The original also stored the third argument's low byte at the
+    // write-only D_800F54A9 (BATTLE.PRG 0x800CF15C).
+    runtime.SetActionVariant(static_cast<std::uint8_t>(start.variant));
   }
   runtime.SetPrimaryToken(runtime.AllocateToken());
   runtime.SelectPackage(ActivePackage::kAction);

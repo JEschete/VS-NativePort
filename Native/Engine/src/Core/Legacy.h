@@ -9,8 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_CORE_LEGACY_H_DECLS)
 #define VS_CORE_LEGACY_H_DECLS
 
-extern int Core_legacyUnreferencedBlock[5][6];
-extern u_int Core_legacyUnreferencedWord;
 extern char Core_legacyBuildTimestamp[];
 extern u_int Core_legacyRamSize;
 extern u_int Core_legacyStackSize;

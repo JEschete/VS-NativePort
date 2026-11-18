@@ -181,9 +181,8 @@ class FakePrimary final : public FakePlayback<fx::PrimaryEffectRuntime> {
   void ResetCameraMotion() override { Record("reset camera"); }
 
   void StoreActionRequest() override { Record("store request"); }
-  void SetActionVariant(std::uint8_t variant, std::uint8_t argument) override {
-    Record("variant " + std::to_string(variant) + " " +
-           std::to_string(argument));
+  void SetActionVariant(std::uint8_t variant) override {
+    Record("variant " + std::to_string(variant));
   }
   std::uint8_t AllocateToken() override { return allocated_token; }
   void CaptureSavedCamera() override { Record("capture saved"); }
@@ -776,12 +775,11 @@ TEST_CASE("F01433 the action effect begins loading with a fresh token",
                std::tuple{std::uint16_t{4}, 0, false},
                std::tuple{std::uint16_t{3}, 7, false},
                std::tuple{std::uint16_t{0x104}, 7, false});
-  CHECK(fx::BeginActionEffect(
-            {.source_type = source, .variant = variant, .argument = 0x2FE},
-            primary) == 200);
+  CHECK(fx::BeginActionEffect({.source_type = source, .variant = variant},
+                              primary) == 200);
   Log expected{"store request"};
   if (kept) {
-    expected.emplace_back("variant 3 254");
+    expected.emplace_back("variant 3");
   }
   expected.insert(expected.end(), {"token 200", "select 1", "capture saved",
                                    "capture effect", "primary 6"});

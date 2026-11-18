@@ -76,8 +76,8 @@ Effects_ActionEffectRequest Effects_secondaryRequest;
 // decomp: D_800F54A8 (D_800F54A8@BATTLE/BATTLE.PRG)
 char Effects_primaryLoaded;
 
-// decomp: D_800F54A9 (D_800F54A9@BATTLE/BATTLE.PRG)
-char Effects_actionVariantArgument;
+// D_800F54A9 was written by func_800CF0E8 (0x800CF15C) and never read; it is
+// retired (#445).
 
 // decomp: D_800F54B0 (D_800F54B0@BATTLE/BATTLE.PRG)
 Effects_EffectInstance* Effects_secondaryInstances;

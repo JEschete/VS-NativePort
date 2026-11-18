@@ -376,9 +376,10 @@ class ReviewedConsumerTests(unittest.TestCase):
                 row = next(row for row in fields
                            if row["type_id"] == tid and row["name"] == member)
                 self.assertEqual((row["final_name"], row["meaning"], row["confidence"]),
-                                 (final, "Not read", "low"))
+                                 (final, "Not used by native code; kept for the original layout", "med"))
                 self.assertRegex(row["notes"],
-                                 r"^declaration-only;source:upstream:6E644\.c:\d+$")
+                                 r"^native-refs:none;source:native:Native\\[^;]+\.h:\d+;"
+                                 r"declaration-only;source:upstream:6E644\.c:\d+$")
 
 
 class MemberPairTests(unittest.TestCase):
