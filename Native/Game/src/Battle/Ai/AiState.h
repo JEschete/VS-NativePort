@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_AI_AISTATE_H_TYPES
-#define VS_BATTLE_AI_AISTATE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ActorRecord;
@@ -66,17 +65,9 @@ struct Battle_Ai_WanderRecordView;
 struct Battle_Ai_WanderView;
 struct Battle_Ai_WaypointSearchView;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_BATTLE_AI_AISTATE_H_SET_TYPES_ONLY
-#endif
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
-#ifdef VS_BATTLE_AI_AISTATE_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_BATTLE_AI_AISTATE_H_SET_TYPES_ONLY
-#endif
 
 // layout: ledger (upstream merge) for D_800F58BC_t
 struct Battle_Ai_RoomAiState {
@@ -1647,5 +1638,3 @@ struct Battle_Ai_WanderView {
     char reserved160[8];
     Battle_Ai_TilePosition destination;
 };
-
-#endif // VS_BATTLE_AI_AISTATE_H_TYPES

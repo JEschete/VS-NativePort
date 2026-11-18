@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_MAP_H_TYPES
-#define VS_MENU_MAP_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Map_CompassBound;
@@ -24,10 +23,6 @@ struct Menu_Map_MapLabel {
 struct Menu_Map_MapLabel;
 static_assert(sizeof(Menu_Map_MapLabel) == 0x8, "Menu_Map_MapLabel must keep its PS1 layout");
 
-#endif // VS_MENU_MAP_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_MAP_H_DECLS)
-#define VS_MENU_MAP_H_DECLS
 #include "DiscQueue.h"
 #include "Field/Map.h"
 
@@ -72,5 +67,3 @@ extern int Menu_Map_selectedMap;;
 extern int Menu_Map_triggerHideUi;;
 extern short Menu_Map_uiAnimationState;;
 void Menu_Map_ResetMenu5Statics();
-
-#endif // VS_MENU_MAP_H_DECLS

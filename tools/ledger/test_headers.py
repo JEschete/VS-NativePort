@@ -225,14 +225,14 @@ class LedgerTests(unittest.TestCase):
             linked = [issue.rule for issue in headers.check(self.workspace) if "Linked.h" in issue.subject]
             self.assertEqual(linked, ["criterion-reintroduced"])
 
-            # A macro include guard is retired too; the split header's section guards are not yet.
+            # Include guards are retired too: a macro guard and the copier's split sections both fail.
             self.fixture.files["Native/Game/src/Menu/Linked.h"] = LINKED.replace("(void)", "()")
             self.fixture.write()
             headers.sync(self.workspace)
-            returned = [issue.message for issue in headers.check(self.workspace)
-                        if issue.rule == "criterion-reintroduced" and "Linked.h" in issue.subject]
-            self.assertEqual(len(returned), 1)
-            self.assertTrue(returned[0].startswith("guard retired"), returned[0])
+            returned = {issue.subject.split()[1]: issue.message for issue in headers.check(self.workspace)
+                        if issue.rule == "criterion-reintroduced"}
+            self.assertTrue(returned["Native/Game/src/Menu/Linked.h"].startswith("guard retired"), returned)
+            self.assertIn("guard: #pragma once", returned["Native/Game/src/Menu/Map.h"])
 
     def test_line_endings_do_not_change_a_measurement(self) -> None:
         text = "#pragma once\n#define VS_PAIR \\\n  int first; \\\n  int second;\nvoid Sum(void);\n"

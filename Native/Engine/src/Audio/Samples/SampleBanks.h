@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_SAMPLES_SAMPLEBANKS_H_TYPES
-#define VS_AUDIO_SAMPLES_SAMPLEBANKS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_BankStreamState;
@@ -38,15 +37,8 @@ struct Audio_Instrument {
 };
 static_assert(sizeof(Audio_Instrument) == 0x10, "Audio_Instrument must keep its PS1 layout");
 
-#endif // VS_AUDIO_SAMPLES_SAMPLEBANKS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_SAMPLES_SAMPLEBANKS_H_DECLS)
-#define VS_AUDIO_SAMPLES_SAMPLEBANKS_H_DECLS
-
 extern Audio_MusicSampleBankIds Audio_Samples_musicSampleBankIds;
 extern Audio_Instrument Audio_Samples_instruments[256];
 extern int Audio_Samples_soundEffectBankIds[3];
 extern int Audio_Samples_bankChunkHeader[16];
 extern Audio_BankStreamState Audio_Samples_bankStream;
-
-#endif // VS_AUDIO_SAMPLES_SAMPLEBANKS_H_DECLS

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_DISCQUEUE_H_TYPES
-#define VS_DISCQUEUE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Content_DiscDrive;
@@ -88,11 +87,6 @@ struct Content_DiscDrive {
     int framesSinceLastRead;
 };
 
-#endif // VS_DISCQUEUE_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_DISCQUEUE_H_DECLS)
-#define VS_DISCQUEUE_H_DECLS
-
 extern u_char* Content_legacyDiscReadBuffer;
 extern DslLOC Content_legacyDiscReadLocation;
 extern int Content_legacyXaReadyBcdField;
@@ -103,5 +97,3 @@ extern Content_DiscQueueSlot Content_discRequestSlots[32];
 extern struct Content_DiscRequestCounts Content_discRequestCounts;
 extern Content_DiscDrive Content_discDriveState;
 extern char Content_discControlResponseBytes[11];
-
-#endif // VS_DISCQUEUE_H_DECLS

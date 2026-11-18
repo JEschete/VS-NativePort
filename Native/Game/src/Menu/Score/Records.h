@@ -1,13 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_SCORE_RECORDS_H_TYPES
-#define VS_MENU_SCORE_RECORDS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
-#endif // VS_MENU_SCORE_RECORDS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_RECORDS_H_DECLS)
-#define VS_MENU_SCORE_RECORDS_H_DECLS
 #include "Menu/Score/ScoreScreen.h"
 
 extern u_short Menu_Score_clearCount;;
@@ -21,5 +16,3 @@ extern char const* Menu_Score_kTimeAttackReferenceTimes[];
 extern u_short Menu_Score_timeAttacks[58]; /* contents: disc string table (ModuleData.cpp) */;
 extern u_short Menu_Score_titleDescriptions[784]; /* contents: disc string table (ModuleData.cpp) */;
 extern u_short Menu_Score_titleText[364]; /* contents: disc string table (ModuleData.cpp) */;
-
-#endif // VS_MENU_SCORE_RECORDS_H_DECLS

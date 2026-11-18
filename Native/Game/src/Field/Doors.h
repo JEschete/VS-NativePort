@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_DOORS_H_TYPES
-#define VS_FIELD_DOORS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_DoorFlagIdWord;
@@ -25,10 +24,6 @@ struct Field_DoorTileLocation {
 };
 static_assert(sizeof(Field_DoorTileLocation) == 0x2, "Field_DoorTileLocation must keep its PS1 layout");
 
-#endif // VS_FIELD_DOORS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_DOORS_H_DECLS)
-#define VS_FIELD_DOORS_H_DECLS
 #include "Field/Mpd.h"
 
 extern short Field_lockedDoorIndexRanges[54];
@@ -37,5 +32,3 @@ extern Field_DoorFlagIdWord Field_snapshotDoorFlagSource;
 extern Field_MpdDoorRecord Field_pendingDestinationDoor;
 extern short Field_enteredDoorId;
 extern Field_MpdDoorRecord Field_entranceDoorRecord;
-
-#endif // VS_FIELD_DOORS_H_DECLS

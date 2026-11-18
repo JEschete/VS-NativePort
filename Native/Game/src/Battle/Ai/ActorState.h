@@ -1,13 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_AI_ACTORSTATE_H_TYPES
-#define VS_BATTLE_AI_ACTORSTATE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
-#endif // VS_BATTLE_AI_ACTORSTATE_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_ACTORSTATE_H_DECLS)
-#define VS_BATTLE_AI_ACTORSTATE_H_DECLS
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -33,5 +28,3 @@ extern Battle_Ai_RoomAiState* Battle_Ai_roomAiState;
 extern void* Battle_Ai_roomHasWaypoints;
 extern int Battle_Ai_attributeActorMask;
 extern const unsigned char Battle_Ai_kFlags34Bit14Values[4];
-
-#endif // VS_BATTLE_AI_ACTORSTATE_H_DECLS

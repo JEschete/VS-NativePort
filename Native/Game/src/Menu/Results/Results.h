@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_RESULTS_RESULTS_H_TYPES
-#define VS_MENU_RESULTS_RESULTS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Results_BuffReel;
@@ -95,10 +94,6 @@ struct Menu_Results_BuffReel {
 };
 static_assert(sizeof(Menu_Results_BuffReel) == 0x4, "Menu_Results_BuffReel must keep its PS1 layout");
 
-#endif // VS_MENU_RESULTS_RESULTS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_RESULTS_RESULTS_H_DECLS)
-#define VS_MENU_RESULTS_RESULTS_H_DECLS
 #include "Render/Images.h"
 
 extern int Menu_Results_buffReelIndex;;
@@ -115,5 +110,3 @@ extern int Menu_Results_onScreenScore;;
 extern int Menu_Results_rank;;
 extern u_char Menu_Results_riskbreakerRanks[][4];
 extern u_int Menu_Results_score;;
-
-#endif // VS_MENU_RESULTS_RESULTS_H_DECLS

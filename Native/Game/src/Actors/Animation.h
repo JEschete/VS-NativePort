@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_ANIMATION_H_TYPES
-#define VS_ACTORS_ANIMATION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_AnimationPose;
@@ -40,10 +39,6 @@ struct Actors_SeqAnimationBank {
 };
 static_assert(sizeof(Actors_SeqAnimationBank) == 0x8, "Actors_SeqAnimationBank must keep its PS1 layout");
 
-#endif // VS_ACTORS_ANIMATION_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_ACTORS_ANIMATION_H_DECLS)
-#define VS_ACTORS_ANIMATION_H_DECLS
 #include "Actors/TextureAnimation.h"
 
 extern u_char Actors_sharedSequenceIdsByKind[592];
@@ -64,5 +59,3 @@ extern char* Actors_sharedSequenceAnimationData[4][16];
 extern void* Actors_primarySequenceBuffer;
 extern short Actors_sharedSequenceEntryParams[4][16];
 extern char Actors_lastResolvedSequenceIndex;
-
-#endif // VS_ACTORS_ANIMATION_H_DECLS

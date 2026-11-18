@@ -1,21 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_MODELINSTANCE_H_TYPES
-#define VS_ACTORS_MODELINSTANCE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ModelEffectSlot;
 struct Actors_ModelInstance;
 struct Actors_ShpModel;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ACTORS_MODELINSTANCE_H_SET_TYPES_ONLY
-#endif
 #include "Render/Palette.h"
-#ifdef VS_ACTORS_MODELINSTANCE_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ACTORS_MODELINSTANCE_H_SET_TYPES_ONLY
-#endif
 
 // decomp: D_800F4538_unk64 (src/BATTLE/BATTLE.PRG/3A1A0.h:99)
 struct Actors_ModelEffectSlot {
@@ -96,5 +87,3 @@ struct Actors_ModelInstance {
     Actors_ModelEffectSlot palettePulse;
     Actors_ShpModel* model;
 };
-
-#endif // VS_ACTORS_MODELINSTANCE_H_TYPES

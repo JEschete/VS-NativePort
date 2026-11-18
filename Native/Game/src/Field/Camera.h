@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_CAMERA_H_TYPES
-#define VS_FIELD_CAMERA_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_CameraPositionPair;
@@ -8,15 +7,7 @@ struct Field_CameraTransition;
 struct Field_SphericalCamera;
 struct Field_SphericalCameraValues;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_FIELD_CAMERA_H_SET_TYPES_ONLY
-#endif
 #include "Render/Render.h"
-#ifdef VS_FIELD_CAMERA_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_FIELD_CAMERA_H_SET_TYPES_ONLY
-#endif
 
 // decomp: _sphericalValues (src/BATTLE/BATTLE.PRG/146C.h:738)
 struct Field_SphericalCameraValues {
@@ -66,5 +57,3 @@ struct Field_CameraTransition {
     int transitionFrames;
 };
 static_assert(sizeof(Field_CameraTransition) == 0xF8, "Field_CameraTransition must keep its PS1 layout");
-
-#endif // VS_FIELD_CAMERA_H_TYPES

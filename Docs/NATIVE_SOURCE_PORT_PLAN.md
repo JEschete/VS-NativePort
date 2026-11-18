@@ -418,9 +418,10 @@ PS1 layout under the x64 MSVC rules.
 
 - **Output:** 751 files (328 `.c`, 395 `.h`, 28 `.inl`). Of 3,758 functions, 3,514 are copied C and 244 are
   assembly-only `VS_UNPORTED` stubs with their real prototypes. Every global (2,174) and type (842) is written.
-- **Headers:** each `X.c` has a sibling `X.h` with its prototypes and externs. Generated headers have a types
-  section (macros, types) and a declarations section; type dependencies are included in types-only mode, so
-  include cycles between declaration sections resolve. Includes come from the names each file uses (plus types
+- **Headers:** each `X.c` has a sibling `X.h` with its prototypes and externs. Generated headers had a types
+  section (macros, types) and a declarations section, with type dependencies included in types-only mode so that
+  include cycles between declaration sections resolved; since 2026-11-18 each is one `#pragma once` header
+  (`Docs\CPP_HEADERS.md`). Includes come from the names each file uses (plus types
   reachable through pointers for `.c` files). Where the ledger has both `include\M\X.h` and `src\M\X.h` they are
   one public header.
 - **Declaration differences between decomp files** (each file declared its own view of a global or prototype):

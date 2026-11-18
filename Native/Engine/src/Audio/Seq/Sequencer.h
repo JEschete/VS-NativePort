@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_SEQ_SEQUENCER_H_TYPES
-#define VS_AUDIO_SEQ_SEQUENCER_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_FadeTimer;
@@ -17,10 +16,6 @@ struct Audio_FadeTimer {
 };
 static_assert(sizeof(Audio_FadeTimer) == 0x10, "Audio_FadeTimer must keep its PS1 layout");
 
-#endif // VS_AUDIO_SEQ_SEQUENCER_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_SEQ_SEQUENCER_H_DECLS)
-#define VS_AUDIO_SEQ_SEQUENCER_H_DECLS
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
@@ -39,5 +34,3 @@ extern void (*Audio_Seq_kExtendedOpcodeHandlers[32])(Audio_SeqChannel*, int);
 extern Audio_CommandParams Audio_Seq_embeddedSoundEffectParams;
 extern Audio_FadeTimer Audio_Seq_masterFade;
 extern int Audio_Seq_randomPitchPhase;
-
-#endif // VS_AUDIO_SEQ_SEQUENCER_H_DECLS

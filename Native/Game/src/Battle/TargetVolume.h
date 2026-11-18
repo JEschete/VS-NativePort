@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_TARGETVOLUME_H_TYPES
-#define VS_BATTLE_TARGETVOLUME_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_SphereTargetLabel;
@@ -9,15 +8,7 @@ struct Battle_TargetSphere;
 struct Battle_TargetSphereSetupView;
 struct Battle_TargetSphereSpec;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_BATTLE_TARGETVOLUME_H_SET_TYPES_ONLY
-#endif
 #include "Battle/BattleTypes.h"
-#ifdef VS_BATTLE_TARGETVOLUME_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_BATTLE_TARGETVOLUME_H_SET_TYPES_ONLY
-#endif
 
 // decomp: D_800EB9B8_t2 (src/BATTLE/BATTLE.PRG/573B8.c:31)
 struct Battle_TargetSphereSpec {
@@ -145,5 +136,3 @@ struct Battle_TargetSphere {
     char wireEdges[0x604];
     u_char terrainRowFlags[81];
 };
-
-#endif // VS_BATTLE_TARGETVOLUME_H_TYPES

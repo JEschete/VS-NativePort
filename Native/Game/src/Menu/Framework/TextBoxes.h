@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_FRAMEWORK_TEXTBOXES_H_TYPES
-#define VS_MENU_FRAMEWORK_TEXTBOXES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Framework_TextBoxSelector;
@@ -8,15 +7,7 @@ struct Menu_StringContext;
 struct Menu_TextAnchorWord;
 struct Menu_TextBoxState;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_MENU_FRAMEWORK_TEXTBOXES_H_SET_TYPES_ONLY
-#endif
 #include "Battle/TextBoxes.h"
-#ifdef VS_MENU_FRAMEWORK_TEXTBOXES_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_MENU_FRAMEWORK_TEXTBOXES_H_SET_TYPES_ONLY
-#endif
 
 // decomp: vs_battle_informationTextBoxHeader (src/BATTLE/BATTLE.PRG/5BF94.h:538)
 enum Menu_InformationBoxHeader {
@@ -81,12 +72,5 @@ struct Menu_TextBoxState {
     short opaque2E;
 };
 
-#endif // VS_MENU_FRAMEWORK_TEXTBOXES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_FRAMEWORK_TEXTBOXES_H_DECLS)
-#define VS_MENU_FRAMEWORK_TEXTBOXES_H_DECLS
-
 extern Menu_TextAnchorWord Menu_textBoxAnchors[2749][2];
 extern int Menu_informationHeaderPositions[5480];
-
-#endif // VS_MENU_FRAMEWORK_TEXTBOXES_H_DECLS

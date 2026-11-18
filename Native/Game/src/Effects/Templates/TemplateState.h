@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_TEMPLATES_TEMPLATESTATE_H_TYPES
-#define VS_EFFECTS_TEMPLATES_TEMPLATESTATE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_ClosedRingState;
@@ -15,15 +14,7 @@ struct Effects_Trail9;
 struct Effects_Trail9State;
 struct Effects_TransposedRingState;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_EFFECTS_TEMPLATES_TEMPLATESTATE_H_SET_TYPES_ONLY
-#endif
 #include "Effects/Particles.h"
-#ifdef VS_EFFECTS_TEMPLATES_TEMPLATESTATE_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_EFFECTS_TEMPLATES_TEMPLATESTATE_H_SET_TYPES_ONLY
-#endif
 
 // decomp: vs_closedRingState (src/EFFECT/PLG077.BIN/18.c:25)
 struct Effects_ClosedRingState {
@@ -145,5 +136,3 @@ struct Effects_TransposedRingState {
     int age;
     Effects_ParticleTextureAnimation texture;
 };
-
-#endif // VS_EFFECTS_TEMPLATES_TEMPLATESTATE_H_TYPES

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_RENDER_SCREENTRANSITION_H_TYPES
-#define VS_RENDER_SCREENTRANSITION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Render_LegacyTransitionWipePacket;
@@ -12,14 +11,7 @@ struct Render_LegacyTransitionWipePacket {
 };
 static_assert(sizeof(Render_LegacyTransitionWipePacket) == 0x30, "Render_LegacyTransitionWipePacket must keep its PS1 layout");
 
-#endif // VS_RENDER_SCREENTRANSITION_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_RENDER_SCREENTRANSITION_H_DECLS)
-#define VS_RENDER_SCREENTRANSITION_H_DECLS
-
 extern DR_MODE Render_legacyTransitionDrawModes[2];
 extern Render_LegacyTransitionWipePacket Render_legacyTransitionWipePackets[2];
 extern POLY_G4 Render_legacyTransitionEdgePackets[2];
 extern POLY_F4 Render_legacyTransitionFadePackets[2];
-
-#endif // VS_RENDER_SCREENTRANSITION_H_DECLS

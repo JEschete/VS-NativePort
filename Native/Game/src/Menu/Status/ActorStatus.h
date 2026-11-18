@@ -1,16 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_STATUS_ACTORSTATUS_H_TYPES
-#define VS_MENU_STATUS_ACTORSTATUS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
 // decomp: _renderLimbUiState (src/MENU/MENU4.PRG/120.c:1138)
 enum Menu_Status_LimbUiMode { Menu_Status_LimbUiMode_None, Menu_Status_LimbUiMode_Init };
-
-#endif // VS_MENU_STATUS_ACTORSTATUS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_STATUS_ACTORSTATUS_H_DECLS)
-#define VS_MENU_STATUS_ACTORSTATUS_H_DECLS
 
 extern char Menu_Status_layoutPadding1[24];;
 extern int Menu_Status_animationStep;
@@ -30,5 +24,3 @@ extern u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (
 extern int Menu_Status_xPos;
 extern int Menu_Status_yPos;
 void Menu_Status_ActorStatus_ResetMenu4Statics();
-
-#endif // VS_MENU_STATUS_ACTORSTATUS_H_DECLS

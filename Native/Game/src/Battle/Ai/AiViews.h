@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_AI_AIVIEWS_H_TYPES
-#define VS_BATTLE_AI_AIVIEWS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_ActorStats;
@@ -94,15 +93,7 @@ struct Battle_Ai_WanderTiming;
 struct Battle_Ai_WaypointTile;
 struct Battle_Ai_WordPair;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_BATTLE_AI_AIVIEWS_H_SET_TYPES_ONLY
-#endif
 #include "Battle/Ai/Navigation.h"
-#ifdef VS_BATTLE_AI_AIVIEWS_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_BATTLE_AI_AIVIEWS_H_SET_TYPES_ONLY
-#endif
 
 // decomp: actionCandidateEntry (src/BATTLE/BATTLE.PRG/6FC00.c:500)
 struct Battle_Ai_CandidateEntryView {
@@ -962,5 +953,3 @@ union Battle_Ai_TerrainTileWord {
         unsigned char tileX, tag, tileZ, searchStatus;
     } tile;
 };
-
-#endif // VS_BATTLE_AI_AIVIEWS_H_TYPES

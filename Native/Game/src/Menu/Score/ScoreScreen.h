@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_SCORE_SCORESCREEN_H_TYPES
-#define VS_MENU_SCORE_SCORESCREEN_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Score_CursorMemory;
@@ -71,10 +70,6 @@ struct Menu_Score_CursorMemory {
 };
 static_assert(sizeof(Menu_Score_CursorMemory) == 0x8, "Menu_Score_CursorMemory must keep its PS1 layout");
 
-#endif // VS_MENU_SCORE_SCORESCREEN_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_SCORESCREEN_H_DECLS)
-#define VS_MENU_SCORE_SCORESCREEN_H_DECLS
 #include "DiscQueue.h"
 
 extern int Menu_Score_layoutPadding1;;
@@ -106,5 +101,3 @@ extern int Menu_Score_rotationColor;;
 extern short Menu_Score_selectedEnemy;;
 extern char Menu_Score_unusedYesString[];
 extern int Menu_Score_zoomColor;;
-
-#endif // VS_MENU_SCORE_SCORESCREEN_H_DECLS

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_TRIGGERMARKERS_H_TYPES
-#define VS_FIELD_TRIGGERMARKERS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_TriggerMarkerVertex;
@@ -20,12 +19,5 @@ struct Field_TriggerMarkerVertex {
 };
 static_assert(sizeof(Field_TriggerMarkerVertex) == 0x28, "Field_TriggerMarkerVertex must keep its PS1 layout");
 
-#endif // VS_FIELD_TRIGGERMARKERS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_TRIGGERMARKERS_H_DECLS)
-#define VS_FIELD_TRIGGERMARKERS_H_DECLS
-
 extern RECT Field_triggerMarkerTextureSource;
 extern RECT Field_triggerMarkerPaletteSource;
-
-#endif // VS_FIELD_TRIGGERMARKERS_H_DECLS

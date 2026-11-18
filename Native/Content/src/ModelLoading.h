@@ -1,13 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MODELLOADING_H_TYPES
-#define VS_MODELLOADING_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
-#endif // VS_MODELLOADING_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MODELLOADING_H_DECLS)
-#define VS_MODELLOADING_H_DECLS
 #include "ActorAssets.h"
 #include "Actors/WeaponModel.h"
 #include "DiscQueue.h"
@@ -40,5 +35,3 @@ extern Content_DiscFile Content_legacyEtmFileLocation;
 extern Content_DiscQueueSlot* Content_legacyEtmDiscRequest;
 extern Content_ActorAssetRequest Content_legacyActorAssetRequests[16];
 extern Actors_WeaponModelData* Content_legacyWeaponModelBuffers[84];
-
-#endif // VS_MODELLOADING_H_DECLS

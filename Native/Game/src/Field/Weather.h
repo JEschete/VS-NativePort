@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_WEATHER_H_TYPES
-#define VS_FIELD_WEATHER_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_WeatherParticle;
@@ -17,11 +16,4 @@ struct Field_WeatherParticle {
 };
 static_assert(sizeof(Field_WeatherParticle) == 0x10, "Field_WeatherParticle must keep its PS1 layout");
 
-#endif // VS_FIELD_WEATHER_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_WEATHER_H_DECLS)
-#define VS_FIELD_WEATHER_H_DECLS
-
 extern char Field_screenWeatherFade;
-
-#endif // VS_FIELD_WEATHER_H_DECLS

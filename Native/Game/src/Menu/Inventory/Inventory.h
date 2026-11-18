@@ -1,13 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_INVENTORY_INVENTORY_H_TYPES
-#define VS_MENU_INVENTORY_INVENTORY_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
-
-#endif // VS_MENU_INVENTORY_INVENTORY_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_INVENTORY_INVENTORY_H_DECLS)
-#define VS_MENU_INVENTORY_INVENTORY_H_DECLS
 
 extern int Menu_Inventory_ashleyRenderState;
 extern int Menu_Inventory_ashleyYOffset;
@@ -31,5 +25,3 @@ extern int Menu_Inventory_selectedItemRow;;
 extern u_char Menu_Inventory_equipListStep;;
 void Menu_Inventory_ResetMenu3Statics();
 void Menu_Inventory_ResetMenubStatics();
-
-#endif // VS_MENU_INVENTORY_INVENTORY_H_DECLS

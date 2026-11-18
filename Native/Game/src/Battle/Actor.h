@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_ACTOR_H_TYPES
-#define VS_BATTLE_ACTOR_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ActorModelSlot;
@@ -11,16 +10,8 @@ struct Battle_ActorStats;
 struct Battle_ActorStatsFlags;
 struct Battle_LimbStats;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_BATTLE_ACTOR_H_SET_TYPES_ONLY
-#endif
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#ifdef VS_BATTLE_ACTOR_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_BATTLE_ACTOR_H_SET_TYPES_ONLY
-#endif
 
 // decomp: vs_battle_limbStatus (src/BATTLE/BATTLE.PRG/5BF94.h:502)
 enum Battle_LimbConditionLevel {
@@ -160,5 +151,3 @@ struct Battle_ActorStatsFlags {
     u_char reserved3;
 };
 static_assert(sizeof(Battle_ActorStatsFlags) == 0x4, "Battle_ActorStatsFlags must keep its PS1 layout");
-
-#endif // VS_BATTLE_ACTOR_H_TYPES

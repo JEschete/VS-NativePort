@@ -1,25 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_ACTORRECORD_H_TYPES
-#define VS_ACTORS_ACTORRECORD_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ActorRecord;
 struct Actors_CompanionOffset;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ACTORS_ACTORRECORD_H_SET_TYPES_ONLY
-#endif
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/TextureAnimation.h"
 #include "Render/Palette.h"
-#ifdef VS_ACTORS_ACTORRECORD_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ACTORS_ACTORRECORD_H_SET_TYPES_ONLY
-#endif
 
 // decomp: D_800F4538_unk58 (src/BATTLE/BATTLE.PRG/3A1A0.h:31)
 struct Actors_CompanionOffset {
@@ -194,5 +185,3 @@ struct Actors_ActorRecord {
     u_short previousTargetZ;
     unsigned modelDataSize;
 };
-
-#endif // VS_ACTORS_ACTORRECORD_H_TYPES

@@ -1,8 +1,8 @@
 # C++ headers
 
-Every native file compiles as C++23 (plan D5), but most headers are still written in C: `.h` files with the copier's
-split type sections, `#define` constants and everything at global scope. Until 2026-11-18 they also used `extern "C"`,
-`typedef struct`, `_Static_assert`, `f(void)`, GNU attributes and macro include guards.
+Every native file compiles as C++23 (plan D5), but most headers are still written in C: `.h` files with `#define`
+constants and everything at global scope. Until 2026-11-18 they also used `extern "C"`, `typedef struct`,
+`_Static_assert`, `f(void)`, GNU attributes, macro include guards and the copier's split type sections.
 They work, but they are not C++, and GitHub's language bar reports them as C for that reason. The owner decided on
 2026-11-18 that they are rewritten as real C++ headers rather than renamed or relabeled. Work is tracked in #441.
 
@@ -37,12 +37,19 @@ these four the way C linkage is held: a tracked header that regains one fails `-
 keep it remaining. `tools\ledger\hazards.py` reads struct definitions in either form, and its sites were unchanged by
 the rewrite.
 
-## Macro include guards retired (2026-11-18)
+## Include guards retired (2026-11-18)
 
-The 65 headers guarded by a whole-file `#ifndef X` / `#define X` / `#endif` now use `#pragma once`; no other file
-tested or defined any of those guard names. `RETIRED_CRITERIA` holds `guard` against `macro` and `none`
-(`RETIRED_GUARDS`). The 222 `split` headers keep their `VS_TYPES_ONLY` sections until each is merged into one header,
-so `split` is not retired yet.
+Every header now uses `#pragma once`, and `RETIRED_CRITERIA` holds `guard` to it.
+
+- The 65 headers guarded by a whole-file `#ifndef X` / `#define X` / `#endif` were converted; no other file tested or
+  defined any of those guard names.
+- The 222 `split` headers were merged into one section each. The copier wrote a types section and a declarations
+  section, and included type dependencies in `VS_TYPES_ONLY` mode, so an includer saw only their types. No source
+  file set `VS_TYPES_ONLY`, and only one declarations section defined a macro (`SPU_PAN_TABLE_SIZE`), so making the
+  declarations visible changes no expansion. It exposed one include cycle, `Effects/Runtime.h` ->
+  `Battle/ActionResolution.h` -> `Battle/BattleTypes.h` -> `Effects/Runtime.h`. `ActionResolution.h` included
+  `Action.h`, `BattleTypes.h` and `Hit.h` only for two pointer parameters, so it now forward-declares
+  `Battle_ActionDefinition` and `Battle_HitResult` instead.
 
 ## Owner decisions (2026-11-18)
 
@@ -157,13 +164,13 @@ compile settings, is part of #248.
 | --- | ---: | ---: |
 | `.hpp` extension | 369 | |
 | `generated` (in `copy_manifest.json`) | 281 | |
-| `guard` (`#pragma once`) | 222 | |
+| `guard` (`#pragma once`) | 0 | |
 | `c_linkage` | 0 | 0 |
 | `static_asserts` | 0 | 0 |
 | `typedefs` | 0 | 0 |
 | `void_params` | 0 | 0 |
 | `gnu_attributes` | 0 | 0 |
-| `macros` | 69 | 10,519 |
+| `macros` | 35 | 10,482 |
 | `global_decls` | 368 | 2,531 |
 | `c_wrapped` | 0 | 0 |
 | `baseline` | 19 | 308 |

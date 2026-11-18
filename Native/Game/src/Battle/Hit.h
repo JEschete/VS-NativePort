@@ -1,21 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_HIT_H_TYPES
-#define VS_BATTLE_HIT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_DamageCalculation;
 struct Battle_HitResult;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_BATTLE_HIT_H_SET_TYPES_ONLY
-#endif
 #include "Battle/ActionResolution.h"
 #include "Battle/BattleTypes.h"
-#ifdef VS_BATTLE_HIT_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_BATTLE_HIT_H_SET_TYPES_ONLY
-#endif
 
 // decomp: _hitEntity_t (src/BATTLE/BATTLE.PRG/146C.c:78)
 struct Battle_HitResult {
@@ -81,5 +72,3 @@ struct Battle_DamageCalculation {
     /* 0x24 */ short armorStatFactor;
 };
 static_assert(sizeof(Battle_DamageCalculation) == 0x26, "Battle_DamageCalculation must keep its PS1 layout");
-
-#endif // VS_BATTLE_HIT_H_TYPES

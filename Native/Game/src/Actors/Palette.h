@@ -1,19 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_PALETTE_H_TYPES
-#define VS_ACTORS_PALETTE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_PalettePulseView;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ACTORS_PALETTE_H_SET_TYPES_ONLY
-#endif
 #include "Actors/ModelInstance.h"
-#ifdef VS_ACTORS_PALETTE_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ACTORS_PALETTE_H_SET_TYPES_ONLY
-#endif
 
 // decomp: func_800AB788_t (src/BATTLE/BATTLE.PRG/40564.c:42)
 struct Actors_PalettePulseView {
@@ -26,5 +17,3 @@ struct Actors_PalettePulseView {
     u_short pulsedPalette[16];
 };
 static_assert(sizeof(Actors_PalettePulseView) == 0x16C, "Actors_PalettePulseView must keep its PS1 layout");
-
-#endif // VS_ACTORS_PALETTE_H_TYPES

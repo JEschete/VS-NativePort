@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_PACKAGE_H_TYPES
-#define VS_EFFECTS_PACKAGE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_CurveBlock;
@@ -14,15 +13,7 @@ struct Effects_PackageFile;
 struct Effects_PackageTexture;
 struct Effects_PackageTextureInfo;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_EFFECTS_PACKAGE_H_SET_TYPES_ONLY
-#endif
 #include "Effects/Particles.h"
-#ifdef VS_EFFECTS_PACKAGE_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_EFFECTS_PACKAGE_H_SET_TYPES_ONLY
-#endif
 
 // decomp: pFileBlock1 (src/BATTLE/BATTLE.PRG/6F014.c:293)
 struct Effects_PackageBlock1 {
@@ -114,5 +105,3 @@ struct Effects_PackageFile {
     u_char blocks[0];
 };
 static_assert(sizeof(Effects_PackageFile) == 0x4, "Effects_PackageFile must keep its PS1 layout");
-
-#endif // VS_EFFECTS_PACKAGE_H_TYPES

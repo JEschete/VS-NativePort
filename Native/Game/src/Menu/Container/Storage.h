@@ -1,19 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_CONTAINER_STORAGE_H_TYPES
-#define VS_MENU_CONTAINER_STORAGE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Container_InventoryStorage;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_MENU_CONTAINER_STORAGE_H_SET_TYPES_ONLY
-#endif
 #include "Items/Inventory.h"
-#ifdef VS_MENU_CONTAINER_STORAGE_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_MENU_CONTAINER_STORAGE_H_SET_TYPES_ONLY
-#endif
 
 // decomp: copyContainerFlags (src/MENU/MENUD.PRG/234.c:17)
 enum Menu_Container_CopyContainerFlag { Menu_Container_CopyContainerFlag_CopyContainerFlagsCopy = 0x10 };
@@ -31,13 +22,6 @@ struct Menu_Container_InventoryStorage {
 };
 static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Container_InventoryStorage must keep its PS1 layout");
 
-#endif // VS_MENU_CONTAINER_STORAGE_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_CONTAINER_STORAGE_H_DECLS)
-#define VS_MENU_CONTAINER_STORAGE_H_DECLS
-
 extern u_short Menu_Container_transferredMiscCount;;
 extern u_short Menu_Container_containerItemCapacities[];
 void Menu_Container_Storage_ResetMenudStatics();
-
-#endif // VS_MENU_CONTAINER_STORAGE_H_DECLS

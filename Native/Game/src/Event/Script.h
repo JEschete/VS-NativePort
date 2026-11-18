@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EVENT_SCRIPT_H_TYPES
-#define VS_EVENT_SCRIPT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Event_ScriptBytePair;
@@ -12,12 +11,5 @@ struct Event_ScriptBytePair {
 };
 static_assert(sizeof(Event_ScriptBytePair) == 0x2, "Event_ScriptBytePair must keep its PS1 layout");
 
-#endif // VS_EVENT_SCRIPT_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_EVENT_SCRIPT_H_DECLS)
-#define VS_EVENT_SCRIPT_H_DECLS
-
 extern u_char Event_specialSubroutineScript[468];
 extern intptr_t (**Event_legacySkipHandlerCopy)(u_char*, short);
-
-#endif // VS_EVENT_SCRIPT_H_DECLS

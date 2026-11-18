@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_INPUT_CONTROLLERS_H_TYPES
-#define VS_INPUT_CONTROLLERS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Input_ControllerPortState;
@@ -20,12 +19,5 @@ struct Input_ControllerPortState {
 };
 static_assert(sizeof(Input_ControllerPortState) == 0xB, "Input_ControllerPortState must keep its PS1 layout");
 
-#endif // VS_INPUT_CONTROLLERS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_INPUT_CONTROLLERS_H_DECLS)
-#define VS_INPUT_CONTROLLERS_H_DECLS
-
 extern char Input_legacyPadResponseBytes[2][34];
 extern char Input_legacyActuatorAlignment[];
-
-#endif // VS_INPUT_CONTROLLERS_H_DECLS

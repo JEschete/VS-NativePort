@@ -65,9 +65,8 @@ QUOTED_INCLUDE = re.compile(r'^[ \t]*#[ \t]*include[ \t]*"(?P<name>[^"]+)"', re.
 PERMITTED_MACROS = {
     "VS_ASSERT": "stringizes the asserted condition",
 }
-# Criteria cleared from every tracked header (for `guard`, the kinds in RETIRED_GUARDS), each with its C++ form. A
-# header still remaining for other criteria must not regain one, which a stale-ledger finding alone would let a sync
-# record.
+# Criteria cleared from every tracked header, each with its C++ form. A header still remaining for other criteria must
+# not regain one, which a stale-ledger finding alone would let a sync record.
 RETIRED_CRITERIA = {
     "static_asserts": "static_assert",
     "typedefs": "struct X { ... }; or using N = T;",
@@ -75,14 +74,12 @@ RETIRED_CRITERIA = {
     "gnu_attributes": "a standard attribute",
     "guard": "#pragma once",
 }
-# Guard kinds no tracked header uses; `split` stays permitted until the types-only sections are merged.
-RETIRED_GUARDS = {"macro", "none"}
 
 
 def reintroduced(values: dict[str, str]) -> list[str]:
     """The RETIRED_CRITERIA a header's measurements fail."""
     return [column for column in RETIRED_CRITERIA
-            if (values[column] in RETIRED_GUARDS if column == "guard" else values[column] != "0")]
+            if (values[column] != PRAGMA_ONCE if column == "guard" else values[column] != "0")]
 
 
 class HeaderWorkspace(gates.Workspace):
@@ -97,7 +94,7 @@ def kind_of(path: str) -> str:
 
 
 def guard_of(directives: list[tuple[str, str]], code: str) -> str:
-    """`split` for the generator's types-only sections, `macro` for an #ifndef guard, else pragma-once or none."""
+    """`split` for the copier's former types-only sections, `macro` for an #ifndef guard, else pragma-once or none."""
     if "VS_TYPES_ONLY" in code:
         return "split"
     for (name, rest), following in pairwise(directives):

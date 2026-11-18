@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_TYPES
-#define VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_SfxProgramHeader;
@@ -14,13 +13,6 @@ struct Audio_SfxProgramHeader {
 };
 static_assert(sizeof(Audio_SfxProgramHeader) == 0xC, "Audio_SfxProgramHeader must keep its PS1 layout");
 
-#endif // VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_DECLS)
-#define VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_DECLS
-
 extern u_int* Audio_Playback_soundEffectProgramOffsets;
 extern u_short* Audio_Playback_soundEffectBankSelectors;
 extern char* Audio_Playback_soundEffectProgramData;
-
-#endif // VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_DECLS

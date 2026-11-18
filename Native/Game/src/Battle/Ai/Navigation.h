@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_AI_NAVIGATION_H_TYPES
-#define VS_BATTLE_AI_NAVIGATION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_Ai_DirectionDelta;
@@ -39,16 +38,9 @@ union Battle_Ai_TilePosition {
     } tile;
 };
 
-#endif // VS_BATTLE_AI_NAVIGATION_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_NAVIGATION_H_DECLS)
-#define VS_BATTLE_AI_NAVIGATION_H_DECLS
-
 extern Battle_Ai_DirectionDelta Battle_Ai_directionDeltas[8];
 extern u_char Battle_Ai_routeStepDirections[272];
 extern u_short (*Battle_Ai_tileFlagMap)[32];
 extern unsigned short* Battle_Ai_roomWaypoints;
 extern u_short (*Battle_Ai_specialTerrainHeights)[32];
 extern Battle_Ai_RouteGateEnd* Battle_Ai_routeGates;
-
-#endif // VS_BATTLE_AI_NAVIGATION_H_DECLS

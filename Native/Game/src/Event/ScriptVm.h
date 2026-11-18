@@ -1,16 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EVENT_SCRIPTVM_H_TYPES
-#define VS_EVENT_SCRIPTVM_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
 // decomp: D_800F4B8B (D_800F4B8B@BATTLE/BATTLE.PRG): a view into another global
 #define Event_weatherTweenDuration (*(char*)(&Event_weatherTween.durationFrames))
-
-#endif // VS_EVENT_SCRIPTVM_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_EVENT_SCRIPTVM_H_DECLS)
-#define VS_EVENT_SCRIPTVM_H_DECLS
 
 extern char Event_skipPaletteResetCommand[336];
 extern char Event_kSkipSoundRestoreMarker[328];
@@ -47,5 +41,3 @@ extern uintptr_t Event_subroutineReturnCursor;
 extern char Event_isSkipForced;
 extern char Event_isScriptBackdropEnabled;
 extern intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short);
-
-#endif // VS_EVENT_SCRIPTVM_H_DECLS

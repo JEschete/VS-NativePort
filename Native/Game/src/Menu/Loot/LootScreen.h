@@ -1,13 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_LOOT_LOOTSCREEN_H_TYPES
-#define VS_MENU_LOOT_LOOTSCREEN_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
-#endif // VS_MENU_LOOT_LOOTSCREEN_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_LOOT_LOOTSCREEN_H_DECLS)
-#define VS_MENU_LOOT_LOOTSCREEN_H_DECLS
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Loot/LootInventory.h"
@@ -29,5 +24,3 @@ extern char Menu_Loot_selectedLoot;;
 extern char Menu_Loot_showInventory;;
 extern char Menu_Loot_showLoot;;
 void Menu_Loot_LootScreen_ResetMenubStatics();
-
-#endif // VS_MENU_LOOT_LOOTSCREEN_H_DECLS

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_SEQ_CHANNEL_H_TYPES
-#define VS_AUDIO_SEQ_CHANNEL_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_AkaoSequenceFile;
@@ -8,15 +7,7 @@ struct Audio_KeymapEntry;
 struct Audio_MusicConfig;
 struct Audio_SeqChannel;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_AUDIO_SEQ_CHANNEL_H_SET_TYPES_ONLY
-#endif
 #include "Audio/Mixer/VoiceMixer.h"
-#ifdef VS_AUDIO_SEQ_CHANNEL_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_AUDIO_SEQ_CHANNEL_H_SET_TYPES_ONLY
-#endif
 
 // decomp: D_800358FE (D_800358FE@SLUS_010.40): a view into another global
 #define Audio_Seq_savedMusicId (*(short*)(&Audio_Seq_savedMusicConfig.musicId))
@@ -162,10 +153,6 @@ struct Audio_MusicConfig {
     int reserved9C;
 };
 
-#endif // VS_AUDIO_SEQ_CHANNEL_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_SEQ_CHANNEL_H_DECLS)
-#define VS_AUDIO_SEQ_CHANNEL_H_DECLS
 #include "Audio/Mixer/MixControl.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
@@ -187,5 +174,3 @@ extern State_ArtsStatus Audio_Seq_unusedArtsStatus;
 extern Items_Inventory Audio_Seq_unusedInventory;
 extern State_StateFlags Audio_Seq_unusedStateFlags;
 extern Items_InventoryIndices Audio_Seq_unusedInventoryIndices;
-
-#endif // VS_AUDIO_SEQ_CHANNEL_H_DECLS

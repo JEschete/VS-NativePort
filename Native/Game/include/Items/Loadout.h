@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ITEMS_LOADOUT_H_TYPES
-#define VS_ITEMS_LOADOUT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Items_AccessorySpawnLoadout;
@@ -14,16 +13,8 @@ struct Items_WeaponLoadout;
 struct Items_WeaponReservedBlock;
 struct Items_WeaponSpawnLoadout;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ITEMS_LOADOUT_H_SET_TYPES_ONLY
-#endif
 #include "Items/Equipment.h"
 #include "Items/Weapons.h"
-#ifdef VS_ITEMS_LOADOUT_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ITEMS_LOADOUT_H_SET_TYPES_ONLY
-#endif
 
 // decomp: vs_battle_classAffinityBaseline (src/BATTLE/BATTLE.PRG/146C.h:282)
 struct Items_ClassAffinityBaseline {
@@ -173,5 +164,3 @@ struct Items_WeaponSpawnLoadout {
     char name[24]; /* vs_string */
 };
 static_assert(sizeof(Items_WeaponSpawnLoadout) == 0x10C, "Items_WeaponSpawnLoadout must keep its PS1 layout");
-
-#endif // VS_ITEMS_LOADOUT_H_TYPES

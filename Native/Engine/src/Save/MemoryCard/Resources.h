@@ -1,19 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_SAVE_MEMORYCARD_RESOURCES_H_TYPES
-#define VS_SAVE_MEMORYCARD_RESOURCES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Save_CardUiResources;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_SAVE_MEMORYCARD_RESOURCES_H_SET_TYPES_ONLY
-#endif
 #include "Save/MemoryCard/GameFiles.h"
-#ifdef VS_SAVE_MEMORYCARD_RESOURCES_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_SAVE_MEMORYCARD_RESOURCES_H_SET_TYPES_ONLY
-#endif
 
 // decomp: mcdata_t (src/MENU/MENU7.PRG/260.c:162)
 struct Save_CardUiResources {
@@ -28,11 +19,4 @@ struct Save_CardUiResources {
     struct DIRENTRY directoryEntry;
 };
 
-#endif // VS_SAVE_MEMORYCARD_RESOURCES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_SAVE_MEMORYCARD_RESOURCES_H_DECLS)
-#define VS_SAVE_MEMORYCARD_RESOURCES_H_DECLS
-
 extern Save_CardUiResources* Save_MemoryCard_uiResources;;
-
-#endif // VS_SAVE_MEMORYCARD_RESOURCES_H_DECLS

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_RENDER_TEXTURES_H_TYPES
-#define VS_RENDER_TEXTURES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Render_TextureSlot;
@@ -14,12 +13,5 @@ struct Render_TextureSlot {
 };
 static_assert(sizeof(Render_TextureSlot) == 0x8, "Render_TextureSlot must keep its PS1 layout");
 
-#endif // VS_RENDER_TEXTURES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_RENDER_TEXTURES_H_DECLS)
-#define VS_RENDER_TEXTURES_H_DECLS
-
 extern Render_TextureSlot Render_legacyActorTextureSlots[25];
 extern Render_TextureSlot Render_legacyWeaponTextureSlots[20];
-
-#endif // VS_RENDER_TEXTURES_H_DECLS

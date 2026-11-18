@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_SOUNDBANKS_H_TYPES
-#define VS_AUDIO_SOUNDBANKS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_SoundReleaseView;
@@ -34,13 +33,6 @@ struct Audio_SoundState {
     Content_DiscQueueSlot* waveBankRequest;
 };
 
-#endif // VS_AUDIO_SOUNDBANKS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_SOUNDBANKS_H_DECLS)
-#define VS_AUDIO_SOUNDBANKS_H_DECLS
-
 extern u_short Audio_menuSoundEffects[11264];
 extern Audio_SoundState Audio_soundState;
 extern char Audio_waveBankFileMap[];
-
-#endif // VS_AUDIO_SOUNDBANKS_H_DECLS

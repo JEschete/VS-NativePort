@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_TITLE_SAVEFILES_H_TYPES
-#define VS_TITLE_SAVEFILES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Title_SaveMenuBackgroundRecord;
@@ -28,10 +27,6 @@ struct Title_SaveMenuUiRecord {
 };
 static_assert(sizeof(Title_SaveMenuUiRecord) == 0xF000, "Title_SaveMenuUiRecord must keep its PS1 layout");
 
-#endif // VS_TITLE_SAVEFILES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_TITLE_SAVEFILES_H_DECLS)
-#define VS_TITLE_SAVEFILES_H_DECLS
 #include "Menu/Files.h"
 #include "Save/MemoryCard/GameFiles.h"
 
@@ -55,5 +50,3 @@ extern u_char Title_selectionCursorColor;;
 extern int Title_selectionCursorPosition;;
 extern char* Title_memoryCardUiResource;;
 extern u_short* Title_saveMenuText;;
-
-#endif // VS_TITLE_SAVEFILES_H_DECLS

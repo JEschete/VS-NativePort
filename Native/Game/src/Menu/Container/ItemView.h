@@ -1,13 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_CONTAINER_ITEMVIEW_H_TYPES
-#define VS_MENU_CONTAINER_ITEMVIEW_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
-#endif // VS_MENU_CONTAINER_ITEMVIEW_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_CONTAINER_ITEMVIEW_H_DECLS)
-#define VS_MENU_CONTAINER_ITEMVIEW_H_DECLS
 #include "Items/Inventory.h"
 
 extern char const* Menu_Container_kStorageNames[];
@@ -24,5 +19,3 @@ extern int Menu_Container_detailsClosedWithTriangle;;
 extern Items_Container* Menu_Container_otherStorage;;
 extern u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData.cpp) */;
 extern Items_Container* Menu_Container_containerData;;
-
-#endif // VS_MENU_CONTAINER_ITEMVIEW_H_DECLS

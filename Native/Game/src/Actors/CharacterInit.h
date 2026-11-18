@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_CHARACTERINIT_H_TYPES
-#define VS_ACTORS_CHARACTERINIT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_CharacterInit;
@@ -8,16 +7,8 @@ struct Actors_LimbActionInit;
 struct Actors_LimbInit;
 struct Actors_SpawnSettings;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ACTORS_CHARACTERINIT_H_SET_TYPES_ONLY
-#endif
 #include "Items/EquipmentInit.h"
 #include "Items/Loadout.h"
-#ifdef VS_ACTORS_CHARACTERINIT_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ACTORS_CHARACTERINIT_H_SET_TYPES_ONLY
-#endif
 
 // decomp: _actions (src/BATTLE/BATTLE.PRG/146C.h:845)
 struct Actors_LimbActionInit {
@@ -77,5 +68,3 @@ struct Actors_CharacterInit {
     int zudIndex;
 };
 static_assert(sizeof(Actors_CharacterInit) == 0x464, "Actors_CharacterInit must keep its PS1 layout");
-
-#endif // VS_ACTORS_CHARACTERINIT_H_TYPES

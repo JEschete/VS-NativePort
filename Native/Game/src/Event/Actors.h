@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EVENT_ACTORS_H_TYPES
-#define VS_EVENT_ACTORS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Event_ActorSelection;
@@ -13,12 +12,5 @@ struct Event_ActorSelection {
 };
 static_assert(sizeof(Event_ActorSelection) == 0x18, "Event_ActorSelection must keep its PS1 layout");
 
-#endif // VS_EVENT_ACTORS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_EVENT_ACTORS_H_DECLS)
-#define VS_EVENT_ACTORS_H_DECLS
-
 extern int Event_weaponDrawStates[121];
 extern char Event_animationBankBases[472];
-
-#endif // VS_EVENT_ACTORS_H_DECLS

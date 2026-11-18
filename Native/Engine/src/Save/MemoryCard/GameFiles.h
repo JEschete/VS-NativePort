@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_SAVE_MEMORYCARD_GAMEFILES_H_TYPES
-#define VS_SAVE_MEMORYCARD_GAMEFILES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Save_CardFileInfoRecord;
@@ -11,20 +10,12 @@ struct Save_SaveFileSummary;
 struct Save_SaveProtectedHeader;
 struct Save_SaveSlotBase;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_SAVE_MEMORYCARD_GAMEFILES_H_SET_TYPES_ONLY
-#endif
 #include "Field/Mpd.h"
 #include "Items/Inventory.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
-#ifdef VS_SAVE_MEMORYCARD_GAMEFILES_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_SAVE_MEMORYCARD_GAMEFILES_H_SET_TYPES_ONLY
-#endif
 
 // decomp: _findCurrentSave_e (src/MENU/MENU7.PRG/260.c:1561)
 enum Save_FindSaveResult {
@@ -147,5 +138,3 @@ struct Save_GameSaveImage {
     Items_ContainerData containerData;
     char reserved59E0[0x220];
 };
-
-#endif // VS_SAVE_MEMORYCARD_GAMEFILES_H_TYPES

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_COLLISION_H_TYPES
-#define VS_FIELD_COLLISION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_SavedPositionWords;
@@ -14,14 +13,7 @@ struct Field_SavedPositionWords {
 };
 static_assert(sizeof(Field_SavedPositionWords) == 0x8, "Field_SavedPositionWords must keep its PS1 layout");
 
-#endif // VS_FIELD_COLLISION_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_COLLISION_H_DECLS)
-#define VS_FIELD_COLLISION_H_DECLS
-
 extern u_char Field_kTileSurfaceIds[2744];
 extern u_char Field_collisionProbeDirection;
 extern short Field_platformContactSearchDepth;
 extern SVECTOR Field_collisionProbePosition;
-
-#endif // VS_FIELD_COLLISION_H_DECLS

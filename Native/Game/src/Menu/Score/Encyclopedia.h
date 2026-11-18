@@ -1,13 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_SCORE_ENCYCLOPEDIA_H_TYPES
-#define VS_MENU_SCORE_ENCYCLOPEDIA_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
-#endif // VS_MENU_SCORE_ENCYCLOPEDIA_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_SCORE_ENCYCLOPEDIA_H_DECLS)
-#define VS_MENU_SCORE_ENCYCLOPEDIA_H_DECLS
 #include "DiscQueue.h"
 #include "Menu/Score/ScoreScreen.h"
 
@@ -23,5 +18,3 @@ extern Menu_Score_ZudHeader* Menu_Score_zudData;;
 extern int Menu_Score_zudLbas[];
 extern int Menu_Score_zudSizes[];
 void Menu_Score_Encyclopedia_ResetMenu9Statics();
-
-#endif // VS_MENU_SCORE_ENCYCLOPEDIA_H_DECLS

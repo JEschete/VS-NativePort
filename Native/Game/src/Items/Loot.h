@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ITEMS_LOOT_H_TYPES
-#define VS_ITEMS_LOOT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Items_BattleLoot;
@@ -14,15 +13,7 @@ struct Items_LootedItem;
 struct Items_LootedShield;
 struct Items_LootedWeapon;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ITEMS_LOOT_H_SET_TYPES_ONLY
-#endif
 #include "Items/Inventory.h"
-#ifdef VS_ITEMS_LOOT_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ITEMS_LOOT_H_SET_TYPES_ONLY
-#endif
 
 // decomp: vs_battle_lootedAccessory (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:218)
 struct Items_LootedAccessory {
@@ -125,5 +116,3 @@ struct Items_LootListNode {
     int droppedMask;
     Items_BattleLoot loot;
 };
-
-#endif // VS_ITEMS_LOOT_H_TYPES

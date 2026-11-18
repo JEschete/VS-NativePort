@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_AI_PERCEPTION_H_TYPES
-#define VS_BATTLE_AI_PERCEPTION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_Ai_RelationWord;
@@ -20,13 +19,6 @@ struct Battle_Ai_RelationWord {
 };
 static_assert(sizeof(Battle_Ai_RelationWord) == 0x4, "Battle_Ai_RelationWord must keep its PS1 layout");
 
-#endif // VS_BATTLE_AI_PERCEPTION_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_PERCEPTION_H_DECLS)
-#define VS_BATTLE_AI_PERCEPTION_H_DECLS
-
 extern int Battle_Ai_frameTickBudget;
 extern int Battle_Ai_secondPerceptionTarget;
 extern int Battle_Ai_candidateEngagedThisUpdate;
-
-#endif // VS_BATTLE_AI_PERCEPTION_H_DECLS

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_GIMMICKS_H_TYPES
-#define VS_FIELD_GIMMICKS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ShpModel;
@@ -12,19 +11,11 @@ struct Field_GimmickSnapshot;
 struct Field_GimmickTemplate;
 struct Field_MpdLockTrigger;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_FIELD_GIMMICKS_H_SET_TYPES_ONLY
-#endif
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Shadow.h"
 #include "Render/Palette.h"
-#ifdef VS_FIELD_GIMMICKS_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_FIELD_GIMMICKS_H_SET_TYPES_ONLY
-#endif
 
 // decomp: D_800E8FB4_t (src/BATTLE/BATTLE.PRG/30DB0.c:36)
 struct Field_GimmickTemplate {
@@ -281,10 +272,6 @@ struct Field_GimmickPhysicsView {
 };
 struct Field_GimmickPhysicsView;
 
-#endif // VS_FIELD_GIMMICKS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_GIMMICKS_H_DECLS)
-#define VS_FIELD_GIMMICKS_H_DECLS
 #include "Field/Doors.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
@@ -330,5 +317,3 @@ extern char Field_gimmickPaletteColors[240];
 extern Field_GimmickInstance* Field_gimmickInstances[16];
 extern int Field_gimmickInteractionDirection;
 extern short const Field_kPlatformBounceOffsets[];
-
-#endif // VS_FIELD_GIMMICKS_H_DECLS

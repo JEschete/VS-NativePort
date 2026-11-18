@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_HUD_H_TYPES
-#define VS_BATTLE_HUD_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 union Battle_HudHighlightWord;
@@ -12,11 +11,6 @@ union Battle_HudHighlightWord {
 };
 union Battle_HudHighlightWord;
 static_assert(sizeof(Battle_HudHighlightWord) == 0x4, "Battle_HudHighlightWord must keep its PS1 layout");
-
-#endif // VS_BATTLE_HUD_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_HUD_H_DECLS)
-#define VS_BATTLE_HUD_H_DECLS
 
 extern char* Battle_limbNames[20];
 extern char Battle_hudStatusIconsHidden;
@@ -51,5 +45,3 @@ extern char* Battle_puzzleTimerTextPointer;
 extern char Battle_lowerScreenUiState;
 extern char Battle_puzzleTimerText[9];
 extern int Battle_puzzleTimer;
-
-#endif // VS_BATTLE_HUD_H_DECLS

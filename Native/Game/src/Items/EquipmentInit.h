@@ -1,20 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ITEMS_EQUIPMENTINIT_H_TYPES
-#define VS_ITEMS_EQUIPMENTINIT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Items_AccessoryInit;
 struct Items_ArmorInit;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ITEMS_EQUIPMENTINIT_H_SET_TYPES_ONLY
-#endif
 #include "Items/Equipment.h"
-#ifdef VS_ITEMS_EQUIPMENTINIT_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ITEMS_EQUIPMENTINIT_H_SET_TYPES_ONLY
-#endif
 
 // decomp: _accessoryIntermediate (src/BATTLE/BATTLE.PRG/146C.h:839)
 struct Items_AccessoryInit {
@@ -35,5 +26,3 @@ struct Items_ArmorInit {
     char index;
 };
 static_assert(sizeof(Items_ArmorInit) == 0x34, "Items_ArmorInit must keep its PS1 layout");
-
-#endif // VS_ITEMS_EQUIPMENTINIT_H_TYPES

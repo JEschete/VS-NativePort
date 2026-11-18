@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_DRIVER_SOUNDDRIVER_H_TYPES
-#define VS_AUDIO_DRIVER_SOUNDDRIVER_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_CommandArguments;
@@ -30,11 +29,6 @@ struct Audio_DriverFlags {
 };
 static_assert(sizeof(Audio_DriverFlags) == 0xC, "Audio_DriverFlags must keep its PS1 layout");
 
-#endif // VS_AUDIO_DRIVER_SOUNDDRIVER_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_DRIVER_SOUNDDRIVER_H_DECLS)
-#define VS_AUDIO_DRIVER_SOUNDDRIVER_H_DECLS
-
 extern int Audio_Driver_legacySpuEvent;
 extern int Audio_Driver_recentTickCostTotal;
 extern int Audio_Driver_recentTickCosts[4];
@@ -42,5 +36,3 @@ extern char Audio_Driver_legacySpuFlushBytes[64];
 extern char Audio_Driver_legacySpuAllocatorTable;
 extern Audio_CommandArguments Audio_Driver_commandArguments;
 extern Audio_DriverFlags Audio_Driver_controlLatches;
-
-#endif // VS_AUDIO_DRIVER_SOUNDDRIVER_H_DECLS

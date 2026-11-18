@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_CUTSCENE_STREAM_H_TYPES
-#define VS_AUDIO_CUTSCENE_STREAM_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_CutsceneStreamData;
@@ -51,12 +50,5 @@ struct Audio_CutsceneStreamState {
     /* 0x5C */ int controlFlags;
 };
 
-#endif // VS_AUDIO_CUTSCENE_STREAM_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_CUTSCENE_STREAM_H_DECLS)
-#define VS_AUDIO_CUTSCENE_STREAM_H_DECLS
-
 extern volatile int Audio_Cutscene_legacySpuTransferBusy;
 extern Audio_CutsceneStreamState Audio_Cutscene_streamState;
-
-#endif // VS_AUDIO_CUTSCENE_STREAM_H_DECLS

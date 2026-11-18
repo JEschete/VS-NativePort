@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_STATUSEFFECTS_H_TYPES
-#define VS_BATTLE_STATUSEFFECTS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_StatusEffectParams;
@@ -79,10 +78,6 @@ struct Battle_StatusEffectParams {
 };
 static_assert(sizeof(Battle_StatusEffectParams) == 0x10, "Battle_StatusEffectParams must keep its PS1 layout");
 
-#endif // VS_BATTLE_STATUSEFFECTS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_STATUSEFFECTS_H_DECLS)
-#define VS_BATTLE_STATUSEFFECTS_H_DECLS
 #include "Menu/Framework/ActorPreview.h"
 #include "Menu/Score/ScoreScreen.h"
 
@@ -96,5 +91,3 @@ extern int Battle_unusedSubmenuState;
 extern Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 extern int Battle_unusedGlobal2;
 extern Battle_StatusEffectParams Battle_statusEffectParams[32];
-
-#endif // VS_BATTLE_STATUSEFFECTS_H_DECLS

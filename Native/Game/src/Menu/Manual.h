@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_MANUAL_H_TYPES
-#define VS_MENU_MANUAL_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Manual_AnimationState;
@@ -45,10 +44,6 @@ struct Menu_Manual_BackgroundTransparencies {
 };
 static_assert(sizeof(Menu_Manual_BackgroundTransparencies) == 0x10, "Menu_Manual_BackgroundTransparencies must keep its PS1 layout");
 
-#endif // VS_MENU_MANUAL_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_MANUAL_H_DECLS)
-#define VS_MENU_MANUAL_H_DECLS
 #include "DiscQueue.h"
 
 extern u_short Menu_Manual_layoutPadding1;
@@ -69,5 +64,3 @@ extern int Menu_Manual_scrollPosition;;
 extern int Menu_Manual_selectedRow;;
 extern int Menu_Manual_showMenuState;;
 extern int Menu_Manual_topMenuState;;
-
-#endif // VS_MENU_MANUAL_H_DECLS

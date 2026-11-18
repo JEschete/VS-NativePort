@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_RUNTIME_H_TYPES
-#define VS_EFFECTS_RUNTIME_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_ActionControlKey;
@@ -32,16 +31,8 @@ struct Effects_TimelineTrackHeader;
 struct Effects_TransformControlView;
 struct Effects_TransformDefinition;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_EFFECTS_RUNTIME_H_SET_TYPES_ONLY
-#endif
 #include "Battle/ActionResolution.h"
 #include "Effects/Transforms.h"
-#ifdef VS_EFFECTS_RUNTIME_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_EFFECTS_RUNTIME_H_SET_TYPES_ONLY
-#endif
 
 // decomp: D_800F5310 (D_800F5310@BATTLE/BATTLE.PRG): a view into another global
 #define Effects_effectOrigin ((SVECTOR*)(&Effects_actionRequest.position))
@@ -294,10 +285,6 @@ struct Effects_ShakeChannelKey {
 };
 static_assert(sizeof(Effects_ShakeChannelKey) == 0x8, "Effects_ShakeChannelKey must keep its PS1 layout");
 
-#endif // VS_EFFECTS_RUNTIME_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_RUNTIME_H_DECLS)
-#define VS_EFFECTS_RUNTIME_H_DECLS
 #include "DiscQueue.h"
 
 extern u_char Effects_effectBufferIndex;
@@ -331,5 +318,3 @@ extern Effects_EffectRenderer Effects_rendererTableAlias[];
 extern Effects_EffectRenderer Effects_effectRenderers[8];
 extern Effects_EffectPackage Effects_actionPackage;
 extern Effects_EffectPackage Effects_secondaryPackage;
-
-#endif // VS_EFFECTS_RUNTIME_H_DECLS

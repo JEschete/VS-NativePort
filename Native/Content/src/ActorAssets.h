@@ -1,20 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORASSETS_H_TYPES
-#define VS_ACTORASSETS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Content_ActorAssetRequest;
 struct Content_SequenceBuffer;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ACTORASSETS_H_SET_TYPES_ONLY
-#endif
 #include "Field/Actors.h"
-#ifdef VS_ACTORASSETS_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ACTORASSETS_H_SET_TYPES_ONLY
-#endif
 
 // decomp: func_8009C378_t (src/BATTLE/BATTLE.PRG/30DB0.h:9)
 struct Content_SequenceBuffer {
@@ -37,5 +28,3 @@ struct Content_ActorAssetRequest {
     char material;
     char variant;
 };
-
-#endif // VS_ACTORASSETS_H_TYPES

@@ -1,21 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_SEQ_AKAOFORMAT_H_TYPES
-#define VS_AUDIO_SEQ_AKAOFORMAT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_AkaoFileHeader;
 struct Audio_AkaoSequenceFile;
 struct Audio_KeymapEntry;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_AUDIO_SEQ_AKAOFORMAT_H_SET_TYPES_ONLY
-#endif
 #include "Audio/Akao.h"
-#ifdef VS_AUDIO_SEQ_AKAOFORMAT_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_AUDIO_SEQ_AKAOFORMAT_H_SET_TYPES_ONLY
-#endif
 
 // decomp: AkaoSeqHeader (src/SLUS_010.40/25AC.c:41)
 struct Audio_AkaoFileHeader {
@@ -64,5 +55,3 @@ struct Audio_KeymapEntry {
     char panAndReverb; /* low 7 bits pan, high bit reverb-enable */
 };
 static_assert(sizeof(Audio_KeymapEntry) == 0x8, "Audio_KeymapEntry must keep its PS1 layout");
-
-#endif // VS_AUDIO_SEQ_AKAOFORMAT_H_TYPES

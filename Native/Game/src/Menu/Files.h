@@ -1,20 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_FILES_H_TYPES
-#define VS_MENU_FILES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Files_FileMenuElement;
 struct Menu_Files_PrimitiveBuffer;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_MENU_FILES_H_SET_TYPES_ONLY
-#endif
 #include "Render/LegacyPackets.h"
-#ifdef VS_MENU_FILES_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_MENU_FILES_H_SET_TYPES_ONLY
-#endif
 
 // decomp: fileMenuElementState_e (src/MENU/MENU7.PRG/260.c:110)
 enum Menu_Files_ElementState {
@@ -78,5 +69,3 @@ struct Menu_Files_PrimitiveBuffer {
         u_long reserved0[15];
     } prim;
 };
-
-#endif // VS_MENU_FILES_H_TYPES

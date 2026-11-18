@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_MANUAL_H_TYPES
-#define VS_FIELD_MANUAL_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_ManualDisplayState;
@@ -16,11 +15,4 @@ struct Field_ManualDisplayState {
 };
 static_assert(sizeof(Field_ManualDisplayState) == 0x24, "Field_ManualDisplayState must keep its PS1 layout");
 
-#endif // VS_FIELD_MANUAL_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_MANUAL_H_DECLS)
-#define VS_FIELD_MANUAL_H_DECLS
-
 extern Field_ManualDisplayState Field_manualDisplayState;
-
-#endif // VS_FIELD_MANUAL_H_DECLS

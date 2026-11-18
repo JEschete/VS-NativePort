@@ -1,13 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_MAGIC_H_TYPES
-#define VS_MENU_MAGIC_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
-
-#endif // VS_MENU_MAGIC_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_MAGIC_H_DECLS)
-#define VS_MENU_MAGIC_H_DECLS
 
 extern char Menu_Magic_warlockSpellIds[20];
 extern char Menu_Magic_shamanSpellIds[8];
@@ -27,5 +21,3 @@ extern char Menu_Magic_availableWarlockSpells[18];;
 extern u_short Menu_Magic_magicStrings[2462]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Magic_savePointData[];
 extern u_short Menu_Magic_teleportationStrings[1599]; /* contents: disc string table (ModuleData.cpp) */;
-
-#endif // VS_MENU_MAGIC_H_DECLS

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_ACTION_H_TYPES
-#define VS_BATTLE_ACTION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_ActionAiFlags;
@@ -9,16 +8,8 @@ union Battle_ActionHitParamsWord;
 struct Battle_ActionRequest;
 struct Battle_ActionState;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_BATTLE_ACTION_H_SET_TYPES_ONLY
-#endif
 #include "Battle/Hit.h"
 #include "Battle/TargetingState.h"
-#ifdef VS_BATTLE_ACTION_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_BATTLE_ACTION_H_SET_TYPES_ONLY
-#endif
 
 // decomp: actionTypes (src/SLUS_010.40/main.h:51)
 enum Battle_ActionType {
@@ -174,5 +165,3 @@ union Battle_ActionHitParamsWord {
     u_int word;
 };
 static_assert(sizeof(Battle_ActionHitParamsWord) == 0x4, "Battle_ActionHitParamsWord must keep its PS1 layout");
-
-#endif // VS_BATTLE_ACTION_H_TYPES

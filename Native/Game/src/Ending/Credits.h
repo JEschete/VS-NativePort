@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ENDING_CREDITS_H_TYPES
-#define VS_ENDING_CREDITS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Ending_Credits_Element;
@@ -89,11 +88,6 @@ struct Ending_Credits_TimHeader {
 };
 static_assert(sizeof(Ending_Credits_TimHeader) == 0x14, "Ending_Credits_TimHeader must keep its PS1 layout");
 
-#endif // VS_ENDING_CREDITS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_ENDING_CREDITS_H_DECLS)
-#define VS_ENDING_CREDITS_H_DECLS
-
 extern u_char Ending_Credits_scriptBytes[7040];
 extern u_char Ending_Credits_glyphWidths[440244];
 extern Ending_Credits_TimHeader Ending_Credits_embeddedTextureOne;
@@ -125,5 +119,3 @@ extern Ending_Credits_TimHeader* Ending_Credits_queuedTimDestination;
 extern void* Ending_Credits_illustrationResources[16];
 extern int Ending_Credits_illustrationDiscLocations[];
 extern int Ending_Credits_illustrationDiscSizes[];
-
-#endif // VS_ENDING_CREDITS_H_DECLS

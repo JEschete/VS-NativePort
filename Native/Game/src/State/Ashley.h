@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_ASHLEY_H_TYPES
-#define VS_STATE_ASHLEY_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct State_AshleyLimbSnapshot;
@@ -47,11 +46,4 @@ struct State_AshleySnapshot {
 };
 static_assert(sizeof(State_AshleySnapshot) == 0x100, "State_AshleySnapshot must keep its PS1 layout");
 
-#endif // VS_STATE_ASHLEY_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_STATE_ASHLEY_H_DECLS)
-#define VS_STATE_ASHLEY_H_DECLS
-
 extern State_AshleySnapshot State_ashleySnapshot;
-
-#endif // VS_STATE_ASHLEY_H_DECLS

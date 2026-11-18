@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ITEMS_INVENTORY_H_TYPES
-#define VS_ITEMS_INVENTORY_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Items_Container;
@@ -17,15 +16,7 @@ struct Items_InventoryShield;
 struct Items_InventoryWeapon;
 struct Items_MiscItemStack;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_ITEMS_INVENTORY_H_SET_TYPES_ONLY
-#endif
 #include "Items/Weapons.h"
-#ifdef VS_ITEMS_INVENTORY_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_ITEMS_INVENTORY_H_SET_TYPES_ONLY
-#endif
 
 // decomp: vs_itemCategories (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:155)
 enum Items_ItemCategory {
@@ -213,5 +204,3 @@ struct Items_Container {
     Items_ContainerIndices indices;
 };
 static_assert(sizeof(Items_Container) == 0x4180, "Items_Container must keep its PS1 layout");
-
-#endif // VS_ITEMS_INVENTORY_H_TYPES

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_TARGETINGSTATE_H_TYPES
-#define VS_BATTLE_TARGETINGSTATE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_TargetPreview;
@@ -22,10 +21,6 @@ struct Battle_TargetPreview {
 };
 static_assert(sizeof(Battle_TargetPreview) == 0x18, "Battle_TargetPreview must keep its PS1 layout");
 
-#endif // VS_BATTLE_TARGETINGSTATE_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_TARGETINGSTATE_H_DECLS)
-#define VS_BATTLE_TARGETINGSTATE_H_DECLS
 #include "Menu/Framework/TextBoxes.h"
 
 extern char Battle_categoryNeedsTargetSelection[96];
@@ -49,5 +44,3 @@ extern u_char Battle_secondColumnGroupCount;
 extern u_char Battle_firstColumnGroupCount;
 extern u_char Battle_targetColumnTopOffset;
 extern Menu_StringContext Battle_stringContext;
-
-#endif // VS_BATTLE_TARGETINGSTATE_H_DECLS

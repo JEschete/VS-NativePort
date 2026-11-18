@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_AI_MOVEMENT_H_TYPES
-#define VS_BATTLE_AI_MOVEMENT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_Ai_ArenaOrbitState;
@@ -28,12 +27,5 @@ struct Battle_Ai_ArenaOrbitState {
 };
 static_assert(sizeof(Battle_Ai_ArenaOrbitState) == 0x20, "Battle_Ai_ArenaOrbitState must keep its PS1 layout");
 
-#endif // VS_BATTLE_AI_MOVEMENT_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_AI_MOVEMENT_H_DECLS)
-#define VS_BATTLE_AI_MOVEMENT_H_DECLS
-
 extern int Battle_Ai_savedMovementRandomState;
 extern unsigned short (*Battle_Ai_patrolRoutes)[8];
-
-#endif // VS_BATTLE_AI_MOVEMENT_H_DECLS

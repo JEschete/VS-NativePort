@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_PARTICLES_H_TYPES
-#define VS_EFFECTS_PARTICLES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_FixedVector;
@@ -259,11 +258,6 @@ struct Effects_PluginEffectState {
 };
 static_assert(sizeof(Effects_PluginEffectState) == 0x78, "Effects_PluginEffectState must keep its PS1 layout");
 
-#endif // VS_EFFECTS_PARTICLES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_PARTICLES_H_DECLS)
-#define VS_EFFECTS_PARTICLES_H_DECLS
-
 extern int Effects_emissionCounter;
 extern u_char Effects_pairedParticleColorPresets[2727][2][4];
 extern u_char Effects_particleColorPresetTable[1088][5][4];
@@ -274,5 +268,3 @@ extern Effects_Particle* Effects_particlePool;
 extern int Effects_particlePoolReferences;
 extern int Effects_particleDrag;
 extern Effects_ParticleGravity Effects_particleGravity;
-
-#endif // VS_EFFECTS_PARTICLES_H_DECLS

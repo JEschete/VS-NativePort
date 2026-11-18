@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_MOVEMENT_H_TYPES
-#define VS_ACTORS_MOVEMENT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_AirborneTickAccumulator;
@@ -44,10 +43,6 @@ struct Actors_AirborneTickAccumulator {
 };
 static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTickAccumulator must keep its PS1 layout");
 
-#endif // VS_ACTORS_MOVEMENT_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_ACTORS_MOVEMENT_H_DECLS)
-#define VS_ACTORS_MOVEMENT_H_DECLS
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
@@ -72,5 +67,3 @@ extern u_short Actors_supportingPlatformLayer;
 extern u_char Actors_supportingGimmickIndex;
 extern char Actors_isActorUpdateComplete;
 extern u_char Actors_pushedGimmickIndex;
-
-#endif // VS_ACTORS_MOVEMENT_H_DECLS

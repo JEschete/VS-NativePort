@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_PROGRESS_H_TYPES
-#define VS_STATE_PROGRESS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct State_ArtsStatus;
@@ -58,12 +57,5 @@ struct State_ScoreData {
 };
 static_assert(sizeof(State_ScoreData) == 0x114, "State_ScoreData must keep its PS1 layout");
 
-#endif // VS_STATE_PROGRESS_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_STATE_PROGRESS_H_DECLS)
-#define VS_STATE_PROGRESS_H_DECLS
-
 extern char State_learnedActionFlags[32];
 extern State_RoomVisitFlags State_roomVisitProgress;
-
-#endif // VS_STATE_PROGRESS_H_DECLS

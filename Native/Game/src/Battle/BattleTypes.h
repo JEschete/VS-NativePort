@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_BATTLETYPES_H_TYPES
-#define VS_BATTLE_BATTLETYPES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_EffectDefinitionView;
@@ -27,16 +26,8 @@ struct Battle_TargetVolumeFlags;
 struct Battle_TargetVolumeMatrix;
 union Battle_VectorWords;
 
-#ifndef VS_TYPES_ONLY
-#define VS_TYPES_ONLY
-#define VS_BATTLE_BATTLETYPES_H_SET_TYPES_ONLY
-#endif
 #include "Effects/Runtime.h"
 #include "Render/LegacyPackets.h"
-#ifdef VS_BATTLE_BATTLETYPES_H_SET_TYPES_ONLY
-#undef VS_TYPES_ONLY
-#undef VS_BATTLE_BATTLETYPES_H_SET_TYPES_ONLY
-#endif
 
 // decomp: effectDefinitionView (src/BATTLE/BATTLE.PRG/5BF94.c:617)
 struct Battle_EffectDefinitionView {
@@ -313,5 +304,3 @@ union Battle_VectorWords {
     int words[2];
 };
 static_assert(sizeof(Battle_VectorWords) == 0x8, "Battle_VectorWords must keep its PS1 layout");
-
-#endif // VS_BATTLE_BATTLETYPES_H_TYPES

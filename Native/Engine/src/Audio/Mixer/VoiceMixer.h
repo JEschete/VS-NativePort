@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_MIXER_VOICEMIXER_H_TYPES
-#define VS_AUDIO_MIXER_VOICEMIXER_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_VoiceEnvelope;
@@ -78,10 +77,6 @@ struct Audio_VoiceEnvelope {
 };
 static_assert(sizeof(Audio_VoiceEnvelope) == 0x8, "Audio_VoiceEnvelope must keep its PS1 layout");
 
-#endif // VS_AUDIO_MIXER_VOICEMIXER_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_MIXER_VOICEMIXER_H_DECLS)
-#define VS_AUDIO_MIXER_VOICEMIXER_H_DECLS
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
@@ -102,5 +97,3 @@ extern int Audio_Mixer_musicPitchScale;
 extern int Audio_Mixer_tempoScale;
 extern Audio_MusicConfig* Audio_Mixer_voiceOwners[VOICE_COUNT];
 extern Audio_VoiceModeMasks Audio_Mixer_voiceModes;
-
-#endif // VS_AUDIO_MIXER_VOICEMIXER_H_DECLS

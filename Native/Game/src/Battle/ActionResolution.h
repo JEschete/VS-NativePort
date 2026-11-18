@@ -1,8 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_ACTIONRESOLUTION_H_TYPES
-#define VS_BATTLE_ACTIONRESOLUTION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
+struct Battle_ActionDefinition;
+struct Battle_HitResult;
 struct Battle_HitTargetWord;
 
 // decomp: func_8008631C_t2 (src/BATTLE/BATTLE.PRG/146C.c:37)
@@ -16,18 +17,8 @@ struct Battle_HitTargetWord {
 };
 static_assert(sizeof(Battle_HitTargetWord) == 0x8, "Battle_HitTargetWord must keep its PS1 layout");
 
-#endif // VS_BATTLE_ACTIONRESOLUTION_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_ACTIONRESOLUTION_H_DECLS)
-#define VS_BATTLE_ACTIONRESOLUTION_H_DECLS
-#include "Battle/Action.h"
-#include "Battle/BattleTypes.h"
-#include "Battle/Hit.h"
-
 extern u_char Battle_limbInjuryStatusIds[20];
 extern void (*Battle_actionEffectMediators[70])(
     Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int);
 extern u_int Battle_hitPrerequisiteResult;
 extern u_int Battle_previousHitResult;
-
-#endif // VS_BATTLE_ACTIONRESOLUTION_H_DECLS

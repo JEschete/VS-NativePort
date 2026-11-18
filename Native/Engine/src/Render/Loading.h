@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_RENDER_LOADING_H_TYPES
-#define VS_RENDER_LOADING_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Render_LegacyImageSize;
@@ -14,12 +13,5 @@ struct Render_LegacyImageSize {
 };
 static_assert(sizeof(Render_LegacyImageSize) == 0x4, "Render_LegacyImageSize must keep its PS1 layout");
 
-#endif // VS_RENDER_LOADING_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_RENDER_LOADING_H_DECLS)
-#define VS_RENDER_LOADING_H_DECLS
-
 extern u_long Render_loadingScreenPixels[1260];
 extern Render_LegacyImageSize Render_legacyLoadingImageHeader;
-
-#endif // VS_RENDER_LOADING_H_DECLS
