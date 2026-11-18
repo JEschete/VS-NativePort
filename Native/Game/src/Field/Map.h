@@ -15,7 +15,7 @@ typedef struct Field_MapRoom {
     short zoneId;
     short mapId;
 } Field_MapRoom;
-_Static_assert(sizeof(Field_MapRoom) == 0xC, "Field_MapRoom must keep its PS1 layout");
+static_assert(sizeof(Field_MapRoom) == 0xC, "Field_MapRoom must keep its PS1 layout");
 
 // decomp: vs_battle_roomName (src/BATTLE/BATTLE.PRG/146C.h:646)
 typedef struct Field_MapRoomName {
@@ -23,20 +23,20 @@ typedef struct Field_MapRoomName {
     short prev;
     short next;
 } Field_MapRoomName;
-_Static_assert(sizeof(Field_MapRoomName) == 0x24, "Field_MapRoomName must keep its PS1 layout");
+static_assert(sizeof(Field_MapRoomName) == 0x24, "Field_MapRoomName must keep its PS1 layout");
 
 // decomp: vs_battle_roomVertices (src/BATTLE/BATTLE.PRG/146C.h:640)
 typedef struct Field_MapRoomVertices {
     int vertexCount;
     SVECTOR vertices[0];
 } Field_MapRoomVertices;
-_Static_assert(sizeof(Field_MapRoomVertices) == 0x4, "Field_MapRoomVertices must keep its PS1 layout");
+static_assert(sizeof(Field_MapRoomVertices) == 0x4, "Field_MapRoomVertices must keep its PS1 layout");
 
 // decomp: vs_battle_scene (src/BATTLE/BATTLE.PRG/146C.h:157)
 typedef struct Field_MapScene {
     int roomCount;
     Field_MapRoom rooms[0];
 } Field_MapScene;
-_Static_assert(sizeof(Field_MapScene) == 0x4, "Field_MapScene must keep its PS1 layout");
+static_assert(sizeof(Field_MapScene) == 0x4, "Field_MapScene must keep its PS1 layout");
 
 #endif // VS_FIELD_MAP_H_TYPES

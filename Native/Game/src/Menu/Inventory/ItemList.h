@@ -11,6 +11,6 @@
 
 extern char Menu_Inventory_freezeTabArrows;
 extern u_char* Menu_Inventory_inventoryIndices[];
-void Menu_Inventory_ItemList_ResetMainMenuStatics(void);
+void Menu_Inventory_ItemList_ResetMainMenuStatics();
 
 #endif // VS_MENU_INVENTORY_ITEMLIST_H_DECLS

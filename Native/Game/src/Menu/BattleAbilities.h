@@ -25,6 +25,6 @@ extern char Menu_BattleAbilities_unlockableChainAbilities[];
 extern char Menu_BattleAbilities_unlockableDefenseAbilities[];
 extern char Menu_BattleAbilities_unlockedChainAbilities[16];;
 extern char Menu_BattleAbilities_unlockedDefenseAbilities[16];;
-void Menu_BattleAbilities_ResetMenu2Statics(void);
+void Menu_BattleAbilities_ResetMenu2Statics();
 
 #endif // VS_MENU_BATTLEABILITIES_H_DECLS

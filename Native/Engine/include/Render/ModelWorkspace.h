@@ -2,4 +2,4 @@
 
 typedef struct Render_ModelScratchpad Render_ModelScratchpad;
 
-Render_ModelScratchpad* Render_ModelWorkspace(void);
+Render_ModelScratchpad* Render_ModelWorkspace();

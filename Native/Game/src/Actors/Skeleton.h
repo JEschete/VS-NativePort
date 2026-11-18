@@ -21,7 +21,7 @@ typedef struct Actors_ShpBone {
     u_char reservedE;
     u_char reservedF;
 } Actors_ShpBone;
-_Static_assert(sizeof(Actors_ShpBone) == 0x10, "Actors_ShpBone must keep its PS1 layout");
+static_assert(sizeof(Actors_ShpBone) == 0x10, "Actors_ShpBone must keep its PS1 layout");
 
 // decomp: D_800F4538_unk68 (src/BATTLE/BATTLE.PRG/3A1A0.h:92)
 typedef struct Actors_ShpModel {
@@ -32,6 +32,6 @@ typedef struct Actors_ShpModel {
     u_int polygonSection; /* offset from the struct (on-disc pointer) */
     Actors_ShpBone bones[0];
 } Actors_ShpModel;
-_Static_assert(sizeof(Actors_ShpModel) == 0x40, "Actors_ShpModel must keep its PS1 layout");
+static_assert(sizeof(Actors_ShpModel) == 0x40, "Actors_ShpModel must keep its PS1 layout");
 
 #endif // VS_ACTORS_SKELETON_H_TYPES

@@ -22,6 +22,6 @@ extern Content_DiscQueueSlot* Menu_Score_zudCdSlot;;
 extern Menu_Score_ZudHeader* Menu_Score_zudData;;
 extern int Menu_Score_zudLbas[];
 extern int Menu_Score_zudSizes[];
-void Menu_Score_Encyclopedia_ResetMenu9Statics(void);
+void Menu_Score_Encyclopedia_ResetMenu9Statics();
 
 #endif // VS_MENU_SCORE_ENCYCLOPEDIA_H_DECLS

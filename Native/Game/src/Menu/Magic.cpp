@@ -27,7 +27,7 @@ char Menu_Magic_layoutPadding2[2];
 char Menu_Magic_layoutPadding3[6];
 
 // decomp: _ (_@src/MENU/MENU0.PRG/84.c)
-const int Menu_Magic_layoutPadding4 __attribute__((unused)) = 0;
+const int Menu_Magic_layoutPadding4 = 0;
 
 // decomp: _MPCostDirectTextBuffer (_MPCostDirectTextBuffer@src/MENU/MENU0.PRG/84.c)
 char Menu_Magic_mpCostDirectTextBuffer[16];

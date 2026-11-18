@@ -35,7 +35,7 @@ typedef struct MATRIX {
 } MATRIX;
 
 // ---- state set by the game
-void Core_Gte_Reset(void);
+void Core_Gte_Reset();
 void Core_Gte_SetRotMatrix(const MATRIX* m);
 void Core_Gte_SetTransMatrix(const MATRIX* m);
 void Core_Gte_SetTransVector(const VECTOR* v);
@@ -52,10 +52,10 @@ void Core_Gte_SetDepthCue(long coefficient, long offset);
 // ---- single steps (the inline macros of the copied code)
 void Core_Gte_LoadV0(const SVECTOR* v);
 void Core_Gte_LoadSxy3(long sxy0, long sxy1, long sxy2);
-void Core_Gte_Rtps(void);    // rotate, translate, project V0
-void Core_Gte_Rtv0Tr(void);  // rotate and translate V0, no projection
-void Core_Gte_Nclip(void);   // winding of the three screen points
-void Core_Gte_ClearTranslation(void);
+void Core_Gte_Rtps();    // rotate, translate, project V0
+void Core_Gte_Rtv0Tr();  // rotate and translate V0, no projection
+void Core_Gte_Nclip();   // winding of the three screen points
+void Core_Gte_ClearTranslation();
 void Core_Gte_StoreSxy2(long* out);
 void Core_Gte_StoreSz3Otz(long* out);  // SZ3 / 4
 void Core_Gte_StoreOtz(long* out);

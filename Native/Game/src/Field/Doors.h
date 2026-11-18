@@ -14,7 +14,7 @@ typedef struct Field_DoorFlagIdWord {
     u_short requiredFlagId : 10;
     u_short reservedBits10 : 6;
 } Field_DoorFlagIdWord;
-_Static_assert(sizeof(Field_DoorFlagIdWord) == 0x2, "Field_DoorFlagIdWord must keep its PS1 layout");
+static_assert(sizeof(Field_DoorFlagIdWord) == 0x2, "Field_DoorFlagIdWord must keep its PS1 layout");
 
 // decomp: _mpdRoomDoorSection2 (src/SLUS_010.40/main.h:429)
 typedef struct Field_DoorTileLocation {
@@ -23,7 +23,7 @@ typedef struct Field_DoorTileLocation {
     u_short floorLayer : 3;
     u_short entryDirection : 3;
 } Field_DoorTileLocation;
-_Static_assert(sizeof(Field_DoorTileLocation) == 0x2, "Field_DoorTileLocation must keep its PS1 layout");
+static_assert(sizeof(Field_DoorTileLocation) == 0x2, "Field_DoorTileLocation must keep its PS1 layout");
 
 #endif // VS_FIELD_DOORS_H_TYPES
 

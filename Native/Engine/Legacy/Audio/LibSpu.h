@@ -11,16 +11,16 @@
 #define SPU_REV_MODE_CLEAR_WA 0x100
 #define SPU_MALLOC_RECSIZ 8
 
-typedef void (*SpuTransferCallbackProc)(void);
+typedef void (*SpuTransferCallbackProc)();
 
 // The SPU's register file (0x1F801C00-0x1F801DFF) as ordinary memory: the copy
 // tool maps the game's register literals here, and the audio backend reads the
 // voice state the sound driver writes.
 #define LEGACY_SPU_REGISTER_BYTES 0x200
-void* LegacySpu_Registers(void);
+void* LegacySpu_Registers();
 // The SPU's 512 KiB sample memory, filled by SpuWrite.
 #define LEGACY_SPU_RAM_BYTES 0x80000
-unsigned char* LegacySpu_Ram(void);
+unsigned char* LegacySpu_Ram();
 
 SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func);
 unsigned long SpuSetTransferStartAddr(unsigned long addr);
@@ -29,7 +29,7 @@ typedef struct SpuVolume {
   short left, right;
 } SpuVolume;
 
-void SpuStart(void);
+void SpuStart();
 long SpuSetNoiseClock(long nClock);
 long SpuSetReverb(long onOff);
 unsigned long SpuWrite(unsigned char* addr, unsigned long size);
@@ -39,5 +39,5 @@ void SpuSetCommonMasterVolume(short left, short right);
 long SpuSetReverbModeType(long mode);
 void SpuSetReverbModeDepth(short left, short right);
 void SpuGetReverbModeType(long* mode);
-void SsUtReverbOn(void);
-void SsUtReverbOff(void);
+void SsUtReverbOn();
+void SsUtReverbOff();

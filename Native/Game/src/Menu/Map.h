@@ -12,7 +12,7 @@ struct Menu_Map_CompassBound {
     int y;
 };
 typedef struct Menu_Map_CompassBound Menu_Map_CompassBound;
-_Static_assert(sizeof(Menu_Map_CompassBound) == 0x8, "Menu_Map_CompassBound must keep its PS1 layout");
+static_assert(sizeof(Menu_Map_CompassBound) == 0x8, "Menu_Map_CompassBound must keep its PS1 layout");
 
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8) (src/MENU/MENU5.PRG/4D8.c:1069)
 struct Menu_Map_MapLabel {
@@ -22,7 +22,7 @@ struct Menu_Map_MapLabel {
     short id;
 };
 typedef struct Menu_Map_MapLabel Menu_Map_MapLabel;
-_Static_assert(sizeof(Menu_Map_MapLabel) == 0x8, "Menu_Map_MapLabel must keep its PS1 layout");
+static_assert(sizeof(Menu_Map_MapLabel) == 0x8, "Menu_Map_MapLabel must keep its PS1 layout");
 
 #endif // VS_MENU_MAP_H_TYPES
 
@@ -31,7 +31,7 @@ _Static_assert(sizeof(Menu_Map_MapLabel) == 0x8, "Menu_Map_MapLabel must keep it
 #include "DiscQueue.h"
 #include "Field/Map.h"
 
-extern int const Menu_Map_unusedGlobal1[] __attribute__((unused));
+extern int const Menu_Map_unusedGlobal1[];
 extern RECT Menu_Map_kDoorMarkerUpperRects[];
 extern RECT Menu_Map_kDoorMarkerLowerRects[];
 extern short Menu_Map_layoutPadding1[2];;
@@ -71,6 +71,6 @@ extern int Menu_Map_sceneRowIdMap[32];;
 extern int Menu_Map_selectedMap;;
 extern int Menu_Map_triggerHideUi;;
 extern short Menu_Map_uiAnimationState;;
-void Menu_Map_ResetMenu5Statics(void);
+void Menu_Map_ResetMenu5Statics();
 
 #endif // VS_MENU_MAP_H_DECLS

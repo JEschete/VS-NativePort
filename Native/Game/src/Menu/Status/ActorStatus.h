@@ -30,6 +30,6 @@ extern char Menu_Status_selectedStatRow;;
 extern u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Status_xPos;
 extern int Menu_Status_yPos;
-void Menu_Status_ActorStatus_ResetMenu4Statics(void);
+void Menu_Status_ActorStatus_ResetMenu4Statics();
 
 #endif // VS_MENU_STATUS_ACTORSTATUS_H_DECLS

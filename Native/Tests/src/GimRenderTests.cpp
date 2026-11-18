@@ -40,8 +40,8 @@
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
 
-_Static_assert(sizeof Menu_textBoxOrderingTables == 102 * sizeof(u_long),
-               "three textbox ordering buffers");
+static_assert(sizeof Menu_textBoxOrderingTables == 102 * sizeof(u_long),
+              "three textbox ordering buffers");
 
 int Tests_EncodedTextFormatting(void) {
   const Menu_StringContext saved = Battle_stringContext;

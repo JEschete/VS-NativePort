@@ -18,5 +18,5 @@ typedef struct DslFILTER {
   u_short pad;
 } DslFILTER;
 
-int DsInit(void);
+int DsInit();
 int DsGetSector(void* madr, int size);

@@ -9,15 +9,15 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BOOT_OVERLAYRESET_H_DECLS)
 #define VS_BOOT_OVERLAYRESET_H_DECLS
 
-void Boot_ResetMainMenuStatics(void);
-void Boot_ResetMenu2Statics(void);
-void Boot_ResetMenu3Statics(void);
-void Boot_ResetMenu4Statics(void);
-void Boot_ResetMenu5Statics(void);
-void Boot_ResetMenu9Statics(void);
-void Boot_ResetMenubStatics(void);
-void Boot_ResetMenudStatics(void);
-void Boot_ResetMenueStatics(void);
-void Boot_ResetMenufStatics(void);
+void Boot_ResetMainMenuStatics();
+void Boot_ResetMenu2Statics();
+void Boot_ResetMenu3Statics();
+void Boot_ResetMenu4Statics();
+void Boot_ResetMenu5Statics();
+void Boot_ResetMenu9Statics();
+void Boot_ResetMenubStatics();
+void Boot_ResetMenudStatics();
+void Boot_ResetMenueStatics();
+void Boot_ResetMenufStatics();
 
 #endif // VS_BOOT_OVERLAYRESET_H_DECLS

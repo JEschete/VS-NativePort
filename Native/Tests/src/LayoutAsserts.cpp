@@ -35,24 +35,22 @@
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
 
-_Static_assert(
+static_assert(
     sizeof(Actors_ActorCore) - offsetof(Actors_ActorCore, model) >=
         offsetof(Field_GimmickInstance, reserved178),
     "The auxiliary actor allocation must own the native gimmick prefix");
 
-_Static_assert(
+static_assert(
     offsetof(Battle_Ai_ActorAiState, engagementFrames) == 170,
     "Renamed engagement state must retain its verified native layout");
-_Static_assert(offsetof(Battle_Ai_ActorAiState, engagementCooldownFrames) ==
-                   180,
-               "Engagement cooldown layout changed");
-_Static_assert(offsetof(Battle_Ai_ActorAiState, reengagementGraceFrames) == 182,
-               "Reengagement grace layout changed");
-_Static_assert(offsetof(Battle_Ai_ActorAiState, awarenessFramesRemaining) ==
-                   326,
-               "Awareness duration layout changed");
-_Static_assert(offsetof(Battle_Ai_ActorAiState, awarenessMarker) == 340,
-               "Awareness marker layout changed");
+static_assert(offsetof(Battle_Ai_ActorAiState, engagementCooldownFrames) == 180,
+              "Engagement cooldown layout changed");
+static_assert(offsetof(Battle_Ai_ActorAiState, reengagementGraceFrames) == 182,
+              "Reengagement grace layout changed");
+static_assert(offsetof(Battle_Ai_ActorAiState, awarenessFramesRemaining) == 326,
+              "Awareness duration layout changed");
+static_assert(offsetof(Battle_Ai_ActorAiState, awarenessMarker) == 340,
+              "Awareness marker layout changed");
 
 int TestsRoomSfxBankBinding(void) {
   const Audio_SoundState saved_state = Audio_soundState;
@@ -98,66 +96,66 @@ int TestsDiscReadSizeContract(void) {
   return passed;
 }
 
-_Static_assert(sizeof(Battle_ActionDefinition) == 52,
-               "action definition disc stride");
-_Static_assert(offsetof(Battle_ActionDefinition, cost) == 3,
-               "action cost offset");
-_Static_assert(offsetof(Battle_ActionDefinition, aiFlags) == 14,
-               "action AI flags offset");
-_Static_assert(offsetof(Battle_ActionDefinition, hits) == 20,
-               "action hit definitions offset");
-_Static_assert(offsetof(Battle_ActionDefinition, name) == 28,
-               "action name offset");
-_Static_assert(sizeof(Battle_TargetSphereSetupView) >=
-                   sizeof(Battle_TargetSphere),
-               "sphere allocation extent");
-_Static_assert(offsetof(Battle_TargetSphereSetupView, wireVertices) ==
-                   offsetof(Battle_TargetSphere, wireVertices),
-               "sphere vertex view offset");
-_Static_assert(offsetof(Battle_TargetSphereSetupView, wireEdges) ==
-                   offsetof(Battle_TargetSphere, wireEdges),
-               "sphere edge view offset");
-_Static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
-                   offsetof(Battle_TargetSphere, labels),
-               "sphere label view offset");
+static_assert(sizeof(Battle_ActionDefinition) == 52,
+              "action definition disc stride");
+static_assert(offsetof(Battle_ActionDefinition, cost) == 3,
+              "action cost offset");
+static_assert(offsetof(Battle_ActionDefinition, aiFlags) == 14,
+              "action AI flags offset");
+static_assert(offsetof(Battle_ActionDefinition, hits) == 20,
+              "action hit definitions offset");
+static_assert(offsetof(Battle_ActionDefinition, name) == 28,
+              "action name offset");
+static_assert(sizeof(Battle_TargetSphereSetupView) >=
+                  sizeof(Battle_TargetSphere),
+              "sphere allocation extent");
+static_assert(offsetof(Battle_TargetSphereSetupView, wireVertices) ==
+                  offsetof(Battle_TargetSphere, wireVertices),
+              "sphere vertex view offset");
+static_assert(offsetof(Battle_TargetSphereSetupView, wireEdges) ==
+                  offsetof(Battle_TargetSphere, wireEdges),
+              "sphere edge view offset");
+static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
+                  offsetof(Battle_TargetSphere, labels),
+              "sphere label view offset");
 
 // An actor record placed at core.model (VS::Content::ParseActorModel) must
 // end before the weapon model slots.
-_Static_assert(sizeof(Actors_ActorModelSlot) >= sizeof(Actors_WeaponModel),
-               "equipment slot must fit a native weapon model");
-_Static_assert(_Alignof(Actors_ActorModelSlot) >= _Alignof(Actors_WeaponModel),
-               "equipment slot must align a native weapon model");
-_Static_assert(offsetof(Actors_ActorAllocation, modelSlots) %
-                       _Alignof(Actors_ActorRecord) ==
-                   0,
-               "secondary body record must be aligned");
-_Static_assert(offsetof(Actors_ActorAllocation, modelSlots) -
-                       offsetof(Actors_ActorAllocation, core.model) >=
-                   sizeof(Actors_ActorRecord),
-               "the actor record overlaps the weapon model slots");
+static_assert(sizeof(Actors_ActorModelSlot) >= sizeof(Actors_WeaponModel),
+              "equipment slot must fit a native weapon model");
+static_assert(_Alignof(Actors_ActorModelSlot) >= _Alignof(Actors_WeaponModel),
+              "equipment slot must align a native weapon model");
+static_assert(offsetof(Actors_ActorAllocation, modelSlots) %
+                      _Alignof(Actors_ActorRecord) ==
+                  0,
+              "secondary body record must be aligned");
+static_assert(offsetof(Actors_ActorAllocation, modelSlots) -
+                      offsetof(Actors_ActorAllocation, core.model) >=
+                  sizeof(Actors_ActorRecord),
+              "the actor record overlaps the weapon model slots");
 
 // VS::Actors::LiveActorSpawnHost (ActorSpawningLive.cpp) addresses the stats
 // block of an allocation as `actor + 1`.
-_Static_assert(offsetof(Actors_ActorAllocation, core.actor.stats) ==
-                   sizeof(Battle_Actor),
-               "stats do not follow the Battle_Actor");
+static_assert(offsetof(Actors_ActorAllocation, core.actor.stats) ==
+                  sizeof(Battle_Actor),
+              "stats do not follow the Battle_Actor");
 
 // On-disc structs keep the file layout (ONDISC_OFFSETS): the SHP header is 64
 // bytes, the bones follow.
-_Static_assert(sizeof(Actors_ShpModel) == 64, "SHP header layout");
-_Static_assert(offsetof(Actors_ShpModel, bones) == 64, "SHP bones offset");
-_Static_assert(offsetof(Actors_SeqAnimationBank, headers) == 8,
-               "SEQ bank header layout");
-_Static_assert(
+static_assert(sizeof(Actors_ShpModel) == 64, "SHP header layout");
+static_assert(offsetof(Actors_ShpModel, bones) == 64, "SHP bones offset");
+static_assert(offsetof(Actors_SeqAnimationBank, headers) == 8,
+              "SEQ bank header layout");
+static_assert(
     sizeof((static_cast<Actors_ActorRecord*>(nullptr))->animationHeader) ==
         sizeof(void*),
     "SEQ bank cache must be pointer-sized");
 
 // Runtime views must follow the native object, including pointers hidden in the
 // original PS1 padding.
-#define SAME_FIELD(View, member, Record, field)                     \
-  _Static_assert(offsetof(View, member) == offsetof(Record, field), \
-                 "native view mismatch: " #View "." #member)
+#define SAME_FIELD(View, member, Record, field)                    \
+  static_assert(offsetof(View, member) == offsetof(Record, field), \
+                "native view mismatch: " #View "." #member)
 SAME_FIELD(Battle_Ai_AiActorView, actorId, Battle_Actor, id);
 SAME_FIELD(Battle_Ai_AiActorView, aiControlFlags, Battle_Actor, kind);
 SAME_FIELD(Battle_Ai_AiActorView, stats, Battle_Actor, stats);
@@ -195,17 +193,17 @@ SAME_FIELD(Field_GimmickMotionView, state, Field_GimmickInstance,
            pulsedPalette);
 SAME_FIELD(Field_GimmickMotionView, savedState, Field_GimmickInstance,
            basePalette);
-_Static_assert(sizeof(Battle_Ai_AiCreationView) <=
-                   sizeof(Battle_Ai_ActorAiState),
-               "creation view exceeds storage");
-_Static_assert(sizeof(Battle_Ai_actorAiStates) /
-                       sizeof(Battle_Ai_actorAiStates[0]) ==
-                   16,
-               "AI table extent");
-_Static_assert(sizeof(Battle_Ai_roomHasWaypoints) == sizeof(void*),
-               "room auxiliary-data pointer width");
-_Static_assert(sizeof(Battle_Ai_ActorAiState) % 4 == 0,
-               "AI clear requires whole words");
+static_assert(sizeof(Battle_Ai_AiCreationView) <=
+                  sizeof(Battle_Ai_ActorAiState),
+              "creation view exceeds storage");
+static_assert(sizeof(Battle_Ai_actorAiStates) /
+                      sizeof(Battle_Ai_actorAiStates[0]) ==
+                  16,
+              "AI table extent");
+static_assert(sizeof(Battle_Ai_roomHasWaypoints) == sizeof(void*),
+              "room auxiliary-data pointer width");
+static_assert(sizeof(Battle_Ai_ActorAiState) % 4 == 0,
+              "AI clear requires whole words");
 #undef SAME_FIELD
 
 static int TestDecision(Battle_Ai_ActorAiState* state) {

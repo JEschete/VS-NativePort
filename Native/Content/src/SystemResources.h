@@ -16,6 +16,6 @@ typedef struct Content_SystemDatHeader {
     u_int fixedImageOffset;
     u_int interfaceDataOffset;
 } Content_SystemDatHeader;
-_Static_assert(sizeof(Content_SystemDatHeader) == 0x20, "Content_SystemDatHeader must keep its PS1 layout");
+static_assert(sizeof(Content_SystemDatHeader) == 0x20, "Content_SystemDatHeader must keep its PS1 layout");
 
 #endif // VS_SYSTEMRESOURCES_H_TYPES

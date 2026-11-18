@@ -12,6 +12,6 @@ typedef struct Render_ColorCode {
     u_char blue;
     u_char code;
 } Render_ColorCode;
-_Static_assert(sizeof(Render_ColorCode) == 0x4, "Render_ColorCode must keep its PS1 layout");
+static_assert(sizeof(Render_ColorCode) == 0x4, "Render_ColorCode must keep its PS1 layout");
 
 #endif // VS_RENDER_PALETTE_H_TYPES

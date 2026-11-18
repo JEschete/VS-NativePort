@@ -39,7 +39,7 @@ typedef struct Render_ModelScratchpadAnglesView {
     MATRIX matrix;
     SVECTOR rotation;
 } Render_ModelScratchpadAnglesView;
-_Static_assert(sizeof(Render_ModelScratchpadAnglesView) == 0x8C, "Render_ModelScratchpadAnglesView must keep its PS1 layout");
+static_assert(sizeof(Render_ModelScratchpadAnglesView) == 0x8C, "Render_ModelScratchpadAnglesView must keep its PS1 layout");
 
 // decomp: cameraTransformScratch (src/BATTLE/BATTLE.PRG/44F14.c:82)
 typedef struct Render_ModelScratchpadCameraView {
@@ -48,7 +48,7 @@ typedef struct Render_ModelScratchpadCameraView {
     char reserved84[8];
     VECTOR reserved8C;
 } Render_ModelScratchpadCameraView;
-_Static_assert(sizeof(Render_ModelScratchpadCameraView) == 0x9C, "Render_ModelScratchpadCameraView must keep its PS1 layout");
+static_assert(sizeof(Render_ModelScratchpadCameraView) == 0x9C, "Render_ModelScratchpadCameraView must keep its PS1 layout");
 
 // decomp: frameScratch (src/BATTLE/BATTLE.PRG/44F14.c:137)
 struct Render_DrawDepthScratch {
@@ -56,7 +56,7 @@ struct Render_DrawDepthScratch {
     int depth;
 };
 typedef struct Render_DrawDepthScratch Render_DrawDepthScratch;
-_Static_assert(sizeof(Render_DrawDepthScratch) == 0x8, "Render_DrawDepthScratch must keep its PS1 layout");
+static_assert(sizeof(Render_DrawDepthScratch) == 0x8, "Render_DrawDepthScratch must keep its PS1 layout");
 
 // decomp: func_800A1DE8_t (src/BATTLE/BATTLE.PRG/38C1C.c:16)
 typedef struct Render_ModelScratchpadBoneView {
@@ -66,6 +66,6 @@ typedef struct Render_ModelScratchpadBoneView {
     u_char reserved5C[8];
     MATRIX matrix;
 } Render_ModelScratchpadBoneView;
-_Static_assert(sizeof(Render_ModelScratchpadBoneView) == 0x84, "Render_ModelScratchpadBoneView must keep its PS1 layout");
+static_assert(sizeof(Render_ModelScratchpadBoneView) == 0x84, "Render_ModelScratchpadBoneView must keep its PS1 layout");
 
 #endif // VS_RENDER_MODELDRAW_H_TYPES

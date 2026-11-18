@@ -133,10 +133,10 @@ compile settings, is part of #248.
 | `generated` (in `copy_manifest.json`) | 281 | |
 | `guard` (`#pragma once`) | 287 | |
 | `c_linkage` | 0 | 0 |
-| `static_asserts` | 118 | 362 |
+| `static_asserts` | 0 | 0 |
 | `typedefs` | 157 | 1,247 |
-| `void_params` | 39 | 107 |
-| `gnu_attributes` | 5 | 7 |
+| `void_params` | 0 | 0 |
+| `gnu_attributes` | 0 | 0 |
 | `macros` | 69 | 10,519 |
 | `global_decls` | 368 | 3,206 |
 | `c_wrapped` | 0 | 0 |

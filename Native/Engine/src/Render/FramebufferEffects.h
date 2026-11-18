@@ -12,6 +12,6 @@ typedef struct Render_FramebufferEffectTranslation {
     int reserved8;
     int reservedC;
 } Render_FramebufferEffectTranslation;
-_Static_assert(sizeof(Render_FramebufferEffectTranslation) == 0x10, "Render_FramebufferEffectTranslation must keep its PS1 layout");
+static_assert(sizeof(Render_FramebufferEffectTranslation) == 0x10, "Render_FramebufferEffectTranslation must keep its PS1 layout");
 
 #endif // VS_RENDER_FRAMEBUFFEREFFECTS_H_TYPES

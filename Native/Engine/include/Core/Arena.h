@@ -8,7 +8,7 @@
 
 #define CORE_GAME_HEAP_SIZE (16u * 1024u * 1024u)
 
-void* Core_GameHeapArena(void);
+void* Core_GameHeapArena();
 
 // The RAM the PS1 loaded overlay modules into (0x80068800 up to the heap at
 // 0x8010C000). The modules are compiled in natively, but the game also uses the

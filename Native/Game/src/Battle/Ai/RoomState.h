@@ -15,7 +15,7 @@
 #include "Legacy/Psx.h"
 #include "Render/Palette.h"
 
-void Battle_Ai_InvalidateSessionBindings(void);
+void Battle_Ai_InvalidateSessionBindings();
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Shadow.h"

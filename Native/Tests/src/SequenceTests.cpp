@@ -1368,12 +1368,12 @@ typedef struct SourceWeaponMatrixLayout {
   uint32_t offsets;
   MATRIX matrices[4];
 } SourceWeaponMatrixLayout;
-_Static_assert(offsetof(SourceWeaponMatrixLayout, matrices) == 0x20,
-               "Original 3A1A0.h weapon matrix offset");
-_Static_assert(0x20 + 2 * sizeof(MATRIX) + 2 * sizeof(int16_t) == 0x64,
-               "Original mask byte is matrix2 m02");
-_Static_assert(offsetof(Actors_WeaponModel, boneWorldMatrices) != 0x20,
-               "Native weapon pointers must not use the guest matrix offset");
+static_assert(offsetof(SourceWeaponMatrixLayout, matrices) == 0x20,
+              "Original 3A1A0.h weapon matrix offset");
+static_assert(0x20 + 2 * sizeof(MATRIX) + 2 * sizeof(int16_t) == 0x64,
+              "Original mask byte is matrix2 m02");
+static_assert(offsetof(Actors_WeaponModel, boneWorldMatrices) != 0x20,
+              "Native weapon pointers must not use the guest matrix offset");
 
 static void DrawWeaponOverrideFixture(const Actors_ModelInstance* instance,
                                       const CVECTOR* tint,

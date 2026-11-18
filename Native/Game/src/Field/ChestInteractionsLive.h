@@ -8,9 +8,9 @@ struct Effects_ActionEffectRequest;
 struct SVECTOR;
 struct Items_TreasureChest;
 enum { kFieldEntranceRecordBytes = 12 };
-int Field_CurrentSavePointIdEntry(void);
+int Field_CurrentSavePointIdEntry();
 void Field_RefreshAshleyInteractionTileEntry(struct Actors_ActorRecord* record);
-void Field_StoreEntranceDoorForReloadEntry(void);
+void Field_StoreEntranceDoorForReloadEntry();
 void Field_ApplyUnlockEffectToRoomObjectEntry(struct SVECTOR* target_position);
 void Field_SetEntranceDoorRecordEntry(
     char (*record)[kFieldEntranceRecordBytes]);
@@ -23,25 +23,25 @@ struct Items_TreasureChest* Field_FindFacingUnlootedChestEntry(int actor);
 int Field_TryTriggerFacingTileEventEntry(int actor);
 int Field_TileInFrontOfActorEntry(struct Actors_ActorLocationQuery* actor,
                                   unsigned char* output);
-int Field_WaitForChestCameraFocusEntry(void);
-int Field_StepTrapCameraFocusEntry(void);
-int Field_IsChestAnimationReadyEntry(void);
-int Field_TrackInteractionCameraToAshleyEntry(void);
+int Field_WaitForChestCameraFocusEntry();
+int Field_StepTrapCameraFocusEntry();
+int Field_IsChestAnimationReadyEntry();
+int Field_TrackInteractionCameraToAshleyEntry();
 void Field_TriggerActorTrapEntry(struct Field_MpdLockTrigger* address,
                                  struct Actors_ActorLocationQuery* location,
                                  int actor);
-void Field_BeginObjectInteractionWaitEntry(void);
-void Field_EndObjectInteractionWaitEntry(void);
+void Field_BeginObjectInteractionWaitEntry();
+void Field_EndObjectInteractionWaitEntry();
 int Field_InteractWithLockedRoomObjectEntry(
     struct Field_MpdLockTrigger* address);
 void Field_TryOpenChestEntry(struct Field_MpdLockTrigger* address, int actor);
 void Field_BeginChestInteractionEntry(struct Field_MpdLockTrigger* address,
                                       int actor);
-void Field_FinishChestInteractionEntry(void);
-void Field_OpenChestContentsEntry(void);
-int Field_UpdateChestContentsSelectionEntry(void);
-void Field_DispatchTrapOrChestInteractionEntry(void);
-void Field_FinishTrapInteractionEntry(void);
+void Field_FinishChestInteractionEntry();
+void Field_OpenChestContentsEntry();
+int Field_UpdateChestContentsSelectionEntry();
+void Field_DispatchTrapOrChestInteractionEntry();
+void Field_FinishTrapInteractionEntry();
 void Field_BeginTrapInteractionEntry(struct Field_MpdLockTrigger* address,
                                      struct Actors_ActorLocation* location,
                                      int actor);

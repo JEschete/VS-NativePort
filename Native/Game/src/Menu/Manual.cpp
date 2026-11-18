@@ -6,7 +6,7 @@
 #include "Menu/Manual.h"
 
 // decomp: _0 (_0@src/MENU/MENUE.PRG/494.c)
-u_short Menu_Manual_layoutPadding1 __attribute__((unused)) = 0x0380;
+u_short Menu_Manual_layoutPadding1 = 0x0380;
 
 // decomp: _colorStops0 (_colorStops0@src/MENU/MENUE.PRG/494.c)
 CVECTOR const Menu_Manual_kColorStops0[] = { { 0, 0x20, 0x50, 0 }, { 0x19, 0x82, 0x6C, 0 },

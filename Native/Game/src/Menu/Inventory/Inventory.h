@@ -29,7 +29,7 @@ extern u_short Menu_Inventory_menuText[472]; /* contents: disc string table (Mod
 extern char Menu_Inventory_unusedMiscActions[64];;
 extern int Menu_Inventory_selectedItemRow;;
 extern u_char Menu_Inventory_equipListStep;;
-void Menu_Inventory_ResetMenu3Statics(void);
-void Menu_Inventory_ResetMenubStatics(void);
+void Menu_Inventory_ResetMenu3Statics();
+void Menu_Inventory_ResetMenubStatics();
 
 #endif // VS_MENU_INVENTORY_INVENTORY_H_DECLS

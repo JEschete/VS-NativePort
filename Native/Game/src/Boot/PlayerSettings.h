@@ -1,3 +1,3 @@
 #pragma once
 
-void Boot_InitializePlayerSettings(void);
+void Boot_InitializePlayerSettings();

@@ -63,7 +63,7 @@ typedef struct Field_MpdEnemySpawn {
     u_char reserved26;
     u_char sceneTest;
 } Field_MpdEnemySpawn;
-_Static_assert(sizeof(Field_MpdEnemySpawn) == 0x28, "Field_MpdEnemySpawn must keep its PS1 layout");
+static_assert(sizeof(Field_MpdEnemySpawn) == 0x28, "Field_MpdEnemySpawn must keep its PS1 layout");
 
 // decomp: _mpdGeometryHeader (src/BATTLE/BATTLE.PRG/146C.h:31)
 typedef struct Field_MpdPolygonGroupHeader {
@@ -84,14 +84,14 @@ typedef struct Field_MpdPolygonGroupHeader {
     int reserved38;
     int reserved3C;
 } Field_MpdPolygonGroupHeader;
-_Static_assert(sizeof(Field_MpdPolygonGroupHeader) == 0x40, "Field_MpdPolygonGroupHeader must keep its PS1 layout");
+static_assert(sizeof(Field_MpdPolygonGroupHeader) == 0x40, "Field_MpdPolygonGroupHeader must keep its PS1 layout");
 
 // decomp: _mpdGeometrySection (src/BATTLE/BATTLE.PRG/146C.h:64)
 typedef struct Field_MpdGeometrySection {
     int groupCount;
     Field_MpdPolygonGroupHeader groupHeaders[0];
 } Field_MpdGeometrySection;
-_Static_assert(sizeof(Field_MpdGeometrySection) == 0x4, "Field_MpdGeometrySection must keep its PS1 layout");
+static_assert(sizeof(Field_MpdGeometrySection) == 0x4, "Field_MpdGeometrySection must keep its PS1 layout");
 
 // decomp: _mpdHeader (src/BATTLE/BATTLE.PRG/146C.c:328)
 typedef struct Field_MpdHeader {
@@ -108,7 +108,7 @@ typedef struct Field_MpdHeader {
     int lootSectionOffset;
     int lootSectionSize;
 } Field_MpdHeader;
-_Static_assert(sizeof(Field_MpdHeader) == 0x30, "Field_MpdHeader must keep its PS1 layout");
+static_assert(sizeof(Field_MpdHeader) == 0x30, "Field_MpdHeader must keep its PS1 layout");
 
 // decomp: _mpdPolygt3 (src/BATTLE/BATTLE.PRG/146C.h:44)
 typedef struct Field_MpdTriangle {
@@ -123,7 +123,7 @@ typedef struct Field_MpdTriangle {
     char u2, v2;
     short textureId;
 } Field_MpdTriangle;
-_Static_assert(sizeof(Field_MpdTriangle) == 0x20, "Field_MpdTriangle must keep its PS1 layout");
+static_assert(sizeof(Field_MpdTriangle) == 0x20, "Field_MpdTriangle must keep its PS1 layout");
 
 // decomp: _mpdPolygt4 (src/BATTLE/BATTLE.PRG/146C.h:59)
 typedef struct Field_MpdQuad {
@@ -140,7 +140,7 @@ typedef struct Field_MpdQuad {
     char vertex4OffsetX, vertex4OffsetY, vertex4OffsetZ, u4;
     char red4, green4, blue4, v4;
 } Field_MpdQuad;
-_Static_assert(sizeof(Field_MpdQuad) == 0x28, "Field_MpdQuad must keep its PS1 layout");
+static_assert(sizeof(Field_MpdQuad) == 0x28, "Field_MpdQuad must keep its PS1 layout");
 
 // decomp: _mpdRoomCollisionMapSection (src/BATTLE/BATTLE.PRG/146C.h:12)
 typedef struct Field_MpdCollisionHeader {
@@ -149,7 +149,7 @@ typedef struct Field_MpdCollisionHeader {
     short heightOrigin;
     short cellCount;
 } Field_MpdCollisionHeader;
-_Static_assert(sizeof(Field_MpdCollisionHeader) == 0x8, "Field_MpdCollisionHeader must keep its PS1 layout");
+static_assert(sizeof(Field_MpdCollisionHeader) == 0x8, "Field_MpdCollisionHeader must keep its PS1 layout");
 
 // decomp: _mpdRoomDoorSection_t (src/SLUS_010.40/main.h:446)
 typedef struct Field_MpdDoorRecord {
@@ -168,7 +168,7 @@ typedef struct Field_MpdDoorRecord {
     u_char reserved0A;
     u_char reserved0B;
 } Field_MpdDoorRecord;
-_Static_assert(sizeof(Field_MpdDoorRecord) == 0xC, "Field_MpdDoorRecord must keep its PS1 layout");
+static_assert(sizeof(Field_MpdDoorRecord) == 0xC, "Field_MpdDoorRecord must keep its PS1 layout");
 
 // decomp: _mpdRoomSection11 (src/BATTLE/BATTLE.PRG/146C.h:168)
 typedef struct Field_MpdViewTrigger {
@@ -181,7 +181,7 @@ typedef struct Field_MpdViewTrigger {
     u_short effectCount;
     char effectIds[0];
 } Field_MpdViewTrigger;
-_Static_assert(sizeof(Field_MpdViewTrigger) == 0x4, "Field_MpdViewTrigger must keep its PS1 layout");
+static_assert(sizeof(Field_MpdViewTrigger) == 0x4, "Field_MpdViewTrigger must keep its PS1 layout");
 
 // decomp: _mpdRoomSection3 (src/BATTLE/BATTLE.PRG/146C.h:81); upstream MpdTile
 // (src/BATTLE/BATTLE.PRG/mpd.h:23). The "never read" bits were checked against
@@ -217,7 +217,7 @@ typedef struct Field_MpdTileCell {
     u_int aiNoFlight : 1;
     u_int aiTerrainClasses : 3;
 } Field_MpdTileCell;
-_Static_assert(sizeof(Field_MpdTileCell) == 0x4, "Field_MpdTileCell must keep its PS1 layout");
+static_assert(sizeof(Field_MpdTileCell) == 0x4, "Field_MpdTileCell must keep its PS1 layout");
 
 // decomp: _mpdRoomSection12 (src/BATTLE/BATTLE.PRG/146C.h:193)
 typedef struct Field_MpdMovingPlatform {
@@ -244,7 +244,7 @@ typedef struct Field_MpdMovingPlatform {
     int positionZ;
     Field_MpdTileCell tileCell;
 } Field_MpdMovingPlatform;
-_Static_assert(sizeof(Field_MpdMovingPlatform) == 0xB8, "Field_MpdMovingPlatform must keep its PS1 layout");
+static_assert(sizeof(Field_MpdMovingPlatform) == 0xB8, "Field_MpdMovingPlatform must keep its PS1 layout");
 
 // decomp: _mpdRoomSection9 (src/BATTLE/BATTLE.PRG/146C.h:97)
 typedef struct Field_MpdFloorTrigger {
@@ -313,7 +313,7 @@ typedef struct Field_MpdSectionE {
     u_int secondArray; /* offset from the struct (on-disc pointer) */
     int payload[0];
 } Field_MpdSectionE;
-_Static_assert(sizeof(Field_MpdSectionE) == 0x14, "Field_MpdSectionE must keep its PS1 layout");
+static_assert(sizeof(Field_MpdSectionE) == 0x14, "Field_MpdSectionE must keep its PS1 layout");
 
 // decomp: func_80091C6C_t2 (src/BATTLE/BATTLE.PRG/2842C.c:151)
 typedef struct Field_MpdPolygonUvView {
@@ -333,7 +333,7 @@ typedef struct Field_MpdPolygonUvView {
     char fourthColor[3];
     u_char v3;
 } Field_MpdPolygonUvView;
-_Static_assert(sizeof(Field_MpdPolygonUvView) == 0x28, "Field_MpdPolygonUvView must keep its PS1 layout");
+static_assert(sizeof(Field_MpdPolygonUvView) == 0x28, "Field_MpdPolygonUvView must keep its PS1 layout");
 
 // decomp: func_80093914_t (src/BATTLE/BATTLE.PRG/2842C.c:98)
 typedef struct Field_MpdTriangleColorView {
@@ -350,7 +350,7 @@ typedef struct Field_MpdTriangleColorView {
     u_char green3;
     u_char remainder[0xA];
 } Field_MpdTriangleColorView;
-_Static_assert(sizeof(Field_MpdTriangleColorView) == 0x20, "Field_MpdTriangleColorView must keep its PS1 layout");
+static_assert(sizeof(Field_MpdTriangleColorView) == 0x20, "Field_MpdTriangleColorView must keep its PS1 layout");
 
 // decomp: func_80093914_t2 (src/BATTLE/BATTLE.PRG/2842C.c:117)
 typedef struct Field_MpdQuadColorView {
@@ -371,7 +371,7 @@ typedef struct Field_MpdQuadColorView {
     u_char blue4;
     u_char v4;
 } Field_MpdQuadColorView;
-_Static_assert(sizeof(Field_MpdQuadColorView) == 0x28, "Field_MpdQuadColorView must keep its PS1 layout");
+static_assert(sizeof(Field_MpdQuadColorView) == 0x28, "Field_MpdQuadColorView must keep its PS1 layout");
 
 // decomp: mpdObjectSpawn (src/BATTLE/BATTLE.PRG/146C.c:394)
 typedef struct Field_MpdObjectSpawn {
@@ -391,6 +391,6 @@ typedef struct Field_MpdObjectSpawn {
     u_short model;
     u_char reserved10[0x18];
 } Field_MpdObjectSpawn;
-_Static_assert(sizeof(Field_MpdObjectSpawn) == 0x28, "Field_MpdObjectSpawn must keep its PS1 layout");
+static_assert(sizeof(Field_MpdObjectSpawn) == 0x28, "Field_MpdObjectSpawn must keep its PS1 layout");
 
 #endif // VS_FIELD_MPD_H_TYPES

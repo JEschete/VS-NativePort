@@ -38,7 +38,7 @@ typedef struct Actors_SeqAnimationBank {
     u_int animationMap; /* offset from the struct (on-disc pointer) */
     u_short headers[0];
 } Actors_SeqAnimationBank;
-_Static_assert(sizeof(Actors_SeqAnimationBank) == 0x8, "Actors_SeqAnimationBank must keep its PS1 layout");
+static_assert(sizeof(Actors_SeqAnimationBank) == 0x8, "Actors_SeqAnimationBank must keep its PS1 layout");
 
 #endif // VS_ACTORS_ANIMATION_H_TYPES
 

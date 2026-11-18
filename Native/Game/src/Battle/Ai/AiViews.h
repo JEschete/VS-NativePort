@@ -113,13 +113,13 @@ typedef struct Battle_Ai_CandidateEntryView {
     unsigned int reserved10Bit0 : 1, opaque10Bit1 : 1, reserved10Bit2 : 1, reserved10Bit3 : 1, reserved10Bit4 : 1, reserved10Bit5 : 1,
         range : 16, reserved12Bit6 : 10;
 } Battle_Ai_CandidateEntryView;
-_Static_assert(sizeof(Battle_Ai_CandidateEntryView) == 0x14, "Battle_Ai_CandidateEntryView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_CandidateEntryView) == 0x14, "Battle_Ai_CandidateEntryView must keep its PS1 layout");
 
 // decomp: actionCandidateTarget (src/BATTLE/BATTLE.PRG/6FC00.c:503)
 typedef struct Battle_Ai_RelationByteView {
     unsigned char opaque0, reserved1[3];
 } Battle_Ai_RelationByteView;
-_Static_assert(sizeof(Battle_Ai_RelationByteView) == 0x4, "Battle_Ai_RelationByteView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_RelationByteView) == 0x4, "Battle_Ai_RelationByteView must keep its PS1 layout");
 
 // decomp: actionChoiceFlags (src/BATTLE/BATTLE.PRG/74088.c:859)
 typedef struct Battle_Ai_ActionChoiceFlagsView {
@@ -129,7 +129,7 @@ typedef struct Battle_Ai_ActionChoiceFlagsView {
     u_int reserved0Bit3 : 1;
     u_int reserved0Bit4 : 28;
 } Battle_Ai_ActionChoiceFlagsView;
-_Static_assert(sizeof(Battle_Ai_ActionChoiceFlagsView) == 0x4, "Battle_Ai_ActionChoiceFlagsView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionChoiceFlagsView) == 0x4, "Battle_Ai_ActionChoiceFlagsView must keep its PS1 layout");
 
 // decomp: actionChoice (src/BATTLE/BATTLE.PRG/74088.c:872)
 typedef struct Battle_Ai_ActionChoiceEntryView {
@@ -144,7 +144,7 @@ typedef struct Battle_Ai_ActionChoiceEntryView {
     u_int reservedFBit3 : 5;
     Battle_Ai_ActionChoiceFlagsView reserved10;
 } Battle_Ai_ActionChoiceEntryView;
-_Static_assert(sizeof(Battle_Ai_ActionChoiceEntryView) == 0x14, "Battle_Ai_ActionChoiceEntryView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionChoiceEntryView) == 0x14, "Battle_Ai_ActionChoiceEntryView must keep its PS1 layout");
 
 // decomp: actionChoiceInfo (src/BATTLE/BATTLE.PRG/74088.c:897)
 typedef struct Battle_Ai_ActionChoiceInfoView {
@@ -157,14 +157,14 @@ typedef struct Battle_Ai_ActionChoiceInfoView {
     u_int reservedFBit6 : 2;
     char reserved10[0x24];
 } Battle_Ai_ActionChoiceInfoView;
-_Static_assert(sizeof(Battle_Ai_ActionChoiceInfoView) == 0x34, "Battle_Ai_ActionChoiceInfoView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionChoiceInfoView) == 0x34, "Battle_Ai_ActionChoiceInfoView must keep its PS1 layout");
 
 // decomp: actionCostView (src/BATTLE/BATTLE.PRG/74088.c:471)
 typedef struct Battle_Ai_ActionCostView {
     unsigned int reserved0;
     char reserved4[48];
 } Battle_Ai_ActionCostView;
-_Static_assert(sizeof(Battle_Ai_ActionCostView) == 0x34, "Battle_Ai_ActionCostView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionCostView) == 0x34, "Battle_Ai_ActionCostView must keep its PS1 layout");
 
 // decomp: actionDispatchActor (src/BATTLE/BATTLE.PRG/71618.c:1055)
 typedef struct Battle_Ai_DispatchActorView {
@@ -180,7 +180,7 @@ typedef struct Battle_Ai_DispatchActorView {
 typedef struct Battle_Ai_DispatchEntryView {
     unsigned int reserved0, reserved4, reserved8, reservedC;
 } Battle_Ai_DispatchEntryView;
-_Static_assert(sizeof(Battle_Ai_DispatchEntryView) == 0x10, "Battle_Ai_DispatchEntryView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_DispatchEntryView) == 0x10, "Battle_Ai_DispatchEntryView must keep its PS1 layout");
 
 // decomp: actionDispatchModel (src/BATTLE/BATTLE.PRG/71618.c:1049)
 typedef struct Battle_Ai_DispatchModelView {
@@ -204,7 +204,7 @@ typedef union Battle_Ai_MetadataWord {
     unsigned int word;
     unsigned char bytes[4];
 } Battle_Ai_MetadataWord;
-_Static_assert(sizeof(Battle_Ai_MetadataWord) == 0x4, "Battle_Ai_MetadataWord must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_MetadataWord) == 0x4, "Battle_Ai_MetadataWord must keep its PS1 layout");
 
 // decomp: actionMetadataAction (src/BATTLE/BATTLE.PRG/7CD68.c:503)
 typedef struct Battle_Ai_MetadataActionView {
@@ -213,7 +213,7 @@ typedef struct Battle_Ai_MetadataActionView {
     unsigned int opaqueC;
     char reserved10[36];
 } Battle_Ai_MetadataActionView;
-_Static_assert(sizeof(Battle_Ai_MetadataActionView) == 0x34, "Battle_Ai_MetadataActionView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_MetadataActionView) == 0x34, "Battle_Ai_MetadataActionView must keep its PS1 layout");
 
 // decomp: actionMetadataEntry (src/BATTLE/BATTLE.PRG/7CD68.c:515)
 typedef struct Battle_Ai_ActionMetadataEntry {
@@ -221,20 +221,20 @@ typedef struct Battle_Ai_ActionMetadataEntry {
         radius : 16, reserved3Bit0 : 8;
     unsigned int rangeSquared;
 } Battle_Ai_ActionMetadataEntry;
-_Static_assert(sizeof(Battle_Ai_ActionMetadataEntry) == 0x8, "Battle_Ai_ActionMetadataEntry must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionMetadataEntry) == 0x8, "Battle_Ai_ActionMetadataEntry must keep its PS1 layout");
 
 // decomp: actionMetadataSlot (src/BATTLE/BATTLE.PRG/7CD68.c:506)
 typedef struct Battle_Ai_MetadataSlotView {
     unsigned short id, reserved2;
 } Battle_Ai_MetadataSlotView;
-_Static_assert(sizeof(Battle_Ai_MetadataSlotView) == 0x4, "Battle_Ai_MetadataSlotView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_MetadataSlotView) == 0x4, "Battle_Ai_MetadataSlotView must keep its PS1 layout");
 
 // decomp: actionMetadataStats (src/BATTLE/BATTLE.PRG/7CD68.c:510)
 typedef struct Battle_Ai_MetadataStatsView {
     char reserved0[0x8C0];
     Battle_Ai_MetadataSlotView slots[6][4];
 } Battle_Ai_MetadataStatsView;
-_Static_assert(sizeof(Battle_Ai_MetadataStatsView) == 0x920, "Battle_Ai_MetadataStatsView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_MetadataStatsView) == 0x920, "Battle_Ai_MetadataStatsView must keep its PS1 layout");
 
 // decomp: actionReactionAction (src/BATTLE/BATTLE.PRG/74088.c:708)
 typedef struct Battle_Ai_ReactionActionView {
@@ -242,14 +242,14 @@ typedef struct Battle_Ai_ReactionActionView {
     unsigned int effect1, effect2;
     char reserved1C[24];
 } Battle_Ai_ReactionActionView;
-_Static_assert(sizeof(Battle_Ai_ReactionActionView) == 0x34, "Battle_Ai_ReactionActionView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ReactionActionView) == 0x34, "Battle_Ai_ReactionActionView must keep its PS1 layout");
 
 // decomp: actionReactionMotion (src/BATTLE/BATTLE.PRG/74088.c:712)
 typedef struct Battle_Ai_ReactionOrbitView {
     char reserved0[10];
     unsigned char isOrbiting;
 } Battle_Ai_ReactionOrbitView;
-_Static_assert(sizeof(Battle_Ai_ReactionOrbitView) == 0xB, "Battle_Ai_ReactionOrbitView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ReactionOrbitView) == 0xB, "Battle_Ai_ReactionOrbitView must keep its PS1 layout");
 
 // decomp: actionScoreActor (src/BATTLE/BATTLE.PRG/74088.c:563)
 typedef struct Battle_Ai_ActorListNodeView {
@@ -279,7 +279,7 @@ typedef struct Battle_Ai_ActionSlotConfigView {
     u_int reserved3Bit0 : 8;
     u_int reserved4;
 } Battle_Ai_ActionSlotConfigView;
-_Static_assert(sizeof(Battle_Ai_ActionSlotConfigView) == 0x8, "Battle_Ai_ActionSlotConfigView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionSlotConfigView) == 0x8, "Battle_Ai_ActionSlotConfigView must keep its PS1 layout");
 
 // decomp: actionStatDelta (src/BATTLE/BATTLE.PRG/74088.c:459)
 typedef struct Battle_Ai_StatDeltaView {
@@ -297,7 +297,7 @@ typedef struct Battle_Ai_StatDeltaView {
     char reserved3E[2];
     int skip;
 } Battle_Ai_StatDeltaView;
-_Static_assert(sizeof(Battle_Ai_StatDeltaView) == 0x44, "Battle_Ai_StatDeltaView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_StatDeltaView) == 0x44, "Battle_Ai_StatDeltaView must keep its PS1 layout");
 
 // decomp: actionStatApplication (src/BATTLE/BATTLE.PRG/74088.c:467)
 typedef struct Battle_Ai_StatApplicationView {
@@ -308,7 +308,7 @@ typedef struct Battle_Ai_StatApplicationView {
     unsigned short count;
     Battle_Ai_StatDeltaView entries[1];
 } Battle_Ai_StatApplicationView;
-_Static_assert(sizeof(Battle_Ai_StatApplicationView) == 0x90, "Battle_Ai_StatApplicationView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_StatApplicationView) == 0x90, "Battle_Ai_StatApplicationView must keep its PS1 layout");
 
 // decomp: actorEvaluationActor (src/BATTLE/BATTLE.PRG/74088.c:1523)
 typedef struct Battle_Ai_EvaluationActorView {
@@ -326,7 +326,7 @@ typedef struct Battle_Ai_EvaluationContextView {
     char reserved5[63];
     int opaque44;
 } Battle_Ai_EvaluationContextView;
-_Static_assert(sizeof(Battle_Ai_EvaluationContextView) == 0x48, "Battle_Ai_EvaluationContextView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_EvaluationContextView) == 0x48, "Battle_Ai_EvaluationContextView must keep its PS1 layout");
 
 // decomp: actorEvaluationStats (src/BATTLE/BATTLE.PRG/74088.c:1516)
 typedef struct Battle_Ai_EvaluationStatsView {
@@ -337,7 +337,7 @@ typedef struct Battle_Ai_EvaluationStatsView {
     char reserved32[1];
     unsigned char opaque33;
 } Battle_Ai_EvaluationStatsView;
-_Static_assert(sizeof(Battle_Ai_EvaluationStatsView) == 0x34, "Battle_Ai_EvaluationStatsView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_EvaluationStatsView) == 0x34, "Battle_Ai_EvaluationStatsView must keep its PS1 layout");
 
 // decomp: actorInitializationPoint (src/BATTLE/BATTLE.PRG/7CD68.c:833)
 typedef union Battle_Ai_CreationTileWord {
@@ -380,7 +380,7 @@ typedef struct Battle_Ai_CreationStatsView {
     unsigned char opaque32;
     unsigned char opaque33;
 } Battle_Ai_CreationStatsView;
-_Static_assert(sizeof(Battle_Ai_CreationStatsView) == 0x34, "Battle_Ai_CreationStatsView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_CreationStatsView) == 0x34, "Battle_Ai_CreationStatsView must keep its PS1 layout");
 
 // decomp: actorObject (src/BATTLE/BATTLE.PRG/6FC00.c:588)
 typedef struct Battle_Ai_PerceivedObjectView {
@@ -425,7 +425,7 @@ typedef union Battle_Ai_SettingsWord {
     unsigned short halves[2];
     unsigned char bytes[4];
 } Battle_Ai_SettingsWord;
-_Static_assert(sizeof(Battle_Ai_SettingsWord) == 0x4, "Battle_Ai_SettingsWord must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_SettingsWord) == 0x4, "Battle_Ai_SettingsWord must keep its PS1 layout");
 
 // decomp: actorSettingsActor (src/BATTLE/BATTLE.PRG/7CD68.c:616)
 typedef struct Battle_Ai_SettingsActorView {
@@ -447,7 +447,7 @@ typedef struct Battle_Ai_WanderTiming {
     unsigned short movePeriod, restPeriod;
     unsigned char rate, reserved5;
 } Battle_Ai_WanderTiming;
-_Static_assert(sizeof(Battle_Ai_WanderTiming) == 0x6, "Battle_Ai_WanderTiming must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_WanderTiming) == 0x6, "Battle_Ai_WanderTiming must keep its PS1 layout");
 
 // decomp: actorUpdateActor (src/BATTLE/BATTLE.PRG/6FC00.c:868)
 typedef struct Battle_Ai_PerceptionActorView {
@@ -467,14 +467,14 @@ typedef struct Battle_Ai_HpPairView {
     u_int current : 16;
     u_int max : 16;
 } Battle_Ai_HpPairView;
-_Static_assert(sizeof(Battle_Ai_HpPairView) == 0x4, "Battle_Ai_HpPairView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_HpPairView) == 0x4, "Battle_Ai_HpPairView must keep its PS1 layout");
 
 // decomp: actorUpdatePoint (src/BATTLE/BATTLE.PRG/6FC00.c:873)
 typedef struct Battle_Ai_PositionLinkView {
     u_int position;
     u_int opaque4;
 } Battle_Ai_PositionLinkView;
-_Static_assert(sizeof(Battle_Ai_PositionLinkView) == 0x8, "Battle_Ai_PositionLinkView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_PositionLinkView) == 0x8, "Battle_Ai_PositionLinkView must keep its PS1 layout");
 
 // decomp: actorUpdateStats (src/BATTLE/BATTLE.PRG/6FC00.c:885)
 typedef struct Battle_Ai_PerceptionStatsView {
@@ -483,7 +483,7 @@ typedef struct Battle_Ai_PerceptionStatsView {
     int reserved1C;
     int reserved20;
 } Battle_Ai_PerceptionStatsView;
-_Static_assert(sizeof(Battle_Ai_PerceptionStatsView) == 0x24, "Battle_Ai_PerceptionStatsView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_PerceptionStatsView) == 0x24, "Battle_Ai_PerceptionStatsView must keep its PS1 layout");
 
 // decomp: da4bcActor (src/BATTLE/BATTLE.PRG/71618.c:776)
 typedef struct Battle_Ai_EscortActorView {
@@ -495,13 +495,13 @@ typedef struct Battle_Ai_EscortActorView {
 typedef struct Battle_Ai_EscortEntryView {
     unsigned int reserved0, reserved4, reserved8, opaqueC;
 } Battle_Ai_EscortEntryView;
-_Static_assert(sizeof(Battle_Ai_EscortEntryView) == 0x10, "Battle_Ai_EscortEntryView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_EscortEntryView) == 0x10, "Battle_Ai_EscortEntryView must keep its PS1 layout");
 
 // decomp: da4bcEntryTarget (src/BATTLE/BATTLE.PRG/71618.c:780)
 typedef struct Battle_Ai_EscortTargetView {
     unsigned int target : 4, reserved0Bit4 : 28;
 } Battle_Ai_EscortTargetView;
-_Static_assert(sizeof(Battle_Ai_EscortTargetView) == 0x4, "Battle_Ai_EscortTargetView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_EscortTargetView) == 0x4, "Battle_Ai_EscortTargetView must keep its PS1 layout");
 
 // decomp: da4bcModel (src/BATTLE/BATTLE.PRG/71618.c:761)
 typedef struct Battle_Ai_GuardModelView {
@@ -518,13 +518,13 @@ typedef struct Battle_Ai_EscortRelationBits {
     unsigned int reserved0Bit0 : 6, mode : 2, reserved1Bit0 : 12, category : 7, reserved3Bit3 : 1, oldMode : 2,
         reserved3Bit6 : 2;
 } Battle_Ai_EscortRelationBits;
-_Static_assert(sizeof(Battle_Ai_EscortRelationBits) == 0x4, "Battle_Ai_EscortRelationBits must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_EscortRelationBits) == 0x4, "Battle_Ai_EscortRelationBits must keep its PS1 layout");
 
 // decomp: directionalCacheBits (src/BATTLE/BATTLE.PRG/771A8.c:900)
 typedef struct Battle_Ai_DirectionCacheBits {
     unsigned char tested, valid;
 } Battle_Ai_DirectionCacheBits;
-_Static_assert(sizeof(Battle_Ai_DirectionCacheBits) == 0x2, "Battle_Ai_DirectionCacheBits must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_DirectionCacheBits) == 0x2, "Battle_Ai_DirectionCacheBits must keep its PS1 layout");
 
 // decomp: func_800DC888_t (src/BATTLE/BATTLE.PRG/6F014.c:253)
 typedef struct Battle_Ai_ActionTiming {
@@ -540,14 +540,14 @@ typedef struct Battle_Ai_ActionTiming {
     short opaque14;
     short opaque16;
 } Battle_Ai_ActionTiming;
-_Static_assert(sizeof(Battle_Ai_ActionTiming) == 0x18, "Battle_Ai_ActionTiming must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionTiming) == 0x18, "Battle_Ai_ActionTiming must keep its PS1 layout");
 
 // decomp: func_800DCAA0_t1 (src/BATTLE/BATTLE.PRG/6F014.c:417)
 typedef struct Battle_Ai_CandidateTable {
     char reserved0[0x88];
     u_char reserved88;
 } Battle_Ai_CandidateTable;
-_Static_assert(sizeof(Battle_Ai_CandidateTable) == 0x89, "Battle_Ai_CandidateTable must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_CandidateTable) == 0x89, "Battle_Ai_CandidateTable must keep its PS1 layout");
 
 // decomp: func_800DCAA0_t2 (src/BATTLE/BATTLE.PRG/6F014.c:96)
 typedef struct Battle_Ai_CandidateFlags {
@@ -560,7 +560,7 @@ typedef struct Battle_Ai_CandidateFlags {
     u_int opaque0Bit6 : 16;
     u_int reserved2Bit6 : 10;
 } Battle_Ai_CandidateFlags;
-_Static_assert(sizeof(Battle_Ai_CandidateFlags) == 0x4, "Battle_Ai_CandidateFlags must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_CandidateFlags) == 0x4, "Battle_Ai_CandidateFlags must keep its PS1 layout");
 
 // decomp: func_800DEB10_t (src/BATTLE/BATTLE.PRG/6F014.c:278)
 typedef struct Battle_Ai_EngagementActor {
@@ -587,7 +587,7 @@ typedef struct Battle_Ai_EngagementActor {
     char reserved3E[2];
     int opaque40;
 } Battle_Ai_EngagementActor;
-_Static_assert(sizeof(Battle_Ai_EngagementActor) == 0x44, "Battle_Ai_EngagementActor must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_EngagementActor) == 0x44, "Battle_Ai_EngagementActor must keep its PS1 layout");
 
 // decomp: func_800DEB10_t2 (src/BATTLE/BATTLE.PRG/6F014.c:85)
 typedef struct Battle_Ai_EngagementData {
@@ -615,7 +615,7 @@ typedef struct Battle_Ai_ReactionRecord {
     u_short opaque4A;
     Battle_Ai_EngagementActor opaque4C[0];
 } Battle_Ai_ReactionRecord;
-_Static_assert(sizeof(Battle_Ai_ReactionRecord) == 0x4C, "Battle_Ai_ReactionRecord must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ReactionRecord) == 0x4C, "Battle_Ai_ReactionRecord must keep its PS1 layout");
 
 // decomp: func_800DFA54_t (src/BATTLE/BATTLE.PRG/6F014.c:49)
 typedef struct Battle_Ai_RouteGateTile {
@@ -623,7 +623,7 @@ typedef struct Battle_Ai_RouteGateTile {
     u_char opaque1;
     u_char opaque2;
 } Battle_Ai_RouteGateTile;
-_Static_assert(sizeof(Battle_Ai_RouteGateTile) == 0x3, "Battle_Ai_RouteGateTile must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_RouteGateTile) == 0x3, "Battle_Ai_RouteGateTile must keep its PS1 layout");
 
 // decomp: func_800E1238_t (src/BATTLE/BATTLE.PRG/6F014.c:139)
 typedef struct Battle_Ai_ModelStatePrefix {
@@ -633,7 +633,7 @@ typedef struct Battle_Ai_ModelStatePrefix {
     u_int opaqueABit5 : 1;
     u_int reservedABit6 : 10;
 } Battle_Ai_ModelStatePrefix;
-_Static_assert(sizeof(Battle_Ai_ModelStatePrefix) == 0xC, "Battle_Ai_ModelStatePrefix must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ModelStatePrefix) == 0xC, "Battle_Ai_ModelStatePrefix must keep its PS1 layout");
 
 // decomp: func_800E5568_t (src/BATTLE/BATTLE.PRG/6F014.c:27)
 typedef struct Battle_Ai_ActionRangeShape {
@@ -643,7 +643,7 @@ typedef struct Battle_Ai_ActionRangeShape {
     u_char shape : 3;
     u_char angle : 5;
 } Battle_Ai_ActionRangeShape;
-_Static_assert(sizeof(Battle_Ai_ActionRangeShape) == 0x4, "Battle_Ai_ActionRangeShape must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionRangeShape) == 0x4, "Battle_Ai_ActionRangeShape must keep its PS1 layout");
 
 // decomp: func_800E5698_t (src/BATTLE/BATTLE.PRG/6F014.c:37)
 typedef struct Battle_Ai_ActionRangeView {
@@ -658,28 +658,28 @@ typedef struct Battle_Ai_ActionRangeView2 {
     char reserved0[0x38];
     Battle_Ai_ActionRangeShape opaque38;
 } Battle_Ai_ActionRangeView2;
-_Static_assert(sizeof(Battle_Ai_ActionRangeView2) == 0x3C, "Battle_Ai_ActionRangeView2 must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionRangeView2) == 0x3C, "Battle_Ai_ActionRangeView2 must keep its PS1 layout");
 
 // decomp: func_800E5A74_t (src/BATTLE/BATTLE.PRG/6F014.c:19)
 typedef struct Battle_Ai_SavedSettingsPair {
     int reserved0;
     u_short opaque4;
 } Battle_Ai_SavedSettingsPair;
-_Static_assert(sizeof(Battle_Ai_SavedSettingsPair) == 0x8, "Battle_Ai_SavedSettingsPair must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_SavedSettingsPair) == 0x8, "Battle_Ai_SavedSettingsPair must keep its PS1 layout");
 
 // decomp: func_800E78F4_t2 (src/BATTLE/BATTLE.PRG/6F014.c:390)
 typedef struct Battle_Ai_WordPair {
     int reserved0;
     u_int reserved4;
 } Battle_Ai_WordPair;
-_Static_assert(sizeof(Battle_Ai_WordPair) == 0x8, "Battle_Ai_WordPair must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_WordPair) == 0x8, "Battle_Ai_WordPair must keep its PS1 layout");
 
 // decomp: movementActorPosition (src/BATTLE/BATTLE.PRG/771A8.c:2269)
 typedef struct Battle_Ai_ActorPositionView {
     char reserved0[0x1C];
     short x, reserved1E, z;
 } Battle_Ai_ActorPositionView;
-_Static_assert(sizeof(Battle_Ai_ActorPositionView) == 0x22, "Battle_Ai_ActorPositionView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActorPositionView) == 0x22, "Battle_Ai_ActorPositionView must keep its PS1 layout");
 
 // decomp: movementCheckObject (src/BATTLE/BATTLE.PRG/771A8.c:967)
 typedef struct Battle_Ai_CheckObjectView {
@@ -729,19 +729,19 @@ typedef struct Battle_Ai_StepActorView {
 typedef struct Battle_Ai_WaypointTile {
     unsigned char x, reserved1, z, reserved3;
 } Battle_Ai_WaypointTile;
-_Static_assert(sizeof(Battle_Ai_WaypointTile) == 0x4, "Battle_Ai_WaypointTile must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_WaypointTile) == 0x4, "Battle_Ai_WaypointTile must keep its PS1 layout");
 
 // decomp: obstructionCache (src/BATTLE/BATTLE.PRG/771A8.c:793)
 typedef struct Battle_Ai_ObstructionCache {
     unsigned char reserved0, reserved1, tested, reserved3, result[8];
 } Battle_Ai_ObstructionCache;
-_Static_assert(sizeof(Battle_Ai_ObstructionCache) == 0xC, "Battle_Ai_ObstructionCache must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ObstructionCache) == 0xC, "Battle_Ai_ObstructionCache must keep its PS1 layout");
 
 // decomp: obstructionVector (src/BATTLE/BATTLE.PRG/771A8.c:772)
 typedef struct Battle_Ai_ObstructionVector {
     short x, y, z, reserved6;
 } Battle_Ai_ObstructionVector;
-_Static_assert(sizeof(Battle_Ai_ObstructionVector) == 0x8, "Battle_Ai_ObstructionVector must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ObstructionVector) == 0x8, "Battle_Ai_ObstructionVector must keep its PS1 layout");
 
 // decomp: obstructionModel (src/BATTLE/BATTLE.PRG/771A8.c:776)
 typedef struct Battle_Ai_ObstructionModel {
@@ -760,7 +760,7 @@ typedef struct Battle_Ai_RadialRetreatOrbitView {
     char reserved12[6];
     short startX, startZ;
 } Battle_Ai_RadialRetreatOrbitView;
-_Static_assert(sizeof(Battle_Ai_RadialRetreatOrbitView) == 0x1C, "Battle_Ai_RadialRetreatOrbitView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_RadialRetreatOrbitView) == 0x1C, "Battle_Ai_RadialRetreatOrbitView must keep its PS1 layout");
 
 // decomp: radialMotionActor (src/BATTLE/BATTLE.PRG/7EE98.c:503)
 typedef struct Battle_Ai_RetreatPlayerRecordView {
@@ -790,7 +790,7 @@ typedef struct Battle_Ai_RouteGateView {
     char reserved0[14];
     u_char closedGates;
 } Battle_Ai_RouteGateView;
-_Static_assert(sizeof(Battle_Ai_RouteGateView) == 0xF, "Battle_Ai_RouteGateView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_RouteGateView) == 0xF, "Battle_Ai_RouteGateView must keep its PS1 layout");
 
 // decomp: targetMovementActor (src/BATTLE/BATTLE.PRG/771A8.c:1900)
 typedef struct Battle_Ai_ApproachActorView {
@@ -803,7 +803,7 @@ typedef struct Battle_Ai_ApproachActorView {
 typedef struct Battle_Ai_ApproachRelationBits {
     unsigned int active : 1, opaque0Bit1 : 1, opaque0Bit2 : 1, reserved0Bit3 : 2, visible : 1, reserved0Bit6 : 26;
 } Battle_Ai_ApproachRelationBits;
-_Static_assert(sizeof(Battle_Ai_ApproachRelationBits) == 0x4, "Battle_Ai_ApproachRelationBits must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ApproachRelationBits) == 0x4, "Battle_Ai_ApproachRelationBits must keep its PS1 layout");
 
 // decomp: targetMovementModel (src/BATTLE/BATTLE.PRG/771A8.c:1908)
 typedef struct Battle_Ai_ApproachTargetRecordView {
@@ -835,7 +835,7 @@ typedef struct Battle_Ai_OrbitTrackingOrbitView {
     char reserved15[7];
     unsigned char started;
 } Battle_Ai_OrbitTrackingOrbitView;
-_Static_assert(sizeof(Battle_Ai_OrbitTrackingOrbitView) == 0x20, "Battle_Ai_OrbitTrackingOrbitView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_OrbitTrackingOrbitView) == 0x20, "Battle_Ai_OrbitTrackingOrbitView must keep its PS1 layout");
 
 // decomp: trackingMotionActor (src/BATTLE/BATTLE.PRG/7EE98.c:595)
 typedef struct Battle_Ai_OrbitPlayerRecordView {
@@ -848,7 +848,7 @@ typedef struct Battle_Ai_OrbitStatsView {
     char reserved0[0x18];
     short currentHp, maxHp;
 } Battle_Ai_OrbitStatsView;
-_Static_assert(sizeof(Battle_Ai_OrbitStatsView) == 0x1C, "Battle_Ai_OrbitStatsView must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_OrbitStatsView) == 0x1C, "Battle_Ai_OrbitStatsView must keep its PS1 layout");
 
 // decomp: wanderObject (src/BATTLE/BATTLE.PRG/771A8.c:1590)
 typedef struct Battle_Ai_WanderRecordView {
@@ -905,14 +905,14 @@ typedef union Battle_Ai_CandidateTileWord {
     unsigned int word;
     unsigned char bytes[4];
 } Battle_Ai_CandidateTileWord;
-_Static_assert(sizeof(Battle_Ai_CandidateTileWord) == 0x4, "Battle_Ai_CandidateTileWord must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_CandidateTileWord) == 0x4, "Battle_Ai_CandidateTileWord must keep its PS1 layout");
 
 // decomp: da4bcPoint (src/BATTLE/BATTLE.PRG/71618.c:752)
 typedef union Battle_Ai_GuardTileWord {
     unsigned int word;
     unsigned char bytes[4];
 } Battle_Ai_GuardTileWord;
-_Static_assert(sizeof(Battle_Ai_GuardTileWord) == 0x4, "Battle_Ai_GuardTileWord must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_GuardTileWord) == 0x4, "Battle_Ai_GuardTileWord must keep its PS1 layout");
 
 // decomp: movementPath (src/BATTLE/BATTLE.PRG/771A8.c:2351)
 typedef union Battle_Ai_DetourWord {
@@ -953,7 +953,7 @@ typedef union Battle_Ai_ApproachTileWord {
     unsigned int word;
     unsigned char bytes[4];
 } Battle_Ai_ApproachTileWord;
-_Static_assert(sizeof(Battle_Ai_ApproachTileWord) == 0x4, "Battle_Ai_ApproachTileWord must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ApproachTileWord) == 0x4, "Battle_Ai_ApproachTileWord must keep its PS1 layout");
 
 // decomp: terrainMovementPoint (src/BATTLE/BATTLE.PRG/771A8.c:1478)
 typedef union Battle_Ai_TerrainTileWord {

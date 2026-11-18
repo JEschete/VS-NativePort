@@ -14,6 +14,6 @@ typedef struct Render_TextureRegion {
     u_short tpage;
     u_short clut;
 } Render_TextureRegion;
-_Static_assert(sizeof(Render_TextureRegion) == 0x8, "Render_TextureRegion must keep its PS1 layout");
+static_assert(sizeof(Render_TextureRegion) == 0x8, "Render_TextureRegion must keep its PS1 layout");
 
 #endif // VS_RENDER_IMAGES_H_TYPES

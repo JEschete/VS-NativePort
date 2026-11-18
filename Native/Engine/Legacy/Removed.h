@@ -8,13 +8,13 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-typedef void (*LegacyRemovedCallback)(void);
+typedef void (*LegacyRemovedCallback)();
 
 static inline int DrawSync(int mode) {
   (void)mode;
   return 0;
 }
-static inline u_long DrawSyncCallback(void (*func)(void)) {
+static inline u_long DrawSyncCallback(void (*func)()) {
   (void)func;
   return 0;
 }
@@ -44,10 +44,10 @@ static inline u_long* FntFlush(int id) {
   (void)id;
   return NULL;
 }
-static inline void InitGeom(void) {}
-static inline int ResetCallback(void) { return 0; }
-static inline int EnterCriticalSection(void) { return 0; }
-static inline void ExitCriticalSection(void) {}
+static inline void InitGeom() {}
+static inline int ResetCallback() { return 0; }
+static inline int EnterCriticalSection() { return 0; }
+static inline void ExitCriticalSection() {}
 static inline long TestEvent(long ev) {
   (void)ev;
   return 0;
@@ -60,13 +60,13 @@ static inline void SystemError(char c, long n) {
   (void)c;
   (void)n;
 }
-static inline void _bu_init(void) {}
+static inline void _bu_init() {}
 static inline long SpuInitMalloc(long num, char* top) {
   (void)num;
   (void)top;
   return 0;
 }
-static inline void SpuQuit(void) {}
+static inline void SpuQuit() {}
 static inline long SpuSetIRQ(long onOff) {
   (void)onOff;
   return 0;
@@ -84,7 +84,7 @@ static inline long SpuSetTransferMode(long mode) {
   return 0;
 }
 static inline void DecDCTReset(int mode) { (void)mode; }
-static inline void StCdInterrupt(void) {}
+static inline void StCdInterrupt() {}
 static inline int CdMix(void* vol) {
   (void)vol;
   return 0;
@@ -93,8 +93,8 @@ static inline int DsMix(void* vol) {
   (void)vol;
   return 0;
 }
-static inline void DsFlush(void) {}
-static inline int DsSystemStatus(void) { return 0; }
+static inline void DsFlush() {}
+static inline int DsSystemStatus() { return 0; }
 static inline void* DsReadyCallback(void* func) {
   (void)func;
   return NULL;
@@ -104,4 +104,4 @@ static inline int DsStartReadySystem(void* func, int count) {
   (void)count;
   return 0;
 }
-static inline void DsEndReadySystem(void) {}
+static inline void DsEndReadySystem() {}

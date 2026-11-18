@@ -29,7 +29,7 @@ typedef struct Battle_TargetSphereSpec {
     int reserved8;
     int reservedC;
 } Battle_TargetSphereSpec;
-_Static_assert(sizeof(Battle_TargetSphereSpec) == 0x10, "Battle_TargetSphereSpec must keep its PS1 layout");
+static_assert(sizeof(Battle_TargetSphereSpec) == 0x10, "Battle_TargetSphereSpec must keep its PS1 layout");
 
 // decomp: D_800EB9B8_t (src/BATTLE/BATTLE.PRG/573B8.c:55)
 typedef struct Battle_TargetSphereSetupView {

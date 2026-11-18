@@ -6,7 +6,7 @@
 #include "Menu/Map.h"
 
 // decomp: D_80102C40 (D_80102C40@src/MENU/MENU5.PRG/4D8.c)
-int const Menu_Map_unusedGlobal1[] __attribute__((unused)) = { 0x006B4100, 0x006C8219,
+int const Menu_Map_unusedGlobal1[] = { 0x006B4100, 0x006C8219,
     0x00663040, 0x00203840, 0x00330500, 0x00262801, 0x00200808, 0x00081010 };
 
 // decomp: D_80108D04 (D_80108D04@src/MENU/MENU5.PRG/4D8.c)

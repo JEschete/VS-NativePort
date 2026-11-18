@@ -27,7 +27,7 @@ typedef struct Menu_Manual_AnimationState {
     short timer;
     short isActive;
 } Menu_Manual_AnimationState;
-_Static_assert(sizeof(Menu_Manual_AnimationState) == 0xE, "Menu_Manual_AnimationState must keep its PS1 layout");
+static_assert(sizeof(Menu_Manual_AnimationState) == 0xE, "Menu_Manual_AnimationState must keep its PS1 layout");
 
 // decomp: _menuBgChunkWidths_t (src/MENU/MENUE.PRG/494.c:29)
 typedef struct Menu_Manual_BackgroundChunkWidths {
@@ -35,7 +35,7 @@ typedef struct Menu_Manual_BackgroundChunkWidths {
     int reserved4;
     int reserved8;
 } Menu_Manual_BackgroundChunkWidths;
-_Static_assert(sizeof(Menu_Manual_BackgroundChunkWidths) == 0xC, "Menu_Manual_BackgroundChunkWidths must keep its PS1 layout");
+static_assert(sizeof(Menu_Manual_BackgroundChunkWidths) == 0xC, "Menu_Manual_BackgroundChunkWidths must keep its PS1 layout");
 
 // decomp: _menuBgTransparencies_t (src/MENU/MENUE.PRG/494.c:23)
 typedef struct Menu_Manual_BackgroundTransparencies {
@@ -44,7 +44,7 @@ typedef struct Menu_Manual_BackgroundTransparencies {
     int reserved8;
     int reservedC;
 } Menu_Manual_BackgroundTransparencies;
-_Static_assert(sizeof(Menu_Manual_BackgroundTransparencies) == 0x10, "Menu_Manual_BackgroundTransparencies must keep its PS1 layout");
+static_assert(sizeof(Menu_Manual_BackgroundTransparencies) == 0x10, "Menu_Manual_BackgroundTransparencies must keep its PS1 layout");
 
 #endif // VS_MENU_MANUAL_H_TYPES
 
@@ -52,7 +52,7 @@ _Static_assert(sizeof(Menu_Manual_BackgroundTransparencies) == 0x10, "Menu_Manua
 #define VS_MENU_MANUAL_H_DECLS
 #include "DiscQueue.h"
 
-extern u_short Menu_Manual_layoutPadding1 __attribute__((unused));
+extern u_short Menu_Manual_layoutPadding1;
 extern CVECTOR const Menu_Manual_kColorStops0[];
 extern CVECTOR const Menu_Manual_kColorStops1[];
 extern u_long* Menu_Manual_helpAssets;;

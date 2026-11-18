@@ -30,7 +30,7 @@ typedef struct Menu_Container_InventoryStorage {
     Items_Container container;
     Items_Container gadgetBag;
 } Menu_Container_InventoryStorage;
-_Static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Container_InventoryStorage must keep its PS1 layout");
+static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Container_InventoryStorage must keep its PS1 layout");
 
 #endif // VS_MENU_CONTAINER_STORAGE_H_TYPES
 
@@ -39,6 +39,6 @@ _Static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Contain
 
 extern u_short Menu_Container_transferredMiscCount;;
 extern u_short Menu_Container_containerItemCapacities[];
-void Menu_Container_Storage_ResetMenudStatics(void);
+void Menu_Container_Storage_ResetMenudStatics();
 
 #endif // VS_MENU_CONTAINER_STORAGE_H_DECLS

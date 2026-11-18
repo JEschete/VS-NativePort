@@ -3,7 +3,7 @@
 // Optional encounter configuration stays inactive in normal sessions.
 // The diagnostic readiness hooks also observe normal-game lifetimes.
 void Boot_EncounterRoomPlacements(void** data, unsigned int* size);
-int Boot_EncounterUsesRoomEvents(void);
-void Boot_EncounterPollStop(void);
+int Boot_EncounterUsesRoomEvents();
+void Boot_EncounterPollStop();
 // Diagnostic readiness only; never alters gameplay/event state.
-void Boot_ResetGameplayInspection(void);
+void Boot_ResetGameplayInspection();

@@ -3,7 +3,7 @@
 #include "Menu/Legacy.h"
 
 // decomp: __unused_vertices__ (__unused_vertices__@src/MENU/unused_vertices.h)
-u_int const Menu_legacyUnusedVertices[] __attribute__((unused)) = { 0xFFEAFFFA,
+u_int const Menu_legacyUnusedVertices[] = { 0xFFEAFFFA,
     0xFFEA0012, 0x0001FFFA, 0x00010012, 0xFFEAFFEF, 0xFFEA0007, 0x0001FFEF, 0x00010007,
     0xFFE3FFF6, 0xFFE30014, 0x0001FFF6, 0x00010014, 0xFFE3FFED, 0xFFE30009, 0x0001FFED,
     0x00010009, 0xFFF0FFF7, 0xFFF0000B, 0xFFFDFFF7, 0xFFFD000B, 0xFFF0FFF6, 0xFFF0000A,

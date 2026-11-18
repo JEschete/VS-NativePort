@@ -772,7 +772,7 @@ typedef struct Battle_Ai_ActionCandidate {
     u_int reservedFBit3 : 5;
     Battle_Ai_CandidateFlags opaque10;
 } Battle_Ai_ActionCandidate;
-_Static_assert(sizeof(Battle_Ai_ActionCandidate) == 0x14, "Battle_Ai_ActionCandidate must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionCandidate) == 0x14, "Battle_Ai_ActionCandidate must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800DD604_t
 typedef struct Battle_Ai_ActionSlotMetadata {
@@ -787,7 +787,7 @@ typedef struct Battle_Ai_ActionSlotMetadata {
     /* 0x03 */ u_int reserved3Bit0 : 8;
     /* 0x04 */ u_int rangeSquared;
 } Battle_Ai_ActionSlotMetadata;
-_Static_assert(sizeof(Battle_Ai_ActionSlotMetadata) == 0x8, "Battle_Ai_ActionSlotMetadata must keep its PS1 layout");
+static_assert(sizeof(Battle_Ai_ActionSlotMetadata) == 0x8, "Battle_Ai_ActionSlotMetadata must keep its PS1 layout");
 
 // decomp: func_800DEEA4_t2 (src/BATTLE/BATTLE.PRG/6F014.c:437)
 typedef struct Battle_Ai_ActionExecutionView {

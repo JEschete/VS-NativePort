@@ -4,12 +4,12 @@
 
 struct Audio_SeqChannel;
 
-void Audio_Native_Reset(void);
-void Audio_Native_Tick(void);
+void Audio_Native_Reset();
+void Audio_Native_Tick();
 void Audio_Native_ConfigureChannel(struct Audio_SeqChannel* channel);
 int16_t Audio_Native_Envelope(unsigned voice);
 void Audio_Native_SetNoiseClock(int clock);
-int Audio_Native_ReverbMode(void);
+int Audio_Native_ReverbMode();
 void Audio_Native_SetReverbMode(int mode);
 void Audio_Native_SetReverbDepth(int16_t left, int16_t right);
 void Audio_Native_EnableReverb(int enabled);

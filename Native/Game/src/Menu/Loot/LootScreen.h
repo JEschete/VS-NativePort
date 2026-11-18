@@ -28,6 +28,6 @@ extern Menu_Loot_LootListItem* Menu_Loot_lootListWorkingCopy;;
 extern char Menu_Loot_selectedLoot;;
 extern char Menu_Loot_showInventory;;
 extern char Menu_Loot_showLoot;;
-void Menu_Loot_LootScreen_ResetMenubStatics(void);
+void Menu_Loot_LootScreen_ResetMenubStatics();
 
 #endif // VS_MENU_LOOT_LOOTSCREEN_H_DECLS

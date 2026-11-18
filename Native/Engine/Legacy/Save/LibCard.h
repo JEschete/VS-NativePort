@@ -26,7 +26,7 @@ long LegacyApi_cd(char* path);
 struct DIRENTRY* LegacyApi_firstfile(char* pattern, struct DIRENTRY* dir);
 struct DIRENTRY* LegacyApi_nextfile(struct DIRENTRY* dir);
 void InitCARD(long val);
-long StartCARD(void);
+long StartCARD();
 long _card_info(long chan);
 long _card_clear(long chan);
 long _card_load(long chan);

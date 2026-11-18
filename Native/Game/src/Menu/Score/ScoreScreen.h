@@ -31,10 +31,10 @@ typedef struct Menu_Score_EnemyEntry {
     u_char unlocked;
     u_char prev;
     u_char next;
-    u_char reservedF __attribute__((unused));
+    u_char reservedF;
     char name[28];
 } Menu_Score_EnemyEntry;
-_Static_assert(sizeof(Menu_Score_EnemyEntry) == 0x2C, "Menu_Score_EnemyEntry must keep its PS1 layout");
+static_assert(sizeof(Menu_Score_EnemyEntry) == 0x2C, "Menu_Score_EnemyEntry must keep its PS1 layout");
 
 // decomp: _zudData_t (src/MENU/MENU9.PRG/592C.c:25)
 typedef struct Menu_Score_ZudHeader {
@@ -56,7 +56,7 @@ typedef struct Menu_Score_ZudHeader {
     u_long battleSeqOffset;
     int battleSeqLen;
 } Menu_Score_ZudHeader;
-_Static_assert(sizeof(Menu_Score_ZudHeader) == 0x30, "Menu_Score_ZudHeader must keep its PS1 layout");
+static_assert(sizeof(Menu_Score_ZudHeader) == 0x30, "Menu_Score_ZudHeader must keep its PS1 layout");
 
 // decomp: vs_battle_menu9CursorMemory_t (src/BATTLE/BATTLE.PRG/146C.h:791)
 typedef struct Menu_Score_CursorMemory {
@@ -69,7 +69,7 @@ typedef struct Menu_Score_CursorMemory {
     u_char gazettePage;
     u_char gazetteRow;
 } Menu_Score_CursorMemory;
-_Static_assert(sizeof(Menu_Score_CursorMemory) == 0x8, "Menu_Score_CursorMemory must keep its PS1 layout");
+static_assert(sizeof(Menu_Score_CursorMemory) == 0x8, "Menu_Score_CursorMemory must keep its PS1 layout");
 
 #endif // VS_MENU_SCORE_SCORESCREEN_H_TYPES
 
@@ -99,12 +99,12 @@ extern Content_DiscQueueSlot* Menu_Score_monBinCdQueueSlot;;
 extern Menu_Score_EnemyEntry* Menu_Score_monBinData;;
 extern const Content_DiscFile Menu_Score_kMonBinFile;
 extern int Menu_Score_nextState;;
-extern char Menu_Score_unusedNoString[] __attribute__((unused));
+extern char Menu_Score_unusedNoString[];
 extern u_short Menu_Score_openedChestCount;;
 extern u_short Menu_Score_rankText[192]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Score_rotationColor;;
 extern short Menu_Score_selectedEnemy;;
-extern char Menu_Score_unusedYesString[] __attribute__((unused));
+extern char Menu_Score_unusedYesString[];
 extern int Menu_Score_zoomColor;;
 
 #endif // VS_MENU_SCORE_SCORESCREEN_H_DECLS

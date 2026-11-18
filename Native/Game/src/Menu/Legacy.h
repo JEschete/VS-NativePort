@@ -9,6 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_LEGACY_H_DECLS)
 #define VS_MENU_LEGACY_H_DECLS
 
-extern u_int const Menu_legacyUnusedVertices[] __attribute__((unused));
+extern u_int const Menu_legacyUnusedVertices[];
 
 #endif // VS_MENU_LEGACY_H_DECLS

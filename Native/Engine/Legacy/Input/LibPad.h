@@ -39,7 +39,7 @@
 #define InfoModeCurExOffs 3
 
 void PadInitDirect(unsigned char* port1, unsigned char* port2);
-void PadStartCom(void);
+void PadStartCom();
 int PadGetState(int port);
 int PadInfoMode(int port, int term, int offs);
 int PadSetActAlign(int port, unsigned char* table);

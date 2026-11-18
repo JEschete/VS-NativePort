@@ -16,4 +16,4 @@ int Movie_PlayerOpen(const char* disc_path);
 int Movie_PlayerDrawFrame(int ticks, int x, int y);
 
 // Stops picture and soundtrack.
-void Movie_PlayerClose(void);
+void Movie_PlayerClose();

@@ -20,6 +20,6 @@ typedef struct Event_SplashTween {
     short startBrightness;
     short deltaBrightness;
 } Event_SplashTween;
-_Static_assert(sizeof(Event_SplashTween) == 0x14, "Event_SplashTween must keep its PS1 layout");
+static_assert(sizeof(Event_SplashTween) == 0x14, "Event_SplashTween must keep its PS1 layout");
 
 #endif // VS_EVENT_SPLASH_H_TYPES

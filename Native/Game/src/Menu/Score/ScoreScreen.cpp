@@ -73,7 +73,7 @@ const Content_DiscFile Menu_Score_kMonBinFile = { VS_MON_BIN_LBA, VS_MON_BIN_SIZ
 int Menu_Score_nextState;
 
 // decomp: _noString (_noString@src/MENU/MENU9.PRG/238.c)
-char Menu_Score_unusedNoString[] __attribute__((unused)) = "NO\0";
+char Menu_Score_unusedNoString[] = "NO\0";
 
 // decomp: _openedChestCount (_openedChestCount@src/MENU/MENU9.PRG/238.c)
 u_short Menu_Score_openedChestCount;
@@ -88,7 +88,7 @@ int Menu_Score_rotationColor;
 short Menu_Score_selectedEnemy;
 
 // decomp: _yesString (_yesString@src/MENU/MENU9.PRG/238.c)
-char Menu_Score_unusedYesString[] __attribute__((unused)) = "YES\0";
+char Menu_Score_unusedYesString[] = "YES\0";
 
 // decomp: _zoomColor (_zoomColor@src/MENU/MENU9.PRG/238.c)
 int Menu_Score_zoomColor;

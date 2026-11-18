@@ -6,6 +6,6 @@
 // so code that reaches the same bytes both ways still agrees. Each use is
 // replaced by locals or module state when its function is modernized.
 
-void* Core_ScratchBase(void);
+void* Core_ScratchBase();
 
 #define Core_ScratchAddr(n) ((unsigned long*)Core_ScratchBase() + (n))

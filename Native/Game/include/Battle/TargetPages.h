@@ -11,12 +11,12 @@ typedef struct Battle_TargetPageInfo {
   int selected;
 } Battle_TargetPageInfo;
 
-void Battle_ResetTargetPages(void);
+void Battle_ResetTargetPages();
 int Battle_AdvanceTargetPage(int direction);
-int Battle_HandleTargetPageButtons(void);
-int Battle_TargetPagesUseShoulders(void);
+int Battle_HandleTargetPageButtons();
+int Battle_TargetPagesUseShoulders();
 unsigned char Battle_MapTargetPageIndex(unsigned char index);
 int Battle_ValidateTargetPreviewIndex(int index);
 int Battle_TargetPreviewIndexIsValid(int index);
-Battle_TargetPageInfo Battle_GetTargetPageInfo(void);
-void Battle_DrawTargetPageHint(void);
+Battle_TargetPageInfo Battle_GetTargetPageInfo();
+void Battle_DrawTargetPageHint();

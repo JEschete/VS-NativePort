@@ -11,4 +11,4 @@ int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest);
 // Fills every global listed in Content_moduleData (Content/ModuleData.h) from
 // the extracted module files. Returns the number of entries that could not be
 // filled (logged).
-int Content_LoadModuleData(void);
+int Content_LoadModuleData();

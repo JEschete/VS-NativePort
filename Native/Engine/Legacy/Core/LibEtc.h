@@ -26,14 +26,13 @@
 #define EvMdNOINTR 0x2000
 
 int VSync(int mode);
-int VSyncCallback(void (*f)(void));
+int VSyncCallback(void (*f)());
 long SetVideoMode(long mode);
 long SetRCnt(unsigned long spec, unsigned short target, long mode);
 long GetRCnt(unsigned long spec);
 long StartRCnt(unsigned long spec);
 long StopRCnt(unsigned long spec);
-long OpenEvent(unsigned long desc, long spec, long mode,
-               long (*callback)(void));
+long OpenEvent(unsigned long desc, long spec, long mode, long (*callback)());
 long CloseEvent(long event);
 long EnableEvent(long event);
 long DisableEvent(long event);

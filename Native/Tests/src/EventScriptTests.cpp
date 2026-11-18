@@ -765,21 +765,21 @@ int Tests_NativeSessionTransitions(void) {
 // 573B8.c:67 mixes control codes with addresses; every dispatch boundary must
 // retain native pointer width.
 typedef intptr_t (*TestOpcodeHandler)(u_char*, int16_t);
-_Static_assert(_Generic(Event_kOpcodeHandlers[0],
-                   TestOpcodeHandler: 1,
-                   default: 0),
-               "normal opcode ABI");
-_Static_assert(_Generic(Event_kSkipOpcodeHandlers[0],
-                   TestOpcodeHandler: 1,
-                   default: 0),
-               "skip opcode ABI");
-_Static_assert(_Generic(Event_legacySkipHandlerCopy[0],
-                   TestOpcodeHandler: 1,
-                   default: 0),
-               "copied skip opcode ABI");
-_Static_assert(sizeof(Event_kSkipOpcodeHandlers) ==
-                   256 * sizeof(TestOpcodeHandler),
-               "complete skip table");
+static_assert(_Generic(Event_kOpcodeHandlers[0],
+                  TestOpcodeHandler: 1,
+                  default: 0),
+              "normal opcode ABI");
+static_assert(_Generic(Event_kSkipOpcodeHandlers[0],
+                  TestOpcodeHandler: 1,
+                  default: 0),
+              "skip opcode ABI");
+static_assert(_Generic(Event_legacySkipHandlerCopy[0],
+                  TestOpcodeHandler: 1,
+                  default: 0),
+              "copied skip opcode ABI");
+static_assert(sizeof(Event_kSkipOpcodeHandlers) ==
+                  256 * sizeof(TestOpcodeHandler),
+              "complete skip table");
 
 int Tests_EventScriptNativeBranches(int skip) {
   const VS::test_support::LiveScriptRuntimeScope runtime;
