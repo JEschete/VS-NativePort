@@ -1,5 +1,4 @@
 import json
-import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,10 +13,7 @@ class PlayerPaths:
 
     @classmethod
     def default(cls) -> "PlayerPaths":
-        local = os.environ.get("LOCALAPPDATA")
-        if not local:
-            raise RuntimeError("LOCALAPPDATA is unavailable; pass --state-dir explicitly")
-        return cls(Path(local) / "VS-NativePort" / "Player")
+        return cls(REPOSITORY / "build" / "player")
 
     @property
     def runtime(self) -> Path:

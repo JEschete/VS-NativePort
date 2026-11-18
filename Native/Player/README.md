@@ -391,7 +391,7 @@ claim currently fitting drops with Square; inventory capacity remains native.
 
 ## Persistent state and cleanup
 
-Default state: `%LOCALAPPDATA%\VS-NativePort\Player`. Override it only with a
+Default state: `<repository>\build\player` (git-ignored). Override it only with a
 new dedicated `--state-dir` **before** the subcommand. Existing unowned
 directories and linked/junction paths are refused.
 
@@ -438,7 +438,7 @@ SQLite outcome.
 The owner's explicit2026-10-28 pruning authorization cold-archived older raw
 logs, including pinned evidence, without changing outcomes or deleting saves,
 assets or summaries. The verified path/digest index is
-`%LOCALAPPDATA%\VS-NativePort\evidence-archive\20261028\index.jsonl`.
+`build\evidence-archive\20261028\index.jsonl`.
 An archived path is not a new successful observation; restore/read its original
 bytes when needed. Do not keep raising raw-log budgets or replay the prologue
 again to replace evidence that already exists.

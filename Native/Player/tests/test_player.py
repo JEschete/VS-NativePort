@@ -1055,6 +1055,17 @@ class TraceTests(unittest.TestCase):
 
 
 class StorageTests(unittest.TestCase):
+    def test_default_storage_stays_in_repository_without_appdata(self):
+        with tempfile.TemporaryDirectory(prefix="vs-player-test-") as directory:
+            repository = Path(directory)
+            with (mock.patch("vs_player.config.REPOSITORY", repository),
+                  mock.patch.dict("os.environ", {}, clear=True)):
+                paths = PlayerPaths.default()
+            paths.initialize()
+            self.assertEqual(paths.root, repository / "build" / "player")
+            self.assertTrue(paths.runtime.is_dir())
+            self.assertTrue((paths.root / ".vs-player-owned.json").is_file())
+
     def test_spatial_retrieval_is_scoped_and_survives_raw_log_cleanup(self):
         with tempfile.TemporaryDirectory(prefix="vs-player-test-") as directory:
             paths = PlayerPaths(Path(directory) / "state")
