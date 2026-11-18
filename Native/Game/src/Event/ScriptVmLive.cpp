@@ -446,14 +446,14 @@ class LiveVmHost final : public ScriptVmHost {
     State::SetLiveScriptFlag(flag, value);
   }
   std::uint32_t HeldButtons() const override {
-    return VS::Input::buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed;
   }
-  void ClearHeldButtons() override { VS::Input::buttonsPressed.allButtons = 0; }
+  void ClearHeldButtons() override { VS::Input::buttonsPressed = 0; }
   bool StartPressed() const override {
-    return (VS::Input::buttonsPressed.allButtons & PADstart) != 0;
+    return (VS::Input::buttonsPressed & PADstart) != 0;
   }
   std::uint8_t PressedButtonsLowByte() const override {
-    return VS::Input::buttonsPressed.ports[0].lowByte;
+    return VS::Input::LowButtonByte(VS::Input::buttonsPressed);
   }
   int PreviousButtons() const override { return VS::Input::previousButtons; }
   int CountInventoryItem(int item) override {

@@ -53,7 +53,7 @@ struct LiveFixture {
     Audio_Seq_unusedInventory = {};
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     Menu_Inventory_ashleyRenderState = 0;
     Menu_Inventory_ashleyYOffset = 5;
     Menu_Inventory_secondaryTitleEnabled = 7;
@@ -175,13 +175,13 @@ TEST_CASE("F02574 live close integrates rows and retains the source exit mask",
   LiveFixture fixture;
   fixture.rows[31].state = Menu_Framework_MenuItemState_Idle;
   fixture.rows[31].w = 164;
-  VS::Input::buttonsPressed.allButtons = VS::Input::Triangle;
+  VS::Input::buttonsPressed = VS::Input::Triangle;
   inventory::ExitLiveDetailsView(1);
   CHECK(fixture.rows[31].state == Menu_Framework_MenuItemState_Dismiss);
   CHECK(fixture.rows[31].targetPosition0 == -164);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 2);
   CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));
-  VS::Input::buttonsPressed.allButtons = VS::Input::Circle;
+  VS::Input::buttonsPressed = VS::Input::Circle;
   inventory::ExitLiveDetailsView(0);
   CHECK(Menu_Inventory_exitToBattle == 0);
 }

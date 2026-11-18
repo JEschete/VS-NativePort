@@ -20,7 +20,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Input/Vibration.h"
+#include "Input/Vibration.hpp"
 #include "Legacy/Input/LibPad.h"
 #include "State/Timers.hpp"
 
@@ -28,14 +28,14 @@
 // _buttonHeldFrameCount, vs_main_stickPosBuf, vs_main_buttonRepeat,
 // vs_main_buttonsPreviousState, vs_main_buttonsPressed, vs_main_buttonsState
 // and vs_main_settings (main.c), zero like the PS1 BSS.
-Input_ControllerPortState
+VS::Input::LegacyControllerPort
     VS::Input::controllerPorts[VS::Input::kControllerPortCount]{};
 int VS::Input::releasedButtons = 0;
-u_int VS::Input::buttonHeldFrames[VS::Input::kButtonCount]{};
-Input_StickPosition VS::Input::stickPosBuf{};
+std::uint32_t VS::Input::buttonHeldFrames[VS::Input::kButtonCount]{};
+VS::Input::StickPosition VS::Input::stickPosBuf{};
 int VS::Input::buttonRepeat = 0;
 int VS::Input::previousButtons = 0;
-union Input_PressedButtonsView VS::Input::buttonsPressed{};
+std::uint32_t VS::Input::buttonsPressed = 0;
 int VS::Input::buttonsState = 0;
 State_Settings VS::Input::settings{};
 
@@ -49,36 +49,37 @@ constexpr std::size_t kLegacyLeftStickY = 6;
 constexpr std::size_t kLegacyModeLock = 7;
 constexpr std::size_t kLegacyActuators = 8;
 constexpr std::size_t kLegacyConnected = 0xA;
-static_assert(sizeof(Input_ControllerPortState) == kLegacyPortBytes);
-static_assert(offsetof(Input_ControllerPortState, controllerType) == 0);
-static_assert(offsetof(Input_ControllerPortState, extendedType) == 1);
-static_assert(offsetof(Input_ControllerPortState, buttonBits) == 2);
-static_assert(offsetof(Input_ControllerPortState, rightStickX) ==
+static_assert(sizeof(LegacyControllerPort) == kLegacyPortBytes);
+static_assert(offsetof(LegacyControllerPort, controller_type) == 0);
+static_assert(offsetof(LegacyControllerPort, extended_type) == 1);
+static_assert(offsetof(LegacyControllerPort, button_bits) == 2);
+static_assert(offsetof(LegacyControllerPort, right_stick_x) ==
               kLegacyRightStickX);
-static_assert(offsetof(Input_ControllerPortState, rightStickY) ==
+static_assert(offsetof(LegacyControllerPort, right_stick_y) ==
               kLegacyRightStickY);
-static_assert(offsetof(Input_ControllerPortState, leftStickX) ==
+static_assert(offsetof(LegacyControllerPort, left_stick_x) ==
               kLegacyLeftStickX);
-static_assert(offsetof(Input_ControllerPortState, leftStickY) ==
+static_assert(offsetof(LegacyControllerPort, left_stick_y) ==
               kLegacyLeftStickY);
-static_assert(offsetof(Input_ControllerPortState, modeLock) == kLegacyModeLock);
-static_assert(offsetof(Input_ControllerPortState, actuatorLevels) ==
+static_assert(offsetof(LegacyControllerPort, mode_lock) == kLegacyModeLock);
+static_assert(offsetof(LegacyControllerPort, actuator_levels) ==
               kLegacyActuators);
-static_assert(offsetof(Input_ControllerPortState, connected) ==
-              kLegacyConnected);
-static_assert(std::size(Input_ControllerPortState{}.actuatorLevels) ==
-              kMotorCount);
+static_assert(offsetof(LegacyControllerPort, connected) == kLegacyConnected);
+static_assert(
+    std::tuple_size_v<decltype(LegacyControllerPort::actuator_levels)> ==
+    kMotorCount);
 static_assert(std::size(controllerPorts) == kControllerPortCount);
 static_assert(std::size(buttonHeldFrames) == kButtonCount);
-static_assert(sizeof(Input_legacyPadResponseBytes[0]) == kPadPacketBytes);
+static_assert(sizeof(legacyPadResponseBytes) ==
+              kControllerPortCount * kPadPacketBytes);
 
 constexpr std::size_t kLegacyStickBytes = 0x10;
 constexpr std::size_t kLegacyStickRightX = 8;
 constexpr std::size_t kLegacyStickRightY = 0xC;
-static_assert(sizeof(Input_StickPosition) == kLegacyStickBytes);
-static_assert(offsetof(Input_StickPosition, lStickX) == 0);
-static_assert(offsetof(Input_StickPosition, rStickX) == kLegacyStickRightX);
-static_assert(offsetof(Input_StickPosition, rStickY) == kLegacyStickRightY);
+static_assert(sizeof(StickPosition) == kLegacyStickBytes);
+static_assert(offsetof(StickPosition, l_stick_x) == 0);
+static_assert(offsetof(StickPosition, r_stick_x) == kLegacyStickRightX);
+static_assert(offsetof(StickPosition, r_stick_y) == kLegacyStickRightY);
 
 constexpr std::size_t kSettingsMonoSound = 10;
 constexpr std::size_t kSettingsVibrationOn = 11;
@@ -87,8 +88,6 @@ static_assert(offsetof(State_Settings, vibrationOn) == kSettingsVibrationOn);
 
 // libpad port IDs: port index << 4.
 constexpr int kPortIdShift = 4;
-// main.c:139 D_8004A504: the preset directory and its one pattern.
-constexpr std::size_t kVibrationPresetBytes = 24;
 // Patterns are a few steps long; a stream not ended within this many bytes
 // is refused rather than followed through memory.
 constexpr std::size_t kMaxPatternBytes = 4096;
@@ -110,14 +109,6 @@ void Refused(const char* operation, const char* reason, std::int64_t value) {
   }
 }
 
-std::uint8_t Byte(char value) noexcept {
-  return static_cast<std::uint8_t>(value);
-}
-
-char LegacyByte(std::uint8_t value) noexcept {
-  return static_cast<char>(value);
-}
-
 int PortId(ControllerPort port) noexcept {
   return static_cast<int>(port) << kPortIdShift;
 }
@@ -137,37 +128,32 @@ std::optional<ControllerPort> PortFromId(int port_id) noexcept {
 }
 
 ControllerPortState LoadPort(ControllerPort port) noexcept {
-  const Input_ControllerPortState& legacy =
+  const LegacyControllerPort& legacy =
       std::span(controllerPorts)[PortIndex(port)];
   return {
-      .kind = static_cast<ControllerKind>(Byte(legacy.controllerType)),
-      .extended_id = Byte(legacy.extendedType),
-      .button_bits = Byte(legacy.buttonBits),
-      .left_stick = {.x = Byte(legacy.rightStickX),
-                     .y = Byte(legacy.rightStickY)},
-      .right_stick = {.x = Byte(legacy.leftStickX),
-                      .y = Byte(legacy.leftStickY)},
-      .mode_lock = Byte(legacy.modeLock),
-      .motor_commands = {Byte(legacy.actuatorLevels[0]),
-                         Byte(legacy.actuatorLevels[1])},
+      .kind = static_cast<ControllerKind>(legacy.controller_type),
+      .extended_id = legacy.extended_type,
+      .button_bits = legacy.button_bits,
+      .left_stick = {.x = legacy.right_stick_x, .y = legacy.right_stick_y},
+      .right_stick = {.x = legacy.left_stick_x, .y = legacy.left_stick_y},
+      .mode_lock = legacy.mode_lock,
+      .motor_commands = legacy.actuator_levels,
       .connected = legacy.connected != 0,
   };
 }
 
 void StorePort(ControllerPort port, const ControllerPortState& state) noexcept {
-  Input_ControllerPortState& legacy =
-      std::span(controllerPorts)[PortIndex(port)];
-  legacy.controllerType = LegacyByte(static_cast<std::uint8_t>(state.kind));
-  legacy.extendedType = LegacyByte(state.extended_id);
-  legacy.buttonBits = LegacyByte(state.button_bits);
-  legacy.rightStickX = LegacyByte(state.left_stick.x);
-  legacy.rightStickY = LegacyByte(state.left_stick.y);
-  legacy.leftStickX = LegacyByte(state.right_stick.x);
-  legacy.leftStickY = LegacyByte(state.right_stick.y);
-  legacy.modeLock = LegacyByte(state.mode_lock);
-  legacy.actuatorLevels[0] = LegacyByte(state.motor_commands[0]);
-  legacy.actuatorLevels[1] = LegacyByte(state.motor_commands[1]);
-  legacy.connected = static_cast<char>(state.connected ? 1 : 0);
+  LegacyControllerPort& legacy = std::span(controllerPorts)[PortIndex(port)];
+  legacy.controller_type = static_cast<std::uint8_t>(state.kind);
+  legacy.extended_type = state.extended_id;
+  legacy.button_bits = state.button_bits;
+  legacy.right_stick_x = state.left_stick.x;
+  legacy.right_stick_y = state.left_stick.y;
+  legacy.left_stick_x = state.right_stick.x;
+  legacy.left_stick_y = state.right_stick.y;
+  legacy.mode_lock = state.mode_lock;
+  legacy.actuator_levels = state.motor_commands;
+  legacy.connected = state.connected ? 1 : 0;
 }
 
 ControllerPorts LoadPorts() noexcept {
@@ -181,7 +167,7 @@ void StorePorts(const ControllerPorts& ports) noexcept {
 
 PadPacket ToPacket(LegacyPadPacket bytes) noexcept {
   PadPacket packet{};
-  std::ranges::transform(bytes, packet.begin(), Byte);
+  std::ranges::copy(bytes, packet.begin());
   return packet;
 }
 
@@ -203,20 +189,18 @@ class LibPadHost final : public ControllerHost {
   }
 
   void RegisterMotorCommands(ControllerPort port) override {
-    char* const bytes =
-        std::span(controllerPorts)[PortIndex(port)].actuatorLevels;
-    PadSetAct(PortId(port), reinterpret_cast<unsigned char*>(bytes),
-              static_cast<int>(kMotorCount));
+    PadSetAct(
+        PortId(port),
+        std::span(controllerPorts)[PortIndex(port)].actuator_levels.data(),
+        static_cast<int>(kMotorCount));
   }
 
   bool AlignMotors(ControllerPort port) override {
-    return PadSetActAlign(PortId(port), reinterpret_cast<unsigned char*>(
-                                            Input_legacyActuatorAlignment)) !=
-           0;
+    return PadSetActAlign(PortId(port), legacyActuatorAlignment.data()) != 0;
   }
 
   PadPacket ReceivedPacket(ControllerPort port) override {
-    return ToPacket(std::span(Input_legacyPadResponseBytes)[PortIndex(port)]);
+    return std::span(legacyPadResponseBytes)[PortIndex(port)];
   }
 };
 
@@ -269,16 +253,16 @@ void StoreControllerState(const ControllerState& state) noexcept {
   StorePorts(state.ports);
   const ButtonState& buttons = state.buttons;
   buttonsState = static_cast<int>(buttons.held);
-  buttonsPressed.allButtons = buttons.pressed;
+  buttonsPressed = buttons.pressed;
   releasedButtons = static_cast<int>(buttons.released);
   previousButtons = static_cast<int>(buttons.previous);
   buttonRepeat = static_cast<int>(buttons.repeat);
   std::ranges::copy(buttons.held_ticks, std::begin(buttonHeldFrames));
   // The legacy r fields are the physical left stick (ControllerLiveState.hpp).
-  stickPosBuf.rStickX = state.sticks.left.x;
-  stickPosBuf.rStickY = state.sticks.left.y;
-  stickPosBuf.lStickX = state.sticks.right.x;
-  stickPosBuf.lStickY = state.sticks.right.y;
+  stickPosBuf.r_stick_x = state.sticks.left.x;
+  stickPosBuf.r_stick_y = state.sticks.left.y;
+  stickPosBuf.l_stick_x = state.sticks.right.x;
+  stickPosBuf.l_stick_y = state.sticks.right.y;
 }
 
 ControllerFrame PollLiveControllers() {
@@ -444,8 +428,7 @@ void UpdateLiveVibrationPatterns() {
 }
 
 void PlayLiveVibrationPreset(int index) {
-  const auto presets =
-      std::as_bytes(std::span(Input_vibrationPresets, kVibrationPresetBytes));
+  const auto presets = std::as_bytes(std::span(vibrationPresets));
   const auto started = PlayVibrationPreset(live_vibration, presets, index);
   if (!started && started.error() != VibrationPresetError::kNotListed) {
     Refused("PlayLiveVibrationPreset",

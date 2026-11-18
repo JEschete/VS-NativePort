@@ -287,7 +287,7 @@ TEST_CASE(
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
   fixture.Advance(detail::UpdateLiveItemDetails);
-  VS::Input::buttonsPressed.allButtons = input::Cross;
+  VS::Input::buttonsPressed = input::Cross;
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 1);

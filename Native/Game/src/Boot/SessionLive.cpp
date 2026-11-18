@@ -33,7 +33,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Input/Controllers.h"
+#include "Input/Controllers.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
@@ -217,10 +217,10 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Input::SetLiveMotorCommand(0, 1, 0);
   }
   void RefreshControllers() override {
-    VS::Input::UpdateLiveControllerConnection(kFirstPadPortId,
-                                              Input_legacyPadResponseBytes[0]);
-    VS::Input::UpdateLiveControllerConnection(kSecondPadPortId,
-                                              Input_legacyPadResponseBytes[1]);
+    VS::Input::UpdateLiveControllerConnection(
+        kFirstPadPortId, VS::Input::legacyPadResponseBytes[0]);
+    VS::Input::UpdateLiveControllerConnection(
+        kSecondPadPortId, VS::Input::legacyPadResponseBytes[1]);
   }
   void ShutdownAudio() override { VS::Audio::Playback::LiveShutdown(); }
   void WaitForVerticalSync(int count) override { VSync(count); }
@@ -253,13 +253,12 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   void InitializeMemoryCard() override { InitCARD(0); }
   void StartMemoryCard() override { StartCARD(); }
   void InitializeControllers() override {
-    PadInitDirect(
-        reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[0]),
-        reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[1]));
+    PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
+                  VS::Input::legacyPadResponseBytes[1].data());
     VS::Input::ConfigureLiveControllerActuators(
-        kFirstPadPortId, Input_legacyPadResponseBytes[0]);
+        kFirstPadPortId, VS::Input::legacyPadResponseBytes[0]);
     VS::Input::ConfigureLiveControllerActuators(
-        kSecondPadPortId, Input_legacyPadResponseBytes[1]);
+        kSecondPadPortId, VS::Input::legacyPadResponseBytes[1]);
   }
   void StartControllerCommunication() override { PadStartCom(); }
   void UnlockAnalogModeSwitch() override {

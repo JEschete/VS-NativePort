@@ -20,9 +20,7 @@ class LiveDetailWorld : public World {
     require_rows_();
     return Framework::AreLiveMenuRowsIdle();
   }
-  std::uint32_t PressedButtons() override {
-    return VS::Input::buttonsPressed.allButtons;
-  }
+  std::uint32_t PressedButtons() override { return VS::Input::buttonsPressed; }
   void BeginTransition(DetailRowId row) override {
     BeginLiveDetailsTransition(row.index);
   }

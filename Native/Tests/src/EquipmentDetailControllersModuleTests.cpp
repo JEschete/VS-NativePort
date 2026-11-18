@@ -56,11 +56,11 @@ TEST_CASE("F02576 MENU3 reload retains zero-initialized controller state",
   fixture.AddParts();
   fixture.Open(inventory::UpdateLiveBladeDetails);
   fixture.Wait(inventory::UpdateLiveBladeDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
   Boot_ResetMenu3Statics();
   fixture.IdleRows();
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 1);
   CHECK(VS::Menu::Framework::enabledStatPages == 3);
 }
@@ -72,11 +72,11 @@ TEST_CASE(
   fixture.AddParts();
   fixture.Open(inventory::UpdateLiveBladeDetails);
   fixture.Wait(inventory::UpdateLiveBladeDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
   Boot_ResetMenubStatics();
   fixture.IdleRows();
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 1);
   CHECK(VS::Menu::Framework::enabledStatPages == 3);
 }

@@ -369,13 +369,13 @@ TEST_CASE("F02950 real exit retains container phase and full triangle mask",
   detail::InitializeLiveDetailsLayout(kSelected, samples::kClassAffinityPages);
   fixture.IdleRows();
   fixture.rows[kHeader].w = samples::kHeaderWidth;
-  VS::Input::buttonsPressed.allButtons = VS::Input::Triangle;
+  VS::Input::buttonsPressed = VS::Input::Triangle;
   detail::ExitLiveDetailsView(1);
   CHECK(fixture.rows[kHeader].targetPosition0 == -164);
   CHECK(Menu_Container_detailsViewPhase == 2);
   CHECK(Menu_Container_detailsClosedWithTriangle ==
         static_cast<int>(VS::Input::Triangle));
-  VS::Input::buttonsPressed.allButtons = VS::Input::Circle;
+  VS::Input::buttonsPressed = VS::Input::Circle;
   detail::ExitLiveDetailsView(0);
   CHECK(Menu_Container_detailsClosedWithTriangle == 0);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);

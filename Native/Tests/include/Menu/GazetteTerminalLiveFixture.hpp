@@ -249,14 +249,14 @@ class TerminalFixture
 
   static void Input(unsigned pressed = 0, unsigned repeated = 0,
                     unsigned held = 0, unsigned released = 0) {
-    VS::Input::buttonsPressed.allButtons = pressed;
+    VS::Input::buttonsPressed = pressed;
     VS::Input::buttonRepeat = std::bit_cast<std::int32_t>(repeated);
     VS::Input::previousButtons = std::bit_cast<std::int32_t>(held);
     VS::Input::releasedButtons = std::bit_cast<std::int32_t>(released);
-    VS::Input::stickPosBuf.lStickX = 128;
-    VS::Input::stickPosBuf.lStickY = 128;
-    VS::Input::stickPosBuf.rStickX = 128;
-    VS::Input::stickPosBuf.rStickY = 128;
+    VS::Input::stickPosBuf.l_stick_x = 128;
+    VS::Input::stickPosBuf.l_stick_y = 128;
+    VS::Input::stickPosBuf.r_stick_x = 128;
+    VS::Input::stickPosBuf.r_stick_y = 128;
   }
 
   void BorrowMon() {

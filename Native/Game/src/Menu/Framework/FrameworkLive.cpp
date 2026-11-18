@@ -1309,7 +1309,7 @@ MenuRow& LiveMenuRow(int row) {
 }
 
 Buttons LiveButtons() {
-  return {.pressed = VS::Input::buttonsPressed.allButtons,
+  return {.pressed = VS::Input::buttonsPressed,
           .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
           .held = static_cast<std::uint32_t>(VS::Input::buttonsState)};
 }

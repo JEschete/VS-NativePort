@@ -176,8 +176,7 @@ class LiveAssignmentHost final : public AssignmentHost {
         reinterpret_cast<u_long*>(table + kAssignmentLayerByteOffset));
   }
   AssignmentInput Input() const override {
-    const auto pressed =
-        static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
+    const auto pressed = static_cast<std::uint32_t>(VS::Input::buttonsPressed);
     const auto repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat);
     return {.circle = (pressed & kCircle) != 0,
             .triangle = (pressed & kTriangle) != 0,

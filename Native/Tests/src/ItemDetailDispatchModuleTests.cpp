@@ -50,11 +50,11 @@ TEST_CASE("F02579 real MENU3 reset retains armor return-stage BSS",
   fixture.AddArmor();
   fixture.Open(inv::UpdateLiveArmorDetails);
   fixture.Wait(inv::UpdateLiveArmorDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inv::UpdateLiveArmorDetails(0) == 0);
   Boot_ResetMenu3Statics();
   fixture.IdleRows();
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   CHECK(inv::UpdateLiveArmorDetails(0) == 1);
   CHECK(inv::UpdateLiveArmorDetails((20 << 8) | 2) == 0);
 }
@@ -65,11 +65,11 @@ TEST_CASE("F02580 real MENUB reset retains gem return-stage until a new entry",
   fixture.AddGems();
   fixture.Open(inv::UpdateLiveGemDetails);
   fixture.Wait(inv::UpdateLiveGemDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inv::UpdateLiveGemDetails(0) == 0);
   Boot_ResetMenubStatics();
   fixture.IdleRows();
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   CHECK(inv::UpdateLiveGemDetails(0) == 1);
   CHECK(inv::UpdateLiveGemDetails((20 << 8) | 2) == 0);
 }
@@ -82,10 +82,10 @@ TEST_CASE("F02581 real MENUB reset does not forget the active gem dispatcher",
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
   fixture.Wait(inv::UpdateLiveGemDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
   Boot_ResetMenubStatics();
   fixture.IdleRows();
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   CHECK(inv::UpdateLiveItemDetails(0) == 1);
 }

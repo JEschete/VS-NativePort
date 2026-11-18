@@ -290,11 +290,11 @@ class LiveSelection final : public SelectedLimbHost {
               static_cast<std::uint8_t>(VS::Menu::Framework::cursorColor),
           .yaw = Menu_Status_xPos,
           .pitch = Menu_Status_yPos,
-          .pressed = VS::Input::buttonsPressed.allButtons,
+          .pressed = VS::Input::buttonsPressed,
           .held = static_cast<std::uint32_t>(VS::Input::buttonsState),
           .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
-          .stick_x = VS::Input::stickPosBuf.rStickX,
-          .stick_y = VS::Input::stickPosBuf.rStickY};
+          .stick_x = VS::Input::stickPosBuf.r_stick_x,
+          .stick_y = VS::Input::stickPosBuf.r_stick_y};
 }
 void StoreNavigationFrame(const StatusEffectNavigationFrame& frame) {
   Menu_Status_selectedElement = frame.selected_element;

@@ -316,9 +316,9 @@ struct LootFixture : TextLoadingFixture {
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
   }
   static void AnswerConsolidation(bool confirm) {
-    VS::Input::buttonsPressed.allButtons = confirm ? kConfirm : kCancel;
+    VS::Input::buttonsPressed = confirm ? kConfirm : kCancel;
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     Menu_Loot_lootLeftEdge = 6;
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
   }

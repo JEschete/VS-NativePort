@@ -78,7 +78,7 @@ TEST_CASE("F02969 live uses actual controller edges and halfword misc slot 256",
   auto& owner = fixture.containers.storage->container;
   fixture.OpenMiscSort();
   REQUIRE(fixture.Frame(dialogs::UpdateLiveSortMenu, input::Down) == 0);
-  REQUIRE((VS::Input::buttonsPressed.allButtons & input::Down) != 0);
+  REQUIRE((VS::Input::buttonsPressed & input::Down) != 0);
   fixture.Frame(dialogs::UpdateLiveSortMenu);
   REQUIRE(fixture.Frame(dialogs::UpdateLiveSortMenu, input::Circle) == 2);
   REQUIRE(owner.indices.misc[0] == 256);

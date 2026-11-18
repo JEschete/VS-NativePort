@@ -320,7 +320,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     return Items::Live::Typed(Audio_Seq_unusedInventory);
   }
   Input::PadState Buttons() override {
-    return {.pressed = VS::Input::buttonsPressed.allButtons,
+    return {.pressed = VS::Input::buttonsPressed,
             .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
             .sticks = {}};
   }

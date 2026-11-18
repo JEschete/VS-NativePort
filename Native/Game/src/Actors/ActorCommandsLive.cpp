@@ -50,7 +50,7 @@ namespace {
 // VS::Actors::ashleyMoveInput words the movement input writes.
 constexpr std::size_t kMoveInputLateral = 1;
 constexpr std::size_t kMoveInputForward = 3;
-// Input_ControllerPortState.controllerType of an analog controller.
+// VS::Input::LegacyControllerPort::controller_type of an analog controller.
 constexpr std::uint8_t kAnalogController = 7;
 // func_8001B200 code a waiting command with an unknown opcode reports.
 constexpr int kUnknownWaitingOpcodeDiagnostic = 0xC1;
@@ -286,7 +286,7 @@ class LiveAshleyHost final : public AshleyMovementHost {
   }
   void UpdateCameraOrbit() override { VS::Field::LiveUpdateCameraOrbitInput(); }
   [[nodiscard]] AshleyControls Controls() const override {
-    const Input_ControllerPortState& port = VS::Input::controllerPorts[0];
+    const VS::Input::LegacyControllerPort& port = VS::Input::controllerPorts[0];
     const auto held = static_cast<std::uint32_t>(VS::Input::previousButtons);
     const auto has = [held](std::uint32_t button) {
       return (held & button) != 0;
@@ -298,13 +298,10 @@ class LiveAshleyHost final : public AshleyMovementHost {
                  .left = has(PADLleft),
                  .right = has(PADLright)},
         .walk_held = has(PADR2),
-        .jump_pressed = (VS::Input::buttonsPressed.allButtons & PADRleft) != 0};
-    if (static_cast<std::uint8_t>(port.controllerType) == kAnalogController) {
-      // The stick bytes are unsigned (the original builds with unsigned
-      // char).
+        .jump_pressed = (VS::Input::buttonsPressed & PADRleft) != 0};
+    if (port.controller_type == kAnalogController) {
       controls.stick =
-          AshleyStick{.x = static_cast<std::uint8_t>(port.rightStickX),
-                      .y = static_cast<std::uint8_t>(port.rightStickY)};
+          AshleyStick{.x = port.right_stick_x, .y = port.right_stick_y};
     }
     return controls;
   }

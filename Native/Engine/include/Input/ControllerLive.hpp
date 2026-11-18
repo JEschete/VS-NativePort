@@ -14,7 +14,7 @@
 // The vibration slots are typed state owned here. Invalid ports, motors and
 // patterns are refused, reported and leave the state unchanged.
 namespace VS::Input {
-using LegacyPadPacket = std::span<const char, kPadPacketBytes>;
+using LegacyPadPacket = std::span<const std::uint8_t, kPadPacketBytes>;
 
 [[nodiscard]] VibrationState& LiveVibrationState() noexcept;
 // Requests refused since start-up.

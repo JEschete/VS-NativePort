@@ -14,10 +14,10 @@
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Input/Controllers.h"
+#include "Input/Controllers.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
-#include "Input/Vibration.h"
+#include "Input/Vibration.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -175,14 +175,14 @@ struct RumbleFixture {
 
 struct PatternState {
   VS::Input::VibrationState saved_vibration = VS::Input::LiveVibrationState();
-  std::array<Input_ControllerPortState, 2> saved_ports =
+  std::array<VS::Input::LegacyControllerPort, 2> saved_ports =
       std::to_array(VS::Input::controllerPorts);
   std::array<unsigned char, 11> pattern{5, 2, 1, 0, 0, 2, 128, 2, 128, 0, 0};
 
   PatternState() {
     VS::Input::LiveVibrationState() = {};
     VS::Input::ConfigureLiveControllerActuators(
-        0, Input_legacyPadResponseBytes[0]);
+        0, VS::Input::legacyPadResponseBytes[0]);
   }
 
   ~PatternState() {
@@ -209,7 +209,8 @@ struct PatternState {
 
   static void CheckPresetSlot(std::size_t slot_index) {
     CHECK(Slot(slot_index).pattern.Bytes().data() ==
-          reinterpret_cast<const std::byte*>(Input_vibrationPresets + 8));
+          reinterpret_cast<const std::byte*>(
+              VS::Input::vibrationPresets.data() + 8));
     CHECK(Slot(slot_index).owner == 0x80);
     CHECK(Slot(slot_index).active);
   }
@@ -228,7 +229,7 @@ TEST_CASE("Original stick axis mapping preserves dead-zone boundaries",
 TEST_CASE("Original vibration preset uses its directory and preview owner",
           "[input][vibration][pattern]") {
   PatternState fixture;
-  REQUIRE(Input_vibrationPresets[0] == 1);
+  REQUIRE(VS::Input::vibrationPresets[0] == 1);
   VS::Input::PlayLiveVibrationPreset(0);
   PatternState::CheckPresetSlot(0);
   CHECK(PatternState::Slot(1).pattern.Bytes().data() == nullptr);

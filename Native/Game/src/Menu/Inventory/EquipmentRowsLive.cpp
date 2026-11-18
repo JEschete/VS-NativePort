@@ -356,7 +356,7 @@ void UpdateLiveEquipmentChoices(int has_sfx) {
   }
   LiveRowsHost host;
   const EquipmentChoiceInput input{
-      VS::Input::buttonsPressed.allButtons,
+      VS::Input::buttonsPressed,
       static_cast<std::uint32_t>(VS::Input::buttonRepeat)};
   if (!UpdateEquipmentChoices(*state, host, input, has_sfx)) {
     Refuse("a list step, cursor or scroll position outside the list");

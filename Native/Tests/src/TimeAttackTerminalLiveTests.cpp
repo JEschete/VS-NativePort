@@ -117,7 +117,7 @@ void AdvanceCountdownToExit(LiveFixture& fixture) {
   REQUIRE(r::LiveInitializeTimeAttackStart() == 1);
   Menu_Results_screenState = 2;
   REQUIRE(r::LiveUpdateTimeAttackStart() == 0);
-  VS::Input::buttonsPressed.allButtons = 0x20;
+  VS::Input::buttonsPressed = 0x20;
   for (int tick = 0; tick < 62; ++tick) {
     fixture.BeginFrame();
     CHECK(r::LiveUpdateTimeAttackStart() == 0);

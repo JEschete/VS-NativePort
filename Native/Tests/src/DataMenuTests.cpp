@@ -13,7 +13,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Text/TextCode.hpp"
-#include "Input/Buttons.h"
+#include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
@@ -68,7 +68,7 @@ struct EmptySlotsFixture {
     VS::Menu::Files::textTable = text.data();
     // Input feedback needs a bound bank, even when no sound programs exist.
     sfx_offsets.fill(UINT32_MAX);
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     VS::Input::buttonRepeat = 0;
   }
 
@@ -85,10 +85,10 @@ struct EmptySlotsFixture {
   void CheckEmptySlotInput() const {
     files::Context context = LiveFiles();
     for (size_t index = 0; index < summaries.size(); ++index) {
-      VS::Input::buttonsPressed.allButtons = PADRright;
+      VS::Input::buttonsPressed = PADRright;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
       CHECK(VS::Menu::Files::selectCursorXy != 0);
-      VS::Input::buttonsPressed.allButtons = 0;
+      VS::Input::buttonsPressed = 0;
       VS::Input::buttonRepeat = PADLdown;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
       VS::Input::buttonRepeat = 0;
@@ -208,13 +208,13 @@ TEST_CASE("Game Over fade links packets through native handles",
   files::Context context = LiveFiles();
   files::UpdateGameOverChoices(context, true);
   for (int frame = 0; frame < 16; ++frame) {
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     CHECK(files::UpdateGameOverChoices(context, false) == 0);
   }
 
-  VS::Input::buttonsPressed.allButtons = PADstart;
+  VS::Input::buttonsPressed = PADstart;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   const auto* fade_packet = Render_frameScratch.primitiveCursor;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
   CHECK(nextPrim(render.ordering.data() + 2) == fade_packet);
@@ -234,7 +234,7 @@ TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
     CHECK(files::LiveFilesState().elements[index + 5].slot_unavailable != 0);
   }
   fixture.CheckEmptySlotInput();
-  VS::Input::buttonsPressed.allButtons = PADRdown;
+  VS::Input::buttonsPressed = PADRdown;
   CHECK(files::UpdateLoadFiles(context, 0) == -1);
   CHECK(VS::Menu::Files::selectCursorXy == 0);
 }

@@ -113,7 +113,7 @@ struct LiveVmFixture {
   std::int16_t finished = Event_isMainThreadFinished;
   std::int16_t chained = Event_isChainedEventLoaded;
   char skip = Event_skipState;
-  Input_PressedButtonsView pressed = VS::Input::buttonsPressed;
+  std::uint32_t pressed = VS::Input::buttonsPressed;
   int previous = VS::Input::previousButtons;
   char forced = Event_isSkipForced;
   char stops_music = Event_stopsMusicOnSkip;
@@ -469,7 +469,7 @@ bool CompareFrozenButtonWait(const ButtonWaitSample& sample,
   const auto expected_wait = expected.wait;
   const auto expected_buttons = expected.buttons;
   Event_threadWaitFrames[sample.thread] = sample.remaining;
-  VS::Input::buttonsPressed.allButtons = sample.buttons;
+  VS::Input::buttonsPressed = sample.buttons;
   if (mutation == 1) command[1] ^= 4;
   if (mutation == 2) ++Event_threadWaitFrames[sample.thread];
   const event::ScriptInstruction instruction{command, {}, sample.thread};
@@ -479,8 +479,8 @@ bool CompareFrozenButtonWait(const ButtonWaitSample& sample,
                                            instruction, event::LiveScriptVm());
   const auto result = WaitResultCode(native);
   const auto wait = Event_threadWaitFrames[sample.thread];
-  if (mutation == 3) VS::Input::buttonsPressed.allButtons = sample.buttons;
-  const auto buttons = VS::Input::buttonsPressed.allButtons;
+  if (mutation == 3) VS::Input::buttonsPressed = sample.buttons;
+  const auto buttons = VS::Input::buttonsPressed;
   AddResultDigest(fingerprints[0], static_cast<std::uint32_t>(original));
   AddResultDigest(fingerprints[0], static_cast<std::uint16_t>(expected_wait));
   AddResultDigest(fingerprints[0], expected_buttons);
@@ -1131,12 +1131,12 @@ void CheckLiveButtonWait(ButtonWaitSample sample, bool guarded, int skip) {
   Event_skipState = static_cast<char>(skip);
   auto& host = event::LiveScriptVm();
   host.SetWaitFrames(sample.thread, sample.remaining);
-  VS::Input::buttonsPressed.allButtons = sample.buttons;
+  VS::Input::buttonsPressed = sample.buttons;
   host.SetThreadCursor(sample.thread, start);
   const auto expected = FrozenButtonWaitResult(sample);
   CHECK_FALSE(event::ExecuteLiveScriptThread(sample.thread));
   CHECK(host.WaitFrames(sample.thread) == expected.wait);
-  CHECK(VS::Input::buttonsPressed.allButtons == expected.buttons);
+  CHECK(VS::Input::buttonsPressed == expected.buttons);
   CHECK(host.ThreadCursor(sample.thread) ==
         (expected.code == 0
              ? event::ScriptLocation{}
@@ -1294,7 +1294,7 @@ void CheckLiveButtonStore(int operand, bool guarded, int skip) {
   auto& host = event::LiveScriptVm();
   for (int value = 0; value < 256; ++value) {
     VS::Input::previousButtons = 0x345600 | value;
-    VS::Input::buttonsPressed.allButtons = 0xABCD0000 | (value ^ 0x80);
+    VS::Input::buttonsPressed = 0xABCD0000 | (value ^ 0x80);
     host.SetFlag(operand & 1023, 0x55);
     host.SetThreadCursor(0, start);
     CHECK_FALSE(event::ExecuteLiveScriptThread(0));

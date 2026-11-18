@@ -5287,15 +5287,15 @@ T00582.007,T00582,patrolWaypointState,7,timer,0,unsigned char,,,,opaque104,"Used
 T00582.008,T00582,patrolWaypointState,8,pad105,1,char[99],,,,reserved105,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:1375;declaration-only;source:771A8.c:1852
 T00582.009,T00582,patrolWaypointState,9,dest,0,vs_battle_movementPosition,,,,destination,Destination tile,high,source:771A8.c:1885
 T00583.000,T00583,percent_t,0,data,0,char[4],,,,text,Encoded percent sign and terminator,high,source:238.c:2376;source:238.c:2373
-T00584.000,T00584,portInfo_t,0,mode,0,char,,,,controllerType,Controller type from PadInfoMode; 5 and 7 report sticks,high,source:main.c:8515;source:main.c:8516
-T00584.001,T00584,portInfo_t,1,exId,0,char,,,,extendedType,Extended controller id; nonzero supports mode lock,high,source:main.c:8471
-T00584.002,T00584,portInfo_t,2,states,0,char,,,,buttonBits,Low byte of the last inverted button state,med,source:main.c:8527
-T00584.003,T00584,portInfo_t,3,rStickX,0,char,,,,rightStickX,Right stick X,high,source:main.c:8517
-T00584.004,T00584,portInfo_t,4,rStickY,0,char,,,,rightStickY,Right stick Y,high,source:main.c:8518
-T00584.005,T00584,portInfo_t,5,lStickX,0,char,,,,leftStickX,Left stick X,high,source:main.c:8519
-T00584.006,T00584,portInfo_t,6,lStickY,0,char,,,,leftStickY,Left stick Y,high,source:main.c:8520
-T00584.007,T00584,portInfo_t,7,lock,0,char,,,,modeLock,Mode lock passed to PadSetMainMode,high,source:main.c:8476
-T00584.008,T00584,portInfo_t,8,actData,0,char[2],,,,actuatorLevels,Motor levels sent with PadSetAct,high,source:main.c:8482
+T00584.000,T00584,portInfo_t,0,mode,0,char,,,,controller_type,Controller type from PadInfoMode; 5 and 7 report sticks,high,source:main.c:8515;source:main.c:8516
+T00584.001,T00584,portInfo_t,1,exId,0,char,,,,extended_type,Extended controller id; nonzero supports mode lock,high,source:main.c:8471
+T00584.002,T00584,portInfo_t,2,states,0,char,,,,button_bits,Low byte of the last inverted button state,med,source:main.c:8527
+T00584.003,T00584,portInfo_t,3,rStickX,0,char,,,,right_stick_x,Right stick X,high,source:main.c:8517
+T00584.004,T00584,portInfo_t,4,rStickY,0,char,,,,right_stick_y,Right stick Y,high,source:main.c:8518
+T00584.005,T00584,portInfo_t,5,lStickX,0,char,,,,left_stick_x,Left stick X,high,source:main.c:8519
+T00584.006,T00584,portInfo_t,6,lStickY,0,char,,,,left_stick_y,Left stick Y,high,source:main.c:8520
+T00584.007,T00584,portInfo_t,7,lock,0,char,,,,mode_lock,Mode lock passed to PadSetMainMode,high,source:main.c:8476
+T00584.008,T00584,portInfo_t,8,actData,0,char[2],,,,actuator_levels,Motor levels sent with PadSetAct,high,source:main.c:8482
 T00584.009,T00584,portInfo_t,9,connected,0,char,,,,connected,Port finished connection setup,high,source:main.c:8546
 T00585.000,T00585,primBuf_t,0,tag,0,u_long,,,,tag,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
 T00585.001,T00585,primBuf_t,1,prim,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),,,,prim,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1191
@@ -6523,10 +6523,10 @@ T00709.001,T00709,vs_main_statusEffectParams_t,1,unk4,1,u_short,,,,duration,"Sta
 T00709.002,T00709,vs_main_statusEffectParams_t,2,unk6,1,u_short,,,,tickInterval,Ticks per HP change of a damage-over-time status,med,source:74088.c:1223
 T00709.003,T00709,vs_main_statusEffectParams_t,3,unk8,1,int,,,,cancelledStatuses,Active statuses the effect cancels instead of stacking,med,source:146C.c:11209
 T00709.004,T00709,vs_main_statusEffectParams_t,4,unkC,1,int,,,,blockingStatuses,Active statuses that keep the effect from applying,med,source:146C.c:11206
-T00710.000,T00710,vs_main_stickPos,0,lStickX,0,int,,,,lStickX,Named in the fork; see cited use,med,source:4D8.c:611
-T00710.001,T00710,vs_main_stickPos,1,lStickY,0,int,,,,lStickY,Named in the fork; see cited use,med,source:4D8.c:612
-T00710.002,T00710,vs_main_stickPos,2,rStickX,0,int,,,,rStickX,Named in the fork; see cited use,med,source:5BF94.c:667
-T00710.003,T00710,vs_main_stickPos,3,rStickY,0,int,,,,rStickY,Named in the fork; see cited use,med,source:5BF94.c:668
+T00710.000,T00710,vs_main_stickPos,0,lStickX,0,int,,,,l_stick_x,Named in the fork; see cited use,med,source:4D8.c:611
+T00710.001,T00710,vs_main_stickPos,1,lStickY,0,int,,,,l_stick_y,Named in the fork; see cited use,med,source:4D8.c:612
+T00710.002,T00710,vs_main_stickPos,2,rStickX,0,int,,,,r_stick_x,Named in the fork; see cited use,med,source:5BF94.c:667
+T00710.003,T00710,vs_main_stickPos,3,rStickY,0,int,,,,r_stick_y,Named in the fork; see cited use,med,source:5BF94.c:668
 T00711.000,T00711,vs_menu_container,0,data,0,vs_menu_containerData,,,,items,Items by category,med,source:2D10.c:177;use cited by sanity pass;source:func_8006B57C_t.h:130
 T00711.001,T00711,vs_menu_container,1,indices,0,vs_menu_containerIndices,,,,indices,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:4090
 T00712.000,T00712,vs_menu_containerData,0,weapons,0,vs_main_inventoryWeapon[32],,,,weapons,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:3844

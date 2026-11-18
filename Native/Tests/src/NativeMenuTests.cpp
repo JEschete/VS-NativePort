@@ -61,8 +61,7 @@ struct MenuFixture {
   fs::path root;
   State_Settings settings = VS::Input::settings;
   int active = Boot_isGameplayActive;
-  decltype(VS::Input::buttonsPressed.allButtons) pressed =
-      VS::Input::buttonsPressed.allButtons;
+  decltype(VS::Input::buttonsPressed) pressed = VS::Input::buttonsPressed;
   int repeat = VS::Input::buttonRepeat;
   std::array<u_int, 12> sound_offsets{};
   std::array<u_short, 12> sound_selectors{};
@@ -88,7 +87,7 @@ struct MenuFixture {
     REQUIRE(fs::create_directory(root));
     Save::ConfigureDirectory(root);
     Boot_isGameplayActive = 0;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     VS::Input::buttonRepeat = 0;
     sound_selectors.fill(0x8000);
     Audio_Mixer_kCommandHandlers[0x20] = CountSound;
@@ -101,7 +100,7 @@ struct MenuFixture {
       Save::ShutdownFileMenus();
       VS::Input::settings = settings;
       Boot_isGameplayActive = active;
-      VS::Input::buttonsPressed.allButtons = pressed;
+      VS::Input::buttonsPressed = pressed;
       VS::Input::buttonRepeat = repeat;
       Audio_Mixer_kCommandHandlers[0x20] = sound_handler;
       Audio_Driver_commandArguments = sound_arguments;
@@ -299,7 +298,7 @@ std::string Text(const char* text) {
 }
 
 void Buttons(int pressed, int repeat = 0) {
-  VS::Input::buttonsPressed.allButtons = pressed;
+  VS::Input::buttonsPressed = pressed;
   VS::Input::buttonRepeat = repeat;
 }
 

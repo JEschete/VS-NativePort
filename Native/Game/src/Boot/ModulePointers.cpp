@@ -306,8 +306,8 @@
 #include "Field/TransitionsLiveState.hpp"
 #include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
-#include "Input/Controllers.h"
-#include "Input/Vibration.h"
+#include "Input/Controllers.hpp"
+#include "Input/Vibration.hpp"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -910,8 +910,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x80040A14u, 516u, (void*)&VS::Core::Math::kArcTangentTable, sizeof VS::Core::Math::kArcTangentTable, 1u, 1u},
     {"SLUS_010.40", 0x80049138u, 4u, (void*)&VS::Core::legacyRamSize, sizeof VS::Core::legacyRamSize, 1u, 1u},
     {"SLUS_010.40", 0x8004913Cu, 4u, (void*)&VS::Core::legacyStackSize, sizeof VS::Core::legacyStackSize, 1u, 1u},
-    {"SLUS_010.40", 0x8004A504u, 24u, (void*)&Input_vibrationPresets, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004A51Cu, 12u, (void*)&Input_legacyActuatorAlignment, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004A504u, 24u, (void*)&VS::Input::vibrationPresets, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004A51Cu, 12u, (void*)&VS::Input::legacyActuatorAlignment, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004A528u, 4u, (void*)&VS::Title::titleScreenVisitCount, sizeof VS::Title::titleScreenVisitCount, 0u, 0u},
     {"SLUS_010.40", 0x8004A52Cu, 4u, (void*)&Render_isFrameStepPaused, sizeof Render_isFrameStepPaused, 1u, 1u},
     {"SLUS_010.40", 0x8004A530u, 400u, (void*)&Audio_legacyWaveBankDiscOffsets, 0u, 0u, 0u},
@@ -948,7 +948,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x80055D10u, 28u, (void*)&Content_discDriveState, sizeof Content_discDriveState, 0u, 0u},
     {"SLUS_010.40", 0x80055D2Cu, 11u, (void*)&Content_discControlResponseBytes, sizeof Content_discControlResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005DFD0u, 4u, (void*)&Boot_battleReturnStackPointer, sizeof Boot_battleReturnStackPointer, 1u, 1u},
-    {"SLUS_010.40", 0x8005DFF0u, 68u, (void*)&Input_legacyPadResponseBytes, sizeof Input_legacyPadResponseBytes, 1u, 1u},
+    {"SLUS_010.40", 0x8005DFF0u, 68u, (void*)&VS::Input::legacyPadResponseBytes, sizeof VS::Input::legacyPadResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005E038u, 136u, (void*)&Audio_soundState, sizeof Audio_soundState, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C0u, 8u, (void*)&Render_legacyPrimitiveBuffers, sizeof Render_legacyPrimitiveBuffers, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C8u, 4u, (void*)&Render_nearClip, sizeof Render_nearClip, 1u, 1u},

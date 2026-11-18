@@ -189,13 +189,13 @@ struct LiveWorld {
     Battle_hudHidden = 0;
     Battle_hudSlideOffset = 0;
     VS::Field::isFieldRenderingEnabled = 1;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
     VS::Input::buttonRepeat = 0;
-    VS::Input::stickPosBuf.lStickX = 128;
-    VS::Input::stickPosBuf.lStickY = 128;
-    VS::Input::stickPosBuf.rStickX = 128;
-    VS::Input::stickPosBuf.rStickY = 128;
+    VS::Input::stickPosBuf.l_stick_x = 128;
+    VS::Input::stickPosBuf.l_stick_y = 128;
+    VS::Input::stickPosBuf.r_stick_x = 128;
+    VS::Input::stickPosBuf.r_stick_y = 128;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     std::ranges::fill(Audio_Seq_unusedStateFlags.mapPaling, 0);
     std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
@@ -287,7 +287,7 @@ struct LiveWorld {
   int Tick(std::uint32_t pressed = 0, int held = 0, int repeat = 0,
            bool framework_tick = false) {
     ResetFrame();
-    VS::Input::buttonsPressed.allButtons = pressed;
+    VS::Input::buttonsPressed = pressed;
     VS::Input::previousButtons = held;
     VS::Input::buttonRepeat = repeat;
     if (framework_tick) framework::UpdateLiveScreen();
@@ -354,9 +354,9 @@ void HideResetAndCancel(LiveWorld& world) {
 }
 
 void ExitScreen(LiveWorld& world, std::uint8_t& step) {
-  VS::Input::buttonsPressed.allButtons = 0x10;
+  VS::Input::buttonsPressed = 0x10;
   REQUIRE(map::LiveUpdateScreen(&step) == 0);
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   int result = 0;
   for (std::size_t tick = 0; tick < kTickBudget && result == 0; ++tick) {
     world.ResetFrame();

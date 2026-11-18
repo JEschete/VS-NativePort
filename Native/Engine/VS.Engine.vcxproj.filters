@@ -483,7 +483,7 @@
     <ClCompile Include="src\Core\Unported.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClInclude Include="src\Input\Buttons.h">
+    <ClInclude Include="src\Input\Buttons.hpp">
       <Filter>src\Input</Filter>
     </ClInclude>
     <ClCompile Include="src\Input\Controller.cpp">
@@ -495,7 +495,7 @@
     <ClCompile Include="src\Input\Controllers.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
-    <ClInclude Include="src\Input\Controllers.h">
+    <ClInclude Include="src\Input\Controllers.hpp">
       <Filter>src\Input</Filter>
     </ClInclude>
     <ClCompile Include="src\Input\Pad.cpp">
@@ -504,7 +504,7 @@
     <ClCompile Include="src\Input\Vibration.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
-    <ClInclude Include="src\Input\Vibration.h">
+    <ClInclude Include="src\Input\Vibration.hpp">
       <Filter>src\Input</Filter>
     </ClInclude>
     <ClCompile Include="src\Movie\Intro\Playback.cpp">

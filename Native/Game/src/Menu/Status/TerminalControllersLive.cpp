@@ -101,11 +101,11 @@ TerminalFrame LoadFrame() {
       .hud_hidden = static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
       .current_menu =
           static_cast<std::uint8_t>(VS::Menu::Framework::menuState.currentMenu),
-      .pressed = VS::Input::buttonsPressed.allButtons,
+      .pressed = VS::Input::buttonsPressed,
       .held = static_cast<std::uint32_t>(VS::Input::buttonsState),
       .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
-      .stick_x = VS::Input::stickPosBuf.rStickX,
-      .stick_y = VS::Input::stickPosBuf.rStickY};
+      .stick_x = VS::Input::stickPosBuf.r_stick_x,
+      .stick_y = VS::Input::stickPosBuf.r_stick_y};
 }
 void StoreFrame(const TerminalFrame& frame) {
   Menu_Status_selectedActor = frame.selected_actor;

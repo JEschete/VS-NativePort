@@ -154,9 +154,7 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
         {.row = kQuantityRow, .x = x, .y = kQuantityY, .w = kQuantityWidth},
         text);
   }
-  std::uint32_t PressedButtons() override {
-    return VS::Input::buttonsPressed.allButtons;
-  }
+  std::uint32_t PressedButtons() override { return VS::Input::buttonsPressed; }
   std::uint32_t RepeatedButtons() override { return VS::Input::buttonRepeat; }
   void SetQuantityFont() override {
     Render::SetLiveMenuFontStyle(kQuantityFont);

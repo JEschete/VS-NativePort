@@ -137,7 +137,7 @@ int VS::Battle::AdvanceTargetPage(int direction) {
 }
 
 int VS::Battle::HandleTargetPageButtons(void) {
-  const auto pressed = VS::Input::buttonsPressed.allButtons & (PADL1 | PADR1);
+  const auto pressed = VS::Input::buttonsPressed & (PADL1 | PADR1);
   int changed = 0;
   if (pressed == PADL1) changed = VS::Battle::AdvanceTargetPage(-1);
   if (pressed == PADR1) changed = VS::Battle::AdvanceTargetPage(1);

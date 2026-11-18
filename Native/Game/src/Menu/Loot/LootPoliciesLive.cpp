@@ -360,7 +360,7 @@ class LivePromptHost final : public PromptHost {
 };
 
 [[nodiscard]] PromptInput LiveInput() {
-  return {.pressed = VS::Input::buttonsPressed.allButtons,
+  return {.pressed = VS::Input::buttonsPressed,
           .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
           .information_shown = VS::Input::settings.information != 0};
 }

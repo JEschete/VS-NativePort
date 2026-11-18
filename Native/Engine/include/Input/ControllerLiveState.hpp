@@ -4,22 +4,26 @@
 // reads and writes. ControllerLive.cpp defines it and keeps it in step with
 // the core (Controller.hpp).
 
-#include "Input/Buttons.h"
-#include "Input/Controllers.h"
+#include <cstdint>
+
+#include "Input/Buttons.hpp"
+#include "Input/Controller.hpp"
+#include "Input/Controllers.hpp"
 #include "State/Settings.h"
 
 namespace VS::Input {
 // main.c:8854-8859 _buttonHeldFrameCount: one counter per button word bit.
 inline constexpr int kButtonHeldFrameCount = 32;
-// main.c:8470 portInfo_t _portInfo[2]. rightStickX/Y hold the physical left
-// stick and leftStickX/Y the right one, as the original named them.
-extern Input_ControllerPortState controllerPorts[2];
+// main.c:8470 portInfo_t _portInfo[2]; Controllers.hpp names the sticks.
+extern LegacyControllerPort controllerPorts[kControllerPortCount];
 extern int releasedButtons;
-extern u_int buttonHeldFrames[kButtonHeldFrameCount];
-extern Input_StickPosition stickPosBuf;
+extern std::uint32_t buttonHeldFrames[kButtonHeldFrameCount];
+extern StickPosition stickPosBuf;
 extern int buttonRepeat;
 extern int previousButtons;
-extern union Input_PressedButtonsView buttonsPressed;
+// vs_main_buttonsPressed; LowButtonByte reads the first pad's face and
+// shoulder byte.
+extern std::uint32_t buttonsPressed;
 extern int buttonsState;
 extern State_Settings settings;
 }  // namespace VS::Input

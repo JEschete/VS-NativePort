@@ -316,7 +316,7 @@ class LiveHelpPagesHost final : public HelpPagesHost {
     return LiveLastPageLineOffset();
   }
   [[nodiscard]] std::uint32_t PressedButtons() const override {
-    return VS::Input::buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed;
   }
   [[nodiscard]] std::uint32_t PreviousButtons() const override {
     return static_cast<std::uint32_t>(VS::Input::previousButtons);

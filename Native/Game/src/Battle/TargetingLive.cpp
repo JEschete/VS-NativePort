@@ -1027,14 +1027,14 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     return static_cast<std::uint32_t>(VS::Input::buttonsState);
   }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
-    return VS::Input::buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed;
   }
   [[nodiscard]] std::uint32_t ButtonsRepeated() const override {
     return static_cast<std::uint32_t>(VS::Input::buttonRepeat);
   }
   [[nodiscard]] battle::StickInput RightStick() const override {
-    return {VS::Input::MapStickDeadZone(VS::Input::stickPosBuf.rStickX),
-            VS::Input::MapStickDeadZone(VS::Input::stickPosBuf.rStickY)};
+    return {VS::Input::MapStickDeadZone(VS::Input::stickPosBuf.r_stick_x),
+            VS::Input::MapStickDeadZone(VS::Input::stickPosBuf.r_stick_y)};
   }
   void PlayLeaveSound() override { VS::Menu::PlayLeaveSound(); }
   void PlaySelectSound() override { VS::Menu::PlaySelectSound(); }

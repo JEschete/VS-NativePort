@@ -15,7 +15,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Core/RandomLive.hpp"
-#include "Input/Buttons.h"
+#include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
@@ -31,8 +31,7 @@ struct RouletteFixture {
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   unsigned saved_random = VS::Core::BiosRand().State();
-  decltype(VS::Input::buttonsPressed.allButtons) saved_input =
-      VS::Input::buttonsPressed.allButtons;
+  decltype(VS::Input::buttonsPressed) saved_input = VS::Input::buttonsPressed;
   int saved_state = Menu_Results_screenState;
   int saved_timer = Menu_Results_screenTimer;
   int saved_reel = Menu_Results_buffReelIndex;
@@ -69,7 +68,7 @@ struct RouletteFixture {
     std::fill(std::begin(Audio_Mixer_kCommandHandlers),
               std::end(Audio_Mixer_kCommandHandlers), IgnoreAudio);
     Audio_nextSfxChannelGroup7E = 2;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     Menu_Results_screenTimer = -4096;
   }
 
@@ -77,7 +76,7 @@ struct RouletteFixture {
     VS::Menu::Results::ResetLiveGameClearModuleData();
     Battle_characterState = saved_actor;
     VS::Core::SeedBiosRand(saved_random);
-    VS::Input::buttonsPressed.allButtons = saved_input;
+    VS::Input::buttonsPressed = saved_input;
     Menu_Results_screenState = saved_state;
     Menu_Results_screenTimer = saved_timer;
     Menu_Results_buffReelIndex = saved_reel;
@@ -104,9 +103,9 @@ struct RouletteFixture {
   void PrimeStateTimer(int ticks) {
     Menu_Results_screenTimer = -4096;
     Menu_Results_screenState = 2;
-    VS::Input::buttonsPressed.allButtons = PADRright;
+    VS::Input::buttonsPressed = PADRright;
     REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     for (int tick = 1; tick < ticks; ++tick) {
       Menu_Results_screenState = 2;
       REQUIRE(VS::Menu::Results::LiveUpdateGameClear() == 0);
@@ -191,7 +190,7 @@ TEST_CASE(
   Menu_Results_screenTimer = 0;
   Menu_Results_elementAnimationState = 0;
   Menu_Results_buffReelSelection = 248;
-  VS::Input::buttonsPressed.allButtons = PADRright;
+  VS::Input::buttonsPressed = PADRright;
   const auto random = VS::Core::BiosRand().State();
   CHECK(VS::Menu::Results::LiveUpdateGameClear() == 0);
   CHECK(Menu_Results_screenState == 0);

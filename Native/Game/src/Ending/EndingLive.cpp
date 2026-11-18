@@ -406,7 +406,7 @@ class LiveDisplay : public Host {
   void CountPresentedFrame() override { ++Ending_Credits_xaResumeFrameCount; }
   void UpdateControllers() override { Input::UpdateLiveControllers(); }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
-    return static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
+    return static_cast<std::uint32_t>(VS::Input::buttonsPressed);
   }
 
   void BeginOrderingTables(const OrderingTableLayout& layout) override {

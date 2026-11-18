@@ -585,7 +585,7 @@ int LiveUpdateGameClear() {
     Refuse("award without a valid reel and character stats");
     return 0;
   }
-  const bool confirm = (VS::Input::buttonsPressed.allButtons & PADRright) != 0;
+  const bool confirm = (VS::Input::buttonsPressed & PADRright) != 0;
   LiveScreen host;
   const auto step = UpdateGameClear(game.screen, reels, confirm, host);
   StoreState(game);

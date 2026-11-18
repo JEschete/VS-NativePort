@@ -238,7 +238,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
     battle::LiveQueueAbilityTimingResult(result);
   }
   [[nodiscard]] std::uint32_t PressedButtons() const override {
-    return VS::Input::buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed;
   }
   [[nodiscard]] bool EffectsBusy() const override {
     return (static_cast<std::uint32_t>(Effects_effectBusyFlags) &

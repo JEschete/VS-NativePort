@@ -17,7 +17,7 @@
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Input/Controllers.h"
+#include "Input/Controllers.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.h"
@@ -183,19 +183,18 @@ void StartBothSlots(Input::VibrationState& vibration) {
 
 // Saves and restores every legacy global the Live binding writes.
 struct LiveControllerGlobals {
-  std::array<Input_ControllerPortState, 2> ports =
+  std::array<VS::Input::LegacyControllerPort, 2> ports =
       std::to_array(VS::Input::controllerPorts);
-  std::array<std::array<char, Input::kPadPacketBytes>, 2> packets{
-      std::to_array(Input_legacyPadResponseBytes[0]),
-      std::to_array(Input_legacyPadResponseBytes[1])};
-  std::array<u_int, Input::kButtonCount> held_frames =
+  std::array<VS::Input::PadPacket, Input::kControllerPortCount> packets =
+      VS::Input::legacyPadResponseBytes;
+  std::array<std::uint32_t, Input::kButtonCount> held_frames =
       std::to_array(VS::Input::buttonHeldFrames);
   Input::VibrationState vibration = Input::LiveVibrationState();
   int released = VS::Input::releasedButtons;
-  Input_StickPosition sticks = VS::Input::stickPosBuf;
+  VS::Input::StickPosition sticks = VS::Input::stickPosBuf;
   int repeat = VS::Input::buttonRepeat;
   int previous = VS::Input::previousButtons;
-  union Input_PressedButtonsView pressed = VS::Input::buttonsPressed;
+  std::uint32_t pressed = VS::Input::buttonsPressed;
   int held = VS::Input::buttonsState;
   State_Settings settings = VS::Input::settings;
   int tick_speed = VS::State::tickSpeed;
@@ -210,8 +209,7 @@ struct LiveControllerGlobals {
   ~LiveControllerGlobals() {
     PadInitDirect(nullptr, nullptr);
     std::ranges::copy(ports, std::begin(VS::Input::controllerPorts));
-    std::ranges::copy(packets[0], std::begin(Input_legacyPadResponseBytes[0]));
-    std::ranges::copy(packets[1], std::begin(Input_legacyPadResponseBytes[1]));
+    VS::Input::legacyPadResponseBytes = packets;
     std::ranges::copy(held_frames, std::begin(VS::Input::buttonHeldFrames));
     Input::LiveVibrationState() = vibration;
     VS::Input::releasedButtons = released;
@@ -232,9 +230,8 @@ void PrepareLiveControllers() {
   Boot_isSoftResetEnabled = 0;
   VS::Input::previousButtons = 0;
   std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
-  PadInitDirect(
-      reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[0]),
-      reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[1]));
+  PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
+                VS::Input::legacyPadResponseBytes[1].data());
 }
 
 // Feeds an analog first pad with its left stick at (200, 100) and no second.
@@ -903,8 +900,8 @@ TEST_CASE("Live controller requests refuse unknown ports motors and patterns",
   Input::SetLiveMotorCommand(2, 0, 0x11);
   Input::SetLiveMotorCommand(0, 2, 0x11);
   Input::SetLiveMotorCommand(-1, 0, 0x11);
-  CHECK(Input::ReadLiveControllerPort(0x20, Input_legacyPadResponseBytes[0]) ==
-        0);
+  CHECK(Input::ReadLiveControllerPort(
+            0x20, VS::Input::legacyPadResponseBytes[0]) == 0);
   CHECK(Input::StartLiveVibrationPattern(nullptr, 1, 0) == 0);
   // A stream with no zero-frame step within the bound is not followed.
   const std::vector<char> unterminated(4096, 1);
@@ -913,8 +910,7 @@ TEST_CASE("Live controller requests refuse unknown ports motors and patterns",
   CHECK_FALSE(Input::LiveVibrationState().slots[0].active);
 
   Input::SetLiveMotorCommand(1, 1, 0x77);
-  CHECK(static_cast<unsigned char>(
-            VS::Input::controllerPorts[1].actuatorLevels[1]) == 0x77);
+  CHECK(VS::Input::controllerPorts[1].actuator_levels[1] == 0x77);
   CHECK(Input::RefusedLiveControllerRequestCount() == refusals + 6);
 }
 
@@ -987,7 +983,7 @@ TEST_CASE("Live controller updates publish the legacy button state",
   FeedLivePad(kButtonCross);
   CHECK(Input::UpdateLiveControllers() == 1);
   CHECK(VS::Input::buttonsState == static_cast<int>(kButtonCross));
-  CHECK(VS::Input::buttonsPressed.allButtons == kButtonCross);
+  CHECK(VS::Input::buttonsPressed == kButtonCross);
   CHECK(VS::Input::buttonRepeat == static_cast<int>(kButtonCross));
   CHECK(VS::Input::previousButtons == static_cast<int>(kButtonCross));
   CHECK(VS::Input::buttonHeldFrames[6] == 1U);
@@ -1005,11 +1001,10 @@ TEST_CASE("Live controller updates publish the legacy stick and port state",
   FeedLivePad(0);
   CHECK(Input::UpdateLiveControllers() == 1);
   // The legacy r fields hold the physical left stick (main.c:8803).
-  CHECK(VS::Input::stickPosBuf.rStickX == 200);
-  CHECK(VS::Input::stickPosBuf.rStickY == 100);
-  CHECK(VS::Input::stickPosBuf.lStickX == 128);
-  CHECK(VS::Input::controllerPorts[0].controllerType == 7);
+  CHECK(VS::Input::stickPosBuf.r_stick_x == 200);
+  CHECK(VS::Input::stickPosBuf.r_stick_y == 100);
+  CHECK(VS::Input::stickPosBuf.l_stick_x == 128);
+  CHECK(VS::Input::controllerPorts[0].controller_type == 7);
   CHECK(VS::Input::controllerPorts[0].connected == 1);
-  CHECK(static_cast<unsigned char>(VS::Input::controllerPorts[0].rightStickX) ==
-        200);
+  CHECK(VS::Input::controllerPorts[0].right_stick_x == 200);
 }

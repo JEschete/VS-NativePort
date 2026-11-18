@@ -541,7 +541,7 @@ using PickerEntry = file_menu::FileMenuResult (*)(
     const file_menu::FileMenuInput&);
 
 int RunPicker(PickerEntry entry, int init) {
-  const auto pressed = VS::Input::buttonsPressed.allButtons;
+  const auto pressed = VS::Input::buttonsPressed;
   const file_menu::FileMenuInput input{
       .accept = (pressed & PADRright) != 0,
       .cancel = (pressed & PADRdown) != 0,

@@ -272,7 +272,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
   TerminalRuntime& Runtime() override { return runtime_; }
   Input::PadState Buttons() override {
     return {.held = static_cast<std::uint32_t>(VS::Input::buttonsState),
-            .pressed = VS::Input::buttonsPressed.allButtons,
+            .pressed = VS::Input::buttonsPressed,
             .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
             .sticks = {}};
   }

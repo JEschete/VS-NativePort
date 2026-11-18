@@ -1108,7 +1108,7 @@ class LiveRoomLoadHost final
     // The original also zeroes vs_main_unused0-2 here; nothing reads them.
     VS::Input::buttonRepeat = 0;
     VS::Input::releasedButtons = 0;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
     VS::Input::buttonsState = 0;
     Scratch().camera.farClip = ONE;

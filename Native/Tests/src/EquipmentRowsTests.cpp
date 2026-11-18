@@ -857,7 +857,7 @@ struct LiveRowsFixture {
   LiveRowsFixture() {
     VS::Menu::Framework::menuItems = rows.data();
     Menu_Inventory_itemsText = nullptr;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     VS::Input::buttonRepeat = 0;
     texts[0] = reinterpret_cast<u_short*>(first.name.data());
     texts[1] = reinterpret_cast<u_short*>(first.description.data());
@@ -943,7 +943,7 @@ TEST_CASE("UpdateLiveEquipmentChoices slides rows in and closes on Cross",
   inv::UpdateLiveEquipmentChoices(0);
   CHECK(Menu_Inventory_equipListStep == inv::kEquipmentRowsWaiting);
   Menu_Inventory_equipListStep = inv::kEquipmentRowsInput;
-  VS::Input::buttonsPressed.allButtons = kCross;
+  VS::Input::buttonsPressed = kCross;
   inv::UpdateLiveEquipmentChoices(0);
   CHECK(Menu_Inventory_itemsText == nullptr);
   CHECK(Menu_Inventory_selectedItemRow == inv::kEquipmentChoiceCancel);

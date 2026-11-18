@@ -1029,7 +1029,7 @@ void PressForFrame(int frame) {
   VS::Input::buttonRepeat = frame == kDownFrame ? static_cast<int>(kDown)
                             : frame == kUpFrame ? static_cast<int>(kUp)
                                                 : 0;
-  VS::Input::buttonsPressed.allButtons =
+  VS::Input::buttonsPressed =
       frame == kCircleFrame ? static_cast<int>(kCircle) : 0;
 }
 

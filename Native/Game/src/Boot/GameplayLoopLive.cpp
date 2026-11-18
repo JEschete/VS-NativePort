@@ -153,7 +153,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Field_isMenuRequestQueued = queued ? 1 : 0;
   }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
-    return VS::Input::buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed;
   }
   [[nodiscard]] std::uint32_t PreviousButtons() const override {
     return static_cast<std::uint32_t>(VS::Input::previousButtons);

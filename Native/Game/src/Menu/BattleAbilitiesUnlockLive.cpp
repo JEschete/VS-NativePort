@@ -63,7 +63,7 @@ bool InformationDone() {
 }
 
 bool ConfirmPressed() {
-  return VS::Input::buttonsPressed.ports[0].lowByte != 0;
+  return VS::Input::LowButtonByte(VS::Input::buttonsPressed) != 0;
 }
 
 class LiveProgress final : public UnlockProgress {

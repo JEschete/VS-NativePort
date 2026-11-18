@@ -213,7 +213,7 @@ class LiveHost final : public Host {
   void UpdateControllers() override { ::VS::Input::UpdateLiveControllers(); }
   Buttons Input() override {
     return {.held = static_cast<std::uint32_t>(VS::Input::buttonsState),
-            .pressed = VS::Input::buttonsPressed.allButtons};
+            .pressed = VS::Input::buttonsPressed};
   }
   void InvalidateControllerConnections() override {
     ::VS::Input::InvalidateLiveControllerConnections();

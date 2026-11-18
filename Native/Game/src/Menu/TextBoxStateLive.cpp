@@ -165,8 +165,7 @@ int SelectLiveTextBoxChoice(u_char box_mask) {
   LiveTextBoxes boxes = ReadLiveTextBoxes();
   TextBoxSelector selector = ReadLiveTextBoxSelector();
   const TextBoxSelectionInput input{
-      .pressed =
-          static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons),
+      .pressed = static_cast<std::uint32_t>(VS::Input::buttonsPressed),
       .default_choice =
           static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.opaque11),
   };

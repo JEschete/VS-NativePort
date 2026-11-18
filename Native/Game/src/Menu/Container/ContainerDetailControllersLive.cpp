@@ -219,9 +219,7 @@ class LiveControllerWorld final : public ControllerWorld {
     RequireRows();
     return Framework::AreLiveMenuRowsIdle();
   }
-  std::uint32_t PressedButtons() override {
-    return VS::Input::buttonsPressed.allButtons;
-  }
+  std::uint32_t PressedButtons() override { return VS::Input::buttonsPressed; }
   void BeginTransition(DetailRow row) override {
     BeginLiveDetailsTransition(row.index);
   }

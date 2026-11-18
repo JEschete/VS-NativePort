@@ -825,14 +825,14 @@ int UpdateLiveGazette() {
   auto cursor = ReadCursor();
   LiveGazetteHost host(state, cursor);
   const GazetteInput input{
-      static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons),
+      static_cast<std::uint32_t>(VS::Input::buttonsPressed),
       static_cast<std::uint32_t>(VS::Input::buttonRepeat),
       static_cast<std::uint32_t>(VS::Input::previousButtons),
       static_cast<std::uint32_t>(VS::Input::releasedButtons),
-      VS::Input::stickPosBuf.lStickX,
-      VS::Input::stickPosBuf.lStickY,
-      VS::Input::stickPosBuf.rStickX,
-      VS::Input::stickPosBuf.rStickY};
+      VS::Input::stickPosBuf.l_stick_x,
+      VS::Input::stickPosBuf.l_stick_y,
+      VS::Input::stickPosBuf.r_stick_x,
+      VS::Input::stickPosBuf.r_stick_y};
   const auto result = UpdateGazette(state, cursor, input, host);
   host.Publish();
   return result.value_or(0);

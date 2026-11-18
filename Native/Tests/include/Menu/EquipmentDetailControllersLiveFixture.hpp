@@ -260,7 +260,7 @@ struct LiveFixture {
     std::copy(orders.begin(), orders.end(), Menu_Inventory_inventoryIndices);
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     Menu_Inventory_selectedItemCategoryIconOnTop = 1;
     Menu_Inventory_exitToBattle = 0;
     Menu_Inventory_ashleyRenderState = 0;

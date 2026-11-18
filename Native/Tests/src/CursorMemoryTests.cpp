@@ -26,7 +26,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Input/Buttons.h"
+#include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
@@ -518,7 +518,7 @@ struct WorkshopRepairFixture {
     REQUIRE(RunSetup([](setup::Context& c) {
               return setup::UpdateRepair(c, true);
             }) == 0);
-    VS::Input::buttonsPressed.allButtons = static_cast<u_short>(button);
+    VS::Input::buttonsPressed = static_cast<u_short>(button);
     for (int step = 0; step < 5; ++step) {
       CAPTURE(step);
       REQUIRE(Tick() == 0);

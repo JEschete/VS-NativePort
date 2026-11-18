@@ -200,7 +200,7 @@ TEST_CASE(
   fixture.Frame(VS::Input::Down);
   fixture.Frame();
   REQUIRE(fixture.Frame(VS::Input::Circle) == 1);
-  REQUIRE((VS::Input::buttonsPressed.allButtons & VS::Input::Circle) != 0);
+  REQUIRE((VS::Input::buttonsPressed & VS::Input::Circle) != 0);
 }
 
 TEST_CASE(

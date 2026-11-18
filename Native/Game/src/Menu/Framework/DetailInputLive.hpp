@@ -14,8 +14,6 @@ class LiveDetailInputWorld : public World {
   std::uint32_t RepeatButtons() override {
     return static_cast<std::uint32_t>(VS::Input::buttonRepeat);
   }
-  std::uint32_t PressedButtons() override {
-    return VS::Input::buttonsPressed.allButtons;
-  }
+  std::uint32_t PressedButtons() override { return VS::Input::buttonsPressed; }
 };
 }  // namespace VS::Menu::Framework

@@ -111,10 +111,10 @@ struct ReloadFixture : tests::Fixture {
 void BeginCountdown(tests::Fixture& fixture) {
   fixture.LoadThroughTextures(Asset::kStart);
   REQUIRE(results::LiveInitializeTimeAttackStart() == 1);
-  VS::Input::buttonsPressed.allButtons = 0x20;
+  VS::Input::buttonsPressed = 0x20;
   REQUIRE(results::LiveUpdateTimeAttackStart() == 0);
   REQUIRE(Menu_Results_screenState == 2);
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   fixture.BeginFrame();
   REQUIRE(results::LiveUpdateTimeAttackStart() == 0);
   REQUIRE(results::LiveTimeAttackOwnsCountdownControls());

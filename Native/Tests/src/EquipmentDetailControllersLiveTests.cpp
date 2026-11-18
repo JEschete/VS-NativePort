@@ -122,7 +122,7 @@ TEST_CASE("F02577 exit draws current grip count through actual presentation",
   fixture.Open(inventory::UpdateLiveGripDetails);
   fixture.Wait(inventory::UpdateLiveGripDetails);
   fixture.ResetFrame();
-  VS::Input::buttonsPressed.allButtons = VS::Input::Triangle;
+  VS::Input::buttonsPressed = VS::Input::Triangle;
   CHECK(inventory::UpdateLiveGripDetails(0) == 0);
   CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 2);
@@ -151,7 +151,7 @@ TEST_CASE("F02578 live shield waits for real row idle before accepting exit",
   fixture.AddShield();
   fixture.Open(inventory::UpdateLiveShieldDetails);
   fixture.Wait(inventory::UpdateLiveShieldDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inventory::UpdateLiveShieldDetails(0) == 0);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);
   fixture.IdleRows();

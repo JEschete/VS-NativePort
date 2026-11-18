@@ -911,7 +911,7 @@ struct LiveManualFixture {
   int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
   int saved_fade_step = VS::Menu::Framework::backgroundFadeStep;
   int saved_selected = VS::Menu::Framework::selectedRow;
-  u_int saved_pressed = VS::Input::buttonsPressed.allButtons;
+  u_int saved_pressed = VS::Input::buttonsPressed;
   int saved_previous = VS::Input::previousButtons;
   int saved_repeat = VS::Input::buttonRepeat;
   int saved_step = Menu_Manual_showMenuState;
@@ -937,7 +937,7 @@ struct LiveManualFixture {
     std::ranges::fill(Content_discRequestSlots, Content_DiscQueueSlot{});
     Content_discRequestCounts = Content_DiscRequestCounts{};
     VS::Menu::Framework::menuItems = rows.data();
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
     VS::Input::buttonRepeat = 0;
     Menu_Manual_showMenuState = manual::kHelpStart;
@@ -978,7 +978,7 @@ struct LiveManualFixture {
     VS::Menu::Framework::menuItems = saved_rows;
     VS::Menu::Framework::selectedRow = saved_selected;
     VS::Input::settings = saved_settings;
-    VS::Input::buttonsPressed.allButtons = saved_pressed;
+    VS::Input::buttonsPressed = saved_pressed;
     VS::Input::previousButtons = saved_previous;
     VS::Input::buttonRepeat = saved_repeat;
     Field_manualDisplayState = saved_display;
@@ -1364,7 +1364,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages leaves the page and frees its text",
   int* const text = Menu_Manual_helpText;
   Menu_Manual_showMenuState = manual::kHelpShowPage;
   Menu_Manual_helpPageLoadCounter = 3;
-  VS::Input::buttonsPressed.allButtons = manual::kButtonCircle;
+  VS::Input::buttonsPressed = manual::kButtonCircle;
   VS::Menu::LiveTextBox(manual::kPageTextBox)->state = 3;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(Menu_Manual_showMenuState == manual::kHelpListTopics);

@@ -53,7 +53,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Field/Interactions.h"
-#include "Input/Buttons.h"
+#include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
@@ -178,7 +178,7 @@ struct AbilityFixture {
       VS::Input::settings.mappedDefenseAbilities[index] =
           static_cast<char>(40 + index);
     }
-    VS::Input::buttonsPressed.allButtons = PADRright;
+    VS::Input::buttonsPressed = PADRright;
     Battle_floatingLabels = &labels;
     Battle_floatingLabelCount = 0;
     VS::State::tickSpeed = 2;
@@ -1183,7 +1183,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   }
 
   static int Tick(int buttons = 0) {
-    VS::Input::buttonsPressed.allButtons = static_cast<u_short>(buttons);
+    VS::Input::buttonsPressed = static_cast<u_short>(buttons);
     VS::Input::buttonRepeat = static_cast<u_short>(buttons);
     return VS::Menu::Loot::UpdateLiveLootSelection(0);
   }
@@ -1994,7 +1994,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     AbilityFixture fixture;
     fixture.Prepare(defense, action_id, depth);
     constexpr std::array kButtons{PADRright, PADRup, PADRleft};
-    VS::Input::buttonsPressed.allButtons = kButtons[slot - 1];
+    VS::Input::buttonsPressed = kButtons[slot - 1];
     VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
     fixture.action.abilityTimer = 100 + delta;
     constexpr int kStreak = 7;
@@ -2050,7 +2050,7 @@ TEST_CASE("Unmapped buttons and no input cannot start an ability",
     CHECK(Battle_floatingLabelCount == 0);
   }
   SECTION("no button") {
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
     CHECK(Battle_floatingLabelCount == 0);
@@ -2068,7 +2068,7 @@ TEST_CASE("Simultaneous ability buttons keep the original input priority",
                std::make_pair(PADRright | PADRup | PADRleft, 3));
   AbilityFixture fixture;
   fixture.action.abilityTimer = 102;
-  VS::Input::buttonsPressed.allButtons = buttons;
+  VS::Input::buttonsPressed = buttons;
   VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(1, slot);
 }

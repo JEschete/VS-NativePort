@@ -217,7 +217,8 @@ void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
   }
   TextBoxText view = ViewOf(*box);
   const TextBoxInput input{
-      .confirm_pressed = VS::Input::buttonsPressed.ports[0].lowByte != 0,
+      .confirm_pressed =
+          VS::Input::LowButtonByte(VS::Input::buttonsPressed) != 0,
       .tick_speed = VS::State::tickSpeed};
   LivePacketQueue glyphs(layers + kTextForegroundLayer);
   const ProgressiveTextResult result = DrawProgressiveTextBoxText(
@@ -268,7 +269,7 @@ void BlendLiveTextBoxIntoFramebuffer(Menu_TextBoxState* box, int glyph_alpha) {
   const FramebufferTextBlend blend{
       .alpha = glyph_alpha,
       .framebuffer_x = Render_frameBuf * kFramebufferWidth,
-      .skip_pressed = (VS::Input::buttonsPressed.allButtons & PADRright) != 0};
+      .skip_pressed = (VS::Input::buttonsPressed & PADRright) != 0};
   const VariableFontTables font{.glyph_widths = LiveVariableFontGlyphWidths(),
                                 .pixel_expansion = Render_kGlyphPixelExpansion};
   LiveVramPixels vram;

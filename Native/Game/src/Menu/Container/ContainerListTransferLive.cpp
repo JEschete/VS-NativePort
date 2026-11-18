@@ -265,7 +265,7 @@ class LiveTransferWorld final : public TransferWorld {
         static_cast<char>(return_state);
   }
   std::uint32_t PressedButtons() override {
-    return static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
+    return static_cast<std::uint32_t>(VS::Input::buttonsPressed);
   }
   std::uint32_t HeldButtons() override {
     return static_cast<std::uint32_t>(VS::Input::buttonsState);

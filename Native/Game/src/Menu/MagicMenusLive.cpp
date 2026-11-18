@@ -190,8 +190,7 @@ class LiveHost final : public MenuHost {
     Framework::LiveMenuCursorMemory()[kRankSelection] = selected;
   }
   RankInput ReadRankInput() override {
-    const auto pressed =
-        static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
+    const auto pressed = static_cast<std::uint32_t>(VS::Input::buttonsPressed);
     const auto repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat);
     return {.quit = (pressed & PADRup) != 0,
             .back = (pressed & PADRdown) != 0,

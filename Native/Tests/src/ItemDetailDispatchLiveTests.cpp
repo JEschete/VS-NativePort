@@ -156,9 +156,9 @@ TEST_CASE("F02581 normal close restores list commands and Ashley presentation",
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
   fixture.Wait(inv::UpdateLiveGemDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 1);
   CHECK(Menu_Inventory_itemCategoryIconsEnabled == 1);
@@ -175,9 +175,9 @@ TEST_CASE("F02581 battle close consumes the actual triangle return intent",
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
   fixture.Wait(inv::UpdateLiveGemDetails);
-  VS::Input::buttonsPressed.allButtons = VS::Input::Triangle;
+  VS::Input::buttonsPressed = VS::Input::Triangle;
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
-  VS::Input::buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed = 0;
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == -2);
   CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));

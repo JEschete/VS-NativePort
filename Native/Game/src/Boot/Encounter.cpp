@@ -884,7 +884,7 @@ EncounterState InspectGameplay() {
   state.frame_buffer = Render_frameBuf;
   state.transition = VS::Field::screenTransitionStep;
   state.native_buttons = VS::Input::buttonsState;
-  state.native_pressed = VS::Input::buttonsPressed.allButtons;
+  state.native_pressed = VS::Input::buttonsPressed;
   state.action_phase = Battle_actionFlowMode;
   InspectLearnedActions(state);
   constexpr int kLootFlag = 0xAB;

@@ -597,13 +597,13 @@ int LiveUpdateMapMenu() {
     MapMenuState state = ReadState();
     LiveMapMenu host(state);
     const MapInput input{
-        .pressed = VS::Input::buttonsPressed.allButtons,
+        .pressed = VS::Input::buttonsPressed,
         .held = static_cast<std::uint32_t>(VS::Input::previousButtons),
         .repeated = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
-        .left_x = static_cast<std::uint8_t>(VS::Input::stickPosBuf.lStickX),
-        .left_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.lStickY),
-        .right_x = static_cast<std::uint8_t>(VS::Input::stickPosBuf.rStickX),
-        .right_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.rStickY),
+        .left_x = static_cast<std::uint8_t>(VS::Input::stickPosBuf.l_stick_x),
+        .left_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.l_stick_y),
+        .right_x = static_cast<std::uint8_t>(VS::Input::stickPosBuf.r_stick_x),
+        .right_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.r_stick_y),
         .field_yaw =
             static_cast<std::uint16_t>(Render_frameScratch.camera.angles.vy)};
     std::array<DiscFileRange, kSceneCount> files{};

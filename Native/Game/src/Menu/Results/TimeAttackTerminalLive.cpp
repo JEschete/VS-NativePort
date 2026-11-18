@@ -572,7 +572,7 @@ int LiveUpdateTimeAttackResults() {
   if (state.phase <= kResultsClosingPhase && !ValidCourse()) return 0;
   LiveScreen host(state, TimeAttackAsset::kResults);
   const auto step = UpdateTimeAttackResults(
-      state, (VS::Input::buttonsPressed.allButtons & kConfirmMask) != 0, host);
+      state, (VS::Input::buttonsPressed & kConfirmMask) != 0, host);
   StoreState(state);
   return Return(step);
 }
@@ -583,7 +583,7 @@ int LiveUpdateTimeAttackStart() {
   if (state.phase < kResultsClosingPhase && !ValidCourse()) return 0;
   LiveScreen host(state, TimeAttackAsset::kStart);
   const auto step = UpdateTimeAttackStart(
-      state, (VS::Input::buttonsPressed.allButtons & kConfirmMask) != 0, host);
+      state, (VS::Input::buttonsPressed & kConfirmMask) != 0, host);
   StoreState(state);
   return Return(step);
 }

@@ -193,7 +193,7 @@ class Fixture {
     render::InitializeLiveTexturePages();
     results::ResetLiveGameClearModuleData();
     Battle_unusedSubmenuState = 0;
-    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed = 0;
     Audio_Seq_unusedScoredata = {};
     Audio_Seq_unusedStateFlags = {};
     State_roomVisitProgress = {};

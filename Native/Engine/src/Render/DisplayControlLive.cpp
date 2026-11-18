@@ -12,10 +12,10 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/RandomLive.hpp"
-#include "Input/Buttons.h"
+#include "Input/Buttons.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Input/Controllers.h"
+#include "Input/Controllers.hpp"
 #include "Render/Display.h"
 #include "Render/Loading.h"
 #include "Render/PaletteAnimationLive.hpp"
@@ -123,22 +123,23 @@ class LiveFieldFrame final : public FieldFrameHost {
   void ToggleFrameStepPause() override { Render_isFrameStepPaused ^= 1; }
   // The original polled both pads inline (146C.c:5998-6008).
   std::uint32_t PollSecondControllerPressed() override {
-    const auto first = static_cast<std::uint16_t>(
-        VS::Input::ReadLiveControllerPort(0, Input_legacyPadResponseBytes[0]));
+    const auto first =
+        static_cast<std::uint16_t>(VS::Input::ReadLiveControllerPort(
+            0, VS::Input::legacyPadResponseBytes[0]));
     VS::Input::buttonsState = first;
     const auto second =
         static_cast<std::uint32_t>(VS::Input::ReadLiveControllerPort(
-            kSecondPortShift, Input_legacyPadResponseBytes[1]));
+            kSecondPortShift, VS::Input::legacyPadResponseBytes[1]));
     const std::uint32_t state = first | (second << kSecondPortShift);
     VS::Input::buttonsState = static_cast<int>(state);
-    VS::Input::UpdateLiveControllerConnection(0,
-                                              Input_legacyPadResponseBytes[0]);
-    VS::Input::UpdateLiveControllerConnection(kSecondPortShift,
-                                              Input_legacyPadResponseBytes[1]);
+    VS::Input::UpdateLiveControllerConnection(
+        0, VS::Input::legacyPadResponseBytes[0]);
+    VS::Input::UpdateLiveControllerConnection(
+        kSecondPortShift, VS::Input::legacyPadResponseBytes[1]);
     const auto previous =
         static_cast<std::uint32_t>(VS::Input::previousButtons);
     const std::uint32_t pressed = ~previous & state;
-    VS::Input::buttonsPressed.allButtons = pressed;
+    VS::Input::buttonsPressed = pressed;
     VS::Input::releasedButtons = static_cast<int>(previous & ~state);
     VS::Input::previousButtons = VS::Input::buttonsState;
     return pressed >> kSecondPortShift;

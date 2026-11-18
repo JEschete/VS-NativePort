@@ -96,7 +96,8 @@ namespace Math = VS::Core::Math;
 constexpr std::string_view kChannel = "field.camera";
 // Battle_ActionState::cameraPreview when no preview is framed.
 constexpr std::uint8_t kNoCameraPreview = 0xFF;
-// portInfo_t::controllerType of an analog (DualShock) pad.
+// LegacyControllerPort::controller_type (decomp: portInfo_t) of an analog
+// (DualShock) pad.
 constexpr int kAnalogControllerType = 7;
 
 std::uint64_t refused_calls = 0;
@@ -407,16 +408,15 @@ std::uint32_t LiveCameraHost::HeldButtons() {
 }
 
 std::uint32_t LiveCameraHost::PressedButtons() {
-  return VS::Input::buttonsPressed.allButtons;
+  return VS::Input::buttonsPressed;
 }
 
 std::optional<StickPosition> LiveCameraHost::AnalogRightStick() {
-  const Input_ControllerPortState& port = VS::Input::controllerPorts[0];
-  if (static_cast<std::uint8_t>(port.controllerType) != kAnalogControllerType) {
+  const VS::Input::LegacyControllerPort& port = VS::Input::controllerPorts[0];
+  if (port.controller_type != kAnalogControllerType) {
     return std::nullopt;
   }
-  return StickPosition{.x = static_cast<std::uint8_t>(port.rightStickX),
-                       .y = static_cast<std::uint8_t>(port.rightStickY)};
+  return StickPosition{.x = port.right_stick_x, .y = port.right_stick_y};
 }
 
 // The original loads vs_scratch_t::viewMatrix at 0x1F800014; the native

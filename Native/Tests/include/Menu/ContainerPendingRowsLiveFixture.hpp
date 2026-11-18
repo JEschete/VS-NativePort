@@ -78,9 +78,8 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     VS::Menu::textBoxBufferIndex = 0;
     Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable, kTextOrderingEntries);
-    PadInitDirect(
-        reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[0]),
-        reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[1]));
+    PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
+                  VS::Input::legacyPadResponseBytes[1].data());
     Buttons(0);
   }
   ~PendingRowsLiveFixture() {
