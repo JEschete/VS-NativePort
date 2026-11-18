@@ -8,9 +8,12 @@
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EVENT_SCRIPTCAMERA_H_DECLS)
 #define VS_EVENT_SCRIPTCAMERA_H_DECLS
-#include "Event/Camera.h"
-#include "Event/Screen.h"
 #include "Render/FramebufferEffects.h"
+
+// The workspace type is C++ (Event/Camera.hpp); the pointer keeps C linkage.
+namespace VS::Event {
+struct CameraState;
+}
 
 extern CVECTOR Event_kDefaultScreenTint;
 extern Render_FramebufferEffectTranslation Event_kDefaultScreenTransform;
@@ -19,6 +22,6 @@ extern short Event_kOrbitReturnHeightOffsets[134];
 extern u_char Event_kOrbitReturnFirstCommand[4];
 extern u_char Event_kOrbitReturnSecondCommand[3];
 extern char Event_skipNextFieldCameraRestore;
-extern Event_CameraState* Event_camera;
+extern VS::Event::CameraState* Event_camera;
 
 #endif // VS_EVENT_SCRIPTCAMERA_H_DECLS

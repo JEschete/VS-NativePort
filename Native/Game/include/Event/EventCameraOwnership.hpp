@@ -4,12 +4,14 @@
 // origin actor. The live binding (EventCameraOwnershipLive.hpp) allocates the
 // camera workspace, applies the start state in the original order and maps
 // the origin fields to and from the workspace.
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
 
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/EventCameraLens.hpp"
 #include "Event/ScriptCommand.hpp"
 
 namespace VS::Event {
@@ -88,9 +90,8 @@ struct EventCameraStart {
   EventLensStart far_clip;
   // The first shake oscillator's envelope word counts the active shakes.
   std::int16_t shake_count = 0;
-  // The busy flags the completion mask sums (bit 0x80).
-  std::uint8_t shake_a_busy = 0;
-  std::uint8_t shake_b_busy = 0;
+  // The oscillators' duration bytes; the completion mask sums them (bit 0x80).
+  std::array<std::uint8_t, kEventShakeOscillatorCount> shake_durations{};
   std::uint16_t origin_actor = kEventCameraWorldOrigin;
   // The framebuffer effect requests interleaved with the stores.
   bool screen_capture_enabled = false;

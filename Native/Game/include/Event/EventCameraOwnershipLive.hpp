@@ -1,6 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.h) and
+// Binding from the event camera workspace (Event_camera, Event/Camera.hpp) and
 // the field camera override (Event_skipNextFieldCameraRestore) to the typed
 // ownership rules (EventCameraOwnership.hpp). Each entry keeps the original
 // signature so the opcode table, the module bindings and the callers can use

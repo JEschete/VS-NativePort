@@ -7,6 +7,7 @@
 
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraControl.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
@@ -15,7 +16,6 @@
 #include "State/ScriptFlagsLive.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
@@ -32,7 +32,7 @@ constexpr int kSavedFieldDistanceFlag = 0xB0;
   std::abort();
 }
 
-Event_CameraState& RequiredCamera(const char* operation) {
+CameraState& RequiredCamera(const char* operation) {
   if (Event_camera == nullptr) Refuse(operation, "missing event camera");
   return *Event_camera;
 }
@@ -53,7 +53,7 @@ class LiveFieldCameraPlacementHost final : public EventFieldCameraHost {
 // decomp: BATTLE.PRG func_800BE36C (F01236, src/BATTLE/BATTLE.PRG/4A0A8.c:4018,
 // 0x800BE36C-0x800BE3A0)
 void SetEventCameraFollowingEntry(int look_at_follow, int eye_follow) {
-  Event_CameraState& camera = RequiredCamera("SetEventCameraFollowing");
+  CameraState& camera = RequiredCamera("SetEventCameraFollowing");
   EventCameraTracks tracks = LoadLiveEventCameraTracks(camera);
   SetEventCameraFollowing(tracks, static_cast<std::uint8_t>(look_at_follow),
                           static_cast<std::uint8_t>(eye_follow));
@@ -63,7 +63,7 @@ void SetEventCameraFollowingEntry(int look_at_follow, int eye_follow) {
 // decomp: BATTLE.PRG func_800BE3A0 (F01237, src/BATTLE/BATTLE.PRG/4A0A8.c:4026,
 // 0x800BE3A0-0x800BE3D0)
 void StopEventCameraMotionEntry() {
-  Event_CameraState& camera = RequiredCamera("StopEventCameraMotion");
+  CameraState& camera = RequiredCamera("StopEventCameraMotion");
   EventCameraTracks tracks = LoadLiveEventCameraTracks(camera);
   StopEventCameraMotion(tracks);
   StoreLiveEventCameraTracks(camera, tracks);
@@ -78,7 +78,7 @@ void RestoreEventFieldCameraEntry(std::int16_t field_facing,
     Event_skipNextFieldCameraRestore = static_cast<char>(skip);
     return;
   }
-  Event_CameraState& camera = RequiredCamera("RestoreEventFieldCamera");
+  CameraState& camera = RequiredCamera("RestoreEventFieldCamera");
   LiveFieldCameraPlacementHost field_camera;
   LiveEventCameraTrackHost motion;
   EventCameraTracks tracks = LoadLiveEventCameraTracks(camera);
@@ -97,7 +97,7 @@ void StartEventCameraOrbitReturnEntry(char orbit_side) {
   const SavedFieldCameraView view{
       .facing = State::LiveScriptFlag(kSavedFieldFacingFlag),
       .distance_index = State::LiveScriptFlag(kSavedFieldDistanceFlag)};
-  Event_CameraState& camera = RequiredCamera(kOperation);
+  CameraState& camera = RequiredCamera(kOperation);
   LiveFieldCameraPlacementHost field_camera;
   LiveEventCameraTrackHost motion;
   EventCameraTracks tracks = LoadLiveEventCameraTracks(camera);
@@ -119,7 +119,8 @@ void StartEventCameraOrbitReturnEntry(char orbit_side) {
 std::intptr_t Event_CommandStopCameraMotionOpcode(
     std::uint8_t* /*instruction*/, std::int16_t /*thread_index*/) {
   namespace event = VS::Event;
-  Event_CameraState& camera = event::RequiredCamera("CommandStopCameraMotion");
+  VS::Event::CameraState& camera =
+      event::RequiredCamera("CommandStopCameraMotion");
   event::EventCameraTracks tracks = event::LoadLiveEventCameraTracks(camera);
   event::CommandStopCameraMotion(tracks);
   event::StoreLiveEventCameraTracks(camera, tracks);
@@ -133,7 +134,7 @@ std::intptr_t Event_CommandSetCameraFollowingOpcode(
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandSetCameraFollowing";
   if (instruction == nullptr) event::Refuse(kOperation, "missing instruction");
-  Event_CameraState& camera = event::RequiredCamera(kOperation);
+  VS::Event::CameraState& camera = event::RequiredCamera(kOperation);
   event::EventCameraTracks tracks = event::LoadLiveEventCameraTracks(camera);
   static_cast<void>(event::CommandSetCameraFollowing(
       event::ScriptCommand{instruction, event::kSetCameraFollowingLength},

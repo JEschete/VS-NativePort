@@ -216,8 +216,8 @@ bool UpdateEventShakeOscillator(EventShakeOscillator& oscillator,
 void UpdateEventCameraShake(EventCameraShake& shake,
                             EventCameraScratch& scratch,
                             EventCameraLensHost& host) {
-  scratch.eye_shake = {};
   scratch.look_at_shake = {};
+  scratch.eye_shake = {};
   std::int16_t active = 0;
   for (EventShakeOscillator& oscillator : shake.oscillators) {
     if (!UpdateEventShakeOscillator(oscillator, scratch.envelope, host)) {
@@ -231,19 +231,19 @@ void UpdateEventCameraShake(EventCameraShake& shake,
     };
     scratch.axis_shake = {
         .x = axis(kXAxisShift), .y = axis(kYAxisShift), .z = axis(kZAxisShift)};
-    if ((mask & kShakeAxisEye) != 0) {
-      scratch.eye_shake = AddPositions(scratch.eye_shake, scratch.axis_shake);
-    }
     if ((mask & kShakeAxisLookAt) != 0) {
       scratch.look_at_shake =
           AddPositions(scratch.look_at_shake, scratch.axis_shake);
+    }
+    if ((mask & kShakeAxisEye) != 0) {
+      scratch.eye_shake = AddPositions(scratch.eye_shake, scratch.axis_shake);
     }
     ++active;
   }
   shake.active_count = active;
   if (active != 0) {
-    shake.eye_offset = scratch.eye_shake;
     shake.look_at_offset = scratch.look_at_shake;
+    shake.eye_offset = scratch.eye_shake;
   }
 }
 

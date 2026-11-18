@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Event/Camera.hpp"
+
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Event/Camera.h"
-#include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
 #include "Render/FramebufferEffects.h"
 
@@ -28,6 +28,6 @@ u_char Event_kOrbitReturnSecondCommand[3]; /* contents: module image (ModuleData
 char Event_skipNextFieldCameraRestore;
 
 // decomp: D_800F4BA4 (D_800F4BA4@BATTLE/BATTLE.PRG)
-Event_CameraState* Event_camera;
+VS::Event::CameraState* Event_camera;
 
 }  // extern "C"

@@ -1827,7 +1827,7 @@
     <ClInclude Include="src\Event\Actors.h">
       <Filter>src\Event</Filter>
     </ClInclude>
-    <ClInclude Include="src\Event\Camera.h">
+    <ClInclude Include="src\Event\Camera.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\CutsceneLifecycle.cpp">
@@ -1905,7 +1905,7 @@
     <ClCompile Include="src\Event\RoomTriggers.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\Screen.h">
+    <ClInclude Include="src\Event\Screen.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\Script.cpp">

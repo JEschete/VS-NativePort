@@ -12,11 +12,11 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Scratch.h"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/ScriptCommand.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
@@ -27,38 +27,13 @@ namespace VS::Event {
 namespace {
 using Core::Math::Position3;
 
-// The original addressed the oscillators from the first slot's displacement:
-// a two-byte active count at 0x1A4, then two 12-byte oscillators.
-constexpr std::size_t kShakeCountOffset = 0x1A4;
-constexpr std::size_t kFirstOscillatorOffset = 0x1A6;
-constexpr std::size_t kOscillatorStride = sizeof(Event_ShakeOscillator);
-static_assert(offsetof(Event_CameraState, shakeOscillatorA) ==
-              kShakeCountOffset);
-static_assert(offsetof(Event_CameraState, shakeEyeOffsetX) ==
-              kFirstOscillatorOffset +
-                  kEventShakeOscillatorCount * kOscillatorStride);
-// Oscillator fields, from the record's start.
-using Oscillator = Event_ShakeOscillator;
-constexpr std::size_t kEnvelopeField = offsetof(Oscillator, envelopeShape) + 1;
-constexpr std::size_t kDisplacementField = offsetof(Oscillator, displacement);
-constexpr std::size_t kCyclesField = offsetof(Oscillator, cycles);
-constexpr std::size_t kAmplitudeField = offsetof(Oscillator, amplitude);
-constexpr std::size_t kElapsedField = offsetof(Oscillator, elapsedFrames);
-constexpr std::size_t kDurationField = offsetof(Oscillator, durationFrames);
-constexpr std::size_t kAxisMaskField = offsetof(Oscillator, axisMask);
-// The scratch words: the shared envelope (0x1F800088) and the
-// cameraShakeScratch vectors behind it.
-using ShakeScratch = Event_CameraShakeScratch;
+static_assert(kShakeOscillatorCount == kEventShakeOscillatorCount);
+// The scratch words (decomp cameraShakeScratch at 0x1F800088): the shared
+// envelope, then the look-at, eye and per-axis shake vectors.
 constexpr std::size_t kEnvelopeScratch = 0x88;
-constexpr std::size_t kEyeShakeScratch = 0xD8;
-constexpr std::size_t kLookAtShakeScratch = 0xE0;
+constexpr std::size_t kLookAtShakeScratch = 0xD8;
+constexpr std::size_t kEyeShakeScratch = 0xE0;
 constexpr std::size_t kAxisShakeScratch = 0xE8;
-static_assert(kEnvelopeScratch + offsetof(ShakeScratch, eyeShake) ==
-              kEyeShakeScratch);
-static_assert(kEnvelopeScratch + offsetof(ShakeScratch, lookAtShake) ==
-              kLookAtShakeScratch);
-static_assert(kEnvelopeScratch + offsetof(ShakeScratch, axisShake) ==
-              kAxisShakeScratch);
 constexpr std::size_t kHalfBytes = sizeof(std::int16_t);
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
@@ -66,7 +41,7 @@ constexpr std::size_t kHalfBytes = sizeof(std::int16_t);
   std::abort();
 }
 
-Event_CameraState& RequiredCamera(const char* operation) {
+CameraState& RequiredCamera(const char* operation) {
   if (Event_camera == nullptr) Refuse(operation, "missing event camera");
   return *Event_camera;
 }
@@ -103,16 +78,16 @@ void StorePosition(unsigned char* base, std::size_t offset, Position3 value) {
 EventCameraScratch LoadScratch() {
   const unsigned char* scratch = ScratchBytes();
   return {.envelope = LoadAt<std::int32_t>(scratch, kEnvelopeScratch),
-          .eye_shake = LoadPosition(scratch, kEyeShakeScratch),
           .look_at_shake = LoadPosition(scratch, kLookAtShakeScratch),
+          .eye_shake = LoadPosition(scratch, kEyeShakeScratch),
           .axis_shake = LoadPosition(scratch, kAxisShakeScratch)};
 }
 
 void StoreScratch(const EventCameraScratch& values) {
   unsigned char* scratch = ScratchBytes();
   StoreAt(scratch, kEnvelopeScratch, values.envelope);
-  StorePosition(scratch, kEyeShakeScratch, values.eye_shake);
   StorePosition(scratch, kLookAtShakeScratch, values.look_at_shake);
+  StorePosition(scratch, kEyeShakeScratch, values.eye_shake);
   StorePosition(scratch, kAxisShakeScratch, values.axis_shake);
 }
 
@@ -124,93 +99,81 @@ void StoreEnvelopeScratch(std::int32_t envelope) {
   StoreAt(ScratchBytes(), kEnvelopeScratch, envelope);
 }
 
-EventLensTween LoadLens(const Event_LensTween& lens) {
-  return {.changed = static_cast<std::uint8_t>(lens.hasChanged),
-          .easing_mode = static_cast<std::uint8_t>(lens.easingMode),
+EventLensTween LoadLens(const LensTween& lens) {
+  return {.changed = lens.has_changed,
+          .easing_mode = lens.easing_mode,
           .value = lens.value,
-          .start_value = lens.startValue,
-          .delta_value = lens.deltaValue,
-          .elapsed_frames = static_cast<std::uint8_t>(lens.elapsedFrames),
-          .duration_frames = static_cast<std::uint8_t>(lens.durationFrames)};
+          .start_value = lens.start_value,
+          .delta_value = lens.delta_value,
+          .elapsed_frames = lens.elapsed_frames,
+          .duration_frames = lens.duration_frames};
 }
 
-void StoreLens(Event_LensTween& lens, const EventLensTween& tween) {
-  lens.hasChanged = static_cast<char>(tween.changed);
-  lens.easingMode = static_cast<char>(tween.easing_mode);
+void StoreLens(LensTween& lens, const EventLensTween& tween) {
+  lens.has_changed = tween.changed;
+  lens.easing_mode = tween.easing_mode;
   lens.value = tween.value;
-  lens.startValue = tween.start_value;
-  lens.deltaValue = tween.delta_value;
-  lens.elapsedFrames = static_cast<char>(tween.elapsed_frames);
-  lens.durationFrames = static_cast<char>(tween.duration_frames);
+  lens.start_value = tween.start_value;
+  lens.delta_value = tween.delta_value;
+  lens.elapsed_frames = tween.elapsed_frames;
+  lens.duration_frames = tween.duration_frames;
 }
 
-EventShakeOscillator LoadOscillator(const unsigned char* record) {
-  return {.envelope = LoadAt<std::uint8_t>(record, kEnvelopeField),
-          .displacement = LoadAt<std::int16_t>(record, kDisplacementField),
-          .cycles = LoadAt<std::int16_t>(record, kCyclesField),
-          .amplitude = LoadAt<std::int16_t>(record, kAmplitudeField),
-          .elapsed_frames = LoadAt<std::uint8_t>(record, kElapsedField),
-          .duration_frames = LoadAt<std::uint8_t>(record, kDurationField),
-          .axis_mask = LoadAt<std::uint8_t>(record, kAxisMaskField)};
+EventShakeOscillator LoadOscillator(const ShakeOscillator& record) {
+  return {.envelope = record.envelope_shape,
+          .displacement = record.displacement,
+          .cycles = record.cycles,
+          .amplitude = record.amplitude,
+          .elapsed_frames = record.elapsed_frames,
+          .duration_frames = record.duration_frames,
+          .axis_mask = record.axis_mask};
 }
 
-// Byte 0 and byte 11 of each record are not the oscillator's.
-void StoreOscillator(unsigned char* record,
+// The record's first and last bytes are not the oscillator's and are kept.
+void StoreOscillator(ShakeOscillator& record,
                      const EventShakeOscillator& oscillator) {
-  StoreAt(record, kEnvelopeField, oscillator.envelope);
-  StoreAt(record, kDisplacementField, oscillator.displacement);
-  StoreAt(record, kCyclesField, oscillator.cycles);
-  StoreAt(record, kAmplitudeField, oscillator.amplitude);
-  StoreAt(record, kElapsedField, oscillator.elapsed_frames);
-  StoreAt(record, kDurationField, oscillator.duration_frames);
-  StoreAt(record, kAxisMaskField, oscillator.axis_mask);
+  record.envelope_shape = oscillator.envelope;
+  record.displacement = oscillator.displacement;
+  record.cycles = oscillator.cycles;
+  record.amplitude = oscillator.amplitude;
+  record.elapsed_frames = oscillator.elapsed_frames;
+  record.duration_frames = oscillator.duration_frames;
+  record.axis_mask = oscillator.axis_mask;
 }
 
-unsigned char* OscillatorRecord(Event_CameraState& camera, std::size_t index) {
-  return reinterpret_cast<unsigned char*>(&camera) + kFirstOscillatorOffset +
-         index * kOscillatorStride;
-}
-
-EventCameraShake LoadShake(Event_CameraState& camera) {
+EventCameraShake LoadShake(const CameraState& camera) {
   EventCameraShake shake;
   for (std::size_t index = 0; index < shake.oscillators.size(); ++index) {
     shake.oscillators.at(index) =
-        LoadOscillator(OscillatorRecord(camera, index));
+        LoadOscillator(camera.shake_oscillators.at(index));
   }
-  shake.active_count = camera.shakeOscillatorA.envelopeShape.count;
-  shake.eye_offset = {.x = camera.shakeEyeOffsetX,
-                      .y = camera.shakeEyeOffsetY,
-                      .z = camera.shakeEyeOffsetZ};
-  shake.look_at_offset = {.x = camera.shakeLookAtOffsetX,
-                          .y = camera.shakeLookAtOffsetY,
-                          .z = camera.shakeLookAtOffsetZ};
+  shake.active_count = camera.shake_active_count;
+  shake.look_at_offset = camera.shake_look_at_offset;
+  shake.eye_offset = camera.shake_eye_offset;
   return shake;
 }
 
-void StoreShake(Event_CameraState& camera, const EventCameraShake& shake) {
+// The offsets are three halfwords each; the pad between them is kept.
+void StoreShake(CameraState& camera, const EventCameraShake& shake) {
   for (std::size_t index = 0; index < shake.oscillators.size(); ++index) {
-    StoreOscillator(OscillatorRecord(camera, index),
+    StoreOscillator(camera.shake_oscillators.at(index),
                     shake.oscillators.at(index));
   }
-  camera.shakeOscillatorA.envelopeShape.count = shake.active_count;
-  camera.shakeEyeOffsetX = shake.eye_offset.x;
-  camera.shakeEyeOffsetY = shake.eye_offset.y;
-  camera.shakeEyeOffsetZ = shake.eye_offset.z;
-  camera.shakeLookAtOffsetX = shake.look_at_offset.x;
-  camera.shakeLookAtOffsetY = shake.look_at_offset.y;
-  camera.shakeLookAtOffsetZ = shake.look_at_offset.z;
+  camera.shake_active_count = shake.active_count;
+  camera.shake_look_at_offset = shake.look_at_offset;
+  camera.shake_eye_offset = shake.eye_offset;
 }
 
-EventCameraLenses LoadLenses(const Event_CameraState& camera) {
-  return {.projection_distance = LoadLens(camera.projectionDistance),
-          .near_clip = LoadLens(camera.nearClip),
-          .far_clip = LoadLens(camera.farClip)};
+EventCameraLenses LoadLenses(const CameraState& camera) {
+  return {.projection_distance = LoadLens(camera.projection_distance),
+          .near_clip = LoadLens(camera.near_clip),
+          .far_clip = LoadLens(camera.far_clip)};
 }
 
-void StoreLenses(Event_CameraState& camera, const EventCameraLenses& lenses) {
-  StoreLens(camera.projectionDistance, lenses.projection_distance);
-  StoreLens(camera.nearClip, lenses.near_clip);
-  StoreLens(camera.farClip, lenses.far_clip);
+void StoreLenses(CameraState& camera, const EventCameraLenses& lenses) {
+  StoreLens(camera.projection_distance, lenses.projection_distance);
+  StoreLens(camera.near_clip, lenses.near_clip);
+  StoreLens(camera.far_clip, lenses.far_clip);
 }
 
 std::size_t CommandLength(std::uint8_t opcode) {
@@ -242,7 +205,7 @@ class LiveEventCameraLensHost final : public EventCameraLensHost {
 
 // decomp: BATTLE.PRG func_800BDF6C (F01233, src/BATTLE/BATTLE.PRG/4A0A8.c:3927,
 // 0x800BDF6C-0x800BE01C)
-void UpdateEventLensTweenEntry(Event_LensTween* lens_tween) {
+void UpdateEventLensTweenEntry(LensTween* lens_tween) {
   if (lens_tween == nullptr) Refuse("UpdateEventLensTween", "missing tween");
   LiveEventCameraLensHost host;
   EventLensTween tween = LoadLens(*lens_tween);
@@ -254,16 +217,15 @@ void UpdateEventLensTweenEntry(Event_LensTween* lens_tween) {
 
 // decomp: BATTLE.PRG func_800BE01C (F01234, src/BATTLE/BATTLE.PRG/4A0A8.c:3945,
 // 0x800BE01C-0x800BE180)
-int UpdateEventShakeOscillatorEntry(Event_ShakeOscillator* oscillator) {
+int UpdateEventShakeOscillatorEntry(ShakeOscillator* oscillator) {
   if (oscillator == nullptr) {
     Refuse("UpdateEventShakeOscillator", "missing oscillator");
   }
-  auto* record = reinterpret_cast<unsigned char*>(oscillator);
   LiveEventCameraLensHost host;
-  EventShakeOscillator state = LoadOscillator(record);
+  EventShakeOscillator state = LoadOscillator(*oscillator);
   std::int32_t envelope = LoadEnvelopeScratch();
   const bool active = UpdateEventShakeOscillator(state, envelope, host);
-  StoreOscillator(record, state);
+  StoreOscillator(*oscillator, state);
   StoreEnvelopeScratch(envelope);
   return active ? 1 : 0;
 }
@@ -271,7 +233,7 @@ int UpdateEventShakeOscillatorEntry(Event_ShakeOscillator* oscillator) {
 // decomp: BATTLE.PRG func_800BE180 (F01235, src/BATTLE/BATTLE.PRG/4A0A8.c:3983,
 // 0x800BE180-0x800BE36C)
 void UpdateEventCameraShakeEntry() {
-  Event_CameraState& camera = RequiredCamera("UpdateEventCameraShake");
+  CameraState& camera = RequiredCamera("UpdateEventCameraShake");
   LiveEventCameraLensHost host;
   EventCameraShake shake = LoadShake(camera);
   EventCameraScratch scratch = LoadScratch();
@@ -290,7 +252,7 @@ std::intptr_t Event_CommandCameraLensOrShakeOpcode(
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandCameraLensOrShake";
   if (instruction == nullptr) event::Refuse(kOperation, "missing instruction");
-  Event_CameraState& camera = event::RequiredCamera(kOperation);
+  VS::Event::CameraState& camera = event::RequiredCamera(kOperation);
   event::EventCameraLenses lenses = event::LoadLenses(camera);
   event::EventCameraShake shake = event::LoadShake(camera);
   const std::optional<std::intptr_t> result = event::CommandCameraLensOrShake(

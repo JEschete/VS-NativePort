@@ -1,6 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.h), the
+// Binding from the event camera workspace (Event_camera, Event/Camera.hpp), the
 // field camera override (Event_skipNextFieldCameraRestore), the field camera
 // placement and the saved field view's script flags to the typed stop,
 // follow and field returns (EventCameraControl.hpp). Each entry keeps the

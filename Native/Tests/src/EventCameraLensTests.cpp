@@ -8,13 +8,13 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Math/Distance.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/EventCameraLensLive.hpp"
 #include "Event/ScriptCommand.hpp"
 
 extern "C" {
 #include "Core/Scratch.h"
-#include "Event/Camera.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "State/Timers.h"
@@ -71,8 +71,8 @@ event::EventShakeOscillator ActiveOscillator() {
 
 // Saves the event camera globals the live entries use.
 struct LiveLensFixture {
-  Event_CameraState camera{};
-  Event_CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState camera{};
+  VS::Event::CameraState* saved_camera = Event_camera;
   int saved_tick_speed = State_tickSpeed;
   std::array<unsigned char, 0x100> saved_scratch{};
 
@@ -101,6 +101,13 @@ std::int32_t ScratchWord(std::size_t offset) {
 void SetScratchWord(std::size_t offset, std::int32_t value) {
   std::memcpy(static_cast<unsigned char*>(Core_ScratchBase()) + offset, &value,
               sizeof(value));
+}
+
+Position3 ScratchPosition(std::size_t offset) {
+  Position3 value;
+  std::memcpy(&value, static_cast<unsigned char*>(Core_ScratchBase()) + offset,
+              sizeof(value));
+  return value;
 }
 }  // namespace
 
@@ -325,16 +332,16 @@ TEST_CASE("Camera shake sums the oscillators per axis and track",
   // x factor +1, y factor -1, z factor 0, eye and look-at.
   shake.oscillators.at(0).axis_mask = (2 << 2) | (0 << 4) | (1 << 6) | 3;
   shake.oscillators.at(1) = ActiveOscillator();
-  // x factor +2, look-at only.
+  // x factor +2, eye only.
   shake.oscillators.at(1).axis_mask = (3 << 2) | (1 << 4) | (1 << 6) | 2;
   event::EventCameraScratch scratch;
-  scratch.eye_shake = {9, 9, 9};
+  scratch.look_at_shake = {9, 9, 9};
   event::UpdateEventCameraShake(shake, scratch, host);
   CHECK(shake.active_count == 2);
-  CHECK(shake.eye_offset == Position3{0x100, -0x100, 0});
-  CHECK(shake.look_at_offset == Position3{0x300, -0x100, 0});
+  CHECK(shake.look_at_offset == Position3{0x100, -0x100, 0});
+  CHECK(shake.eye_offset == Position3{0x300, -0x100, 0});
   CHECK(scratch.axis_shake == Position3{0x200, 0, 0});
-  CHECK(scratch.eye_shake == shake.eye_offset);
+  CHECK(scratch.look_at_shake == shake.look_at_offset);
 }
 
 TEST_CASE("Camera shake keeps the offsets while idle",
@@ -342,17 +349,17 @@ TEST_CASE("Camera shake keeps the offsets while idle",
   FakeLensHost host;
   event::EventCameraShake shake;
   shake.active_count = 2;
-  shake.eye_offset = {1, 2, 3};
-  shake.look_at_offset = {4, 5, 6};
+  shake.look_at_offset = {1, 2, 3};
+  shake.eye_offset = {4, 5, 6};
   event::EventCameraScratch scratch;
-  scratch.eye_shake = {9, 9, 9};
-  scratch.look_at_shake = {8, 8, 8};
+  scratch.look_at_shake = {9, 9, 9};
+  scratch.eye_shake = {8, 8, 8};
   event::UpdateEventCameraShake(shake, scratch, host);
   CHECK(shake.active_count == 0);
-  CHECK(shake.eye_offset == Position3{1, 2, 3});
-  CHECK(shake.look_at_offset == Position3{4, 5, 6});
-  CHECK(scratch.eye_shake == Position3{});
+  CHECK(shake.look_at_offset == Position3{1, 2, 3});
+  CHECK(shake.eye_offset == Position3{4, 5, 6});
   CHECK(scratch.look_at_shake == Position3{});
+  CHECK(scratch.eye_shake == Position3{});
   CHECK(host.sine_angles.empty());
 }
 
@@ -366,28 +373,36 @@ TEST_CASE("Camera shake offset sums wrap at 16 bits", "[event][camera][lens]") {
   shake.oscillators.at(1) = shake.oscillators.at(0);
   event::EventCameraScratch scratch;
   event::UpdateEventCameraShake(shake, scratch, host);
-  CHECK(shake.eye_offset.x == -0x2000);
-  CHECK(shake.look_at_offset == Position3{});
+  CHECK(shake.look_at_offset.x == -0x2000);
+  CHECK(shake.eye_offset == Position3{});
 }
 
 // Live entries and the opcode wrapper over the camera workspace.
 TEST_CASE("Live camera lens opcode writes the workspace",
           "[event][camera][lens]") {
   const LiveLensFixture fixture;
-  Event_camera->nearClip.value = 0x20;
+  Event_camera->near_clip.value = 0x20;
   std::array<std::uint8_t, 4> lens{0xEB, 0x60, 2, 6};
   CHECK(Event_CommandCameraLensOrShakeOpcode(lens.data(), 0) == 0);
-  CHECK(Event_camera->nearClip.startValue == 0x20);
-  CHECK(Event_camera->nearClip.deltaValue == 0x40);
-  CHECK(Event_camera->nearClip.durationFrames == 6);
+  CHECK(Event_camera->near_clip.start_value == 0x20);
+  CHECK(Event_camera->near_clip.delta_value == 0x40);
+  CHECK(Event_camera->near_clip.duration_frames == 6);
+}
 
+TEST_CASE("Live camera shake opcode fills the first idle oscillator",
+          "[event][camera][lens]") {
+  const LiveLensFixture fixture;
   std::array<std::uint8_t, 6> start{0xEF, 2, 0x40, 0x07, 1, 30};
   CHECK(Event_CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
-  const auto* bytes = reinterpret_cast<const unsigned char*>(Event_camera);
-  // The first oscillator record starts at 0x1A6: duration at +9.
-  CHECK(bytes[0x1A6 + 9] == 30);
-  CHECK(bytes[0x1A6 + 1] == 1);
-  CHECK(Event_camera->shakeOscillatorA.envelopeShape.count == 0);
+  const VS::Event::ShakeOscillator& first =
+      Event_camera->shake_oscillators.at(0);
+  CHECK(first.cycles == 2);
+  CHECK(first.amplitude == 0x40);
+  CHECK(first.axis_mask == 0x07);
+  CHECK(first.envelope_shape == 1);
+  CHECK(first.duration_frames == 30);
+  CHECK(Event_camera->shake_oscillators.at(1).duration_frames == 0);
+  CHECK(Event_camera->shake_active_count == 0);
 }
 
 TEST_CASE("Live camera shake entry updates the workspace and scratch",
@@ -398,28 +413,49 @@ TEST_CASE("Live camera shake entry updates the workspace and scratch",
   REQUIRE(Event_CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
   SetScratchWord(0x88, 5);
   VS::Event::UpdateEventCameraShakeEntry();
-  CHECK(Event_camera->shakeOscillatorA.envelopeShape.count == 1);
+  CHECK(Event_camera->shake_active_count == 1);
   // Zero cycles keep the wave at sin(0).
-  CHECK(Event_camera->shakeEyeOffsetX == 0);
+  CHECK(Event_camera->shake_look_at_offset == Position3{});
   CHECK(ScratchWord(0x88) == 0x1000);
-  const auto* bytes = reinterpret_cast<const unsigned char*>(Event_camera);
-  CHECK(bytes[0x1A6 + 8] == 1);
+  CHECK(Event_camera->shake_oscillators.at(0).elapsed_frames == 1);
+}
+
+// func_800BE180 adds axis bit 0 into 0x1BE, which applyCameraState adds to the
+// look-at, and bit 1 into 0x1C6, which it adds to the eye.
+TEST_CASE("Live camera shake routes each axis bit to its workspace offset",
+          "[event][camera][lens]") {
+  const LiveLensFixture fixture;
+  State_tickSpeed = 2;
+  // A quarter cycle on the first tick: sin(0x400) is 1.0. Each axis field holds
+  // its direction plus 1.
+  std::array<std::uint8_t, 6> look_at{
+      0xEF, 1, 0x40, (2 << 2) | (1 << 4) | (1 << 6) | 1, 0, 4};
+  std::array<std::uint8_t, 6> eye{
+      0xEF, 1, 0x20, (1 << 2) | (2 << 4) | (1 << 6) | 2, 0, 4};
+  REQUIRE(Event_CommandCameraLensOrShakeOpcode(look_at.data(), 0) == 0);
+  REQUIRE(Event_CommandCameraLensOrShakeOpcode(eye.data(), 0) == 0);
+  VS::Event::UpdateEventCameraShakeEntry();
+  CHECK(Event_camera->shake_active_count == 2);
+  CHECK(Event_camera->shake_look_at_offset == Position3{.x = 0x40});
+  CHECK(Event_camera->shake_eye_offset == Position3{.y = 0x20});
+  CHECK(ScratchPosition(0xD8) == Position3{.x = 0x40});
+  CHECK(ScratchPosition(0xE0) == Position3{.y = 0x20});
 }
 
 TEST_CASE("Live lens tween entry stores the value and the fraction",
           "[event][camera][lens]") {
   const LiveLensFixture fixture;
   State_tickSpeed = 4;
-  Event_LensTween& tween = Event_camera->farClip;
-  tween.startValue = 0x100;
-  tween.deltaValue = 0x100;
-  tween.elapsedFrames = 8;
-  tween.durationFrames = 10;
+  VS::Event::LensTween& tween = Event_camera->far_clip;
+  tween.start_value = 0x100;
+  tween.delta_value = 0x100;
+  tween.elapsed_frames = 8;
+  tween.duration_frames = 10;
   SetScratchWord(0x88, -1);
   VS::Event::UpdateEventLensTweenEntry(&tween);
-  CHECK(tween.elapsedFrames == 10);
-  CHECK(tween.durationFrames == 0);
-  CHECK(tween.hasChanged == 1);
+  CHECK(tween.elapsed_frames == 10);
+  CHECK(tween.duration_frames == 0);
+  CHECK(tween.has_changed == 1);
   CHECK(ScratchWord(0x88) == 0x1000);
   CHECK(tween.value == 0x200);
 }

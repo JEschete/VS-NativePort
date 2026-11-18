@@ -40,7 +40,7 @@ enum class ScreenTransformOpcode : std::uint8_t {
 [[nodiscard]] std::optional<std::size_t> ScreenTransformLength(
     std::uint8_t opcode) noexcept;
 
-// Event_AngleTween (func_800BD57C_t): a 12-bit angle eased from `start` by
+// AngleTween (func_800BD57C_t): a 12-bit angle eased from `start` by
 // `delta` over `duration` half-ticks. `changed` tells the camera to apply it.
 struct EventAngleTween {
   std::uint8_t changed{};
@@ -55,7 +55,7 @@ struct EventAngleTween {
                          const EventAngleTween&) = default;
 };
 
-// Event_TripleTween (func_800BDBB4_t): up to three values eased together.
+// TripleTween (func_800BDBB4_t): up to three values eased together.
 // The two-value tweens still advance their third value from whatever start
 // and delta it holds, as the original did.
 inline constexpr std::size_t kScreenTweenValues = 3;

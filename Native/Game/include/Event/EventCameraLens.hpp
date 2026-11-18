@@ -2,7 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // The event camera's lens tweens (projection distance, near and far clip),
 // its two-oscillator shake and the script opcode that configures them. This is
-// the event script camera (Event/Camera.h); the Effects camera shake is a
+// the event script camera (Event/Camera.hpp); the Effects camera shake is a
 // separate system. The live binding (EventCameraLensLive.hpp) maps the
 // workspace and the shared scratch words to and from these records.
 #include <array>
@@ -30,9 +30,11 @@ inline constexpr std::uint8_t kShakeEnvelopeFlat = 0;
 inline constexpr std::uint8_t kShakeEnvelopeFadeOut = 1;
 inline constexpr std::uint8_t kShakeEnvelopeSwell = 2;
 inline constexpr std::uint8_t kShakeEnvelopeFadeIn = 3;
-// The axis mask's low bits select the shaken tracks.
-inline constexpr std::uint8_t kShakeAxisEye = 0x01;
-inline constexpr std::uint8_t kShakeAxisLookAt = 0x02;
+// The axis mask's low bits select the shaken tracks: bit 0 sums into the
+// look-at offset (workspace 0x1BE), bit 1 into the eye offset (0x1C6), which
+// vs_battle_applyCameraState adds to the look-at point and the eye.
+inline constexpr std::uint8_t kShakeAxisLookAt = 0x01;
+inline constexpr std::uint8_t kShakeAxisEye = 0x02;
 
 // A lens value tweened from `start_value` by `delta_value` over
 // `duration_frames`; a zero duration is at rest. `changed` asks the camera
@@ -79,8 +81,8 @@ struct EventCameraShake {
   std::array<EventShakeOscillator, kEventShakeOscillatorCount> oscillators{};
   // The oscillators active in the last update.
   std::int16_t active_count = 0;
-  Core::Math::Position3 eye_offset;
   Core::Math::Position3 look_at_offset;
+  Core::Math::Position3 eye_offset;
 
   friend bool operator==(const EventCameraShake&,
                          const EventCameraShake&) = default;
@@ -91,8 +93,8 @@ struct EventCameraShake {
 // reuses whatever it holds, as in the original.
 struct EventCameraScratch {
   std::int32_t envelope = 0;
-  Core::Math::Position3 eye_shake;
   Core::Math::Position3 look_at_shake;
+  Core::Math::Position3 eye_shake;
   Core::Math::Position3 axis_shake;
 
   friend bool operator==(const EventCameraScratch&,

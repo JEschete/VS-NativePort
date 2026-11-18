@@ -9,15 +9,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
 #include "Event/EventScreenTweensLive.hpp"
 #include "Event/ScriptCommand.hpp"
 
 extern "C" {
 #include "Core/Scratch.h"
-#include "Event/Camera.h"
 #include "Event/InterpolationCurveLive.h"
-#include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "State/Timers.h"
@@ -354,7 +353,7 @@ TEST_CASE("Screen tweens apply each running tween in order",
 
 TEST_CASE("Live screen tween entries skip a missing camera or tween",
           "[event][camera][screen-tween]") {
-  Event_CameraState* const saved = Event_camera;
+  VS::Event::CameraState* const saved = Event_camera;
   Event_camera = nullptr;
   const std::uint64_t before = ev::RefusedEventScreenTweenCount();
   std::array<std::uint8_t, 5> instruction{0xE4, 1, 2, 3, 0};
@@ -370,24 +369,24 @@ TEST_CASE("Live screen tween entries skip a missing camera or tween",
 
 TEST_CASE("Live screen tween entries keep the workspace layout",
           "[event][camera][screen-tween]") {
-  Event_CameraState* const saved = Event_camera;
+  VS::Event::CameraState* const saved = Event_camera;
   const int saved_tick = State_tickSpeed;
-  Event_CameraState camera{};
+  VS::Event::CameraState camera{};
   Event_camera = &camera;
-  camera.capturedScreenRoll.angle = 0x700;
+  camera.captured_screen_roll.angle = 0x700;
   std::array<std::uint8_t, 5> roll{0xE3, 0x00, 0x01, 0x2F, 4};
   CHECK(Event_CommandTweenCameraRollOpcode(roll.data(), 0) == 0);
-  CHECK(camera.capturedScreenRoll.deltaAngle == -0x600 + 0x1000);
-  CHECK(camera.capturedScreenRoll.easingMode == 0xF);
+  CHECK(camera.captured_screen_roll.delta_angle == -0x600 + 0x1000);
+  CHECK(camera.captured_screen_roll.easing_mode == 0xF);
   State_tickSpeed = 4;
-  camera.screenTint.reserved08 = 0x1234;
-  camera.screenTint.reserved1A = 0x5678;
-  camera.screenTint.startValue0 = 0x40;
-  camera.screenTint.durationFrames = 2;
-  CHECK(ev::UpdateEventTripleTweenEntry(&camera.screenTint) == 1);
-  CHECK(camera.screenTint.reserved08 == 0x1234);
-  CHECK(camera.screenTint.reserved1A == 0x5678);
-  CHECK(camera.screenTint.durationFrames == 0);
+  camera.screen_tint.reserved08 = 0x1234;
+  camera.screen_tint.reserved1a = 0x5678;
+  camera.screen_tint.start_value0 = 0x40;
+  camera.screen_tint.duration_frames = 2;
+  CHECK(ev::UpdateEventTripleTweenEntry(&camera.screen_tint) == 1);
+  CHECK(camera.screen_tint.reserved08 == 0x1234);
+  CHECK(camera.screen_tint.reserved1a == 0x5678);
+  CHECK(camera.screen_tint.duration_frames == 0);
   std::int32_t recorded = 0;
   std::memcpy(&recorded, static_cast<std::byte*>(Core_ScratchBase()) + 0x88,
               sizeof(recorded));

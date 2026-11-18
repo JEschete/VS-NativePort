@@ -16,6 +16,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
@@ -25,7 +26,6 @@
 
 extern "C" {
 #include "Battle/TargetingState.h"
-#include "Event/Camera.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
@@ -86,10 +86,14 @@ struct EventSessionFixture {
 };
 
 struct EventCameraFixture {
-  Event_CameraState* saved_camera = Event_camera;
+  // The camera track rules use the scratch words from 0x1F800088 (decomp
+  // cameraScratch, 0x90 bytes).
+  static constexpr std::size_t kCameraScratchOffset = 0x88;
+  static constexpr std::size_t kCameraScratchBytes = 0x90;
+  VS::Event::CameraState* saved_camera = Event_camera;
   decltype(State_tickSpeed) saved_speed = State_tickSpeed;
-  Event_CameraState camera{};
-  std::array<std::byte, sizeof(Event_CameraTrackScratch)> scratch{};
+  VS::Event::CameraState camera{};
+  std::array<std::byte, kCameraScratchBytes> scratch{};
   std::array<u_char, sizeof Event_kOrbitReturnFirstCommand> saved_eye{};
   std::array<u_char, sizeof Event_kOrbitReturnSecondCommand> saved_look_at{};
 
@@ -98,16 +102,17 @@ struct EventCameraFixture {
                 saved_eye.size());
     std::memcpy(saved_look_at.data(), &Event_kOrbitReturnSecondCommand,
                 saved_look_at.size());
-    std::memcpy(scratch.data(),
-                static_cast<std::byte*>(Core_ScratchBase()) + 0x88,
-                scratch.size());
+    std::memcpy(
+        scratch.data(),
+        static_cast<std::byte*>(Core_ScratchBase()) + kCameraScratchOffset,
+        scratch.size());
     Event_camera = &camera;
     State_tickSpeed = 2;
-    camera.lookAt.currentPosition = {100, 200, 300, 0};
-    camera.lookAt.destination = {400, 500, 600, 0};
-    camera.lookAt.partnerPosition = {1000, 800, 900, 0};
-    camera.eye.currentPosition = camera.lookAt.partnerPosition;
-    camera.eye.partnerPosition = camera.lookAt.currentPosition;
+    camera.look_at.current_position = {100, 200, 300, 0};
+    camera.look_at.destination = {400, 500, 600, 0};
+    camera.look_at.partner_position = {1000, 800, 900, 0};
+    camera.eye.current_position = camera.look_at.partner_position;
+    camera.eye.partner_position = camera.look_at.current_position;
     camera.eye.destination = {1200, 1000, 1100, 0};
   }
 
@@ -116,8 +121,9 @@ struct EventCameraFixture {
                 saved_eye.size());
     std::memcpy(&Event_kOrbitReturnSecondCommand, saved_look_at.data(),
                 saved_look_at.size());
-    std::memcpy(static_cast<std::byte*>(Core_ScratchBase()) + 0x88,
-                scratch.data(), scratch.size());
+    std::memcpy(
+        static_cast<std::byte*>(Core_ScratchBase()) + kCameraScratchOffset,
+        scratch.data(), scratch.size());
     Event_camera = saved_camera;
     State_tickSpeed = saved_speed;
     Core_Gte_Reset();
@@ -148,23 +154,23 @@ struct EventCameraFixture {
   }
 
   void CheckStarted() const {
-    CHECK(camera.eye.motionMode == 4);
-    CHECK(camera.lookAt.motionMode == 2);
-    CHECK(camera.eye.durationFrames == 85);
-    CHECK(camera.lookAt.durationFrames == 85);
+    CHECK(camera.eye.motion_mode == 4);
+    CHECK(camera.look_at.motion_mode == 2);
+    CHECK(camera.eye.duration_frames == 85);
+    CHECK(camera.look_at.duration_frames == 85);
     const std::array<u_char, 4> easing{
-        camera.eye.easingPrimary, camera.eye.easingSecondary,
-        camera.eye.easingTertiary, camera.lookAt.easingPrimary};
+        camera.eye.easing_primary, camera.eye.easing_secondary,
+        camera.eye.easing_tertiary, camera.look_at.easing_primary};
     CHECK(easing == std::array<u_char, 4>{1, 0, 1, 1});
   }
 
   void CheckFinished() const {
-    CHECK(camera.eye.motionMode == 15);
-    CHECK(camera.lookAt.motionMode == 15);
-    CHECK(camera.eye.elapsedFrames == 85);
-    CHECK(camera.lookAt.elapsedFrames == 85);
-    const auto& current = camera.lookAt.currentPosition;
-    const auto& destination = camera.lookAt.destination;
+    CHECK(camera.eye.motion_mode == 15);
+    CHECK(camera.look_at.motion_mode == 15);
+    CHECK(camera.eye.elapsed_frames == 85);
+    CHECK(camera.look_at.elapsed_frames == 85);
+    const auto& current = camera.look_at.current_position;
+    const auto& destination = camera.look_at.destination;
     const std::array current_position{current.vx, current.vy, current.vz};
     const std::array expected_position{destination.vx, destination.vy,
                                        destination.vz};
@@ -340,10 +346,10 @@ TEST_CASE("Orbit return tracks retain original easing and 85-tick completion",
       reinterpret_cast<u_char*>(&Event_kOrbitReturnSecondCommand), 0);
   fixture.CheckStarted();
   for (int frame = 0; frame < 85; ++frame) {
-    VS::Event::UpdateEventCameraTrackEntry(&fixture.camera.lookAt,
+    VS::Event::UpdateEventCameraTrackEntry(&fixture.camera.look_at,
                                            &fixture.camera.eye);
     VS::Event::UpdateEventCameraTrackEntry(&fixture.camera.eye,
-                                           &fixture.camera.lookAt);
+                                           &fixture.camera.look_at);
   }
   fixture.CheckFinished();
 }

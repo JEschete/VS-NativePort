@@ -10,15 +10,14 @@
 #include "Core/Log.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 
 extern "C" {
 #include "Core/Scratch.h"
-#include "Event/Camera.h"
 #include "Event/InterpolationCurveLive.h"
-#include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Render/FramebufferEffects.h"
@@ -37,65 +36,64 @@ void Skip(const char* operation, const char* reason) {
   VS_LOG_ERROR("event.camera", "{} skipped: {}", operation, reason);
 }
 
-EventAngleTween LoadAngleTween(const Event_AngleTween& tween) {
-  return {.changed = static_cast<std::uint8_t>(tween.hasChanged),
-          .easing = static_cast<std::uint8_t>(tween.easingMode),
+EventAngleTween LoadAngleTween(const AngleTween& tween) {
+  return {.changed = static_cast<std::uint8_t>(tween.has_changed),
+          .easing = static_cast<std::uint8_t>(tween.easing_mode),
           .angle = tween.angle,
-          .start = tween.startAngle,
-          .delta = tween.deltaAngle,
-          .elapsed = tween.elapsedFrames,
-          .duration = tween.durationFrames};
+          .start = tween.start_angle,
+          .delta = tween.delta_angle,
+          .elapsed = tween.elapsed_frames,
+          .duration = tween.duration_frames};
 }
 
-void StoreAngleTween(Event_AngleTween& tween, const EventAngleTween& value) {
-  tween.hasChanged = static_cast<char>(value.changed);
-  tween.easingMode = static_cast<char>(value.easing);
+void StoreAngleTween(AngleTween& tween, const EventAngleTween& value) {
+  tween.has_changed = static_cast<char>(value.changed);
+  tween.easing_mode = static_cast<char>(value.easing);
   tween.angle = value.angle;
-  tween.startAngle = value.start;
-  tween.deltaAngle = value.delta;
-  tween.elapsedFrames = value.elapsed;
-  tween.durationFrames = value.duration;
+  tween.start_angle = value.start;
+  tween.delta_angle = value.delta;
+  tween.elapsed_frames = value.elapsed;
+  tween.duration_frames = value.duration;
 }
 
 // The reserved words are left as they were.
-EventScreenTween LoadScreenTween(const Event_TripleTween& tween) {
-  return {.easing = static_cast<std::uint8_t>(tween.easingMode),
-          .current = {tween.currentValue0, tween.currentValue1,
-                      tween.currentValue2},
-          .start = {tween.startValue0, tween.startValue1, tween.startValue2},
-          .delta = {tween.deltaValue0, tween.deltaValue1, tween.deltaValue2},
-          .elapsed = tween.elapsedFrames,
-          .duration = tween.durationFrames};
+EventScreenTween LoadScreenTween(const TripleTween& tween) {
+  return {.easing = static_cast<std::uint8_t>(tween.easing_mode),
+          .current = {tween.current_value0, tween.current_value1,
+                      tween.current_value2},
+          .start = {tween.start_value0, tween.start_value1, tween.start_value2},
+          .delta = {tween.delta_value0, tween.delta_value1, tween.delta_value2},
+          .elapsed = tween.elapsed_frames,
+          .duration = tween.duration_frames};
 }
 
-void StoreScreenTween(Event_TripleTween& tween, const EventScreenTween& value) {
-  tween.easingMode = static_cast<char>(value.easing);
-  tween.currentValue0 = value.current[0];
-  tween.currentValue1 = value.current[1];
-  tween.currentValue2 = value.current[2];
-  tween.startValue0 = value.start[0];
-  tween.startValue1 = value.start[1];
-  tween.startValue2 = value.start[2];
-  tween.deltaValue0 = value.delta[0];
-  tween.deltaValue1 = value.delta[1];
-  tween.deltaValue2 = value.delta[2];
-  tween.elapsedFrames = value.elapsed;
-  tween.durationFrames = value.duration;
+void StoreScreenTween(TripleTween& tween, const EventScreenTween& value) {
+  tween.easing_mode = static_cast<char>(value.easing);
+  tween.current_value0 = value.current[0];
+  tween.current_value1 = value.current[1];
+  tween.current_value2 = value.current[2];
+  tween.start_value0 = value.start[0];
+  tween.start_value1 = value.start[1];
+  tween.start_value2 = value.start[2];
+  tween.delta_value0 = value.delta[0];
+  tween.delta_value1 = value.delta[1];
+  tween.delta_value2 = value.delta[2];
+  tween.elapsed_frames = value.elapsed;
+  tween.duration_frames = value.duration;
 }
 
-EventScreenTweens LoadScreenTweens(const Event_CameraState& camera) {
-  return {.scale = LoadScreenTween(camera.screenScale),
-          .tint = LoadScreenTween(camera.screenTint),
-          .translation = LoadScreenTween(camera.screenTranslation),
-          .radial_warp = LoadScreenTween(camera.screenEffectTween)};
+EventScreenTweens LoadScreenTweens(const CameraState& camera) {
+  return {.scale = LoadScreenTween(camera.screen_scale),
+          .tint = LoadScreenTween(camera.screen_tint),
+          .translation = LoadScreenTween(camera.screen_translation),
+          .radial_warp = LoadScreenTween(camera.screen_effect_tween)};
 }
 
-void StoreScreenTweens(Event_CameraState& camera,
-                       const EventScreenTweens& tweens) {
-  StoreScreenTween(camera.screenScale, tweens.scale);
-  StoreScreenTween(camera.screenTint, tweens.tint);
-  StoreScreenTween(camera.screenTranslation, tweens.translation);
-  StoreScreenTween(camera.screenEffectTween, tweens.radial_warp);
+void StoreScreenTweens(CameraState& camera, const EventScreenTweens& tweens) {
+  StoreScreenTween(camera.screen_scale, tweens.scale);
+  StoreScreenTween(camera.screen_tint, tweens.tint);
+  StoreScreenTween(camera.screen_translation, tweens.translation);
+  StoreScreenTween(camera.screen_effect_tween, tweens.radial_warp);
 }
 
 class LiveTweenEasing final : public EventTweenEasing {
@@ -168,7 +166,7 @@ class LiveScreenEffect final : public EventScreenEffectPort {
   }
 };
 
-Event_CameraState* LiveCamera(const char* operation) {
+CameraState* LiveCamera(const char* operation) {
   if (Event_camera == nullptr) Skip(operation, "missing event camera");
   return Event_camera;
 }
@@ -176,7 +174,7 @@ Event_CameraState* LiveCamera(const char* operation) {
 
 // decomp: BATTLE.PRG func_800BD57C (F01227, src/BATTLE/BATTLE.PRG/4A0A8.c:3647,
 // 0x800BD57C-0x800BD610)
-void UpdateEventAngleTweenEntry(Event_AngleTween* tween) {
+void UpdateEventAngleTweenEntry(AngleTween* tween) {
   if (tween == nullptr) {
     Skip("UpdateEventAngleTween", "missing tween");
     return;
@@ -190,7 +188,7 @@ void UpdateEventAngleTweenEntry(Event_AngleTween* tween) {
 // decomp: BATTLE.PRG func_800BDAB4 (F01230, src/BATTLE/BATTLE.PRG/4A0A8.c:3812,
 // 0x800BDAB4-0x800BDBB4)
 void UpdateEventScreenTransformsEntry() {
-  Event_CameraState* camera = LiveCamera("UpdateEventScreenTransforms");
+  CameraState* camera = LiveCamera("UpdateEventScreenTransforms");
   if (camera == nullptr) return;
   LiveTweenEasing easing;
   LiveScreenEffect screen;
@@ -201,7 +199,7 @@ void UpdateEventScreenTransformsEntry() {
 
 // decomp: BATTLE.PRG func_800BDBB4 (F01231, src/BATTLE/BATTLE.PRG/4A0A8.c:3838,
 // 0x800BDBB4-0x800BDC9C)
-int UpdateEventTripleTweenEntry(Event_TripleTween* tween) {
+int UpdateEventTripleTweenEntry(TripleTween* tween) {
   if (tween == nullptr) {
     Skip("UpdateEventTripleTween", "missing tween");
     return 0;
@@ -245,20 +243,20 @@ std::intptr_t Event_CommandTweenCameraRollOpcode(
     event::Skip(kOperation, "missing instruction");
     return 0;
   }
-  Event_CameraState* camera = event::LiveCamera(kOperation);
+  VS::Event::CameraState* camera = event::LiveCamera(kOperation);
   if (camera == nullptr) return 0;
   event::EventAngleTween camera_roll =
-      event::LoadAngleTween(camera->cameraRoll);
+      event::LoadAngleTween(camera->camera_roll);
   event::EventAngleTween screen_roll =
-      event::LoadAngleTween(camera->capturedScreenRoll);
+      event::LoadAngleTween(camera->captured_screen_roll);
   if (!event::CommandTweenCameraRoll(
           event::ScriptCommand{instruction, event::kTweenRollLength},
           camera_roll, screen_roll)) {
     event::Skip(kOperation, "not a roll opcode");
     return 0;
   }
-  event::StoreAngleTween(camera->cameraRoll, camera_roll);
-  event::StoreAngleTween(camera->capturedScreenRoll, screen_roll);
+  event::StoreAngleTween(camera->camera_roll, camera_roll);
+  event::StoreAngleTween(camera->captured_screen_roll, screen_roll);
   return 0;
 }
 
@@ -278,7 +276,7 @@ std::intptr_t Event_CommandScreenTransformOpcode(
     event::Skip(kOperation, "not a screen transform opcode");
     return 0;
   }
-  Event_CameraState* camera = event::LiveCamera(kOperation);
+  VS::Event::CameraState* camera = event::LiveCamera(kOperation);
   if (camera == nullptr) return 0;
   event::LiveScreenEffect screen;
   event::EventScreenTweens tweens = event::LoadScreenTweens(*camera);

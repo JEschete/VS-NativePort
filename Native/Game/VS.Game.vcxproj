@@ -2467,13 +2467,13 @@
     <ClInclude Include="src\Ending\Credits.h" />
     <ClInclude Include="src\Ending\Results.h" />
     <ClInclude Include="src\Event\Actors.h" />
-    <ClInclude Include="src\Event\Camera.h" />
+    <ClInclude Include="src\Event\Camera.hpp" />
     <ClInclude Include="src\Event\Dialog.h" />
     <ClInclude Include="src\Event\Interpolation.h" />
     <ClInclude Include="src\Event\InterpolationCurveLive.h" />
     <ClInclude Include="src\Event\Playback.h" />
     <ClInclude Include="src\Event\RoomTriggerEntryLive.h" />
-    <ClInclude Include="src\Event\Screen.h" />
+    <ClInclude Include="src\Event\Screen.hpp" />
     <ClInclude Include="src\Event\Script.h" />
     <ClInclude Include="src\Event\ScriptActorOpcodes.h" />
     <ClInclude Include="src\Event\ScriptActors.h" />

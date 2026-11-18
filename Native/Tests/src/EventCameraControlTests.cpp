@@ -9,6 +9,7 @@
 
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraControl.hpp"
 #include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraOwnership.hpp"
@@ -16,7 +17,6 @@
 #include "Event/ScriptCommand.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
@@ -135,8 +135,8 @@ void RunFieldReturn(FieldReturn& run, std::int32_t eye_units,
 
 // Points Event_camera at a zeroed workspace and keeps the restore globals.
 struct LiveControlWorkspace {
-  Event_CameraState camera{};
-  Event_CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState camera{};
+  VS::Event::CameraState* saved_camera = Event_camera;
   char saved_skip = Event_skipNextFieldCameraRestore;
   std::int16_t saved_scripted = Event_isFieldCameraRestoreScripted;
 
@@ -152,10 +152,10 @@ struct LiveControlWorkspace {
   }
 };
 
-void SetMoving(Event_CameraTrack& track, std::uint8_t mode) {
-  track.motionMode = mode;
-  track.followRequest = 1;
-  track.isFollowing = 1;
+void SetMoving(VS::Event::CameraTrack& track, std::uint8_t mode) {
+  track.motion_mode = mode;
+  track.follow_request = 1;
+  track.is_following = 1;
 }
 }  // namespace
 
@@ -180,19 +180,19 @@ TEST_CASE("Event camera stop rests both tracks and clears the follow requests",
 TEST_CASE("Event camera stop entry writes the workspace tracks",
           "[event][camera][follow]") {
   LiveControlWorkspace workspace;
-  SetMoving(workspace.camera.lookAt, event::kCameraMotionLinear);
+  SetMoving(workspace.camera.look_at, event::kCameraMotionLinear);
   SetMoving(workspace.camera.eye, event::kCameraMotionTerrainGlide);
-  workspace.camera.eye.durationFrames = 21;
+  workspace.camera.eye.duration_frames = 21;
 
   event::StopEventCameraMotionEntry();
 
-  CHECK(workspace.camera.lookAt.motionMode == event::kEventCameraTrackIdle);
-  CHECK(workspace.camera.eye.motionMode == event::kEventCameraTrackIdle);
-  CHECK(workspace.camera.lookAt.followRequest == 0);
-  CHECK(workspace.camera.lookAt.isFollowing == 0);
-  CHECK(workspace.camera.eye.followRequest == 0);
-  CHECK(workspace.camera.eye.isFollowing == 0);
-  CHECK(workspace.camera.eye.durationFrames == 21);
+  CHECK(workspace.camera.look_at.motion_mode == event::kEventCameraTrackIdle);
+  CHECK(workspace.camera.eye.motion_mode == event::kEventCameraTrackIdle);
+  CHECK(workspace.camera.look_at.follow_request == 0);
+  CHECK(workspace.camera.look_at.is_following == 0);
+  CHECK(workspace.camera.eye.follow_request == 0);
+  CHECK(workspace.camera.eye.is_following == 0);
+  CHECK(workspace.camera.eye.duration_frames == 21);
 }
 
 // F01193 func_800BB33C
@@ -200,15 +200,15 @@ TEST_CASE("Event camera stop entry writes the workspace tracks",
 TEST_CASE("Camera stop opcode rests the workspace without reading an operand",
           "[event][camera][follow]") {
   LiveControlWorkspace workspace;
-  SetMoving(workspace.camera.lookAt, event::kCameraMotionOrbit);
+  SetMoving(workspace.camera.look_at, event::kCameraMotionOrbit);
   SetMoving(workspace.camera.eye, event::kCameraMotionBone);
 
   CHECK(Event_CommandStopCameraMotionOpcode(nullptr, 0) == 0);
 
-  CHECK(workspace.camera.lookAt.motionMode == event::kEventCameraTrackIdle);
-  CHECK(workspace.camera.eye.motionMode == event::kEventCameraTrackIdle);
-  CHECK(workspace.camera.lookAt.followRequest == 0);
-  CHECK(workspace.camera.eye.isFollowing == 0);
+  CHECK(workspace.camera.look_at.motion_mode == event::kEventCameraTrackIdle);
+  CHECK(workspace.camera.eye.motion_mode == event::kEventCameraTrackIdle);
+  CHECK(workspace.camera.look_at.follow_request == 0);
+  CHECK(workspace.camera.eye.is_following == 0);
 }
 
 TEST_CASE("Camera stop opcode repeats on a resting workspace",
@@ -219,9 +219,9 @@ TEST_CASE("Camera stop opcode repeats on a resting workspace",
   CHECK(Event_CommandStopCameraMotionOpcode(instruction.data(), 0) == 0);
   CHECK(Event_CommandStopCameraMotionOpcode(instruction.data(), 0) == 0);
 
-  CHECK(workspace.camera.lookAt.motionMode == event::kEventCameraTrackIdle);
-  CHECK(workspace.camera.eye.motionMode == event::kEventCameraTrackIdle);
-  CHECK(workspace.camera.eye.followRequest == 0);
+  CHECK(workspace.camera.look_at.motion_mode == event::kEventCameraTrackIdle);
+  CHECK(workspace.camera.eye.motion_mode == event::kEventCameraTrackIdle);
+  CHECK(workspace.camera.eye.follow_request == 0);
 }
 
 // F01236 func_800BE36C
@@ -243,16 +243,16 @@ TEST_CASE("Event camera following sets both requests and waits to follow",
 TEST_CASE("Event camera following entry keeps each request's low byte",
           "[event][camera][follow]") {
   LiveControlWorkspace workspace;
-  SetMoving(workspace.camera.lookAt, event::kCameraMotionLinear);
+  SetMoving(workspace.camera.look_at, event::kCameraMotionLinear);
   SetMoving(workspace.camera.eye, event::kCameraMotionLinear);
 
   event::SetEventCameraFollowingEntry(0x101, 0x2FF);
 
-  CHECK(workspace.camera.lookAt.followRequest == 1);
-  CHECK(workspace.camera.lookAt.isFollowing == 0);
-  CHECK(workspace.camera.eye.followRequest == 0xFF);
-  CHECK(workspace.camera.eye.isFollowing == 0);
-  CHECK(workspace.camera.eye.motionMode == event::kCameraMotionLinear);
+  CHECK(workspace.camera.look_at.follow_request == 1);
+  CHECK(workspace.camera.look_at.is_following == 0);
+  CHECK(workspace.camera.eye.follow_request == 0xFF);
+  CHECK(workspace.camera.eye.is_following == 0);
+  CHECK(workspace.camera.eye.motion_mode == event::kCameraMotionLinear);
 }
 
 // F01194 func_800BB35C
@@ -299,15 +299,15 @@ TEST_CASE("Camera following opcode refuses a command without its operand",
 TEST_CASE("Camera following opcode entry writes the workspace and returns 0",
           "[event][camera][follow]") {
   LiveControlWorkspace workspace;
-  SetMoving(workspace.camera.lookAt, event::kCameraMotionLinear);
+  SetMoving(workspace.camera.look_at, event::kCameraMotionLinear);
   std::array<std::uint8_t, 2> instruction{0xDF, 0x02};
 
   CHECK(Event_CommandSetCameraFollowingOpcode(instruction.data(), 3) == 0);
 
-  CHECK(workspace.camera.lookAt.followRequest == 0);
-  CHECK(workspace.camera.lookAt.isFollowing == 0);
-  CHECK(workspace.camera.eye.followRequest == 1);
-  CHECK(workspace.camera.lookAt.motionMode == event::kCameraMotionLinear);
+  CHECK(workspace.camera.look_at.follow_request == 0);
+  CHECK(workspace.camera.look_at.is_following == 0);
+  CHECK(workspace.camera.eye.follow_request == 1);
+  CHECK(workspace.camera.look_at.motion_mode == event::kCameraMotionLinear);
 }
 
 // F01196 func_800BB3BC

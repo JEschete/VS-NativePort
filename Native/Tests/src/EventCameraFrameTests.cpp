@@ -9,14 +9,13 @@
 
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraFrame.hpp"
 #include "Event/EventCameraFrameLive.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Field/CameraLive.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
-#include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 }
@@ -280,7 +279,7 @@ TEST_CASE("Camera track update crosses the partners then steps in order",
 
 TEST_CASE("Live camera frame entries skip a missing camera or instruction",
           "[event][camera][camera-frame]") {
-  Event_CameraState* const saved = Event_camera;
+  VS::Event::CameraState* const saved = Event_camera;
   Event_camera = nullptr;
   const std::uint64_t before = ev::RefusedEventCameraFrameCount();
   std::array<std::uint8_t, 2> instruction{0xE0, 0x01};
@@ -295,16 +294,16 @@ TEST_CASE("Live camera frame entries skip a missing camera or instruction",
 
 TEST_CASE("Live camera completion reads the workspace bytes unsigned",
           "[event][camera][camera-frame]") {
-  Event_CameraState* const saved = Event_camera;
-  Event_CameraState camera{};
+  VS::Event::CameraState* const saved = Event_camera;
+  VS::Event::CameraState camera{};
   Event_camera = &camera;
-  camera.lookAt.motionMode = 0xF;
-  camera.eye.motionMode = 0xF;
+  camera.look_at.motion_mode = 0xF;
+  camera.eye.motion_mode = 0xF;
   CHECK(ev::EventCameraCompletionMaskEntry() == 0xFF);
-  camera.shakeOscillatorA.reserved0B = static_cast<char>(0xFF);
-  camera.shakeOscillatorB.reserved0B = 1;
-  camera.farClip.durationFrames = static_cast<char>(0x80);
-  camera.screenEffectTween.durationFrames = 0x100;
+  camera.shake_oscillators.at(0).duration_frames = 0xFF;
+  camera.shake_oscillators.at(1).duration_frames = 1;
+  camera.far_clip.duration_frames = 0x80;
+  camera.screen_effect_tween.duration_frames = 0x100;
   CHECK(ev::EventCameraCompletionMaskEntry() == 0x1F);
   std::array<std::uint8_t, 2> instruction{0xE0, 0x1F};
   CHECK(Event_CommandWaitCameraTracksOpcode(instruction.data(), 0) == 0);
@@ -315,36 +314,36 @@ TEST_CASE("Live camera completion reads the workspace bytes unsigned",
 
 TEST_CASE("Live camera entries keep the workspace layout",
           "[event][camera][camera-frame]") {
-  Event_CameraState* const saved = Event_camera;
+  VS::Event::CameraState* const saved = Event_camera;
   const char saved_skip = Event_skipNextFieldCameraRestore;
   VECTOR saved_look_at{};
   VECTOR saved_position{};
   VS::Field::LiveCameraLookAt(&saved_look_at);
   VS::Field::LiveCameraPosition(&saved_position);
   const int saved_roll = VS::Field::LiveCameraRoll();
-  Event_CameraState camera{};
+  VS::Event::CameraState camera{};
   Event_camera = &camera;
   Event_skipNextFieldCameraRestore = 0;
-  camera.lookAt.currentPosition = {
+  camera.look_at.current_position = {
       .vx = 0x1000, .vy = 0x2000, .vz = 0x3000, .pad = 0x55};
-  camera.eye.currentPosition = {
+  camera.eye.current_position = {
       .vx = -0x1000, .vy = 0, .vz = 0x500, .pad = 0x66};
-  camera.originActorId = 1;
-  camera.originOffset = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
-  camera.cameraRoll.hasChanged = 1;
-  camera.cameraRoll.angle = 0x123;
+  camera.origin_actor_id = 1;
+  camera.origin_offset = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
+  camera.camera_roll.has_changed = 1;
+  camera.camera_roll.angle = 0x123;
   ev::ApplyEventCameraStateEntry();
   VECTOR look_at{};
   VS::Field::LiveCameraLookAt(&look_at);
   CHECK((look_at.vx == 0x1001 && look_at.vy == 0x2002 && look_at.vz == 0x3003));
   CHECK(VS::Field::LiveCameraRoll() == 0x123);
-  CHECK(camera.cameraRoll.hasChanged == 0);
-  CHECK(camera.lookAt.currentPosition.pad == 0x55);
-  camera.lookAt.motionMode = 0xF;
-  camera.eye.motionMode = 0xF;
+  CHECK(camera.camera_roll.has_changed == 0);
+  CHECK(camera.look_at.current_position.pad == 0x55);
+  camera.look_at.motion_mode = 0xF;
+  camera.eye.motion_mode = 0xF;
   ev::UpdateEventCameraTracksEntry();
-  CHECK(camera.eye.partnerPosition.vx == 0x1000);
-  CHECK(camera.lookAt.partnerPosition.vz == 0x500);
+  CHECK(camera.eye.partner_position.vx == 0x1000);
+  CHECK(camera.look_at.partner_position.vz == 0x500);
   VS::Field::LiveSetCameraLookAt(&saved_look_at);
   VS::Field::LiveSetCameraPosition(&saved_position);
   VS::Field::LiveSetCameraRoll(saved_roll);

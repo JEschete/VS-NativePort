@@ -12,6 +12,7 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -19,7 +20,6 @@
 #include "Render/ScreenOverlayLive.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 }
@@ -30,14 +30,14 @@ using Core::Math::Vec3;
 
 // The original allocation size; the workspace keeps its PS1 layout.
 constexpr std::size_t kEventCameraWorkspaceBytes = 0x28C;
-static_assert(sizeof(Event_CameraState) == kEventCameraWorkspaceBytes);
+static_assert(sizeof(CameraState) == kEventCameraWorkspaceBytes);
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
   VS_LOG_ERROR("event.camera", "{} refused: {}", operation, reason);
   std::abort();
 }
 
-Event_CameraState& RequiredCamera(const char* operation) {
+CameraState& RequiredCamera(const char* operation) {
   if (Event_camera == nullptr) Refuse(operation, "missing event camera");
   return *Event_camera;
 }
@@ -55,89 +55,88 @@ void StoreVector(VECTOR& vector, Vec3 value) {
   vector.vz = value.z;
 }
 
-char StoredFlag(bool flag) { return static_cast<char>(flag ? 1 : 0); }
+std::uint8_t StoredFlag(bool flag) { return flag ? 1 : 0; }
 
-void StoreTrackMotion(Event_CameraTrack& track,
-                      const EventCameraTrackStart& start) {
-  track.motionMode = start.motion_mode;
-  track.isFollowing = static_cast<u_char>(start.following ? 1 : 0);
-  track.followRequest = static_cast<u_char>(start.follow_requested ? 1 : 0);
+void StoreTrackMotion(CameraTrack& track, const EventCameraTrackStart& start) {
+  track.motion_mode = start.motion_mode;
+  track.is_following = start.following ? 1 : 0;
+  track.follow_request = start.follow_requested ? 1 : 0;
 }
 
-void StoreScreenValues(Event_TripleTween& tween,
-                       const EventScreenTweenStart& start) {
-  if (start.value2.has_value()) tween.currentValue2 = *start.value2;
-  tween.currentValue1 = start.value1;
-  tween.currentValue0 = start.value0;
+void StoreScreenValues(TripleTween& tween, const EventScreenTweenStart& start) {
+  if (start.value2.has_value()) tween.current_value2 = *start.value2;
+  tween.current_value1 = start.value1;
+  tween.current_value0 = start.value0;
 }
 
-void StoreLens(Event_LensTween& lens, const EventLensStart& start) {
-  lens.durationFrames = static_cast<char>(start.duration_frames);
+void StoreLens(LensTween& lens, const EventLensStart& start) {
+  lens.duration_frames = start.duration_frames;
   lens.value = start.value;
-  lens.hasChanged = StoredFlag(start.changed);
+  lens.has_changed = StoredFlag(start.changed);
 }
 
 // The first stages: the tracks from the field camera and the camera roll.
-void StoreTracksAndRoll(Event_CameraState& camera,
-                        const EventCameraStart& start) {
-  StoreVector(camera.eye.currentPosition, start.eye.position);
-  StoreVector(camera.lookAt.partnerPosition, start.look_at.partner);
-  StoreVector(camera.lookAt.currentPosition, start.look_at.position);
-  StoreVector(camera.eye.partnerPosition, start.eye.partner);
-  StoreTrackMotion(camera.lookAt, start.look_at);
+void StoreTracksAndRoll(CameraState& camera, const EventCameraStart& start) {
+  StoreVector(camera.eye.current_position, start.eye.position);
+  StoreVector(camera.look_at.partner_position, start.look_at.partner);
+  StoreVector(camera.look_at.current_position, start.look_at.position);
+  StoreVector(camera.eye.partner_position, start.eye.partner);
+  StoreTrackMotion(camera.look_at, start.look_at);
   StoreTrackMotion(camera.eye, start.eye);
-  camera.cameraRoll.durationFrames = start.camera_roll.duration_frames;
-  camera.cameraRoll.angle = start.camera_roll.angle;
-  camera.cameraRoll.hasChanged = StoredFlag(start.camera_roll.changed);
+  camera.camera_roll.duration_frames = start.camera_roll.duration_frames;
+  camera.camera_roll.angle = start.camera_roll.angle;
+  camera.camera_roll.has_changed = StoredFlag(start.camera_roll.changed);
 }
 
 // Each framebuffer effect request follows the stores before it in the
 // original; the tween durations land after their request.
-void StoreScreenTweens(Event_CameraState& camera,
-                       const EventCameraStart& start) {
+void StoreScreenTweens(CameraState& camera, const EventCameraStart& start) {
   Render::SetLiveFramebufferEffectEnabled(start.screen_capture_enabled ? 1 : 0);
-  camera.capturedScreenRoll.durationFrames = start.screen_roll.duration_frames;
-  camera.capturedScreenRoll.angle = start.screen_roll.angle;
+  camera.captured_screen_roll.duration_frames =
+      start.screen_roll.duration_frames;
+  camera.captured_screen_roll.angle = start.screen_roll.angle;
   Render::SetLiveFramebufferEffectRotation(start.screen_roll.angle);
-  camera.capturedScreenRoll.hasChanged = StoredFlag(start.screen_roll.changed);
-  StoreScreenValues(camera.screenScale, start.screen_scale);
+  camera.captured_screen_roll.has_changed =
+      StoredFlag(start.screen_roll.changed);
+  StoreScreenValues(camera.screen_scale, start.screen_scale);
   Render::SetLiveFramebufferEffectScale(&Event_kDefaultScreenTransform);
-  camera.screenScale.durationFrames = start.screen_scale.duration_frames;
-  StoreScreenValues(camera.screenTint, start.screen_tint);
+  camera.screen_scale.duration_frames = start.screen_scale.duration_frames;
+  StoreScreenValues(camera.screen_tint, start.screen_tint);
   Render::SetLiveFramebufferEffectTint(&Event_kDefaultScreenTint);
-  camera.screenTint.durationFrames = start.screen_tint.duration_frames;
-  StoreScreenValues(camera.screenTranslation, start.screen_translation);
+  camera.screen_tint.duration_frames = start.screen_tint.duration_frames;
+  StoreScreenValues(camera.screen_translation, start.screen_translation);
   Render::SetLiveFramebufferEffectOffset(&Event_kDefaultScreenTransform);
-  camera.screenTranslation.durationFrames =
+  camera.screen_translation.duration_frames =
       start.screen_translation.duration_frames;
   Render::SetLiveFramebufferEffectBlendMode(start.screen_blend_mode);
 }
 
-void StoreLensShakeAndOrigin(Event_CameraState& camera,
+void StoreLensShakeAndOrigin(CameraState& camera,
                              const EventCameraStart& start) {
-  StoreScreenValues(camera.screenEffectTween, start.screen_warp);
-  camera.screenEffectTween.durationFrames = start.screen_warp.duration_frames;
-  StoreLens(camera.projectionDistance, start.projection_distance);
-  StoreLens(camera.nearClip, start.near_clip);
-  StoreLens(camera.farClip, start.far_clip);
-  camera.shakeOscillatorB.reserved0B = static_cast<char>(start.shake_b_busy);
-  camera.shakeOscillatorA.reserved0B = static_cast<char>(start.shake_a_busy);
-  camera.shakeOscillatorA.envelopeShape.count = start.shake_count;
-  camera.originActorId = start.origin_actor;
+  StoreScreenValues(camera.screen_effect_tween, start.screen_warp);
+  camera.screen_effect_tween.duration_frames =
+      start.screen_warp.duration_frames;
+  StoreLens(camera.projection_distance, start.projection_distance);
+  StoreLens(camera.near_clip, start.near_clip);
+  StoreLens(camera.far_clip, start.far_clip);
+  camera.shake_oscillators.at(1).duration_frames = start.shake_durations[1];
+  camera.shake_oscillators.at(0).duration_frames = start.shake_durations[0];
+  camera.shake_active_count = start.shake_count;
+  camera.origin_actor_id = start.origin_actor;
 }
 
-EventCameraOrigin LoadOrigin(const Event_CameraState& camera) {
-  return {.actor = camera.originActorId,
-          .offset = LoadVector(camera.originOffset),
-          .eye_position = LoadVector(camera.eye.currentPosition),
-          .look_at_position = LoadVector(camera.lookAt.currentPosition)};
+EventCameraOrigin LoadOrigin(const CameraState& camera) {
+  return {.actor = camera.origin_actor_id,
+          .offset = LoadVector(camera.origin_offset),
+          .eye_position = LoadVector(camera.eye.current_position),
+          .look_at_position = LoadVector(camera.look_at.current_position)};
 }
 
-void StoreOrigin(Event_CameraState& camera, const EventCameraOrigin& origin) {
-  StoreVector(camera.eye.currentPosition, origin.eye_position);
-  StoreVector(camera.lookAt.currentPosition, origin.look_at_position);
-  camera.originActorId = origin.actor;
-  StoreVector(camera.originOffset, origin.offset);
+void StoreOrigin(CameraState& camera, const EventCameraOrigin& origin) {
+  StoreVector(camera.eye.current_position, origin.eye_position);
+  StoreVector(camera.look_at.current_position, origin.look_at_position);
+  camera.origin_actor_id = origin.actor;
+  StoreVector(camera.origin_offset, origin.offset);
 }
 
 class LiveEventCameraOriginHost final : public EventCameraOriginHost {
@@ -160,10 +159,10 @@ class LiveEventCameraOriginHost final : public EventCameraOriginHost {
 // decomp: BATTLE.PRG func_800BBBE8 (F01214, src/BATTLE/BATTLE.PRG/4A0A8.c:3014,
 // 0x800BBBE8-0x800BBDDC)
 void InitializeEventCameraEntry() {
-  Event_camera = static_cast<Event_CameraState*>(
-      Core::Memory::AllocateLiveFromHighEnd(sizeof(Event_CameraState)));
+  Event_camera = static_cast<CameraState*>(
+      Core::Memory::AllocateLiveFromHighEnd(sizeof(CameraState)));
   Event_skipNextFieldCameraRestore = 0;
-  Event_CameraState& camera = RequiredCamera("InitializeEventCamera");
+  CameraState& camera = RequiredCamera("InitializeEventCamera");
   VECTOR field_eye{};
   VECTOR field_look_at{};
   Field::LiveCameraPosition(&field_eye);
@@ -185,7 +184,7 @@ void SetEventFieldCameraOverrideEntry(int field_camera_override) {
 // decomp: BATTLE.PRG func_800BBE10 (F01217, src/BATTLE/BATTLE.PRG/4A0A8.c:3086,
 // 0x800BBE10-0x800BBE94)
 void SetEventCameraOriginActorEntry(std::uint16_t origin_actor) {
-  Event_CameraState& camera = RequiredCamera("SetEventCameraOriginActor");
+  CameraState& camera = RequiredCamera("SetEventCameraOriginActor");
   LiveEventCameraOriginHost host;
   EventCameraOrigin origin = LoadOrigin(camera);
   SetEventCameraOriginActor(origin, origin_actor, host);
@@ -195,7 +194,7 @@ void SetEventCameraOriginActorEntry(std::uint16_t origin_actor) {
 // decomp: BATTLE.PRG func_800BBE94 (F01218, src/BATTLE/BATTLE.PRG/4A0A8.c:3101,
 // 0x800BBE94-0x800BBF14)
 void UpdateEventCameraOriginEntry() {
-  Event_CameraState& camera = RequiredCamera("UpdateEventCameraOrigin");
+  CameraState& camera = RequiredCamera("UpdateEventCameraOrigin");
   LiveEventCameraOriginHost host;
   EventCameraOrigin origin = LoadOrigin(camera);
   UpdateEventCameraOrigin(origin, host);
@@ -210,7 +209,7 @@ std::intptr_t Event_CommandSetCameraOriginActorOpcode(
   namespace event = VS::Event;
   constexpr const char* kOperation = "CommandSetCameraOriginActor";
   if (instruction == nullptr) event::Refuse(kOperation, "missing instruction");
-  Event_CameraState& camera = event::RequiredCamera(kOperation);
+  VS::Event::CameraState& camera = event::RequiredCamera(kOperation);
   event::LiveEventCameraOriginHost host;
   event::EventCameraOrigin origin = event::LoadOrigin(camera);
   static_cast<void>(event::CommandSetCameraOriginActor(

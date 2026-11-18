@@ -40,7 +40,7 @@ inline constexpr std::int16_t kScaleBothDurations = 2;
 // Three little-endian halfwords of a fixed vector operand.
 inline constexpr std::size_t kScriptFixedVectorBytes = 6;
 
-// One camera track (Event_CameraTrack). The positions are 20.12 fixed point.
+// One camera track (CameraTrack). The positions are 20.12 fixed point.
 // The flags are the stored bytes: the update tests them bitwise.
 struct EventCameraTrack {
   std::uint8_t motion_mode = kEventCameraTrackIdle;

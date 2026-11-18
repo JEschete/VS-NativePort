@@ -10,6 +10,7 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraFrame.hpp"
 #include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
@@ -22,8 +23,6 @@
 extern "C" {
 #include "Core/Gte.h"
 #include "Core/Scratch.h"
-#include "Event/Camera.h"
-#include "Event/Screen.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
@@ -49,7 +48,7 @@ void Skip(const char* operation, const char* reason) {
   VS_LOG_ERROR("event.camera", "{} skipped: {}", operation, reason);
 }
 
-Event_CameraState* LiveCamera(const char* operation) {
+CameraState* LiveCamera(const char* operation) {
   if (Event_camera == nullptr) Skip(operation, "missing event camera");
   return Event_camera;
 }
@@ -73,65 +72,51 @@ VECTOR RecordOf(Vec3 vector) {
   return record;
 }
 
-EventCameraSetting LoadAngle(const Event_AngleTween& tween) {
-  return {.changed = static_cast<std::uint8_t>(tween.hasChanged),
-          .value = tween.angle};
+EventCameraSetting LoadAngle(const AngleTween& tween) {
+  return {.changed = tween.has_changed, .value = tween.angle};
 }
 
-EventCameraSetting LoadLens(const Event_LensTween& tween) {
-  return {.changed = static_cast<std::uint8_t>(tween.hasChanged),
-          .value = tween.value};
+EventCameraSetting LoadLens(const LensTween& tween) {
+  return {.changed = tween.has_changed, .value = tween.value};
 }
 
-EventCameraFrame LoadFrame(const Event_CameraState& camera) {
-  return {.look_at = VectorOf(camera.lookAt.currentPosition),
-          .eye = VectorOf(camera.eye.currentPosition),
-          .origin_actor = camera.originActorId,
-          .origin_offset = VectorOf(camera.originOffset),
-          .shake_active_count = camera.shakeOscillatorA.envelopeShape.count,
-          .look_at_shake = {.x = camera.shakeEyeOffsetX,
-                            .y = camera.shakeEyeOffsetY,
-                            .z = camera.shakeEyeOffsetZ},
-          .eye_shake = {.x = camera.shakeLookAtOffsetX,
-                        .y = camera.shakeLookAtOffsetY,
-                        .z = camera.shakeLookAtOffsetZ},
-          .camera_roll = LoadAngle(camera.cameraRoll),
-          .screen_roll = LoadAngle(camera.capturedScreenRoll),
-          .projection_distance = LoadLens(camera.projectionDistance),
-          .near_clip = LoadLens(camera.nearClip),
-          .far_clip = LoadLens(camera.farClip)};
+EventCameraFrame LoadFrame(const CameraState& camera) {
+  return {.look_at = VectorOf(camera.look_at.current_position),
+          .eye = VectorOf(camera.eye.current_position),
+          .origin_actor = camera.origin_actor_id,
+          .origin_offset = VectorOf(camera.origin_offset),
+          .shake_active_count = camera.shake_active_count,
+          .look_at_shake = camera.shake_look_at_offset,
+          .eye_shake = camera.shake_eye_offset,
+          .camera_roll = LoadAngle(camera.camera_roll),
+          .screen_roll = LoadAngle(camera.captured_screen_roll),
+          .projection_distance = LoadLens(camera.projection_distance),
+          .near_clip = LoadLens(camera.near_clip),
+          .far_clip = LoadLens(camera.far_clip)};
 }
 
 // Writes what ApplyEventCameraState may change: the tracks' positions (taken
 // from the field camera) and the settings' changed flags.
-void StoreFrame(Event_CameraState& camera, const EventCameraFrame& frame) {
-  StoreVector(camera.lookAt.currentPosition, frame.look_at);
-  StoreVector(camera.eye.currentPosition, frame.eye);
-  camera.cameraRoll.hasChanged = static_cast<char>(frame.camera_roll.changed);
-  camera.capturedScreenRoll.hasChanged =
-      static_cast<char>(frame.screen_roll.changed);
-  camera.projectionDistance.hasChanged =
-      static_cast<char>(frame.projection_distance.changed);
-  camera.nearClip.hasChanged = static_cast<char>(frame.near_clip.changed);
-  camera.farClip.hasChanged = static_cast<char>(frame.far_clip.changed);
+void StoreFrame(CameraState& camera, const EventCameraFrame& frame) {
+  StoreVector(camera.look_at.current_position, frame.look_at);
+  StoreVector(camera.eye.current_position, frame.eye);
+  camera.camera_roll.has_changed = frame.camera_roll.changed;
+  camera.captured_screen_roll.has_changed = frame.screen_roll.changed;
+  camera.projection_distance.has_changed = frame.projection_distance.changed;
+  camera.near_clip.has_changed = frame.near_clip.changed;
+  camera.far_clip.has_changed = frame.far_clip.changed;
 }
 
-EventCameraProgress LoadProgress(const Event_CameraState& camera) {
-  // The original read each oscillator's byte at +0xB (Camera.h reserved0B)
-  // unsigned.
-  return {.look_at_mode = camera.lookAt.motionMode,
-          .eye_mode = camera.eye.motionMode,
-          .camera_roll_duration = camera.cameraRoll.durationFrames,
-          .projection_duration = static_cast<std::uint8_t>(
-              camera.projectionDistance.durationFrames),
-          .near_clip_duration =
-              static_cast<std::uint8_t>(camera.nearClip.durationFrames),
-          .far_clip_duration =
-              static_cast<std::uint8_t>(camera.farClip.durationFrames),
-          .screen_effect_duration = camera.screenEffectTween.durationFrames,
-          .shake_durations = {
-              static_cast<std::uint8_t>(camera.shakeOscillatorA.reserved0B),
-              static_cast<std::uint8_t>(camera.shakeOscillatorB.reserved0B)}};
+EventCameraProgress LoadProgress(const CameraState& camera) {
+  return {.look_at_mode = camera.look_at.motion_mode,
+          .eye_mode = camera.eye.motion_mode,
+          .camera_roll_duration = camera.camera_roll.duration_frames,
+          .projection_duration = camera.projection_distance.duration_frames,
+          .near_clip_duration = camera.near_clip.duration_frames,
+          .far_clip_duration = camera.far_clip.duration_frames,
+          .screen_effect_duration = camera.screen_effect_tween.duration_frames,
+          .shake_durations = {camera.shake_oscillators.at(0).duration_frames,
+                              camera.shake_oscillators.at(1).duration_frames}};
 }
 
 // The field camera, the renderer and the GTE, through the scratchpad words
@@ -212,41 +197,41 @@ class LiveCameraOutput final : public EventCameraOutputPort {
 // The live workspace's track positions and per-part updates.
 class LiveCameraSteps final : public EventCameraStepPort {
  public:
-  explicit LiveCameraSteps(Event_CameraState& camera) : camera_(&camera) {}
+  explicit LiveCameraSteps(CameraState& camera) : camera_(&camera) {}
 
   EventCameraPair CurrentPositions() override {
-    return {.look_at = VectorOf(camera_->lookAt.currentPosition),
-            .eye = VectorOf(camera_->eye.currentPosition)};
+    return {.look_at = VectorOf(camera_->look_at.current_position),
+            .eye = VectorOf(camera_->eye.current_position)};
   }
 
   void SetPartnerPositions(const EventCameraPair& partners) override {
-    StoreVector(camera_->lookAt.partnerPosition, partners.look_at);
-    StoreVector(camera_->eye.partnerPosition, partners.eye);
+    StoreVector(camera_->look_at.partner_position, partners.look_at);
+    StoreVector(camera_->eye.partner_position, partners.eye);
   }
 
   void Advance(EventCameraStep step) override {
-    Event_CameraState& camera = *camera_;
+    CameraState& camera = *camera_;
     switch (step) {
       case EventCameraStep::kLookAtTrack:
-        UpdateEventCameraTrackEntry(&camera.lookAt, &camera.eye);
+        UpdateEventCameraTrackEntry(&camera.look_at, &camera.eye);
         break;
       case EventCameraStep::kEyeTrack:
-        UpdateEventCameraTrackEntry(&camera.eye, &camera.lookAt);
+        UpdateEventCameraTrackEntry(&camera.eye, &camera.look_at);
         break;
       case EventCameraStep::kCameraRoll:
-        UpdateEventAngleTweenEntry(&camera.cameraRoll);
+        UpdateEventAngleTweenEntry(&camera.camera_roll);
         break;
       case EventCameraStep::kScreenRoll:
-        UpdateEventAngleTweenEntry(&camera.capturedScreenRoll);
+        UpdateEventAngleTweenEntry(&camera.captured_screen_roll);
         break;
       case EventCameraStep::kProjectionDistance:
-        UpdateEventLensTweenEntry(&camera.projectionDistance);
+        UpdateEventLensTweenEntry(&camera.projection_distance);
         break;
       case EventCameraStep::kNearClip:
-        UpdateEventLensTweenEntry(&camera.nearClip);
+        UpdateEventLensTweenEntry(&camera.near_clip);
         break;
       case EventCameraStep::kFarClip:
-        UpdateEventLensTweenEntry(&camera.farClip);
+        UpdateEventLensTweenEntry(&camera.far_clip);
         break;
       case EventCameraStep::kShake:
         UpdateEventCameraShakeEntry();
@@ -255,14 +240,14 @@ class LiveCameraSteps final : public EventCameraStepPort {
   }
 
  private:
-  Event_CameraState* camera_;
+  CameraState* camera_;
 };
 }  // namespace
 
 // decomp: BATTLE.PRG vs_battle_applyCameraState (F01219,
 // src/BATTLE/BATTLE.PRG/4A0A8.c:3117, 0x800BBF14-0x800BC1CC)
 void ApplyEventCameraStateEntry() {
-  Event_CameraState* camera = LiveCamera("ApplyEventCameraState");
+  CameraState* camera = LiveCamera("ApplyEventCameraState");
   if (camera == nullptr) return;
   LiveCameraOutput output;
   EventCameraFrame frame = LoadFrame(*camera);
@@ -275,7 +260,7 @@ void ApplyEventCameraStateEntry() {
 // decomp: BATTLE.PRG func_800BC9E0 (F01222, src/BATTLE/BATTLE.PRG/4A0A8.c:3371,
 // 0x800BC9E0-0x800BCA8C)
 void UpdateEventCameraTracksEntry() {
-  Event_CameraState* camera = LiveCamera("UpdateEventCameraTracks");
+  CameraState* camera = LiveCamera("UpdateEventCameraTracks");
   if (camera == nullptr) return;
   LiveCameraSteps steps(*camera);
   UpdateEventCameraTracks(steps);
@@ -284,7 +269,7 @@ void UpdateEventCameraTracksEntry() {
 // decomp: BATTLE.PRG func_800BD610 (F01228, src/BATTLE/BATTLE.PRG/4A0A8.c:3663,
 // 0x800BD610-0x800BD6C4)
 int EventCameraCompletionMaskEntry() {
-  Event_CameraState* camera = LiveCamera("EventCameraCompletionMask");
+  CameraState* camera = LiveCamera("EventCameraCompletionMask");
   if (camera == nullptr) return 0;
   return EventCameraCompletionMask(LoadProgress(*camera));
 }
@@ -304,7 +289,7 @@ std::intptr_t Event_CommandWaitCameraTracksOpcode(
     event::Skip(kOperation, "missing instruction");
     return 0;
   }
-  Event_CameraState* camera = event::LiveCamera(kOperation);
+  VS::Event::CameraState* camera = event::LiveCamera(kOperation);
   if (camera == nullptr) return 0;
   const auto completion = static_cast<std::uint8_t>(
       event::EventCameraCompletionMask(event::LoadProgress(*camera)));

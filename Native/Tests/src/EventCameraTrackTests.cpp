@@ -13,13 +13,13 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/Vector.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptCommand.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
 #include "Event/ScriptCamera.h"
 #include "State/Timers.h"
 }
@@ -168,8 +168,8 @@ Vec3 VectorOf(const VECTOR& vector) {
 
 // Points Event_camera at a zeroed workspace for the entry tests.
 struct LiveTrackWorkspace {
-  Event_CameraState camera{};
-  Event_CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState camera{};
+  VS::Event::CameraState* saved_camera = Event_camera;
   int saved_tick_speed = State_tickSpeed;
 
   LiveTrackWorkspace() { Event_camera = &camera; }
@@ -792,13 +792,13 @@ TEST_CASE("Camera track update entry reads the tick speed",
           "[event][camera][track]") {
   LiveTrackWorkspace workspace;
   State_tickSpeed = 4;
-  Event_CameraTrack& track = workspace.camera.lookAt;
-  track.motionMode = event::kCameraMotionPartnerOffset;
-  track.durationFrames = 10;
+  VS::Event::CameraTrack& track = workspace.camera.look_at;
+  track.motion_mode = event::kCameraMotionPartnerOffset;
+  track.duration_frames = 10;
   track.displacement = {0x1000, 0, 0, 0};
   event::UpdateEventCameraTrackEntry(&track, &workspace.camera.eye);
-  CHECK(track.elapsedFrames == 2);
-  CHECK(VectorOf(track.currentPosition) == Vec3{0x1000, 0, 0});
+  CHECK(track.elapsed_frames == 2);
+  CHECK(VectorOf(track.current_position) == Vec3{0x1000, 0, 0});
 }
 
 // F01239 func_800BE53C
@@ -833,13 +833,13 @@ TEST_CASE("Camera track duration counts an overflowing distance as zero",
 
 TEST_CASE("Camera track duration entry writes only the duration",
           "[event][camera][track]") {
-  Event_CameraTrack track{};
-  track.currentPosition = {0, 1024 * kUnit, 0, 0};
-  track.durationFrames = 100;
-  track.motionMode = 9;
+  VS::Event::CameraTrack track{};
+  track.current_position = {0, 1024 * kUnit, 0, 0};
+  track.duration_frames = 100;
+  track.motion_mode = 9;
   event::ScaleEventCameraTrackDurationEntry(&track);
-  CHECK(track.durationFrames == 102);
-  CHECK(track.motionMode == 9);
+  CHECK(track.duration_frames == 102);
+  CHECK(track.motion_mode == 9);
 }
 
 // F01240 func_800BE5A4
@@ -870,15 +870,15 @@ TEST_CASE("Camera duration selector scales one track or both to their mean",
 TEST_CASE("Camera duration entry scales the workspace tracks",
           "[event][camera][track]") {
   LiveTrackWorkspace workspace;
-  workspace.camera.lookAt.currentPosition = {512 * kUnit, 0, 0, 0};
-  workspace.camera.lookAt.durationFrames = 30;
-  workspace.camera.eye.currentPosition = {0, 2048 * kUnit, 0, 0};
-  workspace.camera.eye.durationFrames = 60;
+  workspace.camera.look_at.current_position = {512 * kUnit, 0, 0, 0};
+  workspace.camera.look_at.duration_frames = 30;
+  workspace.camera.eye.current_position = {0, 2048 * kUnit, 0, 0};
+  workspace.camera.eye.duration_frames = 60;
   event::ScaleEventCameraDurationEntry(1);
-  CHECK(workspace.camera.lookAt.durationFrames == 30);
-  CHECK(workspace.camera.eye.durationFrames == 122);
+  CHECK(workspace.camera.look_at.duration_frames == 30);
+  CHECK(workspace.camera.eye.duration_frames == 122);
   event::ScaleEventCameraDurationEntry(2);
   // (15 + 249) / 2.
-  CHECK(workspace.camera.lookAt.durationFrames == 132);
-  CHECK(workspace.camera.eye.durationFrames == 132);
+  CHECK(workspace.camera.look_at.duration_frames == 132);
+  CHECK(workspace.camera.eye.duration_frames == 132);
 }

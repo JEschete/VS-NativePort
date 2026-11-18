@@ -1,14 +1,12 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// Binding from the event camera workspace (Event_camera, Event/Camera.h), the
+// Binding from the event camera workspace (Event_camera, Event/Camera.hpp), the
 // field camera, the renderer, the GTE and the scratch words to the typed
 // camera frame step (EventCameraFrame.hpp). Each entry keeps the original
 // signature so the script VM, the module bindings and the opcode table can
 // use it in place of the copy. A missing workspace or instruction is logged
 // and skipped; the original read through a null pointer.
 #include <cstdint>
-
-struct Event_CameraState;
 
 namespace VS::Event {
 // decomp: BATTLE.PRG func_800BB41C (F01197, 4A0A8.c:2788), opcode 0xE0 (the

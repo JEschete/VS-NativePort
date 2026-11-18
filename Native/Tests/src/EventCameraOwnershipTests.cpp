@@ -9,6 +9,7 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/EventCameraOwnershipLive.hpp"
 #include "Event/ScriptCommand.hpp"
@@ -16,7 +17,6 @@
 #include "Render/ScreenOverlayLive.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 }
@@ -68,7 +68,7 @@ struct LiveEventCameraFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, kArenaBytes> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Event_CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState* saved_camera = Event_camera;
   char saved_override = Event_skipNextFieldCameraRestore;
 
   LiveEventCameraFixture() { VS::Render::InitializeLiveFramebufferEffect(); }
@@ -85,14 +85,14 @@ struct LiveEventCameraFixture {
 
 // A workspace for the origin entries, with the pads marked.
 struct LiveOriginWorkspace {
-  Event_CameraState camera{};
-  Event_CameraState* saved_camera = Event_camera;
+  VS::Event::CameraState camera{};
+  VS::Event::CameraState* saved_camera = Event_camera;
 
   LiveOriginWorkspace() {
-    camera.originActorId = 7;
-    camera.originOffset = {0x1000, -0x2000, 0x3000, 0x55};
-    camera.eye.currentPosition = {1, 2, 3, 0x66};
-    camera.lookAt.currentPosition = {-4, -5, -6, 0x77};
+    camera.origin_actor_id = 7;
+    camera.origin_offset = {0x1000, -0x2000, 0x3000, 0x55};
+    camera.eye.current_position = {1, 2, 3, 0x66};
+    camera.look_at.current_position = {-4, -5, -6, 0x77};
     Event_camera = &camera;
   }
   LiveOriginWorkspace(const LiveOriginWorkspace&) = delete;
@@ -102,15 +102,15 @@ struct LiveOriginWorkspace {
   ~LiveOriginWorkspace() { Event_camera = saved_camera; }
 
   void RequireWorldWithOffsetApplied() const {
-    CHECK(camera.originActorId == event::kEventCameraWorldOrigin);
-    CHECK(VectorOf(camera.eye.currentPosition) ==
+    CHECK(camera.origin_actor_id == event::kEventCameraWorldOrigin);
+    CHECK(VectorOf(camera.eye.current_position) ==
           Vec3{0x1001, -0x1FFE, 0x3003});
-    CHECK(VectorOf(camera.lookAt.currentPosition) ==
+    CHECK(VectorOf(camera.look_at.current_position) ==
           Vec3{0xFFC, -0x2005, 0x2FFA});
-    CHECK(VectorOf(camera.originOffset) == Vec3{});
-    CHECK(camera.eye.currentPosition.pad == 0x66);
-    CHECK(camera.lookAt.currentPosition.pad == 0x77);
-    CHECK(camera.originOffset.pad == 0x55);
+    CHECK(VectorOf(camera.origin_offset) == Vec3{});
+    CHECK(camera.eye.current_position.pad == 0x66);
+    CHECK(camera.look_at.current_position.pad == 0x77);
+    CHECK(camera.origin_offset.pad == 0x55);
   }
 };
 }  // namespace
@@ -137,8 +137,8 @@ TEST_CASE("Event camera start rests the angles and clears the shakes",
   CHECK(start.screen_roll == event::EventAngleStart{});
   CHECK(start.origin_actor == event::kEventCameraWorldOrigin);
   CHECK(start.shake_count == 0);
-  CHECK(start.shake_a_busy == 0);
-  CHECK(start.shake_b_busy == 0);
+  CHECK(start.shake_durations ==
+        std::array<std::uint8_t, event::kEventShakeOscillatorCount>{});
   CHECK_FALSE(start.screen_capture_enabled);
   CHECK(start.screen_blend_mode == event::kEventScreenBlendMode);
 }
@@ -307,9 +307,9 @@ TEST_CASE("Event camera init entry allocates and clears the field override",
   REQUIRE(Event_camera != nullptr);
   const auto capacity = VS::Core::Memory::LivePayloadCapacity(Event_camera);
   REQUIRE(capacity.has_value());
-  CHECK(*capacity >= sizeof(Event_CameraState));
+  CHECK(*capacity >= sizeof(VS::Event::CameraState));
   CHECK(Event_skipNextFieldCameraRestore == 0);
-  CHECK(Event_camera->originActorId == event::kEventCameraWorldOrigin);
+  CHECK(Event_camera->origin_actor_id == event::kEventCameraWorldOrigin);
 }
 
 TEST_CASE("Event camera init entry mirrors the field camera",
@@ -321,13 +321,13 @@ TEST_CASE("Event camera init entry mirrors the field camera",
   VS::Field::LiveCameraLookAt(&field_look_at);
   event::InitializeEventCameraEntry();
   REQUIRE(Event_camera != nullptr);
-  const Event_CameraState& camera = *Event_camera;
-  CHECK(VectorOf(camera.eye.currentPosition) == VectorOf(field_eye));
-  CHECK(VectorOf(camera.lookAt.partnerPosition) == VectorOf(field_eye));
-  CHECK(VectorOf(camera.lookAt.currentPosition) == VectorOf(field_look_at));
-  CHECK(VectorOf(camera.eye.partnerPosition) == VectorOf(field_look_at));
-  CHECK(camera.eye.motionMode == event::kEventCameraTrackIdle);
-  CHECK(camera.lookAt.motionMode == event::kEventCameraTrackIdle);
+  const VS::Event::CameraState& camera = *Event_camera;
+  CHECK(VectorOf(camera.eye.current_position) == VectorOf(field_eye));
+  CHECK(VectorOf(camera.look_at.partner_position) == VectorOf(field_eye));
+  CHECK(VectorOf(camera.look_at.current_position) == VectorOf(field_look_at));
+  CHECK(VectorOf(camera.eye.partner_position) == VectorOf(field_look_at));
+  CHECK(camera.eye.motion_mode == event::kEventCameraTrackIdle);
+  CHECK(camera.look_at.motion_mode == event::kEventCameraTrackIdle);
 }
 
 TEST_CASE("Event camera init entry starts the angles lens and screen tweens",
@@ -335,22 +335,22 @@ TEST_CASE("Event camera init entry starts the angles lens and screen tweens",
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
   REQUIRE(Event_camera != nullptr);
-  const Event_CameraState& camera = *Event_camera;
-  CHECK(camera.cameraRoll.hasChanged == 1);
-  CHECK(camera.capturedScreenRoll.hasChanged == 1);
-  CHECK(camera.screenScale.currentValue0 == 0x1000);
-  CHECK(camera.screenTranslation.currentValue1 == 0x1000);
-  CHECK(camera.screenEffectTween.currentValue0 == 0x1000);
-  CHECK(camera.projectionDistance.value == 0x200);
-  CHECK(camera.nearClip.value == 0x40);
-  CHECK(camera.farClip.value == 0x1000);
+  const VS::Event::CameraState& camera = *Event_camera;
+  CHECK(camera.camera_roll.has_changed == 1);
+  CHECK(camera.captured_screen_roll.has_changed == 1);
+  CHECK(camera.screen_scale.current_value0 == 0x1000);
+  CHECK(camera.screen_translation.current_value1 == 0x1000);
+  CHECK(camera.screen_effect_tween.current_value0 == 0x1000);
+  CHECK(camera.projection_distance.value == 0x200);
+  CHECK(camera.near_clip.value == 0x40);
+  CHECK(camera.far_clip.value == 0x1000);
 }
 
 TEST_CASE("Event camera re-init allocates a second workspace",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
-  Event_CameraState* const first = Event_camera;
+  VS::Event::CameraState* const first = Event_camera;
   REQUIRE(first != nullptr);
   event::InitializeEventCameraEntry();
   REQUIRE(Event_camera != nullptr);
@@ -363,7 +363,7 @@ TEST_CASE("Event camera free entry releases and keeps the pointer",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
-  Event_CameraState* const camera = Event_camera;
+  VS::Event::CameraState* const camera = Event_camera;
   REQUIRE(camera != nullptr);
   const std::uint64_t refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
   FreeEventCamera();
@@ -390,13 +390,13 @@ TEST_CASE("Event camera free then re-init reuses the released block",
           "[event][camera][ownership]") {
   LiveEventCameraFixture fixture;
   event::InitializeEventCameraEntry();
-  Event_CameraState* const first = Event_camera;
+  VS::Event::CameraState* const first = Event_camera;
   REQUIRE(first != nullptr);
-  first->originActorId = 3;
+  first->origin_actor_id = 3;
   FreeEventCamera();
   event::InitializeEventCameraEntry();
   CHECK(Event_camera == first);
-  CHECK(Event_camera->originActorId == event::kEventCameraWorldOrigin);
+  CHECK(Event_camera->origin_actor_id == event::kEventCameraWorldOrigin);
 }
 
 TEST_CASE("Event field camera override entry stores the low byte",
@@ -427,9 +427,9 @@ TEST_CASE("Event camera origin command entry resolves a world reference",
 TEST_CASE("Event camera origin update entry clears the world offset",
           "[event][camera][ownership]") {
   LiveOriginWorkspace workspace;
-  workspace.camera.originActorId = event::kEventCameraWorldOrigin;
+  workspace.camera.origin_actor_id = event::kEventCameraWorldOrigin;
   event::UpdateEventCameraOriginEntry();
-  CHECK(VectorOf(workspace.camera.originOffset) == Vec3{});
-  CHECK(workspace.camera.originOffset.pad == 0x55);
-  CHECK(VectorOf(workspace.camera.eye.currentPosition) == Vec3{1, 2, 3});
+  CHECK(VectorOf(workspace.camera.origin_offset) == Vec3{});
+  CHECK(workspace.camera.origin_offset.pad == 0x55);
+  CHECK(VectorOf(workspace.camera.eye.current_position) == Vec3{1, 2, 3});
 }

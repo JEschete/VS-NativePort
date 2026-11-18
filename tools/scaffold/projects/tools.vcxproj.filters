@@ -894,6 +894,9 @@
     <None Include="..\..\ledger\hazards.py">
       <Filter>tools\ledger</Filter>
     </None>
+    <None Include="..\..\ledger\headers.py">
+      <Filter>tools\ledger</Filter>
+    </None>
     <None Include="..\..\ledger\modernization.py">
       <Filter>tools\ledger</Filter>
     </None>
@@ -907,6 +910,9 @@
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\test_hazards.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\test_headers.py">
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\test_modernization.py">

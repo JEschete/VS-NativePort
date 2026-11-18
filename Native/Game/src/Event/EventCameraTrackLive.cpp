@@ -15,6 +15,7 @@
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Event/Camera.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptCommand.hpp"
@@ -22,7 +23,6 @@
 #include "Field/CollisionMapLive.hpp"
 
 extern "C" {
-#include "Event/Camera.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "State/Timers.h"
@@ -42,18 +42,17 @@ constexpr std::intptr_t kUnassignedResult = -1;
   std::abort();
 }
 
-Event_CameraState& RequiredCamera(const char* operation) {
+CameraState& RequiredCamera(const char* operation) {
   if (Event_camera == nullptr) Refuse(operation, "missing event camera");
   return *Event_camera;
 }
 
-Event_CameraTrack& RequiredTrack(Event_CameraTrack* track,
-                                 const char* operation) {
+CameraTrack& RequiredTrack(CameraTrack* track, const char* operation) {
   if (track == nullptr) Refuse(operation, "missing camera track");
   return *track;
 }
 
-const char* TrackName(const Event_CameraTrack& track) {
+const char* TrackName(const CameraTrack& track) {
   return Event_camera != nullptr && &track == &Event_camera->eye ? "eye"
                                                                  : "look_at";
 }
@@ -71,71 +70,71 @@ void StoreVector(VECTOR& vector, Vec3 value) {
   vector.vz = value.z;
 }
 
-EventCameraTrack LoadTrack(const Event_CameraTrack& record) {
-  return {.motion_mode = record.motionMode,
-          .primary_easing = record.easingPrimary,
-          .secondary_easing = record.easingSecondary,
-          .tertiary_easing = record.easingTertiary,
-          .elapsed_frames = record.elapsedFrames,
-          .duration_frames = record.durationFrames,
-          .follow_request = record.followRequest,
-          .following = record.isFollowing,
-          .motion_scalar = record.motionScalar,
-          .motion_scalar_delta = record.motionScalarDelta,
-          .orbit_angle = record.orbitAngle,
-          .orbit_angle_delta = record.orbitAngleDelta,
-          .start_position = LoadVector(record.startPosition),
+EventCameraTrack LoadTrack(const CameraTrack& record) {
+  return {.motion_mode = record.motion_mode,
+          .primary_easing = record.easing_primary,
+          .secondary_easing = record.easing_secondary,
+          .tertiary_easing = record.easing_tertiary,
+          .elapsed_frames = record.elapsed_frames,
+          .duration_frames = record.duration_frames,
+          .follow_request = record.follow_request,
+          .following = record.is_following,
+          .motion_scalar = record.motion_scalar,
+          .motion_scalar_delta = record.motion_scalar_delta,
+          .orbit_angle = record.orbit_angle,
+          .orbit_angle_delta = record.orbit_angle_delta,
+          .start_position = LoadVector(record.start_position),
           .destination = LoadVector(record.destination),
           .displacement = LoadVector(record.displacement),
-          .height_offset = LoadVector(record.heightOffset),
-          .follow_delta = LoadVector(record.followDelta),
-          .follow_position = LoadVector(record.followPosition),
-          .previous_position = LoadVector(record.previousCameraPosition),
-          .computed_position = LoadVector(record.computedPosition),
-          .current_position = LoadVector(record.currentPosition),
-          .partner_position = LoadVector(record.partnerPosition)};
+          .height_offset = LoadVector(record.height_offset),
+          .follow_delta = LoadVector(record.follow_delta),
+          .follow_position = LoadVector(record.follow_position),
+          .previous_position = LoadVector(record.previous_camera_position),
+          .computed_position = LoadVector(record.computed_position),
+          .current_position = LoadVector(record.current_position),
+          .partner_position = LoadVector(record.partner_position)};
 }
 
-void StoreTrack(Event_CameraTrack& record, const EventCameraTrack& track) {
-  record.motionMode = track.motion_mode;
-  record.easingPrimary = track.primary_easing;
-  record.easingSecondary = track.secondary_easing;
-  record.easingTertiary = track.tertiary_easing;
-  record.elapsedFrames = track.elapsed_frames;
-  record.durationFrames = track.duration_frames;
-  record.followRequest = track.follow_request;
-  record.isFollowing = track.following;
-  record.motionScalar = track.motion_scalar;
-  record.motionScalarDelta = track.motion_scalar_delta;
-  record.orbitAngle = track.orbit_angle;
-  record.orbitAngleDelta = track.orbit_angle_delta;
-  StoreVector(record.startPosition, track.start_position);
+void StoreTrack(CameraTrack& record, const EventCameraTrack& track) {
+  record.motion_mode = track.motion_mode;
+  record.easing_primary = track.primary_easing;
+  record.easing_secondary = track.secondary_easing;
+  record.easing_tertiary = track.tertiary_easing;
+  record.elapsed_frames = track.elapsed_frames;
+  record.duration_frames = track.duration_frames;
+  record.follow_request = track.follow_request;
+  record.is_following = track.following;
+  record.motion_scalar = track.motion_scalar;
+  record.motion_scalar_delta = track.motion_scalar_delta;
+  record.orbit_angle = track.orbit_angle;
+  record.orbit_angle_delta = track.orbit_angle_delta;
+  StoreVector(record.start_position, track.start_position);
   StoreVector(record.destination, track.destination);
   StoreVector(record.displacement, track.displacement);
-  StoreVector(record.heightOffset, track.height_offset);
-  StoreVector(record.followDelta, track.follow_delta);
-  StoreVector(record.followPosition, track.follow_position);
-  StoreVector(record.previousCameraPosition, track.previous_position);
-  StoreVector(record.computedPosition, track.computed_position);
-  StoreVector(record.currentPosition, track.current_position);
-  StoreVector(record.partnerPosition, track.partner_position);
+  StoreVector(record.height_offset, track.height_offset);
+  StoreVector(record.follow_delta, track.follow_delta);
+  StoreVector(record.follow_position, track.follow_position);
+  StoreVector(record.previous_camera_position, track.previous_position);
+  StoreVector(record.computed_position, track.computed_position);
+  StoreVector(record.current_position, track.current_position);
+  StoreVector(record.partner_position, track.partner_position);
 }
 
 }  // namespace
 
-EventCameraTracks LoadLiveEventCameraTracks(const Event_CameraState& camera) {
-  return {.look_at = LoadTrack(camera.lookAt),
+EventCameraTracks LoadLiveEventCameraTracks(const CameraState& camera) {
+  return {.look_at = LoadTrack(camera.look_at),
           .eye = LoadTrack(camera.eye),
-          .origin_actor = camera.originActorId,
-          .origin_offset = LoadVector(camera.originOffset),
-          .last_terrain_position = LoadVector(camera.lastTerrainPosition)};
+          .origin_actor = camera.origin_actor_id,
+          .origin_offset = LoadVector(camera.origin_offset),
+          .last_terrain_position = LoadVector(camera.last_terrain_position)};
 }
 
-void StoreLiveEventCameraTracks(Event_CameraState& camera,
+void StoreLiveEventCameraTracks(CameraState& camera,
                                 const EventCameraTracks& tracks) {
-  StoreTrack(camera.lookAt, tracks.look_at);
+  StoreTrack(camera.look_at, tracks.look_at);
   StoreTrack(camera.eye, tracks.eye);
-  StoreVector(camera.lastTerrainPosition, tracks.last_terrain_position);
+  StoreVector(camera.last_terrain_position, tracks.last_terrain_position);
 }
 
 std::int16_t LiveEventCameraTrackHost::FloorHeight(std::int32_t world_x,
@@ -174,7 +173,7 @@ LiveEventCameraTrackHost::TaggedBonePosition(int actor, int tag) {
 namespace {
 // The track update needs the workspace only for the terrain glide's last
 // position, where the original read it.
-void UpdateTrack(Event_CameraTrack& record, std::int32_t tick_speed,
+void UpdateTrack(CameraTrack& record, std::int32_t tick_speed,
                  const char* operation) {
   LiveEventCameraTrackHost host;
   EventCameraTrack track = LoadTrack(record);
@@ -190,16 +189,16 @@ void UpdateTrack(Event_CameraTrack& record, std::int32_t tick_speed,
                 unsigned{track.primary_easing}, unsigned{track.elapsed_frames},
                 tick_speed);
   }
-  Event_CameraState* camera = nullptr;
+  CameraState* camera = nullptr;
   Vec3 last_terrain_position;
   if (track.motion_mode == kCameraMotionTerrainGlide) {
     camera = &RequiredCamera(operation);
-    last_terrain_position = LoadVector(camera->lastTerrainPosition);
+    last_terrain_position = LoadVector(camera->last_terrain_position);
   }
   UpdateEventCameraTrack(track, last_terrain_position, tick_speed, host);
   StoreTrack(record, track);
   if (camera != nullptr) {
-    StoreVector(camera->lastTerrainPosition, last_terrain_position);
+    StoreVector(camera->last_terrain_position, last_terrain_position);
   }
 }
 }  // namespace
@@ -210,7 +209,7 @@ std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
                                        std::int16_t /*thread_index*/) {
   constexpr const char* kOperation = "CommandCameraMotion";
   if (instruction == nullptr) Refuse(kOperation, "missing instruction");
-  Event_CameraState& camera = RequiredCamera(kOperation);
+  CameraState& camera = RequiredCamera(kOperation);
   LiveEventCameraTrackHost host;
   EventCameraTracks tracks = LoadLiveEventCameraTracks(camera);
   const ScriptCommand command{instruction,
@@ -219,13 +218,13 @@ std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
       CommandCameraMotion(command, tracks, host);
   StoreLiveEventCameraTracks(camera, tracks);
   if (outcome == CameraMotionOutcome::kApplied) {
-    const Event_CameraTrack& started =
+    const CameraTrack& started =
         (instruction[0] & kCameraMotionEyeTrackBit) != 0 ? camera.eye
-                                                         : camera.lookAt;
+                                                         : camera.look_at;
     VS_LOG_DEBUG("event.camera", "start track={} mode={} easing={} duration={}",
-                 TrackName(started), unsigned{started.motionMode},
-                 unsigned{started.easingPrimary},
-                 unsigned{started.durationFrames});
+                 TrackName(started), unsigned{started.motion_mode},
+                 unsigned{started.easing_primary},
+                 unsigned{started.duration_frames});
   }
   if (outcome != CameraMotionOutcome::kUnassigned) return 0;
   VS_LOG_WARN("event.camera", "{}: opcode {:#04x} has no operation", kOperation,
@@ -235,24 +234,23 @@ std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
 
 // decomp: BATTLE.PRG func_800BCA8C (F01223, src/BATTLE/BATTLE.PRG/4A0A8.c:3389,
 // 0x800BCA8C-0x800BCFB4)
-void UpdateEventCameraTrackEntry(Event_CameraTrack* track,
-                                 Event_CameraTrack* /*other*/) {
+void UpdateEventCameraTrackEntry(CameraTrack* track, CameraTrack* /*other*/) {
   constexpr const char* kOperation = "UpdateEventCameraTrack";
   UpdateTrack(RequiredTrack(track, kOperation), State_tickSpeed, kOperation);
 }
 
 // decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4A0A8.c:3502,
 // 0x800BCFB4-0x800BD2B8)
-void AdvanceTerrainCameraTrackEntry(Event_CameraTrack* track) {
+void AdvanceTerrainCameraTrackEntry(CameraTrack* track) {
   constexpr const char* kOperation = "AdvanceTerrainCameraTrack";
-  Event_CameraTrack& record = RequiredTrack(track, kOperation);
-  Event_CameraState& camera = RequiredCamera(kOperation);
+  CameraTrack& record = RequiredTrack(track, kOperation);
+  CameraState& camera = RequiredCamera(kOperation);
   LiveEventCameraTrackHost host;
   EventCameraTrack state = LoadTrack(record);
-  Vec3 last_terrain_position = LoadVector(camera.lastTerrainPosition);
+  Vec3 last_terrain_position = LoadVector(camera.last_terrain_position);
   AdvanceTerrainCameraTrack(state, last_terrain_position, host);
   StoreTrack(record, state);
-  StoreVector(camera.lastTerrainPosition, last_terrain_position);
+  StoreVector(camera.last_terrain_position, last_terrain_position);
 }
 
 // decomp: BATTLE.PRG func_800BD2B8 (F01225, src/BATTLE/BATTLE.PRG/4A0A8.c:3556,
@@ -267,23 +265,22 @@ int EventCameraGroundClearanceEntry(MATRIX* probe) {
 
 // decomp: BATTLE.PRG func_800BE53C (F01239, src/BATTLE/BATTLE.PRG/4A0A8.c:4074,
 // 0x800BE53C-0x800BE5A4)
-void ScaleEventCameraTrackDurationEntry(Event_CameraTrack* track) {
-  Event_CameraTrack& record =
-      RequiredTrack(track, "ScaleEventCameraTrackDuration");
+void ScaleEventCameraTrackDurationEntry(CameraTrack* track) {
+  CameraTrack& record = RequiredTrack(track, "ScaleEventCameraTrackDuration");
   EventCameraTrack state = LoadTrack(record);
   ScaleEventCameraTrackDuration(state);
-  record.durationFrames = state.duration_frames;
+  record.duration_frames = state.duration_frames;
 }
 
 // decomp: BATTLE.PRG func_800BE5A4 (F01240, src/BATTLE/BATTLE.PRG/4A0A8.c:4082,
 // 0x800BE5A4-0x800BE628)
 void ScaleEventCameraDurationEntry(std::int16_t selector) {
-  Event_CameraState& camera = RequiredCamera("ScaleEventCameraDuration");
-  EventCameraTrack look_at = LoadTrack(camera.lookAt);
+  CameraState& camera = RequiredCamera("ScaleEventCameraDuration");
+  EventCameraTrack look_at = LoadTrack(camera.look_at);
   EventCameraTrack eye = LoadTrack(camera.eye);
   ScaleEventCameraDuration(look_at, eye, selector);
-  camera.lookAt.durationFrames = look_at.duration_frames;
-  camera.eye.durationFrames = eye.duration_frames;
+  camera.look_at.duration_frames = look_at.duration_frames;
+  camera.eye.duration_frames = eye.duration_frames;
 }
 
 // decomp: BATTLE.PRG _setVectorImm (F01246, src/BATTLE/BATTLE.PRG/4A0A8.c:4148,

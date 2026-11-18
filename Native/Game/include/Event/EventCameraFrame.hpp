@@ -67,8 +67,8 @@ struct EventCameraFrame {
   // The shake's active oscillator count; the shake applies while it is not 0.
   std::int16_t shake_active_count = 0;
   // The shake offsets in whole units: the workspace's first triple (0x1BE,
-  // named shakeEyeOffset in Event/Camera.h) moves the look-at, the second
-  // (0x1C6) the eye.
+  // CameraState::shake_look_at_offset) moves the look-at, the second (0x1C6,
+  // shake_eye_offset) the eye.
   Core::Math::Position3 look_at_shake;
   Core::Math::Position3 eye_shake;
   EventCameraSetting camera_roll;
