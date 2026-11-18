@@ -24,8 +24,12 @@ The gap is resolved in `51a9b2ed8c48030ffc9fa12beb661e5015eb7e63`, with exact-re
 [Source Quality 44215989935](https://github.com/JEschete/VS-NativePort/actions/runs/44215989935)
 passing. Thirty-nine slices cover all 72 functions; historical counts were measured
 at eight recorded verification revisions. No CPP marks or behavior changed, and
-this does not claim EC-04 retirement. #434 is closed; #276 remains open for its
-broader acceptance criteria. See
+this does not claim EC-04 retirement. #434 and #276 are closed. #276 closed at
+`c5f8039ae19a2e546250918a183d50e93c9c260b` after exact-revision
+[Source Quality 44217018364](https://github.com/JEschete/VS-NativePort/actions/runs/44217018364)
+passed. All 3,732 `copy=yes` rows derive `cpp=x` and are slice-covered. This
+closes source promotion only, not whole-project behavior verification or
+compatibility retirement. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv). Older continuation entries below
 are historical snapshots; the current F00830 status above supersedes their
@@ -35,8 +39,9 @@ blocker notes.
 
 - Remaining by plan row: 30: 0, 39: 0, 47: 0, 48: 0, 50: 0, 52: 0.
   F00830's scoped commit, exact-revision CI and #296 closure are complete.
-  #434's slice-registration gap is closed; #276 remains open for its broader
-  acceptance criteria.
+  #434's slice-registration gap and #276's generated-function promotion scope
+  are closed; this does not claim whole-project behavior verification or
+  compatibility retirement.
   The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -105,8 +110,10 @@ blocker notes.
   coverage only and does not claim EC-04 retirement. #434 closed after exact
   [Source Quality 44215989935](https://github.com/JEschete/VS-NativePort/actions/runs/44215989935)
   passed on the fixing commit. All 72 belonged to #276's original generated
-  cohort, but none belongs to these final 112. #276 remains open for broader
-  acceptance. Historical instrumentation columns
+  cohort, but none belongs to these final 112. #276 closed at
+  `c5f8039ae19a2e546250918a183d50e93c9c260b` after exact-revision
+  [Source Quality 44217018364](https://github.com/JEschete/VS-NativePort/actions/runs/44217018364)
+  passed. Historical instrumentation columns
   `tests_execute`/`replay_execute` remain preserved, not relabeled as fresh
   coverage; current behavior evidence comes from the linked verification
   records and actual runs. Reproduction and the explicit incomplete-parent
@@ -130,9 +137,9 @@ blocker notes.
   to diverge; restoring `rangeOrigin` restored Debug and Release baselines.
   The original F00062 caller's `focusPosition` mapping remains a known limit;
   the target path was left unchanged under the owner's scope decision. This
-  caller-input limit is separate from the completed final-112 promotion; #276
-  remains open for #434. No gameplay, EC retirement or M8 completion is
-  claimed.
+  caller-input limit is separate from the completed source-promotion scope;
+  #276 closes source promotion only. No gameplay, EC retirement or M8
+  completion is claimed.
 - Map-terminal evidence (`VR-MENU-MAP-TERMINAL`): six original spans pass
   6,144 vectors, zero mismatches; 58 instruction mutants and six compiled
   native variants are detected. `group-20261117-113440` passes both builds,
