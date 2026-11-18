@@ -14,8 +14,10 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/TerrainHeight.hpp"
 
 namespace VS::Battle::Ai {
@@ -31,13 +33,6 @@ constexpr unsigned kCommandPending = 0x80;
 constexpr unsigned kLimbCount = 6;
 constexpr unsigned kActionsPerLimb = 4;
 
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    VS::Core::Debugf("ai", "%s", message);
-    std::abort();
-  }
-}
-
 int DirectionComponent(int value) {
   return value > 1 ? value - kComponentModulus : value;
 }
@@ -52,8 +47,8 @@ unsigned DirectionForOffset(int dx, int dz) {
       return index;
     }
   }
-  VS::Core::Debugf("ai", "AI movement corner has unsupported offset (%d,%d)",
-                   dx, dz);
+  Core::Errorf("ai", "AI movement corner has unsupported offset (%d,%d)", dx,
+               dz);
   std::abort();
 }
 

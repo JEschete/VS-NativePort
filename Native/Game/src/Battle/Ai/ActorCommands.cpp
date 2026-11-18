@@ -366,7 +366,7 @@ void IssueActorCommand(ActorCommandRoom& room, ActorCommandState& state,
       Attack(room, packet);
       break;
     default:
-      VS::Core::Debugf("ai",
+      VS::Core::Errorf("ai",
                        "AI actor command intent %d has no dispatch handler",
                        static_cast<int>(intent));
       std::abort();

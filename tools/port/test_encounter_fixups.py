@@ -5049,6 +5049,18 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         sequencer = (root / "Native/Engine/src/Audio/Seq/SeqSequencerLive.cpp").read_text()
         self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
 
+    def test_fatal_refusals_report_at_error_level(self):
+        # #451: the default log level filters Debugf, so a refusal that aborts must report through Errorf.
+        root = Path(__file__).resolve().parents[2]
+        silent = re.compile(r"\bDebugf\([^;]*;\s*(?:std::)?(?:abort|terminate|exit|quick_exit|_Exit)\(")
+        sites = []
+        for path in sorted((root / "Native").rglob("*")):
+            if path.suffix not in {".c", ".cpp", ".h", ".hpp"} or "data" in path.relative_to(root / "Native").parts:
+                continue
+            text = path.read_text(encoding="utf-8", errors="replace")
+            sites += [f"{path.relative_to(root)}:{text.count(chr(10), 0, m.start()) + 1}" for m in silent.finditer(text)]
+        self.assertEqual(sites, [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -62,7 +62,7 @@ constexpr std::uint32_t kLowHalf = 0xFFFF;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    VS::Core::Debugf("event", "%s", message);
+    VS::Core::Errorf("event", "%s", message);
     std::abort();
   }
 }

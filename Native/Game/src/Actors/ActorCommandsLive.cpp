@@ -254,7 +254,7 @@ class LiveCommandHost final : public ActorCommandHost {
   static Battle_Actor& Required(int actor_id) {
     Battle_Actor* actor = Actor(actor_id);
     if (actor == nullptr) {
-      VS::Core::Debugf("actors.commands", "Command requires battle actor %d",
+      VS::Core::Errorf("actors.commands", "Command requires battle actor %d",
                        actor_id);
       std::abort();
     }

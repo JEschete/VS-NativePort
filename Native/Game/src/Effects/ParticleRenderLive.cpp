@@ -68,7 +68,7 @@ enum QuadWord {
 };
 
 [[noreturn]] void Fail(const char* message) {
-  VS::Core::Debugf("effects", "%s", message);
+  VS::Core::Errorf("effects", "%s", message);
   std::abort();
 }
 

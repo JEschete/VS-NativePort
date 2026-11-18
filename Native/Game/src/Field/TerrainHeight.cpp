@@ -40,7 +40,7 @@ int WrappedHeight(int unwrapped) {
 
 int CheckedCoordinate(std::int64_t value) {
   if (!std::in_range<int>(value)) {
-    VS::Core::Debugf("ai",
+    VS::Core::Errorf("ai",
                      "Terrain segment coordinate overflows source arithmetic");
     std::abort();
   }
@@ -50,7 +50,7 @@ int CheckedCoordinate(std::int64_t value) {
 
 std::uint16_t TerrainGrid::Cell(int x, int z) const {
   if (!Contains(x, z)) {
-    VS::Core::Debugf(
+    VS::Core::Errorf(
         "ai", "Terrain height requires a grid and valid tile (%d,%d)", x, z);
     std::abort();
   }

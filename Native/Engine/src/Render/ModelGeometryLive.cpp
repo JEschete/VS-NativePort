@@ -400,7 +400,7 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
                                const SVECTOR& root_offset) {
   const std::uintptr_t limit = PrimitiveLimit();
   if (limit == 0 || Render_frameScratch.orderingTable == nullptr) {
-    VS::Core::Debugf(kChannel,
+    VS::Core::Errorf(kChannel,
                      "Actor shadow requires actor, view and packet buffers");
     std::abort();
   }
@@ -428,7 +428,7 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
       {Content_battleShadowVertices, Content_battleShadowFaces}, ground,
       transformer, queue);
   if (result.status == ActorShadowStatus::kInvalidMesh) {
-    VS::Core::Debugf(kChannel, "Invalid actor shadow vertex offset");
+    VS::Core::Errorf(kChannel, "Invalid actor shadow vertex offset");
     std::abort();
   }
   actor.soundPosition = {result.anchor[0], result.anchor[1], result.anchor[2],

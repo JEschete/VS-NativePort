@@ -106,7 +106,7 @@ void RefuseNativeDialog(int box, int string_id) {
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    VS::Core::Debugf("event", "%s", message);
+    VS::Core::Errorf("event", "%s", message);
     std::abort();
   }
 }

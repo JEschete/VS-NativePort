@@ -29,7 +29,7 @@ constexpr char kSkipActive = 2;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    VS::Core::Debugf("event", "%s", message);
+    VS::Core::Errorf("event", "%s", message);
     std::abort();
   }
 }

@@ -21,7 +21,7 @@ namespace VS::Actors {
 namespace {
 void Require(bool valid, const char* message) {
   if (!valid) {
-    VS::Core::Debugf("actors", "%s", message);
+    VS::Core::Errorf("actors", "%s", message);
     std::abort();
   }
 }
@@ -30,7 +30,7 @@ Actors_ActorRecord& Actor(int actor_id) {
   if (actor_id < 0 ||
       static_cast<unsigned>(actor_id) >= std::size(Actors_actorRecords) ||
       Actors_actorRecords[actor_id] == nullptr) {
-    VS::Core::Debugf("actors", "Motion request requires actor %d", actor_id);
+    VS::Core::Errorf("actors", "Motion request requires actor %d", actor_id);
     std::abort();
   }
   return *Actors_actorRecords[actor_id];
@@ -318,7 +318,7 @@ void TurnLiveNavigationActor(int actor_id, int facing) {
 void TurnLiveActorAtSpeed(int actor_id, std::int16_t facing, int speed) {
   LiveMotionActor actor(actor_id);
   if (!TurnActorAtSpeed(actor, facing, speed)) {
-    VS::Core::Debugf("actors", "Actor %d turn has zero angular speed",
+    VS::Core::Errorf("actors", "Actor %d turn has zero angular speed",
                      actor_id);
     std::abort();
   }
