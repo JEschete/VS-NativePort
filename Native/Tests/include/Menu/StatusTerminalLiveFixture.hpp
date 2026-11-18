@@ -23,7 +23,6 @@
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
-#include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 
@@ -335,7 +334,10 @@ struct Fixture {
   ~Fixture() {
     st::ResetLiveLimbControllersModuleData();
     st::ResetLiveActorSwitchPhase();
-    VS::Render::SetLiveCameraProjectionDistance(saved_projection.previous);
+    // The preview draw sets the GTE screen distance. Render_projectionDistance
+    // is not that distance's previous value (0 versus 1000 at start-up), so
+    // reset the GTE; saved_projection and geometry restore their own state.
+    Core_Gte_Reset();
   }
 
   static VS::Content::AssetAddress Address(const void* pointer) {

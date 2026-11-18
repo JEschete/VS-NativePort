@@ -172,6 +172,32 @@ TEST_CASE(
   }
 }
 
+TEST_CASE("Terminal fixture leaves the GTE projection at its baseline",
+          "[status-terminal][status-terminal-live][fixture-isolation]") {
+  equipment_detail_tests::ValueRestore<decltype(Render_projectionDistance)>
+      projection{Render_projectionDistance};
+  Core_Gte_Reset();
+  Render_projectionDistance = 0;
+  SVECTOR point{256, 0, 1024, 0};
+  Core_GteWord before{};
+  Core_GteWord after{};
+  Core_GteWord cue{};
+  Core_GteWord flags{};
+  Core_Gte_RotTransPers(&point, &before, &cue, &flags);
+  REQUIRE(before != 0);
+  {
+    equipment_detail_tests::ValueRestore<
+        decltype(Menu_Status_delayScreenUpdate)>
+        delay{Menu_Status_delayScreenUpdate};
+    Fixture fixture;
+    Menu_Status_delayScreenUpdate = 2;
+    st::LiveDrawFrame();
+  }
+  Core_Gte_RotTransPers(&point, &after, &cue, &flags);
+  CHECK(after == before);
+  CHECK(Render_projectionDistance == 0);
+}
+
 TEST_CASE(
     "F02682 Live accepts only owner state bytes and current text allocation",
     "[status-terminal][status-terminal-live][F02682]") {

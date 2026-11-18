@@ -303,6 +303,8 @@ struct PlatformShadowLiveFixture : PlatformPlacementFixture {
   std::vector<u_long> ordering = std::vector<u_long>(0x2088 / sizeof(u_long));
   GeometryWords geometry{1};
   PlatformShadowLiveFixture() {
+    // Project with the GTE's own screen distance, not one a prior test left.
+    Core_Gte_Reset();
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data();
     Render_legacyOrderingTables[0] = ordering.data();
