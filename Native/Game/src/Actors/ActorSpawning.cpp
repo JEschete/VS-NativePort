@@ -321,8 +321,8 @@ void Register(ActorSpawnHost& host, SpawnedActor actor, std::size_t slot,
   static_cast<void>(host.CreateAiState(slot, kFreshAiFlags));
 }
 
-// Field_zoneContext's one-file ZUD cache (146C.c:6604-6627): the cached file
-// when it is `zud`, else a read of `zud` in its place.
+// VS::Field::zoneContext's one-file ZUD cache (146C.c:6604-6627): the cached
+// file when it is `zud`, else a read of `zud` in its place.
 [[nodiscard]] std::optional<ZudBlock> LoadZud(ActorSpawnHost& host, int zud) {
   if (const std::optional<int> cached = host.CachedZud()) {
     if (*cached == zud) {

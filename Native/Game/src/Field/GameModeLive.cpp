@@ -19,7 +19,7 @@
 #include "Battle/TargetingState.h"
 #include "Core/Log.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
-#include "Field/GameModeLiveState.h"
+#include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/MapLive.hpp"
@@ -34,7 +34,7 @@
 #include "State/ScriptFlagsLive.hpp"
 
 // decomp: D_800F1968 (D_800F1968@BATTLE/BATTLE.PRG)
-int Field_isInteractionPaused;
+int VS::Field::isInteractionPaused;
 
 namespace VS::Field {
 namespace {
@@ -56,7 +56,7 @@ class LiveFieldModeHost final : public FieldModeHost {
     Battle_actionFlowMode = static_cast<u_int>(mode);
   }
   void SetInteractionPaused(bool paused) override {
-    Field_isInteractionPaused = Flag(paused);
+    isInteractionPaused = Flag(paused);
   }
   void MarkCurrentRoomVisited() override { LiveMarkCurrentRoomVisited(); }
 

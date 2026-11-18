@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"

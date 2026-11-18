@@ -16,9 +16,9 @@
 #include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
-#include "Actors/AppearanceLiveState.h"
+#include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelRenderingLive.hpp"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.h"
@@ -32,6 +32,7 @@
 #include "Battle/Hud.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLiveState.h"
@@ -42,7 +43,6 @@
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
 #include "ModelLoading.h"
-#include "OverlayWorkspaceLiveState.h"
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelGeometryLive.hpp"
@@ -240,7 +240,7 @@ struct Fixture {
   ValueRestore<void*> saved_primitives{Render_legacyPrimitiveBuffers[0]};
   ValueRestore<void*> saved_ordering{Render_legacyOrderingTables[0]};
   ValueRestore<void*> saved_current_ordering{Render_legacyCurrentOrderingTable};
-  ValueRestore<char> saved_owner{Content_overlayWorkspaceOwner};
+  ValueRestore<char> saved_owner{VS::Content::overlayWorkspaceOwner};
   ValueRestore<char> saved_hud{Battle_hudHidden};
   ValueRestore<char> saved_lower_ui{Battle_lowerScreenUiState};
   ValueRestore<decltype(Field_isFieldRenderingEnabled)> saved_field{
@@ -267,13 +267,13 @@ struct Fixture {
   ArrayRestore<Actors_WeaponModel*, std::size(Actors_weaponModels)>
       saved_weapons{Actors_weaponModels};
   ValueRestore<void*> saved_primary_sequence{Actors_primarySequenceBuffer};
-  ValueRestore<VECTOR> saved_scale{Actors_roomActorScale};
+  ValueRestore<VECTOR> saved_scale{VS::Actors::roomActorScale};
   ValueRestore<Actors_SkeletonPose> saved_pose{Actors_skeletonPose};
   ValueRestore<MATRIX> saved_root_matrix{Actors_skeletonRootMatrix};
   ValueRestore<MATRIX> saved_bone_camera{Actors_boneMatrixScratch};
   ValueRestore<MATRIX> saved_camera_basis{Render_cameraBasisMatrix};
   ValueRestore<Actors_ModelRenderContext> saved_model_context{
-      Actors_modelRenderContext};
+      VS::Actors::modelRenderContext};
   ValueRestore<char> saved_sequence_index{Actors_lastResolvedSequenceIndex};
   ValueRestore<std::remove_reference_t<decltype(*Render_ModelWorkspace())>>
       saved_model_workspace{*Render_ModelWorkspace()};
@@ -322,7 +322,7 @@ struct Fixture {
         reinterpret_cast<char*>(Menu_Framework_menuItems + fw::kRowCount);
     Menu_Framework_rowTypeBuf = reinterpret_cast<int*>(
         Menu_Framework_stringBuf + fw::kStringBufferBytes);
-    Content_overlayWorkspaceOwner = 6;
+    VS::Content::overlayWorkspaceOwner = 6;
     BindText();
     BindFrame();
     BindPreview();

@@ -1,16 +1,19 @@
 #pragma once
 
+#include <cstddef>
+#include <iterator>
+
 #include "Field/Gimmicks.h"
+
+namespace VS::Field {
 
 // Original actor-query fallbacks (38C1C.c): renderer slot16 has no gimmick
 // slot.
-static inline Field_GimmickInstance* Field_FindGimmickForActorSlot(
-    int actor_slot) {
-  enum {
-    kGimmickSlotCount =
-        sizeof Field_gimmickInstances / sizeof Field_gimmickInstances[0]
-  };
-  return actor_slot >= 0 && actor_slot < kGimmickSlotCount
+inline Field_GimmickInstance* FindGimmickForActorSlot(int actor_slot) {
+  return actor_slot >= 0 && static_cast<std::size_t>(actor_slot) <
+                                std::size(Field_gimmickInstances)
              ? Field_gimmickInstances[actor_slot]
              : nullptr;
 }
+
+}  // namespace VS::Field

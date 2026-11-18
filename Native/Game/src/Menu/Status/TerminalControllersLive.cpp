@@ -11,6 +11,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Battle/Hud.h"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.h"
@@ -21,7 +22,6 @@
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
-#include "OverlayWorkspaceLiveState.h"
 #include "Render/Camera.h"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Display.h"
@@ -163,7 +163,7 @@ bool Workspace() {
   constexpr std::size_t kWorkspaceBytes =
       kRowsBytes + Framework::kStringBufferBytes +
       Framework::kRowTypeCount * sizeof(int);
-  if (Content_overlayWorkspaceOwner != kWorkspaceOwner ||
+  if (VS::Content::overlayWorkspaceOwner != kWorkspaceOwner ||
       !InPayload(Menu_Framework_menuItems, kWorkspaceBytes)) {
     Refuse("missing or foreign MAINMENU workspace owner");
     return false;

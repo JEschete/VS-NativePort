@@ -14,9 +14,9 @@
 #include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
-#include "Actors/AppearanceLiveState.h"
+#include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelRenderingLive.hpp"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/Textures.h"
@@ -71,13 +71,13 @@ inline auto PreviewOwners() {
                     BytesOf(Actors_sharedSequenceAnimationData),
                     BytesOf(Actors_sharedSequenceBankIndex),
                     BytesOf(Actors_lastResolvedSequenceIndex),
-                    BytesOf(Actors_roomActorScale),
+                    BytesOf(VS::Actors::roomActorScale),
                     BytesOf(Actors_pushedGimmickIndex),
                     BytesOf(Actors_isActorUpdateComplete),
                     BytesOf(Actors_skeletonPose),
                     BytesOf(Actors_skeletonRootMatrix),
                     BytesOf(Actors_boneMatrixScratch),
-                    BytesOf(Actors_modelRenderContext),
+                    BytesOf(VS::Actors::modelRenderContext),
                     BytesOf(*Render_ModelWorkspace()),
                     BytesOf(Content_legacyActorAssetRequests),
                     BytesOf(Content_legacyModelLoadPhase),

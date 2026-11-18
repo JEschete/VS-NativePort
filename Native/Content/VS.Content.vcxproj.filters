@@ -84,9 +84,6 @@
     <ClCompile Include="src\OverlayWorkspaceLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\OverlayWorkspaceLiveState.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\PFile.cpp">
       <Filter>src</Filter>
     </ClCompile>

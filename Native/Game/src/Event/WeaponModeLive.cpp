@@ -19,7 +19,7 @@
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
 #include "Event/WeaponMode.hpp"
-#include "Event/WeaponModeOpcode.h"
+#include "Event/WeaponModeOpcode.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace {
@@ -89,7 +89,7 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
 
 // decomp: func_800B9DB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2158): the opcode reads
 // its mode at byte 1 and its transition variant at byte 2.
-intptr_t Event_ScriptSetAshleyBattleModeOpcode(u_char* command, int16_t) {
+intptr_t VS::Event::ScriptSetAshleyBattleModeOpcode(u_char* command, int16_t) {
   Require(command != nullptr, "Script weapon-mode command is missing");
   LiveWeaponModeHost host;
   const event::WeaponModeCommand decoded{.mode = command[1],

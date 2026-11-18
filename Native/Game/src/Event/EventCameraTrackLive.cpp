@@ -17,7 +17,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraTrack.hpp"
-#include "Event/InterpolationCurveLive.h"
+#include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
@@ -142,7 +142,7 @@ std::int16_t LiveEventCameraTrackHost::FloorHeight(std::int32_t world_x,
 std::int32_t LiveEventCameraTrackHost::Ease(std::uint8_t curve,
                                             std::uint8_t frame,
                                             std::uint8_t duration) {
-  return Event_EvaluateInterpolationCurveEntry(curve, frame, duration);
+  return EvaluateInterpolationCurveEntry(curve, frame, duration);
 }
 
 int LiveEventCameraTrackHost::ResolveActorReference(std::uint16_t reference) {

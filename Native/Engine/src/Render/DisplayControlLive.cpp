@@ -20,7 +20,7 @@
 #include "Render/Loading.h"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/GameClockLive.hpp"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Timers.h"
 
 namespace VS::Render {

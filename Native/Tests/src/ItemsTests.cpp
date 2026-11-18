@@ -30,7 +30,7 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Items/Recovery.hpp"
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
@@ -2885,6 +2885,6 @@ TEST_CASE("Items native bindings retire the module entries they replace",
   // Battle_statCalculators[15] still stores the item recovery entry.
   CHECK(resolve(0x80083430u) ==
         reinterpret_cast<void*>(&items::CalculateLiveItemRecovery));
-  CHECK(resolve(0x800F1900u) == static_cast<void*>(&Items_lootListHead));
+  CHECK(resolve(0x800F1900u) == static_cast<void*>(&VS::Items::lootListHead));
   CHECK(resolve(0x800F5210u) == static_cast<void*>(&Items_miscItemInvoked));
 }

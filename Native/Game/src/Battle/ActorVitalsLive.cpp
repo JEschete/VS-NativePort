@@ -22,7 +22,7 @@
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/Timers.h"
 
@@ -84,7 +84,7 @@ class LiveVitalsWorld final : public ActorVitalsWorld {
     VS::Battle::SuppressLiveAshleyStatusLabels();
   }
   std::int16_t EventTrigger(int event) override {
-    return Event_EvaluateRoomEventTriggersEntry(event, 0, nullptr, 0);
+    return VS::Event::EvaluateRoomEventTriggersEntry(event, 0, nullptr, 0);
   }
   void BeginQueuedCutscene() override { Event::BeginLiveQueuedCutscene(); }
   void BeginDefeatAnimation(int slot) override {

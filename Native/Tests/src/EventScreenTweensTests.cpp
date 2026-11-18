@@ -13,7 +13,7 @@
 #include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
 #include "Event/EventScreenTweensLive.hpp"
-#include "Event/InterpolationCurveLive.h"
+#include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
@@ -387,7 +387,7 @@ TEST_CASE("Live screen tween entries keep the workspace layout",
   std::int32_t recorded = 0;
   std::memcpy(&recorded, static_cast<std::byte*>(Core_ScratchBase()) + 0x88,
               sizeof(recorded));
-  CHECK(recorded == Event_EvaluateInterpolationCurveEntry(0, 2, 2));
+  CHECK(recorded == VS::Event::EvaluateInterpolationCurveEntry(0, 2, 2));
   State_tickSpeed = saved_tick;
   Event_camera = saved;
 }

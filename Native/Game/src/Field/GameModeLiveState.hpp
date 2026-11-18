@@ -4,5 +4,9 @@
 // battle rewards and the runtime snapshot read and write it. GameModeLive.cpp
 // defines it.
 
+namespace VS::Field {
+
 // decomp: D_800F1968 (BATTLE/BATTLE.PRG)
-extern int Field_isInteractionPaused;
+extern int isInteractionPaused;
+
+}  // namespace VS::Field

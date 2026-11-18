@@ -32,7 +32,7 @@
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "Title/SaveFiles.h"
 
 namespace {
@@ -101,7 +101,7 @@ struct ClockFixture {
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
   void* saved_table = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
-  State_PlayTime saved_time = State_playTime;
+  State_PlayTime saved_time = VS::State::playTime;
   u_int saved_random = Core_interfaceRandomState;
   std::array<u_char, 264> saved_trim{};
   std::array<u_char, 92> saved_widths{};
@@ -143,7 +143,7 @@ struct ClockFixture {
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
     Render_legacyOrderingTables[0] = saved_table;
     Render_frameBuf = saved_framebuffer;
-    State_playTime = saved_time;
+    VS::State::playTime = saved_time;
     Core_interfaceRandomState = saved_random;
   }
 
@@ -184,21 +184,21 @@ TEST_CASE("Data play time uses mutable digits and retains overflow formatting",
           "[render][menu][data][clock]") {
   ClockFixture fixture;
   const unsigned hours = GENERATE(0u, 12u, 99u, 100u);
-  State_playTime.all = (hours << 24) | (34u << 16) | (56u << 8);
-  const auto saved = State_playTime.all;
+  VS::State::playTime.all = (hours << 24) | (34u << 16) | (56u << 8);
+  const auto saved = VS::State::playTime.all;
   const auto expected =
       hours >= 100 ? "100:00:00:00" : std::format("{:02}:34:56:00", hours);
   files::Context context = LiveFiles();
   files::DrawPlayTime(context);
   CHECK(fixture.Clock() == expected);
-  CHECK(State_playTime.all == saved);
+  CHECK(VS::State::playTime.all == saved);
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
   files::ResetLiveFilesStatics();
   fixture.ResetPackets();
   files::DrawPlayTime(context);
   CHECK(fixture.Clock() == expected);
-  CHECK(State_playTime.all == saved);
+  CHECK(VS::State::playTime.all == saved);
 }
 
 TEST_CASE("Game Over fade links packets through native handles",

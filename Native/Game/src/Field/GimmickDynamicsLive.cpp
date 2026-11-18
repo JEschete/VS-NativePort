@@ -1,4 +1,4 @@
-#include "Field/GimmickDynamicsLive.h"
+#include "Field/GimmickDynamicsLive.hpp"
 
 #include <algorithm>
 #include <array>
@@ -14,7 +14,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/GimmickDynamics.hpp"
-#include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickReactionsLive.hpp"
 #include "Field/Gimmicks.h"
@@ -224,7 +223,8 @@ bool UpdateLiveGimmickMotion(Field_GimmickInstance* record) {
 }
 }  // namespace VS::Field
 
-void Field_UpdateGimmickMotionEntry(Field_GimmickPhysicsView* record, int) {
+void VS::Field::UpdateGimmickMotionEntry(Field_GimmickPhysicsView* record,
+                                         int) {
   static_cast<void>(VS::Field::UpdateLiveGimmickMotion(
       reinterpret_cast<Field_GimmickInstance*>(record)));
 }

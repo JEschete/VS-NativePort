@@ -52,7 +52,7 @@
 #include "Field/Room.h"
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.hpp"
 #include "Render/Palette.h"
@@ -605,27 +605,28 @@ void TestsNativeMonoOutput(int enabled) {
 }
 
 int TestsZoneMusicCanonicalState(void) {
-  const int saved_id = Field_zoneContext.musicId;
-  const int saved_slot = Field_zoneContext.musicSlot;
-  const int saved_enabled = Field_zoneContext.isMusicFadeEnabled;
+  const int saved_id = VS::Field::zoneContext.musicId;
+  const int saved_slot = VS::Field::zoneContext.musicSlot;
+  const int saved_enabled = VS::Field::zoneContext.isMusicFadeEnabled;
   int passed = 0;
-  Field_zoneContext.musicId = 16;
-  Field_zoneContext.musicSlot = 3;
-  Field_zoneContext.isMusicFadeEnabled = 1;
+  VS::Field::zoneContext.musicId = 16;
+  VS::Field::zoneContext.musicSlot = 3;
+  VS::Field::zoneContext.isMusicFadeEnabled = 1;
   if (VS::Field::LiveZoneSoundFileId() == 16) passed |= 1;
-  Field_zoneContext.musicId = 17;
+  VS::Field::zoneContext.musicId = 17;
   if (VS::Field::LiveZoneSoundFileId() == 17) passed |= 2;
-  if (Field_zoneContext.musicSlot == 3) passed |= 4;
+  if (VS::Field::zoneContext.musicSlot == 3) passed |= 4;
   VS::Audio::LiveSetZoneMusicSwitchEnabled(0);
-  if (Field_zoneContext.isMusicFadeEnabled == 0) passed |= 8;
+  if (VS::Field::zoneContext.isMusicFadeEnabled == 0) passed |= 8;
   VS::Audio::LiveSetZoneMusicSwitchEnabled(1);
-  if (Field_zoneContext.isMusicFadeEnabled == 1) passed |= 16;
-  if (Field_zoneContext.musicId == 17 && Field_zoneContext.musicSlot == 3) {
+  if (VS::Field::zoneContext.isMusicFadeEnabled == 1) passed |= 16;
+  if (VS::Field::zoneContext.musicId == 17 &&
+      VS::Field::zoneContext.musicSlot == 3) {
     passed |= 32;
   }
-  Field_zoneContext.musicId = saved_id;
-  Field_zoneContext.musicSlot = saved_slot;
-  Field_zoneContext.isMusicFadeEnabled = saved_enabled;
+  VS::Field::zoneContext.musicId = saved_id;
+  VS::Field::zoneContext.musicSlot = saved_slot;
+  VS::Field::zoneContext.isMusicFadeEnabled = saved_enabled;
   return passed;
 }
 

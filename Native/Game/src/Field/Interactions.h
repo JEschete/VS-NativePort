@@ -3,7 +3,7 @@
 #include "Legacy/Psx.h"
 
 
-#include "Field/InteractionFocusLive.h"
+#include "Field/InteractionFocusLive.hpp"
 
-extern Field_InteractionFocus Field_interactionFocus;
+extern VS::Field::InteractionFocus Field_interactionFocus;
 extern u_int Field_controlMode;

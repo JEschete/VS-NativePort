@@ -14,7 +14,7 @@
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"

@@ -1,27 +1,26 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the overlay workspace rules (OverlayWorkspace.hpp): the
-// owner tag is the legacy byte Content_overlayWorkspaceOwner.
+// owner tag is the legacy byte VS::Content::overlayWorkspaceOwner.
 #include "Content/OverlayWorkspaceLive.hpp"
 
 #include <cstdint>
 
 #include "Content/OverlayWorkspace.hpp"
-#include "OverlayWorkspaceLiveState.h"
 
 // decomp: D_800F18F8 (D_800F18F8@BATTLE/BATTLE.PRG)
-char Content_overlayWorkspaceOwner;
+char VS::Content::overlayWorkspaceOwner;
 
 namespace VS::Content {
 namespace {
-static_assert(sizeof Content_overlayWorkspaceOwner == 1);
+static_assert(sizeof overlayWorkspaceOwner == 1);
 
 class LiveOverlayWorkspace final : public OverlayWorkspaceHost {
  public:
   [[nodiscard]] std::uint8_t Owner() const override {
-    return static_cast<std::uint8_t>(Content_overlayWorkspaceOwner);
+    return static_cast<std::uint8_t>(overlayWorkspaceOwner);
   }
   void SetOwner(std::uint8_t owner) override {
-    Content_overlayWorkspaceOwner = static_cast<char>(owner);
+    overlayWorkspaceOwner = static_cast<char>(owner);
   }
 };
 }  // namespace

@@ -19,7 +19,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Event/CutsceneLifecycle.hpp"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
@@ -31,7 +31,7 @@
 #include "Field/Interactions.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Field/RoomEffectsLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
@@ -125,13 +125,11 @@ class LiveCutsceneHost final : public CutsceneHost {
     Battle::Ai::UpdateLiveRouteGateAvailability();
   }
   bool EvaluateFollowOnTrigger() override {
-    return Event_EvaluateRoomEventTriggersEntry(kFollowOnTrigger, 0, nullptr,
-                                                0) == 1;
+    return EvaluateRoomEventTriggersEntry(kFollowOnTrigger, 0, nullptr, 0) == 1;
   }
   bool SceneTimerActive() override { return State_sceneTimer.mode != 0; }
   bool EvaluateTimerTrigger() override {
-    return Event_EvaluateRoomEventTriggersEntry(kTimerTrigger, 0, nullptr, 0) ==
-           1;
+    return EvaluateRoomEventTriggersEntry(kTimerTrigger, 0, nullptr, 0) == 1;
   }
   void ClearActorSoundOverrides() override {
     Actors::SetLiveActorSoundOverrides(-1, Actors::SoundEffectSlot{});
@@ -151,8 +149,8 @@ class LiveCutsceneHost final : public CutsceneHost {
   }
   void ShowGameplayHud() override { VS::Battle::SetLiveGameplayHudHidden(0); }
   CutsceneMusic Music() override {
-    return {Field_zoneContext.musicSlot, Audio_soundState.playingMusicHandle,
-            Audio_soundState.musicHandles};
+    return {VS::Field::zoneContext.musicSlot,
+            Audio_soundState.playingMusicHandle, Audio_soundState.musicHandles};
   }
   void PlayRoomMusic(int slot) override {
     Audio::LivePlayMusicSlot(slot, kRoomMusicVolume, 0);

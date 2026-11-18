@@ -22,7 +22,7 @@
 #include "State/GameClockLive.hpp"
 #include "State/KillScore.hpp"
 #include "State/KillScoreLive.hpp"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/SceneTimer.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlags.hpp"
@@ -670,12 +670,12 @@ TEST_CASE("A busy event player does not consume timer expiry", "[state-boot]") {
 }
 
 TEST_CASE("The live play time record round-trips", "[state-boot]") {
-  const State_PlayTime saved = State_playTime;
+  const State_PlayTime saved = VS::State::playTime;
   const PlayTime time{.frames = 6, .seconds = 7, .minutes = 8, .hours = 99};
   VS::State::StoreLivePlayTime(time);
-  CHECK(State_playTime.t.hours == 99);
+  CHECK(VS::State::playTime.t.hours == 99);
   CHECK(VS::State::LivePlayTime() == time);
-  State_playTime = saved;
+  VS::State::playTime = saved;
 }
 
 TEST_CASE("Live kill scoring records hostile and unscored kills",

@@ -12,7 +12,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelDrawingLive.hpp"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
@@ -42,7 +42,7 @@ namespace {
 struct ActorShadowFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
-  Actors_ModelRenderContext saved_context = Actors_modelRenderContext;
+  Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
   Actors_SkeletonPose saved_pose = Actors_skeletonPose;
   Field_RoomRecord saved_room = Field_roomData;
   int saved_framebuffer = Render_frameBuf;
@@ -81,7 +81,7 @@ struct ActorShadowFixture {
     camera.t[2] = 1024;
     Render_frameScratch.viewMatrix = camera;
     *Render_ModelWorkspace() = {};
-    Actors_modelRenderContext = {};
+    VS::Actors::modelRenderContext = {};
     actor.instance.isVisible = -1;
     actor.instance.soundEnabled = 1;
     actor.instance.boneCount = 1;
@@ -120,7 +120,7 @@ struct ActorShadowFixture {
               Field_gimmickInstances);
     Render_frameScratch = saved_frame;
     *Render_ModelWorkspace() = saved_workspace;
-    Actors_modelRenderContext = saved_context;
+    VS::Actors::modelRenderContext = saved_context;
     Actors_skeletonPose = saved_pose;
     Render_frameBuf = saved_framebuffer;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;

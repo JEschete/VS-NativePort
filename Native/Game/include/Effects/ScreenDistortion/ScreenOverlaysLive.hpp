@@ -32,10 +32,9 @@ int* AppendLiveVignetteCorner(int packed_corner_xy, int first_angular_step,
 void DrawLiveVignette();
 
 // The controller lifetime (ScreenOverlayLifetime.cpp) over D_800EB9B4 and its
-// default controller (Effects_screenEffectDefaults), the disc queue, overlay
-// workspace and texture pages. Attaching points D_800EB9B4 at the defaults;
-// detaching resets the defaults.
-// func_800CA97C.
+// default controller (VS::Effects::screenEffectDefaults), the disc queue,
+// overlay workspace and texture pages. Attaching points D_800EB9B4 at the
+// defaults; detaching resets the defaults. func_800CA97C.
 void ResetLiveScreenOverlay();
 // _loadScreff2. Refuses and reports a missing controller; a missing read
 // request is reported and stays pending.

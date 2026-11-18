@@ -8,15 +8,15 @@
 #include "Legacy/Psx.h"
 #include "State/GameClock.hpp"
 #include "State/GameTime.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Timers.h"
 
 // decomp: vs_main_gametime (vs_main_gametime@SLUS_010.40)
-State_PlayTime State_playTime;
+State_PlayTime VS::State::playTime;
 
 namespace VS::State {
 PlayTime LivePlayTime() noexcept {
-  const auto& record = State_playTime.t;
+  const auto& record = playTime.t;
   return PlayTime{.frames = record.frames,
                   .seconds = record.seconds,
                   .minutes = record.minutes,
@@ -24,7 +24,7 @@ PlayTime LivePlayTime() noexcept {
 }
 
 void StoreLivePlayTime(const PlayTime& time) noexcept {
-  auto& record = State_playTime.t;
+  auto& record = playTime.t;
   record.frames = time.frames;
   record.seconds = time.seconds;
   record.minutes = time.minutes;

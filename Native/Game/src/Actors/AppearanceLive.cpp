@@ -13,7 +13,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Appearance.hpp"
-#include "Actors/AppearanceLiveState.h"
+#include "Actors/AppearanceLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Shadow.h"
@@ -21,13 +21,13 @@
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/GimmickLookup.h"
+#include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
 #include "Render/PaletteAnimationLive.hpp"
 
 // decomp: D_800F4438 (D_800F4438@BATTLE/BATTLE.PRG)
-VECTOR Actors_roomActorScale;
+VECTOR VS::Actors::roomActorScale;
 
 namespace VS::Actors {
 namespace {
@@ -120,7 +120,7 @@ struct LivePulseModel {
   if (Actors_ActorRecord* actor = LiveActorRecord(actor_id, operation)) {
     return {.actor = actor};
   }
-  return {.gimmick = Field_FindGimmickForActorSlot(actor_id)};
+  return {.gimmick = VS::Field::FindGimmickForActorSlot(actor_id)};
 }
 
 class LiveTransitionActors final : public AppearanceTransitionActors {
@@ -205,11 +205,11 @@ void SetLiveRoomActorScale(const VECTOR* room_scale) {
     WarnActorRefused("SetRoomActorScale", "null scale");
     return;
   }
-  Core::Math::Vec3 stored = VectorOf(Actors_roomActorScale);
+  Core::Math::Vec3 stored = VectorOf(roomActorScale);
   const std::int16_t actor_scale =
       SetRoomActorScale(stored, VectorOf(*room_scale));
-  StoreVector(Actors_roomActorScale, stored);
-  Actors_roomActorScale.pad = room_scale->pad;
+  StoreVector(roomActorScale, stored);
+  roomActorScale.pad = room_scale->pad;
   for (Actors_ActorRecord* actor : Actors_actorRecords) {
     if (actor != nullptr) actor->scale = actor_scale;
   }

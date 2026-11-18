@@ -189,7 +189,7 @@
     <ClCompile Include="src\Actors\ActorLifecycle.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ActorModelSlot.h">
+    <ClInclude Include="src\Actors\ActorModelSlot.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\ActorMotion.cpp">
@@ -255,7 +255,7 @@
     <ClCompile Include="src\Actors\AppearanceLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\AppearanceLiveState.h">
+    <ClInclude Include="src\Actors\AppearanceLiveState.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\AppearanceTransition.cpp">
@@ -291,7 +291,7 @@
     <ClCompile Include="src\Actors\ModelRenderingLive.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ModelRenderingLiveState.h">
+    <ClInclude Include="src\Actors\ModelRenderingLiveState.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\MotionRequests.cpp">
@@ -1050,7 +1050,7 @@
     <ClCompile Include="src\Boot\PlayerSettings.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
-    <ClInclude Include="src\Boot\PlayerSettings.h">
+    <ClInclude Include="src\Boot\PlayerSettings.hpp">
       <Filter>src\Boot</Filter>
     </ClInclude>
     <ClCompile Include="src\Boot\Session.cpp">
@@ -1602,7 +1602,7 @@
     <ClCompile Include="src\Effects\ScreenEffectState.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\ScreenEffectState.h">
+    <ClInclude Include="src\Effects\ScreenEffectState.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\ScriptedEffectTriggers.cpp">
@@ -1875,7 +1875,7 @@
     <ClCompile Include="src\Event\InterpolationCurveLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\InterpolationCurveLive.h">
+    <ClInclude Include="src\Event\InterpolationCurveLive.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\Playback.cpp">
@@ -1887,7 +1887,7 @@
     <ClCompile Include="src\Event\RoomTriggerEntryLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\RoomTriggerEntryLive.h">
+    <ClInclude Include="src\Event\RoomTriggerEntryLive.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\RoomTriggers.cpp">
@@ -2031,7 +2031,7 @@
     <ClCompile Include="src\Event\WeaponModeLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\WeaponModeOpcode.h">
+    <ClInclude Include="src\Event\WeaponModeOpcode.hpp">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\Event\Weather.h">
@@ -2136,7 +2136,7 @@
     <ClCompile Include="src\Field\GameModeLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\GameModeLiveState.h">
+    <ClInclude Include="src\Field\GameModeLiveState.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\GimmickAnimationQueue.cpp">
@@ -2154,10 +2154,7 @@
     <ClCompile Include="src\Field\GimmickDynamicsLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\GimmickDynamicsLive.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Field\GimmickLookup.h">
+    <ClInclude Include="src\Field\GimmickLookup.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClInclude Include="src\Field\GimmickMotion.h">
@@ -2178,9 +2175,6 @@
     <ClCompile Include="src\Field\GimmickReactionsLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\GimmickReactionsLive.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\GimmickResources.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2202,7 +2196,7 @@
     <ClInclude Include="src\Field\Input.h">
       <Filter>src\Field</Filter>
     </ClInclude>
-    <ClInclude Include="src\Field\InteractionFocusLive.h">
+    <ClInclude Include="src\Field\InteractionFocusLive.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Interactions.cpp">
@@ -2304,7 +2298,7 @@
     <ClCompile Include="src\Field\RoomLoadingLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomLoadingLiveState.h">
+    <ClInclude Include="src\Field\RoomLoadingLiveState.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\RoomRendering.cpp">
@@ -2322,7 +2316,7 @@
     <ClCompile Include="src\Field\RoomStateLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomStateLiveState.h">
+    <ClInclude Include="src\Field\RoomStateLiveState.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\RoomSwitches.cpp">
@@ -2448,7 +2442,7 @@
     <ClCompile Include="src\Items\LootLive.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\LootLiveState.h">
+    <ClInclude Include="src\Items\LootLiveState.hpp">
       <Filter>src\Items</Filter>
     </ClInclude>
     <ClCompile Include="src\Items\Materials.cpp">
@@ -3165,7 +3159,7 @@
     <ClInclude Include="src\State\Location.h">
       <Filter>src\State</Filter>
     </ClInclude>
-    <ClInclude Include="src\State\PlayTime.h">
+    <ClInclude Include="src\State\PlayTime.hpp">
       <Filter>src\State</Filter>
     </ClInclude>
     <ClCompile Include="src\State\Progress.cpp">
@@ -3234,7 +3228,7 @@
     <ClCompile Include="src\Title\TitleMenuLive.cpp">
       <Filter>src\Title</Filter>
     </ClCompile>
-    <ClInclude Include="src\Title\TitleMenuLiveState.h">
+    <ClInclude Include="src\Title\TitleMenuLiveState.hpp">
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClCompile Include="src\Title\TitleScreen.cpp">

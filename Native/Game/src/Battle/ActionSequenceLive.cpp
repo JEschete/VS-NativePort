@@ -24,7 +24,7 @@
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.h"
 #include "Field/GameModeLive.hpp"
@@ -142,7 +142,8 @@ class LiveWorld final : public ActionSequenceWorld {
   std::uint32_t ControlMode() override { return Field_controlMode; }
   std::int32_t EvaluateRoomEvents() override {
     constexpr int kAfterAction = 12;
-    return Event_EvaluateRoomEventTriggersEntry(kAfterAction, 0, nullptr, 0);
+    return VS::Event::EvaluateRoomEventTriggersEntry(kAfterAction, 0, nullptr,
+                                                     0);
   }
   void BeginCutscene() override { Event::BeginLiveQueuedCutscene(); }
   void OpenLoot() override { Items::OpenLivePendingEnemyLoot(); }

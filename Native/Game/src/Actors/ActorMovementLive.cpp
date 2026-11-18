@@ -26,7 +26,7 @@
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
-#include "Field/GimmickLookup.h"
+#include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -352,10 +352,10 @@ class LiveMovementHost final : public MovementHost {
     return OptionalGimmick(Field_gimmickInstances[index]);
   }
   std::optional<MovementGimmick> GimmickForActorSlot(int slot) override {
-    return OptionalGimmick(Field_FindGimmickForActorSlot(slot));
+    return OptionalGimmick(VS::Field::FindGimmickForActorSlot(slot));
   }
   void UpdateGimmickMotion(int slot, int) override {
-    Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(slot);
+    Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(slot);
     if (gimmick == nullptr) return;
     const Synced synced(registry_);
     static_cast<void>(VS::Field::UpdateLiveGimmickMotion(gimmick));

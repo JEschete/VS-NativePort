@@ -24,7 +24,7 @@
 #include "Field/Room.h"
 #include "Field/RoomLoading.hpp"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/DisplayControl.hpp"
@@ -849,8 +849,8 @@ TEST_CASE("Releasing a zone frees its events and tables",
                                              "FreeZoneTables"});
   CHECK(ZoneSoundFileId(42) == 42);
 
-  SavedGlobal saved_zone{Field_zoneContext};
-  Field_zoneContext.musicId = 42;
+  SavedGlobal saved_zone{zoneContext};
+  zoneContext.musicId = 42;
   CHECK(LiveZoneSoundFileId() == 42);
 }
 

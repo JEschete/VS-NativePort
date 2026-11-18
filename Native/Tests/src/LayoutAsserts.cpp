@@ -7,7 +7,7 @@
 
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Audio/SoundBanks.h"
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/ActionTable.h"
@@ -121,9 +121,10 @@ static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
 
 // An actor record placed at core.model (VS::Content::ParseActorModel) must
 // end before the weapon model slots.
-static_assert(sizeof(Actors_ActorModelSlot) >= sizeof(Actors_WeaponModel),
+static_assert(sizeof(VS::Actors::ActorModelSlot) >= sizeof(Actors_WeaponModel),
               "equipment slot must fit a native weapon model");
-static_assert(_Alignof(Actors_ActorModelSlot) >= _Alignof(Actors_WeaponModel),
+static_assert(_Alignof(VS::Actors::ActorModelSlot) >=
+                  _Alignof(Actors_WeaponModel),
               "equipment slot must align a native weapon model");
 static_assert(offsetof(Actors_ActorAllocation, modelSlots) %
                       _Alignof(Actors_ActorRecord) ==

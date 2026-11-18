@@ -7,7 +7,11 @@
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
 
+namespace VS::Field {
+
 // decomp: _zoneContext (BATTLE/BATTLE.PRG 146C.h:719, 0x800F1880): the
 // loaded zone's tables, music and file reads and the loaded room's id,
 // extent, placements and scene.
-extern Field_ZoneContext Field_zoneContext;
+extern Field_ZoneContext zoneContext;
+
+}  // namespace VS::Field

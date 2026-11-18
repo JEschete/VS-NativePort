@@ -17,7 +17,7 @@
 #include "Battle/Hit.h"
 #include "Core/Log.hpp"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Traps.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loadout.h"

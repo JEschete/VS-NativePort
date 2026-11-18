@@ -2295,15 +2295,15 @@
   <ItemGroup>
     <ClInclude Include="src\Actors\ActorAllocation.h" />
     <ClInclude Include="src\Actors\ActorCommandsLiveState.h" />
-    <ClInclude Include="src\Actors\ActorModelSlot.h" />
+    <ClInclude Include="src\Actors\ActorModelSlot.hpp" />
     <ClInclude Include="src\Actors\ActorRecord.h" />
     <ClInclude Include="src\Actors\Animation.h" />
-    <ClInclude Include="src\Actors\AppearanceLiveState.h" />
+    <ClInclude Include="src\Actors\AppearanceLiveState.hpp" />
     <ClInclude Include="src\Actors\CharacterInit.h" />
     <ClInclude Include="src\Actors\Location.h" />
     <ClInclude Include="src\Actors\ModelDraw.h" />
     <ClInclude Include="src\Actors\ModelInstance.h" />
-    <ClInclude Include="src\Actors\ModelRenderingLiveState.h" />
+    <ClInclude Include="src\Actors\ModelRenderingLiveState.hpp" />
     <ClInclude Include="src\Actors\Movement.h" />
     <ClInclude Include="src\Actors\Palette.h" />
     <ClInclude Include="src\Actors\RoomActorCache.h" />
@@ -2359,7 +2359,7 @@
     <ClInclude Include="src\Battle\ValueLabels.h" />
     <ClInclude Include="src\Boot\GameLoop.h" />
     <ClInclude Include="src\Boot\OverlayReset.h" />
-    <ClInclude Include="src\Boot\PlayerSettings.h" />
+    <ClInclude Include="src\Boot\PlayerSettings.hpp" />
     <ClInclude Include="src\Effects\Camera.h" />
     <ClInclude Include="src\Effects\CameraLiveState.h" />
     <ClInclude Include="src\Effects\EffectResourcesLiveState.h" />
@@ -2432,7 +2432,7 @@
     <ClInclude Include="src\Effects\PurgeTables.h" />
     <ClInclude Include="src\Effects\Runtime.h" />
     <ClInclude Include="src\Effects\ScreenEffects.h" />
-    <ClInclude Include="src\Effects\ScreenEffectState.h" />
+    <ClInclude Include="src\Effects\ScreenEffectState.hpp" />
     <ClInclude Include="src\Effects\Templates\TemplateState.h" />
     <ClInclude Include="src\Effects\TimelineTrackKeys.hpp" />
     <ClInclude Include="src\Effects\Trails.h" />
@@ -2447,9 +2447,9 @@
     <ClInclude Include="src\Event\Camera.hpp" />
     <ClInclude Include="src\Event\Dialog.h" />
     <ClInclude Include="src\Event\Interpolation.h" />
-    <ClInclude Include="src\Event\InterpolationCurveLive.h" />
+    <ClInclude Include="src\Event\InterpolationCurveLive.hpp" />
     <ClInclude Include="src\Event\Playback.h" />
-    <ClInclude Include="src\Event\RoomTriggerEntryLive.h" />
+    <ClInclude Include="src\Event\RoomTriggerEntryLive.hpp" />
     <ClInclude Include="src\Event\Screen.hpp" />
     <ClInclude Include="src\Event\Script.h" />
     <ClInclude Include="src\Event\ScriptActorOpcodes.h" />
@@ -2468,7 +2468,7 @@
     <ClInclude Include="src\Event\Sound.h" />
     <ClInclude Include="src\Event\Splash.h" />
     <ClInclude Include="src\Event\Triggers.h" />
-    <ClInclude Include="src\Event\WeaponModeOpcode.h" />
+    <ClInclude Include="src\Event\WeaponModeOpcode.hpp" />
     <ClInclude Include="src\Event\Weather.h" />
     <ClInclude Include="src\Field\Actors.h" />
     <ClInclude Include="src\Field\Background.h" />
@@ -2481,17 +2481,15 @@
     <ClInclude Include="src\Field\Doors.h" />
     <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />
     <ClInclude Include="src\Field\EnvironmentLiveState.h" />
-    <ClInclude Include="src\Field\GameModeLiveState.h" />
+    <ClInclude Include="src\Field\GameModeLiveState.hpp" />
     <ClInclude Include="src\Field\GimmickAnimationQueueLive.h" />
-    <ClInclude Include="src\Field\GimmickDynamicsLive.h" />
-    <ClInclude Include="src\Field\GimmickLookup.h" />
+    <ClInclude Include="src\Field\GimmickLookup.hpp" />
     <ClInclude Include="src\Field\GimmickMotion.h" />
     <ClInclude Include="src\Field\GimmickPlacementLive.h" />
-    <ClInclude Include="src\Field\GimmickReactionsLive.h" />
     <ClInclude Include="src\Field\GimmickResourcesLive.h" />
     <ClInclude Include="src\Field\Gimmicks.h" />
     <ClInclude Include="src\Field\Input.h" />
-    <ClInclude Include="src\Field\InteractionFocusLive.h" />
+    <ClInclude Include="src\Field\InteractionFocusLive.hpp" />
     <ClInclude Include="src\Field\Interactions.h" />
     <ClInclude Include="src\Field\InteractionTargetLive.h" />
     <ClInclude Include="src\Field\Locations.h" />
@@ -2504,9 +2502,9 @@
     <ClInclude Include="src\Field\PlatformPlacementLive.h" />
     <ClInclude Include="src\Field\Platforms.h" />
     <ClInclude Include="src\Field\Room.h" />
-    <ClInclude Include="src\Field\RoomLoadingLiveState.h" />
+    <ClInclude Include="src\Field\RoomLoadingLiveState.hpp" />
     <ClInclude Include="src\Field\RoomRenderingLiveState.h" />
-    <ClInclude Include="src\Field\RoomStateLiveState.h" />
+    <ClInclude Include="src\Field\RoomStateLiveState.hpp" />
     <ClInclude Include="src\Field\RoomSwitchesLive.h" />
     <ClInclude Include="src\Field\TransitionsLiveState.h" />
     <ClInclude Include="src\Field\TriggerMarkers.h" />
@@ -2519,7 +2517,7 @@
     <ClInclude Include="src\Items\InventoryLiveState.h" />
     <ClInclude Include="src\Items\ItemRecordsLive.hpp" />
     <ClInclude Include="src\Items\Loot.h" />
-    <ClInclude Include="src\Items\LootLiveState.h" />
+    <ClInclude Include="src\Items\LootLiveState.hpp" />
     <ClInclude Include="src\Items\Materials.h" />
     <ClInclude Include="src\Items\TreasureChests.h" />
     <ClInclude Include="src\Items\Weapons.h" />
@@ -2568,7 +2566,7 @@
     <ClInclude Include="src\Menu\TextBox.h" />
     <ClInclude Include="src\State\Ashley.h" />
     <ClInclude Include="src\State\Location.h" />
-    <ClInclude Include="src\State\PlayTime.h" />
+    <ClInclude Include="src\State\PlayTime.hpp" />
     <ClInclude Include="src\State\RoomCache.h" />
     <ClInclude Include="src\State\RoomMemory.h" />
     <ClInclude Include="src\State\SceneTimer.h" />
@@ -2579,7 +2577,7 @@
     <ClInclude Include="src\Title\NewGame.h" />
     <ClInclude Include="src\Title\SaveCard.h" />
     <ClInclude Include="src\Title\SaveFiles.h" />
-    <ClInclude Include="src\Title\TitleMenuLiveState.h" />
+    <ClInclude Include="src\Title\TitleMenuLiveState.hpp" />
     <ClInclude Include="src\Title\TitleScreen.h" />
     <ClInclude Include="include\Actors\ActorCommands.hpp" />
     <ClInclude Include="include\Actors\ActorCommandsLive.hpp" />

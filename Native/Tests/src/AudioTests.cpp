@@ -23,7 +23,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/AudioDevice.hpp"
-#include "Audio/LfoWaveforms.h"
+#include "Audio/LfoWaveforms.hpp"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SeqVoiceCommands.hpp"
@@ -2070,6 +2070,6 @@ TEST_CASE("Unavailable LFO selections error before changing active modulation",
     fixture.Enable(kind, 65, 1);
     fixture.CheckRefused(kind, before, cursor);
   }
-  CHECK(Audio_Seq_LfoWaveform(256) == nullptr);
+  CHECK(VS::Audio::Seq::LfoWaveform(256) == nullptr);
   CHECK(errors == 4);
 }

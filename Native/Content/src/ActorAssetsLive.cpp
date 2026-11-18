@@ -25,7 +25,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLive.hpp"
-#include "Actors/AppearanceLiveState.h"
+#include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
@@ -1039,7 +1039,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     }
   }
   [[nodiscard]] std::int16_t RoomActorScale() const override {
-    return static_cast<std::int16_t>(Actors_roomActorScale.vx);
+    return static_cast<std::int16_t>(VS::Actors::roomActorScale.vx);
   }
   void ResetActorMotion(int slot) override {
     VS::Actors::ResetLiveActorMotionState(slot, 0);

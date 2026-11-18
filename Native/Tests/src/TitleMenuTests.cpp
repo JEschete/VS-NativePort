@@ -27,7 +27,7 @@
 #include "Title/SaveFiles.h"
 #include "Title/TitleMenu.hpp"
 #include "Title/TitleMenuLive.hpp"
-#include "Title/TitleMenuLiveState.h"
+#include "Title/TitleMenuLiveState.hpp"
 
 namespace {
 namespace title = VS::Title;
@@ -660,14 +660,14 @@ class LiveHostGuard {
   LiveHostGuard& operator=(LiveHostGuard&&) = delete;
   ~LiveHostGuard() {
     Input_settings = settings_;
-    Title_titleScreenVisitCount = visits_;
+    VS::Title::titleScreenVisitCount = visits_;
     std::ranges::copy(draw_, std::begin(Render_legacyDrawEnvironments));
     std::ranges::copy(display_, std::begin(Render_legacyDisplayEnvironments));
   }
 
  private:
   State_Settings settings_ = Input_settings;
-  int visits_ = Title_titleScreenVisitCount;
+  int visits_ = VS::Title::titleScreenVisitCount;
   std::array<DRAWENV, 2> draw_{};
   std::array<DISPENV, 2> display_{};
 };
@@ -1685,7 +1685,7 @@ TEST_CASE("Title live host binds settings and visits", "[title][title-menu]") {
   CHECK(host.Settings() ==
         title::PlayerSettings{.mono_sound = 1, .vibration_on = 0});
   host.SetVisitCount(5);
-  CHECK(Title_titleScreenVisitCount == 5);
+  CHECK(VS::Title::titleScreenVisitCount == 5);
   CHECK(host.VisitCount() == 5);
 }
 

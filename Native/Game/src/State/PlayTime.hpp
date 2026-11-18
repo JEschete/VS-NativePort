@@ -6,5 +6,9 @@
 
 #include "State/GameTime.h"
 
+namespace VS::State {
+
 // decomp: vs_main_gametime (SLUS_010.40 main.h:173 vs_Gametime_t)
-extern State_PlayTime State_playTime;
+extern State_PlayTime playTime;
+
+}  // namespace VS::State

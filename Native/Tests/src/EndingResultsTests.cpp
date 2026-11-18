@@ -21,7 +21,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Render/TextureRegionDraw.hpp"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -915,7 +915,7 @@ class LiveClearRecords {
   LiveClearRecords() {
     Audio_Seq_unusedScoredata = {};
     Audio_Seq_unusedStateFlags = {};
-    State_playTime = {};
+    VS::State::playTime = {};
     State_roomVisitProgress = {};
     State_savedEntryDoor = {};
     Input_settings = {};
@@ -929,7 +929,7 @@ class LiveClearRecords {
   ~LiveClearRecords() {
     Audio_Seq_unusedScoredata = score_;
     Audio_Seq_unusedStateFlags = flags_;
-    State_playTime = play_time_;
+    VS::State::playTime = play_time_;
     State_roomVisitProgress = rooms_;
     State_savedEntryDoor = door_;
     Input_settings = settings_;
@@ -940,7 +940,7 @@ class LiveClearRecords {
  private:
   State_ScoreData score_ = Audio_Seq_unusedScoredata;
   State_StateFlags flags_ = Audio_Seq_unusedStateFlags;
-  State_PlayTime play_time_ = State_playTime;
+  State_PlayTime play_time_ = VS::State::playTime;
   State_RoomVisitFlags rooms_ = State_roomVisitProgress;
   Field_MpdDoorRecord door_ = State_savedEntryDoor;
   State_Settings settings_ = Input_settings;
@@ -953,8 +953,8 @@ class LiveClearRecords {
 // A 2:05 clear on the second difficulty with magic used, Asura defeated, one
 // chest opened and two of four visited rooms countable.
 void CommitLiveClear() {
-  State_playTime.t.hours = 2;
-  State_playTime.t.minutes = 5;
+  VS::State::playTime.t.hours = 2;
+  VS::State::playTime.t.minutes = 5;
   State_StateFlags& flags = Audio_Seq_unusedStateFlags;
   flags.clearCount = 4;
   flags.difficulty = 1;

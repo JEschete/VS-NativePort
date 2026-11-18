@@ -13,6 +13,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.h"
 #include "Boot/SessionLive.hpp"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/SystemResourcesLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
@@ -23,17 +24,16 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.h"
-#include "Field/GameModeLiveState.h"
+#include "Field/GameModeLiveState.hpp"
 #include "Field/Interactions.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Input/ControllerLive.hpp"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "OverlayWorkspaceLiveState.h"
 #include "Render/Camera.h"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
@@ -97,7 +97,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Render::InitializeLiveTexturePages();
   }
   void ResetOverlayWorkspaceOwner() override {
-    Content_overlayWorkspaceOwner = 0;
+    VS::Content::overlayWorkspaceOwner = 0;
   }
   void LoadSystemResources() override {
     VS::Content::LoadLiveSystemResources();
@@ -112,27 +112,27 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Battle::ApplyLiveLearnedActionUnlocks();
   }
   void ApplyGameplayDefaults(const GameplayOverlayDefaults& defaults) override {
-    Field_zoneContext.currentSceneId = 0;
-    Field_zoneContext.reserved38 = 0;
-    Field_zoneContext.mapId = 0;
-    Field_zoneContext.zndId = 0;
-    Field_zoneContext.zudDiscRequest = nullptr;
-    Field_zoneContext.mpdDiscRequest = nullptr;
-    Field_zoneContext.zndDiscRequest = nullptr;
-    Field_zoneContext.mpdData = nullptr;
-    Field_zoneContext.zndData = nullptr;
-    Field_zoneContext.musicSlot = 0;
-    Field_zoneContext.musicId = 0;
-    Field_zoneContext.isMusicFadeEnabled =
+    VS::Field::zoneContext.currentSceneId = 0;
+    VS::Field::zoneContext.reserved38 = 0;
+    VS::Field::zoneContext.mapId = 0;
+    VS::Field::zoneContext.zndId = 0;
+    VS::Field::zoneContext.zudDiscRequest = nullptr;
+    VS::Field::zoneContext.mpdDiscRequest = nullptr;
+    VS::Field::zoneContext.zndDiscRequest = nullptr;
+    VS::Field::zoneContext.mpdData = nullptr;
+    VS::Field::zoneContext.zndData = nullptr;
+    VS::Field::zoneContext.musicSlot = 0;
+    VS::Field::zoneContext.musicId = 0;
+    VS::Field::zoneContext.isMusicFadeEnabled =
         defaults.zone_music_fade_enabled ? 1 : 0;
-    Field_zoneContext.loadedZudIndexPlusOne = 0;
+    VS::Field::zoneContext.loadedZudIndexPlusOne = 0;
     Field_pendingDestinationDoor = State_savedEntryDoor;
     Field_screenTransitionEffect = defaults.transition_effect;
     Field_screenTransitionStep = defaults.transition_step;
     Field_screenTransitionSpeed = defaults.transition_speed;
     Field_screenTransitionWipeAngle = defaults.transition_wipe_angle;
-    Field_isInteractionPaused = defaults.interaction_paused ? 1 : 0;
-    Items_lootListHead = nullptr;
+    VS::Field::isInteractionPaused = defaults.interaction_paused ? 1 : 0;
+    VS::Items::lootListHead = nullptr;
     // The original also cleared the write-only D_800F1874 (18.c:570).
     Field_controlMode = defaults.field_control_mode;
     VS::State::SetLiveTickSpeed(defaults.tick_speed);
@@ -142,7 +142,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     timer.mode = VS::State::kSceneTimerStopped;
     timer.time = {};
     VS::State::StoreLiveSceneTimer(timer);
-    Field_zoneContext.currentSceneId = State_savedEntryDoor.requiredFlagId;
+    VS::Field::zoneContext.currentSceneId = State_savedEntryDoor.requiredFlagId;
     Field_cameraTransition = nullptr;
     VS::Field::LiveResetCameraToAshley();
     VS::Render::SetLiveCameraFarClip(defaults.far_clip, 1);

@@ -30,7 +30,7 @@
 #include "Core/Gte.h"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Field/GimmickLookup.h"
+#include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
 #include "Render/CameraViewLive.hpp"
@@ -114,7 +114,8 @@ struct LiveSkeleton {
                                             const char* operation) {
   Actors_ActorRecord* actor = LiveActorRecord(actor_id, operation);
   if (actor != nullptr) return {.actor = actor, .gimmick = nullptr};
-  return {.actor = nullptr, .gimmick = Field_FindGimmickForActorSlot(actor_id)};
+  return {.actor = nullptr,
+          .gimmick = VS::Field::FindGimmickForActorSlot(actor_id)};
 }
 
 [[nodiscard]] std::optional<Actors_ShpBone> ReadBone(

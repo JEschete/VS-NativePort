@@ -1025,7 +1025,7 @@ int func_800F9800(void) {
             check_event_dispatch.event_headers(
                 {}, {"F01130": {"header": r"Native\Game\include\Event\WeaponMode.hpp"}}
             ),
-            [r"Native\Game\src\Event\WeaponModeOpcode.h"],
+            [r"Native\Game\src\Event\WeaponModeOpcode.hpp"],
         )
         self.assertEqual(
             check_event_dispatch.opcode_symbol("F01130", "Event::ScriptSetAshleyBattleMode"), binding
@@ -1506,8 +1506,8 @@ int func_800F9800(void) {
                     "F00908": ("Field_FindInteractableGimmickAheadEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
                     "F00913": ("Field_BeginGimmickInteractionEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
                     "F00914": ("Field_ApplyGimmickInteractionCommandEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
-                    "F01014": ("Field_UpdateGimmickReactionAnimationEntry", r"Native\Game\src\Field\GimmickReactionsLive.h"),
-                    "F01013": ("Field_UpdateGimmickMotionEntry", r"Native\Game\src\Field\GimmickDynamicsLive.h"),
+                    "F01014": ("Field_UpdateGimmickReactionAnimationEntry", r"Native\Game\include\Field\GimmickReactionsLive.hpp"),
+                    "F01013": ("Field_UpdateGimmickMotionEntry", r"Native\Game\include\Field\GimmickDynamicsLive.hpp"),
                     "F00065": ("Field_DisableTrapAtPositionEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
                     "F00602": ("Field_RoomTriggerAtTileEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
                     "F00616": ("Field_SetRoomTriggerEnabledEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
@@ -1582,8 +1582,8 @@ int func_800F9800(void) {
                     "F00584": ("Field_QueueGimmickAnimationEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),
                     "F00607": ("Field_ToggleRoomSwitchEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
                     "F00853": ("Field_GimmickPlacementEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
-                    "F01261": ("Event_EvaluateRoomEventTriggersEntry", r"Native\Game\src\Event\RoomTriggerEntryLive.h"),
-                    "F01276": ("Event_EvaluateInterpolationCurveEntry", r"Native\Game\src\Event\InterpolationCurveLive.h"),
+                    "F01261": ("Event_EvaluateRoomEventTriggersEntry", r"Native\Game\src\Event\RoomTriggerEntryLive.hpp"),
+                    "F01276": ("Event_EvaluateInterpolationCurveEntry", r"Native\Game\src\Event\InterpolationCurveLive.hpp"),
                 }
                 if identity in retained_c:
                     self.assertEqual((binding, header), retained_c[identity])
@@ -1803,7 +1803,7 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         for address, size, name in (
-            ("800F4ED8", 16, "Effects_screenEffectDefaults"),
+            ("800F4ED8", 16, "VS::Effects::screenEffectDefaults"),
             ("800F1D08", 4, "Field_matchingDoorRecords"),
         ):
             self.assertIn(
@@ -1981,12 +1981,12 @@ int func_800F9800(void) {
         )
         root = Path(__file__).resolve().parents[2]
         vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
-        self.assertIn('#include "Event/WeaponModeOpcode.h"', vm)
-        self.assertIn("Event_ScriptSetAshleyBattleModeOpcode,", vm)
-        self.assertNotIn("VS::Event::ScriptSetAshleyBattleMode", vm)
+        self.assertIn('#include "Event/WeaponModeOpcode.hpp"', vm)
+        self.assertIn("VS::Event::ScriptSetAshleyBattleModeOpcode,", vm)
+        self.assertNotRegex(vm, r"VS::Event::ScriptSetAshleyBattleMode\b")
         pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertIn(
-            '{"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u}',
+            '{"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&VS::Event::ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u}',
             pointers,
         )
         core = (root / r"Native\Game\src\Event\WeaponMode.cpp").read_text(encoding="utf-8")
@@ -3479,7 +3479,7 @@ int func_800F9800(void) {
         live = (root / r"Native\Game\src\Actors\SkeletonLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Field_FindGimmickForActorSlot(actor_id)", live)
+        self.assertIn("VS::Field::FindGimmickForActorSlot(actor_id)", live)
         self.assertNotIn("(Actors_ActorRecord*)", live)
         self.assertNotIn("Field_gimmickInstances[", live)
 
@@ -3852,7 +3852,7 @@ int func_800F9800(void) {
         self.assertIn("}else{g_game_over_request=Content::CompleteLiveRefusedDiscRequest(&file,", files)
         spawning = "".join((root / r"Native\Game\src\Actors\ActorSpawningLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(request!=nullptr){Content::EnqueueLivePriorityDiscRequest(request,", spawning)
-        self.assertIn("}else{request=Content::CompleteLiveRefusedDiscRequest(&disc,Field_zoneContext.zudData);}", spawning)
+        self.assertIn("}else{request=Content::CompleteLiveRefusedDiscRequest(&disc,VS::Field::zoneContext.zudData);}", spawning)
         items = "".join((root / r"Native\Game\src\Menu\Framework\ItemRowsLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(g_item_text_request!=nullptr){Content::EnqueueLiveDiscRequest(g_item_text_request,", items)
         self.assertIn("}else{g_item_text_request=Content::CompleteLiveRefusedDiscRequest(&file,block);}", items)
@@ -4506,11 +4506,11 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
     def test_gimmick_reaction_generated_calls_keep_typed_retained_entry(self):
         root = Path(__file__).resolve().parents[2]
         generated = (root / r"Native\Game\src\Field\Gimmicks.cpp").read_text(encoding="utf-8")
-        call = "Field_UpdateGimmickReactionAnimationEntry((Field_GimmickMotionView*)object)"
+        call = "UpdateGimmickReactionAnimationEntry((Field_GimmickMotionView*)object)"
         self.assertEqual(generated.count(call), 0)
         self.assertNotIn("int Field_UpdateGimmickReactionAnimation(", generated)
         self.assertNotIn("void Field_UpdateGimmickMotion(", generated)
-        self.assertNotRegex(generated, r"\(\(int\s*\(\*\).*?\)Field_UpdateGimmickReactionAnimationEntry")
+        self.assertNotRegex(generated, r"\(\(int\s*\(\*\).*?\)(?:VS::Field::|Field_)UpdateGimmickReactionAnimationEntry")
         live = (root / r"Native\Game\src\Field\GimmickDynamicsLive.cpp").read_text(encoding="utf-8")
         self.assertIn("UpdateLiveGimmickReactionAnimation(record_)", live)
         owned = self.owned_items()
@@ -4901,7 +4901,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         core = (root / r"Native\Game\src\Title\TitleMenu.cpp").read_text(encoding="utf-8")
         self.assertIn("host.ResetPlayerSettings();", core)
         live = (root / r"Native\Game\src\Title\TitleMenuLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("void ResetPlayerSettings() override { Boot_InitializePlayerSettings(); }", live)
+        self.assertIn("void ResetPlayerSettings() override { VS::Boot::InitializePlayerSettings(); }", live)
         helper = (root / r"Native\Game\src\Boot\PlayerSettings.cpp").read_text(encoding="utf-8")
         self.assertIn("0x2D8", helper)
 
@@ -4985,7 +4985,10 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         live = (root / "Native/Game/src/Actors/ActorSpawningLive.cpp").read_text(encoding="utf-8")
         model = live.split("std::uint8_t ZoneEnemyModel(int zud) const override {", 1)[1].split("\n  }\n", 1)[0]
         self.assertIn("zud >= ZoneEnemyCount()", model)
-        self.assertIn("Field_zoneContext.zndEnemies[zud].recordBytes[kZoneEnemyModelByte]", model)
+        self.assertIn(
+            "VS::Field::zoneContext.zndEnemies[zud].recordBytes[kZoneEnemyModelByte]",
+            "".join(model.split()),
+        )
         for text in (core, live):
             self.assertNotIn("Actors_zoneCharacterInitData", text)
 
@@ -5025,12 +5028,12 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
     def test_equipment_slot_storage_is_owned_and_native_sized(self):
         root = Path(__file__).resolve().parents[2]
         allocation = (root / "Native/Game/src/Actors/ActorAllocation.h").read_text()
-        slot = (root / "Native/Game/src/Actors/ActorModelSlot.h").read_text()
-        self.assertIn('#include "Actors/ActorModelSlot.h"', allocation)
+        slot = (root / "Native/Game/src/Actors/ActorModelSlot.hpp").read_text()
+        self.assertIn('#include "Actors/ActorModelSlot.hpp"', allocation)
         self.assertNotIn("storage[0x5E8]", allocation)
         self.assertIn("Actors_WeaponModel weapon;", slot)
         registry = (root / "tools/port/owned.csv").read_text()
-        self.assertIn("T00633,type,Actors_ActorModelSlot,", registry)
+        self.assertIn("T00633,type,VS::Actors::ActorModelSlot,", registry)
 
     def test_native_audio_preserves_optional_layer_guard_and_connects_sfx(self):
         self.assertNotIn("F03192", copy_fixups.FIXES)

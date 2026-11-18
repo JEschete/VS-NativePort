@@ -3,9 +3,10 @@
 
 #include "State/GameClock.hpp"
 
-// Binding from the live play time record (State_playTime, State/PlayTime.h)
-// to the typed clock (State/GameClock.hpp), in the original argument order
-// for the generated callers (tools/port/copy_fixups.py OWNED_CALL_BINDINGS).
+// Binding from the live play time record (VS::State::playTime,
+// State/PlayTime.h) to the typed clock (State/GameClock.hpp), in the original
+// argument order for the generated callers (tools/port/copy_fixups.py
+// OWNED_CALL_BINDINGS).
 namespace VS::State {
 [[nodiscard]] PlayTime LivePlayTime() noexcept;
 void StoreLivePlayTime(const PlayTime& time) noexcept;

@@ -12,7 +12,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Battle/Action.h"

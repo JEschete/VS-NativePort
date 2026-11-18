@@ -447,14 +447,14 @@ NATIVE_HELPER_HEADERS = {
     "Field_FindInteractableGimmickAheadEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
     "Field_BeginGimmickInteractionEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
     "Field_ApplyGimmickInteractionCommandEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
-    "Field_UpdateGimmickReactionAnimationEntry": r"Native\Game\src\Field\GimmickReactionsLive.h",
-    "Field_UpdateGimmickMotionEntry": r"Native\Game\src\Field\GimmickDynamicsLive.h",
+    "Field_UpdateGimmickReactionAnimationEntry": r"Native\Game\include\Field\GimmickReactionsLive.hpp",
+    "Field_UpdateGimmickMotionEntry": r"Native\Game\include\Field\GimmickDynamicsLive.hpp",
     "Field_DisableTrapAtPositionEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
     "Field_RoomTriggerAtTileEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
     "Field_SetRoomTriggerEnabledEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
     "Field_FindTopGimmickAtTileEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
-    "Event_EvaluateInterpolationCurveEntry": r"Native\Game\src\Event\InterpolationCurveLive.h",
-    "Event_EvaluateRoomEventTriggersEntry": r"Native\Game\src\Event\RoomTriggerEntryLive.h",
+    "Event_EvaluateInterpolationCurveEntry": r"Native\Game\src\Event\InterpolationCurveLive.hpp",
+    "Event_EvaluateRoomEventTriggersEntry": r"Native\Game\src\Event\RoomTriggerEntryLive.hpp",
     "VS::Event::ResolveLiveScriptActorReference": r"Native\Game\include\Event\ScriptVmLive.hpp",
     "VS::Event::InitializeEventCameraEntry": r"Native\Game\include\Event\EventCameraOwnershipLive.hpp",
     "VS::Event::SetEventFieldCameraOverrideEntry": r"Native\Game\include\Event\EventCameraOwnershipLive.hpp",
@@ -772,7 +772,7 @@ NATIVE_HELPER_HEADERS = {
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
        for name in ("VS::Field::LiveMovingPlatformPlacement", "VS::Field::FindLiveMovingPlatformById")},
-    "Event_ScriptSetAshleyBattleModeOpcode": r"Native\Game\src\Event\WeaponModeOpcode.h",
+    "Event_ScriptSetAshleyBattleModeOpcode": r"Native\Game\src\Event\WeaponModeOpcode.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::FloodFillLiveAiTerrainHeights": r"Native\Game\include\Battle\Ai\SpecialTerrainLive.hpp",
     "VS::Battle::Ai::FindLiveAdjacentAiGroundHeight": r"Native\Game\include\Battle\Ai\SpecialTerrainLive.hpp",
@@ -1097,7 +1097,7 @@ NATIVE_HELPER_HEADERS = {
            "BuildEulerRotationMatrixQuadrant", "ScaleMatrixColumns",
        )},
     "Field_FindGimmickForActorSlot":
-        r"Native\Game\src\Field\GimmickLookup.h",
+        r"Native\Game\src\Field\GimmickLookup.hpp",
     **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.h"
        for name in (
            "Ending_Credits_PrepareEmbeddedArt", "Ending_Credits_EmbeddedArt",
@@ -1135,7 +1135,7 @@ NATIVE_HELPER_HEADERS = {
            "Save_NativeCancelResume", "Save_NativeResetSession",
        )},
     "Battle_Ai_TerrainRegionCell": r"Native\Game\src\Battle\Ai\FrameUpdate.h",
-    "Audio_Seq_LfoWaveform": r"Native\Engine\include\Audio\LfoWaveforms.h",
+    "Audio_Seq_LfoWaveform": r"Native\Engine\include\Audio\LfoWaveforms.hpp",
     **{name: r"Native\Engine\include\Audio\MusicState.h"
        for name in (
            "Audio_Native_SaveMusicSnapshot",
@@ -1506,7 +1506,7 @@ NATIVE_HELPER_HEADERS = {
            "Boot_EncounterUsesRoomEvents",
            "Boot_EncounterPollStop",
        )},
-    "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.h",
+    "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.hpp",
     "Battle_Ai_InvalidateSessionBindings": r"Native\Game\src\Battle\Ai\RoomState.h",
     **{name: r"Native\Engine\include\Core\Diagnostics.h"
        for name in ("Core_Warnf", "Core_Errorf")},

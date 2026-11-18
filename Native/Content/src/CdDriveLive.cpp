@@ -24,7 +24,7 @@
 #include "DiscQueue.h"
 #include "Legacy/LibDs.h"
 #include "State/GameClockLive.hpp"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 
 namespace VS::Content {
 namespace {

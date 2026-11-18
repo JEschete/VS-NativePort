@@ -18,11 +18,11 @@
 #include "Effects/Runtime.h"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/GameModeLiveState.h"
+#include "Field/GameModeLiveState.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/PlatformPlacementLive.h"
 #include "Field/RoomRenderingLive.hpp"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
@@ -56,7 +56,7 @@ class LiveWorld final : public RewardDispatchWorld {
     Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
   }
   void SetInteractionPaused(bool paused) override {
-    Field_isInteractionPaused = paused ? 1 : 0;
+    VS::Field::isInteractionPaused = paused ? 1 : 0;
   }
   std::int32_t FollowAction() override { return Battle_rewardsFollowAction; }
   std::uint8_t ScriptFlag(int flag) override {
@@ -125,7 +125,7 @@ class LiveWorld final : public RewardDispatchWorld {
   }
   Menu::Framework::LootListId LootHead() override {
     return Menu::Framework::LootListId{
-        reinterpret_cast<std::uintptr_t>(Items_lootListHead)};
+        reinterpret_cast<std::uintptr_t>(VS::Items::lootListHead)};
   }
   void OpenLoot(Menu::Framework::LootListId owner) override {
     Menu::Framework::OpenLiveLootListMenu(

@@ -57,7 +57,7 @@
 #include "Save/MemoryCard/Resources.h"
 #include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeMenu.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
 #include "Title/SaveCard.h"
@@ -538,8 +538,10 @@ class LiveCardHost : public LiveGpuHost {
   void ClearDoorEntered() override {
     Audio_Seq_unusedStateFlags.doorEntered = 0;
   }
-  std::uint32_t PlayTime() override { return State_playTime.all; }
-  void SetPlayTime(std::uint32_t time) override { State_playTime.all = time; }
+  std::uint32_t PlayTime() override { return VS::State::playTime.all; }
+  void SetPlayTime(std::uint32_t time) override {
+    VS::State::playTime.all = time;
+  }
 
  private:
   // One save image of the workspace over another (_rMemcpy of

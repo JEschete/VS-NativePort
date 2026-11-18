@@ -17,7 +17,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.h"
-#include "Effects/ScreenEffectState.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -70,8 +70,8 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
       Core_interfaceRandomState};
   ValueRestore<decltype(Effects_screenEffectOverlay)> saved_overlay{
       Effects_screenEffectOverlay};
-  ValueRestore<decltype(Effects_screenEffectDefaults)> saved_defaults{
-      Effects_screenEffectDefaults};
+  ValueRestore<decltype(VS::Effects::screenEffectDefaults)> saved_defaults{
+      VS::Effects::screenEffectDefaults};
 
   NotificationFixture() {
     Menu_sceneNotificationBuffer = nullptr;
@@ -102,7 +102,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     State_tickSpeed = 2;
     Battle_lowerScreenUiState = 0;
     Effects_screenEffectOverlay = nullptr;
-    Effects_screenEffectDefaults = {};
+    VS::Effects::screenEffectDefaults = {};
   }
   ~NotificationFixture() { menu::ReleaseLiveSceneNotification(); }
   static void SetTemplate(std::span<u_short> table, std::size_t offset) {

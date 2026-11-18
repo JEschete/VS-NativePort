@@ -381,10 +381,10 @@ TEST_CASE("Equipment reload releases shields through the actual preview slot",
 
 TEST_CASE("Actor equipment slots contain complete aligned native models",
           "[menu][equipment][model-storage]") {
-  CHECK(sizeof(Actors_ActorModelSlot) >= sizeof(Actors_WeaponModel));
-  CHECK(alignof(Actors_ActorModelSlot) >= alignof(Actors_WeaponModel));
-  if (sizeof(Actors_ActorModelSlot) < sizeof(Actors_WeaponModel) ||
-      alignof(Actors_ActorModelSlot) < alignof(Actors_WeaponModel)) {
+  CHECK(sizeof(VS::Actors::ActorModelSlot) >= sizeof(Actors_WeaponModel));
+  CHECK(alignof(VS::Actors::ActorModelSlot) >= alignof(Actors_WeaponModel));
+  if (sizeof(VS::Actors::ActorModelSlot) < sizeof(Actors_WeaponModel) ||
+      alignof(VS::Actors::ActorModelSlot) < alignof(Actors_WeaponModel)) {
     return;
   }
   const int index = GENERATE(0, 1);
@@ -404,7 +404,7 @@ TEST_CASE("Actor equipment slots contain complete aligned native models",
     model.reserved5E4 = 0x12345678;
   }
   const auto offset = offsetof(Actors_ActorAllocation, modelSlots) +
-                      index * sizeof(Actors_ActorModelSlot);
+                      index * sizeof(VS::Actors::ActorModelSlot);
   std::memcpy(expected.data() + offset, &model, sizeof model);
   auto* slot = &allocation.actor.modelSlots[index];
   if (clear) {

@@ -24,16 +24,16 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLiveState.h"
-#include "Field/RoomStateLiveState.h"
+#include "Field/RoomStateLiveState.hpp"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
 #include "Menu/MapTerminalLive.hpp"
 #include "State/Progress.h"
 
 // decomp: D_800F19A0 (D_800F19A0@BATTLE/BATTLE.PRG)
-int Field_isRoomVisitPending;
+int VS::Field::isRoomVisitPending;
 
 namespace VS::Field {
 namespace {
@@ -68,12 +68,12 @@ void StoreVisitedPlaces(const VisitedPlaces& visited) {
 }
 
 RoomVisitState LoadRoomVisit() {
-  return RoomVisitState{.pending = Field_isRoomVisitPending != 0,
+  return RoomVisitState{.pending = isRoomVisitPending != 0,
                         .visited = LoadVisitedPlaces()};
 }
 
 void StoreRoomVisit(const RoomVisitState& state) {
-  Field_isRoomVisitPending = state.pending ? 1 : 0;
+  isRoomVisitPending = state.pending ? 1 : 0;
   StoreVisitedPlaces(state.visited);
 }
 
@@ -230,8 +230,8 @@ int LiveFindLocationId(int zone_id, int room_id) {
 int LiveCurrentRoomId() {
   const std::array<LocationDestination, kLocationCount> table =
       LiveLocationTable();
-  return CurrentRoomId(table, CurrentRoom{.zone_id = Field_zoneContext.zndId,
-                                          .room_id = Field_zoneContext.mapId});
+  return CurrentRoomId(table, CurrentRoom{.zone_id = zoneContext.zndId,
+                                          .room_id = zoneContext.mapId});
 }
 
 int LiveEnableOwnedRoomRendering(int owner_room_index) {

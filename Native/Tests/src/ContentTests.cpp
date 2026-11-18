@@ -64,7 +64,6 @@
 #include "Legacy/Psx.h"
 #include "ModelLoading.h"
 #include "Movie/MoviePlayer.h"
-#include "OverlayWorkspaceLiveState.h"
 #include "PFile.h"
 #include "Render/PageSpace.hpp"
 
@@ -1223,9 +1222,9 @@ TEST_CASE("PLG073 and PLG074 import all eight ring-arc color rows",
 
 namespace {
 struct ContentWorkspaceState {
-  char saved = Content_overlayWorkspaceOwner;
-  ContentWorkspaceState() { Content_overlayWorkspaceOwner = 0; }
-  ~ContentWorkspaceState() { Content_overlayWorkspaceOwner = saved; }
+  char saved = VS::Content::overlayWorkspaceOwner;
+  ContentWorkspaceState() { VS::Content::overlayWorkspaceOwner = 0; }
+  ~ContentWorkspaceState() { VS::Content::overlayWorkspaceOwner = saved; }
 };
 
 struct ActorAssetState {
@@ -1302,23 +1301,23 @@ TEST_CASE("Overlay workspace claims preserve the owning tag",
           "[content][semantic-names][workspace]") {
   ContentWorkspaceState state;
   CHECK(Content::AcquireLiveOverlayWorkspace(6) == 1);
-  CHECK(Content_overlayWorkspaceOwner == 6);
+  CHECK(VS::Content::overlayWorkspaceOwner == 6);
   CHECK(Content::AcquireLiveOverlayWorkspace(2) == 0);
-  CHECK(Content_overlayWorkspaceOwner == 6);
+  CHECK(VS::Content::overlayWorkspaceOwner == 6);
   CHECK(Content::ReleaseLiveOverlayWorkspace(2) == 0);
-  CHECK(Content_overlayWorkspaceOwner == 6);
+  CHECK(VS::Content::overlayWorkspaceOwner == 6);
 }
 
 TEST_CASE("Overlay workspace release permits a subsequent different owner",
           "[content][semantic-names][workspace]") {
   ContentWorkspaceState state;
-  Content_overlayWorkspaceOwner = 6;
+  VS::Content::overlayWorkspaceOwner = 6;
   CHECK(Content::ReleaseLiveOverlayWorkspace(6) == 1);
-  CHECK(Content_overlayWorkspaceOwner == 0);
+  CHECK(VS::Content::overlayWorkspaceOwner == 0);
   CHECK(Content::ReleaseLiveOverlayWorkspace(6) == 0);
   CHECK(Content::AcquireLiveOverlayWorkspace(2) == 1);
   CHECK(Content::ReleaseLiveOverlayWorkspace(2) == 1);
-  CHECK(Content_overlayWorkspaceOwner == 0);
+  CHECK(VS::Content::overlayWorkspaceOwner == 0);
 }
 
 TEST_CASE("Timeline section and track indices retain block-relative offsets",

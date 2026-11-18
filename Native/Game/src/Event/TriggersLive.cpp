@@ -8,7 +8,7 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Core/Diagnostics.h"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"

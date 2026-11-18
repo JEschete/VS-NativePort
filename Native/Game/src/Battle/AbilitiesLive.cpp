@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <iterator>
 
-#include "Actors/ActorModelSlot.h"
+#include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.h"

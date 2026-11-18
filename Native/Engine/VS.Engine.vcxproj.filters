@@ -765,7 +765,7 @@
     <ClInclude Include="include\Audio\AudioDevice.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\Audio\LfoWaveforms.h">
+    <ClInclude Include="include\Audio\LfoWaveforms.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\MixControl.hpp">

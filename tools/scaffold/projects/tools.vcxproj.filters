@@ -844,6 +844,9 @@
     <Filter Include="tools\naming">
       <UniqueIdentifier>{5A927D97-BA8D-561F-80B9-FBBE4A577EA2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tools\naming\traces">
+      <UniqueIdentifier>{441461CC-04D8-535F-972F-BBE050BD1B8B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="tools\port">
       <UniqueIdentifier>{70376229-6E65-5EF4-B9D7-769299972C0F}</UniqueIdentifier>
     </Filter>
@@ -957,6 +960,9 @@
     <None Include="..\..\naming\cite_globals.py">
       <Filter>tools\naming</Filter>
     </None>
+    <None Include="..\..\naming\disc_refs.py">
+      <Filter>tools\naming</Filter>
+    </None>
     <None Include="..\..\naming\evidence.py">
       <Filter>tools\naming</Filter>
     </None>
@@ -970,6 +976,9 @@
       <Filter>tools\naming</Filter>
     </None>
     <None Include="..\..\naming\merge_symbols.py">
+      <Filter>tools\naming</Filter>
+    </None>
+    <None Include="..\..\naming\native_refs.py">
       <Filter>tools\naming</Filter>
     </None>
     <None Include="..\..\naming\native_symbol_inventory.py">
@@ -993,8 +1002,14 @@
     <None Include="..\..\naming\test_symbol_support.py">
       <Filter>tools\naming</Filter>
     </None>
+    <None Include="..\..\naming\test_trace_queue.py">
+      <Filter>tools\naming</Filter>
+    </None>
     <None Include="..\..\naming\trace_queue.py">
       <Filter>tools\naming</Filter>
+    </None>
+    <None Include="..\..\naming\traces\README.md">
+      <Filter>tools\naming\traces</Filter>
     </None>
     <None Include="..\..\naming\upstream_layout.py">
       <Filter>tools\naming</Filter>

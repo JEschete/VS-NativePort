@@ -18,7 +18,7 @@
 #include <type_traits>
 
 #include "Audio/Driver/SoundDriver.h"
-#include "Audio/LfoWaveforms.h"
+#include "Audio/LfoWaveforms.hpp"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/PlaybackReset.hpp"
 #include "Audio/Samples/SampleBanks.h"
@@ -161,7 +161,7 @@ class LiveVoiceCommandHost final : public VoiceCommandHost {
   }
 
   bool HasLfoWaveform(std::uint8_t shape) override {
-    return Audio_Seq_LfoWaveform(shape) != nullptr;
+    return LfoWaveform(shape) != nullptr;
   }
 
   void SetVoiceMode(ChannelKind kind, VoiceMode mode,

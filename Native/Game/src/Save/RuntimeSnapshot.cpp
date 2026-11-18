@@ -41,12 +41,12 @@
 #include "Core/Random.h"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.h"
-#include "Field/GameModeLiveState.h"
+#include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
@@ -57,7 +57,7 @@
 #include "Render/Camera.h"
 #include "Render/UiPrimitives.h"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/RoomMemory.h"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
@@ -131,7 +131,7 @@ struct PersistentInputs {
   std::array<char, std::size(State_learnedActionFlags)> learned;
   decltype(Snapshot::learned_actions) unlocked;
   std::uint32_t mix_behavior = 0;
-  decltype(State_playTime) play_time{};
+  decltype(VS::State::playTime) play_time{};
 };
 
 struct PendingResume {
@@ -1196,19 +1196,19 @@ Result CaptureActors(Snapshot& state) {
 }
 
 void ApplyClock(std::uint64_t ticks) {
-  State_playTime.t.frames = static_cast<signed char>(ticks % kClockRadix);
+  VS::State::playTime.t.frames = static_cast<signed char>(ticks % kClockRadix);
   ticks /= kClockRadix;
-  State_playTime.t.seconds = static_cast<signed char>(ticks % kClockRadix);
+  VS::State::playTime.t.seconds = static_cast<signed char>(ticks % kClockRadix);
   ticks /= kClockRadix;
-  State_playTime.t.minutes = static_cast<signed char>(ticks % kClockRadix);
-  State_playTime.t.hours = static_cast<signed char>(ticks / kClockRadix);
+  VS::State::playTime.t.minutes = static_cast<signed char>(ticks % kClockRadix);
+  VS::State::playTime.t.hours = static_cast<signed char>(ticks / kClockRadix);
 }
 
 Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
   const auto& model = actor.instance;
   // func_8006C39C (146C.c:1893) freezes ordinary walk/turn intent in menus.
   // Resume rebuilds an idle actor at this position, not that transient intent.
-  const bool menu_paused = Field_isInteractionPaused != 0 &&
+  const bool menu_paused = VS::Field::isInteractionPaused != 0 &&
                            (Field_controlMode == 5 || Field_controlMode == 6);
   const bool horizontal_motion =
       model.turnFrames != 0 || model.rootMotion.vx != 0 ||
@@ -1416,14 +1416,16 @@ std::expected<Snapshot, std::string> Capture(
       Battle_characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
       Field_roomData.environment == nullptr ||
-      Field_zoneContext.mpdDiscRequest != nullptr ||
-      Field_zoneContext.zndDiscRequest != nullptr) {
+      VS::Field::zoneContext.mpdDiscRequest != nullptr ||
+      VS::Field::zoneContext.zndDiscRequest != nullptr) {
     return std::unexpected("gameplay is not ready for a semantic capture");
   }
-  if (Field_zoneContext.zndId <= 0 || Field_zoneContext.zndId > kLastLocation ||
-      Field_zoneContext.mapId < 0 || Field_zoneContext.mapId > kLastLocation ||
-      Field_zoneContext.currentSceneId < 0 ||
-      Field_zoneContext.currentSceneId > kLastScene) {
+  if (VS::Field::zoneContext.zndId <= 0 ||
+      VS::Field::zoneContext.zndId > kLastLocation ||
+      VS::Field::zoneContext.mapId < 0 ||
+      VS::Field::zoneContext.mapId > kLastLocation ||
+      VS::Field::zoneContext.currentSceneId < 0 ||
+      VS::Field::zoneContext.currentSceneId > kLastScene) {
     return std::unexpected("live scene identity is invalid");
   }
   const auto phase = ValidateCaptureBoundary(*Actors_actorRecords[0]);
@@ -1437,11 +1439,13 @@ std::expected<Snapshot, std::string> Capture(
   valid = CaptureInventoryOrder(state);
   if (!valid) return std::unexpected(valid.error());
   const auto& model = Actors_actorRecords[0]->instance;
-  state.location.zone = static_cast<std::uint16_t>(Field_zoneContext.zndId);
-  state.location.room = static_cast<std::uint16_t>(Field_zoneContext.mapId);
+  state.location.zone =
+      static_cast<std::uint16_t>(VS::Field::zoneContext.zndId);
+  state.location.room =
+      static_cast<std::uint16_t>(VS::Field::zoneContext.mapId);
   // _zoneContext+0x68 (G00254/D800F18E8), not the detached door alias.
   state.location.scene =
-      static_cast<std::uint16_t>(Field_zoneContext.currentSceneId);
+      static_cast<std::uint16_t>(VS::Field::zoneContext.currentSceneId);
   state.location.position = {model.position.vx, model.position.vy,
                              model.position.vz};
   state.location.facing = model.facing;
@@ -1466,7 +1470,7 @@ std::expected<Snapshot, std::string> Capture(
       actual.vz != orbit_position.vz) {
     return std::unexpected("current camera position is not the captured orbit");
   }
-  const auto& time = State_playTime.t;
+  const auto& time = VS::State::playTime.t;
   if (time.hours < 0 || time.hours > kMaximumHours || time.minutes < 0 ||
       time.minutes >= kClockRadix || time.seconds < 0 ||
       time.seconds >= kClockRadix || time.frames < 0 ||
@@ -1522,7 +1526,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
               staged.previous.learned.begin());
   staged.previous.unlocked = staged.previous.state.learned_actions;
   staged.previous.mix_behavior = Audio_Driver_controlLatches.mixBehavior;
-  staged.previous.play_time = State_playTime;
+  staged.previous.play_time = VS::State::playTime;
   // All fallible work, including owning the staging copy, precedes mutation.
   pending.emplace(std::move(staged));
   ApplyPersistent(pending->state);
@@ -1573,7 +1577,7 @@ void CancelResume() {
         "CancelResume: audio consumer unavailable; restoring output latch");
   }
   Audio_Driver_controlLatches.mixBehavior = previous.mix_behavior;
-  if (pending->new_game) State_playTime = previous.play_time;
+  if (pending->new_game) VS::State::playTime = previous.play_time;
   pending.reset();
 }
 
@@ -1587,12 +1591,12 @@ std::expected<void, std::string> FinishResume() {
       Battle_characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
       Field_roomData.environment == nullptr ||
-      Field_zoneContext.zndId != state.location.zone ||
-      Field_zoneContext.mapId != state.location.room ||
-      Field_zoneContext.currentSceneId != state.location.scene ||
+      VS::Field::zoneContext.zndId != state.location.zone ||
+      VS::Field::zoneContext.mapId != state.location.room ||
+      VS::Field::zoneContext.currentSceneId != state.location.scene ||
       Field_roomData.environment->sceneId != state.location.scene ||
-      Field_zoneContext.mpdDiscRequest != nullptr ||
-      Field_zoneContext.zndDiscRequest != nullptr ||
+      VS::Field::zoneContext.mpdDiscRequest != nullptr ||
+      VS::Field::zoneContext.zndDiscRequest != nullptr ||
       State_ashleySnapshot.stats.isPending != 0) {
     return std::unexpected("the staged resume room/Ashley spawn is not ready");
   }

@@ -171,12 +171,12 @@
 #include "ActorAssets.h"
 #include "ActorAssetsLiveState.h"
 #include "Actors/ActorCommandsLiveState.h"
-#include "Actors/ActorModelSlot.h"
+#include "Actors/ActorModelSlot.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
-#include "Actors/AppearanceLiveState.h"
+#include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
@@ -245,15 +245,15 @@
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-#include "Effects/ScreenEffectState.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Event/Actors.h"
-#include "Event/InterpolationCurveLive.h"
+#include "Event/InterpolationCurveLive.hpp"
 #include "Event/Playback.h"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/Script.h"
 #include "Event/ScriptActorOpcodes.h"
 #include "Event/ScriptActors.h"
@@ -271,7 +271,7 @@
 #include "Event/Sound.h"
 #include "Event/Splash.h"
 #include "Event/Triggers.h"
-#include "Event/WeaponModeOpcode.h"
+#include "Event/WeaponModeOpcode.hpp"
 #include "Event/Weather.h"
 #include "Field/Actors.h"
 #include "Field/BackgroundLiveState.h"
@@ -281,15 +281,15 @@
 #include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
 #include "Field/EnvironmentLiveState.h"
-#include "Field/GameModeLiveState.h"
+#include "Field/GameModeLiveState.hpp"
 #include "Field/GimmickAnimationQueueLive.h"
-#include "Field/GimmickDynamicsLive.h"
+#include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickPlacementLive.h"
-#include "Field/GimmickReactionsLive.h"
+#include "Field/GimmickReactionsLive.hpp"
 #include "Field/GimmickResourcesLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Input.h"
-#include "Field/InteractionFocusLive.h"
+#include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.h"
 #include "Field/Interactions.h"
 #include "Field/Locations.h"
@@ -301,9 +301,9 @@
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Field/Room.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLiveState.h"
-#include "Field/RoomStateLiveState.h"
+#include "Field/RoomStateLiveState.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLiveState.h"
 #include "Field/TriggerMarkers.h"
@@ -316,7 +316,7 @@
 #include "Items/InventoryLiveState.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Items/Materials.h"
 #include "Items/TreasureChests.h"
 #include "Items/Weapons.h"
@@ -332,7 +332,7 @@
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
 #include "Movie/Intro.h"
-#include "OverlayWorkspaceLiveState.h"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -345,13 +345,13 @@
 #include "Render/UiPrimitives.h"
 #include "State/Ashley.h"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Progress.h"
 #include "State/RoomCache.h"
 #include "State/RoomMemory.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
-#include "Title/TitleMenuLiveState.h"
+#include "Title/TitleMenuLiveState.hpp"
 
 // Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).
 #include "Content/ModuleData.h"
@@ -580,21 +580,21 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1868u, 4u, (void*)&Effects_effectBusyFlags, sizeof Effects_effectBusyFlags, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F186Cu, 4u, (void*)&Field_isFirstPersonViewEnabled, sizeof Field_isFirstPersonViewEnabled, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1870u, 4u, (void*)&Render_legacyCurrentOrderingTable, sizeof Render_legacyCurrentOrderingTable, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1880u, 4u, (void*)&Field_zoneContext, sizeof Field_zoneContext, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1880u, 4u, (void*)&VS::Field::zoneContext, sizeof VS::Field::zoneContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F18ECu, 4u, (void*)&Battle_actionSelection, sizeof Battle_actionSelection, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F18F0u, 4u, (void*)&Battle_actionFlowMode, sizeof Battle_actionFlowMode, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F18F8u, 4u, (void*)&Content_overlayWorkspaceOwner, sizeof Content_overlayWorkspaceOwner, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F18F8u, 4u, (void*)&VS::Content::overlayWorkspaceOwner, sizeof VS::Content::overlayWorkspaceOwner, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F18FCu, 4u, (void*)&Battle_recoveryRewardMode, sizeof Battle_recoveryRewardMode, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1900u, 4u, (void*)&Items_lootListHead, sizeof Items_lootListHead, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1900u, 4u, (void*)&VS::Items::lootListHead, sizeof VS::Items::lootListHead, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1904u, 4u, (void*)&Field_cameraTransition, sizeof Field_cameraTransition, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F190Cu, 4u, (void*)&Field_isFieldRenderingEnabled, sizeof Field_isFieldRenderingEnabled, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1910u, 20u, (void*)&Field_interactionFocus, sizeof Field_interactionFocus, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1928u, 4u, (void*)&Battle_actors, sizeof Battle_actors, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1968u, 4u, (void*)&Field_isInteractionPaused, sizeof Field_isInteractionPaused, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F1968u, 4u, (void*)&VS::Field::isInteractionPaused, sizeof VS::Field::isInteractionPaused, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F196Cu, 4u, (void*)&Field_controlMode, sizeof Field_controlMode, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1970u, 24u, (void*)&Render_legacyMaskBitOffPackets, sizeof Render_legacyMaskBitOffPackets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1988u, 24u, (void*)&Render_legacyMaskBitOnPackets, sizeof Render_legacyMaskBitOnPackets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F19A0u, 4u, (void*)&Field_isRoomVisitPending, sizeof Field_isRoomVisitPending, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F19A0u, 4u, (void*)&VS::Field::isRoomVisitPending, sizeof VS::Field::isRoomVisitPending, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F19C8u, 4u, (void*)&Field_roomGeometryDrawMode, sizeof Field_roomGeometryDrawMode, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F19CCu, 4u, (void*)&Battle_actionState, sizeof Battle_actionState, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F19D0u, 4u, (void*)&Field_sphericalCamera, sizeof Field_sphericalCamera, 0u, 0u},
@@ -683,10 +683,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F2308u, 4u, (void*)&Content_legacyEtmDiscRequest, sizeof Content_legacyEtmDiscRequest, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F2310u, 320u, (void*)&Content_legacyActorAssetRequests, sizeof Content_legacyActorAssetRequests, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F2450u, 8u, (void*)&Actors_sharedSequenceBankTexturePages, sizeof Actors_sharedSequenceBankTexturePages, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F2458u, 6144u, (void*)&Actors_modelRenderContext, sizeof Actors_modelRenderContext, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F2458u, 6144u, (void*)&VS::Actors::modelRenderContext, sizeof VS::Actors::modelRenderContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F3C58u, 32u, (void*)&Actors_skeletonPose, sizeof Actors_skeletonPose, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F3C78u, 32u, (void*)&Actors_skeletonRootMatrix, sizeof Actors_skeletonRootMatrix, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4438u, 16u, (void*)&Actors_roomActorScale, sizeof Actors_roomActorScale, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4438u, 16u, (void*)&VS::Actors::roomActorScale, sizeof VS::Actors::roomActorScale, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4448u, 224u, (void*)&Field_gimmickPaletteColors, sizeof Field_gimmickPaletteColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4528u, 16u, (void*)&Actors_sharedSequenceData, sizeof Actors_sharedSequenceData, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4538u, 68u, (void*)&Actors_actorRecords, sizeof Actors_actorRecords, 0u, 0u},
@@ -770,7 +770,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4E98u, 8u, (void*)&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4EA0u, 4u, (void*)&Menu_Framework_actionRestrictions, sizeof Menu_Framework_actionRestrictions, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4EA8u, 13u, (void*)&Menu_textBoxSelector, sizeof Menu_textBoxSelector, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4ED8u, 16u, (void*)&Effects_screenEffectDefaults, sizeof Effects_screenEffectDefaults, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4ED8u, 16u, (void*)&VS::Effects::screenEffectDefaults, sizeof VS::Effects::screenEffectDefaults, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4EE8u, 242u, (void*)&Menu_Framework_menuMemory, sizeof Menu_Framework_menuMemory, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4FE0u, 384u, (void*)&Menu_textBoxes, sizeof Menu_textBoxes, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5168u, 56u, (void*)&Battle_stringContext, sizeof Battle_stringContext, 0u, 0u},
@@ -915,7 +915,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8004913Cu, 4u, (void*)&Core_legacyStackSize, sizeof Core_legacyStackSize, 1u, 1u},
     {"SLUS_010.40", 0x8004A504u, 24u, (void*)&Input_vibrationPresets, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004A51Cu, 12u, (void*)&Input_legacyActuatorAlignment, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004A528u, 4u, (void*)&Title_titleScreenVisitCount, sizeof Title_titleScreenVisitCount, 0u, 0u},
+    {"SLUS_010.40", 0x8004A528u, 4u, (void*)&VS::Title::titleScreenVisitCount, sizeof VS::Title::titleScreenVisitCount, 0u, 0u},
     {"SLUS_010.40", 0x8004A52Cu, 4u, (void*)&Render_isFrameStepPaused, sizeof Render_isFrameStepPaused, 1u, 1u},
     {"SLUS_010.40", 0x8004A530u, 400u, (void*)&Audio_legacyWaveBankDiscOffsets, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004A6C0u, 800u, (void*)&Audio_legacyMusicDiscOffsets, 0u, 0u, 0u},
@@ -977,7 +977,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80060068u, 256u, (void*)&State_ashleySnapshot, sizeof State_ashleySnapshot, 1u, 1u},
     {"SLUS_010.40", 0x80060168u, 3840u, (void*)&Audio_Seq_unusedInventory, sizeof Audio_Seq_unusedInventory, 1u, 1u},
     {"SLUS_010.40", 0x80061068u, 12u, (void*)&State_savedEntryDoor, sizeof State_savedEntryDoor, 1u, 1u},
-    {"SLUS_010.40", 0x80061074u, 4u, (void*)&State_playTime, sizeof State_playTime, 0u, 0u},
+    {"SLUS_010.40", 0x80061074u, 4u, (void*)&VS::State::playTime, sizeof VS::State::playTime, 0u, 0u},
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
@@ -1050,8 +1050,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800A38E0u, 0u, (void*)&Field_FindInteractableGimmickAheadEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A3E6Cu, 0u, (void*)&Field_BeginGimmickInteractionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A41D0u, 0u, (void*)&Field_ApplyGimmickInteractionCommandEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B101Cu, 0u, (void*)&Field_UpdateGimmickReactionAnimationEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&Field_UpdateGimmickMotionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B101Cu, 0u, (void*)&VS::Field::UpdateGimmickReactionAnimationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&VS::Field::UpdateGimmickMotionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDD8u, 0u, (void*)&Field_DisableTrapAtPositionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A4FCu, 0u, (void*)&Field_CurrentSavePointIdEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D85D8u, 0u, (void*)&Battle_Ai_RefreshActionCandidateReadinessEntry, 0u, 0u, 0u},
@@ -1074,8 +1074,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008D438u, 0u, (void*)&Field_RoomTriggerAtTileEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabledEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A91DCu, 0u, (void*)&Field_FindTopGimmickAtTileEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurveEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BEC58u, 0u, (void*)&Event_EvaluateRoomEventTriggersEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&VS::Event::EvaluateInterpolationCurveEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BEC58u, 0u, (void*)&VS::Event::EvaluateRoomEventTriggersEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFE50u, 0u, (void*)&VS::Event::ResolveLiveScriptActorReference, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BBBE8u, 0u, (void*)&VS::Event::InitializeEventCameraEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BBE04u, 0u, (void*)&VS::Event::SetEventFieldCameraOverrideEntry, 0u, 0u, 0u},
@@ -1105,7 +1105,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x800424E4u, 0u, (void*)&VS::Boot::RunEndingAndReturnToTitleLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C74u, 0u, (void*)&VS::Boot::WaitForOverlayReadyLive, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C94u, 0u, (void*)&VS::Boot::SetSoftResetEnabledLive, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&VS::Event::ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BB028u, 0u, (void*)&Event_CommandSpecialOperationOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66A8u, 0u, (void*)&Event_ScriptReportInvalidOpcodeOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66F4u, 0u, (void*)&Event_ScriptWaitForEventFileOpcode, 0u, 0u, 0u},

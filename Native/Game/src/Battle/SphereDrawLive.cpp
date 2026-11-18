@@ -27,7 +27,7 @@
 #include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/GimmickLookup.h"
+#include "Field/GimmickLookup.hpp"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -207,7 +207,7 @@ class LiveTerrainSource final : public SphereTerrainSource {
 
   std::optional<std::uint8_t> TopGimmickObject(std::int32_t tile_x,
                                                std::int32_t tile_z) override {
-    const Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(
+    const Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(
         Field_FindTopGimmickAtTileEntry(tile_x, tile_z, 0));
     if (gimmick == nullptr) {
       return std::nullopt;

@@ -6,7 +6,7 @@
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptEffectOpcodes.h"
 #include "Event/ScriptVm.h"
-#include "Event/WeaponModeOpcode.h"
+#include "Event/WeaponModeOpcode.hpp"
 
 // decomp: D_800E9BE0 (D_800E9BE0@BATTLE/BATTLE.PRG)
 char Event_skipPaletteResetCommand[336]; /* contents: module image (ModuleData.cpp) */
@@ -139,7 +139,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptClearAshleyStatusEffectsOpcode, Event_ScriptShowGeometryGroupOpcode, Event_ScriptHideGeometryGroupOpcode, Event_ScriptSwapGeometryGroupFlagsOpcode, Event_ScriptSetCollisionTileModeOpcode,
     Event_ScriptChangeRoomOpcode, Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_ScriptSetWipeAngleOpcode, Event_ScriptConfigureScreenTransitionOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptYieldFrameOpcode, Event_ScriptTogglePaletteHookOpcode, Event_ScriptTransformPalettesOpcode, Event_ScriptSetActorRenderModeOpcode,
-    Event_ScriptSetAshleyBattleModeOpcode, Event_ScriptSetRoomBackgroundVisibleOpcode, Event_ScriptLoadRoomBackgroundOpcode, Event_ScriptWaitForRoomBackgroundOpcode, Event_ScriptFreeRoomBackgroundOpcode,
+    VS::Event::ScriptSetAshleyBattleModeOpcode, Event_ScriptSetRoomBackgroundVisibleOpcode, Event_ScriptLoadRoomBackgroundOpcode, Event_ScriptWaitForRoomBackgroundOpcode, Event_ScriptFreeRoomBackgroundOpcode,
     Event_ScriptSetEnvironmentParticlesOpcode, Event_ScriptSetParticleVariationEnabledOpcode, Event_ScriptControlRoomAnimationOpcode, Event_ScriptMuteEnvironmentSoundOpcode, Event_ScriptSetBackgroundOffsetOpcode,
     Event_ScriptSetFirstPersonViewOpcode, Event_ScriptAdjustGeometryDepthBiasOpcode, Event_ScriptSetBackgroundParallaxOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptNoOperationOpcode,
     Event_ScriptNoOperationOpcode, Event_ScriptNoOperationOpcode, Event_CommandStopAllSfxOpcode, Event_CommandStopSfxOpcode,

@@ -41,7 +41,7 @@
 #include "Save/RuntimeSnapshot.hpp"
 #include "State/Ashley.h"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/RoomMemory.h"
 #include "Title/SaveFiles.h"
 
@@ -597,7 +597,7 @@ struct ClearInputsFixture {
   Field_MpdDoorRecord entry = State_savedEntryDoor;
   State_RoomVisitFlags visits = State_roomVisitProgress;
   State_ScoreData score = Audio_Seq_unusedScoredata;
-  decltype(State_playTime) time = State_playTime;
+  decltype(VS::State::playTime) time = VS::State::playTime;
   decltype(std::to_array(State_recentRoomEnemyStates)) caches =
       std::to_array(State_recentRoomEnemyStates);
   decltype(std::to_array(State_learnedActionFlags)) learned =
@@ -618,8 +618,8 @@ struct ClearInputsFixture {
     State_savedEntryDoor.entryTileZ = 2;
     State_roomVisitProgress = {};
     Audio_Seq_unusedScoredata = {};
-    State_playTime.all = 0;
-    State_playTime.t.hours = 1;
+    VS::State::playTime.all = 0;
+    VS::State::playTime.t.hours = 1;
     State_currentRoomStateSlot = 0;
     std::fill_n(State_recentRoomEnemyStates, caches.size(),
                 State_RoomEnemyStates{});
@@ -643,7 +643,7 @@ struct ClearInputsFixture {
     State_savedEntryDoor = entry;
     State_roomVisitProgress = visits;
     Audio_Seq_unusedScoredata = score;
-    State_playTime = time;
+    VS::State::playTime = time;
     std::copy(caches.begin(), caches.end(), State_recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
     State_currentRoomStateSlot = cache_slot;

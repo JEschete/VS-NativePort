@@ -13,7 +13,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Appearance.hpp"
 #include "Actors/AppearanceLive.hpp"
-#include "Actors/AppearanceLiveState.h"
+#include "Actors/AppearanceLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
@@ -34,7 +34,7 @@ struct LiveAppearanceState {
       std::to_array(Actors_weaponModels);
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
-  VECTOR saved_scale = Actors_roomActorScale;
+  VECTOR saved_scale = VS::Actors::roomActorScale;
   std::vector<std::unique_ptr<Actors_ActorRecord>> records;
 
   LiveAppearanceState() {
@@ -53,7 +53,7 @@ struct LiveAppearanceState {
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
     std::ranges::copy(saved_weapons, std::begin(Actors_weaponModels));
     std::ranges::copy(saved_gimmicks, std::begin(Field_gimmickInstances));
-    Actors_roomActorScale = saved_scale;
+    VS::Actors::roomActorScale = saved_scale;
   }
 
   Actors_ActorRecord& AddActor(int actor_id) {
@@ -297,10 +297,10 @@ TEST_CASE("Live room scale sets each actor's scale from the stored x",
   // #283: the actors took the halfword at the stored x, never a stale view.
   CHECK(first.scale == 0x1000);
   CHECK(last.scale == 0x1000);
-  CHECK(Actors_roomActorScale.vx == 0x11000);
-  CHECK(Actors_roomActorScale.vy == 2048);
-  CHECK(Actors_roomActorScale.vz == 1024);
-  CHECK(Actors_roomActorScale.pad == 7);
+  CHECK(VS::Actors::roomActorScale.vx == 0x11000);
+  CHECK(VS::Actors::roomActorScale.vy == 2048);
+  CHECK(VS::Actors::roomActorScale.vz == 1024);
+  CHECK(VS::Actors::roomActorScale.pad == 7);
 
   VS::test_support::ChannelWarnings warnings{"actors"};
   actors::SetLiveRoomActorScale(nullptr);
@@ -497,5 +497,6 @@ TEST_CASE("Appearance bindings retire the module entries they replace",
     INFO("address " << address);
     CHECK(resolve(address) == nullptr);
   }
-  CHECK(resolve(0x800F4438u) == static_cast<void*>(&Actors_roomActorScale));
+  CHECK(resolve(0x800F4438u) ==
+        static_cast<void*>(&VS::Actors::roomActorScale));
 }

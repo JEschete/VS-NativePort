@@ -19,7 +19,7 @@
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
 #include "Field/CameraLiveState.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Render/Camera.h"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -37,7 +37,8 @@ struct LiveFixture {
   Battle_ActionState* saved_state = Battle_actionState;
   decltype(Field_sphericalCamera) saved_camera = Field_sphericalCamera;
   decltype(Field_cameraTransition) saved_transition = Field_cameraTransition;
-  decltype(Field_zoneContext.bounds) saved_bounds = Field_zoneContext.bounds;
+  decltype(VS::Field::zoneContext.bounds) saved_bounds =
+      VS::Field::zoneContext.bounds;
   Render_FrameScratch saved_frame = Render_frameScratch;
   int saved_projection = Render_projectionDistance;
   MATRIX saved_bone_camera = Actors_boneMatrixScratch;
@@ -72,7 +73,7 @@ struct LiveFixture {
     Render_frameScratch.viewMatrix.t[2] = 1024;
     Render_frameScratch.camera = {};
     Field_cameraTransition = nullptr;
-    Field_zoneContext.bounds = {-100, -100, 100, 100};
+    VS::Field::zoneContext.bounds = {-100, -100, 100, 100};
     Battle_actionState = &state;
     state.queueIndex = 3;
     state.queue[3].focusPosition = {-4, -2, 2, 71};
@@ -84,7 +85,7 @@ struct LiveFixture {
     Battle_actionState = saved_state;
     Field_sphericalCamera = saved_camera;
     Field_cameraTransition = saved_transition;
-    Field_zoneContext.bounds = saved_bounds;
+    VS::Field::zoneContext.bounds = saved_bounds;
     Render_frameScratch = saved_frame;
     // An inactive legacy global is not a snapshot of the math projection.
     Render_projectionDistance = saved_projection;

@@ -36,7 +36,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/ChestInteractions.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -45,13 +45,13 @@
 #include "Field/Doors.h"
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/InteractionFocusLive.h"
+#include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.h"
 #include "Field/MinimapSceneLive.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.h"
@@ -235,8 +235,8 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
     return true;
   }
   bool TriggerFallEvent() override {
-    return Event_EvaluateRoomEventTriggersEntry(kActorFallEventRequest, 0,
-                                                nullptr, 0) == 1;
+    return VS::Event::EvaluateRoomEventTriggersEntry(kActorFallEventRequest, 0,
+                                                     nullptr, 0) == 1;
   }
 };
 
@@ -289,7 +289,7 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
     return VS::Field::LoadLiveRoomTransition().pending_door;
   }
   std::uint8_t CurrentZoneId() const override {
-    return static_cast<std::uint8_t>(Field_zoneContext.zndId);
+    return static_cast<std::uint8_t>(VS::Field::zoneContext.zndId);
   }
   void BeginTransition(const VS::Field::DoorRecord& door,
                        VS::Field::AshleyTransitionRoute route) override {
@@ -332,8 +332,8 @@ class LiveAshleyTileHost final : public VS::Field::AshleyTileTriggerHost {
   bool EventOwnsControl() override { return actor_.EventOwnsControl(); }
   bool TriggerPlayerTileEvent() override {
     constexpr std::int32_t kPlayerTileEvent = 2;
-    return Event_EvaluateRoomEventTriggersEntry(kPlayerTileEvent, 0, nullptr,
-                                                0) == 1;
+    return VS::Event::EvaluateRoomEventTriggersEntry(kPlayerTileEvent, 0,
+                                                     nullptr, 0) == 1;
   }
   void BeginQueuedCutscene() override { VS::Event::BeginLiveQueuedCutscene(); }
   std::optional<VS::Field::ActorTileTrap> Trap(
@@ -400,8 +400,8 @@ class LiveFacingEventHost final : public VS::Field::FacingEventHost {
   bool EvaluateInteraction(const VS::Field::FacingTile& tile) override {
     std::array<std::uint8_t, kFacingPositionBytes> position{tile.x, tile.layer,
                                                             tile.z, 0};
-    return Event_EvaluateRoomEventTriggersEntry(kFacingInteractionMode, 0,
-                                                position.data(), 1) == 1;
+    return VS::Event::EvaluateRoomEventTriggersEntry(kFacingInteractionMode, 0,
+                                                     position.data(), 1) == 1;
   }
 };
 

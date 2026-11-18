@@ -18,7 +18,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Boot/GameLoop.h"
-#include "Boot/PlayerSettings.h"
+#include "Boot/PlayerSettings.hpp"
 #include "Content/StringTables.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
@@ -44,7 +44,7 @@
 #include "State/Ashley.h"
 #include "State/GameClockLive.hpp"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Progress.h"
 #include "State/RoomMemory.h"
 #include "State/StateFlags.h"
@@ -53,11 +53,11 @@
 #include "Title/NewGame.h"
 #include "Title/SaveFiles.h"
 #include "Title/TitleMenu.hpp"  // NOLINT(build/include): typed API
-#include "Title/TitleMenuLiveState.h"
+#include "Title/TitleMenuLiveState.hpp"
 #include "Title/TitleScreen.h"
 
 // decomp: vs_main_titleScreenCount (vs_main_titleScreenCount@SLUS_010.40)
-int Title_titleScreenVisitCount = 0;
+int VS::Title::titleScreenVisitCount = 0;
 
 namespace VS::Title {
 namespace {
@@ -200,7 +200,7 @@ class LiveHost final : public Host {
     Input_settings.monoSound = static_cast<char>(settings.mono_sound);
     Input_settings.vibrationOn = static_cast<char>(settings.vibration_on);
   }
-  void ResetPlayerSettings() override { Boot_InitializePlayerSettings(); }
+  void ResetPlayerSettings() override { VS::Boot::InitializePlayerSettings(); }
   void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
   void SetDiscMixVolume(std::uint32_t volume) override {
     if (!Audio::Control::SetLiveDiscMixVolume(volume)) {
@@ -351,10 +351,8 @@ class LiveHost final : public Host {
   bool IntroMoviePlaying() override { return Movie_Intro_isPlaying != 0; }
   void ClearIntroMoviePlaying() override { Movie_Intro_isPlaying = 0; }
 
-  int VisitCount() override { return Title_titleScreenVisitCount; }
-  void SetVisitCount(int count) override {
-    Title_titleScreenVisitCount = count;
-  }
+  int VisitCount() override { return titleScreenVisitCount; }
+  void SetVisitCount(int count) override { titleScreenVisitCount = count; }
   bool ClearSavePending() override { return Boot_isClearSavePending != 0; }
   void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }
   void StageClearGame() override { Save_NativeStageClearGame(); }
@@ -412,7 +410,8 @@ class LiveHost final : public Host {
   void ClearProgressRecords() override {
     Core::Memory::ZeroLiveAlignedWords(&State_roomVisitProgress,
                                        sizeof State_roomVisitProgress);
-    Core::Memory::ZeroLiveAlignedWords(&State_playTime, sizeof State_playTime);
+    Core::Memory::ZeroLiveAlignedWords(&VS::State::playTime,
+                                       sizeof VS::State::playTime);
     Core::Memory::ZeroLiveAlignedWords(&Audio_Seq_unusedScoredata,
                                        sizeof Audio_Seq_unusedScoredata);
     State_currentRoomStateSlot = 0;

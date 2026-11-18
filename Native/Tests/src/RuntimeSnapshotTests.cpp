@@ -47,12 +47,12 @@
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.h"
 #include "Field/Doors.h"
-#include "Field/GameModeLiveState.h"
+#include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
@@ -65,7 +65,7 @@
 #include "Render/UiPrimitives.h"
 #include "Save/RuntimeSnapshot.hpp"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/RoomMemory.h"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
@@ -238,9 +238,9 @@ struct RuntimeFixture {
   decltype(State_savedEntryDoor) entry = State_savedEntryDoor;
   decltype(Field_snapshotDoorFlagSource) detached_scene =
       Field_snapshotDoorFlagSource;
-  decltype(State_playTime) time = State_playTime;
+  decltype(VS::State::playTime) time = VS::State::playTime;
   decltype(State_sceneTimer) timer = State_sceneTimer;
-  decltype(Field_zoneContext) zone = Field_zoneContext;
+  decltype(VS::Field::zoneContext) zone = VS::Field::zoneContext;
   decltype(Field_roomData) room = Field_roomData;
   decltype(Field_sphericalCamera) camera = Field_sphericalCamera;
   decltype(Render_frameScratch.camera) rendered_camera =
@@ -273,7 +273,7 @@ struct RuntimeFixture {
   int projection = Render_projectionDistance;
   int first_person = Field_isFirstPersonViewEnabled;
   unsigned control_mode = Field_controlMode;
-  int interaction_paused = Field_isInteractionPaused;
+  int interaction_paused = VS::Field::isInteractionPaused;
   Field_CameraTransition* transition = Field_cameraTransition;
   Audio_DriverFlags audio_flags = Audio_Driver_controlLatches;
   Audio_CommandArguments audio_arguments = Audio_Driver_commandArguments;
@@ -376,14 +376,14 @@ struct RuntimeFixture {
 
   void SetWorld() {
     Field_controlMode = 1;
-    Field_isInteractionPaused = 0;
+    VS::Field::isInteractionPaused = 0;
     Field_isFirstPersonViewEnabled = 0;
     Field_cameraTransition = nullptr;
-    Field_zoneContext = {};
-    Field_zoneContext.zndId = 9;
-    Field_zoneContext.mapId = 0;
-    Field_zoneContext.currentSceneId = 37;
-    Field_zoneContext.bounds = {0, 0, 4, 4};
+    VS::Field::zoneContext = {};
+    VS::Field::zoneContext.zndId = 9;
+    VS::Field::zoneContext.mapId = 0;
+    VS::Field::zoneContext.currentSceneId = 37;
+    VS::Field::zoneContext.bounds = {0, 0, 4, 4};
     environment.sceneId = 37;
     Field_roomData = {};
     Field_roomData.isLoaded = 1;
@@ -420,7 +420,7 @@ struct RuntimeFixture {
   }
 
   void SetClocksAndCaches() {
-    State_playTime.t = {59, 58, 57, 12};
+    VS::State::playTime.t = {59, 58, 57, 12};
     State_sceneTimer = {};
     State_sceneTimer.mode = 2;
     State_sceneTimer.resetScope = 2;
@@ -610,9 +610,9 @@ struct RuntimeFixture {
     State_ashleySnapshot = ashley;
     State_savedEntryDoor = entry;
     Field_snapshotDoorFlagSource = detached_scene;
-    State_playTime = time;
+    VS::State::playTime = time;
     State_sceneTimer = timer;
-    Field_zoneContext = zone;
+    VS::Field::zoneContext = zone;
     Field_roomData = room;
     Field_sphericalCamera = camera;
     Render_frameScratch.camera = rendered_camera;
@@ -636,7 +636,7 @@ struct RuntimeFixture {
     Render_projectionDistance = projection;
     Field_isFirstPersonViewEnabled = first_person;
     Field_controlMode = control_mode;
-    Field_isInteractionPaused = interaction_paused;
+    VS::Field::isInteractionPaused = interaction_paused;
     Field_cameraTransition = transition;
     Audio_Driver_controlLatches = audio_flags;
     Audio_Driver_commandArguments = audio_arguments;
@@ -672,15 +672,15 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, Battle_actionDefinitions);
   Append(bytes, State_ashleySnapshot);
   Append(bytes, State_savedEntryDoor);
-  Append(bytes, State_playTime);
+  Append(bytes, VS::State::playTime);
   Append(bytes, State_sceneTimer);
   Append(bytes, Field_sphericalCamera);
   Append(bytes, Render_frameScratch.camera);
-  Append(bytes, Field_zoneContext);
+  Append(bytes, VS::Field::zoneContext);
   Append(bytes, Field_roomData);
   Append(bytes, Field_isFirstPersonViewEnabled);
   Append(bytes, Field_controlMode);
-  Append(bytes, Field_isInteractionPaused);
+  Append(bytes, VS::Field::isInteractionPaused);
   Append(bytes, Field_cameraTransition != nullptr);
   Append(bytes, Render_nearClip);
   Append(bytes, Render_projectionDistance);
@@ -929,7 +929,7 @@ void InvalidateLiveMotion(RuntimeFixture& fixture, int defect) {
 
 void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   InvalidateLiveMotion(fixture, defect);
-  if (defect == 0) Field_zoneContext.currentSceneId = 38;
+  if (defect == 0) VS::Field::zoneContext.currentSceneId = 38;
   if (defect == 1) Boot_isGameplayActive = 0;
   if (defect == 2) fixture.player_stats.weapon.index = 9;
   if (defect == 3) Audio_Seq_unusedInventory.weapons[0].grip = 255;
@@ -1211,7 +1211,7 @@ TEST_CASE("Runtime capture accepts horizontal motion frozen by a field menu",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   Field_controlMode = GENERATE(5, 6);
-  Field_isInteractionPaused = 1;
+  VS::Field::isInteractionPaused = 1;
   fixture.player_model.instance.turnFrames = 11;
   fixture.player_model.instance.rootMotion.vx = -18;
   fixture.player_model.instance.rootMotion.vz = 3;
@@ -1231,7 +1231,7 @@ TEST_CASE("Menu-paused capture still rejects airborne and supported motion",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   Field_controlMode = GENERATE(5, 6);
-  Field_isInteractionPaused = 1;
+  VS::Field::isInteractionPaused = 1;
   const auto defect = GENERATE(6, 7, 11, 12, 13, 14, 16, 18, 20, 21, 31, 32);
   InvalidateLiveFixture(fixture, defect);
   if (defect == 32) fixture.player_model.instance.rootMotion.vy = 1;
@@ -1245,7 +1245,7 @@ TEST_CASE("Only an actually paused field menu permits residual walking",
   RuntimeFixture fixture;
   const auto defect = GENERATE(0, 1, 2, 3);
   Field_controlMode = defect == 0 ? 1 : (defect == 1 ? 3 : 5);
-  Field_isInteractionPaused = defect == 3 ? 0 : 1;
+  VS::Field::isInteractionPaused = defect == 3 ? 0 : 1;
   fixture.player_model.instance.rootMotion.vx = 18;
   if (defect == 2) fixture.player_model.supportGimmick = 1;
   const auto before = LiveFingerprint(fixture);
@@ -1350,7 +1350,7 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   fixture.player_model.instance.position = {64, 0, 64, 0};
   fixture.player_stats.currentHp = 7;
   fixture.player_stats.statuses = 0;
-  State_playTime.all = 0;
+  VS::State::playTime.all = 0;
   State_sceneTimer = {};
   Field_sphericalCamera.values.yaw = 0;
   Core_Random_Seed(1);
@@ -1377,10 +1377,10 @@ void CheckRestoredPlayer(const RuntimeFixture& fixture) {
 }
 
 void CheckRestoredClockCamera() {
-  CHECK(State_playTime.t.hours == 12);
-  CHECK(State_playTime.t.minutes == 57);
-  CHECK(State_playTime.t.seconds == 58);
-  CHECK(State_playTime.t.frames == 59);
+  CHECK(VS::State::playTime.t.hours == 12);
+  CHECK(VS::State::playTime.t.minutes == 57);
+  CHECK(VS::State::playTime.t.seconds == 58);
+  CHECK(VS::State::playTime.t.frames == 59);
   CHECK(State_sceneTimer.frames == 29);
   CHECK(State_sceneTimer.seconds == 17);
   CHECK(Field_sphericalCamera.values.yaw == 1027);
@@ -1549,8 +1549,8 @@ TEST_CASE("Wrong room or unfinished spawn cannot partially finish a resume",
   const auto defect = GENERATE(0, 1, 2, 3, 4);
   State_ashleySnapshot.stats.isPending = 0;
   if (defect == 0) State_ashleySnapshot.stats.isPending = 1;
-  if (defect == 1) Field_zoneContext.mapId = 1;
-  if (defect == 2) Field_zoneContext.currentSceneId = 38;
+  if (defect == 1) VS::Field::zoneContext.mapId = 1;
+  if (defect == 2) VS::Field::zoneContext.currentSceneId = 38;
   if (defect == 3) Field_roomData.isLoaded = 0;
   if (defect == 4) Boot_isGameplayActive = 0;
   const auto before = LiveFingerprint(fixture);
@@ -1648,7 +1648,7 @@ void CheckResumeRestoresAshley(RuntimeFixture& fixture) {
 }
 
 void CheckResumeKeptLiveState(const RuntimeFixture& fixture) {
-  CHECK(State_playTime.t.frames == 8);
+  CHECK(VS::State::playTime.t.frames == 8);
   CHECK(fixture.player_model.instance.position.vx == 77);
   CHECK(fixture.player_model.instance.position.vy == -88);
   CHECK(Field_sphericalCamera.values.yaw == 333);
@@ -1669,9 +1669,9 @@ TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
   REQUIRE(Save::PrepareResume(*decoded));
   CheckResumeRestoresAshley(fixture);
   Boot_isGameplayActive = 1;
-  Field_zoneContext.zndId = 1;
+  VS::Field::zoneContext.zndId = 1;
   State_recentRoomEnemyStates[0].nextSlot = 5;
-  State_playTime.t.frames = 8;
+  VS::State::playTime.t.frames = 8;
   fixture.player_model.instance.position = {77, -88, 99, 0};
   Field_sphericalCamera.values.yaw = 333;
   Core_Random_Seed(777);

@@ -32,13 +32,13 @@
 #include "Field/CameraLiveState.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/GameModeLiveState.h"
+#include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
@@ -303,12 +303,10 @@ void LiveCameraHost::SetActorTransitionMode(int mode) {
   Escape([mode] { Actors::SetLiveActorTransitionMode(mode); });
 }
 
-bool LiveCameraHost::IsInteractionPaused() {
-  return Field_isInteractionPaused != 0;
-}
+bool LiveCameraHost::IsInteractionPaused() { return isInteractionPaused != 0; }
 
 CameraBounds LiveCameraHost::ZoneBounds() {
-  const Field_ZoneBounds& bounds = Field_zoneContext.bounds;
+  const Field_ZoneBounds& bounds = zoneContext.bounds;
   return {.min_x = bounds.minX,
           .min_z = bounds.minZ,
           .max_x = bounds.maxX,

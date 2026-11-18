@@ -185,7 +185,7 @@ class Host : public Render::ImmediatePacketTarget {
   [[nodiscard]] virtual PlayerSettings Settings() = 0;
   // Writes only the mono and vibration settings.
   virtual void SetSettings(PlayerSettings settings) = 0;
-  // Boot_InitializePlayerSettings.
+  // VS::Boot::InitializePlayerSettings.
   virtual void ResetPlayerSettings() = 0;
   virtual void SetMonoOutput(int mono) = 0;
   virtual void SetDiscMixVolume(std::uint32_t volume) = 0;

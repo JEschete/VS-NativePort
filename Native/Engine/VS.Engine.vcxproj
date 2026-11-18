@@ -557,7 +557,7 @@
     <ClInclude Include="include\Audio\Ambience.hpp" />
     <ClInclude Include="include\Audio\AmbienceLive.hpp" />
     <ClInclude Include="include\Audio\AudioDevice.hpp" />
-    <ClInclude Include="include\Audio\LfoWaveforms.h" />
+    <ClInclude Include="include\Audio\LfoWaveforms.hpp" />
     <ClInclude Include="include\Audio\MixControl.hpp" />
     <ClInclude Include="include\Audio\MixControlLive.hpp" />
     <ClInclude Include="include\Audio\Music.hpp" />

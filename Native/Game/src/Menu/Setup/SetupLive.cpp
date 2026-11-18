@@ -27,7 +27,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"

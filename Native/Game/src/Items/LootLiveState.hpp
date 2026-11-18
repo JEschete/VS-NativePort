@@ -6,6 +6,10 @@
 
 struct Items_LootListNode;
 
+namespace VS::Items {
+
 // decomp: _lootListHead (BATTLE/BATTLE.PRG 146C.h): the newest entry; each
 // node is a game heap block.
-extern Items_LootListNode* Items_lootListHead;
+extern Items_LootListNode* lootListHead;
+
+}  // namespace VS::Items

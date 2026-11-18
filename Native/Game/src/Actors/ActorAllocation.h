@@ -5,7 +5,7 @@
 struct Actors_ActorAllocation;
 struct Actors_ActorCore;
 
-#include "Actors/ActorModelSlot.h"
+#include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.h"
 #include "Battle/Actor.h"
 
@@ -26,5 +26,5 @@ struct Actors_ActorCore {
 struct Actors_ActorAllocation {
     Actors_ActorCore core;
     char reservedB2C[0x1788 + 80]; /* x64: the actor record is larger */
-    Actors_ActorModelSlot modelSlots[2];
+    VS::Actors::ActorModelSlot modelSlots[2];
 };

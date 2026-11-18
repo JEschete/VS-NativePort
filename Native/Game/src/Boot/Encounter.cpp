@@ -40,7 +40,7 @@
 #include "Battle/TargetPages.h"
 #include "Battle/TargetVolume.h"
 #include "Boot/GameLoop.h"
-#include "Boot/PlayerSettings.h"
+#include "Boot/PlayerSettings.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
@@ -54,7 +54,7 @@
 #include "Ending/ClearResults.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -68,7 +68,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.h"
@@ -79,7 +79,7 @@
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -141,7 +141,7 @@ int EnterOrFinishEncounter() {
   // Reuse _sysReinit and _initGameData rather than manufacturing player stats.
   // Provenance: SLUS main.c:8309; TITLE/22C.c:4698.
   VS::Boot::InitializeTitleSessionLive();
-  Boot_InitializePlayerSettings();
+  VS::Boot::InitializePlayerSettings();
   VS::Title::InitializeLiveNewGameData();
   // VS::Title::Run follows _initGameData with _initEnvironment (TITLE.PRG
   // 22C.c:4463, VS::Title::InitializeSettings), whose state writes are
@@ -825,7 +825,7 @@ void InspectInventory(EncounterState& state) {
 }
 
 void InspectPendingLoot(EncounterState& state) {
-  for (const auto* node = Items_lootListHead; node != nullptr;
+  for (const auto* node = VS::Items::lootListHead; node != nullptr;
        node = node->next) {
     if (state.pending_loot.size() >= EncounterLimits::kActorSlots) {
       throw std::runtime_error("encounter loot list exceeds actor storage");
@@ -860,8 +860,8 @@ EncounterState InspectGameplay() {
   state.ready = gameplay_inspection_ready && Boot_isGameplayActive != 0 &&
                 Field_controlMode != 0;
   if (!state.ready) return state;
-  state.zone = Field_zoneContext.zndId;
-  state.room = Field_zoneContext.mapId;
+  state.zone = VS::Field::zoneContext.zndId;
+  state.room = VS::Field::zoneContext.mapId;
   state.control_mode = Field_controlMode;
   state.game_over = Audio_Seq_unusedStateFlags.gameOver != 0;
   state.field_rendering_enabled =
@@ -976,7 +976,7 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
   const auto& camera = Field_sphericalCamera;
   const auto script =
       Event::LeaseLiveScriptSource(Event::ScriptRegion::kEventScript);
-  scene["id"] = Field_zoneContext.currentSceneId;
+  scene["id"] = VS::Field::zoneContext.currentSceneId;
   scene["event"] = {
       {"id", Event_eventId},
       {"source", Event_eventSource},
@@ -1053,8 +1053,8 @@ EncounterDoorRequest CheckDoorRequest(int index) {
 
 void ApplyPendingDoorRequest() {
   if (pending_door < 0 || !gameplay_inspection_ready || !room_prepared) return;
-  if (Field_zoneContext.zndId != pending_door_zone ||
-      Field_zoneContext.mapId != pending_door_room) {
+  if (VS::Field::zoneContext.zndId != pending_door_zone ||
+      VS::Field::zoneContext.mapId != pending_door_room) {
     VS_LOG_ERROR("field.door-test",
                  "source changed before queued door {} executed", pending_door);
     pending_door = -1;
@@ -1074,7 +1074,7 @@ void ApplyPendingDoorRequest() {
               door.destinationZoneId, door.destinationRoomId);
   // Same handoff as Field_CheckActorTriggers (146C.c), after its door gate.
   constexpr int kTransitionSpeed = 8;
-  if (door.destinationZoneId == Field_zoneContext.zndId) {
+  if (door.destinationZoneId == VS::Field::zoneContext.zndId) {
     VS::Field::LiveBeginRoomTransition(&door, 0, kTransitionSpeed);
   } else {
     VS::Field::LiveBeginZoneTransition(&door, 0, kTransitionSpeed);
@@ -1091,8 +1091,8 @@ EncounterDoorRequest RequestEncounterDoorTransition(int index) {
   const auto checked = CheckDoorRequest(index);
   if (checked.status != EncounterDoorRequestStatus::kAccepted) return checked;
   pending_door = index;
-  pending_door_zone = Field_zoneContext.zndId;
-  pending_door_room = Field_zoneContext.mapId;
+  pending_door_zone = VS::Field::zoneContext.zndId;
+  pending_door_room = VS::Field::zoneContext.mapId;
   return {EncounterDoorRequestStatus::kAccepted, {}};
 }
 }  // namespace VS::Game
@@ -1101,10 +1101,10 @@ void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::active) return;
   VS::Game::room_prepared = false;
   if (!VS::Game::UsesConfiguredEncounterPlacements(
-          VS::Game::configuration, Field_zoneContext.zndId,
-          Field_zoneContext.mapId, VS::Game::external_event_started)) {
+          VS::Game::configuration, VS::Field::zoneContext.zndId,
+          VS::Field::zoneContext.mapId, VS::Game::external_event_started)) {
     VS_LOG_DEBUG("encounter.spawn", "using original placements zone={} room={}",
-                 Field_zoneContext.zndId, Field_zoneContext.mapId);
+                 VS::Field::zoneContext.zndId, VS::Field::zoneContext.mapId);
     return;
   }
   *data = VS::Game::placements.data();
@@ -1152,13 +1152,13 @@ void Boot_EncounterPollStop() {
       // frame in the configured room, after any production entry events.
       const bool configured_room_ready =
           Event_playbackPhase == 0 && Field_controlMode == 1 &&
-          Field_zoneContext.zndId == VS::Game::configuration.zone &&
-          Field_zoneContext.mapId == VS::Game::configuration.room;
+          VS::Field::zoneContext.zndId == VS::Game::configuration.zone &&
+          VS::Field::zoneContext.mapId == VS::Game::configuration.room;
       if (VS::Game::configuration.external_event &&
           !VS::Game::external_event_started && configured_room_ready) {
         const int event = *VS::Game::configuration.external_event;
         // Original 4A0A8.c:4302 direct-event request; no story flag mutation.
-        const int result = Event_EvaluateRoomEventTriggersEntry(
+        const int result = VS::Event::EvaluateRoomEventTriggersEntry(
             VS::Game::kDirectEventTrigger, event, nullptr, 0);
         if (result != 1) {
           Core_Errorf("encounter.event",
@@ -1170,7 +1170,8 @@ void Boot_EncounterPollStop() {
         VS_LOG_INFO("encounter.event",
                     "Starting external event {} in zone {} room {}; "
                     "component fixture, not story progression",
-                    event, Field_zoneContext.zndId, Field_zoneContext.mapId);
+                    event, VS::Field::zoneContext.zndId,
+                    VS::Field::zoneContext.mapId);
         VS::Event::BeginLiveQueuedCutscene();
       } else if (VS::Game::configuration.room_local_event &&
                  !VS::Game::room_local_event_started && configured_room_ready) {
@@ -1184,8 +1185,8 @@ void Boot_EncounterPollStop() {
             VS::Event::OperandHalf(locals, static_cast<std::size_t>(selector) *
                                                kDoorOffsetBytes) == 0) {
           Core_Errorf("encounter.event", "Room %d/%d has no local event %d",
-                      Field_zoneContext.zndId, Field_zoneContext.mapId,
-                      selector);
+                      VS::Field::zoneContext.zndId,
+                      VS::Field::zoneContext.mapId, selector);
           std::abort();
         }
         // Same queue state as a satisfied local room trigger (0x8000 event id)
@@ -1198,7 +1199,8 @@ void Boot_EncounterPollStop() {
         VS_LOG_INFO("encounter.event",
                     "Starting room-local event {} in zone {} room {}; "
                     "trigger conditions not evaluated",
-                    selector, Field_zoneContext.zndId, Field_zoneContext.mapId);
+                    selector, VS::Field::zoneContext.zndId,
+                    VS::Field::zoneContext.mapId);
         VS::Event::BeginLiveQueuedCutscene();
       }
     }

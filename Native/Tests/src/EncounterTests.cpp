@@ -11,7 +11,7 @@
 #include "Audio/Seq/Channel.h"
 #include "Battle/Encounter.hpp"
 #include "Battle/EncounterHooks.h"
-#include "Boot/PlayerSettings.h"
+#include "Boot/PlayerSettings.hpp"
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/Trace.hpp"
 #include "Content/DataStore.hpp"
@@ -502,7 +502,7 @@ TEST_CASE("Encounter catalog hostility is independent of defeat retention",
 TEST_CASE("Direct entry and title share usable player menu defaults",
           "[combat][encounter]") {
   const auto saved = Input_settings;
-  Boot_InitializePlayerSettings();
+  VS::Boot::InitializePlayerSettings();
   CHECK(Input_settings.menuFlags == 0x2D8);
   CHECK(Input_settings.information == 1);
   CHECK(Input_settings.simpleMap == 3);
@@ -510,7 +510,7 @@ TEST_CASE("Direct entry and title share usable player menu defaults",
   CHECK(Input_settings.abilityTimingDisplay == 1);
   CHECK(Input_settings.cursorMemory == 1);
   Input_settings.menuFlags = 0;
-  Boot_InitializePlayerSettings();
+  VS::Boot::InitializePlayerSettings();
   CHECK(Input_settings.menuFlags == 0x2D8);
   Input_settings = saved;
 }

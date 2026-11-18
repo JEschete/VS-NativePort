@@ -13,7 +13,7 @@
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
-#include "Effects/ScreenEffectState.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
@@ -185,7 +185,7 @@ class LiveScreenOverlayPainter final : public ScreenOverlayPainter {
 // The attached controller, or the defaults the next attach points at.
 Effects_ScreenEffectOverlay& LiveLifetimeRecord() {
   return Effects_screenEffectOverlay != nullptr ? *Effects_screenEffectOverlay
-                                                : Effects_screenEffectDefaults;
+                                                : screenEffectDefaults;
 }
 
 ScreenOverlayLifetime ReadLiveLifetime() {
@@ -202,7 +202,7 @@ void WriteLiveLifetime(const ScreenOverlayLifetime& lifetime) {
   if (!lifetime.attached) {
     Effects_screenEffectOverlay = nullptr;
   } else if (Effects_screenEffectOverlay == nullptr) {
-    Effects_screenEffectOverlay = &Effects_screenEffectDefaults;
+    Effects_screenEffectOverlay = &screenEffectDefaults;
   }
   Effects_ScreenEffectOverlay& record = LiveLifetimeRecord();
   record.loading = lifetime.loading;

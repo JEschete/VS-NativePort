@@ -38,7 +38,7 @@
 #include "Save/SnapshotLive.hpp"
 #include "State/Ashley.h"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Progress.h"
 #include "State/RoomCache.h"
 #include "State/RoomMemory.h"
@@ -346,9 +346,9 @@ class LiveSaveState final : public SaveStateHost {
     }
     return {};
   }
-  std::uint32_t PlayTime() override { return State_playTime.all; }
+  std::uint32_t PlayTime() override { return VS::State::playTime.all; }
   void SetPlayTime(std::uint32_t play_time) override {
-    State_playTime.all = play_time;
+    VS::State::playTime.all = play_time;
   }
   void CaptureSnapshot() override { VS::Save::CaptureLiveAshleySnapshot(); }
   void SetMonoOutput(std::int32_t mono) override {

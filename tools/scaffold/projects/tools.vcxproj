@@ -52,11 +52,13 @@
     <None Include="..\..\naming\append_rows.py" />
     <None Include="..\..\naming\cite_declarations.py" />
     <None Include="..\..\naming\cite_globals.py" />
+    <None Include="..\..\naming\disc_refs.py" />
     <None Include="..\..\naming\evidence.py" />
     <None Include="..\..\naming\make_batches.py" />
     <None Include="..\..\naming\make_symbol_batches.py" />
     <None Include="..\..\naming\merge_names.py" />
     <None Include="..\..\naming\merge_symbols.py" />
+    <None Include="..\..\naming\native_refs.py" />
     <None Include="..\..\naming\native_symbol_inventory.py" />
     <None Include="..\..\naming\resolve_dups.py" />
     <None Include="..\..\naming\sanity_pass.py" />
@@ -64,7 +66,9 @@
     <None Include="..\..\naming\test_merge_symbols.py" />
     <None Include="..\..\naming\test_native_symbol_inventory.py" />
     <None Include="..\..\naming\test_symbol_support.py" />
+    <None Include="..\..\naming\test_trace_queue.py" />
     <None Include="..\..\naming\trace_queue.py" />
+    <None Include="..\..\naming\traces\README.md" />
     <None Include="..\..\naming\upstream_layout.py" />
     <None Include="..\..\naming\upstream_prs.py" />
     <None Include="..\..\permuter_settings.toml" />

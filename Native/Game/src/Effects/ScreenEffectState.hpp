@@ -2,4 +2,8 @@
 
 struct Effects_ScreenEffectOverlay;
 
-extern Effects_ScreenEffectOverlay Effects_screenEffectDefaults;
+namespace VS::Effects {
+
+extern Effects_ScreenEffectOverlay screenEffectDefaults;
+
+}  // namespace VS::Effects

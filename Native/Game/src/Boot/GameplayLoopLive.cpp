@@ -53,7 +53,7 @@
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
@@ -73,7 +73,7 @@
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Input/ControllerLive.hpp"
@@ -218,7 +218,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   }
 
   std::int32_t EvaluateRoomEventTriggers(std::int32_t request) override {
-    return Event_EvaluateRoomEventTriggersEntry(request, 0, nullptr, 0);
+    return VS::Event::EvaluateRoomEventTriggersEntry(request, 0, nullptr, 0);
   }
   bool EvaluateActorRoomEventTrigger(int slot) override {
     return VS::Event::EvaluateLiveActorRoomEventTrigger(slot);

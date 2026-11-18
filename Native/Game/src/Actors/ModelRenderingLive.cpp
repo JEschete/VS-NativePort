@@ -22,13 +22,13 @@
 #include "Actors/Animation.h"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
-#include "Actors/AppearanceLiveState.h"
+#include "Actors/AppearanceLiveState.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.hpp"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
@@ -58,7 +58,7 @@
 #include "State/Timers.h"
 
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
-Actors_ModelRenderContext Actors_modelRenderContext;
+Actors_ModelRenderContext VS::Actors::modelRenderContext;
 
 namespace VS::Actors {
 namespace {
@@ -502,8 +502,8 @@ void PrepareLiveActorRootTransform(Actors_ActorRecord* actor) {
     WarnActorRefused("PrepareActorRootTransform", "no actor record");
     return;
   }
-  std::fill(std::begin(Actors_modelRenderContext.modelScale),
-            std::end(Actors_modelRenderContext.modelScale), kUnitModelScale);
+  std::fill(std::begin(modelRenderContext.modelScale),
+            std::end(modelRenderContext.modelScale), kUnitModelScale);
   Render_ModelScratchpad& workspace = Workspace();
   StoreVector(workspace.rootOffset,
               ActorRootOffset(VectorOf(actor->blendPose.boneKeys[kRootKey]),
@@ -550,9 +550,9 @@ void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
   const std::optional<GimmickPose> pose = LiveGimmickPose(*object, placement);
   if (!pose) return;
   Render_ModelScratchpad& workspace = Workspace();
-  const GimmickTransform placed = PlaceGimmick(
-      placement, *pose, TransformOf(*camera), VectorOf(workspace.rootOffset),
-      VectorOf(Actors_roomActorScale));
+  const GimmickTransform placed =
+      PlaceGimmick(placement, *pose, TransformOf(*camera),
+                   VectorOf(workspace.rootOffset), VectorOf(roomActorScale));
   workspace.model = object->model;
   StoreVector(workspace.position, placed.position);
   if (placed.rotation) {

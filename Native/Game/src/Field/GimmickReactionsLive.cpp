@@ -1,4 +1,4 @@
-#include "Field/GimmickReactionsLive.h"
+#include "Field/GimmickReactionsLive.hpp"
 
 #include <algorithm>
 #include <array>
@@ -11,7 +11,6 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickMotion.h"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/GimmickReactionsLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
@@ -165,7 +164,8 @@ GimmickReactionResult UpdateLiveGimmickReactionAnimation(
 }
 }  // namespace VS::Field
 
-int Field_UpdateGimmickReactionAnimationEntry(Field_GimmickMotionView* record) {
+int VS::Field::UpdateGimmickReactionAnimationEntry(
+    Field_GimmickMotionView* record) {
   const auto result = VS::Field::UpdateLiveGimmickReactionAnimation(
       reinterpret_cast<Field_GimmickInstance*>(record));
   return result == VS::Field::GimmickReactionResult::kComplete ? 0 : 1;

@@ -6,8 +6,8 @@
 #include "Field/RoomState.hpp"
 
 // Binding from the location table (Field_locationDestinations), the visit
-// records (State_roomVisitProgress and Field_isRoomVisitPending), the loaded
-// room (Field_roomData) and the session's room globals to the typed room
+// records (State_roomVisitProgress and VS::Field::isRoomVisitPending), the
+// loaded room (Field_roomData) and the session's room globals to the typed room
 // bookkeeping rules (RoomState.hpp). Each adapter keeps the original call
 // shape for the generated callers (copy_fixups.py OWNED_CALL_BINDINGS).
 namespace VS::Field {

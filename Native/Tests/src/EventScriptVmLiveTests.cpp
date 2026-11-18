@@ -17,8 +17,8 @@
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Event/InterpolationCurveLive.h"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/InterpolationCurveLive.hpp"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptControlOpcodes.h"
@@ -3032,8 +3032,8 @@ void CheckRetainedInterpolationEntry(InterpolationEntrySample sample,
   const auto curve_mode = static_cast<std::int16_t>(sample.mode);
   const auto curve_frame = static_cast<std::int16_t>(sample.frame);
   const auto curve_duration = static_cast<std::int16_t>(sample.duration);
-  CHECK(Event_EvaluateInterpolationCurveEntry(curve_mode, curve_frame,
-                                              curve_duration) ==
+  CHECK(VS::Event::EvaluateInterpolationCurveEntry(curve_mode, curve_frame,
+                                                   curve_duration) ==
         event::EvaluateInterpolationCurve(curve_mode, curve_frame,
                                           curve_duration, host));
 }
@@ -3046,7 +3046,8 @@ TEST_CASE("Retained interpolation entry resolves and matches the typed core",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BFEBC) ==
-      reinterpret_cast<const void*>(&Event_EvaluateInterpolationCurveEntry));
+      reinterpret_cast<const void*>(
+          &VS::Event::EvaluateInterpolationCurveEntry));
   for (int slot = 0; slot < 4; ++slot) {
     host.SetCustomEasingCurve(slot,
                               {.family = static_cast<std::uint8_t>(slot),
@@ -3069,13 +3070,15 @@ TEST_CASE(
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BEC58) ==
-      reinterpret_cast<const void*>(&Event_EvaluateRoomEventTriggersEntry));
+      reinterpret_cast<const void*>(
+          &VS::Event::EvaluateRoomEventTriggersEntry));
   for (int phase = 0; phase < 5; ++phase) {
     host.SetPhase(static_cast<event::PlaybackPhase>(phase));
-    CHECK(Event_EvaluateRoomEventTriggersEntry(0xFF, 0, nullptr, 0) ==
+    CHECK(VS::Event::EvaluateRoomEventTriggersEntry(0xFF, 0, nullptr, 0) ==
           (phase == 0 ? 0 : 2));
   }
-  CHECK(Event_EvaluateRoomEventTriggersEntry(0x40, 0x1234, nullptr, 0) == 1);
+  CHECK(VS::Event::EvaluateRoomEventTriggersEntry(0x40, 0x1234, nullptr, 0) ==
+        1);
   CHECK(host.EventId() == 0x1234);
   CHECK(host.Source() == event::EventSource::kEventFile);
   CHECK(host.Phase() == event::PlaybackPhase::kRequested);
@@ -3228,7 +3231,7 @@ TEST_CASE("Legacy easing entry reads the native owned custom curve",
   const LiveVmFixture fixture;
   Event_customEasingCurves[0] = 0;
   event::LiveScriptVm().SetCustomEasingCurve(0, {0, 1});
-  CHECK(Event_EvaluateInterpolationCurveEntry(4, 1, 2) == 1024);
+  CHECK(VS::Event::EvaluateInterpolationCurveEntry(4, 1, 2) == 1024);
 }
 
 TEST_CASE("Live VM refuses pointer results and detached control adapters",

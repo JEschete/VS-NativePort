@@ -4,9 +4,13 @@
 // (Event/WeaponMode.hpp). The opcode table and the BATTLE.PRG module image
 // (0x800B9DB4) hold this adapter; it decodes the command bytes and binds the
 // typed core to the live event, battle and model state.
-#include <stdint.h>
+#include <cstdint>
 
 #include "Legacy/Psx.h"
 
-intptr_t Event_ScriptSetAshleyBattleModeOpcode(u_char* command,
-                                               int16_t thread_id);
+namespace VS::Event {
+
+std::intptr_t ScriptSetAshleyBattleModeOpcode(u_char* command,
+                                              std::int16_t thread_id);
+
+}  // namespace VS::Event

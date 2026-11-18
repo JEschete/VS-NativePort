@@ -55,7 +55,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/RoomTriggers.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -82,10 +82,10 @@
 #include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoading.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
-#include "Field/RoomStateLiveState.h"
+#include "Field/RoomStateLiveState.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Field/Znd.h"
 #include "Field/Zone.h"
@@ -109,7 +109,7 @@
 #include "State/Timers.h"
 
 // decomp: _zoneContext (_zoneContext@BATTLE/BATTLE.PRG)
-Field_ZoneContext Field_zoneContext;
+Field_ZoneContext VS::Field::zoneContext;
 
 namespace {
 // The ordering table entries the unload's frames clear and present.
@@ -260,13 +260,12 @@ std::array<ReadRecord, 2> read_records{};
 }
 
 [[nodiscard]] Content_DiscQueueSlot*& RequestOf(LoadedFile file) {
-  return file == LoadedFile::kZone ? Field_zoneContext.zndDiscRequest
-                                   : Field_zoneContext.mpdDiscRequest;
+  return file == LoadedFile::kZone ? zoneContext.zndDiscRequest
+                                   : zoneContext.mpdDiscRequest;
 }
 
 [[nodiscard]] void*& DataOf(LoadedFile file) {
-  return file == LoadedFile::kZone ? Field_zoneContext.zndData
-                                   : Field_zoneContext.mpdData;
+  return file == LoadedFile::kZone ? zoneContext.zndData : zoneContext.mpdData;
 }
 
 // decomp: BATTLE.PRG _loadZnd and _loadMpd (146C.c:14803-14818 and
@@ -428,8 +427,8 @@ void FreeLowEnd(auto*& block) {
 }
 
 void ClearPlacements() {
-  Field_zoneContext.mpdEnemies = nullptr;
-  Field_zoneContext.mpdEnemyCount = 0;
+  zoneContext.mpdEnemies = nullptr;
+  zoneContext.mpdEnemyCount = 0;
 }
 
 // --- The host services, as linear mixins over each host interface
@@ -650,11 +649,11 @@ class LiveSpawning : public Host {
   }
 
   [[nodiscard]] std::span<const std::byte> PlacementRecords() const override {
-    if (Field_zoneContext.mpdEnemies == nullptr) {
+    if (zoneContext.mpdEnemies == nullptr) {
       return {};
     }
     return std::as_bytes(std::span<const Field_MpdEnemySpawn>(
-        Field_zoneContext.mpdEnemies, Field_zoneContext.mpdEnemyCount));
+        zoneContext.mpdEnemies, zoneContext.mpdEnemyCount));
   }
 
   [[nodiscard]] bool ActorSlotOccupied(int slot) const override {
@@ -664,16 +663,14 @@ class LiveSpawning : public Host {
   }
 
   [[nodiscard]] int ZoneEnemyCount() const override {
-    return Field_zoneContext.zndEnemies != nullptr
-               ? Field_zoneContext.zndEnemyCount
-               : 0;
+    return zoneContext.zndEnemies != nullptr ? zoneContext.zndEnemyCount : 0;
   }
 
   [[nodiscard]] bool TemplateUsesSecondaryBody(int enemy_id) const override {
     if (enemy_id < 0 || enemy_id >= ZoneEnemyCount()) {
       return false;
     }
-    const Field_ZndEnemyRecord& record = Field_zoneContext.zndEnemies[enemy_id];
+    const Field_ZndEnemyRecord& record = zoneContext.zndEnemies[enemy_id];
     return Actors_usesSecondaryBodyModel[record
                                              .recordBytes[kTemplateModelAt]] !=
            0;
@@ -682,15 +679,15 @@ class LiveSpawning : public Host {
   // The template is copied: the spawn decodes it and keeps no pointer.
   void SpawnEnemy(int slot, std::size_t placement_index, int enemy_id,
                   int flags) override {
-    if (placement_index >= Field_zoneContext.mpdEnemyCount || enemy_id < 0 ||
+    if (placement_index >= zoneContext.mpdEnemyCount || enemy_id < 0 ||
         enemy_id >= ZoneEnemyCount()) {
       this->Refuse(RoomLoadRefusal::kEnemyTemplate, enemy_id);
       return;
     }
     Actors_CharacterInit init{};
-    std::memcpy(&init, &Field_zoneContext.zndEnemies[enemy_id], sizeof init);
+    std::memcpy(&init, &zoneContext.zndEnemies[enemy_id], sizeof init);
     static_cast<void>(Actors::SpawnLiveRoomEnemy(
-        slot, &Field_zoneContext.mpdEnemies[placement_index], &init, flags));
+        slot, &zoneContext.mpdEnemies[placement_index], &init, flags));
   }
 
   void SpawnUntemplatedEnemy(int slot, const Actors::SpawnPlacement& placement,
@@ -712,11 +709,11 @@ class LiveSpawning : public Host {
   }
 
   void FreeCachedZud() override {
-    if (Field_zoneContext.zudData != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zudData);
+    if (zoneContext.zudData != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(zoneContext.zudData);
     }
-    Field_zoneContext.zudData = nullptr;
-    Field_zoneContext.loadedZudIndexPlusOne = 0;
+    zoneContext.zudData = nullptr;
+    zoneContext.loadedZudIndexPlusOne = 0;
   }
 };
 
@@ -785,9 +782,8 @@ class LivePlacements : public Host {
       return;
     }
     std::ranges::copy(records, block);
-    Field_zoneContext.mpdEnemies =
-        reinterpret_cast<Field_MpdEnemySpawn*>(block);
-    Field_zoneContext.mpdEnemyCount =
+    zoneContext.mpdEnemies = reinterpret_cast<Field_MpdEnemySpawn*>(block);
+    zoneContext.mpdEnemyCount =
         static_cast<u_int>(records.size() / kRoomPlacementBytes);
   }
 };
@@ -799,7 +795,7 @@ class LiveZoneLoadHost final
  public:
   // decomp: BATTLE.PRG _loadMpdLbas (146C.c:14774)
   void StoreRoomFiles(std::span<const Content::DiscFileExtent> files) override {
-    Field_zoneContext.mpdFiles = nullptr;
+    zoneContext.mpdFiles = nullptr;
     room_files = {};
     if (files.empty()) {
       return;
@@ -812,16 +808,16 @@ class LiveZoneLoadHost final
       return;
     }
     std::ranges::transform(files, table, ToDiscFile);
-    Field_zoneContext.mpdFiles = table;
+    zoneContext.mpdFiles = table;
     room_files = {.table = table, .count = files.size()};
   }
 
   // decomp: BATTLE.PRG _loadZndEnemies (146C.c:14783)
   void StoreZoneEnemies(std::span<const Content::DiscFileExtent> zud_files,
                         std::span<const std::byte> templates) override {
-    Field_zoneContext.zndEnemyCount = static_cast<int>(zud_files.size());
-    Field_zoneContext.zudFiles = nullptr;
-    Field_zoneContext.zndEnemies = nullptr;
+    zoneContext.zndEnemyCount = static_cast<int>(zud_files.size());
+    zoneContext.zudFiles = nullptr;
+    zoneContext.zndEnemies = nullptr;
     if (zud_files.empty()) {
       return;
     }
@@ -833,14 +829,13 @@ class LiveZoneLoadHost final
     if (files == nullptr || records == nullptr) {
       FreeLowEnd(records);
       FreeLowEnd(files);
-      Field_zoneContext.zndEnemyCount = 0;
+      zoneContext.zndEnemyCount = 0;
       return;
     }
     std::ranges::transform(zud_files, files, ToDiscFile);
     std::ranges::copy(templates, records);
-    Field_zoneContext.zudFiles = files;
-    Field_zoneContext.zndEnemies =
-        reinterpret_cast<Field_ZndEnemyRecord*>(records);
+    zoneContext.zudFiles = files;
+    zoneContext.zndEnemies = reinterpret_cast<Field_ZndEnemyRecord*>(records);
   }
 
   void CopyPaletteRow(std::span<const std::byte> colors,
@@ -884,7 +879,7 @@ class LiveZoneLoadHost final
   }
 
   [[nodiscard]] bool MusicFadeEnabled() const override {
-    return Field_zoneContext.isMusicFadeEnabled != 0;
+    return zoneContext.isMusicFadeEnabled != 0;
   }
 
   void FadeOutCurrentMusic() override {
@@ -920,13 +915,13 @@ class LiveZoneLoadHost final
     return Audio::LiveLoadMusicSlotBlocking(music_id, target_slot);
   }
 
-  void SetMusicSlot(int slot) override { Field_zoneContext.musicSlot = slot; }
+  void SetMusicSlot(int slot) override { zoneContext.musicSlot = slot; }
 
   // decomp: BATTLE.PRG _finishLoadZnd (146C.c:14876-14878)
   void FinishZoneMusic(int music_id) override {
-    Field_zoneContext.musicId = music_id;
-    Field_zoneContext.isMusicFadeEnabled = 1;
-    Field_zoneContext.reserved38 = 0;
+    zoneContext.musicId = music_id;
+    zoneContext.isMusicFadeEnabled = 1;
+    zoneContext.reserved38 = 0;
   }
 };
 
@@ -939,10 +934,10 @@ class LiveZoneReleaseHost final : public ZoneReleaseHost {
   // decomp: BATTLE.PRG func_80089098 (146C.c:14889-14896); the original
   // left the freed tables set.
   void FreeZoneTables() override {
-    FreeLowEnd(Field_zoneContext.zndEnemies);
-    FreeLowEnd(Field_zoneContext.zudFiles);
-    FreeLowEnd(Field_zoneContext.mpdFiles);
-    Field_zoneContext.zndEnemyCount = 0;
+    FreeLowEnd(zoneContext.zndEnemies);
+    FreeLowEnd(zoneContext.zudFiles);
+    FreeLowEnd(zoneContext.mpdFiles);
+    zoneContext.zndEnemyCount = 0;
     room_files = {};
   }
 };
@@ -963,7 +958,7 @@ class LiveRoomLoadHost final
   // Only the table the zone load stored is read.
   [[nodiscard]] int RoomFileCount() const override {
     return room_files.table != nullptr &&
-                   room_files.table == Field_zoneContext.mpdFiles
+                   room_files.table == zoneContext.mpdFiles
                ? static_cast<int>(room_files.count)
                : 0;
   }
@@ -983,16 +978,16 @@ class LiveRoomLoadHost final
   }
 
   void SetCurrentRoom(const CurrentRoom& room) override {
-    Field_zoneContext.zndId = room.zone_id;
-    Field_zoneContext.mapId = room.room_id;
+    zoneContext.zndId = room.zone_id;
+    zoneContext.mapId = room.room_id;
   }
 
   [[nodiscard]] int LoadedSceneId() const override {
-    return Field_zoneContext.currentSceneId;
+    return zoneContext.currentSceneId;
   }
 
   void SetLoadedSceneId(int scene_id) override {
-    Field_zoneContext.currentSceneId = scene_id;
+    zoneContext.currentSceneId = scene_id;
   }
 
   void ClearRoomEnemyMemory() override { Actors::ClearLiveRoomEnemyMemory(); }
@@ -1007,13 +1002,13 @@ class LiveRoomLoadHost final
 
   void SetPlacementHidden(std::size_t placement_index,
                           std::uint8_t hidden) override {
-    if (Field_zoneContext.mpdEnemies != nullptr &&
-        placement_index < Field_zoneContext.mpdEnemyCount) {
-      Field_zoneContext.mpdEnemies[placement_index].isHidden = hidden;
+    if (zoneContext.mpdEnemies != nullptr &&
+        placement_index < zoneContext.mpdEnemyCount) {
+      zoneContext.mpdEnemies[placement_index].isHidden = hidden;
     }
   }
 
-  void MarkRoomVisitPending() override { Field_isRoomVisitPending = 1; }
+  void MarkRoomVisitPending() override { isRoomVisitPending = 1; }
 
   [[nodiscard]] int CollisionMapDimensions() const override {
     return LiveCollisionMapDimensions(0);
@@ -1032,25 +1027,23 @@ class LiveRoomLoadHost final
 
   void SetZoneExtent(const ZoneTileExtent& extent,
                      const ZoneBounds& bounds) override {
-    Field_zoneContext.tileColumns = extent.columns;
-    Field_zoneContext.tileRows = extent.rows;
-    Field_zoneContext.bounds.minX = bounds.min_x;
-    Field_zoneContext.bounds.minZ = bounds.min_z;
-    Field_zoneContext.bounds.maxX = bounds.max_x;
-    Field_zoneContext.bounds.maxZ = bounds.max_z;
+    zoneContext.tileColumns = extent.columns;
+    zoneContext.tileRows = extent.rows;
+    zoneContext.bounds.minX = bounds.min_x;
+    zoneContext.bounds.minZ = bounds.min_z;
+    zoneContext.bounds.maxX = bounds.max_x;
+    zoneContext.bounds.maxZ = bounds.max_z;
   }
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15338-15344): the halfwords at
   // 0x48, 0x4A, 0x4C, 0x50, 0x52 and 0x54.
   void ClearRoomResetWords() override {
-    Field_zoneContext.reserved48 = 0;
-    Field_zoneContext.reserved4C = static_cast<int>(
-        static_cast<std::uint32_t>(Field_zoneContext.reserved4C) &
-        kHighHalfMask);
-    Field_zoneContext.reserved50 = 0;
-    Field_zoneContext.reserved54 = static_cast<int>(
-        static_cast<std::uint32_t>(Field_zoneContext.reserved54) &
-        kHighHalfMask);
+    zoneContext.reserved48 = 0;
+    zoneContext.reserved4C = static_cast<int>(
+        static_cast<std::uint32_t>(zoneContext.reserved4C) & kHighHalfMask);
+    zoneContext.reserved50 = 0;
+    zoneContext.reserved54 = static_cast<int>(
+        static_cast<std::uint32_t>(zoneContext.reserved54) & kHighHalfMask);
   }
 
   void CaptureBackgroundColors() override {
@@ -1183,7 +1176,7 @@ class LiveRoomLoadHost final
   void JumpToTitle() override { Boot::JumpToLiveTitle(); }
 
   [[nodiscard]] bool RoomEventTriggered() override {
-    return Event_EvaluateRoomEventTriggersEntry(1, 0, nullptr, 0) == 1;
+    return VS::Event::EvaluateRoomEventTriggersEntry(1, 0, nullptr, 0) == 1;
   }
 
   void RequestEventStart() override {
@@ -1208,7 +1201,7 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] int RoomMusicSlot() const override {
-    return Field_zoneContext.musicSlot;
+    return zoneContext.musicSlot;
   }
 
   void PlayRoomMusic(int slot) override {
@@ -1256,8 +1249,8 @@ class LiveRoomUnloadHost final
   void MarkCurrentRoomVisited() override { LiveMarkCurrentRoomVisited(); }
 
   void FreePlacements() override {
-    FreeLowEnd(Field_zoneContext.mpdEnemies);
-    Field_zoneContext.mpdEnemyCount = 0;
+    FreeLowEnd(zoneContext.mpdEnemies);
+    zoneContext.mpdEnemyCount = 0;
   }
 
   void FreeScriptedActorAi() override {
@@ -1302,7 +1295,7 @@ void LiveReleaseZoneData() {
   ReleaseZoneData(host);
 }
 
-int LiveZoneSoundFileId() { return ZoneSoundFileId(Field_zoneContext.musicId); }
+int LiveZoneSoundFileId() { return ZoneSoundFileId(zoneContext.musicId); }
 
 void LiveSpawnRoomActors() {
   LiveActorSpawnHost host;

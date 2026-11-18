@@ -17,7 +17,7 @@
 #include "Field/Locations.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomState.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Legacy/Psx.h"
@@ -57,9 +57,7 @@ class LiveTransitionHost final : public TransitionHost {
  public:
   explicit LiveTransitionHost(RoomTransitionState& state) : state_(state) {}
 
-  [[nodiscard]] int CurrentZoneId() const override {
-    return Field_zoneContext.zndId;
-  }
+  [[nodiscard]] int CurrentZoneId() const override { return zoneContext.zndId; }
   [[nodiscard]] std::optional<LocationDestination> Location(
       int location_id) const override {
     if (location_id < 0 ||

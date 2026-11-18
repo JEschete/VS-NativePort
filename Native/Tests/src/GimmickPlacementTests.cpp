@@ -35,7 +35,7 @@
 #include "Core/Random.h"
 #include "Core/RandomLive.hpp"
 #include "Effects/Runtime.h"
-#include "Event/RoomTriggerEntryLive.h"
+#include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
 #include "Event/TriggersLive.hpp"
@@ -47,13 +47,11 @@
 #include "Field/GimmickAnimationQueue.hpp"
 #include "Field/GimmickAnimationQueueLive.h"
 #include "Field/GimmickDynamics.hpp"
-#include "Field/GimmickDynamicsLive.h"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickPlacement.hpp"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickReactions.hpp"
-#include "Field/GimmickReactionsLive.h"
 #include "Field/GimmickReactionsLive.hpp"
 #include "Field/GimmickResources.hpp"
 #include "Field/GimmickResourcesLive.h"
@@ -65,7 +63,7 @@
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomSwitches.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLive.hpp"
@@ -415,7 +413,7 @@ TEST_CASE(
   CHECK(VS::Field::UpdateLiveGimmickReactionAnimation(
             static_cast<Field_GimmickInstance*>(short_record)) ==
         VS::Field::GimmickReactionResult::kRefused);
-  CHECK(Field_UpdateGimmickReactionAnimationEntry(nullptr) == 1);
+  CHECK(VS::Field::UpdateGimmickReactionAnimationEntry(nullptr) == 1);
 }
 
 TEST_CASE("Gimmick reaction retains its original module address",
@@ -424,7 +422,7 @@ TEST_CASE("Gimmick reaction retains its original module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B101C) ==
         reinterpret_cast<const void*>(
-            &Field_UpdateGimmickReactionAnimationEntry));
+            &VS::Field::UpdateGimmickReactionAnimationEntry));
 }
 
 TEST_CASE(
@@ -1399,7 +1397,7 @@ struct ScriptedFallDoorFixture {
   VS::Field::RoomTransitionState saved_transition =
       VS::Field::LoadLiveRoomTransition();
   Field_MpdDoorRecord saved_entrance = Field_entranceDoorRecord;
-  decltype(Field_zoneContext) saved_zone = Field_zoneContext;
+  decltype(VS::Field::zoneContext) saved_zone = VS::Field::zoneContext;
   Field_MpdCollisionHeader collision{
       .width = 2, .height = 2, .heightOrigin = 0, .cellCount = 4};
   std::array<Field_MpdTileCell, 4> cells{};
@@ -1415,8 +1413,8 @@ struct ScriptedFallDoorFixture {
     Battle_actors[2] = actors.actor.get();
     Actors_actorRecords[2] = actors.record.get();
     VS::Field::StoreLiveRoomTransition({});
-    Field_zoneContext = {};
-    Field_zoneContext.zndId = 9;
+    VS::Field::zoneContext = {};
+    VS::Field::zoneContext.zndId = 9;
     cells[3].isPit = 1;
     environment.fallDestinationZone = 9;
     environment.fallDestinationRoom = 3;
@@ -1428,15 +1426,16 @@ struct ScriptedFallDoorFixture {
     Field_roomData.header.environmentLength = sizeof environment;
   }
   ~ScriptedFallDoorFixture() {
-    if (Field_zoneContext.zndDiscRequest != nullptr) {
-      VS::Content::ReleaseLiveDiscRequest(Field_zoneContext.zndDiscRequest);
+    if (VS::Field::zoneContext.zndDiscRequest != nullptr) {
+      VS::Content::ReleaseLiveDiscRequest(
+          VS::Field::zoneContext.zndDiscRequest);
     }
-    if (Field_zoneContext.zndData != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(Field_zoneContext.zndData);
+    if (VS::Field::zoneContext.zndData != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(VS::Field::zoneContext.zndData);
     }
     VS::Field::StoreLiveRoomTransition(saved_transition);
     Field_entranceDoorRecord = saved_entrance;
-    Field_zoneContext = saved_zone;
+    VS::Field::zoneContext = saved_zone;
     Field_roomData = actors.saved_room;
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_records, Actors_actorRecords);
@@ -4809,10 +4808,10 @@ TEST_CASE(
   TriggerFixture fixture;
   PublishTrigger({4, 0, 255, 255, 4, 12, 0, 8, 7, 9, 255});
   std::array<std::uint8_t, 4> tile{7, 0, 9, 0};
-  CHECK(Event_EvaluateRoomEventTriggersEntry(4, 0, tile.data(), 1) == 1);
+  CHECK(VS::Event::EvaluateRoomEventTriggersEntry(4, 0, tile.data(), 1) == 1);
   CHECK(VS::Event::LiveScriptVm().EventId() == 12);
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
-  CHECK(Event_EvaluateRoomEventTriggersEntry(4, 0, nullptr, 1) == 0);
+  CHECK(VS::Event::EvaluateRoomEventTriggersEntry(4, 0, nullptr, 1) == 0);
 }
 
 TEST_CASE("Facing event entry dispatches adjacent tile through native triggers",
@@ -7462,7 +7461,7 @@ TEST_CASE(
   REQUIRE(record != nullptr);
   CHECK_FALSE(VS::Field::UpdateLiveGimmickMotion(
       static_cast<Field_GimmickInstance*>(record)));
-  Field_UpdateGimmickMotionEntry(nullptr, 0);
+  VS::Field::UpdateGimmickMotionEntry(nullptr, 0);
 }
 
 TEST_CASE("Gimmick dynamics retains its original module address",
@@ -7470,7 +7469,7 @@ TEST_CASE("Gimmick dynamics retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B0908) ==
-        reinterpret_cast<const void*>(&Field_UpdateGimmickMotionEntry));
+        reinterpret_cast<const void*>(&VS::Field::UpdateGimmickMotionEntry));
 }
 
 TEST_CASE(

@@ -20,7 +20,6 @@
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Package.h"
-#include "OverlayWorkspaceLiveState.h"
 
 namespace {
 namespace Content = VS::Content;
@@ -39,9 +38,9 @@ class FakeOverlayWorkspace final : public Content::OverlayWorkspaceHost {
 };
 
 struct LiveWorkspaceOwner {
-  char saved = Content_overlayWorkspaceOwner;
-  LiveWorkspaceOwner() { Content_overlayWorkspaceOwner = 0; }
-  ~LiveWorkspaceOwner() { Content_overlayWorkspaceOwner = saved; }
+  char saved = VS::Content::overlayWorkspaceOwner;
+  LiveWorkspaceOwner() { VS::Content::overlayWorkspaceOwner = 0; }
+  ~LiveWorkspaceOwner() { VS::Content::overlayWorkspaceOwner = saved; }
   LiveWorkspaceOwner(const LiveWorkspaceOwner&) = delete;
   LiveWorkspaceOwner& operator=(const LiveWorkspaceOwner&) = delete;
   LiveWorkspaceOwner(LiveWorkspaceOwner&&) = delete;
@@ -272,11 +271,11 @@ TEST_CASE("Live overlay workspace binding stores the claimed byte",
           "[content-slice][content][workspace]") {
   LiveWorkspaceOwner state;
   CHECK(Content::AcquireLiveOverlayWorkspace(0x1FF) == 1);
-  CHECK(static_cast<std::uint8_t>(Content_overlayWorkspaceOwner) == 0xFF);
+  CHECK(static_cast<std::uint8_t>(VS::Content::overlayWorkspaceOwner) == 0xFF);
   CHECK(Content::AcquireLiveOverlayWorkspace(4) == 0);
   CHECK(Content::ReleaseLiveOverlayWorkspace(-1) == 0);
   CHECK(Content::ReleaseLiveOverlayWorkspace(0xFF) == 1);
-  CHECK(Content_overlayWorkspaceOwner == 0);
+  CHECK(VS::Content::overlayWorkspaceOwner == 0);
 }
 
 TEST_CASE("Main menu overlay reads start at its fixed disc sector",
@@ -472,7 +471,7 @@ TEST_CASE("Retired content entries leave no module address bindings",
   // The globals the Live bindings now own keep their addresses.
   CHECK(Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                       0x800F18F8u) ==
-        &Content_overlayWorkspaceOwner);
+        &VS::Content::overlayWorkspaceOwner);
   CHECK(Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                       0x800E8FC4u) ==
         &Content_assetQueuePeakUsage);

@@ -22,7 +22,7 @@
 #include "Audio/SoundSlotsLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Core/Runtime.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
 #include "State/GameClockLive.hpp"
@@ -174,7 +174,7 @@ class LiveMusic final : public MusicHost {
   void StopAllMusic() override { Control::LiveStopAllMusic(); }
 
   void StoreZoneMusicSwitch(std::int32_t enabled) override {
-    Field_zoneContext.isMusicFadeEnabled = enabled;
+    VS::Field::zoneContext.isMusicFadeEnabled = enabled;
   }
 
   void Diagnose(std::uint32_t code) override {

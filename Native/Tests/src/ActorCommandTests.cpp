@@ -22,7 +22,7 @@
 #include "Battle/Damage.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Legacy/Psx.h"
 
 namespace {

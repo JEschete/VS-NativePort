@@ -14,7 +14,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/WeaponModel.h"
@@ -194,7 +194,7 @@ class LiveShadowGround final : public ShadowGround {
 }
 
 [[nodiscard]] ModelProjectionView ProjectedVertices() {
-  const Actors_ModelRenderContext& context = Actors_modelRenderContext;
+  const Actors_ModelRenderContext& context = VS::Actors::modelRenderContext;
   const std::size_t count = std::min<std::size_t>(
       context.projectedVertexCount, std::size(context.projectedVertices));
   return {std::span<const std::int32_t>(context.projectedVertices).first(count),
@@ -225,7 +225,7 @@ class LiveShadowGround final : public ShadowGround {
 
 bool ProjectLive(const ModelCounts& counts, std::span<const std::byte> model,
                  std::span<const MATRIX> matrices) {
-  Actors_ModelRenderContext& context = Actors_modelRenderContext;
+  Actors_ModelRenderContext& context = VS::Actors::modelRenderContext;
   context.projectedVertexCount = 0;
   LiveModelTransformer transformer(matrices);
   const ModelProjectionResult result =

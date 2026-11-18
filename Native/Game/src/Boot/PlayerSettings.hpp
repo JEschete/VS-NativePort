@@ -1,3 +1,7 @@
 #pragma once
 
-void Boot_InitializePlayerSettings();
+namespace VS::Boot {
+
+void InitializePlayerSettings();
+
+}  // namespace VS::Boot

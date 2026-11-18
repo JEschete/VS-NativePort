@@ -13,7 +13,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
-#include "Event/InterpolationCurveLive.h"
+#include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
@@ -97,7 +97,7 @@ class LiveTweenEasing final : public EventTweenEasing {
  public:
   std::int32_t EaseFraction(std::uint8_t mode, std::int16_t frame,
                             std::int16_t duration) override {
-    return Event_EvaluateInterpolationCurveEntry(mode, frame, duration);
+    return EvaluateInterpolationCurveEntry(mode, frame, duration);
   }
 
   void RecordEasedFraction(std::int32_t fraction) override {

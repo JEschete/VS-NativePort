@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Driver/SoundDriver.h"
-#include "Audio/LfoWaveforms.h"
+#include "Audio/LfoWaveforms.hpp"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/PlaybackReset.hpp"
 #include "Audio/Samples/SampleBanks.h"

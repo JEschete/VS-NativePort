@@ -37,7 +37,7 @@
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
@@ -801,7 +801,7 @@ struct GameplayInspectionFixture {
   int saved_gameplay = Boot_isGameplayActive;
   decltype(Field_controlMode) saved_control = Field_controlMode;
   decltype(Battle_actionState) saved_action = Battle_actionState;
-  decltype(Items_lootListHead) saved_loot = Items_lootListHead;
+  decltype(VS::Items::lootListHead) saved_loot = VS::Items::lootListHead;
   decltype(Field_roomData.floorTriggers) saved_triggers =
       Field_roomData.floorTriggers;
   decltype(Field_roomData.doors) saved_doors = Field_roomData.doors;
@@ -837,7 +837,7 @@ struct GameplayInspectionFixture {
     Boot_isGameplayActive = 1;
     Field_controlMode = 1;
     Battle_actionState = nullptr;
-    Items_lootListHead = nullptr;
+    VS::Items::lootListHead = nullptr;
     Field_roomData.floorTriggers = nullptr;
     Field_roomData.doors = nullptr;
     Field_roomData.header.doorsLength = 0;
@@ -864,7 +864,7 @@ struct GameplayInspectionFixture {
     Boot_isGameplayActive = saved_gameplay;
     Field_controlMode = saved_control;
     Battle_actionState = saved_action;
-    Items_lootListHead = saved_loot;
+    VS::Items::lootListHead = saved_loot;
     Field_roomData.floorTriggers = saved_triggers;
     Field_roomData.doors = saved_doors;
     Field_roomData.header.doorsLength = saved_door_length;

@@ -49,7 +49,7 @@
 #include "Render/UiPrimitives.h"
 #include "State/GameClockLive.hpp"
 #include "State/Location.h"
-#include "State/PlayTime.h"
+#include "State/PlayTime.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -503,13 +503,14 @@ PlaythroughFlags LoadFlags() {
 }
 
 ClearProgress LoadProgress() {
-  ClearProgress progress{.play_time = {.hours = State_playTime.t.hours,
-                                       .minutes = State_playTime.t.minutes},
-                         .score = LoadScore(),
-                         .flags = LoadFlags(),
-                         .save_count = Input_settings.currentGameSaveCount,
-                         .entry_zone = State_savedEntryDoor.destinationZoneId,
-                         .entry_room = State_savedEntryDoor.destinationRoomId};
+  ClearProgress progress{
+      .play_time = {.hours = VS::State::playTime.t.hours,
+                    .minutes = VS::State::playTime.t.minutes},
+      .score = LoadScore(),
+      .flags = LoadFlags(),
+      .save_count = Input_settings.currentGameSaveCount,
+      .entry_zone = State_savedEntryDoor.destinationZoneId,
+      .entry_room = State_savedEntryDoor.destinationRoomId};
   static_assert(std::size(State_roomVisitProgress.roomFlags) == kRoomFlagWords);
   std::ranges::transform(
       State_roomVisitProgress.roomFlags, progress.visited_rooms.begin(),

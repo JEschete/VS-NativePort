@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the loot rules (Loot.hpp): the battle loot list
-// (Items_lootListHead, nodes on the game heap), the battle flow around the
+// (VS::Items::lootListHead, nodes on the game heap), the battle flow around the
 // loot menu and the treasure chests of the loaded room (Field_roomData).
 #include "Items/LootLive.hpp"
 
@@ -35,14 +35,14 @@
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loot.hpp"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Loot/Paging.h"
 #include "State/ScriptFlagsLive.hpp"
 
 // decomp: _lootListHead (_lootListHead@BATTLE/BATTLE.PRG)
-Items_LootListNode* Items_lootListHead = nullptr;
+Items_LootListNode* VS::Items::lootListHead = nullptr;
 
 namespace VS::Items {
 namespace {
@@ -65,8 +65,8 @@ static_assert(std::is_same_v<decltype(Items_LootListNode::droppedMask), int>);
 static_assert(sizeof(Items_TreasureChest) == sizeof(TreasureChest));
 static_assert(sizeof(Items_TreasureChest) == layout::kTreasureChestBytes);
 
-// Items_lootListHead's nodes. The reserved node is a game heap block that is
-// not yet listed; it is pushed or freed before the list is dropped.
+// VS::Items::lootListHead's nodes. The reserved node is a game heap block that
+// is not yet listed; it is pushed or freed before the list is dropped.
 class LiveLootList final : public LootList {
  public:
   LiveLootList() = default;
@@ -93,24 +93,23 @@ class LiveLootList final : public LootList {
     }
     Commit(reserved_->loot, loot);
     reserved_->droppedMask = dropper;
-    reserved_->next = Items_lootListHead;
-    Items_lootListHead = std::exchange(reserved_, nullptr);
+    reserved_->next = lootListHead;
+    lootListHead = std::exchange(reserved_, nullptr);
   }
 
   void ReleaseReservedEntry() override { FreeReserved(); }
 
   bool HasEntryFrom(std::int32_t dropper) const override {
-    for (const auto* node = Items_lootListHead; node != nullptr;
-         node = node->next) {
+    for (const auto* node = lootListHead; node != nullptr; node = node->next) {
       if (node->droppedMask == dropper) return true;
     }
     return false;
   }
 
-  bool IsEmpty() const override { return Items_lootListHead == nullptr; }
+  bool IsEmpty() const override { return lootListHead == nullptr; }
 
   void Clear() override {
-    auto* node = std::exchange(Items_lootListHead, nullptr);
+    auto* node = std::exchange(lootListHead, nullptr);
     while (node != nullptr) {
       auto* const next = node->next;
       Core::Memory::FreeLiveFromHighEnd(node);
@@ -136,7 +135,7 @@ class LiveLootFlowHost final : public LootFlowHost {
         VS::State::LiveScriptFlag(kRewardStageFlag));
   }
   void OpenEnemyLootList() override {
-    VS::Menu::Framework::OpenLiveLootListMenu(Items_lootListHead);
+    VS::Menu::Framework::OpenLiveLootListMenu(lootListHead);
     Field_controlMode = kMenuControlMode;
     Battle_actionFlowMode = kEnemyLootFlowMode;
     VS::Field::LivePauseFieldForMenu();
@@ -149,7 +148,7 @@ class LiveLootFlowHost final : public LootFlowHost {
   }
   void OpenScriptedLootList() override {
     Battle_lootMenuOpened = 1;
-    VS::Menu::Framework::OpenLiveLootListMenu(Items_lootListHead);
+    VS::Menu::Framework::OpenLiveLootListMenu(lootListHead);
     Battle_actionFlowMode = kScriptedLootFlowMode;
     VS::Battle::BeginLiveRewardPause();
   }

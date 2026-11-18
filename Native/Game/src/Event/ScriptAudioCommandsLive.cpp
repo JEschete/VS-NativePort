@@ -18,7 +18,7 @@
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Legacy/Psx.h"
 
 namespace {

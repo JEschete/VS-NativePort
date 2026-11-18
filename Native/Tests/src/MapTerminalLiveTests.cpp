@@ -43,7 +43,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomRenderingLiveState.h"
 #include "Field/RoomStateLive.hpp"
-#include "Field/RoomStateLiveState.h"
+#include "Field/RoomStateLiveState.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"

@@ -25,7 +25,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Effects/ScriptedEffectTriggersLive.hpp"
-#include "Event/InterpolationCurveLive.h"
+#include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffectCommands.hpp"
 #include "Event/ScriptEffectOpcodes.h"
@@ -281,7 +281,7 @@ class LiveScanlineCanvas final : public event::ScanlineCanvas {
 class LiveImageTweenHost final : public event::ImageTweenHost {
  public:
   [[nodiscard]] int EaseFraction(int mode, int frame, int duration) override {
-    return Event_EvaluateInterpolationCurveEntry(
+    return VS::Event::EvaluateInterpolationCurveEntry(
         static_cast<std::int16_t>(mode), static_cast<std::int16_t>(frame),
         static_cast<std::int16_t>(duration));
   }

@@ -53,7 +53,7 @@
 #include "Core/Log.hpp"
 #include "Field/Actors.h"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/GimmickLookup.h"
+#include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -385,7 +385,8 @@ class LiveActorStateHost final : public ActorStateHost {
     return record != nullptr ? &records_.Attach(*record) : nullptr;
   }
   std::optional<GimmickView> Gimmick(int id) override {
-    const Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(id);
+    const Field_GimmickInstance* gimmick =
+        VS::Field::FindGimmickForActorSlot(id);
     if (gimmick == nullptr) return std::nullopt;
     return GimmickView{
         .skipped = gimmick->isSkipped != 0,
@@ -506,7 +507,7 @@ class LiveActorStateHost final : public ActorStateHost {
 
  private:
   Field_GimmickInstance* KnownGimmick(int id) const {
-    Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(id);
+    Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(id);
     if (gimmick == nullptr) {
       WarnActorRefused(operation_, "no gimmick stands in the actor slot");
     }

@@ -14,7 +14,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelDrawingLive.hpp"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
@@ -390,7 +390,7 @@ struct BorrowedGeometryFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
   Actors_SkeletonPose saved_pose = Actors_skeletonPose;
-  Actors_ModelRenderContext saved_context = Actors_modelRenderContext;
+  Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
   Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
   std::array<unsigned, 32> model_bytes{};
   Actors_ActorRecord actor{};
@@ -429,7 +429,7 @@ struct BorrowedGeometryFixture {
     std::copy(saved_records.begin(), saved_records.end(),
               std::begin(Actors_actorRecords));
     Actors_skeletonPose = saved_pose;
-    Actors_modelRenderContext = saved_context;
+    VS::Actors::modelRenderContext = saved_context;
     *Render_ModelWorkspace() = saved_workspace;
     Core_Gte_Reset();
   }

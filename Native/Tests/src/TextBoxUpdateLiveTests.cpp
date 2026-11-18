@@ -11,7 +11,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Random.h"
 #include "Core/Random.hpp"
-#include "Effects/ScreenEffectState.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
@@ -48,8 +48,8 @@ struct LiveUpdateFixture {
       Core_interfaceRandomState};
   ValueRestore<decltype(Effects_screenEffectOverlay)> saved_overlay{
       Effects_screenEffectOverlay};
-  ValueRestore<decltype(Effects_screenEffectDefaults)> saved_defaults{
-      Effects_screenEffectDefaults};
+  ValueRestore<decltype(VS::Effects::screenEffectDefaults)> saved_defaults{
+      VS::Effects::screenEffectDefaults};
   std::array<u_long, kFrameEntries> ordering{};
 
   explicit LiveUpdateFixture(std::uint8_t buffer = 0) {
@@ -67,7 +67,7 @@ struct LiveUpdateFixture {
     Battle_lowerScreenUiState = 0;
     Core_interfaceRandomState = kRandomSeed;
     Effects_screenEffectOverlay = nullptr;
-    Effects_screenEffectDefaults = {};
+    VS::Effects::screenEffectDefaults = {};
     auto& box = Menu_textBoxes[0];
     box.flags.kind = static_cast<unsigned>(menu::TextBoxKind::kHidden);
     box.flags.openStyle = 2;

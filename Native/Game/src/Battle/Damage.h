@@ -3,7 +3,7 @@
 #include "Legacy/Psx.h"
 
 
-#include "Actors/ActorModelSlot.h"
+#include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Action.h"

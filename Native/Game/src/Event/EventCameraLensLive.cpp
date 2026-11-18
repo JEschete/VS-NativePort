@@ -14,7 +14,7 @@
 #include "Core/Scratch.h"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
-#include "Event/InterpolationCurveLive.h"
+#include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
@@ -191,9 +191,9 @@ class LiveEventCameraLensHost final : public EventCameraLensHost {
   int TickSpeed() override { return State_tickSpeed; }
 
   int EaseFraction(int mode, int frame, int duration) override {
-    return Event_EvaluateInterpolationCurveEntry(
-        static_cast<std::int16_t>(mode), static_cast<std::int16_t>(frame),
-        static_cast<std::int16_t>(duration));
+    return EvaluateInterpolationCurveEntry(static_cast<std::int16_t>(mode),
+                                           static_cast<std::int16_t>(frame),
+                                           static_cast<std::int16_t>(duration));
   }
 
   int Sine(int angle) override { return Core::Math::Sine(angle); }

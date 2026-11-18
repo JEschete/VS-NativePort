@@ -64,7 +64,7 @@
 #include "Items/Loot.h"
 #include "Items/Loot.hpp"
 #include "Items/LootLive.hpp"
-#include "Items/LootLiveState.h"
+#include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
@@ -592,7 +592,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 384> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Items_LootListNode* saved_head = Items_lootListHead;
+  Items_LootListNode* saved_head = VS::Items::lootListHead;
   Battle_Actor* saved_actor = Battle_actors[1];
   Items_Inventory* saved_staging = Menu_Loot_inventory;
   Items_BattleLoot* saved_entry = Menu_Framework_lootEntry;
@@ -606,7 +606,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   Battle_ActorStats stats{};
 
   EnemyLootFixture() {
-    Items_lootListHead = nullptr;
+    VS::Items::lootListHead = nullptr;
     enemy.id = 1;
     enemy.roomSpawnIndex = 1;
     enemy.stats = &stats;
@@ -624,7 +624,7 @@ struct EnemyLootFixture : LootInventoryFixture {
 
   ~EnemyLootFixture() {
     VS::Items::ClearLiveRoomLootList();
-    Items_lootListHead = saved_head;
+    VS::Items::lootListHead = saved_head;
     Battle_actors[1] = saved_actor;
     Menu_Loot_inventory = saved_staging;
     Menu_Framework_lootEntry = saved_entry;
@@ -647,10 +647,10 @@ struct EnemyLootFixture : LootInventoryFixture {
   }
 
   void CheckQueued(int guaranteed, bool candidate, bool success) {
-    REQUIRE(Items_lootListHead != nullptr);
-    CHECK(Items_lootListHead->droppedMask == enemy.id);
-    CHECK(Items_lootListHead->next == nullptr);
-    const auto& loot = Items_lootListHead->loot;
+    REQUIRE(VS::Items::lootListHead != nullptr);
+    CHECK(VS::Items::lootListHead->droppedMask == enemy.id);
+    CHECK(VS::Items::lootListHead->next == nullptr);
+    const auto& loot = VS::Items::lootListHead->loot;
     CheckLootItem(loot.misc[0], guaranteed > 0 ? 323 : 0,
                   guaranteed > 0 ? 2 : 0, guaranteed > 0 ? 3 : 0);
     CheckLootItem(loot.misc[1], guaranteed > 1 ? 324 : 0,
@@ -676,7 +676,7 @@ struct EnemyLootFixture : LootInventoryFixture {
 
   void CheckCleared() {
     VS::Items::ClearLiveRoomLootList();
-    CHECK(Items_lootListHead == nullptr);
+    CHECK(VS::Items::lootListHead == nullptr);
     CHECK(VS::Core::Memory::GameHeap().Empty());
   }
 };
@@ -1022,15 +1022,15 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     EnableEquipmentDrop(stats.limbs[1].armor);
     stats.limbs[1].armor.armor.id = 153;
     VS::Items::QueueLiveEnemyLoot(&enemy);
-    REQUIRE(Items_lootListHead != nullptr);
-    auto& loot = Items_lootListHead->loot;
+    REQUIRE(VS::Items::lootListHead != nullptr);
+    auto& loot = VS::Items::lootListHead->loot;
     loot.weapon.difficultyFlags = static_cast<char>(flags);
     loot.shield.difficultyFlags = static_cast<char>(flags);
     loot.accessory.difficultyFlags = static_cast<char>(flags);
     for (auto& armor : loot.armor) {
       armor.difficultyFlags = static_cast<char>(flags);
     }
-    VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+    VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   }
 
   static void CheckRow(const Menu_Loot_LootListItem& row, int index,
@@ -2514,10 +2514,10 @@ TEST_CASE("Enemy loot rolls equipment before its optional item candidate",
   }
   const bool success = candidate && above_roll != 0;
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
-  CHECK((Items_lootListHead != nullptr) == (guaranteed != 0 || success));
-  if (Items_lootListHead != nullptr) {
+  CHECK((VS::Items::lootListHead != nullptr) == (guaranteed != 0 || success));
+  if (VS::Items::lootListHead != nullptr) {
     fixture.CheckQueued(guaranteed, candidate, success);
-    VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+    VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
     fixture.DeliverRows(guaranteed + (success ? 1 : 0));
   }
   CHECK(LootInventoryFixture::Quantity(323) == (guaranteed > 0 ? 2 : 0));
@@ -2543,9 +2543,9 @@ TEST_CASE("Defeat eligibility prevents repeat item rewards and random draws",
     for (int index = 0; index < 3; ++index) expected.Next(255);
   }
   VS::Battle::ResolveLiveEnemyDefeat(0, 1, 0);
-  auto* const first = Items_lootListHead;
+  auto* const first = VS::Items::lootListHead;
   VS::Battle::ResolveLiveEnemyDefeat(0, 1, 0);
-  CHECK(Items_lootListHead == first);
+  CHECK(VS::Items::lootListHead == first);
   CHECK((first != nullptr) == (guard == 0 && guaranteed != 0));
   CHECK(fixture.enemy.defeated == (guard != 1));
   fixture.random.CheckSequence(expected);
@@ -2572,7 +2572,7 @@ TEST_CASE(
   PrepareScoredEnemyDefeat(ability, loot);
   VS::Battle::ResolveLiveEnemyDefeat(0, 1, -1);
   const auto score = VS::State::LiveKillScore();
-  auto* const first = Items_lootListHead;
+  auto* const first = VS::Items::lootListHead;
   CHECK(score.enemy_kills.at(2) == 1);
   CHECK(score.enemy_kill_flags.at(0) == 128);
   CHECK(score.streak_score == 300);
@@ -2581,7 +2581,7 @@ TEST_CASE(
   CHECK(loot.enemy.defeated == 1);
   VS::Battle::ResolveLiveEnemyDefeat(0, 1, 1);
   CHECK(VS::State::LiveKillScore() == score);
-  CHECK(Items_lootListHead == first);
+  CHECK(VS::Items::lootListHead == first);
 }
 
 TEST_CASE("Direct duplicate loot queues release rejected nodes after rolling",
@@ -2590,19 +2590,19 @@ TEST_CASE("Direct duplicate loot queues release rejected nodes after rolling",
   fixture.SetGuaranteed(1);
   VS::Core::Random expected;
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
-  REQUIRE(Items_lootListHead != nullptr);
-  auto* const first = Items_lootListHead;
+  REQUIRE(VS::Items::lootListHead != nullptr);
+  auto* const first = VS::Items::lootListHead;
   const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
-  CHECK(Items_lootListHead == first);
+  CHECK(VS::Items::lootListHead == first);
   CHECK(first->next == nullptr);
   CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
   auto second_enemy = fixture.enemy;
   second_enemy.id = 2;
   VS::Items::QueueLiveEnemyLoot(&second_enemy);
-  REQUIRE(Items_lootListHead != first);
-  CHECK(Items_lootListHead->droppedMask == 2);
-  CHECK(Items_lootListHead->next == first);
+  REQUIRE(VS::Items::lootListHead != first);
+  CHECK(VS::Items::lootListHead->droppedMask == 2);
+  CHECK(VS::Items::lootListHead->next == first);
   for (int index = 0; index < 9; ++index) expected.Next(255);
   fixture.random.CheckSequence(expected);
   fixture.CheckCleared();
@@ -2642,13 +2642,13 @@ TEST_CASE("Prologue progression suppresses presentation without losing loot",
   fixture.SetGuaranteed(guaranteed);
   VS::State::SetLiveScriptFlag(0xAB, static_cast<char>(intro));
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
-  auto* const queued = Items_lootListHead;
+  auto* const queued = VS::Items::lootListHead;
   VS::Items::OpenLivePendingEnemyLoot();
   CHECK(Field_controlMode == 12);
   CHECK(Battle_actionFlowMode == 0);
   CHECK(Menu_Framework_lootLists == nullptr);
   CHECK(Menu_Framework_lootEntry == nullptr);
-  CHECK(Items_lootListHead == queued);
+  CHECK(VS::Items::lootListHead == queued);
   if (queued != nullptr) fixture.CheckQueued(1, false, false);
   fixture.CheckCleared();
 }
@@ -2723,9 +2723,9 @@ TEST_CASE("Six limb rolls retain only the first two successful armor drops",
     }
   }
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
-  CHECK((Items_lootListHead != nullptr) == !selected.empty());
-  if (Items_lootListHead != nullptr) {
-    const auto& loot = Items_lootListHead->loot;
+  CHECK((VS::Items::lootListHead != nullptr) == !selected.empty());
+  if (VS::Items::lootListHead != nullptr) {
+    const auto& loot = VS::Items::lootListHead->loot;
     for (std::size_t index = 0; index < selected.size(); ++index) {
       CheckEquipmentDrop(loot.armor[index],
                          fixture.stats.limbs[selected[index]].armor);
@@ -2891,7 +2891,7 @@ TEST_CASE(
   const bool claim_first = GENERATE(false, true);
   EquipmentStagingFixture fixture;
   fixture.QueueArmorBatch();
-  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
   std::vector<int> seen;
   fixture.CollectArmorPage(seen, claim_first);
@@ -2904,13 +2904,14 @@ TEST_CASE("Pending loot pages reset safely before source release and reopen",
           "[combat][loot][staging-capacity]") {
   EquipmentStagingFixture fixture;
   fixture.QueueArmorBatch();
-  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
-  const auto first = Items_lootListHead->loot;
+  const auto first = VS::Items::lootListHead->loot;
   Menu_Loot_ResetPaging();
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
-  CHECK(std::memcmp(&Items_lootListHead->loot, &first, sizeof(first)) == 0);
-  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+  CHECK(std::memcmp(&VS::Items::lootListHead->loot, &first, sizeof(first)) ==
+        0);
+  VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
   fixture.CheckCleared();
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
@@ -2918,7 +2919,7 @@ TEST_CASE("Pending loot pages reset safely before source release and reopen",
   fixture.stats = {};
   fixture.SetGuaranteed(1);
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
-  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   fixture.DeliverRows(1);
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
   fixture.CheckCleared();
@@ -2946,14 +2947,15 @@ TEST_CASE("Loot menu cancellation retains the page until positive confirmation",
           "[combat][loot][staging-capacity][loot-paging-ui]") {
   LootPagingMenuFixture fixture;
   fixture.QueueArmorBatch();
-  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   const auto before = fixture.source;
-  const auto queued = Items_lootListHead->loot;
+  const auto queued = VS::Items::lootListHead->loot;
   fixture.OpenLeaveConfirmation();
   fixture.Step(PADRdown);
   CHECK(Menu_Loot_lootListCount == 16);
   EquipmentLootFixture::CheckInventory(fixture.source, before);
-  CHECK(std::memcmp(&Items_lootListHead->loot, &queued, sizeof(queued)) == 0);
+  CHECK(std::memcmp(&VS::Items::lootListHead->loot, &queued, sizeof(queued)) ==
+        0);
   fixture.SettleRows();
   fixture.Step();
   fixture.OpenLeaveConfirmation();
@@ -2966,7 +2968,7 @@ TEST_CASE("Loot menu take-all advances only after the current claims finish",
           "[combat][loot][staging-capacity][loot-paging-ui]") {
   LootPagingMenuFixture fixture;
   fixture.QueueArmorBatch();
-  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+  VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   fixture.Step(PADRleft);
   CHECK(Menu_Loot_lootListCount == 16);
   for (int tick = 0; tick < 10 && Menu_Loot_lootListCount != 8; ++tick) {
@@ -2989,16 +2991,17 @@ TEST_CASE("Loot menu cannot abandon a key while another page is pending",
           "[combat][loot][staging-capacity][loot-paging-ui]") {
   LootPagingMenuFixture fixture;
   fixture.QueueArmorBatch();
-  Items_lootListHead->loot.misc[0] = {467, 3, 1};
-  VS::Menu::Loot::Live::BuildStagedInventory(Items_lootListHead);
+  VS::Items::lootListHead->loot.misc[0] = {467, 3, 1};
+  VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 17);
   const auto before = fixture.source;
-  const auto queued = Items_lootListHead->loot;
+  const auto queued = VS::Items::lootListHead->loot;
   CHECK(fixture.Tick(PADRdown) == 0);
   CHECK(fixture.Tick() == 0);
   CHECK(fixture.Tick(PADRdown) == 0);
   CHECK(Menu_Loot_lootListCount == 17);
   EquipmentLootFixture::CheckInventory(fixture.source, before);
-  CHECK(std::memcmp(&Items_lootListHead->loot, &queued, sizeof(queued)) == 0);
+  CHECK(std::memcmp(&VS::Items::lootListHead->loot, &queued, sizeof(queued)) ==
+        0);
   CHECK(Menu_Loot_lootClaimed == 0);
 }

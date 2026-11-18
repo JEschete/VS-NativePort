@@ -48,7 +48,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"

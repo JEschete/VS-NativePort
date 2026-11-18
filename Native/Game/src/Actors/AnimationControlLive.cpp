@@ -34,7 +34,7 @@
 #include "Core/Log.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Field/GimmickLookup.h"
+#include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "State/Timers.h"
 
@@ -299,13 +299,14 @@ class LiveAnimationHost final : public AnimationControlHost {
         VS::Event::EventPlaybackState(VS::Event::LiveScriptVm()));
   }
   std::optional<AnimationGimmick> GimmickForActorSlot(int slot) override {
-    const Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(slot);
+    const Field_GimmickInstance* gimmick =
+        VS::Field::FindGimmickForActorSlot(slot);
     if (gimmick == nullptr) return std::nullopt;
     return AnimationGimmick{.mode = gimmick->mode,
                             .support_index = gimmick->objectInfo.supportIndex};
   }
   void SetGimmickMode(int slot, std::int16_t mode) override {
-    Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(slot);
+    Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(slot);
     if (gimmick == nullptr) {
       VS_LOG_WARN("actors", "Gimmick mode refused: no gimmick in slot {}",
                   slot);

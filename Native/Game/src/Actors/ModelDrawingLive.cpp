@@ -19,7 +19,7 @@
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRenderingLiveState.h"
+#include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Palette.h"
 #include "Actors/Shadow.h"
@@ -33,7 +33,7 @@
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/Actors.h"
-#include "Field/GimmickLookup.h"
+#include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
@@ -484,7 +484,8 @@ class LiveBoneProjection final : public BoneProjectionHost {
       matrix_ = &actor->boneMatrices[bone];
       return {BoneLookup::kFound, actor->instance.model->bones[bone].length};
     }
-    const Field_GimmickInstance* object = Field_FindGimmickForActorSlot(slot);
+    const Field_GimmickInstance* object =
+        VS::Field::FindGimmickForActorSlot(slot);
     if (object == nullptr) return {};
     if (bone < 0 || bone >= object->boneCount ||
         static_cast<size_t>(bone) >=

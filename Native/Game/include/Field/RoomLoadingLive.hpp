@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-// Binding from the zone context (Field_zoneContext), the loaded room record
-// (Field_roomData), the pending door and the session's heap, disc queue,
+// Binding from the zone context (VS::Field::zoneContext), the loaded room
+// record (Field_roomData), the pending door and the session's heap, disc queue,
 // actors, events, camera and music to the typed zone and room loading rules
 // (RoomLoading.hpp). Each adapter keeps the original call shape for the
 // generated callers (copy_fixups.py OWNED_CALL_BINDINGS). Refusals are

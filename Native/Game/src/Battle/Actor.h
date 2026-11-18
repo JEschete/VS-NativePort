@@ -2,7 +2,9 @@
 #pragma once
 #include "Legacy/Psx.h"
 
-struct Actors_ActorModelSlot;
+namespace VS::Actors {
+struct ActorModelSlot;
+}  // namespace VS::Actors
 struct Actors_ModelInstance;
 struct Battle_ActionSlot;
 struct Battle_Actor;
@@ -64,7 +66,7 @@ struct Battle_Actor {
     Battle_ActorStats* stats;
     int allocationKind;
     Actors_ModelInstance* model;
-    Actors_ActorModelSlot* equipmentModels[2];
+    VS::Actors::ActorModelSlot* equipmentModels[2];
 };
 
 // decomp: vs_battle_actor_unk8C0 (src/BATTLE/BATTLE.PRG/146C.h:447)
