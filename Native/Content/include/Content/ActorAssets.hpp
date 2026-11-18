@@ -34,8 +34,10 @@ inline constexpr std::uint8_t kNoAssetTextureSlot = 0xFF;
 inline constexpr std::int16_t kModellessActorId = 0x7F;
 // The bytes a weapon geometry copy moves (sizeof _wepModelOffsets).
 inline constexpr std::size_t kWeaponGeometryBytes = 0x800;
-// The bytes an actor battle sequence copy moves (func_8009C378).
+// The capacity of the primary battle sequence buffer (func_8009C378).
 inline constexpr std::size_t kWeaponSequenceBytes = 0x7800;
+// The live sequence work buffer allocated for material animations.
+inline constexpr std::size_t kSequenceWorkBufferBytes = 0x4800;
 // The SHP texture layout block copied into the actor record (0xE8 bytes).
 inline constexpr std::size_t kActorTextureLayoutBytes = 0xE8;
 
@@ -480,6 +482,8 @@ class ActorAssetHost {
   virtual std::span<const std::uint8_t> SharedSequenceIdsByKind() const = 0;
   virtual AssetAddress PrimarySequenceBuffer() const = 0;
   virtual AssetAddress SequenceWorkBuffer() const = 0;
+  virtual std::optional<std::size_t> SequenceBankSize(
+      AssetAddress bank) const = 0;
   virtual void ResetActorTextureFrames(int bank) = 0;
 
   // Native bookkeeping for the model and sequence validators.
@@ -535,7 +539,7 @@ int FindSharedActorSequence(const ActorAssetHost& host,
                             ActorAssetRequest& request);
 int UpdateActorSequenceLoad(ActorAssetHost& host, ActorAssetLoadState& state,
                             ActorAssetRequest& request);
-void CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,
+bool CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,
                         AssetAddress source);
 int ParseActorSequence(ActorAssetHost& host, ActorAssetLoadState& state,
                        ActorAssetRequest& request);

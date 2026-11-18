@@ -25,6 +25,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Content/ActorAssets.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -643,12 +644,10 @@ void InitializeLiveActorModelResources() {
   }
   std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
             nullptr);
-  constexpr std::size_t kPrimarySequenceBytes = 0x7800;
-  constexpr std::size_t kSequenceWorkBytes = 0x4800;
   Actors_primarySequenceBuffer =
-      Core::Memory::AllocateLiveFromLowEnd(kPrimarySequenceBytes);
+      Core::Memory::AllocateLiveFromLowEnd(Content::kWeaponSequenceBytes);
   Actors_sequenceWorkBuffer =
-      Core::Memory::AllocateLiveFromLowEnd(kSequenceWorkBytes);
+      Core::Memory::AllocateLiveFromLowEnd(Content::kSequenceWorkBufferBytes);
   for (std::size_t slot = 0; slot < kWeaponTextureSlots; ++slot) {
     StoreSlotIds(Render_legacyWeaponTextureSlots[slot],
                  WeaponTextureSlotIds(slot));

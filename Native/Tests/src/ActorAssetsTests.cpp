@@ -118,7 +118,7 @@ class FakeAssetHost final : public Content::ActorAssetHost {
     weapon_buffers = {AddBlock(Content::kWeaponGeometryBytes),
                       AddBlock(Content::kWeaponGeometryBytes)};
     primary_sequence = AddBlock(Content::kWeaponSequenceBytes);
-    work_sequence = AddBlock(Content::kWeaponSequenceBytes);
+    work_sequence = AddBlock(Content::kSequenceWorkBufferBytes);
   }
 
   AssetAddress AddBlock(std::size_t bytes) {
@@ -363,6 +363,16 @@ class FakeAssetHost final : public Content::ActorAssetHost {
     return primary_sequence;
   }
   AssetAddress SequenceWorkBuffer() const override { return work_sequence; }
+  std::optional<std::size_t> SequenceBankSize(
+      AssetAddress bank) const override {
+    for (auto entry = sequence_banks.rbegin(); entry != sequence_banks.rend();
+         ++entry) {
+      if (entry->destination == bank) {
+        return entry->bytes;
+      }
+    }
+    return std::nullopt;
+  }
   void ResetActorTextureFrames(int bank) override {
     texture_frame_resets.push_back(bank);
   }
@@ -386,6 +396,7 @@ class FakeAssetHost final : public Content::ActorAssetHost {
   void RecordSequenceCopy(AssetAddress destination, AssetAddress source,
                           std::size_t bytes) override {
     sequence_copies.push_back({destination, source, bytes});
+    sequence_banks.push_back({destination, source, bytes});
   }
   void Refuse(const char* what, std::int64_t /*value*/) override {
     refusals.emplace_back(what);
@@ -1824,17 +1835,93 @@ TEST_CASE("Weapon sequence copies move the fixed block into the destination",
   std::ranges::generate(host.Block(source), [value = 0U]() mutable {
     return static_cast<std::byte>(value++ & 0xFFU);
   });
+  host.RecordSequenceBank(source, Content::kWeaponSequenceBytes);
   std::ranges::fill(host.Block(destination), std::byte{0x6B});
-  Content::CopyWeaponSequence(host, destination, source);
+  REQUIRE(Content::CopyWeaponSequence(host, destination, source));
   const std::span<std::byte> copied = host.Block(destination);
   CHECK(std::ranges::equal(copied.first(Content::kWeaponSequenceBytes),
                            host.Block(source)));
   CHECK(copied[Content::kWeaponSequenceBytes] == std::byte{0x6B});
   REQUIRE(host.sequence_copies.size() == 1);
   CHECK(host.sequence_copies[0].bytes == Content::kWeaponSequenceBytes);
-  Content::CopyWeaponSequence(host, host.AddBlock(0x100), source);
+  CHECK_FALSE(Content::CopyWeaponSequence(host, host.AddBlock(0x100), source));
   CHECK(host.refusals == std::vector<std::string>{"weapon sequence copy"});
-  CHECK(host.sequence_copies.size() == 2);
+  CHECK(host.sequence_copies.size() == 1);
+}
+
+TEST_CASE("Weapon sequence copies do not read beyond a short source bank",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  constexpr std::size_t kSourceBytes = 0x7608;
+  const AssetAddress source = host.AddBlock(kSourceBytes);
+  const AssetAddress destination = host.AddBlock(Content::kWeaponSequenceBytes);
+  std::ranges::generate(host.Block(source), [value = 0U]() mutable {
+    return static_cast<std::byte>(value++ & 0xFFU);
+  });
+  std::ranges::fill(host.Block(destination), std::byte{0x6B});
+  host.RecordSequenceBank(source, kSourceBytes);
+
+  REQUIRE(Content::CopyWeaponSequence(host, destination, source));
+
+  const std::span<std::byte> copied = host.Block(destination);
+  CHECK(std::ranges::equal(copied.first(kSourceBytes), host.Block(source)));
+  CHECK(std::ranges::all_of(copied.subspan(kSourceBytes), [](std::byte value) {
+    return value == std::byte{0x6B};
+  }));
+  REQUIRE(host.sequence_copies.size() == 1);
+  CHECK(host.sequence_copies[0].bytes == kSourceBytes);
+  CHECK(host.SequenceBankSize(destination) == kSourceBytes);
+}
+
+TEST_CASE("Weapon sequence copies refuse an unknown or oversized bank",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  const AssetAddress unknown = host.AddBlock(Content::kWeaponSequenceBytes);
+  const AssetAddress oversized =
+      host.AddBlock(Content::kWeaponSequenceBytes + 4);
+  const AssetAddress destination = host.AddBlock(Content::kWeaponSequenceBytes);
+  std::ranges::fill(host.Block(destination), std::byte{0x6B});
+  std::ranges::generate(host.Block(oversized), [value = 0U]() mutable {
+    return static_cast<std::byte>(value++ & 0xFFU);
+  });
+  host.RecordSequenceBank(oversized, Content::kWeaponSequenceBytes + 4);
+
+  CHECK_FALSE(Content::CopyWeaponSequence(host, destination, unknown));
+  CHECK_FALSE(Content::CopyWeaponSequence(host, destination, oversized));
+  CHECK(host.refusals ==
+        std::vector<std::string>{"weapon sequence source bank",
+                                 "weapon sequence source size"});
+  CHECK(host.sequence_copies.empty());
+  CHECK(std::ranges::all_of(host.Block(destination), [](std::byte value) {
+    return value == std::byte{0x6B};
+  }));
+}
+
+TEST_CASE("Sequence parser refuses a material bank larger than its work buffer",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  constexpr std::uint8_t kMaterialSequenceSubKind = 3;
+  constexpr std::uint32_t kOversizedBytes =
+      static_cast<std::uint32_t>(Content::kSequenceWorkBufferBytes + 4);
+  const AssetAddress file = host.AddBlock(8 + kOversizedBytes);
+  std::span<std::byte> file_bytes = host.Block(file);
+  std::memcpy(file_bytes.data() + 4, &kOversizedBytes, sizeof(kOversizedBytes));
+  std::ranges::fill(host.Block(host.work_sequence), std::byte{0x6B});
+  ActorAssetLoadState state;
+  ActorAssetRequest request;
+  request.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceLoad);
+  request.sub_kind = kMaterialSequenceSubKind;
+  request.data = file;
+
+  CHECK(Content::ParseActorSequence(host, state, request) == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"sequence copy destination"});
+  CHECK(host.sequence_banks.empty());
+  CHECK(std::ranges::all_of(
+      host.Block(host.work_sequence),
+      [](std::byte value) { return value == std::byte{0x6B}; }));
 }
 
 TEST_CASE("Live battle asset entry points refuse a null request and bad slots",

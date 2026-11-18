@@ -1869,8 +1869,12 @@ int FinishSequenceLoad(ActorAssetHost& host, ActorAssetLoadState& state,
 
 int CopySequence(ActorAssetHost& host, AssetAddress sequence,
                  const FileCursor& cursor, std::uint32_t bytes) {
-  static_cast<void>(
-      CopyWordsInto(host, sequence, cursor.At(), bytes, "sequence copy"));
+  if (bytes > host.Bytes(sequence, 0).size()) {
+    return RefuseActor(host, "sequence copy destination", bytes);
+  }
+  if (!CopyWordsInto(host, sequence, cursor.At(), bytes, "sequence copy")) {
+    return kAssetRefused;
+  }
   host.RecordSequenceBank(sequence, bytes);
   return kAssetDone;
 }
@@ -1937,11 +1941,29 @@ int UpdateActorSequenceLoad(ActorAssetHost& host, ActorAssetLoadState& state,
 }
 
 // decomp: BATTLE.PRG func_8009C378 (src/BATTLE/BATTLE.PRG/30DB0.c:1608)
-void CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,
+bool CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,
                         AssetAddress source) {
-  CopyFixedBlock(host, destination, source, kWeaponSequenceBytes,
-                 "weapon sequence copy");
-  host.RecordSequenceCopy(destination, source, kWeaponSequenceBytes);
+  const std::optional<std::size_t> source_size = host.SequenceBankSize(source);
+  if (!source_size || *source_size == 0) {
+    host.Refuse("weapon sequence source bank",
+                static_cast<std::int64_t>(source));
+    return false;
+  }
+  if (*source_size > kWeaponSequenceBytes) {
+    host.Refuse("weapon sequence source size",
+                static_cast<std::int64_t>(*source_size));
+    return false;
+  }
+  const std::span<std::byte> to = host.Bytes(destination, *source_size);
+  const std::span<std::byte> from = host.Bytes(source, *source_size);
+  if (to.size() < *source_size || from.size() < *source_size) {
+    host.Refuse("weapon sequence copy",
+                static_cast<std::int64_t>(*source_size));
+    return false;
+  }
+  std::memmove(to.data(), from.data(), *source_size);
+  host.RecordSequenceCopy(destination, source, *source_size);
+  return true;
 }
 
 namespace {
@@ -2007,14 +2029,19 @@ int ShareBattleSequence(ActorAssetHost& host, const ActorAssetRequest& request,
   if (target < kPlayerSequenceSlots) {
     if (actor.slot == 0) {
       sequence = host.PrimarySequenceBuffer();
-      CopyWeaponSequence(host, sequence, other.battle_sequence);
+      if (!CopyWeaponSequence(host, sequence, other.battle_sequence)) {
+        return kAssetRefused;
+      }
     } else if (source == 0) {
       sequence = host.AllocateLow(kWeaponSequenceBytes);
       if (sequence == AssetAddress::kNone) {
         host.StoreActor(target, actor);
         return RefuseActor(host, "battle sequence copy", target);
       }
-      CopyWeaponSequence(host, sequence, other.battle_sequence);
+      if (!CopyWeaponSequence(host, sequence, other.battle_sequence)) {
+        host.FreeLow(sequence);
+        return kAssetRefused;
+      }
     }
   }
   actor.battle_sequence = sequence;

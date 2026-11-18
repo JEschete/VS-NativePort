@@ -1117,6 +1117,15 @@ class LiveActorAssetHost final : public ActorAssetHost {
   [[nodiscard]] AssetAddress SequenceWorkBuffer() const override {
     return Address(Actors_sequenceWorkBuffer);
   }
+  [[nodiscard]] std::optional<std::size_t> SequenceBankSize(
+      AssetAddress bank) const override {
+    const std::span<const std::uint8_t> bytes =
+        Actors::SequenceBankBytes(Pointer(bank));
+    if (bytes.empty()) {
+      return std::nullopt;
+    }
+    return bytes.size();
+  }
   void ResetActorTextureFrames(int bank) override {
     VS::Actors::ResetLiveActorTextureFrames(bank);
   }

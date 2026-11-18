@@ -19,6 +19,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
@@ -1287,6 +1288,7 @@ TEST_CASE("Weapon sequence copies retain relative offsets and exact extent",
   std::memset(destination.get(), 0x6B, sizeof(*destination));
   source->firstSectionPointer = 0x40;
   source->secondSectionPointer = 0x200;
+  VS::Actors::RegisterSequenceBank(source.get(), Content::kWeaponSequenceBytes);
   Content::CopyLiveWeaponSequence(destination.get(), source.get());
   const auto original = std::as_bytes(std::span(source.get(), 1));
   const auto copied = std::as_bytes(std::span(destination.get(), 1));
@@ -1296,6 +1298,7 @@ TEST_CASE("Weapon sequence copies retain relative offsets and exact extent",
   }));
   CHECK(destination->firstSectionPointer == 0x40);
   CHECK(destination->secondSectionPointer == 0x200);
+  VS::Actors::ForgetSequenceBanks(source.get(), Content::kWeaponSequenceBytes);
 }
 
 TEST_CASE("Overlay workspace claims preserve the owning tag",
