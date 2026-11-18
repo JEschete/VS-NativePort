@@ -1,6 +1,6 @@
 # Current Handoff
 
-Updated 2026-11-17. Map terminals F02689/F02690/F02699/F02702/F04149/F04151
+Updated 2026-11-18. Map terminals F02689/F02690/F02699/F02702/F04149/F04151
 are accepted in `be3f8e1e33f478e3967dd1d53c30d4064b0ca7ee`.
 [Source Quality 44130430409](https://github.com/JEschete/VS-NativePort/actions/runs/44130430409)
 succeeds on that exact revision; #425/#426/#427/#433 are closed.
@@ -11,16 +11,16 @@ succeeds at that exact revision; #432 is closed. The preview-ownership prerequis
 `0a440855871c2b7a49eef73a821316b744c3d8f4` also passed exact CI; #430 is closed.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The locally verified original 900-function cohort now has **900 resolved
-(888 promoted, 12 retired)**. **111 of the requested final 112** are published
-and accepted; F00830 is locally promoted with its integration gates passing.
-Its scoped commit, publication, exact-revision CI and #296 closure remain
-pending. Independent-index issues #376/#377/#384
+The original 900-function cohort now has **900 resolved
+(888 promoted, 12 retired)**. All **112 requested final functions** are
+published and accepted. F00830 is in `a4a88418242d4a06aca5610472c95a3685120cf8`;
+[Source Quality 44206065938](https://github.com/JEschete/VS-NativePort/actions/runs/44206065938)
+passes on that exact revision and #296 is closed. Independent-index issues #376/#377/#384
 are closed at `1d891ceb0b369a09f2083fa3c9d2569d297e81af` with
 [Source Quality 44134309733](https://github.com/JEschete/VS-NativePort/actions/runs/44134309733).
 The final audit also records a separate,
 pre-existing 72-function slice-registration gap in #434; those functions
-are outside the requested 112. Neither #276 nor #296 is closed. See
+are outside the requested 112. #296 is closed; #276 remains open for #434. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv). Older continuation entries below
 are historical snapshots; the current F00830 status above supersedes their
@@ -28,10 +28,9 @@ blocker notes.
 
 ## Current status and next steps
 
-- Remaining by plan row: 30: 0, 39: 0, 47: 0,
-  48: 0, 50: 0, 52: 0.
-  F00830 has local Debug/Release, replay, differential, copier and quality
-  evidence; scoped publication, exact-revision CI and #296 closure remain.
+- Remaining by plan row: 30: 0, 39: 0, 47: 0, 48: 0, 50: 0, 52: 0.
+  F00830's scoped commit, exact-revision CI and #296 closure are complete.
+  #276 remains open for the separate #434 slice-registration gap.
   The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -86,11 +85,10 @@ blocker notes.
   original F02856/F02860/F02865 obligations, not only 30 staging cases.
 - Final requested-cohort audit reconstructs the 112 pending rows at
   `b4b11beb058400b4f31a3c52d1ba145637854b29` (before the first Analyze group).
-  All 111 resolved rows have six CPP marks, passing Debug/Release verification
+  All 112 resolved rows have six CPP marks, passing Debug/Release verification
   records and recorded slices with zero remaining old-symbol consumers:
-  19 verification records and 19 slices. Across the entire catalog, 3,731 of
-  3,732 `copy=yes` rows derive CPP marks; only F00830 is unmarked and only its
-  original body is still copied. Seventeen generated module-reset helpers
+  20 verification records and 20 slices. Across the entire catalog, all 3,732
+  `copy=yes` rows derive CPP marks. Seventeen generated module-reset helpers
   have no original catalog function ID and remain data/module scaffolding,
   not additional unfinished original functions.
   The broader #276 acceptance is still incomplete: 72 earlier promoted rows
@@ -113,14 +111,17 @@ blocker notes.
   group `20261117-190123` passes 9,466 Debug and Release cases (12,979,717
   assertions each), 15 focused cases (168 assertions), both canonical replays,
   copier controls and changed-file quality with zero new findings. Promotion
-  ledgers and their sync/checks pass.
+  ledgers and their sync/checks pass. Commit
+  `a4a88418242d4a06aca5610472c95a3685120cf8` is accepted by exact-revision
+  [Source Quality 44206065938](https://github.com/JEschete/VS-NativePort/actions/runs/44206065938);
+  #296 is closed.
   Switching the Live target damage/defense inputs from the existing
   `rangeOrigin` to queued `focusPosition` caused both canonical replay hashes
   to diverge; restoring `rangeOrigin` restored Debug and Release baselines.
   The original F00062 caller's `focusPosition` mapping remains a known limit;
-  the target path was left unchanged under the owner's scope decision. Next:
-  commit and publish the scoped promotion, verify exact-revision CI, then close
-  #296 with the evidence. No gameplay, EC retirement or M8 completion is
+  the target path was left unchanged under the owner's scope decision. This
+  caller-input limit is separate from the completed final-112 promotion; #276
+  remains open for #434. No gameplay, EC retirement or M8 completion is
   claimed.
 - Map-terminal evidence (`VR-MENU-MAP-TERMINAL`): six original spans pass
   6,144 vectors, zero mismatches; 58 instruction mutants and six compiled
