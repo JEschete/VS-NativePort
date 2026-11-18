@@ -129,6 +129,7 @@ int func_800F9800(void) {
             "F00819": ("SetLiveEnemyCombatPose", "SetEnemyCombatPose", 0x8009DF3C),
             "F00832": ("PlayLiveDefenseAbilityAnimation", "PlayDefenseAbilityAnimation", 0x8009EE9C),
             "F00891": ("FinishLiveEnemyCombatPose", "FinishEnemyCombatPose", 0x800A2574),
+            "F00830": ("PlayLiveActorDamageReaction", "PlayActorDamageReaction", 0x8009EA14),
         }
         root = Path(__file__).resolve().parents[2]
         with (root / r"tools\port\owned.csv").open(newline="", encoding="utf-8") as table:
@@ -145,9 +146,6 @@ int func_800F9800(void) {
                                  r"Native\Game\include\Battle\ActionAnimationsLive.hpp")
                 self.assertNotIn(f"Battle_{old}(", generated)
                 self.assertNotIn(f"Battle_{old}(", header)
-        self.assertNotIn("F00830", owned)
-        self.assertNotIn("F00830", copy_fixups.OWNED_CALL_BINDINGS)
-        self.assertIn("void Battle_PlayActorDamageReaction(", generated)
         for declaration in ("u_char Battle_chainAbilityAnimationGroups[168];",
                             "int Battle_chainAbilityAnimationSide;",
                             "char Battle_specialActionPitch;"):

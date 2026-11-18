@@ -46,6 +46,11 @@ ACTORS = (0x80500000, 0x80502000, 0x80504000)
 BANKS = (0x80600000, 0x80602000, 0x80604000)
 TARGET, RECORD_BYTES = 0x80700000, 0x800
 REACTIONS = (819, 832, 891)
+F00830 = 830
+PLATFORM_RELEASE = 0x8008C49C
+CLEAR_MOVEMENT_REQUEST = 0x800A525C
+TELEPORT_CANCEL = 0x800A2C48
+F00830_STATE_COUNT = 7
 POSE_BYTES, BLEND_POSE, CURRENT_POSE = 0x550, 0x704, 0xC54
 TURN, IMPACT, COPY = 0x800A9EB4, 0x8006C84C, 0x800490B0
 FACING, PITCH, HEADER = 0x8009E180, 0x8009E228, 0x800AD494
@@ -55,6 +60,7 @@ SPANS = {
     817: (0x8009DD00, 0x8009DDF4),
     818: (0x8009DDF4, 0x8009DF3C),
     819: (0x8009DF3C, 0x8009E070),
+    830: (0x8009EA14, 0x8009EC9C),
     823: (0x8009E2E0, 0x8009E480),
     831: (0x8009EC9C, 0x8009EE9C),
     832: (0x8009EE9C, 0x8009EFEC),
@@ -114,6 +120,14 @@ def mutants(function: int) -> dict:
             "unsigned-copy-mode": {0x8009E034: immediate(11, 2, 19, 3)},
             "omit-full-pose-copy": {0x8009E044: 0},
             "short-pose-copy": {0x8009E048: immediate(9, 6, 0, 0x540)},
+        },
+        830: {
+            "action-pose-branch": {0x8009EA60: 0x1040004C},
+            "force-nonclimbing-path": {0x8009EBA4: 0x10000011},
+            "force-teleport-cancel": {0x8009EBF4: 0x10430003},
+            "climbing-animation-3a": {0x8009EBE8: 0x2410003A},
+            "omit-movement-request-clear": {0x8009EC4C: 0},
+            "animation-set-fe": {0x8009EC54: 0x240200FE},
         },
         823: {
             "turn-phase-one": {0x8009E344: 0},
@@ -196,6 +210,8 @@ def safe_horizontal(point: list[int], actor: list[int]) -> bool:
 
 
 def vector(function: int, rng: random.Random, number: int) -> dict:
+    if function == F00830:
+        return damage_reaction_vector(rng, number)
     if function in REACTIONS:
         return reaction_vector(function, rng, number)
     actors = [actor_values(rng) for _ in ACTORS]
@@ -258,6 +274,35 @@ def vector(function: int, rng: random.Random, number: int) -> dict:
     }
 
 
+def damage_reaction_vector(rng: random.Random, number: int) -> dict:
+    value = vector(818, rng, number)
+    target_impact = number % 4 != 0
+    for actor in value["actors"]:
+        locomotion = (
+            2 if target_impact and number % 5 == 0 else number % 2
+        )
+        actor[0] = (actor[0] & ~0x0F184000) | (locomotion << 19)
+        actor[1] = (0, 1, 16, 255)[number % 4]
+    value["function"] = F00830
+    value["owner"] = 0
+    value["target_impact"] = target_impact
+    value["visited_hit_count"] = (1, 3)[number % 2]
+    value["damage_state"] = [
+        [
+            int(number % 5 == 0),
+            (0, 0, 2, 3, 4, 5)[(number + index) % 6],
+            (0, 0x3B, 0x5B, 0xFF)[(number + index) % 4],
+            rng.randrange(256),
+            s16(rng.getrandbits(16)),
+            s16(rng.getrandbits(16)),
+            rng.getrandbits(32),
+        ]
+        for index in range(3)
+    ]
+    value["raw"] = [rng.randbytes(0x1900) for _ in ACTORS]
+    return value
+
+
 def reaction_vector(function: int, rng: random.Random, number: int) -> dict:
     value = vector(818, rng, number)
     value["function"], value["owner"] = function, 0
@@ -301,6 +346,9 @@ def inputs(v: dict) -> list[int]:
         int(v["bone_success"]), v["preset"], *v["point"],
         *(value for actor in v["actors"] for value in actor),
     ]
+    if v["function"] == F00830:
+        result.extend((int(v["target_impact"]), v["visited_hit_count"]))
+        result.extend(value for actor in v["damage_state"] for value in actor)
     if v["function"] in REACTIONS:
         for animation, raw in zip(v["animations"], v["raw"], strict=True):
             result.extend((animation, *pose_words(raw, BLEND_POSE), *pose_words(raw, CURRENT_POSE)))
@@ -321,6 +369,19 @@ def run(machine: Machine, v: dict) -> tuple[dict, list[int]]:
     ):
         values = {name: actor[index] for index, (name, _, _) in enumerate(FIELDS)}
         block = pack_fields(raw, FIELDS, values)
+        if v["function"] == F00830:
+            action_pose, support, animation_set, request_mode, direction, facing, distance = (
+                v["damage_state"][index]
+            )
+            record = bytearray(block)
+            record[0x5AC] = (record[0x5AC] & ~0x08) | (action_pose << 3)
+            record[0xC] = (record[0xC] & 0xF0) | support
+            record[0x6E3] = animation_set
+            record[0x1848] = request_mode
+            record[0x184C:0x184E] = (direction & 0xFFFF).to_bytes(2, "little")
+            record[0x184E:0x1850] = (facing & 0xFFFF).to_bytes(2, "little")
+            record[0x1850:0x1854] = distance.to_bytes(4, "little")
+            block = bytes(record)
         machine.store(base, block)
         if v["function"] in REACTIONS:
             machine.put(base + 0x5B8, v["animations"][index], 1)
@@ -497,10 +558,16 @@ def run(machine: Machine, v: dict) -> tuple[dict, list[int]]:
     machine.stub(IMPACT, lambda m: record([11, m.r[4], 0, 0, 0]))
     machine.follow.add(SPECIAL)
     machine.follow.update((SPANS[819][0], COPY))
+    if v["function"] == F00830:
+        machine.stub(PLATFORM_RELEASE, lambda m: record([12, m.r[4], m.r[5], 0, 0]))
+        machine.stub(TELEPORT_CANCEL, lambda m: record([13, owner(m.r[4]), 0, 0, 0]))
+        machine.follow.add(CLEAR_MOVEMENT_REQUEST)
     machine.r[4:8] = [
         v["slot"], TARGET if v["point_present"] else 0,
         v["parameter"] & MASK, v["sequence"] & MASK,
     ]
+    if v["function"] == F00830:
+        machine.r[20] = v["visited_hit_count"] & MASK
     if v["function"] in (819, 891):
         machine.r[5] = v["parameter"] & MASK
     machine.stores.clear()
@@ -526,14 +593,27 @@ def check(_image, v: dict, observation: dict, native: list[int], reference: dict
     if native[1:4] != [observation["owner"], observation["side"], observation["special"]]:
         problems.append(f"owner/side/pitch {native[1:4]} != "
                         f"{[observation['owner'], observation['side'], observation['special']]}")
-    start = 4 + 3 * FIELD_COUNT
-    count = native[start + 4]
-    tail = start + 5 + count * 5
+    actor_start = 4
+    state_start = actor_start + 3 * FIELD_COUNT
+    target_start = state_start + (3 * F00830_STATE_COUNT if v["function"] == F00830 else 0)
+    count = native[target_start + 4]
+    tail = target_start + 5 + count * 5
     reaction_fields = 1 + POSE_BYTES // 2 if v["function"] in REACTIONS else 0
     for index in range(3):
-        start = 4 + index * FIELD_COUNT
+        start = actor_start + index * FIELD_COUNT
         values = {name: native[start + i] for i, (name, _, _) in enumerate(FIELDS)}
         expected = pack_fields(reference["before"][index], FIELDS, values)
+        if v["function"] == F00830:
+            extra = native[state_start + index * F00830_STATE_COUNT:
+                           state_start + (index + 1) * F00830_STATE_COUNT]
+            if extra[0] != ((reference["before"][index][0x5AC] >> 3) & 1):
+                problems.append(f"actor {index} action-pose state")
+            expected[0xC] = (expected[0xC] & 0xF0) | (extra[1] & 0x0F)
+            expected[0x6E3] = extra[2] & 255
+            expected[0x1848] = extra[3] & 255
+            expected[0x184C:0x184E] = (extra[4] & 0xFFFF).to_bytes(2, "little")
+            expected[0x184E:0x1850] = (extra[5] & 0xFFFF).to_bytes(2, "little")
+            expected[0x1850:0x1854] = (extra[6] & MASK).to_bytes(4, "little")
         if reaction_fields:
             reaction = native[tail + index * reaction_fields:tail + (index + 1) * reaction_fields]
             expected[0x5B8] = reaction[0] & 255
@@ -550,12 +630,17 @@ def check(_image, v: dict, observation: dict, native: list[int], reference: dict
             problems.append(f"actor {index} bytes {','.join(differing[:16])}")
         if native[start + FIELD_COUNT - 1] != v["actors"][index][-1]:
             problems.append(f"actor {index} changed its loaded bank")
-    start = 4 + 3 * FIELD_COUNT
-    target = b"".join((value & 0xFFFF).to_bytes(2, "little") for value in native[start:start + 4])
+    target = b"".join(
+        (value & 0xFFFF).to_bytes(2, "little")
+        for value in native[target_start:target_start + 4]
+    )
     if target != observation["target"]:
         problems.append("target fields")
-    count = native[start + 4]
-    events = [native[start + 5 + i * 5:start + 10 + i * 5] for i in range(count)]
+    count = native[target_start + 4]
+    events = [
+        native[target_start + 5 + i * 5:target_start + 10 + i * 5]
+        for i in range(count)
+    ]
     if len(native) != tail + 3 * reaction_fields:
         problems.append("driver output length")
     if events != observation["events"]:
@@ -574,6 +659,35 @@ def check(_image, v: dict, observation: dict, native: list[int], reference: dict
 
 
 def describe(_image, results: list) -> list[str]:
+    if results and results[0][0]["function"] == F00830:
+        coverage = {
+            "source_nonclimbing": 0,
+            "target_nonclimbing": 0,
+            "target_climbing": 0,
+            "action_pose_override": 0,
+            "platform_release": 0,
+            "root_bone_query": 0,
+            "movement_request_reset": 0,
+        }
+        for value, observation, native in results:
+            climbing = ((value["actors"][0][0] >> 19) & 3) == 2
+            if value["target_impact"]:
+                coverage["target_climbing" if climbing else "target_nonclimbing"] += 1
+            else:
+                coverage["source_nonclimbing"] += 1
+            coverage["action_pose_override"] += value["damage_state"][0][0] != 0
+            coverage["platform_release"] += any(event[0] == 12 for event in observation["events"])
+            coverage["root_bone_query"] += any(event[0] == 6 for event in observation["events"])
+            coverage["movement_request_reset"] += (
+                native[4 + 3 * FIELD_COUNT + 3]
+                == (0 if value["actors"][0][1] == 0 else 1)
+            )
+        return [
+            "Coverage: " + ", ".join(f"{key}={value}" for key, value in coverage.items()),
+            "Target-impact behavior and non-climbing source-impact behavior are compared "
+            "against original MIPS; source-impact climbing is intentionally corrected to "
+            "the approved 0/8 blend and is covered by native tests, not claimed as PS1 parity.",
+        ]
     counts = {
         "null_actor": 0, "null_point": 0, "controlled_helpers": 0,
         "real_helper_math": 0, "real_header_queries": 0, "controlled_header_queries": 0,

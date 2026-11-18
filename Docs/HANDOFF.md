@@ -11,21 +11,27 @@ succeeds at that exact revision; #432 is closed. The preview-ownership prerequis
 `0a440855871c2b7a49eef73a821316b744c3d8f4` also passed exact CI; #430 is closed.
 The accepted checkpoint is on
 [#276](https://github.com/JEschete/VS-NativePort/issues/276).
-The locally verified original 900-function cohort has **899 resolved
-(887 promoted, 12 retired) and 1 remaining**. **111 of the requested final
-112** are published and accepted. Independent-index issues #376/#377/#384
+The locally verified original 900-function cohort now has **900 resolved
+(888 promoted, 12 retired)**. **111 of the requested final 112** are published
+and accepted; F00830 is locally promoted with its integration gates passing.
+Its scoped commit, publication, exact-revision CI and #296 closure remain
+pending. Independent-index issues #376/#377/#384
 are closed at `1d891ceb0b369a09f2083fa3c9d2569d297e81af` with
 [Source Quality 44134309733](https://github.com/JEschete/VS-NativePort/actions/runs/44134309733).
-F00830 remains blocked by #296. The final audit also records a separate,
+The final audit also records a separate,
 pre-existing 72-function slice-registration gap in #434; those functions
 are outside the requested 112. Neither #276 nor #296 is closed. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
-[promotion plan](ledgers/PROMOTION_PLAN.csv).
+[promotion plan](ledgers/PROMOTION_PLAN.csv). Older continuation entries below
+are historical snapshots; the current F00830 status above supersedes their
+blocker notes.
 
 ## Current status and next steps
 
-- Remaining by plan row: 30: 1 (F00830, blocked by #296), 39: 0, 47: 0,
+- Remaining by plan row: 30: 0, 39: 0, 47: 0,
   48: 0, 50: 0, 52: 0.
+  F00830 has local Debug/Release, replay, differential, copier and quality
+  evidence; scoped publication, exact-revision CI and #296 closure remain.
   The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -98,15 +104,24 @@ are outside the requested 112. Neither #276 nor #296 is closed. See
   records and actual runs. Reproduction and the explicit incomplete-parent
   result are in `build\scratch\final-index\audit_cohort.py`,
   `cohort-audit.log` and `cohort-receipt.json`.
-- F00830/#296 needs an evidenced climbing-hit contract before promotion.
-  The target path's visited-hit count (observed 1/3) is not the source
-  effect path's inherited `s4` (primary VM address or secondary next-instance
-  pointer). The consumer distinguishes a nonzero word from its narrowed
-  duration, so zero is not an evidenced equivalent. Next observation:
-  aligned reference climbing-hit behavior/reachability for the source path,
-  or an explicit owner decision for the typed native behavior. Do not
-  repeat unchanged probes, guess a blend constant or expose pointer bits
-  as the native API.
+- F00830/#296 is locally promoted under the owner's explicit decision:
+  source-impact climbing uses 0 blend frames for Ashley and 8 for other actors;
+  target-impact climbing retains the visited-hit count. The source-impact
+  correction is intentional native behavior, not proven PS1 equivalence.
+  The MIPS differential passes 4,096 vectors with zero mismatches; all six
+  instruction mutants and a broken native variant are detected. The shared
+  group `20261117-190123` passes 9,466 Debug and Release cases (12,979,717
+  assertions each), 15 focused cases (168 assertions), both canonical replays,
+  copier controls and changed-file quality with zero new findings. Promotion
+  ledgers and their sync/checks pass.
+  Switching the Live target damage/defense inputs from the existing
+  `rangeOrigin` to queued `focusPosition` caused both canonical replay hashes
+  to diverge; restoring `rangeOrigin` restored Debug and Release baselines.
+  The original F00062 caller's `focusPosition` mapping remains a known limit;
+  the target path was left unchanged under the owner's scope decision. Next:
+  commit and publish the scoped promotion, verify exact-revision CI, then close
+  #296 with the evidence. No gameplay, EC retirement or M8 completion is
+  claimed.
 - Map-terminal evidence (`VR-MENU-MAP-TERMINAL`): six original spans pass
   6,144 vectors, zero mismatches; 58 instruction mutants and six compiled
   native variants are detected. `group-20261117-113440` passes both builds,

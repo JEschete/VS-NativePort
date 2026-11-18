@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bit>
+#include <limits>
 
 #include "Actors/Skeleton.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -45,6 +46,21 @@ constexpr int kEnemyFinishMode = 3;
 constexpr int kEnemyFallbackBlendFrames = 16;
 constexpr int kEnemyTurnSteps = 8;
 constexpr std::uint8_t kFinishedCombatPose = 6;
+constexpr std::uint8_t kClimbingLocomotionState = 2;
+constexpr std::uint8_t kTeleportReactionState = 3;
+constexpr int kAshleyStandingHitAnimation = 0x44;
+constexpr int kAshleyFallingHitAnimation = 0x45;
+constexpr int kActorHitAnimation = 0x40;
+constexpr int kActorAlternateHitAnimation = 0x42;
+constexpr int kClimbingHitAnimation = 0x3B;
+constexpr int kActionPoseHitAnimation = 0x5B;
+constexpr int kAshleyBlendFrames = 0;
+constexpr int kOtherActorBlendFrames = 8;
+constexpr int kFacingHalfTurn = 0x800;
+constexpr int kFacingFullTurn = 0x1000;
+constexpr int kFacingDirectionBias = 0x200;
+constexpr std::uint32_t kFacingAlternateThreshold = 0x801;
+constexpr std::uint8_t kAnimationSetUnspecified = 0xFF;
 
 Vec3 Vector(Actors::MotionVector point) { return {point.x, point.y, point.z}; }
 
@@ -104,6 +120,99 @@ Result Melee(int slot, ActionAnimationActor& actor, int parameter,
   }
   world.Play(slot, animation, kMeleeBlendFrames);
   world.ResetHead(actor);
+  return Result::kComplete;
+}
+
+ActionAnimationResult DamageReaction(int slot, bool target_impact,
+                                     std::size_t visited_hit_count,
+                                     ActionReactionWorld& world) {
+  auto* actor = world.Actor(slot);
+  if (actor == nullptr) return Result::kComplete;
+  if (target_impact &&
+      visited_hit_count >
+          static_cast<std::size_t>(std::numeric_limits<int>::max())) {
+    return Result::kInvalidTargetHitCount;
+  }
+
+  int animation = kActionPoseHitAnimation;
+  if (!actor->ActionPoseActive()) {
+    const auto source = world.Target();
+    bool use_directional_animation = slot != 0;
+    if (slot == 0) {
+      int pitch = 0;
+      if (source) {
+        const auto position = actor->Position();
+        const auto delta_x = static_cast<std::int32_t>(source->x) - position.x;
+        const auto delta_z = static_cast<std::int32_t>(source->z) - position.z;
+        const auto horizontal_distance = Core::Math::SquareRootInteger(
+            WrappingAdd(AbsoluteSquare(delta_x), AbsoluteSquare(delta_z)));
+        const auto root_height = world.RootBoneHeight(actor->Slot());
+        if (!root_height) return Result::kMissingRootBone;
+        const auto current_source = world.Target();
+        if (!current_source) return Result::kMissingTarget;
+        pitch = Core::Math::Arctangent2(
+            static_cast<std::int32_t>(current_source->y) - *root_height,
+            horizontal_distance);
+      }
+      animation = pitch < kLowPitch ? kAshleyFallingHitAnimation
+                                    : kAshleyStandingHitAnimation;
+      use_directional_animation = pitch >= kLowPitch && pitch < kHighPitch;
+    }
+    if (use_directional_animation) {
+      std::int32_t source_facing_delta = 0;
+      if (source) {
+        const auto position = actor->Position();
+        const auto delta_x = static_cast<std::int32_t>(source->x) - position.x;
+        const auto delta_z = static_cast<std::int32_t>(source->z) - position.z;
+        const auto source_facing =
+            (delta_x == 0 && delta_z == 0)
+                ? actor->Facing()
+                : (0xC00 - Core::Math::Arctangent2(delta_z, delta_x)) & 0xFFF;
+        source_facing_delta = source_facing - actor->Facing();
+        if (source_facing_delta > kFacingHalfTurn) {
+          source_facing_delta -= kFacingFullTurn;
+        } else if (source_facing_delta < -kFacingHalfTurn) {
+          source_facing_delta += kFacingFullTurn;
+        }
+      }
+      const auto biased_facing_delta = static_cast<std::uint32_t>(
+          source_facing_delta + kFacingDirectionBias);
+      animation = biased_facing_delta >= kFacingAlternateThreshold
+                      ? kActorAlternateHitAnimation
+                      : kActorHitAnimation;
+    }
+  }
+
+  int blend_frames = 0;
+  if (actor->LocomotionState() == kClimbingLocomotionState) {
+    const auto support_layer = actor->SupportLayer();
+    if (support_layer != 0) {
+      world.ReleaseMovingPlatformActor(static_cast<int>(support_layer) - 2);
+      actor->ClearSupportLayer();
+    }
+    animation = kClimbingHitAnimation;
+    blend_frames = target_impact        ? static_cast<int>(visited_hit_count)
+                   : actor->Slot() == 0 ? kAshleyBlendFrames
+                                        : kOtherActorBlendFrames;
+  } else {
+    if (actor->ReactionState() == kTeleportReactionState) {
+      world.CancelTeleportTransition(*actor);
+    }
+    actor->SetTurnFrames(0);
+    if (actor->Slot() == 0) {
+      actor->ClearJumpCountdown();
+      actor->ClearLocomotionState();
+      actor->ClearMovementPending();
+      actor->ClearMovementMode();
+      blend_frames = kAshleyBlendFrames;
+    } else {
+      blend_frames = kOtherActorBlendFrames;
+    }
+  }
+  world.ClearMovementRequest(*actor);
+  actor->SetAnimationSet(kAnimationSetUnspecified);
+  world.Play(slot, animation, blend_frames);
+  world.ResetHead(*actor);
   return Result::kComplete;
 }
 }  // namespace
@@ -194,6 +303,19 @@ ActionAnimationResult SetEnemyCombatPose(int slot, int mode,
   world.Play(slot, animation, blend);
   if (mode < kEnemyFinishMode) actor->CopyPoseToBlend();
   return Result::kComplete;
+}
+
+// F00830: func_8009EA14, src/BATTLE/BATTLE.PRG/30DB0.c:2837.
+ActionAnimationResult PlayActorDamageReaction(int slot,
+                                              ActionReactionWorld& world) {
+  return DamageReaction(slot, false, 0, world);
+}
+
+// F00830 target-hit extension: F00062 supplies its number of visited hits.
+ActionAnimationResult PlayTargetDamageReaction(int slot,
+                                               std::size_t visited_hit_count,
+                                               ActionReactionWorld& world) {
+  return DamageReaction(slot, true, visited_hit_count, world);
 }
 
 // F00823: func_8009E2E0, src/BATTLE/BATTLE.PRG/30DB0.c:2554.

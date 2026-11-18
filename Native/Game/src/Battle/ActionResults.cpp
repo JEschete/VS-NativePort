@@ -220,15 +220,17 @@ void ApplyActionTargetEffects(int actor_id, ActionTargetEffects& effects) {
     return;
   }
   Reaction reaction = Reaction::kNone;
+  std::size_t visited_hit_count = 0;
   for (std::size_t index = 0; index < effects.HitCount(); ++index) {
     const ActionTargetHit hit = effects.Hit(index);
+    ++visited_hit_count;
     if (hit.targets_position || hit.target_actor != actor_id) continue;
     reaction = NextReaction(reaction, hit.impact_kind, effects);
     effects.ApplyHit(index);
   }
   switch (reaction) {
     case Reaction::kHit:
-      effects.PlayDamageReaction(actor_id);
+      effects.PlayDamageReaction(actor_id, visited_hit_count);
       break;
     case Reaction::kBlock:
       // Gimmick actors have no actor record. func_8009DDF4 has no NULL check:

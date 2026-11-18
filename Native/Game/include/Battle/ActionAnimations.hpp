@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 
@@ -17,7 +18,8 @@ enum class ActionAnimationResult : std::uint8_t {
   kInvalidChainAbility,
   kNegativeSquaredDistance,
   kMissingRootBone,
-  kMissingTarget
+  kMissingTarget,
+  kInvalidTargetHitCount
 };
 
 struct ActionAnimationPitch {
@@ -70,6 +72,14 @@ class ActionReactionActor : public ActionAnimationActor {
   virtual std::uint8_t AnimationId() const = 0;
   virtual void CopyPoseToBlend() = 0;
   virtual void SetPoseState(std::uint8_t state) = 0;
+  virtual bool ActionPoseActive() const = 0;
+  virtual std::uint8_t LocomotionState() const = 0;
+  virtual std::uint8_t SupportLayer() const = 0;
+  virtual std::uint8_t ReactionState() const = 0;
+  virtual void ClearLocomotionState() = 0;
+  virtual void ClearMovementPending() = 0;
+  virtual void ClearSupportLayer() = 0;
+  virtual void SetAnimationSet(std::uint8_t animation_set) = 0;
 };
 
 class ActionReactionWorld : public ActionAnimationWorld {
@@ -77,6 +87,9 @@ class ActionReactionWorld : public ActionAnimationWorld {
   ActionReactionActor* Actor(int slot) override = 0;
   virtual void TurnTo(int slot, std::int16_t facing, int rate) = 0;
   virtual void QueueImpactEffects(int slot) = 0;
+  virtual void ReleaseMovingPlatformActor(int platform) = 0;
+  virtual void CancelTeleportTransition(ActionReactionActor& actor) = 0;
+  virtual void ClearMovementRequest(ActionReactionActor& actor) = 0;
 };
 
 ActionAnimationResult PlayMeleeAttackAnimation(int slot, int parameter,
@@ -85,6 +98,11 @@ ActionAnimationResult PlayDefenseAnimation(int slot,
                                            ActionAnimationWorld& world);
 ActionAnimationResult SetEnemyCombatPose(int slot, int mode,
                                          ActionReactionWorld& world);
+ActionAnimationResult PlayActorDamageReaction(int slot,
+                                              ActionReactionWorld& world);
+ActionAnimationResult PlayTargetDamageReaction(int slot,
+                                               std::size_t visited_hit_count,
+                                               ActionReactionWorld& world);
 ActionAnimationResult PlaySpellCastAnimation(int slot, int phase,
                                              ActionAnimationWorld& world);
 ActionAnimationResult PlayChainAbilityAnimation(int slot, int ability,

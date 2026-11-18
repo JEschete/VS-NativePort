@@ -14,6 +14,95 @@ namespace b = VS::Battle;
 using t::Kind;
 using t::Result;
 
+TEST_CASE("F00830 source climbing reactions use the approved 0/8 blend",
+          "[action-animations][F00830]") {
+  for (const auto [input_slot, actor_slot, blend] :
+       {std::array{0, 0, 0}, std::array{16, 1, 8}}) {
+    t::World world;
+    world.actors.at(0).slot = static_cast<std::uint8_t>(actor_slot);
+    world.actors.at(0).flags |= 2U << 19;
+    world.actors.at(0).support_layer = 3;
+    if (input_slot == 0) world.target.reset();
+    REQUIRE(b::PlayActorDamageReaction(input_slot, world) == Result::kComplete);
+    const auto play = world.Calls(Kind::kPlay);
+    REQUIRE(play.size() == 1);
+    CHECK(play.front().first == 0x3B);
+    CHECK(play.front().third == static_cast<std::uint32_t>(blend));
+    CHECK(world.Calls(Kind::kPlatformRelease) ==
+          std::vector<t::Event>{{Kind::kPlatformRelease, 1, 0xFFFFFFFFU}});
+    CHECK(world.actors.at(0).support_layer == 0);
+    CHECK(world.actors.at(0).animation_set == 0xFF);
+  }
+}
+
+TEST_CASE("F00830 target climbing reactions preserve visited-hit blends",
+          "[action-animations][F00830]") {
+  for (const int visited_hit_count : {1, 3}) {
+    t::World world;
+    world.actors.at(0).slot = 1;
+    world.actors.at(0).flags |= 2U << 19;
+    REQUIRE(b::PlayTargetDamageReaction(16, visited_hit_count, world) ==
+            Result::kComplete);
+    const auto play = world.Calls(Kind::kPlay);
+    REQUIRE(play.size() == 1);
+    CHECK(play.front().first == 0x3B);
+    CHECK(play.front().third == static_cast<std::uint32_t>(visited_hit_count));
+  }
+}
+
+TEST_CASE("F00830 Ashley source hits keep the original directional branch",
+          "[action-animations][F00830]") {
+  for (const auto [target, animation] :
+       {std::pair{std::optional<VS::Actors::MotionVector>{}, 0x40},
+        std::pair{std::optional<VS::Actors::MotionVector>{
+                      VS::Actors::MotionVector{10, 0, 0, 0}},
+                  0x42}}) {
+    t::World world;
+    world.actors.at(0).slot = 0;
+    world.target = target;
+    REQUIRE(b::PlayActorDamageReaction(0, world) == Result::kComplete);
+    const auto play = world.Calls(Kind::kPlay);
+    REQUIRE(play.size() == 1);
+    CHECK(play.front().first == animation);
+  }
+}
+
+void ConfigureNonclimbingAshley(t::World& world) {
+  auto& actor = world.actors.at(0);
+  actor.slot = 0;
+  actor.flags =
+      (actor.flags & ~0x0F184000U) | (1U << 19) | (3U << 24) | (1U << 14);
+}
+
+TEST_CASE(
+    "F00830 Ashley target reactions use normal blend and clear locomotion",
+    "[action-animations][F00830]") {
+  t::World world;
+  auto& actor = world.actors.at(0);
+  ConfigureNonclimbingAshley(world);
+  REQUIRE(b::PlayTargetDamageReaction(16, 3, world) == Result::kComplete);
+  const auto play = world.Calls(Kind::kPlay);
+  REQUIRE(play.size() == 1);
+  CHECK(play.front().third == 0);
+  CHECK(actor.jump == 0);
+  CHECK((actor.flags & (3U << 19)) == 0);
+  CHECK((actor.flags & (1U << 14)) == 0);
+  CHECK(actor.animation_set == 0xFF);
+}
+
+TEST_CASE("F00830 Ashley target reactions cancel teleport and clear requests",
+          "[action-animations][F00830]") {
+  t::World world;
+  auto& actor = world.actors.at(0);
+  ConfigureNonclimbingAshley(world);
+  REQUIRE(b::PlayTargetDamageReaction(16, 3, world) == Result::kComplete);
+  CHECK(world.Calls(Kind::kTeleportCancel).size() == 1);
+  CHECK(actor.request_mode == 0);
+  CHECK(actor.request_direction == 0);
+  CHECK(actor.request_facing == 0);
+  CHECK(actor.request_distance == 0);
+}
+
 TEST_CASE("F00817 selects melee bands and the full-word special parameter",
           "[action-animations][F00817]") {
   std::vector<std::uint32_t> animations;

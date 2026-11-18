@@ -26,7 +26,9 @@ enum class Kind : std::uint32_t {
   kSide,
   kSpecialPitch,
   kTurn,
-  kImpact
+  kImpact,
+  kPlatformRelease,
+  kTeleportCancel
 };
 struct Event {
   Kind kind = Kind::kFacing;
@@ -53,6 +55,13 @@ struct Actor final : b::ActionReactionActor {
   std::uint8_t special_entries = 64;
   bool map_present = true;
   std::uint8_t animation = 0;
+  bool action_pose_active = false;
+  std::uint8_t support_layer = 0;
+  std::uint8_t animation_set = 0;
+  std::uint8_t request_mode = 1;
+  std::int16_t request_direction = 123;
+  std::int16_t request_facing = 456;
+  std::uint32_t request_distance = 789;
   std::array<std::uint32_t, kReactionPoseWords> pose{};
   std::array<std::uint32_t, kReactionPoseWords> blend_pose{};
 
@@ -78,6 +87,18 @@ struct Actor final : b::ActionReactionActor {
     flags =
         (flags & 0x8FFFFFFFU) | (static_cast<std::uint32_t>(state & 7U) << 28);
   }
+  bool ActionPoseActive() const override { return action_pose_active; }
+  std::uint8_t LocomotionState() const override {
+    return static_cast<std::uint8_t>((flags >> 19) & 3U);
+  }
+  std::uint8_t SupportLayer() const override { return support_layer; }
+  std::uint8_t ReactionState() const override {
+    return static_cast<std::uint8_t>((flags >> 24) & 0xFU);
+  }
+  void ClearLocomotionState() override { flags &= ~0x00180000U; }
+  void ClearMovementPending() override { flags &= ~0x00004000U; }
+  void ClearSupportLayer() override { support_layer = 0; }
+  void SetAnimationSet(std::uint8_t value) override { animation_set = value; }
 };
 
 class Banks final : public a::AnimationBankSource {
@@ -220,6 +241,20 @@ struct World final : b::ActionReactionWorld {
   void QueueImpactEffects(int slot) override {
     Record({Kind::kImpact, static_cast<std::uint32_t>(slot)});
   }
+  void ReleaseMovingPlatformActor(int platform) override {
+    Record({Kind::kPlatformRelease, static_cast<std::uint32_t>(platform),
+            0xFFFFFFFFU});
+  }
+  void CancelTeleportTransition(b::ActionReactionActor& actor) override {
+    Record({Kind::kTeleportCancel, static_cast<std::uint32_t>(Owner(actor))});
+  }
+  void ClearMovementRequest(b::ActionReactionActor& actor) override {
+    auto& record = actors.at(Owner(actor));
+    record.request_mode = record.Slot() == 0 ? 0 : 1;
+    record.request_direction = 0;
+    record.request_facing = 0;
+    record.request_distance = 0;
+  }
   std::vector<Event> Calls(Kind kind) const {
     std::vector<Event> result;
     for (const auto& event : events) {
@@ -325,6 +360,8 @@ inline Result Run(int function, int slot, int parameter, int sequence,
       return b::PlayDefenseAnimation(slot, world);
     case 819:
       return b::SetEnemyCombatPose(slot, parameter, world);
+    case 830:
+      return b::PlayActorDamageReaction(slot, world);
     case 823:
       return b::PlaySpellCastAnimation(slot, parameter, world);
     case 831:

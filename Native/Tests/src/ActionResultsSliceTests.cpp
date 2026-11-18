@@ -36,8 +36,10 @@ class RecordingEffects final : public battle::ActionTargetEffects {
   void ApplyHit(std::size_t index) override {
     calls.push_back("apply " + std::to_string(index));
   }
-  void PlayDamageReaction(int actor_id) override {
-    calls.push_back("damage " + std::to_string(actor_id));
+  void PlayDamageReaction(int actor_id,
+                          std::size_t visited_hit_count) override {
+    calls.push_back("damage " + std::to_string(actor_id) + " after " +
+                    std::to_string(visited_hit_count));
   }
   bool HasActorRecord(int /*actor_id*/) override { return has_record; }
   void PlayDefense(int actor_id) override {
@@ -82,12 +84,23 @@ TEST_CASE("Typed action target effects let hits and recovery override blocks",
                   HitOn(kTarget, kAlternateBlockImpact)};
   battle::ApplyActionTargetEffects(kTarget, effects);
   CHECK(effects.calls ==
-        Calls{"area", "apply 0", "apply 1", "apply 2", "damage 2"});
+        Calls{"area", "apply 0", "apply 1", "apply 2", "damage 2 after 3"});
 
   RecordingEffects recover;
   recover.hits = {HitOn(0, kHitImpact), HitOn(0, kRecoveryImpact)};
   battle::ApplyActionTargetEffects(0, recover);
   CHECK(recover.calls == Calls{"apply 0", "apply 1", "recover"});
+}
+
+TEST_CASE("Typed target reactions receive all hit records visited",
+          "[battle][action][typed]") {
+  RecordingEffects effects;
+  effects.hits = {HitOn(kOther, kHitImpact),
+                  HitOn(kTarget, kHitImpact),
+                  {.targets_position = true, .target_actor = kTarget},
+                  HitOn(kTarget, kNeutralImpact)};
+  battle::ApplyActionTargetEffects(kTarget, effects);
+  CHECK(effects.calls == Calls{"apply 1", "apply 3", "damage 2 after 4"});
 }
 
 TEST_CASE("Typed action target effects block only single-target actions",

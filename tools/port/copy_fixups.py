@@ -1088,6 +1088,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::LiveQueueEquipmentStatChange": r"Native\Game\include\Battle\FloatingLabelPlacementLive.hpp",
     "VS::Battle::LiveDrawEquipmentStatChange": r"Native\Game\include\Battle\FloatingLabelPlacementLive.hpp",
     "VS::Battle::LiveCommitEquipmentStatChanges": r"Native\Game\include\Battle\FloatingLabelPlacementLive.hpp",
+    "VS::Battle::PlayLiveActorDamageReaction": r"Native\Game\include\Battle\ActionAnimationsLive.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
        for name in (
@@ -2388,6 +2389,7 @@ OWNED_CALL_BINDINGS["F00725"] = "VS::Battle::LiveDrawActorStatusLabel"
 OWNED_CALL_BINDINGS["F00738"] = "VS::Battle::LiveQueueEquipmentStatChange"
 OWNED_CALL_BINDINGS["F00739"] = "VS::Battle::LiveDrawEquipmentStatChange"
 OWNED_CALL_BINDINGS["F00742"] = "VS::Battle::LiveCommitEquipmentStatChanges"
+OWNED_CALL_BINDINGS["F00830"] = "VS::Battle::PlayLiveActorDamageReaction"
 OWNED_CALL_BINDINGS["F00828"] = "Field_RefreshAshleyInteractionTileEntry"
 OWNED_CALL_BINDINGS["F00602"] = "Field_RoomTriggerAtTileEntry"
 OWNED_CALL_BINDINGS["F00616"] = "Field_SetRoomTriggerEnabledEntry"
@@ -4880,6 +4882,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x80096768, "VS::Battle::LiveQueueEquipmentStatChange"),  # F00738
     ("BATTLE/BATTLE.PRG", 0x8009695C, "VS::Battle::LiveDrawEquipmentStatChange"),  # F00739
     ("BATTLE/BATTLE.PRG", 0x800971D4, "VS::Battle::LiveCommitEquipmentStatChanges"),  # F00742
+    ("BATTLE/BATTLE.PRG", 0x8009EA14, "VS::Battle::PlayLiveActorDamageReaction"),  # F00830
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E

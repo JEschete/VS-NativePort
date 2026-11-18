@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorMovementLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/SkeletonLive.hpp"
@@ -19,6 +20,7 @@ extern "C" {
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionFlow.h"
 #include "Core/Diagnostics.h"
+#include "Field/PlatformPlacementLive.h"
 }
 
 namespace VS::Battle {
@@ -41,6 +43,8 @@ const char* Reason(ActionAnimationResult result) {
       return "root bone query produced no position";
     case ActionAnimationResult::kMissingTarget:
       return "used target owner disappeared";
+    case ActionAnimationResult::kInvalidTargetHitCount:
+      return "target hit traversal count exceeds the signed blend range";
   }
   return "unknown result";
 }
@@ -92,6 +96,24 @@ class LiveActor final : public ActionReactionActor {
   void CopyPoseToBlend() override { record_.blendPose = record_.pose; }
   void SetPoseState(std::uint8_t state) override {
     record_.instance.poseState = state;
+  }
+  bool ActionPoseActive() const override {
+    return record_.actionPoseActive != 0;
+  }
+  std::uint8_t LocomotionState() const override {
+    return record_.instance.locomotionState;
+  }
+  std::uint8_t SupportLayer() const override {
+    return record_.instance.supportLayer;
+  }
+  std::uint8_t ReactionState() const override {
+    return record_.instance.reactionState;
+  }
+  void ClearLocomotionState() override { record_.instance.locomotionState = 0; }
+  void ClearMovementPending() override { record_.instance.movementPending = 0; }
+  void ClearSupportLayer() override { record_.instance.supportLayer = 0; }
+  void SetAnimationSet(std::uint8_t animation_set) override {
+    record_.animationSet = animation_set;
   }
 
  private:
@@ -163,6 +185,19 @@ class LiveWorld final : public ActionReactionWorld {
     Require(Battle_actionState != nullptr);
     static_cast<void>(VS::Effects::LiveQueueActionImpactEffects(slot));
   }
+  void ReleaseMovingPlatformActor(int platform) override {
+    static_cast<void>(Field_SetMovingPlatformActorEntry(platform, -1));
+  }
+  void CancelTeleportTransition(ActionReactionActor& actor) override {
+    auto& live_actor = static_cast<LiveActor&>(actor);
+    auto& record = live_actor.Record();
+    Actors::CancelLiveActorTeleportTransition(&record);
+  }
+  void ClearMovementRequest(ActionReactionActor& actor) override {
+    auto& live_actor = static_cast<LiveActor&>(actor);
+    auto& record = live_actor.Record();
+    Actors::ClearLiveActorMovementRequest(&record);
+  }
 
  private:
   SVECTOR* target_;
@@ -185,6 +220,16 @@ void PlayLiveDefenseAnimation(int slot, SVECTOR* target) {
 void SetLiveEnemyCombatPose(int slot, int mode) {
   LiveWorld world(nullptr);
   Require(SetEnemyCombatPose(slot, mode, world));
+}
+// F00830 source-impact entry preserves the original two-argument module ABI.
+void PlayLiveActorDamageReaction(int slot, SVECTOR* source_position) {
+  LiveWorld world(source_position);
+  Require(PlayActorDamageReaction(slot, world));
+}
+void PlayLiveTargetDamageReaction(int slot, SVECTOR* source_position,
+                                  std::size_t visited_hit_count) {
+  LiveWorld world(source_position);
+  Require(PlayTargetDamageReaction(slot, visited_hit_count, world));
 }
 // F00823: func_8009E2E0, src/BATTLE/BATTLE.PRG/30DB0.c:2554.
 void PlayLiveSpellCastAnimation(int slot, SVECTOR* target, int phase) {

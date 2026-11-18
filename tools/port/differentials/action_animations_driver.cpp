@@ -9,6 +9,10 @@ bool Reaction(int function)
 {
     return function == 819 || function == 832 || function == 891;
 }
+bool DamageReaction(int function)
+{
+    return function == 830;
+}
 std::int64_t Read()
 {
     std::int64_t value { };
@@ -88,6 +92,21 @@ int main()
         world.target = target_present ? std::optional { point } : std::nullopt;
         for (auto& actor : world.actors)
             ReadActor(actor);
+        bool target_impact = false;
+        int visited_hit_count = 0;
+        if (DamageReaction(function)) {
+            target_impact = Read() != 0;
+            visited_hit_count = static_cast<int>(Read());
+            for (auto& actor : world.actors) {
+                actor.action_pose_active = Read() != 0;
+                actor.support_layer = static_cast<std::uint8_t>(Read());
+                actor.animation_set = static_cast<std::uint8_t>(Read());
+                actor.request_mode = static_cast<std::uint8_t>(Read());
+                actor.request_direction = static_cast<std::int16_t>(Read());
+                actor.request_facing = static_cast<std::int16_t>(Read());
+                actor.request_distance = static_cast<std::uint32_t>(Read());
+            }
+        }
         if (Reaction(function)) {
             for (auto& actor : world.actors) {
                 actor.animation = static_cast<std::uint8_t>(Read());
@@ -99,13 +118,29 @@ int main()
         }
         if (!std::cin)
             return 2;
-        const auto result = t::Run(function, slot, parameter, sequence, world);
+        const auto result = DamageReaction(function)
+            ? target_impact
+                ? VS::Battle::PlayTargetDamageReaction(
+                      slot, static_cast<std::size_t>(visited_hit_count), world)
+                : VS::Battle::PlayActorDamageReaction(slot, world)
+            : t::Run(function, slot, parameter, sequence, world);
         std::cout << static_cast<int>(result);
         Emit(static_cast<std::uint32_t>(world.table_owner + 1));
         Emit(world.side);
         Emit(world.special_pitch);
         for (const auto& actor : world.actors)
             EmitActor(actor);
+        if (DamageReaction(function)) {
+            for (const auto& actor : world.actors) {
+                Emit(actor.action_pose_active ? 1U : 0U);
+                Emit(actor.support_layer);
+                Emit(actor.animation_set);
+                Emit(actor.request_mode);
+                Emit(static_cast<std::uint16_t>(actor.request_direction));
+                Emit(static_cast<std::uint16_t>(actor.request_facing));
+                Emit(actor.request_distance);
+            }
+        }
         const auto target = world.target.value_or(point);
         for (const auto value : { target.x, target.y, target.z, target.w }) {
             Emit(static_cast<std::uint16_t>(value));

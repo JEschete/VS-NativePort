@@ -93,8 +93,10 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
     ApplyLiveActorActionResult(hit);
   }
 
-  void PlayDamageReaction(int actor_id) override {
-    Battle_PlayActorDamageReaction(actor_id, &Battle_actionState->rangeOrigin);
+  void PlayDamageReaction(int actor_id,
+                          std::size_t visited_hit_count) override {
+    PlayLiveTargetDamageReaction(actor_id, &Battle_actionState->rangeOrigin,
+                                 visited_hit_count);
   }
 
   bool HasActorRecord(int actor_id) override {

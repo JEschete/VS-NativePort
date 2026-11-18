@@ -39,8 +39,9 @@ class ActionTargetEffects {
   [[nodiscard]] virtual bool IsAreaAction() = 0;
   // Applies one matching hit to its actor (_applyBattleAbilityEffect).
   virtual void ApplyHit(std::size_t index) = 0;
-  // Plays the damage reaction toward the action origin (func_8009EA14).
-  virtual void PlayDamageReaction(int actor_id) = 0;
+  // Plays the reaction with the number of hit records visited by func_8006CB04.
+  virtual void PlayDamageReaction(int actor_id,
+                                  std::size_t visited_hit_count) = 0;
   [[nodiscard]] virtual bool HasActorRecord(int actor_id) = 0;
   // Plays the defense animation toward the action origin (func_8009DDF4).
   virtual void PlayDefense(int actor_id) = 0;

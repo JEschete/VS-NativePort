@@ -10,6 +10,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionOutcomes.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -89,7 +90,7 @@ class LiveAction final : public ActionOutcomeAction {
     return Hit(action_.primaryTarget);
   }
   void DamageReaction(int actor) override {
-    Battle_PlayActorDamageReaction(actor, &action_.focusPosition);
+    PlayLiveActorDamageReaction(actor, &action_.focusPosition);
   }
   void ApplyPrimaryResult() override {
     ApplyLiveActorActionResult(&action_.primaryTarget);
