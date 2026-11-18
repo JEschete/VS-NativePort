@@ -1,14 +1,19 @@
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
 #include <format>
+#include <fstream>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <span>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -16,6 +21,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/CdDriveLive.hpp"
+#include "Content/DataStore.hpp"
+#include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -364,6 +371,9 @@ class FakeHelpHost final : public manual::HelpPagesHost {
   }
   void ReleaseHelpFile(HelpFile file) override {
     events.push_back(std::format("release:{}", Name(file)));
+  }
+  void CancelHelpFile(HelpFile file) override {
+    events.push_back(std::format("cancel:{}", Name(file)));
   }
   [[nodiscard]] std::optional<HelpAssetHeader> HelpAssets() const override {
     return header;
@@ -1282,17 +1292,19 @@ TEST_CASE("F04163 LiveUpdateHelpPages refuses missing requests and uploads",
   LiveManualFixture fixture;
   Menu_Manual_showMenuState = manual::kHelpLoadAssets;
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
+  // A missing request can never load: the topic is abandoned (#408).
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_showMenuState == manual::kHelpLoadAssets);
-  CHECK(manual::LiveManualScreenRefusalCount() == refusals + 1);
+  CHECK(Menu_Manual_showMenuState == manual::kHelpListTopics);
+  CHECK(manual::LiveManualScreenRefusalCount() == refusals + 2);
 
   // A header whose tiles run past the buffer: the CLUT upload is refused.
   const std::array<std::uint8_t, 16> assets{1, 0, 0, 0, 1, 0, 0, 0};
   Menu_Manual_helpAssets = LiveManualFixture::Payload<u_long>(assets);
   Menu_Manual_helpAssetsCdQueue = LiveManualFixture::LoadedRequest();
+  Menu_Manual_showMenuState = manual::kHelpLoadAssets;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(Menu_Manual_showMenuState == manual::kHelpLoadText);
-  CHECK(manual::LiveManualScreenRefusalCount() == refusals + 2);
+  CHECK(manual::LiveManualScreenRefusalCount() == refusals + 3);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages opens the loaded text where it was left",
@@ -1381,5 +1393,142 @@ TEST_CASE("F04163 LiveUpdateHelpPages frees both buffers and keeps them",
   CHECK(Menu_Manual_helpAssets == assets);
   CHECK(VS::Render::LiveTexturePages()[0x1F].state ==
         VS::Render::TexturePageState::kRetiring);
+}
+
+// #408: the original waits on a failed help read forever (494.c:308-311 and
+// 322-325). Native cancels the topic's outstanding reads, frees both buffers
+// and lists the topics again.
+TEST_CASE("F04163 UpdateHelpPages returns to the topics when the assets fail",
+          "[manual-screen]") {
+  FakeHelpHost host;
+  HelpPagesState state{.step = manual::kHelpLoadAssets};
+  host.held = {true, true};
+  host.file_states = {manual::kHelpFileFailed, 3};
+  CHECK(manual::UpdateHelpPages(host, state) == 0);
+  CHECK(host.events == Events{"cancel:assets", "release:assets", "free:assets",
+                              "forget:assets", "cancel:text", "release:text",
+                              "free:text", "forget:text"});
+  CHECK(host.refusals ==
+        std::vector<std::string>{"Manual help file failed to load"});
+  CHECK(state.step == manual::kHelpListTopics);
+  CHECK(host.held == std::array<bool, 2>{false, false});
+
+  host.events.clear();
+  CHECK(manual::UpdateHelpPages(host, state) == 0);
+  CHECK(host.events == Events{"info", "topics:1"});
+  CHECK(state.step == manual::kHelpSelectTopic);
+}
+
+TEST_CASE("F04163 UpdateHelpPages returns to the topics when the text fails",
+          "[manual-screen]") {
+  FakeHelpHost host;
+  HelpPagesState state{.step = manual::kHelpLoadText,
+                       .scroll = 99,
+                       .line_count = 99,
+                       .arrow_frame = 5,
+                       .load_counter = 6};
+  host.held = {false, true};
+  host.file_states = {0, manual::kHelpFileFailed};
+  CHECK(manual::UpdateHelpPages(host, state) == 0);
+  CHECK(host.events ==
+        Events{"cancel:text", "release:text", "free:text", "forget:text"});
+  CHECK(host.refusals ==
+        std::vector<std::string>{"Manual help file failed to load"});
+  CHECK(state == HelpPagesState{.step = manual::kHelpListTopics,
+                                .scroll = 99,
+                                .line_count = 99,
+                                .arrow_frame = 5,
+                                .load_counter = 6});
+  CHECK(host.held == std::array<bool, 2>{false, false});
+}
+
+// Extracted data that lists the first topic's help files without holding
+// them, and a game heap large enough for both buffers.
+struct MissingHelpFiles {
+  struct alignas(VS::Core::Memory::kHeapUnitBytes) Arena {
+    std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 4096> bytes{};
+  };
+  VS::Content::DataStore::ScopedOverride store;
+  Content_DiscDrive saved_drive = Content_discDriveState;
+  std::unique_ptr<Arena> arena = std::make_unique<Arena>();
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena->bytes};
+  std::filesystem::path root =
+      std::filesystem::temp_directory_path() /
+      std::format("vs-missing-help-{}",
+                  std::chrono::steady_clock::now().time_since_epoch().count());
+
+  MissingHelpFiles() {
+    std::filesystem::create_directories(root / "disc");
+    std::ofstream manifest(root / VS::Content::DataStore::ManifestName);
+    manifest << "lba\tsize\tform\tpath\n";
+    for (const auto file : {HelpFile::kAssets, HelpFile::kText}) {
+      const Content_DiscFile& listed =
+          Menu_Manual_kHelpFileCdFiles[static_cast<std::size_t>(file)];
+      manifest << listed.lba << '\t' << listed.size << "\traw\tSMALL/MISSING"
+               << static_cast<int>(file) << ".BIN\n";
+    }
+    manifest.close();
+    REQUIRE(manifest.good());
+    REQUIRE(VS::Content::DataStore::Open(root).has_value());
+    VS::Content::ResetLiveDiscDrive();
+    VS::Content::InitializeLiveDiscQueue();
+  }
+  MissingHelpFiles(const MissingHelpFiles&) = delete;
+  MissingHelpFiles& operator=(const MissingHelpFiles&) = delete;
+  MissingHelpFiles(MissingHelpFiles&&) = delete;
+  MissingHelpFiles& operator=(MissingHelpFiles&&) = delete;
+  ~MissingHelpFiles() noexcept(false) {
+    VS::Content::ResetLiveDiscDrive();
+    Content_discDriveState = saved_drive;
+    std::error_code error;
+    std::filesystem::remove_all(root, error);
+  }
+};
+
+// The topic's reads are cancelled, its requests and buffers released, and the
+// topic list shown again after one refusal.
+void CheckTopicAbandoned(const int* text, const u_long* assets,
+                         std::uint64_t refusals) {
+  CHECK(Menu_Manual_showMenuState == manual::kHelpListTopics);
+  CHECK(manual::LiveManualScreenRefusalCount() == refusals + 1);
+  CHECK(Menu_Manual_helpText == nullptr);
+  CHECK(Menu_Manual_helpAssets == nullptr);
+  CHECK(Menu_Manual_helpTextCdQueue == nullptr);
+  CHECK(Menu_Manual_helpAssetsCdQueue == nullptr);
+  CHECK(Freed(text));
+  CHECK(Freed(assets));
+  CHECK(std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
+    return slot.state == Content_DiscRequestState_Free;
+  }));
+}
+
+TEST_CASE(
+    "F04163 LiveUpdateHelpPages returns to the topics when a help file is "
+    "missing",
+    "[manual-screen-live]") {
+  LiveManualFixture fixture;
+  MissingHelpFiles missing;
+  Menu_Manual_showMenuState = manual::kHelpSelectTopic;
+  Menu_Manual_topMenuState = manual::kTopicStepSelectRow;
+  Menu_Framework_selectedRow = 0;
+  CHECK(manual::LiveUpdateHelpPages() == 0);
+  REQUIRE(Menu_Manual_showMenuState == manual::kHelpLoadAssets);
+  int* const text = Menu_Manual_helpText;
+  u_long* const assets = Menu_Manual_helpAssets;
+  REQUIRE(text != nullptr);
+  REQUIRE(assets != nullptr);
+  REQUIRE(Menu_Manual_helpTextCdQueue != nullptr);
+  REQUIRE(Menu_Manual_helpAssetsCdQueue != nullptr);
+  const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
+
+  // Without the native return, the pages wait in kHelpLoadAssets for good.
+  constexpr int kFrameBudget = 120;
+  for (int frame = 0; frame < kFrameBudget &&
+                      Menu_Manual_showMenuState == manual::kHelpLoadAssets;
+       ++frame) {
+    VS::Content::UpdateLiveDiscQueue();
+    CHECK(manual::LiveUpdateHelpPages() == 0);
+  }
+  CheckTopicAbandoned(text, assets, refusals);
 }
 }  // namespace

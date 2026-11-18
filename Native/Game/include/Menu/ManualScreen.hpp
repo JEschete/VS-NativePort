@@ -127,6 +127,9 @@ inline constexpr std::int32_t kHelpTexturePageOwner = 5;
 inline constexpr std::int32_t kHelpBackgroundLayer = 2046;
 // vs_main_CdQueueStateLoaded.
 inline constexpr std::int16_t kHelpFileLoaded = 4;
+// The disc queue's error state: the read failed or was cancelled, and the
+// request never reaches kHelpFileLoaded.
+inline constexpr std::int16_t kHelpFileFailed = 6;
 // The asset file: a sprite tile count and a CLUT count, then the tiles (128
 // bytes each) and the CLUTs.
 inline constexpr std::uint32_t kHelpAssetHeaderBytes = 8;
@@ -297,6 +300,9 @@ class HelpPagesHost {
   virtual void RequestHelpFile(HelpFile file, std::int32_t topic) = 0;
   [[nodiscard]] virtual std::int16_t HelpFileState(HelpFile file) const = 0;
   virtual void ReleaseHelpFile(HelpFile file) = 0;
+  // Native: stops a pending read into the file's buffer so the buffer can be
+  // freed. The original has no such step; it never abandons a help read.
+  virtual void CancelHelpFile(HelpFile file) = 0;
   // The loaded asset file's header, or nothing when there is no asset
   // buffer to read it from.
   [[nodiscard]] virtual std::optional<HelpAssetHeader> HelpAssets() const = 0;
@@ -348,7 +354,10 @@ class HelpPagesHost {
 // buffers and texture pages), else 0. A topic past the help files is
 // refused and leaves for the menu; a shown topic past the scroll memories
 // is refused and pages from the top without remembering its position; a
-// loaded asset file without a buffer is refused and uploads nothing.
+// loaded asset file without a buffer is refused and uploads nothing. A help
+// read that fails is refused: the topic's outstanding reads are cancelled,
+// their buffers freed and the topic list shown again (the original waits for
+// it forever, #408).
 [[nodiscard]] std::int32_t UpdateHelpPages(HelpPagesHost& host,
                                            HelpPagesState& state);
 }  // namespace VS::Menu::manual

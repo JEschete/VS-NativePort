@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <format>
+#include <initializer_list>
 #include <string_view>
 
 #include "Core/Math/ScalarMath.hpp"
@@ -70,10 +71,31 @@ void SelectTopic(HelpPagesHost& host, HelpPagesState& state) {
   host.DismissInformationBox();
 }
 
-// _showMenu's loadSubMenu step. A failed read keeps waiting, as the original
-// does.
+// _showMenu's loadSubMenu and initSubMenu steps wait for the loaded state
+// (494.c:308-311 and 322-325); a failed read never reaches it, so the
+// original waits forever with no way out. Native cancels the topic's
+// outstanding reads, frees their buffers and shows the topic list again, as
+// leaving a page does (#408).
+void AbandonTopic(HelpPagesHost& host, HelpPagesState& state,
+                  std::initializer_list<HelpFile> pending) {
+  host.Refuse("Manual help file failed to load");
+  for (const HelpFile file : pending) {
+    host.CancelHelpFile(file);
+    host.ReleaseHelpFile(file);
+    FreeHeldBuffer(host, file);
+    host.ForgetHelpBuffer(file);
+  }
+  state.step = kHelpListTopics;
+}
+
+// _showMenu's loadSubMenu step.
 void LoadAssets(HelpPagesHost& host, HelpPagesState& state) {
-  if (host.HelpFileState(HelpFile::kAssets) != kHelpFileLoaded) {
+  const std::int16_t assets = host.HelpFileState(HelpFile::kAssets);
+  if (assets == kHelpFileFailed) {
+    AbandonTopic(host, state, {HelpFile::kAssets, HelpFile::kText});
+    return;
+  }
+  if (assets != kHelpFileLoaded) {
     return;
   }
   host.ReleaseHelpFile(HelpFile::kAssets);
@@ -92,10 +114,14 @@ void LoadAssets(HelpPagesHost& host, HelpPagesState& state) {
   state.step = kHelpLoadText;
 }
 
-// _showMenu's initSubMenu step. A failed read keeps waiting, as the original
-// does.
+// _showMenu's initSubMenu step.
 void LoadText(HelpPagesHost& host, HelpPagesState& state) {
-  if (host.HelpFileState(HelpFile::kText) != kHelpFileLoaded) {
+  const std::int16_t text = host.HelpFileState(HelpFile::kText);
+  if (text == kHelpFileFailed) {
+    AbandonTopic(host, state, {HelpFile::kText});
+    return;
+  }
+  if (text != kHelpFileLoaded) {
     return;
   }
   host.ReleaseHelpFile(HelpFile::kText);

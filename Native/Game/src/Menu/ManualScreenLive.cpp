@@ -43,6 +43,7 @@ extern "C" {
 namespace VS::Menu::manual {
 namespace {
 static_assert(kHelpFileLoaded == Content_DiscRequestState_Loaded);
+static_assert(kHelpFileFailed == Content_DiscRequestState_Error);
 static_assert(kSquareButtonIcon == Menu_Framework_ButtonId_Square);
 static_assert(kCircleButtonIcon == Menu_Framework_ButtonId_Circle);
 static_assert(kNoMenuItem == Menu_Framework_MenuItemId_None);
@@ -243,11 +244,13 @@ class LiveHelpPagesHost final : public HelpPagesHost {
           Content::CompleteLiveRefusedDiscRequest(&disc_file, HelpBuffer(file));
     }
   }
+  // A missing request can never load, so it reads as failed and the core
+  // returns to the topic list.
   [[nodiscard]] std::int16_t HelpFileState(HelpFile file) const override {
     const Content_DiscQueueSlot* const request = HelpRequest(file);
     if (request == nullptr) {
       RefuseLive("Manual help file has no disc request");
-      return Content_DiscRequestState_Free;
+      return Content_DiscRequestState_Error;
     }
     return request->state;
   }
@@ -257,6 +260,18 @@ class LiveHelpPagesHost final : public HelpPagesHost {
     Content_DiscQueueSlot*& request = HelpRequest(file);
     Content::ReleaseLiveDiscRequest(request);
     request = nullptr;
+  }
+  void CancelHelpFile(HelpFile file) override {
+    void* const buffer = HelpBuffer(file);
+    if (buffer == nullptr) {
+      return;
+    }
+    const auto bytes = Core::Memory::LivePayloadCapacity(buffer);
+    if (!bytes || *bytes == 0 ||
+        !Content::CancelLiveDiscWrites(
+            {static_cast<std::byte*>(buffer), *bytes})) {
+      RefuseLive("Manual help read could not be cancelled");
+    }
   }
   [[nodiscard]] std::optional<HelpAssetHeader> HelpAssets() const override {
     const std::optional<std::size_t> bytes = HelpAssetBytes();
