@@ -4,6 +4,11 @@
 // backslash paths, which its glob matcher does not match on Windows.
 "use strict";
 
+// jscpd's in-memory store rejects every hash lookup miss with a new Error.
+// Capturing a stack for each one dominated the run; the errors are only
+// control flow, so skip the capture.
+Error.stackTraceLimit = 0;
+
 const fs = require("fs");
 const path = require("path");
 

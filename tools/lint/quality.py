@@ -14,8 +14,10 @@ import runpy
 import shutil
 import subprocess
 import sys
+import time
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
@@ -31,6 +33,11 @@ SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx"}
 INCLUDE_DIRECTIVE = re.compile(r'^[ \t]*#[ \t]*include[ \t]*[<"]([^">]+)[">]', re.M)
 TIDY_TIMEOUT = 600
 CLONE_TIMEOUT = 600
+CPPLINT_BATCH = 30
+# The clone scan is one single-threaded process; leave it a processor while
+# per-file formatter and cpplint processes share the rest.
+WORKERS = max(1, (os.cpu_count() or 1) - 1)
+BACKGROUND_CHECKS = ("clones",)
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
     "Native/Engine/include/Core/Gte.h": "EC-03",
@@ -175,58 +182,65 @@ def finding(tool: str, rule: str, path: str, line: int, message: str) -> Finding
     return Finding(tool, rule, path, line, message, context)
 
 
+def format_finding(executable: str, path: str) -> Finding | None:
+    text = run([executable, "--style=file", "--output-replacements-xml", path])
+    replacements = ET.fromstring(text)
+    if replacements.get("incomplete_format") == "true":
+        raise RuntimeError(f"clang-format could not parse {path}")
+    if not replacements.findall("replacement"):
+        return None
+    normalized = (ROOT / path).read_text(encoding="utf-8-sig").replace("\r\n", "\n")
+    digest = hashlib.sha256(normalized.encode()).hexdigest()
+    return Finding("format", "google", path, 1, "Google formatting required", digest)
+
+
 def check_format(files: list[str]) -> list[Finding]:
     executable = llvm_tool("clang-format")
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        results = list(pool.map(lambda path: format_finding(executable, path), files))
+    return [item for item in results if item]
+
+
+CPPLINT_LINE = re.compile(r"^(.*?):(\d+):\s+(.*?)\s+\[([^]]+)\]\s+\[\d+\]$")
+
+
+def cpplint_batch(files: list[str]) -> list[Finding]:
+    text = run(
+        [
+            sys.executable,
+            "-m",
+            "cpplint",
+            "--extensions=c,cc,cpp,cxx,h,hpp,hxx,inl",
+            *files,
+        ],
+        allowed=(0, 1),
+    )
     findings = []
-    for path in files:
-        text = run([executable, "--style=file", "--output-replacements-xml", path])
-        replacements = ET.fromstring(text)
-        if replacements.get("incomplete_format") == "true":
-            raise RuntimeError(f"clang-format could not parse {path}")
-        if replacements.findall("replacement"):
-            normalized = (
-                (ROOT / path).read_text(encoding="utf-8-sig").replace("\r\n", "\n")
-            )
-            digest = hashlib.sha256(normalized.encode()).hexdigest()
+    for line in text.splitlines():
+        match = CPPLINT_LINE.match(line)
+        if match:
+            path, number, message, rule = match.groups()
             findings.append(
-                Finding(
-                    "format", "google", path, 1, "Google formatting required", digest
-                )
+                finding("cpplint", rule, relative(path), int(number), message)
             )
+    reported = re.search(r"Total errors found:\s*(\d+)", text)
+    if reported and int(reported[1]) != len(findings):
+        raise RuntimeError(f"cpplint errors could not be parsed:\n{text[-4000:]}")
+    if text.count("Done processing ") != len(files):
+        raise RuntimeError(
+            f"cpplint did not process every requested file:\n{text[-4000:]}"
+        )
     return findings
 
 
 def check_cpplint(files: list[str]) -> list[Finding]:
-    findings = []
-    pattern = re.compile(r"^(.*?):(\d+):\s+(.*?)\s+\[([^]]+)\]\s+\[\d+\]$")
-    for start in range(0, len(files), 30):
-        text = run(
-            [
-                sys.executable,
-                "-m",
-                "cpplint",
-                "--extensions=c,cc,cpp,cxx,h,hpp,hxx,inl",
-                *files[start : start + 30],
-            ],
-            allowed=(0, 1),
-        )
-        parsed = 0
-        for line in text.splitlines():
-            match = pattern.match(line)
-            if match:
-                parsed += 1
-                path, number, message, rule = match.groups()
-                findings.append(
-                    finding("cpplint", rule, relative(path), int(number), message)
-                )
-        reported = re.search(r"Total errors found:\s*(\d+)", text)
-        if reported and int(reported[1]) != parsed:
-            raise RuntimeError(f"cpplint errors could not be parsed:\n{text[-4000:]}")
-        if text.count("Done processing ") != len(files[start : start + 30]):
-            raise RuntimeError(
-                f"cpplint did not process every requested file:\n{text[-4000:]}"
-            )
-    return findings
+    batches = [
+        files[start : start + CPPLINT_BATCH]
+        for start in range(0, len(files), CPPLINT_BATCH)
+    ]
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        results = list(pool.map(cpplint_batch, batches))
+    return [item for found in results for item in found]
 
 
 def check_ruff(files: list[str]) -> list[Finding]:
@@ -687,6 +701,38 @@ def inapplicable_cpp_header_advice(item: Finding) -> bool:
     )
 
 
+def run_checks(checks: dict[str, Callable[[], list[Finding]]]) -> list[Finding]:
+    """Run every check, overlapping background scans with the others.
+
+    Findings keep the order of `checks`, so the report does not depend on
+    which check finished first.
+    """
+    results: dict[str, list[Finding]] = {}
+
+    def timed(name: str) -> tuple[list[Finding], float]:
+        started = time.perf_counter()
+        return checks[name](), time.perf_counter() - started
+
+    with ThreadPoolExecutor(max_workers=len(BACKGROUND_CHECKS)) as background:
+        pending = {
+            name: background.submit(timed, name)
+            for name in checks
+            if name in BACKGROUND_CHECKS
+        }
+        if pending:
+            print(f"Checking {', '.join(pending)} in the background...", flush=True)
+        for name in checks:
+            if name in pending:
+                continue
+            print(f"Checking {name}...", flush=True)
+            results[name], seconds = timed(name)
+            print(f"  {len(results[name])} findings ({seconds:.1f} s)", flush=True)
+        for name, future in pending.items():
+            results[name], seconds = future.result()
+            print(f"  {name}: {len(results[name])} findings ({seconds:.1f} s)", flush=True)
+    return [item for name in checks for item in results[name]]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -758,13 +804,7 @@ def main() -> int:
         checks["tidy"] = lambda: check_tidy(
             tidy_sources(native, selected), scope, args.jobs
         )
-    findings = []
-    for name, check in checks.items():
-        print(f"Checking {name}...", flush=True)
-        found = check()
-        print(f"  {len(found)} findings", flush=True)
-        findings.extend(found)
-    findings = deduplicate_findings(findings)
+    findings = deduplicate_findings(run_checks(checks))
     fixtures = [item for item in findings if intentional_test_fixture(item)]
     findings = [item for item in findings if not intentional_test_fixture(item)]
     replacement_style = [item for item in findings if deferred_replacement_style(item)]

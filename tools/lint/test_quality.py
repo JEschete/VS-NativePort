@@ -8,6 +8,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -451,6 +452,31 @@ class ToolControlTests(unittest.TestCase):
         )
         (quality.ROOT / path).write_text(formatted, encoding="utf-8")
         self.assertEqual(quality.check_format([path]), [])
+
+    def test_parallel_cpplint_batches_all_report_in_file_order(self) -> None:
+        content = "namespace quality_control {\nint Add(int left,int right){return left+right;}\n}\n"
+        paths = [self.source(f"batch_{index}.cc", content) for index in range(3)]
+        with patch.object(quality, "CPPLINT_BATCH", 1):
+            findings = quality.check_cpplint(paths)
+        reported = list(dict.fromkeys(item.path for item in findings))
+        self.assertEqual(reported, paths)
+
+    def test_background_scans_overlap_and_keep_check_order(self) -> None:
+        foreground_ran = threading.Event()
+
+        def clones() -> list[quality.Finding]:
+            # Fails unless the foreground check runs while this scan waits.
+            if not foreground_ran.wait(10):
+                raise AssertionError("background scan did not overlap")
+            return [quality.Finding("clones", "cpp", "b.cpp", 1, "clone", "")]
+
+        def formatting() -> list[quality.Finding]:
+            foreground_ran.set()
+            return [quality.Finding("format", "google", "a.cpp", 1, "format", "")]
+
+        with redirect_stdout(io.StringIO()):
+            findings = quality.run_checks({"clones": clones, "format": formatting})
+        self.assertEqual([item.tool for item in findings], ["clones", "format"])
 
     def test_catch2_checks_do_not_request_logging_check_macros(self) -> None:
         with tempfile.TemporaryDirectory(

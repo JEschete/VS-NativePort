@@ -48,8 +48,10 @@ quality-native.cmd --files Native/Engine/src/Core/FrameClock.cpp --tidy
 quality-native.cmd --tidy
 ```
 
-The default command runs formatting, cpplint, Ruff, and clone detection. `--tidy`
-adds compilation-based analysis. A header change analyzes the owned translation
+The default command runs formatting, cpplint, Ruff, and clone detection. Formatting
+and cpplint batches run on a worker pool (one fewer than the logical processors)
+while clone detection runs in the background; the report keeps the serial check
+and file order. `--tidy` adds compilation-based analysis. A header change analyzes the owned translation
 units that include it directly or transitively (resolved over all native sources,
 including copied ones); ambiguous include names over-select rather than skip.
 Translation units run in parallel; `--jobs N` limits the worker count (default:
@@ -80,15 +82,18 @@ gh run watch <run-id> --exit-status
 
 Check that `headSha` is the intended published revision before using the result
 to close an issue. A previous revision's passing run is not a substitute.
-Manual dispatch uses the same Windows job, permissions and quality baselines
-as the automatic triggers.
+Manual dispatch uses the same Windows jobs, permissions and quality baselines
+as the automatic triggers. The workflow has two parallel jobs: **Tool and ledger
+controls** (tool tests, ledger gates and the regression baseline) and **Source
+quality** (the quality positive controls and the full quality pass). A run is
+green only when both jobs pass.
 
 Each `run:` step holds exactly one command. A multi-line PowerShell step reports
 only the last native command's exit code, so an earlier failing check was reported
 as success (#333). `tools/lint/test_workflows.py` rejects any step with more than
 one command; split such a step instead of reordering its commands.
 
-The Windows job also checks symbol-ledger merge and member-pairing contracts:
+The tool and ledger job also checks symbol-ledger merge and member-pairing contracts:
 
 ```powershell
 .\.venv-3\Scripts\python.exe -m unittest discover -s tools\naming -p test_*.py -v
