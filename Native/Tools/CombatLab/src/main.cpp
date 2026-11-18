@@ -71,6 +71,7 @@ struct Options {
   bool verification_log = false;
   bool door_transitions = false;
   bool scene_catalog = false;
+  bool gpu_validation = false;
   std::string door_case;
   std::string door_from;
   fs::path door_resume;
@@ -238,6 +239,9 @@ Options Parse(int argc, char** argv) {
       options.door_transitions = true;
     } else if (argument == "--scene-catalog") {
       options.scene_catalog = true;
+    } else if (argument == "--gpu-validation" ||
+               argument == "--no-gpu-validation") {
+      // Read by Render::ChooseGpuValidation below.
     } else {
       if (++index == argc) {
         throw std::runtime_error("option is missing a value");
@@ -245,6 +249,7 @@ Options Parse(int argc, char** argv) {
       ParseValue(options, argument, argv[index]);
     }
   }
+  options.gpu_validation = Render::ChooseGpuValidation(argc, argv);
   ValidateOptions(options);
   if (options.data.empty()) options.data = FindData();
   return options;
@@ -341,7 +346,8 @@ bool ShowLoading(Platform::App& app, Render::Device& gpu, Canvas& canvas,
   return true;
 }
 
-void InitializeWindow(Platform::App& app, Render::Device& gpu, Trace& trace) {
+void InitializeWindow(Platform::App& app, Render::Device& gpu, Trace& trace,
+                      bool gpu_validation) {
   Platform::WindowDesc window;
   window.title = "Vagrant Story - Combat Lab";
   window.initialize_devices = false;
@@ -352,14 +358,26 @@ void InitializeWindow(Platform::App& app, Render::Device& gpu, Trace& trace) {
   trace.Event("startup.stage", {{"stage", "window.end"}});
   trace.Event("host.window", {{"id", SDL_GetWindowID(app.Window())}});
   trace.Event("startup.stage", {{"stage", "gpu.begin"}});
-  if (const auto initialized = gpu.Init(app.Window(), true); !initialized) {
+  if (const auto initialized = gpu.Init(app.Window(), gpu_validation);
+      !initialized) {
     throw std::runtime_error(initialized.error());
   }
+  trace.Event("render.gpu",
+              {{"backend", gpu.BackendName()},
+               {"validation", Render::GpuValidationName(gpu.Validation())}});
   trace.Event("startup.stage", {{"stage", "gpu.end"}});
 }
 
-void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
+// `gpu` is null for runs that never create a device (catalog-only).
+void WriteManifest(const Options& options, Trace& trace, std::size_t scripts,
+                   const Render::Device* gpu) {
   const auto source = Game::TraceSourceProvenance(Platform::ExecutableDir());
+  nlohmann::json gpu_backend = nullptr;
+  nlohmann::json gpu_validation = nullptr;
+  if (gpu != nullptr) {
+    gpu_backend = gpu->BackendName();
+    gpu_validation = Render::GpuValidationName(gpu->Validation());
+  }
   WriteJson(trace.Directory() / "manifest.json",
             {{"schema", 1},
              {"revision", source.at("revision")},
@@ -385,12 +403,16 @@ void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
                   ? nlohmann::json{{"first", options.effect_paths->first},
                                    {"last", options.effect_paths->last}}
                   : nlohmann::json(nullptr)},
+             {"gpu_validation_requested", options.gpu_validation},
+             {"gpu_backend", gpu_backend},
+             {"gpu_validation", gpu_validation},
              {"devices", options.devices}});
 }
 
 void CompleteRetainedDoors(const Options& options, Trace& trace,
+                           const Render::Device& gpu,
                            const nlohmann::json& retained_passed) {
-  WriteManifest(options, trace, 0);
+  WriteManifest(options, trace, 0, &gpu);
   WriteJson(trace.Directory() / "sequence-results.json",
             EncodeDoorCheckpoint(nlohmann::json::array(), retained_passed,
                                  "completed"));
@@ -402,7 +424,7 @@ void CompleteRetainedDoors(const Options& options, Trace& trace,
 void WriteSceneInventory(const Options& options, Trace& trace,
                          const std::vector<Game::EncounterZone>& catalog) {
   const auto inventory = ReadSceneCatalog(catalog);
-  WriteManifest(options, trace, 0);
+  WriteManifest(options, trace, 0, nullptr);
   WriteJson(trace.Directory() / "scene-inventory.json", inventory);
   trace.Event("scene.catalog", {{"assets", inventory.at("assets").size()},
                                 {"errors", inventory.at("errors")}});
@@ -1176,7 +1198,7 @@ int Run(int argc, char** argv) {
 
     Platform::App app;
     Render::Device gpu;
-    InitializeWindow(app, gpu, trace);
+    InitializeWindow(app, gpu, trace, options.gpu_validation);
     ConfigureSession(options);
     Input::InputSystem input;
     input.SetDevicesEnabled(options.devices);
@@ -1194,7 +1216,7 @@ int Run(int argc, char** argv) {
     ValidateScripts(scripts, catalog);
     trace.Event("startup.stage", {{"stage", "catalog.end"}});
     if (options.door_transitions && scripts.empty()) {
-      CompleteRetainedDoors(options, trace, retained_passed);
+      CompleteRetainedDoors(options, trace, gpu, retained_passed);
       return trace.Failed() ? 1 : 0;
     }
     if (!ShowLoading(app, gpu, canvas, input, trace,
@@ -1210,7 +1232,7 @@ int Run(int argc, char** argv) {
                      "RECORDING RUN CONFIGURATION")) {
       return scripts.empty() ? 0 : 2;
     }
-    WriteManifest(options, trace, scripts.size());
+    WriteManifest(options, trace, scripts.size(), &gpu);
     trace.Event("startup.stage", {{"stage", "audio.begin"}});
     Audio::AudioDevice audio(options.speed == 1);
     VS_LOG_INFO("audio", "Combat Lab native mix timing: {}",

@@ -12,6 +12,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -47,8 +48,10 @@ namespace {
 
 #ifdef VS_RELEASE_BUILD
 constexpr bool kEnableDetailedGameLogging = false;
+constexpr std::string_view kBuildConfiguration = "Release";
 #else
 constexpr bool kEnableDetailedGameLogging = true;
+constexpr std::string_view kBuildConfiguration = "Debug";
 #endif
 
 bool ConfigureLogging(int argc, char** argv, Game::GameplayTrace* trace) {
@@ -167,6 +170,33 @@ struct Capture {
            std::ranges::any_of(ranges, [tick](const auto& range) {
              return tick >= range.first && tick <= range.last;
            });
+  }
+
+  // Records the configuration the frames were captured in, including GPU
+  // validation (issue #348): Release has no other log of it. Named apart from
+  // a trace's manifest.json so a capture into a run directory cannot replace
+  // it.
+  void WriteManifest(const Render::Device& gpu,
+                     const std::vector<std::string>& arguments) const {
+    if (dir.empty()) return;
+    fs::create_directories(dir);
+    const auto source = Game::TraceSourceProvenance(Platform::ExecutableDir());
+    const nlohmann::json manifest{
+        {"schema", 1},
+        {"host", "desktop"},
+        {"configuration", kBuildConfiguration},
+        {"build", __DATE__ " " __TIME__},
+        {"revision", source.at("revision")},
+        {"worktree", source.at("worktree")},
+        {"source_status", source.at("status")},
+        {"gpu_backend", gpu.BackendName()},
+        {"gpu_validation", Render::GpuValidationName(gpu.Validation())},
+        {"arguments", arguments}};
+    std::ofstream stream(dir / "capture.json");
+    stream << manifest.dump(2) << '\n';
+    if (!stream.flush()) {
+      throw std::runtime_error("cannot write capture manifest");
+    }
   }
 
   void WriteClear(u64 tick) const {
@@ -306,14 +336,18 @@ struct RunSettings {
   u64 max_ticks = 0;
   u32 speed = 1;
   bool devices = true;
+  bool gpu_validation = false;
   Capture capture;
   InputScript script;
   std::optional<fs::path> save_directory;
   std::optional<Render::EffectPathTraceRange> effect_paths;
+  std::vector<std::string> arguments;
 };
 
 RunSettings ParseRunSettings(int argc, char** argv) {
   RunSettings settings;
+  settings.arguments.assign(argv, argv + argc);
+  settings.gpu_validation = Render::ChooseGpuValidation(argc, argv);
   if (auto s = Option(argc, argv, "--speed")) {
     std::from_chars(s->data(), s->data() + s->size(), settings.speed);
     settings.speed = std::max(settings.speed, 1u);
@@ -437,11 +471,17 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
     return 1;
   }
   Render::Device gpu;
-  if (auto r = gpu.Init(app.Window(), true); !r) {
+  if (auto r = gpu.Init(app.Window(), settings.gpu_validation); !r) {
     ReportStartupFailure("Graphics initialization failed", r.error(),
                          app.Window());
     return 1;
   }
+  if (trace != nullptr) {
+    trace->Event("render.gpu",
+                 {{"backend", gpu.BackendName()},
+                  {"validation", Render::GpuValidationName(gpu.Validation())}});
+  }
+  settings.capture.WriteManifest(gpu, settings.arguments);
   Audio::AudioDevice audio(settings.speed == 1);
   if (auto r = audio.Open(); !r) {
     VS_LOG_WARN("boot", "{} (continuing without audio)", r.error());
@@ -577,6 +617,7 @@ int main(int argc, char** argv) try {
          {"host", "desktop"},
          {"detailed_logging", true},
          {"verification_log", verification_log},
+         {"gpu_validation_requested", Render::ChooseGpuValidation(argc, argv)},
          {"build", __DATE__ " " __TIME__},
          {"revision", source.at("revision")},
          {"worktree", source.at("worktree")},

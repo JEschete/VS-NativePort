@@ -2,19 +2,148 @@
 
 #include <SDL3/SDL.h>
 
+#include <algorithm>
+#include <cstddef>
+#include <exception>
 #include <limits>
+#include <span>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include "Core/Log.hpp"
 
 namespace VS::Render {
 
+namespace {
+
+#ifdef _DEBUG
+constexpr bool kGpuValidationByDefault = true;
+#else
+constexpr bool kGpuValidationByDefault = false;
+#endif
+
+// Collects SDL's GPU-category messages while the device is created: SDL logs
+// whether it found the validation layers only there. Other categories pass
+// through to the previous output function.
+class SdlGpuReportCapture {
+ public:
+  explicit SdlGpuReportCapture(std::vector<std::string>* reports)
+      : reports_(reports) {
+    if (reports_ == nullptr) return;
+    SDL_GetLogOutputFunction(&previous_, &previous_data_);
+    priority_ = SDL_GetLogPriority(SDL_LOG_CATEGORY_GPU);
+    SDL_SetLogPriority(SDL_LOG_CATEGORY_GPU, SDL_LOG_PRIORITY_INFO);
+    SDL_SetLogOutputFunction(&Output, this);
+  }
+  ~SdlGpuReportCapture() {
+    if (reports_ == nullptr) return;
+    SDL_SetLogOutputFunction(previous_, previous_data_);
+    SDL_SetLogPriority(SDL_LOG_CATEGORY_GPU, priority_);
+  }
+  SdlGpuReportCapture(const SdlGpuReportCapture&) = delete;
+  SdlGpuReportCapture& operator=(const SdlGpuReportCapture&) = delete;
+
+  bool Lost() const { return lost_; }
+
+ private:
+  static void SDLCALL Output(void* userdata, int category,
+                             SDL_LogPriority priority, const char* message) {
+    auto& self = *static_cast<SdlGpuReportCapture*>(userdata);
+    if (category == SDL_LOG_CATEGORY_GPU && message != nullptr) {
+      // SDL is C: an exception must not unwind through it.
+      try {
+        self.reports_->emplace_back(message);
+      } catch (const std::exception&) {
+        self.lost_ = true;
+      }
+      return;
+    }
+    if (self.previous_ != nullptr) {
+      self.previous_(self.previous_data_, category, priority, message);
+    }
+  }
+
+  std::vector<std::string>* reports_;
+  SDL_LogOutputFunction previous_ = nullptr;
+  void* previous_data_ = nullptr;
+  SDL_LogPriority priority_ = SDL_LOG_PRIORITY_INVALID;
+  bool lost_ = false;
+};
+
+}  // namespace
+
+bool GpuValidationByDefault() { return kGpuValidationByDefault; }
+
+bool ChooseGpuValidation(int argc, const char* const* argv) {
+  bool validation = kGpuValidationByDefault;
+  if (argv == nullptr || argc <= 0) return validation;
+  for (const char* argument : std::span(argv, static_cast<std::size_t>(argc))) {
+    const std::string_view text = argument == nullptr ? "" : argument;
+    if (text == "--gpu-validation") {
+      validation = true;
+    } else if (text == "--no-gpu-validation") {
+      validation = false;
+    }
+  }
+  return validation;
+}
+
+GpuValidation ClassifyGpuValidation(bool requested,
+                                    std::span<const std::string> sdl_reports) {
+  if (!requested) return GpuValidation::kOff;
+  const auto reported = [sdl_reports](std::string_view text) {
+    return std::ranges::any_of(sdl_reports, [text](const std::string& report) {
+      return report.find(text) != std::string::npos;
+    });
+  };
+  // SDL 3.4 D3D12 and Vulkan report the layers with these messages.
+  if (reported("Validation layers enabled")) return GpuValidation::kOn;
+  if (reported("Validation layers partially enabled")) {
+    return GpuValidation::kPartial;
+  }
+  if (reported("Validation layers not found")) {
+    return GpuValidation::kUnavailable;
+  }
+  return GpuValidation::kUnreported;
+}
+
+std::string_view GpuValidationName(GpuValidation validation) {
+  switch (validation) {
+    case GpuValidation::kOff:
+      return "off";
+    case GpuValidation::kOn:
+      return "on";
+    case GpuValidation::kPartial:
+      return "partial";
+    case GpuValidation::kUnavailable:
+      return "unavailable";
+    case GpuValidation::kUnreported:
+      return "unreported";
+  }
+  return "unreported";
+}
+
 Device::~Device() { Shutdown(); }
 
-std::expected<void, std::string> Device::Init(SDL_Window* window, bool debug) {
+std::expected<void, std::string> Device::Init(SDL_Window* window,
+                                              bool validation) {
   m_window_ = window;
-  m_device_ = SDL_CreateGPUDevice(
-      SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL, debug, nullptr);
+  std::vector<std::string> reports;
+  bool lost_reports = false;
+  {
+    const SdlGpuReportCapture capture(validation ? &reports : nullptr);
+    m_device_ = SDL_CreateGPUDevice(
+        SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL, validation,
+        nullptr);
+    lost_reports = capture.Lost();
+  }
+  for (const auto& report : reports) {
+    VS_LOG_INFO("render", "SDL GPU: {}", report);
+  }
+  if (lost_reports) {
+    VS_LOG_WARN("render", "SDL GPU reports were lost while recording them");
+  }
   if (!m_device_) {
     return std::unexpected(std::string("SDL_CreateGPUDevice failed: ") +
                            SDL_GetError());
@@ -23,7 +152,14 @@ std::expected<void, std::string> Device::Init(SDL_Window* window, bool debug) {
     return std::unexpected(std::string("SDL_ClaimWindowForGPUDevice failed: ") +
                            SDL_GetError());
   }
-  VS_LOG_INFO("render", "GPU backend: {}", BackendName());
+  m_validation_ = ClassifyGpuValidation(validation, reports);
+  if (validation && m_validation_ != GpuValidation::kOn) {
+    VS_LOG_WARN("render", "GPU backend: {}; validation requested but {}",
+                BackendName(), GpuValidationName(m_validation_));
+  } else {
+    VS_LOG_INFO("render", "GPU backend: {}; validation {}", BackendName(),
+                GpuValidationName(m_validation_));
+  }
   return {};
 }
 
@@ -42,6 +178,7 @@ void Device::Shutdown() {
     }
     SDL_DestroyGPUDevice(m_device_);
     m_device_ = nullptr;
+    m_validation_ = GpuValidation::kOff;
   }
 }
 

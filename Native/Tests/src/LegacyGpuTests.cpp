@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -597,4 +598,57 @@ TEST_CASE("Live failures cross the C-linkage DrawPrim with their reason",
   Packet packet{.tag = kOneWordPacket, .body = {kFlatTriangle}};
   void (*volatile submit)(Packet*) = &SubmitThroughDrawPrim;
   CHECK_THROWS_WITH(submit(&packet), "Truncated render command");
+}
+
+// Issue #348: Release runs without SDL GPU validation unless asked, and the
+// state SDL reported, not the request, is what a capture records.
+TEST_CASE("GPU validation follows the build unless the command line overrides",
+          "[legacy][gpu][gpu-validation]") {
+  using VS::Render::ChooseGpuValidation;
+  using VS::Render::GpuValidationByDefault;
+#ifdef _DEBUG
+  CHECK(GpuValidationByDefault());
+#else
+  CHECK_FALSE(GpuValidationByDefault());
+#endif
+  const std::array<const char*, 1> none{{"vs-native"}};
+  CHECK(ChooseGpuValidation(static_cast<int>(none.size()), none.data()) ==
+        GpuValidationByDefault());
+  CHECK(ChooseGpuValidation(0, nullptr) == GpuValidationByDefault());
+  const std::array<const char*, 3> on{
+      {"vs-native", "--no-gpu-validation", "--gpu-validation"}};
+  CHECK(ChooseGpuValidation(static_cast<int>(on.size()), on.data()));
+  const std::array<const char*, 4> off{
+      {"vs-native", "--gpu-validation", "--frames", "--no-gpu-validation"}};
+  CHECK_FALSE(ChooseGpuValidation(static_cast<int>(off.size()), off.data()));
+}
+
+TEST_CASE("GPU validation state comes from what SDL reported",
+          "[legacy][gpu][gpu-validation]") {
+  using VS::Render::ClassifyGpuValidation;
+  using VS::Render::GpuValidation;
+  const std::vector<std::string> enabled{
+      "D3D12: Validation layers enabled, expect debug level performance!"};
+  const std::vector<std::string> partial{
+      "Validation layers partially enabled, some warnings may not be "
+      "available"};
+  const std::vector<std::string> missing{
+      "Validation layers not found, continuing without validation"};
+  const std::vector<std::string> silent{"D3D12: unrelated driver notice"};
+  CHECK(ClassifyGpuValidation(false, enabled) == GpuValidation::kOff);
+  CHECK(ClassifyGpuValidation(true, enabled) == GpuValidation::kOn);
+  CHECK(ClassifyGpuValidation(true, partial) == GpuValidation::kPartial);
+  CHECK(ClassifyGpuValidation(true, missing) == GpuValidation::kUnavailable);
+  CHECK(ClassifyGpuValidation(true, silent) == GpuValidation::kUnreported);
+}
+
+TEST_CASE("GPU validation states have stable manifest names",
+          "[legacy][gpu][gpu-validation]") {
+  using VS::Render::GpuValidation;
+  using VS::Render::GpuValidationName;
+  CHECK(GpuValidationName(GpuValidation::kOff) == "off");
+  CHECK(GpuValidationName(GpuValidation::kOn) == "on");
+  CHECK(GpuValidationName(GpuValidation::kPartial) == "partial");
+  CHECK(GpuValidationName(GpuValidation::kUnavailable) == "unavailable");
+  CHECK(GpuValidationName(GpuValidation::kUnreported) == "unreported");
 }

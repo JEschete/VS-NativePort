@@ -70,6 +70,7 @@ Ticks are logical game ticks (1/60 s). Unknown options and invalid values are er
 | `--player-observations` | Keep full per-tick observation frames for the external test player. Normally passed by its runner. |
 | `--fixed-frame-ticks <1..262>` | Advance the frame-counter clock by a fixed step per read, so repeated runs match. |
 | `--trace-effect-paths <first:last>` | Log effect and particle paths for an inclusive tick range. Needs `--speed 1`. |
+| `--gpu-validation` / `--no-gpu-validation` | Request or refuse SDL GPU validation layers; the last wins. Default: on in Debug, off in Release. The manifest records the request and the state SDL reported. |
 
 Button names for `--press` are `Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select`.
 `--fixed-frame-ticks` is explained in [MODERNIZATION.md](MODERNIZATION.md). The external test player is described in
