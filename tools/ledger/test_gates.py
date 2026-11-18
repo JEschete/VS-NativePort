@@ -465,6 +465,36 @@ class PromotionGateTests(GateTestCase):
         )
         self.expect_failure("claim-typed_interface")
 
+    def test_parameter_named_like_a_legacy_type_keeps_typed_interface(self) -> None:
+        self.fixture.promote()
+        self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
+            "namespace VS::Sys {\nstruct RingQuad { int v; };\n"
+            "int Thing(RingQuad& quad, int uint = 0) { return quad.v + uint; }\n}\n"
+        )
+        self.assertNotIn("claim-typed_interface", [issue.rule for issue in self.report().issues])
+
+    def test_legacy_types_are_found_only_in_type_positions(self) -> None:
+        cases = {
+            "void Map(RingQuad& quad, std::int32_t u_offset)": None,
+            "void Map(RingQuad* quad[4], int uint = 1)": None,
+            "void Map(std::span<const RingQuad> quad, void (*callback)(int quad))": None,
+            "int quad(int v)": None,
+            "auto Map(int v) -> RingQuad": None,
+            "void Map(quad frame)": "quad",
+            "void Map(const quad& frame)": "quad",
+            "void Map(quad)": "quad",
+            "void Map(const quad)": "quad",
+            "void Map(std::span<quad> frames)": "quad",
+            "void Map(void (*callback)(u_char value))": "u_char",
+            "auto Map(int v) -> u_short": "u_short",
+            "u_int Map(int v)": "u_int",
+            "int Map(void* v)": "void*",
+        }
+        for signature, expected in cases.items():
+            with self.subTest(signature=signature):
+                found = gates.legacy_signature_type(signature)
+                self.assertEqual(found and found.replace(" ", ""), expected)
+
     def test_blank_modernized_cannot_claim_no_bridge(self) -> None:
         self.fixture.promote()
         self.fixture.catalog[2]["modernized"] = ""
