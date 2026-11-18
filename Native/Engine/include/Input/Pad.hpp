@@ -57,7 +57,7 @@ std::string DescribeButtons(u32 mask);
 u32 ParseButtons(std::string_view names);
 
 // Gathers keyboard + first gamepad each logical tick and derives edge/repeat
-// state.
+// state. Adopts another connected gamepad when the active one disconnects.
 class InputSystem {
  public:
   InputSystem() = default;
@@ -84,6 +84,7 @@ class InputSystem {
   void SetDevicesEnabled(bool enabled) { m_devices_ = enabled; }
 
  private:
+  bool OpenGamepad(u32 instance_id);
   void UpdateActuators();
   void CloseGamepad();
   u32 SampleKeyboard() const;

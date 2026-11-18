@@ -425,7 +425,7 @@ listening parity remain unverified.
 
 | Input | Notes |
 |---|---|
-| Any SDL3-supported gamepad | Mapped to the PlayStation pad layout (Cross/Circle/…). |
+| Any SDL3-supported gamepad | Mapped to the PlayStation pad layout (Cross/Circle/…). The first pad is active; another connected pad takes over if it disconnects. |
 | Keyboard | Arrows = D-pad · X = Cross · C = Circle · Z = Square · S = Triangle · Q/E = L1/R1 · 1/3 = L2/R2 · Enter = Start · Backspace = Select (`Native\Input`). The remapping UI is a Phase 2 item. |
 
 ---

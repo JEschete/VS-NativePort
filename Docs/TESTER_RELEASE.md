@@ -149,8 +149,8 @@ Gamepads use SDL3, not libpad: Xbox 360/One/Series/Elite, DualShock/DualSense/Ed
 Switch Pro/Joy-Con and other SDL-mapped controllers are supported by that backend.
 This is not a claim that every model/connection mode has been physically tested.
 Generic controllers need an SDL gamepad mapping. Buttons map by position
-(south = Cross, east = Circle); only one active pad is used. Automatic handover to
-another already-connected pad remains tracked in #438.
+(south = Cross, east = Circle); only one active pad is used. If it disconnects,
+the next available connected gamepad takes over automatically.
 
 FFmpeg is external and is not included in this ZIP; see
 [Which FFmpeg to use](#which-ffmpeg-to-use):

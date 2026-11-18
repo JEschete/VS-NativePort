@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 
 #include <limits>
+#include <memory>
 #include <string>
 
 #include "Core/Log.hpp"
@@ -74,6 +75,16 @@ u32 ParseButtons(std::string_view names) {
 
 InputSystem::~InputSystem() { CloseGamepad(); }
 
+bool InputSystem::OpenGamepad(u32 instance_id) {
+  m_pad_ = SDL_OpenGamepad(instance_id);
+  if (!m_pad_) {
+    VS_LOG_WARN("input", "opening gamepad {}: {}", instance_id, SDL_GetError());
+    return false;
+  }
+  VS_LOG_INFO("input", "gamepad connected: {}", GamepadName());
+  return true;
+}
+
 void InputSystem::CloseGamepad() {
   if (m_pad_) {
     if ((m_rumble_low_ != 0 || m_rumble_high_ != 0) &&
@@ -91,14 +102,21 @@ void InputSystem::CloseGamepad() {
 
 void InputSystem::HandleEvent(const SDL_Event& ev) {
   if (ev.type == SDL_EVENT_GAMEPAD_ADDED && !m_pad_) {
-    m_pad_ = SDL_OpenGamepad(ev.gdevice.which);
-    if (m_pad_) {
-      VS_LOG_INFO("input", "gamepad connected: {}", GamepadName());
-    }
+    OpenGamepad(ev.gdevice.which);
   } else if (ev.type == SDL_EVENT_GAMEPAD_REMOVED && m_pad_ &&
              SDL_GetGamepadID(m_pad_) == ev.gdevice.which) {
     VS_LOG_INFO("input", "gamepad disconnected: {}", GamepadName());
     CloseGamepad();
+    int count = 0;
+    const std::unique_ptr<SDL_JoystickID, decltype(&SDL_free)> devices(
+        SDL_GetGamepads(&count), SDL_free);
+    if (!devices) {
+      VS_LOG_WARN("input", "listing gamepads: {}", SDL_GetError());
+      return;
+    }
+    for (int index = 0; index < count; ++index) {
+      if (OpenGamepad(devices.get()[index])) break;
+    }
   }
 }
 

@@ -1,5 +1,42 @@
 # Current Handoff
 
+## Connected-controller handover (#438), 2026-11-18
+
+Starting revision: `aa41806e6`, clean worktree. The active-controller removal
+handler now closes the old pad, resets its rumble cache, enumerates SDL's
+remaining gamepads and opens the first available one. Initial connection and
+handover share the same open/logging path; enumeration/open failures are logged.
+Inactive-controller removal does not change the selected pad.
+
+The two initial regression cases failed on the old implementation: input and
+rumble were not handed over. Final SDL virtual-device tests cover real queued
+removal events after both ADDED events have already been consumed, replacement
+buttons/stick/edges, inactive removal, last-pad removal, reconnect, unchanged
+rumble levels on the replacement and rumble shutdown. The existing removal test
+now actually detaches its device: SDL no longer delivers rumble callbacks after
+detachment. Connected-pad shutdown still checks the zero-motor callback.
+Automatic fixtures allow only their synthetic VID/PID so rescans cannot select
+or rumble a physical controller; the opt-in hardware test remains separate.
+
+Validation on the uncommitted changes subsequently committed for #438:
+
+- MSBuild `VagrantStory.Native.sln /t:VS_Tests;VS_Desktop;VS_CombatLab /m
+  /p:Configuration=<Debug|Release> /p:Platform=x64 /v:minimal /nologo` passed
+  in both configurations. After test-only refinements, rebuilt
+  `Native\Tests\VS.Tests.vcxproj` with the same configuration/platform options.
+- `build\<Debug|Release>\VS.Tests.exe "[input]" --reporter compact` passed
+  **62 tests / 797 assertions** in each configuration.
+- `quality-native.cmd --files Native\Engine\src\Input\Pad.cpp
+  Native\Engine\include\Input\Pad.hpp Native\Tests\src\VibrationTests.cpp
+  --tidy` passed with **zero new findings**, including header dependents.
+
+Evidence: `build\issue-438-before-tests.log`,
+`build\issue-438-<debug|release>-build.log`,
+`build\issue-438-<debug|release>-final-build.log`,
+`build\issue-438-<debug|release>-tests.log`, and
+`build\issue-438-quality.log`. Exact-revision CI/closure evidence belongs on #438.
+No new physical-controller model or gameplay certification is claimed.
+
 ## Transient-tooling retirement (#440), 2026-11-18
 
 Starting revision: `d654bad79`, clean worktree. Retired 255 campaign files:
@@ -59,7 +96,8 @@ logs in the same directory. Retired scripts and snapshots remain in Git history.
   files moved to `build\player` and 3,631 archive files to
   `build\evidence-archive`; all hashes matched and SQLite integrity checked OK.
 - Controller support remains SDL3 mapping-based; no new physical-controller
-  certification was performed. Already-connected pad handover remains #438.
+  certification was performed. Already-connected pad handover is covered by
+  the #438 checkpoint above.
 
 Local evidence is ignored under `build`: `portability-debug-final-build.log`,
 `portability-release-build.log`, `portability-release-tests.log`,

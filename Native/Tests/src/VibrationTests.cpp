@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -29,9 +30,32 @@ struct Command {
 };
 
 struct GamepadSubsystem {
-  bool ready = SDL_InitSubSystem(SDL_INIT_GAMEPAD);
+  std::optional<std::string> saved_allowlist;
+  bool virtual_only;
+  bool ready;
+
+  explicit GamepadSubsystem(bool virtual_only = true)
+      : virtual_only(virtual_only) {
+    if (virtual_only) {
+      if (const char* value =
+              SDL_GetHint(SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT)) {
+        saved_allowlist = value;
+      }
+      REQUIRE(
+          SDL_SetHintWithPriority(SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT,
+                                  "0xffff/0x0001", SDL_HINT_OVERRIDE));
+    }
+    ready = SDL_InitSubSystem(SDL_INIT_GAMEPAD);
+  }
+
   ~GamepadSubsystem() {
     if (ready) SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
+    if (virtual_only) {
+      SDL_SetHintWithPriority(
+          SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT,
+          saved_allowlist ? saved_allowlist->c_str() : nullptr,
+          SDL_HINT_OVERRIDE);
+    }
   }
 };
 
@@ -42,6 +66,8 @@ struct VirtualGamepad {
     SDL_VirtualJoystickDesc desc{};
     SDL_INIT_INTERFACE(&desc);
     desc.type = SDL_JOYSTICK_TYPE_GAMEPAD;
+    desc.vendor_id = 0xffff;
+    desc.product_id = 0x0001;
     desc.naxes = SDL_GAMEPAD_AXIS_COUNT;
     desc.nbuttons = SDL_GAMEPAD_BUTTON_COUNT;
     desc.axis_mask = (1u << SDL_GAMEPAD_AXIS_COUNT) - 1;
@@ -57,6 +83,11 @@ struct VirtualGamepad {
 
   ~VirtualGamepad() {
     if (id != 0) SDL_DetachVirtualJoystick(id);
+  }
+
+  void Detach() {
+    REQUIRE(SDL_DetachVirtualJoystick(id));
+    id = 0;
   }
 };
 
@@ -88,6 +119,35 @@ void Connect(VS::Input::InputSystem& input, SDL_JoystickID id) {
   event.gdevice.which = id;
   input.HandleEvent(event);
   REQUIRE(input.HasGamepad());
+}
+
+void PumpInputEvents(VS::Input::InputSystem& input) {
+  SDL_Event event{};
+  while (SDL_PollEvent(&event)) input.HandleEvent(event);
+}
+
+void CheckDisconnectedInput(VS::Input::InputSystem& input) {
+  CHECK_FALSE(input.HasGamepad());
+  const auto& state = input.Update();
+  CHECK_FALSE(state.analog);
+  CHECK(state.held == 0);
+  CHECK(state.sticks.lx == VS::Input::Sticks::kCenter);
+}
+
+void HoldCrossAndRight(SDL_Joystick* joystick) {
+  REQUIRE(joystick != nullptr);
+  REQUIRE(
+      SDL_SetJoystickVirtualButton(joystick, SDL_GAMEPAD_BUTTON_SOUTH, true));
+  REQUIRE(SDL_SetJoystickVirtualAxis(joystick, SDL_GAMEPAD_AXIS_LEFTX, 32767));
+}
+
+void CheckAdoptedInput(VS::Input::InputSystem& input) {
+  REQUIRE(input.HasGamepad());
+  const auto& state = input.Update();
+  CHECK(state.analog);
+  CHECK(state.held == (VS::Input::Cross | VS::Input::Right));
+  CHECK(state.pressed == (VS::Input::Cross | VS::Input::Right));
+  CHECK(state.sticks.lx == 255);
 }
 
 void CheckLast(const std::vector<Command>& commands, Uint16 low, Uint16 high) {
@@ -248,12 +308,77 @@ TEST_CASE("Closing and removing a gamepad stop its active rumble",
   Connect(input, device.id);
   input.Update();
   CheckLast(commands, 65535, 65535);
-  SDL_Event event{};
-  event.type = SDL_EVENT_GAMEPAD_REMOVED;
-  event.gdevice.which = device.id;
-  input.HandleEvent(event);
-  CHECK_FALSE(input.HasGamepad());
-  CheckLast(commands, 0, 0);
+  // Real detachment removes the SDL rumble callback before the removal event.
+  device.Detach();
+  const auto disconnected_commands = commands.size();
+  PumpInputEvents(input);
+  CheckDisconnectedInput(input);
+  CHECK(commands.size() == disconnected_commands);
+  VirtualGamepad reconnected(commands);
+  REQUIRE(reconnected.id != 0);
+  PumpInputEvents(input);
+  REQUIRE(input.HasGamepad());
+  input.Update();
+  CheckLast(commands, 65535, 65535);
+}
+
+TEST_CASE("Gamepad removal adopts an already connected pad without another add",
+          "[input][gamepad-handover]") {
+  std::vector<Command> replacement_commands;
+  RumbleFixture fixture;
+  VirtualGamepad replacement(replacement_commands);
+  REQUIRE(replacement.id != 0);
+  const std::unique_ptr<SDL_Joystick, decltype(&SDL_CloseJoystick)> joystick(
+      SDL_OpenJoystick(replacement.id), SDL_CloseJoystick);
+  HoldCrossAndRight(joystick.get());
+  PumpInputEvents(fixture.input);
+  const auto& original = fixture.input.Update();
+  CHECK(original.held == 0);
+  CHECK(original.sticks.lx == VS::Input::Sticks::kCenter);
+
+  fixture.device.Detach();
+  PumpInputEvents(fixture.input);
+  CheckAdoptedInput(fixture.input);
+  replacement.Detach();
+  PumpInputEvents(fixture.input);
+  CheckDisconnectedInput(fixture.input);
+  CHECK(fixture.input.State().released ==
+        (VS::Input::Cross | VS::Input::Right));
+}
+
+TEST_CASE("Removing an inactive gamepad leaves the active pad alone",
+          "[input][gamepad-handover]") {
+  std::vector<Command> replacement_commands;
+  RumbleFixture fixture;
+  VirtualGamepad replacement(replacement_commands);
+  REQUIRE(replacement.id != 0);
+  PumpInputEvents(fixture.input);
+  replacement.Detach();
+  PumpInputEvents(fixture.input);
+  REQUIRE(fixture.input.HasGamepad());
+  CHECK(fixture.input.Update().held == 0);
+  fixture.Apply(1, 128);
+  CheckLast(fixture.commands, 32896, 65535);
+  CHECK(replacement_commands.empty());
+}
+
+TEST_CASE("Gamepad handover reapplies unchanged rumble to the replacement",
+          "[input][vibration][gamepad-handover]") {
+  std::vector<Command> replacement_commands;
+  RumbleFixture fixture;
+  VirtualGamepad replacement(replacement_commands);
+  REQUIRE(replacement.id != 0);
+  PumpInputEvents(fixture.input);
+  fixture.Apply(1, 128);
+  CheckLast(fixture.commands, 32896, 65535);
+  CHECK(replacement_commands.empty());
+  fixture.device.Detach();
+  PumpInputEvents(fixture.input);
+  REQUIRE(fixture.input.HasGamepad());
+  fixture.input.Update();
+  CheckLast(replacement_commands, 32896, 65535);
+  fixture.Apply(0, 0);
+  CheckLast(replacement_commands, 0, 0);
 }
 
 TEST_CASE("Active vibration survives the SDL refresh interval",
@@ -432,7 +557,7 @@ void RunApprovedHardwareCheck() {
     SKIP("Set VS_NATIVE_RUMBLE_DEVICE to the exact approved gamepad name");
   }
   const std::string target(requested);
-  GamepadSubsystem subsystem;
+  GamepadSubsystem subsystem(false);
   REQUIRE(subsystem.ready);
   const SDL_JoystickID id = FindApprovedGamepad(target);
   VS::Input::InputSystem input;
