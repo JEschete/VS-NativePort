@@ -12,6 +12,7 @@
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 
 extern "C" {
@@ -155,6 +156,54 @@ void TransferPageOwner(int previous, int next) {
   render::AdvanceLiveTexturePageRetirements();
   render::AdvanceLiveTexturePageRetirements();
   REQUIRE(render::ReserveLiveTexturePageRange(29, 3, next) == 29);
+}
+
+struct RankRead {
+  Content_DiscQueueSlot* request = nullptr;
+  std::uint64_t generation = 0;
+  void* buffer = nullptr;
+  std::size_t heap_blocks = 0;
+};
+
+// Starts the MENUF load, then fails RANK.DIS through the real drive: no
+// extracted file holds the sector, so the queue resolves the read as Error.
+RankRead StartFailedRankRead(std::array<unsigned char, 1>& outer) {
+  constexpr int kQueueUpdates = 2;
+  constexpr int kUnmappedSector = 0x7FFF'0000;
+  REQUIRE(results::LiveUpdateResultsScreen(outer.data()) == 0);
+  REQUIRE(Battle_unusedSubmenuState == 1);
+  auto& request = Content_discRequestSlots[0];
+  REQUIRE(request.state == Content_DiscRequestState_Enqueued);
+  const RankRead rank{
+      .request = &request,
+      .generation = content::LiveDiscRequestGeneration(&request),
+      .buffer = request.vram,
+      .heap_blocks = memory::GameHeap().AllocatedBlocks().size()};
+  request.cdFile.lba = kUnmappedSector;
+  for (int update = 0; update < kQueueUpdates; ++update) {
+    content::UpdateLiveDiscQueue();
+  }
+  REQUIRE(request.state == Content_DiscRequestState_Error);
+  return rank;
+}
+
+void CheckFailedRequestKept(const RankRead& rank) {
+  CHECK(Battle_unusedSubmenuState == 1);
+  CHECK(rank.request->state == Content_DiscRequestState_Error);
+  CHECK(content::LiveDiscRequestGeneration(rank.request) == rank.generation);
+  CHECK(rank.request->vram == rank.buffer);
+  CHECK(Content_discRequestCounts.waiting == 0);
+  CHECK(Content_discRequestCounts.reading == 0);
+}
+
+void CheckFailedLoadOwners(const RankRead& rank) {
+  CHECK(memory::GameHeap().AllocatedBlocks().size() == rank.heap_blocks);
+  CHECK(render::LiveTexturePages()[29].state ==
+        render::TexturePageState::kOwned);
+  const auto status = results::InspectLiveGameClear();
+  CHECK(status.owns_request);
+  CHECK(status.owns_buffer);
+  CHECK(status.owns_pages);
 }
 }  // namespace
 
@@ -316,6 +365,34 @@ TEST_CASE("Game-clear Live missing slot and queue Error remain pending",
   CHECK(results::LiveInitializeGameClear() == 0);
   CHECK(Battle_unusedSubmenuState == 1);
   CHECK(results::InspectLiveGameClear().owns_buffer);
+}
+
+// #410: the original queue retried a failed read until it loaded, so
+// _initCongratulationsScreen waited at its load step. The native queue's
+// terminal Error (#314) leaves the MENUF caller pending the same way: no
+// retry, no second reservation and no completion, with its owners retained.
+TEST_CASE(
+    "Game-clear Live MENUF caller stays pending after a real drive failure",
+    "[game-clear-live][F03010][F03008]") {
+  constexpr int kFrames = 120;
+  LiveFixture fixture;
+  std::array<unsigned char, 1> outer{0};
+  const RankRead rank = StartFailedRankRead(outer);
+
+  int pending = 0;
+  int retried = 0;
+  for (int frame = 0; frame < kFrames; ++frame) {
+    pending += results::LiveUpdateResultsScreen(outer.data()) == 0 ? 1 : 0;
+    retried += rank.request->state != Content_DiscRequestState_Error ? 1 : 0;
+    content::UpdateLiveDiscQueue();
+  }
+  CHECK(pending == kFrames);
+  CHECK(retried == 0);
+  CHECK(outer.front() == 1);
+  CheckFailedRequestKept(rank);
+  CheckFailedLoadOwners(rank);
+  CHECK(results::CleanupLiveGameClearOwnedState());
+  CHECK(memory::GameHeap().Empty());
 }
 
 TEST_CASE(

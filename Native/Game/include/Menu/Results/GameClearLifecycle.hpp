@@ -157,7 +157,12 @@ class GameClearInitHost {
   virtual bool ReserveTexturePages(const TexturePageLoan& loan) = 0;
   // Allocates RANK.DIS storage, allocates a request, then enqueues it.
   virtual bool BeginTextureRead() = 0;
-  // Only original queue state Loaded advances; error is not completion.
+  // Only original queue state Loaded advances; error is not completion. The
+  // original queue never set its error state: a failed read was retried until
+  // it loaded (main.c _processCdQueue, diskUpdate), so this step waited. The
+  // native queue's terminal Error (#314) cannot load, and the step keeps
+  // waiting without a retry; cold or VM reset cleanup releases its owners
+  // (#410).
   virtual bool TextureReadLoaded() = 0;
   virtual std::optional<ResultsTimBlocks> ParseTim(std::size_t index) = 0;
   virtual bool UploadPixels(std::size_t index,
@@ -216,7 +221,9 @@ class GameClearScreenHost {
 
 // decomp: _renderCongratulationsScreen, MENUF.PRG/3B8.c:755 (0x8010384C).
 // Completion leaves both timers unchanged. The production caller owns
-// exiting; deliberately no new once-only reward latch (#410).
+// exiting: vs_menuF_exec resets its phase on completion, and the event menu
+// that runs it returns and closes, so it is not called again. Deliberately no
+// new once-only reward latch (#410).
 GameClearStep UpdateGameClear(GameClearScreen& screen,
                               std::span<const BonusReel> reels, bool confirm,
                               GameClearScreenHost& host);

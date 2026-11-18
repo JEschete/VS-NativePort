@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
@@ -112,13 +113,14 @@ class FakeHost final : public fw::Host {
   void ForgetBackgroundBuffer() override {}
   std::span<const std::uint8_t> BackgroundSource() override { return {}; }
   void UpdateMiscItemShortcut(int /*mode*/) override {}
-  int RunSubmenu(fw::Submenu /*submenu*/, int /*state_index*/) override {
-    return 0;
+  int RunSubmenu(fw::Submenu submenu, int /*state_index*/) override {
+    submenus_run.push_back(submenu);
+    return submenu_result;
   }
   void BindInventoryViews() override {}
   void UpdateStatPanels() override {}
   void ReserveMenuTexturePages() override {}
-  void RetireMenuTexturePages() override {}
+  void RetireMenuTexturePages() override { ++retired_page_sets; }
   void UploadImage(std::uint32_t /*position*/,
                    std::span<const std::byte> /*pixels*/,
                    std::uint32_t /*size*/) override {}
@@ -154,6 +156,9 @@ class FakeHost final : public fw::Host {
   std::vector<std::string> refusals;
   std::vector<fw::MenuSound> sounds;
   std::vector<std::uint8_t> shown;
+  std::vector<fw::Submenu> submenus_run;
+  int submenu_result = 0;
+  int retired_page_sets = 0;
   FakeQueue queue;
   VS::Render::FontStyle font;
 };
@@ -236,6 +241,40 @@ fw::SortStats SampleSortStats() {
   stats.affinities[0] = kSortId;
   stats.types[1] = kSortCount;
   return stats;
+}
+
+// vs_battle_menuState_t.currentMenu values, menuStatus done, and the event
+// menu that runs MENUF.PRG's results screen (BATTLE.PRG 5BF94.c:2966,
+// MAINMENU.PRG C48.c:316).
+constexpr std::uint8_t kChallengeMenu = 15;
+constexpr std::uint8_t kMenuReturning = 0x7F;
+constexpr std::uint8_t kMenuClosed = 0x3F;
+constexpr std::int16_t kMenuDone = 2;
+
+// An event opened the results screen and its overlay is already loaded.
+void OpenEventResults(Fixture& f, std::uint8_t opened_without_main_menu) {
+  f.state.loaded_sub_menu = static_cast<std::int8_t>(kChallengeMenu);
+  f.state.control.current_menu = kChallengeMenu;
+  f.state.control.loading = 0;
+  f.state.action_restrictions = kEvent;
+  f.state.opened_without_main_menu = opened_without_main_menu;
+  f.host.submenu_result = 1;
+}
+
+// The first update ran the results screen once and left the event menu.
+void CheckResultsReturned(const Fixture& f, bool retires_pages) {
+  REQUIRE(f.host.submenus_run.size() == 1);
+  CHECK(f.host.submenus_run.front() == fw::Submenu::kResults);
+  CHECK(f.state.control.current_menu == kMenuReturning);
+  CHECK(f.host.retired_page_sets == (retires_pages ? 1 : 0));
+  CHECK(f.state.action_selection.menu_status == 0);
+}
+
+void CheckEventMenuClosed(const Fixture& f, bool retires_pages) {
+  CHECK(f.host.submenus_run.size() == 1);
+  CHECK(f.state.action_selection.menu_status == kMenuDone);
+  CHECK(f.state.control.current_menu == kMenuClosed);
+  CHECK(f.host.retired_page_sets == (retires_pages ? 1 : 0));
 }
 
 // One in 4.12 fixed point, and a quarter turn.
@@ -561,4 +600,36 @@ TEST_CASE("Menu framework live quit delay restarts after a reload",
     CHECK(fw::LiveQuitDelay() == (frame == kQuitFrames ? 1 : 0));
   }
   fw::ResetLiveMainMenuStatics();
+}
+
+TEST_CASE("Menu framework closes an event results screen after one completion",
+          "[menu-framework][menu]") {
+  // #410: the results screen returns 1 once its reward completes; the event
+  // menu then returns and closes, so the screen is never called again.
+  const auto without_main_menu = GENERATE(std::uint8_t{0}, std::uint8_t{1});
+  const bool retires_pages = without_main_menu == 0;
+  Fixture f;
+  OpenEventResults(f, without_main_menu);
+
+  fw::UpdateMenuOverlay(f.ctx);
+  CheckResultsReturned(f, retires_pages);
+  fw::UpdateMenuOverlay(f.ctx);
+  CheckEventMenuClosed(f, retires_pages);
+  fw::UpdateMenuOverlay(f.ctx);
+  CheckEventMenuClosed(f, retires_pages);
+}
+
+TEST_CASE("Menu framework keeps calling a pending event results screen",
+          "[menu-framework][menu]") {
+  constexpr std::size_t kPendingFrames = 3;
+  Fixture f;
+  OpenEventResults(f, 1);
+  f.host.submenu_result = 0;
+
+  for (std::size_t frame = 0; frame < kPendingFrames; ++frame) {
+    fw::UpdateMenuOverlay(f.ctx);
+  }
+  CHECK(f.host.submenus_run.size() == kPendingFrames);
+  CHECK(f.state.control.current_menu == kChallengeMenu);
+  CHECK(f.state.action_selection.menu_status == 0);
 }
