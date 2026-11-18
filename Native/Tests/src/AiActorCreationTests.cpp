@@ -1,7 +1,12 @@
+#include <process.h>
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <exception>
+#include <filesystem>
+#include <fstream>
 #include <iterator>
 #include <optional>
 #include <span>
@@ -16,9 +21,12 @@
 #include "Battle/Ai/ActorCreation.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"
 #include "Battle/Ai/ActorSettings.hpp"
+#include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Platform/App.hpp"
+#include "Platform/CrashHandler.hpp"
 #include "Render/ModelGeometryLive.hpp"
 
 extern "C" {
@@ -763,4 +771,48 @@ TEST_CASE("AI creation retains its original module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E6178) ==
         reinterpret_cast<const void*>(&VS::Battle::Ai::CreateLiveActorAiState));
+}
+
+TEST_CASE("Terminate handler logs live planning invariant",
+          "[.planning-uncaught-parent]") {
+  const auto output =
+      VS::Platform::ExecutableDir() /
+      ("planning-uncaught-" + std::to_string(_getpid()) + ".log");
+  const auto arguments = std::to_array<std::string>(
+      {(VS::Platform::ExecutableDir() / "VS.Tests.exe").string(),
+       "[.planning-uncaught-child]", "--reporter", "compact"});
+  std::error_code output_error;
+  std::filesystem::remove(output, output_error);
+  REQUIRE_FALSE(output_error);
+  const auto result = VS::Platform::RunProcess(arguments, output);
+  REQUIRE(result.has_value());
+  CHECK(*result != 0);
+
+  std::ifstream input(output);
+  REQUIRE(input.good());
+  const std::string log((std::istreambuf_iterator<char>(input)),
+                        std::istreambuf_iterator<char>());
+  INFO(log);
+  CHECK(log.find("uncaught exception: battle actor has no AI state") !=
+        std::string::npos);
+  input.close();
+  std::filesystem::remove(output, output_error);
+  CHECK_FALSE(output_error);
+}
+
+TEST_CASE("Planning invariant termination child",
+          "[.planning-uncaught-child]") {
+  VS::Platform::InstallCrashHandler();
+  Battle_Actor actor{};
+  Battle_Ai_RoomAiState room{};
+  actor.id = 0;
+  Battle_Ai_roomAiState = &room;
+  Battle_actors[0] = &actor;
+  Battle_Ai_actorAiStates[0] = nullptr;
+  try {
+    VS::Battle::Ai::RebuildLiveActorActionPlans(nullptr);
+  } catch (...) {
+    std::terminate();
+  }
+  FAIL("A live actor without AI state was accepted");
 }

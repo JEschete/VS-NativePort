@@ -1,14 +1,8 @@
 // Hand-maintained tests for the typed AI plan rebuild slice (#247, #255).
-#include <process.h>
-
 #include <algorithm>
 #include <array>
 #include <cstring>
-#include <exception>
-#include <filesystem>
-#include <fstream>
 #include <functional>
-#include <iterator>
 #include <optional>
 #include <set>
 #include <span>
@@ -23,24 +17,12 @@
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Content/ModuleData.h"
-#include "Platform/App.hpp"
-#include "Platform/CrashHandler.hpp"
-
-extern "C" {
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Damage.h"
-}
 
 namespace {
 using VS::Battle::Ai::ActionPlanningRoom;
 using VS::Battle::Ai::PlanningActor;
 using VS::Battle::Ai::PlanningRequest;
 namespace ai = VS::Battle::Ai;
-
-int RebuildLivePlansWithMissingAiState() {
-  return ai::RebuildLiveActorActionPlans(nullptr);
-}
 
 ai::ActionCandidate PlanCandidate(int score, unsigned threshold = 0) {
   ai::ActionCandidate candidate(
@@ -793,48 +775,4 @@ TEST_CASE("Completed plan refuses records outside native storage",
   }
   CHECK_FALSE(ai::ReconcileCompletedActionPlan(CompletedActionOf(5), host));
   CHECK(host.log == expected);
-}
-
-TEST_CASE("Terminate handler logs live planning invariant",
-          "[.planning-uncaught-parent]") {
-  const auto output =
-      VS::Platform::ExecutableDir() /
-      ("planning-uncaught-" + std::to_string(_getpid()) + ".log");
-  const auto arguments = std::to_array<std::string>(
-      {(VS::Platform::ExecutableDir() / "VS.Tests.exe").string(),
-       "[.planning-uncaught-child]", "--reporter", "compact"});
-  std::error_code output_error;
-  std::filesystem::remove(output, output_error);
-  REQUIRE_FALSE(output_error);
-  const auto result = VS::Platform::RunProcess(arguments, output);
-  REQUIRE(result.has_value());
-  CHECK(*result != 0);
-
-  std::ifstream input(output);
-  REQUIRE(input.good());
-  const std::string log((std::istreambuf_iterator<char>(input)),
-                        std::istreambuf_iterator<char>());
-  INFO(log);
-  CHECK(log.find("uncaught exception: battle actor has no AI state") !=
-        std::string::npos);
-  input.close();
-  std::filesystem::remove(output, output_error);
-  CHECK_FALSE(output_error);
-}
-
-TEST_CASE("Planning invariant termination child",
-          "[.planning-uncaught-child]") {
-  VS::Platform::InstallCrashHandler();
-  Battle_Actor actor{};
-  Battle_Ai_RoomAiState room{};
-  actor.id = 0;
-  Battle_Ai_roomAiState = &room;
-  Battle_actors[0] = &actor;
-  Battle_Ai_actorAiStates[0] = nullptr;
-  try {
-    RebuildLivePlansWithMissingAiState();
-  } catch (...) {
-    std::terminate();
-  }
-  FAIL("A live actor without AI state was accepted");
 }
