@@ -1,5 +1,4 @@
-#ifndef NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACE_HPP_
-#define NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACE_HPP_
+#pragma once
 
 #include <optional>
 #include <vector>
@@ -163,5 +162,3 @@ void RebuildActorActionPlans(ActionPlanningRoom& room,
                              const std::optional<PlanningRequest>& request);
 
 }  // namespace VS::Battle::Ai
-
-#endif  // NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACE_HPP_

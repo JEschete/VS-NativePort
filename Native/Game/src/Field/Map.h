@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_MAP_H_TYPES
-#define VS_FIELD_MAP_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_MapRoom;
@@ -38,5 +37,3 @@ struct Field_MapScene {
     Field_MapRoom rooms[0];
 };
 static_assert(sizeof(Field_MapScene) == 0x4, "Field_MapScene must keep its PS1 layout");
-
-#endif // VS_FIELD_MAP_H_TYPES

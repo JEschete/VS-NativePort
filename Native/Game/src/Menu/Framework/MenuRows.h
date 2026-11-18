@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_FRAMEWORK_MENUROWS_H_TYPES
-#define VS_MENU_FRAMEWORK_MENUROWS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Framework_ItemText;
@@ -12,5 +11,3 @@ struct Menu_Framework_ItemText {
     u_short description[48];
 };
 static_assert(sizeof(Menu_Framework_ItemText) == 0x80, "Menu_Framework_ItemText must keep its PS1 layout");
-
-#endif // VS_MENU_FRAMEWORK_MENUROWS_H_TYPES

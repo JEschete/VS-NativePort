@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EVENT_SPLASH_H_TYPES
-#define VS_EVENT_SPLASH_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Event_SplashTween;
@@ -21,5 +20,3 @@ struct Event_SplashTween {
     short deltaBrightness;
 };
 static_assert(sizeof(Event_SplashTween) == 0x14, "Event_SplashTween must keep its PS1 layout");
-
-#endif // VS_EVENT_SPLASH_H_TYPES

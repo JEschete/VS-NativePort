@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_BACKGROUND_H_TYPES
-#define VS_FIELD_BACKGROUND_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_BackgroundLayout;
@@ -21,5 +20,3 @@ struct Field_BackgroundLayout {
     Field_BackgroundTile tiles[0];
 };
 static_assert(sizeof(Field_BackgroundLayout) == 0xC, "Field_BackgroundLayout must keep its PS1 layout");
-
-#endif // VS_FIELD_BACKGROUND_H_TYPES

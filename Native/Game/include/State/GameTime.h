@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_GAMETIME_H_TYPES
-#define VS_STATE_GAMETIME_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 union State_PlayTime;
@@ -15,5 +14,3 @@ union State_PlayTime {
     } t;
     u_int all;
 };
-
-#endif // VS_STATE_GAMETIME_H_TYPES

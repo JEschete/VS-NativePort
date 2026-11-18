@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_PLATFORMS_H_TYPES
-#define VS_FIELD_PLATFORMS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_PlatformContactPoint;
@@ -13,5 +12,3 @@ struct Field_PlatformContactPoint {
     short platformIndex;
 };
 static_assert(sizeof(Field_PlatformContactPoint) == 0x8, "Field_PlatformContactPoint must keep its PS1 layout");
-
-#endif // VS_FIELD_PLATFORMS_H_TYPES

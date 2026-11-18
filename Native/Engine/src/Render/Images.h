@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_RENDER_IMAGES_H_TYPES
-#define VS_RENDER_IMAGES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Render_TextureRegion;
@@ -15,5 +14,3 @@ struct Render_TextureRegion {
     u_short clut;
 };
 static_assert(sizeof(Render_TextureRegion) == 0x8, "Render_TextureRegion must keep its PS1 layout");
-
-#endif // VS_RENDER_IMAGES_H_TYPES

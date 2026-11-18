@@ -1,5 +1,4 @@
-#ifndef NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACELIVE_HPP_
-#define NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACELIVE_HPP_
+#pragma once
 
 #include "Battle/Action.h"
 #include "Battle/Ai/AiViews.h"
@@ -31,5 +30,3 @@ PlanningRequest PlanningRequestOf(const Battle_ActionRequest& request);
 int RebuildLiveActorActionPlans(Battle_ActionRequest* request);
 
 }  // namespace VS::Battle::Ai
-
-#endif  // NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACELIVE_HPP_

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_ACTORS_H_TYPES
-#define VS_FIELD_ACTORS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_ActorPlacement;
@@ -13,5 +12,3 @@ struct Field_ActorPlacement {
     u_int height : 8;
 };
 static_assert(sizeof(Field_ActorPlacement) == 0x4, "Field_ActorPlacement must keep its PS1 layout");
-
-#endif // VS_FIELD_ACTORS_H_TYPES

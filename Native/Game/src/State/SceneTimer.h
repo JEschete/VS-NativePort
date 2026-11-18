@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_SCENETIMER_H_TYPES
-#define VS_STATE_SCENETIMER_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct State_SceneTimer;
@@ -16,5 +15,3 @@ struct State_SceneTimer {
     signed char hours;
 };
 static_assert(sizeof(State_SceneTimer) == 0x8, "State_SceneTimer must keep its PS1 layout");
-
-#endif // VS_STATE_SCENETIMER_H_TYPES

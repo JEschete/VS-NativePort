@@ -1,7 +1,5 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-#ifndef VS_OWNED_FIELD_INTERACTIONFOCUSLIVE_H
-#define VS_OWNED_FIELD_INTERACTIONFOCUSLIVE_H
 #include "Actors/Location.h"
 #include "Legacy/Psx.h"
 
@@ -9,5 +7,3 @@
 struct Field_InteractionFocus {
   Actors_ActorLocationQuery actor_query;
 };
-
-#endif  // VS_OWNED_FIELD_INTERACTIONFOCUSLIVE_H

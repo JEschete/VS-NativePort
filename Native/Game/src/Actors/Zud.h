@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_ZUD_H_TYPES
-#define VS_ACTORS_ZUD_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ZudHeader;
@@ -21,5 +20,3 @@ struct Actors_ZudHeader {
     int battleAnimationSize;
 };
 static_assert(sizeof(Actors_ZudHeader) == 0x30, "Actors_ZudHeader must keep its PS1 layout");
-
-#endif // VS_ACTORS_ZUD_H_TYPES

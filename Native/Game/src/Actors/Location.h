@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_LOCATION_H_TYPES
-#define VS_ACTORS_LOCATION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ActorLocation;
@@ -45,5 +44,3 @@ struct Actors_PlacementBuffer {
     int reserved20;
 };
 static_assert(sizeof(Actors_PlacementBuffer) == 0x24, "Actors_PlacementBuffer must keep its PS1 layout");
-
-#endif // VS_ACTORS_LOCATION_H_TYPES

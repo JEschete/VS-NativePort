@@ -205,8 +205,9 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(rules(self.workspace), ["c-linkage-reintroduced"])
 
     def test_a_retired_criterion_cannot_return_to_a_remaining_header(self) -> None:
-        # Linked.h stays remaining for its macro guard and constant; nothing retired is left in it.
-        self.fixture.files["Native/Game/src/Menu/Linked.h"] = LINKED.replace("(void)", "()")
+        # Linked.h stays remaining for its suffix, C linkage and constant; nothing retired is left in it.
+        cleared = "#pragma once\n" + LINKED.replace("(void)", "()").split("\n", 2)[2].removesuffix("#endif\n")
+        self.fixture.files["Native/Game/src/Menu/Linked.h"] = cleared
         self.fixture.write()
         headers.sync(self.workspace)
         with mock.patch.object(headers, "RETIRED_CRITERIA", RETIRED):
@@ -215,14 +216,23 @@ class LedgerTests(unittest.TestCase):
                               if issue.rule == "criterion-reintroduced"], ["H0002 Native/Game/src/Menu/Map.h"])
 
             # A sync records the typedef but does not accept it.
-            self.fixture.files["Native/Game/src/Menu/Linked.h"] = LINKED.replace(
-                "(void)", "()").replace("#define VS_LINKED_COUNT 4\n", "#define VS_LINKED_COUNT 4\ntypedef int Count;\n")
+            self.fixture.files["Native/Game/src/Menu/Linked.h"] = cleared.replace(
+                "#define VS_LINKED_COUNT 4\n", "#define VS_LINKED_COUNT 4\ntypedef int Count;\n")
             self.fixture.write()
             linked = [issue.rule for issue in headers.check(self.workspace) if "Linked.h" in issue.subject]
             self.assertEqual(sorted(linked), ["criterion-reintroduced", "ledger-stale"])
             headers.sync(self.workspace)
             linked = [issue.rule for issue in headers.check(self.workspace) if "Linked.h" in issue.subject]
             self.assertEqual(linked, ["criterion-reintroduced"])
+
+            # A macro include guard is retired too; the split header's section guards are not yet.
+            self.fixture.files["Native/Game/src/Menu/Linked.h"] = LINKED.replace("(void)", "()")
+            self.fixture.write()
+            headers.sync(self.workspace)
+            returned = [issue.message for issue in headers.check(self.workspace)
+                        if issue.rule == "criterion-reintroduced" and "Linked.h" in issue.subject]
+            self.assertEqual(len(returned), 1)
+            self.assertTrue(returned[0].startswith("guard retired"), returned[0])
 
     def test_line_endings_do_not_change_a_measurement(self) -> None:
         text = "#pragma once\n#define VS_PAIR \\\n  int first; \\\n  int second;\nvoid Sum(void);\n"

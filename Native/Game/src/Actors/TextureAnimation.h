@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_TEXTUREANIMATION_H_TYPES
-#define VS_ACTORS_TEXTUREANIMATION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_TextureAnimationFrame;
@@ -91,5 +90,3 @@ struct Actors_TextureOverlayRect {
     u_char height;
 };
 static_assert(sizeof(Actors_TextureOverlayRect) == 0x4, "Actors_TextureOverlayRect must keep its PS1 layout");
-
-#endif // VS_ACTORS_TEXTUREANIMATION_H_TYPES

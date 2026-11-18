@@ -1,5 +1,4 @@
-#ifndef NATIVE_GAME_SRC_FIELD_GIMMICKLOOKUP_H_
-#define NATIVE_GAME_SRC_FIELD_GIMMICKLOOKUP_H_
+#pragma once
 
 #include "Field/Gimmicks.h"
 
@@ -15,5 +14,3 @@ static inline Field_GimmickInstance* Field_FindGimmickForActorSlot(
              ? Field_gimmickInstances[actor_slot]
              : nullptr;
 }
-
-#endif  // NATIVE_GAME_SRC_FIELD_GIMMICKLOOKUP_H_

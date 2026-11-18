@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_ROOMCACHE_H_TYPES
-#define VS_STATE_ROOMCACHE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct State_RoomEnemyStates;
@@ -14,5 +13,3 @@ struct State_RoomEnemyStates {
     char actorStates[8][0x28];
 };
 static_assert(sizeof(State_RoomEnemyStates) == 0x148, "State_RoomEnemyStates must keep its PS1 layout");
-
-#endif // VS_STATE_ROOMCACHE_H_TYPES

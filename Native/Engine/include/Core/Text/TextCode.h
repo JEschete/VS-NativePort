@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_CORE_TEXT_TEXTCODE_H_TYPES
-#define VS_CORE_TEXT_TEXTCODE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
@@ -28,5 +27,3 @@ enum Core_TextCode {
     Core_TextCode_PrintDecimal = 0xFE,
     Core_TextCode_PrintString = 0xFF
 };
-
-#endif // VS_CORE_TEXT_TEXTCODE_H_TYPES

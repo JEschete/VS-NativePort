@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_STREAM_H_TYPES
-#define VS_AUDIO_STREAM_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_AkaoStreamHeader;
@@ -29,5 +28,3 @@ struct Audio_CutsceneStreamData {
     /* 0xD0 */ char audioData[1];
 };
 static_assert(sizeof(Audio_CutsceneStreamData) == 0xD4, "Audio_CutsceneStreamData must keep its PS1 layout");
-
-#endif // VS_AUDIO_STREAM_H_TYPES

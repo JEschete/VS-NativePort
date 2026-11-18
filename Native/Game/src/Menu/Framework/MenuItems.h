@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_FRAMEWORK_MENUITEMS_H_TYPES
-#define VS_MENU_FRAMEWORK_MENUITEMS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
@@ -28,5 +27,3 @@ enum Menu_Framework_MenuState {
     Menu_Framework_MenuState_NoneClosed = 0x3F,
     Menu_Framework_MenuState_OpenedFromMainMenu = 0x40
 };
-
-#endif // VS_MENU_FRAMEWORK_MENUITEMS_H_TYPES

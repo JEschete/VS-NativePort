@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_RENDER_LEGACYPACKETS_H_TYPES
-#define VS_RENDER_LEGACYPACKETS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Render_ClosedRingPacket;
@@ -292,5 +291,3 @@ struct Render_TransposedRingTexCoord {
     u_char reserved1;
 };
 static_assert(sizeof(Render_TransposedRingTexCoord) == 0x2, "Render_TransposedRingTexCoord must keep its PS1 layout");
-
-#endif // VS_RENDER_LEGACYPACKETS_H_TYPES

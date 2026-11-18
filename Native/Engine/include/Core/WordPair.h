@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_CORE_WORDPAIR_H_TYPES
-#define VS_CORE_WORDPAIR_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Core_WordPair;
@@ -11,5 +10,3 @@ struct Core_WordPair {
     int high;
 };
 static_assert(sizeof(Core_WordPair) == 0x8, "Core_WordPair must keep its PS1 layout");
-
-#endif // VS_CORE_WORDPAIR_H_TYPES

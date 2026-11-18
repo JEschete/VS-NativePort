@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_RENDER_RENDER_H_TYPES
-#define VS_RENDER_RENDER_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Render_Camera;
@@ -47,5 +46,3 @@ struct Render_FrameScratch {
     /* 0x14 */ MATRIX viewMatrix;
     /* 0x34 */ Render_Camera camera;
 };
-
-#endif // VS_RENDER_RENDER_H_TYPES

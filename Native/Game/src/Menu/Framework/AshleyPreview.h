@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_FRAMEWORK_ASHLEYPREVIEW_H_TYPES
-#define VS_MENU_FRAMEWORK_ASHLEYPREVIEW_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
@@ -10,5 +9,3 @@ enum Menu_Framework_AshleyRenderMode {
     Menu_Framework_AshleyRenderMode_Init,
     Menu_Framework_AshleyRenderMode_Restore
 };
-
-#endif // VS_MENU_FRAMEWORK_ASHLEYPREVIEW_H_TYPES

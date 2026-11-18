@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_SYSTEMRESOURCES_H_TYPES
-#define VS_SYSTEMRESOURCES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Content_SystemDatHeader;
@@ -17,5 +16,3 @@ struct Content_SystemDatHeader {
     u_int interfaceDataOffset;
 };
 static_assert(sizeof(Content_SystemDatHeader) == 0x20, "Content_SystemDatHeader must keep its PS1 layout");
-
-#endif // VS_SYSTEMRESOURCES_H_TYPES

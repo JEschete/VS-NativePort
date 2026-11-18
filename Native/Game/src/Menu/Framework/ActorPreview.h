@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_FRAMEWORK_ACTORPREVIEW_H_TYPES
-#define VS_MENU_FRAMEWORK_ACTORPREVIEW_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Framework_PreviewPoseBytes;
@@ -25,5 +24,3 @@ struct Menu_Framework_PreviewPoseState {
     char opaque11;
 };
 static_assert(sizeof(Menu_Framework_PreviewPoseState) == 0x14, "Menu_Framework_PreviewPoseState must keep its PS1 layout");
-
-#endif // VS_MENU_FRAMEWORK_ACTORPREVIEW_H_TYPES

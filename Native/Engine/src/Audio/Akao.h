@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_AKAO_H_TYPES
-#define VS_AUDIO_AKAO_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_AkaoProgramFile;
@@ -29,5 +28,3 @@ struct Audio_AkaoProgramFile {
     /* 0x810 */ char programData[1]; // Sfx bytecode
 };
 static_assert(sizeof(Audio_AkaoProgramFile) == 0x814, "Audio_AkaoProgramFile must keep its PS1 layout");
-
-#endif // VS_AUDIO_AKAO_H_TYPES

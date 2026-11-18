@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_TRANSFORMS_H_TYPES
-#define VS_EFFECTS_TRANSFORMS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_AnimatedLocalTransform;
@@ -97,5 +96,3 @@ struct Effects_AnimatedLocalTransform {
     int reserved70;
 };
 static_assert(sizeof(Effects_AnimatedLocalTransform) == 0x74, "Effects_AnimatedLocalTransform must keep its PS1 layout");
-
-#endif // VS_EFFECTS_TRANSFORMS_H_TYPES

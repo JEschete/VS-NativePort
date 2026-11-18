@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_CORE_INTPAIR_H_TYPES
-#define VS_CORE_INTPAIR_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Core_IntPair;
@@ -11,5 +10,3 @@ struct Core_IntPair {
     int reserved4;
 };
 static_assert(sizeof(Core_IntPair) == 0x8, "Core_IntPair must keep its PS1 layout");
-
-#endif // VS_CORE_INTPAIR_H_TYPES

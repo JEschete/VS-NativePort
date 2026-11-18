@@ -1,7 +1,5 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-#ifndef VS_OWNED_BATTLE_AI_FRAMEUPDATE_H
-#define VS_OWNED_BATTLE_AI_FRAMEUPDATE_H
 #include "Legacy/Psx.h"
 
 struct Battle_Ai_ActorAiState;
@@ -44,5 +42,3 @@ struct Battle_Ai_FrameContext {
 Battle_Ai_FrameContext* Battle_Ai_FrameState();
 int Battle_Ai_TryTerrainRegionCell(int tile_x, int tile_z, u_char** cell);
 u_char* Battle_Ai_TerrainRegionCell(int tile_x, int tile_z);
-
-#endif  // VS_OWNED_BATTLE_AI_FRAMEUPDATE_H

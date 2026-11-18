@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_SHADOW_H_TYPES
-#define VS_ACTORS_SHADOW_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ShadowBlend;
@@ -20,5 +19,3 @@ struct Actors_ShadowBlend {
     short radiusShrinkDelta;
 };
 static_assert(sizeof(Actors_ShadowBlend) == 0x14, "Actors_ShadowBlend must keep its PS1 layout");
-
-#endif // VS_ACTORS_SHADOW_H_TYPES

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ITEMS_WEAPONS_H_TYPES
-#define VS_ITEMS_WEAPONS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Items_WeaponRange;
@@ -14,5 +13,3 @@ struct Items_WeaponRange {
     char attackShapeAngle : 5;
 };
 static_assert(sizeof(Items_WeaponRange) == 0x4, "Items_WeaponRange must keep its PS1 layout");
-
-#endif // VS_ITEMS_WEAPONS_H_TYPES

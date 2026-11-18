@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EVENT_WEATHER_H_TYPES
-#define VS_EVENT_WEATHER_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Event_WeatherTween;
@@ -22,5 +21,3 @@ struct Event_WeatherTween {
     short deltaIntensity;
 };
 static_assert(sizeof(Event_WeatherTween) == 0x16, "Event_WeatherTween must keep its PS1 layout");
-
-#endif // VS_EVENT_WEATHER_H_TYPES

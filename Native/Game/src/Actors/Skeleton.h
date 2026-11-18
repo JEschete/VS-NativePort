@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_SKELETON_H_TYPES
-#define VS_ACTORS_SKELETON_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ShpBone;
@@ -33,5 +32,3 @@ struct Actors_ShpModel {
     Actors_ShpBone bones[0];
 };
 static_assert(sizeof(Actors_ShpModel) == 0x40, "Actors_ShpModel must keep its PS1 layout");
-
-#endif // VS_ACTORS_SKELETON_H_TYPES

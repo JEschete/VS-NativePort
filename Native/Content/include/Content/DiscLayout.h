@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_CONTENT_DISCLAYOUT_H_TYPES
-#define VS_CONTENT_DISCLAYOUT_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
@@ -10329,5 +10328,3 @@
 #define VS_WAVE0200_DAT_SIZE 100352
 #define VS_SYSTEM_CNF_SIZE 2048
 #define VS_TITLE_PRG_SIZE 555008
-
-#endif // VS_CONTENT_DISCLAYOUT_H_TYPES

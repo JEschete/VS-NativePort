@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_SETTINGS_H_TYPES
-#define VS_STATE_SETTINGS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct State_Settings;
@@ -27,5 +26,3 @@ struct State_Settings {
     u_int saveFileGeneration;
 };
 static_assert(sizeof(State_Settings) == 0x20, "State_Settings must keep its PS1 layout");
-
-#endif // VS_STATE_SETTINGS_H_TYPES

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_RENDER_MODELDRAW_H_TYPES
-#define VS_RENDER_MODELDRAW_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_ShpModel;
@@ -67,5 +66,3 @@ struct Render_ModelScratchpadBoneView {
     MATRIX matrix;
 };
 static_assert(sizeof(Render_ModelScratchpadBoneView) == 0x84, "Render_ModelScratchpadBoneView must keep its PS1 layout");
-
-#endif // VS_RENDER_MODELDRAW_H_TYPES

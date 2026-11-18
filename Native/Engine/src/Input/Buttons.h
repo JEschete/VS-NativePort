@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_INPUT_BUTTONS_H_TYPES
-#define VS_INPUT_BUTTONS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 union Input_PressedButtonsView;
@@ -24,5 +23,3 @@ union Input_PressedButtonsView {
     } ports[2];
 };
 union Input_PressedButtonsView;
-
-#endif // VS_INPUT_BUTTONS_H_TYPES

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EVENT_INTERPOLATION_H_TYPES
-#define VS_EVENT_INTERPOLATION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Event_InterpolationCurve;
@@ -11,5 +10,3 @@ struct Event_InterpolationCurve {
     signed char power;
 };
 static_assert(sizeof(Event_InterpolationCurve) == 0x2, "Event_InterpolationCurve must keep its PS1 layout");
-
-#endif // VS_EVENT_INTERPOLATION_H_TYPES

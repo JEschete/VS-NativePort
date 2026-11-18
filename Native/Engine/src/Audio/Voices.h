@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_VOICES_H_TYPES
-#define VS_AUDIO_VOICES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_LegacyVoiceChannelState;
@@ -36,5 +35,3 @@ struct Audio_LegacyVoiceChannelState {
     /* 0x5C */ int controlFlags;
 };
 static_assert(sizeof(Audio_LegacyVoiceChannelState) == 0x60, "Audio_LegacyVoiceChannelState must keep its PS1 layout");
-
-#endif // VS_AUDIO_VOICES_H_TYPES

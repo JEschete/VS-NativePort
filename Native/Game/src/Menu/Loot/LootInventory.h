@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_MENU_LOOT_LOOTINVENTORY_H_TYPES
-#define VS_MENU_LOOT_LOOTINVENTORY_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Menu_Loot_LootListItem;
@@ -23,5 +22,3 @@ struct Menu_Loot_LootListItem {
     char state;
 };
 static_assert(sizeof(Menu_Loot_LootListItem) == 0x4, "Menu_Loot_LootListItem must keep its PS1 layout");
-
-#endif // VS_MENU_LOOT_LOOTINVENTORY_H_TYPES

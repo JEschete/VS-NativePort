@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_LOADING_H_TYPES
-#define VS_EFFECTS_LOADING_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_FileLoadContext;
@@ -21,5 +20,3 @@ struct Effects_TextureLoadList {
     u_short isClut[8];
 };
 static_assert(sizeof(Effects_TextureLoadList) == 0x44, "Effects_TextureLoadList must keep its PS1 layout");
-
-#endif // VS_EFFECTS_LOADING_H_TYPES

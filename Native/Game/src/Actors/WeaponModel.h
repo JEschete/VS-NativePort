@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_WEAPONMODEL_H_TYPES
-#define VS_ACTORS_WEAPONMODEL_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_WeaponModel;
@@ -66,5 +65,3 @@ struct Actors_WeaponModel {
     int reserved5E0;
     int reserved5E4;
 };
-
-#endif // VS_ACTORS_WEAPONMODEL_H_TYPES

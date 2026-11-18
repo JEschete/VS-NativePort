@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_GIMMICKMOTION_H_TYPES
-#define VS_FIELD_GIMMICKMOTION_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_GimmickMotionView;
@@ -25,5 +24,3 @@ struct Field_GimmickMotionView {
     char reserved16C[2];
     u_char material, reserved16F, frame;
 };
-
-#endif // VS_FIELD_GIMMICKMOTION_H_TYPES

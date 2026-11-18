@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_VALUELABELS_H_TYPES
-#define VS_BATTLE_VALUELABELS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_FloatingLabel;
@@ -31,5 +30,3 @@ struct Battle_FloatingLabel {
     short scaleY;
     signed char text[4];
 };
-
-#endif // VS_BATTLE_VALUELABELS_H_TYPES

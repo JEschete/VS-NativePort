@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_ZONE_H_TYPES
-#define VS_FIELD_ZONE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Content_DiscFile;
@@ -64,5 +63,3 @@ struct Field_ZoneContext {
     Field_MpdEnemySpawn* mpdEnemies;
     int currentSceneId;
 };
-
-#endif // VS_FIELD_ZONE_H_TYPES

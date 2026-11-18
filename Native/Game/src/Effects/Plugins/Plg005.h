@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_PLUGINS_PLG005_H_TYPES
-#define VS_EFFECTS_PLUGINS_PLG005_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_Plg005_AnalyzeGridQuad;
@@ -24,5 +23,3 @@ struct Effects_Plg005_AnalyzeGridQuad {
     int curveSampleDistance;
 };
 static_assert(sizeof(Effects_Plg005_AnalyzeGridQuad) == 0x1C, "Effects_Plg005_AnalyzeGridQuad must keep its PS1 layout");
-
-#endif // VS_EFFECTS_PLUGINS_PLG005_H_TYPES

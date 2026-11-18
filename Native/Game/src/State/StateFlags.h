@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_STATE_STATEFLAGS_H_TYPES
-#define VS_STATE_STATEFLAGS_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct State_StateFlags;
@@ -134,5 +133,3 @@ struct State_StateFlags {
     char reserved400[64];
 };
 static_assert(sizeof(State_StateFlags) == 0x440, "State_StateFlags must keep its PS1 layout");
-
-#endif // VS_STATE_STATEFLAGS_H_TYPES

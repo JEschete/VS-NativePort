@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_ACTORS_ROOMACTORCACHE_H_TYPES
-#define VS_ACTORS_ROOMACTORCACHE_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Actors_RoomActorRecord;
@@ -45,5 +44,3 @@ struct Actors_RoomActorRecord {
     u_char height;
 };
 static_assert(sizeof(Actors_RoomActorRecord) == 0x28, "Actors_RoomActorRecord must keep its PS1 layout");
-
-#endif // VS_ACTORS_ROOMACTORCACHE_H_TYPES

@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_BATTLE_ROOM_H_TYPES
-#define VS_BATTLE_ROOM_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Battle_DoorRecord;
@@ -23,5 +22,3 @@ struct Battle_PrimitiveBytes {
     char reserved3;
 };
 static_assert(sizeof(Battle_PrimitiveBytes) == 0x4, "Battle_PrimitiveBytes must keep its PS1 layout");
-
-#endif // VS_BATTLE_ROOM_H_TYPES

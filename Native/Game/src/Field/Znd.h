@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_FIELD_ZND_H_TYPES
-#define VS_FIELD_ZND_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Field_ZndEnemyRecord;
@@ -23,5 +22,3 @@ struct Field_ZndHeader {
     int musicId;
 };
 static_assert(sizeof(Field_ZndHeader) == 0x1C, "Field_ZndHeader must keep its PS1 layout");
-
-#endif // VS_FIELD_ZND_H_TYPES

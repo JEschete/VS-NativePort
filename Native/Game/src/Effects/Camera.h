@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_EFFECTS_CAMERA_H_TYPES
-#define VS_EFFECTS_CAMERA_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Effects_CameraShakeChannel;
@@ -34,5 +33,3 @@ struct Effects_EffectCamera {
     int farClip;
 };
 static_assert(sizeof(Effects_EffectCamera) == 0x40, "Effects_EffectCamera must keep its PS1 layout");
-
-#endif // VS_EFFECTS_CAMERA_H_TYPES

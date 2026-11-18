@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_CONTENT_STRINGTABLES_H_TYPES
-#define VS_CONTENT_STRINGTABLES_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 
@@ -4596,5 +4595,3 @@ enum Text_Menue_menuText_indices_e {
     Text_Menue_menuText_Index_areaMapDesc = 26,
     Text_Menue_menuText_Index_readMeDesc = 27,
 };
-
-#endif // VS_CONTENT_STRINGTABLES_H_TYPES

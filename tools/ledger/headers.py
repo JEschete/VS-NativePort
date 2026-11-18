@@ -65,14 +65,24 @@ QUOTED_INCLUDE = re.compile(r'^[ \t]*#[ \t]*include[ \t]*"(?P<name>[^"]+)"', re.
 PERMITTED_MACROS = {
     "VS_ASSERT": "stringizes the asserted condition",
 }
-# Criteria cleared from every tracked header, each with its C++ form. A header still remaining for other criteria must
-# not regain one, which a stale-ledger finding alone would let a sync record.
+# Criteria cleared from every tracked header (for `guard`, the kinds in RETIRED_GUARDS), each with its C++ form. A
+# header still remaining for other criteria must not regain one, which a stale-ledger finding alone would let a sync
+# record.
 RETIRED_CRITERIA = {
     "static_asserts": "static_assert",
     "typedefs": "struct X { ... }; or using N = T;",
     "void_params": "f()",
     "gnu_attributes": "a standard attribute",
+    "guard": "#pragma once",
 }
+# Guard kinds no tracked header uses; `split` stays permitted until the types-only sections are merged.
+RETIRED_GUARDS = {"macro", "none"}
+
+
+def reintroduced(values: dict[str, str]) -> list[str]:
+    """The RETIRED_CRITERIA a header's measurements fail."""
+    return [column for column in RETIRED_CRITERIA
+            if (values[column] in RETIRED_GUARDS if column == "guard" else values[column] != "0")]
 
 
 class HeaderWorkspace(gates.Workspace):
@@ -439,7 +449,7 @@ def check(workspace: HeaderWorkspace) -> list[Issue]:
             if linkage_retired and values["c_linkage"] != "0":
                 found.append(issue("c-linkage-reintroduced", subject, "C linkage is retired in every file; use C++ "
                                    "linkage (Docs/CPP_HEADERS.md)"))
-            returned = [column for column in RETIRED_CRITERIA if row["kind"] == "header" and values[column] != "0"]
+            returned = reintroduced(values) if row["kind"] == "header" else []
             if returned:
                 forms = "; ".join(f"{column}: {RETIRED_CRITERIA[column]}" for column in returned)
                 found.append(issue("criterion-reintroduced", subject, f"{', '.join(returned)} retired in every "

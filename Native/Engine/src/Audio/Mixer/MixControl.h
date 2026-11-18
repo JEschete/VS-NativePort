@@ -1,6 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#ifndef VS_AUDIO_MIXER_MIXCONTROL_H_TYPES
-#define VS_AUDIO_MIXER_MIXCONTROL_H_TYPES
+#pragma once
 #include "Legacy/Psx.h"
 
 struct Audio_CommandParams;
@@ -17,5 +16,3 @@ struct Audio_CommandParams {
 
 // decomp: FSoundCommandHandler (src/SLUS_010.40/25AC.c:77)
 using Audio_CommandHandler = void (*)(Audio_CommandParams*);
-
-#endif // VS_AUDIO_MIXER_MIXCONTROL_H_TYPES
