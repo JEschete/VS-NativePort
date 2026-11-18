@@ -38,6 +38,9 @@ void RecordLiveEffectCurves(std::span<const std::byte> payload);
 // that pointer. A block recorded again at the same
 // address replaces the extent; a package that binds no block 8 keeps the
 // previous package's pointer and extent, as the original kept the pointer.
+// With every extent in use, the oldest one that neither the action nor the
+// secondary package record still binds is replaced, so the resident
+// secondary programs survive any number of loaded packages.
 void RecordLiveEffectPrograms(std::span<const std::byte> payload);
 // Withdraws the program block starting at `programs`.
 void ForgetLiveEffectPrograms(const void* programs);
@@ -49,7 +52,8 @@ void ForgetLiveEffectPrograms(const void* programs);
 // pointer into its table, as the original did, so its program's extent is
 // looked up by the table containing that pointer. Recording a table withdraws
 // every recorded table it overlaps, so a reused buffer has one extent; with
-// every extent in use, the oldest is replaced.
+// every extent in use, the oldest one neither package record binds is
+// replaced.
 void RecordLiveAnimationTable(std::span<std::byte> table);
 // Withdraws the animation table starting at `table`.
 void ForgetLiveAnimationTable(const void* table);

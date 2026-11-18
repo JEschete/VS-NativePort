@@ -1815,6 +1815,100 @@ TEST_CASE("Live effect resource contexts move between the package records",
   CHECK(Effects_package == &Effects_actionPackage);
 }
 
+namespace {
+constexpr std::uint16_t kHitScriptOffset = 0x75;
+constexpr std::size_t kProgramBytes = 0x80;
+constexpr std::uint8_t kResidentMarker = 0x5A;
+// More than the eight extents of each registry.
+constexpr std::size_t kLoadedPackages = 10;
+
+// A package with an empty block-2 animation table and a block-8 program
+// holding `marker` where the refused hit script read (#442).
+std::vector<std::byte> AnimatedProgramPackage(std::uint8_t marker) {
+  std::vector<std::uint8_t> programs(kProgramBytes, 0);
+  programs.at(kHitScriptOffset) = marker;
+  return BuildPackage({
+      {.type = 2, .payload = {0, 0, 0, 0}},
+      {.type = 8, .payload = programs},
+  });
+}
+
+// Binds a resident package to the secondary record, as
+// InitializeEffectResources binds the empty package, then binds packages to
+// the action record, each in its own buffer as LoadEffectPackage allocates
+// one. The records are restored and every bound program and table withdrawn.
+struct ResidentPackageScope {
+  LivePackageScope action;
+  Effects_EffectPackage saved_secondary = Effects_secondaryPackage;
+  std::vector<std::byte> resident = AnimatedProgramPackage(kResidentMarker);
+  std::vector<std::vector<std::byte>> loaded;
+  std::vector<const void*> programs;
+  std::vector<const void*> tables;
+
+  ResidentPackageScope() = default;
+  ResidentPackageScope(const ResidentPackageScope&) = delete;
+  ResidentPackageScope& operator=(const ResidentPackageScope&) = delete;
+  ResidentPackageScope(ResidentPackageScope&&) = delete;
+  ResidentPackageScope& operator=(ResidentPackageScope&&) = delete;
+  ~ResidentPackageScope() {
+    for (const void* program : programs) {
+      Effects::ForgetLiveEffectPrograms(program);
+    }
+    for (const void* table : tables) Effects::ForgetLiveAnimationTable(table);
+    Effects_package = &Effects_secondaryPackage;
+    Effects::ForgetLivePackageExtents();
+    Effects_secondaryPackage = saved_secondary;
+  }
+
+  void Bind(Effects_EffectPackage& record, std::span<std::byte> package) {
+    Effects_package = &record;
+    auto walk = Effects::BindLiveEffectPackage(package);
+    CHECK(Required(walk).status == Effects::PackageWalkStatus::kEnded);
+    programs.push_back(record.block8Data);
+    tables.push_back(record.block2Data);
+  }
+
+  void BindResidentThenLoad() {
+    Effects_secondaryPackage = {};
+    Bind(Effects_secondaryPackage, resident);
+    loaded.reserve(kLoadedPackages);
+    for (std::size_t i = 0; i < kLoadedPackages; ++i) {
+      loaded.push_back(AnimatedProgramPackage(static_cast<std::uint8_t>(i)));
+      Bind(Effects_actionPackage, loaded.back());
+    }
+  }
+};
+}  // namespace
+
+TEST_CASE("Loaded effect packages keep the resident package's blocks recorded",
+          "[effects][effects-resources-transforms][package-extents]") {
+  ResidentPackageScope scope;
+  scope.BindResidentThenLoad();
+
+  CHECK(
+      Effects::LiveEffectPrograms(Effects_secondaryPackage.block8Data).size() ==
+      kProgramBytes);
+  CHECK(
+      Effects::LiveAnimationTable(Effects_secondaryPackage.block2Data).size() ==
+      4);
+  // A melee hit's secondary script still reads its operand (#442).
+  Effects_EffectInstance hit{};
+  hit.script = Effects_secondaryPackage.block8Data;
+  hit.scriptOffset = kHitScriptOffset;
+  CHECK(Effects::LiveReadScriptByte(&hit) == kResidentMarker);
+  CHECK(hit.scriptOffset == kHitScriptOffset + 1);
+
+  // The oldest loads no record binds make room: the resident package and the
+  // last seven loads fill the eight extents.
+  CHECK(Effects::LiveEffectPrograms(scope.programs.at(3)).empty());
+  CHECK(Effects::LiveAnimationTable(scope.tables.at(3)).empty());
+  CHECK(Effects::LiveEffectPrograms(scope.programs.at(4)).size() ==
+        kProgramBytes);
+  CHECK(Effects::LiveAnimationTable(scope.tables.at(4)).size() == 4);
+  CHECK(Effects::LiveEffectPrograms(Effects_actionPackage.block8Data).size() ==
+        kProgramBytes);
+}
+
 TEST_CASE("Live effect camera and transforms refuse a missing instance",
           "[effects][effects-resources-transforms]") {
   const Effects::EffectCameraState saved = Effects::LoadLiveEffectCameraState();

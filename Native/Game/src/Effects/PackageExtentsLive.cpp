@@ -29,6 +29,36 @@ struct PackageExtentRecord {
 std::array<PackageExtentRecord, kRecordCapacity> records{};
 std::size_t next_replacement = 0;
 
+// Whether the action or secondary package record still binds `data` as its
+// `block` pointer; the current and saved package pointers only ever select
+// one of the two. The resident secondary package binds the empty package's
+// blocks once, while every loaded package takes a new buffer, so a bound
+// extent must outlive the loads after it (#442).
+template <typename Block>
+bool IsBound(const void* data, Block Effects_EffectPackage::* block) {
+  if (data == nullptr) return false;
+  return static_cast<const void*>(Effects_actionPackage.*block) == data ||
+         static_cast<const void*>(Effects_secondaryPackage.*block) == data;
+}
+
+// A free extent, else the oldest one no package binds, else the oldest; a
+// free extent has the lowest order.
+template <typename Extents, typename Block>
+auto& ReplaceableExtent(Extents& extents,
+                        Block Effects_EffectPackage::* block) {
+  auto* oldest = &*std::ranges::min_element(
+      extents, {}, [](const auto& extent) { return extent.recorded; });
+  decltype(oldest) oldest_unbound = nullptr;
+  for (auto& extent : extents) {
+    if (IsBound(extent.data, block)) continue;
+    if (oldest_unbound == nullptr ||
+        extent.recorded < oldest_unbound->recorded) {
+      oldest_unbound = &extent;
+    }
+  }
+  return oldest_unbound != nullptr ? *oldest_unbound : *oldest;
+}
+
 // The action and secondary packages' program blocks, with room for blocks
 // rebound at other addresses and for test programs.
 constexpr std::size_t kProgramCapacity = 8;
@@ -36,10 +66,13 @@ constexpr std::size_t kProgramCapacity = 8;
 struct ProgramExtent {
   const std::byte* data = nullptr;
   std::size_t size = 0;
+  // Order of recording; the oldest unbound extent is replaced when none is
+  // free.
+  std::uint64_t recorded = 0;
 };
 
 std::array<ProgramExtent, kProgramCapacity> programs{};
-std::size_t next_program = 0;
+std::uint64_t program_records = 0;
 
 ProgramExtent* FindProgram(const void* data) {
   if (data == nullptr) return nullptr;
@@ -54,7 +87,8 @@ constexpr std::size_t kAnimationTableCapacity = 8;
 struct AnimationTableExtent {
   std::byte* data = nullptr;
   std::size_t size = 0;
-  // Order of recording; the oldest extent is replaced when none is free.
+  // Order of recording; the oldest unbound extent is replaced when none is
+  // free.
   std::uint64_t recorded = 0;
 
   [[nodiscard]] std::uintptr_t Begin() const {
@@ -130,10 +164,11 @@ void RecordLiveEffectPrograms(std::span<const std::byte> payload) {
   if (payload.data() == nullptr) return;
   auto* extent = FindProgram(payload.data());
   if (extent == nullptr) {
-    extent = &programs.at(next_program);
-    next_program = (next_program + 1) % programs.size();
+    extent = &ReplaceableExtent(programs, &Effects_EffectPackage::block8Data);
   }
-  *extent = {.data = payload.data(), .size = payload.size()};
+  *extent = {.data = payload.data(),
+             .size = payload.size(),
+             .recorded = ++program_records};
 }
 
 void ForgetLiveEffectPrograms(const void* data) {
@@ -157,9 +192,8 @@ void RecordLiveAnimationTable(std::span<std::byte> table) {
       extent = {};
     }
   }
-  // A free extent, else the oldest; a free one has the lowest order.
-  *std::ranges::min_element(animation_tables, {},
-                            &AnimationTableExtent::recorded) = recorded;
+  ReplaceableExtent(animation_tables, &Effects_EffectPackage::block2Data) =
+      recorded;
 }
 
 void ForgetLiveAnimationTable(const void* data) {
