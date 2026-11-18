@@ -54,6 +54,7 @@ renumbers function IDs and rewrites the catalogs, so do not run it to refresh st
 | D21 | Texture/VRAM model for 1b | **Page image:** one 1024×512 16-bit image the game's uploads, copies and drawing act on with the original semantics (`Render::PageSpace`). As built, drawing is rasterized on the CPU for parity and the GPU only presents; the GPU renderer of §6.2 replaces the rasterizer in 2a. | Owner (2026-10-17) |
 | D22 | Movies | **AV1** in Matroska with FLAC, converted by FFmpeg at extract time; dav1d + libwebm + dr_flac at run time. | Owner (2026-10-17) |
 | D23 | Instruments | **sfizz** (SFZ + WAV) driven by the ported AKAO sequencer, as proposed in §6.3. | Owner (2026-10-17) |
+| D24 | C++ headers | Every header becomes a real C++ header (`.hpp`, `#pragma once`, namespaces, C++ linkage, no C idioms); a rename or language override is not enough. The copier is retired: its decomp input was removed in `6b20016f0`, generated files are edited directly, and a generated header leaves `copy_manifest.json` when it is migrated. Tracked in [CPP_HEADERS.md](CPP_HEADERS.md). | Owner (2026-11-18) |
 
 ### 0.1 Target meaning of "not an emulator"
 
@@ -403,7 +404,7 @@ For each row (in file order):
 10. Module statics with an initial value are restored by generated per-module resets (as built: the statics stay named variables; folding them into the `state:` structs the data ledger names is Step 5); scratchpad uses map to Core's scratch block; asm-only functions become `VS_UNPORTED` stubs ([PORTING_WATCHLIST.md](PORTING_WATCHLIST.md) §1, §5, §6).
 11. Re-run `tools\scaffold\gen_solution.py` so the projects list the new files.
 
-**As built (2026-10-17).** `python tools\port\decl_index.py` (libclang declaration extents, about 90 s) and
+**As built (2026-10-17; the regeneration workflow is superseded by D24, 2026-11-18).** `python tools\port\decl_index.py` (libclang declaration extents, about 90 s) and
 `python tools\port\hazard_index.py` (x64 hazards, about 5 min), then `python tools\port\copy_to_native.py` (about
 1 min), then `gen_solution.py` and a build; `copy_to_native.py --mark` after a successful build fills
 `copied`/`compiles`. The copy is regenerated from the decomp until each item is modernized, so fixes go into the

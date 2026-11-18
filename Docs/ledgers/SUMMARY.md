@@ -122,10 +122,12 @@ the evidence then available was prose and an uncommitted local artifact. Later
 resource-release and allocation-refusal tests are recorded in `VERIFY_LEDGER.csv`;
 the historical marker removal is not a claim that those functions remain untested.
 
-### Per-function work and platform hazards
+### Per-function work, platform hazards and C++ headers
 
 [MODERNIZATION.md](../MODERNIZATION.md) tracks each port target through promotion and its regression cover.
 [PLATFORM_HAZARDS.md](../PLATFORM_HAZARDS.md) logs each site that may rely on something PS1 hardware tolerated.
+[CPP_HEADERS.md](../CPP_HEADERS.md) tracks the rewrite of C-style headers, and the C linkage that depends on them, into
+C++ ([HEADER_LEDGER.csv](HEADER_LEDGER.csv)).
 
 ### Slices and retirement
 
@@ -374,9 +376,12 @@ and the generated functions and the split zone-context aliases are retired, Room
 generated and 38 hand-written C sources compile as C++23. This is language migration, not promotion: they keep C
 linkage and the relaxed settings, so their functions stay `wip` and none gains `cpp=x`, `modernized` or `verified`.
 
-Generated files remain reproducible: `tools\port\cpp_adapt.py` derives the conversions C performed implicitly from
-compiler diagnostics, `tools\port\cpp_adaptations.json` records them, and the copy tool replays them. Copied code keeps
-C's meaning through `/J`, `-fno-finite-loops` and `-fno-strict-return`.
+Generated files are no longer reproducible. The copy tool, which also replayed the `tools\port\cpp_adaptations.json`
+conversions, read the decomp under `resources\rood-reverseWin`, and the owner removed that folder on purpose in
+`6b20016f0`.
+`tools\port\copy_manifest.json` now lists files not yet migrated, and those files are edited directly (owner decision,
+2026-11-18; see [CPP_HEADERS.md](../CPP_HEADERS.md)). Copied code keeps C's meaning through `/J`, `-fno-finite-loops`
+and `-fno-strict-return`.
 
 ### Full tidy result (#248)
 

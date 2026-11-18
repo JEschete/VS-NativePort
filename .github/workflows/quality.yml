@@ -45,12 +45,16 @@ jobs:
         run: python -m unittest discover -s tools\ledger -p test_modernization.py -v
       - name: Verify hazard controls
         run: python -m unittest discover -s tools\ledger -p test_hazards.py -v
+      - name: Verify header migration controls
+        run: python -m unittest discover -s tools\ledger -p test_headers.py -v
       - name: Verify regression controls
         run: python -m unittest discover -s tools\test -p test_regression.py -v
       - name: Check the modernization ledger
         run: python tools\ledger\modernization.py --check
       - name: Check the platform hazard ledger
         run: python tools\ledger\hazards.py --check
+      - name: Check the C++ header migration ledger
+        run: python tools\ledger\headers.py --check
       - name: Check the regression baseline
         run: python tools\test\regression.py static
 
