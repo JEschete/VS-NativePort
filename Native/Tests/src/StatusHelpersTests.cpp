@@ -9,18 +9,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/StatusHelpers.hpp"
-#include "Battle/StatusHelpersLive.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusHelpers.hpp"
+#include "Battle/StatusHelpersLive.hpp"
+#include "Content/ModuleData.h"
 #include "Field/Interactions.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace battle = VS::Battle;

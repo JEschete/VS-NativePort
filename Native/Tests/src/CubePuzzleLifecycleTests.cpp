@@ -14,28 +14,26 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzleLifecycle.hpp"
-#include "Menu/Results/CubePuzzleLifecycleLive.hpp"
-#include "Menu/Results/CubePuzzleText.hpp"
-#include "Menu/Results/ResultsDrawing.hpp"
-#include "Menu/Results/ResultsPalette.hpp"
-#include "Render/DisplayControl.hpp"
-#include "Render/TexturePagesLive.hpp"
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Room.h"
+#include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzleLifecycle.hpp"
+#include "Menu/Results/CubePuzzleLifecycleLive.hpp"
+#include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/Results.h"
+#include "Menu/Results/ResultsDrawing.hpp"
+#include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttack.h"
+#include "Render/DisplayControl.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace {
 namespace r = VS::Menu::Results;

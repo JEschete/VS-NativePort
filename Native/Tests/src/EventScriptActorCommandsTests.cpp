@@ -16,12 +16,9 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptActorCommands.hpp"
+#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Event/ScriptVm.h"
-}
 
 namespace {
 namespace actors = VS::Actors;

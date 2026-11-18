@@ -1,9 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-extern "C" {
 #include "Legacy/Psx.h"
-}
 
 // Binds the actor preview (ActorPreview.hpp) to the actor and weapon records
 // (Actors_actorRecords, Actors_weaponModels), the game heap, the battle asset

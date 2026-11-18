@@ -5,12 +5,9 @@
 #include <string>
 
 #include "Battle/Encounter.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Field/Mpd.h"
 #include "Items/Loadout.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Game {
 

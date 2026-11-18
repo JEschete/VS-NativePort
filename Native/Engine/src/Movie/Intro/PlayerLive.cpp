@@ -1,16 +1,14 @@
 // Hand-maintained live binding for Movie/Intro/Player.cpp.
 #include <cstdint>
 
-#include "Input/ControllerLive.hpp"
-#include "Movie/IntroPlayer.hpp"
-#include "Movie/IntroPlayerLive.hpp"
-extern "C" {
 #include "Input/Buttons.h"
+#include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Movie/Intro/Playback.h"
+#include "Movie/IntroPlayer.hpp"
+#include "Movie/IntroPlayerLive.hpp"
 #include "Movie/MoviePlayer.h"
-}
 
 namespace VS::Movie::Intro {
 namespace {

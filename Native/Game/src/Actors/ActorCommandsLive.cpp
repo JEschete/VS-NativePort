@@ -13,31 +13,29 @@
 #include "Actors/ActorCommandsLiveState.h"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
+#include "Actors/Animation.h"
 #include "Actors/AnimationControlLive.hpp"
+#include "Actors/Location.h"
 #include "Actors/MotionRequestsLive.hpp"
+#include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
-#include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Core/Runtime.hpp"
-#include "Effects/ActionEffectCallbacksLive.hpp"
-#include "Field/CameraLive.hpp"
-#include "Field/ChestInteractionsLive.h"
-
-extern "C" {
-#include "Actors/Animation.h"
-#include "Actors/Location.h"
-#include "Actors/Movement.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
+#include "Core/Runtime.hpp"
+#include "Effects/ActionEffectCallbacksLive.hpp"
+#include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.h"
+#include "Field/ChestInteractionsLive.h"
 #include "Field/Doors.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
@@ -46,7 +44,6 @@ extern "C" {
 
 // decomp: D_800F1A50 (D_800F1A50@BATTLE/BATTLE.PRG)
 int Actors_ashleyMoveInput[kActorsAshleyMoveInputWords];
-}
 
 namespace VS::Actors {
 namespace {

@@ -12,20 +12,18 @@
 #include <type_traits>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/Feedback.h"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudRenderingLiveFixture.hpp"
 #include "Battle/HudShortcutLiveFixture.hpp"
 #include "Content/ModuleData.h"
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/Feedback.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Text/CompactFont.h"
 #include "State/SceneTimer.h"
 #include "State/Timers.h"
-}
 
 namespace hud_orchestration_live_fixture {
 namespace b = VS::Battle;

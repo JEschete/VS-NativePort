@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Plugins/Plg167.h"
 
@@ -9,4 +8,3 @@ CVECTOR Effects_Plg167_closedRingColorFactors[8]; /* contents: module image (Mod
 // decomp: D_800FD844 (D_800FD844@EFFECT/PLG167.BIN)
 int Effects_Plg167_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

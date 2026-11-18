@@ -17,18 +17,15 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/DataStore.hpp"
-#include "Menu/FilesLive.hpp"
-#include "Save/NativeFilePresentation.hpp"
-
-extern "C" {
 #include "Core/Text/TextCode.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
+#include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.h"
 #include "Save/MemoryCard/Resources.h"
+#include "Save/NativeFilePresentation.hpp"
 #include "Title/SaveFiles.h"
-}
 
 namespace {
 namespace fs = std::filesystem;

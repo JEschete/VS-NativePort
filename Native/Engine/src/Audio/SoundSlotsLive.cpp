@@ -11,11 +11,8 @@
 #include "Audio/SoundBanks.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio {
 namespace {

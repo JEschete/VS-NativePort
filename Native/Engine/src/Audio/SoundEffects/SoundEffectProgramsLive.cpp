@@ -15,23 +15,20 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/SampleBanksLive.hpp"
-#include "Audio/SeqMusicSequenceLive.hpp"
-#include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SoundEffectPrograms.hpp"
-#include "Audio/SoundPlaybackLive.hpp"
-#include "Audio/VoiceOutputLive.hpp"
-
-extern "C" {
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/SampleBanksLive.hpp"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/SeqMusicSequenceLive.hpp"
+#include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SoundEffectPrograms.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundPlaybackLive.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio::SoundEffects {
 namespace {

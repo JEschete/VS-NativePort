@@ -9,32 +9,30 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/AnimationControlLive.hpp"
-#include "Battle/ActionAnimationsLive.hpp"
-#include "Battle/ActionResults.hpp"
-#include "Battle/ActorVitalsLive.hpp"
-#include "Battle/FloatingLabelPlacementLive.hpp"
-#include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/FloatingLabelQueueLive.hpp"
-#include "Battle/StatusHelpersLive.hpp"
-#include "Battle/StatusLifecycleLive.hpp"
-#include "Core/Log.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionResults.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/ActorVitalsLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Battle/FloatingLabelPlacementLive.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusHelpersLive.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/TargetingState.h"
+#include "Core/Log.hpp"
 #include "Core/Unported.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Battle {
 namespace {

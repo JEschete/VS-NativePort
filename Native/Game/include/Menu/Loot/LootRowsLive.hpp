@@ -1,9 +1,7 @@
 #pragma once
 
-extern "C" {
 #include "Items/Loot.h"
 #include "Menu/Loot/LootInventory.h"
-}
 
 namespace VS::Menu::Loot::Live {  // NOLINT(readability-identifier-naming)
 void RefreshClaimableRows();

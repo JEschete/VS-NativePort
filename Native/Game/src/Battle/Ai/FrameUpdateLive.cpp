@@ -7,13 +7,6 @@
 #include <cstring>
 #include <optional>
 
-#include "Battle/Ai/ActionExecutionLive.hpp"
-#include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Battle/Ai/BlockedMovementLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-
-extern "C" {
-
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -25,10 +18,14 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/BlockedMovementLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -78,7 +75,6 @@ u_char* Battle_Ai_TerrainRegionCell(int tile_x, int tile_z) {
   if (!Battle_Ai_TryTerrainRegionCell(tile_x, tile_z, &cell)) abort();
   return cell;
 }
-}  // extern "C"
 
 namespace {
 Battle_Ai_ActorAiState* AsActorAiState(void* view) {

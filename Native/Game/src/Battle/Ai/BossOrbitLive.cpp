@@ -9,23 +9,21 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/BossOrbit.hpp"
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/RadialMovementLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/BossOrbit.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Diagnostics.h"
-}
+#include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

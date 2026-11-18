@@ -16,26 +16,23 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.h"
 #include "Field/ChestInteractionsLive.h"
-#include "Field/MinimapScene.hpp"
-#include "Field/MinimapSceneLive.h"
-#include "Field/MinimapSceneLive.hpp"
-#include "Field/Transitions.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
+#include "Field/MinimapSceneLive.h"
+#include "Field/MinimapSceneLive.hpp"
 #include "Field/Room.h"
+#include "Field/Transitions.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
-}
 
 namespace {
 std::span<const std::byte> SceneBytes(const void* data, size_t size) {

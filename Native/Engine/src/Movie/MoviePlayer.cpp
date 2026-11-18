@@ -337,7 +337,7 @@ std::unique_ptr<Player> g_player;
 
 }  // namespace
 
-extern "C" int Movie_PlayerOpen(const char* disc_path) {
+int Movie_PlayerOpen(const char* disc_path) {
   g_player.reset();
   const Content::DataStore* store = Content::DataStore::Get();
   const Content::DataStore::Entry* e = store ? store->Find(disc_path) : nullptr;
@@ -356,7 +356,7 @@ extern "C" int Movie_PlayerOpen(const char* disc_path) {
   return 1;
 }
 
-extern "C" int Movie_PlayerDrawFrame(int ticks, int x, int y) {
+int Movie_PlayerDrawFrame(int ticks, int x, int y) {
   if (!g_player) {
     return 0;
   }
@@ -366,4 +366,4 @@ extern "C" int Movie_PlayerDrawFrame(int ticks, int x, int y) {
   return more ? 1 : 0;
 }
 
-extern "C" void Movie_PlayerClose(void) { g_player.reset(); }
+void Movie_PlayerClose(void) { g_player.reset(); }

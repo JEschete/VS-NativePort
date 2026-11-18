@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Legacy.h"
 
@@ -33,4 +32,3 @@ u_int const Menu_legacyUnusedVertices[] __attribute__((unused)) = { 0xFFEAFFFA,
     0x00B80090, 0x0008001A, 0x00C00090, 0x0008001A, 0x00C80090, 0x00080016, 0x00D00090,
     0x00080024 };
 
-}  // extern "C"

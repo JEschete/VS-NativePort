@@ -15,22 +15,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
-#include "Menu/FilesLive.hpp"
-#include "Save/MemoryCard/GameFilesLive.hpp"
-#include "Title/TitleMenu.hpp"
-#include "Title/TitleMenuLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
+#include "Content/ModuleData.h"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.h"
+#include "Menu/FilesLive.hpp"
 #include "Render/Display.h"
+#include "Save/MemoryCard/GameFilesLive.hpp"
 #include "State/Location.h"
 #include "State/StateFlags.h"
 #include "Title/SaveFiles.h"
+#include "Title/TitleMenu.hpp"
+#include "Title/TitleMenuLive.hpp"
 #include "Title/TitleMenuLiveState.h"
-}
 
 namespace {
 namespace title = VS::Title;

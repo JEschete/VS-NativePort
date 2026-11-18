@@ -22,10 +22,16 @@
 #include <string_view>
 #include <utility>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
+#include "Boot/GameLoop.h"
 #include "Core/Log.hpp"
+#include "Core/Text/TextCode.h"
 #include "Field/ChestInteractionsLive.h"
+#include "Field/Gimmicks.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/FilesLive.hpp"
+#include "Menu/FilesLiveState.h"
 #include "Menu/Sounds.hpp"
 #include "Platform/App.hpp"
 #include "Save/FileMenu.hpp"
@@ -35,15 +41,7 @@
 #include "Save/NativeMenu.hpp"
 #include "Save/NativeResume.h"
 #include "Save/RuntimeSnapshot.hpp"
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Boot/GameLoop.h"
-#include "Core/Text/TextCode.h"
-#include "Field/Gimmicks.h"
-#include "Input/ControllerLiveState.h"
-#include "Menu/FilesLiveState.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace VS::Game::Save {
 namespace {
@@ -634,22 +632,22 @@ int UpdateLiveSaveMenu(int init_state) {
 std::span<const char> LiveFileMenuFooter() { return VS::Game::Save::footer; }
 }  // namespace VS::Menu
 
-extern "C" int Save_NativeSelectContainer(int init) {
+int Save_NativeSelectContainer(int init) {
   return VS::Game::Save::RunPicker(VS::Menu::Files::UpdateContainerMenu, init);
 }
 
-extern "C" int Save_NativeInitialTitleSelection(void) {
+int Save_NativeInitialTitleSelection(void) {
   return VS::Game::Save::InitialTitleSelection();
 }
 
-extern "C" void Save_NativeDrawFileOverlay(int title) {
+void Save_NativeDrawFileOverlay(int title) {
   const auto screen = VS::Game::Save::FileMenuPresentation();
   if (screen && screen->title == (title != 0)) {
     VS::Game::Save::DrawNativeFileScreen(*screen);
   }
 }
 
-extern "C" Items_ContainerData* Save_NativeContainerData(void) {
+Items_ContainerData* Save_NativeContainerData(void) {
   auto& storage = VS::Game::Save::staged_storage;
   if (!storage) {
     VS_LOG_ERROR("save", "Container access without a selected native file");
@@ -658,11 +656,11 @@ extern "C" Items_ContainerData* Save_NativeContainerData(void) {
   return &*storage;
 }
 
-extern "C" void Save_NativeReleaseContainer(void) {
+void Save_NativeReleaseContainer(void) {
   VS::Game::Save::staged_storage.reset();
 }
 
-extern "C" void Save_NativeStageClearGame(void) {
+void Save_NativeStageClearGame(void) {
   namespace Save = VS::Game::Save;
   Save::staged_clear.reset();
   Save::ClearError().clear();

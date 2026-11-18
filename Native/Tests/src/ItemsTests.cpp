@@ -12,9 +12,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
 #include "Event/ScriptVmLive.hpp"
+#include "Field/Gimmicks.h"
+#include "Field/Room.h"
+#include "Items/Categories.h"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/EquipmentStats.hpp"
@@ -30,13 +34,6 @@
 #include "Items/Recovery.hpp"
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
-#include "Items/Categories.h"
-}
 
 namespace {
 namespace items = VS::Items;

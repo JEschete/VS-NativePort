@@ -10,25 +10,22 @@
 #include <string_view>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Battle/Actor.h"
+#include "Battle/Damage.h"
+#include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Core/Log.hpp"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/ActorSwitching.hpp"
+#include "Render/Render.h"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Hud.h"
-#include "Legacy/Psx.h"
-#include "Menu/Status/ActorStatus.h"
-#include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {

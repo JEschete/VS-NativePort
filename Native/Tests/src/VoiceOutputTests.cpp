@@ -8,13 +8,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Cutscene/Stream.h"
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Content/AudioBank.hpp"
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-}  // extern "C"
 
 namespace {
 

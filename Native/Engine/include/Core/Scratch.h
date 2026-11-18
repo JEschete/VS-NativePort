@@ -6,14 +6,6 @@
 // so code that reaches the same bytes both ways still agrees. Each use is
 // replaced by locals or module state when its function is modernized.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void* Core_ScratchBase(void);
-
-#ifdef __cplusplus
-}
-#endif
 
 #define Core_ScratchAddr(n) ((unsigned long*)Core_ScratchBase() + (n))

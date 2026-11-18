@@ -13,20 +13,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Boot/SessionLive.hpp"
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
-#include "Event/ScriptVmLive.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-#include "TestSupport/ScriptSources.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/TextBox.h"
-}
+#include "Menu/TextBoxStateLive.hpp"
+#include "TestSupport/ScriptSources.hpp"
 
 namespace {
 namespace event = VS::Event;

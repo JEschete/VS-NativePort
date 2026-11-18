@@ -7,15 +7,7 @@
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: _zoneContext (BATTLE/BATTLE.PRG 146C.h:719, 0x800F1880): the
 // loaded zone's tables, music and file reads and the loaded room's id,
 // extent, placements and scene.
 extern Field_ZoneContext Field_zoneContext;
-
-#ifdef __cplusplus
-}
-#endif

@@ -9,17 +9,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/RewardFlowLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Memory/HeapLive.hpp"
-#include "Field/EnvironmentLive.hpp"
-#include "Field/GameMode.hpp"
-#include "Field/RoomEffectsLive.hpp"
-#include "Menu/SceneNotifications.hpp"
-#include "Menu/SceneNotificationsLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
@@ -28,20 +17,29 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
+#include "Battle/RewardFlowLive.hpp"
 #include "Battle/Rewards.h"
 #include "Battle/TargetingState.h"
+#include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Effects/Runtime.h"
+#include "Field/EnvironmentLive.hpp"
 #include "Field/EnvironmentLiveState.h"
+#include "Field/GameMode.hpp"
 #include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Minimap.h"
+#include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.h"
 #include "Items/LootLiveState.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/MenuRows.h"
+#include "Menu/SceneNotifications.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
-}
+#include "Render/PaletteAnimationLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace {
 namespace b = VS::Battle;

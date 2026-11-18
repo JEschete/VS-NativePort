@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Event/Triggers.h"
 
@@ -15,4 +14,3 @@ void* Event_roomDoorEventData;
 // decomp: _mpdScriptSection (_mpdScriptSection@BATTLE/BATTLE.PRG)
 short Event_hasRoomEntryScript;
 
-}  // extern "C"

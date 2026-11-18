@@ -11,10 +11,6 @@
 #include <type_traits>
 #include <vector>
 
-#include "Core/Math/ScalarMath.hpp"
-#include "Field/ActorCollisionLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
@@ -24,6 +20,8 @@ extern "C" {
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
+#include "Core/Math/ScalarMath.hpp"
+#include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Render/Display.h"
@@ -36,7 +34,6 @@ extern "C" {
 extern unsigned int
     Content_battleShadowVertices[VS::Render::kShadowVertexCount];
 extern unsigned int Content_battleShadowFaces[VS::Render::kShadowFaceCount];
-}
 
 namespace VS::Render {
 namespace {

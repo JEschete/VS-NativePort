@@ -12,19 +12,16 @@
 #include <utility>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
 #include "Items/Inventory.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Loot/LootRows.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
-}
 
 static_assert(static_cast<std::size_t>(kMenuLootRowCapacity) ==
               VS::Menu::Loot::kLootRowCapacity);
@@ -225,7 +222,6 @@ void RecordClaimedKey(int item_id) {
 }
 }  // namespace VS::Menu::Loot::Live
 
-extern "C" {
 void Menu_Loot_ResetPaging(void) {
   auto& paging = VS::Menu::Loot::Live::PagingState();
   paging.batch = {};
@@ -249,5 +245,4 @@ int Menu_Loot_AdvanceStagedInventory(void) {
     item_live::Commit(*paging.sources[i], records[i]);
   }
   return advanced ? 1 : 0;
-}
 }

@@ -6,12 +6,9 @@
 #include <cstdint>
 #include <span>
 
-#include "Items/ItemRecordsLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
+#include "Items/ItemRecordsLive.hpp"
 #include "Menu/Inventory/ItemList.h"
-}
 
 namespace VS::Menu::Inventory::sorting_test {
 inline constexpr auto kOrderTables = Items::kItemCategoryCount - 1;

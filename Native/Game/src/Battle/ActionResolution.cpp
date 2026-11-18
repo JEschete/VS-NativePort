@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
@@ -19,4 +18,3 @@ u_int Battle_hitPrerequisiteResult;
 // decomp: D_800F1A04 (D_800F1A04@BATTLE/BATTLE.PRG)
 u_int Battle_previousHitResult;
 
-}  // extern "C"

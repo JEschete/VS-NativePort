@@ -16,21 +16,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Render/EncodedText.hpp"
 #include "Render/UiPackets.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Items/Inventory.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
-}
 
 namespace {
 namespace fw = VS::Menu::Framework;

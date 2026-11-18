@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
@@ -22,4 +21,3 @@ u_short Battle_battleAbilityPointRequirements[150]; /* contents: module image (M
 // D_8005FFB0 was vs_main_scoredata.chainStreak (+0x110), not a separate global
 // (#448; Battle/Abilities.cpp JudgeTimedInput).
 
-}  // extern "C"

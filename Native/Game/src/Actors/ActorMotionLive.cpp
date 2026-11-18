@@ -7,21 +7,18 @@
 #include <cstdlib>
 #include <iterator>
 
-#include "Actors/AnimationControlLive.hpp"
-#include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Field/ActorCollisionLive.hpp"
-#include "Field/CollisionMapLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
+#include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
-}
+#include "Field/CollisionMapLive.hpp"
 
 static_assert(sizeof(Actors_TileTarget) == sizeof(VS::Actors::PackedTile));
 static_assert(sizeof(SVECTOR) == sizeof(VS::Actors::MotionVector));

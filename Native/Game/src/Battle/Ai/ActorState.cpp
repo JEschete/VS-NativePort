@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
@@ -51,4 +50,3 @@ int Battle_Ai_attributeActorMask;
 // decomp: D_80069C08 (D_80069C08@BATTLE/BATTLE.PRG)
 const unsigned char Battle_Ai_kFlags34Bit14Values[4] = { 9, 7, 0, 0 };
 
-}  // extern "C"

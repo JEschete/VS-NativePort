@@ -5,14 +5,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Sphere.h"
 #include "Battle/SphereLifecycle.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
-#include "Battle/Sphere.h"
 #include "Battle/TargetingState.h"
-}
+#include "Core/Memory/HeapLive.hpp"
 
 namespace {
 namespace battle = VS::Battle;

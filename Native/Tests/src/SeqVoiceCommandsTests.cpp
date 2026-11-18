@@ -9,8 +9,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Driver/SoundDriver.h"
 #include "Audio/LfoWaveforms.h"
+#include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/PlaybackReset.hpp"
+#include "Audio/Samples/SampleBanks.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SeqChannelCommands.hpp"
 #include "Audio/SeqEnvelopeCommands.hpp"
 #include "Audio/SeqModulationCommands.hpp"
@@ -21,13 +25,6 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
-}
 
 namespace {
 namespace Seq = VS::Audio::Seq;

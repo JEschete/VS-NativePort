@@ -10,18 +10,16 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Battle/DamagePolicies.hpp"
-#include "Battle/DamagePoliciesLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
-#include "Items/EquipmentLive.hpp"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/DamagePolicies.hpp"
+#include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/Hit.h"
-}
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
+#include "Items/EquipmentLive.hpp"
 
 namespace {
 namespace b = VS::Battle;

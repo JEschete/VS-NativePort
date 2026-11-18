@@ -10,19 +10,16 @@
 #include "Audio/MusicLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
-#include "Event/ScriptAudioCommands.hpp"
-#include "Event/ScriptAudioOpcodes.h"
-#include "Event/ScriptVmLive.hpp"
-#include "Field/RoomLoadingLive.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
+#include "Event/ScriptAudioCommands.hpp"
+#include "Event/ScriptAudioOpcodes.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.h"
 #include "Legacy/Psx.h"
-}
 
 namespace {
 namespace event = VS::Event;

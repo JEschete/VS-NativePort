@@ -10,19 +10,17 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace {
 namespace items = VS::Items;

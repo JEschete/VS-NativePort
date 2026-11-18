@@ -13,16 +13,6 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/SeqControlCommands.hpp"
-#include "Audio/SeqMusicSequenceLive.hpp"
-#include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SeqSequencer.hpp"
-#include "Audio/SeqVoiceCommands.hpp"
-#include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/VoiceMixerLive.hpp"
-#include "Audio/XaMixLive.hpp"
-
-extern "C" {
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
@@ -30,11 +20,18 @@ extern "C" {
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SeqControlCommands.hpp"
+#include "Audio/SeqMusicSequenceLive.hpp"
+#include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SeqSequencer.hpp"
+#include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SequencerOutput.h"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/StreamPlayback.h"
+#include "Audio/VoiceMixerLive.hpp"
+#include "Audio/XaMixLive.hpp"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio::Seq {
 namespace {

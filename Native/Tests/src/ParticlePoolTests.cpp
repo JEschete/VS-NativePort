@@ -14,10 +14,8 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ParticlePool.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-extern "C" {
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

@@ -5,15 +5,12 @@
 
 #include <cstdint>
 
-#include "Menu/Score/ScoreRank.hpp"
-#include "Menu/Score/ScoreRankLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
+#include "Menu/Score/ScoreRank.hpp"
+#include "Menu/Score/ScoreRankLive.hpp"
 #include "State/Progress.h"
-}
 
 namespace VS::Menu::Results {
 // decomp: MENUF.PRG _calculateScore (src/MENU/MENUF.PRG/3B8.c:2801). The int

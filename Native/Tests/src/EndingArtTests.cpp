@@ -8,16 +8,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Ending/Credits.h"
 #include "Ending/Credits/EmbeddedArt.h"
 #include "Ending/EndingLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Ending/Credits.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 constexpr auto kOffsets = std::to_array<std::size_t>({

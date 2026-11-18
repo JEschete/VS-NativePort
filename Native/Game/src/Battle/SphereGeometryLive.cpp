@@ -9,12 +9,9 @@
 #include <optional>
 #include <span>
 
+#include "Battle/Sphere.h"
 #include "Core/Log.hpp"
 #include "Core/Scratch.h"
-
-extern "C" {
-#include "Battle/Sphere.h"
-}
 
 namespace VS::Battle {
 namespace {

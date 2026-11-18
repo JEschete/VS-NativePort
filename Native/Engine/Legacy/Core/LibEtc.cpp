@@ -49,8 +49,6 @@ void WaitOneFrame() {
 
 }  // namespace
 
-extern "C" {
-
 int VSync(int mode) {
   if (mode < 0) {
     return g_ticks;  // vertical blanks since boot
@@ -150,5 +148,3 @@ void Legacy_AdvanceCounter2(unsigned elapsedClocks) {
     if (!g_rcnt2Running || g_rcnt2Target == 0) return;
   }
 }
-
-}  // extern "C"

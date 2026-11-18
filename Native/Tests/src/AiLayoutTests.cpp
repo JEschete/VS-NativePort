@@ -5,25 +5,22 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/Runtime.h"
 #include "Legacy/Psx.h"
 #include "TestSupport/EffectProgramScope.hpp"
 
-extern "C" {
-#include "Effects/Runtime.h"
-}
-
-extern "C" int Tests_LayoutAssertsLinked(void);
-extern "C" int Tests_AiViewsRoundTrip(void);
-extern "C" int Tests_EffectTimelineTrackStride(void);
-extern "C" int Tests_GimmickViewsRoundTrip(void);
-extern "C" int Tests_CollisionHeightPatterns(void);
-extern "C" int Tests_ActorConditionSnapshot(void);
-extern "C" int Tests_AiFrameCache(void);
-extern "C" int Tests_AiFrameStages(void);
-extern "C" int Tests_TargetSphereViews(void);
-extern "C" int Tests_AiMovementSetup(void);
-extern "C" int Tests_AiRelations(void);
-extern "C" int Tests_AiMovementDispatch(void);
+int Tests_LayoutAssertsLinked(void);
+int Tests_AiViewsRoundTrip(void);
+int Tests_EffectTimelineTrackStride(void);
+int Tests_GimmickViewsRoundTrip(void);
+int Tests_CollisionHeightPatterns(void);
+int Tests_ActorConditionSnapshot(void);
+int Tests_AiFrameCache(void);
+int Tests_AiFrameStages(void);
+int Tests_TargetSphereViews(void);
+int Tests_AiMovementSetup(void);
+int Tests_AiRelations(void);
+int Tests_AiMovementDispatch(void);
 
 TEST_CASE(
     "AI movement dispatch invokes the configured native decision callback",

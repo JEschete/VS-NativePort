@@ -8,22 +8,19 @@
 #include <iterator>
 #include <optional>
 
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/BlockedMovementLive.hpp"
-#include "Battle/Ai/CandidateMovementLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-
-extern "C" {
-#include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/BlockedMovementLive.hpp"
+#include "Battle/Ai/CandidateMovementLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle::Ai {
 namespace {

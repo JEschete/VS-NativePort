@@ -6,16 +6,13 @@
 #include <span>
 #include <utility>
 
-#include "Audio/MusicState.h"
-#include "Audio/MusicVoiceConflicts.hpp"
-#include "Core/Log.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/MusicState.h"
+#include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/Seq/Channel.h"
-}
+#include "Core/Log.hpp"
+#include "Legacy/Psx.h"
 
 namespace {
 class SequenceChannelVoices final : public VS::Audio::Seq::MusicChannelVoices {

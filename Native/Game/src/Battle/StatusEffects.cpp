@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/StatusEffects.h"
 #include "Menu/Framework/ActorPreview.h"
@@ -35,4 +34,3 @@ int Battle_unusedGlobal2;
 // decomp: vs_main_statusEffectParams (vs_main_statusEffectParams@SLUS_010.40)
 Battle_StatusEffectParams Battle_statusEffectParams[32]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

@@ -9,20 +9,17 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/CubePuzzleText.hpp"
+#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Menu/Results/CubePuzzle.h"
-#include "Menu/Results/Results.h"
 #include "Render/Images.h"
+#include "Render/TextureRegionDrawLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Menu::Results {
 namespace {

@@ -1,4 +1,4 @@
-"""Track the migration of C-style native headers, and the C linkage that depends on them, to C++.
+"""Track the migration of C-style native headers to C++, and keep the retired C linkage from returning.
 
   python tools\\ledger\\headers.py --sync    rescan the tracked files, follow .h -> .hpp renames, refresh the tracker
   python tools\\ledger\\headers.py --check   exit 1 on a stale ledger, a regressed file or a new C-style file
@@ -7,8 +7,10 @@ Docs\\ledgers\\HEADER_LEDGER.csv has a `header` row for every header that was C-
 (every `.h` and every `.hpp` failing a criterion) and a `source` row for every `.cpp` that had C linkage then.
 Docs\\CPP_HEADERS.md defines each criterion and its C++ replacement. All columns except `notes` are measured, and a
 row is `done` only when every criterion of its kind holds. `done` is sticky: a later regression fails --check instead
-of being re-measured away. `retired` is written by hand for a file deleted on purpose and needs a note. Rows are only
-created when the ledger is first written, so a new C-style file fails --check rather than joining the ledger.
+of being re-measured away. Once no source row remains, C linkage is retired: a tracked file that regains it fails
+--check even while other criteria keep it remaining. `retired` is written by hand for a file deleted on purpose and
+needs a note. Rows are only created when the ledger is first written, so a new C-style file fails --check rather than
+joining the ledger.
 Tracked in issue #441.
 """
 from __future__ import annotations
@@ -398,6 +400,9 @@ def check(workspace: HeaderWorkspace) -> list[Issue]:
         return [issue("ledger-missing", str(workspace.ledger), "run headers.py --sync")]
     scanner = Scanner(workspace)
     rows = read_csv(workspace.ledger)
+    # Once no source keeps C linkage, it is retired everywhere: a header still remaining for other criteria must not
+    # regain it, which a stale-ledger finding alone would let a sync record.
+    linkage_retired = not any(row["kind"] == "source" and row["status"] == "remaining" for row in rows)
     found = []
     tracked = set()
     for row in rows:
@@ -421,6 +426,9 @@ def check(workspace: HeaderWorkspace) -> list[Issue]:
         missed = failures(row["path"], values)
         if row["status"] == "done" and missed:
             found.append(issue(f"{row['kind']}-regressed", subject, f"a done {row['kind']} fails {', '.join(missed)}"))
+        elif linkage_retired and values["c_linkage"] != "0":
+            found.append(issue("c-linkage-reintroduced", subject, "C linkage is retired in every file; use C++ "
+                               "linkage (Docs/CPP_HEADERS.md)"))
         expected = measured_row(row, scanner)
         if any(row[column] != expected[column] for column in [*MEASURED, "status"]):
             found.append(issue("ledger-stale", subject, "measurements differ from the source; run --sync"))

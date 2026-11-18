@@ -7,11 +7,9 @@
 #include <limits>
 #include <optional>
 
+#include "Core/Diagnostics.h"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle::Ai {
 namespace {

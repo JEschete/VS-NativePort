@@ -6,12 +6,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Event/ScriptControlOpcodes.h"
+#include "Legacy/Psx.h"
 #include "State/RoomMemory.h"
-}
 
 namespace {
 struct RoomActorCacheFixture {
@@ -50,11 +47,11 @@ void CheckRoomActorCache(std::size_t index, int room, int zone,
 }
 }  // namespace
 
-extern "C" int Tests_EventScriptNativeBranches(int skip);
-extern "C" int Tests_EventScriptBranchHandlers(void);
-extern "C" int Tests_NativeSessionTransitions(void);
-extern "C" int Tests_AudioModesWithoutSavedMusic(void);
-extern "C" int Tests_RoomLightingSamples(void);
+int Tests_EventScriptNativeBranches(int skip);
+int Tests_EventScriptBranchHandlers(void);
+int Tests_NativeSessionTransitions(void);
+int Tests_AudioModesWithoutSavedMusic(void);
+int Tests_RoomLightingSamples(void);
 
 TEST_CASE("Room lighting samples both layers and interpolates vertex colors",
           "[render][lighting]") {

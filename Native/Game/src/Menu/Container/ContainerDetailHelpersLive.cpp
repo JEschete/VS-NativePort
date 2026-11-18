@@ -6,24 +6,21 @@
 #include <optional>
 #include <string_view>
 
+#include "Core/Diagnostics.h"
+#include "Input/ControllerLiveState.h"
 #include "Input/Pad.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerDetailHelpers.hpp"
+#include "Menu/Container/ItemView.h"
+#include "Menu/Container/Storage.h"
 #include "Menu/Framework/DetailInputLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Sounds.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
-#include "Input/ControllerLiveState.h"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
 #include "Menu/Framework/FrameworkLiveState.h"
-}
+#include "Menu/Sounds.hpp"
 
 namespace VS::Menu::container {
 namespace {

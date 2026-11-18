@@ -9,22 +9,19 @@
 #include <iterator>
 #include <span>
 
-#include "Core/RandomLive.hpp"
-#include "Input/ControllerLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "State/GameClockLive.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
+#include "Core/RandomLive.hpp"
 #include "Input/Buttons.h"
+#include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Input/Controllers.h"
 #include "Render/Display.h"
 #include "Render/Loading.h"
+#include "Render/PaletteAnimationLive.hpp"
+#include "State/GameClockLive.hpp"
 #include "State/PlayTime.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Render {
 namespace {

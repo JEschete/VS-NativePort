@@ -5,32 +5,30 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "Audio/SoundBanksLive.hpp"
-#include "Battle/Ai/ConditionSnapshotBinding.hpp"
-#include "Battle/Ai/DecisionsLive.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Ai/RelationsLive.hpp"
-#include "Content/DiscReaderLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Effects/EffectResourcesLive.hpp"
-
-extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Audio/SoundBanks.h"
+#include "Audio/SoundBanksLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingState.h"
+#include "Content/DiscReaderLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
+#include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/Runtime.h"
 #include "Field/GimmickMotion.h"
@@ -632,4 +630,3 @@ int Tests_AiViewsRoundTrip(void) {
 }
 
 int Tests_LayoutAssertsLinked(void) { return 1; }
-}  // extern "C"

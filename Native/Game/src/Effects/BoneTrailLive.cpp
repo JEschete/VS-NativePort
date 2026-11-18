@@ -14,27 +14,24 @@
 
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Scratch.h"
 #include "Effects/BoneTrail.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/Templates/RingCore.hpp"
-#include "Legacy/Psx.h"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
 #include "Effects/Runtime.h"
+#include "Effects/Templates/RingCore.hpp"
 #include "Effects/Trails.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Effects {
 namespace {

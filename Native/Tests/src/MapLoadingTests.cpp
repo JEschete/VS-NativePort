@@ -8,18 +8,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/MapLoading.hpp"
-#include "Menu/MapLoadingLive.hpp"
-extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/Map.h"
 #include "Legacy/Psx.h"
 #include "Menu/Map.h"
+#include "Menu/MapLoading.hpp"
+#include "Menu/MapLoadingLive.hpp"
 #include "State/Progress.h"
-}
 
 namespace {
 namespace map = VS::Menu::map;

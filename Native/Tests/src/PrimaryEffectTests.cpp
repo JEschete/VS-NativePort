@@ -11,9 +11,7 @@
 
 #include "Effects/PrimaryEffect.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-extern "C" {
 #include "Effects/Runtime.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

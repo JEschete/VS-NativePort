@@ -11,25 +11,22 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/StatusEffects.h"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Score/GazetteRows.hpp"
-#include "Menu/Score/GazetteRowsLive.hpp"
-
-extern "C" {
-#include "Battle/StatusEffects.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Score/GazetteRows.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the gazette's scrolling rows, top menu and unused menu
 // wrappers (MENU9.PRG 238.c:54-267, 1430-1471).

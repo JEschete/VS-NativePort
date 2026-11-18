@@ -17,8 +17,10 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
+#include "Items/InventoryLiveState.h"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
@@ -26,25 +28,20 @@
 #include "Menu/Container/ContainerListTransfer.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Sounds.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Input/ControllerLiveState.h"
-#include "Items/InventoryLiveState.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/ItemList.h"
-}
+#include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 
 namespace VS::Menu::container {
 namespace {

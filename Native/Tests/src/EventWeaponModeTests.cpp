@@ -9,29 +9,26 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/SequencePlaybackLive.hpp"
-#include "Content/ModuleData.h"
-#include "Event/WeaponModeOpcode.h"
-#include "Legacy/Psx.h"
-#include "State/ScriptFlagsLive.hpp"
-#include "TestSupport/ScriptSources.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
+#include "Content/ModuleData.h"
 #include "Event/Actors.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
-}
+#include "Event/WeaponModeOpcode.h"
+#include "Legacy/Psx.h"
+#include "State/ScriptFlagsLive.hpp"
+#include "TestSupport/ScriptSources.hpp"
 
 namespace {
 using Handler = intptr_t (*)(u_char*, std::int16_t);

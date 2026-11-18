@@ -14,31 +14,28 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/Location.h"
 #include "Content/ModuleData.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLive.hpp"
+#include "Effects/CameraLiveState.h"
 #include "Effects/Curves.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
 #include "TestSupport/EffectProgramScope.hpp"
-
-extern "C" {
-#include "Actors/Location.h"
-#include "Effects/CameraLiveState.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-}
 
 namespace {
 namespace Effects = VS::Effects;

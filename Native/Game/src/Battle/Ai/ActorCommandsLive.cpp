@@ -8,18 +8,15 @@
 #include <cstring>
 #include <iterator>
 
-#include "Battle/Ai/ActorCommands.hpp"
-#include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Field/TerrainHeight.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
-}
+#include "Field/TerrainHeight.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

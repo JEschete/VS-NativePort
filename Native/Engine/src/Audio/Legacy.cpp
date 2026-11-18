@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Legacy.h"
 
@@ -15,4 +14,3 @@ char Audio_legacySpuAllocationTable[SPU_MALLOC_RECSIZ * (SPU_MALLOC_NUM_BLOCKS +
 // decomp: g_bSpuTransferring (g_bSpuTransferring@SLUS_010.40)
 volatile int Audio_legacySpuTransferBusy;
 
-}  // extern "C"

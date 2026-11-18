@@ -8,12 +8,9 @@
 #include <optional>
 #include <span>
 
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Core/Diagnostics.h"
 #include "Ending/Credits.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 constexpr std::size_t kTimCapacity = 72224;
@@ -87,7 +84,7 @@ std::optional<std::size_t> TimLength(std::span<const unsigned char> source) {
 
 // ENDING/D4.c:999,583; G00802 aliases TIM8 at8007709C. G00788's imported
 // trailing module span contains the complete TIMs, not just glyph widths.
-extern "C" int Ending_Credits_PrepareEmbeddedArt(void) {
+int Ending_Credits_PrepareEmbeddedArt(void) {
   prepared = false;
   Ending_Credits_illustrationTimWorkspace = nullptr;
   const std::span<const unsigned char> source(Ending_Credits_glyphWidths);
@@ -113,8 +110,7 @@ extern "C" int Ending_Credits_PrepareEmbeddedArt(void) {
   return 1;
 }
 
-extern "C" Ending_Credits_TimHeader* Ending_Credits_EmbeddedArt(
-    unsigned index) {
+Ending_Credits_TimHeader* Ending_Credits_EmbeddedArt(unsigned index) {
   if (!prepared || index >= embedded_art.size()) {
     Core_Errorf("ending.art", "unprepared or invalid embedded TIM index=%u",
                 index);

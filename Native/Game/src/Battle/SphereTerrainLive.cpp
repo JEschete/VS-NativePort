@@ -7,15 +7,12 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "Battle/Sphere.h"
 #include "Battle/SphereTerrain.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Sphere.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 constexpr int kCoordinateBits = 16;

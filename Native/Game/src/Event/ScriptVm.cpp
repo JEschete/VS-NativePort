@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Event/ScriptActorOpcodes.h"
 #include "Event/ScriptAudioOpcodes.h"
@@ -175,4 +174,3 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode,
     Event_ScriptReportInvalidOpcodeOpcode, Event_ScriptReportInvalidOpcodeOpcode, Event_CommandFinishEventOpcode, Event_CommandFinishEventOpcode };
 
-}  // extern "C"

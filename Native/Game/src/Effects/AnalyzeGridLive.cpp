@@ -11,27 +11,24 @@
 #include <string_view>
 #include <type_traits>
 
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Scratch.h"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/PackageExtents.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
 #include "Effects/Package.h"
+#include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 #include "Render/Camera.h"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Effects {
 namespace {

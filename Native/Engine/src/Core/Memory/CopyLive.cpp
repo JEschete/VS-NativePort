@@ -4,9 +4,7 @@
 
 #include <cinttypes>
 
-extern "C" {
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Core::Memory {
 namespace {

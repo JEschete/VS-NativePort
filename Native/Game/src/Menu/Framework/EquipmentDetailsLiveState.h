@@ -10,10 +10,6 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct Items_InventoryArmor Items_InventoryArmor;
 typedef struct Items_InventoryBlade Items_InventoryBlade;
 typedef struct Items_InventoryGem Items_InventoryGem;
@@ -72,7 +68,3 @@ extern u_char
                                           [kMenuStatusViewDirections];
 // decomp: vs_mainMenu_strIntAgi (MENU/MAINMENU.PRG 2D10.c)
 extern int16_t Menu_Framework_strIntAgi[kMenuPrimaryStatCount];
-
-#ifdef __cplusplus
-}
-#endif

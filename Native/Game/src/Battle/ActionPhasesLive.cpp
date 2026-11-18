@@ -9,23 +9,21 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/ActionPhases.hpp"
-#include "Battle/BattleModeLive.hpp"
-#include "Battle/HudOrchestrationLive.hpp"
-#include "Effects/BoneTrailLive.hpp"
-#include "Field/RoomRenderingLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionPhases.hpp"
 #include "Battle/Actor.h"
+#include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.h"
+#include "Effects/BoneTrailLive.hpp"
 #include "Field/Interactions.h"
+#include "Field/RoomRenderingLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "State/Progress.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Battle {
 namespace {

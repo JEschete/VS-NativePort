@@ -10,24 +10,21 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Gte.h"
 #include "Legacy/Psx.h"
 #include "Render/CameraView.hpp"
 #include "Render/CameraViewLive.hpp"
+#include "Render/Display.h"
 #include "Render/DisplayControl.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/Frame.h"
+#include "Render/Render.h"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the #276 slice A4 (#279) camera, display and HUD packet
 // policies: values traced from 146C.c, 5BF94.c, 44F14.c and main.c, and every

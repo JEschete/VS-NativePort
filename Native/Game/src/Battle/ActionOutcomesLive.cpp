@@ -9,27 +9,25 @@
 
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
+#include "Actors/Location.h"
 #include "Audio/SfxLive.hpp"
+#include "Battle/Action.h"
+#include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimationsLive.hpp"
+#include "Battle/ActionFlow.h"
 #include "Battle/ActionOutcomes.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Damage.h"
+#include "Battle/Feedback.h"
 #include "Battle/HudOrchestrationLive.hpp"
+#include "Core/Diagnostics.h"
 #include "Items/LootLive.hpp"
 #include "Save/Snapshot.hpp"
 #include "State/KillScoreLive.hpp"
-extern "C" {
-#include "Actors/Location.h"
-#include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Feedback.h"
-#include "Core/Diagnostics.h"
 #include "State/Progress.h"
-}
 
 namespace VS::Battle {
 namespace {

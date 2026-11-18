@@ -13,7 +13,7 @@
 
 // The copied boot entry (vs_main_exec): the original's endless loop, run on the
 // game fiber.
-extern "C" void Boot_ResetGameplayInspection(void);
+void Boot_ResetGameplayInspection(void);
 
 namespace VS::Game {
 

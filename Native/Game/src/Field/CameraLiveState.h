@@ -7,10 +7,6 @@
 #include "Field/Camera.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: _firstPersonViewEnabled (BATTLE/BATTLE.PRG 146C.c:648): 1 while
 // Select may enter the first-person view.
 extern int Field_isFirstPersonViewEnabled;
@@ -23,7 +19,3 @@ extern int Field_roomGeometryDrawMode;
 // decomp: vs_battle_cameraCurrentSpherical (BATTLE/BATTLE.PRG 146C.h:1096):
 // the orbit's angles, quarter turn, zoom and tracking speed.
 extern Field_SphericalCamera Field_sphericalCamera;
-
-#ifdef __cplusplus
-}
-#endif

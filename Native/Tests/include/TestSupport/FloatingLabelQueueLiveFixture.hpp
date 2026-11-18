@@ -8,20 +8,17 @@
 #include <cstring>
 #include <span>
 
-#include "Actors/SkeletonLiveState.h"
-#include "Battle/FloatingLabelPlacementLive.hpp"
-#include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/FloatingLabelQueueLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Battle/Feedback.h"
+#include "Battle/FloatingLabelPlacementLive.hpp"
+#include "Battle/FloatingLabelProducersLive.hpp"
+#include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/BiosRand.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
-}
 
 namespace VS::test_support::live_floating_labels {
 using LabelWords = std::array<std::uint32_t, 6>;

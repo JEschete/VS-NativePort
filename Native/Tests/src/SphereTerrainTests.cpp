@@ -8,30 +8,27 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Action.h"
+#include "Battle/ActionFlow.h"
 #include "Battle/ActionPreviewLive.hpp"
+#include "Battle/ActionResolution.h"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/Sphere.h"
 #include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetingLive.hpp"
-#include "Core/Math/MatrixLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Action.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionResolution.h"
-#include "Battle/Sphere.h"
 #include "Battle/TargetingState.h"
+#include "Core/Math/MatrixLive.hpp"
 #include "Field/Interactions.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 constexpr u_long kGuard = 0xA1B2C3D4;

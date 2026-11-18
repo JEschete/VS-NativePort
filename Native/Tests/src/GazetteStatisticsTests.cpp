@@ -19,11 +19,8 @@
 #include "Menu/Score/GazetteStatistics.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/GameFont.hpp"
-#include "Render/UiPackets.hpp"
-
-extern "C" {
 #include "Render/Text/VariableFont.h"
-}
+#include "Render/UiPackets.hpp"
 
 namespace {
 namespace score = VS::Menu::Score;

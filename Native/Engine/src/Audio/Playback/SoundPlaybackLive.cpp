@@ -12,24 +12,21 @@
 #include <span>
 #include <variant>
 
-#include "Audio/MixControlLive.hpp"
-#include "Audio/SeqControlCommands.hpp"
-#include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SoundControlLive.hpp"
-#include "Audio/SoundDriverLive.hpp"
-#include "Audio/SoundPlayback.hpp"
-
-extern "C" {
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
+#include "Audio/MixControlLive.hpp"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/SeqControlCommands.hpp"
+#include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SoundControlLive.hpp"
+#include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundPlayback.hpp"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio::Playback {
 namespace {

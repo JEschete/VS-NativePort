@@ -7,7 +7,6 @@
 #include <iterator>
 #include <span>
 
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/AbilityState.h"
@@ -15,7 +14,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Menu/Magic.h"
-}
 
 namespace hud_rendering_fixture {
 class LiveShortcut {

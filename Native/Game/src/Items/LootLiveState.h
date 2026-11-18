@@ -6,14 +6,6 @@
 
 typedef struct Items_LootListNode Items_LootListNode;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: _lootListHead (BATTLE/BATTLE.PRG 146C.h): the newest entry; each
 // node is a game heap block.
 extern Items_LootListNode* Items_lootListHead;
-
-#ifdef __cplusplus
-}
-#endif

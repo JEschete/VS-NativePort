@@ -15,33 +15,30 @@
 #include <utility>
 #include <vector>
 
+#include "Audio/Sfx.h"
 #include "Audio/SoundPlaybackLive.hpp"
+#include "Battle/ActionTable.h"
+#include "Battle/Hud.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "Menu/GazetteStatisticsLiveFixture.hpp"
-#include "Menu/Score/GazetteCameraLive.hpp"
-#include "Menu/Score/GazetteRows.hpp"
-#include "Menu/Score/GazetteRowsLive.hpp"
-#include "Menu/Score/GazetteTerminal.hpp"
-#include "Menu/Score/GazetteTerminalLive.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
-#include "Audio/Sfx.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Hud.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Menus.h"
+#include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/GazetteCameraLive.hpp"
+#include "Menu/Score/GazetteRows.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteTerminal.hpp"
+#include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
+#include "Render/RoomDrawLive.hpp"
 #include "State/Progress.h"
 #include "State/Timers.h"
-}
 
 namespace gazette_terminal_live_tests {
 namespace shared = gazette_times_live_tests;

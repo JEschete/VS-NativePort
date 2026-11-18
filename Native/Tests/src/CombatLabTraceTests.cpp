@@ -13,14 +13,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "CombatLab/Trace.hpp"
-#include "Diagnostics/PlayerObservation.hpp"
-#include "Diagnostics/SceneTrace.h"
-#include "Legacy/Psx.h"
-#include "Platform/App.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
@@ -34,7 +26,10 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Boot/GameLoop.h"
+#include "CombatLab/Trace.hpp"
 #include "Core/BiosRand.h"
+#include "Diagnostics/PlayerObservation.hpp"
+#include "Diagnostics/SceneTrace.h"
 #include "Event/ScriptVm.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -43,6 +38,7 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
 #include "Items/LootLiveState.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/MenuItems.h"
@@ -52,8 +48,9 @@ extern "C" {
 #include "Menu/Magic.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
+#include "Platform/App.hpp"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace {
 struct TraceScope {

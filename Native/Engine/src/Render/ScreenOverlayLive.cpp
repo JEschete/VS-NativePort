@@ -10,12 +10,10 @@
 #include <cstdint>
 #include <memory>
 
-#include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -23,7 +21,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/ScreenTransition.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Render {
 namespace {

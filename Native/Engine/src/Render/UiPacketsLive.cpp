@@ -15,15 +15,12 @@
 #include <optional>
 #include <span>
 
-#include "Render/SpritesLive.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Render {
 namespace {

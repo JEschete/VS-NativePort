@@ -6,16 +6,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/PlaybackReset.hpp"
-#include "Audio/PlaybackResetLive.hpp"
-extern "C" {
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/PlaybackReset.hpp"
+#include "Audio/PlaybackResetLive.hpp"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SoundEffects/SoundEffects.h"
-}  // extern "C"
 
 namespace {
 

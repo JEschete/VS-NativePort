@@ -7,15 +7,12 @@
 #include <type_traits>
 
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/Feedback.h"
 #include "Battle/FloatingLabelProducers.hpp"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Log.hpp"
-
-extern "C" {
-#include "Battle/Feedback.h"
-}
 
 namespace VS::Battle {
 namespace {

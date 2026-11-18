@@ -10,23 +10,21 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/RadialMovementLive.hpp"
-#include "Battle/Ai/TargetApproach.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/RadialMovementLive.hpp"
+#include "Battle/Ai/TargetApproach.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

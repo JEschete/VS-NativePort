@@ -15,15 +15,12 @@
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearScore.hpp"
+#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Score/ScoreRank.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
-
-extern "C" {
-#include "Menu/Results/Results.h"
 #include "Render/Images.h"
-}
+#include "Render/TextureRegionDrawLive.hpp"
 
 namespace VS::Menu::Results {
 namespace {

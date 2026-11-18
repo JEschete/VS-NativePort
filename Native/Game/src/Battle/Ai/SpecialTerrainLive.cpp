@@ -7,12 +7,9 @@
 #include <cstring>
 #include <type_traits>
 
-#include "Field/CollisionMapLive.hpp"
-
-extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Core/Diagnostics.h"
-}
+#include "Field/CollisionMapLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

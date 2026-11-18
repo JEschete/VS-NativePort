@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
@@ -48,4 +47,3 @@ Audio_FadeTimer Audio_Seq_masterFade;
 // decomp: g_Sound_LfoPhase (g_Sound_LfoPhase@SLUS_010.40)
 int Audio_Seq_randomPitchPhase;
 
-}  // extern "C"

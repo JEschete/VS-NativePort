@@ -10,20 +10,18 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.h"
+#include "Core/Gte.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/ScreenOverlay.hpp"
-#include "Render/ScreenOverlayLive.hpp"
-extern "C" {
-#include "Core/Gte.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/TransitionsLiveState.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/FramebufferEffects.h"
+#include "Render/ScreenOverlay.hpp"
+#include "Render/ScreenOverlayLive.hpp"
 #include "Render/ScreenTransition.h"
-}
 
 namespace {
 namespace Render = VS::Render;

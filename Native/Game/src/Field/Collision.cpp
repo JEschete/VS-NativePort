@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Field/Collision.h"
 
@@ -15,4 +14,3 @@ short Field_platformContactSearchDepth;
 // decomp: D_800F4B08 (D_800F4B08@BATTLE/BATTLE.PRG)
 SVECTOR Field_collisionProbePosition;
 
-}  // extern "C"

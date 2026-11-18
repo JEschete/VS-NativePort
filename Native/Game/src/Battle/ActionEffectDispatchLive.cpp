@@ -7,22 +7,20 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/ActionEffectDispatch.hpp"
-#include "Battle/StatusQueueLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
+#include "Battle/ActionEffectDispatch.hpp"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusQueueLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Items/Loadout.h"
 #include "State/Progress.h"
-}
+#include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle {
 namespace {

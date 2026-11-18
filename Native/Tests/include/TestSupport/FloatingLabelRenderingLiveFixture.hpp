@@ -15,19 +15,16 @@
 #include <utility>
 #include <vector>
 
+#include "Battle/Feedback.h"
 #include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Content/ModuleData.h"
-#include "Render/UiPackets.hpp"
-
-extern "C" {
-#include "Battle/Feedback.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
+#include "Render/UiPackets.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::test_support::floating_label_rendering {
 inline constexpr std::size_t kLabelCapacity = 32;

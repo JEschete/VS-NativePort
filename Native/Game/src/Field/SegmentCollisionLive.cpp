@@ -8,22 +8,20 @@
 #include <span>
 #include <vector>
 
-#include "Core/Log.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-#include "Field/SegmentCollision.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Core/Log.hpp"
 #include "Field/Collision.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
-}
+#include "Field/SegmentCollision.hpp"
 
 namespace VS::Field {
 namespace {

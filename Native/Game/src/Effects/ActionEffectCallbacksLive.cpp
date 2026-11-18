@@ -8,16 +8,13 @@
 #include "Battle/HudStateLive.hpp"
 #include "Effects/ActionEffectCallbacks.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
-#include "Field/GameModeLive.hpp"
-#include "Field/MapLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-
-extern "C" {
 #include "Effects/Runtime.h"
+#include "Field/GameModeLive.hpp"
 #include "Field/Interactions.h"
+#include "Field/MapLive.hpp"
 #include "Legacy/Psx.h"
+#include "Render/PaletteAnimationLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Effects {
 namespace {

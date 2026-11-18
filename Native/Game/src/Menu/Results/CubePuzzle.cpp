@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
 
@@ -12,4 +11,3 @@ short Menu_Results_puzzleParTime;
 // decomp: _puzzleRankCap (_puzzleRankCap@src/MENU/MENUF.PRG/3B8.c)
 short Menu_Results_puzzleRankCap;
 
-}  // extern "C"

@@ -9,19 +9,17 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticleTextureAnimation.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
-#include "Core/Gte.h"
-#include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 namespace fx = VS::Effects;

@@ -12,34 +12,32 @@
 #include <type_traits>
 #include <utility>
 
+#include "Core/BiosRand.h"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Core/Scratch.h"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Templates/ParticleCore.hpp"
-#include "Effects/Templates/ParticleDispatch.hpp"
-#include "Legacy/Psx.h"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/BiosRand.h"
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
+#include "Effects/Templates/ParticleCore.hpp"
+#include "Effects/Templates/ParticleDispatch.hpp"
 #include "Effects/Transforms.h"
+#include "Legacy/Psx.h"
 #include "Render/Camera.h"
 #include "Render/Frame.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
 
 // The overlays' emission cursors (Effects/Plugins/Plg*.h); PLG152's origin
@@ -65,7 +63,6 @@ extern int Effects_Plg266_particleEmissionCounter;
 extern int Effects_Plg266_particleEmissionCounter2;
 extern int Effects_Plg300_particleEmissionCounter;
 extern int Effects_Plg301_particleEmissionCounter;
-}
 
 namespace VS::Effects::Templates {
 namespace {

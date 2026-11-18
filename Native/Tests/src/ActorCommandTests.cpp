@@ -10,22 +10,20 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/RoomAiMap.hpp"
-#include "Battle/Ai/RoomAiMapLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/RoomAiMap.hpp"
+#include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Damage.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomLoadingLiveState.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 // Catch2's REQUIRE throws, but clang-tidy cannot see that; the explicit throw

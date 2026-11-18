@@ -8,23 +8,20 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/StatusEffects.h"
+#include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/GazetteStatistics.hpp"
+#include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/StatusEffects.h"
-#include "Content/StringTables.h"
-#include "Menu/Score/Records.h"
 #include "State/Progress.h"
-}
 
 namespace VS::Menu::Score {
 namespace {

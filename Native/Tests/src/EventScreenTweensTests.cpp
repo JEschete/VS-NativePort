@@ -8,19 +8,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Scratch.h"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
 #include "Event/EventScreenTweensLive.hpp"
-#include "Event/ScriptCommand.hpp"
-
-extern "C" {
-#include "Core/Scratch.h"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace ev = VS::Event;

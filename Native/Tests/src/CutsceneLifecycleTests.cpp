@@ -9,16 +9,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Event/CutsceneLifecycle.hpp"
-#include "Event/CutsceneLifecycleLive.hpp"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
+#include "Event/CutsceneLifecycle.hpp"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/Interactions.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace {
 namespace event = VS::Event;

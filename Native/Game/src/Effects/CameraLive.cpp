@@ -7,23 +7,21 @@
 #include <iterator>
 #include <type_traits>
 
+#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Effects/Camera.h"
 #include "Effects/Camera.hpp"
+#include "Effects/CameraLiveState.h"
 #include "Effects/Curves.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Field/CameraLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/CameraViewLive.hpp"
-
-extern "C" {
-#include "Core/BiosRand.h"
-#include "Effects/Camera.h"
-#include "Effects/CameraLiveState.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 #include "Field/Camera.h"
+#include "Field/CameraLive.hpp"
+#include "Legacy/Psx.h"
 #include "Render/Camera.h"
+#include "Render/CameraViewLive.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -44,7 +42,6 @@ std::int16_t Effects_cameraMotionDuration;
 Effects_EffectCamera Effects_savedActionCamera;
 // decomp: D_800F55E8 (D_800F55E8@BATTLE/BATTLE.PRG)
 u_int Effects_cameraTransitionMode;
-}
 
 namespace {
 // The original's layouts (5BF94.c:6474 shake channels, 6681 effect camera).

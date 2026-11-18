@@ -11,12 +11,10 @@
 
 #include "Battle/ActionResults.hpp"
 #include "Battle/ActionResultsLive.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-}
+#include "Content/ModuleData.h"
 
 namespace {
 namespace battle = VS::Battle;

@@ -19,12 +19,9 @@
 #include "Core/Runtime.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
 #include "Render/Render.h"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace Math = VS::Core::Math;
 using FixedTrig = std::int32_t (*)(std::int32_t) noexcept;

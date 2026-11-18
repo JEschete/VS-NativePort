@@ -18,15 +18,12 @@
 #include "Event/Camera.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/InterpolationCurveLive.h"
+#include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-
-extern "C" {
-#include "Event/ScriptCamera.h"
-#include "Event/ScriptControlOpcodes.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Event {
 namespace {

@@ -13,39 +13,36 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/XaMixLive.hpp"
-#include "Core/Log.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Input/ControllerLive.hpp"
-#include "Menu/FilesLive.hpp"
-#include "Menu/Sounds.hpp"
-#include "Movie/IntroPlayerLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-#include "Save/FileMenuLive.hpp"
-#include "Save/MemoryCard/GameFilesLive.hpp"
-#include "Save/MenuAssetsLive.hpp"
-#include "State/GameClockLive.hpp"
-#include "Title/TitleMenu.hpp"  // NOLINT(build/include): typed API
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Boot/GameLoop.h"
 #include "Boot/PlayerSettings.h"
 #include "Content/StringTables.h"
 #include "Core/Gte.h"
+#include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
+#include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
+#include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.h"
+#include "Menu/Sounds.hpp"
 #include "Movie/Intro/Playback.h"
+#include "Movie/IntroPlayerLive.hpp"
 #include "Render/Display.h"
+#include "Render/UiPacketsLive.hpp"
+#include "Save/FileMenuLive.hpp"
+#include "Save/MemoryCard/GameFilesLive.hpp"
+#include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeMenu.h"
 #include "Save/NativeResume.h"
 #include "State/Ashley.h"
+#include "State/GameClockLive.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.h"
 #include "State/Progress.h"
@@ -55,12 +52,12 @@ extern "C" {
 #include "Title/Credits.h"
 #include "Title/NewGame.h"
 #include "Title/SaveFiles.h"
+#include "Title/TitleMenu.hpp"  // NOLINT(build/include): typed API
 #include "Title/TitleMenuLiveState.h"
 #include "Title/TitleScreen.h"
 
 // decomp: vs_main_titleScreenCount (vs_main_titleScreenCount@SLUS_010.40)
 int Title_titleScreenVisitCount = 0;
-}
 
 namespace VS::Title {
 namespace {

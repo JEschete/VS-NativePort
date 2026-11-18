@@ -6,10 +6,6 @@
 // the page space where the original's MDEC output went, and plays the
 // soundtrack through the audio device.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Opens the converted movie for a disc path ("MOV/TITLE.STR") and starts its
 // soundtrack. Returns 0 if it is not available (logged); the other calls then
 // do nothing.
@@ -21,7 +17,3 @@ int Movie_PlayerDrawFrame(int ticks, int x, int y);
 
 // Stops picture and soundtrack.
 void Movie_PlayerClose(void);
-
-#ifdef __cplusplus
-}
-#endif

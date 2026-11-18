@@ -13,25 +13,22 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/TextureAnimation.hpp"
-#include "Actors/TextureAnimationLive.hpp"
-#include "Content/ModuleData.h"
-#include "Legacy/Psx.h"
-#include "Render/UiPackets.hpp"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
 #include "Actors/TextureAnimation.h"
+#include "Actors/TextureAnimation.hpp"
+#include "Actors/TextureAnimationLive.hpp"
 #include "Actors/Textures.h"
+#include "Content/ModuleData.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/UiPackets.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 // Contracts of the #276 row 22 texture animation: the keyed channels, the
 // frame and scripted cell copies and the scrolling regions (BATTLE.PRG

@@ -10,7 +10,7 @@
 #define VS_EVENT_SCRIPTCAMERA_H_DECLS
 #include "Render/FramebufferEffects.h"
 
-// The workspace type is C++ (Event/Camera.hpp); the pointer keeps C linkage.
+// The workspace type is defined in Event/Camera.hpp.
 namespace VS::Event {
 struct CameraState;
 }

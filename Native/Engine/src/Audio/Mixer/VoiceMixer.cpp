@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
@@ -51,4 +50,3 @@ Audio_MusicConfig* Audio_Mixer_voiceOwners[VOICE_COUNT];
 // decomp: g_Sound_VoiceModeFlags (g_Sound_VoiceModeFlags@SLUS_010.40)
 Audio_VoiceModeMasks Audio_Mixer_voiceModes;
 
-}  // extern "C"

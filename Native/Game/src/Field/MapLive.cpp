@@ -8,14 +8,11 @@
 
 #include "Core/Log.hpp"
 #include "Field/Map.hpp"
-#include "Field/RoomStateLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Field/MapProgress.h"
 #include "Field/Minimap.h"
+#include "Field/RoomStateLive.hpp"
+#include "Legacy/Psx.h"
 #include "State/Progress.h"
-}
 
 namespace {
 using VS::Field::RoomVisitFlags;

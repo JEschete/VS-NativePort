@@ -7,14 +7,12 @@
 #include <iterator>
 #include <span>
 
-#include "Battle/HudRendering.hpp"
-extern "C" {
 #include "Battle/Hud.h"
+#include "Battle/HudRendering.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace hud_rendering_fixture {
 inline constexpr std::size_t kHudOrderingWords = 0x2088 / sizeof(u_long);

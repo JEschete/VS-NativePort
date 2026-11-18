@@ -7,15 +7,12 @@
 #include <iterator>
 
 #include "Actors/AnimationControlLive.hpp"
-#include "Battle/HudStateLive.hpp"
-#include "Core/Log.hpp"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
-}
+#include "Battle/HudStateLive.hpp"
+#include "Core/Log.hpp"
 
 namespace {
 namespace battle = VS::Battle;

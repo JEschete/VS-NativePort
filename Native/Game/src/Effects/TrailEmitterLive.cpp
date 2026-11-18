@@ -11,15 +11,22 @@
 #include <string_view>
 #include <type_traits>
 
+#include "Core/BiosRand.h"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Core/Scratch.h"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
+#include "Effects/Templates/TemplateState.h"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailInit.hpp"
 #include "Effects/Templates/TrailRender.hpp"
@@ -27,19 +34,9 @@
 #include "Effects/Templates/TrailUpdate.hpp"
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitter.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/BiosRand.h"
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/TemplateState.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Effects {
 namespace {

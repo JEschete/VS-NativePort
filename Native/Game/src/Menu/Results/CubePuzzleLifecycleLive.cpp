@@ -13,34 +13,31 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
+#include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/MinimapScene.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Results/CubePuzzleLifecycle.hpp"
-#include "Menu/Results/CubePuzzleText.hpp"
-#include "Menu/Results/CubePuzzleTextLive.hpp"
-#include "Menu/Results/ResultsDrawing.hpp"
-#include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Menu/Results/ResultsPalette.hpp"
-#include "Render/DisplayControl.hpp"
-#include "Render/TexturePagesLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/StatusEffects.h"
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/CubePuzzleLifecycle.hpp"
+#include "Menu/Results/CubePuzzleText.hpp"
+#include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/Results.h"
+#include "Menu/Results/ResultsDrawing.hpp"
+#include "Menu/Results/ResultsDrawingLive.hpp"
+#include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttack.h"
+#include "Render/DisplayControl.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Menu::Results {
 namespace {

@@ -11,22 +11,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemListRows.hpp"
 #include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/InventorySortingLiveFixture.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Inventory/Inventory.h"
-}
 
 namespace {
 namespace inventory = VS::Menu::Inventory;

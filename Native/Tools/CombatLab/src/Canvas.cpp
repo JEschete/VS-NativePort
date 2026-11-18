@@ -9,11 +9,8 @@
 
 #include "Content/DataStore.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
 #include "Render/Text/CompactFont.h"
 #include "SystemResources.h"
-}
 
 namespace VS::combat_lab {
 namespace {

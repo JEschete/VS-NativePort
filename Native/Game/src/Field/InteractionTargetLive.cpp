@@ -6,17 +6,15 @@
 #include <span>
 #include <vector>
 
-#include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Field/InteractionTargetLive.hpp"
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/Gimmicks.h"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Items/TreasureChests.h"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Field {
 namespace {

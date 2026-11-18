@@ -5,23 +5,20 @@
 #include <stdexcept>
 #include <vector>
 
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Ai/PlanningWorkspace.hpp"
-#include "Boot/SessionLive.hpp"
-
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.h"
-}
+#include "Boot/SessionLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

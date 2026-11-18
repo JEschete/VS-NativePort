@@ -6,19 +6,16 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/SkeletonLive.hpp"
-#include "Battle/ActorMarkersLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Actors/SkeletonLive.hpp"
+#include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 struct MarkerFixture {

@@ -4,10 +4,6 @@
 // and binds them to the typed loaders (ActorAssets.hpp); the battle start-up
 // (ModelRendering.cpp) still clears the parse flag directly.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: D_800E8F29 (BATTLE/BATTLE.PRG 30DB0.c): the parse phase of the
 // model being parsed; 1 while its primitives wait for the second frame.
 extern unsigned char Content_modelParseResetFlag;
@@ -23,7 +19,3 @@ extern int Content_assetQueueFrameTicks;
 // decomp: D_800F45D8 (BATTLE/BATTLE.PRG 30DB0.c): the kind of the slowest
 // request.
 extern int Content_lastAssetRequestType;
-
-#ifdef __cplusplus
-}
-#endif

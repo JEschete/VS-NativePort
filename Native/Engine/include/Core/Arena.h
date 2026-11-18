@@ -6,10 +6,6 @@
 // than the original because the structs allocated from it hold 8-byte
 // pointers on x64; the heap's block tables live outside it.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define CORE_GAME_HEAP_SIZE (16u * 1024u * 1024u)
 
 void* Core_GameHeapArena(void);
@@ -21,15 +17,5 @@ void* Core_GameHeapArena(void);
 #define CORE_OVERLAY_BASE 0x80068800u
 #define CORE_OVERLAY_SIZE (0x8010C000u - CORE_OVERLAY_BASE)
 extern unsigned char Core_overlayArena[CORE_OVERLAY_SIZE];
-#ifdef __cplusplus
 #define Core_OverlayAddress(psxAddress) \
   (static_cast<void*>(Core_overlayArena + ((psxAddress) - CORE_OVERLAY_BASE)))
-#else
-#define Core_OverlayAddress(psxAddress)                \
-  /* NOLINTNEXTLINE(readability/casting): C branch. */ \
-  ((void*)(Core_overlayArena + ((psxAddress) - CORE_OVERLAY_BASE)))
-#endif
-
-#ifdef __cplusplus
-}
-#endif

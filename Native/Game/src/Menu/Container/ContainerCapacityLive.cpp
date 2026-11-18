@@ -8,20 +8,17 @@
 #include <string>
 #include <string_view>
 
+#include "Core/Diagnostics.h"
 #include "Items/ContainerIndexingLive.hpp"
+#include "Items/InventoryLiveState.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Container/ContainerCapacity.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Render/GameFontLive.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
-#include "Items/InventoryLiveState.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
-}
+#include "Render/GameFontLive.hpp"
 
 namespace VS::Menu::container {
 namespace {

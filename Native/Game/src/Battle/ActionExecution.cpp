@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/ActionExecution.h"
 
@@ -9,4 +8,3 @@ int Battle_settledCameraDistance;
 // decomp: D_800F19EC (D_800F19EC@BATTLE/BATTLE.PRG)
 int Battle_cameraEaseMode;
 
-}  // extern "C"

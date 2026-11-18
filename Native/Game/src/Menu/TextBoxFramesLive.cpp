@@ -9,23 +9,20 @@
 #include <span>
 
 #include "Content/ModuleData.h"
-#include "Core/Memory/HeapLive.hpp"
-#include "Event/ScriptVmLive.hpp"
-#include "Menu/TextBoxFrames.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-#include "Render/Sprites.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxFrames.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/Sprites.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Menu {
 namespace {

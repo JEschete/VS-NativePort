@@ -1,9 +1,7 @@
 #pragma once
 
-extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
-}
 
 namespace VS::Menu::Loot::Live {  // NOLINT(readability-identifier-naming)
 [[nodiscard]] int StageBlade(Items_InventoryBlade* blade, int weapon_index);

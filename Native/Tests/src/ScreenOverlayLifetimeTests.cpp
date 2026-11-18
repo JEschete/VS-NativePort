@@ -6,20 +6,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/DiscLayout.h"
+#include "Core/Overlays.h"
+#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Core/Overlays.h"
-#include "DiscQueue.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
+#include "Legacy/Psx.h"
 #include "OverlayWorkspaceLiveState.h"
-}
 
 namespace {
 namespace sd = VS::Effects::ScreenDistortion;

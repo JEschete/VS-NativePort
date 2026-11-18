@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <iterator>
 
+#include "Core/Diagnostics.h"
+#include "Input/ControllerLiveState.h"
 #include "Input/Pad.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
@@ -11,16 +13,11 @@
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Inventory/DetailsPolicies.hpp"
-#include "Menu/Sounds.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
-#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Inventory/DetailsPolicies.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
-}
+#include "Menu/Sounds.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {

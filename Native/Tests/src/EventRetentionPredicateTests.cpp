@@ -5,17 +5,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Battle/Encounter.hpp"
-#include "Event/RoomTriggerEntryLive.h"
-#include "Event/ScriptVmLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/Encounter.hpp"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
-}
+#include "Legacy/Psx.h"
 
 static_assert(
     std::is_same_v<decltype(&VS::Actors::IsLiveActorRetainedAfterDefeat),

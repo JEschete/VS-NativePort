@@ -14,19 +14,16 @@
 
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
+#include "Menu/Manual.h"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPage.hpp"
+#include "Render/Display.h"
 #include "Render/DisplayControl.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Input/ControllerLiveState.h"
-#include "Legacy/Psx.h"
-#include "Menu/Manual.h"
-#include "Render/Display.h"
-}
 
 namespace VS::Menu::manual {
 namespace {

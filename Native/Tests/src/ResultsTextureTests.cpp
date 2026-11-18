@@ -8,20 +8,17 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Ending/Results.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
-#include "Menu/Results/TimeAttackRatingLive.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
-
-extern "C" {
-#include "Ending/Results.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 struct ResultsTextureFixture {

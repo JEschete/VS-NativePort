@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
@@ -611,4 +610,3 @@ const Content_ModuleDataEntry Content_moduleData[] = {
 };
 const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];
 
-}  // extern "C"

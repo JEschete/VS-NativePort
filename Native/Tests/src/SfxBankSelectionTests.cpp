@@ -14,27 +14,24 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/MixControlLive.hpp"
-#include "Audio/SfxLive.hpp"
-#include "Audio/SoundControlLive.hpp"
-#include "Audio/SoundEffectPrograms.hpp"
-#include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/SoundPlaybackLive.hpp"
-#include "Core/Log.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Driver/SoundDriver.h"
+#include "Audio/MixControlLive.hpp"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
+#include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanks.h"
+#include "Audio/SoundControlLive.hpp"
+#include "Audio/SoundEffectPrograms.hpp"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
-}
+#include "Audio/SoundPlaybackLive.hpp"
+#include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
+#include "Legacy/Psx.h"
 
 namespace {
 namespace Core = VS::Core;

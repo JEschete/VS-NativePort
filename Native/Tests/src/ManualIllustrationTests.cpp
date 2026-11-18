@@ -9,17 +9,14 @@
 
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/ManualIllustration.hpp"
-#include "Menu/ManualIllustrationLive.hpp"
-
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Manual.h"
+#include "Menu/ManualIllustration.hpp"
+#include "Menu/ManualIllustrationLive.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the manual's illustrations (MENUE.PRG 494.c:481-511, 619-713,
 // 883-960): the help asset uploads, the atlas sprites and diagram lines of a

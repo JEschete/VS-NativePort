@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
 #include "Ending/Results.h"
@@ -26,4 +25,3 @@ Content_DiscQueueSlot* Ending_resultsDiscReadSlot;
 // decomp: timData (timData@ENDING/ENDING.PRG)
 void* Ending_resultsTimBuffer;
 
-}  // extern "C"

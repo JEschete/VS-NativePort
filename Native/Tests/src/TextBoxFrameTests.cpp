@@ -10,19 +10,16 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
+#include "Menu/TextBox.h"
 #include "Menu/TextBoxFrames.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-
-extern "C" {
-#include "Event/ScriptVm.h"
-#include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 

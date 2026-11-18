@@ -8,17 +8,14 @@
 #include <string>
 #include <string_view>
 
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/RoomActorCache.h"
 #include "Field/Mpd.h"
 #include "Items/Inventory.h"
+#include "Legacy/Psx.h"
 #include "State/Ashley.h"
 #include "State/Progress.h"
 #include "State/SceneTimer.h"
 #include "State/Settings.h"
-}
 
 namespace VS::Game::Save {
 

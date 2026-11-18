@@ -5,10 +5,6 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct CdlATV {
   u_char val0, val1, val2, val3;
 } CdlATV;
@@ -24,7 +20,3 @@ typedef struct DslFILTER {
 
 int DsInit(void);
 int DsGetSector(void* madr, int size);
-
-#ifdef __cplusplus
-}
-#endif

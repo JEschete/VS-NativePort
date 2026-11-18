@@ -6,9 +6,7 @@
 #include <cinttypes>
 #include <cstdint>
 
-extern "C" {
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Render {
 namespace {

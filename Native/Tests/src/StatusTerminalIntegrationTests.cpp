@@ -7,12 +7,9 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Boot/SessionLive.hpp"
+#include "Content/DiscLayout.h"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/StatusTerminalLiveFixture.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-}
 
 namespace {
 namespace st = VS::Menu::Status;

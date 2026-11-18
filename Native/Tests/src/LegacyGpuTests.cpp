@@ -9,23 +9,20 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 
-#include "Field/RoomRenderingLive.hpp"
-#include "Legacy/Render/LibGpu.h"
-#include "Render/Device.hpp"
-#include "Render/PageSpace.hpp"
-#include "Render/RoomDraw.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
 #include "Core/Scratch.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Gimmicks.h"
+#include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomRenderingLiveState.h"
+#include "Legacy/Render/LibGpu.h"
+#include "Render/Device.hpp"
+#include "Render/PageSpace.hpp"
 #include "Render/Render.h"
-}
+#include "Render/RoomDraw.hpp"
+#include "Render/RoomDrawLive.hpp"
 
-extern "C" void* Render_legacyPrimitiveBuffers[2];
-extern "C" int Render_frameBuf;
+extern void* Render_legacyPrimitiveBuffers[2];
+extern int Render_frameBuf;
 
 namespace {
 
@@ -588,11 +585,11 @@ TEST_CASE("GPU frame byte counts reject invalid and overflowing dimensions",
   CHECK_FALSE(device.PresentImage(nullptr, 1, 1));
 }
 
-// Issue #267: copied code calls the C-linkage DrawPrim, and SubmitPacket throws
-// beneath it. /EHsc lets the exception cross that frame without its cleanups;
-// the first opaque C++ call above it, like the host loop's, still catches it.
-TEST_CASE("Live failures cross the C-linkage DrawPrim with their reason",
-          "[legacy][gpu]") {
+// Issue #267: SubmitPacket throws beneath DrawPrim, which copied code calls.
+// The first opaque C++ call above it, like the host loop's, catches it with its
+// reason. DrawPrim had C linkage until #441, so /EHsc gave its frame no
+// cleanups; it now unwinds like any C++ frame.
+TEST_CASE("Live failures cross DrawPrim with their reason", "[legacy][gpu]") {
   constexpr u_long kOneWordPacket = 1u << 24;
   constexpr u_long kFlatTriangle = 0x20u << 24;  // needs four command words
   Packet packet{.tag = kOneWordPacket, .body = {kFlatTriangle}};

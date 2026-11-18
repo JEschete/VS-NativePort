@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Items/Inventory.h"
 #include "Menu/Container/ItemView.h"
@@ -47,4 +46,3 @@ u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData
 // decomp: vs_menuD_containerData (vs_menuD_containerData@MENU/MENUD.PRG)
 Items_Container* Menu_Container_containerData;
 
-}  // extern "C"

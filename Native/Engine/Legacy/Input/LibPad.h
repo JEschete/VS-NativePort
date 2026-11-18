@@ -8,10 +8,6 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define PADLup (1 << 12)
 #define PADLdown (1 << 14)
 #define PADLleft (1 << 15)
@@ -49,7 +45,3 @@ int PadInfoMode(int port, int term, int offs);
 int PadSetActAlign(int port, unsigned char* table);
 int PadSetMainMode(int port, int offs, int lock);
 void PadSetAct(int port, unsigned char* table, int len);
-
-#ifdef __cplusplus
-}
-#endif

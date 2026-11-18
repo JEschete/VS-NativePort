@@ -13,17 +13,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorRosterLive.hpp"
-#include "Actors/RoomEnemyMemory.hpp"
-#include "Actors/RoomEnemyMemoryLive.hpp"
-#include "Legacy/Psx.h"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/RoomActorCache.h"
+#include "Actors/RoomEnemyMemory.hpp"
+#include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/Spawning.h"
 #include "Battle/AbilityState.h"
@@ -31,9 +27,10 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Legacy/Psx.h"
 #include "State/RoomCache.h"
 #include "State/RoomMemory.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace {
 namespace actors = VS::Actors;

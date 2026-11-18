@@ -12,24 +12,21 @@
 #include <iterator>
 #include <optional>
 
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/BossOrbitLive.hpp"
-#include "Battle/Ai/DecisionsLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Ai/RelationsLive.hpp"
-
-extern "C" {
-#include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/BossOrbitLive.hpp"
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
-}
 
 namespace VS::Battle::Ai {
 namespace {

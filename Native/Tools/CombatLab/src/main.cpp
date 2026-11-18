@@ -15,6 +15,7 @@
 
 #include "Audio/AudioDevice.hpp"
 #include "Battle/Encounter.hpp"
+#include "Boot/GameLoop.h"
 #include "CombatLab/Canvas.hpp"
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/SceneCatalog.hpp"
@@ -24,6 +25,7 @@
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Log.hpp"
+#include "Ending/Credits/StaffRoll.h"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.h"
@@ -34,11 +36,6 @@
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
 #include "Save/NativeMenu.hpp"
-
-extern "C" {
-#include "Boot/GameLoop.h"
-#include "Ending/Credits/StaffRoll.h"
-}
 
 namespace VS::combat_lab {
 namespace {

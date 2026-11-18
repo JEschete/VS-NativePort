@@ -15,38 +15,35 @@
 #include <string_view>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
+#include "Battle/TargetingState.h"
+#include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
+#include "Items/InventoryLiveState.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
 #include "Menu/Loot/LootPolicies.hpp"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
+#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/Paging.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/TargetingState.h"
-#include "Content/StringTables.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/InventoryLiveState.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/Loot/LootScreen.h"
-#include "Menu/Loot/Paging.h"
-}
 
 namespace VS::Menu::Loot::Live {
 namespace {

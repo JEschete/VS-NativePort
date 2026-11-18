@@ -9,13 +9,5 @@ typedef struct Field_DoorMatchList {
   Field_MpdDoorRecord** records;
 } Field_DoorMatchList;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Filled by VS::Field::TransitionLiveDoorsAtTile (Field/DoorMatchesLive.hpp).
 extern Field_DoorMatchList Field_matchingDoorRecords;
-
-#ifdef __cplusplus
-}
-#endif

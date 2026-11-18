@@ -9,23 +9,21 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionCameraSelectionLive.hpp"
-#include "Content/ModuleData.h"
-#include "Render/CameraViewLive.hpp"
-#include "Render/ModelGeometryLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Battle/Action.h"
+#include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.h"
+#include "Content/ModuleData.h"
 #include "Core/Gte.h"
 #include "Field/CameraLiveState.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "Render/Camera.h"
+#include "Render/CameraViewLive.hpp"
+#include "Render/ModelGeometryLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 namespace b = VS::Battle;

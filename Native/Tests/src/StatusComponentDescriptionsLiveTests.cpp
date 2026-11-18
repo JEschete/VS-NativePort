@@ -11,14 +11,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/DiscLayout.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
 #include "Menu/StatusComponentsWorld.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-}
 
 namespace {
 namespace status = VS::Menu::Status;

@@ -19,42 +19,40 @@
 #include <tuple>
 #include <type_traits>
 
+#include "ActorAssets.h"
+#include "ActorAssetsLiveState.h"
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
+#include "Actors/Animation.h"
 #include "Actors/AppearanceLive.hpp"
+#include "Actors/AppearanceLiveState.h"
+#include "Actors/ModelInstance.h"
+#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
+#include "Actors/SkeletonLiveState.h"
+#include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Actors/Textures.h"
+#include "Actors/WeaponModel.h"
 #include "Audio/SfxLive.hpp"
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/GimmickResourcesLive.hpp"
-#include "Render/ModelGeometryLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-
-extern "C" {
-#include "ActorAssets.h"
-#include "ActorAssetsLiveState.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/AppearanceLiveState.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
-#include "Actors/WeaponModel.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Items/Materials.h"
 #include "Legacy/Psx.h"
 #include "LegacyFiles.h"
 #include "ModelLoading.h"
+#include "Render/ModelGeometryLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.h"
 
 // decomp: D_800E8F29 (D_800E8F29@BATTLE/BATTLE.PRG)
@@ -67,7 +65,6 @@ int Content_lastLoadPhaseSnapshot;
 int Content_assetQueueFrameTicks;
 // decomp: D_800F45D8 (D_800F45D8@BATTLE/BATTLE.PRG)
 int Content_lastAssetRequestType;
-}
 
 namespace VS::Content {
 namespace {

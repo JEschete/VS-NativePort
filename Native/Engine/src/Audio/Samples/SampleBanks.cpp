@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Samples/SampleBanks.h"
 
@@ -18,4 +17,3 @@ int Audio_Samples_bankChunkHeader[16];
 // decomp: D_80039BC8 (D_80039BC8@SLUS_010.40)
 Audio_BankStreamState Audio_Samples_bankStream;
 
-}  // extern "C"

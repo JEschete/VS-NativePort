@@ -7,10 +7,6 @@
 #include "Actors/WeaponModel.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: D_800F3C58 (BATTLE/BATTLE.PRG 44F14.c): the bone matrices of the
 // skeleton being drawn and its scale.
 extern Actors_SkeletonPose Actors_skeletonPose;
@@ -26,7 +22,3 @@ extern Actors_WeaponModel* Actors_weaponModels[kActorsWeaponModelCount];
 // decomp: D_800F49B8 (BATTLE/BATTLE.PRG 38C1C.c): the camera the bone queries
 // view the bones from; the room pass and the pose builder prepare it.
 extern MATRIX Actors_boneMatrixScratch;
-
-#ifdef __cplusplus
-}
-#endif

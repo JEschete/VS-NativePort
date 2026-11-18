@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Render/Text/CompactFont.h"
 
@@ -12,4 +11,3 @@ u_char Render_compactGlyphWidths[92]; /* contents: module image (ModuleData.cpp)
 // decomp: D_800EB7D4 (D_800EB7D4@BATTLE/BATTLE.PRG)
 u_char Render_compactGlyphIndices[60]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

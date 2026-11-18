@@ -11,22 +11,20 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/FilesLive.hpp"
-#include "Menu/GazetteTerminalLiveFixture.hpp"
-#include "Menu/Score/GazetteCameraLive.hpp"
-#include "Menu/Score/GazetteRowsLive.hpp"
-#include "Menu/Score/GazetteStatisticsLive.hpp"
-#include "Menu/Score/GazetteTerminalLive.hpp"
-
-extern "C" {
 #include "Core/Random.h"
 #include "Core/Text/TextCode.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
+#include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.h"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/GazetteCameraLive.hpp"
+#include "Menu/Score/GazetteRowsLive.hpp"
+#include "Menu/Score/GazetteStatisticsLive.hpp"
+#include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/Records.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -36,7 +34,6 @@ extern "C" {
 #include "Save/MemoryCard/GameFiles.h"
 #include "State/PlayTime.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace {
 namespace files = VS::Menu::Files;

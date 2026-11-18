@@ -15,8 +15,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Content/DiscLayout.h"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "DiscQueue.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
@@ -27,11 +29,6 @@
 #include "Menu/Sounds.hpp"
 #include "Render/EncodedText.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "DiscQueue.h"
-}
 
 namespace {
 namespace fw = VS::Menu::Framework;

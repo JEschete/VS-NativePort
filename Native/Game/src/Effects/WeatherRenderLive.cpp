@@ -11,30 +11,27 @@
 #include <string_view>
 #include <vector>
 
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
+#include "Core/Scratch.h"
 #include "Effects/WeatherPool.hpp"
 #include "Effects/WeatherPoolLiveSupport.hpp"
 #include "Effects/WeatherRender.hpp"
 #include "Field/Background.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
 #include "Field/BackgroundLiveState.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLiveState.h"
 #include "Field/Mpd.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Field/Weather.h"
+#include "Legacy/Psx.h"
 #include "Render/Frame.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Effects {
 namespace {

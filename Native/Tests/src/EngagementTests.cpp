@@ -7,15 +7,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 struct EngagementFixture {

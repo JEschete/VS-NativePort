@@ -12,26 +12,23 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/Skeleton.hpp"
-#include "Actors/SkeletonLive.hpp"
-#include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/ActorSettingsLive.hpp"
-#include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Battle/Ai/RelationsLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-
-extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
+#include "Actors/Skeleton.hpp"
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Core/Memory/HeapLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

@@ -7,10 +7,6 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define MODE_NTSC 0
 
 // kernel event descriptors
@@ -42,7 +38,3 @@ long CloseEvent(long event);
 long EnableEvent(long event);
 long DisableEvent(long event);
 void Legacy_AdvanceCounter2(unsigned elapsedClocks);
-
-#ifdef __cplusplus
-}
-#endif

@@ -12,23 +12,20 @@
 
 #include "Actors/ActorTableLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/HudRendering.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
+#include "Battle/HudRendering.hpp"
 #include "Core/Diagnostics.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Magic.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Battle {
 namespace {

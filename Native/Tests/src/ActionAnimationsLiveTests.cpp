@@ -10,20 +10,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/SequencePlaybackLive.hpp"
-#include "Battle/ActionAnimationsLive.hpp"
-#include "Content/ModuleData.h"
-#include "Render/ModelGeometryLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.h"
-}
+#include "Content/ModuleData.h"
+#include "Render/ModelGeometryLive.hpp"
 namespace {
 namespace b = VS::Battle;
 namespace a = VS::Actors;

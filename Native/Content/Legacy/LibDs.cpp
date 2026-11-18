@@ -4,7 +4,6 @@
 
 // Remaining compatibility entry points (EC-04), not the extracted-file reader.
 
-extern "C" {
 int DsInit(void) {
   VS_UNPORTED("libds:DsInit");
   return {};
@@ -16,5 +15,3 @@ int DsGetSector(void* madr, int size) {
   VS_UNPORTED("libds:DsGetSector");
   return {};
 }
-
-}  // extern "C"

@@ -8,7 +8,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Battle/Encounter.hpp"
+#include "Battle/EncounterHooks.h"
+#include "Boot/PlayerSettings.h"
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/Trace.hpp"
 #include "Content/DataStore.hpp"
@@ -17,15 +20,9 @@
 #include "Field/CollisionSampling.hpp"
 #include "Field/DoorMatchesLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/EncounterHooks.h"
-#include "Boot/PlayerSettings.h"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.h"
-}
 
 namespace {
 using VS::Game::EncounterSetup;

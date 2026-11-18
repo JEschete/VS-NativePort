@@ -13,28 +13,25 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Scratch.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Score/GazetteCamera.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-#include "Core/Scratch.h"
-#include "Legacy/Psx.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the gazette's viewer camera, panels and overview (MENU9.PRG
 // 238.c:1402-1408, 1474-1509, 1552-1717, 2146-2174).

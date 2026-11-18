@@ -16,15 +16,13 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
+#include "DiscQueue.h"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffect.hpp"
-extern "C" {
-#include "DiscQueue.h"
 #include "Effects/Runtime.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

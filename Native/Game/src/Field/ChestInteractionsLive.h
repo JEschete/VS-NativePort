@@ -1,8 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
@@ -48,9 +45,7 @@ void Field_FinishTrapInteractionEntry(void);
 void Field_BeginTrapInteractionEntry(struct Field_MpdLockTrigger* address,
                                      struct Actors_ActorLocation* location,
                                      int actor);
-#ifdef __cplusplus
-}
-extern "C++" {
+
 #include "Field/ChestInteractions.hpp"
 #include "Field/InteractionTarget.hpp"
 namespace VS::Field {
@@ -77,5 +72,3 @@ std::optional<ChestTarget> FindLiveFacingUnlootedChest(std::int32_t actor);
 Field_MpdLockTrigger* ResolveLiveRoomObjectTarget(RoomObjectTarget target);
 RoomObjectInteractionResult InteractLiveRoomObject(RoomObjectTarget target);
 }  // namespace VS::Field
-}
-#endif

@@ -21,19 +21,16 @@
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
 #include "Effects/TimelinePlaybackLive.hpp"
+#include "Effects/Transforms.h"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
-}
 
 static_assert(std::extent_v<decltype(Effects_scriptOpcodeHandlers)> ==
               VS::Effects::kEffectScriptOpcodes);

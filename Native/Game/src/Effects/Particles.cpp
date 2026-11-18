@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -34,4 +33,3 @@ int Effects_particleDrag;
 // decomp: D_800F5620 (D_800F5620@BATTLE/BATTLE.PRG)
 Effects_ParticleGravity Effects_particleGravity;
 
-}  // extern "C"

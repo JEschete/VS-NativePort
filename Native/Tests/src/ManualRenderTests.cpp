@@ -9,20 +9,17 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Text/TextCode.h"
+#include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
+#include "Menu/Manual.h"
 #include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
-
-extern "C" {
-#include "Core/Text/TextCode.h"
-#include "Input/ControllerLiveState.h"
-#include "Menu/Manual.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 __declspec(noinline) void ReuseReturnedStack() {

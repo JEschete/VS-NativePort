@@ -14,29 +14,27 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/OverlayWorkspaceLive.hpp"
+#include "Core/Arena.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Effects/CurvesLive.hpp"
-#include "Effects/EffectResources.hpp"
-#include "Effects/PackageExtents.hpp"
-#include "Effects/ParticlePoolLive.hpp"
-#include "Effects/TextureBindings.hpp"
-#include "Legacy/Psx.h"
-#include "Render/TexturePagesLive.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Core/Arena.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
+#include "Effects/CurvesLive.hpp"
+#include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLiveState.h"
 #include "Effects/Loading.h"
 #include "Effects/Package.h"
+#include "Effects/PackageExtents.hpp"
+#include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
+#include "Effects/TextureBindings.hpp"
+#include "Legacy/Psx.h"
+#include "Render/TexturePagesLive.hpp"
 
 // decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
 int Effects_textureLoadIndex;
@@ -63,7 +61,6 @@ u_long* Effects_textureLoadBuffer;
 int Effects_pluginEntryPointCount;
 // decomp: D_800F5874 (D_800F5874@BATTLE/BATTLE.PRG)
 int Effects_loadedTextureSlots;
-}
 
 static_assert(sizeof(Effects_FileLoadContext) == sizeof(std::uint32_t));
 static_assert(std::extent_v<decltype(Effects_TextureLoadList::loadContexts)> ==

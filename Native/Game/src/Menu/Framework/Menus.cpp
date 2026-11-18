@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Menus.h"
 
@@ -24,4 +23,3 @@ char Menu_Framework_abilityGroupActionRanges[8]; /* contents: module image (Modu
 // decomp: vs_battle_cursorBrightnessAnimation (vs_battle_cursorBrightnessAnimation@BATTLE/BATTLE.PRG)
 char Menu_Framework_cursorBrightnessAnimation[22012]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

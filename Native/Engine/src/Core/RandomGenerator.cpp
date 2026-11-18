@@ -115,7 +115,7 @@ i32 Random::NextAveraged(Rand15& source, Table table, i32& index, i32 max) {
 
 }  // namespace VS::Core
 
-extern "C" int Core_Random_Rand(void) {
+int Core_Random_Rand(void) {
   auto& bios = VS::Core::BiosRand();
   const auto before = bios.State();
   const int value = bios.Next();
@@ -124,11 +124,9 @@ extern "C" int Core_Random_Rand(void) {
   return value;
 }
 
-extern "C" void Core_Random_Seed(unsigned int seed) {
+void Core_Random_Seed(unsigned int seed) {
   VS::Core::BiosRand().Seed(seed);
   VS_LOG_TRACE("rng", "seed={}", seed);
 }
 
-extern "C" unsigned int Core_Random_State(void) {
-  return VS::Core::BiosRand().State();
-}
+unsigned int Core_Random_State(void) { return VS::Core::BiosRand().State(); }

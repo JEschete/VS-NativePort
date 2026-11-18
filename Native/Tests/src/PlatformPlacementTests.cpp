@@ -12,35 +12,32 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/ActorMovementLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Log.hpp"
-#include "Core/Math/MatrixLive.hpp"
-#include "Field/ActorCollisionLive.hpp"
-#include "Field/PlatformPlacement.hpp"
-#include "Field/PlatformPlacementLive.h"
-#include "Field/PlatformPlacementLive.hpp"
-#include "Field/RoomEffects.hpp"
-#include "Legacy/Psx.h"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/RoomDraw.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Content/ModuleData.h"
+#include "Core/Log.hpp"
+#include "Core/Math/MatrixLive.hpp"
+#include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacement.hpp"
+#include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
+#include "Field/RoomEffects.hpp"
 #include "Field/RoomRenderingLiveState.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.h"
+#include "Render/RoomDraw.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-}
 
 namespace {
 constexpr auto kGroupBytes = VS::Render::kRoomGroupRecordBytes;

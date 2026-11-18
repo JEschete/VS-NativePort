@@ -8,10 +8,6 @@
 #include "Effects/Loading.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: D_800F5630 (BATTLE/BATTLE.PRG 6F014.c:612): the texture asset
 // being loaded.
 extern int Effects_textureLoadIndex;
@@ -47,7 +43,3 @@ extern int Effects_pluginEntryPointCount;
 // decomp: D_800F5874 (BATTLE/BATTLE.PRG 6F014.c:592): bit n set while
 // texture page n holds an effect texture.
 extern int Effects_loadedTextureSlots;
-
-#ifdef __cplusplus
-}
-#endif

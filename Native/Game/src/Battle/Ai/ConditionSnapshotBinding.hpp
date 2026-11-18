@@ -2,11 +2,8 @@
 // Hand-maintained (tools/port/owned.csv).
 #include <span>
 
-#include "Battle/Ai/ConditionSnapshot.hpp"
-
-extern "C" {
 #include "Battle/Ai/AiViews.h"
-}
+#include "Battle/Ai/ConditionSnapshot.hpp"
 
 // Binds the live battle actor list to the typed condition snapshot.
 namespace VS::Battle::Ai {

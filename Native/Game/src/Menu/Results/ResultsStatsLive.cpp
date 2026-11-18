@@ -6,13 +6,10 @@
 #include <cstdint>
 #include <optional>
 
-#include "Menu/Results/ResultsStats.hpp"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.h"
-}
+#include "Menu/Results/ResultsStats.hpp"
 
 namespace VS::Menu::Results {
 namespace {

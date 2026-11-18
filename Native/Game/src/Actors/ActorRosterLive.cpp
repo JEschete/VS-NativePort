@@ -16,20 +16,18 @@
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/BattleActorState.hpp"
 #include "Actors/RoomEnemyMemoryLive.hpp"
+#include "Actors/Spawning.h"
+#include "Battle/AbilityState.h"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Damage.h"
+#include "Battle/Feedback.h"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-extern "C" {
-#include "Actors/Spawning.h"
-#include "Battle/AbilityState.h"
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Feedback.h"
 #include "Field/Gimmicks.h"
-}
 
 namespace VS::Actors {
 namespace {

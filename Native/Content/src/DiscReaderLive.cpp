@@ -4,14 +4,12 @@
 #include <cstdint>
 #include <limits>
 
-#include "Content/DiscReader.hpp"
-#include "Core/Diagnostics.h"
-extern "C" {
 #include "Audio/XaPlayback.h"
 #include "Content/DataAccess.h"
+#include "Content/DiscReader.hpp"
+#include "Core/Diagnostics.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Content {
 namespace {

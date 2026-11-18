@@ -10,9 +10,7 @@
 
 #include "Battle/SphereGeometry.hpp"
 #include "Battle/SphereGeometryLive.hpp"
-extern "C" {
 #include "Battle/TargetVolume.h"
-}
 
 namespace {
 namespace battle = VS::Battle;

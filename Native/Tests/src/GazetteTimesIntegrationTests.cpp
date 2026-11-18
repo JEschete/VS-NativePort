@@ -9,16 +9,13 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/SessionLive.hpp"
+#include "Content/DiscLayout.h"
+#include "Event/ScriptVm.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTimesLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Event/ScriptVm.h"
 #include "Menu/Score/ScoreScreen.h"
-}
 
 namespace {
 namespace live = gazette_times_live_tests;

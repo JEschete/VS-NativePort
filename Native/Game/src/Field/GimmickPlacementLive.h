@@ -1,8 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 struct Field_GimmickSnapshot;
 struct Field_GimmickInstance;
 struct Actors_ActorRecord;
@@ -23,6 +20,3 @@ void Field_ApplyGimmickInteractionCommandEntry(struct Actors_ActorRecord* actor,
 int Field_MeasureTileStackEntry(int tile_x, int tile_z, int* height_offset);
 int Field_IsGimmickWithinHeightBandEntry(int tile_x, int tile_z,
                                          int minimum_height);
-#ifdef __cplusplus
-}
-#endif

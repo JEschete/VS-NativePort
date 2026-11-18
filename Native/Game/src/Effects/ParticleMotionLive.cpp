@@ -5,19 +5,16 @@
 #include <cstdint>
 #include <string_view>
 
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/Gte.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Effects {
 namespace {

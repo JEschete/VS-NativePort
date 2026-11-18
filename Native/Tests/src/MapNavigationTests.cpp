@@ -8,18 +8,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Field/MinimapScene.hpp"
-#include "Menu/MapNavigation.hpp"
-#include "Menu/MapNavigationLive.hpp"
-extern "C" {
 #include "Battle/StatusEffects.h"
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
 #include "Menu/Map.h"
-}
+#include "Menu/MapNavigation.hpp"
+#include "Menu/MapNavigationLive.hpp"
 
 namespace {
 namespace nav = VS::Menu::map;

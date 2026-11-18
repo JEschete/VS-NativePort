@@ -9,26 +9,23 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
+#include "Actors/ActorRecord.h"
 #include "Actors/AnimationControlLive.hpp"
+#include "Actors/Location.h"
+#include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacement.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/InteractionTargetLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Location.h"
-#include "Actors/Movement.h"
-#include "Battle/Ai/Navigation.h"
-#include "Core/Diagnostics.h"
 #include "Field/Gimmicks.h"
-}
+#include "Field/InteractionTargetLive.hpp"
 
 namespace {
 

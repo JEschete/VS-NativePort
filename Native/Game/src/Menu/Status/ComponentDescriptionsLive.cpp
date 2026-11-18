@@ -9,16 +9,13 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Status/ComponentDescriptions.hpp"
-
-extern "C" {
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-}
 
 namespace VS::Menu::Status {  // NOLINT(readability-identifier-naming)
 namespace {

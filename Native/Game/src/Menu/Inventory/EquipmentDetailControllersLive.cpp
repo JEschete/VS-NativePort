@@ -8,30 +8,27 @@
 #include <optional>
 #include <span>
 
-#include "Items/ItemRecords.hpp"
-#include "Items/ItemRecordsLive.hpp"
-#include "Menu/Framework/EquipmentDetails.hpp"
-#include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/ItemRows.hpp"
-#include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Inventory/DetailsPoliciesLive.hpp"
-#include "Menu/Inventory/EquipmentDetailControllers.hpp"
-#include "Menu/Inventory/ItemDetailLiveSupport.hpp"
-#include "Render/GameFontLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.h"
 #include "Input/ControllerLiveState.h"
+#include "Items/ItemRecords.hpp"
+#include "Items/ItemRecordsLive.hpp"
+#include "Menu/Framework/EquipmentDetails.hpp"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRows.hpp"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Inventory/DetailsPoliciesLive.hpp"
+#include "Menu/Inventory/EquipmentDetailControllers.hpp"
+#include "Menu/Inventory/ItemDetailLiveSupport.hpp"
 #include "Render/Frame.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Menu::Inventory {
 namespace {

@@ -7,32 +7,29 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorRecord.h"
+#include "Actors/ModelInstance.h"
+#include "Actors/Movement.h"
+#include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
+#include "Audio/ActorSound.h"
 #include "Audio/ActorSound.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/Sfx.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundSlotsLive.hpp"
-#include "Core/RandomLive.hpp"
-#include "Effects/WeatherPoolLive.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Field/GimmickPlacementLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Audio/ActorSound.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Core/BiosRand.h"
+#include "Core/RandomLive.hpp"
+#include "Effects/WeatherPoolLive.hpp"
 #include "Field/Collision.h"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio {
 namespace {

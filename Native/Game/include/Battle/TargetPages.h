@@ -11,10 +11,6 @@ typedef struct Battle_TargetPageInfo {
   int selected;
 } Battle_TargetPageInfo;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void Battle_ResetTargetPages(void);
 int Battle_AdvanceTargetPage(int direction);
 int Battle_HandleTargetPageButtons(void);
@@ -24,7 +20,3 @@ int Battle_ValidateTargetPreviewIndex(int index);
 int Battle_TargetPreviewIndexIsValid(int index);
 Battle_TargetPageInfo Battle_GetTargetPageInfo(void);
 void Battle_DrawTargetPageHint(void);
-
-#ifdef __cplusplus
-}
-#endif

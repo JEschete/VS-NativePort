@@ -14,6 +14,9 @@
 #include <optional>
 #include <span>
 
+#include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
@@ -21,13 +24,7 @@
 #include "Audio/StreamControl.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio::Cutscene {
 namespace {

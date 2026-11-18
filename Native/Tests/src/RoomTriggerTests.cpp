@@ -13,13 +13,10 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Event/RoomTriggers.hpp"
-#include "Event/TriggersLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
-}
+#include "Event/TriggersLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace {
 namespace event = VS::Event;

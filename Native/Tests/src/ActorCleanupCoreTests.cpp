@@ -17,13 +17,10 @@
 
 #include "Battle/Ai/ActorCleanup.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/Navigation.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 namespace ai = VS::Battle::Ai;

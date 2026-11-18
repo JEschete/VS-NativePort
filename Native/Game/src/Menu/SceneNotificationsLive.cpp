@@ -8,22 +8,19 @@
 #include <optional>
 #include <span>
 
-#include "Content/StringTables.h"
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/SceneNotifications.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-#include "Render/EncodedText.hpp"
-#include "Render/EncodedTextLive.hpp"
-
-extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
+#include "Content/StringTables.h"
 #include "Core/Diagnostics.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Menus.h"
+#include "Menu/SceneNotifications.hpp"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxStateLive.hpp"
+#include "Render/EncodedText.hpp"
+#include "Render/EncodedTextLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Menu {
 namespace {

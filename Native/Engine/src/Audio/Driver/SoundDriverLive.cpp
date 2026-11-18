@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <span>
 
+#include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/SoundDriver.h"
 #include "Audio/PlaybackResetLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencerLive.hpp"
@@ -16,12 +18,7 @@
 #include "Audio/SoundDriver.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio::Driver {
 namespace {

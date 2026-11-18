@@ -12,26 +12,23 @@
 #include <string>
 #include <string_view>
 
-#include "Battle/ActionCostsLive.hpp"
-#include "Content/StringTables.h"
-#include "Core/Log.hpp"
-#include "Field/RoomStateLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/MagicCosts.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Content/StringTables.h"
+#include "Core/Log.hpp"
+#include "Field/RoomStateLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
-}
+#include "Menu/MagicCosts.hpp"
 
 namespace VS::Menu::Magic {
 namespace {

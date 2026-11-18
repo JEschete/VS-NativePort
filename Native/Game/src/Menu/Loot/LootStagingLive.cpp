@@ -3,9 +3,7 @@
 #include <cstdint>
 
 #include "Items/ItemRecordsLive.hpp"
-extern "C" {
 #include "Menu/Loot/LootScreen.h"
-}
 #include "Menu/Loot/LootStaging.hpp"
 
 namespace VS::Menu::Loot::Live {

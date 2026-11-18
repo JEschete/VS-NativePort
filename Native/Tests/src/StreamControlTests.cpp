@@ -10,14 +10,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/StreamControl.hpp"
-#include "Audio/StreamControlLive.hpp"
-#include "Content/AudioStream.hpp"
-extern "C" {
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/SoundBanks.h"
-}  // extern "C"
+#include "Audio/StreamControl.hpp"
+#include "Audio/StreamControlLive.hpp"
+#include "Content/AudioStream.hpp"
 
 namespace {
 

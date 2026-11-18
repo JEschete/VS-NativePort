@@ -6,13 +6,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/MotionRequestsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/MotionRequestsLive.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
-}
 
 namespace {
 static_assert(sizeof(SVECTOR) == 2 * sizeof(int));

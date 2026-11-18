@@ -13,16 +13,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/DamageCalculations.hpp"
-#include "Battle/DamageCalculationsLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/DamageCalculations.hpp"
+#include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/Hit.h"
-}
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
 
 namespace {
 namespace b = VS::Battle;

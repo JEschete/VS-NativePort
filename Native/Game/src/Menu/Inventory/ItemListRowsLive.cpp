@@ -7,24 +7,21 @@
 #include <span>
 #include <string_view>
 
-#include "Core/Log.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Items/ItemRecordsLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/ItemRows.hpp"
-#include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Inventory/ItemListRows.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
+#include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Items/InventoryLiveState.h"
+#include "Items/ItemRecordsLive.hpp"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRows.hpp"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
-}
+#include "Menu/Inventory/ItemListRows.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {

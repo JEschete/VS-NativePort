@@ -7,15 +7,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Sphere.h"
 #include "Battle/SphereTargetLabels.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
-#include "Battle/Targeting.hpp"
-
-extern "C" {
-#include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
+#include "Battle/Targeting.hpp"
 #include "Menu/Framework/Menus.h"
-}
 
 namespace {
 namespace battle = VS::Battle;

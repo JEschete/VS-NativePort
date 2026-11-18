@@ -13,16 +13,13 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/Runtime.h"
 #include "Effects/Templates/ClosedRing.hpp"
 #include "Effects/Templates/Ring.hpp"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/TiledRing.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Effects/Runtime.h"
-}
 
 namespace {
 namespace rings = VS::Effects::Templates;

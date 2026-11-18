@@ -15,20 +15,16 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanksLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/RandomLive.hpp"
-#include "Field/MapLive.hpp"
-#include "Save/MemoryCard/GameFiles.hpp"
-#include "Save/SnapshotLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
+#include "Core/Memory/HeapLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
 #include "Field/Map.h"
+#include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
@@ -37,7 +33,9 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Save/MemoryCard/GameFiles.h"
+#include "Save/MemoryCard/GameFiles.hpp"
 #include "Save/MemoryCard/Resources.h"
+#include "Save/SnapshotLive.hpp"
 #include "State/Ashley.h"
 #include "State/Location.h"
 #include "State/PlayTime.h"
@@ -48,7 +46,6 @@ extern "C" {
 #include "State/StateFlags.h"
 #include "Title/SaveCard.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace VS::Save::MemoryCard {
 namespace {

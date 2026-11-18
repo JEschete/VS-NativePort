@@ -5,14 +5,11 @@
 #include <cstdint>
 #include <iterator>
 
+#include "Battle/Damage.h"
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/ScriptedEffectTriggers.hpp"
-
-extern "C" {
-#include "Battle/Damage.h"
-}
 
 namespace VS::Effects {
 namespace {

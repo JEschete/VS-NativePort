@@ -10,12 +10,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.h"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Options.hpp"
 #include "Menu/OptionsLive.hpp"
-
-extern "C" {
-#include "Menu/Framework/FrameworkLiveState.h"
-}
 
 namespace {
 namespace options = VS::Menu::Options;

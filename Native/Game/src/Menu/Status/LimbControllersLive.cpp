@@ -10,28 +10,25 @@
 #include <string_view>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/HudStateLive.hpp"
-#include "Input/ControllerLiveState.h"
-#include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Sounds.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/Sprites.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.h"
+#include "Input/ControllerLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
+#include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorStatus.h"
-}
+#include "Render/GameFontLive.hpp"
+#include "Render/Sprites.hpp"
+#include "Render/UiPacketsLive.hpp"
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {

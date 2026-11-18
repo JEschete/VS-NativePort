@@ -11,11 +11,8 @@
 #include <utility>
 
 #include "Core/Arena.h"
-#include "Core/Memory/Heap.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
-}
+#include "Core/Memory/Heap.hpp"
 
 namespace VS::Core::Memory {
 namespace {

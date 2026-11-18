@@ -5,10 +5,6 @@
 // TransitionsLive.cpp defines them and mirrors them into the typed
 // RoomTransitionState (Field/Transitions.hpp) around each call.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: vs_battle_screenTransitionStep (BATTLE/BATTLE.PRG 146C.h): the
 // Field::TransitionStep.
 extern unsigned int Field_screenTransitionStep;
@@ -23,7 +19,3 @@ extern int Field_screenTransitionWipeAngle;
 // decomp: vs_battle_screenTransitionSpeed (BATTLE/BATTLE.PRG 146C.h): the
 // alpha change per frame.
 extern int Field_screenTransitionSpeed;
-
-#ifdef __cplusplus
-}
-#endif

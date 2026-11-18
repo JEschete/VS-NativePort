@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
 #include "Render/Images.h"
@@ -205,4 +204,3 @@ u_char Menu_Results_riskbreakerRanks[][4] = { { 3, Menu_Results_DisIndex_Rank1Gr
 // decomp: _score (_score@src/MENU/MENUF.PRG/3B8.c)
 u_int Menu_Results_score;
 
-}  // extern "C"

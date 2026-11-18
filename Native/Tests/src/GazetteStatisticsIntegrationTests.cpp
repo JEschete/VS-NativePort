@@ -10,14 +10,11 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Boot/SessionLive.hpp"
+#include "Content/DiscLayout.h"
+#include "Event/ScriptVm.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Event/ScriptVm.h"
-}
 
 namespace {
 namespace live = gazette_statistics_live_tests;

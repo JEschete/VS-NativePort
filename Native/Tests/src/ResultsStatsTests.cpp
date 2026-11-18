@@ -3,12 +3,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/Results/ResultsStats.hpp"
-#include "Menu/Results/ResultsStatsLive.hpp"
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-}
+#include "Menu/Results/ResultsStats.hpp"
+#include "Menu/Results/ResultsStatsLive.hpp"
 
 namespace {
 namespace r = VS::Menu::Results;

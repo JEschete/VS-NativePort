@@ -7,12 +7,10 @@
 #include <iterator>
 #include <span>
 
-#include "Field/MapLive.hpp"
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Core/Diagnostics.h"
-}
+#include "Field/MapLive.hpp"
 
 namespace VS::Battle {
 namespace {

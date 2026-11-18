@@ -6,15 +6,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Actor.h"
 #include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Battle/Damage.h"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-}
 
 namespace {
 struct StoredCondition {

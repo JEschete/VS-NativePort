@@ -8,18 +8,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Event/ScriptVmLive.hpp"
-#include "State/GameClock.hpp"
-#include "State/GameClockLive.hpp"
-#include "State/KillScore.hpp"
-#include "State/KillScoreLive.hpp"
-#include "State/SceneTimer.hpp"
-#include "State/SceneTimerLive.hpp"
-#include "State/ScriptFlags.hpp"
-#include "State/ScriptFlagsLive.hpp"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
@@ -28,10 +16,19 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Core/BiosRand.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
+#include "State/GameClock.hpp"
+#include "State/GameClockLive.hpp"
+#include "State/KillScore.hpp"
+#include "State/KillScoreLive.hpp"
 #include "State/PlayTime.h"
+#include "State/SceneTimer.hpp"
+#include "State/SceneTimerLive.hpp"
+#include "State/ScriptFlags.hpp"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace state = VS::State;
 using state::KillScore;

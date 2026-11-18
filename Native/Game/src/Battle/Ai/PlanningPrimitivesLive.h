@@ -6,9 +6,6 @@ struct Battle_Ai_ActorAiState;
 struct Battle_Ai_ActionCandidate;
 struct Battle_Ai_ReactionRecord;
 struct Battle_ActionDefinition;
-#ifdef __cplusplus
-extern "C" {
-#endif
 int Battle_Ai_RefreshActionCandidateReadinessEntry(
     struct Battle_Ai_CandidateReadinessView* state);
 void Battle_Ai_ApplySimulatedActionResultsEntry(
@@ -29,6 +26,3 @@ void Battle_Ai_ReconcileCompletedActionPlanEntry(
 void Battle_Ai_AdvancePlanningSimulationEntry(int time_step);
 void Battle_Ai_EnumerateActionCandidatesEntry(
     struct Battle_Ai_ActorAiState* state, int readiness_threshold);
-#ifdef __cplusplus
-}
-#endif

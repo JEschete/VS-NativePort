@@ -10,19 +10,17 @@
 #include <iterator>
 #include <optional>
 
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/BlockedMovement.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

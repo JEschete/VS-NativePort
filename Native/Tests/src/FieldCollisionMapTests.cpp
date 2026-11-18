@@ -14,30 +14,27 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
-#include "Field/CollisionMap.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Field/Map.hpp"
-#include "Field/MapLive.hpp"
-#include "Field/Traps.hpp"
-#include "Field/TrapsLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
+#include "Content/ModuleData.h"
+#include "Field/CollisionMap.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
+#include "Field/Map.hpp"
+#include "Field/MapLive.hpp"
 #include "Field/MapProgress.h"
 #include "Field/Minimap.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Field/Traps.hpp"
+#include "Field/TrapsLive.hpp"
 #include "Field/Zone.h"
+#include "Legacy/Psx.h"
 #include "State/Progress.h"
-}
 
 namespace {
 using VS::Field::CollisionCellRef;

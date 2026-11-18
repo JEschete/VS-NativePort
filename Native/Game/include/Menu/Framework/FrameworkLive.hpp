@@ -5,10 +5,7 @@
 #include <span>
 
 #include "Legacy/Psx.h"
-
-extern "C" {
 #include "Menu/Framework/ActionSelection.h"
-}
 
 struct Menu_Framework_MenuRow;
 struct Items_LootListNode;

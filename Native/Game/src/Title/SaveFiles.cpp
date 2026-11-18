@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Files.h"
 #include "Save/MemoryCard/GameFiles.h"
@@ -65,4 +64,3 @@ char* Title_memoryCardUiResource;
 // decomp: _textTable (_textTable@src/TITLE/TITLE.PRG/22C.c)
 u_short* Title_saveMenuText;
 
-}  // extern "C"

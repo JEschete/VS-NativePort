@@ -9,32 +9,30 @@
 #include <optional>
 #include <vector>
 
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorPerception.hpp"
-#include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Ai/RadialMovementLive.hpp"
-#include "Core/FrameTiming.hpp"
-#include "Core/Math/Distance.hpp"
-#include "Field/TerrainHeight.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/ActorPerception.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
+#include "Core/FrameTiming.hpp"
+#include "Core/Math/Distance.hpp"
 #include "Field/Gimmicks.h"
-}
+#include "Field/TerrainHeight.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

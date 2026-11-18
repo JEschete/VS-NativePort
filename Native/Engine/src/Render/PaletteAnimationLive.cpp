@@ -10,14 +10,11 @@
 #include <span>
 
 #include "Actors/AppearanceLive.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
 #include "Render/Palette.h"
-}
 
 namespace VS::Render {
 namespace {

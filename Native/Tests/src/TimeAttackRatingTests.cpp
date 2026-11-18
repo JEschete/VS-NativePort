@@ -7,19 +7,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
+#include "Menu/Results/TimeAttack.h"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackRating.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/TextureRegionDraw.hpp"
-#include "TestSupport/TimeAttackDrawRecorder.hpp"
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Menu/Results/TimeAttack.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-}
+#include "TestSupport/TimeAttackDrawRecorder.hpp"
 
 namespace {
 namespace r = VS::Menu::Results;

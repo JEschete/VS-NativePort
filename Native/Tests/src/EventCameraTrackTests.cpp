@@ -17,12 +17,9 @@
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
-#include "Event/ScriptCommand.hpp"
-
-extern "C" {
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace event = VS::Event;

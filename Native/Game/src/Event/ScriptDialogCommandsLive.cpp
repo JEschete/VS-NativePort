@@ -12,25 +12,22 @@
 #include <iterator>
 #include <string>
 
-#include "Event/ScriptActorCommandsLive.hpp"
-#include "Event/ScriptDialogCommands.hpp"
-#include "Event/ScriptDialogOpcodes.h"
-#include "Event/ScriptVmLive.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Core/Diagnostics.h"
+#include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptActors.h"
+#include "Event/ScriptDialogCommands.hpp"
+#include "Event/ScriptDialogOpcodes.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxStateLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace {
 namespace event = VS::Event;

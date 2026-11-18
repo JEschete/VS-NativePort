@@ -13,16 +13,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Ai/CandidateMovement.hpp"
-#include "Battle/Ai/CandidateMovementLive.hpp"
-#include "Content/ModuleData.h"
-
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-}
+#include "Battle/Ai/CandidateMovement.hpp"
+#include "Battle/Ai/CandidateMovementLive.hpp"
+#include "Content/ModuleData.h"
 
 namespace {
 namespace ai = VS::Battle::Ai;

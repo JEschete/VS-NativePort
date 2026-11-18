@@ -11,12 +11,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
-extern "C" {
-#include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

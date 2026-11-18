@@ -6,11 +6,8 @@
 #include "Items/ContainerIndexing.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
-
-extern "C" {
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
-}
 
 namespace container_indexing_tests {
 namespace items = VS::Items;

@@ -15,22 +15,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/ContainerMenuDialogsLiveFixture.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Inventory/EquipmentMenus.hpp"
-#include "Menu/Inventory/EquipmentMenusLive.hpp"
-#include "Menu/Inventory/EquipmentRowsLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Hud.h"
 #include "Items/Inventory.h"
+#include "Menu/ContainerMenuDialogsLiveFixture.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Inventory/EquipmentMenus.hpp"
+#include "Menu/Inventory/EquipmentMenusLive.hpp"
+#include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
-}
 
 // Contracts of the equipment menu (MENU3.PRG 16C.c:343-1233): the four slot
 // menus, the handler table that picks one for a top-menu row, and the top

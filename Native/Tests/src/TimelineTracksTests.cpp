@@ -8,13 +8,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracks.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Effects/Transforms.hpp"
-extern "C" {
-#include "Effects/Runtime.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

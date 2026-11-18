@@ -10,19 +10,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/Appearance.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.h"
-#include "Content/ModuleData.h"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
+#include "Content/ModuleData.h"
 #include "Field/Gimmicks.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
 using actors::AppearanceStatus;

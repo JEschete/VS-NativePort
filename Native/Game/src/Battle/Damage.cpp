@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
@@ -32,4 +31,3 @@ int Battle_criticalHitOccurred;
 // decomp: _armorDpAdjustmentAmounts (_armorDpAdjustmentAmounts@BATTLE/BATTLE.PRG)
 short Battle_limbArmorDpLoss[8];
 
-}  // extern "C"

@@ -13,34 +13,31 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Boot/SessionLive.hpp"
-#include "Content/ActorAssets.hpp"
-#include "Content/ActorAssetsLive.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/GameClearLifecycleLiveFixture.hpp"
-#include "Menu/GazetteTimesLiveFixture.hpp"
-#include "Menu/OverlayLoadFixture.hpp"
-#include "Menu/Score/EncyclopediaPreview.hpp"
-#include "Menu/Score/EncyclopediaPreviewLive.hpp"
-
-extern "C" {
 #include "ActorAssets.h"
 #include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Battle/TargetingState.h"
+#include "Boot/SessionLive.hpp"
+#include "Content/ActorAssets.hpp"
+#include "Content/ActorAssetsLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Event/ScriptVm.h"
 #include "Legacy/Psx.h"
 #include "LegacyFiles.h"
+#include "Menu/GameClearLifecycleLiveFixture.hpp"
+#include "Menu/GazetteTimesLiveFixture.hpp"
 #include "Menu/Inventory/Inventory.h"
+#include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Score/Encyclopedia.h"
+#include "Menu/Score/EncyclopediaPreview.hpp"
+#include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
-}
 
 namespace {
 namespace score = VS::Menu::Score;

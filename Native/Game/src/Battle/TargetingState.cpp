@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/TargetingState.h"
 #include "Menu/Framework/TextBoxes.h"
@@ -67,4 +66,3 @@ u_char Battle_targetColumnTopOffset;
 // decomp: vs_battle_stringContext (vs_battle_stringContext@BATTLE/BATTLE.PRG)
 Menu_StringContext Battle_stringContext;
 
-}  // extern "C"

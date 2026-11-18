@@ -1,13 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "Items/Loadout.h"
-#ifdef __cplusplus
-}
-#endif
 
 // Binds the equipment details (EquipmentDetails.hpp) to the variables the
 // copied menus share (EquipmentDetailsLiveState.h), the item tables and texts

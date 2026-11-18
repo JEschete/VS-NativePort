@@ -7,17 +7,13 @@
 #include <cstdlib>
 #include <span>
 
+#include "Battle/Feedback.h"
+#include "Battle/StatusEffects.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
-#include "Field/RoomLoadingLive.hpp"
-#include "Menu/MapTerminalLive.hpp"
-
-extern "C" {
-#include "Battle/Feedback.h"
-#include "Battle/StatusEffects.h"
 #include "Field/BackgroundLiveState.h"
 #include "Field/Doors.h"
 #include "Field/GimmickAnimationQueueLive.h"
@@ -27,16 +23,17 @@ extern "C" {
 #include "Field/Minimap.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Field/RoomStateLiveState.h"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
+#include "Menu/MapTerminalLive.hpp"
 #include "State/Progress.h"
 
 // decomp: D_800F19A0 (D_800F19A0@BATTLE/BATTLE.PRG)
 int Field_isRoomVisitPending;
-}
 
 namespace VS::Field {
 namespace {

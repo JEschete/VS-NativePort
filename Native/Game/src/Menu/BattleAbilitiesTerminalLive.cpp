@@ -5,32 +5,29 @@
 #include <bit>
 #include <iterator>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Core/Log.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/BattleAbilitiesTerminal.hpp"
-#include "Menu/BattleAbilitiesUnlockLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Sounds.hpp"
-#include "Render/GameFontLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
 #include "Content/StringTables.h"
+#include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/BattleAbilities.h"
+#include "Menu/BattleAbilitiesTerminal.hpp"
+#include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
+#include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
-}
 
 namespace VS::Menu::BattleAbilities {
 namespace {

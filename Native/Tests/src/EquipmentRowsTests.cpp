@@ -12,29 +12,26 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ActorAssets.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Memory/Heap.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Inventory/EquipmentRows.hpp"
-#include "Menu/Inventory/EquipmentRowsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
+#include "Content/ActorAssets.hpp"
+#include "Content/ModuleData.h"
+#include "Core/Memory/Heap.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Inventory/EquipmentRows.hpp"
+#include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/TextBox.h"
-}
 
 // Contracts of the equipment menus' choice list (MENU3.PRG 16C.c:39-336) and
 // preview model reload (68C4.c:12-127).

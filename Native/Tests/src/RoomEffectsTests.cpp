@@ -14,16 +14,13 @@
 
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/Gimmicks.h"
+#include "Field/Room.h"
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomEffectsCore.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Field/Gimmicks.h"
-#include "Field/Room.h"
-}
 
 namespace {
 namespace fx = VS::Field;

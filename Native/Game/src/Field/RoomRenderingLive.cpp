@@ -8,38 +8,36 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/ActorMarkersLive.hpp"
-#include "Core/Log.hpp"
-#include "Field/EnvironmentLive.hpp"
-#include "Field/GimmickResourcesLive.hpp"
-#include "Field/MapLive.hpp"
-#include "Field/MinimapSceneLive.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-#include "Field/RoomEffectsLive.hpp"
-#include "Field/RoomTriggerMarkersLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/RoomDrawLive.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
+#include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.h"
 #include "Core/Gte.h"
+#include "Core/Log.hpp"
 #include "Core/Scratch.h"
 #include "Field/CameraLiveState.h"
+#include "Field/EnvironmentLive.hpp"
 #include "Field/GimmickAnimationQueueLive.h"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
+#include "Field/MapLive.hpp"
 #include "Field/Minimap.h"
+#include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
+#include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomTriggerMarkersLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Palette.h"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.h"
+#include "Render/RoomDrawLive.hpp"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "State/Timers.h"
 
 // decomp: D_800F190C (D_800F190C@BATTLE/BATTLE.PRG)
@@ -50,7 +48,6 @@ u_short Field_areRoomUpdatesPaused;
 u_short* Field_roomPalettes;
 // decomp: D_800F1BB0 (D_800F1BB0@BATTLE/BATTLE.PRG)
 Field_RoomTint Field_roomTint;
-}
 
 namespace {
 // The original's layouts (146C.c:168, Mpd.h and 146C.c:15966).

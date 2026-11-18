@@ -14,16 +14,13 @@
 #include "Content/ModuleData.h"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
+#include "Field/BackgroundLiveState.h"
 #include "Field/Environment.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
-extern "C" {
-#include "Field/BackgroundLiveState.h"
-}
-
 // D_80068C1C, loaded from BATTLE.PRG by Content.
-extern "C" unsigned int Content_battleSkyDome[166];
+extern unsigned int Content_battleSkyDome[166];
 
 namespace {
 namespace fx = VS::Field;

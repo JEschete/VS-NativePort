@@ -19,26 +19,23 @@
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "DiscQueue.h"
 #include "Effects/CameraLive.hpp"
+#include "Effects/CameraLiveState.h"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/EffectResourcesLiveState.h"
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectScriptLive.hpp"
+#include "Effects/Package.h"
 #include "Effects/ParticlePoolLive.hpp"
+#include "Effects/Particles.h"
 #include "Effects/PrimaryEffect.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
-#include "Input/ControllerLive.hpp"
-
-extern "C" {
-#include "DiscQueue.h"
-#include "Effects/CameraLiveState.h"
-#include "Effects/EffectResourcesLiveState.h"
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-}
+#include "Input/ControllerLive.hpp"
 
 static_assert(std::extent_v<decltype(Effects_tokenBitmaps)> >=
               std::size_t{VS::Effects::kEffectTokenWords});

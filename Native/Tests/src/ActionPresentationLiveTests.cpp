@@ -8,19 +8,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionPresentationLive.hpp"
-#include "Content/ModuleData.h"
-#include "Render/ModelGeometryLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Action.h"
+#include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Content/ModuleData.h"
 #include "Effects/Runtime.h"
-}
+#include "Render/ModelGeometryLive.hpp"
 
 namespace {
 namespace b = VS::Battle;

@@ -9,16 +9,13 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/SessionLive.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/ModuleData.h"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/TimeAttackTerminalLiveFixture.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Menu/Framework/FrameworkLiveState.h"
 #include "Render/Frame.h"
-}
 
 namespace {
 namespace results = VS::Menu::Results;

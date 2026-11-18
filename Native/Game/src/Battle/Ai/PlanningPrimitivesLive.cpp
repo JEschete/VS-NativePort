@@ -17,22 +17,12 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/ActorStateLive.hpp"
-#include "Battle/ActionPreviewLive.hpp"
-#include "Battle/Ai/ConditionSnapshotBinding.hpp"
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.h"
-#include "Battle/Ai/PlanningWorkspace.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Field/GimmickPlacementLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
@@ -40,13 +30,21 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/PlanningPrimitivesLive.h"
+#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/TargetingLive.hpp"
 #include "Core/Diagnostics.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.h"
+#include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
-}
+#include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

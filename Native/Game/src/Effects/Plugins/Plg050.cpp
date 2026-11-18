@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Plugins/Plg050.h"
 
@@ -9,4 +8,3 @@ u_char Effects_Plg050_ringColorFactors[8][4]; /* contents: module image (ModuleD
 // decomp: D_800FC644 (D_800FC644@EFFECT/PLG050.BIN)
 int Effects_Plg050_trailEmissionCounter; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

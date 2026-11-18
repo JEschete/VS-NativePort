@@ -8,21 +8,19 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/BasicActionEffects.hpp"
-#include "Battle/DamagePoliciesLive.hpp"
-#include "Battle/HitCalculationsLive.hpp"
-#include "Battle/StatusQueueLive.hpp"
-#include "Core/RandomLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/BasicActionEffects.hpp"
 #include "Battle/Damage.h"
+#include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/Hit.h"
+#include "Battle/HitCalculationsLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Core/RandomLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle {
 namespace {

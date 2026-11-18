@@ -13,14 +13,11 @@
 
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Legacy/Psx.h"
+#include "Menu/Manual.h"
 #include "Menu/ManualIllustration.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Menu/Manual.h"
-}
 
 namespace VS::Menu::manual {
 namespace {

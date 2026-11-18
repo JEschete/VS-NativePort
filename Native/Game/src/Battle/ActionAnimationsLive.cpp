@@ -8,20 +8,18 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
+#include "Actors/ActorRecord.h"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
-#include "Actors/SkeletonLive.hpp"
-#include "Battle/ActionAnimations.hpp"
-#include "Effects/SecondaryEffectRequestsLive.hpp"
-extern "C" {
-#include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
+#include "Battle/ActionAnimations.hpp"
 #include "Battle/ActionFlow.h"
 #include "Core/Diagnostics.h"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/PlatformPlacementLive.h"
-}
 
 namespace VS::Battle {
 namespace {

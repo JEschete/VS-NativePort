@@ -13,15 +13,12 @@
 
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/LegacyPad.hpp"
-#include "Input/Pad.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Input/Controllers.h"
+#include "Input/LegacyPad.hpp"
+#include "Input/Pad.hpp"
 #include "Input/Vibration.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 struct Command {

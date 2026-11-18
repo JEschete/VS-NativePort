@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Plugins/Plg265.h"
 
@@ -15,4 +14,3 @@ int Effects_Plg265_trailEmissionCounter; /* contents: module image (ModuleData.c
 // decomp: D_800FFDC0 (D_800FFDC0@EFFECT/PLG265.BIN)
 int Effects_Plg265_particleEmissionCounter2; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

@@ -10,20 +10,16 @@
 #include <iterator>
 #include <optional>
 
-#include "Battle/HudOrchestrationLive.hpp"
-
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Core/Diagnostics.h"
-}
-
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

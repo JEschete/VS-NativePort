@@ -8,13 +8,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/Decisions.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Ai/ActorState.h"
-}
 
 namespace {
 namespace Ai = VS::Battle::Ai;

@@ -10,28 +10,25 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/ActionTable.h"
+#include "Battle/Hud.h"
+#include "Battle/TextBoxes.h"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Random.h"
+#include "Effects/ScreenEffectState.h"
+#include "Effects/ScreenEffects.h"
+#include "Event/ScriptVm.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
+#include "Menu/Framework/Menus.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
-
-extern "C" {
-#include "Battle/ActionTable.h"
-#include "Battle/Hud.h"
-#include "Battle/TextBoxes.h"
-#include "Core/Random.h"
-#include "Effects/ScreenEffectState.h"
-#include "Effects/ScreenEffects.h"
-#include "Event/ScriptVm.h"
-#include "Menu/Framework/Menus.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace menu = VS::Menu;

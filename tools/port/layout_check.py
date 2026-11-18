@@ -45,8 +45,8 @@ def use_toolchain_libclang() -> None:
         ci.Config.set_library_file(str(library))
 
 
-def c_includes(headers: list[str]) -> str:
-    return 'extern "C" {\n' + "".join(f'#include "{ct.include_spelling(h)}"\n' for h in headers) + "}\n"
+def header_includes(headers: list[str]) -> str:
+    return "".join(f'#include "{ct.include_spelling(h)}"\n' for h in headers)
 
 
 def main() -> int:
@@ -55,7 +55,7 @@ def main() -> int:
     a = ap.parse_args()
     manifest = json.loads(ct.MANIFEST.read_text(encoding="utf-8"))
     headers = [p for p in manifest if p.endswith(".h")]
-    src = c_includes(sorted(headers))
+    src = header_includes(sorted(headers))
     args = CXX_ARGS + [f"-I{NATIVE / i}" for i in INCLUDES]
     use_toolchain_libclang()
     tu = ci.Index.create().parse("all_headers.cpp", args=args, unsaved_files=[("all_headers.cpp", src)])

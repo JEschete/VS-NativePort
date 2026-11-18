@@ -7,12 +7,9 @@
 #include <cstdlib>
 #include <span>
 
-#include "Battle/FloatingLabelQueue.hpp"
-
-extern "C" {
 #include "Battle/Feedback.h"
+#include "Battle/FloatingLabelQueue.hpp"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle {
 namespace {

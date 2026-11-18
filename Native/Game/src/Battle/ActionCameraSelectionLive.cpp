@@ -8,22 +8,20 @@
 #include <vector>
 
 #include "Actors/SkeletonLive.hpp"
-#include "Battle/ActionCameraSelection.hpp"
-#include "Battle/ActionPresentationLive.hpp"
-#include "Battle/SphereLifecycleLive.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Field/CameraLive.hpp"
-#include "Render/CameraViewLive.hpp"
-extern "C" {
 #include "Battle/Action.h"
+#include "Battle/ActionCameraSelection.hpp"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionPresentationLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Sphere.h"
+#include "Battle/SphereLifecycleLive.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
+#include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.h"
 #include "Render/Camera.h"
-}
+#include "Render/CameraViewLive.hpp"
 
 namespace VS::Battle {
 namespace {

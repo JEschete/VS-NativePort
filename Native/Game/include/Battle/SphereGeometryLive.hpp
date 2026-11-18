@@ -2,13 +2,10 @@
 
 #include <optional>
 
-#include "Battle/SphereGeometry.hpp"
-
-extern "C" {
 #include "Battle/BattleTypes.h"
+#include "Battle/SphereGeometry.hpp"
 #include "Battle/TargetVolume.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Battle {
 [[nodiscard]] std::optional<Core::Math::Mat3> BuildLiveSphereVolumeTransform(

@@ -12,25 +12,22 @@
 #include <span>
 #include <type_traits>
 
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Core/BiosRand.h"
-#include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
+#include "Core/BiosRand.h"
 #include "Core/Diagnostics.h"
-}
+#include "Core/Memory/HeapLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

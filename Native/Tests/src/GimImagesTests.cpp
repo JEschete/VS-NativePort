@@ -12,23 +12,20 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/DiscLayout.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "DiscQueue.h"
 #include "Legacy/Psx.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
 #include "Render/GimImages.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "Render/Render.h"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "DiscQueue.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the #276 row 6 GIM slice: the event scripts' tiled images
 // (BATTLE.PRG 5BF94.c:2347-4449, 4A0A8.c:609-905).

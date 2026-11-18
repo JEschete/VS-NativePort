@@ -14,7 +14,10 @@
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
+#include "Effects/Templates/TemplateState.h"
 #include "Effects/Templates/TrailCore.hpp"
 #include "Effects/Templates/TrailInit.hpp"
 #include "Effects/Templates/TrailRender.hpp"
@@ -22,12 +25,6 @@
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitter.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-#include "Effects/Templates/TemplateState.h"
-}
 
 namespace {
 namespace trails = VS::Effects::Templates;

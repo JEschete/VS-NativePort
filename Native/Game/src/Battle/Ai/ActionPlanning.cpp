@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -33,4 +32,3 @@ Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 // decomp: D_800F5904 (D_800F5904@BATTLE/BATTLE.PRG)
 u_char (*Battle_Ai_candidateExclusions)[256];
 
-}  // extern "C"

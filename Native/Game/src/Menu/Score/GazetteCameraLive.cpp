@@ -16,22 +16,19 @@
 #include "Core/Log.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
+#include "Core/Scratch.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Score/GazetteCamera.hpp"
+#include "Menu/Score/Records.h"
+#include "Menu/Score/ScoreScreen.h"
+#include "Render/Display.h"
 #include "Render/GameFontLive.hpp"
+#include "Render/Render.h"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/Scratch.h"
-#include "Menu/Score/Records.h"
-#include "Menu/Score/ScoreScreen.h"
-#include "Render/Display.h"
-#include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Menu::Score {
 namespace {

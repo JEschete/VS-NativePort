@@ -12,34 +12,31 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
+#include "Actors/Animation.h"
 #include "Actors/AnimationControl.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
+#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Actors/WeaponModel.h"
 #include "Audio/ActorSoundLive.hpp"
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Damage.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
-#include "Event/ScriptVmLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/WeaponModel.h"
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Actors {
 namespace {

@@ -10,20 +10,18 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/StatusHelpers.hpp"
-#include "Items/ItemRecordsLive.hpp"
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusHelpers.hpp"
 #include "Core/Diagnostics.h"
 #include "Field/Interactions.h"
+#include "Items/ItemRecordsLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Battle {
 namespace {

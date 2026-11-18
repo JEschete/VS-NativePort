@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -22,4 +21,3 @@ Battle_ActionState* Battle_actionState;
 // D_8005FFAF was vs_main_scoredata.weaponKillStreak (+0x10F), not a separate
 // global (#448; State/KillScoreLive.cpp ResetLiveWeaponKillStreak).
 
-}  // extern "C"

@@ -8,10 +8,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/Results/ResultsRankLive.hpp"
-#include "Menu/Score/ScoreRank.hpp"
-#include "Menu/Score/ScoreRankLive.hpp"
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
@@ -21,12 +17,14 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
+#include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Score/Records.h"
+#include "Menu/Score/ScoreRank.hpp"
+#include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Render.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-}
 
 namespace {
 namespace s = VS::Menu::Score;

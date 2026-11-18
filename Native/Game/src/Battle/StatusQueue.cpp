@@ -6,9 +6,7 @@
 #include <optional>
 #include <span>
 
-extern "C" {
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle {
 namespace {

@@ -14,10 +14,12 @@
 #include "Audio/ActorSound.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/Ambience.hpp"
+#include "Audio/Cutscene/Stream.h"
 #include "Audio/Music.hpp"
 #include "Audio/MusicLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/Sfx.hpp"
+#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
 #include "Audio/Stream.hpp"
@@ -27,12 +29,7 @@
 #include "Audio/StreamLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/ModuleData.h"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/SoundBanks.h"
 #include "DiscQueue.h"
-}
 
 namespace {
 namespace Audio = VS::Audio;

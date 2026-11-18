@@ -4,24 +4,21 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-#include "Render/GameFontLive.hpp"
-
-extern "C" {
 #include "Core/Text/TextCode.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
-}
 
 namespace {
 struct InformationFixture {

@@ -5,12 +5,10 @@
 #include <cstdint>
 #include <span>
 
-#include "Render/RoomLighting.hpp"
-extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Render/Palette.h"
-}
+#include "Render/RoomLighting.hpp"
 
 namespace VS::Field {
 

@@ -13,32 +13,29 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Encounter.hpp"
-#include "CombatLab/Trace.hpp"
-#include "Content/DataAccess.h"
-#include "Content/DataStore.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Field/EncounterSpawnProfile.hpp"
-#include "Items/EquipmentLive.hpp"
-#include "Items/ItemRecordsLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Setup/Assembly.hpp"
-#include "Menu/Setup/SetupLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/Encounter.hpp"
+#include "CombatLab/Trace.hpp"
+#include "Content/DataAccess.h"
+#include "Content/DataStore.hpp"
+#include "Core/Memory/HeapLive.hpp"
+#include "Field/EncounterSpawnProfile.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
+#include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
+#include "Items/ItemRecordsLive.hpp"
 #include "Items/Loadout.h"
+#include "Legacy/Psx.h"
+#include "Menu/Setup/Assembly.hpp"
+#include "Menu/Setup/SetupLive.hpp"
 #include "State/Progress.h"
 #include "Title/NewGame.h"
-}
 
 namespace {
 struct ProfileFixture {

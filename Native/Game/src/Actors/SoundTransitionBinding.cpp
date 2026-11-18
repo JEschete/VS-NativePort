@@ -1,14 +1,11 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Actors/SoundTransitionBinding.hpp"
 
-#include "Actors/SoundTransition.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
+#include "Actors/SoundTransition.hpp"
+#include "Legacy/Psx.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Actors {
 namespace {

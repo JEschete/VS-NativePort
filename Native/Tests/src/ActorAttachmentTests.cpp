@@ -5,16 +5,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/ModelDrawingLive.hpp"
-#include "Core/Log.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ModelDrawingLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Core/Log.hpp"
+#include "Legacy/Psx.h"
 #include "ModelLoading.h"
-}
 
 namespace {
 struct AttachmentFixture {

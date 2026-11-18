@@ -1,10 +1,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "Effects/TimelinePlaybackLive.hpp"
-
-extern "C" {
 #include "Effects/Runtime.h"
+#include "Effects/TimelinePlaybackLive.hpp"
 #include "Legacy/Psx.h"
 
 // 5BF94.c:8442 used PS1 header-sized pointer arithmetic instead of indexing
@@ -36,4 +34,3 @@ int Tests_EffectTimelineTrackStride(void) {
          timeline->tracks[1].keys == &secondKey &&
          timeline->tracks[0].keyIndex == 0 && timeline->tracks[1].keyIndex == 0;
 }
-}  // extern "C"

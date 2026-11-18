@@ -8,19 +8,17 @@
 #include <cstdlib>
 #include <span>
 
+#include "Battle/BattleTypes.h"
+#include "Battle/Sphere.h"
 #include "Battle/SphereDrawLive.hpp"
 #include "Battle/SphereGeometryLive.hpp"
+#include "Battle/TargetVolume.h"
 #include "Battle/TargetingDraw.hpp"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
 #include "Render/SpritesLive.hpp"
-extern "C" {
-#include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
-#include "Battle/TargetVolume.h"
-#include "Core/Gte.h"
-}
 
 namespace VS::Battle {
 namespace {

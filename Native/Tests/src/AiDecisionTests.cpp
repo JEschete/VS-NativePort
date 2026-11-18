@@ -7,26 +7,23 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/ReactionDelay.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Core/Random.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Damage.h"
+#include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
+#include "Core/Random.hpp"
 #include "Field/Gimmicks.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 struct DecisionFixture {

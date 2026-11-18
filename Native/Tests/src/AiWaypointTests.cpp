@@ -10,16 +10,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Waypoints.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Content/ModuleData.h"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/Navigation.h"
-}
 
 namespace {
 namespace ai = VS::Battle::Ai;

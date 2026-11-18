@@ -7,22 +7,20 @@
 #include <cstdlib>
 #include <optional>
 
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/FlightMovementLive.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Ai/RadialMovementLive.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

@@ -2,13 +2,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/OverlayReset.h"
 #include "Content/ModuleData.h"
 #include "Input/Pad.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-}
 
 namespace {
 namespace inventory = VS::Menu::Inventory;

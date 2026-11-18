@@ -5,9 +5,7 @@
 #include <cstdint>
 #include <optional>
 
-extern "C" {
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle::Ai {
 namespace {

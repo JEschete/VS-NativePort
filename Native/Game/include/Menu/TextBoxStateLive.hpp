@@ -3,11 +3,9 @@
 
 #include <cstddef>
 
-#include "Menu/TextBoxState.hpp"
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
-}
+#include "Menu/TextBoxState.hpp"
 
 namespace VS::Menu {
 // Fresh value views of Menu_textBoxes and Menu_textBoxSelector. Indexes past

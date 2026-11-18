@@ -41,16 +41,8 @@ typedef struct Battle_Ai_FrameContext {
   int lastBudgetTick;
 } Battle_Ai_FrameContext;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 Battle_Ai_FrameContext* Battle_Ai_FrameState(void);
 int Battle_Ai_TryTerrainRegionCell(int tile_x, int tile_z, u_char** cell);
 u_char* Battle_Ai_TerrainRegionCell(int tile_x, int tile_z);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  // VS_OWNED_BATTLE_AI_FRAMEUPDATE_H

@@ -8,16 +8,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionAnimationsLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
+#include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Effects/CameraLiveState.h"
 #include "Effects/Runtime.h"
-}
 
 namespace {
 struct ImpactFixture {

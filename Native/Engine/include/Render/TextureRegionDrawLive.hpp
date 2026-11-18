@@ -3,10 +3,7 @@
 #include <span>
 
 #include "Legacy/Psx.h"
-
-extern "C" {
 #include "Render/Images.h"
-}
 
 // The results screens' atlas draws over the current frame's primitive buffer
 // and ordering table. The atlas and color arrays arrive as spans, so an

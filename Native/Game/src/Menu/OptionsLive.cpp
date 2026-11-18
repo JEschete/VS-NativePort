@@ -8,24 +8,21 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanksLive.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Options.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Options.hpp"
 #include "Menu/OptionsLiveState.h"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxStateLive.hpp"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
-}
 
 // decomp: _menuStrings (src/MENU/MENU8.PRG/88.c)
 u_short Menu_Options_menuStrings[kMenuOptionsMenuStringCount];

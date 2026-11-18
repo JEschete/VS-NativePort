@@ -13,25 +13,22 @@
 #include <string_view>
 #include <vector>
 
-#include "Content/DataStore.hpp"
-#include "Field/MinimapScene.hpp"
-#include "Menu/FilesLive.hpp"
-#include "Render/UiPackets.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Battle/Feedback.h"
+#include "Content/DataStore.hpp"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
 #include "Field/Map.h"
 #include "Field/MapProgress.h"
+#include "Field/MinimapScene.hpp"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 #include "Menu/Files.h"
+#include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.h"
+#include "Render/UiPackets.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace VS::Game::Save {
 namespace {

@@ -7,28 +7,26 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
+#include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
-#include "Render/DisplayControl.hpp"
-#include "Render/TextureRegionDraw.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
-#include "TestSupport/TimeAttackDrawRecorder.hpp"
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Menu/Results/CubePuzzle.h"
-#include "Menu/Results/Results.h"
 #include "Render/Display.h"
+#include "Render/DisplayControl.hpp"
 #include "Render/Frame.h"
 #include "Render/Images.h"
 #include "Render/Render.h"
+#include "Render/TextureRegionDraw.hpp"
+#include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-}
+#include "TestSupport/TimeAttackDrawRecorder.hpp"
 
 namespace {
 namespace r = VS::Menu::Results;

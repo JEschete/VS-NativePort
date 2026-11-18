@@ -2,10 +2,6 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct Audio_SeqChannel;
 
 void Audio_Native_Reset(void);
@@ -22,7 +18,3 @@ int Audio_Native_StartStreamVoice(unsigned voice, const char* instrument,
                                   int reverb);
 void Audio_Native_PauseVoice(unsigned voice, int paused);
 int Audio_Native_VoiceActive(unsigned voice);
-
-#ifdef __cplusplus
-}
-#endif

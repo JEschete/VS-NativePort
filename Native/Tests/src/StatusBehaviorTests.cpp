@@ -3,14 +3,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionCostsLive.hpp"
-#include "Battle/StatusLifecycleLive.hpp"
-#include "Battle/StatusQueueLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
@@ -19,8 +14,10 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusLifecycleLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
 #include "Core/Random.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 struct ConditionFixture {

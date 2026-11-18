@@ -9,18 +9,16 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/HitCalculations.hpp"
-#include "Battle/HitModifiersLive.hpp"
-#include "Core/RandomLive.hpp"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
+#include "Battle/HitCalculations.hpp"
 #include "Battle/HitChance.h"
+#include "Battle/HitModifiersLive.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Core/RandomLive.hpp"
 
 namespace VS::Battle {
 namespace {

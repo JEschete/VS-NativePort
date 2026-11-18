@@ -21,7 +21,7 @@ void TraceFailure(std::string_view reason) noexcept {
 }
 }  // namespace
 
-extern "C" std::uint64_t Diagnostics_RecordSceneCommand(
+std::uint64_t Diagnostics_RecordSceneCommand(
     std::int32_t event_id, std::int32_t source, std::int32_t thread,
     const void* instruction, const void* script_base, std::uint32_t size,
     std::int32_t skip_state) {
@@ -59,8 +59,7 @@ extern "C" std::uint64_t Diagnostics_RecordSceneCommand(
   }
 }
 
-extern "C" void Diagnostics_RecordSceneResult(std::uint64_t command,
-                                              std::int64_t result) {
+void Diagnostics_RecordSceneResult(std::uint64_t command, std::int64_t result) {
   if (command == 0 ||
       !VS::Core::IsLogEnabled(VS::Core::LogLevel::Debug, "event-result")) {
     return;
@@ -81,9 +80,8 @@ extern "C" void Diagnostics_RecordSceneResult(std::uint64_t command,
   }
 }
 
-extern "C" void Diagnostics_RecordScriptFlagWrite(std::int32_t flag,
-                                                  std::uint8_t before,
-                                                  std::uint8_t after) {
+void Diagnostics_RecordScriptFlagWrite(std::int32_t flag, std::uint8_t before,
+                                       std::uint8_t after) {
   if (!VS::Core::IsLogEnabled(VS::Core::LogLevel::Debug, "state-flag")) return;
   try {
     VS::Core::LogWrite(VS::Core::LogLevel::Debug, "state-flag",

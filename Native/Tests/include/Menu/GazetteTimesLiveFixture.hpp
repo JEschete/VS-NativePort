@@ -14,30 +14,27 @@
 #include <utility>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/StatusEffects.h"
 #include "Content/ModuleData.h"
+#include "Content/StringTables.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Score/GazetteTimes.hpp"
-#include "Menu/Score/GazetteTimesLive.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/Sprites.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/StatusEffects.h"
-#include "Content/StringTables.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/Menus.h"
+#include "Menu/Score/GazetteTimes.hpp"
+#include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/Records.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
+#include "Render/Sprites.hpp"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace gazette_times_live_tests {
 namespace score = VS::Menu::Score;

@@ -11,13 +11,11 @@
 #include "Effects/BoneTrail.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectInstances.hpp"
+#include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
 #include "Legacy/Psx.h"
-extern "C" {
-#include "Effects/Runtime.h"
 #include "Render/Display.h"
 #include "Render/LegacyPackets.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

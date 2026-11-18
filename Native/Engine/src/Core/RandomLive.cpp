@@ -4,10 +4,7 @@
 #include "Core/RandomLive.hpp"
 
 #include "Core/Log.hpp"
-
-extern "C" {
 #include "Core/Random.h"
-}
 
 namespace VS::Core {
 namespace {

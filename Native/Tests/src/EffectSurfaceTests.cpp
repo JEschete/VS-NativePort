@@ -13,6 +13,7 @@
 
 #include "Core/Math/Interpolation.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/Runtime.h"
 #include "Effects/Templates/Grid.hpp"
 #include "Effects/Templates/Mesh10.hpp"
 #include "Effects/Templates/MirrorSurface.hpp"
@@ -23,10 +24,6 @@
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Effects/Runtime.h"
-}
 
 namespace {
 namespace surfaces = VS::Effects::Templates;

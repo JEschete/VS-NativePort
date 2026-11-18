@@ -5,17 +5,14 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Core/Runtime.hpp"
-#include "State/GameClock.hpp"
-
-extern "C" {
 #include "Legacy/Psx.h"
+#include "State/GameClock.hpp"
 #include "State/GameTime.h"
 #include "State/PlayTime.h"
 #include "State/Timers.h"
 
 // decomp: vs_main_gametime (vs_main_gametime@SLUS_010.40)
 State_PlayTime State_playTime;
-}
 
 namespace VS::State {
 PlayTime LivePlayTime() noexcept {

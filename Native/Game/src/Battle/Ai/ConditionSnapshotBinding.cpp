@@ -9,15 +9,12 @@
 #include <optional>
 #include <span>
 
-#include "Battle/Ai/ConditionSnapshot.hpp"
-#include "Core/Diagnostics.h"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/Actor.h"
+#include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
-}
+#include "Core/Diagnostics.h"
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

@@ -8,13 +8,5 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 intptr_t Event_ScriptSetAshleyBattleModeOpcode(u_char* command,
                                                int16_t thread_id);
-
-#ifdef __cplusplus
-}
-#endif

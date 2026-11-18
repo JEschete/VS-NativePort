@@ -7,17 +7,14 @@
 #include <optional>
 #include <string_view>
 
+#include "Core/Diagnostics.h"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerSorting.hpp"
-#include "Menu/Framework/SortingKeysLive.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
 #include "Menu/Container/ItemView.h"
-}
+#include "Menu/Framework/SortingKeysLive.hpp"
 
 namespace VS::Menu::container {
 namespace {

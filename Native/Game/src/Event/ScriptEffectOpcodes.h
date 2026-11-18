@@ -9,10 +9,6 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 intptr_t Event_CommandPlayActorEffectOpcode(u_char* command, int16_t thread_id);
 intptr_t Event_CommandAdvanceEffectStageOpcode(u_char* command,
                                                int16_t thread_id);
@@ -40,7 +36,3 @@ intptr_t Event_CommandFreeScreenEffectsOpcode(u_char* command,
                                               int16_t thread_id);
 intptr_t Event_CommandSetScanlineOverlayOpcode(u_char* command,
                                                int16_t thread_id);
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif

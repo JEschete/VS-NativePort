@@ -13,6 +13,10 @@
 #include <utility>
 
 #include "Audio/AudioDevice.hpp"
+#include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Samples/SampleBanks.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SequencerOutput.h"
 #include "Audio/StreamPlayback.h"
 #include "Audio/VoiceEngine.hpp"
@@ -23,13 +27,6 @@
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/Paths.hpp"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
-}
 
 namespace {
 using VS::Audio::VoiceControls;

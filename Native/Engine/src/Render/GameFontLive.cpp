@@ -15,29 +15,26 @@
 
 #include "Actors/TextureAnimationLive.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/DisplayControl.hpp"
-#include "Render/EncodedText.hpp"
-#include "Render/EncodedTextLive.hpp"
-#include "Render/GameFont.hpp"
-#include "Render/ScaledFontLive.hpp"
-#include "Render/TextBoxText.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
+#include "Render/DisplayControl.hpp"
+#include "Render/EncodedText.hpp"
+#include "Render/EncodedTextLive.hpp"
 #include "Render/Frame.h"
+#include "Render/GameFont.hpp"
 #include "Render/Render.h"
+#include "Render/ScaledFontLive.hpp"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
+#include "Render/TextBoxText.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Render {
 namespace {

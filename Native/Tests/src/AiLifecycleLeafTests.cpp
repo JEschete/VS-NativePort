@@ -10,29 +10,25 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
-#include "Core/BiosRand.h"
-#include "Core/Random.hpp"
-#include "Core/Unported.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Field/Gimmicks.h"
-}
-
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorSettingsLive.hpp"
-#include "Battle/Ai/DecisionsLive.hpp"
-#include "Battle/Ai/RelationsLive.hpp"
+#include "Content/ModuleData.h"
+#include "Core/BiosRand.h"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Random.hpp"
+#include "Core/Unported.hpp"
+#include "Field/Gimmicks.h"
+#include "Legacy/Psx.h"
 
 static_assert(
     std::is_same_v<decltype(&VS::Battle::Ai::ClearLiveActorAiNavigationReset),

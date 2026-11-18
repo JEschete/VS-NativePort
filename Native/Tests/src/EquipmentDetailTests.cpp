@@ -8,14 +8,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/RenameLive.hpp"
-#include "Render/GameFontLive.hpp"
-
-extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
@@ -25,19 +17,24 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Text/TextCode.h"
 #include "Event/ScriptVm.h"
+#include "Legacy/Psx.h"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
+#include "Menu/RenameLive.hpp"
 #include "Menu/RenameLiveState.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 static_assert(sizeof Menu_Framework_comparisonStatTotals == 8);

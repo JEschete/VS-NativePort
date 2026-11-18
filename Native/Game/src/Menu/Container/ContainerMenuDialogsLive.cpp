@@ -10,29 +10,26 @@
 #include <string_view>
 
 #include "Audio/SfxLive.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/Math/ScalarMath.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ContainerMenuDialogs.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
+#include "Menu/Container/ItemView.h"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
+#include "Menu/Inventory/ItemList.h"
 #include "Menu/Sounds.hpp"
+#include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
-#include "Input/ControllerLiveState.h"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Inventory/ItemList.h"
-#include "Menu/TextBox.h"
 #include "Render/Render.h"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Menu::container {
 namespace {

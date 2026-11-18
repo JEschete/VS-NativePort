@@ -12,7 +12,10 @@
 #include <optional>
 
 #include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorRecord.h"
+#include "Actors/Animation.h"
 #include "Actors/AnimationControlLive.hpp"
+#include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -20,20 +23,14 @@
 #include "Core/Log.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
+#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/Movement.h"
-#include "Field/Collision.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Actors {
 namespace {

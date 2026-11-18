@@ -1,11 +1,10 @@
 #include <stdint.h>
 
-#include "Battle/ActionResultsLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionResultsLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -73,4 +72,3 @@ int Tests_CombatTargetResults(void) {
   Battle_floatingLabelCount = saved_label_count;
   return passed;
 }
-}  // extern "C"

@@ -5,11 +5,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/Sounds.hpp"
-
-extern "C" {
 #include "Content/ModuleData.h"
-}
+#include "Menu/Sounds.hpp"
 
 TEST_CASE("Menu sounds keep the original sound-effect ids and channel group",
           "[menu][sounds]") {

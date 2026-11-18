@@ -7,15 +7,12 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
+#include "Render/Camera.h"
 #include "Render/CameraViewLive.hpp"
 #include "Render/GameFontLive.hpp"
-
-extern "C" {
-#include "Menu/Framework/ItemRowsLiveState.h"
-#include "Render/Camera.h"
-}
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {

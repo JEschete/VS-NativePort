@@ -10,19 +10,16 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
+#include "Render/Render.h"
 #include "Render/TexturePages.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TimImage.hpp"
 #include "Render/TimImageLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the #276 row 6 texture slice: the lendable texture pages
 // (146C.c:9480-9549), the TIM parse (146C.c:16935, D4.c:2235), the texture

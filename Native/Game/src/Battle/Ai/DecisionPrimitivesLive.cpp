@@ -13,10 +13,6 @@
 #include <span>
 #include <type_traits>
 
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
@@ -26,12 +22,13 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/BiosRand.h"
 #include "Core/Diagnostics.h"
 #include "Field/Gimmicks.h"
-}
 
 namespace VS::Battle::Ai {
 namespace {

@@ -7,24 +7,21 @@
 #include <cstdint>
 #include <iterator>
 
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Menu/Score/ScoreRank.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/StatusEffects.h"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Scratch.h"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Score/Records.h"
+#include "Menu/Score/ScoreRank.hpp"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Render.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Menu::Score {
 namespace {

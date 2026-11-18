@@ -11,8 +11,10 @@
 #include <iterator>
 #include <optional>
 
+#include "Audio/LegacyFiles.h"
 #include "Audio/Music.hpp"
 #include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
 #include "Audio/SoundControlLive.hpp"
@@ -20,15 +22,10 @@
 #include "Audio/SoundSlotsLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Core/Runtime.hpp"
-#include "State/GameClockLive.hpp"
-
-extern "C" {
-#include "Audio/LegacyFiles.h"
-#include "Audio/SoundBanks.h"
 #include "Field/RoomLoadingLiveState.h"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
-}
+#include "State/GameClockLive.hpp"
 
 namespace VS::Audio {
 namespace {

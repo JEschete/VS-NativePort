@@ -15,35 +15,31 @@
 #include <utility>
 #include <vector>
 
-#include "Actors/ActorStateLive.hpp"
-#include "Audio/SoundBanksLive.hpp"
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
-#include "Core/BiosRand.h"
-#include "Core/Log.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Field/CameraLive.hpp"
-#include "Items/EquipmentLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ActorStateLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.h"
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
+#include "Core/BiosRand.h"
+#include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.h"
+#include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.h"
 #include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
@@ -55,6 +51,7 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
+#include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Camera.h"
@@ -62,8 +59,8 @@ extern "C" {
 #include "State/Location.h"
 #include "State/PlayTime.h"
 #include "State/RoomMemory.h"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Game::Save {
 namespace {

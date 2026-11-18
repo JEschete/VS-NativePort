@@ -11,11 +11,14 @@
 #include <string>
 #include <vector>
 
+#include "Battle/Actor.h"
+#include "Boot/OverlayReset.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
+#include "Legacy/Input/LibPad.h"
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -24,13 +27,7 @@
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Battle/Actor.h"
-#include "Boot/OverlayReset.h"
-#include "Legacy/Input/LibPad.h"
 #include "State/Timers.h"
-}
 
 namespace container_dialog_live_tests {
 namespace dialogs = VS::Menu::container;

@@ -11,24 +11,21 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
-#include "Ending/ClearResultsCore.hpp"
-#include "Ending/EndingLive.hpp"
-#include "Render/TextureRegionDraw.hpp"
-#include "TestSupport/ChannelWarnings.hpp"
-#include "TestSupport/EndingDisplayRecorder.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
+#include "Content/ModuleData.h"
+#include "Ending/ClearResultsCore.hpp"
+#include "Ending/EndingLive.hpp"
 #include "Ending/Results.h"
 #include "Input/ControllerLiveState.h"
+#include "Render/TextureRegionDraw.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
+#include "TestSupport/EndingDisplayRecorder.hpp"
 
 namespace {
 namespace Ending = VS::Ending;

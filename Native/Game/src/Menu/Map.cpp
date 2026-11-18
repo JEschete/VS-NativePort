@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
@@ -170,4 +169,3 @@ void Menu_Map_ResetMenu5Statics(void)
     }
 }
 
-}  // extern "C"

@@ -6,26 +6,23 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/GameClearLifecycleLiveFixture.hpp"
-#include "Menu/Results/GameClearLifecycle.hpp"
-#include "Menu/Results/GameClearLifecycleLive.hpp"
-#include "Menu/Results/TimeAttackTerminalLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
+#include "Content/CdDriveLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
+#include "Menu/GameClearLifecycleLiveFixture.hpp"
+#include "Menu/Results/GameClearLifecycle.hpp"
+#include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "State/Progress.h"
-}
 
 namespace {
 namespace results = VS::Menu::Results;

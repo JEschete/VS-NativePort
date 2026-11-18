@@ -18,34 +18,31 @@
 #include <vector>
 
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/AbilityState.h"
+#include "Battle/ActionFlow.h"
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/RewardFlowLive.hpp"
+#include "Battle/Rewards.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
+#include "Field/Gimmicks.h"
+#include "Field/Interactions.h"
+#include "Field/Mpd.h"
+#include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loot.hpp"
 #include "Items/LootLiveState.h"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
-#include "Battle/AbilityState.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/Rewards.h"
-#include "Field/Collision.h"
-#include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Loot/Paging.h"
+#include "State/ScriptFlagsLive.hpp"
 
 // decomp: _lootListHead (_lootListHead@BATTLE/BATTLE.PRG)
 Items_LootListNode* Items_lootListHead = nullptr;
-}
 
 namespace VS::Items {
 namespace {

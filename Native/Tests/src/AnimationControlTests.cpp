@@ -12,14 +12,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/AnimationControl.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
 using actors::ActionAnimationBusy;

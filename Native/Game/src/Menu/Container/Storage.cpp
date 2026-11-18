@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Container/Storage.h"
 
@@ -18,4 +17,3 @@ void Menu_Container_Storage_ResetMenudStatics(void)
     }
 }
 
-}  // extern "C"

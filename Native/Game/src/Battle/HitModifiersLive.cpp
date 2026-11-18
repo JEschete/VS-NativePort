@@ -9,15 +9,13 @@
 #include <optional>
 #include <type_traits>
 
-#include "Battle/HitModifiers.hpp"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/HitChance.h"
+#include "Battle/HitModifiers.hpp"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle {
 namespace {

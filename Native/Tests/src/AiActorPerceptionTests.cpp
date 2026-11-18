@@ -11,20 +11,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Actor.h"
 #include "Battle/Ai/ActorPerception.hpp"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Math/Distance.hpp"
-
-extern "C" {
-#include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-}
+#include "Content/ModuleData.h"
+#include "Core/Math/Distance.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;

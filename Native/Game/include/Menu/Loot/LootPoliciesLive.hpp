@@ -1,9 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-extern "C" {
 #include "Menu/Loot/LootInventory.h"
-}
 
 namespace VS::Menu::Loot::Live {  // NOLINT(readability-identifier-naming)
 // decomp: MENUB.PRG _displayInventoryCapacities, 8010837C

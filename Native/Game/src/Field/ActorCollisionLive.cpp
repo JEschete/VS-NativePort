@@ -9,21 +9,18 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Core/Log.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Field/ActorCollision.hpp"
-#include "Field/CollisionMap.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Field/PlatformPlacement.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
+#include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Field/ActorCollision.hpp"
 #include "Field/Collision.h"
+#include "Field/CollisionMap.hpp"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
-}
+#include "Field/PlatformPlacement.hpp"
+#include "Legacy/Psx.h"
 
 namespace VS::Field {
 namespace {

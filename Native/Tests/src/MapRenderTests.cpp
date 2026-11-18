@@ -8,21 +8,18 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Field/Gimmicks.h"
+#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Menu/Map.h"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapTerminalLive.hpp"
 #include "Render/DepthCueLive.hpp"
-
-extern "C" {
-#include "Field/Gimmicks.h"
-#include "Field/Map.h"
-#include "Menu/Map.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 std::span<const std::byte> SceneBytes(const void* data, size_t size) {

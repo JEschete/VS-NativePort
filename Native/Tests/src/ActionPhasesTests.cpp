@@ -10,15 +10,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/ActionPhases.hpp"
-#include "Battle/ActionPhasesLive.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionPhases.hpp"
+#include "Battle/ActionPhasesLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-}
+#include "Content/ModuleData.h"
 
 namespace {
 namespace b = VS::Battle;

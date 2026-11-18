@@ -16,30 +16,27 @@
 #include <string_view>
 
 #include "Audio/SfxLive.hpp"
+#include "Battle/AbilityState.h"
+#include "Battle/Actor.h"
+#include "Battle/Damage.h"
 #include "Core/Log.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentLive.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecordsLive.hpp"
+#include "Items/Loadout.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetails.hpp"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
+#include "Menu/Framework/Menus.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/EquipmentStats.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Battle/AbilityState.h"
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
-#include "Menu/Framework/Menus.h"
-}
 
 namespace VS::Menu::Framework {
 namespace {
@@ -592,7 +589,6 @@ void ResetLiveEquipmentDetailsStatics() {
 }
 }  // namespace VS::Menu::Framework
 
-extern "C" {
 // decomp: D_80102488 (MENU/MAINMENU.PRG C48.c)
 std::int16_t Menu_Framework_comparisonStatDeltas[kMenuComparisonStatCount];
 // decomp: D_80102490 (MENU/MAINMENU.PRG C48.c)
@@ -629,4 +625,3 @@ u_char Menu_Framework_statusViewNavigationMap[kMenuStatusViewElementCount]
                                              [kMenuStatusViewDirections];
 // decomp: vs_mainMenu_strIntAgi (MENU/MAINMENU.PRG)
 std::int16_t Menu_Framework_strIntAgi[kMenuPrimaryStatCount];
-}

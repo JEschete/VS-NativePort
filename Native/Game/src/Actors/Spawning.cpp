@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/Spawning.h"
@@ -210,4 +209,3 @@ char Actors_placeholderActorName[20]; /* contents: module image (ModuleData.cpp)
 // decomp: D_8004FE88 (D_8004FE88@SLUS_010.40)
 u_char Actors_usesSecondaryBodyModel[256]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

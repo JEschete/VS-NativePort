@@ -4,20 +4,17 @@
 
 #include <cstdint>
 
-#include "Core/Math/MatrixLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Render/RoomDraw.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
 #include "Actors/SkeletonLiveState.h"
 #include "Core/Gte.h"
+#include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Render.h"
+#include "Render/RoomDraw.hpp"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Render {
 namespace {

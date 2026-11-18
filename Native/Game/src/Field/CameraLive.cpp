@@ -12,41 +12,39 @@
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Battle/HudOrchestrationLive.hpp"
-#include "Battle/HudStateLive.hpp"
-#include "Battle/SphereLifecycleLive.hpp"
-#include "Core/Log.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Field/GameModeLive.hpp"
-#include "Field/MapLive.hpp"
-#include "Field/RoomRenderingLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/CameraViewLive.hpp"
-
-extern "C" {
 #include "Actors/Location.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
+#include "Battle/HudOrchestrationLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Battle/Sphere.h"
+#include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetPages.h"
 #include "Battle/TargetingState.h"
 #include "Core/Gte.h"
+#include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.h"
 #include "Field/Camera.h"
 #include "Field/CameraLiveState.h"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/GameModeLive.hpp"
 #include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
+#include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomRenderingLive.hpp"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
 #include "Render/Camera.h"
+#include "Render/CameraViewLive.hpp"
 #include "Render/Render.h"
 
 // decomp: _firstPersonViewEnabled (_firstPersonViewEnabled@BATTLE/BATTLE.PRG)
@@ -59,7 +57,6 @@ int Field_roomGeometryDrawMode;
 // decomp: vs_battle_cameraCurrentSpherical
 // (vs_battle_cameraCurrentSpherical@BATTLE/BATTLE.PRG)
 Field_SphericalCamera Field_sphericalCamera;
-}
 
 namespace {
 // The original's layouts (146C.h:738-823 and scratch.h:10).

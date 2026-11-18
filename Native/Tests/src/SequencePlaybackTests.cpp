@@ -7,12 +7,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/SequencePlayback.hpp"
-#include "Actors/SequencePlaybackLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
-}  // extern "C"
+#include "Actors/SequencePlayback.hpp"
+#include "Actors/SequencePlaybackLive.hpp"
 
 namespace {
 

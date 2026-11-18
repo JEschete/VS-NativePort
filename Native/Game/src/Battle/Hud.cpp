@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Hud.h"
 
@@ -102,4 +101,3 @@ char Battle_puzzleTimerText[9] = "00:00:00";
 // decomp: D_8005046C (D_8005046C@SLUS_010.40)
 int Battle_puzzleTimer;
 
-}  // extern "C"

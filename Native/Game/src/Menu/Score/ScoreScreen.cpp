@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
@@ -94,4 +93,3 @@ char Menu_Score_unusedYesString[] __attribute__((unused)) = "YES\0";
 // decomp: _zoomColor (_zoomColor@src/MENU/MENU9.PRG/238.c)
 int Menu_Score_zoomColor;
 
-}  // extern "C"

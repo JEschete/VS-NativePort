@@ -11,24 +11,21 @@
 #include <vector>
 
 #include "Actors/AppearanceLive.hpp"
+#include "Battle/BattleTypes.h"
+#include "Battle/Sphere.h"
 #include "Battle/SphereContainmentLive.hpp"
 #include "Battle/SphereTargetLabels.hpp"
+#include "Battle/TargetVolume.h"
 #include "Battle/Targeting.hpp"
+#include "Battle/TargetingState.h"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/Menus.h"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
-#include "Battle/TargetVolume.h"
-#include "Battle/TargetingState.h"
-#include "Core/Gte.h"
-#include "Menu/Framework/Menus.h"
-}
 
 namespace VS::Battle {
 namespace {

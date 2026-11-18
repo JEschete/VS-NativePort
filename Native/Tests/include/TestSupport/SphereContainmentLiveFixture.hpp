@@ -7,12 +7,10 @@
 #include <cstring>
 #include <span>
 
-#include "Battle/SphereContainmentLive.hpp"
-extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Sphere.h"
+#include "Battle/SphereContainmentLive.hpp"
 #include "Battle/TargetVolume.h"
-}
 
 namespace VS::test_support::sphere_containment {
 using Point = std::array<std::uint16_t, 3>;

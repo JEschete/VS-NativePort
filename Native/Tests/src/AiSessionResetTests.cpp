@@ -6,11 +6,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
@@ -18,9 +13,11 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
-}
+#include "Core/Memory/HeapLive.hpp"
+#include "Legacy/Psx.h"
 
 namespace {
 template <typename Pointer>

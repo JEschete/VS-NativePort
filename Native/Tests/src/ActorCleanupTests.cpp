@@ -10,32 +10,29 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceTransition.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorSettingsLive.hpp"
-#include "Battle/Ai/BossOrbitLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/BossOrbitLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
+#include "Legacy/Psx.h"
 #include "State/Timers.h"
-}
 
 namespace {
 struct CleanupFixture {

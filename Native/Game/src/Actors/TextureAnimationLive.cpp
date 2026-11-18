@@ -11,19 +11,16 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/ActorTableLive.hpp"
-#include "Actors/TextureAnimation.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ActorTableLive.hpp"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
 #include "Actors/TextureAnimation.h"
+#include "Actors/TextureAnimation.hpp"
 #include "Actors/Textures.h"
 #include "Core/Diagnostics.h"
+#include "Render/UiPacketsLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Actors {
 namespace {

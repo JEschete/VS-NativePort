@@ -8,16 +8,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Status/ActorSwitching.hpp"
-#include "Menu/Status/ActorSwitchingLive.hpp"
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Status/ActorStatus.h"
-}
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorSwitching.hpp"
+#include "Menu/Status/ActorSwitchingLive.hpp"
 
 namespace {
 namespace st = VS::Menu::Status;

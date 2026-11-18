@@ -17,9 +17,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
-extern "C" {
 #include "Effects/Runtime.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

@@ -15,14 +15,11 @@
 #include "Actors/ActorMotion.hpp"
 #include "Actors/ActorMovement.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Content/ModuleData.h"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Content/ModuleData.h"
 #include "Field/Gimmicks.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
 using actors::MotionVector;

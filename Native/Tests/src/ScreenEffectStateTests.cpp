@@ -8,19 +8,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
-#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Content/DiscLayout.h"
+#include "Content/ModuleData.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Field/DoorMatchList.h"
+#include "Legacy/Psx.h"
 #include "OverlayWorkspaceLiveState.h"
-}
 
 namespace {
 struct ScreenStateFixture {

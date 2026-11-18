@@ -22,6 +22,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
+#include "Core/Random.h"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
@@ -30,10 +31,6 @@
 #include "Core/String/GameTextLive.hpp"
 #include "Legacy/Core/LibEtc.h"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/Random.h"
-}
 
 using VS::i32;
 namespace Core = VS::Core;

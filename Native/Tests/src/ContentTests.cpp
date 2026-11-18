@@ -19,31 +19,23 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "ActorAssets.h"
+#include "Actors/ActorRecord.h"
+#include "Actors/Animation.h"
+#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Audio/Seq/Sequencer.h"
+#include "Battle/Damage.h"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/ModuleData.h"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/PFile.hpp"
 #include "Core/Log.hpp"
 #include "Effects/EffectResources.hpp"
-#include "Effects/TrailEmitterLive.hpp"
-#include "Effects/Transforms.hpp"
-#include "Field/RoomLoading.hpp"
-#include "Legacy/Psx.h"
-#include "Movie/MoviePlayer.h"
-#include "Render/PageSpace.hpp"
-
-extern "C" {
-#include "ActorAssets.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/Movement.h"
-#include "Audio/Seq/Sequencer.h"
-#include "Battle/Damage.h"
-#include "Content/DiscLayout.h"
 #include "Effects/Package.h"
 #include "Effects/Plugins/Plg044.h"
 #include "Effects/Plugins/Plg049.h"
@@ -65,10 +57,16 @@ extern "C" {
 #include "Effects/Plugins/Plg260.h"
 #include "Effects/Plugins/Plg265.h"
 #include "Effects/PurgeTables.h"
+#include "Effects/TrailEmitterLive.hpp"
+#include "Effects/Transforms.hpp"
 #include "Field/MapProgress.h"
+#include "Field/RoomLoading.hpp"
+#include "Legacy/Psx.h"
 #include "ModelLoading.h"
+#include "Movie/MoviePlayer.h"
 #include "OverlayWorkspaceLiveState.h"
 #include "PFile.h"
+#include "Render/PageSpace.hpp"
 
 // The ring palettes at their eight transparency entries (#289); the plugin
 // headers declare them without a bound.
@@ -128,7 +126,6 @@ extern u_char Effects_Plg297_ringColorFactors[8][4];
 extern u_char Effects_Plg300_ringColorFactors[8][4];
 extern u_char Effects_Plg300_ringColorFactors2[8][4];
 extern CVECTOR Effects_Plg301_closedRingColorFactors[8];
-}
 
 using VS::u16;
 using VS::u32;
@@ -137,13 +134,13 @@ using VS::usize;
 namespace Content = VS::Content;
 namespace Render = VS::Render;
 
-extern "C" int Tests_ActionDefinitionsLoaded(void);
-extern "C" int Tests_DefaultEffectPackageLoaded(void);
-extern "C" int TestsRoomSfxBankBinding(void);
-extern "C" int TestsDiscReadSizeContract(void);
-extern "C" int CheckMenuDiscStringsLoaded(void);
+int Tests_ActionDefinitionsLoaded(void);
+int Tests_DefaultEffectPackageLoaded(void);
+int TestsRoomSfxBankBinding(void);
+int TestsDiscReadSizeContract(void);
+int CheckMenuDiscStringsLoaded(void);
 // Reviewed source blob, defined with the generated module data (#280).
-extern "C" unsigned int Content_battleTriggerMarkerBytes[29];
+extern unsigned int Content_battleTriggerMarkerBytes[29];
 
 namespace {
 constexpr auto kMesh10Data = std::to_array<Content_ModuleDataEntry>({

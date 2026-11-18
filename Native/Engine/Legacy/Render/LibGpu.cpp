@@ -10,11 +10,8 @@
 #include "Core/Unported.h"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
-#include "Render/PageSpace.hpp"
-
-extern "C" {
 #include "Render/Frame.h"
-}
+#include "Render/PageSpace.hpp"
 
 // Transitional libgpu shims (plan §2.2): each call acts on the page space
 // (Render/PageSpace.hpp, owner decision "page-image") with the original
@@ -82,8 +79,6 @@ u32 TextureWindow(const RECT* tw) {
 }
 
 }  // namespace
-
-extern "C" {
 
 u_long LegacyGpu_Handle(const void* p) {
   LinkTable& t = Links();
@@ -315,5 +310,3 @@ void SetPolyG4(POLY_G4* p) { setPolyG4(p); }
 void SetSemiTrans(void* p, int abe) { setSemiTrans(p, abe); }
 void SetSprt(SPRT* p) { setSprt(p); }
 void SetTile(TILE* p) { setTile(p); }
-
-}  // extern "C"

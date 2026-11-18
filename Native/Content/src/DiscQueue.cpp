@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
 
@@ -33,4 +32,3 @@ Content_DiscDrive Content_discDriveState;
 // decomp: _dsControlBuf (_dsControlBuf@SLUS_010.40)
 char Content_discControlResponseBytes[11];
 
-}  // extern "C"

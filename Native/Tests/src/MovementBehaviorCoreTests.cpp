@@ -17,13 +17,10 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/MovementBehavior.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Ai/AiState.h"
-}
 
 namespace {
 namespace ai = VS::Battle::Ai;

@@ -15,17 +15,14 @@
 
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/ManualTopics.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-
-extern "C" {
 #include "Field/Manual.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Manual.h"
-}
+#include "Menu/ManualTopics.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 
 namespace VS::Menu::manual {
 namespace {

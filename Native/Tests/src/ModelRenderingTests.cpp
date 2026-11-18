@@ -9,21 +9,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLive.hpp"
+#include "Actors/Movement.h"
+#include "Actors/WeaponModel.h"
 #include "Core/Gte.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-#include "Actors/WeaponModel.h"
-#include "Field/Gimmicks.h"
-}
 
 // Contracts of the #276 row 22 room model pass and model transforms
 // (BATTLE.PRG 44F14.c:826-1143 and 1695, 49268.c:48-245; INITBTL.PRG FB0.c:19).

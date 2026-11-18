@@ -14,25 +14,23 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/BasicActionEffects.hpp"
-#include "Battle/BasicActionEffectsLive.hpp"
-#include "Battle/DamageRecoveryEffectsLive.hpp"
-#include "Battle/HitCalculationsLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
-#include "Core/RandomLive.hpp"
-#include "State/ScriptFlags.hpp"
-#include "State/ScriptFlagsLive.hpp"
-extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/BasicActionEffects.hpp"
+#include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/Damage.h"
+#include "Battle/DamageRecoveryEffectsLive.hpp"
 #include "Battle/Hit.h"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusEffects.h"
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
 #include "Core/Random.h"
-}
+#include "Core/RandomLive.hpp"
+#include "State/ScriptFlags.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace {
 namespace battle = VS::Battle;

@@ -8,10 +8,6 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: _containerStrings (MENU/MENU7.PRG 260.c): halfword offsets, then
 // the strings; ModuleData.cpp fills it from the disc string table.
 enum { kMenuFilesContainerStringCount = 895 };
@@ -30,7 +26,3 @@ extern int Menu_Files_selectCursorXy;
 extern u_short* Menu_Files_textTable;
 // decomp: _frameBuf (TITLE/TITLE.PRG 22C.c)
 extern char Menu_Files_frameBuf;
-
-#ifdef __cplusplus
-}
-#endif

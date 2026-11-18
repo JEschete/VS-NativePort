@@ -7,13 +7,10 @@
 
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-
-extern "C" {
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
-}
 
 namespace VS::Menu::Framework {
 using LiveDetailController = int (*)(int);

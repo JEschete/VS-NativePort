@@ -7,15 +7,13 @@
 #include <iterator>
 #include <optional>
 
-#include "Battle/ActionCosts.hpp"
-extern "C" {
 #include "Battle/Action.h"
+#include "Battle/ActionCosts.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle {
 namespace {

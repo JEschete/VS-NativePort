@@ -11,20 +11,17 @@
 #include "Battle/RewardFlowLive.hpp"
 #include "Core/Log.hpp"
 #include "Event/EventSceneTransition.hpp"
+#include "Event/ScriptAudio.h"
 #include "Event/ScriptCommand.hpp"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptStep.hpp"
+#include "Event/ScriptVm.h"
 #include "Field/DoorRecord.hpp"
 #include "Field/DoorRecordLive.hpp"
+#include "Field/Mpd.h"
 #include "Field/TransitionsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
-#include "Event/ScriptAudio.h"
-#include "Event/ScriptControlOpcodes.h"
-#include "Event/ScriptVm.h"
-#include "Field/Mpd.h"
-}
 
 namespace VS::Event {
 namespace {

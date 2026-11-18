@@ -12,15 +12,13 @@
 #include <span>
 #include <type_traits>
 
+#include "Audio/Seq/Channel.h"
+#include "Items/Categories.h"
 #include "Items/EquipmentStats.hpp"
 #include "Items/Inventory.hpp"
 #include "Items/InventoryLiveState.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Items/Categories.h"
 
 unsigned char Items_miscItemInvoked = 0;
 const unsigned char Items_Inventory_inventoryItemCapacities[8] = {
@@ -29,7 +27,6 @@ const unsigned char Items_Inventory_inventoryItemCapacities[8] = {
     VS::Items::kCategoryCapacities[4], VS::Items::kCategoryCapacities[5],
     VS::Items::kCategoryCapacities[6], VS::Items::kCategoryCapacities[7],
 };
-}
 
 static_assert(std::size(Items_Inventory_inventoryItemCapacities) ==
               VS::Items::kItemCategoryCount);

@@ -16,22 +16,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Cutscene/Stream.h"
 #include "Audio/MixControl.hpp"
 #include "Audio/MixControlLive.hpp"
+#include "Audio/Mixer/MixControl.h"
+#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundDriver.hpp"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/VoiceMixer.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Content/ModuleData.h"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
-}
 
 namespace {
 namespace Driver = VS::Audio::Driver;

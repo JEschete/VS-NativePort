@@ -7,15 +7,12 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
-#include "Render/Sprites.hpp"
-#include "Render/SpritesLive.hpp"
-
-extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/Sprites.hpp"
+#include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 using VS::Render::SpritePacket;

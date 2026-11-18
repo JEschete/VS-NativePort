@@ -6,24 +6,21 @@
 #include <cstdlib>
 #include <iterator>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
+#include "Actors/Animation.h"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AppearanceLive.hpp"
-#include "Battle/BattleModeLive.hpp"
-#include "Event/WeaponMode.hpp"
-#include "Event/WeaponModeOpcode.h"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
 #include "Actors/Movement.h"
 #include "Battle/AbilityState.h"
+#include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
-}
+#include "Event/WeaponMode.hpp"
+#include "Event/WeaponModeOpcode.h"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace {
 namespace event = VS::Event;

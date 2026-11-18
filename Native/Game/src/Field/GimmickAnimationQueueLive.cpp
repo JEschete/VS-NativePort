@@ -5,15 +5,12 @@
 #include <iterator>
 
 #include "Field/ChestInteractionsLive.h"
+#include "Field/Doors.h"
 #include "Field/GimmickAnimationQueue.hpp"
+#include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomSwitchesLive.h"
-
-extern "C" {
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
 #include "Items/TreasureChests.h"
-}
 
 namespace {
 

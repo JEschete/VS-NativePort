@@ -7,10 +7,6 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct DIRENTRY {
   char name[20];
   long attr;
@@ -41,7 +37,3 @@ long _card_format(long chan);
 #define O_RDWR 0x0003
 #define O_CREAT 0x0200
 #define O_NOWAIT 0x8000
-
-#ifdef __cplusplus
-}
-#endif

@@ -13,14 +13,12 @@
 #include "Field/ChestInteractionsLive.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorRecordLive.hpp"
-#include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomState.hpp"
-
-extern "C" {
 #include "Field/Doors.h"
 #include "Field/Locations.h"
 #include "Field/Mpd.h"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomState.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Legacy/Psx.h"
 #include "Render/ScreenTransition.h"
@@ -40,7 +38,6 @@ int Field_screenTransitionWipeAngle;
 // decomp: vs_battle_screenTransitionSpeed
 // (vs_battle_screenTransitionSpeed@BATTLE/BATTLE.PRG)
 int Field_screenTransitionSpeed;
-}
 
 namespace VS::Field {
 namespace {

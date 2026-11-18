@@ -12,7 +12,12 @@
 #include <string>
 #include <utility>
 
+#include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Mixer/MixControl.h"
+#include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/SequencerOutput.h"
+#include "Audio/SoundBanks.h"
 #include "Audio/StreamBuffersLive.hpp"
 #include "Audio/StreamControl.hpp"
 #include "Audio/StreamPlayback.h"
@@ -22,14 +27,6 @@
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/Paths.hpp"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/SoundBanks.h"
-}
 
 namespace {
 namespace Cutscene = VS::Audio::Cutscene;

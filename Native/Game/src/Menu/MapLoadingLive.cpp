@@ -10,37 +10,34 @@
 #include <string_view>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscLayout.h"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "DiscQueue.h"
+#include "Field/Map.h"
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/MapLoading.hpp"
-#include "Menu/MapNavigationLive.hpp"
-#include "Menu/MapSceneStorageLive.hpp"
-#include "Render/DepthCueLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/StatusEffects.h"
-#include "Content/DiscLayout.h"
-#include "Core/Gte.h"
-#include "DiscQueue.h"
-#include "Field/Map.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Map.h"
+#include "Menu/MapLoading.hpp"
+#include "Menu/MapNavigationLive.hpp"
+#include "Menu/MapSceneStorageLive.hpp"
 #include "Render/Camera.h"
+#include "Render/DepthCueLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.h"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
-}
 
 namespace VS::Menu::map {
 namespace {

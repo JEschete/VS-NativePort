@@ -6,16 +6,14 @@
 #include <span>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
 #include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Field/DoorMatches.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 constexpr int kDoorQueryRandomByteIndex = 7;

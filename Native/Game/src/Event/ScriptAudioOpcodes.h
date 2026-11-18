@@ -9,10 +9,6 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 intptr_t Event_ScriptPlaySoundCommandOpcode(u_char* command, int16_t thread_id);
 intptr_t Event_CommandPlayActorSfxOpcode(u_char* command, int16_t thread_id);
 intptr_t Event_CommandSlideSfxVolumeOpcode(u_char* command, int16_t thread_id);
@@ -47,7 +43,3 @@ intptr_t Event_CommandSetMusicJumpThresholdOpcode(u_char* command,
                                                   int16_t thread_id);
 intptr_t Event_CommandPlayMenuSelectSfxOpcode(u_char* command,
                                               int16_t thread_id);
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif

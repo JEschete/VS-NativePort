@@ -8,19 +8,16 @@
 #include <string_view>
 
 #include "Core/Log.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/Status/DetailTransitions.hpp"
-
-extern "C" {
-#include "Input/ControllerLiveState.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
-#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Status/ActorStatus.h"
-}
+#include "Menu/Status/DetailTransitions.hpp"
 
 namespace VS::Menu::Status {  // NOLINT(readability-identifier-naming)
 namespace {

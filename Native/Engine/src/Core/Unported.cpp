@@ -61,11 +61,9 @@ void DumpUnportedToLog() {
 
 }  // namespace VS::Core
 
-extern "C" void Core_RecordUnported(const char* site) {
-  VS::Core::RecordUnported(site);
-}
+void Core_RecordUnported(const char* site) { VS::Core::RecordUnported(site); }
 
-extern "C" void Core_Tracef(const char* format, ...) {
+void Core_Tracef(const char* format, ...) {
   if (!VS::Core::IsLogEnabled(VS::Core::LogLevel::Trace, "trace")) {
     return;
   }
@@ -89,21 +87,21 @@ void WriteFormatted(VS::Core::LogLevel level, const char* channel,
 }
 }  // namespace
 
-extern "C" void Core_Debugf(const char* channel, const char* format, ...) {
+void Core_Debugf(const char* channel, const char* format, ...) {
   va_list args;
   va_start(args, format);
   WriteFormatted(VS::Core::LogLevel::Debug, channel, format, args);
   va_end(args);
 }
 
-extern "C" void Core_Warnf(const char* channel, const char* format, ...) {
+void Core_Warnf(const char* channel, const char* format, ...) {
   va_list args;
   va_start(args, format);
   WriteFormatted(VS::Core::LogLevel::Warn, channel, format, args);
   va_end(args);
 }
 
-extern "C" void Core_Errorf(const char* channel, const char* format, ...) {
+void Core_Errorf(const char* channel, const char* format, ...) {
   va_list args;
   va_start(args, format);
   WriteFormatted(VS::Core::LogLevel::Error, channel, format, args);

@@ -2,11 +2,9 @@
 
 #include <iterator>
 
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Actors {
 void WarnActorRefused(const char* operation, const char* reason) {

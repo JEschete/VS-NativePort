@@ -12,28 +12,25 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/AbilityState.h"
+#include "Battle/Actor.h"
 #include "Core/Log.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentLive.hpp"
+#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentMenus.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/Sounds.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/AbilityState.h"
-#include "Battle/Actor.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Inventory.h"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Inventory/Inventory.h"
-}
+#include "Menu/Sounds.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {

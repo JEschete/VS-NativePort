@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Title/TitleScreen.h"
 
@@ -18,4 +17,3 @@ char Title_movieStatePadding[28];
 // decomp: _6 (_6@src/TITLE/TITLE.PRG/22C.c)
 char Title_movieDecoderPadding[4];
 
-}  // extern "C"

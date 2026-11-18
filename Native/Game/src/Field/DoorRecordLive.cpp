@@ -4,10 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 
-extern "C" {
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
-}
 
 namespace {
 // main.h:446 _mpdRoomDoorSection_t: twelve bytes, the door tile halfword at

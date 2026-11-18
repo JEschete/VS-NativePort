@@ -19,18 +19,15 @@
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/RoomEnemyMemory.hpp"
 #include "Content/CdDrive.hpp"
-#include "Field/RoomLoading.hpp"
-#include "Field/RoomLoadingLive.hpp"
-#include "Field/RoomState.hpp"
-#include "Legacy/Psx.h"
-#include "Render/DisplayControl.hpp"
-
-extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Field/RoomLoading.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.h"
-}
+#include "Field/RoomState.hpp"
+#include "Legacy/Psx.h"
+#include "Render/DisplayControl.hpp"
 
 namespace VS::Field {
 namespace {

@@ -8,15 +8,12 @@
 #include <span>
 
 #include "Legacy/Psx.h"
-#include "Render/TextureRegionDraw.hpp"
-
-extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Images.h"
 #include "Render/Render.h"
+#include "Render/TextureRegionDraw.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;

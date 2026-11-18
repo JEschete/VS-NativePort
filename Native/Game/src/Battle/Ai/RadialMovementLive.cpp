@@ -9,22 +9,20 @@
 #include <iterator>
 #include <optional>
 
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/RadialMovement.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/RadialMovement.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

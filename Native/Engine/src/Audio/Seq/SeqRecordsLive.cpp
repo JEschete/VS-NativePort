@@ -16,23 +16,20 @@
 #include <span>
 #include <type_traits>
 
+#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/PlaybackReset.hpp"
+#include "Audio/Samples/SampleBanks.h"
+#include "Audio/Seq/Channel.h"
+#include "Audio/Seq/Sequencer.h"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
+#include "Audio/SoundBanks.h"
 #include "Audio/VoiceOutput.hpp"
 #include "Core/Arena.h"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
-#include "Audio/SoundBanks.h"
-}
 
 namespace VS::Audio::Seq {
 namespace {

@@ -8,12 +8,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/TargetPages.hpp"
+#include "Battle/TargetingState.h"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/TargetingState.h"
-}
 
 namespace {
 constexpr std::size_t kPageSize = 24;

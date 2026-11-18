@@ -4,12 +4,9 @@
 #include <stdexcept>
 
 #include "Content/CdDriveLive.hpp"
+#include "DiscQueue.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-
-extern "C" {
-#include "DiscQueue.h"
-}
 
 namespace menu_overlay_tests {
 

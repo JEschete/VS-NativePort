@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Plugins/Plg236.h"
 
@@ -12,4 +11,3 @@ u_char Effects_Plg236_ringColorFactors[8][4]; /* contents: module image (ModuleD
 // decomp: D_800FD1D0 (D_800FD1D0@EFFECT/PLG236.BIN)
 u_char Effects_Plg236_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

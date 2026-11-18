@@ -3,12 +3,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/OverlayReset.h"
 #include "Content/ModuleData.h"
 #include "Items/ContainerIndexingLiveFixture.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-}
 
 namespace {
 namespace items = VS::Items;

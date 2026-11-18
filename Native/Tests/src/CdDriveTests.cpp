@@ -14,11 +14,8 @@
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "State/GameClockLive.hpp"
-
-extern "C" {
 #include "DiscQueue.h"
-}
+#include "State/GameClockLive.hpp"
 
 namespace {
 namespace Content = VS::Content;

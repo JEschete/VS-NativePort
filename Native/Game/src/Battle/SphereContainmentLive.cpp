@@ -8,13 +8,11 @@
 #include <iterator>
 #include <span>
 
-#include "Core/Log.hpp"
-#include "Core/Math/ScalarMath.hpp"
-extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
-}
+#include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Battle {
 namespace {

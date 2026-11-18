@@ -6,17 +6,15 @@
 
 #include <cstdint>
 
-#include "Battle/HudStateLive.hpp"
-#include "State/SceneTimer.hpp"
-#include "State/ScriptFlags.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Battle/Hud.h"
+#include "Battle/HudStateLive.hpp"
 #include "Core/BiosRand.h"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Event/Triggers.h"
 #include "State/SceneTimer.h"
+#include "State/SceneTimer.hpp"
+#include "State/ScriptFlags.hpp"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
 
 // decomp: D_80050468 (D_80050468@SLUS_010.40)
@@ -24,7 +22,6 @@ State_SceneTimer State_sceneTimer;
 
 // decomp: vs_gametime_tickspeed (vs_gametime_tickspeed@SLUS_010.40)
 int State_tickSpeed;
-}
 
 namespace VS::State {
 namespace {

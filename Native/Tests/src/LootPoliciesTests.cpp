@@ -8,20 +8,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootPolicies.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootRows.hpp"
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
-}
 
 namespace {
 namespace items = VS::Items;

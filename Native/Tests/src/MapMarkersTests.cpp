@@ -7,13 +7,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/MapMarkers.hpp"
-#include "Menu/MapMarkersLive.hpp"
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Menu/Map.h"
+#include "Menu/MapMarkers.hpp"
+#include "Menu/MapMarkersLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace {
 namespace map = VS::Menu::map;

@@ -20,32 +20,29 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Hud.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/ManualScreen.hpp"
-#include "Menu/ManualScreenLive.hpp"
-#include "Menu/ManualTopics.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-
-extern "C" {
-#include "Battle/Hud.h"
 #include "DiscQueue.h"
 #include "Field/Manual.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Manual.h"
+#include "Menu/ManualScreen.hpp"
+#include "Menu/ManualScreenLive.hpp"
+#include "Menu/ManualTopics.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the manual screen's lifecycle and help pages (MENUE.PRG
 // 494.c:132-448): the unused menu wrappers, the screen's open, wait, show and

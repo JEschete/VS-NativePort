@@ -18,12 +18,9 @@
 
 #include "CombatLab/DoorTests.hpp"
 #include "Content/DataStore.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::combat_lab {
 namespace {

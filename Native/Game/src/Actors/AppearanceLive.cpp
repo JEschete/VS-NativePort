@@ -10,27 +10,24 @@
 #include <iterator>
 #include <optional>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
 #include "Actors/Appearance.hpp"
 #include "Actors/AppearanceLiveState.h"
-#include "Actors/SequencePlaybackLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Shadow.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
+#include "Render/PaletteAnimationLive.hpp"
 
 // decomp: D_800F4438 (D_800F4438@BATTLE/BATTLE.PRG)
 VECTOR Actors_roomActorScale;
-}
 
 namespace VS::Actors {
 namespace {

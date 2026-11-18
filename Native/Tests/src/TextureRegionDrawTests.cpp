@@ -6,17 +6,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Legacy/Psx.h"
-#include "Render/TextureRegionDraw.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
-
-extern "C" {
 #include "Ending/ClearResults.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/TextureRegionDraw.hpp"
+#include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 using VS::Render::QuadColor;

@@ -13,16 +13,14 @@
 #include "Actors/ActorRoster.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorTableLive.hpp"
-#include "Actors/RoomEnemyMemory.hpp"
-#include "Battle/Ai/ActorCleanupLive.hpp"
-extern "C" {
 #include "Actors/Location.h"
 #include "Actors/RoomActorCache.h"
+#include "Actors/RoomEnemyMemory.hpp"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.h"
 #include "State/RoomCache.h"
 #include "State/RoomMemory.h"
-}
 
 namespace VS::Actors {
 namespace {

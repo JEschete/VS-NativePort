@@ -6,27 +6,24 @@
 #include <cstdint>
 #include <optional>
 
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Scratch.h"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraFrame.hpp"
 #include "Event/EventCameraLensLive.hpp"
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/EventScreenTweensLive.hpp"
+#include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
+#include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptVm.h"
 #include "Field/CameraLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "Event/ScriptCamera.h"
-#include "Event/ScriptControlOpcodes.h"
-#include "Event/ScriptVm.h"
-}
 
 namespace VS::Event {
 namespace {

@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Animation.h"
 #include "Actors/TextureAnimation.h"
@@ -60,4 +59,3 @@ short Actors_sharedSequenceEntryParams[4][16];
 // decomp: D_800F49DC (D_800F49DC@BATTLE/BATTLE.PRG)
 char Actors_lastResolvedSequenceIndex;
 
-}  // extern "C"

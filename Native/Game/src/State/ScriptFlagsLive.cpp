@@ -6,14 +6,11 @@
 #include <cstdint>
 #include <span>
 
-#include "State/ScriptFlags.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.h"
 #include "Diagnostics/SceneTrace.h"
+#include "State/ScriptFlags.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace VS::State {
 namespace {

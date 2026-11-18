@@ -15,13 +15,10 @@
 #include "Effects/Curves.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/PackageExtents.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Effects/Package.h"
+#include "Effects/PackageExtents.hpp"
 #include "Effects/Runtime.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Effects {
 namespace {

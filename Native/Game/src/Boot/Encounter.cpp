@@ -15,40 +15,18 @@
 #include <vector>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Actors/ActorStateLive.hpp"
-#include "Audio/SoundBanksLive.hpp"
-#include "Battle/ActionOutcomesLive.hpp"
-#include "Battle/StatusLifecycleLive.hpp"
-#include "Battle/StatusQueueLive.hpp"
-#include "Battle/TargetPages.h"
-#include "Boot/SessionLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Core/Log.hpp"
-#include "Diagnostics/GameplayTrace.hpp"
-#include "Event/CutsceneLifecycleLive.hpp"
-#include "Event/ScriptVmLive.hpp"
-#include "Event/TriggersLive.hpp"
-#include "Field/ChestInteractionsLive.h"
-#include "Field/DoorRecordLive.hpp"
-#include "Field/EncounterSpawnProfile.hpp"
-#include "Field/RoomRenderingLive.hpp"
-#include "Field/TransitionsLive.hpp"
-#include "Items/EquipmentLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-#include "Title/TitleMenuLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanks.h"
+#include "Audio/SoundBanksLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
@@ -57,36 +35,54 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusLifecycleLive.hpp"
+#include "Battle/StatusQueueLive.hpp"
+#include "Battle/TargetPages.h"
 #include "Battle/TargetVolume.h"
 #include "Boot/GameLoop.h"
 #include "Boot/PlayerSettings.h"
+#include "Boot/SessionLive.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
 #include "Core/BiosRand.h"
 #include "Core/Diagnostics.h"
+#include "Core/Log.hpp"
 #include "Core/Random.h"
 #include "Core/Scratch.h"
+#include "Diagnostics/GameplayTrace.hpp"
 #include "Effects/Runtime.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits/StaffRoll.h"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
+#include "Event/TriggersLive.hpp"
 #include "Field/CameraLiveState.h"
+#include "Field/ChestInteractionsLive.h"
+#include "Field/DoorRecordLive.hpp"
 #include "Field/Doors.h"
+#include "Field/EncounterSpawnProfile.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLiveState.h"
+#include "Field/RoomRenderingLive.hpp"
+#include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
+#include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
 #include "Items/LootLiveState.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/MenuItems.h"
@@ -97,7 +93,8 @@ extern "C" {
 #include "Render/UiPrimitives.h"
 #include "State/Location.h"
 #include "State/Progress.h"
-}
+#include "State/ScriptFlagsLive.hpp"
+#include "Title/TitleMenuLive.hpp"
 
 namespace VS::Game {
 namespace {
@@ -1100,7 +1097,7 @@ EncounterDoorRequest RequestEncounterDoorTransition(int index) {
 }
 }  // namespace VS::Game
 
-extern "C" void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
+void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::active) return;
   VS::Game::room_prepared = false;
   if (!VS::Game::UsesConfiguredEncounterPlacements(
@@ -1117,7 +1114,7 @@ extern "C" void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
                VS::Game::configuration.enemies.size());
 }
 
-extern "C" int Boot_EncounterUsesRoomEvents() {
+int Boot_EncounterUsesRoomEvents() {
   return !VS::Game::active ||
          VS::Game::UsesEncounterRoomEvents(VS::Game::configuration,
                                            VS::Game::external_event_started);
@@ -1136,7 +1133,7 @@ VS::Event::RoomEventLoad VS::Game::LoadEncounterRoomEvents() {
            sizeof(empty_triggers)}});
 }
 
-extern "C" void Boot_EncounterPollStop() {
+void Boot_EncounterPollStop() {
   VS::Game::gameplay_inspection_ready = true;
   if (VS::Game::active) {
     if (!VS::Game::player_stats_initialized) {
@@ -1208,6 +1205,6 @@ extern "C" void Boot_EncounterPollStop() {
   }
 }
 
-extern "C" void Boot_ResetGameplayInspection() {
+void Boot_ResetGameplayInspection() {
   VS::Game::gameplay_inspection_ready = false;
 }

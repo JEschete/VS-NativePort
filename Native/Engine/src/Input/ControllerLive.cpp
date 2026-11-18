@@ -15,23 +15,19 @@
 #include <optional>
 #include <span>
 
-#include "Boot/SessionLive.hpp"
-#include "Input/Controller.hpp"
-#include "Legacy/Input/LibPad.h"
-
-extern "C" {
 #include "Boot/GameLoop.h"
+#include "Boot/SessionLive.hpp"
 #include "Core/Diagnostics.h"
+#include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Input/Vibration.h"
+#include "Legacy/Input/LibPad.h"
 #include "State/Timers.h"
-}
 
 // decomp: SLUS_010.40 _portInfo, vs_main_buttonsReleased,
 // _buttonHeldFrameCount, vs_main_stickPosBuf, vs_main_buttonRepeat,
 // vs_main_buttonsPreviousState, vs_main_buttonsPressed, vs_main_buttonsState
 // and vs_main_settings (main.c), zero like the PS1 BSS.
-extern "C" {
 Input_ControllerPortState
     Input_controllerPorts[VS::Input::kControllerPortCount]{};
 int Input_releasedButtons = 0;
@@ -42,7 +38,6 @@ int Input_previousButtons = 0;
 union Input_PressedButtonsView Input_buttonsPressed{};
 int Input_buttonsState = 0;
 State_Settings Input_settings{};
-}
 
 namespace VS::Input {
 namespace {

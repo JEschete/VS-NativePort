@@ -13,23 +13,20 @@
 
 #include "Content/ModuleData.h"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
 #include "Effects/TextureBindings.hpp"
+#include "Effects/Transforms.h"
 #include "Effects/TransformsLive.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
-
-extern "C" {
-#include "Effects/Package.h"
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-#include "Effects/Transforms.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 struct TextureBindingFixture {

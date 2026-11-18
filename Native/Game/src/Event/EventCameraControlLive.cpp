@@ -11,15 +11,12 @@
 #include "Event/EventCameraControl.hpp"
 #include "Event/EventCameraTrack.hpp"
 #include "Event/EventCameraTrackLive.hpp"
-#include "Event/ScriptCommand.hpp"
-#include "Field/CameraLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
-}
+#include "Field/CameraLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Event {
 namespace {

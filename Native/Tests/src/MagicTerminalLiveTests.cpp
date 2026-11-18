@@ -11,24 +11,21 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/AbilityState.h"
+#include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
 #include "Boot/SessionLive.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/Menus.h"
+#include "Menu/Magic.h"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
-
-extern "C" {
-#include "Battle/AbilityState.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
-#include "Content/DiscLayout.h"
-#include "Menu/Framework/Menus.h"
-#include "Menu/Magic.h"
-}
 
 namespace {
 namespace magic = VS::Menu::Magic;

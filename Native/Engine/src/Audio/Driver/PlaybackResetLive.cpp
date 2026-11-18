@@ -7,20 +7,18 @@
 #include <cstdint>
 #include <iterator>
 
-#include "Audio/MixControlLive.hpp"
-#include "Audio/PlaybackReset.hpp"
-extern "C" {
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
+#include "Audio/MixControlLive.hpp"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/PlaybackReset.hpp"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
-}  // extern "C"
 
 namespace VS::Audio::Driver {
 namespace {

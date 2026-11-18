@@ -11,7 +11,10 @@
 #include <type_traits>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Actors/Location.h"
 #include "Actors/SkeletonLive.hpp"
+#include "Core/BiosRand.h"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -19,18 +22,12 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/Transforms.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Actors/Location.h"
-#include "Core/BiosRand.h"
-#include "Core/Gte.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
+#include "Effects/Transforms.hpp"
+#include "Legacy/Psx.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // func_800D0548_arg1 (5BF94.c:6076) views each Effects_TransformSlot.
 namespace {

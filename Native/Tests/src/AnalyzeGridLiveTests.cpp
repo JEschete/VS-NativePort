@@ -8,15 +8,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/Gte.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Scratch.h"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/AnalyzeGridLive.hpp"
-#include "Effects/PackageExtents.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
 #include "Effects/Package.h"
+#include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
@@ -25,7 +23,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 namespace effects = VS::Effects;

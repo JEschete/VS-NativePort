@@ -1,45 +1,42 @@
-extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-extern "C++" {
 #include <array>
 #include <cstddef>
 
-#include "Core/Memory/HeapLive.hpp"
-#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Status/LimbControllersLive.hpp"
-#include "Menu/Status/TerminalControllersLive.hpp"
-#include "Menu/TextBoxFramesLive.hpp"
-#include "Render/EncodedTextLive.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/ScaledFont.hpp"
-#include "Render/ScaledFontLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-}
 #include "Actors/Spawning.h"
 #include "Battle/TargetingState.h"
 #include "Boot/OverlayReset.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
+#include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/LimbControllersLive.hpp"
+#include "Menu/Status/TerminalControllersLive.hpp"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxFramesLive.hpp"
 #include "Render/Display.h"
+#include "Render/EncodedTextLive.hpp"
 #include "Render/Frame.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
+#include "Render/ScaledFont.hpp"
+#include "Render/ScaledFontLive.hpp"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
 
@@ -618,5 +615,3 @@ int CheckDefaultLoadoutNames(void) {
          memcmp(Actors_ashleyInitialLoadout.weapon.name, weapon_name,
                 sizeof weapon_name) == 0;
 }
-
-}  // extern "C"

@@ -7,7 +7,6 @@
 #include "Effects/Templates/SurfacesLive.hpp"
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitterLive.hpp"
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "Effects/Loading.h"
@@ -476,4 +475,3 @@ Effects_FileLoadContext Effects_pluginFiles[] = { PLG_NONE, PLG_NONE, PLG_NONE, 
 #undef PLG_NONE
 #undef PLG
 
-}  // extern "C"

@@ -10,10 +10,6 @@
 #include "Field/Weather.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: D_800F1D98 (BATTLE/BATTLE.PRG 146C.c:710): [0..2] the particle
 // velocity the weather effects derive, [4] the wind strength, [5] its
 // direction, [6] a copy of the intensity scale, [7..9] the direction,
@@ -42,7 +38,3 @@ extern char Field_isWeatherVariationEnabled;
 // decomp: D_800F1DD4 (BATTLE/BATTLE.PRG 146C.c:729): the 0x800-byte particle
 // buffer (low heap), or null.
 extern Field_WeatherParticle* Field_weatherParticles;
-
-#ifdef __cplusplus
-}
-#endif

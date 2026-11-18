@@ -12,25 +12,22 @@
 #include <iterator>
 #include <optional>
 
+#include "Audio/LegacyFiles.h"
 #include "Audio/SampleBanksLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
+#include "Audio/Sfx.h"
+#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/SoundSlotsLive.hpp"
 #include "Audio/StreamPlayback.h"
 #include "Audio/XaMixLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Runtime.hpp"
-#include "State/GameClockLive.hpp"
-
-extern "C" {
-#include "Audio/LegacyFiles.h"
-#include "Audio/Sfx.h"
-#include "Audio/SoundBanks.h"
 #include "Content/DiscLayout.h"
+#include "Core/Runtime.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-}
+#include "State/GameClockLive.hpp"
 
 namespace VS::Audio {
 namespace {

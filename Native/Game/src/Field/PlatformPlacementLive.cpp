@@ -17,22 +17,20 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
+#include "Field/Mpd.h"
 #include "Field/PlatformPlacement.hpp"
 #include "Field/PlatformPlacementLive.h"
+#include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
+#include "Field/RoomRenderingLiveState.h"
 #include "Legacy/Psx.h"
+#include "Render/Display.h"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-extern "C" {
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Field/RoomRenderingLiveState.h"
-#include "Render/Display.h"
 #include "State/Timers.h"
-}
 
 namespace {
 using VS::Field::kMovingPlatformCapacity;

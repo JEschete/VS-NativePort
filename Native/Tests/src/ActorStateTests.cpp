@@ -19,14 +19,10 @@
 #include "Actors/ActorLifecycle.hpp"
 #include "Actors/ActorMotion.hpp"
 #include "Actors/ActorPlacement.hpp"
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/BattleActorState.hpp"
-#include "Legacy/Psx.h"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
@@ -35,7 +31,8 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Field/Gimmicks.h"
-}
+#include "Legacy/Psx.h"
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace {
 namespace actors = VS::Actors;

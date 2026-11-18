@@ -7,14 +7,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-}
 
 namespace {
 struct StoredCommand {

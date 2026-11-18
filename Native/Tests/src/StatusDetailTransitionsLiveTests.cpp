@@ -12,12 +12,9 @@
 
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/DetailTransitionsLive.hpp"
 #include "Menu/StatusTransitionsWorld.hpp"
-
-extern "C" {
-#include "Menu/Status/ActorStatus.h"
-}
 
 namespace {
 namespace status = VS::Menu::Status;

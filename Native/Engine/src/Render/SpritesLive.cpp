@@ -10,14 +10,12 @@
 #include <cstddef>
 #include <cstdint>
 
-extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Render {
 namespace {

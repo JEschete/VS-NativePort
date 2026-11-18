@@ -8,13 +8,10 @@
 
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/UiPackets.hpp"
-
-extern "C" {
 #include "Effects/ScreenEffects.h"
+#include "Legacy/Psx.h"
 #include "Render/Render.h"
-}
+#include "Render/UiPackets.hpp"
 
 namespace {
 namespace sd = VS::Effects::ScreenDistortion;

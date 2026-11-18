@@ -24,7 +24,6 @@ void CompleteTransfer() {
 
 }  // namespace
 
-extern "C" {
 void* LegacySpu_Registers(void) { return g_registers; }
 
 unsigned char* LegacySpu_Ram(void) { return g_ram; }
@@ -109,5 +108,3 @@ void SpuGetReverbModeType(long* mode) {
 void SsUtReverbOn(void) { VS_UNPORTED("libspu:SsUtReverbOn"); }
 
 void SsUtReverbOff(void) { VS_UNPORTED("libspu:SsUtReverbOff"); }
-
-}  // extern "C"

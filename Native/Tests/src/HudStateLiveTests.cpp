@@ -7,13 +7,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/HudStateLive.hpp"
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
+#include "Battle/HudStateLive.hpp"
 #include "Field/Minimap.h"
-}
 
 namespace {
 namespace b = VS::Battle;

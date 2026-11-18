@@ -11,17 +11,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Boot/SessionLive.hpp"
-#include "Menu/EquipmentDetailControllersLiveFixture.hpp"
-#include "Menu/OverlayLoadFixture.hpp"
-#include "Menu/Status/LimbControllersLive.hpp"
-
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
+#include "Menu/EquipmentDetailControllersLiveFixture.hpp"
+#include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Status/ActorStatus.h"
-}
+#include "Menu/Status/LimbControllersLive.hpp"
 
 namespace {
 namespace status = VS::Menu::Status;

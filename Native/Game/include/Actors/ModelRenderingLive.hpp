@@ -2,10 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include "Actors/ModelRendering.hpp"
-
-extern "C" {
 #include "Legacy/Psx.h"
-}
 
 struct Actors_ActorRecord;
 struct Actors_WeaponModel;

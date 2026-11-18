@@ -9,23 +9,20 @@
 #include <span>
 #include <string_view>
 
-#include "Core/Log.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/MapMarkers.hpp"
-#include "Render/Sprites.hpp"
-#include "Render/SpritesLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
+#include "Core/Log.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Map.h"
+#include "Menu/MapMarkers.hpp"
 #include "Render/Render.h"
+#include "Render/Sprites.hpp"
+#include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Menu::map {
 namespace {

@@ -12,19 +12,16 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Boot/GameLoop.h"
 #include "Content/ModuleData.h"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Input/ControllerLiveState.h"
+#include "Input/Controllers.h"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Boot/GameLoop.h"
-#include "Input/ControllerLiveState.h"
-#include "Input/Controllers.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace Input = VS::Input;

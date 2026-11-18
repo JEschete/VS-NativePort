@@ -9,19 +9,16 @@
 #include <optional>
 #include <type_traits>
 
-#include "Audio/SeqControlCommands.hpp"
-#include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/VoiceOutput.hpp"
-
-extern "C" {
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SeqControlCommands.hpp"
+#include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
-}
+#include "Audio/VoiceOutput.hpp"
 
 namespace VS::Audio::Seq {
 namespace {

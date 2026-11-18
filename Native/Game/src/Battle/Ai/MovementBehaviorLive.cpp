@@ -12,32 +12,29 @@
 #include <span>
 #include <type_traits>
 
+#include "Actors/Movement.h"
+#include "Battle/Action.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/Movement.h"
+#include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/Perception.h"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Ai/TargetApproachLive.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
-#include "Core/Math/Distance.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-
-extern "C" {
-#include "Actors/Movement.h"
-#include "Battle/Action.h"
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
+#include "Core/Math/Distance.hpp"
 #include "Field/Gimmicks.h"
-}
+#include "Field/PlatformPlacementLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

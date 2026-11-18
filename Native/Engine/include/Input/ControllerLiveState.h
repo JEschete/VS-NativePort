@@ -8,10 +8,6 @@
 #include "Input/Controllers.h"
 #include "State/Settings.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // main.c:8854-8859 _buttonHeldFrameCount: one counter per button word bit.
 enum { kInputButtonHeldFrameCount = 32 };
 
@@ -26,7 +22,3 @@ extern int Input_previousButtons;
 extern union Input_PressedButtonsView Input_buttonsPressed;
 extern int Input_buttonsState;
 extern State_Settings Input_settings;
-
-#ifdef __cplusplus
-}
-#endif

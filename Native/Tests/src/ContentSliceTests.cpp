@@ -19,11 +19,8 @@
 #include "Content/SystemResources.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "OverlayWorkspaceLiveState.h"
-
-extern "C" {
 #include "Effects/Package.h"
-}
+#include "OverlayWorkspaceLiveState.h"
 
 namespace {
 namespace Content = VS::Content;

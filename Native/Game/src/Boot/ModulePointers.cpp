@@ -167,7 +167,6 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Event/Camera.hpp"
-extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
 #include "ActorAssetsLiveState.h"
@@ -2463,4 +2462,3 @@ const Content_ModulePointerTable Content_modulePointers[] = {
 };
 const unsigned Content_modulePointerCount = sizeof Content_modulePointers / sizeof Content_modulePointers[0];
 
-}  // extern "C"

@@ -9,15 +9,12 @@
 #include <iterator>
 
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/GimmickMotion.h"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickReactionsLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
-#include "Field/InteractionTargetLive.hpp"
-
-extern "C" {
-#include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
-}
+#include "Field/InteractionTargetLive.hpp"
 
 namespace {
 constexpr std::size_t kLongTableRows = 16;

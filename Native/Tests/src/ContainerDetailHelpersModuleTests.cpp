@@ -3,15 +3,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/OverlayReset.h"
 #include "Content/ModuleData.h"
 #include "Input/Pad.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/ContainerDetailHelpersSamples.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-}
 
 namespace {
 namespace detail = VS::Menu::container;

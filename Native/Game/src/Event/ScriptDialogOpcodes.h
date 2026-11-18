@@ -9,10 +9,6 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 intptr_t Event_ScriptInitDialogBoxOpcode(u_char* command, int16_t thread_id);
 intptr_t Event_ScriptShowDialogTextOpcode(u_char* command, int16_t thread_id);
 intptr_t Event_ScriptDismissDialogBoxOpcode(u_char* command, int16_t thread_id);
@@ -26,7 +22,3 @@ intptr_t Event_ScriptSetDialogTransitionDurationOpcode(u_char* command,
 intptr_t Event_ScriptSelectDialogChoiceOpcode(u_char* command,
                                               int16_t thread_id);
 intptr_t Event_ScriptSetDialogSpeakerOpcode(u_char* command, int16_t thread_id);
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif

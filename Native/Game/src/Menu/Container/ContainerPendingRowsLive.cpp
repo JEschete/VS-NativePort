@@ -8,19 +8,16 @@
 #include <span>
 #include <string_view>
 
+#include "Core/Diagnostics.h"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerPendingRows.hpp"
-#include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveHost.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/FrameworkLiveState.h"
-}
+#include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Framework/ItemRowsLiveHost.hpp"
 
 namespace VS::Menu::container {
 namespace {

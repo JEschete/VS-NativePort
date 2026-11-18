@@ -9,26 +9,23 @@
 #include <cstdint>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
+#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
+#include "Menu/Results/TimeAttack.h"
 #include "Menu/Results/TimeAttackHeading.hpp"
 #include "Menu/Results/TimeAttackRating.hpp"
-#include "Render/DisplayControl.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
+#include "Render/DisplayControl.hpp"
 #include "Render/Frame.h"
 #include "Render/Images.h"
 #include "Render/Render.h"
+#include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-}
 
 namespace VS::test_support::time_attack {
 namespace results = VS::Menu::Results;

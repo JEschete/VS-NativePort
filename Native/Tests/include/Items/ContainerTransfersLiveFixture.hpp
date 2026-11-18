@@ -4,17 +4,14 @@
 #include <array>
 #include <memory>
 
-#include "Items/ContainerTransfersLive.hpp"
-#include "Items/ItemRecordsLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
+#include "Items/ContainerTransfersLive.hpp"
 #include "Items/InventoryLiveState.h"
+#include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Inventory/ItemList.h"
-}
 
 namespace container_transfers_tests {
 namespace items = VS::Items;

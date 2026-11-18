@@ -9,21 +9,19 @@
 #include <iterator>
 #include <type_traits>
 
+#include "Battle/Actor.h"
+#include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
+#include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycle.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
-extern "C" {
-#include "Battle/Actor.h"
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Feedback.h"
-#include "Battle/StatusEffects.h"
-#include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle {
 namespace {

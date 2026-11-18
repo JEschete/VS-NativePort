@@ -10,14 +10,12 @@
 #include <optional>
 #include <span>
 
-#include "Battle/StatusQueue.hpp"
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusQueue.hpp"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle {
 namespace {

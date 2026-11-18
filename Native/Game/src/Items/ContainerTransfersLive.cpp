@@ -10,20 +10,17 @@
 #include <type_traits>
 #include <variant>
 
+#include "Audio/Seq/Channel.h"
+#include "Core/Diagnostics.h"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfers.hpp"
-#include "Items/ItemRecordsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Core/Diagnostics.h"
 #include "Items/InventoryLiveState.h"
+#include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Inventory/ItemList.h"
-}
 
 namespace VS::Items {
 namespace {

@@ -8,16 +8,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/StatusLifecycle.hpp"
-#include "Battle/StatusLifecycleLive.hpp"
-#include "Content/ModuleData.h"
-#include "Items/EquipmentAffinity.hpp"
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/StatusEffects.h"
-}
+#include "Battle/StatusLifecycle.hpp"
+#include "Battle/StatusLifecycleLive.hpp"
+#include "Content/ModuleData.h"
+#include "Items/EquipmentAffinity.hpp"
 
 namespace {
 namespace battle = VS::Battle;

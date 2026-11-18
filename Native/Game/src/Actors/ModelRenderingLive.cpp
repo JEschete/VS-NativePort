@@ -14,45 +14,43 @@
 #include <span>
 #include <type_traits>
 
+#include "ActorAssets.h"
+#include "ActorAssetsLiveState.h"
 #include "Actors/ActorMotionLive.hpp"
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
+#include "Actors/Animation.h"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
+#include "Actors/AppearanceLiveState.h"
 #include "Actors/AppearanceTransitionLive.hpp"
+#include "Actors/ModelDraw.h"
 #include "Actors/ModelDrawingLive.hpp"
+#include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.hpp"
 #include "Actors/ModelRenderingLiveState.h"
+#include "Actors/Movement.h"
+#include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Actors/Textures.h"
+#include "Actors/WeaponModel.h"
 #include "Content/ActorAssets.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
-#include "Render/CameraViewLive.hpp"
-#include "Render/ModelGeometryLive.hpp"
-
-extern "C" {
-#include "ActorAssets.h"
-#include "ActorAssetsLiveState.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/AppearanceLiveState.h"
-#include "Actors/ModelDraw.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/Textures.h"
-#include "Actors/WeaponModel.h"
-#include "Core/Diagnostics.h"
-#include "Event/ScriptVm.h"
 #include "Field/Gimmicks.h"
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
+#include "Render/CameraViewLive.hpp"
 #include "Render/ModelDraw.h"
+#include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
@@ -61,7 +59,6 @@ extern "C" {
 
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
 Actors_ModelRenderContext Actors_modelRenderContext;
-}
 
 namespace VS::Actors {
 namespace {

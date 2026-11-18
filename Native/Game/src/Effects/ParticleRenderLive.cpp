@@ -17,24 +17,21 @@
 
 #include "Core/Log.hpp"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/Package.h"
 #include "Effects/ParticleRender.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/PageSpace.hpp"
-#include "Render/RoomDrawLive.hpp"
-#include "nlohmann/json.hpp"
-
-extern "C" {
-#include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
+#include "Legacy/Psx.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
+#include "Render/PageSpace.hpp"
 #include "Render/Render.h"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-}
+#include "nlohmann/json.hpp"
 
 namespace VS::Effects {
 namespace {

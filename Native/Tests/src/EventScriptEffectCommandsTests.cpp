@@ -13,18 +13,15 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Event/ScriptActors.h"
 #include "Event/ScriptEffectCommands.hpp"
+#include "Event/ScriptEffectOpcodes.h"
+#include "Event/ScriptEffects.h"
+#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "TestSupport/ScriptSources.hpp"
 #include "TestSupport/ScriptSteps.hpp"
-
-extern "C" {
-#include "Event/ScriptActors.h"
-#include "Event/ScriptEffectOpcodes.h"
-#include "Event/ScriptEffects.h"
-#include "Event/ScriptVm.h"
-}
 
 namespace {
 namespace event = VS::Event;

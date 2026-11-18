@@ -16,10 +16,8 @@
 
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
-#include "TestSupport/EffectProgramScope.hpp"
-extern "C" {
 #include "Effects/Runtime.h"
-}
+#include "TestSupport/EffectProgramScope.hpp"
 
 namespace {
 namespace fx = VS::Effects;

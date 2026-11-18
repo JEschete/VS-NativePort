@@ -14,20 +14,18 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/ActionCosts.hpp"
-#include "Battle/ActionCostsLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
-#include "Items/EquipmentLive.hpp"
-#include "Items/EquipmentStats.hpp"
-extern "C" {
 #include "Actors/CharacterInit.h"
 #include "Battle/Action.h"
+#include "Battle/ActionCosts.hpp"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-}
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
+#include "Items/EquipmentLive.hpp"
+#include "Items/EquipmentStats.hpp"
 
 namespace {
 namespace battle = VS::Battle;

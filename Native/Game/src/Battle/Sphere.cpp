@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Sphere.h"
@@ -35,4 +34,3 @@ u_char Battle_reuseSphereVolumes; /* contents: module image (ModuleData.cpp) */
 // decomp: D_800EB9B8 (D_800EB9B8@BATTLE/BATTLE.PRG)
 Battle_TargetSphereSetupView* Battle_targetSphere; /* data: contents loaded in Step 5 */
 
-}  // extern "C"

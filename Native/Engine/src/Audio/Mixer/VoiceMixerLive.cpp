@@ -15,20 +15,17 @@
 #include <span>
 #include <vector>
 
-#include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SeqSequencer.hpp"
-#include "Audio/SequencerOutput.h"
-#include "Audio/VoiceMixer.hpp"
-#include "Audio/VoiceOutputLive.hpp"
-
-extern "C" {
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SeqSequencer.hpp"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
-}
+#include "Audio/VoiceMixer.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 
 namespace VS::Audio::Mixer {
 namespace {

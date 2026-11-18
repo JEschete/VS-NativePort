@@ -21,20 +21,17 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.h"
-#include "Legacy/Psx.h"
-#include "Save/MemoryCard/GameFiles.hpp"
-#include "Save/MemoryCard/GameFilesLive.hpp"
-#include "Save/Snapshot.hpp"
-#include "Save/SnapshotLive.hpp"
-
-extern "C" {
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
 #include "Save/MemoryCard/GameFiles.h"
+#include "Save/MemoryCard/GameFiles.hpp"
+#include "Save/MemoryCard/GameFilesLive.hpp"
 #include "Save/MemoryCard/Resources.h"
+#include "Save/Snapshot.hpp"
+#include "Save/SnapshotLive.hpp"
 #include "State/Ashley.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace Files = VS::Save::MemoryCard;
 namespace Save = VS::Save;

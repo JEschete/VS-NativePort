@@ -7,32 +7,29 @@
 #include <span>
 #include <string_view>
 
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/ActorPreviewLive.hpp"
-#include "Menu/Framework/ItemRows.hpp"
-#include "Menu/Status/LimbControllersLive.hpp"
-#include "Menu/Status/TerminalControllersLiveInternal.hpp"
-#include "Render/CameraViewLive.hpp"
-#include "Render/EncodedText.hpp"
-#include "Render/SpritesLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Battle/Hud.h"
 #include "Core/Diagnostics.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.h"
+#include "Menu/Framework/ActorPreviewLive.hpp"
+#include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/LimbControllersLive.hpp"
+#include "Menu/Status/TerminalControllersLiveInternal.hpp"
 #include "OverlayWorkspaceLiveState.h"
 #include "Render/Camera.h"
+#include "Render/CameraViewLive.hpp"
 #include "Render/Display.h"
+#include "Render/EncodedText.hpp"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
-}
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {

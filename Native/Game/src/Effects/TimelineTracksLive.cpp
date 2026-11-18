@@ -13,15 +13,12 @@
 #include "Actors/ActorFlags.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
 #include "Effects/TimelineTrackKeys.hpp"
 #include "Effects/TimelineTracks.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-
-extern "C" {
-#include "Effects/Runtime.h"
-}
 
 namespace VS::Effects {
 namespace {

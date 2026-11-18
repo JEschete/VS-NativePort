@@ -178,6 +178,25 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(ledger(self.workspace)["Native/Game/src/Menu/Linked.hpp"]["status"], "done")
         self.assertEqual(rules(self.workspace), ["header-regressed", "source-regressed"])
 
+    def test_retired_linkage_cannot_return_to_a_remaining_header(self) -> None:
+        self.fixture.files["Native/Game/src/Menu/Linked.h"] = LINKED.replace(
+            '#ifdef __cplusplus\nextern "C" {\n#endif\n', "").replace("#ifdef __cplusplus\n}\n#endif\n", "")
+        self.fixture.files["Native/Game/src/Menu/Uses.cpp"] = '#include "Menu/Linked.h"\n'
+        self.fixture.write()
+        headers.sync(self.workspace)
+        rows = ledger(self.workspace)
+        self.assertEqual(rows["Native/Game/src/Menu/Uses.cpp"]["status"], "done")
+        self.assertEqual(rows["Native/Game/src/Menu/Linked.h"]["status"], "remaining")
+        self.assertEqual(rules(self.workspace), [])
+
+        # A sync records the measurement but does not accept the linkage.
+        self.fixture.files["Native/Game/src/Menu/Map.h"] = GENERATED.replace(
+            "void Menu_Map_Draw", 'extern "C" void Menu_Map_Draw')
+        self.fixture.write()
+        self.assertEqual(rules(self.workspace), ["c-linkage-reintroduced", "ledger-stale"])
+        headers.sync(self.workspace)
+        self.assertEqual(rules(self.workspace), ["c-linkage-reintroduced"])
+
     def test_line_endings_do_not_change_a_measurement(self) -> None:
         text = "#pragma once\n#define VS_PAIR \\\n  int first; \\\n  int second;\nvoid Sum(void);\n"
         for name, ending in (("Lf.h", b"\n"), ("Crlf.h", b"\r\n")):

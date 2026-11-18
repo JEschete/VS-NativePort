@@ -11,23 +11,20 @@
 #include <type_traits>
 #include <vector>
 
-#include "Core/Log.hpp"
-#include "Field/CollisionMap.hpp"
-#include "Field/CollisionSampling.hpp"
-#include "Field/PlatformPlacement.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
+#include "Core/Log.hpp"
 #include "Field/Collision.h"
+#include "Field/CollisionMap.hpp"
+#include "Field/CollisionSampling.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacement.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
 #include "Field/Zone.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 using VS::Field::CollisionCellRef;

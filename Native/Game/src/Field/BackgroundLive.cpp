@@ -13,29 +13,27 @@
 #include <vector>
 
 #include "Content/CdDriveLive.hpp"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Scratch.h"
+#include "DiscQueue.h"
+#include "Field/BackgroundLiveState.h"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
+#include "Field/Gimmicks.h"
+#include "Field/Mpd.h"
+#include "Field/Room.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "Render/Render.h"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TimImageLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "DiscQueue.h"
-#include "Field/BackgroundLiveState.h"
-#include "Field/Gimmicks.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Render/Render.h"
 
 // decomp: D_800F1CE0 (D_800F1CE0@BATTLE/BATTLE.PRG)
 VECTOR Field_backgroundReferenceVectors[2];
@@ -65,7 +63,6 @@ u_char Field_isTiledBackgroundEnabled;
 Field_BackgroundLayout* Field_loadedBackgroundLayout;
 // decomp: D_800F1DD0 (D_800F1DD0@BATTLE/BATTLE.PRG)
 u_long* Field_legacyBackgroundTimBuffer;
-}
 
 namespace {
 // D_80068C1C: 34 twelve-byte vertices, the third word of each its colour, and
@@ -92,7 +89,7 @@ constexpr std::size_t kTiledSectionBytes = kTiledLayoutFileAt + kDiscFileBytes;
 }  // namespace
 
 // Complete D_80068C1C definition from BATTLE.PRG:0x41C, loaded by Content.
-extern "C" unsigned int Content_battleSkyDome[kSkyDomeWords];
+extern unsigned int Content_battleSkyDome[kSkyDomeWords];
 
 static_assert(sizeof(Content_battleSkyDome) == VS::Render::kSkyDomeBytes);
 static_assert(VS::Render::kSkyDomeVertexBytes ==

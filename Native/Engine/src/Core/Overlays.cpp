@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Overlays.h"
 
@@ -7,4 +6,3 @@ extern "C" {
 void* const Core_overlaySlots[5] = { Core_OverlayAddress(0x80068800u), Core_OverlayAddress(0x800F9800u),
     Core_OverlayAddress(0x80102800u), Core_OverlayAddress(0x800F9800u), Core_OverlayAddress(0x800F9800u) };
 
-}  // extern "C"

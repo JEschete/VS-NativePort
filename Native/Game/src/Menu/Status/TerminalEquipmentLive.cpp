@@ -9,14 +9,11 @@
 #include "Items/EquipmentStats.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
 #include "Menu/Status/DetailTransitions.hpp"
 #include "Menu/Status/DetailTransitionsLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
-
-extern "C" {
-#include "Menu/Framework/ItemRowsLiveState.h"
-}
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {

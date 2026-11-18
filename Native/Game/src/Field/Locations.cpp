@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
@@ -107,4 +106,3 @@ Content_DiscFile Field_legacyZoneDiscFiles[] = { mkCdFile(VS_ZONE000_ZND), mkCdF
     mkCdFile(VS_ZONE254_ZND), mkCdFile(VS_ZONE255_ZND) };
 #pragma pop_macro("mkCdFile")
 
-}  // extern "C"

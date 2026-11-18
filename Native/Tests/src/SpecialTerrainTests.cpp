@@ -7,19 +7,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Content/ModuleData.h"
-#include "Legacy/Psx.h"
-#include "Platform/GameFiber.hpp"
-
-extern "C" {
-#include "Battle/Ai/Navigation.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
+#include "Legacy/Psx.h"
+#include "Platform/GameFiber.hpp"
 
 static_assert(std::is_same_v<
               decltype(&VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace),

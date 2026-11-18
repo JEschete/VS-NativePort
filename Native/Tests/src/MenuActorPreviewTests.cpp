@@ -12,7 +12,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorStateRecord.hpp"
+#include "Actors/Movement.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
@@ -20,11 +22,6 @@
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Render/DepthCue.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-}
 
 namespace {
 namespace fw = VS::Menu::Framework;

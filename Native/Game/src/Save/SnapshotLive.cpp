@@ -13,11 +13,8 @@
 #include <type_traits>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Actors/RoomEnemyMemoryLive.hpp"
-#include "Save/Snapshot.hpp"
-
-extern "C" {
 #include "Actors/Location.h"
+#include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
@@ -27,10 +24,10 @@ extern "C" {
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
+#include "Save/Snapshot.hpp"
 #include "State/Ashley.h"
 #include "State/Location.h"
 #include "State/Progress.h"
-}
 
 namespace VS::Save {
 namespace {

@@ -3,9 +3,7 @@
 #include <algorithm>
 #include <array>
 
-extern "C" {
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle::Ai {
 namespace {

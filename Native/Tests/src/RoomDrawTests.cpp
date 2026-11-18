@@ -14,19 +14,16 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.h"
-#include "Core/Math/ScalarMath.hpp"
-#include "Legacy/Psx.h"
-#include "Render/RoomDraw.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
 #include "Core/Gte.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/RoomDraw.hpp"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 namespace Render = VS::Render;

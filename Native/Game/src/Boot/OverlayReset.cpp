@@ -21,7 +21,6 @@
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
 #include "Menu/BattleAbilities.h"
@@ -119,4 +118,3 @@ void Boot_ResetMenufStatics(void)
     VS::Menu::Results::ResetLiveTimeAttackModuleData();
 }
 
-}  // extern "C"

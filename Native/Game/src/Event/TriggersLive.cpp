@@ -7,19 +7,16 @@
 #include <utility>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Event/RoomTriggerEntryLive.h"
-#include "Event/ScriptVmLive.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Items/InventoryLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
+#include "Event/RoomTriggerEntryLive.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
-}
+#include "Items/InventoryLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Event {
 namespace {

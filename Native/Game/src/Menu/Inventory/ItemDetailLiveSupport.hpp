@@ -4,16 +4,13 @@
 #include <cstdint>
 #include <span>
 
+#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/EquipmentDetails.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/ItemRowsLive.hpp"
+#include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllers.hpp"
-
-extern "C" {
-#include "Input/ControllerLiveState.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
-}
 
 namespace VS::Menu::Inventory {
 template <typename World>

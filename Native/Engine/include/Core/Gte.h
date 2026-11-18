@@ -10,10 +10,6 @@
 // Vector/matrix types keep their PS1 names and layouts while the code is C;
 // plan §6.1 replaces them with Core::Vec3s / Mat3x3s on promotion.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Compatibility entry points require the Win32 long ABI for 32-bit words.
 typedef long Core_GteWord;
 
@@ -85,7 +81,3 @@ long Core_Gte_RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
                           long* sxy0, long* sxy1, long* sxy2, long* sxy3,
                           long* p, long* flag);
 long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2);
-
-#ifdef __cplusplus
-}
-#endif

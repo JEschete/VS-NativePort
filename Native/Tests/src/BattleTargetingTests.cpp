@@ -18,18 +18,6 @@
 
 #include "Battle/Abilities.hpp"
 #include "Battle/AbilitiesLive.hpp"
-#include "Battle/AttackPrerequisites.hpp"
-#include "Battle/AttackPrerequisitesLive.hpp"
-#include "Battle/BattleMode.hpp"
-#include "Battle/BattleModeLive.hpp"
-#include "Battle/Targeting.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Log.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -38,13 +26,22 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/AttackPrerequisiteTable.h"
 #include "Battle/AttackPrerequisites.h"
+#include "Battle/AttackPrerequisites.hpp"
+#include "Battle/AttackPrerequisitesLive.hpp"
+#include "Battle/BattleMode.hpp"
+#include "Battle/BattleModeLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
+#include "Battle/Targeting.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
-}
+#include "Content/ModuleData.h"
+#include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Legacy/Psx.h"
 
 namespace {
 namespace battle = VS::Battle;

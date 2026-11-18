@@ -15,7 +15,7 @@ from pathlib import Path
 import clang.cindex as ci
 import copy_fixups as cf
 import copy_to_native as ct
-from layout_check import CXX_ARGS, INCLUDES, c_includes, use_toolchain_libclang
+from layout_check import CXX_ARGS, INCLUDES, header_includes, use_toolchain_libclang
 
 
 def top_level(cursor: ci.Cursor):
@@ -53,7 +53,7 @@ def main() -> int:
     use_toolchain_libclang()
     cp = ct.Copier()
     headers = event_headers(json.loads(ct.MANIFEST.read_text()), cp.owned)
-    source = c_includes(headers)
+    source = header_includes(headers)
     flags = CXX_ARGS + [f'-I{ct.NATIVE / p}' for p in INCLUDES]
     tu = ci.Index.create().parse('event_contract.cpp', args=flags, unsaved_files=[('event_contract.cpp', source)])
     errors = [str(d) for d in tu.diagnostics if d.severity >= 3]

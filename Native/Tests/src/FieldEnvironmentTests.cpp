@@ -13,12 +13,9 @@
 #include "Field/Background.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
+#include "Field/EnvironmentLiveState.h"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Field/EnvironmentLiveState.h"
-}
 
 namespace {
 namespace fx = VS::Field;

@@ -9,15 +9,12 @@
 #include <source_location>
 #include <span>
 
+#include "Battle/Sphere.h"
 #include "Battle/SphereLifecycle.hpp"
+#include "Battle/TargetPages.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/CopyLive.hpp"
-
-extern "C" {
-#include "Battle/Sphere.h"
-#include "Battle/TargetPages.h"
 #include "Input/ControllerLiveState.h"
-}
 
 namespace VS::Core::Memory {
 void* AllocateLiveFromLowEnd(std::size_t bytes, std::source_location site);

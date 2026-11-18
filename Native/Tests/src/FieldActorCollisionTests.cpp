@@ -13,18 +13,15 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Content/ModuleData.h"
 #include "Field/ActorCollision.hpp"
 #include "Field/ActorCollisionLive.hpp"
-#include "Field/CollisionMap.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
 #include "Field/Collision.h"
+#include "Field/CollisionMap.hpp"
 #include "Field/Gimmicks.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 using VS::Field::ActorCollisionHost;

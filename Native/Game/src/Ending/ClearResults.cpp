@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Ending/ClearResults.h"
 
@@ -60,4 +59,3 @@ int Ending_isScoreIncrementing;
 // decomp: _incrementingMapCompletion (_incrementingMapCompletion@ENDING/ENDING.PRG)
 int Ending_isMapCompletionIncrementing;
 
-}  // extern "C"

@@ -5,10 +5,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
@@ -16,12 +12,13 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 struct PursuitFixture {

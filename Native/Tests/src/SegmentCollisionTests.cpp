@@ -11,30 +11,27 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/ActionPreviewLive.hpp"
-#include "Content/ModuleData.h"
-#include "Field/SegmentCollision.hpp"
-#include "Field/SegmentCollisionLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Content/ModuleData.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
+#include "Field/SegmentCollision.hpp"
+#include "Field/SegmentCollisionLive.hpp"
+#include "Legacy/Psx.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
-}
 
 static_assert(std::is_same_v<
               decltype(&VS::Field::TraceLiveActorAndTerrainCollision),

@@ -10,10 +10,8 @@ struct Battle_Ai_WanderView;
 // NOLINTNEXTLINE(modernize-use-using): shared with the C movement headers.
 typedef int (*Battle_Ai_PathTest)(Battle_Ai_MovementPathView*, int);
 
-extern "C" {
 // The hesitation lengths (bytes 1..3) loaded from BATTLE.PRG.
 extern unsigned int Content_battleAiHesitationLengths[1];
-}
 
 // Bindings from the actor AI state table, the room's AI frame context, the
 // battle actor list and the movement code to the typed ground navigation

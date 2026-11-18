@@ -12,20 +12,17 @@
 #include <cstring>
 #include <span>
 
+#include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/SampleBanks.hpp"
+#include "Audio/Samples/SampleBanks.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio::Samples {
 namespace {

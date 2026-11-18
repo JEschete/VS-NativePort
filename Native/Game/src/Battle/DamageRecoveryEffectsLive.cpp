@@ -7,18 +7,16 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/DamagePoliciesLive.hpp"
-#include "Battle/DamageRecoveryEffects.hpp"
-#include "Battle/HitCalculationsLive.hpp"
-#include "Items/EquipmentLive.hpp"
-extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/DamagePoliciesLive.hpp"
+#include "Battle/DamageRecoveryEffects.hpp"
 #include "Battle/Hit.h"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Items/EquipmentLive.hpp"
 
 namespace VS::Battle {
 namespace {

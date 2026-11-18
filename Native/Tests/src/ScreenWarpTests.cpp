@@ -12,16 +12,13 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.h"
+#include "Core/Math/FixedPoint.h"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/Math/FixedPoint.h"
 #include "Effects/ScreenEffects.h"
+#include "Legacy/Psx.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 std::uint32_t Point(int x, int y) {

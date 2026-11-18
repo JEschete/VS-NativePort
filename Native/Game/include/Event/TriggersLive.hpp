@@ -1,6 +1,5 @@
 #pragma once
 
-extern "C++" {
 #include "Event/RoomTriggers.hpp"
 
 namespace VS::Event {
@@ -14,4 +13,3 @@ bool EvaluateLiveActorRoomEventTrigger(int actor_id);
 [[nodiscard]] RoomEventLoad ImportLiveRoomScripts(RoomEventInput input);
 void FreeLiveRoomScripts();
 }  // namespace VS::Event
-}

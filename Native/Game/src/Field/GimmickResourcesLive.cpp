@@ -8,6 +8,8 @@
 #include <optional>
 #include <span>
 
+#include "ActorAssets.h"
+#include "Actors/Skeleton.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.h"
@@ -15,14 +17,10 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickResourcesLive.h"
+#include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-extern "C" {
-#include "ActorAssets.h"
-#include "Actors/Skeleton.h"
-#include "Field/Gimmicks.h"
-}
 
 namespace {
 using VS::Field::kGimmickResourceSlots;

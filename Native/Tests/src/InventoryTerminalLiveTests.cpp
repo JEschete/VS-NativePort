@@ -15,35 +15,32 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/SoundPlaybackLive.hpp"
-#include "Boot/SessionLive.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/DiscReaderLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/EquipmentDetailControllersLiveFixture.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Inventory/InventoryTerminalLive.hpp"
-#include "Menu/InventoryTerminalWorld.hpp"
-#include "Menu/Loot/LootTerminal.hpp"
-#include "Menu/Loot/LootTerminalLive.hpp"
-#include "Menu/OverlayLoadFixture.hpp"
-
-extern "C" {
 #include "Audio/Sfx.h"
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Boot/OverlayReset.h"
+#include "Boot/SessionLive.hpp"
+#include "Content/CdDriveLive.hpp"
+#include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
+#include "Content/DiscReaderLive.hpp"
+#include "Content/ModuleData.h"
 #include "Core/Diagnostics.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/RoomRenderingLiveState.h"
 #include "Items/Loot.h"
+#include "Menu/EquipmentDetailControllersLiveFixture.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/Menus.h"
+#include "Menu/Inventory/InventoryTerminalLive.hpp"
+#include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootScreen.h"
-}
+#include "Menu/Loot/LootTerminal.hpp"
+#include "Menu/Loot/LootTerminalLive.hpp"
+#include "Menu/OverlayLoadFixture.hpp"
 
 namespace {
 namespace inventory = VS::Menu::Inventory;

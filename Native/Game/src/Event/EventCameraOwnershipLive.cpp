@@ -14,15 +14,12 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraOwnership.hpp"
+#include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
+#include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
-
-extern "C" {
-#include "Event/ScriptCamera.h"
-#include "Event/ScriptControlOpcodes.h"
-}
 
 namespace VS::Event {
 namespace {

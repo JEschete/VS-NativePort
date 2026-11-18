@@ -7,10 +7,8 @@
 #include <type_traits>
 
 #include "Battle/DamagePolicies.hpp"
-#include "Items/ItemRecordsLive.hpp"
-extern "C" {
 #include "Battle/Hit.h"
-}
+#include "Items/ItemRecordsLive.hpp"
 
 namespace VS::Battle {
 namespace {

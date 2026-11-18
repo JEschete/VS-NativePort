@@ -11,33 +11,30 @@
 #include <string_view>
 #include <utility>
 
-#include "Actors/ModelRenderingLive.hpp"
-#include "Audio/SequencerOutput.h"
-#include "Content/ActorAssetsLive.hpp"
-#include "Menu/Framework/ActorPreviewLive.hpp"
-#include "Menu/GazetteTerminalLiveFixture.hpp"
-#include "Menu/Score/EncyclopediaPreview.hpp"
-#include "Menu/Score/EncyclopediaPreviewLive.hpp"
-
-extern "C" {
 #include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.h"
+#include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/Textures.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Field/Gimmicks.h"
+#include "Menu/Framework/ActorPreviewLive.hpp"
+#include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/Inventory/Inventory.h"
+#include "Menu/Score/EncyclopediaPreview.hpp"
+#include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "ModelLoading.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Textures.h"
-}
 
 namespace gazette_terminal_live_tests {
 inline content::AssetAddress Address(const void* pointer) {

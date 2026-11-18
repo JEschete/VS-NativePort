@@ -12,21 +12,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/MagicCosts.hpp"
-#include "Menu/MagicCostsLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Magic.h"
+#include "Menu/MagicCosts.hpp"
+#include "Menu/MagicCostsLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace {
 namespace magic = VS::Menu::Magic;

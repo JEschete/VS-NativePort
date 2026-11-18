@@ -13,12 +13,20 @@
 #include <type_traits>
 
 #include "Audio/SfxLive.hpp"
+#include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "DiscQueue.h"
+#include "Field/Manual.h"
 #include "Field/RoomRenderingLive.hpp"
+#include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
+#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Manual.h"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualScreen.hpp"
@@ -28,17 +36,6 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Battle/Hud.h"
-#include "DiscQueue.h"
-#include "Field/Manual.h"
-#include "Input/ControllerLiveState.h"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Manual.h"
-}
 
 namespace VS::Menu::manual {
 namespace {

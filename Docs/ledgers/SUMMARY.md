@@ -126,8 +126,8 @@ the historical marker removal is not a claim that those functions remain unteste
 
 [MODERNIZATION.md](../MODERNIZATION.md) tracks each port target through promotion and its regression cover.
 [PLATFORM_HAZARDS.md](../PLATFORM_HAZARDS.md) logs each site that may rely on something PS1 hardware tolerated.
-[CPP_HEADERS.md](../CPP_HEADERS.md) tracks the rewrite of C-style headers, and the C linkage that depends on them, into
-C++ ([HEADER_LEDGER.csv](HEADER_LEDGER.csv)).
+[CPP_HEADERS.md](../CPP_HEADERS.md) tracks the rewrite of C-style headers into C++
+([HEADER_LEDGER.csv](HEADER_LEDGER.csv)) and keeps the retired C linkage from returning.
 
 ### Slices and retirement
 

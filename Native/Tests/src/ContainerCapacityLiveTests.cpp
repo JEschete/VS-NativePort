@@ -11,6 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/OverlayReset.h"
 #include "Core/Log.hpp"
 #include "Items/ContainerGemCountsLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
@@ -23,10 +24,6 @@
 #include "Render/GameFont.hpp"
 #include "Render/Sprites.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-}
 
 namespace {
 namespace items = VS::Items;

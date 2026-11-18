@@ -158,8 +158,6 @@ void Multiply(const short a[3][3], const short b[3][3], short out[3][3]) {
 
 }  // namespace
 
-extern "C" {
-
 void Core_Gte_Reset(void) { g = GteState{}; }
 
 void Core_Gte_SetRotMatrix(const MATRIX* m) {
@@ -388,5 +386,3 @@ long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2) {
   Core_Gte_Nclip();
   return g.mac0;
 }
-
-}  // extern "C"

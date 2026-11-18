@@ -392,10 +392,8 @@ void WatchWrites(const void* address, int bytes) {
 
 }  // namespace VS::Platform
 
-extern "C" void Platform_WatchWrites(const void* address, int bytes) {
+void Platform_WatchWrites(const void* address, int bytes) {
   VS::Platform::WatchWrites(address, bytes);
 }
 
-extern "C" void Platform_LogCallStack(const char* why) {
-  VS::Platform::LogCallStack(why);
-}
+void Platform_LogCallStack(const char* why) { VS::Platform::LogCallStack(why); }

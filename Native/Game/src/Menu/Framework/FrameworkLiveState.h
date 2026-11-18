@@ -13,10 +13,6 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuMemory.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: _loadedSubMenu (BATTLE/BATTLE.PRG 5BF94.c): the module image byte
 // is 0, so the zero-initialised definition stands for it.
 extern signed char Menu_Framework_loadedSubMenu;
@@ -93,7 +89,3 @@ extern char Menu_Framework_hideMenu;
 extern char Menu_Framework_itemsListRow;
 // decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG): never read.
 extern Menu_Container_InventoryStorage* Menu_Framework_unusedInventoryStorage;
-
-#ifdef __cplusplus
-}
-#endif

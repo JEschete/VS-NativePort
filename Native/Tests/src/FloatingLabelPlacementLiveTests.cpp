@@ -11,13 +11,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/FloatingLabelPlacementLive.hpp"
-#include "TestSupport/FloatingLabelRenderingLiveFixture.hpp"
-
-extern "C" {
 #include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
 #include "State/Timers.h"
-}
+#include "TestSupport/FloatingLabelRenderingLiveFixture.hpp"
 
 // The generated F00719-F00742 bodies are retired. Each parity case runs the
 // Live entry over the inputs the generated body ran and compares a digest of

@@ -7,13 +7,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/OverlayReset.h"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/InventorySortingLiveFixture.hpp"
 #include "Menu/SortingKeysFixture.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-}
 
 namespace {
 namespace sorting = VS::Menu::Inventory;

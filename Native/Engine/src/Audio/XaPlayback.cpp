@@ -12,20 +12,17 @@
 #include <vector>
 
 #include "Audio/AudioDevice.hpp"
+#include "Audio/Control/SoundControl.h"
+#include "Audio/Driver/SoundDriver.h"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/XaMix.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
+#include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Platform/Paths.hpp"
-
-extern "C" {
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "DiscQueue.h"
-}
 
 namespace {
 constexpr unsigned kMaximumVolume = 0x7FFF;

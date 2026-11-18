@@ -13,20 +13,17 @@
 
 #include "Actors/ActorSpawning.hpp"
 #include "Actors/ActorSpawningLive.hpp"
-#include "Content/ActorAssets.hpp"
-#include "Content/CdDrive.hpp"
-#include "Legacy/Psx.h"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
 #include "Actors/CharacterInit.h"
 #include "Actors/RoomActorCache.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Content/ActorAssets.hpp"
+#include "Content/CdDrive.hpp"
 #include "Field/Actors.h"
 #include "Field/Mpd.h"
-}
+#include "Legacy/Psx.h"
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace {
 namespace actors = VS::Actors;

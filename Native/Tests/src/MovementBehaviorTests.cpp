@@ -7,13 +7,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/Movement.h"
-}
+#include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Legacy/Psx.h"
 
 namespace {
 struct MovementFixture {

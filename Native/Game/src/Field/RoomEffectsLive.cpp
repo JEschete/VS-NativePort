@@ -8,20 +8,17 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/RoomEffects.hpp"
-#include "Field/RoomEffectsCore.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
+#include "Field/RoomEffects.hpp"
+#include "Field/RoomEffectsCore.hpp"
+#include "Legacy/Psx.h"
 
 // The polygon bytes the typed room effects rewrite in place, as the legacy
 // views and renderer read them.

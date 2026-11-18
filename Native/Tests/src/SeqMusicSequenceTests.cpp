@@ -9,17 +9,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Mixer/MixControl.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Seq/Channel.h"
-}
 
 namespace {
 namespace Seq = VS::Audio::Seq;

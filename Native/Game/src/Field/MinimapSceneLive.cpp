@@ -8,21 +8,19 @@
 #include <span>
 #include <stdexcept>
 
-#include "Core/Log.hpp"
-#include "Field/MinimapScene.hpp"
-#include "Field/MinimapSceneLive.h"
-extern "C" {
 #include "Audio/Seq/Channel.h"
+#include "Core/Log.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
+#include "Field/MinimapScene.hpp"
+#include "Field/MinimapSceneLive.h"
 #include "Field/Room.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Field {
 namespace {
@@ -219,7 +217,7 @@ void DrawLiveMinimapScene(const void* data, std::size_t size) {
 
 }  // namespace VS::Field
 
-extern "C" int Field_SceneDoorIdEntry(int door_index) {
+int Field_SceneDoorIdEntry(int door_index) {
   if (Field_roomData.minimapScene == nullptr) return -1;
   const auto* data =
       reinterpret_cast<const std::byte*>(Field_roomData.minimapScene);
@@ -228,7 +226,7 @@ extern "C" int Field_SceneDoorIdEntry(int door_index) {
   return id ? static_cast<int>(*id) : -1;
 }
 
-extern "C" void Field_MarkEntranceDoorOnSceneMapEntry(int door_index) {
+void Field_MarkEntranceDoorOnSceneMapEntry(int door_index) {
   Field_enteredDoorId =
       std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(door_index));
   if (Field_roomData.minimapScene == nullptr) return;

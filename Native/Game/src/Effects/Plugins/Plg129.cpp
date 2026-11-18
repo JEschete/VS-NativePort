@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Plugins/Plg129.h"
 
@@ -18,4 +17,3 @@ SVECTOR Effects_Plg129_surfaceVertices[5][16]; /* contents: module image (Module
 // decomp: D_800FD918 (D_800FD918@EFFECT/PLG129.BIN)
 u_char Effects_Plg129_ringColorFactors2[8][4]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

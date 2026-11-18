@@ -24,17 +24,14 @@
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
 #include "Effects/TimelinePlayback.hpp"
 #include "Effects/TimelineTrackKeys.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Input/ControllerLive.hpp"
-
-extern "C" {
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-}
 
 namespace VS::Effects {
 namespace {

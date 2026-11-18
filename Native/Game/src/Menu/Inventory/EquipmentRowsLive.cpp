@@ -12,39 +12,36 @@
 #include <span>
 #include <string_view>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/AnimationControlLive.hpp"
+#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/SkeletonLiveState.h"
+#include "Actors/WeaponModel.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
+#include "Battle/AbilityState.h"
+#include "Battle/Actor.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Items/EquipmentLive.hpp"
-#include "Menu/Framework/ActorPreviewLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Inventory/EquipmentRows.hpp"
-#include "Menu/Sounds.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/WeaponModel.h"
-#include "Audio/Seq/Channel.h"
-#include "Battle/AbilityState.h"
-#include "Battle/Actor.h"
 #include "Input/ControllerLiveState.h"
+#include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
+#include "Menu/Framework/ActorPreviewLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Inventory/EquipmentRows.hpp"
 #include "Menu/Inventory/Inventory.h"
-}
+#include "Menu/Sounds.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {

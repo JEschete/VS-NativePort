@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -125,4 +124,3 @@ int Field_gimmickInteractionDirection;
 // decomp: D_80068BEC (D_80068BEC@src/BATTLE/BATTLE.PRG/146C.c)
 short const Field_kPlatformBounceOffsets[] = { 8, 14, 16, 11, 7, 3, 1 };
 
-}  // extern "C"

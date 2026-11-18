@@ -7,26 +7,23 @@
 #include <cstring>
 #include <iterator>
 
-#include "Core/Log.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/BattleAbilities.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
+#include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/BattleAbilities.h"
+#include "Menu/BattleAbilities.hpp"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
+#include "Menu/TextBoxStateLive.hpp"
 #include "State/Progress.h"
-}
 
 namespace VS::Menu::BattleAbilities {
 namespace {

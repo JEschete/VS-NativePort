@@ -9,10 +9,6 @@
 #include "Effects/Camera.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: D_800F54B8 (BATTLE/BATTLE.PRG 5BF94.c:6474): the four shake
 // channels. The generated declaration had 75 entries; the original's are
 // the four bytes before D_800F54D0 (6 bytes each).
@@ -42,7 +38,3 @@ extern Effects_EffectCamera Effects_savedActionCamera;
 // decomp: D_800F55E8 (BATTLE/BATTLE.PRG 5BF94.c:6575): the transition mode
 // (0 none, 1 linear, 2 cosine, 3 hold).
 extern u_int Effects_cameraTransitionMode;
-
-#ifdef __cplusplus
-}
-#endif

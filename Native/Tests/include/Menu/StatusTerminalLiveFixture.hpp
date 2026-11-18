@@ -13,26 +13,14 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/ModelRenderingLive.hpp"
-#include "Actors/SequencePlaybackLive.hpp"
-#include "Content/ActorAssets.hpp"
-#include "Content/ActorAssetsLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Menu/EquipmentDetailControllersLiveFixture.hpp"
-#include "Menu/Framework/ActorPreviewLive.hpp"
-#include "Menu/Status/ActorSwitchingLive.hpp"
-#include "Menu/Status/LimbControllersLive.hpp"
-#include "Menu/Status/TerminalControllersLiveInternal.hpp"
-#include "Render/ModelGeometryLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-
-extern "C" {
 #include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.h"
+#include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
@@ -42,16 +30,25 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
+#include "Content/ActorAssets.hpp"
+#include "Content/ActorAssetsLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLiveState.h"
+#include "Menu/EquipmentDetailControllersLiveFixture.hpp"
+#include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Status/ActorStatus.h"
+#include "Menu/Status/ActorSwitchingLive.hpp"
+#include "Menu/Status/LimbControllersLive.hpp"
+#include "Menu/Status/TerminalControllersLiveInternal.hpp"
 #include "ModelLoading.h"
 #include "OverlayWorkspaceLiveState.h"
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.h"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.h"
-}
 
 namespace status_terminal_live_tests {
 namespace st = VS::Menu::Status;

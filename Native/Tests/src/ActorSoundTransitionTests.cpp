@@ -5,14 +5,11 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Actors/SoundTransitionBinding.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/SoundTransitionBinding.hpp"
 #include "Audio/ActorSound.h"
+#include "Legacy/Psx.h"
 #include "State/Timers.h"
-}
 
 namespace {
 std::array<u_char, 4> SoundValues(const Actors_ModelEffectSlot& state) {

@@ -8,21 +8,18 @@
 #include <optional>
 
 #include "Core/Log.hpp"
+#include "Core/Scratch.h"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
-#include "Event/ScriptCommand.hpp"
-#include "Render/ScreenOverlayLive.hpp"
-
-extern "C" {
-#include "Core/Scratch.h"
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
 #include "Render/FramebufferEffects.h"
+#include "Render/ScreenOverlayLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Event {
 namespace {

@@ -12,20 +12,17 @@
 #include <span>
 
 #include "Audio/SeqRecordsLive.hpp"
+#include "Audio/Sfx.h"
 #include "Audio/Sfx.hpp"
+#include "Audio/SoundBanks.h"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Runtime.hpp"
-
-extern "C" {
-#include "Audio/Sfx.h"
-#include "Audio/SoundBanks.h"
-#include "Core/Gte.h"
 #include "Core/Scratch.h"
 #include "Legacy/Psx.h"
 #include "Render/Render.h"
-}
 
 namespace VS::Audio {
 namespace {

@@ -13,31 +13,29 @@
 #include <span>
 #include <type_traits>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
+#include "Actors/Animation.h"
 #include "Actors/Appearance.hpp"
 #include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelDrawingLive.hpp"
-#include "Actors/ModelRenderingLive.hpp"
-#include "Actors/Skeleton.hpp"
-#include "Actors/SkeletonLiveState.h"
-#include "Core/Math/MatrixLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Render/CameraViewLive.hpp"
-#include "Render/ModelGeometryLive.hpp"
-#include "Render/SpritesLive.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
+#include "Actors/ModelRenderingLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Actors/Skeleton.hpp"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
+#include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
+#include "Render/CameraViewLive.hpp"
+#include "Render/ModelGeometryLive.hpp"
+#include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
@@ -51,7 +49,6 @@ Actors_WeaponModel* Actors_weaponModels[kActorsWeaponModelCount];
 
 // decomp: D_800F49B8 (D_800F49B8@BATTLE/BATTLE.PRG)
 MATRIX Actors_boneMatrixScratch;
-}
 
 namespace VS::Actors {
 namespace {

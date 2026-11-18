@@ -19,7 +19,6 @@ constexpr std::size_t kPaletteBytes = 4;
 using LivePalette = u_char[kPaletteEntries][kPaletteBytes];
 }  // namespace
 
-extern "C" {
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -32,7 +31,6 @@ extern LivePalette Effects_Plg236_ringColorFactors;
 extern LivePalette Effects_Plg263_ringColorFactors2;
 extern LivePalette Effects_Plg300_ringColorFactors;
 extern LivePalette Effects_Plg300_ringColorFactors2;
-}
 
 namespace VS::Effects::Templates {
 namespace {

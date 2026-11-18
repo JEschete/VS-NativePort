@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
@@ -66,4 +65,3 @@ int Menu_Manual_showMenuState;
 // decomp: _topMenu_state (_topMenu_state@src/MENU/MENUE.PRG/494.c)
 int Menu_Manual_topMenuState;
 
-}  // extern "C"

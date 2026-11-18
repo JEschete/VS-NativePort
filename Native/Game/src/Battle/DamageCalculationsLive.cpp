@@ -8,14 +8,12 @@
 #include <optional>
 #include <type_traits>
 
+#include "Battle/Damage.h"
 #include "Battle/DamageCalculations.hpp"
+#include "Battle/Hit.h"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
-extern "C" {
-#include "Battle/Damage.h"
-#include "Battle/Hit.h"
-}
 
 namespace VS::Battle {
 namespace {

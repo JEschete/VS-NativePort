@@ -8,20 +8,17 @@
 #include <span>
 #include <vector>
 
-#include "Field/CollisionMapLive.hpp"
-#include "Field/RoomTriggerMarkers.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Collision.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Field/RoomTriggerMarkers.hpp"
 #include "Field/TriggerMarkers.h"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-}
 
 namespace {
 constexpr std::size_t kMarkerRecordBytes = 116;
@@ -33,7 +30,7 @@ constexpr int kMarkerPaletteTargetY = 320;
 }  // namespace
 
 // Complete D_800E8548 definition from BATTLE.PRG:0x7FD48, loaded by Content.
-extern "C" unsigned int
+extern unsigned int
     Content_battleTriggerMarkerBytes[kMarkerRecordBytes / sizeof(unsigned int)];
 
 namespace {

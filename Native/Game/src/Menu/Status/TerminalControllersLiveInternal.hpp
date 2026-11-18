@@ -9,21 +9,18 @@
 #include <utility>
 
 #include "Actors/ActorStateLive.hpp"
+#include "Battle/Actor.h"
+#include "Battle/Damage.h"
 #include "Battle/HudStateLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
+#include "Menu/Framework/EquipmentDetailsLiveState.h"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/Menus.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/Menus.h"
-}
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {

@@ -12,16 +12,14 @@
 #include <type_traits>
 #include <vector>
 
-#include "Actors/AnimationControlLive.hpp"
-#include "Actors/AnimationPoseLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Shadow.h"
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
-}
+#include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Actors {
 namespace {

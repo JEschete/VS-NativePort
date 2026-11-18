@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 
@@ -27,4 +26,3 @@ int Render_frameBuf;
 // decomp: D_8004A52C (D_8004A52C@SLUS_010.40)
 int Render_isFrameStepPaused = 0;
 
-}  // extern "C"

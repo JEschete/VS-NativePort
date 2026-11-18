@@ -5,16 +5,14 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Battle/StatFactors.hpp"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
+#include "Battle/StatFactors.hpp"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Battle {
 namespace {

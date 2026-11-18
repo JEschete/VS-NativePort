@@ -11,13 +11,11 @@
 
 #include "Battle/ActionEffectDispatch.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
-extern "C" {
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-}
 
 namespace {
 namespace battle = VS::Battle;

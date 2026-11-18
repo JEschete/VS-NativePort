@@ -3,9 +3,7 @@
 
 #include <cstdint>
 
-extern "C" {
 #include "Legacy/Psx.h"
-}
 
 // Binds the gazette camera and panels (GazetteCamera.hpp) to the frame's
 // primitive buffer and scene ordering table (Render_frameScratch,

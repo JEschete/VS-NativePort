@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
@@ -73,4 +72,3 @@ void Menu_Loot_LootScreen_ResetMenubStatics(void)
     }
 }
 
-}  // extern "C"

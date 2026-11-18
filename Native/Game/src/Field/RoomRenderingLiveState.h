@@ -8,10 +8,6 @@
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: D_800F190C (BATTLE/BATTLE.PRG 146C.c:15521): 1 while the field
 // (room, actors and effects) draws behind the menus.
 extern int Field_isFieldRenderingEnabled;
@@ -24,7 +20,3 @@ extern u_short* Field_roomPalettes;
 // decomp: D_800F1BB0 (BATTLE/BATTLE.PRG 146C.c:15995): the room tint's
 // channel offsets, strength and on switch.
 extern Field_RoomTint Field_roomTint;
-
-#ifdef __cplusplus
-}
-#endif

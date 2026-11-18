@@ -13,24 +13,22 @@
 #include <span>
 
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/AnimationControlLive.hpp"
-#include "Actors/AnimationPoseLive.hpp"
-#include "Actors/SkeletonLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Field/ActorCollisionLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Movement.h"
+#include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
+#include "Core/Math/ScalarMath.hpp"
+#include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
+#include "Render/PaletteAnimationLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Actors {
 namespace {

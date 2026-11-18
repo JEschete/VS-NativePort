@@ -12,11 +12,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Core/PointerSort.hpp"
-
-extern "C" {
 #include "Content/ModuleData.h"
-}
+#include "Core/PointerSort.hpp"
 
 static_assert(std::is_same_v<decltype(&VS::Core::SortPointersByDescendingKey),
                              bool (*)(std::span<VS::Core::SortKey>)>);

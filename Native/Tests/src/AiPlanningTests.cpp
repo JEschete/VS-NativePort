@@ -12,16 +12,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/BlockedMovementLive.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.h"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Action.h"
@@ -31,14 +21,21 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
+#include "Battle/Ai/PlanningPrimitivesLive.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
+#include "Content/ModuleData.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.h"
 #include "Field/Gimmicks.h"
-}
+#include "Legacy/Psx.h"
+#include "State/ScriptFlagsLive.hpp"
 
 namespace {
 struct PlanningFixture {

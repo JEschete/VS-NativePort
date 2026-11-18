@@ -3,14 +3,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/OverlayReset.h"
 #include "Content/ModuleData.h"
 #include "Items/ContainerGemCountsLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
 #include "Menu/Container/ContainerCapacityLive.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-}
 
 namespace {
 namespace items = VS::Items;

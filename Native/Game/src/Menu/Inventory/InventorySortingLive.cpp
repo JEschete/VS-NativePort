@@ -7,16 +7,13 @@
 #include <span>
 #include <string_view>
 
-#include "Items/ItemRecordsLive.hpp"
-#include "Menu/Framework/SortingKeysLive.hpp"
-#include "Menu/Inventory/InventorySorting.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.h"
 #include "Items/InventoryLiveState.h"
+#include "Items/ItemRecordsLive.hpp"
+#include "Menu/Framework/SortingKeysLive.hpp"
+#include "Menu/Inventory/InventorySorting.hpp"
 #include "Menu/Inventory/ItemList.h"
-}
 
 namespace VS::Menu::Inventory {
 namespace {

@@ -12,13 +12,10 @@
 #include "Event/Camera.hpp"
 #include "Event/EventCameraFrame.hpp"
 #include "Event/EventCameraFrameLive.hpp"
-#include "Event/ScriptCommand.hpp"
-#include "Field/CameraLive.hpp"
-
-extern "C" {
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
-}
+#include "Field/CameraLive.hpp"
 
 namespace {
 namespace ev = VS::Event;

@@ -2,9 +2,7 @@
 
 #include <cstdint>
 
-extern "C" {
 #include "Input/ControllerLiveState.h"
-}
 
 namespace VS::Menu::Framework {
 template <typename World>

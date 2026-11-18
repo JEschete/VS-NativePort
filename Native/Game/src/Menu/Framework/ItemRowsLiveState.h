@@ -7,10 +7,6 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG 2D10.c): ITEMHELP.BIN in
 // the loaded block, or stale after the block is freed.
 extern u_short* Menu_Framework_itemHelp;
@@ -25,7 +21,3 @@ extern u_short* Menu_Framework_menu12Text;
 // category, 0 for one-handed and 1 for two-handed.
 enum { kMenuWeaponHandCategories = 10 };
 extern u_char Menu_Framework_weaponHands[kMenuWeaponHandCategories];
-
-#ifdef __cplusplus
-}
-#endif

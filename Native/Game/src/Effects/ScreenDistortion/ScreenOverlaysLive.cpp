@@ -5,23 +5,21 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
+#include "Core/Overlays.h"
+#include "DiscQueue.h"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
-#include "Render/TexturePagesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Core/Overlays.h"
-#include "DiscQueue.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
+#include "Render/TexturePagesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Effects::ScreenDistortion {
 namespace {

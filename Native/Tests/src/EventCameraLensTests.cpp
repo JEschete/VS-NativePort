@@ -8,17 +8,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Math/Distance.hpp"
+#include "Core/Scratch.h"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/EventCameraLensLive.hpp"
-#include "Event/ScriptCommand.hpp"
-
-extern "C" {
-#include "Core/Scratch.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace event = VS::Event;

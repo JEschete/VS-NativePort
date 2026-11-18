@@ -9,11 +9,8 @@
 
 #include "CombatLab/Canvas.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
 #include "Render/Text/CompactFont.h"
 #include "SystemResources.h"
-}
 
 namespace {
 using VS::combat_lab::Canvas;

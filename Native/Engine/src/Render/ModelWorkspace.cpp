@@ -1,4 +1,3 @@
-extern "C" {
 #include "Render/ModelWorkspace.h"
 
 #include "Render/ModelDraw.h"
@@ -8,4 +7,3 @@ extern "C" {
 static Render_ModelScratchpad model_workspace;
 
 Render_ModelScratchpad* Render_ModelWorkspace(void) { return &model_workspace; }
-}  // extern "C"

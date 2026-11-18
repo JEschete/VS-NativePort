@@ -9,17 +9,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/ActionFlow.h"
 #include "Event/EventSceneTransition.hpp"
 #include "Event/ScriptCommand.hpp"
-#include "Event/ScriptStep.hpp"
-#include "Field/DoorRecord.hpp"
-
-extern "C" {
-#include "Battle/ActionFlow.h"
 #include "Event/ScriptControlOpcodes.h"
+#include "Event/ScriptStep.hpp"
 #include "Event/ScriptVm.h"
+#include "Field/DoorRecord.hpp"
 #include "State/RoomMemory.h"
-}
 
 namespace {
 namespace event = VS::Event;

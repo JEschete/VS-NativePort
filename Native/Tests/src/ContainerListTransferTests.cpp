@@ -12,15 +12,12 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
+#include "Menu/Container/ItemView.h"
 #include "Menu/ContainerListTransferWorld.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
 #include "Menu/ContainerPendingRowsWorld.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-
-extern "C" {
-#include "Menu/Container/ItemView.h"
 #include "Menu/Framework/Framework.h"
-}
+#include "Menu/Framework/FrameworkLive.hpp"
 
 namespace {
 namespace world_data = container_list_transfer_tests;

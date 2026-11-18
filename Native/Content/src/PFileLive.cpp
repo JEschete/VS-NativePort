@@ -12,11 +12,8 @@
 #include "Content/PFile.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
-
-extern "C" {
 #include "Effects/Package.h"
 #include "Effects/Runtime.h"
-}
 
 namespace VS::Content {
 namespace {

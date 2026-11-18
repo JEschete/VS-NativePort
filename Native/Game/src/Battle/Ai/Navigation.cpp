@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Ai/Navigation.h"
 
@@ -21,4 +20,3 @@ u_short (*Battle_Ai_specialTerrainHeights)[32];
 // decomp: D_800F5910 (D_800F5910@BATTLE/BATTLE.PRG)
 Battle_Ai_RouteGateEnd* Battle_Ai_routeGates;
 
-}  // extern "C"

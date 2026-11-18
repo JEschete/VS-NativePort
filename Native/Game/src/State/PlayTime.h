@@ -6,13 +6,5 @@
 
 #include "State/GameTime.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: vs_main_gametime (SLUS_010.40 main.h:173 vs_Gametime_t)
 extern State_PlayTime State_playTime;
-
-#ifdef __cplusplus
-}
-#endif

@@ -7,12 +7,9 @@
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
-}
 
 namespace {
 constexpr int kGuard = 0x13572468;

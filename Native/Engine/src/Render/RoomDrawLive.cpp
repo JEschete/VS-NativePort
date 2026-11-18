@@ -6,17 +6,14 @@
 #include <cstdint>
 #include <span>
 
-#include "Core/Math/ScalarMath.hpp"
-
-extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Render {
 namespace {

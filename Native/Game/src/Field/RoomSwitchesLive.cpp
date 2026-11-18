@@ -6,24 +6,21 @@
 #include <span>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/CollisionMapLive.hpp"
+#include "Field/Doors.h"
 #include "Field/GimmickAnimationQueueLive.h"
+#include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/MinimapScene.hpp"
-#include "Field/RoomEffectsLive.hpp"
-#include "Field/RoomSwitches.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
+#include "Field/RoomEffectsLive.hpp"
+#include "Field/RoomSwitches.hpp"
 #include "Items/TreasureChests.h"
 #include "State/StateFlags.h"
-}
 
 namespace {
 

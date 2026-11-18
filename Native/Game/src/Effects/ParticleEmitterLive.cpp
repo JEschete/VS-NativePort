@@ -12,25 +12,22 @@
 #include <utility>
 
 #include "Actors/SkeletonLive.hpp"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Core/Scratch.h"
 #include "Effects/CurvesLive.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitter.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Effects {
 namespace {

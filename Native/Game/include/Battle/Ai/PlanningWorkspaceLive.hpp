@@ -1,12 +1,9 @@
 #ifndef NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACELIVE_HPP_
 #define NATIVE_GAME_INCLUDE_BATTLE_AI_PLANNINGWORKSPACELIVE_HPP_
 
-#include "Battle/Ai/PlanningWorkspace.hpp"
-
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/Ai/AiViews.h"
-}
+#include "Battle/Ai/PlanningWorkspace.hpp"
 
 namespace VS::Battle::Ai {
 

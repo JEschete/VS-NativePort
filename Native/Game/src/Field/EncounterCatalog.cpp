@@ -12,20 +12,17 @@
 #include <utility>
 #include <vector>
 
+#include "Actors/CharacterInit.h"
+#include "Actors/Spawning.h"
+#include "Audio/SoundBanks.h"
 #include "Battle/Encounter.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Actors/CharacterInit.h"
-#include "Actors/Spawning.h"
-#include "Audio/SoundBanks.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Game {
 namespace {

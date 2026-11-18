@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Legacy.h"
 
@@ -16,4 +15,3 @@ u_int Core_legacyRamSize = 0x200000;
 // decomp: _stacksize (_stacksize@SLUS_010.40)
 u_int Core_legacyStackSize = 0x4000;
 
-}  // extern "C"

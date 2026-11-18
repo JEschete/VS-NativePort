@@ -9,15 +9,12 @@
 #include <type_traits>
 #include <variant>
 
+#include "Core/Diagnostics.h"
 #include "Items/ContainerIndexing.hpp"
 #include "Items/ContainerTables.hpp"
-#include "Items/ItemRecordsLive.hpp"
-
-extern "C" {
-#include "Core/Diagnostics.h"
 #include "Items/Inventory.h"
+#include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/Storage.h"
-}
 
 namespace VS::Items {
 namespace {

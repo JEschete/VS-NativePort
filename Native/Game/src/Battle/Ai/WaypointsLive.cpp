@@ -8,17 +8,15 @@
 #include <optional>
 #include <span>
 
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Field/TerrainHeight.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Core/Diagnostics.h"
-}
+#include "Field/TerrainHeight.hpp"
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

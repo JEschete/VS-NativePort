@@ -13,22 +13,19 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/AnimationControlLive.hpp"
-#include "Actors/MotionRequestsLive.hpp"
-#include "Actors/SequencePlaybackLive.hpp"
-#include "Core/Log.hpp"
-#include "Field/CollisionMapLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
+#include "Actors/AnimationControlLive.hpp"
+#include "Actors/MotionRequestsLive.hpp"
 #include "Actors/Movement.h"
+#include "Actors/SequencePlaybackLive.hpp"
+#include "Core/Log.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/Collision.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
 
 namespace {
 using JumpEntry = void (*)(int, int*, int, int);

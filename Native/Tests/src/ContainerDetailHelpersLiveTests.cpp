@@ -17,10 +17,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-
-extern "C" {
 #include "Menu/Framework/Menus.h"
-}
 
 namespace {
 namespace detail = VS::Menu::container;

@@ -9,31 +9,28 @@
 #include <string_view>
 #include <utility>
 
-#include "Input/Pad.hpp"
-#include "Items/ItemRecordsLive.hpp"
-#include "Menu/Container/ContainerDetailControllers.hpp"
-#include "Menu/Container/ContainerDetailHelpersLive.hpp"
-#include "Menu/Framework/DetailDispatchLiveSupport.hpp"
-#include "Menu/Framework/EquipmentDetails.hpp"
-#include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/ItemRowsLive.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.h"
 #include "Input/ControllerLiveState.h"
+#include "Input/Pad.hpp"
+#include "Items/ItemRecordsLive.hpp"
+#include "Menu/Container/ContainerDetailControllers.hpp"
+#include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ItemView.h"
+#include "Menu/Framework/DetailDispatchLiveSupport.hpp"
+#include "Menu/Framework/EquipmentDetails.hpp"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveState.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Menu::container {
 namespace {

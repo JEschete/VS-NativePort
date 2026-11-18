@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Sfx.h"
 
@@ -21,4 +20,3 @@ int Audio_nextSfxChannelGroupFF000;
 // decomp: D_8005FE84 (D_8005FE84@SLUS_010.40)
 int Audio_nextSfxChannelGroupF00000;
 
-}  // extern "C"

@@ -5,11 +5,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/SphereContainmentLive.hpp"
+#include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "TestSupport/SphereContainmentLiveFixture.hpp"
-extern "C" {
-#include "Core/Gte.h"
-}
 
 namespace {
 namespace b = VS::Battle;

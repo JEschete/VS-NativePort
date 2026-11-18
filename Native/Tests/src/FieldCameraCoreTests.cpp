@@ -11,14 +11,11 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Camera.hpp"
 #include "Field/CameraLive.hpp"
-#include "Legacy/Psx.h"
-#include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
 #include "Field/CameraLiveState.h"
+#include "Legacy/Psx.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
+#include "TestSupport/ChannelWarnings.hpp"
 
 namespace {
 namespace fx = VS::Field;

@@ -14,7 +14,13 @@
 #include <span>
 #include <type_traits>
 
+#include "Audio/Cutscene/Stream.h"
+#include "Audio/Driver/SoundDriver.h"
 #include "Audio/MixControl.hpp"
+#include "Audio/Mixer/MixControl.h"
+#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Seq/AkaoFormat.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
@@ -23,18 +29,9 @@
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/VoiceOutputLive.hpp"
-
-extern "C" {
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/AkaoFormat.h"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio::Mixer {
 namespace {

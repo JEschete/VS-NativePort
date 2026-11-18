@@ -1,13 +1,22 @@
 # C++ headers
 
 Every native file compiles as C++23 (plan D5), but most headers are still written in C: `.h` files with `typedef struct`,
-`_Static_assert`, `extern "C"`, macro guards, `#define` constants and everything at global scope. They work, but they
-are not C++, and GitHub's language bar reports them as C for that reason. The owner decided on 2026-11-18 that they are
-rewritten as real C++ headers rather than renamed or relabeled. Work is tracked in #441.
+`_Static_assert`, macro guards, `#define` constants and everything at global scope, and until 2026-11-18 `extern "C"`.
+They work, but they are not C++, and GitHub's language bar reports them as C for that reason. The owner decided on
+2026-11-18 that they are rewritten as real C++ headers rather than renamed or relabeled. Work is tracked in #441.
 
 [HEADER_LEDGER.csv](ledgers/HEADER_LEDGER.csv) has one row per file that needs work. `tools\ledger\headers.py` measures
 every row from the source, so the ledger cannot claim progress the code does not have. CI fails on a stale ledger, on a
-`done` row that regresses, and on a new C-style header or a new `.cpp` with C linkage.
+`done` row that regresses, on a new C-style header or `.cpp`, and on C linkage returning to any tracked file.
+
+## C linkage retired (2026-11-18)
+
+C linkage was removed from every native file in one change rather than header by header. A name's linkage must agree in
+every translation unit that declares it, so migrating one header's linkage would have changed all of its includers
+anyway. Every file compiles as C++, and nothing outside the build looks up a native name by its C spelling: there are
+no exports, `GetProcAddress` lookups or assembly files, and the Python tools load only system DLLs. Debug and Release
+linked with no declaration that disagreed with its definition. The remaining `.h` files are still C-style in the other
+criteria below; their declarations now have C++ linkage.
 
 ## Owner decisions (2026-11-18)
 
@@ -17,7 +26,7 @@ every row from the source, so the ledger cannot claim progress the code does not
   `resources\rood-reverseWin`, which the owner removed on purpose in `6b20016f0`, so it can no longer regenerate
   anything. `tools\port\copy_manifest.json` now lists files that have not been migrated yet. It no longer means the
   file can be reproduced. Generated files are edited directly. A migration that crosses a generated file, for example
-  removing an `extern "C"` wrapper around a header that is being migrated, edits it in place. A generated header
+  updating an include when a header becomes `.hpp`, edits it in place. A generated header
   leaves the manifest when it is migrated itself, and from then on it is held to the strict quality checks like any
   other hand-maintained file.
 
@@ -82,9 +91,7 @@ compile settings, is part of #248.
 1. Pick a header whose dependencies are done or move in the same change. Start with leaves.
 2. `git mv X.h X.hpp` and update every include of it.
 3. Rewrite it against the criteria table, with `#pragma once`, its system or module namespace and the ledgers' names.
-4. In the same change, remove every `extern "C"` wrapper around it and every `extern "C"` on definitions or local
-   declarations of its functions. A function's linkage must agree in every file, so all includers change together.
-5. If it was generated, remove it from `copy_manifest.json` and resolve what that exposes. The first migration
+4. If it was generated, remove it from `copy_manifest.json` and resolve what that exposes. The first migration
    (`Event/Camera.hpp` and `Event/Screen.hpp`, #347) established these steps:
    - Delete the path's line from `copy_manifest.json`. Only membership matters now; nothing compares the hashes.
    - Run `tools\ledger\gates.py --check`. Headers carry no `owned.csv` rows, so none were reported, but a header
@@ -94,11 +101,10 @@ compile settings, is part of #248.
    - The header is now in the strict quality scope: `lower_case` members, `<cstdint>` types (the original's plain
      `char` was unsigned, so its bytes are `std::uint8_t`), and no magic numbers. Put the original layout's sizes and
      offsets in a `layout` namespace of named constants, each with its `static_assert`.
-   - A generated file that stays in the manifest and declares C-linkage data of the migrated type keeps its linkage
-     with a forward declaration inside its `extern "C"` block, for example
-     `namespace VS::Event { struct CameraState; }` before `extern VS::Event::CameraState* Event_camera;`.
-6. Update ledger locations that name the old path, then run `tools\scaffold\gen_solution.py`.
-7. Build Debug and Release, run the tests that cover the changed code, run the quality check on the changed files, and
+   - A generated file that stays in the manifest and declares data of the migrated type forward-declares it, for
+     example `namespace VS::Event { struct CameraState; }` before `extern VS::Event::CameraState* Event_camera;`.
+5. Update ledger locations that name the old path, then run `tools\scaffold\gen_solution.py`.
+6. Build Debug and Release, run the tests that cover the changed code, run the quality check on the changed files, and
    run `python tools\ledger\headers.py --sync`.
 
 ## Not part of this work
@@ -113,12 +119,12 @@ compile settings, is part of #248.
 
 <!-- headers:begin (generated by tools/ledger/headers.py --sync) -->
 
-**2 of 435 headers done**, 429 remaining, 4 retired. **0 of 813 sources free of C linkage**, 809 remaining, 4 retired.
+**56 of 435 headers done**, 375 remaining, 4 retired. **809 of 813 sources free of C linkage**, 0 remaining, 4 retired.
 
 | Header origin | Headers | Done | Remaining | Retired |
 | --- | ---: | ---: | ---: | ---: |
 | generated | 287 | 2 | 281 | 4 |
-| owned | 138 | 0 | 138 | 0 |
+| owned | 138 | 54 | 84 | 0 |
 | legacy | 10 | 0 | 10 | 0 |
 
 | Header criterion | Headers failing | Sites remaining |
@@ -126,28 +132,28 @@ compile settings, is part of #248.
 | `.hpp` extension | 369 | |
 | `generated` (in `copy_manifest.json`) | 281 | |
 | `guard` (`#pragma once`) | 287 | |
-| `c_linkage` | 127 | 292 |
+| `c_linkage` | 0 | 0 |
 | `static_asserts` | 118 | 362 |
 | `typedefs` | 157 | 1,247 |
 | `void_params` | 39 | 107 |
 | `gnu_attributes` | 5 | 7 |
-| `macros` | 69 | 10,521 |
+| `macros` | 69 | 10,519 |
 | `global_decls` | 368 | 3,206 |
-| `c_wrapped` | 357 | 5,681 |
+| `c_wrapped` | 0 | 0 |
 | `baseline` | 23 | 581 |
 
 | Source origin | Sources | Done | Remaining | `c_linkage` sites remaining |
 | --- | ---: | ---: | ---: | ---: |
-| generated | 199 | 0 | 195 | 195 |
-| owned | 608 | 0 | 608 | 735 |
-| legacy | 6 | 0 | 6 | 8 |
+| generated | 199 | 195 | 0 | 0 |
+| owned | 608 | 608 | 0 | 0 |
+| legacy | 6 | 6 | 0 | 0 |
 
 | Project | Headers done | Headers remaining | Sources done | Sources remaining |
 | --- | ---: | ---: | ---: | ---: |
-| Content | 0 | 13 | 0 | 12 |
-| Engine | 0 | 81 | 0 | 90 |
-| Game | 2 | 315 | 0 | 435 |
-| Tests | 0 | 20 | 0 | 269 |
-| Tools | 0 | 0 | 0 | 3 |
+| Content | 0 | 13 | 12 | 0 |
+| Engine | 7 | 74 | 90 | 0 |
+| Game | 29 | 288 | 435 | 0 |
+| Tests | 20 | 0 | 269 | 0 |
+| Tools | 0 | 0 | 3 | 0 |
 
 <!-- headers:end -->

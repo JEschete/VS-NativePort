@@ -12,36 +12,33 @@
 #include <string_view>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/StatusEffects.h"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/Doors.h"
+#include "Field/Gimmicks.h"
+#include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
+#include "Field/Room.h"
+#include "Legacy/Psx.h"
+#include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Map.h"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapSceneStorageLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/DepthCueLive.hpp"
 #include "Render/GameFontLive.hpp"
+#include "Render/Render.h"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/StatusEffects.h"
-#include "Core/Gte.h"
-#include "Field/Doors.h"
-#include "Field/Gimmicks.h"
-#include "Field/Map.h"
-#include "Field/Room.h"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/Map.h"
-#include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Menu::map {
 namespace {

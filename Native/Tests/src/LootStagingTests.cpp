@@ -6,11 +6,9 @@
 
 #include "Content/ModuleData.h"
 #include "Items/Inventory.hpp"
+#include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/LootStaging.hpp"
 #include "Menu/Loot/LootStagingLive.hpp"
-extern "C" {
-#include "Menu/Loot/LootScreen.h"
-}
 
 namespace {
 namespace items = VS::Items;

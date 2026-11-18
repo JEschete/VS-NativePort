@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
@@ -38,4 +37,3 @@ u_short Menu_Score_titleDescriptions[784]; /* contents: disc string table (Modul
 // decomp: _titleText (_titleText@src/MENU/MENU9.PRG/238.c)
 u_short Menu_Score_titleText[364]; /* contents: disc string table (ModuleData.cpp) */
 
-}  // extern "C"

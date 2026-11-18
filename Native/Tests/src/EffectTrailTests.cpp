@@ -16,6 +16,8 @@
 #include "Core/Math/Interpolation.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailCore.hpp"
@@ -25,13 +27,8 @@
 #include "Effects/Templates/TrailUpdate.hpp"
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitter.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
 #include "Effects/Trails.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 namespace trails = VS::Effects::Templates;

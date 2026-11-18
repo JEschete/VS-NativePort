@@ -11,13 +11,10 @@
 #include <source_location>
 #include <span>
 
-#include "Render/EncodedText.hpp"
-
-extern "C" {
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.h"
+#include "Render/EncodedText.hpp"
 #include "Render/Text/VariableFont.h"
-}
 
 namespace VS::Render {
 namespace {

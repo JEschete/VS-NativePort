@@ -10,22 +10,19 @@
 #include <string>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/StatusEffects.h"
+#include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Core/String/GameText.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Score/GazetteCameraLive.hpp"
 #include "Menu/Score/GazetteTimes.hpp"
-#include "Render/GameFontLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/StatusEffects.h"
-#include "Content/StringTables.h"
 #include "Menu/Score/Records.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
-}
 
 namespace VS::Menu::Score {
 namespace {

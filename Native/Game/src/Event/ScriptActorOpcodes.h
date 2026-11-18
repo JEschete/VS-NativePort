@@ -9,10 +9,6 @@
 
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 intptr_t Event_ScriptResetActorGroupStateOpcode(u_char* command,
                                                 int16_t thread_id);
 intptr_t Event_ScriptStoreActorTileOpcode(u_char* command, int16_t thread_id);
@@ -91,7 +87,3 @@ intptr_t Event_CommandAwardMiscLootOpcode(u_char* command, int16_t thread_id);
 intptr_t Event_CommandConsumeMiscItemOpcode(u_char* command, int16_t thread_id);
 intptr_t Event_CommandStoreActorDistanceOpcode(u_char* command,
                                                int16_t thread_id);
-
-#ifdef __cplusplus
-}
-#endif

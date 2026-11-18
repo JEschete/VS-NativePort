@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Inventory/Inventory.h"
 
@@ -99,4 +98,3 @@ void Menu_Inventory_ResetMenubStatics(void)
     }
 }
 
-}  // extern "C"

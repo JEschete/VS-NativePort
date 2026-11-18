@@ -9,10 +9,6 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct P_TAG {
   unsigned addr : 24;
   unsigned len : 8;
@@ -266,20 +262,7 @@ static inline u_long LegacyGpu_LinkOfPointer(const void* p) {
 }
 // setaddr takes either a packet pointer or a link word copied from another
 // packet
-#ifdef __cplusplus
 #define LegacyGpu_Link(x) LegacyGpu_LinkOf(x)
-#else
-// C generic selection must distinguish built-in types, even at equal widths.
-#define LegacyGpu_Link(x)                                                 \
-  _Generic((x),                                                           \
-      int: LegacyGpu_LinkOfWord,                                          \
-      unsigned int: LegacyGpu_LinkOfWord,                                 \
-      long: LegacyGpu_LinkOfWord,               /* NOLINT(runtime/int) */ \
-      unsigned long: LegacyGpu_LinkOfWord,      /* NOLINT(runtime/int) */ \
-      long long: LegacyGpu_LinkOfWord,          /* NOLINT(runtime/int) */ \
-      unsigned long long: LegacyGpu_LinkOfWord, /* NOLINT(runtime/int) */ \
-      default: LegacyGpu_LinkOfPointer)(x)
-#endif
 #define setlen(p, _len) (((P_TAG*)(p))->len = (u_char)(_len))
 #define setaddr(p, _addr) (((P_TAG*)(p))->addr = LegacyGpu_Link(_addr))
 #define setcode(p, _code) (((P_TAG*)(p))->code = (u_char)(_code))
@@ -348,11 +331,6 @@ void SetSemiTrans(void* p, int abe);
 void SetSprt(SPRT* p);
 void SetTile(TILE* p);
 
-#ifdef __cplusplus
-}
-
-// Copied sources include this header inside their extern "C" block.
-extern "C++" {
 #include <type_traits>
 
 template <class T>
@@ -363,5 +341,3 @@ inline u_long LegacyGpu_LinkOf(T x) {
     return static_cast<u_long>(x) & 0xFFFFFF;
   }
 }
-}  // extern "C++"
-#endif

@@ -11,10 +11,7 @@
 
 #include "Core/Log.hpp"
 #include "Effects/PrimaryEffect.hpp"
-
-extern "C" {
 #include "Effects/Runtime.h"
-}
 
 static_assert(std::extent_v<decltype(Effects_tokenBitmaps)> >=
               std::size_t{VS::Effects::kEffectTokenWords});

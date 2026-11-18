@@ -7,21 +7,18 @@
 #include <iterator>
 #include <optional>
 
-#include "Actors/SkeletonLive.hpp"
-#include "Battle/ActionOutcomesLive.hpp"
-#include "Core/Log.hpp"
-#include "Effects/EffectRuntimeLive.hpp"
-#include "Effects/SecondaryEffectRequests.hpp"
-
-extern "C" {
 #include "Actors/Location.h"
+#include "Actors/SkeletonLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Hit.h"
+#include "Core/Log.hpp"
+#include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/SecondaryEffectRequests.hpp"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Effects {
 namespace {

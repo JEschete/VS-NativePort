@@ -12,27 +12,24 @@
 #include <span>
 #include <string_view>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
+#include "Actors/Movement.h"
+#include "Actors/SkeletonLiveState.h"
+#include "Actors/WeaponModel.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/ActorPreviewLive.hpp"
-#include "Menu/Score/EncyclopediaPreview.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/WeaponModel.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Score/Encyclopedia.h"
-}
+#include "Menu/Score/EncyclopediaPreview.hpp"
 
 namespace VS::Menu::Score {
 namespace {

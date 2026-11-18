@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/LegacyFiles.h"
 #include "Content/DiscLayout.h"
@@ -254,4 +253,3 @@ int Audio_legacyWaveBankDiscOffsets[] = { VS_WAVE0000_DAT_LBA, VS_WAVE0001_DAT_L
     VS_WAVE0095_DAT_LBA, VS_WAVE0096_DAT_LBA, VS_WAVE0097_DAT_LBA, VS_WAVE0098_DAT_LBA,
     VS_WAVE0099_DAT_LBA };
 
-}  // extern "C"

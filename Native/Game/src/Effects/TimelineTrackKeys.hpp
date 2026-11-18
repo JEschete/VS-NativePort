@@ -9,10 +9,7 @@
 #include <string_view>
 
 #include "Core/Log.hpp"
-
-extern "C" {
 #include "Effects/Runtime.h"
-}
 
 // The effect timeline Live bindings' refusal report and current-key view
 // (TimelineTracksLive.cpp, TimelinePlaybackLive.cpp).

@@ -35,7 +35,7 @@ renumbers function IDs and rewrites the catalogs, so do not run it to refresh st
 | D2 | Role of the decomp | `resources\rood-reverseWin` is a **read-only reference**. Nothing in the solution includes, links or loads anything from `resources\`. Code is *copied* into `Native\` once, then owned there. *(2026-11-18: that pinned copy was removed in `6b20016f0`; the read-only reference is now the upstream submodule `resources\rood-reverse`, and the copier is retired per D24.)* | Owner |
 | D3 | Matching | **Not a goal.** No byte matching, no register matching, no keeping the original memory layout. We are free to change types, widen IDs and add content. | Owner |
 | D4 | Architecture | **x64 only.** Windows is LLP64 (`long` = 4 bytes), so pointers are the only width change. | Owner |
-| D5 | Language | **C++23** for everything in `Native\`, with no C or assembly (owner, 2026-10-31; enforced by `tools\ledger\gates.py`). Copied code compiles as C++ with C linkage and relaxed settings; each item is then **promoted** per the checklist in §8. The original C and assembly stay under `resources\` as read-only reference. | Owner |
+| D5 | Language | **C++23** for everything in `Native\`, with no C or assembly (owner, 2026-10-31; enforced by `tools\ledger\gates.py`). Copied code compiles as C++ with relaxed settings (its C linkage was retired in #441); each item is then **promoted** per the checklist in §8. The original C and assembly stay under `resources\` as read-only reference. | Owner |
 | D6 | Layout | Mirrors the DW4 port: root `.sln`, `Native\` with one solution folder per system, versioned JSON schemas, generated assets git-ignored (§3). | Owner (agreed) |
 | D7 | Phasing | **Phase 1:** run like the original. **Phase 2:** enhancement. **Phase 3:** go wild. Each has sub-phases (§1). | Owner |
 | D8 | SDK replacement | Every PS1 SDK call is retired with one of three strategies: **R** (rewrite at copy time), **T** (temporary translator shim, then migrate and delete), **D** (delete). Each symbol is tracked in the SDK ledger. Shims translate into the *modern* system API and never model hardware (§2.2). | Owner (agreed, "Adjustment B") |
@@ -711,8 +711,8 @@ Steps 3, 4 and 6 are explicit reviewed claims that the tool can only falsify: a 
 and `void*` is necessary for a typed interface but does not prove one, and a linked record proves a test exists, not that
 it covers everything. A `.cpp` suffix, renamed function, forwarding wrapper or declaration cannot produce `cpp=x`, and
 any remaining consumer of the old symbol blocks it, including one in generated code. Compiling as C++ is not promotion:
-generated code keeps C linkage and untyped signatures, so a function with generated callers cannot reach `cpp=x` until
-those callers migrate; see
+generated code keeps global names and untyped signatures (its C linkage was retired in #441), so a function with
+generated callers cannot reach `cpp=x` until those callers migrate; see
 [the ledger summary](ledgers/SUMMARY.md) for the current inventory, [MODERNIZATION.md](MODERNIZATION.md) for the
 per-function work and regression rules, and [PLATFORM_HAZARDS.md](PLATFORM_HAZARDS.md) for what PS1 hardware tolerated.
 

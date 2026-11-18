@@ -7,17 +7,14 @@
 #include <cstdint>
 #include <optional>
 
-#include "State/KillScore.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.h"
+#include "State/KillScore.hpp"
 #include "State/Progress.h"
-}
 
 namespace VS::State {
 namespace {

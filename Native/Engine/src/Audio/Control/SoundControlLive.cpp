@@ -10,19 +10,16 @@
 #include <span>
 #include <type_traits>
 
+#include "Audio/Driver/SoundDriver.h"
 #include "Audio/MixControlLive.hpp"
+#include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/SampleBanksLive.hpp"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundControl.hpp"
+#include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/SoundPlayback.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
-
-extern "C" {
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/SoundEffects/SoundEffects.h"
-}
 
 namespace VS::Audio::Control {
 namespace {

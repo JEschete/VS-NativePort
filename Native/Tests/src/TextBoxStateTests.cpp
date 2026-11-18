@@ -9,12 +9,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/TextBoxState.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Menu/TextBox.h"
-}
+#include "Menu/TextBoxState.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 
 namespace {
 namespace m = VS::Menu;

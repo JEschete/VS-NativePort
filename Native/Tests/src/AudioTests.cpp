@@ -23,6 +23,9 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/AudioDevice.hpp"
+#include "Audio/LfoWaveforms.h"
+#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/SequencerOutput.h"
@@ -38,32 +41,26 @@
 #include "Legacy/Psx.h"
 #include "nlohmann/json.hpp"
 
-extern "C" {
-#include "Audio/LfoWaveforms.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
-}
-
-extern "C" int TestsZoneMusicCanonicalState(void);
-extern "C" void TestsNativeNoiseChannel(void);
-extern "C" void TestsNativeMonoOutput(int enabled);
-extern "C" int TestsMenuSoundDispatch(void);
-extern "C" void TestsPrepareStreamPlayback(void);
-extern "C" void TestsRestoreStreamPlayback(void);
-extern "C" int TestsBindEffectStream(void* bytes, size_t size);
-extern "C" int TestsPlayStreamSlot(int slot, int pan, int volume);
-extern "C" void TestsAdvanceStreamTick(void);
-extern "C" void TestsStreamControl(int command, int value, int target);
-extern "C" unsigned TestsStreamVoiceMask(void);
-extern "C" unsigned TestsStreamVolume(void);
-extern "C" int TestsStreamSlotIsEmpty(void);
-extern "C" void TestsPrepareXaPlayback(void);
-extern "C" void TestsRestoreXaPlayback(void);
-extern "C" int TestsXaCommand(int command, int first, int second, int third);
-extern "C" int TestsSavedMusicVoiceConflicts(void);
-extern "C" int TestsNativeMusicSnapshot(void);
-extern "C" int TestsPendingModulationSlides(int effect, int kind);
-extern "C" int TestsCancelQueuedMusic(int queued, int secondary);
+int TestsZoneMusicCanonicalState(void);
+void TestsNativeNoiseChannel(void);
+void TestsNativeMonoOutput(int enabled);
+int TestsMenuSoundDispatch(void);
+void TestsPrepareStreamPlayback(void);
+void TestsRestoreStreamPlayback(void);
+int TestsBindEffectStream(void* bytes, size_t size);
+int TestsPlayStreamSlot(int slot, int pan, int volume);
+void TestsAdvanceStreamTick(void);
+void TestsStreamControl(int command, int value, int target);
+unsigned TestsStreamVoiceMask(void);
+unsigned TestsStreamVolume(void);
+int TestsStreamSlotIsEmpty(void);
+void TestsPrepareXaPlayback(void);
+void TestsRestoreXaPlayback(void);
+int TestsXaCommand(int command, int first, int second, int third);
+int TestsSavedMusicVoiceConflicts(void);
+int TestsNativeMusicSnapshot(void);
+int TestsPendingModulationSlides(int effect, int kind);
+int TestsCancelQueuedMusic(int queued, int secondary);
 
 namespace {
 void CheckMusicCancellation(int result) {

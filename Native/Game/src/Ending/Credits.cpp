@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "Ending/Credits.h"
@@ -103,4 +102,3 @@ int Ending_Credits_illustrationDiscSizes[] = { VS_ILLUST06_BIN_SIZE, VS_ILLUST07
     VS_ILLUST12_BIN_SIZE, VS_ILLUST13_BIN_SIZE, VS_ILLUST14_BIN_SIZE,
     VS_ILLUST15_BIN_SIZE, VS_ILLUST16_BIN_SIZE, 0, 0, 0, 0, 0 };
 
-}  // extern "C"

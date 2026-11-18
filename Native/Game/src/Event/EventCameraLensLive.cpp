@@ -14,14 +14,11 @@
 #include "Core/Scratch.h"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
-#include "Event/ScriptCommand.hpp"
-
-extern "C" {
 #include "Event/InterpolationCurveLive.h"
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Event {
 namespace {

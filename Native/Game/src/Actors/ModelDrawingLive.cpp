@@ -13,16 +13,10 @@
 #include <span>
 #include <type_traits>
 
-#include "Actors/AnimationPoseLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Event/ScriptVmLive.hpp"
-#include "Field/RoomLightingLive.hpp"
-#include "Render/ModelGeometryLive.hpp"
-#include "Render/RoomLighting.hpp"
-extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
+#include "Actors/AnimationPoseLive.hpp"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRenderingLiveState.h"
@@ -35,22 +29,26 @@ extern "C" {
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
 #include "Field/Actors.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
+#include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
+#include "Render/RoomLighting.hpp"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Actors {
 namespace {

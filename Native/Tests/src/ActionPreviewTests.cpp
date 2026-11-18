@@ -13,20 +13,18 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/ActionPreview.hpp"
-#include "Battle/ActionPreviewLive.hpp"
-#include "Battle/HitModifiers.hpp"
-#include "Battle/HitModifiersLive.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionPreview.hpp"
+#include "Battle/ActionPreviewLive.hpp"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/HitChance.h"
-}
+#include "Battle/HitModifiers.hpp"
+#include "Battle/HitModifiersLive.hpp"
+#include "Content/ModuleData.h"
 
 namespace {
 namespace b = VS::Battle;

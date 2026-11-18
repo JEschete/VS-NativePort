@@ -9,22 +9,19 @@
 #include <span>
 #include <type_traits>
 
-#include "Core/Log.hpp"
-#include "Field/RoomLoadingLive.hpp"
-#include "Field/Traps.hpp"
-#include "Items/ItemRecordsLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
+#include "Core/Log.hpp"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.h"
+#include "Field/Traps.hpp"
+#include "Items/ItemRecordsLive.hpp"
 #include "Items/Loadout.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 using VS::Field::TrapPanelHit;

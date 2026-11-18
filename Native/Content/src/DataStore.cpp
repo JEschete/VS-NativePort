@@ -159,7 +159,7 @@ std::expected<std::vector<u8>, std::string> DataStore::ReadAll(
 
 }  // namespace VS::Content
 
-extern "C" int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
+int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
   using VS::u32;
   using VS::u64;
   using VS::u8;

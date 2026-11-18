@@ -11,10 +11,6 @@
 #include "Field/Background.h"
 #include "Legacy/Psx.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // decomp: D_800F1CE0 (BATTLE/BATTLE.PRG 146C.h:1113): zero vectors; [0] is
 // the sky dome's turn outside a room.
 extern VECTOR Field_backgroundReferenceVectors[2];
@@ -54,7 +50,3 @@ extern Field_BackgroundLayout* Field_loadedBackgroundLayout;
 // decomp: D_800F1DD0 (BATTLE/BATTLE.PRG 146C.c:728): its TIM until the
 // upload (high heap), or null.
 extern u_long* Field_legacyBackgroundTimBuffer;
-
-#ifdef __cplusplus
-}
-#endif

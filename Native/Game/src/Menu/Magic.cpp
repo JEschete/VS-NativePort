@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Magic.h"
 
@@ -64,4 +63,3 @@ int Menu_Magic_savePointData[] = { 0x0305001B, 0x0801000E, 0x04030199, 0x0C0C001
 // decomp: _teleportationStrings (_teleportationStrings@MENU/MENU0.PRG)
 u_short Menu_Magic_teleportationStrings[1599]; /* contents: disc string table (ModuleData.cpp) */
 
-}  // extern "C"

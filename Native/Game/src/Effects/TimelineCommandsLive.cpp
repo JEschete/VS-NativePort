@@ -11,24 +11,21 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Core/BiosRand.h"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
+#include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracksLive.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/BiosRand.h"
-#include "Core/Gte.h"
-#include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/InteractionTargetLive.h"
-}
+#include "Field/PlatformPlacementLive.hpp"
+#include "Legacy/Psx.h"
 
 // Effects_TransformMotionView views an Effects_TransformSlot
 // (TransformsLive.cpp checks its fields).

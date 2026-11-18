@@ -5,19 +5,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/Ai/ActorPerceptionLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 static_assert(offsetof(Actors_ModelInstance, position) ==

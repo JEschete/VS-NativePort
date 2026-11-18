@@ -10,30 +10,27 @@
 #include <span>
 #include <string_view>
 
-#include "Battle/HudOrchestration.hpp"
-#include "Battle/HudRenderingLive.hpp"
-#include "Battle/HudStateLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Render/GameFont.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
+#include "Battle/HudOrchestration.hpp"
+#include "Battle/HudRenderingLive.hpp"
+#include "Battle/HudStateLive.hpp"
 #include "Core/Diagnostics.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Frame.h"
+#include "Render/GameFont.hpp"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
 #include "Render/Text/CompactFont.h"
+#include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimer.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Battle {
 namespace {

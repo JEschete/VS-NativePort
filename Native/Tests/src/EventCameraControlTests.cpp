@@ -14,13 +14,10 @@
 #include "Event/EventCameraControlLive.hpp"
 #include "Event/EventCameraOwnership.hpp"
 #include "Event/EventCameraTrack.hpp"
-#include "Event/ScriptCommand.hpp"
-
-extern "C" {
 #include "Event/ScriptCamera.h"
+#include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVm.h"
-}
 
 namespace {
 namespace event = VS::Event;

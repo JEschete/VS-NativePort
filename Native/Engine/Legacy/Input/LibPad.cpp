@@ -1,12 +1,9 @@
 #include "Legacy/Input/LibPad.h"
 
 #include "Core/Log.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Input/LegacyPad.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Input/ControllerLiveState.h"
-}
 
 // libpad shim (plan §6.5). The game registered two receive buffers with
 // PadInitDirect and decodes them itself; this writes them in the original
@@ -82,8 +79,6 @@ void FeedPad(int port, const Input::PadState& state, bool connected) {
 
 }  // namespace VS::Legacy
 
-extern "C" {
-
 void PadInitDirect(unsigned char* port1, unsigned char* port2) {
   g_ports[0] = Port{};
   g_ports[1] = Port{};
@@ -158,5 +153,3 @@ void PadSetAct(int port, unsigned char* table, int len) {
   p->actuators = len == 0 ? nullptr : table;
   p->actuator_count = len;
 }
-
-}  // extern "C"

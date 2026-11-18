@@ -4,11 +4,6 @@
 #include <cstddef>
 #include <span>
 
-#include "Battle/Ai/FlightMovementLive.hpp"
-#include "Battle/Ai/FlightTerrain.hpp"
-#include "Field/TerrainHeight.hpp"
-
-extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -19,15 +14,17 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/FlightMovementLive.hpp"
+#include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
+#include "Field/TerrainHeight.hpp"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.h"
-}
 
 namespace VS::Battle::Ai {
 Field::TerrainGrid CurrentTerrain() noexcept {

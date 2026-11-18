@@ -318,7 +318,7 @@ bool RelocateModulePointerTable(const Content_ModulePointerTable& table,
 
 }  // namespace VS::Content
 
-extern "C" int Content_LoadModuleData(void) {
+int Content_LoadModuleData(void) {
   const DataStore* store = DataStore::Get();
   if (store == nullptr) {
     VS_LOG_ERROR("content", "module data: no extracted data");

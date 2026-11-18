@@ -7,16 +7,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Ai/AiState.h"
 #include "Battle/Ai/BlockedMovement.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
+#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Movement.h"
 #include "Content/ModuleData.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
-extern "C" {
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/Movement.h"
-}
 
 namespace {
 namespace ai = VS::Battle::Ai;

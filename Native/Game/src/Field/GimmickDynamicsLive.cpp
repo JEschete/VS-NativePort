@@ -9,6 +9,7 @@
 
 #include "Audio/SfxLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -16,12 +17,8 @@
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickReactionsLive.hpp"
-#include "Field/InteractionTargetLive.hpp"
-
-extern "C" {
-#include "Battle/Ai/Navigation.h"
 #include "Field/Gimmicks.h"
-}
+#include "Field/InteractionTargetLive.hpp"
 
 namespace {
 using Record = Field_GimmickInstance;

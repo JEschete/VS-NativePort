@@ -12,31 +12,28 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/ActorMotionLive.hpp"
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Memory/HeapLive.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Field/GimmickResourcesLive.hpp"
-#include "Legacy/Psx.h"
-#include "Platform/CrashHandler.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.h"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/Collision.h"
+#include "Field/CollisionMapLive.hpp"
+#include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
+#include "Legacy/Psx.h"
+#include "Platform/CrashHandler.hpp"
 
 static_assert(
     std::is_same_v<decltype(&VS::Battle::Ai::HasLiveActorNavigationState),

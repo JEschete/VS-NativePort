@@ -17,16 +17,13 @@
 #include "Audio/SampleBanks.hpp"
 #include "Audio/SampleBanksLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundPlayback.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/ModuleData.h"
-
-extern "C" {
-#include "Audio/SoundBanks.h"
-}
 
 namespace {
 namespace Audio = VS::Audio;

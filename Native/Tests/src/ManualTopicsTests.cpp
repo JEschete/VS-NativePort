@@ -10,18 +10,15 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/ManualTopics.hpp"
-#include "Menu/ManualTopicsLive.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-
-extern "C" {
 #include "Field/Manual.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Manual.h"
-}
+#include "Menu/ManualTopics.hpp"
+#include "Menu/ManualTopicsLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 
 // Contracts of the manual's topic menu and page text (MENUE.PRG 494.c:76-118,
 // 450-475, 514-575): the topic rows and their remembered cursor, the

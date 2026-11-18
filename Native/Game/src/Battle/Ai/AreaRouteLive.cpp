@@ -11,20 +11,18 @@
 #include <vector>
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/Movement.h"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Core/Diagnostics.h"
-}
+#include "Field/PlatformPlacementLive.hpp"
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

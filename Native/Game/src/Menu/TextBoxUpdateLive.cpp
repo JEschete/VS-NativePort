@@ -7,22 +7,19 @@
 #include <iterator>
 #include <span>
 
+#include "Battle/Hud.h"
 #include "Battle/HudOrchestrationLive.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/TextBox.h"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Battle/Hud.h"
-#include "Core/Diagnostics.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/TextBox.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Menu {
 namespace {

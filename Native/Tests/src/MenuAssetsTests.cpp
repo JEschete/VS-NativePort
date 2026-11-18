@@ -9,20 +9,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Memory/HeapLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-#include "Save/MenuAssets.hpp"
-#include "Save/MenuAssetsLive.hpp"
-
-extern "C" {
 #include "Boot/GameLoop.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.h"
+#include "Render/TexturePagesLive.hpp"
 #include "Save/MemoryCard/Resources.h"
+#include "Save/MenuAssets.hpp"
+#include "Save/MenuAssetsLive.hpp"
 #include "Title/SaveCard.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace {
 using VS::Save::MemoryCard::InitializeMenuResourcesStep;

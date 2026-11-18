@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Render/ScreenTransition.h"
 
@@ -15,4 +14,3 @@ POLY_G4 Render_legacyTransitionEdgePackets[2];
 // decomp: vs_battle_screenTransitionPolyF4 (vs_battle_screenTransitionPolyF4@BATTLE/BATTLE.PRG)
 POLY_F4 Render_legacyTransitionFadePackets[2];
 
-}  // extern "C"

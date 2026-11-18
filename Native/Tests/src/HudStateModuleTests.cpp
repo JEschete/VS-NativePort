@@ -6,13 +6,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/HudStateLive.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
+#include "Battle/HudStateLive.hpp"
+#include "Content/ModuleData.h"
 #include "Field/Minimap.h"
-}
 
 namespace {
 namespace b = VS::Battle;

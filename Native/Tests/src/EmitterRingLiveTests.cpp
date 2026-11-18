@@ -7,25 +7,22 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Gte.h"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Core/Scratch.h"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/Templates/RepeatingRingsLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
+#include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/TemplateState.h"
 #include "Effects/Transforms.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 namespace effects = VS::Effects;

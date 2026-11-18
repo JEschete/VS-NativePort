@@ -10,18 +10,16 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearScore.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
+#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
-#include "Render/TextureRegionDraw.hpp"
-#include "Render/TextureRegionDrawLive.hpp"
-extern "C" {
-#include "Menu/Results/Results.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Images.h"
 #include "Render/Render.h"
+#include "Render/TextureRegionDraw.hpp"
+#include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace {
 namespace r = VS::Menu::Results;

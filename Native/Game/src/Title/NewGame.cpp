@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Title/NewGame.h"
 
@@ -176,4 +175,3 @@ int Title_newGameInventoryTemplate[15][64] = {
 int Title_initialLearnedActionBits[8] = { 0x0074FE7F, 0x00000000, 0x00000000, 0x00000000, -131837,
     0x007EFEFD, 0x00000000, -1 };
 
-}  // extern "C"

@@ -16,18 +16,15 @@
 #include <type_traits>
 
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscLayout.h"
+#include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "DiscQueue.h"
+#include "Render/Display.h"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Core/Diagnostics.h"
-#include "DiscQueue.h"
-#include "Render/Display.h"
-}
 
 namespace VS::Render {
 namespace {

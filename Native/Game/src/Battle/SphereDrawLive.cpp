@@ -11,34 +11,31 @@
 #include <optional>
 #include <span>
 
+#include "Battle/BattleTypes.h"
+#include "Battle/Sphere.h"
 #include "Battle/SphereDraw.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
+#include "Battle/TargetPages.h"
+#include "Battle/TargetVolume.h"
 #include "Battle/TargetingDraw.hpp"
 #include "Battle/TargetingDrawLive.hpp"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Scratch.h"
+#include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/SpritesLive.hpp"
-
-extern "C" {
-#include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
-#include "Battle/TargetPages.h"
-#include "Battle/TargetVolume.h"
-#include "Core/Gte.h"
-#include "Field/Camera.h"
 #include "Field/GimmickLookup.h"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/Menus.h"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Battle {
 namespace {

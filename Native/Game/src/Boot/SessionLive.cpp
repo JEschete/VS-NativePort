@@ -10,18 +10,31 @@
 
 #include "Audio/MusicLive.hpp"
 #include "Audio/SampleBanksLive.hpp"
+#include "Audio/SequencerOutput.h"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
+#include "Battle/Ai/RoomState.h"
+#include "Battle/EncounterHooks.h"
+#include "Battle/TargetingState.h"
+#include "Boot/GameLoop.h"
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/DiscReaderLive.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Overlays.h"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
+#include "DiscQueue.h"
 #include "Ending/EndingLive.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
+#include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Input/ControllerLiveState.h"
+#include "Input/Controllers.h"
+#include "Legacy/Psx.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
@@ -37,31 +50,15 @@
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
-#include "Render/DisplayControlLive.hpp"
-#include "Render/ScreenOverlayLive.hpp"
-#include "Save/SnapshotLive.hpp"
-#include "State/GameClockLive.hpp"
-#include "Title/TitleMenuLive.hpp"
-
-extern "C" {
-#include "Audio/SequencerOutput.h"
-#include "Battle/Ai/RoomState.h"
-#include "Battle/EncounterHooks.h"
-#include "Battle/TargetingState.h"
-#include "Boot/GameLoop.h"
-#include "Content/DiscLayout.h"
-#include "Core/Diagnostics.h"
-#include "Core/Overlays.h"
-#include "DiscQueue.h"
-#include "Event/ScriptVm.h"
-#include "Input/ControllerLiveState.h"
-#include "Input/Controllers.h"
-#include "Legacy/Psx.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
+#include "Render/DisplayControlLive.hpp"
+#include "Render/ScreenOverlayLive.hpp"
 #include "Save/NativeResume.h"
+#include "Save/SnapshotLive.hpp"
 #include "State/Ashley.h"
-}
+#include "State/GameClockLive.hpp"
+#include "Title/TitleMenuLive.hpp"
 
 namespace VS::Boot {
 namespace {
@@ -142,8 +139,8 @@ class LiveSessionHost final : public SessionHost {
     Core_Debugf("boot", "native session transition: %s",
                 destination == SessionDestination::kTitle ? "title" : "battle");
     Event::AbandonLiveScriptUses();
-    // NOLINTNEXTLINE(cert-err52-cpp): the copied call graph is extern "C" and
-    // cannot carry an exception (#267); the barrier guards the frames.
+    // NOLINTNEXTLINE(cert-err52-cpp): the session boundary leaves the copied
+    // call graph by jump, not exception (#267); the barrier guards the frames.
     std::longjmp(session_boundary, static_cast<int>(destination));
   }
 

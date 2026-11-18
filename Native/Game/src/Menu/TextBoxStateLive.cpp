@@ -11,13 +11,11 @@
 #include <span>
 
 #include "Actors/TextureAnimationLive.hpp"
-#include "Menu/Sounds.hpp"
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.h"
 #include "Input/ControllerLiveState.h"
+#include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
-}
 
 namespace VS::Menu {
 namespace {

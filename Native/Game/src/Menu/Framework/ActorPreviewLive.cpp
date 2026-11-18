@@ -12,39 +12,36 @@
 #include <string_view>
 #include <type_traits>
 
+#include "ActorAssets.h"
+#include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ActorStateRecord.hpp"
+#include "Actors/Animation.h"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLive.hpp"
+#include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/SkeletonLiveState.h"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Actors/WeaponModel.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/ChestInteractionsLive.h"
+#include "Field/Gimmicks.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DepthCue.hpp"
-
-extern "C" {
-#include "ActorAssets.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/WeaponModel.h"
-#include "Field/Gimmicks.h"
-#include "Legacy/Psx.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
-}
 
 namespace VS::Menu::Framework {
 namespace {

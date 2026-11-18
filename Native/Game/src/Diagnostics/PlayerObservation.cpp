@@ -11,23 +11,15 @@
 #include <string>
 #include <utility>
 
-#include "Actors/ActorStateLive.hpp"
-#include "Battle/AbilitiesLive.hpp"
-#include "Battle/ActionCostsLive.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Diagnostics/GameplayTrace.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Items/LootLive.hpp"
-#include "Legacy/Psx.h"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Audio/Seq/Channel.h"
+#include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
+#include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionResolution.h"
@@ -37,11 +29,14 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Text/TextCode.h"
+#include "Diagnostics/GameplayTrace.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/Collision.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
@@ -49,7 +44,9 @@ extern "C" {
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
+#include "Items/LootLive.hpp"
 #include "Items/TreasureChests.h"
+#include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLiveState.h"
@@ -58,8 +55,8 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
+#include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Game {
 namespace {

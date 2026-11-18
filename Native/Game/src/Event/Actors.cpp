@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Event/Actors.h"
 
@@ -9,4 +8,3 @@ int Event_weaponDrawStates[121]; /* contents: module image (ModuleData.cpp) */
 // decomp: D_800E9B58 (D_800E9B58@BATTLE/BATTLE.PRG)
 char Event_animationBankBases[472]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

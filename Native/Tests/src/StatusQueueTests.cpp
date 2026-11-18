@@ -12,17 +12,15 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Battle/StatusQueue.hpp"
-#include "Battle/StatusQueueLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-}
+#include "Battle/StatusQueue.hpp"
+#include "Battle/StatusQueueLive.hpp"
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
 
 namespace {
 namespace battle = VS::Battle;

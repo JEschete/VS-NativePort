@@ -5,10 +5,6 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define SPU_OFF 0
 #define SPU_ON 1
 #define SPU_TRANSFER_BY_DMA 0L
@@ -45,7 +41,3 @@ void SpuSetReverbModeDepth(short left, short right);
 void SpuGetReverbModeType(long* mode);
 void SsUtReverbOn(void);
 void SsUtReverbOff(void);
-
-#ifdef __cplusplus
-}
-#endif

@@ -15,7 +15,7 @@ struct Effects_Trail9State;
 struct Effects_TrailQuadSet;
 
 // PLG074's emission cursor in the overlay module image (ModuleData.cpp).
-extern "C" int Content_plg074TrailEmissionCounter[1];
+extern int Content_plg074TrailEmissionCounter[1];
 
 // Live binding for the five- and nine-sample trail emitters (TrailEmitter.cpp):
 // the current effect package and instance, the emitter scratch block, the GTE,

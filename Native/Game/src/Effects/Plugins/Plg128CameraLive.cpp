@@ -9,28 +9,25 @@
 #include <span>
 #include <type_traits>
 
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/Scratch.h"
+#include "Effects/Camera.h"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/PackageExtents.hpp"
-#include "Effects/Plugins/Plg128Camera.hpp"
-
-extern "C" {
-#include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "Effects/Camera.h"
 #include "Effects/Package.h"
+#include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.h"
 #include "Effects/Plugins/Plg128.h"
+#include "Effects/Plugins/Plg128Camera.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
-}
 
 namespace VS::Effects::Plg128 {
 namespace {

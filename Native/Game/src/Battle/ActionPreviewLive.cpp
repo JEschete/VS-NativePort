@@ -13,25 +13,23 @@
 #include <vector>
 
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/Action.h"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionEffectDispatchLive.hpp"
-#include "Battle/ActionPreview.hpp"
-#include "Battle/AttackPrerequisitesLive.hpp"
-#include "Battle/HitCalculationsLive.hpp"
-#include "Battle/SphereContainmentLive.hpp"
-#include "Field/SegmentCollisionLive.hpp"
-extern "C" {
-#include "Battle/Action.h"
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionPreview.hpp"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/Damage.h"
+#include "Battle/HitCalculationsLive.hpp"
 #include "Battle/Sphere.h"
+#include "Battle/SphereContainmentLive.hpp"
 #include "Core/Diagnostics.h"
-}
+#include "Field/SegmentCollisionLive.hpp"
 
 namespace VS::Battle {
 namespace {

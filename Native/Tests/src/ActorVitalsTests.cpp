@@ -9,16 +9,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Actor.h"
 #include "Battle/ActorVitals.hpp"
 #include "Battle/ActorVitalsLive.hpp"
-#include "Content/ModuleData.h"
-extern "C" {
-#include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
+#include "Content/ModuleData.h"
 #include "State/SceneTimer.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace battle = VS::Battle;

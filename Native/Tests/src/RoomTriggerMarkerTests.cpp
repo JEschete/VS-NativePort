@@ -9,26 +9,23 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Field/RoomTriggerMarkers.hpp"
-#include "Field/RoomTriggerMarkersLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/PageSpace.hpp"
-#include "Render/RoomDraw.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Field/CameraLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Field/RoomTriggerMarkers.hpp"
+#include "Field/RoomTriggerMarkersLive.hpp"
 #include "Field/TriggerMarkers.h"
+#include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
+#include "Render/PageSpace.hpp"
+#include "Render/RoomDraw.hpp"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 
 extern unsigned int Content_battleTriggerMarkerBytes[29];
-}
 
 namespace {
 struct MarkerDefinition {

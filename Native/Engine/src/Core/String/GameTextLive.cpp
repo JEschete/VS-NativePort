@@ -5,9 +5,7 @@
 #include <algorithm>
 #include <cinttypes>
 
-extern "C" {
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Core::String {
 namespace {

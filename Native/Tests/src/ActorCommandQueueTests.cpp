@@ -15,17 +15,14 @@
 
 #include "Actors/ActorCommands.hpp"
 #include "Actors/ActorCommandsLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Math/ScalarMath.hpp"
-
-extern "C" {
 #include "Actors/ActorCommandsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Content/ModuleData.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/Interactions.h"
-}
 
 namespace actors = VS::Actors;
 using actors::ActorCommand;

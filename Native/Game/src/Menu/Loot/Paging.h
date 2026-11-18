@@ -3,10 +3,6 @@
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Temporary row metadata, not additional player inventory slots. */
 enum { kMenuLootRowCapacity = sizeof(Items_InventoryIndices) };
 
@@ -15,7 +11,3 @@ enum { kMenuLootRowCapacity = sizeof(Items_InventoryIndices) };
 int Menu_Loot_AdvanceStagedInventory(void);
 /* Forgets the pending batch before its loot records are released. */
 void Menu_Loot_ResetPaging(void);
-
-#ifdef __cplusplus
-}
-#endif

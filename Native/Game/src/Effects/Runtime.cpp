@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
 #include "Effects/Package.h"
@@ -103,4 +102,3 @@ Effects_EffectPackage Effects_actionPackage;
 // decomp: D_800F57A0 (D_800F57A0@BATTLE/BATTLE.PRG)
 Effects_EffectPackage Effects_secondaryPackage;
 
-}  // extern "C"

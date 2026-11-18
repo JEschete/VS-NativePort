@@ -16,12 +16,9 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/PrimaryEffectLive.hpp"
-
-extern "C" {
 #include "Effects/Particles.h"
+#include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
-}
 
 namespace VS::Effects {
 namespace {

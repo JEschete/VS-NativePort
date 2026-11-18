@@ -1,7 +1,5 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
 #include "Battle/Ai/RoomState.h"
-}
 
 #include <array>
 #include <cstddef>
@@ -12,19 +10,6 @@ extern "C" {
 #include <optional>
 #include <span>
 
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/FrameUpdateLive.hpp"
-#include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Ai/ReactionDelay.hpp"
-#include "Battle/Ai/RoomAiMap.hpp"
-#include "Core/Math/Distance.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Field/CollisionMapLive.hpp"
-#include "Field/InteractionTargetLive.hpp"
-#include "Field/RoomLoadingLive.hpp"
-
-extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -33,27 +18,37 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
+#include "Battle/Ai/ReactionDelay.hpp"
+#include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
+#include "Core/Math/Distance.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/Collision.h"
+#include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
+#include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.h"
-}  // extern "C"
 
 namespace {
 using VS::Battle::Ai::RoomAiGrid;
@@ -247,7 +242,6 @@ VS::Battle::Ai::BattleActorReactionDelays() {
   return delays;
 }
 
-extern "C" {
 void Battle_Ai_InvalidateSessionBindings(void) {
   // The arena was already reset: never dereference or free its former bindings.
   ClearRoomAiBindings();
@@ -269,4 +263,3 @@ void Battle_Ai_InvalidateSessionBindings(void) {
   Battle_Ai_candidateEngagedThisUpdate = 0;
   Core_Debugf("ai.lifecycle", "invalidated AI bindings after game-arena reset");
 }
-}  // extern "C"

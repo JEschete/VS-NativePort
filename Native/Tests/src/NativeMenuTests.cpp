@@ -16,24 +16,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/SoundPlaybackLive.hpp"
-#include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Log.hpp"
-#include "Ending/EndingLive.hpp"
-#include "Save/FileMenuLive.hpp"
-#include "Save/NativeContainerLive.hpp"
-#include "Save/NativeFilePresentation.hpp"
-#include "Save/NativeMenu.h"
-#include "Save/NativeMenu.hpp"
-#include "Save/RuntimeSnapshot.hpp"
-
-extern "C" {
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Boot/GameLoop.h"
+#include "Content/DataStore.hpp"
+#include "Content/ModuleData.h"
+#include "Core/Log.hpp"
+#include "Ending/EndingLive.hpp"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
@@ -41,12 +33,17 @@ extern "C" {
 #include "Items/Categories.h"
 #include "Menu/Files.h"
 #include "Menu/FilesLiveState.h"
+#include "Save/FileMenuLive.hpp"
+#include "Save/NativeContainerLive.hpp"
+#include "Save/NativeFilePresentation.hpp"
+#include "Save/NativeMenu.h"
+#include "Save/NativeMenu.hpp"
+#include "Save/RuntimeSnapshot.hpp"
 #include "State/Ashley.h"
 #include "State/Location.h"
 #include "State/PlayTime.h"
 #include "State/RoomMemory.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace {
 namespace fs = std::filesystem;

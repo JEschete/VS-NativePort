@@ -6,38 +6,35 @@
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Audio/AmbienceLive.hpp"
-#include "Battle/HudOrchestrationLive.hpp"
-#include "Battle/HudStateLive.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Core/Log.hpp"
-#include "Effects/SecondaryEffectRequestsLive.hpp"
-#include "Field/MapLive.hpp"
-#include "Field/RoomRenderingLive.hpp"
-#include "Field/RoomStateLive.hpp"
-#include "Field/TransitionsLive.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "State/ScriptFlagsLive.hpp"
-
-extern "C" {
 #include "Actors/Location.h"
+#include "Audio/AmbienceLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
+#include "Battle/HudOrchestrationLive.hpp"
+#include "Battle/HudStateLive.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
+#include "Core/Log.hpp"
+#include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
+#include "Field/MapLive.hpp"
 #include "Field/PlatformPlacementLive.h"
+#include "Field/RoomRenderingLive.hpp"
+#include "Field/RoomStateLive.hpp"
+#include "Field/TransitionsLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActionSelection.h"
+#include "Menu/Framework/FrameworkLive.hpp"
+#include "Render/PaletteAnimationLive.hpp"
+#include "State/ScriptFlagsLive.hpp"
 
 // decomp: D_800F1968 (D_800F1968@BATTLE/BATTLE.PRG)
 int Field_isInteractionPaused;
-}
 
 namespace VS::Field {
 namespace {

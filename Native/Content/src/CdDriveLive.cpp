@@ -21,13 +21,10 @@
 #include "Content/CdDrive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.h"
-#include "State/GameClockLive.hpp"
-
-extern "C" {
 #include "DiscQueue.h"
 #include "Legacy/LibDs.h"
+#include "State/GameClockLive.hpp"
 #include "State/PlayTime.h"
-}
 
 namespace VS::Content {
 namespace {

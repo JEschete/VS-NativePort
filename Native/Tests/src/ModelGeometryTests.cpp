@@ -7,14 +7,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Render/ModelGeometry.hpp"
-#include "Render/ModelGeometryLive.hpp"
-
-extern "C" {
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Field/Gimmicks.h"
-}
+#include "Render/ModelGeometry.hpp"
+#include "Render/ModelGeometryLive.hpp"
 
 namespace {
 namespace Render = VS::Render;

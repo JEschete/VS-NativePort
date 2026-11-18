@@ -8,22 +8,20 @@
 #include <span>
 #include <type_traits>
 
-#include "Battle/TargetPages.hpp"
-#include "Battle/TargetingLive.hpp"
-#include "Core/Log.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Sounds.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/UiPackets.hpp"
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
+#include "Battle/TargetPages.hpp"
+#include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
+#include "Core/Log.hpp"
 #include "Field/Interactions.h"
 #include "Input/ControllerLiveState.h"
-}
+#include "Legacy/Psx.h"
+#include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
+#include "Render/UiPackets.hpp"
 
 namespace {
 constexpr auto kSlots = std::extent_v<decltype(Battle_ActionState::previews)>;

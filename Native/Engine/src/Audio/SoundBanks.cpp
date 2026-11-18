@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
 #include "DiscQueue.h"
@@ -22,4 +21,3 @@ char Audio_waveBankFileMap[] = { 0, 65, 66, 66, 68, 69, 67, 85, 68, 93, 69, 68, 
     51, 50, 52, 49, 47, 46, 45, 45, 45, 44, 44, 43, 42, 41, 40, 39, 38, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0 };
 
-}  // extern "C"

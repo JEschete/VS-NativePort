@@ -7,14 +7,12 @@
 #include <span>
 
 #include "Core/Log.hpp"
-#include "Effects/ScreenDistortion/RadialWarp.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
 #include "Core/Math/FixedPoint.h"
+#include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenEffects.h"
+#include "Legacy/Psx.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace VS::Effects::ScreenDistortion {
 namespace {

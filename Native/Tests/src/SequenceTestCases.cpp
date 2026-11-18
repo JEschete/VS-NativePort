@@ -11,42 +11,41 @@
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 
-extern "C" int Tests_SharedSequenceOffsets(void);
-extern "C" int Tests_AdvanceSequenceWithoutScratch(void);
-extern "C" int Tests_BlendSequencePose(int mode);
-extern "C" int Tests_ModelWorkspaceIsolation(void);
-extern "C" int Tests_ModelProjectionGroups(void);
-extern "C" int Tests_ModelPolygonPackets(int colored, int split);
-extern "C" int TestsModelGimmickOverridePackets(unsigned state,
-                                                unsigned pulse_mask, int limb);
-extern "C" int TestsModelWeaponOverridePackets(unsigned state,
-                                               unsigned pulse_mask, int limb);
-extern "C" int TestsModelLimbPalettePackets(int colored, int split, int limb,
-                                            unsigned pulse_mask);
-extern "C" int TestsModelAppearancePackets(int colored, int split,
-                                           unsigned state, unsigned pulse_mask);
-extern "C" int Tests_ActorPoseHierarchy(void);
-extern "C" int Tests_ProjectedBoneEndpoints(void);
-extern "C" int TestBoneEndpointOwner(int owner, int endpoint);
-extern "C" int TestScriptedEffectTargetBinding(int scenario);
-extern "C" int TestSharedSequenceRetirement(void);
-extern "C" int TestSharedSequenceRetirementControl(int scenario);
-extern "C" int TestAnimationEventUnwind(int scenario);
-extern "C" int TestOptionalActorScriptSlide(int present, int rate, int skip);
-extern "C" int TestOptionalMovementWrapper(int operation, int rate);
-extern "C" int TestGimmickStackTop(int scenario);
-extern "C" int Tests_RoomSpawnCountGuard(void);
-extern "C" int Tests_ActorTextureFrameRectangles(int wide, int fallback,
-                                                 unsigned* command);
-extern "C" int Tests_FacialTextureBankHandoff(void);
-extern "C" int Tests_GimmickRoomScale(void);
-extern "C" int Tests_DirectMovementCommand(void);
-extern "C" int Tests_TargetSphereWireframe(void);
-extern "C" int Tests_TargetLabelStride(void);
-extern "C" int Tests_SparseIdlePoseReset(void);
-extern "C" int Tests_ActionCameraRecovery(void);
-extern "C" int TestBattleAnimationHeaderOutputs(int consumer, int mode,
-                                                int available);
+int Tests_SharedSequenceOffsets(void);
+int Tests_AdvanceSequenceWithoutScratch(void);
+int Tests_BlendSequencePose(int mode);
+int Tests_ModelWorkspaceIsolation(void);
+int Tests_ModelProjectionGroups(void);
+int Tests_ModelPolygonPackets(int colored, int split);
+int TestsModelGimmickOverridePackets(unsigned state, unsigned pulse_mask,
+                                     int limb);
+int TestsModelWeaponOverridePackets(unsigned state, unsigned pulse_mask,
+                                    int limb);
+int TestsModelLimbPalettePackets(int colored, int split, int limb,
+                                 unsigned pulse_mask);
+int TestsModelAppearancePackets(int colored, int split, unsigned state,
+                                unsigned pulse_mask);
+int Tests_ActorPoseHierarchy(void);
+int Tests_ProjectedBoneEndpoints(void);
+int TestBoneEndpointOwner(int owner, int endpoint);
+int TestScriptedEffectTargetBinding(int scenario);
+int TestSharedSequenceRetirement(void);
+int TestSharedSequenceRetirementControl(int scenario);
+int TestAnimationEventUnwind(int scenario);
+int TestOptionalActorScriptSlide(int present, int rate, int skip);
+int TestOptionalMovementWrapper(int operation, int rate);
+int TestGimmickStackTop(int scenario);
+int Tests_RoomSpawnCountGuard(void);
+int Tests_ActorTextureFrameRectangles(int wide, int fallback,
+                                      unsigned* command);
+int Tests_FacialTextureBankHandoff(void);
+int Tests_GimmickRoomScale(void);
+int Tests_DirectMovementCommand(void);
+int Tests_TargetSphereWireframe(void);
+int Tests_TargetLabelStride(void);
+int Tests_SparseIdlePoseReset(void);
+int Tests_ActionCameraRecovery(void);
+int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available);
 
 TEST_CASE(
     "Action recovery reads the owning camera state rather than detached "

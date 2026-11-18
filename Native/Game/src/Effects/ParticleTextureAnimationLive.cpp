@@ -11,15 +11,12 @@
 
 #include "Core/Log.hpp"
 #include "Effects/EffectResources.hpp"
+#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimation.hpp"
-#include "Effects/TextureBindings.hpp"
-
-extern "C" {
-#include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-}
+#include "Effects/TextureBindings.hpp"
 
 namespace VS::Effects {
 namespace {

@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "LegacyFiles.h"
 
@@ -39,4 +38,3 @@ u_short Content_legacyMaterialModelSequenceDiscOffsets[16][4]; /* contents: modu
 // decomp: D_800E8EFC (D_800E8EFC@BATTLE/BATTLE.PRG)
 u_char Content_legacyMaterialModelSequenceSectorCounts[11][4]; /* contents: module image (ModuleData.cpp) */
 
-}  // extern "C"

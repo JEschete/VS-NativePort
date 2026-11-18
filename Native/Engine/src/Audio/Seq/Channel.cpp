@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
@@ -55,4 +54,3 @@ State_StateFlags Audio_Seq_unusedStateFlags;
 // decomp: vs_main_inventoryIndices (vs_main_inventoryIndices@SLUS_010.40)
 Items_InventoryIndices Audio_Seq_unusedInventoryIndices;
 
-}  // extern "C"

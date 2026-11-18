@@ -9,32 +9,29 @@
 #include <span>
 #include <string_view>
 
+#include "Audio/Seq/Channel.h"
 #include "Battle/AbilitiesLive.hpp"
+#include "Battle/AbilityState.h"
+#include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
+#include "Battle/ActionTable.h"
+#include "Battle/Actor.h"
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Field/ChestInteractionsLive.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/Menus.h"
+#include "Menu/Magic.h"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenus.hpp"
 #include "Menu/MagicTerminal.hpp"
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/Sounds.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/AbilityState.h"
-#include "Battle/Action.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Actor.h"
-#include "Input/ControllerLiveState.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/Menus.h"
-#include "Menu/Magic.h"
 #include "Render/Text/CompactFont.h"
-}
+#include "Render/UiPacketsLive.hpp"
 
 namespace VS::Menu::Magic {
 namespace {

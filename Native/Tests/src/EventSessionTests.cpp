@@ -13,28 +13,25 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/TargetingState.h"
 #include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraTrackLive.hpp"
-#include "Event/ScriptVmLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/SceneNotifications.hpp"
-#include "Menu/SceneNotificationsLive.hpp"
-#include "TestSupport/ScriptSources.hpp"
-
-extern "C" {
-#include "Battle/TargetingState.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
+#include "Event/ScriptVmLive.hpp"
+#include "Legacy/Psx.h"
+#include "Menu/SceneNotifications.hpp"
+#include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
 #include "State/Timers.h"
-}
+#include "TestSupport/ScriptSources.hpp"
 
 namespace {
 constexpr std::array<u_char, 4> kEyeReturn{0xD4, 0x10, 0x10, 0x55};

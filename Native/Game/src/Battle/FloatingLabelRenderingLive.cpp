@@ -9,21 +9,18 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/Feedback.h"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
 #include "Content/ModuleData.h"
-#include "Render/GameFont.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-#include "Render/UiTexturedQuads.hpp"
-
-extern "C" {
-#include "Battle/Feedback.h"
 #include "Core/Diagnostics.h"
 #include "Render/Display.h"
+#include "Render/GameFont.hpp"
 #include "Render/Render.h"
+#include "Render/SpritesLive.hpp"
 #include "Render/Text/CompactFont.h"
-}
+#include "Render/UiPacketsLive.hpp"
+#include "Render/UiTexturedQuads.hpp"
 
 namespace VS::Battle {
 namespace {

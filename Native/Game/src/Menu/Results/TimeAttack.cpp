@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
@@ -22,4 +21,3 @@ int Menu_Results_screenTimer;
 // decomp: _timeTrialTime (_timeTrialTime@src/MENU/MENUF.PRG/3B8.c)
 int Menu_Results_timeTrialTime;
 
-}  // extern "C"

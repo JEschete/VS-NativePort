@@ -8,10 +8,8 @@
 #include "Content/OverlayWorkspace.hpp"
 #include "OverlayWorkspaceLiveState.h"
 
-extern "C" {
 // decomp: D_800F18F8 (D_800F18F8@BATTLE/BATTLE.PRG)
 char Content_overlayWorkspaceOwner;
-}
 
 namespace VS::Content {
 namespace {

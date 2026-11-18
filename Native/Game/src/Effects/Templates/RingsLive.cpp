@@ -36,7 +36,6 @@ constexpr std::size_t kFullPaletteEntries = kRingPaletteMask + 1;
 constexpr std::size_t kPaletteEntryBytes = 4;
 }  // namespace
 
-extern "C" {
 #include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Scratch.h"
@@ -143,7 +142,6 @@ extern CVECTOR Effects_Plg297_closedRingColorFactors[kFullPaletteEntries];
 extern u_char Effects_Plg297_ringColorFactors[kFullPaletteEntries]
                                              [kPaletteEntryBytes];
 extern CVECTOR Effects_Plg301_closedRingColorFactors[kFullPaletteEntries];
-}
 
 namespace VS::Effects::Templates {
 namespace {

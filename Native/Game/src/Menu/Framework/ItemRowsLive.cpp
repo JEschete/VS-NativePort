@@ -11,34 +11,31 @@
 #include <span>
 #include <string_view>
 
-#include "Content/CdDriveLive.hpp"
-#include "Core/Log.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Items/EquipmentLive.hpp"
-#include "Items/ItemRecordsLive.hpp"
-#include "Menu/Container/ContainerDetailHelpersLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/ItemRows.hpp"
-#include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Render/EncodedText.hpp"
-#include "Render/EncodedTextLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/TargetingState.h"
+#include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
+#include "Core/Log.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
+#include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
+#include "Items/ItemRecordsLive.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
+#include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/Framework.hpp"
+#include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRows.hpp"
+#include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/ItemRowsLiveState.h"
-}
+#include "Render/EncodedText.hpp"
+#include "Render/EncodedTextLive.hpp"
 
 namespace VS::Menu::Framework {
 namespace {
@@ -516,7 +513,6 @@ void ResetLiveItemRowsStatics() {
 }
 }  // namespace VS::Menu::Framework
 
-extern "C" {
 // decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG 2D10.c:42)
 u_short* Menu_Framework_itemHelp = nullptr;
 // decomp: vs_mainMenu_itemNames (MENU/MAINMENU.PRG 2D10.c:150): the module
@@ -528,4 +524,3 @@ u_short* Menu_Framework_menu12Text = nullptr;
 // decomp: vs_mainMenu_weaponHands (MENU/MAINMENU.PRG 2D10.c:157)
 u_char Menu_Framework_weaponHands[kMenuWeaponHandCategories] = {0, 0, 1, 0, 1,
                                                                 0, 1, 1, 1, 0};
-}

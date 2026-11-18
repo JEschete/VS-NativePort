@@ -13,29 +13,26 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/MusicVoiceConflicts.hpp"
-#include "Audio/SampleBanksLive.hpp"
-#include "Audio/SeqControlCommands.hpp"
-#include "Audio/SeqMusicSequence.hpp"
-#include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SeqSequencer.hpp"
-#include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/VoiceOutputLive.hpp"
-#include "Audio/XaMixLive.hpp"
-
-extern "C" {
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/MusicState.h"
+#include "Audio/MusicVoiceConflicts.hpp"
+#include "Audio/SampleBanksLive.hpp"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Audio/SeqControlCommands.hpp"
+#include "Audio/SeqMusicSequence.hpp"
+#include "Audio/SeqRecordsLive.hpp"
+#include "Audio/SeqSequencer.hpp"
+#include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
-}
+#include "Audio/VoiceOutputLive.hpp"
+#include "Audio/XaMixLive.hpp"
 
 namespace VS::Audio::Seq {
 namespace {

@@ -4,10 +4,6 @@
 // transitional shims). C++ code uses Core/Unported.hpp; both record into the
 // same table.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void Core_RecordUnported(const char* site);
 
 // printf-style diagnostics; formatting is skipped when the level/channel is
@@ -15,10 +11,6 @@ void Core_RecordUnported(const char* site);
 // uses debug level.
 void Core_Tracef(const char* format, ...);
 void Core_Debugf(const char* channel, const char* format, ...);
-
-#ifdef __cplusplus
-}
-#endif
 
 #ifndef VS_UNPORTED
 #define VS_UNPORTED(site) Core_RecordUnported(site)

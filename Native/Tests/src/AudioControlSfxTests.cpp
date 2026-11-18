@@ -17,6 +17,7 @@
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/Sfx.hpp"
 #include "Audio/SfxLive.hpp"
+#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
 #include "Audio/SoundControlLive.hpp"
@@ -24,10 +25,6 @@
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundPlayback.hpp"
 #include "Content/ModuleData.h"
-
-extern "C" {
-#include "Audio/SoundBanks.h"
-}
 
 namespace {
 namespace Audio = VS::Audio;

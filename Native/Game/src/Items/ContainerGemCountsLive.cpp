@@ -2,10 +2,7 @@
 
 #include "Items/ContainerGemCounts.hpp"
 #include "Items/ContainerIndexingLive.hpp"
-
-extern "C" {
 #include "Menu/Container/ItemView.h"
-}
 
 namespace VS::Items {
 // decomp: _getWeaponsubItemCount (src/MENU/MENUD.PRG/234.c:1959)

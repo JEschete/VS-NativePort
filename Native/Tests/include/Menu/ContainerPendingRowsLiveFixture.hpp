@@ -8,22 +8,19 @@
 #include <stdexcept>
 #include <vector>
 
+#include "Boot/OverlayReset.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
+#include "Legacy/Input/LibPad.h"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
 #include "Menu/ContainerPendingRowsWorld.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-#include "Legacy/Input/LibPad.h"
 #include "State/Timers.h"
-}
 
 namespace container_pending_rows_live_tests {
 namespace rows = VS::Menu::container;

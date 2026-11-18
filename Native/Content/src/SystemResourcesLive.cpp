@@ -7,17 +7,14 @@
 #include <span>
 
 #include "Content/CdDriveLive.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/SystemResources.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-#include "Legacy/Psx.h"
 #include "SystemResources.h"
-}
 
 namespace VS::Content {
 namespace {

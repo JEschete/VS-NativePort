@@ -9,6 +9,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -17,15 +18,11 @@
 #include "Field/Background.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
-
-extern "C" {
-#include "Core/BiosRand.h"
 #include "Field/EnvironmentLiveState.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/Weather.h"
-}
 
 namespace VS::Effects {
 namespace {

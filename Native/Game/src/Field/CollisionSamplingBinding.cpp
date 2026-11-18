@@ -3,13 +3,10 @@
 #include <span>
 
 #include "Field/CollisionSampling.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
+#include "Legacy/Psx.h"
 
 std::span<const std::byte> VS::Field::LiveRoomCollisionMap() {
   if (Field_roomData.collisionMap == nullptr) return {};

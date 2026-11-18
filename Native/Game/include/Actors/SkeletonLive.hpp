@@ -5,10 +5,7 @@
 
 #include "Actors/Skeleton.hpp"
 #include "Core/Math/Matrix.hpp"
-
-extern "C" {
 #include "Legacy/Psx.h"
-}
 
 struct Actors_ActorRecord;
 

@@ -5,7 +5,6 @@
 // Transitional shims (plan §2.2). Each records VS_UNPORTED until it translates
 // into the modern system.
 
-extern "C" {
 long LegacyApi_open(char* path, unsigned long mode) {
   (void)path;
   (void)mode;
@@ -100,5 +99,3 @@ long _card_format(long chan) {
   VS_UNPORTED("libcard:_card_format");
   return {};
 }
-
-}  // extern "C"

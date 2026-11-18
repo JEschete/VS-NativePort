@@ -10,36 +10,33 @@
 #include <span>
 
 #include "Audio/MusicLive.hpp"
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
+#include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "DiscQueue.h"
+#include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
+#include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
+#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsPalette.hpp"
+#include "Menu/Results/TimeAttack.h"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
+#include "Render/FramebufferEffects.h"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TimImage.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/SceneTimerLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/StatusEffects.h"
-#include "Core/Diagnostics.h"
-#include "DiscQueue.h"
-#include "Input/ControllerLiveState.h"
-#include "Menu/Results/CubePuzzle.h"
-#include "Menu/Results/Results.h"
-#include "Menu/Results/TimeAttack.h"
-#include "Render/FramebufferEffects.h"
 #include "State/Progress.h"
+#include "State/SceneTimerLive.hpp"
 #include "State/StateFlags.h"
-}
 
 namespace VS::Menu::Results {
 namespace {

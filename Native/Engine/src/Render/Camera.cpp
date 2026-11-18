@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Render/Camera.h"
 
@@ -12,4 +11,3 @@ MATRIX Render_cameraBasisMatrix;
 // decomp: vs_main_projectionDistance (vs_main_projectionDistance@SLUS_010.40)
 int Render_projectionDistance;
 
-}  // extern "C"

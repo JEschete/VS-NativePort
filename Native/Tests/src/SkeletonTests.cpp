@@ -12,23 +12,20 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/Appearance.hpp"
+#include "Actors/Movement.h"
+#include "Actors/Skeleton.h"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLive.hpp"
+#include "Actors/SkeletonLiveState.h"
+#include "Actors/WeaponModel.h"
 #include "Content/ModuleData.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/Gimmicks.h"
 #include "Render/ModelGeometryLive.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/WeaponModel.h"
-#include "Field/Gimmicks.h"
-}
 
 namespace actors = VS::Actors;
 using actors::BoneLabels;

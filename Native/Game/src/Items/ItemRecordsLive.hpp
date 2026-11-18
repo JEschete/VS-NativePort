@@ -13,28 +13,25 @@
 #include <type_traits>
 #include <utility>
 
-#include "Battle/FloatingLabelProducersLive.hpp"
-#include "Battle/StatusLifecycleLive.hpp"
-#include "Items/EquipmentAffinity.hpp"
-#include "Items/EquipmentStats.hpp"
-#include "Items/ItemRecords.hpp"
-
-extern "C" {
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Items/Equipment.h"
+#include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentInit.h"
+#include "Items/EquipmentStats.hpp"
 #include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Items::Live {
 template <typename Legacy>

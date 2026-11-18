@@ -6,12 +6,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Boot/OverlayReset.h"
 #include "Content/ModuleData.h"
 #include "Menu/ContainerDetailControllersLiveFixture.hpp"
-
-extern "C" {
-#include "Boot/OverlayReset.h"
-}
 
 namespace {
 namespace detail = container_detail_controllers_tests::detail;

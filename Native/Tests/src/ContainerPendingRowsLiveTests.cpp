@@ -8,11 +8,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Menu/Container/ContainerListTransferLive.hpp"
-#include "Menu/ContainerPendingRowsLiveFixture.hpp"
-
-extern "C" {
 #include "Menu/Container/ItemView.h"
-}
+#include "Menu/ContainerPendingRowsLiveFixture.hpp"
 
 namespace {
 namespace tests = container_pending_rows_live_tests;

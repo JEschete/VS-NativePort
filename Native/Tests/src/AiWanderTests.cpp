@@ -14,19 +14,16 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/AiState.h"
+#include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/AreaRoute.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Wander.hpp"
 #include "Battle/Ai/WanderLive.hpp"
 #include "Content/ModuleData.h"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/FrameUpdate.h"
-}
 
 namespace {
 namespace ai = VS::Battle::Ai;

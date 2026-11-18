@@ -13,12 +13,9 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Ai/TileHeightSampling.hpp"
 #include "Core/Math/Distance.hpp"
-
-extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
 
 namespace {
 using VS::Battle::Ai::BuildRoomAiMap;

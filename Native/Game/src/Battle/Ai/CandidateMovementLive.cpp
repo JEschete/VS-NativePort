@@ -12,29 +12,27 @@
 #include <type_traits>
 #include <vector>
 
-#include "Battle/Ai/ActionExecutionLive.hpp"
-#include "Battle/Ai/ActorCleanupLive.hpp"
-#include "Battle/Ai/CandidateMovement.hpp"
-#include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Battle/Ai/RadialMovementLive.hpp"
-#include "Core/Math/ScalarMath.hpp"
-#include "Field/TerrainHeight.hpp"
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActionExecutionLive.hpp"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/CandidateMovement.hpp"
+#include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-}
+#include "Core/Math/ScalarMath.hpp"
+#include "Field/TerrainHeight.hpp"
 
 namespace VS::Battle::Ai {
 namespace {

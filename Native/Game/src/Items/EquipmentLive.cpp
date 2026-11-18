@@ -12,21 +12,18 @@
 #include <span>
 #include <utility>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/AbilityState.h"
+#include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacementLive.hpp"
+#include "Battle/Hit.h"
+#include "Battle/StatusEffects.h"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/EquipmentWear.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Recovery.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/AbilityState.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
-}
 
 namespace VS::Items {
 namespace {

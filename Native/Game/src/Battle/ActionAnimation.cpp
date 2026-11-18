@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/ActionAnimation.h"
 
@@ -12,4 +11,3 @@ int Battle_chainAbilityAnimationSide;
 // decomp: D_800F49E4 (D_800F49E4@BATTLE/BATTLE.PRG)
 char Battle_specialActionPitch;
 
-}  // extern "C"

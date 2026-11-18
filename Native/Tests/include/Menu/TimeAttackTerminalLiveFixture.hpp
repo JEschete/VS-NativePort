@@ -10,14 +10,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
-#include "Menu/Results/TimeAttackTerminalLive.hpp"
-#include "Render/ScreenOverlayLive.hpp"
-
-extern "C" {
 #include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Render/FramebufferEffects.h"
+#include "Render/ScreenOverlayLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace time_attack_terminal_live_tests {
 namespace results = VS::Menu::Results;

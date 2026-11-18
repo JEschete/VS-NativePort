@@ -11,18 +11,15 @@
 
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/ActorMarkers.hpp"
-#include "Core/Log.hpp"
-#include "Render/Sprites.hpp"
-#include "Render/SpritesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Battle/Feedback.h"
 #include "Core/Gte.h"
+#include "Core/Log.hpp"
 #include "Field/GimmickPlacementLive.h"
 #include "Input/ControllerLiveState.h"
 #include "Render/Render.h"
-}
+#include "Render/Sprites.hpp"
+#include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 
 namespace VS::Battle {
 namespace {

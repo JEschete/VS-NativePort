@@ -9,18 +9,15 @@
 #include <iterator>
 
 #include "Audio/Sfx.hpp"
+#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundSlotsLive.hpp"
 #include "Audio/Stream.hpp"
 #include "Content/CdDrive.hpp"
-
-extern "C" {
-#include "Audio/SoundBanks.h"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-}
 
 namespace VS::Audio {
 namespace {

@@ -7,22 +7,19 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Hud.h"
 #include "Content/DataStore.hpp"
+#include "Core/Random.h"
 #include "Core/Random.hpp"
+#include "Effects/ScreenEffectState.h"
+#include "Effects/ScreenEffects.h"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
-
-extern "C" {
-#include "Battle/Hud.h"
-#include "Core/Random.h"
-#include "Effects/ScreenEffectState.h"
-#include "Effects/ScreenEffects.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace menu = VS::Menu;

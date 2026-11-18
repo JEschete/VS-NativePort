@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Menu/Status/ActorStatus.h"
 
@@ -111,4 +110,3 @@ void Menu_Status_ActorStatus_ResetMenu4Statics(void)
     }
 }
 
-}  // extern "C"

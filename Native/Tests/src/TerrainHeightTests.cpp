@@ -9,17 +9,14 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Math/Distance.hpp"
+#include "Field/Collision.h"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/Navigation.h"
-#include "Field/Collision.h"
-}
 
 namespace {
 struct TerrainFixture {

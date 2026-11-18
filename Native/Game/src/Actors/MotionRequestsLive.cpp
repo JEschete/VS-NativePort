@@ -11,14 +11,11 @@
 
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorMovementLive.hpp"
-#include "Actors/AnimationControlLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
+#include "Actors/AnimationControlLive.hpp"
 #include "Actors/Movement.h"
 #include "Core/Diagnostics.h"
-}
 
 namespace VS::Actors {
 namespace {

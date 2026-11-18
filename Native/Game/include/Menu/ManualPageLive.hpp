@@ -3,9 +3,7 @@
 
 #include <cstdint>
 
-extern "C" {
 #include "Menu/Manual.h"
-}
 
 // Bindings from the manual page cores (ManualPage.hpp) to the help text,
 // the back buffer's draw environment, the page arrow counter, last frame's

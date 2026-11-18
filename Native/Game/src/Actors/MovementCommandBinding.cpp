@@ -1,13 +1,10 @@
 // Hand-maintained (tools/port/owned.csv).
 #include <iterator>
 
-#include "Actors/MovementCommand.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-}
+#include "Actors/MovementCommand.hpp"
+#include "Legacy/Psx.h"
 
 namespace {
 class ActorTableMovementRequests final

@@ -10,22 +10,19 @@
 #include <type_traits>
 
 #include "Actors/SkeletonLive.hpp"
+#include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacement.hpp"
 #include "Battle/FloatingLabelProducers.hpp"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
 #include "Battle/FloatingLabelRenderingLive.hpp"
-#include "Core/Log.hpp"
-#include "Render/TextureRegionDraw.hpp"
-
-extern "C" {
-#include "Battle/Feedback.h"
 #include "Core/Gte.h"
+#include "Core/Log.hpp"
 #include "Field/RoomRenderingLiveState.h"
 #include "Input/ControllerLiveState.h"
+#include "Render/TextureRegionDraw.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Battle {
 namespace {

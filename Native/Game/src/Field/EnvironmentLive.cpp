@@ -7,17 +7,15 @@
 #include <type_traits>
 
 #include "Audio/SfxLive.hpp"
+#include "Core/BiosRand.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Effects/WeatherRenderLive.hpp"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
-#include "Field/RoomRenderingLive.hpp"
-
-extern "C" {
-#include "Core/BiosRand.h"
 #include "Field/EnvironmentLiveState.h"
 #include "Field/Gimmicks.h"
+#include "Field/RoomRenderingLive.hpp"
 
 // decomp: D_800F1D98 (D_800F1D98@BATTLE/BATTLE.PRG)
 int16_t Field_weatherParameters[kFieldWeatherParameterWords];
@@ -37,7 +35,6 @@ char Field_roomWeatherKind;
 char Field_isWeatherVariationEnabled;
 // decomp: D_800F1DD4 (D_800F1DD4@BATTLE/BATTLE.PRG)
 Field_WeatherParticle* Field_weatherParticles;
-}
 
 namespace {
 // The original's particle record (146C.h) and D_800F1D98's word indices:

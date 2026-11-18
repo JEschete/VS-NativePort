@@ -2,9 +2,6 @@
 
 #include "Field/Platforms.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 void Field_InitializeMovingPlatformsEntry(void);
 void Field_DrawMovingPlatformShadowsEntry(void);
 void Field_SetPlatformFreezeAppearanceEntry(int requested);
@@ -19,6 +16,3 @@ void Field_FreezeMovingPlatformsEntry(int freeze_frames);
 void Field_FreezeRoomGimmicksTemporarilyEntry(void);
 void Field_SetMovingPlatformVisibilityEntry(int platform_index, int visibility);
 unsigned int Field_MovingPlatformDwellTicksEntry(int platform_index);
-#ifdef __cplusplus
-}
-#endif

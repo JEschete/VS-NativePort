@@ -5,13 +5,10 @@
 #include <span>
 
 #include "Core/Log.hpp"
-#include "Effects/TextureBindings.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Effects/Package.h"
 #include "Effects/Runtime.h"
-}
+#include "Effects/TextureBindings.hpp"
+#include "Legacy/Psx.h"
 
 static_assert(sizeof(Effects_PackageTextureInfo) ==
               VS::Effects::kTextureFrameRecordBytes);

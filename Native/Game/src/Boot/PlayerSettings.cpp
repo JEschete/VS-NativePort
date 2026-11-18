@@ -1,4 +1,3 @@
-extern "C" {
 #include "Boot/PlayerSettings.h"
 
 #include <string.h>
@@ -18,4 +17,3 @@ void Boot_InitializePlayerSettings(void) {
   Input_settings.abilityTimingDisplay = 1;
   Input_settings.cursorMemory = 1;
 }
-}  // extern "C"

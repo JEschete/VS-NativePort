@@ -11,18 +11,15 @@
 
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/ManualPage.hpp"
-#include "Menu/ManualPageLive.hpp"
-
-extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Manual.h"
+#include "Menu/ManualPage.hpp"
+#include "Menu/ManualPageLive.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-}
 
 // Contracts of the manual page's frame (MENUE.PRG 494.c:577-616, 716-881,
 // 962-987): content clipping, the page background, the scroll fades, the

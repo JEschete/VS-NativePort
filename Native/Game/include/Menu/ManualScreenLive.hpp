@@ -3,9 +3,7 @@
 
 #include <cstdint>
 
-extern "C" {
 #include "Legacy/Psx.h"
-}
 
 // Bindings from the manual screen and help page cores (ManualScreen.hpp) to
 // MENUE.PRG's statics (Menu/Manual.h), the menu framework, the HUD, the game

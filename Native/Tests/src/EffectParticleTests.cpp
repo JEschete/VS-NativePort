@@ -17,6 +17,8 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
 #include "Effects/PackageExtents.hpp"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
 #include "Effects/Templates/ParticleControl.hpp"
 #include "Effects/Templates/ParticleCore.hpp"
 #include "Effects/Templates/ParticleDispatch.hpp"
@@ -26,11 +28,6 @@
 #include "Effects/Templates/ParticleTarget.hpp"
 #include "Effects/Templates/ParticlesLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Effects/Particles.h"
-#include "Effects/Runtime.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

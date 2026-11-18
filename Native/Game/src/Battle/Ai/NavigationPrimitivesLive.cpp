@@ -13,33 +13,31 @@
 #include <optional>
 #include <span>
 
+#include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
-#include "Battle/Ai/SpecialTerrainLive.hpp"
-#include "Core/FrameTiming.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Field/PlatformPlacementLive.hpp"
-#include "Legacy/Psx.h"
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Movement.h"
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
+#include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
+#include "Core/FrameTiming.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
-}
+#include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
 namespace {

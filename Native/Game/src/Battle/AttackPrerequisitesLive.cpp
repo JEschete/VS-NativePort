@@ -11,17 +11,14 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Core/Log.hpp"
-
-extern "C" {
 #include "Battle/Action.h"
 #include "Battle/Actor.h"
 #include "Battle/AttackPrerequisites.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
+#include "Core/Log.hpp"
 #include "Items/Equipment.h"
 #include "Items/Loadout.h"
-}
 
 namespace {
 namespace battle = VS::Battle;
@@ -145,7 +142,6 @@ int LiveCheckActionHitPrerequisite(Battle_ActionDefinition* action,
 
 // The prerequisite table slots (decomp: _attackPrerequisiteFunctions,
 // src/BATTLE/BATTLE.PRG/146C.c:628), with the dispatch ABI.
-extern "C" {
 // decomp: _hitPrerequisiteNever0..3 (146C.c:10146, 10180, 10186, 10192)
 int Battle_RejectAttackPrerequisiteSlot(Battle_ActionDefinition* /*action*/,
                                         u_char* target_result_bytes) {
@@ -343,4 +339,3 @@ int Battle_IgnoreAttackPrerequisiteSlot(Battle_ActionDefinition* /*action*/,
                                         u_char* target_result_bytes) {
   return RunRule(battle::IgnoreAttackPrerequisite, target_result_bytes);
 }
-}  // extern "C"

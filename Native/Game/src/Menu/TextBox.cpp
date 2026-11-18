@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/TextBoxes.h"
 #include "Menu/Framework/TextBoxes.h"
@@ -29,4 +28,3 @@ Menu_TextBoxState Menu_textBoxes[8];
 // decomp: D_800F51B8 (D_800F51B8@BATTLE/BATTLE.PRG)
 u_long* Menu_activeTextBoxOrderingTable;
 
-}  // extern "C"

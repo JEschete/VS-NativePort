@@ -7,31 +7,28 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/CdDrive.hpp"
-#include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/Results/GameClearLifecycleLive.hpp"
-#include "Menu/Results/TimeAttackTerminalLive.hpp"
-#include "Menu/TimeAttackTerminalLiveFixture.hpp"
-#include "Render/ScreenOverlayLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-#include "State/SceneTimerLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
+#include "Content/CdDrive.hpp"
+#include "Content/CdDriveLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
+#include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
+#include "Menu/Results/TimeAttackTerminalLive.hpp"
+#include "Menu/TimeAttackTerminalLiveFixture.hpp"
+#include "Render/ScreenOverlayLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "State/Progress.h"
+#include "State/SceneTimerLive.hpp"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
-}
 
 namespace {
 namespace r = VS::Menu::Results;

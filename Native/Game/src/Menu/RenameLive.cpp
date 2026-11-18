@@ -12,32 +12,29 @@
 #include <string_view>
 #include <type_traits>
 
+#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
+#include "Battle/TargetingState.h"
+#include "Content/DiscLayout.h"
 #include "Core/Log.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentLive.hpp"
+#include "Items/Inventory.h"
+#include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/TextBoxes.h"
 #include "Menu/Rename.hpp"
+#include "Menu/RenameLiveState.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/TargetingState.h"
-#include "Content/DiscLayout.h"
-#include "Input/ControllerLiveState.h"
-#include "Items/Inventory.h"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
-#include "Menu/Framework/Menus.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/RenameLiveState.h"
-}
 
 // decomp: _renderRenameMenuStrings (src/MENU/MENU8.PRG/21A0.c)
 u_short Menu_Rename_renderRenameMenuStrings[kMenuRenameMenuStringCount];

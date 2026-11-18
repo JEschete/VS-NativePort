@@ -8,23 +8,20 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/SoundPlaybackLive.hpp"
-#include "Core/BiosRand.h"
-#include "Legacy/Psx.h"
-#include "Menu/Results/GameClearLifecycleLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-
-extern "C" {
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Sfx.h"
+#include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
+#include "Core/BiosRand.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
+#include "Legacy/Psx.h"
+#include "Menu/Results/GameClearLifecycleLive.hpp"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
-}
+#include "Render/TexturePagesLive.hpp"
 
 namespace {
 void IgnoreAudio(Audio_CommandParams*) {}

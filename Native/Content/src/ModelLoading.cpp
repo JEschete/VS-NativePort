@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
 #include "Actors/WeaponModel.h"
@@ -88,4 +87,3 @@ Content_ActorAssetRequest Content_legacyActorAssetRequests[16];
 // decomp: vs_battle_commonWepBuffs (vs_battle_commonWepBuffs@BATTLE/BATTLE.PRG)
 Actors_WeaponModelData* Content_legacyWeaponModelBuffers[84];
 
-}  // extern "C"

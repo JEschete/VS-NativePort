@@ -12,13 +12,11 @@
 
 #include "Audio/SoundBanks.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelinePlayback.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/Transforms.hpp"
-extern "C" {
-#include "Effects/Runtime.h"
-}
 
 namespace {
 namespace fx = VS::Effects;

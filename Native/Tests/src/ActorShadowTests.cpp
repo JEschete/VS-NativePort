@@ -10,32 +10,29 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/ModelDrawingLive.hpp"
-#include "Content/ModuleData.h"
-#include "Field/ActorCollisionLive.hpp"
-#include "Legacy/Psx.h"
-#include "Render/ModelGeometryLive.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
+#include "Content/ModuleData.h"
+#include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
+#include "Legacy/Psx.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelGeometryLive.hpp"
 #include "Render/ModelWorkspace.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
 extern unsigned int Content_battleShadowVertices[18];
 extern unsigned int Content_battleShadowFaces[24];
-}
 
 static_assert(std::is_same_v<decltype(&VS::Render::DrawLiveActorGroundShadow),
                              void (*)(Actors_ActorRecord&, const MATRIX&,

@@ -6,23 +6,20 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/Hud.h"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
 #include "Legacy/Psx.h"
-#include "State/SceneTimerLive.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/Hud.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
+#include "State/SceneTimerLive.hpp"
 #include "State/Timers.h"
-}
 
-extern "C" int Tests_EncodedTextFormatting(void);
+int Tests_EncodedTextFormatting(void);
 
 TEST_CASE(
     "Encoded text formatting retains zero glyphs and terminates nested strings",
@@ -30,10 +27,9 @@ TEST_CASE(
   REQUIRE(Tests_EncodedTextFormatting() == 1);
 }
 
-extern "C" int Tests_ScaledDialogueGlyphs(void);
-extern "C" int Tests_CompactTextAndGaugeLinks(void);
-extern "C" int CheckFeedbackEffectDialogueLinks(int framebuffer,
-                                                int feedback_layer);
+int Tests_ScaledDialogueGlyphs(void);
+int Tests_CompactTextAndGaugeLinks(void);
+int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer);
 
 TEST_CASE("Compact text and gauge chains retain native packet links",
           "[render][text]") {
@@ -56,7 +52,7 @@ TEST_CASE("Screen feedback preserves the dialogue ordering chain",
   }
 }
 
-extern "C" int CheckMenuRowNativeLinks(int scrolling);
+int CheckMenuRowNativeLinks(int scrolling);
 
 TEST_CASE("Menu rows use native overlay links without changing scene ordering",
           "[render][menu][links]") {
@@ -64,21 +60,21 @@ TEST_CASE("Menu rows use native overlay links without changing scene ordering",
   REQUIRE(CheckMenuRowNativeLinks(1) == 1);
 }
 
-extern "C" int CheckMenuWorkspaceReset(void);
+int CheckMenuWorkspaceReset(void);
 
 TEST_CASE("Menu initialization clears every native row and scratch byte",
           "[render][menu][workspace]") {
   REQUIRE(CheckMenuWorkspaceReset() == 1);
 }
 
-extern "C" int CheckMenuReloadClosingDelay(void);
+int CheckMenuReloadClosingDelay(void);
 
 TEST_CASE("Menu reloads restore the original five-tick closing delay",
           "[render][menu][lifecycle]") {
   REQUIRE(CheckMenuReloadClosingDelay() == 1);
 }
 
-extern "C" int CheckStatusPacketLinks(int background_first);
+int CheckStatusPacketLinks(int background_first);
 
 TEST_CASE("Status background and limb packets preserve the complete UI chain",
           "[render][menu][status]") {
@@ -86,14 +82,14 @@ TEST_CASE("Status background and limb packets preserve the complete UI chain",
   REQUIRE(CheckStatusPacketLinks(1) == 1);
 }
 
-extern "C" int CheckMenuPromptPanelLinks(void);
+int CheckMenuPromptPanelLinks(void);
 
 TEST_CASE("Prompt and action-cost panels retain the lower menu chain",
           "[render][menu][panels]") {
   REQUIRE(CheckMenuPromptPanelLinks() == 1);
 }
 
-extern "C" int CheckDefaultLoadoutNames(void);
+int CheckDefaultLoadoutNames(void);
 
 TEST_CASE("Default actor and weapon names retain encoded glyphs and controls",
           "[render][menu][names]") {

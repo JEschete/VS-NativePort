@@ -5,21 +5,18 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-#include "Render/UiPacketsLive.hpp"
-
-extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
+#include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.h"
+#include "Render/TexturePagesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveCard.h"
 #include "Title/SaveFiles.h"
-}
 
 namespace VS::Save::MemoryCard {
 namespace {

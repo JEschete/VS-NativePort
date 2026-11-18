@@ -9,13 +9,10 @@
 
 #include "Content/ModuleData.h"
 #include "Field/CollisionSampling.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-}
+#include "Legacy/Psx.h"
 
 namespace {
 // A 1x1 map: header, floor and ceiling descriptors, then two 4x4 patterns.

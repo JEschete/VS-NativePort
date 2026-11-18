@@ -12,21 +12,19 @@
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
-#include "Battle/ActionOutcomesLive.hpp"
-#include "Battle/HudOrchestrationLive.hpp"
-#include "Battle/StatusLifecycleLive.hpp"
-#include "Event/CutsceneLifecycleLive.hpp"
-#include "State/SceneTimerLive.hpp"
-extern "C" {
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
+#include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/StatusEffects.h"
+#include "Battle/StatusLifecycleLive.hpp"
 #include "Core/Diagnostics.h"
+#include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.h"
+#include "State/SceneTimerLive.hpp"
 #include "State/Timers.h"
-}
 
 namespace VS::Battle {
 namespace {

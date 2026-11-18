@@ -14,38 +14,35 @@
 #include <utility>
 #include <vector>
 
+#include "Audio/Seq/Channel.h"
+#include "Battle/TargetingState.h"
 #include "Content/ModuleData.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/ControllerLiveState.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/ItemRows.hpp"
-#include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
-#include "Render/EncodedText.hpp"
-#include "Render/GameFontLive.hpp"
-#include "Render/Sprites.hpp"
-
-extern "C" {
-#include "Audio/Seq/Channel.h"
-#include "Battle/TargetingState.h"
-#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/TextBoxes.h"
+#include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
+#include "Render/EncodedText.hpp"
 #include "Render/Frame.h"
+#include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
+#include "Render/Sprites.hpp"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
-}
 
 namespace equipment_detail_tests {
 namespace inventory = VS::Menu::Inventory;

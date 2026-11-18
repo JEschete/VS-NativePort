@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
@@ -105,4 +104,3 @@ RECT const Battle_kStatChangeSecondWordRects[] = { { 104, 160, 28, 8 }, { 104, 1
     { 144, 160, 30, 8 }, { 144, 168, 14, 8 }, { 144, 176, 18, 8 }, { 144, 184, 26, 8 },
     { 144, 192, 26, 8 }, { 144, 200, 22, 8 }, { 144, 208, 36, 8 } };
 
-}  // extern "C"

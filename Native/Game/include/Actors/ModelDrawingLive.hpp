@@ -1,12 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "Actors/ModelDrawing.hpp"
-
-extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ModelDrawing.hpp"
 #include "Legacy/Psx.h"
-}
 
 // Binds the model drawing policies to the live actor records, model workspace,
 // GTE and ordering table.

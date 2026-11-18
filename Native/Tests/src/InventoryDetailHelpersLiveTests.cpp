@@ -6,20 +6,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Input/Pad.hpp"
-#include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/Framework.hpp"
-#include "Menu/Inventory/DetailsPoliciesLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Input/ControllerLiveState.h"
+#include "Input/Pad.hpp"
+#include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/MenuItems.h"
+#include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
-}
 
 namespace {
 namespace inventory = VS::Menu::Inventory;

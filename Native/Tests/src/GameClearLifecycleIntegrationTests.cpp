@@ -9,14 +9,11 @@
 #include "Audio/MusicLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDrive.hpp"
+#include "Content/DiscLayout.h"
 #include "Content/ModuleData.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Render/UiPacketsLive.hpp"
-
-extern "C" {
-#include "Content/DiscLayout.h"
-}
 
 namespace {
 namespace results = VS::Menu::Results;

@@ -5,14 +5,9 @@
 // BATTLE.PRG module image hold these bindings; each runs its rule on the
 // target actor named by the hit's target result bytes
 // (AttackPrerequisitesLive.cpp).
-#include "Legacy/Psx.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "Battle/Action.h"
 #include "Battle/AttackPrerequisiteTable.h"
+#include "Legacy/Psx.h"
 
 int Battle_RejectAttackPrerequisiteSlot(Battle_ActionDefinition* action,
                                         u_char* target_result_bytes);
@@ -80,7 +75,3 @@ int Battle_CanApplyDrainSlot(Battle_ActionDefinition* action,
                              u_char* target_result_bytes);
 int Battle_IgnoreAttackPrerequisiteSlot(Battle_ActionDefinition* action,
                                         u_char* target_result_bytes);
-
-#ifdef __cplusplus
-}
-#endif

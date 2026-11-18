@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Field/Minimap.h"
 
@@ -12,4 +11,3 @@ short Field_minimapSlideFrame;
 // decomp: D_800F1CD6 (D_800F1CD6@BATTLE/BATTLE.PRG)
 char Field_isMinimapVisible;
 
-}  // extern "C"

@@ -14,11 +14,8 @@
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/ParticlePool.hpp"
-
-extern "C" {
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-}
 
 namespace VS::Effects {
 namespace {

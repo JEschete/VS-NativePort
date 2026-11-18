@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Ending/Credits.h"
 #include "Ending/Credits/StaffRoll.h"
@@ -49,4 +48,3 @@ u_short Ending_Credits_backgroundBrightness;
 // decomp: vs_main_frameDuration (vs_main_frameDuration@SLUS_010.40)
 u_int Ending_Credits_xaResumeFrameCount;
 
-}  // extern "C"

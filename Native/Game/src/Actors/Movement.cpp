@@ -1,5 +1,4 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -58,4 +57,3 @@ char Actors_isActorUpdateComplete;
 // decomp: D_800F4B19 (D_800F4B19@BATTLE/BATTLE.PRG)
 u_char Actors_pushedGimmickIndex;
 
-}  // extern "C"

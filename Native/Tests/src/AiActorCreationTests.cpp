@@ -18,18 +18,6 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Battle/Ai/ActorCreation.hpp"
-#include "Battle/Ai/ActorCreationLive.hpp"
-#include "Battle/Ai/ActorSettings.hpp"
-#include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Content/ModuleData.h"
-#include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Platform/App.hpp"
-#include "Platform/CrashHandler.hpp"
-#include "Render/ModelGeometryLive.hpp"
-
-extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
@@ -37,12 +25,21 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorCreation.hpp"
+#include "Battle/Ai/ActorCreationLive.hpp"
+#include "Battle/Ai/ActorSettings.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
+#include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Damage.h"
-}
+#include "Content/ModuleData.h"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/HeapLive.hpp"
+#include "Platform/App.hpp"
+#include "Platform/CrashHandler.hpp"
+#include "Render/ModelGeometryLive.hpp"
 
 // F01818 func_800E6178 (BATTLE/BATTLE.PRG/7CD68.c:934).
 namespace {

@@ -13,17 +13,14 @@
 
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
+#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Render/GameFontLive.hpp"
+#include "Render/Images.h"
 #include "Render/SpritesLive.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiTexturedQuads.hpp"
-
-extern "C" {
-#include "Menu/Results/Results.h"
-#include "Render/Images.h"
-}
 
 namespace VS::Menu::Results {
 namespace {

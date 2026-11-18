@@ -6,10 +6,6 @@
 // data ledger and the decomp's splat configs: positions only, the bytes come
 // from the user's disc at start-up.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct Content_ModuleDataEntry {
   const char* module;  // disc path of the module file (e.g. "TITLE/TITLE.PRG")
   unsigned offset;     // byte offset in that file
@@ -50,9 +46,6 @@ extern const unsigned Content_moduleSymbolCount;
 extern const Content_ModulePointerTable Content_modulePointers[];
 extern const unsigned Content_modulePointerCount;
 
-#ifdef __cplusplus
-}
-
 #include <span>
 #include <string_view>
 
@@ -65,4 +58,3 @@ bool RelocateModulePointerTable(const Content_ModulePointerTable& table,
                                 std::span<const unsigned char> image,
                                 std::span<const Content_ModuleSymbol> symbols);
 }  // namespace VS::Content
-#endif

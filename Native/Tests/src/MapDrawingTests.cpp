@@ -12,12 +12,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Menu/MapDrawing.hpp"
-#include "Menu/MapDrawingLive.hpp"
-#include "Menu/TextBoxStateLive.hpp"
-#include "Render/RoomDrawLive.hpp"
-
-extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Core/Gte.h"
 #include "Field/Doors.h"
@@ -26,13 +20,16 @@ extern "C" {
 #include "Field/Room.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Map.h"
+#include "Menu/MapDrawing.hpp"
+#include "Menu/MapDrawingLive.hpp"
+#include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
-}
 
 namespace map = VS::Menu::map;
 
