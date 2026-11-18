@@ -32,7 +32,7 @@ renumbers function IDs and rewrites the catalogs, so do not run it to refresh st
 | # | Decision | Choice | Decided by |
 |---|---|---|---|
 | D1 | What the port is | A **native source port**. Game logic is re-homed into modern C++ systems. There is no emulator, no BIOS, no guest RAM, no MIPS code, and no stand-in PS1 SDK. | Owner |
-| D2 | Role of the decomp | `resources\rood-reverseWin` is a **read-only reference**. Nothing in the solution includes, links or loads anything from `resources\`. Code is *copied* into `Native\` once, then owned there. | Owner |
+| D2 | Role of the decomp | `resources\rood-reverseWin` is a **read-only reference**. Nothing in the solution includes, links or loads anything from `resources\`. Code is *copied* into `Native\` once, then owned there. *(2026-11-18: that pinned copy was removed in `6b20016f0`; the read-only reference is now the upstream submodule `resources\rood-reverse`, and the copier is retired per D24.)* | Owner |
 | D3 | Matching | **Not a goal.** No byte matching, no register matching, no keeping the original memory layout. We are free to change types, widen IDs and add content. | Owner |
 | D4 | Architecture | **x64 only.** Windows is LLP64 (`long` = 4 bytes), so pointers are the only width change. | Owner |
 | D5 | Language | **C++23** for everything in `Native\`, with no C or assembly (owner, 2026-10-31; enforced by `tools\ledger\gates.py`). Copied code compiles as C++ with C linkage and relaxed settings; each item is then **promoted** per the checklist in §8. The original C and assembly stay under `resources\` as read-only reference. | Owner |

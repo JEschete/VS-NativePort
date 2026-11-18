@@ -309,7 +309,7 @@ tool or category to conceal native behavior or layout problems.
 - Keep exact source bytes and expected values in focused tests where they are evidence.
 - Investigate clone reports before extracting an abstraction; similar syntax alone
   does not establish identical behavior or ownership.
-- Fix copied-code defects in the copier or a registered owned implementation.
+- Fix copied-code defects in the copied file itself; the copier is retired (plan D24).
 - Keep behavior tests, native-layout checks, and build verification alongside lint.
 
 The CI workflow runs the fast gate, the ledger gate check and tool positive

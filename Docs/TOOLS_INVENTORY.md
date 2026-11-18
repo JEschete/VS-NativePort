@@ -12,7 +12,7 @@ Reuse classes:
 
 The backbone sources of truth are, in priority order:
 
-1. `resources\rood-reverseWin` — the 97.81%-matching C decompilation (code semantics).
+1. `resources\rood-reverse` — the upstream C decompilation (code semantics). The pinned copy `resources\rood-reverseWin` was removed in `6b20016f0`.
 2. `SLUS-01040\` and `disks\SLUS-01040.bin` — the original game data (assets).
 3. `resources\DataCrystal\` — file format and RAM documentation.
 4. `C:\Tools\RE_Docs\` — prior research notes (`VS_NATIVEPORT_CONTEXT.md`, `Native_Ports\VAGRANT_STORY_TOOLING.md`, `SDL3.md`, `TRACY.md`, `RENDERDOC.md`, `DW4_TOOLING.md`).
@@ -111,7 +111,7 @@ Mirrors in `tools\PSX\Asset-Tools\jpsxdec`, `tools\PSX\Emulators\{DuckStation,PC
 | `Setup-Windows.ps1`, `windows.py` | Existing environment bootstrap scripts from the decomp workflow. |
 | `Probe-Native.ps1` | Old probe script for the removed emulated-RAM build. Retire it in M0. |
 | `.clang-format`, `permuter_settings.toml` | Decomp formatting and permuter configuration. |
-| `port\` | Copy pipeline: `copy_to_native.py`, `copy_fixups.py`, `own.py`, `understood.py`, indexes (BUILDING.md §8). |
+| `port\` | Retired copy pipeline (plan D24): `copy_to_native.py`, `copy_fixups.py`, `own.py`; plus `understood.py` and indexes (BUILDING.md §8). |
 | `scaffold\gen_solution.py` | Generates the solution, including the `Tools` folder's item projects for `tools\` and `C:\Tools` (`scaffold\projects\`, entry files only for untracked trees). |
 | `test\run_native.ps1` | Copy, build and run the port with captures and scripted input (`-SkipIntro` presses Start during the movie). |
 | `test\duckstation_setup.ps1`, `test\duckstation_capture.ps1` | Portable DuckStation for reference captures, with key input. |
@@ -145,4 +145,4 @@ Mirrors in `tools\PSX\Asset-Tools\jpsxdec`, `tools\PSX\Emulators\{DuckStation,PC
 1. Only **VENDOR** code may appear under `src\`, and only with an entry in `THIRD_PARTY.md` naming the upstream URL, revision and license.
 2. For **REFERENCE** code, cite the file and line in commit messages or comments as "behavior reference". Never paste its code.
 3. Game data (`SLUS-01040\`, `disks\`, anything extracted from them) is never committed. The port loads it from a user-provided path at runtime.
-4. The decomp (`resources\rood-reverseWin`) keeps its own license. Ported files under `src\Game\` keep a provenance header (see the plan, §6).
+4. The decomp (`resources\rood-reverse`) keeps its own license. Ported files under `src\Game\` keep a provenance header (see the plan, §6).

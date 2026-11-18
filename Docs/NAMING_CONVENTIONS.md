@@ -157,7 +157,8 @@ Abbreviations allowed in names: `Hp`, `Mp`, `Dp`, `Pp`, `Ui`, `Hud`, `Fx`, `Rgb`
 
 ## 7. Sources to consult
 
-- The decomp (read-only): `resources\rood-reverseWin\src\…`, plus `include\` for struct definitions.
+- The decomp (read-only): `resources\rood-reverse\src\…`, plus `include\` for struct definitions. The pinned copy
+  `resources\rood-reverseWin` that older rows cite was removed in `6b20016f0`.
 - DataCrystal pages: `resources\DataCrystal\` (formats, lists, mechanics, executables).
 - GodHands: `tools\PSX\VagrantStory\GodHands`, plus the other VS tools under `tools\PSX\VagrantStory\`.
 - Callers and callees as listed in the batch file.

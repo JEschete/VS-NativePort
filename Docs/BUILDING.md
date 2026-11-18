@@ -53,8 +53,7 @@ currently verify that instance's C++ components before invoking it.
 |---|---|
 | Python 3.10+ with the `.venv-3` environment and `python -m pip install -r tools\requirements.txt` | Port tools and pinned Google-style/static-analysis checks; see [QUALITY.md](QUALITY.md) |
 | Node.js 22+ and `npm ci --prefix tools/lint --ignore-scripts` | Pinned first-party clone detection |
-| `resources\rood-reverseWin` (in the repo) | Read-only reference that those tools parse. The build never uses it. |
-| Optional: `git submodule update --init` | Fetches `resources\rood-reverse` (upstream decomp) and the Ghidra PSX loader. Neither is needed to build. |
+| Optional: `git submodule update --init` | Fetches `resources\rood-reverse` (upstream decomp, the read-only code reference) and the Ghidra PSX loader. Neither is needed to build. The pinned copy `resources\rood-reverseWin` was removed in `6b20016f0`; tools that still name it need retooling before use. |
 | Optional: external reference tools | See [TOOLS_INVENTORY.md](TOOLS_INVENTORY.md) |
 
 The retained environment on this development machine is `.venv-3` (Python
@@ -475,12 +474,12 @@ These scripts regenerate committed files. They are not part of the build.
 | `python tools\port\decomp_index.py` | libclang index of the decomp → `build\port\index.json` |
 | `python tools\port\data_inventory.py` | Global data inventory → `build\port\data.json` |
 | `python tools\port\gen_decomp_headers.py [--data Native\data]` | Generated headers that `decomp_index.py` and the copy need (disc layout; string-table offsets read from the extracted data) |
-| `python tools\port\copy_to_native.py` | Regenerate the copied code in `Native\` from the decomp (never edit its output; `tools\port\own.py` takes an item over by hand) |
+| `python tools\port\copy_to_native.py` | **Retired** (plan D24): its decomp input was removed in `6b20016f0`. It produced the copied code in `Native\`, which is now edited in place |
 | `python tools\port\understood.py vs_title_exec@TITLE.PRG [--mark]` | Check (and mark) `understood` for every function reachable from a root |
 | `python tools\naming\merge_names.py --check-all` | Validate the function catalog naming |
 | `python tools\scaffold\gen_solution.py` | Regenerate the `.sln` / `.vcxproj` files, including the `Tools` solution folder that shows `tools\`, `C:\Tools` and `D:\Dev\Modding\VS-Workshop` (source, docs, scripts; set `VS_EXTERNAL_TOOLS` / `VS_WORKSHOP` for other locations; both are optional: on a machine without them the projects list nothing and regenerating leaves them alone) and `Solution Items`, discovered from the repository (root files, all of `Docs\` with its subfolders, `.github\`; new files appear on the next run). **Run it after any project change**; do not hand-edit the project files. |
 
-The copier also needs the extracted `Native\data\disc\EFFECT\PLG*.BIN` files to
+Historical (the copier is retired): the copier also needed the extracted `Native\data\disc\EFFECT\PLG*.BIN` files to
 resolve identical plugin overlays, and the pinned reference's `splat_symbols.csv`
 analysis for `BATTLE\BATTLE.PRG` and `SLUS_010.40` to relocate module pointer tables.
 Missing inputs fail before generated files are written. The symbol maps default

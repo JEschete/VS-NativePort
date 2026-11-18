@@ -40,8 +40,9 @@ history. Verify each change with the smallest builds, Catch2 tags, replays and q
 - Keep typed cores separate from checked live bindings. A live binding refuses a missing pointer or an out-of-range
   index instead of reading through it.
 - Add `// decomp: <symbol> (<source file>:<line>)` provenance to translated code.
-- Fix generated code through the copier or a registered owned implementation, never by patching its output. Never
-  hand-edit `.vcxproj` files; run `python tools\scaffold\gen_solution.py`.
+- The copier is retired (plan D24): edit copied code in place and keep its provenance. Write new headers as C++
+  ([CPP_HEADERS.md](../Docs/CPP_HEADERS.md)). Never hand-edit `.vcxproj` files; run
+  `python tools\scaffold\gen_solution.py`.
 - Stage new tool files before generating projects: the tools solution inventory uses tracked files. Restage the
   scoped files after fixes before committing; staging does not establish verification.
 
