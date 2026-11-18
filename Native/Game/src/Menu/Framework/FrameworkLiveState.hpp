@@ -11,81 +11,86 @@
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/MenuMemory.h"
 
+namespace VS::Menu {
+// decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c)
+extern char textBoxBufferIndex;
+// decomp: D_800F4CD0 (BATTLE/BATTLE.PRG 5BF94.c)
+inline constexpr int kTextBoxOrderingTableCount = 102;
+extern u_long textBoxOrderingTables[kTextBoxOrderingTableCount];
+// decomp: D_800F4E6B (BATTLE/BATTLE.PRG 5BF94.c)
+extern char saveLocationId;
+}  // namespace VS::Menu
+
+namespace VS::Menu::Framework {
 // decomp: _loadedSubMenu (BATTLE/BATTLE.PRG 5BF94.c): the module image byte
 // is 0, so the zero-initialised definition stands for it.
-extern signed char Menu_Framework_loadedSubMenu;
+extern signed char loadedSubMenu;
 // decomp: vs_battle_menuItems (BATTLE/BATTLE.PRG 5BF94.c): the forty rows of
 // the workspace block, or null with no workspace.
-extern Menu_Framework_MenuRow* Menu_Framework_menuItems;
+extern Menu_Framework_MenuRow* menuItems;
 // decomp: D_800EB9C4 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Items_LootListNode* Menu_Framework_lootLists;
+extern Items_LootListNode* lootLists;
 // decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Items_BattleLoot* Menu_Framework_lootEntry;
-// decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c)
-extern char Menu_textBoxBufferIndex;
+extern Items_BattleLoot* lootEntry;
 // decomp: _menuBgUnpackedBuf (BATTLE/BATTLE.PRG 5BF94.c)
-extern u_int* Menu_Framework_menuBackgroundBuffer;
+extern u_int* menuBackgroundBuffer;
 // decomp: D_800F4CC0 (BATTLE/BATTLE.PRG 5BF94.c)
-extern int Menu_Framework_mainMenuCursorAnimation;
-// decomp: D_800F4CD0 (BATTLE/BATTLE.PRG 5BF94.c)
-enum { kMenuTextBoxOrderingTableCount = 102 };
-extern u_long Menu_textBoxOrderingTables[kMenuTextBoxOrderingTableCount];
+extern int mainMenuCursorAnimation;
 // decomp: vs_battle_shortcutInvoked (BATTLE/BATTLE.PRG 5BF94.c)
-extern char Menu_Framework_shortcutInvoked;
-// decomp: D_800F4E6B (BATTLE/BATTLE.PRG 5BF94.c)
-extern char Menu_saveLocationId;
+extern char shortcutInvoked;
 // decomp: vs_battle_submenuStates (BATTLE/BATTLE.PRG 5BF94.c)
-enum { kMenuSubmenuStateCount = 16 };
-extern char Menu_Framework_submenuStates[kMenuSubmenuStateCount];
+extern char submenuStates[kSubmenuStateCount];
 // decomp: vs_battle_rowTypeBuf (BATTLE/BATTLE.PRG 5BF94.c)
-extern int* Menu_Framework_rowTypeBuf;
+extern int* rowTypeBuf;
 // decomp: vs_battle_unlockedBreakArt (BATTLE/BATTLE.PRG 5BF94.c)
-extern char Menu_Framework_unlockedBreakArt;
+extern char unlockedBreakArt;
 // decomp: vs_battle_stringBuf (BATTLE/BATTLE.PRG 5BF94.c)
-extern char* Menu_Framework_stringBuf;
+extern char* stringBuf;
 // decomp: D_800F4E98 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Menu_Framework_ActionSelection Menu_Framework_actionSelection;
+extern Menu_Framework_ActionSelection actionSelection;
 // decomp: D_800F4EA0 (BATTLE/BATTLE.PRG 5BF94.c)
-extern int Menu_Framework_actionRestrictions;
+extern int actionRestrictions;
 // decomp: D_800F4EE8 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Menu_Framework_MenuMemory Menu_Framework_menuMemory;
+extern Menu_Framework_MenuMemory menuMemory;
 // decomp: vs_battle_unlockedBattleAbility (BATTLE/BATTLE.PRG 5BF94.c)
-extern char Menu_Framework_unlockedBattleAbility;
+extern char unlockedBattleAbility;
 // decomp: D_800F4FDB (BATTLE/BATTLE.PRG 5BF94.c)
-extern char Menu_Framework_openedWithoutMainMenu;
+extern char openedWithoutMainMenu;
 // decomp: vs_battle_menuState (BATTLE/BATTLE.PRG 5BF94.c)
-extern Menu_Framework_MenuControlState Menu_Framework_menuState;
+extern Menu_Framework_MenuControlState menuState;
 // decomp: _itemsText (MENU/MAINMENU.PRG 58EC.c): the list menu's entries.
-extern u_short* Menu_Framework_itemsText;
+extern u_short* itemsText;
 // decomp: _menuRowYOffset (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_menuRowYOffset;
+extern char menuRowYOffset;
 // decomp: _selectedRow (MENU/MAINMENU.PRG 58EC.c)
-extern int Menu_Framework_selectedRow;
+extern int selectedRow;
 // decomp: _subMenuId (MENU/MAINMENU.PRG 58EC.c)
-extern u_char Menu_Framework_subMenuId;
+extern u_char subMenuId;
 // decomp: _subMenuPage (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_subMenuPage;
+extern char subMenuPage;
 // decomp: _subMenuRowCount (MENU/MAINMENU.PRG 58EC.c)
-extern u_short Menu_Framework_subMenuRowCount;
+extern u_short subMenuRowCount;
 // decomp: _subMenuRowInfo (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_subMenuRowInfo;
+extern char subMenuRowInfo;
 // decomp: _textHeaders (MENU/MAINMENU.PRG 58EC.c)
-extern Menu_Framework_TextHeader Menu_Framework_textHeaders[2];
+extern Menu_Framework_TextHeader textHeaders[2];
 // decomp: vs_mainMenu_actionMenuState (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_actionMenuState;
+extern char actionMenuState;
 // decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG 58EC.c)
-extern int Menu_Framework_backgroundFadeStep;
+extern int backgroundFadeStep;
 // decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG): never read.
-extern char Menu_Framework_unusedContainerEmptyBackup;
+extern char unusedContainerEmptyBackup;
 // decomp: vs_mainMenu_cursorColor (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_cursorColor;
+extern char cursorColor;
 // decomp: vs_mainMenu_displayActionCost (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_displayActionCost;
+extern char displayActionCost;
 // decomp: vs_mainMenu_hideMenu (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_hideMenu;
+extern char hideMenu;
 // decomp: vs_mainMenu_itemsListRow (MENU/MAINMENU.PRG 58EC.c)
-extern char Menu_Framework_itemsListRow;
+extern char itemsListRow;
 // decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG): never read.
-extern Menu_Container_InventoryStorage* Menu_Framework_unusedInventoryStorage;
+extern Menu_Container_InventoryStorage* unusedInventoryStorage;
+}  // namespace VS::Menu::Framework

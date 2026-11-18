@@ -61,7 +61,7 @@
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
 #include "Field/GameModeLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -228,7 +228,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
                                                   ashley_placement_.location);
   }
   bool TryTriggerFacingTileEvent(int slot) override {
-    return Field_TryTriggerFacingTileEventEntry(slot) != 0;
+    return VS::Field::TryTriggerFacingTileEventEntry(slot) != 0;
   }
   void BeginQueuedCutscene() override { Event::BeginLiveQueuedCutscene(); }
   void StartPreparedCutscene() override { Event::StartLivePreparedCutscene(); }
@@ -292,10 +292,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
         VS::Field::BeginLiveChestInteraction(*facing_chest_, slot));
   }
   void BeginObjectInteractionWait() override {
-    Field_BeginObjectInteractionWaitEntry();
+    VS::Field::BeginObjectInteractionWaitEntry();
   }
   void EndObjectInteractionWait() override {
-    Field_EndObjectInteractionWaitEntry();
+    VS::Field::EndObjectInteractionWaitEntry();
   }
   [[nodiscard]] bool IsSceneNotificationPending() override {
     return VS::Menu::IsLiveSceneNotificationPending() != 0;
@@ -369,34 +369,36 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Field::LiveUpdateFirstPersonViewExit();
   }
   bool TrackInteractionCameraToAshley() override {
-    return Field_TrackInteractionCameraToAshleyEntry() != 0;
+    return VS::Field::TrackInteractionCameraToAshleyEntry() != 0;
   }
   [[nodiscard]] bool IsCameraLookAtOnAshley() override {
     return VS::Field::LiveIsCameraLookAtOnAshley() != 0;
   }
 
   bool StepTrapCameraFocus() override {
-    return Field_StepTrapCameraFocusEntry() != 0;
+    return VS::Field::StepTrapCameraFocusEntry() != 0;
   }
   bool WaitForChestCameraFocus() override {
-    return Field_WaitForChestCameraFocusEntry() != 0;
+    return VS::Field::WaitForChestCameraFocusEntry() != 0;
   }
   void DispatchTrapOrChestInteraction() override {
-    Field_DispatchTrapOrChestInteractionEntry();
+    VS::Field::DispatchTrapOrChestInteractionEntry();
   }
   [[nodiscard]] bool IsActionEffectBusy() override {
     return VS::Effects::LiveActionEffectBusyFlags() != 0;
   }
-  void FinishTrapInteraction() override { Field_FinishTrapInteractionEntry(); }
-  [[nodiscard]] bool IsChestAnimationReady() override {
-    return Field_IsChestAnimationReadyEntry() != 0;
+  void FinishTrapInteraction() override {
+    VS::Field::FinishTrapInteractionEntry();
   }
-  void OpenChestContents() override { Field_OpenChestContentsEntry(); }
+  [[nodiscard]] bool IsChestAnimationReady() override {
+    return VS::Field::IsChestAnimationReadyEntry() != 0;
+  }
+  void OpenChestContents() override { VS::Field::OpenChestContentsEntry(); }
   bool UpdateChestContentsSelection() override {
-    return Field_UpdateChestContentsSelectionEntry() != 0;
+    return VS::Field::UpdateChestContentsSelectionEntry() != 0;
   }
   void FinishChestInteraction() override {
-    Field_FinishChestInteractionEntry();
+    VS::Field::FinishChestInteractionEntry();
   }
   void RebuildActorActionPlans() override {
     static_cast<void>(VS::Battle::Ai::RebuildLiveActorActionPlans(

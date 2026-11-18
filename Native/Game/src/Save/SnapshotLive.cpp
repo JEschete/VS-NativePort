@@ -20,7 +20,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Field/CameraLiveState.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
@@ -192,7 +192,7 @@ class LiveSnapshotHost final : public SnapshotHost {
     VS::Actors::StoreLiveRoomActorState(actor, 0);
   }
   void StoreEntranceDoorForReload() override {
-    Field_StoreEntranceDoorForReloadEntry();
+    VS::Field::StoreEntranceDoorForReloadEntry();
   }
 };
 }  // namespace

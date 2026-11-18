@@ -11,18 +11,20 @@
 namespace menu_overlay_tests {
 
 struct Load {
-  equipment_detail_tests::ValueRestore<decltype(Menu_Framework_menuState)>
-      saved_control{Menu_Framework_menuState};
-  equipment_detail_tests::ValueRestore<decltype(Menu_Framework_loadedSubMenu)>
-      saved_loaded{Menu_Framework_loadedSubMenu};
+  equipment_detail_tests::ValueRestore<decltype(VS::Menu::Framework::menuState)>
+      saved_control{VS::Menu::Framework::menuState};
   equipment_detail_tests::ValueRestore<
-      decltype(Menu_Framework_openedWithoutMainMenu)>
-      saved_without_main{Menu_Framework_openedWithoutMainMenu};
-  equipment_detail_tests::ValueRestore<decltype(Menu_Framework_shortcutInvoked)>
-      saved_shortcut{Menu_Framework_shortcutInvoked};
+      decltype(VS::Menu::Framework::loadedSubMenu)>
+      saved_loaded{VS::Menu::Framework::loadedSubMenu};
   equipment_detail_tests::ValueRestore<
-      decltype(Menu_Framework_menuBackgroundBuffer)>
-      saved_background{Menu_Framework_menuBackgroundBuffer};
+      decltype(VS::Menu::Framework::openedWithoutMainMenu)>
+      saved_without_main{VS::Menu::Framework::openedWithoutMainMenu};
+  equipment_detail_tests::ValueRestore<
+      decltype(VS::Menu::Framework::shortcutInvoked)>
+      saved_shortcut{VS::Menu::Framework::shortcutInvoked};
+  equipment_detail_tests::ValueRestore<
+      decltype(VS::Menu::Framework::menuBackgroundBuffer)>
+      saved_background{VS::Menu::Framework::menuBackgroundBuffer};
   Content_DiscQueueSlot* request;
   std::uint64_t generation = 0;
   int submenu;
@@ -35,12 +37,12 @@ struct Load {
     generation = VS::Content::LiveDiscRequestGeneration(request);
     // This controlled completion has no queued destination. Leave it allocated
     // so genuine owner cleanup can update queue counts without restoration.
-    Menu_Framework_loadedSubMenu = static_cast<signed char>(menu);
-    Menu_Framework_shortcutInvoked = 0;
-    Menu_Framework_openedWithoutMainMenu = 1;
-    Menu_Framework_menuBackgroundBuffer = nullptr;
-    Menu_Framework_menuState.loading = 1;
-    Menu_Framework_menuState.cdQueue = request;
+    VS::Menu::Framework::loadedSubMenu = static_cast<signed char>(menu);
+    VS::Menu::Framework::shortcutInvoked = 0;
+    VS::Menu::Framework::openedWithoutMainMenu = 1;
+    VS::Menu::Framework::menuBackgroundBuffer = nullptr;
+    VS::Menu::Framework::menuState.loading = 1;
+    VS::Menu::Framework::menuState.cdQueue = request;
   }
   ~Load() {
     if (VS::Content::LiveDiscRequestGeneration(request) == generation) {

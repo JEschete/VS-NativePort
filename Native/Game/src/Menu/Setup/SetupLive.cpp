@@ -36,14 +36,14 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Setup/Combination.hpp"  // NOLINT(build/include): typed API
@@ -317,20 +317,20 @@ class LiveHost final : public Host {
     Framework::SetLiveBackgroundPriority(ot_offset, brightness);
   }
   void SetCursorColor(int color) override {
-    Menu_Framework_cursorColor = static_cast<char>(color);
+    VS::Menu::Framework::cursorColor = static_cast<char>(color);
   }
-  int ItemsListRow() override { return Menu_Framework_itemsListRow; }
+  int ItemsListRow() override { return VS::Menu::Framework::itemsListRow; }
   std::span<std::int32_t> RowTypes() override {
-    if (Menu_Framework_rowTypeBuf == nullptr) {
+    if (VS::Menu::Framework::rowTypeBuf == nullptr) {
       return {};
     }
-    return {Menu_Framework_rowTypeBuf, Framework::kRowTypeCount};
+    return {VS::Menu::Framework::rowTypeBuf, Framework::kRowTypeCount};
   }
   std::span<std::uint8_t> StringBuffer() override {
-    if (Menu_Framework_stringBuf == nullptr) {
+    if (VS::Menu::Framework::stringBuf == nullptr) {
       return {};
     }
-    return {reinterpret_cast<std::uint8_t*>(Menu_Framework_stringBuf),
+    return {reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
             Framework::kStringBufferBytes};
   }
   int CursorMemory() override { return Input_settings.cursorMemory; }
@@ -361,12 +361,14 @@ class LiveHost final : public Host {
   }
 
   void ReturnFromSetup(int return_state) override {
-    Menu_Framework_menuState.currentMenu = Menu_Framework_menuState.returnState;
-    Menu_Framework_menuState.returnState = static_cast<char>(return_state);
-    Menu_Framework_actionRestrictions &= ~kWorkshopRestriction;
+    VS::Menu::Framework::menuState.currentMenu =
+        VS::Menu::Framework::menuState.returnState;
+    VS::Menu::Framework::menuState.returnState =
+        static_cast<char>(return_state);
+    VS::Menu::Framework::actionRestrictions &= ~kWorkshopRestriction;
   }
   void OpenMenu(int menu) override {
-    Menu_Framework_menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
   }
 
   void ResetEquipmentStats() override { Framework::ResetLiveEquipmentStats(); }
@@ -421,29 +423,31 @@ class LiveHost final : public Host {
     Framework::UpdateLiveDpPpBars(flags);
   }
   void SetEquipmentSubtype(int subtype) override {
-    Menu_Framework_equipmentSubtype = static_cast<char>(subtype);
+    VS::Menu::Framework::equipmentSubtype = static_cast<char>(subtype);
   }
   void SetEquipmentStat(std::size_t index, int value) override {
-    if (index >= std::size(Menu_Framework_equipmentStats)) {
+    if (index >= std::size(VS::Menu::Framework::equipmentStats)) {
       Refuse("workshop equipment stat outside the details table");
       return;
     }
-    Menu_Framework_equipmentStats[index] = static_cast<std::int16_t>(value);
+    VS::Menu::Framework::equipmentStats[index] =
+        static_cast<std::int16_t>(value);
   }
   void SetPrimaryStatValue(std::size_t index, int value) override {
-    if (index >= std::size(Menu_Framework_strIntAgi)) {
+    if (index >= std::size(VS::Menu::Framework::strIntAgi)) {
       Refuse("workshop primary stat outside the details table");
       return;
     }
-    Menu_Framework_strIntAgi[index] = static_cast<std::int16_t>(value);
+    VS::Menu::Framework::strIntAgi[index] = static_cast<std::int16_t>(value);
   }
 
   std::span<const std::uint8_t> Menu12() override {
-    if (Menu_Framework_menu12Text == nullptr) {
+    if (VS::Menu::Framework::menu12Text == nullptr) {
       return {};
     }
-    return {reinterpret_cast<const std::uint8_t*>(Menu_Framework_menu12Text),
-            Framework::kMenu12Bytes};
+    return {
+        reinterpret_cast<const std::uint8_t*>(VS::Menu::Framework::menu12Text),
+        Framework::kMenu12Bytes};
   }
   Framework::ItemRowsHost& ItemRows() override {
     Commit();

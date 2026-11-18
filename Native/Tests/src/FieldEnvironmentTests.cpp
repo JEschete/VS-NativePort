@@ -13,7 +13,7 @@
 #include "Field/Background.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/EnvironmentLiveState.h"
+#include "Field/EnvironmentLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -449,29 +449,31 @@ TEST_CASE("Weather setters keep halfwords and free the particles",
 TEST_CASE("Live weather intensity reaches the velocity's scale word",
           "[field-camera][field-environment]") {
   std::array<std::int16_t, 10> saved_words{};
-  std::copy_n(Field_weatherParameters, saved_words.size(), saved_words.begin());
-  const std::int16_t saved_scale = Field_weatherIntensityScale;
-  const std::int16_t saved_sound = Field_weatherAmbientSoundId;
-  const std::int16_t saved_intensity = Field_weatherIntensity;
-  const std::int16_t saved_capacity = Field_weatherParticleCapacity;
-  const std::int16_t saved_count = Field_weatherParticleCount;
+  std::copy_n(VS::Field::weatherParameters, saved_words.size(),
+              saved_words.begin());
+  const std::int16_t saved_scale = VS::Field::weatherIntensityScale;
+  const std::int16_t saved_sound = VS::Field::weatherAmbientSoundId;
+  const std::int16_t saved_intensity = VS::Field::weatherIntensity;
+  const std::int16_t saved_capacity = VS::Field::weatherParticleCapacity;
+  const std::int16_t saved_count = VS::Field::weatherParticleCount;
 
-  Field_weatherAmbientSoundId = fx::kNoAmbientSound;
-  Field_weatherParticleCapacity = 128;
-  Field_weatherParameters[4] = 0;
-  Field_weatherParameters[5] = 0x400;
+  VS::Field::weatherAmbientSoundId = fx::kNoAmbientSound;
+  VS::Field::weatherParticleCapacity = 128;
+  VS::Field::weatherParameters[4] = 0;
+  VS::Field::weatherParameters[5] = 0x400;
   VS::Field::LiveSetWeatherIntensity(5);
-  const std::int16_t scale = Field_weatherIntensityScale;
-  const std::int16_t mirror = Field_weatherParameters[6];
-  const std::int16_t velocity_x = Field_weatherParameters[0];
-  const std::int16_t count = Field_weatherParticleCount;
+  const std::int16_t scale = VS::Field::weatherIntensityScale;
+  const std::int16_t mirror = VS::Field::weatherParameters[6];
+  const std::int16_t velocity_x = VS::Field::weatherParameters[0];
+  const std::int16_t count = VS::Field::weatherParticleCount;
 
-  std::copy(saved_words.begin(), saved_words.end(), Field_weatherParameters);
-  Field_weatherIntensityScale = saved_scale;
-  Field_weatherAmbientSoundId = saved_sound;
-  Field_weatherIntensity = saved_intensity;
-  Field_weatherParticleCapacity = saved_capacity;
-  Field_weatherParticleCount = saved_count;
+  std::copy(saved_words.begin(), saved_words.end(),
+            VS::Field::weatherParameters);
+  VS::Field::weatherIntensityScale = saved_scale;
+  VS::Field::weatherAmbientSoundId = saved_sound;
+  VS::Field::weatherIntensity = saved_intensity;
+  VS::Field::weatherParticleCapacity = saved_capacity;
+  VS::Field::weatherParticleCount = saved_count;
 
   CHECK(scale == 52);
   CHECK(mirror == 52);

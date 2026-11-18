@@ -49,7 +49,8 @@ TEST_CASE("F02979 live searches the current workspace and all 64 entries",
       data::kLastGemPendingToken;
   REQUIRE(rows::FindLivePendingTransfer(5, data::kLastGemSlot) ==
           kLastPendingPosition);
-  Menu_Framework_unusedInventoryStorage = fixture.containers.replacement.get();
+  VS::Menu::Framework::unusedInventoryStorage =
+      fixture.containers.replacement.get();
   fixture.containers.replacement->itemsToTransfer[1] =
       data::kLastGemPendingToken;
   REQUIRE(rows::FindLivePendingTransfer(5, data::kLastGemSlot) == 2);
@@ -63,7 +64,8 @@ TEST_CASE(
   rows::AppendLivePendingTransfer(kMiscCategory, data::kLastMiscSlot);
   REQUIRE(fixture.containers.storage->itemsToTransfer[0] ==
           data::kLastMiscPendingToken);
-  Menu_Framework_unusedInventoryStorage = fixture.containers.replacement.get();
+  VS::Menu::Framework::unusedInventoryStorage =
+      fixture.containers.replacement.get();
   rows::AppendLivePendingTransfer(1, 0);
   REQUIRE(fixture.containers.replacement->itemsToTransfer[0] ==
           data::kBladePendingToken);
@@ -94,12 +96,12 @@ TEST_CASE(
   auto& replacement = *fixture.containers.replacement;
   replacement.stagedTransfer.misc[0] = {
       .id = data::kMiscId + 1, .count = 2, .index = 1};
-  Menu_Framework_unusedInventoryStorage = &replacement;
+  VS::Menu::Framework::unusedInventoryStorage = &replacement;
   rows::RebuildLivePendingTransfers();
   REQUIRE(fixture.Build(kPendingCategory) == 1);
   REQUIRE(replacement.itemsToTransfer[0] == data::kMiscPendingToken);
   REQUIRE(fixture.workspace.texts[0] ==
-          Menu_Framework_itemNames[data::kMiscId + 1]);
+          VS::Menu::Framework::itemNames[data::kMiscId + 1]);
   REQUIRE(fixture.containers.storage->itemsToTransfer[0] == 0);
 }
 
@@ -154,7 +156,7 @@ TEST_CASE(
   }
   REQUIRE(fixture.Build(kMiscCategory) == data::kRowCount);
   REQUIRE(fixture.workspace.texts[fixture.workspace.texts.size() - 2] ==
-          Menu_Framework_itemNames[data::kMiscId]);
+          VS::Menu::Framework::itemNames[data::kMiscId]);
   REQUIRE(fixture.workspace.texts.back() ==
           fixture.workspace.descriptions.data() +
               (data::kRowCount - 1) * framework::kRowDescriptionBufferBytes);
@@ -175,7 +177,7 @@ TEST_CASE("F02985 controller allocates the full native row workspace",
     item.count = 1;
   }
   REQUIRE(VS::Menu::container::LiveUpdateItemList(1) == 0);
-  Menu_Framework_menuMemory.opaqueA0[0] = 7;
+  VS::Menu::Framework::menuMemory.opaqueA0[0] = 7;
   const auto guard_before = VS::Core::Memory::DamagedLiveHeapGuardCount();
   REQUIRE(VS::Menu::container::LiveUpdateItemList(0) == 0);
   CHECK(VS::Core::Memory::DamagedLiveHeapGuardCount() == guard_before);
@@ -235,7 +237,7 @@ TEST_CASE(
   storage.itemsToTransfer[0] = data::kMiscPendingToken;
   const auto* const owner = Menu_Container_containerData;
   Boot_ResetMenudStatics();
-  REQUIRE(Menu_Framework_unusedInventoryStorage == &storage);
+  REQUIRE(VS::Menu::Framework::unusedInventoryStorage == &storage);
   REQUIRE(Menu_Container_containerData == owner);
   REQUIRE(rows::FindLivePendingTransfer(kMiscCategory, 0) == 1);
   rows::AppendLivePendingTransfer(kMiscCategory, data::kLastMiscSlot);

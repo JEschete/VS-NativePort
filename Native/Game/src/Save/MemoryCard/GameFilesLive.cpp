@@ -29,9 +29,9 @@
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/GameFiles.hpp"
 #include "Save/MemoryCard/Resources.h"
@@ -355,13 +355,14 @@ class LiveSaveState final : public SaveStateHost {
     VS::Audio::LiveSetMonoOutput(mono);
   }
   std::uint8_t SaveLocation() override {
-    return static_cast<std::uint8_t>(Menu_saveLocationId);
+    return static_cast<std::uint8_t>(VS::Menu::saveLocationId);
   }
   std::uint8_t MapCompletion() override {
     return static_cast<std::uint8_t>(VS::Field::LiveMapCompletionPercent());
   }
   bool KeepsContainerData() override {
-    return (Menu_Framework_actionRestrictions & kKeepContainerRestriction) != 0;
+    return (VS::Menu::Framework::actionRestrictions &
+            kKeepContainerRestriction) != 0;
   }
   std::uint32_t NextKeystreamBits(std::int32_t bits) override {
     if (keystream_ == LiveKeystream::kTitleCipher) {
@@ -605,10 +606,11 @@ int ReadLiveSaveStep(int request) {
     return static_cast<int>(TransferStatus::kFailed);
   }
   TransferProgress progress = LoadProgress();
-  SaveTransfer transfer{.card = live_card,
-                        .progress = progress,
-                        .progress_counter = Menu_Files_fileProgressCounter,
-                        .workspace = *workspace};
+  SaveTransfer transfer{
+      .card = live_card,
+      .progress = progress,
+      .progress_counter = VS::Menu::Files::fileProgressCounter,
+      .workspace = *workspace};
   const TransferStatus status = ReadSaveStep(live_read, transfer, request);
   StoreProgress(progress);
   return static_cast<int>(status);
@@ -620,10 +622,11 @@ int WriteLiveSaveStep(int request) {
     return static_cast<int>(TransferStatus::kFailed);
   }
   TransferProgress progress = LoadProgress();
-  SaveTransfer transfer{.card = live_card,
-                        .progress = progress,
-                        .progress_counter = Menu_Files_fileProgressCounter,
-                        .workspace = *workspace};
+  SaveTransfer transfer{
+      .card = live_card,
+      .progress = progress,
+      .progress_counter = VS::Menu::Files::fileProgressCounter,
+      .workspace = *workspace};
   const TransferStatus status = WriteSaveStep(live_write, live_read, transfer,
                                               PublishedDirectory(), request);
   StoreProgress(progress);

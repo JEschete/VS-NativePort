@@ -70,12 +70,12 @@ TEST_CASE("Ordinary MENUD reload retains weapon controller BSS animation",
   Boot_ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveWeaponDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == kWeaponStrength);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == kWeaponStrength);
   CHECK(Menu_Container_containerData == &fixture.containers.storage->container);
   detail::ResetLiveContainerDetailControllers();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveWeaponDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] ==
+  CHECK(VS::Menu::Framework::strIntAgi[0] ==
         kChangedStrength + equipment_detail_tests::kGripStrength);
 }
 
@@ -90,11 +90,11 @@ TEST_CASE(
   Boot_ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveGemDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == 9);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 9);
   detail::ResetLiveContainerDetailControllers();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveGemDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == kChangedStrength);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == kChangedStrength);
 }
 
 TEST_CASE("F02957 ordinary reload preserves full-domain armor countdown",
@@ -104,17 +104,17 @@ TEST_CASE("F02957 ordinary reload preserves full-domain armor countdown",
   auto& owner = fixture.containers.storage->container;
   owner.indices.armor[0] = kContainerPart + 1;
   fixture.Open(detail::UpdateLiveArmorDetails);
-  const auto strength = Menu_Framework_strIntAgi[0];
+  const auto strength = VS::Menu::Framework::strIntAgi[0];
   owner.items.armor[kContainerPart].strength = kChangedStrength;
   Boot_ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveArmorDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == strength);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == strength);
   CHECK(Menu_Container_containerData == &owner);
   detail::ResetLiveContainerDetailControllers();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveArmorDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == kChangedStrength);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == kChangedStrength);
 }
 
 TEST_CASE("F02959 ordinary reload retains selected category and panel BSS",
@@ -126,10 +126,11 @@ TEST_CASE("F02959 ordinary reload retains selected category and panel BSS",
   Boot_ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
-  CHECK(Menu_Framework_equipmentSubtype == fw::equipment_subtype::kGem);
+  CHECK(VS::Menu::Framework::equipmentSubtype == fw::equipment_subtype::kGem);
   CHECK(Menu_Container_detailsViewPhase == 1);
   detail::ResetLiveContainerDetailControllers();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
-  CHECK(Menu_Framework_equipmentSubtype == fw::equipment_subtype::kWeapon);
+  CHECK(VS::Menu::Framework::equipmentSubtype ==
+        fw::equipment_subtype::kWeapon);
 }

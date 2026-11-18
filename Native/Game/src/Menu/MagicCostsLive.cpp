@@ -25,7 +25,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
 #include "Menu/MagicCosts.hpp"
@@ -126,12 +126,12 @@ class LiveHost final : public Host {
   }
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
   std::uint32_t ActionRestrictions() override {
-    return static_cast<std::uint32_t>(Menu_Framework_actionRestrictions);
+    return static_cast<std::uint32_t>(VS::Menu::Framework::actionRestrictions);
   }
   void SetTeleportCursorMemory(std::uint8_t row, std::uint8_t scroll) override {
-    Menu_Framework_menuMemory.cursorMemories[kTeleportCursorRow] =
+    VS::Menu::Framework::menuMemory.cursorMemories[kTeleportCursorRow] =
         ToStorageChar(row);
-    Menu_Framework_menuMemory.cursorMemories[kTeleportCursorScroll] =
+    VS::Menu::Framework::menuMemory.cursorMemories[kTeleportCursorScroll] =
         ToStorageChar(scroll);
   }
   std::uint8_t CursorMemorySetting() override {
@@ -163,7 +163,7 @@ class LiveHost final : public Host {
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
   int HighlightedRow() override { return Framework::LiveHighlightedRow(); }
   void SetDisplayActionCost(int enabled) override {
-    Menu_Framework_displayActionCost = static_cast<char>(enabled);
+    VS::Menu::Framework::displayActionCost = static_cast<char>(enabled);
   }
   void ClearRowsExcept(int row) override {
     Framework::ClearLiveMenuExcept(row);

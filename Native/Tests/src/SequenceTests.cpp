@@ -37,7 +37,7 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "DiscQueue.h"
 #include "Effects/Camera.h"
-#include "Effects/CameraLiveState.h"
+#include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.h"
 #include "Event/ScriptActorOpcodes.h"
 #include "Event/ScriptActors.h"
@@ -45,7 +45,7 @@
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
 #include "Field/CameraLiveState.hpp"
-#include "Field/GimmickPlacementLive.h"
+#include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -876,7 +876,7 @@ int TestGimmickStackTop(int scenario) {
     actor.instance.rootMotion = (SVECTOR){1, 2, 3, 4};
     Actors_actorRecords[2] = &actor;
   }
-  Field_DropUnsupportedGimmickStackEntry(kRoot);
+  VS::Field::DropUnsupportedGimmickStackEntry(kRoot);
   int passed = root.objectInfo.isFalling == 1;
   if (has_actor) {
     passed &= actor.instance.movementMode == 3 &&
@@ -1006,8 +1006,9 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Actors_ActorRecord* saved_actor[kSlots];
   Field_GimmickInstance* saved_object[kSlots];
   const Effects_ActionEffectRequest saved_request = Effects_actionRequest;
-  const Effects_EffectCamera saved_camera = Effects_effectCamera;
-  const Effects_EffectCamera saved_action_camera = Effects_savedActionCamera;
+  const Effects_EffectCamera saved_camera = VS::Effects::effectCamera;
+  const Effects_EffectCamera saved_action_camera =
+      VS::Effects::savedActionCamera;
   Effects_EffectPackage* saved_package = Effects_package;
   const u_int saved_phase = Effects_primaryPhase;
   const char saved_token = Effects_primaryToken;
@@ -1091,8 +1092,8 @@ int TestScriptedEffectTargetBinding(int scenario) {
   }
   memcpy(Effects_tokenBitmaps, saved_bitmaps, sizeof saved_bitmaps);
   Effects_actionRequest = saved_request;
-  Effects_effectCamera = saved_camera;
-  Effects_savedActionCamera = saved_action_camera;
+  VS::Effects::effectCamera = saved_camera;
+  VS::Effects::savedActionCamera = saved_action_camera;
   Effects_package = saved_package;
   Effects_primaryPhase = saved_phase;
   Effects_primaryToken = saved_token;

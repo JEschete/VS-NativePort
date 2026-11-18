@@ -36,7 +36,7 @@
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Inventory/EquipmentRows.hpp"
@@ -173,7 +173,7 @@ class LiveRowsHost final : public EquipmentRowsHost {
 
 // vs_mainMenu_armor: Ashley's armor or the open container's.
 [[nodiscard]] std::span<const Items_InventoryArmor> BoundArmor() {
-  const Items_InventoryArmor* table = Menu_Framework_armor;
+  const Items_InventoryArmor* table = VS::Menu::Framework::armor;
   if (table == nullptr) {
     return {};
   }
@@ -214,10 +214,10 @@ class LiveAccessoryHost final : public AccessoryPreviewHost {
   }
   void StoreStatColumns(const AccessoryStatColumns& columns) override {
     for (std::size_t i = 0; i < kAccessoryStatColumn; ++i) {
-      Menu_Framework_equipmentStats[i] = columns.classes[i];
-      Menu_Framework_equipmentStats[i + kAccessoryStatColumn] =
+      VS::Menu::Framework::equipmentStats[i] = columns.classes[i];
+      VS::Menu::Framework::equipmentStats[i + kAccessoryStatColumn] =
           columns.affinities[i];
-      Menu_Framework_equipmentStats[i + 2 * kAccessoryStatColumn] =
+      VS::Menu::Framework::equipmentStats[i + 2 * kAccessoryStatColumn] =
           columns.types[i];
     }
   }
@@ -226,8 +226,8 @@ class LiveAccessoryHost final : public AccessoryPreviewHost {
     Framework::SetLivePrimaryStats(strength, intelligence, agility, known);
   }
   void SetStatusItem(std::uint8_t subtype, std::uint8_t item) override {
-    Menu_Framework_equipmentSubtype = static_cast<char>(subtype);
-    Menu_Framework_currentStatusViewItem = static_cast<char>(item);
+    VS::Menu::Framework::equipmentSubtype = static_cast<char>(subtype);
+    VS::Menu::Framework::currentStatusViewItem = static_cast<char>(item);
   }
   void SetStatPages(std::int32_t pages) override {
     Framework::SetLiveEnabledStatPages(pages);

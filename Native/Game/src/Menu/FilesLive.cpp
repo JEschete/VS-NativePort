@@ -25,7 +25,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.h"
@@ -33,11 +33,11 @@
 #include "Legacy/Psx.h"
 #include "Menu/Files.h"
 #include "Menu/Files.hpp"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
@@ -64,19 +64,20 @@
 #include "Title/SaveFiles.h"
 
 // decomp: _containerStrings (_containerStrings@src/MENU/MENU7.PRG/260.c)
-u_short Menu_Files_containerStrings[kMenuFilesContainerStringCount];
+u_short
+    VS::Menu::Files::containerStrings[VS::Menu::Files::kContainerStringCount];
 // decomp: _dataNotSaved (_dataNotSaved@src/MENU/MENU7.PRG/260.c)
-char Menu_Files_dataNotSaved;
+char VS::Menu::Files::dataNotSaved;
 // decomp: _fileProgressCounter (_fileProgressCounter@src/MENU/MENU7.PRG/260.c)
-int Menu_Files_fileProgressCounter;
+int VS::Menu::Files::fileProgressCounter;
 // decomp: _memoryCardMessage (_memoryCardMessage@src/MENU/MENU7.PRG/260.c)
-char* Menu_Files_memoryCardMessage;
+char* VS::Menu::Files::memoryCardMessage;
 // decomp: _selectCursorXy (_selectCursorXy@src/MENU/MENU7.PRG/260.c)
-int Menu_Files_selectCursorXy;
+int VS::Menu::Files::selectCursorXy;
 // decomp: _textTable (_textTable@src/MENU/MENU7.PRG/260.c)
-u_short* Menu_Files_textTable;
+u_short* VS::Menu::Files::textTable;
 // decomp: _frameBuf (_frameBuf@src/TITLE/TITLE.PRG/22C.c)
-char Menu_Files_frameBuf;
+char VS::Menu::Files::frameBuf;
 
 namespace VS::Menu::Files {
 namespace {
@@ -130,7 +131,7 @@ static_assert(offsetof(ContainerIndices, misc) ==
               offsetof(Items_ContainerIndices, misc));
 
 static_assert(sizeof(State_Settings) == kSettingsBytes);
-static_assert(sizeof(Menu_Files_containerStrings) ==
+static_assert(sizeof(containerStrings) ==
               kContainerStringHalfwords * sizeof(std::uint16_t));
 static_assert(VS_GAMEOVER_BIN_SIZE >=
               kGameOverImageHalfwords * sizeof(std::uint16_t));
@@ -267,8 +268,8 @@ Framework::Buttons LiveButtons() {
 [[nodiscard]] std::span<const std::uint8_t> TextTail(const char* text) {
   const std::span<const char> footer = VS::Menu::LiveFileMenuFooter();
   const std::array<std::span<const std::uint8_t>, 3> regions{
-      std::span(reinterpret_cast<const std::uint8_t*>(Menu_Files_textTable),
-                Menu_Files_textTable != nullptr ? kTextTableBytes : 0),
+      std::span(reinterpret_cast<const std::uint8_t*>(textTable),
+                textTable != nullptr ? kTextTableBytes : 0),
       std::span(reinterpret_cast<const std::uint8_t*>(Title_saveMenuText),
                 Title_saveMenuText != nullptr ? kTextTableBytes : 0),
       std::span(reinterpret_cast<const std::uint8_t*>(footer.data()),
@@ -396,11 +397,10 @@ class LiveGpuHost : public Host {
 class LiveCardHost : public LiveGpuHost {
  public:
   std::span<const std::uint16_t> TextTable() override {
-    return TableSpan(Menu_Files_textTable);
+    return TableSpan(textTable);
   }
   void SetCardMessage(std::optional<std::uint16_t> offset) override {
-    Menu_Files_memoryCardMessage =
-        TableMessage(Menu_Files_textTable, offset, *this);
+    memoryCardMessage = TableMessage(textTable, offset, *this);
   }
   int AdvanceCardReadiness(int port) override {
     return VS::Save::MemoryCard::AdvanceLiveCardReadiness(port);
@@ -413,39 +413,35 @@ class LiveCardHost : public LiveGpuHost {
   }
   Framework::Buttons Input() override { return LiveButtons(); }
   std::span<const std::uint16_t> ContainerStrings() override {
-    return Menu_Files_containerStrings;
+    return containerStrings;
   }
   bool CardMessageIs(std::uint16_t offset) override {
-    return Menu_Files_textTable != nullptr && offset < kTextTableHalfwords &&
-           Menu_Files_memoryCardMessage ==
-               reinterpret_cast<char*>(Menu_Files_textTable + offset);
+    return textTable != nullptr && offset < kTextTableHalfwords &&
+           memoryCardMessage == reinterpret_cast<char*>(textTable + offset);
   }
   std::span<const std::uint8_t> CardMessage() override {
-    if (Menu_Files_memoryCardMessage == nullptr) {
+    if (memoryCardMessage == nullptr) {
       return {};
     }
-    const std::span<const std::uint8_t> text =
-        TextTail(Menu_Files_memoryCardMessage);
+    const std::span<const std::uint8_t> text = TextTail(memoryCardMessage);
     if (text.empty()) {
       Refuse("memory-card message outside the MCMAN.BIN table and footer");
     }
     return text;
   }
-  std::int32_t CursorPosition() override { return Menu_Files_selectCursorXy; }
+  std::int32_t CursorPosition() override { return selectCursorXy; }
   void SetCursorPosition(std::int32_t position) override {
-    Menu_Files_selectCursorXy = position;
+    selectCursorXy = position;
   }
   std::uint8_t DataNotSaved() override {
-    return static_cast<std::uint8_t>(Menu_Files_dataNotSaved);
+    return static_cast<std::uint8_t>(dataNotSaved);
   }
   void SetDataNotSaved(std::uint8_t not_saved) override {
-    Menu_Files_dataNotSaved = static_cast<char>(not_saved);
+    dataNotSaved = static_cast<char>(not_saved);
   }
-  std::int32_t ProgressCounter() override {
-    return Menu_Files_fileProgressCounter;
-  }
+  std::int32_t ProgressCounter() override { return fileProgressCounter; }
   void SetProgressCounter(std::int32_t counter) override {
-    Menu_Files_fileProgressCounter = counter;
+    fileProgressCounter = counter;
   }
   TransferProgress Transfer() override {
     return {.position = Title_transferProgressPosition,
@@ -588,14 +584,13 @@ class LiveHost : public LiveCardHost {
     }
     for (std::size_t i = 0; i < strings.size(); ++i) {
       const std::optional<std::size_t> offset =
-          OffsetIn(Menu_Files_textTable,
-                   Menu_Files_textTable != nullptr ? kTextTableBytes : 0,
+          OffsetIn(textTable, textTable != nullptr ? kTextTableBytes : 0,
                    strings[i].data());
       if (!offset) {
         Refuse("data menu row text outside the MCMAN.BIN table");
         return;
       }
-      pointers[i] = reinterpret_cast<char*>(Menu_Files_textTable) + *offset;
+      pointers[i] = reinterpret_cast<char*>(textTable) + *offset;
     }
     Framework::CreateLiveMenuRows(static_cast<int>(row_types.size()), row_info,
                                   pointers.data(), row_types.data());
@@ -612,7 +607,7 @@ class LiveHost : public LiveCardHost {
     Framework::SetLiveBackgroundFade(fade);
   }
   int BackgroundFadeStep() override {
-    return Menu_Framework_backgroundFadeStep;
+    return VS::Menu::Framework::backgroundFadeStep;
   }
   void InitInformationBox(Framework::InformationHeader header) override {
     VS::Menu::InitLiveInformationTextBox(
@@ -623,7 +618,7 @@ class LiveHost : public LiveCardHost {
         static_cast<std::int16_t>(state);
   }
   void SetInformationMessage(std::uint16_t offset) override {
-    if (char* message = TableMessage(Menu_Files_textTable, offset, *this)) {
+    if (char* message = TableMessage(textTable, offset, *this)) {
       Framework::SetLiveInformationMessage(message);
     }
   }
@@ -631,10 +626,10 @@ class LiveHost : public LiveCardHost {
     return VS::Field::LiveCurrentSavePointId();
   }
   int SaveLocationId() override {
-    return static_cast<unsigned char>(Menu_saveLocationId);
+    return static_cast<unsigned char>(VS::Menu::saveLocationId);
   }
   void SetSaveLocationId(int id) override {
-    Menu_saveLocationId = static_cast<char>(id);
+    VS::Menu::saveLocationId = static_cast<char>(id);
   }
   GameFlags Flags() override {
     const State_StateFlags& flags = Audio_Seq_unusedStateFlags;
@@ -685,7 +680,7 @@ class LiveHost : public LiveCardHost {
     return VS::Save::MemoryCard::LoadLiveIntroSnapshotStep(action);
   }
   void SetCurrentMenu(int menu) override {
-    Menu_Framework_menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
   }
 
   void BeginGameOverLoad() override {
@@ -851,10 +846,10 @@ class TitleLiveHost final : public TitleHost {
   Framework::Buttons Input() override { return LiveButtons(); }
 
   std::uint8_t FrameBuffer() override {
-    return static_cast<std::uint8_t>(Menu_Files_frameBuf);
+    return static_cast<std::uint8_t>(frameBuf);
   }
   void SetFrameBuffer(std::uint8_t buffer) override {
-    Menu_Files_frameBuf = static_cast<char>(buffer);
+    frameBuf = static_cast<char>(buffer);
   }
   void PutDisplay(int display_x, int draw_x) override {
     DISPENV display{};

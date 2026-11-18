@@ -61,7 +61,7 @@
 #include "Event/Triggers.h"
 #include "Event/TriggersLive.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/DoorRecordLive.hpp"
 #include "Field/Doors.h"
 #include "Field/EncounterSpawnProfile.hpp"
@@ -83,8 +83,8 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
@@ -116,7 +116,7 @@ std::optional<EncounterRouletteState> InspectRoulette(int menu) {
     return std::nullopt;
   }
   return EncounterRouletteState{
-      .entry_phase = Menu_Framework_submenuStates[kResultsMenu],
+      .entry_phase = VS::Menu::Framework::submenuStates[kResultsMenu],
       .screen_state = Menu_Results_screenState,
       .timer = Menu_Results_screenTimer,
       .animation = Menu_Results_elementAnimationState,
@@ -634,7 +634,7 @@ void InitializeEncounterPlayerWeapon(EncounterWeapon choice) {
   VS::Items::BuildLiveWeaponStatsFromParts(&stats, &*source);
   VS::Items::StoreLiveInventoryWeaponStats(&weapon, &stats);
   // Match MAINMENU/2D10.c's weapon equip restriction (staves are one-handed).
-  if (Menu_Framework_weaponHands[static_cast<int>(choice) - 1] != 0) {
+  if (VS::Menu::Framework::weaponHands[static_cast<int>(choice) - 1] != 0) {
     for (auto& shield : inventory.shields) shield.isEquipped = 0;
   }
 }
@@ -779,7 +779,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
   }
   constexpr int kFieldControl = 1;
   if (Field_controlMode != kFieldControl || Battle_actionFlowMode != 0 ||
-      Menu_Framework_menuState.currentMenu !=
+      VS::Menu::Framework::menuState.currentMenu !=
           Menu_Framework_MenuState_NoneClosed) {
     return reject("RETURN TO IDLE FIELD BEFORE ADJUSTING ASHLEY");
   }
@@ -867,9 +867,9 @@ EncounterState InspectGameplay() {
   state.field_rendering_enabled =
       VS::Field::LiveRoomRenderState().field_rendering_enabled;
   state.menu_state =
-      static_cast<unsigned char>(Menu_Framework_menuState.currentMenu);
+      static_cast<unsigned char>(VS::Menu::Framework::menuState.currentMenu);
   if (state.menu_state != Menu_Framework_MenuState_NoneClosed &&
-      Menu_Framework_itemsText != nullptr) {
+      VS::Menu::Framework::itemsText != nullptr) {
     state.menu_highlighted_row = VS::Menu::Framework::LiveHighlightedRow();
   }
   state.roulette = InspectRoulette(state.menu_state);

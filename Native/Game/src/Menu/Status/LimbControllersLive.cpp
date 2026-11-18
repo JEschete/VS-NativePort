@@ -19,10 +19,10 @@
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorStatus.h"
@@ -243,7 +243,7 @@ class LiveNavigation final : public StatusEffectNavigationHost {
 [[nodiscard]] LimbPanelFrame PanelFrame() {
   return {.selected_actor = Menu_Status_selectedActor,
           .selection_and_dimming = static_cast<std::uint8_t>(
-              Menu_Framework_menuMemory.opaque51[kSelectionDimmingIndex]),
+              VS::Menu::Framework::menuMemory.opaque51[kSelectionDimmingIndex]),
           .fade_screen = Menu_Status_fadeScreen,
           .background_first = Menu_Status_drawBackgroundFirst,
           .row_offsets = {reinterpret_cast<const std::uint8_t*>(
@@ -255,7 +255,7 @@ class LiveNavigation final : public StatusEffectNavigationHost {
   LimbPanelFrame frame = PanelFrame();
   LivePanel host;
   const auto result = UpdateLimbPanel(panel_state, frame, request, host);
-  Menu_Framework_menuMemory.opaque51[kSelectionDimmingIndex] =
+  VS::Menu::Framework::menuMemory.opaque51[kSelectionDimmingIndex] =
       static_cast<char>(frame.selection_and_dimming);
   return result;
 }
@@ -286,7 +286,8 @@ class LiveSelection final : public SelectedLimbHost {
 
 [[nodiscard]] StatusEffectNavigationFrame NavigationFrame() {
   return {.selected_element = Menu_Status_selectedElement,
-          .cursor_color = static_cast<std::uint8_t>(Menu_Framework_cursorColor),
+          .cursor_color =
+              static_cast<std::uint8_t>(VS::Menu::Framework::cursorColor),
           .yaw = Menu_Status_xPos,
           .pitch = Menu_Status_yPos,
           .pressed = Input_buttonsPressed.allButtons,
@@ -297,7 +298,7 @@ class LiveSelection final : public SelectedLimbHost {
 }
 void StoreNavigationFrame(const StatusEffectNavigationFrame& frame) {
   Menu_Status_selectedElement = frame.selected_element;
-  Menu_Framework_cursorColor = static_cast<char>(frame.cursor_color);
+  VS::Menu::Framework::cursorColor = static_cast<char>(frame.cursor_color);
   Menu_Status_xPos = frame.yaw;
   Menu_Status_yPos = frame.pitch;
 }
@@ -362,7 +363,7 @@ void LiveShowSelectedLimbCondition() {
     Refuse("ShowSelectedLimbCondition", selected.error());
     return;
   }
-  if (Menu_Framework_stringBuf == nullptr) {
+  if (VS::Menu::Framework::stringBuf == nullptr) {
     Refuse("ShowSelectedLimbCondition", LimbControllerError::kInvalidText);
     return;
   }
@@ -388,7 +389,7 @@ void LiveShowSelectedLimbCondition() {
   Render::EncodedTextArguments arguments;
   LiveSelection host(&arguments);
   const std::span output(
-      reinterpret_cast<std::uint8_t*>(Menu_Framework_stringBuf),
+      reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
       Framework::kStringBufferBytes);
   Report("ShowSelectedLimbCondition",
          ShowSelectedLimbCondition(Menu_Status_selectedElement, text, arguments,
@@ -403,11 +404,12 @@ void LivePopulateSelectedLimbDefense() {
   }
   const Battle_LimbStats* const limb = *selected;
   LiveSelection host;
-  Report("PopulateSelectedLimbDefense",
-         PopulateSelectedLimbDefense(Menu_Status_selectedElement,
-                                     {.affinities = std::span(limb->affinities),
-                                      .damage_types = std::span(limb->types)},
-                                     Menu_Framework_equipmentStats, host));
+  Report(
+      "PopulateSelectedLimbDefense",
+      PopulateSelectedLimbDefense(Menu_Status_selectedElement,
+                                  {.affinities = std::span(limb->affinities),
+                                   .damage_types = std::span(limb->types)},
+                                  VS::Menu::Framework::equipmentStats, host));
 }
 
 void ResetLiveLimbControllersModuleData() {

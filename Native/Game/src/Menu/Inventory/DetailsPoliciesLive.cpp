@@ -13,7 +13,7 @@
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/DetailsPolicies.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.h"
@@ -25,8 +25,9 @@ constexpr std::size_t kIndexedCategories = Items::kItemCategoryCount - 1;
 constexpr std::size_t kCategoryCursorWorkspaceOffset = 0x3A;
 static_assert(offsetof(Menu_Framework_MenuMemory, opaque3A) ==
               kCategoryCursorWorkspaceOffset);
-static_assert(sizeof(Menu_Framework_menuMemory.opaque3A.categoryCursors[0]) ==
-              sizeof(CursorMemory));
+static_assert(
+    sizeof(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[0]) ==
+    sizeof(CursorMemory));
 
 [[noreturn]] void Refuse(const char* reason) {
   VS::Core::Errorf("menu.inventory", "Inventory details refused: %s", reason);
@@ -34,7 +35,7 @@ static_assert(sizeof(Menu_Framework_menuMemory.opaque3A.categoryCursors[0]) ==
 }
 
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) {
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing menu row workspace");
   }
 }
@@ -57,7 +58,7 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
   }
   void RememberPage(CursorMemory memory) override {
     RequireCategory(kIndexedCategories);
-    auto& cursor = Menu_Framework_menuMemory.opaque3A
+    auto& cursor = VS::Menu::Framework::menuMemory.opaque3A
                        .categoryCursors[static_cast<std::size_t>(category_)]
                        .position;
     cursor.row = memory.row;

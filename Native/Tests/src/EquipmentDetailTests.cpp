@@ -22,9 +22,9 @@
 #include "Event/ScriptVm.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/RenameLive.hpp"
@@ -37,7 +37,7 @@
 #include "Render/UiPrimitives.h"
 
 namespace {
-static_assert(sizeof Menu_Framework_comparisonStatTotals == 8);
+static_assert(sizeof VS::Menu::Framework::comparisonStatTotals == 8);
 
 struct ComparisonFixture {
   Battle_Actor* saved_actor = Battle_actors[0];
@@ -48,20 +48,21 @@ struct ComparisonFixture {
   std::array<int16_t, 4> saved_accessory{};
   std::array<int16_t, 8> saved_primary{};
   std::array<char, 8> saved_range{};
-  char saved_subtype = Menu_Framework_equipmentSubtype;
+  char saved_subtype = VS::Menu::Framework::equipmentSubtype;
 
   ComparisonFixture() {
-    std::copy_n(Menu_Framework_comparisonStatDeltas, saved_deltas.size(),
+    std::copy_n(VS::Menu::Framework::comparisonStatDeltas, saved_deltas.size(),
                 saved_deltas.begin());
-    std::memcpy(saved_totals.data(), Menu_Framework_comparisonStatTotals,
+    std::memcpy(saved_totals.data(), VS::Menu::Framework::comparisonStatTotals,
                 sizeof saved_totals);
-    std::copy_n(Menu_Framework_comparisonAccessoryStats, saved_accessory.size(),
-                saved_accessory.begin());
-    std::copy_n(Menu_Framework_strIntAgi, saved_primary.size(),
+    std::copy_n(VS::Menu::Framework::comparisonAccessoryStats,
+                saved_accessory.size(), saved_accessory.begin());
+    std::copy_n(VS::Menu::Framework::strIntAgi, saved_primary.size(),
                 saved_primary.begin());
-    std::copy_n(Menu_Framework_rangeRiskData, saved_range.size(),
+    std::copy_n(VS::Menu::Framework::rangeRiskData, saved_range.size(),
                 saved_range.begin());
-    std::memset(Menu_Framework_comparisonStatTotals, 0, sizeof saved_totals);
+    std::memset(VS::Menu::Framework::comparisonStatTotals, 0,
+                sizeof saved_totals);
     stats.strength = stats.intelligence = stats.agility = 100;
     stats.totalStrength = stats.totalIntelligence = stats.totalAgility = 100;
     stats.accessory.currentInt = 1;
@@ -72,16 +73,16 @@ struct ComparisonFixture {
   ~ComparisonFixture() {
     Battle_actors[0] = saved_actor;
     std::copy(saved_deltas.begin(), saved_deltas.end(),
-              Menu_Framework_comparisonStatDeltas);
-    std::memcpy(Menu_Framework_comparisonStatTotals, saved_totals.data(),
+              VS::Menu::Framework::comparisonStatDeltas);
+    std::memcpy(VS::Menu::Framework::comparisonStatTotals, saved_totals.data(),
                 sizeof saved_totals);
     std::copy(saved_accessory.begin(), saved_accessory.end(),
-              Menu_Framework_comparisonAccessoryStats);
+              VS::Menu::Framework::comparisonAccessoryStats);
     std::copy(saved_primary.begin(), saved_primary.end(),
-              Menu_Framework_strIntAgi);
+              VS::Menu::Framework::strIntAgi);
     std::copy(saved_range.begin(), saved_range.end(),
-              Menu_Framework_rangeRiskData);
-    Menu_Framework_equipmentSubtype = saved_subtype;
+              VS::Menu::Framework::rangeRiskData);
+    VS::Menu::Framework::equipmentSubtype = saved_subtype;
   }
 };
 
@@ -91,21 +92,21 @@ struct EquipmentFixture {
   void* saved_ordering = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
-  char saved_page = Menu_Framework_itemStatPage;
-  char saved_pages = Menu_Framework_enabledStatPages;
-  char saved_subtype = Menu_Framework_equipmentSubtype;
+  char saved_page = VS::Menu::Framework::itemStatPage;
+  char saved_pages = VS::Menu::Framework::enabledStatPages;
+  char saved_subtype = VS::Menu::Framework::equipmentSubtype;
   std::array<int16_t, 64> saved_stats{};
   std::vector<u_long> storage =
       std::vector<u_long>(0x20000 / 4 + 2, 0xDEADBEEF);
   std::array<u_long, 32> ordering{};
 
   explicit EquipmentFixture(int page) {
-    std::copy_n(Menu_Framework_equipmentStats, saved_stats.size(),
+    std::copy_n(VS::Menu::Framework::equipmentStats, saved_stats.size(),
                 saved_stats.begin());
-    std::fill_n(Menu_Framework_equipmentStats, saved_stats.size(), 0);
-    Menu_Framework_itemStatPage = static_cast<char>(page);
-    Menu_Framework_enabledStatPages = 7;
-    Menu_Framework_equipmentSubtype = 0;
+    std::fill_n(VS::Menu::Framework::equipmentStats, saved_stats.size(), 0);
+    VS::Menu::Framework::itemStatPage = static_cast<char>(page);
+    VS::Menu::Framework::enabledStatPages = 7;
+    VS::Menu::Framework::equipmentSubtype = 0;
     Render_frameBuf = 0;
     Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
     Render_frameScratch.primitiveCursor = storage.data() + 1;
@@ -118,10 +119,10 @@ struct EquipmentFixture {
 
   ~EquipmentFixture() {
     std::copy(saved_stats.begin(), saved_stats.end(),
-              Menu_Framework_equipmentStats);
-    Menu_Framework_itemStatPage = saved_page;
-    Menu_Framework_enabledStatPages = saved_pages;
-    Menu_Framework_equipmentSubtype = saved_subtype;
+              VS::Menu::Framework::equipmentStats);
+    VS::Menu::Framework::itemStatPage = saved_page;
+    VS::Menu::Framework::enabledStatPages = saved_pages;
+    VS::Menu::Framework::equipmentSubtype = saved_subtype;
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
     Render_legacyOrderingTables[0] = saved_ordering;
@@ -170,7 +171,7 @@ struct EquipmentFixture {
 
 struct RenameFrameFixture {
   EquipmentFixture frame{0};
-  Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
+  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   decltype(std::to_array(
       VS::Menu::Rename::renderRenameMenuStrings)) saved_strings =
       std::to_array(VS::Menu::Rename::renderRenameMenuStrings);
@@ -179,7 +180,7 @@ struct RenameFrameFixture {
   std::array<Menu_Framework_MenuRow, 40> rows{};
 
   RenameFrameFixture() {
-    Menu_Framework_menuItems = rows.data();
+    VS::Menu::Framework::menuItems = rows.data();
     // The live chain lookups only accept the frame's own ordering table.
     Render_legacyOrderingTables[0] = frame.ordering.data();
     Render_frameScratch.orderingTable = frame.ordering.data() + 24;
@@ -202,7 +203,7 @@ struct RenameFrameFixture {
   }
 
   ~RenameFrameFixture() {
-    Menu_Framework_menuItems = saved_rows;
+    VS::Menu::Framework::menuItems = saved_rows;
     Render_legacyOrderingTables[0] = saved_table;
     std::copy(saved_strings.begin(), saved_strings.end(),
               VS::Menu::Rename::renderRenameMenuStrings);
@@ -327,7 +328,7 @@ TEST_CASE(
       static_cast<int16_t>(100 + modifier);
   VS::Menu::Framework::SetLiveActorComparisonStats(mode);
   std::array<int16_t, 4> totals{};
-  std::memcpy(totals.data(), Menu_Framework_comparisonStatTotals,
+  std::memcpy(totals.data(), VS::Menu::Framework::comparisonStatTotals,
               sizeof totals);
   const int16_t expected =
       static_cast<int16_t>(modifier + (mode == 0 ? 0 : 100));
@@ -335,9 +336,9 @@ TEST_CASE(
   const std::array<int16_t, 4> expected_totals{expected_total, expected_total,
                                                expected_total, 0};
   CHECK(totals == expected_totals);
-  CHECK(Menu_Framework_comparisonStatDeltas[0] == expected);
-  CHECK(Menu_Framework_comparisonStatDeltas[1] == expected);
-  CHECK(Menu_Framework_comparisonStatDeltas[2] == expected);
+  CHECK(VS::Menu::Framework::comparisonStatDeltas[0] == expected);
+  CHECK(VS::Menu::Framework::comparisonStatDeltas[1] == expected);
+  CHECK(VS::Menu::Framework::comparisonStatDeltas[2] == expected);
   CHECK(fixture.stats.strength == 100 + modifier);
 }
 
@@ -352,9 +353,9 @@ TEST_CASE("Primary comparison columns apply actor and accessory values once",
   if (weapon) VS::Menu::Framework::SetLivePrimaryStats(10, 1, -4, 1);
   std::array<int, 3> equipped{};
   for (size_t index = 0; index < equipped.size(); ++index) {
-    equipped[index] = Menu_Framework_strIntAgi[index] +
-                      Menu_Framework_comparisonStatDeltas[index] +
-                      Menu_Framework_comparisonAccessoryStats[index];
+    equipped[index] = VS::Menu::Framework::strIntAgi[index] +
+                      VS::Menu::Framework::comparisonStatDeltas[index] +
+                      VS::Menu::Framework::comparisonAccessoryStats[index];
   }
   const std::array<int, 3> expected =
       weapon ? std::array{110 + modifier, 102 + modifier, 96 + modifier}

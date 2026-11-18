@@ -16,7 +16,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Options.hpp"
 #include "Menu/OptionsLiveState.hpp"
 #include "Menu/TextBox.h"
@@ -97,7 +97,7 @@ class LiveHost final : public Host {
   }
   int RememberedRow() override {
     return static_cast<unsigned char>(
-        Menu_Framework_menuMemory.opaque85[kRememberedRowSlot]);
+        VS::Menu::Framework::menuMemory.opaque85[kRememberedRowSlot]);
   }
   void DismissInformationBox() override {
     Framework::DismissLiveInformationBox();
@@ -153,7 +153,7 @@ class LiveHost final : public Host {
     Input::PlayLiveVibrationPreset(preset);
   }
   void ReturnToBattle() override {
-    Menu_Framework_menuState.currentMenu = kBattleMenu;
+    VS::Menu::Framework::menuState.currentMenu = kBattleMenu;
   }
 
  private:

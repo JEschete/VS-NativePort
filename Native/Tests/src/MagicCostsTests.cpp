@@ -19,7 +19,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Magic.h"
 #include "Menu/MagicCosts.hpp"
 #include "Menu/MagicCostsLive.hpp"
@@ -570,12 +570,12 @@ TEST_CASE("Magic CreateHeader refuses a label outside the menu strings",
 namespace {
 struct TeleportLiveFixture {
   State_Settings saved_settings = Input_settings;
-  Menu_Framework_MenuMemory saved_memory = Menu_Framework_menuMemory;
-  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
-  u_short* saved_text = Menu_Framework_itemsText;
-  int saved_selected = Menu_Framework_selectedRow;
-  int saved_restrictions = Menu_Framework_actionRestrictions;
-  char saved_display_cost = Menu_Framework_displayActionCost;
+  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  u_short* saved_text = VS::Menu::Framework::itemsText;
+  int saved_selected = VS::Menu::Framework::selectedRow;
+  int saved_restrictions = VS::Menu::Framework::actionRestrictions;
+  char saved_display_cost = VS::Menu::Framework::displayActionCost;
   Battle_Actor* saved_character = Battle_characterState;
   std::array<char, 48> saved_states{};
   std::array<u_short, 1599> saved_strings{};
@@ -592,10 +592,10 @@ struct TeleportLiveFixture {
     std::copy_n(Menu_Magic_teleportationStrings, 1599, saved_strings.begin());
     std::fill_n(Audio_Seq_unusedStateFlags.savePointStates, 48, char{0});
     std::fill_n(Menu_Magic_teleportationStrings, 1599, u_short{0});
-    Menu_Framework_menuItems = rows.data();
-    Menu_Framework_itemsText = nullptr;
-    Menu_Framework_menuMemory = {};
-    Menu_Framework_actionRestrictions = 0;
+    VS::Menu::Framework::menuItems = rows.data();
+    VS::Menu::Framework::itemsText = nullptr;
+    VS::Menu::Framework::menuMemory = {};
+    VS::Menu::Framework::actionRestrictions = 0;
     Input_settings.menuFlags = 0x3FF;
     Input_settings.cursorMemory = 0;
     Battle_characterState = &actor;
@@ -606,20 +606,20 @@ struct TeleportLiveFixture {
 
   ~TeleportLiveFixture() {
     VS::Menu::Magic::ResetTeleportMenuLiveState();
-    if (Menu_Framework_itemsText != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
+    if (VS::Menu::Framework::itemsText != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(VS::Menu::Framework::itemsText);
     }
     std::copy(saved_states.begin(), saved_states.end(),
               Audio_Seq_unusedStateFlags.savePointStates);
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_Magic_teleportationStrings);
     Input_settings = saved_settings;
-    Menu_Framework_menuMemory = saved_memory;
-    Menu_Framework_menuItems = saved_items;
-    Menu_Framework_itemsText = saved_text;
-    Menu_Framework_selectedRow = saved_selected;
-    Menu_Framework_actionRestrictions = saved_restrictions;
-    Menu_Framework_displayActionCost = saved_display_cost;
+    VS::Menu::Framework::menuMemory = saved_memory;
+    VS::Menu::Framework::menuItems = saved_items;
+    VS::Menu::Framework::itemsText = saved_text;
+    VS::Menu::Framework::selectedRow = saved_selected;
+    VS::Menu::Framework::actionRestrictions = saved_restrictions;
+    VS::Menu::Framework::displayActionCost = saved_display_cost;
     Battle_characterState = saved_character;
   }
 
@@ -634,29 +634,29 @@ struct TeleportLiveFixture {
 
 TEST_CASE("Magic SetSpellMpCostLive refuses invalid ids without cost text",
           "[magic-costs-live]") {
-  const char saved = Menu_Framework_displayActionCost;
+  const char saved = VS::Menu::Framework::displayActionCost;
   Battle_Actor* const saved_character = Battle_characterState;
-  Menu_Framework_displayActionCost = 0;
+  VS::Menu::Framework::displayActionCost = 0;
   magic::SetSpellMpCostLive(std::numeric_limits<int>::min());
   magic::SetSpellMpCostLive(256);
   magic::SetSpellMpCostLive(-256);
   Battle_characterState = nullptr;
   magic::SetSpellMpCostLive(1);
-  CHECK(Menu_Framework_displayActionCost == 0);
+  CHECK(VS::Menu::Framework::displayActionCost == 0);
   Battle_characterState = saved_character;
-  Menu_Framework_displayActionCost = saved;
+  VS::Menu::Framework::displayActionCost = saved;
 }
 
 TEST_CASE("Magic SetTeleportMpCostLive publishes only formattable costs",
           "[magic-costs-live]") {
-  const char saved = Menu_Framework_displayActionCost;
-  Menu_Framework_displayActionCost = 0;
+  const char saved = VS::Menu::Framework::displayActionCost;
+  VS::Menu::Framework::displayActionCost = 0;
   magic::SetTeleportMpCostLive(-1, 0);
   magic::SetTeleportMpCostLive(0x10000, 0);
-  CHECK(Menu_Framework_displayActionCost == 0);
+  CHECK(VS::Menu::Framework::displayActionCost == 0);
   magic::SetTeleportMpCostLive(15, 1);
-  CHECK(Menu_Framework_displayActionCost == 1);
-  Menu_Framework_displayActionCost = saved;
+  CHECK(VS::Menu::Framework::displayActionCost == 1);
+  VS::Menu::Framework::displayActionCost = saved;
 }
 
 TEST_CASE("Magic TeleportMpCostLive refuses targets outside the table",
@@ -679,10 +679,10 @@ TEST_CASE("Magic UpdateTeleportMenuLive packs the confirmed destination",
   CHECK(magic::UpdateTeleportMenuLive(0) == 0);
   CHECK(Input_settings.cursorMemory == 0);
 
-  Menu_Framework_selectedRow = 1;
+  VS::Menu::Framework::selectedRow = 1;
   VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
   CHECK(magic::UpdateTeleportMenuLive(0) == 0);
-  CHECK(Menu_Framework_displayActionCost == 0);
+  CHECK(VS::Menu::Framework::displayActionCost == 0);
   fixture.FinishRowAnimations();
   const int packed = magic::UpdateTeleportMenuLive(0);
   const magic::SavePoint& target = magic::OriginalSavePoints()[10];

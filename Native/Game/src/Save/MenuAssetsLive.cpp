@@ -10,7 +10,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/GameFiles.h"
@@ -96,7 +96,7 @@ class LiveMenuAssets final : public MenuAssetHost {
     Save_MemoryCard_uiResources = reinterpret_cast<Save_CardUiResources*>(
         Title_memoryCardUiResource + kResourceOffset);
     if (owner == MenuAssetOwner::kDataMenu) {
-      Menu_Files_textTable = Save_MemoryCard_uiResources->textTable;
+      VS::Menu::Files::textTable = Save_MemoryCard_uiResources->textTable;
     } else {
       Title_saveMenuText = Save_MemoryCard_uiResources->textTable;
     }
@@ -111,7 +111,7 @@ class LiveMenuAssets final : public MenuAssetHost {
     Save_MemoryCard_uiResources = nullptr;
     // #300: every view AllocateAssets derived pointed into the freed block, so
     // clear them all for the readers' null guards to refuse later reads.
-    Menu_Files_textTable = nullptr;
+    VS::Menu::Files::textTable = nullptr;
     Title_saveMenuText = nullptr;
     Title_saveFileSummaries = nullptr;
     Title_cardDirectoryEntryBuffer = nullptr;

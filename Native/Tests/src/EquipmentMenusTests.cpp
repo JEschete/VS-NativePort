@@ -19,11 +19,11 @@
 #include "Battle/Hud.h"
 #include "Items/Inventory.h"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/EquipmentMenus.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
@@ -1274,13 +1274,13 @@ struct MenuGlobals {
   detail::ValueRestore<char> load{Menu_Inventory_equipmentModelLoadStep};
   detail::ArrayRestore<u_short, std::size(Menu_Inventory_menuText)> text{
       Menu_Inventory_menuText};
-  detail::ArrayRestore<u_char, std::size(Menu_Framework_weaponHands)> hands{
-      Menu_Framework_weaponHands};
+  detail::ArrayRestore<u_char, std::size(VS::Menu::Framework::weaponHands)>
+      hands{VS::Menu::Framework::weaponHands};
 
   MenuGlobals() {
     Menu_Inventory_itemsText = nullptr;
     Menu_Inventory_equipListStep = 0;
-    std::ranges::fill(Menu_Framework_weaponHands, u_char{0});
+    std::ranges::fill(VS::Menu::Framework::weaponHands, u_char{0});
     inv::ResetEquipmentRowsLive();
     inv::ResetEquipmentMenusLive();
   }
@@ -1346,8 +1346,8 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
   // already freed.
   void MaskTextTails(std::span<std::uint8_t> heap) {
     Track(Menu_Inventory_itemsText, Menu_Inventory_menuRowCount);
-    Track(reinterpret_cast<const char*>(Menu_Framework_itemsText),
-          Menu_Framework_subMenuRowCount);
+    Track(reinterpret_cast<const char*>(VS::Menu::Framework::itemsText),
+          VS::Menu::Framework::subMenuRowCount);
     for (const std::size_t record : text_records) {
       if (record + sizeof(fw::ItemText) > heap.size()) {
         continue;
@@ -1439,19 +1439,19 @@ struct Snapshot {
                       Menu_Inventory_itemsFirstRow,
                       fixture.Classify(Menu_Inventory_itemsText),
                       Menu_Inventory_equipmentModelLoadStep,
-                      Menu_Framework_enabledStatPages,
-                      Menu_Framework_itemStatPage,
-                      Menu_Framework_equipmentSubtype,
-                      Menu_Framework_currentStatusViewItem,
+                      VS::Menu::Framework::enabledStatPages,
+                      VS::Menu::Framework::itemStatPage,
+                      VS::Menu::Framework::equipmentSubtype,
+                      VS::Menu::Framework::currentStatusViewItem,
                       fw::LiveHighlightedRow()};
   const auto append = [&snapshot](std::span<const std::int16_t> values) {
     snapshot.panels.insert(snapshot.panels.end(), values.begin(), values.end());
   };
-  append(Menu_Framework_equipmentStats);
-  append(Menu_Framework_strIntAgi);
-  append(Menu_Framework_comparisonStatDeltas);
-  append(Menu_Framework_comparisonStatTotals);
-  append(Menu_Framework_comparisonAccessoryStats);
+  append(VS::Menu::Framework::equipmentStats);
+  append(VS::Menu::Framework::strIntAgi);
+  append(VS::Menu::Framework::comparisonStatDeltas);
+  append(VS::Menu::Framework::comparisonStatTotals);
+  append(VS::Menu::Framework::comparisonAccessoryStats);
   const auto heap = std::span(
       reinterpret_cast<const std::uint8_t*>(fixture.heap_bytes.data()),
       fixture.heap_bytes.size());
@@ -1598,7 +1598,7 @@ TEST_CASE("Live weapon menu matches the frozen MENU3 digest",
   const auto setup = [](MenusFixture& fixture) {
     fixture.AddEquipment();
     Audio_Seq_unusedInventory.shields[0].isEquipped = 1;
-    Menu_Framework_weaponHands[0] = 1;
+    VS::Menu::Framework::weaponHands[0] = 1;
   };
   const auto steps = [](Script& script) { BackThenChoose(script, 1); };
   const MenuRun live = Play(inv::UpdateLiveWeaponMenu, setup, steps);
@@ -1614,7 +1614,7 @@ TEST_CASE("Live shield menu matches the frozen MENU3 digest",
     fixture.AddEquipment();
     fixture.stats.weapon.blade.id = 1;
     fixture.stats.weapon.blade.category = 1;
-    Menu_Framework_weaponHands[0] = 1;
+    VS::Menu::Framework::weaponHands[0] = 1;
   };
   const auto steps = [](Script& script) { BackThenChoose(script, 1); };
   const MenuRun live = Play(inv::UpdateLiveShieldMenu, setup, steps);
@@ -1702,7 +1702,7 @@ TEST_CASE("Live equipment menus refuse slots, parts and rows outside",
   MenusFixture fixture;
   fixture.AddEquipment();
   const std::uint64_t before = inv::LiveEquipmentMenusRefusalCount();
-  const char pages = Menu_Framework_enabledStatPages;
+  const char pages = VS::Menu::Framework::enabledStatPages;
   Audio_Seq_unusedInventoryIndices.armor[0] = 17;
   CHECK(inv::UpdateLiveArmorMenu(1) == 0);
   CHECK(inv::UpdateLiveAccessoryMenu(1) == 0);
@@ -1710,7 +1710,7 @@ TEST_CASE("Live equipment menus refuse slots, parts and rows outside",
   CHECK(inv::DispatchLiveEquipmentMenu(9) == 0);
   CHECK(inv::DispatchLiveEquipmentMenu(-1) == 0);
   CHECK(inv::LiveEquipmentMenusRefusalCount() == before + 5);
-  CHECK(Menu_Framework_enabledStatPages == pages);
+  CHECK(VS::Menu::Framework::enabledStatPages == pages);
 }
 
 TEST_CASE("Live equipment menu reset forgets the open slot menu",

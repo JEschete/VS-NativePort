@@ -14,7 +14,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.h"
 #include "Menu/ManualTopics.hpp"
 #include "Menu/ManualTopicsLive.hpp"
@@ -436,11 +436,11 @@ TEST_CASE("Page text refuses lines that overflow the page buffer",
 namespace {
 struct LiveTopicFixture {
   State_Settings saved_settings = Input_settings;
-  Menu_Framework_MenuMemory saved_memory = Menu_Framework_menuMemory;
-  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
-  u_short* saved_text = Menu_Framework_itemsText;
-  int saved_selected = Menu_Framework_selectedRow;
-  u_short saved_count = Menu_Framework_subMenuRowCount;
+  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  u_short* saved_text = VS::Menu::Framework::itemsText;
+  int saved_selected = VS::Menu::Framework::selectedRow;
+  u_short saved_count = VS::Menu::Framework::subMenuRowCount;
   std::array<u_short, 516> saved_table = std::to_array(Menu_Manual_menuText);
   int saved_step = Menu_Manual_topMenuState;
   int saved_row = Menu_Manual_selectedRow;
@@ -454,9 +454,9 @@ struct LiveTopicFixture {
   } workspace;
 
   LiveTopicFixture() {
-    Menu_Framework_menuItems = workspace.rows.data();
-    Menu_Framework_itemsText = nullptr;
-    Menu_Framework_menuMemory = {};
+    VS::Menu::Framework::menuItems = workspace.rows.data();
+    VS::Menu::Framework::itemsText = nullptr;
+    VS::Menu::Framework::menuMemory = {};
     Input_settings.menuFlags = 0x3FF;
     std::fill(std::begin(Menu_Manual_menuText), std::end(Menu_Manual_menuText),
               u_short{0});
@@ -470,11 +470,11 @@ struct LiveTopicFixture {
   ~LiveTopicFixture() {
     ReleaseRows();
     Input_settings = saved_settings;
-    Menu_Framework_menuMemory = saved_memory;
-    Menu_Framework_menuItems = saved_items;
-    Menu_Framework_itemsText = saved_text;
-    Menu_Framework_selectedRow = saved_selected;
-    Menu_Framework_subMenuRowCount = saved_count;
+    VS::Menu::Framework::menuMemory = saved_memory;
+    VS::Menu::Framework::menuItems = saved_items;
+    VS::Menu::Framework::itemsText = saved_text;
+    VS::Menu::Framework::selectedRow = saved_selected;
+    VS::Menu::Framework::subMenuRowCount = saved_count;
     std::copy(saved_table.begin(), saved_table.end(), Menu_Manual_menuText);
     Menu_Manual_topMenuState = saved_step;
     Menu_Manual_selectedRow = saved_row;
@@ -482,9 +482,9 @@ struct LiveTopicFixture {
   }
 
   static void ReleaseRows() {
-    if (Menu_Framework_itemsText != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
-      Menu_Framework_itemsText = nullptr;
+    if (VS::Menu::Framework::itemsText != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(VS::Menu::Framework::itemsText);
+      VS::Menu::Framework::itemsText = nullptr;
     }
   }
 };
@@ -536,10 +536,10 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
   Field_manualDisplayState.currentManual = 10;
   CHECK(manual::LiveUpdateTopicMenu(1) == -1);
   CHECK(Menu_Manual_topMenuState == 1);
-  CHECK(Menu_Framework_menuMemory.cursorMemories[4] == 5);
-  CHECK(Menu_Framework_menuMemory.cursorMemories[5] == 5);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[4] == 5);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[5] == 5);
   CHECK(Input_settings.cursorMemory == fixture.saved_settings.cursorMemory);
-  REQUIRE(Menu_Framework_itemsText != nullptr);
+  REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(manual::LiveUpdateTopicMenu(0) == -1);
   CHECK(Menu_Manual_topMenuState == 1);
 }
@@ -547,12 +547,12 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
 TEST_CASE("Live topic selection returns chosen and cancelled rows",
           "[manual-topics-live]") {
   LiveTopicFixture fixture;
-  Menu_Framework_menuMemory.cursorMemories[4] = 3;
-  Menu_Framework_selectedRow = 2;
+  VS::Menu::Framework::menuMemory.cursorMemories[4] = 3;
+  VS::Menu::Framework::selectedRow = 2;
   Menu_Manual_topMenuState = 1;
   CHECK(manual::LiveUpdateTopicMenu(0) == 2);
   CHECK(Menu_Manual_selectedRow == 2);
-  Menu_Framework_selectedRow = -2;
+  VS::Menu::Framework::selectedRow = -2;
   CHECK(manual::LiveGetSelectedTopicRow() == -2);
 }
 
@@ -565,7 +565,7 @@ TEST_CASE("Live topic menu refuses an unterminated table as a cancel",
   CHECK(manual::LiveUpdateTopicMenu(1) == -2);
   CHECK(manual::LiveTopicRefusalCount() == refusals + 1);
   CHECK(Menu_Manual_topMenuState == 0);
-  CHECK(Menu_Framework_itemsText == nullptr);
+  CHECK(VS::Menu::Framework::itemsText == nullptr);
 }
 
 TEST_CASE("Live topic rows refuse strings outside the topic table",
@@ -578,7 +578,7 @@ TEST_CASE("Live topic rows refuse strings outside the topic table",
   manual::LiveSetTopicRows(1, 0, strings.data());
   manual::LiveSetTopicRows(0, 0, strings.data());
   CHECK(manual::LiveTopicRefusalCount() == refusals + 2);
-  CHECK(Menu_Framework_itemsText == nullptr);
+  CHECK(VS::Menu::Framework::itemsText == nullptr);
 }
 
 TEST_CASE("Live topic rows list strings inside the topic table",
@@ -589,8 +589,8 @@ TEST_CASE("Live topic rows list strings inside the topic table",
   const auto refusals = manual::LiveTopicRefusalCount();
   manual::LiveSetTopicRows(1, 0, strings.data());
   CHECK(manual::LiveTopicRefusalCount() == refusals);
-  CHECK(Menu_Framework_itemsText != nullptr);
-  CHECK(Menu_Framework_menuMemory.cursorMemories[4] == 0);
+  CHECK(VS::Menu::Framework::itemsText != nullptr);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[4] == 0);
 }
 
 TEST_CASE("Live page text hands the composed page to text box zero",

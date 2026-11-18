@@ -13,28 +13,28 @@
 #include "Effects/WeatherRenderLive.hpp"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
-#include "Field/EnvironmentLiveState.h"
+#include "Field/EnvironmentLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLive.hpp"
 
 // decomp: D_800F1D98 (D_800F1D98@BATTLE/BATTLE.PRG)
-int16_t Field_weatherParameters[kFieldWeatherParameterWords];
+int16_t VS::Field::weatherParameters[VS::Field::kWeatherParameterWords];
 // decomp: D_800F1DA4 (D_800F1DA4@BATTLE/BATTLE.PRG)
-int16_t Field_weatherIntensityScale;
+int16_t VS::Field::weatherIntensityScale;
 // decomp: D_800F1DBC (D_800F1DBC@BATTLE/BATTLE.PRG)
-int16_t Field_weatherAmbientSoundId;
+int16_t VS::Field::weatherAmbientSoundId;
 // decomp: D_800F1DC0 (D_800F1DC0@BATTLE/BATTLE.PRG)
-int16_t Field_weatherParticleCount;
+int16_t VS::Field::weatherParticleCount;
 // decomp: D_800F1DC2 (D_800F1DC2@BATTLE/BATTLE.PRG)
-int16_t Field_weatherParticleCapacity;
+int16_t VS::Field::weatherParticleCapacity;
 // decomp: D_800F1DC4 (D_800F1DC4@BATTLE/BATTLE.PRG)
-int16_t Field_weatherIntensity;
+int16_t VS::Field::weatherIntensity;
 // decomp: D_800F1DCA (D_800F1DCA@BATTLE/BATTLE.PRG)
-char Field_roomWeatherKind;
+char VS::Field::roomWeatherKind;
 // decomp: D_800F1DCB (D_800F1DCB@BATTLE/BATTLE.PRG)
-char Field_isWeatherVariationEnabled;
+char VS::Field::isWeatherVariationEnabled;
 // decomp: D_800F1DD4 (D_800F1DD4@BATTLE/BATTLE.PRG)
-Field_WeatherParticle* Field_weatherParticles;
+Field_WeatherParticle* VS::Field::weatherParticles;
 
 namespace {
 // The original's particle record (146C.h) and D_800F1D98's word indices:
@@ -89,37 +89,37 @@ auto RunLive(Rule rule) {
 }  // namespace
 
 RoomWeatherState LoadLiveRoomWeatherState() {
-  return {.wind_strength = Field_weatherParameters[kWindStrengthWord],
-          .wind_direction = Field_weatherParameters[kWindDirectionWord],
-          .direction_step = Field_weatherParameters[kDirectionStepWord],
-          .intensity_step = Field_weatherParameters[kIntensityStepWord],
-          .strength_step = Field_weatherParameters[kStrengthStepWord],
-          .intensity_scale = Field_weatherIntensityScale,
-          .ambient_sound_id = Field_weatherAmbientSoundId,
-          .particle_count = Field_weatherParticleCount,
-          .particle_capacity = Field_weatherParticleCapacity,
-          .intensity = Field_weatherIntensity,
-          .kind = static_cast<std::uint8_t>(Field_roomWeatherKind),
-          .variation_enabled =
-              static_cast<std::uint8_t>(Field_isWeatherVariationEnabled),
-          .particles = ParticlesIdOf(Field_weatherParticles)};
+  return {
+      .wind_strength = weatherParameters[kWindStrengthWord],
+      .wind_direction = weatherParameters[kWindDirectionWord],
+      .direction_step = weatherParameters[kDirectionStepWord],
+      .intensity_step = weatherParameters[kIntensityStepWord],
+      .strength_step = weatherParameters[kStrengthStepWord],
+      .intensity_scale = weatherIntensityScale,
+      .ambient_sound_id = weatherAmbientSoundId,
+      .particle_count = weatherParticleCount,
+      .particle_capacity = weatherParticleCapacity,
+      .intensity = weatherIntensity,
+      .kind = static_cast<std::uint8_t>(roomWeatherKind),
+      .variation_enabled = static_cast<std::uint8_t>(isWeatherVariationEnabled),
+      .particles = ParticlesIdOf(weatherParticles)};
 }
 
 void StoreLiveRoomWeatherState(const RoomWeatherState& state) {
-  Field_weatherParameters[kWindStrengthWord] = state.wind_strength;
-  Field_weatherParameters[kWindDirectionWord] = state.wind_direction;
-  Field_weatherParameters[kDirectionStepWord] = state.direction_step;
-  Field_weatherParameters[kIntensityStepWord] = state.intensity_step;
-  Field_weatherParameters[kStrengthStepWord] = state.strength_step;
-  Field_weatherIntensityScale = state.intensity_scale;
-  Field_weatherParameters[kIntensityScaleWord] = state.intensity_scale;
-  Field_weatherAmbientSoundId = state.ambient_sound_id;
-  Field_weatherParticleCount = state.particle_count;
-  Field_weatherParticleCapacity = state.particle_capacity;
-  Field_weatherIntensity = state.intensity;
-  Field_roomWeatherKind = static_cast<char>(state.kind);
-  Field_isWeatherVariationEnabled = static_cast<char>(state.variation_enabled);
-  Field_weatherParticles = ParticlesOf(state.particles);
+  weatherParameters[kWindStrengthWord] = state.wind_strength;
+  weatherParameters[kWindDirectionWord] = state.wind_direction;
+  weatherParameters[kDirectionStepWord] = state.direction_step;
+  weatherParameters[kIntensityStepWord] = state.intensity_step;
+  weatherParameters[kStrengthStepWord] = state.strength_step;
+  weatherIntensityScale = state.intensity_scale;
+  weatherParameters[kIntensityScaleWord] = state.intensity_scale;
+  weatherAmbientSoundId = state.ambient_sound_id;
+  weatherParticleCount = state.particle_count;
+  weatherParticleCapacity = state.particle_capacity;
+  weatherIntensity = state.intensity;
+  roomWeatherKind = static_cast<char>(state.kind);
+  isWeatherVariationEnabled = static_cast<char>(state.variation_enabled);
+  weatherParticles = ParticlesOf(state.particles);
 }
 
 template <typename Call>

@@ -26,14 +26,14 @@ using equipment_detail_tests::ValueRestore;
 struct LiveTransitionFixture : equipment_detail_tests::LiveFixture {
   ArrayRestore<u_short, std::size(Menu_Status_statusStrings)> saved_status{
       Menu_Status_statusStrings};
-  ArrayRestore<u_char, std::size(Menu_Framework_weaponHands)> saved_hands{
-      Menu_Framework_weaponHands};
+  ArrayRestore<u_char, std::size(VS::Menu::Framework::weaponHands)> saved_hands{
+      VS::Menu::Framework::weaponHands};
   vs_test::status_components::World text;
 
   LiveTransitionFixture() {
     std::memcpy(help.data(), text.help.data(), text.help.size());
     std::memcpy(names.data(), text.names.data(), text.names.size());
-    std::ranges::copy(text.hands, Menu_Framework_weaponHands);
+    std::ranges::copy(text.hands, VS::Menu::Framework::weaponHands);
     Battle_stringContext = {};
     std::fill_n(Menu_Status_statusStrings, 48, u_short{74});
     Menu_Status_statusStrings[74] = 0xE701;
@@ -56,7 +56,7 @@ Entry ModuleEntry(unsigned address, Entry expected) {
 TEST_CASE("Status navigation module entry reads the current framework map",
           "[status-transitions-live][F02655]") {
   LiveTransitionFixture fixture;
-  auto& link = Menu_Framework_statusViewNavigationMap[3][0];
+  auto& link = VS::Menu::Framework::statusViewNavigationMap[3][0];
   ValueRestore saved_link{link};
   link = 9;
   Input_buttonRepeat = 0x1000;
@@ -65,7 +65,7 @@ TEST_CASE("Status navigation module entry reads the current framework map",
   Input_buttonRepeat = 0;
   CHECK(entry(9, 0) == 9);
   CHECK(entry(21, 0) == 21);
-  CHECK(Menu_Framework_stringBuf == fixture.description.data());
+  CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
 TEST_CASE("Status hoist module entry preserves text and flies the name row out",
@@ -106,13 +106,13 @@ TEST_CASE("Status title module entry creates real category and equipment rows",
 TEST_CASE("Status initialization module entry binds actual stat page ownership",
           "[status-transitions-live][F02671]") {
   LiveTransitionFixture fixture;
-  Menu_Framework_enabledStatPages = 0;
+  VS::Menu::Framework::enabledStatPages = 0;
   ModuleEntry(0x80104C0C, &status::InitializeLiveDetailPanel)(1, 5);
-  CHECK(Menu_Framework_enabledStatPages == 5);
-  CHECK(Menu_Framework_itemStatPage == fw::stat_page::kClass);
+  CHECK(VS::Menu::Framework::enabledStatPages == 5);
+  CHECK(VS::Menu::Framework::itemStatPage == fw::stat_page::kClass);
   CHECK(fw::LiveMenuRow(32).row_icon == 27);
   CHECK(fw::LiveMenuRow(11).target0 == 18);
-  CHECK(Menu_Framework_stringBuf == fixture.description.data());
+  CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
 TEST_CASE("Status weapon module entry formats real parts and empty sockets",
@@ -130,7 +130,7 @@ TEST_CASE("Status weapon module entry formats real parts and empty sockets",
   CHECK(row.unselectable == (component == 4));
   CHECK(row.x == (init != 0 ? 320 : component < 3 ? 162 : 169));
   CHECK(VS::Items::Live::Typed(weapon) == typed);
-  CHECK(Menu_Framework_stringBuf == fixture.description.data());
+  CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
 TEST_CASE("Status shield module entry masks slide flags and preserves loadouts",
@@ -149,7 +149,7 @@ TEST_CASE("Status shield module entry masks slide flags and preserves loadouts",
   CHECK(row.state ==
         ((init & 1) != 0 ? fw::RowState::kSlideX : fw::RowState::kIdle));
   CHECK(VS::Items::Live::Typed(shield) == typed);
-  CHECK(Menu_Framework_stringBuf == fixture.description.data());
+  CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
 TEST_CASE("Status exit module entry drives real rows and optional DP PP hiding",
@@ -172,7 +172,7 @@ TEST_CASE("Status exit module entry drives real rows and optional DP PP hiding",
     fw::UpdateLiveDpPpBars(0);
   }
   CHECK(fixture.Sprites().empty() == clear);
-  CHECK(Menu_Framework_stringBuf == fixture.description.data());
+  CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
 TEST_CASE("Status Live transitions refuse absent workspace without text writes",
@@ -182,7 +182,7 @@ TEST_CASE("Status Live transitions refuse absent workspace without text writes",
   auto shield = std::bit_cast<Items_ShieldLoadout>(data::Shield());
   fixture.description.fill('Q');
   const auto before = fixture.description;
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   status::HoistLiveEquipmentRow(0);
   status::BeginLiveDetailTransition(0);
   status::InitializeLiveDetailPanel(0, 7);
@@ -190,5 +190,5 @@ TEST_CASE("Status Live transitions refuse absent workspace without text writes",
   status::SetLiveShieldGemRow(1, &shield, 1);
   status::ExitLiveEquipmentDetails(1);
   CHECK(fixture.description == before);
-  CHECK(Menu_Framework_menuItems == nullptr);
+  CHECK(VS::Menu::Framework::menuItems == nullptr);
 }

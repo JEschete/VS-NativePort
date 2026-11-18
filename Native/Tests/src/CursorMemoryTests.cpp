@@ -36,11 +36,11 @@
 #include "Legacy/Psx.h"
 #include "Menu/BreakArts.h"
 #include "Menu/BreakArtsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
@@ -57,18 +57,18 @@
 namespace {
 struct CursorFixture {
   State_Settings saved_settings = Input_settings;
-  Menu_Framework_MenuMemory saved_memory = Menu_Framework_menuMemory;
-  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
-  u_short* saved_text = Menu_Framework_itemsText;
-  int saved_selected = Menu_Framework_selectedRow;
-  int saved_animation = Menu_Framework_mainMenuCursorAnimation;
-  char saved_root = Menu_Framework_submenuStates[0];
-  char saved_page = Menu_Framework_subMenuPage;
-  char saved_row_info = Menu_Framework_subMenuRowInfo;
-  char saved_row_y = Menu_Framework_menuRowYOffset;
-  char saved_list_row = Menu_Framework_itemsListRow;
-  u_char saved_id = Menu_Framework_subMenuId;
-  u_short saved_count = Menu_Framework_subMenuRowCount;
+  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  u_short* saved_text = VS::Menu::Framework::itemsText;
+  int saved_selected = VS::Menu::Framework::selectedRow;
+  int saved_animation = VS::Menu::Framework::mainMenuCursorAnimation;
+  char saved_root = VS::Menu::Framework::submenuStates[0];
+  char saved_page = VS::Menu::Framework::subMenuPage;
+  char saved_row_info = VS::Menu::Framework::subMenuRowInfo;
+  char saved_row_y = VS::Menu::Framework::menuRowYOffset;
+  char saved_list_row = VS::Menu::Framework::itemsListRow;
+  u_char saved_id = VS::Menu::Framework::subMenuId;
+  u_short saved_count = VS::Menu::Framework::subMenuRowCount;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
@@ -80,29 +80,29 @@ struct CursorFixture {
   std::array<int, 20> row_types{};
 
   CursorFixture() {
-    Menu_Framework_menuItems = workspace.rows.data();
-    Menu_Framework_itemsText = nullptr;
-    Menu_Framework_menuMemory = {};
+    VS::Menu::Framework::menuItems = workspace.rows.data();
+    VS::Menu::Framework::itemsText = nullptr;
+    VS::Menu::Framework::menuMemory = {};
     Input_settings.menuFlags = 0x3FF;
   }
 
   ~CursorFixture() {
-    if (Menu_Framework_itemsText != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemsText);
+    if (VS::Menu::Framework::itemsText != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(VS::Menu::Framework::itemsText);
     }
     Input_settings = saved_settings;
-    Menu_Framework_menuMemory = saved_memory;
-    Menu_Framework_menuItems = saved_items;
-    Menu_Framework_itemsText = saved_text;
-    Menu_Framework_selectedRow = saved_selected;
-    Menu_Framework_mainMenuCursorAnimation = saved_animation;
-    Menu_Framework_submenuStates[0] = saved_root;
-    Menu_Framework_subMenuPage = saved_page;
-    Menu_Framework_subMenuRowInfo = saved_row_info;
-    Menu_Framework_menuRowYOffset = saved_row_y;
-    Menu_Framework_itemsListRow = saved_list_row;
-    Menu_Framework_subMenuId = saved_id;
-    Menu_Framework_subMenuRowCount = saved_count;
+    VS::Menu::Framework::menuMemory = saved_memory;
+    VS::Menu::Framework::menuItems = saved_items;
+    VS::Menu::Framework::itemsText = saved_text;
+    VS::Menu::Framework::selectedRow = saved_selected;
+    VS::Menu::Framework::mainMenuCursorAnimation = saved_animation;
+    VS::Menu::Framework::submenuStates[0] = saved_root;
+    VS::Menu::Framework::subMenuPage = saved_page;
+    VS::Menu::Framework::subMenuRowInfo = saved_row_info;
+    VS::Menu::Framework::menuRowYOffset = saved_row_y;
+    VS::Menu::Framework::itemsListRow = saved_list_row;
+    VS::Menu::Framework::subMenuId = saved_id;
+    VS::Menu::Framework::subMenuRowCount = saved_count;
   }
 
   void OpenRows(int count) {
@@ -136,12 +136,12 @@ struct BreakArtMenuFixture {
   std::array<Battle_ActionDefinition, 4> saved_actions{};
   Battle_Actor* saved_character = Battle_characterState;
   Battle_Actor* saved_actor = Battle_actors[0];
-  decltype(Menu_Framework_shortcutInvoked) saved_shortcut =
-      Menu_Framework_shortcutInvoked;
-  decltype(Menu_Framework_actionRestrictions) saved_restrictions =
-      Menu_Framework_actionRestrictions;
-  decltype(Menu_Framework_displayActionCost) saved_cost =
-      Menu_Framework_displayActionCost;
+  decltype(VS::Menu::Framework::shortcutInvoked) saved_shortcut =
+      VS::Menu::Framework::shortcutInvoked;
+  decltype(VS::Menu::Framework::actionRestrictions) saved_restrictions =
+      VS::Menu::Framework::actionRestrictions;
+  decltype(VS::Menu::Framework::displayActionCost) saved_cost =
+      VS::Menu::Framework::displayActionCost;
   Battle_Actor actor{};
   Battle_ActorStats stats{};
   int category;
@@ -164,8 +164,8 @@ struct BreakArtMenuFixture {
     actor.equippedWeaponCategory = static_cast<u_char>(category);
     actor.weaponDrawn = 1;
     stats.currentHp = 999;
-    Menu_Framework_actionRestrictions = 0;
-    Menu_Framework_shortcutInvoked = 0;
+    VS::Menu::Framework::actionRestrictions = 0;
+    VS::Menu::Framework::shortcutInvoked = 0;
     for (int index = 0; index < 4; ++index) {
       auto& action = Battle_actionDefinitions[first_action + index];
       saved_actions[index] = action;
@@ -185,9 +185,9 @@ struct BreakArtMenuFixture {
               &Battle_actionDefinitions[first_action]);
     Battle_characterState = saved_character;
     Battle_actors[0] = saved_actor;
-    Menu_Framework_shortcutInvoked = saved_shortcut;
-    Menu_Framework_actionRestrictions = saved_restrictions;
-    Menu_Framework_displayActionCost = saved_cost;
+    VS::Menu::Framework::shortcutInvoked = saved_shortcut;
+    VS::Menu::Framework::actionRestrictions = saved_restrictions;
+    VS::Menu::Framework::displayActionCost = saved_cost;
     Audio_Seq_unusedArtsStatus.artsLearned[category % 10] = saved_arts;
   }
 
@@ -202,7 +202,7 @@ struct BreakArtMenuFixture {
   }
 
   int SelectRow(int row) {
-    Menu_Framework_selectedRow = row;
+    VS::Menu::Framework::selectedRow = row;
     VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
     REQUIRE(VS::Menu::break_arts::UpdateArtListLive(0) == 0);
     FinishRowAnimations();
@@ -220,8 +220,8 @@ struct EquipmentGateFixture {
   decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
       Audio_Seq_unusedInventoryIndices;
   Battle_Actor* saved_character = Battle_characterState;
-  decltype(Menu_Framework_actionRestrictions) saved_restrictions =
-      Menu_Framework_actionRestrictions;
+  decltype(VS::Menu::Framework::actionRestrictions) saved_restrictions =
+      VS::Menu::Framework::actionRestrictions;
   Battle_Actor actor{};
   Battle_ActorStats stats{};
 
@@ -243,7 +243,7 @@ struct EquipmentGateFixture {
     Audio_Seq_unusedInventory = saved_inventory;
     Audio_Seq_unusedInventoryIndices = saved_indices;
     Battle_characterState = saved_character;
-    Menu_Framework_actionRestrictions = saved_restrictions;
+    VS::Menu::Framework::actionRestrictions = saved_restrictions;
   }
 };
 
@@ -267,8 +267,8 @@ struct WorkshopGateFixture {
   CursorFixture rows;
   decltype(Audio_Seq_unusedInventory) saved_inventory =
       Audio_Seq_unusedInventory;
-  u_short* saved_text = Menu_Framework_menu12Text;
-  int* saved_types = Menu_Framework_rowTypeBuf;
+  u_short* saved_text = VS::Menu::Framework::menu12Text;
+  int* saved_types = VS::Menu::Framework::rowTypeBuf;
   Field_MpdEnvironment* saved_environment = Field_roomData.environment;
   u_int saved_environment_length = Field_roomData.header.environmentLength;
   setup::State saved_state = setup::LiveSetupState();
@@ -279,8 +279,8 @@ struct WorkshopGateFixture {
     setup::LiveSetupState() = {};
     std::fill(strings.begin(), strings.end(), 0xE7E7);
     std::fill_n(strings.begin(), 16, 32);
-    Menu_Framework_menu12Text = strings.data();
-    Menu_Framework_rowTypeBuf = rows.row_types.data();
+    VS::Menu::Framework::menu12Text = strings.data();
+    VS::Menu::Framework::rowTypeBuf = rows.row_types.data();
     Field_roomData.environment = &environment;
     Field_roomData.header.environmentLength = sizeof environment;
     Audio_Seq_unusedInventory = {};
@@ -297,8 +297,8 @@ struct WorkshopGateFixture {
   ~WorkshopGateFixture() {
     setup::LiveSetupState() = saved_state;
     Audio_Seq_unusedInventory = saved_inventory;
-    Menu_Framework_menu12Text = saved_text;
-    Menu_Framework_rowTypeBuf = saved_types;
+    VS::Menu::Framework::menu12Text = saved_text;
+    VS::Menu::Framework::rowTypeBuf = saved_types;
     Field_roomData.environment = saved_environment;
     Field_roomData.header.environmentLength = saved_environment_length;
   }
@@ -307,9 +307,9 @@ struct WorkshopGateFixture {
     std::uint8_t state = 2;
     REQUIRE(setup::UpdateLiveSetup(state) == 0);
     REQUIRE(state == 3);
-    REQUIRE(Menu_Framework_subMenuRowCount == 6);
+    REQUIRE(VS::Menu::Framework::subMenuRowCount == 6);
     const auto* items = reinterpret_cast<const Menu_Framework_ItemText*>(
-        Menu_Framework_itemsText);
+        VS::Menu::Framework::itemsText);
     REQUIRE(items != nullptr);
     return items;
   }
@@ -320,9 +320,11 @@ struct WorkshopChoicesFixture {
   decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
       Audio_Seq_unusedInventoryIndices;
   decltype(Battle_stringContext) saved_context = Battle_stringContext;
-  decltype(Menu_Framework_itemNames) saved_names = Menu_Framework_itemNames;
-  u_short* saved_help = Menu_Framework_itemHelp;
-  decltype(Menu_Framework_shields) saved_shields = Menu_Framework_shields;
+  decltype(VS::Menu::Framework::itemNames) saved_names =
+      VS::Menu::Framework::itemNames;
+  u_short* saved_help = VS::Menu::Framework::itemHelp;
+  decltype(VS::Menu::Framework::shields) saved_shields =
+      VS::Menu::Framework::shields;
   std::array<u_short, 2048> strings{};
   std::array<u_short, 16384> help{};
   char names[512][24]{};
@@ -337,11 +339,11 @@ struct WorkshopChoicesFixture {
       std::fill_n(name, std::size(name), static_cast<char>(0xE7));
       name[0] = 10;
     }
-    Menu_Framework_menu12Text = strings.data();
-    Menu_Framework_itemHelp = help.data();
-    Menu_Framework_itemNames = names;
-    Menu_Framework_rowTypeBuf = types.data();
-    Menu_Framework_shields = Audio_Seq_unusedInventory.shields;
+    VS::Menu::Framework::menu12Text = strings.data();
+    VS::Menu::Framework::itemHelp = help.data();
+    VS::Menu::Framework::itemNames = names;
+    VS::Menu::Framework::rowTypeBuf = types.data();
+    VS::Menu::Framework::shields = Audio_Seq_unusedInventory.shields;
     setup::LiveSetupState().combination.workshop = 6;
     Audio_Seq_unusedInventoryIndices = {};
     FillParts();
@@ -354,9 +356,9 @@ struct WorkshopChoicesFixture {
   ~WorkshopChoicesFixture() {
     Audio_Seq_unusedInventoryIndices = saved_indices;
     Battle_stringContext = saved_context;
-    Menu_Framework_itemNames = saved_names;
-    Menu_Framework_itemHelp = saved_help;
-    Menu_Framework_shields = saved_shields;
+    VS::Menu::Framework::itemNames = saved_names;
+    VS::Menu::Framework::itemHelp = saved_help;
+    VS::Menu::Framework::shields = saved_shields;
   }
 
   void FillParts() {
@@ -1031,13 +1033,13 @@ TEST_CASE("Equipment management obeys progression tarnish and action gates",
   EquipmentGateFixture fixture;
   Audio_Seq_unusedStateFlags.introState = static_cast<char>(intro);
   fixture.stats.statuses = tarnished ? 0x80000 : 0;
-  Menu_Framework_actionRestrictions = restrictions;
+  VS::Menu::Framework::actionRestrictions = restrictions;
   REQUIRE(VS::Menu::Inventory::UpdateLiveItemList(1) == 0);
   REQUIRE(VS::Menu::Inventory::UpdateLiveItemList(0) == 0);
-  REQUIRE(Menu_Framework_subMenuRowCount == 2);
-  REQUIRE(Menu_Framework_itemsText != nullptr);
+  REQUIRE(VS::Menu::Framework::subMenuRowCount == 2);
+  REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
-      Menu_Framework_itemsText);
+      VS::Menu::Framework::itemsText);
   const bool disabled = intro < 3 || tarnished || (restrictions & 7) != 0;
   for (int row = 0; row < 2; ++row) {
     CHECK(((rows[row].menuRowFlags & 1) != 0) == disabled);
@@ -1052,9 +1054,9 @@ TEST_CASE("Cursor Memory controls the actual root selection consumer",
   Input_settings.cursorMemory = enabled;
   Input_settings.menuFlags = flags;
   for (int visit = 0; visit < 3; ++visit) {
-    Menu_Framework_submenuStates[0] = 7;
+    VS::Menu::Framework::submenuStates[0] = 7;
     CHECK(VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0);
-    CHECK(Menu_Framework_submenuStates[0] ==
+    CHECK(VS::Menu::Framework::submenuStates[0] ==
           (enabled ? 7 : (flags == 0x3F8 ? 3 : 0)));
     CHECK(Input_settings.cursorMemory == enabled);
   }
@@ -1065,19 +1067,19 @@ TEST_CASE("Cursor Memory restores shared row and scroll positions",
   const char enabled = GENERATE(char{0}, char{1});
   CursorFixture fixture;
   Input_settings.cursorMemory = enabled;
-  Menu_Framework_menuMemory.cursorMemories[0] = 3;
-  Menu_Framework_menuMemory.cursorMemories[1] = 5;
+  VS::Menu::Framework::menuMemory.cursorMemories[0] = 3;
+  VS::Menu::Framework::menuMemory.cursorMemories[1] = 5;
   fixture.OpenRows(20);
-  REQUIRE(Menu_Framework_itemsText != nullptr);
+  REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(VS::Menu::Framework::LiveHighlightedRow() == (enabled ? 8 : 0));
-  Menu_Framework_selectedRow = 4;
-  Menu_Framework_subMenuPage = 6;
+  VS::Menu::Framework::selectedRow = 4;
+  VS::Menu::Framework::subMenuPage = 6;
   VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
-  CHECK(Menu_Framework_itemsText == nullptr);
-  CHECK(Menu_Framework_menuMemory.cursorMemories[0] == 4);
-  CHECK(Menu_Framework_menuMemory.cursorMemories[1] == 6);
+  CHECK(VS::Menu::Framework::itemsText == nullptr);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[0] == 4);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[1] == 6);
   fixture.OpenRows(20);
-  REQUIRE(Menu_Framework_itemsText != nullptr);
+  REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(VS::Menu::Framework::LiveHighlightedRow() == (enabled ? 10 : 0));
 }
 
@@ -1085,10 +1087,10 @@ TEST_CASE("Cursor Memory clamps a remembered selection after rows shrink",
           "[menu][options][cursor]") {
   CursorFixture fixture;
   Input_settings.cursorMemory = 1;
-  Menu_Framework_menuMemory.cursorMemories[0] = 4;
-  Menu_Framework_menuMemory.cursorMemories[1] = 6;
+  VS::Menu::Framework::menuMemory.cursorMemories[0] = 4;
+  VS::Menu::Framework::menuMemory.cursorMemories[1] = 6;
   fixture.OpenRows(3);
-  REQUIRE(Menu_Framework_itemsText != nullptr);
+  REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(VS::Menu::Framework::LiveHighlightedRow() == 0);
 }
 
@@ -1102,9 +1104,9 @@ TEST_CASE("Options retain the real Puzzle Mode availability gate",
   CHECK(VS::Menu::Options::UpdateLiveOptions(state) == 0);
   CHECK(state == 5);
   CHECK(Input_settings.cursorMemory == 0);
-  REQUIRE(Menu_Framework_itemsText != nullptr);
+  REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
-      Menu_Framework_itemsText);
+      VS::Menu::Framework::itemsText);
   for (int row = 0; row < 9; ++row) {
     CAPTURE(disabled, row);
     CHECK(rows[row].menuRowFlags ==
@@ -1121,21 +1123,21 @@ TEST_CASE(
   const bool equipped = (flags & 2) != 0;
   const char cursor_memory = static_cast<char>((flags >> 2) & 1);
   BreakArtMenuFixture fixture(category);
-  Menu_Framework_shortcutInvoked = shortcut;
+  VS::Menu::Framework::shortcutInvoked = shortcut;
   if (!equipped) {
     fixture.actor.equippedWeaponCategory =
         static_cast<u_char>(category % 10 + 1);
   }
   Input_settings.cursorMemory = cursor_memory;
-  Menu_Framework_menuMemory
+  VS::Menu::Framework::menuMemory
       .cursorMemories[static_cast<std::size_t>(category + 11) * 2] = 3;
   fixture.Open();
-  REQUIRE(Menu_Framework_itemsText != nullptr);
-  REQUIRE(Menu_Framework_subMenuRowCount == (shortcut ? 4 : 5));
+  REQUIRE(VS::Menu::Framework::itemsText != nullptr);
+  REQUIRE(VS::Menu::Framework::subMenuRowCount == (shortcut ? 4 : 5));
   REQUIRE(VS::Menu::Framework::LiveHighlightedRow() == (cursor_memory ? 3 : 0));
   CHECK(Input_settings.cursorMemory == cursor_memory);
   const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
-      Menu_Framework_itemsText);
+      VS::Menu::Framework::itemsText);
   for (int index = 0; index < 4; ++index) {
     CHECK(rows[index].menuRowFlags ==
           (equipped ? 0 : Menu_Framework_RowTypeFlag_Disabled));
@@ -1151,7 +1153,7 @@ TEST_CASE("The fourth learned Break Art remains an action in every category",
   const int category = GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
   const char shortcut = GENERATE(char{0}, char{1});
   BreakArtMenuFixture fixture(category);
-  Menu_Framework_shortcutInvoked = shortcut;
+  VS::Menu::Framework::shortcutInvoked = shortcut;
   fixture.Open();
   CHECK(fixture.SelectRow(3) == fixture.first_action + 3);
 }

@@ -12,7 +12,7 @@
 #include "Content/DiscLayout.h"
 #include "Content/ModuleData.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/TimeAttackTerminalLiveFixture.hpp"
 #include "Render/Frame.h"
@@ -218,22 +218,24 @@ TEST_CASE(
     "[time-attack-integration][time-attack-framework][F03008]") {
   tests::Fixture fixture;
   const game_clear_live_tests::SavedGlobals<
-      Menu_Framework_menuState, Menu_Framework_loadedSubMenu,
-      Menu_Framework_openedWithoutMainMenu, Menu_Framework_actionRestrictions,
-      Menu_Framework_submenuStates>
+      VS::Menu::Framework::menuState, VS::Menu::Framework::loadedSubMenu,
+      VS::Menu::Framework::openedWithoutMainMenu,
+      VS::Menu::Framework::actionRestrictions,
+      VS::Menu::Framework::submenuStates>
       saved;
-  Menu_Framework_loadedSubMenu = 15;
-  Menu_Framework_openedWithoutMainMenu = 1;
-  Menu_Framework_menuState.currentMenu = 15;
-  Menu_Framework_menuState.loading = 0;
-  Menu_Framework_actionRestrictions = 0x200;
-  Menu_Framework_submenuStates[15] = 2;
-  Menu_Framework_submenuStates[14] = static_cast<char>(0xAA);
+  VS::Menu::Framework::loadedSubMenu = 15;
+  VS::Menu::Framework::openedWithoutMainMenu = 1;
+  VS::Menu::Framework::menuState.currentMenu = 15;
+  VS::Menu::Framework::menuState.loading = 0;
+  VS::Menu::Framework::actionRestrictions = 0x200;
+  VS::Menu::Framework::submenuStates[15] = 2;
+  VS::Menu::Framework::submenuStates[14] = static_cast<char>(0xAA);
   Audio_Seq_unusedStateFlags.menuFSubmenu = 3;
   Audio_Seq_unusedScoredata.miscScore = 99;
   VS::Menu::Framework::UpdateLiveMainMenu(15);
-  CHECK(Menu_Framework_submenuStates[15] == 0);
-  CHECK(static_cast<unsigned char>(Menu_Framework_submenuStates[14]) == 0xAA);
+  CHECK(VS::Menu::Framework::submenuStates[15] == 0);
+  CHECK(static_cast<unsigned char>(VS::Menu::Framework::submenuStates[14]) ==
+        0xAA);
   CHECK(Audio_Seq_unusedScoredata.miscScore == 99);
 }
 

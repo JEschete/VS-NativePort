@@ -29,7 +29,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
@@ -529,7 +529,7 @@ class LiveGazetteHost final : public GazetteHost {
     return UpdateLiveTopMenu(initialize ? 1 : 0);
   }
   std::uint8_t OverviewCursor() override {
-    const auto& memory = Menu_Framework_menuMemory.cursorMemories;
+    const auto& memory = VS::Menu::Framework::menuMemory.cursorMemories;
     return static_cast<std::uint8_t>(memory[kOverviewMemoryRow] +
                                      memory[kOverviewMemoryPage]);
   }
@@ -676,16 +676,16 @@ class LiveGazetteHost final : public GazetteHost {
 };
 
 GazetteScreenEnvironment ReadScreenEnvironment() {
-  return {Battle_hudSlideOffset, Menu_Framework_backgroundFadeStep,
-          static_cast<std::uint8_t>(Menu_Framework_menuState.currentMenu),
-          static_cast<std::uint8_t>(Menu_Framework_hideMenu)};
+  return {Battle_hudSlideOffset, VS::Menu::Framework::backgroundFadeStep,
+          static_cast<std::uint8_t>(VS::Menu::Framework::menuState.currentMenu),
+          static_cast<std::uint8_t>(VS::Menu::Framework::hideMenu)};
 }
 
 void WriteScreenEnvironment(const GazetteScreenEnvironment& environment) {
   Battle_hudSlideOffset = environment.hud_slide_offset;
-  Menu_Framework_menuState.currentMenu =
+  VS::Menu::Framework::menuState.currentMenu =
       static_cast<char>(environment.current_menu);
-  Menu_Framework_hideMenu = static_cast<char>(environment.hide_menu);
+  VS::Menu::Framework::hideMenu = static_cast<char>(environment.hide_menu);
 }
 
 class LiveScreenHost final : public GazetteScreenHost {

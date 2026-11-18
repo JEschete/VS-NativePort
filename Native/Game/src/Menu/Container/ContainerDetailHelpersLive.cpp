@@ -19,7 +19,7 @@
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Sounds.hpp"
 
 namespace VS::Menu::container {
@@ -28,7 +28,7 @@ constexpr std::size_t kFirstContainerCursor = 2;
 constexpr std::size_t kContainerCursorFieldOffset = 0xA0;
 static_assert(offsetof(Menu_Framework_MenuMemory, opaqueA0) ==
               kContainerCursorFieldOffset);
-static_assert(std::size(Menu_Framework_menuMemory.opaqueA0) ==
+static_assert(std::size(VS::Menu::Framework::menuMemory.opaqueA0) ==
               kFirstContainerCursor + Items::kItemCategoryCount * 2);
 
 [[noreturn]] void Refuse(std::string_view reason) {
@@ -46,7 +46,7 @@ Items::ItemCategory Category(int category) {
 }
 
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) {
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing current menu row workspace");
   }
 }
@@ -63,8 +63,9 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
   void RememberPage(DetailCursor cursor) override {
     const auto category = static_cast<std::size_t>(Category(category_));
     const auto offset = kFirstContainerCursor + category * sizeof(DetailCursor);
-    Menu_Framework_menuMemory.opaqueA0[offset] = static_cast<char>(cursor.row);
-    Menu_Framework_menuMemory.opaqueA0[offset + 1] =
+    VS::Menu::Framework::menuMemory.opaqueA0[offset] =
+        static_cast<char>(cursor.row);
+    VS::Menu::Framework::menuMemory.opaqueA0[offset + 1] =
         static_cast<char>(cursor.page);
   }
   std::span<const std::uint16_t> DisplayOrder() override {

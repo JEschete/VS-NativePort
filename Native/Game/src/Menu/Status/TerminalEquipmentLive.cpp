@@ -9,7 +9,7 @@
 #include "Items/EquipmentStats.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Status/ComponentDescriptionsLive.hpp"
 #include "Menu/Status/DetailTransitions.hpp"
 #include "Menu/Status/DetailTransitionsLive.hpp"
@@ -144,7 +144,7 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
     if (!Workspace()) {
       return {};
     }
-    return {reinterpret_cast<std::uint8_t*>(Menu_Framework_stringBuf),
+    return {reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
             Framework::kStringBufferBytes};
   }
   std::optional<TerminalRowText> FormatRow(
@@ -206,13 +206,13 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
                                     kEquipmentListStyle, strings.data(),
                                     types.data());
     });
-    return Menu_Framework_itemsText != nullptr;
+    return VS::Menu::Framework::itemsText != nullptr;
   }
   std::optional<int> NavigateDetail(std::uint8_t selected,
                                     std::uint32_t flags) override {
     Framework::StatusViewNavigation links{};
     for (std::size_t row = 0; row < links.size(); ++row) {
-      std::ranges::copy(Menu_Framework_statusViewNavigationMap[row],
+      std::ranges::copy(VS::Menu::Framework::statusViewNavigationMap[row],
                         links[row].begin());
     }
     return NavigateDetailElements(
@@ -244,8 +244,9 @@ class EquipmentHost final : public HostBase<EquipmentTerminalHost> {
     const auto buffer = DescriptionBuffer();
     auto view = Slice(buffer, text);
     if (view.empty()) {
-      view = Slice(ByteView(Menu_Framework_itemHelp, Framework::kItemHelpBytes),
-                   text);
+      view = Slice(
+          ByteView(VS::Menu::Framework::itemHelp, Framework::kItemHelpBytes),
+          text);
     }
     if (view.empty()) {
       Refuse("component returned text outside its current owners");

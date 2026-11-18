@@ -4,12 +4,12 @@
 #include <array>
 #include <iterator>
 
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
 #include "Field/GimmickAnimationQueue.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
-#include "Field/RoomSwitchesLive.h"
+#include "Field/RoomSwitchesLive.hpp"
 #include "Items/TreasureChests.h"
 
 namespace {
@@ -170,7 +170,7 @@ class LiveAnimationDispatchHost final
     if (!Matches(slot, job)) return false;
     const auto room = room_targets_[slot];
     return room ? VS::Field::FinishLiveDoorAnimation(*room)
-                : Field_FinishDoorAnimationEntry(targets_[slot]) != 0;
+                : VS::Field::FinishDoorAnimationEntry(targets_[slot]) != 0;
   }
   void ToggleSwitch(
       std::size_t slot,
@@ -180,7 +180,7 @@ class LiveAnimationDispatchHost final
         static_cast<void>(
             VS::Field::ToggleLiveChestSwitch(*chest_targets_[slot]));
       } else {
-        Field_ToggleRoomSwitchEntry(targets_[slot]);
+        VS::Field::ToggleRoomSwitchEntry(targets_[slot]);
       }
     }
   }
@@ -191,7 +191,7 @@ class LiveAnimationDispatchHost final
       if (room) {
         static_cast<void>(VS::Field::StartLiveDoorAnimation(*room));
       } else {
-        static_cast<void>(Field_StartDoorAnimationEntry(targets_[slot]));
+        static_cast<void>(VS::Field::StartDoorAnimationEntry(targets_[slot]));
       }
     }
   }

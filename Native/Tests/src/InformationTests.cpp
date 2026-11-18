@@ -10,7 +10,7 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.h"
@@ -30,8 +30,8 @@ struct InformationFixture {
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
   char saved_setting = Input_settings.information;
   int saved_buttons = Input_buttonsState;
-  int* saved_rows = Menu_Framework_rowTypeBuf;
-  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
+  int* saved_rows = VS::Menu::Framework::rowTypeBuf;
+  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   std::array<unsigned char, 0x20010> memory{};
   std::array<u_long, 34> ordering{};
   std::array<char, 96> message{};
@@ -48,8 +48,8 @@ struct InformationFixture {
     Render_legacyPrimitiveBuffers[0] = memory.data() + 8;
     Render_frameBuf = 0;
     Menu_activeTextBoxOrderingTable = ordering.data();
-    Menu_Framework_menuItems = rows.data();
-    Menu_Framework_rowTypeBuf = row_types.data();
+    VS::Menu::Framework::menuItems = rows.data();
+    VS::Menu::Framework::rowTypeBuf = row_types.data();
     Input_buttonsState = 0;
     Menu_textBoxes[7] = {};
     VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
@@ -65,8 +65,8 @@ struct InformationFixture {
     VS::Render::LiveFontStyle() = saved_style;
     Input_settings.information = saved_setting;
     Input_buttonsState = saved_buttons;
-    Menu_Framework_rowTypeBuf = saved_rows;
-    Menu_Framework_menuItems = saved_items;
+    VS::Menu::Framework::rowTypeBuf = saved_rows;
+    VS::Menu::Framework::menuItems = saved_items;
   }
 
   void ResetPackets() {

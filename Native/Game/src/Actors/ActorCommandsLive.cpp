@@ -35,7 +35,7 @@
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"

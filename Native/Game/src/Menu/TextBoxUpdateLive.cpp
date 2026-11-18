@@ -12,7 +12,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -26,7 +26,7 @@ namespace {
 constexpr int kTextOrderingSlot = -6;
 constexpr int kTimerVisible = 1;
 std::uint64_t refused_updates = 0;
-static_assert(std::size(Menu_textBoxOrderingTables) ==
+static_assert(std::size(textBoxOrderingTables) ==
               kTextBoxOrderingBufferCount * kTextBoxOrderingTags);
 
 void RefuseUpdate() {
@@ -72,12 +72,12 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
              Menu_activeTextBoxOrderingTable + kTextBoxOrderingTags - 1);
   }
   std::uint8_t OrderingBufferIndex() const override {
-    return static_cast<std::uint8_t>(Menu_textBoxBufferIndex);
+    return static_cast<std::uint8_t>(textBoxBufferIndex);
   }
   void BeginOrderingBuffer(std::uint8_t index) override {
-    Menu_textBoxBufferIndex = static_cast<char>(index);
+    textBoxBufferIndex = static_cast<char>(index);
     Menu_activeTextBoxOrderingTable =
-        std::span(Menu_textBoxOrderingTables)
+        std::span(textBoxOrderingTables)
             .subspan(index * kTextBoxOrderingTags, kTextBoxOrderingTags)
             .data();
     ClearOTag(Menu_activeTextBoxOrderingTable,
@@ -103,10 +103,10 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
 void UpdateLiveTextBoxes() {
   auto* destination = Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene, kTextOrderingSlot);
-  const auto buffer = static_cast<std::uint8_t>(Menu_textBoxBufferIndex);
+  const auto buffer = static_cast<std::uint8_t>(textBoxBufferIndex);
   if (destination == nullptr || buffer >= kTextBoxOrderingBufferCount ||
       Menu_activeTextBoxOrderingTable !=
-          std::span(Menu_textBoxOrderingTables)
+          std::span(textBoxOrderingTables)
               .subspan(buffer * kTextBoxOrderingTags, kTextBoxOrderingTags)
               .data()) {
     RefuseUpdate();

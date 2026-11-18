@@ -9,7 +9,7 @@ struct Effects_EffectCamera;
 struct Effects_EffectInstance;
 
 // Live binding for the effect camera (Camera.hpp) over the copied effect
-// camera globals (CameraLiveState.h): each entry loads them into an
+// camera globals (CameraLiveState.hpp): each entry loads them into an
 // EffectCameraState, runs the typed core over the field camera, the
 // renderer's camera, the current package's curves and the BIOS rand(), and
 // stores them back. The entries keep the original signatures for the copied

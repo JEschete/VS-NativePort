@@ -65,18 +65,18 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_flags{
       Audio_Seq_unusedStateFlags};
   ValueRestore<decltype(Input_settings)> saved_settings{Input_settings};
-  ValueRestore<decltype(Menu_Framework_menuState)> saved_control{
-      Menu_Framework_menuState};
-  ValueRestore<decltype(Menu_Framework_actionSelection)> saved_action{
-      Menu_Framework_actionSelection};
-  ValueRestore<decltype(Menu_Framework_shortcutInvoked)> saved_shortcut{
-      Menu_Framework_shortcutInvoked};
-  ValueRestore<decltype(Menu_Framework_itemsText)> saved_items{
-      Menu_Framework_itemsText};
-  ValueRestore<decltype(Menu_Framework_displayActionCost)> saved_cost{
-      Menu_Framework_displayActionCost};
-  ValueRestore<decltype(Menu_Framework_actionRestrictions)> saved_restrictions{
-      Menu_Framework_actionRestrictions};
+  ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
+      VS::Menu::Framework::menuState};
+  ValueRestore<decltype(VS::Menu::Framework::actionSelection)> saved_action{
+      VS::Menu::Framework::actionSelection};
+  ValueRestore<decltype(VS::Menu::Framework::shortcutInvoked)> saved_shortcut{
+      VS::Menu::Framework::shortcutInvoked};
+  ValueRestore<decltype(VS::Menu::Framework::itemsText)> saved_items{
+      VS::Menu::Framework::itemsText};
+  ValueRestore<decltype(VS::Menu::Framework::displayActionCost)> saved_cost{
+      VS::Menu::Framework::displayActionCost};
+  ValueRestore<decltype(VS::Menu::Framework::actionRestrictions)>
+      saved_restrictions{VS::Menu::Framework::actionRestrictions};
   ArrayRestore<Battle_ActionDefinition, std::size(Battle_actionDefinitions)>
       saved_actions{Battle_actionDefinitions};
   ArrayRestore<u_short, std::size(Menu_Magic_magicStrings)> saved_magic{
@@ -108,11 +108,11 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     stats.currentMp = 500;
     Audio_Seq_unusedStateFlags = {};
     Input_settings.cursorMemory = 0;
-    Menu_Framework_menuState = {};
-    Menu_Framework_actionSelection = {};
-    Menu_Framework_shortcutInvoked = 0;
-    Menu_Framework_menuMemory = {};
-    Menu_Framework_actionRestrictions = 0;
+    VS::Menu::Framework::menuState = {};
+    VS::Menu::Framework::actionSelection = {};
+    VS::Menu::Framework::shortcutInvoked = 0;
+    VS::Menu::Framework::menuMemory = {};
+    VS::Menu::Framework::actionRestrictions = 0;
     std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
     InitializeStrings();
     InitializeSpells();
@@ -149,7 +149,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     }
   }
   void CloseList() {
-    if (Menu_Framework_itemsText != nullptr) {
+    if (VS::Menu::Framework::itemsText != nullptr) {
       static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
     }
     framework::ClearLiveMenuExcept(framework::kNoRow);
@@ -158,7 +158,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     REQUIRE(kSchoolEntries[school](init) == 0);
     IdleRows();
     REQUIRE(kSchoolEntries[school](0) == 0);
-    REQUIRE(Menu_Framework_subMenuRowCount == 1);
+    REQUIRE(VS::Menu::Framework::subMenuRowCount == 1);
     IdleRows();
   }
   void LeaveSchool(std::size_t school) {
@@ -170,7 +170,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   }
   void CheckSchoolRow(std::size_t school, int flags) const {
     const auto item = FirstItem();
-    CHECK(Menu_Framework_subMenuRowCount == 1);
+    CHECK(VS::Menu::Framework::subMenuRowCount == 1);
     CHECK(item.flags == flags);
     CHECK(item.name[0] == (school == 0 ? 1 : 2));
   }
@@ -179,7 +179,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     REQUIRE(magic::UpdateTeleportMenuLive(1) == 0);
     IdleRows();
     REQUIRE(magic::UpdateTeleportMenuLive(0) == 0);
-    REQUIRE(Menu_Framework_subMenuRowCount == 1);
+    REQUIRE(VS::Menu::Framework::subMenuRowCount == 1);
     CloseList();
     REQUIRE(magic::UpdateTeleportMenuLive(0) == 0);
     IdleRows();
@@ -188,7 +188,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   void EnterRanks(unsigned init = 1) {
     Battle_actionDefinitions[kActions[0] + 1].unlocked = 1;
     OpenSchool(0, init);
-    Menu_Framework_selectedRow = 0;
+    VS::Menu::Framework::selectedRow = 0;
     static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
     REQUIRE(magic::UpdateWarlockMenuLive(0) == 0);
     IdleRows();
@@ -251,7 +251,7 @@ TEST_CASE("Magic module entries create only populated restricted school rows",
   MagicLiveFixture fixture;
   const std::size_t school = GENERATE(0U, 1U, 2U, 3U);
   const auto refusals = magic::RefusedMagicMenuCount();
-  Menu_Framework_actionRestrictions = 7;
+  VS::Menu::Framework::actionRestrictions = 7;
   const auto entry = ResolveSchoolEntry(school);
   REQUIRE(entry(2) == 0);
   fixture.IdleRows();
@@ -275,7 +275,7 @@ TEST_CASE("Magic outer module ABI publishes categories through its caller byte",
   std::uint8_t state = 3;
   REQUIRE(reinterpret_cast<int (*)(std::uint8_t*)>(address)(&state) == 0);
   CHECK(state == 5);
-  CHECK(Menu_Framework_subMenuRowCount == 4);
+  CHECK(VS::Menu::Framework::subMenuRowCount == 4);
   CHECK(fixture.FirstItem().name[0] == 1);
   CHECK(magic::RefusedMagicMenuCount() == refusals);
 }
@@ -306,8 +306,8 @@ TEST_CASE("MENU0 completion and cold sessions also restore teleport ownership",
   fixture.LeaveTeleport();
   fixture.ResetThroughBoundary(cold);
   REQUIRE(magic::UpdateTeleportMenuLive(0) == 0);
-  CHECK(Menu_Framework_subMenuRowCount == 1);
-  CHECK(VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemsText)
+  CHECK(VS::Menu::Framework::subMenuRowCount == 1);
+  CHECK(VS::Core::Memory::LivePayloadCapacity(VS::Menu::Framework::itemsText)
             .has_value());
   CHECK(Audio_Seq_unusedStateFlags.savePointStates[kSavePoint] == 1);
 }

@@ -163,7 +163,8 @@ TEST_CASE("F02925 actual item-row host reloads its current container owner",
           "[container-detail-helpers-live][F02925]") {
   LiveFixture fixture;
   fixture.AddContainerWeapon();
-  Menu_Framework_weapons = fixture.containers.storage->container.items.weapons;
+  VS::Menu::Framework::weapons =
+      fixture.containers.storage->container.items.weapons;
   fw::LiveItemRowsHost host;
   auto loadout = host.InventoryWeaponLoadout(samples::kWeapon);
   if (!loadout) {
@@ -191,7 +192,7 @@ TEST_CASE("F02925 zero optional parts do not require a container owner",
   source.name[std::size(source.name) - 1] = 'z';
   Items_WeaponLoadout target{};
   Menu_Container_containerData = nullptr;
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   detail::BuildLiveWeaponStats(&target, &source, nullptr);
   CHECK(target.name[23] == 'z');
   CHECK(target.blade.id == 0);
@@ -227,7 +228,7 @@ TEST_CASE("F02926 actual item-row host uses flagged container gem records",
   auto& owner = fixture.containers.storage->container.items;
   items::Live::Commit(owner.gems[samples::kFlaggedGemIndex],
                       samples::kShieldGem);
-  Menu_Framework_shields = owner.shields;
+  VS::Menu::Framework::shields = owner.shields;
   fw::LiveItemRowsHost host;
   const auto loadout = host.InventoryShieldLoadout(samples::kShield);
   if (!loadout) {
@@ -243,7 +244,7 @@ TEST_CASE(
     "F02942 live byte visibility does not touch unrelated inventory state",
     "[container-detail-helpers-live][F02942]") {
   LiveFixture fixture;
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   Menu_Container_containerData = nullptr;
   detail::SetLivePanelVisibility(static_cast<char>(samples::kByteMax));
   CHECK(static_cast<std::uint8_t>(Menu_Container_categoryTitleVisible) == 255);
@@ -303,7 +304,7 @@ TEST_CASE("F02947 live layout integrates native transition and stat helpers",
   CHECK(fixture.rows[kHeader].w == 164);
   CHECK(fixture.rows[kHeader].targetPosition0 == 16);
   CHECK(fixture.rows[kSelected].targetPosition0 == 18);
-  CHECK(Menu_Framework_enabledStatPages == 3);
+  CHECK(VS::Menu::Framework::enabledStatPages == 3);
 }
 
 TEST_CASE("F02947 live selected-header alias keeps continuation write order",
@@ -313,7 +314,7 @@ TEST_CASE("F02947 live selected-header alias keeps continuation write order",
                                       samples::kTypePage);
   CHECK(fixture.rows[kHeader].state == Menu_Framework_MenuItemState_SlideY);
   CHECK(fixture.rows[kHeader].targetPosition0 == 18);
-  CHECK(Menu_Framework_enabledStatPages == 4);
+  CHECK(VS::Menu::Framework::enabledStatPages == 4);
 }
 
 TEST_CASE(
@@ -345,16 +346,17 @@ TEST_CASE("F02949 live selection preserves exact container cursor bytes",
   LiveFixture fixture;
   MemoryBytes expected{};
   expected.fill(samples::kReservedByte);
-  Menu_Framework_menuMemory =
+  VS::Menu::Framework::menuMemory =
       std::bit_cast<Menu_Framework_MenuMemory>(expected);
   std::span(fixture.containers.storage->container.indices.misc).back() =
       samples::kHalfwordToken;
   expected[samples::kCursorBase + samples::kMiscCategory * 2] = 0;
   expected[samples::kCursorBase + samples::kMiscCategory * 2 + 1] =
       samples::kByteMax;
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   CHECK(detail::SelectLiveDetailsItem(6, 255) == 65535);
-  CHECK(std::bit_cast<MemoryBytes>(Menu_Framework_menuMemory) == expected);
+  CHECK(std::bit_cast<MemoryBytes>(VS::Menu::Framework::menuMemory) ==
+        expected);
   Menu_Container_containerData = &fixture.containers.replacement->container;
   std::span(fixture.containers.replacement->container.indices.misc).back() =
       samples::kByteOverflowToken;

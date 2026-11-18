@@ -9,7 +9,7 @@ struct Field_SphericalCamera;
 struct Field_SphericalCameraValues;
 
 // Live binding for the field camera (Camera.hpp) over the copied camera
-// globals (CameraLiveState.h) and the frame scratch camera: each entry loads
+// globals (CameraLiveState.hpp) and the frame scratch camera: each entry loads
 // them into a FieldCameraState, runs the typed core over the live actors,
 // input, battle flow, renderer and high-end heap, stores them back and only
 // then writes its output records. The entries keep the original call shapes

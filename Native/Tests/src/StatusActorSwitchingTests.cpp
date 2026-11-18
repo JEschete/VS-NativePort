@@ -12,7 +12,7 @@
 #include "Battle/Damage.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/ActorSwitching.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
@@ -360,7 +360,7 @@ struct LiveActorSlot {
 // A local menu table and the switch globals, restored when the test ends.
 struct LiveSwitchScene {
   LiveSwitchScene() {
-    Menu_Framework_menuItems = rows.data();
+    VS::Menu::Framework::menuItems = rows.data();
     st::ResetLiveActorSwitchPhase();
   }
   LiveSwitchScene(const LiveSwitchScene&) = delete;
@@ -369,7 +369,7 @@ struct LiveSwitchScene {
   LiveSwitchScene& operator=(LiveSwitchScene&&) = delete;
   ~LiveSwitchScene() {
     st::ResetLiveActorSwitchPhase();
-    Menu_Framework_menuItems = saved_rows;
+    VS::Menu::Framework::menuItems = saved_rows;
     Menu_Status_animationStep = saved_step;
     Menu_Status_drawBackgroundFirst = saved_first;
     Menu_Status_fadeScreen = saved_fade;
@@ -377,7 +377,7 @@ struct LiveSwitchScene {
   }
 
   std::array<Menu_Framework_MenuRow, VS::Menu::Framework::kRowCount> rows{};
-  Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
+  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int saved_step = Menu_Status_animationStep;
   int saved_first = Menu_Status_drawBackgroundFirst;
   int saved_fade = Menu_Status_fadeScreen;

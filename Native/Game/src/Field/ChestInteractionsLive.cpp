@@ -1,4 +1,4 @@
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 
 #include <array>
 #include <bit>
@@ -52,7 +52,7 @@
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/RoomSwitchesLive.h"
+#include "Field/RoomSwitchesLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Field/TrapsLive.hpp"
@@ -285,7 +285,7 @@ class LiveAshleyFallHost final : public VS::Field::AshleyFallHost {
     VS::Battle::BeginLiveActorDefeatAnimation(record->stats->actorId);
   }
   VS::Field::DoorRecord StoreEntranceForReload() override {
-    Field_StoreEntranceDoorForReloadEntry();
+    VS::Field::StoreEntranceDoorForReloadEntry();
     return VS::Field::LoadLiveRoomTransition().pending_door;
   }
   std::uint8_t CurrentZoneId() const override {
@@ -638,7 +638,7 @@ class LiveRoomObjectInteractionHost final
   }
   void BeginToggle() override {
     if (auto* record = Record()) {
-      static_cast<void>(Field_BeginDoorToggleEntry(record));
+      static_cast<void>(VS::Field::BeginDoorToggleEntry(record));
     }
   }
   void PlaySound(std::int32_t sound) override {
@@ -1067,7 +1067,7 @@ bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
 }  // namespace VS::Field
 
 // decomp: BATTLE.PRG func_80073E30 (src/BATTLE/BATTLE.PRG/146C.c:4935).
-void Field_TryOpenChestEntry(Field_MpdLockTrigger* address, int) {
+void VS::Field::TryOpenChestEntry(Field_MpdLockTrigger* address, int) {
   const auto target = VS::Field::FindLiveChestTargetAddress(address);
   if (target) {
     static_cast<void>(VS::Field::TryOpenLiveChest(*target));
@@ -1075,8 +1075,8 @@ void Field_TryOpenChestEntry(Field_MpdLockTrigger* address, int) {
 }
 
 // decomp: BATTLE.PRG func_80074050 (src/BATTLE/BATTLE.PRG/146C.c:4993).
-void Field_BeginChestInteractionEntry(Field_MpdLockTrigger* address,
-                                      int actor) {
+void VS::Field::BeginChestInteractionEntry(Field_MpdLockTrigger* address,
+                                           int actor) {
   const auto target = VS::Field::FindLiveChestTargetAddress(address);
   if (target) {
     static_cast<void>(VS::Field::BeginLiveChestInteraction(*target, actor));
@@ -1084,33 +1084,33 @@ void Field_BeginChestInteractionEntry(Field_MpdLockTrigger* address,
 }
 
 // decomp: BATTLE.PRG func_800742A4 (src/BATTLE/BATTLE.PRG/146C.c:5066).
-void Field_FinishChestInteractionEntry() {
+void VS::Field::FinishChestInteractionEntry() {
   LiveChestInteractionHost host;
   static_cast<void>(VS::Field::FinishChestInteraction(host));
 }
 
 // decomp: BATTLE.PRG func_800743E0 (src/BATTLE/BATTLE.PRG/146C.c:5107).
-void Field_OpenChestContentsEntry() {
+void VS::Field::OpenChestContentsEntry() {
   LiveChestInteractionHost host;
   static_cast<void>(VS::Field::OpenChestContents(host));
 }
 
 // decomp: BATTLE.PRG func_800744B8 (src/BATTLE/BATTLE.PRG/146C.c:5139).
-int Field_UpdateChestContentsSelectionEntry() {
+int VS::Field::UpdateChestContentsSelectionEntry() {
   LiveChestInteractionHost host;
   return VS::Field::UpdateChestContentsSelection(host) ? 1 : 0;
 }
 
 // decomp: BATTLE.PRG func_800741D4 (src/BATTLE/BATTLE.PRG/146C.c:5044).
-void Field_DispatchTrapOrChestInteractionEntry() {
+void VS::Field::DispatchTrapOrChestInteractionEntry() {
   LiveInteractionDispatchHost host;
   static_cast<void>(VS::Field::DispatchTrapOrChestInteraction(host));
 }
 
 // decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4973).
-void Field_BeginTrapInteractionEntry(Field_MpdLockTrigger* address,
-                                     Actors_ActorLocation* victim_location,
-                                     int actor) {
+void VS::Field::BeginTrapInteractionEntry(Field_MpdLockTrigger* address,
+                                          Actors_ActorLocation* victim_location,
+                                          int actor) {
   const auto target = VS::Field::FindLiveTrapTargetAddress(address);
   if (target) {
     LiveTrapSelectionHost host(victim_location);
@@ -1119,25 +1119,26 @@ void Field_BeginTrapInteractionEntry(Field_MpdLockTrigger* address,
 }
 
 // decomp: BATTLE.PRG func_80074314 (src/BATTLE/BATTLE.PRG/146C.c:5080).
-void Field_FinishTrapInteractionEntry() {
+void VS::Field::FinishTrapInteractionEntry() {
   LiveTrapFinishHost host;
   static_cast<void>(VS::Field::FinishTrapInteraction(host));
 }
 
 // decomp: BATTLE.PRG func_80073AA4 (src/BATTLE/BATTLE.PRG/146C.c:4823).
-void Field_BeginObjectInteractionWaitEntry() {
+void VS::Field::BeginObjectInteractionWaitEntry() {
   LiveObjectInteractionWaitHost host;
   VS::Field::BeginObjectInteractionWait(host);
 }
 
 // decomp: BATTLE.PRG func_80073ACC (src/BATTLE/BATTLE.PRG/146C.c:4829).
-void Field_EndObjectInteractionWaitEntry() {
+void VS::Field::EndObjectInteractionWaitEntry() {
   LiveObjectInteractionWaitHost host;
   VS::Field::EndObjectInteractionWait(host);
 }
 
 // decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836).
-int Field_InteractWithLockedRoomObjectEntry(Field_MpdLockTrigger* address) {
+int VS::Field::InteractWithLockedRoomObjectEntry(
+    Field_MpdLockTrigger* address) {
   LiveRoomObjectInteractionHost host(address);
   return VS::Field::InteractWithLockedRoomObject(host) ==
                  VS::Field::RoomObjectInteractionResult::kWait
@@ -1146,9 +1147,9 @@ int Field_InteractWithLockedRoomObjectEntry(Field_MpdLockTrigger* address) {
 }
 
 // decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909).
-void Field_TriggerActorTrapEntry(Field_MpdLockTrigger* address,
-                                 Actors_ActorLocationQuery* location,
-                                 int actor) {
+void VS::Field::TriggerActorTrapEntry(Field_MpdLockTrigger* address,
+                                      Actors_ActorLocationQuery* location,
+                                      int actor) {
   const auto target = VS::Field::FindLiveTrapTargetAddress(address);
   if (target && location != nullptr) {
     const auto& point = location->location.position;
@@ -1158,40 +1159,40 @@ void Field_TriggerActorTrapEntry(Field_MpdLockTrigger* address,
 }
 
 // decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019).
-int Field_WaitForChestCameraFocusEntry() {
+int VS::Field::WaitForChestCameraFocusEntry() {
   LiveInteractionCameraHost host;
   return VS::Field::WaitForChestCameraFocus(host) ? 1 : 0;
 }
 
 // decomp: BATTLE.PRG func_8007418C (src/BATTLE/BATTLE.PRG/146C.c:5034).
-int Field_StepTrapCameraFocusEntry() {
+int VS::Field::StepTrapCameraFocusEntry() {
   LiveInteractionCameraHost host;
   return VS::Field::StepTrapCameraFocus(host).value_or(0);
 }
 
 // decomp: BATTLE.PRG func_8007424C (src/BATTLE/BATTLE.PRG/146C.c:5055).
-int Field_IsChestAnimationReadyEntry() {
+int VS::Field::IsChestAnimationReadyEntry() {
   LiveInteractionCameraHost host;
   return VS::Field::IsChestAnimationReady(host) ? 1 : 0;
 }
 
 // decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089).
-int Field_TrackInteractionCameraToAshleyEntry() {
+int VS::Field::TrackInteractionCameraToAshleyEntry() {
   LiveInteractionCameraHost host;
   return VS::Field::TrackInteractionCameraToAshley(host).value_or(0);
 }
 
 // decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232).
-int Field_CurrentSavePointIdEntry(void) {
+int VS::Field::CurrentSavePointIdEntry(void) {
   return VS::Field::LiveCurrentSavePointId();
 }
 
-void Field_RefreshAshleyInteractionTileEntry(Actors_ActorRecord* record) {
+void VS::Field::RefreshAshleyInteractionTileEntry(Actors_ActorRecord* record) {
   static_cast<void>(VS::Field::RefreshLiveAshleyInteractionTile(record));
 }
 
-int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
-                                  unsigned char* output) {
+int VS::Field::TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
+                                       unsigned char* output) {
   if (actor == nullptr || output == nullptr) {
     return -1;
   }
@@ -1212,7 +1213,7 @@ int Field_TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
 
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260).
 // decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514).
-void Field_ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position) {
+void VS::Field::ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position) {
   if (target_position == nullptr) return;
   SVECTOR position{};
   std::memcpy(&position, target_position, sizeof(position));
@@ -1241,13 +1242,13 @@ void Field_ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position) {
       target, {position.vx, position.vy, position.vz}, host));
 }
 
-void Field_StoreEntranceDoorForReloadEntry(void) {
+void VS::Field::StoreEntranceDoorForReloadEntry(void) {
   const auto encoded = VS::Field::EnteredDoorReloadByte(Field_enteredDoorId);
   Audio_Seq_unusedStateFlags.doorEntered = std::bit_cast<char>(encoded);
 }
 
-void Field_SetEntranceDoorRecordEntry(
-    char (*input)[kFieldEntranceRecordBytes]) {
+void VS::Field::SetEntranceDoorRecordEntry(
+    char (*input)[VS::Field::kEntranceRecordBytes]) {
   if (input == nullptr) {
     VS::Field::SetLiveEntranceDoor(std::nullopt);
     return;
@@ -1257,11 +1258,12 @@ void Field_SetEntranceDoorRecordEntry(
   VS::Field::SetLiveEntranceDoor(VS::Field::DoorRecordOf(record));
 }
 
-void Field_FindEntranceDoorNearTileEntry(int tile_x, int tile_z, int layer) {
+void VS::Field::FindEntranceDoorNearTileEntry(int tile_x, int tile_z,
+                                              int layer) {
   VS::Field::FindLiveEntranceDoorNearTile(tile_x, tile_z, layer);
 }
 
-int Field_CheckAshleyTileTriggersEntry(int actor, unsigned char* input) {
+int VS::Field::CheckAshleyTileTriggersEntry(int actor, unsigned char* input) {
   if (input == nullptr) return 0;
   Actors_ActorLocation location{};
   std::memcpy(&location, input, sizeof location);
@@ -1277,8 +1279,8 @@ int Field_CheckAshleyTileTriggersEntry(int actor, unsigned char* input) {
   return VS::Field::CheckLiveAshleyTileTriggers(actor, placement) ? 1 : 0;
 }
 
-int Field_CheckActorTrapAndFallTriggersEntry(int actor,
-                                             Actors_ActorLocation* location) {
+int VS::Field::CheckActorTrapAndFallTriggersEntry(
+    int actor, Actors_ActorLocation* location) {
   if (location == nullptr) return 0;
   const VS::Actors::ActorPlacementView placement{
       .tile = {.x = location->packedTile.target.tileX,
@@ -1293,19 +1295,19 @@ int Field_CheckActorTrapAndFallTriggersEntry(int actor,
       VS::Field::CheckLiveActorTrapAndFallTriggers(actor, placement));
 }
 
-int Field_TryTriggerFacingTileEventEntry(int actor) {
+int VS::Field::TryTriggerFacingTileEventEntry(int actor) {
   LiveFacingEventHost host;
   return VS::Field::TryTriggerFacingTileEvent(actor, host) ? 1 : 0;
 }
 
 // decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271).
-Field_MpdLockTrigger* Field_FindFacingRoomObjectEntry(int actor) {
+Field_MpdLockTrigger* VS::Field::FindFacingRoomObjectEntry(int actor) {
   const auto target = VS::Field::FindLiveFacingRoomObject(actor);
   return target ? VS::Field::ResolveLiveRoomObjectTarget(*target) : nullptr;
 }
 
 // decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5290).
-Items_TreasureChest* Field_FindFacingUnlootedChestEntry(int actor) {
+Items_TreasureChest* VS::Field::FindFacingUnlootedChestEntry(int actor) {
   const auto target = VS::Field::FindLiveFacingUnlootedChest(actor);
   return target ? VS::Field::ResolveLiveChestTarget(*target) : nullptr;
 }

@@ -1037,15 +1037,16 @@ template <typename Entry>
 std::vector<DirectionFrame> RunDirection(Entry entry) {
   LiveFixture fixture;
   VS::Menu::Framework::ResetLiveMainMenuStatics();
-  Menu_Framework_menuMemory.opaque9E = 1;
+  VS::Menu::Framework::menuMemory.opaque9E = 1;
   std::vector<DirectionFrame> frames;
-  frames.push_back({entry(1), Menu_Framework_menuMemory.opaque9E, {}, {}});
+  frames.push_back(
+      {entry(1), VS::Menu::Framework::menuMemory.opaque9E, {}, {}});
   for (int frame = 0; frame < kDirectionFrames; ++frame) {
     fixture.Frame();
     PressForFrame(frame);
     DirectionFrame record{};
     record.result = entry(0);
-    record.selection = Menu_Framework_menuMemory.opaque9E;
+    record.selection = VS::Menu::Framework::menuMemory.opaque9E;
     for (std::size_t row = 0; row < 2; ++row) {
       const auto& item = fixture.rows.at(kFirstDirectionRow + row);
       record.x.at(row) = item.x;
@@ -1156,15 +1157,15 @@ TEST_CASE("F02986 live reset restores the first-entry direction reset",
   live::equipment::ValueRestore<char> memory{Input_settings.cursorMemory};
   Input_settings.cursorMemory = 0;
   transfer::ResetLiveContainerTransferStatics();
-  Menu_Framework_menuMemory.opaque9E = 2;
+  VS::Menu::Framework::menuMemory.opaque9E = 2;
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);
-  REQUIRE(Menu_Framework_menuMemory.opaque9E == 0);
-  Menu_Framework_menuMemory.opaque9E = 2;
+  REQUIRE(VS::Menu::Framework::menuMemory.opaque9E == 0);
+  VS::Menu::Framework::menuMemory.opaque9E = 2;
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);
-  REQUIRE(Menu_Framework_menuMemory.opaque9E == 2);
+  REQUIRE(VS::Menu::Framework::menuMemory.opaque9E == 2);
   transfer::ResetLiveContainerTransferStatics();
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);
-  REQUIRE(Menu_Framework_menuMemory.opaque9E == 0);
+  REQUIRE(VS::Menu::Framework::menuMemory.opaque9E == 0);
   transfer::ResetLiveContainerTransferStatics();
 }
 
@@ -1186,7 +1187,7 @@ std::vector<ListFrame> RunItemList(Entry entry) {
   fixture.AddMisc();
   std::vector<ListFrame> frames;
   frames.push_back({entry(1), {}});
-  Menu_Framework_menuMemory.opaqueA0[0] = kMiscToken;
+  VS::Menu::Framework::menuMemory.opaqueA0[0] = kMiscToken;
   const auto guard_before = VS::Core::Memory::DamagedLiveHeapGuardCount();
   for (int frame = 0; frame < kListFrames; ++frame) {
     ListFrame record{entry(0), {}};
@@ -1219,8 +1220,8 @@ TEST_CASE("F02985 F02987 live entries refuse missing storage and steps",
   LiveFixture fixture;
   transfer::ResetLiveContainerTransferStatics();
   live::equipment::ValueRestore<Menu_Container_InventoryStorage*> storage{
-      Menu_Framework_unusedInventoryStorage};
-  Menu_Framework_unusedInventoryStorage = nullptr;
+      VS::Menu::Framework::unusedInventoryStorage};
+  VS::Menu::Framework::unusedInventoryStorage = nullptr;
   REQUIRE(transfer::LiveUpdateItemList(1) == 0);
   REQUIRE(transfer::LiveUpdateScreen(nullptr) == 0);
   live::equipment::ValueRestore<Items_Container*> active{

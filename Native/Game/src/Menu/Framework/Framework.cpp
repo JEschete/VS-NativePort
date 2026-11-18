@@ -668,7 +668,7 @@ constexpr int kDataMenu = 7;
 constexpr int kLootMenu = 12;
 constexpr int kChallengeMenu = 15;
 constexpr int kUnlockMenu = 3;
-// Menu_Framework_actionSelection.menuStatus.
+// VS::Menu::Framework::actionSelection.menuStatus.
 constexpr std::int16_t kMenuOpen = 1;
 constexpr std::int16_t kMenuDone = 2;
 // The item shortcut runs MAINMENU.PRG's item screen alone.

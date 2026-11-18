@@ -39,15 +39,15 @@ constexpr std::size_t kMaterialArgument = 9;
 constexpr std::size_t kGripArgument = 5;
 
 struct LiveFixture : equipment_detail_tests::LiveFixture {
-  equipment_detail_tests::ArrayRestore<u_char,
-                                       std::size(Menu_Framework_weaponHands)>
-      saved_hands{Menu_Framework_weaponHands};
+  equipment_detail_tests::ArrayRestore<
+      u_char, std::size(VS::Menu::Framework::weaponHands)>
+      saved_hands{VS::Menu::Framework::weaponHands};
   data::World text;
 
   LiveFixture() {
     std::memcpy(help.data(), text.help.data(), text.help.size());
     std::memcpy(names.data(), text.names.data(), text.names.size());
-    std::ranges::copy(text.hands, Menu_Framework_weaponHands);
+    std::ranges::copy(text.hands, VS::Menu::Framework::weaponHands);
     Battle_stringContext = {};
   }
   char* HelpEntry(std::size_t index) {
@@ -112,7 +112,7 @@ TEST_CASE("Status weapon module entry publishes real blade stats and highlight",
   auto weapon = std::bit_cast<Items_WeaponLoadout>(typed);
   auto entry = ModuleEntry(0x8010317C, &status::SelectLiveWeaponComponent);
   CHECK(entry(1, &weapon) == fixture.description.data());
-  CHECK(Menu_Framework_strIntAgi[0] == kWeaponStrength);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == kWeaponStrength);
   CHECK(fixture.rows[kComponentRow].selected == 1);
   CHECK(VS::Items::Live::Typed(weapon) == typed);
 }
@@ -121,12 +121,12 @@ TEST_CASE("Status shield module entry clears an empty socket but not its owner",
           "[status-components-live][F02651]") {
   LiveFixture fixture;
   Items_ShieldLoadout shield{};
-  Menu_Framework_equipmentStats[0] = 37;
+  VS::Menu::Framework::equipmentStats[0] = 37;
   auto entry = ModuleEntry(0x801032C4, &status::SelectLiveShieldComponent);
   CHECK(entry(1, &shield) == fixture.NoGems());
-  CHECK(Menu_Framework_equipmentStats[0] == 0);
+  CHECK(VS::Menu::Framework::equipmentStats[0] == 0);
   CHECK(fixture.rows[kComponentRow].selected == 1);
-  CHECK(Menu_Framework_stringBuf == fixture.description.data());
+  CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
 }
 
 TEST_CASE("Status armor and accessory module entries use real item text",
@@ -170,9 +170,9 @@ TEST_CASE("Status selectable module entry reads the current stat page",
   LiveFixture fixture;
   const auto entry =
       ModuleEntry(0x8010341C, &status::IsLiveDetailElementSelectable);
-  Menu_Framework_itemStatPage = fw::stat_page::kType;
+  VS::Menu::Framework::itemStatPage = fw::stat_page::kType;
   CHECK(entry(5, 0xFFFF) == 0);
-  Menu_Framework_itemStatPage = fw::stat_page::kClass;
+  VS::Menu::Framework::itemStatPage = fw::stat_page::kClass;
   CHECK(entry(5, 0) == 1);
   CHECK(entry(12, 3) == 1);
   CHECK(entry(13, 3) == 0);
@@ -187,8 +187,8 @@ TEST_CASE("MENU4 completion preserves borrowed component text and row owners",
   const auto buffer = fixture.description;
   menu_overlay_tests::Load load(5, {VS_MENU4_PRG_LBA, VS_MENU4_PRG_SIZE});
   CHECK(load.Complete() == 1);
-  CHECK(Menu_Framework_itemHelp == fixture.help.data());
-  CHECK(Menu_Framework_stringBuf == fixture.description.data());
-  CHECK(Menu_Framework_menuItems == fixture.rows.data());
+  CHECK(VS::Menu::Framework::itemHelp == fixture.help.data());
+  CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());
+  CHECK(VS::Menu::Framework::menuItems == fixture.rows.data());
   CHECK(fixture.description == buffer);
 }

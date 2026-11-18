@@ -19,7 +19,7 @@
 #include "Menu/Container/ContainerSortingLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Sounds.hpp"
@@ -57,7 +57,7 @@ TransferConfirmationState g_transfer;
 }
 
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) {
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing current container dialog menu rows");
   }
 }
@@ -198,7 +198,7 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
   }
   void HideTransferPanels() override { SetLivePanelVisibility(0); }
   std::uint8_t ListAnimationRow() override {
-    return static_cast<std::uint8_t>(Menu_Framework_itemsListRow);
+    return static_cast<std::uint8_t>(VS::Menu::Framework::itemsListRow);
   }
   void AdvanceListRows() override {
     RequireRows();

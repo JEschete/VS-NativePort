@@ -6,9 +6,9 @@
 
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/EquipmentDetails.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllers.hpp"
 
@@ -43,15 +43,16 @@ inline std::span<char> FindLiveItemDetailText(char* text,
   const auto address = reinterpret_cast<std::uintptr_t>(text);
   const std::array tables{
       borrowed_buffer,
-      std::span<char>{Menu_Framework_stringBuf,
-                      Menu_Framework_stringBuf == nullptr
+      std::span<char>{VS::Menu::Framework::stringBuf,
+                      VS::Menu::Framework::stringBuf == nullptr
                           ? 0
                           : Framework::kStringBufferBytes},
-      std::span<char>{
-          reinterpret_cast<char*>(Menu_Framework_itemHelp),
-          Menu_Framework_itemHelp == nullptr ? 0 : Framework::kItemHelpBytes},
-      std::span<char>{reinterpret_cast<char*>(Menu_Framework_itemNames),
-                      Menu_Framework_itemNames == nullptr
+      std::span<char>{reinterpret_cast<char*>(VS::Menu::Framework::itemHelp),
+                      VS::Menu::Framework::itemHelp == nullptr
+                          ? 0
+                          : Framework::kItemHelpBytes},
+      std::span<char>{reinterpret_cast<char*>(VS::Menu::Framework::itemNames),
+                      VS::Menu::Framework::itemNames == nullptr
                           ? 0
                           : Framework::kItemNamesBytes}};
   for (const auto table : tables) {

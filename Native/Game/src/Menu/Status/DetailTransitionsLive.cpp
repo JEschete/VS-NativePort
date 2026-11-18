@@ -11,9 +11,9 @@
 #include "Input/ControllerLiveState.h"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorStatus.h"
@@ -26,7 +26,7 @@ void Refuse(std::string_view reason) {
 }
 
 bool RowsAvailable() {
-  if (Menu_Framework_menuItems == nullptr) {
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("status transition: missing menu workspace");
     return false;
   }
@@ -37,7 +37,7 @@ class LiveTransitionHost final : public DetailTransitionHost {
  public:
   void Refuse(std::string_view reason) override { Status::Refuse(reason); }
   std::span<Framework::MenuRow> Rows() override {
-    return Menu_Framework_menuItems == nullptr
+    return VS::Menu::Framework::menuItems == nullptr
                ? std::span<Framework::MenuRow>{}
                : std::span{&Framework::LiveMenuRow(0), Framework::kRowCount};
   }
@@ -74,14 +74,15 @@ class LiveTransitionHost final : public DetailTransitionHost {
 int NavigateLiveDetailElements(unsigned int selected, int flags) {
   Framework::StatusViewNavigation links{};
   for (std::size_t row = 0; row < links.size(); ++row) {
-    std::ranges::copy(Menu_Framework_statusViewNavigationMap[row],
+    std::ranges::copy(VS::Menu::Framework::statusViewNavigationMap[row],
                       links[row].begin());
   }
   const auto result = NavigateDetailElements(
       {.selected = selected,
        .flags = static_cast<std::uint32_t>(flags),
        .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-       .stat_page = static_cast<std::uint8_t>(Menu_Framework_itemStatPage),
+       .stat_page =
+           static_cast<std::uint8_t>(VS::Menu::Framework::itemStatPage),
        .links = links});
   if (!result) {
     Refuse("status transition: invalid or cyclic detail navigation");

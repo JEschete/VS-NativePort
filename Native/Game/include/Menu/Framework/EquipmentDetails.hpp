@@ -106,7 +106,7 @@ inline constexpr StatusViewNavigation kStatusViewNavigation{{
 }};
 
 // The equipment details' variables. The first group is shared with the
-// copied menus (EquipmentDetailsLiveState.h); the rest were module statics.
+// copied menus (EquipmentDetailsLiveState.hpp); the rest were module statics.
 struct EquipmentDetailsState {
   // vs_mainMenu_equipmentStats: the class (0-15) and affinity (16-31)
   // totals, the types (32-35) and the damage type (36); entries 48-62 hold a

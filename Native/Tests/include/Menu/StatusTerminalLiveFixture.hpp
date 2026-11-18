@@ -91,31 +91,31 @@ struct GeometryRestore {
 };
 
 struct MainMenuScope {
-  ValueRestore<decltype(Menu_Framework_menuRowYOffset)> y{
-      Menu_Framework_menuRowYOffset};
-  ValueRestore<decltype(Menu_Framework_selectedRow)> selected{
-      Menu_Framework_selectedRow};
-  ValueRestore<decltype(Menu_Framework_subMenuId)> submenu{
-      Menu_Framework_subMenuId};
-  ValueRestore<decltype(Menu_Framework_subMenuPage)> page{
-      Menu_Framework_subMenuPage};
-  ValueRestore<decltype(Menu_Framework_subMenuRowCount)> rows{
-      Menu_Framework_subMenuRowCount};
-  ValueRestore<decltype(Menu_Framework_subMenuRowInfo)> info{
-      Menu_Framework_subMenuRowInfo};
-  ValueRestore<decltype(Menu_Framework_actionMenuState)> action{
-      Menu_Framework_actionMenuState};
-  ValueRestore<decltype(Menu_Framework_backgroundFadeStep)> fade{
-      Menu_Framework_backgroundFadeStep};
-  ValueRestore<decltype(Menu_Framework_cursorColor)> cursor{
-      Menu_Framework_cursorColor};
-  ValueRestore<decltype(Menu_Framework_displayActionCost)> cost{
-      Menu_Framework_displayActionCost};
-  ValueRestore<decltype(Menu_Framework_hideMenu)> hidden{
-      Menu_Framework_hideMenu};
-  ValueRestore<decltype(Menu_Framework_itemsListRow)> list{
-      Menu_Framework_itemsListRow};
-  ValueRestore<u_short*> items{Menu_Framework_itemsText};
+  ValueRestore<decltype(VS::Menu::Framework::menuRowYOffset)> y{
+      VS::Menu::Framework::menuRowYOffset};
+  ValueRestore<decltype(VS::Menu::Framework::selectedRow)> selected{
+      VS::Menu::Framework::selectedRow};
+  ValueRestore<decltype(VS::Menu::Framework::subMenuId)> submenu{
+      VS::Menu::Framework::subMenuId};
+  ValueRestore<decltype(VS::Menu::Framework::subMenuPage)> page{
+      VS::Menu::Framework::subMenuPage};
+  ValueRestore<decltype(VS::Menu::Framework::subMenuRowCount)> rows{
+      VS::Menu::Framework::subMenuRowCount};
+  ValueRestore<decltype(VS::Menu::Framework::subMenuRowInfo)> info{
+      VS::Menu::Framework::subMenuRowInfo};
+  ValueRestore<decltype(VS::Menu::Framework::actionMenuState)> action{
+      VS::Menu::Framework::actionMenuState};
+  ValueRestore<decltype(VS::Menu::Framework::backgroundFadeStep)> fade{
+      VS::Menu::Framework::backgroundFadeStep};
+  ValueRestore<decltype(VS::Menu::Framework::cursorColor)> cursor{
+      VS::Menu::Framework::cursorColor};
+  ValueRestore<decltype(VS::Menu::Framework::displayActionCost)> cost{
+      VS::Menu::Framework::displayActionCost};
+  ValueRestore<decltype(VS::Menu::Framework::hideMenu)> hidden{
+      VS::Menu::Framework::hideMenu};
+  ValueRestore<decltype(VS::Menu::Framework::itemsListRow)> list{
+      VS::Menu::Framework::itemsListRow};
+  ValueRestore<u_short*> items{VS::Menu::Framework::itemsText};
   MainMenuScope() { fw::ResetLiveMainMenuStatics(); }
   ~MainMenuScope() { fw::ResetLiveMainMenuStatics(); }
 };
@@ -245,20 +245,21 @@ struct Fixture {
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
       VS::Field::isFieldRenderingEnabled};
   ValueRestore<Menu_Framework_MenuControlState> saved_control{
-      Menu_Framework_menuState};
-  ValueRestore<Menu_Framework_MenuRow*> saved_rows{Menu_Framework_menuItems};
-  ValueRestore<char*> saved_strings{Menu_Framework_stringBuf};
-  ValueRestore<int*> saved_types{Menu_Framework_rowTypeBuf};
-  ValueRestore<u_short*> saved_list_text{Menu_Framework_itemsText};
-  ValueRestore<decltype(Menu_Framework_itemNames)> saved_names{
-      Menu_Framework_itemNames};
-  ValueRestore<u_short*> saved_help{Menu_Framework_itemHelp};
-  ValueRestore<u_short*> saved_menu12{Menu_Framework_menu12Text};
+      VS::Menu::Framework::menuState};
+  ValueRestore<Menu_Framework_MenuRow*> saved_rows{
+      VS::Menu::Framework::menuItems};
+  ValueRestore<char*> saved_strings{VS::Menu::Framework::stringBuf};
+  ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
+  ValueRestore<u_short*> saved_list_text{VS::Menu::Framework::itemsText};
+  ValueRestore<decltype(VS::Menu::Framework::itemNames)> saved_names{
+      VS::Menu::Framework::itemNames};
+  ValueRestore<u_short*> saved_help{VS::Menu::Framework::itemHelp};
+  ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
   ValueRestore<Menu_Framework_MenuMemory> saved_memory{
-      Menu_Framework_menuMemory};
+      VS::Menu::Framework::menuMemory};
   ValueRestore<Menu_StringContext> saved_context{Battle_stringContext};
-  ArrayRestore<char, kMenuSubmenuStateCount> saved_submenus{
-      Menu_Framework_submenuStates};
+  ArrayRestore<char, VS::Menu::Framework::kSubmenuStateCount> saved_submenus{
+      VS::Menu::Framework::submenuStates};
   ArrayRestore<Battle_Actor*, std::size(Battle_actors)> saved_actors{
       Battle_actors};
   ArrayRestore<Actors_ActorRecord*, std::size(Actors_actorRecords)>
@@ -283,7 +284,7 @@ struct Fixture {
   ArrayRestore<u_short, std::size(Battle_statusStrings)> saved_battle_text{
       Battle_statusStrings};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
-      Menu_Framework_equipmentStats};
+      VS::Menu::Framework::equipmentStats};
   ArrayRestore<char, std::size(Menu_Framework_animationIndices)>
       saved_animation{Menu_Framework_animationIndices};
   std::vector<std::byte> arena = std::vector<std::byte>(kArenaBytes);
@@ -316,11 +317,12 @@ struct Fixture {
       throw std::runtime_error("terminal Live fixture allocation failed");
     }
     std::memset(workspace, 0, kWorkspaceBytes);
-    Menu_Framework_menuItems = static_cast<Menu_Framework_MenuRow*>(workspace);
-    Menu_Framework_stringBuf =
-        reinterpret_cast<char*>(Menu_Framework_menuItems + fw::kRowCount);
-    Menu_Framework_rowTypeBuf = reinterpret_cast<int*>(
-        Menu_Framework_stringBuf + fw::kStringBufferBytes);
+    VS::Menu::Framework::menuItems =
+        static_cast<Menu_Framework_MenuRow*>(workspace);
+    VS::Menu::Framework::stringBuf =
+        reinterpret_cast<char*>(VS::Menu::Framework::menuItems + fw::kRowCount);
+    VS::Menu::Framework::rowTypeBuf = reinterpret_cast<int*>(
+        VS::Menu::Framework::stringBuf + fw::kStringBufferBytes);
     VS::Content::overlayWorkspaceOwner = 6;
     BindText();
     BindFrame();
@@ -436,15 +438,15 @@ struct Fixture {
     auto bytes =
         std::span(static_cast<std::uint8_t*>(text), fw::kItemTextBytes);
     std::ranges::fill(bytes, std::uint8_t{0xE7});
-    Menu_Framework_itemNames =
+    VS::Menu::Framework::itemNames =
         static_cast<char (*)[fw::kItemNameRowBytes]>(text);
-    Menu_Framework_itemHelp =
+    VS::Menu::Framework::itemHelp =
         reinterpret_cast<u_short*>(bytes.data() + fw::kItemNamesBytes);
-    Menu_Framework_menu12Text = reinterpret_cast<u_short*>(
+    VS::Menu::Framework::menu12Text = reinterpret_cast<u_short*>(
         bytes.data() + fw::kItemNamesBytes + fw::kItemHelpBytes);
-    std::fill_n(Menu_Framework_itemHelp, equipment_detail_tests::kHelpEntries,
-                u_short{4000});
-    Menu_Framework_itemHelp[4000] = 0xE751;
+    std::fill_n(VS::Menu::Framework::itemHelp,
+                equipment_detail_tests::kHelpEntries, u_short{4000});
+    VS::Menu::Framework::itemHelp[4000] = 0xE751;
     std::ranges::fill(Menu_Status_statusStrings, u_short{0xE7E7});
     std::fill_n(Menu_Status_statusStrings, 61, u_short{400});
     Menu_Status_statusStrings[400] = 0xE741;
@@ -478,7 +480,8 @@ struct Fixture {
     }
   }
   [[nodiscard]] std::uint8_t* State() const {
-    return reinterpret_cast<std::uint8_t*>(&Menu_Framework_submenuStates[4]);
+    return reinterpret_cast<std::uint8_t*>(
+        &VS::Menu::Framework::submenuStates[4]);
   }
 };
 }  // namespace status_terminal_live_tests

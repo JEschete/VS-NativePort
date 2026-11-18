@@ -41,12 +41,12 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
 
   static void Bind(Items_Container& owner) {
     Menu_Container_containerData = &owner;
-    Menu_Framework_weapons = owner.items.weapons;
-    Menu_Framework_blades = owner.items.blades;
-    Menu_Framework_grips = owner.items.grips;
-    Menu_Framework_shields = owner.items.shields;
-    Menu_Framework_armor = owner.items.armor;
-    Menu_Framework_gems = owner.items.gems;
+    VS::Menu::Framework::weapons = owner.items.weapons;
+    VS::Menu::Framework::blades = owner.items.blades;
+    VS::Menu::Framework::grips = owner.items.grips;
+    VS::Menu::Framework::shields = owner.items.shields;
+    VS::Menu::Framework::armor = owner.items.armor;
+    VS::Menu::Framework::gems = owner.items.gems;
   }
   void AddContainerWeapon() {
     AddWeapon();

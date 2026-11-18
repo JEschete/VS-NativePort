@@ -19,9 +19,9 @@ TEST_CASE("F02575 live initialization uses production weapon stats and layout",
   LiveFixture fixture;
   fixture.AddWeapon();
   fixture.Open(inventory::UpdateLiveWeaponDetails);
-  CHECK(Menu_Framework_equipmentSubtype == 1);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
-  CHECK(Menu_Framework_enabledStatPages == 7);
+  CHECK(VS::Menu::Framework::equipmentSubtype == 1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::enabledStatPages == 7);
   CHECK(fixture.rows[31].targetPosition0 == 16);
   CHECK(fixture.rows[20].targetPosition0 == 18);
   CHECK(Menu_Inventory_ashleyYOffset == 5);
@@ -47,12 +47,12 @@ TEST_CASE("F02576 live blade stats retain sign and class affinity-only pages",
   LiveFixture fixture;
   fixture.AddParts();
   fixture.Open(inventory::UpdateLiveBladeDetails);
-  CHECK(Menu_Framework_currentStatusViewItem == 16);
-  CHECK(Menu_Framework_enabledStatPages == 3);
-  CHECK(Menu_Framework_equipmentSubtype == 2);
-  CHECK(Menu_Framework_equipmentStats[0] == -3);
-  CHECK(Menu_Framework_equipmentStats[16] == 4);
-  CHECK(Menu_Framework_strIntAgi[0] == 9);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 16);
+  CHECK(VS::Menu::Framework::enabledStatPages == 3);
+  CHECK(VS::Menu::Framework::equipmentSubtype == 2);
+  CHECK(VS::Menu::Framework::equipmentStats[0] == -3);
+  CHECK(VS::Menu::Framework::equipmentStats[16] == 4);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 9);
 }
 
 TEST_CASE(
@@ -64,25 +64,25 @@ TEST_CASE(
   fixture.Wait(inventory::UpdateLiveBladeDetails);
   Input_buttonRepeat = VS::Input::R1;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
-  CHECK(Menu_Framework_menuMemory.opaque3A.categoryCursors[1].position.page ==
-        1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[1]
+            .position.page == 1);
   CHECK(fixture.rows[31].itemPage == 2);
   CHECK(fixture.rows[20].selected == 1);
-  CHECK(Menu_Framework_strIntAgi[0] == 7);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 7);
 }
 
 TEST_CASE("F02577 live grip stats are type-only without requiring gem owners",
           "[equipment-detail-controllers-live][F02577]") {
   LiveFixture fixture;
   fixture.AddParts();
-  Menu_Framework_gems = nullptr;
+  VS::Menu::Framework::gems = nullptr;
   fixture.Open(inventory::UpdateLiveGripDetails);
-  CHECK(Menu_Framework_equipmentSubtype == 4);
-  CHECK(Menu_Framework_enabledStatPages == 4);
-  CHECK(Menu_Framework_equipmentStats[33] == -2);
-  CHECK(Menu_Framework_strIntAgi[0] == 5);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::equipmentSubtype == 4);
+  CHECK(VS::Menu::Framework::enabledStatPages == 4);
+  CHECK(VS::Menu::Framework::equipmentStats[33] == -2);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 5);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
 }
 
 TEST_CASE(
@@ -137,8 +137,8 @@ TEST_CASE("F02578 live shield initializes exactly three gem rows",
   fixture.AddShield();
   fixture.Open(inventory::UpdateLiveShieldDetails);
   fixture.Wait(inventory::UpdateLiveShieldDetails, kShieldGemRows);
-  CHECK(Menu_Framework_equipmentSubtype == 8);
-  CHECK(Menu_Framework_enabledStatPages == 7);
+  CHECK(VS::Menu::Framework::equipmentSubtype == 8);
+  CHECK(VS::Menu::Framework::enabledStatPages == 7);
   CHECK(fixture.rows[11].unselectable == 1);
   CHECK(fixture.rows[12].unselectable == 1);
   CHECK(fixture.rows[13].unselectable == 1);

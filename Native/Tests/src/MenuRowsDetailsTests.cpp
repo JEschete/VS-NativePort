@@ -20,11 +20,11 @@
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/UiPackets.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -889,20 +889,20 @@ TEST_CASE("Live gem rows point into the loaded text block",
           "[menu][menu-rows-details]") {
   std::vector<std::uint16_t> block(
       (fw::kItemNamesBytes + fw::kItemHelpBytes) / 2, 0xE7E7);
-  auto* const saved_names = Menu_Framework_itemNames;
-  auto* const saved_help = Menu_Framework_itemHelp;
-  Menu_Framework_itemNames =
-      reinterpret_cast<decltype(Menu_Framework_itemNames)>(block.data());
-  Menu_Framework_itemHelp = block.data() + (fw::kItemNamesBytes / 2);
-  Menu_Framework_itemHelp[122] = 2000;
+  auto* const saved_names = VS::Menu::Framework::itemNames;
+  auto* const saved_help = VS::Menu::Framework::itemHelp;
+  VS::Menu::Framework::itemNames =
+      reinterpret_cast<decltype(VS::Menu::Framework::itemNames)>(block.data());
+  VS::Menu::Framework::itemHelp = block.data() + (fw::kItemNamesBytes / 2);
+  VS::Menu::Framework::itemHelp[122] = 2000;
   Items_InventoryGem gem{};
   gem.id = 262;
   std::array<char*, 2> menu_text{};
   int row_type = 0;
   std::array<std::uint8_t, fw::kRowDescriptionBufferBytes> buffer{};
   fw::FormatLiveGemRow(&gem, menu_text.data(), &row_type, buffer.data());
-  Menu_Framework_itemNames = saved_names;
-  Menu_Framework_itemHelp = saved_help;
+  VS::Menu::Framework::itemNames = saved_names;
+  VS::Menu::Framework::itemHelp = saved_help;
   CHECK(menu_text[0] ==
         reinterpret_cast<char*>(block.data()) + (262 * fw::kItemNameRowBytes));
   CHECK(menu_text[1] == reinterpret_cast<char*>(buffer.data()));
@@ -912,30 +912,31 @@ TEST_CASE("Live gem rows point into the loaded text block",
 
 TEST_CASE("Live item text unloads with no block report it freed",
           "[menu][menu-rows-details]") {
-  auto* const saved_names = Menu_Framework_itemNames;
-  Menu_Framework_itemNames = nullptr;
+  auto* const saved_names = VS::Menu::Framework::itemNames;
+  VS::Menu::Framework::itemNames = nullptr;
   CHECK(fw::UnloadLiveItemTextWhenReady() == 1);
-  CHECK(Menu_Framework_itemNames == nullptr);
-  Menu_Framework_itemNames = saved_names;
+  CHECK(VS::Menu::Framework::itemNames == nullptr);
+  VS::Menu::Framework::itemNames = saved_names;
 }
 
 TEST_CASE("Live item row statics reset the hand table",
           "[menu][menu-rows-details]") {
-  auto* const saved_names = Menu_Framework_itemNames;
-  auto* const saved_help = Menu_Framework_itemHelp;
-  auto* const saved_menu12 = Menu_Framework_menu12Text;
-  const std::vector<u_char> saved_hands(std::begin(Menu_Framework_weaponHands),
-                                        std::end(Menu_Framework_weaponHands));
-  Menu_Framework_weaponHands[0] = 9;
+  auto* const saved_names = VS::Menu::Framework::itemNames;
+  auto* const saved_help = VS::Menu::Framework::itemHelp;
+  auto* const saved_menu12 = VS::Menu::Framework::menu12Text;
+  const std::vector<u_char> saved_hands(
+      std::begin(VS::Menu::Framework::weaponHands),
+      std::end(VS::Menu::Framework::weaponHands));
+  VS::Menu::Framework::weaponHands[0] = 9;
   fw::ResetLiveItemRowsStatics();
-  const std::vector<u_char> hands(std::begin(Menu_Framework_weaponHands),
-                                  std::end(Menu_Framework_weaponHands));
+  const std::vector<u_char> hands(std::begin(VS::Menu::Framework::weaponHands),
+                                  std::end(VS::Menu::Framework::weaponHands));
   CHECK(hands == std::vector<u_char>{0, 0, 1, 0, 1, 0, 1, 1, 1, 0});
-  CHECK(Menu_Framework_itemNames == nullptr);
-  Menu_Framework_itemNames = saved_names;
-  Menu_Framework_itemHelp = saved_help;
-  Menu_Framework_menu12Text = saved_menu12;
-  std::ranges::copy(saved_hands, std::begin(Menu_Framework_weaponHands));
+  CHECK(VS::Menu::Framework::itemNames == nullptr);
+  VS::Menu::Framework::itemNames = saved_names;
+  VS::Menu::Framework::itemHelp = saved_help;
+  VS::Menu::Framework::menu12Text = saved_menu12;
+  std::ranges::copy(saved_hands, std::begin(VS::Menu::Framework::weaponHands));
 }
 
 // ---------------------------------------------------------------- details
@@ -2316,44 +2317,47 @@ TEST_CASE("DP/PP bars slide in and out", "[menu][menu-rows-details]") {
 
 TEST_CASE("Live range, risk and primary stats reach the shared variables",
           "[menu][menu-rows-details]") {
-  const std::vector<char> saved_range(std::begin(Menu_Framework_rangeRiskData),
-                                      std::end(Menu_Framework_rangeRiskData));
+  const std::vector<char> saved_range(
+      std::begin(VS::Menu::Framework::rangeRiskData),
+      std::end(VS::Menu::Framework::rangeRiskData));
   const std::vector<std::int16_t> saved_primary(
-      std::begin(Menu_Framework_strIntAgi), std::end(Menu_Framework_strIntAgi));
-  std::ranges::fill(Menu_Framework_rangeRiskData, '\0');
+      std::begin(VS::Menu::Framework::strIntAgi),
+      std::end(VS::Menu::Framework::strIntAgi));
+  std::ranges::fill(VS::Menu::Framework::rangeRiskData, '\0');
   fw::SetLiveRangeAndRisk(300, 5, 9, 1);
-  const std::vector<int> range(std::begin(Menu_Framework_rangeRiskData),
-                               std::end(Menu_Framework_rangeRiskData));
+  const std::vector<int> range(std::begin(VS::Menu::Framework::rangeRiskData),
+                               std::end(VS::Menu::Framework::rangeRiskData));
   CHECK(range == std::vector<int>{44, 5, 9, 1, 0, 0, 0, 0});
   fw::SetLivePrimaryStats(11, 12, 13, 1);
-  const std::vector<int> primary(std::begin(Menu_Framework_strIntAgi),
-                                 std::end(Menu_Framework_strIntAgi));
+  const std::vector<int> primary(std::begin(VS::Menu::Framework::strIntAgi),
+                                 std::end(VS::Menu::Framework::strIntAgi));
   CHECK(primary == std::vector<int>{11, 12, 13, 1, 11, 12, 13, 1});
-  CHECK(std::ranges::all_of(Menu_Framework_rangeRiskData,
+  CHECK(std::ranges::all_of(VS::Menu::Framework::rangeRiskData,
                             [](char value) { return value == 0; }));
-  std::ranges::copy(saved_range, std::begin(Menu_Framework_rangeRiskData));
-  std::ranges::copy(saved_primary, std::begin(Menu_Framework_strIntAgi));
+  std::ranges::copy(saved_range,
+                    std::begin(VS::Menu::Framework::rangeRiskData));
+  std::ranges::copy(saved_primary, std::begin(VS::Menu::Framework::strIntAgi));
 }
 
 TEST_CASE("Live stat pages and the detail cursor reach the shared variables",
           "[menu][menu-rows-details]") {
-  const char saved_page = Menu_Framework_itemStatPage;
-  const char saved_enabled = Menu_Framework_enabledStatPages;
-  const u_char saved_selected = Menu_Framework_selectedStatusViewElement;
+  const char saved_page = VS::Menu::Framework::itemStatPage;
+  const char saved_enabled = VS::Menu::Framework::enabledStatPages;
+  const u_char saved_selected = VS::Menu::Framework::selectedStatusViewElement;
   VS::test_support::ChannelWarnings warnings{"menu.framework"};
-  Menu_Framework_itemStatPage = 2;
+  VS::Menu::Framework::itemStatPage = 2;
   fw::SetLiveEnabledStatPages(3);
-  CHECK(Menu_Framework_enabledStatPages == 3);
-  CHECK(Menu_Framework_itemStatPage == 0);
+  CHECK(VS::Menu::Framework::enabledStatPages == 3);
+  CHECK(VS::Menu::Framework::itemStatPage == 0);
   fw::SetLiveEnabledStatPages(0);
   fw::ResetLiveItemDetailCursor();
-  CHECK(Menu_Framework_selectedStatusViewElement == 9);
+  CHECK(VS::Menu::Framework::selectedStatusViewElement == 9);
   CHECK(warnings.messages ==
         std::vector<std::string>{
             "equipment details: stat pages with none enabled"});
-  Menu_Framework_itemStatPage = saved_page;
-  Menu_Framework_enabledStatPages = saved_enabled;
-  Menu_Framework_selectedStatusViewElement = saved_selected;
+  VS::Menu::Framework::itemStatPage = saved_page;
+  VS::Menu::Framework::enabledStatPages = saved_enabled;
+  VS::Menu::Framework::selectedStatusViewElement = saved_selected;
 }
 
 TEST_CASE("Live equipment detail statics reset the DP/PP bars",

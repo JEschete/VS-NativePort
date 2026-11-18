@@ -21,15 +21,15 @@ namespace VS::Field {
 // dereferenced.
 enum class WeatherParticlesId : std::uintptr_t { kNone = 0 };
 
-// Field_roomWeatherKind values.
+// VS::Field::roomWeatherKind values.
 inline constexpr std::uint8_t kNoWeather = 0;
 inline constexpr std::uint8_t kRainWeather = 1;
 inline constexpr std::uint8_t kSnowWeather = 2;
 inline constexpr std::uint8_t kScreenWeather = 3;
 inline constexpr std::uint8_t kEmberWeather = 4;
 
-// Field_weatherAmbientSoundId values: -2 when the room has no ambient sound
-// and -1 while the ambient sound is held off by the caller.
+// VS::Field::weatherAmbientSoundId values: -2 when the room has no ambient
+// sound and -1 while the ambient sound is held off by the caller.
 inline constexpr std::int16_t kNoAmbientSound = -2;
 inline constexpr std::int16_t kAmbientSoundHeld = -1;
 // The rain's looping sound effect.

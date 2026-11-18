@@ -13,7 +13,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/GimmickPlacementLive.h"
+#include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Items/InventoryLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -87,7 +87,7 @@ class LiveRoomTriggerHost final : public RoomTriggerHost {
   }
   std::optional<TriggerPlacement> GimmickPlacement(int gimmick) override {
     Field_GimmickSnapshot snapshot{};
-    if (Field_GimmickPlacementEntry(gimmick, &snapshot) < 0) {
+    if (VS::Field::GimmickPlacementEntry(gimmick, &snapshot) < 0) {
       return std::nullopt;
     }
     constexpr unsigned kHalfwordBits = 16;

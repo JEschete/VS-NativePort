@@ -28,10 +28,10 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
@@ -49,13 +49,14 @@ namespace VS::Menu::Loot::Live {
 namespace {
 namespace items = VS::Items;
 namespace item_live = VS::Items::Live;
+using Framework::kItemNameRowBytes;
 using Framework::MenuRow;
 using Framework::RowPlacement;
 
 constexpr std::uint32_t kRefusalLogLimit = 16;
 constexpr std::uint32_t kRefusalLogInterval = 1024;
 constexpr std::size_t kNameTableBytes = Framework::kItemNamesBytes;
-constexpr std::size_t kItemNameCount = kNameTableBytes / kMenuItemNameRowBytes;
+constexpr std::size_t kItemNameCount = kNameTableBytes / kItemNameRowBytes;
 // decomp: _menuText[(availableAction + 4) * 2] names the action's row text.
 constexpr std::size_t kActionTextBase = 4;
 constexpr int kDiscardSoundGroup = 0x7E;
@@ -112,13 +113,13 @@ void StoreRows(std::span<const LootRow> rows) {
 }
 
 [[nodiscard]] std::span<const std::uint8_t> ItemNameText(std::uint16_t id) {
-  if (Menu_Framework_itemNames == nullptr || id >= kItemNameCount) {
+  if (Framework::itemNames == nullptr || id >= kItemNameCount) {
     Refuse("an item name outside vs_mainMenu_itemNames");
     return {};
   }
   const auto* names =
-      reinterpret_cast<const std::uint8_t*>(Menu_Framework_itemNames);
-  const std::size_t first = std::size_t{id} * kMenuItemNameRowBytes;
+      reinterpret_cast<const std::uint8_t*>(Framework::itemNames);
+  const std::size_t first = std::size_t{id} * kItemNameRowBytes;
   return std::span(names, Framework::kItemNamesBytes).subspan(first);
 }
 
@@ -267,33 +268,32 @@ class LiveDescriptionHost final : public DescriptionHost {
       case items::ItemCategory::kWeapon:
         Framework::FormatLiveInventoryWeaponRow(&ashley.weapons[index],
                                                 text.data(), &row_type,
-                                                Menu_Framework_stringBuf);
+                                                Framework::stringBuf);
         break;
       case items::ItemCategory::kBlade:
         Framework::FormatLiveBladeRow(&ashley.blades[index], text.data(),
-                                      &row_type, Menu_Framework_stringBuf);
+                                      &row_type, Framework::stringBuf);
         break;
       case items::ItemCategory::kGrip:
         Framework::FormatLiveGripRow(&ashley.grips[index], text.data(),
-                                     &row_type, Menu_Framework_stringBuf);
+                                     &row_type, Framework::stringBuf);
         break;
       case items::ItemCategory::kShield:
         Framework::FormatLiveInventoryShieldRow(&ashley.shields[index],
                                                 text.data(), &row_type,
-                                                Menu_Framework_stringBuf);
+                                                Framework::stringBuf);
         break;
       case items::ItemCategory::kArmor:
-        Framework::FormatLiveInventoryArmorRow(&ashley.armor[index],
-                                               text.data(), &row_type,
-                                               Menu_Framework_stringBuf);
+        Framework::FormatLiveInventoryArmorRow(
+            &ashley.armor[index], text.data(), &row_type, Framework::stringBuf);
         break;
       case items::ItemCategory::kGem:
         Framework::FormatLiveGemRow(&ashley.gems[index], text.data(), &row_type,
-                                    Menu_Framework_stringBuf);
+                                    Framework::stringBuf);
         break;
       case items::ItemCategory::kMisc:
         Framework::FormatLiveMiscItemRow(&ashley.misc[index], text.data(),
-                                         &row_type, Menu_Framework_stringBuf);
+                                         &row_type, Framework::stringBuf);
         break;
       case items::ItemCategory::kManage:
         break;
@@ -352,11 +352,11 @@ class LivePromptHost final : public PromptHost {
         Framework::DrawLiveMainMenuCursor(step, position));
   }
   void SetStringItem(std::uint16_t item_id) override {
-    if (Menu_Framework_itemNames == nullptr || item_id >= kItemNameCount) {
+    if (Framework::itemNames == nullptr || item_id >= kItemNameCount) {
       Refuse("a kept item outside vs_mainMenu_itemNames");
       return;
     }
-    Battle_stringContext.strings[0] = Menu_Framework_itemNames[item_id];
+    Battle_stringContext.strings[0] = Framework::itemNames[item_id];
   }
 };
 
@@ -432,11 +432,10 @@ int UpdateLeaveConfirmation(int init) {
   if (init != 0) {
     if (!HaveLootList("UpdateLeaveConfirmation")) return 0;
     const auto rows = LoadRows();
-    const LeaveContext context{
-        .rows = rows,
-        .count = Menu_Loot_lootListCount,
-        .claimed = claimed,
-        .single_entry = Menu_Framework_lootEntry != nullptr};
+    const LeaveContext context{.rows = rows,
+                               .count = Menu_Loot_lootListCount,
+                               .claimed = claimed,
+                               .single_entry = Framework::lootEntry != nullptr};
     item_live::WarnRefusal(
         "UpdateLeaveConfirmation",
         InitLeaveConfirmation(prompt, context,

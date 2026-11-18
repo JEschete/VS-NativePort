@@ -58,7 +58,6 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoadingLive.hpp"
@@ -1007,13 +1006,13 @@ void LiveVmHost::ApplySpecialOperation(SpecialOperation operation,
       ScaleEventCameraDurationEntry(static_cast<std::int16_t>(argument));
       break;
     case SpecialOperation::kFreezeMovingPlatforms:
-      Field_FreezeMovingPlatformsEntry(argument);
+      VS::Field::FreezeMovingPlatformsEntry(argument);
       break;
     case SpecialOperation::kClearGeometryOcclusion:
       Field::LiveClearGeometryOcclusion();
       break;
     case SpecialOperation::kPauseMovingPlatforms:
-      Field_SetMovingPlatformsPausedEntry(argument);
+      VS::Field::SetMovingPlatformsPausedEntry(argument);
       break;
     case SpecialOperation::kSetVignette:
       VS::Effects::ScreenDistortion::SetLiveVignetteEnabled(argument);

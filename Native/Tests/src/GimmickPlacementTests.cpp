@@ -41,7 +41,7 @@
 #include "Event/TriggersLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/ChestInteractions.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
 #include "Field/GimmickAnimationQueue.hpp"
@@ -49,7 +49,6 @@
 #include "Field/GimmickDynamics.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickPlacement.hpp"
-#include "Field/GimmickPlacementLive.h"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/GimmickReactions.hpp"
 #include "Field/GimmickReactionsLive.hpp"
@@ -63,7 +62,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomSwitches.hpp"
-#include "Field/RoomSwitchesLive.h"
+#include "Field/RoomSwitchesLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Field/Traps.hpp"
@@ -1487,7 +1486,7 @@ std::uint8_t ExpectedHeight(const Field_GimmickInstance& object) {
 void CheckValidSnapshot(int slot, const Field_GimmickInstance& object) {
   const auto expected_height = ExpectedHeight(object);
   auto output = SentinelSnapshot();
-  REQUIRE(Field_GimmickPlacementEntry(slot, &output) == 0);
+  REQUIRE(VS::Field::GimmickPlacementEntry(slot, &output) == 0);
   CHECK(output.placementByte0 == 5);
   CHECK(output.placementByte2 == 9);
   CHECK(output.orientation == 3);
@@ -2186,7 +2185,7 @@ TEST_CASE("Native trap action preserves its original module binding",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80073D30) ==
-        reinterpret_cast<const void*>(&Field_TriggerActorTrapEntry));
+        reinterpret_cast<const void*>(&VS::Field::TriggerActorTrapEntry));
 }
 
 TEST_CASE("Native trap action refuses invalid actor or stale target",
@@ -2194,7 +2193,7 @@ TEST_CASE("Native trap action refuses invalid actor or stale target",
   CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, -1));
   CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, 17));
   CHECK_FALSE(VS::Field::TriggerLiveActorTrap({}, {}, 0));
-  Field_TriggerActorTrapEntry(nullptr, nullptr, -1);
+  VS::Field::TriggerActorTrapEntry(nullptr, nullptr, -1);
 }
 
 TEST_CASE("Interaction camera focus wait preserves actor gate short circuit",
@@ -2253,27 +2252,28 @@ TEST_CASE("Interaction camera returns from Ashley with original halfword wrap",
 TEST_CASE("Interaction camera entries retain all original module addresses",
           "[interaction-camera-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x80074120) ==
-        reinterpret_cast<const void*>(&Field_WaitForChestCameraFocusEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x80074120) ==
+      reinterpret_cast<const void*>(&VS::Field::WaitForChestCameraFocusEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8007418C) ==
-        reinterpret_cast<const void*>(&Field_StepTrapCameraFocusEntry));
+        reinterpret_cast<const void*>(&VS::Field::StepTrapCameraFocusEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8007424C) ==
-        reinterpret_cast<const void*>(&Field_IsChestAnimationReadyEntry));
+        reinterpret_cast<const void*>(&VS::Field::IsChestAnimationReadyEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80074374) ==
         reinterpret_cast<const void*>(
-            &Field_TrackInteractionCameraToAshleyEntry));
+            &VS::Field::TrackInteractionCameraToAshleyEntry));
 }
 
 TEST_CASE("Interaction camera entries refuse an absent target focus",
           "[interaction-camera-live][field]") {
   const auto saved = VS::Field::LiveInteractionTargetState();
   VS::Field::LiveInteractionTargetState().Clear();
-  CHECK(Field_WaitForChestCameraFocusEntry() == 1);
-  CHECK(Field_StepTrapCameraFocusEntry() == 0);
+  CHECK(VS::Field::WaitForChestCameraFocusEntry() == 1);
+  CHECK(VS::Field::StepTrapCameraFocusEntry() == 0);
   VS::Field::LiveInteractionTargetState() = saved;
 }
 
@@ -2317,12 +2317,12 @@ TEST_CASE("Facing tile entry preserves X layer Z and untouched fourth byte",
   actor.location.packedTile.target.tileLayer = 2;
   actor.location.position.pad = 1024;
   std::array<std::uint8_t, 4> output{0xA1, 0xA2, 0xA3, 0xA4};
-  CHECK(Field_TileInFrontOfActorEntry(&actor, output.data()) == 1);
+  CHECK(VS::Field::TileInFrontOfActorEntry(&actor, output.data()) == 1);
   CHECK(output == std::array<std::uint8_t, 4>{16, 2, 23, 0xA4});
   const auto saved = output;
-  CHECK(Field_TileInFrontOfActorEntry(nullptr, output.data()) == -1);
+  CHECK(VS::Field::TileInFrontOfActorEntry(nullptr, output.data()) == -1);
   CHECK(output == saved);
-  CHECK(Field_TileInFrontOfActorEntry(&actor, nullptr) == -1);
+  CHECK(VS::Field::TileInFrontOfActorEntry(&actor, nullptr) == -1);
 }
 
 TEST_CASE("Facing tile entry retains original module address",
@@ -2330,7 +2330,7 @@ TEST_CASE("Facing tile entry retains original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80074798) ==
-        reinterpret_cast<const void*>(&Field_TileInFrontOfActorEntry));
+        reinterpret_cast<const void*>(&VS::Field::TileInFrontOfActorEntry));
 }
 
 TEST_CASE("Facing event uses requested actor and computed adjacent tile",
@@ -2665,7 +2665,7 @@ TEST_CASE("Scripted fall producer initializes the complete transition door",
   location.packedTile.word =
       std::bit_cast<std::int32_t>(std::uint32_t{0xC0010001});
   location.position.vy = 17;
-  CHECK(Field_CheckAshleyTileTriggersEntry(
+  CHECK(VS::Field::CheckAshleyTileTriggersEntry(
             2, reinterpret_cast<unsigned char*>(&location)) == 0);
   CHECK(VS::Field::screenTransitionStep == (destination_zone == 9 ? 1 : 2));
   const auto transition = VS::Field::LoadLiveRoomTransition();
@@ -2821,15 +2821,15 @@ TEST_CASE("Actor disabled tile trigger refuses before actor cache access",
 
 TEST_CASE("Actor tile trigger C boundary retains module and refuses bad input",
           "[actor-tile-trigger-live][field]") {
-  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, nullptr) == 0);
+  CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, nullptr) == 0);
   Actors_ActorLocation location{};
-  CHECK(Field_CheckActorTrapAndFallTriggersEntry(-1, &location) == 0);
-  CHECK(Field_CheckActorTrapAndFallTriggersEntry(17, &location) == 0);
+  CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(-1, &location) == 0);
+  CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(17, &location) == 0);
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x800751B8) ==
-      reinterpret_cast<const void*>(&Field_CheckActorTrapAndFallTriggersEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800751B8) ==
+        reinterpret_cast<const void*>(
+            &VS::Field::CheckActorTrapAndFallTriggersEntry));
 }
 
 TEST_CASE("Actor native tile trigger stores packed location and computed mode",
@@ -2839,13 +2839,13 @@ TEST_CASE("Actor native tile trigger stores packed location and computed mode",
   Actors_ActorLocation location{};
   location.packedTile.target = {
       .tileX = 3, .tileLayer = 2, .tileZ = 4, .facing = 255};
-  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
+  CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
   CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
   CHECK(std::bit_cast<std::uint32_t>(location.packedTile.word) == 0xFF040203);
-  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
+  CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
   CHECK(fixture.actor->lastTriggerTile.word == 0x00040203);
   Battle_actors[2] = nullptr;
-  CHECK(Field_CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
+  CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(2, &location) == 0);
 }
 
 TEST_CASE("Facing event refuses invalid actor and absent placement",
@@ -2950,12 +2950,12 @@ TEST_CASE("Facing chest collection flag keeps original halfword argument wrap",
 
 TEST_CASE("Facing query C entries refuse invalid actor indices",
           "[facing-query-live][field]") {
-  CHECK(Field_TryTriggerFacingTileEventEntry(-1) == 0);
-  CHECK(Field_TryTriggerFacingTileEventEntry(17) == 0);
-  CHECK(Field_FindFacingRoomObjectEntry(-1) == nullptr);
-  CHECK(Field_FindFacingRoomObjectEntry(17) == nullptr);
-  CHECK(Field_FindFacingUnlootedChestEntry(-1) == nullptr);
-  CHECK(Field_FindFacingUnlootedChestEntry(17) == nullptr);
+  CHECK(VS::Field::TryTriggerFacingTileEventEntry(-1) == 0);
+  CHECK(VS::Field::TryTriggerFacingTileEventEntry(17) == 0);
+  CHECK(VS::Field::FindFacingRoomObjectEntry(-1) == nullptr);
+  CHECK(VS::Field::FindFacingRoomObjectEntry(17) == nullptr);
+  CHECK(VS::Field::FindFacingUnlootedChestEntry(-1) == nullptr);
+  CHECK(VS::Field::FindFacingUnlootedChestEntry(17) == nullptr);
 }
 
 TEST_CASE("Facing queries retain all original module entries",
@@ -2963,13 +2963,15 @@ TEST_CASE("Facing queries retain all original module entries",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80074860) ==
-        reinterpret_cast<const void*>(&Field_TryTriggerFacingTileEventEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::TryTriggerFacingTileEventEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800748B8) ==
-        reinterpret_cast<const void*>(&Field_FindFacingRoomObjectEntry));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x80074950) ==
-        reinterpret_cast<const void*>(&Field_FindFacingUnlootedChestEntry));
+        reinterpret_cast<const void*>(&VS::Field::FindFacingRoomObjectEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x80074950) ==
+      reinterpret_cast<const void*>(&VS::Field::FindFacingUnlootedChestEntry));
 }
 
 TEST_CASE("Room object query target refuses stale and out of range resolution",
@@ -3011,10 +3013,12 @@ TEST_CASE("Object interaction wait keeps both original module bindings",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80073AA4) ==
-        reinterpret_cast<const void*>(&Field_BeginObjectInteractionWaitEntry));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x80073ACC) ==
-        reinterpret_cast<const void*>(&Field_EndObjectInteractionWaitEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::BeginObjectInteractionWaitEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x80073ACC) ==
+      reinterpret_cast<const void*>(&VS::Field::EndObjectInteractionWaitEntry));
 }
 
 TEST_CASE("Room object interaction keeps reusable keys and consumed sigils",
@@ -3106,9 +3110,9 @@ TEST_CASE("Native room object entry refuses null and foreign record addresses",
           "[room-object-interaction-live][field]") {
   RoomObjectRecordFixture fixture;
   Field_MpdLockTrigger foreign{};
-  CHECK(Field_InteractWithLockedRoomObjectEntry(nullptr) == 1);
-  CHECK(Field_InteractWithLockedRoomObjectEntry(&foreign) == 1);
-  CHECK(Field_InteractWithLockedRoomObjectEntry(
+  CHECK(VS::Field::InteractWithLockedRoomObjectEntry(nullptr) == 1);
+  CHECK(VS::Field::InteractWithLockedRoomObjectEntry(&foreign) == 1);
+  CHECK(VS::Field::InteractWithLockedRoomObjectEntry(
             reinterpret_cast<Field_MpdLockTrigger*>(std::uintptr_t{1})) == 1);
 }
 
@@ -3116,19 +3120,19 @@ TEST_CASE("Native room object entry reads only its present busy lock record",
           "[room-object-interaction-live][field]") {
   RoomObjectRecordFixture fixture;
   fixture.locks[1].isOpen = 1;
-  CHECK(Field_InteractWithLockedRoomObjectEntry(&fixture.locks[1]) == 1);
+  CHECK(VS::Field::InteractWithLockedRoomObjectEntry(&fixture.locks[1]) == 1);
   fixture.locks[1].isOpen = 0;
   fixture.locks[1].isTriggered = 1;
-  CHECK(Field_InteractWithLockedRoomObjectEntry(&fixture.locks[1]) == 1);
+  CHECK(VS::Field::InteractWithLockedRoomObjectEntry(&fixture.locks[1]) == 1);
 }
 
 TEST_CASE("Native room object interaction keeps its original module binding",
           "[room-object-interaction-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x80073AFC) ==
-      reinterpret_cast<const void*>(&Field_InteractWithLockedRoomObjectEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80073AFC) ==
+        reinterpret_cast<const void*>(
+            &VS::Field::InteractWithLockedRoomObjectEntry));
 }
 
 TEST_CASE("Typed chest flow owns selected begin finish and contents decisions",
@@ -3452,11 +3456,11 @@ TEST_CASE("Live door lookup returns generation checked room identities",
   if (!target) return;
   CHECK(target->index == 1);
   CHECK(VS::Field::ResolveLiveRoomObjectTarget(*target) == &fixture.locks[1]);
-  CHECK(Field_InteractiveDoorAtTileEntry(5, 6, 2) == &fixture.locks[1]);
+  CHECK(VS::Field::InteractiveDoorAtTileEntry(5, 6, 2) == &fixture.locks[1]);
   VS::Field::InvalidateLiveInteractionTargets();
   CHECK(VS::Field::ResolveLiveRoomObjectTarget(*target) == nullptr);
   fixture.locks[0].trigger.activation = 0;
-  CHECK(Field_InteractiveDoorAtTileEntry(5, 6, 2) == nullptr);
+  CHECK(VS::Field::InteractiveDoorAtTileEntry(5, 6, 2) == nullptr);
 }
 
 TEST_CASE("Live door lookup refuses partial misaligned and absent records",
@@ -3464,13 +3468,13 @@ TEST_CASE("Live door lookup refuses partial misaligned and absent records",
   RoomObjectRecordFixture fixture;
   fixture.locks[0].trigger.activation = 1;
   Field_roomData.header.lockTriggersLength = sizeof fixture.locks - 1;
-  CHECK(Field_InteractiveDoorAtTileEntry(0, 0, 0) == nullptr);
+  CHECK(VS::Field::InteractiveDoorAtTileEntry(0, 0, 0) == nullptr);
   Field_roomData.header.lockTriggersLength = sizeof fixture.locks;
   Field_roomData.lockTriggers = reinterpret_cast<Field_MpdLockTrigger*>(
       reinterpret_cast<std::byte*>(fixture.locks.data()) + 1);
-  CHECK(Field_InteractiveDoorAtTileEntry(0, 0, 0) == nullptr);
+  CHECK(VS::Field::InteractiveDoorAtTileEntry(0, 0, 0) == nullptr);
   Field_roomData.lockTriggers = nullptr;
-  CHECK(Field_InteractiveDoorAtTileEntry(0, 0, 0) == nullptr);
+  CHECK(VS::Field::InteractiveDoorAtTileEntry(0, 0, 0) == nullptr);
 }
 
 TEST_CASE("Native sigil lookup and marking preserve unsigned first-pair state",
@@ -3480,17 +3484,17 @@ TEST_CASE("Native sigil lookup and marking preserve unsigned first-pair state",
       std::bit_cast<char>(std::uint8_t{128});
   Audio_Seq_unusedStateFlags.opaque186[1] =
       std::bit_cast<char>(std::uint8_t{254});
-  CHECK(Field_IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 128);
-  CHECK(Field_IsRoomSigilDoorUnlockedEntry(10, 1, 0) == 128);
-  CHECK(Field_IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
+  CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 128);
+  CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(10, 1, 0) == 128);
+  CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
   auto expected = Audio_Seq_unusedStateFlags;
   expected.opaque186[0] = 1;
-  Field_MarkSigilDoorUnlockedEntry(0);
+  VS::Field::MarkSigilDoorUnlockedEntry(0);
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
         std::bit_cast<FlagBytes>(expected));
-  CHECK(Field_IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 1);
-  CHECK(Field_IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
+  CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 1);
+  CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
 }
 
 TEST_CASE(
@@ -3504,8 +3508,8 @@ TEST_CASE(
                                      std::array<std::int16_t, 2>{0, 24}}) {
     Field_lockedDoorIndexRanges[0] = range[0];
     Field_lockedDoorIndexRanges[1] = range[1];
-    Field_MarkSigilDoorUnlockedEntry(0);
-    CHECK(Field_IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 0);
+    VS::Field::MarkSigilDoorUnlockedEntry(0);
+    CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 0);
     CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
           std::bit_cast<FlagBytes>(expected));
   }
@@ -3515,8 +3519,8 @@ TEST_CASE(
   CHECK_FALSE(VS::Field::MarkLiveSigilDoorUnlocked(0));
   Field_roomData.minimapScene = nullptr;
   CHECK_FALSE(VS::Field::MarkLiveSigilDoorUnlocked(0));
-  Field_MarkSigilDoorUnlockedEntry(-1);
-  CHECK(Field_IsRoomSigilDoorUnlockedEntry(9, 247, UINT32_MAX) == 0);
+  VS::Field::MarkSigilDoorUnlockedEntry(-1);
+  CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, UINT32_MAX) == 0);
   CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
         std::bit_cast<FlagBytes>(expected));
 }
@@ -3528,7 +3532,7 @@ TEST_CASE("Live sigil groups stop at the eight original boundary words",
   Field_lockedDoorIndexRanges[8] = 2;
   Audio_Seq_unusedStateFlags.opaque186[0] =
       std::bit_cast<char>(std::uint8_t{128});
-  CHECK(Field_IsRoomSigilDoorUnlockedEntry(9, 247, 7) == 0);
+  CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 7) == 0);
   CHECK_FALSE(VS::Field::MarkLiveSigilDoorUnlocked(7));
   CHECK(std::bit_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.opaque186[0]) ==
         128);
@@ -3539,13 +3543,14 @@ TEST_CASE("Door table native entries retain original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008BC04) ==
-        reinterpret_cast<const void*>(&Field_InteractiveDoorAtTileEntry));
+        reinterpret_cast<const void*>(&VS::Field::InteractiveDoorAtTileEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008E6DC) ==
-        reinterpret_cast<const void*>(&Field_MarkSigilDoorUnlockedEntry));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x8008E7BC) ==
-        reinterpret_cast<const void*>(&Field_IsRoomSigilDoorUnlockedEntry));
+        reinterpret_cast<const void*>(&VS::Field::MarkSigilDoorUnlockedEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x8008E7BC) ==
+      reinterpret_cast<const void*>(&VS::Field::IsRoomSigilDoorUnlockedEntry));
 }
 
 TEST_CASE(
@@ -3646,7 +3651,7 @@ TEST_CASE("Full door queue refusal keeps a closed door retryable",
     REQUIRE(VS::Field::QueueLiveGimmickAnimation(1, &room.locks[1]));
   }
   room.locks[0].delayFrames = 7;
-  CHECK(Field_BeginDoorToggleEntry(&room.locks[0]) == 0);
+  CHECK(VS::Field::BeginDoorToggleEntry(&room.locks[0]) == 0);
   CHECK(room.locks[0].isTriggered == 0);
   CHECK(room.locks[0].delayFrames == 7);
   CHECK(Field_pendingGimmickAnimationCount == 8);
@@ -3758,7 +3763,7 @@ TEST_CASE("Native door collision preserves every packed cell field except XOR5",
   for (std::uint32_t passability = 0; passability < 8; ++passability) {
     const auto word = (0xA5A5A5A5 & ~0x1C00u) | (passability << 10);
     for (auto& cell : cells) cell = std::bit_cast<Field_MpdTileCell>(word);
-    Field_ToggleDoorCollisionEntry(&room.locks[0]);
+    VS::Field::ToggleDoorCollisionEntry(&room.locks[0]);
     CHECK(std::bit_cast<std::uint32_t>(cells[0]) == (word ^ (5u << 10)));
     CHECK(std::bit_cast<std::uint32_t>(cells[2]) == (word ^ (5u << 10)));
     CHECK(std::bit_cast<std::uint32_t>(cells[1]) == word);
@@ -3778,7 +3783,7 @@ TEST_CASE(
   for (std::size_t slot = 0; slot < VS::Field::kGimmickAnimationSlots; ++slot) {
     REQUIRE(VS::Field::QueueLiveGimmickAnimation(1, &room.locks[1]));
   }
-  CHECK(Field_BeginDoorToggleEntry(&room.locks[0]) == 0);
+  CHECK(VS::Field::BeginDoorToggleEntry(&room.locks[0]) == 0);
   CHECK(room.locks[0].isTriggered == 0);
   CHECK(room.locks[0].delayFrames == 7);
   VS::Field::ResetGimmickAnimationQueueEntry();
@@ -3791,7 +3796,7 @@ TEST_CASE(
   RoomObjectRecordFixture room;
   room.locks[0].linkedLockIndex = -1;
   room.locks[0].trigger.lockState.lock.roomEffect = -1;
-  REQUIRE(Field_BeginDoorToggleEntry(&room.locks[0]) == 1);
+  REQUIRE(VS::Field::BeginDoorToggleEntry(&room.locks[0]) == 1);
   CHECK(room.locks[0].isTriggered == 1);
   CHECK(room.locks[0].delayFrames == 8);
   CHECK(Field_pendingGimmickAnimationCount == 1);
@@ -3810,7 +3815,7 @@ TEST_CASE(
   room.locks[1].trigger.activation = 1;
   room.locks[1].isOpen = 2;
   room.locks[1].isTriggered = 1;
-  REQUIRE(Field_FinishDoorAnimationEntry(&room.locks[0]) == 1);
+  REQUIRE(VS::Field::FinishDoorAnimationEntry(&room.locks[0]) == 1);
   CHECK(room.locks[0].isOpen == 1);
   CHECK(room.locks[0].isTriggered == 0);
   CHECK(room.locks[1].isOpen == 0);
@@ -3825,7 +3830,7 @@ TEST_CASE("Native self-linked active door toggles its state twice",
   room.locks[0].isOpen = 0;
   room.locks[0].linkedLockIndex = 0;
   room.locks[0].trigger.activation = 1;
-  REQUIRE(Field_FinishDoorAnimationEntry(&room.locks[0]) == 1);
+  REQUIRE(VS::Field::FinishDoorAnimationEntry(&room.locks[0]) == 1);
   CHECK(room.locks[0].isOpen == 0);
 }
 
@@ -3837,7 +3842,7 @@ TEST_CASE("Native disabled linked door remains unchanged",
   room.locks[0].linkedLockIndex = 1;
   room.locks[1].trigger.activation = 0;
   room.locks[1].isOpen = -1;
-  REQUIRE(Field_FinishDoorAnimationEntry(&room.locks[0]) == 1);
+  REQUIRE(VS::Field::FinishDoorAnimationEntry(&room.locks[0]) == 1);
   CHECK(room.locks[1].isOpen == -1);
 }
 
@@ -3845,9 +3850,9 @@ TEST_CASE("Native door entries refuse out of room and stale typed targets",
           "[door-animation-live][field]") {
   RoomObjectRecordFixture room;
   Field_MpdLockTrigger outsider{};
-  CHECK(Field_BeginDoorToggleEntry(nullptr) == 0);
-  CHECK(Field_StartDoorAnimationEntry(&outsider) == 0);
-  CHECK(Field_FinishDoorAnimationEntry(&outsider) == 0);
+  CHECK(VS::Field::BeginDoorToggleEntry(nullptr) == 0);
+  CHECK(VS::Field::StartDoorAnimationEntry(&outsider) == 0);
+  CHECK(VS::Field::FinishDoorAnimationEntry(&outsider) == 0);
   const VS::Field::RoomObjectTarget target{
       0, VS::Field::LiveInteractionTargetDomain().generation};
   VS::Field::InvalidateLiveInteractionTargets();
@@ -3862,16 +3867,16 @@ TEST_CASE("Door lifecycle entries retain every original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008BD74) ==
-        reinterpret_cast<const void*>(&Field_ToggleDoorCollisionEntry));
+        reinterpret_cast<const void*>(&VS::Field::ToggleDoorCollisionEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008BEBC) ==
-        reinterpret_cast<const void*>(&Field_BeginDoorToggleEntry));
+        reinterpret_cast<const void*>(&VS::Field::BeginDoorToggleEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008BF48) ==
-        reinterpret_cast<const void*>(&Field_StartDoorAnimationEntry));
+        reinterpret_cast<const void*>(&VS::Field::StartDoorAnimationEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C1C8) ==
-        reinterpret_cast<const void*>(&Field_FinishDoorAnimationEntry));
+        reinterpret_cast<const void*>(&VS::Field::FinishDoorAnimationEntry));
 }
 
 TEST_CASE(
@@ -3966,16 +3971,16 @@ TEST_CASE("Native unlock effect clears eligible doors and both chest tags",
   SVECTOR point{.vx = -1, .vy = -2, .vz = 3, .pad = 0x10};
   const auto original =
       std::bit_cast<std::array<std::byte, sizeof(point)>>(point);
-  Field_ApplyUnlockEffectToRoomObjectEntry(&point);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 0);
   CHECK(Battle_floatingLabelCount == 0);
   CHECK(std::bit_cast<std::array<std::byte, sizeof(point)>>(point) == original);
   point.pad = 0x20;
-  Field_ApplyUnlockEffectToRoomObjectEntry(&point);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(fixture.chests[0].lockLevel == 0);
   fixture.chests[0].lockLevel = 2;
   point.pad = 0x100;
-  Field_ApplyUnlockEffectToRoomObjectEntry(&point);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(fixture.chests[0].lockLevel == 0);
 }
 
@@ -3984,12 +3989,12 @@ TEST_CASE("Native unlock effect invalid indices label without reading a record",
   UnlockEffectLiveFixture fixture;
   SVECTOR point{.vx = -1, .vy = -2, .vz = 3, .pad = 0x1F};
   const auto saved_risk = Core_randomShuffleIndex;
-  Field_ApplyUnlockEffectToRoomObjectEntry(&point);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(Battle_floatingLabelCount == 1);
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 2);
   CHECK(Core_randomShuffleIndex == saved_risk);
   point.pad = 0x2F;
-  Field_ApplyUnlockEffectToRoomObjectEntry(&point);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(Battle_floatingLabelCount == 2);
   CHECK(fixture.chests[0].lockLevel == 3);
   CHECK(Core_randomShuffleIndex == saved_risk);
@@ -4000,8 +4005,8 @@ TEST_CASE("Native unlock effect unknown and null targets remain no ops",
   UnlockEffectLiveFixture fixture;
   SVECTOR point{.vx = 0, .vy = 0, .vz = 0, .pad = 0x30};
   const auto saved_risk = Core_randomShuffleIndex;
-  Field_ApplyUnlockEffectToRoomObjectEntry(&point);
-  Field_ApplyUnlockEffectToRoomObjectEntry(nullptr);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(nullptr);
   CHECK(Battle_floatingLabelCount == 0);
   CHECK(Core_randomShuffleIndex == saved_risk);
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 2);
@@ -4015,7 +4020,7 @@ TEST_CASE("Native opened chest unlock effect skips risk and preserves its lock",
   VS::State::SetLiveScriptFlag(0x3C1, 1);
   const auto saved_risk = Core_randomShuffleIndex;
   SVECTOR point{.vx = 1, .vy = -2, .vz = 3, .pad = 0x20};
-  Field_ApplyUnlockEffectToRoomObjectEntry(&point);
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(fixture.chests[0].lockLevel == 3);
   CHECK(Battle_floatingLabelCount == 1);
   CHECK(Core_randomShuffleIndex == saved_risk);
@@ -4028,7 +4033,7 @@ TEST_CASE("Native unlock effect copies unaligned packed input without mutation",
   std::array<std::byte, sizeof(point) + 1> bytes{};
   std::memcpy(bytes.data() + 1, &point, sizeof(point));
   const auto saved = bytes;
-  Field_ApplyUnlockEffectToRoomObjectEntry(
+  VS::Field::ApplyUnlockEffectToRoomObjectEntry(
       reinterpret_cast<SVECTOR*>(bytes.data() + 1));
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 0);
   CHECK(bytes == saved);
@@ -4037,10 +4042,10 @@ TEST_CASE("Native unlock effect copies unaligned packed input without mutation",
 TEST_CASE("Unlock effect keeps its original module entry address",
           "[unlock-effect-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x8006CE70) ==
-      reinterpret_cast<const void*>(&Field_ApplyUnlockEffectToRoomObjectEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8006CE70) ==
+        reinterpret_cast<const void*>(
+            &VS::Field::ApplyUnlockEffectToRoomObjectEntry));
 }
 
 TEST_CASE("Active room trigger values preserve order and current identities",
@@ -4509,7 +4514,7 @@ TEST_CASE("Refused switch start leaves its busy marker retryable",
   }
   Field_MpdLockTrigger rejected{};
   rejected.trigger.activation = 7;
-  Field_BeginSwitchToggleEntry(&rejected);
+  VS::Field::BeginSwitchToggleEntry(&rejected);
   CHECK(Field_pendingGimmickAnimationCount == 8);
   CHECK(rejected.trigger.markerFade == 0);
   CHECK(rejected.trigger.activation == 7);
@@ -4524,16 +4529,16 @@ TEST_CASE("Native switch start retries after queue capacity is freed",
   }
   Field_MpdLockTrigger target{};
   target.trigger.activation = 7;
-  Field_BeginSwitchToggleEntry(&target);
+  VS::Field::BeginSwitchToggleEntry(&target);
   REQUIRE(target.trigger.markerFade == 0);
   VS::Field::ResetGimmickAnimationQueueEntry();
-  Field_BeginSwitchToggleEntry(&target);
+  VS::Field::BeginSwitchToggleEntry(&target);
   CHECK(Field_pendingGimmickAnimationCount == 1);
   CHECK(target.trigger.markerFade == 1);
   CHECK(target.trigger.activation == 20);
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 2);
   CHECK(Field_gimmickAnimationQueue[0].trigger == &target);
-  Field_BeginSwitchToggleEntry(&target);
+  VS::Field::BeginSwitchToggleEntry(&target);
   CHECK(Field_pendingGimmickAnimationCount == 1);
 }
 
@@ -4543,9 +4548,9 @@ TEST_CASE("Native switch start preserves immediate state and original module",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D5FC) ==
-        reinterpret_cast<const void*>(&Field_BeginSwitchToggleEntry));
-  Field_BeginSwitchToggleEntry(nullptr);
-  Field_BeginSwitchToggleEntry(
+        reinterpret_cast<const void*>(&VS::Field::BeginSwitchToggleEntry));
+  VS::Field::BeginSwitchToggleEntry(nullptr);
+  VS::Field::BeginSwitchToggleEntry(
       reinterpret_cast<Field_MpdLockTrigger*>(std::uintptr_t{1}));
   for (const auto value : {-1, 1, 32767, -32768}) {
     Field_MpdLockTrigger target{};
@@ -4554,7 +4559,7 @@ TEST_CASE("Native switch start preserves immediate state and original module",
     target.trigger.tileX = -1;
     target.trigger.tileZ = -1;
     target.trigger.floorLayer = -1;
-    Field_BeginSwitchToggleEntry(&target);
+    VS::Field::BeginSwitchToggleEntry(&target);
     CHECK(Field_pendingGimmickAnimationCount == 0);
     CHECK(target.trigger.lockState.switchValue == 0);
     CHECK(target.trigger.markerFade == 0);
@@ -4624,8 +4629,8 @@ TEST_CASE("Native switch entry preserves original module and signed word state",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D658) ==
-        reinterpret_cast<const void*>(&Field_ToggleRoomSwitchEntry));
-  Field_ToggleRoomSwitchEntry(nullptr);
+        reinterpret_cast<const void*>(&VS::Field::ToggleRoomSwitchEntry));
+  VS::Field::ToggleRoomSwitchEntry(nullptr);
   for (const auto value : {0, 1, 2, -1, -32768, 32767}) {
     Field_MpdLockTrigger record{};
     record.trigger.tileX = -1;
@@ -4634,7 +4639,7 @@ TEST_CASE("Native switch entry preserves original module and signed word state",
     record.trigger.kind = -1;
     record.trigger.lockState.switchValue = static_cast<std::int16_t>(value);
     record.trigger.markerFade = -1;
-    Field_ToggleRoomSwitchEntry(&record);
+    VS::Field::ToggleRoomSwitchEntry(&record);
     CHECK(record.trigger.lockState.switchValue == (value == 0 ? 1 : 0));
     CHECK(record.trigger.markerFade == 0);
   }
@@ -4646,7 +4651,7 @@ TEST_CASE(
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A0024) ==
-        reinterpret_cast<const void*>(&Field_GimmickPlacementEntry));
+        reinterpret_cast<const void*>(&VS::Field::GimmickPlacementEntry));
 }
 
 TEST_CASE("Typed gimmick placement refuses slots before record access",
@@ -4710,11 +4715,11 @@ TEST_CASE("Gimmick snapshots refuse invalid and absent slots without writing",
   auto output = SentinelSnapshot();
   const auto before = std::bit_cast<SnapshotBytes>(output);
   for (int slot = -2; slot < 18; ++slot) {
-    CHECK(Field_GimmickPlacementEntry(slot, &output) == -1);
+    CHECK(VS::Field::GimmickPlacementEntry(slot, &output) == -1);
     CHECK(std::bit_cast<SnapshotBytes>(output) == before);
   }
   Field_gimmickInstances[0] = fixture.object.get();
-  CHECK(Field_GimmickPlacementEntry(0, nullptr) == -1);
+  CHECK(VS::Field::GimmickPlacementEntry(0, nullptr) == -1);
 }
 
 TEST_CASE("Gimmick snapshots reject attached falling and moving records",
@@ -4727,7 +4732,7 @@ TEST_CASE("Gimmick snapshots reject attached falling and moving records",
     fixture.object->parent = refusal == 0 ? 0 : 0xFF;
     fixture.object->objectInfo.isFalling = refusal == 1;
     fixture.object->mode = static_cast<std::int16_t>(refusal == 2);
-    CHECK(Field_GimmickPlacementEntry(0, &output) == -1);
+    CHECK(VS::Field::GimmickPlacementEntry(0, &output) == -1);
     CHECK(std::bit_cast<SnapshotBytes>(output) == before);
   }
 }
@@ -4822,17 +4827,17 @@ TEST_CASE("Facing event entry dispatches adjacent tile through native triggers",
   object.tileZ = 10;
   Field_gimmickInstances[0] = &object;
   PublishTrigger({4, 0, 255, 255, 4, 12, 0, 8, 7, 9, 255});
-  CHECK(Field_TryTriggerFacingTileEventEntry(0) == 1);
+  CHECK(VS::Field::TryTriggerFacingTileEventEntry(0) == 1);
   CHECK(VS::Event::LiveScriptVm().EventId() == 12);
   CHECK(VS::Event::LiveScriptVm().Phase() ==
         VS::Event::PlaybackPhase::kRequested);
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kRunning);
   Event_isDirectEventRequest = 1;
-  CHECK(Field_TryTriggerFacingTileEventEntry(0) == 0);
+  CHECK(VS::Field::TryTriggerFacingTileEventEntry(0) == 0);
   VS::Event::LiveScriptVm().SetPhase(VS::Event::PlaybackPhase::kIdle);
   Event_isDirectEventRequest = 0;
   object.tileZ = 11;
-  CHECK(Field_TryTriggerFacingTileEventEntry(0) == 0);
+  CHECK(VS::Field::TryTriggerFacingTileEventEntry(0) == 0);
   CHECK(VS::Event::LiveScriptVm().Phase() == VS::Event::PlaybackPhase::kIdle);
 }
 
@@ -5020,12 +5025,12 @@ TEST_CASE(
   const auto saved = std::bit_cast<InstanceBytes>(fixture.instances);
   auto reference = fixture.instances[0];
   reference.positionY = 256;
-  CHECK(Field_FindGimmickBelowEntry(&reference) == 1);
-  CHECK(Field_FindTopGimmickAtTileEntry(255, 254, 0) == 5);
-  CHECK(Field_FindTopGimmickAtTileEntry(-1, 254, 0) == 0);
+  CHECK(VS::Field::FindGimmickBelowEntry(&reference) == 1);
+  CHECK(VS::Field::FindTopGimmickAtTileEntry(255, 254, 0) == 5);
+  CHECK(VS::Field::FindTopGimmickAtTileEntry(-1, 254, 0) == 0);
   CHECK(std::bit_cast<InstanceBytes>(fixture.instances) == saved);
   reference.reserved5F = 0;
-  CHECK(Field_FindGimmickBelowEntry(&reference) == -1);
+  CHECK(VS::Field::FindGimmickBelowEntry(&reference) == -1);
 }
 
 TEST_CASE("Native stack query idle control keeps all nonzero original requests",
@@ -5034,11 +5039,11 @@ TEST_CASE("Native stack query idle control keeps all nonzero original requests",
   auto& record = fixture.instances[0];
   record.parent = record.objectInfo.carrier = 255;
   record.mode = -1;
-  CHECK(Field_FindTopGimmickAtTileEntry(0, 0, 0) == 1);
-  CHECK(Field_FindTopGimmickAtTileEntry(0, 0, 1) == 0);
-  CHECK(Field_FindTopGimmickAtTileEntry(0, 0, -1) == 0);
+  CHECK(VS::Field::FindTopGimmickAtTileEntry(0, 0, 0) == 1);
+  CHECK(VS::Field::FindTopGimmickAtTileEntry(0, 0, 1) == 0);
+  CHECK(VS::Field::FindTopGimmickAtTileEntry(0, 0, -1) == 0);
   record.mode = 0;
-  CHECK(Field_FindTopGimmickAtTileEntry(0, 0, -1) == 1);
+  CHECK(VS::Field::FindTopGimmickAtTileEntry(0, 0, -1) == 1);
 }
 
 TEST_CASE(
@@ -5069,8 +5074,8 @@ TEST_CASE(
   std::memset(record, 0xA5, 64);
   Field_gimmickInstances[1] = reinterpret_cast<Field_GimmickInstance*>(record);
   CHECK_FALSE(VS::Field::LiveGimmickQueryState(1));
-  CHECK(Field_FindGimmickBelowEntry(Field_gimmickInstances[1]) == -1);
-  CHECK(Field_FindGimmickBelowEntry(nullptr) == -1);
+  CHECK(VS::Field::FindGimmickBelowEntry(Field_gimmickInstances[1]) == -1);
+  CHECK(VS::Field::FindGimmickBelowEntry(nullptr) == -1);
   Field_gimmickInstances[1] =
       reinterpret_cast<Field_GimmickInstance*>(record + 1);
   CHECK_FALSE(VS::Field::LiveGimmickQueryState(1));
@@ -5083,10 +5088,10 @@ TEST_CASE("Gimmick stack queries retain both original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009F794) ==
-        reinterpret_cast<const void*>(&Field_FindGimmickBelowEntry));
+        reinterpret_cast<const void*>(&VS::Field::FindGimmickBelowEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A91DC) ==
-        reinterpret_cast<const void*>(&Field_FindTopGimmickAtTileEntry));
+        reinterpret_cast<const void*>(&VS::Field::FindTopGimmickAtTileEntry));
 }
 
 TEST_CASE(
@@ -5153,13 +5158,13 @@ TEST_CASE("Native gimmick subtype returns every byte only for kind one",
   record.objectInfo.objectId = 1;
   for (std::uint32_t subtype = 0; subtype <= UINT8_MAX; ++subtype) {
     record.objectInfo.subtype = static_cast<std::uint8_t>(subtype);
-    CHECK(Field_GimmickSubtypeEntry(1) == subtype);
+    CHECK(VS::Field::GimmickSubtypeEntry(1) == subtype);
   }
   record.objectInfo.objectId = 3;
-  CHECK(Field_GimmickSubtypeEntry(1) == -1);
-  CHECK(Field_GimmickSubtypeEntry(-1) == -1);
-  CHECK(Field_GimmickSubtypeEntry(16) == -1);
-  CHECK(Field_GimmickSubtypeEntry(0) == -1);
+  CHECK(VS::Field::GimmickSubtypeEntry(1) == -1);
+  CHECK(VS::Field::GimmickSubtypeEntry(-1) == -1);
+  CHECK(VS::Field::GimmickSubtypeEntry(16) == -1);
+  CHECK(VS::Field::GimmickSubtypeEntry(0) == -1);
 }
 
 TEST_CASE(
@@ -5171,16 +5176,16 @@ TEST_CASE(
   record.mode = -1;
   record.objectInfo.isFalling = 1;
   record.parent = 0;
-  CHECK(Field_AreGimmicksMovingEntry() == 1);
+  CHECK(VS::Field::AreGimmicksMovingEntry() == 1);
   CHECK(VS::Field::AreLiveGimmicksMoving());
   record.motionState = 1;
-  CHECK(Field_AreGimmicksMovingEntry() == 0);
+  CHECK(VS::Field::AreGimmicksMovingEntry() == 0);
   record.motionState = 0;
   record.isSkipped = -1;
-  CHECK(Field_AreGimmicksMovingEntry() == 0);
+  CHECK(VS::Field::AreGimmicksMovingEntry() == 0);
   record.isSkipped = 0;
   record.mode = 0;
-  CHECK(Field_AreGimmicksMovingEntry() == 0);
+  CHECK(VS::Field::AreGimmicksMovingEntry() == 0);
 }
 
 TEST_CASE(
@@ -5194,8 +5199,8 @@ TEST_CASE(
   REQUIRE(record != nullptr);
   std::memset(record, 0xA5, 64);
   Field_gimmickInstances[1] = reinterpret_cast<Field_GimmickInstance*>(record);
-  CHECK(Field_GimmickSubtypeEntry(1) == -1);
-  CHECK(Field_AreGimmicksMovingEntry() == 0);
+  CHECK(VS::Field::GimmickSubtypeEntry(1) == -1);
+  CHECK(VS::Field::AreGimmicksMovingEntry() == 0);
   CHECK(record[0] == std::byte{0xA5});
   CHECK(record[63] == std::byte{0xA5});
 }
@@ -5205,10 +5210,10 @@ TEST_CASE("Gimmick status entries retain both original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009F858) ==
-        reinterpret_cast<const void*>(&Field_GimmickSubtypeEntry));
+        reinterpret_cast<const void*>(&VS::Field::GimmickSubtypeEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A47C4) ==
-        reinterpret_cast<const void*>(&Field_AreGimmicksMovingEntry));
+        reinterpret_cast<const void*>(&VS::Field::AreGimmicksMovingEntry));
 }
 
 TEST_CASE(
@@ -5281,11 +5286,11 @@ TEST_CASE(
 
 namespace {
 void CheckNativeMenuStackAndBand(int& offset) {
-  CHECK(Field_MeasureTileStackEntry(255, 254, &offset) == 1);
+  CHECK(VS::Field::MeasureTileStackEntry(255, 254, &offset) == 1);
   CHECK(offset == -128);
-  CHECK(Field_IsGimmickWithinHeightBandEntry(255, 254, 0) == 1);
-  CHECK(Field_IsGimmickWithinHeightBandEntry(255, 254, 128) == 1);
-  CHECK(Field_IsGimmickWithinHeightBandEntry(255, 254, 129) == 0);
+  CHECK(VS::Field::IsGimmickWithinHeightBandEntry(255, 254, 0) == 1);
+  CHECK(VS::Field::IsGimmickWithinHeightBandEntry(255, 254, 128) == 1);
+  CHECK(VS::Field::IsGimmickWithinHeightBandEntry(255, 254, 129) == 0);
 }
 }  // namespace
 
@@ -5306,10 +5311,10 @@ TEST_CASE(
   CheckNativeMenuStackAndBand(offset);
   CHECK(std::bit_cast<Bytes>(fixture.instances) == before);
   fixture.instances[0].mode = fixture.instances[1].mode = -1;
-  CHECK(Field_MeasureTileStackEntry(255, 254, &offset) == 0);
+  CHECK(VS::Field::MeasureTileStackEntry(255, 254, &offset) == 0);
   CHECK(offset == 0);
-  CHECK(Field_IsGimmickWithinHeightBandEntry(255, 254, 0) == 1);
-  CHECK(Field_IsGimmickWithinHeightBandEntry(-1, -2, 0) == 0);
+  CHECK(VS::Field::IsGimmickWithinHeightBandEntry(255, 254, 0) == 1);
+  CHECK(VS::Field::IsGimmickWithinHeightBandEntry(-1, -2, 0) == 0);
 }
 
 TEST_CASE(
@@ -5321,10 +5326,10 @@ TEST_CASE(
   auto expected = output;
   const std::int32_t offset = -256;
   std::memcpy(expected.data() + 1, &offset, sizeof(offset));
-  CHECK(Field_MeasureTileStackEntry(
+  CHECK(VS::Field::MeasureTileStackEntry(
             0, 0, reinterpret_cast<int*>(output.data() + 1)) == 0);
   CHECK(output == expected);
-  CHECK(Field_MeasureTileStackEntry(0, 0, nullptr) == 0);
+  CHECK(VS::Field::MeasureTileStackEntry(0, 0, nullptr) == 0);
 }
 
 TEST_CASE(
@@ -5341,9 +5346,9 @@ TEST_CASE(
   Field_gimmickInstances[1] = reinterpret_cast<Field_GimmickInstance*>(record);
   Field_gimmickInstances[5] = nullptr;
   int offset = 7;
-  CHECK(Field_MeasureTileStackEntry(0, 0, &offset) == 0);
+  CHECK(VS::Field::MeasureTileStackEntry(0, 0, &offset) == 0);
   CHECK(offset == 0);
-  CHECK(Field_IsGimmickWithinHeightBandEntry(0, 0, 0) == 0);
+  CHECK(VS::Field::IsGimmickWithinHeightBandEntry(0, 0, 0) == 0);
   CHECK(record[0] == std::byte{0xA5});
   CHECK(record[63] == std::byte{0xA5});
 }
@@ -5353,10 +5358,11 @@ TEST_CASE("Menu gimmick queries retain both original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MAINMENU.PRG",
                                           0x800FA188) ==
-        reinterpret_cast<const void*>(&Field_MeasureTileStackEntry));
+        reinterpret_cast<const void*>(&VS::Field::MeasureTileStackEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MAINMENU.PRG",
                                           0x800FA238) ==
-        reinterpret_cast<const void*>(&Field_IsGimmickWithinHeightBandEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::IsGimmickWithinHeightBandEntry));
 }
 
 TEST_CASE(
@@ -5370,7 +5376,7 @@ TEST_CASE(
   record.rotationY = 17;
   record.rotationZ = 23;
   record.reserved2A = 19;
-  REQUIRE(Field_SetGimmickOrientationEntry(1, 0) == 0);
+  REQUIRE(VS::Field::SetGimmickOrientationEntry(1, 0) == 0);
   CHECK(record.rotationTicks == 0);
   CHECK(record.rotationX == 0);
   CHECK(record.rotationY == 0);
@@ -5492,7 +5498,7 @@ TEST_CASE(
   matrix_bytes[kPaddingStart] = std::byte{0x34};
   matrix_bytes[kPaddingStart + 1] = std::byte{0x12};
   const auto expected = VS::Core::Math::BuildEulerRotationMatrix({1024, 0, 0});
-  REQUIRE(Field_SetGimmickOrientationEntry(1, 1) == 0);
+  REQUIRE(VS::Field::SetGimmickOrientationEntry(1, 1) == 0);
   CHECK(VS::Core::Math::MatrixOf(record.matrices[4]) == expected);
   CHECK(record.matrices[4].t[0] == 0x12345678);
   CHECK(matrix_bytes[kPaddingStart] == std::byte{0x34});
@@ -5508,14 +5514,14 @@ TEST_CASE(
   auto& record = fixture.instances[0];
   record.rotationTicks = 9;
   const auto before = VS::Core::Math::MatrixOf(record.matrices[4]);
-  CHECK(Field_SetGimmickOrientationEntry(1, 24) == -1);
+  CHECK(VS::Field::SetGimmickOrientationEntry(1, 24) == -1);
   CHECK(record.objectInfo.material == 24);
   CHECK(record.rotationTicks == 9);
   CHECK(VS::Core::Math::MatrixOf(record.matrices[4]) == before);
-  CHECK(Field_SetGimmickOrientationEntry(-1, 0) == -1);
-  CHECK(Field_SetGimmickOrientationEntry(16, 0) == -1);
+  CHECK(VS::Field::SetGimmickOrientationEntry(-1, 0) == -1);
+  CHECK(VS::Field::SetGimmickOrientationEntry(16, 0) == -1);
   record.objectInfo.objectId = 3;
-  CHECK(Field_SetGimmickOrientationEntry(1, 0) == -1);
+  CHECK(VS::Field::SetGimmickOrientationEntry(1, 0) == -1);
   CHECK(record.objectInfo.material == 24);
 }
 
@@ -5524,7 +5530,7 @@ TEST_CASE("Gimmick orientation retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A0104) ==
-        reinterpret_cast<const void*>(&Field_SetGimmickOrientationEntry));
+        reinterpret_cast<const void*>(&VS::Field::SetGimmickOrientationEntry));
 }
 
 namespace {
@@ -6913,16 +6919,16 @@ TEST_CASE(
     "Native gimmick point placement samples actual support before occupancy",
     "[gimmick-placeability-live][field]") {
   GimmickPointLiveFixture fixture;
-  const auto result = Field_CanPlaceGimmickAtPointEntry(64, 64, 0);
+  const auto result = VS::Field::CanPlaceGimmickAtPointEntry(64, 64, 0);
   SVECTOR origin{};
   CHECK(VS::Field::LiveSampleActorSupportHeight(&origin, 64, 64, 1) >= 0);
   CHECK((VS::Field::LiveCollisionProbeCellWord() & (1u << 20)) == 0);
   CHECK(result == 1);
-  CHECK(Field_CanPlaceGimmickAtPointEntry(64, 64, 1) == 0);
+  CHECK(VS::Field::CanPlaceGimmickAtPointEntry(64, 64, 1) == 0);
   Actors_actorRecords[2] = &fixture.actor;
   fixture.actor.instance.currentTileX = 0;
   fixture.actor.instance.currentTileZ = 0;
-  CHECK(Field_CanPlaceGimmickAtPointEntry(64, 64, 0) == 0);
+  CHECK(VS::Field::CanPlaceGimmickAtPointEntry(64, 64, 0) == 0);
 }
 
 TEST_CASE("Native gimmick point placement rejects actual probe bit twenty",
@@ -6930,7 +6936,7 @@ TEST_CASE("Native gimmick point placement rejects actual probe bit twenty",
   GimmickPointLiveFixture fixture;
   const auto original = std::bit_cast<std::uint32_t>(fixture.cells[0]);
   fixture.cells[0] = std::bit_cast<Field_MpdTileCell>(original | (1u << 20));
-  CHECK(Field_CanPlaceGimmickAtPointEntry(64, 64, 0) == 0);
+  CHECK(VS::Field::CanPlaceGimmickAtPointEntry(64, 64, 0) == 0);
   CHECK((VS::Field::LiveCollisionProbeCellWord() & (1u << 20)) != 0);
 }
 
@@ -6938,9 +6944,9 @@ TEST_CASE(
     "Native gimmick point placement refuses absent and out-of-room probes",
     "[gimmick-placeability-live][field]") {
   GimmickPointLiveFixture fixture;
-  CHECK(Field_CanPlaceGimmickAtPointEntry(INT32_MAX, INT32_MIN, 0) == 0);
+  CHECK(VS::Field::CanPlaceGimmickAtPointEntry(INT32_MAX, INT32_MIN, 0) == 0);
   Field_roomData.collisionMap = nullptr;
-  CHECK(Field_CanPlaceGimmickAtPointEntry(64, 64, 0) == 0);
+  CHECK(VS::Field::CanPlaceGimmickAtPointEntry(64, 64, 0) == 0);
 }
 
 TEST_CASE("Gimmick point placement retains its original module address",
@@ -6948,7 +6954,7 @@ TEST_CASE("Gimmick point placement retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A3DB4) ==
-        reinterpret_cast<const void*>(&Field_CanPlaceGimmickAtPointEntry));
+        reinterpret_cast<const void*>(&VS::Field::CanPlaceGimmickAtPointEntry));
 }
 
 TEST_CASE("Interaction tile release preserves every animation and actor byte",
@@ -7095,7 +7101,7 @@ TEST_CASE("Native interaction tile release clears only the actual reservation",
   record.animationId = 0x4F;
   record.instance.facing = 3072;
   room.flags[2][4] = 0x80;
-  Field_RefreshAshleyInteractionTileEntry(&record);
+  VS::Field::RefreshAshleyInteractionTileEntry(&record);
   CHECK(room.flags[2][4] == 0);
 }
 
@@ -7149,21 +7155,21 @@ TEST_CASE("Native save point query returns unsigned activation bytes",
   Audio_Seq_unusedStateFlags.opaque20 = 0;
   Audio_Seq_unusedStateFlags.opaque40 = 0;
   room.triggers[0].activation = 1;
-  REQUIRE(Field_CurrentSavePointIdEntry() == 1);
+  REQUIRE(VS::Field::CurrentSavePointIdEntry() == 1);
   for (const auto value : {127, 128, 255}) {
     room.triggers[0].activation =
         std::bit_cast<char>(static_cast<std::uint8_t>(value));
-    CHECK(Field_CurrentSavePointIdEntry() == value);
+    CHECK(VS::Field::CurrentSavePointIdEntry() == value);
   }
 }
 
 TEST_CASE("Interaction tile release retains its original module address",
           "[interaction-tile-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x8009E634) ==
-      reinterpret_cast<const void*>(&Field_RefreshAshleyInteractionTileEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8009E634) ==
+        reinterpret_cast<const void*>(
+            &VS::Field::RefreshAshleyInteractionTileEntry));
 }
 
 TEST_CASE("Save point query retains its original module address",
@@ -7171,7 +7177,7 @@ TEST_CASE("Save point query retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008A4FC) ==
-        reinterpret_cast<const void*>(&Field_CurrentSavePointIdEntry));
+        reinterpret_cast<const void*>(&VS::Field::CurrentSavePointIdEntry));
 }
 
 TEST_CASE("Native save point query refuses missing and suppressed trigger data",
@@ -7186,20 +7192,20 @@ TEST_CASE("Native save point query refuses missing and suppressed trigger data",
   room.triggers[0].activation = 7;
   Audio_Seq_unusedStateFlags.opaque20 = 0;
   Audio_Seq_unusedStateFlags.opaque40 = 0;
-  REQUIRE(Field_CurrentSavePointIdEntry() == 7);
+  REQUIRE(VS::Field::CurrentSavePointIdEntry() == 7);
   room.triggers[0].kind = 15;
-  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
   Audio_Seq_unusedStateFlags.opaque20 = 1;
-  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
   room.triggers[0].kind = 16;
-  CHECK(Field_CurrentSavePointIdEntry() == 7);
+  CHECK(VS::Field::CurrentSavePointIdEntry() == 7);
   Field_roomData.header.floorTriggersLength = sizeof(room.triggers) - 1;
-  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
   Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
   placement.cells[0].hasRoomTrigger = 0;
-  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
   Actors_actorRecords[0] = nullptr;
-  CHECK(Field_CurrentSavePointIdEntry() == 0);
+  CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
 }
 
 namespace {
@@ -7541,7 +7547,7 @@ TEST_CASE("Gimmick interaction command retains its original module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A41D0) ==
         reinterpret_cast<const void*>(
-            &Field_ApplyGimmickInteractionCommandEntry));
+            &VS::Field::ApplyGimmickInteractionCommandEntry));
 }
 
 TEST_CASE(
@@ -7549,7 +7555,7 @@ TEST_CASE(
     "tile",
     "[gimmick-interaction-start-live][field]") {
   GimmickStartLiveFixture fixture;
-  REQUIRE(Field_BeginGimmickInteractionEntry(0) == 0);
+  REQUIRE(VS::Field::BeginGimmickInteractionEntry(0) == 0);
   CHECK(Field_interactingGimmickId == 1);
   CheckNativeInitiationSlide(fixture);
   CHECK(fixture.actor.weaponPoseActive == 1);
@@ -7562,15 +7568,15 @@ TEST_CASE(
     "grid",
     "[gimmick-interaction-start-live][field]") {
   GimmickStartLiveFixture fixture;
-  CHECK(Field_BeginGimmickInteractionEntry(-1) == -1);
-  CHECK(Field_BeginGimmickInteractionEntry(17) == -1);
-  CHECK(Field_BeginGimmickInteractionEntry(2) == -1);
+  CHECK(VS::Field::BeginGimmickInteractionEntry(-1) == -1);
+  CHECK(VS::Field::BeginGimmickInteractionEntry(17) == -1);
+  CHECK(VS::Field::BeginGimmickInteractionEntry(2) == -1);
   fixture.actor.weaponPoseActive = 1;
-  CHECK(Field_BeginGimmickInteractionEntry(0) == -1);
+  CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
   CHECK(Field_interactingGimmickId == -1);
   fixture.actor.weaponPoseActive = 0;
   Battle_Ai_tileFlagMap = nullptr;
-  CHECK(Field_BeginGimmickInteractionEntry(0) == -1);
+  CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
   CHECK(fixture.actor.instance.turnFrames == 0);
 }
 
@@ -7581,13 +7587,13 @@ TEST_CASE(
   fixture.instances[0].objectInfo.objectId = 0;
   SECTION("Original unsigned table byte becomes material") {
     Field_kGimmickRollOrientations[0] = 17;
-    REQUIRE(Field_BeginGimmickInteractionEntry(0) == 0);
+    REQUIRE(VS::Field::BeginGimmickInteractionEntry(0) == 0);
     CHECK(fixture.instances[0].objectInfo.material == 17);
     CHECK(fixture.instances[0].slideZ == -128);
   }
   SECTION("Oversized backing declaration does not authorize material255") {
     fixture.instances[0].objectInfo.material = 255;
-    CHECK(Field_BeginGimmickInteractionEntry(0) == -1);
+    CHECK(VS::Field::BeginGimmickInteractionEntry(0) == -1);
     CheckNativeRollRefusal(fixture);
   }
 }
@@ -7595,24 +7601,25 @@ TEST_CASE(
 TEST_CASE("Gimmick interaction initiation retains its original module address",
           "[gimmick-interaction-start-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800A3E6C) ==
-        reinterpret_cast<const void*>(&Field_BeginGimmickInteractionEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800A3E6C) ==
+      reinterpret_cast<const void*>(&VS::Field::BeginGimmickInteractionEntry));
 }
 
 TEST_CASE(
     "Native gimmick interaction uses real top placement and actor occupancy",
     "[gimmick-interaction-live][field]") {
   GimmickInteractionLiveFixture fixture;
-  CHECK(Field_FindInteractableGimmickAheadEntry(0) == 1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == 1);
   CHECK(Field_gimmickInteractionDirection == 0);
   Actors_ActorRecord blocker{};
   blocker.instance.currentTileZ = 1;
   Actors_actorRecords[2] = &blocker;
-  CHECK(Field_FindInteractableGimmickAheadEntry(0) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   Actors_actorRecords[2] = nullptr;
   fixture.instances[0].objectInfo.interaction = 1;
-  CHECK(Field_FindInteractableGimmickAheadEntry(0) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
 }
 
 TEST_CASE(
@@ -7620,30 +7627,30 @@ TEST_CASE(
     "direction",
     "[gimmick-interaction-live][field]") {
   GimmickInteractionLiveFixture fixture;
-  CHECK(Field_FindInteractableGimmickAheadEntry(-1) == -1);
-  CHECK(Field_FindInteractableGimmickAheadEntry(17) == -1);
-  CHECK(Field_FindInteractableGimmickAheadEntry(2) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(-1) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(17) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(2) == -1);
   CHECK(Field_gimmickInteractionDirection == 77);
   fixture.actor.routePhase = 1;
-  CHECK(Field_FindInteractableGimmickAheadEntry(0) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   CHECK(Field_gimmickInteractionDirection == 77);
   fixture.actor.routePhase = 0;
   fixture.actor.actionPoseActive = 1;
   fixture.actor.instance.attachBone = 255;
-  CHECK(Field_FindInteractableGimmickAheadEntry(0) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
   CHECK(Field_gimmickInteractionDirection == 0);
   fixture.actor.instance.attachBone = 1;
   Field_gimmickInstances[1] = nullptr;
-  CHECK(Field_FindInteractableGimmickAheadEntry(0) == -1);
+  CHECK(VS::Field::FindInteractableGimmickAheadEntry(0) == -1);
 }
 
 TEST_CASE("Gimmick interaction selector retains its original module address",
           "[gimmick-interaction-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x800A38E0) ==
-      reinterpret_cast<const void*>(&Field_FindInteractableGimmickAheadEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800A38E0) ==
+        reinterpret_cast<const void*>(
+            &VS::Field::FindInteractableGimmickAheadEntry));
 }
 
 TEST_CASE("Retired actor-above alias leaves no original module binding",
@@ -7920,7 +7927,8 @@ TEST_CASE("Unsupported gimmick stack drop retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009F530) ==
-        reinterpret_cast<const void*>(&Field_DropUnsupportedGimmickStackEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::DropUnsupportedGimmickStackEntry));
 }
 
 namespace {

@@ -9,10 +9,10 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Status/ComponentDescriptions.hpp"
@@ -42,7 +42,7 @@ class LiveComponentDisplay final : public ComponentDisplay {
   }
   void ClearComponentStats() override { Framework::ResetLiveEquipmentStats(); }
   bool SelectRow(int row) override {
-    if (Menu_Framework_menuItems == nullptr || row < 0 ||
+    if (VS::Menu::Framework::menuItems == nullptr || row < 0 ||
         static_cast<std::size_t>(row) >= Framework::kRowCount) {
       return false;
     }
@@ -151,6 +151,6 @@ char* LiveAccessoryDescription(Items_AccessorySpawnLoadout* accessory) {
 int IsLiveDetailElementSelectable(int element, int flags) {
   return static_cast<int>(IsDetailElementSelectable(
       element, static_cast<std::uint32_t>(flags),
-      static_cast<std::uint8_t>(Menu_Framework_itemStatPage)));
+      static_cast<std::uint8_t>(VS::Menu::Framework::itemStatPage)));
 }
 }  // namespace VS::Menu::Status

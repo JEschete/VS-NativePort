@@ -24,7 +24,7 @@
 #include "DiscQueue.h"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
-#include "Effects/EffectResourcesLiveState.h"
+#include "Effects/EffectResourcesLiveState.hpp"
 #include "Effects/Loading.h"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -37,30 +37,30 @@
 #include "Render/TexturePagesLive.hpp"
 
 // decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
-int Effects_textureLoadIndex;
+int VS::Effects::textureLoadIndex;
 // decomp: D_800F5638 (D_800F5638@BATTLE/BATTLE.PRG)
-Effects_TextureLoadList Effects_textureLoads;
+Effects_TextureLoadList VS::Effects::textureLoads;
 // decomp: vs_battle_pfileBuf (vs_battle_pfileBuf@BATTLE/BATTLE.PRG)
-void* Effects_packageBuffer;
+void* VS::Effects::packageBuffer;
 // decomp: D_800F5680 (D_800F5680@BATTLE/BATTLE.PRG)
-u_int Effects_textureLoadState;
+u_int VS::Effects::textureLoadState;
 // decomp: D_800F5684 (D_800F5684@BATTLE/BATTLE.PRG)
-int Effects_purgeOverlayLoaded;
+int VS::Effects::purgeOverlayLoaded;
 // decomp: vs_battle_pFileLoadContext
 // (vs_battle_pFileLoadContext@BATTLE/BATTLE.PRG)
-Effects_FileLoadContext Effects_packageFile;
+Effects_FileLoadContext VS::Effects::packageFile;
 // decomp: D_800F568C (D_800F568C@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* Effects_resourceReadSlot;
+Content_DiscQueueSlot* VS::Effects::resourceReadSlot;
 // decomp: _plgLoadState (_plgLoadState@BATTLE/BATTLE.PRG)
-u_int Effects_pluginLoadState;
+u_int VS::Effects::pluginLoadState;
 // decomp: _plgLoadContext (_plgLoadContext@BATTLE/BATTLE.PRG)
-Effects_FileLoadContext Effects_pluginFile;
+Effects_FileLoadContext VS::Effects::pluginFile;
 // decomp: D_800F56A0 (D_800F56A0@BATTLE/BATTLE.PRG)
-u_long* Effects_textureLoadBuffer;
+u_long* VS::Effects::textureLoadBuffer;
 // decomp: _plgEntryPointCount (_plgEntryPointCount@BATTLE/BATTLE.PRG)
-int Effects_pluginEntryPointCount;
+int VS::Effects::pluginEntryPointCount;
 // decomp: D_800F5874 (D_800F5874@BATTLE/BATTLE.PRG)
-int Effects_loadedTextureSlots;
+int VS::Effects::loadedTextureSlots;
 
 static_assert(sizeof(Effects_FileLoadContext) == sizeof(std::uint32_t));
 static_assert(std::extent_v<decltype(Effects_TextureLoadList::loadContexts)> ==
@@ -319,10 +319,10 @@ class LivePackageHost final : public EffectPackageHost {
   if (package == static_cast<void*>(Effects_emptyPackage)) {
     return std::as_writable_bytes(std::span(Effects_emptyPackage));
   }
-  if (package != Effects_packageBuffer) return std::nullopt;
+  if (package != packageBuffer) return std::nullopt;
   const std::size_t capacity = Memory::LivePayloadCapacity(package).value_or(0);
   return std::span(static_cast<std::byte*>(package),
-                   std::min<std::size_t>(Effects_packageFile.size, capacity));
+                   std::min<std::size_t>(packageFile.size, capacity));
 }
 
 // The ids name only kNone; the live addresses they carry are made here.
@@ -634,34 +634,33 @@ std::optional<PackageWalk> BindLiveEffectPackage(std::span<std::byte> package) {
 
 EffectResourceState LoadLiveEffectResourceState() {
   return {
-      .read = IdOf<DiscReadId>(Effects_resourceReadSlot),
-      .package_buffer = BufferOf(Effects_packageBuffer),
-      .texture_buffer = BufferOf(Effects_textureLoadBuffer),
-      .purge_overlay_loaded = Effects_purgeOverlayLoaded != 0,
-      .package_file = ExtentOf(Effects_packageFile),
-      .texture_index = Effects_textureLoadIndex,
-      .texture_state = static_cast<TextureLoadState>(Effects_textureLoadState),
-      .textures = TexturesOf(Effects_textureLoads),
-      .loaded_texture_pages =
-          static_cast<std::uint32_t>(Effects_loadedTextureSlots),
-      .plugin_state = static_cast<PluginLoadState>(Effects_pluginLoadState),
-      .plugin_file = ExtentOf(Effects_pluginFile),
-      .plugin_entry_count = Effects_pluginEntryPointCount};
+      .read = IdOf<DiscReadId>(resourceReadSlot),
+      .package_buffer = BufferOf(packageBuffer),
+      .texture_buffer = BufferOf(textureLoadBuffer),
+      .purge_overlay_loaded = purgeOverlayLoaded != 0,
+      .package_file = ExtentOf(packageFile),
+      .texture_index = textureLoadIndex,
+      .texture_state = static_cast<TextureLoadState>(textureLoadState),
+      .textures = TexturesOf(textureLoads),
+      .loaded_texture_pages = static_cast<std::uint32_t>(loadedTextureSlots),
+      .plugin_state = static_cast<PluginLoadState>(pluginLoadState),
+      .plugin_file = ExtentOf(pluginFile),
+      .plugin_entry_count = pluginEntryPointCount};
 }
 
 void StoreLiveEffectResourceState(const EffectResourceState& state) {
-  Effects_resourceReadSlot = PointerOf<Content_DiscQueueSlot>(state.read);
-  Effects_packageBuffer = PointerOf<void>(state.package_buffer.id);
-  Effects_textureLoadBuffer = PointerOf<u_long>(state.texture_buffer.id);
-  Effects_purgeOverlayLoaded = state.purge_overlay_loaded ? 1 : 0;
-  StoreExtent(Effects_packageFile, state.package_file);
-  Effects_textureLoadIndex = state.texture_index;
-  Effects_textureLoadState = static_cast<u_int>(state.texture_state);
-  StoreTextures(Effects_textureLoads, state.textures);
-  Effects_loadedTextureSlots = static_cast<int>(state.loaded_texture_pages);
-  Effects_pluginLoadState = static_cast<u_int>(state.plugin_state);
-  StoreExtent(Effects_pluginFile, state.plugin_file);
-  Effects_pluginEntryPointCount = state.plugin_entry_count;
+  resourceReadSlot = PointerOf<Content_DiscQueueSlot>(state.read);
+  packageBuffer = PointerOf<void>(state.package_buffer.id);
+  textureLoadBuffer = PointerOf<u_long>(state.texture_buffer.id);
+  purgeOverlayLoaded = state.purge_overlay_loaded ? 1 : 0;
+  StoreExtent(packageFile, state.package_file);
+  textureLoadIndex = state.texture_index;
+  textureLoadState = static_cast<u_int>(state.texture_state);
+  StoreTextures(textureLoads, state.textures);
+  loadedTextureSlots = static_cast<int>(state.loaded_texture_pages);
+  pluginLoadState = static_cast<u_int>(state.plugin_state);
+  StoreExtent(pluginFile, state.plugin_file);
+  pluginEntryPointCount = state.plugin_entry_count;
 }
 
 EffectResourceContext LoadLiveEffectResourceContext() {

@@ -29,7 +29,7 @@
 #include "DiscQueue.h"
 #include "Event/ScriptVm.h"
 #include "Field/BackgroundLive.hpp"
-#include "Field/BackgroundLiveState.h"
+#include "Field/BackgroundLiveState.hpp"
 #include "Field/Doors.h"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.h"
@@ -137,11 +137,12 @@ struct LiveWorld {
   ValueRestore<int> saved_previous{Input_previousButtons};
   ValueRestore<int> saved_repeat{Input_buttonRepeat};
   ValueRestore<decltype(Input_stickPosBuf)> saved_sticks{Input_stickPosBuf};
-  ValueRestore<decltype(Menu_Framework_menuState)> saved_menu{
-      Menu_Framework_menuState};
-  ValueRestore<Menu_Framework_MenuRow*> saved_rows{Menu_Framework_menuItems};
-  ValueRestore<char> saved_hide{Menu_Framework_hideMenu};
-  ValueRestore<int> saved_fade{Menu_Framework_backgroundFadeStep};
+  ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_menu{
+      VS::Menu::Framework::menuState};
+  ValueRestore<Menu_Framework_MenuRow*> saved_rows{
+      VS::Menu::Framework::menuItems};
+  ValueRestore<char> saved_hide{VS::Menu::Framework::hideMenu};
+  ValueRestore<int> saved_fade{VS::Menu::Framework::backgroundFadeStep};
   ValueRestore<decltype(Battle_hudHidden)> saved_hud{Battle_hudHidden};
   ValueRestore<int> saved_hud_slide{Battle_hudSlideOffset};
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
@@ -180,10 +181,10 @@ struct LiveWorld {
     content::InitializeLiveDiscQueue();
     REQUIRE(map::ResetMapTerminalColdState());
     framework::ResetLiveMainMenuStatics();
-    Menu_Framework_menuItems = rows.data();
-    Menu_Framework_menuState = {};
-    Menu_Framework_backgroundFadeStep = 0;
-    Menu_Framework_hideMenu = 0;
+    VS::Menu::Framework::menuItems = rows.data();
+    VS::Menu::Framework::menuState = {};
+    VS::Menu::Framework::backgroundFadeStep = 0;
+    VS::Menu::Framework::hideMenu = 0;
     Battle_hudHidden = 0;
     Battle_hudSlideOffset = 0;
     VS::Field::isFieldRenderingEnabled = 1;
@@ -226,7 +227,7 @@ struct LiveWorld {
 
   ~LiveWorld() {
     if (!map::ResetMapTerminalColdState()) std::terminate();
-    if (Menu_Framework_itemsText != nullptr) {
+    if (VS::Menu::Framework::itemsText != nullptr) {
       static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
     }
     framework::ClearLiveMenuExcept(framework::kNoRow);
@@ -338,8 +339,8 @@ void CheckNoSceneOwners() {
 
 void HideResetAndCancel(LiveWorld& world) {
   REQUIRE(world.Tick(0x100) == 0);
-  CHECK(std::pair<int, int>{Menu_Map_triggerHideUi, Menu_Framework_hideMenu} ==
-        std::pair{1, 1});
+  CHECK(std::pair<int, int>{Menu_Map_triggerHideUi,
+                            VS::Menu::Framework::hideMenu} == std::pair{1, 1});
   REQUIRE(world.Tick(0, 0x800) == 0);
   CHECK(std::pair<int, int>{Menu_Map_geomOffsetX, Menu_Map_cameraDistance} ==
         std::pair{0, 768});
@@ -369,7 +370,7 @@ void CheckRestoredDisplay() {
   CHECK(VS::Field::isFieldRenderingEnabled == 1);
   CHECK(Battle_hudHidden == 0);
   CHECK(Battle_hudSlideOffset == 0);
-  CHECK(Menu_Framework_hideMenu == 0);
+  CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 
 void CheckRestoredPixels() {
@@ -633,7 +634,7 @@ TEST_CASE(
   CHECK(Battle_hudSlideOffset == 0x200000);
   VS::Render::GamePages().Fill({640, 256, 160, 240}, 255, 0, 0);
   ExitScreen(world, step);
-  CHECK(Menu_Framework_menuState.currentMenu == 6);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 6);
   CheckRestoredDisplay();
   CheckRestoredPixels();
   CHECK(memory::GameHeap().Empty());
@@ -647,8 +648,8 @@ TEST_CASE(
   auto* scene = Battle_unusedSceneBuffer;
   REQUIRE(world.Tick(0x100) == 0);
   REQUIRE(world.OpenChooser());
-  CHECK(std::pair<int, int>{Menu_Framework_hideMenu, Menu_Map_triggerHideUi} ==
-        std::pair{0, 1});
+  CHECK(std::pair<int, int>{VS::Menu::Framework::hideMenu,
+                            Menu_Map_triggerHideUi} == std::pair{0, 1});
   const bool triangle = GENERATE(false, true);
   REQUIRE(world.Tick(triangle ? 0x10U : 0x40U, 0, 0, true) == 0);
   for (std::size_t tick = 0; tick < 40 && Menu_Map_menuState == 2; ++tick) {
@@ -892,7 +893,7 @@ struct FullDiscQueue {
 
 struct RestoreRoomRuntime {
   const game_clear_live_tests::SavedGlobals<
-      Field_backgroundReferenceVectors, Field_entranceDoorRecord,
+      VS::Field::backgroundReferenceVectors, Field_entranceDoorRecord,
       Battle_unusedMenu9CursorMemory, Field_manualDisplayState,
       VS::Field::roomPalettes, Battle_floatingLabels,
       Battle_placedLabelPositions, Field_enteredDoorId,
@@ -953,23 +954,25 @@ TEST_CASE("Production framework dispatch uses the real map state byte",
           "[map-terminal-integration][map-terminal-framework][F04149]") {
   LiveWorld world(true);
   const game_clear_live_tests::SavedGlobals<
-      Menu_Framework_loadedSubMenu, Menu_Framework_openedWithoutMainMenu,
-      Menu_Framework_actionRestrictions, Menu_Framework_submenuStates>
+      VS::Menu::Framework::loadedSubMenu,
+      VS::Menu::Framework::openedWithoutMainMenu,
+      VS::Menu::Framework::actionRestrictions,
+      VS::Menu::Framework::submenuStates>
       saved;
-  Menu_Framework_loadedSubMenu = kMapScreen;
-  Menu_Framework_openedWithoutMainMenu = 1;
-  Menu_Framework_menuState.currentMenu = kMapScreen;
-  Menu_Framework_menuState.loading = 0;
-  Menu_Framework_actionRestrictions = 0;
-  Menu_Framework_submenuStates[kMapScreen] = 3;
-  Menu_Framework_submenuStates[kMapScreen - 1] = static_cast<char>(0xAA);
+  VS::Menu::Framework::loadedSubMenu = kMapScreen;
+  VS::Menu::Framework::openedWithoutMainMenu = 1;
+  VS::Menu::Framework::menuState.currentMenu = kMapScreen;
+  VS::Menu::Framework::menuState.loading = 0;
+  VS::Menu::Framework::actionRestrictions = 0;
+  VS::Menu::Framework::submenuStates[kMapScreen] = 3;
+  VS::Menu::Framework::submenuStates[kMapScreen - 1] = static_cast<char>(0xAA);
   Menu_Map_currentMapRow = 23;
   REQUIRE(VS::Save::MemoryCard::LiveMenuAssetPhase() ==
           VS::Save::MemoryCard::MenuAssetPhase::kIdle);
   framework::UpdateLiveMainMenu(kMapScreen);
-  CHECK(Menu_Framework_submenuStates[kMapScreen] == 4);
+  CHECK(VS::Menu::Framework::submenuStates[kMapScreen] == 4);
   CHECK(static_cast<unsigned char>(
-            Menu_Framework_submenuStates[kMapScreen - 1]) == 0xAA);
+            VS::Menu::Framework::submenuStates[kMapScreen - 1]) == 0xAA);
   CHECK(Menu_Map_currentMapRow == -1);
   CHECK(Content_discRequestCounts.waiting != 0);
   CHECK(std::ranges::any_of(Content_discRequestSlots, [](const auto& slot) {

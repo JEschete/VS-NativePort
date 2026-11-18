@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the item rows (ItemRows.hpp): defines the item texts
-// (ItemRowsLiveState.h) and implements the hosts over them, the item tables
+// (ItemRowsLiveState.hpp) and implements the hosts over them, the item tables
 // the menus show, the battle string context, the menu rows and the disc queue.
 #include "Menu/Framework/ItemRowsLive.hpp"
 
@@ -27,13 +27,13 @@
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
 
@@ -97,10 +97,10 @@ static_assert(item_text::kEndsSetupOffset ==
               Text_Menu_ITEMHELP_BIN_Offset_endsSetup);
 static_assert(item_text::kItem0Name == Text_Menu_ITEMNAME_BIN_Index_item0);
 static_assert(item_text::kWoodName == Text_Menu_ITEMNAME_BIN_Index_wood);
-static_assert(sizeof(*Menu_Framework_itemNames) == kItemNameRowBytes);
+static_assert(sizeof(*itemNames) == kItemNameRowBytes);
 
 // decomp: vs_mainMenu_weaponHands' module image values (2D10.c:157).
-constexpr std::array<u_char, kMenuWeaponHandCategories> kInitialWeaponHands{
+constexpr std::array<u_char, kWeaponHandCategories> kInitialWeaponHands{
     0, 0, 1, 0, 1, 0, 1, 1, 1, 0,
 };
 
@@ -117,17 +117,17 @@ void Warn(std::string_view what) { VS_LOG_WARN("menu.framework", "{}", what); }
 
 // The text tables in the loaded block; empty before the first load.
 [[nodiscard]] std::span<const std::uint8_t> HelpBytes() {
-  if (Menu_Framework_itemHelp == nullptr) {
+  if (itemHelp == nullptr) {
     return {};
   }
-  return {Bytes(Menu_Framework_itemHelp), kItemHelpBytes};
+  return {Bytes(itemHelp), kItemHelpBytes};
 }
 
 [[nodiscard]] std::span<const std::uint8_t> NameBytes() {
-  if (Menu_Framework_itemNames == nullptr) {
+  if (itemNames == nullptr) {
     return {};
   }
-  return {Bytes(Menu_Framework_itemNames), kItemNamesBytes};
+  return {Bytes(itemNames), kItemNamesBytes};
 }
 
 // The empty text a refused row shows.
@@ -191,9 +191,9 @@ template <typename Legacy, std::size_t Count>
     case TextSource::kEmpty:
       return EmptyText();
     case TextSource::kHelp:
-      return reinterpret_cast<char*>(Menu_Framework_itemHelp) + text.offset;
+      return reinterpret_cast<char*>(itemHelp) + text.offset;
     case TextSource::kNames:
-      return reinterpret_cast<char*>(Menu_Framework_itemNames) + text.offset;
+      return reinterpret_cast<char*>(itemNames) + text.offset;
     case TextSource::kBuffer:
       return static_cast<char*>(buffer);
     case TextSource::kWeaponName:
@@ -246,11 +246,10 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
       Warn("item text: no memory for the text block");
       return;
     }
-    Menu_Framework_itemNames = static_cast<char (*)[kItemNameRowBytes]>(block);
-    Menu_Framework_itemHelp =
-        reinterpret_cast<u_short*>(Bytes(block) + kItemNamesBytes);
-    Menu_Framework_menu12Text = reinterpret_cast<u_short*>(
-        Bytes(block) + kItemNamesBytes + kItemHelpBytes);
+    itemNames = static_cast<char (*)[kItemNameRowBytes]>(block);
+    itemHelp = reinterpret_cast<u_short*>(Bytes(block) + kItemNamesBytes);
+    menu12Text = reinterpret_cast<u_short*>(Bytes(block) + kItemNamesBytes +
+                                            kItemHelpBytes);
     // The three files are contiguous on the disc.
     const Content_DiscFile file{.lba = VS_ITEMNAME_BIN_LBA,
                                 .size = static_cast<int>(kItemTextBytes)};
@@ -276,12 +275,12 @@ class LiveItemTextLoadHost final : public ItemTextLoadHost {
   }
 
   [[nodiscard]] bool ItemTextAllocated() override {
-    return Menu_Framework_itemNames != nullptr;
+    return itemNames != nullptr;
   }
 
   void FreeItemText() override {
-    Core::Memory::FreeLiveFromHighEnd(Menu_Framework_itemNames);
-    Menu_Framework_itemNames = nullptr;
+    Core::Memory::FreeLiveFromHighEnd(itemNames);
+    itemNames = nullptr;
   }
 };
 }  // namespace
@@ -301,7 +300,7 @@ std::span<const std::uint8_t> LiveItemRowsHost::NameText() {
 }
 
 std::span<const std::uint8_t> LiveItemRowsHost::WeaponHands() {
-  return Menu_Framework_weaponHands;
+  return weaponHands;
 }
 
 Render::EncodedTextArguments LiveItemRowsHost::TextArguments() {
@@ -323,7 +322,7 @@ std::optional<Items::WeaponLoadout> LiveItemRowsHost::InventoryWeaponLoadout(
   Items_InventoryWeapon legacy{};
   Items::Live::Commit(legacy, weapon);
   Items_WeaponLoadout loadout{};
-  if (Menu_Framework_weapons == Audio_Seq_unusedInventory.weapons) {
+  if (VS::Menu::Framework::weapons == Audio_Seq_unusedInventory.weapons) {
     Items::LoadLiveInventoryWeaponStats(&loadout, &legacy);
   } else if (Items_ContainerData* container = OpenContainer()) {
     VS::Menu::container::BuildLiveWeaponStats(&loadout, &legacy, container);
@@ -338,7 +337,7 @@ std::optional<Items::ShieldLoadout> LiveItemRowsHost::InventoryShieldLoadout(
   Items_InventoryShield legacy{};
   Items::Live::Commit(legacy, shield);
   Items_ShieldLoadout loadout{};
-  if (Menu_Framework_shields == Audio_Seq_unusedInventory.shields) {
+  if (VS::Menu::Framework::shields == Audio_Seq_unusedInventory.shields) {
     Items::LoadLiveInventoryShieldStats(&loadout, &legacy);
   } else if (Items_ContainerData* container = OpenContainer()) {
     VS::Menu::container::BuildLiveShieldStats(&loadout, &legacy, container);
@@ -350,45 +349,45 @@ std::optional<Items::ShieldLoadout> LiveItemRowsHost::InventoryShieldLoadout(
 
 std::optional<Items::InventoryWeapon> LiveItemRowsHost::Weapon(int reference) {
   return Referenced<Items_InventoryWeapon>(
-      Menu_Framework_weapons, Audio_Seq_unusedInventory.weapons,
+      VS::Menu::Framework::weapons, Audio_Seq_unusedInventory.weapons,
       ContainerTable(&Items_ContainerData::weapons), reference);
 }
 
 std::optional<Items::InventoryBlade> LiveItemRowsHost::Blade(int reference) {
   return Referenced<Items_InventoryBlade>(
-      Menu_Framework_blades, Audio_Seq_unusedInventory.blades,
+      VS::Menu::Framework::blades, Audio_Seq_unusedInventory.blades,
       ContainerTable(&Items_ContainerData::blades), reference);
 }
 
 std::optional<Items::InventoryGrip> LiveItemRowsHost::Grip(int reference) {
   return Referenced<Items_InventoryGrip>(
-      Menu_Framework_grips, Audio_Seq_unusedInventory.grips,
+      VS::Menu::Framework::grips, Audio_Seq_unusedInventory.grips,
       ContainerTable(&Items_ContainerData::grips), reference);
 }
 
 std::optional<Items::InventoryShield> LiveItemRowsHost::Shield(int reference) {
   return Referenced<Items_InventoryShield>(
-      Menu_Framework_shields, Audio_Seq_unusedInventory.shields,
+      VS::Menu::Framework::shields, Audio_Seq_unusedInventory.shields,
       ContainerTable(&Items_ContainerData::shields), reference);
 }
 
 std::optional<Items::InventoryArmor> LiveItemRowsHost::Armor(int reference) {
   return Referenced<Items_InventoryArmor>(
-      Menu_Framework_armor, Audio_Seq_unusedInventory.armor,
+      VS::Menu::Framework::armor, Audio_Seq_unusedInventory.armor,
       ContainerTable(&Items_ContainerData::armor), reference);
 }
 
 std::optional<Items::InventoryGem> LiveItemRowsHost::Gem(int reference) {
   return Referenced<Items_InventoryGem>(
-      Menu_Framework_gems, Audio_Seq_unusedInventory.gems,
+      VS::Menu::Framework::gems, Audio_Seq_unusedInventory.gems,
       ContainerTable(&Items_ContainerData::gems), reference);
 }
 
 std::span<std::uint8_t> LiveItemRowsHost::StringBuffer() {
-  if (Menu_Framework_stringBuf == nullptr) {
+  if (stringBuf == nullptr) {
     return {};
   }
-  return {Bytes(Menu_Framework_stringBuf), kStringBufferBytes};
+  return {Bytes(stringBuf), kStringBufferBytes};
 }
 
 void LiveItemRowsHost::DeactivateRow(int row) { DeactivateLiveRow(row); }
@@ -508,19 +507,20 @@ int UnloadLiveItemTextWhenReady() {
 }
 
 void ResetLiveItemRowsStatics() {
-  Menu_Framework_itemNames = nullptr;
-  std::ranges::copy(kInitialWeaponHands, Menu_Framework_weaponHands);
+  itemNames = nullptr;
+  std::ranges::copy(kInitialWeaponHands, weaponHands);
 }
 }  // namespace VS::Menu::Framework
 
 // decomp: vs_mainMenu_itemHelp (MENU/MAINMENU.PRG 2D10.c:42)
-u_short* Menu_Framework_itemHelp = nullptr;
+u_short* VS::Menu::Framework::itemHelp = nullptr;
 // decomp: vs_mainMenu_itemNames (MENU/MAINMENU.PRG 2D10.c:150): the module
 // image value is null.
-char (*Menu_Framework_itemNames)[VS::Menu::Framework::kItemNameRowBytes] =
+char (*VS::Menu::Framework::itemNames)[VS::Menu::Framework::kItemNameRowBytes] =
     nullptr;
 // decomp: vs_mainMenu_menu12Text (MENU/MAINMENU.PRG 2D10.c:1132)
-u_short* Menu_Framework_menu12Text = nullptr;
+u_short* VS::Menu::Framework::menu12Text = nullptr;
 // decomp: vs_mainMenu_weaponHands (MENU/MAINMENU.PRG 2D10.c:157)
-u_char Menu_Framework_weaponHands[kMenuWeaponHandCategories] = {0, 0, 1, 0, 1,
-                                                                0, 1, 1, 1, 0};
+u_char VS::Menu::Framework::weaponHands
+    [VS::Menu::Framework::kWeaponHandCategories] = {0, 0, 1, 0, 1,
+                                                    0, 1, 1, 1, 0};

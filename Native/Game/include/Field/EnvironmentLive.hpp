@@ -7,7 +7,7 @@
 #include "Field/Environment.hpp"
 
 // Live binding for the room weather (Environment.hpp) over the copied weather
-// globals (EnvironmentLiveState.h), the room record, the room clock, the
+// globals (EnvironmentLiveState.hpp), the room record, the room clock, the
 // random generator, the weather effects (WeatherPoolLive.hpp and
 // WeatherRenderLive.hpp), the field sound group and the low-end heap. Each
 // entry loads the globals into a RoomWeatherState, runs the typed core and

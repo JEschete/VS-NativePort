@@ -1,4 +1,5 @@
-#include "Field/GimmickPlacementLive.h"
+
+#include "Field/GimmickPlacementLive.hpp"
 
 #include <algorithm>
 #include <array>
@@ -23,7 +24,6 @@
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickPlacement.hpp"
-#include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 
@@ -719,30 +719,31 @@ std::optional<std::size_t> FindLiveTopGimmickAtTile(
 }
 }  // namespace VS::Field
 
-int Field_FindGimmickBelowEntry(const Field_GimmickInstance* reference) {
+int VS::Field::FindGimmickBelowEntry(const Field_GimmickInstance* reference) {
   if (!ReadableQueryRecord(reference)) return -1;
   const auto index = VS::Field::FindGimmickBelow(SnapshotQueryStates(),
                                                  QueryState(*reference));
   return index ? static_cast<int>(*index) : -1;
 }
 
-int Field_FindTopGimmickAtTileEntry(int tile_x, int tile_z,
-                                    int require_idle_mode) {
+int VS::Field::FindTopGimmickAtTileEntry(int tile_x, int tile_z,
+                                         int require_idle_mode) {
   const auto index = VS::Field::FindLiveTopGimmickAtTile(
       {tile_x, tile_z}, require_idle_mode != 0);
   return index ? static_cast<int>(*index) : 0;
 }
 
-int Field_GimmickSubtypeEntry(int slot) {
+int VS::Field::GimmickSubtypeEntry(int slot) {
   const auto value = VS::Field::GimmickSubtype(SnapshotQueryStates(), slot);
   return value ? static_cast<int>(*value) : -1;
 }
 
-int Field_AreGimmicksMovingEntry(void) {
+int VS::Field::AreGimmicksMovingEntry(void) {
   return VS::Field::AreLiveGimmicksMoving() ? 1 : 0;
 }
 
-int Field_MeasureTileStackEntry(int tile_x, int tile_z, int* height_offset) {
+int VS::Field::MeasureTileStackEntry(int tile_x, int tile_z,
+                                     int* height_offset) {
   if (height_offset == nullptr) return 0;
   const auto result =
       VS::Field::MeasureTileStack(SnapshotQueryStates(), {tile_x, tile_z});
@@ -751,44 +752,44 @@ int Field_MeasureTileStackEntry(int tile_x, int tile_z, int* height_offset) {
   return result.interaction_two ? 1 : 0;
 }
 
-int Field_IsGimmickWithinHeightBandEntry(int tile_x, int tile_z,
-                                         int minimum_height) {
+int VS::Field::IsGimmickWithinHeightBandEntry(int tile_x, int tile_z,
+                                              int minimum_height) {
   return VS::Field::IsGimmickWithinHeightBand(SnapshotQueryStates(),
                                               {tile_x, tile_z}, minimum_height)
              ? 1
              : 0;
 }
 
-int Field_SetGimmickOrientationEntry(int slot, int orientation) {
+int VS::Field::SetGimmickOrientationEntry(int slot, int orientation) {
   return VS::Field::SetLiveGimmickOrientation(slot, orientation) ? 0 : -1;
 }
 
-int Field_CanPlaceGimmickAtPointEntry(int x, int z, int minimum_height) {
+int VS::Field::CanPlaceGimmickAtPointEntry(int x, int z, int minimum_height) {
   return VS::Field::CanPlaceLiveGimmickAtPoint({x, z, minimum_height}) ? 1 : 0;
 }
 
-void Field_DropUnsupportedGimmickStackEntry(int slot) {
+void VS::Field::DropUnsupportedGimmickStackEntry(int slot) {
   static_cast<void>(VS::Field::DropLiveUnsupportedGimmickStack(slot));
 }
 
-int Field_FindInteractableGimmickAheadEntry(int actor_slot) {
+int VS::Field::FindInteractableGimmickAheadEntry(int actor_slot) {
   const auto result = VS::Field::FindLiveInteractableGimmickAhead(actor_slot);
   return result ? static_cast<int>(*result) : -1;
 }
 
-int Field_BeginGimmickInteractionEntry(int actor_slot) {
+int VS::Field::BeginGimmickInteractionEntry(int actor_slot) {
   return VS::Field::BeginLiveGimmickInteraction(actor_slot) ? 0 : -1;
 }
 
-void Field_ApplyGimmickInteractionCommandEntry(Actors_ActorRecord* actor,
-                                               int mode) {
+void VS::Field::ApplyGimmickInteractionCommandEntry(Actors_ActorRecord* actor,
+                                                    int mode) {
   static_cast<void>(VS::Field::ApplyLiveGimmickInteractionCommand(actor, mode));
 }
 
 // decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3654).
 // Original 800A0034 tests inherited s0 before the slot load at 800A004C.
-int Field_GimmickPlacementEntry(int gimmick_slot,
-                                Field_GimmickSnapshot* output_snapshot) {
+int VS::Field::GimmickPlacementEntry(int gimmick_slot,
+                                     Field_GimmickSnapshot* output_snapshot) {
   if (output_snapshot == nullptr || gimmick_slot < 0 ||
       static_cast<std::size_t>(gimmick_slot) >=
           std::size(Field_gimmickInstances)) {

@@ -176,24 +176,26 @@ TEST_CASE(
     "[F04156]") {
   live::Fixture fixture;
   const game_clear_live_tests::SavedGlobals<
-      Menu_Framework_menuState, Menu_Framework_loadedSubMenu,
-      Menu_Framework_openedWithoutMainMenu, Menu_Framework_actionRestrictions,
-      Menu_Framework_submenuStates>
+      VS::Menu::Framework::menuState, VS::Menu::Framework::loadedSubMenu,
+      VS::Menu::Framework::openedWithoutMainMenu,
+      VS::Menu::Framework::actionRestrictions,
+      VS::Menu::Framework::submenuStates>
       saved;
-  Menu_Framework_loadedSubMenu = kGazetteScreen;
-  Menu_Framework_openedWithoutMainMenu = 1;
-  Menu_Framework_menuState.currentMenu = kGazetteScreen;
-  Menu_Framework_menuState.loading = 0;
-  Menu_Framework_actionRestrictions = 0;
-  Menu_Framework_submenuStates[kGazetteScreen] = 3;
-  Menu_Framework_submenuStates[kGazetteScreen - 1] = static_cast<char>(0xAA);
+  VS::Menu::Framework::loadedSubMenu = kGazetteScreen;
+  VS::Menu::Framework::openedWithoutMainMenu = 1;
+  VS::Menu::Framework::menuState.currentMenu = kGazetteScreen;
+  VS::Menu::Framework::menuState.loading = 0;
+  VS::Menu::Framework::actionRestrictions = 0;
+  VS::Menu::Framework::submenuStates[kGazetteScreen] = 3;
+  VS::Menu::Framework::submenuStates[kGazetteScreen - 1] =
+      static_cast<char>(0xAA);
   Menu_Score_score = 12345;
   Menu_Score_characterRank = 0xFF;
   fw::UpdateLiveMainMenu(kGazetteScreen);
-  CHECK(Menu_Framework_submenuStates[kGazetteScreen] == 4);
+  CHECK(VS::Menu::Framework::submenuStates[kGazetteScreen] == 4);
   CHECK(static_cast<unsigned char>(
-            Menu_Framework_submenuStates[kGazetteScreen - 1]) == 0xAA);
-  CHECK(Menu_Framework_backgroundFadeStep > 0);
+            VS::Menu::Framework::submenuStates[kGazetteScreen - 1]) == 0xAA);
+  CHECK(VS::Menu::Framework::backgroundFadeStep > 0);
   fw::UpdateLiveMainMenu(kGazetteScreen);
   CHECK(Menu_Score_score == 0);
   CHECK(Menu_Score_characterRank == 15);

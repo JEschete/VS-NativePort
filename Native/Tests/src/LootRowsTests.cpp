@@ -14,7 +14,7 @@
 #include "Content/ModuleData.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootScreen.h"
@@ -121,7 +121,7 @@ struct LiveRowsFixture {
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
   Items_Inventory previous_ashley{Audio_Seq_unusedInventory};
   Items_InventoryIndices previous_indices{Audio_Seq_unusedInventoryIndices};
-  Items_BattleLoot* previous_entry{Menu_Framework_lootEntry};
+  Items_BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
   char previous_difficulty{Audio_Seq_unusedStateFlags.difficulty};
 
   LiveRowsFixture() {
@@ -143,7 +143,7 @@ struct LiveRowsFixture {
     Menu_Loot_lootListCount = 0;
     Audio_Seq_unusedInventory = previous_ashley;
     Audio_Seq_unusedInventoryIndices = previous_indices;
-    Menu_Framework_lootEntry = previous_entry;
+    VS::Menu::Framework::lootEntry = previous_entry;
     Audio_Seq_unusedStateFlags.difficulty = previous_difficulty;
   }
 
@@ -447,7 +447,7 @@ TEST_CASE("Live chest staging pages the single loot entry",
   typed.misc[0] = {.item_id = 323, .difficulty_flags = 3, .count = 2};
   typed.misc[1] = {.item_id = 467, .difficulty_flags = 3, .count = 1};
   items::Live::Commit(chest, typed);
-  Menu_Framework_lootEntry = &chest;
+  VS::Menu::Framework::lootEntry = &chest;
   live::BuildStagedInventory(nullptr);
   REQUIRE(Menu_Loot_lootListCount == 2);
   CHECK(fixture.rows[0].state == 1);

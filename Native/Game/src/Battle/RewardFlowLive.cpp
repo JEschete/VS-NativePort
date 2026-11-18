@@ -20,7 +20,7 @@
 #include "Field/GameModeLive.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/MapLive.hpp"
-#include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Menu/Framework/ActionSelection.h"
@@ -114,7 +114,7 @@ class LiveWorld final : public RewardDispatchWorld {
     VS::Effects::LiveSpawnAbilityLearnedEffect();
   }
   void PauseMovingPlatforms() override {
-    Field_SetMovingPlatformsPausedEntry(1);
+    VS::Field::SetMovingPlatformsPausedEntry(1);
   }
   void ShowActionLearned(std::uint16_t action) override {
     constexpr int kLearnedNotice = 0xC;

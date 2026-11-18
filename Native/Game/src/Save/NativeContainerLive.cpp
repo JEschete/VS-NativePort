@@ -19,11 +19,11 @@
 #include "Items/Weapons.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/FilesLive.hpp"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -57,27 +57,27 @@ constexpr int kContainerRestorePriority = -4;
 constexpr int kContainerInformationBox = 7;
 
 char* ContainerString(int offset) {
-  return reinterpret_cast<char*>(&Menu_Files_containerStrings[offset]);
+  return reinterpret_cast<char*>(&containerStrings[offset]);
 }
 
 Menu_Container_InventoryStorage& Storage() {
-  if (Menu_Framework_unusedInventoryStorage == nullptr) {
+  if (VS::Menu::Framework::unusedInventoryStorage == nullptr) {
     VS::Core::Errorf("save", "Container save submenu used without its storage");
     std::abort();
   }
-  return *Menu_Framework_unusedInventoryStorage;
+  return *VS::Menu::Framework::unusedInventoryStorage;
 }
 
 class LiveContainerSave final : public ContainerSaveHost {
  public:
   void BeginSession() override {
     VS::Menu::PlayOpenSound();
-    Menu_Framework_unusedContainerEmptyBackup =
+    VS::Menu::Framework::unusedContainerEmptyBackup =
         static_cast<char>(Input_settings.containerEmpty);
-    Menu_Framework_unusedInventoryStorage =
+    VS::Menu::Framework::unusedInventoryStorage =
         static_cast<Menu_Container_InventoryStorage*>(
             VS::Core::Memory::AllocateLiveFromHighEnd(
-                sizeof *Menu_Framework_unusedInventoryStorage));
+                sizeof *VS::Menu::Framework::unusedInventoryStorage));
     static_assert(
         sizeof(Menu_Container_InventoryStorage) % sizeof(std::uint32_t) == 0);
     VS::Core::Memory::ZeroWordsBackward(
@@ -155,12 +155,13 @@ class LiveContainerSave final : public ContainerSaveHost {
                                              Save_NativeContainerData(),
                                              sizeof storage.storedContainer);
     VS::Save::MemoryCard::ReleaseLiveMenuResources();
-    Menu_Framework_menuState.returnState = Menu_Framework_menuState.currentMenu;
-    Menu_Framework_menuState.currentMenu = kContainerInventoryMenu;
+    VS::Menu::Framework::menuState.returnState =
+        VS::Menu::Framework::menuState.currentMenu;
+    VS::Menu::Framework::menuState.currentMenu = kContainerInventoryMenu;
   }
 
   ContainerScreenResult ContainerScreenOutcome() override {
-    switch (Menu_Framework_menuState.returnState) {
+    switch (VS::Menu::Framework::menuState.returnState) {
       case 0:
         return ContainerScreenResult::kRestore;
       case 1:
@@ -180,11 +181,12 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   int PollWrite() override { return UpdateLiveDataSaveMenu(0); }
 
-  bool DataNotSaved() override { return Menu_Files_dataNotSaved != 0; }
+  bool DataNotSaved() override { return dataNotSaved != 0; }
 
   void RestoreInventory() override {
     Menu_Container_InventoryStorage& storage = Storage();
-    Input_settings.containerEmpty = Menu_Framework_unusedContainerEmptyBackup;
+    Input_settings.containerEmpty =
+        VS::Menu::Framework::unusedContainerEmptyBackup;
     VS::Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory,
                                              storage.savedInventory,
                                              sizeof storage.savedInventory);
@@ -214,13 +216,13 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   bool InformationBoxClosed() override {
     return VS::Menu::DismissLiveTextBox(kContainerInformationBox) == 0 &&
-           Menu_Framework_backgroundFadeStep == 0;
+           VS::Menu::Framework::backgroundFadeStep == 0;
   }
 
   void EndSession() override {
     VS::Core::Memory::FreeLiveFromHighEnd(
-        Menu_Framework_unusedInventoryStorage);
-    Menu_Framework_unusedInventoryStorage = nullptr;
+        VS::Menu::Framework::unusedInventoryStorage);
+    VS::Menu::Framework::unusedInventoryStorage = nullptr;
     Save_NativeReleaseContainer();
   }
 

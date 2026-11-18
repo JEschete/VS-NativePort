@@ -6,8 +6,9 @@
 namespace item_detail_tests {
 namespace inventory = VS::Menu::Inventory;
 struct DispatchLiveFixture : equipment_detail_tests::LiveFixture {
-  equipment_detail_tests::ValueRestore<decltype(Menu_Framework_cursorColor)>
-      saved_cursor{Menu_Framework_cursorColor};
+  equipment_detail_tests::ValueRestore<
+      decltype(VS::Menu::Framework::cursorColor)>
+      saved_cursor{VS::Menu::Framework::cursorColor};
 
   DispatchLiveFixture() { inventory::ResetLiveItemDetailDispatch(); }
   ~DispatchLiveFixture() { inventory::ResetLiveItemDetailDispatch(); }

@@ -20,7 +20,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/LimbControllersLive.hpp"
@@ -40,7 +40,7 @@
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
 
-static_assert(sizeof Menu_textBoxOrderingTables == 102 * sizeof(u_long),
+static_assert(sizeof VS::Menu::textBoxOrderingTables == 102 * sizeof(u_long),
               "three textbox ordering buffers");
 
 int Tests_EncodedTextFormatting(void) {
@@ -304,7 +304,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
   void* const saved_table = Render_legacyOrderingTables[0];
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   const char saved_width = Render_variableFontGlyphWidths[5];
-  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
+  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuRow rows[40] = {0};
   // The Live menu links only into the current frame's ordering table, which
   // holds the overlay and scene tables as in the game loop.
@@ -334,7 +334,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
   Render_legacyPrimitiveBuffers[0] = storage + 1;
   Render_legacyOrderingTables[0] = frame_table;
   Render_variableFontGlyphWidths[5] = 7;
-  Menu_Framework_menuItems = rows;
+  VS::Menu::Framework::menuItems = rows;
 
   if (scrolling) {
     VS::Menu::Framework::DrawLiveScrollableRow(&row);
@@ -372,7 +372,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
   Render_legacyOrderingTables[0] = saved_table;
   VS::Render::LiveFontStyle() = saved_style;
   Render_variableFontGlyphWidths[5] = saved_width;
-  Menu_Framework_menuItems = saved_items;
+  VS::Menu::Framework::menuItems = saved_items;
   return passed;
 }
 
@@ -393,29 +393,29 @@ int CheckMenuWorkspaceReset(void) {
     return 0;
   }
   memset(storage, guard, allocation_bytes);
-  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
-  char* const saved_strings = Menu_Framework_stringBuf;
-  int* const saved_types = Menu_Framework_rowTypeBuf;
+  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  char* const saved_strings = VS::Menu::Framework::stringBuf;
+  int* const saved_types = VS::Menu::Framework::rowTypeBuf;
   const u_short saved_flags = Input_settings.menuFlags;
   const unsigned int saved_memory = Input_settings.cursorMemory;
-  const char saved_selection = Menu_Framework_submenuStates[0];
-  const int saved_cursor = Menu_Framework_mainMenuCursorAnimation;
-  Menu_Framework_menuItems =
+  const char saved_selection = VS::Menu::Framework::submenuStates[0];
+  const int saved_cursor = VS::Menu::Framework::mainMenuCursorAnimation;
+  VS::Menu::Framework::menuItems =
       reinterpret_cast<Menu_Framework_MenuRow*>((storage + kGuardBytes));
   // The workspace layout the menu's allocation sets: the string buffer, then
   // the row types, after the rows.
-  Menu_Framework_stringBuf =
-      reinterpret_cast<char*>(Menu_Framework_menuItems + kRows);
-  Menu_Framework_rowTypeBuf =
-      reinterpret_cast<int*>(Menu_Framework_stringBuf + kStringBytes);
+  VS::Menu::Framework::stringBuf =
+      reinterpret_cast<char*>(VS::Menu::Framework::menuItems + kRows);
+  VS::Menu::Framework::rowTypeBuf =
+      reinterpret_cast<int*>(VS::Menu::Framework::stringBuf + kStringBytes);
   Input_settings.menuFlags = 1;
   Input_settings.cursorMemory = 0;
-  Menu_Framework_submenuStates[0] = 0;
+  VS::Menu::Framework::submenuStates[0] = 0;
 
   int passed = VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0 &&
-               Menu_Framework_menuItems[kRows - 1].subText == nullptr;
-  const unsigned char* tail =
-      reinterpret_cast<const unsigned char*>(Menu_Framework_menuItems + kRows);
+               VS::Menu::Framework::menuItems[kRows - 1].subText == nullptr;
+  const unsigned char* tail = reinterpret_cast<const unsigned char*>(
+      VS::Menu::Framework::menuItems + kRows);
   for (int index = 0; index < kScratchBytes; ++index) {
     passed = passed && tail[index] == 0;
   }
@@ -423,25 +423,26 @@ int CheckMenuWorkspaceReset(void) {
     passed = passed && storage[index] == guard &&
              storage[kGuardBytes + workspace_bytes + index] == guard;
   }
-  Menu_Framework_menuItems = saved_items;
-  Menu_Framework_stringBuf = saved_strings;
-  Menu_Framework_rowTypeBuf = saved_types;
+  VS::Menu::Framework::menuItems = saved_items;
+  VS::Menu::Framework::stringBuf = saved_strings;
+  VS::Menu::Framework::rowTypeBuf = saved_types;
   Input_settings.menuFlags = saved_flags;
   Input_settings.cursorMemory = saved_memory;
-  Menu_Framework_submenuStates[0] = saved_selection;
-  Menu_Framework_mainMenuCursorAnimation = saved_cursor;
+  VS::Menu::Framework::submenuStates[0] = saved_selection;
+  VS::Menu::Framework::mainMenuCursorAnimation = saved_cursor;
   free(storage);
   return passed;
 }
 
 int CheckMenuReloadClosingDelay(void) {
   enum { kRows = 40, kVisits = 3, kClosingTicks = 5 };
-  const Menu_Framework_MenuControlState saved_state = Menu_Framework_menuState;
-  Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
-  u_int* saved_background = Menu_Framework_menuBackgroundBuffer;
-  const signed char saved_loaded = Menu_Framework_loadedSubMenu;
-  const char saved_shortcut = Menu_Framework_shortcutInvoked;
-  const char saved_without_main = Menu_Framework_openedWithoutMainMenu;
+  const Menu_Framework_MenuControlState saved_state =
+      VS::Menu::Framework::menuState;
+  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  u_int* saved_background = VS::Menu::Framework::menuBackgroundBuffer;
+  const signed char saved_loaded = VS::Menu::Framework::loadedSubMenu;
+  const char saved_shortcut = VS::Menu::Framework::shortcutInvoked;
+  const char saved_without_main = VS::Menu::Framework::openedWithoutMainMenu;
   Menu_Framework_MenuRow rows[kRows] = {0};
   // The overlay read is a queue slot, as the menu's own reads are.
   Content_DiscQueueSlot* const request = &Content_discRequestSlots[31];
@@ -449,20 +450,20 @@ int CheckMenuReloadClosingDelay(void) {
   int passed = 1;
   Boot_ResetMainMenuStatics();
   VS::Menu::Framework::ResetLiveMainMenuStatics();
-  Menu_Framework_menuItems = rows;
-  Menu_Framework_menuBackgroundBuffer = nullptr;
-  Menu_Framework_loadedSubMenu = 0;
-  Menu_Framework_shortcutInvoked = 0;
-  Menu_Framework_openedWithoutMainMenu = 1;
-  Menu_Framework_menuState.cdQueue = request;
+  VS::Menu::Framework::menuItems = rows;
+  VS::Menu::Framework::menuBackgroundBuffer = nullptr;
+  VS::Menu::Framework::loadedSubMenu = 0;
+  VS::Menu::Framework::shortcutInvoked = 0;
+  VS::Menu::Framework::openedWithoutMainMenu = 1;
+  VS::Menu::Framework::menuState.cdQueue = request;
 
   for (int visit = 0; visit < kVisits; ++visit) {
     request->state = Content_DiscRequestState_Loaded;
     request->cdFile = {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE};
-    Menu_Framework_menuState.loading = 1;
+    VS::Menu::Framework::menuState.loading = 1;
     passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1 &&
               request->state == Content_DiscRequestState_Free &&
-              Menu_Framework_menuState.loading == 0;
+              VS::Menu::Framework::menuState.loading == 0;
     for (int tick = 1; tick <= kClosingTicks; ++tick) {
       passed &= VS::Menu::Framework::LoadLiveMenuOverlay(0) == 1;
       passed &= VS::Menu::Framework::LiveQuitDelay() == (tick == kClosingTicks);
@@ -471,12 +472,12 @@ int CheckMenuReloadClosingDelay(void) {
 
   Boot_ResetMainMenuStatics();
   VS::Menu::Framework::ResetLiveMainMenuStatics();
-  Menu_Framework_menuState = saved_state;
-  Menu_Framework_menuItems = saved_items;
-  Menu_Framework_menuBackgroundBuffer = saved_background;
-  Menu_Framework_loadedSubMenu = saved_loaded;
-  Menu_Framework_shortcutInvoked = saved_shortcut;
-  Menu_Framework_openedWithoutMainMenu = saved_without_main;
+  VS::Menu::Framework::menuState = saved_state;
+  VS::Menu::Framework::menuItems = saved_items;
+  VS::Menu::Framework::menuBackgroundBuffer = saved_background;
+  VS::Menu::Framework::loadedSubMenu = saved_loaded;
+  VS::Menu::Framework::shortcutInvoked = saved_shortcut;
+  VS::Menu::Framework::openedWithoutMainMenu = saved_without_main;
   *request = saved_slot;
   return passed;
 }
@@ -549,9 +550,9 @@ int CheckMenuPromptPanelLinks(void) {
   enum { kOrderingWords = 0x822, kPacketWords = 256, kAnimationFrames = 8 };
   const u_long guard = 0xDEADBEEF;
   const Render_FrameScratch saved_frame = Render_frameScratch;
-  const char saved_display = Menu_Framework_displayActionCost;
+  const char saved_display = VS::Menu::Framework::displayActionCost;
   Menu_Framework_TextHeader saved_headers[2];
-  memcpy(saved_headers, Menu_Framework_textHeaders, sizeof saved_headers);
+  memcpy(saved_headers, VS::Menu::Framework::textHeaders, sizeof saved_headers);
   u_long ordering[kOrderingWords];
   u_long storage[kPacketWords];
   ClearOTagR(ordering, kOrderingWords);
@@ -561,8 +562,8 @@ int CheckMenuPromptPanelLinks(void) {
   Render_frameScratch.primitiveCursor = storage + 1;
   Render_frameScratch.orderingTable = ordering + 18;
   Render_frameScratch.overlayOrderingTable = ordering + 2;
-  Menu_Framework_displayActionCost = 1;
-  memset(Menu_Framework_textHeaders, 0, sizeof saved_headers);
+  VS::Menu::Framework::displayActionCost = 1;
+  memset(VS::Menu::Framework::textHeaders, 0, sizeof saved_headers);
   // The typed HUD packets reserve their words in the current frame's buffer
   // and link only into the current frame's ordering table.
   void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
@@ -586,8 +587,8 @@ int CheckMenuPromptPanelLinks(void) {
                nextPrim(ordering + 15) == storage + 15 && end > storage + 1 &&
                end < storage + kPacketWords && storage[0] == guard &&
                *end == guard;
-  memcpy(Menu_Framework_textHeaders, saved_headers, sizeof saved_headers);
-  Menu_Framework_displayActionCost = saved_display;
+  memcpy(VS::Menu::Framework::textHeaders, saved_headers, sizeof saved_headers);
+  VS::Menu::Framework::displayActionCost = saved_display;
   Render_frameScratch = saved_frame;
   Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
   Render_legacyOrderingTables[Render_frameBuf & 1] = saved_table;

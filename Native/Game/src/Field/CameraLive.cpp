@@ -37,7 +37,7 @@
 #include "Field/Interactions.h"
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
-#include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/Zone.h"
@@ -340,7 +340,7 @@ void LiveCameraHost::SetMinimapVisible(bool visible) {
 }
 
 void LiveCameraHost::SetMovingPlatformsPaused(bool paused) {
-  Escape([paused] { Field_SetMovingPlatformsPausedEntry(paused ? 1 : 0); });
+  Escape([paused] { SetMovingPlatformsPausedEntry(paused ? 1 : 0); });
 }
 
 void LiveCameraHost::EnterFieldExploration() {

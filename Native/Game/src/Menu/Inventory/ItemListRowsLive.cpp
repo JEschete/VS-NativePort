@@ -16,7 +16,7 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -179,11 +179,11 @@ class LiveItemRowsWorld final : public ItemRowsWorld {
 class LiveRestoreWorld final : public ItemRowsRestoreWorld {
  public:
   std::uint8_t ListAnimationRow() override {
-    return static_cast<std::uint8_t>(Menu_Framework_itemsListRow);
+    return static_cast<std::uint8_t>(VS::Menu::Framework::itemsListRow);
   }
   void AdvanceListRows() override { Framework::UpdateLiveRowSelection(); }
   Framework::MenuRow* Row(std::int32_t index) override {
-    if (Menu_Framework_menuItems == nullptr || index < 0 ||
+    if (VS::Menu::Framework::menuItems == nullptr || index < 0 ||
         static_cast<std::size_t>(index) >= Framework::kRowCount) {
       return nullptr;
     }

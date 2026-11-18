@@ -21,7 +21,7 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -161,7 +161,7 @@ class LiveAssignmentHost final : public AssignmentHost {
     Framework::SetLiveInformationMessageText(TextBytes(text));
   }
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
-  void HideActionCost() override { Menu_Framework_displayActionCost = 0; }
+  void HideActionCost() override { VS::Menu::Framework::displayActionCost = 0; }
   void DrawButton(AssignmentButton button, int x, int y) override {
     const std::array<int, kAssignmentButtonCount> icons{2, 0, 1};
     auto* table =
@@ -193,9 +193,9 @@ class LiveAssignmentHost final : public AssignmentHost {
   }
   void RememberCursor(AbilityMenuType type, AbilityCursor cursor) override {
     const auto slot = static_cast<std::size_t>(type) * kPointersPerRow;
-    Menu_Framework_menuMemory.cursorMemories[slot] =
+    VS::Menu::Framework::menuMemory.cursorMemories[slot] =
         LegacyByte(cursor.highlighted);
-    Menu_Framework_menuMemory.cursorMemories[slot + 1] =
+    VS::Menu::Framework::menuMemory.cursorMemories[slot + 1] =
         LegacyByte(cursor.first);
   }
   int DrawCursor(int animation, int position) override {
@@ -215,7 +215,7 @@ class LiveListHost final : public AbilityListHost {
         kind == AbilityKind::kChain ? 0 : 1, 1);
   }
   bool ShortcutInvoked() const override {
-    return Menu_Framework_shortcutInvoked != 0;
+    return VS::Menu::Framework::shortcutInvoked != 0;
   }
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
   std::span<const std::uint8_t> ActionOrder(AbilityKind kind) const override {
@@ -305,7 +305,7 @@ class LiveScreenHost final : public AbilityScreenHost {
     Framework::InitializeLiveInformationBox();
   }
   int Shortcut() const override {
-    return static_cast<std::uint8_t>(Menu_Framework_shortcutInvoked);
+    return static_cast<std::uint8_t>(VS::Menu::Framework::shortcutInvoked);
   }
   bool ShowShortcutCategory(const AbilityShortcutRow& row) override {
     const auto index = row.kind == AbilityKind::kChain
@@ -369,7 +369,7 @@ class LiveScreenHost final : public AbilityScreenHost {
   }
   void ClearCommand() override { Framework::SetLiveCommandLabel(0); }
   void ReturnToBattleMenu() override {
-    Menu_Framework_menuState.currentMenu = kBattleMenu;
+    VS::Menu::Framework::menuState.currentMenu = kBattleMenu;
   }
   std::optional<std::uint8_t> AnimationOffset(
       std::uint8_t step) const override {

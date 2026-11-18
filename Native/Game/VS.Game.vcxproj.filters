@@ -1098,7 +1098,7 @@
     <ClCompile Include="src\Effects\CameraLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\CameraLiveState.h">
+    <ClInclude Include="src\Effects\CameraLiveState.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Curves.cpp">
@@ -1119,7 +1119,7 @@
     <ClCompile Include="src\Effects\EffectResourcesLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\EffectResourcesLiveState.h">
+    <ClInclude Include="src\Effects\EffectResourcesLiveState.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\EffectRuntime.cpp">
@@ -2058,7 +2058,7 @@
     <ClCompile Include="src\Field\BackgroundLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\BackgroundLiveState.h">
+    <ClInclude Include="src\Field\BackgroundLiveState.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Camera.cpp">
@@ -2079,7 +2079,7 @@
     <ClCompile Include="src\Field\ChestInteractionsLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\ChestInteractionsLive.h">
+    <ClInclude Include="src\Field\ChestInteractionsLive.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Collision.cpp">
@@ -2130,7 +2130,7 @@
     <ClCompile Include="src\Field\EnvironmentLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\EnvironmentLiveState.h">
+    <ClInclude Include="src\Field\EnvironmentLiveState.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\GameMode.cpp">
@@ -2169,9 +2169,6 @@
     <ClCompile Include="src\Field\GimmickPlacementLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\GimmickPlacementLive.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\GimmickReactions.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2262,9 +2259,6 @@
     <ClCompile Include="src\Field\PlatformPlacementLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\PlatformPlacementLive.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClInclude Include="src\Field\Platforms.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -2319,7 +2313,7 @@
     <ClCompile Include="src\Field\RoomSwitchesLive.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomSwitchesLive.h">
+    <ClInclude Include="src\Field\RoomSwitchesLive.hpp">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\RoomTriggerMarkers.cpp">
@@ -2550,7 +2544,7 @@
     <ClCompile Include="src\Menu\FilesLive.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\FilesLiveState.h">
+    <ClInclude Include="src\Menu\FilesLiveState.hpp">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Framework\ActorPreview.cpp">
@@ -2580,7 +2574,7 @@
     <ClCompile Include="src\Menu\Framework\EquipmentDetailsLive.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\EquipmentDetailsLiveState.h">
+    <ClInclude Include="src\Menu\Framework\EquipmentDetailsLiveState.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Framework\Framework.cpp">
@@ -2592,7 +2586,7 @@
     <ClCompile Include="src\Menu\Framework\FrameworkLive.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\FrameworkLiveState.h">
+    <ClInclude Include="src\Menu\Framework\FrameworkLiveState.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Framework\ItemRows.cpp">
@@ -2604,7 +2598,7 @@
     <ClInclude Include="src\Menu\Framework\ItemRowsLiveHost.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="src\Menu\Framework\ItemRowsLiveState.h">
+    <ClInclude Include="src\Menu\Framework\ItemRowsLiveState.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="src\Menu\Framework\ItemSorting.hpp">

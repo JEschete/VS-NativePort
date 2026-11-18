@@ -14,7 +14,7 @@
 #include "Battle/Feedback.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
-#include "Field/GimmickPlacementLive.h"
+#include "Field/GimmickPlacementLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Render/Render.h"
 #include "Render/Sprites.hpp"
@@ -95,7 +95,7 @@ class LiveActorMarkerWorld final : public ActorMarkerWorld {
     return UnpackMarkerPoint(static_cast<std::uint32_t>(screen));
   }
   int GimmickSubtype(int actor) override {
-    return Field_GimmickSubtypeEntry(actor);
+    return VS::Field::GimmickSubtypeEntry(actor);
   }
   bool DrawSprite(const ActorMarkerSprite& sprite) override {
     u_long* const chain = SceneEntry(sprite.ordering_slot);

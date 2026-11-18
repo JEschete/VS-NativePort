@@ -13,7 +13,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Save/MemoryCard/Resources.h"
 #include "Save/MenuAssets.hpp"
@@ -312,7 +312,7 @@ class LiveAssetFixture {
     VS::Render::LiveTexturePages() = saved_pages_;
     LoadImage(&image_, reinterpret_cast<u_long*>(saved_vram_.data()));
     DrawSync(0);
-    Menu_Files_textTable = saved_menu_text_;
+    VS::Menu::Files::textTable = saved_menu_text_;
     Title_saveMenuText = saved_title_text_;
     Title_saveFileSummaries = saved_summaries_;
     Title_cardDirectoryEntryBuffer = saved_directory_;
@@ -335,7 +335,7 @@ class LiveAssetFixture {
   Content_DiscRequestCounts saved_counts_ = Content_discRequestCounts;
   Content_DiscDrive saved_drive_ = Content_discDriveState;
   int saved_soft_reset_ = Boot_isSoftResetEnabled;
-  u_short* saved_menu_text_ = Menu_Files_textTable;
+  u_short* saved_menu_text_ = VS::Menu::Files::textTable;
   u_short* saved_title_text_ = Title_saveMenuText;
   Save_CardFileInfoRecord* saved_summaries_ = Title_saveFileSummaries;
   DIRENTRY* saved_directory_ = Title_cardDirectoryEntryBuffer;
@@ -389,7 +389,7 @@ void LoadLive(int (*step)(int)) {
 struct AssetViews {
   char* image = Title_memoryCardUiResource;
   Save_CardUiResources* resources = Save_MemoryCard_uiResources;
-  u_short* menu_text = Menu_Files_textTable;
+  u_short* menu_text = VS::Menu::Files::textTable;
   u_short* title_text = Title_saveMenuText;
   Save_CardFileInfoRecord* summaries = Title_saveFileSummaries;
   DIRENTRY* directory = Title_cardDirectoryEntryBuffer;
@@ -435,7 +435,7 @@ void CheckViewsCleared() {
   CHECK(LiveMenuAssetPhase() == MenuAssetPhase::kIdle);
   CHECK(Title_memoryCardUiResource == nullptr);
   CHECK(Save_MemoryCard_uiResources == nullptr);
-  CHECK(Menu_Files_textTable == nullptr);
+  CHECK(VS::Menu::Files::textTable == nullptr);
   CHECK(Title_saveMenuText == nullptr);
   CHECK(Title_saveFileSummaries == nullptr);
   CHECK(Title_cardDirectoryEntryBuffer == nullptr);
@@ -447,7 +447,7 @@ TEST_CASE("Live data-menu asset release clears every view into the block",
   const LiveAssetFixture fixture;
   const auto refused_pages = VS::Render::RefusedLiveTexturePageRequestCount();
   LoadLive(&VS::Save::MemoryCard::StepLiveMenuResources);
-  CHECK(Menu_Files_textTable == Save_MemoryCard_uiResources->textTable);
+  CHECK(VS::Menu::Files::textTable == Save_MemoryCard_uiResources->textTable);
   VS::Save::MemoryCard::ReleaseLiveMenuResources();
   CheckViewsCleared();
   CHECK(VS::Render::RefusedLiveTexturePageRequestCount() == refused_pages);

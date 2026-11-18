@@ -14,7 +14,7 @@
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Effects/CameraLiveState.h"
+#include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.h"
 
 namespace {
@@ -29,9 +29,10 @@ struct ImpactFixture {
   Effects_EffectPackage previous_secondary = Effects_secondaryPackage;
   Effects_ActionEffectRequest previous_request = Effects_secondaryRequest;
   Effects_EffectInstance* previous_instances = Effects_secondaryInstances;
-  decltype(Effects_savedActionCamera) previous_camera =
-      Effects_savedActionCamera;
-  decltype(Effects_effectCamera) previous_effect_camera = Effects_effectCamera;
+  decltype(VS::Effects::savedActionCamera) previous_camera =
+      VS::Effects::savedActionCamera;
+  decltype(VS::Effects::effectCamera) previous_effect_camera =
+      VS::Effects::effectCamera;
   decltype(std::to_array(Effects_tokenBitmaps)) previous_tokens =
       std::to_array(Effects_tokenBitmaps);
   int previous_busy = Effects_effectBusyFlags;
@@ -59,8 +60,8 @@ struct ImpactFixture {
     Effects_secondaryPackage = previous_secondary;
     Effects_secondaryRequest = previous_request;
     Effects_secondaryInstances = previous_instances;
-    Effects_savedActionCamera = previous_camera;
-    Effects_effectCamera = previous_effect_camera;
+    VS::Effects::savedActionCamera = previous_camera;
+    VS::Effects::effectCamera = previous_effect_camera;
     Effects_effectBusyFlags = previous_busy;
     std::ranges::copy(previous_tokens, std::begin(Effects_tokenBitmaps));
   }

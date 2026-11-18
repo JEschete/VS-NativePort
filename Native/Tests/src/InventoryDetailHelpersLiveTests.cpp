@@ -10,9 +10,9 @@
 #include "Input/ControllerLiveState.h"
 #include "Input/Pad.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -25,8 +25,8 @@ constexpr std::size_t kIndexedCategories = 7;
 constexpr int kSelectedRow = 20;
 
 struct LiveFixture {
-  Menu_Framework_MenuRow* previous_rows = Menu_Framework_menuItems;
-  Menu_Framework_MenuMemory previous_memory = Menu_Framework_menuMemory;
+  Menu_Framework_MenuRow* previous_rows = VS::Menu::Framework::menuItems;
+  Menu_Framework_MenuMemory previous_memory = VS::Menu::Framework::menuMemory;
   Items_Inventory previous_inventory = Audio_Seq_unusedInventory;
   int previous_held = Input_buttonsState;
   int previous_repeat = Input_buttonRepeat;
@@ -38,8 +38,8 @@ struct LiveFixture {
   char previous_categories = Menu_Inventory_itemCategoryIconsEnabled;
   char previous_command = Menu_Inventory_statusCommandState;
   char previous_header = Menu_Inventory_selectedItemCategoryIconOnTop;
-  char previous_pages = Menu_Framework_enabledStatPages;
-  char previous_page = Menu_Framework_itemStatPage;
+  char previous_pages = VS::Menu::Framework::enabledStatPages;
+  char previous_page = VS::Menu::Framework::itemStatPage;
   std::array<u_char*, kIndexedCategories> previous_orders{};
   std::array<Menu_Framework_MenuRow, fw::kRowCount> rows{};
   std::array<std::uint8_t, 48> order{};
@@ -48,7 +48,7 @@ struct LiveFixture {
     for (std::size_t i = 0; i < previous_orders.size(); ++i) {
       previous_orders[i] = Menu_Inventory_inventoryIndices[i];
     }
-    Menu_Framework_menuItems = rows.data();
+    VS::Menu::Framework::menuItems = rows.data();
     Audio_Seq_unusedInventory = {};
     Input_buttonsState = 0;
     Input_buttonRepeat = 0;
@@ -62,8 +62,8 @@ struct LiveFixture {
   }
 
   ~LiveFixture() {
-    Menu_Framework_menuItems = previous_rows;
-    Menu_Framework_menuMemory = previous_memory;
+    VS::Menu::Framework::menuItems = previous_rows;
+    VS::Menu::Framework::menuMemory = previous_memory;
     Audio_Seq_unusedInventory = previous_inventory;
     Input_buttonsState = previous_held;
     Input_buttonRepeat = previous_repeat;
@@ -76,8 +76,8 @@ struct LiveFixture {
     Menu_Inventory_statusCommandState = previous_command;
     Menu_Inventory_selectedItemCategoryIconOnTop = previous_header;
     fw::ResetLiveEquipmentDetailsStatics();
-    Menu_Framework_enabledStatPages = previous_pages;
-    Menu_Framework_itemStatPage = previous_page;
+    VS::Menu::Framework::enabledStatPages = previous_pages;
+    VS::Menu::Framework::itemStatPage = previous_page;
     for (std::size_t i = 0; i < previous_orders.size(); ++i) {
       Menu_Inventory_inventoryIndices[i] = previous_orders[i];
     }
@@ -93,7 +93,7 @@ auto MemoryBytes(const Menu_Framework_MenuMemory& memory) {
 TEST_CASE("F02566 live panels need no row or actor owner",
           "[inventory-detail-helpers-live][F02566]") {
   LiveFixture fixture;
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   inventory::SetLivePanelVisibility(static_cast<char>(0xFF));
   CHECK(static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleEnabled) ==
         0xFF);
@@ -113,7 +113,7 @@ TEST_CASE("F02567 live paging uses the production inventory count lazily",
   Input_buttonRepeat = VS::Input::R1;
   CHECK(inventory::PollLiveDetailsPaging(0, 1) == 0);
   Input_buttonsState = VS::Input::L1 | VS::Input::R1;
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   CHECK(inventory::PollLiveDetailsPaging(-1, 17) == 17);
 }
 
@@ -148,7 +148,7 @@ TEST_CASE("F02571 live layout uses real transition and stat page helpers",
   CHECK(fixture.rows[31].w == 164);
   CHECK(fixture.rows[31].targetPosition0 == 16);
   CHECK(fixture.rows[kSelectedRow].targetPosition0 == 18);
-  CHECK(Menu_Framework_enabledStatPages == 7);
+  CHECK(VS::Menu::Framework::enabledStatPages == 7);
 }
 
 TEST_CASE("F02573 live selection preserves the full cursor record and peers",
@@ -156,14 +156,15 @@ TEST_CASE("F02573 live selection preserves the full cursor record and peers",
   LiveFixture fixture;
   std::array<std::uint8_t, sizeof(Menu_Framework_MenuMemory)> initial{};
   initial.fill(0xA5);
-  Menu_Framework_menuMemory = std::bit_cast<Menu_Framework_MenuMemory>(initial);
+  VS::Menu::Framework::menuMemory =
+      std::bit_cast<Menu_Framework_MenuMemory>(initial);
   Menu_Inventory_inventoryIndices[5] = fixture.order.data();
   fixture.order[47] = 48;
   auto expected = initial;
   expected[0x3C + 5 * 2] = 0;
   expected[0x3C + 5 * 2 + 1] = 47;
   CHECK(inventory::SelectLiveDetailsItem(5, 47) == 48);
-  CHECK(MemoryBytes(Menu_Framework_menuMemory) == expected);
+  CHECK(MemoryBytes(VS::Menu::Framework::menuMemory) == expected);
   fixture.order[47] = 1;
   CHECK(inventory::SelectLiveDetailsItem(5, 47) == 1);
 }

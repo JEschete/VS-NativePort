@@ -33,4 +33,19 @@ std::optional<Field_PlatformContactPoint> LiveMovingPlatformPlacement(
 // The current room's visible platform on `support_layer` (func_800A4A24).
 std::optional<Field_PlatformContactPoint> FindLiveMovingPlatformById(
     int support_layer);
+
+void InitializeMovingPlatformsEntry();
+void DrawMovingPlatformShadowsEntry();
+void SetPlatformFreezeAppearanceEntry(int requested);
+void* MovingPlatformTargetWaypointEntry(int index);
+int UpdateMovingPlatformsEntry();
+int CollectMovingPlatformPositionsEntry(
+    Field_PlatformContactPoint output_contacts[]);
+int SetMovingPlatformActorEntry(int platform_index, int control);
+void ResetMovingPlatformWaypointEntry(int platform_index, int waypoint);
+void SetMovingPlatformsPausedEntry(int paused);
+void FreezeMovingPlatformsEntry(int freeze_frames);
+void FreezeRoomGimmicksTemporarilyEntry();
+void SetMovingPlatformVisibilityEntry(int platform_index, int visibility);
+unsigned int MovingPlatformDwellTicksEntry(int platform_index);
 }  // namespace VS::Field

@@ -24,7 +24,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Runtime.h"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/EnvironmentLiveState.h"
+#include "Field/EnvironmentLiveState.hpp"
 #include "Field/GameMode.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
@@ -33,7 +33,7 @@
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Items/LootLiveState.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
@@ -50,7 +50,7 @@ struct LiveFixture {
   render::PaletteAnimation saved_palette = render::LivePaletteAnimation();
   VS::Field::RoomWeatherState saved_weather =
       VS::Field::LoadLiveRoomWeatherState();
-  std::int16_t saved_weather_alias = Field_weatherParameters[6];
+  std::int16_t saved_weather_alias = VS::Field::weatherParameters[6];
   std::int16_t saved_effect_sound = VS::Field::LiveRoomEffectState().sound_id;
   decltype(VS::Field::roomTint) saved_tint = VS::Field::roomTint;
   u_int saved_phase = Battle_actionFlowMode;
@@ -76,7 +76,7 @@ struct LiveFixture {
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
               nullptr);
     render::InitializeLiveClutAnimation();
-    Field_weatherAmbientSoundId = -1;
+    VS::Field::weatherAmbientSoundId = -1;
     VS::Field::LiveRoomEffectState().sound_id = -1;
     Battle_actionFlowMode = 99;
     Battle_rewardsFollowAction = 0;
@@ -101,7 +101,7 @@ struct LiveFixture {
     const_cast<render::PaletteAnimation&>(render::LivePaletteAnimation()) =
         saved_palette;
     VS::Field::StoreLiveRoomWeatherState(saved_weather);
-    Field_weatherParameters[6] = saved_weather_alias;
+    VS::Field::weatherParameters[6] = saved_weather_alias;
     VS::Field::LiveRoomEffectState().sound_id = saved_effect_sound;
     VS::Field::roomTint = saved_tint;
     Battle_actionFlowMode = saved_phase;
@@ -121,38 +121,39 @@ struct LiveFixture {
 };
 
 struct LiveMenuFixture : LiveFixture {
-  decltype(Menu_Framework_menuState) saved_menu = Menu_Framework_menuState;
-  decltype(Menu_Framework_actionSelection) saved_selection =
-      Menu_Framework_actionSelection;
-  Items_LootListNode* saved_lists = Menu_Framework_lootLists;
-  Items_BattleLoot* saved_entry = Menu_Framework_lootEntry;
-  Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
-  int saved_restrictions = Menu_Framework_actionRestrictions;
-  char saved_shortcut = Menu_Framework_shortcutInvoked;
-  char saved_opened = Menu_Framework_openedWithoutMainMenu;
-  char saved_art = Menu_Framework_unlockedBreakArt;
-  char saved_ability = Menu_Framework_unlockedBattleAbility;
+  decltype(VS::Menu::Framework::menuState) saved_menu =
+      VS::Menu::Framework::menuState;
+  decltype(VS::Menu::Framework::actionSelection) saved_selection =
+      VS::Menu::Framework::actionSelection;
+  Items_LootListNode* saved_lists = VS::Menu::Framework::lootLists;
+  Items_BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
+  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
+  int saved_restrictions = VS::Menu::Framework::actionRestrictions;
+  char saved_shortcut = VS::Menu::Framework::shortcutInvoked;
+  char saved_opened = VS::Menu::Framework::openedWithoutMainMenu;
+  char saved_art = VS::Menu::Framework::unlockedBreakArt;
+  char saved_ability = VS::Menu::Framework::unlockedBattleAbility;
   std::array<Menu_Framework_MenuRow, 40> rows{};
 
   LiveMenuFixture() {
-    Menu_Framework_menuState = {};
-    Menu_Framework_menuState.currentMenu = 0x3F;
-    Menu_Framework_actionSelection = {};
-    Menu_Framework_menuItems = rows.data();
-    Menu_Framework_lootLists = nullptr;
-    Menu_Framework_lootEntry = nullptr;
+    VS::Menu::Framework::menuState = {};
+    VS::Menu::Framework::menuState.currentMenu = 0x3F;
+    VS::Menu::Framework::actionSelection = {};
+    VS::Menu::Framework::menuItems = rows.data();
+    VS::Menu::Framework::lootLists = nullptr;
+    VS::Menu::Framework::lootEntry = nullptr;
   }
   ~LiveMenuFixture() {
-    Menu_Framework_menuState = saved_menu;
-    Menu_Framework_actionSelection = saved_selection;
-    Menu_Framework_lootLists = saved_lists;
-    Menu_Framework_lootEntry = saved_entry;
-    Menu_Framework_menuItems = saved_rows;
-    Menu_Framework_actionRestrictions = saved_restrictions;
-    Menu_Framework_shortcutInvoked = saved_shortcut;
-    Menu_Framework_openedWithoutMainMenu = saved_opened;
-    Menu_Framework_unlockedBreakArt = saved_art;
-    Menu_Framework_unlockedBattleAbility = saved_ability;
+    VS::Menu::Framework::menuState = saved_menu;
+    VS::Menu::Framework::actionSelection = saved_selection;
+    VS::Menu::Framework::lootLists = saved_lists;
+    VS::Menu::Framework::lootEntry = saved_entry;
+    VS::Menu::Framework::menuItems = saved_rows;
+    VS::Menu::Framework::actionRestrictions = saved_restrictions;
+    VS::Menu::Framework::shortcutInvoked = saved_shortcut;
+    VS::Menu::Framework::openedWithoutMainMenu = saved_opened;
+    VS::Menu::Framework::unlockedBreakArt = saved_art;
+    VS::Menu::Framework::unlockedBattleAbility = saved_ability;
   }
 };
 
@@ -255,10 +256,10 @@ TEST_CASE("F00220 live acquisition uses the actual pending and menu policies",
   b::ShowLivePendingRewardUnlock();
   CHECK(Battle_actionFlowMode == 6);
   CHECK(VS::Field::isInteractionPaused == 1);
-  CHECK(Menu_Framework_menuState.currentMenu == 3);
-  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
-  CHECK(Menu_Framework_unlockedBreakArt == 0);
-  CHECK(Menu_Framework_unlockedBattleAbility == 1);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 3);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
+  CHECK(VS::Menu::Framework::unlockedBreakArt == 0);
+  CHECK(VS::Menu::Framework::unlockedBattleAbility == 1);
   CHECK(Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked == 0);
 }
 
@@ -272,9 +273,9 @@ TEST_CASE("F00221 live loot uses the actual native list owner and menu",
   b::OpenLivePendingLootRewards();
   CHECK(Battle_actionFlowMode == 4);
   CHECK(VS::Field::isInteractionPaused == 1);
-  CHECK(Menu_Framework_menuState.currentMenu == 12);
-  CHECK(Menu_Framework_lootLists == &node);
-  CHECK(Menu_Framework_lootEntry == nullptr);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 12);
+  CHECK(VS::Menu::Framework::lootLists == &node);
+  CHECK(VS::Menu::Framework::lootEntry == nullptr);
   CHECK(VS::Items::lootListHead == &node);
 }
 
@@ -286,35 +287,35 @@ TEST_CASE("F00222 live results use the production challenge menu",
   b::OpenLiveRewardResults();
   CHECK(Battle_actionFlowMode == 3);
   CHECK(VS::Field::isInteractionPaused == 1);
-  CHECK(Menu_Framework_menuState.currentMenu == 15);
-  CHECK(Menu_Framework_openedWithoutMainMenu == 1);
-  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 15);
+  CHECK(VS::Menu::Framework::openedWithoutMainMenu == 1);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
 }
 
 TEST_CASE("F00223 live menu updates retain busy state or complete the return",
           "[reward-flow][reward-live][F00223]") {
   LiveMenuFixture fixture;
   const bool returning = GENERATE(false, true);
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = returning ? 0x7F : 0x3F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = returning ? 0x7F : 0x3F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Battle_actionState = nullptr;
   b::UpdateLiveRewardResultsDialog();
   CHECK(Battle_actionFlowMode == (returning ? 2 : 99));
-  CHECK(Menu_Framework_actionSelection.menuStatus == (returning ? 2 : 1));
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == (returning ? 2 : 1));
   CHECK(VS::Field::isInteractionPaused == (returning ? 0 : 77));
 }
 
 TEST_CASE("F00196 live continuation resumes field and actual ability recovery",
           "[reward-dialogs][reward-live][F00196]") {
   LiveDialogFixture fixture;
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0x7F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0x7F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Field_isMinimapVisible = 0;
   Field_areMovingPlatformsPaused = 1;
   b::UpdateLiveLootResults();
-  CHECK(Menu_Framework_actionSelection.menuStatus == 2);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(VS::Field::areRoomUpdatesPaused == 0);
   CHECK(Field_areMovingPlatformsPaused == 0);
@@ -332,10 +333,10 @@ TEST_CASE("F00197 live delay uses older ability grant not reward phase six",
   CHECK(Battle_actionFlowMode == 14);
   CHECK(VS::Field::isInteractionPaused == 1);
   CHECK(Field_areMovingPlatformsPaused == 1);
-  CHECK(Menu_Framework_menuState.currentMenu == 3);
-  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
-  CHECK(Menu_Framework_unlockedBreakArt == 0);
-  CHECK(Menu_Framework_unlockedBattleAbility == 1);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 3);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
+  CHECK(VS::Menu::Framework::unlockedBreakArt == 0);
+  CHECK(VS::Menu::Framework::unlockedBattleAbility == 1);
 }
 
 TEST_CASE("F00197 live busy delay needs no unused action or character owner",
@@ -347,22 +348,22 @@ TEST_CASE("F00197 live busy delay needs no unused action or character owner",
   b::UpdateLiveAbilityUnlockDelay();
   CHECK(Battle_actionFlowMode == 99);
   CHECK(VS::Field::isInteractionPaused == 77);
-  CHECK(Menu_Framework_menuState.currentMenu == 0x3F);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 0x3F);
 }
 
 TEST_CASE("F00198 live notice blocks field restoration and ability recovery",
           "[reward-dialogs][reward-live][F00198]") {
   LiveDialogFixture fixture;
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0x7F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0x7F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Menu_sceneNotificationBuffer = fixture.notice.data();
   Menu_textBoxes[7].flags.done = 0;
   Battle_actionState = nullptr;
   const auto refusals = VS::Menu::RefusedLiveSceneNotificationCount();
   b::UpdateLiveAbilityUnlockResults();
   CHECK(VS::Menu::RefusedLiveSceneNotificationCount() == refusals);
-  CHECK(Menu_Framework_actionSelection.menuStatus == 2);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 2);
   CHECK(Menu_sceneNotificationBuffer == fixture.notice.data());
   CHECK(VS::Field::isInteractionPaused == 77);
   CHECK(Battle_actionFlowMode == 99);
@@ -371,12 +372,12 @@ TEST_CASE("F00198 live notice blocks field restoration and ability recovery",
 TEST_CASE("F00198 live absent notice proceeds to actual older ability recovery",
           "[reward-dialogs][reward-live][F00198]") {
   LiveDialogFixture fixture;
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0x7F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0x7F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Field_isMinimapVisible = 0;
   b::UpdateLiveAbilityUnlockResults();
-  CHECK(Menu_Framework_actionSelection.menuStatus == 2);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 2);
   CHECK(Menu_sceneNotificationBuffer == nullptr);
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(Field_isMinimapVisible == 1);
@@ -388,7 +389,7 @@ TEST_CASE("F00198 live absent notice proceeds to actual older ability recovery",
 TEST_CASE("F00198 live busy menu never advances the scene notice timer",
           "[reward-dialogs][reward-live][F00198]") {
   LiveDialogFixture fixture;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Menu_sceneNotificationBuffer = fixture.notice.data();
   Menu_textBoxes[7].flags.done = 1;
   Menu_sceneNotificationTimed = 1;
@@ -404,9 +405,9 @@ TEST_CASE("F00198 live busy menu never advances the scene notice timer",
 TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
           "[reward-dialogs][reward-live][F00224]") {
   LiveDialogFixture fixture;
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0x7F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0x7F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Battle_lootMenuOpened = INT32_MIN;
   Battle_rewardsFollowAction = 0x10000;
   Battle_actionState = nullptr;
@@ -414,7 +415,7 @@ TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
   Field_isMinimapVisible = 0;
   Field_areMovingPlatformsPaused = 1;
   b::UpdateLivePendingLootDialog();
-  CHECK(Menu_Framework_actionSelection.menuStatus == 2);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 2);
   CHECK(Battle_actionFlowMode == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(Field_isMinimapVisible == 0);
@@ -425,13 +426,13 @@ TEST_CASE("F00224 live loot branch uses actual reward resume not field resume",
 TEST_CASE("F00224 live empty loot selects actual pending unlock policy lazily",
           "[reward-dialogs][reward-live][F00224]") {
   LiveDialogFixture fixture;
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0x7F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0x7F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Battle_actionState = nullptr;
   fixture.actor.stats = nullptr;
   b::UpdateLivePendingLootDialog();
-  CHECK(Menu_Framework_actionSelection.menuStatus == 2);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 2);
   CHECK(Battle_actionFlowMode == 5);
   CHECK(Field_areMovingPlatformsPaused == 1);
   CHECK(VS::Field::isInteractionPaused == 77);
@@ -462,9 +463,9 @@ TEST_CASE("F00225 live wait opens new reward phase six through actual services",
   b::WaitForLiveRewardUnlockEffects();
   CHECK(Battle_actionFlowMode == 6);
   CHECK(VS::Field::isInteractionPaused == 1);
-  CHECK(Menu_Framework_menuState.currentMenu == 3);
-  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
-  CHECK(Menu_Framework_unlockedBattleAbility == 1);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 3);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
+  CHECK(VS::Menu::Framework::unlockedBattleAbility == 1);
   CHECK(Battle_recoveryRewardMode == 0);
 }
 
@@ -477,20 +478,20 @@ TEST_CASE("F00225 live busy mask does not require action or ability owners",
   b::WaitForLiveRewardUnlockEffects();
   CHECK(Battle_actionFlowMode == 99);
   CHECK(VS::Field::isInteractionPaused == 77);
-  CHECK(Menu_Framework_menuState.currentMenu == 0x3F);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 0x3F);
 }
 
 TEST_CASE("F00226 live busy menu preserves production notice timing",
           "[reward-dispatch][reward-live][F00226]") {
   LiveDialogFixture fixture;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Menu_sceneNotificationBuffer = fixture.notice.data();
   Menu_textBoxes[7].flags.done = 1;
   Menu_sceneNotificationTimed = 1;
   Menu_sceneNotificationTimer = 12;
   Battle_actionState = nullptr;
   b::UpdateLiveRewardUnlockDialog();
-  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
   CHECK(Menu_sceneNotificationTimer == 12);
   CHECK(Menu_sceneNotificationBuffer == fixture.notice.data());
   CHECK(Battle_actionFlowMode == 99);
@@ -498,9 +499,9 @@ TEST_CASE("F00226 live busy menu preserves production notice timing",
 }
 
 void PrepareClosedUnlock() {
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0x7F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0x7F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Battle_actionState = nullptr;
   Field_controlMode = 0x89ABCDEF;
   Field_isMinimapVisible = 0;
@@ -511,7 +512,7 @@ TEST_CASE("F00226 live close ends reward pause then checks actual unlocks",
   LiveDialogFixture fixture;
   PrepareClosedUnlock();
   b::UpdateLiveRewardUnlockDialog();
-  CHECK(Menu_Framework_actionSelection.menuStatus == 2);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 2);
   CHECK(Menu_sceneNotificationBuffer == nullptr);
   CHECK(Battle_actionFlowMode == 5);
   CHECK(VS::Field::isInteractionPaused == 0);
@@ -541,8 +542,8 @@ TEST_CASE("F00227 live event start resets full flags before challenge results",
   CHECK(Battle_lootMenuOpened == 0);
   CHECK(Battle_rewardsFollowAction == 0);
   CHECK(Battle_actionFlowMode == 3);
-  CHECK(Menu_Framework_menuState.currentMenu == 15);
-  CHECK(Menu_Framework_actionSelection.menuStatus == 1);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 15);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
   CHECK(VS::Field::isInteractionPaused == 1);
 }
 
@@ -561,8 +562,8 @@ TEST_CASE(
   CHECK(Battle_lootMenuOpened == 0);
   CHECK(Battle_rewardsFollowAction == 1);
   CHECK(Battle_actionFlowMode == 4);
-  CHECK(Menu_Framework_menuState.currentMenu == 12);
-  CHECK(Menu_Framework_lootLists == &node);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 12);
+  CHECK(VS::Menu::Framework::lootLists == &node);
   CHECK(VS::Field::isInteractionPaused == 1);
 }
 
@@ -576,7 +577,7 @@ TEST_CASE("F00229 live unknown full phases are not narrowed or booleanized",
   Battle_characterState = nullptr;
   CHECK(b::UpdateLiveRewardSequence() == 0);
   CHECK(Battle_actionFlowMode == phase);
-  CHECK(Menu_Framework_actionSelection.menuStatus == 0);
+  CHECK(VS::Menu::Framework::actionSelection.menuStatus == 0);
   CHECK(VS::Field::isInteractionPaused == 77);
 }
 
@@ -585,7 +586,7 @@ TEST_CASE("F00229 live handled waiting phases preserve the original int result",
   LiveDialogFixture fixture;
   const u_int phase = GENERATE(3U, 4U, 5U, 6U);
   Battle_actionFlowMode = phase;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Effects_effectBusyFlags = 2;
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
@@ -598,9 +599,9 @@ TEST_CASE("F00229 live completed handler returns one before next idle dispatch",
           "[reward-dispatch][reward-live][F00229]") {
   LiveDialogFixture fixture;
   Battle_actionFlowMode = 3;
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0x7F;
-  Menu_Framework_actionSelection.menuStatus = 1;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0x7F;
+  VS::Menu::Framework::actionSelection.menuStatus = 1;
   Battle_actionState = nullptr;
   Battle_characterState = nullptr;
   CHECK(b::UpdateLiveRewardSequence() == 1);

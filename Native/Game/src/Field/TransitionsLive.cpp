@@ -10,7 +10,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Core/Log.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/DoorRecordLive.hpp"
 #include "Field/Doors.h"

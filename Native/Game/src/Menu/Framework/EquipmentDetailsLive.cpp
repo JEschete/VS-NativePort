@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the equipment details (EquipmentDetails.hpp): defines the
-// variables the copied menus share (EquipmentDetailsLiveState.h) and the
+// variables the copied menus share (EquipmentDetailsLiveState.hpp) and the
 // screen's statics, and implements the host over the item rows' host,
 // Ashley's equipment, the battle actors, the controller, the menu rows and the
 // frame's ordering tables.
@@ -27,7 +27,7 @@
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetails.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
@@ -42,20 +42,13 @@ namespace VS::Menu::Framework {
 namespace {
 constexpr std::size_t kArmorStatsLimbCount = 5;
 
-static_assert(kMenuComparisonStatCount == kComparisonStatCount);
-static_assert(kMenuRangeRiskBytes == kRangeRiskBytes);
-static_assert(kMenuEquipmentStatCount == kEquipmentStatCount);
-static_assert(kMenuPrimaryStatCount == kPrimaryStatCount);
-static_assert(kMenuStatusViewElementCount == kStatusViewElementCount);
-static_assert(kMenuStatusViewDirections == kStatusViewDirections);
-
 // vs_mainMenu_drawClassAffinityType's page turn (C48.c:950): sound effect
 // 0x7E of group 14.
 constexpr int kPageSoundGroup = 14;
 constexpr int kPageSoundEffect = 0x7E;
 
 // The screen's variables between calls: the shared ones are reloaded from
-// EquipmentDetailsLiveState.h around each call, the rest were module statics.
+// EquipmentDetailsLiveState.hpp around each call, the rest were module statics.
 EquipmentDetailsState g_state;
 
 void Warn(std::string_view what) {
@@ -68,66 +61,55 @@ void Warn(std::string_view what) {
 
 void Load() {
   auto& state = g_state;
-  std::ranges::copy(Menu_Framework_equipmentStats, state.stats.begin());
-  std::ranges::copy(Menu_Framework_strIntAgi, state.primary.begin());
-  std::ranges::transform(Menu_Framework_rangeRiskData, state.range_risk.begin(),
-                         Byte);
-  std::ranges::copy(Menu_Framework_comparisonStatDeltas,
-                    state.comparison_deltas.begin());
-  std::ranges::copy(Menu_Framework_comparisonStatTotals,
-                    state.comparison_totals.begin());
-  std::ranges::copy(Menu_Framework_comparisonAccessoryStats,
+  std::ranges::copy(equipmentStats, state.stats.begin());
+  std::ranges::copy(strIntAgi, state.primary.begin());
+  std::ranges::transform(rangeRiskData, state.range_risk.begin(), Byte);
+  std::ranges::copy(comparisonStatDeltas, state.comparison_deltas.begin());
+  std::ranges::copy(comparisonStatTotals, state.comparison_totals.begin());
+  std::ranges::copy(comparisonAccessoryStats,
                     state.comparison_accessory.begin());
-  state.subtype = Byte(Menu_Framework_equipmentSubtype);
-  state.item = Byte(Menu_Framework_currentStatusViewItem);
-  state.enabled_pages = Byte(Menu_Framework_enabledStatPages);
-  state.page = Byte(Menu_Framework_itemStatPage);
-  state.selected = Menu_Framework_selectedStatusViewElement;
-  std::ranges::transform(Menu_Framework_statusViewCursorPositions,
+  state.subtype = Byte(equipmentSubtype);
+  state.item = Byte(currentStatusViewItem);
+  state.enabled_pages = Byte(enabledStatPages);
+  state.page = Byte(itemStatPage);
+  state.selected = selectedStatusViewElement;
+  std::ranges::transform(statusViewCursorPositions,
                          state.cursor_positions.begin(),
                          [](int xy) { return static_cast<std::uint32_t>(xy); });
   for (std::size_t i = 0; i < kStatusViewElementCount; ++i) {
-    std::ranges::copy(Menu_Framework_statusViewNavigationMap[i],
-                      state.navigation[i].begin());
+    std::ranges::copy(statusViewNavigationMap[i], state.navigation[i].begin());
   }
 }
 
 void Store() {
   const auto& state = g_state;
-  std::ranges::copy(state.stats, Menu_Framework_equipmentStats);
-  std::ranges::copy(state.primary, Menu_Framework_strIntAgi);
+  std::ranges::copy(state.stats, equipmentStats);
+  std::ranges::copy(state.primary, strIntAgi);
   std::ranges::transform(
-      state.range_risk, Menu_Framework_rangeRiskData,
+      state.range_risk, rangeRiskData,
       [](std::uint8_t value) { return static_cast<char>(value); });
-  std::ranges::copy(state.comparison_deltas,
-                    Menu_Framework_comparisonStatDeltas);
-  std::ranges::copy(state.comparison_totals,
-                    Menu_Framework_comparisonStatTotals);
-  std::ranges::copy(state.comparison_accessory,
-                    Menu_Framework_comparisonAccessoryStats);
-  Menu_Framework_equipmentSubtype = static_cast<char>(state.subtype);
-  Menu_Framework_currentStatusViewItem = static_cast<char>(state.item);
-  Menu_Framework_enabledStatPages = static_cast<char>(state.enabled_pages);
-  Menu_Framework_itemStatPage = static_cast<char>(state.page);
-  Menu_Framework_selectedStatusViewElement = state.selected;
-  std::ranges::transform(state.cursor_positions,
-                         Menu_Framework_statusViewCursorPositions,
+  std::ranges::copy(state.comparison_deltas, comparisonStatDeltas);
+  std::ranges::copy(state.comparison_totals, comparisonStatTotals);
+  std::ranges::copy(state.comparison_accessory, comparisonAccessoryStats);
+  equipmentSubtype = static_cast<char>(state.subtype);
+  currentStatusViewItem = static_cast<char>(state.item);
+  enabledStatPages = static_cast<char>(state.enabled_pages);
+  itemStatPage = static_cast<char>(state.page);
+  selectedStatusViewElement = state.selected;
+  std::ranges::transform(state.cursor_positions, statusViewCursorPositions,
                          [](std::uint32_t xy) { return static_cast<int>(xy); });
   for (std::size_t i = 0; i < kStatusViewElementCount; ++i) {
-    std::ranges::copy(state.navigation[i],
-                      Menu_Framework_statusViewNavigationMap[i]);
+    std::ranges::copy(state.navigation[i], statusViewNavigationMap[i]);
   }
 }
 
 // Writes the status view tables' module image values (2D10.c:823,
 // 2D10.c:830), as loading the overlay did; the game only reads them.
 bool LoadStatusViewTables() noexcept {
-  std::ranges::transform(kStatusViewCursorPositions,
-                         Menu_Framework_statusViewCursorPositions,
+  std::ranges::transform(kStatusViewCursorPositions, statusViewCursorPositions,
                          [](std::uint32_t xy) { return static_cast<int>(xy); });
   for (std::size_t i = 0; i < kStatusViewElementCount; ++i) {
-    std::ranges::copy(kStatusViewNavigation[i],
-                      Menu_Framework_statusViewNavigationMap[i]);
+    std::ranges::copy(kStatusViewNavigation[i], statusViewNavigationMap[i]);
   }
   return true;
 }
@@ -590,38 +572,45 @@ void ResetLiveEquipmentDetailsStatics() {
 }  // namespace VS::Menu::Framework
 
 // decomp: D_80102488 (MENU/MAINMENU.PRG C48.c)
-std::int16_t Menu_Framework_comparisonStatDeltas[kMenuComparisonStatCount];
+std::int16_t VS::Menu::Framework::comparisonStatDeltas
+    [VS::Menu::Framework::kComparisonStatCount];
 // decomp: D_80102490 (MENU/MAINMENU.PRG C48.c)
-std::int16_t Menu_Framework_comparisonStatTotals[kMenuComparisonStatCount];
+std::int16_t VS::Menu::Framework::comparisonStatTotals
+    [VS::Menu::Framework::kComparisonStatCount];
 // decomp: D_80102498 (MENU/MAINMENU.PRG C48.c)
-std::int16_t Menu_Framework_comparisonAccessoryStats[kMenuComparisonStatCount];
+std::int16_t VS::Menu::Framework::comparisonAccessoryStats
+    [VS::Menu::Framework::kComparisonStatCount];
 // decomp: _rangeRiskData (MENU/MAINMENU.PRG C48.c)
-char Menu_Framework_rangeRiskData[kMenuRangeRiskBytes];
+char VS::Menu::Framework::rangeRiskData[VS::Menu::Framework::kRangeRiskBytes];
 // decomp: vs_mainMenu_weapons .. vs_mainMenu_gems (MENU/MAINMENU.PRG)
-Items_InventoryWeapon* Menu_Framework_weapons;
-Items_InventoryBlade* Menu_Framework_blades;
-Items_InventoryGrip* Menu_Framework_grips;
-Items_InventoryShield* Menu_Framework_shields;
-Items_InventoryArmor* Menu_Framework_armor;
-Items_InventoryGem* Menu_Framework_gems;
+Items_InventoryWeapon* VS::Menu::Framework::weapons;
+Items_InventoryBlade* VS::Menu::Framework::blades;
+Items_InventoryGrip* VS::Menu::Framework::grips;
+Items_InventoryShield* VS::Menu::Framework::shields;
+Items_InventoryArmor* VS::Menu::Framework::armor;
+Items_InventoryGem* VS::Menu::Framework::gems;
 // decomp: vs_mainMenu_currentStatusViewItem (MENU/MAINMENU.PRG)
-char Menu_Framework_currentStatusViewItem;
+char VS::Menu::Framework::currentStatusViewItem;
 // decomp: vs_mainMenu_enabledStatPages (MENU/MAINMENU.PRG)
-char Menu_Framework_enabledStatPages;
+char VS::Menu::Framework::enabledStatPages;
 // decomp: vs_mainMenu_equipmentStats (MENU/MAINMENU.PRG)
-std::int16_t Menu_Framework_equipmentStats[kMenuEquipmentStatCount];
+std::int16_t VS::Menu::Framework::equipmentStats
+    [VS::Menu::Framework::kEquipmentStatCount];
 // decomp: vs_mainMenu_equipmentSubtype (MENU/MAINMENU.PRG)
-char Menu_Framework_equipmentSubtype;
+char VS::Menu::Framework::equipmentSubtype;
 // decomp: vs_mainMenu_itemStatPage (MENU/MAINMENU.PRG)
-char Menu_Framework_itemStatPage;
+char VS::Menu::Framework::itemStatPage;
 // decomp: vs_mainMenu_selectedStatusViewElement (MENU/MAINMENU.PRG)
-u_char Menu_Framework_selectedStatusViewElement;
+u_char VS::Menu::Framework::selectedStatusViewElement;
 // decomp: vs_mainMenu_statusViewCursorPositions (MENU/MAINMENU.PRG
 // 2D10.c:830): the module image values.
-int Menu_Framework_statusViewCursorPositions[kMenuStatusViewElementCount];
+int VS::Menu::Framework::statusViewCursorPositions
+    [VS::Menu::Framework::kStatusViewElementCount];
 // decomp: vs_mainMenu_statusViewNavigationMap (MENU/MAINMENU.PRG
 // 2D10.c:823): the module image values.
-u_char Menu_Framework_statusViewNavigationMap[kMenuStatusViewElementCount]
-                                             [kMenuStatusViewDirections];
+u_char VS::Menu::Framework::statusViewNavigationMap
+    [VS::Menu::Framework::kStatusViewElementCount]
+    [VS::Menu::Framework::kStatusViewDirections];
 // decomp: vs_mainMenu_strIntAgi (MENU/MAINMENU.PRG)
-std::int16_t Menu_Framework_strIntAgi[kMenuPrimaryStatCount];
+std::int16_t
+    VS::Menu::Framework::strIntAgi[VS::Menu::Framework::kPrimaryStatCount];

@@ -40,7 +40,7 @@
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
@@ -807,16 +807,18 @@ struct GameplayInspectionFixture {
   decltype(Field_roomData.header.doorsLength) saved_door_length =
       Field_roomData.header.doorsLength;
   decltype(Field_roomData) saved_room = Field_roomData;
-  decltype(Menu_Framework_menuItems) saved_menu_items =
-      Menu_Framework_menuItems;
-  decltype(Menu_Framework_itemsText) saved_text = Menu_Framework_itemsText;
-  decltype(Menu_Framework_menuState) saved_menu = Menu_Framework_menuState;
+  decltype(VS::Menu::Framework::menuItems) saved_menu_items =
+      VS::Menu::Framework::menuItems;
+  decltype(VS::Menu::Framework::itemsText) saved_text =
+      VS::Menu::Framework::itemsText;
+  decltype(VS::Menu::Framework::menuState) saved_menu =
+      VS::Menu::Framework::menuState;
   decltype(Event_isMenuTransitionActive) saved_event_menu =
       Event_isMenuTransitionActive;
   decltype(Audio_Seq_unusedStateFlags.menuFSubmenu) saved_results_kind =
       Audio_Seq_unusedStateFlags.menuFSubmenu;
   std::array<char, 16> saved_submenus =
-      std::to_array(Menu_Framework_submenuStates);
+      std::to_array(VS::Menu::Framework::submenuStates);
   int saved_results_state = Menu_Results_screenState;
   int saved_results_timer = Menu_Results_screenTimer;
   u_int saved_results_animation = Menu_Results_elementAnimationState;
@@ -842,9 +844,10 @@ struct GameplayInspectionFixture {
     Field_roomData.header.doorsLength = 0;
     Field_roomData.collisionMap = nullptr;
     Field_roomData.tileCells = nullptr;
-    Menu_Framework_menuItems = nullptr;
-    Menu_Framework_itemsText = nullptr;
-    Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
+    VS::Menu::Framework::menuItems = nullptr;
+    VS::Menu::Framework::itemsText = nullptr;
+    VS::Menu::Framework::menuState.currentMenu =
+        Menu_Framework_MenuState_NoneClosed;
     Event_isMenuTransitionActive = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
@@ -868,13 +871,13 @@ struct GameplayInspectionFixture {
     Field_roomData.doors = saved_doors;
     Field_roomData.header.doorsLength = saved_door_length;
     Field_roomData = saved_room;
-    Menu_Framework_menuItems = saved_menu_items;
-    Menu_Framework_itemsText = saved_text;
-    Menu_Framework_menuState = saved_menu;
+    VS::Menu::Framework::menuItems = saved_menu_items;
+    VS::Menu::Framework::itemsText = saved_text;
+    VS::Menu::Framework::menuState = saved_menu;
     Event_isMenuTransitionActive = saved_event_menu;
     Audio_Seq_unusedStateFlags.menuFSubmenu = saved_results_kind;
     std::copy(saved_submenus.begin(), saved_submenus.end(),
-              Menu_Framework_submenuStates);
+              VS::Menu::Framework::submenuStates);
     Menu_Results_screenState = saved_results_state;
     Menu_Results_screenTimer = saved_results_timer;
     Menu_Results_elementAnimationState = saved_results_animation;
@@ -1000,9 +1003,9 @@ TEST_CASE(
     "Gameplay roulette inspection reads the original state without changes",
     "[diagnostics][inspection][roulette-trace]") {
   GameplayInspectionFixture fixture;
-  Menu_Framework_menuState.currentMenu = 15;
+  VS::Menu::Framework::menuState.currentMenu = 15;
   Audio_Seq_unusedStateFlags.menuFSubmenu = 0;
-  Menu_Framework_submenuStates[15] = 2;
+  VS::Menu::Framework::submenuStates[15] = 2;
   Menu_Results_screenState = 1;
   Menu_Results_screenTimer = 490;
   Menu_Results_elementAnimationState = 35;
@@ -1025,7 +1028,7 @@ TEST_CASE(
     "Roulette inspection excludes loading other submenus and closed menus",
     "[diagnostics][inspection][roulette-trace]") {
   GameplayInspectionFixture fixture;
-  Menu_Framework_menuState.currentMenu = 15;
+  VS::Menu::Framework::menuState.currentMenu = 15;
   Audio_Seq_unusedStateFlags.menuFSubmenu = 0;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   VS::Boot::EncounterPollStop();
@@ -1033,9 +1036,10 @@ TEST_CASE(
   Audio_Seq_unusedStateFlags.menuFSubmenu = 1;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   Audio_Seq_unusedStateFlags.menuFSubmenu = 0;
-  Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
+  VS::Menu::Framework::menuState.currentMenu =
+      Menu_Framework_MenuState_NoneClosed;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
-  Menu_Framework_menuState.currentMenu = 15;
+  VS::Menu::Framework::menuState.currentMenu = 15;
   VS::Boot::ResetGameplayInspection();
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
 }
@@ -1246,28 +1250,31 @@ TEST_CASE("Gameplay inspection reads copied plain chars as unsigned bytes",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
   struct MenuGuard {
-    decltype(Menu_Framework_menuState) state = Menu_Framework_menuState;
-    decltype(Menu_Framework_menuMemory) memory = Menu_Framework_menuMemory;
+    decltype(VS::Menu::Framework::menuState) state =
+        VS::Menu::Framework::menuState;
+    decltype(VS::Menu::Framework::menuMemory) memory =
+        VS::Menu::Framework::menuMemory;
     decltype(Audio_Seq_unusedStateFlags) flags = Audio_Seq_unusedStateFlags;
-    decltype(Menu_Framework_menuItems) items = Menu_Framework_menuItems;
+    decltype(VS::Menu::Framework::menuItems) items =
+        VS::Menu::Framework::menuItems;
     ~MenuGuard() {
-      Menu_Framework_menuItems = items;
-      Menu_Framework_menuState = state;
-      Menu_Framework_menuMemory = memory;
+      VS::Menu::Framework::menuItems = items;
+      VS::Menu::Framework::menuState = state;
+      VS::Menu::Framework::menuMemory = memory;
       Audio_Seq_unusedStateFlags = flags;
     }
   } guard;
   // Copied code compiles with an unsigned char; C++ readers must agree with it.
   constexpr int kMenuControl = 5;
   constexpr int kResultsMenu = 15;
-  std::array<std::remove_pointer_t<decltype(Menu_Framework_menuItems)>, 1>
+  std::array<std::remove_pointer_t<decltype(VS::Menu::Framework::menuItems)>, 1>
       rows{};
-  Menu_Framework_menuItems = rows.data();
+  VS::Menu::Framework::menuItems = rows.data();
   Field_controlMode = kMenuControl;
-  Menu_Framework_menuState.currentMenu = kResultsMenu;
+  VS::Menu::Framework::menuState.currentMenu = kResultsMenu;
   Audio_Seq_unusedStateFlags.menuFSubmenu = static_cast<char>(200);
-  Menu_Framework_menuMemory.cursorMemories[12] = static_cast<char>(200);
-  Menu_Framework_menuMemory.cursorMemories[13] = static_cast<char>(201);
+  VS::Menu::Framework::menuMemory.cursorMemories[12] = static_cast<char>(200);
+  VS::Menu::Framework::menuMemory.cursorMemories[13] = static_cast<char>(201);
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(state.results_screen == 200);
@@ -1548,8 +1555,8 @@ TEST_CASE("Earned ability menus are observed without changing combat mode",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
   std::array<Menu_Framework_MenuRow, 10> rows{};
-  Menu_Framework_menuItems = rows.data();
-  Menu_Framework_menuState.currentMenu = 3;
+  VS::Menu::Framework::menuItems = rows.data();
+  VS::Menu::Framework::menuState.currentMenu = 3;
   Battle_actionFlowMode = 14;
   const auto reward =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
@@ -1571,12 +1578,12 @@ struct ItemInspectionFixture : ReactionInspectionFixture {
       std::to_array(Audio_Seq_unusedInventory.misc);
   decltype(std::to_array(Audio_Seq_unusedInventoryIndices.misc)) saved_indices =
       std::to_array(Audio_Seq_unusedInventoryIndices.misc);
-  decltype(Menu_Framework_shortcutInvoked) saved_shortcut =
-      Menu_Framework_shortcutInvoked;
-  decltype(Menu_Framework_itemsListRow) saved_list =
-      Menu_Framework_itemsListRow;
-  decltype(Menu_Framework_subMenuRowCount) saved_rows =
-      Menu_Framework_subMenuRowCount;
+  decltype(VS::Menu::Framework::shortcutInvoked) saved_shortcut =
+      VS::Menu::Framework::shortcutInvoked;
+  decltype(VS::Menu::Framework::itemsListRow) saved_list =
+      VS::Menu::Framework::itemsListRow;
+  decltype(VS::Menu::Framework::subMenuRowCount) saved_rows =
+      VS::Menu::Framework::subMenuRowCount;
 
   ItemInspectionFixture() {
     std::fill_n(Audio_Seq_unusedInventory.misc, saved_items.size(),
@@ -1596,9 +1603,9 @@ struct ItemInspectionFixture : ReactionInspectionFixture {
               Audio_Seq_unusedInventory.misc);
     std::copy(saved_indices.begin(), saved_indices.end(),
               Audio_Seq_unusedInventoryIndices.misc);
-    Menu_Framework_shortcutInvoked = saved_shortcut;
-    Menu_Framework_itemsListRow = saved_list;
-    Menu_Framework_subMenuRowCount = saved_rows;
+    VS::Menu::Framework::shortcutInvoked = saved_shortcut;
+    VS::Menu::Framework::itemsListRow = saved_list;
+    VS::Menu::Framework::subMenuRowCount = saved_rows;
     Menu_Loot_controlsEnabled = saved_loot_controls;
     Menu_Loot_lootListCount = saved_loot_count;
   }
@@ -1635,12 +1642,13 @@ TEST_CASE("Consumable menu rows retain native inventory identity and bounds",
   std::array<Menu_Framework_MenuRow, 10> rows{};
   std::array<Menu_Framework_ItemText, 1> text{};
   Field_controlMode = 5;
-  Menu_Framework_menuItems = rows.data();
-  Menu_Framework_itemsText = reinterpret_cast<std::uint16_t*>(text.data());
-  Menu_Framework_menuState.currentMenu = 4;
-  Menu_Framework_shortcutInvoked = 5;
-  Menu_Framework_itemsListRow = 17;
-  Menu_Framework_subMenuRowCount = 1;
+  VS::Menu::Framework::menuItems = rows.data();
+  VS::Menu::Framework::itemsText =
+      reinterpret_cast<std::uint16_t*>(text.data());
+  VS::Menu::Framework::menuState.currentMenu = 4;
+  VS::Menu::Framework::shortcutInvoked = 5;
+  VS::Menu::Framework::itemsListRow = 17;
+  VS::Menu::Framework::subMenuRowCount = 1;
   Audio_Seq_unusedInventoryIndices.misc[0] = 1;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
@@ -1656,8 +1664,8 @@ TEST_CASE("Loot input readiness is observed without claiming the drop",
           "[player][diagnostics][inspection]") {
   ItemInspectionFixture fixture;
   std::array<Menu_Framework_MenuRow, 10> rows{};
-  Menu_Framework_menuItems = rows.data();
-  Menu_Framework_menuState.currentMenu = 12;
+  VS::Menu::Framework::menuItems = rows.data();
+  VS::Menu::Framework::menuState.currentMenu = 12;
   Battle_actionFlowMode = 12;
   Menu_Loot_controlsEnabled = 1;
   Menu_Loot_lootListCount = 1;
@@ -1674,8 +1682,8 @@ TEST_CASE(
     "[player][diagnostics][event-reward]") {
   ItemInspectionFixture fixture;
   std::array<Menu_Framework_MenuRow, 10> rows{};
-  Menu_Framework_menuItems = rows.data();
-  Menu_Framework_menuState.currentMenu = 12;
+  VS::Menu::Framework::menuItems = rows.data();
+  VS::Menu::Framework::menuState.currentMenu = 12;
   Field_controlMode = 3;
   Battle_actionFlowMode = 4;
   Event_isMenuTransitionActive = 1;

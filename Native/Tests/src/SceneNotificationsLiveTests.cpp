@@ -59,10 +59,10 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
       Menu_menuStrings};
   ArrayRestore<char, std::size(Menu_kNotificationItemNames[0])> saved_item{
       Menu_kNotificationItemNames[0]};
-  ArrayRestore<u_long, std::size(Menu_textBoxOrderingTables)> saved_tables{
-      Menu_textBoxOrderingTables};
+  ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)> saved_tables{
+      VS::Menu::textBoxOrderingTables};
   ValueRestore<u_long*> saved_active{Menu_activeTextBoxOrderingTable};
-  ValueRestore<char> saved_index{Menu_textBoxBufferIndex};
+  ValueRestore<char> saved_index{VS::Menu::textBoxBufferIndex};
   ValueRestore<decltype(VS::State::tickSpeed)> saved_speed{
       VS::State::tickSpeed};
   ValueRestore<decltype(Battle_lowerScreenUiState)> saved_ui{
@@ -96,8 +96,8 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     Menu_kNotificationItemNames[0][0] = 7;
     Menu_kNotificationItemNames[0][1] = 8;
     Menu_kNotificationItemNames[0][2] = kEnd;
-    Menu_textBoxBufferIndex = 0;
-    Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
+    VS::Menu::textBoxBufferIndex = 0;
+    Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable,
               static_cast<int>(menu::kTextBoxOrderingTags));
     VS::State::tickSpeed = 2;

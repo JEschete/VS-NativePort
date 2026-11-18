@@ -7,10 +7,10 @@
 
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 
 namespace VS::Menu::Framework {
 using LiveDetailController = int (*)(int);
@@ -39,18 +39,16 @@ class LiveDetailDispatcherWorld : public World {
     return AreLiveMenuRowsIdle();
   }
   std::uint8_t SelectedDetailElement() override {
-    return Menu_Framework_selectedStatusViewElement;
+    return selectedStatusViewElement;
   }
-  void SetCursorBright(bool bright) override {
-    Menu_Framework_cursorColor = bright ? 1 : 0;
-  }
+  void SetCursorBright(bool bright) override { cursorColor = bright ? 1 : 0; }
   void DrawDetailTabNavigation() override {
     CheckFrame(true);
     DrawLiveTabNavigation(1);
   }
   void DrawItemDetails() override {
     CheckRows();
-    if (Menu_Framework_selectedStatusViewElement >= kStatusViewElementCount) {
+    if (selectedStatusViewElement >= kStatusViewElementCount) {
       this->Refuse(cursor_error_);
     }
     UpdateLiveItemDetails();

@@ -397,7 +397,7 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
   virtual void SetInformationBoxState(int state) = 0;
   // vs_mainmenu_setMessage with the text table's text at `offset`.
   virtual void SetInformationMessage(std::uint16_t offset) = 0;
-  // Menu_saveLocationId and the room's save point.
+  // VS::Menu::saveLocationId and the room's save point.
   [[nodiscard]] virtual int CurrentSavePointId() = 0;
   [[nodiscard]] virtual int SaveLocationId() = 0;
   virtual void SetSaveLocationId(int id) = 0;
@@ -433,7 +433,7 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
 // The title screen's copies (TITLE.PRG 22C.c).
 class TitleHost : public Render::ImmediatePacketTarget, public CardHost {
  public:
-  // Menu_Files_frameBuf (TITLE.PRG _frameBuf).
+  // VS::Menu::Files::frameBuf (TITLE.PRG _frameBuf).
   [[nodiscard]] virtual std::uint8_t FrameBuffer() = 0;
   virtual void SetFrameBuffer(std::uint8_t buffer) = 0;
   // SetDefDispEnv at (display_x, 0) showing lines 8..231 and SetDefDrawEnv

@@ -34,7 +34,7 @@
 #include "Core/Text/TextCode.h"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Event/ScriptVm.h"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
@@ -49,7 +49,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
@@ -275,21 +275,23 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
           state.action_phase == kLootPhase)) &&
        !(state.control_mode == kChestControl &&
          state.action_phase == kChestContentsPhase)) ||
-      Menu_Framework_menuItems == nullptr) {
+      VS::Menu::Framework::menuItems == nullptr) {
     return result;
   }
   result.available = true;
-  result.loading = Menu_Framework_menuState.loading != 0;
-  result.shortcut = static_cast<unsigned char>(Menu_Framework_shortcutInvoked);
+  result.loading = VS::Menu::Framework::menuState.loading != 0;
+  result.shortcut =
+      static_cast<unsigned char>(VS::Menu::Framework::shortcutInvoked);
   if ((state.menu_state & kMenuIdMask) == kLootPhase) {
     result.loot_input_ready = Menu_Loot_controlsEnabled != 0;
     result.loot_count = Menu_Loot_lootListCount;
   }
   result.selected_menu = static_cast<int>(state.menu_state & kMenuIdMask);
   result.submenu_phase = static_cast<unsigned char>(
-      Menu_Framework_submenuStates[state.menu_state & kSubmenuStateMask]);
+      VS::Menu::Framework::submenuStates[state.menu_state & kSubmenuStateMask]);
   result.selected_row = state.menu_highlighted_row;
-  result.list_phase = static_cast<unsigned char>(Menu_Framework_itemsListRow);
+  result.list_phase =
+      static_cast<unsigned char>(VS::Menu::Framework::itemsListRow);
   result.assignment_phase =
       static_cast<int>(Menu_BattleAbilities_abilityMenuState);
   result.assignment_type =
@@ -301,25 +303,26 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   constexpr int kRankCursorMemory = 12;
   constexpr int kRankCountMemory = 13;
   result.spell_level = static_cast<unsigned char>(
-      Menu_Framework_menuMemory.cursorMemories[kRankCursorMemory]);
+      VS::Menu::Framework::menuMemory.cursorMemories[kRankCursorMemory]);
   result.spell_level_count = static_cast<unsigned char>(
-      Menu_Framework_menuMemory.cursorMemories[kRankCountMemory]);
+      VS::Menu::Framework::menuMemory.cursorMemories[kRankCountMemory]);
   if (result.selected_menu == 0) {
     for (int index = 0; index < kMainMenuEntries; ++index) {
       if ((Input_settings.menuFlags & (1u << index)) == 0) continue;
-      const auto& row = Menu_Framework_menuItems[index];
+      const auto& row = VS::Menu::Framework::menuItems[index];
       result.rows.push_back({index, InspectGameText(row.text),
                              row.unselectable != 0, row.selected != 0});
       if (row.selected != 0) result.selected_row = index;
     }
-  } else if (!result.loading && Menu_Framework_itemsText != nullptr) {
+  } else if (!result.loading && VS::Menu::Framework::itemsText != nullptr) {
     constexpr unsigned kMaximumObservedRows = 256;
-    if (Menu_Framework_subMenuRowCount > kMaximumObservedRows) {
+    if (VS::Menu::Framework::subMenuRowCount > kMaximumObservedRows) {
       throw std::runtime_error("menu inspection exceeds supported row count");
     }
     const auto* text = reinterpret_cast<const Menu_Framework_ItemText*>(
-        Menu_Framework_itemsText);
-    for (unsigned index = 0; index < Menu_Framework_subMenuRowCount; ++index) {
+        VS::Menu::Framework::itemsText);
+    for (unsigned index = 0; index < VS::Menu::Framework::subMenuRowCount;
+         ++index) {
       const auto* name = reinterpret_cast<const char*>(text[index].name);
       result.rows.push_back(
           {static_cast<int>(index),
@@ -599,7 +602,7 @@ EncounterNavigationState InspectNavigation() {
   VS::Actors::LiveActorPlacement(0, &placement);
   constexpr std::size_t kFacingTileBytes = 4;
   std::array<u_char, kFacingTileBytes> facing{};
-  Field_TileInFrontOfActorEntry(&placement, facing.data());
+  VS::Field::TileInFrontOfActorEntry(&placement, facing.data());
   result.facing_tile = {facing[0], facing[2], facing[1]};
   result.collision_radius = player->collisionRadius;
   result.collision_height = player->collisionHeight;

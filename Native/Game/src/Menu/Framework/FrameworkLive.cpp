@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the menu framework (Framework.hpp): defines the
-// framework's variables (FrameworkLiveState.h), mirrors the scalar ones with
+// framework's variables (FrameworkLiveState.hpp), mirrors the scalar ones with
 // the typed State around each call and implements the Host over the workspace
 // block, the frame ordering tables, the disc queue, the text boxes, the
 // battle interface, the camera and the submenus.
@@ -68,10 +68,10 @@
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/MenuMemory.h"
 #include "Menu/Framework/MenuRows.h"
@@ -123,9 +123,6 @@ constexpr std::size_t kHelpTextWords = 80;
 }  // namespace
 }  // namespace VS::Menu::Framework
 
-static_assert(static_cast<std::size_t>(kMenuSubmenuStateCount) ==
-              VS::Menu::Framework::kSubmenuStateCount);
-
 // decomp: D_800EBA78 (BATTLE/BATTLE.PRG 5BF94.c:2934): the main menu help
 // text from the module image (ModuleData.cpp); its last word opens the
 // gradient window.
@@ -134,78 +131,81 @@ extern unsigned int
 
 // decomp: _loadedSubMenu (BATTLE/BATTLE.PRG 5BF94.c): the module image byte
 // is 0.
-signed char Menu_Framework_loadedSubMenu = 0;
+signed char VS::Menu::Framework::loadedSubMenu = 0;
 // decomp: vs_battle_menuItems (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_MenuRow* Menu_Framework_menuItems = nullptr;
+Menu_Framework_MenuRow* VS::Menu::Framework::menuItems = nullptr;
 // decomp: D_800EB9C4 (BATTLE/BATTLE.PRG 5BF94.c)
-Items_LootListNode* Menu_Framework_lootLists = nullptr;
+Items_LootListNode* VS::Menu::Framework::lootLists = nullptr;
 // decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)
-Items_BattleLoot* Menu_Framework_lootEntry = nullptr;
+Items_BattleLoot* VS::Menu::Framework::lootEntry = nullptr;
 // decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c): the module image byte is 0.
-char Menu_textBoxBufferIndex = 0;
+char VS::Menu::textBoxBufferIndex = 0;
 // decomp: _menuBgUnpackedBuf (BATTLE/BATTLE.PRG 5BF94.c)
-u_int* Menu_Framework_menuBackgroundBuffer = nullptr;
+u_int* VS::Menu::Framework::menuBackgroundBuffer = nullptr;
 // decomp: D_800F4CC0 (BATTLE/BATTLE.PRG 5BF94.c)
-int Menu_Framework_mainMenuCursorAnimation = 0;
+int VS::Menu::Framework::mainMenuCursorAnimation = 0;
 // decomp: D_800F4CD0 (BATTLE/BATTLE.PRG 5BF94.c)
-u_long Menu_textBoxOrderingTables[kMenuTextBoxOrderingTableCount] = {};
+u_long VS::Menu::textBoxOrderingTables[VS::Menu::kTextBoxOrderingTableCount] =
+    {};
 // decomp: vs_battle_shortcutInvoked (BATTLE/BATTLE.PRG 5BF94.c)
-char Menu_Framework_shortcutInvoked = 0;
+char VS::Menu::Framework::shortcutInvoked = 0;
 // decomp: D_800F4E6B (BATTLE/BATTLE.PRG 5BF94.c)
-char Menu_saveLocationId = 0;
+char VS::Menu::saveLocationId = 0;
 // decomp: vs_battle_submenuStates (BATTLE/BATTLE.PRG 5BF94.c)
-char Menu_Framework_submenuStates[kMenuSubmenuStateCount] = {};
+char VS::Menu::Framework::submenuStates
+    [VS::Menu::Framework::kSubmenuStateCount] = {};
 // decomp: vs_battle_rowTypeBuf (BATTLE/BATTLE.PRG 5BF94.c)
-int* Menu_Framework_rowTypeBuf = nullptr;
+int* VS::Menu::Framework::rowTypeBuf = nullptr;
 // decomp: vs_battle_unlockedBreakArt (BATTLE/BATTLE.PRG 5BF94.c)
-char Menu_Framework_unlockedBreakArt = 0;
+char VS::Menu::Framework::unlockedBreakArt = 0;
 // decomp: vs_battle_stringBuf (BATTLE/BATTLE.PRG 5BF94.c)
-char* Menu_Framework_stringBuf = nullptr;
+char* VS::Menu::Framework::stringBuf = nullptr;
 // decomp: D_800F4E98 (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_ActionSelection Menu_Framework_actionSelection = {};
+Menu_Framework_ActionSelection VS::Menu::Framework::actionSelection = {};
 // decomp: D_800F4EA0 (BATTLE/BATTLE.PRG 5BF94.c)
-int Menu_Framework_actionRestrictions = 0;
+int VS::Menu::Framework::actionRestrictions = 0;
 // decomp: D_800F4EE8 (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_MenuMemory Menu_Framework_menuMemory = {};
+Menu_Framework_MenuMemory VS::Menu::Framework::menuMemory = {};
 // decomp: vs_battle_unlockedBattleAbility (BATTLE/BATTLE.PRG 5BF94.c)
-char Menu_Framework_unlockedBattleAbility = 0;
+char VS::Menu::Framework::unlockedBattleAbility = 0;
 // decomp: D_800F4FDB (BATTLE/BATTLE.PRG 5BF94.c)
-char Menu_Framework_openedWithoutMainMenu = 0;
+char VS::Menu::Framework::openedWithoutMainMenu = 0;
 // decomp: vs_battle_menuState (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_MenuControlState Menu_Framework_menuState = {};
+Menu_Framework_MenuControlState VS::Menu::Framework::menuState = {};
 // decomp: _itemsText (MENU/MAINMENU.PRG 58EC.c)
-u_short* Menu_Framework_itemsText = nullptr;
+u_short* VS::Menu::Framework::itemsText = nullptr;
 // decomp: _menuRowYOffset (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_menuRowYOffset = 0;
+char VS::Menu::Framework::menuRowYOffset = 0;
 // decomp: _selectedRow (MENU/MAINMENU.PRG 58EC.c)
-int Menu_Framework_selectedRow = 0;
+int VS::Menu::Framework::selectedRow = 0;
 // decomp: _subMenuId (MENU/MAINMENU.PRG 58EC.c)
-u_char Menu_Framework_subMenuId = 0;
+u_char VS::Menu::Framework::subMenuId = 0;
 // decomp: _subMenuPage (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_subMenuPage = 0;
+char VS::Menu::Framework::subMenuPage = 0;
 // decomp: _subMenuRowCount (MENU/MAINMENU.PRG 58EC.c)
-u_short Menu_Framework_subMenuRowCount = 0;
+u_short VS::Menu::Framework::subMenuRowCount = 0;
 // decomp: _subMenuRowInfo (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_subMenuRowInfo = 0;
+char VS::Menu::Framework::subMenuRowInfo = 0;
 // decomp: _textHeaders (MENU/MAINMENU.PRG 58EC.c)
 Menu_Framework_TextHeader
-    Menu_Framework_textHeaders[VS::Menu::Framework::kTextHeaderCount] = {};
+    VS::Menu::Framework::textHeaders[VS::Menu::Framework::kTextHeaderCount] =
+        {};
 // decomp: vs_mainMenu_actionMenuState (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_actionMenuState = 0;
+char VS::Menu::Framework::actionMenuState = 0;
 // decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG 58EC.c)
-int Menu_Framework_backgroundFadeStep = 0;
+int VS::Menu::Framework::backgroundFadeStep = 0;
 // decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG): never read.
-char Menu_Framework_unusedContainerEmptyBackup = 0;
+char VS::Menu::Framework::unusedContainerEmptyBackup = 0;
 // decomp: vs_mainMenu_cursorColor (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_cursorColor = 0;
+char VS::Menu::Framework::cursorColor = 0;
 // decomp: vs_mainMenu_displayActionCost (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_displayActionCost = 0;
+char VS::Menu::Framework::displayActionCost = 0;
 // decomp: vs_mainMenu_hideMenu (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_hideMenu = 0;
+char VS::Menu::Framework::hideMenu = 0;
 // decomp: vs_mainMenu_itemsListRow (MENU/MAINMENU.PRG 58EC.c)
-char Menu_Framework_itemsListRow = 0;
+char VS::Menu::Framework::itemsListRow = 0;
 // decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG): never read.
-Menu_Container_InventoryStorage* Menu_Framework_unusedInventoryStorage =
+Menu_Container_InventoryStorage* VS::Menu::Framework::unusedInventoryStorage =
     nullptr;
 
 namespace VS::Menu::Framework {
@@ -333,103 +333,93 @@ std::array<TrackedItems, 2> g_items{};
 }
 
 void LoadControl() {
-  g_state.loaded_sub_menu = Menu_Framework_loadedSubMenu;
-  g_state.control = {
-      .current_menu = Byte(Menu_Framework_menuState.currentMenu),
-      .return_state = Byte(Menu_Framework_menuState.returnState),
-      .execute_ability_type = Byte(Menu_Framework_menuState.executeAbilityType),
-      .loading = Byte(Menu_Framework_menuState.loading)};
+  g_state.loaded_sub_menu = loadedSubMenu;
+  g_state.control = {.current_menu = Byte(menuState.currentMenu),
+                     .return_state = Byte(menuState.returnState),
+                     .execute_ability_type = Byte(menuState.executeAbilityType),
+                     .loading = Byte(menuState.loading)};
   g_state.action_selection = {
-      .menu_status = Menu_Framework_actionSelection.menuStatus,
-      .selection_kind = Menu_Framework_actionSelection.selectionKind,
-      .execute_ability = Menu_Framework_actionSelection.executeAbility.word};
-  g_state.shortcut_invoked = Byte(Menu_Framework_shortcutInvoked);
-  g_state.opened_without_main_menu = Byte(Menu_Framework_openedWithoutMainMenu);
-  g_state.unlocked_break_art = Byte(Menu_Framework_unlockedBreakArt);
-  g_state.unlocked_battle_ability = Byte(Menu_Framework_unlockedBattleAbility);
-  g_state.save_location_id = Byte(Menu_saveLocationId);
-  g_state.action_restrictions = Menu_Framework_actionRestrictions;
-  g_state.main_menu_cursor_animation = Menu_Framework_mainMenuCursorAnimation;
-  std::memcpy(g_state.submenu_states.data(), Menu_Framework_submenuStates,
-              sizeof(Menu_Framework_submenuStates));
-  std::memcpy(g_state.text_headers.data(), Menu_Framework_textHeaders,
-              sizeof(Menu_Framework_textHeaders));
-  g_state.loot_lists =
-      LootListId{reinterpret_cast<std::uintptr_t>(Menu_Framework_lootLists)};
-  g_state.loot_entry =
-      LootEntryId{reinterpret_cast<std::uintptr_t>(Menu_Framework_lootEntry)};
+      .menu_status = actionSelection.menuStatus,
+      .selection_kind = actionSelection.selectionKind,
+      .execute_ability = actionSelection.executeAbility.word};
+  g_state.shortcut_invoked = Byte(shortcutInvoked);
+  g_state.opened_without_main_menu = Byte(openedWithoutMainMenu);
+  g_state.unlocked_break_art = Byte(unlockedBreakArt);
+  g_state.unlocked_battle_ability = Byte(unlockedBattleAbility);
+  g_state.save_location_id = Byte(VS::Menu::saveLocationId);
+  g_state.action_restrictions = actionRestrictions;
+  g_state.main_menu_cursor_animation = mainMenuCursorAnimation;
+  std::memcpy(g_state.submenu_states.data(), submenuStates,
+              sizeof(submenuStates));
+  std::memcpy(g_state.text_headers.data(), textHeaders, sizeof(textHeaders));
+  g_state.loot_lists = LootListId{reinterpret_cast<std::uintptr_t>(lootLists)};
+  g_state.loot_entry = LootEntryId{reinterpret_cast<std::uintptr_t>(lootEntry)};
 }
 
 void LoadMainMenu() {
   MainMenuStatics& menu = g_state.main_menu;
-  menu.menu_row_y_offset = Byte(Menu_Framework_menuRowYOffset);
-  menu.selected_row = Menu_Framework_selectedRow;
-  menu.sub_menu_id = Menu_Framework_subMenuId;
-  menu.sub_menu_page = Byte(Menu_Framework_subMenuPage);
-  menu.sub_menu_row_count = Menu_Framework_subMenuRowCount;
-  menu.sub_menu_row_info = Byte(Menu_Framework_subMenuRowInfo);
-  menu.action_menu_state = Byte(Menu_Framework_actionMenuState);
-  menu.background_fade_step = Menu_Framework_backgroundFadeStep;
-  menu.cursor_color = Byte(Menu_Framework_cursorColor);
-  menu.display_action_cost = Byte(Menu_Framework_displayActionCost);
-  menu.hide_menu = Byte(Menu_Framework_hideMenu);
-  menu.items_list_row = Byte(Menu_Framework_itemsListRow);
+  menu.menu_row_y_offset = Byte(menuRowYOffset);
+  menu.selected_row = selectedRow;
+  menu.sub_menu_id = subMenuId;
+  menu.sub_menu_page = Byte(subMenuPage);
+  menu.sub_menu_row_count = subMenuRowCount;
+  menu.sub_menu_row_info = Byte(subMenuRowInfo);
+  menu.action_menu_state = Byte(actionMenuState);
+  menu.background_fade_step = backgroundFadeStep;
+  menu.cursor_color = Byte(cursorColor);
+  menu.display_action_cost = Byte(displayActionCost);
+  menu.hide_menu = Byte(hideMenu);
+  menu.items_list_row = Byte(itemsListRow);
 
   // A list another writer left in _itemsText holds the rows it counts.
-  auto* const items = reinterpret_cast<ItemText*>(Menu_Framework_itemsText);
+  auto* const items = reinterpret_cast<ItemText*>(itemsText);
   TrackedItems& rows = Tracked(ItemList::kRows);
   if (items != rows.items) {
-    rows = {.items = items,
-            .count = items != nullptr ? Menu_Framework_subMenuRowCount : 0U};
+    rows = {.items = items, .count = items != nullptr ? subMenuRowCount : 0U};
   }
 }
 
 void StoreControl() {
-  Menu_Framework_loadedSubMenu = g_state.loaded_sub_menu;
-  Menu_Framework_menuState.currentMenu = Char(g_state.control.current_menu);
-  Menu_Framework_menuState.returnState = Char(g_state.control.return_state);
-  Menu_Framework_menuState.executeAbilityType =
-      Char(g_state.control.execute_ability_type);
-  Menu_Framework_menuState.loading = Char(g_state.control.loading);
-  Menu_Framework_actionSelection.menuStatus =
-      g_state.action_selection.menu_status;
-  Menu_Framework_actionSelection.selectionKind =
-      g_state.action_selection.selection_kind;
-  Menu_Framework_actionSelection.executeAbility.word =
+  loadedSubMenu = g_state.loaded_sub_menu;
+  menuState.currentMenu = Char(g_state.control.current_menu);
+  menuState.returnState = Char(g_state.control.return_state);
+  menuState.executeAbilityType = Char(g_state.control.execute_ability_type);
+  menuState.loading = Char(g_state.control.loading);
+  actionSelection.menuStatus = g_state.action_selection.menu_status;
+  actionSelection.selectionKind = g_state.action_selection.selection_kind;
+  actionSelection.executeAbility.word =
       g_state.action_selection.execute_ability;
-  Menu_Framework_shortcutInvoked = Char(g_state.shortcut_invoked);
-  Menu_Framework_openedWithoutMainMenu = Char(g_state.opened_without_main_menu);
-  Menu_Framework_unlockedBreakArt = Char(g_state.unlocked_break_art);
-  Menu_Framework_unlockedBattleAbility = Char(g_state.unlocked_battle_ability);
-  Menu_saveLocationId = Char(g_state.save_location_id);
-  Menu_Framework_actionRestrictions = g_state.action_restrictions;
-  Menu_Framework_mainMenuCursorAnimation = g_state.main_menu_cursor_animation;
-  std::memcpy(Menu_Framework_submenuStates, g_state.submenu_states.data(),
-              sizeof(Menu_Framework_submenuStates));
-  std::memcpy(Menu_Framework_textHeaders, g_state.text_headers.data(),
-              sizeof(Menu_Framework_textHeaders));
-  Menu_Framework_lootLists = reinterpret_cast<Items_LootListNode*>(
+  shortcutInvoked = Char(g_state.shortcut_invoked);
+  openedWithoutMainMenu = Char(g_state.opened_without_main_menu);
+  unlockedBreakArt = Char(g_state.unlocked_break_art);
+  unlockedBattleAbility = Char(g_state.unlocked_battle_ability);
+  VS::Menu::saveLocationId = Char(g_state.save_location_id);
+  actionRestrictions = g_state.action_restrictions;
+  mainMenuCursorAnimation = g_state.main_menu_cursor_animation;
+  std::memcpy(submenuStates, g_state.submenu_states.data(),
+              sizeof(submenuStates));
+  std::memcpy(textHeaders, g_state.text_headers.data(), sizeof(textHeaders));
+  lootLists = reinterpret_cast<Items_LootListNode*>(
       static_cast<std::uintptr_t>(g_state.loot_lists));
-  Menu_Framework_lootEntry = reinterpret_cast<Items_BattleLoot*>(
+  lootEntry = reinterpret_cast<Items_BattleLoot*>(
       static_cast<std::uintptr_t>(g_state.loot_entry));
 }
 
 void StoreMainMenu() {
   const MainMenuStatics& menu = g_state.main_menu;
-  Menu_Framework_menuRowYOffset = Char(menu.menu_row_y_offset);
-  Menu_Framework_selectedRow = menu.selected_row;
-  Menu_Framework_subMenuId = menu.sub_menu_id;
-  Menu_Framework_subMenuPage = Char(menu.sub_menu_page);
-  Menu_Framework_subMenuRowCount = menu.sub_menu_row_count;
-  Menu_Framework_subMenuRowInfo = Char(menu.sub_menu_row_info);
-  Menu_Framework_actionMenuState = Char(menu.action_menu_state);
-  Menu_Framework_backgroundFadeStep = menu.background_fade_step;
-  Menu_Framework_cursorColor = Char(menu.cursor_color);
-  Menu_Framework_displayActionCost = Char(menu.display_action_cost);
-  Menu_Framework_hideMenu = Char(menu.hide_menu);
-  Menu_Framework_itemsListRow = Char(menu.items_list_row);
-  Menu_Framework_itemsText =
-      reinterpret_cast<u_short*>(Tracked(ItemList::kRows).items);
+  menuRowYOffset = Char(menu.menu_row_y_offset);
+  selectedRow = menu.selected_row;
+  subMenuId = menu.sub_menu_id;
+  subMenuPage = Char(menu.sub_menu_page);
+  subMenuRowCount = menu.sub_menu_row_count;
+  subMenuRowInfo = Char(menu.sub_menu_row_info);
+  actionMenuState = Char(menu.action_menu_state);
+  backgroundFadeStep = menu.background_fade_step;
+  cursorColor = Char(menu.cursor_color);
+  displayActionCost = Char(menu.display_action_cost);
+  hideMenu = Char(menu.hide_menu);
+  itemsListRow = Char(menu.items_list_row);
+  itemsText = reinterpret_cast<u_short*>(Tracked(ItemList::kRows).items);
 }
 
 // The live variables into the State.
@@ -665,32 +655,28 @@ class LiveHost final : public Host {
   }
 
   std::span<MenuRow> Rows() override {
-    if (Menu_Framework_menuItems == nullptr) {
+    if (menuItems == nullptr) {
       return {};
     }
-    return {reinterpret_cast<MenuRow*>(Menu_Framework_menuItems), kRowCount};
+    return {reinterpret_cast<MenuRow*>(menuItems), kRowCount};
   }
 
   std::span<std::uint8_t> Strings() override {
-    if (Menu_Framework_menuItems == nullptr ||
-        Menu_Framework_stringBuf == nullptr) {
+    if (menuItems == nullptr || stringBuf == nullptr) {
       return {};
     }
-    return {reinterpret_cast<std::uint8_t*>(Menu_Framework_stringBuf),
-            kStringBufferBytes};
+    return {reinterpret_cast<std::uint8_t*>(stringBuf), kStringBufferBytes};
   }
 
   std::span<std::int32_t> RowTypes() override {
-    if (Menu_Framework_menuItems == nullptr ||
-        Menu_Framework_rowTypeBuf == nullptr) {
+    if (menuItems == nullptr || rowTypeBuf == nullptr) {
       return {};
     }
-    return {Menu_Framework_rowTypeBuf, kRowTypeCount};
+    return {rowTypeBuf, kRowTypeCount};
   }
 
   std::span<std::uint8_t> MenuMemory() override {
-    return {reinterpret_cast<std::uint8_t*>(&Menu_Framework_menuMemory),
-            kMenuMemoryBytes};
+    return {reinterpret_cast<std::uint8_t*>(&menuMemory), kMenuMemoryBytes};
   }
 
   bool AllocateWorkspace() override {
@@ -699,29 +685,28 @@ class LiveHost final : public Host {
         VS::Core::Memory::AllocateLiveFromHighEnd(kWorkspaceBytes);
     if (block == nullptr) {
       VS::Content::ReleaseLiveOverlayWorkspace(kMenuWorkspaceOwner);
-      Menu_Framework_menuItems = nullptr;
-      Menu_Framework_stringBuf = nullptr;
-      Menu_Framework_rowTypeBuf = nullptr;
+      menuItems = nullptr;
+      stringBuf = nullptr;
+      rowTypeBuf = nullptr;
       return false;
     }
     auto* const rows = static_cast<Menu_Framework_MenuRow*>(block);
-    Menu_Framework_menuItems = rows;
-    Menu_Framework_stringBuf = reinterpret_cast<char*>(rows + kRowCount);
-    Menu_Framework_rowTypeBuf =
-        reinterpret_cast<int*>(Menu_Framework_stringBuf + kStringBufferBytes);
+    menuItems = rows;
+    stringBuf = reinterpret_cast<char*>(rows + kRowCount);
+    rowTypeBuf = reinterpret_cast<int*>(stringBuf + kStringBufferBytes);
     return true;
   }
 
   void ReleaseWorkspace() override {
-    if (Menu_Framework_menuItems == nullptr) {
+    if (menuItems == nullptr) {
       return;
     }
     VS::Content::ReleaseLiveOverlayWorkspace(kMenuWorkspaceOwner);
-    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_menuItems);
-    Menu_Framework_menuItems = nullptr;
+    VS::Core::Memory::FreeLiveFromHighEnd(menuItems);
+    menuItems = nullptr;
   }
 
-  void ForgetWorkspace() override { Menu_Framework_menuItems = nullptr; }
+  void ForgetWorkspace() override { menuItems = nullptr; }
 
   std::span<ItemText> Items(ItemList list) override {
     const TrackedItems& tracked = Tracked(list);
@@ -742,7 +727,7 @@ class LiveHost final : public Host {
     TrackedItems& tracked = Tracked(list);
     tracked = {.items = items, .count = items != nullptr ? entries : 0};
     if (list == ItemList::kRows) {
-      Menu_Framework_itemsText = reinterpret_cast<u_short*>(items);
+      itemsText = reinterpret_cast<u_short*>(items);
     }
     if (items == nullptr) {
       return {};
@@ -757,7 +742,7 @@ class LiveHost final : public Host {
     }
     tracked = {};
     if (list == ItemList::kRows) {
-      Menu_Framework_itemsText = nullptr;
+      itemsText = nullptr;
     }
   }
 
@@ -897,7 +882,7 @@ class LiveHost final : public Host {
   }
 
   void BeginOverlayLoad(int sub_menu, bool main_menu_program) override {
-    Menu_Framework_MenuControlState& control = Menu_Framework_menuState;
+    Menu_Framework_MenuControlState& control = menuState;
     std::uint32_t file_data = MainMenuProgram();
     if (!main_menu_program) {
       if (sub_menu < 0 ||
@@ -924,15 +909,14 @@ class LiveHost final : public Host {
   }
 
   bool IsOverlayLoaded() override {
-    const Content_DiscQueueSlot* const request =
-        Menu_Framework_menuState.cdQueue;
+    const Content_DiscQueueSlot* const request = menuState.cdQueue;
     return request == nullptr ||
            request->state == Content_DiscRequestState_Loaded;
   }
 
   void FinishOverlayLoad() override {
     std::optional<int> loaded_lba;
-    if (auto* request = Menu_Framework_menuState.cdQueue) {
+    if (auto* request = menuState.cdQueue) {
       loaded_lba = request->cdFile.lba;
       VS::Content::ReleaseLiveDiscRequest(request);
     }
@@ -953,9 +937,7 @@ class LiveHost final : public Host {
     ResetLoadedSubmenu(*loaded_lba);
   }
 
-  void ForgetOverlayLoad() override {
-    Menu_Framework_menuState.cdQueue = nullptr;
-  }
+  void ForgetOverlayLoad() override { menuState.cdQueue = nullptr; }
 
   // The other MAINMENU.PRG files' statics; the original dropped both lists'
   // pointers without freeing them.
@@ -968,11 +950,11 @@ class LiveHost final : public Host {
   }
 
   bool ReleaseBackgroundBuffer() override {
-    if (Menu_Framework_menuBackgroundBuffer == nullptr) {
+    if (menuBackgroundBuffer == nullptr) {
       return false;
     }
-    VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_menuBackgroundBuffer);
-    Menu_Framework_menuBackgroundBuffer = nullptr;
+    VS::Core::Memory::FreeLiveFromHighEnd(menuBackgroundBuffer);
+    menuBackgroundBuffer = nullptr;
     return true;
   }
 
@@ -982,18 +964,16 @@ class LiveHost final : public Host {
   }
 
   std::span<std::uint32_t> AllocateBackgroundBuffer() override {
-    Menu_Framework_menuBackgroundBuffer =
+    menuBackgroundBuffer =
         static_cast<u_int*>(VS::Core::Memory::AllocateLiveFromHighEnd(
             kBackgroundWords * sizeof(u_int)));
-    if (Menu_Framework_menuBackgroundBuffer == nullptr) {
+    if (menuBackgroundBuffer == nullptr) {
       return {};
     }
-    return {Menu_Framework_menuBackgroundBuffer, kBackgroundWords};
+    return {menuBackgroundBuffer, kBackgroundWords};
   }
 
-  void ForgetBackgroundBuffer() override {
-    Menu_Framework_menuBackgroundBuffer = nullptr;
-  }
+  void ForgetBackgroundBuffer() override { menuBackgroundBuffer = nullptr; }
 
   std::span<const std::uint8_t> BackgroundSource() override {
     const auto* const source = static_cast<const std::uint8_t*>(
@@ -1010,7 +990,7 @@ class LiveHost final : public Host {
   }
 
   int RunSubmenu(Submenu submenu, int state_index) override {
-    char& state = Menu_Framework_submenuStates[state_index & kSubmenuStateMask];
+    char& state = submenuStates[state_index & kSubmenuStateMask];
     auto* const bytes = reinterpret_cast<u_char*>(&state);
     const CallOutScope scope;
     switch (submenu) {
@@ -1056,12 +1036,12 @@ class LiveHost final : public Host {
 
   void BindInventoryViews() override {
     Items_Inventory& inventory = Audio_Seq_unusedInventory;
-    Menu_Framework_weapons = inventory.weapons;
-    Menu_Framework_blades = inventory.blades;
-    Menu_Framework_grips = inventory.grips;
-    Menu_Framework_shields = inventory.shields;
-    Menu_Framework_armor = inventory.armor;
-    Menu_Framework_gems = inventory.gems;
+    VS::Menu::Framework::weapons = inventory.weapons;
+    VS::Menu::Framework::blades = inventory.blades;
+    VS::Menu::Framework::grips = inventory.grips;
+    VS::Menu::Framework::shields = inventory.shields;
+    VS::Menu::Framework::armor = inventory.armor;
+    VS::Menu::Framework::gems = inventory.gems;
   }
 
   void UpdateStatPanels() override {
@@ -1111,7 +1091,7 @@ class LiveHost final : public Host {
     Effects_screenEffectOverlay = nullptr;
     Battle_targetSphere = nullptr;
     VS::Render::ForgetLiveGimImages();
-    Menu_textBoxBufferIndex = 0;
+    VS::Menu::textBoxBufferIndex = 0;
     Battle_lowerScreenUiState = 0;
     Battle_hudHidden = 0;
     Battle_hudBattleMode = 0;
@@ -1119,9 +1099,9 @@ class LiveHost final : public Host {
     Battle_statusIconCarousel.word = kStatusIconCarouselIdle;
     Menu_sceneNotificationBuffer = nullptr;
     VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
-    Battle_actionSelection = &Menu_Framework_actionSelection;
+    Battle_actionSelection = &actionSelection;
     Menu_textBoxes[0] = Menu_TextBoxState{};
-    Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
+    Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable, kTextBoxOrderingTags);
   }
 
@@ -1423,7 +1403,7 @@ Menu_Framework_ActionSelection* LiveActionSelectionState() {
     LiveCall call;
     static_cast<void>(ActionSelectionState(call.Ctx()));
   }
-  return &Menu_Framework_actionSelection;
+  return &actionSelection;
 }
 
 int DrawLiveMainMenuCursor(int step, int position) {

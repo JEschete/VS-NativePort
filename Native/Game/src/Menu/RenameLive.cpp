@@ -23,8 +23,8 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Rename.hpp"
@@ -158,34 +158,34 @@ class LiveHost final : public Host {
                 std::min(name.size(), kNameBytes));
     Battle_stringContext.strings[0] =
         reinterpret_cast<char*>(g_prompt_name.data());
-    if (Menu_Framework_stringBuf == nullptr) {
+    if (VS::Menu::Framework::stringBuf == nullptr) {
       Refuse("rename prompt without the menu's string buffer");
       return;
     }
     const std::span<std::uint8_t> message(
-        reinterpret_cast<std::uint8_t*>(Menu_Framework_stringBuf),
+        reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
         Framework::kStringBufferBytes);
     if (!Render::FormatEncodedText(message, prompt,
                                    Render::LiveEncodedTextArguments())) {
       Refuse("rename prompt does not fit the menu's string buffer");
       message[0] = Render::kTextTerminator;
     }
-    Framework::SetLiveInformationMessage(Menu_Framework_stringBuf);
+    Framework::SetLiveInformationMessage(VS::Menu::Framework::stringBuf);
   }
   void DismissConfirmPrompt() override {
     VS::Menu::DismissLiveTextBox(kInformationTextBox);
   }
   void ReturnToMenu() override {
-    Menu_Framework_menuState.currentMenu = kWeaponMenu;
+    VS::Menu::Framework::menuState.currentMenu = kWeaponMenu;
   }
 
   std::optional<Request> RenameRequest() override {
-    if (Menu_Framework_stringBuf == nullptr) {
+    if (VS::Menu::Framework::stringBuf == nullptr) {
       return std::nullopt;
     }
     return Request{
-        .edit_existing = Menu_Framework_stringBuf[0] == 1,
-        .weapon = static_cast<std::uint8_t>(Menu_Framework_stringBuf[1])};
+        .edit_existing = VS::Menu::Framework::stringBuf[0] == 1,
+        .weapon = static_cast<std::uint8_t>(VS::Menu::Framework::stringBuf[1])};
   }
   std::optional<Weapon> LoadWeapon(int weapon) override {
     if (weapon < 0 || weapon >= kWeaponSlots) {
@@ -204,13 +204,13 @@ class LiveHost final : public Host {
     return Audio_Seq_unusedInventory.blades[blade].id;
   }
   std::span<const std::uint8_t> ItemName(int item) override {
-    if (Menu_Framework_itemNames == nullptr || item < 0 ||
+    if (VS::Menu::Framework::itemNames == nullptr || item < 0 ||
         item >= kItemNameCount) {
       return {};
     }
-    return {
-        reinterpret_cast<const std::uint8_t*>(Menu_Framework_itemNames[item]),
-        kNameBytes};
+    return {reinterpret_cast<const std::uint8_t*>(
+                VS::Menu::Framework::itemNames[item]),
+            kNameBytes};
   }
   void StoreWeaponName(int weapon,
                        std::span<const std::uint8_t> name) override {

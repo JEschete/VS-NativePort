@@ -10,7 +10,7 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/ItemList.h"
 
 namespace container_transfers_tests {
@@ -23,7 +23,7 @@ struct LiveFixture {
       items::Live::Typed(Audio_Seq_unusedInventory);
   std::uint16_t saved_count = Menu_Container_transferredMiscCount;
   Menu_Container_InventoryStorage* saved_storage =
-      Menu_Framework_unusedInventoryStorage;
+      VS::Menu::Framework::unusedInventoryStorage;
   Items_Container* saved_owner = Menu_Container_containerData;
   Items_Container* saved_other = Menu_Container_otherStorage;
   std::unique_ptr<Menu_Container_InventoryStorage> storage =

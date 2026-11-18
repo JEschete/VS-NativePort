@@ -21,7 +21,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLive.hpp"
-#include "Effects/CameraLiveState.h"
+#include "Effects/CameraLiveState.hpp"
 #include "Effects/Curves.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
@@ -372,8 +372,10 @@ struct TrapTileProducerScope {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   decltype(Effects_secondaryPackage) saved_secondary = Effects_secondaryPackage;
   decltype(Effects_secondaryRequest) saved_request = Effects_secondaryRequest;
-  decltype(Effects_savedActionCamera) saved_camera = Effects_savedActionCamera;
-  decltype(Effects_effectCamera) saved_effect_camera = Effects_effectCamera;
+  decltype(VS::Effects::savedActionCamera) saved_camera =
+      VS::Effects::savedActionCamera;
+  decltype(VS::Effects::effectCamera) saved_effect_camera =
+      VS::Effects::effectCamera;
   Effects_EffectInstance* saved_instances = Effects_secondaryInstances;
   int saved_busy = Effects_effectBusyFlags;
   decltype(std::to_array(Effects_tokenBitmaps)) saved_tokens =
@@ -391,8 +393,8 @@ struct TrapTileProducerScope {
   ~TrapTileProducerScope() {
     Effects_secondaryPackage = saved_secondary;
     Effects_secondaryRequest = saved_request;
-    Effects_savedActionCamera = saved_camera;
-    Effects_effectCamera = saved_effect_camera;
+    VS::Effects::savedActionCamera = saved_camera;
+    VS::Effects::effectCamera = saved_effect_camera;
     Effects_secondaryInstances = saved_instances;
     Effects_effectBusyFlags = saved_busy;
     std::ranges::copy(saved_tokens, Effects_tokenBitmaps);

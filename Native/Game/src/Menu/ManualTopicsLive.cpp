@@ -19,7 +19,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.h"
 #include "Menu/ManualTopics.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -51,14 +51,14 @@ std::span<const std::uint16_t> TopicTable() {
 class LiveTopicMenuHost final : public TopicMenuHost {
  public:
   void SetTopicCursor(TopicCursor cursor) override {
-    Menu_Framework_menuMemory.cursorMemories[kCursorRowMemory] =
+    VS::Menu::Framework::menuMemory.cursorMemories[kCursorRowMemory] =
         static_cast<char>(cursor.row);
-    Menu_Framework_menuMemory.cursorMemories[kCursorScrollMemory] =
+    VS::Menu::Framework::menuMemory.cursorMemories[kCursorScrollMemory] =
         static_cast<char>(cursor.scroll);
   }
   [[nodiscard]] std::uint8_t TopicCursorRow() const override {
     return static_cast<std::uint8_t>(
-        Menu_Framework_menuMemory.cursorMemories[kCursorRowMemory]);
+        VS::Menu::Framework::menuMemory.cursorMemories[kCursorRowMemory]);
   }
   [[nodiscard]] std::uint8_t CursorMemorySetting() const override {
     return static_cast<std::uint8_t>(Input_settings.cursorMemory);

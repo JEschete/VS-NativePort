@@ -12,7 +12,7 @@ struct Effects_RendererSlot;
 // Live binding for the effect resources (EffectResources.hpp) over the
 // battle's package records (Effects_package, Effects_actionPackage,
 // Effects_secondaryPackage, Effects_savedPackage), the loader state
-// (EffectResourcesLiveState.h), the renderer table (Effects_effectRenderers)
+// (EffectResourcesLiveState.hpp), the renderer table (Effects_effectRenderers)
 // and the EFFPURGE.BIN purge tables. The host reads and uploads through the
 // disc queue, the high heap, the overlay arena, VRAM and the texture pages;
 // sound blocks bind through the room sound banks.

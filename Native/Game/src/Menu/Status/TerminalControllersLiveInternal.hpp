@@ -13,9 +13,9 @@
 #include "Battle/Damage.h"
 #include "Battle/HudStateLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
@@ -75,7 +75,7 @@ class HostBase : public Interface {
          std::size(Menu_Framework_rowAnimationSteps)},
         {reinterpret_cast<const std::uint8_t*>(Menu_Framework_animationIndices),
          std::size(Menu_Framework_animationIndices)},
-        Menu_Framework_statusViewCursorPositions};
+        VS::Menu::Framework::statusViewCursorPositions};
   }
   std::optional<TerminalActor> Actor(int slot) override {
     return ActorView(slot);

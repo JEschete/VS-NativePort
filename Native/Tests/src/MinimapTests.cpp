@@ -18,7 +18,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.h"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
@@ -423,7 +423,7 @@ TEST_CASE("Native entrance lookup accepts bounded scene index 128",
   CHECK(VS::Field::SceneDoorIdEntry(128) == 254);
   Field_MpdDoorRecord door{};
   door.doorId = 128;
-  Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
+  VS::Field::SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
   CHECK(Field_enteredDoorId == 254);
   CHECK(Field_entranceDoorRecord.doorId == 128);
   CHECK(VS::Field::SceneDoorIdEntry(129) == -1);
@@ -441,14 +441,14 @@ TEST_CASE("Typed entrance live lookup keeps order upper layers and byte bounds",
   doors[1].tileLocation.floorLayer = 2;
   Field_roomData.doors = doors.data();
   Field_roomData.header.doorsLength = sizeof doors;
-  Field_FindEntranceDoorNearTileEntry(3, 3, 0);
+  VS::Field::FindEntranceDoorNearTileEntry(3, 3, 0);
   CHECK(Field_enteredDoorId == 254);
   CHECK(Field_entranceDoorRecord.tileLocation.tileX == 2);
-  Field_FindEntranceDoorNearTileEntry(50, 50, 2);
+  VS::Field::FindEntranceDoorNearTileEntry(50, 50, 2);
   CHECK(Field_enteredDoorId == 254);
   CHECK(Field_entranceDoorRecord.tileLocation.tileX == 7);
   Field_roomData.header.doorsLength = sizeof doors - 1;
-  Field_FindEntranceDoorNearTileEntry(3, 3, 0);
+  VS::Field::FindEntranceDoorNearTileEntry(3, 3, 0);
   CHECK(Field_enteredDoorId == -1);
   CHECK(Field_entranceDoorRecord.doorId == 0);
 }
@@ -464,13 +464,13 @@ TEST_CASE("Reload door native store writes only its packed state byte",
   auto expected = saved;
   Field_enteredDoorId = 254;
   expected.doorEntered = std::bit_cast<char>(std::uint8_t{255});
-  Field_StoreEntranceDoorForReloadEntry();
+  VS::Field::StoreEntranceDoorForReloadEntry();
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
         std::bit_cast<FlagBytes>(expected));
   CHECK(Field_enteredDoorId == 254);
   Field_enteredDoorId = -1;
-  Field_StoreEntranceDoorForReloadEntry();
+  VS::Field::StoreEntranceDoorForReloadEntry();
   CHECK(std::bit_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.doorEntered) ==
         0);
 }
@@ -480,13 +480,15 @@ TEST_CASE("Entrance native entries retain original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008B8F8) ==
-        reinterpret_cast<const void*>(&Field_SetEntranceDoorRecordEntry));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x8008B960) ==
-        reinterpret_cast<const void*>(&Field_FindEntranceDoorNearTileEntry));
+        reinterpret_cast<const void*>(&VS::Field::SetEntranceDoorRecordEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x8008B960) ==
+      reinterpret_cast<const void*>(&VS::Field::FindEntranceDoorNearTileEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008AB68) ==
-        reinterpret_cast<const void*>(&Field_StoreEntranceDoorForReloadEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::StoreEntranceDoorForReloadEntry));
 }
 
 TEST_CASE("Scene door native entries retain original module addresses",
@@ -509,15 +511,16 @@ TEST_CASE("Native entrance lookup uses bounded unsigned scene bytes",
   for (std::uint32_t id = 0; id <= UINT8_MAX; ++id) {
     fixture.words[25] = id << 8;
     CHECK(VS::Field::SceneDoorIdEntry(0) == id);
-    Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
+    VS::Field::SetEntranceDoorRecordEntry(
+        reinterpret_cast<char (*)[12]>(&door));
     CHECK(Field_enteredDoorId == id);
     CHECK(Field_entranceDoorRecord.requiredFlagId == 321);
   }
   Field_roomData.header.minimapSceneLength = 26 * sizeof(u_long) - 1;
   CHECK(VS::Field::SceneDoorIdEntry(0) == -1);
-  Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
+  VS::Field::SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
   CHECK(Field_enteredDoorId == -1);
-  Field_SetEntranceDoorRecordEntry(nullptr);
+  VS::Field::SetEntranceDoorRecordEntry(nullptr);
   CHECK(Field_enteredDoorId == -1);
   CHECK(Field_entranceDoorRecord.requiredFlagId == 0);
 }

@@ -8,7 +8,7 @@
 #include "Legacy/Psx.h"
 
 // Live binding for the room background (Background.hpp) over the copied
-// background globals (BackgroundLiveState.h), the room record, the frame
+// background globals (BackgroundLiveState.hpp), the room record, the frame
 // scratch camera, the high-end heap, the disc queue, VRAM and the frame's
 // primitive buffer. Each entry loads the globals into a RoomBackgroundState,
 // runs the typed core and stores them back. The entries keep the original

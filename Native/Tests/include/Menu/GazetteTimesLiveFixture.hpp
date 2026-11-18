@@ -21,7 +21,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Score/GazetteTimes.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
@@ -77,10 +77,10 @@ inline auto MutableOwners() {
                     BytesOf(Menu_Score_clearCount),
                     BytesOf(Audio_Seq_unusedScoredata),
                     BytesOf(Battle_unusedMenu9CursorMemory),
-                    BytesOf(Menu_Framework_menuItems),
-                    BytesOf(Menu_Framework_menuMemory),
-                    BytesOf(Menu_Framework_cursorColor),
-                    BytesOf(Menu_Framework_hideMenu),
+                    BytesOf(VS::Menu::Framework::menuItems),
+                    BytesOf(VS::Menu::Framework::menuMemory),
+                    BytesOf(VS::Menu::Framework::cursorColor),
+                    BytesOf(VS::Menu::Framework::hideMenu),
                     BytesOf(Menu_textBoxes),
                     BytesOf(Render_frameScratch),
                     BytesOf(Render_legacyPrimitiveBuffers),
@@ -269,9 +269,9 @@ class Fixture {
 
   Fixture() {
     ReloadBorrowedTables();
-    Menu_Framework_menuItems = rows.data();
-    Menu_Framework_cursorColor = 0;
-    Menu_Framework_hideMenu = 0;
+    VS::Menu::Framework::menuItems = rows.data();
+    VS::Menu::Framework::cursorColor = 0;
+    VS::Menu::Framework::hideMenu = 0;
     Menu_textBoxes[kInformationBox] = {};
     Battle_unusedMenu9CursorMemory.gazettePage = 0;
     std::ranges::fill(Menu_Score_gazetteRows, Menu_Score_Row{});

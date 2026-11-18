@@ -12,7 +12,7 @@
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootPolicies.hpp"
@@ -244,11 +244,11 @@ struct LivePoliciesFixture {
   Items_Inventory backup{};
   std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   std::array<Menu_Framework_MenuRow, 40> menu_rows{};
-  Menu_Framework_MenuRow* previous_menu_rows{Menu_Framework_menuItems};
+  Menu_Framework_MenuRow* previous_menu_rows{VS::Menu::Framework::menuItems};
   Items_Inventory* previous_inventory{Menu_Loot_inventory};
   Items_Inventory* previous_backup{Menu_Loot_inventoryBackup};
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
-  Items_BattleLoot* previous_entry{Menu_Framework_lootEntry};
+  Items_BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
   Items_Inventory previous_ashley{Audio_Seq_unusedInventory};
   char previous_claimed{Menu_Loot_lootClaimed};
 
@@ -257,25 +257,25 @@ struct LivePoliciesFixture {
     VS::Menu::Inventory::BindLiveLootInventoryText(
         VS::tests::inventory_terminal::LootText());
     live::ResetPolicyStatics();
-    Menu_Framework_menuItems = menu_rows.data();
+    VS::Menu::Framework::menuItems = menu_rows.data();
     Menu_Loot_inventory = &staged;
     Menu_Loot_inventoryBackup = &backup;
     Menu_Loot_lootList = rows.data();
     Menu_Loot_lootListCount = 0;
     Menu_Loot_lootListOffset = 0;
     Menu_Loot_lootClaimed = 0;
-    Menu_Framework_lootEntry = nullptr;
+    VS::Menu::Framework::lootEntry = nullptr;
   }
 
   ~LivePoliciesFixture() {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
     live::ResetPolicyStatics();
-    Menu_Framework_menuItems = previous_menu_rows;
+    VS::Menu::Framework::menuItems = previous_menu_rows;
     Menu_Loot_inventory = previous_inventory;
     Menu_Loot_inventoryBackup = previous_backup;
     Menu_Loot_lootList = previous_rows;
     Menu_Loot_lootListCount = 0;
-    Menu_Framework_lootEntry = previous_entry;
+    VS::Menu::Framework::lootEntry = previous_entry;
     Audio_Seq_unusedInventory = previous_ashley;
     Menu_Loot_lootClaimed = previous_claimed;
   }
@@ -643,7 +643,7 @@ TEST_CASE("Live leave confirmation returns the empty and single-entry results",
   CHECK(live::UpdateLeaveConfirmation(1) == 0);
   CHECK(live::UpdateLeaveConfirmation(0) == 1);
   Items_BattleLoot chest{};
-  Menu_Framework_lootEntry = &chest;
+  VS::Menu::Framework::lootEntry = &chest;
   Menu_Loot_lootListCount = 1;
   CHECK(live::UpdateLeaveConfirmation(1) == 0);
   CHECK(live::UpdateLeaveConfirmation(0) == 2);

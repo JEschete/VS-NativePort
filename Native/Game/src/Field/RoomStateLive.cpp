@@ -14,7 +14,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
-#include "Field/BackgroundLiveState.h"
+#include "Field/BackgroundLiveState.hpp"
 #include "Field/Doors.h"
 #include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/Gimmicks.h"
@@ -124,8 +124,8 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
     namespace Memory = Core::Memory;
     switch (record) {
       case RoomRecord::kBackgroundReferenceVectors:
-        Memory::ZeroLiveAlignedWords(Field_backgroundReferenceVectors,
-                                     sizeof Field_backgroundReferenceVectors);
+        Memory::ZeroLiveAlignedWords(backgroundReferenceVectors,
+                                     sizeof backgroundReferenceVectors);
         return;
       case RoomRecord::kRoomData:
         Memory::ZeroLiveAlignedWords(&Field_roomData, sizeof Field_roomData);
@@ -181,7 +181,7 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
   // The original hands the cleared reference vectors' first five words to
   // the background as its gradient colours (18.c:595).
   void ApplyBackgroundReferenceColors() override {
-    const auto& [first, second] = Field_backgroundReferenceVectors;
+    const auto& [first, second] = backgroundReferenceVectors;
     const GradientColors colors{
         static_cast<std::int32_t>(first.vx),
         static_cast<std::int32_t>(first.vy),

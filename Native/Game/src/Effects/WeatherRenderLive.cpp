@@ -18,9 +18,9 @@
 #include "Effects/WeatherPoolLiveSupport.hpp"
 #include "Effects/WeatherRender.hpp"
 #include "Field/Background.hpp"
-#include "Field/BackgroundLiveState.h"
+#include "Field/BackgroundLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "Field/EnvironmentLiveState.h"
+#include "Field/EnvironmentLiveState.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/Weather.h"
@@ -152,15 +152,15 @@ class LiveRenderHost final : public WeatherRenderHost {
 [[nodiscard]] WeatherFrame LiveFrame() {
   return {.paused = VS::Field::areRoomUpdatesPaused != 0,
           .tick_speed = VS::State::tickSpeed,
-          .velocity = {.x = Field_weatherParameters[kVelocityXWord],
-                       .y = Field_weatherParameters[kVelocityYWord],
-                       .z = Field_weatherParameters[kVelocityZWord]}};
+          .velocity = {.x = VS::Field::weatherParameters[kVelocityXWord],
+                       .y = VS::Field::weatherParameters[kVelocityYWord],
+                       .z = VS::Field::weatherParameters[kVelocityZWord]}};
 }
 
 // The first background reference VECTOR read as an SVECTOR, as the original
 // did: its x word's halves and its y word's low half.
 [[nodiscard]] WeatherPoint LiveReference() {
-  const VECTOR& vector = Field_backgroundReferenceVectors[0];
+  const VECTOR& vector = VS::Field::backgroundReferenceVectors[0];
   const auto x = static_cast<std::uint32_t>(vector.vx);
   const auto y = static_cast<std::uint32_t>(vector.vy);
   return {.x = static_cast<std::int16_t>(static_cast<std::uint16_t>(x)),
@@ -194,7 +194,7 @@ void LiveDrawRainParticles() {
           [&](WeatherPoolHost& pool, WeatherRenderHost& render,
               std::span<WeatherParticle> particles) {
             return DrawRainParticles(pool, render, frame, particles,
-                                     Field_weatherParticleCount, area);
+                                     VS::Field::weatherParticleCount, area);
           });
 }
 
@@ -245,7 +245,8 @@ void LiveDrawRisingEmberParticles() {
           [&](WeatherPoolHost& pool, WeatherRenderHost& render,
               std::span<WeatherParticle> particles) {
             return DrawRisingEmberParticles(pool, render, frame, particles,
-                                            Field_weatherParticleCount, *area);
+                                            VS::Field::weatherParticleCount,
+                                            *area);
           });
 }
 
@@ -257,7 +258,7 @@ void LiveDrawSnowParticles() {
           [&](WeatherPoolHost& pool, WeatherRenderHost& render,
               std::span<WeatherParticle> particles) {
             return DrawSnowParticles(pool, render, frame, particles,
-                                     Field_weatherParticleCount, area);
+                                     VS::Field::weatherParticleCount, area);
           });
 }
 

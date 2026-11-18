@@ -32,10 +32,10 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -114,7 +114,8 @@ void RequireIdleContext(const ContextState& context) {
   }
 }
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) Refuse("missing menu row workspace");
+  if (VS::Menu::Framework::menuItems == nullptr)
+    Refuse("missing menu row workspace");
 }
 void RequireFrame() {
   if (Render_frameScratch.primitiveCursor == nullptr ||
@@ -156,7 +157,7 @@ std::span<std::uint8_t> FixedOrder(Category category) {
 }
 
 void ReadRuntime(TerminalRuntime& runtime) {
-  auto& memory = Menu_Framework_menuMemory.opaque3A;
+  auto& memory = VS::Menu::Framework::menuMemory.opaque3A;
   static_assert(sizeof(memory) == kCursorBytes);
   static_assert(sizeof(InventoryCursorMemory) == kCursorBytes);
   runtime.cursor = std::bit_cast<InventoryCursorMemory>(memory);
@@ -169,12 +170,12 @@ void ReadRuntime(TerminalRuntime& runtime) {
       static_cast<std::uint8_t>(Menu_Inventory_statusCommandAnimationStep),
       static_cast<std::uint8_t>(Menu_Inventory_selectedItemCategoryIconOnTop),
       Menu_Inventory_ashleyRenderState};
-  const auto& control = Menu_Framework_menuState;
+  const auto& control = VS::Menu::Framework::menuState;
   runtime.control.current_menu = static_cast<std::uint8_t>(control.currentMenu);
   runtime.control.return_state = static_cast<std::uint8_t>(control.returnState);
   runtime.control.execute_ability_type =
       static_cast<std::uint8_t>(control.executeAbilityType);
-  const auto& use = Menu_Framework_actionSelection;
+  const auto& use = VS::Menu::Framework::actionSelection;
   runtime.use = {use.menuStatus, use.selectionKind,
                  static_cast<std::uint16_t>(use.executeAbility.halves[0]),
                  static_cast<std::uint16_t>(use.executeAbility.halves[1]),
@@ -183,11 +184,11 @@ void ReadRuntime(TerminalRuntime& runtime) {
       static_cast<std::uint8_t>(Input_settings.cursorMemory);
   runtime.freeze_tabs =
       static_cast<std::uint8_t>(Menu_Inventory_freezeTabArrows);
-  runtime.restrictions = Menu_Framework_actionRestrictions;
+  runtime.restrictions = VS::Menu::Framework::actionRestrictions;
   runtime.hud_slide_offset = Battle_hudSlideOffset;
 }
 void WriteRuntime(const TerminalRuntime& runtime) {
-  auto& memory = Menu_Framework_menuMemory.opaque3A;
+  auto& memory = VS::Menu::Framework::menuMemory.opaque3A;
   memory =
       std::bit_cast<std::remove_reference_t<decltype(memory)>>(runtime.cursor);
   const auto& panels = runtime.presentation;
@@ -205,12 +206,12 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   Menu_Inventory_selectedItemCategoryIconOnTop =
       static_cast<char>(panels.icon_on_top);
   Menu_Inventory_ashleyRenderState = panels.ashley_layout;
-  auto& control = Menu_Framework_menuState;
+  auto& control = VS::Menu::Framework::menuState;
   control.currentMenu = static_cast<char>(runtime.control.current_menu);
   control.returnState = static_cast<char>(runtime.control.return_state);
   control.executeAbilityType =
       static_cast<char>(runtime.control.execute_ability_type);
-  auto& use = Menu_Framework_actionSelection;
+  auto& use = VS::Menu::Framework::actionSelection;
   use.menuStatus = runtime.use.command;
   use.selectionKind = runtime.use.kind;
   use.executeAbility.halves[0] = static_cast<std::int16_t>(runtime.use.action);
@@ -219,7 +220,7 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   Input_settings.cursorMemory =
       static_cast<char>(runtime.cursor_memory_enabled);
   Menu_Inventory_freezeTabArrows = static_cast<char>(runtime.freeze_tabs);
-  Menu_Framework_actionRestrictions = runtime.restrictions;
+  VS::Menu::Framework::actionRestrictions = runtime.restrictions;
   Battle_hudSlideOffset = runtime.hud_slide_offset;
 }
 
@@ -415,7 +416,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     Call([] {
       Framework::UpdateLiveInformationVisibility(
           Framework::LiveHighlightedActionRow(),
-          Menu_Framework_actionMenuState);
+          VS::Menu::Framework::actionMenuState);
     });
   }
   void Sort(Category category, std::int32_t stat) override {
@@ -740,7 +741,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     });
   }
   bool ItemNamesLoaded() override {
-    return Menu_Framework_itemNames != nullptr;
+    return VS::Menu::Framework::itemNames != nullptr;
   }
   bool LoadItemText(bool initialize) override {
     return Call(
@@ -784,7 +785,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     Call([] { Framework::SetLiveCommandLabel(0); });
   }
   std::int32_t BackgroundFadeStep() override {
-    return Menu_Framework_backgroundFadeStep;
+    return VS::Menu::Framework::backgroundFadeStep;
   }
   std::int32_t AnimationOffset(std::size_t step) override {
     const auto offsets = std::span(Menu_Framework_rowAnimationSteps);

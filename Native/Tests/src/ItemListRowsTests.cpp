@@ -17,7 +17,7 @@
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -662,24 +662,24 @@ TEST_CASE("Inventory live rows refuse categories without an order table",
 TEST_CASE("Inventory live restore settles the live menu rows",
           "[inventory-rows-live][F02596]") {
   std::array<Menu_Framework_MenuRow, framework::kRowCount> rows{};
-  auto* const saved_rows = Menu_Framework_menuItems;
-  const auto saved_list_row = Menu_Framework_itemsListRow;
+  auto* const saved_rows = VS::Menu::Framework::menuItems;
+  const auto saved_list_row = VS::Menu::Framework::itemsListRow;
   const auto memory = framework::LiveMenuCursorMemory();
   const auto saved_cursor = memory[CursorIndex(kArmor)];
   rows[kSlidingRow].state = 2;
   rows[kSlidingRow].targetPosition0 = kTargetX;
-  Menu_Framework_menuItems = rows.data();
-  Menu_Framework_itemsListRow = 16;
+  VS::Menu::Framework::menuItems = rows.data();
+  VS::Menu::Framework::itemsListRow = 16;
   memory[CursorIndex(kArmor)] = kRememberedRow;
   inventory::LiveRestoreItemRows(kArmor);
   CHECK(rows[kSlidingRow].state == 1);
   CHECK(rows[kSlidingRow].x == kTargetX);
   CHECK(rows[inventory::kFirstItemListRow + kRememberedRow].selected == 1);
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   const auto before = inventory::ItemListRowsLiveRefusalCount();
   inventory::LiveRestoreItemRows(kArmor);
   CHECK(inventory::ItemListRowsLiveRefusalCount() == before + 1);
-  Menu_Framework_menuItems = saved_rows;
-  Menu_Framework_itemsListRow = saved_list_row;
+  VS::Menu::Framework::menuItems = saved_rows;
+  VS::Menu::Framework::itemsListRow = saved_list_row;
   memory[CursorIndex(kArmor)] = saved_cursor;
 }

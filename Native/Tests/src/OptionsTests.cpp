@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Options.hpp"
 #include "Menu/OptionsLive.hpp"
 
@@ -398,23 +398,23 @@ TEST_CASE("Options choice entry points share one choice state each",
 
 TEST_CASE("Options live binding returns to the battle through the menu state",
           "[menu-files][menu][menu-options]") {
-  const auto saved_state = Menu_Framework_menuState;
-  Menu_Framework_MenuRow* const saved_items = Menu_Framework_menuItems;
-  Menu_Framework_menuItems = nullptr;
-  Menu_Framework_menuState.currentMenu = 0;
+  const auto saved_state = VS::Menu::Framework::menuState;
+  Menu_Framework_MenuRow* const saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::menuItems = nullptr;
+  VS::Menu::Framework::menuState.currentMenu = 0;
   options::ResetLiveOptionsStatics();
   std::uint8_t step = StepByte(Step::kExitToBattle);
   CHECK(options::UpdateLiveOptions(step) == 1);
   CHECK(step == StepByte(Step::kNone));
-  CHECK(Menu_Framework_menuState.currentMenu == 8);
-  Menu_Framework_menuState.currentMenu = 0;
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 8);
+  VS::Menu::Framework::menuState.currentMenu = 0;
   step = StepByte(Step::kExitToMenu);
   CHECK(options::UpdateLiveOptions(step) == 1);
   CHECK(step == StepByte(Step::kNone));
-  CHECK(Menu_Framework_menuState.currentMenu == 0);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 0);
   CHECK(options::UpdateLiveOptions(step) == 0);
-  Menu_Framework_menuItems = saved_items;
-  Menu_Framework_menuState = saved_state;
+  VS::Menu::Framework::menuItems = saved_items;
+  VS::Menu::Framework::menuState = saved_state;
 }
 
 TEST_CASE("Options retires the MENU8.PRG options module symbols",

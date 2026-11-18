@@ -13,7 +13,7 @@ struct Items_ShieldLoadout;
 struct Items_WeaponLoadout;
 struct Menu_Framework_MenuRow;
 
-// Binds the item rows (ItemRows.hpp) to their texts (ItemRowsLiveState.h),
+// Binds the item rows (ItemRows.hpp) to their texts (ItemRowsLiveState.hpp),
 // the inventory and container tables the menus show (vs_mainMenu_weapons ..
 // vs_mainMenu_gems), the battle string context, vs_battle_stringBuf, the menu
 // rows and the disc queue, in the shapes the copied menus call. A null record

@@ -17,11 +17,11 @@
 #include "Menu/Framework/DetailDispatchLiveSupport.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -56,7 +56,7 @@ ItemDetailDispatcherState g_dispatcher;
 }
 
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) {
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing menu row workspace");
   }
 }
@@ -144,11 +144,11 @@ std::span<char> TextView(char* text, std::span<char> borrowed_buffer) {
 }
 
 void RequireRowText(bool buffer) {
-  if (Menu_Framework_itemHelp == nullptr ||
-      Menu_Framework_itemNames == nullptr) {
+  if (VS::Menu::Framework::itemHelp == nullptr ||
+      VS::Menu::Framework::itemNames == nullptr) {
     Refuse("missing current item help or name text");
   }
-  if (buffer && Menu_Framework_stringBuf == nullptr) {
+  if (buffer && VS::Menu::Framework::stringBuf == nullptr) {
     Refuse("missing current item description workspace");
   }
 }
@@ -174,7 +174,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
   void SetStatistics(InventorySlot slot) override {
     if (category_ == Category::kArmor) {
       if (slot.one_based != 0) {
-        RequireBoundTable(Menu_Framework_armor,
+        RequireBoundTable(VS::Menu::Framework::armor,
                           Audio_Seq_unusedInventory.armor);
         const auto armor = Items::Live::Typed(
             Referenced(Audio_Seq_unusedInventory.armor, slot));
@@ -186,7 +186,8 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
       }
       Framework::SetLiveArmorStats(slot.one_based);
     } else {
-      RequireBoundTable(Menu_Framework_gems, Audio_Seq_unusedInventory.gems);
+      RequireBoundTable(VS::Menu::Framework::gems,
+                        Audio_Seq_unusedInventory.gems);
       (void)Referenced(Audio_Seq_unusedInventory.gems, slot);
       Framework::SetLiveGemStats(slot.one_based);
     }
@@ -215,7 +216,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
   DetailRowView FormatItem(InventorySlot slot) override {
     std::array<char*, 2> text{};
     int row_type = 0;
-    char* const buffer = Menu_Framework_stringBuf;
+    char* const buffer = VS::Menu::Framework::stringBuf;
     const std::span<char> borrowed_buffer{
         buffer, buffer == nullptr ? 0 : Framework::kStringBufferBytes};
     if (category_ == Category::kArmor) {
@@ -251,7 +252,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
 class LiveIconWorld final : public CategoryIconWorld {
  public:
   std::uint8_t CurrentCategory() override {
-    return Menu_Framework_menuMemory.opaque3A.currentCategory;
+    return VS::Menu::Framework::menuMemory.opaque3A.currentCategory;
   }
   void DrawListTabNavigation() override {
     RequireFrame(true);

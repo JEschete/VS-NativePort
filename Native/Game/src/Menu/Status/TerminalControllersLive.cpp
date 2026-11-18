@@ -17,7 +17,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/ItemRows.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/LimbControllersLive.hpp"
@@ -88,17 +88,18 @@ TerminalFrame LoadFrame() {
       .model_delay = static_cast<std::uint8_t>(Menu_Status_delayScreenUpdate),
       .selected_element = Menu_Status_selectedElement,
       .selected_stat = static_cast<std::uint8_t>(Menu_Status_selectedStatRow),
-      .cursor_color = static_cast<std::uint8_t>(Menu_Framework_cursorColor),
+      .cursor_color =
+          static_cast<std::uint8_t>(VS::Menu::Framework::cursorColor),
       .freeze_tabs = static_cast<std::uint8_t>(Menu_Inventory_freezeTabArrows),
-      .stat_page = static_cast<std::uint8_t>(Menu_Framework_itemStatPage),
+      .stat_page = static_cast<std::uint8_t>(VS::Menu::Framework::itemStatPage),
       .enabled_pages =
-          static_cast<std::uint8_t>(Menu_Framework_enabledStatPages),
+          static_cast<std::uint8_t>(VS::Menu::Framework::enabledStatPages),
       .selected_equipment = static_cast<std::uint8_t>(
-          Menu_Framework_menuMemory.selectedEquipment),
+          VS::Menu::Framework::menuMemory.selectedEquipment),
       .cursor_memory = static_cast<std::uint8_t>(Input_settings.cursorMemory),
       .hud_hidden = static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
       .current_menu =
-          static_cast<std::uint8_t>(Menu_Framework_menuState.currentMenu),
+          static_cast<std::uint8_t>(VS::Menu::Framework::menuState.currentMenu),
       .pressed = Input_buttonsPressed.allButtons,
       .held = static_cast<std::uint32_t>(Input_buttonsState),
       .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
@@ -119,15 +120,17 @@ void StoreFrame(const TerminalFrame& frame) {
   Menu_Status_delayScreenUpdate = static_cast<char>(frame.model_delay);
   Menu_Status_selectedElement = frame.selected_element;
   Menu_Status_selectedStatRow = static_cast<char>(frame.selected_stat);
-  Menu_Framework_cursorColor = static_cast<char>(frame.cursor_color);
+  VS::Menu::Framework::cursorColor = static_cast<char>(frame.cursor_color);
   Menu_Inventory_freezeTabArrows = static_cast<char>(frame.freeze_tabs);
-  Menu_Framework_itemStatPage = static_cast<char>(frame.stat_page);
-  Menu_Framework_enabledStatPages = static_cast<char>(frame.enabled_pages);
-  Menu_Framework_menuMemory.selectedEquipment =
+  VS::Menu::Framework::itemStatPage = static_cast<char>(frame.stat_page);
+  VS::Menu::Framework::enabledStatPages =
+      static_cast<char>(frame.enabled_pages);
+  VS::Menu::Framework::menuMemory.selectedEquipment =
       static_cast<char>(frame.selected_equipment);
   Input_settings.cursorMemory = static_cast<char>(frame.cursor_memory);
   Battle_hudStatusIconsHidden = static_cast<char>(frame.hud_hidden);
-  Menu_Framework_menuState.currentMenu = static_cast<char>(frame.current_menu);
+  VS::Menu::Framework::menuState.currentMenu =
+      static_cast<char>(frame.current_menu);
 }
 TerminalView LoadView() {
   const MATRIX& view = Render_frameScratch.viewMatrix;
@@ -164,14 +167,15 @@ bool Workspace() {
       kRowsBytes + Framework::kStringBufferBytes +
       Framework::kRowTypeCount * sizeof(int);
   if (VS::Content::overlayWorkspaceOwner != kWorkspaceOwner ||
-      !InPayload(Menu_Framework_menuItems, kWorkspaceBytes)) {
+      !InPayload(VS::Menu::Framework::menuItems, kWorkspaceBytes)) {
     Refuse("missing or foreign MAINMENU workspace owner");
     return false;
   }
   const auto* expected =
-      reinterpret_cast<const char*>(Menu_Framework_menuItems) + kRowsBytes;
-  if (Menu_Framework_stringBuf != expected ||
-      reinterpret_cast<const char*>(Menu_Framework_rowTypeBuf) !=
+      reinterpret_cast<const char*>(VS::Menu::Framework::menuItems) +
+      kRowsBytes;
+  if (VS::Menu::Framework::stringBuf != expected ||
+      reinterpret_cast<const char*>(VS::Menu::Framework::rowTypeBuf) !=
           expected + Framework::kStringBufferBytes) {
     Refuse(
         "description or row-type buffer is not the MAINMENU workspace borrow");
@@ -180,13 +184,13 @@ bool Workspace() {
   return true;
 }
 bool ItemText() {
-  if (!InPayload(Menu_Framework_itemNames, Framework::kItemTextBytes)) {
+  if (!InPayload(VS::Menu::Framework::itemNames, Framework::kItemTextBytes)) {
     Refuse("missing or expired MAINMENU item text allocation");
     return false;
   }
   const auto* names =
-      reinterpret_cast<const std::uint8_t*>(Menu_Framework_itemNames);
-  if (reinterpret_cast<const std::uint8_t*>(Menu_Framework_itemHelp) !=
+      reinterpret_cast<const std::uint8_t*>(VS::Menu::Framework::itemNames);
+  if (reinterpret_cast<const std::uint8_t*>(VS::Menu::Framework::itemHelp) !=
       names + Framework::kItemNamesBytes) {
     Refuse("ITEMHELP is not the current MAINMENU text owner's view");
     return false;

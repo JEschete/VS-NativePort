@@ -14,7 +14,7 @@
 #include "Content/ModuleData.h"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
-#include "Field/BackgroundLiveState.h"
+#include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
 #include "Legacy/Psx.h"
 #include "TestSupport/ChannelWarnings.hpp"
@@ -631,7 +631,7 @@ TEST_CASE("Live background colours reach the sky dome",
   std::array<unsigned int, 166> saved_dome{};
   std::ranges::copy(Content_battleSkyDome, saved_dome.begin());
   std::array<int, 5> saved_colors{};
-  std::ranges::copy(Field_backgroundGradientColors, saved_colors.begin());
+  std::ranges::copy(VS::Field::backgroundGradientColors, saved_colors.begin());
   ChannelWarnings warnings{"field.background"};
 
   const std::array<int, 5> colors{1, 2, 3, 4, 0xABCDEF};
@@ -645,7 +645,7 @@ TEST_CASE("Live background colours reach the sky dome",
   }
 
   std::ranges::copy(saved_dome, Content_battleSkyDome);
-  std::ranges::copy(saved_colors, Field_backgroundGradientColors);
+  std::ranges::copy(saved_colors, VS::Field::backgroundGradientColors);
   REQUIRE_FALSE(warnings.messages.empty());
   CHECK(warnings.messages[0] ==
         "SetRoomBackgroundColors was given a null record; the call is "

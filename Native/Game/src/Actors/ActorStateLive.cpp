@@ -55,7 +55,6 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Platforms.h"
 #include "Render/Palette.h"
@@ -475,7 +474,7 @@ class LiveActorStateHost final : public ActorStateHost {
   void ReleaseMovingPlatform(int platform) override {
     const Synced synced(*this);
     static_cast<void>(
-        Field_SetMovingPlatformActorEntry(platform, kNoPlatformRider));
+        VS::Field::SetMovingPlatformActorEntry(platform, kNoPlatformRider));
   }
   int SupportHeight(int x, int z) override {
     const Synced synced(*this);

@@ -51,8 +51,8 @@ struct ReloadFixture : Fixture {
     Render_projectionDistance = 777;
     Render_frameScratch.camera.position.vx = 1234;
     Render_frameScratch.camera.angles.pad = 77;
-    Menu_Framework_menuMemory.selectedEquipment = 5;
-    Battle_stringContext.strings[0] = Menu_Framework_stringBuf;
+    VS::Menu::Framework::menuMemory.selectedEquipment = 5;
+    Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
     *State() = 7;
   }
 
@@ -74,15 +74,15 @@ struct ReloadFixture : Fixture {
   }
 
   void CheckBorrowedOwners(bool cold) {
-    CHECK(Menu_Framework_menuItems == workspace);
-    CHECK(Menu_Framework_itemNames == text);
+    CHECK(VS::Menu::Framework::menuItems == workspace);
+    CHECK(VS::Menu::Framework::itemNames == text);
     CHECK(memory::LivePayloadCapacity(workspace).has_value());
     CHECK(memory::LivePayloadCapacity(text).has_value());
     CHECK(Battle_actors[0] == &actor);
     CHECK(actor.stats == &stats);
-    CHECK(Menu_Framework_menuMemory.selectedEquipment == 5);
+    CHECK(VS::Menu::Framework::menuMemory.selectedEquipment == 5);
     CHECK(Battle_stringContext.strings[0] ==
-          (cold ? nullptr : Menu_Framework_stringBuf));
+          (cold ? nullptr : VS::Menu::Framework::stringBuf));
   }
 
   void CheckOtherAndPending() {
@@ -135,7 +135,7 @@ TEST_CASE("Status terminal module entries drive real detail and list rows",
   CHECK(fw::LiveMenuRow(11).target0 == 155);
   REQUIRE(ModuleEntry(0x80105970, &st::LiveUpdateEquipmentList)(0) == 0);
   CHECK(st::LiveEquipmentListControllerState().phase == 1);
-  CHECK(Menu_Framework_itemsText != nullptr);
+  CHECK(VS::Menu::Framework::itemsText != nullptr);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
 }
 

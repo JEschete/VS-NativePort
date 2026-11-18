@@ -19,7 +19,7 @@
 #include "Menu/BattleAbilities.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
@@ -143,8 +143,8 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     BattleAbilities::Refuse(reason);
   }
   void ResetUnlockMenuMemory() override {
-    std::memset(Menu_Framework_menuMemory.opaque34, 0,
-                sizeof(Menu_Framework_menuMemory.opaque34));
+    std::memset(VS::Menu::Framework::menuMemory.opaque34, 0,
+                sizeof(VS::Menu::Framework::menuMemory.opaque34));
   }
   int SelectedRow() const override { return Framework::LiveSelectedRow(); }
   bool ShowCategory(const AbilityCategoryRow& row) override {
@@ -229,10 +229,10 @@ class LiveNotificationHost final : public UnlockNotificationHost {
     Framework::InitializeLiveInformationBox();
   }
   bool BreakArtPending() const override {
-    return Menu_Framework_unlockedBreakArt != 0;
+    return VS::Menu::Framework::unlockedBreakArt != 0;
   }
   bool AbilityPending() const override {
-    return Menu_Framework_unlockedBattleAbility != 0;
+    return VS::Menu::Framework::unlockedBattleAbility != 0;
   }
   int UpdateBreakArt(bool initialize) override {
     return LiveUpdateBreakArtUnlock(initialize ? 1 : 0);
@@ -259,9 +259,9 @@ class LiveRowsHost final : public AbilityRowsHost {
   AbilityCursor SavedCursor(AbilityMenuType type) const override {
     const auto index = static_cast<std::size_t>(type) * kPointersPerRow;
     return {static_cast<std::uint8_t>(
-                Menu_Framework_menuMemory.cursorMemories[index]),
+                VS::Menu::Framework::menuMemory.cursorMemories[index]),
             static_cast<std::uint8_t>(
-                Menu_Framework_menuMemory.cursorMemories[index + 1])};
+                VS::Menu::Framework::menuMemory.cursorMemories[index + 1])};
   }
   std::optional<std::uint8_t> ActionAt(AbilityMenuType type,
                                        int index) const override {

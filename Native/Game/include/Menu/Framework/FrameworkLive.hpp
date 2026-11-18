@@ -16,7 +16,7 @@ struct Items_InventoryMisc;
 struct Items_EquipmentPartStats;
 
 // Binds the menu framework (Framework.hpp) to its variables
-// (FrameworkLiveState.h), the frame ordering tables, the disc queue, the text
+// (FrameworkLiveState.hpp), the frame ordering tables, the disc queue, the text
 // boxes, the battle interface and the submenus, in the shapes the copied
 // menus and the battle flow call. Each entry runs the typed function over the
 // live State and writes the State back before it returns.

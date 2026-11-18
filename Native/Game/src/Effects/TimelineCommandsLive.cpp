@@ -22,7 +22,7 @@
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Effects/Transforms.h"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
@@ -203,7 +203,7 @@ void LiveActivateTargetGimmick(Effects_EffectInstance* instance) {
   if (Refused(instance, "room object")) return;
   if (const auto object = TargetGimmick(EndpointsOf(*instance))) {
     SVECTOR point = PointOf(*object);
-    Field_ApplyUnlockEffectToRoomObjectEntry(&point);
+    VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   }
 }
 

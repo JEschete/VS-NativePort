@@ -16,12 +16,12 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllers.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
@@ -55,7 +55,7 @@ std::array g_gem_count_text{'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
 }
 
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) {
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing menu row workspace");
   }
 }
@@ -76,13 +76,13 @@ void RequireBoundTable(const Record* bound, Record (&table)[Count]) {
 }
 
 void RequireText(bool names, bool buffer) {
-  if (Menu_Framework_itemHelp == nullptr) {
+  if (VS::Menu::Framework::itemHelp == nullptr) {
     Refuse("missing item help text");
   }
-  if (names && Menu_Framework_itemNames == nullptr) {
+  if (names && VS::Menu::Framework::itemNames == nullptr) {
     Refuse("missing item name text");
   }
-  if (buffer && Menu_Framework_stringBuf == nullptr) {
+  if (buffer && VS::Menu::Framework::stringBuf == nullptr) {
     Refuse("missing item description workspace");
   }
 }
@@ -91,13 +91,15 @@ void RequireGem(std::uint8_t reference) {
   if (reference == 0) {
     return;
   }
-  RequireBoundTable(Menu_Framework_gems, Audio_Seq_unusedInventory.gems);
+  RequireBoundTable(VS::Menu::Framework::gems, Audio_Seq_unusedInventory.gems);
   (void)Referenced(Audio_Seq_unusedInventory.gems, reference);
 }
 
 void RequireWeaponParts(const Items_InventoryWeapon& weapon) {
-  RequireBoundTable(Menu_Framework_blades, Audio_Seq_unusedInventory.blades);
-  RequireBoundTable(Menu_Framework_grips, Audio_Seq_unusedInventory.grips);
+  RequireBoundTable(VS::Menu::Framework::blades,
+                    Audio_Seq_unusedInventory.blades);
+  RequireBoundTable(VS::Menu::Framework::grips,
+                    Audio_Seq_unusedInventory.grips);
   (void)Referenced(Audio_Seq_unusedInventory.blades, weapon.blade);
   (void)Referenced(Audio_Seq_unusedInventory.grips, weapon.grip);
   for (std::size_t gem = 0; gem < Items::kWeaponGemCount; ++gem) {
@@ -150,7 +152,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
     switch (category_) {
       case Category::kWeapon:
         if (reference != 0) {
-          RequireBoundTable(Menu_Framework_weapons,
+          RequireBoundTable(VS::Menu::Framework::weapons,
                             Audio_Seq_unusedInventory.weapons);
           const auto& weapon =
               Referenced(Audio_Seq_unusedInventory.weapons, reference);
@@ -163,20 +165,20 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
         Framework::SetLiveWeaponStats(reference);
         break;
       case Category::kBlade:
-        RequireBoundTable(Menu_Framework_blades,
+        RequireBoundTable(VS::Menu::Framework::blades,
                           Audio_Seq_unusedInventory.blades);
         (void)Referenced(Audio_Seq_unusedInventory.blades, reference);
         Framework::SetLiveBladeStats(reference);
         break;
       case Category::kGrip:
-        RequireBoundTable(Menu_Framework_grips,
+        RequireBoundTable(VS::Menu::Framework::grips,
                           Audio_Seq_unusedInventory.grips);
         (void)Referenced(Audio_Seq_unusedInventory.grips, reference);
         Framework::SetLiveGripStats(reference);
         break;
       case Category::kShield:
         if (reference != 0) {
-          RequireBoundTable(Menu_Framework_shields,
+          RequireBoundTable(VS::Menu::Framework::shields,
                             Audio_Seq_unusedInventory.shields);
           const auto& shield =
               Referenced(Audio_Seq_unusedInventory.shields, reference);
@@ -232,34 +234,34 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
       case Category::kWeapon: {
         auto& weapon =
             Referenced(Audio_Seq_unusedInventory.weapons, slot.one_based);
-        RequireBoundTable(Menu_Framework_weapons,
+        RequireBoundTable(VS::Menu::Framework::weapons,
                           Audio_Seq_unusedInventory.weapons);
         RequireWeaponParts(weapon);
         weapon_name = weapon.name;
         Framework::FormatLiveInventoryWeaponRow(&weapon, text.data(), &row_type,
-                                                Menu_Framework_stringBuf);
+                                                VS::Menu::Framework::stringBuf);
         break;
       }
       case Category::kBlade:
         Framework::FormatLiveBladeRow(
             &Referenced(Audio_Seq_unusedInventory.blades, slot.one_based),
-            text.data(), &row_type, Menu_Framework_stringBuf);
+            text.data(), &row_type, VS::Menu::Framework::stringBuf);
         break;
       case Category::kGrip:
         Framework::FormatLiveGripRow(
             &Referenced(Audio_Seq_unusedInventory.grips, slot.one_based),
-            text.data(), &row_type, Menu_Framework_stringBuf);
+            text.data(), &row_type, VS::Menu::Framework::stringBuf);
         break;
       case Category::kShield: {
         auto& shield =
             Referenced(Audio_Seq_unusedInventory.shields, slot.one_based);
-        RequireBoundTable(Menu_Framework_shields,
+        RequireBoundTable(VS::Menu::Framework::shields,
                           Audio_Seq_unusedInventory.shields);
         for (std::size_t gem = 0; gem < Items::kWeaponGemCount; ++gem) {
           RequireGem(shield.gems[gem]);
         }
         Framework::FormatLiveInventoryShieldRow(&shield, text.data(), &row_type,
-                                                Menu_Framework_stringBuf);
+                                                VS::Menu::Framework::stringBuf);
         break;
       }
       default:
@@ -314,18 +316,19 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
     }
   }
   void RequireWeaponRow(int row, InventorySlot slot) const {
-    RequireBoundTable(Menu_Framework_weapons,
+    RequireBoundTable(VS::Menu::Framework::weapons,
                       Audio_Seq_unusedInventory.weapons);
     const auto& weapon =
         Referenced(Audio_Seq_unusedInventory.weapons, slot.one_based);
     if (row == 1) {
-      RequireBoundTable(Menu_Framework_blades,
+      RequireBoundTable(VS::Menu::Framework::blades,
                         Audio_Seq_unusedInventory.blades);
       (void)Referenced(Audio_Seq_unusedInventory.blades, weapon.blade);
       RequireText(true, true);
       return;
     }
-    RequireBoundTable(Menu_Framework_grips, Audio_Seq_unusedInventory.grips);
+    RequireBoundTable(VS::Menu::Framework::grips,
+                      Audio_Seq_unusedInventory.grips);
     const auto& grip = Referenced(Audio_Seq_unusedInventory.grips, weapon.grip);
     if (row == 2) {
       RequireText(false, true);
@@ -337,7 +340,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
     }
   }
   void RequireShieldRow(int row, InventorySlot slot) const {
-    RequireBoundTable(Menu_Framework_shields,
+    RequireBoundTable(VS::Menu::Framework::shields,
                       Audio_Seq_unusedInventory.shields);
     const auto& shield =
         Referenced(Audio_Seq_unusedInventory.shields, slot.one_based);

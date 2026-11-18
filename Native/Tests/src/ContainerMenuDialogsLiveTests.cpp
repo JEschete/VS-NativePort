@@ -145,7 +145,7 @@ TEST_CASE(
     "[container-menu-dialogs-live]") {
   LiveFixture fixture;
   const auto help =
-      std::span(reinterpret_cast<std::uint8_t*>(Menu_Framework_itemHelp),
+      std::span(reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::itemHelp),
                 framework::kItemHelpBytes);
   const auto name = framework::ItemHelpEntry(help, 552);
   const auto description = framework::ItemHelpEntry(help, 554);
@@ -161,7 +161,7 @@ TEST_CASE(
   framework::CreateLiveMenuRows(2, kContainerListInfo, texts.data(),
                                 types.data());
   dialogs::RestoreLiveItemRows(0);
-  REQUIRE(static_cast<std::uint8_t>(Menu_Framework_itemsListRow) >= 16);
+  REQUIRE(static_cast<std::uint8_t>(VS::Menu::Framework::itemsListRow) >= 16);
   REQUIRE(fixture.rows[20].state == Menu_Framework_MenuItemState_Idle);
   REQUIRE(fixture.rows[20].x == fixture.rows[20].targetPosition0);
   REQUIRE(fixture.rows[20].selected == 1);

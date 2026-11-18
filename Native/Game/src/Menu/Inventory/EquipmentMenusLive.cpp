@@ -25,7 +25,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentMenus.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
@@ -182,10 +182,11 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
                      .category = static_cast<std::uint8_t>(blade.category)};
   }
   bool IsTwoHanded(std::uint8_t category) override {
-    if (category == 0 || category > kMenuWeaponHandCategories) {
+    if (category == 0 ||
+        category > VS::Menu::Framework::kWeaponHandCategories) {
       return false;
     }
-    return std::span(Menu_Framework_weaponHands)[category - 1U] != 0;
+    return std::span(VS::Menu::Framework::weaponHands)[category - 1U] != 0;
   }
 
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }

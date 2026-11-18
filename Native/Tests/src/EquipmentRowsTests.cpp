@@ -24,10 +24,10 @@
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/EquipmentRows.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -840,7 +840,7 @@ struct LiveRowsFixture {
   Restore<char> saved_count{Menu_Inventory_menuRowCount};
   Restore<char> saved_first{Menu_Inventory_itemsFirstRow};
   Restore<char> saved_equipped{Menu_Inventory_equippedItem};
-  Restore<Menu_Framework_MenuRow*> saved_rows{Menu_Framework_menuItems};
+  Restore<Menu_Framework_MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
   Restore<decltype(Input_buttonsPressed)> saved_pressed{Input_buttonsPressed};
   Restore<int> saved_repeat{Input_buttonRepeat};
   GlobalArrayRestore<Menu_textBoxes> saved_text_boxes;
@@ -854,7 +854,7 @@ struct LiveRowsFixture {
   std::array<int, 2> flags{Flags(0, 0, 3, 1, 4), Flags(1, 0, 0, 2, 0)};
 
   LiveRowsFixture() {
-    Menu_Framework_menuItems = rows.data();
+    VS::Menu::Framework::menuItems = rows.data();
     Menu_Inventory_itemsText = nullptr;
     Input_buttonsPressed.allButtons = 0;
     Input_buttonRepeat = 0;
@@ -966,19 +966,21 @@ TEST_CASE("UpdateLiveEquipmentChoices refuses text outside the game heap",
 }
 
 struct LiveAccessoryFixture {
-  Restore<Items_InventoryArmor*> saved_armor{Menu_Framework_armor};
+  Restore<Items_InventoryArmor*> saved_armor{VS::Menu::Framework::armor};
   Restore<Items_Inventory> saved_inventory{Audio_Seq_unusedInventory};
-  Restore<char> saved_pages{Menu_Framework_enabledStatPages};
-  Restore<char> saved_page{Menu_Framework_itemStatPage};
-  Restore<char> saved_subtype{Menu_Framework_equipmentSubtype};
-  Restore<char> saved_item{Menu_Framework_currentStatusViewItem};
-  Restore<u_char> saved_selection{Menu_Framework_selectedStatusViewElement};
-  GlobalArrayRestore<Menu_Framework_equipmentStats> saved_stats;
-  GlobalArrayRestore<Menu_Framework_strIntAgi> saved_primary;
-  GlobalArrayRestore<Menu_Framework_rangeRiskData> saved_range;
-  GlobalArrayRestore<Menu_Framework_comparisonStatDeltas> saved_deltas;
-  GlobalArrayRestore<Menu_Framework_comparisonStatTotals> saved_totals;
-  GlobalArrayRestore<Menu_Framework_comparisonAccessoryStats> saved_accessory;
+  Restore<char> saved_pages{VS::Menu::Framework::enabledStatPages};
+  Restore<char> saved_page{VS::Menu::Framework::itemStatPage};
+  Restore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
+  Restore<char> saved_item{VS::Menu::Framework::currentStatusViewItem};
+  Restore<u_char> saved_selection{
+      VS::Menu::Framework::selectedStatusViewElement};
+  GlobalArrayRestore<VS::Menu::Framework::equipmentStats> saved_stats;
+  GlobalArrayRestore<VS::Menu::Framework::strIntAgi> saved_primary;
+  GlobalArrayRestore<VS::Menu::Framework::rangeRiskData> saved_range;
+  GlobalArrayRestore<VS::Menu::Framework::comparisonStatDeltas> saved_deltas;
+  GlobalArrayRestore<VS::Menu::Framework::comparisonStatTotals> saved_totals;
+  GlobalArrayRestore<VS::Menu::Framework::comparisonAccessoryStats>
+      saved_accessory;
 };
 
 TEST_CASE("SetLiveAccessoryPreviewStats spreads Ashley's accessory",
@@ -990,29 +992,29 @@ TEST_CASE("SetLiveAccessoryPreviewStats spreads Ashley's accessory",
   accessory.classes[0] = 6;
   accessory.affinities[2] = -4;
   accessory.types[1] = -7;
-  Menu_Framework_armor = Audio_Seq_unusedInventory.armor;
+  VS::Menu::Framework::armor = Audio_Seq_unusedInventory.armor;
   inv::SetLiveAccessoryPreviewStats(2);
-  CHECK(Menu_Framework_equipmentStats[0] == 6);
-  CHECK(Menu_Framework_equipmentStats[8] == 6);
-  CHECK(Menu_Framework_equipmentStats[16 + 2] == -4);
-  CHECK(Menu_Framework_equipmentStats[32 + 1] == -7);
-  CHECK(Menu_Framework_equipmentStats[32 + 4] == 0);
-  CHECK(Menu_Framework_equipmentSubtype == 32);
-  CHECK(Menu_Framework_currentStatusViewItem == 2);
+  CHECK(VS::Menu::Framework::equipmentStats[0] == 6);
+  CHECK(VS::Menu::Framework::equipmentStats[8] == 6);
+  CHECK(VS::Menu::Framework::equipmentStats[16 + 2] == -4);
+  CHECK(VS::Menu::Framework::equipmentStats[32 + 1] == -7);
+  CHECK(VS::Menu::Framework::equipmentStats[32 + 4] == 0);
+  CHECK(VS::Menu::Framework::equipmentSubtype == 32);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 2);
 }
 
 TEST_CASE("SetLiveAccessoryPreviewStats refuses an unbound armor table",
           "[equipment-rows-live]") {
   LiveAccessoryFixture fixture;
   std::array<Items_InventoryArmor, 4> foreign{};
-  Menu_Framework_armor = foreign.data();
-  Menu_Framework_equipmentSubtype = 5;
+  VS::Menu::Framework::armor = foreign.data();
+  VS::Menu::Framework::equipmentSubtype = 5;
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   inv::SetLiveAccessoryPreviewStats(1);
-  Menu_Framework_armor = Audio_Seq_unusedInventory.armor;
+  VS::Menu::Framework::armor = Audio_Seq_unusedInventory.armor;
   inv::SetLiveAccessoryPreviewStats(17);
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before + 2);
-  CHECK(Menu_Framework_equipmentSubtype == 5);
+  CHECK(VS::Menu::Framework::equipmentSubtype == 5);
 }
 
 struct LiveModelFixture {

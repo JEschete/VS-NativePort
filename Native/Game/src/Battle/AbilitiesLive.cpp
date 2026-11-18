@@ -44,7 +44,7 @@
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -207,7 +207,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
     VS::Effects::LiveSpawnAbilityLearnedEffect();
   }
   void PauseMovingPlatforms() override {
-    Field_SetMovingPlatformsPausedEntry(1);
+    VS::Field::SetMovingPlatformsPausedEntry(1);
   }
   void PauseFieldForMenu() override { VS::Field::LivePauseFieldForMenu(); }
   void ShowActionLearnedNotification(int action_id) override {

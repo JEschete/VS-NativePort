@@ -68,12 +68,12 @@ TEST_CASE("F02953 live weapon uses container records beyond inventory capacity",
   LiveFixture fixture;
   fixture.AddContainerWeapon();
   fixture.Open(detail::UpdateLiveWeaponDetails);
-  CHECK(Menu_Framework_currentStatusViewItem == kContainerWeapon + 1);
-  CHECK(Menu_Framework_strIntAgi[0] == kWeaponStrength);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerWeapon + 1);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == kWeaponStrength);
   fixture.Advance(detail::UpdateLiveWeaponDetails);
   Input_buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveWeaponDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(fixture.rows[kContainerRow].subText == nullptr);
   CHECK(fixture.rows[kHeader].itemPage == 2);
 }
@@ -84,13 +84,14 @@ TEST_CASE(
   LiveFixture fixture;
   fixture.AddContainerBlade();
   fixture.Open(detail::UpdateLiveBladeDetails);
-  CHECK(Menu_Framework_currentStatusViewItem == kContainerPart + 1);
-  CHECK(Menu_Framework_strIntAgi[0] ==
+  CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerPart + 1);
+  CHECK(VS::Menu::Framework::strIntAgi[0] ==
         equipment_detail_tests::kSecondBladeStrength);
   fixture.Advance(detail::UpdateLiveBladeDetails);
   Input_buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveBladeDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == equipment_detail_tests::kBladeStrength);
+  CHECK(VS::Menu::Framework::strIntAgi[0] ==
+        equipment_detail_tests::kBladeStrength);
   CHECK(fixture.rows[kHeader].itemPage == 2);
 }
 
@@ -125,13 +126,14 @@ TEST_CASE("F02956 actual shield helpers support unoccupied container gem slots",
   LiveFixture fixture;
   fixture.AddContainerShield();
   fixture.Open(detail::UpdateLiveShieldDetails);
-  CHECK(Menu_Framework_currentStatusViewItem == kContainerWeapon + 1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerWeapon + 1);
   fixture.Advance(detail::UpdateLiveShieldDetails);
   Input_buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveShieldDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(fixture.rows[kHeader].itemPage == 2);
-  CHECK(Menu_Framework_equipmentSubtype == fw::equipment_subtype::kShield);
+  CHECK(VS::Menu::Framework::equipmentSubtype ==
+        fw::equipment_subtype::kShield);
 }
 
 TEST_CASE("F02957 actual armor paging reaches container record sixty four",
@@ -139,11 +141,11 @@ TEST_CASE("F02957 actual armor paging reaches container record sixty four",
   LiveFixture fixture;
   fixture.AddContainerArmor();
   fixture.Open(detail::UpdateLiveArmorDetails);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   fixture.Advance(detail::UpdateLiveArmorDetails);
   Input_buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveArmorDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == kContainerPart + 1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerPart + 1);
   CHECK(fixture.rows[kHeader].itemPage == 2);
 }
 
@@ -174,10 +176,10 @@ TEST_CASE(
         fixture.ResetFrame();
         fw::UpdateLiveDpPpBars(0);
       }
-      CHECK(static_cast<std::uint8_t>(Menu_Framework_currentStatusViewItem) ==
-            reference);
+      CHECK(static_cast<std::uint8_t>(
+                VS::Menu::Framework::currentStatusViewItem) == reference);
       CHECK(fixture.Sprites().empty() == accessory);
-      CHECK(static_cast<std::uint8_t>(Menu_Framework_equipmentSubtype) ==
+      CHECK(static_cast<std::uint8_t>(VS::Menu::Framework::equipmentSubtype) ==
             (accessory ? fw::equipment_subtype::kAccessory
                        : fw::equipment_subtype::kArmor));
     }
@@ -192,7 +194,7 @@ TEST_CASE("F02957 real reentry resolves replacement container-only armor",
   previous.items.armor[kLastInventoryArmor - 1] = previous.items.armor[0];
   previous.indices.armor[0] = kLastInventoryArmor;
   fixture.Open(detail::UpdateLiveArmorDetails);
-  CHECK(Menu_Framework_currentStatusViewItem == kLastInventoryArmor);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == kLastInventoryArmor);
   auto& next = fixture.containers.replacement->container;
   auto& selected = next.items.armor[kFirstContainerOnlyArmor - 1];
   selected = previous.items.armor[0];
@@ -205,8 +207,8 @@ TEST_CASE("F02957 real reentry resolves replacement container-only armor",
         0);
   fixture.IdleRows();
   CHECK(detail::UpdateLiveArmorDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == kFirstContainerOnlyArmor);
-  CHECK(Menu_Framework_strIntAgi[0] == kChangedStrength);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == kFirstContainerOnlyArmor);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == kChangedStrength);
 }
 
 TEST_CASE("F02958 gem statistics preserve container reference one ninety two",
@@ -214,13 +216,13 @@ TEST_CASE("F02958 gem statistics preserve container reference one ninety two",
   LiveFixture fixture;
   fixture.AddContainerGems();
   fixture.Open(detail::UpdateLiveGemDetails);
-  CHECK(static_cast<std::uint8_t>(Menu_Framework_currentStatusViewItem) ==
+  CHECK(static_cast<std::uint8_t>(VS::Menu::Framework::currentStatusViewItem) ==
         kContainerGem + 1);
-  CHECK(Menu_Framework_strIntAgi[0] == 9);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 9);
   fixture.Advance(detail::UpdateLiveGemDetails);
   Input_buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveGemDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == 5);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 5);
   CHECK(fixture.rows[kHeader].itemPage == 2);
 }
 
@@ -237,14 +239,14 @@ TEST_CASE("F02958 live re-entry resolves the new owner before loading stats",
         0);
   fixture.IdleRows();
   CHECK(detail::UpdateLiveGemDetails(0) == 0);
-  CHECK(Menu_Framework_strIntAgi[0] == kChangedStrength);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == kChangedStrength);
 }
 
 TEST_CASE("F02944 real queue traversal preserves container layer and palettes",
           "[container-detail-controllers-live][F02944]") {
   LiveFixture fixture;
-  Menu_Framework_menuMemory.opaqueA0[0] = 1;
-  Menu_Framework_menuMemory.opaque3A.currentCategory = 2;
+  VS::Menu::Framework::menuMemory.opaqueA0[0] = 1;
+  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 2;
   fixture.ResetFrame();
   detail::DrawLiveCategoryIcons(0, 0);
   const auto actual = fixture.Sprites();
@@ -260,11 +262,11 @@ TEST_CASE("F02944 merged header does not require unused container text owners",
   LiveFixture fixture;
   constexpr int kMergeX = 60;
   constexpr int kFirstCategoryIcon = 24;
-  Menu_Framework_menuMemory.opaqueA0[0] = 1;
+  VS::Menu::Framework::menuMemory.opaqueA0[0] = 1;
   fixture.rows[kHeader].x = kMergeX;
   Menu_Container_containerData = nullptr;
-  Menu_Framework_itemNames = nullptr;
-  Menu_Framework_itemHelp = nullptr;
+  VS::Menu::Framework::itemNames = nullptr;
+  VS::Menu::Framework::itemHelp = nullptr;
   fixture.ResetFrame();
   detail::DrawLiveCategoryIcons(0, 1);
   CHECK(fixture.rows[kHeader].rowIcon == kFirstCategoryIcon);

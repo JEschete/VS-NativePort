@@ -1,4 +1,4 @@
-#include "Field/RoomSwitchesLive.h"
+#include "Field/RoomSwitchesLive.hpp"
 
 #include <algorithm>
 #include <array>
@@ -8,7 +8,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
 #include "Field/GimmickAnimationQueueLive.hpp"
@@ -281,7 +281,7 @@ class LiveRoomSwitchStartHost final : public VS::Field::RoomSwitchStartHost {
     if (!State()) {
       return false;
     }
-    Field_ToggleRoomSwitchEntry(trigger_);
+    VS::Field::ToggleRoomSwitchEntry(trigger_);
     return true;
   }
 
@@ -431,52 +431,53 @@ bool ToggleLiveChestSwitch(ChestTarget target) {
 }
 }  // namespace VS::Field
 
-void Field_ToggleDoorCollisionEntry(Field_MpdLockTrigger* door) {
+void VS::Field::ToggleDoorCollisionEntry(Field_MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   if (target) static_cast<void>(VS::Field::ToggleLiveDoorCollision(*target));
 }
-int Field_BeginDoorToggleEntry(Field_MpdLockTrigger* door) {
+int VS::Field::BeginDoorToggleEntry(Field_MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   return target && VS::Field::BeginLiveDoorToggle(*target);
 }
-int Field_StartDoorAnimationEntry(Field_MpdLockTrigger* door) {
+int VS::Field::StartDoorAnimationEntry(Field_MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   return target && VS::Field::StartLiveDoorAnimation(*target);
 }
-int Field_FinishDoorAnimationEntry(Field_MpdLockTrigger* door) {
+int VS::Field::FinishDoorAnimationEntry(Field_MpdLockTrigger* door) {
   const auto target = RoomDoorTarget(door);
   return target && VS::Field::FinishLiveDoorAnimation(*target);
 }
 
 // decomp: BATTLE.PRG func_8008BC04 (146C.c:16215).
-Field_MpdLockTrigger* Field_InteractiveDoorAtTileEntry(int tile_x, int tile_z,
-                                                       int floor_layer) {
+Field_MpdLockTrigger* VS::Field::InteractiveDoorAtTileEntry(int tile_x,
+                                                            int tile_z,
+                                                            int floor_layer) {
   const auto target = VS::Field::FindLiveInteractiveDoorAtTile(
       {.tile_x = tile_x, .tile_z = tile_z, .floor_layer = floor_layer});
   return target ? VS::Field::ResolveLiveRoomObjectTarget(*target) : nullptr;
 }
 
 // decomp: BATTLE.PRG func_8008E6DC (146C.c:17399).
-void Field_MarkSigilDoorUnlockedEntry(int sigil_index) {
+void VS::Field::MarkSigilDoorUnlockedEntry(int sigil_index) {
   static_cast<void>(VS::Field::MarkLiveSigilDoorUnlocked(
       static_cast<std::uint32_t>(sigil_index)));
 }
 
 // decomp: BATTLE.PRG func_8008E7BC (146C.c:17419).
-int Field_IsRoomSigilDoorUnlockedEntry(int zone_id, int map_id,
-                                       unsigned int sigil_index) {
+int VS::Field::IsRoomSigilDoorUnlockedEntry(int zone_id, int map_id,
+                                            unsigned int sigil_index) {
   return VS::Field::LiveRoomSigilDoorUnlockByte(
       {.zone_id = zone_id, .map_id = map_id, .sigil_index = sigil_index});
 }
 
 // decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16883).
-void Field_ToggleRoomSwitchEntry(Field_MpdLockTrigger* switch_trigger) {
+void VS::Field::ToggleRoomSwitchEntry(Field_MpdLockTrigger* switch_trigger) {
   LiveRoomSwitchHost host(switch_trigger);
   static_cast<void>(VS::Field::ToggleRoomSwitch(host));
 }
 
 // decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16870).
-void Field_BeginSwitchToggleEntry(Field_MpdLockTrigger* switch_trigger) {
+void VS::Field::BeginSwitchToggleEntry(Field_MpdLockTrigger* switch_trigger) {
   LiveRoomSwitchStartHost host(switch_trigger);
   static_cast<void>(VS::Field::BeginSwitchToggle(host));
 }

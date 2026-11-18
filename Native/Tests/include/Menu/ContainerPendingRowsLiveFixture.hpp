@@ -48,7 +48,7 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
   container_transfers_tests::LiveFixture containers;
   std::vector<std::byte> heap_bytes = std::vector<std::byte>(kHeapBytes);
   VS::Core::Memory::ScopedLiveGameHeap heap{heap_bytes};
-  equipment::ValueRestore<int*> saved_types{Menu_Framework_rowTypeBuf};
+  equipment::ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   equipment::ValueRestore<int> saved_previous{Input_previousButtons};
   equipment::ValueRestore<decltype(VS::State::tickSpeed)> saved_tick{
       VS::State::tickSpeed};
@@ -56,9 +56,9 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
       Input_buttonHeldFrames};
   equipment::ValueRestore<u_long*> saved_text_ordering{
       Menu_activeTextBoxOrderingTable};
-  equipment::ValueRestore<char> saved_text_index{Menu_textBoxBufferIndex};
-  equipment::ArrayRestore<u_long, std::size(Menu_textBoxOrderingTables)>
-      saved_text_tables{Menu_textBoxOrderingTables};
+  equipment::ValueRestore<char> saved_text_index{VS::Menu::textBoxBufferIndex};
+  equipment::ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)>
+      saved_text_tables{VS::Menu::textBoxOrderingTables};
   std::array<int, framework::kRowTypeCount> row_types{};
   RowWorkspace workspace;
 
@@ -69,14 +69,14 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     CopyText(R"(Native\data\disc\MENU\ITEMNAME.BIN)",
              std::as_writable_bytes(std::span(names)),
              framework::kItemNamesBytes);
-    Menu_Framework_rowTypeBuf = row_types.data();
+    VS::Menu::Framework::rowTypeBuf = row_types.data();
     Menu_Container_containerData = &containers.storage->container;
     Menu_Container_otherStorage = &containers.storage->container;
     Input_previousButtons = 0;
     std::ranges::fill(Input_buttonHeldFrames, 0U);
     VS::State::tickSpeed = 2;
-    Menu_textBoxBufferIndex = 0;
-    Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
+    VS::Menu::textBoxBufferIndex = 0;
+    Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable, kTextOrderingEntries);
     PadInitDirect(
         reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[0]),
@@ -141,9 +141,9 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     };
     return within(primitives.data() + 1, Render_frameScratch.primitiveCursor) ||
            within(ordering.data(), ordering.data() + ordering.size()) ||
-           within(Menu_textBoxOrderingTables,
-                  Menu_textBoxOrderingTables +
-                      std::size(Menu_textBoxOrderingTables));
+           within(VS::Menu::textBoxOrderingTables,
+                  VS::Menu::textBoxOrderingTables +
+                      std::size(VS::Menu::textBoxOrderingTables));
   }
   std::vector<std::vector<std::uint32_t>> Packets() const {
     const auto cursor =

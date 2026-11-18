@@ -1,6 +1,6 @@
 #include "Field/InteractionsLive.hpp"
 
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 
 namespace VS::Field {
 bool CheckAshleyTileTriggersLive(int actor_id, Actors_ActorLocation& location) {

@@ -25,7 +25,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.h"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPageLive.hpp"
@@ -98,12 +98,12 @@ class LiveScreenHost final : public ScreenHost {
     Framework::SetLiveCommandLabel(command);
   }
   [[nodiscard]] std::int32_t BackgroundFadeStep() const override {
-    return Menu_Framework_backgroundFadeStep;
+    return VS::Menu::Framework::backgroundFadeStep;
   }
   void SetCurrentMenu(std::int32_t menu) override {
-    Menu_Framework_menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
   }
-  void RevealMenu() override { Menu_Framework_hideMenu = 0; }
+  void RevealMenu() override { VS::Menu::Framework::hideMenu = 0; }
 };
 
 [[nodiscard]] HelpPagesState LoadHelpState() {
@@ -198,10 +198,12 @@ class LiveHelpPagesHost final : public HelpPagesHost {
     return LiveUpdateTopicMenu(init);
   }
   [[nodiscard]] TopicCursor TopicMenuCursor() const override {
-    return {.row = static_cast<std::uint8_t>(
-                Menu_Framework_menuMemory.cursorMemories[kCursorRowMemory]),
-            .scroll = static_cast<std::uint8_t>(
-                Menu_Framework_menuMemory.cursorMemories[kCursorScrollMemory])};
+    return {
+        .row = static_cast<std::uint8_t>(
+            VS::Menu::Framework::menuMemory.cursorMemories[kCursorRowMemory]),
+        .scroll = static_cast<std::uint8_t>(
+            VS::Menu::Framework::menuMemory
+                .cursorMemories[kCursorScrollMemory])};
   }
   [[nodiscard]] std::uint16_t CurrentManual() const override {
     return Field_manualDisplayState.currentManual;

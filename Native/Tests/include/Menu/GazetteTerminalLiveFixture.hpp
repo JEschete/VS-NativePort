@@ -108,22 +108,22 @@ inline auto ControlOwners() {
                     BytesOf(Menu_Score_score),
                     BytesOf(Menu_Score_cameraPositionBackup),
                     BytesOf(Menu_Score_cameraAnglesBackup),
-                    BytesOf(Menu_Framework_menuState),
-                    BytesOf(Menu_Framework_actionSelection),
-                    BytesOf(Menu_Framework_backgroundFadeStep),
-                    BytesOf(Menu_Framework_actionRestrictions),
-                    BytesOf(Menu_Framework_itemsText),
-                    BytesOf(Menu_Framework_rowTypeBuf),
-                    BytesOf(Menu_Framework_selectedRow),
-                    BytesOf(Menu_Framework_subMenuId),
-                    BytesOf(Menu_Framework_subMenuPage),
-                    BytesOf(Menu_Framework_subMenuRowCount),
-                    BytesOf(Menu_Framework_subMenuRowInfo),
-                    BytesOf(Menu_Framework_itemsListRow),
-                    BytesOf(Menu_Framework_menuRowYOffset),
-                    BytesOf(Menu_Framework_textHeaders),
-                    BytesOf(Menu_Framework_actionMenuState),
-                    BytesOf(Menu_Framework_displayActionCost),
+                    BytesOf(VS::Menu::Framework::menuState),
+                    BytesOf(VS::Menu::Framework::actionSelection),
+                    BytesOf(VS::Menu::Framework::backgroundFadeStep),
+                    BytesOf(VS::Menu::Framework::actionRestrictions),
+                    BytesOf(VS::Menu::Framework::itemsText),
+                    BytesOf(VS::Menu::Framework::rowTypeBuf),
+                    BytesOf(VS::Menu::Framework::selectedRow),
+                    BytesOf(VS::Menu::Framework::subMenuId),
+                    BytesOf(VS::Menu::Framework::subMenuPage),
+                    BytesOf(VS::Menu::Framework::subMenuRowCount),
+                    BytesOf(VS::Menu::Framework::subMenuRowInfo),
+                    BytesOf(VS::Menu::Framework::itemsListRow),
+                    BytesOf(VS::Menu::Framework::menuRowYOffset),
+                    BytesOf(VS::Menu::Framework::textHeaders),
+                    BytesOf(VS::Menu::Framework::actionMenuState),
+                    BytesOf(VS::Menu::Framework::displayActionCost),
                     BytesOf(Menu_textBoxSelector),
                     BytesOf(Battle_hudHidden),
                     BytesOf(Battle_hudSlideOffset),
@@ -190,12 +190,12 @@ class TerminalFixture
     }
     fw::ResetLiveMainMenuStatics();
     score::ResetGazetteRowsLive();
-    Menu_Framework_itemsText = nullptr;
-    Menu_Framework_rowTypeBuf = row_types_.data();
-    Menu_Framework_menuState = {};
-    Menu_Framework_actionSelection = {};
-    Menu_Framework_actionRestrictions = 0;
-    Menu_Framework_backgroundFadeStep = 0;
+    VS::Menu::Framework::itemsText = nullptr;
+    VS::Menu::Framework::rowTypeBuf = row_types_.data();
+    VS::Menu::Framework::menuState = {};
+    VS::Menu::Framework::actionSelection = {};
+    VS::Menu::Framework::actionRestrictions = 0;
+    VS::Menu::Framework::backgroundFadeStep = 0;
     Menu_Score_characterRank = 0;
     Input_settings.cursorMemory = 1;
     Audio_Seq_unusedStateFlags.introState = 3;
@@ -204,7 +204,7 @@ class TerminalFixture
     Input();
   }
   ~TerminalFixture() {
-    if (Menu_Framework_itemsText != nullptr) {
+    if (VS::Menu::Framework::itemsText != nullptr) {
       static_cast<void>(fw::CloseLiveRowsAndRememberCursor());
     }
     ReleaseBorrowedMon();

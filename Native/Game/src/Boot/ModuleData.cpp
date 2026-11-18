@@ -118,7 +118,7 @@
 #include "Menu/BattleAbilities.h"
 #include "Menu/BreakArts.h"
 #include "Menu/Container/ItemView.h"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
@@ -549,7 +549,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"MENU/MENU5.PRG", 0x5BFC, 564u, &Menu_Map_mapNames, sizeof Menu_Map_mapNames}, // G01228 _mapNames
     {"MENU/MENU5.PRG", 0x5E30, 640u, &Menu_Map_connectingMaps, sizeof Menu_Map_connectingMaps}, // G01213 _connectingMaps
     {"MENU/MENU5.PRG", 0x60B0, 1044u, &Menu_Map_doors, sizeof Menu_Map_doors}, // G01218 _doors
-    {"MENU/MENU7.PRG", 0x81B0, 1790u, &Menu_Files_containerStrings, sizeof Menu_Files_containerStrings}, // G01269 _containerStrings
+    {"MENU/MENU7.PRG", 0x81B0, 1790u, &VS::Menu::Files::containerStrings, sizeof VS::Menu::Files::containerStrings}, // G01269 _containerStrings
     {"MENU/MENU8.PRG", 0x2D58, 2140u, &VS::Menu::Options::menuStrings, sizeof VS::Menu::Options::menuStrings}, // G01393 _menuStrings
     {"MENU/MENU8.PRG", 0x35B4, 416u, &VS::Menu::Rename::renderRenameMenuStrings, sizeof VS::Menu::Rename::renderRenameMenuStrings}, // G01396 _renderRenameMenuStrings
     {"MENU/MENU9.PRG", 0x5D20, 68u, &Menu_Score_menuText, sizeof Menu_Score_menuText}, // G01449 _menuText

@@ -6,7 +6,7 @@ struct Effects_ActionEffectRequest;
 // Live binding for the effect runtime and the primary effect's action
 // lifecycle (EffectRuntime.hpp) over Runtime.cpp's globals, the current
 // effect package (Effects_package), the loader state
-// (EffectResourcesLiveState.h) and the effect cameras (CameraLiveState.h).
+// (EffectResourcesLiveState.hpp) and the effect cameras (CameraLiveState.hpp).
 // The entries keep the original signatures for the battle, event and menu
 // callers and the module's function pointers. A missing action request,
 // package, package block or renderer is refused with a diagnostic, as is a

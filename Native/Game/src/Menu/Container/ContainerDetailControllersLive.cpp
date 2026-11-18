@@ -21,11 +21,11 @@
 #include "Menu/Framework/DetailDispatchLiveSupport.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.h"
 #include "Render/SpritesLive.hpp"
@@ -75,7 +75,7 @@ ControllerState& State(Category category) {
 }
 
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) {
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing current container menu row workspace");
   }
 }
@@ -119,11 +119,11 @@ void RequireAshleyStats() {
 }
 
 void RequireText(bool names, bool buffer) {
-  if (Menu_Framework_itemHelp == nullptr ||
-      (names && Menu_Framework_itemNames == nullptr)) {
+  if (VS::Menu::Framework::itemHelp == nullptr ||
+      (names && VS::Menu::Framework::itemNames == nullptr)) {
     Refuse("missing used container item name or help text");
   }
-  if (buffer && Menu_Framework_stringBuf == nullptr) {
+  if (buffer && VS::Menu::Framework::stringBuf == nullptr) {
     Refuse("missing current container row description workspace");
   }
 }
@@ -167,15 +167,16 @@ using TextOwners = std::array<std::span<char>, kTextOwnerCount>;
 TextOwners BorrowTextOwners(std::span<char> weapon_name) {
   return {
       weapon_name,
-      std::span<char>{Menu_Framework_stringBuf,
-                      Menu_Framework_stringBuf == nullptr
+      std::span<char>{VS::Menu::Framework::stringBuf,
+                      VS::Menu::Framework::stringBuf == nullptr
                           ? 0
                           : Framework::kStringBufferBytes},
-      std::span<char>{
-          reinterpret_cast<char*>(Menu_Framework_itemHelp),
-          Menu_Framework_itemHelp == nullptr ? 0 : Framework::kItemHelpBytes},
-      std::span<char>{reinterpret_cast<char*>(Menu_Framework_itemNames),
-                      Menu_Framework_itemNames == nullptr
+      std::span<char>{reinterpret_cast<char*>(VS::Menu::Framework::itemHelp),
+                      VS::Menu::Framework::itemHelp == nullptr
+                          ? 0
+                          : Framework::kItemHelpBytes},
+      std::span<char>{reinterpret_cast<char*>(VS::Menu::Framework::itemNames),
+                      VS::Menu::Framework::itemNames == nullptr
                           ? 0
                           : Framework::kItemNamesBytes}};
 }
@@ -207,7 +208,7 @@ void RequireGem(std::uint8_t reference) {
     return;
   }
   auto& table = Records().gems;
-  RequireBound(Menu_Framework_gems, table);
+  RequireBound(VS::Menu::Framework::gems, table);
   (void)Referenced(table, {reference});
 }
 
@@ -240,7 +241,7 @@ class LiveControllerWorld final : public ControllerWorld {
       case Category::kWeapon:
         if (item.one_based != 0) {
           auto& table = Records().weapons;
-          RequireBound(Menu_Framework_weapons, table);
+          RequireBound(VS::Menu::Framework::weapons, table);
           if (Referenced(table, item).isEquipped != 0) {
             RequireAshleyStats();
           }
@@ -248,19 +249,19 @@ class LiveControllerWorld final : public ControllerWorld {
         Framework::SetLiveWeaponStats(item.one_based);
         break;
       case Category::kBlade:
-        RequireBound(Menu_Framework_blades, Records().blades);
+        RequireBound(VS::Menu::Framework::blades, Records().blades);
         (void)Referenced(Records().blades, item);
         Framework::SetLiveBladeStats(item.one_based);
         break;
       case Category::kGrip:
-        RequireBound(Menu_Framework_grips, Records().grips);
+        RequireBound(VS::Menu::Framework::grips, Records().grips);
         (void)Referenced(Records().grips, item);
         Framework::SetLiveGripStats(item.one_based);
         break;
       case Category::kShield:
         if (item.one_based != 0) {
           auto& table = Records().shields;
-          RequireBound(Menu_Framework_shields, table);
+          RequireBound(VS::Menu::Framework::shields, table);
           if (Referenced(table, item).isEquipped != 0) {
             RequireAshleyStats();
           }
@@ -271,7 +272,7 @@ class LiveControllerWorld final : public ControllerWorld {
         SetArmorStatistics(item);
         break;
       case Category::kGem:
-        RequireBound(Menu_Framework_gems, Records().gems);
+        RequireBound(VS::Menu::Framework::gems, Records().gems);
         (void)Referenced(Records().gems, item);
         Framework::SetLiveGemStats(item.one_based);
         break;
@@ -382,7 +383,7 @@ class LiveControllerWorld final : public ControllerWorld {
   }
   void SetArmorStatistics(ContainerSlot item) const {
     if (item.one_based != 0) {
-      RequireBound(Menu_Framework_armor, Records().armor);
+      RequireBound(VS::Menu::Framework::armor, Records().armor);
       const auto armor = Items::Live::Typed(Referenced(Records().armor, item));
       if (armor.limb >= 1 && armor.limb <= Items::kLimbCount) {
         RequireAshleyStats();
@@ -393,10 +394,10 @@ class LiveControllerWorld final : public ControllerWorld {
   void FormatRecord(ContainerSlot item, std::array<char*, 2>& text,
                     int& row_type) const {
     auto& records = Records();
-    char* const buffer = Menu_Framework_stringBuf;
+    char* const buffer = VS::Menu::Framework::stringBuf;
     switch (category_) {
       case Category::kWeapon:
-        RequireBound(Menu_Framework_weapons, records.weapons);
+        RequireBound(VS::Menu::Framework::weapons, records.weapons);
         Framework::FormatLiveInventoryWeaponRow(
             &Referenced(records.weapons, item), text.data(), &row_type, buffer);
         break;
@@ -409,7 +410,7 @@ class LiveControllerWorld final : public ControllerWorld {
                                      text.data(), &row_type, buffer);
         break;
       case Category::kShield:
-        RequireBound(Menu_Framework_shields, records.shields);
+        RequireBound(VS::Menu::Framework::shields, records.shields);
         Framework::FormatLiveInventoryShieldRow(
             &Referenced(records.shields, item), text.data(), &row_type, buffer);
         break;
@@ -426,15 +427,15 @@ class LiveControllerWorld final : public ControllerWorld {
     }
   }
   void RequireWeaponRow(int row, ContainerSlot item) const {
-    RequireBound(Menu_Framework_weapons, Records().weapons);
+    RequireBound(VS::Menu::Framework::weapons, Records().weapons);
     const auto weapon = Items::Live::Typed(Referenced(Records().weapons, item));
     if (row == 1) {
-      RequireBound(Menu_Framework_blades, Records().blades);
+      RequireBound(VS::Menu::Framework::blades, Records().blades);
       (void)Referenced(Records().blades, {weapon.blade});
       RequireText(true, true);
       return;
     }
-    RequireBound(Menu_Framework_grips, Records().grips);
+    RequireBound(VS::Menu::Framework::grips, Records().grips);
     const auto grip =
         Items::Live::Typed(Referenced(Records().grips, {weapon.grip}));
     if (row == 2) {
@@ -452,7 +453,7 @@ class LiveControllerWorld final : public ControllerWorld {
     }
   }
   void RequireShieldRow(int row, ContainerSlot item) const {
-    RequireBound(Menu_Framework_shields, Records().shields);
+    RequireBound(VS::Menu::Framework::shields, Records().shields);
     const auto shield = Items::Live::Typed(Referenced(Records().shields, item));
     if (row >= 1 && std::cmp_less_equal(row, Items::kWeaponGemCount) &&
         row - 1 < shield.base.gem_slots) {
@@ -469,7 +470,8 @@ class LiveControllerWorld final : public ControllerWorld {
 class LiveIconWorld final : public CategoryIconWorld {
  public:
   std::uint8_t CurrentCategory() override {
-    return static_cast<std::uint8_t>(Menu_Framework_menuMemory.opaqueA0[0]);
+    return static_cast<std::uint8_t>(
+        VS::Menu::Framework::menuMemory.opaqueA0[0]);
   }
   void DrawListTabNavigation() override {
     RequireFrame(true);

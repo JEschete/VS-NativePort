@@ -77,7 +77,7 @@
 #include "Field/MapLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
-#include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomLoading.hpp"
@@ -590,7 +590,7 @@ class LiveSections : public Host {
     ResetGimmickAnimationQueueEntry();
     LiveInitializeRoomEffects();
     Items::RestoreLiveRoomChestStates();
-    Field_InitializeMovingPlatformsEntry();
+    InitializeMovingPlatformsEntry();
     Battle::ResetLiveFloatingLabels();
     Effects::LiveAllocateWeatherParticles();
     LiveInitializeRoomBackgroundColors();

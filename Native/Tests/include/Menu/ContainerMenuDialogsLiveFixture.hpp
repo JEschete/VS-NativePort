@@ -67,12 +67,13 @@ struct DialogLiveFixture : equipment::LiveFixture {
   equipment::ValueRestore<char> saved_controls{
       Menu_Container_controlsPanelMode};
   equipment::ValueRestore<char> saved_freeze{Menu_Inventory_freezeTabArrows};
-  equipment::ValueRestore<char> saved_animation{Menu_Framework_itemsListRow};
+  equipment::ValueRestore<char> saved_animation{
+      VS::Menu::Framework::itemsListRow};
   equipment::ValueRestore<u_long*> saved_text_ordering{
       Menu_activeTextBoxOrderingTable};
-  equipment::ValueRestore<char> saved_text_index{Menu_textBoxBufferIndex};
-  equipment::ArrayRestore<u_long, std::size(Menu_textBoxOrderingTables)>
-      saved_text_tables{Menu_textBoxOrderingTables};
+  equipment::ValueRestore<char> saved_text_index{VS::Menu::textBoxBufferIndex};
+  equipment::ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)>
+      saved_text_tables{VS::Menu::textBoxOrderingTables};
 
   DialogLiveFixture() {
     framework::ResetLiveMainMenuStatics();
@@ -84,8 +85,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
     Input_previousButtons = 0;
     std::ranges::fill(Input_buttonHeldFrames, 0U);
     VS::State::tickSpeed = 2;
-    Menu_textBoxBufferIndex = 0;
-    Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
+    VS::Menu::textBoxBufferIndex = 0;
+    Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable, kTextOrderingTags);
     PadInitDirect(
         reinterpret_cast<unsigned char*>(Input_legacyPadResponseBytes[0]),
@@ -205,7 +206,7 @@ struct DialogLiveFixture : equipment::LiveFixture {
         reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
     const auto table = reinterpret_cast<std::uintptr_t>(ordering.data());
     const auto text_table =
-        reinterpret_cast<std::uintptr_t>(Menu_textBoxOrderingTables);
+        reinterpret_cast<std::uintptr_t>(VS::Menu::textBoxOrderingTables);
     const auto bytes = words * sizeof(u_long);
     if (first >= primitive && first <= cursor && bytes <= cursor - first) {
       return true;
@@ -215,14 +216,14 @@ struct DialogLiveFixture : equipment::LiveFixture {
       return true;
     }
     return first >= text_table &&
-           first <= text_table + sizeof Menu_textBoxOrderingTables &&
-           bytes <= text_table + sizeof Menu_textBoxOrderingTables - first;
+           first <= text_table + sizeof VS::Menu::textBoxOrderingTables &&
+           bytes <= text_table + sizeof VS::Menu::textBoxOrderingTables - first;
   }
 };
 
 struct EquippedFixture : DialogLiveFixture {
   equipment::ValueRestore<Battle_Actor*> saved_actor{Battle_characterState};
-  equipment::ValueRestore<int*> saved_types{Menu_Framework_rowTypeBuf};
+  equipment::ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   std::array<int, framework::kRowTypeCount> row_types{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
@@ -230,7 +231,7 @@ struct EquippedFixture : DialogLiveFixture {
   EquippedFixture() {
     actor.stats = &stats;
     Battle_characterState = &actor;
-    Menu_Framework_rowTypeBuf = row_types.data();
+    VS::Menu::Framework::rowTypeBuf = row_types.data();
     AddWeapon();
     const auto module = ReadData(R"(Native\data\disc\MENU\MENU3.PRG)");
     const auto entries = std::span(Content_moduleData, Content_moduleDataCount);

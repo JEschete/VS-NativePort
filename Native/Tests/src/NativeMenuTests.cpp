@@ -32,7 +32,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
 #include "Menu/Files.h"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/NativeContainerLive.hpp"
 #include "Save/NativeFilePresentation.hpp"
@@ -418,7 +418,7 @@ void CheckFirstTwoFiles(std::array<Save::FileStatus, 2> expected) {
 }
 
 void CheckFailedSave(const MenuFixture& fixture) {
-  REQUIRE(Text(Menu_Files_memoryCardMessage) == "Save failed - see log");
+  REQUIRE(Text(VS::Menu::Files::memoryCardMessage) == "Save failed - see log");
   CHECK(fixture.sounds[8] == 0);
   CHECK(Input_settings.cumulativeSaveCount ==
         fixture.settings.cumulativeSaveCount);
@@ -474,7 +474,7 @@ TEST_CASE("Native Save cannot bypass production save-point eligibility",
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(1) == 0);
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
   ConfirmSave();
-  CHECK(Text(Menu_Files_memoryCardMessage) == "Save failed - see log");
+  CHECK(Text(VS::Menu::Files::memoryCardMessage) == "Save failed - see log");
   CHECK(!fs::exists(fixture.root / "slot00.vssave"));
   CHECK(Input_settings.cumulativeSaveCount == before.cumulativeSaveCount);
   CHECK(Input_settings.currentGameSaveCount == before.currentGameSaveCount);
@@ -494,10 +494,11 @@ TEST_CASE("Native picker never replaces an invalid existing file",
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(1) == 0);
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
   CHECK(Screen().files.front().status == Save::FileStatus::kInvalid);
-  CHECK(Text(Menu_Files_memoryCardMessage) == "Invalid data - not overwritten");
+  CHECK(Text(VS::Menu::Files::memoryCardMessage) ==
+        "Invalid data - not overwritten");
   Buttons(PADRright);
   CHECK(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
-  CHECK(Text(Menu_Files_memoryCardMessage) == "No usable native save");
+  CHECK(Text(VS::Menu::Files::memoryCardMessage) == "No usable native save");
   std::ifstream input(path, std::ios::binary);
   CHECK(std::string(std::istreambuf_iterator<char>(input), {}) ==
         "unsupported or damaged save");
@@ -684,7 +685,7 @@ void CheckClearSaveCarryover(const Save::Document& document) {
 void CheckClearSaveSession() {
   CHECK(Input_settings.cumulativeSaveCount == 20);
   CHECK(Input_settings.currentGameSaveCount == 0);
-  CHECK(Menu_Files_dataNotSaved == 1);
+  CHECK(VS::Menu::Files::dataNotSaved == 1);
   CHECK(Text(Screen().summaries[0].room_name.data()) == "CLEAR GAME");
 }
 }  // namespace
@@ -897,7 +898,7 @@ TEST_CASE(
 
   BeginPicker(VS::Menu::UpdateLiveDataLoadMenu, 1);
   Press(PADRright, VS::Menu::UpdateLiveDataLoadMenu);
-  CHECK(Text(Menu_Files_memoryCardMessage) == "No usable native save");
+  CHECK(Text(VS::Menu::Files::memoryCardMessage) == "No usable native save");
   CheckSounds(fixture, {1, 2, 3, 1, 0});
 }
 
@@ -1007,7 +1008,8 @@ TEST_CASE("Native empty container consent revalidates an appeared save",
   ChooseYes(Save_NativeSelectContainer);
   content.Store(MenuContentFixture::Document());
   Press(0, Save_NativeSelectContainer);
-  CHECK(Text(Menu_Files_memoryCardMessage) == "File changed - select again");
+  CHECK(Text(VS::Menu::Files::memoryCardMessage) ==
+        "File changed - select again");
   CHECK_FALSE(Save::ResumePending());
 }
 
@@ -1033,7 +1035,7 @@ TEST_CASE("Native save retry refreshes previews without losing staged storage",
   CHECK(Screen().files[0].status == Save::FileStatus::kInvalid);
   REQUIRE(fs::remove(fixture.root / "slot00.vssave"));
   Press(PADRright, VS::Menu::UpdateLiveDataSaveMenu);
-  REQUIRE(Text(Menu_Files_memoryCardMessage) == "No usable native save");
+  REQUIRE(Text(VS::Menu::Files::memoryCardMessage) == "No usable native save");
   Press(PADRright, VS::Menu::UpdateLiveDataSaveMenu);
   Press(0, VS::Menu::UpdateLiveDataSaveMenu);
   REQUIRE(Screen().files[0].status == Save::FileStatus::kEmpty);

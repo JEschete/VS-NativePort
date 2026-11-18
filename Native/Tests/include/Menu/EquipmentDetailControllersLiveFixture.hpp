@@ -23,11 +23,11 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
@@ -121,12 +121,13 @@ struct DrawnSprite {
 };
 
 struct LiveFixture {
-  ValueRestore<Menu_Framework_MenuRow*> saved_rows{Menu_Framework_menuItems};
+  ValueRestore<Menu_Framework_MenuRow*> saved_rows{
+      VS::Menu::Framework::menuItems};
   ValueRestore<Items_Inventory> saved_inventory{Audio_Seq_unusedInventory};
   ValueRestore<Items_InventoryIndices> saved_indices{
       Audio_Seq_unusedInventoryIndices};
   ValueRestore<Menu_Framework_MenuMemory> saved_memory{
-      Menu_Framework_menuMemory};
+      VS::Menu::Framework::menuMemory};
   ArrayRestore<u_char*, kIndexedCategories> saved_orders{
       Menu_Inventory_inventoryIndices};
   ValueRestore<int> saved_held{Input_buttonsState};
@@ -140,34 +141,36 @@ struct LiveFixture {
   ValueRestore<char> saved_categories{Menu_Inventory_itemCategoryIconsEnabled};
   ValueRestore<char> saved_command{Menu_Inventory_statusCommandState};
   ValueRestore<char> saved_header{Menu_Inventory_selectedItemCategoryIconOnTop};
-  ValueRestore<char> saved_pages{Menu_Framework_enabledStatPages};
-  ValueRestore<char> saved_page{Menu_Framework_itemStatPage};
-  ValueRestore<char> saved_subtype{Menu_Framework_equipmentSubtype};
-  ValueRestore<char> saved_item{Menu_Framework_currentStatusViewItem};
+  ValueRestore<char> saved_pages{VS::Menu::Framework::enabledStatPages};
+  ValueRestore<char> saved_page{VS::Menu::Framework::itemStatPage};
+  ValueRestore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
+  ValueRestore<char> saved_item{VS::Menu::Framework::currentStatusViewItem};
   ValueRestore<u_char> saved_selection{
-      Menu_Framework_selectedStatusViewElement};
+      VS::Menu::Framework::selectedStatusViewElement};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
-      Menu_Framework_equipmentStats};
+      VS::Menu::Framework::equipmentStats};
   ArrayRestore<int16_t, fw::kPrimaryStatCount> saved_primary{
-      Menu_Framework_strIntAgi};
+      VS::Menu::Framework::strIntAgi};
   ArrayRestore<char, fw::kRangeRiskBytes> saved_range{
-      Menu_Framework_rangeRiskData};
+      VS::Menu::Framework::rangeRiskData};
   ArrayRestore<int16_t, fw::kComparisonStatCount> saved_deltas{
-      Menu_Framework_comparisonStatDeltas};
+      VS::Menu::Framework::comparisonStatDeltas};
   ArrayRestore<int16_t, fw::kComparisonStatCount> saved_totals{
-      Menu_Framework_comparisonStatTotals};
+      VS::Menu::Framework::comparisonStatTotals};
   ArrayRestore<int16_t, fw::kComparisonStatCount> saved_accessory{
-      Menu_Framework_comparisonAccessoryStats};
-  ValueRestore<Items_InventoryWeapon*> saved_weapons{Menu_Framework_weapons};
-  ValueRestore<Items_InventoryBlade*> saved_blades{Menu_Framework_blades};
-  ValueRestore<Items_InventoryGrip*> saved_grips{Menu_Framework_grips};
-  ValueRestore<Items_InventoryShield*> saved_shields{Menu_Framework_shields};
-  ValueRestore<Items_InventoryArmor*> saved_armor{Menu_Framework_armor};
-  ValueRestore<Items_InventoryGem*> saved_gems{Menu_Framework_gems};
-  ValueRestore<u_short*> saved_help{Menu_Framework_itemHelp};
-  ValueRestore<decltype(Menu_Framework_itemNames)> saved_names{
-      Menu_Framework_itemNames};
-  ValueRestore<char*> saved_buffer{Menu_Framework_stringBuf};
+      VS::Menu::Framework::comparisonAccessoryStats};
+  ValueRestore<Items_InventoryWeapon*> saved_weapons{
+      VS::Menu::Framework::weapons};
+  ValueRestore<Items_InventoryBlade*> saved_blades{VS::Menu::Framework::blades};
+  ValueRestore<Items_InventoryGrip*> saved_grips{VS::Menu::Framework::grips};
+  ValueRestore<Items_InventoryShield*> saved_shields{
+      VS::Menu::Framework::shields};
+  ValueRestore<Items_InventoryArmor*> saved_armor{VS::Menu::Framework::armor};
+  ValueRestore<Items_InventoryGem*> saved_gems{VS::Menu::Framework::gems};
+  ValueRestore<u_short*> saved_help{VS::Menu::Framework::itemHelp};
+  ValueRestore<decltype(VS::Menu::Framework::itemNames)> saved_names{
+      VS::Menu::Framework::itemNames};
+  ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
   ValueRestore<decltype(Battle_stringContext)> saved_arguments{
       Battle_stringContext};
   ArrayRestore<Menu_TextBoxState, std::size(Menu_textBoxes)> saved_text_boxes{
@@ -237,15 +240,15 @@ struct LiveFixture {
   }
 
   void BindInventory() {
-    Menu_Framework_menuItems = rows.data();
+    VS::Menu::Framework::menuItems = rows.data();
     Audio_Seq_unusedInventory = {};
     Audio_Seq_unusedInventoryIndices = {};
-    Menu_Framework_weapons = Audio_Seq_unusedInventory.weapons;
-    Menu_Framework_blades = Audio_Seq_unusedInventory.blades;
-    Menu_Framework_grips = Audio_Seq_unusedInventory.grips;
-    Menu_Framework_shields = Audio_Seq_unusedInventory.shields;
-    Menu_Framework_armor = Audio_Seq_unusedInventory.armor;
-    Menu_Framework_gems = Audio_Seq_unusedInventory.gems;
+    VS::Menu::Framework::weapons = Audio_Seq_unusedInventory.weapons;
+    VS::Menu::Framework::blades = Audio_Seq_unusedInventory.blades;
+    VS::Menu::Framework::grips = Audio_Seq_unusedInventory.grips;
+    VS::Menu::Framework::shields = Audio_Seq_unusedInventory.shields;
+    VS::Menu::Framework::armor = Audio_Seq_unusedInventory.armor;
+    VS::Menu::Framework::gems = Audio_Seq_unusedInventory.gems;
     const std::array<u_char*, kIndexedCategories> orders{
         Audio_Seq_unusedInventoryIndices.weapons,
         Audio_Seq_unusedInventoryIndices.blades,
@@ -274,10 +277,10 @@ struct LiveFixture {
       name.fill(static_cast<char>(VS::Render::kTextTerminator));
       name[0] = 1;
     }
-    Menu_Framework_itemHelp = help.data();
-    Menu_Framework_itemNames =
+    VS::Menu::Framework::itemHelp = help.data();
+    VS::Menu::Framework::itemNames =
         reinterpret_cast<char (*)[fw::kItemNameRowBytes]>(names.data());
-    Menu_Framework_stringBuf = description.data();
+    VS::Menu::Framework::stringBuf = description.data();
   }
   void ResetFrame() {
     Render_frameBuf = 0;
@@ -297,12 +300,12 @@ struct LiveFixture {
   }
   fw::ItemText FirstItem() const {
     const auto capacity =
-        VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemsText);
+        VS::Core::Memory::LivePayloadCapacity(VS::Menu::Framework::itemsText);
     if (!capacity || *capacity < sizeof(fw::ItemText)) {
       throw std::runtime_error("menu did not produce an owned row");
     }
     fw::ItemText result;
-    std::memcpy(&result, Menu_Framework_itemsText, sizeof result);
+    std::memcpy(&result, VS::Menu::Framework::itemsText, sizeof result);
     return result;
   }
   void AddParts() {

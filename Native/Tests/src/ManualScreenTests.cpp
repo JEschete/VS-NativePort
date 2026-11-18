@@ -32,7 +32,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Manual.h"
 #include "Menu/ManualScreen.hpp"
 #include "Menu/ManualScreenLive.hpp"
@@ -888,14 +888,15 @@ constexpr int kInformationBox = 7;
 struct LiveManualFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 1024> arena{};
-  Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
+  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int* saved_text = Menu_Manual_helpText;
   u_long* saved_assets = Menu_Manual_helpAssets;
   Content_DiscQueueSlot* saved_text_request = Menu_Manual_helpTextCdQueue;
   Content_DiscQueueSlot* saved_assets_request = Menu_Manual_helpAssetsCdQueue;
   void* saved_primitives = Render_legacyPrimitiveBuffers[0];
   void* saved_ordering = Render_legacyOrderingTables[0];
-  Menu_Framework_MenuControlState saved_menu_state = Menu_Framework_menuState;
+  Menu_Framework_MenuControlState saved_menu_state =
+      VS::Menu::Framework::menuState;
   std::vector<u_long> storage = std::vector<u_long>(kPacketWords, 0xDEADBEEF);
   std::vector<u_long> ordering = std::vector<u_long>(kTableWords);
   Menu_TextBoxState saved_box = *VS::Menu::LiveTextBox(manual::kPageTextBox);
@@ -908,8 +909,8 @@ struct LiveManualFixture {
   std::array<Menu_Framework_MenuRow, 40> rows{};
   int saved_hud_slide = Battle_hudSlideOffset;
   int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
-  int saved_fade_step = Menu_Framework_backgroundFadeStep;
-  int saved_selected = Menu_Framework_selectedRow;
+  int saved_fade_step = VS::Menu::Framework::backgroundFadeStep;
+  int saved_selected = VS::Menu::Framework::selectedRow;
   u_int saved_pressed = Input_buttonsPressed.allButtons;
   int saved_previous = Input_previousButtons;
   int saved_repeat = Input_buttonRepeat;
@@ -926,16 +927,16 @@ struct LiveManualFixture {
   DRAWENV saved_back_env = Render_legacyDrawEnvironments[1];
   Content_DiscRequestCounts saved_request_counts = Content_discRequestCounts;
   Field_ManualDisplayState saved_display = Field_manualDisplayState;
-  Menu_Framework_MenuMemory saved_memory = Menu_Framework_menuMemory;
+  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   char saved_hud_hidden = Battle_hudHidden;
   char saved_lower_screen = Battle_lowerScreenUiState;
-  char saved_hide_menu = Menu_Framework_hideMenu;
+  char saved_hide_menu = VS::Menu::Framework::hideMenu;
   VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
 
   LiveManualFixture() {
     std::ranges::fill(Content_discRequestSlots, Content_DiscQueueSlot{});
     Content_discRequestCounts = Content_DiscRequestCounts{};
-    Menu_Framework_menuItems = rows.data();
+    VS::Menu::Framework::menuItems = rows.data();
     Input_buttonsPressed.allButtons = 0;
     Input_previousButtons = 0;
     Input_buttonRepeat = 0;
@@ -970,12 +971,12 @@ struct LiveManualFixture {
     Battle_hudSlideOffset = saved_hud_slide;
     Battle_lowerScreenUiState = saved_lower_screen;
     VS::Field::isFieldRenderingEnabled = saved_field_rendering;
-    Menu_Framework_hideMenu = saved_hide_menu;
-    Menu_Framework_menuState = saved_menu_state;
-    Menu_Framework_backgroundFadeStep = saved_fade_step;
-    Menu_Framework_menuMemory = saved_memory;
-    Menu_Framework_menuItems = saved_rows;
-    Menu_Framework_selectedRow = saved_selected;
+    VS::Menu::Framework::hideMenu = saved_hide_menu;
+    VS::Menu::Framework::menuState = saved_menu_state;
+    VS::Menu::Framework::backgroundFadeStep = saved_fade_step;
+    VS::Menu::Framework::menuMemory = saved_memory;
+    VS::Menu::Framework::menuItems = saved_rows;
+    VS::Menu::Framework::selectedRow = saved_selected;
     Input_settings = saved_settings;
     Input_buttonsPressed.allButtons = saved_pressed;
     Input_previousButtons = saved_previous;
@@ -1142,7 +1143,7 @@ TEST_CASE("F04161 LiveUpdateScreen refuses a null step",
 TEST_CASE("F04161 LiveUpdateScreen fades in and arms the open delay",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Menu_Framework_backgroundFadeStep = 0;
+  VS::Menu::Framework::backgroundFadeStep = 0;
   u_char step = manual::kScreenOpen;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(step == manual::kScreenInitialize);
@@ -1190,19 +1191,19 @@ TEST_CASE("F04161 LiveUpdateScreen waits for the fade to reach the game menu",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   manual::LiveManualScreenState().help_result = manual::kHelpExitToGame;
-  Menu_Framework_hideMenu = 1;
-  Menu_Framework_menuState.currentMenu = 0;
+  VS::Menu::Framework::hideMenu = 1;
+  VS::Menu::Framework::menuState.currentMenu = 0;
   u_char step = manual::kScreenShutDown;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(step == manual::kScreenExit);
-  Menu_Framework_backgroundFadeStep = 2;
+  VS::Menu::Framework::backgroundFadeStep = 2;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
-  CHECK(Menu_Framework_hideMenu == 1);
-  Menu_Framework_backgroundFadeStep = 0;
+  CHECK(VS::Menu::Framework::hideMenu == 1);
+  VS::Menu::Framework::backgroundFadeStep = 0;
   CHECK(manual::LiveUpdateScreen(&step) == 1);
   CHECK(step == manual::kScreenClosed);
-  CHECK(Menu_Framework_menuState.currentMenu == manual::kGameMenu);
-  CHECK(Menu_Framework_hideMenu == 0);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == manual::kGameMenu);
+  CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 
 TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
@@ -1256,9 +1257,9 @@ TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
   const auto [selected, step] = GENERATE(
       std::pair{-2, manual::kHelpLeaveToMenu},
       std::pair{manual::kTopicMenuExitToGame, manual::kHelpLeaveToGame});
-  Menu_Framework_selectedRow = selected;
-  Menu_Framework_menuMemory.cursorMemories[4] = 4;
-  Menu_Framework_menuMemory.cursorMemories[5] = 6;
+  VS::Menu::Framework::selectedRow = selected;
+  VS::Menu::Framework::menuMemory.cursorMemories[4] = 4;
+  VS::Menu::Framework::menuMemory.cursorMemories[5] = 6;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(Menu_Manual_showMenuState == step);
   CHECK(Field_manualDisplayState.currentManual == 10);
@@ -1507,7 +1508,7 @@ TEST_CASE(
   MissingHelpFiles missing;
   Menu_Manual_showMenuState = manual::kHelpSelectTopic;
   Menu_Manual_topMenuState = manual::kTopicStepSelectRow;
-  Menu_Framework_selectedRow = 0;
+  VS::Menu::Framework::selectedRow = 0;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   REQUIRE(Menu_Manual_showMenuState == manual::kHelpLoadAssets);
   int* const text = Menu_Manual_helpText;

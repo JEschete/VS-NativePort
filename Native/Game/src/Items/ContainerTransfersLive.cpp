@@ -19,7 +19,7 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/ItemList.h"
 
 namespace VS::Items {
@@ -45,10 +45,10 @@ ItemCategory Category(int category) {
 }
 
 Menu_Container_InventoryStorage& Storage() {
-  if (Menu_Framework_unusedInventoryStorage == nullptr) {
+  if (VS::Menu::Framework::unusedInventoryStorage == nullptr) {
     Refuse("missing inventory-storage owner");
   }
-  return *Menu_Framework_unusedInventoryStorage;
+  return *VS::Menu::Framework::unusedInventoryStorage;
 }
 
 OrderTables Orders(Items_ContainerIndices& indices) {

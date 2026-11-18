@@ -8,21 +8,23 @@
 
 #include "Legacy/Psx.h"
 
+namespace VS::Menu::Files {
 // decomp: _containerStrings (MENU/MENU7.PRG 260.c): halfword offsets, then
 // the strings; ModuleData.cpp fills it from the disc string table.
-enum { kMenuFilesContainerStringCount = 895 };
-extern u_short Menu_Files_containerStrings[kMenuFilesContainerStringCount];
+inline constexpr int kContainerStringCount = 895;
+extern u_short containerStrings[kContainerStringCount];
 // decomp: _dataNotSaved (MENU/MENU7.PRG 260.c)
-extern char Menu_Files_dataNotSaved;
+extern char dataNotSaved;
 // decomp: _fileProgressCounter (MENU/MENU7.PRG 260.c)
-extern int Menu_Files_fileProgressCounter;
+extern int fileProgressCounter;
 // decomp: _memoryCardMessage (MENU/MENU7.PRG 260.c): the text table's
 // message, the native file menu's footer, or null.
-extern char* Menu_Files_memoryCardMessage;
+extern char* memoryCardMessage;
 // decomp: _selectCursorXy (MENU/MENU7.PRG 260.c)
-extern int Menu_Files_selectCursorXy;
+extern int selectCursorXy;
 // decomp: _textTable (MENU/MENU7.PRG 260.c): MCMAN.BIN's text once the menu
 // resources load.
-extern u_short* Menu_Files_textTable;
+extern u_short* textTable;
 // decomp: _frameBuf (TITLE/TITLE.PRG 22C.c)
-extern char Menu_Files_frameBuf;
+extern char frameBuf;
+}  // namespace VS::Menu::Files

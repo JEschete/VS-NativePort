@@ -8,13 +8,14 @@ struct Menu_Framework_MenuRow;
 // Binds the gazette rows (GazetteRows.hpp) to the frame's primitive buffer
 // and overlay ordering table (Render_frameScratch), vs_main_frameBuf
 // (Render_frameBuf), the menu framework's rows and cursor memory
-// (Menu_Framework_menuMemory), the cursor memory setting (Input_settings),
-// the gazette's remembered row (Battle_unusedMenu9CursorMemory) and the top
-// menu strings (Menu_Score_menuText), in the shapes the copied score screen
-// calls. The arrow animation and the top menu's step live here instead of
-// 238.c's statics. A null row, text or ordering table, a row count outside
-// 0-256, a full primitive buffer and row text without an end are refused and
-// reported on the "menu.score" channel.
+// (VS::Menu::Framework::menuMemory), the cursor memory setting
+// (Input_settings), the gazette's remembered row
+// (Battle_unusedMenu9CursorMemory) and the top menu strings
+// (Menu_Score_menuText), in the shapes the copied score screen calls. The arrow
+// animation and the top menu's step live here instead of 238.c's statics. A
+// null row, text or ordering table, a row count outside 0-256, a full primitive
+// buffer and row text without an end are refused and reported on the
+// "menu.score" channel.
 namespace VS::Menu::Score {  // NOLINT(readability-identifier-naming)
 struct ScrollableRowAnimation;
 struct TopMenuState;

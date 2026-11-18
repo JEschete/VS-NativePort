@@ -69,8 +69,8 @@
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Framework/Framework.h"
-#include "Menu/Framework/FrameworkLiveState.h"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.h"
@@ -595,7 +595,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   Items_LootListNode* saved_head = VS::Items::lootListHead;
   Battle_Actor* saved_actor = Battle_actors[1];
   Items_Inventory* saved_staging = Menu_Loot_inventory;
-  Items_BattleLoot* saved_entry = Menu_Framework_lootEntry;
+  Items_BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
   Menu_Loot_LootListItem* saved_rows = Menu_Loot_lootList;
   u_char saved_count = Menu_Loot_lootListCount;
   u_char saved_offset = Menu_Loot_lootListOffset;
@@ -614,7 +614,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     Audio_Seq_unusedInventory = {};
     source = {};
     Menu_Loot_inventory = &source;
-    Menu_Framework_lootEntry = nullptr;
+    VS::Menu::Framework::lootEntry = nullptr;
     Menu_Loot_lootList = rows.data();
     Menu_Loot_lootListCount = 0;
     Menu_Loot_lootListOffset = 0;
@@ -627,7 +627,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     VS::Items::lootListHead = saved_head;
     Battle_actors[1] = saved_actor;
     Menu_Loot_inventory = saved_staging;
-    Menu_Framework_lootEntry = saved_entry;
+    VS::Menu::Framework::lootEntry = saved_entry;
     Menu_Loot_lootList = saved_rows;
     Menu_Loot_lootListCount = saved_count;
     Menu_Loot_lootListOffset = saved_offset;
@@ -1107,8 +1107,9 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   State_Settings saved_settings = Input_settings;
   decltype(Input_buttonsPressed) saved_buttons = Input_buttonsPressed;
   decltype(Input_buttonRepeat) saved_repeat = Input_buttonRepeat;
-  Menu_Framework_MenuRow* saved_menu_rows = Menu_Framework_menuItems;
-  decltype(Menu_Framework_itemNames) saved_names = Menu_Framework_itemNames;
+  Menu_Framework_MenuRow* saved_menu_rows = VS::Menu::Framework::menuItems;
+  decltype(VS::Menu::Framework::itemNames) saved_names =
+      VS::Menu::Framework::itemNames;
   decltype(Battle_stringContext) saved_string_context = Battle_stringContext;
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
   Render_FrameScratch saved_frame = Render_frameScratch;
@@ -1138,8 +1139,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Menu::Inventory::BindLiveLootInventoryText(
         VS::tests::inventory_terminal::LootText());
     VS::Menu::Loot::ResetLootTerminalModuleData();
-    Menu_Framework_menuItems = menu_rows.data();
-    Menu_Framework_itemNames = item_names;
+    VS::Menu::Framework::menuItems = menu_rows.data();
+    VS::Menu::Framework::itemNames = item_names;
     Menu_textBoxes[7] = {};
     VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
     sfx_offsets.fill(UINT32_MAX);
@@ -1162,8 +1163,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     Input_settings = saved_settings;
     Input_buttonsPressed = saved_buttons;
     Input_buttonRepeat = saved_repeat;
-    Menu_Framework_menuItems = saved_menu_rows;
-    Menu_Framework_itemNames = saved_names;
+    VS::Menu::Framework::menuItems = saved_menu_rows;
+    VS::Menu::Framework::itemNames = saved_names;
     Battle_stringContext = saved_string_context;
     Menu_textBoxes[7] = saved_box;
     Render_frameScratch = saved_frame;
@@ -1369,16 +1370,16 @@ struct LootPresentationFixture : EnemyLootFixture {
   u_int saved_control = Field_controlMode;
   u_int saved_flow = Battle_actionFlowMode;
   Actors_ActorRecord* saved_player = Actors_actorRecords[0];
-  Items_LootListNode* saved_menu_list = Menu_Framework_lootLists;
-  Items_BattleLoot* saved_menu_entry = Menu_Framework_lootEntry;
+  Items_LootListNode* saved_menu_list = VS::Menu::Framework::lootLists;
+  Items_BattleLoot* saved_menu_entry = VS::Menu::Framework::lootEntry;
   Actors_ActorRecord locked_player_pose{};
 
   LootPresentationFixture() {
     // A locked pose keeps this presentation-gate test independent of model I/O.
     locked_player_pose.animationId = 0x63;
     Actors_actorRecords[0] = &locked_player_pose;
-    Menu_Framework_lootLists = nullptr;
-    Menu_Framework_lootEntry = nullptr;
+    VS::Menu::Framework::lootLists = nullptr;
+    VS::Menu::Framework::lootEntry = nullptr;
     Field_controlMode = 1;
     Battle_actionFlowMode = 11;
   }
@@ -1388,8 +1389,8 @@ struct LootPresentationFixture : EnemyLootFixture {
     Field_controlMode = saved_control;
     Battle_actionFlowMode = saved_flow;
     Actors_actorRecords[0] = saved_player;
-    Menu_Framework_lootLists = saved_menu_list;
-    Menu_Framework_lootEntry = saved_menu_entry;
+    VS::Menu::Framework::lootLists = saved_menu_list;
+    VS::Menu::Framework::lootEntry = saved_menu_entry;
   }
 };
 
@@ -2646,8 +2647,8 @@ TEST_CASE("Prologue progression suppresses presentation without losing loot",
   VS::Items::OpenLivePendingEnemyLoot();
   CHECK(Field_controlMode == 12);
   CHECK(Battle_actionFlowMode == 0);
-  CHECK(Menu_Framework_lootLists == nullptr);
-  CHECK(Menu_Framework_lootEntry == nullptr);
+  CHECK(VS::Menu::Framework::lootLists == nullptr);
+  CHECK(VS::Menu::Framework::lootEntry == nullptr);
   CHECK(VS::Items::lootListHead == queued);
   if (queued != nullptr) fixture.CheckQueued(1, false, false);
   fixture.CheckCleared();
@@ -2931,7 +2932,7 @@ TEST_CASE("Single chest loot remains intact when staging is abandoned",
   Items_BattleLoot chest{};
   chest.misc[0] = {323, 3, 2};
   chest.misc[1] = {467, 3, 1};
-  Menu_Framework_lootEntry = &chest;
+  VS::Menu::Framework::lootEntry = &chest;
   const auto before = chest;
   VS::Menu::Loot::Live::BuildStagedInventory(nullptr);
   REQUIRE(Menu_Loot_lootListCount == 2);

@@ -420,7 +420,7 @@ void HideViewerUi(live::PreviewFixture& fixture) {
   live::Fixture::Input(0x100);
   REQUIRE(fixture.TickGazette() == 0);
   CHECK(Menu_Score_hideUi == 1);
-  CHECK(Menu_Framework_hideMenu == 1);
+  CHECK(VS::Menu::Framework::hideMenu == 1);
   const auto hidden_text = fixture.TextRuns();
   CHECK(std::ranges::none_of(hidden_text, [](const auto& run) {
     return run.text.starts_with("NO.");
@@ -431,7 +431,7 @@ void ShowViewerUi(live::PreviewFixture& fixture) {
   live::Fixture::Input(0x100);
   REQUIRE(fixture.TickGazette() == 0);
   CHECK(Menu_Score_hideUi == 0);
-  CHECK(Menu_Framework_hideMenu == 0);
+  CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 
 void BeginEnemySwitch(live::PreviewFixture& fixture) {
@@ -880,7 +880,7 @@ void DrawActiveGazetteScreen(live::PreviewFixture& fixture,
     REQUIRE(score::UpdateLiveGazetteScreen(&phase) == 0);
   }
   REQUIRE(Menu_Score_menuState == 2);
-  CHECK(Menu_Framework_backgroundFadeStep > 0);
+  CHECK(VS::Menu::Framework::backgroundFadeStep > 0);
 }
 
 void RequestScreenExit(live::PreviewFixture& fixture, std::uint8_t& phase) {
@@ -907,7 +907,7 @@ void CheckScreenRestoredField() {
 void BeginScreenFade(std::uint8_t& phase) {
   REQUIRE(score::UpdateLiveGazetteScreen(&phase) == 0);
   REQUIRE(phase == 8);
-  const int initial_fade = Menu_Framework_backgroundFadeStep;
+  const int initial_fade = VS::Menu::Framework::backgroundFadeStep;
   REQUIRE(initial_fade > 0);
 }
 
@@ -920,9 +920,9 @@ void FinishScreenFade(live::PreviewFixture& fixture, std::uint8_t& phase) {
   }
   CHECK(result == 1);
   CHECK(phase == 0);
-  CHECK(Menu_Framework_backgroundFadeStep == 0);
-  CHECK(Menu_Framework_menuState.currentMenu == 9);
-  CHECK(Menu_Framework_hideMenu == 0);
+  CHECK(VS::Menu::Framework::backgroundFadeStep == 0);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == 9);
+  CHECK(VS::Menu::Framework::hideMenu == 0);
 }
 
 TEST_CASE(

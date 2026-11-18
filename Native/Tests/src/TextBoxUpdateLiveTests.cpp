@@ -34,10 +34,10 @@ constexpr std::uint32_t kRandomSeed = 0x12345678;
 struct LiveUpdateFixture {
   ArrayRestore<Menu_TextBoxState, menu::kTextBoxCount> saved_boxes{
       Menu_textBoxes};
-  ArrayRestore<u_long, std::size(Menu_textBoxOrderingTables)> saved_tables{
-      Menu_textBoxOrderingTables};
+  ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)> saved_tables{
+      VS::Menu::textBoxOrderingTables};
   ValueRestore<u_long*> saved_active{Menu_activeTextBoxOrderingTable};
-  ValueRestore<char> saved_index{Menu_textBoxBufferIndex};
+  ValueRestore<char> saved_index{VS::Menu::textBoxBufferIndex};
   ValueRestore<decltype(Render_frameScratch)> saved_frame{Render_frameScratch};
   ValueRestore<void*> saved_ordering{Render_legacyOrderingTables[0]};
   ValueRestore<int> saved_framebuffer{Render_frameBuf};
@@ -56,9 +56,9 @@ struct LiveUpdateFixture {
   explicit LiveUpdateFixture(std::uint8_t buffer = 0) {
     std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
     std::ranges::fill(ordering, kTerminator);
-    Menu_textBoxBufferIndex = static_cast<char>(buffer);
+    VS::Menu::textBoxBufferIndex = static_cast<char>(buffer);
     Menu_activeTextBoxOrderingTable =
-        Menu_textBoxOrderingTables + buffer * menu::kTextBoxOrderingTags;
+        VS::Menu::textBoxOrderingTables + buffer * menu::kTextBoxOrderingTags;
     ClearOTag(Menu_activeTextBoxOrderingTable,
               static_cast<int>(menu::kTextBoxOrderingTags));
     Render_frameBuf = 0;
@@ -94,9 +94,9 @@ TEST_CASE(
   CHECK(Menu_textBoxes[0].frameX == 40);
   CHECK(fixture.ordering[kTextEntry] == LegacyGpu_Handle(submitted));
   CHECK(submitted[menu::kTextBoxOrderingTags - 1] == kTerminator);
-  CHECK(static_cast<std::uint8_t>(Menu_textBoxBufferIndex) == next);
+  CHECK(static_cast<std::uint8_t>(VS::Menu::textBoxBufferIndex) == next);
   CHECK(Menu_activeTextBoxOrderingTable ==
-        Menu_textBoxOrderingTables + next * menu::kTextBoxOrderingTags);
+        VS::Menu::textBoxOrderingTables + next * menu::kTextBoxOrderingTags);
   CHECK(Menu_activeTextBoxOrderingTable[menu::kTextBoxOrderingTags - 1] ==
         kTerminator);
   CHECK(Core_interfaceRandomState == expected_random);
@@ -111,7 +111,7 @@ TEST_CASE(
       Render_frameScratch.orderingTable = nullptr;
       break;
     case 1:
-      Menu_textBoxBufferIndex = 3;
+      VS::Menu::textBoxBufferIndex = 3;
       break;
     case 2:
       Menu_activeTextBoxOrderingTable = fixture.ordering.data();
@@ -138,7 +138,7 @@ TEST_CASE("Original text-box update module entry advances the production frame",
   REQUIRE(resolved == reinterpret_cast<void*>(&menu::UpdateLiveTextBoxes));
   reinterpret_cast<decltype(&menu::UpdateLiveTextBoxes)>(resolved)();
   CHECK(Menu_textBoxes[0].state == 3);
-  CHECK(Menu_textBoxBufferIndex == 1);
+  CHECK(VS::Menu::textBoxBufferIndex == 1);
   CHECK(fixture.ordering[kTextEntry] == LegacyGpu_Handle(submitted));
 }
 
@@ -157,7 +157,7 @@ void CheckContainerFrameAfterRotation() {
     menu::UpdateLiveTextBoxes();
     CHECK(box.state == 2);
   }
-  CHECK(Menu_textBoxBufferIndex == 2);
+  CHECK(VS::Menu::textBoxBufferIndex == 2);
   CHECK(Menu_activeTextBoxOrderingTable == prior_ordering);
 }
 }  // namespace

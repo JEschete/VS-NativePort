@@ -28,7 +28,7 @@
 #include "Event/Triggers.h"
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
-#include "Field/BackgroundLiveState.h"
+#include "Field/BackgroundLiveState.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/TransitionsLive.hpp"
@@ -1962,9 +1962,9 @@ struct BackgroundOpcodeStateFixture {
   int first_person = VS::Field::isFirstPersonViewEnabled;
 
   BackgroundOpcodeStateFixture() {
-    Field_backgroundTextureDiscRequest = nullptr;
-    Field_backgroundLayoutDiscRequest = nullptr;
-    Field_loadedBackgroundLayout = nullptr;
+    VS::Field::backgroundTextureDiscRequest = nullptr;
+    VS::Field::backgroundLayoutDiscRequest = nullptr;
+    VS::Field::loadedBackgroundLayout = nullptr;
   }
   ~BackgroundOpcodeStateFixture() {
     VS::Field::StoreLiveRoomBackgroundState(background);
@@ -2016,18 +2016,18 @@ TEST_CASE("Native background bindings store visibility offset and parallax",
           "[event][script][room-commands][room-background][event-vm-live]") {
   const LiveVmFixture fixture;
   const BackgroundOpcodeStateFixture background;
-  Field_isTiledBackgroundEnabled = 0;
+  VS::Field::isTiledBackgroundEnabled = 0;
   VS::Field::isFirstPersonViewEnabled = 1;
   static_cast<void>(
       MountBackgroundScript({0x73, 0x80, 0x7B, 0x00, 0x80, 0xFF, 0x7F, 0x7E,
                              0xE0, 0x20, 0x00, 0x7C, 0x02, 0xF0}));
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
   CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
-  CHECK(Field_isTiledBackgroundEnabled == 0x80);
-  CHECK(Field_backgroundOffsetX == -32768);
-  CHECK(Field_backgroundOffsetY == 0x7FFF);
-  CHECK(Field_backgroundParallaxScaleXFixed12 == -4096);
-  CHECK(Field_backgroundParallaxScaleYFixed12 == 4096);
+  CHECK(VS::Field::isTiledBackgroundEnabled == 0x80);
+  CHECK(VS::Field::backgroundOffsetX == -32768);
+  CHECK(VS::Field::backgroundOffsetY == 0x7FFF);
+  CHECK(VS::Field::backgroundParallaxScaleXFixed12 == -4096);
+  CHECK(VS::Field::backgroundParallaxScaleYFixed12 == 4096);
   CHECK(VS::Field::isFirstPersonViewEnabled == 0);
 }
 
@@ -2037,20 +2037,20 @@ TEST_CASE("Native background release yields only while skipping",
     CAPTURE(static_cast<int>(skip));
     const LiveVmFixture fixture;
     const BackgroundOpcodeStateFixture background;
-    Field_isTiledBackgroundEnabled = 1;
+    VS::Field::isTiledBackgroundEnabled = 1;
     Event_skipState = skip;
     const auto start = MountBackgroundScript({0x76, 0x73, 0x05, 0xF0});
     auto& host = event::LiveScriptVm();
     CHECK_FALSE(event::ExecuteLiveScriptThread(0));
     if (skip == 2) {
       // The release yielded before the visibility opcode ran.
-      CHECK(Field_isTiledBackgroundEnabled == 0);
+      CHECK(VS::Field::isTiledBackgroundEnabled == 0);
       CHECK(host.ThreadCursor(0) == event::ScriptLocation{start.region,
                                                           start.offset + 1,
                                                           start.generation});
       CHECK_FALSE(event::ExecuteLiveScriptThread(0));
     }
-    CHECK(Field_isTiledBackgroundEnabled == 5);
+    CHECK(VS::Field::isTiledBackgroundEnabled == 5);
     CHECK_FALSE(host.ThreadCursor(0).Present());
   }
 }

@@ -67,16 +67,16 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
   ArrayRestore<char, abilities::kAbilityCapacity> saved_defense{
       Menu_BattleAbilities_unlockedDefenseAbilities};
   ArrayRestore<Menu_Framework_TextHeader, 2> saved_headers{
-      Menu_Framework_textHeaders};
-  ValueRestore<char> saved_cost_display{Menu_Framework_displayActionCost};
+      VS::Menu::Framework::textHeaders};
+  ValueRestore<char> saved_cost_display{VS::Menu::Framework::displayActionCost};
   ValueRestore<u_short*> saved_rows{Menu_BattleAbilities_abilityText};
   ValueRestore<char> saved_count{Menu_BattleAbilities_abilityCount};
   ValueRestore<u_int> saved_state{Menu_BattleAbilities_abilityMenuState};
   ValueRestore<char> saved_type{Menu_BattleAbilities_selectedAbilityType};
   ValueRestore<int> saved_highlight{Menu_BattleAbilities_highlightedAbility};
   ValueRestore<char> saved_first{Menu_BattleAbilities_firstAbility};
-  ValueRestore<u_short*> saved_items{Menu_Framework_itemsText};
-  ValueRestore<int*> saved_types{Menu_Framework_rowTypeBuf};
+  ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
+  ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   std::array<int, framework::kRowTypeCount> types{};
   Battle_Actor actor{};
 
@@ -88,9 +88,9 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
     Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[1] = 65535;
     Audio_Seq_unusedArtsStatus.kills.totalKills = 65535;
     Input_settings.cursorMemory = 0;
-    Menu_Framework_menuMemory = {};
-    Menu_Framework_itemsText = nullptr;
-    Menu_Framework_rowTypeBuf = types.data();
+    VS::Menu::Framework::menuMemory = {};
+    VS::Menu::Framework::itemsText = nullptr;
+    VS::Menu::Framework::rowTypeBuf = types.data();
     Menu_BattleAbilities_abilityText = nullptr;
     Menu_BattleAbilities_unlockedChainAbilities[0] = kAction;
     std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
@@ -111,7 +111,7 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
       VS::Core::Memory::FreeLiveFromHighEnd(Menu_BattleAbilities_abilityText);
       Menu_BattleAbilities_abilityText = nullptr;
     }
-    if (Menu_Framework_itemsText != nullptr) {
+    if (VS::Menu::Framework::itemsText != nullptr) {
       static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
     }
     framework::ClearLiveMenuExcept(framework::kNoRow);
@@ -133,15 +133,15 @@ struct LiveTerminalFixture : LiveFoundationFixture {
       Battle_chainAbilityActionIds};
   ArrayRestore<char, std::size(Battle_defenseAbilityActionIds)>
       saved_defense_order{Battle_defenseAbilityActionIds};
-  ValueRestore<decltype(Menu_Framework_shortcutInvoked)> saved_shortcut{
-      Menu_Framework_shortcutInvoked};
-  ValueRestore<decltype(Menu_Framework_menuState)> saved_control{
-      Menu_Framework_menuState};
+  ValueRestore<decltype(VS::Menu::Framework::shortcutInvoked)> saved_shortcut{
+      VS::Menu::Framework::shortcutInvoked};
+  ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
+      VS::Menu::Framework::menuState};
 
   LiveTerminalFixture() {
     framework::ResetLiveMainMenuStatics();
     abilities::ResetLiveAbilityTerminalColdState();
-    Menu_Framework_shortcutInvoked = 1;
+    VS::Menu::Framework::shortcutInvoked = 1;
     std::ranges::fill(Battle_chainAbilityActionIds, char{0});
     std::ranges::fill(Battle_defenseAbilityActionIds, char{0});
     Battle_chainAbilityActionIds[0] = kAction;
@@ -230,8 +230,8 @@ TEST_CASE(
   CHECK(fixture.RowText()[0] == 0x10FA);
   CHECK(fixture.RowText()[1] == 0xE701);
   CHECK(fixture.RowText()[17] == 0xE702);
-  CHECK(std::string_view(Menu_Framework_textHeaders[0].text) == "#255");
-  CHECK(std::string_view(Menu_Framework_textHeaders[1].text) == "RISK");
+  CHECK(std::string_view(VS::Menu::Framework::textHeaders[0].text) == "#255");
+  CHECK(std::string_view(VS::Menu::Framework::textHeaders[1].text) == "RISK");
 }
 
 TEST_CASE("Ability terminal retains all six original MENU2 entries",
@@ -266,7 +266,7 @@ TEST_CASE("MENU2 reload restarts learned lists without releasing heap owners",
 TEST_CASE("F02625 actual screen entry creates categories from its caller byte",
           "[battle-ability-terminal-live][F02625]") {
   LiveTerminalFixture fixture;
-  Menu_Framework_shortcutInvoked = 0;
+  VS::Menu::Framework::shortcutInvoked = 0;
   std::uint8_t phase = 3;
   auto* address = VS::Content::ResolveModuleAddress(
       {Content_moduleSymbols, Content_moduleSymbolCount}, kModule, 0x801038D4);
@@ -276,7 +276,7 @@ TEST_CASE("F02625 actual screen entry creates categories from its caller byte",
   }
   REQUIRE(reinterpret_cast<int (*)(std::uint8_t*)>(address)(&phase) == 0);
   CHECK(phase == 5);
-  CHECK(Menu_Framework_itemsText != nullptr);
+  CHECK(VS::Menu::Framework::itemsText != nullptr);
 }
 
 TEST_CASE("Ability terminal cold reset preserves foundation row ownership",

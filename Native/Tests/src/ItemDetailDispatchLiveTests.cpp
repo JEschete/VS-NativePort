@@ -15,7 +15,7 @@ constexpr int kGemDispatchEntry = (((20 << 8) | 1) << 4) | 5;
 TEST_CASE("F02568 production renderer merges only the selected category icon",
           "[item-detail-dispatch-live][F02568]") {
   DispatchLiveFixture fixture;
-  Menu_Framework_menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
   fixture.rows[31].x = 60;
   inv::DrawLiveItemCategoryIcons(2, 1);
   const auto sprites = fixture.Sprites();
@@ -27,7 +27,7 @@ TEST_CASE("F02568 production renderer merges only the selected category icon",
 TEST_CASE("F02568 native sprite queues preserve overlay position and palette",
           "[item-detail-dispatch-live][F02568]") {
   DispatchLiveFixture fixture;
-  Menu_Framework_menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
   fixture.rows[31].x = 61;
   inv::DrawLiveItemCategoryIcons(0, 1);
   const auto sprites = fixture.Sprites();
@@ -43,10 +43,10 @@ TEST_CASE("F02579 armor details use production stats and native row layout",
   DispatchLiveFixture fixture;
   fixture.AddArmor();
   fixture.Open(inv::UpdateLiveArmorDetails);
-  CHECK(Menu_Framework_equipmentSubtype == fw::equipment_subtype::kArmor);
-  CHECK(Menu_Framework_currentStatusViewItem == 16);
-  CHECK(Menu_Framework_enabledStatPages == 7);
-  CHECK(Menu_Framework_strIntAgi[0] == -7);
+  CHECK(VS::Menu::Framework::equipmentSubtype == fw::equipment_subtype::kArmor);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 16);
+  CHECK(VS::Menu::Framework::enabledStatPages == 7);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == -7);
   CHECK(fixture.rows[31].targetPosition0 == 16);
   CHECK(fixture.rows[20].targetPosition0 == 18);
 }
@@ -56,9 +56,10 @@ TEST_CASE("F02579 accessory details keep their real subtype",
   DispatchLiveFixture fixture;
   fixture.AddArmor(true);
   fixture.Open(inv::UpdateLiveArmorDetails);
-  CHECK(Menu_Framework_equipmentSubtype == fw::equipment_subtype::kAccessory);
-  CHECK(Menu_Framework_currentStatusViewItem == 16);
-  CHECK(Menu_Framework_enabledStatPages == 7);
+  CHECK(VS::Menu::Framework::equipmentSubtype ==
+        fw::equipment_subtype::kAccessory);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 16);
+  CHECK(VS::Menu::Framework::enabledStatPages == 7);
 }
 
 TEST_CASE("F02579 paging integrates the real armor formatter and cursor memory",
@@ -69,9 +70,9 @@ TEST_CASE("F02579 paging integrates the real armor formatter and cursor memory",
   fixture.Wait(inv::UpdateLiveArmorDetails);
   Input_buttonRepeat = VS::Input::R1;
   CHECK(inv::UpdateLiveArmorDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
-  CHECK(Menu_Framework_menuMemory.opaque3A.categoryCursors[4].position.page ==
-        1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[4]
+            .position.page == 1);
   CHECK(fixture.rows[31].itemPage == 2);
   CHECK(fixture.rows[20].selected == 1);
 }
@@ -82,12 +83,12 @@ TEST_CASE(
   DispatchLiveFixture fixture;
   fixture.AddGems();
   fixture.Open(inv::UpdateLiveGemDetails);
-  CHECK(Menu_Framework_equipmentSubtype == fw::equipment_subtype::kGem);
-  CHECK(Menu_Framework_currentStatusViewItem == 48);
-  CHECK(Menu_Framework_enabledStatPages == 3);
-  CHECK(Menu_Framework_equipmentStats[0] == -4);
-  CHECK(Menu_Framework_equipmentStats[16] == 7);
-  CHECK(Menu_Framework_strIntAgi[0] == 9);
+  CHECK(VS::Menu::Framework::equipmentSubtype == fw::equipment_subtype::kGem);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 48);
+  CHECK(VS::Menu::Framework::enabledStatPages == 3);
+  CHECK(VS::Menu::Framework::equipmentStats[0] == -4);
+  CHECK(VS::Menu::Framework::equipmentStats[16] == 7);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 9);
 }
 
 TEST_CASE(
@@ -99,11 +100,11 @@ TEST_CASE(
   fixture.Wait(inv::UpdateLiveGemDetails);
   Input_buttonRepeat = VS::Input::R1;
   CHECK(inv::UpdateLiveGemDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
-  CHECK(Menu_Framework_menuMemory.opaque3A.categoryCursors[5].position.page ==
-        1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[5]
+            .position.page == 1);
   CHECK(fixture.rows[31].itemPage == 2);
-  CHECK(Menu_Framework_strIntAgi[0] == 5);
+  CHECK(VS::Menu::Framework::strIntAgi[0] == 5);
 }
 
 TEST_CASE("F02581 packed list selection enters the real gem controller",
@@ -112,11 +113,11 @@ TEST_CASE("F02581 packed list selection enters the real gem controller",
   fixture.AddGems();
   CHECK(inv::UpdateLiveItemDetails(kGemDispatchEntry) == 0);
   CHECK(fixture.rows[31].itemPage == 1);
-  CHECK(Menu_Framework_selectedStatusViewElement == 9);
+  CHECK(VS::Menu::Framework::selectedStatusViewElement == 9);
   CHECK(Menu_Inventory_exitToBattle == 0);
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == 48);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 48);
 }
 
 TEST_CASE(
@@ -130,7 +131,7 @@ TEST_CASE(
   fixture.IdleRows();
   fixture.ResetFrame();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
-  CHECK(Menu_Framework_cursorColor == 0);
+  CHECK(VS::Menu::Framework::cursorColor == 0);
   CHECK_FALSE(fixture.Sprites().empty());
 }
 
@@ -143,7 +144,7 @@ TEST_CASE(
   fixture.IdleRows();
   CHECK(inv::UpdateLiveGemDetails(0) == 0);
   CHECK(inv::UpdateLiveItemDetails(5) == 0);
-  CHECK(Menu_Framework_currentStatusViewItem == 1);
+  CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(fixture.rows[31].itemPage == 0);
 }
 

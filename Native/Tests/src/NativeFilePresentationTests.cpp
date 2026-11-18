@@ -22,7 +22,7 @@
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 #include "Menu/FilesLive.hpp"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Save/MemoryCard/Resources.h"
 #include "Save/NativeFilePresentation.hpp"
 #include "Title/SaveFiles.h"
@@ -236,7 +236,7 @@ TEST_CASE("Native file drawing is inert outside the original asset lifetime",
   Save_MemoryCard_uiResources = nullptr;
   const auto before_menu = VS::Menu::Files::LiveFilesState().elements[0];
   const auto before_title = Title_fileMenuElements[0];
-  const int menu_cursor = Menu_Files_selectCursorXy;
+  const int menu_cursor = VS::Menu::Files::selectCursorXy;
   const int title_cursor = Title_selectionCursorPosition;
   Save::DrawNativeFileScreen({});
   Save::NativeFileScreen title;
@@ -246,7 +246,7 @@ TEST_CASE("Native file drawing is inert outside the original asset lifetime",
   CHECK(VS::Menu::Files::LiveFilesState().elements[0] == before_menu);
   CHECK(std::memcmp(&before_title, &Title_fileMenuElements[0],
                     sizeof(before_title)) == 0);
-  CHECK(Menu_Files_selectCursorXy == menu_cursor);
+  CHECK(VS::Menu::Files::selectCursorXy == menu_cursor);
   CHECK(Title_selectionCursorPosition == title_cursor);
   Save_MemoryCard_uiResources = saved_resources;
 }

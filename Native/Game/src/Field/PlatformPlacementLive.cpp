@@ -21,7 +21,6 @@
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacement.hpp"
-#include "Field/PlatformPlacementLive.h"
 #include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
@@ -649,26 +648,26 @@ std::optional<Field_PlatformContactPoint> FindLiveMovingPlatformById(
 }
 }  // namespace VS::Field
 
-void Field_InitializeMovingPlatformsEntry(void) {
+void VS::Field::InitializeMovingPlatformsEntry(void) {
   VS::Field::InitializeLiveMovingPlatforms();
 }
-void Field_DrawMovingPlatformShadowsEntry(void) {
+void VS::Field::DrawMovingPlatformShadowsEntry(void) {
   VS::Field::DrawLiveMovingPlatformShadows();
 }
-void Field_SetPlatformFreezeAppearanceEntry(int requested) {
+void VS::Field::SetPlatformFreezeAppearanceEntry(int requested) {
   static_cast<void>(VS::Field::SetLivePlatformFreezeAppearance(requested));
 }
-void* Field_MovingPlatformTargetWaypointEntry(int index) {
+void* VS::Field::MovingPlatformTargetWaypointEntry(int index) {
   auto* record = PlatformRecord(index, std::size(Field_platformBounceFrames));
   if (record == nullptr) return nullptr;
   const auto selection = WaypointSelectionOf(*record);
   return selection ? &record->waypoints[selection->index] : nullptr;
 }
-int Field_UpdateMovingPlatformsEntry(void) {
+int VS::Field::UpdateMovingPlatformsEntry(void) {
   static_cast<void>(VS::Field::UpdateLiveMovingPlatforms());
   return 0;
 }
-int Field_CollectMovingPlatformPositionsEntry(
+int VS::Field::CollectMovingPlatformPositionsEntry(
     Field_PlatformContactPoint output_contacts[]) {
   if (output_contacts == nullptr) return 0;
   const auto contacts = VS::Field::CollectLiveMovingPlatformPositions();
@@ -680,28 +679,29 @@ int Field_CollectMovingPlatformPositionsEntry(
   }
   return static_cast<int>(contacts.size());
 }
-int Field_SetMovingPlatformActorEntry(int platform_index, int control) {
+int VS::Field::SetMovingPlatformActorEntry(int platform_index, int control) {
   return VS::Field::SetLiveMovingPlatformActor(platform_index, control);
 }
-void Field_ResetMovingPlatformWaypointEntry(int platform_index, int waypoint) {
+void VS::Field::ResetMovingPlatformWaypointEntry(int platform_index,
+                                                 int waypoint) {
   static_cast<void>(
       VS::Field::ResetLiveMovingPlatformWaypoint(platform_index, waypoint));
 }
-void Field_SetMovingPlatformsPausedEntry(int paused) {
+void VS::Field::SetMovingPlatformsPausedEntry(int paused) {
   VS::Field::SetLiveMovingPlatformsPaused(paused);
 }
-void Field_FreezeMovingPlatformsEntry(int freeze_frames) {
+void VS::Field::FreezeMovingPlatformsEntry(int freeze_frames) {
   static_cast<void>(VS::Field::FreezeLiveMovingPlatforms(freeze_frames));
 }
-void Field_FreezeRoomGimmicksTemporarilyEntry(void) {
+void VS::Field::FreezeRoomGimmicksTemporarilyEntry(void) {
   static_cast<void>(VS::Field::FreezeLiveRoomGimmicksTemporarily());
 }
-void Field_SetMovingPlatformVisibilityEntry(int platform_index,
-                                            int visibility) {
+void VS::Field::SetMovingPlatformVisibilityEntry(int platform_index,
+                                                 int visibility) {
   static_cast<void>(
       VS::Field::SetLiveMovingPlatformVisibility(platform_index, visibility));
 }
-unsigned int Field_MovingPlatformDwellTicksEntry(int platform_index) {
+unsigned int VS::Field::MovingPlatformDwellTicksEntry(int platform_index) {
   const auto ticks = VS::Field::LiveMovingPlatformDwellTicks(platform_index);
   return ticks ? static_cast<unsigned int>(*ticks)
                : std::numeric_limits<unsigned int>::max();

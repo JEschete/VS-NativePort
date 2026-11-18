@@ -333,7 +333,7 @@ class SaveStateHost {
   virtual std::uint8_t SaveLocation() = 0;
   // vs_battle_getMapCompletion, stored as the statistics' one byte.
   virtual std::uint8_t MapCompletion() = 0;
-  // Menu_Framework_actionRestrictions & 0x400: a container save keeps the
+  // VS::Menu::Framework::actionRestrictions & 0x400: a container save keeps the
   // container data of a first save.
   virtual bool KeepsContainerData() = 0;
   // The keystream that draws the slot identity, the cipher key and the
@@ -450,7 +450,7 @@ std::expected<void, SaveImageError> PackageClearSave(
 struct SaveTransfer {
   CardHost& card;
   TransferProgress& progress;
-  // Menu_Files_fileProgressCounter.
+  // VS::Menu::Files::fileProgressCounter.
   std::int32_t progress_counter = 0;
   SaveWorkspace workspace;
 };

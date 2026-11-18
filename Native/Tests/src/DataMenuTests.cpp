@@ -17,8 +17,8 @@
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
-#include "Menu/FilesLiveState.h"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/FilesLiveState.hpp"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/GazetteCameraLive.hpp"
@@ -46,9 +46,9 @@ struct EmptySlotsFixture {
   decltype(Input_buttonsPressed) saved_pressed = Input_buttonsPressed;
   decltype(Input_buttonRepeat) saved_repeat = Input_buttonRepeat;
   Save_CardFileInfoRecord* saved_summaries = Title_saveFileSummaries;
-  u_short* saved_table = Menu_Files_textTable;
-  char* saved_message = Menu_Files_memoryCardMessage;
-  int saved_cursor = Menu_Files_selectCursorXy;
+  u_short* saved_table = VS::Menu::Files::textTable;
+  char* saved_message = VS::Menu::Files::memoryCardMessage;
+  int saved_cursor = VS::Menu::Files::selectCursorXy;
   std::array<files::Element, files::kElementCount> saved_elements =
       files::LiveFilesState().elements;
   std::array<Save_CardFileInfoRecord, 5> summaries{};
@@ -65,7 +65,7 @@ struct EmptySlotsFixture {
       summary.summary.base.slotState = Save_CardFileSlotStatus_Available;
     }
     Title_saveFileSummaries = summaries.data();
-    Menu_Files_textTable = text.data();
+    VS::Menu::Files::textTable = text.data();
     // Input feedback needs a bound bank, even when no sound programs exist.
     sfx_offsets.fill(UINT32_MAX);
     Input_buttonsPressed.allButtons = 0;
@@ -75,9 +75,9 @@ struct EmptySlotsFixture {
   ~EmptySlotsFixture() {
     files::LiveFilesState().elements = saved_elements;
     Title_saveFileSummaries = saved_summaries;
-    Menu_Files_textTable = saved_table;
-    Menu_Files_memoryCardMessage = saved_message;
-    Menu_Files_selectCursorXy = saved_cursor;
+    VS::Menu::Files::textTable = saved_table;
+    VS::Menu::Files::memoryCardMessage = saved_message;
+    VS::Menu::Files::selectCursorXy = saved_cursor;
     Input_buttonsPressed = saved_pressed;
     Input_buttonRepeat = saved_repeat;
   }
@@ -87,7 +87,7 @@ struct EmptySlotsFixture {
     for (size_t index = 0; index < summaries.size(); ++index) {
       Input_buttonsPressed.allButtons = PADRright;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
-      CHECK(Menu_Files_selectCursorXy != 0);
+      CHECK(VS::Menu::Files::selectCursorXy != 0);
       Input_buttonsPressed.allButtons = 0;
       Input_buttonRepeat = PADLdown;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
@@ -236,7 +236,7 @@ TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
   fixture.CheckEmptySlotInput();
   Input_buttonsPressed.allButtons = PADRdown;
   CHECK(files::UpdateLoadFiles(context, 0) == -1);
-  CHECK(Menu_Files_selectCursorXy == 0);
+  CHECK(VS::Menu::Files::selectCursorXy == 0);
 }
 
 TEST_CASE("Score list numbers retain every original digit and native link",

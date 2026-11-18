@@ -19,7 +19,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.h"
 #include "DiscQueue.h"
-#include "Field/BackgroundLiveState.h"
+#include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.h"
@@ -36,33 +36,34 @@
 #include "Render/UiPacketsLive.hpp"
 
 // decomp: D_800F1CE0 (D_800F1CE0@BATTLE/BATTLE.PRG)
-VECTOR Field_backgroundReferenceVectors[2];
+VECTOR VS::Field::backgroundReferenceVectors[2];
 // decomp: D_800F1D78 (D_800F1D78@BATTLE/BATTLE.PRG)
-int Field_backgroundGradientColors[kFieldBackgroundGradientColorCount];
+int VS::Field::backgroundGradientColors
+    [VS::Field::kBackgroundGradientColorCount];
 // decomp: D_800F1DAC (D_800F1DAC@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* Field_backgroundTextureDiscRequest;
+Content_DiscQueueSlot* VS::Field::backgroundTextureDiscRequest;
 // decomp: D_800F1DB0 (D_800F1DB0@BATTLE/BATTLE.PRG)
-Content_DiscQueueSlot* Field_backgroundLayoutDiscRequest;
+Content_DiscQueueSlot* VS::Field::backgroundLayoutDiscRequest;
 // decomp: D_800F1DB4 (D_800F1DB4@BATTLE/BATTLE.PRG)
-int16_t Field_backgroundOffsetX;
+int16_t VS::Field::backgroundOffsetX;
 // decomp: D_800F1DB6 (D_800F1DB6@BATTLE/BATTLE.PRG)
-int16_t Field_backgroundOffsetY;
+int16_t VS::Field::backgroundOffsetY;
 // decomp: D_800F1DB8 (D_800F1DB8@BATTLE/BATTLE.PRG)
-int16_t Field_backgroundParallaxScaleXFixed12;
+int16_t VS::Field::backgroundParallaxScaleXFixed12;
 // decomp: D_800F1DBA (D_800F1DBA@BATTLE/BATTLE.PRG)
-int16_t Field_backgroundParallaxScaleYFixed12;
+int16_t VS::Field::backgroundParallaxScaleYFixed12;
 // decomp: D_800F1DBE (D_800F1DBE@BATTLE/BATTLE.PRG)
-int16_t Field_legacyBackgroundTextureReservationId;
+int16_t VS::Field::legacyBackgroundTextureReservationId;
 // decomp: D_800F1DC6 (D_800F1DC6@BATTLE/BATTLE.PRG)
-char Field_isSolidBackground;
+char VS::Field::isSolidBackground;
 // decomp: D_800F1DC8 (D_800F1DC8@BATTLE/BATTLE.PRG)
-char Field_legacyBackgroundTexturePage;
+char VS::Field::legacyBackgroundTexturePage;
 // decomp: D_800F1DC9 (D_800F1DC9@BATTLE/BATTLE.PRG)
-u_char Field_isTiledBackgroundEnabled;
+u_char VS::Field::isTiledBackgroundEnabled;
 // decomp: D_800F1DCC (D_800F1DCC@BATTLE/BATTLE.PRG)
-Field_BackgroundLayout* Field_loadedBackgroundLayout;
+Field_BackgroundLayout* VS::Field::loadedBackgroundLayout;
 // decomp: D_800F1DD0 (D_800F1DD0@BATTLE/BATTLE.PRG)
-u_long* Field_legacyBackgroundTimBuffer;
+u_long* VS::Field::legacyBackgroundTimBuffer;
 
 namespace {
 // D_80068C1C: 34 twelve-byte vertices, the third word of each its colour, and
@@ -245,42 +246,38 @@ auto RunLive(Rule rule) {
 
 RoomBackgroundState LoadLiveRoomBackgroundState() {
   RoomBackgroundState state{
-      .offset_x = Field_backgroundOffsetX,
-      .offset_y = Field_backgroundOffsetY,
-      .parallax_x = Field_backgroundParallaxScaleXFixed12,
-      .parallax_y = Field_backgroundParallaxScaleYFixed12,
-      .texture_page_count = Field_legacyBackgroundTextureReservationId,
-      .solid = static_cast<std::uint8_t>(Field_isSolidBackground),
-      .texture_page =
-          static_cast<std::uint8_t>(Field_legacyBackgroundTexturePage),
-      .tiled_enabled = Field_isTiledBackgroundEnabled,
-      .texture_read =
-          IdOf<BackgroundReadId>(Field_backgroundTextureDiscRequest),
-      .layout_read = IdOf<BackgroundReadId>(Field_backgroundLayoutDiscRequest),
-      .layout = IdOf<BackgroundBufferId>(Field_loadedBackgroundLayout),
-      .tim_buffer = IdOf<BackgroundBufferId>(Field_legacyBackgroundTimBuffer)};
-  std::ranges::copy(Field_backgroundGradientColors,
-                    state.gradient_colors.begin());
+      .offset_x = backgroundOffsetX,
+      .offset_y = backgroundOffsetY,
+      .parallax_x = backgroundParallaxScaleXFixed12,
+      .parallax_y = backgroundParallaxScaleYFixed12,
+      .texture_page_count = legacyBackgroundTextureReservationId,
+      .solid = static_cast<std::uint8_t>(isSolidBackground),
+      .texture_page = static_cast<std::uint8_t>(legacyBackgroundTexturePage),
+      .tiled_enabled = isTiledBackgroundEnabled,
+      .texture_read = IdOf<BackgroundReadId>(backgroundTextureDiscRequest),
+      .layout_read = IdOf<BackgroundReadId>(backgroundLayoutDiscRequest),
+      .layout = IdOf<BackgroundBufferId>(loadedBackgroundLayout),
+      .tim_buffer = IdOf<BackgroundBufferId>(legacyBackgroundTimBuffer)};
+  std::ranges::copy(backgroundGradientColors, state.gradient_colors.begin());
   return state;
 }
 
 void StoreLiveRoomBackgroundState(const RoomBackgroundState& state) {
-  std::ranges::copy(state.gradient_colors, Field_backgroundGradientColors);
-  Field_backgroundOffsetX = state.offset_x;
-  Field_backgroundOffsetY = state.offset_y;
-  Field_backgroundParallaxScaleXFixed12 = state.parallax_x;
-  Field_backgroundParallaxScaleYFixed12 = state.parallax_y;
-  Field_legacyBackgroundTextureReservationId = state.texture_page_count;
-  Field_isSolidBackground = static_cast<char>(state.solid);
-  Field_legacyBackgroundTexturePage = static_cast<char>(state.texture_page);
-  Field_isTiledBackgroundEnabled = state.tiled_enabled;
-  Field_backgroundTextureDiscRequest =
+  std::ranges::copy(state.gradient_colors, backgroundGradientColors);
+  backgroundOffsetX = state.offset_x;
+  backgroundOffsetY = state.offset_y;
+  backgroundParallaxScaleXFixed12 = state.parallax_x;
+  backgroundParallaxScaleYFixed12 = state.parallax_y;
+  legacyBackgroundTextureReservationId = state.texture_page_count;
+  isSolidBackground = static_cast<char>(state.solid);
+  legacyBackgroundTexturePage = static_cast<char>(state.texture_page);
+  isTiledBackgroundEnabled = state.tiled_enabled;
+  backgroundTextureDiscRequest =
       PointerOf<Content_DiscQueueSlot>(state.texture_read);
-  Field_backgroundLayoutDiscRequest =
+  backgroundLayoutDiscRequest =
       PointerOf<Content_DiscQueueSlot>(state.layout_read);
-  Field_loadedBackgroundLayout =
-      PointerOf<Field_BackgroundLayout>(state.layout);
-  Field_legacyBackgroundTimBuffer = PointerOf<u_long>(state.tim_buffer);
+  loadedBackgroundLayout = PointerOf<Field_BackgroundLayout>(state.layout);
+  legacyBackgroundTimBuffer = PointerOf<u_long>(state.tim_buffer);
 }
 
 std::optional<RoomEnvironment> LiveRoomEnvironment() {
@@ -397,7 +394,7 @@ void LiveBackgroundHost::DrawSkyDome(const CameraVector& position,
 }
 
 CameraVector LiveBackgroundHost::ReferenceRotation() {
-  return Math::VectorOf(Field_backgroundReferenceVectors[0]);
+  return Math::VectorOf(backgroundReferenceVectors[0]);
 }
 
 std::optional<BackgroundLayout> LiveBackgroundHost::Layout(
@@ -566,7 +563,7 @@ void LiveSetTiledBackgroundEnabled(int enabled) {
 }
 
 // decomp: BATTLE.PRG func_8008EB24 (src/BATTLE/BATTLE.PRG/146C.c:17531)
-int* LiveRoomBackgroundColors() { return Field_backgroundGradientColors; }
+int* LiveRoomBackgroundColors() { return backgroundGradientColors; }
 
 // decomp: BATTLE.PRG func_8008EB30 (src/BATTLE/BATTLE.PRG/146C.c:17533)
 void LiveSetRoomBackgroundColors(const int* gradient_colors) {

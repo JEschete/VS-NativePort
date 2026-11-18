@@ -28,7 +28,6 @@
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "State/Timers.hpp"
 
@@ -283,7 +282,7 @@ class LiveMovementHost final : public MovementHost {
     return Field_platformBounceFrames[platform];
   }
   void SetPlatformRider(int platform, int rider) override {
-    Field_SetMovingPlatformActorEntry(platform, rider);
+    VS::Field::SetMovingPlatformActorEntry(platform, rider);
   }
   int TileSurfaceId(int index) override {
     if (index < 0 ||

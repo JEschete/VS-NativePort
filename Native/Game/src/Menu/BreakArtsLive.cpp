@@ -26,7 +26,7 @@
 #include "Menu/BreakArts.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Render/GameFontLive.hpp"
 #include "State/Progress.h"
@@ -148,10 +148,10 @@ class LiveHost final : public Host {
     Input_settings.cursorMemory = ToStorageChar(value);
   }
   std::uint32_t ActionRestrictions() override {
-    return static_cast<std::uint32_t>(Menu_Framework_actionRestrictions);
+    return static_cast<std::uint32_t>(VS::Menu::Framework::actionRestrictions);
   }
   bool ShortcutInvoked() override {
-    return Menu_Framework_shortcutInvoked != 0;
+    return VS::Menu::Framework::shortcutInvoked != 0;
   }
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
@@ -223,7 +223,7 @@ class LiveHost final : public Host {
                                 nullptr);
   }
   void SetDisplayActionCost(int enabled) override {
-    Menu_Framework_displayActionCost = static_cast<char>(enabled);
+    VS::Menu::Framework::displayActionCost = static_cast<char>(enabled);
   }
   void ClearRowsExcept(int row) override {
     Framework::ClearLiveMenuExcept(row);
@@ -238,22 +238,22 @@ class LiveHost final : public Host {
     Framework::SetLiveCommandLabel(command);
   }
   void SetActionSelection(std::uint16_t action_id) override {
-    Menu_Framework_actionSelection.executeAbility.word = action_id;
+    VS::Menu::Framework::actionSelection.executeAbility.word = action_id;
   }
   void SetExecuteAbilityType(std::uint8_t type) override {
-    Menu_Framework_menuState.executeAbilityType = ToStorageChar(type);
+    VS::Menu::Framework::menuState.executeAbilityType = ToStorageChar(type);
   }
   std::uint8_t CurrentMenu() override {
-    return Menu_Framework_menuState.currentMenu;
+    return VS::Menu::Framework::menuState.currentMenu;
   }
   void SetCurrentMenu(std::uint8_t menu) override {
-    Menu_Framework_menuState.currentMenu = ToStorageChar(menu);
+    VS::Menu::Framework::menuState.currentMenu = ToStorageChar(menu);
   }
   void SetReturnState(std::uint8_t state) override {
-    Menu_Framework_menuState.returnState = ToStorageChar(state);
+    VS::Menu::Framework::menuState.returnState = ToStorageChar(state);
   }
   void SetSelectionKind(std::int16_t kind) override {
-    Menu_Framework_actionSelection.selectionKind = kind;
+    VS::Menu::Framework::actionSelection.selectionKind = kind;
   }
 
  private:

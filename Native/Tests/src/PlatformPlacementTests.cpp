@@ -24,7 +24,6 @@
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacement.hpp"
-#include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
 #include "Field/RoomEffects.hpp"
@@ -459,7 +458,7 @@ TEST_CASE("Native platform initialization resets only its four bounce slots",
               3);
   Field_platformBounceFrames[VS::Field::kMovingPlatformCapacity] = 19;
   Field_roomData.movingPlatforms = nullptr;
-  Field_InitializeMovingPlatformsEntry();
+  VS::Field::InitializeMovingPlatformsEntry();
   CHECK(Field_areMovingPlatformsPaused == 0);
   CHECK(Field_platformFreezeFrames == 0);
   CHECK(Field_isPlatformFreezeTintActive == 0);
@@ -479,7 +478,7 @@ TEST_CASE("Native platform initialization preserves packed records and flags",
   Field_roomData.geometry = geometry.data();
   Field_roomData.header.geometryLength = sizeof geometry;
   const auto saved = fixture.platforms;
-  Field_InitializeMovingPlatformsEntry();
+  VS::Field::InitializeMovingPlatformsEntry();
   using Bytes = std::array<std::byte, sizeof(saved)>;
   CHECK(std::bit_cast<Bytes>(fixture.platforms) == std::bit_cast<Bytes>(saved));
   CHECK(geometry == GeometryWords{1, 0x12345778, 1216, -768, 448, 7, 8, 9, 10});
@@ -496,7 +495,7 @@ TEST_CASE("Native platform initialization resets its entrance waypoint last",
   GeometryWords geometry{1, 0x100, 0, 0, 0};
   Field_roomData.geometry = geometry.data();
   Field_roomData.header.geometryLength = sizeof geometry;
-  Field_InitializeMovingPlatformsEntry();
+  VS::Field::InitializeMovingPlatformsEntry();
   CHECK(platform.positionX == -4097);
   CHECK(platform.positionY == -8191);
   CHECK(platform.positionZ == 8193);
@@ -509,7 +508,8 @@ TEST_CASE("Platform initialization retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C538) ==
-        reinterpret_cast<const void*>(&Field_InitializeMovingPlatformsEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::InitializeMovingPlatformsEntry));
 }
 
 TEST_CASE("Platform collection preserves visible order and original indices",
@@ -561,7 +561,7 @@ TEST_CASE("Native platform collection preserves unused output and records",
   const auto saved = fixture.platforms;
   std::array<Field_PlatformContactPoint, 3> contacts{
       Field_PlatformContactPoint{7, 8, 9, 10}, {7, 8, 9, 10}, {7, 8, 9, 10}};
-  CHECK(Field_CollectMovingPlatformPositionsEntry(contacts.data()) == 1);
+  CHECK(VS::Field::CollectMovingPlatformPositionsEntry(contacts.data()) == 1);
   using ContactBytes = std::array<std::byte, sizeof(contacts)>;
   const decltype(contacts) expected{
       Field_PlatformContactPoint{1216, -768, 448, 1},
@@ -572,7 +572,7 @@ TEST_CASE("Native platform collection preserves unused output and records",
   using RecordBytes = std::array<std::byte, sizeof(saved)>;
   CHECK(std::bit_cast<RecordBytes>(fixture.platforms) ==
         std::bit_cast<RecordBytes>(saved));
-  CHECK(Field_CollectMovingPlatformPositionsEntry(nullptr) == 0);
+  CHECK(VS::Field::CollectMovingPlatformPositionsEntry(nullptr) == 0);
 }
 
 TEST_CASE("Native platform collection refuses partial and misaligned records",
@@ -593,7 +593,7 @@ TEST_CASE("Platform collection retains its original module address",
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D2C0) ==
         reinterpret_cast<const void*>(
-            &Field_CollectMovingPlatformPositionsEntry));
+            &VS::Field::CollectMovingPlatformPositionsEntry));
 }
 
 TEST_CASE("Typed collection supports five records without legacy buffer writes",
@@ -605,7 +605,7 @@ TEST_CASE("Typed collection supports five records without legacy buffer writes",
   CHECK(VS::Field::CollectLiveMovingPlatformPositions().size() == 5);
   std::array<Field_PlatformContactPoint, 4> output{};
   const auto saved = output;
-  CHECK(Field_CollectMovingPlatformPositionsEntry(output.data()) == 0);
+  CHECK(VS::Field::CollectMovingPlatformPositionsEntry(output.data()) == 0);
   using Bytes = std::array<std::byte, sizeof(output)>;
   CHECK(std::bit_cast<Bytes>(output) == std::bit_cast<Bytes>(saved));
 }
@@ -625,7 +625,7 @@ TEST_CASE(
   GeometryWords geometry{1};
   Field_roomData.geometry = geometry.data();
   Field_roomData.header.geometryLength = sizeof geometry;
-  Field_InitializeMovingPlatformsEntry();
+  VS::Field::InitializeMovingPlatformsEntry();
   CHECK(geometry == GeometryWords{1, 0, 2});
   CHECK(Field_platformBounceFrames[4] == 19);
 }
@@ -644,7 +644,7 @@ TEST_CASE("Entrance initialization resets the sixth platform terminal waypoint",
   GeometryWords geometry{1};
   Field_roomData.geometry = geometry.data();
   Field_roomData.header.geometryLength = sizeof geometry;
-  Field_InitializeMovingPlatformsEntry();
+  VS::Field::InitializeMovingPlatformsEntry();
   CHECK(platform.positionX == -4097);
   CHECK(platform.isHidden == 0);
   CHECK(geometry == GeometryWords{1, 0x100, -1});
@@ -872,7 +872,7 @@ TEST_CASE("Platform motion retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C8A8) ==
-        reinterpret_cast<const void*>(&Field_UpdateMovingPlatformsEntry));
+        reinterpret_cast<const void*>(&VS::Field::UpdateMovingPlatformsEntry));
 }
 
 TEST_CASE("Platform shadow preserves all original pit surface choices",
@@ -951,7 +951,7 @@ TEST_CASE("Native platform shadows emit translucent quad then subtractive mode",
   PlatformShadowLiveFixture fixture;
   const auto saved = fixture.platforms;
   const auto geometry = fixture.geometry;
-  Field_DrawMovingPlatformShadowsEntry();
+  VS::Field::DrawMovingPlatformShadowsEntry();
   CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 8);
   CHECK((fixture.storage[0] >> 24) == 5);
   CHECK((fixture.storage[1] >> 24) == 0x2A);
@@ -965,14 +965,14 @@ TEST_CASE("Native platform shadows skip hidden records without packet writes",
           "[platform-shadow-live][field]") {
   PlatformShadowLiveFixture fixture;
   fixture.platforms[0].isHidden = 1;
-  Field_DrawMovingPlatformShadowsEntry();
+  VS::Field::DrawMovingPlatformShadowsEntry();
   CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data());
 }
 
 TEST_CASE("Native platform shadows project a nondegenerate shaded footprint",
           "[platform-shadow-live][field]") {
   PlatformShadowLiveFixture fixture;
-  Field_DrawMovingPlatformShadowsEntry();
+  VS::Field::DrawMovingPlatformShadowsEntry();
   CHECK(fixture.ProjectedArea() != 0);
   CHECK(fixture.storage[1] == 0x2A767676);
 }
@@ -983,7 +983,7 @@ TEST_CASE("Native platform shadows refuse a full primitive buffer",
   Render_frameScratch.primitiveCursor =
       fixture.storage.data() + fixture.storage.size();
   const auto dropped = VS::Render::DroppedLiveUiPacketCount();
-  Field_DrawMovingPlatformShadowsEntry();
+  VS::Field::DrawMovingPlatformShadowsEntry();
   CHECK(Render_frameScratch.primitiveCursor ==
         fixture.storage.data() + fixture.storage.size());
   CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped + 1);
@@ -997,7 +997,7 @@ TEST_CASE("Native platform shadows refuse when their draw mode cannot fit",
   const auto saved_storage = fixture.storage;
   const auto saved_ordering = fixture.ordering;
   const auto dropped = VS::Render::DroppedLiveUiPacketCount();
-  Field_DrawMovingPlatformShadowsEntry();
+  VS::Field::DrawMovingPlatformShadowsEntry();
   CHECK(Render_frameScratch.primitiveCursor == cursor);
   CHECK(VS::Render::DroppedLiveUiPacketCount() == dropped + 1);
   CHECK(std::ranges::equal(fixture.storage, saved_storage));
@@ -1009,7 +1009,8 @@ TEST_CASE("Platform shadows retain their original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008CEB0) ==
-        reinterpret_cast<const void*>(&Field_DrawMovingPlatformShadowsEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::DrawMovingPlatformShadowsEntry));
 }
 
 TEST_CASE(
@@ -1142,7 +1143,8 @@ TEST_CASE("Freeze appearance retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008E4DC) ==
-        reinterpret_cast<const void*>(&Field_SetPlatformFreezeAppearanceEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::SetPlatformFreezeAppearanceEntry));
 }
 
 TEST_CASE("Platform target waypoint returns every masked index and exact value",
@@ -1180,7 +1182,7 @@ TEST_CASE(
   REQUIRE(point.has_value());
   if (!point) return;
   CHECK(*point == VS::Field::MovingPlatformWaypoint{-4097, 8193, 12288, 17});
-  CHECK(Field_MovingPlatformTargetWaypointEntry(0) ==
+  CHECK(VS::Field::MovingPlatformTargetWaypointEntry(0) ==
         &fixture.platforms[0].waypoints[2]);
   fixture.platforms[0].waypoints[2].vx = 44;
   CHECK(point->x == -4097);
@@ -1190,10 +1192,10 @@ TEST_CASE("Native target waypoint refuses invalid indices and partial tables",
           "[platform-target-waypoint-live][field]") {
   PlatformPlacementFixture fixture;
   CHECK_FALSE(VS::Field::LiveMovingPlatformTargetWaypoint(-1).has_value());
-  CHECK(Field_MovingPlatformTargetWaypointEntry(2) == nullptr);
+  CHECK(VS::Field::MovingPlatformTargetWaypointEntry(2) == nullptr);
   Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms) - 1;
   CHECK_FALSE(VS::Field::LiveMovingPlatformTargetWaypoint(0).has_value());
-  CHECK(Field_MovingPlatformTargetWaypointEntry(0) == nullptr);
+  CHECK(VS::Field::MovingPlatformTargetWaypointEntry(0) == nullptr);
 }
 
 TEST_CASE("Target waypoint preserves each original C record address",
@@ -1201,7 +1203,7 @@ TEST_CASE("Target waypoint preserves each original C record address",
   PlatformPlacementFixture fixture;
   for (std::uint8_t current = 0; current < 4; ++current) {
     fixture.platforms[1].currentWaypoint = current;
-    CHECK(Field_MovingPlatformTargetWaypointEntry(1) ==
+    CHECK(VS::Field::MovingPlatformTargetWaypointEntry(1) ==
           &fixture.platforms[1].waypoints[current]);
   }
 }
@@ -1209,10 +1211,10 @@ TEST_CASE("Target waypoint preserves each original C record address",
 TEST_CASE("Target waypoint retains its original module address",
           "[platform-target-waypoint-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x8008E2D4) ==
-      reinterpret_cast<const void*>(&Field_MovingPlatformTargetWaypointEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8008E2D4) ==
+        reinterpret_cast<const void*>(
+            &VS::Field::MovingPlatformTargetWaypointEntry));
 }
 
 TEST_CASE("Platform control retains seven bits and conditional bounce reset",
@@ -1369,7 +1371,7 @@ TEST_CASE(
     Field_platformBounceFrames[0] = 7;
     auto expected = fixture.platforms[0];
     expected.controlState = static_cast<std::uint32_t>(control) & 127;
-    REQUIRE(Field_SetMovingPlatformActorEntry(0, control) == 1);
+    REQUIRE(VS::Field::SetMovingPlatformActorEntry(0, control) == 1);
     using Bytes = std::array<std::byte, sizeof(expected)>;
     CHECK(std::bit_cast<Bytes>(fixture.platforms[0]) ==
           std::bit_cast<Bytes>(expected));
@@ -1377,25 +1379,25 @@ TEST_CASE(
   }
   Field_platformFreezeFrames = -1;
   Field_platformBounceFrames[0] = 7;
-  REQUIRE(Field_SetMovingPlatformActorEntry(0, 1) == 1);
+  REQUIRE(VS::Field::SetMovingPlatformActorEntry(0, 1) == 1);
   CHECK(Field_platformBounceFrames[0] == 7);
 }
 
 TEST_CASE("Native platform control and dwell refuse invalid record spans",
           "[platform-control-live][field]") {
   PlatformPlacementFixture fixture;
-  CHECK(Field_SetMovingPlatformActorEntry(-1, 1) == 0);
-  CHECK(Field_SetMovingPlatformActorEntry(2, 1) == 0);
-  CHECK(Field_MovingPlatformDwellTicksEntry(-1) == UINT32_MAX);
+  CHECK(VS::Field::SetMovingPlatformActorEntry(-1, 1) == 0);
+  CHECK(VS::Field::SetMovingPlatformActorEntry(2, 1) == 0);
+  CHECK(VS::Field::MovingPlatformDwellTicksEntry(-1) == UINT32_MAX);
   Field_roomData.header.movingPlatformsLength = sizeof fixture.platforms - 1;
-  CHECK(Field_SetMovingPlatformActorEntry(0, 1) == 0);
-  CHECK(Field_MovingPlatformDwellTicksEntry(0) == UINT32_MAX);
+  CHECK(VS::Field::SetMovingPlatformActorEntry(0, 1) == 0);
+  CHECK(VS::Field::MovingPlatformDwellTicksEntry(0) == UINT32_MAX);
   Field_roomData.header.movingPlatformsLength = sizeof fixture.platforms;
   Field_roomData.movingPlatforms = reinterpret_cast<Field_MpdMovingPlatform*>(
       reinterpret_cast<std::byte*>(fixture.platforms.data()) + 1);
-  CHECK(Field_SetMovingPlatformActorEntry(0, 1) == 0);
+  CHECK(VS::Field::SetMovingPlatformActorEntry(0, 1) == 0);
   Field_roomData.movingPlatforms = nullptr;
-  CHECK(Field_SetMovingPlatformActorEntry(0, 1) == 0);
+  CHECK(VS::Field::SetMovingPlatformActorEntry(0, 1) == 0);
 }
 
 TEST_CASE(
@@ -1404,14 +1406,14 @@ TEST_CASE(
     "[platform-control-live][field]") {
   PlatformPlacementFixture fixture;
   Field_platformFreezeFrames = 47;
-  Field_SetMovingPlatformsPausedEntry(65535);
+  VS::Field::SetMovingPlatformsPausedEntry(65535);
   CHECK(Field_areMovingPlatformsPaused == 255);
   CHECK(Field_platformFreezeFrames == 47);
   fixture.platforms[0].motionTicks = 65535;
   fixture.platforms[0].isWaiting = 1;
-  CHECK(Field_MovingPlatformDwellTicksEntry(0) == 65535);
+  CHECK(VS::Field::MovingPlatformDwellTicksEntry(0) == 65535);
   fixture.platforms[0].isWaiting = 0;
-  CHECK(Field_MovingPlatformDwellTicksEntry(0) == UINT32_MAX);
+  CHECK(VS::Field::MovingPlatformDwellTicksEntry(0) == UINT32_MAX);
 }
 
 TEST_CASE(
@@ -1426,7 +1428,7 @@ TEST_CASE(
   REQUIRE(VS::Field::FreezeLiveMovingPlatforms(-1));
   CHECK(Field_platformFreezeFrames == -1);
   Field_roomData.header.movingPlatformsLength = 0;
-  Field_FreezeMovingPlatformsEntry(180);
+  VS::Field::FreezeMovingPlatformsEntry(180);
   CHECK(Field_platformFreezeFrames == -1);
 }
 
@@ -1437,7 +1439,7 @@ TEST_CASE("Temporary room freeze native entry preserves packed platform data",
   Field_areMovingPlatformsPaused = 128;
   Field_platformFreezeFrames = 47;
   const auto before = fixture.platforms;
-  Field_FreezeRoomGimmicksTemporarilyEntry();
+  VS::Field::FreezeRoomGimmicksTemporarilyEntry();
   CHECK(Field_platformFreezeFrames == 180);
   CHECK(Field_isPlatformFreezeTintActive == 1);
   CHECK(Field_areMovingPlatformsPaused == 128);
@@ -1447,17 +1449,17 @@ TEST_CASE("Temporary room freeze native entry preserves packed platform data",
   Field_roomData.header.movingPlatformsLength = 0;
   Field_platformFreezeFrames = 47;
   CHECK_FALSE(VS::Field::FreezeLiveRoomGimmicksTemporarily());
-  Field_FreezeRoomGimmicksTemporarilyEntry();
+  VS::Field::FreezeRoomGimmicksTemporarilyEntry();
   CHECK(Field_platformFreezeFrames == 47);
 }
 
 TEST_CASE("Temporary room freeze retains its original module address",
           "[platform-temporary-freeze-live][field]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x8006CE50) ==
-      reinterpret_cast<const void*>(&Field_FreezeRoomGimmicksTemporarilyEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x8006CE50) ==
+        reinterpret_cast<const void*>(
+            &VS::Field::FreezeRoomGimmicksTemporarilyEntry));
 }
 
 TEST_CASE("Native platform visibility changes only record and geometry bits",
@@ -1491,7 +1493,7 @@ TEST_CASE("Native platform visibility retains missing geometry and bounds",
   CHECK_FALSE(VS::Field::SetLiveMovingPlatformVisibility(0, 0));
   CHECK(fixture.platforms[0].isHidden == 0);
   Field_roomData.movingPlatforms = nullptr;
-  Field_SetMovingPlatformVisibilityEntry(0, 0);
+  VS::Field::SetMovingPlatformVisibilityEntry(0, 0);
   CHECK(fixture.platforms[0].isHidden == 0);
 }
 
@@ -1511,7 +1513,8 @@ TEST_CASE("Platform visibility retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008E224) ==
-        reinterpret_cast<const void*>(&Field_SetMovingPlatformVisibilityEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::SetMovingPlatformVisibilityEntry));
 }
 
 TEST_CASE("Platform control entries retain original module addresses",
@@ -1519,16 +1522,18 @@ TEST_CASE("Platform control entries retain original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C49C) ==
-        reinterpret_cast<const void*>(&Field_SetMovingPlatformActorEntry));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x8008D594) ==
-        reinterpret_cast<const void*>(&Field_SetMovingPlatformsPausedEntry));
+        reinterpret_cast<const void*>(&VS::Field::SetMovingPlatformActorEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x8008D594) ==
+      reinterpret_cast<const void*>(&VS::Field::SetMovingPlatformsPausedEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D5A0) ==
-        reinterpret_cast<const void*>(&Field_FreezeMovingPlatformsEntry));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x8008E320) ==
-        reinterpret_cast<const void*>(&Field_MovingPlatformDwellTicksEntry));
+        reinterpret_cast<const void*>(&VS::Field::FreezeMovingPlatformsEntry));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x8008E320) ==
+      reinterpret_cast<const void*>(&VS::Field::MovingPlatformDwellTicksEntry));
 }
 
 TEST_CASE(
@@ -1649,7 +1654,8 @@ TEST_CASE("Waypoint reset retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C6B4) ==
-        reinterpret_cast<const void*>(&Field_ResetMovingPlatformWaypointEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::ResetMovingPlatformWaypointEntry));
 }
 
 TEST_CASE(
@@ -1663,7 +1669,7 @@ TEST_CASE(
   CHECK(fixture.platforms[0].isHidden == 1);
   CHECK(fixture.platforms[1].isHidden == 1);
   std::array<Field_PlatformContactPoint, 4> visible{};
-  CHECK(Field_CollectMovingPlatformPositionsEntry(visible.data()) == 0);
+  CHECK(VS::Field::CollectMovingPlatformPositionsEntry(visible.data()) == 0);
   CHECK_FALSE(VS::Field::FindLiveMovingPlatformById(3).has_value());
 }
 
@@ -1675,7 +1681,8 @@ TEST_CASE(
   for (int frame = 0; frame < 7; ++frame) {
     Field_platformBounceFrames[1] = static_cast<char>(frame);
     std::array<Field_PlatformContactPoint, 4> visible{};
-    REQUIRE(Field_CollectMovingPlatformPositionsEntry(visible.data()) == 1);
+    REQUIRE(VS::Field::CollectMovingPlatformPositionsEntry(visible.data()) ==
+            1);
     const auto placement = VS::Field::LiveMovingPlatformPlacement(3);
     const auto found = VS::Field::FindLiveMovingPlatformById(3);
     REQUIRE(placement.has_value());

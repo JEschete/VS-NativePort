@@ -4,7 +4,7 @@
 #include "Items/Loadout.h"
 
 // Binds the equipment details (EquipmentDetails.hpp) to the variables the
-// copied menus share (EquipmentDetailsLiveState.h), the item tables and texts
+// copied menus share (EquipmentDetailsLiveState.hpp), the item tables and texts
 // (ItemRowsLive.hpp), Ashley's equipment, the battle actors, the controller,
 // the menu rows and the frame's ordering tables, in the shapes the copied
 // menus call. Each entry loads the shared variables into the typed state,

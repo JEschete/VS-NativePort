@@ -30,10 +30,10 @@
 #include "Items/LootLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -110,7 +110,8 @@ void RequireIdleControllers() {
   }
 }
 void RequireRows() {
-  if (Menu_Framework_menuItems == nullptr) Refuse("missing menu row workspace");
+  if (VS::Menu::Framework::menuItems == nullptr)
+    Refuse("missing menu row workspace");
 }
 void RequireFrame() {
   if (Render_frameScratch.primitiveCursor == nullptr ||
@@ -132,7 +133,7 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
       static_cast<std::uint8_t>(Menu_Inventory_selectedItemCategoryIconOnTop),
       Menu_Inventory_ashleyRenderState};
   runtime.inventory_category = static_cast<std::uint8_t>(
-      Menu_Framework_menuMemory.opaque3A.currentCategory);
+      VS::Menu::Framework::menuMemory.opaque3A.currentCategory);
   runtime.show_inventory = static_cast<std::uint8_t>(Menu_Loot_showInventory);
   runtime.inventory_step = Menu_Loot_inventoryCapacityFlyinTimer;
   runtime.show_loot = static_cast<std::uint8_t>(Menu_Loot_showLoot);
@@ -145,7 +146,7 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
       static_cast<std::uint8_t>(Input_settings.information);
   runtime.hud_hidden = static_cast<std::uint8_t>(Battle_hudHidden);
   runtime.hud_slide_offset = Battle_hudSlideOffset;
-  runtime.result_kind = Menu_Framework_actionSelection.selectionKind;
+  runtime.result_kind = VS::Menu::Framework::actionSelection.selectionKind;
 }
 void WriteRuntime(const LootTerminalRuntime& runtime) {
   Menu_Loot_lootListCount = runtime.cursor.count;
@@ -164,7 +165,7 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   Menu_Inventory_selectedItemCategoryIconOnTop =
       static_cast<char>(ui.icon_on_top);
   Menu_Inventory_ashleyRenderState = ui.ashley_layout;
-  Menu_Framework_menuMemory.opaque3A.currentCategory =
+  VS::Menu::Framework::menuMemory.opaque3A.currentCategory =
       static_cast<char>(runtime.inventory_category);
   Menu_Loot_showInventory = static_cast<char>(runtime.show_inventory);
   Menu_Loot_inventoryCapacityFlyinTimer = runtime.inventory_step;
@@ -176,7 +177,7 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   Input_settings.information = static_cast<char>(runtime.information_shown);
   Battle_hudHidden = static_cast<char>(runtime.hud_hidden);
   Battle_hudSlideOffset = runtime.hud_slide_offset;
-  Menu_Framework_actionSelection.selectionKind = runtime.result_kind;
+  VS::Menu::Framework::actionSelection.selectionKind = runtime.result_kind;
 }
 void InvalidateWorkspace() {
   if (g_workspace) {
@@ -381,10 +382,10 @@ class LiveTerminalHost final : public LootTerminalHost {
   void SetItemName(std::uint16_t id) override {
     constexpr auto kItemNameCount =
         Framework::kItemNamesBytes / Framework::kItemNameRowBytes;
-    if (Menu_Framework_itemNames == nullptr || id >= kItemNameCount) {
+    if (VS::Menu::Framework::itemNames == nullptr || id >= kItemNameCount) {
       Refuse("loot item name outside its loaded table");
     }
-    Battle_stringContext.strings[0] = Menu_Framework_itemNames[id];
+    Battle_stringContext.strings[0] = VS::Menu::Framework::itemNames[id];
   }
   void InitializeInformation(bool caution) override {
     Call([&] {
@@ -610,9 +611,11 @@ class LiveTerminalHost final : public LootTerminalHost {
     Call([] { VS::Menu::Loot::Live::ResetPaging(); });
   }
   void BuildStagedInventory() override {
-    Call([] { Live::BuildStagedInventory(Menu_Framework_lootLists); });
+    Call([] { Live::BuildStagedInventory(VS::Menu::Framework::lootLists); });
   }
-  bool HaveRoomLoot() override { return Menu_Framework_lootLists != nullptr; }
+  bool HaveRoomLoot() override {
+    return VS::Menu::Framework::lootLists != nullptr;
+  }
   void ClearRoomLoot() override {
     Call([] { Items::ClearLiveRoomLootList(); });
   }

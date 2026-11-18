@@ -17,7 +17,7 @@
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Render/GameFontLive.hpp"
 
 namespace VS::Menu::container {
@@ -63,7 +63,7 @@ class LiveWorld final : public StorageCapacityWorld,
   }
   std::int32_t Occupied(StorageArea area,
                         Items::ItemCategory category) override {
-    auto* const storage = Menu_Framework_unusedInventoryStorage;
+    auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
     Items_Container* const owner = storage == nullptr ? nullptr
                                    : area == StorageArea::kGadgetBag
                                        ? &storage->gadgetBag
@@ -84,12 +84,12 @@ class LiveWorld final : public StorageCapacityWorld,
     return receiving_.emplace(owner == nullptr ? nullptr : &owner->items);
   }
   Items::ContainerWorld& Staging() override {
-    auto* const storage = Menu_Framework_unusedInventoryStorage;
+    auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
     return staging_.emplace(storage == nullptr ? nullptr
                                                : &storage->stagedTransfer);
   }
   std::span<const std::uint16_t> PendingTransfers() override {
-    auto* const storage = Menu_Framework_unusedInventoryStorage;
+    auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
     if (storage == nullptr) Refuse("missing pending-transfer owner");
     return storage->itemsToTransfer;
   }

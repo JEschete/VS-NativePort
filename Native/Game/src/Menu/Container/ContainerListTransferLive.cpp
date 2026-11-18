@@ -30,13 +30,13 @@
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/EquipmentDetailsLiveState.h"
+#include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Sounds.hpp"
@@ -108,7 +108,7 @@ class RecordView final : public Items::ContainerWorld {
 };
 
 Menu_Container_InventoryStorage& Storage() {
-  auto* const storage = Menu_Framework_unusedInventoryStorage;
+  auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
   if (storage == nullptr) Refuse("missing inventory storage");
   return *storage;
 }
@@ -152,8 +152,9 @@ char* MenuTextPointer(TransferText text) {
     }
     return reinterpret_cast<char*>(&Menu_Container_menuText[text.offset]);
   }
-  if (Menu_Framework_itemHelp == nullptr) Refuse("item help text not loaded");
-  return reinterpret_cast<char*>(Menu_Framework_itemHelp + text.offset);
+  if (VS::Menu::Framework::itemHelp == nullptr)
+    Refuse("item help text not loaded");
+  return reinterpret_cast<char*>(VS::Menu::Framework::itemHelp + text.offset);
 }
 
 char* FlagByte(TransferFlag flag) {
@@ -227,14 +228,15 @@ class LiveTransferWorld final : public TransferWorld {
     Menu_Inventory_freezeTabArrows = static_cast<char>(value);
   }
   std::uint8_t CategoryToken() override {
-    return static_cast<std::uint8_t>(Menu_Framework_menuMemory.opaqueA0[0]);
+    return static_cast<std::uint8_t>(
+        VS::Menu::Framework::menuMemory.opaqueA0[0]);
   }
   void SetCategoryToken(std::uint8_t token) override {
-    Menu_Framework_menuMemory.opaqueA0[0] = static_cast<char>(token);
+    VS::Menu::Framework::menuMemory.opaqueA0[0] = static_cast<char>(token);
   }
   void ClearCategoryMemory() override {
-    std::memset(Menu_Framework_menuMemory.opaqueA0, 0,
-                sizeof Menu_Framework_menuMemory.opaqueA0);
+    std::memset(VS::Menu::Framework::menuMemory.opaqueA0, 0,
+                sizeof VS::Menu::Framework::menuMemory.opaqueA0);
   }
   // The original wrote cursorMemories[(category + 0x51) * 2], past that
   // array's end into opaqueA0's row/page pair for the category.
@@ -242,21 +244,24 @@ class LiveTransferWorld final : public TransferWorld {
                          std::uint8_t page) override {
     const auto offset =
         kFirstCategoryCursor + static_cast<std::size_t>(category) * 2;
-    if (offset + 1 >= std::size(Menu_Framework_menuMemory.opaqueA0)) {
+    if (offset + 1 >= std::size(VS::Menu::Framework::menuMemory.opaqueA0)) {
       Refuse("category cursor outside menu memory");
     }
-    Menu_Framework_menuMemory.opaqueA0[offset] = static_cast<char>(row);
-    Menu_Framework_menuMemory.opaqueA0[offset + 1] = static_cast<char>(page);
+    VS::Menu::Framework::menuMemory.opaqueA0[offset] = static_cast<char>(row);
+    VS::Menu::Framework::menuMemory.opaqueA0[offset + 1] =
+        static_cast<char>(page);
   }
   std::uint16_t DirectionSelection() override {
-    return Menu_Framework_menuMemory.opaque9E;
+    return VS::Menu::Framework::menuMemory.opaque9E;
   }
   void SetDirectionSelection(std::uint16_t selection) override {
-    Menu_Framework_menuMemory.opaque9E = selection;
+    VS::Menu::Framework::menuMemory.opaque9E = selection;
   }
   void ReturnFromMenu(std::uint8_t return_state) override {
-    Menu_Framework_menuState.currentMenu = Menu_Framework_menuState.returnState;
-    Menu_Framework_menuState.returnState = static_cast<char>(return_state);
+    VS::Menu::Framework::menuState.currentMenu =
+        VS::Menu::Framework::menuState.returnState;
+    VS::Menu::Framework::menuState.returnState =
+        static_cast<char>(return_state);
   }
   std::uint32_t PressedButtons() override {
     return static_cast<std::uint32_t>(Input_buttonsPressed.allButtons);
@@ -274,8 +279,9 @@ class LiveTransferWorld final : public TransferWorld {
     return Menu_Container_menuText[index];
   }
   std::uint16_t ItemHelpEntry(std::size_t index) override {
-    if (Menu_Framework_itemHelp == nullptr) Refuse("item help text not loaded");
-    return Menu_Framework_itemHelp[index];
+    if (VS::Menu::Framework::itemHelp == nullptr)
+      Refuse("item help text not loaded");
+    return VS::Menu::Framework::itemHelp[index];
   }
   std::uint8_t RowAnimationStep(std::size_t index) override {
     if (index >= std::size(Menu_Framework_rowAnimationSteps)) {
@@ -335,12 +341,12 @@ class LiveTransferWorld final : public TransferWorld {
   void PublishActiveRecords() override {
     auto* const container = Menu_Container_containerData;
     if (container == nullptr) Refuse("missing active container");
-    Menu_Framework_weapons = container->items.weapons;
-    Menu_Framework_blades = container->items.blades;
-    Menu_Framework_grips = container->items.grips;
-    Menu_Framework_shields = container->items.shields;
-    Menu_Framework_armor = container->items.armor;
-    Menu_Framework_gems = container->items.gems;
+    VS::Menu::Framework::weapons = container->items.weapons;
+    VS::Menu::Framework::blades = container->items.blades;
+    VS::Menu::Framework::grips = container->items.grips;
+    VS::Menu::Framework::shields = container->items.shields;
+    VS::Menu::Framework::armor = container->items.armor;
+    VS::Menu::Framework::gems = container->items.gems;
   }
   void StoreContainerSnapshot() override {
     auto& storage = Storage();
@@ -464,26 +470,27 @@ class LiveTransferWorld final : public TransferWorld {
         types.size() > kActionRowCapacity) {
       Refuse("action rows outside their workspace");
     }
-    if (Menu_Framework_rowTypeBuf == nullptr) Refuse("missing row type buffer");
+    if (VS::Menu::Framework::rowTypeBuf == nullptr)
+      Refuse("missing row type buffer");
     std::array<char*, kActionRowCapacity * kTextsPerRow> pointers{};
     for (std::size_t text = 0; text < texts.size() && text < pointers.size();
          ++text) {
       pointers.at(text) = MenuTextPointer(texts[text]);
     }
-    const std::span<int> row_types(Menu_Framework_rowTypeBuf,
+    const std::span<int> row_types(VS::Menu::Framework::rowTypeBuf,
                                    kActionRowCapacity);
     for (std::size_t row = 0; row < kActionRowCapacity; ++row) {
       row_types[row] = row < types.size() ? types[row] : 0;
     }
     Framework::CreateLiveActionRows(count, menu, pointers.data(),
-                                    Menu_Framework_rowTypeBuf);
+                                    VS::Menu::Framework::rowTypeBuf);
   }
   std::int32_t HighlightedActionRow() override {
     return Framework::LiveHighlightedActionRow();
   }
   void ShowActionInformation(std::int32_t row) override {
-    Framework::UpdateLiveInformationVisibility(row,
-                                               Menu_Framework_actionMenuState);
+    Framework::UpdateLiveInformationVisibility(
+        row, VS::Menu::Framework::actionMenuState);
   }
   void UpdateActionMenu() override { Framework::UpdateLiveActionMenu(); }
   std::int32_t ActionSelectionResult() override {

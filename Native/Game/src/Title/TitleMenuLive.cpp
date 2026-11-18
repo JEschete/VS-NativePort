@@ -30,7 +30,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Menu/Sounds.hpp"
 #include "Movie/Intro/Playback.h"
 #include "Movie/IntroPlayerLive.hpp"
@@ -393,7 +393,7 @@ class LiveHost final : public Host {
   }
   void DrawFileBackground() override { Menu::Files::DrawLiveBackground(); }
   void DrawFileFrame() override {
-    Menu::Files::DrawLiveTitleFrame(Menu_Files_frameBuf);
+    Menu::Files::DrawLiveTitleFrame(VS::Menu::Files::frameBuf);
   }
   void DrawExitFade() override { Menu::Files::DrawLiveExitFade(); }
 

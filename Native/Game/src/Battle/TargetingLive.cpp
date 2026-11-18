@@ -62,7 +62,6 @@
 #include "Field/Interactions.h"
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
-#include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
@@ -737,7 +736,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     VS::Field::LiveSetRoomAnimationsPaused(paused ? 1 : 0);
   }
   void SetMovingPlatformsPaused(bool paused) override {
-    Field_SetMovingPlatformsPausedEntry(paused ? 1 : 0);
+    VS::Field::SetMovingPlatformsPausedEntry(paused ? 1 : 0);
   }
   void SetActorMarkersHidden(bool hidden) override {
     VS::Battle::SetLiveActorMarkersHidden(hidden ? 1 : 0);

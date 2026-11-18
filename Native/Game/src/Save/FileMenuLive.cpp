@@ -27,11 +27,11 @@
 #include "Boot/GameLoop.h"
 #include "Core/Log.hpp"
 #include "Core/Text/TextCode.h"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Input/ControllerLiveState.h"
 #include "Menu/FilesLive.hpp"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Menu/Sounds.hpp"
 #include "Platform/App.hpp"
 #include "Save/FileMenu.hpp"
@@ -151,7 +151,7 @@ void Status(FileMenuScreen screen, std::string_view text) {
   if (screen == FileMenuScreen::kTitle) {
     Title_memoryCardMessage = footer.data();
   } else {
-    Menu_Files_memoryCardMessage = footer.data();
+    VS::Menu::Files::memoryCardMessage = footer.data();
   }
 }
 
@@ -339,9 +339,9 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
       Title_selectionCursorPosition = 0;
     } else {
       VS::Menu::Files::ResetLiveElements();
-      Menu_Files_selectCursorXy = 0;
+      VS::Menu::Files::selectCursorXy = 0;
     }
-    Menu_Files_dataNotSaved = 0;
+    VS::Menu::Files::dataNotSaved = 0;
   }
   void ShowStatus(FileMenuScreen screen, std::string_view text) override {
     Status(screen, text);
@@ -497,7 +497,7 @@ std::expected<void, std::string> LiveFileMenuHost::WriteSelection(
   const auto written = (*opened)->Write(selected.slot, *document, consent);
   if (!written) return std::unexpected(written.error());
   AdoptSettings(*document);
-  Menu_Files_dataNotSaved = 1;
+  VS::Menu::Files::dataNotSaved = 1;
   VS_LOG_INFO(
       "save", "Saved native slot {} generation {} zone {} room {} scene {}",
       selected.slot, document->generation, document->state.location.zone,
@@ -584,8 +584,8 @@ void ResetFileMenuSession() {
   if (Title_memoryCardMessage == footer.data()) {
     Title_memoryCardMessage = nullptr;
   }
-  if (Menu_Files_memoryCardMessage == footer.data()) {
-    Menu_Files_memoryCardMessage = nullptr;
+  if (VS::Menu::Files::memoryCardMessage == footer.data()) {
+    VS::Menu::Files::memoryCardMessage = nullptr;
   }
 }
 

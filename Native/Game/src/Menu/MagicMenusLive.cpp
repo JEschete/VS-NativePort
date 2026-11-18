@@ -18,11 +18,11 @@
 #include "Battle/Actor.h"
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
-#include "Field/ChestInteractionsLive.h"
+#include "Field/ChestInteractionsLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
 #include "Menu/MagicCostsLive.hpp"
@@ -111,10 +111,10 @@ class LiveHost final : public MenuHost {
         VS::Battle::LiveActorActionRestrictionFlags(0, action));
   }
   std::uint32_t ActionRestrictions() override {
-    return static_cast<std::uint32_t>(Menu_Framework_actionRestrictions);
+    return static_cast<std::uint32_t>(VS::Menu::Framework::actionRestrictions);
   }
   std::uint8_t ShortcutInvoked() override {
-    return static_cast<std::uint8_t>(Menu_Framework_shortcutInvoked);
+    return static_cast<std::uint8_t>(VS::Menu::Framework::shortcutInvoked);
   }
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
@@ -156,7 +156,7 @@ class LiveHost final : public MenuHost {
   }
   void FlyOutRow(int row) override { Framework::FlyOutLiveRowRight(row); }
   void DisplayCost(bool enabled) override {
-    Menu_Framework_displayActionCost = enabled ? 1 : 0;
+    VS::Menu::Framework::displayActionCost = enabled ? 1 : 0;
   }
   bool SpellCost(int action) override {
     const auto id = action < 0 ? -static_cast<std::int64_t>(action) : action;
@@ -242,7 +242,9 @@ class LiveHost final : public MenuHost {
   std::span<const std::uint8_t> SavePointStates() override {
     return Bytes(Audio_Seq_unusedStateFlags.savePointStates);
   }
-  bool AtSavePoint() override { return Field_CurrentSavePointIdEntry() != 0; }
+  bool AtSavePoint() override {
+    return VS::Field::CurrentSavePointIdEntry() != 0;
+  }
   bool SetSchoolTitle(School school, TextRef text, int width) override {
     const auto index = static_cast<std::size_t>(school);
     const auto bytes = Resolve(text);
@@ -285,22 +287,23 @@ class LiveHost final : public MenuHost {
   }
   int RunTeleport(int init) override { return UpdateTeleportMenuLive(init); }
   void SetActionSelection(std::int32_t action) override {
-    Menu_Framework_actionSelection.executeAbility.word = action;
+    VS::Menu::Framework::actionSelection.executeAbility.word = action;
   }
   void SetAbilityType(std::uint8_t type) override {
-    Menu_Framework_menuState.executeAbilityType = StorageByte(type);
+    VS::Menu::Framework::menuState.executeAbilityType = StorageByte(type);
   }
   void SetSelectionKind(std::int16_t kind) override {
-    Menu_Framework_actionSelection.selectionKind = kind;
+    VS::Menu::Framework::actionSelection.selectionKind = kind;
   }
   std::uint8_t CurrentMenu() override {
-    return static_cast<std::uint8_t>(Menu_Framework_menuState.currentMenu);
+    return static_cast<std::uint8_t>(
+        VS::Menu::Framework::menuState.currentMenu);
   }
   void SetCurrentMenu(std::uint8_t menu) override {
-    Menu_Framework_menuState.currentMenu = StorageByte(menu);
+    VS::Menu::Framework::menuState.currentMenu = StorageByte(menu);
   }
   void SetReturnMenu(std::uint8_t menu) override {
-    Menu_Framework_menuState.returnState = StorageByte(menu);
+    VS::Menu::Framework::menuState.returnState = StorageByte(menu);
   }
 
  private:

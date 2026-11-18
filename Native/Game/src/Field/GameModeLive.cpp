@@ -23,7 +23,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/MapLive.hpp"
-#include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
@@ -90,7 +90,7 @@ class LiveFieldModeHost final : public FieldModeHost {
     LiveSetRoomAnimationsPaused(Flag(paused));
   }
   void SetMovingPlatformsPaused(bool paused) override {
-    Field_SetMovingPlatformsPausedEntry(Flag(paused));
+    SetMovingPlatformsPausedEntry(Flag(paused));
   }
   void SetRoomAmbienceDucked(bool ducked) override {
     Audio::LiveSetRoomAmbienceDucked(Flag(ducked));

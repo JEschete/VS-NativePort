@@ -5,6 +5,7 @@
 
 #include "Field/GimmickPlacement.hpp"
 
+struct Field_GimmickSnapshot;
 struct Field_GimmickInstance;
 struct Actors_ActorRecord;
 
@@ -22,4 +23,19 @@ std::optional<std::size_t> FindLiveInteractableGimmickAhead(
 bool BeginLiveGimmickInteraction(std::int32_t actor_slot);
 bool ApplyLiveGimmickInteractionCommand(Actors_ActorRecord* actor,
                                         std::int32_t mode);
+
+int GimmickPlacementEntry(int gimmick_slot,
+                          Field_GimmickSnapshot* output_snapshot);
+int FindGimmickBelowEntry(const Field_GimmickInstance* reference);
+int FindTopGimmickAtTileEntry(int tile_x, int tile_z, int require_idle_mode);
+int GimmickSubtypeEntry(int slot);
+int AreGimmicksMovingEntry();
+int SetGimmickOrientationEntry(int slot, int orientation);
+int CanPlaceGimmickAtPointEntry(int x, int z, int minimum_height);
+void DropUnsupportedGimmickStackEntry(int slot);
+int FindInteractableGimmickAheadEntry(int actor_slot);
+int BeginGimmickInteractionEntry(int actor_slot);
+void ApplyGimmickInteractionCommandEntry(Actors_ActorRecord* actor, int mode);
+int MeasureTileStackEntry(int tile_x, int tile_z, int* height_offset);
+int IsGimmickWithinHeightBandEntry(int tile_x, int tile_z, int minimum_height);
 }  // namespace VS::Field

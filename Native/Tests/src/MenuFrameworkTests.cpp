@@ -16,7 +16,7 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Render/GameFont.hpp"
 #include "Render/UiPackets.hpp"
 
@@ -281,10 +281,10 @@ constexpr std::int16_t kQuarterTurn = 0x400;
 // Points the generated row table at local rows for one test.
 class LiveRows {
  public:
-  LiveRows() : saved_(Menu_Framework_menuItems) {
-    Menu_Framework_menuItems = rows.data();
+  LiveRows() : saved_(VS::Menu::Framework::menuItems) {
+    VS::Menu::Framework::menuItems = rows.data();
   }
-  ~LiveRows() { Menu_Framework_menuItems = saved_; }
+  ~LiveRows() { VS::Menu::Framework::menuItems = saved_; }
   LiveRows(const LiveRows&) = delete;
   LiveRows& operator=(const LiveRows&) = delete;
   LiveRows(LiveRows&&) = delete;
@@ -578,7 +578,7 @@ TEST_CASE("Menu framework live rows outside the table land in the discard row",
                      [past_end](const Menu_Framework_MenuRow& entry) {
                        return &entry == past_end;
                      }));
-  Menu_Framework_menuItems = nullptr;
+  VS::Menu::Framework::menuItems = nullptr;
   CHECK(fw::LiveMenuItem(0) != nullptr);
   CHECK(fw::AreLiveMenuRowsIdle() == 1);
 }

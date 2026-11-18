@@ -33,7 +33,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Map.h"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
@@ -514,9 +514,9 @@ class LiveScreen final : public MapScreenHost {
     return true;
   }
   void SetDestination(std::uint8_t menu) override {
-    Menu_Framework_menuState.currentMenu = static_cast<char>(menu);
+    VS::Menu::Framework::menuState.currentMenu = static_cast<char>(menu);
   }
-  void ShowMenu() override { Menu_Framework_hideMenu = 0; }
+  void ShowMenu() override { VS::Menu::Framework::hideMenu = 0; }
 };
 
 bool DrainPendingScene() {
@@ -634,8 +634,8 @@ int LiveUpdateScreen(unsigned char* step) {
   }
   try {
     LiveScreen host;
-    const auto result =
-        UpdateScreen(host, screen, *step, Menu_Framework_backgroundFadeStep);
+    const auto result = UpdateScreen(host, screen, *step,
+                                     VS::Menu::Framework::backgroundFadeStep);
     if (!result) Refuse("UpdateScreen", "background is not owned");
     return result.value_or(0);
   } catch (const std::exception& error) {

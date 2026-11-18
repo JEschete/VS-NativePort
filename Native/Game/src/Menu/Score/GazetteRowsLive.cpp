@@ -21,7 +21,7 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Score/GazetteRows.hpp"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Display.h"
@@ -153,14 +153,14 @@ class LiveGazetteMenu final : public GazetteMenuHost {
     return Battle_unusedMenu9CursorMemory.gazetteRow;
   }
   void SetTopMenuCursor(TopMenuCursor cursor) override {
-    Menu_Framework_menuMemory.cursorMemories[kTopMenuCursorRow] =
+    VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuCursorRow] =
         static_cast<char>(cursor.row);
-    Menu_Framework_menuMemory.cursorMemories[kTopMenuFirstRow] =
+    VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuFirstRow] =
         static_cast<char>(cursor.first_row);
   }
   std::uint8_t TopMenuCursorRow() override {
     return static_cast<std::uint8_t>(
-        Menu_Framework_menuMemory.cursorMemories[kTopMenuCursorRow]);
+        VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuCursorRow]);
   }
   std::uint8_t CursorMemorySetting() override {
     return static_cast<std::uint8_t>(Input_settings.cursorMemory);

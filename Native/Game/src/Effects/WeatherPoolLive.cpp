@@ -18,7 +18,7 @@
 #include "Field/Background.hpp"
 #include "Field/Environment.hpp"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/EnvironmentLiveState.h"
+#include "Field/EnvironmentLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
@@ -142,8 +142,8 @@ void StoreParticles(std::span<Field_WeatherParticle> records,
 }
 
 std::span<Field_WeatherParticle> Buffer() {
-  if (Field_weatherParticles == nullptr) return {};
-  return {Field_weatherParticles, kWeatherParticleCapacity};
+  if (VS::Field::weatherParticles == nullptr) return {};
+  return {VS::Field::weatherParticles, kWeatherParticleCapacity};
 }
 
 bool InBuffer(const Field_WeatherParticle* particle) {
@@ -165,16 +165,16 @@ std::optional<Field::WeatherArea> Area() {
 }
 
 WeatherPoolState LoadState() {
-  return {.particle_count = Field_weatherParticleCount,
-          .particle_capacity = Field_weatherParticleCapacity,
-          .kind = static_cast<std::uint8_t>(Field_roomWeatherKind),
+  return {.particle_count = VS::Field::weatherParticleCount,
+          .particle_capacity = VS::Field::weatherParticleCapacity,
+          .kind = static_cast<std::uint8_t>(VS::Field::roomWeatherKind),
           .screen_fade = static_cast<std::uint8_t>(Field_screenWeatherFade)};
 }
 
 void StoreState(const WeatherPoolState& state) {
-  Field_weatherParticleCount = state.particle_count;
-  Field_weatherParticleCapacity = state.particle_capacity;
-  Field_roomWeatherKind = static_cast<char>(state.kind);
+  VS::Field::weatherParticleCount = state.particle_count;
+  VS::Field::weatherParticleCapacity = state.particle_capacity;
+  VS::Field::roomWeatherKind = static_cast<char>(state.kind);
   Field_screenWeatherFade = static_cast<char>(state.screen_fade);
 }
 }  // namespace weather_live
@@ -182,8 +182,8 @@ void StoreState(const WeatherPoolState& state) {
 // decomp: BATTLE.PRG func_8008E8F8 (146C.c:17445).
 void LiveAllocateWeatherParticles() {
   weather_live::PoolHost host;
-  Field_weatherParticles = ParticlesOf(
-      AllocateWeatherParticles(host, ParticlesIdOf(Field_weatherParticles)));
+  VS::Field::weatherParticles = ParticlesOf(AllocateWeatherParticles(
+      host, ParticlesIdOf(VS::Field::weatherParticles)));
 }
 
 // decomp: BATTLE.PRG func_8008EA90 (146C.c:17500).
@@ -202,8 +202,9 @@ void LiveRoomWeatherState(int* weather_kind_output, int* intensity_output) {
     Refuse("RoomWeatherState", "missing output");
     return;
   }
-  const RoomWeatherReport report = RoomWeatherStateOf(
-      static_cast<std::uint8_t>(Field_roomWeatherKind), Field_weatherIntensity);
+  const RoomWeatherReport report =
+      RoomWeatherStateOf(static_cast<std::uint8_t>(VS::Field::roomWeatherKind),
+                         VS::Field::weatherIntensity);
   *weather_kind_output = report.kind;
   *intensity_output = report.intensity;
 }
@@ -249,11 +250,11 @@ void LiveResetFallingWeatherParticle(Field_WeatherParticle* weather_particle) {
 void LiveRecalculateWeatherVelocity() {
   weather_live::PoolHost host;
   const WeatherVelocity velocity = WeatherVelocityOf(
-      host, {.elevation = Field_weatherParameters[kElevationWord],
-             .azimuth = Field_weatherParameters[kAzimuthWord],
-             .scale = Field_weatherParameters[kScaleWord]});
-  Field_weatherParameters[kVelocityXWord] = velocity.x;
-  Field_weatherParameters[kVelocityZWord] = velocity.z;
-  Field_weatherParameters[kVelocityYWord] = velocity.y;
+      host, {.elevation = VS::Field::weatherParameters[kElevationWord],
+             .azimuth = VS::Field::weatherParameters[kAzimuthWord],
+             .scale = VS::Field::weatherParameters[kScaleWord]});
+  VS::Field::weatherParameters[kVelocityXWord] = velocity.x;
+  VS::Field::weatherParameters[kVelocityZWord] = velocity.z;
+  VS::Field::weatherParameters[kVelocityYWord] = velocity.y;
 }
 }  // namespace VS::Effects

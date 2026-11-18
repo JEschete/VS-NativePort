@@ -19,7 +19,7 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Score/GazetteRows.hpp"
 #include "Menu/Score/GazetteRowsLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
@@ -452,8 +452,8 @@ TEST_CASE("RenderLiveScrollableRow refuses a null row or ordering table",
 // The menu rows, cursor memory, settings, gazette row and top menu strings,
 // with a game heap for the rows' text.
 struct LiveMenuFixture {
-  Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
-  Menu_Framework_MenuMemory saved_memory = Menu_Framework_menuMemory;
+  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
+  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   State_Settings saved_settings = Input_settings;
   Menu_Score_CursorMemory saved_cursor = Battle_unusedMenu9CursorMemory;
   std::array<u_short, std::size(Menu_Score_menuText)> saved_text{};
@@ -467,7 +467,7 @@ struct LiveMenuFixture {
 
   LiveMenuFixture() {
     std::copy_n(Menu_Score_menuText, saved_text.size(), saved_text.begin());
-    Menu_Framework_menuItems = rows.data();
+    VS::Menu::Framework::menuItems = rows.data();
     Input_settings.cursorMemory = 0;
     for (std::size_t i = 0; i < names.size(); ++i) {
       names[i][0] = static_cast<char>(10 + i);
@@ -483,8 +483,8 @@ struct LiveMenuFixture {
   ~LiveMenuFixture() {
     if (fw::LiveSelectedRow() == -1) fw::CloseLiveRowsAndRememberCursor();
     std::ranges::copy(saved_text, Menu_Score_menuText);
-    Menu_Framework_menuItems = saved_rows;
-    Menu_Framework_menuMemory = saved_memory;
+    VS::Menu::Framework::menuItems = saved_rows;
+    VS::Menu::Framework::menuMemory = saved_memory;
     Input_settings = saved_settings;
     Battle_unusedMenu9CursorMemory = saved_cursor;
     score::LiveTopMenuState() = saved_top_menu;
@@ -497,8 +497,8 @@ TEST_CASE("RestoreLiveTopMenuCursor recalls the row and restores the setting",
           "[gazette-rows-live]") {
   LiveMenuFixture fixture;
   score::RestoreLiveTopMenuCursor(4, 2, fixture.text.data());
-  CHECK(Menu_Framework_menuMemory.cursorMemories[2] == 2);
-  CHECK(Menu_Framework_menuMemory.cursorMemories[3] == 0);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 2);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[3] == 0);
   CHECK(Input_settings.cursorMemory == 0);
   CHECK(fw::LiveSelectedRow() == -1);
   CHECK(fw::LiveHighlightedRow() == 2);
@@ -507,12 +507,12 @@ TEST_CASE("RestoreLiveTopMenuCursor recalls the row and restores the setting",
 TEST_CASE("RestoreLiveTopMenuCursor refuses missing text and bad counts",
           "[gazette-rows-live]") {
   LiveMenuFixture fixture;
-  Menu_Framework_menuMemory.cursorMemories[2] = 6;
+  VS::Menu::Framework::menuMemory.cursorMemories[2] = 6;
   const std::uint64_t refused = score::LiveGazetteRowsRefusals();
   score::RestoreLiveTopMenuCursor(2, 1, nullptr);
   score::RestoreLiveTopMenuCursor(-1, 1, fixture.text.data());
   CHECK(score::LiveGazetteRowsRefusals() == refused + 2);
-  CHECK(Menu_Framework_menuMemory.cursorMemories[2] == 6);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 6);
   CHECK(fixture.rows[10].state == 0);
 }
 
@@ -522,7 +522,7 @@ TEST_CASE("UpdateLiveTopMenu shows the choices and returns the chosen row",
   Battle_unusedMenu9CursorMemory.gazetteRow = 3;
   CHECK(score::UpdateLiveTopMenu(1) == score::kTopMenuPending);
   CHECK(score::LiveTopMenuState() == score::TopMenuState{1, 0});
-  CHECK(Menu_Framework_menuMemory.cursorMemories[2] == 3);
+  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 3);
   CHECK(fw::LiveHighlightedRow() == 3);
   CHECK(fw::LiveSelectedRow() == -1);
   CHECK(score::UpdateLiveTopMenu(0) == score::kTopMenuPending);

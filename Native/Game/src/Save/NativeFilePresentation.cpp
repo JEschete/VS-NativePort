@@ -24,7 +24,7 @@
 #include "Field/Znd.h"
 #include "Menu/Files.h"
 #include "Menu/FilesLive.hpp"
-#include "Menu/FilesLiveState.h"
+#include "Menu/FilesLiveState.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/Resources.h"
@@ -610,7 +610,8 @@ void DrawNativeFileScreen(const NativeFileScreen& screen) {
   constexpr Extent kHeaderSize{140, 12};
   if (Title_memoryCardUiResource == nullptr ||
       Save_MemoryCard_uiResources == nullptr ||
-      (screen.title ? Title_saveMenuText : Menu_Files_textTable) == nullptr) {
+      (screen.title ? Title_saveMenuText : VS::Menu::Files::textTable) ==
+          nullptr) {
     return;
   }
   const Frontend frontend(screen.title);

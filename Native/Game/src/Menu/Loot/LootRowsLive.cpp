@@ -16,7 +16,7 @@
 #include "Items/Inventory.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.hpp"
@@ -204,10 +204,10 @@ void BuildStagedInventory(Items_LootListNode* node) {
   sources.clear();
   for (; node != nullptr; node = node->next) sources.push_back(&node->loot);
   if (sources.empty()) {
-    if (Menu_Framework_lootEntry == nullptr) {
+    if (VS::Menu::Framework::lootEntry == nullptr) {
       item_live::WarnNullRecord(kOperation);
     } else {
-      sources.push_back(Menu_Framework_lootEntry);
+      sources.push_back(VS::Menu::Framework::lootEntry);
     }
   }
   const auto records = TypedSources();

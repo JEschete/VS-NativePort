@@ -84,7 +84,7 @@ int Navigate(std::string_view module, unsigned address, int initialize) {
 void EnterEmptyNavigation(std::string_view module, unsigned address) {
   REQUIRE(Navigate(module, address, 2) == 0);
   REQUIRE(Navigate(module, address, 0) == 0);
-  REQUIRE(Menu_Framework_itemsText == nullptr);
+  REQUIRE(VS::Menu::Framework::itemsText == nullptr);
 }
 
 struct TerminalSession {
@@ -103,19 +103,19 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_flags{
       Audio_Seq_unusedStateFlags};
   ValueRestore<decltype(Input_settings)> saved_settings{Input_settings};
-  ValueRestore<decltype(Menu_Framework_menuState)> saved_control{
-      Menu_Framework_menuState};
-  ValueRestore<decltype(Menu_Framework_actionSelection)> saved_action{
-      Menu_Framework_actionSelection};
+  ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
+      VS::Menu::Framework::menuState};
+  ValueRestore<decltype(VS::Menu::Framework::actionSelection)> saved_action{
+      VS::Menu::Framework::actionSelection};
   ValueRestore<decltype(Battle_hudHidden)> saved_hud{Battle_hudHidden};
   ValueRestore<decltype(Battle_hudSlideOffset)> saved_hud_offset{
       Battle_hudSlideOffset};
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
       VS::Field::isFieldRenderingEnabled};
-  ValueRestore<int> saved_background{Menu_Framework_backgroundFadeStep};
-  ValueRestore<int> saved_restrictions{Menu_Framework_actionRestrictions};
-  ValueRestore<u_short*> saved_items{Menu_Framework_itemsText};
-  ValueRestore<int*> saved_types{Menu_Framework_rowTypeBuf};
+  ValueRestore<int> saved_background{VS::Menu::Framework::backgroundFadeStep};
+  ValueRestore<int> saved_restrictions{VS::Menu::Framework::actionRestrictions};
+  ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
+  ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   ValueRestore<char> saved_freeze{Menu_Inventory_freezeTabArrows};
   ValueRestore<char> saved_title_step{
       Menu_Inventory_secondaryTitleAnimationStep};
@@ -146,13 +146,13 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     Audio_Seq_unusedStateFlags.introState = 3;
     Input_settings.cursorMemory = 0;
-    Menu_Framework_menuState = {};
-    Menu_Framework_actionSelection = {};
-    Menu_Framework_backgroundFadeStep = 0;
-    Menu_Framework_menuMemory = {};
-    Menu_Framework_actionRestrictions = 0;
-    Menu_Framework_itemsText = nullptr;
-    Menu_Framework_rowTypeBuf = row_types.data();
+    VS::Menu::Framework::menuState = {};
+    VS::Menu::Framework::actionSelection = {};
+    VS::Menu::Framework::backgroundFadeStep = 0;
+    VS::Menu::Framework::menuMemory = {};
+    VS::Menu::Framework::actionRestrictions = 0;
+    VS::Menu::Framework::itemsText = nullptr;
+    VS::Menu::Framework::rowTypeBuf = row_types.data();
     Menu_Inventory_secondaryTitleEnabled = 0;
     Menu_Inventory_itemCategoryIconsEnabled = 0;
     Menu_Inventory_statusCommandState = 0;
@@ -174,7 +174,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   }
 
   void CloseList() {
-    if (Menu_Framework_itemsText != nullptr) {
+    if (VS::Menu::Framework::itemsText != nullptr) {
       static_cast<void>(framework::CloseLiveRowsAndRememberCursor());
     }
     framework::ClearLiveMenuExcept(framework::kNoRow);
@@ -188,7 +188,7 @@ struct TextLoadingFixture : TerminalFixture {
   ValueRestore<Content_DiscRequestCounts> saved_request_counts{
       Content_discRequestCounts};
   ValueRestore<Content_DiscDrive> saved_drive{Content_discDriveState};
-  ValueRestore<u_short*> saved_menu12{Menu_Framework_menu12Text};
+  ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
 
   TextLoadingFixture() {
     if (!content::DataStore::Open(R"(Native\data)")) {
@@ -199,7 +199,7 @@ struct TextLoadingFixture : TerminalFixture {
     content::InitializeLiveDiscQueue();
   }
   ~TextLoadingFixture() {
-    if (VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemNames) &&
+    if (VS::Core::Memory::LivePayloadCapacity(VS::Menu::Framework::itemNames) &&
         !UnloadText()) {
       VS::Core::Errorf("tests",
                        "menu terminal fixture could not drain its item text");
@@ -236,11 +236,11 @@ struct LootFixture : TextLoadingFixture {
   ValueRestore<Menu_Loot_LootListItem*> saved_loot_rows{Menu_Loot_lootList};
   ValueRestore<Menu_Loot_LootListItem*> saved_working{
       Menu_Loot_lootListWorkingCopy};
-  ValueRestore<decltype(Menu_Framework_lootLists)> saved_room_loot{
-      Menu_Framework_lootLists};
-  ValueRestore<decltype(Menu_Framework_lootEntry)> saved_chest{
-      Menu_Framework_lootEntry};
-  std::remove_pointer_t<decltype(Menu_Framework_lootEntry)> chest{};
+  ValueRestore<decltype(VS::Menu::Framework::lootLists)> saved_room_loot{
+      VS::Menu::Framework::lootLists};
+  ValueRestore<decltype(VS::Menu::Framework::lootEntry)> saved_chest{
+      VS::Menu::Framework::lootEntry};
+  std::remove_pointer_t<decltype(VS::Menu::Framework::lootEntry)> chest{};
   ValueRestore<u_char> saved_count{Menu_Loot_lootListCount};
   ValueRestore<u_char> saved_offset{Menu_Loot_lootListOffset};
   ValueRestore<char> saved_selected{Menu_Loot_selectedLoot};
@@ -260,8 +260,8 @@ struct LootFixture : TextLoadingFixture {
       throw std::runtime_error("loot integration requires an unused workspace");
     }
     loot::ResetLootTerminalSession();
-    Menu_Framework_lootLists = nullptr;
-    Menu_Framework_lootEntry = &chest;
+    VS::Menu::Framework::lootLists = nullptr;
+    VS::Menu::Framework::lootEntry = &chest;
     std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
   }
   ~LootFixture() { loot::ResetLootTerminalSession(); }
@@ -372,8 +372,8 @@ TEST_CASE("F02597 Live loot does not inherit item-menu global restrictions",
           "[inventory-terminal-live][F02597]") {
   TerminalFixture fixture;
   fixture.AddWeapon();
-  Menu_Framework_actionRestrictions = 7;
-  Menu_Framework_menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::actionRestrictions = 7;
+  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
   REQUIRE(Navigate(kItemModule, kItemNavigation, 2) == 0);
   REQUIRE(Navigate(kItemModule, kItemNavigation, 0) == 0);
   CHECK((fixture.FirstItem().flags & 1) != 0);
@@ -397,18 +397,18 @@ TEST_CASE(
       loot ? 12 : 4,
       loot ? Content_DiscFile{VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE}
            : Content_DiscFile{VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
-  Menu_Framework_menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
   EnterEmptyNavigation(other_module, other_address);
   EnterEmptyNavigation(module, address);
   fixture.AddWeapon();
   CHECK(load.Poll() == 0);
   CHECK(Navigate(module, address, 0) == 0);
-  CHECK(Menu_Framework_itemsText == nullptr);
+  CHECK(VS::Menu::Framework::itemsText == nullptr);
   CHECK(load.Complete() == 1);
   CHECK(Navigate(other_module, other_address, 0) == 0);
-  CHECK(Menu_Framework_itemsText == nullptr);
+  CHECK(VS::Menu::Framework::itemsText == nullptr);
   REQUIRE(Navigate(module, address, 0) == 0);
-  CHECK(Menu_Framework_itemsText != nullptr);
+  CHECK(VS::Menu::Framework::itemsText != nullptr);
 }
 
 TEST_CASE("MENUB text loads its original module bytes again after a cold reset",
@@ -452,13 +452,13 @@ TEST_CASE("F02553 MAINMENU reload restarts the live shortcut title phase",
     CHECK(load.Complete() == 1);
   }
   inventory::UpdateLiveMiscItemShortcut(0);
-  CHECK(Menu_Framework_itemNames == nullptr);
+  CHECK(VS::Menu::Framework::itemNames == nullptr);
   menu_overlay_tests::Load load(logical_submenu,
                                 {VS_MAINMENU_PRG_LBA, VS_MAINMENU_PRG_SIZE});
-  Menu_Framework_shortcutInvoked = kItemShortcut;
+  VS::Menu::Framework::shortcutInvoked = kItemShortcut;
   CHECK(load.Complete() == 0);
   inventory::UpdateLiveMiscItemShortcut(0);
-  CHECK(VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemNames)
+  CHECK(VS::Core::Memory::LivePayloadCapacity(VS::Menu::Framework::itemNames)
             .has_value());
   REQUIRE(fixture.UnloadText());
 }
@@ -466,8 +466,8 @@ TEST_CASE("F02553 MAINMENU reload restarts the live shortcut title phase",
 TEST_CASE("F02636 only MENU3 reload clears the live exit countdown",
           "[inventory-terminal-live][inventory-reload][F02636]") {
   TerminalFixture fixture;
-  Menu_Framework_itemNames = nullptr;
-  Menu_Framework_menuState.returnState = 1;
+  VS::Menu::Framework::itemNames = nullptr;
+  VS::Menu::Framework::menuState.returnState = 1;
   std::uint8_t step = kContainerReturn;
   REQUIRE(inventory::UpdateLiveInventoryScreen(&step) == 0);
   REQUIRE(step == kInventoryCountdown);
@@ -475,7 +475,7 @@ TEST_CASE("F02636 only MENU3 reload clears the live exit countdown",
   CHECK(inventory::UpdateLiveInventoryScreen(&step) == 0);
   Boot_ResetMenu3Statics();
   CHECK(inventory::UpdateLiveInventoryScreen(&step) == 1);
-  CHECK(Menu_Framework_menuState.currentMenu == kBattleMenu);
+  CHECK(VS::Menu::Framework::menuState.currentMenu == kBattleMenu);
 }
 
 TEST_CASE("Loot terminal module entries retain their distinct call shapes",

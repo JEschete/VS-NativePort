@@ -11,7 +11,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
-#include "Field/RoomSwitchesLive.h"
+#include "Field/RoomSwitchesLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -157,7 +157,7 @@ class LiveMapMarkerHost final : public MapMarkerHost {
 
   bool IsSigilDoorUnlocked(std::int32_t zone_id, std::int32_t map_id,
                            std::uint32_t kind) override {
-    return Field_IsRoomSigilDoorUnlockedEntry(zone_id, map_id, kind) != 0;
+    return VS::Field::IsRoomSigilDoorUnlockedEntry(zone_id, map_id, kind) != 0;
   }
 
  private:

@@ -26,7 +26,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/FrameworkLiveState.h"
+#include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Map.h"
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapNavigationLive.hpp"
@@ -101,13 +101,14 @@ class LiveAreaMenu final : public AreaMenuHost {
     menu_text_ = listed_text_.data();
   }
   void SetAreaCursor(AreaListCursor cursor) override {
-    Menu_Framework_menuMemory.cursorMemories[0] = static_cast<char>(cursor.row);
-    Menu_Framework_menuMemory.cursorMemories[1] =
+    VS::Menu::Framework::menuMemory.cursorMemories[0] =
+        static_cast<char>(cursor.row);
+    VS::Menu::Framework::menuMemory.cursorMemories[1] =
         static_cast<char>(cursor.first_row);
   }
   std::uint8_t AreaCursorRow() override {
     return static_cast<std::uint8_t>(
-        Menu_Framework_menuMemory.cursorMemories[0]);
+        VS::Menu::Framework::menuMemory.cursorMemories[0]);
   }
   std::uint8_t CursorMemorySetting() override {
     return static_cast<std::uint8_t>(Input_settings.cursorMemory);

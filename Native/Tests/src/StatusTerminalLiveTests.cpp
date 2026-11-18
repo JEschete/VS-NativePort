@@ -84,15 +84,15 @@ TEST_CASE(
   Fixture fixture;
   const auto refused = st::RefusedLiveTerminalControllerCount();
   std::array<Menu_Framework_MenuRow, fw::kRowCount> forged{};
-  Menu_Framework_menuItems = forged.data();
+  VS::Menu::Framework::menuItems = forged.data();
   CHECK(st::LiveUpdateEquipmentList(-1) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 1);
-  Menu_Framework_menuItems =
+  VS::Menu::Framework::menuItems =
       static_cast<Menu_Framework_MenuRow*>(fixture.workspace);
-  ++Menu_Framework_rowTypeBuf;
+  ++VS::Menu::Framework::rowTypeBuf;
   CHECK(st::LiveUpdateEquipmentDetails(1) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 2);
-  --Menu_Framework_rowTypeBuf;
+  --VS::Menu::Framework::rowTypeBuf;
   memory::FreeLiveFromHighEnd(fixture.workspace);
   CHECK(st::LiveUpdateEquipmentList(-1) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 3);
@@ -130,7 +130,7 @@ TEST_CASE("F02676 Live enters real list phase and resets before repeated entry",
   CHECK(Menu_Status_selectedStatRow == 0);
   REQUIRE(st::LiveUpdateEquipmentList(257) == 0);
   CHECK(static_cast<std::uint8_t>(
-            Menu_Framework_menuMemory.selectedEquipment) == 2);
+            VS::Menu::Framework::menuMemory.selectedEquipment) == 2);
 }
 
 TEST_CASE("F02677 and F02678 Live draw into the registered frame storage",
@@ -208,7 +208,7 @@ TEST_CASE(
   CHECK(forged == 3);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 1);
   *fixture.State() = 3;
-  ++Menu_Framework_itemHelp;
+  ++VS::Menu::Framework::itemHelp;
   CHECK(st::LiveUpdateStatusTerminal(fixture.State()) == 0);
   CHECK(*fixture.State() == 3);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 2);
@@ -278,8 +278,8 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
   REQUIRE(st::LiveUpdateLimbPanel(-1) == 0);
   const auto limb = st::LiveLimbPanelControllerState();
   Menu_Status_selectedElement = 4;
-  Menu_Framework_menuMemory.opaque51[49] = static_cast<char>(0x85);
-  Battle_stringContext.strings[0] = Menu_Framework_stringBuf;
+  VS::Menu::Framework::menuMemory.opaque51[49] = static_cast<char>(0x85);
+  Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveEquipmentDetailControllerState() == st::EquipmentDetailState{});
   CHECK(st::LiveLimbPanelControllerState().phase == limb.phase);
@@ -287,16 +287,16 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
   CHECK(st::LiveLimbPanelControllerState().animation_steps ==
         limb.animation_steps);
   CHECK(Menu_Status_selectedElement == 4);
-  CHECK(static_cast<std::uint8_t>(Menu_Framework_menuMemory.opaque51[49]) ==
-        0x85);
+  CHECK(static_cast<std::uint8_t>(
+            VS::Menu::Framework::menuMemory.opaque51[49]) == 0x85);
 }
 
 TEST_CASE("Terminal reload retains the actual allocations and text arguments",
           "[status-terminal][status-terminal-live]") {
   Fixture fixture;
-  Battle_stringContext.strings[0] = Menu_Framework_stringBuf;
+  Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
   st::ResetLiveTerminalControllersModuleData();
   CHECK(memory::LivePayloadCapacity(fixture.workspace).has_value());
   CHECK(memory::LivePayloadCapacity(fixture.text).has_value());
-  CHECK(Battle_stringContext.strings[0] == Menu_Framework_stringBuf);
+  CHECK(Battle_stringContext.strings[0] == VS::Menu::Framework::stringBuf);
 }

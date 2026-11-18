@@ -7,7 +7,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/ItemRowsLiveState.h"
+#include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
 #include "Render/Camera.h"
@@ -19,7 +19,9 @@ namespace VS::Menu::Status::terminal_live {
 namespace {
 class ScreenHost final : public HostBase<StatusTerminalHost> {
  public:
-  bool HasItemText() override { return Menu_Framework_itemNames != nullptr; }
+  bool HasItemText() override {
+    return VS::Menu::Framework::itemNames != nullptr;
+  }
   std::optional<int> LoadItemText(bool start) override {
     return Invoke([start] {
       return Framework::LoadLiveItemText(static_cast<int>(start));
@@ -156,9 +158,9 @@ namespace VS::Menu::Status {
 int LiveUpdateStatusTerminal(std::uint8_t* state) {
   const auto address = reinterpret_cast<std::uintptr_t>(state);
   const auto start =
-      reinterpret_cast<std::uintptr_t>(Menu_Framework_submenuStates);
+      reinterpret_cast<std::uintptr_t>(VS::Menu::Framework::submenuStates);
   if (state == nullptr || address < start ||
-      address - start >= std::size(Menu_Framework_submenuStates)) {
+      address - start >= std::size(VS::Menu::Framework::submenuStates)) {
     terminal_live::Refuse(
         "entry state is not a live BATTLE submenu-state byte");
     return 0;
@@ -166,7 +168,7 @@ int LiveUpdateStatusTerminal(std::uint8_t* state) {
   if (!terminal_live::Workspace()) {
     return 0;
   }
-  if (Menu_Framework_itemNames != nullptr && !terminal_live::ItemText()) {
+  if (VS::Menu::Framework::itemNames != nullptr && !terminal_live::ItemText()) {
     return 0;
   }
   terminal_live::ScreenHost host;

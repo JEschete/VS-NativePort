@@ -14,7 +14,7 @@
 #include "Render/EncodedText.hpp"
 
 namespace VS::Menu::Framework {
-// ItemRowsHost over the item texts (ItemRowsLiveState.h), the tables
+// ItemRowsHost over the item texts (ItemRowsLiveState.hpp), the tables
 // vs_mainMenu_weapons .. vs_mainMenu_gems point at (Ashley's inventory or the
 // open container), vs_battle_stringContext, vs_battle_stringBuf and the menu
 // rows. Refusals are logged on the "menu.framework" channel.

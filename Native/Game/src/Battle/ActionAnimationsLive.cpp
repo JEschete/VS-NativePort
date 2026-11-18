@@ -19,7 +19,7 @@
 #include "Battle/ActionFlow.h"
 #include "Core/Diagnostics.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
-#include "Field/PlatformPlacementLive.h"
+#include "Field/PlatformPlacementLive.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -184,7 +184,7 @@ class LiveWorld final : public ActionReactionWorld {
     static_cast<void>(VS::Effects::LiveQueueActionImpactEffects(slot));
   }
   void ReleaseMovingPlatformActor(int platform) override {
-    static_cast<void>(Field_SetMovingPlatformActorEntry(platform, -1));
+    static_cast<void>(VS::Field::SetMovingPlatformActorEntry(platform, -1));
   }
   void CancelTeleportTransition(ActionReactionActor& actor) override {
     auto& live_actor = static_cast<LiveActor&>(actor);

@@ -113,7 +113,7 @@ TEST_CASE("Container detail helpers retain normal MENUD BSS across reload",
 TEST_CASE("Ordinary MENUD reload retains detail owner and halfword orders",
           "[container-detail-helpers-module][F02943][F02949]") {
   LiveFixture fixture;
-  const auto memory = Menu_Framework_menuMemory;
+  const auto memory = VS::Menu::Framework::menuMemory;
   std::span(fixture.storage->container.indices.misc).back() =
       samples::kHalfwordToken;
   Menu_Container_containerItemCapacities[samples::kMiscCategory] = 0;
@@ -121,5 +121,5 @@ TEST_CASE("Ordinary MENUD reload retains detail owner and halfword orders",
   CHECK(Menu_Container_containerData == &fixture.storage->container);
   CHECK(Menu_Container_containerItemCapacities[6] == 256);
   CHECK(detail::SelectLiveDetailsItem(6, 255) == 65535);
-  Menu_Framework_menuMemory = memory;
+  VS::Menu::Framework::menuMemory = memory;
 }

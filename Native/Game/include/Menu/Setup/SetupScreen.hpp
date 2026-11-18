@@ -376,7 +376,7 @@ class Host {
   virtual void SetDpPp(int current_dp, int max_dp, int current_pp,
                        int max_pp) = 0;
   virtual void UpdateDpPpBars(int flags) = 0;
-  // Menu_Framework_equipmentSubtype, equipmentStats[] and strIntAgi[].
+  // VS::Menu::Framework::equipmentSubtype, equipmentStats[] and strIntAgi[].
   virtual void SetEquipmentSubtype(int subtype) = 0;
   virtual void SetEquipmentStat(std::size_t index, int value) = 0;
   virtual void SetPrimaryStatValue(std::size_t index, int value) = 0;

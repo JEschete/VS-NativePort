@@ -21,12 +21,12 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Effects/CameraLive.hpp"
-#include "Effects/CameraLiveState.h"
+#include "Effects/CameraLiveState.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/EffectResourcesLiveState.h"
+#include "Effects/EffectResourcesLiveState.hpp"
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/Package.h"
@@ -137,15 +137,13 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   bool ActionHasEffect() override {
     return Effects_actionRequest.effectId != 0;
   }
-  bool PackageOnDisc() override { return Effects_packageFile.lba != 0; }
-  bool PurgeOverlayHeld() override { return Effects_purgeOverlayLoaded != 0; }
+  bool PackageOnDisc() override { return packageFile.lba != 0; }
+  bool PurgeOverlayHeld() override { return purgeOverlayLoaded != 0; }
   void ReleasePurgeOverlay() override {
     Content::ReleaseLiveOverlayWorkspace(kPurgeOverlayOwner);
-    Effects_purgeOverlayLoaded = 0;
+    purgeOverlayLoaded = 0;
   }
-  void BindPackage() override {
-    LiveBindEffectPackageBlocks(Effects_packageBuffer);
-  }
+  void BindPackage() override { LiveBindEffectPackageBlocks(packageBuffer); }
   std::uint8_t PackageTrackCount() override {
     const Effects_EffectPackage* package = CurrentPackage("track count");
     if (package == nullptr) {
@@ -235,10 +233,10 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
     return static_cast<std::uint8_t>(LiveAllocateEffectToken());
   }
   void CaptureSavedCamera() override {
-    LiveCaptureEffectCamera(&Effects_savedActionCamera);
+    LiveCaptureEffectCamera(&savedActionCamera);
   }
   void CaptureEffectCamera() override {
-    LiveCaptureEffectCamera(&Effects_effectCamera);
+    LiveCaptureEffectCamera(&effectCamera);
   }
 
   bool HasTimeline(Instance& instance) override {
@@ -333,10 +331,10 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
     LiveSelectEffectResourceContext(std::to_underlying(package));
   }
   void CaptureSavedCamera() override {
-    LiveCaptureEffectCamera(&Effects_savedActionCamera);
+    LiveCaptureEffectCamera(&savedActionCamera);
   }
   void CaptureEffectCamera() override {
-    LiveCaptureEffectCamera(&Effects_effectCamera);
+    LiveCaptureEffectCamera(&effectCamera);
   }
 
  private:
