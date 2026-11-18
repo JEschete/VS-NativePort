@@ -655,6 +655,13 @@ int ParseWeaponFile(ActorAssetHost& host, ActorAssetLoadState& state,
   model.quad_count = static_cast<std::uint16_t>(cursor.U16());
   model.other_primitive_count = static_cast<std::uint16_t>(cursor.U16());
   const std::int32_t size = cursor.I32();
+  // Native bound: the original copied boneCount * 8 bytes into the record's
+  // four bones and posed that many. Shipped WEP files have three bones (#270).
+  // The record is left unclaimed, so the slot is neither busy nor releasable.
+  if (cursor.Ok() && model.bone_count > kWeaponModelBones) {
+    host.Refuse("weapon bone count", model.bone_count);
+    return kAssetRefused;
+  }
   if (!cursor.Ok() || size < 0) {
     host.StoreWeapon(target, model);
     host.Refuse("weapon geometry size", size);

@@ -1932,3 +1932,88 @@ TEST_CASE("Live battle asset entry points refuse a null request and bad slots",
   CHECK(Content::ReleaseLiveSequenceEffectTexture(0) == -1);
   CHECK(Content::LiveActorAssetRefusals() == before + 2);
 }
+
+namespace {
+// Loads a WEP whose header declares `bones` bones into weapon slot 4.
+int LoadWeaponWithBones(FakeAssetHost& host, std::uint8_t bones) {
+  std::vector<std::byte> file = WeaponFile();
+  file[4] = std::byte{bones};
+  AddWeaponFile(host);
+  host.AddDiscFile(kWepSector, std::move(file));
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  int result = kAssetPending;
+  for (int step = 0; step < 4 && result == kAssetPending; ++step) {
+    result = Content::UpdateWeaponModelLoad(host, state, request);
+  }
+  return result;
+}
+}  // namespace
+
+TEST_CASE("Weapon files load four bones and refuse a fifth",
+          "[content-slice][content][actor-assets]") {
+  const auto four_owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& four = *four_owner;
+  CHECK(LoadWeaponWithBones(four, 4) == kAssetDone);
+  CHECK(four.refusals.empty());
+  CHECK(four.weapon_bones[4].size() == 32);
+  const auto five_owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& five = *five_owner;
+  CHECK(LoadWeaponWithBones(five, 5) == kAssetRefused);
+  CHECK(five.refusals == std::vector<std::string>{"weapon bone count"});
+  CHECK(five.low_blocks.empty());
+  CHECK(five.weapon_bones[4].empty());
+  CHECK(Required(five.weapons[4]).bone_count == 0);
+  CHECK(five.high_frees == five.high_blocks);
+}
+
+TEST_CASE("Weapon files refuse geometry larger than a fixed slot buffer",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  constexpr auto kOversizedGeometry =
+      static_cast<std::uint32_t>(Content::kWeaponGeometryBytes + 0x100);
+  std::vector<std::byte> file = WeaponFile();
+  file.resize(2 * kSectorBytes);
+  Put32(file, 0xC, kOversizedGeometry);
+  AddWeaponFile(host);
+  host.SetTable(AssetFileTable::kWepSectors, Index(kWepModel), 2);
+  host.AddDiscFile(kWepSector, std::move(file));
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  request.target_slot = 0;
+  StepWeaponLoad(host, state, request, 1);
+  CHECK(Content::UpdateWeaponModelLoad(host, state, request) == kAssetRefused);
+  CHECK(host.refusals == std::vector<std::string>{"weapon geometry copy"});
+  CHECK(host.low_blocks.empty());
+  REQUIRE(host.geometry_records.size() == 1);
+  CHECK(host.geometry_records[0].destination == host.weapon_buffers[0]);
+  CHECK(host.geometry_records[0].bytes == Content::kWeaponGeometryBytes);
+}
+
+TEST_CASE("Shared weapon copies into a fixed slot read only the source model",
+          "[content-slice][content][actor-assets]") {
+  const auto owner = std::make_unique<FakeAssetHost>();
+  FakeAssetHost& host = *owner;
+  AddWeaponFile(host);
+  constexpr std::size_t kSourceBytes = 0x100;
+  WeaponAssetRecord source;
+  source.bone_count = 2;
+  source.actor_id = 1;
+  source.model_id = kWepModel;
+  source.texture_slot = Content::kNoAssetTextureSlot;
+  source.geometry = host.AddBlock(kSourceBytes);
+  std::ranges::fill(host.Block(source.geometry), std::byte{0x5A});
+  host.weapons[5] = source;
+  const std::span<std::byte> fixed = host.Block(host.weapon_buffers[0]);
+  std::ranges::fill(fixed, std::byte{0xEE});
+  ActorAssetLoadState state;
+  ActorAssetRequest request = WeaponRequest(host);
+  request.target_slot = 0;
+  CHECK(Content::UpdateWeaponModelLoad(host, state, request) == kAssetDone);
+  CHECK(host.refusals.empty());
+  CHECK(host.reads.empty());
+  CHECK(Required(host.weapons[0]).geometry == host.weapon_buffers[0]);
+  CHECK(fixed[kSourceBytes - 1] == std::byte{0x5A});
+  CHECK(fixed[kSourceBytes] == std::byte{0xEE});
+}

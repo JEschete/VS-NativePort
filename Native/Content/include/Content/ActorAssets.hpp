@@ -34,6 +34,8 @@ inline constexpr std::uint8_t kNoAssetTextureSlot = 0xFF;
 inline constexpr std::int16_t kModellessActorId = 0x7F;
 // The bytes a weapon geometry copy moves (sizeof _wepModelOffsets).
 inline constexpr std::size_t kWeaponGeometryBytes = 0x800;
+// The bones a weapon record holds (vs_battle_wepModels_t bones[4]).
+inline constexpr std::size_t kWeaponModelBones = 4;
 // The capacity of the primary battle sequence buffer (func_8009C378).
 inline constexpr std::size_t kWeaponSequenceBytes = 0x7800;
 // The live sequence work buffer allocated for material animations.

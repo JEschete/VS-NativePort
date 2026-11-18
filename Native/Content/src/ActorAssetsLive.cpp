@@ -157,10 +157,8 @@ static_assert(std::extent_v<decltype(Actors_ActorRecord::textureScroll)> ==
 static_assert(offsetof(Actors_ActorRecord, textureOverlays) +
                   kActorTextureLayoutBytes <=
               sizeof(Actors_ActorRecord));
-// The weapon record holds four bones.
-constexpr std::size_t kWeaponRecordBones = 4;
 static_assert(sizeof(Actors_WeaponModel::bones) ==
-              kWeaponRecordBones * sizeof(SVECTOR));
+              kWeaponModelBones * sizeof(SVECTOR));
 static_assert(sizeof(Actors_WeaponModel::palettes) ==
               sizeof(WeaponAssetRecord::palettes));
 static_assert(sizeof(Actors_WeaponModel::workingPalette) ==
