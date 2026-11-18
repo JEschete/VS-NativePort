@@ -3,27 +3,27 @@
 #define VS_ACTORS_TEXTUREANIMATION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_TextureAnimationFrame Actors_TextureAnimationFrame;
-typedef struct Actors_TextureAnimationKey Actors_TextureAnimationKey;
-typedef struct Actors_TextureAnimationSlot Actors_TextureAnimationSlot;
-typedef struct Actors_TextureCellOrigin Actors_TextureCellOrigin;
-typedef struct Actors_TextureOverlayRect Actors_TextureOverlayRect;
-typedef struct Actors_TextureOverlayUpload Actors_TextureOverlayUpload;
-typedef struct Actors_TextureScrollBounds Actors_TextureScrollBounds;
-typedef struct Actors_TextureScrollState Actors_TextureScrollState;
+struct Actors_TextureAnimationFrame;
+struct Actors_TextureAnimationKey;
+struct Actors_TextureAnimationSlot;
+struct Actors_TextureCellOrigin;
+struct Actors_TextureOverlayRect;
+struct Actors_TextureOverlayUpload;
+struct Actors_TextureScrollBounds;
+struct Actors_TextureScrollState;
 
 // decomp: D_800F4538_unk180C (src/BATTLE/BATTLE.PRG/3A1A0.h:198)
-typedef struct Actors_TextureAnimationSlot {
+struct Actors_TextureAnimationSlot {
     u_char timeline : 4;
     u_char mode : 4;
     u_char currentFrame;
     u_char keyIndex;
     u_char ticks;
-} Actors_TextureAnimationSlot;
+};
 static_assert(sizeof(Actors_TextureAnimationSlot) == 0x4, "Actors_TextureAnimationSlot must keep its PS1 layout");
 
 // decomp: D_800F4538_unk181C (src/BATTLE/BATTLE.PRG/3A1A0.h:242)
-typedef struct Actors_TextureScrollState {
+struct Actors_TextureScrollState {
     u_char x;
     u_char y;
     signed char stepX;
@@ -32,20 +32,20 @@ typedef struct Actors_TextureScrollState {
     u_char timer;
     u_char pad6;
     u_char pad7;
-} Actors_TextureScrollState;
+};
 static_assert(sizeof(Actors_TextureScrollState) == 0x8, "Actors_TextureScrollState must keep its PS1 layout");
 
 // decomp: D_800F4538_unk614 (src/BATTLE/BATTLE.PRG/3A1A0.h:212)
-typedef struct Actors_TextureCellOrigin {
+struct Actors_TextureCellOrigin {
     u_char x;
     u_char y;
     u_char columns;
     u_char reserved3;
-} Actors_TextureCellOrigin;
+};
 static_assert(sizeof(Actors_TextureCellOrigin) == 0x4, "Actors_TextureCellOrigin must keep its PS1 layout");
 
 // decomp: D_800F4538_unk61C (src/BATTLE/BATTLE.PRG/3A1A0.h:231)
-typedef struct Actors_TextureScrollBounds {
+struct Actors_TextureScrollBounds {
     u_char x;
     u_char y;
     u_char width;
@@ -55,41 +55,41 @@ typedef struct Actors_TextureScrollBounds {
     u_char bounces : 1;
     u_char reservedBits1 : 7;
     u_char interval;
-} Actors_TextureScrollBounds;
+};
 static_assert(sizeof(Actors_TextureScrollBounds) == 0x8, "Actors_TextureScrollBounds must keep its PS1 layout");
 
 // decomp: func_800AAE9C_t (src/BATTLE/BATTLE.PRG/40564.c:12)
-typedef struct Actors_TextureAnimationKey {
+struct Actors_TextureAnimationKey {
     u_char frame;
     u_char duration;
-} Actors_TextureAnimationKey;
+};
 static_assert(sizeof(Actors_TextureAnimationKey) == 0x2, "Actors_TextureAnimationKey must keep its PS1 layout");
 
 // decomp: func_800AB358_t (src/BATTLE/BATTLE.PRG/40564.c:32)
-typedef struct Actors_TextureOverlayUpload {
+struct Actors_TextureOverlayUpload {
     u_char reserved0;
     u_char overlayIndex;
     u_char sourceX;
     u_char sourceY;
-} Actors_TextureOverlayUpload;
+};
 static_assert(sizeof(Actors_TextureOverlayUpload) == 0x4, "Actors_TextureOverlayUpload must keep its PS1 layout");
 
 // decomp: texMapAnimation_t (src/BATTLE/BATTLE.PRG/3A1A0.h:219)
-typedef struct Actors_TextureAnimationFrame {
+struct Actors_TextureAnimationFrame {
     u_char overlayIndex;
     u_char sourceX;
     u_char sourceY;
     u_char columns;
-} Actors_TextureAnimationFrame;
+};
 static_assert(sizeof(Actors_TextureAnimationFrame) == 0x4, "Actors_TextureAnimationFrame must keep its PS1 layout");
 
 // decomp: texMapOverlay_t (src/BATTLE/BATTLE.PRG/3A1A0.h:205)
-typedef struct Actors_TextureOverlayRect {
+struct Actors_TextureOverlayRect {
     u_char x;
     u_char y;
     u_char width;
     u_char height;
-} Actors_TextureOverlayRect;
+};
 static_assert(sizeof(Actors_TextureOverlayRect) == 0x4, "Actors_TextureOverlayRect must keep its PS1 layout");
 
 #endif // VS_ACTORS_TEXTUREANIMATION_H_TYPES

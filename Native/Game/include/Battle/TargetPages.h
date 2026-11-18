@@ -1,15 +1,15 @@
 #pragma once
 
-typedef struct Battle_TargetPreview Battle_TargetPreview;
+struct Battle_TargetPreview;
 
-typedef struct Battle_TargetPageInfo {
+struct Battle_TargetPageInfo {
   int total;
   int page;
   int pages;
   int first;
   int visible;
   int selected;
-} Battle_TargetPageInfo;
+};
 
 void Battle_ResetTargetPages();
 int Battle_AdvanceTargetPage(int direction);

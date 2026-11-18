@@ -3,8 +3,8 @@
 #define VS_BATTLE_HIT_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_DamageCalculation Battle_DamageCalculation;
-typedef struct Battle_HitResult Battle_HitResult;
+struct Battle_DamageCalculation;
+struct Battle_HitResult;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -18,7 +18,7 @@ typedef struct Battle_HitResult Battle_HitResult;
 #endif
 
 // decomp: _hitEntity_t (src/BATTLE/BATTLE.PRG/146C.c:78)
-typedef struct Battle_HitResult {
+struct Battle_HitResult {
     Battle_HitTargetWord target;
     short riskChange;
     short strengthChange;
@@ -52,10 +52,10 @@ typedef struct Battle_HitResult {
     short armorDpChange;
     short shieldPpChange;
     int targetsPosition;
-} Battle_HitResult;
+};
 
 // decomp: _hitIntermediate (src/BATTLE/BATTLE.PRG/146C.c:11269)
-typedef struct Battle_DamageCalculation {
+struct Battle_DamageCalculation {
     /* 0x00 */ u_char type;
     /* 0x01 */ u_char sourceAffinity;
     /* 0x02 */ u_char sourceClass;
@@ -79,7 +79,7 @@ typedef struct Battle_DamageCalculation {
     /* 0x20 */ short statFactor;
     /* 0x22 */ short shieldStatFactor;
     /* 0x24 */ short armorStatFactor;
-} Battle_DamageCalculation;
+};
 static_assert(sizeof(Battle_DamageCalculation) == 0x26, "Battle_DamageCalculation must keep its PS1 layout");
 
 #endif // VS_BATTLE_HIT_H_TYPES

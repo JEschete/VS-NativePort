@@ -3,13 +3,13 @@
 #define VS_MENU_SCORE_SCORESCREEN_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Score_CursorMemory Menu_Score_CursorMemory;
-typedef struct Menu_Score_EnemyEntry Menu_Score_EnemyEntry;
-typedef struct Menu_Score_Row Menu_Score_Row;
-typedef struct Menu_Score_ZudHeader Menu_Score_ZudHeader;
+struct Menu_Score_CursorMemory;
+struct Menu_Score_EnemyEntry;
+struct Menu_Score_Row;
+struct Menu_Score_ZudHeader;
 
 // decomp: _gazetteRow (src/MENU/MENU9.PRG/238.c:363)
-typedef struct Menu_Score_Row {
+struct Menu_Score_Row {
     char selected;
     char opaque1;
     char animationState;
@@ -18,10 +18,10 @@ typedef struct Menu_Score_Row {
     short rowIndex;
     char* title;
     char* description;
-} Menu_Score_Row;
+};
 
 // decomp: _monBinData_t (src/MENU/MENU9.PRG/238.c:377)
-typedef struct Menu_Score_EnemyEntry {
+struct Menu_Score_EnemyEntry {
     short zudId;
     short classId;
     short killFlagsOffset;
@@ -33,11 +33,11 @@ typedef struct Menu_Score_EnemyEntry {
     u_char next;
     u_char reservedF;
     char name[28];
-} Menu_Score_EnemyEntry;
+};
 static_assert(sizeof(Menu_Score_EnemyEntry) == 0x2C, "Menu_Score_EnemyEntry must keep its PS1 layout");
 
 // decomp: _zudData_t (src/MENU/MENU9.PRG/592C.c:25)
-typedef struct Menu_Score_ZudHeader {
+struct Menu_Score_ZudHeader {
     u_char characterId;
     u_char weapon;
     u_char opaque2;
@@ -55,11 +55,11 @@ typedef struct Menu_Score_ZudHeader {
     int commonSeqLen;
     u_long battleSeqOffset;
     int battleSeqLen;
-} Menu_Score_ZudHeader;
+};
 static_assert(sizeof(Menu_Score_ZudHeader) == 0x30, "Menu_Score_ZudHeader must keep its PS1 layout");
 
 // decomp: vs_battle_menu9CursorMemory_t (src/BATTLE/BATTLE.PRG/146C.h:791)
-typedef struct Menu_Score_CursorMemory {
+struct Menu_Score_CursorMemory {
     u_char titlePage;
     u_char titleRow;
     u_char encyclopaediaPage;
@@ -68,7 +68,7 @@ typedef struct Menu_Score_CursorMemory {
     u_char recordTimeRow;
     u_char gazettePage;
     u_char gazetteRow;
-} Menu_Score_CursorMemory;
+};
 static_assert(sizeof(Menu_Score_CursorMemory) == 0x8, "Menu_Score_CursorMemory must keep its PS1 layout");
 
 #endif // VS_MENU_SCORE_SCORESCREEN_H_TYPES

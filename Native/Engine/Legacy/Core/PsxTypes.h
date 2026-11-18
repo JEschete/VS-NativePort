@@ -13,16 +13,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef unsigned char u_char;
-typedef unsigned short u_short;
-typedef unsigned int u_int;
-typedef unsigned long u_long;
-typedef unsigned short ushort;
-typedef unsigned int uint;
+using u_char = unsigned char;
+using u_short = unsigned short;
+using u_int = unsigned int;
+using u_long = unsigned long;
+using ushort = unsigned short;
+using uint = unsigned int;
 
-typedef struct quad {
+struct quad {
   long val[2];
-} quad;
+};
 
 #define ONE 4096
 #define ABS(x) (((x) >= 0) ? (x) : (-(x)))

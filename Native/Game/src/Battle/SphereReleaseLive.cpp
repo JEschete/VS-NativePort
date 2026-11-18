@@ -3,7 +3,7 @@
 #include "Battle/TargetPages.h"
 #include "Core/Memory/HeapLive.hpp"
 
-typedef struct Battle_TargetSphereSetupView Battle_TargetSphereSetupView;
+struct Battle_TargetSphereSetupView;
 extern Battle_TargetSphereSetupView* Battle_targetSphere;
 
 namespace VS::Battle {

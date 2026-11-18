@@ -3,11 +3,11 @@
 #define VS_EFFECTS_SCREENEFFECTS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Content_DiscQueueSlot Content_DiscQueueSlot;
-typedef struct Effects_ScreenEffectOverlay Effects_ScreenEffectOverlay;
+struct Content_DiscQueueSlot;
+struct Effects_ScreenEffectOverlay;
 
 // decomp: D_800EB9B4_t (src/GIM/SCREFF2.PRG/0.h:12)
-typedef struct Effects_ScreenEffectOverlay {
+struct Effects_ScreenEffectOverlay {
     u_char loading;
     u_char opaque1;
     u_short feedbackLayer;
@@ -15,7 +15,7 @@ typedef struct Effects_ScreenEffectOverlay {
     short radialWarpArg1;
     int vignetteEnabled;
     Content_DiscQueueSlot* slot;
-} Effects_ScreenEffectOverlay;
+};
 
 #endif // VS_EFFECTS_SCREENEFFECTS_H_TYPES
 

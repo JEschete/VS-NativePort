@@ -3,14 +3,14 @@
 #define VS_BATTLE_HUD_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef union Battle_HudHighlightWord Battle_HudHighlightWord;
+union Battle_HudHighlightWord;
 
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.c:451:8) (src/BATTLE/BATTLE.PRG/5BF94.c:451)
 union Battle_HudHighlightWord {
     int word;
     u_char bytes[4];
 };
-typedef union Battle_HudHighlightWord Battle_HudHighlightWord;
+union Battle_HudHighlightWord;
 static_assert(sizeof(Battle_HudHighlightWord) == 0x4, "Battle_HudHighlightWord must keep its PS1 layout");
 
 #endif // VS_BATTLE_HUD_H_TYPES

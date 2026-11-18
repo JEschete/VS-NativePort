@@ -3,8 +3,8 @@
 #define VS_PFILE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Content_PFileTimelineTable Content_PFileTimelineTable;
-typedef struct Content_PFileTimelineTrackEntry Content_PFileTimelineTrackEntry;
+struct Content_PFileTimelineTable;
+struct Content_PFileTimelineTrackEntry;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -17,17 +17,17 @@ typedef struct Content_PFileTimelineTrackEntry Content_PFileTimelineTrackEntry;
 #endif
 
 // decomp: func_800D55A4_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:46)
-typedef struct Content_PFileTimelineTrackEntry {
+struct Content_PFileTimelineTrackEntry {
     Effects_TimelineTrackHeader header;
     u_short dataOffset;
-} Content_PFileTimelineTrackEntry;
+};
 static_assert(sizeof(Content_PFileTimelineTrackEntry) == 0x4, "Content_PFileTimelineTrackEntry must keep its PS1 layout");
 
 // decomp: func_800D55A4_t (src/BATTLE/BATTLE.PRG/5BF94.c:51)
-typedef struct Content_PFileTimelineTable {
+struct Content_PFileTimelineTable {
     int trackCount;
     Content_PFileTimelineTrackEntry tracks[0];
-} Content_PFileTimelineTable;
+};
 static_assert(sizeof(Content_PFileTimelineTable) == 0x4, "Content_PFileTimelineTable must keep its PS1 layout");
 
 #endif // VS_PFILE_H_TYPES

@@ -3,10 +3,10 @@
 #define VS_SYSTEMRESOURCES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Content_SystemDatHeader Content_SystemDatHeader;
+struct Content_SystemDatHeader;
 
 // decomp: System_dat_h (src/BATTLE/INITBTL.PRG/18.c:23)
-typedef struct Content_SystemDatHeader {
+struct Content_SystemDatHeader {
     u_int image0Offset;
     u_int image1Offset;
     u_int paletteOffset;
@@ -15,7 +15,7 @@ typedef struct Content_SystemDatHeader {
     u_int image4Offset;
     u_int fixedImageOffset;
     u_int interfaceDataOffset;
-} Content_SystemDatHeader;
+};
 static_assert(sizeof(Content_SystemDatHeader) == 0x20, "Content_SystemDatHeader must keep its PS1 layout");
 
 #endif // VS_SYSTEMRESOURCES_H_TYPES

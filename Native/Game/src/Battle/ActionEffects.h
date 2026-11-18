@@ -3,7 +3,7 @@
 #define VS_BATTLE_ACTIONEFFECTS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_SoundEventTargets Battle_SoundEventTargets;
+struct Battle_SoundEventTargets;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -16,11 +16,11 @@ typedef struct Battle_SoundEventTargets Battle_SoundEventTargets;
 #endif
 
 // decomp: soundEventTargets (src/BATTLE/BATTLE.PRG/5BF94.c:637)
-typedef struct Battle_SoundEventTargets {
+struct Battle_SoundEventTargets {
     u_short reserved0;
     u_char reserved2, reserved3;
     char reserved4[12];
     Effects_ActionEffectTarget reserved10[0];
-} Battle_SoundEventTargets;
+};
 
 #endif // VS_BATTLE_ACTIONEFFECTS_H_TYPES

@@ -11,7 +11,7 @@
 #define SPU_REV_MODE_CLEAR_WA 0x100
 #define SPU_MALLOC_RECSIZ 8
 
-typedef void (*SpuTransferCallbackProc)();
+using SpuTransferCallbackProc = void (*)();
 
 // The SPU's register file (0x1F801C00-0x1F801DFF) as ordinary memory: the copy
 // tool maps the game's register literals here, and the audio backend reads the
@@ -25,9 +25,9 @@ unsigned char* LegacySpu_Ram();
 SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func);
 unsigned long SpuSetTransferStartAddr(unsigned long addr);
 
-typedef struct SpuVolume {
+struct SpuVolume {
   short left, right;
-} SpuVolume;
+};
 
 void SpuStart();
 long SpuSetNoiseClock(long nClock);

@@ -3,8 +3,8 @@
 #define VS_ACTORS_ACTORALLOCATION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_ActorAllocation Actors_ActorAllocation;
-typedef struct Actors_ActorCore Actors_ActorCore;
+struct Actors_ActorAllocation;
+struct Actors_ActorCore;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -19,7 +19,7 @@ typedef struct Actors_ActorCore Actors_ActorCore;
 #endif
 
 // decomp: vs_battle_actor_dat2 (src/BATTLE/BATTLE.PRG/146C.h:615)
-typedef struct Actors_ActorCore {
+struct Actors_ActorCore {
     struct {
         Battle_Actor actor;
         Battle_ActorStats stats;
@@ -29,13 +29,13 @@ typedef struct Actors_ActorCore {
     int reserved16C;
     int reserved170;
     int reserved174;
-} Actors_ActorCore;
+};
 
 // decomp: vs_battle_actor_dat (src/BATTLE/BATTLE.PRG/146C.h:621)
-typedef struct Actors_ActorAllocation {
+struct Actors_ActorAllocation {
     Actors_ActorCore core;
     char reservedB2C[0x1788 + 80]; /* x64: the actor record is larger */
     Actors_ActorModelSlot modelSlots[2];
-} Actors_ActorAllocation;
+};
 
 #endif // VS_ACTORS_ACTORALLOCATION_H_TYPES

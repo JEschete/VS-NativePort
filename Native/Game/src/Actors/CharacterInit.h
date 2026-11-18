@@ -3,10 +3,10 @@
 #define VS_ACTORS_CHARACTERINIT_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_CharacterInit Actors_CharacterInit;
-typedef struct Actors_LimbActionInit Actors_LimbActionInit;
-typedef struct Actors_LimbInit Actors_LimbInit;
-typedef struct Actors_SpawnSettings Actors_SpawnSettings;
+struct Actors_CharacterInit;
+struct Actors_LimbActionInit;
+struct Actors_LimbInit;
+struct Actors_SpawnSettings;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -20,15 +20,15 @@ typedef struct Actors_SpawnSettings Actors_SpawnSettings;
 #endif
 
 // decomp: _actions (src/BATTLE/BATTLE.PRG/146C.h:845)
-typedef struct Actors_LimbActionInit {
+struct Actors_LimbActionInit {
     u_short actionId;
     char opaque2;
     char index;
-} Actors_LimbActionInit;
+};
 static_assert(sizeof(Actors_LimbActionInit) == 0x4, "Actors_LimbActionInit must keep its PS1 layout");
 
 // decomp: _limbInit (src/BATTLE/BATTLE.PRG/146C.h:857)
-typedef struct Actors_LimbInit {
+struct Actors_LimbInit {
     u_short hp;
     char agilityDefenseBonus;
     char chainEvasion;
@@ -38,17 +38,17 @@ typedef struct Actors_LimbInit {
     Items_ArmorInit armor;
     char dpSplash[6];
     char reserved5A[2];
-} Actors_LimbInit;
+};
 static_assert(sizeof(Actors_LimbInit) == 0x5C, "Actors_LimbInit must keep its PS1 layout");
 
 // decomp: actorSpawnSettings (src/BATTLE/BATTLE.PRG/146C.c:260)
-typedef struct Actors_SpawnSettings {
+struct Actors_SpawnSettings {
     char bytes[8];
-} Actors_SpawnSettings;
+};
 static_assert(sizeof(Actors_SpawnSettings) == 0x8, "Actors_SpawnSettings must keep its PS1 layout");
 
 // decomp: vs_battle_charInitData (src/BATTLE/BATTLE.PRG/146C.h:886)
-typedef struct Actors_CharacterInit {
+struct Actors_CharacterInit {
     u_short subType;
     char characterKind;
     u_char reach : 5;
@@ -75,7 +75,7 @@ typedef struct Actors_CharacterInit {
     Items_AccessoryInit accessory;
     Actors_LimbInit limbs[6];
     int zudIndex;
-} Actors_CharacterInit;
+};
 static_assert(sizeof(Actors_CharacterInit) == 0x464, "Actors_CharacterInit must keep its PS1 layout");
 
 #endif // VS_ACTORS_CHARACTERINIT_H_TYPES

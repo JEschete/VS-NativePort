@@ -3,7 +3,7 @@
 #define VS_MENU_RESULTS_RESULTS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Results_BuffReel Menu_Results_BuffReel;
+struct Menu_Results_BuffReel;
 
 // decomp: BuffReelStats (src/MENU/MENUF.PRG/3B8.c:708)
 enum Menu_Results_BuffReelStat {
@@ -13,11 +13,9 @@ enum Menu_Results_BuffReelStat {
     Menu_Results_BuffReelStat_Hp,
     Menu_Results_BuffReelStat_Mp
 };
-typedef enum Menu_Results_BuffReelStat Menu_Results_BuffReelStat;
 
 // decomp: _disFileIndices (src/MENU/MENUF.PRG/3B8.c:44)
 enum Menu_Results_DisFile { Menu_Results_DisFile_Rank, Menu_Results_DisFile_Time, Menu_Results_DisFile_Attack, Menu_Results_DisFile_Iq, Menu_Results_DisFile_Esc };
-typedef enum Menu_Results_DisFile Menu_Results_DisFile;
 
 // decomp: disIndices (src/MENU/MENUF.PRG/3B8.c:491)
 enum Menu_Results_DisIndex {
@@ -89,13 +87,12 @@ enum Menu_Results_DisIndex {
     Menu_Results_DisIndex_Esc0GivingUp = 123,
     Menu_Results_DisIndex_Esc0Chicken = 125,
 };
-typedef enum Menu_Results_DisIndex Menu_Results_DisIndex;
 
 // decomp: _buffReels_t (src/MENU/MENUF.PRG/3B8.c:18)
-typedef struct Menu_Results_BuffReel {
+struct Menu_Results_BuffReel {
     short stat;
     short amount;
-} Menu_Results_BuffReel;
+};
 static_assert(sizeof(Menu_Results_BuffReel) == 0x4, "Menu_Results_BuffReel must keep its PS1 layout");
 
 #endif // VS_MENU_RESULTS_RESULTS_H_TYPES

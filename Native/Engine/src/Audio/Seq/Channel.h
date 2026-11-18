@@ -3,10 +3,10 @@
 #define VS_AUDIO_SEQ_CHANNEL_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_AkaoSequenceFile Audio_AkaoSequenceFile;
-typedef struct Audio_KeymapEntry Audio_KeymapEntry;
-typedef struct Audio_MusicConfig Audio_MusicConfig;
-typedef struct Audio_SeqChannel Audio_SeqChannel;
+struct Audio_AkaoSequenceFile;
+struct Audio_KeymapEntry;
+struct Audio_MusicConfig;
+struct Audio_SeqChannel;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -22,7 +22,7 @@ typedef struct Audio_SeqChannel Audio_SeqChannel;
 #define Audio_Seq_savedMusicId (*(short*)(&Audio_Seq_savedMusicConfig.musicId))
 
 // decomp: FSoundChannel (src/include/sound.h:410)
-typedef struct Audio_SeqChannel {
+struct Audio_SeqChannel {
     char* programCounter;
     char* loopStarts[(4)];
     char* returnAddress;
@@ -111,10 +111,10 @@ typedef struct Audio_SeqChannel {
     short tremoloVolume;
     short autoPanOffset;
     Audio_VoiceParams voice;
-} Audio_SeqChannel;
+};
 
 // decomp: FSoundChannelConfig (src/include/sound.h:492)
-typedef struct Audio_MusicConfig {
+struct Audio_MusicConfig {
     int statusFlags;
     int activeChannels;
     u_int keyedVoices;
@@ -160,7 +160,7 @@ typedef struct Audio_MusicConfig {
     int reserved94;
     int reserved98;
     int reserved9C;
-} Audio_MusicConfig;
+};
 
 #endif // VS_AUDIO_SEQ_CHANNEL_H_TYPES
 

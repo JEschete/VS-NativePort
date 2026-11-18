@@ -8,7 +8,7 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-typedef void (*LegacyRemovedCallback)();
+using LegacyRemovedCallback = void (*)();
 
 static inline int DrawSync(int mode) {
   (void)mode;

@@ -3,10 +3,10 @@
 #define VS_BATTLE_AI_MOVEMENT_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_Ai_ArenaOrbitState Battle_Ai_ArenaOrbitState;
+struct Battle_Ai_ArenaOrbitState;
 
 // layout: ledger (upstream merge) for D_800F5920_t
-typedef struct Battle_Ai_ArenaOrbitState {
+struct Battle_Ai_ArenaOrbitState {
     /* 0x00 */ u_short heading;
     /* 0x02 */ u_char phase;
     /* 0x03 */ u_char distanceCached;
@@ -25,7 +25,7 @@ typedef struct Battle_Ai_ArenaOrbitState {
     /* 0x18 */ short startX;
     /* 0x1A */ short startZ;
     /* 0x1C */ u_char started;
-} Battle_Ai_ArenaOrbitState;
+};
 static_assert(sizeof(Battle_Ai_ArenaOrbitState) == 0x20, "Battle_Ai_ArenaOrbitState must keep its PS1 layout");
 
 #endif // VS_BATTLE_AI_MOVEMENT_H_TYPES

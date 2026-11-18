@@ -3,10 +3,10 @@
 #define VS_EVENT_WEATHER_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Event_WeatherTween Event_WeatherTween;
+struct Event_WeatherTween;
 
 // decomp: D_800F4B88_t (src/BATTLE/BATTLE.PRG/4A0A8.c:172)
-typedef struct Event_WeatherTween {
+struct Event_WeatherTween {
     char reserved00;
     char reserved01;
     char elapsedFrames;
@@ -20,7 +20,7 @@ typedef struct Event_WeatherTween {
     short intensity;
     short startIntensity;
     short deltaIntensity;
-} Event_WeatherTween;
+};
 static_assert(sizeof(Event_WeatherTween) == 0x16, "Event_WeatherTween must keep its PS1 layout");
 
 #endif // VS_EVENT_WEATHER_H_TYPES

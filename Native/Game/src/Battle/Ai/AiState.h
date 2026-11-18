@@ -3,68 +3,68 @@
 #define VS_BATTLE_AI_AISTATE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_ActorRecord Actors_ActorRecord;
-typedef struct Battle_Actor Battle_Actor;
-typedef struct Battle_ActorStats Battle_ActorStats;
-typedef struct Battle_Ai_ActionCandidate Battle_Ai_ActionCandidate;
-typedef struct Battle_Ai_ActionChoiceView Battle_Ai_ActionChoiceView;
-typedef struct Battle_Ai_ActionExecutionView Battle_Ai_ActionExecutionView;
-typedef struct Battle_Ai_ActionMetadataView Battle_Ai_ActionMetadataView;
-typedef struct Battle_Ai_ActionPlanView Battle_Ai_ActionPlanView;
-typedef struct Battle_Ai_ActionSlotMetadata Battle_Ai_ActionSlotMetadata;
-typedef struct Battle_Ai_ActorAiState Battle_Ai_ActorAiState;
-typedef struct Battle_Ai_AiActorView Battle_Ai_AiActorView;
-typedef struct Battle_Ai_AiCreationView Battle_Ai_AiCreationView;
-typedef struct Battle_Ai_ApproachActorView Battle_Ai_ApproachActorView;
-typedef struct Battle_Ai_ApproachTargetRecordView Battle_Ai_ApproachTargetRecordView;
-typedef struct Battle_Ai_AreaRouteView Battle_Ai_AreaRouteView;
-typedef struct Battle_Ai_BlockedRecoveryView Battle_Ai_BlockedRecoveryView;
-typedef struct Battle_Ai_CandidateMovementView Battle_Ai_CandidateMovementView;
-typedef struct Battle_Ai_CandidateReadinessView Battle_Ai_CandidateReadinessView;
-typedef struct Battle_Ai_CheckObjectView Battle_Ai_CheckObjectView;
-typedef struct Battle_Ai_CreationModelView Battle_Ai_CreationModelView;
-typedef struct Battle_Ai_CreationStatsView Battle_Ai_CreationStatsView;
-typedef struct Battle_Ai_DecisionDispatchView Battle_Ai_DecisionDispatchView;
-typedef struct Battle_Ai_DirectionCacheView Battle_Ai_DirectionCacheView;
-typedef struct Battle_Ai_EngagementActorView Battle_Ai_EngagementActorView;
-typedef struct Battle_Ai_EngagementData Battle_Ai_EngagementData;
-typedef struct Battle_Ai_EngagementView Battle_Ai_EngagementView;
-typedef struct Battle_Ai_EscortEntryView Battle_Ai_EscortEntryView;
-typedef struct Battle_Ai_EscortRelationsView Battle_Ai_EscortRelationsView;
-typedef struct Battle_Ai_EscortView Battle_Ai_EscortView;
-typedef struct Battle_Ai_FloorHeightView Battle_Ai_FloorHeightView;
-typedef struct Battle_Ai_MetadataStatsView Battle_Ai_MetadataStatsView;
-typedef struct Battle_Ai_ModelActiveView Battle_Ai_ModelActiveView;
-typedef struct Battle_Ai_ModelStatePrefix Battle_Ai_ModelStatePrefix;
-typedef struct Battle_Ai_MoveTargetView Battle_Ai_MoveTargetView;
-typedef struct Battle_Ai_MovementCheckView Battle_Ai_MovementCheckView;
-typedef struct Battle_Ai_MovementDecisionView Battle_Ai_MovementDecisionView;
-typedef struct Battle_Ai_MovementDestinationView Battle_Ai_MovementDestinationView;
-typedef struct Battle_Ai_MovementPathView Battle_Ai_MovementPathView;
-typedef struct Battle_Ai_MovementRecoveryView Battle_Ai_MovementRecoveryView;
-typedef struct Battle_Ai_MovementStepView Battle_Ai_MovementStepView;
-typedef struct Battle_Ai_ObstructionModel Battle_Ai_ObstructionModel;
-typedef struct Battle_Ai_ObstructionView Battle_Ai_ObstructionView;
-typedef struct Battle_Ai_OrbitStatsView Battle_Ai_OrbitStatsView;
-typedef struct Battle_Ai_OrbitTrackingView Battle_Ai_OrbitTrackingView;
-typedef struct Battle_Ai_PatrolView Battle_Ai_PatrolView;
-typedef struct Battle_Ai_PerceivedObjectView Battle_Ai_PerceivedObjectView;
-typedef struct Battle_Ai_PerceptionUpdateView Battle_Ai_PerceptionUpdateView;
-typedef struct Battle_Ai_PerceptionView Battle_Ai_PerceptionView;
-typedef struct Battle_Ai_PlanEvaluationView Battle_Ai_PlanEvaluationView;
-typedef struct Battle_Ai_PositionLinkView Battle_Ai_PositionLinkView;
-typedef struct Battle_Ai_RadialRetreatView Battle_Ai_RadialRetreatView;
-typedef struct Battle_Ai_ReactionView Battle_Ai_ReactionView;
-typedef struct Battle_Ai_RecoveryModelView Battle_Ai_RecoveryModelView;
-typedef struct Battle_Ai_RoomAiState Battle_Ai_RoomAiState;
-typedef struct Battle_Ai_SettingsActorView Battle_Ai_SettingsActorView;
-typedef struct Battle_Ai_SettingsView Battle_Ai_SettingsView;
-typedef struct Battle_Ai_TargetApproachView Battle_Ai_TargetApproachView;
-typedef struct Battle_Ai_TerrainMoveActorView Battle_Ai_TerrainMoveActorView;
-typedef struct Battle_Ai_TerrainMoveView Battle_Ai_TerrainMoveView;
-typedef struct Battle_Ai_WanderRecordView Battle_Ai_WanderRecordView;
-typedef struct Battle_Ai_WanderView Battle_Ai_WanderView;
-typedef struct Battle_Ai_WaypointSearchView Battle_Ai_WaypointSearchView;
+struct Actors_ActorRecord;
+struct Battle_Actor;
+struct Battle_ActorStats;
+struct Battle_Ai_ActionCandidate;
+struct Battle_Ai_ActionChoiceView;
+struct Battle_Ai_ActionExecutionView;
+struct Battle_Ai_ActionMetadataView;
+struct Battle_Ai_ActionPlanView;
+struct Battle_Ai_ActionSlotMetadata;
+struct Battle_Ai_ActorAiState;
+struct Battle_Ai_AiActorView;
+struct Battle_Ai_AiCreationView;
+struct Battle_Ai_ApproachActorView;
+struct Battle_Ai_ApproachTargetRecordView;
+struct Battle_Ai_AreaRouteView;
+struct Battle_Ai_BlockedRecoveryView;
+struct Battle_Ai_CandidateMovementView;
+struct Battle_Ai_CandidateReadinessView;
+struct Battle_Ai_CheckObjectView;
+struct Battle_Ai_CreationModelView;
+struct Battle_Ai_CreationStatsView;
+struct Battle_Ai_DecisionDispatchView;
+struct Battle_Ai_DirectionCacheView;
+struct Battle_Ai_EngagementActorView;
+struct Battle_Ai_EngagementData;
+struct Battle_Ai_EngagementView;
+struct Battle_Ai_EscortEntryView;
+struct Battle_Ai_EscortRelationsView;
+struct Battle_Ai_EscortView;
+struct Battle_Ai_FloorHeightView;
+struct Battle_Ai_MetadataStatsView;
+struct Battle_Ai_ModelActiveView;
+struct Battle_Ai_ModelStatePrefix;
+struct Battle_Ai_MoveTargetView;
+struct Battle_Ai_MovementCheckView;
+struct Battle_Ai_MovementDecisionView;
+struct Battle_Ai_MovementDestinationView;
+struct Battle_Ai_MovementPathView;
+struct Battle_Ai_MovementRecoveryView;
+struct Battle_Ai_MovementStepView;
+struct Battle_Ai_ObstructionModel;
+struct Battle_Ai_ObstructionView;
+struct Battle_Ai_OrbitStatsView;
+struct Battle_Ai_OrbitTrackingView;
+struct Battle_Ai_PatrolView;
+struct Battle_Ai_PerceivedObjectView;
+struct Battle_Ai_PerceptionUpdateView;
+struct Battle_Ai_PerceptionView;
+struct Battle_Ai_PlanEvaluationView;
+struct Battle_Ai_PositionLinkView;
+struct Battle_Ai_RadialRetreatView;
+struct Battle_Ai_ReactionView;
+struct Battle_Ai_RecoveryModelView;
+struct Battle_Ai_RoomAiState;
+struct Battle_Ai_SettingsActorView;
+struct Battle_Ai_SettingsView;
+struct Battle_Ai_TargetApproachView;
+struct Battle_Ai_TerrainMoveActorView;
+struct Battle_Ai_TerrainMoveView;
+struct Battle_Ai_WanderRecordView;
+struct Battle_Ai_WanderView;
+struct Battle_Ai_WaypointSearchView;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -79,7 +79,7 @@ typedef struct Battle_Ai_WaypointSearchView Battle_Ai_WaypointSearchView;
 #endif
 
 // layout: ledger (upstream merge) for D_800F58BC_t
-typedef struct Battle_Ai_RoomAiState {
+struct Battle_Ai_RoomAiState {
     /* 0x00 */ u_char maxTileX;
     /* 0x01 */ u_char maxTileZ;
     /* 0x02 */ u_char minTileX;
@@ -111,10 +111,10 @@ typedef struct Battle_Ai_RoomAiState {
     /* 0x20 */ Battle_Ai_ActorAiState *engagedTail;
     /* 0x24 */ int approachMoves;
     /* 0x28 */ Battle_Actor *specialActors[4];
-} Battle_Ai_RoomAiState;
+};
 
 // decomp: actionCandidateState (src/BATTLE/BATTLE.PRG/6FC00.c:513)
-typedef struct Battle_Ai_CandidateReadinessView {
+struct Battle_Ai_CandidateReadinessView {
     char reserved0_0[84];
     void* nativePointer54; /* PS1 pointer slot 0x54 */
     void* nativePointer58; /* PS1 pointer slot 0x58 */
@@ -135,10 +135,10 @@ typedef struct Battle_Ai_CandidateReadinessView {
     char reserved224_230[512];
     Battle_Ai_CandidateEntryView* candidateOrder[16];
     int candidateCount;
-} Battle_Ai_CandidateReadinessView;
+};
 
 // decomp: actionChoiceState (src/BATTLE/BATTLE.PRG/74088.c:885)
-typedef struct Battle_Ai_ActionChoiceView {
+struct Battle_Ai_ActionChoiceView {
     char reserved0[0x1B];
     u_char isDead;
     char reserved1C_1C[56];
@@ -159,10 +159,10 @@ typedef struct Battle_Ai_ActionChoiceView {
     char reserved154_1A4[136];
     void* nativePointer22C; /* PS1 pointer slot 0x22C */
     Battle_Ai_ActionSlotConfigView actionSlots[6][4];
-} Battle_Ai_ActionChoiceView;
+};
 
 // decomp: actionDispatchState (src/BATTLE/BATTLE.PRG/71618.c:1085)
-typedef struct Battle_Ai_DecisionDispatchView {
+struct Battle_Ai_DecisionDispatchView {
     unsigned int opaque0, opaque4, opaque8;
     unsigned short reservedC, reservedE;
     char reserved10[4];
@@ -204,10 +204,10 @@ typedef struct Battle_Ai_DecisionDispatchView {
     char reserved1E8_230[512];
     Battle_Ai_DispatchEntryView* candidateOrder[16];
     int candidateCount;
-} Battle_Ai_DecisionDispatchView;
+};
 
 // decomp: actionMetadataState (src/BATTLE/BATTLE.PRG/7CD68.c:525)
-typedef struct Battle_Ai_ActionMetadataView {
+struct Battle_Ai_ActionMetadataView {
     char reserved0[0x17];
     unsigned char actionCostEnabled;
     char reserved18_18[60];
@@ -226,10 +226,10 @@ typedef struct Battle_Ai_ActionMetadataView {
     char reserved89_1A4[136];
     void* nativePointer22C; /* PS1 pointer slot 0x22C */
     Battle_Ai_ActionMetadataEntry actionSlots[6][4];
-} Battle_Ai_ActionMetadataView;
+};
 
 // decomp: actionPlanState (src/BATTLE/BATTLE.PRG/74088.c:1284)
-typedef struct Battle_Ai_ActionPlanView {
+struct Battle_Ai_ActionPlanView {
     char reserved0[0x26];
     u_char allowFallbackAction;
     char reserved27[0x2D];
@@ -255,10 +255,10 @@ typedef struct Battle_Ai_ActionPlanView {
     Battle_Ai_CandidateEntryView candidates[16];
     Battle_Ai_CandidateEntryView* candidateOrder[16];
     int candidateCount;
-} Battle_Ai_ActionPlanView;
+};
 
 // decomp: actionReactionState (src/BATTLE/BATTLE.PRG/74088.c:703)
-typedef struct Battle_Ai_ReactionView {
+struct Battle_Ai_ReactionView {
     char reserved0[0x13];
     union { u_char usesRoomActionDelay; u_char temporaryAshleyAlliance; };
     char reserved14[12];
@@ -292,10 +292,10 @@ typedef struct Battle_Ai_ReactionView {
     char reserved12E_190[16];
     void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_RelationWordView relations[16];
-} Battle_Ai_ReactionView;
+};
 
 // decomp: actorEvaluationState (src/BATTLE/BATTLE.PRG/74088.c:1538)
-typedef struct Battle_Ai_PlanEvaluationView {
+struct Battle_Ai_PlanEvaluationView {
     char reserved0[19];
     unsigned char usesRoomActionDelay;
     char reserved14[7];
@@ -318,10 +318,10 @@ typedef struct Battle_Ai_PlanEvaluationView {
     void* nativePointer18C; /* PS1 pointer slot 0x18C */
     char reservedE9_190[10];
     unsigned char opaque19A;
-} Battle_Ai_PlanEvaluationView;
+};
 
 // decomp: actorInitializationActor (src/BATTLE/BATTLE.PRG/7CD68.c:869)
-typedef struct Battle_Ai_AiActorView {
+struct Battle_Ai_AiActorView {
     void* nativePointer0; /* PS1 pointer slot 0x0 */
     int actorId;
     Battle_Ai_ActorStateFlags stateFlags;
@@ -336,10 +336,10 @@ typedef struct Battle_Ai_AiActorView {
     Battle_Ai_CreationStatsView* stats;
     int listExemptFlag;
     Battle_Ai_CreationModelView* model;
-} Battle_Ai_AiActorView;
+};
 
 // decomp: actorInitializationState (src/BATTLE/BATTLE.PRG/7CD68.c:927)
-typedef struct Battle_Ai_AiCreationView {
+struct Battle_Ai_AiCreationView {
     char reserved0[42];
     unsigned char hasTaggedBone3;
     char reserved2B[9];
@@ -401,10 +401,10 @@ typedef struct Battle_Ai_AiCreationView {
     unsigned char opaque225;
     unsigned char opaque226;
     unsigned char opaque227;
-} Battle_Ai_AiCreationView;
+};
 
 // decomp: actorRelationState (src/BATTLE/BATTLE.PRG/6FC00.c:638)
-typedef struct Battle_Ai_PerceptionView {
+struct Battle_Ai_PerceptionView {
     char reserved0[0x22];
     u_char settingsBit23;
     char reserved23[2];
@@ -439,10 +439,10 @@ typedef struct Battle_Ai_PerceptionView {
     void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_TargetRelation relations[16];
     u_int distancesSquared[16];
-} Battle_Ai_PerceptionView;
+};
 
 // decomp: actorSettingsState (src/BATTLE/BATTLE.PRG/7CD68.c:673)
-typedef struct Battle_Ai_SettingsView {
+struct Battle_Ai_SettingsView {
     char reserved0[22];
     unsigned char linkedActor;
     char reserved17[2];
@@ -504,10 +504,10 @@ typedef struct Battle_Ai_SettingsView {
     unsigned short angle;
     char reserved12A[52];
     unsigned short movementFlags;
-} Battle_Ai_SettingsView;
+};
 
 // decomp: actorTimerState (src/BATTLE/BATTLE.PRG/73700.c:462)
-typedef struct Battle_Ai_EngagementView {
+struct Battle_Ai_EngagementView {
     char reserved0[0x54];
     Battle_Ai_EngagementActorView* actor;
     void* nativePointer58; /* PS1 pointer slot 0x58 */
@@ -528,10 +528,10 @@ typedef struct Battle_Ai_EngagementView {
     char reserved131_190[16];
     struct Battle_Ai_EngagementView* nextEngaged;
     unsigned char targetFlags;
-} Battle_Ai_EngagementView;
+};
 
 // decomp: actorUpdateState (src/BATTLE/BATTLE.PRG/6FC00.c:958)
-typedef struct Battle_Ai_PerceptionUpdateView {
+struct Battle_Ai_PerceptionUpdateView {
     char reserved0[8];
     u_char opaque8;
     char reserved9[5];
@@ -604,10 +604,10 @@ typedef struct Battle_Ai_PerceptionUpdateView {
     char reserved19B_19B[5];
     void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     u_int relations[16];
-} Battle_Ai_PerceptionUpdateView;
+};
 
 // decomp: candidateMovementState (src/BATTLE/BATTLE.PRG/71618.c:504)
-typedef struct Battle_Ai_CandidateMovementView {
+struct Battle_Ai_CandidateMovementView {
     char reserved0[1];
     unsigned char opaque1;
     char reserved2[74];
@@ -659,10 +659,10 @@ typedef struct Battle_Ai_CandidateMovementView {
     void* nativePointer468; /* PS1 pointer slot 0x468 */
     void* nativePointer46C; /* PS1 pointer slot 0x46C */
     int candidateCount;
-} Battle_Ai_CandidateMovementView;
+};
 
 // decomp: da4bcState (src/BATTLE/BATTLE.PRG/71618.c:747)
-typedef struct Battle_Ai_EscortView {
+struct Battle_Ai_EscortView {
     char reserved0[14];
     unsigned char opaqueE, opaqueF;
     char reserved10[6];
@@ -706,10 +706,10 @@ typedef struct Battle_Ai_EscortView {
     void* nativePointer22C; /* PS1 pointer slot 0x22C */
     char reserved224_230[512];
     Battle_Ai_EscortEntryView* candidateOrder[16];
-} Battle_Ai_EscortView;
+};
 
 // decomp: da4bcTargetState (src/BATTLE/BATTLE.PRG/71618.c:771)
-typedef struct Battle_Ai_EscortRelationsView {
+struct Battle_Ai_EscortRelationsView {
     char reserved0_0[84];
     void* nativePointer54; /* PS1 pointer slot 0x54 */
     void* nativePointer58; /* PS1 pointer slot 0x58 */
@@ -722,10 +722,10 @@ typedef struct Battle_Ai_EscortRelationsView {
     char reserved0_190[16];
     void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_EscortRelationBits relations[16];
-} Battle_Ai_EscortRelationsView;
+};
 
 // decomp: directionalCacheState (src/BATTLE/BATTLE.PRG/771A8.c:896)
-typedef struct Battle_Ai_DirectionCacheView {
+struct Battle_Ai_DirectionCacheView {
     char reserved0[0x34];
     Battle_Ai_DirectionCacheTile tile, previousTile;
     char reserved3C_3C[24];
@@ -737,10 +737,10 @@ typedef struct Battle_Ai_DirectionCacheView {
     void* nativePointer68; /* PS1 pointer slot 0x68 */
     char reserved3C_6C[82];
     short flightHeight;
-} Battle_Ai_DirectionCacheView;
+};
 
 // decomp: func_800D8400_t (src/BATTLE/BATTLE.PRG/6FC00.c:426)
-typedef struct Battle_Ai_MoveTargetView {
+struct Battle_Ai_MoveTargetView {
     unsigned char reserved0[7];
     unsigned char movementDisabled;
     unsigned char reserved8[0x2C];
@@ -754,10 +754,10 @@ typedef struct Battle_Ai_MoveTargetView {
     void* nativePointer68; /* PS1 pointer slot 0x68 */
     char reserved38_6C[252];
     Battle_Ai_TilePosition destination;
-} Battle_Ai_MoveTargetView;
+};
 
 // decomp: func_800DCAA0_t (src/BATTLE/BATTLE.PRG/6F014.c:112)
-typedef struct Battle_Ai_ActionCandidate {
+struct Battle_Ai_ActionCandidate {
     int opaque0;
     u_int row : 3;
     u_int column : 2;
@@ -771,11 +771,11 @@ typedef struct Battle_Ai_ActionCandidate {
     u_int weight : 8;
     u_int reservedFBit3 : 5;
     Battle_Ai_CandidateFlags opaque10;
-} Battle_Ai_ActionCandidate;
+};
 static_assert(sizeof(Battle_Ai_ActionCandidate) == 0x14, "Battle_Ai_ActionCandidate must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800DD604_t
-typedef struct Battle_Ai_ActionSlotMetadata {
+struct Battle_Ai_ActionSlotMetadata {
     /* 0x00 */ u_int reserved0Bit0 : 1;
     /* 0x00 */ u_int opaque0Bit1 : 1;
     /* 0x00 */ u_int opaque0Bit2 : 1;
@@ -786,11 +786,11 @@ typedef struct Battle_Ai_ActionSlotMetadata {
     /* 0x01 */ u_int radius : 16;
     /* 0x03 */ u_int reserved3Bit0 : 8;
     /* 0x04 */ u_int rangeSquared;
-} Battle_Ai_ActionSlotMetadata;
+};
 static_assert(sizeof(Battle_Ai_ActionSlotMetadata) == 0x8, "Battle_Ai_ActionSlotMetadata must keep its PS1 layout");
 
 // decomp: func_800DEEA4_t2 (src/BATTLE/BATTLE.PRG/6F014.c:437)
-typedef struct Battle_Ai_ActionExecutionView {
+struct Battle_Ai_ActionExecutionView {
     char reserved0[0x16];
     signed char linkedActor;
     char reserved17[0x21];
@@ -819,10 +819,10 @@ typedef struct Battle_Ai_ActionExecutionView {
     char reserved13A_230[512];
     Battle_Ai_ActionCandidate* candidateOrder[16];
     int candidateCount;
-} Battle_Ai_ActionExecutionView;
+};
 
 // decomp: func_800E0850_t (src/BATTLE/BATTLE.PRG/6F014.c:412)
-typedef struct Battle_Ai_FloorHeightView {
+struct Battle_Ai_FloorHeightView {
     char reserved0[7];
     u_char movementDisabled;
     char reserved8[0x2C];
@@ -851,10 +851,10 @@ typedef struct Battle_Ai_FloorHeightView {
     void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     char reserved18A_1A4[132];
     int stallCounter;
-} Battle_Ai_FloorHeightView;
+};
 
 // layout: ledger (upstream merge) for func_800E78F4_t
-typedef struct Battle_Ai_ActorAiState {
+struct Battle_Ai_ActorAiState {
     /* 0x00 */ char reserved0;
     /* 0x01 */ u_char opaque1;
     /* 0x02 */ u_char isStuck;
@@ -1113,10 +1113,10 @@ typedef struct Battle_Ai_ActorAiState {
         u_char movementModeCounters[13];
     };
     /* 0x481 */ u_char reactionPending;
-} Battle_Ai_ActorAiState;
+};
 
 // decomp: movementCheckState (src/BATTLE/BATTLE.PRG/771A8.c:979)
-typedef struct Battle_Ai_MovementCheckView {
+struct Battle_Ai_MovementCheckView {
     char reserved0[0x34];
     int tile;
     char reserved38_38[28];
@@ -1132,10 +1132,10 @@ typedef struct Battle_Ai_MovementCheckView {
     unsigned short movementFlags;
     char reserved160[8];
     int destination;
-} Battle_Ai_MovementCheckView;
+};
 
 // decomp: movementDecisionContext (src/BATTLE/BATTLE.PRG/771A8.c:2182)
-typedef struct Battle_Ai_MovementDecisionView {
+struct Battle_Ai_MovementDecisionView {
     char reserved0[0x4C];
     short x;
     short padding4E;
@@ -1189,10 +1189,10 @@ typedef struct Battle_Ai_MovementDecisionView {
     void* nativePointer46C; /* PS1 pointer slot 0x46C */
     char padding1E8_470[17];
     u_char reactionPending;
-} Battle_Ai_MovementDecisionView;
+};
 
 // decomp: movementDestinationState (src/BATTLE/BATTLE.PRG/771A8.c:1385)
-typedef struct Battle_Ai_MovementDestinationView {
+struct Battle_Ai_MovementDestinationView {
     char reserved0[0xD];
     unsigned char opaqueD;
     char reservedE[0x26];
@@ -1221,10 +1221,10 @@ typedef struct Battle_Ai_MovementDestinationView {
     Battle_Ai_TilePosition nextTile;
     char reserved174[8];
     int moveX, moveZ;
-} Battle_Ai_MovementDestinationView;
+};
 
 // decomp: movementPathState (src/BATTLE/BATTLE.PRG/771A8.c:2381)
-typedef struct Battle_Ai_MovementPathView {
+struct Battle_Ai_MovementPathView {
     char reserved0;
     u_char opaque1;
     char reserved2[2];
@@ -1260,7 +1260,7 @@ typedef struct Battle_Ai_MovementPathView {
     char reserved194[5];
     u_char opaque199;
     u_char waitTimer;
-} Battle_Ai_MovementPathView;
+};
 
 // decomp: movementRecoveryState (src/BATTLE/BATTLE.PRG/771A8.c:2243)
 struct Battle_Ai_MovementRecoveryView {
@@ -1294,10 +1294,10 @@ struct Battle_Ai_MovementRecoveryView {
     char reserved18C_1A4[132];
     int stallCounter;
 };
-typedef struct Battle_Ai_MovementRecoveryView Battle_Ai_MovementRecoveryView;
+struct Battle_Ai_MovementRecoveryView;
 
 // decomp: movementStepState (src/BATTLE/BATTLE.PRG/771A8.c:1051)
-typedef struct Battle_Ai_MovementStepView {
+struct Battle_Ai_MovementStepView {
     unsigned char opaque0;
     char reserved1[6];
     unsigned char movementDisabled;
@@ -1331,16 +1331,16 @@ typedef struct Battle_Ai_MovementStepView {
     void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     char reserved18A_1A4[132];
     int stallCounter;
-} Battle_Ai_MovementStepView;
+};
 
 // decomp: nearestWaypointState (src/BATTLE/BATTLE.PRG/74088.c:941)
-typedef struct Battle_Ai_WaypointSearchView {
+struct Battle_Ai_WaypointSearchView {
     char reserved0[0x4C];
     short x, y, z;
-} Battle_Ai_WaypointSearchView;
+};
 
 // decomp: obstructionState (src/BATTLE/BATTLE.PRG/771A8.c:790)
-typedef struct Battle_Ai_ObstructionView {
+struct Battle_Ai_ObstructionView {
     char reserved0[0x4C];
     Battle_Ai_ObstructionVector position;
     void* nativePointer54; /* PS1 pointer slot 0x54 */
@@ -1357,10 +1357,10 @@ typedef struct Battle_Ai_ObstructionView {
     unsigned char maxRange;
     char reservedB4[4];
     short height;
-} Battle_Ai_ObstructionView;
+};
 
 // decomp: patrolWaypointState (src/BATTLE/BATTLE.PRG/771A8.c:1854)
-typedef struct Battle_Ai_PatrolView {
+struct Battle_Ai_PatrolView {
     char reserved0[0x34];
     Battle_Ai_TilePosition tile;
     char reserved38_38[28];
@@ -1374,7 +1374,7 @@ typedef struct Battle_Ai_PatrolView {
     unsigned char index, row, rate, direction, opaque104;
     char reserved105[0x63];
     Battle_Ai_TilePosition destination;
-} Battle_Ai_PatrolView;
+};
 
 // decomp: radialMotionState (src/BATTLE/BATTLE.PRG/7EE98.c:480)
 struct Battle_Ai_RadialRetreatView {
@@ -1414,10 +1414,10 @@ struct Battle_Ai_RadialRetreatView {
     void* nativePointer46C; /* PS1 pointer slot 0x46C */
     int candidateCount;
 };
-typedef struct Battle_Ai_RadialRetreatView Battle_Ai_RadialRetreatView;
+struct Battle_Ai_RadialRetreatView;
 
 // decomp: routeEdgeState (src/BATTLE/BATTLE.PRG/771A8.c:554)
-typedef struct Battle_Ai_AreaRouteView {
+struct Battle_Ai_AreaRouteView {
     char reserved0[5];
     u_char opaque5;
     char reserved6[0x2E];
@@ -1456,10 +1456,10 @@ typedef struct Battle_Ai_AreaRouteView {
     char reserved18C_190[11];
     u_char gate;
     Battle_Ai_RouteGateTile exit;
-} Battle_Ai_AreaRouteView;
+};
 
 // decomp: stuckMovementState (src/BATTLE/BATTLE.PRG/71618.c:1210)
-typedef struct Battle_Ai_BlockedRecoveryView {
+struct Battle_Ai_BlockedRecoveryView {
     char reserved0[2];
     u_char isStuck;
     char reserved3[0x19];
@@ -1487,10 +1487,10 @@ typedef struct Battle_Ai_BlockedRecoveryView {
     u_char movementTarget;
     char reserved15D[0xB];
     Battle_Ai_BlockedTileWord destination;
-} Battle_Ai_BlockedRecoveryView;
+};
 
 // decomp: targetMovementState (src/BATTLE/BATTLE.PRG/771A8.c:1967)
-typedef struct Battle_Ai_TargetApproachView {
+struct Battle_Ai_TargetApproachView {
     unsigned char opaque0;
     unsigned char opaque1;
     char reserved2[1];
@@ -1555,10 +1555,10 @@ typedef struct Battle_Ai_TargetApproachView {
     void* nativePointer1A0; /* PS1 pointer slot 0x1A0 */
     Battle_Ai_ApproachRelationBits relations[16];
     unsigned int distancesSquared[16];
-} Battle_Ai_TargetApproachView;
+};
 
 // decomp: terrainMovementState (src/BATTLE/BATTLE.PRG/771A8.c:1508)
-typedef struct Battle_Ai_TerrainMoveView {
+struct Battle_Ai_TerrainMoveView {
     char reserved0[2];
     unsigned char isStuck;
     char reserved3[1];
@@ -1586,7 +1586,7 @@ typedef struct Battle_Ai_TerrainMoveView {
     int moveZ;
     char reserved184[4];
     short angle;
-} Battle_Ai_TerrainMoveView;
+};
 
 // decomp: trackingMotionState (src/BATTLE/BATTLE.PRG/7EE98.c:571)
 struct Battle_Ai_OrbitTrackingView {
@@ -1604,10 +1604,10 @@ struct Battle_Ai_OrbitTrackingView {
     char reserved15D[0x1F];
     int moveX, moveZ, moveY;
 };
-typedef struct Battle_Ai_OrbitTrackingView Battle_Ai_OrbitTrackingView;
+struct Battle_Ai_OrbitTrackingView;
 
 // decomp: wanderState (src/BATTLE/BATTLE.PRG/771A8.c:1625)
-typedef struct Battle_Ai_WanderView {
+struct Battle_Ai_WanderView {
     char reserved0[2];
     unsigned char isStuck;
     unsigned char opaque3;
@@ -1646,6 +1646,6 @@ typedef struct Battle_Ai_WanderView {
     unsigned short movementFlags;
     char reserved160[8];
     Battle_Ai_TilePosition destination;
-} Battle_Ai_WanderView;
+};
 
 #endif // VS_BATTLE_AI_AISTATE_H_TYPES

@@ -3,7 +3,7 @@
 #define VS_ITEMS_EQUIPMENT_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Items_EquipmentPartStats Items_EquipmentPartStats;
+struct Items_EquipmentPartStats;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -17,10 +17,9 @@ typedef struct Items_EquipmentPartStats Items_EquipmentPartStats;
 
 // decomp: vs_gemTargets (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:166)
 enum Items_GemTarget { Items_GemTarget_Shield = 0x80 };
-typedef enum Items_GemTarget Items_GemTarget;
 
 // decomp: vs_battle_uiEquipment (src/BATTLE/BATTLE.PRG/146C.h:322)
-typedef struct Items_EquipmentPartStats {
+struct Items_EquipmentPartStats {
     /* 0x00 */ u_short id;
     /* 0x02 */ signed char subId;
     /* 0x03 */ signed char weaponModelId;
@@ -45,7 +44,7 @@ typedef struct Items_EquipmentPartStats {
     /* 0x20 */ signed char classes[8];
     /* 0x28 */ signed char affinities[8];
     /* 0x30 */
-} Items_EquipmentPartStats;
+};
 static_assert(sizeof(Items_EquipmentPartStats) == 0x30, "Items_EquipmentPartStats must keep its PS1 layout");
 
 #endif // VS_ITEMS_EQUIPMENT_H_TYPES

@@ -3,15 +3,15 @@
 #define VS_MENU_MAP_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Map_CompassBound Menu_Map_CompassBound;
-typedef struct Menu_Map_MapLabel Menu_Map_MapLabel;
+struct Menu_Map_CompassBound;
+struct Menu_Map_MapLabel;
 
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8) (src/MENU/MENU5.PRG/4D8.c:1064)
 struct Menu_Map_CompassBound {
     int x;
     int y;
 };
-typedef struct Menu_Map_CompassBound Menu_Map_CompassBound;
+struct Menu_Map_CompassBound;
 static_assert(sizeof(Menu_Map_CompassBound) == 0x8, "Menu_Map_CompassBound must keep its PS1 layout");
 
 // decomp: (unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8) (src/MENU/MENU5.PRG/4D8.c:1069)
@@ -21,7 +21,7 @@ struct Menu_Map_MapLabel {
     short type;
     short id;
 };
-typedef struct Menu_Map_MapLabel Menu_Map_MapLabel;
+struct Menu_Map_MapLabel;
 static_assert(sizeof(Menu_Map_MapLabel) == 0x8, "Menu_Map_MapLabel must keep its PS1 layout");
 
 #endif // VS_MENU_MAP_H_TYPES

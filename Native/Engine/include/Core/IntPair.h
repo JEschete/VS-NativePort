@@ -3,13 +3,13 @@
 #define VS_CORE_INTPAIR_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Core_IntPair Core_IntPair;
+struct Core_IntPair;
 
 // decomp: intPair (src/BATTLE/BATTLE.PRG/44F14.c:88)
-typedef struct Core_IntPair {
+struct Core_IntPair {
     int reserved0;
     int reserved4;
-} Core_IntPair;
+};
 static_assert(sizeof(Core_IntPair) == 0x8, "Core_IntPair must keep its PS1 layout");
 
 #endif // VS_CORE_INTPAIR_H_TYPES

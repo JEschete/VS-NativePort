@@ -3,10 +3,10 @@
 #define VS_FIELD_TRIGGERMARKERS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Field_TriggerMarkerVertex Field_TriggerMarkerVertex;
+struct Field_TriggerMarkerVertex;
 
 // decomp: D_800E8594_t (src/BATTLE/BATTLE.PRG/146C.c:197)
-typedef struct Field_TriggerMarkerVertex {
+struct Field_TriggerMarkerVertex {
     short positionX;
     short height;
     short positionZ;
@@ -17,7 +17,7 @@ typedef struct Field_TriggerMarkerVertex {
     int reserved1C;
     int reserved20;
     char lastVertexShade[4];
-} Field_TriggerMarkerVertex;
+};
 static_assert(sizeof(Field_TriggerMarkerVertex) == 0x28, "Field_TriggerMarkerVertex must keep its PS1 layout");
 
 #endif // VS_FIELD_TRIGGERMARKERS_H_TYPES

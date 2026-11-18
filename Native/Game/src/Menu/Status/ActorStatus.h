@@ -6,7 +6,6 @@
 
 // decomp: _renderLimbUiState (src/MENU/MENU4.PRG/120.c:1138)
 enum Menu_Status_LimbUiMode { Menu_Status_LimbUiMode_None, Menu_Status_LimbUiMode_Init };
-typedef enum Menu_Status_LimbUiMode Menu_Status_LimbUiMode;
 
 #endif // VS_MENU_STATUS_ACTORSTATUS_H_TYPES
 

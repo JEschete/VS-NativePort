@@ -3,10 +3,10 @@
 #define VS_BATTLE_TARGETINGSTATE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_TargetPreview Battle_TargetPreview;
+struct Battle_TargetPreview;
 
 // decomp: D_800F19CC_t5 (src/BATTLE/BATTLE.PRG/146C.h:901)
-typedef struct Battle_TargetPreview {
+struct Battle_TargetPreview {
     SVECTOR position;
     u_char kind;
     u_char actorId;
@@ -19,7 +19,7 @@ typedef struct Battle_TargetPreview {
     char opaque15;
     char opaque16;
     char enemyClass;
-} Battle_TargetPreview;
+};
 static_assert(sizeof(Battle_TargetPreview) == 0x18, "Battle_TargetPreview must keep its PS1 layout");
 
 #endif // VS_BATTLE_TARGETINGSTATE_H_TYPES

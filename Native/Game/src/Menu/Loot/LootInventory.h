@@ -3,7 +3,7 @@
 #define VS_MENU_LOOT_LOOTINVENTORY_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Loot_LootListItem Menu_Loot_LootListItem;
+struct Menu_Loot_LootListItem;
 
 // decomp: lootItemState (src/MENU/MENUB.PRG/260.c:15)
 enum Menu_Loot_LootItemState {
@@ -14,15 +14,14 @@ enum Menu_Loot_LootItemState {
     Menu_Loot_LootItemState_Indent2,
     Menu_Loot_LootItemState_Indent3
 };
-typedef enum Menu_Loot_LootItemState Menu_Loot_LootItemState;
 
 // decomp: _lootListItem (src/MENU/MENUB.PRG/260.c:29)
-typedef struct Menu_Loot_LootListItem {
+struct Menu_Loot_LootListItem {
     char itemCategory;
     u_char itemIndex;
     char opaque2;
     char state;
-} Menu_Loot_LootListItem;
+};
 static_assert(sizeof(Menu_Loot_LootListItem) == 0x4, "Menu_Loot_LootListItem must keep its PS1 layout");
 
 #endif // VS_MENU_LOOT_LOOTINVENTORY_H_TYPES

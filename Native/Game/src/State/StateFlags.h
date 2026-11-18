@@ -3,10 +3,10 @@
 #define VS_STATE_STATEFLAGS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct State_StateFlags State_StateFlags;
+struct State_StateFlags;
 
 // decomp: vs_main_flags_t (src/SLUS_010.40/main.h:366)
-typedef struct State_StateFlags {
+struct State_StateFlags {
     char clearCount;
     char difficulty;
     char normalModeCleared;
@@ -132,7 +132,7 @@ typedef struct State_StateFlags {
     char reserved3A0[32];
     char chestsOpened[64];
     char reserved400[64];
-} State_StateFlags;
+};
 static_assert(sizeof(State_StateFlags) == 0x440, "State_StateFlags must keep its PS1 layout");
 
 #endif // VS_STATE_STATEFLAGS_H_TYPES

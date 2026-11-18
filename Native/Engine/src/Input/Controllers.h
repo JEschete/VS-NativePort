@@ -3,10 +3,10 @@
 #define VS_INPUT_CONTROLLERS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Input_ControllerPortState Input_ControllerPortState;
+struct Input_ControllerPortState;
 
 // decomp: portInfo_t (src/SLUS_010.40/main.h:19)
-typedef struct Input_ControllerPortState {
+struct Input_ControllerPortState {
     char controllerType;
     char extendedType;
     char buttonBits;
@@ -17,7 +17,7 @@ typedef struct Input_ControllerPortState {
     char modeLock;
     char actuatorLevels[2];
     char connected;
-} Input_ControllerPortState;
+};
 static_assert(sizeof(Input_ControllerPortState) == 0xB, "Input_ControllerPortState must keep its PS1 layout");
 
 #endif // VS_INPUT_CONTROLLERS_H_TYPES

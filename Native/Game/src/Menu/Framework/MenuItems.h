@@ -10,7 +10,6 @@ enum Menu_Framework_MenuItemScroll {
     Menu_Framework_MenuItemScroll_Up,
     Menu_Framework_MenuItemScroll_Down
 };
-typedef enum Menu_Framework_MenuItemScroll Menu_Framework_MenuItemScroll;
 
 // decomp: vs_battle_menuItemState (src/BATTLE/BATTLE.PRG/5BF94.h:33)
 enum Menu_Framework_MenuItemState {
@@ -21,7 +20,6 @@ enum Menu_Framework_MenuItemState {
     Menu_Framework_MenuItemState_SlideXY,
     Menu_Framework_MenuItemState_Dismiss = 5
 };
-typedef enum Menu_Framework_MenuItemState Menu_Framework_MenuItemState;
 
 // decomp: vs_battle_menuStates (src/BATTLE/BATTLE.PRG/5BF94.h:68)
 enum Menu_Framework_MenuState {
@@ -30,6 +28,5 @@ enum Menu_Framework_MenuState {
     Menu_Framework_MenuState_NoneClosed = 0x3F,
     Menu_Framework_MenuState_OpenedFromMainMenu = 0x40
 };
-typedef enum Menu_Framework_MenuState Menu_Framework_MenuState;
 
 #endif // VS_MENU_FRAMEWORK_MENUITEMS_H_TYPES

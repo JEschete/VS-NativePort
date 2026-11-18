@@ -3,10 +3,10 @@
 #define VS_MENU_FRAMEWORK_TEXTBOXES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Framework_TextBoxSelector Menu_Framework_TextBoxSelector;
-typedef struct Menu_StringContext Menu_StringContext;
-typedef struct Menu_TextAnchorWord Menu_TextAnchorWord;
-typedef struct Menu_TextBoxState Menu_TextBoxState;
+struct Menu_Framework_TextBoxSelector;
+struct Menu_StringContext;
+struct Menu_TextAnchorWord;
+struct Menu_TextBoxState;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -25,36 +25,35 @@ enum Menu_InformationBoxHeader {
     Menu_InformationBoxHeader_Information,
     Menu_InformationBoxHeader_Check
 };
-typedef enum Menu_InformationBoxHeader Menu_InformationBoxHeader;
 
 // decomp: _textBoxSelector_t (src/BATTLE/BATTLE.PRG/5BF94.c:186)
-typedef struct Menu_Framework_TextBoxSelector {
+struct Menu_Framework_TextBoxSelector {
     u_char order[8];
     u_char reserved8;
     u_char reserved9;
     u_char selectedIndex;
     u_char count;
     u_char reservedC;
-} Menu_Framework_TextBoxSelector;
+};
 static_assert(sizeof(Menu_Framework_TextBoxSelector) == 0xD, "Menu_Framework_TextBoxSelector must keep its PS1 layout");
 
 // decomp: func_800CCE10_t (src/BATTLE/BATTLE.PRG/5BF94.c:307)
-typedef struct Menu_TextAnchorWord {
+struct Menu_TextAnchorWord {
     int x : 12;
     int y : 12;
     u_int alignment : 2;
     u_int opaque3Bit2 : 4;
-} Menu_TextAnchorWord;
+};
 static_assert(sizeof(Menu_TextAnchorWord) == 0x4, "Menu_TextAnchorWord must keep its PS1 layout");
 
 // decomp: vs_battle_stringContext_t (src/BATTLE/BATTLE.PRG/5BF94.h:165)
-typedef struct Menu_StringContext {
+struct Menu_StringContext {
     int integers[10];
     char* strings[10];
-} Menu_StringContext;
+};
 
 // decomp: vs_battle_textBox (src/BATTLE/BATTLE.PRG/5BF94.h:121)
-typedef struct Menu_TextBoxState {
+struct Menu_TextBoxState {
     Battle_TextBoxFlags flags;
     short opaque4;
     short opaque6;
@@ -80,7 +79,7 @@ typedef struct Menu_TextBoxState {
     short frameHeight;
     short opaque2C;
     short opaque2E;
-} Menu_TextBoxState;
+};
 
 #endif // VS_MENU_FRAMEWORK_TEXTBOXES_H_TYPES
 

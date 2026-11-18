@@ -3,34 +3,34 @@
 #define VS_FIELD_ROOM_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Field_MapScene Field_MapScene;
-typedef struct Field_MpdCollisionHeader Field_MpdCollisionHeader;
-typedef struct Field_MpdDoorRecord Field_MpdDoorRecord;
-typedef struct Field_MpdEnvironment Field_MpdEnvironment;
-typedef struct Field_MpdFloorTrigger Field_MpdFloorTrigger;
-typedef struct Field_MpdLockTrigger Field_MpdLockTrigger;
-typedef struct Field_MpdMovingPlatform Field_MpdMovingPlatform;
-typedef struct Field_MpdSectionE Field_MpdSectionE;
-typedef struct Field_MpdTileCell Field_MpdTileCell;
-typedef struct Field_MpdViewTrigger Field_MpdViewTrigger;
-typedef struct Field_RoomRecord Field_RoomRecord;
-typedef struct Field_RoomTint Field_RoomTint;
-typedef struct Field_ZoneBounds Field_ZoneBounds;
-typedef struct Items_TreasureChest Items_TreasureChest;
+struct Field_MapScene;
+struct Field_MpdCollisionHeader;
+struct Field_MpdDoorRecord;
+struct Field_MpdEnvironment;
+struct Field_MpdFloorTrigger;
+struct Field_MpdLockTrigger;
+struct Field_MpdMovingPlatform;
+struct Field_MpdSectionE;
+struct Field_MpdTileCell;
+struct Field_MpdViewTrigger;
+struct Field_RoomRecord;
+struct Field_RoomTint;
+struct Field_ZoneBounds;
+struct Items_TreasureChest;
 
 // decomp: D_800F1BB0_t (src/BATTLE/BATTLE.PRG/146C.c:168)
-typedef struct Field_RoomTint {
+struct Field_RoomTint {
     signed char red;
     signed char green;
     signed char blue;
     char reserved03;
     short strength;
     short isActive;
-} Field_RoomTint;
+};
 static_assert(sizeof(Field_RoomTint) == 0x8, "Field_RoomTint must keep its PS1 layout");
 
 // decomp: _mpdRoomSection (src/BATTLE/BATTLE.PRG/146C.h:270)
-typedef struct Field_RoomRecord {
+struct Field_RoomRecord {
     char isLoaded;
     char displayFlag;
     short roomIndex;
@@ -84,7 +84,7 @@ typedef struct Field_RoomRecord {
     void* section16; /* a section pointer (filled with the others) */
     void* section17; /* a section pointer (filled with the others) */
     Field_ZoneBounds* zoneBounds;
-} Field_RoomRecord;
+};
 
 #endif // VS_FIELD_ROOM_H_TYPES
 

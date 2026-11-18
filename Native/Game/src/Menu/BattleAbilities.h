@@ -6,7 +6,6 @@
 
 // decomp: abilityType (src/MENU/MENU2.PRG/64.c:55)
 enum Menu_BattleAbilities_AbilityType { Menu_BattleAbilities_AbilityType_Chain = 24, Menu_BattleAbilities_AbilityType_Defense };
-typedef enum Menu_BattleAbilities_AbilityType Menu_BattleAbilities_AbilityType;
 
 #endif // VS_MENU_BATTLEABILITIES_H_TYPES
 

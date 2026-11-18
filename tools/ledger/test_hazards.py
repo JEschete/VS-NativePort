@@ -233,6 +233,12 @@ class CapacityTests(unittest.TestCase):
         found = [item for item in scan_all(header, self.INVENTORY) if item.detail == "Items_Inventory.gems[48]"]
         self.assertEqual(found[0].line, 5)
 
+    def test_a_cpp_struct_definition_is_scanned_through_its_nested_braces(self) -> None:
+        header = ("struct Items_Inventory;\nint gems;\n\nstruct Items_Inventory {\n    union {\n        int raw;\n    };\n"
+                  "    Items_InventoryGem gems[48];\n};\n")
+        found = [item for item in scan_all(header, self.INVENTORY) if item.detail == "Items_Inventory.gems[48]"]
+        self.assertEqual([item.line for item in found], [8])
+
     def test_a_narrow_id_field_is_found(self) -> None:
         header = "typedef struct Items_InventoryWeapon {\n    u_char blade;\n    char isEquipped;\n} Items_InventoryWeapon;\n"
         found = [item.detail for item in scan_all(header, self.INVENTORY) if item.hazard_class == "NARROW-ID"]

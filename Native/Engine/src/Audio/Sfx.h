@@ -3,16 +3,16 @@
 #define VS_AUDIO_SFX_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_SfxSlotRequest Audio_SfxSlotRequest;
+struct Audio_SfxSlotRequest;
 
 // decomp: func_800172D4_t (src/SLUS_010.40/25AC.c:56)
-typedef struct Audio_SfxSlotRequest {
+struct Audio_SfxSlotRequest {
     int index;
     int reserved04;
     int reserved08;
     int reserved0C;
     int reserved10;
-} Audio_SfxSlotRequest;
+};
 static_assert(sizeof(Audio_SfxSlotRequest) == 0x14, "Audio_SfxSlotRequest must keep its PS1 layout");
 
 #endif // VS_AUDIO_SFX_H_TYPES

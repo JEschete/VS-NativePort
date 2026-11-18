@@ -5,18 +5,18 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-typedef struct CdlATV {
+struct CdlATV {
   u_char val0, val1, val2, val3;
-} CdlATV;
+};
 
-typedef struct DslLOC {
+struct DslLOC {
   u_char minute, second, sector, track;
-} DslLOC;
+};
 
-typedef struct DslFILTER {
+struct DslFILTER {
   u_char file, chan;
   u_short pad;
-} DslFILTER;
+};
 
 int DsInit();
 int DsGetSector(void* madr, int size);

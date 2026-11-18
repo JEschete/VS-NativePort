@@ -3,65 +3,65 @@
 #define VS_EFFECTS_PARTICLES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Effects_FixedVector Effects_FixedVector;
-typedef struct Effects_PackageTextureInfo Effects_PackageTextureInfo;
-typedef struct Effects_Particle Effects_Particle;
-typedef struct Effects_ParticleAttractionView Effects_ParticleAttractionView;
-typedef union Effects_ParticleColorWord Effects_ParticleColorWord;
-typedef struct Effects_ParticleDefinition Effects_ParticleDefinition;
-typedef struct Effects_ParticleEmitterScratch Effects_ParticleEmitterScratch;
-typedef struct Effects_ParticleEndpointView Effects_ParticleEndpointView;
-typedef struct Effects_ParticleGravity Effects_ParticleGravity;
-typedef struct Effects_ParticleMotion Effects_ParticleMotion;
-typedef struct Effects_ParticleMotionView Effects_ParticleMotionView;
-typedef struct Effects_ParticleQuadSet Effects_ParticleQuadSet;
-typedef struct Effects_ParticleQuadWord Effects_ParticleQuadWord;
-typedef struct Effects_ParticleTextureAnimation Effects_ParticleTextureAnimation;
-typedef struct Effects_PluginEffectState Effects_PluginEffectState;
-typedef struct Effects_Trail Effects_Trail;
-typedef struct Effects_TrailQuadSet Effects_TrailQuadSet;
+struct Effects_FixedVector;
+struct Effects_PackageTextureInfo;
+struct Effects_Particle;
+struct Effects_ParticleAttractionView;
+union Effects_ParticleColorWord;
+struct Effects_ParticleDefinition;
+struct Effects_ParticleEmitterScratch;
+struct Effects_ParticleEndpointView;
+struct Effects_ParticleGravity;
+struct Effects_ParticleMotion;
+struct Effects_ParticleMotionView;
+struct Effects_ParticleQuadSet;
+struct Effects_ParticleQuadWord;
+struct Effects_ParticleTextureAnimation;
+struct Effects_PluginEffectState;
+struct Effects_Trail;
+struct Effects_TrailQuadSet;
 
 // decomp: D_800F5620_t (src/BATTLE/BATTLE.PRG/5BF94.c:113)
-typedef struct Effects_ParticleGravity {
+struct Effects_ParticleGravity {
     int x;
     int y;
     int z;
     int reservedC;
-} Effects_ParticleGravity;
+};
 static_assert(sizeof(Effects_ParticleGravity) == 0x10, "Effects_ParticleGravity must keep its PS1 layout");
 
 // decomp: effectAttractionView (src/BATTLE/BATTLE.PRG/5BF94.c:631)
-typedef struct Effects_ParticleAttractionView {
+struct Effects_ParticleAttractionView {
     char reserved0[0x62];
     short targetX, targetY, targetZ;
     char reserved68[8];
     int attraction;
-} Effects_ParticleAttractionView;
+};
 static_assert(sizeof(Effects_ParticleAttractionView) == 0x74, "Effects_ParticleAttractionView must keep its PS1 layout");
 
 // decomp: effectMotionState (src/BATTLE/BATTLE.PRG/5BF94.c:625)
-typedef struct Effects_ParticleMotionView {
+struct Effects_ParticleMotionView {
     short reserved0;
     short gravityScale;
     int x, y, z;
     int vx, vy, vz;
     int fx, fy, fz;
     int ax, ay, az;
-} Effects_ParticleMotionView;
+};
 static_assert(sizeof(Effects_ParticleMotionView) == 0x34, "Effects_ParticleMotionView must keep its PS1 layout");
 
 // decomp: func_800CFAAC_t (src/BATTLE/BATTLE.PRG/5BF94.c:177)
-typedef struct Effects_ParticleEndpointView {
+struct Effects_ParticleEndpointView {
     char reserved0[0xC];
     short endX;
     short endY;
     short startX;
     short startY;
-} Effects_ParticleEndpointView;
+};
 static_assert(sizeof(Effects_ParticleEndpointView) == 0x14, "Effects_ParticleEndpointView must keep its PS1 layout");
 
 // decomp: func_800D6CF_t (src/BATTLE/BATTLE.PRG/5BF94.h:230)
-typedef struct Effects_ParticleTextureAnimation {
+struct Effects_ParticleTextureAnimation {
     int reserved0;
     short reserved4;
     u_char frameTimer;
@@ -76,29 +76,29 @@ typedef struct Effects_ParticleTextureAnimation {
     u_char reserved17;
     u_char* program;
     Effects_PackageTextureInfo* textureInfo;
-} Effects_ParticleTextureAnimation;
+};
 
 // layout: ledger (upstream merge) for func_800D52A4_t2
-typedef struct Effects_FixedVector {
+struct Effects_FixedVector {
     /* 0x00 */ int vx;
     /* 0x04 */ int vy;
     /* 0x08 */ int vz;
-} Effects_FixedVector;
+};
 static_assert(sizeof(Effects_FixedVector) == 0xC, "Effects_FixedVector must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800D52A4_t
-typedef struct Effects_ParticleMotion {
+struct Effects_ParticleMotion {
     /* 0x00 */ short mass;
     /* 0x02 */ short gravityScale;
     /* 0x04 */ Effects_FixedVector position;
     /* 0x10 */ Effects_FixedVector velocity;
     /* 0x1C */ Effects_FixedVector force;
     /* 0x28 */ Effects_FixedVector acceleration;
-} Effects_ParticleMotion;
+};
 static_assert(sizeof(Effects_ParticleMotion) == 0x34, "Effects_ParticleMotion must keep its PS1 layout");
 
 // layout: ledger (upstream merge) for func_800D2904_t
-typedef struct Effects_Particle {
+struct Effects_Particle {
     /* 0x00 */ struct Effects_Particle *previous;
     /* 0x04 */ struct Effects_Particle *next;
     /* 0x08 */ Effects_ParticleMotion motion;
@@ -117,10 +117,10 @@ typedef struct Effects_Particle {
     /* 0x70 */ int attraction;
     /* 0x74 */ u_char colorCurves[3];
     /* 0x77 */ u_char age;
-} Effects_Particle;
+};
 
 // decomp: func_800FA098_arg0 (src/BATTLE/BATTLE.PRG/5BF94.h:270)
-typedef struct Effects_ParticleDefinition {
+struct Effects_ParticleDefinition {
     u_char animationId;
     u_char textureIndex;
     u_char endEvent;
@@ -158,11 +158,11 @@ typedef struct Effects_ParticleDefinition {
     u_char attractionTransform;
     u_char ringSegments;
     u_char ringPositions;
-} Effects_ParticleDefinition;
+};
 static_assert(sizeof(Effects_ParticleDefinition) == 0xCC, "Effects_ParticleDefinition must keep its PS1 layout");
 
 // decomp: func_800D2904_curves (src/BATTLE/BATTLE.PRG/5BF94.h:280)
-typedef union Effects_ParticleColorWord {
+union Effects_ParticleColorWord {
     int word;
     struct {
         u_char redCurve;
@@ -170,10 +170,10 @@ typedef union Effects_ParticleColorWord {
         u_char blueCurve;
         u_char age;
     } fields;
-} Effects_ParticleColorWord;
+};
 
 // layout: ledger (upstream merge) for func_800FA098_arg1
-typedef struct Effects_ParticleEmitterScratch {
+struct Effects_ParticleEmitterScratch {
     /* 0x00 */ VECTOR opaque0;
     /* 0x10 */ VECTOR reserved10;
     /* 0x20 */ int reserved20;
@@ -215,10 +215,10 @@ typedef struct Effects_ParticleEmitterScratch {
     /* 0x180 */ int transparency;
     /* 0x184 */ int ringSegments;
     /* 0x188 */ int ringPositions;
-} Effects_ParticleEmitterScratch;
+};
 
 // decomp: func_800FA098_arg3 (src/EFFECT/particleSetup.h:27)
-typedef struct Effects_ParticleQuadSet {
+struct Effects_ParticleQuadSet {
     u_char opaque0;
     u_char definitionIndex;
     short count;
@@ -226,17 +226,17 @@ typedef struct Effects_ParticleQuadSet {
     int opaque8;
     int age;
     Effects_ParticleTextureAnimation textureAnimation;
-} Effects_ParticleQuadSet;
+};
 
 // decomp: func_800FA098_arg3_2 (src/EFFECT/particleSetup.h:17)
-typedef struct Effects_ParticleQuadWord {
+struct Effects_ParticleQuadWord {
     short reserved0;
     short reserved2;
-} Effects_ParticleQuadWord;
+};
 static_assert(sizeof(Effects_ParticleQuadWord) == 0x4, "Effects_ParticleQuadWord must keep its PS1 layout");
 
 // decomp: func_800FA76C_arg3 (src/EFFECT/trails.h:27)
-typedef struct Effects_TrailQuadSet {
+struct Effects_TrailQuadSet {
     u_char opaque0;
     u_char definitionIndex;
     u_char trailcount;
@@ -245,10 +245,10 @@ typedef struct Effects_TrailQuadSet {
     int curveSampleDistance;
     Effects_ParticleTextureAnimation textureAnimation;
     u_char sampledTransparencyCurve[0];
-} Effects_TrailQuadSet;
+};
 
 // decomp: func_800FB4C0_t (src/BATTLE/BATTLE.PRG/5BF94.h:500)
-typedef struct Effects_PluginEffectState {
+struct Effects_PluginEffectState {
     u_char reserved0[0xC];
     VECTOR position;
     u_char reserved1C[0x44];
@@ -256,7 +256,7 @@ typedef struct Effects_PluginEffectState {
     u_int variant : 4;
     u_int reserved61Bit4 : 20;
     u_char reserved64[20];
-} Effects_PluginEffectState;
+};
 static_assert(sizeof(Effects_PluginEffectState) == 0x78, "Effects_PluginEffectState must keep its PS1 layout");
 
 #endif // VS_EFFECTS_PARTICLES_H_TYPES

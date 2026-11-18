@@ -6,6 +6,5 @@
 
 // decomp: enemyClasses (src/SLUS_010.40/main.h:60)
 enum Battle_EnemyClass { Battle_EnemyClass_Undead = 2 };
-typedef enum Battle_EnemyClass Battle_EnemyClass;
 
 #endif // VS_BATTLE_ENEMY_H_TYPES

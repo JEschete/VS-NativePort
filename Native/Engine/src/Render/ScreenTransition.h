@@ -3,13 +3,13 @@
 #define VS_RENDER_SCREENTRANSITION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Render_LegacyTransitionWipePacket Render_LegacyTransitionWipePacket;
+struct Render_LegacyTransitionWipePacket;
 
 // decomp: vs_battle_screenTransitionWipePoly (src/BATTLE/BATTLE.PRG/146C.h:802)
-typedef struct Render_LegacyTransitionWipePacket {
+struct Render_LegacyTransitionWipePacket {
     POLY_F4 coveredQuad;
     POLY_F4 edgeQuad;
-} Render_LegacyTransitionWipePacket;
+};
 static_assert(sizeof(Render_LegacyTransitionWipePacket) == 0x30, "Render_LegacyTransitionWipePacket must keep its PS1 layout");
 
 #endif // VS_RENDER_SCREENTRANSITION_H_TYPES

@@ -3,34 +3,34 @@
 #define VS_EFFECTS_RUNTIME_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Effects_ActionControlKey Effects_ActionControlKey;
-typedef struct Effects_ActionEffectRequest Effects_ActionEffectRequest;
-typedef struct Effects_ActionEffectTarget Effects_ActionEffectTarget;
-typedef struct Effects_ChildTrackKey Effects_ChildTrackKey;
-typedef struct Effects_ChildTrackView Effects_ChildTrackView;
-typedef struct Effects_ColorTrackKey Effects_ColorTrackKey;
-typedef struct Effects_CurveBlock Effects_CurveBlock;
-typedef struct Effects_EffectInstance Effects_EffectInstance;
-typedef struct Effects_EffectInstanceTargets Effects_EffectInstanceTargets;
-typedef struct Effects_EffectPackage Effects_EffectPackage;
-typedef struct Effects_EffectSpawnRequest Effects_EffectSpawnRequest;
-typedef struct Effects_EffectTimeline Effects_EffectTimeline;
-typedef struct Effects_HitEffectRequest Effects_HitEffectRequest;
-typedef struct Effects_PackageBlock3 Effects_PackageBlock3;
-typedef struct Effects_PackageBlock5 Effects_PackageBlock5;
-typedef struct Effects_PackageBlock9 Effects_PackageBlock9;
-typedef struct Effects_PackageTexture Effects_PackageTexture;
-typedef struct Effects_PackageTextureInfo Effects_PackageTextureInfo;
-typedef struct Effects_Particle Effects_Particle;
-typedef struct Effects_ParticleTrackKey Effects_ParticleTrackKey;
-typedef struct Effects_RendererSlot Effects_RendererSlot;
-typedef struct Effects_RendererTrackKey Effects_RendererTrackKey;
-typedef struct Effects_ShakeChannelKey Effects_ShakeChannelKey;
-typedef struct Effects_ShakeTrackKey Effects_ShakeTrackKey;
-typedef struct Effects_TimelineTrack Effects_TimelineTrack;
-typedef struct Effects_TimelineTrackHeader Effects_TimelineTrackHeader;
-typedef struct Effects_TransformControlView Effects_TransformControlView;
-typedef struct Effects_TransformDefinition Effects_TransformDefinition;
+struct Effects_ActionControlKey;
+struct Effects_ActionEffectRequest;
+struct Effects_ActionEffectTarget;
+struct Effects_ChildTrackKey;
+struct Effects_ChildTrackView;
+struct Effects_ColorTrackKey;
+struct Effects_CurveBlock;
+struct Effects_EffectInstance;
+struct Effects_EffectInstanceTargets;
+struct Effects_EffectPackage;
+struct Effects_EffectSpawnRequest;
+struct Effects_EffectTimeline;
+struct Effects_HitEffectRequest;
+struct Effects_PackageBlock3;
+struct Effects_PackageBlock5;
+struct Effects_PackageBlock9;
+struct Effects_PackageTexture;
+struct Effects_PackageTextureInfo;
+struct Effects_Particle;
+struct Effects_ParticleTrackKey;
+struct Effects_RendererSlot;
+struct Effects_RendererTrackKey;
+struct Effects_ShakeChannelKey;
+struct Effects_ShakeTrackKey;
+struct Effects_TimelineTrack;
+struct Effects_TimelineTrackHeader;
+struct Effects_TransformControlView;
+struct Effects_TransformDefinition;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -50,7 +50,7 @@ typedef struct Effects_TransformDefinition Effects_TransformDefinition;
 #define Effects_actionRequestPointer (*(Effects_ActionEffectRequest**)(&Effects_actionPackage.request))
 
 // decomp: actionEffectTarget (src/BATTLE/BATTLE.PRG/6E644.h:21)
-typedef struct Effects_ActionEffectTarget {
+struct Effects_ActionEffectTarget {
     u_short type;
     u_short colorPreset;
     union {
@@ -62,10 +62,10 @@ typedef struct Effects_ActionEffectTarget {
         } actor;
         SVECTOR position;
     } value;
-} Effects_ActionEffectTarget;
+};
 
 // decomp: D_800F53B8_t3 (src/BATTLE/BATTLE.PRG/5BF94.h:473)
-typedef struct Effects_EffectInstanceTargets {
+struct Effects_EffectInstanceTargets {
     Effects_ActionEffectTarget source;
     Effects_ActionEffectTarget emitFrom;
     Effects_ActionEffectTarget target;
@@ -75,10 +75,10 @@ typedef struct Effects_EffectInstanceTargets {
     short effectId;
     short phase;
     int parameter;
-} Effects_EffectInstanceTargets;
+};
 
 // decomp: D_800F53B8_t (src/BATTLE/BATTLE.PRG/5BF94.h:490)
-typedef struct Effects_EffectInstance {
+struct Effects_EffectInstance {
     struct Effects_EffectInstance* next;
     struct Effects_EffectInstance* parent;
     char particleCount;
@@ -93,10 +93,10 @@ typedef struct Effects_EffectInstance {
     Effects_Particle* particles;
     Effects_TransformSlot transforms[16];
     Effects_EffectInstanceTargets context;
-} Effects_EffectInstance;
+};
 
 // decomp: D_800F53B8_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:98)
-typedef struct Effects_EffectSpawnRequest {
+struct Effects_EffectSpawnRequest {
     Effects_ActionEffectTarget* source;
     Effects_ActionEffectTarget* emitFrom;
     Effects_ActionEffectTarget* target;
@@ -110,36 +110,36 @@ typedef struct Effects_EffectSpawnRequest {
     u_char reserved22;
     u_char reserved23;
     int reserved24;
-} Effects_EffectSpawnRequest;
+};
 
 // decomp: func_800D5780_t2 (src/BATTLE/BATTLE.PRG/5BF94.h:444)
-typedef struct Effects_TimelineTrackHeader {
+struct Effects_TimelineTrackHeader {
     u_short kind : 8;
     u_short keyCount : 8;
-} Effects_TimelineTrackHeader;
+};
 static_assert(sizeof(Effects_TimelineTrackHeader) == 0x2, "Effects_TimelineTrackHeader must keep its PS1 layout");
 
 // decomp: func_800D5780_t (src/BATTLE/BATTLE.PRG/5BF94.h:453)
-typedef struct Effects_TimelineTrack {
+struct Effects_TimelineTrack {
     /* 0x0 */ u_long* keys;
     /* 0x4 */ Effects_TimelineTrackHeader header;
     /* 0x6 */ short keyIndex;
     /* 0x8 */ short curveFrame;
     /* 0xA */ short keyTimer;
     /* 0xC */ int keyParameter;
-} Effects_TimelineTrack;
+};
 
 // decomp: D_800F53B8_t4 (src/BATTLE/BATTLE.PRG/5BF94.h:461)
-typedef struct Effects_EffectTimeline {
+struct Effects_EffectTimeline {
     char trackCount;
     char flags;
     short frame;
     int activeTracks;
     Effects_TimelineTrack tracks[0];
-} Effects_EffectTimeline;
+};
 
 // decomp: D_800F569C_t (src/BATTLE/BATTLE.PRG/5BF94.h:373)
-typedef struct Effects_EffectPackage {
+struct Effects_EffectPackage {
     int reserved0;
     int reserved4;
     Effects_PackageBlock5* block5Data;
@@ -159,10 +159,10 @@ typedef struct Effects_EffectPackage {
     void* block13Data;
     int auxiliarySoundHandle;
     Effects_ActionEffectRequest* request;
-} Effects_EffectPackage;
+};
 
 // decomp: actionEffectRequest (src/BATTLE/BATTLE.PRG/6E644.h:31)
-typedef struct Effects_ActionEffectRequest {
+struct Effects_ActionEffectRequest {
     u_short effectId;
     u_char count;
     u_char otherCount;
@@ -170,10 +170,10 @@ typedef struct Effects_ActionEffectRequest {
     Effects_ActionEffectTarget targets[16];
     u_char others[16];
     SVECTOR position;
-} Effects_ActionEffectRequest;
+};
 
 // decomp: func_8006C4C4_t (src/BATTLE/BATTLE.PRG/146C.c:244)
-typedef struct Effects_HitEffectRequest {
+struct Effects_HitEffectRequest {
     short opaque0;
     char opaque2;
     char opaque3;
@@ -188,11 +188,11 @@ typedef struct Effects_HitEffectRequest {
     short opaque12;
     Battle_HitTargetWord opaque14;
     int reserved1C[50];
-} Effects_HitEffectRequest;
+};
 static_assert(sizeof(Effects_HitEffectRequest) == 0xE4, "Effects_HitEffectRequest must keep its PS1 layout");
 
 // decomp: effectExec (src/BATTLE/BATTLE.PRG/6E644.h:35)
-typedef int (*Effects_EffectRenderer)(Effects_RendererSlot*, u_int, int);
+using Effects_EffectRenderer = int (*)(Effects_RendererSlot*, u_int, int);
 
 // decomp: func_800D4910_t (src/BATTLE/BATTLE.PRG/6E644.h:37)
 struct Effects_RendererSlot {
@@ -200,36 +200,36 @@ struct Effects_RendererSlot {
     Effects_EffectRenderer renderer;
     void* rendererState;
 };
-typedef struct Effects_RendererSlot Effects_RendererSlot;
+struct Effects_RendererSlot;
 
 // decomp: func_800D57FC_t (src/BATTLE/BATTLE.PRG/5BF94.c:36)
-typedef struct Effects_ParticleTrackKey {
+struct Effects_ParticleTrackKey {
     u_int frame : 8;
     u_int duration : 8;
     u_int opaque2Bit0 : 4;
     u_int opaque2Bit4 : 6;
     u_int opaque3Bit2 : 6;
-} Effects_ParticleTrackKey;
+};
 static_assert(sizeof(Effects_ParticleTrackKey) == 0x4, "Effects_ParticleTrackKey must keep its PS1 layout");
 
 // decomp: func_800D57FC_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:41)
-typedef struct Effects_ShakeTrackKey {
+struct Effects_ShakeTrackKey {
     unsigned reserved0Bit0 : 4;
     unsigned curve : 5;
-} Effects_ShakeTrackKey;
+};
 static_assert(sizeof(Effects_ShakeTrackKey) == 0x4, "Effects_ShakeTrackKey must keep its PS1 layout");
 
 // decomp: func_800D5A98_t (src/BATTLE/BATTLE.PRG/5BF94.c:335)
-typedef struct Effects_ChildTrackKey {
+struct Effects_ChildTrackKey {
     u_char actors[6];
     u_char final;
     u_char frame;
     u_char delay;
-} Effects_ChildTrackKey;
+};
 static_assert(sizeof(Effects_ChildTrackKey) == 0x9, "Effects_ChildTrackKey must keep its PS1 layout");
 
 // decomp: func_800D5A98_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:345)
-typedef struct Effects_ChildTrackView {
+struct Effects_ChildTrackView {
     Effects_ChildTrackKey* event;
     Effects_TimelineTrackHeader reserved4;
     short reserved6;
@@ -237,50 +237,50 @@ typedef struct Effects_ChildTrackView {
     short reservedA;
     short delay;
     short index;
-} Effects_ChildTrackView;
+};
 
 // decomp: func_800D5D74_t (src/BATTLE/BATTLE.PRG/5BF94.c:218)
-typedef struct Effects_RendererTrackKey {
+struct Effects_RendererTrackKey {
     u_int frame : 9;
     u_int opaque1Bit1 : 9;
     u_int effectRenderer : 3;
     u_int opaque2Bit5 : 6;
     u_int reserved3Bit3 : 5;
     u_short opaque4;
-} Effects_RendererTrackKey;
+};
 static_assert(sizeof(Effects_RendererTrackKey) == 0x8, "Effects_RendererTrackKey must keep its PS1 layout");
 
 // decomp: func_800D6310_t (src/BATTLE/BATTLE.PRG/5BF94.c:209)
-typedef struct Effects_ColorTrackKey {
+struct Effects_ColorTrackKey {
     short frame;
     short duration;
     unsigned char red;
     unsigned char green;
     unsigned char blue;
     unsigned char mode;
-} Effects_ColorTrackKey;
+};
 static_assert(sizeof(Effects_ColorTrackKey) == 0x8, "Effects_ColorTrackKey must keep its PS1 layout");
 
 // decomp: func_800D6508_t (src/BATTLE/BATTLE.PRG/5BF94.c:106)
-typedef struct Effects_TransformControlView {
+struct Effects_TransformControlView {
     char reserved0[0x22];
     u_short attachmentMode : 2;
     u_short motionResumed : 1;
     u_short reserved22Bit3 : 13;
     char reserved24[0xAC];
-} Effects_TransformControlView;
+};
 static_assert(sizeof(Effects_TransformControlView) == 0xD0, "Effects_TransformControlView must keep its PS1 layout");
 
 // decomp: func_800D6894_t (src/BATTLE/BATTLE.PRG/5BF94.c:57)
-typedef struct Effects_ActionControlKey {
+struct Effects_ActionControlKey {
     u_short frame;
     u_char opaque2;
     u_char opaque3;
-} Effects_ActionControlKey;
+};
 static_assert(sizeof(Effects_ActionControlKey) == 0x4, "Effects_ActionControlKey must keep its PS1 layout");
 
 // decomp: func_800D6A18_t (src/BATTLE/BATTLE.PRG/5BF94.c:231)
-typedef struct Effects_ShakeChannelKey {
+struct Effects_ShakeChannelKey {
     u_short frame : 9;
     u_short reserved1Bit1 : 7;
     u_short reserved2;
@@ -291,7 +291,7 @@ typedef struct Effects_ShakeChannelKey {
     u_int opaque6Bit1 : 7;
     u_int opaque7Bit0 : 1;
     u_int opaque7Bit1 : 7;
-} Effects_ShakeChannelKey;
+};
 static_assert(sizeof(Effects_ShakeChannelKey) == 0x8, "Effects_ShakeChannelKey must keep its PS1 layout");
 
 #endif // VS_EFFECTS_RUNTIME_H_TYPES

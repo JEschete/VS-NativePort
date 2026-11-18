@@ -3,16 +3,16 @@
 #define VS_FIELD_ZONE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Content_DiscFile Content_DiscFile;
-typedef struct Content_DiscQueueSlot Content_DiscQueueSlot;
-typedef struct Field_MpdEnemySpawn Field_MpdEnemySpawn;
-typedef struct Field_RoomLoadResetBlock Field_RoomLoadResetBlock;
-typedef struct Field_ZndEnemyRecord Field_ZndEnemyRecord;
-typedef struct Field_ZoneBounds Field_ZoneBounds;
-typedef struct Field_ZoneContext Field_ZoneContext;
+struct Content_DiscFile;
+struct Content_DiscQueueSlot;
+struct Field_MpdEnemySpawn;
+struct Field_RoomLoadResetBlock;
+struct Field_ZndEnemyRecord;
+struct Field_ZoneBounds;
+struct Field_ZoneContext;
 
 // decomp: D_800F18C8_t (src/BATTLE/BATTLE.PRG/146C.c:313)
-typedef struct Field_RoomLoadResetBlock {
+struct Field_RoomLoadResetBlock {
     short reserved00;
     short reserved02;
     short reserved04;
@@ -22,20 +22,20 @@ typedef struct Field_RoomLoadResetBlock {
     int reserved0C;
     int reserved10;
     int reserved14;
-} Field_RoomLoadResetBlock;
+};
 static_assert(sizeof(Field_RoomLoadResetBlock) == 0x18, "Field_RoomLoadResetBlock must keep its PS1 layout");
 
 // decomp: _zoneContextBounds (src/BATTLE/BATTLE.PRG/146C.h:214)
-typedef struct Field_ZoneBounds {
+struct Field_ZoneBounds {
     short minX;
     short minZ;
     short maxX;
     short maxZ;
-} Field_ZoneBounds;
+};
 static_assert(sizeof(Field_ZoneBounds) == 0x8, "Field_ZoneBounds must keep its PS1 layout");
 
 // decomp: _zoneContext_t (src/BATTLE/BATTLE.PRG/146C.h:719)
-typedef struct Field_ZoneContext {
+struct Field_ZoneContext {
     int zndId;
     Content_DiscFile* mpdFiles;
     int zndEnemyCount;
@@ -63,6 +63,6 @@ typedef struct Field_ZoneContext {
     u_int mpdEnemyCount;
     Field_MpdEnemySpawn* mpdEnemies;
     int currentSceneId;
-} Field_ZoneContext;
+};
 
 #endif // VS_FIELD_ZONE_H_TYPES

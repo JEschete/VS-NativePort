@@ -3,10 +3,10 @@
 #define VS_FIELD_CAMERA_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Field_CameraPositionPair Field_CameraPositionPair;
-typedef struct Field_CameraTransition Field_CameraTransition;
-typedef struct Field_SphericalCamera Field_SphericalCamera;
-typedef struct Field_SphericalCameraValues Field_SphericalCameraValues;
+struct Field_CameraPositionPair;
+struct Field_CameraTransition;
+struct Field_SphericalCamera;
+struct Field_SphericalCameraValues;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -19,33 +19,33 @@ typedef struct Field_SphericalCameraValues Field_SphericalCameraValues;
 #endif
 
 // decomp: _sphericalValues (src/BATTLE/BATTLE.PRG/146C.h:738)
-typedef struct Field_SphericalCameraValues {
+struct Field_SphericalCameraValues {
     int yaw;
     int pitch;
     int distance;
     int mode;
-} Field_SphericalCameraValues;
+};
 static_assert(sizeof(Field_SphericalCameraValues) == 0x10, "Field_SphericalCameraValues must keep its PS1 layout");
 
 // decomp: _sphericalCamera (src/BATTLE/BATTLE.PRG/146C.h:746)
-typedef struct Field_SphericalCamera {
+struct Field_SphericalCamera {
     Field_SphericalCameraValues values;
     Field_SphericalCameraValues delta;
     int initialDistance;
     int zoomVelocity;
     int speed;
-} Field_SphericalCamera;
+};
 static_assert(sizeof(Field_SphericalCamera) == 0x2C, "Field_SphericalCamera must keep its PS1 layout");
 
 // decomp: func_80077DF0_t (src/BATTLE/BATTLE.PRG/146C.c:211)
-typedef struct Field_CameraPositionPair {
+struct Field_CameraPositionPair {
     VECTOR position;
     VECTOR lookAt;
-} Field_CameraPositionPair;
+};
 static_assert(sizeof(Field_CameraPositionPair) == 0x20, "Field_CameraPositionPair must keep its PS1 layout");
 
 // decomp: vs_battle_cameraTransition_t (src/BATTLE/BATTLE.PRG/146C.h:823)
-typedef struct Field_CameraTransition {
+struct Field_CameraTransition {
     Render_Camera fromCameraState;
     Field_SphericalCamera fromSpherical;
     int fromNearClip;
@@ -64,7 +64,7 @@ typedef struct Field_CameraTransition {
     int projectionDistanceStep;
     int transitionSpeed;
     int transitionFrames;
-} Field_CameraTransition;
+};
 static_assert(sizeof(Field_CameraTransition) == 0xF8, "Field_CameraTransition must keep its PS1 layout");
 
 #endif // VS_FIELD_CAMERA_H_TYPES

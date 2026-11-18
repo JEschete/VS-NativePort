@@ -3,10 +3,10 @@
 #define VS_AUDIO_VOICES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_LegacyVoiceChannelState Audio_LegacyVoiceChannelState;
+struct Audio_LegacyVoiceChannelState;
 
 // decomp: FSound80094FA0 (src/include/sound.h:304)
-typedef struct Audio_LegacyVoiceChannelState {
+struct Audio_LegacyVoiceChannelState {
     /* 0x00 */ int reserved00;
     /* 0x04 */ int reserved04;
     /* 0x08 */ int reserved08;
@@ -34,7 +34,7 @@ typedef struct Audio_LegacyVoiceChannelState {
     /* 0x54 */ int reserved54;
     /* 0x58 */ int voiceSampleRate;
     /* 0x5C */ int controlFlags;
-} Audio_LegacyVoiceChannelState;
+};
 static_assert(sizeof(Audio_LegacyVoiceChannelState) == 0x60, "Audio_LegacyVoiceChannelState must keep its PS1 layout");
 
 #endif // VS_AUDIO_VOICES_H_TYPES

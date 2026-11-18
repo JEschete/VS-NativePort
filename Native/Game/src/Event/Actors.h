@@ -3,14 +3,14 @@
 #define VS_EVENT_ACTORS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Event_ActorSelection Event_ActorSelection;
+struct Event_ActorSelection;
 
 // decomp: func_800BB68C_t (src/BATTLE/BATTLE.PRG/4A0A8.c:182)
-typedef struct Event_ActorSelection {
+struct Event_ActorSelection {
     char remainingCount;
     char cursor;
     char actorIds[22];
-} Event_ActorSelection;
+};
 static_assert(sizeof(Event_ActorSelection) == 0x18, "Event_ActorSelection must keep its PS1 layout");
 
 #endif // VS_EVENT_ACTORS_H_TYPES

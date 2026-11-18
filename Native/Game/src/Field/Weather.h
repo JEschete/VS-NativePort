@@ -3,10 +3,10 @@
 #define VS_FIELD_WEATHER_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Field_WeatherParticle Field_WeatherParticle;
+struct Field_WeatherParticle;
 
 // decomp: D_800F1DD4_t (src/BATTLE/BATTLE.PRG/146C.c:184)
-typedef struct Field_WeatherParticle {
+struct Field_WeatherParticle {
     SVECTOR position;
     short screenX;
     short screenY;
@@ -14,7 +14,7 @@ typedef struct Field_WeatherParticle {
     char swayPhase;
     char fallShift;
     char speed;
-} Field_WeatherParticle;
+};
 static_assert(sizeof(Field_WeatherParticle) == 0x10, "Field_WeatherParticle must keep its PS1 layout");
 
 #endif // VS_FIELD_WEATHER_H_TYPES

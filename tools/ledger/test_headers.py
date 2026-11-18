@@ -8,9 +8,12 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import headers  # noqa: E402
+
+RETIRED = dict(headers.RETIRED_CRITERIA)
 
 GENERATED = """// Copied from the decomp by tools/port/copy_to_native.py.
 #ifndef VS_MENU_MAP_H_TYPES
@@ -117,6 +120,10 @@ class MeasureTests(unittest.TestCase):
 
 class LedgerTests(unittest.TestCase):
     def setUp(self) -> None:
+        # The fixtures are C headers from before any criterion was retired; one test below restores the retirements.
+        retirements = mock.patch.object(headers, "RETIRED_CRITERIA", {})
+        retirements.start()
+        self.addCleanup(retirements.stop)
         self.directory = tempfile.TemporaryDirectory()
         self.fixture = Fixture(Path(self.directory.name))
         self.fixture.manifest = {"Native/Game/src/Menu/Map.h": "hash"}
@@ -196,6 +203,26 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(rules(self.workspace), ["c-linkage-reintroduced", "ledger-stale"])
         headers.sync(self.workspace)
         self.assertEqual(rules(self.workspace), ["c-linkage-reintroduced"])
+
+    def test_a_retired_criterion_cannot_return_to_a_remaining_header(self) -> None:
+        # Linked.h stays remaining for its macro guard and constant; nothing retired is left in it.
+        self.fixture.files["Native/Game/src/Menu/Linked.h"] = LINKED.replace("(void)", "()")
+        self.fixture.write()
+        headers.sync(self.workspace)
+        with mock.patch.object(headers, "RETIRED_CRITERIA", RETIRED):
+            self.assertEqual(ledger(self.workspace)["Native/Game/src/Menu/Linked.h"]["status"], "remaining")
+            self.assertEqual([issue.subject for issue in headers.check(self.workspace)
+                              if issue.rule == "criterion-reintroduced"], ["H0002 Native/Game/src/Menu/Map.h"])
+
+            # A sync records the typedef but does not accept it.
+            self.fixture.files["Native/Game/src/Menu/Linked.h"] = LINKED.replace(
+                "(void)", "()").replace("#define VS_LINKED_COUNT 4\n", "#define VS_LINKED_COUNT 4\ntypedef int Count;\n")
+            self.fixture.write()
+            linked = [issue.rule for issue in headers.check(self.workspace) if "Linked.h" in issue.subject]
+            self.assertEqual(sorted(linked), ["criterion-reintroduced", "ledger-stale"])
+            headers.sync(self.workspace)
+            linked = [issue.rule for issue in headers.check(self.workspace) if "Linked.h" in issue.subject]
+            self.assertEqual(linked, ["criterion-reintroduced"])
 
     def test_line_endings_do_not_change_a_measurement(self) -> None:
         text = "#pragma once\n#define VS_PAIR \\\n  int first; \\\n  int second;\nvoid Sum(void);\n"

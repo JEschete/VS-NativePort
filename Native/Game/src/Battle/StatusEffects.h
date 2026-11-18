@@ -3,9 +3,9 @@
 #define VS_BATTLE_STATUSEFFECTS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_StatusEffectParams Battle_StatusEffectParams;
-typedef struct Battle_StatusEffectTick Battle_StatusEffectTick;
-typedef struct Battle_StatusEffectTickTable Battle_StatusEffectTickTable;
+struct Battle_StatusEffectParams;
+struct Battle_StatusEffectTick;
+struct Battle_StatusEffectTickTable;
 
 // decomp: D_8004EF20 (D_8004EF20@SLUS_010.40): a view into another global
 #define Battle_statusParams5Duration (*(u_char*)(&Battle_statusEffectParams[5].duration))
@@ -52,32 +52,31 @@ enum Battle_StatusFlag {
     Battle_StatusFlag_EarthDefUp = 1 << 22,
     Battle_StatusFlag_WaterDefUp = 1 << 23
 };
-typedef enum Battle_StatusFlag Battle_StatusFlag;
 
 // decomp: statusEffectTick (src/BATTLE/BATTLE.PRG/74088.c:1162)
-typedef struct Battle_StatusEffectTick {
+struct Battle_StatusEffectTick {
     int reserved0;
     u_short reserved4;
     u_short reserved6;
     int reserved8;
     int reservedC;
-} Battle_StatusEffectTick;
+};
 static_assert(sizeof(Battle_StatusEffectTick) == 0x10, "Battle_StatusEffectTick must keep its PS1 layout");
 
 // decomp: statusEffectTable (src/BATTLE/BATTLE.PRG/74088.c:1165)
-typedef struct Battle_StatusEffectTickTable {
+struct Battle_StatusEffectTickTable {
     Battle_StatusEffectTick reserved0[1];
-} Battle_StatusEffectTickTable;
+};
 static_assert(sizeof(Battle_StatusEffectTickTable) == 0x10, "Battle_StatusEffectTickTable must keep its PS1 layout");
 
 // decomp: vs_main_statusEffectParams_t (src/SLUS_010.40/main.h:115)
-typedef struct Battle_StatusEffectParams {
+struct Battle_StatusEffectParams {
     int statusFlags;
     u_short duration;
     u_short tickInterval;
     int cancelledStatuses;
     int blockingStatuses;
-} Battle_StatusEffectParams;
+};
 static_assert(sizeof(Battle_StatusEffectParams) == 0x10, "Battle_StatusEffectParams must keep its PS1 layout");
 
 #endif // VS_BATTLE_STATUSEFFECTS_H_TYPES

@@ -8,7 +8,8 @@ Docs\\ledgers\\HEADER_LEDGER.csv has a `header` row for every header that was C-
 Docs\\CPP_HEADERS.md defines each criterion and its C++ replacement. All columns except `notes` are measured, and a
 row is `done` only when every criterion of its kind holds. `done` is sticky: a later regression fails --check instead
 of being re-measured away. Once no source row remains, C linkage is retired: a tracked file that regains it fails
---check even while other criteria keep it remaining. `retired` is written by hand for a file deleted on purpose and
+--check even while other criteria keep it remaining. RETIRED_CRITERIA, cleared from every tracked header, are held the
+same way. `retired` is written by hand for a file deleted on purpose and
 needs a note. Rows are only created when the ledger is first written, so a new C-style file fails --check rather than
 joining the ledger.
 Tracked in issue #441.
@@ -63,6 +64,14 @@ QUOTED_INCLUDE = re.compile(r'^[ \t]*#[ \t]*include[ \t]*"(?P<name>[^"]+)"', re.
 # Macros that need the preprocessor itself; anything a constexpr, inline function or template can do is not here.
 PERMITTED_MACROS = {
     "VS_ASSERT": "stringizes the asserted condition",
+}
+# Criteria cleared from every tracked header, each with its C++ form. A header still remaining for other criteria must
+# not regain one, which a stale-ledger finding alone would let a sync record.
+RETIRED_CRITERIA = {
+    "static_asserts": "static_assert",
+    "typedefs": "struct X { ... }; or using N = T;",
+    "void_params": "f()",
+    "gnu_attributes": "a standard attribute",
 }
 
 
@@ -426,9 +435,15 @@ def check(workspace: HeaderWorkspace) -> list[Issue]:
         missed = failures(row["path"], values)
         if row["status"] == "done" and missed:
             found.append(issue(f"{row['kind']}-regressed", subject, f"a done {row['kind']} fails {', '.join(missed)}"))
-        elif linkage_retired and values["c_linkage"] != "0":
-            found.append(issue("c-linkage-reintroduced", subject, "C linkage is retired in every file; use C++ "
-                               "linkage (Docs/CPP_HEADERS.md)"))
+        else:
+            if linkage_retired and values["c_linkage"] != "0":
+                found.append(issue("c-linkage-reintroduced", subject, "C linkage is retired in every file; use C++ "
+                                   "linkage (Docs/CPP_HEADERS.md)"))
+            returned = [column for column in RETIRED_CRITERIA if row["kind"] == "header" and values[column] != "0"]
+            if returned:
+                forms = "; ".join(f"{column}: {RETIRED_CRITERIA[column]}" for column in returned)
+                found.append(issue("criterion-reintroduced", subject, f"{', '.join(returned)} retired in every "
+                                   f"header; use the C++ form ({forms})"))
         expected = measured_row(row, scanner)
         if any(row[column] != expected[column] for column in [*MEASURED, "status"]):
             found.append(issue("ledger-stale", subject, "measurements differ from the source; run --sync"))

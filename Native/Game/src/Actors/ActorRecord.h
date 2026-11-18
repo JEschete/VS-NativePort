@@ -3,8 +3,8 @@
 #define VS_ACTORS_ACTORRECORD_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_ActorRecord Actors_ActorRecord;
-typedef struct Actors_CompanionOffset Actors_CompanionOffset;
+struct Actors_ActorRecord;
+struct Actors_CompanionOffset;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -22,16 +22,16 @@ typedef struct Actors_CompanionOffset Actors_CompanionOffset;
 #endif
 
 // decomp: D_800F4538_unk58 (src/BATTLE/BATTLE.PRG/3A1A0.h:31)
-typedef struct Actors_CompanionOffset {
+struct Actors_CompanionOffset {
     signed char offsetX;
     signed char offsetY;
     signed char offsetZ;
     u_char depthBias;
-} Actors_CompanionOffset;
+};
 static_assert(sizeof(Actors_CompanionOffset) == 0x4, "Actors_CompanionOffset must keep its PS1 layout");
 
 // decomp: D_800F4538_t (src/BATTLE/BATTLE.PRG/3A1A0.h:400)
-typedef struct Actors_ActorRecord {
+struct Actors_ActorRecord {
     Actors_ModelInstance instance;
     MATRIX boneMatrices[42];
     u_char routePhase : 2;
@@ -193,6 +193,6 @@ typedef struct Actors_ActorRecord {
     u_short previousTargetX;
     u_short previousTargetZ;
     unsigned modelDataSize;
-} Actors_ActorRecord;
+};
 
 #endif // VS_ACTORS_ACTORRECORD_H_TYPES

@@ -9,72 +9,72 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-typedef struct P_TAG {
+struct P_TAG {
   unsigned addr : 24;
   unsigned len : 8;
   u_char r0, g0, b0, code;
-} P_TAG;
+};
 
-typedef struct RECT {
+struct RECT {
   short x, y, w, h;
-} RECT;
+};
 
-typedef struct DR_ENV {
+struct DR_ENV {
   u_long tag;
   u_long code[15];
-} DR_ENV;
+};
 
-typedef struct DRAWENV {
+struct DRAWENV {
   RECT clip;
   short ofs[2];
   RECT tw;
   u_short tpage;
   u_char dtd, dfe, isbg, r0, g0, b0;
   DR_ENV dr_env;
-} DRAWENV;
+};
 
-typedef struct DISPENV {
+struct DISPENV {
   RECT disp;
   RECT screen;
   u_char isinter, isrgb24, pad0, pad1;
-} DISPENV;
+};
 
-typedef struct DR_AREA {
+struct DR_AREA {
   u_long tag;
   u_long code[2];
-} DR_AREA;
-typedef struct DR_MODE {
+};
+struct DR_MODE {
   u_long tag;
   u_long code[2];
-} DR_MODE;
-typedef struct DR_MOVE {
+};
+struct DR_MOVE {
   u_long tag;
   u_long code[5];
-} DR_MOVE;
-typedef struct DR_STP {
+};
+struct DR_STP {
   u_long tag;
   u_long code[2];
-} DR_STP;
-typedef struct DR_TPAGE {
+};
+struct DR_TPAGE {
   u_long tag;
   u_long code[1];
-} DR_TPAGE;
+};
 
-typedef struct LINE_F2 {
+struct LINE_F2 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0, x1, y1;
-} LINE_F2;
+};
 
-typedef struct LINE_G2 {
+struct LINE_G2 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
   u_char r1, g1, b1, p1;
   short x1, y1;
-} LINE_G2;
+};
 
-typedef struct LINE_G4 {
+struct LINE_G4 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
@@ -85,21 +85,21 @@ typedef struct LINE_G4 {
   u_char r3, g3, b3, p3;
   short x3, y3;
   u_long pad;
-} LINE_G4;
+};
 
-typedef struct POLY_F3 {
+struct POLY_F3 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0, x1, y1, x2, y2;
-} POLY_F3;
+};
 
-typedef struct POLY_F4 {
+struct POLY_F4 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0, x1, y1, x2, y2, x3, y3;
-} POLY_F4;
+};
 
-typedef struct POLY_FT4 {
+struct POLY_FT4 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
@@ -114,9 +114,9 @@ typedef struct POLY_FT4 {
   short x3, y3;
   u_char u3, v3;
   u_short pad2;
-} POLY_FT4;
+};
 
-typedef struct POLY_G3 {
+struct POLY_G3 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
@@ -124,9 +124,9 @@ typedef struct POLY_G3 {
   short x1, y1;
   u_char r2, g2, b2, pad2;
   short x2, y2;
-} POLY_G3;
+};
 
-typedef struct POLY_G4 {
+struct POLY_G4 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
@@ -136,9 +136,9 @@ typedef struct POLY_G4 {
   short x2, y2;
   u_char r3, g3, b3, pad3;
   short x3, y3;
-} POLY_G4;
+};
 
-typedef struct POLY_GT3 {
+struct POLY_GT3 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
@@ -152,9 +152,9 @@ typedef struct POLY_GT3 {
   short x2, y2;
   u_char u2, v2;
   u_short pad2;
-} POLY_GT3;
+};
 
-typedef struct POLY_GT4 {
+struct POLY_GT4 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
@@ -172,39 +172,39 @@ typedef struct POLY_GT4 {
   short x3, y3;
   u_char u3, v3;
   u_short pad3;
-} POLY_GT4;
+};
 
-typedef struct SPRT {
+struct SPRT {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
   u_char u0, v0;
   u_short clut;
   short w, h;
-} SPRT;
+};
 
-typedef struct SPRT_8 {
+struct SPRT_8 {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
   u_char u0, v0;
   u_short clut;
-} SPRT_8;
+};
 
-typedef struct TILE {
+struct TILE {
   u_long tag;
   u_char r0, g0, b0, code;
   short x0, y0;
   short w, h;
-} TILE;
+};
 
-typedef struct TIM_IMAGE {
+struct TIM_IMAGE {
   u_long mode;
   RECT* crect;
   u_long* caddr;
   RECT* prect;
   u_long* paddr;
-} TIM_IMAGE;
+};
 
 // ---- packet field setters
 #define setVector(v, _x, _y, _z) \

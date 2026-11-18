@@ -6,13 +6,13 @@
 // data ledger and the decomp's splat configs: positions only, the bytes come
 // from the user's disc at start-up.
 
-typedef struct Content_ModuleDataEntry {
+struct Content_ModuleDataEntry {
   const char* module;  // disc path of the module file (e.g. "TITLE/TITLE.PRG")
   unsigned offset;     // byte offset in that file
   unsigned size;       // bytes to copy (sizeof the native global)
   void* target;
   unsigned capacity;
-} Content_ModuleDataEntry;
+};
 
 extern const Content_ModuleDataEntry Content_moduleData[];
 extern const unsigned Content_moduleDataCount;
@@ -21,7 +21,7 @@ extern const unsigned Content_moduleDataCount;
 // Native\Game\src\Boot\ModulePointers.cpp). Each element on the disc is a PS1
 // address; the loader resolves it through the symbol map: exactly for a
 // function, within the symbol's extent for data.
-typedef struct Content_ModuleSymbol {
+struct Content_ModuleSymbol {
   const char* module;
   unsigned address;  // PS1 address
   unsigned size;     // bytes (data); 0 for a function
@@ -29,9 +29,9 @@ typedef struct Content_ModuleSymbol {
   unsigned nativeSize;
   unsigned sourceElementSize;
   unsigned nativeElementSize;
-} Content_ModuleSymbol;
+};
 
-typedef struct Content_ModulePointerTable {
+struct Content_ModulePointerTable {
   const char* module;
   unsigned offset;  // byte offset of the table in the module file
   unsigned count;   // pointers
@@ -39,7 +39,7 @@ typedef struct Content_ModulePointerTable {
   unsigned capacity;
   // LFO references are original short sample/control data, even at code labels.
   const Content_ModuleSymbol* sample_source;
-} Content_ModulePointerTable;
+};
 
 extern const Content_ModuleSymbol Content_moduleSymbols[];
 extern const unsigned Content_moduleSymbolCount;

@@ -3,7 +3,7 @@
 #define VS_MENU_CONTAINER_STORAGE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Container_InventoryStorage Menu_Container_InventoryStorage;
+struct Menu_Container_InventoryStorage;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -17,10 +17,9 @@ typedef struct Menu_Container_InventoryStorage Menu_Container_InventoryStorage;
 
 // decomp: copyContainerFlags (src/MENU/MENUD.PRG/234.c:17)
 enum Menu_Container_CopyContainerFlag { Menu_Container_CopyContainerFlag_CopyContainerFlagsCopy = 0x10 };
-typedef enum Menu_Container_CopyContainerFlag Menu_Container_CopyContainerFlag;
 
 // decomp: vs_menu_inventoryStorage_t (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:153)
-typedef struct Menu_Container_InventoryStorage {
+struct Menu_Container_InventoryStorage {
     char savedInventory[15][256];
     Items_InventoryIndices savedInventoryIndices;
     Items_ContainerData storedContainer;
@@ -29,7 +28,7 @@ typedef struct Menu_Container_InventoryStorage {
     u_short itemsToTransfer[64];
     Items_Container container;
     Items_Container gadgetBag;
-} Menu_Container_InventoryStorage;
+};
 static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Container_InventoryStorage must keep its PS1 layout");
 
 #endif // VS_MENU_CONTAINER_STORAGE_H_TYPES

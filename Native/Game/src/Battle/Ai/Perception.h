@@ -3,10 +3,10 @@
 #define VS_BATTLE_AI_PERCEPTION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_Ai_RelationWord Battle_Ai_RelationWord;
+struct Battle_Ai_RelationWord;
 
 // layout: ledger (upstream merge) for func_800DA1D4_t
-typedef struct Battle_Ai_RelationWord {
+struct Battle_Ai_RelationWord {
     /* 0x00 */ u_int active : 1;
     /* 0x00 */ u_int reserved0Bit1 : 4;
     /* 0x00 */ u_int visible : 1;
@@ -17,7 +17,7 @@ typedef struct Battle_Ai_RelationWord {
     /* 0x03 */ u_int blocked : 1;
     /* 0x03 */ u_int previousClassification : 2;
     /* 0x03 */ u_int reserved3Bit6 : 2;
-} Battle_Ai_RelationWord;
+};
 static_assert(sizeof(Battle_Ai_RelationWord) == 0x4, "Battle_Ai_RelationWord must keep its PS1 layout");
 
 #endif // VS_BATTLE_AI_PERCEPTION_H_TYPES

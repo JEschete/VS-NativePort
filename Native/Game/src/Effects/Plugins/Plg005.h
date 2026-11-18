@@ -3,10 +3,10 @@
 #define VS_EFFECTS_PLUGINS_PLG005_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Effects_Plg005_AnalyzeGridQuad Effects_Plg005_AnalyzeGridQuad;
+struct Effects_Plg005_AnalyzeGridQuad;
 
 // decomp: PLG005_data_t (src/EFFECT/PLG005.BIN/18.c:26)
-typedef struct Effects_Plg005_AnalyzeGridQuad {
+struct Effects_Plg005_AnalyzeGridQuad {
     u_char opaque0;
     u_char opaque1;
     u_char uBase;
@@ -22,7 +22,7 @@ typedef struct Effects_Plg005_AnalyzeGridQuad {
     short opaque12;
     short opaque14;
     int curveSampleDistance;
-} Effects_Plg005_AnalyzeGridQuad;
+};
 static_assert(sizeof(Effects_Plg005_AnalyzeGridQuad) == 0x1C, "Effects_Plg005_AnalyzeGridQuad must keep its PS1 layout");
 
 #endif // VS_EFFECTS_PLUGINS_PLG005_H_TYPES

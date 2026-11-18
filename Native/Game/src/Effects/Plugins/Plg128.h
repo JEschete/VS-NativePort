@@ -3,7 +3,7 @@
 #define VS_EFFECTS_PLUGINS_PLG128_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Effects_Plg128_CameraEffectState Effects_Plg128_CameraEffectState;
+struct Effects_Plg128_CameraEffectState;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -16,7 +16,7 @@ typedef struct Effects_Plg128_CameraEffectState Effects_Plg128_CameraEffectState
 #endif
 
 // decomp: func_800FD9A4_t (src/EFFECT/PLG128.BIN/F8.c:24)
-typedef struct Effects_Plg128_CameraEffectState {
+struct Effects_Plg128_CameraEffectState {
     u_char lifetime, effect;
     short mode;
     int age;
@@ -27,7 +27,7 @@ typedef struct Effects_Plg128_CameraEffectState {
     MATRIX view;
     int nearClip;
     int reservedCC;
-} Effects_Plg128_CameraEffectState;
+};
 static_assert(sizeof(Effects_Plg128_CameraEffectState) == 0xD0, "Effects_Plg128_CameraEffectState must keep its PS1 layout");
 
 #endif // VS_EFFECTS_PLUGINS_PLG128_H_TYPES

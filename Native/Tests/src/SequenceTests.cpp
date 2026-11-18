@@ -126,11 +126,11 @@ int TestBattleAnimationHeaderOutputs(int consumer, int mode, int available) {
   return passed;
 }
 
-typedef struct MorphAnimationFixture {
+struct MorphAnimationFixture {
   Actors_ActorRecord actor;
   unsigned model[64];
   unsigned sequence[128];
-} MorphAnimationFixture;
+};
 
 static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
                                      int animation) {
@@ -175,7 +175,7 @@ static void ForgetMorphAnimation(MorphAnimationFixture* fixture) {
   VS::Actors::ForgetSequenceBanks(fixture->sequence, sizeof fixture->sequence);
 }
 
-typedef struct MorphBindingScope {
+struct MorphBindingScope {
   Actors_ActorRecord* actors[17];
   int bank;
   u_char length;
@@ -183,7 +183,7 @@ typedef struct MorphBindingScope {
   void* data;
   char resolved;
   char skip;
-} MorphBindingScope;
+};
 
 static void BeginMorphBindings(MorphBindingScope* scope) {
   scope->bank = Actors_sharedSequenceBankIndex;
@@ -1270,12 +1270,12 @@ int Tests_ActorPoseHierarchy(void) {
   return passed;
 }
 
-typedef struct ModelPacketOptions {
+struct ModelPacketOptions {
   int colored;
   int split;
   int limb;
   unsigned pulse_mask;
-} ModelPacketOptions;
+};
 
 static void BuildModelPacketFixture(Actors_ShpModel* model,
                                     Actors_ModelInstance* instance,
@@ -1363,11 +1363,11 @@ static void DrawGimmickOverrideFixture(const Actors_ModelInstance* instance,
   VS::Render::DrawLiveGimmickGouraudPolygonsWithOverrides(object);
 }
 
-typedef struct SourceWeaponMatrixLayout {
+struct SourceWeaponMatrixLayout {
   unsigned char header[0x1C];
   uint32_t offsets;
   MATRIX matrices[4];
-} SourceWeaponMatrixLayout;
+};
 static_assert(offsetof(SourceWeaponMatrixLayout, matrices) == 0x20,
               "Original 3A1A0.h weapon matrix offset");
 static_assert(0x20 + 2 * sizeof(MATRIX) + 2 * sizeof(int16_t) == 0x64,

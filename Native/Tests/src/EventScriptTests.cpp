@@ -764,7 +764,7 @@ int Tests_NativeSessionTransitions(void) {
 
 // 573B8.c:67 mixes control codes with addresses; every dispatch boundary must
 // retain native pointer width.
-typedef intptr_t (*TestOpcodeHandler)(u_char*, int16_t);
+using TestOpcodeHandler = intptr_t (*)(u_char*, int16_t);
 static_assert(_Generic(Event_kOpcodeHandlers[0],
                   TestOpcodeHandler: 1,
                   default: 0),

@@ -6,6 +6,5 @@
 
 // decomp: itemIdentifiers (src/SLUS_010.40/main.h:238)
 enum Items_KeyItemId { Items_KeyItemId_BronzeKey = 458, Items_KeyItemId_ChamomileSigil = 466 };
-typedef enum Items_KeyItemId Items_KeyItemId;
 
 #endif // VS_ITEMS_KEYITEMS_H_TYPES

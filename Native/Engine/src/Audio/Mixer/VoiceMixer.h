@@ -3,10 +3,10 @@
 #define VS_AUDIO_MIXER_VOICEMIXER_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_VoiceEnvelope Audio_VoiceEnvelope;
-typedef struct Audio_VoiceModeMasks Audio_VoiceModeMasks;
-typedef struct Audio_VoiceParams Audio_VoiceParams;
-typedef struct Audio_VoiceScheduler Audio_VoiceScheduler;
+struct Audio_VoiceEnvelope;
+struct Audio_VoiceModeMasks;
+struct Audio_VoiceParams;
+struct Audio_VoiceScheduler;
 
 // decomp: D_8002F89C (D_8002F89C@SLUS_010.40): a view into another global
 #define Audio_Mixer_kCenterPanGain (*(short*)((u_char*)&Audio_Mixer_kPanGains + 256))
@@ -30,15 +30,15 @@ typedef struct Audio_VoiceScheduler Audio_VoiceScheduler;
 #define VOICE_COUNT 24
 
 // decomp: FSoundVoiceModeFlags (src/include/sound.h:520)
-typedef struct Audio_VoiceModeMasks {
+struct Audio_VoiceModeMasks {
     int reverb;
     int noise;
     int fm;
-} Audio_VoiceModeMasks;
+};
 static_assert(sizeof(Audio_VoiceModeMasks) == 0xC, "Audio_VoiceModeMasks must keep its PS1 layout");
 
 // decomp: FSoundVoiceParams (src/include/sound.h:316)
-typedef struct Audio_VoiceParams {
+struct Audio_VoiceParams {
     /* 0x00 */ u_int assignedVoice;
     /* 0x04 */ u_int dirtyFlags;
     /* 0x08 */ u_int sampleStart;
@@ -48,11 +48,11 @@ typedef struct Audio_VoiceParams {
     /* 0x14 */ u_short adsrUpper;
     /* 0x16 */ u_short volumeScale;
     /* 0x18 */ SpuVolume volume;
-} Audio_VoiceParams;
+};
 static_assert(sizeof(Audio_VoiceParams) == 0x1C, "Audio_VoiceParams must keep its PS1 layout");
 
 // decomp: FSoundVoiceSchedulerState (src/include/sound.h:274)
-typedef struct Audio_VoiceScheduler {
+struct Audio_VoiceScheduler {
     u_int activeVoices;
     u_int pendingKeyOn;
     u_int keyedVoices;
@@ -67,15 +67,15 @@ typedef struct Audio_VoiceScheduler {
     char pad2A;
     char pad2B;
     u_int reserved2C;
-} Audio_VoiceScheduler;
+};
 static_assert(sizeof(Audio_VoiceScheduler) == 0x30, "Audio_VoiceScheduler must keep its PS1 layout");
 
 // decomp: FSpuVoiceInfo (src/include/sound.h:507)
-typedef struct Audio_VoiceEnvelope {
+struct Audio_VoiceEnvelope {
     /* 0x0 */ int reserved0; // Seems unused
     /* 0x4 */ short envelopeLevel;
     /* 0x6 */ short reserved6;
-} Audio_VoiceEnvelope;
+};
 static_assert(sizeof(Audio_VoiceEnvelope) == 0x8, "Audio_VoiceEnvelope must keep its PS1 layout");
 
 #endif // VS_AUDIO_MIXER_VOICEMIXER_H_TYPES

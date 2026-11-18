@@ -3,8 +3,8 @@
 #define VS_MENU_FILES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Files_FileMenuElement Menu_Files_FileMenuElement;
-typedef struct Menu_Files_PrimitiveBuffer Menu_Files_PrimitiveBuffer;
+struct Menu_Files_FileMenuElement;
+struct Menu_Files_PrimitiveBuffer;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -24,11 +24,9 @@ enum Menu_Files_ElementState {
     Menu_Files_ElementState_AnimateY = 3,
     Menu_Files_ElementState_AnimateNegX = 4
 };
-typedef enum Menu_Files_ElementState Menu_Files_ElementState;
 
 // decomp: statType_e (src/MENU/MENU7.PRG/260.c:1265)
 enum Menu_Files_StatType { Menu_Files_StatType_HP = 0, Menu_Files_StatType_MP = 1 };
-typedef enum Menu_Files_StatType Menu_Files_StatType;
 
 // decomp: vs_fileMenuUiIds_e (src/MENU/MENU7.PRG/260.c:1206)
 enum Menu_Files_FileMenuUiId {
@@ -43,10 +41,9 @@ enum Menu_Files_FileMenuUiId {
     Menu_Files_FileMenuUiId_Mp = 8,
     Menu_Files_FileMenuUiId_Dot = 9,
 };
-typedef enum Menu_Files_FileMenuUiId Menu_Files_FileMenuUiId;
 
 // decomp: fileMenuElements_t (src/MENU/MENU7.PRG/260.c:134)
-typedef struct Menu_Files_FileMenuElement {
+struct Menu_Files_FileMenuElement {
     char state;
     char slotId;
     char outertextBlendFactor;
@@ -62,11 +59,11 @@ typedef struct Menu_Files_FileMenuElement {
     short w;
     short h;
     char text[32];
-} Menu_Files_FileMenuElement;
+};
 static_assert(sizeof(Menu_Files_FileMenuElement) == 0x34, "Menu_Files_FileMenuElement must keep its PS1 layout");
 
 // decomp: primBuf_t (src/MENU/MENU7.PRG/260.c:150)
-typedef struct Menu_Files_PrimitiveBuffer {
+struct Menu_Files_PrimitiveBuffer {
     u_long tag;
     union {
         Render_SpriteTexturePagePacket sprt;
@@ -80,6 +77,6 @@ typedef struct Menu_Files_PrimitiveBuffer {
         } tilePoly;
         u_long reserved0[15];
     } prim;
-} Menu_Files_PrimitiveBuffer;
+};
 
 #endif // VS_MENU_FILES_H_TYPES

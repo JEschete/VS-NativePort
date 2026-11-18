@@ -3,14 +3,14 @@
 #define VS_MENU_FRAMEWORK_MENUROWS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Framework_ItemText Menu_Framework_ItemText;
+struct Menu_Framework_ItemText;
 
 // decomp: _itemsText_t (src/MENU/MAINMENU.PRG/58EC.c:15)
-typedef struct Menu_Framework_ItemText {
+struct Menu_Framework_ItemText {
     u_short name[14];
     int menuRowFlags;
     u_short description[48];
-} Menu_Framework_ItemText;
+};
 static_assert(sizeof(Menu_Framework_ItemText) == 0x80, "Menu_Framework_ItemText must keep its PS1 layout");
 
 #endif // VS_MENU_FRAMEWORK_MENUROWS_H_TYPES

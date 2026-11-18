@@ -1,5 +1,5 @@
 #pragma once
 
-typedef struct Effects_ScreenEffectOverlay Effects_ScreenEffectOverlay;
+struct Effects_ScreenEffectOverlay;
 
 extern Effects_ScreenEffectOverlay Effects_screenEffectDefaults;

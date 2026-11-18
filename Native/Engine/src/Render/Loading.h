@@ -3,15 +3,15 @@
 #define VS_RENDER_LOADING_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Render_LegacyImageSize Render_LegacyImageSize;
+struct Render_LegacyImageSize;
 
 // decomp: imgHeader_t (src/SLUS_010.40/main.c:134)
-typedef struct Render_LegacyImageSize {
+struct Render_LegacyImageSize {
     char widthLow;
     char widthHigh;
     char heightLow;
     char heightHigh;
-} Render_LegacyImageSize;
+};
 static_assert(sizeof(Render_LegacyImageSize) == 0x4, "Render_LegacyImageSize must keep its PS1 layout");
 
 #endif // VS_RENDER_LOADING_H_TYPES

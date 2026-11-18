@@ -4,10 +4,10 @@
 #define VS_OWNED_BATTLE_AI_FRAMEUPDATE_H
 #include "Legacy/Psx.h"
 
-typedef struct Battle_Ai_ActorAiState Battle_Ai_ActorAiState;
-typedef struct Battle_Ai_RoomAiState Battle_Ai_RoomAiState;
-typedef struct Battle_Ai_PerceptionUpdateView Battle_Ai_PerceptionUpdateView;
-typedef struct Battle_Ai_AiCreationView Battle_Ai_AiCreationView;
+struct Battle_Ai_ActorAiState;
+struct Battle_Ai_RoomAiState;
+struct Battle_Ai_PerceptionUpdateView;
+struct Battle_Ai_AiCreationView;
 
 enum {
   kAiFrameActorSlots = 16,
@@ -16,7 +16,7 @@ enum {
   kAiDirectionBytes = 8
 };
 
-typedef struct Battle_Ai_FrameContext {
+struct Battle_Ai_FrameContext {
   Battle_Ai_ActorAiState* actors[kAiFrameActorSlots];
   Battle_Ai_RoomAiState* room;
   u_short (*heightMap)[kAiFrameGridSide];
@@ -39,7 +39,7 @@ typedef struct Battle_Ai_FrameContext {
   void* roomData;
   u_int randomState;
   int lastBudgetTick;
-} Battle_Ai_FrameContext;
+};
 
 Battle_Ai_FrameContext* Battle_Ai_FrameState();
 int Battle_Ai_TryTerrainRegionCell(int tile_x, int tile_z, u_char** cell);

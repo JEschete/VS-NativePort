@@ -11,28 +11,28 @@
 // plan §6.1 replaces them with Core::Vec3s / Mat3x3s on promotion.
 
 // Compatibility entry points require the Win32 long ABI for 32-bit words.
-typedef long Core_GteWord;
+using Core_GteWord = long;
 
-typedef struct SVECTOR {
+struct SVECTOR {
   short vx, vy, vz, pad;
-} SVECTOR;
+};
 
-typedef struct VECTOR {
+struct VECTOR {
   long vx, vy, vz, pad;
-} VECTOR;
+};
 
-typedef struct DVECTOR {
+struct DVECTOR {
   short vx, vy;
-} DVECTOR;
+};
 
-typedef struct CVECTOR {
+struct CVECTOR {
   unsigned char r, g, b, cd;
-} CVECTOR;
+};
 
-typedef struct MATRIX {
+struct MATRIX {
   short m[3][3];
   long t[3];
-} MATRIX;
+};
 
 // ---- state set by the game
 void Core_Gte_Reset();

@@ -3,7 +3,7 @@
 #define VS_EVENT_DIALOG_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Event_DialogPlacement Event_DialogPlacement;
+struct Event_DialogPlacement;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -16,12 +16,12 @@ typedef struct Event_DialogPlacement Event_DialogPlacement;
 #endif
 
 // decomp: textPlacement (src/BATTLE/BATTLE.PRG/4A0A8.c:196)
-typedef struct Event_DialogPlacement {
+struct Event_DialogPlacement {
     Battle_TextAnchorOffset anchorOffset;
     short screenX;
     short screenY;
     int clampDistance;
-} Event_DialogPlacement;
+};
 static_assert(sizeof(Event_DialogPlacement) == 0xC, "Event_DialogPlacement must keep its PS1 layout");
 
 #endif // VS_EVENT_DIALOG_H_TYPES

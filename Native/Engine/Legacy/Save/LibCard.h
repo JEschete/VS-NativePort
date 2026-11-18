@@ -7,14 +7,14 @@
 
 #include "Legacy/Core/PsxTypes.h"
 
-typedef struct DIRENTRY {
+struct DIRENTRY {
   char name[20];
   long attr;
   long size;
   struct DIRENTRY* next;
   long head;
   char system[4];
-} DIRENTRY;
+};
 
 long LegacyApi_open(char* path, unsigned long mode);
 long LegacyApi_close(long fd);

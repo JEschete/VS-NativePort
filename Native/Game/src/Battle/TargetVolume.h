@@ -3,11 +3,11 @@
 #define VS_BATTLE_TARGETVOLUME_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_SphereTargetLabel Battle_SphereTargetLabel;
-typedef struct Battle_TargetPreview Battle_TargetPreview;
-typedef struct Battle_TargetSphere Battle_TargetSphere;
-typedef struct Battle_TargetSphereSetupView Battle_TargetSphereSetupView;
-typedef struct Battle_TargetSphereSpec Battle_TargetSphereSpec;
+struct Battle_SphereTargetLabel;
+struct Battle_TargetPreview;
+struct Battle_TargetSphere;
+struct Battle_TargetSphereSetupView;
+struct Battle_TargetSphereSpec;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -20,7 +20,7 @@ typedef struct Battle_TargetSphereSpec Battle_TargetSphereSpec;
 #endif
 
 // decomp: D_800EB9B8_t2 (src/BATTLE/BATTLE.PRG/573B8.c:31)
-typedef struct Battle_TargetSphereSpec {
+struct Battle_TargetSphereSpec {
     u_char kind;
     u_char reserved1;
     u_char reserved2;
@@ -28,11 +28,11 @@ typedef struct Battle_TargetSphereSpec {
     int reserved4;
     int reserved8;
     int reservedC;
-} Battle_TargetSphereSpec;
+};
 static_assert(sizeof(Battle_TargetSphereSpec) == 0x10, "Battle_TargetSphereSpec must keep its PS1 layout");
 
 // decomp: D_800EB9B8_t (src/BATTLE/BATTLE.PRG/573B8.c:55)
-typedef struct Battle_TargetSphereSetupView {
+struct Battle_TargetSphereSetupView {
     Battle_TargetSphereSpec primaryVolume;
     Battle_TargetSphereSpec secondaryVolume;
     int depthAndYaw;
@@ -102,10 +102,10 @@ typedef struct Battle_TargetSphereSetupView {
     char reservedLabelArea_B70[14660];
     short wireEdges[0x302];
     u_char terrainRowFlags[0x64];
-} Battle_TargetSphereSetupView;
+};
 
 // decomp: D_800EB9B8_unk990 (src/BATTLE/BATTLE.PRG/58578.c:24)
-typedef struct Battle_SphereTargetLabel {
+struct Battle_SphereTargetLabel {
     char state;
     char depth;
     char gradient;
@@ -115,10 +115,10 @@ typedef struct Battle_SphereTargetLabel {
     char fade;
     SVECTOR worldPosition;
     char* text;
-} Battle_SphereTargetLabel;
+};
 
 // decomp: D_800EB9B8_t (src/BATTLE/BATTLE.PRG/58578.c:52)
-typedef struct Battle_TargetSphere {
+struct Battle_TargetSphere {
     Battle_TargetVolume volumes[2];
     short depth;
     short cameraYaw;
@@ -144,6 +144,6 @@ typedef struct Battle_TargetSphere {
     int terrainHeights[81];
     char wireEdges[0x604];
     u_char terrainRowFlags[81];
-} Battle_TargetSphere;
+};
 
 #endif // VS_BATTLE_TARGETVOLUME_H_TYPES

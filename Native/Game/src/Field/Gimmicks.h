@@ -3,14 +3,14 @@
 #define VS_FIELD_GIMMICKS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_ShpModel Actors_ShpModel;
-typedef struct Field_GimmickAnimationJob Field_GimmickAnimationJob;
-typedef struct Field_GimmickInstance Field_GimmickInstance;
-typedef struct Field_GimmickObjectInfo Field_GimmickObjectInfo;
-typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
-typedef struct Field_GimmickSnapshot Field_GimmickSnapshot;
-typedef struct Field_GimmickTemplate Field_GimmickTemplate;
-typedef struct Field_MpdLockTrigger Field_MpdLockTrigger;
+struct Actors_ShpModel;
+struct Field_GimmickAnimationJob;
+struct Field_GimmickInstance;
+struct Field_GimmickObjectInfo;
+struct Field_GimmickPhysicsView;
+struct Field_GimmickSnapshot;
+struct Field_GimmickTemplate;
+struct Field_MpdLockTrigger;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -27,22 +27,22 @@ typedef struct Field_MpdLockTrigger Field_MpdLockTrigger;
 #endif
 
 // decomp: D_800E8FB4_t (src/BATTLE/BATTLE.PRG/30DB0.c:36)
-typedef struct Field_GimmickTemplate {
+struct Field_GimmickTemplate {
     int instanceFlags;
     int instanceWord4;
     int recolorCount;
     int modelDataSize;
-} Field_GimmickTemplate;
+};
 static_assert(sizeof(Field_GimmickTemplate) == 0x10, "Field_GimmickTemplate must keep its PS1 layout");
 
 // decomp: D_800F1D28_t (src/BATTLE/BATTLE.PRG/146C.c:249)
-typedef struct Field_GimmickAnimationJob {
+struct Field_GimmickAnimationJob {
     int jobKind;
     Field_MpdLockTrigger* trigger;
-} Field_GimmickAnimationJob;
+};
 
 // decomp: D_800F4538_t2 (src/BATTLE/BATTLE.PRG/3A1A0.h:24)
-typedef struct Field_GimmickObjectInfo {
+struct Field_GimmickObjectInfo {
     u_char objectId : 3;
     u_char isFalling : 1;
     u_char interaction : 2;
@@ -55,11 +55,11 @@ typedef struct Field_GimmickObjectInfo {
     u_char reserved6;
     u_char reserved7;
     int reserved8;
-} Field_GimmickObjectInfo;
+};
 static_assert(sizeof(Field_GimmickObjectInfo) == 0xC, "Field_GimmickObjectInfo must keep its PS1 layout");
 
 // decomp: D_800F45E0_t (src/BATTLE/BATTLE.PRG/3A1A0.h:633)
-typedef struct Field_GimmickInstance {
+struct Field_GimmickInstance {
     char boneCount;
     char reserved1;
     char reserved2;
@@ -244,17 +244,17 @@ typedef struct Field_GimmickInstance {
     Actors_ShadowBlend shadowBlend;
     int savedPlacement;
     int reserved187C;
-} Field_GimmickInstance;
+};
 
 // decomp: func_800A0024_t (src/BATTLE/BATTLE.PRG/30DB0.c:24)
-typedef struct Field_GimmickSnapshot {
+struct Field_GimmickSnapshot {
     u_char placementByte0;
     u_char heightAboveGround;
     u_char placementByte2;
     u_char orientation;
     int positionXY;
     int positionZ;
-} Field_GimmickSnapshot;
+};
 static_assert(sizeof(Field_GimmickSnapshot) == 0xC, "Field_GimmickSnapshot must keep its PS1 layout");
 
 // decomp: objectAnimationState (src/BATTLE/BATTLE.PRG/44F14.c:148)
@@ -279,7 +279,7 @@ struct Field_GimmickPhysicsView {
     char reserved60_6C[256];
     u_char material, durability, reserved16E, carrier, frame;
 };
-typedef struct Field_GimmickPhysicsView Field_GimmickPhysicsView;
+struct Field_GimmickPhysicsView;
 
 #endif // VS_FIELD_GIMMICKS_H_TYPES
 

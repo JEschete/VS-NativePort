@@ -1,13 +1,15 @@
 # C++ headers
 
-Every native file compiles as C++23 (plan D5), but most headers are still written in C: `.h` files with `typedef struct`,
-`_Static_assert`, macro guards, `#define` constants and everything at global scope, and until 2026-11-18 `extern "C"`.
+Every native file compiles as C++23 (plan D5), but most headers are still written in C: `.h` files with macro guards,
+`#define` constants and everything at global scope. Until 2026-11-18 they also used `extern "C"`, `typedef struct`,
+`_Static_assert`, `f(void)` and GNU attributes.
 They work, but they are not C++, and GitHub's language bar reports them as C for that reason. The owner decided on
 2026-11-18 that they are rewritten as real C++ headers rather than renamed or relabeled. Work is tracked in #441.
 
 [HEADER_LEDGER.csv](ledgers/HEADER_LEDGER.csv) has one row per file that needs work. `tools\ledger\headers.py` measures
 every row from the source, so the ledger cannot claim progress the code does not have. CI fails on a stale ledger, on a
-`done` row that regresses, on a new C-style header or `.cpp`, and on C linkage returning to any tracked file.
+`done` row that regresses, on a new C-style header or `.cpp`, and on C linkage or a retired criterion returning to any
+tracked file.
 
 ## C linkage retired (2026-11-18)
 
@@ -17,6 +19,23 @@ anyway. Every file compiles as C++, and nothing outside the build looks up a nat
 no exports, `GetProcAddress` lookups or assembly files, and the Python tools load only system DLLs. Debug and Release
 linked with no declaration that disagreed with its definition. The remaining `.h` files are still C-style in the other
 criteria below; their declarations now have C++ linkage.
+
+## C spellings retired (2026-11-18)
+
+Four more criteria were cleared from every header by rewrites that keep the meaning, across all of `Native\`:
+
+| Criterion | Rewrite |
+| --- | --- |
+| `static_asserts` | `_Static_assert(...)` became `static_assert(...)` |
+| `void_params` | `f(void)` became `f()` |
+| `gnu_attributes` | `__attribute__((unused))` on extern globals and one public field was removed; it has no effect there |
+| `typedefs` | `typedef struct X X;` became `struct X;` and `typedef struct X { ... } X;` became `struct X { ... };` (unions alike). `typedef enum X X;` was removed: each followed its own `enum X { ... }`, which C++ already names. `typedef T N;`, including function pointers and arrays, became `using N = T;` |
+
+Every tag already matched its typedef name, so no type changed its spelling. Enums stay unscoped: making one an
+`enum class` changes its uses, so it belongs to that header's own migration. `RETIRED_CRITERIA` in `headers.py` holds
+these four the way C linkage is held: a tracked header that regains one fails `--check`, even while other criteria
+keep it remaining. `tools\ledger\hazards.py` reads struct definitions in either form, and its sites were unchanged by
+the rewrite.
 
 ## Owner decisions (2026-11-18)
 
@@ -56,7 +75,7 @@ A header is `done` when it is a `.hpp`, is not generated, uses `#pragma once` an
 | `c_linkage` | `extern "C"` and `__cplusplus` | C++ linkage |
 | `c_wrapped` | `extern "C"` blocks anywhere in `Native\` that include this header | A plain `#include` |
 | `static_asserts` | `_Static_assert` | `static_assert` |
-| `typedefs` | `typedef` | `struct X { ... };`, `enum class`, `using F = ...;` |
+| `typedefs` | `typedef` | `struct X { ... };`, `using F = ...;` |
 | `void_params` | `f(void)` parameter lists | `f()` |
 | `gnu_attributes` | `__attribute__((...))` | Standard attributes such as `[[maybe_unused]]`, or removal |
 | `macros` | `#define`, apart from guards and the permitted macros below | `inline constexpr`, `enum class`, inline functions, templates |
@@ -134,11 +153,11 @@ compile settings, is part of #248.
 | `guard` (`#pragma once`) | 287 | |
 | `c_linkage` | 0 | 0 |
 | `static_asserts` | 0 | 0 |
-| `typedefs` | 157 | 1,247 |
+| `typedefs` | 0 | 0 |
 | `void_params` | 0 | 0 |
 | `gnu_attributes` | 0 | 0 |
 | `macros` | 69 | 10,519 |
-| `global_decls` | 368 | 3,206 |
+| `global_decls` | 368 | 2,531 |
 | `c_wrapped` | 0 | 0 |
 | `baseline` | 19 | 308 |
 

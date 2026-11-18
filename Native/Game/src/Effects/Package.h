@@ -3,16 +3,16 @@
 #define VS_EFFECTS_PACKAGE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Effects_CurveBlock Effects_CurveBlock;
-typedef struct Effects_PackageBlock1 Effects_PackageBlock1;
-typedef struct Effects_PackageBlock11 Effects_PackageBlock11;
-typedef struct Effects_PackageBlock2 Effects_PackageBlock2;
-typedef struct Effects_PackageBlock3 Effects_PackageBlock3;
-typedef struct Effects_PackageBlock5 Effects_PackageBlock5;
-typedef struct Effects_PackageBlock9 Effects_PackageBlock9;
-typedef struct Effects_PackageFile Effects_PackageFile;
-typedef struct Effects_PackageTexture Effects_PackageTexture;
-typedef struct Effects_PackageTextureInfo Effects_PackageTextureInfo;
+struct Effects_CurveBlock;
+struct Effects_PackageBlock1;
+struct Effects_PackageBlock11;
+struct Effects_PackageBlock2;
+struct Effects_PackageBlock3;
+struct Effects_PackageBlock5;
+struct Effects_PackageBlock9;
+struct Effects_PackageFile;
+struct Effects_PackageTexture;
+struct Effects_PackageTextureInfo;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -25,43 +25,43 @@ typedef struct Effects_PackageTextureInfo Effects_PackageTextureInfo;
 #endif
 
 // decomp: pFileBlock1 (src/BATTLE/BATTLE.PRG/6F014.c:293)
-typedef struct Effects_PackageBlock1 {
+struct Effects_PackageBlock1 {
     short tableCount;
     u_short dataOffset;
     int tableOffsets[0];
-} Effects_PackageBlock1;
+};
 static_assert(sizeof(Effects_PackageBlock1) == 0x4, "Effects_PackageBlock1 must keep its PS1 layout");
 
 // decomp: pFileBlock11 (src/BATTLE/BATTLE.PRG/5BF94.c:248)
-typedef struct Effects_PackageBlock11 {
+struct Effects_PackageBlock11 {
     int count;
     short offsets[0];
-} Effects_PackageBlock11;
+};
 static_assert(sizeof(Effects_PackageBlock11) == 0x4, "Effects_PackageBlock11 must keep its PS1 layout");
 
 // decomp: pFileBlock2 (src/BATTLE/BATTLE.PRG/6F014.c:298)
-typedef struct Effects_PackageBlock2 {
+struct Effects_PackageBlock2 {
     int animationCount;
     u_char reserved4[0];
-} Effects_PackageBlock2;
+};
 static_assert(sizeof(Effects_PackageBlock2) == 0x4, "Effects_PackageBlock2 must keep its PS1 layout");
 
 // decomp: pFileBlock3 (src/BATTLE/BATTLE.PRG/5BF94.h:334)
-typedef struct Effects_PackageBlock3 {
+struct Effects_PackageBlock3 {
     int count;
     u_short offsets[0];
-} Effects_PackageBlock3;
+};
 static_assert(sizeof(Effects_PackageBlock3) == 0x4, "Effects_PackageBlock3 must keep its PS1 layout");
 
 // decomp: pFileBlock5 (src/BATTLE/BATTLE.PRG/5BF94.h:329)
-typedef struct Effects_PackageBlock5 {
+struct Effects_PackageBlock5 {
     int reserved0;
     Effects_ParticleDefinition definitions[0];
-} Effects_PackageBlock5;
+};
 static_assert(sizeof(Effects_PackageBlock5) == 0x4, "Effects_PackageBlock5 must keep its PS1 layout");
 
 // decomp: pFileBlock9 (src/BATTLE/BATTLE.PRG/5BF94.h:177)
-typedef struct Effects_PackageBlock9 {
+struct Effects_PackageBlock9 {
     short gravityRange[6];
     short dragRange[2];
     u_char reserved10;
@@ -71,19 +71,19 @@ typedef struct Effects_PackageBlock9 {
     u_char frameCount;
     u_char transformCount;
     u_char timelineIds[4];
-} Effects_PackageBlock9;
+};
 static_assert(sizeof(Effects_PackageBlock9) == 0x1A, "Effects_PackageBlock9 must keep its PS1 layout");
 
 // decomp: pFileCurveBlock (src/BATTLE/BATTLE.PRG/5BF94.h:203)
-typedef struct Effects_CurveBlock {
+struct Effects_CurveBlock {
     u_short count;
     u_short dataOffset;
     u_char curveSizes[0];
-} Effects_CurveBlock;
+};
 static_assert(sizeof(Effects_CurveBlock) == 0x4, "Effects_CurveBlock must keep its PS1 layout");
 
 // decomp: pFileTexture (src/BATTLE/BATTLE.PRG/5BF94.h:351)
-typedef struct Effects_PackageTexture {
+struct Effects_PackageTexture {
     short clut;
     short tpage;
     u_char u;
@@ -98,21 +98,21 @@ typedef struct Effects_PackageTexture {
     short reserved12;
     short reserved14;
     short reserved16;
-} Effects_PackageTexture;
+};
 static_assert(sizeof(Effects_PackageTexture) == 0x18, "Effects_PackageTexture must keep its PS1 layout");
 
 // decomp: pFileTextureInfo (src/BATTLE/BATTLE.PRG/5BF94.h:213)
-typedef struct Effects_PackageTextureInfo {
+struct Effects_PackageTextureInfo {
     u_short reserved0;
     u_short dataIndex;
-} Effects_PackageTextureInfo;
+};
 static_assert(sizeof(Effects_PackageTextureInfo) == 0x4, "Effects_PackageTextureInfo must keep its PS1 layout");
 
 // decomp: p_file_t (src/BATTLE/BATTLE.PRG/6F014.c:303)
-typedef struct Effects_PackageFile {
+struct Effects_PackageFile {
     int meta;
     u_char blocks[0];
-} Effects_PackageFile;
+};
 static_assert(sizeof(Effects_PackageFile) == 0x4, "Effects_PackageFile must keep its PS1 layout");
 
 #endif // VS_EFFECTS_PACKAGE_H_TYPES

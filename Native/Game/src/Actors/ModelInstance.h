@@ -3,9 +3,9 @@
 #define VS_ACTORS_MODELINSTANCE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_ModelEffectSlot Actors_ModelEffectSlot;
-typedef struct Actors_ModelInstance Actors_ModelInstance;
-typedef struct Actors_ShpModel Actors_ShpModel;
+struct Actors_ModelEffectSlot;
+struct Actors_ModelInstance;
+struct Actors_ShpModel;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -18,16 +18,16 @@ typedef struct Actors_ShpModel Actors_ShpModel;
 #endif
 
 // decomp: D_800F4538_unk64 (src/BATTLE/BATTLE.PRG/3A1A0.h:99)
-typedef struct Actors_ModelEffectSlot {
+struct Actors_ModelEffectSlot {
     u_char kind;
     u_char level;
     u_char flags;
     u_char parameter;
-} Actors_ModelEffectSlot;
+};
 static_assert(sizeof(Actors_ModelEffectSlot) == 0x4, "Actors_ModelEffectSlot must keep its PS1 layout");
 
 // decomp: D_800F4538_unk0 (src/BATTLE/BATTLE.PRG/3A1A0.h:190)
-typedef struct Actors_ModelInstance {
+struct Actors_ModelInstance {
     u_char boneCount;
     u_char vertexGroupCount;
     u_short triangleCount;
@@ -95,6 +95,6 @@ typedef struct Actors_ModelInstance {
     u_char reserved63;
     Actors_ModelEffectSlot palettePulse;
     Actors_ShpModel* model;
-} Actors_ModelInstance;
+};
 
 #endif // VS_ACTORS_MODELINSTANCE_H_TYPES

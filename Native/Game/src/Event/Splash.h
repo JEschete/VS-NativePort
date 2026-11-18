@@ -3,10 +3,10 @@
 #define VS_EVENT_SPLASH_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Event_SplashTween Event_SplashTween;
+struct Event_SplashTween;
 
 // decomp: D_800F4B30_t (src/BATTLE/BATTLE.PRG/4A0A8.c:156)
-typedef struct Event_SplashTween {
+struct Event_SplashTween {
     char reserved00;
     char easingMode;
     char elapsedFrames;
@@ -19,7 +19,7 @@ typedef struct Event_SplashTween {
     short deltaScaleFixed12;
     short startBrightness;
     short deltaBrightness;
-} Event_SplashTween;
+};
 static_assert(sizeof(Event_SplashTween) == 0x14, "Event_SplashTween must keep its PS1 layout");
 
 #endif // VS_EVENT_SPLASH_H_TYPES

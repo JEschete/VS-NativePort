@@ -3,10 +3,10 @@
 #define VS_ENDING_CREDITS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Ending_Credits_Element Ending_Credits_Element;
-typedef struct Ending_Credits_TexturedGradientQuadView Ending_Credits_TexturedGradientQuadView;
-typedef struct Ending_Credits_TimHeader Ending_Credits_TimHeader;
-typedef struct Ending_Credits_TimImageBlockHeader Ending_Credits_TimImageBlockHeader;
+struct Ending_Credits_Element;
+struct Ending_Credits_TexturedGradientQuadView;
+struct Ending_Credits_TimHeader;
+struct Ending_Credits_TimImageBlockHeader;
 
 // decomp: easeMode (src/ENDING/ENDING.PRG/D4.c:81)
 enum Ending_Credits_EasingMode {
@@ -15,10 +15,9 @@ enum Ending_Credits_EasingMode {
     Ending_Credits_EasingMode_EaseInOut,
     Ending_Credits_EasingMode_EaseIn,
 };
-typedef enum Ending_Credits_EasingMode Ending_Credits_EasingMode;
 
 // decomp: _creditsElement (src/ENDING/ENDING.PRG/D4.c:30)
-typedef struct Ending_Credits_Element {
+struct Ending_Credits_Element {
     void (*render)(struct Ending_Credits_Element*);
     u_char* textBytes;
     short phase;
@@ -33,10 +32,10 @@ typedef struct Ending_Credits_Element {
     int reserved24;
     int reserved28;
     int reserved2C;
-} Ending_Credits_Element;
+};
 
 // decomp: func_80069388_t (src/ENDING/ENDING.PRG/D4.c:64)
-typedef struct Ending_Credits_TexturedGradientQuadView {
+struct Ending_Credits_TexturedGradientQuadView {
     int dmaTag;
     u_char vertexZeroRed;
     u_char vertexZeroGreen;
@@ -68,26 +67,26 @@ typedef struct Ending_Credits_TexturedGradientQuadView {
     u_char pad2B;
     short vertexThreeX;
     short vertexThreeY;
-} Ending_Credits_TexturedGradientQuadView;
+};
 static_assert(sizeof(Ending_Credits_TexturedGradientQuadView) == 0x30, "Ending_Credits_TexturedGradientQuadView must keep its PS1 layout");
 
 // decomp: func_8006A9C0_t (src/ENDING/ENDING.PRG/D4.c:70)
-typedef struct Ending_Credits_TimImageBlockHeader {
+struct Ending_Credits_TimImageBlockHeader {
     int blockSizeBytes;
     RECT uploadRect;
     char pixelBytes[0];
-} Ending_Credits_TimImageBlockHeader;
+};
 static_assert(sizeof(Ending_Credits_TimImageBlockHeader) == 0xC, "Ending_Credits_TimImageBlockHeader must keep its PS1 layout");
 
 // decomp: func_8006A9C0_t2 (src/ENDING/ENDING.PRG/D4.c:79)
-typedef struct Ending_Credits_TimHeader {
+struct Ending_Credits_TimHeader {
     u_char identifier;
     u_char reserved01;
     u_char reserved02;
     u_char reserved03;
     int mode;
     Ending_Credits_TimImageBlockHeader firstBlock;
-} Ending_Credits_TimHeader;
+};
 static_assert(sizeof(Ending_Credits_TimHeader) == 0x14, "Ending_Credits_TimHeader must keep its PS1 layout");
 
 #endif // VS_ENDING_CREDITS_H_TYPES

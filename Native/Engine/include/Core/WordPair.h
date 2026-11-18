@@ -3,13 +3,13 @@
 #define VS_CORE_WORDPAIR_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Core_WordPair Core_WordPair;
+struct Core_WordPair;
 
 // decomp: func_800ACF54_t (src/BATTLE/BATTLE.PRG/40564.c:2546)
-typedef struct Core_WordPair {
+struct Core_WordPair {
     int low;
     int high;
-} Core_WordPair;
+};
 static_assert(sizeof(Core_WordPair) == 0x8, "Core_WordPair must keep its PS1 layout");
 
 #endif // VS_CORE_WORDPAIR_H_TYPES

@@ -6,7 +6,6 @@
 
 // decomp: drawArtsListOpt (src/MENU/MENU1.PRG/30.c:94)
 enum Menu_BreakArts_ArtListOption { Menu_BreakArts_ArtListOption_OptForceCursorMemory = 0x10 };
-typedef enum Menu_BreakArts_ArtListOption Menu_BreakArts_ArtListOption;
 
 #endif // VS_MENU_BREAKARTS_H_TYPES
 

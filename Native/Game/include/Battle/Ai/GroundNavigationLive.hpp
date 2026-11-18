@@ -8,7 +8,7 @@ struct Battle_Ai_MoveTargetView;
 struct Battle_Ai_MovementPathView;
 struct Battle_Ai_WanderView;
 // NOLINTNEXTLINE(modernize-use-using): shared with the C movement headers.
-typedef int (*Battle_Ai_PathTest)(Battle_Ai_MovementPathView*, int);
+using Battle_Ai_PathTest = int (*)(Battle_Ai_MovementPathView*, int);
 
 // The hesitation lengths (bytes 1..3) loaded from BATTLE.PRG.
 extern unsigned int Content_battleAiHesitationLengths[1];

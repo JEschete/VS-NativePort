@@ -3,13 +3,13 @@
 #define VS_SAVE_MEMORYCARD_GAMEFILES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Save_CardFileInfoRecord Save_CardFileInfoRecord;
-typedef struct Save_GameSaveImage Save_GameSaveImage;
-typedef struct Save_SaveCipherHeader Save_SaveCipherHeader;
-typedef struct Save_SaveFileStats Save_SaveFileStats;
-typedef struct Save_SaveFileSummary Save_SaveFileSummary;
-typedef struct Save_SaveProtectedHeader Save_SaveProtectedHeader;
-typedef struct Save_SaveSlotBase Save_SaveSlotBase;
+struct Save_CardFileInfoRecord;
+struct Save_GameSaveImage;
+struct Save_SaveCipherHeader;
+struct Save_SaveFileStats;
+struct Save_SaveFileSummary;
+struct Save_SaveProtectedHeader;
+struct Save_SaveSlotBase;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -32,14 +32,12 @@ enum Save_FindSaveResult {
     Save_FindSaveResult_NotFound = -1,
     Save_FindSaveResult_Pending = 0
 };
-typedef enum Save_FindSaveResult Save_FindSaveResult;
 
 // decomp: _memcardEventMask_e (src/MENU/MENU7.PRG/260.c:1624)
 enum Save_EventMask {
     Save_EventMask_IgnoreNoEvent = 0x30,
     Save_EventMask_All = 0x70
 };
-typedef enum Save_EventMask Save_EventMask;
 
 // decomp: maskedHandler_e (src/MENU/MENU7.PRG/260.c:1629)
 enum Save_MaskedHandlerResult {
@@ -47,7 +45,6 @@ enum Save_MaskedHandlerResult {
     Save_MaskedHandlerResult_Pending = 0,
     Save_MaskedHandlerResult_Complete = 1
 };
-typedef enum Save_MaskedHandlerResult Save_MaskedHandlerResult;
 
 // decomp: memcardEventHandler_e (src/MENU/MENU7.PRG/260.c:38)
 enum Save_CardReadinessResult {
@@ -56,11 +53,9 @@ enum Save_CardReadinessResult {
     Save_CardReadinessResult_Timeout = 2,
     Save_CardReadinessResult_Unformatted = 3
 };
-typedef enum Save_CardReadinessResult Save_CardReadinessResult;
 
 // decomp: memcardEvents_e (src/MENU/MENU7.PRG/260.c:36)
 enum Save_CardEventGroup { Save_CardEventGroup_Software, Save_CardEventGroup_Hardware = 4 };
-typedef enum Save_CardEventGroup Save_CardEventGroup;
 
 // decomp: slotState_e (src/MENU/MENU7.PRG/260.c:21)
 enum Save_CardFileSlotStatus {
@@ -69,7 +64,6 @@ enum Save_CardFileSlotStatus {
     Save_CardFileSlotStatus_Temporary = 2,
     Save_CardFileSlotStatus_InUse = 3
 };
-typedef enum Save_CardFileSlotStatus Save_CardFileSlotStatus;
 
 // decomp: testMemcardEvents_e (src/MENU/MENU7.PRG/260.c:28)
 enum Save_CardEventSignal {
@@ -79,18 +73,17 @@ enum Save_CardEventSignal {
     Save_CardEventSignal_Unformatted,
     Save_CardEventSignal_None,
 };
-typedef enum Save_CardEventSignal Save_CardEventSignal;
 
 // decomp: saveBase_t (src/MENU/MENU7.PRG/260.c:49)
-typedef struct Save_SaveSlotBase {
+struct Save_SaveSlotBase {
     enum Save_CardFileSlotStatus slotState;
     u_int generation;
     int formatSignature;
-} Save_SaveSlotBase;
+};
 static_assert(sizeof(Save_SaveSlotBase) == 0xC, "Save_SaveSlotBase must keep its PS1 layout");
 
 // decomp: stats_t (src/MENU/MENU7.PRG/260.c:63)
-typedef struct Save_SaveFileStats {
+struct Save_SaveFileStats {
     State_PlayTime gameTime;
     u_short cumulativeSaveCount;
     u_short currentGameSaveCount;
@@ -102,39 +95,39 @@ typedef struct Save_SaveFileStats {
     char reservedF;
     u_short currentMP;
     u_short maxMP;
-} Save_SaveFileStats;
+};
 
 // decomp: saveFileSubInfo_t (src/MENU/MENU7.PRG/260.c:69)
-typedef struct Save_SaveFileSummary {
+struct Save_SaveFileSummary {
     Save_SaveSlotBase base;
     Save_SaveFileStats stats;
     u_short cardTitleTail[16];
-} Save_SaveFileSummary;
+};
 
 // decomp: saveFileInfo_t (src/MENU/MENU7.PRG/260.c:76)
-typedef struct Save_CardFileInfoRecord {
+struct Save_CardFileInfoRecord {
     u_int key;
     Save_SaveFileSummary summary;
     char reserved44[0x1C];
     char iconHeaderBytes[0x20];
-} Save_CardFileInfoRecord;
+};
 
 // decomp: savedata_unk180_2_t (src/MENU/MENU7.PRG/260.c:81)
-typedef struct Save_SaveCipherHeader {
+struct Save_SaveCipherHeader {
     int cipherKey;
     Save_SaveSlotBase slotHeader;
-} Save_SaveCipherHeader;
+};
 static_assert(sizeof(Save_SaveCipherHeader) == 0x10, "Save_SaveCipherHeader must keep its PS1 layout");
 
 // decomp: savedata_unk180_t (src/MENU/MENU7.PRG/260.c:87)
-typedef struct Save_SaveProtectedHeader {
+struct Save_SaveProtectedHeader {
     Save_SaveCipherHeader cipherHeader;
     Save_SaveFileStats summary;
     char blockChecksums[0x5C];
-} Save_SaveProtectedHeader;
+};
 
 // decomp: savedata_t (src/MENU/MENU7.PRG/260.c:108)
-typedef struct Save_GameSaveImage {
+struct Save_GameSaveImage {
     Save_CardFileInfoRecord cardHeader;
     char iconBitmap[0x80];
     char reserved100[0x80];
@@ -153,6 +146,6 @@ typedef struct Save_GameSaveImage {
     State_ArtsStatus artsStatus;
     Items_ContainerData containerData;
     char reserved59E0[0x220];
-} Save_GameSaveImage;
+};
 
 #endif // VS_SAVE_MEMORYCARD_GAMEFILES_H_TYPES

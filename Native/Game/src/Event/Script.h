@@ -3,13 +3,13 @@
 #define VS_EVENT_SCRIPT_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Event_ScriptBytePair Event_ScriptBytePair;
+struct Event_ScriptBytePair;
 
 // decomp: scriptBytePair (src/BATTLE/BATTLE.PRG/4A0A8.c:233)
-typedef struct Event_ScriptBytePair {
+struct Event_ScriptBytePair {
     u_char lowByte;
     u_char highByte;
-} Event_ScriptBytePair;
+};
 static_assert(sizeof(Event_ScriptBytePair) == 0x2, "Event_ScriptBytePair must keep its PS1 layout");
 
 #endif // VS_EVENT_SCRIPT_H_TYPES

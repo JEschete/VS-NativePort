@@ -3,17 +3,17 @@
 #define VS_BATTLE_ACTIONRESOLUTION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_HitTargetWord Battle_HitTargetWord;
+struct Battle_HitTargetWord;
 
 // decomp: func_8008631C_t2 (src/BATTLE/BATTLE.PRG/146C.c:37)
-typedef struct Battle_HitTargetWord {
+struct Battle_HitTargetWord {
     u_char targetActor;
     signed char targetLimb;
     u_char hitThreshold;
     u_char impactKind;
     short hp;
     short mp;
-} Battle_HitTargetWord;
+};
 static_assert(sizeof(Battle_HitTargetWord) == 0x8, "Battle_HitTargetWord must keep its PS1 layout");
 
 #endif // VS_BATTLE_ACTIONRESOLUTION_H_TYPES

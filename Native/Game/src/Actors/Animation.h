@@ -3,20 +3,20 @@
 #define VS_ACTORS_ANIMATION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_AnimationPose Actors_AnimationPose;
-typedef struct Actors_KeyframeRangeScratch Actors_KeyframeRangeScratch;
-typedef struct Actors_SeqAnimationBank Actors_SeqAnimationBank;
+struct Actors_AnimationPose;
+struct Actors_KeyframeRangeScratch;
+struct Actors_SeqAnimationBank;
 
 // decomp: D_1F8003EC_t (src/BATTLE/BATTLE.PRG/44F14.c:18)
-typedef struct Actors_KeyframeRangeScratch {
+struct Actors_KeyframeRangeScratch {
     u_char reserved0[8];
     int firstFrame;
     int lastFrame;
     u_char** trackData;
-} Actors_KeyframeRangeScratch;
+};
 
 // layout: ledger (upstream merge) for D_800F4538_unkC54
-typedef struct Actors_AnimationPose {
+struct Actors_AnimationPose {
     /* 0x00 */ SVECTOR boneKeys[42];
     /* 0x150 */ SVECTOR scaleKeys[42];
     /* 0x2A0 */ SVECTOR reserved2A0[42];
@@ -30,14 +30,14 @@ typedef struct Actors_AnimationPose {
     /* 0x54A */ int reachedEnd : 1;
     /* 0x54A */ int reservedBits : 14;
     /* 0x54C */ int reserved54C;
-} Actors_AnimationPose;
+};
 
 // decomp: func_800AD494_t (src/BATTLE/BATTLE.PRG/40564.c:18)
-typedef struct Actors_SeqAnimationBank {
+struct Actors_SeqAnimationBank {
     int animationData;
     u_int animationMap; /* offset from the struct (on-disc pointer) */
     u_short headers[0];
-} Actors_SeqAnimationBank;
+};
 static_assert(sizeof(Actors_SeqAnimationBank) == 0x8, "Actors_SeqAnimationBank must keep its PS1 layout");
 
 #endif // VS_ACTORS_ANIMATION_H_TYPES

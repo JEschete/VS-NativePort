@@ -3,15 +3,15 @@
 #define VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_SfxProgramHeader Audio_SfxProgramHeader;
+struct Audio_SfxProgramHeader;
 
 // decomp: vs_main_sfxContext (src/SLUS_010.40/25AC.h:9)
-typedef struct Audio_SfxProgramHeader {
+struct Audio_SfxProgramHeader {
     int reserved0;
     int reserved4;
     char reserved8;
     char flags;
-} Audio_SfxProgramHeader;
+};
 static_assert(sizeof(Audio_SfxProgramHeader) == 0xC, "Audio_SfxProgramHeader must keep its PS1 layout");
 
 #endif // VS_AUDIO_PLAYBACK_SOUNDPLAYBACK_H_TYPES

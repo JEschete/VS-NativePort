@@ -3,13 +3,13 @@
 #define VS_BATTLE_ACTOR_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_ActorModelSlot Actors_ActorModelSlot;
-typedef struct Actors_ModelInstance Actors_ModelInstance;
-typedef struct Battle_ActionSlot Battle_ActionSlot;
-typedef struct Battle_Actor Battle_Actor;
-typedef struct Battle_ActorStats Battle_ActorStats;
-typedef struct Battle_ActorStatsFlags Battle_ActorStatsFlags;
-typedef struct Battle_LimbStats Battle_LimbStats;
+struct Actors_ActorModelSlot;
+struct Actors_ModelInstance;
+struct Battle_ActionSlot;
+struct Battle_Actor;
+struct Battle_ActorStats;
+struct Battle_ActorStatsFlags;
+struct Battle_LimbStats;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -30,10 +30,9 @@ enum Battle_LimbConditionLevel {
     Battle_LimbConditionLevel_Good,
     Battle_LimbConditionLevel_Excellent
 };
-typedef enum Battle_LimbConditionLevel Battle_LimbConditionLevel;
 
 // decomp: vs_battle_actor (src/BATTLE/BATTLE.PRG/146C.h:603)
-typedef struct Battle_Actor {
+struct Battle_Actor {
     /* 0x00 */ struct Battle_Actor* next;
     /* 0x04 */ int id;
     /* 0x08 */ u_char commandState;
@@ -75,19 +74,19 @@ typedef struct Battle_Actor {
     int allocationKind;
     Actors_ModelInstance* model;
     Actors_ActorModelSlot* equipmentModels[2];
-} Battle_Actor;
+};
 
 // decomp: vs_battle_actor_unk8C0 (src/BATTLE/BATTLE.PRG/146C.h:447)
-typedef struct Battle_ActionSlot {
+struct Battle_ActionSlot {
     u_short actionId;
     char index : 4;
     char effectModelId : 4;
     char opaque3;
-} Battle_ActionSlot;
+};
 static_assert(sizeof(Battle_ActionSlot) == 0x4, "Battle_ActionSlot must keep its PS1 layout");
 
 // decomp: vs_battle_uiEquipment_limb (src/BATTLE/BATTLE.PRG/146C.h:411)
-typedef struct Battle_LimbStats {
+struct Battle_LimbStats {
     /* 0x00 */ short hp;
     /* 0x02 */ short maxHp;
     /* 0x04 */ signed char agilityDefenseBonus;
@@ -98,11 +97,11 @@ typedef struct Battle_LimbStats {
     /* 0x10 */ short affinities[8];
     /* 0x20 */ Items_ArmorLoadout armor;
     /* 0xDC */
-} Battle_LimbStats;
+};
 static_assert(sizeof(Battle_LimbStats) == 0xDC, "Battle_LimbStats must keep its PS1 layout");
 
 // decomp: vs_battle_actor2 (src/BATTLE/BATTLE.PRG/146C.h:559)
-typedef struct Battle_ActorStats {
+struct Battle_ActorStats {
     /* 0x000 */ char name[24];
     /* 0x018 */ short currentHp;
     /* 0x01A */ short maxHp;
@@ -149,17 +148,17 @@ typedef struct Battle_ActorStats {
     /* 0x95C */ Items_MiscItemStack secondDropItem;
     /* 0x960 */ Items_MiscItemDrop randomDropItem;
     /* 0x964 */
-} Battle_ActorStats;
+};
 static_assert(sizeof(Battle_ActorStats) == 0x964, "Battle_ActorStats must keep its PS1 layout");
 
 // decomp: vs_battle_actor2_flags (src/BATTLE/BATTLE.PRG/146C.h:455)
-typedef struct Battle_ActorStatsFlags {
+struct Battle_ActorStatsFlags {
     u_short reserved0;
     char reserved2Bit0 : 1;
     char reserved2Bit1 : 1;
     char reserved2Bit2 : 6;
     u_char reserved3;
-} Battle_ActorStatsFlags;
+};
 static_assert(sizeof(Battle_ActorStatsFlags) == 0x4, "Battle_ActorStatsFlags must keep its PS1 layout");
 
 #endif // VS_BATTLE_ACTOR_H_TYPES

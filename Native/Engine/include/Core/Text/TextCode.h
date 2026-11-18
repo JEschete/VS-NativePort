@@ -28,6 +28,5 @@ enum Core_TextCode {
     Core_TextCode_PrintDecimal = 0xFE,
     Core_TextCode_PrintString = 0xFF
 };
-typedef enum Core_TextCode Core_TextCode;
 
 #endif // VS_CORE_TEXT_TEXTCODE_H_TYPES

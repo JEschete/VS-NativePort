@@ -3,22 +3,22 @@
 #define VS_ACTORS_WEAPONMODEL_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_WeaponModel Actors_WeaponModel;
-typedef struct Actors_WeaponModelData Actors_WeaponModelData;
+struct Actors_WeaponModel;
+struct Actors_WeaponModelData;
 
 // decomp: _wepModelOffsets (src/BATTLE/BATTLE.PRG/3A1A0.h:120)
-typedef struct Actors_WeaponModelData {
+struct Actors_WeaponModelData {
     u_char header[0x30];
     int textureSection;
     int vertexGroupSection;
     int vertexSection;
     int polygonSection;
     u_char fileBody[0x7C0];
-} Actors_WeaponModelData;
+};
 static_assert(sizeof(Actors_WeaponModelData) == 0x800, "Actors_WeaponModelData must keep its PS1 layout");
 
 // decomp: vs_battle_wepModels_t (src/BATTLE/BATTLE.PRG/3A1A0.h:449)
-typedef struct Actors_WeaponModel {
+struct Actors_WeaponModel {
     u_char boneCount;
     u_char vertexGroupCount;
     u_short triangleCount;
@@ -65,6 +65,6 @@ typedef struct Actors_WeaponModel {
     int reserved5DC;
     int reserved5E0;
     int reserved5E4;
-} Actors_WeaponModel;
+};
 
 #endif // VS_ACTORS_WEAPONMODEL_H_TYPES

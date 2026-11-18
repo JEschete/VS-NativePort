@@ -3,10 +3,10 @@
 #define VS_RENDER_PRIMITIVES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Render_PolyFt4 Render_PolyFt4;
+struct Render_PolyFt4;
 
 // decomp: VS_POLY_FT4 (src/include/gpu.h:93)
-typedef struct Render_PolyFt4 {
+struct Render_PolyFt4 {
     u_long colorCode;
     u_long xy0;
     u_long uv0Palette;
@@ -16,7 +16,7 @@ typedef struct Render_PolyFt4 {
     u_long uv2;
     u_long xy3;
     u_long uv3;
-} Render_PolyFt4;
+};
 static_assert(sizeof(Render_PolyFt4) == 0x24, "Render_PolyFt4 must keep its PS1 layout");
 
 #endif // VS_RENDER_PRIMITIVES_H_TYPES

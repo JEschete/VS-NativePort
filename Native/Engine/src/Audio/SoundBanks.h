@@ -3,18 +3,18 @@
 #define VS_AUDIO_SOUNDBANKS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_SoundReleaseView Audio_SoundReleaseView;
-typedef struct Audio_SoundState Audio_SoundState;
-typedef struct Content_DiscQueueSlot Content_DiscQueueSlot;
+struct Audio_SoundReleaseView;
+struct Audio_SoundState;
+struct Content_DiscQueueSlot;
 
 // decomp: func_8004644C_t (src/BATTLE/BATTLE.PRG/30DB0.c:29)
-typedef struct Audio_SoundReleaseView {
+struct Audio_SoundReleaseView {
     u_char reserved0[0x30];
     int* reserved30;
-} Audio_SoundReleaseView;
+};
 
 // decomp: soundData_t (src/SLUS_010.40/main.h:135)
-typedef struct Audio_SoundState {
+struct Audio_SoundState {
     int currentMusicSlot;
     u_int playingMusicHandle;
     u_int currentMusicId;
@@ -32,7 +32,7 @@ typedef struct Audio_SoundState {
     int waveBankId;
     void* waveBankData;
     Content_DiscQueueSlot* waveBankRequest;
-} Audio_SoundState;
+};
 
 #endif // VS_AUDIO_SOUNDBANKS_H_TYPES
 

@@ -3,10 +3,10 @@
 #define VS_MENU_FRAMEWORK_MENUMEMORY_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Framework_MenuMemory Menu_Framework_MenuMemory;
+struct Menu_Framework_MenuMemory;
 
 // decomp: D_800F4EE8_t (src/BATTLE/BATTLE.PRG/5BF94.h:145)
-typedef struct Menu_Framework_MenuMemory {
+struct Menu_Framework_MenuMemory {
     char cursorMemories[52];
     char opaque34[6];
     struct {
@@ -28,6 +28,6 @@ typedef struct Menu_Framework_MenuMemory {
     u_short opaque9E;
     char opaqueA0[0x12];
     char reservedB2[0x40];
-} Menu_Framework_MenuMemory;
+};
 
 #endif // VS_MENU_FRAMEWORK_MENUMEMORY_H_TYPES

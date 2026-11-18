@@ -10,12 +10,12 @@
 
 #include "Legacy/Psx.h"
 
-typedef struct Items_InventoryArmor Items_InventoryArmor;
-typedef struct Items_InventoryBlade Items_InventoryBlade;
-typedef struct Items_InventoryGem Items_InventoryGem;
-typedef struct Items_InventoryGrip Items_InventoryGrip;
-typedef struct Items_InventoryShield Items_InventoryShield;
-typedef struct Items_InventoryWeapon Items_InventoryWeapon;
+struct Items_InventoryArmor;
+struct Items_InventoryBlade;
+struct Items_InventoryGem;
+struct Items_InventoryGrip;
+struct Items_InventoryShield;
+struct Items_InventoryWeapon;
 
 enum {
   kMenuComparisonStatCount = 4,

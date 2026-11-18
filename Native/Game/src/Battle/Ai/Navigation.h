@@ -3,41 +3,41 @@
 #define VS_BATTLE_AI_NAVIGATION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_Ai_DirectionDelta Battle_Ai_DirectionDelta;
-typedef struct Battle_Ai_MovementPathView Battle_Ai_MovementPathView;
-typedef struct Battle_Ai_RouteGateEnd Battle_Ai_RouteGateEnd;
-typedef union Battle_Ai_TilePosition Battle_Ai_TilePosition;
+struct Battle_Ai_DirectionDelta;
+struct Battle_Ai_MovementPathView;
+struct Battle_Ai_RouteGateEnd;
+union Battle_Ai_TilePosition;
 
 // decomp: D_800F16EC_t (src/BATTLE/BATTLE.PRG/6F014.c:70)
-typedef struct Battle_Ai_DirectionDelta {
+struct Battle_Ai_DirectionDelta {
     signed char dx : 2;
     signed char reserved2Bits : 2;
     signed char dz : 2;
     signed char reserved6Bits : 2;
-} Battle_Ai_DirectionDelta;
+};
 static_assert(sizeof(Battle_Ai_DirectionDelta) == 0x1, "Battle_Ai_DirectionDelta must keep its PS1 layout");
 
 // decomp: D_800F5910_t (src/BATTLE/BATTLE.PRG/6F014.c:43)
-typedef struct Battle_Ai_RouteGateEnd {
+struct Battle_Ai_RouteGateEnd {
     u_short tileX : 5;
     u_short tileZ : 5;
     u_short reservedBits10 : 6;
-} Battle_Ai_RouteGateEnd;
+};
 static_assert(sizeof(Battle_Ai_RouteGateEnd) == 0x2, "Battle_Ai_RouteGateEnd must keep its PS1 layout");
 
 // decomp: movementPathTest (src/BATTLE/BATTLE.PRG/771A8.c:2383)
-typedef int (*Battle_Ai_PathTest)(Battle_Ai_MovementPathView*, int);
+using Battle_Ai_PathTest = int (*)(Battle_Ai_MovementPathView*, int);
 
 // decomp: routeEdgePair (src/BATTLE/BATTLE.PRG/771A8.c:566)
-typedef u_short Battle_Ai_RouteEdgePair[2];
+using Battle_Ai_RouteEdgePair = u_short[2];
 
 // decomp: vs_battle_movementPosition (src/BATTLE/BATTLE.PRG/6FC00.c:418)
-typedef union Battle_Ai_TilePosition {
+union Battle_Ai_TilePosition {
     unsigned int word;
     struct {
         unsigned int tileX : 8, tag : 8, tileZ : 8, searchStatus : 8;
     } tile;
-} Battle_Ai_TilePosition;
+};
 
 #endif // VS_BATTLE_AI_NAVIGATION_H_TYPES
 

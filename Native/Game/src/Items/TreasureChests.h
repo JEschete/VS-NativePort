@@ -3,7 +3,7 @@
 #define VS_ITEMS_TREASURECHESTS_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Items_TreasureChest Items_TreasureChest;
+struct Items_TreasureChest;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -16,7 +16,7 @@ typedef struct Items_TreasureChest Items_TreasureChest;
 #endif
 
 // decomp: _mpdRoomSection13 (src/BATTLE/BATTLE.PRG/146C.h:207)
-typedef struct Items_TreasureChest {
+struct Items_TreasureChest {
     short tileX;
     short tileZ;
     short layer;
@@ -28,7 +28,7 @@ typedef struct Items_TreasureChest {
     short openedFlag;
     short facing;
     Items_BattleLoot loot;
-} Items_TreasureChest;
+};
 static_assert(sizeof(Items_TreasureChest) == 0x234, "Items_TreasureChest must keep its PS1 layout");
 
 #endif // VS_ITEMS_TREASURECHESTS_H_TYPES

@@ -3,13 +3,13 @@
 #define VS_ACTORS_MOVEMENT_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_AirborneTickAccumulator Actors_AirborneTickAccumulator;
-typedef struct Actors_FallDirection Actors_FallDirection;
-typedef struct Actors_MovementRequest Actors_MovementRequest;
-typedef struct Actors_TurnRequest Actors_TurnRequest;
+struct Actors_AirborneTickAccumulator;
+struct Actors_FallDirection;
+struct Actors_MovementRequest;
+struct Actors_TurnRequest;
 
 // decomp: D_800F4538_unk1848 (src/BATTLE/BATTLE.PRG/3A1A0.h:111)
-typedef struct Actors_MovementRequest {
+struct Actors_MovementRequest {
     u_char mode;
     u_char reserved1;
     u_char reserved2;
@@ -19,29 +19,29 @@ typedef struct Actors_MovementRequest {
     u_int distance;
     int reservedC;
     SVECTOR step;
-} Actors_MovementRequest;
+};
 static_assert(sizeof(Actors_MovementRequest) == 0x18, "Actors_MovementRequest must keep its PS1 layout");
 
 // decomp: func_800A3054_t (src/BATTLE/BATTLE.PRG/3A1A0.c:13)
-typedef struct Actors_FallDirection {
+struct Actors_FallDirection {
     short directionX;
     short reserved2;
     short directionZ;
-} Actors_FallDirection;
+};
 static_assert(sizeof(Actors_FallDirection) == 0x6, "Actors_FallDirection must keep its PS1 layout");
 
 // decomp: func_800A6660_t (src/BATTLE/BATTLE.PRG/3A1A0.c:25)
-typedef struct Actors_TurnRequest {
+struct Actors_TurnRequest {
     char reserved0[6];
     short restartTurn;
-} Actors_TurnRequest;
+};
 static_assert(sizeof(Actors_TurnRequest) == 0x8, "Actors_TurnRequest must keep its PS1 layout");
 
 // decomp: func_800AC690_timer_t (src/BATTLE/BATTLE.PRG/40564.c:47)
-typedef struct Actors_AirborneTickAccumulator {
+struct Actors_AirborneTickAccumulator {
     u_int reserved0 : 24;
     u_int tickRemainder : 8;
-} Actors_AirborneTickAccumulator;
+};
 static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTickAccumulator must keep its PS1 layout");
 
 #endif // VS_ACTORS_MOVEMENT_H_TYPES

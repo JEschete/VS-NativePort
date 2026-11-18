@@ -3,11 +3,11 @@
 #define VS_BATTLE_ACTION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Battle_ActionAiFlags Battle_ActionAiFlags;
-typedef struct Battle_ActionDefinition Battle_ActionDefinition;
-typedef union Battle_ActionHitParamsWord Battle_ActionHitParamsWord;
-typedef struct Battle_ActionRequest Battle_ActionRequest;
-typedef struct Battle_ActionState Battle_ActionState;
+struct Battle_ActionAiFlags;
+struct Battle_ActionDefinition;
+union Battle_ActionHitParamsWord;
+struct Battle_ActionRequest;
+struct Battle_ActionState;
 
 #ifndef VS_TYPES_ONLY
 #define VS_TYPES_ONLY
@@ -29,11 +29,9 @@ enum Battle_ActionType {
     Battle_ActionType_BaseAttack,
     Battle_ActionType_Trap
 };
-typedef enum Battle_ActionType Battle_ActionType;
 
 // decomp: actions_e (src/SLUS_010.40/main.h:44)
 enum Battle_ActionId { Battle_ActionId_DaggerArtOne = 184 };
-typedef enum Battle_ActionId Battle_ActionId;
 
 // decomp: vs_battle_warlockSpellIds_e (src/BATTLE/BATTLE.PRG/5BF94.h:6)
 enum Battle_WarlockSpell {
@@ -56,10 +54,9 @@ enum Battle_WarlockSpell {
     Battle_WarlockSpell_DrainHeart = 0x5E,
     Battle_WarlockSpell_DrainMind = 0x5F
 };
-typedef enum Battle_WarlockSpell Battle_WarlockSpell;
 
 // decomp: D_800F19CC_t2 (src/BATTLE/BATTLE.PRG/146C.c:89)
-typedef struct Battle_ActionRequest {
+struct Battle_ActionRequest {
     u_short actionId;
     char effectVariant;
     char damageType;
@@ -68,10 +65,10 @@ typedef struct Battle_ActionRequest {
     u_short targetCount;
     Battle_HitResult targets[255];
     SVECTOR focusPosition;
-} Battle_ActionRequest;
+};
 
 // decomp: D_800F19CC_t (src/BATTLE/BATTLE.PRG/146C.c:138)
-typedef struct Battle_ActionState {
+struct Battle_ActionState {
     u_int queueIndex;
     u_int chainStep;
     Battle_ActionRequest selection;
@@ -118,10 +115,10 @@ typedef struct Battle_ActionState {
     u_short abilityWindow;
     short preferredCameraDistance;
     short cameraZoomState;
-} Battle_ActionState;
+};
 
 // decomp: vs_actionFlags_t (src/SLUS_010.40/main.h:72)
-typedef struct Battle_ActionAiFlags {
+struct Battle_ActionAiFlags {
     u_short reserved0Bit0 : 4;
     u_short opaque0Bit4 : 1;
     u_short rarelyChosen : 1;
@@ -131,11 +128,11 @@ typedef struct Battle_ActionAiFlags {
     u_short opaque1Bit4 : 1;
     u_short radialArea : 1;
     u_short reserved1Bit6 : 2;
-} Battle_ActionAiFlags;
+};
 static_assert(sizeof(Battle_ActionAiFlags) == 0x2, "Battle_ActionAiFlags must keep its PS1 layout");
 
 // decomp: vs_action_t (src/SLUS_010.40/main.h:107)
-typedef struct Battle_ActionDefinition {
+struct Battle_ActionDefinition {
     u_char id;
     u_char effectId;
     u_char returnsToMenuOnCancel : 1;
@@ -168,14 +165,14 @@ typedef struct Battle_ActionDefinition {
         u_int affinity : 3;
     } hits[2];
     char name[24];
-} Battle_ActionDefinition;
+};
 static_assert(sizeof(Battle_ActionDefinition) == 0x34, "Battle_ActionDefinition must keep its PS1 layout");
 
 // decomp: vs_hitParams_t (src/SLUS_010.40/main.h:49)
-typedef union Battle_ActionHitParamsWord {
+union Battle_ActionHitParamsWord {
     u_short halves[2];
     u_int word;
-} Battle_ActionHitParamsWord;
+};
 static_assert(sizeof(Battle_ActionHitParamsWord) == 0x4, "Battle_ActionHitParamsWord must keep its PS1 layout");
 
 #endif // VS_BATTLE_ACTION_H_TYPES

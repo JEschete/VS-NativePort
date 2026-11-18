@@ -3,11 +3,11 @@
 #define VS_ACTORS_ROOMACTORCACHE_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_RoomActorRecord Actors_RoomActorRecord;
-typedef struct Actors_RoomActorRecordWrite Actors_RoomActorRecordWrite;
+struct Actors_RoomActorRecord;
+struct Actors_RoomActorRecordWrite;
 
 // decomp: func_80069EF0_t (src/BATTLE/BATTLE.PRG/146C.c:154)
-typedef struct Actors_RoomActorRecordWrite {
+struct Actors_RoomActorRecordWrite {
     char spawnSlot;
     char isHidden;
     short aiFlags;
@@ -21,11 +21,11 @@ typedef struct Actors_RoomActorRecordWrite {
     short limbHp[6];
     int statuses;
     int placement;
-} Actors_RoomActorRecordWrite;
+};
 static_assert(sizeof(Actors_RoomActorRecordWrite) == 0x28, "Actors_RoomActorRecordWrite must keep its PS1 layout");
 
 // decomp: savedEnemyState (src/BATTLE/BATTLE.PRG/146C.c:376)
-typedef struct Actors_RoomActorRecord {
+struct Actors_RoomActorRecord {
     u_char spawnSlot;
     u_char isHidden;
     short aiFlags;
@@ -43,7 +43,7 @@ typedef struct Actors_RoomActorRecord {
     u_char direction;
     u_char tileZ;
     u_char height;
-} Actors_RoomActorRecord;
+};
 static_assert(sizeof(Actors_RoomActorRecord) == 0x28, "Actors_RoomActorRecord must keep its PS1 layout");
 
 #endif // VS_ACTORS_ROOMACTORCACHE_H_TYPES

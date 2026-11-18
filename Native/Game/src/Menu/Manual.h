@@ -3,9 +3,9 @@
 #define VS_MENU_MANUAL_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Menu_Manual_AnimationState Menu_Manual_AnimationState;
-typedef struct Menu_Manual_BackgroundChunkWidths Menu_Manual_BackgroundChunkWidths;
-typedef struct Menu_Manual_BackgroundTransparencies Menu_Manual_BackgroundTransparencies;
+struct Menu_Manual_AnimationState;
+struct Menu_Manual_BackgroundChunkWidths;
+struct Menu_Manual_BackgroundTransparencies;
 
 // decomp: src/include/lbaMacros.h:9
 #define mkHfoPair(file) mkCdFile(file##_HF1), mkCdFile(file##_HF0)
@@ -15,10 +15,9 @@ enum Menu_Manual_ArrowType {
     Menu_Manual_ArrowType_Up,
     Menu_Manual_ArrowType_Down,
 };
-typedef enum Menu_Manual_ArrowType Menu_Manual_ArrowType;
 
 // decomp: AnimationState_t (src/MENU/MENUE.PRG/494.c:44)
-typedef struct Menu_Manual_AnimationState {
+struct Menu_Manual_AnimationState {
     short reserved0;
     u_short frameMask;
     short frameDuration;
@@ -26,24 +25,24 @@ typedef struct Menu_Manual_AnimationState {
     short currentFrame;
     short timer;
     short isActive;
-} Menu_Manual_AnimationState;
+};
 static_assert(sizeof(Menu_Manual_AnimationState) == 0xE, "Menu_Manual_AnimationState must keep its PS1 layout");
 
 // decomp: _menuBgChunkWidths_t (src/MENU/MENUE.PRG/494.c:29)
-typedef struct Menu_Manual_BackgroundChunkWidths {
+struct Menu_Manual_BackgroundChunkWidths {
     int reserved0;
     int reserved4;
     int reserved8;
-} Menu_Manual_BackgroundChunkWidths;
+};
 static_assert(sizeof(Menu_Manual_BackgroundChunkWidths) == 0xC, "Menu_Manual_BackgroundChunkWidths must keep its PS1 layout");
 
 // decomp: _menuBgTransparencies_t (src/MENU/MENUE.PRG/494.c:23)
-typedef struct Menu_Manual_BackgroundTransparencies {
+struct Menu_Manual_BackgroundTransparencies {
     int reserved0;
     int reserved4;
     int reserved8;
     int reservedC;
-} Menu_Manual_BackgroundTransparencies;
+};
 static_assert(sizeof(Menu_Manual_BackgroundTransparencies) == 0x10, "Menu_Manual_BackgroundTransparencies must keep its PS1 layout");
 
 #endif // VS_MENU_MANUAL_H_TYPES

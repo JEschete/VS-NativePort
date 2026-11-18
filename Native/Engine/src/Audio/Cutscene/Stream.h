@@ -3,8 +3,8 @@
 #define VS_AUDIO_CUTSCENE_STREAM_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_CutsceneStreamData Audio_CutsceneStreamData;
-typedef struct Audio_CutsceneStreamState Audio_CutsceneStreamState;
+struct Audio_CutsceneStreamData;
+struct Audio_CutsceneStreamState;
 
 // decomp: D_80039B14 (D_80039B14@SLUS_010.40): a view into another global
 #define Audio_Cutscene_streamVoices (*(int*)(&Audio_Cutscene_streamState.voiceMask))
@@ -16,7 +16,7 @@ typedef struct Audio_CutsceneStreamState Audio_CutsceneStreamState;
 #define Audio_Cutscene_streamControlFlags (*(int*)(&Audio_Cutscene_streamState.controlFlags))
 
 // decomp: FSoundCutsceneStreamState (src/include/sound.h:597)
-typedef struct Audio_CutsceneStreamState {
+struct Audio_CutsceneStreamState {
     /* 0x00 */ void* currentChunk;
     // Where a repeating stream restarts (header word 5 past the first chunk);
     // NULL when formatFlags bit 1 is clear (25AC.c:6461).
@@ -49,7 +49,7 @@ typedef struct Audio_CutsceneStreamState {
     /* 0x54 */ int reserved54;
     /* 0x58 */ int sampleRate;
     /* 0x5C */ int controlFlags;
-} Audio_CutsceneStreamState;
+};
 
 #endif // VS_AUDIO_CUTSCENE_STREAM_H_TYPES
 

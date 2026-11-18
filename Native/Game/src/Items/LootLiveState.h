@@ -4,7 +4,7 @@
 // loot menu pages through. LootLive.cpp defines it and is the only code that
 // adds or frees its nodes (Loot.hpp LootList).
 
-typedef struct Items_LootListNode Items_LootListNode;
+struct Items_LootListNode;
 
 // decomp: _lootListHead (BATTLE/BATTLE.PRG 146C.h): the newest entry; each
 // node is a game heap block.

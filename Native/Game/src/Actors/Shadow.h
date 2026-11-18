@@ -3,10 +3,10 @@
 #define VS_ACTORS_SHADOW_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Actors_ShadowBlend Actors_ShadowBlend;
+struct Actors_ShadowBlend;
 
 // decomp: D_800F4538_unk1864 (src/BATTLE/BATTLE.PRG/3A1A0.h:52)
-typedef struct Actors_ShadowBlend {
+struct Actors_ShadowBlend {
     int reserved0;
     u_char levelFrames;
     u_char radiusFrames;
@@ -18,7 +18,7 @@ typedef struct Actors_ShadowBlend {
     u_short radiusShrinkRate;
     short radiusExpandDelta;
     short radiusShrinkDelta;
-} Actors_ShadowBlend;
+};
 static_assert(sizeof(Actors_ShadowBlend) == 0x14, "Actors_ShadowBlend must keep its PS1 layout");
 
 #endif // VS_ACTORS_SHADOW_H_TYPES

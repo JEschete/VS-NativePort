@@ -10,6 +10,5 @@ enum Menu_Framework_AshleyRenderMode {
     Menu_Framework_AshleyRenderMode_Init,
     Menu_Framework_AshleyRenderMode_Restore
 };
-typedef enum Menu_Framework_AshleyRenderMode Menu_Framework_AshleyRenderMode;
 
 #endif // VS_MENU_FRAMEWORK_ASHLEYPREVIEW_H_TYPES

@@ -173,7 +173,9 @@ COMPILER_LINE = re.compile(
     r"(?:\s*\[(?P<project>[^\]]+\.vcxproj)\])?")
 TABLE = re.compile(r"^\s*extern\s+(?P<type>[A-Za-z_][\w ]*?)\s*\*\s*(?P<name>[A-Za-z_]\w*)\[(?P<size>\w+)\]\s*;", re.M)
 SCALAR_ELEMENTS = re.compile(r"\b(?:char|short|u_char|u_short|u_int|void|int)\b")
-STRUCT = re.compile(r"typedef\s+struct\s+(?P<name>\w+)\s*\{(?P<body>.*?)\}\s*(?P=name)\s*;", re.S)
+# The head of a named struct definition, C++ (`struct X {`) or the C form the headers are leaving (`typedef struct X {`).
+STRUCT_HEAD = r"\b(?:typedef\s+)?struct\s+{name}\s*\{{"
+STRUCT = re.compile(STRUCT_HEAD.format(name=r"(?P<name>\w+)"))
 FIELD = re.compile(r"^\s*(?P<type>[A-Za-z_][\w ]*?)\s+(?P<name>[A-Za-z_]\w*)(?:\[(?P<size>\w+)\])?\s*;", re.M)
 CAPACITY_STRUCT = re.compile(r"^(?:Items_\w+|\w*(?:Inventory|Container)\w*)$")
 NARROW_TYPES = {"u_char", "char", "unsigned char", "signed char"}
@@ -395,27 +397,40 @@ def capacity_rows(sources: gates.Sources, tables: dict[str, str]) -> list[Hazard
             if match["name"] in tables:
                 rows.append(Hazard("CAPACITY", path, line_of(text, f"{match['name']}["), match["name"], "",
                                    f"{match['name']}[{match['size']}]", "pattern", "medium"))
-        for struct in STRUCT.finditer(code):
-            if CAPACITY_STRUCT.match(struct["name"]):
-                rows += struct_rows(path, text, struct)
+        for name, body in struct_definitions(code):
+            if CAPACITY_STRUCT.match(name):
+                rows += struct_rows(path, text, name, body)
     return rows
 
 
-def struct_rows(path: str, text: str, struct: re.Match[str]) -> list[Hazard]:
+def struct_definitions(code: str) -> list[tuple[str, str]]:
+    """(name, body) of each named struct definition; the body runs to the brace that closes it."""
+    found = []
+    for head in STRUCT.finditer(code):
+        depth = 1
+        position = head.end()
+        while depth and position < len(code):
+            depth += {"{": 1, "}": -1}.get(code[position], 0)
+            position += 1
+        found.append((head["name"], code[head.end():position - 1]))
+    return found
+
+
+def struct_rows(path: str, text: str, struct: str, body: str) -> list[Hazard]:
     rows = []
-    for field in FIELD.finditer(struct["body"]):
+    for field in FIELD.finditer(body):
         name = field["name"]
         kind = " ".join(field["type"].split())
         if TEXT_FIELD.match(name):
             continue
-        qualified = f"{struct['name']}.{name}"
-        definition = re.search(rf"typedef\s+struct\s+{struct['name']}\s*\{{", text)
+        qualified = f"{struct}.{name}"
+        definition = re.search(STRUCT_HEAD.format(name=struct), text)
         line = line_of(text, name, definition.start() if definition else 0)
         if field["size"] and kind not in {"char", "signed char"}:
-            rows.append(Hazard("CAPACITY", path, line, struct["name"], "", f"{qualified}[{field['size']}]",
+            rows.append(Hazard("CAPACITY", path, line, struct, "", f"{qualified}[{field['size']}]",
                                "pattern", "medium"))
         if kind in NARROW_TYPES and NARROW_NAME.match(name):
-            rows.append(Hazard("NARROW-ID", path, line, struct["name"], "", qualified, "pattern", "medium"))
+            rows.append(Hazard("NARROW-ID", path, line, struct, "", qualified, "pattern", "medium"))
     return rows
 
 

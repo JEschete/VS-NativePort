@@ -3,18 +3,18 @@
 #define VS_AUDIO_SEQ_SEQUENCER_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Audio_FadeTimer Audio_FadeTimer;
+struct Audio_FadeTimer;
 
 // decomp: D_800378D4 (D_800378D4@SLUS_010.40): a view into another global
 #define Audio_Seq_musicTransitionTimer (*(int*)(&Audio_Driver_commandArguments.extParam2))
 
 // decomp: FSoundFadeTimer (src/include/sound.h:514)
-typedef struct Audio_FadeTimer {
+struct Audio_FadeTimer {
     /* 0x00 */ int value;
     /* 0x04 */ int step;
     /* 0x08 */ int ticksRemaining;
     /* 0x0C */ int savedValue;
-} Audio_FadeTimer;
+};
 static_assert(sizeof(Audio_FadeTimer) == 0x10, "Audio_FadeTimer must keep its PS1 layout");
 
 #endif // VS_AUDIO_SEQ_SEQUENCER_H_TYPES

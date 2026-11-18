@@ -3,15 +3,15 @@
 #define VS_RENDER_TEXTURES_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Render_TextureSlot Render_TextureSlot;
+struct Render_TextureSlot;
 
 // decomp: vs_battle_texInfo_t (src/BATTLE/BATTLE.PRG/30DB0.h:50)
-typedef struct Render_TextureSlot {
+struct Render_TextureSlot {
     short texturePage;
     short palette;
     short alternatePalette;
     u_char referenceCount;
-} Render_TextureSlot;
+};
 static_assert(sizeof(Render_TextureSlot) == 0x8, "Render_TextureSlot must keep its PS1 layout");
 
 #endif // VS_RENDER_TEXTURES_H_TYPES
