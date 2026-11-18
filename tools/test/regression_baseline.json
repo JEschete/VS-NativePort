@@ -1917,7 +1917,7 @@
    "Finishing a zone load refuses an out-of-range zone id",
    "Finishing a zone load stores its tables and switches the music",
    "Finishing the last music channel of a track ends the track",
-   "First launch has no default CUE save or FFmpeg paths",
+   "First launch defaults only saves beside the launcher",
    "First-person disable and the action distance follow the flags",
    "First-person look turns Ashley and clamps the pitch",
    "First-person transition routines refuse a missing record",
