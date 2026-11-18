@@ -4,7 +4,7 @@
 
 #include <cinttypes>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Core::Memory {
 namespace {
@@ -21,11 +21,12 @@ void live_detail::ReportTruncatedCopy(const char* operation,
   // Report the first and then every power-of-two refusal so a per-frame
   // overrun cannot flood the log.
   if ((truncated_copies & (truncated_copies - 1)) == 0) {
-    Core_Errorf("memory",
-                "%s at %s:%u: %zu of %zu bytes fit the destination or source "
-                "array (refusal %" PRIu64 ")",
-                operation, site.file_name(), static_cast<unsigned>(site.line()),
-                written, requested, truncated_copies);
+    VS::Core::Errorf(
+        "memory",
+        "%s at %s:%u: %zu of %zu bytes fit the destination or source "
+        "array (refusal %" PRIu64 ")",
+        operation, site.file_name(), static_cast<unsigned>(site.line()),
+        written, requested, truncated_copies);
   }
 }
 }  // namespace VS::Core::Memory

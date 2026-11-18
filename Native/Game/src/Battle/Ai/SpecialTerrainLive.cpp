@@ -7,8 +7,9 @@
 #include <cstring>
 #include <type_traits>
 
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Navigation.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/CollisionMapLive.hpp"
 
 namespace VS::Battle::Ai {
@@ -21,13 +22,6 @@ static_assert(sizeof(LiveMapRow) * kNavigationGridSide ==
               kSpecialTerrainCells * sizeof(std::uint16_t));
 static_assert(sizeof(Battle_Ai_directionDeltas) ==
               sizeof(NavigationDirectionCodes));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 SpecialTerrainMaps LiveMaps() {
   Require(Battle_Ai_tileFlagMap != nullptr &&

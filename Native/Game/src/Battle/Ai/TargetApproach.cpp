@@ -8,7 +8,7 @@
 
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/DecisionPrimitives.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -53,7 +53,7 @@ constexpr int kApproachSlot = 1;
 constexpr int kFacingSlot = 6;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Warnf("ai", "%s", message);
+  VS::Core::Warnf("ai", "%s", message);
   return std::nullopt;
 }
 

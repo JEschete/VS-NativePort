@@ -16,19 +16,19 @@
 #include "Items/Categories.h"
 #include "Items/EquipmentStats.hpp"
 #include "Items/Inventory.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 
-unsigned char Items_miscItemInvoked = 0;
-const unsigned char Items_Inventory_inventoryItemCapacities[8] = {
+unsigned char VS::Items::miscItemInvoked = 0;
+const unsigned char VS::Items::Inventory::inventoryItemCapacities[8] = {
     VS::Items::kCategoryCapacities[0], VS::Items::kCategoryCapacities[1],
     VS::Items::kCategoryCapacities[2], VS::Items::kCategoryCapacities[3],
     VS::Items::kCategoryCapacities[4], VS::Items::kCategoryCapacities[5],
     VS::Items::kCategoryCapacities[6], VS::Items::kCategoryCapacities[7],
 };
 
-static_assert(std::size(Items_Inventory_inventoryItemCapacities) ==
+static_assert(std::size(VS::Items::Inventory::inventoryItemCapacities) ==
               VS::Items::kItemCategoryCount);
 static_assert(std::extent_v<decltype(Items_itemCategoryUpperIds)> ==
               VS::Items::kItemIdCategoryCount);
@@ -79,9 +79,9 @@ int CountLiveInventoryItem(int id) {
 // (src/BATTLE/BATTLE.PRG/5BF94.c:4454)
 int ConsumeLiveMiscItem(int misc_id) {
   auto inventory = Typed(Audio_Seq_unusedInventory);
-  std::uint8_t invoked_slot = Items_miscItemInvoked;
+  std::uint8_t invoked_slot = miscItemInvoked;
   const bool consumed = ConsumeMiscItem(misc_id, invoked_slot, inventory);
-  Items_miscItemInvoked = invoked_slot;
+  miscItemInvoked = invoked_slot;
   Commit(Audio_Seq_unusedInventory, inventory);
   return consumed ? 1 : 0;
 }

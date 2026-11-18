@@ -92,7 +92,7 @@ class ActionEffectCallbackHost : public PrimaryEffectSink {
   virtual void SetTintedActor(std::int32_t actor) = 0;
   // Field_controlMode (D_800F196C).
   virtual void SetFieldControlMode(Field::FieldControlMode mode) = 0;
-  // State_tickSpeed (vs_gametime_tickspeed).
+  // VS::State::tickSpeed (vs_gametime_tickspeed).
   virtual void SetTickSpeed(std::int32_t tick_speed) = 0;
   // func_800CB654.
   virtual void SetHudVisibility(Battle::HudVisibility visibility) = 0;

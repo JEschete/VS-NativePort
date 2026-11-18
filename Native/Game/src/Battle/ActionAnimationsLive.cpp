@@ -17,7 +17,7 @@
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimations.hpp"
 #include "Battle/ActionFlow.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/PlatformPlacementLive.h"
 
@@ -49,13 +49,13 @@ const char* Reason(ActionAnimationResult result) {
 
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle", "Action animation refused: invalid used state");
+    VS::Core::Errorf("battle", "Action animation refused: invalid used state");
     std::abort();
   }
 }
 void Require(ActionAnimationResult result) {
   if (result != ActionAnimationResult::kComplete) {
-    Core_Errorf("battle", "Action animation refused: %s", Reason(result));
+    VS::Core::Errorf("battle", "Action animation refused: %s", Reason(result));
     std::abort();
   }
 }

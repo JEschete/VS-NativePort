@@ -15,16 +15,17 @@
 #include "Battle/DamageRecoveryEffects.hpp"
 #include "Battle/Hit.h"
 #include "Battle/HitCalculationsLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/EquipmentLive.hpp"
 
 namespace VS::Battle {
 namespace {
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle",
-                "Damage/recovery effect requires its used hit, actor, stats or "
-                "selection");
+    VS::Core::Errorf(
+        "battle",
+        "Damage/recovery effect requires its used hit, actor, stats or "
+        "selection");
     std::abort();
   }
 }

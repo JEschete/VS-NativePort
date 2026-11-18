@@ -20,7 +20,7 @@
 namespace VS::Actors {
 // Actor records the battle tables hold (Actors_actorRecords).
 inline constexpr int kActorTableSize = 17;
-// Weapon models each actor slot owns (Actors_weaponModels).
+// Weapon models each actor slot owns (VS::Actors::weaponModels).
 inline constexpr std::size_t kWeaponsPerActor = 2;
 // The fully shown weapon blend level.
 inline constexpr std::uint8_t kWeaponBlendShown = 64;

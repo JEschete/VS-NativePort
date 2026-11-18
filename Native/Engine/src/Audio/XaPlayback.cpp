@@ -1,4 +1,4 @@
-#include "Audio/XaPlayback.h"
+#include "Audio/XaPlayback.hpp"
 
 #include <SDL3/SDL.h>
 #include <dr_flac.h>
@@ -218,7 +218,7 @@ XaPlayback& Playback() {
 
 // decomp: func_800443CC, diskReadXaInit (SLUS_010.40/main.c:9164).
 // The second request field is initial CD volume, not a playback byte count.
-int Audio_Native_StartXaStream(int sector, int volume) {
+int VS::Audio::StartXaStream(int sector, int volume) {
   const auto* store = VS::Content::DataStore::Get();
   const auto* entry = store && sector >= 0
                           ? store->FindBySector(static_cast<unsigned>(sector))
@@ -235,7 +235,7 @@ int Audio_Native_StartXaStream(int sector, int volume) {
                                                                          : 0;
 }
 
-void Audio_Native_StopXaStream(void) {
+void VS::Audio::StopXaStream(void) {
   Playback().Stop();
   auto& drive = Content_discDriveState;
   if (drive.state == Content_DiscDriveState_ReadXaInit ||
@@ -249,7 +249,7 @@ void Audio_Native_StopXaStream(void) {
   }
 }
 
-int Audio_Native_XaStreamStatus(void) {
+int VS::Audio::XaStreamStatus(void) {
   const int status = Playback().Status();
   if (status < 0) {
     VS_LOG_ERROR("audio", "XA output failed while supplying or draining PCM");
@@ -258,7 +258,7 @@ int Audio_Native_XaStreamStatus(void) {
   return status;
 }
 
-void Audio_Native_UpdateXaControls(void) {
+void VS::Audio::UpdateXaControls(void) {
   const bool mono = (Audio_Driver_controlLatches.mixBehavior & kMono) != 0;
   Playback().Configure(VS::Audio::Seq::WriteDiscVolume(Audio_Seq_discVolume),
                        VS::Audio::Control::SetDiscMixVolume(g_mix, mono)
@@ -272,11 +272,11 @@ bool SetLiveDiscMixVolume(std::uint32_t volume) {
     return false;
   }
   g_mix = volume;
-  Audio_Native_UpdateXaControls();
+  VS::Audio::UpdateXaControls();
   return true;
 }
 }  // namespace VS::Audio::Control
 
 namespace VS::Audio::Seq {
-void WriteLiveDiscVolume() { Audio_Native_UpdateXaControls(); }
+void WriteLiveDiscVolume() { VS::Audio::UpdateXaControls(); }
 }  // namespace VS::Audio::Seq

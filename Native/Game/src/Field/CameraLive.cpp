@@ -29,7 +29,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.h"
 #include "Field/Camera.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/GameModeLiveState.hpp"
@@ -48,15 +48,15 @@
 #include "Render/Render.h"
 
 // decomp: _firstPersonViewEnabled (_firstPersonViewEnabled@BATTLE/BATTLE.PRG)
-int Field_isFirstPersonViewEnabled;
+int VS::Field::isFirstPersonViewEnabled;
 // decomp: vs_battle_cameraTransition
 // (vs_battle_cameraTransition@BATTLE/BATTLE.PRG)
-Field_CameraTransition* Field_cameraTransition;
+Field_CameraTransition* VS::Field::cameraTransition;
 // decomp: D_800F19C8 (D_800F19C8@BATTLE/BATTLE.PRG)
-int Field_roomGeometryDrawMode;
+int VS::Field::roomGeometryDrawMode;
 // decomp: vs_battle_cameraCurrentSpherical
 // (vs_battle_cameraCurrentSpherical@BATTLE/BATTLE.PRG)
-Field_SphericalCamera Field_sphericalCamera;
+Field_SphericalCamera VS::Field::sphericalCamera;
 
 namespace {
 // The original's layouts (146C.h:738-823 and scratch.h:10).
@@ -237,15 +237,14 @@ auto RunLive(Rule rule) {
 
 FieldCameraState LoadLiveFieldCameraState() {
   const Render_FrameScratch& scratch = Scratch();
-  FieldCameraState state{
-      .camera = ViewCameraOf(scratch.camera),
-      .spherical = SphericalOf(Field_sphericalCamera),
-      .transition = std::nullopt,
-      .first_person_view_enabled = Field_isFirstPersonViewEnabled,
-      .geometry_draw_mode = Field_roomGeometryDrawMode,
-      .view_facing_word = scratch.firstPersonViewFacing};
-  if (Field_cameraTransition != nullptr) {
-    state.transition = TransitionOf(*Field_cameraTransition);
+  FieldCameraState state{.camera = ViewCameraOf(scratch.camera),
+                         .spherical = SphericalOf(sphericalCamera),
+                         .transition = std::nullopt,
+                         .first_person_view_enabled = isFirstPersonViewEnabled,
+                         .geometry_draw_mode = roomGeometryDrawMode,
+                         .view_facing_word = scratch.firstPersonViewFacing};
+  if (cameraTransition != nullptr) {
+    state.transition = TransitionOf(*cameraTransition);
   }
   return state;
 }
@@ -253,12 +252,12 @@ FieldCameraState LoadLiveFieldCameraState() {
 void StoreLiveFieldCameraState(const FieldCameraState& state) {
   Render_FrameScratch& scratch = Scratch();
   StoreViewCamera(scratch.camera, state.camera);
-  StoreSpherical(Field_sphericalCamera, state.spherical);
-  if (state.transition && Field_cameraTransition != nullptr) {
-    StoreTransition(*Field_cameraTransition, *state.transition);
+  StoreSpherical(sphericalCamera, state.spherical);
+  if (state.transition && cameraTransition != nullptr) {
+    StoreTransition(*cameraTransition, *state.transition);
   }
-  Field_isFirstPersonViewEnabled = state.first_person_view_enabled;
-  Field_roomGeometryDrawMode = state.geometry_draw_mode;
+  isFirstPersonViewEnabled = state.first_person_view_enabled;
+  roomGeometryDrawMode = state.geometry_draw_mode;
   scratch.firstPersonViewFacing = state.view_facing_word;
 }
 
@@ -454,14 +453,14 @@ std::optional<FirstPersonTransition> LiveCameraHost::AllocateTransition() {
   auto* const record = static_cast<Field_CameraTransition*>(
       Core::Memory::AllocateLiveFromHighEnd(sizeof(Field_CameraTransition)));
   if (record == nullptr) return std::nullopt;
-  Field_cameraTransition = record;
+  cameraTransition = record;
   return TransitionOf(*record);
 }
 
 void LiveCameraHost::FreeTransition() {
-  if (Field_cameraTransition != nullptr) {
-    Core::Memory::FreeLiveFromHighEnd(Field_cameraTransition);
-    Field_cameraTransition = nullptr;
+  if (cameraTransition != nullptr) {
+    Core::Memory::FreeLiveFromHighEnd(cameraTransition);
+    cameraTransition = nullptr;
   }
 }
 

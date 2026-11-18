@@ -20,7 +20,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/Textures.h"
@@ -44,7 +44,7 @@
 #include "Event/ScriptEffectOpcodes.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/GimmickPlacementLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomLoadingLive.hpp"
@@ -418,22 +418,22 @@ int TestAnimationEventUnwind(int scenario) {
 int Tests_ActionCameraRecovery(void) {
   Battle_ActionState state = {0};
   Battle_ActionState* savedAction = Battle_actionState;
-  const Field_SphericalCamera savedCamera = Field_sphericalCamera;
+  const Field_SphericalCamera savedCamera = VS::Field::sphericalCamera;
   const int savedProjection = Render_projectionDistance;
   const int savedEase = Battle_cameraEaseMode;
   const int savedDistance = Battle_settledCameraDistance;
   state.preferredCameraDistance = 2304;
   Battle_actionState = &state;
-  Field_sphericalCamera.delta.mode = 1;
-  Field_sphericalCamera.values.distance = 1536;
+  VS::Field::sphericalCamera.delta.mode = 1;
+  VS::Field::sphericalCamera.values.distance = 1536;
   Render_projectionDistance = 640;
   Battle_cameraEaseMode = 0;
   Battle_settledCameraDistance = 0;
   VS::Battle::FinishLiveActionSequence();
   const int passed = Render_projectionDistance == 576 &&
-                     Field_sphericalCamera.values.distance == 1728;
+                     VS::Field::sphericalCamera.values.distance == 1728;
   Battle_actionState = savedAction;
-  Field_sphericalCamera = savedCamera;
+  VS::Field::sphericalCamera = savedCamera;
   Render_projectionDistance = savedProjection;
   Battle_cameraEaseMode = savedEase;
   Battle_settledCameraDistance = savedDistance;
@@ -577,8 +577,8 @@ int Tests_DirectMovementCommand(void) {
 int Tests_GimmickRoomScale(void) {
   enum { kGimmickCameraMatrix = 4 };
   const Render_ModelScratchpad savedWorkspace = *Render_ModelWorkspace();
-  const Actors_SkeletonPose savedPose = Actors_skeletonPose;
-  const MATRIX savedRoot = Actors_skeletonRootMatrix;
+  const Actors_SkeletonPose savedPose = VS::Actors::skeletonPose;
+  const MATRIX savedRoot = VS::Actors::skeletonRootMatrix;
   const VECTOR savedScale = VS::Actors::roomActorScale;
   Field_GimmickInstance object = {0};
   Actors_ShpModel model = {0};
@@ -590,7 +590,7 @@ int Tests_GimmickRoomScale(void) {
   object.model = &model;
   object.scaleX = object.scaleY = object.scaleZ = 64;
   Render_ModelWorkspace()->rootOffset = (SVECTOR){10, 20, 30, 0};
-  Actors_skeletonPose.scale = (VECTOR){0};
+  VS::Actors::skeletonPose.scale = (VECTOR){0};
   VS::Actors::roomActorScale = (VECTOR){2048, 4096, 4096, 0};
   VS::Actors::DrawLiveGimmickModel(&object, &camera);
   const int passed =
@@ -599,8 +599,8 @@ int Tests_GimmickRoomScale(void) {
       object.matrices[0].m[2][2] == 4096 && object.matrices[0].t[0] == 10 &&
       object.matrices[0].t[1] == 36 && object.matrices[0].t[2] == 30;
   *Render_ModelWorkspace() = savedWorkspace;
-  Actors_skeletonPose = savedPose;
-  Actors_skeletonRootMatrix = savedRoot;
+  VS::Actors::skeletonPose = savedPose;
+  VS::Actors::skeletonRootMatrix = savedRoot;
   VS::Actors::roomActorScale = savedScale;
   Core_Gte_Reset();
   return passed;
@@ -1111,7 +1111,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   Actors_ActorRecord* saved_actor = Actors_actorRecords[slot];
   Field_GimmickInstance* saved_object =
       has_gimmick_slot ? Field_gimmickInstances[slot] : nullptr;
-  const MATRIX saved_matrix = Actors_boneMatrixScratch;
+  const MATRIX saved_matrix = VS::Actors::boneMatrixScratch;
   const Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
   Actors_actorRecords[slot] =
       owner == 0 || owner == 2 || owner == 5 ? &actor : nullptr;
@@ -1123,10 +1123,10 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   actor.modelDataSize = sizeof model_bytes;
   VS::Render::RecordLiveModelExtent(model, sizeof model_bytes);
   model->bones[0].length = kBoneLength;
-  Actors_boneMatrixScratch = (MATRIX){0};
+  VS::Actors::boneMatrixScratch = (MATRIX){0};
   for (int axis = 0; axis < kSpatialDimensions; ++axis) {
-    Actors_boneMatrixScratch.m[axis][axis] = kFixedPointOne;
-    Actors_boneMatrixScratch.t[axis] = (axis + 1) * 10;
+    VS::Actors::boneMatrixScratch.m[axis][axis] = kFixedPointOne;
+    VS::Actors::boneMatrixScratch.t[axis] = (axis + 1) * 10;
     actor.boneMatrices[0].m[axis][axis] = kFixedPointOne;
     object.matrices[0].m[axis][axis] = kFixedPointOne;
     actor.boneMatrices[0].t[axis] = (axis + 1) * 110;
@@ -1161,7 +1161,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   Actors_actorRecords[slot] = saved_actor;
   if (has_gimmick_slot) Field_gimmickInstances[slot] = saved_object;
   VS::Render::ForgetLiveModelExtent(model);
-  Actors_boneMatrixScratch = saved_matrix;
+  VS::Actors::boneMatrixScratch = saved_matrix;
   *Render_ModelWorkspace() = saved_workspace;
   Core_Gte_Reset();
   return passed && result.pad == 77;
@@ -1205,7 +1205,7 @@ int Tests_ActorPoseHierarchy(void) {
   unsigned file[32] = {0};
   Actors_ActorRecord actor = {0};
   Actors_ShpModel* model = reinterpret_cast<Actors_ShpModel*>(file);
-  const Actors_SkeletonPose savedPose = Actors_skeletonPose;
+  const Actors_SkeletonPose savedPose = VS::Actors::skeletonPose;
   const Actors_ModelRenderContext savedContext = VS::Actors::modelRenderContext;
   const Render_ModelScratchpad savedWorkspace = *Render_ModelWorkspace();
   actor.instance.model = model;
@@ -1228,7 +1228,7 @@ int Tests_ActorPoseHierarchy(void) {
                actor.boneMatrices[1].t[0] == -28 &&
                actor.boneMatrices[1].t[1] == 200 &&
                actor.boneMatrices[1].m[0][0] == 2048 &&
-               Actors_skeletonPose.boneMatrices[1].m[0][0] == 4096;
+               VS::Actors::skeletonPose.boneMatrices[1].m[0][0] == 4096;
   actor.instance.isVisible = 1;
   actor.instance.wasDrawn = 1;
   actor.customTint = 1;
@@ -1263,7 +1263,7 @@ int Tests_ActorPoseHierarchy(void) {
   model->bones[1].parentIndex = 0;
   actor.modelDataSize = sizeof(Actors_ShpModel);
   passed = passed && VS::Actors::BuildLiveActorModelPose(actor, camera) == 0;
-  Actors_skeletonPose = savedPose;
+  VS::Actors::skeletonPose = savedPose;
   VS::Actors::modelRenderContext = savedContext;
   *Render_ModelWorkspace() = savedWorkspace;
   Core_Gte_Reset();
@@ -1595,7 +1595,7 @@ int Tests_ModelWorkspaceIsolation(void) {
   Render_ModelScratchpad* workspace = Render_ModelWorkspace();
   const Render_ModelScratchpad savedWorkspace = *workspace;
   const MATRIX savedBasis = Render_cameraBasisMatrix;
-  const MATRIX savedInverse = Actors_boneMatrixScratch;
+  const MATRIX savedInverse = VS::Actors::boneMatrixScratch;
   Actors_ActorRecord actor = {0};
   memcpy(savedScratch, Core_ScratchBase(), sizeof savedScratch);
   memset(sentinel, 0xA5, sizeof sentinel);
@@ -1627,13 +1627,13 @@ int Tests_ModelWorkspaceIsolation(void) {
   Render_cameraBasisMatrix = camera;
   VS::Render::PrepareLiveActorCameraMatrices(&camera);
   // The bone scratch keeps the source translation (44F14.c:880-883).
-  passed = passed && Actors_boneMatrixScratch.t[0] == camera.t[0] &&
-           Actors_boneMatrixScratch.t[1] == camera.t[1] &&
-           Actors_boneMatrixScratch.t[2] == camera.t[2];
+  passed = passed && VS::Actors::boneMatrixScratch.t[0] == camera.t[0] &&
+           VS::Actors::boneMatrixScratch.t[1] == camera.t[1] &&
+           VS::Actors::boneMatrixScratch.t[2] == camera.t[2];
   memcpy(Core_ScratchBase(), savedScratch, sizeof savedScratch);
   *workspace = savedWorkspace;
   Render_cameraBasisMatrix = savedBasis;
-  Actors_boneMatrixScratch = savedInverse;
+  VS::Actors::boneMatrixScratch = savedInverse;
   Core_Gte_Reset();
   return passed;
 }

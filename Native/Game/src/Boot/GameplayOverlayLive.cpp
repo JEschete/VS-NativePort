@@ -15,7 +15,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/SystemResourcesLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -23,14 +23,14 @@
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Interactions.h"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -59,8 +59,9 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
       Render_legacyOrderingTables[i] = VS::Core::Memory::AllocateLiveFromLowEnd(
           defaults.ordering_table_bytes);
       if (Render_legacyOrderingTables[i] == nullptr) {
-        Core_Errorf("boot", "failed to allocate gameplay ordering table %u",
-                    static_cast<unsigned>(i));
+        VS::Core::Errorf("boot",
+                         "failed to allocate gameplay ordering table %u",
+                         static_cast<unsigned>(i));
         std::abort();
       }
     }
@@ -80,7 +81,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
   }
   void InitializeScriptOpcodeTable() override {
     if (!VS::Event::InitializeLiveScriptOpcodeTable()) {
-      Core_Errorf("boot", "Native event VM initialization refused");
+      VS::Core::Errorf("boot", "Native event VM initialization refused");
       std::abort();
     }
   }
@@ -127,10 +128,10 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
         defaults.zone_music_fade_enabled ? 1 : 0;
     VS::Field::zoneContext.loadedZudIndexPlusOne = 0;
     Field_pendingDestinationDoor = State_savedEntryDoor;
-    Field_screenTransitionEffect = defaults.transition_effect;
-    Field_screenTransitionStep = defaults.transition_step;
-    Field_screenTransitionSpeed = defaults.transition_speed;
-    Field_screenTransitionWipeAngle = defaults.transition_wipe_angle;
+    VS::Field::screenTransitionEffect = defaults.transition_effect;
+    VS::Field::screenTransitionStep = defaults.transition_step;
+    VS::Field::screenTransitionSpeed = defaults.transition_speed;
+    VS::Field::screenTransitionWipeAngle = defaults.transition_wipe_angle;
     VS::Field::isInteractionPaused = defaults.interaction_paused ? 1 : 0;
     VS::Items::lootListHead = nullptr;
     // The original also cleared the write-only D_800F1874 (18.c:570).
@@ -143,18 +144,18 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     timer.time = {};
     VS::State::StoreLiveSceneTimer(timer);
     VS::Field::zoneContext.currentSceneId = State_savedEntryDoor.requiredFlagId;
-    Field_cameraTransition = nullptr;
+    VS::Field::cameraTransition = nullptr;
     VS::Field::LiveResetCameraToAshley();
     VS::Render::SetLiveCameraFarClip(defaults.far_clip, 1);
-    Field_sphericalCamera.delta.pitch = defaults.camera_pitch_delta;
-    Field_sphericalCamera.values.yaw = defaults.camera_yaw;
-    Field_sphericalCamera.values.pitch = defaults.camera_pitch;
-    Field_sphericalCamera.initialDistance = defaults.camera_distance;
-    Field_sphericalCamera.values.distance = defaults.camera_distance;
-    Field_sphericalCamera.delta.yaw = defaults.camera_yaw_delta;
-    Field_sphericalCamera.delta.distance = defaults.camera_distance_delta;
-    Field_sphericalCamera.delta.mode = defaults.camera_delta_mode;
-    Field_sphericalCamera.zoomVelocity = defaults.camera_zoom_velocity;
+    VS::Field::sphericalCamera.delta.pitch = defaults.camera_pitch_delta;
+    VS::Field::sphericalCamera.values.yaw = defaults.camera_yaw;
+    VS::Field::sphericalCamera.values.pitch = defaults.camera_pitch;
+    VS::Field::sphericalCamera.initialDistance = defaults.camera_distance;
+    VS::Field::sphericalCamera.values.distance = defaults.camera_distance;
+    VS::Field::sphericalCamera.delta.yaw = defaults.camera_yaw_delta;
+    VS::Field::sphericalCamera.delta.distance = defaults.camera_distance_delta;
+    VS::Field::sphericalCamera.delta.mode = defaults.camera_delta_mode;
+    VS::Field::sphericalCamera.zoomVelocity = defaults.camera_zoom_velocity;
   }
   void SetRoomActorScale(const VS::Core::Math::Vec3& scale) override {
     VECTOR legacy_scale{scale.x, scale.y, scale.z, 0};
@@ -163,9 +164,10 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
   void ClearActorSlots(std::size_t slot_count) override {
     constexpr std::size_t kActorCapacity = std::size(Battle_actors);
     if (slot_count > kActorCapacity) {
-      Core_Errorf("boot", "gameplay actor slot count %u exceeds capacity %u",
-                  static_cast<unsigned>(slot_count),
-                  static_cast<unsigned>(kActorCapacity));
+      VS::Core::Errorf("boot",
+                       "gameplay actor slot count %u exceeds capacity %u",
+                       static_cast<unsigned>(slot_count),
+                       static_cast<unsigned>(kActorCapacity));
       std::abort();
     }
     for (std::size_t i = 0; i < slot_count; ++i) {
@@ -179,7 +181,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     auto* action_state = static_cast<Battle_ActionState*>(
         VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Battle_ActionState)));
     if (action_state == nullptr) {
-      Core_Errorf("boot", "failed to allocate battle action state");
+      VS::Core::Errorf("boot", "failed to allocate battle action state");
       std::abort();
     }
     VS::Core::Memory::ZeroLiveAlignedWords(

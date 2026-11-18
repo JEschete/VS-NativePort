@@ -10,7 +10,7 @@
 #include <span>
 
 #include "Content/PFile.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/Runtime.h"
@@ -48,10 +48,10 @@ std::byte* Resolve(std::span<std::byte> block,
                    std::optional<std::size_t> offset, const char* operation,
                    int section, int track) {
   if (!offset) {
-    Core_Warnf("content",
-               "%s refused: section %d track %d is outside the %zu-byte "
-               "timeline block",
-               operation, section, track, block.size());
+    VS::Core::Warnf("content",
+                    "%s refused: section %d track %d is outside the %zu-byte "
+                    "timeline block",
+                    operation, section, track, block.size());
     return nullptr;
   }
   return block.data() + *offset;
@@ -61,10 +61,10 @@ std::byte* Resolve(std::span<std::byte> block,
 std::byte* PFileLiveTimelineSection(Effects_PackageBlock3* block, int section) {
   const auto bytes = LiveTimelineBlock(block);
   if (!bytes || section < 0) {
-    Core_Warnf("content",
-               "PFileTimelineSection refused: section %d of an unbounded "
-               "timeline block %p",
-               section, static_cast<void*>(block));
+    VS::Core::Warnf("content",
+                    "PFileTimelineSection refused: section %d of an unbounded "
+                    "timeline block %p",
+                    section, static_cast<void*>(block));
     return nullptr;
   }
   return Resolve(
@@ -76,10 +76,10 @@ std::byte* PFileLiveTimelineTrackData(Effects_PackageBlock3* block, int section,
                                       int track) {
   const auto bytes = LiveTimelineBlock(block);
   if (!bytes || section < 0 || track < 0) {
-    Core_Warnf("content",
-               "PFileTimelineTrackData refused: section %d track %d of an "
-               "unbounded timeline block %p",
-               section, track, static_cast<void*>(block));
+    VS::Core::Warnf("content",
+                    "PFileTimelineTrackData refused: section %d track %d of an "
+                    "unbounded timeline block %p",
+                    section, track, static_cast<void*>(block));
     return nullptr;
   }
   return Resolve(

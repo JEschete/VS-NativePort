@@ -55,7 +55,7 @@
 #include "Menu/TextBox.h"
 #include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -123,8 +123,8 @@ class LiveAbilityHost final : public battle::AbilityHost {
   [[nodiscard]] battle::ActionRequestView Selection() const override {
     return View(state_->selection);
   }
-  [[nodiscard]] int TickSpeed() const override { return State_tickSpeed; }
-  void SetTickSpeed(int speed) override { State_tickSpeed = speed; }
+  [[nodiscard]] int TickSpeed() const override { return VS::State::tickSpeed; }
+  void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetActionFlowMode(int mode) override {
     Battle_actionFlowMode = static_cast<u_int>(mode);
   }
@@ -508,7 +508,7 @@ int PackPendingUnlocks(battle::PendingAbilityUnlocks pending) {
 }
 
 // The original traces the acting actor's animation every timing update
-// (Core_Debugf "combat-flow").
+// (VS::Core::Debugf "combat-flow").
 void TraceAbilityTiming(const Battle_ActionState& state) {
   const Battle_ActionRequest& queued =
       state.queue[state.queueIndex & kQueueSlotMask];

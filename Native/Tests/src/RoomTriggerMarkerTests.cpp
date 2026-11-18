@@ -10,7 +10,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/Seq/Channel.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/RoomTriggerMarkers.hpp"
@@ -23,7 +23,7 @@
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 extern unsigned int Content_battleTriggerMarkerBytes[29];
 
@@ -60,8 +60,8 @@ struct TriggerMarkerFixture {
   State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
   RECT saved_texture = Field_triggerMarkerTextureSource;
   RECT saved_palette = Field_triggerMarkerPaletteSource;
-  int saved_tick_speed = State_tickSpeed;
-  int saved_mode = Field_roomGeometryDrawMode;
+  int saved_tick_speed = VS::State::tickSpeed;
+  int saved_mode = VS::Field::roomGeometryDrawMode;
   int saved_framebuffer = Render_frameBuf;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
   u_short saved_animation = Field_roomAnimationTicks;
@@ -103,8 +103,8 @@ struct TriggerMarkerFixture {
     Field_roomData.header.floorTriggersLength = sizeof triggers;
     for (auto& trigger : triggers) trigger.kind = 3;
     Audio_Seq_unusedStateFlags = {};
-    State_tickSpeed = 1;
-    Field_roomGeometryDrawMode = 0;
+    VS::State::tickSpeed = 1;
+    VS::Field::roomGeometryDrawMode = 0;
     Field_roomAnimationTicks = 0;
     Field_triggerMarkerFrameTicks = 0;
     // No image transfers unless a test explicitly supplies a source rectangle.
@@ -130,8 +130,8 @@ struct TriggerMarkerFixture {
     Audio_Seq_unusedStateFlags = saved_flags;
     Field_triggerMarkerTextureSource = saved_texture;
     Field_triggerMarkerPaletteSource = saved_palette;
-    State_tickSpeed = saved_tick_speed;
-    Field_roomGeometryDrawMode = saved_mode;
+    VS::State::tickSpeed = saved_tick_speed;
+    VS::Field::roomGeometryDrawMode = saved_mode;
     Field_roomAnimationTicks = saved_animation;
     Field_triggerMarkerFrameTicks = saved_marker_ticks;
     Render_frameScratch = saved_frame;
@@ -300,7 +300,7 @@ TEST_CASE(
   trigger.kind = 16;
   trigger.activation = static_cast<char>(sample.active);
   trigger.markerFade = static_cast<char>(sample.initial);
-  State_tickSpeed = sample.ticks;
+  VS::State::tickSpeed = sample.ticks;
   Audio_Seq_unusedStateFlags.opaque20 = static_cast<char>(sample.gate20);
   Audio_Seq_unusedStateFlags.opaque40 = static_cast<char>(sample.gate40);
   VS::Field::DrawLiveRoomTriggerMarkers();
@@ -338,7 +338,7 @@ TEST_CASE("Visible room trigger markers share the original animation update",
   Field_triggerMarkerPaletteSource = {0, 20, 1, 1};
   Field_roomAnimationTicks = 24;
   Field_triggerMarkerFrameTicks = 7;
-  State_tickSpeed = 3;
+  VS::State::tickSpeed = 3;
   for (auto& trigger : fixture.triggers) trigger.activation = 1;
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(2);
@@ -399,12 +399,12 @@ TEST_CASE("Room trigger marker animation retains wrap and single-step timing",
   Field_triggerMarkerPaletteSource = {0, 20, 1, 1};
   fixture.triggers[1].activation = 1;
   Field_roomAnimationTicks = 40;
-  State_tickSpeed = 17;
+  VS::State::tickSpeed = 17;
   VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(1);
   pixels.CheckAnimation(9, 0);
   Field_triggerMarkerFrameTicks = UINT16_MAX;
-  State_tickSpeed = 1;
+  VS::State::tickSpeed = 1;
   Field_roomAnimationTicks = 32;
   fixture.ResetPackets();
   VS::Field::DrawLiveRoomTriggerMarkers();

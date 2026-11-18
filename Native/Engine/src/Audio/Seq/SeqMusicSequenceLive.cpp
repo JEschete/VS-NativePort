@@ -18,7 +18,7 @@
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/MusicState.h"
+#include "Audio/MusicState.hpp"
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/SampleBanksLive.hpp"
 #include "Audio/Samples/SampleBanks.h"
@@ -204,7 +204,7 @@ class LiveMusicHost final : public MusicHost {
 
   void SaveSnapshot(MusicCommandState& state) override {
     StoreMusicCommand(state);
-    Audio_Native_SaveMusicSnapshot();
+    VS::Audio::SaveMusicSnapshot();
     state = LoadMusicCommand();
   }
 
@@ -383,7 +383,7 @@ void LiveRestoreMusicSequence(Audio_AkaoSequenceFile* sequence,
                   "the track lies outside the sequence data");
     return;
   }
-  Audio_Native_RestoreMusicSnapshot(swap_with_saved);
+  VS::Audio::RestoreMusicSnapshot(swap_with_saved);
   Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
   const LiveProgramMemory previous{
       reinterpret_cast<char*>(Audio_Seq_primaryMusicConfig.sequenceBase),

@@ -7,7 +7,11 @@
 
 #include "State/SceneTimer.h"
 
+namespace VS::State {
+
 // decomp: D_80050468 (SLUS_010.40 main.h:422)
-extern State_SceneTimer State_sceneTimer;
+extern State_SceneTimer sceneTimer;
 // decomp: vs_gametime_tickspeed: the frames a tick advances, 2 or 4.
-extern int State_tickSpeed;
+extern int tickSpeed;
+
+}  // namespace VS::State

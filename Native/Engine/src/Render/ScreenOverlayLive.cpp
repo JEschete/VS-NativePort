@@ -10,11 +10,11 @@
 #include <cstdint>
 #include <memory>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/FramebufferEffects.h"
@@ -55,8 +55,9 @@ std::uint64_t refused_overlays = 0;
 
 void ReportRefusal(const char* what) {
   if (std::has_single_bit(++refused_overlays)) {
-    Core_Errorf(kChannel, "screen overlay refused: %s (%" PRIu64 " refused)",
-                what, refused_overlays);
+    VS::Core::Errorf(kChannel,
+                     "screen overlay refused: %s (%" PRIu64 " refused)", what,
+                     refused_overlays);
   }
 }
 
@@ -245,9 +246,9 @@ class DiscardedTransitionTarget final : public ScreenTransitionTarget {
 // decomp: BATTLE.PRG _drawScreenTransition (src/BATTLE/BATTLE.PRG/146C.c:2223).
 void DrawLiveScreenTransition(void* ordering_table) {
   ScreenTransition transition{
-      Field_screenTransitionAlpha, Field_screenTransitionStep,
-      Field_screenTransitionEffect, Field_screenTransitionWipeAngle,
-      Field_screenTransitionSpeed};
+      VS::Field::screenTransitionAlpha, VS::Field::screenTransitionStep,
+      VS::Field::screenTransitionEffect, VS::Field::screenTransitionWipeAngle,
+      VS::Field::screenTransitionSpeed};
   LiveScreenTransformer transformer;
   if (ordering_table == nullptr) {
     if (transition.alpha != 0) {
@@ -260,8 +261,8 @@ void DrawLiveScreenTransition(void* ordering_table) {
         OrderingEntry(ordering_table, kTransitionEntry));
     DrawScreenTransition(transition, target, transformer);
   }
-  Field_screenTransitionAlpha = transition.alpha;
-  Field_screenTransitionStep = transition.step;
+  VS::Field::screenTransitionAlpha = transition.alpha;
+  VS::Field::screenTransitionStep = transition.step;
 }
 
 // decomp: BATTLE.PRG func_8007D360 (src/BATTLE/BATTLE.PRG/146C.c:9258).

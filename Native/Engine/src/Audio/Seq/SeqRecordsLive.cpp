@@ -28,7 +28,7 @@
 #include "Audio/SoundBanks.h"
 #include "Audio/VoiceOutput.hpp"
 #include "Core/Arena.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
 namespace VS::Audio::Seq {
@@ -717,7 +717,7 @@ std::uint64_t LiveRefusalCount() noexcept { return refusals; }
 void ReportRefusal(const char* operation, const char* reason) {
   ++refusals;
   if ((refusals & (refusals - 1)) != 0) return;
-  Core_Warnf("audio", "sequencer %s refused: %s (refusal %" PRIu64 ")",
-             operation, reason, refusals);
+  VS::Core::Warnf("audio", "sequencer %s refused: %s (refusal %" PRIu64 ")",
+                  operation, reason, refusals);
 }
 }  // namespace VS::Audio::Seq

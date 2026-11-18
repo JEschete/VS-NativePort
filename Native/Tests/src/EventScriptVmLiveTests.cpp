@@ -29,7 +29,7 @@
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLiveState.h"
@@ -45,7 +45,7 @@
 #include "State/SceneTimer.h"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -107,7 +107,7 @@ struct LiveVmFixture {
   std::array<std::uint16_t, 66> legacy_curves{};
   std::uintptr_t subroutine_return = Event_subroutineReturnCursor;
   char cached_flag = Event_cachedFlagValue;
-  int tick_speed = State_tickSpeed;
+  int tick_speed = VS::State::tickSpeed;
   char phase = Event_playbackPhase;
   char confirmed = Event_isStartConfirmed;
   std::int16_t finished = Event_isMainThreadFinished;
@@ -117,7 +117,7 @@ struct LiveVmFixture {
   int previous = Input_previousButtons;
   char forced = Event_isSkipForced;
   char stops_music = Event_stopsMusicOnSkip;
-  State_SceneTimer timer = State_sceneTimer;
+  State_SceneTimer timer = VS::State::sceneTimer;
   char timer_hud = Battle_lowerScreenUiState;
   std::int16_t event_id = Event_eventId;
   std::uint16_t event_source = Event_eventSource;
@@ -151,7 +151,7 @@ struct LiveVmFixture {
     std::ranges::copy(legacy_curves, Event_customEasingCurves);
     Event_subroutineReturnCursor = subroutine_return;
     Event_cachedFlagValue = cached_flag;
-    State_tickSpeed = tick_speed;
+    VS::State::tickSpeed = tick_speed;
     Event_playbackPhase = phase;
     Event_isStartConfirmed = confirmed;
     Event_isMainThreadFinished = finished;
@@ -161,7 +161,7 @@ struct LiveVmFixture {
     Input_previousButtons = previous;
     Event_isSkipForced = forced;
     Event_stopsMusicOnSkip = stops_music;
-    State_sceneTimer = timer;
+    VS::State::sceneTimer = timer;
     Battle_lowerScreenUiState = timer_hud;
     Event_eventId = event_id;
     Event_eventSource = event_source;
@@ -896,21 +896,21 @@ void CheckLiveSpecialTimer(bool guarded, int skip) {
   const LiveVmFixture fixture;
   const auto start = MountScript({0xE9, 8, 1, 0xE9, 8, 0, 0xE6});
   BindLiveSpecialSlot(guarded, skip);
-  State_sceneTimer = {.mode = 2,
-                      .pausedMode = 0,
-                      .resetScope = 3,
-                      .frames = 12,
-                      .seconds = 3,
-                      .minutes = 4,
-                      .hours = 5};
+  VS::State::sceneTimer = {.mode = 2,
+                           .pausedMode = 0,
+                           .resetScope = 3,
+                           .frames = 12,
+                           .seconds = 3,
+                           .minutes = 4,
+                           .hours = 5};
   Battle_lowerScreenUiState = 1;
   auto& host = event::LiveScriptVm();
   host.SetThreadCursor(0, start);
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
   CHECK_FALSE(host.ThreadCursor(0).Present());
-  CHECK(State_sceneTimer.mode == 2);
-  CHECK(State_sceneTimer.pausedMode == 2);
-  CHECK(State_sceneTimer.seconds == 3);
+  CHECK(VS::State::sceneTimer.mode == 2);
+  CHECK(VS::State::sceneTimer.pausedMode == 2);
+  CHECK(VS::State::sceneTimer.seconds == 3);
   CHECK(Battle_lowerScreenUiState == 1);
 }
 
@@ -944,7 +944,7 @@ void CheckLiveFileWait(bool guarded, int skip, int state) {
       Event_CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE3] = 2;
   Event_skipState = static_cast<char>(skip);
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   auto& host = event::LiveScriptVm();
   if (state != 0) {
     REQUIRE(host.QueueEventFileLoad(0, event::EventBuffer::kScript));
@@ -954,7 +954,7 @@ void CheckLiveFileWait(bool guarded, int skip, int state) {
   host.SetThreadCursor(0, start);
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
   CHECK(host.ThreadCursor(0) == (state == 1 ? start : event::ScriptLocation{}));
-  CHECK(State_tickSpeed == ((state == 0 || state == 2) ? 4 : 2));
+  CHECK(VS::State::tickSpeed == ((state == 0 || state == 2) ? 4 : 2));
   CheckMountedByte(0xE9, start.generation);
 }
 
@@ -989,11 +989,11 @@ void CheckLiveFinishEvent(bool guarded, int skip) {
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
       guarded ? FinishEventSlotBridge : Event_CommandFinishEventOpcode;
   Event_skipState = static_cast<char>(skip);
-  State_tickSpeed = 4;
+  VS::State::tickSpeed = 4;
   auto& host = event::LiveScriptVm();
   host.SetThreadCursor(0, start);
   CHECK(event::ExecuteLiveScriptThread(0));
-  CHECK(State_tickSpeed == 2);
+  CHECK(VS::State::tickSpeed == 2);
   CHECK(host.ThreadCursor(0) == start);
 }
 
@@ -1080,13 +1080,13 @@ void CheckLiveTimerConfiguration(TimerConfigScenario scenario) {
       Event_CommandStopScriptContextOpcode;
   Event_kOpcodeSizes[0xE9] = 7;
   Event_skipState = static_cast<char>(scenario.skip);
-  State_sceneTimer = {.mode = 2,
-                      .pausedMode = 1,
-                      .resetScope = 0x1234,
-                      .frames = 12,
-                      .seconds = 3,
-                      .minutes = 4,
-                      .hours = 5};
+  VS::State::sceneTimer = {.mode = 2,
+                           .pausedMode = 1,
+                           .resetScope = 0x1234,
+                           .frames = 12,
+                           .seconds = 3,
+                           .minutes = 4,
+                           .hours = 5};
   Battle_lowerScreenUiState = 1;
   auto& host = event::LiveScriptVm();
   const bool valid = scenario.mode < host.SceneTimerModes().size() &&
@@ -1342,7 +1342,7 @@ void CheckLiveFlagBranch(FlagComparison sample, bool guarded, int skip) {
                   : (guarded ? ImmediateBranchSlotBridge
                              : Event_ScriptBranchOnFlagImmediateOpcode);
   Event_skipState = static_cast<char>(skip);
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xEF] = Event_kOpcodeHandlers[0xEF] = handler;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
       Event_CommandSetTickSpeedOpcode;
@@ -1353,7 +1353,7 @@ void CheckLiveFlagBranch(FlagComparison sample, bool guarded, int skip) {
   event::LiveScriptVm().SetThreadCursor(0, start);
   CHECK_FALSE(event::ExecuteLiveScriptThread(0));
   CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
-  CHECK(State_tickSpeed == (fallthrough ? 4 : 2));
+  CHECK(VS::State::tickSpeed == (fallthrough ? 4 : 2));
 }
 
 struct LiveFlagScenario {
@@ -1422,7 +1422,7 @@ event::ScriptLocation PrepareLoopScenario(LoopScenario scenario) {
       MountScript({0xE9, scenario.counter, scenario.initial, 0xE1, 0xEA,
                    scenario.counter, 1, 0, 0xE3, 4, 0xE6});
   Event_skipState = static_cast<char>(scenario.skip);
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE9] = Event_kOpcodeHandlers[0xE9] =
       scenario.guarded ? SetLoopSlotBridge : Event_ScriptSetLoopCounterOpcode;
   Event_kSkipOpcodeHandlers[0xEA] = Event_kOpcodeHandlers[0xEA] =
@@ -1443,7 +1443,7 @@ event::ScriptLocation PrepareLoopScenario(LoopScenario scenario) {
 void CheckLoopResult(std::uint8_t counter, std::uint8_t remaining,
                      bool finished) {
   CHECK(event::LiveScriptVm().LoopCounter(counter) == remaining);
-  CHECK(State_tickSpeed == (finished ? 4 : 2));
+  CHECK(VS::State::tickSpeed == (finished ? 4 : 2));
 }
 
 event::ScriptLocation PrepareCachedScenario(int skip, bool guarded,
@@ -1451,7 +1451,7 @@ event::ScriptLocation PrepareCachedScenario(int skip, bool guarded,
   const auto start =
       MountScript({0xE7, 0xFF, 1, 0xE8, operand, 6, 0, 0xE3, 4, 0xF0});
   Event_skipState = static_cast<char>(skip);
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE7] = Event_kOpcodeHandlers[0xE7] =
       guarded ? CacheSlotBridge : Event_ScriptCacheFlagValueOpcode;
   Event_kSkipOpcodeHandlers[0xE8] = Event_kOpcodeHandlers[0xE8] =
@@ -1469,14 +1469,14 @@ event::ScriptLocation PrepareCachedScenario(int skip, bool guarded,
 
 void CheckCachedOutcome(int value, bool equal) {
   CHECK(static_cast<std::uint8_t>(event::LiveScriptVm().CachedFlag()) == value);
-  CHECK(State_tickSpeed == (equal ? 2 : 4));
+  CHECK(VS::State::tickSpeed == (equal ? 2 : 4));
 }
 
 event::ScriptLocation PrepareContextScenario(int skip, bool guarded) {
   const auto start =
       MountScript({0xE4, 3, 8, 0, 0xE2, 2, 0xE6, 0xE6, 0xE5, 3, 0xE3, 4, 0xE6});
   Event_skipState = static_cast<char>(skip);
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE4] = Event_kOpcodeHandlers[0xE4] =
       guarded ? StartContextSlotBridge : Event_CommandStartScriptContextOpcode;
   Event_kSkipOpcodeHandlers[0xE5] = Event_kOpcodeHandlers[0xE5] =
@@ -1529,7 +1529,7 @@ void CheckWaitSnapshot(event::ScriptLocation start, int thread, int remaining,
   CHECK(host.WaitFrames(thread) == remaining);
   CHECK(host.ThreadCursor(thread) ==
         (waiting ? start : event::ScriptLocation{}));
-  CHECK(State_tickSpeed == (waiting ? 2 : 4));
+  CHECK(VS::State::tickSpeed == (waiting ? 2 : 4));
 }
 
 void CheckWaitDispatch(int thread) {
@@ -1543,7 +1543,7 @@ void CheckUnreleasedWait(event::ScriptLocation start, int thread) {
   CHECK(host.ThreadCursor(thread) == start);
 }
 
-void CheckUnchangedTickSpeed() { CHECK(State_tickSpeed == 2); }
+void CheckUnchangedTickSpeed() { CHECK(VS::State::tickSpeed == 2); }
 
 void CheckLoopScenario(LoopScenario scenario) {
   const LiveVmFixture fixture;
@@ -1568,7 +1568,7 @@ void CheckWaitScenario(WaitScenario scenario) {
   const auto start = MountScript(
       {0xE2, static_cast<std::uint8_t>(scenario.duration), 0xE3, 4, 0xF0});
   Event_skipState = static_cast<char>(scenario.skip);
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   Event_kSkipOpcodeHandlers[0xE2] = Event_kOpcodeHandlers[0xE2] =
       scenario.guarded ? WaitSlotBridge : Event_CommandWaitFramesOpcode;
   Event_kSkipOpcodeHandlers[0xE3] = Event_kOpcodeHandlers[0xE3] =
@@ -1887,13 +1887,13 @@ constexpr auto kRoomControlEntries = std::to_array<ControlEntry>({
 // Restores the draw mode, the texture LOD preserve flag and the room clip
 // state the lighting and depth cue opcodes write.
 struct RoomOpcodeStateFixture {
-  int draw_mode = Field_roomGeometryDrawMode;
+  int draw_mode = VS::Field::roomGeometryDrawMode;
   char preserve_lod = Event_isScriptBackdropEnabled;
   VS::Render::RoomClipState clip = VS::Render::LiveRoomClipState();
 
   RoomOpcodeStateFixture() = default;
   ~RoomOpcodeStateFixture() {
-    Field_roomGeometryDrawMode = draw_mode;
+    VS::Field::roomGeometryDrawMode = draw_mode;
     Event_isScriptBackdropEnabled = preserve_lod;
     VS::Render::LiveRoomClipState() = clip;
   }
@@ -1933,11 +1933,11 @@ TEST_CASE("Native room bindings keep a scripted LOD depth and draw mode",
           "[event][script][room-commands][event-vm-live]") {
   const LiveVmFixture fixture;
   const RoomOpcodeStateFixture room;
-  Field_roomGeometryDrawMode = 0;
+  VS::Field::roomGeometryDrawMode = 0;
   Event_isScriptBackdropEnabled = 0;
   VS::Render::LiveRoomClipState().lod_depth = 100;
   RunRoomScript({0x62, 0x81, 0x61, 0x34, 0x82, 0xF0});
-  CHECK(Field_roomGeometryDrawMode == 0x81);
+  CHECK(VS::Field::roomGeometryDrawMode == 0x81);
   CHECK(Event_isScriptBackdropEnabled == static_cast<char>(-1));
   CHECK(VS::Render::LiveRoomClipState().lod_depth == 0x234);
 }
@@ -1959,7 +1959,7 @@ namespace {
 struct BackgroundOpcodeStateFixture {
   VS::Field::RoomBackgroundState background =
       VS::Field::LoadLiveRoomBackgroundState();
-  int first_person = Field_isFirstPersonViewEnabled;
+  int first_person = VS::Field::isFirstPersonViewEnabled;
 
   BackgroundOpcodeStateFixture() {
     Field_backgroundTextureDiscRequest = nullptr;
@@ -1968,7 +1968,7 @@ struct BackgroundOpcodeStateFixture {
   }
   ~BackgroundOpcodeStateFixture() {
     VS::Field::StoreLiveRoomBackgroundState(background);
-    Field_isFirstPersonViewEnabled = first_person;
+    VS::Field::isFirstPersonViewEnabled = first_person;
   }
   BackgroundOpcodeStateFixture(const BackgroundOpcodeStateFixture&) = delete;
   BackgroundOpcodeStateFixture& operator=(const BackgroundOpcodeStateFixture&) =
@@ -2017,7 +2017,7 @@ TEST_CASE("Native background bindings store visibility offset and parallax",
   const LiveVmFixture fixture;
   const BackgroundOpcodeStateFixture background;
   Field_isTiledBackgroundEnabled = 0;
-  Field_isFirstPersonViewEnabled = 1;
+  VS::Field::isFirstPersonViewEnabled = 1;
   static_cast<void>(
       MountBackgroundScript({0x73, 0x80, 0x7B, 0x00, 0x80, 0xFF, 0x7F, 0x7E,
                              0xE0, 0x20, 0x00, 0x7C, 0x02, 0xF0}));
@@ -2028,7 +2028,7 @@ TEST_CASE("Native background bindings store visibility offset and parallax",
   CHECK(Field_backgroundOffsetY == 0x7FFF);
   CHECK(Field_backgroundParallaxScaleXFixed12 == -4096);
   CHECK(Field_backgroundParallaxScaleYFixed12 == 4096);
-  CHECK(Field_isFirstPersonViewEnabled == 0);
+  CHECK(VS::Field::isFirstPersonViewEnabled == 0);
 }
 
 TEST_CASE("Native background release yields only while skipping",
@@ -2520,7 +2520,7 @@ TEST_CASE("Native tick binding preserves the existing byte selector policy",
       const LiveVmFixture fixture;
       const auto start =
           MountScript({0xE3, static_cast<std::uint8_t>(operand), 0xF0});
-      State_tickSpeed = 2;
+      VS::State::tickSpeed = 2;
       Event_kOpcodeHandlers[0xE3] =
           guarded ? TickSlotBridge : Event_CommandSetTickSpeedOpcode;
       Event_kOpcodeHandlers[0xF0] = Event_CommandStopScriptContextOpcode;
@@ -2529,7 +2529,7 @@ TEST_CASE("Native tick binding preserves the existing byte selector policy",
       host.SetThreadCursor(0, start);
       CHECK_FALSE(event::ExecuteLiveScriptThread(0));
       CHECK_FALSE(host.ThreadCursor(0).Present());
-      CHECK(State_tickSpeed == (operand == 4 ? 4 : 2));
+      CHECK(VS::State::tickSpeed == (operand == 4 ? 4 : 2));
     }
   }
 }
@@ -2876,11 +2876,11 @@ TEST_CASE("Native invalid opcode bindings preserve diagnostic continuation",
     Event_kOpcodeHandlers[0xE3] = Event_CommandSetTickSpeedOpcode;
     Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
     Event_kOpcodeSizes[0xE3] = 2;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     event::LiveScriptVm().SetThreadCursor(0, start);
     CHECK_FALSE(event::ExecuteLiveScriptThread(0));
     CHECK_FALSE(event::LiveScriptVm().ThreadCursor(0).Present());
-    CHECK(State_tickSpeed == 4);
+    CHECK(VS::State::tickSpeed == 4);
   }
 }
 
@@ -3130,7 +3130,7 @@ TEST_CASE("Native saved return binding preserves missing and stale locations",
       Event_kOpcodeHandlers[0xE3] = Event_CommandSetTickSpeedOpcode;
       Event_kOpcodeHandlers[0xE6] = Event_CommandStopScriptContextOpcode;
       Event_kOpcodeSizes[0xE3] = 2;
-      State_tickSpeed = 2;
+      VS::State::tickSpeed = 2;
       auto& host = event::LiveScriptVm();
       if (mode != 0) {
         host.SetSubroutineReturn(
@@ -3139,7 +3139,7 @@ TEST_CASE("Native saved return binding preserves missing and stale locations",
       host.SetThreadCursor(0, start);
       CHECK_FALSE(event::ExecuteLiveScriptThread(0));
       CHECK_FALSE(host.ThreadCursor(0).Present());
-      CHECK(State_tickSpeed == (mode == 0 ? 4 : 2));
+      CHECK(VS::State::tickSpeed == (mode == 0 ? 4 : 2));
     }
   }
 }

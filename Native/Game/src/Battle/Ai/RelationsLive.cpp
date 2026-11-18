@@ -22,25 +22,19 @@
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/BiosRand.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
 static_assert(std::size(Battle_Ai_actorAiStates) == kRelationActorSlots);
 constexpr unsigned kPreservedRelationFlag = 8;
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 // The room actor IDs in battle actor list order.
 class RoomActorList {

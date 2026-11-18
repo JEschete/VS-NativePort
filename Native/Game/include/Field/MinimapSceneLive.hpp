@@ -18,4 +18,9 @@ Field_MapRoomName* ResolveLiveSceneRoomData(void* data, std::size_t size);
 // std::runtime_error for a missing or malformed scene or a full frame.
 void DrawLiveMinimapScene(const void* data, std::size_t size);
 
+// The scene door id of a room door, and marking the entrance door on the map;
+// the original BATTLE.PRG entries.
+int SceneDoorIdEntry(int door_index);
+void MarkEntranceDoorOnSceneMapEntry(int door_index);
+
 }  // namespace VS::Field

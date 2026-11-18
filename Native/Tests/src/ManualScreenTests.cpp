@@ -27,7 +27,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/Manual.h"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
@@ -907,7 +907,7 @@ struct LiveManualFixture {
       std::to_array(Content_discRequestSlots);
   std::array<Menu_Framework_MenuRow, 40> rows{};
   int saved_hud_slide = Battle_hudSlideOffset;
-  int saved_field_rendering = Field_isFieldRenderingEnabled;
+  int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
   int saved_fade_step = Menu_Framework_backgroundFadeStep;
   int saved_selected = Menu_Framework_selectedRow;
   u_int saved_pressed = Input_buttonsPressed.allButtons;
@@ -969,7 +969,7 @@ struct LiveManualFixture {
     Battle_hudHidden = saved_hud_hidden;
     Battle_hudSlideOffset = saved_hud_slide;
     Battle_lowerScreenUiState = saved_lower_screen;
-    Field_isFieldRenderingEnabled = saved_field_rendering;
+    VS::Field::isFieldRenderingEnabled = saved_field_rendering;
     Menu_Framework_hideMenu = saved_hide_menu;
     Menu_Framework_menuState = saved_menu_state;
     Menu_Framework_backgroundFadeStep = saved_fade_step;
@@ -1053,7 +1053,7 @@ struct LiveHud {
 LiveHud CurrentHud() {
   return {.hidden = Battle_hudHidden,
           .slide = Battle_hudSlideOffset,
-          .field_rendering = Field_isFieldRenderingEnabled};
+          .field_rendering = VS::Field::isFieldRenderingEnabled};
 }
 
 // The help page statics as the typed state.
@@ -1156,7 +1156,7 @@ TEST_CASE("F04161 LiveUpdateScreen initializes the help and hides the HUD",
   Input_settings.cursorMemory = 1;
   Menu_Manual_showMenuState = 5;
   Battle_hudHidden = 0;
-  Field_isFieldRenderingEnabled = 1;
+  VS::Field::isFieldRenderingEnabled = 1;
   u_char step = manual::kScreenInitialize;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(manual::LiveManualScreenState().initialized == 1);
@@ -1176,7 +1176,7 @@ TEST_CASE("F04161 LiveUpdateScreen leaves the help for the game",
   Menu_Manual_showMenuState = manual::kHelpLeaveToGame;
   Battle_hudHidden = 1;
   Battle_hudSlideOffset = manual::kHudSlideHidden;
-  Field_isFieldRenderingEnabled = 0;
+  VS::Field::isFieldRenderingEnabled = 0;
   u_char step = manual::kScreenShow;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(step == manual::kScreenShutDown);

@@ -14,7 +14,7 @@
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Render/FramebufferEffects.h"
 #include "Render/ScreenOverlayLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace time_attack_terminal_live_tests {
 namespace results = VS::Menu::Results;
@@ -112,9 +112,9 @@ inline void RestoreEffectSettings(
 // deferred Render packets must be quiesced before discarding their heap.
 class TimeAttackFixture : public game_clear_live_tests::Fixture {
  private:
-  game_clear_live_tests::SavedGlobals<Menu_Results_newTimeSlot,
-                                      Menu_Results_timeTrialTime,
-                                      Menu_Results_clutBuf, State_tickSpeed>
+  game_clear_live_tests::SavedGlobals<
+      Menu_Results_newTimeSlot, Menu_Results_timeTrialTime,
+      Menu_Results_clutBuf, VS::State::tickSpeed>
       saved_;
   render::FramebufferEffectSettings saved_effect_ =
       render::LiveFramebufferEffect().settings;

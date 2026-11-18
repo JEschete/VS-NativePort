@@ -11,7 +11,7 @@
 #include "Actors/Movement.h"
 #include "Core/Log.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
@@ -95,7 +95,7 @@ TEST_CASE("Valid authored view triggers still hide the selected geometry group",
   trigger.header.tileZ = 1;
   trigger.header.viewDirection = 4;
   trigger.header.effectCount = 1;
-  trigger.header.mode = Field_sphericalCamera.initialDistance == 0x900;
+  trigger.header.mode = VS::Field::sphericalCamera.initialDistance == 0x900;
   fixture.cells[4].occlusionAndFloorFlags = 1;
   fixture.geometry[1] = 0;
   Field_roomData.viewTriggers = &trigger.header;

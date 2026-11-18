@@ -7,7 +7,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Battle::Ai {
@@ -49,7 +49,7 @@ constexpr std::size_t kMaxPlatformPositions{Field::kMovingPlatformCapacity};
 constexpr unsigned kGroundMovementAngleShift = 9;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Warnf("ai", "%s", message);
+  VS::Core::Warnf("ai", "%s", message);
   return std::nullopt;
 }
 

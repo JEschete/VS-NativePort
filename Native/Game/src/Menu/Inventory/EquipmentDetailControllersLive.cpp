@@ -10,7 +10,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Battle/Actor.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -50,7 +50,7 @@ std::array<EquipmentDetailState, kControllerCount> g_states{};
 std::array g_gem_count_text{'X', ' ', ' ', ' ', ' ', ' ', '0', '\0'};
 
 [[noreturn]] void Refuse(const char* reason) {
-  Core_Errorf("menu.inventory", "Equipment details refused: %s", reason);
+  VS::Core::Errorf("menu.inventory", "Equipment details refused: %s", reason);
   std::abort();
 }
 

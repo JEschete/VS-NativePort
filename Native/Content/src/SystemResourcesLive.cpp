@@ -9,7 +9,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/SystemResources.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -75,15 +75,16 @@ void LoadLiveSystemResources() {
   LiveSystemResourcesHost host;
   const SystemResourcesLoad load = LoadSystemResources(host);
   if (!load.buffered) {
-    Core_Warnf("content",
-               "LoadSystemResources: no game heap room for SYSTEM.DAT (%u "
-               "bytes); nothing loaded",
-               static_cast<unsigned>(kSystemDatBytes));
+    VS::Core::Warnf("content",
+                    "LoadSystemResources: no game heap room for SYSTEM.DAT (%u "
+                    "bytes); nothing loaded",
+                    static_cast<unsigned>(kSystemDatBytes));
   } else if (load.refused_sections != 0) {
-    Core_Warnf("content",
-               "LoadSystemResources: skipped SYSTEM.DAT sections outside the "
-               "file (mask 0x%02X)",
-               static_cast<unsigned>(load.refused_sections));
+    VS::Core::Warnf(
+        "content",
+        "LoadSystemResources: skipped SYSTEM.DAT sections outside the "
+        "file (mask 0x%02X)",
+        static_cast<unsigned>(load.refused_sections));
   }
 }
 

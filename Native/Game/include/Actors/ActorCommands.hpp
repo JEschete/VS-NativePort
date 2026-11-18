@@ -177,7 +177,7 @@ struct AshleyDirectionPad {
   bool right = false;
 };
 
-// Ashley's move input (Actors_ashleyMoveInput words 1 and 3): the lateral
+// Ashley's move input (VS::Actors::ashleyMoveInput words 1 and 3): the lateral
 // and forward components the movement direction is taken from.
 struct AshleyMoveInput {
   int lateral = 0;

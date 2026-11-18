@@ -68,7 +68,7 @@ enum QuadWord {
 };
 
 [[noreturn]] void Fail(const char* message) {
-  Core_Debugf("effects", "%s", message);
+  VS::Core::Debugf("effects", "%s", message);
   std::abort();
 }
 
@@ -391,7 +391,8 @@ class LiveParticleRenderer final : public ParticleRenderer {
   }
 
   void Finish(std::size_t particles, std::size_t quads) override {
-    Core_Debugf("particles", "rendered_nodes=%zu quads=%zu", particles, quads);
+    VS::Core::Debugf("particles", "rendered_nodes=%zu quads=%zu", particles,
+                     quads);
   }
 
  private:

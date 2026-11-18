@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Audio/Seq/Channel.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
@@ -18,7 +18,7 @@
 #include "Field/TriggerMarkers.h"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 constexpr std::size_t kMarkerRecordBytes = 116;
@@ -95,7 +95,7 @@ class LiveTriggerMarkerRenderer final
     marker.quad.red3 = marker.quad.green3 = marker.quad.blue3 = shade;
     marker.quad.red4 = marker.quad.green4 = marker.quad.blue4 = shade;
     VS::Render::DrawLiveRoomGeometry(&marker, sizeof marker,
-                                     Field_roomGeometryDrawMode);
+                                     VS::Field::roomGeometryDrawMode);
   }
 };
 }  // namespace
@@ -113,7 +113,7 @@ void DrawLiveRoomTriggerMarkers() {
         record.tileX, record.tileZ, record.kind, record.activation != 0,
         static_cast<std::uint8_t>(record.markerFade)});
   }
-  const TriggerMarkerFrame frame{State_tickSpeed,
+  const TriggerMarkerFrame frame{VS::State::tickSpeed,
                                  Audio_Seq_unusedStateFlags.opaque20 != 0 ||
                                      Audio_Seq_unusedStateFlags.opaque40 != 0,
                                  Field_roomAnimationTicks};

@@ -15,7 +15,7 @@
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusQueue.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -26,7 +26,7 @@ using StatusHandler = std::optional<StatusFeedback> (*)(
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Errorf("battle", "%s", message);
+    VS::Core::Errorf("battle", "%s", message);
     std::abort();
   }
 }
@@ -90,7 +90,7 @@ auto ApplyHandler(Battle_HitResult* target, Handler handler, Args... args) {
   auto queued = Load(hit);
   const auto result = handler(rules, actor, queued, args...);
   if (!result) {
-    Core_Errorf("battle", "Status handler refused its rule table");
+    VS::Core::Errorf("battle", "Status handler refused its rule table");
     std::abort();
   }
   Store(queued, hit);

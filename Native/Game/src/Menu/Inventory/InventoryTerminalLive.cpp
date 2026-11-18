@@ -24,11 +24,11 @@
 #include "Battle/HudStateLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/StringTables.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -104,8 +104,8 @@ std::uint64_t g_refusals = 0;
 
 [[noreturn]] void Refuse(std::string_view reason) {
   ++g_refusals;
-  Core_Errorf("menu.inventory", "Inventory terminal refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.inventory", "Inventory terminal refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 void RequireIdleContext(const ContextState& context) {
@@ -178,7 +178,7 @@ void ReadRuntime(TerminalRuntime& runtime) {
   runtime.use = {use.menuStatus, use.selectionKind,
                  static_cast<std::uint16_t>(use.executeAbility.halves[0]),
                  static_cast<std::uint16_t>(use.executeAbility.halves[1]),
-                 Items_miscItemInvoked};
+                 VS::Items::miscItemInvoked};
   runtime.cursor_memory_enabled =
       static_cast<std::uint8_t>(Input_settings.cursorMemory);
   runtime.freeze_tabs =
@@ -215,7 +215,7 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   use.selectionKind = runtime.use.kind;
   use.executeAbility.halves[0] = static_cast<std::int16_t>(runtime.use.action);
   use.executeAbility.halves[1] = static_cast<std::int16_t>(runtime.use.item);
-  Items_miscItemInvoked = runtime.use.slot;
+  VS::Items::miscItemInvoked = runtime.use.slot;
   Input_settings.cursorMemory =
       static_cast<char>(runtime.cursor_memory_enabled);
   Menu_Inventory_freezeTabArrows = static_cast<char>(runtime.freeze_tabs);
@@ -793,7 +793,8 @@ class LiveTerminalHost final : public InventoryTerminalHost,
   }
   std::uint8_t Capacity(Category category) override {
     const auto index = static_cast<std::size_t>(category);
-    const auto capacity = std::span(Items_Inventory_inventoryItemCapacities);
+    const auto capacity =
+        std::span(VS::Items::Inventory::inventoryItemCapacities);
     if (index >= capacity.size()) {
       Refuse("capacity outside inventory categories");
     }

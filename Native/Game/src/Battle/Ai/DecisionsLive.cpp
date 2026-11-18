@@ -18,9 +18,10 @@
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CandidateMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -28,13 +29,6 @@ static_assert(std::size(Battle_Ai_decisionCallbacks) == kDecisionBehaviorCount);
 constexpr int kFleeVisibleMode = 1;
 constexpr unsigned kFirstNonLocomotionCommand = 9;
 constexpr int kAllyRelationship = 2;
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 Battle_Ai_ActorAiState& StateOf(Battle_Ai_ActorAiState* state) {
   Require(state != nullptr, "AI decision behaviour requires an actor state");
@@ -180,10 +174,11 @@ void DispatchLiveMovementBehavior(Battle_Ai_DecisionDispatchView* view) {
 LiveDecisionBehavior SelectLiveDecisionBehavior(std::uint32_t spawn_settings) {
   const std::optional<unsigned> slot = DecisionBehaviorSlot(spawn_settings);
   if (!slot) {
-    Core_Warnf("ai",
-               "decision behaviour index %u is past the %u-entry table; the "
-               "actor wanders instead (#272)",
-               DecisionBehaviorIndex(spawn_settings), kDecisionBehaviorCount);
+    VS::Core::Warnf(
+        "ai",
+        "decision behaviour index %u is past the %u-entry table; the "
+        "actor wanders instead (#272)",
+        DecisionBehaviorIndex(spawn_settings), kDecisionBehaviorCount);
     return nullptr;
   }
   return Battle_Ai_decisionCallbacks[*slot];

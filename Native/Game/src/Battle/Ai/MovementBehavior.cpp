@@ -11,7 +11,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -37,7 +37,7 @@ constexpr int kTileSize = 128;
 constexpr int kTileCenter = 64;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return std::nullopt;
 }
 

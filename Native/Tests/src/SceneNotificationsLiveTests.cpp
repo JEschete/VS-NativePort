@@ -28,7 +28,7 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace menu = VS::Menu;
@@ -63,7 +63,8 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
       Menu_textBoxOrderingTables};
   ValueRestore<u_long*> saved_active{Menu_activeTextBoxOrderingTable};
   ValueRestore<char> saved_index{Menu_textBoxBufferIndex};
-  ValueRestore<decltype(State_tickSpeed)> saved_speed{State_tickSpeed};
+  ValueRestore<decltype(VS::State::tickSpeed)> saved_speed{
+      VS::State::tickSpeed};
   ValueRestore<decltype(Battle_lowerScreenUiState)> saved_ui{
       Battle_lowerScreenUiState};
   ValueRestore<decltype(Core_interfaceRandomState)> saved_random{
@@ -99,7 +100,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable,
               static_cast<int>(menu::kTextBoxOrderingTags));
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     Battle_lowerScreenUiState = 0;
     Effects_screenEffectOverlay = nullptr;
     VS::Effects::screenEffectDefaults = {};

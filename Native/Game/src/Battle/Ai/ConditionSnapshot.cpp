@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 // decomp: BATTLE.PRG func_800DC424 (src/BATTLE/BATTLE.PRG/73C24.s:8). The
@@ -17,9 +17,9 @@ void CaptureActorConditionTable(std::span<const ActorConditionReading> readings,
     if (reading.actor_id < 0 || reading.actor_id >= kBattleActorSlotCount ||
         !reading.condition.has_value() ||
         !table.StoreActorCondition(reading.actor_id, *reading.condition)) {
-      Core_Errorf("ai", "Invalid condition snapshot actor=%d stats=%d",
-                  reading.actor_id,
-                  static_cast<int>(reading.condition.has_value()));
+      VS::Core::Errorf("ai", "Invalid condition snapshot actor=%d stats=%d",
+                       reading.actor_id,
+                       static_cast<int>(reading.condition.has_value()));
       std::abort();
     }
   }

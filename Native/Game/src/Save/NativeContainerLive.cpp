@@ -9,7 +9,7 @@
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Content/StringTables.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/Copy.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -62,7 +62,7 @@ char* ContainerString(int offset) {
 
 Menu_Container_InventoryStorage& Storage() {
   if (Menu_Framework_unusedInventoryStorage == nullptr) {
-    Core_Errorf("save", "Container save submenu used without its storage");
+    VS::Core::Errorf("save", "Container save submenu used without its storage");
     std::abort();
   }
   return *Menu_Framework_unusedInventoryStorage;
@@ -225,7 +225,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void ReportInvalidState(unsigned state) override {
-    Core_Errorf("save", "Invalid container menu state: %u", state);
+    VS::Core::Errorf("save", "Invalid container menu state: %u", state);
   }
 };
 

@@ -28,7 +28,7 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Damage.h"
-#include "Battle/EncounterHooks.h"
+#include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/Hud.h"
@@ -60,7 +60,7 @@
 #include "Event/TriggersLive.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/Doors.h"
 #include "Field/GameModeLive.hpp"
@@ -75,7 +75,7 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/LootLive.hpp"
@@ -97,7 +97,7 @@
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Boot {
 namespace {
@@ -141,10 +141,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return static_cast<std::int32_t>(Battle_actionFlowMode);
   }
   [[nodiscard]] ScreenTransitionStep TransitionStep() const override {
-    return static_cast<ScreenTransitionStep>(Field_screenTransitionStep);
+    return static_cast<ScreenTransitionStep>(VS::Field::screenTransitionStep);
   }
   [[nodiscard]] int TransitionAlpha() const override {
-    return Field_screenTransitionAlpha;
+    return VS::Field::screenTransitionAlpha;
   }
   [[nodiscard]] bool IsMenuRequestQueued() const override {
     return Field_isMenuRequestQueued != 0;
@@ -178,10 +178,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     return (Battle_characterState->weaponDrawn & 1) != 0;
   }
   [[nodiscard]] int CameraYawDelta() const override {
-    return Field_sphericalCamera.delta.yaw;
+    return VS::Field::sphericalCamera.delta.yaw;
   }
   [[nodiscard]] int CameraDeltaMode() const override {
-    return Field_sphericalCamera.delta.mode;
+    return VS::Field::sphericalCamera.delta.mode;
   }
   [[nodiscard]] std::uint32_t EffectBusyFlags() const override {
     return static_cast<std::uint32_t>(Effects_effectBusyFlags);
@@ -189,12 +189,12 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   [[nodiscard]] bool IsFieldRenderingEnabled() const override {
     return VS::Field::LiveRoomRenderState().field_rendering_enabled;
   }
-  [[nodiscard]] int TickSpeed() const override { return State_tickSpeed; }
+  [[nodiscard]] int TickSpeed() const override { return VS::State::tickSpeed; }
 
   bool PollControllers() override {
     return VS::Input::UpdateLiveControllers() != kControllerSkippedFrame;
   }
-  void PollEncounterStop() override { Boot_EncounterPollStop(); }
+  void PollEncounterStop() override { EncounterPollStop(); }
   void BeginFrame() override {
     ordering_table_ =
         static_cast<u_long*>(Render_legacyOrderingTables[Render_frameBuf]);
@@ -341,7 +341,8 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     VS::Actors::UpdateLiveRoomActorMovement();
   }
   void SetCameraPositionFromAngles() override {
-    VS::Field::LiveSetCameraPositionFromAngles(&Field_sphericalCamera.values);
+    VS::Field::LiveSetCameraPositionFromAngles(
+        &VS::Field::sphericalCamera.values);
   }
   void UpdateAshleyFollowCamera() override {
     static_cast<void>(VS::Field::LiveUpdateAshleyFollowCamera());

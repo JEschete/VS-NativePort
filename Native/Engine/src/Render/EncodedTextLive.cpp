@@ -12,7 +12,7 @@
 #include <span>
 
 #include "Battle/TargetingState.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/Text/VariableFont.h"
 
@@ -43,13 +43,14 @@ char* encoded_text_live::Finish(std::uint8_t* destination,
   // The first and then every power-of-two refusal, so a per-frame request
   // cannot flood the log.
   if (std::has_single_bit(refused_text)) {
-    Core_Errorf("text",
-                "encoded text at %s:%u refused: no destination or source, a "
-                "text without a terminator, a string past the ten strings, "
-                "references nested deeper than %d or a destination too small "
-                "(refusal %" PRIu64 ")",
-                site.file_name(), static_cast<unsigned>(site.line()),
-                kMaxEncodedTextNesting, refused_text);
+    VS::Core::Errorf(
+        "text",
+        "encoded text at %s:%u refused: no destination or source, a "
+        "text without a terminator, a string past the ten strings, "
+        "references nested deeper than %d or a destination too small "
+        "(refusal %" PRIu64 ")",
+        site.file_name(), static_cast<unsigned>(site.line()),
+        kMaxEncodedTextNesting, refused_text);
   }
   if (destination == nullptr) {
     return nullptr;

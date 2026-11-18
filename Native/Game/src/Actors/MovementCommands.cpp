@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 #include "Actors/MovementCommand.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -12,8 +12,8 @@ constexpr int kOrientationBits = 16;
 void Store(ActorMovementRequests& requests, int actor_id,
            const MovementCommand& command) {
   if (!requests.StoreMovementRequest(actor_id, command)) {
-    Core_Errorf("actors", "Movement command references missing actor %d",
-                actor_id);
+    VS::Core::Errorf("actors", "Movement command references missing actor %d",
+                     actor_id);
     std::abort();
   }
 }

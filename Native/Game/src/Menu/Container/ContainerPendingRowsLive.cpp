@@ -8,7 +8,7 @@
 #include <span>
 #include <string_view>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -27,8 +27,9 @@ constexpr auto kRowBytes = Framework::kRowDescriptionBufferBytes;
 constexpr auto kDescriptionsBytes = kMaximumRows * kRowBytes;
 
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("menu.container", "Container pending/item rows refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.container",
+                   "Container pending/item rows refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 

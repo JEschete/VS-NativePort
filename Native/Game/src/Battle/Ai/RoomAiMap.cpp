@@ -9,7 +9,7 @@
 #include <span>
 
 #include "Battle/Ai/TileHeightSampling.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 
 namespace VS::Battle::Ai {
@@ -80,8 +80,9 @@ std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
   if ((source.auxiliary &&
        source.auxiliary->size() < kRoomAuxiliaryHeaderBytes) ||
       !ExtentFits(source.collision_extent)) {
-    Core_Errorf("ai", "Invalid room AI header: auxiliary_bytes=%zu",
-                source.auxiliary ? source.auxiliary->size() : std::size_t{0});
+    VS::Core::Errorf(
+        "ai", "Invalid room AI header: auxiliary_bytes=%zu",
+        source.auxiliary ? source.auxiliary->size() : std::size_t{0});
     return std::nullopt;
   }
   std::optional<RoomAiGrid> result{std::in_place};
@@ -144,7 +145,7 @@ std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
 void InitializeRoomAiMap(RoomAiRuntime& runtime) {
   const std::optional<RoomAiGrid> grid = BuildRoomAiMap(runtime.CurrentRoom());
   if (!grid) {
-    Core_Errorf("ai", "Room AI initialization rejected the room header");
+    VS::Core::Errorf("ai", "Room AI initialization rejected the room header");
     std::abort();
   }
   runtime.PublishRoomAiMap(*grid);

@@ -15,7 +15,7 @@
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -70,7 +70,7 @@ event::EventShakeOscillator ActiveOscillator() {
 struct LiveLensFixture {
   VS::Event::CameraState camera{};
   VS::Event::CameraState* saved_camera = Event_camera;
-  int saved_tick_speed = State_tickSpeed;
+  int saved_tick_speed = VS::State::tickSpeed;
   std::array<unsigned char, 0x100> saved_scratch{};
 
   LiveLensFixture() {
@@ -83,7 +83,7 @@ struct LiveLensFixture {
   LiveLensFixture& operator=(LiveLensFixture&&) = delete;
   ~LiveLensFixture() {
     Event_camera = saved_camera;
-    State_tickSpeed = saved_tick_speed;
+    VS::State::tickSpeed = saved_tick_speed;
     std::memcpy(Core_ScratchBase(), saved_scratch.data(), saved_scratch.size());
   }
 };
@@ -405,7 +405,7 @@ TEST_CASE("Live camera shake opcode fills the first idle oscillator",
 TEST_CASE("Live camera shake entry updates the workspace and scratch",
           "[event][camera][lens]") {
   const LiveLensFixture fixture;
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   std::array<std::uint8_t, 6> start{0xEF, 0, 0x40, (2 << 2) | 1, 0, 30};
   REQUIRE(Event_CommandCameraLensOrShakeOpcode(start.data(), 0) == 0);
   SetScratchWord(0x88, 5);
@@ -422,7 +422,7 @@ TEST_CASE("Live camera shake entry updates the workspace and scratch",
 TEST_CASE("Live camera shake routes each axis bit to its workspace offset",
           "[event][camera][lens]") {
   const LiveLensFixture fixture;
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   // A quarter cycle on the first tick: sin(0x400) is 1.0. Each axis field holds
   // its direction plus 1.
   std::array<std::uint8_t, 6> look_at{
@@ -442,7 +442,7 @@ TEST_CASE("Live camera shake routes each axis bit to its workspace offset",
 TEST_CASE("Live lens tween entry stores the value and the fraction",
           "[event][camera][lens]") {
   const LiveLensFixture fixture;
-  State_tickSpeed = 4;
+  VS::State::tickSpeed = 4;
   VS::Event::LensTween& tween = Event_camera->far_clip;
   tween.start_value = 0x100;
   tween.delta_value = 0x100;

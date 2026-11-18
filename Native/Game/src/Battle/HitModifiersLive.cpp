@@ -15,7 +15,7 @@
 #include "Battle/Hit.h"
 #include "Battle/HitChance.h"
 #include "Battle/HitModifiers.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -82,7 +82,7 @@ const T* Pointer(const std::optional<T>& value) {
 template <typename T>
 T Checked(std::optional<T> result) {
   if (!result) {
-    Core_Errorf(
+    VS::Core::Errorf(
         "battle",
         "Hit modifier refused missing actor/stats/action or a used index");
     std::abort();

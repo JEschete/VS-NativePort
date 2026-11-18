@@ -17,9 +17,9 @@
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Shadow.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
@@ -35,25 +35,25 @@ using Core::Math::StoreVector;
 using Core::Math::VectorOf;
 
 static_assert(std::size(Actors_actorRecords) == kActorTableSize);
-static_assert(std::size(Actors_weaponModels) % kWeaponsPerActor == 0);
+static_assert(std::size(weaponModels) % kWeaponsPerActor == 0);
 static_assert(sizeof(Render_ColorCode) == sizeof(Render::ColorCode));
 
 // The actor CLUT rows start at this row plus the actor's slot.
 constexpr unsigned kActorClutRowBase = 0x16;
 // Gimmick palettes are 16-color runs of this row, one per gimmick slot.
 constexpr unsigned kGimmickClutRow = 0x1F;
-constexpr unsigned kWeaponTableSize = std::size(Actors_weaponModels);
+constexpr unsigned kWeaponTableSize = std::size(weaponModels);
 constexpr unsigned kWeaponSlots = kWeaponTableSize / kWeaponsPerActor;
 constexpr int kNoActorStatus = static_cast<int>(AppearanceStatus::kNoModel);
 
 [[nodiscard]] Actors_WeaponModel** LiveWeaponPair(unsigned slot,
                                                   const char* operation) {
   if (slot >= kWeaponSlots) {
-    Core_Warnf("actors", "%s refused: weapon slot %u is outside the table",
-               operation, slot);
+    VS::Core::Warnf("actors", "%s refused: weapon slot %u is outside the table",
+                    operation, slot);
     return nullptr;
   }
-  return &Actors_weaponModels[slot * kWeaponsPerActor];
+  return &weaponModels[slot * kWeaponsPerActor];
 }
 
 [[nodiscard]] Render::ColorCode ToColor(const Render_ColorCode& live) {
@@ -306,10 +306,11 @@ int SetLiveActorTint(int actor_id, const Render_ColorCode* tint) {
 void StartLiveActorAppearanceTransition(int actor_id, int transition_kind) {
   LiveTransitionActors actors;
   if (!StartActorAppearanceTransition(actors, actor_id, transition_kind)) {
-    Core_Warnf("actors",
-               "StartActorAppearanceTransition refused: the chain from actor "
-               "%d names a missing actor or repeats",
-               actor_id);
+    VS::Core::Warnf(
+        "actors",
+        "StartActorAppearanceTransition refused: the chain from actor "
+        "%d names a missing actor or repeats",
+        actor_id);
   }
 }
 }  // namespace VS::Actors

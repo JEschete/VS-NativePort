@@ -19,14 +19,14 @@
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Interactions.h"
 #include "Items/LootLive.hpp"
@@ -39,9 +39,9 @@ namespace VS::Battle {
 namespace {
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle",
-                "Action sequence refused: missing used state or invalid "
-                "queue/target index or count");
+    VS::Core::Errorf("battle",
+                     "Action sequence refused: missing used state or invalid "
+                     "queue/target index or count");
     std::abort();
   }
 }
@@ -112,17 +112,17 @@ class LiveWorld final : public ActionSequenceWorld {
   }
   void BeginRecovery(int mode) override { BeginLivePostActionRecovery(mode); }
   std::int32_t CameraMode() override {
-    return Field_sphericalCamera.delta.mode;
+    return VS::Field::sphericalCamera.delta.mode;
   }
   std::int32_t Projection() override { return Render_projectionDistance; }
   void ApplyProjection(std::int32_t projection) override {
     Render::SetLiveCameraProjectionDistance(projection);
   }
   std::int32_t Distance() override {
-    return Field_sphericalCamera.values.distance;
+    return VS::Field::sphericalCamera.values.distance;
   }
   void SetDistance(std::int32_t distance) override {
-    Field_sphericalCamera.values.distance = distance;
+    VS::Field::sphericalCamera.values.distance = distance;
   }
   std::int16_t PreferredDistance() override {
     return State().preferredCameraDistance;
@@ -172,8 +172,8 @@ void WaitForLiveActionResolution() {
 void WaitForLiveTargetRecovery() {
   LiveWorld world;
   if (WaitForTargetRecovery(world) == TargetRecoveryStatus::kInvalidSequence) {
-    Core_Errorf("battle",
-                "Target recovery refused: empty sequence has no last action");
+    VS::Core::Errorf(
+        "battle", "Target recovery refused: empty sequence has no last action");
     std::abort();
   }
 }

@@ -20,7 +20,7 @@
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
@@ -45,7 +45,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
 #include "Field/GimmickAnimationQueue.hpp"
-#include "Field/GimmickAnimationQueueLive.h"
+#include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/GimmickDynamics.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/GimmickPlacement.hpp"
@@ -54,11 +54,9 @@
 #include "Field/GimmickReactions.hpp"
 #include "Field/GimmickReactionsLive.hpp"
 #include "Field/GimmickResources.hpp"
-#include "Field/GimmickResourcesLive.h"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTarget.hpp"
-#include "Field/InteractionTargetLive.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
@@ -67,7 +65,7 @@
 #include "Field/RoomSwitches.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLive.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Field/Traps.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -478,7 +476,7 @@ TEST_CASE("Gimmick release retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80099D6C) ==
-        reinterpret_cast<const void*>(&Field_ReleaseGimmickInstanceEntry));
+        reinterpret_cast<const void*>(&VS::Field::ReleaseGimmickInstanceEntry));
 }
 
 TEST_CASE(
@@ -492,7 +490,7 @@ TEST_CASE(
   request.subKind = 3;
   auto expected = request;
   expected.dataAddress = 5;
-  REQUIRE(Field_FindSharedGimmickModelEntry(&request) == 1);
+  REQUIRE(VS::Field::FindSharedGimmickModelEntry(&request) == 1);
   using Bytes = std::array<std::byte, sizeof(request)>;
   CHECK(std::bit_cast<Bytes>(request) == std::bit_cast<Bytes>(expected));
   CHECK(fixture.instances[0].objectInfo.objectId == 3);
@@ -507,7 +505,7 @@ TEST_CASE(
   request.subKind = 3;
   std::array<std::byte, sizeof(request) + 1> bytes{};
   std::memcpy(bytes.data() + 1, &request, sizeof(request));
-  REQUIRE(Field_FindSharedGimmickModelEntry(
+  REQUIRE(VS::Field::FindSharedGimmickModelEntry(
               reinterpret_cast<Content_ActorAssetRequest*>(bytes.data() + 1)) ==
           1);
   std::memcpy(&request, bytes.data() + 1, sizeof(request));
@@ -521,9 +519,9 @@ TEST_CASE("Native gimmick sharing preserves failed and absent requests",
   Content_ActorAssetRequest request{};
   request.subKind = 255;
   request.dataAddress = 0x1234;
-  REQUIRE(Field_FindSharedGimmickModelEntry(&request) == 0);
+  REQUIRE(VS::Field::FindSharedGimmickModelEntry(&request) == 0);
   CHECK(request.dataAddress == 0x1234);
-  CHECK(Field_FindSharedGimmickModelEntry(nullptr) == 0);
+  CHECK(VS::Field::FindSharedGimmickModelEntry(nullptr) == 0);
 }
 
 TEST_CASE("Native gimmick palettes preserve the compatibility tail",
@@ -533,7 +531,7 @@ TEST_CASE("Native gimmick palettes preserve the compatibility tail",
   for (std::size_t index = 0; index < palette.size(); ++index) {
     palette[index] = static_cast<std::uint16_t>(index * 17);
   }
-  Field_SetGimmickPaletteTableEntry(palette.data());
+  VS::Field::SetGimmickPaletteTableEntry(palette.data());
   CHECK(std::memcmp(Field_gimmickPaletteColors, palette.data(),
                     sizeof(palette)) == 0);
   CHECK(std::all_of(std::begin(Field_gimmickPaletteColors) + sizeof(palette),
@@ -547,7 +545,7 @@ TEST_CASE("Native gimmick palettes reject short input without mutation",
   const auto saved = std::to_array(Field_gimmickPaletteColors);
   std::array<std::byte, 0xDF> short_palette{};
   CHECK_FALSE(VS::Field::SetLiveGimmickPaletteTable(short_palette));
-  Field_SetGimmickPaletteTableEntry(nullptr);
+  VS::Field::SetGimmickPaletteTableEntry(nullptr);
   CHECK(std::ranges::equal(saved, Field_gimmickPaletteColors));
 }
 
@@ -556,10 +554,10 @@ TEST_CASE("Gimmick resource entries retain their original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80099900) ==
-        reinterpret_cast<const void*>(&Field_FindSharedGimmickModelEntry));
+        reinterpret_cast<const void*>(&VS::Field::FindSharedGimmickModelEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80099960) ==
-        reinterpret_cast<const void*>(&Field_SetGimmickPaletteTableEntry));
+        reinterpret_cast<const void*>(&VS::Field::SetGimmickPaletteTableEntry));
 }
 
 namespace {
@@ -1256,11 +1254,11 @@ struct RoomObjectRecordFixture {
   }
   void CheckEightTickDoorCompletion() {
     for (std::size_t tick = 0; tick < 7; ++tick) {
-      Field_UpdateGimmickAnimationQueueEntry();
+      VS::Field::UpdateGimmickAnimationQueueEntry();
       CHECK(locks[0].isOpen == 0);
     }
-    Field_UpdateGimmickAnimationQueueEntry();
-    Field_UpdateGimmickAnimationQueueEntry();
+    VS::Field::UpdateGimmickAnimationQueueEntry();
+    VS::Field::UpdateGimmickAnimationQueueEntry();
     CHECK(locks[0].isOpen == 1);
     CHECK(locks[0].isTriggered == 0);
     CHECK(Field_pendingGimmickAnimationCount == 0);
@@ -1681,7 +1679,7 @@ struct AnimationQueueFixture {
 
   AnimationQueueFixture() {
     std::ranges::copy(Field_gimmickAnimationQueue, saved.begin());
-    Field_ResetGimmickAnimationQueueEntry();
+    VS::Field::ResetGimmickAnimationQueueEntry();
   }
   ~AnimationQueueFixture() {
     Field_roomData = saved_room;
@@ -1744,9 +1742,9 @@ void QueueOneFrameSwitchJobs(std::span<Field_MpdLockTrigger> targets) {
     target.trigger.floorLayer = -1;
     target.trigger.kind = -1;
     target.trigger.activation = 1;
-    Field_QueueGimmickAnimationEntry(2, &target);
+    VS::Field::QueueGimmickAnimationEntry(2, &target);
   }
-  Field_QueueGimmickAnimationEntry(2, &targets.back());
+  VS::Field::QueueGimmickAnimationEntry(2, &targets.back());
 }
 
 void CheckDrainedSwitchJobs(std::span<const Field_MpdLockTrigger> targets) {
@@ -1760,9 +1758,9 @@ void CheckDrainedSwitchJobs(std::span<const Field_MpdLockTrigger> targets) {
 
 void CheckAnimationKindResets(Field_MpdLockTrigger& target) {
   for (const auto kind : {1, 2, 3}) {
-    Field_QueueGimmickAnimationEntry(kind, &target);
+    VS::Field::QueueGimmickAnimationEntry(kind, &target);
     CHECK(Field_pendingGimmickAnimationCount == 1);
-    Field_ResetGimmickAnimationQueueEntry();
+    VS::Field::ResetGimmickAnimationQueueEntry();
     CHECK(Field_pendingGimmickAnimationCount == 0);
   }
 }
@@ -2669,7 +2667,7 @@ TEST_CASE("Scripted fall producer initializes the complete transition door",
   location.position.vy = 17;
   CHECK(Field_CheckAshleyTileTriggersEntry(
             2, reinterpret_cast<unsigned char*>(&location)) == 0);
-  CHECK(Field_screenTransitionStep == (destination_zone == 9 ? 1 : 2));
+  CHECK(VS::Field::screenTransitionStep == (destination_zone == 9 ? 1 : 2));
   const auto transition = VS::Field::LoadLiveRoomTransition();
   CHECK(transition.pending_door ==
         VS::Field::DoorRecord{.destination_zone_id = destination_zone,
@@ -3275,7 +3273,7 @@ TEST_CASE("Typed chest animation never stores a lock-record alias",
   CHECK(Field_gimmickAnimationQueue[0].trigger == nullptr);
   CHECK(static_cast<std::uint16_t>(fixture.chests[0].reservedA) == 0x0114);
   fixture.chests[0].reservedA = 0x0101;
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(fixture.chests[0].isOpen == 1);
   CHECK(fixture.chests[0].reservedA == 0);
   CHECK(Field_pendingGimmickAnimationCount == 0);
@@ -3289,7 +3287,7 @@ TEST_CASE("Typed chest animation refuses a stale room-generation target",
   REQUIRE(VS::Field::BeginLiveChestSwitch(*target));
   VS::Field::InvalidateLiveInteractionTargets();
   const auto before = fixture.chests[0].reservedA;
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(fixture.chests[0].reservedA == before);
   CHECK_FALSE(VS::Field::BeginLiveChestSwitch(*target));
@@ -3563,7 +3561,7 @@ TEST_CASE(
   CHECK(Field_pendingGimmickAnimationCount == 1);
   CHECK(Field_gimmickAnimationQueue[0].trigger == &room.locks[0]);
   VS::Field::InvalidateLiveInteractionTargets();
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 0);
   CHECK(room.locks[0].delayFrames == 8);
@@ -3578,16 +3576,16 @@ TEST_CASE("Typed door queue reset removes captured target metadata",
   const auto generation = VS::Field::LiveInteractionTargetDomain().generation;
   REQUIRE(VS::Field::QueueLiveGimmickAnimation(
       3, VS::Field::RoomObjectTarget{0, generation}));
-  Field_ResetGimmickAnimationQueueEntry();
+  VS::Field::ResetGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   REQUIRE(VS::Field::QueueLiveGimmickAnimation(
       3, VS::Field::RoomObjectTarget{1, generation}));
   CHECK(Field_gimmickAnimationQueue[0].trigger == &room.locks[1]);
   room.locks[1].delayFrames = 2;
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(room.locks[1].delayFrames == 1);
   CHECK(Field_pendingGimmickAnimationCount == 1);
-  Field_ResetGimmickAnimationQueueEntry();
+  VS::Field::ResetGimmickAnimationQueueEntry();
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 0);
 }
 
@@ -3652,7 +3650,7 @@ TEST_CASE("Full door queue refusal keeps a closed door retryable",
   CHECK(room.locks[0].isTriggered == 0);
   CHECK(room.locks[0].delayFrames == 7);
   CHECK(Field_pendingGimmickAnimationCount == 8);
-  Field_ResetGimmickAnimationQueueEntry();
+  VS::Field::ResetGimmickAnimationQueueEntry();
 }
 
 TEST_CASE("Door begin delays closed doors and preserves every key width",
@@ -3783,7 +3781,7 @@ TEST_CASE(
   CHECK(Field_BeginDoorToggleEntry(&room.locks[0]) == 0);
   CHECK(room.locks[0].isTriggered == 0);
   CHECK(room.locks[0].delayFrames == 7);
-  Field_ResetGimmickAnimationQueueEntry();
+  VS::Field::ResetGimmickAnimationQueueEntry();
 }
 
 TEST_CASE(
@@ -3886,7 +3884,7 @@ TEST_CASE(
   room.locks[0].delayFrames = 8;
   REQUIRE(VS::Field::QueueLiveGimmickAnimation(3, target));
   Field_roomData.header.lockTriggersLength = sizeof room.locks - 1;
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(room.locks[0].delayFrames == 8);
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 0);
@@ -4094,15 +4092,15 @@ TEST_CASE(
     "query",
     "[room-trigger-live][field]") {
   RoomTriggerLiveFixture fixture;
-  CHECK(Field_RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
+  CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
   Audio_Seq_unusedStateFlags.opaque20 = std::bit_cast<char>(std::uint8_t{128});
-  CHECK(Field_RoomTriggerAtTileEntry(0, 0, 0) == nullptr);
+  CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == nullptr);
   fixture.triggers[0].kind = 16;
-  CHECK(Field_RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
-  CHECK(Field_RoomTriggerAtTileEntry(-1, 0, 0) == nullptr);
+  CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
+  CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == nullptr);
   Audio_Seq_unusedStateFlags.opaque20 = 0;
-  CHECK(Field_RoomTriggerAtTileEntry(-1, 0, 0) == &fixture.triggers[2]);
-  CHECK(Field_RoomTriggerAtTileEntry(65535, 0, 0) == nullptr);
+  CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == &fixture.triggers[2]);
+  CHECK(VS::Field::RoomTriggerAtTileEntry(65535, 0, 0) == nullptr);
 }
 
 TEST_CASE(
@@ -4110,10 +4108,10 @@ TEST_CASE(
     "[room-trigger-live][field]") {
   RoomTriggerLiveFixture fixture;
   const auto before = fixture.triggers;
-  Field_SetRoomTriggerEnabledEntry(&fixture.triggers[1], -1);
+  VS::Field::SetRoomTriggerEnabledEntry(&fixture.triggers[1], -1);
   CHECK(static_cast<std::uint8_t>(fixture.triggers[0].activation) == 7);
   CHECK(static_cast<std::uint8_t>(fixture.triggers[1].activation) == 255);
-  Field_SetRoomTriggerEnabledEntry(nullptr, 257);
+  VS::Field::SetRoomTriggerEnabledEntry(nullptr, 257);
   const auto prior = std::as_bytes(std::span(before));
   const auto after = std::as_bytes(std::span(fixture.triggers));
   for (std::size_t offset = 0; offset < after.size(); ++offset) {
@@ -4133,10 +4131,10 @@ TEST_CASE(
   CHECK_FALSE(VS::Field::SetLiveRoomTriggerEnabled(target, 1));
   Field_MpdFloorTrigger foreign{};
   foreign.activation = 9;
-  Field_SetRoomTriggerEnabledEntry(&foreign, 1);
+  VS::Field::SetRoomTriggerEnabledEntry(&foreign, 1);
   CHECK(foreign.activation == 9);
   Field_roomData.header.floorTriggersLength = sizeof(fixture.triggers) - 1;
-  CHECK(Field_RoomTriggerAtTileEntry(0, 0, 0) == nullptr);
+  CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == nullptr);
   CHECK_FALSE(VS::Field::SetLiveRoomTriggerEnabled(std::nullopt, 1));
   CHECK(fixture.triggers[0].activation == 7);
 }
@@ -4148,11 +4146,11 @@ TEST_CASE(
   SVECTOR position{};
   position.vx = -127;
   position.vz = -1;
-  Field_DisableTrapAtPositionEntry(&position);
+  VS::Field::DisableTrapAtPositionEntry(&position);
   CHECK(fixture.triggers[0].activation == 1);
   CHECK(fixture.triggers[1].activation == 7);
   CHECK(fixture.flags[0][0] == 0x480);
-  Field_DisableTrapAtPositionEntry(nullptr);
+  VS::Field::DisableTrapAtPositionEntry(nullptr);
 }
 
 TEST_CASE(
@@ -4162,13 +4160,13 @@ TEST_CASE(
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D438) ==
-        reinterpret_cast<const void*>(&Field_RoomTriggerAtTileEntry));
+        reinterpret_cast<const void*>(&VS::Field::RoomTriggerAtTileEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008DEAC) ==
-        reinterpret_cast<const void*>(&Field_SetRoomTriggerEnabledEntry));
+        reinterpret_cast<const void*>(&VS::Field::SetRoomTriggerEnabledEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8006CDD8) ==
-        reinterpret_cast<const void*>(&Field_DisableTrapAtPositionEntry));
+        reinterpret_cast<const void*>(&VS::Field::DisableTrapAtPositionEntry));
 }
 
 TEST_CASE("Active room triggers preserve both unsigned suppression flags",
@@ -4257,20 +4255,21 @@ TEST_CASE(
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008B6B4) ==
-        reinterpret_cast<const void*>(&Field_ResetGimmickAnimationQueueEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::ResetGimmickAnimationQueueEntry));
   std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots> targets{};
   for (auto& target : targets) {
-    Field_QueueGimmickAnimationEntry(1, &target);
+    VS::Field::QueueGimmickAnimationEntry(1, &target);
   }
   Field_triggerMarkerFrameTicks = 0xFFFF;
-  Field_ResetGimmickAnimationQueueEntry();
+  VS::Field::ResetGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(Field_triggerMarkerFrameTicks == 0);
   for (const auto& job : Field_gimmickAnimationQueue) {
     CHECK(job.jobKind == 0);
     CHECK(job.trigger == nullptr);
   }
-  Field_ResetGimmickAnimationQueueEntry();
+  VS::Field::ResetGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(Field_triggerMarkerFrameTicks == 0);
 }
@@ -4379,10 +4378,10 @@ TEST_CASE("Gimmick animation queue does not count a refused ninth job",
   const AnimationQueueFixture fixture;
   std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots + 1> targets{};
   for (std::size_t slot = 0; slot < AnimationQueueFixture::kSlots; ++slot) {
-    Field_QueueGimmickAnimationEntry(1, &targets[slot]);
+    VS::Field::QueueGimmickAnimationEntry(1, &targets[slot]);
   }
   REQUIRE(Field_pendingGimmickAnimationCount == 8);
-  Field_QueueGimmickAnimationEntry(1, &targets.back());
+  VS::Field::QueueGimmickAnimationEntry(1, &targets.back());
   CHECK(Field_pendingGimmickAnimationCount == 8);
   for (std::size_t slot = 0; slot < AnimationQueueFixture::kSlots; ++slot) {
     CHECK(Field_gimmickAnimationQueue[slot].jobKind == 1);
@@ -4396,14 +4395,14 @@ TEST_CASE("Native gimmick admission refuses invalid calls and preserves module",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C070) ==
-        reinterpret_cast<const void*>(&Field_QueueGimmickAnimationEntry));
+        reinterpret_cast<const void*>(&VS::Field::QueueGimmickAnimationEntry));
   Field_MpdLockTrigger target{};
   for (const auto kind :
        {-1, 0, 4, 257, std::numeric_limits<std::int32_t>::max()}) {
-    Field_QueueGimmickAnimationEntry(kind, &target);
+    VS::Field::QueueGimmickAnimationEntry(kind, &target);
   }
-  Field_QueueGimmickAnimationEntry(1, nullptr);
-  Field_QueueGimmickAnimationEntry(
+  VS::Field::QueueGimmickAnimationEntry(1, nullptr);
+  VS::Field::QueueGimmickAnimationEntry(
       1, reinterpret_cast<Field_MpdLockTrigger*>(std::uintptr_t{1}));
   CHECK(Field_pendingGimmickAnimationCount == 0);
   for (const auto& job : Field_gimmickAnimationQueue) {
@@ -4418,7 +4417,7 @@ TEST_CASE("Native gimmick admission drains accepted jobs and resets cleanly",
   std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots + 1> targets{};
   QueueOneFrameSwitchJobs(targets);
   REQUIRE(Field_pendingGimmickAnimationCount == 8);
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CheckDrainedSwitchJobs(targets);
   CheckAnimationKindResets(targets.back());
@@ -4431,10 +4430,10 @@ TEST_CASE("Delayed door follow-up survives a saturated animation queue",
   AnimationQueueFixture::BindDoors(targets);
   for (auto& target : targets) {
     ConfigureOneFrameDelayedDoor(target);
-    Field_QueueGimmickAnimationEntry(3, &target);
+    VS::Field::QueueGimmickAnimationEntry(3, &target);
   }
   REQUIRE(Field_pendingGimmickAnimationCount == 8);
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 8);
   for (const auto& target : targets) {
     const auto found = std::ranges::find_if(
@@ -4452,11 +4451,11 @@ TEST_CASE("Saturated door continuations drain exactly on the following tick",
   AnimationQueueFixture::BindDoors(targets);
   for (auto& target : targets) {
     ConfigureOneFrameDelayedDoor(target);
-    Field_QueueGimmickAnimationEntry(3, &target);
+    VS::Field::QueueGimmickAnimationEntry(3, &target);
   }
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   REQUIRE(Field_pendingGimmickAnimationCount == 8);
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   for (std::size_t slot = 0; slot < targets.size(); ++slot) {
     CHECK(targets[slot].isOpen == 1);
@@ -4472,8 +4471,8 @@ TEST_CASE("Unsaturated delayed doors retain original same-tick finish order",
   Field_MpdLockTrigger target{};
   AnimationQueueFixture::BindDoors({&target, 1});
   ConfigureOneFrameDelayedDoor(target);
-  Field_QueueGimmickAnimationEntry(3, &target);
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::QueueGimmickAnimationEntry(3, &target);
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(target.isOpen == 1);
   CHECK(target.isTriggered == 0);
@@ -4486,16 +4485,17 @@ TEST_CASE(
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C0C0) ==
-        reinterpret_cast<const void*>(&Field_UpdateGimmickAnimationQueueEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::UpdateGimmickAnimationQueueEntry));
   Field_gimmickAnimationQueue[0] = {2, nullptr};
   Field_pendingGimmickAnimationCount = 1;
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 0);
   Field_MpdLockTrigger target{};
   Field_gimmickAnimationQueue[0] = {99, &target};
   Field_pendingGimmickAnimationCount = 1;
-  Field_UpdateGimmickAnimationQueueEntry();
+  VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 0);
 }
@@ -4505,7 +4505,7 @@ TEST_CASE("Refused switch start leaves its busy marker retryable",
   const AnimationQueueFixture fixture;
   std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots> occupied{};
   for (auto& target : occupied) {
-    Field_QueueGimmickAnimationEntry(1, &target);
+    VS::Field::QueueGimmickAnimationEntry(1, &target);
   }
   Field_MpdLockTrigger rejected{};
   rejected.trigger.activation = 7;
@@ -4520,13 +4520,13 @@ TEST_CASE("Native switch start retries after queue capacity is freed",
   const AnimationQueueFixture fixture;
   std::array<Field_MpdLockTrigger, AnimationQueueFixture::kSlots> occupied{};
   for (auto& target : occupied) {
-    Field_QueueGimmickAnimationEntry(1, &target);
+    VS::Field::QueueGimmickAnimationEntry(1, &target);
   }
   Field_MpdLockTrigger target{};
   target.trigger.activation = 7;
   Field_BeginSwitchToggleEntry(&target);
   REQUIRE(target.trigger.markerFade == 0);
-  Field_ResetGimmickAnimationQueueEntry();
+  VS::Field::ResetGimmickAnimationQueueEntry();
   Field_BeginSwitchToggleEntry(&target);
   CHECK(Field_pendingGimmickAnimationCount == 1);
   CHECK(target.trigger.markerFade == 1);
@@ -7261,7 +7261,7 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
   using HeightRow =
       std::remove_pointer_t<decltype(Battle_Ai_specialTerrainHeights)>;
   std::array<HeightRow, 32> heights{};
-  MATRIX saved_camera = Actors_boneMatrixScratch;
+  MATRIX saved_camera = VS::Actors::boneMatrixScratch;
   struct Model {
     Actors_ShpModel header{};
     std::array<Actors_ShpBone, 2> bones{};
@@ -7275,7 +7275,7 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
     Field_gimmickInteractionDirection = 0;
     instances[0].rotationY = 1000;
     instances[0].objectInfo.supportIndex = 9;
-    Actors_boneMatrixScratch = IdentityMatrix();
+    VS::Actors::boneMatrixScratch = IdentityMatrix();
     for (auto& matrix : actor.boneMatrices) matrix = IdentityMatrix();
     actor.boneMatrices[0].t[1] = -1;
     model.bones[0].tag = 0xF0;
@@ -7289,7 +7289,7 @@ struct GimmickCommandLiveFixture : GimmickStartLiveFixture {
   ~GimmickCommandLiveFixture() {
     VS::Render::ForgetLiveModelExtent(&model);
     Battle_Ai_specialTerrainHeights = saved_heights;
-    Actors_boneMatrixScratch = saved_camera;
+    VS::Actors::boneMatrixScratch = saved_camera;
   }
   static MATRIX IdentityMatrix() {
     MATRIX matrix{};
@@ -8013,14 +8013,14 @@ TEST_CASE(
   Content_ActorAssetRequest request{};
   request.targetSlot = 2;
   request.destination = &fixture.instances[0];
-  REQUIRE(Field_CreateGimmickInstanceEntry(&request) == 0);
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
   auto& record = fixture.instances[0];
   fixture.CheckModelGeometry();
   CHECK(record.basePalette[0] == 0x3535);
   CHECK(VS::Render::LivePaletteAnimation().colors[13][32] == 0x3535);
   CHECK(VS::Render::LivePaletteAnimation().colors[13][47] == 0x3535);
   CHECK(record.slot == 2);
-  REQUIRE(Field_ReleaseGimmickInstanceEntry(2) == 0);
+  REQUIRE(VS::Field::ReleaseGimmickInstanceEntry(2) == 0);
 }
 
 TEST_CASE(
@@ -8034,19 +8034,19 @@ TEST_CASE(
   request.targetSlot = 1;
   request.destination = &fixture.instances[0];
   request.subKind = 3;
-  REQUIRE(Field_CreateGimmickInstanceEntry(&request) == 0);
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
   fixture.instances[0].matrices[0].t[0] = 0x12345678;
   fixture.instances[1].reserved178[0] = 0xA5;
   request.targetSlot = 5;
   request.destination = &fixture.instances[1];
   request.dataAddress = 0x9876;
-  REQUIRE(Field_CreateGimmickInstanceEntry(&request) == 0);
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
   CHECK(request.dataAddress == 1);
   CHECK(fixture.instances[1].model == fixture.instances[0].model);
   CHECK(fixture.instances[1].matrices[0].t[0] == 0x12345678);
   CHECK(fixture.instances[1].reserved178[0] == 0xA5);
-  REQUIRE(Field_ReleaseGimmickInstanceEntry(1) == 0);
-  REQUIRE(Field_ReleaseGimmickInstanceEntry(5) == 0);
+  REQUIRE(VS::Field::ReleaseGimmickInstanceEntry(1) == 0);
+  REQUIRE(VS::Field::ReleaseGimmickInstanceEntry(5) == 0);
 }
 
 TEST_CASE(
@@ -8059,14 +8059,14 @@ TEST_CASE(
   request.destination = &fixture.instances[0];
   request.subKind = 8;
   fixture.instances[0].reserved178[0] = 0xA5;
-  CHECK(Field_CreateGimmickInstanceEntry(&request) == -2);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == &fixture.instances[0]);
   CHECK(fixture.instances[0].model == nullptr);
   CHECK(fixture.instances[0].reserved178[0] == 0xA5);
   Field_gimmickInstances[2] = nullptr;
   request.subKind = 0;
   Field_gimmickTemplateIndices[0] = 3;
-  CHECK(Field_CreateGimmickInstanceEntry(&request) == -2);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == &fixture.instances[0]);
 }
 
@@ -8084,11 +8084,11 @@ TEST_CASE(
   Content_ActorAssetRequest request{};
   request.targetSlot = 2;
   request.destination = destination;
-  CHECK(Field_CreateGimmickInstanceEntry(&request) == -2);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == nullptr);
   CHECK(destination[0] == std::byte{0xA5});
   request.destination = destination + 1;
-  CHECK(Field_CreateGimmickInstanceEntry(&request) == -2);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == nullptr);
   CHECK(destination[1] == std::byte{0xA5});
 }
@@ -8103,7 +8103,7 @@ TEST_CASE(
   request.targetSlot = 2;
   request.destination = &fixture.instances[0];
   Field_gimmickModelTemplates[0] = reinterpret_cast<void*>(0x1000);
-  CHECK(Field_CreateGimmickInstanceEntry(&request) == -2);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(Field_gimmickInstances[2] == &fixture.instances[0]);
   CHECK(fixture.instances[0].model == nullptr);
   Field_gimmickInstances[2] = nullptr;
@@ -8113,7 +8113,7 @@ TEST_CASE(
   Field_GimmickTemplate header{1, 9, 0, 64};
   std::memcpy(source, &header, sizeof(header));
   Field_gimmickModelTemplates[0] = source;
-  CHECK(Field_CreateGimmickInstanceEntry(&request) == -2);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(&request) == -2);
   CHECK(fixture.instances[0].reserved4 == 9);
   CHECK(fixture.instances[0].model == nullptr);
 }
@@ -8140,9 +8140,9 @@ TEST_CASE(
       &shared, sizeof(shared));
   auto* request =
       reinterpret_cast<Content_ActorAssetRequest*>(bytes.data() + 1);
-  CHECK(Field_CreateGimmickInstanceEntry(request) == 0);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(request) == 0);
   CHECK(bytes == expected);
-  CHECK(Field_CreateGimmickInstanceEntry(nullptr) == -2);
+  CHECK(VS::Field::CreateGimmickInstanceEntry(nullptr) == -2);
 }
 
 TEST_CASE(
@@ -8161,7 +8161,7 @@ TEST_CASE(
   std::memcpy(&request.placement, &placement, sizeof(placement));
   CHECK(VS::Field::LiveSampleSupportHeightAt(32704, 0, 32576, 0, 0, 1) ==
         VS::Field::kNoSupportHeight);
-  REQUIRE(Field_CreateGimmickInstanceEntry(&request) == 0);
+  REQUIRE(VS::Field::CreateGimmickInstanceEntry(&request) == 0);
   CHECK(fixture.instances[1].positionX == 32704);
   CHECK(fixture.instances[1].positionZ == 32576);
   CHECK(fixture.instances[1].positionY == 29896);
@@ -8173,5 +8173,5 @@ TEST_CASE("Gimmick creation retains its original module address",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009998C) ==
-        reinterpret_cast<const void*>(&Field_CreateGimmickInstanceEntry));
+        reinterpret_cast<const void*>(&VS::Field::CreateGimmickInstanceEntry));
 }

@@ -21,12 +21,13 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/BiosRand.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
 namespace VS::Battle::Ai {
@@ -70,13 +71,6 @@ constexpr auto kGridSide = static_cast<std::size_t>(kTileFlagGridSide);
 constexpr std::size_t kTileFlagCells = kGridSide * kGridSide;
 constexpr unsigned kLayerBits = 4;
 constexpr unsigned kLocomotionShift = 3;
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 std::span<std::uint16_t> LiveTileFlags() {
   if (Battle_Ai_tileFlagMap == nullptr) return {};

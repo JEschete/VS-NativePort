@@ -28,7 +28,7 @@
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Rename.hpp"
-#include "Menu/RenameLiveState.h"
+#include "Menu/RenameLiveState.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedText.hpp"
@@ -37,11 +37,12 @@
 #include "Render/UiPacketsLive.hpp"
 
 // decomp: _renderRenameMenuStrings (src/MENU/MENU8.PRG/21A0.c)
-u_short Menu_Rename_renderRenameMenuStrings[kMenuRenameMenuStringCount];
+u_short VS::Menu::Rename::renderRenameMenuStrings
+    [VS::Menu::Rename::kMenuStringCount];
 
 namespace VS::Menu::Rename {
 namespace {
-static_assert(sizeof(Menu_Rename_renderRenameMenuStrings) ==
+static_assert(sizeof(renderRenameMenuStrings) ==
               kMenuStringHalfwords * sizeof(std::uint16_t));
 // vs_main_inventoryWeapon and vs_main_inventoryBlade (func_8006B57C_t.h).
 constexpr std::size_t kEquippedOffset = 3;
@@ -75,9 +76,8 @@ class LiveHost final : public Host {
     VS_LOG_WARN("menu.rename", "{}", what);
   }
   std::span<const std::uint8_t> MenuStrings() override {
-    return {reinterpret_cast<const std::uint8_t*>(
-                Menu_Rename_renderRenameMenuStrings),
-            sizeof Menu_Rename_renderRenameMenuStrings};
+    return {reinterpret_cast<const std::uint8_t*>(renderRenameMenuStrings),
+            sizeof renderRenameMenuStrings};
   }
   Framework::Buttons Input() override {
     return {.pressed = Input_buttonsPressed.allButtons,

@@ -25,12 +25,13 @@
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
@@ -61,13 +62,6 @@ static_assert(kRouteEndOffset +
               kRouteAuxiliaryBytes);
 static_assert(sizeof(Battle_Ai_ActorAiState{}.step_height_bytes) ==
               sizeof(std::uint16_t));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 class LiveNavigationGrid final : public NavigationGrid {
  public:

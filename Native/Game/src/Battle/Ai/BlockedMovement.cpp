@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Battle::Ai {
@@ -36,7 +36,7 @@ constexpr int kOrderRange = 2;
 constexpr std::uint8_t kExhaustedStep = 5;
 constexpr std::size_t kSecondOpposite = 3;
 
-void Warn(const char* message) { Core_Warnf("ai", "%s", message); }
+void Warn(const char* message) { VS::Core::Warnf("ai", "%s", message); }
 
 int TileX(std::uint32_t tile) { return static_cast<int>(tile & kTileByteMask); }
 

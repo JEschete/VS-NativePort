@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 
 namespace {
@@ -135,8 +135,8 @@ TEST_CASE(
     messages.emplace_back(record.message);
     ticks.push_back(record.tick);
   });
-  Core_Warnf("native", "bank=%u", 0U);
-  Core_Errorf("native", "slot=%d", -1);
+  VS::Core::Warnf("native", "bank=%u", 0U);
+  VS::Core::Errorf("native", "slot=%d", -1);
   CHECK((levels == std::vector{Core::LogLevel::Warn, Core::LogLevel::Error}));
   CHECK((messages == std::vector<std::string>{"bank=0", "slot=-1"}));
   CHECK((ticks == std::vector<std::uint64_t>{73, 73}));

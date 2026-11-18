@@ -14,7 +14,7 @@
 #include "Battle/RewardFlow.hpp"
 #include "Battle/Rewards.h"
 #include "Battle/TargetingState.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Field/GameModeLive.hpp"
@@ -34,7 +34,7 @@ namespace VS::Battle {
 namespace {
 void Require(bool valid, const char* reason) {
   if (!valid) {
-    Core_Errorf("battle", "Reward flow refused: %s", reason);
+    VS::Core::Errorf("battle", "Reward flow refused: %s", reason);
     std::abort();
   }
 }

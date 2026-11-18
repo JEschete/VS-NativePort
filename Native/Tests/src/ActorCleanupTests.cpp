@@ -15,7 +15,7 @@
 #include "Actors/AppearanceTransition.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorSettingsLive.hpp"
@@ -32,7 +32,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 struct CleanupFixture {
@@ -353,9 +353,9 @@ TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
 }
 namespace {
 struct AppearanceFixture {
-  decltype(std::to_array(Actors_weaponModels)) saved_weapons =
-      std::to_array(Actors_weaponModels);
-  int saved_speed = State_tickSpeed;
+  decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
+      std::to_array(VS::Actors::weaponModels);
+  int saved_speed = VS::State::tickSpeed;
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Field_gimmickInstances)) saved_objects =
@@ -366,10 +366,10 @@ struct AppearanceFixture {
 
   AppearanceFixture() {
     StoreImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
-    std::fill_n(Actors_weaponModels, saved_weapons.size(), nullptr);
+    std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     std::fill_n(Field_gimmickInstances, saved_objects.size(), nullptr);
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     actor.instance.isParsed = -1;
     actor.instance.baseColor = {128, 128, 128, 0};
     actor.instance.actionAnimationState = 4;
@@ -377,12 +377,13 @@ struct AppearanceFixture {
   }
 
   ~AppearanceFixture() {
-    std::copy(saved_weapons.begin(), saved_weapons.end(), Actors_weaponModels);
+    std::copy(saved_weapons.begin(), saved_weapons.end(),
+              VS::Actors::weaponModels);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_objects.begin(), saved_objects.end(),
               Field_gimmickInstances);
     LoadImage(&palette_region, reinterpret_cast<u_long*>(saved_cluts.data()));
-    State_tickSpeed = saved_speed;
+    VS::State::tickSpeed = saved_speed;
   }
 };
 
@@ -533,7 +534,7 @@ TEST_CASE("Gimmick targeting pulses preserve native ownership and CLUT indices",
   const int phase = GENERATE(0, 1, 2, 3);
   const int prefix = GENERATE(0, 0x65);
   AppearanceFixture fixture;
-  State_tickSpeed = speed;
+  VS::State::tickSpeed = speed;
   Field_GimmickInstance object{};
   object.slot = 3;
   std::fill_n(object.reserved114, sizeof object.reserved114, prefix);
@@ -674,8 +675,8 @@ TEST_CASE("Actors past the equipment table fade without equipment",
     std::fill_n(weapon.uploadPalette, 96, 0x7FFF);
     std::fill_n(weapon.workingPalette, 96, 0x1234);
   }
-  Actors_weaponModels[18] = &(*weapons)[0];
-  Actors_weaponModels[19] = &(*weapons)[1];
+  VS::Actors::weaponModels[18] = &(*weapons)[0];
+  VS::Actors::weaponModels[19] = &(*weapons)[1];
   auto& actor = fixture.actor;
   actor.instance.slot = static_cast<u_char>(slot);
   actor.instance.actionAnimationState = 2;
@@ -698,7 +699,7 @@ TEST_CASE("Equipment palette counts stop at their palette storage",
   weapon->reserved5C0 = 0xA5;
   weapon->reserved5C1 = 0x5A;
   weapon->reserved5C2 = 0xBEEF;
-  Actors_weaponModels[0] = weapon.get();
+  VS::Actors::weaponModels[0] = weapon.get();
   auto& actor = fixture.actor;
   actor.instance.slot = 0;
   actor.instance.actionAnimationState = 2;

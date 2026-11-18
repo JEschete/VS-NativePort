@@ -9,7 +9,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Ending/Credits.h"
-#include "Ending/Credits/EmbeddedArt.h"
+#include "Ending/Credits/EmbeddedArt.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Frame.h"
@@ -118,9 +118,9 @@ TEST_CASE(
     "Credits own complete palette and pixel blocks for every embedded TIM",
     "[ending][render][ending-art]") {
   EndingArtFixture fixture;
-  REQUIRE(Ending_Credits_PrepareEmbeddedArt() == 1);
+  REQUIRE(VS::Ending::Credits::PrepareEmbeddedArt() == 1);
   for (unsigned index = 0; index < kOffsets.size(); ++index) {
-    const auto* tim = Ending_Credits_EmbeddedArt(index);
+    const auto* tim = VS::Ending::Credits::EmbeddedArt(index);
     const auto* bytes = reinterpret_cast<const unsigned char*>(tim);
     CHECK(tim->identifier == 0x10);
     CHECK(bytes != Ending_Credits_glyphWidths + kOffsets[index]);
@@ -128,20 +128,20 @@ TEST_CASE(
     CHECK(bytes[64] == index + 1);
   }
   CHECK(Ending_Credits_illustrationTimWorkspace ==
-        Ending_Credits_EmbeddedArt(7));
+        VS::Ending::Credits::EmbeddedArt(7));
 }
 
 TEST_CASE("Credits preserve the full original72224-byte writable TIM workspace",
           "[ending][render][ending-art]") {
   EndingArtFixture fixture;
   fixture.SetTim(7, 256, 1, 160, 224);
-  REQUIRE(Ending_Credits_PrepareEmbeddedArt() == 1);
+  REQUIRE(VS::Ending::Credits::PrepareEmbeddedArt() == 1);
   auto* bytes =
       reinterpret_cast<unsigned char*>(Ending_Credits_illustrationTimWorkspace);
   CHECK(bytes[72223] == 8);
   bytes[72223] = 0xA5;
   CHECK(Ending_Credits_glyphWidths[kOffsets[7] + 72223] == 8);
-  REQUIRE(Ending_Credits_PrepareEmbeddedArt() == 1);
+  REQUIRE(VS::Ending::Credits::PrepareEmbeddedArt() == 1);
   CHECK(bytes[72223] == 8);
 }
 
@@ -163,7 +163,7 @@ TEST_CASE("Credits reject invalid or oversized TIM blocks without a workspace",
     WriteInteger<std::uint16_t>(Ending_Credits_glyphWidths + kOffsets[0] + 16,
                                 256);
   }
-  CHECK(Ending_Credits_PrepareEmbeddedArt() == 0);
+  CHECK(VS::Ending::Credits::PrepareEmbeddedArt() == 0);
   CHECK(Ending_Credits_illustrationTimWorkspace == nullptr);
 }
 

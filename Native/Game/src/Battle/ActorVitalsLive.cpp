@@ -20,17 +20,17 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "State/SceneTimerLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Battle {
 namespace {
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Errorf("battle", "%s", message);
+    VS::Core::Errorf("battle", "%s", message);
     std::abort();
   }
 }
@@ -98,7 +98,7 @@ class LiveVitalsWorld final : public ActorVitalsWorld {
   void SetCounter(std::int32_t value) override {
     Battle_vitalsTickCounter = value;
   }
-  std::int32_t Ticks() override { return State_tickSpeed; }
+  std::int32_t Ticks() override { return VS::State::tickSpeed; }
   std::int32_t RegeneratingLimb() override { return Battle_regeneratingLimb; }
   void SetRegeneratingLimb(std::int32_t value) override {
     Battle_regeneratingLimb = value;
@@ -113,7 +113,8 @@ class LiveVitalsWorld final : public ActorVitalsWorld {
 
 int Checked(std::optional<int> result) {
   if (!result) {
-    Core_Errorf("battle", "Vitals refused missing stats/actor or a used limb");
+    VS::Core::Errorf("battle",
+                     "Vitals refused missing stats/actor or a used limb");
     std::abort();
   }
   return result.value();

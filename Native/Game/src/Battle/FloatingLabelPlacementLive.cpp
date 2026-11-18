@@ -19,10 +19,10 @@
 #include "Battle/FloatingLabelRenderingLive.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Render/TextureRegionDraw.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -303,8 +303,8 @@ void LiveUpdateAndDrawFloatingLabels() {
   const FloatingLabelUpdateState state{
       .ability_cue_frames = Battle_abilityTimingCueFrames,
       .status_step_timer = Battle_statusLabelStepTimer,
-      .tick_speed = State_tickSpeed,
-      .room_updates_paused = Field_areRoomUpdatesPaused != 0,
+      .tick_speed = VS::State::tickSpeed,
+      .room_updates_paused = VS::Field::areRoomUpdatesPaused != 0,
       .ashley_status_labels_hidden = Battle_ashleyStatusLabelsSuppressed != 0};
   if (!UpdateAndDrawFloatingLabels(world, state)) {
     Refuse("floating label update");

@@ -3,5 +3,9 @@
 // The per-tick stream update and reset the generated sound driver calls; the
 // stream commands are in StreamControlLive.hpp.
 
-void Audio_Native_UpdateCutsceneStream();
-void Audio_Native_ResetCutsceneStream();
+namespace VS::Audio {
+
+void UpdateCutsceneStream();
+void ResetCutsceneStream();
+
+}  // namespace VS::Audio

@@ -11,7 +11,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Camera.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -226,10 +226,10 @@ std::uint32_t LeaveFirstPerson(FakeCameraHost& host,
 
 struct LiveCameraFixture {
   Render_Camera saved_camera = Render_frameScratch.camera;
-  Field_SphericalCamera saved_spherical = Field_sphericalCamera;
+  Field_SphericalCamera saved_spherical = VS::Field::sphericalCamera;
   ~LiveCameraFixture() {
     Render_frameScratch.camera = saved_camera;
-    Field_sphericalCamera = saved_spherical;
+    VS::Field::sphericalCamera = saved_spherical;
   }
   LiveCameraFixture() = default;
   LiveCameraFixture(const LiveCameraFixture&) = delete;

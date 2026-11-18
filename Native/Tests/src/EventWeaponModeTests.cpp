@@ -13,7 +13,7 @@
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
@@ -43,8 +43,8 @@ struct WeaponModeFixture {
   Actors_ActorRecord* saved_record = Actors_actorRecords[0];
   Battle_Actor* saved_actor = Battle_actors[0];
   Battle_Actor* saved_character = Battle_characterState;
-  std::array<Actors_WeaponModel*, 2> saved_weapons{Actors_weaponModels[0],
-                                                   Actors_weaponModels[1]};
+  std::array<Actors_WeaponModel*, 2> saved_weapons{VS::Actors::weaponModels[0],
+                                                   VS::Actors::weaponModels[1]};
   decltype(std::to_array(Event_weaponDrawStates)) saved_modes =
       std::to_array(Event_weaponDrawStates);
   decltype(std::to_array(Event_kOpcodeHandlers)) saved_handlers =
@@ -72,7 +72,7 @@ struct WeaponModeFixture {
     Actors_actorRecords[0] = &record;
     Battle_characterState = Battle_actors[0] = &actor;
     for (std::size_t index = 0; index < weapons.size(); ++index) {
-      Actors_weaponModels[index] = &weapons[index];
+      VS::Actors::weaponModels[index] = &weapons[index];
       weapons[index].attachmentBone = 1;
     }
     Event_weaponDrawStates[0] = 0;
@@ -99,7 +99,8 @@ struct WeaponModeFixture {
     Actors_actorRecords[0] = saved_record;
     Battle_actors[0] = saved_actor;
     Battle_characterState = saved_character;
-    std::copy(saved_weapons.begin(), saved_weapons.end(), Actors_weaponModels);
+    std::copy(saved_weapons.begin(), saved_weapons.end(),
+              VS::Actors::weaponModels);
     std::copy(saved_modes.begin(), saved_modes.end(), Event_weaponDrawStates);
     std::copy(saved_handlers.begin(), saved_handlers.end(),
               Event_kOpcodeHandlers);

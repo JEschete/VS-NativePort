@@ -15,7 +15,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Content/ModuleData.h"
 #include "Field/Gimmicks.h"
@@ -30,8 +30,8 @@ namespace {
 struct LiveAppearanceState {
   decltype(std::to_array(Actors_actorRecords)) saved_actors =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Actors_weaponModels)) saved_weapons =
-      std::to_array(Actors_weaponModels);
+  decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
+      std::to_array(VS::Actors::weaponModels);
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
   VECTOR saved_scale = VS::Actors::roomActorScale;
@@ -40,8 +40,8 @@ struct LiveAppearanceState {
   LiveAppearanceState() {
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
               nullptr);
-    std::fill(std::begin(Actors_weaponModels), std::end(Actors_weaponModels),
-              nullptr);
+    std::fill(std::begin(VS::Actors::weaponModels),
+              std::end(VS::Actors::weaponModels), nullptr);
     std::fill(std::begin(Field_gimmickInstances),
               std::end(Field_gimmickInstances), nullptr);
   }
@@ -51,7 +51,7 @@ struct LiveAppearanceState {
   LiveAppearanceState& operator=(LiveAppearanceState&&) = delete;
   ~LiveAppearanceState() {
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
-    std::ranges::copy(saved_weapons, std::begin(Actors_weaponModels));
+    std::ranges::copy(saved_weapons, std::begin(VS::Actors::weaponModels));
     std::ranges::copy(saved_gimmicks, std::begin(Field_gimmickInstances));
     VS::Actors::roomActorScale = saved_scale;
   }
@@ -319,8 +319,8 @@ TEST_CASE("Live weapon requests bind the actor's weapon records",
   weapon.reserved08Bit4 = 1;
   weapon.reserved11 = 9;
   weapon.reserved13 = 4;
-  Actors_weaponModels[6] = &weapon;
-  Actors_weaponModels[7] = &shield;
+  VS::Actors::weaponModels[6] = &weapon;
+  VS::Actors::weaponModels[7] = &shield;
   shield.reserved11 = 33;
 
   actors::ResetLiveActorWeaponVisibilityBlend(3);
@@ -336,7 +336,7 @@ TEST_CASE("Live weapon brightness keeps the low flag bit and level byte",
   state.AddActor(3);
   Actors_WeaponModel weapon{};
   weapon.reserved08Bit4 = 1;
-  Actors_weaponModels[6] = &weapon;
+  VS::Actors::weaponModels[6] = &weapon;
   actors::SetLiveWeaponBrightnessOverride(3, 3, 0x1FF);
   CHECK(weapon.reserved08Bit6 == 1);
   CHECK(weapon.reserved5C0 == 0xFF);

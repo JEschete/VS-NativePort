@@ -13,7 +13,7 @@
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
 #include "Content/ModuleData.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Render/Display.h"
 #include "Render/GameFont.hpp"
 #include "Render/Render.h"
@@ -44,7 +44,7 @@ static_assert(sizeof(Battle_FloatingLabel) == kLabelBytes);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 [[noreturn]] void Refuse(const char* reason) {
-  Core_Errorf("battle.labels.render", "%s", reason);
+  VS::Core::Errorf("battle.labels.render", "%s", reason);
   std::abort();
 }
 

@@ -27,10 +27,11 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
 
@@ -76,13 +77,6 @@ static_assert(offsetof(Escort, relations) == offsetof(State, relations));
 static_assert(offsetof(Escort, candidateOrder) ==
               offsetof(State, candidateOrder));
 
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
-
 State& StateOf(State* state) {
   Require(state != nullptr, "AI candidate movement requires an actor state");
   return *state;
@@ -91,7 +85,7 @@ State& StateOf(State* state) {
 template <typename T>
 T RequireValue(const std::optional<T>& value, const char* message) {
   if (!value) {
-    Core_Errorf("ai", "%s", message);
+    VS::Core::Errorf("ai", "%s", message);
     std::abort();
   }
   return value.value();

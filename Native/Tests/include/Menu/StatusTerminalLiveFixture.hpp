@@ -13,7 +13,6 @@
 #include <type_traits>
 #include <vector>
 
-#include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.hpp"
@@ -21,7 +20,7 @@
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
 #include "Audio/Driver/SoundDriver.h"
@@ -35,7 +34,7 @@
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Status/ActorStatus.h"
@@ -132,7 +131,7 @@ struct AssetStateRestore {
   ArrayRestore<Content_ActorAssetRequest, VS::Content::kActorAssetRequestCount>
       requests{Content_legacyActorAssetRequests};
   ValueRestore<u_char> model_phase{Content_legacyModelLoadPhase};
-  ValueRestore<unsigned char> parse_phase{Content_modelParseResetFlag};
+  ValueRestore<unsigned char> parse_phase{VS::Content::modelParseResetFlag};
   ValueRestore<u_char> sequence_phase{Content_legacySequenceParsePhase};
   ValueRestore<u_char> effect_phase{Content_legacyEtmLoadPhase};
   ValueRestore<u_char*> model_cursor{Content_legacyShpParseCursor};
@@ -141,10 +140,10 @@ struct AssetStateRestore {
   ValueRestore<int> header_word{Content_legacyShpHeaderWord};
   ValueRestore<int> texture_width{Content_legacyShpTextureWidth};
   ValueRestore<int> texture_height{Content_legacyShpTextureHeight};
-  ValueRestore<int> peak{Content_assetQueuePeakUsage};
-  ValueRestore<int> load_phase{Content_lastLoadPhaseSnapshot};
-  ValueRestore<int> ticks{Content_assetQueueFrameTicks};
-  ValueRestore<int> kind{Content_lastAssetRequestType};
+  ValueRestore<int> peak{VS::Content::assetQueuePeakUsage};
+  ValueRestore<int> load_phase{VS::Content::lastLoadPhaseSnapshot};
+  ValueRestore<int> ticks{VS::Content::assetQueueFrameTicks};
+  ValueRestore<int> kind{VS::Content::lastAssetRequestType};
   ArrayRestore<Render_TextureSlot, VS::Content::kActorTextureSlots>
       actor_textures{Render_legacyActorTextureSlots};
   ArrayRestore<Render_TextureSlot, VS::Content::kWeaponTextureSlots>
@@ -243,8 +242,8 @@ struct Fixture {
   ValueRestore<char> saved_owner{VS::Content::overlayWorkspaceOwner};
   ValueRestore<char> saved_hud{Battle_hudHidden};
   ValueRestore<char> saved_lower_ui{Battle_lowerScreenUiState};
-  ValueRestore<decltype(Field_isFieldRenderingEnabled)> saved_field{
-      Field_isFieldRenderingEnabled};
+  ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
+      VS::Field::isFieldRenderingEnabled};
   ValueRestore<Menu_Framework_MenuControlState> saved_control{
       Menu_Framework_menuState};
   ValueRestore<Menu_Framework_MenuRow*> saved_rows{Menu_Framework_menuItems};
@@ -264,13 +263,13 @@ struct Fixture {
       Battle_actors};
   ArrayRestore<Actors_ActorRecord*, std::size(Actors_actorRecords)>
       saved_models{Actors_actorRecords};
-  ArrayRestore<Actors_WeaponModel*, std::size(Actors_weaponModels)>
-      saved_weapons{Actors_weaponModels};
+  ArrayRestore<Actors_WeaponModel*, std::size(VS::Actors::weaponModels)>
+      saved_weapons{VS::Actors::weaponModels};
   ValueRestore<void*> saved_primary_sequence{Actors_primarySequenceBuffer};
   ValueRestore<VECTOR> saved_scale{VS::Actors::roomActorScale};
-  ValueRestore<Actors_SkeletonPose> saved_pose{Actors_skeletonPose};
-  ValueRestore<MATRIX> saved_root_matrix{Actors_skeletonRootMatrix};
-  ValueRestore<MATRIX> saved_bone_camera{Actors_boneMatrixScratch};
+  ValueRestore<Actors_SkeletonPose> saved_pose{VS::Actors::skeletonPose};
+  ValueRestore<MATRIX> saved_root_matrix{VS::Actors::skeletonRootMatrix};
+  ValueRestore<MATRIX> saved_bone_camera{VS::Actors::boneMatrixScratch};
   ValueRestore<MATRIX> saved_camera_basis{Render_cameraBasisMatrix};
   ValueRestore<Actors_ModelRenderContext> saved_model_context{
       VS::Actors::modelRenderContext};
@@ -388,7 +387,8 @@ struct Fixture {
     if (std::ranges::any_of(
             Content_legacyActorAssetRequests,
             [](const auto& request) { return request.assetKind != 0; }) ||
-        Content_legacyModelLoadPhase != 0 || Content_modelParseResetFlag != 0 ||
+        Content_legacyModelLoadPhase != 0 ||
+        VS::Content::modelParseResetFlag != 0 ||
         Content_legacySequenceParsePhase != 0) {
       throw std::runtime_error("terminal fixture requires an idle asset queue");
     }

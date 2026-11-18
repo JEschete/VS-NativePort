@@ -32,6 +32,7 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
@@ -39,7 +40,7 @@
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.h"
 #include "Field/GimmickPlacementLive.hpp"
@@ -179,7 +180,7 @@ std::optional<SimulationSnapshot> ReadSimulationSnapshot() {
 }
 
 bool RefusePlanning(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return false;
 }
 
@@ -209,13 +210,6 @@ std::optional<std::span<const PlanningActorStats>> ReadPlanningStatsRows(
 ActorCondition SimulationConditionOf(const Battle_Ai_ActionTiming& row) {
   return {row.opaque4,  row.opaque6,  row.opaque8,  row.opaqueA, row.opaqueC,
           row.opaque10, row.opaque12, row.opaque14, row.opaque16};
-}
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
 }
 
 const Battle_Ai_ActionTiming& ConditionRowOf(const Battle_Ai_ActionTiming* rows,
@@ -1275,7 +1269,7 @@ std::optional<bool> RefreshLiveActionCandidateReadiness(
       state->candidateCount > static_cast<int>(kCandidateCapacity) ||
       (state->candidateCount > 0 &&
        !ReadablePlanningRecord(Battle_Ai_roomAiState))) {
-    Core_Debugf("ai", "AI readiness state/count/room is unavailable");
+    VS::Core::Debugf("ai", "AI readiness state/count/room is unavailable");
     return std::nullopt;
   }
   LiveCandidateReadiness host(*state);
@@ -1551,14 +1545,14 @@ void Battle_Ai_SimulateActionCandidateEntry(
               : VS::Battle::Ai::CandidateSimulationMode::kLimb)) {
     return;
   }
-  Core_Errorf("ai", "AI candidate simulation entry refused invalid input");
+  VS::Core::Errorf("ai", "AI candidate simulation entry refused invalid input");
   std::abort();
 }
 
 void Battle_Ai_UpdateCandidateHitWeightEntry(
     Battle_Ai_ActionCandidate* candidate) {
   if (VS::Battle::Ai::UpdateLiveCandidateHitWeight(candidate)) return;
-  Core_Errorf("ai", "AI candidate hit-weight entry refused invalid input");
+  VS::Core::Errorf("ai", "AI candidate hit-weight entry refused invalid input");
   std::abort();
 }
 
@@ -1569,7 +1563,7 @@ void Battle_Ai_EvaluateActionCandidateEntry(
                                                   action)) {
     return;
   }
-  Core_Errorf("ai", "AI candidate evaluation entry refused invalid input");
+  VS::Core::Errorf("ai", "AI candidate evaluation entry refused invalid input");
   std::abort();
 }
 

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace {
 using Clock = std::chrono::steady_clock;
@@ -23,7 +23,7 @@ namespace VS::Core {
 int FrameCounterTicks(std::chrono::nanoseconds elapsed) {
   const auto nanoseconds = elapsed.count();
   if (nanoseconds < 0) {
-    Core_Errorf("clock", "Frame work elapsed duration must not be negative");
+    Errorf("clock", "Frame work elapsed duration must not be negative");
     std::abort();
   }
   const auto seconds = nanoseconds / kNanosecondsPerSecond;

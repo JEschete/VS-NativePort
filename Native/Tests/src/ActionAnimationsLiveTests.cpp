@@ -15,7 +15,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimationsLive.hpp"
@@ -36,7 +36,7 @@ struct Model {
 struct LiveFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  MATRIX saved_bone_camera = Actors_boneMatrixScratch;
+  MATRIX saved_bone_camera = VS::Actors::boneMatrixScratch;
   void* saved_work_bank = Actors_sequenceWorkBuffer;
   int saved_side = Battle_chainAbilityAnimationSide;
   char saved_pitch = Battle_specialActionPitch;
@@ -82,9 +82,9 @@ struct LiveFixture {
     std::ranges::copy(rotation, motion);
     a::RegisterSequenceBank(bank, sizeof(sequence));
     Actors_sequenceWorkBuffer = bank;
-    Actors_boneMatrixScratch = {};
+    VS::Actors::boneMatrixScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
-      Actors_boneMatrixScratch.m[axis][axis] = 4096;
+      VS::Actors::boneMatrixScratch.m[axis][axis] = 4096;
       actor.boneMatrices[0].m[axis][axis] = 4096;
     }
     Battle_chainAbilityAnimationGroups[kAbility] = 2;
@@ -98,7 +98,7 @@ struct LiveFixture {
     a::ForgetSequenceBanks(sequence.data(), sizeof(sequence));
     VS::Render::ForgetLiveModelExtent(&model);
     std::ranges::copy(saved_records, std::begin(Actors_actorRecords));
-    Actors_boneMatrixScratch = saved_bone_camera;
+    VS::Actors::boneMatrixScratch = saved_bone_camera;
     Actors_sequenceWorkBuffer = saved_work_bank;
     Actors_lastResolvedSequenceIndex = saved_clip;
     Battle_chainAbilityAnimationGroups[kAbility] = saved_group;

@@ -111,8 +111,8 @@ TEST_CASE("File logging includes tick context and filters C diagnostics",
   Core::SetLogTick(5301);
   Core::SetLogLevel(Core::LogLevel::Debug);
   REQUIRE(Core::SetLogChannels("ai"));
-  Core_Debugf("ai", "actor=%d", 7);
-  Core_Debugf("actors", "hidden debug");
+  VS::Core::Debugf("ai", "actor=%d", 7);
+  VS::Core::Debugf("actors", "hidden debug");
   Core_Tracef("hidden trace");
   VS_LOG_WARN("content", "still visible");
   Core::SetLogLevel(Core::LogLevel::Trace);

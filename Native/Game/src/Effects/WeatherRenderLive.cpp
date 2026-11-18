@@ -22,7 +22,7 @@
 #include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLiveState.h"
 #include "Field/Mpd.h"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Field/Weather.h"
 #include "Legacy/Psx.h"
 #include "Render/Frame.h"
@@ -31,7 +31,7 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Effects {
 namespace {
@@ -150,8 +150,8 @@ class LiveRenderHost final : public WeatherRenderHost {
 };
 
 [[nodiscard]] WeatherFrame LiveFrame() {
-  return {.paused = Field_areRoomUpdatesPaused != 0,
-          .tick_speed = State_tickSpeed,
+  return {.paused = VS::Field::areRoomUpdatesPaused != 0,
+          .tick_speed = VS::State::tickSpeed,
           .velocity = {.x = Field_weatherParameters[kVelocityXWord],
                        .y = Field_weatherParameters[kVelocityYWord],
                        .z = Field_weatherParameters[kVelocityZWord]}};

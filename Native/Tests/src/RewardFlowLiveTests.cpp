@@ -31,7 +31,7 @@
 #include "Field/Interactions.h"
 #include "Field/Minimap.h"
 #include "Field/RoomEffectsLive.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Framework/MenuRows.h"
@@ -52,11 +52,11 @@ struct LiveFixture {
       VS::Field::LoadLiveRoomWeatherState();
   std::int16_t saved_weather_alias = Field_weatherParameters[6];
   std::int16_t saved_effect_sound = VS::Field::LiveRoomEffectState().sound_id;
-  decltype(Field_roomTint) saved_tint = Field_roomTint;
+  decltype(VS::Field::roomTint) saved_tint = VS::Field::roomTint;
   u_int saved_phase = Battle_actionFlowMode;
   int saved_follow = Battle_rewardsFollowAction;
   int saved_pause = VS::Field::isInteractionPaused;
-  u_short saved_room_pause = Field_areRoomUpdatesPaused;
+  u_short saved_room_pause = VS::Field::areRoomUpdatesPaused;
   char saved_minimap = Field_isMinimapVisible;
   u_char saved_platform_pause = Field_areMovingPlatformsPaused;
   Battle_ActionState* saved_action = Battle_actionState;
@@ -81,7 +81,7 @@ struct LiveFixture {
     Battle_actionFlowMode = 99;
     Battle_rewardsFollowAction = 0;
     VS::Field::isInteractionPaused = 77;
-    Field_areRoomUpdatesPaused = 0;
+    VS::Field::areRoomUpdatesPaused = 0;
     Field_isMinimapVisible = 1;
     Field_areMovingPlatformsPaused = 0;
     Battle_actionState = &action;
@@ -103,11 +103,11 @@ struct LiveFixture {
     VS::Field::StoreLiveRoomWeatherState(saved_weather);
     Field_weatherParameters[6] = saved_weather_alias;
     VS::Field::LiveRoomEffectState().sound_id = saved_effect_sound;
-    Field_roomTint = saved_tint;
+    VS::Field::roomTint = saved_tint;
     Battle_actionFlowMode = saved_phase;
     Battle_rewardsFollowAction = saved_follow;
     VS::Field::isInteractionPaused = saved_pause;
-    Field_areRoomUpdatesPaused = saved_room_pause;
+    VS::Field::areRoomUpdatesPaused = saved_room_pause;
     Field_isMinimapVisible = saved_minimap;
     Field_areMovingPlatformsPaused = saved_platform_pause;
     Battle_actionState = saved_action;
@@ -203,7 +203,7 @@ TEST_CASE("F04123 live pause drives the production room and palette services",
   Battle_characterState = nullptr;
   b::BeginLiveRewardPause();
   CHECK(VS::Field::isInteractionPaused == 1);
-  CHECK(Field_areRoomUpdatesPaused == 1);
+  CHECK(VS::Field::areRoomUpdatesPaused == 1);
   CHECK(Field_isMinimapVisible == 0);
   CHECK_FALSE(render::LivePaletteAnimation().enabled);
   CHECK(render::LivePaletteAnimation().rows.at(0).timer.mode ==
@@ -217,7 +217,7 @@ TEST_CASE("F04124 live restoration includes scene colors but leaves the map",
   Battle_actionState = nullptr;
   b::EndLiveRewardPause();
   CHECK(VS::Field::isInteractionPaused == 0);
-  CHECK(Field_areRoomUpdatesPaused == 0);
+  CHECK(VS::Field::areRoomUpdatesPaused == 0);
   CHECK(Field_isMinimapVisible == 1);
   CHECK(render::LivePaletteAnimation().enabled);
   CHECK(render::LivePaletteAnimation().rows.at(13).timer.mode ==
@@ -316,7 +316,7 @@ TEST_CASE("F00196 live continuation resumes field and actual ability recovery",
   b::UpdateLiveLootResults();
   CHECK(Menu_Framework_actionSelection.menuStatus == 2);
   CHECK(VS::Field::isInteractionPaused == 0);
-  CHECK(Field_areRoomUpdatesPaused == 0);
+  CHECK(VS::Field::areRoomUpdatesPaused == 0);
   CHECK(Field_areMovingPlatformsPaused == 0);
   CHECK(Field_isMinimapVisible == 1);
   CHECK(Battle_actionFlowMode == 0);

@@ -6,7 +6,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Items/ContainerTransfersLive.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"

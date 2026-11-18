@@ -34,14 +34,14 @@ constexpr std::uint32_t kSubtractiveBlend = 2;
 constexpr std::uint16_t kAdditivePage{kAdditiveBlend << kBlendShift};
 constexpr std::uint16_t kSubtractivePage{kSubtractiveBlend << kBlendShift};
 
-// Field_screenTransitionEffect: 3 and codes past the table draw nothing.
+// VS::Field::screenTransitionEffect: 3 and codes past the table draw nothing.
 constexpr std::array kTransitionStyles{
     ScreenTransitionStyle::kFadeToBlack, ScreenTransitionStyle::kFadeToWhite,
     ScreenTransitionStyle::kWipe,        ScreenTransitionStyle::kNone,
     ScreenTransitionStyle::kFadeToBlack, ScreenTransitionStyle::kFadeToBlack,
 };
 
-// Field_screenTransitionStep values the draw steps the alpha for.
+// VS::Field::screenTransitionStep values the draw steps the alpha for.
 constexpr std::uint32_t kCoverStep = 1;
 constexpr std::uint32_t kCoverAgainStep = 2;
 constexpr std::uint32_t kCoverThenHoldStep = 5;

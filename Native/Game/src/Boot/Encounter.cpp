@@ -31,7 +31,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
-#include "Battle/EncounterHooks.h"
+#include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
@@ -45,7 +45,7 @@
 #include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
 #include "Core/BiosRand.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Core/Random.h"
 #include "Core/Scratch.h"
@@ -60,7 +60,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
 #include "Event/TriggersLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/DoorRecordLive.hpp"
 #include "Field/Doors.h"
@@ -71,7 +71,7 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLive.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
@@ -878,7 +878,7 @@ EncounterState InspectGameplay() {
         static_cast<unsigned char>(Audio_Seq_unusedStateFlags.menuFSubmenu);
   }
   state.frame_buffer = Render_frameBuf;
-  state.transition = Field_screenTransitionStep;
+  state.transition = VS::Field::screenTransitionStep;
   state.native_buttons = Input_buttonsState;
   state.native_pressed = Input_buttonsPressed.allButtons;
   state.action_phase = Battle_actionFlowMode;
@@ -973,7 +973,7 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
       {"results_frame", Ending_resultsAnimationFrame},
       {"results_leaving", Ending_isLeavingResults != 0}};
   if (!available) return scene;
-  const auto& camera = Field_sphericalCamera;
+  const auto& camera = VS::Field::sphericalCamera;
   const auto script =
       Event::LeaseLiveScriptSource(Event::ScriptRegion::kEventScript);
   scene["id"] = VS::Field::zoneContext.currentSceneId;
@@ -1097,7 +1097,7 @@ EncounterDoorRequest RequestEncounterDoorTransition(int index) {
 }
 }  // namespace VS::Game
 
-void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
+void VS::Boot::EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::active) return;
   VS::Game::room_prepared = false;
   if (!VS::Game::UsesConfiguredEncounterPlacements(
@@ -1114,7 +1114,7 @@ void Boot_EncounterRoomPlacements(void** data, unsigned int* size) {
                VS::Game::configuration.enemies.size());
 }
 
-int Boot_EncounterUsesRoomEvents() {
+int VS::Boot::EncounterUsesRoomEvents() {
   return !VS::Game::active ||
          VS::Game::UsesEncounterRoomEvents(VS::Game::configuration,
                                            VS::Game::external_event_started);
@@ -1133,7 +1133,7 @@ VS::Event::RoomEventLoad VS::Game::LoadEncounterRoomEvents() {
            sizeof(empty_triggers)}});
 }
 
-void Boot_EncounterPollStop() {
+void VS::Boot::EncounterPollStop() {
   VS::Game::gameplay_inspection_ready = true;
   if (VS::Game::active) {
     if (!VS::Game::player_stats_initialized) {
@@ -1161,9 +1161,9 @@ void Boot_EncounterPollStop() {
         const int result = VS::Event::EvaluateRoomEventTriggersEntry(
             VS::Game::kDirectEventTrigger, event, nullptr, 0);
         if (result != 1) {
-          Core_Errorf("encounter.event",
-                      "Cannot queue external event %d: result=%d", event,
-                      result);
+          VS::Core::Errorf("encounter.event",
+                           "Cannot queue external event %d: result=%d", event,
+                           result);
           std::abort();
         }
         VS::Game::external_event_started = true;
@@ -1184,9 +1184,10 @@ void Boot_EncounterPollStop() {
                 locals.size() / kDoorOffsetBytes ||
             VS::Event::OperandHalf(locals, static_cast<std::size_t>(selector) *
                                                kDoorOffsetBytes) == 0) {
-          Core_Errorf("encounter.event", "Room %d/%d has no local event %d",
-                      VS::Field::zoneContext.zndId,
-                      VS::Field::zoneContext.mapId, selector);
+          VS::Core::Errorf("encounter.event",
+                           "Room %d/%d has no local event %d",
+                           VS::Field::zoneContext.zndId,
+                           VS::Field::zoneContext.mapId, selector);
           std::abort();
         }
         // Same queue state as a satisfied local room trigger (0x8000 event id)
@@ -1207,6 +1208,6 @@ void Boot_EncounterPollStop() {
   }
 }
 
-void Boot_ResetGameplayInspection() {
+void VS::Boot::ResetGameplayInspection() {
   VS::Game::gameplay_inspection_ready = false;
 }

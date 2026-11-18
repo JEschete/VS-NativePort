@@ -20,7 +20,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace container_pending_rows_live_tests {
 namespace rows = VS::Menu::container;
@@ -50,8 +50,8 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{heap_bytes};
   equipment::ValueRestore<int*> saved_types{Menu_Framework_rowTypeBuf};
   equipment::ValueRestore<int> saved_previous{Input_previousButtons};
-  equipment::ValueRestore<decltype(State_tickSpeed)> saved_tick{
-      State_tickSpeed};
+  equipment::ValueRestore<decltype(VS::State::tickSpeed)> saved_tick{
+      VS::State::tickSpeed};
   equipment::ArrayRestore<u_int, std::size(Input_buttonHeldFrames)> saved_held{
       Input_buttonHeldFrames};
   equipment::ValueRestore<u_long*> saved_text_ordering{
@@ -74,7 +74,7 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     Menu_Container_otherStorage = &containers.storage->container;
     Input_previousButtons = 0;
     std::ranges::fill(Input_buttonHeldFrames, 0U);
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     Menu_textBoxBufferIndex = 0;
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
     ClearOTag(Menu_activeTextBoxOrderingTable, kTextOrderingEntries);

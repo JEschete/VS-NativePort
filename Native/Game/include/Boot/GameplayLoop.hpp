@@ -12,8 +12,8 @@
 // reaching overlay memory, ordering tables or actor tables directly.
 namespace VS::Boot {
 // The field control modes (Field_controlMode) and screen transition steps
-// (Field_screenTransitionStep) are the field rules' own (Field/GameMode.hpp,
-// Field/Transitions.hpp).
+// (VS::Field::screenTransitionStep) are the field rules' own
+// (Field/GameMode.hpp, Field/Transitions.hpp).
 using FieldControlMode = Field::FieldControlMode;
 using ScreenTransitionStep = Field::TransitionStep;
 

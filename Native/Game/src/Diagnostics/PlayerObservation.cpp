@@ -27,7 +27,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
-#include "Battle/EncounterHooks.h"
+#include "Battle/EncounterHooks.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
@@ -56,7 +56,7 @@
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Game {
 namespace {
@@ -400,7 +400,7 @@ void InspectReactionEligibility(EncounterReactionTimingState& snapshot) {
 EncounterReactionTimingState InspectReactionTiming(
     const EncounterState& state) {
   EncounterReactionTimingState snapshot;
-  snapshot.tick_speed = State_tickSpeed;
+  snapshot.tick_speed = VS::State::tickSpeed;
   snapshot.story_timing = VS::State::LiveScriptFlag(1) != 0;
   for (std::size_t slot = 0; slot < snapshot.chain_actions.size(); ++slot) {
     snapshot.chain_actions[slot] =

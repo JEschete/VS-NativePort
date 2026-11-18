@@ -5,17 +5,21 @@
 // TransitionsLive.cpp defines them and mirrors them into the typed
 // RoomTransitionState (Field/Transitions.hpp) around each call.
 
+namespace VS::Field {
+
 // decomp: vs_battle_screenTransitionStep (BATTLE/BATTLE.PRG 146C.h): the
 // Field::TransitionStep.
-extern unsigned int Field_screenTransitionStep;
+extern unsigned int screenTransitionStep;
 // decomp: vs_battle_screenTransitionEffect (BATTLE/BATTLE.PRG 146C.h): the
 // fade or wipe style (Render::ScreenTransitionStyleOf).
-extern int Field_screenTransitionEffect;
+extern int screenTransitionEffect;
 // decomp: vs_battle_screenTransitionAlpha (BATTLE/BATTLE.PRG 146C.h): 0
 // clear to 255 covered.
-extern int Field_screenTransitionAlpha;
+extern int screenTransitionAlpha;
 // decomp: vs_battle_screenTransitionWipeAngle (BATTLE/BATTLE.PRG 146C.h).
-extern int Field_screenTransitionWipeAngle;
+extern int screenTransitionWipeAngle;
 // decomp: vs_battle_screenTransitionSpeed (BATTLE/BATTLE.PRG 146C.h): the
 // alpha change per frame.
-extern int Field_screenTransitionSpeed;
+extern int screenTransitionSpeed;
+
+}  // namespace VS::Field

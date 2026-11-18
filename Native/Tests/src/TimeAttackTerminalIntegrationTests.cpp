@@ -309,7 +309,7 @@ TEST_CASE("Heap replacement abandons a real countdown frame before reuse",
   VS::Boot::ResetLiveSessionHeap();
   CheckAbandonedFrame();
   CHECK_FALSE(results::LiveTimeAttackOwnsCountdownControls());
-  CHECK(State_tickSpeed == 2);
+  CHECK(VS::State::tickSpeed == 2);
   CHECK(memory::GameHeap().Empty());
   CHECK(memory::RefusedLiveHeapRequestCount() == refusals);
   if (render::HasLiveFramebufferEffectPackets()) {

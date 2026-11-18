@@ -9,7 +9,7 @@
 #include <type_traits>
 #include <variant>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexing.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/Inventory.h"
@@ -19,8 +19,8 @@
 namespace VS::Items {
 namespace {
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("items.container", "Container indexing refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("items.container", "Container indexing refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 

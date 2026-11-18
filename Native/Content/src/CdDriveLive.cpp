@@ -20,7 +20,7 @@
 
 #include "Content/CdDrive.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "DiscQueue.h"
 #include "Legacy/LibDs.h"
 #include "State/GameClockLive.hpp"
@@ -100,7 +100,7 @@ RefusedRecord& FreeRefusedRecord() {
 
 std::uint64_t NextRequestGeneration() {
   if (request_serial == std::numeric_limits<std::uint64_t>::max()) {
-    Core_Warnf("content", "Disc request generation exhausted");
+    VS::Core::Warnf("content", "Disc request generation exhausted");
     return 0;
   }
   return ++request_serial;
@@ -179,8 +179,9 @@ class LiveDiscQueueHost final : public DiscQueueHost {
         BeginLiveDiscRead(file.sector, static_cast<std::uint32_t>(file.bytes),
                           Pointer(destination));
     if (!accepted) {
-      Core_Warnf("content", "Disc read refused: sector %d, %d bytes, state %d",
-                 file.sector, file.bytes, static_cast<int>(DriveState()));
+      VS::Core::Warnf("content",
+                      "Disc read refused: sector %d, %d bytes, state %d",
+                      file.sector, file.bytes, static_cast<int>(DriveState()));
     } else {
       queued_request_.reset();
       read_generation_ = LiveDiscReadGeneration();
@@ -205,8 +206,8 @@ class LiveDiscQueueHost final : public DiscQueueHost {
                : std::nullopt;
   }
   void ClearReadFailure() override {
-    Core_Warnf("content", "Queued disc read failed: state %d",
-               static_cast<int>(DriveState()));
+    VS::Core::Warnf("content", "Queued disc read failed: state %d",
+                    static_cast<int>(DriveState()));
     CancelLiveDiscRead(Content_discDriveState.destination);
     queued_request_.reset();
   }
@@ -292,14 +293,14 @@ class LiveDiscInterruptHost final : public DiscInterruptHost {
 
 void WarnForeignRequest(const char* operation,
                         const Content_DiscQueueSlot* request) {
-  Core_Warnf("content", "%s refused: %p is not a disc request", operation,
-             static_cast<const void*>(request));
+  VS::Core::Warnf("content", "%s refused: %p is not a disc request", operation,
+                  static_cast<const void*>(request));
 }
 }  // namespace
 
 Content_DiscQueueSlot* AllocateLiveDiscRequest(const Content_DiscFile* file) {
   if (file == nullptr) {
-    Core_Warnf("content", "AllocateDiscRequest refused: null file");
+    VS::Core::Warnf("content", "AllocateDiscRequest refused: null file");
     return nullptr;
   }
   DiscRequestQueue queue = LoadQueue();
@@ -307,10 +308,11 @@ Content_DiscQueueSlot* AllocateLiveDiscRequest(const Content_DiscFile* file) {
       AllocateDiscRequest(queue, Extent(*file));
   if (!index) {
     if (std::has_single_bit(++refused_requests)) {
-      Core_Warnf("content",
-                 "AllocateDiscRequest refused: all %zu disc requests are in "
-                 "use (sector %d, %d bytes); %" PRIu64 " refused",
-                 kDiscRequestCapacity, file->lba, file->size, refused_requests);
+      VS::Core::Warnf(
+          "content",
+          "AllocateDiscRequest refused: all %zu disc requests are in "
+          "use (sector %d, %d bytes); %" PRIu64 " refused",
+          kDiscRequestCapacity, file->lba, file->size, refused_requests);
     }
     return nullptr;
   }
@@ -358,13 +360,13 @@ void ReleaseLiveDiscRequest(Content_DiscQueueSlot* request) {
 
 bool CancelLiveDiscWrites(std::span<std::byte> destination) {
   if (destination.empty()) {
-    Core_Warnf("content", "CancelDiscWrites refused: empty destination");
+    VS::Core::Warnf("content", "CancelDiscWrites refused: empty destination");
     return false;
   }
   DiscRequestQueue queue = LoadQueue();
   LiveDiscQueueHost host;
   if (!CancelDiscWrites(queue, Destination(destination.data()), host)) {
-    Core_Warnf("content", "CancelDiscWrites refused: null destination");
+    VS::Core::Warnf("content", "CancelDiscWrites refused: null destination");
     return false;
   }
   CommitQueue(queue);
@@ -374,7 +376,7 @@ bool CancelLiveDiscWrites(std::span<std::byte> destination) {
 Content_DiscQueueSlot* CompleteLiveRefusedDiscRequest(
     const Content_DiscFile* file, void* destination) {
   if (file == nullptr) {
-    Core_Warnf("content", "CompleteRefusedDiscRequest refused: null file");
+    VS::Core::Warnf("content", "CompleteRefusedDiscRequest refused: null file");
     return nullptr;
   }
   const auto generation = NextRequestGeneration();
@@ -452,25 +454,26 @@ int ReadLiveDiscFileBlocking(int sector, int bytes, void* destination) {
   const auto result = ReadDiscFileBlocking(
       host, {.sector = sector, .bytes = bytes}, Destination(destination));
   if (result == DiscReadResult::kFailed) {
-    Core_Warnf("content",
-               "Accepted disc read failed: sector %d, %d bytes, state %d",
-               sector, bytes, static_cast<int>(host.DriveState()));
+    VS::Core::Warnf("content",
+                    "Accepted disc read failed: sector %d, %d bytes, state %d",
+                    sector, bytes, static_cast<int>(host.DriveState()));
   }
   return result == DiscReadResult::kComplete ? 1 : 0;
 }
 
 int ReadLiveRefusedDiscFile(const Content_DiscFile* file, void* destination) {
   if (file == nullptr) {
-    Core_Warnf("content", "ReadRefusedDiscFile refused: null file");
+    VS::Core::Warnf("content", "ReadRefusedDiscFile refused: null file");
     return 0;
   }
   LiveDiscQueueHost host;
   if (!ReadRefusedDiscFile(host, Extent(*file), Destination(destination),
                            kRefusedReadWaitFrames)) {
-    Core_Warnf("content",
-               "ReadRefusedDiscFile: sector %d (%d bytes) was not read; the "
-               "drive stayed in state %d",
-               file->lba, file->size, static_cast<int>(host.DriveState()));
+    VS::Core::Warnf(
+        "content",
+        "ReadRefusedDiscFile: sector %d (%d bytes) was not read; the "
+        "drive stayed in state %d",
+        file->lba, file->size, static_cast<int>(host.DriveState()));
     return 0;
   }
   return 1;
@@ -515,10 +518,11 @@ void HandleLiveXaReadyInterrupt(std::uint8_t interrupt,
   LiveDiscInterruptHost host;
   if (!XaReadyCallback(transfer, static_cast<DiscInterrupt>(interrupt), result,
                        host)) {
-    Core_Warnf("content",
-               "XaReadyCallback refused: a %zu-byte result is shorter than "
-               "%zu bytes",
-               result.size(), kXaReadyResultBytes);
+    VS::Core::Warnf(
+        "content",
+        "XaReadyCallback refused: a %zu-byte result is shorter than "
+        "%zu bytes",
+        result.size(), kXaReadyResultBytes);
   }
   CommitTransfer(transfer);
 }

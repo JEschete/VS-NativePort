@@ -267,7 +267,7 @@ TEST_CASE("F00734 actual update consumes all32 waiting labels without a33rd",
   state.canary.position.pad = 2;
   Battle_abilityTimingCueFrames = 0;
   Battle_statusLabelStepTimer = 21;
-  Field_areRoomUpdatesPaused = 1;
+  VS::Field::areRoomUpdatesPaused = 1;
   b::LiveUpdateAndDrawFloatingLabels();
   CHECK(std::ranges::all_of(state.Labels(), [](const auto& label) {
     return label.position.pad == 1;

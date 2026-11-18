@@ -11,7 +11,7 @@
 #include "Field/ChestInteractionsLive.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
-#include "Field/GimmickAnimationQueueLive.h"
+#include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/MinimapScene.hpp"

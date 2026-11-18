@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "ActorAssetsLiveState.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.h"
 #include "Content/OverlayFiles.hpp"
 #include "Content/OverlayWorkspace.hpp"
@@ -474,7 +474,7 @@ TEST_CASE("Retired content entries leave no module address bindings",
         &VS::Content::overlayWorkspaceOwner);
   CHECK(Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                       0x800E8FC4u) ==
-        &Content_assetQueuePeakUsage);
+        &VS::Content::assetQueuePeakUsage);
   CHECK(Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                       0x800EC4BCu) != nullptr);
 }

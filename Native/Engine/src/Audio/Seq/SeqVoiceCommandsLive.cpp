@@ -31,7 +31,7 @@
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/VoiceOutput.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
 namespace VS::Audio::Seq {

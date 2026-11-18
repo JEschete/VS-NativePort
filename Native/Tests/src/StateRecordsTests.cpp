@@ -27,7 +27,7 @@
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace state = VS::State;
@@ -92,8 +92,8 @@ class FakeTimerHost final : public state::SceneTimerHost {
 // The scene timer's live state, its flags, the puzzle timer HUD, the BIOS
 // random sequence and the room trigger state, restored after one test.
 struct LiveTimerState {
-  State_SceneTimer saved_timer = State_sceneTimer;
-  int saved_tick_speed = State_tickSpeed;
+  State_SceneTimer saved_timer = VS::State::sceneTimer;
+  int saved_tick_speed = VS::State::tickSpeed;
   State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
   char saved_hud = Battle_lowerScreenUiState;
   unsigned saved_random = Core_Random_State();
@@ -110,8 +110,8 @@ struct LiveTimerState {
   LiveTimerState(LiveTimerState&&) = delete;
   LiveTimerState& operator=(LiveTimerState&&) = delete;
   ~LiveTimerState() {
-    State_sceneTimer = saved_timer;
-    State_tickSpeed = saved_tick_speed;
+    VS::State::sceneTimer = saved_timer;
+    VS::State::tickSpeed = saved_tick_speed;
     Audio_Seq_unusedStateFlags = saved_flags;
     Battle_lowerScreenUiState = saved_hud;
     Core_Random_Seed(saved_random);
@@ -155,7 +155,7 @@ struct LiveTimerExpiry {
   }
 
   void Start(int packed_time) {
-    State_tickSpeed = state::kNormalTickSpeed;
+    VS::State::tickSpeed = state::kNormalTickSpeed;
     VS::State::StartLiveSceneTimer(kCountDown, 0, packed_time);
   }
 };
@@ -590,57 +590,57 @@ TEST_CASE("Starting a live scene timer updates its record and HUD",
   LiveTimerState saved;
   Battle_lowerScreenUiState = 0;
   VS::State::StartLiveSceneTimer(kCountDown, 3, 0x0104);
-  CHECK(State_sceneTimer.mode == kCountDown);
-  CHECK(State_sceneTimer.resetScope == 3);
-  CHECK(State_sceneTimer.frames == 4);
-  CHECK(State_sceneTimer.seconds == 1);
+  CHECK(VS::State::sceneTimer.mode == kCountDown);
+  CHECK(VS::State::sceneTimer.resetScope == 3);
+  CHECK(VS::State::sceneTimer.frames == 4);
+  CHECK(VS::State::sceneTimer.seconds == 1);
   CHECK(VS::State::LiveScriptFlag(state::kSceneTimerSecondsFlag) == 1);
   CHECK(Battle_lowerScreenUiState == 1);
 
   CHECK(VS::State::SetLiveTickSpeed(state::kNormalTickSpeed) ==
         state::kNormalTickSpeed);
   CHECK(VS::State::SetLiveTickSpeed(3) == state::kNormalTickSpeed);
-  CHECK(State_tickSpeed == state::kNormalTickSpeed);
+  CHECK(VS::State::tickSpeed == state::kNormalTickSpeed);
 }
 
 TEST_CASE("Pausing a live scene timer stores its mode and resume restores it",
           "[state-boot]") {
   LiveTimerState saved;
-  State_sceneTimer = {.mode = static_cast<char>(kCountDown),
-                      .pausedMode = static_cast<char>(kCountDown),
-                      .resetScope = 3,
-                      .frames = 4,
-                      .seconds = 1,
-                      .minutes = 0,
-                      .hours = 0};
+  VS::State::sceneTimer = {.mode = static_cast<char>(kCountDown),
+                           .pausedMode = static_cast<char>(kCountDown),
+                           .resetScope = 3,
+                           .frames = 4,
+                           .seconds = 1,
+                           .minutes = 0,
+                           .hours = 0};
   Battle_lowerScreenUiState = 1;
   VS::State::SetLiveSceneTimerPaused(1);
-  CHECK(State_sceneTimer.mode == state::kSceneTimerStopped);
-  CHECK(State_sceneTimer.pausedMode == kCountDown);
+  CHECK(VS::State::sceneTimer.mode == state::kSceneTimerStopped);
+  CHECK(VS::State::sceneTimer.pausedMode == kCountDown);
   CHECK(Battle_lowerScreenUiState == 0);
   CHECK(VS::State::UpdateLiveSceneTimer() == 0);
-  CHECK(State_sceneTimer.frames == 4);
+  CHECK(VS::State::sceneTimer.frames == 4);
   VS::State::SetLiveSceneTimerPaused(0);
-  CHECK(State_sceneTimer.mode == kCountDown);
+  CHECK(VS::State::sceneTimer.mode == kCountDown);
 }
 
 TEST_CASE("Resetting a live timer clears time and keeps pause state",
           "[state-boot]") {
   LiveTimerState saved;
-  State_sceneTimer = {.mode = static_cast<char>(kCountDown),
-                      .pausedMode = static_cast<char>(kCountDown),
-                      .resetScope = 3,
-                      .frames = 4,
-                      .seconds = 1,
-                      .minutes = 0,
-                      .hours = 0};
+  VS::State::sceneTimer = {.mode = static_cast<char>(kCountDown),
+                           .pausedMode = static_cast<char>(kCountDown),
+                           .resetScope = 3,
+                           .frames = 4,
+                           .seconds = 1,
+                           .minutes = 0,
+                           .hours = 0};
   Battle_lowerScreenUiState = 1;
   VS::State::ResetLiveSceneTimer();
-  CHECK(State_sceneTimer.mode == state::kSceneTimerStopped);
-  CHECK(State_sceneTimer.pausedMode == kCountDown);
-  CHECK(State_sceneTimer.resetScope == 3);
-  CHECK(State_sceneTimer.frames == 0);
-  CHECK(State_sceneTimer.seconds == 0);
+  CHECK(VS::State::sceneTimer.mode == state::kSceneTimerStopped);
+  CHECK(VS::State::sceneTimer.pausedMode == kCountDown);
+  CHECK(VS::State::sceneTimer.resetScope == 3);
+  CHECK(VS::State::sceneTimer.frames == 0);
+  CHECK(VS::State::sceneTimer.seconds == 0);
   CHECK(Battle_lowerScreenUiState == 0);
 }
 
@@ -649,12 +649,12 @@ TEST_CASE("An ended live countdown evaluates the room expiry triggers",
   LiveTimerExpiry test;
   test.Start(4);
   CHECK(VS::State::UpdateLiveSceneTimer() == 0);
-  CHECK(State_sceneTimer.frames == 2);
+  CHECK(VS::State::sceneTimer.frames == 2);
   CHECK(Event_playbackPhase == 0);
 
   CHECK(VS::State::UpdateLiveSceneTimer() == 1);
-  CHECK(State_sceneTimer.frames == 0);
-  CHECK(State_sceneTimer.mode == kCountDown);
+  CHECK(VS::State::sceneTimer.frames == 0);
+  CHECK(VS::State::sceneTimer.mode == kCountDown);
   CHECK(Event_eventId == LiveTimerExpiry::kExpiryEvent);
   CHECK(Event_playbackPhase == 1);
 }

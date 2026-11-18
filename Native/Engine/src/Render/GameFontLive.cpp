@@ -16,7 +16,7 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
@@ -34,7 +34,7 @@
 #include "Render/TextBoxText.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Render {
 namespace {
@@ -54,8 +54,8 @@ void ReportTextBox(const Menu_TextBoxState* box, const char* problem) {
   // The first and then every power-of-two report, so a per-frame problem
   // cannot flood the log.
   if (std::has_single_bit(text_box_problems)) {
-    Core_Errorf("text", "text box %p %s (%" PRIu64 " text box problems)",
-                static_cast<const void*>(box), problem, text_box_problems);
+    VS::Core::Errorf("text", "text box %p %s (%" PRIu64 " text box problems)",
+                     static_cast<const void*>(box), problem, text_box_problems);
   }
 }
 
@@ -218,7 +218,7 @@ void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
   TextBoxText view = ViewOf(*box);
   const TextBoxInput input{
       .confirm_pressed = Input_buttonsPressed.ports[0].lowByte != 0,
-      .tick_speed = State_tickSpeed};
+      .tick_speed = VS::State::tickSpeed};
   LivePacketQueue glyphs(layers + kTextForegroundLayer);
   const ProgressiveTextResult result = DrawProgressiveTextBoxText(
       view, input, font_style, LiveVariableFontGlyphWidths(),

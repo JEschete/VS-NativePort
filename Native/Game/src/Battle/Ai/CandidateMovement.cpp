@@ -7,7 +7,7 @@
 #include <limits>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -50,7 +50,7 @@ constexpr int kFleeMode = 4;
 constexpr int kPlayerMode = 7;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return std::nullopt;
 }
 

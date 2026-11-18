@@ -19,7 +19,7 @@
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
@@ -150,8 +150,8 @@ class LiveSnapshotHost final : public SnapshotHost {
     return StatsOf(*actor, *actor->stats);
   }
   CameraPose Camera() override {
-    return CameraPose{.pitch = Field_sphericalCamera.delta.pitch,
-                      .distance = Field_sphericalCamera.initialDistance};
+    return CameraPose{.pitch = VS::Field::sphericalCamera.delta.pitch,
+                      .distance = VS::Field::sphericalCamera.initialDistance};
   }
   void StoreEntryDoor(const EntryDoor& door) override {
     std::ranges::copy(door, BytesOf(State_savedEntryDoor).begin());

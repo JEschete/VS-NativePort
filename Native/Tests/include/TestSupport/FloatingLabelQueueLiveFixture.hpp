@@ -11,13 +11,13 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/BiosRand.h"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.h"
 
 namespace VS::test_support::live_floating_labels {
@@ -104,15 +104,15 @@ class Producers {
     actor.boneMatrices[0].m[0][0] = 4096;
     actor.boneMatrices[0].m[1][1] = 4096;
     actor.boneMatrices[0].m[2][2] = 4096;
-    Actors_boneMatrixScratch = actor.boneMatrices[0];
+    VS::Actors::boneMatrixScratch = actor.boneMatrices[0];
     Actors_actorRecords[kActor] = &actor;
     Input_settings.weaponStatChange = 1;
   }
   ~Producers() {
     Actors_actorRecords[kActor] = saved_actor_;
-    Actors_boneMatrixScratch = saved_matrix_;
+    VS::Actors::boneMatrixScratch = saved_matrix_;
     Input_settings = saved_settings_;
-    Field_areRoomUpdatesPaused = saved_pause_;
+    VS::Field::areRoomUpdatesPaused = saved_pause_;
   }
   Producers(const Producers&) = delete;
   Producers& operator=(const Producers&) = delete;
@@ -142,10 +142,10 @@ class Producers {
  private:
   static constexpr int kActor = 1;
   Actors_ActorRecord* saved_actor_ = Actors_actorRecords[kActor];
-  MATRIX saved_matrix_ = Actors_boneMatrixScratch;
+  MATRIX saved_matrix_ = VS::Actors::boneMatrixScratch;
   decltype(Input_settings) saved_settings_ = Input_settings;
-  decltype(Field_areRoomUpdatesPaused) saved_pause_ =
-      Field_areRoomUpdatesPaused;
+  decltype(VS::Field::areRoomUpdatesPaused) saved_pause_ =
+      VS::Field::areRoomUpdatesPaused;
   alignas(Actors_ShpModel) std::array<
       std::byte, sizeof(Actors_ShpModel) + sizeof(Actors_ShpBone)> model_{};
 };

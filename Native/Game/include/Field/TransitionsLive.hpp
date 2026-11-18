@@ -5,7 +5,7 @@
 
 struct Field_MpdDoorRecord;
 
-// Binding from the screen transition globals (TransitionsLiveState.h), the
+// Binding from the screen transition globals (TransitionsLiveState.hpp), the
 // pending door (Field_pendingDestinationDoor), the location table and Ashley
 // to the typed transition rules (Transitions.hpp). Each adapter keeps the
 // original argument order for the generated callers (copy_fixups.py

@@ -24,10 +24,11 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Core/BiosRand.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/Gimmicks.h"
 
 namespace VS::Battle::Ai {
@@ -47,13 +48,6 @@ static_assert(offsetof(Battle_Ai_TargetApproachView, distancesSquared) ==
 constexpr std::uint32_t kRelationReady = 0x80000000;
 constexpr std::uint32_t kRelationInSight = 1u << 2;
 constexpr int kSteppingLocomotion = 1;
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 const Battle_Ai_ActorAiState& StateOf(const Battle_Ai_ActorAiState* state) {
   Require(state != nullptr, "AI decision gate requires an actor state");

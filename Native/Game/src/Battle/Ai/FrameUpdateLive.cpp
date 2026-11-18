@@ -33,7 +33,7 @@
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
@@ -54,16 +54,16 @@ int Battle_Ai_TryTerrainRegionCell(int tile_x, int tile_z, u_char** cell) {
       width == 0 || width > kAiFrameGridSide || height == 0 ||
       height > kAiFrameGridSide || (unsigned)tile_x >= width ||
       (unsigned)tile_z >= height) {
-    Core_Errorf("ai", "Invalid AI direction cell: tile=%d,%d grid=%u,%u",
-                tile_x, tile_z, width, height);
+    VS::Core::Errorf("ai", "Invalid AI direction cell: tile=%d,%d grid=%u,%u",
+                     tile_x, tile_z, width, height);
     return 0;
   }
   const size_t index = static_cast<size_t>(tile_z) * width + (unsigned)tile_x;
   if (index >= frame_context.terrain_region_count) {
-    Core_Errorf("ai",
-                "AI direction cell exceeds source payload: tile=%d,%d "
-                "index=%zu bytes=%zu",
-                tile_x, tile_z, index, frame_context.terrain_region_count);
+    VS::Core::Errorf("ai",
+                     "AI direction cell exceeds source payload: tile=%d,%d "
+                     "index=%zu bytes=%zu",
+                     tile_x, tile_z, index, frame_context.terrain_region_count);
     return 0;
   }
   *cell = frame_context.terrainRegions + index;
@@ -140,8 +140,8 @@ int CacheLiveActorAiWorkingState() {
   const std::optional<WorkingStateWindow> window =
       CacheActorAiWorkingState(source);
   if (!window) {
-    Core_Errorf("ai", "AI terrain bitmap header is truncated: bytes=%zu",
-                source.auxiliary_bytes);
+    VS::Core::Errorf("ai", "AI terrain bitmap header is truncated: bytes=%zu",
+                     source.auxiliary_bytes);
     abort();
   }
   frame_context.terrainRegions = nullptr;
@@ -165,7 +165,8 @@ void RunLiveActorAiUpdateStages() {
   LiveActorAiFrame frame;
   if (RunActorAiUpdateStages(frame) ==
       FrameUpdateResult::kMissingRoomOrActors) {
-    Core_Errorf("ai", "AI update requires a room and the linked actor list");
+    VS::Core::Errorf("ai",
+                     "AI update requires a room and the linked actor list");
     abort();
   }
 }
@@ -193,7 +194,8 @@ void InitializeLiveActorLocomotionMode(Battle_Ai_AiCreationView* view) {
 void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
                                        int run_step) {
   if (static_cast<unsigned>(actor_id) >= kFrameActorSlots) {
-    Core_Errorf("ai", "Vertical movement steps for invalid actor %d", actor_id);
+    VS::Core::Errorf("ai", "Vertical movement steps for invalid actor %d",
+                     actor_id);
     abort();
   }
   Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[actor_id];

@@ -16,7 +16,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.h"
@@ -44,9 +44,9 @@ std::uint64_t refused_calls = 0;
 void Refuse(std::string_view call, LimbControllerError error) {
   if (std::has_single_bit(++refused_calls)) {
     const auto message = LimbControllerErrorText(error);
-    Core_Warnf("menu", "status limbs: %.*s refused: %.*s",
-               static_cast<int>(call.size()), call.data(),
-               static_cast<int>(message.size()), message.data());
+    VS::Core::Warnf("menu", "status limbs: %.*s refused: %.*s",
+                    static_cast<int>(call.size()), call.data(),
+                    static_cast<int>(message.size()), message.data());
   }
 }
 void Report(std::string_view call, const LimbControllerResult& result) {

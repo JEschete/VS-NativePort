@@ -23,7 +23,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -39,7 +39,7 @@
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Loot/Paging.h"
+#include "Menu/Loot/Paging.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
@@ -386,7 +386,7 @@ void RenderBagCapacities(int edge_x) {
       .cursor = LiveCursor(),
       .previewed = static_cast<std::uint8_t>(Menu_Loot_previewedLoot),
       .controls_enabled = static_cast<std::uint8_t>(Menu_Loot_controlsEnabled),
-      .capacities = std::span(Items_Inventory_inventoryItemCapacities)};
+      .capacities = std::span(VS::Items::Inventory::inventoryItemCapacities)};
   LiveCapacityHost host(rows);
   if (!VS::Menu::Loot::RenderBagCapacities(edge_x, panel, host)) {
     Refuse("the previewed loot row is outside the loot list");

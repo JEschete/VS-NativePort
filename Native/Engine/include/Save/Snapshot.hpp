@@ -68,7 +68,7 @@ struct AshleyCombatStats {
   std::int32_t weapon_drawn = 0;
 };
 
-// Field_sphericalCamera's pitch delta and initial distance.
+// VS::Field::sphericalCamera's pitch delta and initial distance.
 struct CameraPose {
   std::int32_t pitch = 0;
   std::int32_t distance = 0;

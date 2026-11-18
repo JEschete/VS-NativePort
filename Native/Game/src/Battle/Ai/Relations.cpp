@@ -8,7 +8,7 @@
 #include <span>
 
 #include "Battle/Ai/ActorCleanup.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -57,7 +57,7 @@ constexpr std::uint8_t kReleasedBehaviorMode = 2;
 constexpr unsigned kHpRestoreEffect = 2;
 
 bool Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return false;
 }
 

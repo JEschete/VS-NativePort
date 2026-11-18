@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -225,10 +225,11 @@ void StepToTile(ActorCommandRoom& room, ActorCommandState& state,
                Field::GroundHeightAtPackedTile(
                    terrain, Core::Math::UnpackTileCoordinate(state.tile)));
   const unsigned threshold = state.step_height;
-  Core_Debugf("ai.move",
-              "step actor=%d from=%08X to=%08X rise=%d threshold=%u flags=%02X",
-              state.actor_id, state.tile, tile, rise, threshold,
-              static_cast<unsigned>(state.movement_flags));
+  VS::Core::Debugf(
+      "ai.move",
+      "step actor=%d from=%08X to=%08X rise=%d threshold=%u flags=%02X",
+      state.actor_id, state.tile, tile, rise, threshold,
+      static_cast<unsigned>(state.movement_flags));
   auto opcode = CommandOpcode::kStep;
   if (rise >= static_cast<int>(threshold)) {
     if ((state.movement_flags & kWalkInsteadOfStep) != 0) {
@@ -365,8 +366,9 @@ void IssueActorCommand(ActorCommandRoom& room, ActorCommandState& state,
       Attack(room, packet);
       break;
     default:
-      Core_Debugf("ai", "AI actor command intent %d has no dispatch handler",
-                  static_cast<int>(intent));
+      VS::Core::Debugf("ai",
+                       "AI actor command intent %d has no dispatch handler",
+                       static_cast<int>(intent));
       std::abort();
   }
 }

@@ -377,10 +377,10 @@ NATIVE_HELPER_HEADERS = {
     "Battle_Ai_ReconcileCompletedActionPlanEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
     "Field_CurrentSavePointIdEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_RefreshAshleyInteractionTileEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
-    "Field_CreateGimmickInstanceEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
-    "Field_ReleaseGimmickInstanceEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
-    "Field_FindSharedGimmickModelEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
-    "Field_SetGimmickPaletteTableEntry": r"Native\Game\src\Field\GimmickResourcesLive.h",
+    "Field_CreateGimmickInstanceEntry": r"Native\Game\include\Field\GimmickResourcesLive.hpp",
+    "Field_ReleaseGimmickInstanceEntry": r"Native\Game\include\Field\GimmickResourcesLive.hpp",
+    "Field_FindSharedGimmickModelEntry": r"Native\Game\include\Field\GimmickResourcesLive.hpp",
+    "Field_SetGimmickPaletteTableEntry": r"Native\Game\include\Field\GimmickResourcesLive.hpp",
     "Field_MovingPlatformTargetWaypointEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
     "Field_SetPlatformFreezeAppearanceEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
     "Field_DrawMovingPlatformShadowsEntry": r"Native\Game\src\Field\PlatformPlacementLive.h",
@@ -402,8 +402,8 @@ NATIVE_HELPER_HEADERS = {
     "Field_InteractiveDoorAtTileEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
     "Field_MarkSigilDoorUnlockedEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
     "Field_IsRoomSigilDoorUnlockedEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
-    "Field_SceneDoorIdEntry": r"Native\Game\src\Field\MinimapSceneLive.h",
-    "Field_MarkEntranceDoorOnSceneMapEntry": r"Native\Game\src\Field\MinimapSceneLive.h",
+    "Field_SceneDoorIdEntry": r"Native\Game\include\Field\MinimapSceneLive.hpp",
+    "Field_MarkEntranceDoorOnSceneMapEntry": r"Native\Game\include\Field\MinimapSceneLive.hpp",
     "Field_StoreEntranceDoorForReloadEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_SetEntranceDoorRecordEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_FindEntranceDoorNearTileEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
@@ -431,9 +431,9 @@ NATIVE_HELPER_HEADERS = {
     "Field_UpdateChestContentsSelectionEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_TryOpenChestEntry": r"Native\Game\src\Field\ChestInteractionsLive.h",
     "Field_BeginSwitchToggleEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
-    "Field_ResetGimmickAnimationQueueEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.h",
-    "Field_UpdateGimmickAnimationQueueEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.h",
-    "Field_QueueGimmickAnimationEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.h",
+    "Field_ResetGimmickAnimationQueueEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.hpp",
+    "Field_UpdateGimmickAnimationQueueEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.hpp",
+    "Field_QueueGimmickAnimationEntry": r"Native\Game\src\Field\GimmickAnimationQueueLive.hpp",
     "Field_ToggleRoomSwitchEntry": r"Native\Game\src\Field\RoomSwitchesLive.h",
     "Field_GimmickPlacementEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
     "Field_FindGimmickBelowEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
@@ -449,9 +449,9 @@ NATIVE_HELPER_HEADERS = {
     "Field_ApplyGimmickInteractionCommandEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
     "Field_UpdateGimmickReactionAnimationEntry": r"Native\Game\include\Field\GimmickReactionsLive.hpp",
     "Field_UpdateGimmickMotionEntry": r"Native\Game\include\Field\GimmickDynamicsLive.hpp",
-    "Field_DisableTrapAtPositionEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
-    "Field_RoomTriggerAtTileEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
-    "Field_SetRoomTriggerEnabledEntry": r"Native\Game\src\Field\InteractionTargetLive.h",
+    "Field_DisableTrapAtPositionEntry": r"Native\Game\include\Field\InteractionTargetLive.hpp",
+    "Field_RoomTriggerAtTileEntry": r"Native\Game\include\Field\InteractionTargetLive.hpp",
+    "Field_SetRoomTriggerEnabledEntry": r"Native\Game\include\Field\InteractionTargetLive.hpp",
     "Field_FindTopGimmickAtTileEntry": r"Native\Game\src\Field\GimmickPlacementLive.h",
     "Event_EvaluateInterpolationCurveEntry": r"Native\Game\src\Event\InterpolationCurveLive.hpp",
     "Event_EvaluateRoomEventTriggersEntry": r"Native\Game\src\Event\RoomTriggerEntryLive.hpp",
@@ -1098,11 +1098,11 @@ NATIVE_HELPER_HEADERS = {
        )},
     "Field_FindGimmickForActorSlot":
         r"Native\Game\src\Field\GimmickLookup.hpp",
-    **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.h"
+    **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.hpp"
        for name in (
            "Ending_Credits_PrepareEmbeddedArt", "Ending_Credits_EmbeddedArt",
        )},
-    **{name: r"Native\Game\include\Diagnostics\SceneTrace.h"
+    **{name: r"Native\Game\include\Diagnostics\SceneTrace.hpp"
        for name in (
            "Diagnostics_RecordSceneCommand", "Diagnostics_RecordSceneResult",
            "Diagnostics_RecordScriptFlagWrite",
@@ -1136,12 +1136,12 @@ NATIVE_HELPER_HEADERS = {
        )},
     "Battle_Ai_TerrainRegionCell": r"Native\Game\src\Battle\Ai\FrameUpdate.h",
     "Audio_Seq_LfoWaveform": r"Native\Engine\include\Audio\LfoWaveforms.hpp",
-    **{name: r"Native\Engine\include\Audio\MusicState.h"
+    **{name: r"Native\Engine\include\Audio\MusicState.hpp"
        for name in (
            "Audio_Native_SaveMusicSnapshot",
            "Audio_Native_RestoreMusicSnapshot",
        )},
-    **{name: r"Native\Engine\include\Audio\StreamPlayback.h"
+    **{name: r"Native\Engine\include\Audio\StreamPlayback.hpp"
        for name in (
            "Audio_Native_UpdateCutsceneStream",
            "Audio_Native_ResetCutsceneStream",
@@ -1500,7 +1500,7 @@ NATIVE_HELPER_HEADERS = {
            "VS::Audio::BindLiveRoomCutsceneStream",
            "VS::Audio::UnbindLiveRoomCutsceneStream",
        )},
-    **{name: r"Native\Game\src\Battle\EncounterHooks.h"
+    **{name: r"Native\Game\src\Battle\EncounterHooks.hpp"
        for name in (
            "Boot_EncounterRoomPlacements",
            "Boot_EncounterUsesRoomEvents",
@@ -1508,9 +1508,9 @@ NATIVE_HELPER_HEADERS = {
        )},
     "Boot_InitializePlayerSettings": r"Native\Game\src\Boot\PlayerSettings.hpp",
     "Battle_Ai_InvalidateSessionBindings": r"Native\Game\src\Battle\Ai\RoomState.h",
-    **{name: r"Native\Engine\include\Core\Diagnostics.h"
+    **{name: r"Native\Engine\include\Core\Diagnostics.hpp"
        for name in ("Core_Warnf", "Core_Errorf")},
-    **{name: r"Native\Game\src\Menu\Loot\Paging.h"
+    **{name: r"Native\Game\src\Menu\Loot\Paging.hpp"
        for name in (
            "kMenuLootRowCapacity", "Menu_Loot_AdvanceStagedInventory",
            "Menu_Loot_ResetPaging",

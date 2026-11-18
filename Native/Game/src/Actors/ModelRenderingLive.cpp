@@ -15,7 +15,6 @@
 #include <type_traits>
 
 #include "ActorAssets.h"
-#include "ActorAssetsLiveState.h"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorTableLive.hpp"
@@ -32,13 +31,14 @@
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
 #include "Content/ActorAssets.hpp"
-#include "Core/Diagnostics.h"
+#include "Content/ActorAssetsLive.hpp"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -55,7 +55,7 @@
 #include "Render/Render.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
 Actors_ModelRenderContext VS::Actors::modelRenderContext;
@@ -76,7 +76,7 @@ constexpr const char* kGimmickDraw = "DrawGimmickModel";
 constexpr const char* kWeaponDraw = "DrawActorWeaponModel";
 
 static_assert(std::size(Actors_actorRecords) == kRoomActorSlots);
-static_assert(std::size(Actors_weaponModels) == kRoomWeaponSlots);
+static_assert(std::size(weaponModels) == kRoomWeaponSlots);
 static_assert(std::size(Field_gimmickInstances) == kRoomGimmickSlots);
 static_assert(std::size(Render_legacyWeaponTextureSlots) ==
               kWeaponTextureSlots);
@@ -86,7 +86,7 @@ static_assert(std::extent_v<decltype(Actors_WeaponModel::boneWorldMatrices)> ==
               kWeaponBoneLimit);
 static_assert(std::extent_v<decltype(Actors_WeaponModel::bones)> ==
               kWeaponBoneLimit);
-static_assert(std::size(Actors_skeletonPose.boneMatrices) >= kWeaponBoneLimit);
+static_assert(std::size(skeletonPose.boneMatrices) >= kWeaponBoneLimit);
 
 // The root key is the last key of the blended pose.
 using PoseKeys = decltype(Actors_AnimationPose::boneKeys);
@@ -223,7 +223,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
       actor = RoomActor(slot);
       if (actor == nullptr) return;
     }
-    if (State_tickSpeed == kSlowedTickSpeed) {
+    if (VS::State::tickSpeed == kSlowedTickSpeed) {
       actor->framesPerStep = static_cast<u_char>(actor->framesPerStep * 2);
     }
     UpdateLiveActorAnimationBlend(actor);
@@ -272,7 +272,7 @@ class LiveRoomModelPass final : public RoomModelPassHost {
 
   [[nodiscard]] std::optional<RoomWeaponState> Weapon(
       std::size_t index) const override {
-    const Actors_WeaponModel* weapon = Actors_weaponModels[index];
+    const Actors_WeaponModel* weapon = weaponModels[index];
     if (weapon == nullptr) return std::nullopt;
     return RoomWeaponState{.shown = weapon->reserved08Bit4 != 0,
                            .owner = weapon->actorId,
@@ -282,14 +282,14 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   // decomp: 44F14.c:1056. The attachment bone indexes the owner's bone
   // matrices, which the original did not bound.
   void DrawWeapon(std::size_t index) override {
-    Actors_WeaponModel* weapon = Actors_weaponModels[index];
+    Actors_WeaponModel* weapon = weaponModels[index];
     if (weapon == nullptr) return;
     Actors_ActorRecord* owner = RoomActor(weapon->actorId);
     if (owner == nullptr) return;
     if (weapon->attachmentBone >= std::size(owner->boneMatrices)) {
-      Core_Warnf("actors", "%s refused: weapon %zu attaches to bone %u",
-                 kRoomPass, index,
-                 static_cast<unsigned>(weapon->attachmentBone));
+      VS::Core::Warnf("actors", "%s refused: weapon %zu attaches to bone %u",
+                      kRoomPass, index,
+                      static_cast<unsigned>(weapon->attachmentBone));
       return;
     }
     DrawLiveActorWeaponModel(weapon,
@@ -367,9 +367,10 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   const Actors_ActorRecord* holder =
       LiveActorRecord(object.parent, kGimmickDraw);
   if (holder == nullptr) {
-    Core_Warnf("actors", "%s refused: gimmick %u's holder slot %u is empty",
-               kGimmickDraw, static_cast<unsigned>(object.slot),
-               static_cast<unsigned>(object.parent));
+    VS::Core::Warnf("actors",
+                    "%s refused: gimmick %u's holder slot %u is empty",
+                    kGimmickDraw, static_cast<unsigned>(object.slot),
+                    static_cast<unsigned>(object.parent));
     return std::nullopt;
   }
   // A tag the holder lacks leaves its anchor at the origin.
@@ -423,7 +424,7 @@ void StoreWeaponPose(Actors_WeaponModel& weapon, const WeaponFadeStep& fade,
   workspace.position.vx = 0;
   workspace.position.vy = 0;
   for (std::size_t bone = 0; bone < chain.size(); ++bone) {
-    StoreTransform(Actors_skeletonPose.boneMatrices[bone], chain[bone]);
+    StoreTransform(skeletonPose.boneMatrices[bone], chain[bone]);
     StoreTransform(weapon.boneWorldMatrices[bone], chain[bone]);
   }
   StoreTransform(workspace.matrix, chain.back());
@@ -455,11 +456,12 @@ void DrawWeaponForOwner(const Actors_WeaponModel& weapon,
   if (!Render::ProjectLiveWeaponModel(weapon)) return;
   if (weapon.textureSlot >= kWeaponTextureSlots ||
       weapon.paletteSlotOffset >= kWeaponTextureSlots) {
-    Core_Warnf("actors",
-               "%s refused: texture slot %u or palette slot %u is outside the "
-               "weapon slot table",
-               kWeaponDraw, static_cast<unsigned>(weapon.textureSlot),
-               static_cast<unsigned>(weapon.paletteSlotOffset));
+    VS::Core::Warnf(
+        "actors",
+        "%s refused: texture slot %u or palette slot %u is outside the "
+        "weapon slot table",
+        kWeaponDraw, static_cast<unsigned>(weapon.textureSlot),
+        static_cast<unsigned>(weapon.paletteSlotOffset));
     return;
   }
   Render_ModelScratchpad& workspace = Workspace();
@@ -562,9 +564,9 @@ void DrawLiveGimmickModel(Field_GimmickInstance* object, MATRIX* camera) {
   }
   if (placed.scale) StoreVector(workspace.scale, *placed.scale);
   StoreTransform(workspace.matrix, placed.model);
-  StoreTransform(Actors_skeletonPose.boneMatrices[0], placed.model);
+  StoreTransform(skeletonPose.boneMatrices[0], placed.model);
   StoreTransform(object->matrices[kModelMatrix], placed.model);
-  StoreTransform(Actors_skeletonRootMatrix, placed.model);
+  StoreTransform(skeletonRootMatrix, placed.model);
   StoreTransform(object->matrices[kRootMatrix], placed.model);
   if (object->isVisible == 0 || !Render::ProjectLiveGimmickModel(*object)) {
     return;
@@ -589,8 +591,8 @@ void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source) {
   }
   const std::size_t bone_count = weapon->boneCount;
   if (bone_count > kWeaponBoneLimit) {
-    Core_Warnf("actors", "%s refused: the weapon has %zu bones", kWeaponDraw,
-               bone_count);
+    VS::Core::Warnf("actors", "%s refused: the weapon has %zu bones",
+                    kWeaponDraw, bone_count);
     return;
   }
   const std::optional<std::array<WeaponBone, kWeaponBoneLimit>> bones =
@@ -644,8 +646,7 @@ void InitializeLiveActorModelResources() {
     StoreSlotIds(Render_legacyWeaponTextureSlots[slot],
                  WeaponTextureSlotIds(slot));
   }
-  std::fill(std::begin(Actors_weaponModels), std::end(Actors_weaponModels),
-            nullptr);
+  std::fill(std::begin(weaponModels), std::end(weaponModels), nullptr);
   for (std::size_t buffer = 0; buffer < 2; ++buffer) {
     Content_legacyWeaponModelBuffers[buffer] =
         static_cast<Actors_WeaponModelData*>(
@@ -662,7 +663,7 @@ void InitializeLiveActorModelResources() {
               nullptr);
   Content_legacySequenceParsePhase = 0;
   Content_legacyEtmLoadPhase = 0;
-  Content_modelParseResetFlag = 0;
+  VS::Content::modelParseResetFlag = 0;
   Menu_Inventory_equipmentModelLoadStep = 0;
   Content_legacyModelLoadPhase = 0;
   Actors_sharedSequenceBankIndex = 0;

@@ -17,15 +17,15 @@
 #include "Battle/HitCalculations.hpp"
 #include "Battle/HitChance.h"
 #include "Battle/HitModifiersLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 
 namespace VS::Battle {
 namespace {
 [[noreturn]] void Refuse() {
-  Core_Errorf("battle",
-              "Action calculation refused missing state, used index or "
-              "retired hit/stat/effect selector");
+  VS::Core::Errorf("battle",
+                   "Action calculation refused missing state, used index or "
+                   "retired hit/stat/effect selector");
   std::abort();
 }
 template <typename T>

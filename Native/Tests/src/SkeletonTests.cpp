@@ -18,7 +18,7 @@
 #include "Actors/Skeleton.h"
 #include "Actors/Skeleton.hpp"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Content/ModuleData.h"
 #include "Core/Math/Matrix.hpp"
@@ -89,11 +89,11 @@ constexpr std::array<BoneLabels, kTestBones> kLabels{{
 struct LiveSkeletonState {
   decltype(std::to_array(Actors_actorRecords)) saved_actors =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Actors_weaponModels)) saved_weapons =
-      std::to_array(Actors_weaponModels);
+  decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
+      std::to_array(VS::Actors::weaponModels);
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
-  MATRIX saved_camera = Actors_boneMatrixScratch;
+  MATRIX saved_camera = VS::Actors::boneMatrixScratch;
   std::vector<std::unique_ptr<Actors_ActorRecord>> records;
   std::vector<std::unique_ptr<Field_GimmickInstance>> gimmicks;
   std::vector<std::unique_ptr<Actors_WeaponModel>> weapons;
@@ -102,11 +102,11 @@ struct LiveSkeletonState {
   LiveSkeletonState() {
     std::fill(std::begin(Actors_actorRecords), std::end(Actors_actorRecords),
               nullptr);
-    std::fill(std::begin(Actors_weaponModels), std::end(Actors_weaponModels),
-              nullptr);
+    std::fill(std::begin(VS::Actors::weaponModels),
+              std::end(VS::Actors::weaponModels), nullptr);
     std::fill(std::begin(Field_gimmickInstances),
               std::end(Field_gimmickInstances), nullptr);
-    Actors_boneMatrixScratch = TranslationMatrix({10, 20, 30});
+    VS::Actors::boneMatrixScratch = TranslationMatrix({10, 20, 30});
   }
   LiveSkeletonState(const LiveSkeletonState&) = delete;
   LiveSkeletonState& operator=(const LiveSkeletonState&) = delete;
@@ -114,9 +114,9 @@ struct LiveSkeletonState {
   LiveSkeletonState& operator=(LiveSkeletonState&&) = delete;
   ~LiveSkeletonState() {
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
-    std::ranges::copy(saved_weapons, std::begin(Actors_weaponModels));
+    std::ranges::copy(saved_weapons, std::begin(VS::Actors::weaponModels));
     std::ranges::copy(saved_gimmicks, std::begin(Field_gimmickInstances));
-    Actors_boneMatrixScratch = saved_camera;
+    VS::Actors::boneMatrixScratch = saved_camera;
     for (const auto& model : models) {
       VS::Render::ForgetLiveModelExtent(model.get());
     }
@@ -160,8 +160,8 @@ struct LiveSkeletonState {
     weapons.push_back(std::make_unique<Actors_WeaponModel>());
     Actors_WeaponModel& weapon = *weapons.back();
     weapon.sectionOffsets = reinterpret_cast<Actors_WeaponModelData*>(&model);
-    Actors_weaponModels[static_cast<std::size_t>(actor_id) *
-                        actors::kWeaponsPerActor] = &weapon;
+    VS::Actors::weaponModels[static_cast<std::size_t>(actor_id) *
+                             actors::kWeaponsPerActor] = &weapon;
     return weapon;
   }
 };
@@ -722,8 +722,10 @@ TEST_CASE("Skeleton bindings retire the module entries they replace",
     INFO("address " << address);
     CHECK(resolve(address) == nullptr);
   }
-  CHECK(resolve(0x800F3C58u) == static_cast<void*>(&Actors_skeletonPose));
-  CHECK(resolve(0x800F3C78u) == static_cast<void*>(&Actors_skeletonRootMatrix));
-  CHECK(resolve(0x800F4588u) == static_cast<void*>(&Actors_weaponModels));
-  CHECK(resolve(0x800F49B8u) == static_cast<void*>(&Actors_boneMatrixScratch));
+  CHECK(resolve(0x800F3C58u) == static_cast<void*>(&VS::Actors::skeletonPose));
+  CHECK(resolve(0x800F3C78u) ==
+        static_cast<void*>(&VS::Actors::skeletonRootMatrix));
+  CHECK(resolve(0x800F4588u) == static_cast<void*>(&VS::Actors::weaponModels));
+  CHECK(resolve(0x800F49B8u) ==
+        static_cast<void*>(&VS::Actors::boneMatrixScratch));
 }

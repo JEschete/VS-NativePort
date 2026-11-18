@@ -23,7 +23,7 @@
 #include "Effects/TimelineTracksLive.hpp"
 #include "Effects/Transforms.h"
 #include "Field/ChestInteractionsLive.h"
-#include "Field/InteractionTargetLive.h"
+#include "Field/InteractionTargetLive.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -167,7 +167,7 @@ void LiveActivateTargetRoomTile(Effects_EffectInstance* instance) {
   if (Refused(instance, "room tile")) return;
   if (const auto tile = TargetRoomTile(EndpointsOf(*instance))) {
     SVECTOR point = PointOf(*tile);
-    Field_DisableTrapAtPositionEntry(&point);
+    VS::Field::DisableTrapAtPositionEntry(&point);
   }
 }
 

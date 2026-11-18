@@ -18,7 +18,7 @@
 #include "Battle/StatusHelpersLive.hpp"
 #include "Content/ModuleData.h"
 #include "Field/Interactions.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -77,7 +77,7 @@ struct LiveRiskFixture {
   Battle_ActionState* saved_action = Battle_actionState;
   std::uint32_t saved_control = Field_controlMode;
   std::uint32_t saved_flow = Battle_actionFlowMode;
-  int saved_ticks = State_tickSpeed;
+  int saved_ticks = VS::State::tickSpeed;
   int saved_timer = Battle_targetingRiskTimer;
   Battle_Actor target_actor{};
   Battle_Actor player_actor{};
@@ -96,7 +96,7 @@ struct LiveRiskFixture {
     Battle_actionState = &action;
     Field_controlMode = 2;
     Battle_actionFlowMode = 1;
-    State_tickSpeed = 1;
+    VS::State::tickSpeed = 1;
     Battle_targetingRiskTimer = 0;
   }
   ~LiveRiskFixture() {
@@ -105,7 +105,7 @@ struct LiveRiskFixture {
     Battle_actionState = saved_action;
     Field_controlMode = saved_control;
     Battle_actionFlowMode = saved_flow;
-    State_tickSpeed = saved_ticks;
+    VS::State::tickSpeed = saved_ticks;
     Battle_targetingRiskTimer = saved_timer;
   }
 };
@@ -384,7 +384,7 @@ TEST_CASE(
   CHECK(Battle_targetingRiskTimer == 0);
   Battle_actionFlowMode = 2;
   Battle_targetingRiskTimer = 29;
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   battle::UpdateLiveTargetingRiskPenalty();
   CHECK(Battle_targetingRiskTimer == 1);
 }

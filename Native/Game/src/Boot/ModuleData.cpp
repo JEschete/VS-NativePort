@@ -125,8 +125,8 @@
 #include "Menu/Magic.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
-#include "Menu/OptionsLiveState.h"
-#include "Menu/RenameLiveState.h"
+#include "Menu/OptionsLiveState.hpp"
+#include "Menu/RenameLiveState.hpp"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Menu/Status/ActorStatus.h"
@@ -550,8 +550,8 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"MENU/MENU5.PRG", 0x5E30, 640u, &Menu_Map_connectingMaps, sizeof Menu_Map_connectingMaps}, // G01213 _connectingMaps
     {"MENU/MENU5.PRG", 0x60B0, 1044u, &Menu_Map_doors, sizeof Menu_Map_doors}, // G01218 _doors
     {"MENU/MENU7.PRG", 0x81B0, 1790u, &Menu_Files_containerStrings, sizeof Menu_Files_containerStrings}, // G01269 _containerStrings
-    {"MENU/MENU8.PRG", 0x2D58, 2140u, &Menu_Options_menuStrings, sizeof Menu_Options_menuStrings}, // G01393 _menuStrings
-    {"MENU/MENU8.PRG", 0x35B4, 416u, &Menu_Rename_renderRenameMenuStrings, sizeof Menu_Rename_renderRenameMenuStrings}, // G01396 _renderRenameMenuStrings
+    {"MENU/MENU8.PRG", 0x2D58, 2140u, &VS::Menu::Options::menuStrings, sizeof VS::Menu::Options::menuStrings}, // G01393 _menuStrings
+    {"MENU/MENU8.PRG", 0x35B4, 416u, &VS::Menu::Rename::renderRenameMenuStrings, sizeof VS::Menu::Rename::renderRenameMenuStrings}, // G01396 _renderRenameMenuStrings
     {"MENU/MENU9.PRG", 0x5D20, 68u, &Menu_Score_menuText, sizeof Menu_Score_menuText}, // G01449 _menuText
     {"MENU/MENU9.PRG", 0x5D64, 384u, &Menu_Score_rankText, sizeof Menu_Score_rankText}, // G01463 _rankText
     {"MENU/MENU9.PRG", 0x5EE4, 728u, &Menu_Score_titleText, sizeof Menu_Score_titleText}, // G01474 _titleText

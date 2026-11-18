@@ -15,7 +15,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/FramebufferEffects.h"
@@ -124,21 +124,21 @@ class LiveOverlayGuard {
   LiveOverlayGuard& operator=(LiveOverlayGuard&&) = delete;
   ~LiveOverlayGuard() {
     Render::InitializeLiveFramebufferEffect();
-    Field_screenTransitionAlpha = alpha_;
-    Field_screenTransitionStep = step_;
-    Field_screenTransitionEffect = effect_;
-    Field_screenTransitionWipeAngle = angle_;
-    Field_screenTransitionSpeed = speed_;
+    VS::Field::screenTransitionAlpha = alpha_;
+    VS::Field::screenTransitionStep = step_;
+    VS::Field::screenTransitionEffect = effect_;
+    VS::Field::screenTransitionWipeAngle = angle_;
+    VS::Field::screenTransitionSpeed = speed_;
     Render_frameBuf = frame_buffer_;
     Core_Gte_Reset();
   }
 
  private:
-  int alpha_ = Field_screenTransitionAlpha;
-  u_int step_ = Field_screenTransitionStep;
-  int effect_ = Field_screenTransitionEffect;
-  int angle_ = Field_screenTransitionWipeAngle;
-  int speed_ = Field_screenTransitionSpeed;
+  int alpha_ = VS::Field::screenTransitionAlpha;
+  u_int step_ = VS::Field::screenTransitionStep;
+  int effect_ = VS::Field::screenTransitionEffect;
+  int angle_ = VS::Field::screenTransitionWipeAngle;
+  int speed_ = VS::Field::screenTransitionSpeed;
   int frame_buffer_ = Render_frameBuf;
 };
 
@@ -788,15 +788,15 @@ TEST_CASE("Live screen transition steps without an ordering table",
           "[render-overlay][render]") {
   const LiveOverlayGuard guard;
   const std::uint64_t refused = Render::RefusedLiveScreenOverlayCount();
-  Field_screenTransitionAlpha = 0;
-  Field_screenTransitionStep = 1;
-  Field_screenTransitionEffect = 0;
-  Field_screenTransitionSpeed = 30;
+  VS::Field::screenTransitionAlpha = 0;
+  VS::Field::screenTransitionStep = 1;
+  VS::Field::screenTransitionEffect = 0;
+  VS::Field::screenTransitionSpeed = 30;
   Render::DrawLiveScreenTransition(nullptr);
-  CHECK(Field_screenTransitionAlpha == 30);
+  CHECK(VS::Field::screenTransitionAlpha == 30);
   CHECK(Render::RefusedLiveScreenOverlayCount() == refused);
   Render::DrawLiveScreenTransition(nullptr);
-  CHECK(Field_screenTransitionAlpha == 60);
+  CHECK(VS::Field::screenTransitionAlpha == 60);
   CHECK(Render::RefusedLiveScreenOverlayCount() == refused + 1);
 }
 
@@ -859,15 +859,15 @@ TEST_CASE("Live screen transition fades the frame being built",
           "[render-overlay][render]") {
   const LiveOverlayGuard guard;
   Render_frameBuf = 1;
-  Field_screenTransitionAlpha = 100;
-  Field_screenTransitionStep = 1;
-  Field_screenTransitionEffect = 0;
-  Field_screenTransitionSpeed = 10;
+  VS::Field::screenTransitionAlpha = 100;
+  VS::Field::screenTransitionStep = 1;
+  VS::Field::screenTransitionEffect = 0;
+  VS::Field::screenTransitionSpeed = 10;
   std::array<u_long, 4> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   Render::DrawLiveScreenTransition(ordering.data());
-  CHECK(Field_screenTransitionAlpha == 110);
-  CHECK(Field_screenTransitionStep == 1);
+  CHECK(VS::Field::screenTransitionAlpha == 110);
+  CHECK(VS::Field::screenTransitionStep == 1);
   const auto chain = Chain(&ordering[1], &ordering[0]);
   REQUIRE(chain.size() == 2);
   CHECK(chain[0] == &Render_legacyTransitionDrawModes[1]);
@@ -884,16 +884,16 @@ TEST_CASE("Live screen transition wipes across the centred band",
           "[render-overlay][render]") {
   const LiveOverlayGuard guard;
   Render_frameBuf = 0;
-  Field_screenTransitionAlpha = 255;
-  Field_screenTransitionStep = 1;
-  Field_screenTransitionEffect = 2;
-  Field_screenTransitionWipeAngle = 0;
-  Field_screenTransitionSpeed = 5;
+  VS::Field::screenTransitionAlpha = 255;
+  VS::Field::screenTransitionStep = 1;
+  VS::Field::screenTransitionEffect = 2;
+  VS::Field::screenTransitionWipeAngle = 0;
+  VS::Field::screenTransitionSpeed = 5;
   std::array<u_long, 4> ordering{};
   ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
   Render::DrawLiveScreenTransition(ordering.data());
-  CHECK(Field_screenTransitionAlpha == 255);
-  CHECK(Field_screenTransitionStep == 1);
+  CHECK(VS::Field::screenTransitionAlpha == 255);
+  CHECK(VS::Field::screenTransitionStep == 1);
   const auto chain = Chain(&ordering[1], &ordering[0]);
   REQUIRE(chain.size() == 4);
   CHECK(chain[0] == &Render_legacyTransitionDrawModes[0]);

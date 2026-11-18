@@ -10,7 +10,7 @@
 #include "Audio/MusicLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptAudioCommands.hpp"
@@ -29,7 +29,7 @@ constexpr char kSkipActive = 2;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Debugf("event", "%s", message);
+    VS::Core::Debugf("event", "%s", message);
     std::abort();
   }
 }
@@ -49,8 +49,8 @@ int Group(std::uint32_t group) { return static_cast<int>(group); }
 class LiveScriptAudioHost final : public event::ScriptAudioHost {
  public:
   void Refuse(event::ScriptAudioRefusal refusal, int value) override {
-    Core_Warnf("event", "Script sound command refused %s (%d)",
-               RefusalText(refusal), value);
+    VS::Core::Warnf("event", "Script sound command refused %s (%d)",
+                    RefusalText(refusal), value);
   }
 
   [[nodiscard]] int ResolveActor(std::uint16_t reference) override {

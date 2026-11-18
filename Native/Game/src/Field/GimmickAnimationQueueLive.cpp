@@ -1,4 +1,4 @@
-#include "Field/GimmickAnimationQueueLive.h"
+#include "Field/GimmickAnimationQueueLive.hpp"
 
 #include <algorithm>
 #include <array>
@@ -285,20 +285,20 @@ bool QueueLiveGimmickAnimation(int kind, RoomObjectTarget target) {
 }  // namespace VS::Field
 
 // decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338).
-void Field_QueueGimmickAnimationEntry(int queued_job_kind,
-                                      Field_MpdLockTrigger* lock_trigger) {
+void VS::Field::QueueGimmickAnimationEntry(int queued_job_kind,
+                                           Field_MpdLockTrigger* lock_trigger) {
   static_cast<void>(
       VS::Field::QueueLiveGimmickAnimation(queued_job_kind, lock_trigger));
 }
 
 // decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16353).
-void Field_UpdateGimmickAnimationQueueEntry() {
+void VS::Field::UpdateGimmickAnimationQueueEntry() {
   LiveAnimationDispatchHost host;
   static_cast<void>(VS::Field::UpdateGimmickAnimationQueue(host));
 }
 
 // decomp: BATTLE.PRG func_8008B6B4 (src/BATTLE/BATTLE.PRG/146C.c:16052).
-void Field_ResetGimmickAnimationQueueEntry() {
+void VS::Field::ResetGimmickAnimationQueueEntry() {
   LiveAnimationResetHost host;
   VS::Field::ResetGimmickAnimationQueue(host);
 }

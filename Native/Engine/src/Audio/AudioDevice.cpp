@@ -11,7 +11,7 @@
 #include <string>
 
 #include "Audio/VoiceEngine.hpp"
-#include "Audio/XaPlayback.h"
+#include "Audio/XaPlayback.hpp"
 #include "Core/Log.hpp"
 
 namespace VS::Audio {
@@ -83,7 +83,7 @@ std::expected<void, std::string> AudioDevice::Open() {
 }
 
 void AudioDevice::Close() {
-  if (g_primary == this) Audio_Native_StopXaStream();
+  if (g_primary == this) VS::Audio::StopXaStream();
   if (m_stream_) {
     if (!SDL_SetAudioStreamGetCallback(m_stream_, nullptr, nullptr)) {
       Core::LogWrite(Core::LogLevel::Error, "audio",

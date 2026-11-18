@@ -11,14 +11,13 @@
 #include <string_view>
 #include <utility>
 
-#include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Textures.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
@@ -56,7 +55,7 @@ inline auto PreviewOwners() {
                     BytesOf(Audio_Mixer_voiceScheduler),
                     BytesOf(Audio_SoundEffects_channels),
                     BytesOf(Actors_actorRecords),
-                    BytesOf(Actors_weaponModels),
+                    BytesOf(VS::Actors::weaponModels),
                     BytesOf(Field_gimmickInstances),
                     BytesOf(Actors_primarySequenceBuffer),
                     BytesOf(Actors_sequenceWorkBuffer),
@@ -74,9 +73,9 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Actors::roomActorScale),
                     BytesOf(Actors_pushedGimmickIndex),
                     BytesOf(Actors_isActorUpdateComplete),
-                    BytesOf(Actors_skeletonPose),
-                    BytesOf(Actors_skeletonRootMatrix),
-                    BytesOf(Actors_boneMatrixScratch),
+                    BytesOf(VS::Actors::skeletonPose),
+                    BytesOf(VS::Actors::skeletonRootMatrix),
+                    BytesOf(VS::Actors::boneMatrixScratch),
                     BytesOf(VS::Actors::modelRenderContext),
                     BytesOf(*Render_ModelWorkspace()),
                     BytesOf(Content_legacyActorAssetRequests),
@@ -105,11 +104,11 @@ inline auto PreviewOwners() {
                     BytesOf(Content_legacyEtmFileBuffer),
                     BytesOf(Content_legacyEtmFileLocation),
                     BytesOf(Content_legacyEtmDiscRequest),
-                    BytesOf(Content_modelParseResetFlag),
-                    BytesOf(Content_assetQueuePeakUsage),
-                    BytesOf(Content_lastLoadPhaseSnapshot),
-                    BytesOf(Content_assetQueueFrameTicks),
-                    BytesOf(Content_lastAssetRequestType),
+                    BytesOf(VS::Content::modelParseResetFlag),
+                    BytesOf(VS::Content::assetQueuePeakUsage),
+                    BytesOf(VS::Content::lastLoadPhaseSnapshot),
+                    BytesOf(VS::Content::assetQueueFrameTicks),
+                    BytesOf(VS::Content::lastAssetRequestType),
                     BytesOf(Menu_Inventory_equipmentModelLoadStep),
                     BytesOf(score::LiveEnemyPreviewState())};
 }
@@ -163,7 +162,8 @@ class PreviewFixture : public TerminalFixture {
   ~PreviewFixture() {
     if (score::LiveEnemyPreviewState().file != content::AssetAddress::kNone ||
         !AssetsIdle()) {
-      Core_Errorf("tests", "terminal preview did not drain its genuine assets");
+      VS::Core::Errorf("tests",
+                       "terminal preview did not drain its genuine assets");
       std::abort();
     }
     if (score::LiveEnemyPreviewState().model_buffer !=

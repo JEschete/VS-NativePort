@@ -19,25 +19,25 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomState.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/ScreenTransition.h"
 
 // decomp: vs_battle_screenTransitionStep
 // (vs_battle_screenTransitionStep@BATTLE/BATTLE.PRG)
-unsigned int Field_screenTransitionStep;
+unsigned int VS::Field::screenTransitionStep;
 // decomp: vs_battle_screenTransitionEffect
 // (vs_battle_screenTransitionEffect@BATTLE/BATTLE.PRG)
-int Field_screenTransitionEffect;
+int VS::Field::screenTransitionEffect;
 // decomp: vs_battle_screenTransitionAlpha
 // (vs_battle_screenTransitionAlpha@BATTLE/BATTLE.PRG)
-int Field_screenTransitionAlpha;
+int VS::Field::screenTransitionAlpha;
 // decomp: vs_battle_screenTransitionWipeAngle
 // (vs_battle_screenTransitionWipeAngle@BATTLE/BATTLE.PRG)
-int Field_screenTransitionWipeAngle;
+int VS::Field::screenTransitionWipeAngle;
 // decomp: vs_battle_screenTransitionSpeed
 // (vs_battle_screenTransitionSpeed@BATTLE/BATTLE.PRG)
-int Field_screenTransitionSpeed;
+int VS::Field::screenTransitionSpeed;
 
 namespace VS::Field {
 namespace {
@@ -185,7 +185,7 @@ class LiveTransitionPrimitives final : public TransitionPrimitiveTarget {
     Render_legacyTransitionDrawModes[kCopiedBuffer] = mode;
   }
   void SetTransitionAlpha(std::int32_t alpha) override {
-    Field_screenTransitionAlpha = alpha;
+    screenTransitionAlpha = alpha;
   }
 };
 }  // namespace
@@ -194,28 +194,28 @@ RoomTransitionState LoadLiveRoomTransition() {
   return RoomTransitionState{
       .screen =
           Render::ScreenTransition{
-              .alpha = Field_screenTransitionAlpha,
-              .step = Field_screenTransitionStep,
-              .effect = Field_screenTransitionEffect,
-              .wipe_angle = Field_screenTransitionWipeAngle,
-              .speed = Field_screenTransitionSpeed,
+              .alpha = screenTransitionAlpha,
+              .step = screenTransitionStep,
+              .effect = screenTransitionEffect,
+              .wipe_angle = screenTransitionWipeAngle,
+              .speed = screenTransitionSpeed,
           },
       .pending_door = DoorRecordOf(Field_pendingDestinationDoor),
   };
 }
 
 void StoreLiveRoomTransition(const RoomTransitionState& state) {
-  Field_screenTransitionAlpha = state.screen.alpha;
-  Field_screenTransitionStep = state.screen.step;
-  Field_screenTransitionEffect = state.screen.effect;
-  Field_screenTransitionWipeAngle = state.screen.wipe_angle;
-  Field_screenTransitionSpeed = state.screen.speed;
+  screenTransitionAlpha = state.screen.alpha;
+  screenTransitionStep = state.screen.step;
+  screenTransitionEffect = state.screen.effect;
+  screenTransitionWipeAngle = state.screen.wipe_angle;
+  screenTransitionSpeed = state.screen.speed;
   StoreDoorRecord(state.pending_door, Field_pendingDestinationDoor);
 }
 
 int LiveScreenTransitionPhase() {
-  return static_cast<int>(ScreenTransitionPhase(
-      static_cast<TransitionStep>(Field_screenTransitionStep)));
+  return static_cast<int>(
+      ScreenTransitionPhase(static_cast<TransitionStep>(screenTransitionStep)));
 }
 
 void LiveConfigureScreenTransition(int effect, int speed, int wipe_angle) {

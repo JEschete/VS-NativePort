@@ -31,7 +31,7 @@
 #include "Ending/ClearResults.h"
 #include "Ending/ClearResultsCore.hpp"
 #include "Ending/Credits.h"
-#include "Ending/Credits/EmbeddedArt.h"
+#include "Ending/Credits/EmbeddedArt.hpp"
 #include "Ending/Credits/StaffRoll.h"
 #include "Ending/Credits/StaffRollCore.hpp"
 #include "Ending/Results.h"
@@ -780,14 +780,14 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
   void StopMusic() override { Audio::LiveRequestXaStreamStop(); }
 
   [[nodiscard]] bool PrepareEmbeddedArt() override {
-    prepared_ = Ending_Credits_PrepareEmbeddedArt() != 0;
+    prepared_ = VS::Ending::Credits::PrepareEmbeddedArt() != 0;
     return prepared_;
   }
   [[nodiscard]] std::span<const std::byte> EmbeddedArt(
       std::size_t index) override {
     if (!prepared_ || index >= Credits::kEmbeddedArtCount) return {};
     return {reinterpret_cast<const std::byte*>(
-                Ending_Credits_EmbeddedArt(static_cast<unsigned>(index))),
+                VS::Ending::Credits::EmbeddedArt(static_cast<unsigned>(index))),
             kEmbeddedTimBytes};
   }
   [[nodiscard]] std::span<std::byte> IllustrationWorkspace() override {

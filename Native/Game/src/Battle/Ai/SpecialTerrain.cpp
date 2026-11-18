@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -72,8 +72,8 @@ bool FloodFillAiTerrainHeights(SpecialTerrainMaps maps,
                                int x, int z, int height) {
   const auto start = CellOf(x, z);
   if (!start) {
-    Core_Warnf("ai", "Special terrain fill from (%d,%d) is outside the grid", x,
-               z);
+    VS::Core::Warnf(
+        "ai", "Special terrain fill from (%d,%d) is outside the grid", x, z);
     return false;
   }
   const auto assigned = static_cast<std::uint16_t>(
@@ -103,7 +103,7 @@ std::optional<std::int16_t> FindAdjacentAiGroundHeight(
     TileFlagCells tile_flags, const FloorHeightQuery& floor_height,
     const NavigationDirectionCodes& directions, int x, int z) {
   if (!floor_height) {
-    Core_Warnf("ai", "Adjacent ground height requires a floor query");
+    VS::Core::Warnf("ai", "Adjacent ground height requires a floor query");
     return std::nullopt;
   }
   for (std::size_t step = 0; step < kSteppedDirections; ++step) {

@@ -27,13 +27,13 @@ static_assert(
 }  // namespace
 
 // D_800F1D08, BATTLE/BATTLE.PRG: owns no PS1-sized inline pointer tail.
-Field_DoorMatchList Field_matchingDoorRecords{};
+VS::Field::DoorMatchList VS::Field::matchingDoorRecords{};
 
 namespace VS::Field {
 // decomp: BATTLE.PRG func_8008BAC8 (src/BATTLE/BATTLE.PRG/146C.c:16185).
-Field_DoorMatchList* TransitionLiveDoorsAtTile(int x, int z, int layer) {
+DoorMatchList* TransitionLiveDoorsAtTile(int x, int z, int layer) {
   matches.clear();
-  Field_matchingDoorRecords = {};
+  matchingDoorRecords = {};
   if (Field_roomData.doors == nullptr) return nullptr;
   const auto bytes = Field_roomData.header.doorsLength;
   if (bytes % sizeof(Field_MpdDoorRecord) != 0) {
@@ -55,8 +55,8 @@ Field_DoorMatchList* TransitionLiveDoorsAtTile(int x, int z, int layer) {
   TransitionDoorsAtTile(tiles, x, z, layer, indices);
   matches.reserve(indices.size());
   for (const std::size_t index : indices) matches.push_back(&records[index]);
-  Field_matchingDoorRecords.count = static_cast<int>(matches.size());
-  Field_matchingDoorRecords.records = matches.data();
-  return &Field_matchingDoorRecords;
+  matchingDoorRecords.count = static_cast<int>(matches.size());
+  matchingDoorRecords.records = matches.data();
+  return &matchingDoorRecords;
 }
 }  // namespace VS::Field

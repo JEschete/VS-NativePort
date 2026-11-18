@@ -19,11 +19,11 @@
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Loot/Paging.h"
+#include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
 
-static_assert(static_cast<std::size_t>(kMenuLootRowCapacity) ==
+static_assert(static_cast<std::size_t>(VS::Menu::Loot::kRowCapacity) ==
               VS::Menu::Loot::kLootRowCapacity);
 static_assert(sizeof(Menu_Loot_LootListItem) ==
               sizeof(VS::Menu::Loot::LootRow));
@@ -77,7 +77,8 @@ std::span<Menu_Loot_LootListItem, kLootRowCapacity> LiveRows() {
                                                              kLootRowCapacity);
 }
 
-// The screen allocates kMenuLootRowCapacity rows with the working inventory.
+// The screen allocates VS::Menu::Loot::kRowCapacity rows with the working
+// inventory.
 std::optional<LootStaging> Load(const char* operation) {
   if (Menu_Loot_inventory == nullptr || Menu_Loot_lootList == nullptr) {
     item_live::WarnNullRecord(operation);
@@ -220,29 +221,27 @@ void RecordClaimedKey(int item_id) {
     VS::State::SetLiveScriptFlag(*flag, 1);
   }
 }
-}  // namespace VS::Menu::Loot::Live
 
-void Menu_Loot_ResetPaging(void) {
-  auto& paging = VS::Menu::Loot::Live::PagingState();
+void ResetPaging() {
+  auto& paging = PagingState();
   paging.batch = {};
   paging.sources.clear();
 }
 
-int Menu_Loot_AdvanceStagedInventory(void) {
+int AdvanceStagedInventory() {
   namespace loot = VS::Menu::Loot;
-  namespace item_live = VS::Items::Live;
-  auto& paging = loot::Live::PagingState();
+  auto& paging = PagingState();
   if (!paging.batch.deferred) return 0;
-  auto records = loot::Live::TypedSources();
+  auto records = TypedSources();
   bool advanced = false;
-  loot::Live::Update("Menu::Loot::AdvanceStagedInventory",
-                     [&records, &advanced](loot::LootStaging& staging,
-                                           loot::ClaimCheck& check) {
-                       advanced = loot::AdvanceStagedInventory(records, staging,
-                                                               check);
-                     });
+  Update("Menu::Loot::AdvanceStagedInventory",
+         [&records, &advanced](loot::LootStaging& staging,
+                               loot::ClaimCheck& check) {
+           advanced = loot::AdvanceStagedInventory(records, staging, check);
+         });
   for (std::size_t i = 0; i < records.size(); ++i) {
     item_live::Commit(*paging.sources[i], records[i]);
   }
   return advanced ? 1 : 0;
 }
+}  // namespace VS::Menu::Loot::Live

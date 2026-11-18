@@ -24,7 +24,7 @@
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/WeaponModel.h"
 #include "Content/ActorAssets.hpp"
@@ -41,14 +41,14 @@
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Menu::Framework {
 namespace {
 using Content::AssetAddress;
 
 static_assert(kActorSlots == std::size(Actors_actorRecords));
-static_assert(kWeaponModelSlots == std::size(Actors_weaponModels));
+static_assert(kWeaponModelSlots == std::size(VS::Actors::weaponModels));
 static_assert(kActorBoneMatrices ==
               std::extent_v<decltype(Actors_ActorRecord::boneMatrices)>);
 
@@ -312,7 +312,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
     if (camera_ != nullptr) Render::PrepareLiveActorCameraMatrices(camera_);
   }
 
-  [[nodiscard]] int TickSpeed() const override { return State_tickSpeed; }
+  [[nodiscard]] int TickSpeed() const override { return VS::State::tickSpeed; }
 
   void SetFramesPerStep(int slot, std::uint8_t frames) override {
     if (Actors_ActorRecord* record = Record(slot)) {
@@ -408,7 +408,7 @@ class LiveActorPreviewHost final : public ActorPreviewHost {
       Warn("weapon slot past the weapon models");
       return nullptr;
     }
-    return Actors_weaponModels[slot];
+    return VS::Actors::weaponModels[slot];
   }
 
   MATRIX* camera_;

@@ -18,16 +18,16 @@
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpers.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/Interactions.h"
 #include "Items/ItemRecordsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Battle {
 namespace {
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Errorf("battle", "%s", message);
+    VS::Core::Errorf("battle", "%s", message);
     std::abort();
   }
 }
@@ -65,7 +65,7 @@ class LiveTargetingRiskWorld final : public TargetingRiskWorld {
     return Battle_actionFlowMode;
   }
   [[nodiscard]] std::int32_t TickSpeed() const override {
-    return State_tickSpeed;
+    return VS::State::tickSpeed;
   }
   [[nodiscard]] std::optional<TargetingRiskTarget> SelectedTarget()
       const override {

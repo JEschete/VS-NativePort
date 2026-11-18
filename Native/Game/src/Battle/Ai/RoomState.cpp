@@ -33,7 +33,7 @@
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Collision.h"
@@ -133,8 +133,8 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     auto* storage = static_cast<RoomAiStorage*>(
         VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(RoomAiStorage)));
     if (storage == nullptr) {
-      Core_Errorf("ai", "Room AI allocation failed: bytes=%zu",
-                  sizeof(RoomAiStorage));
+      VS::Core::Errorf("ai", "Room AI allocation failed: bytes=%zu",
+                       sizeof(RoomAiStorage));
       abort();
     }
     memset(storage, 0, sizeof *storage);
@@ -261,5 +261,6 @@ void Battle_Ai_InvalidateSessionBindings(void) {
   Battle_Ai_fallbackCandidateCount = 0;
   Battle_Ai_unusedPlanCounter = 0;
   Battle_Ai_candidateEngagedThisUpdate = 0;
-  Core_Debugf("ai.lifecycle", "invalidated AI bindings after game-arena reset");
+  VS::Core::Debugf("ai.lifecycle",
+                   "invalidated AI bindings after game-arena reset");
 }

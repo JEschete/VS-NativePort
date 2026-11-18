@@ -17,7 +17,7 @@
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
 #include "Core/BiosRand.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
@@ -77,7 +77,7 @@ std::uint64_t refusals = 0;
 
 void Refuse(const char* reason) {
   if (std::has_single_bit(++refusals)) {
-    Core_Warnf("menu.results", "Game-clear refused: %s", reason);
+    VS::Core::Warnf("menu.results", "Game-clear refused: %s", reason);
   }
 }
 

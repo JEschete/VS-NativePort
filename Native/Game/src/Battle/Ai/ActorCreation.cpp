@@ -11,7 +11,7 @@
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/ActorSettings.hpp"
 #include "Battle/Ai/FrameUpdate.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Battle::Ai {
@@ -50,7 +50,7 @@ constexpr std::uint32_t kByteMask = 0xFF;
 constexpr auto kGridSide = static_cast<std::uint32_t>(kTileFlagGridSide);
 
 bool Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return false;
 }
 

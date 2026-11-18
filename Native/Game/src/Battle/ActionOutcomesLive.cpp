@@ -23,7 +23,7 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/HudOrchestrationLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/LootLive.hpp"
 #include "Save/Snapshot.hpp"
 #include "State/KillScoreLive.hpp"
@@ -33,9 +33,9 @@ namespace VS::Battle {
 namespace {
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle",
-                "Action outcome refused: missing used state, actor, "
-                "stats, placement, or invalid target count/index");
+    VS::Core::Errorf("battle",
+                     "Action outcome refused: missing used state, actor, "
+                     "stats, placement, or invalid target count/index");
     std::abort();
   }
 }

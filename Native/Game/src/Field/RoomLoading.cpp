@@ -153,7 +153,8 @@ constexpr std::uint8_t kMostRecentRoom = 4;
 // The raised camera's room (zone 27, room 1).
 constexpr int kRaisedCameraZone = 27;
 constexpr int kRaisedCameraRoom = 1;
-// The screen transition steps a room starts with (Field_screenTransitionStep).
+// The screen transition steps a room starts with
+// (VS::Field::screenTransitionStep).
 constexpr int kFadeInTransitionEffect = 3;
 constexpr int kFadeInStartStep = 0;
 constexpr int kCoverStep = 3;

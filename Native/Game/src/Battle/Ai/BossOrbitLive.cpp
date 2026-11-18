@@ -18,11 +18,12 @@
 #include "Battle/Ai/BossOrbit.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Core/BiosRand.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle::Ai {
@@ -59,13 +60,6 @@ static_assert(offsetof(Tracking, movementTarget) ==
 static_assert(offsetof(Tracking, moveX) == offsetof(AiState, moveX));
 static_assert(offsetof(Tracking, moveZ) == offsetof(AiState, moveZ));
 static_assert(offsetof(Tracking, moveY) == offsetof(AiState, moveY));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 // The AI state's model is the actor's record.
 Actors_ActorRecord* RecordOf(const AiState& state) {

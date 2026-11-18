@@ -11,7 +11,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Battle/Actor.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Input/Pad.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -68,8 +68,9 @@ ControllerState& State(Category category) {
 }
 
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("menu.container", "Container detail controller refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.container",
+                   "Container detail controller refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 

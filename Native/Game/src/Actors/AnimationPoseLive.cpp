@@ -24,13 +24,13 @@
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/WeaponModel.h"
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Battle/ActionAnimation.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -136,8 +136,8 @@ class LiveAnimationBanks final : public AnimationBankSource {
   [[nodiscard]] void* SharedBank(int slot) const {
     if (slot < 0 ||
         static_cast<std::size_t>(slot) >= std::size(actor_.sharedSequences)) {
-      Core_Errorf(kChannel, "actor=%u shared SEQ slot %d refused",
-                  static_cast<unsigned>(actor_.instance.slot), slot);
+      VS::Core::Errorf(kChannel, "actor=%u shared SEQ slot %d refused",
+                       static_cast<unsigned>(actor_.instance.slot), slot);
       return nullptr;
     }
     return actor_.sharedSequences[slot];
@@ -299,9 +299,10 @@ void ReportEventProblemOnce(const EventProblem& problem) {
     return;
   }
   last = problem;
-  Core_Errorf(kChannel, "actor=%u animation=%u event %u %s; stopped or skipped",
-              problem.actor, problem.animation,
-              static_cast<unsigned>(problem.op), Describe(problem.status));
+  VS::Core::Errorf(kChannel,
+                   "actor=%u animation=%u event %u %s; stopped or skipped",
+                   problem.actor, problem.animation,
+                   static_cast<unsigned>(problem.op), Describe(problem.status));
 }
 
 // The module tables the events read: the lengths and weapon sounds in place,
@@ -456,7 +457,7 @@ class LiveEventHost final : public AnimationEventHost {
   }
 
   void FadeAttachedWeapons(const WeaponFade& fade, bool show) override {
-    for (Actors_WeaponModel* weapon : Actors_weaponModels) {
+    for (Actors_WeaponModel* weapon : weaponModels) {
       if (weapon == nullptr || weapon->boneCount == 0 ||
           weapon->attachmentBone == 0 || weapon->actorId != id_) {
         continue;
@@ -664,7 +665,7 @@ class LiveMotionLookHost final : public MotionLookHost {
 void UpdateLiveMotion(Actors_ActorRecord& actor, bool skip_tweens) {
   Render_ModelScratchpad* workspace = Render_ModelWorkspace();
   if (workspace == nullptr) {
-    Core_Errorf(kChannel, "Motion update has no model workspace");
+    VS::Core::Errorf(kChannel, "Motion update has no model workspace");
     return;
   }
   LiveMotionLookHost host(actor, *workspace);
@@ -739,8 +740,8 @@ std::optional<AnimationClipRef> BoundLiveAnimationClip(
 int RunLiveAnimationEvents(Actors_ActorRecord& actor,
                            Actors_AnimationPose& pose, int mode) {
   if (mode < 0 || mode > static_cast<int>(AnimationEventMode::kFindImpact)) {
-    Core_Errorf(kChannel, "actor=%u animation event mode %d refused",
-                static_cast<unsigned>(actor.instance.slot), mode);
+    VS::Core::Errorf(kChannel, "actor=%u animation event mode %d refused",
+                     static_cast<unsigned>(actor.instance.slot), mode);
     return 0;
   }
   LiveEventHost host(actor, pose, nullptr);
@@ -760,10 +761,10 @@ int RestartLiveAnimationEvents(Actors_ActorRecord& actor) {
   if (RestartActorAnimationEvents(host, tables.View(), clip,
                                   actor.poseOverrideActive != 0) ==
       EventRestart::kUnavailable) {
-    Core_Errorf(kChannel,
-                "cannot unwind actor=%u animation=%u: unavailable events",
-                static_cast<unsigned>(actor.instance.slot),
-                static_cast<unsigned>(actor.animationId));
+    VS::Core::Errorf(kChannel,
+                     "cannot unwind actor=%u animation=%u: unavailable events",
+                     static_cast<unsigned>(actor.instance.slot),
+                     static_cast<unsigned>(actor.animationId));
     return -1;
   }
   return 0;
@@ -775,12 +776,13 @@ int RestartLiveAnimationEvents(Actors_ActorRecord& actor) {
 std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
                                            u_short** header_out) {
   if (header_out == nullptr) {
-    Core_Errorf(kChannel, "Animation header lookup requires a header output");
+    VS::Core::Errorf(kChannel,
+                     "Animation header lookup requires a header output");
     return 0;
   }
   *header_out = nullptr;
   if (actor == nullptr) {
-    Core_Errorf(kChannel, "Animation header lookup requires an actor");
+    VS::Core::Errorf(kChannel, "Animation header lookup requires an actor");
     return 0;
   }
   const LiveHeader found = FindLiveHeader(
@@ -806,7 +808,7 @@ std::intptr_t FindLiveActorAnimationHeader(void* actor, int animation_id,
 void InitializeLiveActorAnimationPose(Actors_ActorRecord* actor,
                                       Actors_AnimationPose* pose) {
   if (actor == nullptr || pose == nullptr) {
-    Core_Errorf(kChannel, "Pose start requires an actor and a pose");
+    VS::Core::Errorf(kChannel, "Pose start requires an actor and a pose");
     return;
   }
   if (actor->poseOverrideActive != 0 &&
@@ -826,17 +828,17 @@ void InitializeLiveActorAnimationPose(Actors_ActorRecord* actor,
       InitializeActorAnimationPose(clip, actor->animationId, state);
   StorePoseState(state, found.address, *pose);
   if (start == PoseStart::kOutOfBank) {
-    Core_Errorf(kChannel,
-                "actor=%u animation=%u has a clip start outside its bank",
-                static_cast<unsigned>(actor->instance.slot),
-                static_cast<unsigned>(actor->animationId));
+    VS::Core::Errorf(kChannel,
+                     "actor=%u animation=%u has a clip start outside its bank",
+                     static_cast<unsigned>(actor->instance.slot),
+                     static_cast<unsigned>(actor->animationId));
   }
 }
 
 // decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1146)
 void UpdateLiveActorAnimationBlend(Actors_ActorRecord* actor) {
   if (actor == nullptr) {
-    Core_Errorf(kChannel, "Animation blend requires an actor");
+    VS::Core::Errorf(kChannel, "Animation blend requires an actor");
     return;
   }
   LiveBlendHost host(*actor);
@@ -846,7 +848,7 @@ void UpdateLiveActorAnimationBlend(Actors_ActorRecord* actor) {
 // decomp: BATTLE.PRG func_800B002C (src/BATTLE/BATTLE.PRG/44F14.c:1486)
 void UpdateLiveMotionAndLookAt(Actors_ActorRecord* actor, int skip_tweens) {
   if (actor == nullptr) {
-    Core_Errorf(kChannel, "Motion update requires an actor");
+    VS::Core::Errorf(kChannel, "Motion update requires an actor");
     return;
   }
   UpdateLiveMotion(*actor, skip_tweens != 0);
@@ -858,8 +860,8 @@ void ApplyLiveLockedBoneTransform(Actors_ActorRecord* actor,
   if (actor == nullptr || parent == nullptr || bone < 0 ||
       static_cast<std::size_t>(bone) >= std::size(actor->boneMatrices) ||
       saved < 1 || saved > kLockedBoneMatrices) {
-    Core_Errorf(kChannel, "Locked bone %d with saved matrix %d refused", bone,
-                saved);
+    VS::Core::Errorf(kChannel, "Locked bone %d with saved matrix %d refused",
+                     bone, saved);
     return;
   }
   // The saved matrix's padding carries over, as the original copied it whole.
@@ -867,7 +869,7 @@ void ApplyLiveLockedBoneTransform(Actors_ActorRecord* actor,
   const Transform3 transform = ApplyLockedBoneTransform(
       Core::Math::TransformOf(*parent), Core::Math::TransformOf(locked));
   Core::Math::StoreTransform(locked, transform);
-  Actors_skeletonPose.boneMatrices[bone] = locked;
+  skeletonPose.boneMatrices[bone] = locked;
   actor->boneMatrices[bone] = locked;
 }
 }  // namespace VS::Actors

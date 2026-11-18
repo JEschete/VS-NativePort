@@ -23,7 +23,7 @@
 #include "Menu/TextBox.h"
 #include "Render/Text/CompactFont.h"
 #include "State/SceneTimer.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace hud_orchestration_live_fixture {
 namespace b = VS::Battle;
@@ -160,7 +160,7 @@ class LiveState {
     Battle_statusIconCarousel.bytes[1] = 255;
     Battle_statusIconCarousel.bytes[2] = 255;
     Battle_statusIconCarousel.bytes[3] = 0;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     actor.stats = {};
     for (auto& limb : actor.stats.limbs) {
       limb.hp = limb.maxHp = 100;
@@ -186,7 +186,7 @@ class LiveState {
   SavedValue<Battle_statusLabelStepTimer> label_step_;
   SavedValue<Battle_puzzleTimerTextPointer> timer_alias_;
   SavedValue<Audio_Seq_unusedStateFlags> flags_;
-  SavedValue<State_tickSpeed> speed_;
+  SavedValue<VS::State::tickSpeed> speed_;
   SavedArray<Battle_actorMarkers> markers_;
   SavedArray<Battle_puzzleTimerText> timer_text_;
   SavedArray<Menu_textBoxes> boxes_;

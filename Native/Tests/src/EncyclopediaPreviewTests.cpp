@@ -14,10 +14,9 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "ActorAssets.h"
-#include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Battle/TargetingState.h"
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssets.hpp"
@@ -616,24 +615,24 @@ struct PreviewLifecycleFixture : LivePreviewFixture {
   game_clear_live_tests::SavedModuleData saved_module;
   game_clear_live_tests::SavedRuntime saved_runtime;
   game_clear_live_tests::SavedGlobals<
-      Actors_actorRecords, Actors_weaponModels, Content_legacyModelLoadPhase,
-      Content_modelParseResetFlag, Content_legacySequenceParsePhase,
-      Content_legacyShpFileBuffer, Content_legacyShpAllocated,
-      Content_legacyShpFileLocation, Content_legacyShpDiscRequest,
-      Content_legacyShpParseCursor, Content_legacyShpCopiedWordCount,
-      Content_legacyShpHeaderWord, Content_legacyShpTextureWidth,
-      Content_legacyShpTextureHeight, Content_legacyWeaponParseCursor,
-      Content_legacySequenceParseData, Content_legacyShpDiscOffsets,
-      Content_legacyShpSectorCounts>
+      Actors_actorRecords, VS::Actors::weaponModels,
+      Content_legacyModelLoadPhase, VS::Content::modelParseResetFlag,
+      Content_legacySequenceParsePhase, Content_legacyShpFileBuffer,
+      Content_legacyShpAllocated, Content_legacyShpFileLocation,
+      Content_legacyShpDiscRequest, Content_legacyShpParseCursor,
+      Content_legacyShpCopiedWordCount, Content_legacyShpHeaderWord,
+      Content_legacyShpTextureWidth, Content_legacyShpTextureHeight,
+      Content_legacyWeaponParseCursor, Content_legacySequenceParseData,
+      Content_legacyShpDiscOffsets, Content_legacyShpSectorCounts>
       saved_loader;
   equipment_detail_tests::ValueRestore<int> saved_zud_size{
       Menu_Score_zudSizes[7]};
 
   PreviewLifecycleFixture() {
     std::ranges::fill(Actors_actorRecords, nullptr);
-    std::ranges::fill(Actors_weaponModels, nullptr);
+    std::ranges::fill(VS::Actors::weaponModels, nullptr);
     Content_legacyModelLoadPhase = 0;
-    Content_modelParseResetFlag = 0;
+    VS::Content::modelParseResetFlag = 0;
     Content_legacySequenceParsePhase = 0;
     Content_legacyShpAllocated = 0;
     Content_legacyShpFileBuffer = nullptr;
@@ -696,7 +695,7 @@ void CheckEmptyPreviewQueue() {
   CHECK(std::ranges::all_of(
       Content_legacyActorAssetRequests,
       [](const auto& item) { return item.assetKind == 0; }));
-  CHECK(Content_modelParseResetFlag == 0);
+  CHECK(VS::Content::modelParseResetFlag == 0);
   CHECK(Content_legacyShpParseCursor == nullptr);
   CHECK(Content_legacySequenceParseData == nullptr);
 }
@@ -728,7 +727,7 @@ void CheckForeignModelRead(const void* file, const Content_DiscQueueSlot* read,
 
 const void* BeginPreviewParser() {
   REQUIRE(VS::Content::UpdateLiveActorAssetQueue() == 1);
-  REQUIRE(Content_modelParseResetFlag == 1);
+  REQUIRE(VS::Content::modelParseResetFlag == 1);
   auto* actor = Actors_actorRecords[1];
   if (actor == nullptr) throw std::runtime_error("preview actor was not bound");
   const auto* geometry = actor->instance.model;

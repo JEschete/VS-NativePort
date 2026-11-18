@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cinttypes>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Core::String {
 namespace {
@@ -27,12 +27,12 @@ void live_detail::ReportRefusedText(const char* operation,
   // The first and then every power-of-two refusal, so a per-frame request
   // cannot flood the log.
   if ((refused_text & (refused_text - 1)) == 0) {
-    Core_Errorf("text",
-                "%s at %s:%u: wrote %zu of %zu bytes; the text has no "
-                "terminator or does not fit the destination (refusal %" PRIu64
-                ")",
-                operation, site.file_name(), static_cast<unsigned>(site.line()),
-                written, requested, refused_text);
+    VS::Core::Errorf(
+        "text",
+        "%s at %s:%u: wrote %zu of %zu bytes; the text has no "
+        "terminator or does not fit the destination (refusal %" PRIu64 ")",
+        operation, site.file_name(), static_cast<unsigned>(site.line()),
+        written, requested, refused_text);
   }
 }
 }  // namespace VS::Core::String

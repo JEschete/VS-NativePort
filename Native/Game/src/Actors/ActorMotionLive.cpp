@@ -15,7 +15,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
@@ -63,9 +63,10 @@ std::uint8_t* LiveBattleCommandState(int actor_id) {
 Actors_ActorRecord* Record(int actor_id) {
   if (actor_id < 0 ||
       static_cast<std::size_t>(actor_id) >= std::size(Actors_actorRecords)) {
-    Core_Warnf("actors",
-               "Actor motion refused: actor id %d lies outside the actor table",
-               actor_id);
+    VS::Core::Warnf(
+        "actors",
+        "Actor motion refused: actor id %d lies outside the actor table",
+        actor_id);
     return nullptr;
   }
   return Actors_actorRecords[actor_id];
@@ -74,7 +75,7 @@ Actors_ActorRecord* Record(int actor_id) {
 template <typename Pointer>
 Pointer& Required(Pointer* value, const char* message) {
   if (value == nullptr) {
-    Core_Errorf("actors", "%s", message);
+    VS::Core::Errorf("actors", "%s", message);
     std::abort();
   }
   return *value;
@@ -104,7 +105,7 @@ void WithActor(int actor_id, Rule rule, const char* absent = nullptr) {
   Actors_ActorRecord* actor = Record(actor_id);
   if (actor == nullptr) {
     if (absent != nullptr) {
-      Core_Debugf("actors", "%s skips absent actor=%d", absent, actor_id);
+      VS::Core::Debugf("actors", "%s skips absent actor=%d", absent, actor_id);
     }
     return;
   }
@@ -115,7 +116,7 @@ void WithActor(int actor_id, Rule rule, const char* absent = nullptr) {
 template <typename Rule>
 void WithPointer(Actors_ActorRecord* actor, const char* name, Rule rule) {
   if (actor == nullptr) {
-    Core_Warnf("actors", "%s refused: no actor record", name);
+    VS::Core::Warnf("actors", "%s refused: no actor record", name);
     return;
   }
   WithRecord(*actor, rule);
@@ -353,7 +354,8 @@ int LiveActorFacingDeltaToPoint(Actors_ActorRecord* actor,
                                 SVECTOR* target_point) {
   if (target_point == nullptr) return 0;
   if (actor == nullptr) {
-    Core_Warnf("actors", "ActorFacingDeltaToPoint refused: no actor record");
+    VS::Core::Warnf("actors",
+                    "ActorFacingDeltaToPoint refused: no actor record");
     return 0;
   }
   const MotionVector target = LiveMotionVector(*target_point);
@@ -646,7 +648,7 @@ void ScaleLiveActorToOverTime(int actor_id, SVECTOR* target_scale,
 
 void UpdateLiveActorRoute(int actor_id, Actors_ActorRecord* actor) {
   if (actor == nullptr) {
-    Core_Warnf("actors", "UpdateActorRoute refused: no actor record");
+    VS::Core::Warnf("actors", "UpdateActorRoute refused: no actor record");
     return;
   }
   LiveActorRoute host(actor_id, *actor);

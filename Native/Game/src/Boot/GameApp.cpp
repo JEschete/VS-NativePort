@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdexcept>
 
+#include "Battle/EncounterHooks.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataAccess.h"
 #include "Core/Log.hpp"
@@ -10,10 +11,6 @@
 #include "Input/Pad.hpp"
 #include "Platform/GameFiber.hpp"
 #include "Save/NativeMenu.hpp"
-
-// The copied boot entry (vs_main_exec): the original's endless loop, run on the
-// game fiber.
-void Boot_ResetGameplayInspection(void);
 
 namespace VS::Game {
 
@@ -35,6 +32,8 @@ const char* ModeName(Mode mode) {
   return "?";
 }
 
+// The copied boot entry (vs_main_exec): the original's endless loop, run on the
+// game fiber.
 struct GameApp::Runner {
   Platform::GameFiber fiber{&VS::Boot::RunLiveGame};
 };
@@ -55,7 +54,7 @@ GameApp::GameApp(Services services) : m_services_(services) {
 
 GameApp::~GameApp() {
   Save::ShutdownFileMenus();
-  Boot_ResetGameplayInspection();
+  VS::Boot::ResetGameplayInspection();
 }
 
 bool GameApp::Finished() const { return m_runner_->fiber.Finished(); }

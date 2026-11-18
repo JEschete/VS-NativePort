@@ -18,7 +18,7 @@
 #include "Battle/Hit.h"
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -26,7 +26,7 @@ namespace VS::Battle {
 namespace {
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Errorf("battle", "%s", message);
+    VS::Core::Errorf("battle", "%s", message);
     std::abort();
   }
 }

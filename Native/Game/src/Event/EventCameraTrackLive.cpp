@@ -23,7 +23,7 @@
 #include "Event/ScriptControlOpcodes.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/CollisionMapLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Event {
 namespace {
@@ -233,7 +233,8 @@ std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
 // 0x800BCA8C-0x800BCFB4)
 void UpdateEventCameraTrackEntry(CameraTrack* track, CameraTrack* /*other*/) {
   constexpr const char* kOperation = "UpdateEventCameraTrack";
-  UpdateTrack(RequiredTrack(track, kOperation), State_tickSpeed, kOperation);
+  UpdateTrack(RequiredTrack(track, kOperation), VS::State::tickSpeed,
+              kOperation);
 }
 
 // decomp: BATTLE.PRG func_800BCFB4 (F01224, src/BATTLE/BATTLE.PRG/4A0A8.c:3502,

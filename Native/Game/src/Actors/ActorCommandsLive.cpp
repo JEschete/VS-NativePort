@@ -10,7 +10,7 @@
 #include <optional>
 
 #include "Actors/ActorCommands.hpp"
-#include "Actors/ActorCommandsLiveState.h"
+#include "Actors/ActorCommandsLiveState.hpp"
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.h"
@@ -30,24 +30,24 @@
 #include "Battle/Damage.h"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Runtime.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/ChestInteractionsLive.h"
 #include "Field/Doors.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLiveState.h"
 
 // decomp: D_800F1A50 (D_800F1A50@BATTLE/BATTLE.PRG)
-int Actors_ashleyMoveInput[kActorsAshleyMoveInputWords];
+int VS::Actors::ashleyMoveInput[VS::Actors::kAshleyMoveInputWords];
 
 namespace VS::Actors {
 namespace {
-// Actors_ashleyMoveInput words the movement input writes.
+// VS::Actors::ashleyMoveInput words the movement input writes.
 constexpr std::size_t kMoveInputLateral = 1;
 constexpr std::size_t kMoveInputForward = 3;
 // Input_ControllerPortState.controllerType of an analog controller.
@@ -56,7 +56,7 @@ constexpr std::uint8_t kAnalogController = 7;
 constexpr int kUnknownWaitingOpcodeDiagnostic = 0xC1;
 constexpr std::uint8_t kNoPreviewSelected = 0xFF;
 
-static_assert(std::size(Actors_ashleyMoveInput) > kMoveInputForward);
+static_assert(std::size(ashleyMoveInput) > kMoveInputForward);
 
 CommandActorGait GaitOf(const Battle_ActorStats& stats) {
   // The stats bytes are unsigned (the original builds with unsigned char).
@@ -81,8 +81,8 @@ SVECTOR NativeVector(const MotionVector& value) {
 CommandPlacement PlacementOf(int actor_id) {
   Actors_ActorLocation location{};
   if (LiveActorPlacement(actor_id, &location) != 0) {
-    Core_Debugf("actors.commands", "Placement of empty actor slot %d",
-                actor_id);
+    VS::Core::Debugf("actors.commands", "Placement of empty actor slot %d",
+                     actor_id);
   }
   return {.tile = TileOf(location.packedTile.target),
           .position = {.x = location.position.vx,
@@ -135,8 +135,8 @@ class LiveCommandHost final : public ActorCommandHost {
   }
 
   void ReportUnknownWaitingOpcode(int actor_id, int opcode) override {
-    Core_Debugf("actors.commands", "Actor %d waits on unknown opcode %d",
-                actor_id, opcode);
+    VS::Core::Debugf("actors.commands", "Actor %d waits on unknown opcode %d",
+                     actor_id, opcode);
     Core::IgnoreDiagnostic(kUnknownWaitingOpcodeDiagnostic, 0);
   }
   // Cross-slice calls (row 21 movement phase): retarget when the movement
@@ -231,9 +231,9 @@ class LiveCommandHost final : public ActorCommandHost {
     const Battle_ActorStats& stats = *Required(actor_id).stats;
     if (limb >= std::size(stats.limbActions) ||
         slot >= std::size(stats.limbActions[0])) {
-      Core_Debugf("actors.commands",
-                  "Actor %d limb action [%u][%u] is outside its table",
-                  actor_id, limb, slot);
+      VS::Core::Debugf("actors.commands",
+                       "Actor %d limb action [%u][%u] is outside its table",
+                       actor_id, limb, slot);
       return std::nullopt;
     }
     return stats.limbActions[limb][slot].actionId;
@@ -254,8 +254,8 @@ class LiveCommandHost final : public ActorCommandHost {
   static Battle_Actor& Required(int actor_id) {
     Battle_Actor* actor = Actor(actor_id);
     if (actor == nullptr) {
-      Core_Debugf("actors.commands", "Command requires battle actor %d",
-                  actor_id);
+      VS::Core::Debugf("actors.commands", "Command requires battle actor %d",
+                       actor_id);
       std::abort();
     }
     return *actor;
@@ -276,7 +276,7 @@ class LiveAshleyHost final : public AshleyMovementHost {
     return LiveActorStateFlags(0);
   }
   [[nodiscard]] unsigned ScreenTransitionStep() const override {
-    return Field_screenTransitionStep;
+    return VS::Field::screenTransitionStep;
   }
   [[nodiscard]] std::optional<int> DoorEntryElevation() const override {
     if (Field_pendingDestinationDoor.reserved06Bit15 == 0) {
@@ -309,17 +309,17 @@ class LiveAshleyHost final : public AshleyMovementHost {
     return controls;
   }
   [[nodiscard]] int CameraDistance() const override {
-    return Field_sphericalCamera.values.distance;
+    return VS::Field::sphericalCamera.values.distance;
   }
   void SetCameraDistance(int distance) override {
-    Field_sphericalCamera.values.distance = distance;
+    VS::Field::sphericalCamera.values.distance = distance;
   }
   [[nodiscard]] int CameraYaw() const override {
-    return Field_sphericalCamera.values.yaw;
+    return VS::Field::sphericalCamera.values.yaw;
   }
   void SetMoveInput(AshleyMoveInput input) override {
-    Actors_ashleyMoveInput[kMoveInputLateral] = input.lateral;
-    Actors_ashleyMoveInput[kMoveInputForward] = input.forward;
+    ashleyMoveInput[kMoveInputLateral] = input.lateral;
+    ashleyMoveInput[kMoveInputForward] = input.forward;
   }
   void SetDirectMovement(int direction, int speed) override {
     VS::Actors::SetDirectMovement(ActorRecordMovementRequests(), 0, direction,

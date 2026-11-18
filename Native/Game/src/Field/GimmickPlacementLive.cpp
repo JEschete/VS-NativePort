@@ -18,7 +18,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -792,8 +792,8 @@ int Field_GimmickPlacementEntry(int gimmick_slot,
   if (output_snapshot == nullptr || gimmick_slot < 0 ||
       static_cast<std::size_t>(gimmick_slot) >=
           std::size(Field_gimmickInstances)) {
-    Core_Warnf("field", "Gimmick snapshot refused: slot=%d output=%p",
-               gimmick_slot, static_cast<void*>(output_snapshot));
+    VS::Core::Warnf("field", "Gimmick snapshot refused: slot=%d output=%p",
+                    gimmick_slot, static_cast<void*>(output_snapshot));
     return -1;
   }
   LiveGimmickPlacementHost host;

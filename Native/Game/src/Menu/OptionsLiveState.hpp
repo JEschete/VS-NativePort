@@ -6,7 +6,11 @@
 
 #include "Legacy/Psx.h"
 
+namespace VS::Menu::Options {
+
 // decomp: _menuStrings (MENU/MENU8.PRG 88.c): halfword offsets, then the
 // strings; ModuleData.cpp fills it from the disc string table.
-enum { kMenuOptionsMenuStringCount = 1070 };
-extern u_short Menu_Options_menuStrings[kMenuOptionsMenuStringCount];
+inline constexpr int kMenuStringCount = 1070;
+extern u_short menuStrings[kMenuStringCount];
+
+}  // namespace VS::Menu::Options

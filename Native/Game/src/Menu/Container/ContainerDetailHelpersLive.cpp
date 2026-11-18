@@ -6,7 +6,7 @@
 #include <optional>
 #include <string_view>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Input/Pad.hpp"
 #include "Items/ContainerIndexingLive.hpp"
@@ -32,8 +32,8 @@ static_assert(std::size(Menu_Framework_menuMemory.opaqueA0) ==
               kFirstContainerCursor + Items::kItemCategoryCount * 2);
 
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("menu.container", "Container details refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.container", "Container details refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 

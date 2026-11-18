@@ -18,7 +18,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Battle/HudRendering.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Magic.h"
 #include "Render/Frame.h"
@@ -41,7 +41,7 @@ constexpr int kFirstWeaponBreakArt = 0xB8;
 constexpr int kWeaponBreakArtCount = 4;
 
 [[noreturn]] void Refuse(const char* message) {
-  Core_Errorf("battle.hud", "%s", message);
+  VS::Core::Errorf("battle.hud", "%s", message);
   std::abort();
 }
 

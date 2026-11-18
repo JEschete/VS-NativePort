@@ -21,7 +21,7 @@
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace Input = VS::Input;
@@ -198,7 +198,7 @@ struct LiveControllerGlobals {
   union Input_PressedButtonsView pressed = Input_buttonsPressed;
   int held = Input_buttonsState;
   State_Settings settings = Input_settings;
-  int tick_speed = State_tickSpeed;
+  int tick_speed = VS::State::tickSpeed;
   int soft_reset = Boot_isSoftResetEnabled;
 
   LiveControllerGlobals(const LiveControllerGlobals&) = delete;
@@ -221,14 +221,14 @@ struct LiveControllerGlobals {
     Input_buttonsPressed = pressed;
     Input_buttonsState = held;
     Input_settings = settings;
-    State_tickSpeed = tick_speed;
+    VS::State::tickSpeed = tick_speed;
     Boot_isSoftResetEnabled = soft_reset;
   }
 };
 
 // Runs live frames at normal speed from a cleared button history.
 void PrepareLiveControllers() {
-  State_tickSpeed = 1;
+  VS::State::tickSpeed = 1;
   Boot_isSoftResetEnabled = 0;
   Input_previousButtons = 0;
   std::ranges::fill(Input_buttonHeldFrames, 0U);

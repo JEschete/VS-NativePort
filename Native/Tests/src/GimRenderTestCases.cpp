@@ -17,7 +17,7 @@
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
 #include "State/SceneTimerLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 int Tests_EncodedTextFormatting(void);
 
@@ -111,7 +111,7 @@ struct PuzzleTimerFixture {
   char saved_seconds = Audio_Seq_unusedStateFlags.puzzleTimerSeconds;
   char saved_minutes = Audio_Seq_unusedStateFlags.puzzleTimerMins;
   char saved_hours = Audio_Seq_unusedStateFlags.puzzleSetMaxTimer;
-  State_SceneTimer saved_timer = State_sceneTimer;
+  State_SceneTimer saved_timer = VS::State::sceneTimer;
   int saved_packed_timer = Battle_puzzleTimer;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
   void* saved_ordering_table = Render_legacyOrderingTables[0];
@@ -140,7 +140,7 @@ struct PuzzleTimerFixture {
     Audio_Seq_unusedStateFlags.puzzleTimerSeconds = saved_seconds;
     Audio_Seq_unusedStateFlags.puzzleTimerMins = saved_minutes;
     Audio_Seq_unusedStateFlags.puzzleSetMaxTimer = saved_hours;
-    State_sceneTimer = saved_timer;
+    VS::State::sceneTimer = saved_timer;
     Battle_puzzleTimer = saved_packed_timer;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
     Render_legacyOrderingTables[0] = saved_ordering_table;
@@ -172,7 +172,7 @@ struct PuzzleTimerFixture {
   }
 
   void DrawCurrent(int hundredths) {
-    DrawCounter(State_sceneTimer, hundredths);
+    DrawCounter(VS::State::sceneTimer, hundredths);
   }
 
   static void CheckGlyph(const u_long* sprite, std::size_t glyph,
@@ -205,10 +205,10 @@ struct PuzzleTimerFixture {
   }
 
   void CheckClockState(int mode, int visible, int minutes, int seconds) const {
-    CHECK(State_sceneTimer.mode == mode);
+    CHECK(VS::State::sceneTimer.mode == mode);
     CHECK(Battle_lowerScreenUiState == visible);
-    CHECK(State_sceneTimer.minutes == minutes);
-    CHECK(State_sceneTimer.seconds == seconds);
+    CHECK(VS::State::sceneTimer.minutes == minutes);
+    CHECK(VS::State::sceneTimer.seconds == seconds);
   }
 };
 }  // namespace
@@ -250,9 +250,9 @@ TEST_CASE("Puzzle timer hide and show preserve repeatable native rendering",
 TEST_CASE("Puzzle HUD reads the authoritative clock without copying its alias",
           "[render][puzzle-timer][timer-binding]") {
   PuzzleTimerFixture fixture;
-  State_sceneTimer = {};
-  State_sceneTimer.minutes = 12;
-  State_sceneTimer.seconds = 34;
+  VS::State::sceneTimer = {};
+  VS::State::sceneTimer.minutes = 12;
+  VS::State::sceneTimer.seconds = 34;
   Battle_puzzleTimer = 0;
   fixture.DrawCurrent(56);
   fixture.CheckRendering("12:34:56");
@@ -262,10 +262,10 @@ TEST_CASE("Puzzle HUD reads the authoritative clock without copying its alias",
 TEST_CASE("Scene timer pause and reset preserve HUD visibility and clock state",
           "[render][puzzle-timer][timer-binding]") {
   PuzzleTimerFixture fixture;
-  State_sceneTimer = {};
-  State_sceneTimer.mode = 1;
-  State_sceneTimer.minutes = 1;
-  State_sceneTimer.seconds = 2;
+  VS::State::sceneTimer = {};
+  VS::State::sceneTimer.mode = 1;
+  VS::State::sceneTimer.minutes = 1;
+  VS::State::sceneTimer.seconds = 2;
   VS::State::SetLiveSceneTimerPaused(1);
   fixture.CheckClockState(0, 0, 1, 2);
   fixture.DrawCurrent(56);

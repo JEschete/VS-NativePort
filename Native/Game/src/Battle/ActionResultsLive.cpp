@@ -82,12 +82,12 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
 
   void ApplyHit(std::size_t index) override {
     Battle_HitResult* hit = &action_->targets[index];
-    Core_Debugf("combat.result",
-                "action=%u target=%d limb=%u impact=%u hp=%d mp=%d "
-                "hp_effect=%u mp_effect=%u",
-                action_->actionId, actor_id_, hit->target.targetLimb,
-                hit->target.impactKind, hit->target.hp, hit->target.mp,
-                hit->hpEffect, hit->mpEffect);
+    VS::Core::Debugf("combat.result",
+                     "action=%u target=%d limb=%u impact=%u hp=%d mp=%d "
+                     "hp_effect=%u mp_effect=%u",
+                     action_->actionId, actor_id_, hit->target.targetLimb,
+                     hit->target.impactKind, hit->target.hp, hit->target.mp,
+                     hit->hpEffect, hit->mpEffect);
     ApplyLiveActorActionResult(hit);
   }
 

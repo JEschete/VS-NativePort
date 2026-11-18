@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "Actors/ActorStateLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -24,8 +24,8 @@ namespace {
 class LiveRoomTriggerHost final : public RoomTriggerHost {
  public:
   void Refuse(RoomTriggerRefusal reason, std::size_t location) override {
-    Core_Warnf("event", "Room trigger refused: reason=%d location=%zu",
-               static_cast<int>(reason), location);
+    VS::Core::Warnf("event", "Room trigger refused: reason=%d location=%zu",
+                    static_cast<int>(reason), location);
   }
   PlaybackPhase Phase() override { return LiveScriptVm().Phase(); }
   bool DirectRequest() override { return Event_isDirectEventRequest != 0; }
@@ -107,8 +107,8 @@ class LiveRoomTriggerHost final : public RoomTriggerHost {
 class LiveRoomSectionHost final : public RoomEventSectionHost {
  public:
   void Refuse(RoomEventLoadError error) override {
-    Core_Warnf("event", "Room event import refused: reason=%d bytes=%zu",
-               static_cast<int>(error.reason), error.bytes);
+    VS::Core::Warnf("event", "Room event import refused: reason=%d bytes=%zu",
+                    static_cast<int>(error.reason), error.bytes);
   }
   RoomEventCopy CopySections(const RoomEventInput& input) override {
     auto sections = RoomEventSections::Copy(input);
@@ -117,8 +117,9 @@ class LiveRoomSectionHost final : public RoomEventSectionHost {
     }
     auto source = PrepareLiveRoomEntrySource(*sections);
     if (!source) {
-      Core_Warnf("event", "Room entry source preparation refused: reason=%d",
-                 static_cast<int>(source.error()));
+      VS::Core::Warnf("event",
+                      "Room entry source preparation refused: reason=%d",
+                      static_cast<int>(source.error()));
       return std::unexpected(RoomEventLoadError{
           RoomEventRefusal::kSourcePreparation, input.entry_script.size()});
     }
@@ -132,7 +133,8 @@ class LiveRoomSectionHost final : public RoomEventSectionHost {
   void BindEntryScript(RoomEventLease sections) override {
     if (sections != prepared_room_ ||
         !PublishLiveScriptSource(std::move(prepared_source_))) {
-      Core_Errorf("event", "Prepared room entry publication invariant failed");
+      VS::Core::Errorf("event",
+                       "Prepared room entry publication invariant failed");
       std::abort();
     }
     prepared_room_.reset();

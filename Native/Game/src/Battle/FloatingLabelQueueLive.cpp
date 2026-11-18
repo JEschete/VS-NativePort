@@ -9,7 +9,7 @@
 
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelQueue.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -20,7 +20,7 @@ static_assert(sizeof *Battle_floatingLabels ==
               kFloatingLabelCapacity * kLegacyFloatingLabelBytes);
 
 [[noreturn]] void Refuse(const char* message) {
-  Core_Errorf("battle.labels", "%s", message);
+  VS::Core::Errorf("battle.labels", "%s", message);
   std::abort();
 }
 

@@ -17,14 +17,14 @@
 #include "Battle/Hud.h"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Event/CutsceneLifecycle.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Input.h"
@@ -34,7 +34,7 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Event {
 namespace {
@@ -53,17 +53,17 @@ class LiveCutsceneHost final : public CutsceneHost {
   void Refuse(CutsceneRefusal reason, int value) override {
     switch (reason) {
       case CutsceneRefusal::kMissingPlayer:
-        Core_Warnf("cutscene", "Preparation refused: missing player");
+        VS::Core::Warnf("cutscene", "Preparation refused: missing player");
         break;
       case CutsceneRefusal::kMusicSlot:
-        Core_Warnf(
+        VS::Core::Warnf(
             "cutscene",
             "Music restoration refused: slot %d is outside the handle table",
             value);
         break;
       case CutsceneRefusal::kMissingActor:
-        Core_Warnf("cutscene", "Command update refused: actor %d was removed",
-                   value);
+        VS::Core::Warnf("cutscene",
+                        "Command update refused: actor %d was removed", value);
         break;
     }
   }
@@ -72,8 +72,8 @@ class LiveCutsceneHost final : public CutsceneHost {
       return std::nullopt;
     }
     return CutscenePreferences{(Battle_characterState->weaponDrawn & 1) != 0,
-                               Field_sphericalCamera.delta.pitch,
-                               Field_sphericalCamera.initialDistance};
+                               VS::Field::sphericalCamera.delta.pitch,
+                               VS::Field::sphericalCamera.initialDistance};
   }
   void SetPreparation(CutscenePreparation preparation) override {
     Field_controlMode = kFieldCutsceneMode;
@@ -117,7 +117,9 @@ class LiveCutsceneHost final : public CutsceneHost {
     return static_cast<std::uint16_t>(
         VS::Event::PendingEventSelector(VS::Event::LiveScriptVm()));
   }
-  void DisableFirstPersonView() override { Field_isFirstPersonViewEnabled = 0; }
+  void DisableFirstPersonView() override {
+    VS::Field::isFirstPersonViewEnabled = 0;
+  }
   void RebuildActionPlans() override {
     Battle::Ai::RebuildLiveActorActionPlans(nullptr);
   }
@@ -127,7 +129,7 @@ class LiveCutsceneHost final : public CutsceneHost {
   bool EvaluateFollowOnTrigger() override {
     return EvaluateRoomEventTriggersEntry(kFollowOnTrigger, 0, nullptr, 0) == 1;
   }
-  bool SceneTimerActive() override { return State_sceneTimer.mode != 0; }
+  bool SceneTimerActive() override { return VS::State::sceneTimer.mode != 0; }
   bool EvaluateTimerTrigger() override {
     return EvaluateRoomEventTriggersEntry(kTimerTrigger, 0, nullptr, 0) == 1;
   }

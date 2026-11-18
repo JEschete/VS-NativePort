@@ -10,7 +10,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Battle/Encounter.hpp"
-#include "Battle/EncounterHooks.h"
+#include "Battle/EncounterHooks.hpp"
 #include "Boot/PlayerSettings.hpp"
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/Trace.hpp"
@@ -96,7 +96,7 @@ struct DoorQueryFixture {
 
   void Check(int x, int z, int layer, std::span<const int> expected) {
     auto* result = VS::Field::TransitionLiveDoorsAtTile(x, z, layer);
-    REQUIRE(result == &Field_matchingDoorRecords);
+    REQUIRE(result == &VS::Field::matchingDoorRecords);
     REQUIRE(result->count == static_cast<int>(expected.size()));
     for (std::size_t index = 0; index < expected.size(); ++index) {
       CAPTURE(index);
@@ -136,20 +136,20 @@ TEST_CASE("Inactive encounter hooks preserve original room placements",
   std::array<Field_MpdEnemySpawn, 2> original{};
   void* data = original.data();
   unsigned int size = sizeof(original);
-  Boot_EncounterRoomPlacements(&data, &size);
+  VS::Boot::EncounterRoomPlacements(&data, &size);
   CHECK(data == original.data());
   CHECK(size == sizeof(original));
   data = nullptr;
   size = 0;
-  Boot_EncounterRoomPlacements(&data, &size);
+  VS::Boot::EncounterRoomPlacements(&data, &size);
   CHECK(data == nullptr);
   CHECK(size == 0);
 }
 
 TEST_CASE("Door query results have actual native pointer-list storage",
           "[field][doors][storage]") {
-  CHECK(std::is_pointer_v<decltype(Field_DoorMatchList::records)>);
-  CHECK(sizeof(Field_DoorMatchList) >=
+  CHECK(std::is_pointer_v<decltype(VS::Field::DoorMatchList::records)>);
+  CHECK(sizeof(VS::Field::DoorMatchList) >=
         sizeof(int) + sizeof(Field_MpdDoorRecord*));
 }
 
@@ -194,12 +194,12 @@ TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
   SECTION("absent room consumes no raw draw") {
     Field_roomData.doors = nullptr;
     CHECK(VS::Field::TransitionLiveDoorsAtTile(0, 0, 0) == nullptr);
-    CHECK(Field_matchingDoorRecords.count == 0);
+    CHECK(VS::Field::matchingDoorRecords.count == 0);
   }
   SECTION("partial record bytes are rejected before traversal") {
     --Field_roomData.header.doorsLength;
     CHECK(VS::Field::TransitionLiveDoorsAtTile(0, 0, 0) == nullptr);
-    CHECK(Field_matchingDoorRecords.count == 0);
+    CHECK(VS::Field::matchingDoorRecords.count == 0);
   }
   CHECK(Core_Random_Rand() == expected.Next());
 }

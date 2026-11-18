@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 namespace VS::Battle::Ai {
@@ -59,12 +59,12 @@ constexpr int kTileCentre = 64;
 constexpr std::uint32_t kAngleMask = 0xFFF;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Warnf("ai", "%s", message);
+  VS::Core::Warnf("ai", "%s", message);
   return std::nullopt;
 }
 
 bool Fail(const char* message) {
-  Core_Warnf("ai", "%s", message);
+  VS::Core::Warnf("ai", "%s", message);
   return false;
 }
 

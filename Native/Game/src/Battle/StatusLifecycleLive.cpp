@@ -18,7 +18,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycle.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -27,7 +27,7 @@ namespace VS::Battle {
 namespace {
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Errorf("battle", "%s", message);
+    VS::Core::Errorf("battle", "%s", message);
     std::abort();
   }
 }

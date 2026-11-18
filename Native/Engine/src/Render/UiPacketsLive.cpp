@@ -15,7 +15,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -49,19 +49,20 @@ bool CountAndReport(std::uint64_t& count) {
 
 void ReportUnspliced(SpliceResult result) {
   if (CountAndReport(unspliced_primitives)) {
-    Core_Errorf("render",
-                "overlay primitive not spliced (result %d, %" PRIu64
-                " refused)",
-                static_cast<int>(result), unspliced_primitives);
+    VS::Core::Errorf("render",
+                     "overlay primitive not spliced (result %d, %" PRIu64
+                     " refused)",
+                     static_cast<int>(result), unspliced_primitives);
   }
 }
 
 void ReportDropped() {
   if (CountAndReport(dropped_packets)) {
-    Core_Errorf("render",
-                "UI packet dropped: no room in the frame primitive buffer or "
-                "no chain (%" PRIu64 " dropped)",
-                dropped_packets);
+    VS::Core::Errorf(
+        "render",
+        "UI packet dropped: no room in the frame primitive buffer or "
+        "no chain (%" PRIu64 " dropped)",
+        dropped_packets);
   }
 }
 
@@ -237,7 +238,7 @@ int DrawLiveIntegerRightAligned(int font, int xy, int value, u_long* before) {
   const RightAlignedNumber number = DrawIntegerRightAligned(
       queue, {.font = font, .position = xy, .value = value});
   if (number.truncated && CountAndReport(truncated_numbers)) {
-    Core_Errorf(
+    VS::Core::Errorf(
         "render",
         "number %d does not end its digit loop; %d digits drawn (%" PRIu64
         " truncated)",
@@ -253,8 +254,8 @@ void DrawLiveStatGauge(int color_index, int w, u_long* before, int xy) {
       [](int color) { return static_cast<std::uint32_t>(color); });
   const auto index = static_cast<std::uint32_t>(color_index);
   if (index >= palette.size()) {
-    Core_Errorf("render", "stat gauge colour %d is outside the palette",
-                color_index);
+    VS::Core::Errorf("render", "stat gauge colour %d is outside the palette",
+                     color_index);
     return;
   }
   LivePacketQueue queue(before);
@@ -277,8 +278,8 @@ void InsertLiveDrawModeCommand(int tpage, u_long* before) {
 
 void UploadLiveImageRectangle(int xy, const void* pixels, int wh) {
   if (pixels == nullptr) {
-    Core_Errorf("render", "image upload to 0x%08X has no pixels",
-                static_cast<unsigned>(xy));
+    VS::Core::Errorf("render", "image upload to 0x%08X has no pixels",
+                     static_cast<unsigned>(xy));
     return;
   }
   LiveImageUpload target(pixels);
@@ -287,8 +288,8 @@ void UploadLiveImageRectangle(int xy, const void* pixels, int wh) {
 
 void ReadLiveImageRectangle(int xy, void* pixels, int wh) {
   if (pixels == nullptr) {
-    Core_Errorf("render", "image read from 0x%08X has no buffer",
-                static_cast<unsigned>(xy));
+    VS::Core::Errorf("render", "image read from 0x%08X has no buffer",
+                     static_cast<unsigned>(xy));
     return;
   }
   LiveImageRead target(pixels);
@@ -317,10 +318,11 @@ void* AppendLiveTexturePage(int tpage, int ot_slot) {
   u_long* entry = LiveFrameOrderingEntry(LiveOrderingBase::kScene, ot_slot);
   if (entry == nullptr) {
     if (CountAndReport(refused_texture_pages)) {
-      Core_Errorf("render",
-                  "texture page 0x%X refused: ordering-table entry %d is "
-                  "outside the frame's table (%" PRIu64 " refused)",
-                  static_cast<unsigned>(tpage), ot_slot, refused_texture_pages);
+      VS::Core::Errorf("render",
+                       "texture page 0x%X refused: ordering-table entry %d is "
+                       "outside the frame's table (%" PRIu64 " refused)",
+                       static_cast<unsigned>(tpage), ot_slot,
+                       refused_texture_pages);
     }
     return Render_frameScratch.primitiveCursor;
   }
@@ -336,11 +338,11 @@ void DrawLiveImmediateSprite(int xy, int uv_clut, int wh, int tpage) {
                                     .size = wh,
                                     .texture_page = tpage}) &&
       CountAndReport(refused_sprites)) {
-    Core_Errorf("render",
-                "sprite at 0x%08X refused: texture page 0x%08X dims it "
-                "outside a colour byte (%" PRIu64 " refused)",
-                static_cast<unsigned>(xy), static_cast<unsigned>(tpage),
-                refused_sprites);
+    VS::Core::Errorf("render",
+                     "sprite at 0x%08X refused: texture page 0x%08X dims it "
+                     "outside a colour byte (%" PRIu64 " refused)",
+                     static_cast<unsigned>(xy), static_cast<unsigned>(tpage),
+                     refused_sprites);
   }
 }
 

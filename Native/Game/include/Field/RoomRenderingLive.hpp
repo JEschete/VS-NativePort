@@ -5,11 +5,11 @@
 
 struct Render_ColorCode;
 
-// Binding from the session's room rendering globals (RoomRenderingLiveState.h),
-// the loaded room (Field_roomData), the frame scratch and the frame's
-// primitive buffer to the typed room rendering rules (RoomRendering.hpp).
-// Each adapter keeps the original call shape for the generated callers
-// (copy_fixups.py OWNED_CALL_BINDINGS).
+// Binding from the session's room rendering globals
+// (RoomRenderingLiveState.hpp), the loaded room (Field_roomData), the frame
+// scratch and the frame's primitive buffer to the typed room rendering rules
+// (RoomRendering.hpp). Each adapter keeps the original call shape for the
+// generated callers (copy_fixups.py OWNED_CALL_BINDINGS).
 namespace VS::Field {
 // The switches and tint as the globals hold them now.
 [[nodiscard]] RoomRenderState LiveRoomRenderState();

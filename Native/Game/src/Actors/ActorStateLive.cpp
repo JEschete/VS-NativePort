@@ -34,7 +34,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Shadow.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/WeaponModel.h"
@@ -369,8 +369,8 @@ class Synced {
 };
 
 Actors_WeaponModel* LiveWeaponModel(int index) {
-  if (index < 0 || index >= kActorsWeaponModelCount) return nullptr;
-  return Actors_weaponModels[index];
+  if (index < 0 || index >= kWeaponModelCount) return nullptr;
+  return weaponModels[index];
 }
 
 class LiveActorStateHost final : public ActorStateHost {

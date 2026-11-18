@@ -14,7 +14,7 @@
 #include <span>
 
 #include "Battle/Ai/DecisionPrimitives.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/PointerSort.hpp"
 
@@ -205,7 +205,7 @@ bool AdvanceSimulationStats(PlanningSimulationStats& stats,
                             std::uint16_t readiness, std::int32_t time_step,
                             const PlanningSimulationRules& rules) {
   if (stats.mobility_limbs[0] >= stats.limbs.size()) {
-    Core_Debugf("ai", "Planning simulation requires valid mobility limbs");
+    VS::Core::Debugf("ai", "Planning simulation requires valid mobility limbs");
     return false;
   }
   if (readiness > kLimbRecoveryReadiness) {
@@ -214,7 +214,8 @@ bool AdvanceSimulationStats(PlanningSimulationStats& stats,
   bool mobile = stats.limbs[stats.mobility_limbs[0]].value >= 2;
   if (!mobile) {
     if (stats.mobility_limbs[1] >= stats.limbs.size()) {
-      Core_Debugf("ai", "Planning simulation requires a second mobility limb");
+      VS::Core::Debugf("ai",
+                       "Planning simulation requires a second mobility limb");
       return false;
     }
     mobile = stats.limbs[stats.mobility_limbs[1]].value >= 2;
@@ -289,7 +290,7 @@ bool ApplySimulationCost(ActorCondition& row, const ActionCost& action) {
 }
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return std::nullopt;
 }
 
@@ -736,7 +737,7 @@ bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
   baseline.SetDistanceSquared(kEnumerationBaselineDistance);
   baseline.SetThreshold(readiness_threshold);
   if (!host.Evaluate(baseline, CandidateEnumerationKind::kNone, std::nullopt)) {
-    Core_Debugf("ai", "AI enumeration could not evaluate its baseline");
+    VS::Core::Debugf("ai", "AI enumeration could not evaluate its baseline");
     return false;
   }
   auto candidate = baseline;
@@ -745,12 +746,12 @@ bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
     for (int column = 0; column < kLimbActionColumns; ++column) {
       const auto slot = host.ReadSlot(row, column);
       if (!slot) {
-        Core_Debugf("ai", "AI enumeration requires readable slot data");
+        VS::Core::Debugf("ai", "AI enumeration requires readable slot data");
         return false;
       }
       if (slot->action == 0 || !slot->usable) continue;
       if (slot->action >= kActionDefinitionCount) {
-        Core_Debugf("ai", "AI enumeration action is outside its table");
+        VS::Core::Debugf("ai", "AI enumeration action is outside its table");
         return false;
       }
       host.BeginTargets();
@@ -768,8 +769,8 @@ bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
       while (const auto target = host.NextTarget()) {
         if (++count > kBattleActorSlotCount ||
             target->id >= kCandidateTargetSlots) {
-          Core_Debugf("ai",
-                      "AI enumeration requires a bounded valid actor list");
+          VS::Core::Debugf(
+              "ai", "AI enumeration requires a bounded valid actor list");
           return false;
         }
         if (target->dead) continue;
@@ -787,7 +788,7 @@ bool EnumerateActionCandidates(std::uint16_t readiness_threshold,
         }
         if (!EnumerateTargetCandidates(candidate, baseline, slot->action,
                                        host.Kind(row, column), host)) {
-          Core_Debugf("ai", "AI enumeration could not evaluate a target");
+          VS::Core::Debugf("ai", "AI enumeration could not evaluate a target");
           return false;
         }
       }
@@ -801,7 +802,8 @@ bool AdvancePlanningSimulation(std::int32_t time_step,
                                PlanningSimulationHost& host) {
   const auto count = host.ActorCount();
   if (count > kBattleActorSlotCount) {
-    Core_Debugf("ai", "Planning simulation actor list exceeds its capacity");
+    VS::Core::Debugf("ai",
+                     "Planning simulation actor list exceeds its capacity");
     return false;
   }
   host.SetReadiness(static_cast<std::uint16_t>(
@@ -809,7 +811,8 @@ bool AdvancePlanningSimulation(std::int32_t time_step,
   for (std::size_t index = 0; index < count; ++index) {
     auto stats = host.ReadActor(index);
     if (!stats) {
-      Core_Debugf("ai", "Planning simulation requires readable actor stats");
+      VS::Core::Debugf("ai",
+                       "Planning simulation requires readable actor stats");
       return false;
     }
     if (!AdvanceSimulationStats(*stats, host.Readiness(), time_step, rules)) {
@@ -817,13 +820,15 @@ bool AdvancePlanningSimulation(std::int32_t time_step,
     }
     host.WriteActor(index, *stats);
     if (!host.RefreshRestrictions(index)) {
-      Core_Debugf("ai", "Planning simulation could not refresh restrictions");
+      VS::Core::Debugf("ai",
+                       "Planning simulation could not refresh restrictions");
       return false;
     }
     for (int row = 0; row < kLimbActionRows; ++row) {
       for (int column = 0; column < kLimbActionColumns; ++column) {
         if (!host.RefreshSlot(index, row, column)) {
-          Core_Debugf("ai", "Planning simulation could not refresh a slot");
+          VS::Core::Debugf("ai",
+                           "Planning simulation could not refresh a slot");
           return false;
         }
       }

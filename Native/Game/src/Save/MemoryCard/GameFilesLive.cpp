@@ -19,7 +19,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
@@ -180,7 +180,7 @@ const char* SaveErrorName(SaveImageError error) {
 // save-screen image buffer.
 std::optional<SaveWorkspace> LiveWorkspace() {
   if (Title_memoryCardUiResource == nullptr) {
-    Core_Errorf(kDiagnosticChannel, "Memory-card workspace is not loaded");
+    VS::Core::Errorf(kDiagnosticChannel, "Memory-card workspace is not loaded");
     return std::nullopt;
   }
   const std::span<std::byte, kWorkspaceBytes> bytes{
@@ -192,8 +192,8 @@ std::optional<SaveWorkspace> LiveWorkspace() {
 
 std::optional<SummaryTable> LiveSummaries() {
   if (Title_saveFileSummaries == nullptr) {
-    Core_Errorf(kDiagnosticChannel,
-                "Memory-card slot summaries are not loaded");
+    VS::Core::Errorf(kDiagnosticChannel,
+                     "Memory-card slot summaries are not loaded");
     return std::nullopt;
   }
   return std::as_writable_bytes(std::span<Save_CardFileInfoRecord, kSlotCount>{
@@ -400,8 +400,8 @@ class LiveIntroHost final : public IntroSnapshotHost {
  public:
   void BeginLoad(IntroSnapshot snapshot) override {
     if (request_ != nullptr || image_ != nullptr) {
-      Core_Errorf(kDiagnosticChannel,
-                  "Intro snapshot requested while one is loading");
+      VS::Core::Errorf(kDiagnosticChannel,
+                       "Intro snapshot requested while one is loading");
       return;
     }
     void* allocation =
@@ -415,8 +415,9 @@ class LiveIntroHost final : public IntroSnapshotHost {
     file.size = VS_OPMCIMG1_BIN_SIZE;
     request_ = VS::Content::AllocateLiveDiscRequest(&file);
     if (request_ == nullptr) {
-      Core_Errorf(kDiagnosticChannel, "No disc request for intro snapshot %d",
-                  static_cast<int>(snapshot));
+      VS::Core::Errorf(kDiagnosticChannel,
+                       "No disc request for intro snapshot %d",
+                       static_cast<int>(snapshot));
       VS::Core::Memory::FreeLiveFromHighEnd(allocation);
       return;
     }
@@ -474,8 +475,8 @@ void StoreProgress(const TransferProgress& progress) {
 
 void ReportPackageError(const std::expected<void, SaveImageError>& packaged) {
   if (!packaged.has_value()) {
-    Core_Errorf(kDiagnosticChannel, "Save not packaged: %s",
-                SaveErrorName(packaged.error()));
+    VS::Core::Errorf(kDiagnosticChannel, "Save not packaged: %s",
+                     SaveErrorName(packaged.error()));
   }
 }
 }  // namespace

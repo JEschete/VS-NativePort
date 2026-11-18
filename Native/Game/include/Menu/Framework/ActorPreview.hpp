@@ -19,7 +19,7 @@
 // an ActorPreviewHost (ActorPreviewLive.hpp binds it).
 namespace VS::Menu::Framework {
 // The actor table slots (Actors_actorRecords) and weapon model slots
-// (Actors_weaponModels) the preview uses: each actor slot owns two weapon
+// (VS::Actors::weaponModels) the preview uses: each actor slot owns two weapon
 // models, the preview's are slots 2 and 3.
 inline constexpr int kAshleyActorSlot = 0;
 inline constexpr int kPreviewActorSlot = 1;

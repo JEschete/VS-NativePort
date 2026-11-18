@@ -6,7 +6,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
@@ -139,8 +139,8 @@ class LiveMenuAssets final : public MenuAssetHost {
     VS::Boot::SetSoftResetEnabledLive(enabled ? 1 : 0);
   }
   void ReportMisuse(MenuAssetMisuse misuse) override {
-    Core_Errorf("save.assets", "Memory-card assets: %s (phase %d)",
-                MisuseName(misuse), static_cast<int>(live_load.phase));
+    VS::Core::Errorf("save.assets", "Memory-card assets: %s (phase %d)",
+                     MisuseName(misuse), static_cast<int>(live_load.phase));
   }
 };
 }  // namespace

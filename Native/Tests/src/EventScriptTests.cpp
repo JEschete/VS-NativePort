@@ -15,7 +15,7 @@
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/MusicLive.hpp"
-#include "Audio/MusicState.h"
+#include "Audio/MusicState.hpp"
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/PlaybackResetLive.hpp"
 #include "Audio/Seq/Channel.h"

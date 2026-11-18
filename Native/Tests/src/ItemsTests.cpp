@@ -25,7 +25,7 @@
 #include "Items/EquipmentWear.hpp"
 #include "Items/Inventory.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loot.hpp"
@@ -196,7 +196,7 @@ struct ItemsWarnings {
 struct LiveItemsState {
   Items_Inventory saved_inventory = Audio_Seq_unusedInventory;
   Items_InventoryIndices saved_indices = Audio_Seq_unusedInventoryIndices;
-  unsigned char saved_invoked = Items_miscItemInvoked;
+  unsigned char saved_invoked = VS::Items::miscItemInvoked;
   Field_RoomRecord saved_room = Field_roomData;
   Battle_Actor* saved_character = Battle_characterState;
   std::array<u_int, 8> saved_upper_ids{};
@@ -210,7 +210,7 @@ struct LiveItemsState {
               std::end(Items_itemCategoryUpperIds), 0U);
     Audio_Seq_unusedInventory = {};
     Audio_Seq_unusedInventoryIndices = {};
-    Items_miscItemInvoked = 0;
+    VS::Items::miscItemInvoked = 0;
     Field_roomData = {};
     actor.stats = &stats;
     Battle_characterState = &actor;
@@ -222,7 +222,7 @@ struct LiveItemsState {
   ~LiveItemsState() {
     Audio_Seq_unusedInventory = saved_inventory;
     Audio_Seq_unusedInventoryIndices = saved_indices;
-    Items_miscItemInvoked = saved_invoked;
+    VS::Items::miscItemInvoked = saved_invoked;
     Field_roomData = saved_room;
     Battle_characterState = saved_character;
     std::copy(saved_upper_ids.begin(), saved_upper_ids.end(),
@@ -2578,14 +2578,14 @@ TEST_CASE("Ashley's live inventory consumes misc items from the invoked slot",
           "[items-slice][items]") {
   LiveItemsState state;
   live::Commit(Audio_Seq_unusedInventory, MakeInventory());
-  Items_miscItemInvoked = 5;
+  VS::Items::miscItemInvoked = 5;
   CHECK(items::ConsumeLiveMiscItem(0x150) == 1);
   CHECK(live::Typed(Audio_Seq_unusedInventory).misc[0] ==
         items::InventoryMisc{0x150, 6, 1});
-  CHECK(Items_miscItemInvoked == 5);
+  CHECK(VS::Items::miscItemInvoked == 5);
   // An id below the invoked items rescans from the first slot.
   CHECK(items::ConsumeLiveMiscItem(0x100) == 0);
-  CHECK(Items_miscItemInvoked == 0);
+  CHECK(VS::Items::miscItemInvoked == 0);
   CHECK(live::Typed(Audio_Seq_unusedInventory).misc[0].count == 6);
 }
 
@@ -2886,5 +2886,6 @@ TEST_CASE("Items native bindings retire the module entries they replace",
   CHECK(resolve(0x80083430u) ==
         reinterpret_cast<void*>(&items::CalculateLiveItemRecovery));
   CHECK(resolve(0x800F1900u) == static_cast<void*>(&VS::Items::lootListHead));
-  CHECK(resolve(0x800F5210u) == static_cast<void*>(&Items_miscItemInvoked));
+  CHECK(resolve(0x800F5210u) ==
+        static_cast<void*>(&VS::Items::miscItemInvoked));
 }

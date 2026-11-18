@@ -10,10 +10,10 @@
 #include <catch2/matchers/catch_matchers.hpp>
 
 #include "Core/Scratch.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLive.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Render/LibGpu.h"
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
@@ -286,8 +286,8 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   VS::Render::SetRoomPolygonNearClip(room_clip, 8);
   VS::Render::SetRoomTextureLodDepth(room_clip, 512);
   const auto saved_room = Field_roomData;
-  const auto saved_tint = Field_roomTint;
-  const auto saved_mode = Field_roomGeometryDrawMode;
+  const auto saved_tint = VS::Field::roomTint;
+  const auto saved_mode = VS::Field::roomGeometryDrawMode;
   const auto saved_start = Field_roomPrimitiveRangeStart;
   const auto saved_end = Field_roomPrimitiveRangeEnd;
   const auto saved_field_view = frame->viewMatrix;
@@ -296,7 +296,7 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   }
   frame->viewMatrix.t[2] = 1024;
   Field_roomData.header.geometryLength = sizeof geometry;
-  Field_roomGeometryDrawMode = 0;
+  VS::Field::roomGeometryDrawMode = 0;
   Render_ColorCode tint{1, 2, 3, 0};
   VS::Field::LiveSetRoomTint(&tint, 0);
   StoreGroup(geometry, 0, group);
@@ -308,8 +308,8 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   CHECK(tinted->g1 == 136);
   CHECK(tinted->b2 == 140);
   Field_roomData = saved_room;
-  Field_roomTint = saved_tint;
-  Field_roomGeometryDrawMode = saved_mode;
+  VS::Field::roomTint = saved_tint;
+  VS::Field::roomGeometryDrawMode = saved_mode;
   Field_roomPrimitiveRangeStart = saved_start;
   Field_roomPrimitiveRangeEnd = saved_end;
   frame->viewMatrix = saved_field_view;

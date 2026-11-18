@@ -12,15 +12,15 @@
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatFactors.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
 std::int16_t Checked(std::optional<std::int16_t> result) {
   if (!result) {
-    Core_Errorf("battle",
-                "Stat factor refused missing required state, actor, "
-                "stats, action or used index");
+    VS::Core::Errorf("battle",
+                     "Stat factor refused missing required state, actor, "
+                     "stats, action or used index");
     std::abort();
   }
   return result.value();

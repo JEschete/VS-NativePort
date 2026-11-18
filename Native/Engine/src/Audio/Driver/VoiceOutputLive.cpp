@@ -18,10 +18,10 @@
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SequencerOutput.h"
-#include "Audio/StreamPlayback.h"
+#include "Audio/StreamPlayback.hpp"
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/VoiceOutput.hpp"
-#include "Audio/XaPlayback.h"
+#include "Audio/XaPlayback.hpp"
 #include "Content/AudioBank.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
@@ -284,8 +284,8 @@ int UploadLiveBank(const void* bank, int /*wait*/, int first_instrument,
 }  // namespace VS::Audio::Samples
 
 void Audio_Native_Reset(void) {
-  Audio_Native_ResetCutsceneStream();
-  Audio_Native_StopXaStream();
+  VS::Audio::ResetCutsceneStream();
+  VS::Audio::StopXaStream();
   Engine().Reset();
   g_instruments = {};
   g_controls = {};
@@ -396,7 +396,7 @@ int Audio_Native_VoiceActive(unsigned voice) {
 }
 
 void Audio_Native_Tick(void) {
-  Audio_Native_UpdateXaControls();
+  VS::Audio::UpdateXaControls();
   constexpr unsigned kMonoOutput = 2;
   const bool mono =
       (Audio_Driver_controlLatches.mixBehavior & kMonoOutput) != 0;

@@ -40,7 +40,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.h"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
@@ -60,7 +60,7 @@
 #include "State/PlayTime.hpp"
 #include "State/RoomMemory.h"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Game::Save {
 namespace {
@@ -384,7 +384,7 @@ VECTOR OrbitPosition(const Snapshot& state) {
 }
 
 void CaptureCamera(Snapshot& state) {
-  const auto& source = Field_sphericalCamera;
+  const auto& source = VS::Field::sphericalCamera;
   auto& target = state.camera;
   target.pitch = source.values.pitch;
   target.distance = source.values.distance;
@@ -402,7 +402,7 @@ void CaptureCamera(Snapshot& state) {
 }
 
 void RestoreCamera(const Snapshot& state) {
-  auto& target = Field_sphericalCamera;
+  auto& target = VS::Field::sphericalCamera;
   const auto& camera = state.camera;
   target.values = {state.location.camera_yaw, camera.pitch, camera.distance,
                    camera.mode};
@@ -1089,8 +1089,8 @@ void CaptureAshley(Snapshot& state, const Battle_Actor& character) {
     }
   }
   target.weaponDrawn = character.weaponDrawn;
-  target.cameraPitch = Field_sphericalCamera.delta.pitch;
-  target.cameraDistance = Field_sphericalCamera.initialDistance;
+  target.cameraPitch = VS::Field::sphericalCamera.delta.pitch;
+  target.cameraDistance = VS::Field::sphericalCamera.initialDistance;
 }
 
 void RestoreAshleyValues(const State_AshleyStatsSnapshot& source,
@@ -1245,8 +1245,9 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
     return std::unexpected(
         "current tile does not match the static world position");
   }
-  if (Field_cameraTransition != nullptr || Field_isFirstPersonViewEnabled ||
-      Field_sphericalCamera.delta.yaw != 0 ||
+  if (VS::Field::cameraTransition != nullptr ||
+      VS::Field::isFirstPersonViewEnabled ||
+      VS::Field::sphericalCamera.delta.yaw != 0 ||
       Render_nearClip != kFieldNearClip ||
       Render_projectionDistance != kFieldProjection ||
       Render_frameScratch.camera.farClip != ONE) {
@@ -1449,7 +1450,7 @@ std::expected<Snapshot, std::string> Capture(
   state.location.position = {model.position.vx, model.position.vy,
                              model.position.vz};
   state.location.facing = model.facing;
-  state.location.camera_yaw = Field_sphericalCamera.values.yaw;
+  state.location.camera_yaw = VS::Field::sphericalCamera.values.yaw;
   state.location.floor_layer = model.currentTileLayer;
   state.location.previous_tile = {model.previousTileX, model.previousTileZ,
                                   model.previousTileLayer};
@@ -1483,7 +1484,7 @@ std::expected<Snapshot, std::string> Capture(
        time.seconds) *
           kClockRadix +
       time.frames;
-  state.scene_timer = State_sceneTimer;
+  state.scene_timer = VS::State::sceneTimer;
   state.random.bios_state = Core_Random_State();
   state.random.interface_state = Core_interfaceRandomState;
   std::copy_n(Core_randomShuffleTable, state.random.shuffle.size(),
@@ -1639,7 +1640,7 @@ std::expected<void, std::string> FinishResume() {
                                  static_cast<char>(state.script_flags[index]));
   }
   ApplyClock(state.play_ticks);
-  State_sceneTimer = state.scene_timer;
+  VS::State::sceneTimer = state.scene_timer;
   ApplyCaches(state);
   SyncMonoOutput(state.settings.monoSound == 1);
   Core_Random_Seed(state.random.bios_state);

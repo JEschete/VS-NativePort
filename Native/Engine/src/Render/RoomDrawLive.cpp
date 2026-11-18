@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.h"
@@ -169,7 +169,8 @@ bool UpdateLiveRoomGroupTransforms(void* geometry, std::size_t bytes) {
       !UpdateRoomGroupTransforms(
           std::span(static_cast<std::byte*>(geometry), bytes),
           LiveRoomCamera())) {
-    Core_Debugf(kChannel, "Room group transforms refused (%zu bytes)", bytes);
+    VS::Core::Debugf(kChannel, "Room group transforms refused (%zu bytes)",
+                     bytes);
     return false;
   }
   return true;
@@ -184,7 +185,7 @@ RoomDrawStatus DrawLiveRoomGeometry(const void* geometry, std::size_t bytes,
   const auto start = reinterpret_cast<std::uintptr_t>(geometry);
   if (start < queue.Limit() &&
       (start >= queue.Begin() || queue.Begin() - start < bytes)) {
-    Core_Debugf(kChannel, "Room geometry overlaps the primitive buffer");
+    VS::Core::Debugf(kChannel, "Room geometry overlaps the primitive buffer");
     return RoomDrawStatus::kInvalidGeometry;
   }
   LiveRoomTransformer transformer;
@@ -192,7 +193,7 @@ RoomDrawStatus DrawLiveRoomGeometry(const void* geometry, std::size_t bytes,
   const RoomDrawStatus status = DrawRoomGeometry(
       BytesOf(geometry, bytes), pass, LiveRoomClipState(), transformer, queue);
   if (status == RoomDrawStatus::kInvalidGeometry) {
-    Core_Debugf(kChannel, "Room geometry refused (%zu bytes)", bytes);
+    VS::Core::Debugf(kChannel, "Room geometry refused (%zu bytes)", bytes);
   }
   return status;
 }
@@ -218,7 +219,7 @@ RoomDrawStatus DrawLiveSkyDome(const void* sky, std::size_t bytes) {
   const RoomDrawStatus status =
       DrawSkyDome(BytesOf(sky, bytes), transformer, queue);
   if (status == RoomDrawStatus::kInvalidGeometry) {
-    Core_Debugf(kChannel, "Sky dome refused (%zu bytes)", bytes);
+    VS::Core::Debugf(kChannel, "Sky dome refused (%zu bytes)", bytes);
   }
   return status;
 }
@@ -235,7 +236,7 @@ bool TintLiveRoomGeometryPrimitives(void* start, void* end,
       (last - first) % sizeof(std::uint32_t) != 0 ||
       first % alignof(std::uint32_t) != 0 || first < base ||
       last - base > kPrimitiveBufferBytes) {
-    Core_Debugf(kChannel, "Room tint range is outside the frame buffer");
+    VS::Core::Debugf(kChannel, "Room tint range is outside the frame buffer");
     return false;
   }
   const std::span packets(static_cast<std::uint32_t*>(start),
@@ -244,7 +245,7 @@ bool TintLiveRoomGeometryPrimitives(void* start, void* end,
   if (TintRoomGeometryPrimitives(packets, room_tint,
                                  static_cast<std::uint32_t>(flags)) ==
       RoomTintStatus::kTruncated) {
-    Core_Debugf(kChannel, "Room tint range ends inside a packet");
+    VS::Core::Debugf(kChannel, "Room tint range ends inside a packet");
     return false;
   }
   return true;

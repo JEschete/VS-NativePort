@@ -10,7 +10,7 @@
 #include <string_view>
 #include <vector>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 
 namespace VS::Core {
@@ -87,21 +87,21 @@ void WriteFormatted(VS::Core::LogLevel level, const char* channel,
 }
 }  // namespace
 
-void Core_Debugf(const char* channel, const char* format, ...) {
+void VS::Core::Debugf(const char* channel, const char* format, ...) {
   va_list args;
   va_start(args, format);
   WriteFormatted(VS::Core::LogLevel::Debug, channel, format, args);
   va_end(args);
 }
 
-void Core_Warnf(const char* channel, const char* format, ...) {
+void VS::Core::Warnf(const char* channel, const char* format, ...) {
   va_list args;
   va_start(args, format);
   WriteFormatted(VS::Core::LogLevel::Warn, channel, format, args);
   va_end(args);
 }
 
-void Core_Errorf(const char* channel, const char* format, ...) {
+void VS::Core::Errorf(const char* channel, const char* format, ...) {
   va_list args;
   va_start(args, format);
   WriteFormatted(VS::Core::LogLevel::Error, channel, format, args);

@@ -28,7 +28,7 @@
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/Sphere.h"
 #include "Battle/SphereContainmentLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 
 namespace VS::Battle {
@@ -40,10 +40,10 @@ static_assert(offsetof(ActionRequest, targets) ==
 static_assert(offsetof(ActionRequest, focus) ==
               offsetof(Battle_ActionRequest, focusPosition));
 [[noreturn]] void Refuse() {
-  Core_Errorf("battle",
-              "Action preview/resolution refused used missing state "
-              "or index; world physical-auto damage and redirects "
-              "without an available source origin are unsupported");
+  VS::Core::Errorf("battle",
+                   "Action preview/resolution refused used missing state "
+                   "or index; world physical-auto damage and redirects "
+                   "without an available source origin are unsupported");
   std::abort();
 }
 template <typename T>

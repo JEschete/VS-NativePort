@@ -18,7 +18,7 @@
 #include "Battle/HudOrchestration.hpp"
 #include "Battle/HudRenderingLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
@@ -30,7 +30,7 @@
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimer.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -50,7 +50,7 @@ constexpr std::size_t kTimerCharacters = 8;
 constexpr int kCoordinateShift = 16;
 
 [[noreturn]] void Refuse(const char* message) {
-  Core_Errorf("battle.hud", "%s", message);
+  VS::Core::Errorf("battle.hud", "%s", message);
   std::abort();
 }
 
@@ -249,7 +249,7 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   std::int32_t Sine(std::uint16_t phase) override {
     return Core::Math::Sine(phase);
   }
-  std::int32_t TickSpeed() override { return State_tickSpeed; }
+  std::int32_t TickSpeed() override { return VS::State::tickSpeed; }
   bool LimbDisplayAllowed() override {
     const auto& box = std::span(Menu_textBoxes)[kLimbCoveringTextBox];
     return !ReadLiveHudState().SuppressesLimbDisplay() &&
@@ -375,9 +375,10 @@ void DrawLivePuzzleTimer(const State_SceneTimer* timer) {
                     static_cast<std::uint8_t>(
                         Audio_Seq_unusedStateFlags.puzzleTimerHundredths),
                     std::span(Battle_puzzleTimerText));
-  Core_Debugf("hud.timer", "text=%s seconds=%d minutes=%d hours=%d frames=%d",
-              Battle_puzzleTimerText, timer->seconds, timer->minutes,
-              timer->hours, timer->frames);
+  VS::Core::Debugf("hud.timer",
+                   "text=%s seconds=%d minutes=%d hours=%d frames=%d",
+                   Battle_puzzleTimerText, timer->seconds, timer->minutes,
+                   timer->hours, timer->frames);
   DrawText(std::string_view(Battle_puzzleTimerText, kTimerCharacters),
            kTimerPosition, kTimerLayer);
 }

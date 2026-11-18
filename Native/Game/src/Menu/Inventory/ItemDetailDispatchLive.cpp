@@ -9,7 +9,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Battle/Actor.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Input/Pad.hpp"
@@ -51,7 +51,7 @@ EquipmentDetailState g_gem_state;
 ItemDetailDispatcherState g_dispatcher;
 
 [[noreturn]] void Refuse(const char* reason) {
-  Core_Errorf("menu.inventory", "Item details refused: %s", reason);
+  VS::Core::Errorf("menu.inventory", "Item details refused: %s", reason);
   std::abort();
 }
 
@@ -321,8 +321,8 @@ class LiveDispatcherWorld final
     Menu_Inventory_ashleyRenderState = static_cast<int>(layout);
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
-    Core_Errorf("menu.inventory", "Item details refused: %.*s",
-                static_cast<int>(reason.size()), reason.data());
+    VS::Core::Errorf("menu.inventory", "Item details refused: %.*s",
+                     static_cast<int>(reason.size()), reason.data());
     std::abort();
   }
 };

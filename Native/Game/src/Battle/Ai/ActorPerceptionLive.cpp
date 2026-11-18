@@ -22,13 +22,14 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/Gimmicks.h"
@@ -94,13 +95,6 @@ static_assert(offsetof(UpdateView, awarenessMarker) ==
               offsetof(AiState, awarenessMarker));
 static_assert(offsetof(UpdateView, opaque19A) == offsetof(AiState, opaque19A));
 static_assert(offsetof(UpdateView, relations) == offsetof(AiState, relations));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 std::uint32_t CurrentTileWord(const Actors_ModelInstance& instance) {
   return static_cast<std::uint32_t>(instance.currentTileX) |

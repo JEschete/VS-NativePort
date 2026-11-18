@@ -17,19 +17,20 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/HudOrchestrationLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Field/Interactions.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Progress.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Battle {
 namespace {
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle", "Action phase refused: missing used state or actor");
+    VS::Core::Errorf("battle",
+                     "Action phase refused: missing used state or actor");
     std::abort();
   }
 }
@@ -91,7 +92,7 @@ class LiveWorld final : public ActionPhaseWorld {
     Battle_recoveryRewardMode = mode;
   }
   void SetTickSpeed(std::uint32_t speed) override {
-    State_tickSpeed = std::bit_cast<std::int32_t>(speed);
+    VS::State::tickSpeed = std::bit_cast<std::int32_t>(speed);
   }
   void SetPhase(ActionPhase phase) override {
     Battle_actionFlowMode = static_cast<std::uint32_t>(phase);

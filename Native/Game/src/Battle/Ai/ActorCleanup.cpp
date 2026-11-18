@@ -10,7 +10,7 @@
 #include <span>
 
 #include "Battle/Ai/ReactionDelay.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -50,7 +50,7 @@ constexpr std::int32_t kPackedIdleFlag = 0x20;
 constexpr unsigned kPackedTimerShift = 6;
 
 bool Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return false;
 }
 

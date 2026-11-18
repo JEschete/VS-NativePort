@@ -18,7 +18,7 @@
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Event {
 namespace {
@@ -188,7 +188,7 @@ std::size_t CommandLength(std::uint8_t opcode) {
 
 class LiveEventCameraLensHost final : public EventCameraLensHost {
  public:
-  int TickSpeed() override { return State_tickSpeed; }
+  int TickSpeed() override { return VS::State::tickSpeed; }
 
   int EaseFraction(int mode, int frame, int duration) override {
     return EvaluateInterpolationCurveEntry(static_cast<std::int16_t>(mode),

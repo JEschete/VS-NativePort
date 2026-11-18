@@ -9,13 +9,13 @@
 
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/MapLive.hpp"
 
 namespace VS::Battle {
 namespace {
 [[noreturn]] void Refuse(const char* message) {
-  Core_Errorf("battle.hud", "%s", message);
+  VS::Core::Errorf("battle.hud", "%s", message);
   std::abort();
 }
 

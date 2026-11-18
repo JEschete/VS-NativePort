@@ -22,10 +22,10 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
@@ -38,7 +38,7 @@
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/RoomDrawLive.hpp"
 #include "State/Progress.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace gazette_terminal_live_tests {
 namespace shared = gazette_times_live_tests;
@@ -127,8 +127,8 @@ inline auto ControlOwners() {
                     BytesOf(Menu_textBoxSelector),
                     BytesOf(Battle_hudHidden),
                     BytesOf(Battle_hudSlideOffset),
-                    BytesOf(Field_isFieldRenderingEnabled),
-                    BytesOf(State_tickSpeed),
+                    BytesOf(VS::Field::isFieldRenderingEnabled),
+                    BytesOf(VS::State::tickSpeed),
                     BytesOf(State_roomVisitProgress),
                     BytesOf(Battle_actionDefinitions),
                     BytesOf(Content_discRequestSlots),
@@ -200,7 +200,7 @@ class TerminalFixture
     Input_settings.cursorMemory = 1;
     Audio_Seq_unusedStateFlags.introState = 3;
     sound_offsets_.fill(std::numeric_limits<std::uint32_t>::max());
-    State_tickSpeed = 4;
+    VS::State::tickSpeed = 4;
     Input();
   }
   ~TerminalFixture() {
@@ -209,7 +209,8 @@ class TerminalFixture
     }
     ReleaseBorrowedMon();
     if (!score::ResetLiveGazetteTerminalModuleState()) {
-      Core_Errorf("tests", "terminal fixture retained an unsafe MON owner");
+      VS::Core::Errorf("tests",
+                       "terminal fixture retained an unsafe MON owner");
       std::abort();
     }
     content::ResetLiveDiscDrive();
@@ -282,7 +283,7 @@ class TerminalFixture
     const auto bytes = static_cast<std::size_t>(Menu_Score_kMonBinFile.size);
     if (!capacity || *capacity < bytes ||
         !content::CancelLiveDiscWrites({borrowed_mon_, bytes})) {
-      Core_Errorf("tests", "terminal borrowed MON cleanup refused");
+      VS::Core::Errorf("tests", "terminal borrowed MON cleanup refused");
       std::abort();
     }
     Menu_Score_monBinData = nullptr;

@@ -14,9 +14,10 @@ namespace VS::Battle {
 namespace {
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle",
-                "Damage policy refused missing required action, hit, actor, "
-                "stats or used index");
+    VS::Core::Errorf(
+        "battle",
+        "Damage policy refused missing required action, hit, actor, "
+        "stats or used index");
     std::abort();
   }
 }

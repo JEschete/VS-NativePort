@@ -8,19 +8,19 @@
 
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Menu/Results/ResultsStats.hpp"
 
 namespace VS::Menu::Results {
 namespace {
 Battle_ActorStats* LiveStats(const char* entry) {
   if (Battle_characterState == nullptr) {
-    Core_Warnf("menu.results", "%s refused: no character state", entry);
+    VS::Core::Warnf("menu.results", "%s refused: no character state", entry);
     return nullptr;
   }
   if (Battle_characterState->stats == nullptr) {
-    Core_Warnf("menu.results", "%s refused: character has no stat record",
-               entry);
+    VS::Core::Warnf("menu.results", "%s refused: character has no stat record",
+                    entry);
     return nullptr;
   }
   return Battle_characterState->stats;

@@ -12,13 +12,13 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.h"
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Render/Camera.h"
 #include "Render/CameraViewLive.hpp"
@@ -35,13 +35,15 @@ struct LiveFixture {
   decltype(std::to_array(Actors_actorRecords)) saved_actors =
       std::to_array(Actors_actorRecords);
   Battle_ActionState* saved_state = Battle_actionState;
-  decltype(Field_sphericalCamera) saved_camera = Field_sphericalCamera;
-  decltype(Field_cameraTransition) saved_transition = Field_cameraTransition;
+  decltype(VS::Field::sphericalCamera) saved_camera =
+      VS::Field::sphericalCamera;
+  decltype(VS::Field::cameraTransition) saved_transition =
+      VS::Field::cameraTransition;
   decltype(VS::Field::zoneContext.bounds) saved_bounds =
       VS::Field::zoneContext.bounds;
   Render_FrameScratch saved_frame = Render_frameScratch;
   int saved_projection = Render_projectionDistance;
-  MATRIX saved_bone_camera = Actors_boneMatrixScratch;
+  MATRIX saved_bone_camera = VS::Actors::boneMatrixScratch;
   Model model{};
   Actors_ActorRecord actor{};
   Battle_ActionState state{};
@@ -65,14 +67,14 @@ struct LiveFixture {
     actor.boneMatrices[1].t[0] = 3;
     actor.boneMatrices[1].t[1] = 4;
     Actors_actorRecords[0] = &actor;
-    Actors_boneMatrixScratch = {};
-    Actors_boneMatrixScratch.m[0][0] = kOne;
-    Actors_boneMatrixScratch.m[1][1] = kOne;
-    Actors_boneMatrixScratch.m[2][2] = kOne;
-    Render_frameScratch.viewMatrix = Actors_boneMatrixScratch;
+    VS::Actors::boneMatrixScratch = {};
+    VS::Actors::boneMatrixScratch.m[0][0] = kOne;
+    VS::Actors::boneMatrixScratch.m[1][1] = kOne;
+    VS::Actors::boneMatrixScratch.m[2][2] = kOne;
+    Render_frameScratch.viewMatrix = VS::Actors::boneMatrixScratch;
     Render_frameScratch.viewMatrix.t[2] = 1024;
     Render_frameScratch.camera = {};
-    Field_cameraTransition = nullptr;
+    VS::Field::cameraTransition = nullptr;
     VS::Field::zoneContext.bounds = {-100, -100, 100, 100};
     Battle_actionState = &state;
     state.queueIndex = 3;
@@ -83,13 +85,13 @@ struct LiveFixture {
   ~LiveFixture() {
     std::ranges::copy(saved_actors, std::begin(Actors_actorRecords));
     Battle_actionState = saved_state;
-    Field_sphericalCamera = saved_camera;
-    Field_cameraTransition = saved_transition;
+    VS::Field::sphericalCamera = saved_camera;
+    VS::Field::cameraTransition = saved_transition;
     VS::Field::zoneContext.bounds = saved_bounds;
     Render_frameScratch = saved_frame;
     // An inactive legacy global is not a snapshot of the math projection.
     Render_projectionDistance = saved_projection;
-    Actors_boneMatrixScratch = saved_bone_camera;
+    VS::Actors::boneMatrixScratch = saved_bone_camera;
     VS::Render::ForgetLiveModelExtent(&model);
   }
 };
@@ -213,9 +215,9 @@ TEST_CASE(
   auto fixture = std::make_unique<LiveFixture>();
   Battle_actionState = nullptr;
   for (int mode : {0, 2, 4, -1}) {
-    Field_sphericalCamera.delta.mode = mode;
+    VS::Field::sphericalCamera.delta.mode = mode;
     b::LiveUpdateActionCameraZoom();
-    CHECK(Field_sphericalCamera.delta.mode == mode);
+    CHECK(VS::Field::sphericalCamera.delta.mode == mode);
   }
 }
 TEST_CASE(
@@ -224,16 +226,16 @@ TEST_CASE(
   const ProjectionReset reset;
   auto fixture = std::make_unique<LiveFixture>();
   fixture->state.cameraZoomState = 1;
-  Field_sphericalCamera = {};
-  Field_sphericalCamera.delta.mode = 1;
-  Field_sphericalCamera.delta.yaw = 1;
-  Field_sphericalCamera.values.distance = 1600;
+  VS::Field::sphericalCamera = {};
+  VS::Field::sphericalCamera.delta.mode = 1;
+  VS::Field::sphericalCamera.delta.yaw = 1;
+  VS::Field::sphericalCamera.values.distance = 1600;
   VS::Render::SetLiveCameraProjectionDistance(704);
   b::LiveUpdateActionCameraZoom();
   CHECK(Render_projectionDistance == 768);
-  CHECK(Field_sphericalCamera.values.distance == 1536);
-  CHECK(Field_sphericalCamera.delta.yaw == 1);
-  CHECK(Field_sphericalCamera.speed > 0);
+  CHECK(VS::Field::sphericalCamera.values.distance == 1536);
+  CHECK(VS::Field::sphericalCamera.delta.yaw == 1);
+  CHECK(VS::Field::sphericalCamera.speed > 0);
   CHECK((Render_frameScratch.camera.lookAt.vx != 0 ||
          Render_frameScratch.camera.lookAt.vz != 0));
   CHECK(fixture->state.queueIndex == 3);

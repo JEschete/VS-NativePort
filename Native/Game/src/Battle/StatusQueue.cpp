@@ -6,7 +6,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -19,7 +19,8 @@ std::optional<std::uint32_t> QueueRule(
     StatusOperation operation = QueueApplicableStatusChanges) {
   const auto index = static_cast<std::size_t>(id);
   if (index >= rules.size()) {
-    Core_Debugf("battle", "Status queue rule %zu is outside its table", index);
+    VS::Core::Debugf("battle", "Status queue rule %zu is outside its table",
+                     index);
     return std::nullopt;
   }
   return operation(rules[index], target, queued);

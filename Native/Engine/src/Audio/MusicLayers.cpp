@@ -8,7 +8,7 @@
 
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/MusicState.h"
+#include "Audio/MusicState.hpp"
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
@@ -61,7 +61,7 @@ void VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts() {
 }
 
 // Sound_Cmd_40/19/1A snapshots (SLUS_010.40/25AC.c:2969,2983,3001).
-void Audio_Native_SaveMusicSnapshot(void) {
+void VS::Audio::SaveMusicSnapshot(void) {
   Audio_Seq_savedMusicConfig = Audio_Seq_primaryMusicConfig;
   std::copy(std::begin(Audio_Seq_musicChannels),
             std::end(Audio_Seq_musicChannels),
@@ -69,7 +69,7 @@ void Audio_Native_SaveMusicSnapshot(void) {
 }
 
 // Sound_SetMusicSequence snapshot restore/swap (SLUS_010.40/25AC.c:2847).
-void Audio_Native_RestoreMusicSnapshot(int swap) {
+void VS::Audio::RestoreMusicSnapshot(int swap) {
   if (swap != 0) {
     std::swap(Audio_Seq_primaryMusicConfig, Audio_Seq_savedMusicConfig);
     std::swap_ranges(std::begin(Audio_Seq_musicChannels),

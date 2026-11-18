@@ -25,7 +25,7 @@
 #include "Actors/BattleActorState.hpp"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
@@ -1270,8 +1270,8 @@ struct LiveStateFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_records =
       std::to_array(Actors_actorRecords);
-  decltype(std::to_array(Actors_weaponModels)) saved_weapons =
-      std::to_array(Actors_weaponModels);
+  decltype(std::to_array(VS::Actors::weaponModels)) saved_weapons =
+      std::to_array(VS::Actors::weaponModels);
   decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
       std::to_array(Field_gimmickInstances);
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
@@ -1280,7 +1280,7 @@ struct LiveStateFixture {
   LiveStateFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
-    std::fill_n(Actors_weaponModels, saved_weapons.size(), nullptr);
+    std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
     std::fill_n(Battle_actorMarkers, saved_markers.size(), 0);
   }
@@ -1291,7 +1291,7 @@ struct LiveStateFixture {
   ~LiveStateFixture() {
     std::ranges::copy(saved_actors, Battle_actors);
     std::ranges::copy(saved_records, Actors_actorRecords);
-    std::ranges::copy(saved_weapons, Actors_weaponModels);
+    std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
     std::ranges::copy(saved_gimmicks, Field_gimmickInstances);
     std::ranges::copy(saved_markers, Battle_actorMarkers);
   }
@@ -1342,8 +1342,8 @@ TEST_CASE("Live display flags round-trip the record and weapon bits",
   record->instance.isFrozen = -1;
   Actors_WeaponModel first{};
   Actors_WeaponModel second{};
-  Actors_weaponModels[6] = &first;
-  Actors_weaponModels[7] = &second;
+  VS::Actors::weaponModels[6] = &first;
+  VS::Actors::weaponModels[7] = &second;
   second.reserved08Bit4 = 1;
 
   VS::Actors::SetLiveActorDisplayFlags(

@@ -12,7 +12,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Hud.h"
 #include "Content/OverlayWorkspaceLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
@@ -55,8 +55,8 @@ constexpr std::size_t kBackgroundWords = 37;
 
 void Refuse(std::string_view reason) {
   ++refused;
-  Core_Warnf("menu", "status terminal refused: %.*s",
-             static_cast<int>(reason.size()), reason.data());
+  VS::Core::Warnf("menu", "status terminal refused: %.*s",
+                  static_cast<int>(reason.size()), reason.data());
 }
 int Report(std::string_view entry, const TerminalResult& result) {
   if (result) {
@@ -64,9 +64,9 @@ int Report(std::string_view entry, const TerminalResult& result) {
   }
   ++refused;
   const auto reason = TerminalErrorText(result.error());
-  Core_Warnf("menu", "status terminal %.*s refused: %.*s",
-             static_cast<int>(entry.size()), entry.data(),
-             static_cast<int>(reason.size()), reason.data());
+  VS::Core::Warnf("menu", "status terminal %.*s refused: %.*s",
+                  static_cast<int>(entry.size()), entry.data(),
+                  static_cast<int>(reason.size()), reason.data());
   return 0;
 }
 

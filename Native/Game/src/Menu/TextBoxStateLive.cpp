@@ -12,7 +12,7 @@
 
 #include "Actors/TextureAnimationLive.hpp"
 #include "Audio/Seq/Channel.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
@@ -41,7 +41,7 @@ class LiveTextBoxHost final : public TextBoxHost {
 std::optional<std::size_t> LiveIndex(int id, const char* entry) {
   const auto index = TextBoxIndex(id);
   if (!index.has_value()) {
-    Core_Warnf("menu", "%s refused text box %d (boxes 0-7)", entry, id);
+    VS::Core::Warnf("menu", "%s refused text box %d (boxes 0-7)", entry, id);
   }
   return index;
 }
@@ -172,10 +172,11 @@ int SelectLiveTextBoxChoice(u_char box_mask) {
   const auto choice =
       SelectTextBoxChoice(boxes, selector, host, box_mask, input);
   if (!choice.has_value()) {
-    Core_Warnf("menu",
-               "SelectTextBoxChoice refused a corrupt selector (count %u), "
-               "restarting the selection",
-               static_cast<unsigned>(selector.count));
+    VS::Core::Warnf(
+        "menu",
+        "SelectTextBoxChoice refused a corrupt selector (count %u), "
+        "restarting the selection",
+        static_cast<unsigned>(selector.count));
     selector.count = 0;
     WriteLiveTextBoxSelector(selector);
     return 0;
@@ -220,8 +221,8 @@ Menu_TextAnchorWord LiveTextBoxAnchor(int anchor_preset_index,
                                               .columns = text_column_count,
                                               .lines = text_line_count});
   if (!anchor.has_value()) {
-    Core_Warnf("menu", "TextBoxAnchor refused preset %d (presets 0-15)",
-               anchor_preset_index);
+    VS::Core::Warnf("menu", "TextBoxAnchor refused preset %d (presets 0-15)",
+                    anchor_preset_index);
     return std::bit_cast<Menu_TextAnchorWord>(std::uint32_t{0});
   }
   return std::bit_cast<Menu_TextAnchorWord>(anchor->Word());

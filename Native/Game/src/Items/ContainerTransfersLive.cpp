@@ -11,11 +11,11 @@
 #include <variant>
 
 #include "Audio/Seq/Channel.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfers.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
@@ -31,8 +31,8 @@ constexpr auto kRecordCategories = kItemCategoryCount - 1;
 using OrderTables = std::array<std::span<std::uint16_t>, kRecordCategories>;
 
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("items.container", "Container transfer refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("items.container", "Container transfer refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 
@@ -70,8 +70,8 @@ class LiveBag final : public GadgetBagWorld {
     return LiveContainerCategoryOrder(category, owner_);
   }
   std::uint8_t InventoryCapacity(ItemCategory category) override {
-    return Items_Inventory_inventoryItemCapacities[static_cast<std::size_t>(
-        category)];
+    return VS::Items::Inventory::inventoryItemCapacities
+        [static_cast<std::size_t>(category)];
   }
   std::span<std::uint8_t> InventoryOrder(ItemCategory category) override {
     const auto value = static_cast<std::size_t>(category);

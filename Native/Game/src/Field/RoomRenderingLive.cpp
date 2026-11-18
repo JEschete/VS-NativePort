@@ -15,9 +15,9 @@
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Scratch.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/EnvironmentLive.hpp"
-#include "Field/GimmickAnimationQueueLive.h"
+#include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/MapLive.hpp"
@@ -27,7 +27,7 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
@@ -38,16 +38,16 @@
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 // decomp: D_800F190C (D_800F190C@BATTLE/BATTLE.PRG)
-int Field_isFieldRenderingEnabled;
+int VS::Field::isFieldRenderingEnabled;
 // decomp: D_800F1BA4 (D_800F1BA4@BATTLE/BATTLE.PRG)
-u_short Field_areRoomUpdatesPaused;
+u_short VS::Field::areRoomUpdatesPaused;
 // decomp: D_800F1BA8 (D_800F1BA8@BATTLE/BATTLE.PRG)
-u_short* Field_roomPalettes;
+u_short* VS::Field::roomPalettes;
 // decomp: D_800F1BB0 (D_800F1BB0@BATTLE/BATTLE.PRG)
-Field_RoomTint Field_roomTint;
+Field_RoomTint VS::Field::roomTint;
 
 namespace {
 // The original's layouts (146C.c:168, Mpd.h and 146C.c:15966).
@@ -122,26 +122,26 @@ template <typename Byte>
 
 // The 1024 colours RoomStateLive.cpp allocates, or none before a session.
 [[nodiscard]] std::span<std::uint16_t> RoomPalettes() {
-  if (Field_roomPalettes == nullptr) {
+  if (roomPalettes == nullptr) {
     return {};
   }
-  return {Field_roomPalettes, kRoomPaletteColors};
+  return {roomPalettes, kRoomPaletteColors};
 }
 
 [[nodiscard]] RoomTintState LoadTint() {
-  return RoomTintState{.parameters = {.red = Field_roomTint.red,
-                                      .green = Field_roomTint.green,
-                                      .blue = Field_roomTint.blue,
-                                      .strength = Field_roomTint.strength},
-                       .active = Field_roomTint.isActive != 0};
+  return RoomTintState{.parameters = {.red = roomTint.red,
+                                      .green = roomTint.green,
+                                      .blue = roomTint.blue,
+                                      .strength = roomTint.strength},
+                       .active = roomTint.isActive != 0};
 }
 
 void StoreTint(const RoomTintState& tint) {
-  Field_roomTint.red = tint.parameters.red;
-  Field_roomTint.green = tint.parameters.green;
-  Field_roomTint.blue = tint.parameters.blue;
-  Field_roomTint.strength = tint.parameters.strength;
-  Field_roomTint.isActive = static_cast<std::int16_t>(tint.active ? 1 : 0);
+  roomTint.red = tint.parameters.red;
+  roomTint.green = tint.parameters.green;
+  roomTint.blue = tint.parameters.blue;
+  roomTint.strength = tint.parameters.strength;
+  roomTint.isActive = static_cast<std::int16_t>(tint.active ? 1 : 0);
 }
 
 void LoadViewTransform() {
@@ -231,8 +231,7 @@ class LiveGeometryHost final : public RoomGeometryHost {
   }
   void DrawGroups() override {
     Field_roomPrimitiveRangeStart = Scratch().primitiveCursor;
-    Render::DrawLiveRoomGeometry(geometry_, Bytes(),
-                                 Field_roomGeometryDrawMode);
+    Render::DrawLiveRoomGeometry(geometry_, Bytes(), roomGeometryDrawMode);
     Field_roomPrimitiveRangeEnd = Scratch().primitiveCursor;
   }
   void TintDrawnPrimitives(const Render::RoomTint& tint) override {
@@ -257,13 +256,13 @@ class LiveGeometryHost final : public RoomGeometryHost {
 
 class LiveSceneHost final : public RoomSceneHost {
  public:
-  int TickSpeed() override { return State_tickSpeed; }
-  bool RoomUpdatesPaused() override { return Field_areRoomUpdatesPaused != 0; }
+  int TickSpeed() override { return VS::State::tickSpeed; }
+  bool RoomUpdatesPaused() override { return areRoomUpdatesPaused != 0; }
   void LoadViewTransform() override { Field::LoadViewTransform(); }
   void DrawTriggerMarkers() override { DrawLiveRoomTriggerMarkers(); }
   void DrawActorMarkers() override { VS::Battle::LiveDrawActorMarkers(); }
   void UpdateGimmickAnimations() override {
-    Field_UpdateGimmickAnimationQueueEntry();
+    UpdateGimmickAnimationQueueEntry();
   }
   void UpdateRoomEffects() override { LiveUpdateRoomEffects(); }
   void DrawPlatformShadows() override { DrawLiveMovingPlatformShadows(); }
@@ -361,15 +360,15 @@ class LivePaletteHost final : public RoomPaletteHost {
 
 RoomRenderState LiveRoomRenderState() {
   return RoomRenderState{
-      .field_rendering_enabled = Field_isFieldRenderingEnabled != 0,
-      .updates_paused = Field_areRoomUpdatesPaused != 0,
+      .field_rendering_enabled = isFieldRenderingEnabled != 0,
+      .updates_paused = areRoomUpdatesPaused != 0,
       .tint = LoadTint()};
 }
 
 void LiveSetFieldRenderingEnabled(int enabled) {
   RoomRenderState state = LiveRoomRenderState();
   SetFieldRenderingEnabled(state, enabled != 0);
-  Field_isFieldRenderingEnabled = state.field_rendering_enabled ? 1 : 0;
+  isFieldRenderingEnabled = state.field_rendering_enabled ? 1 : 0;
 }
 
 void LiveDrawRoomScene() {
@@ -384,8 +383,8 @@ void LiveDrawRoomGeometry(void* geometry) {
 
 void LiveAdvanceRoomAnimationClock() {
   Field_roomAnimationTicks =
-      AdvanceRoomAnimationClock(Field_areRoomUpdatesPaused != 0,
-                                Field_roomAnimationTicks, State_tickSpeed);
+      AdvanceRoomAnimationClock(areRoomUpdatesPaused != 0,
+                                Field_roomAnimationTicks, VS::State::tickSpeed);
 }
 
 void LiveSetRoomRenderingEnabled(int enabled) {
@@ -452,7 +451,7 @@ void LiveClearRoomTint() {
 void LiveSetRoomAnimationsPaused(int paused) {
   RoomRenderState state = LiveRoomRenderState();
   SetRoomAnimationsPaused(state, paused != 0);
-  Field_areRoomUpdatesPaused = static_cast<u_short>(state.updates_paused);
+  areRoomUpdatesPaused = static_cast<u_short>(state.updates_paused);
 }
 
 int LiveApplyCameraGeometryOcclusion(int tile_x, int tile_z, int floor_layer,

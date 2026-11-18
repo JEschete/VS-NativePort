@@ -10,7 +10,7 @@
 #include <string_view>
 
 #include "Audio/SfxLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/ContainerIndexingLive.hpp"
@@ -51,8 +51,8 @@ DiscardPresentation g_presentation;
 TransferConfirmationState g_transfer;
 
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("menu.container", "Container dialog refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.container", "Container dialog refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 

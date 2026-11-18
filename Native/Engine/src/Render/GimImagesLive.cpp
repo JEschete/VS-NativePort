@@ -17,7 +17,7 @@
 
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
@@ -156,8 +156,9 @@ const char* RefusalName(GimRefusal refusal) {
 
 void Report(GimRefusal refusal) {
   if (std::has_single_bit(++refused_requests)) {
-    Core_Errorf("render", "GIM image request refused: %s (%" PRIu64 " refused)",
-                RefusalName(refusal), refused_requests);
+    VS::Core::Errorf("render",
+                     "GIM image request refused: %s (%" PRIu64 " refused)",
+                     RefusalName(refusal), refused_requests);
   }
 }
 

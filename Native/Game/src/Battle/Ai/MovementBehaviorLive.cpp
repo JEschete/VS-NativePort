@@ -31,7 +31,7 @@
 #include "Battle/Ai/WanderLive.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.hpp"
@@ -110,7 +110,7 @@ static_assert(offsetof(Battle_Ai_SettingsView, opaque2D) ==
 static_assert(sizeof(Battle_Ai_GuardTileWord) == sizeof(std::uint32_t));
 
 [[noreturn]] void Fail(const char* message) {
-  Core_Errorf("ai", "%s", message);
+  VS::Core::Errorf("ai", "%s", message);
   std::abort();
 }
 

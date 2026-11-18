@@ -21,7 +21,7 @@
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/Equipment.h"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentInit.h"

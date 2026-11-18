@@ -4,7 +4,7 @@
 #include <iterator>
 
 #include "Audio/Seq/Sequencer.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Audio::Seq {
@@ -13,11 +13,13 @@ namespace VS::Audio::Seq {
 inline std::int16_t* LfoWaveform(unsigned shape) {
   if (shape >= std::size(Audio_Seq_kLfoWaveforms) ||
       Audio_Seq_kLfoWaveforms[shape] == nullptr) {
-    Core_Errorf("audio.lfo", "unsupported source waveform selector=%u", shape);
+    VS::Core::Errorf("audio.lfo", "unsupported source waveform selector=%u",
+                     shape);
     return nullptr;
   }
   void* program = Audio_Seq_kLfoWaveforms[shape];
-  Core_Debugf("audio.lfo", "source selector=%u program=%p", shape, program);
+  VS::Core::Debugf("audio.lfo", "source selector=%u program=%p", shape,
+                   program);
   return Audio_Seq_kLfoWaveforms[shape];
 }
 

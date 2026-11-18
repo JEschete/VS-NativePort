@@ -14,12 +14,13 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/HudOrchestrationLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -36,13 +37,6 @@ static_assert(offsetof(Battle_Ai_EngagementData, reservedA) + 1 ==
               offsetof(Battle_Actor, commandFlags));
 constexpr unsigned kPoseShift = 2;
 constexpr unsigned kPoseMask = 3u << kPoseShift;
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 class LiveAwarenessMarkers final : public AwarenessMarkers {
  public:
@@ -251,7 +245,7 @@ void UpdateLiveTemporaryAwarenessIndicator(
 void DisengageLiveActorById(int actor_id) {
   LiveEngagementTable table;
   if (!DisengageActorById(table, actor_id).has_value()) {
-    Core_Warnf("ai", "AI disengagement ignored actor ID %d", actor_id);
+    VS::Core::Warnf("ai", "AI disengagement ignored actor ID %d", actor_id);
   }
 }
 

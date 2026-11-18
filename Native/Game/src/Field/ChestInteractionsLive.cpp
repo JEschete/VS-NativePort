@@ -48,13 +48,13 @@
 #include "Field/InteractionFocusLive.hpp"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.h"
-#include "Field/MinimapSceneLive.h"
+#include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomSwitchesLive.h"
 #include "Field/TransitionsLive.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Field/TrapsLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
@@ -66,7 +66,7 @@
 #include "Menu/TextBox.h"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 
@@ -185,7 +185,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
     return {.room_trigger = cell->hasRoomTrigger != 0, .pit = cell->isPit != 0};
   }
   bool TransitionInProgress() override {
-    return Field_screenTransitionStep != 0;
+    return VS::Field::screenTransitionStep != 0;
   }
   std::optional<VS::Actors::PackedTile> LastTriggerTile(
       std::int32_t actor) override {
@@ -243,7 +243,7 @@ class LiveActorTileTriggerHost final : public VS::Field::ActorTileTriggerHost {
 class LiveEntranceDoorHost final : public VS::Field::EntranceDoorHost {
  public:
   std::optional<std::uint8_t> SceneDoorId(std::uint8_t door_id) override {
-    const auto scene_id = Field_SceneDoorIdEntry(door_id);
+    const auto scene_id = VS::Field::SceneDoorIdEntry(door_id);
     if (scene_id < 0) return std::nullopt;
     return static_cast<std::uint8_t>(scene_id);
   }
@@ -738,7 +738,7 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
   }
   void FinishChestFlow() override {
     Battle_actionFlowMode = kFinishedActionFlow;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
   }
   void RestoreIdlePoses() override {
     for (int actor = 0; actor < kIdleActorCount; ++actor) {
@@ -814,7 +814,7 @@ class LiveInteractionDispatchHost final
       return false;
     }
     const auto& point = Field_interactionFocus.actor_query.location.position;
-    State_tickSpeed = kTrapTickSpeed;
+    VS::State::tickSpeed = kTrapTickSpeed;
     return VS::Field::TriggerLiveActorTrap(
         target, {.x = point.vx, .y = point.vy, .z = point.vz}, actor);
   }
@@ -838,7 +838,7 @@ class LiveTrapFinishHost final : public VS::Field::TrapFinishHost {
   }
   void FinishFlow() override {
     Battle_actionFlowMode = kFinishedActionFlow;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
   }
   void ReleaseNotification() override {
     VS::Menu::ReleaseLiveSceneNotification();

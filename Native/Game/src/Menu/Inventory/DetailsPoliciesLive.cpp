@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <iterator>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Input/Pad.hpp"
 #include "Items/InventoryLive.hpp"
@@ -29,7 +29,7 @@ static_assert(sizeof(Menu_Framework_menuMemory.opaque3A.categoryCursors[0]) ==
               sizeof(CursorMemory));
 
 [[noreturn]] void Refuse(const char* reason) {
-  Core_Errorf("menu.inventory", "Inventory details refused: %s", reason);
+  VS::Core::Errorf("menu.inventory", "Inventory details refused: %s", reason);
   std::abort();
 }
 
@@ -73,8 +73,8 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
     return {order, Items::kCategoryCapacities[index]};
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
-    Core_Errorf("menu.inventory", "Inventory details refused: %.*s",
-                static_cast<int>(reason.size()), reason.data());
+    VS::Core::Errorf("menu.inventory", "Inventory details refused: %.*s",
+                     static_cast<int>(reason.size()), reason.data());
     std::abort();
   }
   void ClearRows() override {

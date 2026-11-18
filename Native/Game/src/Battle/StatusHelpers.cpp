@@ -8,7 +8,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -27,9 +27,9 @@ bool ValidAffinities(const ElementEnchantment& change) {
   if (valid(change.increased_affinity) && valid(change.decreased_affinity)) {
     return true;
   }
-  Core_Debugf("battle",
-              "Element enchantment indices %d/%d are outside their tables",
-              change.increased_affinity, change.decreased_affinity);
+  VS::Core::Debugf("battle",
+                   "Element enchantment indices %d/%d are outside their tables",
+                   change.increased_affinity, change.decreased_affinity);
   return false;
 }
 
@@ -89,8 +89,8 @@ std::optional<bool> QueueActorStatChangeNumber(
     StatNumberWorld& world, const StatNumberRequest& request) {
   const auto spawn = world.RoomSpawnIndex(request.actor_slot);
   if (!spawn) {
-    Core_Debugf("battle", "Stat number requires actor slot %d",
-                request.actor_slot);
+    VS::Core::Debugf("battle", "Stat number requires actor slot %d",
+                     request.actor_slot);
     return std::nullopt;
   }
   if (spawn.value() == kSuppressedNumberSpawn && request.actor_slot != 0) {
@@ -109,15 +109,16 @@ bool UpdateTargetingRiskPenalty(std::int32_t& timer,
   if (timer == 0) {
     const auto target = world.SelectedTarget();
     if (!target) {
-      Core_Debugf("battle",
-                  "Targeting risk requires the selected actor's stats");
+      VS::Core::Debugf("battle",
+                       "Targeting risk requires the selected actor's stats");
       return false;
     }
     if ((target.value().statuses & kTargetingRiskStatus) != 0 &&
         !target.value().targets_position && target.value().actor_slot == 0) {
       const auto risk = world.PlayerRisk();
       if (!risk) {
-        Core_Debugf("battle", "Targeting risk requires the player's stats");
+        VS::Core::Debugf("battle",
+                         "Targeting risk requires the player's stats");
         return false;
       }
       if (risk.value() < kTargetingRiskLimit) {

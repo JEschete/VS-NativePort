@@ -23,7 +23,6 @@
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
-#include "Field/MinimapSceneLive.h"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Room.h"
 #include "Field/Transitions.hpp"
@@ -421,13 +420,13 @@ TEST_CASE("Native entrance lookup accepts bounded scene index 128",
   Field_roomData.header.minimapSceneLength =
       static_cast<std::uint32_t>(fixture.words.size() * sizeof(u_long));
   CHECK(VS::Field::IsValidMapScene(std::as_bytes(std::span(fixture.words))));
-  CHECK(Field_SceneDoorIdEntry(128) == 254);
+  CHECK(VS::Field::SceneDoorIdEntry(128) == 254);
   Field_MpdDoorRecord door{};
   door.doorId = 128;
   Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
   CHECK(Field_enteredDoorId == 254);
   CHECK(Field_entranceDoorRecord.doorId == 128);
-  CHECK(Field_SceneDoorIdEntry(129) == -1);
+  CHECK(VS::Field::SceneDoorIdEntry(129) == -1);
 }
 
 TEST_CASE("Typed entrance live lookup keeps order upper layers and byte bounds",
@@ -495,10 +494,11 @@ TEST_CASE("Scene door native entries retain original module addresses",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D880) ==
-        reinterpret_cast<const void*>(&Field_SceneDoorIdEntry));
+        reinterpret_cast<const void*>(&VS::Field::SceneDoorIdEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D948) ==
-        reinterpret_cast<const void*>(&Field_MarkEntranceDoorOnSceneMapEntry));
+        reinterpret_cast<const void*>(
+            &VS::Field::MarkEntranceDoorOnSceneMapEntry));
 }
 
 TEST_CASE("Native entrance lookup uses bounded unsigned scene bytes",
@@ -508,13 +508,13 @@ TEST_CASE("Native entrance lookup uses bounded unsigned scene bytes",
   door.requiredFlagId = 321;
   for (std::uint32_t id = 0; id <= UINT8_MAX; ++id) {
     fixture.words[25] = id << 8;
-    CHECK(Field_SceneDoorIdEntry(0) == id);
+    CHECK(VS::Field::SceneDoorIdEntry(0) == id);
     Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
     CHECK(Field_enteredDoorId == id);
     CHECK(Field_entranceDoorRecord.requiredFlagId == 321);
   }
   Field_roomData.header.minimapSceneLength = 26 * sizeof(u_long) - 1;
-  CHECK(Field_SceneDoorIdEntry(0) == -1);
+  CHECK(VS::Field::SceneDoorIdEntry(0) == -1);
   Field_SetEntranceDoorRecordEntry(reinterpret_cast<char (*)[12]>(&door));
   CHECK(Field_enteredDoorId == -1);
   Field_SetEntranceDoorRecordEntry(nullptr);
@@ -528,16 +528,16 @@ TEST_CASE("Scene native marking preserves scene and halfword store semantics",
   fixture.words[25] = 0xAB04FE00;
   auto expected = fixture.words;
   expected[25] |= 0x00100000;
-  Field_MarkEntranceDoorOnSceneMapEntry(0);
+  VS::Field::MarkEntranceDoorOnSceneMapEntry(0);
   CHECK(Field_enteredDoorId == 0);
   CHECK(fixture.words == expected);
-  Field_MarkEntranceDoorOnSceneMapEntry(-1);
+  VS::Field::MarkEntranceDoorOnSceneMapEntry(-1);
   CHECK(Field_enteredDoorId == -1);
   CHECK(fixture.words == expected);
   Field_roomData.minimapScene = nullptr;
-  CHECK(Field_SceneDoorIdEntry(0) == -1);
+  CHECK(VS::Field::SceneDoorIdEntry(0) == -1);
   for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
-    Field_MarkEntranceDoorOnSceneMapEntry(static_cast<std::int32_t>(bits));
+    VS::Field::MarkEntranceDoorOnSceneMapEntry(static_cast<std::int32_t>(bits));
     CHECK(std::bit_cast<std::uint16_t>(Field_enteredDoorId) == bits);
     CHECK(VS::Field::EnteredDoorReloadByte(Field_enteredDoorId) ==
           static_cast<std::uint8_t>((bits & UINT8_MAX) + 1));

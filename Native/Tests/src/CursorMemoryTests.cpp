@@ -46,7 +46,7 @@
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/OptionsLive.hpp"
-#include "Menu/OptionsLiveState.h"
+#include "Menu/OptionsLiveState.hpp"
 #include "Menu/Setup/Assembly.hpp"
 #include "Menu/Setup/Combination.hpp"
 #include "Menu/Setup/SetupLive.hpp"
@@ -114,16 +114,17 @@ struct CursorFixture {
 struct PuzzleOptionsFixture {
   CursorFixture rows;
   std::array<u_short, 1070> saved_table =
-      std::to_array(Menu_Options_menuStrings);
+      std::to_array(VS::Menu::Options::menuStrings);
   char saved_disabled = Audio_Seq_unusedStateFlags.puzzleModeDisabled;
 
   PuzzleOptionsFixture() {
-    std::fill_n(Menu_Options_menuStrings, saved_table.size(), 0xE7E7);
-    std::fill_n(Menu_Options_menuStrings, 18, 64);
+    std::fill_n(VS::Menu::Options::menuStrings, saved_table.size(), 0xE7E7);
+    std::fill_n(VS::Menu::Options::menuStrings, 18, 64);
   }
 
   ~PuzzleOptionsFixture() {
-    std::copy(saved_table.begin(), saved_table.end(), Menu_Options_menuStrings);
+    std::copy(saved_table.begin(), saved_table.end(),
+              VS::Menu::Options::menuStrings);
     Audio_Seq_unusedStateFlags.puzzleModeDisabled = saved_disabled;
   }
 };

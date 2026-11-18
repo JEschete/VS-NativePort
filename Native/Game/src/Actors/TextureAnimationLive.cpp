@@ -18,9 +18,9 @@
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimation.hpp"
 #include "Actors/Textures.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -133,15 +133,17 @@ void StoreSlot(const TextureAnimationSlot& slot,
 }
 
 void WarnSlotRefused(const Actors_ActorRecord& actor, const char* operation) {
-  Core_Warnf("actors", "%s refused: texture slot %u is outside the slot tables",
-             operation, static_cast<unsigned>(actor.textureSlot));
+  VS::Core::Warnf("actors",
+                  "%s refused: texture slot %u is outside the slot tables",
+                  operation, static_cast<unsigned>(actor.textureSlot));
 }
 
 [[nodiscard]] std::optional<std::size_t> LiveBank(const char* operation) {
   const std::size_t bank = Actors_sharedSequenceBankIndex;
   if (bank >= kTextureBanks) {
-    Core_Warnf("actors", "%s refused: sequence bank %zu has no texture row",
-               operation, bank);
+    VS::Core::Warnf("actors",
+                    "%s refused: sequence bank %zu has no texture row",
+                    operation, bank);
     return std::nullopt;
   }
   return bank;
@@ -211,8 +213,8 @@ int SetLiveActorTextureAnimation(int actor_id, int channel, int timeline,
   Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr || channel >= kTextureAnimationChannels) return -1;
   if (channel < 0) {
-    Core_Warnf("actors", "%s refused: channel %d is negative", kOperation,
-               channel);
+    VS::Core::Warnf("actors", "%s refused: channel %d is negative", kOperation,
+                    channel);
     return -1;
   }
   if (command < static_cast<int>(TextureAnimationCommand::kStop) ||
@@ -260,8 +262,8 @@ void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
     return;
   }
   if (static_cast<unsigned>(channel) >= kTextureAnimationChannels) {
-    Core_Warnf("actors", "%s refused: channel %d is outside the channels",
-               kOperation, channel);
+    VS::Core::Warnf("actors", "%s refused: channel %d is outside the channels",
+                    kOperation, channel);
     return;
   }
   const std::optional<std::size_t> bank = LiveBank(kOperation);
@@ -279,9 +281,9 @@ void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
   if (!found.has_value()) return;
   const TextureCellSheet& sheet = *found;
   if (sheet.overlay == 0 || sheet.overlay > kTextureOverlayCount) {
-    Core_Warnf("actors", "%s refused: sheet overlay %u is outside 1..%d",
-               kOperation, static_cast<unsigned>(sheet.overlay),
-               kTextureOverlayCount);
+    VS::Core::Warnf("actors", "%s refused: sheet overlay %u is outside 1..%d",
+                    kOperation, static_cast<unsigned>(sheet.overlay),
+                    kTextureOverlayCount);
     return;
   }
   const std::optional<ActorTextureLayout> layout =
@@ -290,7 +292,7 @@ void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
   const TextureMove move = TextureFrameMove(
       sheet, OverlayOf(actor->textureOverlays[sheet.overlay - 1]), *layout,
       frame);
-  Core_Debugf(
+  VS::Core::Debugf(
       "texture",
       "actor=%u model=%u bank=%u slot=%u clut=%u channel=%d frame=%d "
       "overlay=%u row=%u src=(%d,%d) dst=(%d,%d) size=(%d,%d)",
@@ -334,8 +336,9 @@ void UploadLiveActorTextureOverlay(int actor_id, TextureOverlayCopy copy) {
     return;
   }
   if (copy.overlay >= kTextureOverlayCount) {
-    Core_Warnf("actors", "%s refused: overlay %u is outside 0..%d", kOperation,
-               static_cast<unsigned>(copy.overlay), kTextureOverlayCount - 1);
+    VS::Core::Warnf("actors", "%s refused: overlay %u is outside 0..%d",
+                    kOperation, static_cast<unsigned>(copy.overlay),
+                    kTextureOverlayCount - 1);
     return;
   }
   const std::optional<std::size_t> bank = LiveBank(kOperation);
@@ -363,7 +366,7 @@ void UpdateLiveActorTextureScrolling(Actors_ActorRecord* actor,
   TextureScrolling scrolling = ScrollingOf(*actor);
   const TextureScrollMoves moves =
       StepTextureScrolling(scrolling, layout.value_or(ActorTextureLayout{}),
-                           State_tickSpeed, carried_height);
+                           VS::State::tickSpeed, carried_height);
   StoreScrolling(scrolling, *actor);
   bool refused = false;
   for (const std::optional<TextureMove>& move : moves) {

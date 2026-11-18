@@ -8,6 +8,7 @@
 struct Field_MpdLockTrigger;
 struct Field_MpdFloorTrigger;
 struct Items_TreasureChest;
+struct SVECTOR;
 
 namespace VS::Field {
 
@@ -29,5 +30,11 @@ Items_TreasureChest* ResolveLiveChestTarget(ChestTarget target);
 InteractionTargetState& LiveInteractionTargetState();
 InteractionTargetDomain LiveInteractionTargetDomain();
 void InvalidateLiveInteractionTargets();
+
+// The original BATTLE.PRG entries over the typed queries above.
+Field_MpdFloorTrigger* RoomTriggerAtTileEntry(int x, int z, int layer);
+void SetRoomTriggerEnabledEntry(Field_MpdFloorTrigger* selected,
+                                int activation);
+void DisableTrapAtPositionEntry(SVECTOR* position);
 
 }  // namespace VS::Field

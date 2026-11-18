@@ -16,10 +16,11 @@
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
@@ -48,13 +49,6 @@ static_assert(offsetof(RecoveryView, destination) ==
 static_assert(sizeof(RecoveryView) <= sizeof(AiState));
 static_assert(std::size(AiState{}.detourDirections) ==
               std::tuple_size_v<decltype(BlockedMover::detour_directions)>);
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 Battle_Ai_MoveTargetView* MoveTarget(AiState& state) {
   return reinterpret_cast<Battle_Ai_MoveTargetView*>(&state);

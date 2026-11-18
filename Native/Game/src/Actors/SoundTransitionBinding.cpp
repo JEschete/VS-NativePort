@@ -5,7 +5,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/SoundTransition.hpp"
 #include "Legacy/Psx.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -15,9 +15,9 @@ SoundTransition FromSlot(const Actors_ModelEffectSlot& slot) {
 }  // namespace
 
 void UpdateActorSoundTransition(Actors_ActorRecord& actor) {
-  const SoundTransition next =
-      StepSoundTransition(FromSlot(actor.soundEffect),
-                          FromSlot(actor.soundEffectTarget), State_tickSpeed);
+  const SoundTransition next = StepSoundTransition(
+      FromSlot(actor.soundEffect), FromSlot(actor.soundEffectTarget),
+      VS::State::tickSpeed);
   actor.soundEffect.kind = next.mode;
   actor.soundEffect.level = next.pan;
   actor.soundEffect.flags = next.volume;

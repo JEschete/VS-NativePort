@@ -24,9 +24,6 @@
     <ClCompile Include="src\ActorAssetsLive.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\ActorAssetsLiveState.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\AudioBank.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -15,12 +15,12 @@ namespace VS::Items::Live {
 void WarnRefusal(const char* operation, ItemsStatus status) {
   if (status == ItemsStatus::kOk) return;
   const auto reason = Describe(status);
-  Core_Warnf("items", "%s refused: %.*s", operation,
-             static_cast<int>(reason.size()), reason.data());
+  VS::Core::Warnf("items", "%s refused: %.*s", operation,
+                  static_cast<int>(reason.size()), reason.data());
 }
 
 void WarnNullRecord(const char* operation) {
-  Core_Warnf("items", "%s refused: null record", operation);
+  VS::Core::Warnf("items", "%s refused: null record", operation);
 }
 
 ItemAction ToItemAction(const Battle_ActionDefinition& action) {

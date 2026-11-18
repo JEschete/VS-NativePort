@@ -8,8 +8,8 @@
 #include <string_view>
 
 #include "Audio/Seq/Channel.h"
-#include "Core/Diagnostics.h"
-#include "Items/InventoryLiveState.h"
+#include "Core/Diagnostics.hpp"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/SortingKeysLive.hpp"
 #include "Menu/Inventory/InventorySorting.hpp"
@@ -18,8 +18,8 @@
 namespace VS::Menu::Inventory {
 namespace {
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("menu.inventory.sorting", "Inventory sorting refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.inventory.sorting", "Inventory sorting refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 
@@ -63,8 +63,8 @@ class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
         Menu_Inventory_inventoryIndices[static_cast<std::size_t>(category)]);
   }
   std::uint8_t Capacity(Items::ItemCategory category) override {
-    return Items_Inventory_inventoryItemCapacities[static_cast<std::size_t>(
-        category)];
+    return VS::Items::Inventory::inventoryItemCapacities
+        [static_cast<std::size_t>(category)];
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
     Inventory::Refuse(reason);

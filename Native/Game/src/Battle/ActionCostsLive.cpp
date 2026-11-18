@@ -13,14 +13,15 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle {
 namespace {
 [[noreturn]] void Refuse() {
-  Core_Errorf("battle",
-              "Action cost refused missing used state/index or unsupported "
-              "weapon resource type/cost (#352; only 1..4 or 0/0 supported)");
+  VS::Core::Errorf(
+      "battle",
+      "Action cost refused missing used state/index or unsupported "
+      "weapon resource type/cost (#352; only 1..4 or 0/0 supported)");
   std::abort();
 }
 template <typename T>

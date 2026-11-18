@@ -23,10 +23,11 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 
@@ -165,13 +166,6 @@ static_assert(offsetof(CreationView, opaque224) ==
               offsetof(AiState, locomotionFlags));
 static_assert(offsetof(CreationView, opaque226) == offsetof(AiState, walkStep));
 static_assert(offsetof(CreationView, opaque227) == offsetof(AiState, runStep));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 BattleActorHandle HandleOf(const Battle_Actor* actor) {
   return static_cast<BattleActorHandle>(
@@ -375,10 +369,10 @@ class LiveCreationHost final : public ActorCreationHost {
     state->stats = live.stats;
     state->nativePointer60 = &live.model->position;
     state->nativePointer64 = &live.model->currentTileX;
-    Core_Debugf("ai", "created state=%p id=%u model=%p stats=%p",
-                static_cast<void*>(state),
-                static_cast<unsigned int>(state->actorId),
-                static_cast<void*>(live.model), static_cast<void*>(live.stats));
+    VS::Core::Debugf(
+        "ai", "created state=%p id=%u model=%p stats=%p",
+        static_cast<void*>(state), static_cast<unsigned int>(state->actorId),
+        static_cast<void*>(live.model), static_cast<void*>(live.stats));
     return true;
   }
   [[nodiscard]] std::optional<std::int16_t> AnchorHeightY(
@@ -444,7 +438,7 @@ class LiveCreationHost final : public ActorCreationHost {
 // decomp: func_800E6178 (src/BATTLE/BATTLE.PRG/7CD68.c:934).
 int CreateLiveActorAiState(Battle_Actor* actor, int options) {
   Require(actor != nullptr, "AI creation requires an actor");
-  Core_Debugf(
+  VS::Core::Debugf(
       "ai", "create actor=%p id=%d options=0x%X model=%p stats=%p",
       static_cast<void*>(actor), actor->id, static_cast<unsigned int>(options),
       static_cast<void*>(actor->model), static_cast<void*>(actor->stats));
@@ -463,13 +457,13 @@ int CreateLiveActorAiState(Battle_Actor* actor, int options) {
   Require(remembered_idle.has_value(), "AI creation refused the actor");
   if ((creation.kind & kAiStateActorKinds) != 0) {
     const AiState& state = StateOf(creation.id);
-    Core_Debugf("ai",
-                "initialized actor=%d state=%p bytes=%u radius=%u height=%u",
-                creation.id, static_cast<const void*>(&state),
-                static_cast<unsigned int>(sizeof(AiState)),
-                static_cast<unsigned int>(state.radius),
-                static_cast<unsigned int>(
-                    static_cast<std::uint16_t>(state.pointHeight)));
+    VS::Core::Debugf(
+        "ai", "initialized actor=%d state=%p bytes=%u radius=%u height=%u",
+        creation.id, static_cast<const void*>(&state),
+        static_cast<unsigned int>(sizeof(AiState)),
+        static_cast<unsigned int>(state.radius),
+        static_cast<unsigned int>(
+            static_cast<std::uint16_t>(state.pointHeight)));
   }
   return *remembered_idle ? 1 : 0;
 }

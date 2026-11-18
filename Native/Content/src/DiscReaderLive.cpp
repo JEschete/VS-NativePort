@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <limits>
 
-#include "Audio/XaPlayback.h"
+#include "Audio/XaPlayback.hpp"
 #include "Content/DataAccess.h"
 #include "Content/DiscReader.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 
@@ -125,17 +125,16 @@ class LiveDiscDriveHost final : public DiscDriveHost {
     };
   }
   [[nodiscard]] bool StartXaStream(const DiscXaRequest& request) override {
-    return Audio_Native_StartXaStream(request.start_sector, request.volume) !=
-           0;
+    return VS::Audio::StartXaStream(request.start_sector, request.volume) != 0;
   }
   [[nodiscard]] XaStreamStatus PollXaStream() override {
-    const int status = Audio_Native_XaStreamStatus();
+    const int status = VS::Audio::XaStreamStatus();
     if (status < 0) {
       return XaStreamStatus::kFailed;
     }
     return status == 0 ? XaStreamStatus::kFinished : XaStreamStatus::kPlaying;
   }
-  void StopXaStream() override { Audio_Native_StopXaStream(); }
+  void StopXaStream() override { VS::Audio::StopXaStream(); }
   void MarkXaStreamStarted() override {
     Content_discDriveState.xaModeMarker = 0;
     Content_discDriveState.position.minute = 0;
@@ -165,7 +164,7 @@ bool BeginLiveDiscRead(std::int32_t sector, std::uint32_t bytes,
                        void* destination) {
   if ((bytes != 0 && destination == nullptr) ||
       read_generation == std::numeric_limits<std::uint64_t>::max()) {
-    Core_Warnf(
+    VS::Core::Warnf(
         "content",
         "Disc read refused: missing destination or exhausted generation");
     return false;
@@ -185,7 +184,7 @@ bool LiveDiscReadCompleted(std::uint64_t generation) noexcept {
 
 void CancelLiveDiscRead(const void* destination) {
   if (destination == nullptr) {
-    Core_Warnf("content", "CancelDiscRead refused: null destination");
+    VS::Core::Warnf("content", "CancelDiscRead refused: null destination");
     return;
   }
   if (Content_discDriveState.destination != destination) return;

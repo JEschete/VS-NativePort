@@ -24,12 +24,12 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
-#include "Battle/EncounterHooks.h"
+#include "Battle/EncounterHooks.hpp"
 #include "Boot/GameLoop.h"
 #include "CombatLab/Trace.hpp"
 #include "Core/BiosRand.h"
 #include "Diagnostics/PlayerObservation.hpp"
-#include "Diagnostics/SceneTrace.h"
+#include "Diagnostics/SceneTrace.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -50,7 +50,7 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Platform/App.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 struct TraceScope {
@@ -276,11 +276,11 @@ TEST_CASE(
     scope.directories.push_back(script_path);
     scope.files.push_back(script_path / "events.jsonl");
     const std::array<std::uint8_t, 4> instruction{128, 1, 2, 3};
-    const auto command = Diagnostics_RecordSceneCommand(
-        80, 0, 0, instruction.data(), instruction.data(), instruction.size(),
-        0);
-    Diagnostics_RecordSceneResult(command, 2);
-    Diagnostics_RecordScriptFlagWrite(180, 0, 1);
+    const auto command =
+        VS::Game::RecordSceneCommand(80, 0, 0, instruction.data(),
+                                     instruction.data(), instruction.size(), 0);
+    VS::Game::RecordSceneResult(command, 2);
+    VS::Game::RecordScriptFlagWrite(180, 0, 1);
     VS_LOG_TRACE("rng", "unneeded per-draw trace");
     VS_LOG_DEBUG("event-step", "duplicate instruction text");
     VS_LOG_DEBUG("content", "disc read: repeated source evidence");
@@ -384,13 +384,13 @@ TEST_CASE(
       scope.events = scope.run / "events.jsonl";
       scope.log = scope.run / "session.log";
       VS::Core::SetLogTick(73);
-      command = Diagnostics_RecordSceneCommand(80, 2, 3, script.data() + 16,
-                                               script.data(), 10, 0);
+      command = VS::Game::RecordSceneCommand(80, 2, 3, script.data() + 16,
+                                             script.data(), 10, 0);
       CHECK(command != 0);
       script.fill(0);
-      Diagnostics_RecordScriptFlagWrite(180, 7, 9);
-      Diagnostics_RecordScriptFlagWrite(180, 9, 9);
-      Diagnostics_RecordSceneResult(command, kBranchAddress);
+      VS::Game::RecordScriptFlagWrite(180, 7, 9);
+      VS::Game::RecordScriptFlagWrite(180, 9, 9);
+      VS::Game::RecordSceneResult(command, kBranchAddress);
       trace.Frame(73, {}, SampleState());
       CHECK(trace.Errors() == 0);
       CHECK_FALSE(trace.Failed());
@@ -412,9 +412,9 @@ TEST_CASE(
     scope.events = scope.run / "events.jsonl";
     scope.log = scope.run / "session.log";
     VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
-    CHECK(Diagnostics_RecordSceneCommand(80, 2, 0, nullptr, nullptr, 999, 0) ==
+    CHECK(VS::Game::RecordSceneCommand(80, 2, 0, nullptr, nullptr, 999, 0) ==
           0);
-    Diagnostics_RecordSceneResult(0, 3);
+    VS::Game::RecordSceneResult(0, 3);
     VS::State::SetLiveScriptFlag(180, 17);
     CHECK(VS::State::LiveScriptFlag(180) == 17);
     VS::State::SetLiveScriptFlag(180, saved_flag);
@@ -439,9 +439,8 @@ TEST_CASE("Invalid scene diagnostic records report explicit failures",
   scope.events = scope.run / "events.jsonl";
   scope.log = scope.run / "session.log";
   std::uint8_t opcode = 3;
-  CHECK(Diagnostics_RecordSceneCommand(80, 2, 0, nullptr, nullptr, 1, 0) == 0);
-  CHECK(Diagnostics_RecordSceneCommand(80, 2, 0, &opcode, &opcode, 257, 0) ==
-        0);
+  CHECK(VS::Game::RecordSceneCommand(80, 2, 0, nullptr, nullptr, 1, 0) == 0);
+  CHECK(VS::Game::RecordSceneCommand(80, 2, 0, &opcode, &opcode, 257, 0) == 0);
   CHECK(trace.Errors() == 2);
   VS::Core::LogWrite(VS::Core::LogLevel::Debug, "event-command", "not-json");
   CHECK(trace.Failed());
@@ -833,7 +832,7 @@ struct GameplayInspectionFixture {
   Actors_ActorRecord model{};
 
   GameplayInspectionFixture() {
-    Boot_ResetGameplayInspection();
+    VS::Boot::ResetGameplayInspection();
     Boot_isGameplayActive = 1;
     Field_controlMode = 1;
     Battle_actionState = nullptr;
@@ -860,7 +859,7 @@ struct GameplayInspectionFixture {
   }
 
   ~GameplayInspectionFixture() {
-    Boot_ResetGameplayInspection();
+    VS::Boot::ResetGameplayInspection();
     Boot_isGameplayActive = saved_gameplay;
     Field_controlMode = saved_control;
     Battle_actionState = saved_action;
@@ -935,14 +934,14 @@ TEST_CASE("Normal-game inspection observes scene models only in a ready field",
           "[diagnostics][inspection]") {
   GameplayInspectionFixture fixture;
   CHECK_FALSE(VS::Game::InspectGameplay().ready);
-  Boot_EncounterPollStop();
+  VS::Boot::EncounterPollStop();
   CheckReadyScene(VS::Game::InspectGameplay(), fixture.model);
-  Boot_ResetGameplayInspection();
+  VS::Boot::ResetGameplayInspection();
   const auto loading = VS::Game::InspectGameplay();
   CHECK_FALSE(loading.ready);
   CHECK_FALSE(VS::Game::InspectGameplayScene(loading).contains("models"));
   Boot_isGameplayActive = 0;
-  Boot_EncounterPollStop();
+  VS::Boot::EncounterPollStop();
   CHECK_FALSE(VS::Game::InspectGameplay().ready);
 }
 
@@ -964,10 +963,10 @@ TEST_CASE("Detailed log initialization rejects an unwritable mirror path",
 TEST_CASE("A cached ready snapshot cannot inspect a released gameplay scene",
           "[diagnostics][inspection]") {
   GameplayInspectionFixture fixture;
-  Boot_EncounterPollStop();
+  VS::Boot::EncounterPollStop();
   const auto before = VS::Game::InspectGameplay();
   REQUIRE(before.ready);
-  Boot_ResetGameplayInspection();
+  VS::Boot::ResetGameplayInspection();
   CHECK_FALSE(
       VS::Game::InspectGameplayScene(before).at("available").get<bool>());
   CHECK_FALSE(VS::Game::InspectGameplayScene(before).contains("models"));
@@ -1010,7 +1009,7 @@ TEST_CASE(
   Menu_Results_buffReelIndex = 2;
   Menu_Results_buffReelSelection = 248;
   Core_Random_Seed(0xFEEDC0DEu);
-  Boot_EncounterPollStop();
+  VS::Boot::EncounterPollStop();
   const auto state = VS::Game::InspectGameplay();
   if (state.roulette) {
     CheckRouletteSample(*state.roulette);
@@ -1029,7 +1028,7 @@ TEST_CASE(
   Menu_Framework_menuState.currentMenu = 15;
   Audio_Seq_unusedStateFlags.menuFSubmenu = 0;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
-  Boot_EncounterPollStop();
+  VS::Boot::EncounterPollStop();
   REQUIRE(VS::Game::InspectGameplay().roulette.has_value());
   Audio_Seq_unusedStateFlags.menuFSubmenu = 1;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
@@ -1037,7 +1036,7 @@ TEST_CASE(
   Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   Menu_Framework_menuState.currentMenu = 15;
-  Boot_ResetGameplayInspection();
+  VS::Boot::ResetGameplayInspection();
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
 }
 
@@ -1046,7 +1045,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   decltype(Input_settings) saved_settings = Input_settings;
   decltype(Battle_characterState) saved_character = Battle_characterState;
   decltype(Battle_actionFlowMode) saved_phase = Battle_actionFlowMode;
-  int saved_tick_speed = State_tickSpeed;
+  int saved_tick_speed = VS::State::tickSpeed;
   decltype(std::to_array(Battle_Ai_actorAiStates)) saved_ai =
       std::to_array(Battle_Ai_actorAiStates);
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
@@ -1065,7 +1064,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   ReactionInspectionFixture() {
     Field_controlMode = 2;
     Battle_actionFlowMode = 7;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     Battle_actionState = action.get();
     player.stats = &player_stats;
     enemy.stats = &enemy_stats;
@@ -1102,14 +1101,14 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
         Battle_actionDefinitions[id].cost = 5;
       }
     }
-    Boot_EncounterPollStop();
+    VS::Boot::EncounterPollStop();
   }
 
   ~ReactionInspectionFixture() {
     Input_settings = saved_settings;
     Battle_characterState = saved_character;
     Battle_actionFlowMode = saved_phase;
-    State_tickSpeed = saved_tick_speed;
+    VS::State::tickSpeed = saved_tick_speed;
     std::copy(saved_ai.begin(), saved_ai.end(), Battle_Ai_actorAiStates);
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
@@ -1363,7 +1362,7 @@ TEST_CASE("Player timing keeps acknowledgments after the active input phase",
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
           .reaction_timing;
   CheckDefenseAcknowledgment(acknowledged);
-  Boot_ResetGameplayInspection();
+  VS::Boot::ResetGameplayInspection();
   const auto released =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK_FALSE(released.ready);
@@ -1434,7 +1433,7 @@ TEST_CASE("Observed door contracts preserve the current authored flags",
   door.tileLocation.tileZ = 14;
   Field_roomData.doors = &door;
   Field_roomData.header.doorsLength = sizeof(door);
-  Boot_EncounterPollStop();
+  VS::Boot::EncounterPollStop();
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   REQUIRE(state.doors.size() == 1);

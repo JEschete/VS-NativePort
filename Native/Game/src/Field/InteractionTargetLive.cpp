@@ -1,4 +1,4 @@
-#include "Field/InteractionTargetLive.h"
+#include "Field/InteractionTargetLive.hpp"
 
 #include <bit>
 #include <cstddef>
@@ -10,7 +10,6 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Field/InteractionTargetLive.hpp"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Items/TreasureChests.h"
@@ -229,13 +228,14 @@ void InvalidateLiveInteractionTargets() {
 
 }  // namespace VS::Field
 
-Field_MpdFloorTrigger* Field_RoomTriggerAtTileEntry(int x, int z, int layer) {
+Field_MpdFloorTrigger* VS::Field::RoomTriggerAtTileEntry(int x, int z,
+                                                         int layer) {
   const auto target = VS::Field::FindLiveRoomTriggerAtTile({x, z, layer});
   return target ? VS::Field::ResolveLiveTrapTarget(*target) : nullptr;
 }
 
-void Field_SetRoomTriggerEnabledEntry(Field_MpdFloorTrigger* selected,
-                                      int activation) {
+void VS::Field::SetRoomTriggerEnabledEntry(Field_MpdFloorTrigger* selected,
+                                           int activation) {
   if (selected == nullptr) {
     static_cast<void>(
         VS::Field::SetLiveRoomTriggerEnabled(std::nullopt, activation));
@@ -247,7 +247,7 @@ void Field_SetRoomTriggerEnabledEntry(Field_MpdFloorTrigger* selected,
   }
 }
 
-void Field_DisableTrapAtPositionEntry(SVECTOR* position) {
+void VS::Field::DisableTrapAtPositionEntry(SVECTOR* position) {
   if (position == nullptr) return;
   static_cast<void>(
       VS::Field::DisableLiveTrapAtPosition({position->vx, position->vz}));

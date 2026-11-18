@@ -10,7 +10,7 @@
 #include <optional>
 #include <utility>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 
 namespace VS::Field {
@@ -40,7 +40,8 @@ int WrappedHeight(int unwrapped) {
 
 int CheckedCoordinate(std::int64_t value) {
   if (!std::in_range<int>(value)) {
-    Core_Debugf("ai", "Terrain segment coordinate overflows source arithmetic");
+    VS::Core::Debugf("ai",
+                     "Terrain segment coordinate overflows source arithmetic");
     std::abort();
   }
   return static_cast<int>(value);
@@ -49,8 +50,8 @@ int CheckedCoordinate(std::int64_t value) {
 
 std::uint16_t TerrainGrid::Cell(int x, int z) const {
   if (!Contains(x, z)) {
-    Core_Debugf("ai", "Terrain height requires a grid and valid tile (%d,%d)",
-                x, z);
+    VS::Core::Debugf(
+        "ai", "Terrain height requires a grid and valid tile (%d,%d)", x, z);
     std::abort();
   }
   return rows_[static_cast<std::size_t>(z)][static_cast<std::size_t>(x)];

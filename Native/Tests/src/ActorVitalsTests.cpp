@@ -16,7 +16,7 @@
 #include "Battle/StatusEffects.h"
 #include "Content/ModuleData.h"
 #include "State/SceneTimer.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -417,10 +417,10 @@ TEST_CASE(
   }
   const auto counter = Battle_vitalsTickCounter;
   const auto limb = Battle_regeneratingLimb;
-  const auto ticks = State_tickSpeed;
-  const auto timer = State_sceneTimer;
-  State_sceneTimer = {};
-  State_tickSpeed = 0;
+  const auto ticks = VS::State::tickSpeed;
+  const auto timer = VS::State::sceneTimer;
+  VS::State::sceneTimer = {};
+  VS::State::tickSpeed = 0;
   Battle_vitalsTickCounter = 0;
   Battle_regeneratingLimb = 5;
   const auto result = room();
@@ -431,8 +431,8 @@ TEST_CASE(
   }
   Battle_vitalsTickCounter = counter;
   Battle_regeneratingLimb = limb;
-  State_tickSpeed = ticks;
-  State_sceneTimer = timer;
+  VS::State::tickSpeed = ticks;
+  VS::State::sceneTimer = timer;
   CHECK(result == 0);
   CHECK(updated_counter == 0);
   CHECK(updated_limb == 0);

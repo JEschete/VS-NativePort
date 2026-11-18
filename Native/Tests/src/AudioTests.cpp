@@ -33,7 +33,7 @@
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/XaMixLive.hpp"
-#include "Audio/XaPlayback.h"
+#include "Audio/XaPlayback.hpp"
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
@@ -419,13 +419,13 @@ struct XaFixture {
   static void Start(int volume = 0x7FFF, int sector = kSector) {
     REQUIRE(Command(0, sector, volume) == 1);
     REQUIRE(Command(1) == 7);
-    REQUIRE(Audio_Native_XaStreamStatus() == 1);
+    REQUIRE(VS::Audio::XaStreamStatus() == 1);
   }
 
   static void Stop() {
     REQUIRE(Command(2) == 1);
     REQUIRE(Command(1) == 0);
-    REQUIRE(Audio_Native_XaStreamStatus() == 0);
+    REQUIRE(VS::Audio::XaStreamStatus() == 0);
   }
 
   static std::vector<float> CaptureAt(SDL_AudioStream* source, int sector) {
@@ -619,7 +619,7 @@ TEST_CASE(
     for (usize frame = 0; frame < probe.samples.size(); frame += 2) {
       REQUIRE(probe.samples[frame] == probe.samples[frame + 1]);
     }
-    CHECK(Audio_Native_XaStreamStatus() == 0);
+    CHECK(VS::Audio::XaStreamStatus() == 0);
     CHECK(XaFixture::Command(1) == 0);
     CHECK(XaFixture::Command(2) == 0);
   }
@@ -634,7 +634,7 @@ TEST_CASE("XA fades reset and device re-entry use the production control path",
   SECTION("driver reset") { CHECK(XaFixture::Command(7) == 0); }
   SECTION("disc reset") { CHECK(XaFixture::Command(8) == 0); }
   SECTION("device close") { device.Reopen(); }
-  CHECK(Audio_Native_XaStreamStatus() == 0);
+  CHECK(VS::Audio::XaStreamStatus() == 0);
   XaFixture::Start();
   OutputProbe probe(device.source.get());
   probe.Wait();
@@ -669,7 +669,7 @@ TEST_CASE("Installed ending XA reaches native output and drains at EOF",
   const bool finite = std::ranges::all_of(
       tail, [](float sample) { return std::isfinite(sample); });
   CHECK(finite);
-  CHECK(Audio_Native_XaStreamStatus() == 0);
+  CHECK(VS::Audio::XaStreamStatus() == 0);
   CHECK(XaFixture::Command(1) == 0);
 }
 
@@ -689,17 +689,17 @@ TEST_CASE("XA failures reach the disc error state rather than false success",
                                  std::filesystem::file_size(fixture.asset) / 2);
   }
   SECTION("invalid sector") {
-    CHECK_FALSE(Audio_Native_StartXaStream(-1, 0x7FFF));
+    CHECK_FALSE(VS::Audio::StartXaStream(-1, 0x7FFF));
     return;
   }
   SECTION("invalid initial volume") {
-    CHECK_FALSE(Audio_Native_StartXaStream(XaFixture::kSector, 0x8000));
+    CHECK_FALSE(VS::Audio::StartXaStream(XaFixture::kSector, 0x8000));
     return;
   }
   REQUIRE(XaFixture::Command(0, XaFixture::kSector, 0x7FFF) == 1);
   CHECK(XaFixture::Command(1) == 4);
   CHECK(XaFixture::Command(9) == 1);
-  CHECK(Audio_Native_XaStreamStatus() == 0);
+  CHECK(VS::Audio::XaStreamStatus() == 0);
 }
 
 TEST_CASE("Native mix reset preserves scheduling headroom and movie sources",

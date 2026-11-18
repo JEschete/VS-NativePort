@@ -9,7 +9,7 @@
 #include <span>
 
 #include "Content/ModuleData.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -34,9 +34,9 @@ std::uint64_t refused_frames = 0;
 void RefuseFrame(int index, int reason) {
   ++refused_frames;
   if (std::has_single_bit(refused_frames)) {
-    Core_Warnf("menu",
-               "Text-box frame refused: box=%d reason=%d count=%" PRIu64, index,
-               reason, refused_frames);
+    VS::Core::Warnf("menu",
+                    "Text-box frame refused: box=%d reason=%d count=%" PRIu64,
+                    index, reason, refused_frames);
   }
 }
 

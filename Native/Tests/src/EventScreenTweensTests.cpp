@@ -17,7 +17,7 @@
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
 #include "Event/ScriptControlOpcodes.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace ev = VS::Event;
@@ -367,7 +367,7 @@ TEST_CASE("Live screen tween entries skip a missing camera or tween",
 TEST_CASE("Live screen tween entries keep the workspace layout",
           "[event][camera][screen-tween]") {
   VS::Event::CameraState* const saved = Event_camera;
-  const int saved_tick = State_tickSpeed;
+  const int saved_tick = VS::State::tickSpeed;
   VS::Event::CameraState camera{};
   Event_camera = &camera;
   camera.captured_screen_roll.angle = 0x700;
@@ -375,7 +375,7 @@ TEST_CASE("Live screen tween entries keep the workspace layout",
   CHECK(Event_CommandTweenCameraRollOpcode(roll.data(), 0) == 0);
   CHECK(camera.captured_screen_roll.delta_angle == -0x600 + 0x1000);
   CHECK(camera.captured_screen_roll.easing_mode == 0xF);
-  State_tickSpeed = 4;
+  VS::State::tickSpeed = 4;
   camera.screen_tint.reserved08 = 0x1234;
   camera.screen_tint.reserved1a = 0x5678;
   camera.screen_tint.start_value0 = 0x40;
@@ -388,6 +388,6 @@ TEST_CASE("Live screen tween entries keep the workspace layout",
   std::memcpy(&recorded, static_cast<std::byte*>(Core_ScratchBase()) + 0x88,
               sizeof(recorded));
   CHECK(recorded == VS::Event::EvaluateInterpolationCurveEntry(0, 2, 2));
-  State_tickSpeed = saved_tick;
+  VS::State::tickSpeed = saved_tick;
   Event_camera = saved;
 }

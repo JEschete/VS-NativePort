@@ -14,7 +14,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
@@ -76,7 +76,7 @@ LoadOwner& Owner(TimeAttackAsset asset) {
 
 void Refuse(const char* reason) {
   if (std::has_single_bit(++refusals)) {
-    Core_Warnf("menu.results", "Time-attack terminal refused: %s", reason);
+    VS::Core::Warnf("menu.results", "Time-attack terminal refused: %s", reason);
   }
 }
 

@@ -12,9 +12,10 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
 
@@ -36,19 +37,6 @@ static_assert(offsetof(Battle_Ai_PatrolView, destination) ==
               offsetof(AiState, destination));
 static_assert(offsetof(Battle_Ai_WaypointSearchView, x) ==
               offsetof(AiState, position));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
-
-template <typename T>
-T Required(const std::optional<T>& value, const char* message) {
-  Require(value.has_value(), message);
-  return *value;
-}
 
 Field::TerrainGrid LiveSpecialHeights() {
   if (Battle_Ai_specialTerrainHeights == nullptr) return {};

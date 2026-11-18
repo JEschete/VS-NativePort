@@ -28,7 +28,7 @@
 #include "State/Progress.h"
 #include "State/SceneTimerLive.hpp"
 #include "State/StateFlags.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -94,7 +94,7 @@ void CheckEffectSettings(render::FramebufferEffectPair scale,
 }
 
 void CheckStoppedCountdown() {
-  CHECK(State_tickSpeed == 2);
+  CHECK(VS::State::tickSpeed == 2);
   CHECK_FALSE(r::LiveTimeAttackOwnsCountdownControls());
   CHECK_FALSE(render::IsLiveFramebufferEffectShowing());
   CHECK(render::LiveFramebufferEffect().settings.scale ==
@@ -106,7 +106,7 @@ void CheckRestoredTerminalState(
   CHECK(render::LiveFramebufferEffect().settings == settings);
   CHECK_FALSE(render::HasLiveFramebufferEffectPackets());
   CHECK_FALSE(r::LiveTimeAttackOwnsCountdownControls());
-  CHECK(State_tickSpeed == 4);
+  CHECK(VS::State::tickSpeed == 4);
   CHECK(Menu_Results_newTimeSlot == 3);
   CHECK(Menu_Results_timeTrialTime == 0x10203);
   CHECK(Menu_Results_clutBuf[159] == 0x5A5A);
@@ -121,7 +121,7 @@ void AdvanceCountdownToExit(LiveFixture& fixture) {
   for (int tick = 0; tick < 62; ++tick) {
     fixture.BeginFrame();
     CHECK(r::LiveUpdateTimeAttackStart() == 0);
-    CHECK(State_tickSpeed == 4);
+    CHECK(VS::State::tickSpeed == 4);
   }
   CHECK(Menu_Results_screenState == 4);
 }
@@ -451,14 +451,14 @@ TEST_CASE(
   LiveFixture fixture;
   Menu_Results_screenState = 2;
   CHECK(r::LiveUpdateTimeAttackStart() == 0);
-  CHECK(State_tickSpeed == 4);
+  CHECK(VS::State::tickSpeed == 4);
   CHECK(render::HasLiveFramebufferEffectPackets());
   CheckEffectSettings({0x1029, 0x1029}, {64, 128, 220}, 0);
   r::ResetLiveGameClearModuleData();
   r::ResetLiveTimeAttackModuleData();
   CHECK(r::LiveTimeAttackOwnsCountdownControls());
   CHECK(render::IsLiveFramebufferEffectShowing());
-  CHECK(State_tickSpeed == 4);
+  CHECK(VS::State::tickSpeed == 4);
   CHECK(Menu_Results_screenState == 0);
 }
 
@@ -491,7 +491,7 @@ TEST_CASE(
   CHECK_FALSE(render::HasLiveFramebufferEffectPackets());
   CHECK(r::LiveTimeAttackOwnsCountdownControls());
   CHECK(r::CleanupLiveTimeAttackOwnedState());
-  CHECK(State_tickSpeed == 2);
+  CHECK(VS::State::tickSpeed == 2);
 }
 
 TEST_CASE("F03017 Live cleanup does not stop another framebuffer user",
@@ -503,7 +503,7 @@ TEST_CASE("F03017 Live cleanup does not stop another framebuffer user",
   CHECK_FALSE(r::LiveTimeAttackOwnsCountdownControls());
   CHECK(r::CleanupLiveTimeAttackOwnedState());
   CHECK(render::IsLiveFramebufferEffectShowing());
-  CHECK(State_tickSpeed == 4);
+  CHECK(VS::State::tickSpeed == 4);
 }
 
 TEST_CASE("F03008 Live drives all three real start initializer stages",
@@ -642,7 +642,7 @@ TEST_CASE("Time-attack production fixture restores its caller resources",
                                                    .depth = 19,
                                                    .uses_previous_frame = 1};
   time_attack_terminal_live_tests::RestoreEffectSettings(settings);
-  State_tickSpeed = 4;
+  VS::State::tickSpeed = 4;
   Menu_Results_newTimeSlot = 3;
   Menu_Results_timeTrialTime = 0x10203;
   Menu_Results_clutBuf[159] = 0x5A5A;

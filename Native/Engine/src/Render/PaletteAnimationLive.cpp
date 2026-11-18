@@ -10,7 +10,7 @@
 #include <span>
 
 #include "Actors/AppearanceLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
@@ -31,8 +31,9 @@ std::uint32_t reported_steps = 0;
 
 void ReportRefusal(const char* what) {
   if (std::has_single_bit(++refused_requests)) {
-    Core_Errorf(kChannel, "palette request refused: %s (%" PRIu64 " refused)",
-                what, refused_requests);
+    VS::Core::Errorf(kChannel,
+                     "palette request refused: %s (%" PRIu64 " refused)", what,
+                     refused_requests);
   }
 }
 

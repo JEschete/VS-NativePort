@@ -39,7 +39,7 @@
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.h"
 #include "Field/CameraLive.hpp"
@@ -56,16 +56,17 @@
 #include "State/KillScoreLive.hpp"
 #include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Battle {
 namespace {
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle",
-                "Action presentation refused: missing used owner/index, "
-                "invalid chain slot/category, or unsupported effect capacity "
-                "(maximum 16 unique targets; duplicate input hits allowed)");
+    VS::Core::Errorf(
+        "battle",
+        "Action presentation refused: missing used owner/index, "
+        "invalid chain slot/category, or unsupported effect capacity "
+        "(maximum 16 unique targets; duplicate input hits allowed)");
     std::abort();
   }
 }
@@ -185,7 +186,7 @@ class LiveWorld final : public ActionPresentationWorld {
     return static_cast<std::uint32_t>(
         Actors::LiveAnimationBattleWindowFrame(actor));
   }
-  void SetTickSpeed(int speed) override { State_tickSpeed = speed; }
+  void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetPhase(int phase) override {
     Battle_actionFlowMode = static_cast<std::uint32_t>(phase);
   }

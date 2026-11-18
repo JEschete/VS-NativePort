@@ -33,7 +33,7 @@ constexpr unsigned kActionsPerLimb = 4;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Debugf("ai", "%s", message);
+    VS::Core::Debugf("ai", "%s", message);
     std::abort();
   }
 }
@@ -52,8 +52,8 @@ unsigned DirectionForOffset(int dx, int dz) {
       return index;
     }
   }
-  Core_Debugf("ai", "AI movement corner has unsupported offset (%d,%d)", dx,
-              dz);
+  VS::Core::Debugf("ai", "AI movement corner has unsupported offset (%d,%d)",
+                   dx, dz);
   std::abort();
 }
 

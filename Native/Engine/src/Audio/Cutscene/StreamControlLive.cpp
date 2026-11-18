@@ -20,7 +20,7 @@
 #include "Audio/SoundBanks.h"
 #include "Audio/StreamBuffersLive.hpp"
 #include "Audio/StreamControl.hpp"
-#include "Audio/StreamPlayback.h"
+#include "Audio/StreamPlayback.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
@@ -345,7 +345,7 @@ int UnbindLiveRoomCutsceneStream() {
 }  // namespace VS::Audio
 
 // Replaces the stream portion of func_8001924C, SLUS_010.40/25AC.c:4024.
-void Audio_Native_UpdateCutsceneStream(void) {
+void VS::Audio::UpdateCutsceneStream(void) {
   auto& state = Audio_Cutscene_streamState;
   if (state.voiceMask == 0) return;
   LiveStreamHost host;
@@ -366,7 +366,7 @@ void Audio_Native_UpdateCutsceneStream(void) {
   Cutscene::ApplyStreamGains(host);
 }
 
-void Audio_Native_ResetCutsceneStream(void) {
+void VS::Audio::ResetCutsceneStream(void) {
   LiveStreamHost host;
   Cutscene::StopStreamVoices(host);
   Audio_soundState.sfxStreamData[kRoomSlot] = nullptr;

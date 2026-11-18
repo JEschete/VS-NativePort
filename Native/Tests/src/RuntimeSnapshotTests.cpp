@@ -45,7 +45,7 @@
 #include "Core/Random.h"
 #include "Ending/EndingLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/Doors.h"
 #include "Field/GameModeLiveState.hpp"
 #include "Field/Gimmicks.h"
@@ -68,7 +68,7 @@
 #include "State/PlayTime.hpp"
 #include "State/RoomMemory.h"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 #include "Title/NewGame.h"
 
 namespace {
@@ -239,10 +239,10 @@ struct RuntimeFixture {
   decltype(Field_snapshotDoorFlagSource) detached_scene =
       Field_snapshotDoorFlagSource;
   decltype(VS::State::playTime) time = VS::State::playTime;
-  decltype(State_sceneTimer) timer = State_sceneTimer;
+  decltype(VS::State::sceneTimer) timer = VS::State::sceneTimer;
   decltype(VS::Field::zoneContext) zone = VS::Field::zoneContext;
   decltype(Field_roomData) room = Field_roomData;
-  decltype(Field_sphericalCamera) camera = Field_sphericalCamera;
+  decltype(VS::Field::sphericalCamera) camera = VS::Field::sphericalCamera;
   decltype(Render_frameScratch.camera) rendered_camera =
       Render_frameScratch.camera;
   decltype(std::to_array(State_recentRoomEnemyStates)) caches =
@@ -271,10 +271,10 @@ struct RuntimeFixture {
   int clear_pending = Boot_isClearSavePending;
   int near_clip = Render_nearClip;
   int projection = Render_projectionDistance;
-  int first_person = Field_isFirstPersonViewEnabled;
+  int first_person = VS::Field::isFirstPersonViewEnabled;
   unsigned control_mode = Field_controlMode;
   int interaction_paused = VS::Field::isInteractionPaused;
-  Field_CameraTransition* transition = Field_cameraTransition;
+  Field_CameraTransition* transition = VS::Field::cameraTransition;
   Audio_DriverFlags audio_flags = Audio_Driver_controlLatches;
   Audio_CommandArguments audio_arguments = Audio_Driver_commandArguments;
   Audio_CommandParams audio_params = Audio_Mixer_commandParams;
@@ -377,8 +377,8 @@ struct RuntimeFixture {
   void SetWorld() {
     Field_controlMode = 1;
     VS::Field::isInteractionPaused = 0;
-    Field_isFirstPersonViewEnabled = 0;
-    Field_cameraTransition = nullptr;
+    VS::Field::isFirstPersonViewEnabled = 0;
+    VS::Field::cameraTransition = nullptr;
     VS::Field::zoneContext = {};
     VS::Field::zoneContext.zndId = 9;
     VS::Field::zoneContext.mapId = 0;
@@ -389,13 +389,13 @@ struct RuntimeFixture {
     Field_roomData.isLoaded = 1;
     Field_roomData.environment = &environment;
     Field_roomData.header.environmentLength = sizeof environment;
-    Field_sphericalCamera = {};
-    Field_sphericalCamera.values.yaw = 1027;
-    Field_sphericalCamera.values.pitch = -384;
-    Field_sphericalCamera.values.distance = 1536;
-    Field_sphericalCamera.delta.pitch = 2050;
-    Field_sphericalCamera.initialDistance = 1536;
-    Field_sphericalCamera.delta.mode = 1;
+    VS::Field::sphericalCamera = {};
+    VS::Field::sphericalCamera.values.yaw = 1027;
+    VS::Field::sphericalCamera.values.pitch = -384;
+    VS::Field::sphericalCamera.values.distance = 1536;
+    VS::Field::sphericalCamera.delta.pitch = 2050;
+    VS::Field::sphericalCamera.initialDistance = 1536;
+    VS::Field::sphericalCamera.delta.mode = 1;
     Render_nearClip = 64;
     Render_projectionDistance = 512;
     Render_frameScratch.camera = {};
@@ -406,7 +406,8 @@ struct RuntimeFixture {
   }
 
   void UpdateOrbitPosition() {
-    VS::Field::LiveSetCameraPositionFromAngles(&Field_sphericalCamera.values);
+    VS::Field::LiveSetCameraPositionFromAngles(
+        &VS::Field::sphericalCamera.values);
   }
 
   void SetAudio() {
@@ -421,11 +422,11 @@ struct RuntimeFixture {
 
   void SetClocksAndCaches() {
     VS::State::playTime.t = {59, 58, 57, 12};
-    State_sceneTimer = {};
-    State_sceneTimer.mode = 2;
-    State_sceneTimer.resetScope = 2;
-    State_sceneTimer.seconds = 17;
-    State_sceneTimer.frames = 29;
+    VS::State::sceneTimer = {};
+    VS::State::sceneTimer.mode = 2;
+    VS::State::sceneTimer.resetScope = 2;
+    VS::State::sceneTimer.seconds = 17;
+    VS::State::sceneTimer.frames = 29;
     Core_Random_Seed(0x12345678);
     Core_interfaceRandomState = 0x87654321;
     Core_randomShuffleIndex = 96;
@@ -611,10 +612,10 @@ struct RuntimeFixture {
     State_savedEntryDoor = entry;
     Field_snapshotDoorFlagSource = detached_scene;
     VS::State::playTime = time;
-    State_sceneTimer = timer;
+    VS::State::sceneTimer = timer;
     VS::Field::zoneContext = zone;
     Field_roomData = room;
-    Field_sphericalCamera = camera;
+    VS::Field::sphericalCamera = camera;
     Render_frameScratch.camera = rendered_camera;
     std::copy(caches.begin(), caches.end(), State_recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
@@ -634,10 +635,10 @@ struct RuntimeFixture {
     Boot_isGameplayActive = gameplay;
     Render_nearClip = near_clip;
     Render_projectionDistance = projection;
-    Field_isFirstPersonViewEnabled = first_person;
+    VS::Field::isFirstPersonViewEnabled = first_person;
     Field_controlMode = control_mode;
     VS::Field::isInteractionPaused = interaction_paused;
-    Field_cameraTransition = transition;
+    VS::Field::cameraTransition = transition;
     Audio_Driver_controlLatches = audio_flags;
     Audio_Driver_commandArguments = audio_arguments;
     Audio_Mixer_commandParams = audio_params;
@@ -673,15 +674,15 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, State_ashleySnapshot);
   Append(bytes, State_savedEntryDoor);
   Append(bytes, VS::State::playTime);
-  Append(bytes, State_sceneTimer);
-  Append(bytes, Field_sphericalCamera);
+  Append(bytes, VS::State::sceneTimer);
+  Append(bytes, VS::Field::sphericalCamera);
   Append(bytes, Render_frameScratch.camera);
   Append(bytes, VS::Field::zoneContext);
   Append(bytes, Field_roomData);
-  Append(bytes, Field_isFirstPersonViewEnabled);
+  Append(bytes, VS::Field::isFirstPersonViewEnabled);
   Append(bytes, Field_controlMode);
   Append(bytes, VS::Field::isInteractionPaused);
-  Append(bytes, Field_cameraTransition != nullptr);
+  Append(bytes, VS::Field::cameraTransition != nullptr);
   Append(bytes, Render_nearClip);
   Append(bytes, Render_projectionDistance);
   Append(bytes, fixture.player_stats);
@@ -937,18 +938,18 @@ void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   if (defect == 5) Field_roomData.environment = nullptr;
   if (defect == 6) fixture.player_model.instance.currentTileLayer = 2;
   if (defect == 7) fixture.player_model.instance.supportLayer = 2;
-  if (defect == 8) Field_isFirstPersonViewEnabled = 1;
-  if (defect == 9) Field_sphericalCamera.values.distance = 2000;
-  if (defect == 10) Field_sphericalCamera.values.pitch = -768;
-  if (defect == 22) Field_sphericalCamera.delta.mode = 2;
-  if (defect == 23) Field_sphericalCamera.delta.yaw = 1;
+  if (defect == 8) VS::Field::isFirstPersonViewEnabled = 1;
+  if (defect == 9) VS::Field::sphericalCamera.values.distance = 2000;
+  if (defect == 10) VS::Field::sphericalCamera.values.pitch = -768;
+  if (defect == 22) VS::Field::sphericalCamera.delta.mode = 2;
+  if (defect == 23) VS::Field::sphericalCamera.delta.yaw = 1;
   if (defect == 24) ++Render_frameScratch.camera.position.vx;
   if (defect == 25) Render_frameScratch.camera.angles.vz = 1;
   if (defect == 26) Render_nearClip = 128;
-  if (defect == 27) Field_sphericalCamera.values.pitch = 1024;
+  if (defect == 27) VS::Field::sphericalCamera.values.pitch = 1024;
   if (defect == 28) Render_projectionDistance = 256;
-  if (defect == 29) Field_sphericalCamera.delta.distance = 65;
-  if (defect == 30) Field_cameraTransition = &fixture.camera_transition;
+  if (defect == 29) VS::Field::sphericalCamera.delta.distance = 65;
+  if (defect == 30) VS::Field::cameraTransition = &fixture.camera_transition;
 }
 }  // namespace
 
@@ -1351,8 +1352,8 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   fixture.player_stats.currentHp = 7;
   fixture.player_stats.statuses = 0;
   VS::State::playTime.all = 0;
-  State_sceneTimer = {};
-  Field_sphericalCamera.values.yaw = 0;
+  VS::State::sceneTimer = {};
+  VS::Field::sphericalCamera.values.yaw = 0;
   Core_Random_Seed(1);
   Core_interfaceRandomState = 1;
   std::fill_n(Core_randomShuffleTable, 97, 0);
@@ -1381,11 +1382,11 @@ void CheckRestoredClockCamera() {
   CHECK(VS::State::playTime.t.minutes == 57);
   CHECK(VS::State::playTime.t.seconds == 58);
   CHECK(VS::State::playTime.t.frames == 59);
-  CHECK(State_sceneTimer.frames == 29);
-  CHECK(State_sceneTimer.seconds == 17);
-  CHECK(Field_sphericalCamera.values.yaw == 1027);
+  CHECK(VS::State::sceneTimer.frames == 29);
+  CHECK(VS::State::sceneTimer.seconds == 17);
+  CHECK(VS::Field::sphericalCamera.values.yaw == 1027);
   CHECK(Render_frameScratch.camera.angles.vy == 1027);
-  CHECK(Field_sphericalCamera.initialDistance == 1536);
+  CHECK(VS::Field::sphericalCamera.initialDistance == 1536);
 }
 
 void CheckRestoredRandom(const Save::Snapshot& state) {
@@ -1431,15 +1432,15 @@ void ConfigureStaticOrbit(RuntimeFixture& fixture, unsigned layer) {
   saved.tileLayer = layer;
   saved.facing = 77;
   fixture.player_model.savedPlacement = std::bit_cast<int>(saved);
-  Field_sphericalCamera.values.pitch = -768;
-  Field_sphericalCamera.values.distance = 2304;
-  Field_sphericalCamera.values.mode = 17;
-  Field_sphericalCamera.delta.pitch = -512;
-  Field_sphericalCamera.delta.distance = 32;
-  Field_sphericalCamera.delta.mode = 3;
-  Field_sphericalCamera.initialDistance = 2304;
-  Field_sphericalCamera.zoomVelocity = 48;
-  Field_sphericalCamera.speed = 24;
+  VS::Field::sphericalCamera.values.pitch = -768;
+  VS::Field::sphericalCamera.values.distance = 2304;
+  VS::Field::sphericalCamera.values.mode = 17;
+  VS::Field::sphericalCamera.delta.pitch = -512;
+  VS::Field::sphericalCamera.delta.distance = 32;
+  VS::Field::sphericalCamera.delta.mode = 3;
+  VS::Field::sphericalCamera.initialDistance = 2304;
+  VS::Field::sphericalCamera.zoomVelocity = 48;
+  VS::Field::sphericalCamera.speed = 24;
   Render_frameScratch.camera.lookAt = {111111, -333333, 222222, 0};
   Render_frameScratch.camera.angles = {-764, 1027, 0, 0};
   fixture.UpdateOrbitPosition();
@@ -1463,7 +1464,8 @@ void CheckStaticLayer(const RuntimeFixture& fixture,
 
 void CheckOrbitRestored(const Field_SphericalCamera& expected,
                         const Render_Camera& rendered) {
-  CHECK(std::memcmp(&Field_sphericalCamera, &expected, sizeof(expected)) == 0);
+  CHECK(std::memcmp(&VS::Field::sphericalCamera, &expected, sizeof(expected)) ==
+        0);
   CHECK(Render_frameScratch.camera.position.vx == rendered.position.vx);
   CHECK(Render_frameScratch.camera.position.vy == rendered.position.vy);
   CHECK(Render_frameScratch.camera.position.vz == rendered.position.vz);
@@ -1490,7 +1492,7 @@ TEST_CASE("Schema3 resumes both static floors and a settled nondefault orbit",
   RuntimeFixture fixture;
   ConfigureStaticOrbit(fixture, GENERATE(0u, 1u));
   const auto before = LiveFingerprint(fixture);
-  const auto camera = Field_sphericalCamera;
+  const auto camera = VS::Field::sphericalCamera;
   const auto rendered = Render_frameScratch.camera;
   const auto state = fixture.Capture();
   CHECK(LiveFingerprint(fixture) == before);
@@ -1505,7 +1507,7 @@ TEST_CASE("Schema3 resumes both static floors and a settled nondefault orbit",
     fixture.player_model.instance.currentTileLayer = 0;
     fixture.player_model.instance.previousTileLayer = 0;
     fixture.player_model.savedPlacement = 0;
-    Field_sphericalCamera = {};
+    VS::Field::sphericalCamera = {};
     Render_frameScratch.camera.lookAt = {};
     REQUIRE(Save::FinishResume().has_value());
     CheckStaticLayer(fixture, state);
@@ -1651,7 +1653,7 @@ void CheckResumeKeptLiveState(const RuntimeFixture& fixture) {
   CHECK(VS::State::playTime.t.frames == 8);
   CHECK(fixture.player_model.instance.position.vx == 77);
   CHECK(fixture.player_model.instance.position.vy == -88);
-  CHECK(Field_sphericalCamera.values.yaw == 333);
+  CHECK(VS::Field::sphericalCamera.values.yaw == 333);
   CHECK(Core_Random_State() == 777);
   CHECK(State_recentRoomEnemyStates[0].nextSlot == 5);
 }
@@ -1673,7 +1675,7 @@ TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
   State_recentRoomEnemyStates[0].nextSlot = 5;
   VS::State::playTime.t.frames = 8;
   fixture.player_model.instance.position = {77, -88, 99, 0};
-  Field_sphericalCamera.values.yaw = 333;
+  VS::Field::sphericalCamera.values.yaw = 333;
   Core_Random_Seed(777);
   REQUIRE(Save::FinishResume());
   CHECK_FALSE(Save::ResumePending());

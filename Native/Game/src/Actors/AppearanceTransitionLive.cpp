@@ -19,16 +19,16 @@
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
 #include "Render/PaletteAnimationLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -56,7 +56,7 @@ using ColorBytes = std::array<std::uint8_t, kColorBytes>;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Errorf("actors", "%s", message);
+    VS::Core::Errorf("actors", "%s", message);
     std::abort();
   }
 }
@@ -71,10 +71,9 @@ Equipment EquipmentFor(int slot) {
     return models;
   }
   const auto first = static_cast<std::size_t>(slot) * kEquipmentPerActor;
-  if (first + kEquipmentPerActor <= std::size(Actors_weaponModels)) {
-    std::copy_n(
-        std::begin(Actors_weaponModels) + static_cast<std::ptrdiff_t>(first),
-        kEquipmentPerActor, models.begin());
+  if (first + kEquipmentPerActor <= std::size(weaponModels)) {
+    std::copy_n(std::begin(weaponModels) + static_cast<std::ptrdiff_t>(first),
+                kEquipmentPerActor, models.begin());
   }
   return models;
 }
@@ -120,7 +119,7 @@ void ColorsTo(const AppearanceColors& colors, ColorBytes& color,
   fade_level = colors.fade_level;
 }
 
-int TransitionSpeed() { return State_tickSpeed / 2; }
+int TransitionSpeed() { return VS::State::tickSpeed / 2; }
 
 class LiveActorAppearance final : public ActorAppearance {
  public:
@@ -288,7 +287,7 @@ void UpdateLiveActorPalettePulse(Actors_ActorRecord& actor) {
   const std::span<u_short> destination =
       std::span<u_short>(actor.currentPalette).first(count);
   (void)UpdatePalettePulse(
-      pulse, State_tickSpeed,
+      pulse, VS::State::tickSpeed,
       std::span<const u_short>(actor.basePalette).first(count), destination);
   actor.instance.palettePulse.level = pulse.level;
   actor.instance.palettePulse.flags = pulse.flags;
@@ -298,7 +297,7 @@ void UpdateLiveActorPalettePulse(Actors_ActorRecord& actor) {
 // func_800AB788 (BATTLE.PRG 40564.c:1651) for a gimmick's 16-color palette.
 void UpdateLiveGimmickPalettePulse(Field_GimmickInstance& object) {
   PalettePulse pulse{object.palettePulse.level, object.palettePulse.flags};
-  (void)UpdatePalettePulse(pulse, State_tickSpeed, object.basePalette,
+  (void)UpdatePalettePulse(pulse, VS::State::tickSpeed, object.basePalette,
                            object.pulsedPalette);
   object.palettePulse.level = pulse.level;
   object.palettePulse.flags = pulse.flags;

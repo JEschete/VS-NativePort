@@ -226,7 +226,7 @@ class SoundBankHost {
   // vs_sound_spuTransferring: kTransferFinished, kTransferFailed or still
   // uploading.
   virtual std::int32_t TransferStatus() = 0;
-  // Audio_Native_ResetCutsceneStream.
+  // VS::Audio::ResetCutsceneStream.
   virtual void ResetCutsceneStream() = 0;
 
   virtual void Diagnose(std::uint32_t code) = 0;

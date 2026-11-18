@@ -23,7 +23,7 @@
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCreation.hpp"
 #include "Battle/Ai/ActorCreationLive.hpp"

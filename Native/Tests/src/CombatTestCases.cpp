@@ -80,7 +80,7 @@
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
-#include "Menu/Loot/Paging.h"
+#include "Menu/Loot/Paging.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.h"
@@ -92,7 +92,7 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 int Tests_CombatTargetResults(void);
 
@@ -138,7 +138,7 @@ struct AbilityFixture {
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
   decltype(Battle_floatingLabelCount) saved_label_count =
       Battle_floatingLabelCount;
-  int saved_tick_speed = State_tickSpeed;
+  int saved_tick_speed = VS::State::tickSpeed;
   std::uint8_t saved_difficulty = VS::State::LiveScriptFlag(1);
   Battle_ActionState action{};
   Battle_Actor actors[2]{};
@@ -181,7 +181,7 @@ struct AbilityFixture {
     Input_buttonsPressed.allButtons = PADRright;
     Battle_floatingLabels = &labels;
     Battle_floatingLabelCount = 0;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     VS::State::SetLiveScriptFlag(1, 0);
     Prepare();
   }
@@ -200,7 +200,7 @@ struct AbilityFixture {
     Audio_Seq_unusedScoredata = saved_score;
     Battle_floatingLabels = saved_labels;
     Battle_floatingLabelCount = saved_label_count;
-    State_tickSpeed = saved_tick_speed;
+    VS::State::tickSpeed = saved_tick_speed;
     VS::State::SetLiveScriptFlag(1, saved_difficulty);
   }
 
@@ -601,7 +601,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   u_char saved_offset = Menu_Loot_lootListOffset;
   char saved_selection = Menu_Loot_selectedLoot;
   char saved_difficulty = Audio_Seq_unusedStateFlags.difficulty;
-  std::array<Menu_Loot_LootListItem, kMenuLootRowCapacity> rows{};
+  std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   Battle_Actor enemy{};
   Battle_ActorStats stats{};
 
@@ -979,7 +979,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
 
   void AdvanceArmorPage(bool first_claimed) {
     Menu_Loot_lootListCount = 0;
-    REQUIRE(Menu_Loot_AdvanceStagedInventory() == 1);
+    REQUIRE(VS::Menu::Loot::Live::AdvanceStagedInventory() == 1);
     REQUIRE(Menu_Loot_lootListCount == 8);
     for (int index = 0; index < 8; ++index) {
       CHECK(rows[index].state == !first_claimed);
@@ -993,12 +993,12 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     REQUIRE(seen.size() == 24);
     for (int index = 0; index < 24; ++index) CHECK(seen[index] == 149 + index);
     Menu_Loot_lootListCount = 0;
-    CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+    CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
     VS::Core::Random expected;
     for (int index = 0; index < 40; ++index) expected.Next(255);
     random.CheckSequence(expected);
     CheckCleared();
-    CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+    CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
   }
 
   void QueueArmorBatch() {
@@ -2907,21 +2907,21 @@ TEST_CASE("Pending loot pages reset safely before source release and reopen",
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
   const auto first = VS::Items::lootListHead->loot;
-  Menu_Loot_ResetPaging();
-  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  VS::Menu::Loot::Live::ResetPaging();
+  CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
   CHECK(std::memcmp(&VS::Items::lootListHead->loot, &first, sizeof(first)) ==
         0);
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   REQUIRE(Menu_Loot_lootListCount == 16);
   fixture.CheckCleared();
-  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
 
   fixture.stats = {};
   fixture.SetGuaranteed(1);
   VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   VS::Menu::Loot::Live::BuildStagedInventory(VS::Items::lootListHead);
   fixture.DeliverRows(1);
-  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
   fixture.CheckCleared();
 }
 
@@ -2935,8 +2935,8 @@ TEST_CASE("Single chest loot remains intact when staging is abandoned",
   const auto before = chest;
   VS::Menu::Loot::Live::BuildStagedInventory(nullptr);
   REQUIRE(Menu_Loot_lootListCount == 2);
-  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
-  Menu_Loot_ResetPaging();
+  CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
+  VS::Menu::Loot::Live::ResetPaging();
   CHECK(std::memcmp(&chest, &before, sizeof(chest)) == 0);
   VS::Menu::Loot::Live::BuildStagedInventory(nullptr);
   fixture.DeliverRows(2);

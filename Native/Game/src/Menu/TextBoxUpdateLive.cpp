@@ -9,7 +9,7 @@
 
 #include "Battle/Hud.h"
 #include "Battle/HudOrchestrationLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
@@ -19,7 +19,7 @@
 #include "Menu/TextBoxUpdate.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Menu {
 namespace {
@@ -32,10 +32,11 @@ static_assert(std::size(Menu_textBoxOrderingTables) ==
 void RefuseUpdate() {
   ++refused_updates;
   if (std::has_single_bit(refused_updates)) {
-    Core_Warnf("menu",
-               "Text-box update refused an unbound frame or ordering buffer "
-               "(count=%" PRIu64 ")",
-               refused_updates);
+    VS::Core::Warnf(
+        "menu",
+        "Text-box update refused an unbound frame or ordering buffer "
+        "(count=%" PRIu64 ")",
+        refused_updates);
   }
 }
 
@@ -49,7 +50,7 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
   void WriteBox(std::size_t index, const TextBox& box) override {
     WriteLiveTextBox(index, box);
   }
-  std::int32_t TickSpeed() const override { return State_tickSpeed; }
+  std::int32_t TickSpeed() const override { return VS::State::tickSpeed; }
   void BlendText(std::size_t index, std::int32_t scale) override {
     Render::BlendLiveTextBoxIntoFramebuffer(&std::span(Menu_textBoxes)[index],
                                             scale);
@@ -85,7 +86,9 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
   bool TimerVisible() const override {
     return Battle_lowerScreenUiState == kTimerVisible;
   }
-  void DrawTimer() override { Battle::DrawLivePuzzleTimer(&State_sceneTimer); }
+  void DrawTimer() override {
+    Battle::DrawLivePuzzleTimer(&VS::State::sceneTimer);
+  }
   void DrawOverlay() override {
     Effects::ScreenDistortion::DrawLiveScreenOverlay();
   }

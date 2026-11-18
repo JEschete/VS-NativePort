@@ -129,7 +129,7 @@ std::optional<DamageTarget> Target(const Battle_HitResult* hit) {
 }
 std::int16_t Checked(std::optional<std::int16_t> value) {
   if (!value) {
-    Core_Errorf(
+    VS::Core::Errorf(
         "battle",
         "Damage calculation refused missing required record, used index, "
         "or unsupported healing affinity (zero; drawn one, #351)");

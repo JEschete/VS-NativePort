@@ -19,11 +19,12 @@
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Ai/TargetApproach.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
@@ -89,13 +90,6 @@ static_assert(offsetof(Decision, moveX) == offsetof(AiState, moveX));
 static_assert(offsetof(Decision, targetFlags) == offsetof(AiState, relations));
 static_assert(offsetof(Decision, reactionPending) ==
               offsetof(AiState, reactionPending));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 Approach& ApproachOf(AiState& state) {
   return *reinterpret_cast<Approach*>(&state);

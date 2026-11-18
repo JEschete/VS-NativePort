@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 
 namespace VS::Battle::Ai {
@@ -54,14 +54,14 @@ bool InGrid(int x, int z) {
 
 bool ValidActorId(int actor_id) {
   if (actor_id >= 0 && actor_id < kNavigationActorSlots) return true;
-  Core_Warnf("ai", "AI navigation actor ID %d is out of bounds", actor_id);
+  VS::Core::Warnf("ai", "AI navigation actor ID %d is out of bounds", actor_id);
   return false;
 }
 
 bool SetTileFlag(NavigationGrid& grid, int x, int z, std::uint16_t flag) {
   if (!grid.HasTileFlags()) return true;
   if (!InGrid(x, z)) {
-    Core_Warnf("ai", "AI navigation tile (%d,%d) is out of bounds", x, z);
+    VS::Core::Warnf("ai", "AI navigation tile (%d,%d) is out of bounds", x, z);
     return false;
   }
   grid.SetTileFlags(x, z,
@@ -79,10 +79,10 @@ bool ChangeOccupancy(NavigationGrid& grid, TileOccupantPlacement placement,
   if (!grid.HasOccupancyHeights() ||
       offset > kOccupancyMapBytes - kOccupancyCellBytes ||
       offset % kOccupancyCellBytes != 0) {
-    Core_Warnf("ai", "Gimmick occupancy placement (%u,%u,%u) is invalid",
-               static_cast<unsigned>(placement.x),
-               static_cast<unsigned>(placement.layer),
-               static_cast<unsigned>(placement.z));
+    VS::Core::Warnf("ai", "Gimmick occupancy placement (%u,%u,%u) is invalid",
+                    static_cast<unsigned>(placement.x),
+                    static_cast<unsigned>(placement.layer),
+                    static_cast<unsigned>(placement.z));
     return false;
   }
   const auto cell = offset / kOccupancyCellBytes;
@@ -214,10 +214,10 @@ bool UpdateScriptedRoute(ScriptedRouteHost& host, int actor_id) {
   const auto model = host.Placement(actor_id);
   if (!model || route->actor_id != actor_id ||
       !InGrid(model->tile_x, model->tile_z)) {
-    Core_Warnf("ai",
-               "Scripted route for actor %d requires a model, map, tile "
-               "and actor identity",
-               actor_id);
+    VS::Core::Warnf("ai",
+                    "Scripted route for actor %d requires a model, map, tile "
+                    "and actor identity",
+                    actor_id);
     return false;
   }
   PrepareScriptedRoute(*route, *model);
@@ -258,8 +258,8 @@ std::optional<bool> IsAdjacentTileStepBlocked(
     Field::TerrainGrid terrain, const NavigationDirectionCodes& directions,
     int x, int z, int direction) {
   if (direction < 0 || direction >= kNavigationDirections || !InGrid(x, z)) {
-    Core_Warnf("ai", "AI neighbor step from (%d,%d) toward %d is invalid", x, z,
-               direction);
+    VS::Core::Warnf("ai", "AI neighbor step from (%d,%d) toward %d is invalid",
+                    x, z, direction);
     return std::nullopt;
   }
   const unsigned packed = directions[static_cast<std::size_t>(direction)];
@@ -267,8 +267,8 @@ std::optional<bool> IsAdjacentTileStepBlocked(
   const auto dz =
       SignedDirection((packed >> kDirectionZShift) & kDirectionComponentMask);
   if ((dx == 0 && dz == 0) || dx < -1 || dz < -1) {
-    Core_Warnf("ai", "AI neighbor direction %d has invalid delta (%d,%d)",
-               direction, dx, dz);
+    VS::Core::Warnf("ai", "AI neighbor direction %d has invalid delta (%d,%d)",
+                    direction, dx, dz);
     return std::nullopt;
   }
   const auto next_x = x + dx;
@@ -285,7 +285,7 @@ std::optional<bool> IsAdjacentTileStepBlocked(
 // 32x32 builder uses the native game fiber's existing 16 MiB stack.
 bool BuildAiTerrainHeightsWithWorkspace(SpecialTerrainBuilder& builder) {
   if (!builder.HasNativeMaps()) {
-    Core_Warnf("ai", "Special terrain build requires active native maps");
+    VS::Core::Warnf("ai", "Special terrain build requires active native maps");
     return false;
   }
   builder.BuildSpecialTerrainHeights();
@@ -311,9 +311,9 @@ bool UpdateRouteGateAvailability(
   if (visible_platforms != 0 &&
       (routes[0] & (kFirstPlatformGate | kSecondPlatformGate)) ==
           kSecondPlatformGate) {
-    Core_Warnf("ai",
-               "Route availability: first route word depends on an "
-               "original stack-register value");
+    VS::Core::Warnf("ai",
+                    "Route availability: first route word depends on an "
+                    "original stack-register value");
     return false;
   }
   for (auto& word : routes) {
@@ -338,8 +338,8 @@ std::optional<int> ActorNavigationOverrideStatus(
   if (!*present || !table.HasOverride(actor_id)) return kUnavailable;
   const auto tile = table.OverrideTrackedTile(actor_id);
   if (!tile) {
-    Core_Warnf("ai", "AI navigation override for actor %d requires a tile",
-               actor_id);
+    VS::Core::Warnf("ai", "AI navigation override for actor %d requires a tile",
+                    actor_id);
     return std::nullopt;
   }
   return (*tile & kHorizontalTileMask) !=
@@ -353,8 +353,8 @@ bool CopyActorNavigationOverrideState(NavigationOverrideCopy& copy,
                                       int actor_id) {
   if (!ValidActorId(actor_id)) return false;
   if (!copy.HasSource(actor_id) || !copy.HasDestination()) {
-    Core_Warnf("ai", "AI navigation copy for actor %d requires both states",
-               actor_id);
+    VS::Core::Warnf(
+        "ai", "AI navigation copy for actor %d requires both states", actor_id);
     return false;
   }
   copy.CopySource(actor_id);
@@ -370,9 +370,9 @@ bool SetActorNavigationOverride(NavigationOverrideHost& host, int actor_id,
   if (!present) return false;
   if (!*present) return true;
   if (!host.MatchesActorAndRoom(actor_id)) {
-    Core_Warnf("ai",
-               "Scripted navigation: path request requires matching "
-               "actor and room state");
+    VS::Core::Warnf("ai",
+                    "Scripted navigation: path request requires matching "
+                    "actor and room state");
     return false;
   }
   const std::uint32_t target =
@@ -382,7 +382,7 @@ bool SetActorNavigationOverride(NavigationOverrideHost& host, int actor_id,
   auto destination = NavigationOverrideTarget::kActorState;
   if (!host.HasOverride(actor_id)) {
     if (!host.AllocateOverride(actor_id)) {
-      Core_Warnf("ai", "Scripted navigation: route allocation failed");
+      VS::Core::Warnf("ai", "Scripted navigation: route allocation failed");
       return false;
     }
     destination = NavigationOverrideTarget::kNewRoute;
@@ -399,9 +399,9 @@ bool UpdateActorNavigationOverrides(ScriptedRouteHost& host) {
   int visited = 0;
   while (const auto actor = host.NextActor()) {
     if (++visited > kBattleActorSlots) {
-      Core_Warnf("ai",
-                 "Scripted navigation: actor list is cyclic or exceeds "
-                 "native storage");
+      VS::Core::Warnf("ai",
+                      "Scripted navigation: actor list is cyclic or exceeds "
+                      "native storage");
       return false;
     }
     if (actor->suspended) continue;

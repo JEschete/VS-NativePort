@@ -41,7 +41,7 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomRenderingLive.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/RoomStateLiveState.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -144,8 +144,8 @@ struct LiveWorld {
   ValueRestore<int> saved_fade{Menu_Framework_backgroundFadeStep};
   ValueRestore<decltype(Battle_hudHidden)> saved_hud{Battle_hudHidden};
   ValueRestore<int> saved_hud_slide{Battle_hudSlideOffset};
-  ValueRestore<decltype(Field_isFieldRenderingEnabled)> saved_field{
-      Field_isFieldRenderingEnabled};
+  ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
+      VS::Field::isFieldRenderingEnabled};
   RestorePages saved_pages;
   ArrayRestore<Menu_TextBoxState, std::size(Menu_textBoxes)> saved_boxes{
       Menu_textBoxes};
@@ -186,7 +186,7 @@ struct LiveWorld {
     Menu_Framework_hideMenu = 0;
     Battle_hudHidden = 0;
     Battle_hudSlideOffset = 0;
-    Field_isFieldRenderingEnabled = 1;
+    VS::Field::isFieldRenderingEnabled = 1;
     Input_buttonsPressed.allButtons = 0;
     Input_previousButtons = 0;
     Input_buttonRepeat = 0;
@@ -366,7 +366,7 @@ void ExitScreen(LiveWorld& world, std::uint8_t& step) {
 }
 
 void CheckRestoredDisplay() {
-  CHECK(Field_isFieldRenderingEnabled == 1);
+  CHECK(VS::Field::isFieldRenderingEnabled == 1);
   CHECK(Battle_hudHidden == 0);
   CHECK(Battle_hudSlideOffset == 0);
   CHECK(Menu_Framework_hideMenu == 0);
@@ -628,7 +628,7 @@ TEST_CASE(
   std::uint8_t step = 3;
   REQUIRE(map::LiveUpdateScreen(&step) == 0);
   REQUIRE(world.ReachInput(step));
-  CHECK(Field_isFieldRenderingEnabled == 0);
+  CHECK(VS::Field::isFieldRenderingEnabled == 0);
   CHECK(Battle_hudHidden == 1);
   CHECK(Battle_hudSlideOffset == 0x200000);
   VS::Render::GamePages().Fill({640, 256, 160, 240}, 255, 0, 0);
@@ -894,8 +894,9 @@ struct RestoreRoomRuntime {
   const game_clear_live_tests::SavedGlobals<
       Field_backgroundReferenceVectors, Field_entranceDoorRecord,
       Battle_unusedMenu9CursorMemory, Field_manualDisplayState,
-      Field_roomPalettes, Battle_floatingLabels, Battle_placedLabelPositions,
-      Field_enteredDoorId, Field_areRoomUpdatesPaused, Field_roomTint,
+      VS::Field::roomPalettes, Battle_floatingLabels,
+      Battle_placedLabelPositions, Field_enteredDoorId,
+      VS::Field::areRoomUpdatesPaused, VS::Field::roomTint,
       Battle_unusedSubmenuState, Field_isMinimapVisible,
       Field_minimapSlideFrame, Field_gimmickAnimationQueue,
       Field_pendingGimmickAnimationCount>
@@ -1135,7 +1136,7 @@ TEST_CASE("Actual heap replacement drains a visible map and its pending swap",
   const auto refusals = memory::RefusedLiveHeapRequestCount();
   VS::Boot::ResetLiveSessionHeap();
   CheckDrainedRead(scene, staging, request, 2048, refusals);
-  CHECK(Field_isFieldRenderingEnabled == 1);
+  CHECK(VS::Field::isFieldRenderingEnabled == 1);
   CHECK(Battle_hudHidden == 0);
   const auto projection = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(std::pair<int, int>{projection.x, projection.y} == std::pair{171, 93});
@@ -1158,10 +1159,10 @@ TEST_CASE(
   CHECK_FALSE(map::BoundLiveMapScene(scene));
   CHECK_FALSE(memory::LivePayloadCapacity(scene));
   CHECK(Field_roomData.minimapScene == nullptr);
-  CHECK(Field_roomPalettes != nullptr);
+  CHECK(VS::Field::roomPalettes != nullptr);
   CHECK(Battle_floatingLabels != nullptr);
   CHECK(Battle_placedLabelPositions != nullptr);
-  memory::FreeLiveFromLowEnd(Field_roomPalettes);
+  memory::FreeLiveFromLowEnd(VS::Field::roomPalettes);
   memory::FreeLiveFromLowEnd(Battle_floatingLabels);
   memory::FreeLiveFromLowEnd(Battle_placedLabelPositions);
 }
@@ -1201,7 +1202,7 @@ TEST_CASE("Normal map exit leaves the stored view for the next field draw",
   REQUIRE(map::LiveUpdateScreen(&phase) == 0);
   REQUIRE(world.ReachInput(phase));
   ExitScreen(world, phase);
-  CHECK(Field_isFieldRenderingEnabled == 1);
+  CHECK(VS::Field::isFieldRenderingEnabled == 1);
   std::uint32_t empty_geometry = 0;
   Field_roomData.header.geometryLength = sizeof(empty_geometry);
   world.ResetFrame();

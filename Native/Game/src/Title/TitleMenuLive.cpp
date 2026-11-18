@@ -48,7 +48,7 @@
 #include "State/Progress.h"
 #include "State/RoomMemory.h"
 #include "State/StateFlags.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 #include "Title/Credits.h"
 #include "Title/NewGame.h"
 #include "Title/SaveFiles.h"
@@ -449,7 +449,7 @@ class LiveHost final : public Host {
                                        Title_newGameInventoryTemplate,
                                        sizeof Audio_Seq_unusedInventory);
   }
-  void SetTickSpeed(int speed) override { State_tickSpeed = speed; }
+  void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetEntryDoor(const EntryDoor& door) override {
     State_savedEntryDoor.entryTileX = door.tile_x;
     State_savedEntryDoor.entryTileZ = door.tile_z;

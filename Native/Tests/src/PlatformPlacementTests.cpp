@@ -28,7 +28,7 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/Room.h"
 #include "Field/RoomEffects.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -37,7 +37,7 @@
 #include "Render/RoomDraw.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 constexpr auto kGroupBytes = VS::Render::kRoomGroupRecordBytes;
@@ -266,26 +266,26 @@ struct PlatformMotionLiveFixture : PlatformPlacementFixture {
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
-  decltype(State_tickSpeed) saved_tick_speed = State_tickSpeed;
-  decltype(Field_areRoomUpdatesPaused) saved_room_pause =
-      Field_areRoomUpdatesPaused;
+  decltype(VS::State::tickSpeed) saved_tick_speed = VS::State::tickSpeed;
+  decltype(VS::Field::areRoomUpdatesPaused) saved_room_pause =
+      VS::Field::areRoomUpdatesPaused;
   decltype(Render_frameBuf) saved_frame_buffer = Render_frameBuf;
   PlatformMotionLiveFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
-    Field_areRoomUpdatesPaused = 0;
+    VS::Field::areRoomUpdatesPaused = 0;
     Field_areMovingPlatformsPaused = 0;
     Field_platformFreezeFrames = 0;
     Field_isPlatformFreezeTintActive = 0;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     Render_frameBuf = 0;
     platforms[1].sceneObjectId = 99;
   }
   ~PlatformMotionLiveFixture() {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
-    State_tickSpeed = saved_tick_speed;
-    Field_areRoomUpdatesPaused = saved_room_pause;
+    VS::State::tickSpeed = saved_tick_speed;
+    VS::Field::areRoomUpdatesPaused = saved_room_pause;
     Render_frameBuf = saved_frame_buffer;
   }
 };
@@ -357,7 +357,7 @@ struct PlatformAppearanceGeometry {
 struct PlatformAppearanceLiveFixture : PlatformPlacementFixture {
   VS::Render::PaletteAnimation saved_palette =
       VS::Render::LivePaletteAnimation();
-  u_short* saved_room_palettes = Field_roomPalettes;
+  u_short* saved_room_palettes = VS::Field::roomPalettes;
   std::array<std::uint16_t, 0x240> palettes{};
   PlatformAppearanceGeometry geometry;
   PlatformAppearanceLiveFixture() {
@@ -370,7 +370,7 @@ struct PlatformAppearanceLiveFixture : PlatformPlacementFixture {
     geometry.quad.green1 = 0x34;
     geometry.quad.blue1 = 0x56;
     palettes.fill(0x1234);
-    Field_roomPalettes = palettes.data();
+    VS::Field::roomPalettes = palettes.data();
     Field_roomData.geometry = reinterpret_cast<int*>(&geometry);
     Field_roomData.header.geometryLength = sizeof geometry;
     platforms[0].sceneObjectId = 0;
@@ -381,7 +381,7 @@ struct PlatformAppearanceLiveFixture : PlatformPlacementFixture {
   ~PlatformAppearanceLiveFixture() {
     const_cast<VS::Render::PaletteAnimation&>(
         VS::Render::LivePaletteAnimation()) = saved_palette;
-    Field_roomPalettes = saved_room_palettes;
+    VS::Field::roomPalettes = saved_room_palettes;
   }
 };
 }  // namespace
@@ -824,7 +824,7 @@ TEST_CASE("Platform update rereads tick speed after the obstruction callback",
 TEST_CASE("Native platform motion preserves packed data and bounce geometry",
           "[platform-motion-live][field]") {
   PlatformMotionLiveFixture fixture;
-  State_tickSpeed = 4;
+  VS::State::tickSpeed = 4;
   Field_platformBounceFrames[0] = 0;
   auto& platform = fixture.platforms[0];
   platform.isHidden = 0;
@@ -1105,7 +1105,7 @@ TEST_CASE("Native freeze appearance equality skips all malformed room data",
           "[platform-appearance-live][field]") {
   PlatformAppearanceLiveFixture fixture;
   Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms) - 1;
-  Field_roomPalettes = nullptr;
+  VS::Field::roomPalettes = nullptr;
   REQUIRE(VS::Field::SetLivePlatformFreezeAppearance(0));
   CHECK(Field_isPlatformFreezeTintActive == 0);
   CHECK(fixture.geometry.quad.red1 == 0x12);
@@ -1120,7 +1120,7 @@ TEST_CASE(
   CHECK(Field_isPlatformFreezeTintActive == 0);
   Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms);
   Field_isPlatformFreezeTintActive = 1;
-  Field_roomPalettes = nullptr;
+  VS::Field::roomPalettes = nullptr;
   CHECK_FALSE(VS::Field::SetLivePlatformFreezeAppearance(0));
   CHECK(Field_isPlatformFreezeTintActive == 1);
 }

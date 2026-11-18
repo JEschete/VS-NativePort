@@ -17,7 +17,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Content/ActorAssets.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -287,16 +287,16 @@ bool ValidatePreviewRecords(std::span<const std::byte> buffer) {
       Report("cleanup actor record extends past the preview");
       return false;
     }
-    if (slot >= std::size(Actors_weaponModels) / 2) continue;
+    if (slot >= std::size(VS::Actors::weaponModels) / 2) continue;
     for (const auto weapon_slot : {slot * 2, (slot * 2) | 1}) {
-      const auto* weapon = Actors_weaponModels[weapon_slot];
+      const auto* weapon = VS::Actors::weaponModels[weapon_slot];
       if (weapon != nullptr && !InPreviewBuffer(buffer, weapon)) {
         Report("cleanup actor has a foreign weapon owner");
         return false;
       }
     }
   }
-  for (const auto* weapon : Actors_weaponModels) {
+  for (const auto* weapon : VS::Actors::weaponModels) {
     if (!InPreviewBuffer(buffer, weapon)) continue;
     const auto offset = reinterpret_cast<std::uintptr_t>(weapon) -
                         reinterpret_cast<std::uintptr_t>(buffer.data());
@@ -314,8 +314,9 @@ void ReleasePreviewRecords(std::span<const std::byte> buffer) {
       Content::ReleaseLiveActorModel(static_cast<int>(slot));
     }
   }
-  for (std::size_t slot = 0; slot < std::size(Actors_weaponModels); ++slot) {
-    if (InPreviewBuffer(buffer, Actors_weaponModels[slot])) {
+  for (std::size_t slot = 0; slot < std::size(VS::Actors::weaponModels);
+       ++slot) {
+    if (InPreviewBuffer(buffer, VS::Actors::weaponModels[slot])) {
       Content::ReleaseLiveWeaponModel(static_cast<int>(slot));
     }
   }

@@ -18,7 +18,7 @@
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -216,9 +216,9 @@ class LiveShadowGround final : public ShadowGround {
   const std::span<const std::byte> bytes = LiveModelBytes(model);
   if (bytes.empty() && model != nullptr &&
       std::has_single_bit(++unrecorded_models)) {
-    Core_Errorf(kChannel,
-                "model %p has no recorded extent (%" PRIu64 " refused)", model,
-                unrecorded_models);
+    VS::Core::Errorf(kChannel,
+                     "model %p has no recorded extent (%" PRIu64 " refused)",
+                     model, unrecorded_models);
   }
   return bytes;
 }
@@ -239,13 +239,13 @@ bool ProjectLive(const ModelCounts& counts, std::span<const std::byte> model,
 void ReportDraw(ModelDrawStatus status) {
   switch (status) {
     case ModelDrawStatus::kInvalidLimbRanges:
-      Core_Debugf(kChannel, "Invalid model limb polygon ranges");
+      VS::Core::Debugf(kChannel, "Invalid model limb polygon ranges");
       return;
     case ModelDrawStatus::kInvalidPolygon:
-      Core_Debugf(kChannel, "Invalid model polygon command");
+      VS::Core::Debugf(kChannel, "Invalid model polygon command");
       return;
     case ModelDrawStatus::kTruncatedModel:
-      Core_Debugf(kChannel, "Model polygons run past the model data");
+      VS::Core::Debugf(kChannel, "Model polygons run past the model data");
       return;
     case ModelDrawStatus::kDrawn:
     case ModelDrawStatus::kNoVertices:
@@ -329,9 +329,9 @@ void RecordLiveModelCopy(const void* destination, const void* source,
   const std::span<const std::byte> copied = LiveModelBytes(source);
   if (copied.empty()) {
     ForgetLiveModelExtent(destination);
-    Core_Errorf(kChannel,
-                "model copy %p came from %p, which has no recorded extent",
-                destination, source);
+    VS::Core::Errorf(kChannel,
+                     "model copy %p came from %p, which has no recorded extent",
+                     destination, source);
     return;
   }
   RecordLiveModelExtent(destination, std::min(copied.size(), capacity));
@@ -400,8 +400,8 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
                                const SVECTOR& root_offset) {
   const std::uintptr_t limit = PrimitiveLimit();
   if (limit == 0 || Render_frameScratch.orderingTable == nullptr) {
-    Core_Debugf(kChannel,
-                "Actor shadow requires actor, view and packet buffers");
+    VS::Core::Debugf(kChannel,
+                     "Actor shadow requires actor, view and packet buffers");
     std::abort();
   }
   const Actors_ModelInstance& instance = actor.instance;
@@ -428,13 +428,13 @@ void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
       {Content_battleShadowVertices, Content_battleShadowFaces}, ground,
       transformer, queue);
   if (result.status == ActorShadowStatus::kInvalidMesh) {
-    Core_Debugf(kChannel, "Invalid actor shadow vertex offset");
+    VS::Core::Debugf(kChannel, "Invalid actor shadow vertex offset");
     std::abort();
   }
   actor.soundPosition = {result.anchor[0], result.anchor[1], result.anchor[2],
                          0};
   if (result.status == ActorShadowStatus::kBufferFull) {
-    Core_Debugf(kChannel, "Actor shadow primitive buffer exhausted");
+    VS::Core::Debugf(kChannel, "Actor shadow primitive buffer exhausted");
   }
 }
 

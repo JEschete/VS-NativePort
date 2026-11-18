@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -18,12 +18,12 @@ constexpr unsigned kSpecialActors = 4;
 constexpr unsigned kAreaMask = 15;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return std::nullopt;
 }
 
 bool RefuseUpdate(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return false;
 }
 

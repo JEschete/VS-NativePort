@@ -17,12 +17,12 @@
 
 #include "Boot/GameLoop.h"
 #include "Boot/SessionLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Input/Vibration.h"
 #include "Legacy/Input/LibPad.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 // decomp: SLUS_010.40 _portInfo, vs_main_buttonsReleased,
 // _buttonHeldFrameCount, vs_main_stickPosBuf, vs_main_buttonRepeat,
@@ -104,9 +104,9 @@ bool Reportable(std::uint64_t count) noexcept {
 void Refused(const char* operation, const char* reason, std::int64_t value) {
   ++refused_requests;
   if (Reportable(refused_requests)) {
-    Core_Warnf("input",
-               "%s: %s (%" PRId64 "); nothing changed (refusal %" PRIu64 ")",
-               operation, reason, value, refused_requests);
+    VS::Core::Warnf(
+        "input", "%s: %s (%" PRId64 "); nothing changed (refusal %" PRIu64 ")",
+        operation, reason, value, refused_requests);
   }
 }
 
@@ -289,7 +289,7 @@ ControllerFrame PollLiveControllers() {
       .vibration_on = Input_settings.vibrationOn != 0,
   };
   const ControllerFrameOptions options{
-      .tick_speed = static_cast<std::uint32_t>(State_tickSpeed),
+      .tick_speed = static_cast<std::uint32_t>(VS::State::tickSpeed),
       .soft_reset_enabled = Boot_isSoftResetEnabled != 0,
   };
   LibPadHost host;

@@ -30,7 +30,7 @@
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 #include "TestSupport/ScriptSources.hpp"
 
 namespace {
@@ -88,7 +88,7 @@ struct EventCameraFixture {
   static constexpr std::size_t kCameraScratchOffset = 0x88;
   static constexpr std::size_t kCameraScratchBytes = 0x90;
   VS::Event::CameraState* saved_camera = Event_camera;
-  decltype(State_tickSpeed) saved_speed = State_tickSpeed;
+  decltype(VS::State::tickSpeed) saved_speed = VS::State::tickSpeed;
   VS::Event::CameraState camera{};
   std::array<std::byte, kCameraScratchBytes> scratch{};
   std::array<u_char, sizeof Event_kOrbitReturnFirstCommand> saved_eye{};
@@ -104,7 +104,7 @@ struct EventCameraFixture {
         static_cast<std::byte*>(Core_ScratchBase()) + kCameraScratchOffset,
         scratch.size());
     Event_camera = &camera;
-    State_tickSpeed = 2;
+    VS::State::tickSpeed = 2;
     camera.look_at.current_position = {100, 200, 300, 0};
     camera.look_at.destination = {400, 500, 600, 0};
     camera.look_at.partner_position = {1000, 800, 900, 0};
@@ -122,7 +122,7 @@ struct EventCameraFixture {
         static_cast<std::byte*>(Core_ScratchBase()) + kCameraScratchOffset,
         scratch.data(), scratch.size());
     Event_camera = saved_camera;
-    State_tickSpeed = saved_speed;
+    VS::State::tickSpeed = saved_speed;
     Core_Gte_Reset();
   }
 

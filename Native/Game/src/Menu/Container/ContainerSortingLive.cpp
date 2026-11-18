@@ -7,7 +7,7 @@
 #include <optional>
 #include <string_view>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfersLive.hpp"
@@ -19,8 +19,8 @@
 namespace VS::Menu::container {
 namespace {
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("menu.container.sorting", "Container sorting refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.container.sorting", "Container sorting refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 

@@ -20,7 +20,7 @@
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/SoundSlotsLive.hpp"
-#include "Audio/StreamPlayback.h"
+#include "Audio/StreamPlayback.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -259,7 +259,7 @@ class LiveSoundBanks final : public SoundBankHost {
     return Samples::LiveTransferStatus();
   }
 
-  void ResetCutsceneStream() override { Audio_Native_ResetCutsceneStream(); }
+  void ResetCutsceneStream() override { VS::Audio::ResetCutsceneStream(); }
 
   void Diagnose(std::uint32_t code) override {
     Core::IgnoreDiagnostic(static_cast<int>(code), 0);

@@ -22,7 +22,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/WeaponModel.h"
 #include "Audio/ActorSoundLive.hpp"
@@ -36,7 +36,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickLookup.hpp"
 #include "Field/Gimmicks.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -292,7 +292,7 @@ class LiveAnimationHost final : public AnimationControlHost {
     }
     return Battle_actors[index] != nullptr;
   }
-  int TickSpeed() override { return State_tickSpeed; }
+  int TickSpeed() override { return VS::State::tickSpeed; }
   int EventPlaybackState() override {
     const Synced synced(registry_);
     return static_cast<int>(
@@ -361,11 +361,11 @@ class LiveAnimationHost final : public AnimationControlHost {
   void SetWeaponModelsDrawn(int id, bool drawn) override {
     for (int hand = 0; hand < 2; ++hand) {
       const int index = (id * 2) + hand;
-      if (index < 0 || index >= kActorsWeaponModelCount) {
+      if (index < 0 || index >= kWeaponModelCount) {
         VS_LOG_WARN("actors", "Weapon model draw refused actor id {}", id);
         return;
       }
-      Actors_WeaponModel* model = Actors_weaponModels[index];
+      Actors_WeaponModel* model = weaponModels[index];
       if (model == nullptr) continue;
       const u_char state = drawn ? kDrawnWeaponModel : 0;
       model->reserved11 = state;

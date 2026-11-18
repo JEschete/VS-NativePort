@@ -19,7 +19,7 @@
 #include "Event/ScriptControlOpcodes.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/ScreenOverlayLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Event {
 namespace {
@@ -178,7 +178,7 @@ void UpdateEventAngleTweenEntry(AngleTween* tween) {
   }
   LiveTweenEasing easing;
   EventAngleTween value = LoadAngleTween(*tween);
-  UpdateEventAngleTween(value, State_tickSpeed, easing);
+  UpdateEventAngleTween(value, VS::State::tickSpeed, easing);
   StoreAngleTween(*tween, value);
 }
 
@@ -190,7 +190,7 @@ void UpdateEventScreenTransformsEntry() {
   LiveTweenEasing easing;
   LiveScreenEffect screen;
   EventScreenTweens tweens = LoadScreenTweens(*camera);
-  UpdateEventScreenTransforms(tweens, State_tickSpeed, easing, screen);
+  UpdateEventScreenTransforms(tweens, VS::State::tickSpeed, easing, screen);
   StoreScreenTweens(*camera, tweens);
 }
 
@@ -204,7 +204,7 @@ int UpdateEventTripleTweenEntry(TripleTween* tween) {
   LiveTweenEasing easing;
   EventScreenTween value = LoadScreenTween(*tween);
   const std::optional<std::int32_t> eased =
-      UpdateEventTripleTween(value, State_tickSpeed, easing);
+      UpdateEventTripleTween(value, VS::State::tickSpeed, easing);
   StoreScreenTween(*tween, value);
   return eased.has_value() ? 1 : 0;
 }

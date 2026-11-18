@@ -10,8 +10,8 @@ struct Content_SequenceBuffer;
 
 // Live binding for the battle asset queue and loaders (ActorAssets.hpp) over
 // the legacy request queue (Content_legacyActorAssetRequests), the loaders'
-// globals (ModelLoading.h, ActorAssetsLiveState.h), the actor and weapon
-// records (Actors_actorRecords, Actors_weaponModels), the shared sequence
+// globals (ModelLoading.h and the ones below), the actor and weapon
+// records (Actors_actorRecords, VS::Actors::weaponModels), the shared sequence
 // banks and the texture slot tables. Generated callers keep the original
 // call shapes.
 //
@@ -47,5 +47,25 @@ int ReleaseLiveSequenceEffectTexture(int bank);
 
 // Inputs the loaders refused since start-up.
 [[nodiscard]] std::uint64_t LiveActorAssetRefusals() noexcept;
+
+// The battle asset queue's legacy globals. ActorAssetsLive.cpp defines them
+// and binds them to the typed loaders (ActorAssets.hpp); the battle start-up
+// (ModelRendering.cpp) still clears the parse flag directly.
+
+// decomp: D_800E8F29 (BATTLE/BATTLE.PRG 30DB0.c): the parse phase of the
+// model being parsed; 1 while its primitives wait for the second frame.
+extern unsigned char modelParseResetFlag;
+// decomp: D_800E8FC4 (BATTLE/BATTLE.PRG 30DB0.c): the slowest request (in
+// VSync(1) ticks) while a model file was parsing.
+extern int assetQueuePeakUsage;
+// decomp: D_800F457C (BATTLE/BATTLE.PRG 30DB0.c): the model load phase of
+// that request.
+extern int lastLoadPhaseSnapshot;
+// decomp: D_800F4580 (BATTLE/BATTLE.PRG 30DB0.c): the ticks the last request
+// took.
+extern int assetQueueFrameTicks;
+// decomp: D_800F45D8 (BATTLE/BATTLE.PRG 30DB0.c): the kind of the slowest
+// request.
+extern int lastAssetRequestType;
 
 }  // namespace VS::Content

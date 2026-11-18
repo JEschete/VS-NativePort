@@ -38,7 +38,7 @@
 #include "Items/LootLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Loot/Paging.h"
+#include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 // decomp: _lootListHead (_lootListHead@BATTLE/BATTLE.PRG)
@@ -153,7 +153,7 @@ class LiveLootFlowHost final : public LootFlowHost {
     VS::Battle::BeginLiveRewardPause();
   }
   void ResumeAfterRewards() override { VS::Battle::ResumeLiveAfterRewards(); }
-  void ResetLootPaging() override { Menu_Loot_ResetPaging(); }
+  void ResetLootPaging() override { VS::Menu::Loot::Live::ResetPaging(); }
 };
 
 class LiveChestStateHost final : public ChestStateHost {

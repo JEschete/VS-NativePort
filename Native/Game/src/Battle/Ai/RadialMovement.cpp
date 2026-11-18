@@ -6,7 +6,7 @@
 #include <limits>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -43,7 +43,7 @@ constexpr std::uint8_t kNoMovementTarget = 16;
 constexpr unsigned kDirectionAngleShift = 9;
 
 bool Fail(const char* message) {
-  Core_Warnf("ai", "%s", message);
+  VS::Core::Warnf("ai", "%s", message);
   return false;
 }
 
@@ -126,10 +126,10 @@ std::optional<int> HighestNeighbourDirection(const RadialMovementWorld& world,
     if (x >= width || z >= depth) continue;
     const auto height = Field::TryGroundHeightAtTile(terrain, x, z);
     if (!height) {
-      Core_Warnf("ai",
-                 "AI movement recovery reads tile (%d, %d) outside the "
-                 "terrain",
-                 x, z);
+      VS::Core::Warnf("ai",
+                      "AI movement recovery reads tile (%d, %d) outside the "
+                      "terrain",
+                      x, z);
       return std::nullopt;
     }
     if (*height > best_height) {
@@ -291,8 +291,9 @@ bool RecoverMovement(RadialMovementWorld& world, RadialMover& mover) {
   if (mover.movement_target != kNoMovementTarget) {
     const auto target = world.ActorPosition(mover.movement_target);
     if (!target) {
-      Core_Warnf("ai", "AI movement recovery targets actor %d without a model",
-                 static_cast<int>(mover.movement_target));
+      VS::Core::Warnf("ai",
+                      "AI movement recovery targets actor %d without a model",
+                      static_cast<int>(mover.movement_target));
       return false;
     }
     mover.angle = AngleFrom(mover.x, mover.z, target->x, target->z);

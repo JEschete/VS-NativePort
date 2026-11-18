@@ -24,11 +24,11 @@
 #include "Actors/Palette.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
@@ -48,7 +48,7 @@
 #include "Render/RoomLighting.hpp"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -80,33 +80,34 @@ bool ModelHoldsBones(const Actors_ActorRecord& actor, unsigned bones) {
 // The original 44F14.c:1010 draw assumes the borrowed bone matrix is resident.
 MATRIX* ResolveLiveAttachmentParentMatrix(const Actors_ActorRecord* actor) {
   if (actor == nullptr) {
-    Core_Errorf("actors.attachment", "Cannot resolve a null child actor");
+    VS::Core::Errorf("actors.attachment", "Cannot resolve a null child actor");
     return nullptr;
   }
   const unsigned parent_slot = actor->instance.attachParent;
   const unsigned bone = actor->instance.attachBone;
   if (parent_slot >= kActorSlotCount) {
-    Core_Errorf("actors.attachment",
-                "Invalid parent actor=%u parent=%u bone=%u",
-                static_cast<unsigned>(actor->instance.slot), parent_slot, bone);
+    VS::Core::Errorf(
+        "actors.attachment", "Invalid parent actor=%u parent=%u bone=%u",
+        static_cast<unsigned>(actor->instance.slot), parent_slot, bone);
     return nullptr;
   }
   Actors_ActorRecord* parent = Actors_actorRecords[parent_slot];
   if (parent == nullptr || parent->instance.model == nullptr ||
       parent->instance.boneCount == 0) {
-    Core_Debugf("actors.attachment",
-                "Deferred draw actor=%u parent=%u bone=%u: parent unavailable",
-                static_cast<unsigned>(actor->instance.slot), parent_slot, bone);
+    VS::Core::Debugf(
+        "actors.attachment",
+        "Deferred draw actor=%u parent=%u bone=%u: parent unavailable",
+        static_cast<unsigned>(actor->instance.slot), parent_slot, bone);
     return nullptr;
   }
   const unsigned bone_capacity =
       sizeof parent->boneMatrices / sizeof parent->boneMatrices[0];
   if (parent->instance.boneCount > bone_capacity ||
       bone >= parent->instance.boneCount) {
-    Core_Errorf("actors.attachment",
-                "Invalid bone actor=%u parent=%u bone=%u parent_bones=%u",
-                static_cast<unsigned>(actor->instance.slot), parent_slot, bone,
-                static_cast<unsigned>(parent->instance.boneCount));
+    VS::Core::Errorf("actors.attachment",
+                     "Invalid bone actor=%u parent=%u bone=%u parent_bones=%u",
+                     static_cast<unsigned>(actor->instance.slot), parent_slot,
+                     bone, static_cast<unsigned>(parent->instance.boneCount));
     return nullptr;
   }
   return &parent->boneMatrices[bone];
@@ -274,10 +275,10 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       } else {
         VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, matrix);
         VS::Core::Math::ApplyPremultiplyRotationMatrix(
-            Actors_skeletonPose.boneMatrices[parent], matrix);
+            skeletonPose.boneMatrices[parent], matrix);
       }
     }
-    Actors_skeletonPose.boneMatrices[bone] = matrix;
+    skeletonPose.boneMatrices[bone] = matrix;
     const SVECTOR* local_scale = &actor->blendPose.scaleKeys[bone];
     const int components[3] = {local_scale->vx, local_scale->vy,
                                local_scale->vz};
@@ -389,8 +390,8 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
                 sizeof Render_legacyActorTextureSlots[0] ||
         geometry_->instance.boneCount > actor_.instance.boneCount ||
         !VS::Render::ValidateLiveActorModel(*geometry_)) {
-      Core_Debugf("render", "Invalid actor model %u data or texture slot",
-                  static_cast<unsigned>(geometry_->modelId));
+      VS::Core::Debugf("render", "Invalid actor model %u data or texture slot",
+                       static_cast<unsigned>(geometry_->modelId));
       return false;
     }
     workspace_ = Render_ModelWorkspace();

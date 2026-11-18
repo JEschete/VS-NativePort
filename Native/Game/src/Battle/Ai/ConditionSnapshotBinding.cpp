@@ -13,7 +13,7 @@
 #include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
@@ -69,8 +69,8 @@ void CaptureBattleActorConditions(
   for (const Battle_Actor* actor = Battle_actors[0]; actor != nullptr;
        actor = actor->next) {
     if (count == readings.size()) {
-      Core_Errorf("ai", "Battle actor list holds more than %zu actors",
-                  readings.size());
+      VS::Core::Errorf("ai", "Battle actor list holds more than %zu actors",
+                       readings.size());
       std::abort();
     }
     readings[count++] = {actor->id, ReadCondition(actor->stats)};

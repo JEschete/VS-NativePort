@@ -16,7 +16,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
@@ -242,10 +242,10 @@ class LiveAccessoryHost final : public AccessoryPreviewHost {
 }
 
 [[nodiscard]] Actors_WeaponModel* WeaponModel(int slot) {
-  if (slot < 0 || slot >= kActorsWeaponModelCount) {
+  if (slot < 0 || slot >= VS::Actors::kWeaponModelCount) {
     return nullptr;
   }
-  return Actors_weaponModels[slot];
+  return VS::Actors::weaponModels[slot];
 }
 
 // The original kept vs_battle_actors[1]'s pointer from entry, across the

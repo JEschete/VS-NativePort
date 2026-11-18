@@ -17,7 +17,7 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
 #include "Actors/Shadow.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -84,8 +84,8 @@ void Report(const void* bank, int animation, Problem problem) {
     return;
   }
   last = {bank, animation, problem};
-  Core_Errorf(kChannel, "SEQ bank %p animation %d %s; skipped", bank, animation,
-              Describe(problem));
+  VS::Core::Errorf(kChannel, "SEQ bank %p animation %d %s; skipped", bank,
+                   animation, Describe(problem));
 }
 
 PoseVector FromLive(const SVECTOR& vector) {
@@ -232,9 +232,9 @@ void RegisterSequenceBankCopy(const void* destination, const void* source,
                               std::size_t capacity) {
   const std::span<const std::uint8_t> copied = SequenceBankBytes(source);
   if (copied.empty()) {
-    Core_Errorf(kChannel,
-                "SEQ bank copy %p came from %p, which has no recorded extent",
-                destination, source);
+    VS::Core::Errorf(
+        kChannel, "SEQ bank copy %p came from %p, which has no recorded extent",
+        destination, source);
     return;
   }
   RegisterSequenceBank(destination, std::min(copied.size(), capacity));
@@ -381,9 +381,9 @@ void BlendLiveActorPose(Actors_AnimationPose& destination,
       StoreLivePoseKeys(keys, destination);
       return;
     case PoseBlend::kSkipped:
-      Core_Errorf(kChannel,
-                  "Pose blend at frame %d of zero frames skipped (#261)",
-                  frame);
+      VS::Core::Errorf(kChannel,
+                       "Pose blend at frame %d of zero frames skipped (#261)",
+                       frame);
       return;
   }
 }

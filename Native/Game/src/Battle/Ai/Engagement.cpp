@@ -9,12 +9,12 @@
 #include <optional>
 
 #include "Battle/Ai/Relations.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
 std::nullopt_t Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return std::nullopt;
 }
 

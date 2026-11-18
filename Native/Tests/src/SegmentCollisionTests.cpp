@@ -14,7 +14,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionPreviewLive.hpp"
@@ -96,7 +96,7 @@ SVECTOR* TraceHorizontal(SVECTOR& output, int ignored_actor = 0) {
 struct ActionTraceFixture : SegmentFixture {
   static constexpr int kAction = 255;
   Battle_ActionDefinition definition = Battle_actionDefinitions[kAction];
-  MATRIX bone_matrix = Actors_boneMatrixScratch;
+  MATRIX bone_matrix = VS::Actors::boneMatrixScratch;
   Render_ModelScratchpad workspace = *Render_ModelWorkspace();
   u_int previous_hit = Battle_previousHitResult;
   u_int prerequisite = Battle_hitPrerequisiteResult;
@@ -110,9 +110,9 @@ struct ActionTraceFixture : SegmentFixture {
     Battle_actionDefinitions[kAction] = {};
     Battle_actionDefinitions[kAction].resetsHitResults = 1;
     Battle_actionDefinitions[kAction].hits[0].prerequisiteFunctionId = 1;
-    Actors_boneMatrixScratch = {};
+    VS::Actors::boneMatrixScratch = {};
     for (int axis = 0; axis < 3; ++axis) {
-      Actors_boneMatrixScratch.m[axis][axis] = 4096;
+      VS::Actors::boneMatrixScratch.m[axis][axis] = 4096;
       models[0].boneMatrices[0].m[axis][axis] = 4096;
     }
     Core_Gte_Reset();
@@ -121,7 +121,7 @@ struct ActionTraceFixture : SegmentFixture {
   ~ActionTraceFixture() {
     Battle_actionState = action_state;
     Battle_actionDefinitions[kAction] = definition;
-    Actors_boneMatrixScratch = bone_matrix;
+    VS::Actors::boneMatrixScratch = bone_matrix;
     *Render_ModelWorkspace() = workspace;
     Battle_previousHitResult = previous_hit;
     Battle_hitPrerequisiteResult = prerequisite;

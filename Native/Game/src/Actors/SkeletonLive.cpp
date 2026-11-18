@@ -24,9 +24,9 @@
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/Skeleton.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -39,16 +39,16 @@
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800F3C58 (D_800F3C58@BATTLE/BATTLE.PRG)
-Actors_SkeletonPose Actors_skeletonPose;
+Actors_SkeletonPose VS::Actors::skeletonPose;
 
 // decomp: D_800F3C78 (D_800F3C78@BATTLE/BATTLE.PRG)
-MATRIX Actors_skeletonRootMatrix;
+MATRIX VS::Actors::skeletonRootMatrix;
 
 // decomp: vs_battle_wepModels (vs_battle_wepModels@BATTLE/BATTLE.PRG)
-Actors_WeaponModel* Actors_weaponModels[kActorsWeaponModelCount];
+Actors_WeaponModel* VS::Actors::weaponModels[VS::Actors::kWeaponModelCount];
 
 // decomp: D_800F49B8 (D_800F49B8@BATTLE/BATTLE.PRG)
-MATRIX Actors_boneMatrixScratch;
+MATRIX VS::Actors::boneMatrixScratch;
 
 namespace VS::Actors {
 namespace {
@@ -63,7 +63,7 @@ using PoseKeys = decltype(Actors_AnimationPose::boneKeys);
 using WeaponBoneMatrices = decltype(Actors_WeaponModel::boneWorldMatrices);
 // The root key is the last key of the blended pose.
 constexpr std::size_t kRootKey = std::extent_v<PoseKeys> - 1;
-constexpr std::size_t kWeaponTableSize = std::size(Actors_weaponModels);
+constexpr std::size_t kWeaponTableSize = std::size(weaponModels);
 constexpr std::size_t kWeaponSlots = kWeaponTableSize / kWeaponsPerActor;
 constexpr int kWeaponBoneCapacity = std::extent_v<WeaponBoneMatrices>;
 // SHP bone counts are bytes.
@@ -153,10 +153,10 @@ struct BoneLabelTable {
   for (; table.count < bones; ++table.count) {
     const std::optional<Actors_ShpBone> bone = ReadBone(model, table.count);
     if (!bone) {
-      Core_Warnf("actors",
-                 "%s refused: bone %u of %u lies past the loaded bone table",
-                 operation, static_cast<unsigned>(table.count),
-                 static_cast<unsigned>(bones));
+      VS::Core::Warnf(
+          "actors", "%s refused: bone %u of %u lies past the loaded bone table",
+          operation, static_cast<unsigned>(table.count),
+          static_cast<unsigned>(bones));
       break;
     }
     table.labels[table.count] = LabelsOf(*bone);
@@ -170,8 +170,9 @@ struct BoneLabelTable {
       bone >= 0 ? ReadBone(model, static_cast<std::size_t>(bone))
                 : std::nullopt;
   if (!stored) {
-    Core_Warnf("actors", "%s refused: bone %d lies past the loaded bone table",
-               operation, bone);
+    VS::Core::Warnf("actors",
+                    "%s refused: bone %d lies past the loaded bone table",
+                    operation, bone);
     return std::nullopt;
   }
   return stored->length;
@@ -181,8 +182,9 @@ struct BoneLabelTable {
                                              int bone, const char* operation) {
   const std::span<const MATRIX> matrices = skeleton.Matrices();
   if (bone < 0 || static_cast<std::size_t>(bone) >= matrices.size()) {
-    Core_Warnf("actors", "%s refused: bone %d lies past the %u bone matrices",
-               operation, bone, static_cast<unsigned>(matrices.size()));
+    VS::Core::Warnf("actors",
+                    "%s refused: bone %d lies past the %u bone matrices",
+                    operation, bone, static_cast<unsigned>(matrices.size()));
     return nullptr;
   }
   return &matrices[static_cast<std::size_t>(bone)];
@@ -193,12 +195,11 @@ struct BoneLabelTable {
 [[nodiscard]] const Actors_WeaponModel* LiveFirstWeapon(int actor_id,
                                                         const char* operation) {
   if (actor_id < 0 || static_cast<std::size_t>(actor_id) >= kWeaponSlots) {
-    Core_Warnf("actors", "%s refused: actor %d has no weapon slot", operation,
-               actor_id);
+    VS::Core::Warnf("actors", "%s refused: actor %d has no weapon slot",
+                    operation, actor_id);
     return nullptr;
   }
-  return Actors_weaponModels[static_cast<std::size_t>(actor_id) *
-                             kWeaponsPerActor];
+  return weaponModels[static_cast<std::size_t>(actor_id) * kWeaponsPerActor];
 }
 
 [[nodiscard]] const MATRIX* WeaponBoneMatrix(const Actors_WeaponModel& weapon,
@@ -206,10 +207,11 @@ struct BoneLabelTable {
                                              const char* operation) {
   const int bone = WeaponBoneIndex(selector);
   if (bone < 0 || bone >= kWeaponBoneCapacity) {
-    Core_Warnf("actors",
-               "%s refused: weapon bone selector 0x%X lies past the %d weapon "
-               "bone matrices",
-               operation, static_cast<unsigned>(selector), kWeaponBoneCapacity);
+    VS::Core::Warnf(
+        "actors",
+        "%s refused: weapon bone selector 0x%X lies past the %d weapon "
+        "bone matrices",
+        operation, static_cast<unsigned>(selector), kWeaponBoneCapacity);
     return nullptr;
   }
   return &weapon.boneWorldMatrices[bone];
@@ -228,7 +230,7 @@ struct BoneLabelTable {
 [[nodiscard]] std::optional<Transform3> SelectedBoneViewTransform(
     const LiveSkeleton& skeleton, int actor_id, int selector,
     const char* operation) {
-  const Transform3 camera = TransformOf(Actors_boneMatrixScratch);
+  const Transform3 camera = TransformOf(boneMatrixScratch);
   const MATRIX* bone = nullptr;
   if (skeleton.actor == nullptr) {
     if (skeleton.gimmick == nullptr) return std::nullopt;
@@ -464,8 +466,8 @@ int LiveActorBoneTag(int actor_id, int bone, int kind) {
   if (!skeleton.Present()) return kSkeletonNoOwner;
   const std::optional<BoneTagKind> tag_kind = ClassifyBoneTagKind(kind);
   if (!tag_kind) {
-    Core_Warnf("actors", "%s refused: kind %d names no bone label", kOperation,
-               kind);
+    VS::Core::Warnf("actors", "%s refused: kind %d names no bone label",
+                    kOperation, kind);
     return kSkeletonNoOwner;
   }
   const std::optional<Actors_ShpBone> stored =
@@ -473,8 +475,9 @@ int LiveActorBoneTag(int actor_id, int bone, int kind) {
           ? ReadBone(skeleton.ModelBytes(), static_cast<std::size_t>(bone))
           : std::nullopt;
   if (!stored) {
-    Core_Warnf("actors", "%s refused: bone %d lies past the loaded bone table",
-               kOperation, bone);
+    VS::Core::Warnf("actors",
+                    "%s refused: bone %d lies past the loaded bone table",
+                    kOperation, bone);
     return kSkeletonNoOwner;
   }
   const std::optional<std::int32_t> value =

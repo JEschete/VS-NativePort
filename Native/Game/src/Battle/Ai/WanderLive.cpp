@@ -15,11 +15,12 @@
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle::Ai {
@@ -59,19 +60,6 @@ static_assert(offsetof(View, movementFlags) ==
 static_assert(offsetof(View, destination) == offsetof(AiState, destination));
 static_assert(kAiDirectionBytes == kNavigationDirections);
 static_assert(kAiFrameGridSide == kNavigationGridSide);
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
-
-template <typename T>
-T Required(const std::optional<T>& value, const char* message) {
-  Require(value.has_value(), message);
-  return *value;
-}
 
 Battle_Ai_FrameContext& Frame() { return *Battle_Ai_FrameState(); }
 

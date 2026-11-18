@@ -27,7 +27,7 @@
 #include "Render/Render.h"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 // Contracts of the #276 row 22 texture animation: the keyed channels, the
@@ -150,7 +150,7 @@ struct LiveTextureState {
   decltype(std::to_array(
       Actors_secondarySlotSequences[2])) saved_channel1_keys =
       std::to_array(Actors_secondarySlotSequences[2]);
-  int saved_tick_speed = State_tickSpeed;
+  int saved_tick_speed = VS::State::tickSpeed;
   std::vector<std::unique_ptr<Actors_ActorRecord>> records;
 
   LiveTextureState() {
@@ -179,7 +179,7 @@ struct LiveTextureState {
                       std::begin(Actors_sheathedWeaponAnimationBases));
     std::ranges::copy(saved_channel1_keys,
                       std::begin(Actors_secondarySlotSequences[2]));
-    State_tickSpeed = saved_tick_speed;
+    VS::State::tickSpeed = saved_tick_speed;
   }
 
   // A 4-bit actor in slot 0 with bank 0's row 7 and overlay 0 at (16, 20),
@@ -669,7 +669,7 @@ TEST_CASE("Live texture scrolling runs its timers without a usable slot",
   LiveFrame frame;
   ChannelWarnings warnings{"actors"};
   Actors_ActorRecord& actor = state.AddActor(1);
-  State_tickSpeed = 2;
+  VS::State::tickSpeed = 2;
   actor.textureScrollBounds[0].width = 16;
   actor.textureScrollBounds[0].height = 16;
   actor.textureScroll[0].stepX = 1;

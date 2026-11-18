@@ -855,7 +855,7 @@ void PrepareGazetteScreen(live::PreviewFixture& fixture, std::uint8_t& phase) {
   REQUIRE(score::UpdateLiveGazetteScreen(&phase) == 0);
   REQUIRE(phase == 4);
   CHECK(Battle_hudHidden == 0);
-  CHECK(Field_isFieldRenderingEnabled == 1);
+  CHECK(VS::Field::isFieldRenderingEnabled == 1);
   for (std::size_t tick = 0; tick < live::kFrameBudget && phase != 6; ++tick) {
     fixture.ResetFrame();
     live::fw::UpdateLiveScreen();
@@ -869,7 +869,7 @@ void CheckScreenProgress() {
   CHECK(Menu_Score_characterRank == 15);
   CHECK(Battle_hudHidden == 1);
   CHECK(Battle_hudSlideOffset == 0x200000);
-  CHECK(Field_isFieldRenderingEnabled == 0);
+  CHECK(VS::Field::isFieldRenderingEnabled == 0);
 }
 
 void DrawActiveGazetteScreen(live::PreviewFixture& fixture,
@@ -901,7 +901,7 @@ void CheckScreenRestoredField() {
   CHECK(Actors_actorRecords[1] == nullptr);
   CHECK(Battle_hudHidden == 0);
   CHECK(Battle_hudSlideOffset == 0);
-  CHECK(Field_isFieldRenderingEnabled == 1);
+  CHECK(VS::Field::isFieldRenderingEnabled == 1);
 }
 
 void BeginScreenFade(std::uint8_t& phase) {
@@ -932,7 +932,7 @@ TEST_CASE(
     "F04156]") {
   live::PreviewFixture fixture;
   fixture.LoadSourceActor();
-  Field_isFieldRenderingEnabled = 1;
+  VS::Field::isFieldRenderingEnabled = 1;
   Battle_hudHidden = 0;
   std::uint8_t phase = 3;
   const auto refusals = score::LiveGazetteTerminalRefusals();

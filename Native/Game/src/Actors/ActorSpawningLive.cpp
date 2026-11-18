@@ -42,13 +42,13 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/Mpd.h"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
@@ -847,8 +847,8 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void RestoreCamera(std::int32_t pitch, std::int32_t distance) override {
-    Field_sphericalCamera.delta.pitch = pitch;
-    Field_sphericalCamera.initialDistance = distance;
+    VS::Field::sphericalCamera.delta.pitch = pitch;
+    VS::Field::sphericalCamera.initialDistance = distance;
   }
 
   [[nodiscard]] AshleyInventory ReadAshleyInventory() const override {
@@ -1079,7 +1079,7 @@ int QueueLiveAshleyModelLoad(int model_id) {
 int QueueLiveScriptedActorSpawn(unsigned actor_id, int model_id,
                                 Field_ActorPlacement* placement) {
   constexpr const char* kOperation = "QueueScriptedActorSpawn";
-  Core_Debugf(
+  VS::Core::Debugf(
       "actors", "script spawn actor=%u model=%d existing=%p", actor_id,
       model_id,
       static_cast<void*>(actor_id < kSpawnActorSlots ? Battle_actors[actor_id]

@@ -51,7 +51,7 @@ class SceneTraceFixupTests(unittest.TestCase):
         ):
             self.assertEqual(
                 copy_fixups.NATIVE_HELPER_HEADERS[name],
-                r"Native\Game\include\Diagnostics\SceneTrace.h",
+                r"Native\Game\include\Diagnostics\SceneTrace.hpp",
             )
 
 

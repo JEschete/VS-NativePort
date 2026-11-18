@@ -28,7 +28,7 @@
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
-#include "Audio/StreamPlayback.h"
+#include "Audio/StreamPlayback.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Legacy/Psx.h"
@@ -548,7 +548,7 @@ class LivePlaybackHost final : public PlaybackHost {
 
   void UpdateCutsceneStream(PlaybackState& state) override {
     StorePlayback(state);
-    Audio_Native_UpdateCutsceneStream();
+    VS::Audio::UpdateCutsceneStream();
     LoadPlayback(state);
   }
 

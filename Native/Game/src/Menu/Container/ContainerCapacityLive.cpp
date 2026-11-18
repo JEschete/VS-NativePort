@@ -8,9 +8,9 @@
 #include <string>
 #include <string_view>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexingLive.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Container/ContainerCapacity.hpp"
 #include "Menu/Container/ItemView.h"
@@ -23,8 +23,8 @@
 namespace VS::Menu::container {
 namespace {
 [[noreturn]] void Refuse(std::string_view reason) {
-  Core_Errorf("menu.container", "Container capacity/staging refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.container", "Container capacity/staging refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 
@@ -42,7 +42,7 @@ std::uint16_t Limit(StorageArea area, Items::ItemCategory category) {
     Refuse("capacity category outside container categories");
   }
   return area == StorageArea::kGadgetBag
-             ? Items_Inventory_inventoryItemCapacities[index]
+             ? VS::Items::Inventory::inventoryItemCapacities[index]
              : Menu_Container_containerItemCapacities[index];
 }
 

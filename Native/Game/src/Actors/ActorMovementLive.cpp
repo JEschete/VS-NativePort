@@ -30,7 +30,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.h"
 #include "Field/PlatformPlacementLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -183,7 +183,7 @@ class LiveMovementHost final : public MovementHost {
     return record != nullptr ? &registry_.Attach(*record) : nullptr;
   }
   const MovementTables& Tables() override { return tables_; }
-  int TickSpeed() override { return State_tickSpeed; }
+  int TickSpeed() override { return VS::State::tickSpeed; }
   MotionTerrainHost& Terrain() override { return terrain_; }
 
   // Cross-slice calls into the typed actor animation controls (row 20b).

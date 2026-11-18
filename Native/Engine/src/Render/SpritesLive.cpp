@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -58,10 +58,10 @@ class LiveSpriteQueue final : public SpriteQueue {
     ++dropped_sprites;
     // Logged at powers of two so a full buffer cannot flood the log.
     if (std::has_single_bit(dropped_sprites)) {
-      Core_Errorf("render",
-                  "sprite packet dropped: no room in the frame primitive "
-                  "buffer or no chain (%" PRIu64 " dropped)",
-                  dropped_sprites);
+      VS::Core::Errorf("render",
+                       "sprite packet dropped: no room in the frame primitive "
+                       "buffer or no chain (%" PRIu64 " dropped)",
+                       dropped_sprites);
     }
   }
 

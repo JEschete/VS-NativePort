@@ -12,7 +12,7 @@
 #include <span>
 #include <utility>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -28,7 +28,7 @@ constexpr std::int64_t kHpWeight = 4;
 constexpr std::int64_t kDpWeight = 2;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Debugf("ai", "%s", message);
+  VS::Core::Debugf("ai", "%s", message);
   return std::nullopt;
 }
 

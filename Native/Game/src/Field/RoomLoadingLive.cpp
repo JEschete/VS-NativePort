@@ -12,7 +12,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Actors/ActorCommandsLiveState.h"
+#include "Actors/ActorCommandsLiveState.hpp"
 #include "Actors/ActorMotionLive.hpp"
 #include "Actors/ActorRosterLive.hpp"
 #include "Actors/ActorSpawningLive.hpp"
@@ -35,7 +35,7 @@
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Encounter.hpp"
-#include "Battle/EncounterHooks.h"
+#include "Battle/EncounterHooks.hpp"
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
@@ -64,18 +64,17 @@
 #include "Field/Actors.h"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Doors.h"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GameModeLive.hpp"
-#include "Field/GimmickAnimationQueueLive.h"
+#include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/Locations.h"
 #include "Field/Map.h"
 #include "Field/MapLive.hpp"
-#include "Field/MinimapSceneLive.h"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/PlatformPlacementLive.h"
@@ -86,7 +85,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/RoomStateLive.hpp"
 #include "Field/RoomStateLiveState.hpp"
-#include "Field/TransitionsLiveState.h"
+#include "Field/TransitionsLiveState.hpp"
 #include "Field/Znd.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLive.hpp"
@@ -106,7 +105,7 @@
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 // decomp: _zoneContext (_zoneContext@BATTLE/BATTLE.PRG)
 Field_ZoneContext VS::Field::zoneContext;
@@ -158,7 +157,7 @@ constexpr int kRoomTextureIdOffset = 11;
 constexpr std::ptrdiff_t kOrderingTableOffsetEntries = 4;
 constexpr int kOrderingTableEntries = 0x800;
 constexpr std::size_t kColorBytes = 2;
-// The scene timer's reset scopes (State_sceneTimer.resetScope).
+// The scene timer's reset scopes (VS::State::sceneTimer.resetScope).
 constexpr int kRoomTimerScope = 0;
 constexpr int kZoneTimerScope = 1;
 constexpr int kSceneTimerScope = 2;
@@ -505,7 +504,7 @@ class LiveFileReads : public Host {
   }
 
   [[nodiscard]] SceneTimerScope SceneTimerResetScope() const override {
-    switch (State_sceneTimer.resetScope) {
+    switch (VS::State::sceneTimer.resetScope) {
       case kRoomTimerScope:
         return SceneTimerScope::kRoom;
       case kZoneTimerScope:
@@ -583,12 +582,12 @@ class LiveSections : public Host {
   }
 
   void MarkEntranceDoor(int door) override {
-    Field_MarkEntranceDoorOnSceneMapEntry(door);
+    MarkEntranceDoorOnSceneMapEntry(door);
   }
 
   // decomp: BATTLE.PRG _loadMpdRoomSection (146C.c:15735-15743)
   void InitializeRoomSystems() override {
-    Field_ResetGimmickAnimationQueueEntry();
+    ResetGimmickAnimationQueueEntry();
     LiveInitializeRoomEffects();
     Items::RestoreLiveRoomChestStates();
     Field_InitializeMovingPlatformsEntry();
@@ -762,7 +761,7 @@ class LivePlacements : public Host {
     // The hook replaces the pointer and size; it does not write the records.
     void* data = const_cast<std::byte*>(room.data());
     auto bytes = static_cast<unsigned int>(room.size());
-    Boot_EncounterRoomPlacements(&data, &bytes);
+    VS::Boot::EncounterRoomPlacements(&data, &bytes);
     if (data == nullptr) {
       return {};
     }
@@ -949,7 +948,9 @@ class LiveRoomLoadHost final
     : public LivePlacements<LiveEntrance<LiveSpawning<
           LiveSections<LiveFileReads<LiveReporting<RoomLoadHost>>>>>> {
  public:
-  void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }
+  void ResetGameplayInspection() override {
+    VS::Boot::ResetGameplayInspection();
+  }
 
   [[nodiscard]] Content::DiscFileExtent RoomFile(int room_id) const override {
     return ToExtent(room_files.table[room_id]);
@@ -1055,7 +1056,7 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] bool EncounterUsesRoomEvents() const override {
-    return Boot_EncounterUsesRoomEvents() != 0;
+    return VS::Boot::EncounterUsesRoomEvents() != 0;
   }
 
   [[nodiscard]] Event::RoomEventLoad LoadEncounterRoomEvents() override {
@@ -1098,9 +1099,9 @@ class LiveRoomLoadHost final
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15392-15405)
   void ResetRoomEntryState() override {
-    Field_roomGeometryDrawMode = 0;
-    Field_isFirstPersonViewEnabled = 0;
-    Actors_ashleyMoveInput[0] = 1;
+    roomGeometryDrawMode = 0;
+    isFirstPersonViewEnabled = 0;
+    VS::Actors::ashleyMoveInput[0] = 1;
     Effects_effectBusyFlags = 0;
     static_cast<void>(Actors::SetOtherLiveActorLogicEnabled(1));
     // The original also zeroes vs_main_unused0-2 here; nothing reads them.
@@ -1113,25 +1114,25 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] int ScreenTransitionEffect() const override {
-    return Field_screenTransitionEffect;
+    return screenTransitionEffect;
   }
 
   void SetScreenTransition(int step, bool clear_alpha) override {
-    Field_screenTransitionStep = static_cast<unsigned int>(step);
+    screenTransitionStep = static_cast<unsigned int>(step);
     if (clear_alpha) {
-      Field_screenTransitionAlpha = 0;
+      screenTransitionAlpha = 0;
     }
   }
 
   [[nodiscard]] int InitialCameraDistance() const override {
-    return Field_sphericalCamera.initialDistance;
+    return sphericalCamera.initialDistance;
   }
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15414-15435)
   void ResetCamera(const RoomEntryCamera& camera) override {
     Render::SetLiveCameraNearClip(ONE / kNearClipDivisor);
     Render::SetLiveCameraProjectionDistance(ONE / kProjectionDistanceDivisor);
-    Field_SphericalCamera& orbit = Field_sphericalCamera;
+    Field_SphericalCamera& orbit = sphericalCamera;
     orbit.delta.yaw = 0;
     orbit.delta.distance = 0;
     orbit.values.yaw = orbit.delta.pitch;
@@ -1155,8 +1156,8 @@ class LiveRoomLoadHost final
     LiveClampCameraLookAtToZone(&target, &look_at);
     Render_FrameScratch& scratch = Scratch();
     scratch.camera.lookAt = look_at;
-    scratch.camera.angles.vy = Field_sphericalCamera.values.yaw;
-    LiveSetCameraPositionFromAngles(&Field_sphericalCamera.values);
+    scratch.camera.angles.vy = sphericalCamera.values.yaw;
+    LiveSetCameraPositionFromAngles(&sphericalCamera.values);
     static_cast<void>(Actors::LiveActorPlacement(0, &ashley));
     LiveUpdateCameraTileConstraint(0, &ashley.location.packedTile.target);
     Render::ResetLiveFramebufferEffect();
@@ -1218,7 +1219,9 @@ class LiveRoomLoadHost final
 class LiveRoomUnloadHost final
     : public LiveSections<LiveReporting<RoomUnloadHost>> {
  public:
-  void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }
+  void ResetGameplayInspection() override {
+    VS::Boot::ResetGameplayInspection();
+  }
 
   // decomp: BATTLE.PRG func_8008A3A0 (146C.c:15495-15501)
   void DrawTransitionFrame() override {

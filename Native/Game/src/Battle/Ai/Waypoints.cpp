@@ -8,7 +8,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -20,7 +20,7 @@ constexpr unsigned kPatrolRateMask = 31;
 constexpr std::uint8_t kPatrolArrivalWait = 10;
 
 std::nullopt_t Refuse(const char* message) {
-  Core_Warnf("ai", "%s", message);
+  VS::Core::Warnf("ai", "%s", message);
   return std::nullopt;
 }
 

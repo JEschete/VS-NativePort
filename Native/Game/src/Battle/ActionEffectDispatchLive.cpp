@@ -17,7 +17,7 @@
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusQueueLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Items/Loadout.h"
 #include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
@@ -26,9 +26,9 @@ namespace VS::Battle {
 namespace {
 void Require(bool valid) {
   if (!valid) {
-    Core_Errorf("battle",
-                "Action effect requires its used hit, actor, stats, "
-                "limb, rule, definition, mediator or character");
+    VS::Core::Errorf("battle",
+                     "Action effect requires its used hit, actor, stats, "
+                     "limb, rule, definition, mediator or character");
     std::abort();
   }
 }

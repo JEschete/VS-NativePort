@@ -17,19 +17,20 @@
 #include "Battle/SphereLifecycleLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Render/Camera.h"
 #include "Render/CameraViewLive.hpp"
 
 namespace VS::Battle {
 namespace {
 [[noreturn]] void Refuse() {
-  Core_Errorf("battle",
-              "Action camera/selection refused: missing used state, output "
-              "or skeleton position, unmasked queue index outside 0..3, "
-              "invalid cancel action, or negative wrapped root argument");
+  VS::Core::Errorf(
+      "battle",
+      "Action camera/selection refused: missing used state, output "
+      "or skeleton position, unmasked queue index outside 0..3, "
+      "invalid cancel action, or negative wrapped root argument");
   std::abort();
 }
 void Require(bool valid) {
@@ -87,16 +88,16 @@ class LiveCamera final : public ActionCameraWorld {
     constexpr int kTrackingSpeed = 40;
     Field::LiveComputeCameraTrackingStep(&live, &step, &displacement, 1,
                                          kTrackingSpeed);
-    Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", displacement.vx,
-                displacement.vy, displacement.vz);
+    VS::Core::Debugf("combat-flow", "tracking error=%ld,%ld,%ld",
+                     displacement.vx, displacement.vy, displacement.vz);
     return Core::Math::VectorOf(displacement);
   }
   std::int32_t CameraMode() override {
-    return Field_sphericalCamera.delta.mode;
+    return VS::Field::sphericalCamera.delta.mode;
   }
   std::optional<std::int16_t> Zoom() override {
     auto& state = State();
-    Core_Debugf(
+    VS::Core::Debugf(
         "combat-flow",
         "camera mode=%d zoom=%d yaw=%d distance=%d action=%u targets=%u",
         CameraMode(), state.cameraZoomState, YawDelta(), Distance(),
@@ -104,12 +105,14 @@ class LiveCamera final : public ActionCameraWorld {
         static_cast<unsigned>(state.selection.targetCount));
     return state.cameraZoomState;
   }
-  std::int32_t YawDelta() override { return Field_sphericalCamera.delta.yaw; }
+  std::int32_t YawDelta() override {
+    return VS::Field::sphericalCamera.delta.yaw;
+  }
   std::int32_t Distance() override {
-    return Field_sphericalCamera.values.distance;
+    return VS::Field::sphericalCamera.values.distance;
   }
   void SetDistance(std::int32_t distance) override {
-    Field_sphericalCamera.values.distance = distance;
+    VS::Field::sphericalCamera.values.distance = distance;
   }
   std::int32_t Projection() override { return Render_projectionDistance; }
   void SetProjection(std::int32_t projection) override {
@@ -232,8 +235,9 @@ void LiveUpdateActionCameraZoom() {
   LiveCamera world;
   const int mode = world.CameraMode();
   if (mode != 1 && mode != kAlternateActionCameraMode) {
-    Core_Debugf("combat-flow", "camera mode=%d yaw=%d distance=%d (inactive)",
-                mode, world.YawDelta(), world.Distance());
+    VS::Core::Debugf("combat-flow",
+                     "camera mode=%d yaw=%d distance=%d (inactive)", mode,
+                     world.YawDelta(), world.Distance());
   }
   Require(UpdateActionCameraZoom(world));
 }

@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -91,7 +91,7 @@ void PrepareLiveActorCameraMatrices(const MATRIX* source) {
                              static_cast<std::int32_t>(source->t[2])}
           : Core::Math::Vec3{};
   Core::Math::StoreTransform(
-      Actors_boneMatrixScratch,
+      VS::Actors::boneMatrixScratch,
       Core::Math::Transform3{matrices.rotation, translation});
 }
 }  // namespace VS::Render

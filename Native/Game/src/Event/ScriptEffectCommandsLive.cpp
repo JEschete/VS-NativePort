@@ -17,7 +17,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
@@ -45,7 +45,7 @@
 #include "Render/GimImagesLive.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -72,7 +72,7 @@ constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Debugf("event", "%s", message);
+    VS::Core::Debugf("event", "%s", message);
     std::abort();
   }
 }
@@ -90,8 +90,8 @@ const char* RefusalText(event::ScriptEffectRefusal refusal) {
 class LiveScriptEffectHost final : public event::ScriptEffectHost {
  public:
   void Refuse(event::ScriptEffectRefusal refusal, int value) override {
-    Core_Warnf("event", "Script effect command refused %s (%d)",
-               RefusalText(refusal), value);
+    VS::Core::Warnf("event", "Script effect command refused %s (%d)",
+                    RefusalText(refusal), value);
   }
 
   [[nodiscard]] int ResolveActor(std::uint16_t reference) override {
@@ -112,18 +112,18 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
 
   void ReportUnavailableActor(int effect, std::uint16_t selector,
                               int actor) override {
-    Core_Errorf("event",
-                "effect=%d awaits unavailable actor selector=0x%04X slot=%d",
-                effect, static_cast<unsigned>(selector), actor);
+    VS::Core::Errorf(
+        "event", "effect=%d awaits unavailable actor selector=0x%04X slot=%d",
+        effect, static_cast<unsigned>(selector), actor);
   }
   // A model no actor has resolves to slot 1 and a slot reference is used
   // unchecked; the effect starts at once and its reads of the empty slot
   // leave its target-dependent tracks at their defaults.
   void ReportAbsentActor(int effect, std::uint16_t selector,
                          int actor) override {
-    Core_Debugf("event",
-                "effect=%d absent actor selector=0x%04X targets empty slot %d",
-                effect, static_cast<unsigned>(selector), actor);
+    VS::Core::Debugf(
+        "event", "effect=%d absent actor selector=0x%04X targets empty slot %d",
+        effect, static_cast<unsigned>(selector), actor);
   }
   void StartActorEffect(int effect, int actor) override {
     VS::Effects::LiveStartScriptedActorEffect(effect, actor);
@@ -338,7 +338,7 @@ void UpdateLiveImageTweens() {
     tweens[i] = FromRecord(Event_splashTweens[i]);
   }
   LiveImageTweenHost host;
-  UpdateEventImageTweens(tweens, State_tickSpeed, host);
+  UpdateEventImageTweens(tweens, VS::State::tickSpeed, host);
   for (std::size_t i = 0; i < tweens.size(); ++i) {
     Event_splashTweens[i].elapsedFrames = static_cast<char>(tweens[i].elapsed);
     Event_splashTweens[i].durationFrames =

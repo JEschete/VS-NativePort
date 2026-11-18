@@ -11,7 +11,7 @@
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -28,7 +28,7 @@
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/RenameLive.hpp"
-#include "Menu/RenameLiveState.h"
+#include "Menu/RenameLiveState.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/GameFontLive.hpp"
@@ -171,8 +171,9 @@ struct EquipmentFixture {
 struct RenameFrameFixture {
   EquipmentFixture frame{0};
   Menu_Framework_MenuRow* saved_rows = Menu_Framework_menuItems;
-  decltype(std::to_array(Menu_Rename_renderRenameMenuStrings)) saved_strings =
-      std::to_array(Menu_Rename_renderRenameMenuStrings);
+  decltype(std::to_array(
+      VS::Menu::Rename::renderRenameMenuStrings)) saved_strings =
+      std::to_array(VS::Menu::Rename::renderRenameMenuStrings);
   VS::Menu::Rename::State saved_state = VS::Menu::Rename::LiveRenameState();
   void* saved_table = Render_legacyOrderingTables[0];
   std::array<Menu_Framework_MenuRow, 40> rows{};
@@ -183,16 +184,16 @@ struct RenameFrameFixture {
     Render_legacyOrderingTables[0] = frame.ordering.data();
     Render_frameScratch.orderingTable = frame.ordering.data() + 24;
     Render_frameScratch.overlayOrderingTable = frame.ordering.data() + 8;
-    std::fill_n(Menu_Rename_renderRenameMenuStrings, saved_strings.size(),
+    std::fill_n(VS::Menu::Rename::renderRenameMenuStrings, saved_strings.size(),
                 0xE7E7);
     for (int index = Text_Menu8_rename_Index_ok;
          index <= Text_Menu8_rename_Index_insert; ++index) {
-      Menu_Rename_renderRenameMenuStrings[index] = 150;
+      VS::Menu::Rename::renderRenameMenuStrings[index] = 150;
     }
-    Menu_Rename_renderRenameMenuStrings[150] = 0xE70A;
-    auto* grid =
-        reinterpret_cast<unsigned char*>(Menu_Rename_renderRenameMenuStrings +
-                                         Text_Menu8_rename_Offset_charTable);
+    VS::Menu::Rename::renderRenameMenuStrings[150] = 0xE70A;
+    auto* grid = reinterpret_cast<unsigned char*>(
+        VS::Menu::Rename::renderRenameMenuStrings +
+        Text_Menu8_rename_Offset_charTable);
     std::fill_n(grid, 15 * 9, 10);
     VS::Menu::Rename::State& state = VS::Menu::Rename::LiveRenameState();
     state.name.fill(Core_TextCode_Space);
@@ -204,7 +205,7 @@ struct RenameFrameFixture {
     Menu_Framework_menuItems = saved_rows;
     Render_legacyOrderingTables[0] = saved_table;
     std::copy(saved_strings.begin(), saved_strings.end(),
-              Menu_Rename_renderRenameMenuStrings);
+              VS::Menu::Rename::renderRenameMenuStrings);
     VS::Menu::Rename::LiveRenameState() = saved_state;
   }
 
@@ -223,8 +224,8 @@ struct RenameFrameFixture {
 
 struct EquipmentReloadFixture {
   Actors_ActorRecord* saved_preview = Actors_actorRecords[1];
-  decltype(std::to_array(Actors_weaponModels)) saved_models =
-      std::to_array(Actors_weaponModels);
+  decltype(std::to_array(VS::Actors::weaponModels)) saved_models =
+      std::to_array(VS::Actors::weaponModels);
   Render_TextureSlot saved_texture = Render_legacyWeaponTextureSlots[0];
   decltype(Event_playbackPhase) saved_event_phase = Event_playbackPhase;
   char saved_reload = Menu_Inventory_equipmentModelLoadStep;
@@ -236,10 +237,10 @@ struct EquipmentReloadFixture {
   EquipmentReloadFixture(int category, bool has_preview, int unused_alias) {
     Actors_actorRecords[1] = &preview;
     preview.sequenceModelId = static_cast<u_char>(category);
-    std::fill_n(Actors_weaponModels, saved_models.size(), nullptr);
+    std::fill_n(VS::Actors::weaponModels, saved_models.size(), nullptr);
     shield.boneCount = 1;
-    Actors_weaponModels[1] = &shield;
-    Actors_weaponModels[3] = has_preview ? &preview_shield : nullptr;
+    VS::Actors::weaponModels[1] = &shield;
+    VS::Actors::weaponModels[3] = has_preview ? &preview_shield : nullptr;
     Render_legacyWeaponTextureSlots[0].referenceCount = 2;
     Event_playbackPhase = 0;
     Menu_Inventory_equipmentModelLoadStep = 0;
@@ -248,7 +249,8 @@ struct EquipmentReloadFixture {
 
   ~EquipmentReloadFixture() {
     Actors_actorRecords[1] = saved_preview;
-    std::copy(saved_models.begin(), saved_models.end(), Actors_weaponModels);
+    std::copy(saved_models.begin(), saved_models.end(),
+              VS::Actors::weaponModels);
     Render_legacyWeaponTextureSlots[0] = saved_texture;
     Event_playbackPhase = saved_event_phase;
     Menu_Inventory_equipmentModelLoadStep = saved_reload;
@@ -373,8 +375,8 @@ TEST_CASE("Equipment reload releases shields through the actual preview slot",
         (two_handed ? 1 : 0));
   CHECK(VS::Menu::Inventory::ReloadLiveEquipmentModels(category, 0, 0) == 1);
   CHECK(Menu_Inventory_equipmentModelLoadStep == 1);
-  CHECK(Actors_weaponModels[1] == (release ? nullptr : &fixture.shield));
-  CHECK(Actors_weaponModels[3] ==
+  CHECK(VS::Actors::weaponModels[1] == (release ? nullptr : &fixture.shield));
+  CHECK(VS::Actors::weaponModels[3] ==
         (has_preview ? &fixture.preview_shield : nullptr));
   CHECK(Render_legacyWeaponTextureSlots[0].referenceCount == (release ? 1 : 2));
 }

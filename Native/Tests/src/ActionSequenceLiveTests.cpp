@@ -22,7 +22,7 @@
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
 #include "Effects/Runtime.h"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
 #include "Render/Camera.h"
@@ -41,7 +41,8 @@ struct LiveFixture {
       Effects_secondaryInstances;
   decltype(Menu_sceneNotificationBuffer) saved_notification =
       Menu_sceneNotificationBuffer;
-  decltype(Field_sphericalCamera) saved_camera = Field_sphericalCamera;
+  decltype(VS::Field::sphericalCamera) saved_camera =
+      VS::Field::sphericalCamera;
   Content_ActorAssetRequest saved_request = Content_legacyActorAssetRequests[0];
   std::array<unsigned, 2> saved_effects{Effects_primaryPhase,
                                         Effects_pendingTracks};
@@ -73,7 +74,7 @@ struct LiveFixture {
     Battle_Ai_roomAiState = saved_room;
     Effects_secondaryInstances = saved_trails;
     Menu_sceneNotificationBuffer = saved_notification;
-    Field_sphericalCamera = saved_camera;
+    VS::Field::sphericalCamera = saved_camera;
     Content_legacyActorAssetRequests[0] = saved_request;
     Effects_primaryPhase = saved_effects[0];
     Effects_pendingTracks = saved_effects[1];
@@ -194,14 +195,14 @@ TEST_CASE(
     "[action-sequence][F00195][camera-view]") {
   const ProjectionReset reset;
   auto fixture = std::make_unique<LiveFixture>();
-  Field_sphericalCamera.delta.mode = 3;
-  Field_sphericalCamera.values.distance = -32600;
+  VS::Field::sphericalCamera.delta.mode = 3;
+  VS::Field::sphericalCamera.values.distance = -32600;
   fixture->state.preferredCameraDistance = -32768;
   Battle_settledCameraDistance = 12345;
   VS::Render::SetLiveCameraProjectionDistance(577);
   b::FinishLiveActionSequence();
   CHECK(Render_projectionDistance == 513);
-  CHECK(Field_sphericalCamera.values.distance == -32768);
+  CHECK(VS::Field::sphericalCamera.values.distance == -32768);
   CHECK(Battle_settledCameraDistance == 12345);
   CHECK(fixture->state.chainStep == 0);
 }
@@ -211,7 +212,7 @@ TEST_CASE(
   const ProjectionReset reset;
   auto fixture = std::make_unique<LiveFixture>();
   Battle_actionState = nullptr;
-  Field_sphericalCamera.delta.mode = 0;
+  VS::Field::sphericalCamera.delta.mode = 0;
   VS::Render::SetLiveCameraProjectionDistance(511);
   b::FinishLiveActionSequence();
   CHECK(Battle_actionState == nullptr);

@@ -24,13 +24,13 @@
 #include "Field/PlatformPlacementLive.h"
 #include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 using VS::Field::kMovingPlatformCapacity;
@@ -110,11 +110,12 @@ class LivePlatformAppearanceHost final
     if (frozen) {
       return VS::Render::LoadLiveClutRow(kClutRow, kFirstColor, kFreezePalette);
     }
-    if (Field_roomPalettes == nullptr) return false;
+    if (VS::Field::roomPalettes == nullptr) return false;
     return VS::Render::LoadLiveClutRow(
         kClutRow, kFirstColor,
         std::span<const std::uint16_t>(
-            Field_roomPalettes + kOriginalPaletteOffset, kFrozenPaletteColors));
+            VS::Field::roomPalettes + kOriginalPaletteOffset,
+            kFrozenPaletteColors));
   }
   bool SwapGroupColors(std::uint8_t group) override {
     if (!Valid()) return false;
@@ -344,8 +345,8 @@ class LivePlatformUpdateHost final
     state = {
         .runtime = {.paused = Field_areMovingPlatformsPaused,
                     .freeze_frames = Field_platformFreezeFrames},
-        .tick_speed = State_tickSpeed,
-        .room_updates_paused = Field_areRoomUpdatesPaused != 0,
+        .tick_speed = VS::State::tickSpeed,
+        .room_updates_paused = VS::Field::areRoomUpdatesPaused != 0,
         .platform_section_present = Field_roomData.movingPlatforms != nullptr,
         .frame_buffer_nonzero = Render_frameBuf != 0,
         .freeze_tint_active = Field_isPlatformFreezeTintActive != 0};

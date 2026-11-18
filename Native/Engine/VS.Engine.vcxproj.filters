@@ -780,7 +780,7 @@
     <ClInclude Include="include\Audio\MusicLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\Audio\MusicState.h">
+    <ClInclude Include="include\Audio\MusicState.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\MusicVoiceConflicts.hpp">
@@ -900,7 +900,7 @@
     <ClInclude Include="include\Audio\StreamLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\Audio\StreamPlayback.h">
+    <ClInclude Include="include\Audio\StreamPlayback.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\VoiceEngine.hpp">
@@ -924,7 +924,7 @@
     <ClInclude Include="include\Audio\XaMixLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\Audio\XaPlayback.h">
+    <ClInclude Include="include\Audio\XaPlayback.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Arena.h">
@@ -936,7 +936,7 @@
     <ClInclude Include="include\Core\BiosRand.h">
       <Filter>include\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\Diagnostics.h">
+    <ClInclude Include="include\Core\Diagnostics.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\FrameClock.hpp">

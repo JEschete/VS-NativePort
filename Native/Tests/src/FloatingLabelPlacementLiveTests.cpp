@@ -11,9 +11,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/FloatingLabelPlacementLive.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 #include "TestSupport/FloatingLabelRenderingLiveFixture.hpp"
 
 // The generated F00719-F00742 bodies are retired. Each parity case runs the
@@ -150,8 +150,8 @@ class SavedState {
   ~SavedState() {
     Battle_placedLabelPositions = positions_;
     Battle_ashleyStatusLabelsSuppressed = suppressed_;
-    Field_areRoomUpdatesPaused = paused_;
-    State_tickSpeed = tick_;
+    VS::Field::areRoomUpdatesPaused = paused_;
+    VS::State::tickSpeed = tick_;
     Input_settings = settings_;
   }
   SavedState(const SavedState&) = delete;
@@ -160,8 +160,8 @@ class SavedState {
  private:
   DVECTOR* positions_ = Battle_placedLabelPositions;
   std::int16_t suppressed_ = Battle_ashleyStatusLabelsSuppressed;
-  u_short paused_ = Field_areRoomUpdatesPaused;
-  int tick_ = State_tickSpeed;
+  u_short paused_ = VS::Field::areRoomUpdatesPaused;
+  int tick_ = VS::State::tickSpeed;
   State_Settings settings_ = Input_settings;
 };
 
@@ -363,8 +363,8 @@ std::uint64_t UpdateDigest(Commit update) {
   SavedState saved;
   f::ProductionTables tables;
   f::LiveFrame frame;
-  State_tickSpeed = kTick;
-  Field_areRoomUpdatesPaused = 0;
+  VS::State::tickSpeed = kTick;
+  VS::Field::areRoomUpdatesPaused = 0;
   SeedUpdate(frame);
   UpdateResult result;
   result.draws = Run(frame, update);

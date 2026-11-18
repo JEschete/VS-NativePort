@@ -15,7 +15,7 @@
 #include "Actors/ModelRenderingLiveState.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Content/ModuleData.h"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
@@ -43,7 +43,7 @@ struct ActorShadowFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
   Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
-  Actors_SkeletonPose saved_pose = Actors_skeletonPose;
+  Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
   Field_RoomRecord saved_room = Field_roomData;
   int saved_framebuffer = Render_frameBuf;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
@@ -121,7 +121,7 @@ struct ActorShadowFixture {
     Render_frameScratch = saved_frame;
     *Render_ModelWorkspace() = saved_workspace;
     VS::Actors::modelRenderContext = saved_context;
-    Actors_skeletonPose = saved_pose;
+    VS::Actors::skeletonPose = saved_pose;
     Render_frameBuf = saved_framebuffer;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
     Core_Gte_Reset();

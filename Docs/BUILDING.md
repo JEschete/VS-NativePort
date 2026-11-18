@@ -392,7 +392,7 @@ The current output is stereo or dual-mono, not 5.1. Native noise, preceding-voic
 reverb presets are implemented; bit-exact console output and full-content listening parity remain unverified.
 For AI diagnosis use `--log-level debug --log-channels ai,actors,boot,input,content`.
 `--log-level trace --log-channels frame,trace` enables per-tick begin/end markers and legacy C trace sites;
-this is intentionally verbose. Disabled messages skip formatting. C ports can use `Core_Debugf(channel, format, ...)`;
+this is intentionally verbose. Disabled messages skip formatting. Ports can use `VS::Core::Debugf(channel, format, ...)`;
 existing `Core_Tracef` sites now require trace level. Do not use `off` when collecting crash evidence.
 The capture helper accepts the same controls as `-LogLevel debug -LogChannels 'ai,actors,boot,input,content'`
 and fails on build/run errors, timeouts, logged crashes, or missing requested captures within the tick limit.

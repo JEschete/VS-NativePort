@@ -48,7 +48,7 @@ be2228205378,CAPACITY,medium,pattern,,Items_WeaponLoadout,Native/Game/include/It
 6813b6dd2bda,CAPACITY,medium,pattern,,Items_WeaponReservedBlock,Native/Game/include/Items/Loadout.h,152,Items_WeaponReservedBlock.reserved0[0x18],none,,open,
 9d41e95c33d0,CAPACITY,medium,pattern,,Items_WeaponSpawnLoadout,Native/Game/include/Items/Loadout.h,160,Items_WeaponSpawnLoadout.gems[3],none,,open,
 6eb601b56ba7,CAPACITY,medium,pattern,,Actors_actorRecords,Native/Game/src/Actors/Movement.h,65,Actors_actorRecords[17],55,14,open,
-888aa68f63d3,CAPACITY,medium,pattern,,Actors_weaponModels,Native/Game/src/Actors/SkeletonLiveState.h,21,Actors_weaponModels[kActorsWeaponModelCount],55,14,open,
+1f67a5a4c900,CAPACITY,medium,pattern,,weaponModels,Native/Game/src/Actors/SkeletonLiveState.hpp,23,weaponModels[kWeaponModelCount],55,14,open,
 5b85240d4013,CAPACITY,medium,pattern,,Battle_Ai_actorAiStates,Native/Game/src/Battle/Ai/ActorState.h,26,Battle_Ai_actorAiStates[16],57,23,open,
 a9d5134e7b49,CAPACITY,medium,pattern,,Battle_actors,Native/Game/src/Battle/Damage.h,20,Battle_actors[42],56,24,open,
 485a0b0474c6,CAPACITY,medium,pattern,,Battle_unusedGlobal1,Native/Game/src/Battle/StatusEffects.h,91,Battle_unusedGlobal1[1],56,24,open,
@@ -86,7 +86,7 @@ ab940c410a2c,DIV-ZERO,medium,pattern,,NextDivisor,Native/Engine/src/Render/Encod
 27f2b8dc6273,DIV-ZERO,low,pattern,,FixedStep,Native/Engine/src/Render/PaletteAnimation.cpp,477,(std::int32_t{duration} * 2),50,10,guarded,"divisor is the fade duration; FixedStep's only caller StoreFixedTargets divides only when duration != 0 and sets the channels directly otherwise (main.c:10780-10830, 10997-11060); RenderPaletteTests ""The background gradient offsets and clamps the room colours"" covers the zero-duration path"
 8f98ff1619a7,DIV-ZERO,low,pattern,F04175,TransformModelTint,Native/Engine/src/Render/PaletteAnimation.cpp,889,(std::int32_t{duration} * 2),50,10,guarded,"divisor is the fade duration inside the duration != 0 branch; a zero duration sets the blend directly (main.c:11055-11220); RenderPaletteTests ""The grey tint modes move the room tint's blend"" covers the zero-duration path"
 b82fd24e6700,DIV-ZERO,medium,pattern,,BuildRoomView,Native/Engine/src/Render/RoomDraw.cpp,222,camera.scale,50,10,open,
-7895e5f33b9a,DIV-ZERO,medium,pattern,,TintLiveRoomGeometryPrimitives,Native/Engine/src/Render/RoomDrawLive.cpp,236,alignof(std::uint32_t),50,10,open,
+7895e5f33b9a,DIV-ZERO,medium,pattern,,TintLiveRoomGeometryPrimitives,Native/Engine/src/Render/RoomDrawLive.cpp,237,alignof(std::uint32_t),50,10,open,
 cc3c38c87b36,DIV-ZERO,medium,pattern,F00768,InterpolateRoomLightTriangle,Native/Engine/src/Render/RoomLighting.cpp,111,static_cast,50,10,open,
 32424de85ec7,DIV-ZERO,medium,pattern,,Scaled,Native/Engine/src/Render/TextureRegionDraw.cpp,27,divisor,54,25,open,
 5885e403062f,DIV-ZERO,medium,pattern,,Scaled,Native/Engine/src/Render/TextureRegionDraw.cpp,27,divisor,54,25,open,
@@ -113,7 +113,7 @@ f8da63549b09,DIV-ZERO,medium,pattern,F01851,ApplyLearnedActionUnlocks,Native/Gam
 237b8d3f6d5a,DIV-ZERO,low,pattern,,Regenerate,Native/Game/src/Battle/ActorVitals.cpp,63,(drawn ? kDrawnMpInterval : kStatusInterval),56,24,open,
 5a13dc2ba296,DIV-ZERO,low,pattern,,Regenerate,Native/Game/src/Battle/ActorVitals.cpp,66,(drawn ? kDrawnHpInterval : kRestInterval),56,24,open,
 688ed2071431,DIV-ZERO,medium,pattern,F00525,UpdateActorVitals,Native/Game/src/Battle/ActorVitals.cpp,142,static_cast,56,24,open,
-9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,110,alignment,57,23,open,
+9f66cf8d9bf8,DIV-ZERO,medium,pattern,,ReadablePlanningBytes,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.cpp,111,alignment,57,23,open,
 19e1bfedf4f8,DIV-ZERO,medium,pattern,,DrawChoice,Native/Game/src/Battle/Ai/Wander.cpp,159,static_cast,57,23,open,
 fe461f81515b,DIV-ZERO,medium,pattern,,Roam,Native/Game/src/Battle/Ai/Wander.cpp,168,range,57,23,open,
 ff7c2bc2c19e,DIV-ZERO,medium,pattern,F00396,DistributeHitLimbDamage,Native/Game/src/Battle/DamagePolicies.cpp,76,static_cast,56,24,open,
@@ -150,9 +150,9 @@ e8ba8616e5d1,DIV-ZERO,medium,pattern,F00668,DrawRoomBackgroundTiles,Native/Game/
 9e9bd14f8649,DIV-ZERO,medium,pattern,,ValidTarget,Native/Game/src/Field/GimmickAnimationQueueLive.cpp,35,alignof(Field_MpdLockTrigger),45,3,open,
 f2844639754b,DIV-ZERO,medium,pattern,,CountdownMove,Native/Game/src/Field/GimmickDynamics.cpp,224,count,45,3,open,
 ddfd331f4f52,DIV-ZERO,medium,pattern,,ReadableQueryRecord,Native/Game/src/Field/GimmickPlacementLive.cpp,56,alignof(Field_GimmickInstance),45,3,open,
-9a0cc6472412,DIV-ZERO,medium,pattern,,TrapRecords,Native/Game/src/Field/InteractionTargetLive.cpp,31,alignof(Field_MpdFloorTrigger),45,3,open,
+9a0cc6472412,DIV-ZERO,medium,pattern,,TrapRecords,Native/Game/src/Field/InteractionTargetLive.cpp,30,alignof(Field_MpdFloorTrigger),45,3,open,
 d8458bba03bf,DIV-ZERO,medium,pattern,,PlatformRecords,Native/Game/src/Field/PlatformPlacementLive.cpp,72,alignof(Field_MpdMovingPlatform),45,3,open,
-42b5d4ea2159,DIV-ZERO,medium,pattern,,SetLivePlatformFreezeAppearance,Native/Game/src/Field/PlatformPlacementLive.cpp,472,alignof(Field_MpdEnvironment),45,3,open,
+42b5d4ea2159,DIV-ZERO,medium,pattern,,SetLivePlatformFreezeAppearance,Native/Game/src/Field/PlatformPlacementLive.cpp,473,alignof(Field_MpdEnvironment),45,3,open,
 695570146789,DIV-ZERO,medium,pattern,,GeometryGroupCount,Native/Game/src/Field/RoomRendering.cpp,120,room_effects,45,3,open,
 2150acc97d9c,DIV-ZERO,medium,pattern,,RoomDoorRecords,Native/Game/src/Field/RoomSwitchesLive.cpp,43,alignof(Field_MpdLockTrigger),45,3,open,
 254d310e4e9a,DIV-ZERO,medium,pattern,,QuarterPercent,Native/Game/src/Field/Traps.cpp,38,denominator,45,3,guarded,"all three callers (ApplyLimbDefense, ApplyShieldDefense) call QuarterPercent only after checking that the max DP or PP denominator is nonzero"

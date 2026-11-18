@@ -16,7 +16,7 @@
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.h"
 #include "Field/Doors.h"
-#include "Field/GimmickAnimationQueueLive.h"
+#include "Field/GimmickAnimationQueueLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
 #include "Field/Manual.h"
@@ -25,7 +25,7 @@
 #include "Field/Room.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomStateLiveState.hpp"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
@@ -148,7 +148,7 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
     namespace Memory = Core::Memory;
     switch (buffer) {
       case RoomBuffer::kRoomPalettes:
-        Field_roomPalettes = static_cast<u_short*>(
+        roomPalettes = static_cast<u_short*>(
             Memory::AllocateLiveFromLowEnd(kRoomPaletteBytes));
         return;
       case RoomBuffer::kFloatingLabels:
@@ -163,9 +163,9 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
   }
   void ApplyDefaults(const RoomRuntimeDefaults& defaults) override {
     Field_enteredDoorId = static_cast<std::int16_t>(defaults.entered_door_id);
-    Field_areRoomUpdatesPaused =
+    areRoomUpdatesPaused =
         static_cast<u_short>(defaults.room_updates_paused ? 1 : 0);
-    Field_roomTint.isActive =
+    roomTint.isActive =
         static_cast<std::int16_t>(defaults.room_tint_active ? 1 : 0);
     Battle_unusedSubmenuState = 0;
     Battle_unusedSceneBuffer = nullptr;
@@ -176,7 +176,7 @@ class LiveRoomRuntimeHost final : public RoomRuntimeHost {
   }
   void InitializeRoomBackground() override { LiveInitializeRoomBackground(); }
   void ResetGimmickAnimationQueue() override {
-    Field_ResetGimmickAnimationQueueEntry();
+    ResetGimmickAnimationQueueEntry();
   }
   // The original hands the cleared reference vectors' first five words to
   // the background as its gradient colours (18.c:595).

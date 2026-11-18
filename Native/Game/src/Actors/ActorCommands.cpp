@@ -23,7 +23,7 @@ constexpr int kFacingHalfTurn = 0x800;
 constexpr int kFacingMask = 0xFFF;
 constexpr int kTileSize = 128;
 constexpr int kTileCentre = 64;
-// Door transition steps (Field_screenTransitionStep) that walk Ashley
+// Door transition steps (VS::Field::screenTransitionStep) that walk Ashley
 // through the door.
 constexpr auto kDoorWalkSteps = std::to_array<unsigned>({1U, 2U, 4U});
 

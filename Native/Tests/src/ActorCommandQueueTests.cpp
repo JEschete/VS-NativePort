@@ -15,7 +15,7 @@
 
 #include "Actors/ActorCommands.hpp"
 #include "Actors/ActorCommandsLive.hpp"
-#include "Actors/ActorCommandsLiveState.h"
+#include "Actors/ActorCommandsLiveState.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
@@ -1027,5 +1027,5 @@ TEST_CASE("Promoted actor commands leave no module function binding",
   // The move input buffer stays a module data symbol at its own base.
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800F1A50U) ==
-        static_cast<void*>(Actors_ashleyMoveInput));
+        static_cast<void*>(VS::Actors::ashleyMoveInput));
 }

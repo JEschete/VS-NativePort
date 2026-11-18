@@ -20,11 +20,12 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 
@@ -117,13 +118,6 @@ static_assert(std::size(Battle_Ai_kWanderTimingPresets) >= kWanderPresetCount);
 static_assert(std::size(Battle_Ai_kSettingsBits30Values) >=
               kSettingsChoiceCount);
 static_assert(std::size(Battle_Ai_kFlags34Bit14Values) >= kPatrolRateCount);
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 ActorAiSettingsTables LiveSettingsTables() {
   ActorAiSettingsTables tables;

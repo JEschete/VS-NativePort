@@ -23,9 +23,10 @@
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -44,13 +45,6 @@ constexpr std::size_t kApproachTargetOffset = 0xE5;
 static_assert(offsetof(Battle_Ai_TargetApproachView, targetId) ==
               offsetof(AiState, actorId) + kApproachTargetOffset -
                   kActorIdOffset);
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 Battle_Ai_FrameContext& Frame() { return *Battle_Ai_FrameState(); }
 

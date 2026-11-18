@@ -9,7 +9,7 @@
 #include "State/GameClock.hpp"
 #include "State/GameTime.h"
 #include "State/PlayTime.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 // decomp: vs_main_gametime (vs_main_gametime@SLUS_010.40)
 State_PlayTime VS::State::playTime;
@@ -36,7 +36,7 @@ int UpdateLivePlayTimeAndLoading(int vsync) {
   if (vsync != 1) VS::Core::IdleInstruction();
   VS::Content::UpdateLiveDiscQueue();
   PlayTime time = LivePlayTime();
-  AdvancePlayTime(time, State_tickSpeed);
+  AdvancePlayTime(time, tickSpeed);
   StoreLivePlayTime(time);
   return result;
 }

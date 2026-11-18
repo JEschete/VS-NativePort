@@ -5,10 +5,10 @@
 
 // Live binding for the standalone presentation and actor callbacks
 // (ActionEffectCallbacks.hpp) over Effects_tintedActor, Field_controlMode,
-// State_tickSpeed, Effects_effectBusyFlags, the actor animation and palette
-// services, the HUD, the minimap, the field mode and LiveBeginActionEffect.
-// The entries keep the original signatures for the generated callers and the
-// module's function pointers.
+// VS::State::tickSpeed, Effects_effectBusyFlags, the actor animation and
+// palette services, the HUD, the minimap, the field mode and
+// LiveBeginActionEffect. The entries keep the original signatures for the
+// generated callers and the module's function pointers.
 namespace VS::Effects {
 // func_800CF0E8 for a typed request: the action's effect token, 0 when
 // refused. Fields the request does not define are zero.

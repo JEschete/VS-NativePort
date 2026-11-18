@@ -14,7 +14,7 @@
 #include "Field/MapLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PaletteAnimationLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Effects {
 namespace {
@@ -60,7 +60,7 @@ class LiveHost final : public ActionEffectCallbackHost {
     Field_controlMode = static_cast<u_int>(mode);
   }
   void SetTickSpeed(std::int32_t tick_speed) override {
-    State_tickSpeed = tick_speed;
+    VS::State::tickSpeed = tick_speed;
   }
   void SetHudVisibility(Battle::HudVisibility visibility) override {
     Battle::SetLiveHudHidden(static_cast<int>(visibility));

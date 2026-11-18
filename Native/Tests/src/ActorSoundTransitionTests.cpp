@@ -9,7 +9,7 @@
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Audio/ActorSound.h"
 #include "Legacy/Psx.h"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 std::array<u_char, 4> SoundValues(const Actors_ModelEffectSlot& state) {
@@ -17,13 +17,13 @@ std::array<u_char, 4> SoundValues(const Actors_ModelEffectSlot& state) {
 }
 
 struct SoundTransitionFixture {
-  int saved_tick_speed = State_tickSpeed;
+  int saved_tick_speed = VS::State::tickSpeed;
   Actors_ActorRecord actor{};
 
-  ~SoundTransitionFixture() { State_tickSpeed = saved_tick_speed; }
+  ~SoundTransitionFixture() { VS::State::tickSpeed = saved_tick_speed; }
 
   void Tick(int speed) {
-    State_tickSpeed = speed;
+    VS::State::tickSpeed = speed;
     VS::Actors::UpdateActorSoundTransition(actor);
   }
 

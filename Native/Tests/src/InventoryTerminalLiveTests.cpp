@@ -26,10 +26,10 @@
 #include "Content/DiscLayout.h"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Field/RoomRenderingLiveState.h"
+#include "Field/RoomRenderingLiveState.hpp"
 #include "Items/Loot.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -110,8 +110,8 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<decltype(Battle_hudHidden)> saved_hud{Battle_hudHidden};
   ValueRestore<decltype(Battle_hudSlideOffset)> saved_hud_offset{
       Battle_hudSlideOffset};
-  ValueRestore<decltype(Field_isFieldRenderingEnabled)> saved_field{
-      Field_isFieldRenderingEnabled};
+  ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
+      VS::Field::isFieldRenderingEnabled};
   ValueRestore<int> saved_background{Menu_Framework_backgroundFadeStep};
   ValueRestore<int> saved_restrictions{Menu_Framework_actionRestrictions};
   ValueRestore<u_short*> saved_items{Menu_Framework_itemsText};
@@ -201,8 +201,8 @@ struct TextLoadingFixture : TerminalFixture {
   ~TextLoadingFixture() {
     if (VS::Core::Memory::LivePayloadCapacity(Menu_Framework_itemNames) &&
         !UnloadText()) {
-      Core_Errorf("tests",
-                  "menu terminal fixture could not drain its item text");
+      VS::Core::Errorf("tests",
+                       "menu terminal fixture could not drain its item text");
       std::abort();
     }
     content::ResetLiveDiscDrive();

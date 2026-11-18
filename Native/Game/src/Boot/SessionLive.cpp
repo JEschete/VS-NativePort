@@ -15,13 +15,13 @@
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/Ai/RoomState.h"
-#include "Battle/EncounterHooks.h"
+#include "Battle/EncounterHooks.hpp"
 #include "Battle/TargetingState.h"
 #include "Boot/GameLoop.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscReaderLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Overlays.h"
 #include "Core/RandomLive.hpp"
@@ -77,28 +77,30 @@ constexpr std::int16_t kVramHeight = 512;
 
 void CleanupMenuOwners() {
   if (!Menu::map::ResetMapTerminalColdState()) {
-    Core_Errorf("boot", "map cleanup refused before session reset");
+    VS::Core::Errorf("boot", "map cleanup refused before session reset");
     std::abort();
   }
   if (!Menu::CleanupLiveSceneNotificationOwnedState()) {
-    Core_Errorf("boot",
-                "scene-notification cleanup refused before session reset");
+    VS::Core::Errorf("boot",
+                     "scene-notification cleanup refused before session reset");
     std::abort();
   }
   if (!Menu::Score::CleanupLiveEnemyPreviewOwnedState()) {
-    Core_Errorf("boot", "enemy-preview cleanup refused before session reset");
+    VS::Core::Errorf("boot",
+                     "enemy-preview cleanup refused before session reset");
     std::abort();
   }
   if (!Menu::Score::ResetLiveGazetteTerminalModuleState()) {
-    Core_Errorf("boot", "Gazette cleanup refused before session reset");
+    VS::Core::Errorf("boot", "Gazette cleanup refused before session reset");
     std::abort();
   }
   if (!Menu::Results::CleanupLiveGameClearOwnedState()) {
-    Core_Errorf("boot", "game-clear cleanup refused before session reset");
+    VS::Core::Errorf("boot", "game-clear cleanup refused before session reset");
     std::abort();
   }
   if (!Menu::Results::CleanupLiveTimeAttackOwnedState()) {
-    Core_Errorf("boot", "time-attack cleanup refused before session reset");
+    VS::Core::Errorf("boot",
+                     "time-attack cleanup refused before session reset");
     std::abort();
   }
 }
@@ -132,12 +134,15 @@ class LiveSessionHost final : public SessionHost {
     Menu::Score::ResetLiveTimeTrialStatics();
     Event::ResetLiveScriptRuntime();
   }
-  void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }
+  void ResetGameplayInspection() override {
+    VS::Boot::ResetGameplayInspection();
+  }
   void ResetNativeSession() override { Save_NativeResetSession(); }
 
   [[noreturn]] void Transfer(SessionDestination destination) override {
-    Core_Debugf("boot", "native session transition: %s",
-                destination == SessionDestination::kTitle ? "title" : "battle");
+    VS::Core::Debugf(
+        "boot", "native session transition: %s",
+        destination == SessionDestination::kTitle ? "title" : "battle");
     Event::AbandonLiveScriptUses();
     // NOLINTNEXTLINE(cert-err52-cpp): the session boundary leaves the copied
     // call graph by jump, not exception (#267); the barrier guards the frames.
@@ -145,10 +150,10 @@ class LiveSessionHost final : public SessionHost {
   }
 
   [[noreturn]] void Refuse(SessionRefusal refusal) override {
-    Core_Errorf("boot", "native session transition refused: %s",
-                refusal == SessionRefusal::kNoSession
-                    ? "no session is running"
-                    : "a scope bound to stack storage is live");
+    VS::Core::Errorf("boot", "native session transition refused: %s",
+                     refusal == SessionRefusal::kNoSession
+                         ? "no session is running"
+                         : "a scope bound to stack storage is live");
     std::abort();
   }
 };
@@ -181,14 +186,14 @@ class LiveLifecycleHost final : public OverlayLoadHost,
         file.size = VS_ENDING_PRG_SIZE;
         break;
       default:
-        Core_Errorf("boot", "unsupported overlay program: %d",
-                    static_cast<int>(request.program));
+        VS::Core::Errorf("boot", "unsupported overlay program: %d",
+                         static_cast<int>(request.program));
         std::abort();
     }
 
     const std::uint8_t slot_index = static_cast<std::uint8_t>(request.slot);
     if (slot_index > 1) {
-      Core_Errorf("boot", "unsupported overlay slot: %u", slot_index);
+      VS::Core::Errorf("boot", "unsupported overlay slot: %u", slot_index);
       std::abort();
     }
     Content_DiscQueueSlot* slot = VS::Content::AllocateLiveDiscRequest(&file);
@@ -304,10 +309,10 @@ class LiveLifecycleHost final : public OverlayLoadHost,
 LiveLifecycleHost live_lifecycle_host;
 
 int RunLoadedGame() {
-  Boot_ResetGameplayInspection();
+  VS::Boot::ResetGameplayInspection();
   Boot_isGameplayActive = 1;
   RunGameplayLoopLive();
-  Boot_ResetGameplayInspection();
+  VS::Boot::ResetGameplayInspection();
   SetDispMask(0);
   VS::Audio::LiveStopAndFreeCurrentMusic();
   return 0;
@@ -316,13 +321,13 @@ int RunLoadedGame() {
 class LiveTitleSessionHost final : public TitleSessionHost {
  public:
   void InitializeTitleSession() override {
-    Core_Debugf("boot", "title session initialization begin");
+    VS::Core::Debugf("boot", "title session initialization begin");
     InitializeTitleSessionLive();
-    Core_Debugf("boot", "title session initialization complete");
+    VS::Core::Debugf("boot", "title session initialization complete");
   }
   void LoadTitleOverlay() override {
     LoadTitleOverlayLive();
-    Core_Debugf("boot", "title module ready");
+    VS::Core::Debugf("boot", "title module ready");
   }
   int RunTitle() override { return VS::Title::RunLive(); }
   void SetGameEntryMode(int mode) override { Boot_gameEntryMode = mode; }
@@ -346,7 +351,7 @@ class LiveGameHost final : public GameHost {
 void ResetLiveSessionHeap() {
   CleanupMenuOwners();
   if (!Render::AbandonLiveFrameBeforeHeapReset()) {
-    Core_Errorf("boot", "frame cleanup refused before heap replacement");
+    VS::Core::Errorf("boot", "frame cleanup refused before heap replacement");
     std::abort();
   }
   Core::Memory::ResetLiveGameHeap();

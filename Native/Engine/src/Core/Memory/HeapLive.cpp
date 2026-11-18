@@ -11,7 +11,7 @@
 #include <utility>
 
 #include "Core/Arena.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/Heap.hpp"
 
 namespace VS::Core::Memory {
@@ -32,7 +32,7 @@ void* Allocated(const char* operation, std::size_t bytes,
   }
   ++refused_requests;
   if (Reportable(refused_requests)) {
-    Core_Errorf(
+    VS::Core::Errorf(
         "memory",
         "%s at %s:%u: %zu bytes refused: %s (largest free block %" PRIu32
         " units, refusal %" PRIu64 ")",
@@ -49,25 +49,25 @@ void Released(const char* operation, const void* payload,
   if (!release) {
     ++refused_requests;
     if (Reportable(refused_requests)) {
-      Core_Errorf("memory",
-                  "%s at %s:%u: %p refused: %s; the heap is unchanged "
-                  "(refusal %" PRIu64 ")",
-                  operation, site.file_name(),
-                  static_cast<unsigned>(site.line()), payload,
-                  HeapErrorName(release.error()), refused_requests);
+      VS::Core::Errorf("memory",
+                       "%s at %s:%u: %p refused: %s; the heap is unchanged "
+                       "(refusal %" PRIu64 ")",
+                       operation, site.file_name(),
+                       static_cast<unsigned>(site.line()), payload,
+                       HeapErrorName(release.error()), refused_requests);
     }
     return;
   }
   if (!release->guard_intact) {
     ++damaged_guards;
     if (Reportable(damaged_guards)) {
-      Core_Errorf("memory",
-                  "%s at %s:%u: the header unit before %p (%" PRIu32
-                  " units) was overwritten; the block was released "
-                  "(damaged guard %" PRIu64 ")",
-                  operation, site.file_name(),
-                  static_cast<unsigned>(site.line()), payload, release->units,
-                  damaged_guards);
+      VS::Core::Errorf("memory",
+                       "%s at %s:%u: the header unit before %p (%" PRIu32
+                       " units) was overwritten; the block was released "
+                       "(damaged guard %" PRIu64 ")",
+                       operation, site.file_name(),
+                       static_cast<unsigned>(site.line()), payload,
+                       release->units, damaged_guards);
     }
   }
 }
@@ -75,8 +75,8 @@ void Released(const char* operation, const void* payload,
 void Initialized(const char* operation,
                  const std::expected<void, HeapError>& initialized) {
   if (!initialized) {
-    Core_Errorf("memory", "%s: %s; the game heap is empty", operation,
-                HeapErrorName(initialized.error()));
+    VS::Core::Errorf("memory", "%s: %s; the game heap is empty", operation,
+                     HeapErrorName(initialized.error()));
   }
 }
 }  // namespace

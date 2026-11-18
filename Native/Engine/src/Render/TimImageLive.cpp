@@ -9,7 +9,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Render {
 namespace {
@@ -27,11 +27,11 @@ T ReadField(const std::byte* data, std::size_t offset) {
 
 void ReportRefusal(const void* data, std::uint32_t mode) {
   if (std::has_single_bit(++refused_tims)) {
-    Core_Errorf("render",
-                "TIM at %p (mode 0x%" PRIX32
-                ") refused: its blocks are inconsistent or exceed VRAM "
-                "(%" PRIu64 " refused)",
-                data, mode, refused_tims);
+    VS::Core::Errorf("render",
+                     "TIM at %p (mode 0x%" PRIX32
+                     ") refused: its blocks are inconsistent or exceed VRAM "
+                     "(%" PRIu64 " refused)",
+                     data, mode, refused_tims);
   }
 }
 

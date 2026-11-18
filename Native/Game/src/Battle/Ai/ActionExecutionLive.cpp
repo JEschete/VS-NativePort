@@ -23,9 +23,10 @@
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Field/Gimmicks.h"
 
@@ -39,13 +40,6 @@ static_assert(offsetof(State, opaqueE) == kClearedHeaderBytes);
 static_assert(std::is_same_v<decltype(State::currentCandidate),
                              Battle_Ai_ActionCandidate*>);
 static_assert(std::size(Battle_Ai_actorAiStates) == kCandidateTargetSlots);
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
 
 class LiveExecution final : public ActionExecutionWorld {
  public:
@@ -206,7 +200,7 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
 }  // namespace
 
 [[noreturn]] void RefuseLiveDecisionInputs(const char* message) {
-  Core_Errorf("ai", "%s", message);
+  VS::Core::Errorf("ai", "%s", message);
   std::abort();
 }
 
@@ -236,7 +230,7 @@ void ResetLiveDecisionMovement(State& state, std::uint8_t area) {
 std::optional<int> TryExecuteCheckedLiveActionCandidate(
     State* state, Battle_Ai_ActionCandidate* candidate) {
   if (state == nullptr || candidate == nullptr) {
-    Core_Debugf("ai", "AI action execution requires state and candidate");
+    VS::Core::Debugf("ai", "AI action execution requires state and candidate");
     return std::nullopt;
   }
   LiveExecution world(*state);
@@ -247,7 +241,7 @@ std::optional<int> TryExecuteCheckedLiveActionCandidate(
 
 std::optional<int> TryExecuteCheckedLivePlannedActions(State* state) {
   if (state == nullptr) {
-    Core_Debugf("ai", "AI planned execution requires an actor state");
+    VS::Core::Debugf("ai", "AI planned execution requires an actor state");
     return std::nullopt;
   }
   LiveExecution world(*state);

@@ -15,13 +15,13 @@
 #include "Actors/Animation.h"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Movement.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Actors {
 namespace {
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Debugf("actors", "%s", message);
+    VS::Core::Debugf("actors", "%s", message);
     std::abort();
   }
 }
@@ -30,7 +30,7 @@ Actors_ActorRecord& Actor(int actor_id) {
   if (actor_id < 0 ||
       static_cast<unsigned>(actor_id) >= std::size(Actors_actorRecords) ||
       Actors_actorRecords[actor_id] == nullptr) {
-    Core_Debugf("actors", "Motion request requires actor %d", actor_id);
+    VS::Core::Debugf("actors", "Motion request requires actor %d", actor_id);
     std::abort();
   }
   return *Actors_actorRecords[actor_id];
@@ -76,7 +76,7 @@ const char* EntryName(JumpEntry entry) {
 
 void LogJumpRequest(const Actors_ActorRecord& actor, JumpEntry entry,
                     const PackedTile& target, int speed, std::int16_t facing) {
-  Core_Debugf(
+  VS::Core::Debugf(
       "actors.jump",
       "request actor=%d entry=%s target=[%d,%d,%d,%d] speed=%d facing=%d "
       "position=[%d,%d,%d] phase=%d locked=%d airborne=%d profile=%d",
@@ -88,7 +88,7 @@ void LogJumpRequest(const Actors_ActorRecord& actor, JumpEntry entry,
 }
 
 void LogJumpResult(const Actors_ActorRecord& actor) {
-  Core_Debugf(
+  VS::Core::Debugf(
       "actors.jump",
       "result actor=%d phase=%d countdown=%d destination=[%d,%d] "
       "destination_mode=%d jump_frames=%d root=[%d,%d,%d] landing_pending=%d",
@@ -318,7 +318,8 @@ void TurnLiveNavigationActor(int actor_id, int facing) {
 void TurnLiveActorAtSpeed(int actor_id, std::int16_t facing, int speed) {
   LiveMotionActor actor(actor_id);
   if (!TurnActorAtSpeed(actor, facing, speed)) {
-    Core_Debugf("actors", "Actor %d turn has zero angular speed", actor_id);
+    VS::Core::Debugf("actors", "Actor %d turn has zero angular speed",
+                     actor_id);
     std::abort();
   }
 }

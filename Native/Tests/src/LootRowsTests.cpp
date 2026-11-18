@@ -18,7 +18,7 @@
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Loot/Paging.h"
+#include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
 
@@ -116,7 +116,7 @@ bool IsBound(unsigned address, Entry entry) {
 
 struct LiveRowsFixture {
   Items_Inventory staged{};
-  std::array<Menu_Loot_LootListItem, kMenuLootRowCapacity> rows{};
+  std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   Items_Inventory* previous_inventory{Menu_Loot_inventory};
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
   Items_Inventory previous_ashley{Audio_Seq_unusedInventory};
@@ -125,7 +125,7 @@ struct LiveRowsFixture {
   char previous_difficulty{Audio_Seq_unusedStateFlags.difficulty};
 
   LiveRowsFixture() {
-    Menu_Loot_ResetPaging();
+    VS::Menu::Loot::Live::ResetPaging();
     Menu_Loot_inventory = &staged;
     Menu_Loot_lootList = rows.data();
     Menu_Loot_lootListCount = 0;
@@ -137,7 +137,7 @@ struct LiveRowsFixture {
   }
 
   ~LiveRowsFixture() {
-    Menu_Loot_ResetPaging();
+    VS::Menu::Loot::Live::ResetPaging();
     Menu_Loot_inventory = previous_inventory;
     Menu_Loot_lootList = previous_rows;
     Menu_Loot_lootListCount = 0;
@@ -453,7 +453,7 @@ TEST_CASE("Live chest staging pages the single loot entry",
   CHECK(fixture.rows[0].state == 1);
   CHECK(fixture.rows[1].state == 1);
   CHECK(fixture.staged.misc[0].id == 323);
-  CHECK(Menu_Loot_AdvanceStagedInventory() == 0);
+  CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
   CHECK(items::Live::Typed(chest) == typed);
 }
 

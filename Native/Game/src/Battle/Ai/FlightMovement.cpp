@@ -8,7 +8,7 @@
 
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/SpecialTerrain.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -64,7 +64,7 @@ constexpr std::uint32_t kZeroSumRootInput = 0xFFFFF000;
 constexpr std::int32_t kZeroSumRoot = 21;
 
 bool Fail(const char* message) {
-  Core_Warnf("ai", "%s", message);
+  VS::Core::Warnf("ai", "%s", message);
   return false;
 }
 
@@ -108,7 +108,8 @@ std::uint32_t DirectionAngle(std::int16_t heading) {
 
 bool ValidDirection(int direction, const char* query) {
   if (direction >= 0 && direction < kFlightDirectionCount) return true;
-  Core_Warnf("ai", "AI flight %s direction %d is invalid", query, direction);
+  VS::Core::Warnf("ai", "AI flight %s direction %d is invalid", query,
+                  direction);
   return false;
 }
 
@@ -156,18 +157,18 @@ std::optional<int> BlockingActor(FlightMovementWorld& world,
   while (const auto id = world.NextActor()) {
     const auto obstacle = world.Obstacle(*id);
     if (!obstacle) {
-      Core_Warnf("ai",
-                 "AI flight obstruction reads actor %d without an AI "
-                 "state",
-                 *id);
+      VS::Core::Warnf("ai",
+                      "AI flight obstruction reads actor %d without an AI "
+                      "state",
+                      *id);
       return std::nullopt;
     }
     if (obstacle->actor_id == mover.actor_id || obstacle->actor_id == 0) {
       continue;
     }
     if (!obstacle->position) {
-      Core_Warnf("ai", "AI flight obstruction reads actor %d without a model",
-                 *id);
+      VS::Core::Warnf(
+          "ai", "AI flight obstruction reads actor %d without a model", *id);
       return std::nullopt;
     }
     const auto dx = WrappingSubtract(obstacle->position->x, probe.x);
@@ -215,8 +216,8 @@ FlightTile ClassifyFlightTile(FlightMovementWorld& world,
   }
   const auto flags = world.TileFlags(x, z);
   if (!flags) {
-    Core_Warnf("ai", "AI flight test reads tile (%d, %d) outside the flag map",
-               x, z);
+    VS::Core::Warnf(
+        "ai", "AI flight test reads tile (%d, %d) outside the flag map", x, z);
     return FlightTile::kRefused;
   }
   if ((*flags & kNoFlightTileFlag) != 0) return FlightTile::kClosed;
@@ -226,10 +227,10 @@ FlightTile ClassifyFlightTile(FlightMovementWorld& world,
   if (room->ceiling != 0) {
     const auto ground = Field::TryGroundHeightAtTile(world.Terrain(), x, z);
     if (!ground) {
-      Core_Warnf("ai",
-                 "AI flight test reads tile (%d, %d) outside the "
-                 "terrain",
-                 x, z);
+      VS::Core::Warnf("ai",
+                      "AI flight test reads tile (%d, %d) outside the "
+                      "terrain",
+                      x, z);
       return FlightTile::kRefused;
     }
     if (WrappingAdd(*ground, mover.flight_height) < room->ceiling) {
@@ -266,8 +267,8 @@ std::optional<int> LowestReachableHeight(FlightMovementWorld& world,
     const int x = neighborhood.origin.x + step.dx;
     const int z = neighborhood.origin.z + step.dz;
     if (!neighborhood.terrain.Contains(x, z)) {
-      Core_Warnf("ai", "AI flight reads tile (%d, %d) outside the terrain", x,
-                 z);
+      VS::Core::Warnf("ai", "AI flight reads tile (%d, %d) outside the terrain",
+                      x, z);
       refused = true;
       return false;
     }
@@ -290,7 +291,8 @@ std::optional<int> LowestSegmentHeight(Field::TerrainGrid terrain, int start_x,
     x += step_x;
     z += step_z;
     if (!terrain.Contains(x >> kTileShift, z >> kTileShift)) {
-      Core_Warnf("ai", "AI flight samples (%d, %d) outside the terrain", x, z);
+      VS::Core::Warnf("ai", "AI flight samples (%d, %d) outside the terrain", x,
+                      z);
       return std::nullopt;
     }
   }
@@ -302,8 +304,8 @@ std::optional<int> GroundHeight(const FlightMovementWorld& world,
                                 TileCoordinate tile) {
   const auto terrain = world.Terrain();
   if (!terrain.Contains(tile.x, tile.z)) {
-    Core_Warnf("ai", "AI flight reads tile (%d, %d) outside the terrain",
-               tile.x, tile.z);
+    VS::Core::Warnf("ai", "AI flight reads tile (%d, %d) outside the terrain",
+                    tile.x, tile.z);
     return std::nullopt;
   }
   return Field::GroundHeightAtPackedTile(terrain, tile);
@@ -315,7 +317,7 @@ std::optional<int> GroundHeight(const FlightMovementWorld& world,
 std::optional<std::int32_t> OriginalSquareRoot(std::uint32_t value) {
   if (value == kZeroSumRootInput) return kZeroSumRoot;
   if (static_cast<std::int32_t>(value) < 0) {
-    Core_Warnf("ai", "AI flight takes the root of 0x%08X", value);
+    VS::Core::Warnf("ai", "AI flight takes the root of 0x%08X", value);
     return std::nullopt;
   }
   return Core::Math::SquareRootInteger(static_cast<std::int32_t>(value));

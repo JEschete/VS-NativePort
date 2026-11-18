@@ -16,7 +16,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
-#include "Field/DoorMatchList.h"
+#include "Field/DoorMatchList.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -138,7 +138,7 @@ TEST_CASE("Screen-effect default binding retains original address provenance",
                                           0x800F4ED9u) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800F1D08u) ==
-        &Field_matchingDoorRecords);
+        &VS::Field::matchingDoorRecords);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800F1D09u) == nullptr);
   const auto found = std::ranges::find_if(symbols, [](const auto& symbol) {

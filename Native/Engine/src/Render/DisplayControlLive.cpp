@@ -9,7 +9,7 @@
 #include <iterator>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Core/RandomLive.hpp"
 #include "Input/Buttons.h"
@@ -21,7 +21,7 @@
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Render {
 namespace {
@@ -112,7 +112,7 @@ class LiveFieldFrame final : public FieldFrameHost {
     Core_Gte_SetGeomOffset(x, y);
   }
   [[nodiscard]] std::int32_t TickSpeed() const override {
-    return State_tickSpeed;
+    return VS::State::tickSpeed;
   }
   std::int32_t UpdatePlayTime(std::int32_t ticks) override {
     return VS::State::UpdateLivePlayTimeAndLoading(ticks);
@@ -215,9 +215,9 @@ void ShowLiveLoadingScreen() {
   };
   LiveDisplayDevice device;
   if (!ShowLoadingScreen(device, image)) {
-    Core_Errorf("render",
-                "loading image %dx%d exceeds its %zu pixels; not uploaded",
-                image.width, image.height, pixels.size());
+    VS::Core::Errorf("render",
+                     "loading image %dx%d exceeds its %zu pixels; not uploaded",
+                     image.width, image.height, pixels.size());
   }
 }
 }  // namespace VS::Render

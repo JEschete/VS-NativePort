@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <array>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -29,7 +29,7 @@ constexpr unsigned kTargetMemoryEndingObjectKinds = 0x14;
 constexpr unsigned kObjectKindMask = 7;
 
 bool RefusePlan(const char* reason) {
-  Core_Debugf("ai", "%s", reason);
+  VS::Core::Debugf("ai", "%s", reason);
   return false;
 }
 

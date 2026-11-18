@@ -1,9 +1,13 @@
 #pragma once
 
+namespace VS::Boot {
+
 // Optional encounter configuration stays inactive in normal sessions.
 // The diagnostic readiness hooks also observe normal-game lifetimes.
-void Boot_EncounterRoomPlacements(void** data, unsigned int* size);
-int Boot_EncounterUsesRoomEvents();
-void Boot_EncounterPollStop();
+void EncounterRoomPlacements(void** data, unsigned int* size);
+int EncounterUsesRoomEvents();
+void EncounterPollStop();
 // Diagnostic readiness only; never alters gameplay/event state.
-void Boot_ResetGameplayInspection();
+void ResetGameplayInspection();
+
+}  // namespace VS::Boot

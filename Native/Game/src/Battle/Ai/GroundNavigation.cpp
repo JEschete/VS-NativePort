@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <optional>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
@@ -155,8 +155,9 @@ std::optional<RoomGrid> ActiveGrid(const GroundNavigationWorld& world) {
       world.HasTileMaps() && !world.Terrain().Empty()) {
     return RoomGrid{width, height};
   }
-  Core_Warnf("ai", "AI ground navigation requires a bounded room grid (%08X)",
-             static_cast<unsigned>(bounds));
+  VS::Core::Warnf("ai",
+                  "AI ground navigation requires a bounded room grid (%08X)",
+                  static_cast<unsigned>(bounds));
   return std::nullopt;
 }
 
@@ -173,15 +174,15 @@ int Component(unsigned value) {
 
 std::optional<Tile> Delta(const GroundNavigationWorld& world, int direction) {
   if (direction < 0 || direction >= kNavigationDirections) {
-    Core_Warnf("ai", "AI ground direction %d is out of bounds", direction);
+    VS::Core::Warnf("ai", "AI ground direction %d is out of bounds", direction);
     return std::nullopt;
   }
   const unsigned packed =
       world.DirectionCodes()[static_cast<std::size_t>(direction)];
   const Tile delta{Component(packed), Component(packed >> kDirectionZShift)};
   if ((delta.x == 0 && delta.z == 0) || delta.x < -1 || delta.z < -1) {
-    Core_Warnf("ai", "AI ground direction %d has an invalid delta %02X",
-               direction, packed);
+    VS::Core::Warnf("ai", "AI ground direction %d has an invalid delta %02X",
+                    direction, packed);
     return std::nullopt;
   }
   return delta;
@@ -200,8 +201,8 @@ std::optional<bool> RegionBlocked(const GroundNavigationWorld& world,
                         ? world.TerrainRegionCell(tile.x, tile.z)
                         : std::nullopt;
   if (!cell.has_value()) {
-    Core_Warnf("ai", "AI region query at (%d,%d) direction %d is invalid",
-               tile.x, tile.z, direction);
+    VS::Core::Warnf("ai", "AI region query at (%d,%d) direction %d is invalid",
+                    tile.x, tile.z, direction);
     return std::nullopt;
   }
   return ((static_cast<unsigned>(*cell) >> static_cast<unsigned>(direction)) &
@@ -244,19 +245,19 @@ std::optional<int> FirstBlockingActor(GroundNavigationWorld& world,
   for (auto id = world.NextCollisionActor(); id.has_value();
        id = world.NextCollisionActor()) {
     if (*id < 0 || *id >= kActorSlots) {
-      Core_Warnf("ai", "AI collision actor ID %d is out of bounds", *id);
+      VS::Core::Warnf("ai", "AI collision actor ID %d is out of bounds", *id);
       return std::nullopt;
     }
     const unsigned bit = 1U << static_cast<unsigned>(*id);
     if ((visited & bit) != 0) {
-      Core_Warnf("ai", "AI collision actor list repeats actor %d", *id);
+      VS::Core::Warnf("ai", "AI collision actor list repeats actor %d", *id);
       return std::nullopt;
     }
     visited |= bit;
     if (*id == navigator.actor_id) continue;
     const auto actor = world.CollisionActor(*id);
     if (!actor.has_value()) {
-      Core_Warnf("ai", "AI collision actor %d has no model", *id);
+      VS::Core::Warnf("ai", "AI collision actor %d has no model", *id);
       return std::nullopt;
     }
     if (test(BoundsOf(*id, *actor))) return *id + 1;
@@ -313,8 +314,8 @@ std::optional<bool> InsideApproachRadius(const GroundNavigationWorld& world,
                             ? world.ModelPosition(navigator.approach_target_id)
                             : std::nullopt;
   if (!position.has_value()) {
-    Core_Warnf("ai", "AI approach edge query target %u has no model",
-               static_cast<unsigned>(navigator.approach_target_id));
+    VS::Core::Warnf("ai", "AI approach edge query target %u has no model",
+                    static_cast<unsigned>(navigator.approach_target_id));
     return std::nullopt;
   }
   const auto dx = static_cast<std::int64_t>(TileCentre(target.x) - position->x);
@@ -380,16 +381,16 @@ std::optional<int> CanTraverseTileEdge(GroundNavigationWorld& world,
   const auto source = Unpack(from);
   const auto target = Unpack(to);
   const auto result = [&](int value, const char* reason) {
-    Core_Debugf("ai.edge",
-                "actor=%u from=%08X to=%08X direction=%d result=%d reason=%s "
-                "flags=%04X area=%u stuck=%u height_filter=%u",
-                static_cast<unsigned>(navigator.actor_id),
-                static_cast<unsigned>(from), static_cast<unsigned>(to),
-                direction, value, reason,
-                static_cast<unsigned>(navigator.movement_flags),
-                static_cast<unsigned>(navigator.ground_area),
-                static_cast<unsigned>(navigator.is_stuck),
-                static_cast<unsigned>(navigator.height_filter));
+    VS::Core::Debugf(
+        "ai.edge",
+        "actor=%u from=%08X to=%08X direction=%d result=%d reason=%s "
+        "flags=%04X area=%u stuck=%u height_filter=%u",
+        static_cast<unsigned>(navigator.actor_id), static_cast<unsigned>(from),
+        static_cast<unsigned>(to), direction, value, reason,
+        static_cast<unsigned>(navigator.movement_flags),
+        static_cast<unsigned>(navigator.ground_area),
+        static_cast<unsigned>(navigator.is_stuck),
+        static_cast<unsigned>(navigator.height_filter));
     return std::optional<int>(value);
   };
   if (navigator.movement_disabled != 0) return result(0, "disabled-or-bounds");
@@ -458,16 +459,16 @@ std::optional<bool> FineStepBlocked(GroundNavigationWorld& world,
   const Tile current = Unpack(navigator.tile);
   const auto terrain = world.Terrain();
   if (!terrain.Contains(current.x, current.z)) {
-    Core_Warnf("ai", "AI walk probe tile (%d,%d) is outside the maps",
-               current.x, current.z);
+    VS::Core::Warnf("ai", "AI walk probe tile (%d,%d) is outside the maps",
+                    current.x, current.z);
     return std::nullopt;
   }
   int probe = direction;
   if ((static_cast<unsigned>(direction) & 1U) != 0) {
     probe = NeighborDirection(current, next);
     if (probe < 0) {
-      Core_Warnf("ai", "AI fine step (%d,%d) leaves its neighborhood", next.x,
-                 next.z);
+      VS::Core::Warnf("ai", "AI fine step (%d,%d) leaves its neighborhood",
+                      next.x, next.z);
       return std::nullopt;
     }
   }
@@ -782,7 +783,7 @@ bool NudgeSideBlocker(GroundNavigationWorld& world, GroundNavigator& navigator,
   if (*hit == 0) return true;
   const int blocker = *hit - 1;
   if (blocker >= kActorSlots) {
-    Core_Warnf("ai", "AI detour blocker %d is out of bounds", blocker);
+    VS::Core::Warnf("ai", "AI detour blocker %d is out of bounds", blocker);
     return false;
   }
   if (blocker == navigator.actor_id) {
@@ -796,7 +797,8 @@ bool NudgeSideBlocker(GroundNavigationWorld& world, GroundNavigator& navigator,
   const auto other = world.OtherActorDetourWait(blocker);
   if (!other.has_value()) {
     // The original went through the empty AI slot into low memory.
-    Core_Warnf("ai", "AI detour blocker %d has no AI state to nudge", blocker);
+    VS::Core::Warnf("ai", "AI detour blocker %d has no AI state to nudge",
+                    blocker);
     return true;
   }
   if (ReadyForNudge(other->movement_flags, other->repeat_wait)) {
@@ -853,7 +855,7 @@ std::optional<bool> SideLeavesRoom(const GroundNavigationWorld& world,
   if (!delta.has_value()) return std::nullopt;
   const auto limits = world.RoomTileLimits();
   if (!limits.has_value()) {
-    Core_Warnf("ai", "AI obstacle detour requires the room's tile bounds");
+    VS::Core::Warnf("ai", "AI obstacle detour requires the room's tile bounds");
     return std::nullopt;
   }
   const Tile point = Neighbor(Unpack(navigator.tile), *delta);
@@ -862,8 +864,8 @@ std::optional<bool> SideLeavesRoom(const GroundNavigationWorld& world,
     return true;
   }
   if (!world.HasTileMaps() || point.x >= kGridSide || point.z >= kGridSide) {
-    Core_Warnf("ai", "AI detour side tile (%d,%d) is outside the flag map",
-               point.x, point.z);
+    VS::Core::Warnf("ai", "AI detour side tile (%d,%d) is outside the flag map",
+                    point.x, point.z);
     return std::nullopt;
   }
   const unsigned flags = world.TileFlags(point.x, point.z);
@@ -1117,13 +1119,13 @@ bool ContinueRouteLink(GroundNavigationWorld& world,
     return true;
   }
   if (!world.HasRouteGates()) {
-    Core_Warnf("ai", "AI route continuation requires native route gates");
+    VS::Core::Warnf("ai", "AI route continuation requires native route gates");
     return false;
   }
   const int index = world.FindRouteGateAtTile(navigator, navigator.route_exit);
   if (index >= 0) {
     if (index >= kRouteLinks) {
-      Core_Warnf("ai", "AI route gate index %d is out of bounds", index);
+      VS::Core::Warnf("ai", "AI route gate index %d is out of bounds", index);
       return false;
     }
     const auto end = world.RouteLinkStart(index);
@@ -1231,7 +1233,7 @@ std::optional<std::uint32_t> FindGapLandingTile(
     }
     return packed | (static_cast<std::uint32_t>(result) << kStatusShift);
   }
-  Core_Warnf("ai", "AI gap scan exceeded the bounded room grid");
+  VS::Core::Warnf("ai", "AI gap scan exceeded the bounded room grid");
   return std::nullopt;
 }
 
@@ -1324,7 +1326,8 @@ std::optional<int> UpdateHesitationTurn(GroundNavigationWorld& world,
                                         GroundNavigator& navigator, int chance,
                                         int kind, int slot) {
   if (slot < 0 || slot >= kModeSlots || kind < 1 || kind > kPollKind) {
-    Core_Warnf("ai", "AI hesitation slot %d or kind %d is invalid", slot, kind);
+    VS::Core::Warnf("ai", "AI hesitation slot %d or kind %d is invalid", slot,
+                    kind);
     return std::nullopt;
   }
   // Slots 0..5 keep kind and count in the mode counters; slot 6 keeps its
@@ -1340,7 +1343,7 @@ std::optional<int> UpdateHesitationTurn(GroundNavigationWorld& world,
     }
     count = world.HesitationLength(kind);
     if (count <= 0) {
-      Core_Warnf("ai", "AI hesitation lengths were not loaded");
+      VS::Core::Warnf("ai", "AI hesitation lengths were not loaded");
       return std::nullopt;
     }
     stored_kind = static_cast<std::uint8_t>(kind);
@@ -1378,7 +1381,8 @@ std::optional<VerticalMovementStep> SelectActorVerticalMovementStep(
                                 .code = kVerticalCodes[index]};
   }
   if (navigator.gait != 0) {
-    Core_Warnf("ai", "AI running vertical movement has no configured step");
+    VS::Core::Warnf("ai",
+                    "AI running vertical movement has no configured step");
     return std::nullopt;
   }
   return VerticalMovementStep{};
@@ -1393,16 +1397,16 @@ std::optional<bool> IsTileBehindActorTarget(const GroundNavigationWorld& world,
                               ? world.ModelFacing(navigator.actor_id)
                               : std::nullopt;
   if (!own_facing.has_value()) {
-    Core_Warnf("ai", "AI facing query actor %u has no model",
-               static_cast<unsigned>(navigator.actor_id));
+    VS::Core::Warnf("ai", "AI facing query actor %u has no model",
+                    static_cast<unsigned>(navigator.actor_id));
     return std::nullopt;
   }
   int facing = *own_facing;
   if (navigator.movement_target < kActorSlots) {
     const auto position = world.ModelPosition(navigator.movement_target);
     if (!position.has_value()) {
-      Core_Warnf("ai", "AI facing query target %u has no model",
-                 static_cast<unsigned>(navigator.movement_target));
+      VS::Core::Warnf("ai", "AI facing query target %u has no model",
+                      static_cast<unsigned>(navigator.movement_target));
       return std::nullopt;
     }
     facing =
@@ -1437,9 +1441,9 @@ std::optional<std::uint32_t> FindAiDescentTile(GroundNavigationWorld& world,
   const int floor = Field::GroundHeightAtPackedTile(terrain, start);
   const auto current = Core::Math::UnpackTileCoordinate(navigator.tile);
   if (!terrain.Contains(current.x, current.z)) {
-    Core_Warnf("ai", "AI descent origin (%u,%u) is outside the maps",
-               static_cast<unsigned>(current.x),
-               static_cast<unsigned>(current.z));
+    VS::Core::Warnf("ai", "AI descent origin (%u,%u) is outside the maps",
+                    static_cast<unsigned>(current.x),
+                    static_cast<unsigned>(current.z));
     return std::nullopt;
   }
   if (Field::GroundHeightAtPackedTile(terrain, current) >= floor) return 0U;
@@ -1459,7 +1463,7 @@ std::optional<std::uint32_t> FindAiDescentTile(GroundNavigationWorld& world,
     }
     if (taken + 1 >= steps - 1) return 0U;
   }
-  Core_Warnf("ai", "AI descent scan exceeded the bounded room grid");
+  VS::Core::Warnf("ai", "AI descent scan exceeded the bounded room grid");
   return std::nullopt;
 }
 
@@ -1524,8 +1528,8 @@ bool BeginAiGroundMovement(GroundNavigationWorld& world,
 bool DispatchAiLocomotionMode(GroundNavigationWorld& world,
                               GroundNavigator& navigator, int kind, int angle) {
   if (navigator.locomotion_mode >= kLocomotionModes || kind < 0 || kind > 1) {
-    Core_Warnf("ai", "AI locomotion mode %u or request %d is invalid",
-               static_cast<unsigned>(navigator.locomotion_mode), kind);
+    VS::Core::Warnf("ai", "AI locomotion mode %u or request %d is invalid",
+                    static_cast<unsigned>(navigator.locomotion_mode), kind);
     return false;
   }
   switch (
@@ -1572,7 +1576,7 @@ bool ResolveDirectionalMovement(GroundNavigationWorld& world,
                                 GroundNavigator& navigator, int angle,
                                 int mode) {
   if (mode < 0 || mode >= kDirectionalModes) {
-    Core_Warnf("ai", "AI directional movement mode %d is invalid", mode);
+    VS::Core::Warnf("ai", "AI directional movement mode %d is invalid", mode);
     return false;
   }
   const bool flight = mode >= 2;

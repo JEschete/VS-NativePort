@@ -19,7 +19,7 @@
 #include "Event/EventCameraTrackLive.hpp"
 #include "Event/ScriptCamera.h"
 #include "Event/ScriptCommand.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -167,7 +167,7 @@ Vec3 VectorOf(const VECTOR& vector) {
 struct LiveTrackWorkspace {
   VS::Event::CameraState camera{};
   VS::Event::CameraState* saved_camera = Event_camera;
-  int saved_tick_speed = State_tickSpeed;
+  int saved_tick_speed = VS::State::tickSpeed;
 
   LiveTrackWorkspace() { Event_camera = &camera; }
   LiveTrackWorkspace(const LiveTrackWorkspace&) = delete;
@@ -176,7 +176,7 @@ struct LiveTrackWorkspace {
   LiveTrackWorkspace& operator=(LiveTrackWorkspace&&) = delete;
   ~LiveTrackWorkspace() {
     Event_camera = saved_camera;
-    State_tickSpeed = saved_tick_speed;
+    VS::State::tickSpeed = saved_tick_speed;
   }
 };
 
@@ -788,7 +788,7 @@ TEST_CASE("Camera motion entry warns for operation 6 and stores the tracks",
 TEST_CASE("Camera track update entry reads the tick speed",
           "[event][camera][track]") {
   LiveTrackWorkspace workspace;
-  State_tickSpeed = 4;
+  VS::State::tickSpeed = 4;
   VS::Event::CameraTrack& track = workspace.camera.look_at;
   track.motion_mode = event::kCameraMotionPartnerOffset;
   track.duration_frames = 10;

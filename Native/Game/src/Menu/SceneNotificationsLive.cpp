@@ -12,7 +12,7 @@
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/SceneNotifications.hpp"
@@ -20,7 +20,7 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
-#include "State/Timers.h"
+#include "State/Timers.hpp"
 
 namespace VS::Menu {
 namespace {
@@ -40,8 +40,9 @@ std::uint64_t refused_notifications = 0;
 void Refuse(const char* reason) {
   ++refused_notifications;
   if (std::has_single_bit(refused_notifications)) {
-    Core_Warnf("menu", "Scene notification refused: %s (count=%" PRIu64 ")",
-               reason, refused_notifications);
+    VS::Core::Warnf("menu",
+                    "Scene notification refused: %s (count=%" PRIu64 ")",
+                    reason, refused_notifications);
   }
 }
 
@@ -216,7 +217,8 @@ std::int32_t IsLiveSceneNotificationPending() {
   SceneNotificationState state;
   if (!Load(state)) return 1;
   LiveHost host(state);
-  const auto result = IsSceneNotificationPending(state, host, State_tickSpeed);
+  const auto result =
+      IsSceneNotificationPending(state, host, VS::State::tickSpeed);
   Publish(state);
   return result;
 }

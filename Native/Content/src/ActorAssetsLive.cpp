@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the battle asset queue and loaders (ActorAssets.hpp): the
 // legacy request queue, the loaders' globals (ModelLoading.h and
-// ActorAssetsLiveState.h), the actor and weapon records, the shared sequence
+// ActorAssetsLive.hpp), the actor and weapon records, the shared sequence
 // banks, the texture slot tables, the game heap and the disc request queue
 // (CdDriveLive.hpp).
 #include "Content/ActorAssetsLive.hpp"
@@ -20,7 +20,6 @@
 #include <type_traits>
 
 #include "ActorAssets.h"
-#include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Animation.h"
@@ -31,7 +30,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Actors/SkeletonLiveState.h"
+#include "Actors/SkeletonLiveState.hpp"
 #include "Actors/TextureAnimation.h"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/Textures.h"
@@ -40,7 +39,7 @@
 #include "Content/ActorAssets.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/CdDriveLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
@@ -56,22 +55,22 @@
 #include "Render/Textures.h"
 
 // decomp: D_800E8F29 (D_800E8F29@BATTLE/BATTLE.PRG)
-unsigned char Content_modelParseResetFlag;
+unsigned char VS::Content::modelParseResetFlag;
 // decomp: D_800E8FC4 (D_800E8FC4@BATTLE/BATTLE.PRG)
-int Content_assetQueuePeakUsage;
+int VS::Content::assetQueuePeakUsage;
 // decomp: D_800F457C (D_800F457C@BATTLE/BATTLE.PRG)
-int Content_lastLoadPhaseSnapshot;
+int VS::Content::lastLoadPhaseSnapshot;
 // decomp: D_800F4580 (D_800F4580@BATTLE/BATTLE.PRG)
-int Content_assetQueueFrameTicks;
+int VS::Content::assetQueueFrameTicks;
 // decomp: D_800F45D8 (D_800F45D8@BATTLE/BATTLE.PRG)
-int Content_lastAssetRequestType;
+int VS::Content::lastAssetRequestType;
 
 namespace VS::Content {
 namespace {
 static_assert(std::size(Content_legacyActorAssetRequests) ==
               kActorAssetRequestCount);
 static_assert(std::size(Actors_actorRecords) == kActorRecordSlots);
-static_assert(std::size(Actors_weaponModels) == kWeaponModelSlots);
+static_assert(std::size(VS::Actors::weaponModels) == kWeaponModelSlots);
 static_assert(std::size(Render_legacyActorTextureSlots) == kActorTextureSlots);
 static_assert(std::size(Render_legacyWeaponTextureSlots) ==
               kWeaponTextureSlots);
@@ -194,9 +193,9 @@ std::uint64_t refusals = 0;
 void CountRefusal(const char* what, std::int64_t value) {
   ++refusals;
   if (refusals <= kAlwaysReportedRefusals || std::has_single_bit(refusals)) {
-    Core_Warnf("content",
-               "actor assets refused %s (%" PRId64 "); %" PRIu64 " refused",
-               what, value, refusals);
+    VS::Core::Warnf(
+        "content", "actor assets refused %s (%" PRId64 "); %" PRIu64 " refused",
+        what, value, refusals);
   }
 }
 
@@ -247,7 +246,8 @@ Field_ActorPlacement Placement(std::uint32_t value) {
 bool InRange(int index, int count) { return index >= 0 && index < count; }
 
 Actors_WeaponModel* WeaponAt(int slot) {
-  return InRange(slot, kWeaponModelSlots) ? Actors_weaponModels[slot] : nullptr;
+  return InRange(slot, kWeaponModelSlots) ? VS::Actors::weaponModels[slot]
+                                          : nullptr;
 }
 
 Actors_ActorRecord* ActorAt(int slot) {
@@ -288,7 +288,7 @@ void StoreRequestFields(const ActorAssetRequest& in,
 ActorAssetLoadState LoadState() {
   ActorAssetLoadState state;
   state.model_phase = Content_legacyModelLoadPhase;
-  state.parse_phase = Content_modelParseResetFlag;
+  state.parse_phase = modelParseResetFlag;
   state.sequence_parse_phase = Content_legacySequenceParsePhase;
   state.effect_texture_phase = Content_legacyEtmLoadPhase;
   state.weapon_file_loaded = Content_legacyWeaponFileLoaded != 0;
@@ -310,7 +310,7 @@ ActorAssetLoadState LoadState() {
 
 void StoreState(const ActorAssetLoadState& state) {
   Content_legacyModelLoadPhase = state.model_phase;
-  Content_modelParseResetFlag = state.parse_phase;
+  modelParseResetFlag = state.parse_phase;
   Content_legacySequenceParsePhase = state.sequence_parse_phase;
   Content_legacyEtmLoadPhase = state.effect_texture_phase;
   Content_legacyWeaponFileLoaded = state.weapon_file_loaded ? 1 : 0;
@@ -331,18 +331,18 @@ void StoreState(const ActorAssetLoadState& state) {
 
 ActorAssetQueueStats LoadStats() {
   return {
-      .peak_frame_ticks = Content_assetQueuePeakUsage,
-      .last_load_phase = Content_lastLoadPhaseSnapshot,
-      .frame_ticks = Content_assetQueueFrameTicks,
-      .last_kind = Content_lastAssetRequestType,
+      .peak_frame_ticks = assetQueuePeakUsage,
+      .last_load_phase = lastLoadPhaseSnapshot,
+      .frame_ticks = assetQueueFrameTicks,
+      .last_kind = lastAssetRequestType,
   };
 }
 
 void StoreStats(const ActorAssetQueueStats& stats) {
-  Content_assetQueuePeakUsage = stats.peak_frame_ticks;
-  Content_lastLoadPhaseSnapshot = stats.last_load_phase;
-  Content_assetQueueFrameTicks = stats.frame_ticks;
-  Content_lastAssetRequestType = stats.last_kind;
+  assetQueuePeakUsage = stats.peak_frame_ticks;
+  lastLoadPhaseSnapshot = stats.last_load_phase;
+  assetQueueFrameTicks = stats.frame_ticks;
+  lastAssetRequestType = stats.last_kind;
 }
 
 // --- Weapon records ----------------------------------------------------------
@@ -732,12 +732,13 @@ class LiveActorAssetHost final : public ActorAssetHost {
                                    : Content_legacyModelLoadPhase;
     const std::uint8_t parse = active_state_ != nullptr
                                    ? active_state_->parse_phase
-                                   : Content_modelParseResetFlag;
-    Core_Debugf("actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",
-                static_cast<unsigned>(request.kind),
-                static_cast<unsigned>(request.target_slot),
-                static_cast<unsigned>(request.model_id),
-                static_cast<unsigned>(phase), static_cast<unsigned>(parse));
+                                   : modelParseResetFlag;
+    VS::Core::Debugf(
+        "actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",
+        static_cast<unsigned>(request.kind),
+        static_cast<unsigned>(request.target_slot),
+        static_cast<unsigned>(request.model_id), static_cast<unsigned>(phase),
+        static_cast<unsigned>(parse));
   }
   void MoveRequest(int from, int to) override {
     Content_legacyActorAssetRequests[to] =
@@ -770,11 +771,11 @@ class LiveActorAssetHost final : public ActorAssetHost {
     const Content_ActorAssetRequest& head = Content_legacyActorAssetRequests[0];
     // The original indexed the records with any slot below 17.
     const void* record = ActorAt(head.targetSlot);
-    Core_Debugf("actors",
-                "loaded kind=%u actor=%u model=%d result=%d record=%p",
-                static_cast<unsigned>(head.assetKind),
-                static_cast<unsigned>(head.targetSlot),
-                static_cast<int>(head.modelId), result, record);
+    VS::Core::Debugf("actors",
+                     "loaded kind=%u actor=%u model=%d result=%d record=%p",
+                     static_cast<unsigned>(head.assetKind),
+                     static_cast<unsigned>(head.targetSlot),
+                     static_cast<int>(head.modelId), result, record);
   }
 
   // The game heap.
@@ -907,7 +908,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
     if (model == nullptr) {
       return false;
     }
-    Actors_weaponModels[slot] = model;
+    VS::Actors::weaponModels[slot] = model;
     model->textureSlot = kNoAssetTextureSlot;
     return true;
   }
@@ -952,7 +953,7 @@ class LiveActorAssetHost final : public ActorAssetHost {
   }
   void ClearWeaponSlot(int slot) override {
     if (InRange(slot, kWeaponModelSlots)) {
-      Actors_weaponModels[slot] = nullptr;
+      VS::Actors::weaponModels[slot] = nullptr;
     }
   }
   [[nodiscard]] AssetAddress WeaponGeometryBuffer(int slot) const override {

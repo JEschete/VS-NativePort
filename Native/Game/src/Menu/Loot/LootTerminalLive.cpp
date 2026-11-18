@@ -21,11 +21,11 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.h"
 #include "Items/InventoryLive.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -43,7 +43,7 @@
 #include "Menu/Loot/LootRowsLive.hpp"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/LootTerminal.hpp"
-#include "Menu/Loot/Paging.h"
+#include "Menu/Loot/Paging.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
@@ -99,8 +99,8 @@ std::uint64_t g_refusals = 0;
 
 [[noreturn]] void Refuse(std::string_view reason) {
   ++g_refusals;
-  Core_Errorf("menu.loot", "Loot terminal refused: %.*s",
-              static_cast<int>(reason.size()), reason.data());
+  VS::Core::Errorf("menu.loot", "Loot terminal refused: %.*s",
+                   static_cast<int>(reason.size()), reason.data());
   std::abort();
 }
 void RequireIdleControllers() {
@@ -484,7 +484,8 @@ class LiveTerminalHost final : public LootTerminalHost {
     return static_cast<std::uint8_t>(curve[step]);
   }
   std::uint8_t Capacity(LootCategory category) override {
-    const auto capacities = std::span(Items_Inventory_inventoryItemCapacities);
+    const auto capacities =
+        std::span(VS::Items::Inventory::inventoryItemCapacities);
     const auto index = static_cast<std::size_t>(category);
     if (index >= capacities.size()) {
       Refuse("loot category outside capacity table");
@@ -573,7 +574,8 @@ class LiveTerminalHost final : public LootTerminalHost {
   }
   bool AdvanceBatch() override {
     static_cast<void>(Workspace());
-    return Call([] { return Menu_Loot_AdvanceStagedInventory() != 0; });
+    return Call(
+        [] { return VS::Menu::Loot::Live::AdvanceStagedInventory() != 0; });
   }
   void PopulateBaseStats(std::int32_t actor) override {
     Call([&] { Framework::SetLiveActorComparisonStats(actor); });
@@ -605,7 +607,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     ForgetWorkspace();
   }
   void ResetPaging() override {
-    Call([] { Menu_Loot_ResetPaging(); });
+    Call([] { VS::Menu::Loot::Live::ResetPaging(); });
   }
   void BuildStagedInventory() override {
     Call([] { Live::BuildStagedInventory(Menu_Framework_lootLists); });
@@ -752,7 +754,7 @@ void ResetLootTerminalModuleData() {
 }
 void ResetLootTerminalSession() {
   RequireIdleControllers();
-  Menu_Loot_ResetPaging();
+  VS::Menu::Loot::Live::ResetPaging();
   InvalidateWorkspace();
   g_controllers = {};
   Menu_Loot_lootListCount = 0;

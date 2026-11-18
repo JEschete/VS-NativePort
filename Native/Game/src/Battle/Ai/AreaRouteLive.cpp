@@ -17,10 +17,11 @@
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -77,19 +78,6 @@ static_assert(offsetof(MoveView, moveX) == offsetof(AiState, moveX));
 static_assert(offsetof(MoveView, moveZ) == offsetof(AiState, moveZ));
 static_assert(offsetof(MoveView, angle) == offsetof(AiState, heading));
 static_assert(offsetof(MoveView, actor) == offsetof(AiState, actor));
-
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Errorf("ai", "%s", message);
-    std::abort();
-  }
-}
-
-template <typename T>
-T Required(const std::optional<T>& value, const char* message) {
-  Require(value.has_value(), message);
-  return *value;
-}
 
 AiState& State(void* view) {
   Require(view != nullptr, "AI area routing requires an AI state");

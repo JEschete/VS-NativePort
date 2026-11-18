@@ -35,7 +35,7 @@ constexpr std::uint32_t kLowWord = 0xFFFF;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Debugf("event", "%s", message);
+    VS::Core::Debugf("event", "%s", message);
     std::abort();
   }
 }

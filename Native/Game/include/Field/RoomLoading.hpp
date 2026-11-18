@@ -110,7 +110,7 @@ struct ByteRange {
 
 // --- Reading the zone and room files
 
-// Which loads reset the scene timer (State_sceneTimer.resetScope); kNone
+// Which loads reset the scene timer (VS::State::sceneTimer.resetScope); kNone
 // for any other scope, which no load resets.
 enum class SceneTimerScope : std::uint8_t { kRoom, kZone, kScene, kNone };
 enum class DiscReadState : std::uint8_t { kPending, kLoaded, kFailed };
@@ -683,7 +683,7 @@ struct RoomEventSections {
   bool first_entry = false;
 };
 
-// The orbit camera a room starts with (Field_sphericalCamera).
+// The orbit camera a room starts with (VS::Field::sphericalCamera).
 struct RoomEntryCamera {
   int pitch = 0;
   int mode = 0;

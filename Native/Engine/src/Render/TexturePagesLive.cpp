@@ -6,7 +6,7 @@
 #include <cinttypes>
 #include <cstdint>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 
 namespace VS::Render {
 namespace {
@@ -19,11 +19,11 @@ std::uint64_t refused_requests = 0;
 void ReportRefusal(const char* request, TexturePageRange range, int owner,
                    TexturePageResult result) {
   if (std::has_single_bit(++refused_requests)) {
-    Core_Errorf("render",
-                "texture page %s of %" PRIu32 "+%" PRIu32
-                " for owner %d refused (result %d, %" PRIu64 " refused)",
-                request, range.first, range.count, owner,
-                static_cast<int>(result), refused_requests);
+    VS::Core::Errorf("render",
+                     "texture page %s of %" PRIu32 "+%" PRIu32
+                     " for owner %d refused (result %d, %" PRIu64 " refused)",
+                     request, range.first, range.count, owner,
+                     static_cast<int>(result), refused_requests);
   }
 }
 }  // namespace

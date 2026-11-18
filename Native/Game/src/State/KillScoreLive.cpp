@@ -12,7 +12,7 @@
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "State/KillScore.hpp"
 #include "State/Progress.h"
 
@@ -76,32 +76,32 @@ void StoreLiveKillScore(const KillScore& score) noexcept {
 
 void RecordLiveEnemyKillScore(Battle_Actor* enemy) {
   if (enemy == nullptr) {
-    Core_Warnf("state", "RecordEnemyKillScore refused: no defeated enemy");
+    VS::Core::Warnf("state", "RecordEnemyKillScore refused: no defeated enemy");
     return;
   }
   const DefeatedEnemy defeated = DefeatedEnemyOf(*enemy);
   KillScore score = LiveKillScore();
   if (!RecordEnemyKill(score, defeated) && defeated.scored.has_value()) {
-    Core_Warnf("state",
-               "RecordEnemyKillScore: enemy class %u of sub-type %u is "
-               "outside the %u counted classes; its count was refused",
-               static_cast<unsigned>(defeated.scored->enemy_class),
-               static_cast<unsigned>(defeated.sub_type),
-               static_cast<unsigned>(kEnemyClassCount));
+    VS::Core::Warnf("state",
+                    "RecordEnemyKillScore: enemy class %u of sub-type %u is "
+                    "outside the %u counted classes; its count was refused",
+                    static_cast<unsigned>(defeated.scored->enemy_class),
+                    static_cast<unsigned>(defeated.sub_type),
+                    static_cast<unsigned>(kEnemyClassCount));
   }
   StoreLiveKillScore(score);
 }
 
 void UpdateLiveWeaponKillStreak(int /*unused*/) {
   if (Battle_actionState == nullptr) {
-    Core_Warnf("state", "UpdateWeaponKillStreak refused: no action state");
+    VS::Core::Warnf("state", "UpdateWeaponKillStreak refused: no action state");
     return;
   }
   const std::uint16_t action_id = Battle_actionState->selection.actionId;
   if (!ExtendsWeaponKillStreak(action_id)) return;
   const Battle_Actor* player = Battle_characterState;
   if (player == nullptr || player->stats == nullptr) {
-    Core_Warnf("state", "UpdateWeaponKillStreak refused: no player stats");
+    VS::Core::Warnf("state", "UpdateWeaponKillStreak refused: no player stats");
     return;
   }
   KillScore score = LiveKillScore();

@@ -35,7 +35,7 @@ std::optional<DoorRecord> FindEntranceDoorNearTile(
     std::span<const DoorRecord> doors, std::int32_t tile_x, std::int32_t tile_z,
     std::int32_t floor_layer);
 
-// The screen transition's progress (Field_screenTransitionStep).
+// The screen transition's progress (VS::Field::screenTransitionStep).
 enum class TransitionStep : std::uint32_t {
   kIdle = 0,
   kRoomExit = 1,          // BeginRoomTransition

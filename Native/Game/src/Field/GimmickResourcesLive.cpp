@@ -16,7 +16,6 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Field/GimmickResourcesLive.h"
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -353,7 +352,7 @@ bool SetLiveGimmickPaletteTable(std::span<const std::byte> palette_bytes) {
 }
 }  // namespace VS::Field
 
-int Field_FindSharedGimmickModelEntry(Content_ActorAssetRequest* request) {
+int VS::Field::FindSharedGimmickModelEntry(Content_ActorAssetRequest* request) {
   if (request == nullptr) return 0;
   Content_ActorAssetRequest input{};
   std::memcpy(&input, request, sizeof(input));
@@ -367,18 +366,18 @@ int Field_FindSharedGimmickModelEntry(Content_ActorAssetRequest* request) {
   return 1;
 }
 
-void Field_SetGimmickPaletteTableEntry(const void* palette_data) {
+void VS::Field::SetGimmickPaletteTableEntry(const void* palette_data) {
   if (palette_data == nullptr) return;
   static_cast<void>(VS::Field::SetLiveGimmickPaletteTable(
       {static_cast<const std::byte*>(palette_data),
        sizeof(VS::Field::GimmickPaletteTable)}));
 }
 
-int Field_ReleaseGimmickInstanceEntry(int slot) {
+int VS::Field::ReleaseGimmickInstanceEntry(int slot) {
   return VS::Field::ReleaseLiveGimmickInstance(slot);
 }
 
-int Field_CreateGimmickInstanceEntry(Content_ActorAssetRequest* request) {
+int VS::Field::CreateGimmickInstanceEntry(Content_ActorAssetRequest* request) {
   if (request == nullptr) return VS::Content::kAssetRefused;
   Content_ActorAssetRequest input{};
   std::memcpy(&input, request, sizeof(input));

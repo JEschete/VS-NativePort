@@ -15,7 +15,7 @@
 #include "Audio/Seq/Channel.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptDialogCommands.hpp"
@@ -100,13 +100,13 @@ bool RetainDialogOwner(const event::ScriptDataLease& lease) {
 }
 
 void RefuseNativeDialog(int box, int string_id) {
-  Core_Warnf("event", "Native dialog string refused: box=%d string=%d", box,
-             string_id);
+  VS::Core::Warnf("event", "Native dialog string refused: box=%d string=%d",
+                  box, string_id);
 }
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Debugf("event", "%s", message);
+    VS::Core::Debugf("event", "%s", message);
     std::abort();
   }
 }
@@ -133,8 +133,8 @@ Menu_TextBoxState& Box(int box) {
 class LiveScriptDialogHost final : public event::ScriptDialogHost {
  public:
   void Refuse(event::ScriptDialogRefusal refusal, int value) override {
-    Core_Warnf("event", "Script dialog command refused %s (%d)",
-               RefusalText(refusal), value);
+    VS::Core::Warnf("event", "Script dialog command refused %s (%d)",
+                    RefusalText(refusal), value);
   }
 
   [[nodiscard]] int ResolveActor(std::uint16_t reference) override {

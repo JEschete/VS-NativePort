@@ -175,7 +175,7 @@ int func_800F9800(void) {
         self.assertIn("Battle_settledCameraDistance", generated)
         self.assertIn("Battle_cameraEaseMode", generated)
         binding = (root / r"Native\Game\src\Battle\ActionSequenceLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("Field_sphericalCamera.values.distance", binding)
+        self.assertIn("VS::Field::sphericalCamera.values.distance", binding)
         self.assertNotIn("Battle_settledCameraDistance", binding)
         self.assertIn("Render::SetLiveCameraProjectionDistance", binding)
         self.assertNotIn("Core_Gte_SetGeomScreen", binding)
@@ -1494,7 +1494,7 @@ int func_800F9800(void) {
                 self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
                 header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
                 retained_c = {
-                    "F00782": ("Field_CreateGimmickInstanceEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
+                    "F00782": ("Field_CreateGimmickInstanceEntry", r"Native\Game\include\Field\GimmickResourcesLive.hpp"),
                     "F00837": ("Field_FindGimmickBelowEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
                     "F00838": ("Field_GimmickSubtypeEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
                     "F00917": ("Field_AreGimmicksMovingEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
@@ -1508,13 +1508,13 @@ int func_800F9800(void) {
                     "F00914": ("Field_ApplyGimmickInteractionCommandEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
                     "F01014": ("Field_UpdateGimmickReactionAnimationEntry", r"Native\Game\include\Field\GimmickReactionsLive.hpp"),
                     "F01013": ("Field_UpdateGimmickMotionEntry", r"Native\Game\include\Field\GimmickDynamicsLive.hpp"),
-                    "F00065": ("Field_DisableTrapAtPositionEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
-                    "F00602": ("Field_RoomTriggerAtTileEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
-                    "F00616": ("Field_SetRoomTriggerEnabledEntry", r"Native\Game\src\Field\InteractionTargetLive.h"),
+                    "F00065": ("Field_DisableTrapAtPositionEntry", r"Native\Game\include\Field\InteractionTargetLive.hpp"),
+                    "F00602": ("Field_RoomTriggerAtTileEntry", r"Native\Game\include\Field\InteractionTargetLive.hpp"),
+                    "F00616": ("Field_SetRoomTriggerEnabledEntry", r"Native\Game\include\Field\InteractionTargetLive.hpp"),
                     "F00942": ("Field_FindTopGimmickAtTileEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
-                    "F00783": ("Field_ReleaseGimmickInstanceEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
-                    "F00780": ("Field_FindSharedGimmickModelEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
-                    "F00781": ("Field_SetGimmickPaletteTableEntry", r"Native\Game\src\Field\GimmickResourcesLive.h"),
+                    "F00783": ("Field_ReleaseGimmickInstanceEntry", r"Native\Game\include\Field\GimmickResourcesLive.hpp"),
+                    "F00780": ("Field_FindSharedGimmickModelEntry", r"Native\Game\include\Field\GimmickResourcesLive.hpp"),
+                    "F00781": ("Field_SetGimmickPaletteTableEntry", r"Native\Game\include\Field\GimmickResourcesLive.hpp"),
                     "F00620": ("Field_MovingPlatformTargetWaypointEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00629": ("Field_SetPlatformFreezeAppearanceEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
                     "F00596": ("Field_DrawMovingPlatformShadowsEntry", r"Native\Game\src\Field\PlatformPlacementLive.h"),
@@ -1549,8 +1549,8 @@ int func_800F9800(void) {
                     "F00580": ("Field_InteractiveDoorAtTileEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
                     "F00633": ("Field_MarkSigilDoorUnlockedEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
                     "F00634": ("Field_IsRoomSigilDoorUnlockedEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
-                    "F00610": ("Field_SceneDoorIdEntry", r"Native\Game\src\Field\MinimapSceneLive.h"),
-                    "F00611": ("Field_MarkEntranceDoorOnSceneMapEntry", r"Native\Game\src\Field\MinimapSceneLive.h"),
+                    "F00610": ("Field_SceneDoorIdEntry", r"Native\Game\include\Field\MinimapSceneLive.hpp"),
+                    "F00611": ("Field_MarkEntranceDoorOnSceneMapEntry", r"Native\Game\include\Field\MinimapSceneLive.hpp"),
                     "F00552": ("Field_StoreEntranceDoorForReloadEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00577": ("Field_SetEntranceDoorRecordEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00578": ("Field_FindEntranceDoorNearTileEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
@@ -1577,9 +1577,9 @@ int func_800F9800(void) {
                     "F00148": ("Field_UpdateChestContentsSelectionEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00136": ("Field_TryOpenChestEntry", r"Native\Game\src\Field\ChestInteractionsLive.h"),
                     "F00606": ("Field_BeginSwitchToggleEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
-                    "F00570": ("Field_ResetGimmickAnimationQueueEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),
-                    "F00585": ("Field_UpdateGimmickAnimationQueueEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),
-                    "F00584": ("Field_QueueGimmickAnimationEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.h"),
+                    "F00570": ("Field_ResetGimmickAnimationQueueEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.hpp"),
+                    "F00585": ("Field_UpdateGimmickAnimationQueueEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.hpp"),
+                    "F00584": ("Field_QueueGimmickAnimationEntry", r"Native\Game\src\Field\GimmickAnimationQueueLive.hpp"),
                     "F00607": ("Field_ToggleRoomSwitchEntry", r"Native\Game\src\Field\RoomSwitchesLive.h"),
                     "F00853": ("Field_GimmickPlacementEntry", r"Native\Game\src\Field\GimmickPlacementLive.h"),
                     "F01261": ("Event_EvaluateRoomEventTriggersEntry", r"Native\Game\src\Event\RoomTriggerEntryLive.hpp"),
@@ -1804,7 +1804,7 @@ int func_800F9800(void) {
         )
         for address, size, name in (
             ("800F4ED8", 16, "VS::Effects::screenEffectDefaults"),
-            ("800F1D08", 4, "Field_matchingDoorRecords"),
+            ("800F1D08", 4, "VS::Field::matchingDoorRecords"),
         ):
             self.assertIn(
                 f'{{"BATTLE/BATTLE.PRG", 0x{address}u, {size}u, '
@@ -3077,7 +3077,7 @@ int func_800F9800(void) {
         self.assertIn("std::span(Battle_puzzleTimerText)", source)
         self.assertIn("std::span<char, kPuzzleTimerTextBytes> text", core)
         self.assertLess(
-            source.index('Core_Debugf("hud.timer"'),
+            source.index('VS::Core::Debugf("hud.timer"'),
             source.index("DrawText(std::string_view(Battle_puzzleTimerText"),
         )
         self.assertIn("const State_SceneTimer* timer", source)
@@ -3087,7 +3087,7 @@ int func_800F9800(void) {
         self.assertNotIn("F01392", copy_fixups.FIXES)
         self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01392"], "VS::Menu::UpdateLiveTextBoxes")
         source = (root / r"Native\Game\src\Menu\TextBoxUpdateLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("Battle::DrawLivePuzzleTimer(&State_sceneTimer);", source)
+        self.assertIn("Battle::DrawLivePuzzleTimer(&VS::State::sceneTimer);", source)
         self.assertNotIn("&Battle_puzzleTimer", source)
         self.assertNotIn("Render_activeTextBoxIndex", source)
 
@@ -3327,7 +3327,7 @@ int func_800F9800(void) {
         start = live.index("void InitializeLiveActorAnimationPose(")
         init = live[start:live.index("\n}\n", start)]
         self.assertLess(init.index("RestartLiveAnimationEvents(*actor) < 0"), init.index("actor->poseOverrideActive = 0;"))
-        self.assertIn("Core_Errorf", live)
+        self.assertIn("VS::Core::Errorf", live)
         # #276 slice 20b: PlayActorAnimation (F00856) is owned and keeps the override when the unwind fails.
         core = (root / r"Native\Game\src\Actors\AnimationControl.cpp").read_text(encoding="utf-8")
         self.assertIn(
@@ -3337,7 +3337,7 @@ int func_800F9800(void) {
         )
 
     def test_scripted_effect_requires_its_actor_before_starting_playback(self):
-        # #276 row 36: the typed handler refuses an unavailable actor through its host (Core_Errorf) and holds the
+        # #276 row 36: the typed handler refuses an unavailable actor through its host (VS::Core::Errorf) and holds the
         # script before any playback starts; a model reference must match the actor's model.
         root = Path(__file__).resolve().parents[2]
         core = (root / r"Native\Game\src\Event\ScriptEffectCommands.cpp").read_text(encoding="utf-8")
@@ -3349,7 +3349,7 @@ int func_800F9800(void) {
         self.assertLess(handler.index("return ScriptStep::kHold;"), handler.index("host.StartActorEffect"))
         live = (root / r"Native\Game\src\Event\ScriptEffectCommandsLive.cpp").read_text(encoding="utf-8")
         start = live.index("void ReportUnavailableActor(")
-        self.assertIn("Core_Errorf", live[start:live.index("\n  }\n", start)])
+        self.assertIn("VS::Core::Errorf", live[start:live.index("\n  }\n", start)])
 
     def test_sound_effect_commands_bind_their_handler_table_addresses(self):
         # #276 audio-control-sfx: Audio_Mixer_kCommandHandlers (SLUS_010.40 0x800301E0) stores these 13 handler
@@ -3495,8 +3495,9 @@ int func_800F9800(void) {
                 body = loading.split(header, 1)[1]
                 self.assertTrue(body.startswith("\n  host.ResetGameplayInspection();\n"))
         room_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
-        self.assertEqual(
-            room_live.count("void ResetGameplayInspection() override { Boot_ResetGameplayInspection(); }"), 2)
+        self.assertEqual(len(re.findall(
+            r"void ResetGameplayInspection\(\) override \{\s*VS::Boot::ResetGameplayInspection\(\);\s*\}",
+            room_live)), 2)
 
     def test_gimmick_palette_matches_ledger_element_width_without_growth(self):
         source = "u_char pulsedPalette[0x20];"
@@ -4695,14 +4696,14 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
             with self.subTest(item=item):
                 self.assertIn(item, owned)
                 self.assertEqual(
-                    owned[item]["header"], r"Native\Game\src\Field\DoorMatchList.h"
+                    owned[item]["header"], r"Native\Game\src\Field\DoorMatchList.hpp"
                 )
         self.assertEqual(owned["F00579"]["name"], "VS::Field::TransitionDoorsAtTile")
         self.assertEqual(owned["F00579"]["header"], r"Native\Game\include\Field\DoorMatches.hpp")
         source = (root / "Native/Game/src/Field/Doors.cpp").read_text()
         caller = (root / "Native/Game/src/Field/ChestInteractionsLive.cpp").read_text()
         live_header = (root / "Native/Game/include/Field/DoorMatchesLive.hpp").read_text()
-        self.assertIn('"Field/DoorMatchList.h"', live_header)
+        self.assertIn('"Field/DoorMatchList.hpp"', live_header)
         self.assertIn('#include "Field/DoorMatchesLive.hpp"', caller)
         self.assertNotIn("Field_TransitionDoorsAtTile(", caller)
         self.assertEqual(caller.count("VS::Field::TransitionLiveDoorsAtTile("), 1)
@@ -4714,9 +4715,9 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         core = (root / "Native/Game/src/Field/DoorMatches.cpp").read_text()
         self.assertNotIn("Legacy/", core)
         self.assertNotIn("Field_roomData", core)
-        self.assertNotIn("Field_DoorMatchList Field_matchingDoorRecords;", source)
+        self.assertNotRegex(source, r"DoorMatchList\s+(VS::Field::)?matchingDoorRecords\s*;")
         self.assertNotIn("Field_TransitionDoorsAtTile(int", source)
-        owned_header = (root / "Native/Game/src/Field/DoorMatchList.h").read_text()
+        owned_header = (root / "Native/Game/src/Field/DoorMatchList.hpp").read_text()
         self.assertIn("Field_MpdDoorRecord** records;", owned_header)
         self.assertNotIn("records[0]", owned_header)
 
@@ -5005,7 +5006,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertIn("const int slot = kPreviewWeaponModelSlot + weapon;", reset)
         self.assertIn("host.SetWeaponAttached(slot);", reset)
         live = (root / "Native/Game/src/Menu/Framework/ActorPreviewLive.cpp").read_text()
-        self.assertIn("return Actors_weaponModels[slot];", live)
+        self.assertIn("return VS::Actors::weaponModels[slot];", live)
         self.assertIn("model->reserved08Bit4 = 1;", live)
         self.assertNotIn("Battle_unusedGlobal1", preview + live)
         # #276 row 47 B47-01 promoted func_801090C4 (F02637) to the owned EquipmentRows.cpp
@@ -5019,7 +5020,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
             rows,
         )
         rows_live = (root / "Native/Game/src/Menu/Inventory/EquipmentRowsLive.cpp").read_text()
-        self.assertIn("return Actors_weaponModels[slot];", rows_live)
+        self.assertIn("return VS::Actors::weaponModels[slot];", rows_live)
         self.assertIn("model->reserved11 = 0;", rows_live)
         self.assertNotIn("Battle_unusedGlobal", rows + rows_live)
         inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()

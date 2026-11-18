@@ -25,7 +25,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 #include "DiscQueue.h"
@@ -54,7 +54,7 @@
 #include "Event/Weather.h"
 #include "Field/BackgroundLive.hpp"
 #include "Field/CameraLive.hpp"
-#include "Field/CameraLiveState.h"
+#include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/Gimmicks.h"
@@ -236,26 +236,27 @@ class LiveVmHost final : public ScriptVmHost {
   OpcodeInvocation invocation;
 
   void Refuse(ScriptVmRefusal reason, int value) override {
-    Core_Warnf("event", "Script VM refused: reason=%d value=%d",
-               static_cast<int>(reason), value);
+    VS::Core::Warnf("event", "Script VM refused: reason=%d value=%d",
+                    static_cast<int>(reason), value);
   }
   void NoteInvalidOpcode(const ScriptInstruction& instruction) override {
-    Core_Warnf("event", "Unknown opcode: thread=%d region=%d offset=%u",
-               instruction.thread,
-               static_cast<int>(instruction.location.region),
-               instruction.location.offset);
+    VS::Core::Warnf("event", "Unknown opcode: thread=%d region=%d offset=%u",
+                    instruction.thread,
+                    static_cast<int>(instruction.location.region),
+                    instruction.location.offset);
   }
   void NoteUndefinedSpecialOperation(int operation) override {
-    Core_Warnf("event", "Undefined special operation: %d", operation);
+    VS::Core::Warnf("event", "Undefined special operation: %d", operation);
   }
   void NoteCutsceneSkip(int thread) override {
-    Core_Debugf("event", "Skip event=%d thread=%d", Event_eventId, thread);
+    VS::Core::Debugf("event", "Skip event=%d thread=%d", Event_eventId, thread);
   }
   std::span<const std::uint8_t> Region(ScriptRegion region) const override {
     const auto bytes = sources.Borrow(region);
     if (!bytes) {
-      Core_Warnf("event", "Script source borrow refused: region=%d reason=%d",
-                 static_cast<int>(region), static_cast<int>(bytes.error()));
+      VS::Core::Warnf(
+          "event", "Script source borrow refused: region=%d reason=%d",
+          static_cast<int>(region), static_cast<int>(bytes.error()));
       return {};
     }
     return *bytes;
@@ -263,8 +264,9 @@ class LiveVmHost final : public ScriptVmHost {
   std::uint64_t RegionGeneration(ScriptRegion region) const override {
     const auto source = sources.Lease(region);
     if (!source) {
-      Core_Warnf("event", "Script source lease refused: region=%d reason=%d",
-                 static_cast<int>(region), static_cast<int>(source.error()));
+      VS::Core::Warnf(
+          "event", "Script source lease refused: region=%d reason=%d",
+          static_cast<int>(region), static_cast<int>(source.error()));
       return 0;
     }
     return source->Generation();
@@ -443,8 +445,8 @@ class LiveVmHost final : public ScriptVmHost {
   bool BindRoomDoorSource() override {
     const auto mounted = sources.MountRoom(ScriptRegion::kDoorEvents, room);
     if (!mounted) {
-      Core_Warnf("event", "Door source binding refused: reason=%d",
-                 static_cast<int>(mounted.error()));
+      VS::Core::Warnf("event", "Door source binding refused: reason=%d",
+                      static_cast<int>(mounted.error()));
     }
     return mounted.has_value();
   }
@@ -566,7 +568,7 @@ class LiveVmHost final : public ScriptVmHost {
     Render::SetRoomTextureLodDepth(Render::LiveRoomClipState(), depth);
   }
   void SetRoomGeometryDrawMode(int mode) override {
-    Field_roomGeometryDrawMode = mode;
+    VS::Field::roomGeometryDrawMode = mode;
   }
   void ShowRoomGeometryGroup(int group) override {
     static_cast<void>(Field::LiveShowRoomGeometryGroup(group));
@@ -796,8 +798,9 @@ EventFileStatus LiveVmHost::EventFile() const {
 void LiveVmHost::PublishPrepared(PreparedScriptSource&& prepared) {
   const auto published = sources.Publish(std::move(prepared));
   if (!published) {
-    Core_Errorf("event", "Prepared publication invariant failed: reason=%d",
-                static_cast<int>(published.error()));
+    VS::Core::Errorf("event",
+                     "Prepared publication invariant failed: reason=%d",
+                     static_cast<int>(published.error()));
     std::abort();
   }
 }
@@ -826,8 +829,8 @@ bool LiveVmHost::PreparePendingFile(int id, EventBuffer destination) {
     auto prepared =
         sources.PrepareBuffer(ScriptRegion::kEventScript, pending_buffer_);
     if (!prepared) {
-      Core_Warnf("event", "File source preparation refused: reason=%d",
-                 static_cast<int>(prepared.error()));
+      VS::Core::Warnf("event", "File source preparation refused: reason=%d",
+                      static_cast<int>(prepared.error()));
       pending_buffer_.reset();
       return false;
     }
@@ -877,7 +880,8 @@ bool LiveVmHost::QueueEventFileLoad(int id, EventBuffer destination) {
 void LiveVmHost::CancelEventFile() {
   if (pending_buffer_ && !Content::CancelLiveDiscWrites(std::as_writable_bytes(
                              std::span{*pending_buffer_}))) {
-    Core_Errorf("event", "Cannot release a script destination still writable");
+    VS::Core::Errorf("event",
+                     "Cannot release a script destination still writable");
     std::abort();
   }
   if (RequestMatches()) {
@@ -935,8 +939,8 @@ bool LiveVmHost::AdoptChainedEvent() {
   auto prepared =
       sources.PrepareBuffer(ScriptRegion::kEventScript, chained_buffer_);
   if (!prepared) {
-    Core_Warnf("event", "Chained source preparation refused: reason=%d",
-               static_cast<int>(prepared.error()));
+    VS::Core::Warnf("event", "Chained source preparation refused: reason=%d",
+                    static_cast<int>(prepared.error()));
     return false;
   }
   PublishPrepared(std::move(*prepared));
@@ -1055,8 +1059,9 @@ ScriptFlow LiveVmHost::RunOpcode(ScriptLocation location, int thread) {
   if (!invocation.handled) {
     constexpr std::intptr_t kLastStatus = 4;
     if (legacy_result < 0 || legacy_result > kLastStatus) {
-      Core_Warnf("event", "Pointer-valued opcode result refused: %" PRIdPTR,
-                 legacy_result);
+      VS::Core::Warnf("event",
+                      "Pointer-valued opcode result refused: %" PRIdPTR,
+                      legacy_result);
       result = ScriptFlow::Of(ScriptFlowKind::kStop);
     } else {
       result = ScriptFlow::Of(static_cast<ScriptFlowKind>(legacy_result));
@@ -1071,13 +1076,14 @@ auto WithSourceUse(Operation operation) -> decltype(operation()) {
   static_assert(std::is_trivially_destructible_v<Operation>);
   const auto begun = live_host.sources.BeginUse();
   if (!begun) {
-    Core_Warnf("event", "Script source use refused: reason=%d",
-               static_cast<int>(begun.error()));
+    VS::Core::Warnf("event", "Script source use refused: reason=%d",
+                    static_cast<int>(begun.error()));
     return {};
   }
   const auto result = operation();
   if (!live_host.sources.EndUse()) {
-    Core_Errorf("event", "Script source use ended without a matching begin");
+    VS::Core::Errorf("event",
+                     "Script source use ended without a matching begin");
     std::abort();
   }
   return result;

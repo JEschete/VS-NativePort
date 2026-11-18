@@ -7,8 +7,8 @@
 #include <span>
 
 #include "Audio/Seq/Channel.h"
-#include "Core/Diagnostics.h"
-#include "Diagnostics/SceneTrace.h"
+#include "Core/Diagnostics.hpp"
+#include "Diagnostics/SceneTrace.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/StateFlags.h"
 
@@ -19,7 +19,7 @@ static_assert(sizeof Audio_Seq_unusedStateFlags == kScriptFlagCount);
 class SceneTraceObserver final : public ScriptFlagObserver {
  public:
   void FlagWritten(const ScriptFlagWrite& write) override {
-    Diagnostics_RecordScriptFlagWrite(write.id, write.before, write.after);
+    VS::Game::RecordScriptFlagWrite(write.id, write.before, write.after);
   }
 };
 
@@ -34,8 +34,8 @@ SceneTraceObserver& SceneTrace() noexcept {
 }
 
 void WarnFlagRefused(const char* operation, int id) {
-  Core_Warnf("state", "%s refused: flag %d is outside the %u flag bytes",
-             operation, id, static_cast<unsigned>(kScriptFlagCount));
+  VS::Core::Warnf("state", "%s refused: flag %d is outside the %u flag bytes",
+                  operation, id, static_cast<unsigned>(kScriptFlagCount));
 }
 }  // namespace
 

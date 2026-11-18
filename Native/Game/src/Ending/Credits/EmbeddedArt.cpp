@@ -1,4 +1,4 @@
-#include "EmbeddedArt.h"
+#include "Ending/Credits/EmbeddedArt.hpp"
 
 #include <array>
 #include <cstddef>
@@ -8,7 +8,7 @@
 #include <optional>
 #include <span>
 
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Ending/Credits.h"
 #include "Legacy/Psx.h"
 
@@ -84,7 +84,7 @@ std::optional<std::size_t> TimLength(std::span<const unsigned char> source) {
 
 // ENDING/D4.c:999,583; G00802 aliases TIM8 at8007709C. G00788's imported
 // trailing module span contains the complete TIMs, not just glyph widths.
-int Ending_Credits_PrepareEmbeddedArt(void) {
+int VS::Ending::Credits::PrepareEmbeddedArt() {
   prepared = false;
   Ending_Credits_illustrationTimWorkspace = nullptr;
   const std::span<const unsigned char> source(Ending_Credits_glyphWidths);
@@ -92,14 +92,15 @@ int Ending_Credits_PrepareEmbeddedArt(void) {
     const auto offset =
         static_cast<std::size_t>(kSourceAddresses[index] - kSourceBase);
     if (offset >= source.size()) {
-      Core_Errorf("ending.art", "embedded TIM%u source is outside its module",
-                  static_cast<unsigned>(index + 1));
+      VS::Core::Errorf("ending.art",
+                       "embedded TIM%u source is outside its module",
+                       static_cast<unsigned>(index + 1));
       return 0;
     }
     const auto bytes = TimLength(source.subspan(offset));
     if (!bytes) {
-      Core_Errorf("ending.art", "embedded TIM%u has invalid source blocks",
-                  static_cast<unsigned>(index + 1));
+      VS::Core::Errorf("ending.art", "embedded TIM%u has invalid source blocks",
+                       static_cast<unsigned>(index + 1));
       return 0;
     }
     std::memcpy(&embedded_art[index], source.data() + offset, *bytes);
@@ -110,10 +111,10 @@ int Ending_Credits_PrepareEmbeddedArt(void) {
   return 1;
 }
 
-Ending_Credits_TimHeader* Ending_Credits_EmbeddedArt(unsigned index) {
+Ending_Credits_TimHeader* VS::Ending::Credits::EmbeddedArt(unsigned index) {
   if (!prepared || index >= embedded_art.size()) {
-    Core_Errorf("ending.art", "unprepared or invalid embedded TIM index=%u",
-                index);
+    VS::Core::Errorf("ending.art",
+                     "unprepared or invalid embedded TIM index=%u", index);
     std::abort();
   }
   return &embedded_art[index].header;

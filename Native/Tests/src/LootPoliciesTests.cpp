@@ -19,7 +19,7 @@
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootRows.hpp"
 #include "Menu/Loot/LootScreen.h"
-#include "Menu/Loot/Paging.h"
+#include "Menu/Loot/Paging.hpp"
 
 namespace {
 namespace items = VS::Items;
@@ -242,7 +242,7 @@ loot::OrganizeMenu OpenOrganize(FakePromptHost& host, const loot::LootRow& row,
 struct LivePoliciesFixture {
   Items_Inventory staged{};
   Items_Inventory backup{};
-  std::array<Menu_Loot_LootListItem, kMenuLootRowCapacity> rows{};
+  std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   std::array<Menu_Framework_MenuRow, 40> menu_rows{};
   Menu_Framework_MenuRow* previous_menu_rows{Menu_Framework_menuItems};
   Items_Inventory* previous_inventory{Menu_Loot_inventory};
@@ -657,7 +657,7 @@ TEST_CASE("Live loot policies refuse missing lists and rows",
   fixture.staged.misc[0].id = 77;
   Audio_Seq_unusedInventory = {};
   live::ShowLootDescription(-1);
-  live::ShowLootDescription(static_cast<int>(kMenuLootRowCapacity));
+  live::ShowLootDescription(static_cast<int>(VS::Menu::Loot::kRowCapacity));
   CHECK(Audio_Seq_unusedInventory.misc[0].id == 0);
   Menu_Loot_lootList = nullptr;
   live::RenderBagCapacities(0);

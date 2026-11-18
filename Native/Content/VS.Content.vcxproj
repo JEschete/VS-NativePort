@@ -97,7 +97,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ActorAssets.h" />
-    <ClInclude Include="src\ActorAssetsLiveState.h" />
     <ClInclude Include="src\DiscQueue.h" />
     <ClInclude Include="src\LegacyFiles.h" />
     <ClInclude Include="src\ModelLoading.h" />

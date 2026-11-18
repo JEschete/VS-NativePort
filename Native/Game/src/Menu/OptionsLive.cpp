@@ -18,14 +18,14 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.h"
 #include "Menu/Options.hpp"
-#include "Menu/OptionsLiveState.h"
+#include "Menu/OptionsLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: _menuStrings (src/MENU/MENU8.PRG/88.c)
-u_short Menu_Options_menuStrings[kMenuOptionsMenuStringCount];
+u_short VS::Menu::Options::menuStrings[VS::Menu::Options::kMenuStringCount];
 
 namespace VS::Menu::Options {
 namespace {
@@ -42,7 +42,7 @@ static_assert(offsetof(State_Settings, information) == kInformationOffset);
 static_assert(offsetof(State_Settings, simpleMap) == kSimpleMapOffset);
 static_assert(offsetof(State_Settings, monoSound) == kMonoSoundOffset);
 static_assert(offsetof(State_Settings, vibrationOn) == kVibrationOnOffset);
-static_assert(sizeof(Menu_Options_menuStrings) ==
+static_assert(sizeof(menuStrings) ==
               kMenuStringHalfwords * sizeof(std::uint16_t));
 
 // The flag byte's bits (the bitfields above cursorMemory).
@@ -73,9 +73,7 @@ class LiveHost final : public Host {
   void Refuse(std::string_view what) override {
     VS_LOG_WARN("menu.options", "{}", what);
   }
-  std::span<const std::uint16_t> MenuStrings() override {
-    return Menu_Options_menuStrings;
-  }
+  std::span<const std::uint16_t> MenuStrings() override { return menuStrings; }
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }
   void CreateRows(int row_count, int row_info, std::span<const RowText> texts,
                   std::span<const std::int32_t> row_types) override {
@@ -161,7 +159,7 @@ class LiveHost final : public Host {
  private:
   static char* Text(std::uint16_t offset) {
     // The row texts are byte strings inside the halfword table.
-    return reinterpret_cast<char*>(&Menu_Options_menuStrings[offset]);
+    return reinterpret_cast<char*>(&menuStrings[offset]);
   }
 };
 }  // namespace

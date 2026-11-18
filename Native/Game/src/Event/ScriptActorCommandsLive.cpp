@@ -26,7 +26,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
-#include "Core/Diagnostics.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActorCommands.hpp"
@@ -36,7 +36,7 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/Actors.h"
 #include "Field/Doors.h"
-#include "Field/MinimapSceneLive.h"
+#include "Field/MinimapSceneLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
@@ -62,7 +62,7 @@ constexpr std::uint32_t kLowHalf = 0xFFFF;
 
 void Require(bool valid, const char* message) {
   if (!valid) {
-    Core_Debugf("event", "%s", message);
+    VS::Core::Debugf("event", "%s", message);
     std::abort();
   }
 }
@@ -118,8 +118,8 @@ void StoreLiveSelection(const event::ActorSelection& selection,
 class LiveScriptActorHost final : public event::ScriptActorHost {
  public:
   void Refuse(event::ScriptActorRefusal refusal, int value) override {
-    Core_Warnf("event", "Script actor command refused %s (%d)",
-               RefusalText(refusal), value);
+    VS::Core::Warnf("event", "Script actor command refused %s (%d)",
+                    RefusalText(refusal), value);
   }
 
   [[nodiscard]] int ResolveActor(std::uint16_t reference) override {
@@ -218,7 +218,8 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
   [[nodiscard]] std::uint8_t AnimationBankBase(int bank) const override {
     if (bank < 0 ||
         static_cast<std::size_t>(bank) >= std::size(Event_animationBankBases)) {
-      Core_Warnf("event", "Script animation bank %d is past its table", bank);
+      VS::Core::Warnf("event", "Script animation bank %d is past its table",
+                      bank);
       return 0;
     }
     // The PS1 read these with lbu; a plain char may be signed here.
@@ -369,7 +370,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
     VS::Battle::PreserveLiveAshleyStatuses();
   }
   void MarkEnteredDoor(int door) override {
-    Field_MarkEntranceDoorOnSceneMapEntry(door);
+    VS::Field::MarkEntranceDoorOnSceneMapEntry(door);
   }
   [[nodiscard]] bool MenuTransitionActive() const override {
     return Event_isMenuTransitionActive != 0;
@@ -396,7 +397,7 @@ class LiveScriptActorHost final : public event::ScriptActorHost {
     u_long bone_length = 0;
     if (VS::Actors::LiveActorTaggedBoneMatrix(actor, kDialogAnchorTag, &bone,
                                               &bone_length) < 0) {
-      Core_Warnf("event", "Actor %d has no dialog anchor bone", actor);
+      VS::Core::Warnf("event", "Actor %d has no dialog anchor bone", actor);
       return {.anchor = anchor};
     }
     Core_Gte_SetRotMatrix(&bone);
@@ -436,7 +437,7 @@ void SetLiveEventActorActivity(std::int16_t activity_enabled) {
 void BuildLiveScriptActorSelection(std::uint16_t actor_selector,
                                    Event_ActorSelection* selection) {
   if (selection == nullptr) {
-    Core_Warnf("event", "Script actor selection is missing");
+    VS::Core::Warnf("event", "Script actor selection is missing");
     return;
   }
   LiveScriptActorHost host;
@@ -446,7 +447,7 @@ void BuildLiveScriptActorSelection(std::uint16_t actor_selector,
 
 std::uint16_t NextLiveScriptSelectedActor(Event_ActorSelection* selection) {
   if (selection == nullptr) {
-    Core_Warnf("event", "Script actor selection is missing");
+    VS::Core::Warnf("event", "Script actor selection is missing");
     return kSelectionEnd;
   }
   LiveScriptActorHost host;
@@ -458,7 +459,8 @@ std::uint16_t NextLiveScriptSelectedActor(Event_ActorSelection* selection) {
 
 int LiveActorDialogAnchor(int actor_id, SVECTOR* dialog_anchor) {
   if (dialog_anchor == nullptr) {
-    Core_Warnf("event", "Actor %d dialog anchor output is missing", actor_id);
+    VS::Core::Warnf("event", "Actor %d dialog anchor output is missing",
+                    actor_id);
     return 0;
   }
   LiveScriptActorHost host;

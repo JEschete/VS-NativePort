@@ -20,7 +20,7 @@
 #include "Input/ControllerLiveState.h"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
-#include "Items/InventoryLiveState.h"
+#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
@@ -285,10 +285,10 @@ class LiveTransferWorld final : public TransferWorld {
   }
   std::uint8_t InventoryCapacity(Category category) override {
     const auto index = static_cast<std::size_t>(category);
-    if (index >= std::size(Items_Inventory_inventoryItemCapacities)) {
+    if (index >= std::size(VS::Items::Inventory::inventoryItemCapacities)) {
       Refuse("inventory capacity outside its table");
     }
-    return Items_Inventory_inventoryItemCapacities[index];
+    return VS::Items::Inventory::inventoryItemCapacities[index];
   }
   std::uint16_t ContainerCapacity(Category category) override {
     const auto index = static_cast<std::size_t>(category);
