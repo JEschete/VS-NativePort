@@ -546,17 +546,8 @@ def summary(rows: list[dict[str, str]]) -> str:
     return "\n".join(lines)
 
 
-def tracker_text(current: str, block: str) -> str:
-    start = current.find(SUMMARY_BEGIN)
-    end = current.find(SUMMARY_END)
-    if start < 0 or end < 0:
-        raise SystemExit(f"tracker has no {SUMMARY_BEGIN!r} block")
-    return f"{current[:start]}{SUMMARY_BEGIN}\n\n{block}\n\n{current[end:]}"
-
-
 def write_tracker(workspace: HazardWorkspace, rows: list[dict[str, str]]) -> None:
-    current = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    workspace.tracker.write_bytes(tracker_text(current, summary(rows)).encode("utf-8"))
+    gates.write_tracker_block(workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 
 def sync(workspace: HazardWorkspace, compiler_log: str | None = None) -> None:
@@ -597,10 +588,7 @@ def check(workspace: HazardWorkspace) -> list[Issue]:
     for key in sorted(recorded.keys() - current.keys()):
         row = recorded[key]
         found.append(issue("hazard-gone", key, f"{row['class']} {row['path']} {row['detail']} is gone; run --sync"))
-    text = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    if tracker_text(text, summary(rows)) != text:
-        found.append(issue("tracker-stale", str(workspace.tracker), "tracker block differs from the ledger; run --sync"))
-    return found
+    return found + gates.stale_tracker("hazards", workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 
 def main() -> int:

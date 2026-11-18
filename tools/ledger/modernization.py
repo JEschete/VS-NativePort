@@ -391,18 +391,9 @@ def summary(rows: list[dict[str, str]], sites: dict[str, list[str]]) -> str:
     return "\n".join(lines)
 
 
-def tracker_text(current: str, block: str) -> str:
-    start = current.find(SUMMARY_BEGIN)
-    end = current.find(SUMMARY_END)
-    if start < 0 or end < 0:
-        raise SystemExit(f"tracker has no {SUMMARY_BEGIN!r} block")
-    return f"{current[:start]}{SUMMARY_BEGIN}\n\n{block}\n\n{current[end:]}"
-
-
 def write_tracker(workspace: ModernizationWorkspace, rows: list[dict[str, str]]) -> None:
-    current = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    text = tracker_text(current, summary(rows, shim_sites(gates.Sources(workspace))))
-    workspace.tracker.write_bytes(text.encode("utf-8"))
+    block = summary(rows, shim_sites(gates.Sources(workspace)))
+    gates.write_tracker_block(workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, block)
 
 
 def sync(workspace: ModernizationWorkspace, tests: dict | None = None, replays: dict | None = None) -> None:
@@ -439,10 +430,8 @@ def check(workspace: ModernizationWorkspace) -> list[Issue]:
             found.append(issue("done-not-promoted", identifier, "done needs catalog cpp=x"))
         if promoted and row["status"] != "done":
             found.append(issue("promoted-not-done", identifier, "catalog cpp=x needs status done"))
-    current = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    if tracker_text(current, summary(rows, shim_sites(gates.Sources(workspace)))) != current:
-        found.append(issue("tracker-stale", str(workspace.tracker), "tracker block differs from the ledger; run --sync"))
-    return found
+    block = summary(rows, shim_sites(gates.Sources(workspace)))
+    return found + gates.stale_tracker("modernization", workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, block)
 
 
 def main() -> int:

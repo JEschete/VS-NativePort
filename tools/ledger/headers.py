@@ -386,17 +386,8 @@ def summary(rows: list[dict[str, str]]) -> str:
     return "\n".join(lines)
 
 
-def tracker_text(current: str, block: str) -> str:
-    start = current.find(SUMMARY_BEGIN)
-    end = current.find(SUMMARY_END)
-    if start < 0 or end < 0:
-        raise SystemExit(f"tracker has no {SUMMARY_BEGIN!r} block")
-    return f"{current[:start]}{SUMMARY_BEGIN}\n\n{block}\n\n{current[end:]}"
-
-
 def write_tracker(workspace: HeaderWorkspace, rows: list[dict[str, str]]) -> None:
-    current = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    workspace.tracker.write_bytes(tracker_text(current, summary(rows)).encode("utf-8"))
+    gates.write_tracker_block(workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 
 def check(workspace: HeaderWorkspace) -> list[Issue]:
@@ -440,10 +431,7 @@ def check(workspace: HeaderWorkspace) -> list[Issue]:
         if c_style(path, values):
             found.append(issue(f"{kind_of(path)}-new", path, f"untracked C-style {kind_of(path)} fails "
                                f"{', '.join(failures(path, values))}; write it as C++ (Docs/CPP_HEADERS.md)"))
-    text = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    if tracker_text(text, summary(rows)) != text:
-        found.append(issue("tracker-stale", str(workspace.tracker), "tracker block differs from the ledger; run --sync"))
-    return found
+    return found + gates.stale_tracker("headers", workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 
 def main() -> int:

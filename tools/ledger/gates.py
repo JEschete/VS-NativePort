@@ -142,6 +142,31 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(stream))
 
 
+def read_tracker(path: Path) -> str:
+    """A tracker document with LF line endings, whatever the checkout wrote."""
+    return path.read_bytes().decode("utf-8").replace("\r\n", "\n")
+
+
+def replace_tracker_block(current: str, begin: str, end: str, block: str) -> str:
+    """`current` with its generated block, between the `begin` and `end` markers, replaced by `block`."""
+    start = current.find(begin)
+    finish = current.find(end)
+    if start < 0 or finish < 0:
+        raise SystemExit(f"tracker has no {begin!r} block")
+    return f"{current[:start]}{begin}\n\n{block}\n\n{current[finish:]}"
+
+
+def write_tracker_block(path: Path, begin: str, end: str, block: str) -> None:
+    path.write_bytes(replace_tracker_block(read_tracker(path), begin, end, block).encode("utf-8"))
+
+
+def stale_tracker(tool: str, path: Path, begin: str, end: str, block: str) -> list[Issue]:
+    current = read_tracker(path)
+    if replace_tracker_block(current, begin, end, block) == current:
+        return []
+    return [Issue(tool, "tracker-stale", str(path), "tracker block differs from the ledger; run --sync")]
+
+
 def slash(path: str) -> str:
     return path.replace("\\", "/")
 
