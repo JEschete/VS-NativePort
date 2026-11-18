@@ -376,6 +376,7 @@ int LiveUpdateCubePuzzleResults() {
   StoreScreen(screen);
   Audio_Seq_unusedScoredata.miscScore = score;
   if (step == CubePuzzleScreenStep::kFinishedRankOutsideTable) {
+    // Issue #409: no points for a rank the table does not have.
     RefuseCall("results", "points for a rank outside the table");
   }
   return Finished(step);

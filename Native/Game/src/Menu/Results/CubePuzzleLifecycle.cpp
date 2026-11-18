@@ -328,6 +328,8 @@ CubePuzzleScreenStep UpdateCubePuzzleResults(CubePuzzleScreen& screen,
   }
   host.RetireTexturePages(kCubePuzzleFirstPage, kCubePuzzleStartPages,
                           kCubePuzzlePageOwner);
+  // Issue #409: the original adds _puzzleModeRankPoints[rank] unchecked; an
+  // at-par rank from a cap outside 0-15 would read past the table.
   if (rank < 0 || std::cmp_greater_equal(rank, kCubePuzzleRankPoints.size())) {
     return CubePuzzleScreenStep::kFinishedRankOutsideTable;
   }

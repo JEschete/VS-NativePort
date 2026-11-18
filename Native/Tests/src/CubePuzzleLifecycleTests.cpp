@@ -9,6 +9,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -1073,17 +1074,25 @@ TEST_CASE("F03050 results add the rank's points when Circle finishes",
   CHECK(host.calls.back() == "retire 29 2 5");
 }
 
-TEST_CASE("F03050 results finish without points for a rank outside the table",
+// Issue #409: at or under par the original indexes the 16-entry points table
+// with 15 - cap unclamped; over par it clamps. Native refuses the at-par
+// rank outside the table and awards nothing.
+constexpr std::array<std::int16_t, 4> kOffTableCaps{{16, -1, 0x7FFF, -0x8000}};
+
+TEST_CASE("F03050 results refuse at-par ranks outside the table",
           "[cube-lifecycle]") {
-  FakeScreen host;
-  std::uint32_t score = 50;
-  r::CubePuzzleScreen screen{.timer = 140};
-  CHECK(r::UpdateCubePuzzleResults(screen, {.par_seconds = 30, .rank_cap = 16},
-                                   {}, true, score, host) ==
-        r::CubePuzzleScreenStep::kFinishedRankOutsideTable);
-  CHECK(host.Has("rank 160 124 50 -1"));
-  CHECK(host.calls.back() == "retire 29 2 5");
-  CHECK(score == 50);
+  for (const std::int16_t cap : kOffTableCaps) {
+    CAPTURE(cap);
+    FakeScreen host;
+    std::uint32_t score = 50;
+    r::CubePuzzleScreen screen{.timer = 140};
+    CHECK(r::UpdateCubePuzzleResults(
+              screen, {.par_seconds = 30, .rank_cap = cap}, {}, true, score,
+              host) == r::CubePuzzleScreenStep::kFinishedRankOutsideTable);
+    CHECK(host.Has(std::format("rank 160 124 50 {}", 15 - cap)));
+    CHECK(host.calls.back() == "retire 29 2 5");
+    CHECK(score == 50);
+  }
 }
 
 TEST_CASE("F03050 live results pulse clutBuf while the screen state is set",
@@ -1162,5 +1171,24 @@ TEST_CASE("F03051 live quit pulses clutBuf while the screen state is set",
   CHECK(std::ranges::equal(Menu_Results_clutBuf, expected));
   CHECK(Menu_Results_elementAnimationState == 0x3F);
   CHECK(Menu_Results_screenTimer == 9);
+}
+
+TEST_CASE("F03050 results clamp over-par ranks for caps outside the table",
+          "[cube-lifecycle]") {
+  const r::CubePuzzleClock late{.minutes = 0, .seconds = 31, .hundredths = 0};
+  for (const std::int16_t cap : kOffTableCaps) {
+    CAPTURE(cap);
+    const r::CubePuzzleRating rating{.par_seconds = 30, .rank_cap = cap};
+    const std::int32_t rank = r::CubePuzzleRank(late, rating);
+    REQUIRE(rank >= 0);
+    REQUIRE(std::cmp_less(rank, r::kCubePuzzleRankPoints.size()));
+    FakeScreen host;
+    std::uint32_t score = 50;
+    r::CubePuzzleScreen screen{.timer = 140};
+    CHECK(r::UpdateCubePuzzleResults(screen, rating, late, true, score, host) ==
+          r::CubePuzzleScreenStep::kFinished);
+    CHECK(score ==
+          50 + r::kCubePuzzleRankPoints.at(static_cast<std::size_t>(rank)));
+  }
 }
 }  // namespace
