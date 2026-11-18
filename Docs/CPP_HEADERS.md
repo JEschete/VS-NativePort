@@ -133,7 +133,7 @@ compile settings, is part of #248.
 | `gnu_attributes` | 5 | 7 |
 | `macros` | 69 | 10,521 |
 | `global_decls` | 370 | 3,218 |
-| `c_wrapped` | 359 | 5,685 |
+| `c_wrapped` | 359 | 5,689 |
 | `baseline` | 23 | 581 |
 
 | Source origin | Sources | Done | Remaining | `c_linkage` sites remaining |
