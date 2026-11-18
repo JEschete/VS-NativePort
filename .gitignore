@@ -3,6 +3,13 @@
 /.direnv
 /.vscode/
 /build
+# Naming-review scratch outputs; accepted rows live in Docs/ledgers/.
+/tools/naming/batches/
+/tools/naming/out/
+/tools/naming/sym_batches/
+/tools/naming/sym_out/
+/tools/naming/sanity/
+/tools/naming/dup_decisions.csv
 # Portable launcher assets/saves and development-tool state stay under build/.
 /assets/
 /saves/

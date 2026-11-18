@@ -1,9 +1,9 @@
-﻿"""Shared machinery for the deterministic per-batch name generators (tools\\naming\\sym_gen\\<Batch>.py).
+"""Shared ledger layouts and source citations for the copier and naming-review tools.
 
-Names are written by hand in the batch script; this module only resolves citations from exact source text, so no
-line number is ever typed:
+The original campaign generators are retired. This module retains the layout matching, citation checks and
+review-row helpers used by maintained tools:
 
-  g = Gen("Game_Actors_01")
+  g = Gen("Review")
   g.c(("44F14.c", "scratch->unk3A = actor->unk0.unk14;"))       # source:44F14.c:849
   g.c(("upstream:5BF94.c", "func_800D52A4_t* motion"))         # source:upstream:BATTLE/BATTLE.PRG/5BF94.c:6728
   g.T(tid, role, final, location, purpose, conf, notes, [(orig, final, meaning, conf[, cite]), ...], recv=r"scratch")
@@ -22,7 +22,7 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 TREES = {"": ROOT / "resources" / "rood-reverseWin" / "src", "upstream:": ROOT / "resources" / "rood-reverse" / "src"}
 INDEX = {"": ROOT / "build" / "port" / "index.json", "upstream:": ROOT / "build" / "port" / "index_upstream.json"}
 LEDGERS = ROOT / "Docs" / "ledgers"

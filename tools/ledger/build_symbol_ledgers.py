@@ -23,7 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from tools.naming.sym_gen.common import canonical_type_key  # noqa: E402
+from tools.naming.symbol_support import canonical_type_key  # noqa: E402
 
 LEDGERS = ROOT / "Docs" / "ledgers"
 INDEX = ROOT / "build" / "port" / "index.json"

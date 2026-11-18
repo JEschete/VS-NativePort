@@ -62,8 +62,8 @@ def main() -> int:
     errors = [d.spelling for d in tu.diagnostics if d.severity >= 3]
     cp = ct.Copier()
     by_name = {ct.c_name(r["final_name"]): r for r in cp.types if cp.canon_type(r["id"]) == r["id"]}
-    sys.path.insert(0, str(ct.REPO / "tools" / "naming" / "sym_gen"))
-    from common import Gen
+    sys.path.insert(0, str(ct.REPO / "tools" / "naming"))
+    from symbol_support import Gen
     gen = Gen("Shared")
     out = {"pointer-free": [], "with-pointers": [], "checked": 0, "parse_errors": errors[:20]}
     seen = set()

@@ -1995,14 +1995,6 @@ int func_800F9800(void) {
             row = next(row for row in csv.DictReader(handle) if row["id"] == "G00473")
         self.assertEqual(row["final_name"], "Event::weaponTransitionPending")
         self.assertEqual(row["confidence"], "high")
-        with (root / r"tools\naming\sym_out\Game_Event\globals.csv").open(
-            encoding="utf-8-sig", newline=""
-        ) as handle:
-            proposal = next(
-                row for row in csv.DictReader(handle) if row["id"] == "G00473"
-            )
-        for field in ("final_name", "purpose", "confidence", "notes"):
-            self.assertEqual(proposal[field], row[field])
         with (root / r"Docs\ledgers\TRACE_QUEUE.csv").open(
             encoding="utf-8-sig", newline=""
         ) as handle:

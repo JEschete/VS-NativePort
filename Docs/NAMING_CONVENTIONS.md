@@ -1,5 +1,16 @@
 # Naming & Placement Conventions (Phase 1a, Step 3)
 
+The original naming campaign and C++ promotion (#276) are complete. Historical
+batch inputs/outputs, the batch-specific generators, namespace consolidation and
+sanity-fix replay scripts were retired in #440. Their last version is retained in
+[Git history](https://github.com/JEschete/VS-NativePort/tree/d654bad79/tools/naming).
+Accepted names and evidence remain in the canonical ledgers, not those old batches.
+The generic review/merge tools below remain available for new, scoped reviews;
+their batch directories and reports are ignored scratch outputs.
+Shared layout and citation support lives in
+[`symbol_support.py`](../tools/naming/symbol_support.py). Historical campaign
+examples below do not authorize replaying retired scripts over current ledgers.
+
 This is the contract for the naming pass. Every row in `Docs\ledgers\FUNCTION_CATALOG.csv` with `copy = yes` gets a
 `final_name`, a `final_location` and a `purpose`, following the rules below. `tools\naming\merge_names.py` enforces
 the mechanical rules. The judgement calls (good names, sensible grouping) are on the author.
@@ -63,7 +74,8 @@ to `.cpp` later.
   one grouping folder allowed). Root-namespace functions live directly in the root folder. `merge_names.py` enforces
   this.
 - One concept, one namespace. Don't create near-synonyms (`Seq` / `Sequence` / `Driver\Sequencer`,
-  `Random.c` / `Random\Generator.c`). `tools\naming\consolidate.py` holds the reviewed merges from the first pass.
+  `Random.c` / `Random\Generator.c`). The first-pass consolidation rules are archived
+  with the completed campaign; current placements are in the canonical ledgers.
 - **Never** `Native\Triage\…`. If you truly cannot place a function, pick the best guess and set confidence `low`.
 
 ## 3. Systems and modules (namespace → location)
@@ -317,13 +329,13 @@ fields.csv   id,final_name,meaning,confidence,notes
   by name inside referencing functions, so a hit can belong to another struct with the same member name (e.g.
   `actor->unkC` for `vs_battle_objectData.unkC`); confirm the receiver's type before citing a hit.
 - Write citations by searching for exact source text rather than typing line numbers, and check that each field
-  row cites at least one line naming the original member (Engine_01's generator does both). From Game_Actors_01 on,
-  generators import `tools\naming\sym_gen\common.py` (`Gen`): `c(("file", "text"))` cites either tree
+  row cites at least one line naming the original member. Maintained tools use
+  `tools\naming\symbol_support.py` (`Gen`): `c(("file", "text"))` cites either tree
   (`upstream:` prefix for resources\rood-reverse), `T(...)` auto-cites a field's first access through a receiver
   pattern, `g.decl()` cites a declaration explicitly, and `write()` refuses a field whose cited lines do not name it.
 - Member uses are searched first in functions whose libclang field references (`build\port\index.json` `refs.field`)
   contain the exact `Type.member`, so `actor->unk0.x` is found for the header type even when the function never
-  names that type. `evidence.py` and `common.Gen` both do this. Auto-citations still land on reset lines (`= 0`) that
+  names that type. `evidence.py` and `symbol_support.Gen` both do this. Auto-citations still land on reset lines (`= 0`) that
   prove identity but not meaning; pin meaning-bearing lines explicitly for every name above `low`.
 - Upstream refresh, after `resources\rood-reverse` moves: `python tools\port\decomp_index.py --root
   resources\rood-reverse --out build\port\index_upstream.json`, then `python tools\naming\upstream_layout.py report
@@ -420,7 +432,7 @@ names, locations and collisions; it does not prove semantics or close migration 
 - Final locations of data rows and the function catalog disagreed in places (`Input\src\Controllers.c` vs
   `Controller.c`, `Graphics\src\ScreenTransition.c` vs `FramebufferEffects.c`, `Core\src\Memory.c` vs
   `Memory\Heap.c`, `Content\src\DiscQueue.cpp` vs `CdDrive.c`, `Video\src\Intro.c` vs `Intro\Playback.c`).
-  Resolved 2026-10-17 by `tools\ledger\reconcile_locations.py` (run by `sanity_fixes.py`): 232 `state`/`constexpr`
+  Resolved 2026-10-17 by `tools\ledger\reconcile_locations.py` (then run by the retired sanity-fix script): 232 `state`/`constexpr`
   globals in files no function lives in moved to the catalog file their users live in, within the same namespace
   root. 62 stay in data-only files on purpose: per-plugin effect state (`Effects::PlgNNN`, see §6.8 templates),
   shared game state in `Game\src\State\`, the write-only reset words in the trace queue, and constants such as
@@ -465,7 +477,7 @@ names, locations and collisions; it does not prove semantics or close migration 
   targeted actor/limb; resolve that overlap from the assembly before porting.
 - Game_Battle_02 (2026-10-17): the fork's AI files declare a separate struct per function for one object, the AI
   actor state (upstream `func_800E78F4_t`, T00532, allocated 0x484 bytes); upstream's reviewed functions take that one
-  type. `tools\naming\sym_gen\ai_state.py` names each byte offset once, from the uses gathered across all views and
+  type. The archived `sym_gen/ai_state.py` named each byte offset once, from the uses gathered across all views and
   upstream (`tools\naming\ai_offsets.py` prints the per-offset evidence), and every view takes the
   name at its offset when the member has the same size as upstream's member there (untyped `char[N]` fillers
   upstream do not constrain). Settings bytes are named after the settings-word bit they are decoded from
@@ -511,7 +523,7 @@ names, locations and collisions; it does not prove semantics or close migration 
   (Game_Battle_03): T00418 `EffectDefinitionView` members are now `flags`, `attachment`, `rotationXAndTarget`,
   `rotationY`, `rotationZ` (5BF94.c:5947-6014), which also names T00494. 186 of 659 fields are `low`
   (102 reserved, 45 opaque).
-- Game_Effects_02 (2026-10-17): 155 plugin globals are named by `sym_gen/Game_Effects_02.py` from each plugin's
+- Game_Effects_02 (2026-10-17): 155 plugin globals were named by the archived `sym_gen/Game_Effects_02.py` from each plugin's
   template binding (`#define VS_<MEMBER> D_...` followed by the template include, or an inline `rings.h`-style index)
   found in the global's own overlay directory: plugin overlays share an address range, so one `D_` name can be a
   different object in several plugins. Names are `Effects::PlgNNN::<templateMember>`, numbered when a plugin binds
@@ -528,7 +540,7 @@ names, locations and collisions; it does not prove semantics or close migration 
   the remaining menu structs; four C-name collisions were renamed (`data` -> `items`, `MenuControlState`, `MenuRow`,
   `Menu::TextBoxState`). A receiver review (citations whose receiver differs from the type's usual one) moved 16
   auto-cited fields that had matched a same-named member of another type back to declaration-only.
-- Game_Menu_03..06 (2026-10-17): 985 menu globals from `sym_gen/menu_globals.py` (rules) and
+- Game_Menu_03..06 (2026-10-17): 985 menu globals from the archived `sym_gen/menu_globals.py` (rules) and
   `sym_gen/menu_globals_manual.py` (rows read by hand). Each global's uses are searched in its own scope from the
   ledger key (the declaring function for local statics, the file, or the including overlay for header statics).
   A meaningful fork name is kept at `med`, cited by its first use, in the namespace and file of its main user
@@ -559,9 +571,10 @@ copy-time naming fixes (2026-10-17) and the #148 native semantic sweep (2026-10-
 [archived version of this file](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/NAMING_CONVENTIONS.md#113-lowmed-sanity-pass-2026-10-17)
 (§11.3-§11.6). These rules from those passes still apply:
 
-- **Sanity fixes.** `tools\naming\sanity_pass.py` writes candidates to `tools\naming\sanity\report.csv`. Accepted
-  corrections live in `tools\naming\sanity_fixes.py`, each citing the code read, and are patched into the owning batch
-  outputs. **Re-run `sanity_fixes.py` after regenerating any batch.**
+- **Sanity review.** `tools\naming\sanity_pass.py` writes candidates to the ignored
+  `tools\naming\sanity\report.csv`. Accepted campaign corrections are already in the
+  canonical ledgers. Review new findings against source and update the applicable
+  ledger rows; do not replay the retired sanity-fix script or historical batches.
 - **Low and opaque rows need tracing, not renaming.** Most low fields are `reserved` (never read) or `opaque` (read, but
   the meaning is not established). See #347 and `tools\naming\trace_queue.py`.
 - **Catalog additions.** `tools\ledger\add_missing_functions.py --batch <name>` catalogs functions the scanner missed:

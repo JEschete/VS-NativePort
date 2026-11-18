@@ -19,8 +19,8 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
-from common import ROOT, Gen, ledger_rows  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from symbol_support import ROOT, Gen, ledger_rows  # noqa: E402
 
 OUT = ROOT / "tools" / "naming" / "sanity"
 GENERIC = re.compile(r"^(unk|pad|field|_|D_|func_|filler|dummy|var|temp|tmp)|^[a-z]$|_t\d*$|^(unk|pad)?[0-9A-Fa-f]+$",

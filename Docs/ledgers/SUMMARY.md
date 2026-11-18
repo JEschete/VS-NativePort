@@ -97,48 +97,17 @@ promotion, including the remaining `wip`; the old 281-function #247 checkpoint i
 historical, not the current inventory. `cpp=x` is not behavior verification or EC retirement: the slices' live bindings still
 read the global game state named in each slice's limits, and those compatibility contracts stay open.
 
-### Generated-function cohort (#276)
+### Completed generated-function cohort (#276)
 
-The original cohort is the 3,479 `copy=yes` rows without `cpp` at `04d47338`.
-At the 2026-11-07 NPC-trigger reconciliation published at `4d918907`, 2,434
-derive `cpp=x`, 11 are retired, 1,033 remain generated/unpromoted and one owned
-textbox-frame entry (F01416) remains `wip`.
-This is about 70% resolved; the total promoted count above also includes functions
-outside that original cohort and must not be divided by 3,479.
+The original cohort was the 3,479 `copy=yes` rows without `cpp` at `04d47338`.
+#276 is closed. Its completed scheduling queue and historical campaign artifacts
+were retired in #440, not its canonical evidence: `CPP_PROMOTION.csv`,
+`VERIFY_LEDGER.csv` and `GATE_SLICES.csv` remain authoritative and checked.
+The generated counts above include functions outside that original cohort.
 
-[PROMOTION_PLAN.csv](PROMOTION_PLAN.csv) has 42 completed slices and 12 incomplete
-slices. Row 27 is in progress: native queue/switch, typed chest/trap target,
-object-wait and ordinary-lock milestones are published with exact successful CI.
-#287 and #318/#319/#320 are closed. The F00135/#322 slice now has a typed action
-contract, fully initialized compatibility request, original module binding,
-all-room-kind package initialization audit and actual Debug/Release trap damage
-and return evidence. #322 is closed at fixing `525d182e`, exact successful CI
-`42433562058`. The four interaction camera/wait functions are published at
-`3d995b77`, exact successful CI `42436301250`. The adjacent-tile F00152 leaf
-is published at `770c8fa2`, exact successful CI `42438146863`. Its three
-dependent queries F00153/F00154/F00155 now have typed cores and generation-checked
-gameplay caches, original instruction/read-order/width evidence, actual native
-event start/refusal tests and original chest/lock/opposite-facing controls.
-The query checkpoint passed 4,777 tests / 8,902,094 assertions in each configuration
-and is published at `d25d8d69`, exact successful CI `42440898460`. F00159 now has a
-strict typed non-player cached-tile/trap/fall core, checked Live adapter and direct
-typed actor-command placement, with original 144-instruction and actual cache/module
-evidence. That checkpoint's full Debug/Release each passed 4,788 tests / 8,902,148 assertions;
-both canonical fingerprints and two 1,735-path/hash generations are unchanged.
-The core and Live provider use the existing interaction ownership boundary;
-the completed trap slice retains its original files and dependencies.
-Row 27 still has 55 generated functions. The NPC checkpoint is published at
-`4d918907`, exact successful CI `42445155609`; this source promotion is not
-all-scene trap/fatal-fall parity. The subsequent #323 scripted-fall door safety
-fix passes 4,789 tests / 8,902,162 assertions in each configuration with unchanged
-canonical replays; its publication/CI gate is pending. It does not promote F00158
-or change the cohort counts above.
-#321 tracks the invisible active chest loot panel separately.
-Remaining row-27 functions, later planned slices and the final closing-revision
-Debug/Release, replay, generation, quality and CI gates are still required.
-
-This dated cohort snapshot is not a new gameplay run. See [HANDOFF.md](../HANDOFF.md)
-and the issue evidence for the latest verified source, exact CI and remaining limits.
+The earlier partial-cohort checkpoints remain in Git and issue history. See
+[HANDOFF.md](../HANDOFF.md) and the issue evidence for fresh verification and
+remaining limits. Promotion completion is not gameplay completion or EC retirement.
 
 ### Behavior verification
 

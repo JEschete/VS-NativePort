@@ -27,8 +27,8 @@ def main() -> int:
         return 1
     cp = ct.Copier()
     cp.spelled_type('')
-    sys.path.insert(0, str(ct.REPO / 'tools/naming/sym_gen'))
-    from common import Gen
+    sys.path.insert(0, str(ct.REPO / 'tools/naming'))
+    from symbol_support import Gen
     gen = Gen('Shared')
     records = {c.spelling: c for c in tu.cursor.walk_preorder()
                if c.kind in (ci.CursorKind.STRUCT_DECL, ci.CursorKind.UNION_DECL) and c.is_definition()}

@@ -53,8 +53,8 @@ import decomp_index as dx  # noqa: E402
 REPO = dx.REPO
 LEDGERS = REPO / "Docs" / "ledgers"
 OUT = REPO / "build" / "port" / "refs.json"
-sys.path.insert(0, str(REPO / "tools" / "naming" / "sym_gen"))
-from common import canonical_type_key  # noqa: E402
+sys.path.insert(0, str(REPO / "tools" / "naming"))
+from symbol_support import canonical_type_key  # noqa: E402
 
 K = ci.CursorKind
 RESIDENT = ("SLUS_010.40", "BATTLE/BATTLE.PRG")
@@ -199,8 +199,8 @@ class Ledgers:
         sys.path.insert(0, str(REPO / "tools" / "ledger"))
         import build_ledgers
         self.sdk = set(build_ledgers.load_sdk())
-        sys.path.insert(0, str(REPO / "tools" / "naming" / "sym_gen"))
-        from common import Gen
+        sys.path.insert(0, str(REPO / "tools" / "naming"))
+        from symbol_support import Gen
         self.gen = Gen("Shared")
         self._layouts: dict = {}
         self.t_by_name = {}

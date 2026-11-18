@@ -300,9 +300,15 @@ Status legend: `[ ]` not started, `[A]` shim exists, `[M]` all call sites migrat
 ### 4.3 SOURCE_FILE_LEDGER.md (retired)
 
 This generated per-file checklist of the 440 decomp files (261 game, 179 SDK) was never updated after generation; every
-row stayed unchecked. It has been removed. Per-function status lives in `FUNCTION_CATALOG.csv`, `CPP_PROMOTION.csv` and
-`REMAINING_FUNCTIONS.csv`. The last version is
+row stayed unchecked. It has been removed. Per-function status lives in `FUNCTION_CATALOG.csv` and
+`CPP_PROMOTION.csv`; behavior evidence lives in `VERIFY_LEDGER.csv`. The last version is
 [archived](https://github.com/JEschete/VS-NativePort/blob/8db4f46e292aa19c382807757786d6f07f65c71c/Docs/ledgers/SOURCE_FILE_LEDGER.md).
+
+The completed #276 scheduling snapshots (`PROMOTION_PLAN.csv` and
+`REMAINING_FUNCTIONS.csv`) were retired in #440: all 54 slices were done and all
+900 tail rows were promoted or retired. Their final records remain in
+[Git history](https://github.com/JEschete/VS-NativePort/tree/d654bad79/Docs/ledgers);
+they are not current work queues or a replacement for the canonical ledgers.
 
 ### 4.4 DATA_LEDGER.csv
 

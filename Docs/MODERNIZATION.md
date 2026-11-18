@@ -1,8 +1,9 @@
 # Modernization tracker
 
-The work between "compiles as C++" and "is modern C++", tracked per function so that none of it depends on memory. Compiling
-as C++ was the language migration. It kept C linkage, raw pointers and relaxed settings, so almost all of the promotion
-work in [plan section 8.2](NATIVE_SOURCE_PORT_PLAN.md#82-promotion-checklist-c--cpp-sets-cpp--yes) is still ahead.
+Function promotion (#276) is complete. This report retains the per-function
+promotion/regression records and measured compatibility debt; completion of
+[plan section 8.2](NATIVE_SOURCE_PORT_PLAN.md#82-promotion-checklist-c--cpp-sets-cpp--yes)
+does not establish complete gameplay verification or retirement of live bindings.
 
 [MODERNIZATION_LEDGER.csv](ledgers/MODERNIZATION_LEDGER.csv) has one row per port target. Roadmap issues in #217 describe
 architecture changes rather than per-function work, so this ledger is what tracks each function through them.
@@ -37,65 +38,6 @@ architecture changes rather than per-function work, so this ledger is what track
 | Status | Functions |
 | --- | ---: |
 | done | 3,732 |
-
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (54 done); open functions in no slice: 0.
-
-| Order | Slice | Status | Owner | Files | Open functions | Original lines |
-| ---: | --- | --- | --- | ---: | ---: | ---: |
-| 1 | core-runtime-copy-random-text | done | - | 6 | 0 | 0 |
-| 2 | core-heap | done | coordinator | 1 | 0 | 0 |
-| 3 | core-math | done | coordinator | 5 | 0 | 0 |
-| 4 | render-display-camera-ui | done | coordinator | 5 | 0 | 0 |
-| 5 | render-palette-framebuffer | done | coordinator | 2 | 0 | 0 |
-| 6 | render-images-textures-font | done | coordinator | 4 | 0 | 0 |
-| 7 | input-controller | done | subagent a7-input; coordinator review | 1 | 0 | 0 |
-| 8 | save-memory-card | done | agent:a8-save | 2 | 0 | 0 |
-| 9 | movie-intro | done | coordinator | 1 | 0 | 0 |
-| 10 | audio-seq-voices | done | agent:a10-audio-voices | 3 | 0 | 0 |
-| 11 | audio-seq-control | done | agent:a11-audio-seq-control | 3 | 0 | 0 |
-| 12 | audio-mixer-driver | done | agent:a12-audio-mixer | 3 | 0 | 0 |
-| 13 | audio-playback-banks | done | self | 9 | 0 | 0 |
-| 14 | audio-control-sfx | done | self | 9 | 0 | 0 |
-| 15 | audio-music-streams | done | self | 16 | 0 | 0 |
-| 16 | content | done | agent:a16-content | 6 | 0 | 0 |
-| 17 | state-boot | done | self | 19 | 0 | 0 |
-| 18 | items | done | agent:a18-items | 6 | 0 | 0 |
-| 19 | actors-state-loading | done | self | 17 | 0 | 0 |
-| 20 | actors-animation-skeleton | done | self | 7 | 0 | 0 |
-| 21 | actors-movement | done | self | 7 | 0 | 0 |
-| 22 | actors-appearance-rendering | done | self | 3 | 0 | 0 |
-| 23 | field-collision-map | done | self | 9 | 0 | 0 |
-| 24 | field-camera-background | done | self | 6 | 0 | 0 |
-| 25 | field-rooms | done | self | 11 | 0 | 0 |
-| 26 | field-room-effects | done | self | 3 | 0 | 0 |
-| 27 | field-gimmicks-doors | done | self | 17 | 0 | 0 |
-| 28 | battle-ai | done | self | 8 | 0 | 0 |
-| 29 | battle-damage-status | done | self | 3 | 0 | 0 |
-| 30 | battle-actions | done | self | 5 | 0 | 0 |
-| 31 | battle-targeting-prerequisites | done | self | 8 | 0 | 0 |
-| 32 | battle-sphere-hud-rewards | done | self | 4 | 0 | 0 |
-| 33 | event-vm-triggers | done | self | 9 | 0 | 0 |
-| 34 | event-script-actors | done | self | 3 | 0 | 0 |
-| 35 | event-script-camera-screen-field | done | - | 3 | 0 | 0 |
-| 36 | event-script-audio-dialog-effects | done | self | 10 | 0 | 0 |
-| 37 | effects-runtime-vm | done | - | 3 | 0 | 0 |
-| 38 | effects-resources-transforms | done | self | 8 | 0 | 0 |
-| 39 | effects-particles-screen-plugins | done | - | 11 | 0 | 0 |
-| 40 | effects-particle-templates | done | self | 8 | 0 | 0 |
-| 41 | effects-trail-templates | done | self | 11 | 0 | 0 |
-| 42 | effects-trail-nine-templates | done | self | 7 | 0 | 0 |
-| 43 | effects-ring-templates | done | self | 5 | 0 | 0 |
-| 44 | effects-surface-templates | done | self | 7 | 0 | 0 |
-| 45 | menu-framework | done | self | 2 | 0 | 0 |
-| 46 | menu-framework-rows-details | done | self | 6 | 0 | 0 |
-| 47 | menu-inventory-container | done | self | 5 | 0 | 0 |
-| 48 | menu-loot-status-abilities | done | - | 8 | 0 | 0 |
-| 49 | menu-setup | done | self | 4 | 0 | 0 |
-| 50 | menu-results-score | done | - | 6 | 0 | 0 |
-| 51 | menu-files-options | done | self | 6 | 0 | 0 |
-| 52 | menu-map-manual-text | done | - | 4 | 0 | 0 |
-| 53 | title | done | self | 4 | 0 | 0 |
-| 54 | ending | done | self | 5 | 0 | 0 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
@@ -139,28 +81,18 @@ SDK shim sites still recording `VS_UNPORTED`: 28.
 Consumer and blocker columns describe the last `--sync`, so ordinary edits do not fail the check. A row that moved, appeared or
 disappeared does. Platform hazards are tracked per site in [PLATFORM_HAZARDS.md](PLATFORM_HAZARDS.md) and join on `id`.
 
-## Working a slice
+## Maintaining the records
 
-Work in slices rather than one function at a time, because a function with generated callers cannot reach `cpp=x` until those
-callers migrate. A template and all of its instances are also one piece of work.
+The completed 54-slice scheduling queue and its assignment-only checks were
+retired in #440; they remain in Git history. Do not restart the promotion workflow.
+Use [WORK_PROCEDURES.md](../.github/WORK_PROCEDURES.md) and ordered tracker #4
+for current work.
 
-[PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) is the slice queue. Each row names the files one slice promotes, in roadmap
-order, with its `status` (`planned`, `active`, `blocked` or `done`), its `owner` (`coordinator`, or `agent:<name>` for a delegated
-worktree), and, once finished, its `GATE_SLICES.csv` record and commits. `modernization.py --check` refuses an open function
-whose file is in no slice, a file in two slices, a `done` slice with open functions or no gate record, a slice whose files have
-nothing left but which is not marked `done`, and more than two active `agent:` slices. The tracker block above shows what each
-slice has left.
-
-1. **Pick a slice**: the lowest-order `planned` row of the plan. Set it `active` with its owner. Move callers and callees
-   together where you can.
-2. **Check its cover.** If `regression` says `characterize-first`, write tests that pin today's behavior and watch them pass on
-   the unchanged code. Then rerun `regression.py coverage`.
-3. **Set `status` to `in-progress`.** The check refuses this while `regression` is `characterize-first` or `unmeasured`.
-4. **Take ownership** of generated functions with `tools\port\own.py`.
-5. **Clear its hazards** from [HAZARD_LEDGER.csv](ledgers/HAZARD_LEDGER.csv), and do the section 8.2 steps.
-6. **Run `regression.py check`** in Debug and Release. The result must match the baseline.
-7. **Record the evidence** in `VERIFY_LEDGER.csv` and `CPP_PROMOTION.csv`, then set `status` to `done`. Mark the plan row
-   `done` with its `gate_slice` and commits.
+`modernization.py --check` still validates function membership, ownership,
+promotion/status consistency, regression evidence and the generated report.
+`gates.py --check` separately validates canonical promotion, behavior and
+retirement evidence in `CPP_PROMOTION.csv`, `VERIFY_LEDGER.csv` and
+`GATE_SLICES.csv`. None of those records or gates is retired with the old queue.
 
 ## Regression testing
 

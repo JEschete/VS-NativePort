@@ -1,4 +1,4 @@
-"""Regression tests for aligned semantic symbol-generator rows."""
+"""Regression tests for shared symbol layouts, citations and copier contracts."""
 from __future__ import annotations
 
 import ast
@@ -11,8 +11,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
-from common import Gen, canonical_type_key  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from symbol_support import Gen, canonical_type_key, ledger_rows  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "port"))
 from copy_to_native import Copier  # noqa: E402
@@ -272,7 +272,7 @@ class ReviewedConsumerTests(unittest.TestCase):
 
             for path, name in (
                 (r"tools\port\ref_index.py", "read_rows"),
-                (r"tools\naming\sym_gen\common.py", "ledger_rows"),
+                (r"tools\naming\symbol_support.py", "ledger_rows"),
             ):
                 with self.subTest(reader=name):
                     opened.clear()
@@ -295,12 +295,7 @@ class ReviewedConsumerTests(unittest.TestCase):
     def test_reviewed_one_to_one_consumers_use_strict_pairing(self):
         paths = (
             r"tools\naming\sanity_pass.py",
-            r"tools\naming\sym_gen\Audio.py",
-            r"tools\naming\sym_gen\Engine_01.py",
-            r"tools\naming\sym_gen\Game_Battle_01.py",
-            r"tools\naming\sym_gen\Game_Battle_02.py",
-            r"tools\naming\sym_gen\Game_Menu_01.py",
-            r"tools\naming\sym_gen\ai_state.py",
+            r"tools\naming\symbol_support.py",
             r"tools\naming\upstream_layout.py",
             r"tools\port\check_native_views.py",
             r"tools\port\copy_to_native.py",
@@ -308,13 +303,11 @@ class ReviewedConsumerTests(unittest.TestCase):
             r"tools\port\layout_check.py",
             r"tools\port\ref_index.py",
         )
-        count = 0
         for path in paths:
             calls = [node for node in ast.walk(self.tree(path))
                      if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
                      and node.func.id == "zip"]
             self.assertTrue(calls, path)
-            count += len(calls)
             for call in calls:
                 with self.subTest(path=path, line=call.lineno):
                     self.assertTrue(any(
@@ -322,7 +315,6 @@ class ReviewedConsumerTests(unittest.TestCase):
                         and keyword.value.value is True
                         for keyword in call.keywords
                     ))
-        self.assertEqual(count, 24)
 
     def test_signature_callback_keeps_its_current_native_type(self):
         namespace = {"t": "uintptr_t"}
@@ -374,37 +366,19 @@ class ReviewedConsumerTests(unittest.TestCase):
         ])
 
     def test_adopted_padding_cites_the_upstream_declaration(self):
-        calls = []
-
-        def cite(*pairs):
-            calls.extend(pairs)
-            return "source:upstream:6E644.c:1"
-
-        tree = self.tree(r"tools\naming\sym_gen\Game_Battle_01.py")
-        for tid, member, final, declaration in (
-            ("T00271", "unkB", "reservedB", "char unkB[9];"),
-            ("T00273", "unk8", "reserved8", "char unk8[2];"),
-            ("T00273", "unk15", "reserved15", "char unk15;"),
+        fields = ledger_rows("FIELD_LEDGER.csv")
+        for tid, member, final in (
+            ("T00271", "unkB", "reservedB"),
+            ("T00273", "unk8", "reserved8"),
+            ("T00273", "unk15", "reserved15"),
         ):
             with self.subTest(tid=tid, member=member):
-                calls.clear()
-                definition = next(
-                    node for node in ast.walk(tree)
-                    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-                    and node.func.id == "T" and isinstance(node.args[0], ast.Constant)
-                    and node.args[0].value == tid
-                )
-                node = next(
-                    node for node in ast.walk(definition)
-                    if isinstance(node, ast.Tuple) and len(node.elts) >= 2
-                    and isinstance(node.elts[0], ast.Constant) and node.elts[0].value == member
-                    and isinstance(node.elts[1], ast.Constant) and node.elts[1].value == final
-                )
-                spec = eval(compile(ast.Expression(body=node), "padding-spec", "eval"),
-                            {"LOW": "low", "c": cite})
-                self.assertEqual(spec, (member, final, "Not read", "low",
-                                        "declaration-only;source:upstream:6E644.c:1"))
-                self.assertEqual(calls, [("upstream:6E644.c", declaration)])
+                row = next(row for row in fields
+                           if row["type_id"] == tid and row["name"] == member)
+                self.assertEqual((row["final_name"], row["meaning"], row["confidence"]),
+                                 (final, "Not read", "low"))
+                self.assertRegex(row["notes"],
+                                 r"^declaration-only;source:upstream:6E644\.c:\d+$")
 
 
 class MemberPairTests(unittest.TestCase):

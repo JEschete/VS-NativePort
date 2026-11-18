@@ -15,8 +15,8 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "sym_gen"))
-from common import LEDGERS, ROOT, Gen, ledger_rows  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from symbol_support import LEDGERS, ROOT, Gen, ledger_rows  # noqa: E402
 
 OUT = LEDGERS / "TRACE_QUEUE.csv"
 PRIORITY = {"opaque": 1, "low-named": 2, "global": 2, "type": 3, "reserved": 4}

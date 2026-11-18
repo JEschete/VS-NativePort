@@ -10,9 +10,8 @@ steps and FUNCTION_CATALOG.csv for `cpp`: this ledger copies them and never rais
 written by hand. Consumer and blocker columns describe the revision of the last --sync, so ordinary source edits do not
 fail --check; a row that moved, appeared or disappeared does.
 
-Docs\\ledgers\\PROMOTION_PLAN.csv is the hand-written slice queue: every file that still holds an open function belongs to
-exactly one slice, a slice is `done` only when none of its files has an open function and GATE_SLICES.csv records it,
-and at most MAX_AGENT_SLICES slices are active under an `agent:` owner at once.
+The completed promotion scheduling queue is retired. Canonical promotion, behavior and compatibility-retirement
+evidence remains in CPP_PROMOTION.csv, VERIFY_LEDGER.csv and GATE_SLICES.csv and is validated by gates.py.
 """
 from __future__ import annotations
 
@@ -38,10 +37,6 @@ FIELDS = [
     "source_flags", *COVERAGE_FIELDS, "verify_record", "regression", "notes",
 ]
 STATUS_VALUES = {"todo", "in-progress", "blocked", "done"}
-PLAN_FIELDS = ["order", "slice", "status", "owner", "files", "gate_slice", "issue", "commits", "notes"]
-PLAN_STATUS_VALUES = {"planned", "active", "blocked", "done"}
-AGENT_OWNER = "agent:"
-MAX_AGENT_SLICES = 2
 COVERED = {"recorded", "executed"}
 SOURCE_FLAGS = ["scratchpad", "kseg_literal", "ot24", "ptr_cast", "inline_asm"]
 MODULE_TABLE = "Native/Game/src/Boot/ModulePointers.cpp"
@@ -115,7 +110,6 @@ class ModernizationWorkspace(gates.Workspace):
     def __init__(self, root: Path = gates.ROOT) -> None:
         super().__init__(root)
         self.ledger = self.root / "Docs" / "ledgers" / "MODERNIZATION_LEDGER.csv"
-        self.plan = self.root / "Docs" / "ledgers" / "PROMOTION_PLAN.csv"
         self.tracker = self.root / "Docs" / "MODERNIZATION.md"
 
 
@@ -347,7 +341,7 @@ def table_row(label: str, rows: list[dict[str, str]]) -> str:
     )
 
 
-def summary(rows: list[dict[str, str]], sites: dict[str, list[str]], plan: list[dict[str, str]]) -> str:
+def summary(rows: list[dict[str, str]], sites: dict[str, list[str]]) -> str:
     groups: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
     for row in rows:
         groups[(row["imp_step"], row["issue"])].append(row)
@@ -364,7 +358,6 @@ def summary(rows: list[dict[str, str]], sites: dict[str, list[str]], plan: list[
     lines += ["", "| Status | Functions |", "| --- | ---: |"]
     for status, count in sorted(Counter(row["status"] for row in rows).items()):
         lines.append(f"| {status} | {count:,} |")
-    lines += plan_summary(rows, plan)
     bodies = Counter(row["body"].split(":", 1)[0] for row in rows)
     open_owned = [row for row in rows if row["track"] == "owned" and row["status"] != "done"]
     blocked = sum(1 for row in open_owned if int(row["generated_consumers"]) > 0)
@@ -398,97 +391,6 @@ def summary(rows: list[dict[str, str]], sites: dict[str, list[str]], plan: list[
     return "\n".join(lines)
 
 
-def plan_files(entry: dict[str, str]) -> list[str]:
-    return [path.strip() for path in entry["files"].split(";") if path.strip()]
-
-
-def plan_order(entry: dict[str, str]) -> tuple[int, str]:
-    order = entry["order"].strip()
-    return (int(order), entry["slice"]) if order.isdigit() else (UNASSIGNED_ORDER, entry["slice"])
-
-
-def open_work(rows: list[dict[str, str]]) -> tuple[Counter, Counter]:
-    """Open functions and their original lines per file."""
-    functions: Counter = Counter()
-    lines: Counter = Counter()
-    for row in rows:
-        if row["status"] != "done":
-            functions[row["path"]] += 1
-            lines[row["path"]] += int(row["lines"] or 0)
-    return functions, lines
-
-
-def plan_summary(rows: list[dict[str, str]], plan: list[dict[str, str]]) -> list[str]:
-    functions, lines = open_work(rows)
-    planned = {path for entry in plan for path in plan_files(entry)}
-    unplanned = sum(count for path, count in functions.items() if path not in planned)
-    statuses = ", ".join(f"{count} {status}" for status, count in sorted(Counter(e["status"] for e in plan).items()))
-    out = [
-        "",
-        f"{len(plan)} slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) ({statuses or 'none'}); "
-        f"open functions in no slice: {unplanned}.",
-        "",
-        "| Order | Slice | Status | Owner | Files | Open functions | Original lines |",
-        "| ---: | --- | --- | --- | ---: | ---: | ---: |",
-    ]
-    for entry in sorted(plan, key=plan_order):
-        files = plan_files(entry)
-        out.append(
-            f"| {entry['order']} | {entry['slice']} | {entry['status']} | {entry['owner'] or '-'} | {len(files)} "
-            f"| {sum(functions[path] for path in files):,} | {sum(lines[path] for path in files):,} |"
-        )
-    return out
-
-
-def plan_issues(rows: list[dict[str, str]], plan: list[dict[str, str]], recorded: set[str]) -> list[Issue]:
-    """The slice queue covers every open function once and agrees with the ledgers on what is finished."""
-    def issue(rule: str, subject: str, message: str) -> Issue:
-        return Issue("modernization", rule, subject, message)
-
-    found: list[Issue] = []
-    functions, _ = open_work(rows)
-    slice_of: dict[str, str] = {}
-    names: Counter = Counter(entry["slice"] for entry in plan)
-    orders: Counter = Counter(entry["order"] for entry in plan)
-    agents = []
-    for entry in plan:
-        name, status = entry["slice"], entry["status"]
-        if not name or names[name] > 1:
-            found.append(issue("plan-duplicate", name or "(blank)", "slice names must be present and unique"))
-        if not entry["order"].strip().isdigit() or orders[entry["order"]] > 1:
-            found.append(issue("plan-duplicate", name, f"order {entry['order']!r} must be a unique number"))
-        if status not in PLAN_STATUS_VALUES:
-            found.append(issue("plan-status-unknown", name, f"status {status!r} is not one of the slice states"))
-        files = plan_files(entry)
-        if not files:
-            found.append(issue("plan-empty", name, "a slice lists the files it promotes"))
-        for path in files:
-            if path in slice_of:
-                found.append(issue("plan-file-overlap", path, f"listed by {slice_of[path]} and {name}"))
-            slice_of.setdefault(path, name)
-        remaining = sum(functions[path] for path in files)
-        if status == "done":
-            if remaining:
-                found.append(issue("plan-done-open", name, f"{remaining} functions on its files are still open"))
-            required_slices = {value.strip() for value in entry["gate_slice"].split(";")}
-            missing_slices = required_slices - recorded
-            if missing_slices:
-                found.append(issue("plan-done-unrecorded", name,
-                                   f"gate_slice records missing from GATE_SLICES.csv: {sorted(missing_slices)!r}"))
-        elif files and not remaining:
-            found.append(issue("plan-finished-not-done", name,
-                               "no open function remains on its files: mark it done or correct the file list"))
-        if status == "active" and entry["owner"].startswith(AGENT_OWNER):
-            agents.append(name)
-    if len(agents) > MAX_AGENT_SLICES:
-        found.append(issue("plan-agent-limit", ", ".join(agents),
-                           f"{len(agents)} agent slices are active; the limit is {MAX_AGENT_SLICES}"))
-    for path, count in sorted(functions.items()):
-        if path not in slice_of:
-            found.append(issue("plan-unplanned", path, f"{count} open functions belong to no slice"))
-    return found
-
-
 def tracker_text(current: str, block: str) -> str:
     start = current.find(SUMMARY_BEGIN)
     end = current.find(SUMMARY_END)
@@ -499,7 +401,7 @@ def tracker_text(current: str, block: str) -> str:
 
 def write_tracker(workspace: ModernizationWorkspace, rows: list[dict[str, str]]) -> None:
     current = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    text = tracker_text(current, summary(rows, shim_sites(gates.Sources(workspace)), read_csv(workspace.plan)))
+    text = tracker_text(current, summary(rows, shim_sites(gates.Sources(workspace))))
     workspace.tracker.write_bytes(text.encode("utf-8"))
 
 
@@ -537,10 +439,8 @@ def check(workspace: ModernizationWorkspace) -> list[Issue]:
             found.append(issue("done-not-promoted", identifier, "done needs catalog cpp=x"))
         if promoted and row["status"] != "done":
             found.append(issue("promoted-not-done", identifier, "catalog cpp=x needs status done"))
-    plan = read_csv(workspace.plan)
-    found += plan_issues(rows, plan, {row["slice"] for row in read_csv(workspace.slices)})
     current = workspace.tracker.read_bytes().decode("utf-8").replace("\r\n", "\n")
-    if tracker_text(current, summary(rows, shim_sites(gates.Sources(workspace)), plan)) != current:
+    if tracker_text(current, summary(rows, shim_sites(gates.Sources(workspace)))) != current:
         found.append(issue("tracker-stale", str(workspace.tracker), "tracker block differs from the ledger; run --sync"))
     return found
 

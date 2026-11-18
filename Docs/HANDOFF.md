@@ -1,5 +1,33 @@
 # Current Handoff
 
+## Transient-tooling retirement (#440), 2026-11-18
+
+Starting revision: `d654bad79`, clean worktree. Retired 255 campaign files:
+historical naming inputs/outputs/report/duplicate decisions, 20 batch-specific
+generators, three one-off scripts, and the completed 54-slice and 900-function
+promotion trackers. Generic review tools remain; their scratch outputs are now
+ignored. Shared layout/citation support and its tests moved out of `sym_gen`
+into `tools\naming\symbol_support.py` and `test_symbol_support.py`.
+
+The completed queue's scheduling checks are gone, not the canonical ownership,
+promotion, behavior or compatibility-retirement gates. All retained native files
+and canonical CSV ledgers match their pre-cleanup hashes. `FileMenuLive.cpp`
+and other live bindings are unchanged. Only the 62 quality-baseline entries for
+deleted tool paths were removed; all 4,995 retained entries are unchanged and
+no new findings were accepted.
+
+Local validation: 48 naming tests, 35 modernization tests, 226 encounter/copier
+tests and two symbol-ledger tests passed. Modernization and gate checks report
+zero violations; changed-source quality reports zero new findings. Both copier
+runs reproduce all 486 pre-cleanup output hashes without touching owned files.
+Two solution generations are stable. Native builds/replays were not repeated
+for this tooling-only cleanup because every native source/header/project hash
+is unchanged. Exact-revision CI closure evidence belongs on #440.
+
+Evidence: `build\transient-cleanup\before.json`, `verification.json`,
+`removed-baseline-entries.json`, `copy-1.log`, `copy-2.log` and the project/test
+logs in the same directory. Retired scripts and snapshots remain in Git history.
+
 ## Owner-requested cleanup, 2026-11-18
 
 - Promotion tooling retired in `cb1e04334`; do not run promotion checks.

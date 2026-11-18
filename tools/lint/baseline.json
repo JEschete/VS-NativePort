@@ -219,13 +219,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "01f53ef3d0cf6e55f2bdec41f8561e0ac48f2ba079e3e045fad2b39aaed01918",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "01f9b4909c31ea30b1e73118578cce0c51bde30dcba5d9010b67538280e9efd2",
       "count": 1,
       "tool": "cpplint",
@@ -1115,13 +1108,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "08bdfbf1ccd6abe79e83ab21b22a333865ecaaf7edd6243e61da30c429582baf",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "B007"
-    },
-    {
       "key": "08c4018c34e2e85cb976deceb8a09083f7561a16f0b1bfc5a061a98ff664b742",
       "count": 1,
       "tool": "cpplint",
@@ -1267,13 +1253,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Movie/MoviePlayer.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "0a09f87d3f43cf9451ea078960ddd7a18e9dcd22f62d67651ad35ea0c4c9b657",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sanity_fixes.py",
-      "rule": "F841"
     },
     {
       "key": "0a0e3d97922f7a621ced8fd0daaa54a5dacfe6cf921d07c9e91a3051b0525306",
@@ -1717,13 +1696,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "0ce418cf266175a709c5e87eff024ac1649d8d3f3325506b0b52f990e21694e1",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Battle_03.py",
-      "rule": "E741"
-    },
-    {
       "key": "0cff5f8aac1a93895f989f11300e576137e78a6804c4b745fd82dc83e7e9044b",
       "count": 1,
       "tool": "cpplint",
@@ -1778,13 +1750,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "0d57295927eada57df23d4d9cb7e5b36e45f71f26f77ecb0c3e2660ac52add80",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "B905"
     },
     {
       "key": "0d5af3e0bffdd57da15fe418aea2206ce2910154b160205bc2b2e0172a1976a6",
@@ -2149,13 +2114,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "0fae8d65fed6e1d2038a75c74bb19d376674914780536f1787b9cbd428a0cccc",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/menu_globals.py",
-      "rule": "SIM115"
     },
     {
       "key": "0faee71118f1f1149a100b7cc12773a1e12e713c47da4d674c6dfbed28f26d83",
@@ -2914,13 +2872,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "142af78aeaac0ef41324d2c00b655dfb36599eea6ec21df6b648b54b2f0d70ff",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "B905"
-    },
-    {
       "key": "14346beb8ed23252b12d0122ecc06002089096d1bdbc9789b89640b3a2abced3",
       "count": 1,
       "tool": "cpplint",
@@ -3376,13 +3327,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "17b66ed6f86633e67ff9e98e8d90734a44848502d88d1c051e8925ae28378a14",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "17c3a72dc2df5d00d45017a07ff6814c317b7b86c53fe9805cf90cf790e55cec",
       "count": 1,
       "tool": "cpplint",
@@ -3759,13 +3703,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Unported.hpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "1af09c32a70416e660f4dff508c630a6f8b9c9ae96e3a0d97799d2d1dcd26131",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/menu_globals.py",
-      "rule": "SIM115"
     },
     {
       "key": "1afcc63e0e8b74b44cb490083244b348e5d3b53e5a768c815edf0d4acd2bd018",
@@ -6484,13 +6421,6 @@
       "rule": "B023"
     },
     {
-      "key": "2cb79b5fa159bcb390588a4be934b13d4feea83880edbecae370b36a90328259",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Battle_04.py",
-      "rule": "I001"
-    },
-    {
       "key": "2cb897591eb522bcdf9e8e234d0f4209ee66039f52891b5a6d1af1b0da95ac29",
       "count": 1,
       "tool": "cpplint",
@@ -6701,13 +6631,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "2e34c4d3a3bde6d304b85951ad88b65521e37d48252a0ea33a9594d0f5d7c209",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Effects_02.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "2e3a40f4d9ea9c641b6635ae8e86bda374bd53f96bdea0cc5de7a259570cab85",
       "count": 1,
       "tool": "cpplint",
@@ -6797,13 +6720,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Boot/GameApp.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "2f01b9495b082cc41ef99dfb473a5293a7270bdc4a34d52415e04fbafa1b54be",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "SIM115"
     },
     {
       "key": "2f0b59cf2c570348b3757548e094f456c303de256f3070c153637f00874f5f64",
@@ -7077,13 +6993,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "readability-function-size"
-    },
-    {
-      "key": "30a1449fbcd412e7256eab4dddd6e82765e947784f9cc62209eb6604ffba27db",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "SIM115"
     },
     {
       "key": "30b2e46eef0bf4ee16629a82d812c513fccfdc9571f1d8112eb96e1683b9f778",
@@ -7639,13 +7548,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "35303c6d093fc39dae0534a8c19327103d445865272f218af34a5fc3dbf24111",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "B905"
-    },
-    {
       "key": "3535ab6dfe21bab37e7a4debb48b8fe72bd628e2f647ee1c7e45824cc294a504",
       "count": 1,
       "tool": "cpplint",
@@ -8136,13 +8038,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "389c6f0e5204408db2b5a92ae08c5d40b741f78206b2990e877e5219ce98f953",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "B007"
-    },
-    {
       "key": "38a5c90a5cace0122c9457eced97aba532e07d9a40afc8c0eacdc854e5c8b460",
       "count": 1,
       "tool": "tidy",
@@ -8190,13 +8085,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "39406086c5de1e9ea817a4ee6a867effbdc3a3fc69ba4668d3babb2e4854ee12",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/menu_globals.py",
-      "rule": "B007"
     },
     {
       "key": "3951847721f482d2c7937dca5479c9540f264eb18817134b3a685eca4c167340",
@@ -8829,13 +8717,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "3ea80544c662ae3384c29b6cfdd7ff653da416485cf280c42e4b896558356d75",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/consolidate.py",
-      "rule": "E741"
-    },
-    {
       "key": "3eb633af2cab9d853ae1a2a5503c0051e3449ca66bebc8a5b80e8ca69ce202c7",
       "count": 1,
       "tool": "tidy",
@@ -9163,13 +9044,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "40a1c22e267121b2f06f9c8bf868cc4dd5ff85cf8ae64ab49c6979ed52a89c76",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "B007"
     },
     {
       "key": "40af01c6fccd275789a0a4e452f75fb1ece739fca5e98d50b9912b4a526dc6af",
@@ -10446,13 +10320,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "4a29448fd8688670bdc4596c48a5fa3c5076d06c882dcf52c324acef217af856",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "I001"
-    },
-    {
       "key": "4a47335b2679ffd01a4b420604745d6a223f85d96d7725aa775aa5e38ab1c32a",
       "count": 1,
       "tool": "cpplint",
@@ -10486,13 +10353,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "4a82deed9d4b63e3b1a01a6803c7b01871d2afababcf1be6e13846fdee31c507",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_02.py",
-      "rule": "F401"
     },
     {
       "key": "4a94652092802c13052984974b7971e37d8f35cb992fb1286a449406d3e84ded",
@@ -10633,13 +10493,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "4b68f26f490846ad5533f2b53d8be1fe4202de11365f8b66adda6c5991c09490",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_01.py",
-      "rule": "I001"
     },
     {
       "key": "4b7971353fa440f7205010d4f6234727d6c19be6b1260642f5b646559e11a3d0",
@@ -11118,13 +10971,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "4ea263f642680cff465858eaa86f081723d06cccb5cd4fe3e23acecc12e07b1a",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/menu_globals.py",
-      "rule": "I001"
-    },
-    {
       "key": "4ea3d763c011f00ee6f30d9ddba990870abef15ce459fd1a207823c8328a2f25",
       "count": 1,
       "tool": "cpplint",
@@ -11403,13 +11249,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/Unported.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "515f533ce374a4a31acb740beeafcd577628ebc1e19785368356feba200b3750",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "UP034"
     },
     {
       "key": "516bd74641f1949b7db3f293c291eb23453fdd84289587e2ab0384cf658058c1",
@@ -12623,13 +12462,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5a0b7049092a7fa7b9588f13fad53d68ab48d449d249f6d6ab60f22fad7adf49",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_02.py",
-      "rule": "F401"
-    },
-    {
       "key": "5a0fe3861689bfdced7afe429ee2b9f5deed635282ecf3121c859d3c99369956",
       "count": 1,
       "tool": "tidy",
@@ -12908,13 +12740,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "5c651b96677f3f85e1d44fabf08d10b0275b3d2490b23e18f5feeda94dc1251e",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "SIM115"
     },
     {
       "key": "5c68def6bf9e340c28989e4eb7135b5946586a4df25b256dbf5089248edba975",
@@ -13204,13 +13029,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "5e3e1801f75f6e1659a0715e377895f0c72e3446295326fab9ded344a6c76ec8",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "B007"
-    },
-    {
       "key": "5e406bead6959f1fbb0561139b2ad46d65223f6dc58ce61cb459e4ad2da03baa",
       "count": 1,
       "tool": "cpplint",
@@ -13412,13 +13230,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "5f7cbd7e4fa8bbc66466716fd5f9baf8bc49781f18e51fc373816aef0ce0d9a6",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/menu_globals.py",
-      "rule": "SIM115"
     },
     {
       "key": "5f81cc7370ec47b60d0c0d8110e9dd6375aa13e0d0e2a66539b1f509e46c2b5e",
@@ -14863,13 +14674,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "69add1d798fb737787e63762830aa007d16199c0566a1b5f579361cd7d8f9367",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "69c4453db14d0b4c70b92c51f22ba729915632b152c0b08b6a85933e473645c9",
       "count": 1,
       "tool": "tidy",
@@ -14910,13 +14714,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "6a4a8a9204c27a187cc6115e3b6f461018be37302890ea212728f77090436ee4",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Actors_01.py",
-      "rule": "I001"
     },
     {
       "key": "6a5ecd97d69252b99d7955fb091e08b3c2c4c698586f7ba8192b1193dbe0e737",
@@ -16368,13 +16165,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "75253f905d1230138b5ef5a2f1eba8f4d93b9745d7fc4b72d1c420238cd71d02",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Battle_02.py",
-      "rule": "B905"
-    },
-    {
       "key": "75329e24cfac75cde14c44a944e44846a384c8923fe57e60c268d42f23f23380",
       "count": 1,
       "tool": "tidy",
@@ -16429,13 +16219,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "75846184895443c660b8ba0e7799fdd97990197d2a365b806b374c7e5c2ef520",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/menu_globals.py",
-      "rule": "E741"
     },
     {
       "key": "e170c418d759db456006420dd729684842ec4c9cc927e388adf868f08827fd2b",
@@ -17614,13 +17397,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7ec9723962670a7ce8c66e0cf5472ccba6229efbb7283579d19853a06f2e2ccf",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "B905"
-    },
-    {
       "key": "7ed31385b5a43726b07a0f4c1632b052cb6558975cb276cc3f6be8cf6c96e83e",
       "count": 1,
       "tool": "tidy",
@@ -17752,13 +17528,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "800bb09d77876515b2bba0517c24b7a775411dd1f1d425e79f5017201c0004cd",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "B007"
     },
     {
       "key": "8011d2538d5b95e0bff064af771538be7e45b159104de13de4c124982e29acb9",
@@ -18223,13 +17992,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "83c15fbccdaebb1df08934af4418bdaff37baf8f14c6cee52d9752f47768e29d",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_01.py",
-      "rule": "B905"
-    },
-    {
       "key": "83c38293026866b3c94d971adfa378944dce599b8f887158a7fd212d8b5398a8",
       "count": 1,
       "tool": "cpplint",
@@ -18578,13 +18340,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "85eb309f01b9302764de985b10d9bd487fe60d29b4cd558e12e8b4f72405620c",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sanity_fixes.py",
-      "rule": "I001"
     },
     {
       "key": "cf65343bc4542e1c114312168990711f7bc2c83817c0bbef3ada5b97afb46633",
@@ -19329,13 +19084,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8ae6df86de047e0d8827c5d89f978dae9e3da26d9a58123048f3ce17b5fc19fe",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Actors_01.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "8afaff06e6f75c085a086f5dbe77729cad71302c3c7fc2c583b2030bb1f0cd37",
       "count": 1,
       "tool": "cpplint",
@@ -19628,13 +19376,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "8d478a3c493e594684ef10c25504c6833362551135ca5cb28e043877dfdc5259",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Battle_02.py",
-      "rule": "I001"
     },
     {
       "key": "8d6483ada69d670140f22857887f49109a07b103c2bd17f75febc3746398c627",
@@ -20092,13 +19833,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "906afa845749c580091e5cb5e8ba9c9ac2326afdebaa5dbb8ac2b61d06f1496d",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "B905"
-    },
-    {
       "key": "906b6e423a8e6480fe41bfecec05a08d3985f4ddcddc4a0d68da23f41193e8f4",
       "count": 1,
       "tool": "tidy",
@@ -20484,13 +20218,6 @@
       "rule": "B007"
     },
     {
-      "key": "93358bf42d2427a6efe9fa58ae2b43ac6d78b69979d67422559851b091ddd65d",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "B007"
-    },
-    {
       "key": "934b1483b5944ac906b76ea8fd9bf01b0b3fb97f359d419301575e501ca075d6",
       "count": 1,
       "tool": "ruff",
@@ -20503,13 +20230,6 @@
       "tool": "tidy",
       "path": "Native/Desktop/src/main.cpp",
       "rule": "bugprone-suspicious-stringview-data-usage"
-    },
-    {
-      "key": "936ba5fd572c8d66f9a5e582467623a52a63bf533762bf8cc70f1cc2f044576d",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Effects_02.py",
-      "rule": "I001"
     },
     {
       "key": "9372ab3592c223d2dc147f721cf1ac8d4bb7a5d4f86e21c79cad75e91f25ba54",
@@ -20874,13 +20594,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "957d69406a01d5ded5388e89824f5471e20adbefa0a048c3a26d542cdb65ebe3",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sanity_fixes.py",
-      "rule": "SIM115"
     },
     {
       "key": "95aa39334aa74e1dc5edb83765f5cf6e0105ebcc4b50dd776b8aa97777b2e149",
@@ -21772,13 +21485,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9c083ac4b1c8c96e330beccca8b67ec55cdfb8e062dc401f78f9f4d5a4ac9a51",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "E401"
-    },
-    {
       "key": "9c0d9dc4cb81921aab7b04913028f157d932742f54e4a88d2d1bad5073435bd2",
       "count": 1,
       "tool": "cpplint",
@@ -22568,13 +22274,6 @@
       "tool": "tidy",
       "path": "Native/Content/include/Content/ModuleData.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "a22fd38af82bc945f94dc548d72e37132811428bf356746f686b8820b0411c8f",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "B007"
     },
     {
       "key": "a23d6875349b375a2886ffa8e3f62e51a653d0bc4d4077f0cd6f5c6049f139c6",
@@ -24108,13 +23807,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "adce887ddf43bc9c72494429817dcb867cb125ab4aa565b2649d4bde4d4552fe",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_02.py",
-      "rule": "B905"
     },
     {
       "key": "c716a5e580ede8b8e404aa6498cfd65977473bfd9a30a40d24a525c012430cdd",
@@ -26413,13 +26105,6 @@
       "rule": "readability-function-size"
     },
     {
-      "key": "bec257df0f68fa7396e9a296ec67a30d362286dc03b8f77ec5f82c985a45033b",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "becdef06177c3683cea9dee7e5109a937478071808538867c9d610c1c6427e5f",
       "count": 1,
       "tool": "cpplint",
@@ -26614,13 +26299,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/RoomState.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c097fdc197990a0842fb2c87c00d6d8b6193de0927f87b14c047808b2d75672a",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/ai_state.py",
-      "rule": "B905"
     },
     {
       "key": "c0a0fae34753ab01c3862e1b951f6cab07eb5c4b57816ecdb5cfa9d32433988f",
@@ -27701,13 +27379,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "c8f7e0b7ab4d0c06a0cbf99de8ef66f72232372734dff030c55f70e5de3dcc2e",
-      "count": 2,
-      "tool": "ruff",
-      "path": "tools/naming/sanity_fixes.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "c9016c2295a9f1c1a2b9807a5f54370eced7bf625ae85d4f4fe38ae4701a835b",
       "count": 1,
       "tool": "tidy",
@@ -28079,13 +27750,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "cb81bc2d148f35a1985c705abd1f3104aaafc6d41e53a092d0c7b6679e2719f8",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Battle_03.py",
-      "rule": "I001"
-    },
-    {
       "key": "cb9e218631690206c08128232fefd38b870497ce90db305696cc03974c7aaab6",
       "count": 1,
       "tool": "cpplint",
@@ -28455,13 +28119,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "cdbfdd12a9a20ee82a00fcf5c9411690922bef4532aaf259a1efb2dc12b13d9e",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "E402"
     },
     {
       "key": "cdc21be268a2970617bd7e887f9e3065c0572e97c66da162850305962b173e82",
@@ -29185,13 +28842,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "d28ac19ffef3044d8bc6a262f76827cba8559eedebd5351a92d037b94dd1e70b",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "d2a45e9949838f152d6fa7bd9eabfc5d1b31f9f6c70bf44a0b3be9f995ef6c77",
       "count": 1,
       "tool": "cpplint",
@@ -29218,13 +28868,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d323a49d161bd1b8f48d27c97bef495e864f818749262cc1acacb110dfd230ce",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "B007"
     },
     {
       "key": "d328ca707123c887bf9b0764b4d1b4c244db946d32f438ff5722f57f446ecbc2",
@@ -30030,13 +29673,6 @@
       "tool": "cpplint",
       "path": "Native/Game/include/Boot/GameApp.hpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "d86a8cbfd03075ae3f645f6a628753f9e3f74e3d1f679fca79c6308de35b7ff1",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "B007"
     },
     {
       "key": "d86d929c66f87238db9cfde09da0384ac3f86e203bb7f2b3cf1b7a241f5ee44b",
@@ -32314,13 +31950,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "e97deeb2a3e1c289138b58557b8fad7a6d5dba2762fecfe0987885fae145445f",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sanity_fixes.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "e98c3deac9dd5e05dfee2f7fb89c9f259d93251045c505d1e94bdabf98f79a7c",
       "count": 1,
       "tool": "tidy",
@@ -32389,13 +32018,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "e9d2a697280c1dead54e3366ca5e611a29b999dbf68f6800523a03db678f5ade",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_01.py",
-      "rule": "B905"
     },
     {
       "key": "e9f3ce2a0ed0e2f957a9fe1f7078be75133ba4e9bfd4d6a4553b94d8ad381a2a",
@@ -33266,13 +32888,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f017ff331323bcf91792202b7979e477e65955bf3d22aa105280a2f240df1a59",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Battle_01.py",
-      "rule": "B905"
-    },
-    {
       "key": "f01abb7c14df1565580f25ccdda7e41deb0c8847bd8d1f80b9d2135d092eeb36",
       "count": 1,
       "tool": "tidy",
@@ -33532,13 +33147,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f2196283db24891d79ed73f02289f53b5e970cc971bdaaf5d9e9892558ca6004",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_01.py",
-      "rule": "SIM115"
-    },
-    {
       "key": "f21d947ed06b69a9d22cd46d82dd11ec36ceb8f34e0c096d0631e794242f5f38",
       "count": 2,
       "tool": "ruff",
@@ -33614,13 +33222,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "f28e73cb78c8ccbe57f2907a3d09dcd862044f931ad23a427197464efa5718d5",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Engine_01.py",
-      "rule": "B905"
     },
     {
       "key": "f2920e6d84d1555606fe544d4966c1f1bf8ac918e9c7307821fb8dcffe26c2b2",
@@ -33768,13 +33369,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/CombatTestCases.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "f42854b7648fae9b338dc0432bb2fbd3faf3dbc8deda9bb38c67c3e398b74beb",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Game_Menu_02.py",
-      "rule": "I001"
     },
     {
       "key": "f43e07181ae778a85631d193331c53dd275792e9f7441d3923477c24a3175ad1",
@@ -34428,13 +34022,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f96ea92fd1c12a903254ee44a45e758aa996a70275d97d725b1c69037ce18252",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/ai_state.py",
-      "rule": "B905"
-    },
-    {
       "key": "f97c706db6345bfc78bd26bd34b8f0cec8211581a4ece4d19f16790b992386eb",
       "count": 1,
       "tool": "tidy",
@@ -34608,20 +34195,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Input/Pad.hpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "fa5899b0e3374728d5dd8cd1991656a478809148985d0fb4f8f4b420876416d3",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "B007"
-    },
-    {
-      "key": "fa7c30d0b11a8847c55db35525136dd72665ef33f9588b9db58965446f49a7fe",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/common.py",
-      "rule": "B905"
     },
     {
       "key": "fa8e474f98eae77ee785a44ee3f0ef8bdf9b5ff18f5644e7f88e0b2c9e882f56",
@@ -35063,13 +34636,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "fdb39ffd1e77559d68e5a9e1eddaf1af51c328c8b9d59d0419b715edf37167cf",
-      "count": 1,
-      "tool": "ruff",
-      "path": "tools/naming/sym_gen/Audio.py",
-      "rule": "B007"
     },
     {
       "key": "fdb7adc2444d2b0e0447a325359db718c5c5cd103ea2f9a8d02e245c78f02e2f",

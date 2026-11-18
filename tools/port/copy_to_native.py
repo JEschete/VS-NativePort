@@ -1399,8 +1399,8 @@ class Copier:
 
     def generated_type(self, r: dict, name: str) -> str:
         """Struct written from the ledger layout: upstream-merged layouts, whose pinned text has other members."""
-        sys.path.insert(0, str(REPO / "tools" / "naming" / "sym_gen"))
-        from common import Gen
+        sys.path.insert(0, str(REPO / "tools" / "naming"))
+        from symbol_support import Gen
         if not hasattr(self, "_gen"):
             self._gen = Gen("Shared")
         g = self._gen
@@ -1461,8 +1461,8 @@ class Copier:
         if tid in seen or tid in cf.POINTER_FREE_TYPES:
             return False
         self.spelled_type("")  # builds the decomp-name -> type id table
-        sys.path.insert(0, str(REPO / "tools" / "naming" / "sym_gen"))
-        from common import Gen
+        sys.path.insert(0, str(REPO / "tools" / "naming"))
+        from symbol_support import Gen
         if not hasattr(self, "_gen"):
             self._gen = Gen("Shared")
         try:
