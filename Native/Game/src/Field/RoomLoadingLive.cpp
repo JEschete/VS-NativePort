@@ -112,10 +112,6 @@ extern "C" {
 
 // decomp: _zoneContext (_zoneContext@BATTLE/BATTLE.PRG)
 Field_ZoneContext Field_zoneContext;
-// decomp: D_800F1908 (D_800F1908@BATTLE/BATTLE.PRG)
-int Field_roomResetWord;
-// decomp: D_800F1BBC (D_800F1BBC@BATTLE/BATTLE.PRG)
-char Field_reservedResetByte;
 }
 
 namespace {
@@ -604,7 +600,7 @@ class LiveSections : public Host {
     Effects::LiveAllocateWeatherParticles();
     LiveInitializeRoomBackgroundColors();
     LiveUploadRoomPalettes();
-    Field_reservedResetByte = 0;
+    // The original also cleared the write-only D_800F1BBC (146C.c:15613).
   }
 
   void WaitForOverlayReady() override { Boot::WaitForOverlayReadyLive(); }
@@ -1153,7 +1149,7 @@ class LiveRoomLoadHost final
     orbit.delta.mode = camera.mode;
     orbit.values.pitch = camera.pitch;
     orbit.zoomVelocity = 0;
-    Field_roomResetWord = 0;
+    // The original also cleared the write-only D_800F1908 (146C.c:15305).
   }
 
   // decomp: BATTLE.PRG func_80089DC0 (146C.c:15437-15449)

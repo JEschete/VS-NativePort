@@ -516,6 +516,6 @@ void UpdateAndDrawRoomModels(RoomModelPassHost& host) {
   }
   host.ClearGimmickPushUpdate();
   host.OffsetOrderingTable(-kGimmickDepthEntries);
-  host.CountPass();
+  // The original then incremented the write-only D_800E9308 (44F14.c:1068).
 }
 }  // namespace VS::Actors

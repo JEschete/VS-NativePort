@@ -31,7 +31,6 @@ extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Damage.h"
-#include "Boot/GameplayInit.h"
 #include "Core/Diagnostics.h"
 #include "Effects/Runtime.h"
 #include "Event/ScriptVm.h"
@@ -137,7 +136,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     Field_screenTransitionWipeAngle = defaults.transition_wipe_angle;
     Field_isInteractionPaused = defaults.interaction_paused ? 1 : 0;
     Items_lootListHead = nullptr;
-    Boot_gameplayResetWordOne = 0;
+    // The original also cleared the write-only D_800F1874 (18.c:570).
     Field_controlMode = defaults.field_control_mode;
     VS::State::SetLiveTickSpeed(defaults.tick_speed);
     VS::Render::SetLiveCameraProjectionDistance(defaults.projection_distance);
@@ -193,7 +192,6 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
   void SetFieldRenderingEnabled(bool enabled) override {
     VS::Field::LiveSetFieldRenderingEnabled(enabled ? 1 : 0);
   }
-  void ResetGameplayResetWordTwo() override { Boot_gameplayResetWordTwo = 0; }
   void ConfigureFieldDisplay(const GameplayOverlayDefaults& defaults) override {
     VS::Render::ConfigureLiveFieldDisplay(
         defaults.display_width, defaults.display_height,

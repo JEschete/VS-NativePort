@@ -54,7 +54,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Battle/Recovery.h"
 #include "Battle/StatusEffects.h"
 #include "Field/Actors.h"
 #include "Field/GimmickLookup.h"
@@ -546,7 +545,7 @@ class LiveBattleActorHost final : public BattleActorHost {
     if (actor == nullptr || actor->stats == nullptr) return;
     const Synced synced(*this);
     VS::Battle::RemoveLiveActorStatuses(kAllStatuses, actor->stats);
-    Battle_recoveryResetWord = 0;
+    // The original also cleared the write-only D_800F5160 (146C.c:8682).
   }
   void SetMarker(int id, int flags) override {
     const Synced synced(*this);

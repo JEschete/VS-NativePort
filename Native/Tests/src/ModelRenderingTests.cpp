@@ -545,7 +545,6 @@ class RecordingHost final : public actors::RoomModelPassHost {
     Record("gimmick-draw", index);
   }
   void ClearGimmickPushUpdate() override { Record("clear-push"); }
-  void CountPass() override { Record("count"); }
 
  private:
   void Record(const std::string& call) { calls.push_back(call); }
@@ -693,8 +692,7 @@ TEST_CASE("The room pass visits actors, weapons and gimmicks in order",
                                           "gimmick-draw 3",
                                           "center 4",
                                           "clear-push",
-                                          "ot -4",
-                                          "count"};
+                                          "ot -4"};
   CHECK(host.calls == expected);
 }
 
@@ -706,7 +704,7 @@ TEST_CASE("A gimmick push handled this frame does not step its motion",
   actors::UpdateAndDrawRoomModels(host);
   CHECK(host.calls == std::vector<std::string>{"camera", "ot 4", "center 2",
                                                "gimmick-draw 2", "clear-push",
-                                               "ot -4", "count"});
+                                               "ot -4"});
 }
 
 TEST_CASE("The live model transforms refuse missing records",

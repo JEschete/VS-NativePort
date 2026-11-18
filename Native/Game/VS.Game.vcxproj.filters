@@ -888,12 +888,6 @@
     <ClInclude Include="src\Battle\Legacy.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
-    <ClCompile Include="src\Battle\Recovery.cpp">
-      <Filter>src\Battle</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Battle\Recovery.h">
-      <Filter>src\Battle</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\RewardFlow.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -1030,12 +1024,6 @@
       <Filter>src\Boot</Filter>
     </ClCompile>
     <ClInclude Include="src\Boot\GameLoop.h">
-      <Filter>src\Boot</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Boot\GameplayInit.cpp">
-      <Filter>src\Boot</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Boot\GameplayInit.h">
       <Filter>src\Boot</Filter>
     </ClInclude>
     <ClCompile Include="src\Boot\GameplayLoop.cpp">

@@ -279,7 +279,6 @@ class RoomModelPassHost {
   virtual void DrawGimmick(std::size_t index) = 0;
   // Clears the flag that an actor update handled the pushed gimmick.
   virtual void ClearGimmickPushUpdate() = 0;
-  virtual void CountPass() = 0;
 };
 
 // One frame of the room's actors, their weapons and the gimmicks, in the

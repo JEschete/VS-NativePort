@@ -520,13 +520,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\Recovery.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Battle\RewardFlow.cpp" />
     <ClCompile Include="src\Battle\RewardFlowLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -626,13 +619,6 @@
     </ClCompile>
     <ClCompile Include="src\Boot\GameApp.cpp" />
     <ClCompile Include="src\Boot\GameLoop.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Boot\GameplayInit.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
@@ -2363,7 +2349,6 @@
     <ClInclude Include="src\Battle\HitChance.h" />
     <ClInclude Include="src\Battle\Hud.h" />
     <ClInclude Include="src\Battle\Legacy.h" />
-    <ClInclude Include="src\Battle\Recovery.h" />
     <ClInclude Include="src\Battle\Rewards.h" />
     <ClInclude Include="src\Battle\Room.h" />
     <ClInclude Include="src\Battle\Sphere.h" />
@@ -2373,7 +2358,6 @@
     <ClInclude Include="src\Battle\TextBoxes.h" />
     <ClInclude Include="src\Battle\ValueLabels.h" />
     <ClInclude Include="src\Boot\GameLoop.h" />
-    <ClInclude Include="src\Boot\GameplayInit.h" />
     <ClInclude Include="src\Boot\OverlayReset.h" />
     <ClInclude Include="src\Boot\PlayerSettings.h" />
     <ClInclude Include="src\Effects\Camera.h" />

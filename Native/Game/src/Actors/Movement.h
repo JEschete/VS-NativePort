@@ -58,7 +58,6 @@ _Static_assert(sizeof(Actors_AirborneTickAccumulator) == 0x4, "Actors_AirborneTi
 
 extern u_char Actors_kJumpHangFrames[3204];
 extern u_char Actors_kJumpHeightAdjustments[3196];
-extern int Actors_motionResultResetWord;
 extern u_char Actors_kMotionResultAnimations[3181];
 extern u_char Actors_kMotionResultOneAnimationId;
 extern u_char Actors_kHangMotionAnimationId;

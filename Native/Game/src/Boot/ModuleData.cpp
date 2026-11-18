@@ -231,7 +231,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x808A8, sizeof Field_interactingGimmickId, &Field_interactingGimmickId, sizeof Field_interactingGimmickId}, // G00080 D_800E90A8
     {"BATTLE/BATTLE.PRG", 0x808AC, sizeof Actors_kJumpHangFrames, &Actors_kJumpHangFrames, sizeof Actors_kJumpHangFrames}, // G00081 D_800E90AC
     {"BATTLE/BATTLE.PRG", 0x808B4, sizeof Actors_kJumpHeightAdjustments, &Actors_kJumpHeightAdjustments, sizeof Actors_kJumpHeightAdjustments}, // G00082 D_800E90B4
-    {"BATTLE/BATTLE.PRG", 0x808BC, sizeof Actors_motionResultResetWord, &Actors_motionResultResetWord, sizeof Actors_motionResultResetWord}, // G00083 D_800E90BC
     {"BATTLE/BATTLE.PRG", 0x808C3, sizeof Actors_kMotionResultAnimations, &Actors_kMotionResultAnimations, sizeof Actors_kMotionResultAnimations}, // G00084 D_800E90C3
     {"BATTLE/BATTLE.PRG", 0x808C4, sizeof Actors_kMotionResultOneAnimationId, &Actors_kMotionResultOneAnimationId, sizeof Actors_kMotionResultOneAnimationId}, // G00085 D_800E90C4
     {"BATTLE/BATTLE.PRG", 0x808C6, sizeof Actors_kHangMotionAnimationId, &Actors_kHangMotionAnimationId, sizeof Actors_kHangMotionAnimationId}, // G00086 D_800E90C6

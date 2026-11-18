@@ -941,8 +941,8 @@ Flow ResolveStep(MoveContext& ctx) {
     ctx.motion.x = Narrow16(ctx.motion.x / kWallSlowdown);
     ctx.motion.z = Narrow16(ctx.motion.z / kWallSlowdown);
   }
-  // The original also cleared Actors_motionResultResetWord here; nothing
-  // reads it.
+  // The original also cleared the write-only D_800E90BC here (BATTLE.PRG
+  // 0x800A59C0).
   const TerrainResolve resolved =
       ctx.host.ResolveTerrainMotion(actor, ctx.motion, ctx.input.pad != 0);
   ctx.status = resolved.status;

@@ -228,7 +228,6 @@ extern "C" {
 #include "Battle/HitChance.h"
 #include "Battle/Hud.h"
 #include "Battle/Legacy.h"
-#include "Battle/Recovery.h"
 #include "Battle/Rewards.h"
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
@@ -237,7 +236,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Battle/ValueLabels.h"
 #include "Boot/GameLoop.h"
-#include "Boot/GameplayInit.h"
 #include "Core/Legacy.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Overlays.h"
@@ -443,7 +441,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E90A8u, 4u, (void*)&Field_interactingGimmickId, sizeof Field_interactingGimmickId, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90ACu, 8u, (void*)&Actors_kJumpHangFrames, sizeof Actors_kJumpHangFrames, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90B4u, 8u, (void*)&Actors_kJumpHeightAdjustments, sizeof Actors_kJumpHeightAdjustments, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E90BCu, 4u, (void*)&Actors_motionResultResetWord, sizeof Actors_motionResultResetWord, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90C4u, 4u, (void*)&Actors_kMotionResultOneAnimationId, sizeof Actors_kMotionResultOneAnimationId, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90CCu, 4u, (void*)&Actors_kSlowQuadrantMoveAnimations, sizeof Actors_kSlowQuadrantMoveAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E90D0u, 156u, (void*)&Actors_kFastQuadrantMoveAnimations, sizeof Actors_kFastQuadrantMoveAnimations, 1u, 1u},
@@ -471,7 +468,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E92F0u, 8u, (void*)&Actors_kSoftLandingAnimations, sizeof Actors_kSoftLandingAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92F8u, 8u, (void*)&Actors_kHardLandingAnimations, sizeof Actors_kHardLandingAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9300u, 8u, (void*)&Actors_kLandingRecoveryAnimations, sizeof Actors_kLandingRecoveryAnimations, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9308u, 4u, (void*)&Actors_renderPassCounter, sizeof Actors_renderPassCounter, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E9A28u, 64u, (void*)&Actors_animationEventPoints, sizeof Actors_animationEventPoints, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B34u, 24u, (void*)&Event_sfxSourceIds, sizeof Event_sfxSourceIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B4Cu, 12u, (void*)&Event_weaponDrawStates, sizeof Event_weaponDrawStates, 1u, 1u},
@@ -585,16 +581,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1868u, 4u, (void*)&Effects_effectBusyFlags, sizeof Effects_effectBusyFlags, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F186Cu, 4u, (void*)&Field_isFirstPersonViewEnabled, sizeof Field_isFirstPersonViewEnabled, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1870u, 4u, (void*)&Render_legacyCurrentOrderingTable, sizeof Render_legacyCurrentOrderingTable, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1874u, 4u, (void*)&Boot_gameplayResetWordOne, sizeof Boot_gameplayResetWordOne, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1880u, 4u, (void*)&Field_zoneContext, sizeof Field_zoneContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F18ECu, 4u, (void*)&Battle_actionSelection, sizeof Battle_actionSelection, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F18F0u, 4u, (void*)&Battle_actionFlowMode, sizeof Battle_actionFlowMode, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F18F4u, 4u, (void*)&Boot_gameplayResetWordTwo, sizeof Boot_gameplayResetWordTwo, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F18F8u, 4u, (void*)&Content_overlayWorkspaceOwner, sizeof Content_overlayWorkspaceOwner, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F18FCu, 4u, (void*)&Battle_recoveryRewardMode, sizeof Battle_recoveryRewardMode, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1900u, 4u, (void*)&Items_lootListHead, sizeof Items_lootListHead, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1904u, 4u, (void*)&Field_cameraTransition, sizeof Field_cameraTransition, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1908u, 4u, (void*)&Field_roomResetWord, sizeof Field_roomResetWord, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F190Cu, 4u, (void*)&Field_isFieldRenderingEnabled, sizeof Field_isFieldRenderingEnabled, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1910u, 20u, (void*)&Field_interactionFocus, sizeof Field_interactionFocus, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1928u, 4u, (void*)&Battle_actors, sizeof Battle_actors, 0u, 0u},
@@ -631,7 +624,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F1BACu, 4u, (void*)&Battle_floatingLabels, sizeof Battle_floatingLabels, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BB0u, 8u, (void*)&Field_roomTint, sizeof Field_roomTint, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BB8u, 4u, (void*)&Field_roomPrimitiveRangeEnd, sizeof Field_roomPrimitiveRangeEnd, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F1BBCu, 4u, (void*)&Field_reservedResetByte, sizeof Field_reservedResetByte, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BC0u, 4u, (void*)&Battle_unusedSceneBuffer, sizeof Battle_unusedSceneBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F1BC8u, 36u, (void*)&Field_manualDisplayState, sizeof Field_manualDisplayState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F1BF0u, 8u, (void*)&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory, 1u, 1u},
@@ -782,7 +774,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4ED8u, 16u, (void*)&Effects_screenEffectDefaults, sizeof Effects_screenEffectDefaults, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4EE8u, 242u, (void*)&Menu_Framework_menuMemory, sizeof Menu_Framework_menuMemory, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4FE0u, 384u, (void*)&Menu_textBoxes, sizeof Menu_textBoxes, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5160u, 4u, (void*)&Battle_recoveryResetWord, sizeof Battle_recoveryResetWord, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5168u, 56u, (void*)&Battle_stringContext, sizeof Battle_stringContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51B8u, 4u, (void*)&Menu_activeTextBoxOrderingTable, sizeof Menu_activeTextBoxOrderingTable, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51C0u, 8u, (void*)&Menu_Framework_menuState, sizeof Menu_Framework_menuState, 0u, 0u},

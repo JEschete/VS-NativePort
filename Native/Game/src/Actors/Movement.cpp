@@ -16,9 +16,6 @@ u_char Actors_kJumpHangFrames[3204]; /* contents: module image (ModuleData.cpp) 
 // decomp: D_800E90B4 (D_800E90B4@BATTLE/BATTLE.PRG)
 u_char Actors_kJumpHeightAdjustments[3196]; /* contents: module image (ModuleData.cpp) */
 
-// decomp: D_800E90BC (D_800E90BC@BATTLE/BATTLE.PRG)
-int Actors_motionResultResetWord; /* contents: module image (ModuleData.cpp) */
-
 // decomp: D_800E90C3 (D_800E90C3@BATTLE/BATTLE.PRG)
 u_char Actors_kMotionResultAnimations[3181]; /* contents: module image (ModuleData.cpp) */
 

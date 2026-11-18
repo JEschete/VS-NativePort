@@ -291,7 +291,6 @@ class GameplayOverlayHost {
   virtual void SpawnAshleyWithEquipment() = 0;
   virtual void AllocateBattleActionState() = 0;
   virtual void SetFieldRenderingEnabled(bool enabled) = 0;
-  virtual void ResetGameplayResetWordTwo() = 0;
   virtual void ConfigureFieldDisplay(
       const GameplayOverlayDefaults& defaults) = 0;
 };

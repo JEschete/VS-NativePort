@@ -272,9 +272,6 @@ class RecordingGameplayOverlayHost final
     calls.emplace_back("field-rendering");
     field_rendering_enabled = enabled;
   }
-  void ResetGameplayResetWordTwo() override {
-    calls.emplace_back("reset-word-two");
-  }
   void ConfigureFieldDisplay(
       const VS::Boot::GameplayOverlayDefaults& defaults) override {
     calls.emplace_back("display");
@@ -494,7 +491,6 @@ TEST_CASE("gameplay overlay initialization preserves order and defaults",
                                                "spawn-ashley",
                                                "action-state",
                                                "field-rendering",
-                                               "reset-word-two",
                                                "display"});
   CHECK(host.ordering_defaults == VS::Boot::GameplayOverlayDefaults{});
   CHECK(host.gameplay_defaults == VS::Boot::GameplayOverlayDefaults{});

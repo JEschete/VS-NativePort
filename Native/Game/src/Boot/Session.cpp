@@ -208,7 +208,7 @@ void InitializeGameplayOverlay(GameplayOverlayHost& host) {
   host.SpawnAshleyWithEquipment();
   host.AllocateBattleActionState();
   host.SetFieldRenderingEnabled(defaults.field_rendering_enabled);
-  host.ResetGameplayResetWordTwo();
+  // The original also cleared the write-only D_800F18F4 (18.c:605).
   host.ConfigureFieldDisplay(defaults);
 }
 }  // namespace VS::Boot

@@ -59,9 +59,6 @@ extern "C" {
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 
-// decomp: D_800E9308 (D_800E9308@BATTLE/BATTLE.PRG)
-int Actors_renderPassCounter;
-
 // decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
 Actors_ModelRenderContext Actors_modelRenderContext;
 }
@@ -354,8 +351,6 @@ class LiveRoomModelPass final : public RoomModelPassHost {
   }
 
   void ClearGimmickPushUpdate() override { Actors_isActorUpdateComplete = 0; }
-
-  void CountPass() override { ++Actors_renderPassCounter; }
 
  private:
   MATRIX* camera_;
