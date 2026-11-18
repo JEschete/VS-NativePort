@@ -290,7 +290,10 @@ VECTOR* Core_Gte_ApplyMatrix(MATRIX* m, SVECTOR* v0, VECTOR* v1) {
 VECTOR* Core_Gte_ApplyRotMatrix(SVECTOR* v0, VECTOR* v1) {
   MATRIX m{};
   std::copy(&g.rot[0][0], &g.rot[0][0] + 9, &m.m[0][0]);
-  return Core_Gte_ApplyMatrix(&m, v0, v1);
+  SVECTOR result{};
+  Core_Gte_ApplyMatrixSV(&m, v0, &result);
+  v1->vx = result.vx, v1->vy = result.vy, v1->vz = result.vz;
+  return v1;
 }
 
 VECTOR* Core_Gte_ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1) {

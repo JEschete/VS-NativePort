@@ -386,6 +386,31 @@ TEST_CASE("Short and wide matrix inputs share signed and alias-safe arithmetic",
   CHECK(wide_values == kWideExpectedValues);
 }
 
+TEST_CASE("ApplyRotMatrix saturates IR outputs while ApplyMatrix retains MACs",
+          "[core][math][gte]") {
+  struct ResetGte {
+    ~ResetGte() { Core_Gte_Reset(); }
+  } reset;
+  MATRIX matrix{{{4096, 4096, 0}, {-4096, -4096, 0}, {0, 0, 4096}}, {0, 0, 0}};
+  SVECTOR input{32767, 32767, 0, 91};
+  VECTOR rotated{0, 0, 0, 73};
+  VECTOR applied{0, 0, 0, 53};
+
+  Core_Gte_SetRotMatrix(&matrix);
+  CHECK(Core_Gte_ApplyRotMatrix(&input, &rotated) == &rotated);
+  const std::array<Core_GteWord, 3> rotated_values{rotated.vx, rotated.vy,
+                                                   rotated.vz};
+  constexpr std::array<Core_GteWord, 3> kExpectedRotated{32767, -32768, 0};
+  CHECK(rotated_values == kExpectedRotated);
+  CHECK(rotated.pad == 73);
+  CHECK(Core_Gte_ApplyMatrix(&matrix, &input, &applied) == &applied);
+  const std::array<Core_GteWord, 3> applied_values{applied.vx, applied.vy,
+                                                   applied.vz};
+  constexpr std::array<Core_GteWord, 3> kExpectedApplied{65534, -65534, 0};
+  CHECK(applied_values == kExpectedApplied);
+  CHECK(applied.pad == 53);
+}
+
 TEST_CASE("Shuffle RNG preserves 32-bit product wrap at range boundaries",
           "[core][random]") {
   Core::Random reference;
