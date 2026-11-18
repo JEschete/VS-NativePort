@@ -298,7 +298,7 @@ class PlaybackHost {
                                const EffectSlides& slides) = 0;
   virtual void WriteDiscVolume(PlaybackState& state) = 0;
   virtual void UpdateCutsceneStream(PlaybackState& state) = 0;
-  // Hands the tick to the native output (Audio_Native_Tick).
+  // Hands the tick to the native output (VS::Audio::Driver::TickVoiceOutput).
   virtual void FinishTick(PlaybackState& state) = 0;
   virtual void Refuse(PlaybackRefusal refusal) = 0;
 };

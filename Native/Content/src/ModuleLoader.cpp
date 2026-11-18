@@ -13,9 +13,9 @@
 #include <utility>
 #include <vector>
 
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 
 namespace {
@@ -62,14 +62,14 @@ class Modules {
 // resident one.
 class SymbolMap {
  public:
-  explicit SymbolMap(std::span<const Content_ModuleSymbol> symbols) {
-    for (const Content_ModuleSymbol& symbol : symbols) {
+  explicit SymbolMap(std::span<const VS::Content::ModuleSymbol> symbols) {
+    for (const VS::Content::ModuleSymbol& symbol : symbols) {
       if (symbol.module != nullptr) {
         by_module_[symbol.module].push_back(&symbol);
       }
     }
     for (auto& [module, list] : by_module_) {
-      std::ranges::sort(list, {}, &Content_ModuleSymbol::address);
+      std::ranges::sort(list, {}, &VS::Content::ModuleSymbol::address);
     }
   }
 
@@ -89,11 +89,11 @@ class SymbolMap {
     }
     const auto& list = it->second;
     auto at = std::ranges::upper_bound(list, address, {},
-                                       &Content_ModuleSymbol::address);
+                                       &VS::Content::ModuleSymbol::address);
     if (at == list.begin()) {
       return nullptr;
     }
-    const Content_ModuleSymbol* symbol = *(at - 1);
+    const VS::Content::ModuleSymbol* symbol = *(at - 1);
     if (symbol->target == nullptr) {
       return nullptr;
     }
@@ -117,14 +117,15 @@ class SymbolMap {
     return nullptr;
   }
 
-  std::map<std::string, std::vector<const Content_ModuleSymbol*>, std::less<>>
+  std::map<std::string, std::vector<const VS::Content::ModuleSymbol*>,
+           std::less<>>
       by_module_;
 };
 
 int LoadData(Modules& modules) {
   int failed = 0;
-  for (unsigned index = 0; index < Content_moduleDataCount; ++index) {
-    const Content_ModuleDataEntry& entry = Content_moduleData[index];
+  for (const VS::Content::ModuleDataEntry& entry :
+       VS::Content::ModuleDataEntries()) {
     const std::vector<u8>& image = modules.Get(entry.module);
     if (!Content::CopyModuleDataEntry(entry, image)) {
       if (!image.empty()) {
@@ -142,7 +143,7 @@ int LoadData(Modules& modules) {
 
 class SamplePrograms {
  public:
-  explicit SamplePrograms(const Content_ModuleSymbol& source)
+  explicit SamplePrograms(const VS::Content::ModuleSymbol& source)
       : source_(source) {}
 
   bool Valid(std::string_view module) const {
@@ -207,11 +208,11 @@ class SamplePrograms {
   }
 
   static constexpr std::int64_t kSampleBytes = 2;
-  const Content_ModuleSymbol& source_;
+  const VS::Content::ModuleSymbol& source_;
   std::map<u32, bool> bounded_;
 };
 
-bool RelocateTable(const Content_ModulePointerTable& table,
+bool RelocateTable(const VS::Content::ModulePointerTable& table,
                    std::span<const u8> image, const SymbolMap& symbols) {
   if (table.module == nullptr ||
       (table.count != 0 && table.target == nullptr) ||
@@ -277,10 +278,10 @@ bool RelocateTable(const Content_ModulePointerTable& table,
 }
 
 int RelocatePointers(Modules& modules) {
-  const SymbolMap symbols({Content_moduleSymbols, Content_moduleSymbolCount});
+  const SymbolMap symbols(VS::Content::ModuleSymbols());
   int failed = 0;
-  for (unsigned index = 0; index < Content_modulePointerCount; ++index) {
-    const Content_ModulePointerTable& table = Content_modulePointers[index];
+  for (const VS::Content::ModulePointerTable& table :
+       VS::Content::ModulePointerTables()) {
     if (!RelocateTable(table, modules.Get(table.module), symbols)) {
       ++failed;
     }
@@ -292,7 +293,7 @@ int RelocatePointers(Modules& modules) {
 
 namespace VS::Content {
 
-bool CopyModuleDataEntry(const Content_ModuleDataEntry& entry,
+bool CopyModuleDataEntry(const ModuleDataEntry& entry,
                          std::span<const unsigned char> image) {
   if (entry.target == nullptr || entry.size > entry.capacity ||
       static_cast<u64>(entry.offset) + entry.size > image.size()) {
@@ -305,25 +306,25 @@ bool CopyModuleDataEntry(const Content_ModuleDataEntry& entry,
   return true;
 }
 
-void* ResolveModuleAddress(std::span<const Content_ModuleSymbol> symbols,
+void* ResolveModuleAddress(std::span<const ModuleSymbol> symbols,
                            std::string_view module, unsigned address) {
   return SymbolMap(symbols).Resolve(module, address);
 }
 
-bool RelocateModulePointerTable(const Content_ModulePointerTable& table,
+bool RelocateModulePointerTable(const ModulePointerTable& table,
                                 std::span<const unsigned char> image,
-                                std::span<const Content_ModuleSymbol> symbols) {
+                                std::span<const ModuleSymbol> symbols) {
   return RelocateTable(table, image, SymbolMap(symbols));
 }
 
 }  // namespace VS::Content
 
-int Content_LoadModuleData(void) {
+int VS::Content::LoadModuleData(void) {
   const DataStore* store = DataStore::Get();
   if (store == nullptr) {
     VS_LOG_ERROR("content", "module data: no extracted data");
-    return static_cast<int>(Content_moduleDataCount +
-                            Content_modulePointerCount);
+    return static_cast<int>(VS::Content::kModuleDataCount +
+                            VS::Content::kModulePointerCount);
   }
   Modules modules(*store);
   const int data_failed = LoadData(modules);
@@ -331,8 +332,8 @@ int Content_LoadModuleData(void) {
   VS_LOG_INFO("content",
               "module data: {} globals, {} pointer tables ({} symbols) from {} "
               "modules; {} failed",
-              Content_moduleDataCount, Content_modulePointerCount,
-              Content_moduleSymbolCount, modules.Count(),
+              VS::Content::kModuleDataCount, VS::Content::kModulePointerCount,
+              VS::Content::kModuleSymbolCount, modules.Count(),
               data_failed + pointers_failed);
   return data_failed + pointers_failed;
 }

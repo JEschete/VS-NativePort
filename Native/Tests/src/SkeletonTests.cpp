@@ -20,7 +20,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Gimmicks.h"
@@ -705,8 +705,7 @@ TEST_CASE("Live pitch measures from the actor's root bone",
 
 TEST_CASE("Skeleton bindings retire the module entries they replace",
           "[actors-animation-skeleton][actors][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

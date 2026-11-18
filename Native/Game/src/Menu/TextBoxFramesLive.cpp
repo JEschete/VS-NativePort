@@ -8,7 +8,7 @@
 #include <new>
 #include <span>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVm.h"
@@ -120,8 +120,7 @@ FrameBytes CompatibilityStyleBytes(const void* pointer) {
         pointer);
   }
   FrameBytes result;
-  for (const auto& symbol :
-       std::span(Content_moduleSymbols, Content_moduleSymbolCount)) {
+  for (const auto& symbol : VS::Content::ModuleSymbols()) {
     if (symbol.nativeSize == 0 ||
         symbol.sourceElementSize != symbol.nativeElementSize) {
       continue;

@@ -17,7 +17,6 @@
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/StreamPlayback.hpp"
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/VoiceOutput.hpp"
@@ -283,7 +282,7 @@ int UploadLiveBank(const void* bank, int /*wait*/, int first_instrument,
 }
 }  // namespace VS::Audio::Samples
 
-void Audio_Native_Reset(void) {
+void VS::Audio::Driver::ResetVoiceOutput() {
   VS::Audio::ResetCutsceneStream();
   VS::Audio::StopXaStream();
   Engine().Reset();
@@ -297,7 +296,7 @@ void Audio_Native_Reset(void) {
   }
 }
 
-void Audio_Native_ConfigureChannel(Audio_SeqChannel* channel) {
+void VS::Audio::Driver::ConfigureOutputChannel(Audio_SeqChannel* channel) {
   const auto voice = CheckedVoice(channel->voice.assignedVoice);
   if (channel->instrumentIndex >= g_instruments.size()) {
     VS_LOG_ERROR("audio", "invalid instrument {}", channel->instrumentIndex);
@@ -319,16 +318,18 @@ void Audio_Native_ConfigureChannel(Audio_SeqChannel* channel) {
 }
 
 // decomp: SpuSetNoiseClock, SLUS_010.40/libspu/S_SNC.c.
-void Audio_Native_SetNoiseClock(int clock) {
+void VS::Audio::Driver::SetOutputNoiseClock(int clock) {
   constexpr int kMaximumClock = 63;
   Engine().SetNoiseClock(
       static_cast<unsigned>(std::clamp(clock, 0, kMaximumClock)));
 }
 
 // decomp: SLUS_010.40/libspu/S_SRMT.c, S_SRMD.c, S_SR.c and S_GRMT.c.
-int Audio_Native_ReverbMode(void) { return static_cast<int>(g_reverb.preset); }
+int VS::Audio::Driver::OutputReverbMode() {
+  return static_cast<int>(g_reverb.preset);
+}
 
-void Audio_Native_SetReverbMode(int mode) {
+void VS::Audio::Driver::SetOutputReverbMode(int mode) {
   if (mode < 0 || mode > static_cast<int>(VS::Audio::ReverbPreset::kPipe)) {
     VS_LOG_ERROR("audio", "invalid reverb preset {}", mode);
     std::abort();
@@ -339,14 +340,15 @@ void Audio_Native_SetReverbMode(int mode) {
   VS_LOG_INFO("audio", "reverb preset {}", mode);
 }
 
-void Audio_Native_SetReverbDepth(int16_t left, int16_t right) {
+void VS::Audio::Driver::SetOutputReverbDepth(std::int16_t left,
+                                             std::int16_t right) {
   constexpr float kDepthUnit = 32768;
   g_reverb.left = static_cast<float>(left) / kDepthUnit;
   g_reverb.right = static_cast<float>(right) / kDepthUnit;
   Engine().SetReverb(g_reverb);
 }
 
-void Audio_Native_EnableReverb(int enabled) {
+void VS::Audio::Driver::EnableOutputReverb(int enabled) {
   if (enabled != 0 && enabled != 1) {
     VS_LOG_ERROR("audio", "invalid reverb enable {}", enabled);
     std::abort();
@@ -355,13 +357,14 @@ void Audio_Native_EnableReverb(int enabled) {
   Engine().SetReverb(g_reverb);
 }
 
-int16_t Audio_Native_Envelope(unsigned voice) {
+std::int16_t VS::Audio::Driver::OutputVoiceEnvelope(unsigned voice) {
   return static_cast<int16_t>(Engine().EnvelopeLevel(CheckedVoice(voice)));
 }
 
-int Audio_Native_StartStreamVoice(unsigned voice, const char* instrument,
-                                  float rate, unsigned left, unsigned right,
-                                  int reverb) {
+int VS::Audio::Driver::StartOutputStreamVoice(unsigned voice,
+                                              const char* instrument,
+                                              float rate, unsigned left,
+                                              unsigned right, int reverb) {
   auto& controls = g_controls[CheckedVoice(voice)];
   controls = {};
   controls.instrument = VS::Platform::Utf8Path(instrument);
@@ -385,17 +388,17 @@ int Audio_Native_StartStreamVoice(unsigned voice, const char* instrument,
   return 1;
 }
 
-void Audio_Native_PauseVoice(unsigned voice, int paused) {
+void VS::Audio::Driver::PauseOutputVoice(unsigned voice, int paused) {
   auto& controls = g_controls[CheckedVoice(voice)];
   controls.paused = paused != 0;
   Engine().Configure(voice, controls);
 }
 
-int Audio_Native_VoiceActive(unsigned voice) {
+int VS::Audio::Driver::OutputVoiceActive(unsigned voice) {
   return Engine().IsActive(CheckedVoice(voice)) ? 1 : 0;
 }
 
-void Audio_Native_Tick(void) {
+void VS::Audio::Driver::TickVoiceOutput() {
   VS::Audio::UpdateXaControls();
   constexpr unsigned kMonoOutput = 2;
   const bool mono =

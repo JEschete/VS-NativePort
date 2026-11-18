@@ -5,7 +5,7 @@
 #include <span>
 #include <vector>
 
-#include "Battle/TargetPages.h"
+struct Battle_TargetPreview;
 
 // Native target pages. The original sphere shows one bounded list of target
 // candidates; native pages keep every candidate and split them into pages of
@@ -54,11 +54,31 @@ void SetSphereTargets(TargetPageBook& book,
 
 // Applies SetSphereTargets to the active battle sphere. The pages view entries
 // without owning them: entries must stay valid until the next binding or
-// Battle_ResetTargetPages.
+// ResetTargetPages.
 void SetLiveSphereTargets(std::span<Battle_TargetPreview> entries, int mode);
 
 // The first count of the action previews; aborts when count is negative or
 // exceeds them.
 [[nodiscard]] std::span<Battle_TargetPreview> CheckedTargetPreviews(
     std::span<Battle_TargetPreview> previews, int count);
+
+// The live sphere's paging state, for the page hint and the encounter log.
+struct TargetPageInfo {
+  int total;
+  int page;
+  int pages;
+  int first;
+  int visible;
+  int selected;
+};
+
+void ResetTargetPages();
+int AdvanceTargetPage(int direction);
+int HandleTargetPageButtons();
+int TargetPagesUseShoulders();
+unsigned char MapTargetPageIndex(unsigned char index);
+int ValidateTargetPreviewIndex(int index);
+int TargetPreviewIndexIsValid(int index);
+TargetPageInfo GetTargetPageInfo();
+void DrawTargetPageHint();
 }  // namespace VS::Battle

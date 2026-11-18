@@ -18,7 +18,7 @@
 #include "Battle/DamagePoliciesLive.hpp"
 #include "Battle/Hit.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/EquipmentLive.hpp"
 
 namespace {
@@ -64,19 +64,17 @@ struct Fixture {
   }
 };
 void CheckBinding(std::uint32_t address, void* function) {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto entry =
-      std::ranges::find(symbols, address, &Content_ModuleSymbol::address);
+      std::ranges::find(symbols, address, &VS::Content::ModuleSymbol::address);
   REQUIRE(entry != symbols.end());
   CHECK(entry->target == function);
 }
 void RelocateTable() {
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto tables = VS::Content::ModulePointerTables();
   const auto table = std::ranges::find(
       tables, reinterpret_cast<void**>(Battle_statCalculators),
-      &Content_ModulePointerTable::target);
+      &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   const std::filesystem::path root = "Native\\data";
   if (!VS::Content::DataStore::Open(root)) {
@@ -88,8 +86,7 @@ void RelocateTable() {
   const auto image = store.ReadAll(*module);
   REQUIRE(image.has_value());
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      *table, image.value(),
-      {Content_moduleSymbols, Content_moduleSymbolCount}));
+      *table, image.value(), VS::Content::ModuleSymbols()));
 }
 }  // namespace
 

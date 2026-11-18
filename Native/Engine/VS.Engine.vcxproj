@@ -579,7 +579,6 @@
     <ClInclude Include="include\Audio\SeqRecordsLive.hpp" />
     <ClInclude Include="include\Audio\SeqSequencer.hpp" />
     <ClInclude Include="include\Audio\SeqSequencerLive.hpp" />
-    <ClInclude Include="include\Audio\SequencerOutput.h" />
     <ClInclude Include="include\Audio\SeqVoiceCommands.hpp" />
     <ClInclude Include="include\Audio\SeqVoiceCommandsLive.hpp" />
     <ClInclude Include="include\Audio\Sfx.hpp" />
@@ -650,13 +649,13 @@
     <ClInclude Include="include\Core\WordPair.h" />
     <ClInclude Include="include\Input\Controller.hpp" />
     <ClInclude Include="include\Input\ControllerLive.hpp" />
-    <ClInclude Include="include\Input\ControllerLiveState.h" />
+    <ClInclude Include="include\Input\ControllerLiveState.hpp" />
     <ClInclude Include="include\Input\LegacyPad.hpp" />
     <ClInclude Include="include\Input\Pad.hpp" />
     <ClInclude Include="include\Movie\IntroPlayer.hpp" />
     <ClInclude Include="include\Movie\IntroPlayerLive.hpp" />
     <ClInclude Include="include\Movie\Movie.hpp" />
-    <ClInclude Include="include\Movie\MoviePlayer.h" />
+    <ClInclude Include="include\Movie\MoviePlayer.hpp" />
     <ClInclude Include="include\Platform\App.hpp" />
     <ClInclude Include="include\Platform\CrashHandler.hpp" />
     <ClInclude Include="include\Platform\GameFiber.hpp" />
@@ -676,7 +675,7 @@
     <ClInclude Include="include\Render\GimImagesLive.hpp" />
     <ClInclude Include="include\Render\ModelGeometry.hpp" />
     <ClInclude Include="include\Render\ModelGeometryLive.hpp" />
-    <ClInclude Include="include\Render\ModelWorkspace.h" />
+    <ClInclude Include="include\Render\ModelWorkspace.hpp" />
     <ClInclude Include="include\Render\PageSpace.hpp" />
     <ClInclude Include="include\Render\PaletteAnimation.hpp" />
     <ClInclude Include="include\Render\PaletteAnimationLive.hpp" />

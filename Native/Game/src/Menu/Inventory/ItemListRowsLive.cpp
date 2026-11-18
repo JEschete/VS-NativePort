@@ -12,7 +12,7 @@
 #include "Battle/ActionTable.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Items/InventoryLiveState.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -211,8 +211,9 @@ int BuildLiveRows(ItemRowsContext context, int item_category, char* menu_text[],
       .category = category,
       .context = context,
       .order = *order,
-      .capacity = std::span(VS::Items::Inventory::inventoryItemCapacities)
-          [static_cast<std::size_t>(item_category)],
+      .capacity =
+          std::span(VS::Items::kCategoryCapacities)[static_cast<std::size_t>(
+              item_category)],
       .misc_action_map = std::span<const std::uint8_t>(
           Menu_Inventory_miscItemToActionMap, kMiscActionMapEntries),
       .row_capacity = RowCapacity(menu_text, row_types, text_buf),

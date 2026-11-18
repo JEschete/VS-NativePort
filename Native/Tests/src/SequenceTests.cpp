@@ -58,7 +58,7 @@
 #include "Render/Frame.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelGeometryLive.hpp"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/Render.h"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.h"
@@ -160,7 +160,7 @@ static void InitializeMorphAnimation(MorphAnimationFixture* fixture,
   fixture->actor.poseOverrideActive = 1;
   fixture->actor.animationId = animation;
   fixture->actor.animationLength = 16;
-  fixture->actor.animationHeader = (intptr_t)bank;
+  fixture->actor.animationHeader = reinterpret_cast<intptr_t>(bank);
   fixture->actor.sequenceFlags = 64;
   fixture->actor.commonSequence = bank;
   fixture->actor.sharedSequences[2] = bank;
@@ -257,7 +257,7 @@ int TestSharedSequenceRetirementControl(int scenario) {
   Actors_actorRecords[3] = &first.actor;
   Actors_actorRecords[4] = &second.actor;
   if (scenario == 1) {
-    first.actor.animationHeader = (intptr_t)second.sequence;
+    first.actor.animationHeader = reinterpret_cast<intptr_t>(second.sequence);
     first.actor.pose.eventScript = second.actor.pose.eventScript;
     first.actor.blendPose.eventScript = second.actor.blendPose.eventScript;
     Actors_actorRecords[4] = nullptr;
@@ -313,7 +313,7 @@ static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
     (reinterpret_cast<u_char*>(wide))[wide->animationMap + 2] = 200;
     wide->headers[static_cast<size_t>(5) * 200] = 16;
     wide->headers[static_cast<size_t>(5) * 200 + 2] = 1;
-    fixture->actor.animationHeader = (intptr_t)wide;
+    fixture->actor.animationHeader = reinterpret_cast<intptr_t>(wide);
     fixture->actor.animationSet = 200;
     fixture->actor.sharedSequences[2] = wide;
     VS::Actors::RegisterSequenceBank(wide, sizeof fixture->sequence * 8);
@@ -350,7 +350,7 @@ static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
       passed &= Actors_sharedSequenceBankIndex == 1;
     }
     if (scenario == 10) {
-      passed &= (u_char)Actors_lastResolvedSequenceIndex == 200;
+      passed &= static_cast<u_char>(Actors_lastResolvedSequenceIndex) == 200;
     }
   } else {
     passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
@@ -559,7 +559,7 @@ int Tests_DirectMovementCommand(void) {
       actor.turnState.reserved2 == 0 && actor.turnState.reserved3 == 0 &&
       actor.turnState.direction == 0xC00 && actor.turnState.facing == 0xC00 &&
       actor.turnState.distance == 1536 &&
-      (unsigned)actor.turnState.reservedC == 0xA5A5A5A5u;
+      static_cast<unsigned>(actor.turnState.reservedC) == 0xA5A5A5A5u;
   VS::Actors::SetDirectMovement(requests, 3, 0, 0);
   passed = passed && actor.turnState.mode == 0 &&
            actor.turnState.distance == 0 && actor.turnState.direction == 0 &&
@@ -569,14 +569,14 @@ int Tests_DirectMovementCommand(void) {
            actor.turnState.direction == 0x300 &&
            actor.turnState.facing == 0x800 &&
            actor.turnState.distance == 1024 &&
-           (unsigned)actor.turnState.reservedC == 0xA5A5A5A5u;
+           static_cast<unsigned>(actor.turnState.reservedC) == 0xA5A5A5A5u;
   Actors_actorRecords[3] = saved;
   return passed;
 }
 
 int Tests_GimmickRoomScale(void) {
   enum { kGimmickCameraMatrix = 4 };
-  const Render_ModelScratchpad savedWorkspace = *Render_ModelWorkspace();
+  const Render_ModelScratchpad savedWorkspace = *VS::Render::ModelWorkspace();
   const Actors_SkeletonPose savedPose = VS::Actors::skeletonPose;
   const MATRIX savedRoot = VS::Actors::skeletonRootMatrix;
   const VECTOR savedScale = VS::Actors::roomActorScale;
@@ -589,7 +589,7 @@ int Tests_GimmickRoomScale(void) {
   }
   object.model = &model;
   object.scaleX = object.scaleY = object.scaleZ = 64;
-  Render_ModelWorkspace()->rootOffset = (SVECTOR){10, 20, 30, 0};
+  VS::Render::ModelWorkspace()->rootOffset = (SVECTOR){10, 20, 30, 0};
   VS::Actors::skeletonPose.scale = (VECTOR){0};
   VS::Actors::roomActorScale = (VECTOR){2048, 4096, 4096, 0};
   VS::Actors::DrawLiveGimmickModel(&object, &camera);
@@ -598,7 +598,7 @@ int Tests_GimmickRoomScale(void) {
       object.matrices[0].m[1][1] == 4096 &&
       object.matrices[0].m[2][2] == 4096 && object.matrices[0].t[0] == 10 &&
       object.matrices[0].t[1] == 36 && object.matrices[0].t[2] == 30;
-  *Render_ModelWorkspace() = savedWorkspace;
+  *VS::Render::ModelWorkspace() = savedWorkspace;
   VS::Actors::skeletonPose = savedPose;
   VS::Actors::skeletonRootMatrix = savedRoot;
   VS::Actors::roomActorScale = savedScale;
@@ -944,7 +944,7 @@ int TestOptionalActorScriptSlide(int present, int rate, int skip) {
   const char saved_control = Event_scriptControlledActors[kSlot];
   const char saved_skip = Event_skipState;
   u_char instruction[] = {0x28, kSlot, 0x10, 234, 0, 128, 254, 114, 1, 0};
-  instruction[9] = (u_char)rate;
+  instruction[9] = static_cast<u_char>(rate);
   Actors_actorRecords[kSlot] = present ? &actor : nullptr;
   actor.moveRate = kDefaultRate;
   actor.instance.position = (SVECTOR){100, 200, 300, 0};
@@ -1043,8 +1043,9 @@ int TestScriptedEffectTargetBinding(int scenario) {
   }
   const u_short selector = ScriptedEffectSelector(scenario);
   const int effect = scenario == 10 ? 298 : kEffect;
-  u_char instruction[] = {0xA0, (u_char)effect, (u_char)(effect >> 8),
-                          (u_char)selector, (u_char)(selector >> 8)};
+  u_char instruction[] = {
+      0xA0, static_cast<u_char>(effect), static_cast<u_char>(effect >> 8),
+      static_cast<u_char>(selector), static_cast<u_char>(selector >> 8)};
   Effects_primaryPhase = 3;
   const intptr_t result = Event_CommandPlayActorEffectOpcode(instruction, 0);
   memcpy(request_after, &Effects_actionRequest, sizeof request_after);
@@ -1113,7 +1114,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   Field_GimmickInstance* saved_object =
       has_gimmick_slot ? Field_gimmickInstances[slot] : nullptr;
   const MATRIX saved_matrix = VS::Actors::boneMatrixScratch;
-  const Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
+  const Render_ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   Actors_actorRecords[slot] =
       owner == 0 || owner == 2 || owner == 5 ? &actor : nullptr;
   if (has_gimmick_slot) {
@@ -1163,7 +1164,7 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   if (has_gimmick_slot) Field_gimmickInstances[slot] = saved_object;
   VS::Render::ForgetLiveModelExtent(model);
   VS::Actors::boneMatrixScratch = saved_matrix;
-  *Render_ModelWorkspace() = saved_workspace;
+  *VS::Render::ModelWorkspace() = saved_workspace;
   Core_Gte_Reset();
   return passed && result.pad == 77;
 }
@@ -1208,7 +1209,7 @@ int Tests_ActorPoseHierarchy(void) {
   Actors_ShpModel* model = reinterpret_cast<Actors_ShpModel*>(file);
   const Actors_SkeletonPose savedPose = VS::Actors::skeletonPose;
   const Actors_ModelRenderContext savedContext = VS::Actors::modelRenderContext;
-  const Render_ModelScratchpad savedWorkspace = *Render_ModelWorkspace();
+  const Render_ModelScratchpad savedWorkspace = *VS::Render::ModelWorkspace();
   actor.instance.model = model;
   actor.modelDataSize = sizeof file;
   actor.instance.boneCount = 2;
@@ -1223,7 +1224,7 @@ int Tests_ActorPoseHierarchy(void) {
   actor.blendPose.scaleKeys[1].vx = 32;
   MATRIX camera = {0};
   for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
-  setVector(&Render_ModelWorkspace()->rootOffset, 100, 200, 300);
+  setVector(&VS::Render::ModelWorkspace()->rootOffset, 100, 200, 300);
   int passed = VS::Actors::BuildLiveActorModelPose(actor, camera) == 1 &&
                actor.boneMatrices[0].t[0] == 100 &&
                actor.boneMatrices[1].t[0] == -28 &&
@@ -1241,10 +1242,11 @@ int Tests_ActorPoseHierarchy(void) {
   model->groupSection = 96;
   model->vertexSection = 100;
   model->polygonSection = 108;
-  uint16_t* group = reinterpret_cast<uint16_t*>(((unsigned char*)file + 96));
+  uint16_t* group =
+      reinterpret_cast<uint16_t*>(reinterpret_cast<unsigned char*>(file) + 96);
   group[0] = 0;
   group[1] = 1;
-  setVector(&Render_ModelWorkspace()->rootOffset, 0, 0, 1024);
+  setVector(&VS::Render::ModelWorkspace()->rootOffset, 0, 0, 1024);
   Core_Gte_Reset();
   Core_Gte_SetGeomScreen(256);
   VS::Actors::DrawLiveActorModel(actor, camera, 0);
@@ -1266,7 +1268,7 @@ int Tests_ActorPoseHierarchy(void) {
   passed = passed && VS::Actors::BuildLiveActorModelPose(actor, camera) == 0;
   VS::Actors::skeletonPose = savedPose;
   VS::Actors::modelRenderContext = savedContext;
-  *Render_ModelWorkspace() = savedWorkspace;
+  *VS::Render::ModelWorkspace() = savedWorkspace;
   Core_Gte_Reset();
   return passed;
 }
@@ -1283,15 +1285,15 @@ static void BuildModelPacketFixture(Actors_ShpModel* model,
                                     const ModelPacketOptions* options) {
   instance->triangleCount = 1;
   instance->uvLayout = options->colored != 0;
-  instance->palettePulse.kind = (u_char)options->pulse_mask;
-  if ((unsigned)options->limb < 8) {
+  instance->palettePulse.kind = static_cast<u_char>(options->pulse_mask);
+  if (static_cast<unsigned>(options->limb) < 8) {
     const u_short count = 1;
     const size_t group =
         (options->split != 0 ? 32 : 0) + static_cast<size_t>(options->limb) * 2;
     memcpy(model->header + group, &count, sizeof count);
   }
   model->polygonSection = 64;
-  unsigned char* polygon = (unsigned char*)model + 64;
+  unsigned char* polygon = reinterpret_cast<unsigned char*>(model) + 64;
   const uint16_t indices[3] = {0, 4, 8};
   memcpy(polygon + (options->colored ? 0 : 4), indices, sizeof indices);
   if (options->colored) {
@@ -1340,8 +1342,8 @@ static int ModelPacketColorsMatch(const u_long* packet, int colored,
     return (packet[1] & UINT8_MAX) == 32 &&
            (packet[1 + kVertexPacketWords] & UINT8_MAX) == 64;
   }
-  const unsigned uniform =
-      tint->r | (unsigned)tint->g << 8 | (unsigned)tint->b << 16;
+  const unsigned uniform = tint->r | static_cast<unsigned>(tint->g) << 8 |
+                           static_cast<unsigned>(tint->b) << 16;
   for (int corner = 0; corner < kTriangleCorners; ++corner) {
     if ((packet[1 + corner * kVertexPacketWords] & 0xFFFFFF) != uniform) {
       return 0;
@@ -1425,8 +1427,8 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   const Render_FrameScratch savedFrame = *frame;
   const int savedFrameIndex = Render_frameBuf;
   void* savedBuffer = Render_legacyPrimitiveBuffers[0];
-  const Render_ModelScratchpad savedWorkspace = *Render_ModelWorkspace();
-  unsigned char* memory = (unsigned char*)(malloc(0x20010));
+  const Render_ModelScratchpad savedWorkspace = *VS::Render::ModelWorkspace();
+  unsigned char* memory = static_cast<unsigned char*>(malloc(0x20010));
   if (memory == nullptr) return 0;
   memset(memory, 0xA5, 0x20010);
   u_long ordering[2048];
@@ -1436,8 +1438,8 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   frame->orderingTable = ordering;
   Render_frameBuf = 0;
   Render_legacyPrimitiveBuffers[0] = memory + 8;
-  Render_ModelWorkspace()->palette = 0x1234;
-  Render_ModelWorkspace()->texturePage = 0x15;
+  VS::Render::ModelWorkspace()->palette = 0x1234;
+  VS::Render::ModelWorkspace()->texturePage = 0x15;
   memset(&VS::Actors::modelRenderContext, 0,
          sizeof VS::Actors::modelRenderContext);
   VS::Actors::modelRenderContext.projectedVertexCount = 3;
@@ -1467,9 +1469,10 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   // The static record must not keep the stack model past this frame.
   actor = {};
   const u_long* packet = reinterpret_cast<const u_long*>(memory + 8);
-  const unsigned palette =
-      0x1234 +
-      ((unsigned)limb < 8 && (pulse_mask & (0x80u >> limb)) != 0 ? 0x480 : 0);
+  const unsigned palette = 0x1234 + (static_cast<unsigned>(limb) < 8 &&
+                                             (pulse_mask & (0x80u >> limb)) != 0
+                                         ? 0x480
+                                         : 0);
   const unsigned first_uv = (palette << 16) | 0x140A;
   const int appearance_override =
       override_kind != 0 || pulse_mask != 0 ||
@@ -1488,25 +1491,22 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   passed = passed && ModelPacketColorsMatch(packet, colored, blend, &tint);
   if (split != 0) {
     const u_long* second = packet + 8;
+    const auto& projected = VS::Actors::modelRenderContext.projectedVertices;
     passed = frame->primitiveCursor == memory + 72 &&
              (packet[1] >> 24) == (0x24 | command_bit) &&
              (second[1] >> 24) == (0x24 | command_bit) &&
              packet[3] == first_uv && second[3] >> 16 == palette &&
              packet[5] == page_uv &&
              packet[7] == (split > 0 ? 0x3C32u : 0x5046u) &&
-             packet[6] == (u_long)VS::Actors::modelRenderContext
-                              .projectedVertices[split > 0 ? 2 : 3] &&
-             second[2] == (u_long)VS::Actors::modelRenderContext
-                              .projectedVertices[split > 0 ? 1 : 0] &&
-             second[4] ==
-                 (u_long)VS::Actors::modelRenderContext.projectedVertices[3] &&
-             second[6] ==
-                 (u_long)VS::Actors::modelRenderContext.projectedVertices[2];
+             packet[6] == static_cast<u_long>(projected[split > 0 ? 2 : 3]) &&
+             second[2] == static_cast<u_long>(projected[split > 0 ? 1 : 0]) &&
+             second[4] == static_cast<u_long>(projected[3]) &&
+             second[6] == static_cast<u_long>(projected[2]);
   }
   passed = passed && memory[0] == 0xA5 && memory[0x2000F] == 0xA5;
   *frame = savedFrame;
   VS::Actors::modelRenderContext = savedContext;
-  *Render_ModelWorkspace() = savedWorkspace;
+  *VS::Render::ModelWorkspace() = savedWorkspace;
   Render_frameBuf = savedFrameIndex;
   Render_legacyPrimitiveBuffers[0] = savedBuffer;
   free(memory);
@@ -1546,12 +1546,14 @@ int Tests_ModelProjectionGroups(void) {
   model->groupSection = 96;
   model->vertexSection = 104;
   model->polygonSection = 128;
-  uint16_t* groups = reinterpret_cast<uint16_t*>(((unsigned char*)file + 96));
+  uint16_t* groups =
+      reinterpret_cast<uint16_t*>(reinterpret_cast<unsigned char*>(file) + 96);
   groups[0] = 0;
   groups[1] = 1;
   groups[2] = 1;
   groups[3] = 3;
-  SVECTOR* vertices = reinterpret_cast<SVECTOR*>(((unsigned char*)file + 104));
+  SVECTOR* vertices =
+      reinterpret_cast<SVECTOR*>(reinterpret_cast<unsigned char*>(file) + 104);
   vertices[0].vx = -64;
   vertices[2].vx = 64;
   instance.boneCount = 2;
@@ -1593,7 +1595,7 @@ int Tests_ModelProjectionGroups(void) {
 int Tests_ModelWorkspaceIsolation(void) {
   unsigned char savedScratch[1024];
   unsigned char sentinel[1024];
-  Render_ModelScratchpad* workspace = Render_ModelWorkspace();
+  Render_ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   const Render_ModelScratchpad savedWorkspace = *workspace;
   const MATRIX savedBasis = Render_cameraBasisMatrix;
   const MATRIX savedInverse = VS::Actors::boneMatrixScratch;
@@ -1692,7 +1694,7 @@ int Tests_SharedSequenceOffsets(void) {
   request.assetKind = 8;
   request.targetSlot = 1;
   request.subKind = 1;
-  request.dataAddress = (uintptr_t)source;
+  request.dataAddress = reinterpret_cast<uintptr_t>(source);
   Content_legacyActorAssetRequests[0] = request;
 
   // A finished parse returns 1 and shifts the queue.
@@ -1705,7 +1707,7 @@ int Tests_SharedSequenceOffsets(void) {
            actor.sharedSequences[0] == first && actor.textureRowOffsets[0] == 5;
   if (passed) {
     passed = VS::Actors::FindLiveActorAnimationHeader(&actor, 220, &header) ==
-                 (intptr_t)first &&
+                 reinterpret_cast<intptr_t>(first) &&
              header == first->headers + 9 &&
              Actors_lastResolvedSequenceIndex == 1;
   }
@@ -1718,7 +1720,7 @@ int Tests_SharedSequenceOffsets(void) {
            actor.textureRowOffsets[0] == 6;
   if (passed) {
     passed = VS::Actors::FindLiveActorAnimationHeader(&actor, 220, &header) ==
-                 (intptr_t)second &&
+                 reinterpret_cast<intptr_t>(second) &&
              header == second->headers && Actors_lastResolvedSequenceIndex == 0;
   }
 

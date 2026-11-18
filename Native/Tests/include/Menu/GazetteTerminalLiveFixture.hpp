@@ -26,7 +26,7 @@
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/Score/Encyclopedia.h"
@@ -80,12 +80,12 @@ class SavedRegions {
 };
 
 inline auto ControlOwners() {
-  return std::array{BytesOf(Input_buttonsPressed),
-                    BytesOf(Input_buttonRepeat),
-                    BytesOf(Input_previousButtons),
-                    BytesOf(Input_releasedButtons),
-                    BytesOf(Input_stickPosBuf),
-                    BytesOf(Input_settings),
+  return std::array{BytesOf(VS::Input::buttonsPressed),
+                    BytesOf(VS::Input::buttonRepeat),
+                    BytesOf(VS::Input::previousButtons),
+                    BytesOf(VS::Input::releasedButtons),
+                    BytesOf(VS::Input::stickPosBuf),
+                    BytesOf(VS::Input::settings),
                     BytesOf(Audio_Seq_unusedStateFlags),
                     BytesOf(Audio_nextSfxChannelGroup7E),
                     BytesOf(Menu_Score_menuState),
@@ -197,7 +197,7 @@ class TerminalFixture
     VS::Menu::Framework::actionRestrictions = 0;
     VS::Menu::Framework::backgroundFadeStep = 0;
     Menu_Score_characterRank = 0;
-    Input_settings.cursorMemory = 1;
+    VS::Input::settings.cursorMemory = 1;
     Audio_Seq_unusedStateFlags.introState = 3;
     sound_offsets_.fill(std::numeric_limits<std::uint32_t>::max());
     VS::State::tickSpeed = 4;
@@ -226,10 +226,10 @@ class TerminalFixture
   }
 
   void ImportRegion(std::span<std::byte> region) {
-    const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+    const auto entries = VS::Content::ModuleDataEntries();
     const auto found =
         std::ranges::find(entries, static_cast<void*>(region.data()),
-                          &Content_ModuleDataEntry::target);
+                          &VS::Content::ModuleDataEntry::target);
     if (found == entries.end() || found->module == nullptr ||
         found->capacity != region.size() ||
         (std::string_view(found->module) != shared::kGazetteModule &&
@@ -249,14 +249,14 @@ class TerminalFixture
 
   static void Input(unsigned pressed = 0, unsigned repeated = 0,
                     unsigned held = 0, unsigned released = 0) {
-    Input_buttonsPressed.allButtons = pressed;
-    Input_buttonRepeat = std::bit_cast<std::int32_t>(repeated);
-    Input_previousButtons = std::bit_cast<std::int32_t>(held);
-    Input_releasedButtons = std::bit_cast<std::int32_t>(released);
-    Input_stickPosBuf.lStickX = 128;
-    Input_stickPosBuf.lStickY = 128;
-    Input_stickPosBuf.rStickX = 128;
-    Input_stickPosBuf.rStickY = 128;
+    VS::Input::buttonsPressed.allButtons = pressed;
+    VS::Input::buttonRepeat = std::bit_cast<std::int32_t>(repeated);
+    VS::Input::previousButtons = std::bit_cast<std::int32_t>(held);
+    VS::Input::releasedButtons = std::bit_cast<std::int32_t>(released);
+    VS::Input::stickPosBuf.lStickX = 128;
+    VS::Input::stickPosBuf.lStickY = 128;
+    VS::Input::stickPosBuf.rStickX = 128;
+    VS::Input::stickPosBuf.rStickY = 128;
   }
 
   void BorrowMon() {

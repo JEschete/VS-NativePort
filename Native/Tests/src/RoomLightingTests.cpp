@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Field/RoomLightingLive.hpp"
@@ -325,8 +325,7 @@ TEST_CASE("Live room lighting samples a named layer as the original index",
 
 TEST_CASE("Original room light entries have no module address",
           "[render][room-lighting]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80098B38u) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

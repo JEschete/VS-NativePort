@@ -35,7 +35,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Loot.h"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -1046,7 +1046,7 @@ TEST_CASE(
 
 namespace {
 struct ReactionInspectionFixture : GameplayInspectionFixture {
-  decltype(Input_settings) saved_settings = Input_settings;
+  decltype(VS::Input::settings) saved_settings = VS::Input::settings;
   decltype(Battle_characterState) saved_character = Battle_characterState;
   decltype(Battle_actionFlowMode) saved_phase = Battle_actionFlowMode;
   int saved_tick_speed = VS::State::tickSpeed;
@@ -1097,8 +1097,9 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     action->queue[0].targets[0].target.targetActor = 2;
     for (std::size_t slot = 0;
          slot < VS::Game::EncounterReactionTimingState::kSlots; ++slot) {
-      Input_settings.mappedChainAbilities[slot] = static_cast<char>(22 + slot);
-      Input_settings.mappedDefenseAbilities[slot] =
+      VS::Input::settings.mappedChainAbilities[slot] =
+          static_cast<char>(22 + slot);
+      VS::Input::settings.mappedDefenseAbilities[slot] =
           static_cast<char>(40 + slot);
       for (const auto id : {22 + slot, 40 + slot}) {
         Battle_actionDefinitions[id].type = Battle_ActionType_Ability;
@@ -1109,7 +1110,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   }
 
   ~ReactionInspectionFixture() {
-    Input_settings = saved_settings;
+    VS::Input::settings = saved_settings;
     Battle_characterState = saved_character;
     Battle_actionFlowMode = saved_phase;
     VS::State::tickSpeed = saved_tick_speed;

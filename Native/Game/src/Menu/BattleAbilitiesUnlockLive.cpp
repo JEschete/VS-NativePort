@@ -14,7 +14,7 @@
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilities.hpp"
 #include "Menu/Framework/Framework.h"
@@ -61,7 +61,9 @@ bool InformationDone() {
   return Menu_textBoxes[kInformationBox].flags.done != 0;
 }
 
-bool ConfirmPressed() { return Input_buttonsPressed.ports[0].lowByte != 0; }
+bool ConfirmPressed() {
+  return VS::Input::buttonsPressed.ports[0].lowByte != 0;
+}
 
 class LiveProgress final : public UnlockProgress {
  public:
@@ -170,11 +172,11 @@ class LiveAbilityHost final : public AbilityUnlockHost {
         MenuText(Text_Menu2_battleAbilitiesMenu_Offset_defenseAbilities),
         MenuText(Text_Menu2_battleAbilitiesMenu_Offset_select)};
     std::array<int, kAbilityCategoryCount> types{};
-    const auto saved_cursor = Input_settings.cursorMemory;
-    Input_settings.cursorMemory = 1;
+    const auto saved_cursor = VS::Input::settings.cursorMemory;
+    VS::Input::settings.cursorMemory = 1;
     Framework::CreateLiveMenuRows(kAbilityCategoryCount, kCategoryRowInfo,
                                   strings.data(), types.data());
-    Input_settings.cursorMemory = saved_cursor;
+    VS::Input::settings.cursorMemory = saved_cursor;
   }
   bool ShowAbilityList(AbilityKind kind, std::span<const std::uint8_t> actions,
                        int visible_rows, bool force_cursor) override {
@@ -187,13 +189,13 @@ class LiveAbilityHost final : public AbilityUnlockHost {
       if (description == nullptr) return false;
       strings[index * kPointersPerRow + 1] = description;
     }
-    const auto saved_cursor = Input_settings.cursorMemory;
-    if (force_cursor) Input_settings.cursorMemory = 1;
+    const auto saved_cursor = VS::Input::settings.cursorMemory;
+    if (force_cursor) VS::Input::settings.cursorMemory = 1;
     const int row_info =
         kind == AbilityKind::kChain ? kChainRowInfo : kDefenseRowInfo;
     Framework::CreateLiveMenuRows(visible_rows, row_info, strings.data(),
                                   types.data());
-    Input_settings.cursorMemory = saved_cursor;
+    VS::Input::settings.cursorMemory = saved_cursor;
     return true;
   }
   void ClearMenu() override {
@@ -254,7 +256,7 @@ class LiveRowsHost final : public AbilityRowsHost {
     return Menu_BattleAbilities_abilityText != nullptr;
   }
   bool CursorMemoryEnabled() const override {
-    return Input_settings.cursorMemory != 0;
+    return VS::Input::settings.cursorMemory != 0;
   }
   AbilityCursor SavedCursor(AbilityMenuType type) const override {
     const auto index = static_cast<std::size_t>(type) * kPointersPerRow;

@@ -17,7 +17,7 @@
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -290,11 +290,11 @@ class LiveSelection final : public SelectedLimbHost {
               static_cast<std::uint8_t>(VS::Menu::Framework::cursorColor),
           .yaw = Menu_Status_xPos,
           .pitch = Menu_Status_yPos,
-          .pressed = Input_buttonsPressed.allButtons,
-          .held = static_cast<std::uint32_t>(Input_buttonsState),
-          .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-          .stick_x = Input_stickPosBuf.rStickX,
-          .stick_y = Input_stickPosBuf.rStickY};
+          .pressed = VS::Input::buttonsPressed.allButtons,
+          .held = static_cast<std::uint32_t>(VS::Input::buttonsState),
+          .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
+          .stick_x = VS::Input::stickPosBuf.rStickX,
+          .stick_y = VS::Input::stickPosBuf.rStickY};
 }
 void StoreNavigationFrame(const StatusEffectNavigationFrame& frame) {
   Menu_Status_selectedElement = frame.selected_element;

@@ -45,7 +45,7 @@
 #include "Field/CameraLive.hpp"
 #include "Field/MapLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/Loadout.h"
 #include "Menu/Framework/ActionSelection.h"
@@ -162,8 +162,9 @@ class LiveWorld final : public ActionPresentationWorld {
     return static_cast<std::uint8_t>(State().chainAbilitySlot);
   }
   std::uint8_t MappedChain(std::size_t slot) override {
-    Require(slot < std::size(Input_settings.mappedChainAbilities));
-    return static_cast<std::uint8_t>(Input_settings.mappedChainAbilities[slot]);
+    Require(slot < std::size(VS::Input::settings.mappedChainAbilities));
+    return static_cast<std::uint8_t>(
+        VS::Input::settings.mappedChainAbilities[slot]);
   }
   bool HasPresentation(std::uint16_t action) override {
     return Definition(action).returnsToMenuOnCancel != 0;
@@ -306,7 +307,9 @@ class LiveWorld final : public ActionPresentationWorld {
     Content::QueueLiveActorAssetRequest(&live);
   }
   void HideHud() override { VS::Battle::SetLiveHudHidden(1); }
-  bool InformationEnabled() override { return Input_settings.information != 0; }
+  bool InformationEnabled() override {
+    return VS::Input::settings.information != 0;
+  }
   void ShowAction(std::uint16_t action) override {
     constexpr int kActionNotification = 0xB;
     Menu::ShowLiveSceneNotification(kActionNotification, action, 1);

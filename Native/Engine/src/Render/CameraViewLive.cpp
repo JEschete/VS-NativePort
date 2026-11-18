@@ -10,7 +10,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/Render.h"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -75,7 +75,7 @@ void PrepareLiveActorCameraMatrices(const MATRIX* source) {
       Core::Math::MatrixOf(Render_cameraBasisMatrix),
       static_cast<std::int32_t>(scratch.camera.angles.vz),
       scratch.camera.farClip);
-  Render_ModelScratchpad* workspace = Render_ModelWorkspace();
+  Render_ModelScratchpad* workspace = ModelWorkspace();
   // The original copied an uninitialised stack translation along with the
   // rotation; the workspace translation is cleared instead.
   Core::Math::StoreTransform(workspace->matrix,

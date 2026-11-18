@@ -16,7 +16,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Core/Log.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
@@ -319,7 +319,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
                                   text_.data(), row_types.data());
   }
   bool SquarePressed() override {
-    return (Input_buttonsPressed.allButtons & PADRleft) != 0;
+    return (VS::Input::buttonsPressed.allButtons & PADRleft) != 0;
   }
   void PlayInvalidSound() override { Menu::PlayInvalidSound(); }
   std::int32_t SelectedRow() override { return Framework::LiveSelectedRow(); }

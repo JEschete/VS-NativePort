@@ -10,7 +10,7 @@
 
 #include "CombatLab/DoorTests.hpp"
 #include "CombatLab/SceneCatalog.hpp"
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Content/DataStore.hpp"
 
 namespace {
@@ -267,7 +267,7 @@ TEST_CASE("Scene inventory covers every original event and animation asset",
           "[.assets][disc-scene-inventory]") {
   VS::Content::DataStore::ScopedOverride restore;
   REQUIRE(VS::Content::DataStore::Open("Native\\data").has_value());
-  REQUIRE(Content_LoadModuleData() == 0);
+  REQUIRE(VS::Content::LoadModuleData() == 0);
   const auto catalog = VS::Game::ReadEncounterCatalog(true);
   REQUIRE(catalog.has_value());
   const auto inventory = VS::combat_lab::ReadSceneCatalog(*catalog);

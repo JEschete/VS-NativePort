@@ -27,7 +27,7 @@
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/VoiceMixer.hpp"
 #include "Audio/VoiceMixerLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -2888,8 +2888,7 @@ TEST_CASE("Live mixer passes refuse missing channels and unbound layers",
 TEST_CASE(
     "Mixer commands keep their live bindings and retired helpers keep none",
     "[audio-mixer-driver][audio]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, Audio_CommandHandler>, 22> kept{{
       {0x80017FB0U, &Mixer::LiveSetSoundEffectPitchScale},
       {0x80018090U, &Mixer::LiveSlideSoundEffectPitchScale},

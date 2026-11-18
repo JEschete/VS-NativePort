@@ -17,7 +17,7 @@
 #include "Battle/ActorMarkersLive.hpp"
 #include "Battle/Feedback.h"
 #include "Core/Gte.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -434,7 +434,7 @@ struct LiveMarkerFixture {
       Battle_abilityTimingCueFrames;
   SVECTOR saved_cue = Battle_abilityTimingCuePosition;
   std::array<char, 40> saved_markers{};
-  decltype(Input_settings) saved_settings = Input_settings;
+  decltype(VS::Input::settings) saved_settings = VS::Input::settings;
   Actors_ActorRecord player{};
   Actors_ActorRecord enemy{};
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
@@ -477,7 +477,7 @@ struct LiveMarkerFixture {
     Battle_actorMarkersHidden = saved_hidden;
     Battle_abilityTimingCueFrames = saved_frames;
     Battle_abilityTimingCuePosition = saved_cue;
-    Input_settings = saved_settings;
+    VS::Input::settings = saved_settings;
     Core_Gte_Reset();
   }
   LiveMarkerFixture(const LiveMarkerFixture&) = delete;
@@ -554,10 +554,10 @@ TEST_CASE("Live ability timing cue follows the display setting",
   LiveMarkerFixture fixture;
   Battle_abilityTimingCueFrames = 7;
   Battle_abilityTimingCuePosition = {.vx = 1, .vy = 2, .vz = 3, .pad = 99};
-  Input_settings.abilityTimingDisplay = 0;
+  VS::Input::settings.abilityTimingDisplay = 0;
   VS::Battle::LiveShowAbilityTimingCue(30);
   CHECK(Battle_abilityTimingCueFrames == 7);
-  Input_settings.abilityTimingDisplay = 1;
+  VS::Input::settings.abilityTimingDisplay = 1;
   const SVECTOR player = LiveAnchor(0);
   REQUIRE(player.vy >= 40);
   VS::Battle::LiveShowAbilityTimingCue(30);

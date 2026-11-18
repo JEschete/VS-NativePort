@@ -22,7 +22,6 @@
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/VoiceMixer.hpp"
 #include "Audio/VoiceOutputLive.hpp"
@@ -353,14 +352,14 @@ class LiveMixer final : public MixerHost, private LiveRefusals {
   void Refuse(MixRefusal refusal) override { LiveRefusals::Refuse(refusal); }
 
   std::int16_t Envelope(std::uint32_t voice) override {
-    return Audio_Native_Envelope(voice);
+    return VS::Audio::Driver::OutputVoiceEnvelope(voice);
   }
 
   void ConfigureChannel(ChannelRef ref, MixChannel& channel) override {
     Audio_SeqChannel* record = Record(ref);
     if (record == nullptr) return;
     StoreMixChannel(*record, channel, waves_);
-    Audio_Native_ConfigureChannel(record);
+    VS::Audio::Driver::ConfigureOutputChannel(record);
     channel.state.voice.dirty_flags =
         Same<std::uint32_t>(record->voice.dirtyFlags);
   }
@@ -371,11 +370,11 @@ class LiveMixer final : public MixerHost, private LiveRefusals {
   }
 
   void SetReverbDepth(std::int16_t left, std::int16_t right) override {
-    Audio_Native_SetReverbDepth(left, right);
+    VS::Audio::Driver::SetOutputReverbDepth(left, right);
   }
 
   void SetNoiseClock(std::int32_t clock) override {
-    Audio_Native_SetNoiseClock(clock);
+    VS::Audio::Driver::SetOutputNoiseClock(clock);
   }
 
   void SetReverbVoices(std::uint32_t voices) override {

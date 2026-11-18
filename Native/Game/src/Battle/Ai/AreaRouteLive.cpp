@@ -14,7 +14,6 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -58,9 +57,7 @@ static_assert(offsetof(RouteView, gate) == offsetof(AiState, route_gate));
 static_assert(offsetof(RouteView, exit) == offsetof(AiState, route_exit_bytes));
 static_assert(sizeof(AiState{}.route_exit_bytes) == kTileWordBytes);
 static_assert(sizeof(Battle_Ai_TilePosition) == kTileWordBytes);
-static_assert(kAiFrameActorSlots == kAreaRouteNoTarget);
-static_assert(kAiFrameGridSide == kNavigationGridSide);
-static_assert(kAiDirectionBytes == kNavigationDirections);
+static_assert(kFrameActorSlots == kAreaRouteNoTarget);
 static_assert(sizeof(Battle_Ai_RouteGateTile) == kRouteGateTileBytes);
 // So does the area movement view.
 using MoveView = Battle_Ai_TerrainMoveView;
@@ -84,7 +81,7 @@ AiState& State(void* view) {
   return *static_cast<AiState*>(view);
 }
 
-Battle_Ai_FrameContext& Frame() { return *Battle_Ai_FrameState(); }
+FrameContext& Frame() { return LiveFrameContext(); }
 
 std::optional<std::array<RouteGateEnd, kRouteGateEndCount>> LiveGateEnds() {
   if (Battle_Ai_routeGates == nullptr) return std::nullopt;
@@ -222,10 +219,10 @@ class LiveHeightFilteredMoveWorld final : public HeightFilteredMoveWorld {
     return LiveTerrainRegionCell(x, z);
   }
   void SetTerrainRegionCell(int x, int z, std::uint8_t value) override {
-    u_char* cell = nullptr;
-    Require(Frame().terrainRegions != nullptr &&
-                Battle_Ai_TryTerrainRegionCell(x, z, &cell) != 0,
-            "AI height filter writes outside the regions");
+    std::uint8_t* cell = Frame().terrainRegions != nullptr
+                             ? FindTerrainRegionCell(x, z)
+                             : nullptr;
+    Require(cell != nullptr, "AI height filter writes outside the regions");
     *cell = value;
   }
   [[nodiscard]] NavigationDirectionCodes DirectionCodes() const override {

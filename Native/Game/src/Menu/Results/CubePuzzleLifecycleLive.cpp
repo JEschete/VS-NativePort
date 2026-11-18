@@ -24,7 +24,7 @@
 #include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
@@ -281,7 +281,7 @@ void StoreRating(CubePuzzleRating rating) {
 }
 
 [[nodiscard]] bool LiveConfirmPressed() {
-  return (Input_buttonsPressed.allButtons & PADRright) != 0;
+  return (VS::Input::buttonsPressed.allButtons & PADRright) != 0;
 }
 
 [[nodiscard]] int Finished(CubePuzzleLoad load) {

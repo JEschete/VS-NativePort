@@ -17,7 +17,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
@@ -270,7 +270,7 @@ class LiveTargetApproachWorld final : public TargetApproachWorld {
   }
   void ClearWalkTests() override {
     // The original cleared only the first cache byte, 0x1F8003D0.
-    Battle_Ai_FrameState()->walk_valid = 0;
+    LiveFrameContext().walk_valid = 0;
   }
   void RefreshTargetTile(TargetApproacher& approacher) override {
     Run(approacher, [&] { RefreshLiveAiTargetTile(&ApproachOf(state_)); });

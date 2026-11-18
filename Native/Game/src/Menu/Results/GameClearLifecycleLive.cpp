@@ -21,7 +21,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Results/GameClearLifecycle.hpp"
@@ -585,7 +585,7 @@ int LiveUpdateGameClear() {
     Refuse("award without a valid reel and character stats");
     return 0;
   }
-  const bool confirm = (Input_buttonsPressed.allButtons & PADRright) != 0;
+  const bool confirm = (VS::Input::buttonsPressed.allButtons & PADRright) != 0;
   LiveScreen host;
   const auto step = UpdateGameClear(game.screen, reels, confirm, host);
   StoreState(game);

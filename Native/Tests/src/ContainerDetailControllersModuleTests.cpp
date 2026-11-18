@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/OverlayReset.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/ContainerDetailControllersLiveFixture.hpp"
 
 namespace {
@@ -31,10 +31,9 @@ constexpr std::array<unsigned, 6> kAddresses{
 
 template <typename Function>
 bool Bound(unsigned address, Function function) {
-  return VS::Content::ResolveModuleAddress(
-             {Content_moduleSymbols, Content_moduleSymbolCount},
-             "MENU/MENUD.PRG",
-             address) == reinterpret_cast<const void*>(function);
+  return VS::Content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                           "MENU/MENUD.PRG", address) ==
+         reinterpret_cast<const void*>(function);
 }
 }  // namespace
 

@@ -17,8 +17,8 @@
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/VoiceOutputLive.hpp"
 
 namespace VS::Audio::Driver {
 namespace {
@@ -37,7 +37,7 @@ void InitializePendingModulation(Audio_SeqChannel& channel) {
 
 class LivePlaybackReset final : public PlaybackResetHost {
  public:
-  void ResetOutput() override { Audio_Native_Reset(); }
+  void ResetOutput() override { VS::Audio::Driver::ResetVoiceOutput(); }
 
   void ResetMusicLayers(const MusicLayerReset& reset) override {
     Audio_Seq_activeMusicConfig = &Audio_Seq_primaryMusicConfig;
@@ -134,7 +134,7 @@ class LivePlaybackReset final : public PlaybackResetHost {
   void SetReverbMode(int mode) override { Mixer::LiveSetReverbMode(mode); }
 
   void EnableReverb(bool enabled) override {
-    Audio_Native_EnableReverb(enabled ? 1 : 0);
+    VS::Audio::Driver::EnableOutputReverb(enabled ? 1 : 0);
   }
 };
 }  // namespace

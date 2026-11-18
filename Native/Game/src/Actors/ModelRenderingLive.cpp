@@ -51,7 +51,7 @@
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelDraw.h"
 #include "Render/ModelGeometryLive.hpp"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/Render.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
@@ -110,7 +110,7 @@ static_assert(sizeof(u_long) == sizeof(std::uint32_t),
               "ordering-table entries are 4-byte words");
 
 [[nodiscard]] Render_ModelScratchpad& Workspace() {
-  return *Render_ModelWorkspace();
+  return *VS::Render::ModelWorkspace();
 }
 
 [[nodiscard]] Actors_ActorRecord* RoomActor(std::size_t slot) {

@@ -23,7 +23,6 @@
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqSequencerLive.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/SoundBanksLive.hpp"
@@ -78,7 +77,7 @@ int TestsCancelQueuedMusic(int queued, int secondary) {
   Audio_MusicConfig saved = {0};
   Audio_AkaoSequenceFile sequence = {0};
   const Audio_CommandParams pending = {
-      queued ? (uintptr_t)&sequence : 0, 2, 3, 4, 5, 6};
+      queued ? reinterpret_cast<uintptr_t>(&sequence) : 0, 2, 3, 4, 5, 6};
   int result;
   current.statusFlags = 0x10062;
   Audio_Seq_activeMusicConfig = &current;
@@ -93,7 +92,8 @@ int TestsCancelQueuedMusic(int queued, int secondary) {
              Audio_Seq_pendingMusicData.extParam1 == pending.extParam1 &&
              Audio_Seq_pendingMusicData.extParam2 == pending.extParam2)
             << 2;
-  result |= (!queued || (uintptr_t)&sequence > UINT32_MAX) << 3;
+  result |= (!queued || reinterpret_cast<uintptr_t>(&sequence) > UINT32_MAX)
+            << 3;
   VS::Audio::Mixer::LiveStopMusicAndCancelReplacement(nullptr);
   result |= (Audio_Seq_pendingMusicData.param1 == 0) << 4;
   Audio_Seq_pendingMusicData = original_pending;
@@ -220,7 +220,8 @@ int TestsNativeMusicSnapshot(void) {
            sizeof(Audio_Seq_primaryMusicConfig));
     Audio_Seq_primaryMusicConfig.timerTop = 0x1111;
     Audio_Seq_savedMusicConfig.timerTop = 0x2222;
-    Audio_Seq_savedMusicConfig.sequenceBase = (uintptr_t)sequence.file;
+    Audio_Seq_savedMusicConfig.sequenceBase =
+        reinterpret_cast<uintptr_t>(sequence.file);
     Audio_Seq_savedMusicConfig.patchTable = sequence.file;
     Audio_Seq_savedMusicConfig.keymapTable = &keymap;
     for (channel = 0; channel < 32; ++channel) {
@@ -288,11 +289,12 @@ static int CheckPendingModulationSlides(Audio_SeqChannel* channel, int effect,
     const unsigned length = kind == 0   ? channel->vibratoDepthSlideLength
                             : kind == 1 ? channel->tremoloDepthSlideLength
                                         : channel->autoPanDepthSlideLength;
-    failures |= (depth != (unsigned)(index * (kind == 2 ? 2048 : 4096)) ||
-                 length != (unsigned)(4 - index) ||
-                 channel->vibratoPitch != 0 || channel->tremoloVolume != 0 ||
-                 channel->autoPanOffset != 0 || channel->updateFlags != 0)
-                << 2;
+    failures |=
+        (depth != static_cast<unsigned>(index * (kind == 2 ? 2048 : 4096)) ||
+         length != static_cast<unsigned>(4 - index) ||
+         channel->vibratoPitch != 0 || channel->tremoloVolume != 0 ||
+         channel->autoPanOffset != 0 || channel->updateFlags != 0)
+        << 2;
   }
   channel->programCounter = enable;
   switch (kind) {
@@ -399,7 +401,7 @@ void TestsPrepareXaPlayback(void) {
 
 void TestsRestoreXaPlayback(void) {
   int index;
-  Audio_Native_Reset();
+  VS::Audio::Driver::ResetVoiceOutput();
   Content_discDriveState = savedXaDrive;
   for (index = 0; index < 3; ++index) {
     Audio_Mixer_kCommandHandlers[0xC8 + index] = savedXaCommands[index];
@@ -427,7 +429,7 @@ int TestsXaCommand(int command, int first, int second, int third) {
     case 6:
       return Audio_Seq_discVolumeLevel;
     case 7:
-      Audio_Native_Reset();
+      VS::Audio::Driver::ResetVoiceOutput();
       break;
     case 8:
       VS::Content::ResetLiveDiscDrive();
@@ -465,7 +467,7 @@ void TestsPrepareStreamPlayback(void) {
 
 void TestsRestoreStreamPlayback(void) {
   int index;
-  Audio_Native_Reset();
+  VS::Audio::Driver::ResetVoiceOutput();
   memcpy(Audio_Mixer_kPanGains, savedStreamPan, sizeof(savedStreamPan));
   for (index = 0; index < 7; ++index) {
     Audio_Mixer_kCommandHandlers[kStreamCommandIds[index]] =
@@ -490,7 +492,7 @@ int TestsPlayStreamSlot(int slot, int pan, int volume) {
 void TestsAdvanceStreamTick(void) {
   VS::Audio::Seq::LiveUpdateGlobalSlides();
   VS::Audio::Mixer::LiveCommitPlaybackVoices();
-  Audio_Native_Tick();
+  VS::Audio::Driver::TickVoiceOutput();
 }
 
 void TestsStreamControl(int command, int value, int target) {
@@ -562,7 +564,7 @@ int TestsMenuSoundDispatch(void) {
     menuSoundCalls = 0;
     play[index]();
     if (menuSoundCalls == 1 &&
-        menuSoundObserved.param1 == (uintptr_t)ids[index] &&
+        menuSoundObserved.param1 == static_cast<uintptr_t>(ids[index]) &&
         menuSoundObserved.param2 == (2 << index) &&
         menuSoundObserved.param3 == 0x80 && menuSoundObserved.param4 == 0x7F) {
       result |= 1 << index;
@@ -584,15 +586,15 @@ void TestsNativeNoiseChannel(void) {
   channel.voice.adsrLower = 0x00FF;
   channel.voice.adsrUpper = 0x5FC4;
   VS::Audio::Driver::ResetLivePlaybackState();
-  Audio_Native_ConfigureChannel(&channel);
-  Audio_Native_SetNoiseClock(63);
+  VS::Audio::Driver::ConfigureOutputChannel(&channel);
+  VS::Audio::Driver::SetOutputNoiseClock(63);
   VS::Audio::Driver::SetLiveVoiceNoiseMask(1);
-  Audio_Native_SetReverbMode(4);
-  Audio_Native_SetReverbDepth(0x3FFF, 0x3FFF);
-  Audio_Native_EnableReverb(1);
+  VS::Audio::Driver::SetOutputReverbMode(4);
+  VS::Audio::Driver::SetOutputReverbDepth(0x3FFF, 0x3FFF);
+  VS::Audio::Driver::EnableOutputReverb(1);
   VS::Audio::Driver::SetLiveVoiceReverbMask(1);
   VS::Audio::Driver::KeyOnLiveVoices(1);
-  Audio_Native_Tick();
+  VS::Audio::Driver::TickVoiceOutput();
 }
 
 void TestsNativeMonoOutput(int enabled) {
@@ -601,7 +603,7 @@ void TestsNativeMonoOutput(int enabled) {
   } else {
     VS::Audio::Mixer::LiveEnableStereoOutput(nullptr);
   }
-  Audio_Native_Tick();
+  VS::Audio::Driver::TickVoiceOutput();
 }
 
 int TestsZoneMusicCanonicalState(void) {

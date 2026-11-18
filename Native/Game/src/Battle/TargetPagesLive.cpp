@@ -17,7 +17,7 @@
 #include "Battle/TargetingState.h"
 #include "Core/Log.hpp"
 #include "Field/Interactions.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -79,14 +79,14 @@ class LiveSphere final : public VS::Battle::TargetSphere {
 };
 }  // namespace
 
-void Battle_ResetTargetPages(void) {
+void VS::Battle::ResetTargetPages(void) {
   targets = {};
   book = {};
 }
 
 namespace VS::Battle {
 void SetLiveSphereTargets(std::span<Battle_TargetPreview> entries, int mode) {
-  Battle_ResetTargetPages();
+  ResetTargetPages();
   if (entries.size() > kMaxSphereTargets) {
     VS_LOG_ERROR("targeting.page", "invalid targets count={}", entries.size());
     std::abort();
@@ -111,7 +111,7 @@ std::span<Battle_TargetPreview> CheckedTargetPreviews(
 }
 }  // namespace VS::Battle
 
-int Battle_AdvanceTargetPage(int direction) {
+int VS::Battle::AdvanceTargetPage(int direction) {
   if (direction != -1 && direction != 1) {
     VS_LOG_ERROR("targeting.page", "invalid page direction={}", direction);
     std::abort();
@@ -126,29 +126,29 @@ int Battle_AdvanceTargetPage(int direction) {
   std::fill(std::begin(Sphere()->labels), std::end(Sphere()->labels),
             Battle_SphereTargetLabel{});
   ApplyPage(book.pages[book.current], true);
-  const auto info = Battle_GetTargetPageInfo();
+  const auto info = VS::Battle::GetTargetPageInfo();
   VS_LOG_INFO("targeting.page", "page={}/{} first={} visible={} total={}",
               info.page, info.pages, info.first, info.visible, info.total);
   return 1;
 }
 
-int Battle_HandleTargetPageButtons(void) {
-  const auto pressed = Input_buttonsPressed.allButtons & (PADL1 | PADR1);
+int VS::Battle::HandleTargetPageButtons(void) {
+  const auto pressed = VS::Input::buttonsPressed.allButtons & (PADL1 | PADR1);
   int changed = 0;
-  if (pressed == PADL1) changed = Battle_AdvanceTargetPage(-1);
-  if (pressed == PADR1) changed = Battle_AdvanceTargetPage(1);
+  if (pressed == PADL1) changed = VS::Battle::AdvanceTargetPage(-1);
+  if (pressed == PADR1) changed = VS::Battle::AdvanceTargetPage(1);
   if (changed) VS::Menu::PlayChangeSound();
   return changed;
 }
 
-int Battle_TargetPagesUseShoulders(void) {
+int VS::Battle::TargetPagesUseShoulders(void) {
   return book.pages.size() > 1 && Sphere() != nullptr &&
          Sphere()->targetCount > 0 && Field_controlMode == 2 &&
          (Battle_actionFlowMode == kChooseDirectTarget ||
           Battle_actionFlowMode == kChooseAreaTarget);
 }
 
-unsigned char Battle_MapTargetPageIndex(unsigned char index) {
+unsigned char VS::Battle::MapTargetPageIndex(unsigned char index) {
   if (index == kNoTarget) return index;
   if (book.pages.empty() || index >= book.pages[book.current].count) {
     VS_LOG_ERROR("targeting.page", "invalid local target index={}",
@@ -158,8 +158,8 @@ unsigned char Battle_MapTargetPageIndex(unsigned char index) {
   return static_cast<unsigned char>(book.pages[book.current].first + index);
 }
 
-int Battle_ValidateTargetPreviewIndex(int index) {
-  if (!Battle_TargetPreviewIndexIsValid(index)) {
+int VS::Battle::ValidateTargetPreviewIndex(int index) {
+  if (!VS::Battle::TargetPreviewIndexIsValid(index)) {
     VS_LOG_ERROR("targeting", "target preview index exceeds capacity: {}",
                  index);
     std::abort();
@@ -167,12 +167,12 @@ int Battle_ValidateTargetPreviewIndex(int index) {
   return index;
 }
 
-int Battle_TargetPreviewIndexIsValid(int index) {
+int VS::Battle::TargetPreviewIndexIsValid(int index) {
   return index >= 0 && static_cast<std::size_t>(index) < kSlots;
 }
 
-Battle_TargetPageInfo Battle_GetTargetPageInfo(void) {
-  Battle_TargetPageInfo info{0, 0, 0, 0, 0, -1};
+VS::Battle::TargetPageInfo VS::Battle::GetTargetPageInfo(void) {
+  VS::Battle::TargetPageInfo info{0, 0, 0, 0, 0, -1};
   if (book.pages.empty() || Sphere() == nullptr) return info;
   const VS::Battle::TargetPage page = book.pages[book.current];
   info.total = static_cast<int>(book.total);
@@ -185,9 +185,9 @@ Battle_TargetPageInfo Battle_GetTargetPageInfo(void) {
   return info;
 }
 
-void Battle_DrawTargetPageHint(void) {
+void VS::Battle::DrawTargetPageHint(void) {
   if (book.pages.size() < 2 || Sphere() == nullptr) return;
-  const auto info = Battle_GetTargetPageInfo();
+  const auto info = VS::Battle::GetTargetPageInfo();
   std::array<char, kHintBufferSize> text{};
   std::snprintf(text.data(), text.size(), "L1  %d/%d  R1", info.page,
                 info.pages);

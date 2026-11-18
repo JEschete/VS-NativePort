@@ -5,7 +5,7 @@
 #include <limits>
 
 #include "Audio/XaPlayback.hpp"
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Content/DiscReader.hpp"
 #include "Core/Diagnostics.hpp"
 #include "DiscQueue.h"
@@ -107,9 +107,9 @@ class LiveDiscDriveHost final : public DiscDriveHost {
   [[nodiscard]] bool ReadPendingData() override {
     read_completed = false;
     const Content_DiscDrive& drive = Content_discDriveState;
-    return Content_ReadDiscBytes(static_cast<unsigned>(drive.startSector),
-                                 static_cast<unsigned>(drive.byteCount),
-                                 drive.destination) != 0;
+    return ReadDiscBytes(static_cast<unsigned>(drive.startSector),
+                         static_cast<unsigned>(drive.byteCount),
+                         drive.destination) != 0;
   }
   void MarkSectorsDelivered(std::uint32_t sectors) override {
     read_completed = true;

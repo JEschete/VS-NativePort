@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/MatrixLive.hpp"
@@ -281,8 +281,7 @@ TEST_CASE(
 
 TEST_CASE("Promoted scalar math has no original module addresses",
           "[math][core-leaves][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // These entries were only reached by direct jal instructions (or not at
   // all), so callers use the typed API by name and no address resolves.
   for (const unsigned address :
@@ -420,8 +419,7 @@ TEST_CASE("Retired trig entries leave no module address bindings",
   const char* module = resident ? "SLUS_010.40" : "BATTLE/BATTLE.PRG";
   const unsigned address = resident ? (cosine ? 0x80040F24u : 0x80040F28u)
                                     : (cosine ? 0x80098AB4u : 0x80098AB8u);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, module, address) == nullptr);
 }
 
@@ -670,8 +668,7 @@ TEST_CASE("Tile component arithmetic retains the shared GTE halfword inputs",
 
 TEST_CASE("Promoted distance helpers have no original module addresses",
           "[math][tile-components][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // BATTLE.PRG only reached these through direct jal instructions, so the
   // promoted API is called by name and no address resolves to it.
   for (const unsigned address :

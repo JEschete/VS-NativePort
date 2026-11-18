@@ -12,8 +12,8 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AreaRoute.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
-#include "Content/ModuleData.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -834,8 +834,7 @@ TEST_CASE("Area movement refuses missing maps, routes and outside tiles",
 
 TEST_CASE("Area routing keeps its original module entries",
           "[ai][area-route][route-gates][area-movement][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);
@@ -854,14 +853,14 @@ TEST_CASE("Area routing keeps its original module entries",
 
 namespace {
 struct LiveRouteFixture {
-  Battle_Ai_FrameContext saved = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
   std::array<u_int, 256> routes{};
   u_short flags[32][32]{};
   u_short heights[32][32]{};
   Battle_Ai_ActorAiState state{};
 
   LiveRouteFixture() {
-    auto& frame = *Battle_Ai_FrameState();
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
     frame.roomData = routes.data();
     frame.tileFlags = flags;
     frame.heightMap = heights;
@@ -869,7 +868,7 @@ struct LiveRouteFixture {
     state.reserved154Area = 1;
     state.destination.word = Tile(1, 1);
   }
-  ~LiveRouteFixture() { *Battle_Ai_FrameState() = saved; }
+  ~LiveRouteFixture() { VS::Battle::Ai::LiveFrameContext() = saved; }
   LiveRouteFixture(const LiveRouteFixture&) = delete;
   LiveRouteFixture& operator=(const LiveRouteFixture&) = delete;
 

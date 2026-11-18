@@ -15,7 +15,7 @@
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfers.hpp"
-#include "Items/InventoryLiveState.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
@@ -70,8 +70,7 @@ class LiveBag final : public GadgetBagWorld {
     return LiveContainerCategoryOrder(category, owner_);
   }
   std::uint8_t InventoryCapacity(ItemCategory category) override {
-    return VS::Items::Inventory::inventoryItemCapacities
-        [static_cast<std::size_t>(category)];
+    return VS::Items::kCategoryCapacities[static_cast<std::size_t>(category)];
   }
   std::span<std::uint8_t> InventoryOrder(ItemCategory category) override {
     const auto value = static_cast<std::size_t>(category);

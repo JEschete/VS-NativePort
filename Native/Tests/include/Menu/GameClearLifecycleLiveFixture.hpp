@@ -26,20 +26,20 @@
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/SoundSlotsLive.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
@@ -87,12 +87,10 @@ class SavedGlobals {
 class SavedModuleData {
  public:
   SavedModuleData() {
-    for (const auto& entry :
-         std::span(Content_moduleData, Content_moduleDataCount)) {
+    for (const auto& entry : VS::Content::ModuleDataEntries()) {
       Save(entry.target, entry.capacity);
     }
-    for (const auto& table :
-         std::span(Content_modulePointers, Content_modulePointerCount)) {
+    for (const auto& table : VS::Content::ModulePointerTables()) {
       Save(static_cast<void*>(table.target), table.capacity * sizeof(void*));
     }
     Save(Menu_Results_buffReels,
@@ -157,14 +155,14 @@ class Fixture {
       Audio_Cutscene_streamState, Audio_Samples_musicSampleBankIds,
       Audio_Seq_unusedScoredata, Audio_Seq_unusedStateFlags,
       State_roomVisitProgress, Battle_characterState, Battle_unusedSubmenuState,
-      Input_buttonsPressed, Content_discRequestSlots, Content_discRequestCounts,
-      Content_discDriveState, Render_legacyDrawEnvironments,
-      Menu_Results_screenTimer, Menu_Results_screenState,
-      Menu_Results_buffReelIndex, Menu_Results_buffReelSelection,
-      Menu_Results_elementAnimationState, Menu_Results_score,
-      Menu_Results_mapCompletion, Menu_Results_rank, Menu_Results_clearCount,
-      Menu_Results_onScreenScore, Menu_Results_incrementingScore,
-      Menu_Results_onScreenMapCompletion,
+      VS::Input::buttonsPressed, Content_discRequestSlots,
+      Content_discRequestCounts, Content_discDriveState,
+      Render_legacyDrawEnvironments, Menu_Results_screenTimer,
+      Menu_Results_screenState, Menu_Results_buffReelIndex,
+      Menu_Results_buffReelSelection, Menu_Results_elementAnimationState,
+      Menu_Results_score, Menu_Results_mapCompletion, Menu_Results_rank,
+      Menu_Results_clearCount, Menu_Results_onScreenScore,
+      Menu_Results_incrementingScore, Menu_Results_onScreenMapCompletion,
       Menu_Results_incrementingMapCompletion>
       saved_;
   SavedRuntime saved_runtime_;
@@ -195,7 +193,7 @@ class Fixture {
     render::InitializeLiveTexturePages();
     results::ResetLiveGameClearModuleData();
     Battle_unusedSubmenuState = 0;
-    Input_buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
     Audio_Seq_unusedScoredata = {};
     Audio_Seq_unusedStateFlags = {};
     State_roomVisitProgress = {};
@@ -243,7 +241,7 @@ class Fixture {
     put(0, std::uint32_t{0x4F414B41});
     put(4, kSequenceId);
     put(6, static_cast<std::uint16_t>(kProgram + 4));
-    put(8, static_cast<std::uint16_t>(Audio_Native_ReverbMode()));
+    put(8, static_cast<std::uint16_t>(VS::Audio::Driver::OutputReverbMode()));
     put(0x20, std::uint32_t{1});
     put(0x40, std::uint16_t{4});
     put(kProgram, Audio_Seq_kIdleProgram);
@@ -309,18 +307,17 @@ class Fixture {
     REQUIRE(stream.good());
     const std::vector<unsigned char> image{
         std::istreambuf_iterator<char>(stream), {}};
-    const auto tables =
-        std::span(Content_modulePointers, Content_modulePointerCount);
+    const auto tables = VS::Content::ModulePointerTables();
     const auto handlers = std::ranges::find(
         tables, reinterpret_cast<void**>(Audio_Mixer_kCommandHandlers),
-        &Content_ModulePointerTable::target);
+        &VS::Content::ModulePointerTable::target);
     REQUIRE(handlers != tables.end());
-    REQUIRE(content::RelocateModulePointerTable(
-        *handlers, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
-    const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+    REQUIRE(content::RelocateModulePointerTable(*handlers, image,
+                                                VS::Content::ModuleSymbols()));
+    const auto entries = VS::Content::ModuleDataEntries();
     const auto idle =
         std::ranges::find(entries, static_cast<void*>(&Audio_Seq_kIdleProgram),
-                          &Content_ModuleDataEntry::target);
+                          &VS::Content::ModuleDataEntry::target);
     REQUIRE(idle != entries.end());
     REQUIRE(std::string_view(idle->module) == "SLUS_010.40");
     REQUIRE(content::CopyModuleDataEntry(*idle, image));

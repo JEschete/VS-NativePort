@@ -16,7 +16,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace actors = VS::Actors;
@@ -952,8 +952,7 @@ TEST_CASE("Live routes wait on the record's turn and walk frames",
 
 TEST_CASE("Promoted actor motion leaves no module address binding",
           "[actors][actors-movement][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // No module image stores these functions' addresses; callers use the
   // typed API by name. ActorJumpAnimationProfile (func_800AC690_getProfile)
   // is a decomp-local helper with no address of its own: 0x800AC690 is

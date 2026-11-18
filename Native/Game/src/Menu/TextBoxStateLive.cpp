@@ -13,7 +13,7 @@
 #include "Actors/TextureAnimationLive.hpp"
 #include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
 
@@ -165,7 +165,8 @@ int SelectLiveTextBoxChoice(u_char box_mask) {
   LiveTextBoxes boxes = ReadLiveTextBoxes();
   TextBoxSelector selector = ReadLiveTextBoxSelector();
   const TextBoxSelectionInput input{
-      .pressed = static_cast<std::uint32_t>(Input_buttonsPressed.allButtons),
+      .pressed =
+          static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons),
       .default_choice =
           static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.opaque11),
   };

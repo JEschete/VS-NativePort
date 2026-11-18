@@ -17,7 +17,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Diagnostics.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
@@ -217,7 +217,7 @@ void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
   }
   TextBoxText view = ViewOf(*box);
   const TextBoxInput input{
-      .confirm_pressed = Input_buttonsPressed.ports[0].lowByte != 0,
+      .confirm_pressed = VS::Input::buttonsPressed.ports[0].lowByte != 0,
       .tick_speed = VS::State::tickSpeed};
   LivePacketQueue glyphs(layers + kTextForegroundLayer);
   const ProgressiveTextResult result = DrawProgressiveTextBoxText(
@@ -268,7 +268,7 @@ void BlendLiveTextBoxIntoFramebuffer(Menu_TextBoxState* box, int glyph_alpha) {
   const FramebufferTextBlend blend{
       .alpha = glyph_alpha,
       .framebuffer_x = Render_frameBuf * kFramebufferWidth,
-      .skip_pressed = (Input_buttonsPressed.allButtons & PADRright) != 0};
+      .skip_pressed = (VS::Input::buttonsPressed.allButtons & PADRright) != 0};
   const VariableFontTables font{.glyph_widths = LiveVariableFontGlyphWidths(),
                                 .pixel_expansion = Render_kGlyphPixelExpansion};
   LiveVramPixels vram;

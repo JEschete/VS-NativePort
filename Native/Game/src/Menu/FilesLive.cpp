@@ -28,7 +28,7 @@
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "Menu/Files.h"
@@ -56,7 +56,7 @@
 #include "Save/MemoryCard/GameFilesLive.hpp"
 #include "Save/MemoryCard/Resources.h"
 #include "Save/MenuAssetsLive.hpp"
-#include "Save/NativeMenu.h"
+#include "Save/NativeMenu.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
@@ -235,12 +235,6 @@ void ClearBothBuffers() {
   ClearImage(&rect, 0, 0, 0);
 }
 
-Framework::Buttons LiveButtons() {
-  return {.pressed = Input_buttonsPressed.allButtons,
-          .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-          .held = static_cast<std::uint32_t>(Input_buttonsState)};
-}
-
 [[nodiscard]] std::span<const std::uint16_t> TableSpan(const u_short* table) {
   if (table == nullptr) {
     return {};
@@ -352,7 +346,7 @@ class LiveGpuHost : public Host {
     ::StoreImage(&rect, reinterpret_cast<u_long*>(pixels.data()));
   }
   void DrawSync() override { ::DrawSync(0); }
-  void DrawFileOverlay() override { Save_NativeDrawFileOverlay(0); }
+  void DrawFileOverlay() override { VS::Game::Save::DrawFileOverlay(false); }
   void DrawCompactText(std::string_view text, std::uint32_t position) override {
     u_long* const chain = Render::LiveFrameOrderingEntry(
         Render::LiveOrderingBase::kScene, kCompactTextSlot);
@@ -411,7 +405,7 @@ class LiveCardHost : public LiveGpuHost {
   int FindMatchingSaveSlot() override {
     return VS::Save::MemoryCard::FindLiveMatchingSaveSlot();
   }
-  Framework::Buttons Input() override { return LiveButtons(); }
+  Framework::Buttons Input() override { return Framework::LiveButtons(); }
   std::span<const std::uint16_t> ContainerStrings() override {
     return containerStrings;
   }
@@ -528,8 +522,8 @@ class LiveCardHost : public LiveGpuHost {
   void StashSaveImage() override { MoveSaveImage(2, 1); }
   void RestoreSaveImage() override { MoveSaveImage(1, 2); }
   std::span<std::uint8_t> Settings() override {
-    return {reinterpret_cast<std::uint8_t*>(&Input_settings),
-            sizeof Input_settings};
+    return {reinterpret_cast<std::uint8_t*>(&VS::Input::settings),
+            sizeof VS::Input::settings};
   }
   void ClearDoorEntered() override {
     Audio_Seq_unusedStateFlags.doorEntered = 0;
@@ -645,13 +639,13 @@ class LiveHost : public LiveCardHost {
     Audio_Seq_unusedStateFlags.difficulty = static_cast<char>(difficulty);
   }
   std::uint8_t CursorMemory() override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void SetCursorMemory(std::uint8_t memory) override {
-    Input_settings.cursorMemory = static_cast<char>(memory);
+    VS::Input::settings.cursorMemory = static_cast<char>(memory);
   }
   std::uint8_t MonoSound() override {
-    return static_cast<std::uint8_t>(Input_settings.monoSound);
+    return static_cast<std::uint8_t>(VS::Input::settings.monoSound);
   }
 
   int UpdateDataSaveMenu(int init) override {
@@ -767,7 +761,7 @@ class TitleFilesLiveHost final : public LiveHost {
   void SetProgressCounter(std::int32_t counter) override {
     Title_transferProgressCounter = counter;
   }
-  void DrawFileOverlay() override { Save_NativeDrawFileOverlay(1); }
+  void DrawFileOverlay() override { VS::Game::Save::DrawFileOverlay(true); }
 };
 
 // TITLE.PRG's file screen variables as their own State: Title_fileMenuElements
@@ -843,7 +837,7 @@ class TitleLiveHost final : public TitleHost {
   int FindMatchingSaveSlot() override {
     return VS::Save::MemoryCard::FindLiveMatchingSaveSlot();
   }
-  Framework::Buttons Input() override { return LiveButtons(); }
+  Framework::Buttons Input() override { return Framework::LiveButtons(); }
 
   std::uint8_t FrameBuffer() override {
     return static_cast<std::uint8_t>(frameBuf);

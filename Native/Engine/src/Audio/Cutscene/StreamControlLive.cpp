@@ -16,7 +16,6 @@
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/StreamBuffersLive.hpp"
 #include "Audio/StreamControl.hpp"
@@ -94,7 +93,8 @@ class LiveStreamHost final : public Cutscene::StreamHost {
   }
 
   void PauseVoice(std::int32_t voice, bool paused) override {
-    Audio_Native_PauseVoice(static_cast<unsigned>(voice), paused ? 1 : 0);
+    VS::Audio::Driver::PauseOutputVoice(static_cast<unsigned>(voice),
+                                        paused ? 1 : 0);
   }
 
   void KeyOffVoices(std::uint32_t mask) override {
@@ -132,10 +132,10 @@ class LiveStreamHost final : public Cutscene::StreamHost {
                   std::uint32_t left, std::uint32_t right,
                   bool reverb) override {
     if (!g_bound || channel >= g_bound->instruments.size()) return false;
-    return Audio_Native_StartStreamVoice(static_cast<unsigned>(voice),
-                                         g_bound->instruments[channel].c_str(),
-                                         rate, left, right,
-                                         reverb ? 1 : 0) != 0;
+    return VS::Audio::Driver::StartOutputStreamVoice(
+               static_cast<unsigned>(voice),
+               g_bound->instruments[channel].c_str(), rate, left, right,
+               reverb ? 1 : 0) != 0;
   }
 
   void SetVoiceGains(std::int32_t voice, std::uint32_t left,
@@ -350,8 +350,8 @@ void VS::Audio::UpdateCutsceneStream(void) {
   if (state.voiceMask == 0) return;
   LiveStreamHost host;
   const auto voice = static_cast<unsigned>(state.voiceIndex);
-  if (Audio_Native_VoiceActive(voice) == 0 &&
-      Audio_Native_VoiceActive(voice + 1) == 0) {
+  if (VS::Audio::Driver::OutputVoiceActive(voice) == 0 &&
+      VS::Audio::Driver::OutputVoiceActive(voice + 1) == 0) {
     Cutscene::StopStreamVoices(host);
     return;
   }

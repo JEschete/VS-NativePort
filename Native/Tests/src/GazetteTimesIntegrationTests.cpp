@@ -26,8 +26,7 @@ namespace memory = VS::Core::Memory;
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
   auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENU9.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "MENU/MENU9.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved != reinterpret_cast<void*>(expected)) {
     throw std::runtime_error("incorrect Gazette time module entry");
@@ -76,12 +75,12 @@ struct Fixture : live::Fixture {
 
 void LoadStatisticsLabels() {
   const auto image = live::ReadImage(R"(Native\data\disc\MENU\MENU9.PRG)");
-  const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+  const auto entries = VS::Content::ModuleDataEntries();
   const std::array targets{static_cast<void*>(Menu_Score_statHeaders),
                            static_cast<void*>(Menu_Score_statDescriptions)};
   for (const auto target : targets) {
-    const auto found =
-        std::ranges::find(entries, target, &Content_ModuleDataEntry::target);
+    const auto found = std::ranges::find(entries, target,
+                                         &VS::Content::ModuleDataEntry::target);
     REQUIRE(found != entries.end());
     if (found == entries.end()) {
       throw std::runtime_error("missing statistics label owner");

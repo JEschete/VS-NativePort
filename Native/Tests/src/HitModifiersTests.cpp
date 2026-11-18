@@ -21,7 +21,7 @@
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -100,14 +100,13 @@ std::vector<std::uint8_t> ReadOriginalBattleModule() {
 }
 
 void RelocateHits(std::span<const std::uint8_t> image) {
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto tables = VS::Content::ModulePointerTables();
   const auto table =
       std::ranges::find(tables, reinterpret_cast<void**>(Battle_hitFunctions),
-                        &Content_ModulePointerTable::target);
+                        &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      *table, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
+      *table, image, VS::Content::ModuleSymbols()));
 }
 }  // namespace
 
@@ -458,8 +457,7 @@ TEST_CASE("Original hit table dispatches all four typed callbacks",
 TEST_CASE("Original gem helper symbols dispatch short-return bindings",
           "[hit-modifiers][F00339][F00340][live][module]") {
   LiveFixture f;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto attack = VS::Content::ResolveModuleAddress(
       symbols, "BATTLE/BATTLE.PRG", 0x8007E5E0);
   const auto defense = VS::Content::ResolveModuleAddress(

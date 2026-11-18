@@ -12,7 +12,7 @@
 #include "Audio/SoundBanksLive.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -58,7 +58,7 @@ constexpr char kBattleMenu = 8;
 
 std::uint8_t FlagByte() {
   std::uint8_t flags = 0;
-  std::memcpy(&flags, &Input_settings, sizeof flags);
+  std::memcpy(&flags, &VS::Input::settings, sizeof flags);
   return flags;
 }
 
@@ -123,11 +123,14 @@ class LiveHost final : public Host {
         .ability_timing = (flags & kAbilityTimingBit) != 0,
         .weapon_status = (flags & kWeaponStatusBit) != 0,
         .armor_status = (flags & kArmorStatusBit) != 0,
-        .cursor_memory = static_cast<std::uint8_t>(Input_settings.cursorMemory),
-        .information = static_cast<std::uint8_t>(Input_settings.information),
-        .simple_map = static_cast<std::uint8_t>(Input_settings.simpleMap),
-        .mono_sound = static_cast<std::uint8_t>(Input_settings.monoSound),
-        .vibration_on = static_cast<std::uint8_t>(Input_settings.vibrationOn)};
+        .cursor_memory =
+            static_cast<std::uint8_t>(VS::Input::settings.cursorMemory),
+        .information =
+            static_cast<std::uint8_t>(VS::Input::settings.information),
+        .simple_map = static_cast<std::uint8_t>(VS::Input::settings.simpleMap),
+        .mono_sound = static_cast<std::uint8_t>(VS::Input::settings.monoSound),
+        .vibration_on =
+            static_cast<std::uint8_t>(VS::Input::settings.vibrationOn)};
   }
   void StoreSettings(const Settings& settings) override {
     std::uint8_t flags = FlagByte();
@@ -135,12 +138,13 @@ class LiveHost final : public Host {
     SetFlag(flags, kAbilityTimingBit, settings.ability_timing);
     SetFlag(flags, kWeaponStatusBit, settings.weapon_status);
     SetFlag(flags, kArmorStatusBit, settings.armor_status);
-    std::memcpy(&Input_settings, &flags, sizeof flags);
-    Input_settings.cursorMemory = static_cast<char>(settings.cursor_memory);
-    Input_settings.information = static_cast<char>(settings.information);
-    Input_settings.simpleMap = static_cast<char>(settings.simple_map);
-    Input_settings.monoSound = static_cast<char>(settings.mono_sound);
-    Input_settings.vibrationOn = static_cast<char>(settings.vibration_on);
+    std::memcpy(&VS::Input::settings, &flags, sizeof flags);
+    VS::Input::settings.cursorMemory =
+        static_cast<char>(settings.cursor_memory);
+    VS::Input::settings.information = static_cast<char>(settings.information);
+    VS::Input::settings.simpleMap = static_cast<char>(settings.simple_map);
+    VS::Input::settings.monoSound = static_cast<char>(settings.mono_sound);
+    VS::Input::settings.vibrationOn = static_cast<char>(settings.vibration_on);
   }
   bool PuzzleModeDisabled() override {
     return Audio_Seq_unusedStateFlags.puzzleModeDisabled != 0;

@@ -16,14 +16,13 @@ namespace memory = VS::Core::Memory;
 using status_terminal_live_tests::Fixture;
 
 struct ModuleBindingSnapshot {
-  const Content_ModuleSymbol* symbol;
+  const VS::Content::ModuleSymbol* symbol;
   std::vector<std::byte> bytes;
 };
 
 std::vector<ModuleBindingSnapshot> SnapshotModuleBindings() {
   std::vector<ModuleBindingSnapshot> snapshots;
-  for (const auto& symbol :
-       std::span(Content_moduleSymbols, Content_moduleSymbolCount)) {
+  for (const auto& symbol : VS::Content::ModuleSymbols()) {
     if (symbol.target == nullptr || symbol.nativeSize == 0) continue;
     const auto* begin = static_cast<const std::byte*>(symbol.target);
     snapshots.push_back(
@@ -118,12 +117,12 @@ TEST_CASE("F02675 Live uses real transition rows and diagnoses missing actors",
 TEST_CASE("F02676 Live enters real list phase and resets before repeated entry",
           "[status-terminal][status-terminal-live][F02676]") {
   Fixture fixture;
-  Input_settings.cursorMemory = static_cast<char>(0xA7);
+  VS::Input::settings.cursorMemory = static_cast<char>(0xA7);
   const auto refused = st::RefusedLiveTerminalControllerCount();
   REQUIRE(st::LiveUpdateEquipmentList(0) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
   CHECK(st::LiveEquipmentListControllerState().phase == 1);
-  CHECK(static_cast<std::uint8_t>(Input_settings.cursorMemory) == 0xA7);
+  CHECK(static_cast<std::uint8_t>(VS::Input::settings.cursorMemory) == 0xA7);
   Menu_Status_selectedStatRow = static_cast<char>(250);
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveEquipmentListControllerState() == st::EquipmentListState{});

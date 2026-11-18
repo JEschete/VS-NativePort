@@ -43,8 +43,7 @@ struct LiveTransitionFixture : equipment_detail_tests::LiveFixture {
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
   auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENU4.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "MENU/MENU4.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved == nullptr) {
     throw std::runtime_error("missing status transition module entry");
@@ -59,10 +58,10 @@ TEST_CASE("Status navigation module entry reads the current framework map",
   auto& link = VS::Menu::Framework::statusViewNavigationMap[3][0];
   ValueRestore saved_link{link};
   link = 9;
-  Input_buttonRepeat = 0x1000;
+  VS::Input::buttonRepeat = 0x1000;
   auto entry = ModuleEntry(0x801034BC, &status::NavigateLiveDetailElements);
   CHECK(entry(3, 0x76) == 9);
-  Input_buttonRepeat = 0;
+  VS::Input::buttonRepeat = 0;
   CHECK(entry(9, 0) == 9);
   CHECK(entry(21, 0) == 21);
   CHECK(VS::Menu::Framework::stringBuf == fixture.description.data());

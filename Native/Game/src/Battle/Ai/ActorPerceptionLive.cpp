@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iterator>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "Actors/ActorRecord.h"
@@ -20,12 +21,10 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
 #include "Battle/Damage.h"
@@ -51,7 +50,7 @@ constexpr std::uint32_t kHalfMask = 0xFFFF;
 
 static_assert(std::size(Battle_Ai_actorAiStates) == kPerceptionSlots);
 static_assert(std::size(Field_gimmickInstances) == kPerceptionSlots);
-static_assert(kAiFrameActorSlots == kPerceptionSlots);
+static_assert(kFrameActorSlots == kPerceptionSlots);
 static_assert(std::size(Actors_actorRecords) == kPerceptionRecordSlots);
 
 // Both views are the actor's AI state.
@@ -191,7 +190,7 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
   }
   [[nodiscard]] std::optional<PerceptionShape> FrameShape(
       int target) const override {
-    const AiState* state = Battle_Ai_FrameState()->actors[target];
+    const AiState* state = LiveFrameContext().actors[target];
     if (state == nullptr) return std::nullopt;
     return ShapeOf(*state);
   }
@@ -200,9 +199,9 @@ class LiveTargetPerceptionWorld final : public TargetPerceptionWorld {
   }
   [[nodiscard]] std::optional<bool> IsMarkedTile(
       Core::Math::TileCoordinate tile) const override {
-    const Battle_Ai_FrameContext& frame = *Battle_Ai_FrameState();
-    if (frame.tileFlags == nullptr || tile.x >= kAiFrameGridSide ||
-        tile.z >= kAiFrameGridSide) {
+    const FrameContext& frame = LiveFrameContext();
+    if (frame.tileFlags == nullptr || tile.x >= kNavigationGridSide ||
+        tile.z >= kNavigationGridSide) {
       return std::nullopt;
     }
     return (frame.tileFlags[tile.z][tile.x] & kMarkedTileFlag) != 0;
@@ -405,7 +404,7 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
     return Core::ElapsedFrameCounterTicks();
   }
   void SetLastBudgetTick(std::int32_t tick) override {
-    Battle_Ai_FrameState()->lastBudgetTick = tick;
+    LiveFrameContext().lastBudgetTick = tick;
   }
 
   void Disengage(PerceivingActor& actor) override {
@@ -459,7 +458,7 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
       PerceivingActor& actor) override {
     int ready = 0;
     Run(actor, [&] {
-      ready = Battle_Ai_RefreshActionCandidateReadinessEntry(
+      ready = RefreshActionCandidateReadinessEntry(
           reinterpret_cast<Battle_Ai_CandidateReadinessView*>(&view_));
     });
     return ready != 0;
@@ -482,10 +481,10 @@ class LiveActorPerceptionWorld final : public ActorPerceptionWorld {
 };
 
 void UpdateListedActor(Battle_Actor& battle) {
-  Require(battle.id >= 0 && battle.id < kAiFrameActorSlots,
+  Require(battle.id >= 0 && std::cmp_less(battle.id, kFrameActorSlots),
           "AI perception requires a listed actor inside the AI state table");
   auto* view =
-      reinterpret_cast<UpdateView*>(Battle_Ai_FrameState()->actors[battle.id]);
+      reinterpret_cast<UpdateView*>(LiveFrameContext().actors[battle.id]);
   Require(view != nullptr, "AI perception requires a listed actor's AI state");
   Require(battle.stats != nullptr,
           "AI perception requires a listed actor's stats");

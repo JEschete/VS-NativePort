@@ -2,7 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/FrameTiming.hpp"
 
 namespace {
@@ -31,8 +31,7 @@ TEST_CASE("A stepped frame counter wraps at sixteen bits like the root counter",
 
 TEST_CASE("Promoted frame timing has no original module address",
           "[core][clock][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // func_800E45B4 is reached only by direct jal, so callers use the typed API
   // by name and the BATTLE.PRG address no longer resolves.
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

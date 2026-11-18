@@ -11,7 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/Seq/Channel.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -109,9 +109,9 @@ std::array<items::BattleLoot, 9> ArmorRecords() {
 
 template <typename Entry>
 bool IsBound(unsigned address, Entry entry) {
-  return VS::Content::ResolveModuleAddress(
-             {Content_moduleSymbols, Content_moduleSymbolCount},
-             "MENU/MENUB.PRG", address) == reinterpret_cast<const void*>(entry);
+  return VS::Content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                           "MENU/MENUB.PRG", address) ==
+         reinterpret_cast<const void*>(entry);
 }
 
 struct LiveRowsFixture {

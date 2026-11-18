@@ -27,11 +27,11 @@
 #include "Audio/Seq/Sequencer.h"
 #include "Battle/Damage.h"
 #include "Content/ActorAssetsLive.hpp"
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Content/PFile.hpp"
 #include "Core/Log.hpp"
@@ -63,7 +63,7 @@
 #include "Field/RoomLoading.hpp"
 #include "Legacy/Psx.h"
 #include "ModelLoading.h"
-#include "Movie/MoviePlayer.h"
+#include "Movie/MoviePlayer.hpp"
 #include "PFile.h"
 #include "Render/PageSpace.hpp"
 
@@ -142,7 +142,7 @@ int CheckMenuDiscStringsLoaded(void);
 extern unsigned int Content_battleTriggerMarkerBytes[29];
 
 namespace {
-constexpr auto kMesh10Data = std::to_array<Content_ModuleDataEntry>({
+constexpr auto kMesh10Data = std::to_array<VS::Content::ModuleDataEntry>({
     {"EFFECT/PLG069.BIN", 0x3C24, 80, Effects_Plg069_mesh10Vertices, 80},
     {"EFFECT/PLG069.BIN", 0x3C74, 96, Effects_Plg069_mesh10Faces, 96},
     {"EFFECT/PLG077.BIN", 0x4108, 80, Effects_Plg077_mesh10Vertices, 80},
@@ -159,7 +159,7 @@ constexpr auto kMesh10Data = std::to_array<Content_ModuleDataEntry>({
     {"EFFECT/PLG260.BIN", 0xB7C, 96, Effects_Plg260_mesh10Faces, 96},
 });
 
-constexpr auto kTiledRingData = std::to_array<Content_ModuleDataEntry>({
+constexpr auto kTiledRingData = std::to_array<VS::Content::ModuleDataEntry>({
     {"EFFECT/PLG049.BIN", 19448, 32, Effects_Plg049_tiledRingColorFactors, 32},
     {"EFFECT/PLG069.BIN", 15576, 32, Effects_Plg069_tiledRingColorFactors, 32},
     {"EFFECT/PLG073.BIN", 22332, 32, Effects_Plg073_tiledRingColorFactors, 32},
@@ -176,7 +176,7 @@ constexpr auto kTiledRingData = std::to_array<Content_ModuleDataEntry>({
 });
 
 // Ring and closed ring palettes (#289): eight four-byte entries each.
-constexpr auto kRingPaletteData = std::to_array<Content_ModuleDataEntry>({
+constexpr auto kRingPaletteData = std::to_array<VS::Content::ModuleDataEntry>({
     {"EFFECT/PLG049.BIN", 19416, 32, Effects_Plg049_ringColorFactors, 32},
     {"EFFECT/PLG050.BIN", 11812, 32, Effects_Plg050_ringColorFactors, 32},
     {"EFFECT/PLG053.BIN", 6868, 32, Effects_Plg053_closedRingColorFactors, 32},
@@ -280,8 +280,9 @@ struct DiscReadLogScope {
 
 void CheckDiscReadPayload(const DiscReadLogScope& scope) {
   std::array<u8, DiscReadLogScope::kSize> buffer{};
-  REQUIRE(Content_ReadDiscBytes(DiscReadLogScope::kSector,
-                                DiscReadLogScope::kSize, buffer.data()) == 1);
+  REQUIRE(VS::Content::ReadDiscBytes(DiscReadLogScope::kSector,
+                                     DiscReadLogScope::kSize,
+                                     buffer.data()) == 1);
   CHECK(buffer == scope.expected);
 }
 
@@ -308,7 +309,7 @@ TEST_CASE("Module data copies validate both source and destination extents",
           "[content][module]") {
   const std::array<unsigned char, 8> source{0, 1, 2, 3, 4, 5, 6, 7};
   std::array<unsigned char, 4> destination{9, 9, 9, 9};
-  Content_ModuleDataEntry entry{"fixture", 2, 4, destination.data(), 4};
+  VS::Content::ModuleDataEntry entry{"fixture", 2, 4, destination.data(), 4};
   REQUIRE(Content::CopyModuleDataEntry(entry, source));
   CHECK(destination == std::array<unsigned char, 4>{2, 3, 4, 5});
   const auto saved = destination;
@@ -322,8 +323,8 @@ TEST_CASE("Module data copies validate both source and destination extents",
   CHECK(destination == saved);
   const std::array<unsigned char, 5> odd_source{1, 2, 3, 4, 5};
   std::array<unsigned char, 6> padded_destination{9, 9, 9, 9, 9, 9};
-  Content_ModuleDataEntry odd_entry{"fixture", 0, 5, padded_destination.data(),
-                                    6};
+  VS::Content::ModuleDataEntry odd_entry{"fixture", 0, 5,
+                                         padded_destination.data(), 6};
   REQUIRE(Content::CopyModuleDataEntry(odd_entry, odd_source));
   CHECK(padded_destination == std::array<unsigned char, 6>{1, 2, 3, 4, 5, 9});
 }
@@ -333,7 +334,7 @@ TEST_CASE("Module relocation maps native strides and rejects unsafe interiors",
   std::array<std::uintptr_t, 3> pointers{};
   std::array<unsigned char, 8> bytes{};
   std::array<unsigned char, 16> expanded{};
-  const std::array<Content_ModuleSymbol, 4> symbols{{
+  const std::array<VS::Content::ModuleSymbol, 4> symbols{{
       {"fixture", 0x1000, 12, pointers.data(), sizeof pointers, 4,
        sizeof pointers[0]},
       {"fixture", 0x2000, 8, expanded.data(), sizeof expanded, 0, 0},
@@ -360,15 +361,15 @@ TEST_CASE("Pointer table relocation preserves destinations on invalid input",
   std::array<int, 2> values{};
   std::array<void*, 3> destination{&values[0], &values[0], &values[0]};
   std::array<unsigned, 3> addresses{0x1000, 0, 0x1004};
-  const std::array<Content_ModuleSymbol, 1> symbols{{
+  const std::array<VS::Content::ModuleSymbol, 1> symbols{{
       {"fixture", 0x1000, sizeof values, values.data(), sizeof values,
        sizeof(int), sizeof(int)},
   }};
   const std::span<const unsigned char> image{
       reinterpret_cast<const unsigned char*>(addresses.data()),
       sizeof addresses};
-  Content_ModulePointerTable table{"fixture",          0, 3,
-                                   destination.data(), 3, nullptr};
+  VS::Content::ModulePointerTable table{"fixture",          0, 3,
+                                        destination.data(), 3, nullptr};
   REQUIRE(Content::RelocateModulePointerTable(table, image, symbols));
   CHECK(destination == std::array<void*, 3>{&values[0], nullptr, &values[1]});
   const auto saved = destination;
@@ -397,13 +398,12 @@ TEST_CASE(
     SKIP("Extracted Native/data is unavailable");
   }
   REQUIRE(Content::DataStore::Open(root).has_value());
-  REQUIRE(Content_LoadModuleData() == 0);
+  REQUIRE(VS::Content::LoadModuleData() == 0);
   CheckTemplateReloads();
   CHECK(Tests_ActionDefinitionsLoaded() == 1);
   CHECK(Tests_DefaultEffectPackageLoaded() == 1);
   CHECK(CheckMenuDiscStringsLoaded() == 1);
-  for (unsigned index = 0; index < Content_modulePointerCount; ++index) {
-    const auto& table = Content_modulePointers[index];
+  for (const auto& table : VS::Content::ModulePointerTables()) {
     INFO(table.module << " offset " << table.offset);
     CHECK(table.count <= table.capacity);
   }
@@ -635,7 +635,7 @@ TEST_CASE("Module relocation rejects null targets and unnamed symbols",
   constexpr unsigned kAddress = 0x1000;
   constexpr unsigned kExtent = 8;
   std::array<unsigned char, kExtent> target{};
-  const std::array<Content_ModuleSymbol, 2> symbols{{
+  const std::array<VS::Content::ModuleSymbol, 2> symbols{{
       {"fixture", kAddress, kExtent, nullptr, kExtent, 1, 1},
       {nullptr, kAddress, kExtent, target.data(), kExtent, 1, 1},
   }};
@@ -655,8 +655,7 @@ TEST_CASE("Generated module extents stop before the next source symbol",
   constexpr unsigned kRoomMask = 0x800E8508;
   constexpr unsigned kTriggerMarkerBytes = 0x800E8548;
   constexpr unsigned kLastRoomWord = 15;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(Content::ResolveModuleAddress(
             symbols, kBattle,
             kArmorLoss + (kLastLimb * sizeof Battle_limbArmorDpLoss[0])) ==
@@ -730,7 +729,7 @@ struct MovieScope {
     }
   }
   void Restore() {
-    Movie_PlayerClose();
+    VS::Movie::PlayerClose();
     Render::GamePages().Upload(
         {0, 0, Render::PageSpace::Width, Render::PageSpace::Height},
         pixels.data());
@@ -779,12 +778,12 @@ TEST_CASE("Converted intro movie decodes without changing page ownership",
   Render::GamePages().Fill(
       {0, 0, Render::PageSpace::Width, Render::PageSpace::Height}, 255, 0, 255);
   const u16 before = Render::GamePages().At(0, 0);
-  REQUIRE(Movie_PlayerOpen("MOV/TITLE.STR") == 1);
-  REQUIRE(Movie_PlayerDrawFrame(300, 0, 0) == 1);
+  REQUIRE(VS::Movie::PlayerOpen("MOV/TITLE.STR") == 1);
+  REQUIRE(VS::Movie::PlayerDrawFrame(300, 0, 0) == 1);
   CHECK(std::ranges::any_of(Render::GamePages().Pixels(),
                             [before](u16 pixel) { return pixel != before; }));
-  Movie_PlayerClose();
-  CHECK(Movie_PlayerDrawFrame(301, 0, 0) == 0);
+  VS::Movie::PlayerClose();
+  CHECK(VS::Movie::PlayerDrawFrame(301, 0, 0) == 0);
 }
 
 TEST_CASE(
@@ -848,11 +847,11 @@ TEST_CASE("Manifest sector rounding preserves empty and partial entries",
 }
 
 namespace {
-void CheckTemplateBinding(const Content_ModuleDataEntry& expected) {
+void CheckTemplateBinding(const VS::Content::ModuleDataEntry& expected) {
   INFO(expected.module << " offset " << expected.offset);
-  const std::span entries(Content_moduleData, Content_moduleDataCount);
+  const auto entries = VS::Content::ModuleDataEntries();
   const auto found = std::ranges::find(entries, expected.target,
-                                       &Content_ModuleDataEntry::target);
+                                       &VS::Content::ModuleDataEntry::target);
   REQUIRE(found != entries.end());
   CHECK(std::string_view(found->module) == expected.module);
   CHECK(found->offset == expected.offset);
@@ -860,7 +859,7 @@ void CheckTemplateBinding(const Content_ModuleDataEntry& expected) {
   REQUIRE(found->capacity == expected.capacity);
 }
 
-void CheckMesh10Indices(const Content_ModuleDataEntry& expected,
+void CheckMesh10Indices(const VS::Content::ModuleDataEntry& expected,
                         bool vertices) {
   if (vertices) {
     const std::span values(static_cast<const SVECTOR*>(expected.target), 10);
@@ -879,7 +878,7 @@ void CheckMesh10Indices(const Content_ModuleDataEntry& expected,
 }
 
 void CheckTemplateSourceBytes(const Content::DataStore& store,
-                              const Content_ModuleDataEntry& expected) {
+                              const VS::Content::ModuleDataEntry& expected) {
   INFO(expected.module << " offset " << expected.offset);
   const auto* file = store.Find(expected.module);
   REQUIRE(file != nullptr);
@@ -904,10 +903,10 @@ void CheckLoadedTiledRingData(const Content::DataStore& store) {
     CheckTemplateBinding(expected);
     CheckTemplateSourceBytes(store, expected);
   }
-  const Content_ModuleDataEntry initialized{
+  const VS::Content::ModuleDataEntry initialized{
       "EFFECT/PLG044.BIN", 3832, 32, Effects_Plg044_tiledRingColorFactors, 32};
   CheckTemplateSourceBytes(store, initialized);
-  const Content_ModuleDataEntry shared{
+  const VS::Content::ModuleDataEntry shared{
       "EFFECT/PLG139.BIN", 6752, 32, Effects_Plg085_tiledRingColorFactors, 32};
   CheckTemplateSourceBytes(store, shared);
 }
@@ -923,7 +922,7 @@ void CheckTemplateReloads() {
   CheckLoadedMesh10Data(*Content::DataStore::Get());
   CheckLoadedTiledRingData(*Content::DataStore::Get());
   CheckLoadedRingPalettes(*Content::DataStore::Get());
-  REQUIRE(Content_LoadModuleData() == 0);
+  REQUIRE(VS::Content::LoadModuleData() == 0);
   CheckLoadedMesh10Data(*Content::DataStore::Get());
   CheckLoadedTiledRingData(*Content::DataStore::Get());
   CheckLoadedRingPalettes(*Content::DataStore::Get());
@@ -1011,14 +1010,15 @@ TEST_CASE("LFO relocation imports source data instead of host code pointers",
   addresses[65] = 0x1000;
   std::array<void*, 66> destination{};
   int host_code = 7;
-  const Content_ModuleSymbol code{"fixture", 0x1000, 0, &host_code, 0, 0, 0};
-  const Content_ModuleSymbol source{
+  const VS::Content::ModuleSymbol code{"fixture", 0x1000, 0, &host_code,
+                                       0,         0,      0};
+  const VS::Content::ModuleSymbol source{
       "fixture", 0x1000, sizeof samples, samples.data(), sizeof samples, 2, 2};
   const std::span<const unsigned char> image{
       reinterpret_cast<const unsigned char*>(addresses.data()),
       sizeof addresses};
-  Content_ModulePointerTable table{"fixture",          0,  66,
-                                   destination.data(), 66, &source};
+  VS::Content::ModulePointerTable table{"fixture",          0,  66,
+                                        destination.data(), 66, &source};
   REQUIRE(
       Content::RelocateModulePointerTable(table, image, std::span(&code, 1)));
   CHECK(destination[65] == samples.data());
@@ -1036,13 +1036,13 @@ TEST_CASE(
   std::array<std::int16_t, 8> samples{1000, -1000, 0, 0, -2, 0, 0, 32767};
   std::array<unsigned, 2> addresses{0x1000, 0x100A};
   std::array<void*, 2> destination{};
-  const Content_ModuleSymbol source{
+  const VS::Content::ModuleSymbol source{
       "fixture", 0x1000, sizeof samples, samples.data(), sizeof samples, 2, 2};
   const std::span<const unsigned char> image{
       reinterpret_cast<const unsigned char*>(addresses.data()),
       sizeof addresses};
-  Content_ModulePointerTable table{"fixture",          0, 2,
-                                   destination.data(), 2, &source};
+  VS::Content::ModulePointerTable table{"fixture",          0, 2,
+                                        destination.data(), 2, &source};
   REQUIRE(Content::RelocateModulePointerTable(table, image, {}));
   CHECK(destination[0] == samples.data());
   CHECK(destination[1] == nullptr);
@@ -1056,13 +1056,13 @@ TEST_CASE(
   int sentinel = 7;
   std::array<void*, 2> destination{&sentinel, &sentinel};
   const auto saved = destination;
-  Content_ModuleSymbol source{
+  VS::Content::ModuleSymbol source{
       "fixture", 0x1000, sizeof samples, samples.data(), sizeof samples, 2, 2};
   const std::span<const unsigned char> image{
       reinterpret_cast<const unsigned char*>(addresses.data()),
       sizeof addresses};
-  Content_ModulePointerTable table{"fixture",          0, 2,
-                                   destination.data(), 2, &source};
+  VS::Content::ModulePointerTable table{"fixture",          0, 2,
+                                        destination.data(), 2, &source};
   CHECK_FALSE(Content::RelocateModulePointerTable(table, image, {}));
   CHECK(destination == saved);
   addresses[1] = 0x1000;
@@ -1080,7 +1080,7 @@ void LoadOriginalLfoModules() {
     SKIP("Extracted Native/data is unavailable");
   }
   REQUIRE(Content::DataStore::Open(root).has_value());
-  REQUIRE(Content_LoadModuleData() == 0);
+  REQUIRE(VS::Content::LoadModuleData() == 0);
 }
 
 std::vector<u8> ReadOriginalLfoImage() {
@@ -1093,17 +1093,17 @@ std::vector<u8> ReadOriginalLfoImage() {
   return std::move(*image);
 }
 
-const Content_ModuleSymbol& LoadedLfoOwner() {
-  const std::span tables(Content_modulePointers, Content_modulePointerCount);
+const VS::Content::ModuleSymbol& LoadedLfoOwner() {
+  const auto tables = VS::Content::ModulePointerTables();
   const auto found = std::ranges::find(
       tables, reinterpret_cast<void**>(Audio_Seq_kLfoWaveforms),
-      &Content_ModulePointerTable::target);
+      &VS::Content::ModulePointerTable::target);
   REQUIRE(found != tables.end());
   REQUIRE(found->sample_source != nullptr);
   return *found->sample_source;
 }
 
-void CheckOriginalLfoOwner(const Content_ModuleSymbol& owner,
+void CheckOriginalLfoOwner(const VS::Content::ModuleSymbol& owner,
                            std::span<const u8> image) {
   REQUIRE(owner.address == 0x80010000);
   REQUIRE(owner.size == 0x52000);
@@ -1135,7 +1135,7 @@ std::int16_t AdvanceOriginalLfo(std::span<const u8> image,
 }
 
 void CheckOriginalLfoProgram(std::span<const u8> image,
-                             const Content_ModuleSymbol& owner,
+                             const VS::Content::ModuleSymbol& owner,
                              unsigned selector) {
   const auto offset = std::size_t{0x209A0} + selector * sizeof(std::uint32_t);
   std::uint32_t address = 0;
@@ -1170,24 +1170,24 @@ TEST_CASE("Original LFO source aliases retain every bounded sample and loop",
 
 namespace {
 void CheckPlg074CursorReload(std::span<const u8> image) {
-  const std::span entries(Content_moduleData, Content_moduleDataCount);
+  const auto entries = VS::Content::ModuleDataEntries();
   const auto cursor = std::ranges::find(
-      entries, static_cast<void*>(Content_plg074TrailEmissionCounter),
-      &Content_ModuleDataEntry::target);
+      entries, static_cast<void*>(VS::Content::plg074TrailEmissionCounter),
+      &VS::Content::ModuleDataEntry::target);
   REQUIRE(cursor != entries.end());
   CHECK(std::string_view(cursor->module) == "EFFECT/PLG074.BIN");
   CHECK(cursor->offset == 0x577C);
   CHECK(cursor->size == 4);
   CHECK(cursor->capacity == sizeof(int));
   const auto saved_first = Effects_Plg073_trailEmissionCounter;
-  const auto saved_second = Content_plg074TrailEmissionCounter[0];
+  const auto saved_second = VS::Content::plg074TrailEmissionCounter[0];
   Effects_Plg073_trailEmissionCounter = 5;
-  Content_plg074TrailEmissionCounter[0] = 7;
+  VS::Content::plg074TrailEmissionCounter[0] = 7;
   CHECK(Content::CopyModuleDataEntry(*cursor, image));
-  CHECK(Content_plg074TrailEmissionCounter[0] == 0);
+  CHECK(VS::Content::plg074TrailEmissionCounter[0] == 0);
   CHECK(Effects_Plg073_trailEmissionCounter == 5);
   Effects_Plg073_trailEmissionCounter = saved_first;
-  Content_plg074TrailEmissionCounter[0] = saved_second;
+  VS::Content::plg074TrailEmissionCounter[0] = saved_second;
 }
 }  // namespace
 
@@ -1211,12 +1211,12 @@ TEST_CASE(
 
 TEST_CASE("PLG073 and PLG074 import all eight ring-arc color rows",
           "[content][module][plg074][ring-arc][disc]") {
-  const Content_ModuleDataEntry expected{"EFFECT/PLG073.BIN", 0x575C, 32,
-                                         Effects_Plg073_ringColorFactors, 32};
+  const VS::Content::ModuleDataEntry expected{
+      "EFFECT/PLG073.BIN", 0x575C, 32, Effects_Plg073_ringColorFactors, 32};
   CheckTemplateBinding(expected);
   LoadOriginalLfoModules();
   CheckTemplateSourceBytes(*Content::DataStore::Get(), expected);
-  REQUIRE(Content_LoadModuleData() == 0);
+  REQUIRE(VS::Content::LoadModuleData() == 0);
   CheckTemplateSourceBytes(*Content::DataStore::Get(), expected);
 }
 

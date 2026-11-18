@@ -1,11 +1,14 @@
-#include "Save/NativeResume.h"
+#include "Save/NativeResume.hpp"
 
+#include <optional>
 #include <string>
+#include <utility>
 
 #include "Core/Log.hpp"
 #include "Save/NativeMenu.hpp"
 #include "Save/RuntimeSnapshot.hpp"
 
+namespace VS::Game::Save {
 namespace {
 std::string& ResumeError() {
   static std::string error;
@@ -13,34 +16,29 @@ std::string& ResumeError() {
 }
 }  // namespace
 
-int Save_NativeResumePending(void) {
-  return VS::Game::Save::ResumePending() ? 1 : 0;
-}
-
-int Save_NativeFinishResume(void) {
-  const auto finished = VS::Game::Save::FinishResume();
+bool FinishStagedResume() {
+  const auto finished = FinishResume();
   if (!finished) {
     ResumeError() = finished.error();
     VS_LOG_ERROR("save", "Native resume failed: {}", ResumeError());
-    return 0;
+    return false;
   }
   ResumeError().clear();
   VS_LOG_INFO("save", "Native resume applied before room-event dispatch");
-  return 1;
+  return true;
 }
 
-void Save_NativeCancelResume(void) {
-  if (VS::Game::Save::ResumePending()) {
+void ResetSession() {
+  if (ResumePending()) {
     VS_LOG_INFO("save", "Cancelling a staged native resume");
   }
-  VS::Game::Save::CancelResume();
+  CancelResume();
+  ResetFileMenuSession();
 }
 
-void Save_NativeResetSession(void) {
-  Save_NativeCancelResume();
-  VS::Game::Save::ResetFileMenuSession();
+std::optional<std::string> TakeResumeError() {
+  if (ResumeError().empty()) return std::nullopt;
+  return std::exchange(ResumeError(), std::string{});
 }
 
-const char* Save_NativeResumeError(void) { return ResumeError().c_str(); }
-
-void Save_NativeClearResumeError(void) { ResumeError().clear(); }
+}  // namespace VS::Game::Save

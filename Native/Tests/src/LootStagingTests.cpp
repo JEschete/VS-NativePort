@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/Inventory.hpp"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/LootStaging.hpp"
@@ -50,9 +50,9 @@ items::LootedShield MakeShield() {
 
 template <typename Entry>
 bool IsBound(unsigned address, Entry entry) {
-  return VS::Content::ResolveModuleAddress(
-             {Content_moduleSymbols, Content_moduleSymbolCount},
-             "MENU/MENUB.PRG", address) == reinterpret_cast<const void*>(entry);
+  return VS::Content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                           "MENU/MENUB.PRG", address) ==
+         reinterpret_cast<const void*>(entry);
 }
 
 void FillBlades(items::InventoryContents& target, std::size_t count) {

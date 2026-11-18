@@ -1,5 +1,5 @@
 // Hand-maintained (tools/port/owned.csv).
-#include "Battle/Ai/RoomState.h"
+#include "Battle/Ai/RoomState.hpp"
 
 #include <array>
 #include <cstddef>
@@ -22,7 +22,6 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -71,7 +70,8 @@ struct RoomAiStorage {
 };
 
 void ClearRoomAiBindings() {
-  memset(Battle_Ai_FrameState(), 0, sizeof *Battle_Ai_FrameState());
+  memset(&VS::Battle::Ai::LiveFrameContext(), 0,
+         sizeof VS::Battle::Ai::LiveFrameContext());
   Battle_Ai_roomAiState = nullptr;
   Battle_Ai_tileFlagMap = nullptr;
   Battle_Ai_specialTerrainHeights = nullptr;
@@ -242,7 +242,7 @@ VS::Battle::Ai::BattleActorReactionDelays() {
   return delays;
 }
 
-void Battle_Ai_InvalidateSessionBindings(void) {
+void VS::Battle::Ai::InvalidateSessionBindings(void) {
   // The arena was already reset: never dereference or free its former bindings.
   ClearRoomAiBindings();
   for (size_t slot = 0; slot < sizeof Battle_Ai_actorAiStates /

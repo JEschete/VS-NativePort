@@ -24,9 +24,6 @@ struct Battle_Ai_RouteGateEnd {
 };
 static_assert(sizeof(Battle_Ai_RouteGateEnd) == 0x2, "Battle_Ai_RouteGateEnd must keep its PS1 layout");
 
-// decomp: movementPathTest (src/BATTLE/BATTLE.PRG/771A8.c:2383)
-using Battle_Ai_PathTest = int (*)(Battle_Ai_MovementPathView*, int);
-
 // decomp: routeEdgePair (src/BATTLE/BATTLE.PRG/771A8.c:566)
 using Battle_Ai_RouteEdgePair = u_short[2];
 

@@ -13,7 +13,7 @@
 #include "Battle/RewardFlow.hpp"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/RewardPresentationRecorder.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -514,8 +514,7 @@ TEST_CASE("Reward flow retains eight original void entrypoint relocations",
   constexpr std::array<Word, 8> kAddresses{0x8007B410, 0x8007B470, 0x8007B4C4,
                                            0x8007B508, 0x8007B63C, 0x8007B764,
                                            0x8007B7DC, 0x8007B834};
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (std::size_t index = 0; index < kEntries.size(); ++index) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                             kAddresses.at(index)) ==

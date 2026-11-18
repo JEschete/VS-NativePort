@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/MusicVoiceConflicts.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -74,8 +74,7 @@ TEST_CASE("Reserved voices are detached but not keyed off",
 
 TEST_CASE("The promoted music voice release has no original module address",
           "[audio][music-state]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
                                           0x80015BACu) == nullptr);
 }

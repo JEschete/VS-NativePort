@@ -8,7 +8,7 @@
 
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudOrchestrationLiveFixture.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -16,8 +16,7 @@ namespace f = hud_orchestration_live_fixture;
 
 template <typename Function>
 Function Entry(unsigned address, Function expected) {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   void* const entry =
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", address);
   if (entry == nullptr || entry != reinterpret_cast<void*>(expected)) {

@@ -49,11 +49,11 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
   std::vector<std::byte> heap_bytes = std::vector<std::byte>(kHeapBytes);
   VS::Core::Memory::ScopedLiveGameHeap heap{heap_bytes};
   equipment::ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
-  equipment::ValueRestore<int> saved_previous{Input_previousButtons};
+  equipment::ValueRestore<int> saved_previous{VS::Input::previousButtons};
   equipment::ValueRestore<decltype(VS::State::tickSpeed)> saved_tick{
       VS::State::tickSpeed};
-  equipment::ArrayRestore<u_int, std::size(Input_buttonHeldFrames)> saved_held{
-      Input_buttonHeldFrames};
+  equipment::ArrayRestore<u_int, std::size(VS::Input::buttonHeldFrames)>
+      saved_held{VS::Input::buttonHeldFrames};
   equipment::ValueRestore<u_long*> saved_text_ordering{
       Menu_activeTextBoxOrderingTable};
   equipment::ValueRestore<char> saved_text_index{VS::Menu::textBoxBufferIndex};
@@ -72,8 +72,8 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
     VS::Menu::Framework::rowTypeBuf = row_types.data();
     Menu_Container_containerData = &containers.storage->container;
     Menu_Container_otherStorage = &containers.storage->container;
-    Input_previousButtons = 0;
-    std::ranges::fill(Input_buttonHeldFrames, 0U);
+    VS::Input::previousButtons = 0;
+    std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
     VS::State::tickSpeed = 2;
     VS::Menu::textBoxBufferIndex = 0;
     Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;

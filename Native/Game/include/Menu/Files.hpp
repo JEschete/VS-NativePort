@@ -31,7 +31,7 @@ inline constexpr int kFirstSlotElement = 5;
 inline constexpr std::size_t kPlayTimeBytes = 12;
 // _printCharacter's widths (MENU7.PRG 0x8010A338 onwards).
 inline constexpr std::size_t kGlyphCount = 377;
-// State_Settings (Input_settings).
+// State_Settings (VS::Input::settings).
 inline constexpr std::size_t kSettingsBytes = 0x20;
 inline constexpr std::size_t kClutColors = 16;
 // _gameOverClutBuf: one 256-colour CLUT row.
@@ -366,7 +366,7 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
   // put back.
   virtual void StashSaveImage() = 0;
   virtual void RestoreSaveImage() = 0;
-  // Input_settings as bytes.
+  // VS::Input::settings as bytes.
   [[nodiscard]] virtual std::span<std::uint8_t> Settings() = 0;
   virtual void ClearDoorEntered() = 0;
   [[nodiscard]] virtual std::uint32_t PlayTime() = 0;

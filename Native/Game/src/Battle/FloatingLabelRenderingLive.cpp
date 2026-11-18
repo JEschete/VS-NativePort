@@ -12,7 +12,7 @@
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Render/Display.h"
 #include "Render/GameFont.hpp"
@@ -49,8 +49,7 @@ static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 }
 
 void RequireDataOwner(const void* owner, std::size_t bytes) {
-  for (const auto& entry :
-       std::span(Content_moduleData, Content_moduleDataCount)) {
+  for (const auto& entry : VS::Content::ModuleDataEntries()) {
     if (entry.target == owner && entry.module != nullptr &&
         entry.module == kBattleModule && entry.size >= bytes &&
         entry.capacity >= entry.size) {
@@ -61,8 +60,7 @@ void RequireDataOwner(const void* owner, std::size_t bytes) {
 }
 
 void RequireCaptionOwner() {
-  for (const auto& entry :
-       std::span(Content_moduleSymbols, Content_moduleSymbolCount)) {
+  for (const auto& entry : VS::Content::ModuleSymbols()) {
     if (entry.target == Battle_kLabelCaptionRects && entry.module != nullptr &&
         entry.module == kBattleModule &&
         entry.size >= kCaptionRects * sizeof(RECT)) {

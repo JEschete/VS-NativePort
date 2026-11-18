@@ -16,7 +16,7 @@
 #include "Battle/SphereDraw.hpp"
 #include "Battle/SphereGeometryLive.hpp"
 #include "Battle/SphereTargetLabelsLive.hpp"
-#include "Battle/TargetPages.h"
+#include "Battle/TargetPages.hpp"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingDraw.hpp"
 #include "Battle/TargetingDrawLive.hpp"
@@ -165,7 +165,7 @@ class LiveSphereDrawPort final : public SphereDrawPort {
 
   void UpdateTargetLabels() override { UpdateSphereTargetLabelsEntry(); }
 
-  void DrawTargetPageHint() override { Battle_DrawTargetPageHint(); }
+  void DrawTargetPageHint() override { VS::Battle::DrawTargetPageHint(); }
 
  private:
   Battle_TargetSphere& sphere_;

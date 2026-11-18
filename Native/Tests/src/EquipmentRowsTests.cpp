@@ -18,10 +18,10 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Content/ActorAssets.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -841,8 +841,9 @@ struct LiveRowsFixture {
   Restore<char> saved_first{Menu_Inventory_itemsFirstRow};
   Restore<char> saved_equipped{Menu_Inventory_equippedItem};
   Restore<Menu_Framework_MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
-  Restore<decltype(Input_buttonsPressed)> saved_pressed{Input_buttonsPressed};
-  Restore<int> saved_repeat{Input_buttonRepeat};
+  Restore<decltype(VS::Input::buttonsPressed)> saved_pressed{
+      VS::Input::buttonsPressed};
+  Restore<int> saved_repeat{VS::Input::buttonRepeat};
   GlobalArrayRestore<Menu_textBoxes> saved_text_boxes;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 256> arena{};
@@ -856,8 +857,8 @@ struct LiveRowsFixture {
   LiveRowsFixture() {
     VS::Menu::Framework::menuItems = rows.data();
     Menu_Inventory_itemsText = nullptr;
-    Input_buttonsPressed.allButtons = 0;
-    Input_buttonRepeat = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonRepeat = 0;
     texts[0] = reinterpret_cast<u_short*>(first.name.data());
     texts[1] = reinterpret_cast<u_short*>(first.description.data());
     texts[2] = reinterpret_cast<u_short*>(second.name.data());
@@ -942,7 +943,7 @@ TEST_CASE("UpdateLiveEquipmentChoices slides rows in and closes on Cross",
   inv::UpdateLiveEquipmentChoices(0);
   CHECK(Menu_Inventory_equipListStep == inv::kEquipmentRowsWaiting);
   Menu_Inventory_equipListStep = inv::kEquipmentRowsInput;
-  Input_buttonsPressed.allButtons = kCross;
+  VS::Input::buttonsPressed.allButtons = kCross;
   inv::UpdateLiveEquipmentChoices(0);
   CHECK(Menu_Inventory_itemsText == nullptr);
   CHECK(Menu_Inventory_selectedItemRow == inv::kEquipmentChoiceCancel);
@@ -1095,8 +1096,7 @@ TEST_CASE("Equipment rows registry binds the MENU3 addresses",
       Entry{0x80109344,
             reinterpret_cast<const void*>(&inv::QueueLiveEquipmentModel)},
   };
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const Entry& entry : entries) {
     CAPTURE(entry.address);
     CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MENU3.PRG",

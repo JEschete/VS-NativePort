@@ -5,7 +5,7 @@
 
 #include "Battle/EncounterHooks.hpp"
 #include "Boot/SessionLive.hpp"
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Core/Log.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
@@ -42,7 +42,7 @@ GameApp::GameApp(Services services) : m_services_(services) {
   if (m_services_.save_directory) {
     Save::ConfigureDirectory(*m_services_.save_directory);
   }
-  if (const int failed = Content_LoadModuleData(); failed != 0) {
+  if (const int failed = VS::Content::LoadModuleData(); failed != 0) {
     VS_LOG_ERROR("boot",
                  "{} required module data entries failed; game execution was "
                  "not started",

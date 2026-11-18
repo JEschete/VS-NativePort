@@ -12,7 +12,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ContainerMenuDialogs.hpp"
@@ -155,9 +155,9 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
         text);
   }
   std::uint32_t PressedButtons() override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
-  std::uint32_t RepeatedButtons() override { return Input_buttonRepeat; }
+  std::uint32_t RepeatedButtons() override { return VS::Input::buttonRepeat; }
   void SetQuantityFont() override {
     Render::SetLiveMenuFontStyle(kQuantityFont);
   }

@@ -14,7 +14,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -315,8 +315,7 @@ TEST_CASE("Lifecycle callback mutations are visible to later bits and add pass",
 TEST_CASE(
     "Live action result module binding preserves HP wrap and unused fields",
     "[actor-vitals][action-result-commit][F00522][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto apply = reinterpret_cast<void (*)(Battle_HitResult*)>(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800875C8));

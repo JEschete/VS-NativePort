@@ -1026,10 +1026,10 @@ void PressForFrame(int frame) {
   constexpr int kDownFrame = 24;
   constexpr int kUpFrame = 27;
   constexpr int kCircleFrame = 31;
-  Input_buttonRepeat = frame == kDownFrame ? static_cast<int>(kDown)
-                       : frame == kUpFrame ? static_cast<int>(kUp)
-                                           : 0;
-  Input_buttonsPressed.allButtons =
+  VS::Input::buttonRepeat = frame == kDownFrame ? static_cast<int>(kDown)
+                            : frame == kUpFrame ? static_cast<int>(kUp)
+                                                : 0;
+  VS::Input::buttonsPressed.allButtons =
       frame == kCircleFrame ? static_cast<int>(kCircle) : 0;
 }
 
@@ -1154,8 +1154,8 @@ TEST_CASE("F02986 live direction menu replays after its MENUD reset",
 TEST_CASE("F02986 live reset restores the first-entry direction reset",
           "[container-transfer-live][F02986]") {
   LiveFixture fixture;
-  live::equipment::ValueRestore<char> memory{Input_settings.cursorMemory};
-  Input_settings.cursorMemory = 0;
+  live::equipment::ValueRestore<char> memory{VS::Input::settings.cursorMemory};
+  VS::Input::settings.cursorMemory = 0;
   transfer::ResetLiveContainerTransferStatics();
   VS::Menu::Framework::menuMemory.opaque9E = 2;
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);

@@ -23,7 +23,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/EquipmentStats.hpp"
 
@@ -596,7 +596,7 @@ TEST_CASE(
     "Cost group original module bindings have WORD3 VOID2 VOID3 INT2 arity",
     "[action-costs][F00510][F00511][F00512][F00548]") {
   LiveFixture fixture;
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto binding = [&](std::uint32_t address) {
     const auto pointer = VS::Content::ResolveModuleAddress(
         symbols, "BATTLE/BATTLE.PRG", address);

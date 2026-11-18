@@ -3,7 +3,7 @@
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
 
-namespace VS::Menu::Loot {
+namespace VS::Menu::Loot {  // NOLINT(readability-identifier-naming)
 
 // Temporary row metadata, not additional player inventory slots.
 inline constexpr int kRowCapacity = sizeof(Items_InventoryIndices);

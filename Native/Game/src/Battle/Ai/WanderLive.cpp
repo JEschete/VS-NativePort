@@ -12,7 +12,6 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightMovementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -58,10 +57,8 @@ static_assert(offsetof(View, count) == offsetof(AiState, opaque15D));
 static_assert(offsetof(View, movementFlags) ==
               offsetof(AiState, movementFlags));
 static_assert(offsetof(View, destination) == offsetof(AiState, destination));
-static_assert(kAiDirectionBytes == kNavigationDirections);
-static_assert(kAiFrameGridSide == kNavigationGridSide);
 
-Battle_Ai_FrameContext& Frame() { return *Battle_Ai_FrameState(); }
+FrameContext& Frame() { return LiveFrameContext(); }
 
 WanderActor Load(const View& view) {
   return {.is_stuck = view.isStuck,

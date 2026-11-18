@@ -20,7 +20,7 @@
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/Rewards.h"
 #include "Battle/TargetingState.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Runtime.h"
 #include "Field/EnvironmentLive.hpp"
@@ -447,8 +447,7 @@ TEST_CASE("Reward dialogs retain four original void module entrypoints",
       b::UpdateLiveAbilityUnlockResults, b::UpdateLivePendingLootDialog};
   constexpr std::array<std::uint32_t, 4> kAddresses{0x800797BC, 0x8007980C,
                                                     0x8007983C, 0x8007B884};
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (std::size_t index = 0; index < kEntries.size(); ++index) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                             kAddresses.at(index)) ==
@@ -618,8 +617,7 @@ TEST_CASE("Reward dispatch keeps four VOID0 and the distinct INT0 module entry",
       b::BeginLiveEventRewardResults, b::BeginLivePostActionRewards};
   constexpr std::array<std::uint32_t, 4> kAddresses{0x8007B908, 0x8007B938,
                                                     0x8007B9A0, 0x8007B9CC};
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (std::size_t index = 0; index < kEntries.size(); ++index) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                             kAddresses.at(index)) ==

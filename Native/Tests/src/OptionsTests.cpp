@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Options.hpp"
 #include "Menu/OptionsLive.hpp"
@@ -425,8 +425,7 @@ TEST_CASE("Options retires the MENU8.PRG options module symbols",
   constexpr auto kAddresses = std::to_array<unsigned>(
       {0x80102888, 0x80102A5C, 0x80102C0C, 0x80102DBC, 0x80102F68, 0x80103110,
        0x801032B8, 0x8010345C, 0x801035FC, 0x801037B4});
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const unsigned address : kAddresses) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MENU8.PRG",
                                             address) == nullptr);

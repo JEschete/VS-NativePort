@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Sounds.hpp"
 
 TEST_CASE("Menu sounds keep the original sound-effect ids and channel group",
@@ -25,7 +25,7 @@ TEST_CASE("Menu sound helpers have no original-address module entries",
   // the original reaches them only through jal instructions.
   constexpr std::array<unsigned, 5> kOriginalEntries{
       0x800C02D8U, 0x800C02E0U, 0x800C02E8U, 0x800C02F0U, 0x800C02F8U};
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK_FALSE(symbols.empty());
   for (const auto& symbol : symbols) {
     if (std::strcmp(symbol.module, "BATTLE/BATTLE.PRG") != 0) {

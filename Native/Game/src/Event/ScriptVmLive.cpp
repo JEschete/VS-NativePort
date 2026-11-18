@@ -65,7 +65,7 @@
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/DisplayControlLive.hpp"
@@ -465,16 +465,16 @@ class LiveVmHost final : public ScriptVmHost {
     State::SetLiveScriptFlag(flag, value);
   }
   std::uint32_t HeldButtons() const override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
-  void ClearHeldButtons() override { Input_buttonsPressed.allButtons = 0; }
+  void ClearHeldButtons() override { VS::Input::buttonsPressed.allButtons = 0; }
   bool StartPressed() const override {
-    return (Input_buttonsPressed.allButtons & PADstart) != 0;
+    return (VS::Input::buttonsPressed.allButtons & PADstart) != 0;
   }
   std::uint8_t PressedButtonsLowByte() const override {
-    return Input_buttonsPressed.ports[0].lowByte;
+    return VS::Input::buttonsPressed.ports[0].lowByte;
   }
-  int PreviousButtons() const override { return Input_previousButtons; }
+  int PreviousButtons() const override { return VS::Input::previousButtons; }
   int CountInventoryItem(int item) override {
     return Items::CountLiveInventoryItem(item);
   }

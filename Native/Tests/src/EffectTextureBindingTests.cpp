@@ -11,7 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -291,7 +291,7 @@ TEST_CASE("Effect origin is the canonical primary request focus position",
   CHECK(Effects_effectOrigin[0].vx == 1200);
   CHECK(Effects_effectOrigin[0].vy == -384);
   CHECK(Effects_effectOrigin[0].vz == 900);
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800F5310) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

@@ -20,7 +20,7 @@
 #include "Battle/DamageCalculationsLive.hpp"
 #include "Battle/Hit.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -542,14 +542,12 @@ TEST_CASE(
     "[damage-calculations][F00410][F00411][F00421][F00433]") {
   LiveFixture f;
   const auto image = Module("BATTLE/BATTLE.PRG");
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto tables = VS::Content::ModulePointerTables();
   auto* target = reinterpret_cast<void**>(Battle_statCalculators);
-  const auto table =
-      std::ranges::find(tables, target, &Content_ModulePointerTable::target);
+  const auto table = std::ranges::find(
+      tables, target, &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   REQUIRE(VS::Content::RelocateModulePointerTable(*table, image, symbols));
   const std::array callbacks{
       b::LivePhysicalDamageWithoutDebuffs, b::LiveCalculateSpellHitDamage,

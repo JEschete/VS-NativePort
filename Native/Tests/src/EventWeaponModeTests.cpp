@@ -19,7 +19,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Event/Actors.h"
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
@@ -211,8 +211,7 @@ struct WeaponModeFixture {
   }
 
   static Handler ResolveHandler() {
-    const auto symbols =
-        std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+    const auto symbols = VS::Content::ModuleSymbols();
     void* resolved = VS::Content::ResolveModuleAddress(
         symbols, "BATTLE/BATTLE.PRG", 0x800B9DB4u);
     REQUIRE(resolved != nullptr);

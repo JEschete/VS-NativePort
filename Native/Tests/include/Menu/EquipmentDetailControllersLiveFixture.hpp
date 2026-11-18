@@ -16,9 +16,9 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Battle/TargetingState.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
@@ -130,10 +130,10 @@ struct LiveFixture {
       VS::Menu::Framework::menuMemory};
   ArrayRestore<u_char*, kIndexedCategories> saved_orders{
       Menu_Inventory_inventoryIndices};
-  ValueRestore<int> saved_held{Input_buttonsState};
-  ValueRestore<int> saved_repeat{Input_buttonRepeat};
-  ValueRestore<decltype(Input_buttonsPressed)> saved_pressed{
-      Input_buttonsPressed};
+  ValueRestore<int> saved_held{VS::Input::buttonsState};
+  ValueRestore<int> saved_repeat{VS::Input::buttonRepeat};
+  ValueRestore<decltype(VS::Input::buttonsPressed)> saved_pressed{
+      VS::Input::buttonsPressed};
   ValueRestore<int> saved_preview{Menu_Inventory_ashleyRenderState};
   ValueRestore<int> saved_y{Menu_Inventory_ashleyYOffset};
   ValueRestore<int> saved_return{Menu_Inventory_exitToBattle};
@@ -221,10 +221,10 @@ struct LiveFixture {
         static_cast<void*>(Render_compactGlyphWidths),
         static_cast<void*>(Render_compactGlyphIndices),
         static_cast<void*>(Render_variableFontGlyphWidths)};
-    const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+    const auto entries = VS::Content::ModuleDataEntries();
     for (void* target : targets) {
-      const auto entry =
-          std::ranges::find(entries, target, &Content_ModuleDataEntry::target);
+      const auto entry = std::ranges::find(
+          entries, target, &VS::Content::ModuleDataEntry::target);
       if (entry == entries.end() ||
           std::string_view(entry->module) != "BATTLE/BATTLE.PRG" ||
           !VS::Content::CopyModuleDataEntry(*entry, image)) {
@@ -258,9 +258,9 @@ struct LiveFixture {
         Audio_Seq_unusedInventoryIndices.gems,
         Audio_Seq_unusedInventoryIndices.misc};
     std::copy(orders.begin(), orders.end(), Menu_Inventory_inventoryIndices);
-    Input_buttonsState = 0;
-    Input_buttonRepeat = 0;
-    Input_buttonsPressed.allButtons = 0;
+    VS::Input::buttonsState = 0;
+    VS::Input::buttonRepeat = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
     Menu_Inventory_selectedItemCategoryIconOnTop = 1;
     Menu_Inventory_exitToBattle = 0;
     Menu_Inventory_ashleyRenderState = 0;

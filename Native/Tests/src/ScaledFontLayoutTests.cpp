@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 #include "Render/ScaledFont.hpp"
 
@@ -121,8 +121,7 @@ TEST_CASE("An unavailable scaled glyph target neither draws nor advances",
 
 TEST_CASE("The promoted scaled font glyph has no original module address",
           "[render][scaled-font]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800C79D8u) == nullptr);
 }

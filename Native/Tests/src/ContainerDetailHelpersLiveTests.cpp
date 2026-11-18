@@ -261,13 +261,13 @@ TEST_CASE(
   auto& owner = fixture.containers.storage->container;
   owner.items.weapons[0].blade = 1;
   std::span(owner.items.weapons).back().blade = samples::kWeapon.blade;
-  Input_buttonRepeat = VS::Input::L1;
+  VS::Input::buttonRepeat = VS::Input::L1;
   CHECK(detail::PollLiveDetailsPaging(0, 0) == 1);
   Menu_Container_containerData = &fixture.containers.replacement->container;
   fixture.containers.replacement->container.items.weapons[0].blade = 1;
   CHECK(detail::PollLiveDetailsPaging(0, 0) == 0);
   Menu_Container_containerData = nullptr;
-  Input_buttonsState = VS::Input::L1 | VS::Input::R1;
+  VS::Input::buttonsState = VS::Input::L1 | VS::Input::R1;
   CHECK(detail::PollLiveDetailsPaging(-1, -17) == -17);
 }
 
@@ -369,13 +369,13 @@ TEST_CASE("F02950 real exit retains container phase and full triangle mask",
   detail::InitializeLiveDetailsLayout(kSelected, samples::kClassAffinityPages);
   fixture.IdleRows();
   fixture.rows[kHeader].w = samples::kHeaderWidth;
-  Input_buttonsPressed.allButtons = VS::Input::Triangle;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Triangle;
   detail::ExitLiveDetailsView(1);
   CHECK(fixture.rows[kHeader].targetPosition0 == -164);
   CHECK(Menu_Container_detailsViewPhase == 2);
   CHECK(Menu_Container_detailsClosedWithTriangle ==
         static_cast<int>(VS::Input::Triangle));
-  Input_buttonsPressed.allButtons = VS::Input::Circle;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Circle;
   detail::ExitLiveDetailsView(0);
   CHECK(Menu_Container_detailsClosedWithTriangle == 0);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);

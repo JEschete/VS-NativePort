@@ -17,10 +17,10 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"
-#include "Items/InventoryLiveState.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerCapacityLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
@@ -152,8 +152,9 @@ char* MenuTextPointer(TransferText text) {
     }
     return reinterpret_cast<char*>(&Menu_Container_menuText[text.offset]);
   }
-  if (VS::Menu::Framework::itemHelp == nullptr)
+  if (VS::Menu::Framework::itemHelp == nullptr) {
     Refuse("item help text not loaded");
+  }
   return reinterpret_cast<char*>(VS::Menu::Framework::itemHelp + text.offset);
 }
 
@@ -216,13 +217,13 @@ class LiveTransferWorld final : public TransferWorld {
     *FlagByte(flag) = static_cast<char>(value);
   }
   std::uint8_t CursorMemorySetting() override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void SetCursorMemorySetting(std::uint8_t value) override {
-    Input_settings.cursorMemory = static_cast<char>(value);
+    VS::Input::settings.cursorMemory = static_cast<char>(value);
   }
   void SetContainerEmpty(bool empty) override {
-    Input_settings.containerEmpty = empty ? 1U : 0U;
+    VS::Input::settings.containerEmpty = empty ? 1U : 0U;
   }
   void SetFreezeTabArrows(std::uint8_t value) override {
     Menu_Inventory_freezeTabArrows = static_cast<char>(value);
@@ -264,13 +265,13 @@ class LiveTransferWorld final : public TransferWorld {
         static_cast<char>(return_state);
   }
   std::uint32_t PressedButtons() override {
-    return static_cast<std::uint32_t>(Input_buttonsPressed.allButtons);
+    return static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
   }
   std::uint32_t HeldButtons() override {
-    return static_cast<std::uint32_t>(Input_buttonsState);
+    return static_cast<std::uint32_t>(VS::Input::buttonsState);
   }
   std::uint32_t RepeatedButtons() override {
-    return static_cast<std::uint32_t>(Input_buttonRepeat);
+    return static_cast<std::uint32_t>(VS::Input::buttonRepeat);
   }
   std::uint16_t MenuTextEntry(std::size_t index) override {
     if (index >= std::size(Menu_Container_menuText)) {
@@ -279,8 +280,9 @@ class LiveTransferWorld final : public TransferWorld {
     return Menu_Container_menuText[index];
   }
   std::uint16_t ItemHelpEntry(std::size_t index) override {
-    if (VS::Menu::Framework::itemHelp == nullptr)
+    if (VS::Menu::Framework::itemHelp == nullptr) {
       Refuse("item help text not loaded");
+    }
     return VS::Menu::Framework::itemHelp[index];
   }
   std::uint8_t RowAnimationStep(std::size_t index) override {
@@ -291,10 +293,10 @@ class LiveTransferWorld final : public TransferWorld {
   }
   std::uint8_t InventoryCapacity(Category category) override {
     const auto index = static_cast<std::size_t>(category);
-    if (index >= std::size(VS::Items::Inventory::inventoryItemCapacities)) {
+    if (index >= std::size(VS::Items::kCategoryCapacities)) {
       Refuse("inventory capacity outside its table");
     }
-    return VS::Items::Inventory::inventoryItemCapacities[index];
+    return VS::Items::kCategoryCapacities[index];
   }
   std::uint16_t ContainerCapacity(Category category) override {
     const auto index = static_cast<std::size_t>(category);
@@ -470,8 +472,9 @@ class LiveTransferWorld final : public TransferWorld {
         types.size() > kActionRowCapacity) {
       Refuse("action rows outside their workspace");
     }
-    if (VS::Menu::Framework::rowTypeBuf == nullptr)
+    if (VS::Menu::Framework::rowTypeBuf == nullptr) {
       Refuse("missing row type buffer");
+    }
     std::array<char*, kActionRowCapacity * kTextsPerRow> pointers{};
     for (std::size_t text = 0; text < texts.size() && text < pointers.size();
          ++text) {

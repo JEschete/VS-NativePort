@@ -13,7 +13,6 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/BlockedMovement.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -183,7 +182,7 @@ int IsLiveMovementHistoryStalled(Battle_Ai_PerceptionUpdateView* state) {
 }
 
 void SaveLiveMovementRandomState() {
-  MovementRandomStates states{.frame = Battle_Ai_FrameState()->randomState,
+  MovementRandomStates states{.frame = LiveFrameContext().randomState,
                               .saved = Battle_Ai_savedMovementRandomState};
   SaveMovementRandomState(states);
   Battle_Ai_savedMovementRandomState = states.saved;

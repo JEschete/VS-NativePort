@@ -15,7 +15,7 @@
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Field/GimmickPlacementLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Render/Render.h"
 #include "Render/Sprites.hpp"
 #include "Render/SpritesLive.hpp"
@@ -203,8 +203,8 @@ void LiveShowAbilityTimingCue(int cue_duration_frames) {
       .anchor = {.screen = {.x = position.vx, .y = position.vy},
                  .depth = position.vz},
       .frames = Battle_abilityTimingCueFrames};
-  ShowAbilityTimingCue(world, Input_settings.abilityTimingDisplay != 0, cue,
-                       cue_duration_frames);
+  ShowAbilityTimingCue(world, VS::Input::settings.abilityTimingDisplay != 0,
+                       cue, cue_duration_frames);
   position.vx = cue.anchor.screen.x;
   position.vy = cue.anchor.screen.y;
   position.vz = cue.anchor.depth;

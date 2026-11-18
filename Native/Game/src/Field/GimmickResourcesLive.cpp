@@ -12,7 +12,7 @@
 #include "Actors/Skeleton.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
@@ -51,8 +51,7 @@ std::span<const std::byte> TemplateBytes(const void* address) {
   if (address == nullptr) return {};
   const auto allocation = VS::Core::Memory::LivePayloadContaining(address);
   if (allocation) return BytesAfter(address, *allocation);
-  for (const auto& symbol :
-       std::span{Content_moduleSymbols, Content_moduleSymbolCount}) {
+  for (const auto& symbol : VS::Content::ModuleSymbols()) {
     if (symbol.address == kGimmickTemplateBlobAddress &&
         symbol.target != nullptr &&
         std::strcmp(symbol.module, "BATTLE/BATTLE.PRG") == 0 &&

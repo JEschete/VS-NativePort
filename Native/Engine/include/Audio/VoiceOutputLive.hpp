@@ -1,6 +1,10 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstdint>
+
+struct Audio_SeqChannel;
+
 // Bindings from the generated sound driver to the typed voice writes and bank
 // upload (VoiceOutput.cpp) over the native voice engine. None is stored in a
 // module table, so each takes typed arguments. A voice outside the 24 SPU
@@ -17,6 +21,22 @@ void SetLiveVoiceVolume(int voice, unsigned left, unsigned right,
                         unsigned scale);
 void SetLiveVoiceSampleRate(int voice, int sample_rate);
 void SetLiveVoiceReleaseRateAndMode(int voice, int rate, unsigned mode);
+
+// The native voice output the sequencer, mixer and cutscene stream drive in
+// place of the SPU (VoiceOutputLive.cpp).
+void ResetVoiceOutput();
+void TickVoiceOutput();
+void ConfigureOutputChannel(Audio_SeqChannel* channel);
+std::int16_t OutputVoiceEnvelope(unsigned voice);
+void SetOutputNoiseClock(int clock);
+int OutputReverbMode();
+void SetOutputReverbMode(int mode);
+void SetOutputReverbDepth(std::int16_t left, std::int16_t right);
+void EnableOutputReverb(int enabled);
+int StartOutputStreamVoice(unsigned voice, const char* instrument, float rate,
+                           unsigned left, unsigned right, int reverb);
+void PauseOutputVoice(unsigned voice, int paused);
+int OutputVoiceActive(unsigned voice);
 }  // namespace VS::Audio::Driver
 
 namespace VS::Audio::Samples {

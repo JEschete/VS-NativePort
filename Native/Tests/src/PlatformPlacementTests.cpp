@@ -16,7 +16,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Field/ActorCollisionLive.hpp"
@@ -505,7 +505,7 @@ TEST_CASE("Native platform initialization resets its entrance waypoint last",
 
 TEST_CASE("Platform initialization retains its original module address",
           "[platform-initialization-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C538) ==
         reinterpret_cast<const void*>(
@@ -589,7 +589,7 @@ TEST_CASE("Native platform collection refuses partial and misaligned records",
 
 TEST_CASE("Platform collection retains its original module address",
           "[platform-collection-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D2C0) ==
         reinterpret_cast<const void*>(
@@ -869,7 +869,7 @@ TEST_CASE("Native platform motion refuses partial tables without state writes",
 
 TEST_CASE("Platform motion retains its original module address",
           "[platform-motion-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C8A8) ==
         reinterpret_cast<const void*>(&VS::Field::UpdateMovingPlatformsEntry));
@@ -1006,7 +1006,7 @@ TEST_CASE("Native platform shadows refuse when their draw mode cannot fit",
 
 TEST_CASE("Platform shadows retain their original module address",
           "[platform-shadow-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008CEB0) ==
         reinterpret_cast<const void*>(
@@ -1140,7 +1140,7 @@ TEST_CASE("Native freeze appearance refuses a truncated environment field",
 
 TEST_CASE("Freeze appearance retains its original module address",
           "[platform-appearance-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008E4DC) ==
         reinterpret_cast<const void*>(
@@ -1210,7 +1210,7 @@ TEST_CASE("Target waypoint preserves each original C record address",
 
 TEST_CASE("Target waypoint retains its original module address",
           "[platform-target-waypoint-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008E2D4) ==
         reinterpret_cast<const void*>(
@@ -1455,7 +1455,7 @@ TEST_CASE("Temporary room freeze native entry preserves packed platform data",
 
 TEST_CASE("Temporary room freeze retains its original module address",
           "[platform-temporary-freeze-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8006CE50) ==
         reinterpret_cast<const void*>(
@@ -1510,7 +1510,7 @@ TEST_CASE("Native platform visibility supports the fifth bounded record",
 
 TEST_CASE("Platform visibility retains its original module address",
           "[platform-visibility-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008E224) ==
         reinterpret_cast<const void*>(
@@ -1519,7 +1519,7 @@ TEST_CASE("Platform visibility retains its original module address",
 
 TEST_CASE("Platform control entries retain original module addresses",
           "[platform-control-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C49C) ==
         reinterpret_cast<const void*>(&VS::Field::SetMovingPlatformActorEntry));
@@ -1651,7 +1651,7 @@ TEST_CASE("Geometry position setter rejects truncated groups without mutation",
 
 TEST_CASE("Waypoint reset retains its original module address",
           "[platform-waypoint-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C6B4) ==
         reinterpret_cast<const void*>(

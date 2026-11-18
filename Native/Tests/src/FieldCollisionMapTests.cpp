@@ -20,7 +20,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/CollisionMap.hpp"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/Gimmicks.h"
@@ -863,8 +863,7 @@ TEST_CASE("The live trap binding refuses actions, hits, limbs and actors",
 
 TEST_CASE("Row 23 module entries keep only the trap stat calculators",
           "[field-collision-map][field][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

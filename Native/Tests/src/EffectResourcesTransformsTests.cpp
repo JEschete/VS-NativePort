@@ -15,7 +15,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/Location.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -1937,8 +1937,7 @@ TEST_CASE("Live effect camera and transforms refuse a missing instance",
 
 TEST_CASE("Promoted effect resources and transforms leave no module binding",
           "[effects][effects-resources-transforms]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // No module image stores these functions' addresses; callers use the
   // typed API through the Live entries. The four EFFPURGE.BIN functions
   // never had a module entry.

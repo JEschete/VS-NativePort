@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Core/Log.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Platform/Paths.hpp"
@@ -159,7 +159,7 @@ std::expected<std::vector<u8>, std::string> DataStore::ReadAll(
 
 }  // namespace VS::Content
 
-int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
+int VS::Content::ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
   using VS::u32;
   using VS::u64;
   using VS::u8;

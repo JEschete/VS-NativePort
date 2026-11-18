@@ -16,7 +16,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Manual.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -61,10 +61,10 @@ class LiveTopicMenuHost final : public TopicMenuHost {
         VS::Menu::Framework::menuMemory.cursorMemories[kCursorRowMemory]);
   }
   [[nodiscard]] std::uint8_t CursorMemorySetting() const override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void SetCursorMemorySetting(std::uint8_t value) override {
-    Input_settings.cursorMemory = static_cast<char>(value);
+    VS::Input::settings.cursorMemory = static_cast<char>(value);
   }
   void CreateRows(std::int32_t row_count, std::int32_t row_info,
                   std::span<const std::uint32_t> text_offsets,

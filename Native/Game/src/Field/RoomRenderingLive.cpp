@@ -29,7 +29,7 @@
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Palette.h"
@@ -283,8 +283,8 @@ class LiveSceneHost final : public RoomSceneHost {
     LiveDrawRoomGeometry(Field_roomData.geometry);
   }
   MinimapSettings Minimap() override {
-    return MinimapSettings{.shown = (Input_settings.simpleMap & 1) != 0,
-                           .framed = (Input_settings.simpleMap & 2) != 0,
+    return MinimapSettings{.shown = (VS::Input::settings.simpleMap & 1) != 0,
+                           .framed = (VS::Input::settings.simpleMap & 2) != 0,
                            .has_scene = Field_roomData.minimapScene != nullptr};
   }
   bool MinimapVisible() override { return Field_isMinimapVisible != 0; }

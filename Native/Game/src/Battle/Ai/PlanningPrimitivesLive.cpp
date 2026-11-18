@@ -35,7 +35,6 @@
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/OrbitingBoss.h"
-#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
@@ -1515,21 +1514,22 @@ void BuildLiveAiActionMetadata(Battle_Ai_ActorAiState* state) {
 }
 }  // namespace VS::Battle::Ai
 
-int Battle_Ai_RefreshActionCandidateReadinessEntry(
+int VS::Battle::Ai::RefreshActionCandidateReadinessEntry(
     Battle_Ai_CandidateReadinessView* state) {
   return VS::Battle::Ai::RefreshLiveActionCandidateReadiness(
              reinterpret_cast<Battle_Ai_ActorAiState*>(state))
       .value_or(false);
 }
 
-void Battle_Ai_ApplySimulatedActionResultsEntry(Battle_Ai_ActionTiming* rows) {
+void VS::Battle::Ai::ApplySimulatedActionResultsEntry(
+    Battle_Ai_ActionTiming* rows) {
   if (rows == nullptr) return;
   static_cast<void>(VS::Battle::Ai::ApplyLiveSimulatedActionResults(
       std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>(
           rows, VS::Battle::Ai::kBattleActorSlotCount)));
 }
 
-void Battle_Ai_SimulateActionCandidateEntry(
+void VS::Battle::Ai::SimulateActionCandidateEntry(
     Battle_Ai_ActorAiState* state, Battle_Ai_ActionTiming* rows,
     Battle_Ai_ActionCandidate* candidate, int mode) {
   constexpr int kAimedMode = 3;
@@ -1549,14 +1549,14 @@ void Battle_Ai_SimulateActionCandidateEntry(
   std::abort();
 }
 
-void Battle_Ai_UpdateCandidateHitWeightEntry(
+void VS::Battle::Ai::UpdateCandidateHitWeightEntry(
     Battle_Ai_ActionCandidate* candidate) {
   if (VS::Battle::Ai::UpdateLiveCandidateHitWeight(candidate)) return;
   VS::Core::Errorf("ai", "AI candidate hit-weight entry refused invalid input");
   std::abort();
 }
 
-void Battle_Ai_EvaluateActionCandidateEntry(
+void VS::Battle::Ai::EvaluateActionCandidateEntry(
     Battle_Ai_ActorAiState* state, Battle_Ai_ActionCandidate* candidate,
     int mode, Battle_ActionDefinition* action) {
   if (VS::Battle::Ai::EvaluateLiveActionCandidate(state, candidate, mode,
@@ -1567,24 +1567,24 @@ void Battle_Ai_EvaluateActionCandidateEntry(
   std::abort();
 }
 
-void Battle_Ai_SelectFallbackActionEntry(Battle_Ai_ActorAiState* state) {
+void VS::Battle::Ai::SelectFallbackActionEntry(Battle_Ai_ActorAiState* state) {
   VS::Battle::Ai::SelectLiveFallbackAction(state);
 }
 
-void Battle_Ai_AdvancePlanningSimulationEntry(int time_step) {
+void VS::Battle::Ai::AdvancePlanningSimulationEntry(int time_step) {
   VS::Battle::Ai::AdvanceLivePlanningSimulation(time_step);
 }
 
-void Battle_Ai_EnumerateActionCandidatesEntry(Battle_Ai_ActorAiState* state,
-                                              int readiness_threshold) {
+void VS::Battle::Ai::EnumerateActionCandidatesEntry(
+    Battle_Ai_ActorAiState* state, int readiness_threshold) {
   VS::Battle::Ai::EnumerateLiveActionCandidates(state, readiness_threshold);
 }
 
-void Battle_Ai_BuildActorActionPlanEntry(Battle_Ai_ActorAiState* state) {
+void VS::Battle::Ai::BuildActorActionPlanEntry(Battle_Ai_ActorAiState* state) {
   VS::Battle::Ai::BuildLiveActorActionPlan(state);
 }
 
-void Battle_Ai_ReconcileCompletedActionPlanEntry(
+void VS::Battle::Ai::ReconcileCompletedActionPlanEntry(
     Battle_Ai_ReactionRecord* completed_action) {
   VS::Battle::Ai::ReconcileLiveCompletedActionPlan(
       reinterpret_cast<const Battle_ActionRequest*>(completed_action));

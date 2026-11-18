@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/PointerSort.hpp"
 
 static_assert(std::is_same_v<decltype(&VS::Core::SortPointersByDescendingKey),
@@ -134,7 +134,7 @@ TEST_CASE("Pointer key sorting has no original-address module entry",
   // No disc module stores 0x800E6974 or its 0x800E6958 entry as data; the
   // original's only references are three jal instructions in BATTLE.PRG.
   constexpr std::array<unsigned, 2> kOriginalEntries{0x800E6974u, 0x800E6958u};
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK_FALSE(symbols.empty());
   for (const auto& symbol : symbols) {
     if (std::strcmp(symbol.module, "BATTLE/BATTLE.PRG") != 0) continue;

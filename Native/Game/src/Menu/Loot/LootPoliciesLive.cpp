@@ -21,9 +21,8 @@
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -361,9 +360,9 @@ class LivePromptHost final : public PromptHost {
 };
 
 [[nodiscard]] PromptInput LiveInput() {
-  return {.pressed = Input_buttonsPressed.allButtons,
-          .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-          .information_shown = Input_settings.information != 0};
+  return {.pressed = VS::Input::buttonsPressed.allButtons,
+          .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
+          .information_shown = VS::Input::settings.information != 0};
 }
 
 [[nodiscard]] bool HaveLootList(const char* operation) {
@@ -386,7 +385,7 @@ void RenderBagCapacities(int edge_x) {
       .cursor = LiveCursor(),
       .previewed = static_cast<std::uint8_t>(Menu_Loot_previewedLoot),
       .controls_enabled = static_cast<std::uint8_t>(Menu_Loot_controlsEnabled),
-      .capacities = std::span(VS::Items::Inventory::inventoryItemCapacities)};
+      .capacities = std::span(VS::Items::kCategoryCapacities)};
   LiveCapacityHost host(rows);
   if (!VS::Menu::Loot::RenderBagCapacities(edge_x, panel, host)) {
     Refuse("the previewed loot row is outside the loot list");

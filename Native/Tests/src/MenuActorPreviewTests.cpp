@@ -16,7 +16,7 @@
 #include "Actors/ActorStateRecord.hpp"
 #include "Actors/Movement.h"
 #include "Content/ActorAssets.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
@@ -718,8 +718,7 @@ TEST_CASE("Menu rows, details and actor preview retire their module symbols",
   constexpr auto kAddresses =
       std::to_array<unsigned>({0x800F9A24, 0x800FA3FC, 0x800FA598, 0x800FD220,
                                0x800FC85C, 0x800FE5CC, 0x800FE694, 0x800FC510});
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const unsigned address : kAddresses) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MAINMENU.PRG",
                                             address) == nullptr);

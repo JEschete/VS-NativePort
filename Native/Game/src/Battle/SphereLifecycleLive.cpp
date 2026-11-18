@@ -11,10 +11,10 @@
 
 #include "Battle/Sphere.h"
 #include "Battle/SphereLifecycle.hpp"
-#include "Battle/TargetPages.h"
+#include "Battle/TargetPages.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/CopyLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 
 namespace VS::Core::Memory {
 void* AllocateLiveFromLowEnd(std::size_t bytes, std::source_location site);
@@ -222,7 +222,7 @@ int LiveSphereInteractionMode(const Battle_TargetSphereSetupView* sphere,
 
 // decomp: BATTLE.PRG func_800C031C (src/BATTLE/BATTLE.PRG/573B8.c:363).
 void InitializeSphereEntry() {
-  Battle_ResetTargetPages();
+  ResetTargetPages();
   if (Battle_targetSphere == nullptr) {
     auto* allocated = static_cast<Battle_TargetSphereSetupView*>(
         VS::Core::Memory::AllocateLiveFromLowEnd(
@@ -264,7 +264,7 @@ void ClearSecondarySphereVolumeEntry() {
 
 // decomp: BATTLE.PRG func_800C16DC (src/BATTLE/BATTLE.PRG/58578.c:470).
 void ClearSphereTargetsEntry() {
-  Battle_ResetTargetPages();
+  ResetTargetPages();
   ClearLiveSphereTargets(Battle_targetSphere);
 }
 
@@ -272,6 +272,6 @@ void ClearSphereTargetsEntry() {
 int SphereInteractionModeEntry() {
   return LiveSphereInteractionMode(
       Battle_targetSphere,
-      (Input_buttonsState & kSphereOverrideButtonMask) != 0);
+      (VS::Input::buttonsState & kSphereOverrideButtonMask) != 0);
 }
 }  // namespace VS::Battle

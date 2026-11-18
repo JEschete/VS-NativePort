@@ -38,7 +38,7 @@
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -405,7 +405,7 @@ class LiveDisplay : public Host {
   void CountPresentedFrame() override { ++Ending_Credits_xaResumeFrameCount; }
   void UpdateControllers() override { Input::UpdateLiveControllers(); }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
-    return static_cast<std::uint32_t>(Input_buttonsPressed.allButtons);
+    return static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
   }
 
   void BeginOrderingTables(const OrderingTableLayout& layout) override {
@@ -508,7 +508,7 @@ ClearProgress LoadProgress() {
                     .minutes = VS::State::playTime.t.minutes},
       .score = LoadScore(),
       .flags = LoadFlags(),
-      .save_count = Input_settings.currentGameSaveCount,
+      .save_count = VS::Input::settings.currentGameSaveCount,
       .entry_zone = State_savedEntryDoor.destinationZoneId,
       .entry_room = State_savedEntryDoor.destinationRoomId};
   static_assert(std::size(State_roomVisitProgress.roomFlags) == kRoomFlagWords);

@@ -10,9 +10,9 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/BlockedMovement.hpp"
 #include "Battle/Ai/BlockedMovementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
 
@@ -287,12 +287,12 @@ TEST_CASE("Movement saves the frame's random state", "[ai][blocked-movement]") {
 
 TEST_CASE("The live random state save copies the AI frame's state",
           "[ai][blocked-movement][blocked-movement-live]") {
-  auto& frame = *Battle_Ai_FrameState();
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
   struct Restore {
     u_int random;
     int saved;
     ~Restore() {
-      Battle_Ai_FrameState()->randomState = random;
+      VS::Battle::Ai::LiveFrameContext().randomState = random;
       Battle_Ai_savedMovementRandomState = saved;
     }
   } restore{frame.randomState, Battle_Ai_savedMovementRandomState};
@@ -503,8 +503,7 @@ TEST_CASE("Blocked movement refuses a detour direction outside 0..7",
 
 TEST_CASE("Blocked movement keeps its original module entries",
           "[ai][blocked-movement][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

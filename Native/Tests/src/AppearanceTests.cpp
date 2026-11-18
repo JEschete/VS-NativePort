@@ -17,7 +17,7 @@
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -481,8 +481,7 @@ TEST_CASE("Live appearance transitions refuse a broken companion chain",
 
 TEST_CASE("Appearance bindings retire the module entries they replace",
           "[actors-appearance-rendering][actors][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

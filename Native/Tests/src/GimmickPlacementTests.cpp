@@ -30,7 +30,7 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Content/CdDriveLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.h"
 #include "Core/RandomLive.hpp"
@@ -415,7 +415,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick reaction retains its original module address",
           "[gimmick-reaction-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B101C) ==
         reinterpret_cast<const void*>(
@@ -472,7 +472,7 @@ TEST_CASE("Native gimmick release refuses invalid and bone-zero slots",
 
 TEST_CASE("Gimmick release retains its original module address",
           "[gimmick-release-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80099D6C) ==
         reinterpret_cast<const void*>(&VS::Field::ReleaseGimmickInstanceEntry));
@@ -550,7 +550,7 @@ TEST_CASE("Native gimmick palettes reject short input without mutation",
 
 TEST_CASE("Gimmick resource entries retain their original module addresses",
           "[gimmick-resource-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80099900) ==
         reinterpret_cast<const void*>(&VS::Field::FindSharedGimmickModelEntry));
@@ -2182,7 +2182,7 @@ TEST_CASE("Trap action stops on refused staging or resolution",
 
 TEST_CASE("Native trap action preserves its original module binding",
           "[trap-action-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80073D30) ==
         reinterpret_cast<const void*>(&VS::Field::TriggerActorTrapEntry));
@@ -2251,7 +2251,7 @@ TEST_CASE("Interaction camera returns from Ashley with original halfword wrap",
 
 TEST_CASE("Interaction camera entries retain all original module addresses",
           "[interaction-camera-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x80074120) ==
@@ -2327,7 +2327,7 @@ TEST_CASE("Facing tile entry preserves X layer Z and untouched fourth byte",
 
 TEST_CASE("Facing tile entry retains original module address",
           "[facing-tile-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80074798) ==
         reinterpret_cast<const void*>(&VS::Field::TileInFrontOfActorEntry));
@@ -2825,7 +2825,7 @@ TEST_CASE("Actor tile trigger C boundary retains module and refuses bad input",
   Actors_ActorLocation location{};
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(-1, &location) == 0);
   CHECK(VS::Field::CheckActorTrapAndFallTriggersEntry(17, &location) == 0);
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800751B8) ==
         reinterpret_cast<const void*>(
@@ -2960,7 +2960,7 @@ TEST_CASE("Facing query C entries refuse invalid actor indices",
 
 TEST_CASE("Facing queries retain all original module entries",
           "[facing-query-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80074860) ==
         reinterpret_cast<const void*>(
@@ -3010,7 +3010,7 @@ TEST_CASE("Object interaction wait releases and resumes before exploration",
 
 TEST_CASE("Object interaction wait keeps both original module bindings",
           "[object-interaction-wait-core][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80073AA4) ==
         reinterpret_cast<const void*>(
@@ -3128,7 +3128,7 @@ TEST_CASE("Native room object entry reads only its present busy lock record",
 
 TEST_CASE("Native room object interaction keeps its original module binding",
           "[room-object-interaction-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80073AFC) ==
         reinterpret_cast<const void*>(
@@ -3540,7 +3540,7 @@ TEST_CASE("Live sigil groups stop at the eight original boundary words",
 
 TEST_CASE("Door table native entries retain original module addresses",
           "[interactive-door-live][sigil-door-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008BC04) ==
         reinterpret_cast<const void*>(&VS::Field::InteractiveDoorAtTileEntry));
@@ -3864,7 +3864,7 @@ TEST_CASE("Native door entries refuse out of room and stale typed targets",
 
 TEST_CASE("Door lifecycle entries retain every original module address",
           "[door-animation-live][door-collision-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008BD74) ==
         reinterpret_cast<const void*>(&VS::Field::ToggleDoorCollisionEntry));
@@ -4041,7 +4041,7 @@ TEST_CASE("Native unlock effect copies unaligned packed input without mutation",
 
 TEST_CASE("Unlock effect keeps its original module entry address",
           "[unlock-effect-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8006CE70) ==
         reinterpret_cast<const void*>(
@@ -4162,7 +4162,7 @@ TEST_CASE(
     "Room trigger query activation and disabling retain original module "
     "addresses",
     "[room-trigger-live][trap-disable-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D438) ==
         reinterpret_cast<const void*>(&VS::Field::RoomTriggerAtTileEntry));
@@ -4257,7 +4257,7 @@ TEST_CASE(
     "Native animation reset clears every slot counters and module binding",
     "[gimmick-animation-reset-core][field]") {
   const AnimationQueueFixture fixture;
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008B6B4) ==
         reinterpret_cast<const void*>(
@@ -4397,7 +4397,7 @@ TEST_CASE("Gimmick animation queue does not count a refused ninth job",
 TEST_CASE("Native gimmick admission refuses invalid calls and preserves module",
           "[gimmick-animation-queue][field]") {
   const AnimationQueueFixture fixture;
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C070) ==
         reinterpret_cast<const void*>(&VS::Field::QueueGimmickAnimationEntry));
@@ -4487,7 +4487,7 @@ TEST_CASE(
     "Native animation dispatcher refuses bad entries and preserves module",
     "[gimmick-door-continuation][field]") {
   const AnimationQueueFixture fixture;
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008C0C0) ==
         reinterpret_cast<const void*>(
@@ -4545,7 +4545,7 @@ TEST_CASE("Native switch start retries after queue capacity is freed",
 TEST_CASE("Native switch start preserves immediate state and original module",
           "[gimmick-switch-admission][field]") {
   const AnimationQueueFixture fixture;
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D5FC) ==
         reinterpret_cast<const void*>(&VS::Field::BeginSwitchToggleEntry));
@@ -4626,7 +4626,7 @@ TEST_CASE("Room switches refuse absent and invalidated targets",
 
 TEST_CASE("Native switch entry preserves original module and signed word state",
           "[room-switches][room-switches-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D658) ==
         reinterpret_cast<const void*>(&VS::Field::ToggleRoomSwitchEntry));
@@ -4648,7 +4648,7 @@ TEST_CASE("Native switch entry preserves original module and signed word state",
 TEST_CASE(
     "Native gimmick placement entry preserves the original module address",
     "[gimmick-placement][gimmick-placement-core][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A0024) ==
         reinterpret_cast<const void*>(&VS::Field::GimmickPlacementEntry));
@@ -5085,7 +5085,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick stack queries retain both original module addresses",
           "[gimmick-stack-query-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009F794) ==
         reinterpret_cast<const void*>(&VS::Field::FindGimmickBelowEntry));
@@ -5207,7 +5207,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick status entries retain both original module addresses",
           "[gimmick-status-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009F858) ==
         reinterpret_cast<const void*>(&VS::Field::GimmickSubtypeEntry));
@@ -5355,7 +5355,7 @@ TEST_CASE(
 
 TEST_CASE("Menu gimmick queries retain both original module addresses",
           "[gimmick-menu-query-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MAINMENU.PRG",
                                           0x800FA188) ==
         reinterpret_cast<const void*>(&VS::Field::MeasureTileStackEntry));
@@ -5527,7 +5527,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick orientation retains its original module address",
           "[gimmick-orientation-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A0104) ==
         reinterpret_cast<const void*>(&VS::Field::SetGimmickOrientationEntry));
@@ -6951,7 +6951,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick point placement retains its original module address",
           "[gimmick-placeability-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A3DB4) ==
         reinterpret_cast<const void*>(&VS::Field::CanPlaceGimmickAtPointEntry));
@@ -7165,7 +7165,7 @@ TEST_CASE("Native save point query returns unsigned activation bytes",
 
 TEST_CASE("Interaction tile release retains its original module address",
           "[interaction-tile-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009E634) ==
         reinterpret_cast<const void*>(
@@ -7174,7 +7174,7 @@ TEST_CASE("Interaction tile release retains its original module address",
 
 TEST_CASE("Save point query retains its original module address",
           "[save-point-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008A4FC) ==
         reinterpret_cast<const void*>(&VS::Field::CurrentSavePointIdEntry));
@@ -7472,7 +7472,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick dynamics retains its original module address",
           "[gimmick-dynamics-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B0908) ==
         reinterpret_cast<const void*>(&VS::Field::UpdateGimmickMotionEntry));
@@ -7543,7 +7543,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick interaction command retains its original module address",
           "[gimmick-interaction-command-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A41D0) ==
         reinterpret_cast<const void*>(
@@ -7600,7 +7600,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick interaction initiation retains its original module address",
           "[gimmick-interaction-start-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800A3E6C) ==
@@ -7646,7 +7646,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick interaction selector retains its original module address",
           "[gimmick-interaction-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A38E0) ==
         reinterpret_cast<const void*>(
@@ -7655,7 +7655,7 @@ TEST_CASE("Gimmick interaction selector retains its original module address",
 
 TEST_CASE("Retired actor-above alias leaves no original module binding",
           "[gimmick-actor-above-retirement][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800A3C00) == nullptr);
 }
@@ -7924,7 +7924,7 @@ TEST_CASE(
 
 TEST_CASE("Unsupported gimmick stack drop retains its original module address",
           "[gimmick-stack-drop-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009F530) ==
         reinterpret_cast<const void*>(
@@ -8178,7 +8178,7 @@ TEST_CASE(
 
 TEST_CASE("Gimmick creation retains its original module address",
           "[gimmick-create-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8009998C) ==
         reinterpret_cast<const void*>(&VS::Field::CreateGimmickInstanceEntry));

@@ -68,7 +68,7 @@ TEST_CASE("F02579 paging integrates the real armor formatter and cursor memory",
   fixture.AddArmor();
   fixture.Open(inv::UpdateLiveArmorDetails);
   fixture.Wait(inv::UpdateLiveArmorDetails);
-  Input_buttonRepeat = VS::Input::R1;
+  VS::Input::buttonRepeat = VS::Input::R1;
   CHECK(inv::UpdateLiveArmorDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[4]
@@ -98,7 +98,7 @@ TEST_CASE(
   fixture.AddGems();
   fixture.Open(inv::UpdateLiveGemDetails);
   fixture.Wait(inv::UpdateLiveGemDetails);
-  Input_buttonRepeat = VS::Input::R1;
+  VS::Input::buttonRepeat = VS::Input::R1;
   CHECK(inv::UpdateLiveGemDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[5]
@@ -156,9 +156,9 @@ TEST_CASE("F02581 normal close restores list commands and Ashley presentation",
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
   fixture.Wait(inv::UpdateLiveGemDetails);
-  Input_buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
-  Input_buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed.allButtons = 0;
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 1);
   CHECK(Menu_Inventory_itemCategoryIconsEnabled == 1);
@@ -175,9 +175,9 @@ TEST_CASE("F02581 battle close consumes the actual triangle return intent",
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
   fixture.Wait(inv::UpdateLiveGemDetails);
-  Input_buttonsPressed.allButtons = VS::Input::Triangle;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Triangle;
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
-  Input_buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed.allButtons = 0;
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == -2);
   CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));

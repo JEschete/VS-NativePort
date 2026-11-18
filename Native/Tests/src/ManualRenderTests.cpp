@@ -10,7 +10,7 @@
 
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Text/TextCode.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Manual.h"
 #include "Menu/ManualPageLive.hpp"

@@ -14,7 +14,7 @@
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
@@ -626,8 +626,7 @@ TEST_CASE("Live track loads refuse sequences shorter than their header",
 TEST_CASE("Music commands keep their live bindings and helpers keep none",
           "[audio-seq-control][audio]") {
   using CommandHandler = void (*)(Audio_CommandParams*);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, CommandHandler>, 11> kept{{
       {0x80016DF8U, &Seq::LiveStartOrResumeMusic},
       {0x80016E74U, &Seq::LiveSaveCurrentMusic},

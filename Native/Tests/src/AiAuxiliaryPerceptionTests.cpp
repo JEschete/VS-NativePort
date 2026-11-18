@@ -10,7 +10,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
@@ -31,7 +31,7 @@ struct AuxiliaryPerceptionFixture {
       std::to_array(Field_gimmickInstances);
   decltype(std::to_array(Battle_Ai_actorAiStates)) saved_states =
       std::to_array(Battle_Ai_actorAiStates);
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   std::array<Actors_ActorRecord, 2> records{};
   std::array<Battle_Actor, 3> actors{};
   Battle_Ai_ActorAiState owner{};
@@ -45,7 +45,7 @@ struct AuxiliaryPerceptionFixture {
     std::fill_n(Actors_actorRecords, saved_records.size(), nullptr);
     std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
     std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
-    auto& frame = *Battle_Ai_FrameState();
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
     frame = {};
     frame.tileFlags = flags;
     frame.actors[0] = Battle_Ai_actorAiStates[0] = &owner;
@@ -87,7 +87,7 @@ struct AuxiliaryPerceptionFixture {
               Field_gimmickInstances);
     std::copy(saved_states.begin(), saved_states.end(),
               Battle_Ai_actorAiStates);
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Core_Gte_Reset();
   }
 

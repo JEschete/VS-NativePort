@@ -16,7 +16,7 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FlightMovementLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
@@ -28,7 +28,7 @@
 
 namespace VS::Battle::Ai {
 Field::TerrainGrid CurrentTerrain() noexcept {
-  const auto* frame = Battle_Ai_FrameState();
+  const auto* frame = &LiveFrameContext();
   if (frame->heightMap == nullptr) return {};
   return Field::TerrainGrid{
       std::span<const Field::TerrainRow, Field::kTerrainGridSide>(
@@ -40,7 +40,7 @@ FlightNeighborhood ActorFlightNeighborhood(Battle_Ai_ActorAiState& state) {
   neighborhood.terrain = CurrentTerrain();
   neighborhood.origin = {state.tile.tile.tileX, state.tile.tile.tileZ};
   const auto* deltas = reinterpret_cast<const Battle_Ai_DirectionDelta*>(
-      Battle_Ai_FrameState()->directions);
+      LiveFrameContext().directions);
   for (std::size_t direction = 0; direction < neighborhood.steps.size();
        ++direction) {
     neighborhood.steps[direction] = {deltas[direction].dx,

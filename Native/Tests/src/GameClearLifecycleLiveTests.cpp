@@ -13,7 +13,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/Results/GameClearLifecycle.hpp"

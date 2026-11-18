@@ -25,7 +25,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
@@ -45,7 +45,7 @@ static_assert(sizeof(Battle_Ai_ActionCandidate) ==
 static_assert(std::extent_v<decltype(State::candidateOrder)> ==
               kCandidateCapacity);
 static_assert(std::size(Battle_Ai_actorAiStates) == kCandidateTargetSlots);
-static_assert(kAiFrameActorSlots == kCandidateTargetSlots);
+static_assert(kFrameActorSlots == kCandidateTargetSlots);
 static_assert(offsetof(Movement, opaque1) == offsetof(State, opaque1));
 static_assert(offsetof(Movement, position) == offsetof(State, position));
 static_assert(offsetof(Movement, pointHeight) == offsetof(State, pointHeight));
@@ -160,8 +160,7 @@ class LiveCandidateMovementWorld final
         std::bit_cast<ActionCandidate::Words>(*candidates_.at(handle)));
   }
   [[nodiscard]] bool HasFrameActor(int target) const override {
-    return ValidTarget(target) &&
-           Battle_Ai_FrameState()->actors[target] != nullptr;
+    return ValidTarget(target) && LiveFrameContext().actors[target] != nullptr;
   }
   [[nodiscard]] std::optional<PursuitTarget> TargetModel(
       int target) const override {
@@ -190,7 +189,7 @@ class LiveCandidateMovementWorld final
   [[nodiscard]] std::optional<std::uint32_t> FrameDistance(
       int observer, int target) const override {
     if (!HasFrameActor(observer) || !ValidTarget(target)) return std::nullopt;
-    return Battle_Ai_FrameState()->actors[observer]->distancesSquared[target];
+    return LiveFrameContext().actors[observer]->distancesSquared[target];
   }
   [[nodiscard]] std::optional<ActorRoster> BattleActors() const override {
     ActorRoster roster;

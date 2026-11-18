@@ -16,9 +16,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Seq/Channel.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Mpd.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Render/Display.h"
 #include "Save/MemoryCard/GameFilesLive.hpp"
@@ -659,14 +659,14 @@ class LiveHostGuard {
   LiveHostGuard(LiveHostGuard&&) = delete;
   LiveHostGuard& operator=(LiveHostGuard&&) = delete;
   ~LiveHostGuard() {
-    Input_settings = settings_;
+    VS::Input::settings = settings_;
     VS::Title::titleScreenVisitCount = visits_;
     std::ranges::copy(draw_, std::begin(Render_legacyDrawEnvironments));
     std::ranges::copy(display_, std::begin(Render_legacyDisplayEnvironments));
   }
 
  private:
-  State_Settings settings_ = Input_settings;
+  State_Settings settings_ = VS::Input::settings;
   int visits_ = VS::Title::titleScreenVisitCount;
   std::array<DRAWENV, 2> draw_{};
   std::array<DISPENV, 2> display_{};
@@ -1680,8 +1680,8 @@ TEST_CASE("Title live host binds settings and visits", "[title][title-menu]") {
   title::Host& host = title::LiveTitleHost();
   CHECK(&title::LiveTitleHost() == &host);
   host.SetSettings({.mono_sound = 1, .vibration_on = 0});
-  CHECK(Input_settings.monoSound == 1);
-  CHECK(Input_settings.vibrationOn == 0);
+  CHECK(VS::Input::settings.monoSound == 1);
+  CHECK(VS::Input::settings.vibrationOn == 0);
   CHECK(host.Settings() ==
         title::PlayerSettings{.mono_sound = 1, .vibration_on = 0});
   host.SetVisitCount(5);
@@ -1750,13 +1750,13 @@ TEST_CASE("Title card readiness restarts and TITLE keeps no module symbols",
     return module != nullptr && std::string_view(module) == "TITLE/TITLE.PRG";
   };
   CHECK(std::ranges::none_of(
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount),
-      [&in_title](const Content_ModuleSymbol& symbol) {
+      VS::Content::ModuleSymbols(),
+      [&in_title](const VS::Content::ModuleSymbol& symbol) {
         return in_title(symbol.module);
       }));
   CHECK(std::ranges::none_of(
-      std::span(Content_modulePointers, Content_modulePointerCount),
-      [&in_title](const Content_ModulePointerTable& table) {
+      VS::Content::ModulePointerTables(),
+      [&in_title](const VS::Content::ModulePointerTable& table) {
         return in_title(table.module);
       }));
 }

@@ -8,7 +8,7 @@
 #include <string_view>
 
 #include "Core/Log.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -80,7 +80,7 @@ int NavigateLiveDetailElements(unsigned int selected, int flags) {
   const auto result = NavigateDetailElements(
       {.selected = selected,
        .flags = static_cast<std::uint32_t>(flags),
-       .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
+       .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
        .stat_page =
            static_cast<std::uint8_t>(VS::Menu::Framework::itemStatPage),
        .links = links});

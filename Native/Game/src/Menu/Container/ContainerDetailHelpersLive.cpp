@@ -7,7 +7,7 @@
 #include <string_view>
 
 #include "Core/Diagnostics.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLive.hpp"

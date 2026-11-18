@@ -12,7 +12,7 @@
 #include "Audio/Seq/Channel.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerDetailControllers.hpp"
@@ -220,7 +220,7 @@ class LiveControllerWorld final : public ControllerWorld {
     return Framework::AreLiveMenuRowsIdle();
   }
   std::uint32_t PressedButtons() override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
   void BeginTransition(DetailRow row) override {
     BeginLiveDetailsTransition(row.index);

@@ -28,10 +28,10 @@
 #include "Audio/Seq/Channel.h"
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/VoiceMixerLive.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Audio/XaPlayback.hpp"
 #include "Content/AudioBank.hpp"
@@ -504,18 +504,18 @@ void CheckXaVolumeFades() {
 
 void CheckStreamVoicesStopped() {
   CHECK(TestsStreamVoiceMask() == 0);
-  CHECK_FALSE(Audio_Native_VoiceActive(22));
-  CHECK_FALSE(Audio_Native_VoiceActive(23));
+  CHECK_FALSE(VS::Audio::Driver::OutputVoiceActive(22));
+  CHECK_FALSE(VS::Audio::Driver::OutputVoiceActive(23));
 }
 
 void CheckStreamPauseToCompletion() {
   StreamFixture::Tick(5);
-  CHECK(Audio_Native_VoiceActive(22));
-  const int envelope = Audio_Native_Envelope(22);
+  CHECK(VS::Audio::Driver::OutputVoiceActive(22));
+  const int envelope = VS::Audio::Driver::OutputVoiceEnvelope(22);
   TestsStreamControl(3, 1, 0);
   StreamFixture::Tick(100);
   CHECK(TestsStreamVoiceMask() == 0xC00000);
-  CHECK(Audio_Native_Envelope(22) == envelope);
+  CHECK(VS::Audio::Driver::OutputVoiceEnvelope(22) == envelope);
   TestsStreamControl(3, 0, 0);
   StreamFixture::Tick(100);
   CheckStreamVoicesStopped();
@@ -538,7 +538,7 @@ void CheckStreamVolumeFade() {
   CHECK(TestsStreamVolume() > 0);
   StreamFixture::Tick();
   CHECK(TestsStreamVolume() == 0);
-  CHECK(Audio_Native_VoiceActive(22));
+  CHECK(VS::Audio::Driver::OutputVoiceActive(22));
   TestsStreamControl(0, 127, 0);
   CHECK(TestsStreamVolume() == 0x7F00);
 }
@@ -999,7 +999,7 @@ TEST_CASE(
     CHECK_FALSE(TestsStreamSlotIsEmpty());
     REQUIRE(TestsPlayStreamSlot(3, 128, 127) == 1);
     StreamFixture::Tick(5);
-    CHECK(Audio_Native_VoiceActive(22));
+    CHECK(VS::Audio::Driver::OutputVoiceActive(22));
     TestsStreamControl(4, 0, 0);
     StreamFixture::Tick(5);
     CheckStreamVoicesStopped();
@@ -1026,7 +1026,7 @@ TEST_CASE("Stream fades reach exact targets and reset releases borrowed data",
   CHECK(TestsStreamSlotIsEmpty());
   fixture.BindAndPlay();
   StreamFixture::Tick(5);
-  CHECK(Audio_Native_VoiceActive(22));
+  CHECK(VS::Audio::Driver::OutputVoiceActive(22));
 }
 
 TEST_CASE("Production stream pan and Mono settings reach actual device samples",
@@ -1036,8 +1036,8 @@ TEST_CASE("Production stream pan and Mono settings reach actual device samples",
   StreamFixture fixture(false, true, unicode_path);
   fixture.BindAndPlay(0);
   StreamFixture::Tick();
-  Audio_Native_SetReverbDepth(0, 0);
-  Audio_Native_Tick();
+  VS::Audio::Driver::SetOutputReverbDepth(0, 0);
+  VS::Audio::Driver::TickVoiceOutput();
   {
     OutputProbe output(device.source.get());
     output.Wait();
@@ -1387,8 +1387,8 @@ TEST_CASE("Production noise and reverb remain audible through a control stall",
       return std::isfinite(sample) && std::abs(sample) < 1;
     }));
   }
-  CHECK(Audio_Native_Envelope(0) > 0);
-  Audio_Native_Reset();
+  CHECK(VS::Audio::Driver::OutputVoiceEnvelope(0) > 0);
+  VS::Audio::Driver::ResetVoiceOutput();
 }
 
 TEST_CASE("FM uses the preceding envelope-scaled voice before speaker gains",
@@ -1451,7 +1451,7 @@ TEST_CASE("Production mono includes reverb and can restore stereo tails",
     }
     CHECK(difference > 0.01);
   }
-  Audio_Native_Reset();
+  VS::Audio::Driver::ResetVoiceOutput();
 }
 
 TEST_CASE("Voice zero ignores FM and zero pitch holds the current sample",
@@ -1632,11 +1632,11 @@ TEST_CASE("Native reverb sends survive note stops but never playback reset",
   RenderTick(engine, frames);
   CHECK(Energy(frames, 0) == 0);
   CHECK(Energy(frames, 1) == 0);
-  Audio_Native_Reset();
-  Audio_Native_SetReverbMode(4);
-  CHECK(Audio_Native_ReverbMode() == 4);
-  Audio_Native_Reset();
-  CHECK(Audio_Native_ReverbMode() == 0);
+  VS::Audio::Driver::ResetVoiceOutput();
+  VS::Audio::Driver::SetOutputReverbMode(4);
+  CHECK(VS::Audio::Driver::OutputReverbMode() == 4);
+  VS::Audio::Driver::ResetVoiceOutput();
+  CHECK(VS::Audio::Driver::OutputReverbMode() == 0);
 }
 
 TEST_CASE("sfizz preserves measured pitch, loop playback and the output clock",
@@ -1902,8 +1902,8 @@ TEST_CASE("Accelerated native audio drains every tick and bounds speaker PCM",
   constexpr auto kMaximumBytes =
       static_cast<VS::i32>(kMaximumFrames * kFrameBytes);
   CHECK(maximum_queued <= kMaximumBytes);
-  CHECK(Audio_Native_VoiceActive(22));
-  CHECK(Audio_Native_VoiceActive(23));
+  CHECK(VS::Audio::Driver::OutputVoiceActive(22));
+  CHECK(VS::Audio::Driver::OutputVoiceActive(23));
   OutputProbe probe(output.source.get());
   probe.Wait();
   CHECK(Energy(probe.samples, 0) > 0.1);

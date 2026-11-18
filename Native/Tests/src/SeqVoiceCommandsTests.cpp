@@ -21,7 +21,7 @@
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/VoiceOutput.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -1226,8 +1226,7 @@ TEST_CASE("Live instrument and LFO commands read their legacy tables",
 TEST_CASE(
     "Voice handlers keep module bindings only where opcode tables store them",
     "[audio-seq-voices][audio]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
                                           0x8001B734U) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",

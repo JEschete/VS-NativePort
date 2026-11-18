@@ -27,7 +27,7 @@
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
@@ -39,8 +39,8 @@
 #include "Save/FileMenuLive.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
-#include "Save/NativeMenu.h"
-#include "Save/NativeResume.h"
+#include "Save/NativeMenu.hpp"
+#include "Save/NativeResume.hpp"
 #include "State/Ashley.h"
 #include "State/GameClockLive.hpp"
 #include "State/Location.h"
@@ -193,12 +193,13 @@ class LiveHost final : public Host {
   }
   PlayerSettings Settings() override {
     return {
-        .mono_sound = static_cast<std::uint8_t>(Input_settings.monoSound),
-        .vibration_on = static_cast<std::uint8_t>(Input_settings.vibrationOn)};
+        .mono_sound = static_cast<std::uint8_t>(VS::Input::settings.monoSound),
+        .vibration_on =
+            static_cast<std::uint8_t>(VS::Input::settings.vibrationOn)};
   }
   void SetSettings(PlayerSettings settings) override {
-    Input_settings.monoSound = static_cast<char>(settings.mono_sound);
-    Input_settings.vibrationOn = static_cast<char>(settings.vibration_on);
+    VS::Input::settings.monoSound = static_cast<char>(settings.mono_sound);
+    VS::Input::settings.vibrationOn = static_cast<char>(settings.vibration_on);
   }
   void ResetPlayerSettings() override { VS::Boot::InitializePlayerSettings(); }
   void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
@@ -210,8 +211,8 @@ class LiveHost final : public Host {
 
   void UpdateControllers() override { ::VS::Input::UpdateLiveControllers(); }
   Buttons Input() override {
-    return {.held = static_cast<std::uint32_t>(Input_buttonsState),
-            .pressed = Input_buttonsPressed.allButtons};
+    return {.held = static_cast<std::uint32_t>(VS::Input::buttonsState),
+            .pressed = VS::Input::buttonsPressed.allButtons};
   }
   void InvalidateControllerConnections() override {
     ::VS::Input::InvalidateLiveControllerConnections();
@@ -355,9 +356,9 @@ class LiveHost final : public Host {
   void SetVisitCount(int count) override { titleScreenVisitCount = count; }
   bool ClearSavePending() override { return Boot_isClearSavePending != 0; }
   void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }
-  void StageClearGame() override { Save_NativeStageClearGame(); }
+  void StageClearGame() override { VS::Game::Save::StageClearGame(); }
   int InitialTitleSelection() override {
-    return Save_NativeInitialTitleSelection();
+    return VS::Game::Save::InitialTitleSelection();
   }
 
   void InitializeFileDisplay() override {
@@ -397,7 +398,7 @@ class LiveHost final : public Host {
   }
   void DrawExitFade() override { Menu::Files::DrawLiveExitFade(); }
 
-  void ResetSession() override { Save_NativeResetSession(); }
+  void ResetSession() override { VS::Game::Save::ResetSession(); }
   void ClearStateFlags() override {
     std::memset(&Audio_Seq_unusedStateFlags, 0,
                 sizeof Audio_Seq_unusedStateFlags);

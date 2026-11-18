@@ -23,7 +23,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/BossOrbitLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -45,7 +45,7 @@ struct CleanupFixture {
   Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
   decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
   Battle_Ai_ArenaOrbitState* saved_orbit = Battle_Ai_arenaOrbit;
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   int saved_attribute = Battle_Ai_attributeActorMask;
   int saved_busy = Battle_Ai_candidateEngagedThisUpdate;
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -87,7 +87,7 @@ struct CleanupFixture {
     Battle_Ai_roomAiState = saved_room;
     Battle_Ai_tileFlagMap = saved_flags;
     Battle_Ai_arenaOrbit = saved_orbit;
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Battle_Ai_attributeActorMask = saved_attribute;
     Battle_Ai_candidateEngagedThisUpdate = saved_busy;
   }
@@ -110,11 +110,11 @@ struct CleanupFixture {
 void CheckRetiredAiOwnership(const CleanupFixture& fixture,
                              const Battle_Ai_ActorAiState* peer) {
   CHECK(Battle_Ai_actorAiStates[2] == nullptr);
-  CHECK(Battle_Ai_FrameState()->actors[2] == nullptr);
+  CHECK(VS::Battle::Ai::LiveFrameContext().actors[2] == nullptr);
   CHECK(Battle_Ai_attributeActorMask == (1 << 5));
   CHECK(fixture.room.engagedCount == 0);
   CHECK(Battle_Ai_actorAiStates[5] == peer);
-  CHECK(Battle_Ai_FrameState()->actors[5] == peer);
+  CHECK(VS::Battle::Ai::LiveFrameContext().actors[5] == peer);
   CHECK(peer->linkedActor == 16);
 }
 
@@ -153,14 +153,14 @@ TEST_CASE("Reaction requests draw before checking full-width route ownership",
           "[ai][cleanup]") {
   CleanupFixture fixture;
   auto* state = fixture.AllocateState(1);
-  const auto saved_frame = *Battle_Ai_FrameState();
-  Battle_Ai_FrameState()->randomState = 40;
-  Battle_Ai_FrameState()->lastBudgetTick = 1;
+  const auto saved_frame = VS::Battle::Ai::LiveFrameContext();
+  VS::Battle::Ai::LiveFrameContext().randomState = 40;
+  VS::Battle::Ai::LiveFrameContext().lastBudgetTick = 1;
   state->nativePointer18C =
       reinterpret_cast<void*>(std::uintptr_t{0x100000000});
   VS::Battle::Ai::SetLiveActorAiReactionWithDelay(
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(state), 1, 64);
-  CHECK(Battle_Ai_FrameState()->randomState == 41);
+  CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 41);
   CHECK(state->decisionDelay == 0);
   CHECK(fixture.actors[1].commandFlags == 0xFF);
   state->nativePointer18C = nullptr;
@@ -168,7 +168,7 @@ TEST_CASE("Reaction requests draw before checking full-width route ownership",
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(state), 0x123, 64);
   CHECK(state->decisionDelay == 30);
   CHECK(fixture.actors[1].commandFlags == 0x23);
-  *Battle_Ai_FrameState() = saved_frame;
+  VS::Battle::Ai::LiveFrameContext() = saved_frame;
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
 }
 
@@ -621,8 +621,8 @@ TEST_CASE("AI retirement follows allocation ownership after kind changes",
   removed->nativePointer18C = VS::Core::Memory::AllocateLiveFromHighEnd(128);
   REQUIRE(removed->nativePointer18C != nullptr);
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
-  Battle_Ai_FrameState()->actors[2] = removed;
-  Battle_Ai_FrameState()->actors[5] = peer;
+  VS::Battle::Ai::LiveFrameContext().actors[2] = removed;
+  VS::Battle::Ai::LiveFrameContext().actors[5] = peer;
   fixture.actors[1].kind = static_cast<u_short>(kind);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CheckRetiredAiOwnership(fixture, peer);
@@ -641,11 +641,11 @@ TEST_CASE(
   auto* state = fixture.AllocateState(0);
   state->nativePointer18C = VS::Core::Memory::AllocateLiveFromHighEnd(128);
   REQUIRE(state->nativePointer18C != nullptr);
-  Battle_Ai_FrameState()->actors[0] = state;
+  VS::Battle::Ai::LiveFrameContext().actors[0] = state;
   fixture.actors[0].kind = static_cast<u_short>(kind);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[0]);
   CHECK(Battle_Ai_actorAiStates[0] == state);
-  CHECK(Battle_Ai_FrameState()->actors[0] == state);
+  CHECK(VS::Battle::Ai::LiveFrameContext().actors[0] == state);
   CHECK(state->nativePointer18C == nullptr);
   VS::Core::Memory::FreeLiveFromLowEnd(state);
   Battle_Ai_actorAiStates[0] = nullptr;

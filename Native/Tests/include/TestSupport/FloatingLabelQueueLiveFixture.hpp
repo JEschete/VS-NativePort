@@ -18,7 +18,7 @@
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/BiosRand.h"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 
 namespace VS::test_support::live_floating_labels {
 using LabelWords = std::array<std::uint32_t, 6>;
@@ -106,12 +106,12 @@ class Producers {
     actor.boneMatrices[0].m[2][2] = 4096;
     VS::Actors::boneMatrixScratch = actor.boneMatrices[0];
     Actors_actorRecords[kActor] = &actor;
-    Input_settings.weaponStatChange = 1;
+    VS::Input::settings.weaponStatChange = 1;
   }
   ~Producers() {
     Actors_actorRecords[kActor] = saved_actor_;
     VS::Actors::boneMatrixScratch = saved_matrix_;
-    Input_settings = saved_settings_;
+    VS::Input::settings = saved_settings_;
     VS::Field::areRoomUpdatesPaused = saved_pause_;
   }
   Producers(const Producers&) = delete;
@@ -143,7 +143,7 @@ class Producers {
   static constexpr int kActor = 1;
   Actors_ActorRecord* saved_actor_ = Actors_actorRecords[kActor];
   MATRIX saved_matrix_ = VS::Actors::boneMatrixScratch;
-  decltype(Input_settings) saved_settings_ = Input_settings;
+  decltype(VS::Input::settings) saved_settings_ = VS::Input::settings;
   decltype(VS::Field::areRoomUpdatesPaused) saved_pause_ =
       VS::Field::areRoomUpdatesPaused;
   alignas(Actors_ShpModel) std::array<

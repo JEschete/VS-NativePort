@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/SphereTerrain.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 using VS::Battle::kSphereTerrainCells;
@@ -135,8 +135,7 @@ TEST_CASE("Sphere slices reject malformed scale and corner orientation",
 
 TEST_CASE("The promoted sphere slice has no original module address",
           "[combat][targeting][sphere]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800C2E24u) == nullptr);
 }

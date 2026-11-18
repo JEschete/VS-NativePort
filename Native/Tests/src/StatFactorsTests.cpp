@@ -22,7 +22,7 @@
 #include "Battle/StatFactors.hpp"
 #include "Battle/StatFactorsLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -173,10 +173,9 @@ void CheckPreviousRefusals() {
 }
 void CheckAlias(std::uint32_t address) {
   LiveFixture fixture;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto entry =
-      std::ranges::find(symbols, address, &Content_ModuleSymbol::address);
+      std::ranges::find(symbols, address, &VS::Content::ModuleSymbol::address);
   REQUIRE(entry != symbols.end());
   CHECK(entry->target ==
         reinterpret_cast<void*>(&battle::LiveScalePreviousTargetHit));
@@ -437,15 +436,13 @@ void RelocateStatTable() {
   REQUIRE(module != nullptr);
   const auto image = store.ReadAll(*module);
   REQUIRE(image.has_value());
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto tables = VS::Content::ModulePointerTables();
   const auto table = std::ranges::find(
       tables, reinterpret_cast<void**>(Battle_statCalculators),
-      &Content_ModulePointerTable::target);
+      &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      *table, image.value(),
-      {Content_moduleSymbols, Content_moduleSymbolCount}));
+      *table, image.value(), VS::Content::ModuleSymbols()));
 }
 }  // namespace
 TEST_CASE("Original SHORT table relocates and dispatches all eight factors",
@@ -532,10 +529,9 @@ using LiveCalculator = decltype(&battle::LiveScaleIncomingDamage);
 void CheckIncomingLive(LiveCalculator calculator, IncomingGate gate,
                        std::uint32_t address) {
   LiveFixture fixture;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto entry =
-      std::ranges::find(symbols, address, &Content_ModuleSymbol::address);
+      std::ranges::find(symbols, address, &VS::Content::ModuleSymbol::address);
   REQUIRE(entry != symbols.end());
   CHECK(entry->target == reinterpret_cast<void*>(calculator));
   Battle_actionDefinitions[255].type = gate == IncomingGate::kSpell ? 1 : 7;

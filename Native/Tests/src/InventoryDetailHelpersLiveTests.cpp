@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Seq/Channel.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -28,9 +28,10 @@ struct LiveFixture {
   Menu_Framework_MenuRow* previous_rows = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuMemory previous_memory = VS::Menu::Framework::menuMemory;
   Items_Inventory previous_inventory = Audio_Seq_unusedInventory;
-  int previous_held = Input_buttonsState;
-  int previous_repeat = Input_buttonRepeat;
-  decltype(Input_buttonsPressed) previous_pressed = Input_buttonsPressed;
+  int previous_held = VS::Input::buttonsState;
+  int previous_repeat = VS::Input::buttonRepeat;
+  decltype(VS::Input::buttonsPressed) previous_pressed =
+      VS::Input::buttonsPressed;
   int previous_preview = Menu_Inventory_ashleyRenderState;
   int previous_y = Menu_Inventory_ashleyYOffset;
   int previous_return = Menu_Inventory_exitToBattle;
@@ -50,9 +51,9 @@ struct LiveFixture {
     }
     VS::Menu::Framework::menuItems = rows.data();
     Audio_Seq_unusedInventory = {};
-    Input_buttonsState = 0;
-    Input_buttonRepeat = 0;
-    Input_buttonsPressed.allButtons = 0;
+    VS::Input::buttonsState = 0;
+    VS::Input::buttonRepeat = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
     Menu_Inventory_ashleyRenderState = 0;
     Menu_Inventory_ashleyYOffset = 5;
     Menu_Inventory_secondaryTitleEnabled = 7;
@@ -65,9 +66,9 @@ struct LiveFixture {
     VS::Menu::Framework::menuItems = previous_rows;
     VS::Menu::Framework::menuMemory = previous_memory;
     Audio_Seq_unusedInventory = previous_inventory;
-    Input_buttonsState = previous_held;
-    Input_buttonRepeat = previous_repeat;
-    Input_buttonsPressed = previous_pressed;
+    VS::Input::buttonsState = previous_held;
+    VS::Input::buttonRepeat = previous_repeat;
+    VS::Input::buttonsPressed = previous_pressed;
     Menu_Inventory_ashleyRenderState = previous_preview;
     Menu_Inventory_ashleyYOffset = previous_y;
     Menu_Inventory_exitToBattle = previous_return;
@@ -108,11 +109,11 @@ TEST_CASE("F02567 live paging uses the production inventory count lazily",
   LiveFixture fixture;
   Audio_Seq_unusedInventory.weapons[0].blade = 1;
   Audio_Seq_unusedInventory.weapons[7].blade = 16;
-  Input_buttonRepeat = VS::Input::L1;
+  VS::Input::buttonRepeat = VS::Input::L1;
   CHECK(inventory::PollLiveDetailsPaging(0, 0) == 1);
-  Input_buttonRepeat = VS::Input::R1;
+  VS::Input::buttonRepeat = VS::Input::R1;
   CHECK(inventory::PollLiveDetailsPaging(0, 1) == 0);
-  Input_buttonsState = VS::Input::L1 | VS::Input::R1;
+  VS::Input::buttonsState = VS::Input::L1 | VS::Input::R1;
   VS::Menu::Framework::menuItems = nullptr;
   CHECK(inventory::PollLiveDetailsPaging(-1, 17) == 17);
 }
@@ -174,13 +175,13 @@ TEST_CASE("F02574 live close integrates rows and retains the source exit mask",
   LiveFixture fixture;
   fixture.rows[31].state = Menu_Framework_MenuItemState_Idle;
   fixture.rows[31].w = 164;
-  Input_buttonsPressed.allButtons = VS::Input::Triangle;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Triangle;
   inventory::ExitLiveDetailsView(1);
   CHECK(fixture.rows[31].state == Menu_Framework_MenuItemState_Dismiss);
   CHECK(fixture.rows[31].targetPosition0 == -164);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 2);
   CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));
-  Input_buttonsPressed.allButtons = VS::Input::Circle;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Circle;
   inventory::ExitLiveDetailsView(0);
   CHECK(Menu_Inventory_exitToBattle == 0);
 }

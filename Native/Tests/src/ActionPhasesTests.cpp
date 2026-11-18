@@ -16,7 +16,7 @@
 #include "Battle/ActionPhasesLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -300,8 +300,7 @@ TEST_CASE("F00121 settles every actor before toggling and selecting field mode",
 
 TEST_CASE("F00122 forwarding retirement retains native phase entrypoints",
           "[action-phases][F00122]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8007350C) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

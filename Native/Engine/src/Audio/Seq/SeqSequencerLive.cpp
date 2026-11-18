@@ -25,11 +25,11 @@
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/StreamPlayback.hpp"
 #include "Audio/VoiceMixerLive.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -554,7 +554,7 @@ class LivePlaybackHost final : public PlaybackHost {
 
   void FinishTick(PlaybackState& state) override {
     StorePlayback(state);
-    Audio_Native_Tick();
+    VS::Audio::Driver::TickVoiceOutput();
     LoadPlayback(state);
   }
 

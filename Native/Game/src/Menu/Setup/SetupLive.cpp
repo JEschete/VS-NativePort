@@ -28,7 +28,7 @@
 #include "DiscQueue.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
@@ -239,11 +239,7 @@ class LiveHost final : public Host {
   void Refuse(std::string_view what) override {
     VS_LOG_WARN("menu.setup", "{}", what);
   }
-  Framework::Buttons Input() override {
-    return {.pressed = Input_buttonsPressed.allButtons,
-            .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-            .held = static_cast<std::uint32_t>(Input_buttonsState)};
-  }
+  Framework::Buttons Input() override { return Framework::LiveButtons(); }
   void PlaySound(MenuSound sound) override { PlayMenuSound(sound); }
   void PlaySoundEffect(int effect) override {
     Audio::LivePlaySfxCentered(kMenuSoundChannelGroup, effect);
@@ -333,9 +329,9 @@ class LiveHost final : public Host {
     return {reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
             Framework::kStringBufferBytes};
   }
-  int CursorMemory() override { return Input_settings.cursorMemory; }
+  int CursorMemory() override { return VS::Input::settings.cursorMemory; }
   void SetCursorMemory(int value) override {
-    Input_settings.cursorMemory = static_cast<char>(value);
+    VS::Input::settings.cursorMemory = static_cast<char>(value);
   }
 
   void InitInformationTextBox(int header) override {

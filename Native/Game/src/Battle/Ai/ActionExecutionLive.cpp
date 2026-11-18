@@ -22,7 +22,7 @@
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
@@ -129,7 +129,7 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
  public:
   bool SelectActor(int id) override {
     if (id < 0 || id >= kCandidateTargetSlots) return false;
-    state_ = Battle_Ai_FrameState()->actors[id];
+    state_ = LiveFrameContext().actors[id];
     return state_ != nullptr;
   }
   DecisionDispatchState State() const override {
@@ -143,7 +143,7 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
   int ElapsedTicks() override { return Core::ElapsedFrameCounterTicks(); }
   int TickBudget() const override { return Battle_Ai_frameTickBudget; }
   void CacheTick(int tick) override {
-    Battle_Ai_FrameState()->lastBudgetTick = tick;
+    LiveFrameContext().lastBudgetTick = tick;
   }
   void IssueCommand(int command) override {
     IssueLiveActorCommand(state_, command);
@@ -173,8 +173,9 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
   }
   std::optional<std::uint16_t> TileFlags(unsigned x,
                                          unsigned z) const override {
-    const auto* flags = Battle_Ai_FrameState()->tileFlags;
-    if (flags == nullptr || x >= kAiFrameGridSide || z >= kAiFrameGridSide) {
+    const auto* flags = LiveFrameContext().tileFlags;
+    if (flags == nullptr || x >= kNavigationGridSide ||
+        z >= kNavigationGridSide) {
       return std::nullopt;
     }
     return flags[z][x];
@@ -183,7 +184,7 @@ class LiveDecisions final : public LiveDecisionList<DecisionUpdateWorld> {
     ResetLiveDecisionMovement(*state_, area);
   }
   void ClearFirstDirectionWord() override {
-    Battle_Ai_FrameState()->directionCache[0] = 0;
+    LiveFrameContext().ClearDirectionTests();
   }
   void DispatchMovement() override {
     DispatchLiveMovementBehavior(

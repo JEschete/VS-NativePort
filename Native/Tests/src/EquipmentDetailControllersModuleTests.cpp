@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/OverlayReset.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Input/Pad.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 
@@ -13,7 +13,7 @@ namespace inventory = VS::Menu::Inventory;
 template <typename Entry>
 bool IsBound(std::string_view module, unsigned address, Entry entry) {
   const auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, module, address);
+      VS::Content::ModuleSymbols(), module, address);
   return resolved == reinterpret_cast<void*>(entry);
 }
 }  // namespace
@@ -56,11 +56,11 @@ TEST_CASE("F02576 MENU3 reload retains zero-initialized controller state",
   fixture.AddParts();
   fixture.Open(inventory::UpdateLiveBladeDetails);
   fixture.Wait(inventory::UpdateLiveBladeDetails);
-  Input_buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
   Boot_ResetMenu3Statics();
   fixture.IdleRows();
-  Input_buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed.allButtons = 0;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 1);
   CHECK(VS::Menu::Framework::enabledStatPages == 3);
 }
@@ -72,11 +72,11 @@ TEST_CASE(
   fixture.AddParts();
   fixture.Open(inventory::UpdateLiveBladeDetails);
   fixture.Wait(inventory::UpdateLiveBladeDetails);
-  Input_buttonsPressed.allButtons = VS::Input::Cross;
+  VS::Input::buttonsPressed.allButtons = VS::Input::Cross;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
   Boot_ResetMenubStatics();
   fixture.IdleRows();
-  Input_buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed.allButtons = 0;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 1);
   CHECK(VS::Menu::Framework::enabledStatPages == 3);
 }

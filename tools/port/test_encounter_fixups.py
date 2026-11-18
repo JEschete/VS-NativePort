@@ -481,7 +481,7 @@ int func_800F9800(void) {
                     binding = f"Battle_{name}Slot"
                     self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
                     self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS[binding],
-                                     r"Native\Game\src\Battle\AttackPrerequisites.h")
+                                     r"Native\Game\include\Battle\AttackPrerequisitesLive.hpp")
                     self.assertNotIn(fid, copy_fixups.OWNED_CALL_BINDINGS)
                 if fid in live:
                     header, name = live[fid]
@@ -775,7 +775,7 @@ int func_800F9800(void) {
         self.assertTrue(core.startswith("// Hand-maintained (tools/port/owned.csv)."))
         self.assertLess(core.index("host.StageClearGame();"), core.index("host.ClearPendingClearSave();"))
         live = (root / r"Native\Game\src\Title\TitleMenuLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("void StageClearGame() override { Save_NativeStageClearGame(); }", live)
+        self.assertIn("void StageClearGame() override { VS::Game::Save::StageClearGame(); }", live)
         self.assertIn("void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }", live)
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
@@ -1361,7 +1361,7 @@ int func_800F9800(void) {
         source = (root / r"Native\Game\src\Effects\TrailEmitterLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Content_plg074TrailEmissionCounter[0]", source)
+        self.assertIn("VS::Content::plg074TrailEmissionCounter[0]", source)
         self.assertNotIn("Effects_Plg073_trailEmissionCounter", source)
 
     def room_draw_sources(self):
@@ -1528,17 +1528,17 @@ int func_800F9800(void) {
                     "F00066": ("Field_FreezeRoomGimmicksTemporarilyEntry", r"Native\Game\include\Field\PlatformPlacementLive.hpp"),
                     "F00547": ("Field_CurrentSavePointIdEntry", r"Native\Game\src\Field\ChestInteractionsLive.hpp"),
                     "F00828": ("Field_RefreshAshleyInteractionTileEntry", r"Native\Game\src\Field\ChestInteractionsLive.hpp"),
-                    "F01637": ("Battle_Ai_RefreshActionCandidateReadinessEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01697": ("Battle_Ai_ApplySimulatedActionResultsEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01698": ("Battle_Ai_SimulateActionCandidateEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01699": ("Battle_Ai_UpdateCandidateHitWeightEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01704": ("Battle_Ai_EvaluateActionCandidateEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01707": ("Battle_Ai_SelectFallbackActionEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01712": ("Battle_Ai_EnumerateActionCandidatesEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01713": ("Battle_Ai_AdvancePlanningSimulationEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
-                    "F01716": ("Battle_Ai_BuildActorActionPlanEntry", r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                    "F01637": ("Battle_Ai_RefreshActionCandidateReadinessEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01697": ("Battle_Ai_ApplySimulatedActionResultsEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01698": ("Battle_Ai_SimulateActionCandidateEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01699": ("Battle_Ai_UpdateCandidateHitWeightEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01704": ("Battle_Ai_EvaluateActionCandidateEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01707": ("Battle_Ai_SelectFallbackActionEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01712": ("Battle_Ai_EnumerateActionCandidatesEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01713": ("Battle_Ai_AdvancePlanningSimulationEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
+                    "F01716": ("Battle_Ai_BuildActorActionPlanEntry", r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
                     "F01717": ("Battle_Ai_ReconcileCompletedActionPlanEntry",
-                               r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h"),
+                               r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp"),
                     "F00619": ("Field_SetMovingPlatformVisibilityEntry", r"Native\Game\include\Field\PlatformPlacementLive.hpp"),
                     "F00621": ("Field_MovingPlatformDwellTicksEntry", r"Native\Game\include\Field\PlatformPlacementLive.hpp"),
                     "F00067": ("Field_ApplyUnlockEffectToRoomObjectEntry", r"Native\Game\src\Field\ChestInteractionsLive.hpp"),
@@ -1837,7 +1837,7 @@ int func_800F9800(void) {
             core,
         )
         self.assertIn("return actor_.instance.soundEnabled != 0;", live)
-        self.assertIn("VS::Render::DrawLiveActorGroundShadow(actor_,", live)
+        self.assertRegex(live, r"VS::Render::DrawLiveActorGroundShadow\(\s*actor_,")
 
     def test_model_geometry_reads_models_only_through_recorded_extents(self):
         owned = self.owned_items()
@@ -2861,11 +2861,11 @@ int func_800F9800(void) {
     def test_native_file_cards_draw_after_footer_and_before_fade(self):
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["Save_NativeDrawFileOverlay"],
-            r"Native\Game\include\Save\NativeMenu.h",
+            r"Native\Game\include\Save\NativeMenu.hpp",
         )
         # #276 slices 51 and 53: MENU7's _drawFileMenu and its TITLE.PRG copy (F03624) are the typed
         # Menu::Files core, which asks its host for the cards after the footer and before the fade;
-        # FilesLive.cpp's hosts draw them with Save_NativeDrawFileOverlay(0) and (1).
+        # FilesLive.cpp's hosts draw them with VS::Game::Save::DrawFileOverlay(false) and (true).
         self.assertNotIn("F02757", copy_fixups.FIXES)
         self.assertNotIn("F03624", copy_fixups.FIXES)
         root = Path(__file__).resolve().parents[2]
@@ -2875,8 +2875,8 @@ int func_800F9800(void) {
         self.assertEqual(len(frame), 2)
         self.assertIn("state.screen_fade", frame[1].split("\n", 2)[1])
         live = (root / r"Native\Game\src\Menu\FilesLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("void DrawFileOverlay() override { Save_NativeDrawFileOverlay(0); }", live)
-        self.assertIn("void DrawFileOverlay() override { Save_NativeDrawFileOverlay(1); }", live)
+        self.assertIn("void DrawFileOverlay() override { VS::Game::Save::DrawFileOverlay(false); }", live)
+        self.assertIn("void DrawFileOverlay() override { VS::Game::Save::DrawFileOverlay(true); }", live)
 
     def test_file_pickers_promote_to_typed_core_with_live_callers(self):
         owned = self.owned_items()
@@ -2950,7 +2950,7 @@ int func_800F9800(void) {
         zone = zone.split("\n}\n", 1)[0]
         self.assertIn("if (!host.NativeResumePending()) {\n    host.ResetZoneScriptFlags(", zone)
         room_live = (root / r"Native\Game\src\Field\RoomLoadingLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("return Save_NativeFinishResume() != 0;", room_live)
+        self.assertIn("return VS::Game::Save::FinishStagedResume();", room_live)
         self.assertIn("void JumpToTitle() override { Boot::JumpToLiveTitle(); }", room_live)
         for fid in ("F03423", "F03437"):
             with self.subTest(fid=fid):
@@ -2963,7 +2963,7 @@ int func_800F9800(void) {
         body = core.split("void InitializeNewGameData(Host& host) {", 1)[1]
         self.assertTrue(body.lstrip().startswith("host.ResetSession();"))
         live = (root / r"Native\Game\src\Title\TitleMenuLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("void ResetSession() override { Save_NativeResetSession(); }", live)
+        self.assertIn("void ResetSession() override { VS::Game::Save::ResetSession(); }", live)
         for name in (
             "Save_NativeResumePending",
             "Save_NativeFinishResume",
@@ -2971,7 +2971,7 @@ int func_800F9800(void) {
         ):
             self.assertEqual(
                 copy_fixups.NATIVE_HELPER_HEADERS[name],
-                r"Native\Game\include\Save\NativeResume.h",
+                r"Native\Game\include\Save\NativeResume.hpp",
             )
 
     def test_owned_ai_direction_queries_need_no_region_cell_fixes(self):
@@ -2982,7 +2982,7 @@ int func_800F9800(void) {
                 self.assertNotIn(fid, copy_fixups.FIXES)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["Battle_Ai_TerrainRegionCell"],
-            r"Native\Game\src\Battle\Ai\FrameUpdate.h",
+            r"Native\Game\include\Battle\Ai\FrameUpdateLive.hpp",
         )
 
     def test_room_geometry_names_preserve_index_flags_and_bias_roles(self):
@@ -4568,8 +4568,8 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertIn("static_assert(std::extent_v<decltype(Battle_ActionState::previews)> == "
                       "static_cast<std::size_t>(battle::kTargetPreviewCapacity));", live)
         self.assertIn("state_.selection = {};", live)
-        self.assertIn("Battle_MapTargetPageIndex(", live)
-        self.assertIn("Battle_HandleTargetPageButtons()", live)
+        self.assertIn("VS::Battle::MapTargetPageIndex(", live)
+        self.assertIn("VS::Battle::HandleTargetPageButtons()", live)
         for targeting in (core, live):
             self.assertNotIn("0x84C", targeting)
             self.assertNotIn("sphere-cursor", targeting)
@@ -5043,11 +5043,11 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertNotIn("Audio_Driver_WriteDirtyVoiceParameters(", mixer)
         self.assertNotIn("Audio_Driver_WriteVoiceParameters(", mixer)
         live = (root / "Native/Engine/src/Audio/Mixer/VoiceMixerLive.cpp").read_text()
-        self.assertEqual(live.count("Audio_Native_ConfigureChannel("), 1)
-        self.assertIn("Audio_Native_Envelope(voice)", live)
+        self.assertEqual(live.count("VS::Audio::Driver::ConfigureOutputChannel("), 1)
+        self.assertIn("VS::Audio::Driver::OutputVoiceEnvelope(voice)", live)
         self.assertIn("if (secondary == nullptr) return LiveLayers{active, nullptr, nullptr};", live)
         sequencer = (root / "Native/Engine/src/Audio/Seq/SeqSequencerLive.cpp").read_text()
-        self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
+        self.assertEqual(sequencer.count("VS::Audio::Driver::TickVoiceOutput();"), 1)
 
     def test_fatal_refusals_report_at_error_level(self):
         # #451: the default log level filters Debugf, so a refusal that aborts must report through Errorf.

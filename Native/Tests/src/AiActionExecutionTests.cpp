@@ -20,10 +20,10 @@
 #include "Battle/Ai/ActionExecutionLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -178,7 +178,7 @@ class Decisions final : public ai::DecisionUpdateWorld {
 };
 
 struct LiveDecisionFixture {
-  Battle_Ai_FrameContext old_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext old_frame = VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* old_head = Battle_actors[0];
   Battle_Ai_ActorAiState* old_player = Battle_Ai_actorAiStates[0];
   Actors_ActorRecord* old_record = Actors_actorRecords[0];
@@ -194,13 +194,13 @@ struct LiveDecisionFixture {
     state.reserved14[0] = 1;
     state.reserved1D[0] = 1;
     Battle_actors[0] = &head;
-    Battle_Ai_FrameState()->actors[1] = &state;
+    VS::Battle::Ai::LiveFrameContext().actors[1] = &state;
     Battle_Ai_actorAiStates[0] = &player;
     Actors_actorRecords[0] = &record;
     Battle_Ai_frameTickBudget = std::numeric_limits<int>::max();
   }
   ~LiveDecisionFixture() {
-    *Battle_Ai_FrameState() = old_frame;
+    VS::Battle::Ai::LiveFrameContext() = old_frame;
     Battle_actors[0] = old_head;
     Battle_Ai_actorAiStates[0] = old_player;
     Actors_actorRecords[0] = old_record;
@@ -468,8 +468,7 @@ TEST_CASE("Live movement reset preserves all bytes outside original stores",
 
 TEST_CASE("Action execution module bindings use typed live entries",
           "[action-execution][F01657][F01658][F01659]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);
@@ -504,9 +503,9 @@ TEST_CASE("Live partial decisions keep player record and battle model distinct",
 TEST_CASE("Live decisions diagnose missing listed states and player records",
           "[action-execution][F01659][live]") {
   LiveDecisionFixture fixture;
-  Battle_Ai_FrameState()->actors[1] = nullptr;
+  VS::Battle::Ai::LiveFrameContext().actors[1] = nullptr;
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
-  Battle_Ai_FrameState()->actors[1] = &fixture.state;
+  VS::Battle::Ai::LiveFrameContext().actors[1] = &fixture.state;
   Actors_actorRecords[0] = nullptr;
   CHECK_FALSE(ai::UpdateCheckedLiveActorDecisions());
   Actors_actorRecords[0] = &fixture.record;

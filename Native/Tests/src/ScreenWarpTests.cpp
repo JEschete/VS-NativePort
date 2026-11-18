@@ -11,7 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/FixedPoint.h"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
@@ -270,8 +270,7 @@ TEST_CASE(
 TEST_CASE("Screen warp no longer publishes an original overlay entry",
           "[effects][screen-warp][redirect-binding]") {
   WarpFixture fixture;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "GIM/SCREFF2.PRG",
                                           0x800F9BD8u) == nullptr);
   VS::Effects::ScreenDistortion::DrawLiveScreenOverlay();

@@ -636,9 +636,6 @@
     <ClCompile Include="src\Battle\Ai\FrameUpdate.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\FrameUpdate.h">
-      <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\Ai\FrameUpdateLive.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -693,9 +690,6 @@
     <ClCompile Include="src\Battle\Ai\PlanningPrimitivesLive.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\PlanningPrimitivesLive.h">
-      <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\Ai\PlanningWorkspace.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -723,7 +717,7 @@
     <ClCompile Include="src\Battle\Ai\RoomState.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\RoomState.h">
+    <ClInclude Include="src\Battle\Ai\RoomState.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Ai\SpecialTerrain.cpp">
@@ -756,9 +750,6 @@
     <ClCompile Include="src\Battle\AttackPrerequisites.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\AttackPrerequisites.h">
-      <Filter>src\Battle</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\AttackPrerequisitesLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -3783,9 +3774,6 @@
     <ClInclude Include="include\Battle\TargetingLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
-    <ClInclude Include="include\Battle\TargetPages.h">
-      <Filter>include\Battle</Filter>
-    </ClInclude>
     <ClInclude Include="include\Battle\TargetPages.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
@@ -4881,13 +4869,10 @@
     <ClInclude Include="include\Save\NativeFiles.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
-    <ClInclude Include="include\Save\NativeMenu.h">
-      <Filter>include\Save</Filter>
-    </ClInclude>
     <ClInclude Include="include\Save\NativeMenu.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
-    <ClInclude Include="include\Save\NativeResume.h">
+    <ClInclude Include="include\Save\NativeResume.hpp">
       <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\NativeSnapshot.hpp">

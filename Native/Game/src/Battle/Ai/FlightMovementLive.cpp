@@ -9,6 +9,7 @@
 #include <cstring>
 #include <iterator>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "Actors/ActorRecord.h"
@@ -20,7 +21,6 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FlightMovement.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -34,9 +34,8 @@ namespace VS::Battle::Ai {
 namespace {
 using AiState = Battle_Ai_ActorAiState;
 
-static_assert(kAiDirectionBytes == kFlightDirectionCount);
-static_assert(sizeof(Battle_Ai_FrameContext::blocker_actor) ==
-              kFlightDirectionCount);
+static_assert(kNavigationDirections == kFlightDirectionCount);
+static_assert(sizeof(FrameContext::blocker_actor) == kFlightDirectionCount);
 static_assert(sizeof(AiState{}.reservedBC) == sizeof(std::int16_t));
 // The approach target (0xE5) lies in the state's reserved bytes, which the
 // target approach view names.
@@ -46,7 +45,7 @@ static_assert(offsetof(Battle_Ai_TargetApproachView, targetId) ==
               offsetof(AiState, actorId) + kApproachTargetOffset -
                   kActorIdOffset);
 
-Battle_Ai_FrameContext& Frame() { return *Battle_Ai_FrameState(); }
+FrameContext& Frame() { return LiveFrameContext(); }
 
 FlightMover Load(const AiState& state) {
   const auto* model = state.model;
@@ -129,7 +128,9 @@ class LiveFlightWorld final : public FlightMovementWorld {
   }
   [[nodiscard]] std::optional<FlightObstacle> Obstacle(
       int actor_id) const override {
-    if (actor_id < 0 || actor_id >= kAiFrameActorSlots) return std::nullopt;
+    if (actor_id < 0 || std::cmp_greater_equal(actor_id, kFrameActorSlots)) {
+      return std::nullopt;
+    }
     const auto* other = Frame().actors[actor_id];
     if (other == nullptr) return std::nullopt;
     FlightObstacle obstacle{.actor_id = other->actorId,
@@ -155,8 +156,8 @@ class LiveFlightWorld final : public FlightMovementWorld {
   [[nodiscard]] std::optional<std::uint16_t> TileFlags(int x,
                                                        int z) const override {
     const auto& frame = Frame();
-    if (frame.tileFlags == nullptr || x < 0 || z < 0 || x >= kAiFrameGridSide ||
-        z >= kAiFrameGridSide) {
+    if (frame.tileFlags == nullptr || x < 0 || z < 0 ||
+        x >= kNavigationGridSide || z >= kNavigationGridSide) {
       return std::nullopt;
     }
     return frame.tileFlags[z][x];

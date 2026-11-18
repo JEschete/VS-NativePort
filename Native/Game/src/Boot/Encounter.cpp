@@ -37,7 +37,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
-#include "Battle/TargetPages.h"
+#include "Battle/TargetPages.hpp"
 #include "Battle/TargetVolume.h"
 #include "Boot/GameLoop.h"
 #include "Boot/PlayerSettings.hpp"
@@ -73,7 +73,7 @@
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Field/Zone.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
@@ -279,7 +279,7 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   state.action = action.selection.actionId;
   state.source_actor = action.selection.primaryTarget.target.targetActor;
   state.target_count = action.selection.targetCount;
-  const auto page = Battle_GetTargetPageInfo();
+  const auto page = VS::Battle::GetTargetPageInfo();
   state.target_page = {page.total, page.page,    page.pages,
                        page.first, page.visible, page.selected};
   constexpr unsigned kTargetingControl = 2;
@@ -471,8 +471,9 @@ void LearnProfileBattleAbilities(bool all_abilities) {
     LearnAction(chain);
     LearnAction(defense);
     if (slot < kMappedAbilities) {
-      Input_settings.mappedChainAbilities[slot] = static_cast<char>(chain);
-      Input_settings.mappedDefenseAbilities[slot] = static_cast<char>(defense);
+      VS::Input::settings.mappedChainAbilities[slot] = static_cast<char>(chain);
+      VS::Input::settings.mappedDefenseAbilities[slot] =
+          static_cast<char>(defense);
     }
   }
 }
@@ -545,7 +546,7 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
   constexpr int kPostPrologueStage = 3;
   constexpr unsigned kPostPrologueMenus = 0x120;
   Audio_Seq_unusedStateFlags.introState = kPostPrologueStage;
-  Input_settings.menuFlags |= kPostPrologueMenus;
+  VS::Input::settings.menuFlags |= kPostPrologueMenus;
   if (profile == EncounterProfile::kAllItemsA ||
       profile == EncounterProfile::kAllItemsB) {
     StockEncounterItems(profile);
@@ -747,7 +748,7 @@ void RunEncounter() {
   active = true;
   VS::Boot::InitializePlatformServicesLive();
   VS::Boot::RunLiveSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
-  Battle_ResetTargetPages();
+  VS::Battle::ResetTargetPages();
   active = false;
   external_event_started = false;
   room_local_event_started = false;
@@ -879,8 +880,8 @@ EncounterState InspectGameplay() {
   }
   state.frame_buffer = Render_frameBuf;
   state.transition = VS::Field::screenTransitionStep;
-  state.native_buttons = Input_buttonsState;
-  state.native_pressed = Input_buttonsPressed.allButtons;
+  state.native_buttons = VS::Input::buttonsState;
+  state.native_pressed = VS::Input::buttonsPressed.allButtons;
   state.action_phase = Battle_actionFlowMode;
   InspectLearnedActions(state);
   constexpr int kLootFlag = 0xAB;

@@ -14,7 +14,6 @@
 #include "Audio/PlaybackResetLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencerLive.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundDriver.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
@@ -134,7 +133,7 @@ class LiveSoundDriver final : public SoundDriverHost {
     return Accepted(CloseEvent(event));
   }
 
-  void ResetOutput() override { Audio_Native_Reset(); }
+  void ResetOutput() override { VS::Audio::Driver::ResetVoiceOutput(); }
 
   void Refuse(DriverRefusal refusal) override {
     Seq::ReportRefusal(operation_, RefusalReason(refusal));

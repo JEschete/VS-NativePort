@@ -12,7 +12,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/Interpolation.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Ending/Credits/StaffRollCore.hpp"
@@ -1138,8 +1138,7 @@ TEST_CASE("Promoted staff roll functions leave no module address bindings",
        0x8006AAA0, 0x8006AB44, 0x8006ABBC, 0x8006ABF0, 0x8006AF44, 0x8006AF64,
        0x8006B324, 0x8006B450, 0x8006B6A4, 0x8006B884, 0x8006B930, 0x8006B9B4,
        0x8006B9DC});
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const unsigned address : kAddresses) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "ENDING/ENDING.PRG",
                                             address) == nullptr);

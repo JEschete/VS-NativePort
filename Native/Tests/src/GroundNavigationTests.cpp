@@ -15,7 +15,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
@@ -30,7 +30,7 @@ unsigned Tile(int x, int z) {
 }
 
 struct GroundFixture {
-  Battle_Ai_FrameContext saved = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
   decltype(std::to_array(Actors_actorRecords)) saved_models =
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Battle_actors)) saved_actors =
@@ -39,7 +39,7 @@ struct GroundFixture {
       std::to_array(Battle_Ai_actorAiStates);
   decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
   decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
-  unsigned saved_lengths = Content_battleAiHesitationLengths[0];
+  unsigned saved_lengths = VS::Content::battleAiHesitationLengths[0];
   Battle_Ai_RoomAiState room{};
   std::array<Actors_ActorRecord, 2> models{};
   std::array<Battle_Actor, 2> actors{};
@@ -49,7 +49,7 @@ struct GroundFixture {
   std::array<u_char, 1024> regions{};
 
   GroundFixture() {
-    auto& frame = *Battle_Ai_FrameState();
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
     std::memset(room.engaged_mask_bytes, 0, sizeof room.engaged_mask_bytes);
     room.engagedCount = 0;
     frame.heightMap = heights;
@@ -61,14 +61,14 @@ struct GroundFixture {
     frame.room = &room;
     Battle_Ai_roomAiState = &room;
     Battle_Ai_tileFlagMap = flags;
-    Content_battleAiHesitationLengths[0] = 0x01184614;
+    VS::Content::battleAiHesitationLengths[0] = 0x01184614;
     frame.randomState = 40;
     frame.lastBudgetTick = 1;
     const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
                                            0x10, 0x11, 0x01, 0x31};
     std::copy(directions.begin(), directions.end(), frame.directions);
     ClearCache();
-    std::fill_n(frame.actors, kAiFrameActorSlots, nullptr);
+    std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
@@ -104,19 +104,21 @@ struct GroundFixture {
   }
 
   ~GroundFixture() {
-    *Battle_Ai_FrameState() = saved;
+    VS::Battle::Ai::LiveFrameContext() = saved;
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_states.begin(), saved_states.end(),
               Battle_Ai_actorAiStates);
     Battle_Ai_roomAiState = saved_room;
     Battle_Ai_tileFlagMap = saved_flags;
-    Content_battleAiHesitationLengths[0] = saved_lengths;
+    VS::Content::battleAiHesitationLengths[0] = saved_lengths;
   }
 
   void ClearCache() {
-    std::fill_n(Battle_Ai_FrameState()->directionCache, kAiDirectionCacheWords,
-                0);
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
+    frame.ClearDirectionTests();
+    std::fill(std::begin(frame.blocker_actor), std::end(frame.blocker_actor),
+              0);
   }
 
   int Occupancy(unsigned tile) {
@@ -227,7 +229,7 @@ TEST_CASE("Ground occupancy reads planned positions and native non-AI volumes",
   fixture.states[1].nextPosition.vx = 1216;
   fixture.states[1].nextPosition.vz = 1088;
   CHECK(fixture.Occupancy(Tile(9, 8)) == -1);
-  Battle_Ai_FrameState()->actors[1] = nullptr;
+  VS::Battle::Ai::LiveFrameContext().actors[1] = nullptr;
   CHECK(fixture.Occupancy(Tile(9, 8)) == 1);
   fixture.models[1].instance.position.vx = 1264;
   fixture.models[1].instance.position.vz = 1088;
@@ -244,7 +246,7 @@ TEST_CASE("Directional actor blockers are forward-only and cached by direction",
   fixture.models[1].instance.position.vx = 1216;
   fixture.models[1].instance.position.vz = 1088;
   CHECK(fixture.Blocker(6) == 2);
-  CHECK(Battle_Ai_FrameState()->blocker_valid == 0x40);
+  CHECK(VS::Battle::Ai::LiveFrameContext().blocker_valid == 0x40);
   fixture.models[1].instance.position.vx = 3000;
   CHECK(fixture.Blocker(6) == 2);
   fixture.ClearCache();
@@ -259,7 +261,8 @@ TEST_CASE("Ground walking covers every direction and closes room boundaries",
   const int direction = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   GroundFixture fixture;
   CHECK(fixture.Walk(direction) == 1);
-  CHECK((Battle_Ai_FrameState()->walk_valid & (1u << direction)) != 0);
+  CHECK((VS::Battle::Ai::LiveFrameContext().walk_valid & (1u << direction)) !=
+        0);
   fixture.states[0].tile.word = Tile(0, 8);
   fixture.states[0].position.vx = 32;
   fixture.states[0].fine_x = 0;
@@ -292,7 +295,7 @@ TEST_CASE("Ground walk respects area exceptions and higher terrain layers",
   fixture.ClearCache();
   CHECK(fixture.Walk(6) == 1);
   fixture.flags[8][9] = 0;
-  Battle_Ai_FrameState()->roomData = fixture.regions.data();
+  VS::Battle::Ai::LiveFrameContext().roomData = fixture.regions.data();
   fixture.heights[8][9] = 0x400;
   fixture.ClearCache();
   CHECK(fixture.Walk(6) == 0);
@@ -374,17 +377,17 @@ TEST_CASE("Detour progress detects five repeated tiles and preserves RNG order",
   CHECK(fixture.states[0].opaque19A == 120);
   CHECK(fixture.states[0].detour_repeats == 0);
   CHECK(fixture.states[0].movement_wait == 0);
-  CHECK(Battle_Ai_FrameState()->randomState == 40);
+  CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 40);
 }
 
 TEST_CASE("Non-enabled detour progress draws once and retains the short plan",
           "[ai][ground-motion]") {
   GroundFixture fixture;
-  Battle_Ai_FrameState()->randomState = 3;
+  VS::Battle::Ai::LiveFrameContext().randomState = 3;
   const unsigned result =
       VS::Battle::Ai::RefreshLiveDetourProgress(&fixture.states[0], 0);
   CHECK(((result >> 5) & 127) == 31);
-  CHECK(Battle_Ai_FrameState()->randomState == 4);
+  CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 4);
 }
 
 TEST_CASE("Cardinal passability visits exactly four ordered callbacks",
@@ -410,7 +413,7 @@ TEST_CASE("Existing detour initialization does not consume random draws",
   CHECK(VS::Battle::Ai::InitializeLiveObstacleDetour(
             &fixture.states[0], 0x20, passable) == (0x20u | (15u << 18)));
   CHECK(fixture.states[0].detour_run == 1);
-  CHECK(Battle_Ai_FrameState()->randomState == 40);
+  CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 40);
 }
 
 TEST_CASE("Hesitation only draws for a fresh non-poll request",
@@ -418,10 +421,10 @@ TEST_CASE("Hesitation only draws for a fresh non-poll request",
   GroundFixture fixture;
   CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 0, 3, 1) ==
         0);
-  CHECK(Battle_Ai_FrameState()->randomState == 40);
+  CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 40);
   CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 0, 1, 1) ==
         0);
-  CHECK(Battle_Ai_FrameState()->randomState == 41);
+  CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 41);
   CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 128, 1,
                                                  6) == 1);
   CHECK(fixture.states[0].movementModeCounters[12] == 1);
@@ -710,7 +713,7 @@ TEST_CASE("Live area movement clears one cache byte when the actor is stuck",
   state.opaque4 = 5;
   state.moveX = 1344;
   state.moveZ = 1088;
-  auto& frame = *Battle_Ai_FrameState();
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
   frame.walk_valid = 0xFF;
   frame.walk_passable = 0xFF;
   frame.blocker_valid = 0xFF;

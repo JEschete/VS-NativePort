@@ -12,7 +12,7 @@
 
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "State/Timers.hpp"
 #include "TestSupport/FloatingLabelRenderingLiveFixture.hpp"
 
@@ -152,7 +152,7 @@ class SavedState {
     Battle_ashleyStatusLabelsSuppressed = suppressed_;
     VS::Field::areRoomUpdatesPaused = paused_;
     VS::State::tickSpeed = tick_;
-    Input_settings = settings_;
+    VS::Input::settings = settings_;
   }
   SavedState(const SavedState&) = delete;
   SavedState& operator=(const SavedState&) = delete;
@@ -162,7 +162,7 @@ class SavedState {
   std::int16_t suppressed_ = Battle_ashleyStatusLabelsSuppressed;
   u_short paused_ = VS::Field::areRoomUpdatesPaused;
   int tick_ = VS::State::tickSpeed;
-  State_Settings settings_ = Input_settings;
+  State_Settings settings_ = VS::Input::settings;
 };
 
 using LabelDraw = void (*)(int, int, Battle_FloatingLabel*);
@@ -328,8 +328,8 @@ std::uint64_t EquipmentQueueDigest(EquipmentQueue queue, Commit commit) {
   Digest digest;
   for (const bool weapon : {false, true}) {
     for (const bool armor : {false, true}) {
-      Input_settings.weaponStatChange = weapon ? 1 : 0;
-      Input_settings.armorStatChange = armor ? 1 : 0;
+      VS::Input::settings.weaponStatChange = weapon ? 1 : 0;
+      VS::Input::settings.armorStatChange = armor ? 1 : 0;
       digest.Add(RunEquipment(frame, queue, commit));
     }
   }

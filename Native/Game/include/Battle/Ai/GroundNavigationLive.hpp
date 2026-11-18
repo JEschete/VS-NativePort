@@ -7,18 +7,20 @@ struct Battle_Ai_ActorAiState;
 struct Battle_Ai_MoveTargetView;
 struct Battle_Ai_MovementPathView;
 struct Battle_Ai_WanderView;
-// NOLINTNEXTLINE(modernize-use-using): shared with the C movement headers.
-using Battle_Ai_PathTest = int (*)(Battle_Ai_MovementPathView*, int);
 
+namespace VS::Content {
 // The hesitation lengths (bytes 1..3) loaded from BATTLE.PRG.
-extern unsigned int Content_battleAiHesitationLengths[1];
+extern unsigned int battleAiHesitationLengths[1];
+}  // namespace VS::Content
 
+namespace VS::Battle::Ai {
+// decomp: movementPathTest (src/BATTLE/BATTLE.PRG/771A8.c:2383)
+using PathTest = int (*)(Battle_Ai_MovementPathView*, int);
 // Bindings from the actor AI state table, the room's AI frame context, the
 // battle actor list and the movement code to the typed ground navigation
 // (GroundNavigation.cpp). The views are the actor's AI state. Each aborts
 // with a diagnostic when the typed routine refuses its input; the original
 // read past its tables or the room maps.
-namespace VS::Battle::Ai {
 int LiveDestinationOccupancy(Battle_Ai_MoveTargetView* state,
                              unsigned int tile);
 int CanTraverseLiveTileEdge(Battle_Ai_MoveTargetView* state, unsigned int from,
@@ -33,12 +35,13 @@ void SetLiveDetourBoundary(Battle_Ai_ActorAiState* state);
 unsigned int RefreshLiveDetourProgress(Battle_Ai_ActorAiState* state,
                                        unsigned int flags);
 int LiveCardinalPassabilityMask(Battle_Ai_MovementPathView* state,
-                                Battle_Ai_PathTest test);
+                                VS::Battle::Ai::PathTest test);
 unsigned int InitializeLiveObstacleDetour(Battle_Ai_ActorAiState* state,
                                           unsigned int flags,
-                                          Battle_Ai_PathTest test);
+                                          VS::Battle::Ai::PathTest test);
 int FollowLiveObstacleDetour(Battle_Ai_MovementPathView* state,
-                             Battle_Ai_PathTest test, int blocked_flag_bit);
+                             VS::Battle::Ai::PathTest test,
+                             int blocked_flag_bit);
 int UpdateLiveHesitationTurn(void* state, int chance, int kind, int slot);
 int SelectLiveActorVerticalMovementStep(Battle_Ai_ActorAiState* state,
                                         int* value, int* code);

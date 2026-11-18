@@ -22,7 +22,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
@@ -31,7 +31,7 @@
 #include "Field/SegmentCollisionLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 
 static_assert(std::is_same_v<
               decltype(&VS::Field::TraceLiveActorAndTerrainCollision),
@@ -97,7 +97,7 @@ struct ActionTraceFixture : SegmentFixture {
   static constexpr int kAction = 255;
   Battle_ActionDefinition definition = Battle_actionDefinitions[kAction];
   MATRIX bone_matrix = VS::Actors::boneMatrixScratch;
-  Render_ModelScratchpad workspace = *Render_ModelWorkspace();
+  Render_ModelScratchpad workspace = *VS::Render::ModelWorkspace();
   u_int previous_hit = Battle_previousHitResult;
   u_int prerequisite = Battle_hitPrerequisiteResult;
   u_int last_stat = Battle_lastActionStatValue;
@@ -122,7 +122,7 @@ struct ActionTraceFixture : SegmentFixture {
     Battle_actionState = action_state;
     Battle_actionDefinitions[kAction] = definition;
     VS::Actors::boneMatrixScratch = bone_matrix;
-    *Render_ModelWorkspace() = workspace;
+    *VS::Render::ModelWorkspace() = workspace;
     Battle_previousHitResult = previous_hit;
     Battle_hitPrerequisiteResult = prerequisite;
     Battle_lastActionStatValue = last_stat;
@@ -308,8 +308,7 @@ TEST_CASE("Terrain segment hits preserve floor equality and aliased output",
 TEST_CASE("Native segment and volume entries retain original typed bindings",
           "[field][segment-collision][redirect-binding]") {
   const SegmentFixture fixture;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   auto* address = VS::Content::ResolveModuleAddress(
       symbols, "BATTLE/BATTLE.PRG", 0x800E6C34u);
   REQUIRE(address != nullptr);

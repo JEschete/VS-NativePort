@@ -831,9 +831,6 @@
     <ClInclude Include="include\Audio\SeqSequencerLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\Audio\SequencerOutput.h">
-      <Filter>include\Audio</Filter>
-    </ClInclude>
     <ClInclude Include="include\Audio\SeqVoiceCommands.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
@@ -1044,7 +1041,7 @@
     <ClInclude Include="include\Input\ControllerLive.hpp">
       <Filter>include\Input</Filter>
     </ClInclude>
-    <ClInclude Include="include\Input\ControllerLiveState.h">
+    <ClInclude Include="include\Input\ControllerLiveState.hpp">
       <Filter>include\Input</Filter>
     </ClInclude>
     <ClInclude Include="include\Input\LegacyPad.hpp">
@@ -1062,7 +1059,7 @@
     <ClInclude Include="include\Movie\Movie.hpp">
       <Filter>include\Movie</Filter>
     </ClInclude>
-    <ClInclude Include="include\Movie\MoviePlayer.h">
+    <ClInclude Include="include\Movie\MoviePlayer.hpp">
       <Filter>include\Movie</Filter>
     </ClInclude>
     <ClInclude Include="include\Platform\App.hpp">
@@ -1122,7 +1119,7 @@
     <ClInclude Include="include\Render\ModelGeometryLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
-    <ClInclude Include="include\Render\ModelWorkspace.h">
+    <ClInclude Include="include\Render\ModelWorkspace.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">

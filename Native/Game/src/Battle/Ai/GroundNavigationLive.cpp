@@ -10,6 +10,7 @@
 #include <cstring>
 #include <iterator>
 #include <optional>
+#include <utility>
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
@@ -21,7 +22,6 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightMovementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Movement.h"
@@ -37,8 +37,7 @@ namespace {
 constexpr std::size_t kHesitationKinds = 4;
 constexpr int kRouteLinkEnds = 2;
 
-static_assert(kAiFrameActorSlots == kNavigationActorSlots);
-static_assert(kAiDirectionBytes == kNavigationDirections);
+static_assert(kFrameActorSlots == kNavigationActorSlots);
 static_assert(std::size(Battle_Ai_ActorAiState{}.movementModeCounters) ==
               kMovementModeCounterCount);
 static_assert(sizeof(Battle_Ai_ActorAiState{}.step_height_bytes) ==
@@ -275,7 +274,9 @@ int FlightTest(Battle_Ai_MovementPathView* view, int direction) {
 }
 
 const Actors_ActorRecord* Model(int actor_id) {
-  if (actor_id < 0 || actor_id >= kAiFrameActorSlots) return nullptr;
+  if (actor_id < 0 || std::cmp_greater_equal(actor_id, kFrameActorSlots)) {
+    return nullptr;
+  }
   return Actors_actorRecords[actor_id];
 }
 
@@ -384,7 +385,8 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
   [[nodiscard]] std::uint8_t HesitationLength(int kind) const override {
     if (kind < 0 || kind >= static_cast<int>(kHesitationKinds)) return 0;
     return std::bit_cast<std::array<std::uint8_t, kHesitationKinds>>(
-        Content_battleAiHesitationLengths[0])[static_cast<std::size_t>(kind)];
+        VS::Content::battleAiHesitationLengths[0])[static_cast<std::size_t>(
+        kind)];
   }
 
   [[nodiscard]] bool HasRoomAiState() const override {
@@ -407,11 +409,13 @@ class LiveGroundRoom : public LiveRoomRegions<GroundNavigationWorld> {
   }
 
  protected:
-  static Battle_Ai_FrameContext& Frame() { return *Battle_Ai_FrameState(); }
+  static FrameContext& Frame() { return LiveFrameContext(); }
 
  private:
   static Battle_Ai_ActorAiState* OtherState(int actor_id) {
-    if (actor_id < 0 || actor_id >= kAiFrameActorSlots) return nullptr;
+    if (actor_id < 0 || std::cmp_greater_equal(actor_id, kFrameActorSlots)) {
+      return nullptr;
+    }
     return Frame().actors[actor_id];
   }
 
@@ -514,7 +518,7 @@ class LiveGroundWorld final : public LiveGroundRoom {
 // A C path test over the actor AI state, run as a direction probe.
 class LivePathProbe final : public GroundDirectionProbe {
  public:
-  LivePathProbe(Battle_Ai_ActorAiState& state, Battle_Ai_PathTest test)
+  LivePathProbe(Battle_Ai_ActorAiState& state, PathTest test)
       : state_(state), test_(test) {
     Require(test != nullptr, "AI path probe requires a native callback");
   }
@@ -528,7 +532,7 @@ class LivePathProbe final : public GroundDirectionProbe {
 
  private:
   Battle_Ai_ActorAiState& state_;
-  Battle_Ai_PathTest test_;
+  PathTest test_;
 };
 
 // Runs a mutating core routine over the state's navigator and stores it back.
@@ -599,7 +603,7 @@ unsigned int RefreshLiveDetourProgress(Battle_Ai_ActorAiState* view,
 }
 
 int LiveCardinalPassabilityMask(Battle_Ai_MovementPathView* view,
-                                Battle_Ai_PathTest test) {
+                                PathTest test) {
   auto& state = State(view);
   LivePathProbe probe(state, test);
   auto navigator = Load(state);
@@ -609,8 +613,7 @@ int LiveCardinalPassabilityMask(Battle_Ai_MovementPathView* view,
 }
 
 unsigned int InitializeLiveObstacleDetour(Battle_Ai_ActorAiState* view,
-                                          unsigned int flags,
-                                          Battle_Ai_PathTest test) {
+                                          unsigned int flags, PathTest test) {
   auto& state = State(view);
   LivePathProbe probe(state, test);
   return Required(Update(state,
@@ -621,8 +624,8 @@ unsigned int InitializeLiveObstacleDetour(Battle_Ai_ActorAiState* view,
                   "AI obstacle detour refused its probe or hesitation");
 }
 
-int FollowLiveObstacleDetour(Battle_Ai_MovementPathView* view,
-                             Battle_Ai_PathTest test, int blocked_flag_bit) {
+int FollowLiveObstacleDetour(Battle_Ai_MovementPathView* view, PathTest test,
+                             int blocked_flag_bit) {
   auto& state = State(view);
   LivePathProbe probe(state, test);
   return Required(Update(state,

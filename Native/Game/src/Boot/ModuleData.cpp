@@ -143,16 +143,18 @@
 #include "Title/TitleScreen.h"
 
 // Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Effects/TrailEmitterLive.hpp"
 
 // decomp: EFFECT/PLG074.BIN PLG074 trailEffect.h origin cursor; original image matches PLG073 but mutable state remains overlay-local
-int Content_plg074TrailEmissionCounter[1];
+int VS::Content::plg074TrailEmissionCounter[1];
 // decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 eighteen packed signed16 X/Z vertices; imported source data only
 unsigned int Content_battleShadowVertices[18];
 // decomp: BATTLE/BATTLE.PRG 4B16C.s:1208 twenty-four triangles with byte offsets into projected shadow vertices
 unsigned int Content_battleShadowFaces[24];
 // decomp: BATTLE/BATTLE.PRG 7B5DC.s:func_800E4180 indexed hesitation lengths; native module-owned data
-unsigned int Content_battleAiHesitationLengths[1];
+unsigned int VS::Content::battleAiHesitationLengths[1];
 // decomp: BATTLE/BATTLE.PRG 5BF94.c:2934 D_800EBA78 main menu help text; bytes 316..319 open the gradient window
 unsigned int Content_battleMainMenuHelpText[80];
 // decomp: BATTLE/BATTLE.PRG 58578.c INCLUDE_RODATA D_80069860; strings end at jtbl_800698F8
@@ -168,7 +170,7 @@ unsigned int Content_battleSkyDome[166];
 // decomp: SLUS_010.40 25AC.c:LFO selectors include source-code bytes as sample/control data; original PS-X EXE payload, never host code
 short Content_residentLfoSamples[167936];
 
-const Content_ModuleDataEntry Content_moduleData[] = {
+const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x13BC, sizeof Battle_Ai_kTimedStatusFlags, &Battle_Ai_kTimedStatusFlags, sizeof Battle_Ai_kTimedStatusFlags}, // G00013 D_80069BBC
     {"BATTLE/BATTLE.PRG", 0x1418, sizeof Battle_Ai_kSettingsBits30Values, &Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values}, // G00014 D_80069C18
     {"BATTLE/BATTLE.PRG", 0x141C, sizeof Battle_Ai_kPerceptionRangesSquared, &Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared}, // G00015 D_80069C1C
@@ -596,10 +598,10 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"TITLE/TITLE.PRG", 0x54B68, sizeof Title_debugFontAtlas, &Title_debugFontAtlas, sizeof Title_debugFontAtlas}, // G02023 _debugFont
     {"TITLE/TITLE.PRG", 0x59A68, sizeof Title_saveMenuUiAtlas, &Title_saveMenuUiAtlas, sizeof Title_saveMenuUiAtlas}, // G02024 _uiTable
     {"TITLE/TITLE.PRG", 0x68A68, sizeof Title_saveMenuBackground, &Title_saveMenuBackground, sizeof Title_saveMenuBackground}, // G02089 _saveMenuBg_clut
-    {"EFFECT/PLG074.BIN", 0x577C, 4u, Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter},
+    {"EFFECT/PLG074.BIN", 0x577C, 4u, VS::Content::plg074TrailEmissionCounter, sizeof VS::Content::plg074TrailEmissionCounter},
     {"BATTLE/BATTLE.PRG", 0x81268, 72u, Content_battleShadowVertices, sizeof Content_battleShadowVertices},
     {"BATTLE/BATTLE.PRG", 0x812D4, 96u, Content_battleShadowFaces, sizeof Content_battleShadowFaces},
-    {"BATTLE/BATTLE.PRG", 0x88F58, 4u, Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths},
+    {"BATTLE/BATTLE.PRG", 0x88F58, 4u, VS::Content::battleAiHesitationLengths, sizeof VS::Content::battleAiHesitationLengths},
     {"BATTLE/BATTLE.PRG", 0x83278, 320u, Content_battleMainMenuHelpText, sizeof Content_battleMainMenuHelpText},
     {"BATTLE/BATTLE.PRG", 0x1060, 152u, Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes},
     {"BATTLE/BATTLE.PRG", 0x80B0C, 1820u, Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes},
@@ -608,5 +610,5 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x41C, 664u, Content_battleSkyDome, sizeof Content_battleSkyDome},
     {"SLUS_010.40", 0x800, 335872u, Content_residentLfoSamples, sizeof Content_residentLfoSamples},
 };
-const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];
+const unsigned VS::Content::kModuleDataCount = sizeof VS::Content::kModuleData / sizeof VS::Content::kModuleData[0];
 

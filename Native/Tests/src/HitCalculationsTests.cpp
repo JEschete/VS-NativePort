@@ -24,7 +24,7 @@
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/HitChance.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -187,13 +187,12 @@ std::vector<std::uint8_t> ReadModule(const char* name) {
   return bytes.value();
 }
 void Relocate(void** target, std::span<const std::uint8_t> image) {
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
-  const auto table =
-      std::ranges::find(tables, target, &Content_ModulePointerTable::target);
+  const auto tables = VS::Content::ModulePointerTables();
+  const auto table = std::ranges::find(
+      tables, target, &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      *table, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
+      *table, image, VS::Content::ModuleSymbols()));
 }
 
 bool RoutedSelectorsAreActive(

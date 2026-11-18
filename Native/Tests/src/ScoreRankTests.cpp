@@ -14,7 +14,7 @@
 #include "Battle/StatusEffects.h"
 #include "Core/Scratch.h"
 #include "Field/MapProgress.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsRankLive.hpp"
@@ -106,7 +106,7 @@ class LiveGlobals {
       : scoredata_(Audio_Seq_unusedScoredata),
         flags_(Audio_Seq_unusedStateFlags),
         rooms_(State_roomVisitProgress),
-        settings_(Input_settings),
+        settings_(VS::Input::settings),
         cursor_(Battle_unusedMenu9CursorMemory),
         position_(Menu_Score_cameraPositionBackup),
         angles_(Menu_Score_cameraAnglesBackup) {
@@ -135,7 +135,7 @@ class LiveGlobals {
     Audio_Seq_unusedScoredata = scoredata_;
     Audio_Seq_unusedStateFlags = flags_;
     State_roomVisitProgress = rooms_;
-    Input_settings = settings_;
+    VS::Input::settings = settings_;
     Battle_unusedMenu9CursorMemory = cursor_;
     Menu_Score_cameraPositionBackup = position_;
     Menu_Score_cameraAnglesBackup = angles_;
@@ -453,7 +453,7 @@ TEST_CASE("F04157 live progress binds the room chest and score globals",
           "[score-rank-live][F04157]") {
   const LiveGlobals globals;
   SetLiveProgressInputs();
-  Input_settings.cursorMemory = 0;
+  VS::Input::settings.cursorMemory = 0;
   std::memset(&Battle_unusedMenu9CursorMemory, 0xA5,
               sizeof Battle_unusedMenu9CursorMemory);
   auto* scratch = static_cast<Render_FrameScratch*>(Core_ScratchBase());

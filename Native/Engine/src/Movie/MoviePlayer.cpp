@@ -1,4 +1,4 @@
-#include "Movie/MoviePlayer.h"
+#include "Movie/MoviePlayer.hpp"
 
 #define DR_FLAC_IMPLEMENTATION
 
@@ -337,7 +337,7 @@ std::unique_ptr<Player> g_player;
 
 }  // namespace
 
-int Movie_PlayerOpen(const char* disc_path) {
+int VS::Movie::PlayerOpen(const char* disc_path) {
   g_player.reset();
   const Content::DataStore* store = Content::DataStore::Get();
   const Content::DataStore::Entry* e = store ? store->Find(disc_path) : nullptr;
@@ -356,7 +356,7 @@ int Movie_PlayerOpen(const char* disc_path) {
   return 1;
 }
 
-int Movie_PlayerDrawFrame(int ticks, int x, int y) {
+int VS::Movie::PlayerDrawFrame(int ticks, int x, int y) {
   if (!g_player) {
     return 0;
   }
@@ -366,4 +366,4 @@ int Movie_PlayerDrawFrame(int ticks, int x, int y) {
   return more ? 1 : 0;
 }
 
-void Movie_PlayerClose(void) { g_player.reset(); }
+void VS::Movie::PlayerClose(void) { g_player.reset(); }

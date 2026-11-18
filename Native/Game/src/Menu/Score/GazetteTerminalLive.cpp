@@ -26,7 +26,7 @@
 #include "Core/String/GameText.hpp"
 #include "DiscQueue.h"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -825,14 +825,14 @@ int UpdateLiveGazette() {
   auto cursor = ReadCursor();
   LiveGazetteHost host(state, cursor);
   const GazetteInput input{
-      static_cast<std::uint32_t>(Input_buttonsPressed.allButtons),
-      static_cast<std::uint32_t>(Input_buttonRepeat),
-      static_cast<std::uint32_t>(Input_previousButtons),
-      static_cast<std::uint32_t>(Input_releasedButtons),
-      Input_stickPosBuf.lStickX,
-      Input_stickPosBuf.lStickY,
-      Input_stickPosBuf.rStickX,
-      Input_stickPosBuf.rStickY};
+      static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons),
+      static_cast<std::uint32_t>(VS::Input::buttonRepeat),
+      static_cast<std::uint32_t>(VS::Input::previousButtons),
+      static_cast<std::uint32_t>(VS::Input::releasedButtons),
+      VS::Input::stickPosBuf.lStickX,
+      VS::Input::stickPosBuf.lStickY,
+      VS::Input::stickPosBuf.rStickX,
+      VS::Input::stickPosBuf.rStickY};
   const auto result = UpdateGazette(state, cursor, input, host);
   host.Publish();
   return result.value_or(0);

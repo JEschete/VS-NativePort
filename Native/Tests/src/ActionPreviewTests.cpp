@@ -24,7 +24,7 @@
 #include "Battle/HitChance.h"
 #include "Battle/HitModifiers.hpp"
 #include "Battle/HitModifiersLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -547,13 +547,12 @@ struct PreviewFixture {
     return {std::istreambuf_iterator<char>(stream), {}};
   }
   static void Relocate(void** target, std::span<const std::uint8_t> image) {
-    const auto tables =
-        std::span(Content_modulePointers, Content_modulePointerCount);
-    const auto found =
-        std::ranges::find(tables, target, &Content_ModulePointerTable::target);
+    const auto tables = VS::Content::ModulePointerTables();
+    const auto found = std::ranges::find(
+        tables, target, &VS::Content::ModulePointerTable::target);
     REQUIRE(found != tables.end());
     REQUIRE(VS::Content::RelocateModulePointerTable(
-        *found, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
+        *found, image, VS::Content::ModuleSymbols()));
   }
   void OriginalDefinitions() {
     const auto main = Module("Native\\data\\disc\\SLUS_010.40");

@@ -16,7 +16,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -569,7 +569,7 @@ TEST_CASE("Magic CreateHeader refuses a label outside the menu strings",
 
 namespace {
 struct TeleportLiveFixture {
-  State_Settings saved_settings = Input_settings;
+  State_Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
@@ -596,8 +596,8 @@ struct TeleportLiveFixture {
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuMemory = {};
     VS::Menu::Framework::actionRestrictions = 0;
-    Input_settings.menuFlags = 0x3FF;
-    Input_settings.cursorMemory = 0;
+    VS::Input::settings.menuFlags = 0x3FF;
+    VS::Input::settings.cursorMemory = 0;
     Battle_characterState = &actor;
     actor.stats = &stats;
     stats.currentMp = 500;
@@ -613,7 +613,7 @@ struct TeleportLiveFixture {
               Audio_Seq_unusedStateFlags.savePointStates);
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_Magic_teleportationStrings);
-    Input_settings = saved_settings;
+    VS::Input::settings = saved_settings;
     VS::Menu::Framework::menuMemory = saved_memory;
     VS::Menu::Framework::menuItems = saved_items;
     VS::Menu::Framework::itemsText = saved_text;
@@ -673,11 +673,11 @@ TEST_CASE("Magic UpdateTeleportMenuLive packs the confirmed destination",
   TeleportLiveFixture fixture;
   Audio_Seq_unusedStateFlags.savePointStates[3] = 1;
   Audio_Seq_unusedStateFlags.savePointStates[10] = 2;
-  Input_settings.cursorMemory = 0;
+  VS::Input::settings.cursorMemory = 0;
   CHECK(magic::UpdateTeleportMenuLive(1) == 0);
   fixture.FinishRowAnimations();
   CHECK(magic::UpdateTeleportMenuLive(0) == 0);
-  CHECK(Input_settings.cursorMemory == 0);
+  CHECK(VS::Input::settings.cursorMemory == 0);
 
   VS::Menu::Framework::selectedRow = 1;
   VS::Menu::Framework::CloseLiveRowsAndRememberCursor();

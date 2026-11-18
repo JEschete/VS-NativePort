@@ -16,7 +16,7 @@
 
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 using VS::Battle::Ai::ActionPlanningRoom;
@@ -621,8 +621,7 @@ TEST_CASE("The live request reads the primary target, not padded offsets",
 
 TEST_CASE("The promoted plan rebuild has no original module address",
           "[combat][ai][planning]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DEC88u) == nullptr);
 }

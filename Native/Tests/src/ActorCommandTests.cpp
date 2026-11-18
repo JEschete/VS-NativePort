@@ -14,7 +14,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/RoomAiMap.hpp"
@@ -38,7 +38,7 @@ const T& Required(const std::optional<T>& value) {
 }
 
 struct CommandFixture {
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
   Battle_Actor* saved_actor = Battle_actors[2];
   Actors_ActorRecord* saved_target = Actors_actorRecords[3];
@@ -84,7 +84,7 @@ struct CommandFixture {
     candidate.opaqueCBit7 = 13;
     state.actionSlots[2][1].kind = 1;
     target.instance.position = {100, 200, 300, 0};
-    auto* frame = Battle_Ai_FrameState();
+    auto* frame = &VS::Battle::Ai::LiveFrameContext();
     frame->roomData = nullptr;
     frame->heightMap = heights;
     frame->tileFlags = flags;
@@ -95,7 +95,7 @@ struct CommandFixture {
   }
 
   ~CommandFixture() {
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Battle_Ai_tileFlagMap = saved_flags;
     Battle_actors[2] = saved_actor;
     Actors_actorRecords[3] = saved_target;
@@ -114,7 +114,7 @@ TEST_CASE("AI dispatch covers all eighteen actor command intents",
   CHECK(fixture.actor.commandState == 0x80);
   CHECK(fixture.actor.commandOpcode == opcodes[intent]);
   CHECK(fixture.actor.commandTarget == 3);
-  CHECK(Battle_Ai_FrameState()->movementResult == intent);
+  CHECK(VS::Battle::Ai::LiveFrameContext().movementResult == intent);
 }
 
 TEST_CASE(
@@ -257,7 +257,7 @@ struct RoomCommandFixture : CommandFixture {
     Battle_Ai_routeGates = nullptr;
     Field_roomData = {};
     Field_roomData.collisionMap = &dimensions;
-    *Battle_Ai_FrameState() = {};
+    VS::Battle::Ai::LiveFrameContext() = {};
     state.nextTile.word = 0x00010001;
     Battle_Ai_savedMovementRandomState = 0x12345678;
   }
@@ -309,9 +309,10 @@ TEST_CASE(
     CHECK(Battle_Ai_tileFlagMap[1][1] == 0x20);
     CHECK(Battle_Ai_specialTerrainHeights[1][1] == 0x2002);
     CHECK(Battle_Ai_specialTerrainHeights[0][0] == 2);
-    CHECK(Battle_Ai_FrameState()->heightMap == Battle_Ai_specialTerrainHeights);
+    CHECK(VS::Battle::Ai::LiveFrameContext().heightMap ==
+          Battle_Ai_specialTerrainHeights);
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
-    CHECK(Battle_Ai_FrameState()->heightMap == nullptr);
+    CHECK(VS::Battle::Ai::LiveFrameContext().heightMap == nullptr);
     CHECK(Battle_Ai_specialTerrainHeights == nullptr);
   }
 }
@@ -320,7 +321,7 @@ TEST_CASE("Room terrain supports hover before the first AI update",
           "[ai][actor-commands][room-context]") {
   RoomCommandFixture fixture;
   VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
-  auto* frame = Battle_Ai_FrameState();
+  auto* frame = &VS::Battle::Ai::LiveFrameContext();
   REQUIRE(frame->heightMap != nullptr);
   CHECK(frame->heightMap == Battle_Ai_specialTerrainHeights);
   CHECK(frame->tileFlags == Battle_Ai_tileFlagMap);
@@ -339,7 +340,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
   RoomCommandFixture fixture;
   for (int world = 1; world <= 2; ++world) {
     VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
-    auto* frame = Battle_Ai_FrameState();
+    auto* frame = &VS::Battle::Ai::LiveFrameContext();
     REQUIRE(frame->heightMap == Battle_Ai_specialTerrainHeights);
     REQUIRE(frame->heightMap != nullptr);
     CHECK(frame->randomState == 0x12345678);
@@ -381,10 +382,8 @@ TEST_CASE("Original cutscene rooms allow shorter AI direction payloads",
 }
 
 namespace {
-void CheckMissingDirectionCell(int x, int z, std::uint8_t** cell) {
-  const auto* original = *cell;
-  CHECK_FALSE(Battle_Ai_TryTerrainRegionCell(x, z, cell));
-  CHECK(*cell == original);
+void CheckMissingDirectionCell(int x, int z) {
+  CHECK(VS::Battle::Ai::FindTerrainRegionCell(x, z) == nullptr);
 }
 }  // namespace
 
@@ -395,24 +394,25 @@ TEST_CASE(
   std::array<std::uint8_t, 310> guarded{};
   guarded.front() = 0xA5;
   guarded.back() = 0x5A;
-  auto& frame = *Battle_Ai_FrameState();
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
   frame.terrainRegions = guarded.data() + 1;
   frame.terrain_region_count = 308;
   frame.roomBounds = GENERATE(0x2020u, 0x190Du);
   const int width = static_cast<int>(frame.roomBounds & 0xFFu);
-  auto* cell = guarded.data();
-  REQUIRE(Battle_Ai_TryTerrainRegionCell(307 % width, 307 / width, &cell));
+  std::uint8_t* cell =
+      VS::Battle::Ai::FindTerrainRegionCell(307 % width, 307 / width);
   CHECK(cell == guarded.data() + 308);
+  REQUIRE(cell != nullptr);
   *cell = 0xD2;
-  CHECK(*Battle_Ai_TerrainRegionCell(307 % width, 307 / width) == 0xD2);
-  CheckMissingDirectionCell(308 % width, 308 / width, &cell);
-  CheckMissingDirectionCell(-1, 0, &cell);
-  CheckMissingDirectionCell(width, 0, &cell);
-  CheckMissingDirectionCell(0, -1, &cell);
-  CheckMissingDirectionCell(0, 32, &cell);
-  CHECK_FALSE(Battle_Ai_TryTerrainRegionCell(0, 0, nullptr));
+  CHECK(*VS::Battle::Ai::FindTerrainRegionCell(307 % width, 307 / width) ==
+        0xD2);
+  CheckMissingDirectionCell(308 % width, 308 / width);
+  CheckMissingDirectionCell(-1, 0);
+  CheckMissingDirectionCell(width, 0);
+  CheckMissingDirectionCell(0, -1);
+  CheckMissingDirectionCell(0, 32);
   frame.terrainRegions = nullptr;
-  CheckMissingDirectionCell(0, 0, &cell);
+  CheckMissingDirectionCell(0, 0);
   CHECK(guarded.front() == 0xA5);
   CHECK(guarded.back() == 0x5A);
 }

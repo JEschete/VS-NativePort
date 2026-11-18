@@ -24,7 +24,7 @@
 #include "Audio/SoundEffectPrograms.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundPlayback.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace Audio = VS::Audio;
@@ -1608,8 +1608,7 @@ TEST_CASE("The live resolve returns -1 for a refused bank and 0 for built-ins",
 
 TEST_CASE("Promoted sound control and effect functions keep no module binding",
           "[audio-control-sfx][audio][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::uint32_t, 67> retired{
       0x80012440U, 0x80012468U, 0x80012490U, 0x800124FCU, 0x80012568U,
       0x800125A8U, 0x800125D4U, 0x80012608U, 0x8001264CU, 0x80012694U,
@@ -1638,8 +1637,7 @@ TEST_CASE(
     "command table",
     "[audio-control-sfx][audio][redirect-binding]") {
   using Handler = void (*)(Audio_CommandParams*);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, Handler>, 13> kept{{
       {0x80017208U, &SoundEffects::LivePlayInterfaceProgramPair},
       {0x80017254U, &SoundEffects::LivePlayInterfaceProgram},

@@ -20,7 +20,7 @@
 #include "Battle/StatusQueue.hpp"
 #include "Battle/StatusQueueLive.hpp"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -245,14 +245,13 @@ void CheckUnchangedHandler(Handler handler, std::size_t rule_id) {
 }
 
 void RelocateMediators(std::span<const std::uint8_t> image) {
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto tables = VS::Content::ModulePointerTables();
   const auto table = std::ranges::find(
       tables, reinterpret_cast<void**>(Battle_actionEffectMediators),
-      &Content_ModulePointerTable::target);
+      &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      *table, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
+      *table, image, VS::Content::ModuleSymbols()));
 }
 
 std::vector<std::uint8_t> ReadOriginalBattleModule() {
@@ -519,8 +518,7 @@ TEST_CASE(
 TEST_CASE(
     "Status queue original module entries resolve to checked native bindings",
     "[status-queue][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);
@@ -659,8 +657,7 @@ TEST_CASE(
 
 TEST_CASE("New status module entries resolve to their checked native callbacks",
           "[status-queue][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);
@@ -732,9 +729,9 @@ TEST_CASE(
   LiveFixture fixture;
   RelocateMediators(image);
   for (std::size_t index = 0; index < kHandlers.size(); ++index) {
-    CHECK(VS::Content::ResolveModuleAddress(
-              {Content_moduleSymbols, Content_moduleSymbolCount},
-              "BATTLE/BATTLE.PRG", kAddresses.at(index)) ==
+    CHECK(VS::Content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                            "BATTLE/BATTLE.PRG",
+                                            kAddresses.at(index)) ==
           reinterpret_cast<void*>(kHandlers.at(index)));
     const auto mediator =
         std::ranges::find(Battle_actionEffectMediators, kHandlers.at(index));
@@ -791,8 +788,7 @@ TEST_CASE(
     "Ailment and attack enhancement module entries keep their original "
     "bindings",
     "[status-queue][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);
@@ -861,8 +857,7 @@ TEST_CASE(
 
 TEST_CASE("Defense and cure module addresses keep their checked callbacks",
           "[status-queue][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

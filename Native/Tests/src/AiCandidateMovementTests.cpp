@@ -19,7 +19,7 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CandidateMovement.hpp"
 #include "Battle/Ai/CandidateMovementLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -815,8 +815,7 @@ TEST_CASE(
 TEST_CASE(
     "Candidate movement module entries bind to the six checked live functions",
     "[candidate-movement][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

@@ -14,7 +14,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Container/Storage.h"
@@ -35,7 +35,7 @@
 #include "Save/MemoryCard/Resources.h"
 #include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeContainer.hpp"
-#include "Save/NativeMenu.h"
+#include "Save/NativeMenu.hpp"
 #include "Title/SaveFiles.h"
 
 namespace VS::Menu::Files {
@@ -73,7 +73,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   void BeginSession() override {
     VS::Menu::PlayOpenSound();
     VS::Menu::Framework::unusedContainerEmptyBackup =
-        static_cast<char>(Input_settings.containerEmpty);
+        static_cast<char>(VS::Input::settings.containerEmpty);
     VS::Menu::Framework::unusedInventoryStorage =
         static_cast<Menu_Container_InventoryStorage*>(
             VS::Core::Memory::AllocateLiveFromHighEnd(
@@ -136,10 +136,10 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Menu::Framework::SetLiveBackgroundPriority(kContainerBackgroundPriority,
                                                    kContainerBackgroundAlpha);
     VS::Menu::Files::ResetLiveElements();
-    Save_NativeSelectContainer(1);
+    VS::Game::Save::SelectContainer(1);
   }
 
-  int PollFilePicker() override { return Save_NativeSelectContainer(0); }
+  int PollFilePicker() override { return VS::Game::Save::SelectContainer(0); }
 
   void DrawFiles() override { VS::Menu::Files::DrawLiveFrame(Render_frameBuf); }
 
@@ -152,7 +152,7 @@ class LiveContainerSave final : public ContainerSaveHost {
         &storage.savedInventoryIndices, &Audio_Seq_unusedInventoryIndices,
         sizeof storage.savedInventoryIndices);
     VS::Core::Memory::CopyLiveHalfwordBlocks(&storage.storedContainer,
-                                             Save_NativeContainerData(),
+                                             VS::Game::Save::ContainerData(),
                                              sizeof storage.storedContainer);
     VS::Save::MemoryCard::ReleaseLiveMenuResources();
     VS::Menu::Framework::menuState.returnState =
@@ -173,9 +173,9 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   void BeginWrite() override {
     Menu_Container_InventoryStorage& storage = Storage();
-    VS::Menu::Files::CopyLiveSelectedContainerItems(Save_NativeContainerData(),
-                                                    &storage.container.items,
-                                                    &storage.container.indices);
+    VS::Menu::Files::CopyLiveSelectedContainerItems(
+        VS::Game::Save::ContainerData(), &storage.container.items,
+        &storage.container.indices);
     UpdateLiveDataSaveMenu(kContainerSaveInit);
   }
 
@@ -185,7 +185,7 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   void RestoreInventory() override {
     Menu_Container_InventoryStorage& storage = Storage();
-    Input_settings.containerEmpty =
+    VS::Input::settings.containerEmpty =
         VS::Menu::Framework::unusedContainerEmptyBackup;
     VS::Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory,
                                              storage.savedInventory,
@@ -223,7 +223,7 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Core::Memory::FreeLiveFromHighEnd(
         VS::Menu::Framework::unusedInventoryStorage);
     VS::Menu::Framework::unusedInventoryStorage = nullptr;
-    Save_NativeReleaseContainer();
+    VS::Game::Save::ReleaseContainer();
   }
 
   void ReportInvalidState(unsigned state) override {

@@ -133,8 +133,7 @@ TEST_CASE("Original text-box update module entry advances the production frame",
   LiveUpdateFixture fixture;
   auto* const submitted = Menu_activeTextBoxOrderingTable;
   auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "BATTLE/BATTLE.PRG",
-      0x800CB83C);
+      VS::Content::ModuleSymbols(), "BATTLE/BATTLE.PRG", 0x800CB83C);
   REQUIRE(resolved == reinterpret_cast<void*>(&menu::UpdateLiveTextBoxes));
   reinterpret_cast<decltype(&menu::UpdateLiveTextBoxes)>(resolved)();
   CHECK(Menu_textBoxes[0].state == 3);

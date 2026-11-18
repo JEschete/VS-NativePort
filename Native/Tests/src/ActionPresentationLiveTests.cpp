@@ -16,7 +16,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Effects/Runtime.h"
 #include "Render/ModelGeometryLive.hpp"
 
@@ -165,8 +165,7 @@ TEST_CASE("F00109 production deduplication remains valid at full capacity",
 }
 TEST_CASE("F00110 and F00191 forwarding aliases have no module entries",
           "[action-presentation][F00110][F00191]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800719DC) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

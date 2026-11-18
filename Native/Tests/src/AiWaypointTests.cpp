@@ -14,7 +14,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Waypoints.hpp"
 #include "Battle/Ai/WaypointsLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
 
@@ -340,8 +340,7 @@ TEST_CASE("Live waypoint search writes only the nearest active tile",
 
 TEST_CASE("Waypoint routines keep their original module entries",
           "[ai][waypoints][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

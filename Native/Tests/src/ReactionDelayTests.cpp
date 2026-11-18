@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Ai/ReactionDelay.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace ai = VS::Battle::Ai;
@@ -45,8 +45,7 @@ TEST_CASE(
 
 TEST_CASE("Promoted reaction-delay reset has no original module address",
           "[ai][decisions]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // func_800E4C64 is reached only by direct jal, so the BATTLE.PRG address
   // never resolves and callers use the typed API by name.
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

@@ -16,13 +16,13 @@
 #include "Battle/Ai/ActorSettingsLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/DecisionsLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
@@ -51,7 +51,7 @@ struct AiLifecycleFixture {
 
 struct HostilityFixture {
   unsigned saved_random = Core_Random_State();
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* saved_actor = Battle_actors[3];
   Battle_Ai_ActorAiState state{};
   Battle_Actor actor{};
@@ -63,7 +63,7 @@ struct HostilityFixture {
 
   ~HostilityFixture() {
     Core_Random_Seed(saved_random);
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Battle_actors[3] = saved_actor;
   }
 
@@ -92,7 +92,7 @@ int AshleyAllianceTestCallback(Battle_Ai_ActorAiState*) { return 0x5A; }
 struct AshleyAllianceFixture {
   decltype(std::to_array(Battle_Ai_actorAiStates)) saved_ai_states =
       std::to_array(Battle_Ai_actorAiStates);
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   unsigned saved_random = Core_Random_State();
   Battle_Actor* saved_actor0 = Battle_actors[0];
   Battle_Actor* saved_actor1 = Battle_actors[1];
@@ -117,7 +117,7 @@ struct AshleyAllianceFixture {
   ~AshleyAllianceFixture() {
     std::copy(saved_ai_states.begin(), saved_ai_states.end(),
               Battle_Ai_actorAiStates);
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Core_Random_Seed(saved_random);
     Battle_actors[0] = saved_actor0;
     Battle_actors[1] = saved_actor1;
@@ -152,7 +152,7 @@ struct AshleyAllianceFixture {
   void CheckRecovery(int settings_bit, int busy, unsigned random) {
     CHECK(state.awarenessMarker == (settings_bit ? 0x71 : 6));
     CHECK(state.awarenessFramesRemaining == (settings_bit ? 0x72 : 40));
-    CHECK(Battle_Ai_FrameState()->randomState ==
+    CHECK(VS::Battle::Ai::LiveFrameContext().randomState ==
           (settings_bit ? 0x2000 : 0x2002));
     CHECK(Core_Random_State() == random);
     CHECK(state.decisionDelay ==
@@ -166,7 +166,7 @@ struct AshleyAllianceFixture {
     CHECK(state.awarenessMarker == 6);
     CHECK(state.awarenessFramesRemaining == 0x28);
     CHECK(state.decisionDelay == 1);
-    CHECK(Battle_Ai_FrameState()->randomState == 0x2002);
+    CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 0x2002);
   }
 };
 
@@ -348,7 +348,7 @@ TEST_CASE("AI hostility preserves relation bits and both original RNG streams",
     std::memcpy(&expected.relations[target], &hostile, sizeof(hostile));
     Core_Random_Seed(1234);
     VS::Core::Rand15 expected_random(1234);
-    auto& frame = *Battle_Ai_FrameState();
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
     frame.randomState = 0xFFFF8001u;
     frame.lastBudgetTick = 7;
     if (classification != 3) {
@@ -379,7 +379,7 @@ TEST_CASE(
   Core_Random_Seed(1234);
   VS::Core::Rand15 expected_random(1234);
   expected_random.Next();
-  auto& frame = *Battle_Ai_FrameState();
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
   frame.randomState = 5;
   frame.lastBudgetTick = 11;
   fixture.MakeHostile(7);
@@ -425,7 +425,7 @@ TEST_CASE(
   fixture.CheckEntered(2, AshleyAllianceTestCallback);
   CHECK(Core_Random_State() == after_second);
 
-  auto& frame = *Battle_Ai_FrameState();
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
   frame.randomState = 0x2000;
   frame.lastBudgetTick = 2;
   VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
@@ -589,7 +589,7 @@ TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
       VS::Battle::Ai::UpdateLiveEngagementApproachBehavior;
   Battle_actorMarkers[1] = static_cast<char>(0xA5);
   const auto random = Core_Random_State();
-  const auto frame_random = Battle_Ai_FrameState()->randomState;
+  const auto frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
   for (unsigned count = 0; count < 256; ++count) {
     fixture.Reaction()->allianceReactionCount = static_cast<u_char>(count);
     auto expected = fixture.state;
@@ -599,7 +599,7 @@ TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
     CHECK(StateBytes(fixture.state) == StateBytes(expected));
     CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0xA5);
     CHECK(Core_Random_State() == random);
-    CHECK(Battle_Ai_FrameState()->randomState == frame_random);
+    CHECK(VS::Battle::Ai::LiveFrameContext().randomState == frame_random);
   }
 }
 
@@ -624,7 +624,7 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   Battle_actorMarkers[1] = static_cast<char>(0xA5);
   fixture.actors[1].commandFlags = 0x5A;
   const auto random = Core_Random_State();
-  auto& frame = *Battle_Ai_FrameState();
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
   frame.randomState = 0x2000;
   frame.lastBudgetTick = 2;
   VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
@@ -865,7 +865,7 @@ TEST_CASE("AI settings apply every decoded field through the live view",
 
 TEST_CASE("AI settings retain their original module address",
           "[ai][actor-settings][settings-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800E5A9C) ==

@@ -14,7 +14,9 @@ struct Battle_Ai_ActionCandidate;
 struct Battle_Ai_ActionPlanView;
 struct Battle_Ai_ActorAiState;
 struct Battle_Ai_CandidateEntryView;
+struct Battle_Ai_CandidateReadinessView;
 struct Battle_Ai_ActionTiming;
+struct Battle_Ai_ReactionRecord;
 
 // Bindings from the actor AI state, its stats, the action table, the AI state
 // table and the planner's exclusion table to the typed candidate list and
@@ -95,4 +97,25 @@ void RefreshLiveAiResourceRestrictions(Battle_Ai_ActorAiState* state);
 // decomp: BATTLE.PRG func_800E5710 (src/BATTLE/BATTLE.PRG/7CD68.c:526); a
 // slot action outside the action table aborts with an error.
 void BuildLiveAiActionMetadata(Battle_Ai_ActorAiState* state);
+
+// The BATTLE.PRG module-image entries of the planning operations, in their
+// original calling shape.
+int RefreshActionCandidateReadinessEntry(
+    Battle_Ai_CandidateReadinessView* state);
+void ApplySimulatedActionResultsEntry(Battle_Ai_ActionTiming* rows);
+void SimulateActionCandidateEntry(Battle_Ai_ActorAiState* state,
+                                  Battle_Ai_ActionTiming* rows,
+                                  Battle_Ai_ActionCandidate* candidate,
+                                  int mode);
+void UpdateCandidateHitWeightEntry(Battle_Ai_ActionCandidate* candidate);
+void EvaluateActionCandidateEntry(Battle_Ai_ActorAiState* state,
+                                  Battle_Ai_ActionCandidate* candidate,
+                                  int mode, Battle_ActionDefinition* action);
+void SelectFallbackActionEntry(Battle_Ai_ActorAiState* state);
+void BuildActorActionPlanEntry(Battle_Ai_ActorAiState* state);
+void ReconcileCompletedActionPlanEntry(
+    Battle_Ai_ReactionRecord* completed_action);
+void AdvancePlanningSimulationEntry(int time_step);
+void EnumerateActionCandidatesEntry(Battle_Ai_ActorAiState* state,
+                                    int readiness_threshold);
 }  // namespace VS::Battle::Ai

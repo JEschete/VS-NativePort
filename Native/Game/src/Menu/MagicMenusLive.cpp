@@ -19,7 +19,7 @@
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Field/ChestInteractionsLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -120,10 +120,10 @@ class LiveHost final : public MenuHost {
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
   int HighlightedRow() override { return Framework::LiveHighlightedRow(); }
   std::uint8_t CursorMemory() override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void SetCursorMemory(std::uint8_t value) override {
-    Input_settings.cursorMemory = StorageByte(value);
+    VS::Input::settings.cursorMemory = StorageByte(value);
   }
   bool CreateRows(int style, std::span<const SpellRow> rows) override {
     if (rows.size() > AvailableSpellList::kCapacity) {
@@ -191,8 +191,8 @@ class LiveHost final : public MenuHost {
   }
   RankInput ReadRankInput() override {
     const auto pressed =
-        static_cast<std::uint32_t>(Input_buttonsPressed.allButtons);
-    const auto repeat = static_cast<std::uint32_t>(Input_buttonRepeat);
+        static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
+    const auto repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat);
     return {.quit = (pressed & PADRup) != 0,
             .back = (pressed & PADRdown) != 0,
             .confirm = (pressed & PADRright) != 0,

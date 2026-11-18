@@ -28,9 +28,8 @@ constexpr int kGazetteScreen = static_cast<int>(fw::Submenu::kScore) + 1;
 
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
-  auto* resolved = content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENU9.PRG",
-      address);
+  auto* resolved = content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                                 "MENU/MENU9.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved != reinterpret_cast<void*>(expected)) {
     throw std::runtime_error("incorrect Gazette terminal module entry");

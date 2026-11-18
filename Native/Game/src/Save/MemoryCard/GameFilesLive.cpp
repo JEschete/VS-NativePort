@@ -26,7 +26,7 @@
 #include "Field/Map.h"
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.hpp"
@@ -125,7 +125,7 @@ static_assert(LaysOut(SaveSection::kMapStatus,
                       sizeof(State_roomVisitProgress)));
 static_assert(LaysOut(SaveSection::kSettings,
                       offsetof(Save_GameSaveImage, settings),
-                      sizeof(Input_settings)));
+                      sizeof(VS::Input::settings)));
 static_assert(LaysOut(SaveSection::kAshleySnapshot,
                       offsetof(Save_GameSaveImage, ashleySnapshot),
                       sizeof(State_ashleySnapshot)));
@@ -201,7 +201,8 @@ std::optional<SummaryTable> LiveSummaries() {
 }
 
 std::span<const std::byte, kSettingsBytes> LiveSettings() {
-  return std::as_bytes(std::span<const State_Settings, 1>{&Input_settings, 1});
+  return std::as_bytes(
+      std::span<const State_Settings, 1>{&VS::Input::settings, 1});
 }
 
 CardDirectoryEntry EntryOf(const DIRENTRY& entry) {
@@ -326,7 +327,7 @@ class LiveSaveState final : public SaveStateHost {
       case SaveSection::kMapStatus:
         return BytesOf(State_roomVisitProgress);
       case SaveSection::kSettings:
-        return BytesOf(Input_settings);
+        return BytesOf(VS::Input::settings);
       case SaveSection::kAshleySnapshot:
         return BytesOf(State_ashleySnapshot);
       case SaveSection::kInventory:

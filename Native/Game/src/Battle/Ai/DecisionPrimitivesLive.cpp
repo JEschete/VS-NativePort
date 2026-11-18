@@ -23,7 +23,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
@@ -277,7 +277,7 @@ void PromoteLiveRandomizedActionCandidate(Battle_Ai_ActionPlanView* state,
 }
 
 int NextLiveActorRandomMasked(int range) {
-  Battle_Ai_FrameContext* frame = Battle_Ai_FrameState();
+  FrameContext* frame = &LiveFrameContext();
   Require(frame != nullptr, "AI random draw requires the frame state");
   ActorRandomState random{.accumulator = frame->randomState,
                           .step = frame->lastBudgetTick};

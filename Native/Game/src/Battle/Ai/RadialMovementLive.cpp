@@ -16,7 +16,6 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -106,7 +105,7 @@ class LiveRadialWorld final : public RadialMovementWorld {
     return LiveRoomTileBounds();
   }
   [[nodiscard]] std::uint32_t GridBounds() const override {
-    return Battle_Ai_FrameState()->roomBounds;
+    return LiveFrameContext().roomBounds;
   }
   [[nodiscard]] Field::TerrainGrid Terrain() const override {
     return CurrentTerrain();

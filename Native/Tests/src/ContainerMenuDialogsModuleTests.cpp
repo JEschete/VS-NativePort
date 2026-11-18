@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 
 namespace {
@@ -16,8 +16,7 @@ constexpr std::uint32_t kTransferAddress = 0x801072B0;
 template <typename Entry>
 bool HasBinding(std::uint32_t address, Entry entry) {
   const auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENUD.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "MENU/MENUD.PRG", address);
   return resolved == reinterpret_cast<const void*>(entry);
 }
 }  // namespace

@@ -16,7 +16,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/DiscLayout.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Items/ItemRecords.hpp"
@@ -663,10 +663,10 @@ TEST_CASE("Live workshop recipe reads decode the finished file",
 }
 
 TEST_CASE("MENUC.PRG keeps no module symbol entries", "[menu][menu-setup]") {
-  const std::span<const Content_ModuleSymbol> symbols{
-      Content_moduleSymbols, Content_moduleSymbolCount};
-  CHECK(std::ranges::none_of(symbols, [](const Content_ModuleSymbol& symbol) {
-    return std::string_view(symbol.module) == "MENU/MENUC.PRG";
-  }));
+  const auto symbols = VS::Content::ModuleSymbols();
+  CHECK(std::ranges::none_of(
+      symbols, [](const VS::Content::ModuleSymbol& symbol) {
+        return std::string_view(symbol.module) == "MENU/MENUC.PRG";
+      }));
 }
 }  // namespace

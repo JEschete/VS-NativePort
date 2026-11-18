@@ -29,12 +29,12 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -48,7 +48,7 @@
 #include "Field/Room.h"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
@@ -255,8 +255,9 @@ std::expected<const Content::DataStore::Entry*, std::string> ResolveRoomEntry(
   }
   // _loadMpd (146C.c:15254) submits the ZND's allocation-sized byte request.
   // MAP014 is 65904 file bytes but ZONE009 room5 requests 33 sectors/67584.
-  // Content_ReadDiscBytes zero-fills the last sector; that allocation padding
-  // is not part of the MPD's defined sections, which remain file-bounded below.
+  // VS::Content::ReadDiscBytes zero-fills the last sector; that allocation
+  // padding is not part of the MPD's defined sections, which remain
+  // file-bounded below.
   const auto allocation = static_cast<std::uint64_t>(entry->SectorCount()) *
                           Content::DataStore::kDataSectorBytes;
   if (*size == 0 || entry->size == 0 ||
@@ -425,10 +426,10 @@ std::expected<CategoryBounds, std::string> ReadCategoryBounds(
     const Content::DataStore& store) {
   // G00027 _itemCategorySizes: resolve its registered on-disc slice, rather
   // than depending on whether the BATTLE overlay has been initialized yet.
-  const Content_ModuleDataEntry* slice = nullptr;
-  for (unsigned index = 0; index < Content_moduleDataCount; ++index) {
-    if (Content_moduleData[index].target == &Items_itemCategoryUpperIds) {
-      slice = &Content_moduleData[index];
+  const VS::Content::ModuleDataEntry* slice = nullptr;
+  for (const auto& entry : VS::Content::ModuleDataEntries()) {
+    if (entry.target == &Items_itemCategoryUpperIds) {
+      slice = &entry;
       break;
     }
   }
@@ -891,7 +892,7 @@ void CapturePersistent(Snapshot& state, bool packed_actions = false) {
   }
   state.inventory = Audio_Seq_unusedInventory;
   state.inventory_order = Audio_Seq_unusedInventoryIndices;
-  state.settings = Input_settings;
+  state.settings = VS::Input::settings;
   state.visits = State_roomVisitProgress;
   state.score = Audio_Seq_unusedScoredata;
   state.arts = Audio_Seq_unusedArtsStatus;
@@ -917,7 +918,7 @@ void ApplyPersistent(const Snapshot& state) {
   }
   Audio_Seq_unusedInventory = state.inventory;
   Audio_Seq_unusedInventoryIndices = state.inventory_order;
-  Input_settings = state.settings;
+  VS::Input::settings = state.settings;
   State_roomVisitProgress = state.visits;
   Audio_Seq_unusedScoredata = state.score;
   Audio_Seq_unusedArtsStatus = state.arts;
@@ -1146,7 +1147,8 @@ Result CaptureActors(Snapshot& state) {
   }
   // func_80069FC4, 146C.c:840. Use the original pure placement and AI
   // projections, but acquire records ONLY in the owned staging cache.
-  for (int slot = 0; slot < kAiFrameActorSlots; ++slot) {
+  for (int slot = 0; std::cmp_less(slot, VS::Battle::Ai::kFrameActorSlots);
+       ++slot) {
     const auto* actor = Battle_actors[slot];
     if (actor == nullptr || actor->roomSpawnIndex == kNoRoomSpawn) continue;
     if (actor->stats == nullptr || Actors_actorRecords[slot] == nullptr ||
@@ -1650,7 +1652,7 @@ std::expected<void, std::string> FinishResume() {
   Core_randomShuffleIndex = static_cast<int>(state.random.shuffle_index);
   Battle_Ai_savedMovementRandomState =
       std::bit_cast<int>(state.random.movement_state);
-  Battle_Ai_FrameState()->randomState = state.random.movement_state;
+  VS::Battle::Ai::LiveFrameContext().randomState = state.random.movement_state;
   pending.reset();
   return {};
 }

@@ -1,19 +1,58 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 
 #include "Battle/Ai/FrameUpdate.hpp"
 #include "Battle/Ai/NavigationPrimitives.hpp"
 
+struct Battle_Ai_ActorAiState;
+struct Battle_Ai_RoomAiState;
 struct Battle_Ai_PerceptionUpdateView;
 struct Battle_Ai_AiCreationView;
 
-// Binding from the battle AI tables and the frame context (FrameUpdate.h) to
-// the typed frame update. The signatures keep the module-image entries'
-// calling shape, so relocated BATTLE.PRG addresses resolve to these.
+// Binding from the battle AI tables and the frame context to the typed frame
+// update. The signatures keep the module-image entries' calling shape, so
+// relocated BATTLE.PRG addresses resolve to these.
 namespace VS::Battle::Ai {
+// The battle AI tables cached for the current frame.
+struct FrameContext {
+  Battle_Ai_ActorAiState* actors[kFrameActorSlots];
+  Battle_Ai_RoomAiState* room;
+  std::uint16_t (*heightMap)[kNavigationGridSide];
+  std::uint16_t (*tileFlags)[kNavigationGridSide];
+  std::uint8_t* terrainRegions;
+  std::size_t terrain_region_count;
+  int movementResult;
+  // One bit per direction: walking probed, walking open and blocker probed.
+  std::uint8_t walk_valid;
+  std::uint8_t walk_passable;
+  std::uint8_t blocker_valid;
+  std::uint8_t reserved_cache;
+  // The actor blocking each direction whose blocker_valid bit is set.
+  std::uint8_t blocker_actor[kNavigationDirections];
+  std::uint32_t roomBounds;
+  std::uint8_t directions[kNavigationDirections];
+  void* roomData;
+  std::uint32_t randomState;
+  int lastBudgetTick;
+
+  // Forgets the frame's direction probes; the blocking actors are kept.
+  void ClearDirectionTests() {
+    walk_valid = 0;
+    walk_passable = 0;
+    blocker_valid = 0;
+    reserved_cache = 0;
+  }
+};
+
+[[nodiscard]] FrameContext& LiveFrameContext();
+// The tile's blocked-direction byte in the room's terrain regions; nullptr,
+// with a diagnostic, outside the room or its regions.
+[[nodiscard]] std::uint8_t* FindTerrainRegionCell(int tile_x, int tile_z);
+
 // Caches the actor and room tables into the frame context; returns the packed
 // room bounds. A room whose auxiliary section cannot hold the terrain region
 // header aborts with a diagnostic.

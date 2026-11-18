@@ -56,7 +56,7 @@
 #include "Field/TransitionsLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Field/TrapsLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Items/TreasureChests.h"
@@ -872,7 +872,7 @@ class LiveTrapSelectionHost final : public VS::Field::TrapSelectionHost {
   }
   void ShowInformation(VS::Field::TrapTarget target) override {
     const auto* trap = VS::Field::ResolveLiveTrapTarget(target);
-    if (trap != nullptr && Input_settings.information != 0) {
+    if (trap != nullptr && VS::Input::settings.information != 0) {
       VS::Menu::ShowLiveSceneNotification(kTrapNotification,
                                           trap->kind + kTrapActionOffset, 1);
     }

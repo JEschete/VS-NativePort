@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/OverlayReset.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/ContainerIndexingLiveFixture.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
 
@@ -38,8 +38,7 @@ TEST_CASE("Container sorting registry uses all five actual MENUD signatures",
                                void (*)(Items_EquipmentPartStats*, int, int)>);
   static_assert(std::is_same_v<decltype(&sorting::SortLiveEquipment),
                                void (*)(int, int)>);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (std::size_t row = 0; row < kSortEntries.size(); ++row) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MENUD.PRG",
                                             kSortAddresses[row]) ==

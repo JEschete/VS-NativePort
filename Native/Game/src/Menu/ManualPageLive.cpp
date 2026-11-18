@@ -14,7 +14,7 @@
 
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Manual.h"
 #include "Menu/ManualIllustrationLive.hpp"
@@ -141,7 +141,7 @@ void DrawChecked(std::string_view refused, Draw draw) {
 
 PageArrowState ArrowState() {
   return {.animation_state = Menu_Manual_pageArrowAnimState,
-          .square_held = (Input_previousButtons & PADRleft) != 0};
+          .square_held = (VS::Input::previousButtons & PADRleft) != 0};
 }
 
 // The help text from its first halfword to the end of its heap payload.

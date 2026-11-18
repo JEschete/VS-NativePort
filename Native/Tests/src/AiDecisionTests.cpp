@@ -15,7 +15,7 @@
 #include "Battle/Ai/ActorPerceptionLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Damage.h"
@@ -39,7 +39,7 @@ struct DecisionFixture {
       std::to_array(Actors_actorRecords);
   std::array<Field_GimmickInstance*, 16> saved_gimmicks =
       std::to_array(Field_gimmickInstances);
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   Battle_Ai_RoomAiState room{};
   Battle_Ai_ActorAiState state{};
   std::array<Battle_Actor, 3> actors{};
@@ -87,7 +87,7 @@ struct DecisionFixture {
     std::copy(saved_records.begin(), saved_records.end(), Actors_actorRecords);
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               Field_gimmickInstances);
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
   }
 };
 }  // namespace
@@ -238,7 +238,7 @@ TEST_CASE(
 TEST_CASE("AI actor RNG sign-extends the old halfword before adding its step",
           "[ai][decisions]") {
   DecisionFixture fixture;
-  auto* frame = Battle_Ai_FrameState();
+  auto* frame = &VS::Battle::Ai::LiveFrameContext();
   frame->randomState = 0x7FFF;
   frame->lastBudgetTick = 2;
   CHECK(VS::Battle::Ai::NextLiveActorRandomMasked(128) == 1);
@@ -390,8 +390,8 @@ struct PerceptionFixture : DecisionFixture {
 
   PerceptionFixture() {
     std::fill_n(Battle_Ai_actorAiStates, saved_states.size(), nullptr);
-    auto& frame = *Battle_Ai_FrameState();
-    std::fill_n(frame.actors, kAiFrameActorSlots, nullptr);
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
+    std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
     frame.actors[0] = Battle_Ai_actorAiStates[0] = &player;
     frame.actors[2] = Battle_Ai_actorAiStates[2] = &state;
     frame.tileFlags = flags;

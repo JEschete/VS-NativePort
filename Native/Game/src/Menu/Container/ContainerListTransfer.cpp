@@ -20,7 +20,7 @@ using Core::Math::WrappingAdd;
 using Core::Math::WrappingMultiply;
 using Core::Math::WrappingSubtract;
 
-// Controller bits of Input_buttonsPressed/State/Repeat.
+// Controller bits of VS::Input::buttonsPressed/State/Repeat.
 constexpr std::uint32_t kButtonL1 = 0x4;
 constexpr std::uint32_t kButtonR1 = 0x8;
 constexpr std::uint32_t kButtonTriangle = 0x10;

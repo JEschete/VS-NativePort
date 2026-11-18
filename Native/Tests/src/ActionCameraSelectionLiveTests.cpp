@@ -16,7 +16,7 @@
 #include "Battle/Action.h"
 #include "Battle/ActionCameraSelectionLive.hpp"
 #include "Battle/ActionFlow.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -259,8 +259,7 @@ TEST_CASE("Camera fixture leaves unused math projection unchanged",
 }
 TEST_CASE("F00179 through F00186 module entries retain their actual call ABI",
           "[camera-selection][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, void*>, 8> bindings{{
       {0x80077F14, reinterpret_cast<void*>(&b::LiveActionTargetLimbPosition)},
       {0x80077F70, reinterpret_cast<void*>(&b::LiveActionTargetDistance)},
@@ -282,8 +281,7 @@ TEST_CASE("F00179 through F00186 module entries retain their actual call ABI",
 }
 TEST_CASE("Camera selection relocation rejects interior entrypoints atomically",
           "[camera-selection][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   std::array<std::uint32_t, 4> addresses{0x80078248, 0x800782E4, 0x80078364,
                                          0x800784AC};
   std::array<void*, 4> destination{};
@@ -294,8 +292,8 @@ TEST_CASE("Camera selection relocation rejects interior entrypoints atomically",
       reinterpret_cast<void*>(&b::LiveUpdateActionCameraZoom)};
   const auto image =
       std::bit_cast<std::array<unsigned char, sizeof(addresses)>>(addresses);
-  const Content_ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 4,
-                                         destination.data(),  4, nullptr};
+  const VS::Content::ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 4,
+                                              destination.data(),  4, nullptr};
   REQUIRE(VS::Content::RelocateModulePointerTable(table, image, symbols));
   CHECK(destination == expected);
   addresses[3] += 4;

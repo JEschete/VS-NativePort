@@ -14,7 +14,7 @@
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesTerminal.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
@@ -96,13 +96,13 @@ class LiveAssignmentHost final : public AssignmentHost {
   }
   std::span<std::uint8_t> Mappings(AbilityMenuType type) override {
     if (type == AbilityMenuType::kChain) {
-      return {
-          reinterpret_cast<std::uint8_t*>(Input_settings.mappedChainAbilities),
-          kAssignmentButtonCount};
+      return {reinterpret_cast<std::uint8_t*>(
+                  VS::Input::settings.mappedChainAbilities),
+              kAssignmentButtonCount};
     }
     if (type == AbilityMenuType::kDefense) {
       return {reinterpret_cast<std::uint8_t*>(
-                  Input_settings.mappedDefenseAbilities),
+                  VS::Input::settings.mappedDefenseAbilities),
               kAssignmentButtonCount};
     }
     return {};
@@ -176,8 +176,8 @@ class LiveAssignmentHost final : public AssignmentHost {
   }
   AssignmentInput Input() const override {
     const auto pressed =
-        static_cast<std::uint32_t>(Input_buttonsPressed.allButtons);
-    const auto repeat = static_cast<std::uint32_t>(Input_buttonRepeat);
+        static_cast<std::uint32_t>(VS::Input::buttonsPressed.allButtons);
+    const auto repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat);
     return {.circle = (pressed & kCircle) != 0,
             .triangle = (pressed & kTriangle) != 0,
             .square = (pressed & kSquare) != 0,
@@ -349,11 +349,11 @@ class LiveScreenHost final : public AbilityScreenHost {
                      ? Text_Menu2_battleAbilities_Offset_defenseAbilitiesDesc
                      : Text_Menu2_battleAbilities_Offset_noDefenseAbilities)};
     std::array<int, kCategoryCount> types{0, defense_available ? 0 : 1};
-    const auto remembered = Input_settings.cursorMemory;
-    if (force_cursor_memory) Input_settings.cursorMemory = 1;
+    const auto remembered = VS::Input::settings.cursorMemory;
+    if (force_cursor_memory) VS::Input::settings.cursorMemory = 1;
     Framework::CreateLiveMenuRows(static_cast<int>(kCategoryCount),
                                   kCategoryRowInfo, text.data(), types.data());
-    Input_settings.cursorMemory = remembered;
+    VS::Input::settings.cursorMemory = remembered;
   }
   int SelectedCategory() override { return Framework::LiveSelectedRow(); }
   int UpdateAbilityList(AbilityKind kind, bool initialize) override {

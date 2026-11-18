@@ -17,7 +17,6 @@
 #include "Battle/TargetingState.h"
 #include "Content/DiscLayout.h"
 #include "Core/Log.hpp"
-#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
@@ -79,11 +78,7 @@ class LiveHost final : public Host {
     return {reinterpret_cast<const std::uint8_t*>(renderRenameMenuStrings),
             sizeof renderRenameMenuStrings};
   }
-  Framework::Buttons Input() override {
-    return {.pressed = Input_buttonsPressed.allButtons,
-            .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-            .held = static_cast<std::uint32_t>(Input_buttonsState)};
-  }
+  Framework::Buttons Input() override { return Framework::LiveButtons(); }
   void PlaySound(MenuSound sound) override { PlayMenuSound(sound); }
   void PlaySoundEffect(int effect) override {
     Audio::LivePlaySfxCentered(kMenuSoundChannelGroup, effect);

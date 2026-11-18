@@ -17,13 +17,13 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Collision.h"
@@ -102,7 +102,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
       std::to_array(Battle_actorMarkers);
   Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(Battle_Ai_specialTerrainHeights) saved_heights =
       Battle_Ai_specialTerrainHeights;
   void* saved_auxiliary = Battle_Ai_roomHasWaypoints;
@@ -171,7 +171,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     Battle_Ai_roomHasWaypoints = saved_auxiliary;
     Battle_Ai_specialTerrainHeights = saved_heights;
     Battle_Ai_savedMovementRandomState = saved_movement_random;
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
   }
 
   Battle_Ai_ActorAiState* ActiveRoute() {
@@ -598,7 +598,7 @@ TEST_CASE("Production gimmick release balances one occupancy contribution",
 
 TEST_CASE("Original gimmick occupancy entries resolve to native functions",
           "[ai][navigation][gimmick-occupancy][occupancy-binding]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E6898) ==
         reinterpret_cast<void*>(&VS::Battle::Ai::AddLiveAiTileOccupant));
@@ -738,7 +738,7 @@ TEST_CASE("Route availability retains the original thirteen-point capacity",
 
 TEST_CASE("Original route availability entry resolves to the native updater",
           "[ai][route-availability]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DC638) ==
         reinterpret_cast<void*>(
@@ -915,17 +915,21 @@ TEST_CASE(
   record->route_gate = 1;
   fixture.model.instance.currentTileLayer = 1;
   fixture.grid[8][8] = 0xAB;
-  auto& frame = *Battle_Ai_FrameState();
-  frame.directionCache[0] = 0xFFFFFFFF;
-  frame.directionCache[1] = 0x12345678;
-  frame.directionCache[2] = 0xA5B6C7D8;
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
+  frame.walk_valid = frame.walk_passable = 0xFF;
+  frame.blocker_valid = frame.reserved_cache = 0xFF;
+  constexpr std::array<std::uint8_t, 8> kBlockers{0x78, 0x56, 0x34, 0x12,
+                                                  0xD8, 0xC7, 0xB6, 0xA5};
+  std::ranges::copy(kBlockers, std::begin(frame.blocker_actor));
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   fixture.CheckPreparedRoute();
   fixture.CheckPreparedFlags();
   fixture.CheckCopiedCoordinates();
-  CHECK(frame.directionCache[0] == 0);
-  CHECK(frame.directionCache[1] == 0x12345678);
-  CHECK(frame.directionCache[2] == 0xA5B6C7D8);
+  CHECK(frame.walk_valid == 0);
+  CHECK(frame.walk_passable == 0);
+  CHECK(frame.blocker_valid == 0);
+  CHECK(frame.reserved_cache == 0);
+  CHECK(std::ranges::equal(kBlockers, frame.blocker_actor));
   CHECK(Battle_Ai_savedMovementRandomState == 0x1234);
 }
 
@@ -936,10 +940,10 @@ TEST_CASE("Scripted route updates skip suspended and missing-AI actors safely",
   fixture.AllocateCopiedRoute(1088u | (1088u << 16));
   const auto before = Snapshot(*fixture.ActiveRoute());
   fixture.actors[1].commandState = static_cast<u_char>(flags);
-  Battle_Ai_FrameState()->lastBudgetTick = 0x1234;
+  VS::Battle::Ai::LiveFrameContext().lastBudgetTick = 0x1234;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(Snapshot(*fixture.ActiveRoute()) == before);
-  CHECK(Battle_Ai_FrameState()->lastBudgetTick == 0x1234);
+  CHECK(VS::Battle::Ai::LiveFrameContext().lastBudgetTick == 0x1234);
   fixture.actors[1].commandState = 0;
   Battle_Ai_actorAiStates[1] = nullptr;
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
@@ -976,7 +980,7 @@ TEST_CASE("Scripted arrival retains signed source square-sum behavior",
 TEST_CASE(
     "Original scripted route entries resolve to native lifecycle functions",
     "[ai][scripted-override]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800E527C) ==

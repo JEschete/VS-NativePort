@@ -22,7 +22,6 @@
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
@@ -49,11 +48,8 @@ constexpr unsigned kTileMask = 0xFF;
 constexpr int kTileZShift = 16;
 
 static_assert(std::size(Battle_Ai_actorAiStates) == kNavigationActorSlots);
-static_assert(kAiFrameActorSlots == kNavigationActorSlots);
-static_assert(kAiFrameGridSide == kNavigationGridSide);
-static_assert(kAiDirectionBytes == kNavigationDirections);
-static_assert(std::size(Battle_Ai_FrameContext{}.directions) ==
-              kNavigationDirections);
+static_assert(kFrameActorSlots == kNavigationActorSlots);
+static_assert(std::size(FrameContext{}.directions) == kNavigationDirections);
 // The route table is 256 words followed, at 0x454, by eight link end pairs.
 static_assert(sizeof(Battle_Ai_RouteGateEnd) == 2);
 static_assert(kRouteWordCount * sizeof(u_int) <= kRouteEndOffset);
@@ -321,12 +317,11 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
         .suspended = (actor_->commandState & kSuspendedActorCommands) != 0};
   }
   void StampBudgetTick() override {
-    Battle_Ai_FrameState()->lastBudgetTick =
-        VS::Core::ElapsedFrameCounterTicks();
+    LiveFrameContext().lastBudgetTick = VS::Core::ElapsedFrameCounterTicks();
   }
   [[nodiscard]] std::optional<ScriptedRoute> Route(int actor_id) override {
     const auto* base =
-        Battle_Ai_FrameState()->actors[static_cast<std::size_t>(actor_id)];
+        LiveFrameContext().actors[static_cast<std::size_t>(actor_id)];
     route_ = base != nullptr
                  ? static_cast<Battle_Ai_ActorAiState*>(base->nativePointer18C)
                  : nullptr;
@@ -336,7 +331,7 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
   [[nodiscard]] std::optional<RouteModelPlacement> Placement(
       int actor_id) const override {
     const auto* model = Actors_actorRecords[static_cast<std::size_t>(actor_id)];
-    if (model == nullptr || Battle_Ai_FrameState()->tileFlags == nullptr) {
+    if (model == nullptr || LiveFrameContext().tileFlags == nullptr) {
       return std::nullopt;
     }
     const auto& instance = model->instance;
@@ -350,13 +345,13 @@ class LiveScriptedRouteHost final : public ScriptedRouteHost {
                                .position_pad = instance.position.pad};
   }
   [[nodiscard]] std::uint16_t TileFlags(int x, int z) const override {
-    return Battle_Ai_FrameState()->tileFlags[z][x];
+    return LiveFrameContext().tileFlags[z][x];
   }
   void StoreRoute(const ScriptedRoute& route) override {
     StoreRouteRecord(route, *route_);
   }
   void ClearDirectionCache() override {
-    Battle_Ai_FrameState()->directionCache[0] = 0;
+    LiveFrameContext().ClearDirectionTests();
   }
   void MoveTowardDestinationTile(ScriptedRoute& route) override {
     StoreRouteRecord(route, *route_);
@@ -415,7 +410,7 @@ void RemoveLiveAiTileOccupant(const Field_GimmickInstance* gimmick) {
 
 int IsLiveAdjacentTileStepBlocked(unsigned int tile, int direction) {
   NavigationDirectionCodes directions{};
-  const auto& frame = *Battle_Ai_FrameState();
+  const auto& frame = LiveFrameContext();
   std::copy(std::begin(frame.directions), std::end(frame.directions),
             directions.begin());
   const auto blocked = IsAdjacentTileStepBlocked(

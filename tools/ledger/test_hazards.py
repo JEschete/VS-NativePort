@@ -262,6 +262,12 @@ class ModuleDataTests(unittest.TestCase):
         self.assertEqual(classes("u_char Effects_Plg049_ringColorFactors[1][4]; /* contents: module image */\n"),
                          {"UNSIZED-ARRAY"})
 
+    def test_a_namespace_qualified_placeholder_row_is_found(self) -> None:
+        # The definition of a namespaced global names it qualified; that must not hide the placeholder.
+        found = [item.detail for item in scan_all("int VS::Content::trailCounter[1];\n", "Native/Game/src/Boot/ModuleData.cpp")
+                 if item.hazard_class == "UNSIZED-ARRAY"]
+        self.assertEqual(found, ["VS::Content::trailCounter"])
+
     def test_a_real_one_element_initialized_array_is_clean(self) -> None:
         self.assertEqual(classes("int Effects_rows[1] = {4};\n"), set())
 

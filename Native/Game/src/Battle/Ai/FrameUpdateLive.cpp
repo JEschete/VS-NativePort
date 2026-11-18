@@ -26,12 +26,11 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/BlockedMovementLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/RoomState.h"
+#include "Battle/Ai/RoomState.hpp"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.hpp"
 #include "Field/Collision.h"
@@ -43,37 +42,35 @@
 #include "Legacy/Psx.h"
 #include "Render/Palette.h"
 
-static Battle_Ai_FrameContext frame_context;
+namespace {
+VS::Battle::Ai::FrameContext frame_context;
+}  // namespace
 
-Battle_Ai_FrameContext* Battle_Ai_FrameState(void) { return &frame_context; }
+VS::Battle::Ai::FrameContext& VS::Battle::Ai::LiveFrameContext() {
+  return frame_context;
+}
 
-int Battle_Ai_TryTerrainRegionCell(int tile_x, int tile_z, u_char** cell) {
+std::uint8_t* VS::Battle::Ai::FindTerrainRegionCell(int tile_x, int tile_z) {
   const unsigned width = frame_context.roomBounds & 0xFFu;
   const unsigned height = (frame_context.roomBounds >> 8) & 0xFFu;
-  if (cell == nullptr || frame_context.terrainRegions == nullptr ||
-      width == 0 || width > kAiFrameGridSide || height == 0 ||
-      height > kAiFrameGridSide || (unsigned)tile_x >= width ||
-      (unsigned)tile_z >= height) {
+  if (frame_context.terrainRegions == nullptr || width == 0 ||
+      width > kNavigationGridSide || height == 0 ||
+      height > kNavigationGridSide || static_cast<unsigned>(tile_x) >= width ||
+      static_cast<unsigned>(tile_z) >= height) {
     VS::Core::Errorf("ai", "Invalid AI direction cell: tile=%d,%d grid=%u,%u",
                      tile_x, tile_z, width, height);
-    return 0;
+    return nullptr;
   }
-  const size_t index = static_cast<size_t>(tile_z) * width + (unsigned)tile_x;
+  const size_t index =
+      static_cast<size_t>(tile_z) * width + static_cast<unsigned>(tile_x);
   if (index >= frame_context.terrain_region_count) {
     VS::Core::Errorf("ai",
                      "AI direction cell exceeds source payload: tile=%d,%d "
                      "index=%zu bytes=%zu",
                      tile_x, tile_z, index, frame_context.terrain_region_count);
-    return 0;
+    return nullptr;
   }
-  *cell = frame_context.terrainRegions + index;
-  return 1;
-}
-
-u_char* Battle_Ai_TerrainRegionCell(int tile_x, int tile_z) {
-  u_char* cell = nullptr;
-  if (!Battle_Ai_TryTerrainRegionCell(tile_x, tile_z, &cell)) abort();
-  return cell;
+  return frame_context.terrainRegions + index;
 }
 
 namespace {
@@ -216,11 +213,9 @@ NavigationDirectionCodes LiveDirectionCodes() {
 bool LiveHasRoomData() { return frame_context.roomData != nullptr; }
 
 std::optional<std::uint8_t> LiveTerrainRegionCell(int x, int z) {
-  u_char* cell = nullptr;
-  if (frame_context.terrainRegions == nullptr ||
-      Battle_Ai_TryTerrainRegionCell(x, z, &cell) == 0) {
-    return std::nullopt;
-  }
+  if (frame_context.terrainRegions == nullptr) return std::nullopt;
+  const std::uint8_t* cell = FindTerrainRegionCell(x, z);
+  if (cell == nullptr) return std::nullopt;
   return *cell;
 }
 

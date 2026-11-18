@@ -19,7 +19,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "State/Progress.h"
 
 namespace {
@@ -66,8 +66,7 @@ TEST_CASE("Action outcome module bindings preserve all five original ABIs",
                                int (*)(int)>);
   static_assert(
       std::is_same_v<decltype(&b::ApplyLiveLearnedActionUnlocks), void (*)()>);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](const char* module, std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, module, address);
   };

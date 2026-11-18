@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
@@ -273,8 +273,7 @@ TEST_CASE("Retired fog entries leave no module address bindings",
           "[render][fog][render-display]") {
   // No module image stores SetFogNear or DpqColor (#276 slice A4), so the
   // typed cores are reached only through OWNED_CALL_BINDINGS.
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
                                           0x80041954u) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",

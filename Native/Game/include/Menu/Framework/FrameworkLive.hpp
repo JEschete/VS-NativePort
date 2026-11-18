@@ -21,9 +21,13 @@ struct Items_EquipmentPartStats;
 // menus and the battle flow call. Each entry runs the typed function over the
 // live State and writes the State back before it returns.
 namespace VS::Menu::Framework {
+struct Buttons;
 struct MenuRow;
 struct RowPlacement;
 struct RowText;
+
+// The live pad state (Input/ControllerLiveState.hpp) in the menus' shape.
+[[nodiscard]] Buttons LiveButtons();
 
 // BATTLE.PRG (5BF94.c).
 int LoadLiveMenuOverlay(int packed_menu_state);

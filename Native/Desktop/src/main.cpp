@@ -24,7 +24,7 @@
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Input/Pad.hpp"
-#include "Movie/MoviePlayer.h"
+#include "Movie/MoviePlayer.hpp"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Platform/Paths.hpp"
@@ -487,7 +487,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
     VS_LOG_WARN("boot", "{} (continuing without audio)", r.error());
   }
   struct MovieScope {
-    ~MovieScope() { Movie_PlayerClose(); }
+    ~MovieScope() { VS::Movie::PlayerClose(); }
   } movie_scope;
 
   Input::InputSystem input;

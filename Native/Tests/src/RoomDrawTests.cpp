@@ -13,7 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Room.h"
@@ -1322,7 +1322,7 @@ TEST_CASE("Live room tint is bounded by the current frame buffer",
 
 TEST_CASE("Room draw entries no longer resolve through module addresses",
           "[render][room][redirect-binding]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   constexpr std::array<std::uint32_t, 21> kRetired{
       0x8009723C, 0x80097388, 0x8009797C, 0x80097A10, 0x80097AEC, 0x80097CF0,
       0x80097F70, 0x80098014, 0x800980F8, 0x80098160, 0x8009817C, 0x80098194,

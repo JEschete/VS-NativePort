@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <span>
 
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
@@ -21,7 +21,7 @@ class LiveDetailWorld : public World {
     return Framework::AreLiveMenuRowsIdle();
   }
   std::uint32_t PressedButtons() override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
   void BeginTransition(DetailRowId row) override {
     BeginLiveDetailsTransition(row.index);

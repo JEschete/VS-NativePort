@@ -9,7 +9,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Minimap.h"
 
 namespace {
@@ -17,8 +17,7 @@ namespace b = VS::Battle;
 
 template <typename Function>
 Function ModuleEntry(unsigned address, Function expected) {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   void* const entry =
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", address);
   if (entry == nullptr || entry != reinterpret_cast<void*>(expected)) {

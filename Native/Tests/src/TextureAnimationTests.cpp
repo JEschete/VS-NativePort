@@ -20,7 +20,7 @@
 #include "Actors/TextureAnimation.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Actors/Textures.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -695,8 +695,7 @@ TEST_CASE("Live texture scrolling runs its timers without a usable slot",
 
 TEST_CASE("Texture animation bindings retire the module entries they replace",
           "[actors-appearance-rendering][actors][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // The texture animation is typed C++ now; no BATTLE.PRG image or table
   // stores these addresses.
   constexpr std::array<unsigned, 6> kRetired{0x800AAD4Cu, 0x800AAE9Cu,

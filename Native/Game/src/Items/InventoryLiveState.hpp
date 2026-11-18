@@ -11,12 +11,3 @@ namespace VS::Items {
 extern unsigned char miscItemInvoked;
 
 }  // namespace VS::Items
-
-namespace VS::Items::Inventory {
-
-// decomp: vs_mainMenu_inventoryItemCapacities (MENU/MAINMENU.PRG 2D10.c): the
-// slots each menu category lists. The original never wrote it; it is the
-// typed VS::Items::kCategoryCapacities.
-extern const unsigned char inventoryItemCapacities[8];
-
-}  // namespace VS::Items::Inventory

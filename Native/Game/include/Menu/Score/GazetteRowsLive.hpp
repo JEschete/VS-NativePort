@@ -9,7 +9,7 @@ struct Menu_Framework_MenuRow;
 // and overlay ordering table (Render_frameScratch), vs_main_frameBuf
 // (Render_frameBuf), the menu framework's rows and cursor memory
 // (VS::Menu::Framework::menuMemory), the cursor memory setting
-// (Input_settings), the gazette's remembered row
+// (VS::Input::settings), the gazette's remembered row
 // (Battle_unusedMenu9CursorMemory) and the top menu strings
 // (Menu_Score_menuText), in the shapes the copied score screen calls. The arrow
 // animation and the top menu's step live here instead of 238.c's statics. A

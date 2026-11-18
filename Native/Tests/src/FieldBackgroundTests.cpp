@@ -11,7 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Background.hpp"
 #include "Field/BackgroundLive.hpp"
 #include "Field/BackgroundLiveState.hpp"
@@ -654,8 +654,7 @@ TEST_CASE("Live background colours reach the sky dome",
 
 TEST_CASE("The field camera module symbols are retired",
           "[field-camera][field-background]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   constexpr std::array<std::uint32_t, 57> kRetired{
       0x80069D78U, 0x8006D97CU, 0x8006D9C4U, 0x8006D9FCU, 0x8006DB98U,
       0x8006DEFCU, 0x8006DFE0U, 0x8006E158U, 0x8006E640U, 0x8006EBF8U,

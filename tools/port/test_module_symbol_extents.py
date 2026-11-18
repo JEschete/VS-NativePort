@@ -77,7 +77,7 @@ class SourceBoundaryTests(unittest.TestCase):
 class GeneratedSymbolTableTests(unittest.TestCase):
     def entries(self) -> dict[str, list[tuple[int, int, str, bool]]]:
         text = MODULE_POINTERS.read_text(encoding="utf-8")
-        start = text.index("const Content_ModuleSymbol Content_moduleSymbols[] = {")
+        start = text.index("const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {")
         body = text[start:text.index("\n};", start)]
         by_module: dict[str, list[tuple[int, int, str, bool]]] = {}
         for line in body.splitlines():

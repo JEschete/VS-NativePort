@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/SphereContainmentLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "TestSupport/SphereContainmentLiveFixture.hpp"
 
 namespace {
@@ -17,8 +17,7 @@ using Point = std::span<const std::uint16_t>;
 
 template <typename Function>
 Function Entry(unsigned address, Function expected) {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   void* const pointer =
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", address);
   const bool matches =
@@ -101,8 +100,7 @@ TEST_CASE(
 TEST_CASE(
     "Actual production registry does not expose a false overlay or interior",
     "[sphere-containment-module][F01295]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "TITLE/TITLE.PRG",
                                           0x800C1564) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
@@ -115,13 +113,13 @@ TEST_CASE(
   f::State state;
   state.spheres[0].volumes[1] = f::Volume(1);
   state.spheres[1].volumes[1] = f::Volume(0);
-  const std::array<Content_ModuleSymbol, 2> owners{{
+  const std::array<VS::Content::ModuleSymbol, 2> owners{{
       {"BATTLE/BATTLE.PRG", 0x80200000, 1, &state.spheres[0],
        sizeof(Battle_TargetSphere), 1, 1},
       {"BATTLE/BATTLE.PRG", 0x80210000, 1, &state.spheres[1],
        sizeof(Battle_TargetSphere), 1, 1},
   }};
-  const Content_ModulePointerTable table{
+  const VS::Content::ModulePointerTable table{
       "BATTLE/BATTLE.PRG",
       0,
       1,
@@ -148,8 +146,8 @@ TEST_CASE(
   CHECK(b::IsLivePointInTargetVolume(&volume, f::Point{}) == 1);
   const auto replacement = f::Volume(0);
   const auto bytes = f::Bytes(replacement);
-  const Content_ModuleDataEntry entry{"BATTLE/BATTLE.PRG", 0, sizeof volume,
-                                      &volume, sizeof volume};
+  const VS::Content::ModuleDataEntry entry{
+      "BATTLE/BATTLE.PRG", 0, sizeof volume, &volume, sizeof volume};
   REQUIRE(VS::Content::CopyModuleDataEntry(entry, bytes));
   CHECK(b::IsLivePointInTargetVolume(&volume, {}) == 0);
 }

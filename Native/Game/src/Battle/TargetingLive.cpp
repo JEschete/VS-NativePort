@@ -67,7 +67,7 @@
 #include "Field/Room.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/Controller.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/LootLive.hpp"
 #include "Items/TreasureChests.h"
 #include "Legacy/Psx.h"
@@ -1015,17 +1015,17 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
 
   [[nodiscard]] std::uint32_t ButtonsHeld() const override {
-    return static_cast<std::uint32_t>(Input_buttonsState);
+    return static_cast<std::uint32_t>(VS::Input::buttonsState);
   }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
   [[nodiscard]] std::uint32_t ButtonsRepeated() const override {
-    return static_cast<std::uint32_t>(Input_buttonRepeat);
+    return static_cast<std::uint32_t>(VS::Input::buttonRepeat);
   }
   [[nodiscard]] battle::StickInput RightStick() const override {
-    return {VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickX),
-            VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickY)};
+    return {VS::Input::MapStickDeadZone(VS::Input::stickPosBuf.rStickX),
+            VS::Input::MapStickDeadZone(VS::Input::stickPosBuf.rStickY)};
   }
   void PlayLeaveSound() override { VS::Menu::PlayLeaveSound(); }
   void PlaySelectSound() override { VS::Menu::PlaySelectSound(); }
@@ -1096,10 +1096,10 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     return VS::Battle::AreTargetLabelsSettledEntry() != 0;
   }
   [[nodiscard]] bool HandlePageButtons() override {
-    return Battle_HandleTargetPageButtons() != 0;
+    return VS::Battle::HandleTargetPageButtons() != 0;
   }
   [[nodiscard]] int MapPageIndex(int index) const override {
-    return Battle_MapTargetPageIndex(static_cast<std::uint8_t>(index));
+    return VS::Battle::MapTargetPageIndex(static_cast<std::uint8_t>(index));
   }
 
   void InitInformationBox() override {

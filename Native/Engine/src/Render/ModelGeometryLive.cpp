@@ -27,7 +27,7 @@
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -183,7 +183,7 @@ class LiveShadowGround final : public ShadowGround {
 };
 
 [[nodiscard]] ModelSurface WorkspaceSurface() {
-  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
+  const Render_ModelScratchpad* workspace = ModelWorkspace();
   return {workspace->palette, workspace->texturePage};
 }
 

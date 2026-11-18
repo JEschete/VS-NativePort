@@ -10,11 +10,11 @@
 
 #include "Audio/MusicLive.hpp"
 #include "Audio/SampleBanksLive.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Battle/Ai/RoomState.h"
+#include "Audio/VoiceOutputLive.hpp"
+#include "Battle/Ai/RoomState.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/TargetingState.h"
 #include "Boot/GameLoop.h"
@@ -32,7 +32,7 @@
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.h"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
@@ -54,7 +54,7 @@
 #include "Render/Display.h"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
-#include "Save/NativeResume.h"
+#include "Save/NativeResume.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/Ashley.h"
 #include "State/GameClockLive.hpp"
@@ -137,7 +137,7 @@ class LiveSessionHost final : public SessionHost {
   void ResetGameplayInspection() override {
     VS::Boot::ResetGameplayInspection();
   }
-  void ResetNativeSession() override { Save_NativeResetSession(); }
+  void ResetNativeSession() override { VS::Game::Save::ResetSession(); }
 
   [[noreturn]] void Transfer(SessionDestination destination) override {
     VS::Core::Debugf(
@@ -210,7 +210,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Content::ReleaseLiveDiscRequest(slot);
   }
 
-  void ResetNativeSession() override { Save_NativeResetSession(); }
+  void ResetNativeSession() override { VS::Game::Save::ResetSession(); }
   void HideDisplay() override { SetDispMask(0); }
   void StopControllerMotors() override {
     VS::Input::SetLiveMotorCommand(0, 0, 0);
@@ -269,7 +269,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Input::ResetLiveVibrationPatterns();
   }
   void SetReverbEnabled(bool enabled) override {
-    Audio_Native_EnableReverb(enabled ? 1 : 0);
+    VS::Audio::Driver::EnableOutputReverb(enabled ? 1 : 0);
   }
   void InitializeDiscDrive() override { DsInit(); }
   void InitializeRandomShuffleTable() override {
@@ -284,11 +284,11 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     RECT rect{.x = 0, .y = 0, .w = kVramWidth, .h = kVramHeight};
     ClearImage(&rect, 0, 0, 0);
   }
-  void EnableReverb() override { Audio_Native_EnableReverb(1); }
+  void EnableReverb() override { VS::Audio::Driver::EnableOutputReverb(1); }
   void RegisterVSyncCallback() override { VSyncCallback(VS::Core::IgnoreCall); }
   void ResetGameHeap() override { ResetLiveSessionHeap(); }
   void InvalidateAiBindings() override {
-    Battle_Ai_InvalidateSessionBindings();
+    VS::Battle::Ai::InvalidateSessionBindings();
   }
   void InitializeDiscQueue() override {
     VS::Content::InitializeLiveDiscQueue();
@@ -298,7 +298,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Audio::LiveInitializeMenuSoundBanks();
   }
   void ResetButtonHeldFrames() override {
-    std::ranges::fill(Input_buttonHeldFrames, 0U);
+    std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
   }
   void ResetPlayTime() override { VS::State::StoreLivePlayTime({}); }
   void ClearAshleySnapshotPending() override {

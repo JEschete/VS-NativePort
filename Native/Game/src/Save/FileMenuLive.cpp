@@ -29,7 +29,7 @@
 #include "Core/Text/TextCode.h"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Sounds.hpp"
@@ -37,9 +37,8 @@
 #include "Save/FileMenu.hpp"
 #include "Save/NativeFilePresentation.hpp"
 #include "Save/NativeFiles.hpp"
-#include "Save/NativeMenu.h"
 #include "Save/NativeMenu.hpp"
-#include "Save/NativeResume.h"
+#include "Save/NativeResume.hpp"
 #include "Save/RuntimeSnapshot.hpp"
 #include "Title/SaveFiles.h"
 
@@ -324,10 +323,10 @@ std::expected<Document, std::string> BuildDocument(
 
 void AdoptSettings(const Document& document) {
   const auto& settings = document.state.settings;
-  Input_settings.cumulativeSaveCount = settings.cumulativeSaveCount;
-  Input_settings.currentGameSaveCount = settings.currentGameSaveCount;
-  Input_settings.saveFileGeneration = settings.saveFileGeneration;
-  Input_settings.containerEmpty = settings.containerEmpty;
+  VS::Input::settings.cumulativeSaveCount = settings.cumulativeSaveCount;
+  VS::Input::settings.currentGameSaveCount = settings.currentGameSaveCount;
+  VS::Input::settings.saveFileGeneration = settings.saveFileGeneration;
+  VS::Input::settings.containerEmpty = settings.containerEmpty;
 }
 
 class LiveFileMenuHost final : public file_menu::FileMenuHost {
@@ -351,10 +350,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
     VS_LOG_ERROR("save", "{}: {}", text, detail);
   }
   std::optional<std::string> TakeResumeError() override {
-    if (!*Save_NativeResumeError()) return std::nullopt;
-    std::string error = Save_NativeResumeError();
-    Save_NativeClearResumeError();
-    return error;
+    return VS::Game::Save::TakeResumeError();
   }
   [[nodiscard]] std::expected<void, std::string> ClearSaveStaged()
       const override {
@@ -385,7 +381,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
       const file_menu::FileMenu& menu, VS::Save::WriteConsent consent) override;
   void OpenEmptyContainer() override {
     staged_storage.emplace();
-    Input_settings.containerEmpty = 1;
+    VS::Input::settings.containerEmpty = 1;
   }
   void OpenConfirmedContainer() override;
   std::expected<void, std::string> ResumeConfirmedSelection() override;
@@ -515,7 +511,7 @@ void LiveFileMenuHost::OpenConfirmedContainer() {
   const auto& document = ConfirmedDocument();
   const auto& current = ConfirmedFile();
   staged_storage = document.state.storage;
-  Input_settings.containerEmpty = BankEmpty(*staged_storage);
+  VS::Input::settings.containerEmpty = BankEmpty(*staged_storage);
   VS_LOG_INFO("save", "Opened native container in slot {} recovered {}",
               current.slot, current.status == FileStatus::kRecovered);
 }
@@ -540,15 +536,16 @@ using PickerEntry = file_menu::FileMenuResult (*)(
     const file_menu::FileMenuInput&);
 
 int RunPicker(PickerEntry entry, int init) {
-  const auto pressed = Input_buttonsPressed.allButtons;
+  const auto pressed = VS::Input::buttonsPressed.allButtons;
   const file_menu::FileMenuInput input{
       .accept = (pressed & PADRright) != 0,
       .cancel = (pressed & PADRdown) != 0,
-      .up = (Input_buttonRepeat & PADLup) != 0,
-      .down = (Input_buttonRepeat & PADLdown) != 0};
+      .up = (VS::Input::buttonRepeat & PADLup) != 0,
+      .down = (VS::Input::buttonRepeat & PADLdown) != 0};
   LiveFileMenuHost host;
   return static_cast<int>(entry(picker.session, host, init, input));
 }
+}  // namespace
 
 int InitialTitleSelection() {
   const auto opened = OpenFiles();
@@ -564,7 +561,6 @@ int InitialTitleSelection() {
   }
   return *present ? 1 : 0;
 }
-}  // namespace
 
 void ConfigureDirectory(std::filesystem::path root) {
   if (ResumePending()) {
@@ -610,6 +606,39 @@ void ShutdownFileMenus() {
   files.reset();
   directory.reset();
 }
+
+int SelectContainer(int init) {
+  return RunPicker(VS::Menu::Files::UpdateContainerMenu, init);
+}
+
+void DrawFileOverlay(bool title) {
+  const auto screen = FileMenuPresentation();
+  if (screen && screen->title == title) DrawNativeFileScreen(*screen);
+}
+
+Items_ContainerData* ContainerData() {
+  if (!staged_storage) {
+    VS_LOG_ERROR("save", "Container access without a selected native file");
+    std::abort();
+  }
+  return &*staged_storage;
+}
+
+void ReleaseContainer() { staged_storage.reset(); }
+
+void StageClearGame() {
+  staged_clear.reset();
+  ClearError().clear();
+  auto document = CaptureClearGame();
+  if (!document) {
+    ClearError() = document.error();
+    VS_LOG_ERROR("save", "Cannot stage ending clear save: {}",
+                 document.error());
+    return;
+  }
+  staged_clear = std::move(*document);
+  VS_LOG_INFO("save", "Staged original ending clear save");
+}
 }  // namespace VS::Game::Save
 
 namespace VS::Menu {
@@ -631,46 +660,3 @@ int UpdateLiveSaveMenu(int init_state) {
 }
 std::span<const char> LiveFileMenuFooter() { return VS::Game::Save::footer; }
 }  // namespace VS::Menu
-
-int Save_NativeSelectContainer(int init) {
-  return VS::Game::Save::RunPicker(VS::Menu::Files::UpdateContainerMenu, init);
-}
-
-int Save_NativeInitialTitleSelection(void) {
-  return VS::Game::Save::InitialTitleSelection();
-}
-
-void Save_NativeDrawFileOverlay(int title) {
-  const auto screen = VS::Game::Save::FileMenuPresentation();
-  if (screen && screen->title == (title != 0)) {
-    VS::Game::Save::DrawNativeFileScreen(*screen);
-  }
-}
-
-Items_ContainerData* Save_NativeContainerData(void) {
-  auto& storage = VS::Game::Save::staged_storage;
-  if (!storage) {
-    VS_LOG_ERROR("save", "Container access without a selected native file");
-    std::abort();
-  }
-  return &*storage;
-}
-
-void Save_NativeReleaseContainer(void) {
-  VS::Game::Save::staged_storage.reset();
-}
-
-void Save_NativeStageClearGame(void) {
-  namespace Save = VS::Game::Save;
-  Save::staged_clear.reset();
-  Save::ClearError().clear();
-  auto document = Save::CaptureClearGame();
-  if (!document) {
-    Save::ClearError() = document.error();
-    VS_LOG_ERROR("save", "Cannot stage ending clear save: {}",
-                 document.error());
-    return;
-  }
-  Save::staged_clear = std::move(*document);
-  VS_LOG_INFO("save", "Staged original ending clear save");
-}

@@ -20,9 +20,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Mpd.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/GameFiles.hpp"
@@ -918,12 +918,12 @@ TEST_CASE("The newest and the current save slot come from the summaries",
 TEST_CASE("The live slot lookups read the published summaries and settings",
           "[save][save-memory-card]") {
   Restore summaries_global{Title_saveFileSummaries};
-  Restore settings_global{Input_settings};
+  Restore settings_global{VS::Input::settings};
   const Summaries table = SlotTable();
   std::array<Save_CardFileInfoRecord, Files::kSlotCount> records{};
   std::memcpy(records.data(), table.data(), table.size());
   const auto settings = SettingsFor(kCurrentSlot);
-  std::memcpy(&Input_settings, settings.data(), settings.size());
+  std::memcpy(&VS::Input::settings, settings.data(), settings.size());
   Title_saveFileSummaries = records.data();
   CHECK(Files::NewestLiveSaveSlot() == 3);
   CHECK(Files::FindLiveMatchingSaveSlot() == 4);
@@ -1780,25 +1780,24 @@ TEST_CASE("Live packaging refuses a save without the save menu's icons",
   Restore resource_global{Title_memoryCardUiResource};
   Restore summaries_global{Title_saveFileSummaries};
   Restore icons_global{Save_MemoryCard_uiResources};
-  Restore settings_global{Input_settings};
+  Restore settings_global{VS::Input::settings};
   std::vector<char> workspace(2 * kImageBytes, '\x5A');
   std::array<Save_CardFileInfoRecord, Files::kSlotCount> records{};
   Title_memoryCardUiResource = workspace.data();
   Title_saveFileSummaries = records.data();
   Save_MemoryCard_uiResources = nullptr;
-  const State_Settings settings = Input_settings;
+  const State_Settings settings = VS::Input::settings;
   Files::PackageLiveGameSave(1);
   Files::PackageLiveClearSave(1);
   CHECK(AllEqual(IncomingOf(workspace), std::byte{0x5A}));
   CHECK(AllEqual(std::as_bytes(std::span{workspace}).first(kImageBytes),
                  std::byte{0x5A}));
-  CHECK(std::memcmp(&settings, &Input_settings, sizeof(settings)) == 0);
+  CHECK(std::memcmp(&settings, &VS::Input::settings, sizeof(settings)) == 0);
 }
 
 TEST_CASE("The snapshot routines are no longer resident module exports",
           "[save][save-memory-card]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
                                           0x80042CA0U) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",

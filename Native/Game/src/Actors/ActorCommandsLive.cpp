@@ -40,7 +40,7 @@
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/TransitionsLiveState.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 
 // decomp: D_800F1A50 (D_800F1A50@BATTLE/BATTLE.PRG)
 int VS::Actors::ashleyMoveInput[VS::Actors::kAshleyMoveInputWords];
@@ -286,8 +286,8 @@ class LiveAshleyHost final : public AshleyMovementHost {
   }
   void UpdateCameraOrbit() override { VS::Field::LiveUpdateCameraOrbitInput(); }
   [[nodiscard]] AshleyControls Controls() const override {
-    const Input_ControllerPortState& port = Input_controllerPorts[0];
-    const auto held = static_cast<std::uint32_t>(Input_previousButtons);
+    const Input_ControllerPortState& port = VS::Input::controllerPorts[0];
+    const auto held = static_cast<std::uint32_t>(VS::Input::previousButtons);
     const auto has = [held](std::uint32_t button) {
       return (held & button) != 0;
     };
@@ -298,7 +298,7 @@ class LiveAshleyHost final : public AshleyMovementHost {
                  .left = has(PADLleft),
                  .right = has(PADLright)},
         .walk_held = has(PADR2),
-        .jump_pressed = (Input_buttonsPressed.allButtons & PADRleft) != 0};
+        .jump_pressed = (VS::Input::buttonsPressed.allButtons & PADRleft) != 0};
     if (static_cast<std::uint8_t>(port.controllerType) == kAnalogController) {
       // The stick bytes are unsigned (the original builds with unsigned
       // char).

@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
 
@@ -49,8 +49,7 @@ TEST_CASE("Only the action package's Gravity block shares channel 0",
 
 TEST_CASE("The promoted texture binder has no original module address",
           "[effects][texture-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800D7A14u) == nullptr);
 }

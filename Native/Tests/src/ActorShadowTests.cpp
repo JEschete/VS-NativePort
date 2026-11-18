@@ -16,7 +16,7 @@
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -27,7 +27,7 @@
 #include "Render/Frame.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelGeometryLive.hpp"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -41,7 +41,7 @@ static_assert(std::is_same_v<decltype(&VS::Render::DrawLiveActorGroundShadow),
 namespace {
 struct ActorShadowFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
-  Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
+  Render_ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
   Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
   Field_RoomRecord saved_room = Field_roomData;
@@ -80,7 +80,7 @@ struct ActorShadowFixture {
     camera.m[2][1] = 4096;
     camera.t[2] = 1024;
     Render_frameScratch.viewMatrix = camera;
-    *Render_ModelWorkspace() = {};
+    *VS::Render::ModelWorkspace() = {};
     VS::Actors::modelRenderContext = {};
     actor.instance.isVisible = -1;
     actor.instance.soundEnabled = 1;
@@ -119,7 +119,7 @@ struct ActorShadowFixture {
     std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
               Field_gimmickInstances);
     Render_frameScratch = saved_frame;
-    *Render_ModelWorkspace() = saved_workspace;
+    *VS::Render::ModelWorkspace() = saved_workspace;
     VS::Actors::modelRenderContext = saved_context;
     VS::Actors::skeletonPose = saved_pose;
     Render_frameBuf = saved_framebuffer;
@@ -170,8 +170,8 @@ struct ActorShadowFixture {
   }
 
   void Draw() {
-    VS::Render::DrawLiveActorGroundShadow(actor, camera,
-                                          Render_ModelWorkspace()->rootOffset);
+    VS::Render::DrawLiveActorGroundShadow(
+        actor, camera, VS::Render::ModelWorkspace()->rootOffset);
   }
 
   void SetTerrain(bool along_z, bool steep) {
@@ -202,7 +202,7 @@ struct ActorShadowFixture {
     const std::int16_t coordinate = steep ? 176 : 160;
     actor.instance.position = {coordinate, 0, coordinate, 0};
     actor.shadowRadius = steep ? 32 : 64;
-    Render_ModelWorkspace()->rootOffset = {
+    VS::Render::ModelWorkspace()->rootOffset = {
         coordinate, static_cast<std::int16_t>(steep ? 64 : 56), coordinate, 0};
     camera.t[0] = -coordinate;
     camera.t[1] = coordinate;
@@ -260,7 +260,7 @@ void CheckScaleCase(ActorShadowFixture& fixture, const ShadowScaleCase& input) {
   fixture.actor.instance.scaleX = fixture.actor.instance.scaleY = input.model;
   fixture.actor.shadowBlend.radiusExpandRate =
       fixture.actor.shadowBlend.radiusShrinkRate = input.blend;
-  Render_ModelWorkspace()->rootOffset.vy =
+  VS::Render::ModelWorkspace()->rootOffset.vy =
       static_cast<std::int16_t>(input.height);
   fixture.Draw();
   REQUIRE(fixture.PacketCount() == 24);
@@ -401,8 +401,7 @@ TEST_CASE(
     "Actor shadow native bindings expose mesh strides and no C draw entry",
     "[render][actor-shadow][redirect-binding]") {
   ActorShadowFixture fixture;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // F01268 is typed C++ now; no module-image caller reaches 800B4B14.
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B4B14u) == nullptr);

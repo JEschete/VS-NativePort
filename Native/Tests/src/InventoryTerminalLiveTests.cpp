@@ -25,7 +25,7 @@
 #include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscReaderLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
@@ -69,14 +69,14 @@ constexpr loot::LootRow kTail{5, 47, 9, 5};
 
 template <typename Entry>
 bool IsBound(std::string_view module, unsigned address, Entry entry) {
-  return content::ResolveModuleAddress(
-             {Content_moduleSymbols, Content_moduleSymbolCount}, module,
-             address) == reinterpret_cast<void*>(entry);
+  return content::ResolveModuleAddress(VS::Content::ModuleSymbols(), module,
+                                       address) ==
+         reinterpret_cast<void*>(entry);
 }
 
 int Navigate(std::string_view module, unsigned address, int initialize) {
-  auto* entry = content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, module, address);
+  auto* entry = content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                              module, address);
   if (entry == nullptr) throw std::runtime_error("missing inventory entry");
   return reinterpret_cast<int (*)(int)>(entry)(initialize);
 }
@@ -102,7 +102,8 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<int> saved_sound_group{Audio_nextSfxChannelGroup7E};
   ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_flags{
       Audio_Seq_unusedStateFlags};
-  ValueRestore<decltype(Input_settings)> saved_settings{Input_settings};
+  ValueRestore<decltype(VS::Input::settings)> saved_settings{
+      VS::Input::settings};
   ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
       VS::Menu::Framework::menuState};
   ValueRestore<decltype(VS::Menu::Framework::actionSelection)> saved_action{
@@ -145,7 +146,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     actor.stats = &stats;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     Audio_Seq_unusedStateFlags.introState = 3;
-    Input_settings.cursorMemory = 0;
+    VS::Input::settings.cursorMemory = 0;
     VS::Menu::Framework::menuState = {};
     VS::Menu::Framework::actionSelection = {};
     VS::Menu::Framework::backgroundFadeStep = 0;
@@ -268,9 +269,8 @@ struct LootFixture : TextLoadingFixture {
   int Open() {
     ResetFrame();
     std::uint8_t step = 0;
-    auto* entry = content::ResolveModuleAddress(
-        {Content_moduleSymbols, Content_moduleSymbolCount}, kLootModule,
-        0x80109E90);
+    auto* entry = content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                                kLootModule, 0x80109E90);
     if (entry == nullptr) throw std::runtime_error("missing loot screen entry");
     return reinterpret_cast<int (*)(unsigned char*)>(entry)(&step);
   }
@@ -316,9 +316,9 @@ struct LootFixture : TextLoadingFixture {
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
   }
   static void AnswerConsolidation(bool confirm) {
-    Input_buttonsPressed.allButtons = confirm ? kConfirm : kCancel;
+    VS::Input::buttonsPressed.allButtons = confirm ? kConfirm : kCancel;
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
-    Input_buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
     Menu_Loot_lootLeftEdge = 6;
     REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
   }

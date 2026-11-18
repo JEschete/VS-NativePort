@@ -17,7 +17,7 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudRenderingLiveFixture.hpp"
 #include "Battle/HudShortcutLiveFixture.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
@@ -40,8 +40,8 @@ class SavedArray {
             std::size_t count) {
     const auto target = std::span(Owner).first(count);
     const auto bytes = static_cast<unsigned>(target.size_bytes());
-    const Content_ModuleDataEntry entry{"BATTLE/BATTLE.PRG", offset, bytes,
-                                        target.data(), bytes};
+    const VS::Content::ModuleDataEntry entry{"BATTLE/BATTLE.PRG", offset, bytes,
+                                             target.data(), bytes};
     if (!VS::Content::CopyModuleDataEntry(entry, image)) {
       throw std::runtime_error("HUD fixture needs its original bounded data");
     }

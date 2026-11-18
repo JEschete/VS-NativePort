@@ -10,7 +10,7 @@
 
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
@@ -28,9 +28,8 @@ constexpr std::array kAssets{Asset::kResults, Asset::kStart};
 
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
-  auto* resolved = content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENUF.PRG",
-      address);
+  auto* resolved = content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                                 "MENU/MENUF.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved == nullptr) {
     throw std::runtime_error("missing time-attack module entry");
@@ -112,10 +111,10 @@ struct ReloadFixture : tests::Fixture {
 void BeginCountdown(tests::Fixture& fixture) {
   fixture.LoadThroughTextures(Asset::kStart);
   REQUIRE(results::LiveInitializeTimeAttackStart() == 1);
-  Input_buttonsPressed.allButtons = 0x20;
+  VS::Input::buttonsPressed.allButtons = 0x20;
   REQUIRE(results::LiveUpdateTimeAttackStart() == 0);
   REQUIRE(Menu_Results_screenState == 2);
-  Input_buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed.allButtons = 0;
   fixture.BeginFrame();
   REQUIRE(results::LiveUpdateTimeAttackStart() == 0);
   REQUIRE(results::LiveTimeAttackOwnsCountdownControls());

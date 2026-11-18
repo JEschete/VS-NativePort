@@ -20,7 +20,7 @@
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/SceneCatalog.hpp"
 #include "CombatLab/Trace.hpp"
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
@@ -29,7 +29,7 @@
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.h"
-#include "Movie/MoviePlayer.h"
+#include "Movie/MoviePlayer.hpp"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
 #include "Platform/GameFiber.hpp"
@@ -277,7 +277,7 @@ void LoadData(const Options& options) {
   if (const auto opened = Content::DataStore::Open(options.data); !opened) {
     throw std::runtime_error(opened.error());
   }
-  if (Content_LoadModuleData() != 0) {
+  if (VS::Content::LoadModuleData() != 0) {
     throw std::runtime_error("required production module data failed to load");
   }
 }
@@ -608,7 +608,7 @@ class LiveSession {
         {{"ticks", ticks_}, {"encounter_interrupted", fiber_ != nullptr}},
         ticks_);
     fiber_.reset();
-    Movie_PlayerClose();
+    VS::Movie::PlayerClose();
     return rejected_ || sequence_failed_ || sequence_cancelled_ ? 2 : 0;
   }
 

@@ -2332,15 +2332,12 @@
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp" />
     <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
-    <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\LiveRequire.hpp" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
     <ClInclude Include="src\Battle\Ai\Perception.h" />
-    <ClInclude Include="src\Battle\Ai\PlanningPrimitivesLive.h" />
-    <ClInclude Include="src\Battle\Ai\RoomState.h" />
-    <ClInclude Include="src\Battle\AttackPrerequisites.h" />
+    <ClInclude Include="src\Battle\Ai\RoomState.hpp" />
     <ClInclude Include="src\Battle\AttackPrerequisiteTable.h" />
     <ClInclude Include="src\Battle\BattleTypes.h" />
     <ClInclude Include="src\Battle\Damage.h" />
@@ -2761,7 +2758,6 @@
     <ClInclude Include="include\Battle\TargetingDraw.hpp" />
     <ClInclude Include="include\Battle\TargetingDrawLive.hpp" />
     <ClInclude Include="include\Battle\TargetingLive.hpp" />
-    <ClInclude Include="include\Battle\TargetPages.h" />
     <ClInclude Include="include\Battle\TargetPages.hpp" />
     <ClInclude Include="include\Boot\GameApp.hpp" />
     <ClInclude Include="include\Boot\GameplayLoop.hpp" />
@@ -3127,9 +3123,8 @@
     <ClInclude Include="include\Save\NativeContainerLive.hpp" />
     <ClInclude Include="include\Save\NativeFilePresentation.hpp" />
     <ClInclude Include="include\Save\NativeFiles.hpp" />
-    <ClInclude Include="include\Save\NativeMenu.h" />
     <ClInclude Include="include\Save\NativeMenu.hpp" />
-    <ClInclude Include="include\Save\NativeResume.h" />
+    <ClInclude Include="include\Save\NativeResume.hpp" />
     <ClInclude Include="include\Save\NativeSnapshot.hpp" />
     <ClInclude Include="include\Save\RuntimeSnapshot.hpp" />
     <ClInclude Include="include\Save\SnapshotLive.hpp" />

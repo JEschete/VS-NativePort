@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/SoundTransition.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 using VS::Actors::SoundTransition;
@@ -33,8 +33,7 @@ TEST_CASE("A sound glide ignores the target's mode and length",
 
 TEST_CASE("Promoted sound glide has no original module address",
           "[actors][audio][sound-transition]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // func_800AEEC4 is reached only by direct jal, and its native callers bind
   // the actor record by name.
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

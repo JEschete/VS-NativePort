@@ -11,7 +11,7 @@
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/RoomAiMapLive.hpp"
 #include "Battle/Ai/SpecialTerrainLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
@@ -115,8 +115,7 @@ TEST_CASE("Native terrain-build envelope retains its original typed entry",
           "[ai][special-terrain][redirect-binding]") {
   SpecialTerrainFixture fixture;
   fixture.flags[1][1] = 0x20;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   auto* address = VS::Content::ResolveModuleAddress(
       symbols, "BATTLE/BATTLE.PRG", 0x800E6B4Cu);
   REQUIRE(address != nullptr);
@@ -176,8 +175,7 @@ TEST_CASE("Live special terrain build seeds each region from its ground",
 
 TEST_CASE("Special terrain and room navigation keep their module entries",
           "[ai][special-terrain][room-navigation][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

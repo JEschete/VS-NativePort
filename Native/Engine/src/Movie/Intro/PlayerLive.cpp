@@ -3,12 +3,12 @@
 
 #include "Input/Buttons.h"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Movie/Intro/Playback.h"
 #include "Movie/IntroPlayer.hpp"
 #include "Movie/IntroPlayerLive.hpp"
-#include "Movie/MoviePlayer.h"
+#include "Movie/MoviePlayer.hpp"
 
 namespace VS::Movie::Intro {
 namespace {
@@ -33,7 +33,7 @@ class LiveHost final : public Host {
   void WaitForVerticalBlank() override { VSync(0); }
   void UpdateControllers() override { VS::Input::UpdateLiveControllers(); }
   [[nodiscard]] bool SkipRequested() const override {
-    return (Input_buttonsPressed.allButtons & (PADRright | PADstart)) != 0;
+    return (VS::Input::buttonsPressed.allButtons & (PADRright | PADstart)) != 0;
   }
 
   void ClearPicturePages() override {
@@ -41,10 +41,10 @@ class LiveHost final : public Host {
     setRECT(&rect, 0, 0, kPageWidth, 2 * kPictureHeight);
     ClearImage(&rect, 0, 0, 0);
   }
-  void OpenMovie() override { Movie_PlayerOpen("MOV/TITLE.STR"); }
-  void CloseMovie() override { Movie_PlayerClose(); }
+  void OpenMovie() override { VS::Movie::PlayerOpen("MOV/TITLE.STR"); }
+  void CloseMovie() override { VS::Movie::PlayerClose(); }
   void DrawFrame(std::int32_t elapsed_ticks, PicturePage page) override {
-    Movie_PlayerDrawFrame(elapsed_ticks, 0, PageY(page));
+    VS::Movie::PlayerDrawFrame(elapsed_ticks, 0, PageY(page));
   }
   void ShowPage(PicturePage page) override {
     DISPENV disp;

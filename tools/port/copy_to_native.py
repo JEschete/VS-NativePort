@@ -390,7 +390,7 @@ class Copier:
         self.files: dict[str, OutFile] = {}
         self.provider: dict[str, str] = {
             "Render_ModelWorkspace": r"Native\Engine\include\Render\ModelWorkspace.h",
-            "Battle_Ai_FrameState": r"Native\Game\src\Battle\Ai\FrameUpdate.h",
+            "Battle_Ai_FrameState": r"Native\Game\include\Battle\Ai\FrameUpdateLive.hpp",
         }      # C name -> header path that declares it
         self.struct_names: set[str] = set()     # C names of struct/union types (forward-declarable)
         self.type_home: dict[str, str] = {}     # type id (canonical) -> header path
@@ -2183,7 +2183,7 @@ class Copier:
                 symbols.append(f'    {{"{module}", 0x{address:08X}u, {size}u, (void*){name}, '
                        f'sizeof {name}, 1u, 1u}},')
         text = ("// Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).\n"
-            '#include "Content/ModuleData.h"\n\n' + "\n".join(declarations) + "\n\n"
+            '#include "Content/ModuleData.hpp"\n\n' + "\n".join(declarations) + "\n\n"
                 + "\n".join(sample_sources) + "\n\n"
                 "const Content_ModuleSymbol Content_moduleSymbols[] = {\n" + "\n".join(symbols) + "\n};\n"
                 "const unsigned Content_moduleSymbolCount = sizeof Content_moduleSymbols / sizeof Content_moduleSymbols[0];\n\n"
@@ -2211,7 +2211,7 @@ class Copier:
             definitions.append(f"// decomp: {module} {evidence}\n{declaration};")
             rows.append(f'    {{"{module}", 0x{offset:X}, {size}u, {name}, sizeof {name}}},')
         text = ("// Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).\n"
-            '#include "Content/ModuleData.h"\n\n' + "\n".join(definitions) + "\n\n"
+            '#include "Content/ModuleData.hpp"\n\n' + "\n".join(definitions) + "\n\n"
                 "const Content_ModuleDataEntry Content_moduleData[] = {\n" + "\n".join(rows) + "\n};\n"
                 "const unsigned Content_moduleDataCount = sizeof Content_moduleData / sizeof Content_moduleData[0];\n")
         self.out(self.MODULE_DATA).items.append(Item("var", text, "Content_moduleData", "", [], (0,)))

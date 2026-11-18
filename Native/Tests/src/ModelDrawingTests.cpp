@@ -21,7 +21,7 @@
 #include "Core/Gte.h"
 #include "Legacy/Psx.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 
 namespace {
 using VS::Actors::ActorModelDrawHost;
@@ -391,7 +391,7 @@ struct BorrowedGeometryFixture {
       std::to_array(Actors_actorRecords);
   Actors_SkeletonPose saved_pose = VS::Actors::skeletonPose;
   Actors_ModelRenderContext saved_context = VS::Actors::modelRenderContext;
-  Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
+  Render_ModelScratchpad saved_workspace = *VS::Render::ModelWorkspace();
   std::array<unsigned, 32> model_bytes{};
   Actors_ActorRecord actor{};
   Actors_ActorRecord geometry{};
@@ -421,7 +421,7 @@ struct BorrowedGeometryFixture {
     geometry.fadeBlue = 246;
     Actors_actorRecords[kGeometrySlot] = &geometry;
     for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
-    setVector(&Render_ModelWorkspace()->rootOffset, 0, 0, 1024);
+    setVector(&VS::Render::ModelWorkspace()->rootOffset, 0, 0, 1024);
     Core_Gte_Reset();
     Core_Gte_SetGeomScreen(256);
   }
@@ -430,7 +430,7 @@ struct BorrowedGeometryFixture {
               std::begin(Actors_actorRecords));
     VS::Actors::skeletonPose = saved_pose;
     VS::Actors::modelRenderContext = saved_context;
-    *Render_ModelWorkspace() = saved_workspace;
+    *VS::Render::ModelWorkspace() = saved_workspace;
     Core_Gte_Reset();
   }
   BorrowedGeometryFixture(const BorrowedGeometryFixture&) = delete;

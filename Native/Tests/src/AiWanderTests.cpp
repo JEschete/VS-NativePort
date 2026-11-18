@@ -18,10 +18,10 @@
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/AreaRoute.hpp"
 #include "Battle/Ai/AreaRouteLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Wander.hpp"
 #include "Battle/Ai/WanderLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/TerrainHeight.hpp"
 #include "Legacy/Psx.h"
 
@@ -1016,14 +1016,14 @@ TEST_CASE("Wander movement refuses missing room bounds or tile flags",
 
 namespace {
 struct LiveFrameFixture {
-  Battle_Ai_FrameContext saved = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
   u_short flags[32][32]{};
   u_short heights[32][32]{};
   std::array<u_char, std::size_t{32} * 32U> regions{};
   int room_data = 0;
 
   LiveFrameFixture() {
-    auto& frame = *Battle_Ai_FrameState();
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
     for (auto& row : flags) {
       for (auto& cell : row) cell = 1;
     }
@@ -1035,7 +1035,7 @@ struct LiveFrameFixture {
     frame.roomBounds = 32U | (32U << 8);
     frame.roomData = &room_data;
   }
-  ~LiveFrameFixture() { *Battle_Ai_FrameState() = saved; }
+  ~LiveFrameFixture() { VS::Battle::Ai::LiveFrameContext() = saved; }
   LiveFrameFixture(const LiveFrameFixture&) = delete;
   LiveFrameFixture& operator=(const LiveFrameFixture&) = delete;
 };
@@ -1080,17 +1080,16 @@ TEST_CASE("Live held wanderers only count the hold",
   view->model = &record;
   view->behaviorMode = 1;
   view->wanderTimer = 5;
-  Battle_Ai_FrameState()->walk_valid = 1;
+  VS::Battle::Ai::LiveFrameContext().walk_valid = 1;
   ai::UpdateLiveWanderMovement(view, Tile(10, 10), 3);
   CHECK(view->wanderTimer == 6);
   CHECK(view->isStuck == 0);
-  CHECK(Battle_Ai_FrameState()->walk_valid == 1);
+  CHECK(VS::Battle::Ai::LiveFrameContext().walk_valid == 1);
 }
 
 TEST_CASE("Height filtering and wander keep their original module entries",
           "[ai][height-filter][wander][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

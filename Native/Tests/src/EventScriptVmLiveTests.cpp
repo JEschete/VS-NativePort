@@ -14,7 +14,7 @@
 #include "Battle/Hud.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Event/InterpolationCurveLive.hpp"
@@ -32,7 +32,7 @@
 #include "Field/CameraLiveState.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/TransitionsLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/GimImagesLive.hpp"
@@ -113,8 +113,8 @@ struct LiveVmFixture {
   std::int16_t finished = Event_isMainThreadFinished;
   std::int16_t chained = Event_isChainedEventLoaded;
   char skip = Event_skipState;
-  Input_PressedButtonsView pressed = Input_buttonsPressed;
-  int previous = Input_previousButtons;
+  Input_PressedButtonsView pressed = VS::Input::buttonsPressed;
+  int previous = VS::Input::previousButtons;
   char forced = Event_isSkipForced;
   char stops_music = Event_stopsMusicOnSkip;
   State_SceneTimer timer = VS::State::sceneTimer;
@@ -157,8 +157,8 @@ struct LiveVmFixture {
     Event_isMainThreadFinished = finished;
     Event_isChainedEventLoaded = chained;
     Event_skipState = skip;
-    Input_buttonsPressed = pressed;
-    Input_previousButtons = previous;
+    VS::Input::buttonsPressed = pressed;
+    VS::Input::previousButtons = previous;
     Event_isSkipForced = forced;
     Event_stopsMusicOnSkip = stops_music;
     VS::State::sceneTimer = timer;
@@ -469,7 +469,7 @@ bool CompareFrozenButtonWait(const ButtonWaitSample& sample,
   const auto expected_wait = expected.wait;
   const auto expected_buttons = expected.buttons;
   Event_threadWaitFrames[sample.thread] = sample.remaining;
-  Input_buttonsPressed.allButtons = sample.buttons;
+  VS::Input::buttonsPressed.allButtons = sample.buttons;
   if (mutation == 1) command[1] ^= 4;
   if (mutation == 2) ++Event_threadWaitFrames[sample.thread];
   const event::ScriptInstruction instruction{command, {}, sample.thread};
@@ -479,8 +479,8 @@ bool CompareFrozenButtonWait(const ButtonWaitSample& sample,
                                            instruction, event::LiveScriptVm());
   const auto result = WaitResultCode(native);
   const auto wait = Event_threadWaitFrames[sample.thread];
-  if (mutation == 3) Input_buttonsPressed.allButtons = sample.buttons;
-  const auto buttons = Input_buttonsPressed.allButtons;
+  if (mutation == 3) VS::Input::buttonsPressed.allButtons = sample.buttons;
+  const auto buttons = VS::Input::buttonsPressed.allButtons;
   AddResultDigest(fingerprints[0], static_cast<std::uint32_t>(original));
   AddResultDigest(fingerprints[0], static_cast<std::uint16_t>(expected_wait));
   AddResultDigest(fingerprints[0], expected_buttons);
@@ -1129,12 +1129,12 @@ void CheckLiveButtonWait(ButtonWaitSample sample, bool guarded, int skip) {
   Event_skipState = static_cast<char>(skip);
   auto& host = event::LiveScriptVm();
   host.SetWaitFrames(sample.thread, sample.remaining);
-  Input_buttonsPressed.allButtons = sample.buttons;
+  VS::Input::buttonsPressed.allButtons = sample.buttons;
   host.SetThreadCursor(sample.thread, start);
   const auto expected = FrozenButtonWaitResult(sample);
   CHECK_FALSE(event::ExecuteLiveScriptThread(sample.thread));
   CHECK(host.WaitFrames(sample.thread) == expected.wait);
-  CHECK(Input_buttonsPressed.allButtons == expected.buttons);
+  CHECK(VS::Input::buttonsPressed.allButtons == expected.buttons);
   CHECK(host.ThreadCursor(sample.thread) ==
         (expected.code == 0
              ? event::ScriptLocation{}
@@ -1290,8 +1290,8 @@ void CheckLiveButtonStore(int operand, bool guarded, int skip) {
   Event_skipState = static_cast<char>(skip);
   auto& host = event::LiveScriptVm();
   for (int value = 0; value < 256; ++value) {
-    Input_previousButtons = 0x345600 | value;
-    Input_buttonsPressed.allButtons = 0xABCD0000 | (value ^ 0x80);
+    VS::Input::previousButtons = 0x345600 | value;
+    VS::Input::buttonsPressed.allButtons = 0xABCD0000 | (value ^ 0x80);
     host.SetFlag(operand & 1023, 0x55);
     host.SetThreadCursor(0, start);
     CHECK_FALSE(event::ExecuteLiveScriptThread(0));
@@ -1815,7 +1815,7 @@ TEST_CASE("Original loop differential detects counter value and target mutants",
 
 TEST_CASE("Native control opcode entries resolve to owned table bindings",
           "[event-vm-live][content][module][control-opcode]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const auto& entry : kControlEntries) {
     CAPTURE(entry.address);
     CHECK(content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
@@ -2940,7 +2940,7 @@ TEST_CASE("Native pending selectors preserve source and halfword bits",
 TEST_CASE("Native actor reference adapter preserves slot and special selectors",
           "[event-vm-live][event-actor-reference]") {
   const LiveVmFixture fixture;
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BFE50) ==
       reinterpret_cast<const void*>(&event::ResolveLiveScriptActorReference));
@@ -3043,7 +3043,7 @@ TEST_CASE("Retained interpolation entry resolves and matches the typed core",
           "[event-vm-live][event-native-entries]") {
   const LiveVmFixture fixture;
   auto& host = event::LiveScriptVm();
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BFEBC) ==
       reinterpret_cast<const void*>(
@@ -3067,7 +3067,7 @@ TEST_CASE(
     "[event-vm-live][event-native-entries]") {
   const LiveVmFixture fixture;
   auto& host = event::LiveScriptVm();
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", 0x800BEC58) ==
       reinterpret_cast<const void*>(

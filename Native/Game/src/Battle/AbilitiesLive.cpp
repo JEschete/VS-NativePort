@@ -45,7 +45,7 @@
 #include "Field/GameModeLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -238,7 +238,7 @@ class LiveAbilityHost final : public battle::AbilityHost {
     battle::LiveQueueAbilityTimingResult(result);
   }
   [[nodiscard]] std::uint32_t PressedButtons() const override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
   [[nodiscard]] bool EffectsBusy() const override {
     return (static_cast<std::uint32_t>(Effects_effectBusyFlags) &
@@ -346,8 +346,8 @@ void LiveAbilityHost::FocusSelectionOnActor(int actor) {
 
 int LiveAbilityHost::MappedAbility(AbilityKind kind, int index) const {
   const auto& mapped = kind == AbilityKind::kChain
-                           ? Input_settings.mappedChainAbilities
-                           : Input_settings.mappedDefenseAbilities;
+                           ? VS::Input::settings.mappedChainAbilities
+                           : VS::Input::settings.mappedDefenseAbilities;
   if (!InRange(mapped, index)) {
     VS_LOG_WARN("battle.ability", "mapped ability index={} out of range",
                 index);

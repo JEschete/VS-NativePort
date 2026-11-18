@@ -14,7 +14,7 @@
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
@@ -96,15 +96,16 @@ TerminalFrame LoadFrame() {
           static_cast<std::uint8_t>(VS::Menu::Framework::enabledStatPages),
       .selected_equipment = static_cast<std::uint8_t>(
           VS::Menu::Framework::menuMemory.selectedEquipment),
-      .cursor_memory = static_cast<std::uint8_t>(Input_settings.cursorMemory),
+      .cursor_memory =
+          static_cast<std::uint8_t>(VS::Input::settings.cursorMemory),
       .hud_hidden = static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
       .current_menu =
           static_cast<std::uint8_t>(VS::Menu::Framework::menuState.currentMenu),
-      .pressed = Input_buttonsPressed.allButtons,
-      .held = static_cast<std::uint32_t>(Input_buttonsState),
-      .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-      .stick_x = Input_stickPosBuf.rStickX,
-      .stick_y = Input_stickPosBuf.rStickY};
+      .pressed = VS::Input::buttonsPressed.allButtons,
+      .held = static_cast<std::uint32_t>(VS::Input::buttonsState),
+      .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
+      .stick_x = VS::Input::stickPosBuf.rStickX,
+      .stick_y = VS::Input::stickPosBuf.rStickY};
 }
 void StoreFrame(const TerminalFrame& frame) {
   Menu_Status_selectedActor = frame.selected_actor;
@@ -127,7 +128,7 @@ void StoreFrame(const TerminalFrame& frame) {
       static_cast<char>(frame.enabled_pages);
   VS::Menu::Framework::menuMemory.selectedEquipment =
       static_cast<char>(frame.selected_equipment);
-  Input_settings.cursorMemory = static_cast<char>(frame.cursor_memory);
+  VS::Input::settings.cursorMemory = static_cast<char>(frame.cursor_memory);
   Battle_hudStatusIconsHidden = static_cast<char>(frame.hud_hidden);
   VS::Menu::Framework::menuState.currentMenu =
       static_cast<char>(frame.current_menu);

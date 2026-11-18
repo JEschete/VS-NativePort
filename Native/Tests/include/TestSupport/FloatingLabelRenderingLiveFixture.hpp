@@ -17,7 +17,7 @@
 
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelRenderingLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -82,7 +82,7 @@ class ProductionTables {
 
  private:
   struct Owner {
-    const Content_ModuleDataEntry* entry = nullptr;
+    const VS::Content::ModuleDataEntry* entry = nullptr;
     std::vector<std::uint8_t> bytes;
   };
   struct ExpectedOwner {
@@ -109,10 +109,9 @@ class ProductionTables {
         ExpectedOwner{Render_variableFontGlyphWidths,
                       sizeof(Render_variableFontGlyphWidths)}};
     for (const auto& owner : expected) {
-      const auto entries =
-          std::span(Content_moduleData, Content_moduleDataCount);
-      const auto found = std::ranges::find(entries, owner.target,
-                                           &Content_ModuleDataEntry::target);
+      const auto entries = VS::Content::ModuleDataEntries();
+      const auto found = std::ranges::find(
+          entries, owner.target, &VS::Content::ModuleDataEntry::target);
       if (found == entries.end() || found->module == nullptr ||
           std::string_view(found->module) != "BATTLE/BATTLE.PRG" ||
           found->size > owner.capacity || found->capacity != owner.capacity) {

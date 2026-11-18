@@ -364,17 +364,17 @@ _CONTENT_LIVE = {
 }
 
 NATIVE_HELPER_HEADERS = {
-    "Battle_DrawTargetPageHint": r"Native\Game\include\Battle\TargetPages.h",
-    "Battle_Ai_RefreshActionCandidateReadinessEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_ApplySimulatedActionResultsEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_SimulateActionCandidateEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_UpdateCandidateHitWeightEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_EvaluateActionCandidateEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_SelectFallbackActionEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_EnumerateActionCandidatesEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_AdvancePlanningSimulationEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_BuildActorActionPlanEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
-    "Battle_Ai_ReconcileCompletedActionPlanEntry": r"Native\Game\src\Battle\Ai\PlanningPrimitivesLive.h",
+    "Battle_DrawTargetPageHint": r"Native\Game\include\Battle\TargetPages.hpp",
+    "Battle_Ai_RefreshActionCandidateReadinessEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_ApplySimulatedActionResultsEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_SimulateActionCandidateEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_UpdateCandidateHitWeightEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_EvaluateActionCandidateEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_SelectFallbackActionEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_EnumerateActionCandidatesEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_AdvancePlanningSimulationEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_BuildActorActionPlanEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
+    "Battle_Ai_ReconcileCompletedActionPlanEntry": r"Native\Game\include\Battle\Ai\PlanningPrimitivesLive.hpp",
     "Field_CurrentSavePointIdEntry": r"Native\Game\src\Field\ChestInteractionsLive.hpp",
     "Field_RefreshAshleyInteractionTileEntry": r"Native\Game\src\Field\ChestInteractionsLive.hpp",
     "Field_CreateGimmickInstanceEntry": r"Native\Game\include\Field\GimmickResourcesLive.hpp",
@@ -1127,14 +1127,14 @@ NATIVE_HELPER_HEADERS = {
        for name in _MOTION_REQUEST_LIVE.values()},
     **{f"VS::Menu::{name}": r"Native\Game\include\Save\FileMenuLive.hpp"
        for name in _FILE_MENU_LIVE.values()},
-    "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
-    "Save_NativeDrawFileOverlay": r"Native\Game\include\Save\NativeMenu.h",
-    **{name: r"Native\Game\include\Save\NativeResume.h"
+    "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.hpp",
+    "Save_NativeDrawFileOverlay": r"Native\Game\include\Save\NativeMenu.hpp",
+    **{name: r"Native\Game\include\Save\NativeResume.hpp"
        for name in (
            "Save_NativeResumePending", "Save_NativeFinishResume",
            "Save_NativeCancelResume", "Save_NativeResetSession",
        )},
-    "Battle_Ai_TerrainRegionCell": r"Native\Game\src\Battle\Ai\FrameUpdate.h",
+    "Battle_Ai_TerrainRegionCell": r"Native\Game\include\Battle\Ai\FrameUpdateLive.hpp",
     "Audio_Seq_LfoWaveform": r"Native\Engine\include\Audio\LfoWaveforms.hpp",
     **{name: r"Native\Engine\include\Audio\MusicState.hpp"
        for name in (
@@ -1146,7 +1146,7 @@ NATIVE_HELPER_HEADERS = {
            "Audio_Native_UpdateCutsceneStream",
            "Audio_Native_ResetCutsceneStream",
        )},
-    **{name: r"Native\Engine\include\Audio\SequencerOutput.h"
+    **{name: r"Native\Engine\include\Audio\VoiceOutputLive.hpp"
        for name in (
            "Audio_Native_Reset", "Audio_Native_Tick",
            "Audio_Native_ConfigureChannel", "Audio_Native_Envelope",
@@ -4330,7 +4330,7 @@ BATTLE_ATTACK_PREREQUISITE_SLOTS = (
     ("F00392", 0x8007FDD0, "IgnoreAttackPrerequisite"),
 )
 NATIVE_HELPER_HEADERS |= {
-    f"Battle_{name}Slot": r"Native\Game\src\Battle\AttackPrerequisites.h"
+    f"Battle_{name}Slot": r"Native\Game\include\Battle\AttackPrerequisitesLive.hpp"
     for _, _, name in BATTLE_ATTACK_PREREQUISITE_SLOTS
 }
 

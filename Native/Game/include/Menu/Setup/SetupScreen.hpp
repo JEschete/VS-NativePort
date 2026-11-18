@@ -89,7 +89,8 @@ inline constexpr int kCombineBladesIndex = 73;
 inline constexpr int kNewBladeIndex = 79;
 }  // namespace menu12
 
-// The pad bits the menu reads (Input_buttonsPressed / Input_buttonRepeat).
+// The pad bits the menu reads (VS::Input::buttonsPressed /
+// VS::Input::buttonRepeat).
 namespace pad {
 inline constexpr std::uint32_t kTriangle = 0x10;
 inline constexpr std::uint32_t kCircle = 0x20;
@@ -337,7 +338,7 @@ class Host {
   // vs_battle_rowTypeBuf and vs_battle_stringBuf.
   [[nodiscard]] virtual std::span<std::int32_t> RowTypes() = 0;
   [[nodiscard]] virtual std::span<std::uint8_t> StringBuffer() = 0;
-  // Input_settings.cursorMemory.
+  // VS::Input::settings.cursorMemory.
   [[nodiscard]] virtual int CursorMemory() = 0;
   virtual void SetCursorMemory(int value) = 0;
 

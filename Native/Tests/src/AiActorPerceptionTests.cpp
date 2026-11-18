@@ -17,10 +17,10 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/Distance.hpp"
 
 namespace {
@@ -1324,7 +1324,7 @@ namespace {
 struct LivePerceptionFixture {
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
   int saved_engaged = Battle_Ai_candidateEngagedThisUpdate;
   Battle_Ai_RoomAiState room{};
@@ -1334,14 +1334,14 @@ struct LivePerceptionFixture {
 
   LivePerceptionFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    auto& frame = *Battle_Ai_FrameState();
-    std::fill_n(frame.actors, kAiFrameActorSlots, nullptr);
+    auto& frame = VS::Battle::Ai::LiveFrameContext();
+    std::fill_n(frame.actors, VS::Battle::Ai::kFrameActorSlots, nullptr);
     Battle_Ai_roomAiState = &room;
   }
 
   ~LivePerceptionFixture() {
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Battle_Ai_roomAiState = saved_room;
     Battle_Ai_candidateEngagedThisUpdate = saved_engaged;
   }
@@ -1375,7 +1375,7 @@ TEST_CASE("Actor perception Live pass keeps the AI state's other fields",
   fixture.actor.stats = &fixture.stats;
   fixture.stats.actionRecoveryTimer = 77;
   Battle_actors[0] = &fixture.actor;
-  Battle_Ai_FrameState()->actors[kTarget] = &state;
+  VS::Battle::Ai::LiveFrameContext().actors[kTarget] = &state;
   const Battle_Ai_ActorAiState before = state;
 
   ai::UpdateLiveActorPerception();
@@ -1400,8 +1400,7 @@ TEST_CASE("Actor perception Live pass keeps the AI state's other fields",
 
 TEST_CASE("Actor perception keeps its original module entries",
           "[ai][actor-perception][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

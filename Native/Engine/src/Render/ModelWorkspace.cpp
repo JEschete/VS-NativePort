@@ -1,4 +1,4 @@
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 
 #include "Render/ModelDraw.h"
 
@@ -6,4 +6,6 @@
 // the 0x1F80035C slot.
 static Render_ModelScratchpad model_workspace;
 
-Render_ModelScratchpad* Render_ModelWorkspace(void) { return &model_workspace; }
+Render_ModelScratchpad* VS::Render::ModelWorkspace(void) {
+  return &model_workspace;
+}

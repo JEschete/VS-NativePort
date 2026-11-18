@@ -19,7 +19,7 @@
 #include "Boot/OverlayReset.h"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Menu/BattleAbilities.h"
@@ -42,9 +42,9 @@ constexpr int kDefenseAction = 47;
 
 template <typename Entry>
 bool IsBound(unsigned address, Entry entry) {
-  return VS::Content::ResolveModuleAddress(
-             {Content_moduleSymbols, Content_moduleSymbolCount}, kModule,
-             address) == reinterpret_cast<void*>(entry);
+  return VS::Content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                           kModule, address) ==
+         reinterpret_cast<void*>(entry);
 }
 
 struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
@@ -54,7 +54,8 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
       Battle_characterState};
   ValueRestore<decltype(Audio_Seq_unusedArtsStatus)> saved_progress{
       Audio_Seq_unusedArtsStatus};
-  ValueRestore<decltype(Input_settings)> saved_settings{Input_settings};
+  ValueRestore<decltype(VS::Input::settings)> saved_settings{
+      VS::Input::settings};
   ArrayRestore<Battle_ActionDefinition, std::size(Battle_actionDefinitions)>
       saved_actions{Battle_actionDefinitions};
   ArrayRestore<u_short, std::size(Menu_BattleAbilities_battleAbilityStrings)>
@@ -87,7 +88,7 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
     Audio_Seq_unusedArtsStatus = {};
     Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[1] = 65535;
     Audio_Seq_unusedArtsStatus.kills.totalKills = 65535;
-    Input_settings.cursorMemory = 0;
+    VS::Input::settings.cursorMemory = 0;
     VS::Menu::Framework::menuMemory = {};
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::rowTypeBuf = types.data();
@@ -218,7 +219,7 @@ TEST_CASE(
       reinterpret_cast<u_short*>(Battle_actionDefinitions[kAction].name),
       reinterpret_cast<u_short*>(abilities::LiveUnlockDescription(kAction))};
   auto* address = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, kModule, 0x80102928);
+      VS::Content::ModuleSymbols(), kModule, 0x80102928);
   if (address == nullptr) {
     FAIL("missing ability row entry");
     return;
@@ -252,11 +253,11 @@ TEST_CASE("MENU2 reload restarts learned lists without releasing heap owners",
   REQUIRE(Menu_BattleAbilities_abilityCount == 1);
   auto* owner = Menu_BattleAbilities_abilityText;
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
-  Input_settings.mappedChainAbilities[0] = kAction;
+  VS::Input::settings.mappedChainAbilities[0] = kAction;
   Boot_ResetMenu2Statics();
   CHECK(Menu_BattleAbilities_unlockedChainAbilities[0] == 0);
   CHECK(Menu_BattleAbilities_unlockedDefenseAbilities[0] == 0);
-  CHECK(Input_settings.mappedChainAbilities[0] == kAction);
+  CHECK(VS::Input::settings.mappedChainAbilities[0] == kAction);
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
   VS::Core::Memory::FreeLiveFromHighEnd(owner);
   REQUIRE(fixture.OpenList(defense) == 0);
@@ -269,7 +270,7 @@ TEST_CASE("F02625 actual screen entry creates categories from its caller byte",
   VS::Menu::Framework::shortcutInvoked = 0;
   std::uint8_t phase = 3;
   auto* address = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, kModule, 0x801038D4);
+      VS::Content::ModuleSymbols(), kModule, 0x801038D4);
   if (address == nullptr) {
     FAIL("missing ability screen entry");
     return;

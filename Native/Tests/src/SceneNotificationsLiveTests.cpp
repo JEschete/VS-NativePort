@@ -276,8 +276,7 @@ namespace {
 template <typename Entry>
 Entry NotificationModuleEntry(unsigned address, Entry expected) {
   auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "BATTLE/BATTLE.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "BATTLE/BATTLE.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved != reinterpret_cast<void*>(expected)) {
     throw std::runtime_error("incorrect scene notification module entry");

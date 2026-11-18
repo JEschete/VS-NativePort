@@ -30,7 +30,7 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -597,13 +597,13 @@ int LiveUpdateMapMenu() {
     MapMenuState state = ReadState();
     LiveMapMenu host(state);
     const MapInput input{
-        .pressed = Input_buttonsPressed.allButtons,
-        .held = static_cast<std::uint32_t>(Input_previousButtons),
-        .repeated = static_cast<std::uint32_t>(Input_buttonRepeat),
-        .left_x = static_cast<std::uint8_t>(Input_stickPosBuf.lStickX),
-        .left_y = static_cast<std::uint8_t>(Input_stickPosBuf.lStickY),
-        .right_x = static_cast<std::uint8_t>(Input_stickPosBuf.rStickX),
-        .right_y = static_cast<std::uint8_t>(Input_stickPosBuf.rStickY),
+        .pressed = VS::Input::buttonsPressed.allButtons,
+        .held = static_cast<std::uint32_t>(VS::Input::previousButtons),
+        .repeated = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
+        .left_x = static_cast<std::uint8_t>(VS::Input::stickPosBuf.lStickX),
+        .left_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.lStickY),
+        .right_x = static_cast<std::uint8_t>(VS::Input::stickPosBuf.rStickX),
+        .right_y = static_cast<std::uint8_t>(VS::Input::stickPosBuf.rStickY),
         .field_yaw =
             static_cast<std::uint16_t>(Render_frameScratch.camera.angles.vy)};
     std::array<DiscFileRange, kSceneCount> files{};

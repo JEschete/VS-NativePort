@@ -14,7 +14,7 @@
 #include "Core/RandomLive.hpp"
 #include "Input/Buttons.h"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.h"
 #include "Render/Display.h"
 #include "Render/Loading.h"
@@ -125,21 +125,22 @@ class LiveFieldFrame final : public FieldFrameHost {
   std::uint32_t PollSecondControllerPressed() override {
     const auto first = static_cast<std::uint16_t>(
         VS::Input::ReadLiveControllerPort(0, Input_legacyPadResponseBytes[0]));
-    Input_buttonsState = first;
+    VS::Input::buttonsState = first;
     const auto second =
         static_cast<std::uint32_t>(VS::Input::ReadLiveControllerPort(
             kSecondPortShift, Input_legacyPadResponseBytes[1]));
     const std::uint32_t state = first | (second << kSecondPortShift);
-    Input_buttonsState = static_cast<int>(state);
+    VS::Input::buttonsState = static_cast<int>(state);
     VS::Input::UpdateLiveControllerConnection(0,
                                               Input_legacyPadResponseBytes[0]);
     VS::Input::UpdateLiveControllerConnection(kSecondPortShift,
                                               Input_legacyPadResponseBytes[1]);
-    const auto previous = static_cast<std::uint32_t>(Input_previousButtons);
+    const auto previous =
+        static_cast<std::uint32_t>(VS::Input::previousButtons);
     const std::uint32_t pressed = ~previous & state;
-    Input_buttonsPressed.allButtons = pressed;
-    Input_releasedButtons = static_cast<int>(previous & ~state);
-    Input_previousButtons = Input_buttonsState;
+    VS::Input::buttonsPressed.allButtons = pressed;
+    VS::Input::releasedButtons = static_cast<int>(previous & ~state);
+    VS::Input::previousButtons = VS::Input::buttonsState;
     return pressed >> kSecondPortShift;
   }
   void PresentFrameBuffer(int index) override {

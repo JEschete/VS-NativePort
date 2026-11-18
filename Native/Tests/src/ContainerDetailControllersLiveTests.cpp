@@ -71,7 +71,7 @@ TEST_CASE("F02953 live weapon uses container records beyond inventory capacity",
   CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerWeapon + 1);
   CHECK(VS::Menu::Framework::strIntAgi[0] == kWeaponStrength);
   fixture.Advance(detail::UpdateLiveWeaponDetails);
-  Input_buttonRepeat = input::R1;
+  VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveWeaponDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(fixture.rows[kContainerRow].subText == nullptr);
@@ -88,7 +88,7 @@ TEST_CASE(
   CHECK(VS::Menu::Framework::strIntAgi[0] ==
         equipment_detail_tests::kSecondBladeStrength);
   fixture.Advance(detail::UpdateLiveBladeDetails);
-  Input_buttonRepeat = input::R1;
+  VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveBladeDetails(0) == 0);
   CHECK(VS::Menu::Framework::strIntAgi[0] ==
         equipment_detail_tests::kBladeStrength);
@@ -116,7 +116,7 @@ TEST_CASE(
       nullptr);
   CHECK(actual == fixture.Sprites());
   fixture.ResetFrame();
-  Input_buttonRepeat = input::R1;
+  VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveGripDetails(0) == 0);
   CHECK(fixture.CountLabel(fixture.Sprites()) == "X     2");
 }
@@ -128,7 +128,7 @@ TEST_CASE("F02956 actual shield helpers support unoccupied container gem slots",
   fixture.Open(detail::UpdateLiveShieldDetails);
   CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerWeapon + 1);
   fixture.Advance(detail::UpdateLiveShieldDetails);
-  Input_buttonRepeat = input::R1;
+  VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveShieldDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(fixture.rows[kHeader].itemPage == 2);
@@ -143,7 +143,7 @@ TEST_CASE("F02957 actual armor paging reaches container record sixty four",
   fixture.Open(detail::UpdateLiveArmorDetails);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   fixture.Advance(detail::UpdateLiveArmorDetails);
-  Input_buttonRepeat = input::R1;
+  VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveArmorDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerPart + 1);
   CHECK(fixture.rows[kHeader].itemPage == 2);
@@ -220,7 +220,7 @@ TEST_CASE("F02958 gem statistics preserve container reference one ninety two",
         kContainerGem + 1);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 9);
   fixture.Advance(detail::UpdateLiveGemDetails);
-  Input_buttonRepeat = input::R1;
+  VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveGemDetails(0) == 0);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 5);
   CHECK(fixture.rows[kHeader].itemPage == 2);
@@ -287,7 +287,7 @@ TEST_CASE(
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
   fixture.Advance(detail::UpdateLiveItemDetails);
-  Input_buttonsPressed.allButtons = input::Cross;
+  VS::Input::buttonsPressed.allButtons = input::Cross;
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 1);

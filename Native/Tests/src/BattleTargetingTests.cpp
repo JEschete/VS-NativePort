@@ -25,7 +25,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/AttackPrerequisiteTable.h"
-#include "Battle/AttackPrerequisites.h"
 #include "Battle/AttackPrerequisites.hpp"
 #include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BattleMode.hpp"
@@ -38,7 +37,7 @@
 #include "Battle/Targeting.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
@@ -408,14 +407,14 @@ TEST_CASE("Attack prerequisite slots read the live target actor",
   const ScopedOverride<Battle_StatusEffectParams> strength(
       Battle_statusEffectParams[5], params);
   std::array<u_char, 4> bytes{5, 0, 0, 0};
-  CHECK(Battle_IsAttackTargetUndeadSlot(nullptr, bytes.data()) == 1);
-  CHECK(Battle_IsAttackTargetLivingSlot(nullptr, bytes.data()) == 0);
-  CHECK(Battle_CanApplyStrengthDownSlot(nullptr, bytes.data()) == 1);
+  CHECK(VS::Battle::IsAttackTargetUndeadSlot(nullptr, bytes.data()) == 1);
+  CHECK(VS::Battle::IsAttackTargetLivingSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::CanApplyStrengthDownSlot(nullptr, bytes.data()) == 1);
   live.stats->statusImmunities = 0x40;
-  CHECK(Battle_CanApplyStrengthDownSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::CanApplyStrengthDownSlot(nullptr, bytes.data()) == 0);
   live.stats->statusImmunities = 0;
   live.stats->statuses = 0x8;
-  CHECK(Battle_CanApplyStrengthDownSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::CanApplyStrengthDownSlot(nullptr, bytes.data()) == 0);
 }
 
 TEST_CASE("Attack prerequisite slots read the live target's equipment",
@@ -423,16 +422,16 @@ TEST_CASE("Attack prerequisite slots read the live target's equipment",
   LiveActor live;
   const ScopedOverride<Battle_Actor*> slot(Battle_actors[5], live.actor.get());
   std::array<u_char, 4> bytes{5, 0, 0, 0};
-  CHECK(Battle_CanApplyAirAttackUpSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::CanApplyAirAttackUpSlot(nullptr, bytes.data()) == 0);
   live.stats->weapon.blade.id = 3;
-  CHECK(Battle_CanApplyAirAttackUpSlot(nullptr, bytes.data()) == 1);
-  CHECK(Battle_CanApplyAirDefenseUpSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::CanApplyAirAttackUpSlot(nullptr, bytes.data()) == 1);
+  CHECK(VS::Battle::CanApplyAirDefenseUpSlot(nullptr, bytes.data()) == 0);
   live.stats->limbs[2].armor.armor.id = 7;
-  CHECK(Battle_CanApplyAirDefenseUpSlot(nullptr, bytes.data()) == 1);
-  CHECK(Battle_RejectAttackPrerequisiteSlot(nullptr, bytes.data()) == 0);
-  CHECK(Battle_AcceptAttackPrerequisiteSlot(nullptr, bytes.data()) == 1);
+  CHECK(VS::Battle::CanApplyAirDefenseUpSlot(nullptr, bytes.data()) == 1);
+  CHECK(VS::Battle::RejectAttackPrerequisiteSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::AcceptAttackPrerequisiteSlot(nullptr, bytes.data()) == 1);
   // The original unused slots return the dispatcher's non-zero v0.
-  CHECK(Battle_IgnoreAttackPrerequisiteSlot(nullptr, nullptr) == 1);
+  CHECK(VS::Battle::IgnoreAttackPrerequisiteSlot(nullptr, nullptr) == 1);
 }
 
 TEST_CASE("Attack prerequisite slots refuse an absent target actor",
@@ -440,12 +439,12 @@ TEST_CASE("Attack prerequisite slots refuse an absent target actor",
   const BattleLog log;
   const ScopedOverride<Battle_Actor*> slot(Battle_actors[7], nullptr);
   std::array<u_char, 4> bytes{7, 0, 0, 0};
-  CHECK(Battle_CanApplyPoisonSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::CanApplyPoisonSlot(nullptr, bytes.data()) == 0);
   CHECK(log.Saw("attack prerequisite for absent target actor=7"));
   bytes[0] = 42;
-  CHECK(Battle_CanApplyCurseSlot(nullptr, bytes.data()) == 0);
+  CHECK(VS::Battle::CanApplyCurseSlot(nullptr, bytes.data()) == 0);
   CHECK(log.Saw("attack prerequisite for absent target actor=42"));
-  CHECK(Battle_AcceptAttackPrerequisiteSlot(nullptr, bytes.data()) == 1);
+  CHECK(VS::Battle::AcceptAttackPrerequisiteSlot(nullptr, bytes.data()) == 1);
 }
 
 TEST_CASE("Live hit prerequisite reads the action hit and impact byte",
@@ -3885,8 +3884,7 @@ TEST_CASE("Live range shape extent refuses without a shape",
 
 TEST_CASE("Battle targeting bindings retire the module entries they replace",
           "[battle][battle-targeting]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);
@@ -3908,48 +3906,48 @@ TEST_CASE("Battle targeting bindings retire the module entries they replace",
     CHECK(resolve(address) == nullptr);
   }
   // Battle_attackPrerequisiteFunctions still stores the rule slots.
-  using Slot = decltype(&Battle_RejectAttackPrerequisiteSlot);
+  using Slot = decltype(&VS::Battle::RejectAttackPrerequisiteSlot);
   constexpr std::array<std::pair<unsigned, Slot>, 40> kSlots{{
-      {0x8007F548u, &Battle_RejectAttackPrerequisiteSlot},
-      {0x8007F550u, &Battle_AcceptAttackPrerequisiteSlot},
-      {0x8007F558u, &Battle_AcceptAttackPrerequisiteSlot},
-      {0x8007F560u, &Battle_AcceptAttackPrerequisiteSlot},
-      {0x8007F568u, &Battle_IsAttackTargetUndeadSlot},
-      {0x8007F58Cu, &Battle_IsAttackTargetLivingSlot},
-      {0x8007F5B0u, &Battle_RejectAttackPrerequisiteSlot},
-      {0x8007F5B8u, &Battle_RejectAttackPrerequisiteSlot},
-      {0x8007F5C0u, &Battle_RejectAttackPrerequisiteSlot},
-      {0x8007F5C8u, &Battle_CanApplyStrengthDownSlot},
-      {0x8007F5E8u, &Battle_CanApplyIntelligenceDownSlot},
-      {0x8007F608u, &Battle_CanApplyAgilityDownSlot},
-      {0x8007F628u, &Battle_CanApplyEquipmentDownSlot},
-      {0x8007F6D8u, &Battle_CanApplyHalfMovementSlot},
-      {0x8007F6F8u, &Battle_CanApplyStrengthUpSlot},
-      {0x8007F718u, &Battle_CanApplyIntelligenceUpSlot},
-      {0x8007F738u, &Battle_CanApplyAgilityUpSlot},
-      {0x8007F758u, &Battle_CanApplyEquipmentUpSlot},
-      {0x8007F808u, &Battle_CanApplyQuickenSlot},
-      {0x8007F828u, &Battle_CanApplySilenceSlot},
-      {0x8007F848u, &Battle_CanApplyMagicWardSlot},
-      {0x8007F868u, &Battle_CanApplyRegenerationSlot},
-      {0x8007F888u, &Battle_CanApplyParalysisSlot},
-      {0x8007F8A8u, &Battle_CanApplyPoisonSlot},
-      {0x8007F8C8u, &Battle_CanApplyNumbnessSlot},
-      {0x8007F8E8u, &Battle_CanApplyCurseSlot},
-      {0x8007F908u, &Battle_CanApplyAirAttackUpSlot},
-      {0x8007F96Cu, &Battle_CanApplyFireAttackUpSlot},
-      {0x8007F9D0u, &Battle_CanApplyEarthAttackUpSlot},
-      {0x8007FA34u, &Battle_CanApplyWaterAttackUpSlot},
-      {0x8007FA98u, &Battle_CanApplyAirDefenseUpSlot},
-      {0x8007FB34u, &Battle_CanApplyFireDefenseUpSlot},
-      {0x8007FBD0u, &Battle_CanApplyEarthDefenseUpSlot},
-      {0x8007FC6Cu, &Battle_CanApplyWaterDefenseUpSlot},
-      {0x8007FD08u, &Battle_CanApplyBanishSlot},
-      {0x8007FD28u, &Battle_CanApplyExorciseSlot},
-      {0x8007FD74u, &Battle_CanApplyDrainSlot},
-      {0x8007FDC0u, &Battle_IgnoreAttackPrerequisiteSlot},
-      {0x8007FDC8u, &Battle_IgnoreAttackPrerequisiteSlot},
-      {0x8007FDD0u, &Battle_IgnoreAttackPrerequisiteSlot},
+      {0x8007F548u, &VS::Battle::RejectAttackPrerequisiteSlot},
+      {0x8007F550u, &VS::Battle::AcceptAttackPrerequisiteSlot},
+      {0x8007F558u, &VS::Battle::AcceptAttackPrerequisiteSlot},
+      {0x8007F560u, &VS::Battle::AcceptAttackPrerequisiteSlot},
+      {0x8007F568u, &VS::Battle::IsAttackTargetUndeadSlot},
+      {0x8007F58Cu, &VS::Battle::IsAttackTargetLivingSlot},
+      {0x8007F5B0u, &VS::Battle::RejectAttackPrerequisiteSlot},
+      {0x8007F5B8u, &VS::Battle::RejectAttackPrerequisiteSlot},
+      {0x8007F5C0u, &VS::Battle::RejectAttackPrerequisiteSlot},
+      {0x8007F5C8u, &VS::Battle::CanApplyStrengthDownSlot},
+      {0x8007F5E8u, &VS::Battle::CanApplyIntelligenceDownSlot},
+      {0x8007F608u, &VS::Battle::CanApplyAgilityDownSlot},
+      {0x8007F628u, &VS::Battle::CanApplyEquipmentDownSlot},
+      {0x8007F6D8u, &VS::Battle::CanApplyHalfMovementSlot},
+      {0x8007F6F8u, &VS::Battle::CanApplyStrengthUpSlot},
+      {0x8007F718u, &VS::Battle::CanApplyIntelligenceUpSlot},
+      {0x8007F738u, &VS::Battle::CanApplyAgilityUpSlot},
+      {0x8007F758u, &VS::Battle::CanApplyEquipmentUpSlot},
+      {0x8007F808u, &VS::Battle::CanApplyQuickenSlot},
+      {0x8007F828u, &VS::Battle::CanApplySilenceSlot},
+      {0x8007F848u, &VS::Battle::CanApplyMagicWardSlot},
+      {0x8007F868u, &VS::Battle::CanApplyRegenerationSlot},
+      {0x8007F888u, &VS::Battle::CanApplyParalysisSlot},
+      {0x8007F8A8u, &VS::Battle::CanApplyPoisonSlot},
+      {0x8007F8C8u, &VS::Battle::CanApplyNumbnessSlot},
+      {0x8007F8E8u, &VS::Battle::CanApplyCurseSlot},
+      {0x8007F908u, &VS::Battle::CanApplyAirAttackUpSlot},
+      {0x8007F96Cu, &VS::Battle::CanApplyFireAttackUpSlot},
+      {0x8007F9D0u, &VS::Battle::CanApplyEarthAttackUpSlot},
+      {0x8007FA34u, &VS::Battle::CanApplyWaterAttackUpSlot},
+      {0x8007FA98u, &VS::Battle::CanApplyAirDefenseUpSlot},
+      {0x8007FB34u, &VS::Battle::CanApplyFireDefenseUpSlot},
+      {0x8007FBD0u, &VS::Battle::CanApplyEarthDefenseUpSlot},
+      {0x8007FC6Cu, &VS::Battle::CanApplyWaterDefenseUpSlot},
+      {0x8007FD08u, &VS::Battle::CanApplyBanishSlot},
+      {0x8007FD28u, &VS::Battle::CanApplyExorciseSlot},
+      {0x8007FD74u, &VS::Battle::CanApplyDrainSlot},
+      {0x8007FDC0u, &VS::Battle::IgnoreAttackPrerequisiteSlot},
+      {0x8007FDC8u, &VS::Battle::IgnoreAttackPrerequisiteSlot},
+      {0x8007FDD0u, &VS::Battle::IgnoreAttackPrerequisiteSlot},
   }};
   for (const auto& [address, slot] : kSlots) {
     INFO("address " << address);

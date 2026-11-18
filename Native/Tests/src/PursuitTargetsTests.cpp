@@ -10,7 +10,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/Navigation.h"
@@ -26,7 +26,7 @@ struct PursuitFixture {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   decltype(Field_roomData.movingPlatforms) saved_platforms =
       Field_roomData.movingPlatforms;
   decltype(Field_roomData.header.movingPlatformsLength) saved_platform_bytes =
@@ -41,11 +41,12 @@ struct PursuitFixture {
   PursuitFixture() {
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
-    std::fill_n(Battle_Ai_FrameState()->actors, kAiFrameActorSlots, nullptr);
+    std::fill_n(VS::Battle::Ai::LiveFrameContext().actors,
+                VS::Battle::Ai::kFrameActorSlots, nullptr);
     for (unsigned index = 0; index < states.size(); ++index) {
       Actors_actorRecords[index] = &models[index];
       Battle_actors[index] = &actors[index];
-      Battle_Ai_FrameState()->actors[index] = &states[index];
+      VS::Battle::Ai::LiveFrameContext().actors[index] = &states[index];
       actors[index].id = static_cast<int>(index);
       states[index].actorId = static_cast<u_char>(index);
       states[index].actor =
@@ -73,7 +74,7 @@ struct PursuitFixture {
   ~PursuitFixture() {
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Field_roomData.movingPlatforms = saved_platforms;
     Field_roomData.header.movingPlatformsLength = saved_platform_bytes;
     Battle_Ai_routeGates = saved_gates;
@@ -120,7 +121,7 @@ TEST_CASE(
   PursuitFixture fixture;
   fixture.Approach().targetTileX = 17;
   fixture.Approach().targetTileZ = 18;
-  Battle_Ai_FrameState()->actors[1] = nullptr;
+  VS::Battle::Ai::LiveFrameContext().actors[1] = nullptr;
   Actors_actorRecords[1] = nullptr;
   VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
   CHECK(fixture.Approach().targetTileX == 17);
@@ -160,7 +161,7 @@ TEST_CASE("Approach retains the original missing-cache target-zero distinction",
           "[ai][pursuit-targets]") {
   const int target = GENERATE(0, 1);
   PursuitFixture fixture;
-  Battle_Ai_FrameState()->actors[target] = nullptr;
+  VS::Battle::Ai::LiveFrameContext().actors[target] = nullptr;
   Actors_actorRecords[target] = nullptr;
   fixture.states[0].requestedMovementMode = 3;
   fixture.states[0].currentMovementMode = 2;

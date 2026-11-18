@@ -14,7 +14,7 @@
 #include "Core/Random.h"
 #include "Core/Text/TextCode.h"
 #include "Input/Buttons.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
@@ -43,8 +43,8 @@ files::Context LiveFiles() {
 }
 
 struct EmptySlotsFixture {
-  decltype(Input_buttonsPressed) saved_pressed = Input_buttonsPressed;
-  decltype(Input_buttonRepeat) saved_repeat = Input_buttonRepeat;
+  decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
+  decltype(VS::Input::buttonRepeat) saved_repeat = VS::Input::buttonRepeat;
   Save_CardFileInfoRecord* saved_summaries = Title_saveFileSummaries;
   u_short* saved_table = VS::Menu::Files::textTable;
   char* saved_message = VS::Menu::Files::memoryCardMessage;
@@ -68,8 +68,8 @@ struct EmptySlotsFixture {
     VS::Menu::Files::textTable = text.data();
     // Input feedback needs a bound bank, even when no sound programs exist.
     sfx_offsets.fill(UINT32_MAX);
-    Input_buttonsPressed.allButtons = 0;
-    Input_buttonRepeat = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonRepeat = 0;
   }
 
   ~EmptySlotsFixture() {
@@ -78,20 +78,20 @@ struct EmptySlotsFixture {
     VS::Menu::Files::textTable = saved_table;
     VS::Menu::Files::memoryCardMessage = saved_message;
     VS::Menu::Files::selectCursorXy = saved_cursor;
-    Input_buttonsPressed = saved_pressed;
-    Input_buttonRepeat = saved_repeat;
+    VS::Input::buttonsPressed = saved_pressed;
+    VS::Input::buttonRepeat = saved_repeat;
   }
 
   void CheckEmptySlotInput() const {
     files::Context context = LiveFiles();
     for (size_t index = 0; index < summaries.size(); ++index) {
-      Input_buttonsPressed.allButtons = PADRright;
+      VS::Input::buttonsPressed.allButtons = PADRright;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
       CHECK(VS::Menu::Files::selectCursorXy != 0);
-      Input_buttonsPressed.allButtons = 0;
-      Input_buttonRepeat = PADLdown;
+      VS::Input::buttonsPressed.allButtons = 0;
+      VS::Input::buttonRepeat = PADLdown;
       CHECK(files::UpdateLoadFiles(context, 0) == 0);
-      Input_buttonRepeat = 0;
+      VS::Input::buttonRepeat = 0;
     }
   }
 };
@@ -208,13 +208,13 @@ TEST_CASE("Game Over fade links packets through native handles",
   files::Context context = LiveFiles();
   files::UpdateGameOverChoices(context, true);
   for (int frame = 0; frame < 16; ++frame) {
-    Input_buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
     CHECK(files::UpdateGameOverChoices(context, false) == 0);
   }
 
-  Input_buttonsPressed.allButtons = PADstart;
+  VS::Input::buttonsPressed.allButtons = PADstart;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
-  Input_buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed.allButtons = 0;
   const auto* fade_packet = Render_frameScratch.primitiveCursor;
   CHECK(files::UpdateGameOverChoices(context, false) == 0);
   CHECK(nextPrim(render.ordering.data() + 2) == fade_packet);
@@ -234,7 +234,7 @@ TEST_CASE("Empty Load summaries remain unavailable and can be cancelled",
     CHECK(files::LiveFilesState().elements[index + 5].slot_unavailable != 0);
   }
   fixture.CheckEmptySlotInput();
-  Input_buttonsPressed.allButtons = PADRdown;
+  VS::Input::buttonsPressed.allButtons = PADRdown;
   CHECK(files::UpdateLoadFiles(context, 0) == -1);
   CHECK(VS::Menu::Files::selectCursorXy == 0);
 }

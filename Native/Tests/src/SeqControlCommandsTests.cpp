@@ -13,7 +13,7 @@
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqControlCommandsLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -558,8 +558,7 @@ TEST_CASE("Live layer commands refuse without an active music layer",
 TEST_CASE("Flow-control handlers keep module bindings only in opcode tables",
           "[audio-seq-control][audio]") {
   using Handler = void (*)(Audio_SeqChannel*, int);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, Handler>, 27> kept{{
       {0x8001B138U, &Seq::LiveFinishChannel},
       {0x8001B20CU, &Seq::LiveFinishChannelOnReplacement},

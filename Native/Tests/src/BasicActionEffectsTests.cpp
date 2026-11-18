@@ -26,7 +26,7 @@
 #include "Battle/HitCalculationsLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Random.h"
 #include "Core/RandomLive.hpp"
 #include "State/ScriptFlags.hpp"
@@ -364,14 +364,13 @@ std::vector<std::uint8_t> ReadOriginalModule() {
 
 Handler Relocated(std::uint32_t address, Handler expected) {
   const auto image = ReadOriginalModule();
-  const auto tables =
-      std::span(Content_modulePointers, Content_modulePointerCount);
+  const auto tables = VS::Content::ModulePointerTables();
   const auto table = std::ranges::find(
       tables, reinterpret_cast<void**>(Battle_actionEffectMediators),
-      &Content_ModulePointerTable::target);
+      &VS::Content::ModulePointerTable::target);
   REQUIRE(table != tables.end());
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      *table, image, {Content_moduleSymbols, Content_moduleSymbolCount}));
+      *table, image, VS::Content::ModuleSymbols()));
   for (std::size_t index = 0; index < std::size(Battle_actionEffectMediators);
        ++index) {
     std::array<std::uint8_t, 4> bytes{};

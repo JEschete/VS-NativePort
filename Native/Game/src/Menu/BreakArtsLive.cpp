@@ -20,7 +20,7 @@
 #include "Battle/ActionTable.h"
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/BreakArts.h"
 #include "Menu/BreakArts.hpp"
@@ -142,10 +142,10 @@ class LiveHost final : public Host {
   }
 
   std::uint8_t CursorMemory() override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void SetCursorMemory(std::uint8_t value) override {
-    Input_settings.cursorMemory = ToStorageChar(value);
+    VS::Input::settings.cursorMemory = ToStorageChar(value);
   }
   std::uint32_t ActionRestrictions() override {
     return static_cast<std::uint32_t>(VS::Menu::Framework::actionRestrictions);

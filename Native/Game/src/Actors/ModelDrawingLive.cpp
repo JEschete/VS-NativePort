@@ -42,7 +42,7 @@
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelGeometryLive.hpp"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomLighting.hpp"
@@ -136,7 +136,7 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
     kFirstFrozenJointTag = 3,
     kLastFrozenJointTag = 6
   };
-  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
+  const Render_ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   const unsigned yaw = workspace->angleX;
   const unsigned pitch = workspace->angleY;
   if (tag == 1 || tag == 2) {
@@ -223,7 +223,7 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       return 0;
     }
   }
-  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
+  const Render_ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   SVECTOR rotation = {
       static_cast<int16_t>((actor->blendPose.boneKeys[0].vx >> 1) +
                            actor->instance.rotationX),
@@ -394,7 +394,7 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
                        static_cast<unsigned>(geometry_->modelId));
       return false;
     }
-    workspace_ = Render_ModelWorkspace();
+    workspace_ = VS::Render::ModelWorkspace();
     workspace_->model = geometry_->instance.model;
     workspace_->texturePage =
         Render_legacyActorTextureSlots[geometry_->textureSlot].texturePage;
@@ -455,9 +455,9 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     return actor_.instance.soundEnabled != 0;
   }
   void DrawShadow() override {
-    VS::Render::DrawLiveActorGroundShadow(actor_,
-                                          Render_frameScratch.viewMatrix,
-                                          Render_ModelWorkspace()->rootOffset);
+    VS::Render::DrawLiveActorGroundShadow(
+        actor_, Render_frameScratch.viewMatrix,
+        VS::Render::ModelWorkspace()->rootOffset);
   }
 
  private:

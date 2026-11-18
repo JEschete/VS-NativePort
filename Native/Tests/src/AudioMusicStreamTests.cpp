@@ -28,7 +28,7 @@
 #include "Audio/StreamControl.hpp"
 #include "Audio/StreamLive.hpp"
 #include "Content/CdDrive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "DiscQueue.h"
 
 namespace {
@@ -1753,8 +1753,7 @@ TEST_CASE(
 
 TEST_CASE("Promoted music and stream functions keep no module binding",
           "[audio-music-streams][audio][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::uint32_t, 40> retired{
       0x80044D94U, 0x80044DB4U, 0x80044DD4U, 0x80044DF4U, 0x80044EC8U,
       0x80044F60U, 0x80045000U, 0x800450D4U, 0x800450E4U, 0x80045110U,
@@ -1774,8 +1773,7 @@ TEST_CASE("Promoted music and stream functions keep no module binding",
 
 TEST_CASE("Promoted battle actor sound functions keep no module binding",
           "[audio-music-streams][audio][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::uint32_t, 10> retired{
       0x8006CD60U, 0x8007BE10U, 0x8007C8A4U, 0x8008E480U, 0x800AD62CU,
       0x800AE4FCU, 0x800AE68CU, 0x800AE6C0U, 0x800AE7D8U, 0x800AE828U,

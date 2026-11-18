@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -927,8 +927,7 @@ TEST_CASE("Screen overlay functions no longer resolve by module address",
                0x8007DE78U, 0x8007DE88U, 0x8007DEA8U, 0x8007DECCU, 0x8007DF00U,
                0x8007DF10U, 0x8007DF20U, 0x8007DF30U);
   CAPTURE(address);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           address) == nullptr);
 }
@@ -942,8 +941,7 @@ TEST_CASE("Screen overlay state addresses have no module symbol entry",
                0x800F1A68U, 0x800F1A78U, 0x800F1A9CU, 0x800F1ABCU, 0x800F1B98U,
                0x800F1B9CU);
   CAPTURE(address);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(std::ranges::none_of(symbols, [address](const auto& symbol) {
     return std::string_view(symbol.module) == "BATTLE/BATTLE.PRG" &&
            symbol.address == address;

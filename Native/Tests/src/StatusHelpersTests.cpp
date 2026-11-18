@@ -16,7 +16,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusHelpers.hpp"
 #include "Battle/StatusHelpersLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Interactions.h"
 #include "State/Timers.hpp"
 
@@ -391,8 +391,7 @@ TEST_CASE(
 
 TEST_CASE("Status helper module addresses retain their checked live contracts",
           "[status-helpers][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

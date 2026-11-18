@@ -23,20 +23,19 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Boot/GameLoop.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.h"
 #include "Menu/Files.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/NativeContainerLive.hpp"
 #include "Save/NativeFilePresentation.hpp"
-#include "Save/NativeMenu.h"
 #include "Save/NativeMenu.hpp"
 #include "Save/RuntimeSnapshot.hpp"
 #include "State/Ashley.h"
@@ -60,11 +59,11 @@ void CountSound(Audio_CommandParams* parameters) {
 
 struct MenuFixture {
   fs::path root;
-  State_Settings settings = Input_settings;
+  State_Settings settings = VS::Input::settings;
   int active = Boot_isGameplayActive;
-  decltype(Input_buttonsPressed.allButtons) pressed =
-      Input_buttonsPressed.allButtons;
-  int repeat = Input_buttonRepeat;
+  decltype(VS::Input::buttonsPressed.allButtons) pressed =
+      VS::Input::buttonsPressed.allButtons;
+  int repeat = VS::Input::buttonRepeat;
   std::array<u_int, 12> sound_offsets{};
   std::array<u_short, 12> sound_selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sound_tables{
@@ -89,8 +88,8 @@ struct MenuFixture {
     REQUIRE(fs::create_directory(root));
     Save::ConfigureDirectory(root);
     Boot_isGameplayActive = 0;
-    Input_buttonsPressed.allButtons = 0;
-    Input_buttonRepeat = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::buttonRepeat = 0;
     sound_selectors.fill(0x8000);
     Audio_Mixer_kCommandHandlers[0x20] = CountSound;
     Audio_nextSfxChannelGroup7E = 2;
@@ -100,10 +99,10 @@ struct MenuFixture {
   ~MenuFixture() {
     try {
       Save::ShutdownFileMenus();
-      Input_settings = settings;
+      VS::Input::settings = settings;
       Boot_isGameplayActive = active;
-      Input_buttonsPressed.allButtons = pressed;
-      Input_buttonRepeat = repeat;
+      VS::Input::buttonsPressed.allButtons = pressed;
+      VS::Input::buttonRepeat = repeat;
       Audio_Mixer_kCommandHandlers[0x20] = sound_handler;
       Audio_Driver_commandArguments = sound_arguments;
       Audio_Mixer_commandParams = sound_params;
@@ -209,8 +208,7 @@ struct MenuContentFixture {
 
   void AddBattleBounds(const std::array<unsigned, 8>& bounds) {
     bool found = false;
-    for (unsigned index = 0; index < Content_moduleDataCount; ++index) {
-      const auto& slice = Content_moduleData[index];
+    for (const auto& slice : VS::Content::ModuleDataEntries()) {
       if (slice.target != &Items_itemCategoryUpperIds) continue;
       std::vector<std::uint8_t> battle;
       Put(battle, slice.offset, bounds);
@@ -301,8 +299,8 @@ std::string Text(const char* text) {
 }
 
 void Buttons(int pressed, int repeat = 0) {
-  Input_buttonsPressed.allButtons = pressed;
-  Input_buttonRepeat = repeat;
+  VS::Input::buttonsPressed.allButtons = pressed;
+  VS::Input::buttonRepeat = repeat;
 }
 
 void ConfirmSave() {
@@ -369,7 +367,7 @@ void CheckSounds(const MenuFixture& fixture,
 }
 
 void CheckStagedBank(const Items_ContainerData* bank) {
-  CHECK(Save_NativeContainerData() == bank);
+  CHECK(VS::Game::Save::ContainerData() == bank);
   CHECK(bank->misc[0].id == 323);
   CHECK(bank->misc[0].count == 2);
 }
@@ -389,19 +387,19 @@ void CheckTitlePickerWrapAndCancel() {
 }
 
 void CheckContainerTail(const Items_ContainerData* bank) {
-  CHECK(Save_NativeContainerData() == bank);
-  CHECK(Save_NativeContainerData()->misc[255].id == 308);
-  CHECK(Save_NativeContainerData()->misc[255].count == 2);
+  CHECK(VS::Game::Save::ContainerData() == bank);
+  CHECK(VS::Game::Save::ContainerData()->misc[255].id == 308);
+  CHECK(VS::Game::Save::ContainerData()->misc[255].count == 2);
 }
 
 void CheckVerticalConsent() {
-  Move(PADLleft, Save_NativeSelectContainer);
+  Move(PADLleft, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
-  Move(PADLright, Save_NativeSelectContainer);
+  Move(PADLright, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
-  Move(PADLup, Save_NativeSelectContainer);
+  Move(PADLup, VS::Game::Save::SelectContainer);
   CHECK(Screen().affirmative);
-  Move(PADLdown, Save_NativeSelectContainer);
+  Move(PADLdown, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
 }
 
@@ -420,11 +418,11 @@ void CheckFirstTwoFiles(std::array<Save::FileStatus, 2> expected) {
 void CheckFailedSave(const MenuFixture& fixture) {
   REQUIRE(Text(VS::Menu::Files::memoryCardMessage) == "Save failed - see log");
   CHECK(fixture.sounds[8] == 0);
-  CHECK(Input_settings.cumulativeSaveCount ==
+  CHECK(VS::Input::settings.cumulativeSaveCount ==
         fixture.settings.cumulativeSaveCount);
-  CHECK(Input_settings.currentGameSaveCount ==
+  CHECK(VS::Input::settings.currentGameSaveCount ==
         fixture.settings.currentGameSaveCount);
-  CHECK(Input_settings.saveFileGeneration ==
+  CHECK(VS::Input::settings.saveFileGeneration ==
         fixture.settings.saveFileGeneration);
   CHECK_FALSE(fs::exists(fixture.root / "slot00.vssave"));
 }
@@ -433,7 +431,7 @@ void CheckFailedSave(const MenuFixture& fixture) {
 TEST_CASE("Native Continue scrolls all one hundred files vertically",
           "[save-menu]") {
   MenuFixture fixture;
-  CHECK(Save_NativeInitialTitleSelection() == 0);
+  CHECK(VS::Game::Save::InitialTitleSelection() == 0);
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
   CHECK(SelectedSlot() == 0);
   CHECK(Screen().summaries.size() == 3);
@@ -470,15 +468,16 @@ TEST_CASE("Native file screens have three cards without generic row panels",
 TEST_CASE("Native Save cannot bypass production save-point eligibility",
           "[save-menu]") {
   MenuFixture fixture;
-  const auto before = Input_settings;
+  const auto before = VS::Input::settings;
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(1) == 0);
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
   ConfirmSave();
   CHECK(Text(VS::Menu::Files::memoryCardMessage) == "Save failed - see log");
   CHECK(!fs::exists(fixture.root / "slot00.vssave"));
-  CHECK(Input_settings.cumulativeSaveCount == before.cumulativeSaveCount);
-  CHECK(Input_settings.currentGameSaveCount == before.currentGameSaveCount);
-  CHECK(Input_settings.saveFileGeneration == before.saveFileGeneration);
+  CHECK(VS::Input::settings.cumulativeSaveCount == before.cumulativeSaveCount);
+  CHECK(VS::Input::settings.currentGameSaveCount ==
+        before.currentGameSaveCount);
+  CHECK(VS::Input::settings.saveFileGeneration == before.saveFileGeneration);
 }
 
 TEST_CASE("Native picker never replaces an invalid existing file",
@@ -490,7 +489,7 @@ TEST_CASE("Native picker never replaces an invalid existing file",
     output << "unsupported or damaged save";
     REQUIRE(output.good());
   }
-  CHECK(Save_NativeInitialTitleSelection() == 1);
+  CHECK(VS::Game::Save::InitialTitleSelection() == 1);
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(1) == 0);
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(0) == 0);
   CHECK(Screen().files.front().status == Save::FileStatus::kInvalid);
@@ -507,61 +506,61 @@ TEST_CASE("Native picker never replaces an invalid existing file",
 TEST_CASE("Container selection owns typed storage beyond picker reentry",
           "[save-menu]") {
   MenuFixture fixture;
-  BeginPicker(Save_NativeSelectContainer, 1);
-  Press(PADRright, Save_NativeSelectContainer);
+  BeginPicker(VS::Game::Save::SelectContainer, 1);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   REQUIRE(Screen().confirmation);
   CHECK_FALSE(Screen().affirmative);
   Buttons(0, PADLup);
-  Tick(Save_NativeSelectContainer);
-  Press(PADRright, Save_NativeSelectContainer);
+  Tick(VS::Game::Save::SelectContainer);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   Buttons(0);
-  REQUIRE(Save_NativeSelectContainer(0) == 1);
-  auto* bank = Save_NativeContainerData();
+  REQUIRE(VS::Game::Save::SelectContainer(0) == 1);
+  auto* bank = VS::Game::Save::ContainerData();
   REQUIRE(bank != nullptr);
-  CHECK(Input_settings.containerEmpty == 1);
+  CHECK(VS::Input::settings.containerEmpty == 1);
   bank->misc[255].id = 308;
   bank->misc[255].count = 2;
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(2) == 0);
   CheckContainerTail(bank);
-  Save_NativeReleaseContainer();
+  VS::Game::Save::ReleaseContainer();
 }
 
 TEST_CASE("Native confirmation is vertical explicit consent and cancelable",
           "[save-menu]") {
   MenuFixture fixture;
-  BeginPicker(Save_NativeSelectContainer, 1);
-  Press(PADRright, Save_NativeSelectContainer);
+  BeginPicker(VS::Game::Save::SelectContainer, 1);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   REQUIRE(Screen().confirmation);
   CHECK_FALSE(Screen().affirmative);
   CheckVerticalConsent();
-  Press(PADRright, Save_NativeSelectContainer);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   CheckCanceledConsent(fixture.root);
-  Press(PADRright, Save_NativeSelectContainer);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().affirmative);
-  Move(PADLup, Save_NativeSelectContainer);
+  Move(PADLup, VS::Game::Save::SelectContainer);
   CHECK(Screen().affirmative);
-  Press(PADRdown, Save_NativeSelectContainer);
+  Press(PADRdown, VS::Game::Save::SelectContainer);
   CheckCanceledConsent(fixture.root);
 }
 
 TEST_CASE("Native reentry retains the last file at the end of the scroll",
           "[save-menu]") {
   MenuFixture fixture;
-  BeginPicker(Save_NativeSelectContainer, 1);
-  Move(PADLup, Save_NativeSelectContainer);
+  BeginPicker(VS::Game::Save::SelectContainer, 1);
+  Move(PADLup, VS::Game::Save::SelectContainer);
   CheckSelectedSlot(99);
-  Press(PADRright, Save_NativeSelectContainer);
-  Move(PADLup, Save_NativeSelectContainer);
-  Press(PADRright, Save_NativeSelectContainer);
+  Press(PADRright, VS::Game::Save::SelectContainer);
+  Move(PADLup, VS::Game::Save::SelectContainer);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   Buttons(0);
-  REQUIRE(Save_NativeSelectContainer(0) == 1);
+  REQUIRE(VS::Game::Save::SelectContainer(0) == 1);
   BeginPicker(VS::Menu::UpdateLiveDataSaveMenu, 2);
   CheckSelectedSlot(99);
   CHECK(Screen().files.front().slot == 97);
   CHECK(Screen().files.back().slot == 99);
   CHECK_FALSE(Screen().title);
   CHECK(Screen().save);
-  Save_NativeReleaseContainer();
+  VS::Game::Save::ReleaseContainer();
 }
 
 TEST_CASE("Native session reset clears borrowed presentation and footer",
@@ -574,8 +573,8 @@ TEST_CASE("Native session reset clears borrowed presentation and footer",
   Save::ResetFileMenuSession();
   CHECK_FALSE(Save::FileMenuPresentation());
   CHECK(Title_memoryCardMessage == nullptr);
-  Save_NativeDrawFileOverlay(0);
-  Save_NativeDrawFileOverlay(1);
+  VS::Game::Save::DrawFileOverlay(false);
+  VS::Game::Save::DrawFileOverlay(true);
 }
 
 TEST_CASE("Native clear saves require staged original ending inputs",
@@ -626,13 +625,13 @@ struct ClearInputsFixture {
                 State_RoomEnemyStates{});
     std::fill_n(State_learnedActionFlags, learned.size(), 0);
     State_learnedActionFlags[0] = static_cast<char>(0x80);
-    Input_settings = {};
-    Input_settings.currentGameSaveCount = 7;
-    Input_settings.cumulativeSaveCount = 19;
-    Input_settings.saveFileGeneration = 3;
+    VS::Input::settings = {};
+    VS::Input::settings.currentGameSaveCount = 7;
+    VS::Input::settings.cumulativeSaveCount = 19;
+    VS::Input::settings.saveFileGeneration = 3;
     VS::Ending::LiveCommitClearProgress();
     Boot_isClearSavePending = 1;
-    Save_NativeStageClearGame();
+    VS::Game::Save::StageClearGame();
     Boot_isClearSavePending = 0;
   }
 
@@ -683,8 +682,8 @@ void CheckClearSaveCarryover(const Save::Document& document) {
 }
 
 void CheckClearSaveSession() {
-  CHECK(Input_settings.cumulativeSaveCount == 20);
-  CHECK(Input_settings.currentGameSaveCount == 0);
+  CHECK(VS::Input::settings.cumulativeSaveCount == 20);
+  CHECK(VS::Input::settings.currentGameSaveCount == 0);
   CHECK(VS::Menu::Files::dataNotSaved == 1);
   CHECK(Text(Screen().summaries[0].room_name.data()) == "CLEAR GAME");
 }
@@ -718,7 +717,7 @@ TEST_CASE("Original ending component writes a distinct native clear save",
   CHECK(VS::Menu::UpdateLiveSaveMenu(0) == 1);
   Save::ShutdownFileMenus();
   Save::ConfigureDirectory(fixture.root);
-  CHECK(Save_NativeInitialTitleSelection() == 1);
+  CHECK(VS::Game::Save::InitialTitleSelection() == 1);
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 1);
   CHECK(Engaged(Screen().files.front().document).new_game_entry.has_value());
 }
@@ -751,9 +750,9 @@ void CheckReplacedRecoveredFile(const fs::path& root) {
 void CheckFailedClearSaveChangedNothing(const fs::path& path,
                                         const std::string& bytes) {
   CHECK(Text(Title_memoryCardMessage) == "Save failed - see log");
-  CHECK(Input_settings.cumulativeSaveCount == 19);
-  CHECK(Input_settings.currentGameSaveCount == 7);
-  CHECK(Input_settings.saveFileGeneration == 3);
+  CHECK(VS::Input::settings.cumulativeSaveCount == 19);
+  CHECK(VS::Input::settings.currentGameSaveCount == 7);
+  CHECK(VS::Input::settings.saveFileGeneration == 3);
   CHECK(FileBytes(path) == bytes);
 }
 }  // namespace
@@ -790,8 +789,8 @@ TEST_CASE("Clear-save consent rejects changed content and reset releases input",
   Tick(VS::Menu::UpdateLiveSaveMenu);
   CHECK(Text(Title_memoryCardMessage) == "File changed - select again");
   CHECK(FileBytes(fixture.root / "slot00.vssave") == original);
-  CHECK(Input_settings.cumulativeSaveCount == 19);
-  CHECK(Input_settings.currentGameSaveCount == 7);
+  CHECK(VS::Input::settings.cumulativeSaveCount == 19);
+  CHECK(VS::Input::settings.currentGameSaveCount == 7);
   Save::ResetFileMenuSession();
   REQUIRE(VS::Menu::UpdateLiveSaveMenu(1) == 0);
   CHECK(Text(Title_memoryCardMessage) == "No ending clear save available");
@@ -848,7 +847,7 @@ TEST_CASE("Clear-save failure leaves counters and original bytes unchanged",
   ChooseYes(VS::Menu::UpdateLiveSaveMenu);
   Press(0, VS::Menu::UpdateLiveSaveMenu);
   CHECK(Text(Title_memoryCardMessage) == "Save complete");
-  CHECK(Input_settings.cumulativeSaveCount == 20);
+  CHECK(VS::Input::settings.cumulativeSaveCount == 20);
 }
 
 TEST_CASE(
@@ -881,19 +880,19 @@ TEST_CASE(
     "Native confirmation No cancellation and invalid files use original sounds",
     "[save-menu]") {
   MenuFixture fixture;
-  BeginPicker(Save_NativeSelectContainer, 1);
-  Press(PADRright, Save_NativeSelectContainer);
+  BeginPicker(VS::Game::Save::SelectContainer, 1);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   CheckSounds(fixture, {0, 1, 0, 0, 0});
-  Press(PADRright, Save_NativeSelectContainer);
+  Press(PADRright, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().confirmation);
   CheckSounds(fixture, {0, 1, 1, 0, 0});
-  Press(PADRright, Save_NativeSelectContainer);
-  Move(PADLup, Save_NativeSelectContainer);
-  Press(PADRdown, Save_NativeSelectContainer);
+  Press(PADRright, VS::Game::Save::SelectContainer);
+  Move(PADLup, VS::Game::Save::SelectContainer);
+  Press(PADRdown, VS::Game::Save::SelectContainer);
   CHECK_FALSE(Screen().confirmation);
   CheckSounds(fixture, {1, 2, 2, 0, 0});
   Buttons(PADRdown);
-  REQUIRE(Save_NativeSelectContainer(0) == -1);
+  REQUIRE(VS::Game::Save::SelectContainer(0) == -1);
   CheckSounds(fixture, {1, 2, 3, 0, 0});
 
   BeginPicker(VS::Menu::UpdateLiveDataLoadMenu, 1);
@@ -1003,11 +1002,11 @@ TEST_CASE("Native empty container consent revalidates an appeared save",
           "[save-menu]") {
   MenuFixture fixture;
   MenuContentFixture content(fixture);
-  BeginPicker(Save_NativeSelectContainer, 1);
+  BeginPicker(VS::Game::Save::SelectContainer, 1);
   REQUIRE(Screen().files[0].status == Save::FileStatus::kEmpty);
-  ChooseYes(Save_NativeSelectContainer);
+  ChooseYes(VS::Game::Save::SelectContainer);
   content.Store(MenuContentFixture::Document());
-  Press(0, Save_NativeSelectContainer);
+  Press(0, VS::Game::Save::SelectContainer);
   CHECK(Text(VS::Menu::Files::memoryCardMessage) ==
         "File changed - select again");
   CHECK_FALSE(Save::ResumePending());
@@ -1016,11 +1015,11 @@ TEST_CASE("Native empty container consent revalidates an appeared save",
 TEST_CASE("Native save retry refreshes previews without losing staged storage",
           "[save-menu]") {
   MenuFixture fixture;
-  BeginPicker(Save_NativeSelectContainer, 1);
-  ChooseYes(Save_NativeSelectContainer);
+  BeginPicker(VS::Game::Save::SelectContainer, 1);
+  ChooseYes(VS::Game::Save::SelectContainer);
   Buttons(0);
-  REQUIRE(Save_NativeSelectContainer(0) == 1);
-  auto* bank = Save_NativeContainerData();
+  REQUIRE(VS::Game::Save::SelectContainer(0) == 1);
+  auto* bank = VS::Game::Save::ContainerData();
   bank->misc[0].id = 323;
   bank->misc[0].count = 2;
   BeginPicker(VS::Menu::UpdateLiveDataSaveMenu, 2);
@@ -1042,7 +1041,7 @@ TEST_CASE("Native save retry refreshes previews without losing staged storage",
   ConfirmSave();
   CheckFailedSave(fixture);
   CheckStagedBank(bank);
-  Save_NativeReleaseContainer();
+  VS::Game::Save::ReleaseContainer();
 }
 
 TEST_CASE("Native cached previews cannot conceal missing load content",

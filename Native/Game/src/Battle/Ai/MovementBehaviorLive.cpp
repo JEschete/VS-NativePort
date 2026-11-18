@@ -21,7 +21,7 @@
 #include "Battle/Ai/AreaRouteLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -39,7 +39,7 @@
 namespace VS::Battle::Ai {
 namespace {
 static_assert(std::size(Battle_Ai_actorAiStates) == kMovementActorSlots);
-static_assert(std::extent_v<decltype(Battle_Ai_FrameContext::actors)> ==
+static_assert(std::extent_v<decltype(FrameContext::actors)> ==
               kMovementActorSlots);
 static_assert(std::size(Actors_actorRecords) >= kMovementActorSlots);
 static_assert(std::extent_v<decltype(Battle_Ai_ActorAiState::relations)> ==
@@ -258,7 +258,7 @@ class LiveMovementHost final : public MovementHost {
     return LivePatrolRoutes();
   }
   [[nodiscard]] bool HasFrameActor(int actor_id) const override {
-    const Battle_Ai_FrameContext* frame = Battle_Ai_FrameState();
+    const FrameContext* frame = &LiveFrameContext();
     Require(frame != nullptr, "AI movement requires the frame state");
     return frame->actors[static_cast<std::size_t>(actor_id)] != nullptr;
   }

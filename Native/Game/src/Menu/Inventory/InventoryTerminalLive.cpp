@@ -26,9 +26,10 @@
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/InventoryLiveState.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -114,8 +115,9 @@ void RequireIdleContext(const ContextState& context) {
   }
 }
 void RequireRows() {
-  if (VS::Menu::Framework::menuItems == nullptr)
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing menu row workspace");
+  }
 }
 void RequireFrame() {
   if (Render_frameScratch.primitiveCursor == nullptr ||
@@ -181,7 +183,7 @@ void ReadRuntime(TerminalRuntime& runtime) {
                  static_cast<std::uint16_t>(use.executeAbility.halves[1]),
                  VS::Items::miscItemInvoked};
   runtime.cursor_memory_enabled =
-      static_cast<std::uint8_t>(Input_settings.cursorMemory);
+      static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   runtime.freeze_tabs =
       static_cast<std::uint8_t>(Menu_Inventory_freezeTabArrows);
   runtime.restrictions = VS::Menu::Framework::actionRestrictions;
@@ -217,7 +219,7 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   use.executeAbility.halves[0] = static_cast<std::int16_t>(runtime.use.action);
   use.executeAbility.halves[1] = static_cast<std::int16_t>(runtime.use.item);
   VS::Items::miscItemInvoked = runtime.use.slot;
-  Input_settings.cursorMemory =
+  VS::Input::settings.cursorMemory =
       static_cast<char>(runtime.cursor_memory_enabled);
   Menu_Inventory_freezeTabArrows = static_cast<char>(runtime.freeze_tabs);
   VS::Menu::Framework::actionRestrictions = runtime.restrictions;
@@ -269,9 +271,9 @@ class LiveTerminalHost final : public InventoryTerminalHost,
   }
   TerminalRuntime& Runtime() override { return runtime_; }
   Input::PadState Buttons() override {
-    return {.held = static_cast<std::uint32_t>(Input_buttonsState),
-            .pressed = Input_buttonsPressed.allButtons,
-            .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
+    return {.held = static_cast<std::uint32_t>(VS::Input::buttonsState),
+            .pressed = VS::Input::buttonsPressed.allButtons,
+            .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
             .sticks = {}};
   }
   bool RowsReady() override {
@@ -794,8 +796,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
   }
   std::uint8_t Capacity(Category category) override {
     const auto index = static_cast<std::size_t>(category);
-    const auto capacity =
-        std::span(VS::Items::Inventory::inventoryItemCapacities);
+    const auto capacity = std::span(VS::Items::kCategoryCapacities);
     if (index >= capacity.size()) {
       Refuse("capacity outside inventory categories");
     }

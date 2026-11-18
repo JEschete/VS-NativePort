@@ -2,7 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
 
 namespace {
@@ -11,8 +11,7 @@ namespace rows = VS::Menu::container;
 template <typename Entry>
 bool IsBound(unsigned address, Entry entry) {
   const auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENUD.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "MENU/MENUD.PRG", address);
   return resolved == reinterpret_cast<const void*>(entry);
 }
 }  // namespace

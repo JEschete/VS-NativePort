@@ -20,7 +20,7 @@
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimationsLive.hpp"
 #include "Battle/ActionFlow.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Render/ModelGeometryLive.hpp"
 namespace {
 namespace b = VS::Battle;
@@ -149,11 +149,10 @@ TEST_CASE("Action animation module relocation binds all six original ABIs",
       reinterpret_cast<void*>(&b::PlayLiveSpecialActionAnimation),
       reinterpret_cast<void*>(&b::PlayLiveBreakArtAnimation)};
   std::array<void*, 6> relocated{};
-  const Content_ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 6,
-                                         relocated.data(),    6, nullptr};
+  const VS::Content::ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 6,
+                                              relocated.data(),    6, nullptr};
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      table, image,
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount)));
+      table, image, VS::Content::ModuleSymbols()));
   CHECK(relocated == expected);
 }
 
@@ -334,11 +333,10 @@ TEST_CASE("Reaction module relocation binds the original VOID2 and VOID3 ABIs",
       reinterpret_cast<void*>(&b::PlayLiveDefenseAbilityAnimation),
       reinterpret_cast<void*>(&b::FinishLiveEnemyCombatPose)};
   std::array<void*, 3> relocated{};
-  const Content_ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 3,
-                                         relocated.data(),    3, nullptr};
+  const VS::Content::ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 3,
+                                              relocated.data(),    3, nullptr};
   REQUIRE(VS::Content::RelocateModulePointerTable(
-      table, image,
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount)));
+      table, image, VS::Content::ModuleSymbols()));
   CHECK(relocated == expected);
 }
 

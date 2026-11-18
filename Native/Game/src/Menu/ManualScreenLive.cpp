@@ -21,7 +21,7 @@
 #include "DiscQueue.h"
 #include "Field/Manual.h"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -170,7 +170,7 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   void Publish() const { StoreHelpState(state_); }
 
   [[nodiscard]] std::uint8_t CursorMemorySetting() const override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void ClearDisplayState() override {
     Field_manualDisplayState = Field_ManualDisplayState{};
@@ -316,13 +316,13 @@ class LiveHelpPagesHost final : public HelpPagesHost {
     return LiveLastPageLineOffset();
   }
   [[nodiscard]] std::uint32_t PressedButtons() const override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
   [[nodiscard]] std::uint32_t PreviousButtons() const override {
-    return static_cast<std::uint32_t>(Input_previousButtons);
+    return static_cast<std::uint32_t>(VS::Input::previousButtons);
   }
   [[nodiscard]] std::uint32_t RepeatedButtons() const override {
-    return static_cast<std::uint32_t>(Input_buttonRepeat);
+    return static_cast<std::uint32_t>(VS::Input::buttonRepeat);
   }
   void PlaySfx(std::int32_t group, std::int32_t effect) override {
     Audio::LivePlaySfxCentered(group, effect);

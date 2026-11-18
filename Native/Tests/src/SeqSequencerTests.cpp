@@ -17,7 +17,7 @@
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SeqSequencerLive.hpp"
 #include "Audio/VoiceOutput.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
@@ -607,8 +607,7 @@ TEST_CASE("The live driver tick refuses the active layer as its secondary",
 
 TEST_CASE("Sequencer functions keep no module bindings",
           "[audio-seq-control][audio]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const std::uint32_t address :
        {0x8001924CU, 0x80019614U, 0x80019704U, 0x800199C4U, 0x80019A58U,
         0x80019FC4U, 0x8001A1F4U, 0x8001A22CU, 0x8001A258U, 0x8001A4BCU,

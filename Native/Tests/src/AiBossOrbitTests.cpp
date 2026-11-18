@@ -10,7 +10,7 @@
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/BossOrbit.hpp"
 #include "Battle/Ai/BossOrbitLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 namespace {
@@ -1052,8 +1052,7 @@ TEST_CASE("Retreating bosses refuse a missing actor or path step",
 
 TEST_CASE("Orbiting boss keeps its original module entries",
           "[ai][boss-orbit][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

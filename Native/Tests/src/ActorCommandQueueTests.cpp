@@ -20,7 +20,7 @@
 #include "Actors/Movement.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/Interactions.h"
 
@@ -1013,8 +1013,7 @@ TEST_CASE("Without input Square jumps in place unless Ashley is walk-only",
 
 TEST_CASE("Promoted actor commands leave no module function binding",
           "[actors][actor-command-queue][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // No module image stores these functions' addresses; callers use the typed
   // API by name.
   constexpr std::array<std::uint32_t, 3> kRetired{0x8006E7F0U, 0x800753F8U,

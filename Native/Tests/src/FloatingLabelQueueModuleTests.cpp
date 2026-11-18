@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/FloatingLabelQueueLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "TestSupport/FloatingLabelQueueLiveFixture.hpp"
 
 namespace {
@@ -16,8 +16,7 @@ namespace f = VS::test_support::live_floating_labels;
 
 template <typename Function>
 Function Entry(unsigned address, Function expected) {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   void* const entry =
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", address);
   const bool matches =
@@ -116,8 +115,8 @@ TEST_CASE("Ordinary module-data copying does not invent a label queue reset",
   const auto before = f::Words(state.labels[0][0]);
   std::array<unsigned char, 4> source{1, 2, 3, 4};
   std::array<unsigned char, 4> target{};
-  const Content_ModuleDataEntry entry{"BATTLE/BATTLE.PRG", 0, 4, target.data(),
-                                      4};
+  const VS::Content::ModuleDataEntry entry{"BATTLE/BATTLE.PRG", 0, 4,
+                                           target.data(), 4};
   REQUIRE(VS::Content::CopyModuleDataEntry(entry, source));
   CHECK(target == source);
   CHECK(Battle_floatingLabelCount == 2);

@@ -117,7 +117,7 @@
     <ClInclude Include="include\Content\CdDriveLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
-    <ClInclude Include="include\Content\DataAccess.h">
+    <ClInclude Include="include\Content\DataAccess.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DataStore.hpp">
@@ -135,7 +135,7 @@
     <ClInclude Include="include\Content\DiscReaderLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
-    <ClInclude Include="include\Content\ModuleData.h">
+    <ClInclude Include="include\Content\ModuleData.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\MovieEncoder.hpp">

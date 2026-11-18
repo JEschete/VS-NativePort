@@ -1,7 +1,7 @@
 #include "Legacy/Input/LibPad.h"
 
 #include "Core/Log.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Legacy/Psx.h"
 
@@ -41,7 +41,7 @@ ActuatorState ReadActuators(int port) {
   }
   const Port& p = g_ports[port];
   if (!p.connected || !p.analog || !p.aligned || !p.actuators ||
-      p.actuator_count == 0 || Input_settings.vibrationOn == 0) {
+      p.actuator_count == 0 || VS::Input::settings.vibrationOn == 0) {
     return {};
   }
   // _padResetDefaults (main.c:8468) registers bytes subsequently mutated by

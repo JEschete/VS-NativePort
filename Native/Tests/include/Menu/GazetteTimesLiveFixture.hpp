@@ -16,7 +16,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Content/StringTables.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -142,11 +142,11 @@ inline std::vector<unsigned char> ReadImage(const char* path) {
 inline void ReloadBorrowedTables() {
   const auto battle = ReadImage(R"(Native\data\disc\BATTLE\BATTLE.PRG)");
   const auto gazette = ReadImage(R"(Native\data\disc\MENU\MENU9.PRG)");
-  const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+  const auto entries = VS::Content::ModuleDataEntries();
   for (const auto owner : TableOwners()) {
     const auto found =
         std::ranges::find(entries, static_cast<void*>(owner.data()),
-                          &Content_ModuleDataEntry::target);
+                          &VS::Content::ModuleDataEntry::target);
     if (found == entries.end() || found->module == nullptr ||
         found->capacity != owner.size() || found->size > owner.size()) {
       throw std::runtime_error("Gazette Live table owner registry mismatch");

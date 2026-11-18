@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/DiscLayout.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
@@ -129,8 +129,7 @@ TEST_CASE("Screen-effect queue pointer writes stay within native object guards",
 
 TEST_CASE("Screen-effect default binding retains original address provenance",
           "[effects][screen-state]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800F4ED8u) ==
         &VS::Effects::screenEffectDefaults);

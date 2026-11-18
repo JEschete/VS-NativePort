@@ -15,7 +15,7 @@
 
 #include "Battle/TargetingState.h"
 #include "Boot/SessionLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraTrackLive.hpp"
@@ -128,11 +128,10 @@ struct EventCameraFixture {
 
   static void LoadCommand(void* target, unsigned offset, unsigned size,
                           std::span<const u_char> image) {
-    const auto* end = Content_moduleData + Content_moduleDataCount;
-    const auto* entry = std::find_if(
-        Content_moduleData, end,
-        [target](const auto& item) { return item.target == target; });
-    REQUIRE(entry != end);
+    const auto entries = VS::Content::ModuleDataEntries();
+    const auto entry = std::ranges::find_if(
+        entries, [target](const auto& item) { return item.target == target; });
+    REQUIRE(entry != entries.end());
     CHECK(entry->offset == offset);
     CHECK(entry->size == size);
     CHECK(entry->capacity == size);
@@ -428,7 +427,7 @@ TEST_CASE("Native session transfer abandons the active owned VM source",
 
 TEST_CASE("Retired event lifecycle entries have no native module bindings",
           "[event-vm-live][content][module][retired-entry]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   constexpr std::array<std::uint32_t, 15> kEntries{
       0x800BE98C, 0x800BEB34, 0x800BEBEC, 0x800BF5F0, 0x800BF850,
       0x800BFBB8, 0x800BFD9C, 0x800B6778, 0x800BEB00, 0x800BEB10,
@@ -442,7 +441,7 @@ TEST_CASE("Retired event lifecycle entries have no native module bindings",
 
 TEST_CASE("Retired stack capture and room code jumps have no native bindings",
           "[event][session-reset][retired-entry]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80010AA4) ==
         nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

@@ -26,7 +26,6 @@
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundEffects/SoundEffects.h"
@@ -314,11 +313,13 @@ void SlideMusicPitch(const char* operation, Audio_CommandParams* params,
   StoreMusicPitchScale(slide);
 }
 
-std::int32_t LiveReverbMode() { return Audio_Native_ReverbMode(); }
+std::int32_t LiveReverbMode() { return VS::Audio::Driver::OutputReverbMode(); }
 void EnableLiveReverb(bool enabled) {
-  Audio_Native_EnableReverb(enabled ? SPU_ON : SPU_OFF);
+  VS::Audio::Driver::EnableOutputReverb(enabled ? SPU_ON : SPU_OFF);
 }
-void SetLiveReverbMode(std::int32_t mode) { Audio_Native_SetReverbMode(mode); }
+void SetLiveReverbMode(std::int32_t mode) {
+  VS::Audio::Driver::SetOutputReverbMode(mode);
+}
 
 class LiveReverb final : public ReverbHost {
  public:

@@ -23,9 +23,9 @@
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
-#include "Items/InventoryLiveState.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -110,8 +110,9 @@ void RequireIdleControllers() {
   }
 }
 void RequireRows() {
-  if (VS::Menu::Framework::menuItems == nullptr)
+  if (VS::Menu::Framework::menuItems == nullptr) {
     Refuse("missing menu row workspace");
+  }
 }
 void RequireFrame() {
   if (Render_frameScratch.primitiveCursor == nullptr ||
@@ -143,7 +144,7 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
   runtime.previewed = static_cast<std::uint8_t>(Menu_Loot_previewedLoot);
   runtime.claimed = static_cast<std::uint8_t>(Menu_Loot_lootClaimed);
   runtime.information_shown =
-      static_cast<std::uint8_t>(Input_settings.information);
+      static_cast<std::uint8_t>(VS::Input::settings.information);
   runtime.hud_hidden = static_cast<std::uint8_t>(Battle_hudHidden);
   runtime.hud_slide_offset = Battle_hudSlideOffset;
   runtime.result_kind = VS::Menu::Framework::actionSelection.selectionKind;
@@ -174,7 +175,8 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   Menu_Loot_controlsEnabled = static_cast<char>(runtime.controls_enabled);
   Menu_Loot_previewedLoot = static_cast<char>(runtime.previewed);
   Menu_Loot_lootClaimed = static_cast<char>(runtime.claimed);
-  Input_settings.information = static_cast<char>(runtime.information_shown);
+  VS::Input::settings.information =
+      static_cast<char>(runtime.information_shown);
   Battle_hudHidden = static_cast<char>(runtime.hud_hidden);
   Battle_hudSlideOffset = runtime.hud_slide_offset;
   VS::Menu::Framework::actionSelection.selectionKind = runtime.result_kind;
@@ -318,8 +320,8 @@ class LiveTerminalHost final : public LootTerminalHost {
     return Items::Live::Typed(Audio_Seq_unusedInventory);
   }
   Input::PadState Buttons() override {
-    return {.pressed = Input_buttonsPressed.allButtons,
-            .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
+    return {.pressed = VS::Input::buttonsPressed.allButtons,
+            .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
             .sticks = {}};
   }
   bool RowsReady() override {
@@ -485,8 +487,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     return static_cast<std::uint8_t>(curve[step]);
   }
   std::uint8_t Capacity(LootCategory category) override {
-    const auto capacities =
-        std::span(VS::Items::Inventory::inventoryItemCapacities);
+    const auto capacities = std::span(VS::Items::kCategoryCapacities);
     const auto index = static_cast<std::size_t>(category);
     if (index >= capacities.size()) {
       Refuse("loot category outside capacity table");

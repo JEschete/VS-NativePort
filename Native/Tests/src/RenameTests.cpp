@@ -12,7 +12,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Rename.hpp"
 #include "Menu/RenameLive.hpp"
 #include "Render/EncodedText.hpp"
@@ -519,8 +519,7 @@ TEST_CASE("Rename retires the MENU8.PRG naming module symbols",
   constexpr auto kAddresses = std::to_array<unsigned>(
       {0x801049A0, 0x80104B34, 0x80104BF0, 0x80105268, 0x80105308, 0x80105374,
        0x80105554, 0x801055B8, 0x80105F2C});
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const unsigned address : kAddresses) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MENU8.PRG",
                                             address) == nullptr);

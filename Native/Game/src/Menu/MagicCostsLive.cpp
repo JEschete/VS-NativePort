@@ -21,7 +21,7 @@
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Field/RoomStateLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -135,10 +135,10 @@ class LiveHost final : public Host {
         ToStorageChar(scroll);
   }
   std::uint8_t CursorMemorySetting() override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void SetCursorMemorySetting(std::uint8_t value) override {
-    Input_settings.cursorMemory = ToStorageChar(value);
+    VS::Input::settings.cursorMemory = ToStorageChar(value);
   }
   void CreateRows(int row_info, std::span<const TeleportRow> rows) override {
     if (rows.size() > kSavePointCount) {

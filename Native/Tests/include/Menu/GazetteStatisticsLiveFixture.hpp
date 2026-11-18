@@ -58,12 +58,12 @@ class SavedAdditionalInputs {
 inline void ReloadAdditionalTables() {
   constexpr std::size_t kAdditionalTables = 4;
   const auto image = shared::ReadImage(R"(Native\data\disc\MENU\MENU9.PRG)");
-  const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+  const auto entries = VS::Content::ModuleDataEntries();
   const auto owners = AdditionalOwners();
   for (const auto owner : std::span(owners).first(kAdditionalTables)) {
     const auto found =
         std::ranges::find(entries, static_cast<void*>(owner.data()),
-                          &Content_ModuleDataEntry::target);
+                          &VS::Content::ModuleDataEntry::target);
     if (found == entries.end() || found->module == nullptr ||
         std::string_view(found->module) != shared::kGazetteModule ||
         found->capacity != owner.size() || found->size > owner.size() ||

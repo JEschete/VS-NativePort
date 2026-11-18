@@ -8,7 +8,7 @@
 #include "Input/Controller.hpp"
 
 // Live binding for Controller.hpp. The ports, buttons, sticks and settings
-// stay in the legacy globals the copied code reads (ControllerLiveState.h);
+// stay in the legacy globals the copied code reads (ControllerLiveState.hpp);
 // each adapter loads them into the typed state, runs the core and stores them
 // back. libpad (LibPad.h) is the host. Port IDs are libpad's: 0x00 and 0x10.
 // The vibration slots are typed state owned here. Invalid ports, motors and

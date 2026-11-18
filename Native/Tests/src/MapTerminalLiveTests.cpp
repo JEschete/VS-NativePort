@@ -132,11 +132,12 @@ struct LiveWorld {
       Audio_Seq_unusedStateFlags};
   ValueRestore<decltype(State_roomVisitProgress)> saved_visits{
       State_roomVisitProgress};
-  ValueRestore<decltype(Input_buttonsPressed)> saved_pressed{
-      Input_buttonsPressed};
-  ValueRestore<int> saved_previous{Input_previousButtons};
-  ValueRestore<int> saved_repeat{Input_buttonRepeat};
-  ValueRestore<decltype(Input_stickPosBuf)> saved_sticks{Input_stickPosBuf};
+  ValueRestore<decltype(VS::Input::buttonsPressed)> saved_pressed{
+      VS::Input::buttonsPressed};
+  ValueRestore<int> saved_previous{VS::Input::previousButtons};
+  ValueRestore<int> saved_repeat{VS::Input::buttonRepeat};
+  ValueRestore<decltype(VS::Input::stickPosBuf)> saved_sticks{
+      VS::Input::stickPosBuf};
   ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_menu{
       VS::Menu::Framework::menuState};
   ValueRestore<Menu_Framework_MenuRow*> saved_rows{
@@ -188,13 +189,13 @@ struct LiveWorld {
     Battle_hudHidden = 0;
     Battle_hudSlideOffset = 0;
     VS::Field::isFieldRenderingEnabled = 1;
-    Input_buttonsPressed.allButtons = 0;
-    Input_previousButtons = 0;
-    Input_buttonRepeat = 0;
-    Input_stickPosBuf.lStickX = 128;
-    Input_stickPosBuf.lStickY = 128;
-    Input_stickPosBuf.rStickX = 128;
-    Input_stickPosBuf.rStickY = 128;
+    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::previousButtons = 0;
+    VS::Input::buttonRepeat = 0;
+    VS::Input::stickPosBuf.lStickX = 128;
+    VS::Input::stickPosBuf.lStickY = 128;
+    VS::Input::stickPosBuf.rStickX = 128;
+    VS::Input::stickPosBuf.rStickY = 128;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     std::ranges::fill(Audio_Seq_unusedStateFlags.mapPaling, 0);
     std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
@@ -286,9 +287,9 @@ struct LiveWorld {
   int Tick(std::uint32_t pressed = 0, int held = 0, int repeat = 0,
            bool framework_tick = false) {
     ResetFrame();
-    Input_buttonsPressed.allButtons = pressed;
-    Input_previousButtons = held;
-    Input_buttonRepeat = repeat;
+    VS::Input::buttonsPressed.allButtons = pressed;
+    VS::Input::previousButtons = held;
+    VS::Input::buttonRepeat = repeat;
     if (framework_tick) framework::UpdateLiveScreen();
     return map::LiveUpdateMapMenu();
   }
@@ -353,9 +354,9 @@ void HideResetAndCancel(LiveWorld& world) {
 }
 
 void ExitScreen(LiveWorld& world, std::uint8_t& step) {
-  Input_buttonsPressed.allButtons = 0x10;
+  VS::Input::buttonsPressed.allButtons = 0x10;
   REQUIRE(map::LiveUpdateScreen(&step) == 0);
-  Input_buttonsPressed.allButtons = 0;
+  VS::Input::buttonsPressed.allButtons = 0;
   int result = 0;
   for (std::size_t tick = 0; tick < kTickBudget && result == 0; ++tick) {
     world.ResetFrame();
@@ -823,9 +824,8 @@ TEST_CASE("Map refuses a foreign scene and does not report completed quit",
 namespace {
 template <typename Entry>
 Entry MapModuleEntry(unsigned address, Entry expected) {
-  auto* resolved = content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENU5.PRG",
-      address);
+  auto* resolved = content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                                 "MENU/MENU5.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved != reinterpret_cast<void*>(expected)) {
     throw std::runtime_error("incorrect map terminal module entry");
@@ -944,7 +944,7 @@ TEST_CASE("Original map controller entries consume native loading and input",
   CHECK(MapModuleEntry(0x801030F4, &map::LiveUpdateScreen)(phase.data()) == 0);
   CHECK(phase == std::array<std::uint8_t, 2>{4, 0xAA});
   REQUIRE(world.ReachInput(phase[0]));
-  Input_previousButtons = 0x4002;
+  VS::Input::previousButtons = 0x4002;
   world.ResetFrame();
   CHECK(MapModuleEntry(0x80103684, &map::LiveUpdateMapMenu)() == 0);
   CHECK(Menu_Map_cameraDistance == 784);

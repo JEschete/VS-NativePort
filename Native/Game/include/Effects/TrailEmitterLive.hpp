@@ -14,9 +14,12 @@ struct Effects_RendererSlot;
 struct Effects_Trail9State;
 struct Effects_TrailQuadSet;
 
+namespace VS::Content {
 // PLG074's emission cursor in the overlay module image (ModuleData.cpp).
-extern int Content_plg074TrailEmissionCounter[1];
+extern int plg074TrailEmissionCounter[1];
+}  // namespace VS::Content
 
+namespace VS::Effects {
 // Live binding for the five- and nine-sample trail emitters (TrailEmitter.cpp):
 // the current effect package and instance, the emitter scratch block, the GTE,
 // the BIOS generator, the high-end heap and the overlay's trail stages
@@ -25,7 +28,6 @@ extern int Content_plg074TrailEmissionCounter[1];
 // whose data the package lacks is refused with a diagnostic instead of
 // indexing past it, and a missing instance, transform, slot or heap stops or
 // ignores the call with a diagnostic (#271).
-namespace VS::Effects {
 // One overlay's emitter: its name in diagnostics, its emission cursor
 // (VS_TRAIL_CORNER_STATE) and its target, control, init, update and render
 // instances.

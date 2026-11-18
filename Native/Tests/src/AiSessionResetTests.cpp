@@ -9,12 +9,12 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
-#include "Battle/Ai/RoomState.h"
+#include "Battle/Ai/RoomState.hpp"
 #include "Battle/Damage.h"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
@@ -33,7 +33,7 @@ struct SessionBindingSnapshot {
       std::to_array(Battle_Ai_actorAiStates);
   decltype(std::to_array(Battle_Ai_decisionCallbacks)) callbacks =
       std::to_array(Battle_Ai_decisionCallbacks);
-  Battle_Ai_FrameContext frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext frame = VS::Battle::Ai::LiveFrameContext();
   decltype(Battle_Ai_roomAiState) room = Battle_Ai_roomAiState;
   decltype(Battle_Ai_tileFlagMap) flags = Battle_Ai_tileFlagMap;
   decltype(Battle_Ai_specialTerrainHeights) heights =
@@ -62,7 +62,7 @@ struct SessionBindingSnapshot {
     std::copy(battle_actors.begin(), battle_actors.end(), Battle_actors);
     std::copy(actors.begin(), actors.end(), Battle_Ai_actorAiStates);
     std::copy(callbacks.begin(), callbacks.end(), Battle_Ai_decisionCallbacks);
-    *Battle_Ai_FrameState() = frame;
+    VS::Battle::Ai::LiveFrameContext() = frame;
     Battle_Ai_roomAiState = room;
     Battle_Ai_tileFlagMap = flags;
     Battle_Ai_specialTerrainHeights = heights;
@@ -113,7 +113,7 @@ void SeedInvalidatedPlanningBindings() {
 }
 
 void SeedInvalidatedFrameBindings() {
-  auto& frame = *Battle_Ai_FrameState();
+  auto& frame = VS::Battle::Ai::LiveFrameContext();
   std::fill_n(frame.actors, std::size(frame.actors),
               InvalidatedBinding<Battle_Ai_ActorAiState*>());
   frame.room = InvalidatedBinding<decltype(frame.room)>();
@@ -147,7 +147,7 @@ void CheckInvalidatedMembership() {
     return state == nullptr;
   }));
   CHECK(
-      std::ranges::all_of(Battle_Ai_FrameState()->actors,
+      std::ranges::all_of(VS::Battle::Ai::LiveFrameContext().actors,
                           [](const auto* state) { return state == nullptr; }));
   CHECK(Battle_Ai_attributeActorMask == 0);
   CHECK(Battle_Ai_secondPerceptionTarget == 0);
@@ -157,7 +157,7 @@ void CheckInvalidatedMembership() {
 }
 
 void CheckInvalidatedFrameBindings() {
-  const auto& frame = *Battle_Ai_FrameState();
+  const auto& frame = VS::Battle::Ai::LiveFrameContext();
   CHECK(frame.room == nullptr);
   CHECK(frame.heightMap == nullptr);
   CHECK(frame.tileFlags == nullptr);
@@ -184,7 +184,7 @@ TEST_CASE(
   VS::Core::Memory::InitializeLiveHeapAt(
       arena.data(), static_cast<std::uint32_t>(arena.size()));
   const auto refused = VS::Core::Memory::RefusedLiveHeapRequestCount();
-  Battle_Ai_InvalidateSessionBindings();
+  VS::Battle::Ai::InvalidateSessionBindings();
   CHECK(Battle_Ai_planningStatsSnapshot == nullptr);
   REQUIRE(VS::Battle::Ai::SnapshotLivePlanningActorStats());
   VS::Battle::Ai::RestoreLivePlanningActorStats();
@@ -205,12 +205,12 @@ TEST_CASE("AI session invalidation never touches reclaimed allocation storage",
   Battle_Ai_fallbackCandidateCount = 3;
   Battle_Ai_unusedPlanCounter = 7;
   Battle_Ai_candidateEngagedThisUpdate = 1;
-  Battle_Ai_InvalidateSessionBindings();
+  VS::Battle::Ai::InvalidateSessionBindings();
   CheckInvalidatedRoomBindings();
   CheckInvalidatedPlanningBindings();
   CheckInvalidatedFrameBindings();
   CheckInvalidatedMembership();
   CHECK(std::to_array(Battle_Ai_decisionCallbacks) == saved.callbacks);
-  Battle_Ai_InvalidateSessionBindings();
+  VS::Battle::Ai::InvalidateSessionBindings();
   CheckInvalidatedMembership();
 }

@@ -14,11 +14,11 @@
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Ending/ClearResultsCore.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Ending/Results.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.hpp"
@@ -918,7 +918,7 @@ class LiveClearRecords {
     VS::State::playTime = {};
     State_roomVisitProgress = {};
     State_savedEntryDoor = {};
-    Input_settings = {};
+    VS::Input::settings = {};
     std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
     std::ranges::fill(Ending_countableRoomBits, 0);
   }
@@ -932,7 +932,7 @@ class LiveClearRecords {
     VS::State::playTime = play_time_;
     State_roomVisitProgress = rooms_;
     State_savedEntryDoor = door_;
-    Input_settings = settings_;
+    VS::Input::settings = settings_;
     std::ranges::copy(actions_, std::begin(Battle_actionDefinitions));
     std::ranges::copy(countable_, std::begin(Ending_countableRoomBits));
   }
@@ -943,7 +943,7 @@ class LiveClearRecords {
   State_PlayTime play_time_ = VS::State::playTime;
   State_RoomVisitFlags rooms_ = State_roomVisitProgress;
   Field_MpdDoorRecord door_ = State_savedEntryDoor;
-  State_Settings settings_ = Input_settings;
+  State_Settings settings_ = VS::Input::settings;
   decltype(std::to_array(Battle_actionDefinitions)) actions_ =
       std::to_array(Battle_actionDefinitions);
   decltype(std::to_array(Ending_countableRoomBits)) countable_ =
@@ -1004,8 +1004,7 @@ TEST_CASE("Promoted clear results functions leave no module address bindings",
       {0x8006B760, 0x8006B910, 0x8006B9FC, 0x8006BD78, 0x8006BE04, 0x8006C214,
        0x8006C3CC, 0x8006C514, 0x8006C5C8, 0x8006C744, 0x8006C9A8, 0x8006CAF4,
        0x8006CD38, 0x8006CD94, 0x8006DFD0, 0x8006E074});
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const unsigned address : kAddresses) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "ENDING/ENDING.PRG",
                                             address) == nullptr);

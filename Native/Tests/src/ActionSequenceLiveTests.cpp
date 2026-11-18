@@ -19,7 +19,7 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Gte.h"
 #include "Effects/Runtime.h"
 #include "Field/CameraLiveState.hpp"
@@ -106,8 +106,7 @@ TEST_CASE("Action sequence bindings retain five original VOID0 module ABIs",
       std::is_same_v<decltype(&b::WaitForLiveTargetRecovery), void (*)()>);
   static_assert(
       std::is_same_v<decltype(&b::FinishLiveActionSequence), void (*)()>);
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::uint32_t, 5> addresses{
       0x80078748, 0x800787F0, 0x80079050, 0x800790BC, 0x800793C0};
   const std::array entries{
@@ -121,8 +120,8 @@ TEST_CASE("Action sequence bindings retain five original VOID0 module ABIs",
       image.at(byte) =
           static_cast<unsigned char>(addresses.at(i) >> (byte * 8));
     }
-    Content_ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 1,
-                                     &relocated.at(i),    1, nullptr};
+    VS::Content::ModulePointerTable table{"BATTLE/BATTLE.PRG", 0, 1,
+                                          &relocated.at(i),    1, nullptr};
     REQUIRE(VS::Content::RelocateModulePointerTable(table, image, symbols));
     CHECK(relocated.at(i) == reinterpret_cast<void*>(entries.at(i)));
   }

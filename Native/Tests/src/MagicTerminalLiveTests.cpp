@@ -16,7 +16,7 @@
 #include "Battle/Actor.h"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -64,7 +64,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<Battle_Actor*> saved_ashley{Battle_actors[0]};
   ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_flags{
       Audio_Seq_unusedStateFlags};
-  ValueRestore<decltype(Input_settings)> saved_settings{Input_settings};
+  ValueRestore<decltype(VS::Input::settings)> saved_settings{
+      VS::Input::settings};
   ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
       VS::Menu::Framework::menuState};
   ValueRestore<decltype(VS::Menu::Framework::actionSelection)> saved_action{
@@ -107,7 +108,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     actor.stats = &stats;
     stats.currentMp = 500;
     Audio_Seq_unusedStateFlags = {};
-    Input_settings.cursorMemory = 0;
+    VS::Input::settings.cursorMemory = 0;
     VS::Menu::Framework::menuState = {};
     VS::Menu::Framework::actionSelection = {};
     VS::Menu::Framework::shortcutInvoked = 0;
@@ -209,8 +210,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
 
 SchoolEntry ResolveSchoolEntry(std::size_t school) {
   auto* address = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, kModule,
-      kSchoolAddresses[school]);
+      VS::Content::ModuleSymbols(), kModule, kSchoolAddresses[school]);
   CHECK(address == reinterpret_cast<void*>(kSchoolEntries[school]));
   if (address == nullptr) {
     throw std::runtime_error("missing magic school entry");
@@ -257,7 +257,7 @@ TEST_CASE("Magic module entries create only populated restricted school rows",
   fixture.IdleRows();
   REQUIRE(entry(0) == 0);
   fixture.CheckSchoolRow(school, 1);
-  CHECK(Input_settings.cursorMemory == 0);
+  CHECK(VS::Input::settings.cursorMemory == 0);
   CHECK(magic::RefusedMagicMenuCount() == refusals);
 }
 
@@ -266,7 +266,7 @@ TEST_CASE("Magic outer module ABI publishes categories through its caller byte",
   MagicLiveFixture fixture;
   const auto refusals = magic::RefusedMagicMenuCount();
   auto* address = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, kModule, 0x801042C8);
+      VS::Content::ModuleSymbols(), kModule, 0x801042C8);
   CHECK(address == reinterpret_cast<void*>(&magic::UpdateLive));
   if (address == nullptr) {
     FAIL("missing magic terminal entry");

@@ -14,7 +14,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Scratch.h"
 #include "Field/MapProgress.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreRank.hpp"
@@ -90,7 +90,7 @@ ProgressWorld ReadLiveProgressWorld() {
   }
   world.clear_count =
       static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.clearCount);
-  world.cursor_memory = IsSet(Input_settings.cursorMemory);
+  world.cursor_memory = IsSet(VS::Input::settings.cursorMemory);
   world.conditions = ReadLiveTitleConditions();
   world.record = ReadLiveScoreRecord();
   return world;

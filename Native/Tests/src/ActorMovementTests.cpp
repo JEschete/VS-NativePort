@@ -17,7 +17,7 @@
 #include "Actors/ActorMovementLive.hpp"
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/Gimmicks.h"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -683,8 +683,7 @@ TEST_CASE("Live movement adapters refuse a missing record or a bad mode",
 
 TEST_CASE("Promoted actor movement leaves no module address binding",
           "[actors][actors-movement][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   constexpr std::array<std::uint32_t, 14> kRetired{
       0x800A208Cu, 0x800A25ECu, 0x800A2790u, 0x800A291Cu, 0x800A29A0u,
       0x800A2C48u, 0x800A2CD4u, 0x800A48CCu, 0x800A4A88u, 0x800A4D8Cu,

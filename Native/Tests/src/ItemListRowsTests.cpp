@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Seq/Channel.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -566,8 +566,7 @@ TEST_CASE("Inventory rows registry binds the MENU3 and MENUB addresses",
       Entry{"MENU/MENUB.PRG", 0x8010537C,
             reinterpret_cast<const void*>(&inventory::LiveRestoreItemRows)},
   };
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const Entry& entry : entries) {
     CAPTURE(entry.module, entry.address);
     CHECK(VS::Content::ResolveModuleAddress(symbols, entry.module,

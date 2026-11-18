@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/OverlayReset.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
 
@@ -14,8 +14,7 @@ using container_transfers_tests::LiveFixture;
 template <typename Entry>
 bool IsBound(unsigned address, Entry entry) {
   const auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENUD.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "MENU/MENUD.PRG", address);
   return resolved == reinterpret_cast<const void*>(entry);
 }
 }  // namespace

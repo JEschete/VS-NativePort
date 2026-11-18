@@ -12,7 +12,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
@@ -1652,8 +1652,7 @@ TEST_CASE("Live room effects refuse empty sections and unbound entry points",
 
 TEST_CASE("The room effect module symbols are retired",
           "[field][field-room-effects]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   constexpr std::array<std::uint32_t, 48> kRetired{
       0x8009195CU, 0x80091998U, 0x800919D8U, 0x80091A1CU, 0x80091A78U,
       0x80091AC0U, 0x80091B04U, 0x80091C6CU, 0x80091E10U, 0x80091FE8U,

@@ -10,7 +10,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Actors/MovementCommand.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -63,8 +63,7 @@ TEST_CASE("Movement commands write only through the request table",
 
 TEST_CASE("Promoted movement commands have no original module address",
           "[actors][movement][movement-command]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B64A8u) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

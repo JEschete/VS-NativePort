@@ -27,8 +27,7 @@ enum class Page { kTitles, kStatistics };
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
   auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENU9.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "MENU/MENU9.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved != reinterpret_cast<void*>(expected)) {
     throw std::runtime_error("incorrect Gazette statistics module entry");

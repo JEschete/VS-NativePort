@@ -45,7 +45,7 @@
 #include "Render/Camera.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelGeometryLive.hpp"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.h"
 
@@ -184,15 +184,13 @@ struct AudioRestore {
 
   AudioRestore() {
     const auto image = ReadOriginal(R"(Native\data\disc\SLUS_010.40)");
-    const auto tables =
-        std::span(Content_modulePointers, Content_modulePointerCount);
+    const auto tables = VS::Content::ModulePointerTables();
     const auto table = std::ranges::find(
         tables, reinterpret_cast<void**>(Audio_Mixer_kCommandHandlers),
-        &Content_ModulePointerTable::target);
+        &VS::Content::ModulePointerTable::target);
     if (table == tables.end() ||
         !VS::Content::RelocateModulePointerTable(
-            *table, image,
-            {Content_moduleSymbols, Content_moduleSymbolCount})) {
+            *table, image, VS::Content::ModuleSymbols())) {
       throw std::runtime_error("could not relocate production audio callbacks");
     }
   }
@@ -275,8 +273,8 @@ struct Fixture {
   ValueRestore<Actors_ModelRenderContext> saved_model_context{
       VS::Actors::modelRenderContext};
   ValueRestore<char> saved_sequence_index{Actors_lastResolvedSequenceIndex};
-  ValueRestore<std::remove_reference_t<decltype(*Render_ModelWorkspace())>>
-      saved_model_workspace{*Render_ModelWorkspace()};
+  ValueRestore<std::remove_reference_t<decltype(*VS::Render::ModelWorkspace())>>
+      saved_model_workspace{*VS::Render::ModelWorkspace()};
   AssetStateRestore saved_assets;
   AudioRestore saved_audio;
   ArrayRestore<u_short, std::size(Menu_Status_statusStrings)> saved_status_text{
@@ -372,11 +370,11 @@ struct Fixture {
   }
   static void LoadTextureOrigins() {
     const auto image = ReadOriginal(R"(Native\data\disc\BATTLE\BATTLE.PRG)");
-    const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+    const auto entries = VS::Content::ModuleDataEntries();
     for (void* target : {static_cast<void*>(Actors_textureSlotOrigins),
                          static_cast<void*>(Actors_textureSlotRowOffsets)}) {
-      const auto entry =
-          std::ranges::find(entries, target, &Content_ModuleDataEntry::target);
+      const auto entry = std::ranges::find(
+          entries, target, &VS::Content::ModuleDataEntry::target);
       if (entry == entries.end() ||
           !VS::Content::CopyModuleDataEntry(*entry, image)) {
         throw std::runtime_error(

@@ -22,7 +22,7 @@
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 
 namespace {
 using VS::Game::EncounterSetup;
@@ -501,18 +501,18 @@ TEST_CASE("Encounter catalog hostility is independent of defeat retention",
 
 TEST_CASE("Direct entry and title share usable player menu defaults",
           "[combat][encounter]") {
-  const auto saved = Input_settings;
+  const auto saved = VS::Input::settings;
   VS::Boot::InitializePlayerSettings();
-  CHECK(Input_settings.menuFlags == 0x2D8);
-  CHECK(Input_settings.information == 1);
-  CHECK(Input_settings.simpleMap == 3);
-  CHECK(Input_settings.containerEmpty == 1);
-  CHECK(Input_settings.abilityTimingDisplay == 1);
-  CHECK(Input_settings.cursorMemory == 1);
-  Input_settings.menuFlags = 0;
+  CHECK(VS::Input::settings.menuFlags == 0x2D8);
+  CHECK(VS::Input::settings.information == 1);
+  CHECK(VS::Input::settings.simpleMap == 3);
+  CHECK(VS::Input::settings.containerEmpty == 1);
+  CHECK(VS::Input::settings.abilityTimingDisplay == 1);
+  CHECK(VS::Input::settings.cursorMemory == 1);
+  VS::Input::settings.menuFlags = 0;
   VS::Boot::InitializePlayerSettings();
-  CHECK(Input_settings.menuFlags == 0x2D8);
-  Input_settings = saved;
+  CHECK(VS::Input::settings.menuFlags == 0x2D8);
+  VS::Input::settings = saved;
 }
 
 namespace {

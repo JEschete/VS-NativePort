@@ -12,7 +12,7 @@
 
 #include "Battle/Ai/RadialMovement.hpp"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
 
@@ -602,8 +602,7 @@ TEST_CASE("Recovering movers stand without a neighbour inside the grid",
 
 TEST_CASE("Radial movement keeps its original module entries",
           "[ai][radial-movement][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [symbols](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

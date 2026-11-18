@@ -14,7 +14,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycle.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/EquipmentAffinity.hpp"
 
 namespace {
@@ -464,8 +464,7 @@ TEST_CASE("Live status writes preserve signed HP MP risk and neighboring flags",
 
 TEST_CASE("Lifecycle module bindings execute their typed signatures",
           "[status-lifecycle][F00254][F00517][F00520][F00523][live]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](std::uint32_t address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

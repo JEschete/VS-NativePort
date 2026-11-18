@@ -21,15 +21,7 @@
 #include "Items/ItemRecordsLive.hpp"
 
 unsigned char VS::Items::miscItemInvoked = 0;
-const unsigned char VS::Items::Inventory::inventoryItemCapacities[8] = {
-    VS::Items::kCategoryCapacities[0], VS::Items::kCategoryCapacities[1],
-    VS::Items::kCategoryCapacities[2], VS::Items::kCategoryCapacities[3],
-    VS::Items::kCategoryCapacities[4], VS::Items::kCategoryCapacities[5],
-    VS::Items::kCategoryCapacities[6], VS::Items::kCategoryCapacities[7],
-};
 
-static_assert(std::size(VS::Items::Inventory::inventoryItemCapacities) ==
-              VS::Items::kItemCategoryCount);
 static_assert(std::extent_v<decltype(Items_itemCategoryUpperIds)> ==
               VS::Items::kItemIdCategoryCount);
 static_assert(sizeof(Items_itemCategoryUpperIds[0]) == sizeof(std::uint32_t));

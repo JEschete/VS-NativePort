@@ -19,7 +19,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/Controller.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Vibration.h"
 #include "Legacy/Input/LibPad.h"
 #include "State/Timers.hpp"
@@ -29,15 +29,15 @@
 // vs_main_buttonsPreviousState, vs_main_buttonsPressed, vs_main_buttonsState
 // and vs_main_settings (main.c), zero like the PS1 BSS.
 Input_ControllerPortState
-    Input_controllerPorts[VS::Input::kControllerPortCount]{};
-int Input_releasedButtons = 0;
-u_int Input_buttonHeldFrames[VS::Input::kButtonCount]{};
-Input_StickPosition Input_stickPosBuf{};
-int Input_buttonRepeat = 0;
-int Input_previousButtons = 0;
-union Input_PressedButtonsView Input_buttonsPressed{};
-int Input_buttonsState = 0;
-State_Settings Input_settings{};
+    VS::Input::controllerPorts[VS::Input::kControllerPortCount]{};
+int VS::Input::releasedButtons = 0;
+u_int VS::Input::buttonHeldFrames[VS::Input::kButtonCount]{};
+Input_StickPosition VS::Input::stickPosBuf{};
+int VS::Input::buttonRepeat = 0;
+int VS::Input::previousButtons = 0;
+union Input_PressedButtonsView VS::Input::buttonsPressed{};
+int VS::Input::buttonsState = 0;
+State_Settings VS::Input::settings{};
 
 namespace VS::Input {
 namespace {
@@ -68,8 +68,8 @@ static_assert(offsetof(Input_ControllerPortState, connected) ==
               kLegacyConnected);
 static_assert(std::size(Input_ControllerPortState{}.actuatorLevels) ==
               kMotorCount);
-static_assert(std::size(Input_controllerPorts) == kControllerPortCount);
-static_assert(std::size(Input_buttonHeldFrames) == kButtonCount);
+static_assert(std::size(controllerPorts) == kControllerPortCount);
+static_assert(std::size(buttonHeldFrames) == kButtonCount);
 static_assert(sizeof(Input_legacyPadResponseBytes[0]) == kPadPacketBytes);
 
 constexpr std::size_t kLegacyStickBytes = 0x10;
@@ -138,7 +138,7 @@ std::optional<ControllerPort> PortFromId(int port_id) noexcept {
 
 ControllerPortState LoadPort(ControllerPort port) noexcept {
   const Input_ControllerPortState& legacy =
-      std::span(Input_controllerPorts)[PortIndex(port)];
+      std::span(controllerPorts)[PortIndex(port)];
   return {
       .kind = static_cast<ControllerKind>(Byte(legacy.controllerType)),
       .extended_id = Byte(legacy.extendedType),
@@ -156,7 +156,7 @@ ControllerPortState LoadPort(ControllerPort port) noexcept {
 
 void StorePort(ControllerPort port, const ControllerPortState& state) noexcept {
   Input_ControllerPortState& legacy =
-      std::span(Input_controllerPorts)[PortIndex(port)];
+      std::span(controllerPorts)[PortIndex(port)];
   legacy.controllerType = LegacyByte(static_cast<std::uint8_t>(state.kind));
   legacy.extendedType = LegacyByte(state.extended_id);
   legacy.buttonBits = LegacyByte(state.button_bits);
@@ -204,7 +204,7 @@ class LibPadHost final : public ControllerHost {
 
   void RegisterMotorCommands(ControllerPort port) override {
     char* const bytes =
-        std::span(Input_controllerPorts)[PortIndex(port)].actuatorLevels;
+        std::span(controllerPorts)[PortIndex(port)].actuatorLevels;
     PadSetAct(PortId(port), reinterpret_cast<unsigned char*>(bytes),
               static_cast<int>(kMotorCount));
   }
@@ -260,33 +260,33 @@ std::span<const std::byte> ReadVibrationPattern(
 
 ButtonState LoadButtons() noexcept {
   ButtonState buttons;
-  buttons.previous = static_cast<std::uint32_t>(Input_previousButtons);
-  std::ranges::copy(Input_buttonHeldFrames, buttons.held_ticks.begin());
+  buttons.previous = static_cast<std::uint32_t>(previousButtons);
+  std::ranges::copy(buttonHeldFrames, buttons.held_ticks.begin());
   return buttons;
 }
 
 void StoreControllerState(const ControllerState& state) noexcept {
   StorePorts(state.ports);
   const ButtonState& buttons = state.buttons;
-  Input_buttonsState = static_cast<int>(buttons.held);
-  Input_buttonsPressed.allButtons = buttons.pressed;
-  Input_releasedButtons = static_cast<int>(buttons.released);
-  Input_previousButtons = static_cast<int>(buttons.previous);
-  Input_buttonRepeat = static_cast<int>(buttons.repeat);
-  std::ranges::copy(buttons.held_ticks, std::begin(Input_buttonHeldFrames));
-  // The legacy r fields are the physical left stick (ControllerLiveState.h).
-  Input_stickPosBuf.rStickX = state.sticks.left.x;
-  Input_stickPosBuf.rStickY = state.sticks.left.y;
-  Input_stickPosBuf.lStickX = state.sticks.right.x;
-  Input_stickPosBuf.lStickY = state.sticks.right.y;
+  buttonsState = static_cast<int>(buttons.held);
+  buttonsPressed.allButtons = buttons.pressed;
+  releasedButtons = static_cast<int>(buttons.released);
+  previousButtons = static_cast<int>(buttons.previous);
+  buttonRepeat = static_cast<int>(buttons.repeat);
+  std::ranges::copy(buttons.held_ticks, std::begin(buttonHeldFrames));
+  // The legacy r fields are the physical left stick (ControllerLiveState.hpp).
+  stickPosBuf.rStickX = state.sticks.left.x;
+  stickPosBuf.rStickY = state.sticks.left.y;
+  stickPosBuf.lStickX = state.sticks.right.x;
+  stickPosBuf.lStickY = state.sticks.right.y;
 }
 
 ControllerFrame PollLiveControllers() {
   ControllerState state{
       .ports = LoadPorts(), .buttons = LoadButtons(), .sticks = {}};
   ControllerSettings settings{
-      .mono_sound = Input_settings.monoSound != 0,
-      .vibration_on = Input_settings.vibrationOn != 0,
+      .mono_sound = VS::Input::settings.monoSound != 0,
+      .vibration_on = VS::Input::settings.vibrationOn != 0,
   };
   const ControllerFrameOptions options{
       .tick_speed = static_cast<std::uint32_t>(VS::State::tickSpeed),
@@ -297,8 +297,9 @@ ControllerFrame PollLiveControllers() {
       UpdateControllers(state, settings, host, options);
   StoreControllerState(state);
   if (frame == ControllerFrame::kSoftReset) {
-    Input_settings.monoSound = static_cast<char>(settings.mono_sound ? 1 : 0);
-    Input_settings.vibrationOn =
+    VS::Input::settings.monoSound =
+        static_cast<char>(settings.mono_sound ? 1 : 0);
+    VS::Input::settings.vibrationOn =
         static_cast<char>(settings.vibration_on ? 1 : 0);
   }
   return frame;
@@ -434,7 +435,7 @@ void ResetLiveVibrationPatterns() {
 void UpdateLiveVibrationPatterns() {
   ControllerPortState first = LoadPort(ControllerPort::kFirst);
   const std::uint32_t outside = UpdateVibrationPatterns(
-      live_vibration, first, Input_settings.vibrationOn != 0);
+      live_vibration, first, VS::Input::settings.vibrationOn != 0);
   StorePort(ControllerPort::kFirst, first);
   if (outside != 0) {
     Refused("UpdateLiveVibrationPatterns", "pattern reads outside the pattern",

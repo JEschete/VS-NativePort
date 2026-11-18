@@ -89,7 +89,7 @@
 #include "Field/Znd.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.h"
@@ -100,7 +100,8 @@
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/Render.h"
 #include "Render/ScreenOverlayLive.hpp"
-#include "Save/NativeResume.h"
+#include "Save/NativeResume.hpp"
+#include "Save/RuntimeSnapshot.hpp"
 #include "State/GameClockLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -887,7 +888,7 @@ class LiveZoneLoadHost final
   }
 
   [[nodiscard]] bool NativeResumePending() const override {
-    return Save_NativeResumePending() != 0;
+    return VS::Game::Save::ResumePending();
   }
 
   [[nodiscard]] int GameEntryMode() const override {
@@ -1105,11 +1106,11 @@ class LiveRoomLoadHost final
     Effects_effectBusyFlags = 0;
     static_cast<void>(Actors::SetOtherLiveActorLogicEnabled(1));
     // The original also zeroes vs_main_unused0-2 here; nothing reads them.
-    Input_buttonRepeat = 0;
-    Input_releasedButtons = 0;
-    Input_buttonsPressed.allButtons = 0;
-    Input_previousButtons = 0;
-    Input_buttonsState = 0;
+    VS::Input::buttonRepeat = 0;
+    VS::Input::releasedButtons = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::previousButtons = 0;
+    VS::Input::buttonsState = 0;
     Scratch().camera.farClip = ONE;
   }
 
@@ -1167,11 +1168,11 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] bool NativeResumePending() const override {
-    return Save_NativeResumePending() != 0;
+    return VS::Game::Save::ResumePending();
   }
 
   [[nodiscard]] bool FinishNativeResume() override {
-    return Save_NativeFinishResume() != 0;
+    return VS::Game::Save::FinishStagedResume();
   }
 
   void JumpToTitle() override { Boot::JumpToLiveTitle(); }

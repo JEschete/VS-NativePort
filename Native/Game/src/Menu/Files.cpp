@@ -1095,7 +1095,7 @@ constexpr int kEventMaskIgnoreNoEvent = 0x30;
 // flag.
 constexpr int kPortShift = 16;
 constexpr int kReadRequestFlag = 256;
-// Input_settings' first word: the bit _containerDataEmpty forces.
+// VS::Input::settings' first word: the bit _containerDataEmpty forces.
 constexpr std::uint8_t kMainSettingBit = 0x10;
 constexpr int kMainSettingShift = 4;
 // ValidateAndApplyLiveLoadedSave's results.
@@ -1414,8 +1414,8 @@ void ClearSlotElements(Context& ctx) {
   return (host.Input().pressed & kPadFirstByte) != 0;
 }
 
-// Input_settings copied out and back; refused unless it is the 32 bytes the
-// backups hold.
+// VS::Input::settings copied out and back; refused unless it is the 32 bytes
+// the backups hold.
 [[nodiscard]] std::span<std::uint8_t> WholeSettings(Host& host) {
   const std::span<std::uint8_t> settings = host.Settings();
   if (settings.size() != kSettingsBytes) {

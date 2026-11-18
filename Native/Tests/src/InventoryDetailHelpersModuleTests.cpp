@@ -2,7 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 
 namespace {
@@ -11,7 +11,7 @@ namespace inventory = VS::Menu::Inventory;
 template <typename Entry>
 bool IsBound(std::string_view module, unsigned address, Entry entry) {
   const auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, module, address);
+      VS::Content::ModuleSymbols(), module, address);
   return resolved == reinterpret_cast<void*>(entry);
 }
 }  // namespace

@@ -13,7 +13,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Files.hpp"
 #include "Menu/FilesLive.hpp"
@@ -675,8 +675,7 @@ TEST_CASE("Files retires the MENU7.PRG and TITLE.PRG file module symbols",
   constexpr auto kTitle = std::to_array<unsigned>(
       {0x8006A860, 0x8006A8F8, 0x8006B138, 0x8006B364, 0x8006B4EC, 0x8006C114,
        0x8006E5D0, 0x8006E68C, 0x8006EA70, 0x8006ECF4});
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const unsigned address : kMenu7) {
     CHECK(VS::Content::ResolveModuleAddress(symbols, "MENU/MENU7.PRG",
                                             address) == nullptr);

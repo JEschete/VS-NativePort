@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -66,8 +66,7 @@ TEST_CASE("The live room binding exposes the room's collision bytes",
 
 TEST_CASE("The promoted collision sampler has no original module address",
           "[collision][room][collision-sampling]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x80099514u) == nullptr);
 }

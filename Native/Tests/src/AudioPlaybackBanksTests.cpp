@@ -23,7 +23,7 @@
 #include "Audio/SoundPlayback.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Content/CdDrive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 
 namespace {
 namespace Audio = VS::Audio;
@@ -1351,8 +1351,7 @@ TEST_CASE("Live slots keep the room bank's address and the failed marker",
 
 TEST_CASE("Promoted playback and bank functions keep no module binding",
           "[audio-playback-banks][audio][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::uint32_t, 58> retired{
       0x80011DACU, 0x80011DCCU, 0x80011DECU, 0x80011E40U, 0x80011EBCU,
       0x80011F08U, 0x80011F24U, 0x80011F90U, 0x80011FB4U, 0x80011FDCU,

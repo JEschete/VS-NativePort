@@ -77,7 +77,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/TransitionsLiveState.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/LootLive.hpp"
 #include "Items/TreasureChests.h"
 #include "Legacy/Psx.h"
@@ -153,10 +153,10 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
     Field_isMenuRequestQueued = queued ? 1 : 0;
   }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
-    return Input_buttonsPressed.allButtons;
+    return VS::Input::buttonsPressed.allButtons;
   }
   [[nodiscard]] std::uint32_t PreviousButtons() const override {
-    return static_cast<std::uint32_t>(Input_previousButtons);
+    return static_cast<std::uint32_t>(VS::Input::previousButtons);
   }
   [[nodiscard]] std::uint32_t ActorStateFlags(int slot) override {
     return VS::Actors::LiveActorStateFlags(slot);

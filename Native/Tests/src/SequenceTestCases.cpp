@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Actors/SequencePlayback.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
 int Tests_SharedSequenceOffsets(void);
@@ -293,8 +293,7 @@ TEST_CASE("Gimmick overrides preserve every material state and limb palette",
 
 TEST_CASE("Original gimmick override address has no C entry after promotion",
           "[actors][appearance][render][gimmick-override]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B5C30u) == nullptr);
 }
@@ -310,8 +309,7 @@ TEST_CASE("Weapon overrides preserve the source matrix-byte palette mask",
 
 TEST_CASE("Original weapon override address has no C entry after promotion",
           "[actors][appearance][render][weapon-override]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800B516Cu) == nullptr);
 }

@@ -9,7 +9,7 @@
 
 #include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.hpp"
-#include "Items/InventoryLiveState.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/SortingKeysLive.hpp"
 #include "Menu/Inventory/InventorySorting.hpp"
@@ -63,8 +63,7 @@ class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
         Menu_Inventory_inventoryIndices[static_cast<std::size_t>(category)]);
   }
   std::uint8_t Capacity(Items::ItemCategory category) override {
-    return VS::Items::Inventory::inventoryItemCapacities
-        [static_cast<std::size_t>(category)];
+    return VS::Items::kCategoryCapacities[static_cast<std::size_t>(category)];
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
     Inventory::Refuse(reason);

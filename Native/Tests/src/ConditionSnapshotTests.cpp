@@ -10,7 +10,7 @@
 #include "Battle/Ai/ConditionSnapshot.hpp"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -57,8 +57,7 @@ TEST_CASE("An empty actor list leaves the condition table untouched",
 
 TEST_CASE("The promoted condition snapshot has no original module address",
           "[ai][condition][condition-snapshot]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DC424u) == nullptr);
 }

@@ -13,7 +13,7 @@
 
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Controllers.h"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
@@ -89,13 +89,13 @@ struct VirtualGamepad {
 };
 
 struct ActuatorLease {
-  char saved_setting = Input_settings.vibrationOn;
+  char saved_setting = VS::Input::settings.vibrationOn;
   std::array<unsigned char, 34> response{};
   std::array<unsigned char, 2> levels{};
   std::array<unsigned char, 6> alignment{0, 1, 255, 255, 255, 255};
 
   ActuatorLease() {
-    Input_settings.vibrationOn = 1;
+    VS::Input::settings.vibrationOn = 1;
     PadInitDirect(response.data(), nullptr);
     VS::Input::PadState state;
     state.analog = true;
@@ -106,7 +106,7 @@ struct ActuatorLease {
 
   ~ActuatorLease() {
     PadInitDirect(nullptr, nullptr);
-    Input_settings.vibrationOn = saved_setting;
+    VS::Input::settings.vibrationOn = saved_setting;
   }
 };
 
@@ -176,7 +176,7 @@ struct RumbleFixture {
 struct PatternState {
   VS::Input::VibrationState saved_vibration = VS::Input::LiveVibrationState();
   std::array<Input_ControllerPortState, 2> saved_ports =
-      std::to_array(Input_controllerPorts);
+      std::to_array(VS::Input::controllerPorts);
   std::array<unsigned char, 11> pattern{5, 2, 1, 0, 0, 2, 128, 2, 128, 0, 0};
 
   PatternState() {
@@ -187,7 +187,8 @@ struct PatternState {
 
   ~PatternState() {
     VS::Input::LiveVibrationState() = saved_vibration;
-    std::copy(saved_ports.begin(), saved_ports.end(), Input_controllerPorts);
+    std::copy(saved_ports.begin(), saved_ports.end(),
+              VS::Input::controllerPorts);
   }
 
   int Start(unsigned int slot, int owner_tag = 0x80) {
@@ -256,10 +257,10 @@ TEST_CASE("Vibration Off and scripted input stop an active SDL effect",
   RumbleFixture fixture;
   fixture.Apply(1, 255);
   CheckLast(fixture.commands, 65535, 65535);
-  Input_settings.vibrationOn = 0;
+  VS::Input::settings.vibrationOn = 0;
   fixture.input.Update();
   CheckLast(fixture.commands, 0, 0);
-  Input_settings.vibrationOn = 1;
+  VS::Input::settings.vibrationOn = 1;
   fixture.input.Update();
   CheckLast(fixture.commands, 65535, 65535);
   fixture.input.SetDevicesEnabled(false);
@@ -498,8 +499,8 @@ TEST_CASE("Original vibration reset clears slots and controller connections",
   PatternState pattern;
   REQUIRE(pattern.Start(1) == 1);
   REQUIRE(pattern.Start(2) == 2);
-  Input_controllerPorts[0].connected = 1;
-  Input_controllerPorts[1].connected = 1;
+  VS::Input::controllerPorts[0].connected = 1;
+  VS::Input::controllerPorts[1].connected = 1;
   VS::Input::ResetLiveVibrationPatterns();
   for (const auto& slot : VS::Input::LiveVibrationState().slots) {
     CHECK(slot.pattern.Bytes().empty());
@@ -507,8 +508,8 @@ TEST_CASE("Original vibration reset clears slots and controller connections",
     CHECK(slot.envelopes[0].level == 0);
     CHECK(slot.envelopes[1].level == 0);
   }
-  CHECK(Input_controllerPorts[0].connected == 0);
-  CHECK(Input_controllerPorts[1].connected == 0);
+  CHECK(VS::Input::controllerPorts[0].connected == 0);
+  CHECK(VS::Input::controllerPorts[1].connected == 0);
 }
 
 namespace {

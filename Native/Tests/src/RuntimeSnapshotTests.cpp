@@ -35,12 +35,12 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.h"
 #include "Content/DataStore.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Random.h"
 #include "Ending/EndingLive.hpp"
@@ -54,7 +54,7 @@
 #include "Field/Room.h"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/Znd.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
@@ -155,8 +155,7 @@ struct ContentFixture {
   }
 
   void BuildIndex() {
-    for (unsigned index = 0; index < Content_moduleDataCount; ++index) {
-      const auto& slice = Content_moduleData[index];
+    for (const auto& slice : VS::Content::ModuleDataEntries()) {
       if (slice.target != &Items_itemCategoryUpperIds) continue;
       categories_offset = slice.offset;
       categories_module = slice.module;
@@ -230,7 +229,7 @@ struct RuntimeFixture {
   decltype(Audio_Seq_unusedInventory) inventory = Audio_Seq_unusedInventory;
   decltype(Audio_Seq_unusedInventoryIndices) order =
       Audio_Seq_unusedInventoryIndices;
-  decltype(Input_settings) settings = Input_settings;
+  decltype(VS::Input::settings) settings = VS::Input::settings;
   decltype(State_roomVisitProgress) visits = State_roomVisitProgress;
   decltype(Audio_Seq_unusedArtsStatus) arts = Audio_Seq_unusedArtsStatus;
   decltype(Audio_Seq_unusedScoredata) score = Audio_Seq_unusedScoredata;
@@ -265,7 +264,7 @@ struct RuntimeFixture {
   unsigned interface_random = Core_interfaceRandomState;
   int shuffle_index = Core_randomShuffleIndex;
   int movement_random = Battle_Ai_savedMovementRandomState;
-  unsigned frame_random = Battle_Ai_FrameState()->randomState;
+  unsigned frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
   int current_cache = State_currentRoomStateSlot;
   int gameplay = Boot_isGameplayActive;
   int clear_pending = Boot_isClearSavePending;
@@ -358,8 +357,8 @@ struct RuntimeFixture {
     VS::State::SetLiveScriptFlag(0x43F, static_cast<char>(0xAB));
     VS::State::SetLiveScriptFlag(64, 99);
     VS::State::SetLiveScriptFlag(161, 17);
-    Input_settings = {};
-    Input_settings.mappedChainAbilities[3] = static_cast<char>(255);
+    VS::Input::settings = {};
+    VS::Input::settings.mappedChainAbilities[3] = static_cast<char>(255);
     State_roomVisitProgress = {};
     State_roomVisitProgress.roomFlags[3] = 0x10203040;
     Audio_Seq_unusedArtsStatus = {};
@@ -585,10 +584,10 @@ struct RuntimeFixture {
     State_savedEntryDoor.entryElevation = 1;
     State_savedEntryDoor.tileLocation.entryDirection = 1;
     State_savedEntryDoor.requiredFlagId = 37;
-    Input_settings.currentGameSaveCount = 7;
-    Input_settings.cumulativeSaveCount = 19;
-    Input_settings.menuFlags = 0xFFFF;
-    Input_settings.reserved0Bit0 = 8;
+    VS::Input::settings.currentGameSaveCount = 7;
+    VS::Input::settings.cumulativeSaveCount = 19;
+    VS::Input::settings.menuFlags = 0xFFFF;
+    VS::Input::settings.reserved0Bit0 = 8;
     VS::Ending::LiveCommitClearProgress();
     Boot_isGameplayActive = 0;
     Boot_isClearSavePending = 1;
@@ -604,7 +603,7 @@ struct RuntimeFixture {
     Audio_Seq_unusedStateFlags = flags;
     Audio_Seq_unusedInventory = inventory;
     Audio_Seq_unusedInventoryIndices = order;
-    Input_settings = settings;
+    VS::Input::settings = settings;
     State_roomVisitProgress = visits;
     Audio_Seq_unusedArtsStatus = arts;
     Audio_Seq_unusedScoredata = score;
@@ -630,7 +629,7 @@ struct RuntimeFixture {
     Core_interfaceRandomState = interface_random;
     Core_randomShuffleIndex = shuffle_index;
     Battle_Ai_savedMovementRandomState = movement_random;
-    Battle_Ai_FrameState()->randomState = frame_random;
+    VS::Battle::Ai::LiveFrameContext().randomState = frame_random;
     State_currentRoomStateSlot = current_cache;
     Boot_isGameplayActive = gameplay;
     Render_nearClip = near_clip;
@@ -663,7 +662,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, Audio_Seq_unusedStateFlags);
   Append(bytes, Audio_Seq_unusedInventory);
   Append(bytes, Audio_Seq_unusedInventoryIndices);
-  Append(bytes, Input_settings);
+  Append(bytes, VS::Input::settings);
   Append(bytes, State_roomVisitProgress);
   Append(bytes, Audio_Seq_unusedArtsStatus);
   Append(bytes, Audio_Seq_unusedScoredata);
@@ -696,7 +695,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, Core_randomShuffleTable);
   Append(bytes, Core_randomShuffleIndex);
   Append(bytes, Battle_Ai_savedMovementRandomState);
-  Append(bytes, Battle_Ai_FrameState()->randomState);
+  Append(bytes, VS::Battle::Ai::LiveFrameContext().randomState);
   Append(bytes, Audio_Driver_controlLatches.mixBehavior);
   return bytes;
 }
@@ -1256,11 +1255,11 @@ TEST_CASE("Only an actually paused field menu permits residual walking",
 
 namespace {
 void CheckAudioSettings(bool mono) {
-  CHECK((Input_settings.monoSound == 1) == mono);
+  CHECK((VS::Input::settings.monoSound == 1) == mono);
   CHECK(((Audio_Driver_controlLatches.mixBehavior & 2) != 0) == mono);
   CHECK((Audio_Driver_controlLatches.mixBehavior & 0x10) != 0);
-  CHECK(Input_settings.slotState == 0xFEDCBA98u);
-  CHECK(Input_settings.key == 0xF00DCAFEu);
+  CHECK(VS::Input::settings.slotState == 0xFEDCBA98u);
+  CHECK(VS::Input::settings.key == 0xF00DCAFEu);
 }
 }  // namespace
 
@@ -1271,7 +1270,7 @@ TEST_CASE(
   RuntimeFixture fixture;
   auto state = fixture.Capture();
   const bool mono = GENERATE(false, true);
-  Input_settings.monoSound = static_cast<char>(!mono);
+  VS::Input::settings.monoSound = static_cast<char>(!mono);
   VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
   Audio_Driver_controlLatches.mixBehavior |= 0x10;
   const auto before = LiveFingerprint(fixture);
@@ -1317,7 +1316,7 @@ TEST_CASE("Failed room-ready audio validation leaves cancellation safe",
   Save::CancelResume();
   CHECK_FALSE(Save::ResumePending());
   CHECK((Audio_Driver_controlLatches.mixBehavior & 2) == 0);
-  CHECK(Input_settings.monoSound == 0);
+  CHECK(VS::Input::settings.monoSound == 0);
 }
 
 TEST_CASE("Resume staging can be canceled repeatedly without leaking inputs",
@@ -1359,7 +1358,7 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   std::fill_n(Core_randomShuffleTable, 97, 0);
   Core_randomShuffleIndex = 0;
   Battle_Ai_savedMovementRandomState = 1;
-  Battle_Ai_FrameState()->randomState = 1;
+  VS::Battle::Ai::LiveFrameContext().randomState = 1;
   VS::State::SetLiveScriptFlag(64, 0);
   State_recentRoomEnemyStates[0].nextSlot = 3;
 }
@@ -1395,7 +1394,7 @@ void CheckRestoredRandom(const Save::Snapshot& state) {
   CHECK(std::equal(state.random.shuffle.begin(), state.random.shuffle.end(),
                    Core_randomShuffleTable));
   CHECK(Core_randomShuffleIndex == 96);
-  CHECK(Battle_Ai_FrameState()->randomState == 0xFEDCBA98);
+  CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 0xFEDCBA98);
   CHECK(std::bit_cast<unsigned>(Battle_Ai_savedMovementRandomState) ==
         0xFEDCBA98);
 }

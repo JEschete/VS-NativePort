@@ -17,7 +17,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/Seq/Channel.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -477,7 +477,7 @@ TEST_CASE("Reload door native store writes only its packed state byte",
 
 TEST_CASE("Entrance native entries retain original module addresses",
           "[entrance-door-live][entrance-reload-live][field]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008B8F8) ==
         reinterpret_cast<const void*>(&VS::Field::SetEntranceDoorRecordEntry));
@@ -493,7 +493,7 @@ TEST_CASE("Entrance native entries retain original module addresses",
 
 TEST_CASE("Scene door native entries retain original module addresses",
           "[scene-door-live][minimap]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x8008D880) ==
         reinterpret_cast<const void*>(&VS::Field::SceneDoorIdEntry));

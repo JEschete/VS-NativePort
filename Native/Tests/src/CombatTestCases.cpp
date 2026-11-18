@@ -29,7 +29,8 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/AttackPrerequisites.h"
+#include "Battle/AttackPrerequisiteTable.h"
+#include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BasicActionEffectsLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/DamageCalculationsLive.hpp"
@@ -54,7 +55,7 @@
 #include "Effects/Templates/RingsLive.hpp"
 #include "Field/Interactions.h"
 #include "Input/Buttons.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
@@ -132,8 +133,8 @@ struct AbilityFixture {
   std::array<Battle_Actor*, 2> saved_actors{Battle_actors[0], Battle_actors[1]};
   std::array<Actors_ActorRecord*, 2> saved_records{Actors_actorRecords[0],
                                                    Actors_actorRecords[1]};
-  State_Settings saved_settings = Input_settings;
-  decltype(Input_buttonsPressed) saved_pressed = Input_buttonsPressed;
+  State_Settings saved_settings = VS::Input::settings;
+  decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   decltype(Audio_Seq_unusedScoredata) saved_score = Audio_Seq_unusedScoredata;
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
   decltype(Battle_floatingLabelCount) saved_label_count =
@@ -171,14 +172,14 @@ struct AbilityFixture {
     Battle_actionDefinitions[54].type = Battle_ActionType_Spell;
     Battle_actionDefinitions[99].type = Battle_ActionType_Spell;
     Battle_actionDefinitions[141].type = Battle_ActionType_BreakArt;
-    Input_settings = {};
+    VS::Input::settings = {};
     for (int index = 0; index < 3; ++index) {
-      Input_settings.mappedChainAbilities[index] =
+      VS::Input::settings.mappedChainAbilities[index] =
           static_cast<char>(22 + index);
-      Input_settings.mappedDefenseAbilities[index] =
+      VS::Input::settings.mappedDefenseAbilities[index] =
           static_cast<char>(40 + index);
     }
-    Input_buttonsPressed.allButtons = PADRright;
+    VS::Input::buttonsPressed.allButtons = PADRright;
     Battle_floatingLabels = &labels;
     Battle_floatingLabelCount = 0;
     VS::State::tickSpeed = 2;
@@ -195,8 +196,8 @@ struct AbilityFixture {
       Battle_actors[index] = saved_actors[index];
       Actors_actorRecords[index] = saved_records[index];
     }
-    Input_settings = saved_settings;
-    Input_buttonsPressed = saved_pressed;
+    VS::Input::settings = saved_settings;
+    VS::Input::buttonsPressed = saved_pressed;
     Audio_Seq_unusedScoredata = saved_score;
     Battle_floatingLabels = saved_labels;
     Battle_floatingLabelCount = saved_label_count;
@@ -421,8 +422,10 @@ struct ArtResolutionFixture : AbilityEffectFixture {
     // BATTLE.PRG dispatch tables at file 0x7FA34, 0x7FA54 and 0x7FB78.
     Battle_hitFunctions[1] = VS::Battle::PreviousLiveHitSuccessThreshold;
     Battle_hitFunctions[3] = VS::Battle::LiveAgilityHitChance;
-    Battle_attackPrerequisiteFunctions[1] = Battle_AcceptAttackPrerequisiteSlot;
-    Battle_attackPrerequisiteFunctions[2] = Battle_AcceptAttackPrerequisiteSlot;
+    Battle_attackPrerequisiteFunctions[1] =
+        VS::Battle::AcceptAttackPrerequisiteSlot;
+    Battle_attackPrerequisiteFunctions[2] =
+        VS::Battle::AcceptAttackPrerequisiteSlot;
     Battle_actionEffectMediators[58] =
         VS::Battle::QueueLiveHitDamageAndEquipmentWear;
     Battle_statCalculators[25] = VS::Battle::LivePhysicalDamageWithDebuffs;
@@ -1104,9 +1107,9 @@ struct EquipmentStagingFixture : EnemyLootFixture {
 };
 
 struct LootPagingMenuFixture : EquipmentStagingFixture {
-  State_Settings saved_settings = Input_settings;
-  decltype(Input_buttonsPressed) saved_buttons = Input_buttonsPressed;
-  decltype(Input_buttonRepeat) saved_repeat = Input_buttonRepeat;
+  State_Settings saved_settings = VS::Input::settings;
+  decltype(VS::Input::buttonsPressed) saved_buttons = VS::Input::buttonsPressed;
+  decltype(VS::Input::buttonRepeat) saved_repeat = VS::Input::buttonRepeat;
   Menu_Framework_MenuRow* saved_menu_rows = VS::Menu::Framework::menuItems;
   decltype(VS::Menu::Framework::itemNames) saved_names =
       VS::Menu::Framework::itemNames;
@@ -1144,7 +1147,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     Menu_textBoxes[7] = {};
     VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
     sfx_offsets.fill(UINT32_MAX);
-    Input_settings.information = 0;
+    VS::Input::settings.information = 0;
     Menu_Loot_lootClaimed = 0;
     Menu_Loot_lootLeftEdge = 0;
     Render_frameBuf = 0;
@@ -1160,9 +1163,9 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   ~LootPagingMenuFixture() {
     VS::Menu::Loot::ResetLootTerminalModuleData();
     VS::Menu::Inventory::ResetInventoryTerminalSession();
-    Input_settings = saved_settings;
-    Input_buttonsPressed = saved_buttons;
-    Input_buttonRepeat = saved_repeat;
+    VS::Input::settings = saved_settings;
+    VS::Input::buttonsPressed = saved_buttons;
+    VS::Input::buttonRepeat = saved_repeat;
     VS::Menu::Framework::menuItems = saved_menu_rows;
     VS::Menu::Framework::itemNames = saved_names;
     Battle_stringContext = saved_string_context;
@@ -1180,8 +1183,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   }
 
   static int Tick(int buttons = 0) {
-    Input_buttonsPressed.allButtons = static_cast<u_short>(buttons);
-    Input_buttonRepeat = static_cast<u_short>(buttons);
+    VS::Input::buttonsPressed.allButtons = static_cast<u_short>(buttons);
+    VS::Input::buttonRepeat = static_cast<u_short>(buttons);
     return VS::Menu::Loot::UpdateLiveLootSelection(0);
   }
 
@@ -1895,13 +1898,13 @@ TEST_CASE("Ability eligibility requires mapped input",
   REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(1) == 1);
 
   SECTION("no mapped offensive buttons") {
-    std::fill_n(Input_settings.mappedChainAbilities, 3, 0);
+    std::fill_n(VS::Input::settings.mappedChainAbilities, 3, 0);
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("no mapped defensive buttons") {
     fixture.Prepare(true);
     REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
-    std::fill_n(Input_settings.mappedDefenseAbilities, 3, 0);
+    std::fill_n(VS::Input::settings.mappedDefenseAbilities, 3, 0);
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
 }
@@ -1991,7 +1994,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     AbilityFixture fixture;
     fixture.Prepare(defense, action_id, depth);
     constexpr std::array kButtons{PADRright, PADRup, PADRleft};
-    Input_buttonsPressed.allButtons = kButtons[slot - 1];
+    VS::Input::buttonsPressed.allButtons = kButtons[slot - 1];
     VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
     fixture.action.abilityTimer = 100 + delta;
     constexpr int kStreak = 7;
@@ -2041,13 +2044,13 @@ TEST_CASE("Unmapped buttons and no input cannot start an ability",
   AbilityFixture fixture;
   fixture.action.abilityTimer = 102;
   SECTION("unmapped button") {
-    Input_settings.mappedChainAbilities[0] = 0;
+    VS::Input::settings.mappedChainAbilities[0] = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
     CHECK(Battle_floatingLabelCount == 0);
   }
   SECTION("no button") {
-    Input_buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
     CHECK(Battle_floatingLabelCount == 0);
@@ -2065,7 +2068,7 @@ TEST_CASE("Simultaneous ability buttons keep the original input priority",
                std::make_pair(PADRright | PADRup | PADRleft, 3));
   AbilityFixture fixture;
   fixture.action.abilityTimer = 102;
-  Input_buttonsPressed.allButtons = buttons;
+  VS::Input::buttonsPressed.allButtons = buttons;
   VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(1, slot);
 }

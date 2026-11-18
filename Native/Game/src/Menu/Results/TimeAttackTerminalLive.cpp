@@ -17,7 +17,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Results/CubePuzzle.h"
@@ -572,7 +572,7 @@ int LiveUpdateTimeAttackResults() {
   if (state.phase <= kResultsClosingPhase && !ValidCourse()) return 0;
   LiveScreen host(state, TimeAttackAsset::kResults);
   const auto step = UpdateTimeAttackResults(
-      state, (Input_buttonsPressed.allButtons & kConfirmMask) != 0, host);
+      state, (VS::Input::buttonsPressed.allButtons & kConfirmMask) != 0, host);
   StoreState(state);
   return Return(step);
 }
@@ -583,7 +583,7 @@ int LiveUpdateTimeAttackStart() {
   if (state.phase < kResultsClosingPhase && !ValidCourse()) return 0;
   LiveScreen host(state, TimeAttackAsset::kStart);
   const auto step = UpdateTimeAttackStart(
-      state, (Input_buttonsPressed.allButtons & kConfirmMask) != 0, host);
+      state, (VS::Input::buttonsPressed.allButtons & kConfirmMask) != 0, host);
   StoreState(state);
   return Return(step);
 }

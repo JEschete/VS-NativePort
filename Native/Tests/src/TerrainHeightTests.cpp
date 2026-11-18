@@ -9,10 +9,10 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/Collision.h"
 #include "Field/TerrainHeight.hpp"
@@ -20,13 +20,15 @@
 
 namespace {
 struct TerrainFixture {
-  Battle_Ai_FrameContext saved = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved = VS::Battle::Ai::LiveFrameContext();
   decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
-  u_short heights[kAiFrameGridSide][kAiFrameGridSide]{};
-  u_short flags[kAiFrameGridSide][kAiFrameGridSide]{};
+  u_short heights[VS::Battle::Ai::kNavigationGridSide]
+                 [VS::Battle::Ai::kNavigationGridSide]{};
+  u_short flags[VS::Battle::Ai::kNavigationGridSide]
+               [VS::Battle::Ai::kNavigationGridSide]{};
 
   TerrainFixture() {
-    auto* frame = Battle_Ai_FrameState();
+    auto* frame = &VS::Battle::Ai::LiveFrameContext();
     frame->heightMap = heights;
     frame->tileFlags = flags;
     const std::array<u_char, 8> directions{0x30, 0x33, 0x03, 0x13,
@@ -36,7 +38,7 @@ struct TerrainFixture {
   }
 
   ~TerrainFixture() {
-    *Battle_Ai_FrameState() = saved;
+    VS::Battle::Ai::LiveFrameContext() = saved;
     Battle_Ai_tileFlagMap = saved_flags;
   }
 };
@@ -98,7 +100,7 @@ TEST_CASE("Original terrain occlusion detects every one of sixteen samples",
       GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
   TerrainFixture fixture;
   for (auto& row : fixture.heights) {
-    std::fill_n(row, kAiFrameGridSide, 1023);
+    std::fill_n(row, VS::Battle::Ai::kNavigationGridSide, 1023);
   }
   SVECTOR from{64, -128, 64, 0};
   SVECTOR to{2112, -128, 64, 0};
@@ -147,7 +149,7 @@ TEST_CASE("Terrain ray preserves the original zero-ground flag semantics",
           "[ai][terrain][occlusion]") {
   TerrainFixture fixture;
   for (auto& row : fixture.heights) {
-    std::fill_n(row, kAiFrameGridSide, 1023);
+    std::fill_n(row, VS::Battle::Ai::kNavigationGridSide, 1023);
   }
   SVECTOR from{64, -128, 64, 0};
   SVECTOR to{576, -128, 64, 0};
@@ -166,7 +168,7 @@ TEST_CASE(
     "[ai][terrain][occlusion]") {
   TerrainFixture fixture;
   for (auto& row : fixture.heights) {
-    std::fill_n(row, kAiFrameGridSide, 1023);
+    std::fill_n(row, VS::Battle::Ai::kNavigationGridSide, 1023);
   }
   fixture.heights[0][1] = 1022;
   SVECTOR from{256, -128, 64, 0};
@@ -213,7 +215,7 @@ TEST_CASE(
   CHECK_FALSE(VS::Field::TryGroundHeightAtTile(Grid(), -1, 9).has_value());
   CHECK_FALSE(VS::Field::TryGroundHeightAtTile(Grid(), 32, 9).has_value());
 
-  Battle_Ai_FrameState()->heightMap = nullptr;
+  VS::Battle::Ai::LiveFrameContext().heightMap = nullptr;
   CHECK(Grid().Empty());
   CHECK_FALSE(VS::Field::TryGroundHeightAtTile(Grid(), 17, 9).has_value());
 }
@@ -263,8 +265,7 @@ TEST_CASE("Terrain API takes decoded values instead of register words",
 
 TEST_CASE("Promoted terrain queries have no original module addresses",
           "[ai][terrain][promotion]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   // BATTLE.PRG only reached these through direct jal instructions, so the
   // promoted API is called by name and no address resolves to it.
   for (const unsigned address :
@@ -279,13 +280,13 @@ TEST_CASE("Promoted terrain queries have no original module addresses",
 TEST_CASE("Terrain lookup preserves full grid row stride and final cell bounds",
           "[ai][terrain]") {
   TerrainFixture fixture;
-  for (int z = 0; z < kAiFrameGridSide; ++z) {
-    for (int x = 0; x < kAiFrameGridSide; ++x) {
+  for (int z = 0; z < VS::Battle::Ai::kNavigationGridSide; ++z) {
+    for (int x = 0; x < VS::Battle::Ai::kNavigationGridSide; ++x) {
       fixture.heights[z][x] = static_cast<u_short>(z * 109 + x * 53);
     }
   }
-  for (int z = 0; z < kAiFrameGridSide; ++z) {
-    for (int x = 0; x < kAiFrameGridSide; ++x) {
+  for (int z = 0; z < VS::Battle::Ai::kNavigationGridSide; ++z) {
+    for (int x = 0; x < VS::Battle::Ai::kNavigationGridSide; ++x) {
       const auto [raw, ground] = ReferenceHeights(fixture.heights[z][x]);
       CHECK(VS::Field::GroundHeightFlagsAtTile(Grid(), x, z) == raw);
       CHECK(VS::Field::GroundHeightAtWorldPosition(Grid(), x * 128 + 127,
@@ -300,8 +301,8 @@ TEST_CASE(
   TerrainFixture fixture;
   VS::Battle::Ai::ReserveLiveAiDestinationTile(13, 7);
   VS::Battle::Ai::ReserveLiveAiDestinationTile(13, 7);
-  for (int z = 0; z < kAiFrameGridSide; ++z) {
-    for (int x = 0; x < kAiFrameGridSide; ++x) {
+  for (int z = 0; z < VS::Battle::Ai::kNavigationGridSide; ++z) {
+    for (int x = 0; x < VS::Battle::Ai::kNavigationGridSide; ++x) {
       CHECK(fixture.flags[z][x] == (x == 13 && z == 7 ? 0x80 : 0));
     }
   }

@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Render/Display.h"
@@ -32,8 +32,8 @@ struct TextTransitionFixture {
       std::to_array(Render_kGlyphPixelExpansion);
   VS::Render::FontStyle font_style = VS::Render::LiveFontStyle();
   int frame_buffer = Render_frameBuf;
-  decltype(Input_buttonsPressed.allButtons) buttons =
-      Input_buttonsPressed.allButtons;
+  decltype(VS::Input::buttonsPressed.allButtons) buttons =
+      VS::Input::buttonsPressed.allButtons;
   RECT target{32, 32, kWidth, kHeight};
   RECT atlas{832, 108, 63, 12};
   std::vector<u_short> saved_target =
@@ -57,7 +57,7 @@ struct TextTransitionFixture {
     std::vector<u_short> pixels(std::size_t{kWidth} * kHeight, kBackground);
     LoadImage(&target, reinterpret_cast<u_long*>(pixels.data()));
     Render_frameBuf = 0;
-    Input_buttonsPressed.allButtons = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
     box.x = box.xIndent = target.x;
     box.y = box.yIndent = target.y;
     box.charsPerLine = 4;
@@ -74,7 +74,7 @@ struct TextTransitionFixture {
               std::begin(Render_kGlyphPixelExpansion));
     VS::Render::LiveFontStyle() = font_style;
     Render_frameBuf = frame_buffer;
-    Input_buttonsPressed.allButtons = buttons;
+    VS::Input::buttonsPressed.allButtons = buttons;
   }
 
   void Glyph(unsigned code, u_short index) {

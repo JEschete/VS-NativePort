@@ -5,7 +5,7 @@
 #include <iterator>
 
 #include "Core/Diagnostics.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"

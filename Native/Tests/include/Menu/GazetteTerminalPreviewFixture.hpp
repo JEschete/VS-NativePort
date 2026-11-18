@@ -21,8 +21,8 @@
 #include "Actors/Textures.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
@@ -32,7 +32,7 @@
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "ModelLoading.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 #include "Render/Textures.h"
 
 namespace gazette_terminal_live_tests {
@@ -77,7 +77,7 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Actors::skeletonRootMatrix),
                     BytesOf(VS::Actors::boneMatrixScratch),
                     BytesOf(VS::Actors::modelRenderContext),
-                    BytesOf(*Render_ModelWorkspace()),
+                    BytesOf(*VS::Render::ModelWorkspace()),
                     BytesOf(Content_legacyActorAssetRequests),
                     BytesOf(Content_legacyModelLoadPhase),
                     BytesOf(Content_legacySequenceParsePhase),
@@ -131,8 +131,7 @@ class PreviewFixture : public TerminalFixture {
       throw std::runtime_error("terminal preview fixture requires idle actors");
     }
     for (const auto owner : PreviewOwners()) saved_.Keep(owner);
-    const auto pointers =
-        std::span(Content_modulePointers, Content_modulePointerCount);
+    const auto pointers = VS::Content::ModulePointerTables();
     const auto commands = std::ranges::find_if(pointers, [](const auto& entry) {
       return static_cast<void*>(entry.target) ==
              static_cast<void*>(Audio_Mixer_kCommandHandlers);
@@ -143,9 +142,8 @@ class PreviewFixture : public TerminalFixture {
         commands->capacity != std::size(Audio_Mixer_kCommandHandlers) ||
         commands->module == nullptr ||
         std::string_view(commands->module) != "SLUS_010.40" ||
-        !content::RelocateModulePointerTable(
-            *commands, executable,
-            std::span(Content_moduleSymbols, Content_moduleSymbolCount))) {
+        !content::RelocateModulePointerTable(*commands, executable,
+                                             VS::Content::ModuleSymbols())) {
       throw std::runtime_error("terminal native sound command import failed");
     }
     ImportTable(Actors_textureSlotOrigins);

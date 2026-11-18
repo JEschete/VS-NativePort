@@ -14,7 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -1290,8 +1290,7 @@ namespace {
 template <class Function>
 Function Plg074Entry(unsigned address, Function expected) {
   auto* actual = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "EFFECT/PLG074.BIN",
-      address);
+      VS::Content::ModuleSymbols(), "EFFECT/PLG074.BIN", address);
   REQUIRE(actual == reinterpret_cast<void*>(expected));
   return reinterpret_cast<Function>(actual);
 }
@@ -1299,7 +1298,7 @@ Function Plg074Entry(unsigned address, Function expected) {
 struct Plg074Fixture : EmissionFixture {
   int saved_sample = Effects_curveSamples[0];
   int saved_corner = Effects_Plg073_trailEmissionCounter;
-  int saved_plg074_corner = Content_plg074TrailEmissionCounter[0];
+  int saved_plg074_corner = VS::Content::plg074TrailEmissionCounter[0];
   Effects_ActionEffectRequest saved_request = Effects_actionRequest;
   std::array<CVECTOR, 8> saved_colors{};
   std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
@@ -1312,7 +1311,7 @@ struct Plg074Fixture : EmissionFixture {
     package.block2Count = 1;
     Effects_curveSamples[0] = 0;
     Effects_Plg073_trailEmissionCounter = 0;
-    Content_plg074TrailEmissionCounter[0] = 0;
+    VS::Content::plg074TrailEmissionCounter[0] = 0;
     Effects_actionRequest.position = {400, -500, 600, 0};
     std::ranges::copy(Effects_Plg073_tiledRingColorFactors,
                       saved_colors.begin());
@@ -1339,7 +1338,7 @@ struct Plg074Fixture : EmissionFixture {
     VS::Effects::ForgetLivePackageExtents();
     Effects_curveSamples[0] = saved_sample;
     Effects_Plg073_trailEmissionCounter = saved_corner;
-    Content_plg074TrailEmissionCounter[0] = saved_plg074_corner;
+    VS::Content::plg074TrailEmissionCounter[0] = saved_plg074_corner;
     Effects_actionRequest = saved_request;
     std::ranges::copy(saved_colors, Effects_Plg073_tiledRingColorFactors);
     std::memcpy(Effects_Plg073_ringColorFactors, saved_arc_colors.data(),
@@ -1526,7 +1525,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
       CHECK(point.vy == offsets[anchor][1] + (corner & 2 ? 20 : -20));
       CHECK(point.vz == offsets[anchor][2] + (corner & 4 ? 30 : -30));
     }
-    CHECK(Content_plg074TrailEmissionCounter[0] == 0);
+    CHECK(VS::Content::plg074TrailEmissionCounter[0] == 0);
     CHECK(Effects_Plg073_trailEmissionCounter == 5);
     CHECK(fixture.trails[8].splinePoints[0].vx == 0);
   }
@@ -1602,7 +1601,7 @@ void CheckPlg074EmitterTick(const Effects_TrailQuadSet& state, int count,
                             int cycle) {
   CHECK(state.opaque3 == 1);
   CHECK(state.curveSampleDistance == 1);
-  CHECK(Content_plg074TrailEmissionCounter[0] ==
+  CHECK(VS::Content::plg074TrailEmissionCounter[0] ==
         ((cycle + 1) * std::min(count, 16)) % 8);
   CHECK(Effects_Plg073_trailEmissionCounter == 0);
 }
@@ -1769,9 +1768,9 @@ TEST_CASE("PLG074 promoted trail functions no longer resolve as module code",
   for (const unsigned address :
        {0x800FB414u, 0x800FBBB0u, 0x800FBDC8u, 0x800FC28Cu, 0x800FC404u,
         0x800FC590u, 0x800FCFECu}) {
-    CHECK(VS::Content::ResolveModuleAddress(
-              {Content_moduleSymbols, Content_moduleSymbolCount},
-              "EFFECT/PLG074.BIN", address) == nullptr);
+    CHECK(VS::Content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                            "EFFECT/PLG074.BIN",
+                                            address) == nullptr);
   }
 }
 

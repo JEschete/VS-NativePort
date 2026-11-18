@@ -49,7 +49,7 @@
 #include "Effects/ScreenEffects.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
@@ -746,20 +746,16 @@ class LiveHost final : public Host {
     }
   }
 
-  Buttons Input() override {
-    return {.pressed = Input_buttonsPressed.allButtons,
-            .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-            .held = static_cast<std::uint32_t>(Input_buttonsState)};
-  }
+  Buttons Input() override { return LiveButtons(); }
 
   Settings MenuSettings() override {
-    return {.cursor_memory = Byte(Input_settings.cursorMemory),
-            .information = Byte(Input_settings.information),
-            .menu_flags = Input_settings.menuFlags};
+    return {.cursor_memory = Byte(VS::Input::settings.cursorMemory),
+            .information = Byte(VS::Input::settings.information),
+            .menu_flags = VS::Input::settings.menuFlags};
   }
 
   void SetMenuFlags(std::uint32_t flags) override {
-    Input_settings.menuFlags = static_cast<std::uint16_t>(flags);
+    VS::Input::settings.menuFlags = static_cast<std::uint16_t>(flags);
   }
 
   void PlaySound(MenuSound sound) override {
@@ -1309,6 +1305,12 @@ MenuRow& SetLiveMenuItemText(const RowPlacement& placement,
 MenuRow& LiveMenuRow(int row) {
   LiveCall call;
   return MenuItem(call.Ctx(), row);
+}
+
+Buttons LiveButtons() {
+  return {.pressed = VS::Input::buttonsPressed.allButtons,
+          .repeat = static_cast<std::uint32_t>(VS::Input::buttonRepeat),
+          .held = static_cast<std::uint32_t>(VS::Input::buttonsState)};
 }
 
 int LiveGradientStopColor(u_int gradient, u_int color_index, int brightness) {

@@ -16,7 +16,7 @@
 
 #include "Battle/StatusEffects.h"
 #include "Core/Log.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
@@ -163,10 +163,10 @@ class LiveGazetteMenu final : public GazetteMenuHost {
         VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuCursorRow]);
   }
   std::uint8_t CursorMemorySetting() override {
-    return static_cast<std::uint8_t>(Input_settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
   }
   void SetCursorMemorySetting(std::uint8_t setting) override {
-    Input_settings.cursorMemory = static_cast<char>(setting);
+    VS::Input::settings.cursorMemory = static_cast<char>(setting);
   }
   void ShowRows(std::int32_t row_info,
                 std::span<const std::int32_t> row_types) override {

@@ -9,7 +9,7 @@
 
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetingState.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -112,8 +112,7 @@ TEST_CASE("Checked target previews keep the bound storage",
 
 TEST_CASE("The promoted target binding has no original module address",
           "[combat][targeting][pages]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800C1664u) == nullptr);
 }

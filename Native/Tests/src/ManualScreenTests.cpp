@@ -28,7 +28,7 @@
 #include "DiscQueue.h"
 #include "Field/Manual.h"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -911,9 +911,9 @@ struct LiveManualFixture {
   int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
   int saved_fade_step = VS::Menu::Framework::backgroundFadeStep;
   int saved_selected = VS::Menu::Framework::selectedRow;
-  u_int saved_pressed = Input_buttonsPressed.allButtons;
-  int saved_previous = Input_previousButtons;
-  int saved_repeat = Input_buttonRepeat;
+  u_int saved_pressed = VS::Input::buttonsPressed.allButtons;
+  int saved_previous = VS::Input::previousButtons;
+  int saved_repeat = VS::Input::buttonRepeat;
   int saved_step = Menu_Manual_showMenuState;
   int saved_scroll = Menu_Manual_scrollPosition;
   int saved_line_count = Menu_Manual_lineCount;
@@ -923,7 +923,7 @@ struct LiveManualFixture {
   int saved_topic_row = Menu_Manual_selectedRow;
   int saved_frame_index = Render_frameBuf;
   ScreenState saved_screen = manual::LiveManualScreenState();
-  State_Settings saved_settings = Input_settings;
+  State_Settings saved_settings = VS::Input::settings;
   DRAWENV saved_back_env = Render_legacyDrawEnvironments[1];
   Content_DiscRequestCounts saved_request_counts = Content_discRequestCounts;
   Field_ManualDisplayState saved_display = Field_manualDisplayState;
@@ -937,9 +937,9 @@ struct LiveManualFixture {
     std::ranges::fill(Content_discRequestSlots, Content_DiscQueueSlot{});
     Content_discRequestCounts = Content_DiscRequestCounts{};
     VS::Menu::Framework::menuItems = rows.data();
-    Input_buttonsPressed.allButtons = 0;
-    Input_previousButtons = 0;
-    Input_buttonRepeat = 0;
+    VS::Input::buttonsPressed.allButtons = 0;
+    VS::Input::previousButtons = 0;
+    VS::Input::buttonRepeat = 0;
     Menu_Manual_showMenuState = manual::kHelpStart;
     Menu_Manual_scrollPosition = 0;
     Menu_Manual_lineCount = 0;
@@ -977,10 +977,10 @@ struct LiveManualFixture {
     VS::Menu::Framework::menuMemory = saved_memory;
     VS::Menu::Framework::menuItems = saved_rows;
     VS::Menu::Framework::selectedRow = saved_selected;
-    Input_settings = saved_settings;
-    Input_buttonsPressed.allButtons = saved_pressed;
-    Input_previousButtons = saved_previous;
-    Input_buttonRepeat = saved_repeat;
+    VS::Input::settings = saved_settings;
+    VS::Input::buttonsPressed.allButtons = saved_pressed;
+    VS::Input::previousButtons = saved_previous;
+    VS::Input::buttonRepeat = saved_repeat;
     Field_manualDisplayState = saved_display;
     Menu_Manual_showMenuState = saved_step;
     Menu_Manual_scrollPosition = saved_scroll;
@@ -1154,7 +1154,7 @@ TEST_CASE("F04161 LiveUpdateScreen fades in and arms the open delay",
 TEST_CASE("F04161 LiveUpdateScreen initializes the help and hides the HUD",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Input_settings.cursorMemory = 1;
+  VS::Input::settings.cursorMemory = 1;
   Menu_Manual_showMenuState = 5;
   Battle_hudHidden = 0;
   VS::Field::isFieldRenderingEnabled = 1;
@@ -1209,7 +1209,7 @@ TEST_CASE("F04161 LiveUpdateScreen waits for the fade to reach the game menu",
 TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Input_settings.cursorMemory = 0;
+  VS::Input::settings.cursorMemory = 0;
   Field_manualDisplayState.currentManual = 3;
   Field_manualDisplayState.scrollPositions[3] = 20;
   std::array<int, 2> text{};
@@ -1241,7 +1241,7 @@ TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
 TEST_CASE("F04162 LiveInitHelpState keeps the display state with memory on",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Input_settings.cursorMemory = 1;
+  VS::Input::settings.cursorMemory = 1;
   Field_manualDisplayState.currentManual = 3;
   Field_manualDisplayState.scrollPositions[3] = 20;
   CHECK(manual::LiveInitHelpState() == 1);
@@ -1332,7 +1332,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages draws a page into the frame",
   Menu_Manual_lineCount = 20;
   Menu_Manual_pageArrowAnimState = 15;
   Field_manualDisplayState.currentManual = 2;
-  Input_buttonRepeat = static_cast<int>(manual::kButtonDown);
+  VS::Input::buttonRepeat = static_cast<int>(manual::kButtonDown);
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(Menu_Manual_scrollPosition == 11);
@@ -1364,7 +1364,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages leaves the page and frees its text",
   int* const text = Menu_Manual_helpText;
   Menu_Manual_showMenuState = manual::kHelpShowPage;
   Menu_Manual_helpPageLoadCounter = 3;
-  Input_buttonsPressed.allButtons = manual::kButtonCircle;
+  VS::Input::buttonsPressed.allButtons = manual::kButtonCircle;
   VS::Menu::LiveTextBox(manual::kPageTextBox)->state = 3;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(Menu_Manual_showMenuState == manual::kHelpListTopics);

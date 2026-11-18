@@ -21,11 +21,11 @@
 #include "Battle/Damage.h"
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Trace.hpp"
-#include "Content/DataAccess.h"
+#include "Content/DataAccess.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
@@ -39,7 +39,7 @@
 
 namespace {
 struct ProfileFixture {
-  decltype(Input_settings) saved_settings = Input_settings;
+  decltype(VS::Input::settings) saved_settings = VS::Input::settings;
   decltype(Audio_Seq_unusedStateFlags) saved_flags = Audio_Seq_unusedStateFlags;
   decltype(Audio_Seq_unusedArtsStatus) saved_arts = Audio_Seq_unusedArtsStatus;
   decltype(Audio_Seq_unusedInventory) saved_inventory =
@@ -61,8 +61,8 @@ struct ProfileFixture {
   std::array<u_char, 4> spells{97, 54, 60, 84};
 
   ProfileFixture() {
-    Input_settings = {};
-    Input_settings.menuFlags = 0x2D8;
+    VS::Input::settings = {};
+    VS::Input::settings.menuFlags = 0x2D8;
     Audio_Seq_unusedStateFlags.introState = 0;
     Audio_Seq_unusedInventory = {};
     Audio_Seq_unusedInventory.weapons[0].isEquipped = 1;
@@ -79,7 +79,7 @@ struct ProfileFixture {
   }
 
   ~ProfileFixture() {
-    Input_settings = saved_settings;
+    VS::Input::settings = saved_settings;
     Audio_Seq_unusedStateFlags = saved_flags;
     Audio_Seq_unusedArtsStatus = saved_arts;
     Audio_Seq_unusedInventory = saved_inventory;
@@ -194,7 +194,7 @@ TEST_CASE("Prologue Lab profiles preserve normal starting restrictions",
   ProfileFixture fixture;
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPrologue);
-  CHECK(Input_settings.menuFlags == 0x2D8);
+  CHECK(VS::Input::settings.menuFlags == 0x2D8);
   CHECK(Audio_Seq_unusedStateFlags.introState == 0);
   CHECK(std::all_of(std::begin(State_learnedActionFlags),
                     std::end(State_learnedActionFlags),
@@ -206,9 +206,9 @@ TEST_CASE("Post-prologue Lab profiles enable original Setup and Score gates",
   ProfileFixture fixture;
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPostPrologue);
-  CHECK(Input_settings.menuFlags == 0x3F8);
+  CHECK(VS::Input::settings.menuFlags == 0x3F8);
   CHECK(Audio_Seq_unusedStateFlags.introState == 3);
-  CHECK(Input_settings.mappedChainAbilities[0] == 0);
+  CHECK(VS::Input::settings.mappedChainAbilities[0] == 0);
 }
 
 TEST_CASE("Post-Minotaur Lab profiles grant only representative native actions",
@@ -222,8 +222,8 @@ TEST_CASE("Post-Minotaur Lab profiles grant only representative native actions",
   CHECK(Battle_actionDefinitions[97].unlocked == 1);
   CHECK(Battle_actionDefinitions[192].unlocked == 1);
   CHECK(Battle_actionDefinitions[193].unlocked == 0);
-  CHECK(Input_settings.mappedChainAbilities[0] == 22);
-  CHECK(Input_settings.mappedDefenseAbilities[2] == 42);
+  CHECK(VS::Input::settings.mappedChainAbilities[0] == 22);
+  CHECK(VS::Input::settings.mappedDefenseAbilities[2] == 42);
 }
 
 TEST_CASE("Encounter presets persist Ashley profiles and accept older presets",
@@ -272,9 +272,9 @@ TEST_CASE("All-spells profile preserves inventory equipment and resources",
   CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
                     sizeof indices) == 0);
   CHECK(std::memcmp(&stats, &actor.stats, sizeof stats) == 0);
-  CHECK(Input_settings.mappedChainAbilities[0] == 0);
-  CHECK(Input_settings.mappedDefenseAbilities[0] == 0);
-  CHECK(Input_settings.menuFlags == 0x3F8);
+  CHECK(VS::Input::settings.mappedChainAbilities[0] == 0);
+  CHECK(VS::Input::settings.mappedDefenseAbilities[0] == 0);
+  CHECK(VS::Input::settings.menuFlags == 0x3F8);
   CHECK(Audio_Seq_unusedStateFlags.introState == 3);
 }
 
@@ -319,9 +319,9 @@ TEST_CASE("All-abilities profile grants the original 28 abilities only",
           expected.contains(action));
   }
   for (unsigned slot = 0; slot < 3; ++slot) {
-    CHECK(Input_settings.mappedChainAbilities[slot] ==
+    CHECK(VS::Input::settings.mappedChainAbilities[slot] ==
           Battle_chainAbilityActionIds[slot]);
-    CHECK(Input_settings.mappedDefenseAbilities[slot] ==
+    CHECK(VS::Input::settings.mappedDefenseAbilities[slot] ==
           Battle_defenseAbilityActionIds[slot]);
   }
 }
@@ -355,7 +355,7 @@ TEST_CASE("Ability profiles preserve resources and story progression",
   CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
                     sizeof indices) == 0);
   CHECK(std::memcmp(&stats, &actor.stats, sizeof stats) == 0);
-  CHECK(Input_settings.menuFlags == 0x3F8);
+  CHECK(VS::Input::settings.menuFlags == 0x3F8);
 }
 
 TEST_CASE("All-abilities profile supports repeat entry and saved presets",
@@ -421,14 +421,15 @@ TEST_CASE("All-Break-Arts profile preserves existing ability mappings",
           "[combat][profile][break-arts]") {
   ProfileFixture fixture;
   BindBreakArts();
-  Input_settings.mappedChainAbilities[0] = 22;
-  Input_settings.mappedDefenseAbilities[0] = 40;
-  const auto chain = std::to_array(Input_settings.mappedChainAbilities);
-  const auto defense = std::to_array(Input_settings.mappedDefenseAbilities);
+  VS::Input::settings.mappedChainAbilities[0] = 22;
+  VS::Input::settings.mappedDefenseAbilities[0] = 40;
+  const auto chain = std::to_array(VS::Input::settings.mappedChainAbilities);
+  const auto defense =
+      std::to_array(VS::Input::settings.mappedDefenseAbilities);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllBreakArts);
-  CHECK(std::to_array(Input_settings.mappedChainAbilities) == chain);
-  CHECK(std::to_array(Input_settings.mappedDefenseAbilities) == defense);
+  CHECK(std::to_array(VS::Input::settings.mappedChainAbilities) == chain);
+  CHECK(std::to_array(VS::Input::settings.mappedDefenseAbilities) == defense);
 }
 
 TEST_CASE(
@@ -445,7 +446,7 @@ TEST_CASE(
     CHECK(std::memcmp(&equipment, &Audio_Seq_unusedInventory,
                       offsetof(Items_Inventory, misc)) == 0);
     CHECK(std::to_array(State_learnedActionFlags) == learned);
-    CHECK(Input_settings.menuFlags == 0x3F8);
+    CHECK(VS::Input::settings.menuFlags == 0x3F8);
     CHECK(Audio_Seq_unusedStateFlags.introState == 3);
     CAPTURE(profile);
     CheckStockedSlots(supplied);
@@ -700,7 +701,7 @@ void OpenWeaponSourceData() {
     const auto root = dir / "Native" / "data";
     if (std::filesystem::exists(root / VS::Content::DataStore::ManifestName)) {
       REQUIRE(VS::Content::DataStore::Open(root));
-      REQUIRE(Content_LoadModuleData() == 0);
+      REQUIRE(VS::Content::LoadModuleData() == 0);
       return;
     }
   }

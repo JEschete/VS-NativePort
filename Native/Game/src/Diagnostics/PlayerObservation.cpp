@@ -42,7 +42,7 @@
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/Loot.h"
 #include "Items/LootLive.hpp"
 #include "Items/TreasureChests.h"
@@ -308,7 +308,7 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
       VS::Menu::Framework::menuMemory.cursorMemories[kRankCountMemory]);
   if (result.selected_menu == 0) {
     for (int index = 0; index < kMainMenuEntries; ++index) {
-      if ((Input_settings.menuFlags & (1u << index)) == 0) continue;
+      if ((VS::Input::settings.menuFlags & (1u << index)) == 0) continue;
       const auto& row = VS::Menu::Framework::menuItems[index];
       result.rows.push_back({index, InspectGameText(row.text),
                              row.unselectable != 0, row.selected != 0});
@@ -406,10 +406,10 @@ EncounterReactionTimingState InspectReactionTiming(
   snapshot.tick_speed = VS::State::tickSpeed;
   snapshot.story_timing = VS::State::LiveScriptFlag(1) != 0;
   for (std::size_t slot = 0; slot < snapshot.chain_actions.size(); ++slot) {
-    snapshot.chain_actions[slot] =
-        static_cast<unsigned char>(Input_settings.mappedChainAbilities[slot]);
-    snapshot.defense_actions[slot] =
-        static_cast<unsigned char>(Input_settings.mappedDefenseAbilities[slot]);
+    snapshot.chain_actions[slot] = static_cast<unsigned char>(
+        VS::Input::settings.mappedChainAbilities[slot]);
+    snapshot.defense_actions[slot] = static_cast<unsigned char>(
+        VS::Input::settings.mappedDefenseAbilities[slot]);
   }
   constexpr unsigned kAbilityTimingPhase = 7, kQueueIndexMask = 3;
   if (Battle_actionState == nullptr) return snapshot;

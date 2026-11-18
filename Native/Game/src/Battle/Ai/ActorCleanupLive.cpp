@@ -19,7 +19,7 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/Navigation.h"
@@ -35,7 +35,7 @@ namespace {
 static_assert(std::size(Battle_Ai_actorAiStates) == kCleanupActorSlots);
 static_assert(std::size(Battle_actors) >= kCleanupActorSlots);
 static_assert(std::size(Actors_actorRecords) >= kCleanupActorSlots);
-static_assert(std::extent_v<decltype(Battle_Ai_FrameContext::actors)> ==
+static_assert(std::extent_v<decltype(FrameContext::actors)> ==
               kCleanupActorSlots);
 static_assert(
     std::extent_v<std::remove_pointer_t<decltype(Battle_Ai_tileFlagMap)>> ==
@@ -236,7 +236,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
     const auto slot = static_cast<std::size_t>(actor_id);
     Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[slot];
     Battle_Ai_actorAiStates[slot] = nullptr;
-    Battle_Ai_FrameContext* frame = Battle_Ai_FrameState();
+    FrameContext* frame = &LiveFrameContext();
     Require(frame != nullptr, "AI teardown requires the frame state");
     frame->actors[slot] = nullptr;
     if (state != nullptr) VS::Core::Memory::FreeLiveFromLowEnd(state);

@@ -22,15 +22,13 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/BlockedMovementLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
-#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.h"
 #include "Field/Gimmicks.h"
@@ -367,7 +365,7 @@ struct CompletedPlanFixture {
   }
 
   void Reconcile() {
-    Battle_Ai_ReconcileCompletedActionPlanEntry(
+    VS::Battle::Ai::ReconcileCompletedActionPlanEntry(
         reinterpret_cast<Battle_Ai_ReactionRecord*>(&request));
   }
 
@@ -579,7 +577,7 @@ TEST_CASE("Native planning simulation advances an empty actor list",
   PlanningAdvanceFixture fixture;
   Battle_actors[0] = nullptr;
   fixture.room.readinessLevel = 65535;
-  Battle_Ai_AdvancePlanningSimulationEntry(1);
+  VS::Battle::Ai::AdvancePlanningSimulationEntry(1);
   CHECK(fixture.room.readinessLevel == 0);
 }
 
@@ -612,19 +610,20 @@ TEST_CASE("Native planning simulation refreshes each actor by its own slot",
 
 TEST_CASE("Planning simulation retains its original module address",
           "[ai][planning][simulation-advance-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x800DE030) ==
-      reinterpret_cast<const void*>(&Battle_Ai_AdvancePlanningSimulationEntry));
+  const auto symbols = VS::Content::ModuleSymbols();
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DE030) ==
+        reinterpret_cast<const void*>(
+            &VS::Battle::Ai::AdvancePlanningSimulationEntry));
 }
 
 TEST_CASE("Fallback selection retains its original module address",
           "[ai][planning][fallback-selection-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DD604) ==
-        reinterpret_cast<const void*>(&Battle_Ai_SelectFallbackActionEntry));
+        reinterpret_cast<const void*>(
+            &VS::Battle::Ai::SelectFallbackActionEntry));
 }
 
 TEST_CASE(
@@ -729,7 +728,7 @@ TEST_CASE(
           std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(expected));
   }
   fixture.workspace->opaque4A = 0;
-  Battle_Ai_UpdateCandidateHitWeightEntry(&candidate);
+  VS::Battle::Ai::UpdateCandidateHitWeightEntry(&candidate);
   CHECK(candidate.weight == 0);
 }
 
@@ -789,8 +788,8 @@ TEST_CASE(
   std::memcpy(scratch_rows, scratch.data(), scratch.size());
   fixture.state.settingsModeLow = 1;
   Battle_actionDefinitions[42].aiFlags.opaque0Bit4 = 1;
-  Battle_Ai_EvaluateActionCandidateEntry(&fixture.state, &candidate, 3,
-                                         &Battle_actionDefinitions[42]);
+  VS::Battle::Ai::EvaluateActionCandidateEntry(&fixture.state, &candidate, 3,
+                                               &Battle_actionDefinitions[42]);
   CHECK(candidate.opaque0 == 257 * 128 + 40);
   CHECK(candidate.weight == 40);
 }
@@ -839,17 +838,19 @@ TEST_CASE("Native candidate simulation refuses aliased inputs before writes",
 
 TEST_CASE("Candidate planning functions retain all original module addresses",
           "[ai][planning][candidate-evaluation-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DCAA0) ==
-        reinterpret_cast<const void*>(&Battle_Ai_SimulateActionCandidateEntry));
-  CHECK(
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                        0x800DCBD8) ==
-      reinterpret_cast<const void*>(&Battle_Ai_UpdateCandidateHitWeightEntry));
+        reinterpret_cast<const void*>(
+            &VS::Battle::Ai::SimulateActionCandidateEntry));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x800DCBD8) ==
+        reinterpret_cast<const void*>(
+            &VS::Battle::Ai::UpdateCandidateHitWeightEntry));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DCC94) ==
-        reinterpret_cast<const void*>(&Battle_Ai_EvaluateActionCandidateEntry));
+        reinterpret_cast<const void*>(
+            &VS::Battle::Ai::EvaluateActionCandidateEntry));
 }
 
 TEST_CASE(
@@ -859,7 +860,7 @@ TEST_CASE(
   EnumerationFixture fixture;
   const auto kind = GENERATE(1u, 2u, 3u);
   fixture.state.actionSlots[2][1].kind = kind;
-  Battle_Ai_EnumerateActionCandidatesEntry(&fixture.state, -1);
+  VS::Battle::Ai::EnumerateActionCandidatesEntry(&fixture.state, -1);
   REQUIRE(fixture.state.candidateCount == 1);
   const auto& selected = fixture.state.candidates[0];
   CHECK(selected.row == 2);
@@ -880,7 +881,7 @@ TEST_CASE("Native enumeration caches and ranks without its old scratch records",
   const auto* scratch_rows =
       static_cast<const std::byte*>(Core_ScratchBase()) + 0x30C;
   std::memcpy(scratch.data(), scratch_rows, scratch.size());
-  Battle_Ai_EnumerateActionCandidatesEntry(&fixture.state, -1);
+  VS::Battle::Ai::EnumerateActionCandidatesEntry(&fixture.state, -1);
   REQUIRE(fixture.state.candidateCount == 1);
   REQUIRE(Battle_Ai_fallbackCandidateCount == 1);
   const auto& selected = fixture.state.candidates[0];
@@ -895,7 +896,7 @@ TEST_CASE("Native enumeration rereads exclusions on repeated calls",
           "[ai][planning][candidate-enumeration-live]") {
   EnumerationFixture fixture;
   fixture.state.actionSlots[2][1].kind = GENERATE(1u, 2u, 3u);
-  Battle_Ai_EnumerateActionCandidatesEntry(&fixture.state, -1);
+  VS::Battle::Ai::EnumerateActionCandidatesEntry(&fixture.state, -1);
   REQUIRE(fixture.state.candidateCount == 1);
   REQUIRE(Battle_Ai_fallbackCandidateCount == 1);
   REQUIRE_NOTHROW(
@@ -925,10 +926,11 @@ TEST_CASE(
 
 TEST_CASE("Native enumeration retains its original module address",
           "[ai][planning][candidate-enumeration-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800DD918) ==
-        reinterpret_cast<void*>(&Battle_Ai_EnumerateActionCandidatesEntry));
+  const auto symbols = VS::Content::ModuleSymbols();
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800DD918) ==
+      reinterpret_cast<void*>(&VS::Battle::Ai::EnumerateActionCandidatesEntry));
 }
 
 TEST_CASE("Completed action reconciliation ignores an absent performer state",
@@ -946,7 +948,7 @@ TEST_CASE(
     "[ai][planning][completed-plan-live]") {
   CompletedPlanFixture fixture;
   const auto expected = fixture.Bytes();
-  Battle_Ai_ReconcileCompletedActionPlanEntry(nullptr);
+  VS::Battle::Ai::ReconcileCompletedActionPlanEntry(nullptr);
   CHECK(fixture.Bytes() == expected);
   fixture.request.primaryTarget.targetsPosition = 1;
   fixture.Reconcile();
@@ -1017,19 +1019,20 @@ TEST_CASE(
 
 TEST_CASE("Completed action reconciliation retains its original module address",
           "[ai][planning][completed-plan-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DEB10) ==
         reinterpret_cast<const void*>(
-            &Battle_Ai_ReconcileCompletedActionPlanEntry));
+            &VS::Battle::Ai::ReconcileCompletedActionPlanEntry));
 }
 
 TEST_CASE("Native actor plan retains its original module address",
           "[ai][planning][actor-plan-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DE3E4) ==
-        reinterpret_cast<const void*>(&Battle_Ai_BuildActorActionPlanEntry));
+        reinterpret_cast<const void*>(
+            &VS::Battle::Ai::BuildActorActionPlanEntry));
 }
 
 TEST_CASE(
@@ -1089,7 +1092,7 @@ TEST_CASE(
   const auto jitter = Core_Random_Rand() & 7;
   const auto expected_random = Core_Random_State();
   Core_Random_Seed(1);
-  Battle_Ai_BuildActorActionPlanEntry(&fixture.state);
+  VS::Battle::Ai::BuildActorActionPlanEntry(&fixture.state);
   REQUIRE(fixture.state.candidateCount == 1);
   CHECK(fixture.state.candidateOrder[0] == &fixture.state.candidates[0]);
   CHECK(fixture.state.candidates[0].action == 42);
@@ -1210,17 +1213,17 @@ TEST_CASE(
   fixture.workspace->opaque4C[0].opaque0 = 255;
   using RowBytes = std::array<std::byte, sizeof(fixture.rows)>;
   const auto before = std::bit_cast<RowBytes>(fixture.rows);
-  Battle_Ai_ApplySimulatedActionResultsEntry(fixture.rows.data());
+  VS::Battle::Ai::ApplySimulatedActionResultsEntry(fixture.rows.data());
   CHECK((std::bit_cast<RowBytes>(fixture.rows) == before));
 }
 
 TEST_CASE("Simulated results retain their original module address",
           "[ai][planning][simulation-results-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DC888) ==
         reinterpret_cast<const void*>(
-            &Battle_Ai_ApplySimulatedActionResultsEntry));
+            &VS::Battle::Ai::ApplySimulatedActionResultsEntry));
 }
 
 TEST_CASE("Native simulated results refuse short tails and invalid actor slots",
@@ -1324,7 +1327,7 @@ TEST_CASE(
   CHECK((std::bit_cast<StateBytes>(fixture.state) ==
          std::bit_cast<StateBytes>(expected)));
   fixture.room.readinessLevel = 101;
-  CHECK(Battle_Ai_RefreshActionCandidateReadinessEntry(
+  CHECK(VS::Battle::Ai::RefreshActionCandidateReadinessEntry(
             reinterpret_cast<Battle_Ai_CandidateReadinessView*>(
                 &fixture.state)) == 0);
   CHECK(fixture.state.actionStatus == 0);
@@ -1411,11 +1414,11 @@ TEST_CASE("Native candidate readiness empty status checks actual hostile links",
 
 TEST_CASE("Candidate readiness retains its original module address",
           "[ai][planning][candidate-readiness-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800D85D8) ==
         reinterpret_cast<const void*>(
-            &Battle_Ai_RefreshActionCandidateReadinessEntry));
+            &VS::Battle::Ai::RefreshActionCandidateReadinessEntry));
 }
 
 TEST_CASE("Native candidate readiness refuses absent malformed and short state",
@@ -1532,7 +1535,7 @@ TEST_CASE("Blocked movement forgets its target after exhausting detours",
 
 TEST_CASE("AI target forgetting retains its original module address",
           "[ai][planning][target-forget-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(
       VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                         0x800E4CE8) ==
@@ -1624,7 +1627,7 @@ TEST_CASE("AI action metadata only sets the player's threshold",
 
 TEST_CASE("AI action metadata retains its original module address",
           "[ai][planning][action-metadata-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E5710) ==
         reinterpret_cast<const void*>(

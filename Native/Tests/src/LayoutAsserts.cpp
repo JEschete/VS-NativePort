@@ -17,7 +17,6 @@
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -57,10 +56,12 @@ int TestsRoomSfxBankBinding(void) {
   Audio_soundState = (Audio_SoundState){0};
   unsigned char bank = 0;
   unsigned char replacement = 0;
-  int passed = VS::Audio::LiveBindRoomSfxBank((uintptr_t)&bank) == 1 &&
-               Audio_soundState.sfxBankData[2] == &bank;
+  int passed =
+      VS::Audio::LiveBindRoomSfxBank(reinterpret_cast<uintptr_t>(&bank)) == 1 &&
+      Audio_soundState.sfxBankData[2] == &bank;
   passed = passed &&
-           VS::Audio::LiveBindRoomSfxBank((uintptr_t)&replacement) == 0 &&
+           VS::Audio::LiveBindRoomSfxBank(
+               reinterpret_cast<uintptr_t>(&replacement)) == 0 &&
            Audio_soundState.sfxBankData[2] == &bank &&
            Audio_soundState.sfxBankData[0] == nullptr &&
            Audio_soundState.sfxBankData[1] == nullptr;
@@ -335,7 +336,8 @@ int Tests_TargetSphereViews(void) {
 }
 
 int Tests_AiFrameStages(void) {
-  const Battle_Ai_FrameContext savedFrame = *Battle_Ai_FrameState();
+  const VS::Battle::Ai::FrameContext savedFrame =
+      VS::Battle::Ai::LiveFrameContext();
   Battle_Actor* savedActor = Battle_actors[0];
   Battle_Ai_ActorAiState* savedState = Battle_Ai_actorAiStates[0];
   Battle_Ai_RoomAiState* savedRoom = Battle_Ai_roomAiState;
@@ -376,7 +378,7 @@ int Tests_AiFrameStages(void) {
            Battle_Ai_secondPerceptionTarget == 0 &&
            Battle_Ai_savedMovementRandomState == 0x12345678 &&
            view->opaque14 == 1;
-  *Battle_Ai_FrameState() = savedFrame;
+  VS::Battle::Ai::LiveFrameContext() = savedFrame;
   Battle_actors[0] = savedActor;
   Battle_Ai_actorAiStates[0] = savedState;
   Battle_Ai_roomAiState = savedRoom;
@@ -389,7 +391,8 @@ int Tests_AiFrameStages(void) {
 
 int Tests_AiFrameCache(void) {
   enum { kScratchSentinel = 0xA5 };
-  const Battle_Ai_FrameContext savedFrame = *Battle_Ai_FrameState();
+  const VS::Battle::Ai::FrameContext savedFrame =
+      VS::Battle::Ai::LiveFrameContext();
   Battle_Ai_ActorAiState* savedActors[16];
   memcpy(savedActors, Battle_Ai_actorAiStates, sizeof savedActors);
   Battle_Ai_RoomAiState* savedRoom = Battle_Ai_roomAiState;
@@ -420,7 +423,8 @@ int Tests_AiFrameCache(void) {
   Field_roomData.header.section6Length = sizeof auxiliary;
   Battle_Ai_savedMovementRandomState = 0x12345678;
   const int returned = VS::Battle::Ai::CacheLiveActorAiWorkingState();
-  const Battle_Ai_FrameContext* frame = Battle_Ai_FrameState();
+  const VS::Battle::Ai::FrameContext* frame =
+      &VS::Battle::Ai::LiveFrameContext();
   int passed = returned == static_cast<int>(bounds) &&
                frame->actors[15] == &actor && frame->actors[0] == nullptr &&
                frame->room == &room && frame->tileFlags == flags &&
@@ -433,7 +437,7 @@ int Tests_AiFrameCache(void) {
   for (unsigned index = 0; index < sizeof savedScratch; ++index) {
     passed = passed && scratch[index] == kScratchSentinel;
   }
-  *Battle_Ai_FrameState() = savedFrame;
+  VS::Battle::Ai::LiveFrameContext() = savedFrame;
   memcpy(Battle_Ai_actorAiStates, savedActors, sizeof savedActors);
   Battle_Ai_roomAiState = savedRoom;
   Battle_Ai_tileFlagMap = savedFlags;
@@ -453,17 +457,17 @@ int Tests_DefaultEffectPackageLoaded(void) {
   }
   Effects_EffectPackage package = {0};
   Effects_EffectPackage* saved = Effects_package;
-  const uintptr_t base = (uintptr_t)Effects_emptyPackage;
+  const uintptr_t base = reinterpret_cast<uintptr_t>(Effects_emptyPackage);
   Effects_package = &package;
   VS::Effects::LiveBindEffectPackageBlocks(Effects_emptyPackage);
   const int passed =
       package.block1TableCount == 1 && package.block2Count == 19 &&
       package.block3Data->count == 49 && package.curveBlock->count == 32 &&
       package.block5Data->reserved0 == 46 &&
-      (uintptr_t)package.block8Data == base + 0x4B44 &&
-      (uintptr_t)package.block9Data == base + 0x5078 &&
-      (uintptr_t)package.block10Data == base + 0x50A0 &&
-      (uintptr_t)package.block11Data == base + 0x51BC;
+      reinterpret_cast<uintptr_t>(package.block8Data) == base + 0x4B44 &&
+      reinterpret_cast<uintptr_t>(package.block9Data) == base + 0x5078 &&
+      reinterpret_cast<uintptr_t>(package.block10Data) == base + 0x50A0 &&
+      reinterpret_cast<uintptr_t>(package.block11Data) == base + 0x51BC;
   Effects_package = saved;
   return passed;
 }
@@ -584,7 +588,7 @@ int Tests_AiViewsRoundTrip(void) {
     return 0;
   }
   for (i = 0; i < sizeof guarded.state; ++i) {
-    if (((unsigned char*)&guarded.state)[i] != 0) return 0;
+    if (reinterpret_cast<unsigned char*>(&guarded.state)[i] != 0) return 0;
   }
   actor.id = 2;
   actor.kind = 5;

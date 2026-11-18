@@ -555,7 +555,7 @@ void GenerateLivePlg074TrailOrigins(
     Effects_TrailQuadSet& state) {
   GenerateLiveTrailOrigins(
       definition, scratch, instance, state,
-      {"PLG074", &Content_plg074TrailEmissionCounter[0], &Plg074Stages()});
+      {"PLG074", &VS::Content::plg074TrailEmissionCounter[0], &Plg074Stages()});
 }
 
 // decomp: PLG074 func_800FCFEC (src/EFFECT/trails5.h:677).
@@ -563,6 +563,6 @@ int UpdateLivePlg074TrailEmitter(Effects_RendererSlot* slot,
                                  unsigned int command, int packed) {
   return UpdateLiveTrailEmitter(
       slot, command, packed,
-      {"PLG074", &Content_plg074TrailEmissionCounter[0], &Plg074Stages()});
+      {"PLG074", &VS::Content::plg074TrailEmissionCounter[0], &Plg074Stages()});
 }
 }  // namespace VS::Effects

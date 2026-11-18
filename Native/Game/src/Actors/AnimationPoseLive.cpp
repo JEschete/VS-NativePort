@@ -43,7 +43,7 @@
 #include "Field/Gimmicks.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelGeometryLive.hpp"
-#include "Render/ModelWorkspace.h"
+#include "Render/ModelWorkspace.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -663,7 +663,7 @@ class LiveMotionLookHost final : public MotionLookHost {
 };
 
 void UpdateLiveMotion(Actors_ActorRecord& actor, bool skip_tweens) {
-  Render_ModelScratchpad* workspace = Render_ModelWorkspace();
+  Render_ModelScratchpad* workspace = VS::Render::ModelWorkspace();
   if (workspace == nullptr) {
     VS::Core::Errorf(kChannel, "Motion update has no model workspace");
     return;

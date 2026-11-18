@@ -217,9 +217,8 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/PlanningPrimitivesLive.h"
 #include "Battle/AttackPrerequisiteTable.h"
-#include "Battle/AttackPrerequisites.h"
+#include "Battle/AttackPrerequisitesLive.hpp"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -354,12 +353,11 @@
 #include "Title/TitleMenuLiveState.hpp"
 
 // Pointer tables in the module images and the symbol map that relocates them (splat_symbols.csv).
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
+#include "Effects/TrailEmitterLive.hpp"
 
-extern int Content_plg074TrailEmissionCounter[1];
 extern unsigned int Content_battleShadowVertices[18];
 extern unsigned int Content_battleShadowFaces[24];
-extern unsigned int Content_battleAiHesitationLengths[1];
 extern unsigned int Content_battleMainMenuHelpText[80];
 extern unsigned int Content_battleLimbNameBytes[38];
 extern unsigned int Content_battleGimmickTemplateBytes[455];
@@ -368,9 +366,9 @@ extern unsigned int Content_battleTriggerMarkerBytes[29];
 extern unsigned int Content_battleSkyDome[166];
 extern short Content_residentLfoSamples[167936];
 
-static const Content_ModuleSymbol Content_residentLfoSamplesSource = {"SLUS_010.40", 0x80010000u, 335872u, (void*)Content_residentLfoSamples, sizeof Content_residentLfoSamples, 2u, 2u};
+static const VS::Content::ModuleSymbol Content_residentLfoSamplesSource = {"SLUS_010.40", 0x80010000u, 335872u, (void*)Content_residentLfoSamples, sizeof Content_residentLfoSamples, 2u, 2u};
 
-const Content_ModuleSymbol Content_moduleSymbols[] = {
+const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80068BECu, 14u, (void*)&Field_kPlatformBounceOffsets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80068F04u, 96u, (void*)&Battle_kMarkerFrameCorners, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80068F64u, 48u, (void*)&Battle_kMarkerFrameTexCoords, 0u, 0u, 0u},
@@ -1054,16 +1052,16 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&VS::Field::UpdateGimmickMotionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDD8u, 0u, (void*)&VS::Field::DisableTrapAtPositionEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A4FCu, 0u, (void*)&VS::Field::CurrentSavePointIdEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D85D8u, 0u, (void*)&Battle_Ai_RefreshActionCandidateReadinessEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DC888u, 0u, (void*)&Battle_Ai_ApplySimulatedActionResultsEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DCAA0u, 0u, (void*)&Battle_Ai_SimulateActionCandidateEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DCBD8u, 0u, (void*)&Battle_Ai_UpdateCandidateHitWeightEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DCC94u, 0u, (void*)&Battle_Ai_EvaluateActionCandidateEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DD604u, 0u, (void*)&Battle_Ai_SelectFallbackActionEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DD918u, 0u, (void*)&Battle_Ai_EnumerateActionCandidatesEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DE030u, 0u, (void*)&Battle_Ai_AdvancePlanningSimulationEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DE3E4u, 0u, (void*)&Battle_Ai_BuildActorActionPlanEntry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DEB10u, 0u, (void*)&Battle_Ai_ReconcileCompletedActionPlanEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D85D8u, 0u, (void*)&VS::Battle::Ai::RefreshActionCandidateReadinessEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DC888u, 0u, (void*)&VS::Battle::Ai::ApplySimulatedActionResultsEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DCAA0u, 0u, (void*)&VS::Battle::Ai::SimulateActionCandidateEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DCBD8u, 0u, (void*)&VS::Battle::Ai::UpdateCandidateHitWeightEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DCC94u, 0u, (void*)&VS::Battle::Ai::EvaluateActionCandidateEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DD604u, 0u, (void*)&VS::Battle::Ai::SelectFallbackActionEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DD918u, 0u, (void*)&VS::Battle::Ai::EnumerateActionCandidatesEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DE030u, 0u, (void*)&VS::Battle::Ai::AdvancePlanningSimulationEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DE3E4u, 0u, (void*)&VS::Battle::Ai::BuildActorActionPlanEntry, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DEB10u, 0u, (void*)&VS::Battle::Ai::ReconcileCompletedActionPlanEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4CE8u, 0u, (void*)&VS::Battle::Ai::ForgetLiveAiActionTarget, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5710u, 0u, (void*)&VS::Battle::Ai::BuildLiveAiActionMetadata, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5998u, 0u, (void*)&VS::Battle::Ai::ResolveLiveAiLinkedActors, 0u, 0u, 0u},
@@ -1287,46 +1285,46 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BB304u, 0u, (void*)&Event_CommandReservedScreenEffectOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BB30Cu, 0u, (void*)&Event_CommandFreeScreenEffectsOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BB4F0u, 0u, (void*)&Event_CommandSetScanlineOverlayOpcode, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F548u, 0u, (void*)&Battle_RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F550u, 0u, (void*)&Battle_AcceptAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F558u, 0u, (void*)&Battle_AcceptAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F560u, 0u, (void*)&Battle_AcceptAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F568u, 0u, (void*)&Battle_IsAttackTargetUndeadSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F58Cu, 0u, (void*)&Battle_IsAttackTargetLivingSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F5B0u, 0u, (void*)&Battle_RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F5B8u, 0u, (void*)&Battle_RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F5C0u, 0u, (void*)&Battle_RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F5C8u, 0u, (void*)&Battle_CanApplyStrengthDownSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F5E8u, 0u, (void*)&Battle_CanApplyIntelligenceDownSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F608u, 0u, (void*)&Battle_CanApplyAgilityDownSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F628u, 0u, (void*)&Battle_CanApplyEquipmentDownSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F6D8u, 0u, (void*)&Battle_CanApplyHalfMovementSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F6F8u, 0u, (void*)&Battle_CanApplyStrengthUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F718u, 0u, (void*)&Battle_CanApplyIntelligenceUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F738u, 0u, (void*)&Battle_CanApplyAgilityUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F758u, 0u, (void*)&Battle_CanApplyEquipmentUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F808u, 0u, (void*)&Battle_CanApplyQuickenSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F828u, 0u, (void*)&Battle_CanApplySilenceSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F848u, 0u, (void*)&Battle_CanApplyMagicWardSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F868u, 0u, (void*)&Battle_CanApplyRegenerationSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F888u, 0u, (void*)&Battle_CanApplyParalysisSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F8A8u, 0u, (void*)&Battle_CanApplyPoisonSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F8C8u, 0u, (void*)&Battle_CanApplyNumbnessSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F8E8u, 0u, (void*)&Battle_CanApplyCurseSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F908u, 0u, (void*)&Battle_CanApplyAirAttackUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F96Cu, 0u, (void*)&Battle_CanApplyFireAttackUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007F9D0u, 0u, (void*)&Battle_CanApplyEarthAttackUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FA34u, 0u, (void*)&Battle_CanApplyWaterAttackUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FA98u, 0u, (void*)&Battle_CanApplyAirDefenseUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FB34u, 0u, (void*)&Battle_CanApplyFireDefenseUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FBD0u, 0u, (void*)&Battle_CanApplyEarthDefenseUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FC6Cu, 0u, (void*)&Battle_CanApplyWaterDefenseUpSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FD08u, 0u, (void*)&Battle_CanApplyBanishSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FD28u, 0u, (void*)&Battle_CanApplyExorciseSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FD74u, 0u, (void*)&Battle_CanApplyDrainSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FDC0u, 0u, (void*)&Battle_IgnoreAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FDC8u, 0u, (void*)&Battle_IgnoreAttackPrerequisiteSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FDD0u, 0u, (void*)&Battle_IgnoreAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F548u, 0u, (void*)&VS::Battle::RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F550u, 0u, (void*)&VS::Battle::AcceptAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F558u, 0u, (void*)&VS::Battle::AcceptAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F560u, 0u, (void*)&VS::Battle::AcceptAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F568u, 0u, (void*)&VS::Battle::IsAttackTargetUndeadSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F58Cu, 0u, (void*)&VS::Battle::IsAttackTargetLivingSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F5B0u, 0u, (void*)&VS::Battle::RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F5B8u, 0u, (void*)&VS::Battle::RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F5C0u, 0u, (void*)&VS::Battle::RejectAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F5C8u, 0u, (void*)&VS::Battle::CanApplyStrengthDownSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F5E8u, 0u, (void*)&VS::Battle::CanApplyIntelligenceDownSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F608u, 0u, (void*)&VS::Battle::CanApplyAgilityDownSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F628u, 0u, (void*)&VS::Battle::CanApplyEquipmentDownSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F6D8u, 0u, (void*)&VS::Battle::CanApplyHalfMovementSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F6F8u, 0u, (void*)&VS::Battle::CanApplyStrengthUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F718u, 0u, (void*)&VS::Battle::CanApplyIntelligenceUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F738u, 0u, (void*)&VS::Battle::CanApplyAgilityUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F758u, 0u, (void*)&VS::Battle::CanApplyEquipmentUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F808u, 0u, (void*)&VS::Battle::CanApplyQuickenSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F828u, 0u, (void*)&VS::Battle::CanApplySilenceSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F848u, 0u, (void*)&VS::Battle::CanApplyMagicWardSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F868u, 0u, (void*)&VS::Battle::CanApplyRegenerationSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F888u, 0u, (void*)&VS::Battle::CanApplyParalysisSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F8A8u, 0u, (void*)&VS::Battle::CanApplyPoisonSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F8C8u, 0u, (void*)&VS::Battle::CanApplyNumbnessSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F8E8u, 0u, (void*)&VS::Battle::CanApplyCurseSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F908u, 0u, (void*)&VS::Battle::CanApplyAirAttackUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F96Cu, 0u, (void*)&VS::Battle::CanApplyFireAttackUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007F9D0u, 0u, (void*)&VS::Battle::CanApplyEarthAttackUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FA34u, 0u, (void*)&VS::Battle::CanApplyWaterAttackUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FA98u, 0u, (void*)&VS::Battle::CanApplyAirDefenseUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FB34u, 0u, (void*)&VS::Battle::CanApplyFireDefenseUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FBD0u, 0u, (void*)&VS::Battle::CanApplyEarthDefenseUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FC6Cu, 0u, (void*)&VS::Battle::CanApplyWaterDefenseUpSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FD08u, 0u, (void*)&VS::Battle::CanApplyBanishSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FD28u, 0u, (void*)&VS::Battle::CanApplyExorciseSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FD74u, 0u, (void*)&VS::Battle::CanApplyDrainSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FDC0u, 0u, (void*)&VS::Battle::IgnoreAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FDC8u, 0u, (void*)&VS::Battle::IgnoreAttackPrerequisiteSlot, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007FDD0u, 0u, (void*)&VS::Battle::IgnoreAttackPrerequisiteSlot, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&VS::Field::IsLivePointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&VS::Field::TraceLiveActorAndTerrainCollision, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E65DCu, 0u, (void*)&VS::Battle::Ai::CacheLiveActorAiWorkingState, 0u, 0u, 0u},
@@ -2429,10 +2427,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CB45Cu, 0u, (void*)&VS::Menu::IsLiveSceneNotificationPending, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB50Cu, 0u, (void*)&VS::Menu::ReleaseLiveSceneNotification, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&VS::Menu::UpdateLiveTextBoxes, 0u, 0u, 0u},
-    {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
+    {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)VS::Content::plg074TrailEmissionCounter, sizeof VS::Content::plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F1758u, 4u, (void*)Content_battleAiHesitationLengths, sizeof Content_battleAiHesitationLengths, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F1758u, 4u, (void*)VS::Content::battleAiHesitationLengths, sizeof VS::Content::battleAiHesitationLengths, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBA78u, 320u, (void*)Content_battleMainMenuHelpText, sizeof Content_battleMainMenuHelpText, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80069860u, 152u, (void*)Content_battleLimbNameBytes, sizeof Content_battleLimbNameBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E930Cu, 1820u, (void*)Content_battleGimmickTemplateBytes, sizeof Content_battleGimmickTemplateBytes, 1u, 1u},
@@ -2440,9 +2438,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8548u, 116u, (void*)Content_battleTriggerMarkerBytes, sizeof Content_battleTriggerMarkerBytes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x80068C1Cu, 664u, (void*)Content_battleSkyDome, sizeof Content_battleSkyDome, 1u, 1u},
 };
-const unsigned Content_moduleSymbolCount = sizeof Content_moduleSymbols / sizeof Content_moduleSymbols[0];
+const unsigned VS::Content::kModuleSymbolCount = sizeof VS::Content::kModuleSymbols / sizeof VS::Content::kModuleSymbols[0];
 
-const Content_ModulePointerTable Content_modulePointers[] = {
+const VS::Content::ModulePointerTable VS::Content::kModulePointers[] = {
     {"BATTLE/BATTLE.PRG", 0x7FA34, 8u, (void**)Battle_hitFunctions, sizeof Battle_hitFunctions / sizeof Battle_hitFunctions[0], NULL}, // G00028 _hitFunctions
     {"BATTLE/BATTLE.PRG", 0x7FA54, 40u, (void**)Battle_attackPrerequisiteFunctions, sizeof Battle_attackPrerequisiteFunctions / sizeof Battle_attackPrerequisiteFunctions[0], NULL}, // G00029 _attackPrerequisiteFunctions
     {"BATTLE/BATTLE.PRG", 0x7FB0C, 27u, (void**)Battle_statCalculators, sizeof Battle_statCalculators / sizeof Battle_statCalculators[0], NULL}, // G00031 _statCalculators
@@ -2460,5 +2458,5 @@ const Content_ModulePointerTable Content_modulePointers[] = {
     {"SLUS_010.40", 0x20DE0, 96u, (void**)Audio_Seq_kOpcodeHandlers, sizeof Audio_Seq_kOpcodeHandlers / sizeof Audio_Seq_kOpcodeHandlers[0], NULL}, // G01842 D_800305E0
     {"SLUS_010.40", 0x20F60, 32u, (void**)Audio_Seq_kExtendedOpcodeHandlers, sizeof Audio_Seq_kExtendedOpcodeHandlers / sizeof Audio_Seq_kExtendedOpcodeHandlers[0], NULL}, // G01843 D_80030760
 };
-const unsigned Content_modulePointerCount = sizeof Content_modulePointers / sizeof Content_modulePointers[0];
+const unsigned VS::Content::kModulePointerCount = sizeof VS::Content::kModulePointers / sizeof VS::Content::kModulePointers[0];
 

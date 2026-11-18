@@ -11,7 +11,7 @@
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/DetailDispatchLiveSupport.hpp"

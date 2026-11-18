@@ -30,11 +30,11 @@
 #include "Battle/Ai/ActorSettings.hpp"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Damage.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Platform/App.hpp"
@@ -601,7 +601,7 @@ struct LiveCreationFixture {
   Battle_Ai_RoomAiState* saved_room = Battle_Ai_roomAiState;
   decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
   void* saved_has_waypoints = Battle_Ai_roomHasWaypoints;
-  Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
+  VS::Battle::Ai::FrameContext saved_frame = VS::Battle::Ai::LiveFrameContext();
   int saved_attribute = Battle_Ai_attributeActorMask;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 3072> arena{};
@@ -637,7 +637,7 @@ struct LiveCreationFixture {
     Battle_Ai_roomAiState = saved_room;
     Battle_Ai_tileFlagMap = saved_flags;
     Battle_Ai_roomHasWaypoints = saved_has_waypoints;
-    *Battle_Ai_FrameState() = saved_frame;
+    VS::Battle::Ai::LiveFrameContext() = saved_frame;
     Battle_Ai_attributeActorMask = saved_attribute;
   }
 
@@ -764,7 +764,7 @@ TEST_CASE("Live AI creation registers an auxiliary special actor",
 
 TEST_CASE("AI creation retains its original module address",
           "[ai][actor-creation][creation-live]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E6178) ==
         reinterpret_cast<const void*>(&VS::Battle::Ai::CreateLiveActorAiState));

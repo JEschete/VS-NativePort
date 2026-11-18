@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ActorAssetsLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Content/OverlayFiles.hpp"
 #include "Content/OverlayWorkspace.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
@@ -456,8 +456,7 @@ TEST_CASE("Retired content entries leave no module address bindings",
   // No module image or dispatch table stores the promoted loaders, so the
   // typed cores are reached only through OWNED_CALL_BINDINGS and the Live
   // adapters (#276 slice content).
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   for (const std::uint32_t address : kRetiredBattleEntries) {
     CAPTURE(address);
     CHECK(Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",

@@ -16,7 +16,7 @@
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -68,10 +68,11 @@ int Tests_EncodedTextFormatting(void) {
   char small[4];
   memset(small, 0x55, sizeof small);
   const uint64_t refused = VS::Render::RefusedLiveEncodedTextCount();
-  passed =
-      passed && VS::Render::FormatLiveEncodedText(small, format) == small &&
-      (unsigned char)small[0] == Core_TextCode_Terminator && small[1] == 0x55 &&
-      VS::Render::RefusedLiveEncodedTextCount() == refused + 1;
+  passed = passed &&
+           VS::Render::FormatLiveEncodedText(small, format) == small &&
+           static_cast<unsigned char>(small[0]) == Core_TextCode_Terminator &&
+           small[1] == 0x55 &&
+           VS::Render::RefusedLiveEncodedTextCount() == refused + 1;
   Battle_stringContext = saved;
   return passed;
 }
@@ -124,7 +125,7 @@ static bool DrawTrackedFrameFixture(int index, const void* shape,
 }
 
 int Tests_ScaledDialogueGlyphs(void) {
-  unsigned char* memory = (unsigned char*)(malloc(0x20010));
+  unsigned char* memory = static_cast<unsigned char*>(malloc(0x20010));
   if (memory == nullptr) return 0;
   memset(memory, 0xA5, 0x20010);
   const Render_FrameScratch savedFrame = Render_frameScratch;
@@ -388,7 +389,8 @@ int CheckMenuWorkspaceReset(void) {
       sizeof(Menu_Framework_MenuRow) * kRows + kScratchBytes;
   const size_t allocation_bytes =
       workspace_bytes + static_cast<size_t>(kGuardBytes) * 2;
-  unsigned char* storage = (unsigned char*)(malloc(allocation_bytes));
+  unsigned char* storage =
+      static_cast<unsigned char*>(malloc(allocation_bytes));
   if (storage == nullptr) {
     return 0;
   }
@@ -396,8 +398,8 @@ int CheckMenuWorkspaceReset(void) {
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   char* const saved_strings = VS::Menu::Framework::stringBuf;
   int* const saved_types = VS::Menu::Framework::rowTypeBuf;
-  const u_short saved_flags = Input_settings.menuFlags;
-  const unsigned int saved_memory = Input_settings.cursorMemory;
+  const u_short saved_flags = VS::Input::settings.menuFlags;
+  const unsigned int saved_memory = VS::Input::settings.cursorMemory;
   const char saved_selection = VS::Menu::Framework::submenuStates[0];
   const int saved_cursor = VS::Menu::Framework::mainMenuCursorAnimation;
   VS::Menu::Framework::menuItems =
@@ -408,8 +410,8 @@ int CheckMenuWorkspaceReset(void) {
       reinterpret_cast<char*>(VS::Menu::Framework::menuItems + kRows);
   VS::Menu::Framework::rowTypeBuf =
       reinterpret_cast<int*>(VS::Menu::Framework::stringBuf + kStringBytes);
-  Input_settings.menuFlags = 1;
-  Input_settings.cursorMemory = 0;
+  VS::Input::settings.menuFlags = 1;
+  VS::Input::settings.cursorMemory = 0;
   VS::Menu::Framework::submenuStates[0] = 0;
 
   int passed = VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0 &&
@@ -426,8 +428,8 @@ int CheckMenuWorkspaceReset(void) {
   VS::Menu::Framework::menuItems = saved_items;
   VS::Menu::Framework::stringBuf = saved_strings;
   VS::Menu::Framework::rowTypeBuf = saved_types;
-  Input_settings.menuFlags = saved_flags;
-  Input_settings.cursorMemory = saved_memory;
+  VS::Input::settings.menuFlags = saved_flags;
+  VS::Input::settings.cursorMemory = saved_memory;
   VS::Menu::Framework::submenuStates[0] = saved_selection;
   VS::Menu::Framework::mainMenuCursorAnimation = saved_cursor;
   free(storage);
@@ -582,7 +584,8 @@ int CheckMenuPromptPanelLinks(void) {
     ++count;
     packet = nextPrim(packet);
   }
-  const u_long* end = (const u_long*)(Render_frameScratch.primitiveCursor);
+  const u_long* end =
+      static_cast<const u_long*>(Render_frameScratch.primitiveCursor);
   int passed = packet == nullptr && count >= kOrderingWords + 5 &&
                nextPrim(ordering + 15) == storage + 15 && end > storage + 1 &&
                end < storage + kPacketWords && storage[0] == guard &&

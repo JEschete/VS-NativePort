@@ -55,11 +55,11 @@ struct DialogLiveFixture : equipment::LiveFixture {
   container_transfers_tests::LiveFixture containers;
   std::vector<std::byte> heap_bytes = std::vector<std::byte>(kDialogHeapBytes);
   VS::Core::Memory::ScopedLiveGameHeap heap{heap_bytes};
-  equipment::ValueRestore<int> saved_previous{Input_previousButtons};
+  equipment::ValueRestore<int> saved_previous{VS::Input::previousButtons};
   equipment::ValueRestore<decltype(VS::State::tickSpeed)> saved_tick{
       VS::State::tickSpeed};
-  equipment::ArrayRestore<u_int, std::size(Input_buttonHeldFrames)> saved_held{
-      Input_buttonHeldFrames};
+  equipment::ArrayRestore<u_int, std::size(VS::Input::buttonHeldFrames)>
+      saved_held{VS::Input::buttonHeldFrames};
   equipment::ArrayRestore<u_short, std::size(Menu_Container_menuText)>
       saved_container_text{Menu_Container_menuText};
   equipment::ValueRestore<u_char> saved_direction{
@@ -82,8 +82,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
     Menu_Container_containerData = &containers.storage->container;
     Menu_Container_otherStorage = &containers.storage->gadgetBag;
     Menu_Container_browsingGadgetBag = 0;
-    Input_previousButtons = 0;
-    std::ranges::fill(Input_buttonHeldFrames, 0U);
+    VS::Input::previousButtons = 0;
+    std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
     VS::State::tickSpeed = 2;
     VS::Menu::textBoxBufferIndex = 0;
     Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
@@ -234,7 +234,7 @@ struct EquippedFixture : DialogLiveFixture {
     VS::Menu::Framework::rowTypeBuf = row_types.data();
     AddWeapon();
     const auto module = ReadData(R"(Native\data\disc\MENU\MENU3.PRG)");
-    const auto entries = std::span(Content_moduleData, Content_moduleDataCount);
+    const auto entries = VS::Content::ModuleDataEntries();
     const auto text = std::ranges::find_if(entries, [](const auto& entry) {
       return entry.target == static_cast<void*>(Menu_Inventory_menuText) &&
              std::string_view(entry.module) == "MENU/MENU3.PRG";

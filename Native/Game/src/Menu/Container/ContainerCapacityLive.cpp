@@ -10,7 +10,6 @@
 
 #include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexingLive.hpp"
-#include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Container/ContainerCapacity.hpp"
 #include "Menu/Container/ItemView.h"
@@ -42,7 +41,7 @@ std::uint16_t Limit(StorageArea area, Items::ItemCategory category) {
     Refuse("capacity category outside container categories");
   }
   return area == StorageArea::kGadgetBag
-             ? VS::Items::Inventory::inventoryItemCapacities[index]
+             ? VS::Items::kCategoryCapacities[index]
              : Menu_Container_containerItemCapacities[index];
 }
 

@@ -10,7 +10,7 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/DiscLayout.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -23,9 +23,8 @@ namespace render = VS::Render;
 
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
-  auto* resolved = content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENUF.PRG",
-      address);
+  auto* resolved = content::ResolveModuleAddress(VS::Content::ModuleSymbols(),
+                                                 "MENU/MENUF.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved == nullptr) {
     throw std::runtime_error("missing game-clear module entry");

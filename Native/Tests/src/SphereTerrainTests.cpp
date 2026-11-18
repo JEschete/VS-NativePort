@@ -22,7 +22,7 @@
 #include "Battle/TargetingState.h"
 #include "Core/Math/MatrixLive.hpp"
 #include "Field/Interactions.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -52,7 +52,7 @@ struct SliceFixture {
   }
 
   ~SliceFixture() {
-    Battle_ResetTargetPages();
+    VS::Battle::ResetTargetPages();
     Battle_targetSphere = saved_sphere;
     Render_frameScratch = saved_frame;
     Field_controlMode = saved_control;
@@ -223,23 +223,23 @@ TEST_CASE("Native action buffers cover every supported actor limb",
         kActorLimbDomain);
   CHECK(std::extent_v<decltype(Battle_ActionRequest::targets)> >=
         kActorLimbDomain);
-  CHECK(Battle_ValidateTargetPreviewIndex(254) == 254);
-  CHECK(Battle_TargetPreviewIndexIsValid(254) == 1);
-  CHECK(Battle_TargetPreviewIndexIsValid(255) == 0);
-  CHECK(Battle_TargetPreviewIndexIsValid(-1) == 0);
+  CHECK(VS::Battle::ValidateTargetPreviewIndex(254) == 254);
+  CHECK(VS::Battle::TargetPreviewIndexIsValid(254) == 1);
+  CHECK(VS::Battle::TargetPreviewIndexIsValid(255) == 0);
+  CHECK(VS::Battle::TargetPreviewIndexIsValid(-1) == 0);
 }
 
 TEST_CASE("Extended target pages retain complete actors and absolute indices",
           "[combat][targeting][pages]") {
   ExtendedPageFixture fixture;
-  auto first = Battle_GetTargetPageInfo();
+  auto first = VS::Battle::GetTargetPageInfo();
   CHECK(first.total == 40);
   CHECK(first.pages == 2);
   CHECK(first.visible == 20);
-  CHECK(Battle_MapTargetPageIndex(19) == 19);
+  CHECK(VS::Battle::MapTargetPageIndex(19) == 19);
   fixture.Sphere().selectedTarget = -1;
-  REQUIRE(Battle_AdvanceTargetPage(1) == 1);
-  const auto second = Battle_GetTargetPageInfo();
+  REQUIRE(VS::Battle::AdvanceTargetPage(1) == 1);
+  const auto second = VS::Battle::GetTargetPageInfo();
   CHECK(second.first == 20);
   CHECK(second.visible == 20);
   CHECK(fixture.Sphere().targetLists[0] == fixture.entries.data() + 20);
@@ -253,7 +253,7 @@ TEST_CASE("Minotaur preview index thirty-one stays inside native storage",
     u_long guard = kGuard;
   } storage;
   REQUIRE(std::size(storage.entries) > 31);
-  const int index = Battle_ValidateTargetPreviewIndex(31);
+  const int index = VS::Battle::ValidateTargetPreviewIndex(31);
   storage.entries[index].position = {1531, -308, 1367, 0};
   CHECK(storage.entries[index].position.vx == 1531);
   CHECK(storage.entries[index].position.vy == -308);
@@ -270,26 +270,26 @@ TEST_CASE("Six-part target groups retain every candidate beyond one page",
     entries[index].limb = static_cast<char>(index % 6);
   }
   VS::Battle::SetLiveSphereTargets(entries, 0);
-  CHECK(Battle_GetTargetPageInfo().total == 36);
-  CHECK(Battle_GetTargetPageInfo().visible == 24);
-  REQUIRE(Battle_AdvanceTargetPage(1) == 1);
-  CHECK(Battle_GetTargetPageInfo().first == 24);
-  CHECK(Battle_GetTargetPageInfo().visible == 12);
-  CHECK(Battle_MapTargetPageIndex(7) == 31);
-  CHECK(Battle_MapTargetPageIndex(11) == 35);
+  CHECK(VS::Battle::GetTargetPageInfo().total == 36);
+  CHECK(VS::Battle::GetTargetPageInfo().visible == 24);
+  REQUIRE(VS::Battle::AdvanceTargetPage(1) == 1);
+  CHECK(VS::Battle::GetTargetPageInfo().first == 24);
+  CHECK(VS::Battle::GetTargetPageInfo().visible == 12);
+  CHECK(VS::Battle::MapTargetPageIndex(7) == 31);
+  CHECK(VS::Battle::MapTargetPageIndex(11) == 35);
 }
 
 TEST_CASE(
     "Extended pages map absolute indices and reverse without losing targets",
     "[combat][targeting][pages]") {
   ExtendedPageFixture fixture;
-  REQUIRE(Battle_AdvanceTargetPage(1) == 1);
-  CHECK(Battle_MapTargetPageIndex(0) == 20);
-  CHECK(Battle_MapTargetPageIndex(19) == 39);
-  CHECK(Battle_MapTargetPageIndex(255) == 255);
+  REQUIRE(VS::Battle::AdvanceTargetPage(1) == 1);
+  CHECK(VS::Battle::MapTargetPageIndex(0) == 20);
+  CHECK(VS::Battle::MapTargetPageIndex(19) == 39);
+  CHECK(VS::Battle::MapTargetPageIndex(255) == 255);
   fixture.Sphere().selectedTarget = -1;
-  REQUIRE(Battle_AdvanceTargetPage(-1) == 1);
-  CHECK(Battle_GetTargetPageInfo().first == 0);
+  REQUIRE(VS::Battle::AdvanceTargetPage(-1) == 1);
+  CHECK(VS::Battle::GetTargetPageInfo().first == 0);
 }
 
 TEST_CASE("Native action result clearing covers the entire native capacity",
@@ -336,13 +336,13 @@ TEST_CASE("Small target lists preserve the original single visible page",
     entries[index].actorId = static_cast<char>(index / 6);
   }
   VS::Battle::SetLiveSphereTargets(entries, 0);
-  CHECK(Battle_GetTargetPageInfo().pages == 1);
-  CHECK(Battle_GetTargetPageInfo().visible == 24);
-  CHECK(Battle_MapTargetPageIndex(23) == 23);
-  CHECK(Battle_AdvanceTargetPage(1) == 0);
+  CHECK(VS::Battle::GetTargetPageInfo().pages == 1);
+  CHECK(VS::Battle::GetTargetPageInfo().visible == 24);
+  CHECK(VS::Battle::MapTargetPageIndex(23) == 23);
+  CHECK(VS::Battle::AdvanceTargetPage(1) == 0);
   VS::Battle::SetLiveSphereTargets({}, 0);
-  CHECK(Battle_GetTargetPageInfo().total == 0);
-  CHECK(Battle_GetTargetPageInfo().selected == -1);
+  CHECK(VS::Battle::GetTargetPageInfo().total == 0);
+  CHECK(VS::Battle::GetTargetPageInfo().selected == -1);
 }
 
 TEST_CASE("Paged target lists own shoulders only during target selection",
@@ -355,13 +355,13 @@ TEST_CASE("Paged target lists own shoulders only during target selection",
   VS::Battle::SetLiveSphereTargets(entries, 0);
   Field_controlMode = 2;
   Battle_actionFlowMode = 1;
-  CHECK(Battle_TargetPagesUseShoulders() == 1);
+  CHECK(VS::Battle::TargetPagesUseShoulders() == 1);
   Battle_actionFlowMode = 2;
-  CHECK(Battle_TargetPagesUseShoulders() == 0);
+  CHECK(VS::Battle::TargetPagesUseShoulders() == 0);
   Battle_actionFlowMode = 3;
-  CHECK(Battle_TargetPagesUseShoulders() == 1);
+  CHECK(VS::Battle::TargetPagesUseShoulders() == 1);
   Field_controlMode = 1;
-  CHECK(Battle_TargetPagesUseShoulders() == 0);
+  CHECK(VS::Battle::TargetPagesUseShoulders() == 0);
 }
 
 TEST_CASE("Sphere labels and wireframes preserve the native frame cursor",

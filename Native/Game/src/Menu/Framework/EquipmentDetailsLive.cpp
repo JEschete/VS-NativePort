@@ -20,7 +20,6 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Core/Log.hpp"
-#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/ItemRecordsLive.hpp"
@@ -185,11 +184,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
         .weapon_range = static_cast<std::uint8_t>(stats.weapon.range.range)};
   }
 
-  Buttons Input() override {
-    return {.pressed = Input_buttonsPressed.allButtons,
-            .repeat = static_cast<std::uint32_t>(Input_buttonRepeat),
-            .held = static_cast<std::uint32_t>(Input_buttonsState)};
-  }
+  Buttons Input() override { return LiveButtons(); }
 
   std::span<const std::uint8_t> RowAnimationSteps() override {
     return {

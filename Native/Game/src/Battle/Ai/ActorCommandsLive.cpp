@@ -13,7 +13,7 @@
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/FrameUpdate.h"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Damage.h"
@@ -38,7 +38,7 @@ int DirectionComponent(int value) {
 }
 
 unsigned DirectionForOffset(int dx, int dz) {
-  const auto& frame = *Battle_Ai_FrameState();
+  const auto& frame = LiveFrameContext();
   for (unsigned index = 0; index < std::size(frame.directions); ++index) {
     const auto packed = frame.directions[index];
     if (DirectionComponent(packed & kComponentMask) == dx &&
@@ -65,7 +65,7 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
   [[nodiscard]] bool IsCornerBlocked(std::uint32_t tile, int dx,
                                      int dz) const override {
     const unsigned direction = DirectionForOffset(dx, dz);
-    const auto& frame = *Battle_Ai_FrameState();
+    const auto& frame = LiveFrameContext();
     if (frame.roomData == nullptr) {
       return IsLiveAdjacentTileStepBlocked(tile, static_cast<int>(direction));
     }
@@ -74,19 +74,20 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
     const int x = static_cast<int>(tile & kTileMask);
     const int z = static_cast<int>((tile >> kTileZShift) & kTileMask);
     const auto width = frame.roomBounds & kTileMask;
-    Require(width > 0 && width <= kAiFrameGridSide && x < kAiFrameGridSide &&
-                z < kAiFrameGridSide,
+    Require(width > 0 && width <= kNavigationGridSide &&
+                x < kNavigationGridSide && z < kNavigationGridSide,
             "AI regional movement coordinates are out of bounds");
-    if (x + dx < 0 || z + dz < 0 || x + dx >= kAiFrameGridSide ||
-        z + dz >= kAiFrameGridSide) {
+    if (x + dx < 0 || z + dz < 0 || x + dx >= kNavigationGridSide ||
+        z + dz >= kNavigationGridSide) {
       return true;
     }
     const auto current =
         (frame.heightMap[z][x] >> kTerrainLayerShift) & kTerrainLayerMask;
     const auto next = (frame.heightMap[z + dz][x + dx] >> kTerrainLayerShift) &
                       kTerrainLayerMask;
-    return ((*Battle_Ai_TerrainRegionCell(x, z) >> direction) & 1u) != 0 ||
-           current < next;
+    const std::uint8_t* cell = FindTerrainRegionCell(x, z);
+    Require(cell != nullptr, "AI regional movement leaves the terrain regions");
+    return ((*cell >> direction) & 1u) != 0 || current < next;
   }
 
   [[nodiscard]] ActorFacing Facing() const override {
@@ -185,7 +186,7 @@ void IssueLiveActorCommand(Battle_Ai_ActorAiState* state, int action) {
   Require(actor != nullptr &&
               static_cast<void*>(actor) == static_cast<void*>(state->actor),
           "AI actor command identity does not match the actor table");
-  Battle_Ai_FrameState()->movementResult = action;
+  LiveFrameContext().movementResult = action;
   actor->commandState = kCommandPending;
   actor->commandTarget = state->movementTarget;
   ActorCommandPacket packet{static_cast<CommandOpcode>(actor->commandOpcode),

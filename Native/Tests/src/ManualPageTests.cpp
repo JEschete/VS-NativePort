@@ -11,7 +11,7 @@
 
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Manual.h"
 #include "Menu/ManualPage.hpp"
@@ -460,13 +460,13 @@ class PageGlobalsSnapshot {
         help_(Menu_Manual_helpText),
         frame_index_(Render_frameBuf),
         arrow_state_(Menu_Manual_pageArrowAnimState),
-        held_(Input_previousButtons) {}
+        held_(VS::Input::previousButtons) {}
   PageGlobalsSnapshot(const PageGlobalsSnapshot&) = delete;
   PageGlobalsSnapshot& operator=(const PageGlobalsSnapshot&) = delete;
   PageGlobalsSnapshot(PageGlobalsSnapshot&&) = delete;
   PageGlobalsSnapshot& operator=(PageGlobalsSnapshot&&) = delete;
   ~PageGlobalsSnapshot() {
-    Input_previousButtons = held_;
+    VS::Input::previousButtons = held_;
     Menu_Manual_pageArrowAnimState = arrow_state_;
     Render_frameBuf = frame_index_;
     Menu_Manual_helpText = help_;
@@ -507,7 +507,7 @@ struct PageFrame {
     Render_frameScratch.orderingTable = ordering.data() + kFrameSlotBase;
     Render_frameScratch.primitiveCursor = storage.data();
     Render_frameBuf = 0;
-    Input_previousButtons = 0;
+    VS::Input::previousButtons = 0;
     Menu_Manual_pageArrowAnimState = 0;
   }
 
@@ -577,12 +577,12 @@ TEST_CASE(
     "Live scroll fades link the arrow rows tiles and page into the fade slot",
     "[manual-page-live]") {
   PageFrame frame;
-  Input_previousButtons = PADRleft;
+  VS::Input::previousButtons = PADRleft;
   Menu_Manual_pageArrowAnimState = 4;
   manual::LiveDrawUpperScrollFade();
   CheckLiveUpperFade(frame);
 
-  Input_previousButtons = 0;
+  VS::Input::previousButtons = 0;
   manual::LiveDrawLowerScrollFade();
   CheckLiveLowerFade(frame);
 }

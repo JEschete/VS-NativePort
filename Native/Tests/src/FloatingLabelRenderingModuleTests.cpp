@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/FloatingLabelRenderingLive.hpp"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "TestSupport/FloatingLabelRenderingLiveFixture.hpp"
 
 namespace {
@@ -27,8 +27,7 @@ constexpr std::size_t kQuadWords = 10;
 
 template <typename Function>
 Function Resolve(std::uint32_t address, Function expected) {
-  const auto entries =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto entries = VS::Content::ModuleSymbols();
   void* const target =
       VS::Content::ResolveModuleAddress(entries, "BATTLE/BATTLE.PRG", address);
   const bool matches =

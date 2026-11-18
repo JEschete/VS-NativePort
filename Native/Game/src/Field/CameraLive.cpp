@@ -21,7 +21,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/Sphere.h"
 #include "Battle/SphereLifecycleLive.hpp"
-#include "Battle/TargetPages.h"
+#include "Battle/TargetPages.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
@@ -41,7 +41,7 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Field/Zone.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.h"
 #include "Render/CameraViewLive.hpp"
@@ -360,7 +360,7 @@ void LiveCameraHost::SetActionFlowMode(std::uint32_t mode) {
 }
 
 bool LiveCameraHost::TargetPagesUseShoulders() {
-  return Battle_TargetPagesUseShoulders() != 0;
+  return VS::Battle::TargetPagesUseShoulders() != 0;
 }
 
 int LiveCameraHost::SphereInteractionMode() {
@@ -403,15 +403,15 @@ void LiveCameraHost::SetActorMarkersHidden(bool hidden) {
 }
 
 std::uint32_t LiveCameraHost::HeldButtons() {
-  return static_cast<std::uint32_t>(Input_previousButtons);
+  return static_cast<std::uint32_t>(VS::Input::previousButtons);
 }
 
 std::uint32_t LiveCameraHost::PressedButtons() {
-  return Input_buttonsPressed.allButtons;
+  return VS::Input::buttonsPressed.allButtons;
 }
 
 std::optional<StickPosition> LiveCameraHost::AnalogRightStick() {
-  const Input_ControllerPortState& port = Input_controllerPorts[0];
+  const Input_ControllerPortState& port = VS::Input::controllerPorts[0];
   if (static_cast<std::uint8_t>(port.controllerType) != kAnalogControllerType) {
     return std::nullopt;
   }

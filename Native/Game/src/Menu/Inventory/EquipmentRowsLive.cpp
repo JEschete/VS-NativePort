@@ -27,7 +27,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -356,8 +356,8 @@ void UpdateLiveEquipmentChoices(int has_sfx) {
   }
   LiveRowsHost host;
   const EquipmentChoiceInput input{
-      Input_buttonsPressed.allButtons,
-      static_cast<std::uint32_t>(Input_buttonRepeat)};
+      VS::Input::buttonsPressed.allButtons,
+      static_cast<std::uint32_t>(VS::Input::buttonRepeat)};
   if (!UpdateEquipmentChoices(*state, host, input, has_sfx)) {
     Refuse("a list step, cursor or scroll position outside the list");
     return;

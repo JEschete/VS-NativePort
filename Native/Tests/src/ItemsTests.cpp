@@ -13,7 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Audio/Seq/Channel.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Event/ScriptVmLive.hpp"
 #include "Field/Gimmicks.h"
@@ -2858,8 +2858,7 @@ TEST_CASE("A live room without a whole chest record refuses chest loot",
 
 TEST_CASE("Items native bindings retire the module entries they replace",
           "[items-slice][items][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   const auto resolve = [&](unsigned address) {
     return VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                              address);

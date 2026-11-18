@@ -15,7 +15,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Content/ModuleData.h"
+#include "Content/ModuleData.hpp"
 #include "Field/ActorCollision.hpp"
 #include "Field/ActorCollisionLive.hpp"
 #include "Field/Collision.h"
@@ -1023,8 +1023,7 @@ TEST_CASE("Terrain motion blocked by an overlap leaves the result unwritten",
 
 TEST_CASE("Row 21 and 23 actor collision module entries are retired",
           "[field-actor-collision][field][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto symbols = VS::Content::ModuleSymbols();
   constexpr std::array<std::uint32_t, 14> kRetired{
       0x800A3C34U, 0x800A4494U, 0x800A46A4U, 0x800A6798U, 0x800A69B4U,
       0x800A6EE8U, 0x800A70DCU, 0x800A7524U, 0x800A76BCU, 0x800A8B34U,

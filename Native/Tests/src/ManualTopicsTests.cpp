@@ -11,7 +11,7 @@
 
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/Manual.h"
-#include "Input/ControllerLiveState.h"
+#include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -435,7 +435,7 @@ TEST_CASE("Page text refuses lines that overflow the page buffer",
 
 namespace {
 struct LiveTopicFixture {
-  State_Settings saved_settings = Input_settings;
+  State_Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
@@ -457,7 +457,7 @@ struct LiveTopicFixture {
     VS::Menu::Framework::menuItems = workspace.rows.data();
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuMemory = {};
-    Input_settings.menuFlags = 0x3FF;
+    VS::Input::settings.menuFlags = 0x3FF;
     std::fill(std::begin(Menu_Manual_menuText), std::end(Menu_Manual_menuText),
               u_short{0});
     const std::vector<std::uint16_t> table = TopicTable();
@@ -469,7 +469,7 @@ struct LiveTopicFixture {
   LiveTopicFixture& operator=(LiveTopicFixture&&) = delete;
   ~LiveTopicFixture() {
     ReleaseRows();
-    Input_settings = saved_settings;
+    VS::Input::settings = saved_settings;
     VS::Menu::Framework::menuMemory = saved_memory;
     VS::Menu::Framework::menuItems = saved_items;
     VS::Menu::Framework::itemsText = saved_text;
@@ -538,7 +538,8 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
   CHECK(Menu_Manual_topMenuState == 1);
   CHECK(VS::Menu::Framework::menuMemory.cursorMemories[4] == 5);
   CHECK(VS::Menu::Framework::menuMemory.cursorMemories[5] == 5);
-  CHECK(Input_settings.cursorMemory == fixture.saved_settings.cursorMemory);
+  CHECK(VS::Input::settings.cursorMemory ==
+        fixture.saved_settings.cursorMemory);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(manual::LiveUpdateTopicMenu(0) == -1);
   CHECK(Menu_Manual_topMenuState == 1);

@@ -20,8 +20,7 @@ using status_terminal_live_tests::Fixture;
 template <typename Entry>
 Entry ModuleEntry(unsigned address, Entry expected) {
   auto* resolved = VS::Content::ResolveModuleAddress(
-      {Content_moduleSymbols, Content_moduleSymbolCount}, "MENU/MENU4.PRG",
-      address);
+      VS::Content::ModuleSymbols(), "MENU/MENU4.PRG", address);
   CHECK(resolved == reinterpret_cast<void*>(expected));
   if (resolved == nullptr) {
     throw std::runtime_error("missing status terminal module entry");
