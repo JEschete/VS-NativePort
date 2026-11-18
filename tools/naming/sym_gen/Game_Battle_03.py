@@ -135,7 +135,7 @@ OTHER = [
 for _tid, _name, _purpose, _ov in OTHER:
     loc = ("Native\\Engine\\src\\Audio\\SoundBanks.h" if _name.startswith("Audio::") else
            "Native\\Game\\src\\Actors\\Spawn.h" if _name.startswith("Actors::") else
-           "Native\\Engine\\include\\Core\\Core\\IntPair.h" if _name.startswith("Core::") else
+           "Native\\Engine\\include\\Core\\IntPair.h" if _name.startswith("Core::") else
            "Native\\Game\\src\\Effects\\Particles.h" if _name.startswith("Effects::") else
            AI + "AiViews.h" if _name.startswith("Battle::Ai::") else B + "BattleTypes.h")
     T(_tid, "State", _name, loc, _purpose, L if "not read" in _purpose else M,

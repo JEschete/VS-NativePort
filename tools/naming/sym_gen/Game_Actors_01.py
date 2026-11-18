@@ -274,7 +274,7 @@ T("T00472", "State", "Actors::AirborneTickAccumulator", GA + "Movement.h",
       ("unk0", "reserved0", "Lower bytes owned by other members", "low"),
       ("timer", "tickRemainder", "Fractional ticks carried between frames", "med"),
   ], recv=r"\(\(func_800AC690_timer_t\*\)&actor->unk5B4\)")
-T("T00473", "Value", "Core::WordPair", "Native\\Engine\\include\\Core\\Core\\WordPair.h",
+T("T00473", "Value", "Core::WordPair", "Native\\Engine\\include\\Core\\WordPair.h",
   "Copies eight bytes as two words; the native code assigns the members directly.", "med",
   c(("40564.c", "*(func_800ACF54_t*)&arg0->unk4C = *(func_800ACF54_t*)&arg0->unk1C;")), [
       ("unk0", "low", "First word", "med"),

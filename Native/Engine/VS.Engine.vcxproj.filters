@@ -28,9 +28,6 @@
     <Filter Include="include\Core">
       <UniqueIdentifier>{411A9FF0-2D82-5177-A472-B0B4F9689234}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\Core\Core">
-      <UniqueIdentifier>{F7C013F6-BBD9-58F9-AE32-6D6917D435EA}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\Core\Math">
       <UniqueIdentifier>{2C2E5BC5-B9D0-5B0A-87D9-5789538031ED}</UniqueIdentifier>
     </Filter>
@@ -945,12 +942,6 @@
     <ClInclude Include="include\Core\BiosRand.h">
       <Filter>include\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\Core\IntPair.h">
-      <Filter>include\Core\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Core\Core\WordPair.h">
-      <Filter>include\Core\Core</Filter>
-    </ClInclude>
     <ClInclude Include="include\Core\Diagnostics.h">
       <Filter>include\Core</Filter>
     </ClInclude>
@@ -964,6 +955,9 @@
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Handle.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\IntPair.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Log.hpp">
@@ -1045,6 +1039,9 @@
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Unported.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\WordPair.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Input\Controller.hpp">

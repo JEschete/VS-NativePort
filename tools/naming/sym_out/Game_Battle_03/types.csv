@@ -53,7 +53,7 @@ T00531,State,Battle::Ai::SavedSettingsPair,Native\Game\src\Battle\Ai\AiViews.h,H
 T00532,State,Battle::Ai::ActorAiState,Native\Game\src\Battle\Ai\AiState.h,"Holds one actor's AI state: settings, tile and movement state, perception history and relations, action slots, candidates and plan, allocated per actor when its AI starts.",high,"source:7CD68.c:960;source:upstream:6E644.c:1037;names by offset from sym_gen/ai_state.py, shared with every fork view"
 T00533,State,Battle::Ai::WordPair,Native\Game\src\Battle\Ai\AiViews.h,Holds two words; not read.,low,declaration-only;source:6F014.c:388
 T00541,State,Battle::EffectParameterBytes,Native\Game\src\Battle\BattleTypes.h,Holds effect parameter bytes; not read.,low,declaration-only;source:146C.h:289
-T00544,State,Core::IntPair,Native\Engine\include\Core\Core\IntPair.h,Holds two integers; not read.,low,declaration-only;source:44F14.c:86
+T00544,State,Core::IntPair,Native\Engine\include\Core\IntPair.h,Holds two integers; not read.,low,declaration-only;source:44F14.c:86
 T00545,State,Battle::TargetLabelPrimitive,Native\Game\src\Battle\BattleTypes.h,Holds the primitive tag and box behind a target label.,med,declaration-only;source:58578.c:72
 T00546,State,Battle::LimbEffects,Native\Game\src\Battle\BattleTypes.h,Holds two limb effect values.,med,declaration-only;source:146C.c:40
 T00551,State,Battle::ShapeVertex,Native\Game\src\Battle\BattleTypes.h,Holds one wireframe vertex and its flags.,med,declaration-only;source:573B8.h:6
