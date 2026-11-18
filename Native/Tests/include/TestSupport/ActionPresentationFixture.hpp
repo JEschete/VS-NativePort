@@ -41,7 +41,7 @@ struct World final : b::ActionPresentationWorld {
   std::array<bool, 16> eligible{};
   std::array<std::uint16_t, 10> attacks{};
   std::uint16_t heals{}, item{};
-  std::uint8_t category{}, spell_commit = 1;
+  std::uint8_t category{}, weapon_kill_streak = 1;
   std::int16_t selection_kind{};
   std::uint32_t statuses{}, frame{}, phase{}, speed{};
   int distance{};
@@ -140,7 +140,7 @@ struct World final : b::ActionPresentationWorld {
     Event(0x80077F70);
     return distance;
   }
-  void ClearSpellCommit() override { spell_commit = 0; }
+  void ResetWeaponKillStreak() override { weapon_kill_streak = 0; }
   std::uint16_t HealCount() override { return heals; }
   void SetHealCount(std::uint16_t count) override { heals = count; }
   void RestoreIdle(int actor) override { Event(0x8009E5C4, actor, phase); }

@@ -140,8 +140,6 @@ struct AbilityFixture {
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
   decltype(Battle_floatingLabelCount) saved_label_count =
       Battle_floatingLabelCount;
-  decltype(Battle_abilityInputResult) saved_input_result =
-      Battle_abilityInputResult;
   int saved_tick_speed = State_tickSpeed;
   std::uint8_t saved_difficulty = VS::State::LiveScriptFlag(1);
   Battle_ActionState action{};
@@ -185,7 +183,6 @@ struct AbilityFixture {
     Input_buttonsPressed.allButtons = PADRright;
     Battle_floatingLabels = &labels;
     Battle_floatingLabelCount = 0;
-    Battle_abilityInputResult = 1;
     State_tickSpeed = 2;
     VS::State::SetLiveScriptFlag(1, 0);
     Prepare();
@@ -205,7 +202,6 @@ struct AbilityFixture {
     Audio_Seq_unusedScoredata = saved_score;
     Battle_floatingLabels = saved_labels;
     Battle_floatingLabelCount = saved_label_count;
-    Battle_abilityInputResult = saved_input_result;
     State_tickSpeed = saved_tick_speed;
     VS::State::SetLiveScriptFlag(1, saved_difficulty);
   }
@@ -1999,7 +1995,8 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     Input_buttonsPressed.allButtons = kButtons[slot - 1];
     VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
     fixture.action.abilityTimer = 100 + delta;
-    const auto streak = Audio_Seq_unusedScoredata.chainStreak;
+    constexpr int kStreak = 7;
+    Audio_Seq_unusedScoredata.chainStreak = kStreak;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     const bool success = delta > 0 && delta <= margin;
     const int result = delta <= -margin      ? 0
@@ -2013,8 +2010,9 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     fixture.CheckInputResult(success ? (defense ? 2 : 1) : 0,
                              success ? slot : 0);
     CHECK(fixture.action.abilityTimer == 102 + delta);
+    // A successful defense extends the streak; a missed input ends it (#448).
     CHECK(Audio_Seq_unusedScoredata.chainStreak ==
-          streak + (defense && success && streak < 65535 ? 1 : 0));
+          (success ? kStreak + (defense ? 1 : 0) : 0));
   }
 }
 

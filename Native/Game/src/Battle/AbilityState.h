@@ -19,6 +19,5 @@
 extern Battle_Actor* Battle_characterState;
 extern u_short Battle_breakArtPointRequirements[15][4];
 extern u_short Battle_battleAbilityPointRequirements[150];
-extern short Battle_abilityInputResult;
 
 #endif // VS_BATTLE_ABILITYSTATE_H_DECLS

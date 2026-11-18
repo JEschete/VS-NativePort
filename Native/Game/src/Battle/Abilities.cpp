@@ -280,7 +280,9 @@ void JudgeTimedInput(const ActionRequestView& action, int slot, int margin,
     MarkInputAttempted(host, kNoFollowUp);
   }
   if (host.Field(AbilityField::kAbilityInputSucceeded) == kNoFollowUp) {
-    host.ClearAbilityInputResult();
+    // The original cleared vs_main_scoredata.chainStreak (+0x110,
+    // 0x8005FFB0) at 0x80078F18.
+    host.SetChainStreak(0);
   }
 }
 

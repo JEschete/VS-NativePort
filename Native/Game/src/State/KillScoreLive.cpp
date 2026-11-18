@@ -113,4 +113,10 @@ void UpdateLiveWeaponKillStreak(int /*unused*/) {
       static_cast<std::uint8_t>(player->stats->weapon.blade.category));
   StoreLiveKillScore(score);
 }
+
+// decomp: BATTLE.PRG func_80070F28 at 0x80071284 (`sb zero` to
+// vs_main_scoredata+0x10F, 0x8005FFAF).
+void ResetLiveWeaponKillStreak() noexcept {
+  Audio_Seq_unusedScoredata.weaponKillStreak = 0;
+}
 }  // namespace VS::State

@@ -19,7 +19,7 @@ u_short Battle_breakArtPointRequirements[15][4]; /* contents: module image (Modu
 // decomp: vs_main_battleAbilitiesPointsRequirements (vs_main_battleAbilitiesPointsRequirements@SLUS_010.40)
 u_short Battle_battleAbilityPointRequirements[150]; /* contents: module image (ModuleData.cpp) */
 
-// decomp: D_8005FFB0 (D_8005FFB0@SLUS_010.40)
-short Battle_abilityInputResult;
+// D_8005FFB0 was vs_main_scoredata.chainStreak (+0x110), not a separate global
+// (#448; Battle/Abilities.cpp JudgeTimedInput).
 
 }  // extern "C"

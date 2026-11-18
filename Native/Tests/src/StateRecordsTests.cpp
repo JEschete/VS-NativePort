@@ -771,3 +771,32 @@ TEST_CASE("The live weapon kill streak reads the action and the player",
             Refused("UpdateWeaponKillStreak", "no action state"),
             Refused("UpdateWeaponKillStreak", "no player stats")});
 }
+
+TEST_CASE("Committing a spell ends the live weapon kill streak only",
+          "[state-boot]") {
+  LiveScoreState saved;
+  ChannelWarnings warnings("state");
+  KillScore start{};
+  start.weapon_kill_streak_blade_category = 2;
+  start.weapon_kill_streak = 5;
+  start.chain_streak = 9;
+  VS::State::StoreLiveKillScore(start);
+  // The original stored one zero byte at vs_main_scoredata+0x10F (#448).
+  VS::State::ResetLiveWeaponKillStreak();
+  KillScore expected = start;
+  expected.weapon_kill_streak = 0;
+  CHECK(VS::State::LiveKillScore() == expected);
+
+  // The kept blade category lets the next weapon kill extend from zero.
+  Battle_ActionState action{};
+  action.selection.actionId = 5;
+  Battle_actionState = &action;
+  Battle_ActorStats stats{};
+  stats.weapon.blade.category = 2;
+  Battle_Actor player{};
+  player.stats = &stats;
+  Battle_characterState = &player;
+  VS::State::UpdateLiveWeaponKillStreak(0);
+  CHECK(VS::State::LiveKillScore().weapon_kill_streak == 1);
+  CHECK(warnings.messages.empty());
+}

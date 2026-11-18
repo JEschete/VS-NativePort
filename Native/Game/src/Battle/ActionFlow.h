@@ -17,6 +17,5 @@ extern Menu_Framework_ActionSelection* Battle_actionSelection;
 extern u_int Battle_actionFlowMode;
 extern int Battle_recoveryRewardMode;
 extern Battle_ActionState* Battle_actionState;
-extern char Battle_spellCommitFlag;
 
 #endif // VS_BATTLE_ACTIONFLOW_H_DECLS

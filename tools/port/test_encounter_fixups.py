@@ -225,8 +225,10 @@ int func_800F9800(void) {
         generated = (Path(__file__).resolve().parents[2] / r"Native\Game\src\Battle\ActionFlow.cpp").read_text(
             encoding="utf-8")
         for symbol in ("Battle_actionState", "Battle_actionFlowMode", "Battle_recoveryRewardMode",
-                       "Battle_actionSelection", "Battle_spellCommitFlag"):
+                       "Battle_actionSelection"):
             self.assertIn(symbol, generated)
+        # D_8005FFAF aliased vs_main_scoredata.weaponKillStreak (#448).
+        self.assertNotIn("Battle_spellCommitFlag", generated)
         for name in ("Battle_ResolveEnemyDefeat", "Battle_PlayWeaponHitSounds",
                      "Battle_ApplyActionSourceEffects", "Battle_BeginActorDefeatAnimation",
                      "Battle_ApplyLearnedActionUnlocks"):

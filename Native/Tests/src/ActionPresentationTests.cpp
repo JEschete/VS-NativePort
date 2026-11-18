@@ -159,6 +159,19 @@ TEST_CASE(
   CHECK(world->heals == 1000);
   CHECK(std::ranges::find(world->events, 0x800708EC) != world->events.end());
 }
+TEST_CASE("F00108 ends the weapon kill streak from the first spell",
+          "[action-presentation][F00108]") {
+  // The original cleared vs_main_scoredata.weaponKillStreak for ids >= 55
+  // (#448).
+  for (const auto& [action, streak] : {std::pair{1, 1}, std::pair{54, 1},
+                                       std::pair{55, 0}, std::pair{184, 0}}) {
+    CAPTURE(action);
+    auto world = std::make_unique<World>();
+    world->Current().selection.data.action = static_cast<std::uint16_t>(action);
+    REQUIRE(b::CommitSelectedAction(0, *world));
+    CHECK(world->weapon_kill_streak == streak);
+  }
+}
 TEST_CASE(
     "F00109 preserves current postdispatch action and finishes after callbacks",
     "[action-presentation][F00109]") {

@@ -33,6 +33,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "State/KillScoreLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 extern "C" {
 #include "ActorAssets.h"
@@ -242,7 +243,7 @@ class LiveWorld final : public ActionPresentationWorld {
     Audio_Seq_unusedScoredata.weaponAttacks[category] = count;
   }
   int TargetDistance() override { return LiveActionTargetDistance(); }
-  void ClearSpellCommit() override { Battle_spellCommitFlag = 0; }
+  void ResetWeaponKillStreak() override { State::ResetLiveWeaponKillStreak(); }
   std::uint16_t HealCount() override {
     return Audio_Seq_unusedScoredata.healCount;
   }

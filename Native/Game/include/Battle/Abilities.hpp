@@ -139,7 +139,6 @@ class AbilityHost {
   virtual void QueueChainCount(int count) = 0;
   virtual void ShowAbilityTimingCue(int frames) = 0;
   virtual void QueueAbilityTimingResult(int result) = 0;
-  virtual void ClearAbilityInputResult() = 0;
   [[nodiscard]] virtual std::uint32_t PressedButtons() const = 0;
   [[nodiscard]] virtual bool EffectsBusy() const = 0;
   [[nodiscard]] virtual bool IsActorActionAnimationBusy(int actor) const = 0;

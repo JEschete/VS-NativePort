@@ -19,7 +19,7 @@ int Battle_recoveryRewardMode;
 // decomp: D_800F19CC (D_800F19CC@BATTLE/BATTLE.PRG)
 Battle_ActionState* Battle_actionState;
 
-// decomp: D_8005FFAF (D_8005FFAF@SLUS_010.40)
-char Battle_spellCommitFlag;
+// D_8005FFAF was vs_main_scoredata.weaponKillStreak (+0x10F), not a separate
+// global (#448; State/KillScoreLive.cpp ResetLiveWeaponKillStreak).
 
 }  // extern "C"

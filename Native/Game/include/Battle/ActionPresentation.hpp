@@ -93,7 +93,7 @@ class ActionPresentationWorld {
   virtual std::uint16_t WeaponAttacks(std::size_t category) = 0;
   virtual void SetWeaponAttacks(std::size_t category, std::uint16_t count) = 0;
   virtual int TargetDistance() = 0;
-  virtual void ClearSpellCommit() = 0;
+  virtual void ResetWeaponKillStreak() = 0;
   virtual std::uint16_t HealCount() = 0;
   virtual void SetHealCount(std::uint16_t count) = 0;
   virtual void RestoreIdle(int actor) = 0;

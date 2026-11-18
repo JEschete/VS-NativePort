@@ -18,4 +18,6 @@ void RecordLiveEnemyKillScore(Battle_Actor* enemy);
 // Reads the selected action and the player's blade category. A missing
 // action state, player or player stats is refused with a "state" warning.
 void UpdateLiveWeaponKillStreak(int unused);
+// Committing an action from the first spell up ends the weapon kill streak.
+void ResetLiveWeaponKillStreak() noexcept;
 }  // namespace VS::State

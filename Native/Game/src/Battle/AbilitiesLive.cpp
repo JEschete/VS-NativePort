@@ -240,7 +240,6 @@ class LiveAbilityHost final : public battle::AbilityHost {
   void QueueAbilityTimingResult(int result) override {
     battle::LiveQueueAbilityTimingResult(result);
   }
-  void ClearAbilityInputResult() override { Battle_abilityInputResult = 0; }
   [[nodiscard]] std::uint32_t PressedButtons() const override {
     return Input_buttonsPressed.allButtons;
   }

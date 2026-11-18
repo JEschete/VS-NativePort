@@ -233,7 +233,9 @@ bool CommitSelectedAction(int target_selection_mode,
   world.SetZoom(distance >= kFarDistance && zoom == 1 ? 0 : zoom);
   ResetInputs(world);
   if (world.Selection().Id() >= kFirstSpell) {
-    world.ClearSpellCommit();
+    // The original cleared vs_main_scoredata.weaponKillStreak (+0x10F,
+    // 0x8005FFAF) at 0x80071284.
+    world.ResetWeaponKillStreak();
     if (std::ranges::find(kHeals, world.Selection().Id()) != kHeals.end() &&
         world.HealCount() < kHealCountLimit) {
       world.SetHealCount(static_cast<std::uint16_t>(world.HealCount() + 1));

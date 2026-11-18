@@ -784,9 +784,6 @@ struct FakeAbilityHost final : battle::AbilityHost {
   void QueueAbilityTimingResult(int result) override {
     calls.push_back(Call("Result", {result}));
   }
-  void ClearAbilityInputResult() override {
-    calls.emplace_back("ClearResult()");
-  }
   [[nodiscard]] std::uint32_t PressedButtons() const override {
     return pressed;
   }
@@ -1104,10 +1101,30 @@ TEST_CASE("Ability timing grades a chain input against the window",
       CHECK(host.Field(Field::kChainAbilitySlot) == 2);
       CHECK(host.Field(Field::kPreviousChainInput) == 2);
     } else {
-      CHECK(host.calls == Calls{Call("Result", {result}), "ClearResult()"});
+      CHECK(host.calls == Calls{Call("Result", {result})});
       CHECK(host.Field(Field::kAbilityInputSucceeded) == 0);
       CHECK(host.Field(Field::kChainAbilitySlot) == 0);
     }
+  }
+}
+
+TEST_CASE("A missed chain input ends the chain streak",
+          "[battle][battle-targeting]") {
+  // The original cleared vs_main_scoredata.chainStreak unless the input was
+  // accepted (#448).
+  for (const auto& [timer, streak] :
+       {std::pair{40, 0}, std::pair{50, 0}, std::pair{55, 7}, std::pair{65, 0},
+        std::pair{71, 0}}) {
+    CAPTURE(timer);
+    FakeAbilityHost host;
+    SetUpChain(host);
+    host.busy_actors = {0};
+    host.pressed = kTriangle;
+    host.chain_streak = 7;
+    host.fields[Field::kAbilityWindow] = 50;
+    host.fields[Field::kAbilityTimer] = timer;
+    battle::UpdateBattleAbilityTiming(host);
+    CHECK(host.chain_streak == streak);
   }
 }
 
@@ -1178,12 +1195,14 @@ TEST_CASE("Ability timing caps the streak and ignores a held button",
   SetUpDefense(held);
   held.busy_actors = {5};
   held.pressed = kCircle;
+  held.chain_streak = 7;
   held.fields[Field::kPreviousChainButtons] = static_cast<int>(kCircle);
   held.fields[Field::kAbilityWindow] = 50;
   held.fields[Field::kAbilityTimer] = 63;
   battle::UpdateBattleAbilityTiming(held);
-  CHECK(held.calls == Calls{"Result(2)", "ClearResult()"});
+  CHECK(held.calls == Calls{"Result(2)"});
   CHECK(held.Field(Field::kAbilityInputAttempted) == 0);
+  CHECK(held.chain_streak == 0);
 }
 
 TEST_CASE("Ability timing restores idle poses before advancing",
