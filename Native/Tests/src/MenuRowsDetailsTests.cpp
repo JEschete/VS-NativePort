@@ -2369,4 +2369,40 @@ TEST_CASE("Live equipment detail statics reset the DP/PP bars",
   CHECK(warnings.messages.empty());
 }
 
+// #372: the original copied an accessory's classes into type slots 36-47. Its
+// type page draws the same three rows and bars whatever those slots hold.
+TEST_CASE("Accessory type pages draw only the three type rows",
+          "[menu][menu-rows-details]") {
+  struct Drawn {
+    std::vector<std::string> draws;
+    std::size_t packets = 0;
+  };
+  const auto draw = [](std::int16_t past_types) {
+    Details d;
+    d.state.subtype = fw::equipment_subtype::kAccessory;
+    d.state.enabled_pages = fw::stat_page::kAllEnabled;
+    d.state.page = fw::stat_page::kType;
+    d.state.stats[33] = 1;
+    d.state.stats[34] = 2;
+    d.state.stats[35] = 3;
+    std::fill_n(std::next(d.state.stats.begin(), 36), 12, past_types);
+    fw::DrawEquipmentStatPage(d.ctx, 0);
+    return Drawn{d.host.draws, d.host.queue.packets.size()};
+  };
+  const Drawn zeroed = draw(0);
+  const Drawn spilled = draw(17);
+  CHECK(zeroed.draws == spilled.draws);
+  CHECK(zeroed.packets == spilled.packets);
+  CHECK(zeroed.draws ==
+        std::vector<std::string>{
+            Call("Compared", {1, Xy(88, 64), 1, kStatSlot}),
+            TextCall("#BLUNT", Xy(64, 64), kGray, kStatSlot),
+            Call("Compared", {2, Xy(88, 80), 2, kStatSlot}),
+            TextCall("#EDGED", Xy(64, 80), kGray, kStatSlot),
+            Call("Compared", {3, Xy(88, 96), 3, kStatSlot}),
+            TextCall("#PIERCING", Xy(64, 96), kGray, kStatSlot),
+            Call("Prompt", {24, 48, 135, 12}),
+            Call("Icon", {1, 16, 46, fw::detail_layer::kButtonIcon})});
+}
+
 }  // namespace

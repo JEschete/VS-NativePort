@@ -575,18 +575,18 @@ class RecordingAccessoryHost final : public inv::AccessoryPreviewHost {
 };
 
 // The columns spread from classes 1-8, affinities 20-27 and types 100, 101,
-// 102 and 0xFFFF; types[i & 7] reads on into the classes (16C.c:311).
+// 102 and 0xFFFF; the type columns past the four types stay zero (#372).
 void CheckSpreadColumns(const inv::AccessoryStatColumns& columns) {
   for (std::size_t i = 0; i < 16; ++i) {
     CHECK(columns.classes[i] == static_cast<std::int16_t>((i & 7) + 1));
     CHECK(columns.affinities[i] == static_cast<std::int16_t>(20 + (i & 7)));
   }
   CHECK(columns.types[0] == 100);
+  CHECK(columns.types[1] == 101);
   CHECK(columns.types[3] == -1);
-  CHECK(columns.types[4] == 1);
-  CHECK(columns.types[7] == 4);
-  CHECK(columns.types[11] == -1);
-  CHECK(columns.types[12] == 1);
+  for (std::size_t i = 4; i < 16; ++i) {
+    CHECK(columns.types[i] == 0);
+  }
 }
 
 TEST_CASE("SetAccessoryPreviewStats spreads the accessory's stat columns",
@@ -992,12 +992,14 @@ TEST_CASE("SetLiveAccessoryPreviewStats spreads Ashley's accessory",
   accessory.id = 1;
   accessory.classes[0] = 6;
   accessory.affinities[2] = -4;
+  accessory.types[1] = -7;
   Menu_Framework_armor = Audio_Seq_unusedInventory.armor;
   inv::SetLiveAccessoryPreviewStats(2);
   CHECK(Menu_Framework_equipmentStats[0] == 6);
   CHECK(Menu_Framework_equipmentStats[8] == 6);
   CHECK(Menu_Framework_equipmentStats[16 + 2] == -4);
-  CHECK(Menu_Framework_equipmentStats[32 + 4] == 6);
+  CHECK(Menu_Framework_equipmentStats[32 + 1] == -7);
+  CHECK(Menu_Framework_equipmentStats[32 + 4] == 0);
   CHECK(Menu_Framework_equipmentSubtype == 32);
   CHECK(Menu_Framework_currentStatusViewItem == 2);
 }

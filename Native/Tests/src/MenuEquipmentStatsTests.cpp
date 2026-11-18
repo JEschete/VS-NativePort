@@ -130,7 +130,7 @@ TEST_CASE("armor detail marks the equipped limb and keeps four type values",
   CHECK(state.primary[4] == 15);
 }
 
-TEST_CASE("accessory status preserves the original adjacent-member values",
+TEST_CASE("accessory status copies only its four type values",
           "[equipment-stat-details]") {
   items::AccessorySpawnLoadout accessory{};
   accessory.accessory.id = 1;
@@ -142,9 +142,10 @@ TEST_CASE("accessory status preserves the original adjacent-member values",
   accessory.current_agility = 33;
 
   framework::EquipmentDetailsState state{};
+  state.stats.fill(99);
   const auto effects = status::PopulateAccessoryStats(state, accessory);
-  const std::array<std::int16_t, 16> expected_types{1, 2, 3, 4, 10, 11, 12, 13,
-                                                    1, 2, 3, 4, 10, 11, 12, 13};
+  const std::array<std::int16_t, 16> expected_types{1, 2, 3, 4, 0, 0, 0, 0,
+                                                    0, 0, 0, 0, 0, 0, 0, 0};
 
   CHECK(effects.enabled_pages == 7);
   CHECK(state.subtype == framework::equipment_subtype::kAccessory);

@@ -246,15 +246,12 @@ EquipmentStatsEffects PopulateAccessoryStats(
           SignedWord(accessory.affinities[source]);
     }
 
-    // The original reads types[4..7] from the adjacent classes member. Keep
-    // the observed values while avoiding an out-of-bounds typed-array access.
-    for (std::size_t i = 0; i < kEquipmentClassStats; ++i) {
-      const std::size_t source = i % kClassesPerPart;
-      const std::uint16_t value =
-          source < accessory.types.size()
-              ? accessory.types[source]
-              : accessory.classes[source - accessory.types.size()];
-      state.stats[kTypeStats + i] = SignedWord(value);
+    // The original copied types[i & 7] into 16 slots (MENU4.PRG
+    // _drawAccessoryInfo), reading past the four types into the adjacent
+    // classes. Only slots 32-35 belong to the accessory's types and the type
+    // page draws 33-35, so the copy stops at the four types (#372).
+    for (std::size_t i = 0; i < accessory.types.size(); ++i) {
+      state.stats[kTypeStats + i] = SignedWord(accessory.types[i]);
     }
     const Items::LoadoutAttributes attributes{
         .current_strength = accessory.current_strength,

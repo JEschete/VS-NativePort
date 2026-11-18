@@ -401,12 +401,12 @@ bool SetAccessoryPreviewStats(AccessoryPreviewHost& host,
       columns.classes[i] = static_cast<std::int16_t>(stats.classes[source]);
       columns.affinities[i] =
           static_cast<std::int16_t>(stats.affinities[source]);
-      // The original read types[i & 7] past its four entries, into classes
-      // (16C.c:328); the record keeps classes right after types.
-      columns.types[i] = static_cast<std::int16_t>(
-          source < stats.types.size()
-              ? stats.types[source]
-              : stats.classes[source - stats.types.size()]);
+    }
+    // The original read types[i & 7] past its four entries, into the classes
+    // (16C.c:328). Only the first four type columns belong to the accessory
+    // and the type page draws columns 1-3, so the rest stay zero (#372).
+    for (std::size_t i = 0; i < stats.types.size(); ++i) {
+      columns.types[i] = static_cast<std::int16_t>(stats.types[i]);
     }
     host.StoreStatColumns(columns);
     host.SetPrimaryStats(stats.strength, stats.intelligence, stats.agility,
