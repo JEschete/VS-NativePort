@@ -409,13 +409,6 @@
     <ClCompile Include="src\Render\PaletteAnimationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Render\ResultAtlas.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Render\RoomDraw.cpp" />
     <ClCompile Include="src\Render\RoomDrawLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -552,7 +545,6 @@
     <ClInclude Include="src\Render\Palette.h" />
     <ClInclude Include="src\Render\Primitives.h" />
     <ClInclude Include="src\Render\Render.h" />
-    <ClInclude Include="src\Render\ResultAtlas.h" />
     <ClInclude Include="src\Render\ScreenTransition.h" />
     <ClInclude Include="src\Render\Text\CompactFont.h" />
     <ClInclude Include="src\Render\Text\VariableFont.h" />

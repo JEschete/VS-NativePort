@@ -107,7 +107,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Save/NativeResume.h"
-#include "State/RoomLoad.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
 
@@ -1118,9 +1117,7 @@ class LiveRoomLoadHost final
     Actors_ashleyMoveInput[0] = 1;
     Effects_effectBusyFlags = 0;
     static_cast<void>(Actors::SetOtherLiveActorLogicEnabled(1));
-    State_roomLoadResetWordTwo = 0;
-    State_roomLoadResetWordThree = 0;
-    State_roomLoadResetWordOne = 0;
+    // The original also zeroes vs_main_unused0-2 here; nothing reads them.
     Input_buttonRepeat = 0;
     Input_releasedButtons = 0;
     Input_buttonsPressed.allButtons = 0;

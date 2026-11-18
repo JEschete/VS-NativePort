@@ -562,11 +562,9 @@ TEST_CASE("Encounter floor rejects blocked partial pit and invalid samples",
           "[combat][encounter][floor]") {
   FloorFixture fixture;
   auto expected = VS::Game::EncounterFloor::kBlocked;
-  SECTION("blocked") { fixture.cells[0].doorPassability = 5; }
-  SECTION("partial") { fixture.cells[0].doorPassability = 1; }
-  SECTION("unsupported collision code") {
-    fixture.cells[0].doorPassability = 7;
-  }
+  SECTION("blocked") { fixture.cells[0].passability = 5; }
+  SECTION("partial") { fixture.cells[0].passability = 1; }
+  SECTION("unsupported collision code") { fixture.cells[0].passability = 7; }
   SECTION("pit") {
     fixture.cells[0].isPit = 1;
     expected = VS::Game::EncounterFloor::kPit;

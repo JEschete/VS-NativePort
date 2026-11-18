@@ -18,14 +18,18 @@ typedef struct Audio_CutsceneStreamState Audio_CutsceneStreamState;
 // decomp: FSoundCutsceneStreamState (src/include/sound.h:597)
 typedef struct Audio_CutsceneStreamState {
     /* 0x00 */ void* currentChunk;
-    /* 0x04 */ void* auxiliaryMask;
+    // Where a repeating stream restarts (header word 5 past the first chunk);
+    // NULL when formatFlags bit 1 is clear (25AC.c:6461).
+    /* 0x04 */ void* repeatChunk;
+    // Bit 0 stereo, bit 1 the stream repeats from repeatChunk.
     /* 0x08 */ int formatFlags;
     /* 0x0C */ int voiceMask;
     /* 0x10 */ int voiceIndex;
     /* 0x14 */ u_int totalPages; // Probably a bad name judged on the usage in
                                  // Sound_Cutscene_BeginPlayback
     /* 0x18 */ int currentPage;
-    /* 0x1C */ int reserved1C;
+    // The page count the refill restores when it jumps to repeatChunk.
+    /* 0x1C */ int repeatPages;
     /* 0x20 */ int reserved20;
     /* 0x24 */ int reserved24;
     /* 0x28 */ int pageIndex;

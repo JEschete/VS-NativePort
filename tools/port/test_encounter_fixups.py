@@ -3114,8 +3114,8 @@ int func_800F9800(void) {
         # A35-06: the typed frame step (EventCameraFrameLive.cpp) now drives the tracks, not the copy.
         self.assertNotRegex(generated, r"\bEvent_UpdateEventCameraTracks\(")
         frame = (root / r"Native\Game\src\Event\EventCameraFrameLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("UpdateEventCameraTrackEntry(&camera.lookAt, &camera.eye);", frame)
-        self.assertIn("UpdateEventCameraTrackEntry(&camera.eye, &camera.lookAt);", frame)
+        self.assertIn("UpdateEventCameraTrackEntry(&camera.look_at, &camera.eye);", frame)
+        self.assertIn("UpdateEventCameraTrackEntry(&camera.eye, &camera.look_at);", frame)
 
     def test_camera_follow_stop_and_field_returns_are_owned_by_the_typed_control(self):
         # #276 row 35 A35-03: the typed control (EventCameraControl.cpp) replaces the stop, follow and field
@@ -3140,7 +3140,7 @@ int func_800F9800(void) {
             self.assertNotRegex(generated, rf"\bEvent_{name}\(")
         # A35-06: the typed frame step (EventCameraFrameLive.cpp) now drives the lenses and the shake.
         frame = (root / r"Native\Game\src\Event\EventCameraFrameLive.cpp").read_text(encoding="utf-8")
-        self.assertIn("UpdateEventLensTweenEntry(&camera.farClip);", frame)
+        self.assertIn("UpdateEventLensTweenEntry(&camera.far_clip);", frame)
         self.assertIn("UpdateEventCameraShakeEntry();", frame)
         vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
         self.assertEqual(vm.count("Event_CommandCameraLensOrShakeOpcode"), 5)

@@ -1483,7 +1483,7 @@ struct NavigationInspectionFixture : ReactionInspectionFixture {
     std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
     std::fill(samples.descriptors.begin() + 9, samples.descriptors.end(), 1);
     std::fill(samples.patterns.begin() + 16, samples.patterns.end(), 127);
-    cells[1].doorPassability = 5;
+    cells[1].passability = 5;
     cells[2].isPit = 1;
     Field_roomData.collisionMap = &samples.header;
     Field_roomData.tileCells = cells.data();

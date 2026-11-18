@@ -761,7 +761,7 @@ TEST_CASE("Unchecked cell readers see a missing cell as the absent word",
   const bool any_flag =
       off_grid->isPit || off_grid->hasEventTrigger ||
       off_grid->hasRoomTrigger || off_grid->blocksSphereTerrain ||
-      off_grid->doorPassability != 0 || off_grid->occlusionAndFloorFlags != 0;
+      off_grid->passability != 0 || off_grid->occlusionAndFloorFlags != 0;
   CHECK_FALSE(any_flag);
 }
 

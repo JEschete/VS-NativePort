@@ -36,10 +36,8 @@ T00516.004,opaque,1,Battle::Ai::ActionTiming.opaque8,unk8,0x8,"Used, but its mea
 T00516.005,opaque,1,Battle::Ai::ActionTiming.opaqueA,unkA,0xA,"Used, but its meaning is not established",Battle::Ai::ApplySimulatedActionResults@800DC888 Battle::Ai::ActorMpRatio,,
 T00516.006,opaque,1,Battle::Ai::ActionTiming.opaqueC,unkC,0xC,"Used, but its meaning is not established",Battle::Ai::ApplySimulatedActionResults@800DC888 Battle::Ai::ActorStatusConditionScore,,
 T00532.001,opaque,1,Battle::Ai::ActorAiState.opaque1,unk1,0x1,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x1,
-T00532.090,opaque,1,Battle::Ai::ActorAiState.opaque12A,unk12A,0x12A,"Used, but its meaning is not established",Battle::Ai::SetTemporaryAwarenessIndicator@800D8260,*Battle::Ai::actorAiStates+0x12A,
 T00532.094,opaque,1,Battle::Ai::ActorAiState.opaque12F,unk12F,0x12F,"Used, but its meaning is not established",Battle::Ai::UnlinkEngagedActor@800DBF00,*Battle::Ai::actorAiStates+0x12F,
 T00532.095,opaque,1,Battle::Ai::ActorAiState.opaque130,unk130,0x130,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x130,
-T00532.099,opaque,1,Battle::Ai::ActorAiState.opaque138,unk138,0x138,"Used, but its meaning is not established",Battle::Ai::SetTemporaryAwarenessIndicator@800D8260,*Battle::Ai::actorAiStates+0x138,
 T00532.100,opaque,1,Battle::Ai::ActorAiState.opaque13A,unk13A,0x13A,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x13A,
 T00532.101,opaque,1,Battle::Ai::ActorAiState.opaque13C,unk13C,0x13C,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x13C,
 T00532.109,opaque,1,Battle::Ai::ActorAiState.opaque15D,unk15D,0x15D,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x15D,
@@ -52,10 +50,7 @@ T00532.004,opaque,1,Battle::Ai::ActorAiState.opaque4,unk4,0x4,"Used, but its mea
 T00532.041,opaque,1,Battle::Ai::ActorAiState.opaque44,unk44,0x44,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x44,
 T00532.005,opaque,1,Battle::Ai::ActorAiState.opaque5,unk5,0x5,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x5,
 T00532.008,opaque,1,Battle::Ai::ActorAiState.opaque8,unk8,0x8,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x8,
-T00532.054,opaque,1,Battle::Ai::ActorAiState.opaque8E,unk8E,0x8E,"Used, but its meaning is not established",Battle::Ai::UpdateEngagementBuildup@800DBFE4,*Battle::Ai::actorAiStates+0x8E,
 T00532.009,opaque,1,Battle::Ai::ActorAiState.opaque9,unk9,0x9,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0x9,
-T00532.058,opaque,1,Battle::Ai::ActorAiState.opaque98,unk98,0x98,"Used, but its meaning is not established",Battle::Ai::UpdateEngagementBuildup@800DBFE4,*Battle::Ai::actorAiStates+0x98,
-T00532.059,opaque,1,Battle::Ai::ActorAiState.opaque9A,unk9A,0x9A,"Used, but its meaning is not established",Battle::Ai::UpdateEngagementBuildup@800DBFE4 Battle::Ai::NotifyActionRelationshipChanges@800DEEA4,*Battle::Ai::actorAiStates+0x9A,
 T00532.011,opaque,1,Battle::Ai::ActorAiState.opaqueD,unkD,0xD,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0xD,
 T00532.012,opaque,1,Battle::Ai::ActorAiState.opaqueE,unkE,0xE,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0xE,
 T00532.077,opaque,1,Battle::Ai::ActorAiState.opaqueE7,unkE7,0xE7,"Used, but its meaning is not established",,*Battle::Ai::actorAiStates+0xE7,
@@ -74,11 +69,6 @@ T00385.055,opaque,1,Battle::Ai::AiCreationView.opaque227,field227,0x227,"Used, b
 T00385.017,opaque,1,Battle::Ai::AiCreationView.opaque89,field89,0x89,"Used, but its meaning is not established",Battle::Ai::CreateActorAiState@800E6178,,
 T00385.018,opaque,1,Battle::Ai::AiCreationView.opaque8A,field8A,0x8A,"Used, but its meaning is not established",Battle::Ai::CreateActorAiState@800E6178,,
 T00385.023,opaque,1,Battle::Ai::AiCreationView.opaque9C,field9C,0x9C,"Used, but its meaning is not established",Battle::Ai::CreateActorAiState@800E6178,,
-T00527.006,opaque,1,Battle::Ai::AiModelView.opaque14,unk14,0x14,"Used, but its meaning is not established",,,
-T00527.008,opaque,1,Battle::Ai::AiModelView.opaque1C,unk1C,0x1C,"Used, but its meaning is not established",,,
-T00527.010,opaque,1,Battle::Ai::AiModelView.opaque26,unk26,0x26,"Used, but its meaning is not established",,,
-T00527.015,opaque,1,Battle::Ai::AiModelView.opaque5B0Bit4,unk5B0_4,0x5B0.4,"Used, but its meaning is not established",,,
-T00527.012,opaque,1,Battle::Ai::AiModelView.opaque5C,unk5C,0x5C,"Used, but its meaning is not established",,,
 T00527.003,opaque,1,Battle::Ai::AiModelView.opaqueABit5,unk8_21,0xA.5,"Used, but its meaning is not established",Battle::Ai::UpdateFlightDirectionalMovement@800E1238,,
 T00611.001,opaque,1,Battle::Ai::ApproachRelationBits.opaque0Bit1,f1,0x0.1,"Used, but its meaning is not established",Battle::Ai::UpdateTargetApproachMovement@800E24EC,,
 T00611.002,opaque,1,Battle::Ai::ApproachRelationBits.opaque0Bit2,f2,0x0.2,"Used, but its meaning is not established",Battle::Ai::UpdateTargetApproachMovement@800E24EC,,
@@ -164,8 +154,6 @@ T00396.005,opaque,1,Battle::Ai::PerceptionActorView.opaqueBBit0,unkB_0,0xB.0,"Us
 T00399.040,opaque,1,Battle::Ai::PerceptionUpdateView.opaque114,unk114,0x114,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
 T00399.042,opaque,1,Battle::Ai::PerceptionUpdateView.opaque120,unk120,0x120,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
 T00399.043,opaque,1,Battle::Ai::PerceptionUpdateView.opaque124,unk124,0x124,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
-T00399.045,opaque,1,Battle::Ai::PerceptionUpdateView.opaque12A,unk12A,0x12A,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
-T00399.049,opaque,1,Battle::Ai::PerceptionUpdateView.opaque138,unk138,0x138,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
 T00399.005,opaque,1,Battle::Ai::PerceptionUpdateView.opaque14,unk14,0x14,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
 T00399.051,opaque,1,Battle::Ai::PerceptionUpdateView.opaque156,unk156,0x156,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
 T00399.007,opaque,1,Battle::Ai::PerceptionUpdateView.opaque18,unk18,0x18,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
@@ -184,7 +172,6 @@ T00399.001,opaque,1,Battle::Ai::PerceptionUpdateView.opaque8,unk8,0x8,"Used, but
 T00399.003,opaque,1,Battle::Ai::PerceptionUpdateView.opaqueE,unkE,0xE,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
 T00399.038,opaque,1,Battle::Ai::PerceptionUpdateView.opaqueFB,unkFB,0xFB,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
 T00381.012,opaque,1,Battle::Ai::PlanEvaluationView.opaque19A,f19A,0x19A,"Used, but its meaning is not established",Battle::Ai::RebuildActorActionPlans@800DEC88,,
-T00381.007,opaque,1,Battle::Ai::PlanEvaluationView.opaque9A,timer,0x9A,"Used, but its meaning is not established",Battle::Ai::RebuildActorActionPlans@800DEC88,,
 T00381.009,opaque,1,Battle::Ai::PlanEvaluationView.opaqueE7,fE7,0xE7,"Used, but its meaning is not established",Battle::Ai::RebuildActorActionPlans@800DEC88,,
 T00381.010,opaque,1,Battle::Ai::PlanEvaluationView.opaqueE8,fE8,0xE8,"Used, but its meaning is not established",Battle::Ai::RebuildActorActionPlans@800DEC88,,
 T00398.001,opaque,1,Battle::Ai::PositionLinkView.opaque4,unk4,0x4,"Used, but its meaning is not established",Battle::Ai::UpdateActorPerception@800D8EF4,,
@@ -348,8 +335,6 @@ T00248.000,opaque,1,Menu::Framework::PreviewPoseBytes.opaque0Bit0,unk0_0,0x0.0,"
 T00248.001,opaque,1,Menu::Framework::PreviewPoseBytes.opaque1Bit0,unk0_8,0x1.0,"Used, but its meaning is not established",Menu::Framework::ResetActorPreviewPose@800F9CB0,,
 T00248.002,opaque,1,Menu::Framework::PreviewPoseBytes.opaque2Bit0,unk0_16,0x2.0,"Used, but its meaning is not established",Menu::Framework::ResetActorPreviewPose@800F9CB0,,
 T00248.003,opaque,1,Menu::Framework::PreviewPoseBytes.opaque3Bit0,unk0_24,0x3.0,"Used, but its meaning is not established",Menu::Framework::ResetActorPreviewPose@800F9CB0,,
-T00254.005,opaque,1,Menu::Framework::PreviewPoseState.opaque11,unk11,0x11,Weapon fade-start field; native consumer now uses canonical model slot.,Menu::Inventory::ReloadEquipmentModels,*Battle::unusedGlobal1+0x11,G00409 aliases preview weapon slots2/3;issue116;legacy declaration retained
-T00254.002,opaque,1,Menu::Framework::PreviewPoseState.opaque8,unk8,0x8,Weapon flags bit4 enables preview drawing; native consumer uses canonical model slot.,Menu::Framework::ResetActorPreviewPose@800F9CB0,*Battle::unusedGlobal1+0x8,G00409 aliases preview weapon slots2/3;issue116;legacy declaration retained
 T00316.002,opaque,1,Menu::Loot::LootListItem.opaque2,unk2,0x2,"Used, but its meaning is not established",Menu::Loot::UpdateStackConsolidation Menu::Loot::AppendLootRow Menu::Loot::RenderLootRows Menu::Loot::UpdateLootSelection,,
 T00310.001,opaque,1,Menu::Score::Row.opaque1,unk1,0x1,"Used, but its meaning is not established",Menu::Score::CreateTitleRows Menu::Score::RenderTitles Menu::Score::CreateStatisticRows Menu::Score::CreateTimeTrialRows,,
 T00349.002,opaque,1,Menu::Score::ZudHeader.opaque2,unk2,0x2,"Used, but its meaning is not established",Menu::Score::LoadEnemyModelParts,,
@@ -362,8 +347,6 @@ T00671.002,opaque,1,Menu::TextBoxState.opaque6,unk6,0x6,"Used, but its meaning i
 T00626.001,opaque,1,Render::EffectFlatQuadPacket.opaque4,unk4,0x4,"Used, but its meaning is not established",Effects::Plg005::UpdateAnalyzeGrid func_800FEA10@800FEA10 func_800FC590@800FC590 func_800FD3EC@800FD3EC func_800FD1C4@800FD1C4 func_800FF54C@800FF54C,,
 T00627.004,opaque,1,Render::EffectGouraudQuadPacket.opaque4,unk4,0x4,"Used, but its meaning is not established",Effects::Plg005::UpdateAnalyzeGrid func_800FEA10@800FEA10 func_800FC590@800FC590 func_800FD3EC@800FD3EC func_800FD1C4@800FD1C4 func_800FF54C@800FF54C,,
 T00721.004,opaque,1,Render::ParticleQuadPacket.opaque4,unk4,0x4,"Used, but its meaning is not established",func_800FA760@800FA760 func_800FA920@800FA920 func_800FA778@800FA778 func_800FA858@800FA858 func_800FB2C8@800FB2C8 func_800FBE90@800FBE90,,
-T00596.002,opaque,1,Save::SaveFileSummary.opaque20,unk20,0x20,"Used, but its meaning is not established",Save::MemoryCard::PackageGameSave Save::MemoryCard::PackageClearSave,,
-T00594.002,opaque,1,Save::SaveSlotBase.opaque8,unk8,0x8,"Used, but its meaning is not established",Save::MemoryCard::ValidateAndApplyLoadedSave Save::MemoryCard::PackageGameSave Title::SaveCard::ValidateAndApplyLoadedSave Save::MemoryCard::PackageClearSave,,
 T00695.017,opaque,1,State::StateFlags.opaque11,unk11,0x11,"Used, but its meaning is not established",Menu::SelectTextBoxChoice@800C6C8C,Audio::Seq::unusedStateFlags=0x800615A9,
 T00695.087,opaque,1,State::StateFlags.opaque186,unk186,0x186,"Used, but its meaning is not established",Field::MarkSigilDoorUnlocked@8008E6DC Field::IsRoomSigilDoorUnlocked@8008E7BC,Audio::Seq::unusedStateFlags=0x8006171E,
 T00695.032,opaque,1,State::StateFlags.opaque20,unk20,0x20,"Used, but its meaning is not established",Field::RoomTriggerAtTile@8008D438 Field::DrawRoomTriggerMarkers@8008DF14 Field::ActiveRoomTriggers@8008E400,Audio::Seq::unusedStateFlags=0x800615B8,
@@ -457,7 +440,6 @@ G00421,global,2,Actors::sharedSequenceEntryParams,D_800F4938,,Holds a per-animat
 G00079,global,2,Actors::sheathedWeaponAnimationBases,D_800E909C,,Gives per-actor-kind animation bases used when the weapon is sheathed.,Actors::SetActorWeaponDrawn@8009D934 Actors::UpdateActorTextureAnimations@800AAE9C,Actors::sheathedWeaponAnimationBases=0x800E909C,catalog
 T00274.003,low-named,2,Audio::AkaoProgramFile.metadataTableA,MetadataTableA,0x410,First per-program metadata table,,,
 T00274.004,low-named,2,Audio::AkaoProgramFile.metadataTableB,MetadataTableB,0x610,Second per-program metadata table,,,
-T00282.001,low-named,2,Audio::CutsceneStreamState.auxiliaryMask,unk_Mask_0x4,0x4,Set when the stream starts and tested at page refills; meaning unresolved,Audio::Cutscene::StartStream@8001CEA8 Audio::Cutscene::RefillStreamBuffer@8001D438,Audio::Cutscene::streamState=0x80039B0C,
 T00289.011,low-named,2,Audio::VoiceScheduler.pad2A,field11_0x2a,0x2A,No access found,,Audio::Mixer::voiceScheduler=0x800378BA,
 T00289.012,low-named,2,Audio::VoiceScheduler.pad2B,field12_0x2b,0x2B,No access found,,Audio::Mixer::voiceScheduler=0x800378BB,
 T00629.018,low-named,2,Battle::ActionDefinition.resetsHitResults,flagsD_6,0xD.6,Hits are reset to outcome 4 after their effects (bit 0x4000 of the word at 0xC),,Battle::actionDefinitions=0x8004B9E9 stride 0x34,
@@ -573,7 +555,6 @@ T00373.003,low-named,2,Battle::Ai::ReactionView.settingsBit26,flag20,0x20,Bit 26
 T00373.006,low-named,2,Battle::Ai::ReactionView.settingsBit27,flag27,0x27,Bit 27 of the AI settings word,Battle::Ai::ApplyActorActionReaction@800DD000,,
 T00373.008,low-named,2,Battle::Ai::ReactionView.settingsBits21,flag2C,0x2C,Bits 21-22 of the AI settings word; 3 excludes the actor from relations,Battle::Ai::PropagateActorRelationships@800DD344,,
 T00373.004,low-named,2,Battle::Ai::ReactionView.settingsByte3Bit0,flag21,0x21,Bit 0 of settings byte 3,Battle::Ai::PropagateActorRelationships@800DD344,,
-T00373.001,low-named,2,Battle::Ai::ReactionView.usesRoomActionDelay,flag13,0x13,"When zero the room's default action delay applies, else 50",Battle::Ai::ApplyActorActionReaction@800DD000 Battle::Ai::PropagateActorRelationships@800DD344,,
 T00515.007,low-named,2,Battle::Ai::RelationWord.blocked,unk0_27,0x3.3,Path to the target is blocked (not read by decompiled code) (same bits as T00136 blocked),,,
 T00515.006,low-named,2,Battle::Ai::RelationWord.classificationTimer,unk0_20,0x2.4,Frames before the classification reverts (same bits as T00136 kindTimer),,,
 T00515.004,low-named,2,Battle::Ai::RelationWord.counter,unk0_8,0x1.0,Classification counter (same bits as T00136 counter),,,
@@ -652,7 +633,6 @@ T00215.003,low-named,2,Battle::TargetSphere.wirePhaseA,unk24,0x24,Wireframe anim
 T00215.004,low-named,2,Battle::TargetSphere.wirePhaseB,unk26,0x26,Wireframe animation phase advanced by 7 per shape step,Battle::BuildSphereWireframe@800C253C,,
 T00215.005,low-named,2,Battle::TargetSphere.wirePhaseC,unk28,0x28,Wireframe animation phase advanced by 11 per shape step,Battle::SetSphereVolumes@800C05EC Battle::BuildSphereWireframe@800C253C,,
 T00214.002,low-named,2,Battle::TargetSphereSetupView.depthAndYaw,unk20,0x20,Depth and camera yaw as one word,Battle::DrawSphere@800C0D78,*Battle::targetSphere+0x20,
-T00214.018,low-named,2,Battle::TargetSphereSetupView.labelArea,unk990,0x990,Label and terrain storage,Battle::AreTargetLabelsSettled@800C1D84 Battle::UpdateSphereTargetLabels@800C20B4,*Battle::targetSphere+0x990,
 T00214.008,low-named,2,Battle::TargetSphereSetupView.selectedTarget,unk2D,0x2D,Selected target; -1 after init,Battle::InitSphere@800C031C Battle::SetSphereTargets@800C1664,*Battle::targetSphere+0x2D,
 T00214.009,low-named,2,Battle::TargetSphereSetupView.sphereMode,unk2E,0x2E,Mode passed when the volumes are set,Battle::SetSphereVolumes@800C05EC,*Battle::targetSphere+0x2E,
 T00214.007,low-named,2,Battle::TargetSphereSetupView.targetCount,unk2C,0x2C,Number of selectable targets,Battle::SetSphereTargets@800C1664 Battle::ClearSphereTargets@800C16DC,*Battle::targetSphere+0x2C,
@@ -708,9 +688,7 @@ T00510.001,low-named,2,Effects::TransformControlView.attachmentMode,unk22_0,0x22
 T00510.002,low-named,2,Effects::TransformControlView.motionResumed,unk22_2,0x22.2,Set to resume the transform's motion,Effects::ResumeEffectTransformMotion@800D6508,,
 T00489.007,low-named,2,Effects::TransformSlot.positionX,unk1C,0x1C,Position x (same offset as TransformMotionView.position),,,
 T00489.009,low-named,2,Effects::TransformSlot.positionZ,unk24,0x24,Position z (same offset as TransformMotionView.position),,,
-G00576,global,2,Effects::actionRequestPointer,D_800F5798,,Points to the action request; not read by decompiled code.,Effects::InitializeEffectResources@800D7814,Effects::actionRequestPointer=0x800F5798,state
 G00542,global,2,Effects::actionVariantArgument,D_800F54A9,,Keeps the second action variant argument; not read by decompiled code.,Effects::BeginActionEffect@800CF0E8,Effects::actionVariantArgument=0x800F54A9,state
-G00229,global,2,Effects::emptyPackage,D_800EC4BC,,Is the empty effect package bound when effect resources are initialised.,Effects::InitializeEffectResources@800D7814,Effects::emptyPackage=0x800EC4BC,state
 G00557,global,2,Effects::scriptSelector,D_800F5610,,Keeps the selector byte read by the effect script; not otherwise read.,Effects::SetEffectScriptSelector@800D47C8,Effects::scriptSelector=0x800F5610,state
 G00537,global,2,Effects::unusedPrimaryWord,D_800F53B4,,Cleared with the primary effect state; not otherwise used.,Effects::ResetEffectInstances@800CE67C,Effects::unusedPrimaryWord=0x800F53B4,state
 T00402.002,low-named,2,Event::CameraMotionScratch.pad08,unk8,0x8,Unused scratch bytes,,,
@@ -775,15 +753,10 @@ T00339.000,low-named,2,Field::SphericalCameraValues.yaw,yaw,0x0,Yaw of the spher
 T00234.005,low-named,2,Field::WeatherParticle.fallShift,unkE,0xE,Shift applied to the fall speed of rain,Effects::DrawRainParticles@8008F440 Effects::DrawSnowParticles@8008FDC4 Effects::ResetFallingWeatherParticle@80090A1C,*Field::weatherParticles+0xE,
 T00234.006,low-named,2,Field::WeatherParticle.speed,unkF,0xF,Rise speed of embers; random phase of screen particles,Effects::InitializeScreenWeatherParticles@8008F30C Effects::ResetRisingEmberParticle@8008FA14 Effects::DrawRisingEmberParticles@8008FAC8 Effects::DrawSnowParticles@8008FDC4 Effects::DrawScreenWeatherParticles@80090434 Effects::ResetFallingWeatherParticle@80090A1C,*Field::weatherParticles+0xF,
 T00234.004,low-named,2,Field::WeatherParticle.swayPhase,unkD,0xD,Phase of the sideways sway; also the splash frame of rain,Effects::DrawRainParticles@8008F440 Effects::DrawSnowParticles@8008FDC4 Effects::DrawScreenWeatherParticles@80090434 Effects::ResetFallingWeatherParticle@80090A1C,*Field::weatherParticles+0xD,
-G00266,global,2,Field::auxiliaryActor,D_800F192C,,References an actor released during room teardown; no writer is found in C.,Field::UnloadCurrentRoom@8008A3A0,Field::auxiliaryActor=0x800F192C,state
 G00314,global,2,Field::reservedResetByte,D_800F1BBC,,Retains a byte cleared during room setup; no reader is identified.,Field::LoadRoomSections@8008A908,Field::reservedResetByte=0x800F1BBC,state
-G00253,global,2,Field::roomCleanupBuffer,D_800F18E4,,References a heap buffer freed during room teardown; no writer is found in C.,Field::UnloadCurrentRoom@8008A3A0,Field::roomCleanupBuffer=0x800F18E4,state
-G00251,global,2,Field::roomLoadResetBlock,D_800F18C8,,Holds a twenty-byte block cleared when a room finishes loading; no reader is identified.,Field::FinishRoomLoad@80089DC0,Field::roomLoadResetBlock=0x800F18C8,state
 G00262,global,2,Field::roomResetWord,D_800F1908,,Retains a word cleared during room setup; no reader is identified.,Field::FinishRoomLoad@80089DC0,Field::roomResetWord=0x800F1908,state
-G00254,global,2,Field::snapshotDoorFlagSource,D_800F18E8,,Supplies the value saved into the entry door flag field when Ashley's state is captured.,,Field::snapshotDoorFlagSource=0x800F18E8,state
 T00662.001,low-named,2,Items::WeaponRange.secondRange,unk1,0x1,"Second range, extended by reach",Items::EquipAshleyWeapon@8006B338 Actors::ApplyActorInitialStats@80076784 Actors::InitializeActorDefaults@80076D50 Actors::SpawnAshleyWithEquipment@800F9CCC,,
 T00662.002,low-named,2,Items::WeaponRange.thirdRange,unk2,0x2,"Third range, extended by reach",Items::EquipAshleyWeapon@8006B338 Actors::ApplyActorInitialStats@80076784 Actors::InitializeActorDefaults@80076D50 Actors::SpawnAshleyWithEquipment@800F9CCC,,
-G00172,global,2,Menu::Framework::kMainMenuHelpText,D_800EBA78,,Is the text shown when the main menu's help is requested.,Menu::Framework::UpdateMainMenuSelection@800C930C,Menu::Framework::kMainMenuHelpText=0x800EBA78,constexpr
 G00210,global,2,Menu::kNotificationItemNames,D_800EBF58,,Gives the 12-byte names shown for items from 0x1CA in scene notifications (every second entry).,Menu::ShowSceneNotification@800CB2B8,Menu::kNotificationItemNames=0x800EBF58,constexpr
 T00247.003,low-named,2,Render::ColorCode.code,unk3,0x3,Code byte; cleared for plain colors,Event::ScriptSetActorOverlayPass@800B8788 Render::SetModelTint@80047910 Render::TransformModelTint@80047B30 Render::UpdateModelColorTransitions@800481C0,,
 T00626.000,low-named,2,Render::EffectFlatQuadPacket.tag0,unk0,0x0,"Byte of the ordering-table tag, written when the packet is added",Effects::Plg005::UpdateAnalyzeGrid func_800FEA10@800FEA10 func_800FC590@800FC590 func_800FD3EC@800FD3EC func_800FD1C4@800FD1C4 func_800FF54C@800FF54C,,
@@ -800,11 +773,7 @@ T00721.002,low-named,2,Render::ParticleQuadPacket.tag2,unk2,0x2,"Byte of the ord
 T00733.000,low-named,2,Render::Trail9Packet.tag0,unk0,0x0,"Byte of the ordering-table tag, written when the packet is added",func_800FAA70@800FAA70 func_800FB694@800FB694 func_800FC904@800FC904 func_800FB57C@800FB57C func_800FB9DC@800FB9DC func_800FC564@800FC564,,
 T00733.001,low-named,2,Render::Trail9Packet.tag1,unk1,0x1,Byte of the ordering-table tag,,,
 T00733.002,low-named,2,Render::Trail9Packet.tag2,unk2,0x2,Byte of the ordering-table tag,,,
-G00296,global,2,Render::framebufferEffectResetBytes,D_800F1A9C,,Retains two bytes reset to 128 with the effect; no reader is identified.,Render::ResetFramebufferEffect@8007D360,Render::framebufferEffectResetBytes=0x800F1A9C,state
 T00209.012,low-named,2,State::AshleyStatsSnapshot.actorFlags,flags,0x1A,Actor flag word restored into the actor record at +0x954,Actors::RestoreAshleyRuntimeState@800F9AD8 Save::CaptureAshleySnapshot@80042CB0,,
-G01961,global,2,State::roomLoadResetWordOne,D_8005E1C4,,Retains a shared word cleared when room loading finishes; no reader is identified.,Field::FinishRoomLoad@80089DC0,State::roomLoadResetWordOne=0x8005E1C4,state
-G01970,global,2,State::roomLoadResetWordThree,D_8005E244,,Retains a third shared word cleared when room loading finishes; no reader is identified.,Field::FinishRoomLoad@80089DC0,State::roomLoadResetWordThree=0x8005E244,state
-G01963,global,2,State::roomLoadResetWordTwo,D_8005E1D4,,Retains a second shared word cleared when room loading finishes; no reader is identified.,Field::FinishRoomLoad@80089DC0,State::roomLoadResetWordTwo=0x8005E1D4,state
 T00436,type,3,Actors::ActorLocationWords,func_8006EBF8_t2,size 0xC,Holds an actor location as three words; not read.,,,State
 T00806,type,3,Actors::AuxiliaryActorWord,func_800765B0_t,size 0x4,Holds an auxiliary actor setup word as bytes or a word; not read.,,,State
 T00470,type,3,Actors::JumpContactView,func_800AC690_contact_t,size 0x4,Views a jump's contact word; not read.,,,State
@@ -816,7 +785,6 @@ T00277,type,3,Audio::LegacyVoiceChannelState,FSound80094FA0,size 0x60,Describes 
 T00428,type,3,Audio::SfxSlotRequest,func_800172D4_t,size 0x14,Describes a declared sound-effect slot request whose fields other than index are unidentified.,,,State
 T00429,type,3,Audio::SoundReleaseView,func_8004644C_t,size 0x34,Views a sound record while it is released; not read.,,,State
 T00632,type,3,Battle::ActorStatsFlags,vs_battle_actor2_flags,size 0x4,Declares a flag word of the actor statistics; not read.,,,State
-T00749,type,3,Battle::ActorTargetWord,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-r,size 0x4,"Holds an actor word used as a pending Z movement offset, and as the last targeted actor and limb as halves.",,,State
 T00353,type,3,Battle::Ai::ActionChoiceEntryView,actionChoice,size 0x14,Views an action candidate entry while a choice is recorded; not read.,,,State
 T00354,type,3,Battle::Ai::ActionChoiceFlagsView,actionChoiceFlags,size 0x4,Views the flag word of an action choice; not read.,,,State
 T00355,type,3,Battle::Ai::ActionChoiceInfoView,actionChoiceInfo,size 0x34,Views an action definition while a choice is scored; not read.,,,State
@@ -874,7 +842,6 @@ T00221,type,3,Field::RoomLoadResetBlock,D_800F18C8_t,size 0x18,Holds a block of 
 T00681,type,3,Items::WeaponReservedBlock,vs_battle_uiWeapon_unk,size 0x30,Declares 24 reserved halfwords of a weapon's statistics; not read.,,,State
 T00585,type,3,Menu::Files::PrimitiveBuffer,primBuf_t,size 0x40,Holds one tagged file menu primitive.,,,Packet
 T00248,type,3,Menu::Framework::PreviewPoseBytes,D_800F4538_unk58_3,size 0x4,Views four bytes of an actor record while the preview pose is reset.,,,State
-T00254,type,3,Menu::Framework::PreviewPoseState,D_800F4590_t,size 0x14,Original partial weapon-model view rather than independent pose state.,,Battle::unusedGlobal1=0x800F4590,G00409 aliases preview weapon slots2/3;issue116;legacy declaration retained
 T00317,type,3,Menu::Manual::BackgroundChunkWidths,_menuBgChunkWidths_t,size 0xC,Gives the widths of the manual background's scroll-fade chunks.,,,Value
 T00318,type,3,Menu::Manual::BackgroundTransparencies,_menuBgTransparencies_t,size 0x10,Gives the transparencies of the manual background's scroll-fade chunks.,,,Value
 T00405,type,3,Render::ModelScratchpadCameraView,cameraTransformScratch,size 0x9C,Views the model scratchpad's matrix and scale; not read.,,,State
@@ -998,7 +965,6 @@ T00275.008,reserved,4,Audio::AkaoStreamHeader.reserved24,unk_0x24,0x24,Unidentif
 T00275.009,reserved,4,Audio::AkaoStreamHeader.reserved28,unk_0x28,0x28,Unidentified header word,,,
 T00281.000,reserved,4,Audio::CutsceneStreamData.reserved00,unk_0x00,0x0,Unidentified leading bytes,,,
 T00281.002,reserved,4,Audio::CutsceneStreamData.reservedAC,unk_0xAC,0xAC,Unidentified bytes after the header,,,
-T00282.007,reserved,4,Audio::CutsceneStreamState.reserved1C,field7_0x1c,0x1C,Written at stream start; meaning unresolved,Audio::Cutscene::StartStream@8001CEA8 Audio::Cutscene::RefillStreamBuffer@8001D438,Audio::Cutscene::streamState=0x80039B24,
 T00282.008,reserved,4,Audio::CutsceneStreamState.reserved20,field8_0x20,0x20,No access found,,Audio::Cutscene::streamState=0x80039B28,
 T00282.009,reserved,4,Audio::CutsceneStreamState.reserved24,field9_0x24,0x24,No access found,,Audio::Cutscene::streamState=0x80039B2C,
 T00282.012,reserved,4,Audio::CutsceneStreamState.reserved30,field12_0x30,0x30,No access found,,Audio::Cutscene::streamState=0x80039B38,
@@ -1159,7 +1125,6 @@ T00532.097,reserved,4,Battle::Ai::ActorAiState.reserved132,unk132,0x132,Not read
 T00532.102,reserved,4,Battle::Ai::ActorAiState.reserved13E,unk13E,0x13E,Not read through this view,,*Battle::Ai::actorAiStates+0x13E,
 T00532.016,reserved,4,Battle::Ai::ActorAiState.reserved14,unk14,0x14,Not read through this view,,*Battle::Ai::actorAiStates+0x14,
 T00532.105,reserved,4,Battle::Ai::ActorAiState.reserved154,unk154,0x154,Not read through this view,,*Battle::Ai::actorAiStates+0x154,
-T00532.111,reserved,4,Battle::Ai::ActorAiState.reserved160,unk160,0x160,Packed scripted target X/Z in the first word; the remaining word is unresolved,,*Battle::Ai::actorAiStates+0x160,
 T00532.113,reserved,4,Battle::Ai::ActorAiState.reserved16C,unk16C,0x16C,Not read through this view,,*Battle::Ai::actorAiStates+0x16C,
 T00532.115,reserved,4,Battle::Ai::ActorAiState.reserved174,unk174,0x174,Not read through this view,,*Battle::Ai::actorAiStates+0x174,
 T00532.121,reserved,4,Battle::Ai::ActorAiState.reserved18C,unk18C,0x18C,Not read through this view,,*Battle::Ai::actorAiStates+0x18C,
@@ -1170,7 +1135,6 @@ T00532.127,reserved,4,Battle::Ai::ActorAiState.reserved224,unk224,0x224,Not read
 T00532.030,reserved,4,Battle::Ai::ActorAiState.reserved28,unk28,0x28,Not read through this view,,*Battle::Ai::actorAiStates+0x28,
 T00532.035,reserved,4,Battle::Ai::ActorAiState.reserved2D,unk2D,0x2D,Not read through this view,,*Battle::Ai::actorAiStates+0x2D,
 T00532.037,reserved,4,Battle::Ai::ActorAiState.reserved31,unk31,0x31,Not read through this view,,*Battle::Ai::actorAiStates+0x31,
-T00532.040,reserved,4,Battle::Ai::ActorAiState.reserved3C,unk3C,0x3C,Not read through this view,,*Battle::Ai::actorAiStates+0x3C,
 T00532.042,reserved,4,Battle::Ai::ActorAiState.reserved45,unk45,0x45,Not read through this view,,*Battle::Ai::actorAiStates+0x45,
 T00532.134,reserved,4,Battle::Ai::ActorAiState.reserved474,unk474,0x474,Not read through this view,,*Battle::Ai::actorAiStates+0x474,
 T00532.006,reserved,4,Battle::Ai::ActorAiState.reserved6,unk6,0x6,Not read through this view,,*Battle::Ai::actorAiStates+0x6,
@@ -1214,15 +1178,9 @@ T00385.026,reserved,4,Battle::Ai::AiCreationView.reservedB0,padB0,0xB0,Not read 
 T00385.030,reserved,4,Battle::Ai::AiCreationView.reservedBA,padBA,0xBA,Not read through this view,,,
 T00385.033,reserved,4,Battle::Ai::AiCreationView.reservedC0,padC0,0xC0,Not read through this view,,,
 T00527.000,reserved,4,Battle::Ai::AiModelView.reserved0,unk0,0x0,Not read by decompiled code,,,
-T00527.007,reserved,4,Battle::Ai::AiModelView.reserved16,unk16,0x16,Not read by decompiled code,,,
-T00527.009,reserved,4,Battle::Ai::AiModelView.reserved24,unk24,0x24,Not read by decompiled code,,,
-T00527.011,reserved,4,Battle::Ai::AiModelView.reserved28,unk28,0x28,Not read by decompiled code,,,
 T00527.001,reserved,4,Battle::Ai::AiModelView.reserved4,unk4,0x4,Not read by decompiled code,,,
-T00527.014,reserved,4,Battle::Ai::AiModelView.reserved5B0Bit0,unk5B0_0,0x5B0.0,Not read by decompiled code,,,
-T00527.013,reserved,4,Battle::Ai::AiModelView.reserved60,unk60,0x60,Not read by decompiled code,,,
 T00527.002,reserved,4,Battle::Ai::AiModelView.reserved8Bit0,unk8_0,0x8.0,Not read by decompiled code,,,
 T00527.004,reserved,4,Battle::Ai::AiModelView.reservedABit6,unk8_22,0xA.6,Not read by decompiled code,,,
-T00527.005,reserved,4,Battle::Ai::AiModelView.reservedC,unkC,0xC,Not read by decompiled code,,,
 T00610.000,reserved,4,Battle::Ai::ApproachActorView.reserved0,pad,0x0,Not read by decompiled code,,,
 T00611.003,reserved,4,Battle::Ai::ApproachRelationBits.reserved0Bit3,pad3,0x0.3,Not read by decompiled code,,,
 T00611.005,reserved,4,Battle::Ai::ApproachRelationBits.reserved0Bit6,pad6,0x0.6,Not read by decompiled code,,,
@@ -1547,7 +1505,6 @@ T00373.005,reserved,4,Battle::Ai::ReactionView.reserved22,pad22,0x22,Not read th
 T00373.007,reserved,4,Battle::Ai::ReactionView.reserved28,pad28,0x28,Not read through this view,,,
 T00373.009,reserved,4,Battle::Ai::ReactionView.reserved2D,pad2D,0x2D,Not read through this view,,,
 T00373.011,reserved,4,Battle::Ai::ReactionView.reserved31,pad31,0x31,Not read through this view,,,
-T00373.013,reserved,4,Battle::Ai::ReactionView.reserved89,pad89,0x89,Not read through this view,,,
 T00558.000,reserved,4,Battle::Ai::RecoveryModelView.reserved0,pad0,0x0,Not read by decompiled code,,,
 T00558.004,reserved,4,Battle::Ai::RecoveryModelView.reserved16,pad16,0x16,Not read by decompiled code,,,
 T00558.002,reserved,4,Battle::Ai::RecoveryModelView.reservedC,padC,0xC,Not read by decompiled code,,,
@@ -1574,7 +1531,6 @@ T00392.013,reserved,4,Battle::Ai::SettingsView.reserved28,f28,0x28,Not read thro
 T00392.019,reserved,4,Battle::Ai::SettingsView.reserved2E,f2E,0x2E,Not read through this view,,,
 T00392.025,reserved,4,Battle::Ai::SettingsView.reserved34,pad34,0x34,Not read through this view,,,
 T00392.027,reserved,4,Battle::Ai::SettingsView.reserved58,pad58,0x58,Not read through this view,,,
-T00392.029,reserved,4,Battle::Ai::SettingsView.reserved6C,pad6C,0x6C,Not read through this view,,,
 T00392.031,reserved,4,Battle::Ai::SettingsView.reserved96,pad96,0x96,Not read through this view,,,
 T00392.037,reserved,4,Battle::Ai::SettingsView.reservedB3,padB3,0xB3,Not read through this view,,,
 T00392.039,reserved,4,Battle::Ai::SettingsView.reservedBC,padBC,0xBC,Not read through this view,,,
@@ -2081,12 +2037,6 @@ T00321.001,reserved,4,Field::MpdPolygonGroupHeader.reserved4,unk4,0x4,Not read b
 T00321.002,reserved,4,Field::MpdPolygonGroupHeader.reserved8,unk8,0x8,Not read by decompiled code,,,
 T00321.003,reserved,4,Field::MpdPolygonGroupHeader.reservedC,unkC,0xC,Not read by decompiled code,,,
 T00337.000,reserved,4,Field::MpdSectionE.reserved00,unk0,0x0,Unreferenced word,,,
-T00333.009,reserved,4,Field::MpdTileCell.reserved00Bit15,unk0_15,0x1.7,Unreferenced bit,,,
-T00333.001,reserved,4,Field::MpdTileCell.reserved00Bit5,unk0_5,0x0.5,Unreferenced bit,,,
-T00333.003,reserved,4,Field::MpdTileCell.reserved00Bit7,unk0_7,0x0.7,Unreferenced bit,,,
-T00333.004,reserved,4,Field::MpdTileCell.reserved00Bit8,unk0_8,0x1.0,Unreferenced bit,,,
-T00333.005,reserved,4,Field::MpdTileCell.reserved00Bit9,unk0_9,0x1.1,Unreferenced bit,,,
-T00333.013,reserved,4,Field::MpdTileCell.reserved00Bits19,unk0_19,0x2.4,Unreferenced bits,,,
 T00330.005,reserved,4,Field::MpdViewTrigger.reserved00Bit15,unk0_15,0x1.7,Unreferenced bit,,,
 T00456.000,reserved,4,Field::RoomEffectCommand.reserved00,unk0,0x0,Unidentified pointer,,,
 T00235.003,reserved,4,Field::RoomEffectInstance.reserved03,unk3,0x3,Cleared at setup; no reader identified,Field::InitializeRoomEffects@80092548,Field::roomEffectInstances=0x800F1DDB stride 0xC,

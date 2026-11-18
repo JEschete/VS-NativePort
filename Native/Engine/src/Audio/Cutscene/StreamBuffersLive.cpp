@@ -34,7 +34,7 @@ namespace {
 static_assert(std::size(Audio_Mixer_kPanGains) == kPanGainCount);
 static_assert(sizeof(Audio_CutsceneStreamState::totalPages) ==
               sizeof(std::uint32_t));
-static_assert(sizeof(Audio_CutsceneStreamState::reserved1C) ==
+static_assert(sizeof(Audio_CutsceneStreamState::repeatPages) ==
               sizeof(std::int32_t));
 static_assert(sizeof(Audio_CutsceneStreamState::voiceMask) ==
               sizeof(std::int32_t));
@@ -93,15 +93,15 @@ class LiveStreamBuffers final : public StreamBufferHost {
     const Audio_CutsceneStreamState& state = Audio_Cutscene_streamState;
     std::optional<std::size_t> chunk = OffsetIn(stream_, state.currentChunk);
     std::optional<std::size_t> repeat_chunk;
-    if (state.auxiliaryMask != nullptr) {
-      repeat_chunk = OffsetIn(stream_, state.auxiliaryMask);
+    if (state.repeatChunk != nullptr) {
+      repeat_chunk = OffsetIn(stream_, state.repeatChunk);
       // A repeat section outside the stream detaches the stream as a whole.
       if (!repeat_chunk) chunk.reset();
     }
     return {.chunk = chunk,
             .repeat_chunk = repeat_chunk,
             .pages = state.totalPages,
-            .repeat_pages = static_cast<std::uint32_t>(state.reserved1C),
+            .repeat_pages = static_cast<std::uint32_t>(state.repeatPages),
             .voice = state.voiceIndex,
             .voice_mask = static_cast<std::uint32_t>(state.voiceMask),
             .transfer_busy = Audio_Cutscene_legacySpuTransferBusy != 0};

@@ -33,7 +33,7 @@ struct CollisionMapHeader {
 // platform's single cell.
 inline constexpr std::int32_t kPlatformCollisionLayer = 2;
 inline constexpr std::int32_t kTileWorldSize = 128;
-// A door passability of 5 blocks the whole tile.
+// A passability of 5 blocks the whole tile.
 inline constexpr std::uint32_t kBlockedPassability = 5;
 inline constexpr std::int16_t kMissingFloorHeight = INT16_MIN;
 // The word an absent cell reads as: the original dereferences NULL, and PS1
@@ -103,12 +103,12 @@ struct CameraBounds {
     const CollisionCells& cells, std::int32_t tile_x, std::int32_t tile_z,
     std::int32_t layer);
 
-// `cell_word` with its door passability set to blocked (5) when `blocked` is
+// `cell_word` with its passability set to blocked (5) when `blocked` is
 // nonzero, or open (0).
 [[nodiscard]] std::uint32_t BlockedCellWord(std::uint32_t cell_word,
                                             std::int32_t blocked);
 
-// The cell under a world position, unless the cell's door passability closes
+// The cell under a world position, unless the cell's passability closes
 // the half (or the whole) of the tile the position is in.
 [[nodiscard]] std::optional<CollisionCellRef> FindCollisionCellAtPosition(
     const CollisionCells& cells, std::int16_t world_x, std::int16_t world_z,

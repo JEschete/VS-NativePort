@@ -92,7 +92,7 @@ def main() -> int:
                      f["meaning"], " ".join(touch[:6]), " ".join(watch), ""])
 
     for r in G:
-        if r["confidence"] != "low":
+        if r["confidence"] != "low" or r["copied"] == "retired":
             continue
         touch = [fn_label(fn) for fn in funcs if r["name"] in (fn.get("refs") or {}).get("var", {})
                  and (r["overlay"] == "SLUS_010.40" or fn["file"].removeprefix("src/").startswith(r["overlay"]))]

@@ -533,7 +533,7 @@ bool NavigationPointClear(int x, int z, int floor_height, int body_height) {
   }
   const auto* cell =
       VS::Field::LiveCollisionCellAt(x / kTileSize, z / kTileSize, 0);
-  if (cell == nullptr || cell->doorPassability > kFullyBlockedPassability ||
+  if (cell == nullptr || cell->passability > kFullyBlockedPassability ||
       cell->isPit) {
     return false;
   }
@@ -630,8 +630,7 @@ EncounterNavigationState InspectNavigation() {
       SVECTOR point{static_cast<std::int16_t>(world_x), 0,
                     static_cast<std::int16_t>(world_z), 0};
       const bool passable =
-          cell != nullptr &&
-          cell->doorPassability <= kFullyBlockedPassability &&
+          cell != nullptr && cell->passability <= kFullyBlockedPassability &&
           VS::Field::FindLiveCollisionCellAtPosition(&point, 0) != nullptr;
       const bool pit = cell != nullptr && cell->isPit;
       result.samples.push_back(
@@ -755,8 +754,7 @@ nlohmann::json EncodeRoomTiles() {
       SVECTOR point{static_cast<std::int16_t>(world_x), 0,
                     static_cast<std::int16_t>(world_z), 0};
       const bool passable =
-          cell != nullptr &&
-          cell->doorPassability <= kFullyBlockedPassability &&
+          cell != nullptr && cell->passability <= kFullyBlockedPassability &&
           VS::Field::FindLiveCollisionCellAtPosition(&point, 0) != nullptr;
       const bool pit = cell != nullptr && cell->isPit;
       floors.push_back(VS::Field::LiveFloorHeightAt(world_x, world_z));

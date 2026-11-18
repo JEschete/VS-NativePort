@@ -136,7 +136,6 @@ extern "C" {
 #include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
 #include "Render/Loading.h"
-#include "Render/ResultAtlas.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
@@ -531,7 +530,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"ENDING/ENDING.PRG", 0x72FB4, sizeof Ending_Credits_illustrationHoldFrames, &Ending_Credits_illustrationHoldFrames, sizeof Ending_Credits_illustrationHoldFrames}, // G00803 _illustrationTimers
     {"ENDING/ENDING.PRG", 0x72FD4, sizeof Ending_countableRoomBits, &Ending_countableRoomBits, sizeof Ending_countableRoomBits}, // G00804 _countableRooms
     {"ENDING/ENDING.PRG", 0x73014, sizeof Ending_resultAtlasRegions, &Ending_resultAtlasRegions, sizeof Ending_resultAtlasRegions}, // G00805 _disMap
-    {"ENDING/ENDING.PRG", 0x73014, sizeof Render_resultAtlasRegionTemplates, &Render_resultAtlasRegionTemplates, sizeof Render_resultAtlasRegionTemplates}, // G00806 _disMap
     {"ENDING/ENDING.PRG", 0x73076, sizeof Ending_kRankHeadingWidth, &Ending_kRankHeadingWidth, sizeof Ending_kRankHeadingWidth}, // G00807 D_800DB876
     {"ENDING/ENDING.PRG", 0x7323C, sizeof Ending_rankLabelRegionIds, &Ending_rankLabelRegionIds, sizeof Ending_rankLabelRegionIds}, // G00808 _riskbreakerRanks
     {"ENDING/ENDING.PRG", 0x7327C, sizeof Ending_congratulationsTint, &Ending_congratulationsTint, sizeof Ending_congratulationsTint}, // G00809 D_800DBA7C

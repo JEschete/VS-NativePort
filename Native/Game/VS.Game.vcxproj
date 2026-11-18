@@ -2251,13 +2251,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\State\RoomLoad.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\State\RoomMemory.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2593,7 +2586,6 @@
     <ClInclude Include="src\State\Location.h" />
     <ClInclude Include="src\State\PlayTime.h" />
     <ClInclude Include="src\State\RoomCache.h" />
-    <ClInclude Include="src\State\RoomLoad.h" />
     <ClInclude Include="src\State\RoomMemory.h" />
     <ClInclude Include="src\State\SceneTimer.h" />
     <ClInclude Include="src\State\Settings.h" />

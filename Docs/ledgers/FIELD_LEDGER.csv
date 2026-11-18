@@ -2420,13 +2420,13 @@ T00281.001,T00281,FSoundCutsceneStreamData,1,AkaoHeader,0,FAkaoHeader,,,,streamH
 T00281.002,T00281,FSoundCutsceneStreamData,2,unk_0xAC,1,char[36],,,,reservedAC,Unidentified bytes after the header,low,declaration-only;source:sound.h:564
 T00281.003,T00281,FSoundCutsceneStreamData,3,AudioData,0,char[1],,,,audioData,Variable-length audio data,med,declaration-only;source:sound.h:565
 T00282.000,T00282,FSoundCutsceneStreamState,0,pCurrentChunk,0,void *,,,,currentChunk,Stream chunk being consumed,high,source:25AC.c:6286
-T00282.001,T00282,FSoundCutsceneStreamState,1,unk_Mask_0x4,0,void *,,,loopSampleStart,auxiliaryMask,Set when the stream starts and tested at page refills; meaning unresolved,low,source:25AC.c:6323
+T00282.001,T00282,FSoundCutsceneStreamState,1,unk_Mask_0x4,0,void *,,,loopSampleStart,repeatChunk,"Where a repeating stream restarts: first chunk plus header word 5 when format bit 1 is set, else NULL; the refill jumps here when pages run out",high,"source:25AC.c:6323;settled (#347): 25AC.c:6461 start, 25AC.c:6594 refill"
 T00282.002,T00282,FSoundCutsceneStreamState,2,field2_0x8,0,int,,,streamFormatFlags,formatFlags,Stream format flags from the header; bit 1 tested at start,med,source:25AC.c:6313
 T00282.003,T00282,FSoundCutsceneStreamState,3,VoicesInUseFlags,0,int,,,,voiceMask,Voices the stream plays on,high,source:25AC.c:2198
 T00282.004,T00282,FSoundCutsceneStreamState,4,VoiceIndex,0,int,,,,voiceIndex,First stream voice,high,source:25AC.c:3789
 T00282.005,T00282,FSoundCutsceneStreamState,5,TotalPages,0,u_int,,,remainingSampleBytes,totalPages,Pages in the stream,high,source:25AC.c:6307
 T00282.006,T00282,FSoundCutsceneStreamState,6,CurrentPage,0,int,,,,currentPage,Page being played,high,source:25AC.c:6308
-T00282.007,T00282,FSoundCutsceneStreamState,7,field7_0x1c,0,int,,,loopSampleBytes,reserved1C,Written at stream start; meaning unresolved,low,source:25AC.c:6328
+T00282.007,T00282,FSoundCutsceneStreamState,7,field7_0x1c,0,int,,,loopSampleBytes,repeatPages,"Pages restored when the refill jumps to repeatChunk (total pages less the repeat offset, halved for stereo)",high,"source:25AC.c:6328;settled (#347): 25AC.c:6466/6473 start, 25AC.c:6599 refill"
 T00282.008,T00282,FSoundCutsceneStreamState,8,field8_0x20,0,int,,,,reserved20,No access found,low,declaration-only;source:sound.h:578
 T00282.009,T00282,FSoundCutsceneStreamState,9,field9_0x24,0,int,,,,reserved24,No access found,low,declaration-only;source:sound.h:579
 T00282.010,T00282,FSoundCutsceneStreamState,10,PageIndex,0,int,,,,pageIndex,Index of the page within the ring,med,declaration-only;source:sound.h:580
@@ -2970,19 +2970,19 @@ T00332.008,T00332,_mpdRoomSection13,8,unk10,1,short,,,chest state flag index,ope
 T00332.009,T00332,_mpdRoomSection13,9,unk12,1,short,,,,facing,Direction the chest is opened from,high,source:146C.c:5302
 T00332.010,T00332,_mpdRoomSection13,10,unk14,1,vs_battle_loot,,,,loot,Chest contents,high,source:146C.c:17392
 T00333.000,T00333,_mpdRoomSection3,0,unk0_0,1,u_int,5,,,surfaceKind,Surface kind for footsteps and impacts,high,source:44F14.c:765;source:3A1A0.c:2222
-T00333.001,T00333,_mpdRoomSection3,1,unk0_5,1,u_int,1,,,reserved00Bit5,Unreferenced bit,low,declaration-only;source:146C.h:68
-T00333.002,T00333,_mpdRoomSection3,2,unk0_6,1,u_int,1,,,blocksSphereTerrain,Target-sphere terrain sampling treats the tile as solid and unoccupiable,med,source:58578.c:1062;sanity pass 2026-10-17
-T00333.003,T00333,_mpdRoomSection3,3,unk0_7,1,u_int,1,,,reserved00Bit7,Unreferenced bit,low,declaration-only;source:146C.h:70
-T00333.004,T00333,_mpdRoomSection3,4,unk0_8,1,u_int,1,,,reserved00Bit8,Unreferenced bit,low,declaration-only;source:146C.h:71
-T00333.005,T00333,_mpdRoomSection3,5,unk0_9,1,u_int,1,,,reserved00Bit9,Unreferenced bit,low,declaration-only;source:146C.h:72
-T00333.006,T00333,_mpdRoomSection3,6,unk0_10,1,u_int,3,,collision blocking mode | tile footprint shape,doorPassability,Door blocking bits toggled when a door opens,med,source:146C.c:16268;source:146C.c:16899
+T00333.001,T00333,_mpdRoomSection3,1,unk0_5,1,u_int,1,,,isSlope,Ramp/stair tile: a rise between two slope cells is not a wall and stepping onto one slides instead of climbing,high,source:3A1A0.c:1731;source:3A1A0.c:1747;native:ActorCollision.cpp:320;native:ActorMovement.cpp:595;disc:880 of 941 set cells have sloped collision samples vs 4962 of 91108 clear cells (#347)
+T00333.002,T00333,_mpdRoomSection3,2,unk0_6,1,u_int,1,,,blocksSphereTerrain,Target-sphere terrain sampling treats the tile as solid and unoccupiable,high,source:58578.c:1011;native:SphereDraw.cpp:186;disc:set in 2048 cells (#347)
+T00333.003,T00333,_mpdRoomSection3,3,unk0_7,1,u_int,1,,,padding00Bits7,Padding (bits 7-9): zero in all 92049 disc cells and never read,high,disc:0 of 92049 cells across 512 MPDs;no reader in upstream MpdTile uses or native ports (#347)
+T00333.004,T00333,_mpdRoomSection3,4,unk0_8,1,u_int,1,,,padding00Bits7,Padding (bits 7-9): zero in all 92049 disc cells and never read,high,disc:0 of 92049 cells across 512 MPDs;no reader in upstream MpdTile uses or native ports (#347)
+T00333.005,T00333,_mpdRoomSection3,5,unk0_9,1,u_int,1,,,padding00Bits7,Padding (bits 7-9): zero in all 92049 disc cells and never read,high,disc:0 of 92049 cells across 512 MPDs;no reader in upstream MpdTile uses or native ports (#347)
+T00333.006,T00333,_mpdRoomSection3,6,unk0_10,1,u_int,3,,collision blocking mode | tile footprint shape,passability,"Tile shape (upstream MpdTileShape): 0 open, 1-4 one triangular half closed, 5 blocked; doors, chests and switches toggle 0/5",high,source:146C.c:16268;source:146C.c:16899;upstream:mpd.h:14 MpdTileShape;source:40564.c:89 (#347)
 T00333.007,T00333,_mpdRoomSection3,7,unk0_13,1,u_int,1,,,hasEventTrigger,Entering the tile evaluates the room's event triggers (may start a cutscene),high,source:146C.c:5406;sanity pass 2026-10-17
 T00333.008,T00333,_mpdRoomSection3,8,unk0_14,1,u_int,1,,,isPlatformDocked,Set while a platform rests at its terminal waypoint,med,source:146C.c:16636;source:146C.c:16648
-T00333.009,T00333,_mpdRoomSection3,9,unk0_15,1,u_int,1,,,reserved00Bit15,Unreferenced bit,low,declaration-only;source:146C.h:76
+T00333.009,T00333,_mpdRoomSection3,9,unk0_15,1,u_int,1,,,unusedBit15,Authored on disc (544 cells) but never read by the original,med,"disc:set in 544 of 92049 cells;no reader in upstream MpdTile uses or native ports of every reader (ActorCollision, ActorMovement, SphereDraw, RoomAiMap, GimmickPlacement, CollisionMap, ChestInteractions, PlatformPlacement, Camera) (#347)"
 T00333.010,T00333,_mpdRoomSection3,10,unk0_16,1,u_int,1,,,hasRoomTrigger,"The tile has a room trigger (trap, chest or transition) looked up on entry",high,source:146C.c:5421;source:146C.c:5544;sanity pass 2026-10-17
 T00333.011,T00333,_mpdRoomSection3,11,unk0_17,1,u_int,1,,,isPit,Falling onto this tile kills or moves the player,high,source:146C.c:5472;source:146C.c:5562;source:3A1A0.c:3058
-T00333.012,T00333,_mpdRoomSection3,12,unk0_18,1,u_int,2,,,occlusionAndFloorFlags,Bit 0 applies the tile's camera geometry occlusion; bit 1 keeps it sampled as floor,med,source:146C.c:5356;source:58578.c:1065;sanity pass 2026-10-17
-T00333.013,T00333,_mpdRoomSection3,13,unk0_19,1,u_int,12,,,reserved00Bits19,Unreferenced bits,low,declaration-only;source:146C.h:80
+T00333.012,T00333,_mpdRoomSection3,12,unk0_18,1,u_int,2,,,occlusionAndFloorFlags,Bit 0 applies the tile's camera geometry occlusion; bit 1 keeps a blocked tile sampled as floor by the target sphere,high,source:146C.c:5086;source:58578.c:1014;disc:values 1/2/3 in 2017/81/2 cells (#347)
+T00333.013,T00333,_mpdRoomSection3,13,unk0_19,1,u_int,12,,,forbidsGimmickPlacement+padding00Bits21+aiArea+aiNoWalk+aiNoFlight+aiTerrainClasses,"Bit 20 forbids gimmick placement; bits 21-22 padding (zero on disc); bits 23-31 copied into the AI navigation tile flags: area (4 bits), no-walk, no-flight and three terrain classes tested by actor reject masks",med,source:3A1A0.c:711;asm:7E05C.s:582 func_800E6F9C;native:RoomAiMap.cpp:59;native:GroundNavigation.cpp:357;native:FlightMovement.cpp:42;native:Wander.cpp:27;disc:bits 21-22 zero in all cells (#347)
 T00334.000,T00334,_mpdRoomSection9,0,unk0,1,short,,,tile x,tileX,Tile X,high,source:146C.c:16818
 T00334.001,T00334,_mpdRoomSection9,1,unk2,1,short,,,tile z,tileZ,Tile Z,high,source:146C.c:16818
 T00334.002,T00334,_mpdRoomSection9,2,unk4,1,short,,,surface index,floorLayer,Floor layer,high,source:146C.c:16819

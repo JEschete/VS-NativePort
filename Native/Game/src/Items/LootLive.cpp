@@ -174,7 +174,7 @@ class LiveChestStateHost final : public ChestStateHost {
     auto* const cell = VS::Field::LiveCollisionCellAt(
         static_cast<std::uint32_t>(chest.tile_x),
         static_cast<std::uint32_t>(chest.tile_z), chest.layer);
-    if (cell != nullptr) cell->doorPassability = passability;
+    if (cell != nullptr) cell->passability = passability;
   }
 };
 

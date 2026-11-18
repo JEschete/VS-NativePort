@@ -93,7 +93,7 @@ class LiveDoorCollisionHost final : public VS::Field::RoomDoorCollisionHost {
                   std::uint8_t xor_mask) override {
     auto* cell = VS::Field::LiveCollisionCellAt(query.tile_x, query.tile_z,
                                                 query.floor_layer);
-    if (cell != nullptr) cell->doorPassability ^= xor_mask;
+    if (cell != nullptr) cell->passability ^= xor_mask;
   }
 
  private:
@@ -243,7 +243,7 @@ class LiveRoomSwitchHost final : public VS::Field::RoomSwitchHost {
     auto* cell = VS::Field::LiveCollisionCellAt(state.tile_x, state.tile_z,
                                                 state.floor_layer);
     if (cell != nullptr) {
-      cell->doorPassability = passability;
+      cell->passability = passability;
     }
   }
 
@@ -333,7 +333,7 @@ class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
     auto* cell = VS::Field::LiveCollisionCellAt(state.tile_x, state.tile_z,
                                                 state.floor_layer);
     if (cell != nullptr) {
-      cell->doorPassability = passability;
+      cell->passability = passability;
     }
   }
   bool StoreStartState(std::uint8_t marker, std::uint8_t activation) override {

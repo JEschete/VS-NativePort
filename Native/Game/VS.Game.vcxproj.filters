@@ -3186,12 +3186,6 @@
     <ClInclude Include="src\State\RoomCache.h">
       <Filter>src\State</Filter>
     </ClInclude>
-    <ClCompile Include="src\State\RoomLoad.cpp">
-      <Filter>src\State</Filter>
-    </ClCompile>
-    <ClInclude Include="src\State\RoomLoad.h">
-      <Filter>src\State</Filter>
-    </ClInclude>
     <ClCompile Include="src\State\RoomMemory.cpp">
       <Filter>src\State</Filter>
     </ClCompile>

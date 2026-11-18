@@ -125,9 +125,9 @@ constexpr unsigned kMapHeightShift = 20;
 constexpr std::int32_t kOpenTerrain = 0x10000;
 constexpr std::uint32_t kBlockedTerrain = 0xF0800000;
 constexpr unsigned kBlocksTerrainBit = 6;
-constexpr unsigned kDoorShift = 10;
-constexpr std::uint32_t kDoorMask = 7;
-constexpr std::uint32_t kFirstImpassableDoor = 5;
+constexpr unsigned kPassabilityShift = 10;
+constexpr std::uint32_t kPassabilityMask = 7;
+constexpr std::uint32_t kBlockedPassability = 5;
 constexpr unsigned kFloorFlagBit = 19;
 constexpr std::uint8_t kGimmickObjectMask = 7;
 constexpr std::uint8_t kLowGimmickObjects = 2;
@@ -142,7 +142,7 @@ constexpr std::int32_t kCeilingClearance = 0x30;
 constexpr unsigned kCeilingShift = 17;
 constexpr std::uint32_t kFloorFieldMask = 0x7FFF;
 constexpr unsigned kFloorFieldShift = 2;
-constexpr std::uint32_t kDoorFlagScale = 6;
+constexpr std::uint32_t kPassabilityFlagScale = 6;
 
 [[nodiscard]] constexpr bool Bit(std::uint32_t word, unsigned bit) noexcept {
   return ((word >> bit) & 1U) != 0;
@@ -187,8 +187,9 @@ struct TerrainHeights {
     flag = 0;
     return static_cast<std::int32_t>(kBlockedTerrain);
   }
-  const std::uint32_t door = (cell >> kDoorShift) & kDoorMask;
-  if (door >= kFirstImpassableDoor && !Bit(cell, kFloorFlagBit)) {
+  const std::uint32_t passability =
+      (cell >> kPassabilityShift) & kPassabilityMask;
+  if (passability >= kBlockedPassability && !Bit(cell, kFloorFlagBit)) {
     return kOpenTerrain;
   }
   std::int32_t value = kOpenTerrain;
@@ -211,9 +212,9 @@ struct TerrainHeights {
   if (value != 0) {
     value = heights.low == heights.high ? 1 : 0;
   }
-  if (door - 1U < kFirstImpassableDoor - 1U) {
+  if (passability - 1U < kBlockedPassability - 1U) {
     heights.low = heights.high;
-    flag = static_cast<std::uint8_t>(door * kDoorFlagScale);
+    flag = static_cast<std::uint8_t>(passability * kPassabilityFlagScale);
   }
   return static_cast<std::int32_t>(
       static_cast<std::uint32_t>(value) |

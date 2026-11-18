@@ -183,22 +183,39 @@ typedef struct Field_MpdViewTrigger {
 } Field_MpdViewTrigger;
 _Static_assert(sizeof(Field_MpdViewTrigger) == 0x4, "Field_MpdViewTrigger must keep its PS1 layout");
 
-// decomp: _mpdRoomSection3 (src/BATTLE/BATTLE.PRG/146C.h:81)
+// decomp: _mpdRoomSection3 (src/BATTLE/BATTLE.PRG/146C.h:81); upstream MpdTile
+// (src/BATTLE/BATTLE.PRG/mpd.h:23). The "never read" bits were checked against
+// every native port of the original's readers and all 92,049 cells on the disc
+// (#347).
 typedef struct Field_MpdTileCell {
     u_int surfaceKind : 5;
-    u_int reserved00Bit5 : 1;
+    // Ramps and stairs: a rise between two slope cells is not a wall, and
+    // stepping onto one slides instead of climbing (3A1A0.c:1731-1747).
+    u_int isSlope : 1;
     u_int blocksSphereTerrain : 1;
-    u_int reserved00Bit7 : 1;
-    u_int reserved00Bit8 : 1;
-    u_int reserved00Bit9 : 1;
-    u_int doorPassability : 3;
+    // Zero in every disc cell and never read.
+    u_int padding00Bits7 : 3;
+    // Upstream MpdTileShape: 0 open, 1-4 one triangular half closed, 5 blocked.
+    u_int passability : 3;
     u_int hasEventTrigger : 1;
     u_int isPlatformDocked : 1;
-    u_int reserved00Bit15 : 1;
+    // Set in 544 disc cells, but nothing in the original reads it.
+    u_int unusedBit15 : 1;
     u_int hasRoomTrigger : 1;
     u_int isPit : 1;
+    // Bit 0 selects the camera occlusion; bit 1 keeps a blocked cell sampled as
+    // floor by the target sphere (146C.c:5086, 58578.c:1014).
     u_int occlusionAndFloorFlags : 2;
-    u_int reserved00Bits19 : 12;
+    u_int forbidsGimmickPlacement : 1;
+    // Zero in every disc cell and never read.
+    u_int padding00Bits21 : 2;
+    // The AI navigation map (func_800E6F9C) copies bits 23-31 into its tile
+    // flags: the area (flags & 15), no-walk (0x10), no-flight (0x40) and three
+    // terrain classes that actor reject masks test (0x2000, 0x1000, 0x800).
+    u_int aiArea : 4;
+    u_int aiNoWalk : 1;
+    u_int aiNoFlight : 1;
+    u_int aiTerrainClasses : 3;
 } Field_MpdTileCell;
 _Static_assert(sizeof(Field_MpdTileCell) == 0x4, "Field_MpdTileCell must keep its PS1 layout");
 

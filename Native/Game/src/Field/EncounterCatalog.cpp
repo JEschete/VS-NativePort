@@ -282,7 +282,7 @@ EncounterFloor ClassifyFloor(Bytes collision, const Field_MpdTileCell& tile,
   // func_800A8D64 (40564.c:139) checks passability; func_800A6EE8
   // (3A1A0.c:2175) handles pits. The lab conservatively requires full tiles,
   // excluding diagonal partial cells and dynamic platform/gimmick support.
-  if (tile.doorPassability != 0) return EncounterFloor::kBlocked;
+  if (tile.passability != 0) return EncounterFloor::kBlocked;
   if (tile.isPit != 0) return EncounterFloor::kPit;
   for (int sample_z = 0; sample_z < kSamplesPerTile; ++sample_z) {
     for (int sample_x = 0; sample_x < kSamplesPerTile; ++sample_x) {
