@@ -1861,6 +1861,203 @@ TEST_CASE("PLG074 trail tick events stay within the package's definitions",
   fixture.ResetPackets();
 }
 
+namespace {
+
+// Binds the three-curve package and leaves a curve an earlier package bound
+// in the slot just past it, so only the bound check keeps it out.
+struct StaleCurveBlock {
+  explicit StaleCurveBlock(Plg074Fixture& fixture) {
+    curves.Bind(std::as_bytes(std::span{&fixture.definitions, 1}));
+    curves.bytes[11] = static_cast<u_char>(stale.size());
+    fixture.package.curves[3] = stale.data();
+  }
+
+  CurveBlockStorage curves;
+  std::array<u_char, 5> stale{200, 200, 200, 200, 200};
+};
+
+std::array<u_char, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
+                                                  u_char curve) {
+  fixture.Definition().transparencyCurve = curve;
+  Effects_RendererSlot slot{};
+  REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 1, 0) == 1);
+  auto* state = static_cast<Effects_Trail9State*>(slot.rendererState);
+  REQUIRE(state != nullptr);
+  std::array<u_char, 9> samples{};
+  std::memcpy(samples.data(),
+              reinterpret_cast<const u_char*>(state) +
+                  offsetof(Effects_Trail9State, sampledTransparencyCurve),
+              samples.size());
+  REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 4, 0) == 0);
+  VS::Core::Memory::FreeLiveFromHighEnd(state);
+  return samples;
+}
+
+std::array<int, 5> RotatingSurfaceRows(Plg074Fixture& fixture, u_char curve) {
+  fixture.Definition().transparencyCurve = curve;
+  Effects_RendererSlot slot{};
+  REQUIRE(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 1,
+                                                                  0) == 1);
+  auto* state = static_cast<Effects_RotatingSurfaceState*>(slot.rendererState);
+  REQUIRE(state != nullptr);
+  std::array<int, 5> rows{};
+  std::ranges::copy(state->factors, rows.begin());
+  VS::Core::Memory::FreeLiveFromHighEnd(state);
+  return rows;
+}
+
+}  // namespace
+
+TEST_CASE("Nine-sample trail transparency reads only the package's curves",
+          "[effects][trail-emitter][trail-surface-refusals]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  const StaleCurveBlock curves(fixture);
+  fixture.Definition().intervalRange[0] = 1;
+  CHECK(NineSampleTrailTransparency(fixture, 1) ==
+        std::array<u_char, 9>{10, 10, 10, 20, 20, 20, 30, 30, 40});
+  CHECK_FALSE(log.Contains("transparency curve"));
+  for (const u_char curve : {u_char{3}, u_char{63}}) {
+    CAPTURE(curve);
+    CHECK(NineSampleTrailTransparency(fixture, curve) ==
+          std::array<u_char, 9>{128, 128, 128, 128, 128, 128, 128, 128, 128});
+  }
+  CHECK(
+      log.Contains("PLG049 trail emitter: transparency curve 3 is outside "
+                   "the package's 3 bound curves"));
+  CHECK(log.Contains("transparency curve 63 is outside"));
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Trail emitters stop on a missing instance or transform",
+          "[effects][plg074][trail-emitter][trail-surface-refusals]") {
+  const bool missing_instance = GENERATE(false, true);
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  fixture.Definition().intervalRange[0] = 2;
+  Effects_RendererSlot slot{};
+  REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
+  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  REQUIRE(state != nullptr);
+  if (missing_instance) {
+    Effects_currentInstance = nullptr;
+  } else {
+    fixture.Definition().transformIndex = 16;
+  }
+  const void* before = Render_frameScratch.primitiveCursor;
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
+  CHECK(state->trails == nullptr);
+  CHECK(state->opaque3 == 0);
+  CHECK(Render_frameScratch.primitiveCursor == before);
+  CHECK(log.Contains(missing_instance ? "no current effect instance"
+                                      : "names transform 16 of 16"));
+  VS::Core::Memory::FreeLiveFromHighEnd(state);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Trail emitters refuse an exhausted heap without a partial state",
+          "[effects][plg074][trail-emitter][trail-surface-refusals]") {
+  constexpr std::size_t kArenaBytes = 512;
+  static_assert(16 * sizeof(Effects_Trail) > kArenaBytes);
+  const bool state_fits = GENERATE(false, true);
+  Plg074Fixture fixture;
+  LogCapture log;
+  fixture.Definition().intervalRange[0] = 16;
+  alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, kArenaBytes>
+      arena{};
+  VS::Core::Memory::ScopedLiveGameHeap exhausted(
+      std::span(arena).first(state_fits ? kArenaBytes : 32));
+  Effects_RendererSlot slot{};
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
+  CHECK(slot.rendererState == nullptr);
+  CHECK(log.Contains(state_fits ? "heap exhausted for 16 trails"
+                                : "heap exhausted for state"));
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
+}
+
+TEST_CASE("Trail emitters ignore a call without a slot",
+          "[effects][trail-emitter][trail-surface-refusals]") {
+  LogCapture log;
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(nullptr, 2, 0) == 0);
+  CHECK(VS::Effects::Templates::UpdateLivePlg049TrailNine(nullptr, 1, 0) == 0);
+  CHECK(log.Contains("PLG074 trail emitter: renderer called without a slot"));
+  CHECK(log.Contains("PLG049 trail emitter: renderer called without a slot"));
+}
+
+TEST_CASE("Live surfaces draw full-intensity rows for curves the package lacks",
+          "[effects][plg074][trail-surface-refusals]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  const StaleCurveBlock curves(fixture);
+  CHECK(RotatingSurfaceRows(fixture, 1) ==
+        std::array<int, 5>{20, 20, 40, 60, 80});
+  CHECK_FALSE(log.Contains("transparency curve"));
+  for (const u_char curve : {u_char{3}, u_char{63}}) {
+    CAPTURE(curve);
+    CHECK(RotatingSurfaceRows(fixture, curve) ==
+          std::array<int, 5>{255, 255, 255, 255, 255});
+  }
+  CHECK(
+      log.Contains("transparency curve 3 is outside the package's 3 bound "
+                   "curves"));
+  CHECK(log.Contains("transparency curve 63 is outside"));
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Live surfaces stop on a missing instance or transform",
+          "[effects][plg074][trail-surface-refusals]") {
+  const Effects_EffectRenderer entry =
+      &VS::Effects::Templates::UpdateLivePlg073RotatingSurface;
+  const bool missing_instance = GENERATE(false, true);
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  Effects_RendererSlot slot{};
+  REQUIRE(entry(&slot, 1, 0) == 1);
+  REQUIRE(slot.rendererState != nullptr);
+  if (missing_instance) {
+    Effects_currentInstance = nullptr;
+  } else {
+    fixture.Definition().transformIndex = 16;
+  }
+  const void* before = Render_frameScratch.primitiveCursor;
+  CHECK(entry(&slot, 2, 0) == 0);
+  CHECK(Render_frameScratch.primitiveCursor == before);
+  CHECK(log.Contains(missing_instance ? "no current effect instance"
+                                      : "names transform 16 of 16"));
+  VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+TEST_CASE("Live surfaces refuse an exhausted heap",
+          "[effects][plg074][trail-surface-refusals]") {
+  Plg074Fixture fixture;
+  LogCapture log;
+  std::array<std::byte, 32> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap exhausted(arena);
+  Effects_RendererSlot slot{};
+  CHECK(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 1, 0) ==
+        1);
+  CHECK(slot.rendererState == nullptr);
+  CHECK(log.Contains("heap exhausted for state"));
+  CHECK(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 2, 0) ==
+        0);
+}
+
+TEST_CASE("EFFPURGE's update sweep reaches no renderer state without a slot",
+          "[effects][trail-surface-refusals]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  CHECK(VS::Effects::LiveInvokeAllPluginUpdates(nullptr, 2, 0) == 0);
+  CHECK(log.Contains("PLG074 trail emitter: renderer called without a slot"));
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
 TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
           "[effects][plg074][f01995]") {
   const auto entry = Plg074Entry(

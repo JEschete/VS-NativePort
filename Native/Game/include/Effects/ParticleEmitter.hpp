@@ -213,8 +213,11 @@ struct ParticleEmissionResult {
 // first. RNG order, low-word products, halfword stores and unhandled switch
 // modes follow the original. Empty/full pools retain the #73 no-emission
 // contract. Failed allocations return only this call's new particles.
-// Polygon filling keeps the native predecessor's SquareRootFixed contract;
-// negative root inputs remain a #271 review boundary, not original parity.
+// Polygon filling keeps the native SquareRootFixed contract: a negative root
+// input (only from a negative inner-extent fraction) scales the offset to 0.
+// The original read before its root table there. No shipped definition can
+// reach it: all 29 polygon-fill definitions sample curve 0 (always 0) with
+// inner extents 0..4096 (#271).
 [[nodiscard]] ParticleEmissionResult EmitParticleEvent(
     const ParticleEmissionDefinition& definition,
     const ParticleEmissionContext& context, ParticleEmissionScratch& scratch,

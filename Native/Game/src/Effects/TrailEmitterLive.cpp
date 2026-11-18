@@ -412,7 +412,11 @@ bool LiveTrailEmitterHost<Emitter>::BeginTick() {
   static_cast<void>(Trails(overlay_.name, state));
   instance_ = Effects_currentInstance;
   if (instance_ == nullptr) {
-    InvalidEmitter(overlay_.name, "no current effect instance");
+    VS_LOG_WARN("effects",
+                "{} trail emitter: no current effect instance; emitter "
+                "stopped",
+                overlay_.name);
+    return false;
   }
   const std::size_t index = state.*Layout::kDefinition;
   definition_ = Definition(index);
@@ -501,7 +505,13 @@ int UpdateEmitter(Effects_RendererSlot* slot, unsigned int command, int packed,
   if (overlay.corner == nullptr || overlay.stages == nullptr) {
     InvalidEmitter(overlay.name, "overlay binding is incomplete");
   }
-  if (slot == nullptr) InvalidEmitter(overlay.name, "missing renderer slot");
+  // EFFPURGE's update sweep (F01889) calls every entry without a slot.
+  if (slot == nullptr) {
+    VS_LOG_ERROR("effects",
+                 "{} trail emitter: renderer called without a slot; ignored",
+                 overlay.name);
+    return 0;
+  }
   LiveTrailEmitterHost<Emitter> host(*slot, overlay);
   return UpdateTrailEmitter(static_cast<TrailEmitterCommand>(command), packed,
                             host)

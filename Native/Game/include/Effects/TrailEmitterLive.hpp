@@ -23,7 +23,8 @@ extern "C" int Content_plg074TrailEmissionCounter[1];
 // (TrailsLive.hpp). Definitions, curves and transforms are read only within
 // the current package's recorded extents (PackageExtents.hpp); an emitter
 // whose data the package lacks is refused with a diagnostic instead of
-// indexing past it (#271).
+// indexing past it, and a missing instance, transform, slot or heap stops or
+// ignores the call with a diagnostic (#271).
 namespace VS::Effects {
 // One overlay's emitter: its name in diagnostics, its emission cursor
 // (VS_TRAIL_CORNER_STATE) and its target, control, init, update and render
