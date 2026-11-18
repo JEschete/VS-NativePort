@@ -3940,18 +3940,32 @@ int func_800F9800(void) {
                        if item["id"] == "F00797")
         self.assertEqual(row["name"], "func_8009C378")
         self.assertEqual(row["final_name"], "Content::CopyWeaponSequence")
-        # #276 slice 16: the typed core copies the fixed block without relocating the
-        # on-disc section offsets and records the clone's extent (#261).
+        # #276 slice 16: the typed core preserves on-disc section offsets, and
+        # bounds clones by the registered bank extent (#262).
         self.assertNotIn("F00797", copy_fixups.FIXES)
-        source = " ".join((root / row["final_location"]).read_text(encoding="utf-8").split())
-        body = source.split("void CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,", 1)[1]
-        body = body.split(" } ", 1)[0]
+        source = (root / row["final_location"]).read_text(encoding="utf-8")
+        start = source.index("bool CopyWeaponSequence(")
+        end = source.index("\nnamespace {", start)
+        body = " ".join(source[start:end].split())
+        self.assertIn("SequenceBankSize(source)", body)
         self.assertIn("kWeaponSequenceBytes", body)
-        self.assertIn("host.RecordSequenceCopy(destination, source, kWeaponSequenceBytes);", body)
+        self.assertIn('host.Refuse("weapon sequence source size"', body)
+        self.assertIn("host.RecordSequenceCopy(destination, source, *source_size);", body)
         self.assertNotIn("VS_ONDISC", body)
-        header = (root / r"Native\Content\include\Content\ActorAssets.hpp").read_text(encoding="utf-8")
+        header = (root / r"Native\Content\include\Content\ActorAssets.hpp").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("inline constexpr std::size_t kWeaponSequenceBytes = 0x7800;", header)
-        live = " ".join((root / r"Native\Content\src\ActorAssetsLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn(
+            "inline constexpr std::size_t kSequenceWorkBufferBytes = 0x4800;",
+            header,
+        )
+        live = " ".join(
+            (root / r"Native\Content\src\ActorAssetsLive.cpp")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        self.assertIn("Actors::SequenceBankBytes(Pointer(bank))", live)
         self.assertIn("Actors::RegisterSequenceBankCopy(Pointer(destination), Pointer(source),", live)
 
     def test_audio_music_stream_names_left_the_copier_for_owned_cores(self):
