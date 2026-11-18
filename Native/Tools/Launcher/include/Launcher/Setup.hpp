@@ -55,6 +55,12 @@ std::expected<Settings, std::string> LoadSettings(
     const std::filesystem::path& state);
 Result SaveSettings(const std::filesystem::path& state,
                     const Settings& settings);
+std::expected<bool, std::string> MigrateLegacyState(
+    const std::filesystem::path& legacy, const std::filesystem::path& state);
+Result CleanAssetLeftovers(const std::filesystem::path& state);
+Result ActivateAssets(const std::filesystem::path& staging,
+                      const std::filesystem::path& data,
+                      const std::filesystem::path& previous);
 Result CheckInstallation(const std::filesystem::path& installation);
 Result CheckAssets(const std::filesystem::path& data,
                    const std::filesystem::path& image);

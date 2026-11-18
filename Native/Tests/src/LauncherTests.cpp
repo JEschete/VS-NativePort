@@ -64,6 +64,10 @@ struct LauncherFixture {
   static void Json(const fs::path& path, const nlohmann::json& json) {
     std::ofstream(path) << json.dump();
   }
+  static std::string Read(const fs::path& path) {
+    std::ifstream input(path, std::ios::binary);
+    return {std::istreambuf_iterator<char>(input), {}};
+  }
 };
 }  // namespace
 
@@ -740,15 +744,132 @@ TEST_CASE("Launcher settings persist Unicode paths and reject damaged settings",
   CHECK_FALSE(Launcher::LoadSettings(fixture.root).has_value());
 }
 
-TEST_CASE("First launch has no default CUE save or FFmpeg paths",
+TEST_CASE("First launch defaults only saves beside the launcher",
           "[launcher][privacy]") {
   LauncherFixture fixture;
   const auto settings = Launcher::LoadSettings(fixture.root / "new profile");
   REQUIRE(settings.has_value());
   CHECK(settings->cue.empty());
-  CHECK(settings->saves.empty());
+  CHECK(settings->saves == fixture.root / "new profile" / "saves");
   CHECK(settings->ffmpeg.empty());
   CHECK_FALSE(fs::exists(fixture.root / "new profile"));
+}
+
+TEST_CASE("Portable default saves follow a relocated launcher folder",
+          "[launcher][portable]") {
+  const LauncherFixture fixture;
+  const auto original = fixture.root / "original";
+  const auto relocated = fixture.root / "relocated";
+  REQUIRE(Launcher::SaveSettings(original, {{}, original / "saves", {}}));
+  fs::rename(original, relocated);
+  const auto loaded = Launcher::LoadSettings(relocated);
+  REQUIRE(loaded);
+  if (!loaded) return;
+  CHECK(loaded->saves == relocated / "saves");
+}
+
+TEST_CASE("Launcher moves legacy state without duplicating assets or saves",
+          "[launcher][portable]") {
+  const LauncherFixture fixture;
+  const auto legacy = fixture.root / "legacy";
+  const auto state = fixture.root / "portable";
+  fs::create_directories(legacy / "saves");
+  fs::create_directories(legacy / "assets");
+  fs::create_directories(legacy / "assets-previous-123");
+  fs::create_directories(legacy / "combat-lab-saves");
+  std::ofstream(legacy / "saves" / "slot00.vssave") << "save";
+  std::ofstream(legacy / "saves" / "slot00.vssave.bak") << "backup";
+  std::ofstream(legacy / "assets" / "asset") << "asset";
+  std::ofstream(legacy / "combat-lab-saves" / "slot00.vssave") << "lab";
+  REQUIRE(Launcher::SaveSettings(legacy, {fixture.cue, legacy / "saves", {}}));
+  REQUIRE(Launcher::MigrateLegacyState(legacy, state));
+  CHECK_FALSE(fs::exists(legacy));
+  CHECK(LauncherFixture::Read(state / "saves" / "slot00.vssave") == "save");
+  CHECK(LauncherFixture::Read(state / "saves" / "slot00.vssave.bak") ==
+        "backup");
+  CHECK(LauncherFixture::Read(state / "assets" / "asset") == "asset");
+  CHECK(LauncherFixture::Read(state / "combat-lab" / "saves" /
+                              "slot00.vssave") == "lab");
+  CHECK_FALSE(fs::exists(state / "assets-previous-123"));
+}
+
+TEST_CASE("Legacy migration preserves conflicts and can resume moved files",
+          "[launcher][portable]") {
+  const LauncherFixture fixture;
+  const auto legacy = fixture.root / "legacy";
+  const auto state = fixture.root / "portable";
+  fs::create_directories(legacy / "saves");
+  fs::create_directories(state / "saves");
+  std::ofstream(legacy / "saves" / "slot00.vssave") << "original";
+  std::ofstream(state / "saves" / "slot00.vssave") << "different";
+  REQUIRE_FALSE(Launcher::MigrateLegacyState(legacy, state));
+  CHECK(LauncherFixture::Read(legacy / "saves" / "slot00.vssave") ==
+        "original");
+  CHECK(LauncherFixture::Read(state / "saves" / "slot00.vssave") ==
+        "different");
+  std::ofstream(state / "saves" / "slot00.vssave") << "original";
+  REQUIRE(Launcher::MigrateLegacyState(legacy, state));
+  CHECK_FALSE(fs::exists(legacy));
+  CHECK(LauncherFixture::Read(state / "saves" / "slot00.vssave") == "original");
+}
+
+TEST_CASE("Legacy migration leaves external saves and existing settings alone",
+          "[launcher][portable]") {
+  const LauncherFixture fixture;
+  const auto legacy = fixture.root / "legacy";
+  const auto state = fixture.root / "portable";
+  const auto external = fixture.root / "external";
+  REQUIRE(Launcher::SaveSettings(legacy, {fixture.cue, external, {}}));
+  REQUIRE(Launcher::MigrateLegacyState(legacy, state));
+  const auto loaded = Launcher::LoadSettings(state);
+  REQUIRE(loaded);
+  if (!loaded) return;
+  CHECK(loaded->saves == external);
+  REQUIRE(Launcher::SaveSettings(legacy, {{}, legacy / "saves", {}}));
+  const auto repeated = Launcher::MigrateLegacyState(legacy, state);
+  REQUIRE(repeated);
+  if (!repeated) return;
+  CHECK_FALSE(*repeated);
+  CHECK(fs::exists(legacy / "launcher.json"));
+}
+
+TEST_CASE("Asset activation deletes backups only after a successful swap",
+          "[launcher][assets]") {
+  const LauncherFixture fixture;
+  const auto data = fixture.root / "assets";
+  const auto staging = fixture.root / "assets-staging-456";
+  const auto previous = fixture.root / "assets-previous-456";
+  fs::create_directories(data);
+  std::ofstream(data / "old") << "old";
+  SECTION("Success also cleans older generated leftovers") {
+    fs::create_directories(staging);
+    std::ofstream(staging / "new") << "new";
+    fs::create_directories(fixture.root / "assets-previous-123");
+    fs::create_directories(fixture.root / "assets-staging-123");
+    REQUIRE(Launcher::ActivateAssets(staging, data, previous));
+    CHECK(fs::exists(data / "new"));
+    CHECK_FALSE(fs::exists(previous));
+    CHECK_FALSE(fs::exists(fixture.root / "assets-previous-123"));
+    CHECK_FALSE(fs::exists(fixture.root / "assets-staging-123"));
+  }
+  SECTION("Failure restores the previous set") {
+    REQUIRE_FALSE(Launcher::ActivateAssets(staging, data, previous));
+    CHECK(fs::exists(data / "old"));
+    CHECK_FALSE(fs::exists(previous));
+  }
+}
+
+TEST_CASE("Startup cleanup preserves a sole backup and non-generated folders",
+          "[launcher][assets]") {
+  const LauncherFixture fixture;
+  fs::create_directories(fixture.root / "assets-previous-123");
+  fs::create_directories(fixture.root / "assets-previous-personal");
+  REQUIRE(Launcher::CleanAssetLeftovers(fixture.root));
+  CHECK(fs::exists(fixture.root / "assets-previous-123"));
+  fs::create_directories(fixture.root / "assets");
+  REQUIRE(Launcher::CleanAssetLeftovers(fixture.root));
+  CHECK_FALSE(fs::exists(fixture.root / "assets-previous-123"));
+  CHECK(fs::exists(fixture.root / "assets-previous-personal"));
 }
 
 TEST_CASE("Launcher checks every inventoried asset before reusing extraction",

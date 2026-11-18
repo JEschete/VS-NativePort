@@ -93,17 +93,19 @@ See [TESTER_RELEASE.md](TESTER_RELEASE.md) for the complete first-run flow.
 The launcher has disc (`.cue`, `.bin` or `.chd`), save-folder and FFmpeg pickers,
 a Play button, a download link and an optional winget installation action. The
 disc is checked before setup. Unsupported editions/layouts fail explicitly.
-First-launch path fields are blank; detection and selections are user actions.
+First-launch saves default beside the executable; disc/FFmpeg fields are blank.
 Only that user's own local settings are restored on later launches.
 
-Play prepares assets in SDL's per-user VagrantStory directory, not beside the
-executable. It runs the existing C++ `extract` (including movie/streams) and
+Play prepares assets in `assets` beside the executable (or in an explicit
+`--state-dir`). It runs the existing C++ `extract` (including movie/streams) and
 `audio` bank stages, then checks the manifest/output files and writes a
 versioned completion inventory. Later plays check source identity and all
 inventoried file sizes before reuse. This is the current extraction pipeline,
 not the deferred all-format native conversion described in section 5.
-Failed staging/replaced asset directories are retained for diagnosis/recovery.
-Selected saves remain separate and are passed to the game with `--save-dir`.
+Replaced asset sets are deleted after successful activation; staging leftovers
+are cleaned at the next launch. Saves default to the local `saves` directory;
+selected external folders remain supported through `--save-dir`. The launcher
+migrates legacy AppData state once; see [TESTER_RELEASE.md](TESTER_RELEASE.md).
 
 Build Release, then create the local ZIP:
 
@@ -353,7 +355,7 @@ build\Release\VS.Desktop.exe
 |---|---|
 | `--disc <path>` | Use this disc (`.cue`, `.chd` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
 | `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
-| `--save-dir <dir>` | Override the native save directory. Use a dedicated ignored directory for tests; the default is `saves` inside SDL's per-user VagrantStory directory. Failure to obtain that directory is an explicit error, never a current-directory fallback. |
+| `--save-dir <dir>` | Override the native save directory. Use a dedicated ignored directory for tests; the default is `saves` beside the executable. |
 | `--frames <n>` | Stop after `n` logical ticks (NTSC fields: 60000/1001, approximately 59.94 per second). |
 | `--capture <dir> --at <t1,first:last,...>` | Write `frame_<t>.bmp` at individual ticks or every tick in positive inclusive ranges, e.g. `--at 100,200:500`. Ranges are stored without expanding the command line or allocating one entry per tick. A selected tick with no display image records the host's black presentation instead of silently omitting the frame. For continuous comparisons use `--speed 1`; large selections produce one BMP per selected tick, so bound the run and preserve verified lossless video before removing redundant frames. |
 | `--press <t:Buttons,...>` | Scripted presses, each held 3 ticks, e.g. `3400:Down,3500:Circle` (names: Up Down Left Right Cross Circle Square Triangle L1 R1 L2 R2 L3 R3 Start Select, joined with `+`). |

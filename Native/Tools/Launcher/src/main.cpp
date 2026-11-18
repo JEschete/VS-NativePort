@@ -22,13 +22,31 @@ namespace {
 namespace fs = std::filesystem;
 namespace Launcher = VS::Launcher;
 bool g_console_mode = false;
-void Report(const std::string& message) {
+void Report(const std::string& message, UINT icon = MB_ICONERROR) {
   if (g_console_mode) {
     std::fprintf(stderr, "launcher: %s\n", message.c_str());
   } else {
     const auto text = VS::Platform::Utf8Path(message).wstring();
-    MessageBoxW(nullptr, text.c_str(), L"Vagrant Story Native",
-                MB_OK | MB_ICONERROR);
+    MessageBoxW(nullptr, text.c_str(), L"Vagrant Story Native", MB_OK | icon);
+  }
+}
+
+void MigrateDefaultState(const fs::path& state) {
+  constexpr std::size_t kMaximumWindowsPathCharacters = 32768;
+  std::wstring roaming(kMaximumWindowsPathCharacters, L'\0');
+  const DWORD size = GetEnvironmentVariableW(
+      L"APPDATA", roaming.data(), static_cast<DWORD>(roaming.size()));
+  if (size == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND) return;
+  if (size == 0 || size >= roaming.size()) {
+    throw std::runtime_error("Cannot locate legacy launcher data.");
+  }
+  roaming.resize(size);
+  const auto legacy = fs::path(roaming) / "VS-NativePort" / "VagrantStory";
+  const auto migrated = Launcher::MigrateLegacyState(legacy, state);
+  if (!migrated) throw std::runtime_error(migrated.error());
+  if (*migrated) {
+    Report("Previous launcher data and saves were moved into this game folder.",
+           MB_ICONINFORMATION);
   }
 }
 
@@ -153,8 +171,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int show) try {
   struct ComScope {
     ~ComScope() { CoUninitialize(); }
   } com;
-  const auto root = VS::Platform::UserDataDir();
-  if (!root) throw std::runtime_error(root.error());
   const auto installation = VS::Platform::ExecutableDir();
   const auto arguments = ReadArguments();
   // Reaching this point proves an update's launcher and libraries can load.
@@ -167,13 +183,18 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int show) try {
                    std::find(arguments.begin(), arguments.end(),
                              L"--verify-only") != arguments.end();
   auto options = ParseOptions(arguments);
-  if (options.state.empty()) options.state = *root;
+  const bool default_state = options.state.empty();
+  if (default_state) options.state = installation;
   const std::unique_ptr<void, decltype(&CloseHandle)> single(
       CreateMutexW(nullptr, FALSE, L"Local\\VSNativePortLauncher"),
       CloseHandle);
   if (!single) throw std::runtime_error("Cannot initialize launcher lock.");
   if (GetLastError() == ERROR_ALREADY_EXISTS) {
     throw std::runtime_error("The launcher is already open.");
+  }
+  if (default_state) MigrateDefaultState(options.state);
+  if (auto result = Launcher::CleanAssetLeftovers(options.state); !result) {
+    throw std::runtime_error(result.error());
   }
   if (const auto recovered = Launcher::RecoverInterruptedUpdate(installation);
       recovered) {

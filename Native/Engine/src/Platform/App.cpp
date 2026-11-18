@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -82,18 +83,11 @@ double App::NowSeconds() const {
 
 std::filesystem::path ExecutableDir() {
   const char* base = SDL_GetBasePath();
-  return base ? Utf8Path(base) : std::filesystem::current_path();
-}
-
-std::expected<std::filesystem::path, std::string> UserDataDir() {
-  const std::unique_ptr<char, decltype(&SDL_free)> pref(
-      SDL_GetPrefPath("VS-NativePort", "VagrantStory"), SDL_free);
-  if (!pref) {
-    return std::unexpected(std::string("User data directory is unavailable: ") +
-                           SDL_GetError());
+  if (!base) {
+    throw std::runtime_error(
+        std::string("Executable directory is unavailable: ") + SDL_GetError());
   }
-  const std::string_view path(pref.get());
-  return std::filesystem::path(std::u8string(path.begin(), path.end()));
+  return Utf8Path(base);
 }
 
 std::expected<int, std::string> RunProcess(

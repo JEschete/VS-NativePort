@@ -1134,9 +1134,8 @@ void ConfigureSession(const Options& options) {
   if (!options.save_directory.empty()) {
     Game::Save::ConfigureDirectory(options.save_directory);
   } else {
-    const auto root = Platform::UserDataDir();
-    if (!root) throw std::runtime_error(root.error());
-    Game::Save::ConfigureDirectory(*root / "combat-lab-saves");
+    Game::Save::ConfigureDirectory(Platform::ExecutableDir() / "combat-lab" /
+                                   "saves");
   }
   if (options.frame_tick_step != 0) {
     VS::Core::StepFrameCounterTicks(options.frame_tick_step);

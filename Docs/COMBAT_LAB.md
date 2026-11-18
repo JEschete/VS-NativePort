@@ -33,8 +33,8 @@ a sequence script or door case that did not pass, or a cancelled sequence.
 
 ### Saves
 
-The Lab keeps native saves in `combat-lab-saves` inside SDL's per-user folder (on Windows,
-`%APPDATA%\VS-NativePort\VagrantStory\`). This is separate from the Desktop game's `saves` folder.
+The Lab keeps native saves in `combat-lab\saves` beside its executable.
+This is separate from the Desktop game's `saves` folder beside the executable.
 Pass `--save-dir <dir>` to use another folder, for example an isolated root for automated runs or a deliberate
 cross-host test. Do not point automated tests at the owner's save files.
 
@@ -57,7 +57,7 @@ Ticks are logical game ticks (1/60 s). Unknown options and invalid values are er
 | `--press <tick:Button[+Button][,...]>` | Scripted presses, each held for two ticks. `+` combines buttons. Repeatable. |
 | `--scripted` | Ignore keyboard and gamepad game input so nobody can disturb the run. Host F-keys still work. |
 | `--capture <file.bmp>` | Write the last presented frame to a BMP file on exit. |
-| `--save-dir <dir>` | Use this folder for native saves instead of `combat-lab-saves`. |
+| `--save-dir <dir>` | Use this folder for native saves instead of the local `combat-lab\saves`. |
 | `--sequence <manifest.json>` | Run several presets in one window. See [Script sequences](#script-sequences). |
 | `--catalog-only` | Load data, write `catalog.json` to the run folder and exit without opening a window. |
 | `--scene-catalog` | With `--catalog-only`, also write `scene-inventory.json`. |
@@ -370,7 +370,7 @@ build\Release\VS.CombatLab.exe --sequence <sequence.json> --speed 64 --scripted 
 
 - Group cases that share a prerequisite, and record a failed prerequisite once.
 - Remove or archive run folders you no longer need. Keep logs, captures and game data out of commits and issues.
-- Older raw logs were moved to the cold archive `%LOCALAPPDATA%\VS-NativePort\evidence-archive\20261028`, where
+- Older raw logs are kept in the cold archive `build\evidence-archive\20261028`, where
   `index.jsonl` maps each original path to its archived copy.
 
 ### Detailed logging in the Desktop game

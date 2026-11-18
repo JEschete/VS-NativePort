@@ -291,13 +291,100 @@ Result ProbeFfmpeg(const fs::path& ffmpeg, const fs::path& log) {
   return {};
 }
 
+Result UnlinkedTree(const fs::path& path) {
+  const auto attributes = GetFileAttributesW(path.c_str());
+  if (attributes == INVALID_FILE_ATTRIBUTES) {
+    return std::unexpected("Cannot inspect " + PathText(path));
+  }
+  if ((attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+    return std::unexpected("Refusing linked storage: " + PathText(path));
+  }
+  if (fs::is_directory(path)) {
+    for (const auto& entry : fs::directory_iterator(path)) {
+      if (auto result = UnlinkedTree(entry.path()); !result) {
+        return result;
+      }
+    }
+  }
+  return {};
+}
+
+Result MoveLegacyDirectory(const fs::path& source, const fs::path& target) {
+  if (!fs::exists(source)) return {};
+  if (auto result = UnlinkedTree(source); !result) {
+    return result;
+  }
+  if (fs::exists(target)) {
+    if (auto result = UnlinkedTree(target); !result) {
+      return result;
+    }
+  }
+  fs::create_directories(target);
+  for (const auto& entry : fs::directory_iterator(source)) {
+    const auto destination = target / entry.path().filename();
+    if (entry.is_directory()) {
+      if (auto result = MoveLegacyDirectory(entry.path(), destination);
+          !result) {
+        return result;
+      }
+    } else {
+      if (fs::exists(destination)) {
+        const auto old_hash = Sha256File(entry.path());
+        const auto new_hash = Sha256File(destination);
+        if (!old_hash || !new_hash || *old_hash != *new_hash) {
+          return std::unexpected("Migration will not overwrite " +
+                                 PathText(destination));
+        }
+        fs::remove(entry.path());
+      } else if (!MoveFileExW(entry.path().c_str(), destination.c_str(),
+                              MOVEFILE_COPY_ALLOWED | MOVEFILE_WRITE_THROUGH)) {
+        return std::unexpected(
+            "Cannot move " + PathText(entry.path()) + ": " +
+            std::system_category().message(static_cast<int>(GetLastError())));
+      }
+    }
+  }
+  fs::remove(source);
+  return {};
+}
+
+bool GeneratedAssetDirectory(std::string_view name, std::string_view prefix) {
+  if (!name.starts_with(prefix)) return false;
+  const auto suffix = name.substr(prefix.size());
+  return !suffix.empty() &&
+         suffix.find_first_not_of("0123456789") == std::string_view::npos;
+}
+
+fs::path LocalSavePath(const fs::path& state, const fs::path& saves) {
+  return saves.empty() ? state / "saves"
+                       : (saves.is_absolute() ? saves : state / saves);
+}
+}  // namespace
+
+Result CleanAssetLeftovers(const fs::path& state) {
+  if (!fs::exists(state)) return {};
+  for (const auto& entry : fs::directory_iterator(state)) {
+    const auto name = PathText(entry.path().filename());
+    const bool previous = GeneratedAssetDirectory(name, "assets-previous-");
+    if ((!previous && !GeneratedAssetDirectory(name, "assets-staging-")) ||
+        (previous && !fs::is_directory(state / "assets"))) {
+      continue;
+    }
+    if (auto result = UnlinkedTree(entry.path()); !result) {
+      return result;
+    }
+    fs::remove_all(entry.path());
+  }
+  return {};
+}
+
 Result ActivateAssets(const fs::path& staging, const fs::path& data,
                       const fs::path& previous) {
   const bool replacing = fs::exists(data);
   if (replacing) fs::rename(data, previous);
   std::error_code error;
   fs::rename(staging, data, error);
-  if (!error) return {};
+  if (!error) return CleanAssetLeftovers(data.parent_path());
   if (replacing) {
     std::error_code rollback;
     fs::rename(previous, data, rollback);
@@ -310,7 +397,6 @@ Result ActivateAssets(const fs::path& staging, const fs::path& data,
   }
   return std::unexpected("Cannot activate prepared assets: " + error.message());
 }
-}  // namespace
 
 std::expected<fs::path, std::string> ValidateCue(const fs::path& cue) {
   if (Upper(PathText(cue.extension())) != ".CUE") {
@@ -374,7 +460,7 @@ fs::path FindFfmpeg() {
 
 std::expected<Settings, std::string> LoadSettings(const fs::path& state) {
   const auto path = state / "launcher.json";
-  if (!fs::exists(path)) return Settings{};
+  if (!fs::exists(path)) return Settings{{}, state / "saves", {}};
   const auto value = ReadJson(path);
   if (!value) return std::unexpected(value.error());
   if (!value->is_object() || !value->contains("version") ||
@@ -386,18 +472,77 @@ std::expected<Settings, std::string> LoadSettings(const fs::path& state) {
       return std::unexpected("Invalid launcher setting: " + std::string(key));
     }
   }
-  return Settings{Utf8Path(value->at("cue").get<std::string>()),
-                  Utf8Path(value->at("saves").get<std::string>()),
-                  Utf8Path(value->at("ffmpeg").get<std::string>())};
+  return Settings{
+      Utf8Path(value->at("cue").get<std::string>()),
+      LocalSavePath(state, Utf8Path(value->at("saves").get<std::string>())),
+      Utf8Path(value->at("ffmpeg").get<std::string>())};
 }
 
 Result SaveSettings(const fs::path& state, const Settings& settings) {
   fs::create_directories(state);
+  const auto saves =
+      settings.saves == state / "saves" ? fs::path("saves") : settings.saves;
   return WriteJson(state / "launcher.json",
                    {{"version", 1},
                     {"cue", PathText(settings.cue)},
-                    {"saves", PathText(settings.saves)},
+                    {"saves", PathText(saves)},
                     {"ffmpeg", PathText(settings.ffmpeg)}});
+}
+
+std::expected<bool, std::string> MigrateLegacyState(const fs::path& legacy,
+                                                    const fs::path& state) {
+  if (!fs::exists(legacy) || fs::exists(state / "launcher.json")) return false;
+  if (auto result = UnlinkedTree(legacy); !result) {
+    return std::unexpected(result.error());
+  }
+  if (fs::exists(state)) {
+    if (auto result = UnlinkedTree(state); !result) {
+      return std::unexpected(result.error());
+    }
+  }
+  auto settings = LoadSettings(legacy);
+  if (!settings) return std::unexpected(settings.error());
+  const auto relative = settings->saves.lexically_relative(legacy);
+  if (!relative.empty() && !relative.is_absolute() &&
+      std::ranges::find(relative, fs::path("..")) == relative.end()) {
+    if (relative == ".") {
+      return std::unexpected("Legacy saves need a dedicated subdirectory.");
+    }
+    settings->saves = state / relative;
+    if (auto result = MoveLegacyDirectory(legacy / relative, settings->saves);
+        !result) {
+      return std::unexpected(result.error());
+    }
+  }
+  for (const auto* folder : {"saves", "assets", "combat-lab-saves"}) {
+    const auto target = std::string_view(folder) == "combat-lab-saves"
+                            ? state / "combat-lab" / "saves"
+                            : state / folder;
+    if (auto result = MoveLegacyDirectory(legacy / folder, target); !result) {
+      return std::unexpected(result.error());
+    }
+  }
+  // Only generated leftovers are discarded; unknown user files stay untouched.
+  for (const auto& entry : fs::directory_iterator(legacy)) {
+    const auto name = PathText(entry.path().filename());
+    if (GeneratedAssetDirectory(name, "assets-previous-") ||
+        GeneratedAssetDirectory(name, "assets-staging-") ||
+        name == "setup.log" || name == "ffmpeg-encoders.txt") {
+      fs::remove_all(entry.path());
+    }
+  }
+  if (auto result = SaveSettings(state, *settings); !result) {
+    return std::unexpected(result.error());
+  }
+  fs::remove(legacy / "launcher.json");
+  if (fs::is_empty(legacy)) {
+    fs::remove(legacy);
+  } else {
+    return std::unexpected(
+        "Known data migrated; unrecognized files retained in " +
+        PathText(legacy));
+  }
+  return true;
 }
 
 Result CheckInstallation(const fs::path& installation) {

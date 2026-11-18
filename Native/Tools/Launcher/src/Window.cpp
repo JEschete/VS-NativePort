@@ -171,8 +171,8 @@ constexpr std::array<Caption, 5> kCaptions{{
      kRightAligned},
     {L"Whole-file checksum verification. Renaming a file cannot bypass it.", 44,
      0, 250, 44, 266, kCaptionFont, kMuted, kLeftAligned},
-    {L"Your existing saves are never moved or deleted.", 0, 450, 306, 44, 326,
-     kCaptionFont, kMuted, kRightAligned},
+    {L"Changing this path does not move your existing saves.", 0, 450, 306, 44,
+     326, kCaptionFont, kMuted, kRightAligned},
 }};
 
 std::wstring Wide(const std::string& value) {

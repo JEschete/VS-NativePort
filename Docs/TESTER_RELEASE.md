@@ -38,13 +38,13 @@ setup.
 1. Extract the **entire ZIP** into a folder. Do not run programs inside the ZIP.
 2. Double-click **Start-Game.cmd**. It checks the bundled runtime files and opens
    the launcher. No Visual Studio, Python or Node.js installation is needed.
-   On first launch all path fields are blank. No developer configuration or
-   personal paths are included. Only paths you select are remembered locally.
+   On first launch saves default to the local `saves` folder; disc and FFmpeg
+   fields are blank. No developer configuration or personal paths are included.
 3. Use **Choose disc...** beside the disc field to select your `.cue`, `.bin` or
    `.chd`. The launcher verifies it in the background. **Play stays disabled** until
    the full checksum matches. Use **Verify disc** after editing the path;
    **Disc details / View error** shows the expected and detected identity.
-4. Choose a writable **game save folder**. Existing saves are not moved or deleted
+4. Keep the local **game save folder**, or choose another writable folder. Existing saves are not moved or deleted
    when you change this setting.
 5. On first play, provide **FFmpeg**. Click **Detect** to search your own machine,
    browse to `ffmpeg.exe`, use the official download link, or choose the
@@ -59,7 +59,7 @@ setup.
    Selecting a different image file, such as moving from a BIN to a CHD, prepares
    the assets once more.
    Assets from the earlier unverified-checksum launcher require one preparation
-   update; previous assets are retained rather than silently trusted.
+   update; previous assets are removed only after the replacement is activated.
 
 ## Which FFmpeg to use
 
@@ -114,22 +114,27 @@ builds are not code-signed.
 
 ## Data, saves and failures
 
-- Settings and prepared assets are stored in the per-user
-  `%APPDATA%\VS-NativePort\VagrantStory` directory supplied by SDL. The chosen
-  save folder is independent of the installed game and prepared assets.
+- Settings (`launcher.json`), prepared assets (`assets`), default saves (`saves`)
+  and setup logs live beside `VS.Launcher.exe`. Use a writable game folder.
+  `--state-dir` and the save-folder picker remain explicit overrides.
+- First default launch moves the old `%APPDATA%\VS-NativePort\VagrantStory`
+  state into this folder. Save conflicts are reported, never overwritten; saves
+  already selected outside the old state folder stay where they are. Unknown
+  files are retained and reported instead of deleted. Explicit `--state-dir`
+  launches do not access or create the old AppData state.
 - The launcher remembers all three paths. Keep your disc image available for
   source validation. The game itself launches against the prepared assets.
-- Remembered paths are in your own per-user configuration, never the tester ZIP.
-  Detection is an explicit action; no save or converter location is preselected.
+- Remembered paths are in your local configuration, never the tester ZIP.
+  Disc and converter detection remain explicit actions.
 - The interface scales with monitor DPI. Resize or scroll the window on smaller
   displays; all setup fields and the Play button remain reachable.
 - A failed setup does **not** start the game or mark incomplete assets ready.
   Correct the displayed error and retry. **Open setup log** opens `setup.log`
-  in the per-user directory. It keeps the output of every setup step, including
+  beside the launcher. It keeps the output of every setup step, including
   FFmpeg's own errors. This is installation output, not gameplay logging.
-- Failed staging folders and replaced asset folders are retained for diagnosis
-  and recovery; they are named `assets-staging-*` and `assets-previous-*`.
-  After successful setup you may remove obsolete ones, never your save folder.
+- A successful asset swap deletes old `assets-previous-*` sets. The next launch
+  removes generated staging leftovers and stale backups when active assets exist;
+  a sole backup is kept for recovery. Failed activation restores the previous set.
 - Release game builds disable normal gameplay logging and detailed trace files.
   Startup errors are still displayed. Use a developer Debug build when detailed
   diagnostic evidence is specifically needed.
@@ -140,7 +145,12 @@ builds are not code-signed.
 ## Controls
 
 Keyboard defaults: arrows move, **Z = Cross**, **X = Circle**, **Return = Start**.
-Gamepads use the existing production input support.
+Gamepads use SDL3, not libpad: Xbox 360/One/Series/Elite, DualShock/DualSense/Edge,
+Switch Pro/Joy-Con and other SDL-mapped controllers are supported by that backend.
+This is not a claim that every model/connection mode has been physically tested.
+Generic controllers need an SDL gamepad mapping. Buttons map by position
+(south = Cross, east = Circle); only one active pad is used. Automatic handover to
+another already-connected pad remains tracked in #438.
 
 FFmpeg is external and is not included in this ZIP; see
 [Which FFmpeg to use](#which-ffmpeg-to-use):

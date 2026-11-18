@@ -3,6 +3,15 @@
 /.direnv
 /.vscode/
 /build
+# Portable launcher assets/saves and development-tool state stay under build/.
+/assets/
+/saves/
+/combat-lab/
+/launcher.json
+/setup.log
+/ffmpeg-encoders.txt
+/assets-staging-*/
+/assets-previous-*/
 /config/*.xml
 /data/
 /disks/

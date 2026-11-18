@@ -160,9 +160,7 @@ void Status(FileMenuScreen screen, std::string_view text) {
 std::expected<Files*, std::string> OpenFiles() {
   if (files) return &*files;
   if (!directory) {
-    auto root = Platform::UserDataDir();
-    if (!root) return std::unexpected(root.error());
-    directory = *root / "saves";
+    directory = Platform::ExecutableDir() / "saves";
   }
   auto opened = Files::Open(*directory);
   if (!opened) return std::unexpected(opened.error());
