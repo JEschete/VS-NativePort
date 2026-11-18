@@ -1,6 +1,7 @@
 [submodule "rood-reverse"]
 	path = resources/rood-reverse
 	url = https://github.com/JEschete/rood-reverse.git
+	ignore = all
 [submodule "ghidra_psx_ldr"]
 	path = tools/Base/Analysis/Ghidra/Extensions/ghidra_psx_ldr
 	url = https://github.com/lab313ru/ghidra_psx_ldr.git
