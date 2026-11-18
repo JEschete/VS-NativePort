@@ -5,7 +5,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Movie/Intro/Playback.h"
+#include "Movie/Intro/Playback.hpp"
 #include "Movie/IntroPlayer.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Movie/MoviePlayer.hpp"
@@ -59,16 +59,16 @@ class LiveHost final : public Host {
   void EnableDisplay() override { SetDispMask(1); }
 
   [[nodiscard]] bool IsPlaying() const override {
-    return Movie_Intro_isPlaying != 0;
+    return VS::Movie::Intro::isPlaying != 0;
   }
   void SetPlaying(bool playing) override {
-    Movie_Intro_isPlaying = playing ? 1 : 0;
+    VS::Movie::Intro::isPlaying = playing ? 1 : 0;
   }
   [[nodiscard]] std::uint32_t StartTick() const override {
-    return Movie_Intro_playbackStartTick;
+    return VS::Movie::Intro::playbackStartTick;
   }
   void SetStartTick(std::uint32_t tick) override {
-    Movie_Intro_playbackStartTick = tick;
+    VS::Movie::Intro::playbackStartTick = tick;
   }
   // The original kept the page in its MDEC state's frame index; Start resets it
   // to the upper page each time the intro opens.

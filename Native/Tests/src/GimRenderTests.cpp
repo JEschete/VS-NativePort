@@ -11,7 +11,7 @@
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
@@ -45,14 +45,15 @@ static_assert(sizeof VS::Menu::textBoxOrderingTables == 102 * sizeof(u_long),
 
 int Tests_EncodedTextFormatting(void) {
   const Menu_StringContext saved = Battle_stringContext;
-  char nested[] = {10, 0, Core_TextCode_PrintDecimal, 1,
-                   Core_TextCode_Terminator};
-  char format[] = {Core_TextCode_PrintDecimal, 0, 0x8F,
-                   Core_TextCode_PrintString,  0, 0x8F,
-                   Core_TextCode_PrintHex,     2, Core_TextCode_Terminator,
-                   Core_TextCode_PrintString,  0};
+  char nested[] = {10, 0, VS::Core::TextCode::kPrintDecimal, 1,
+                   VS::Core::TextCode::kTerminator};
+  char format[] = {
+      VS::Core::TextCode::kPrintDecimal, 0, 0x8F,
+      VS::Core::TextCode::kPrintString,  0, 0x8F,
+      VS::Core::TextCode::kPrintHex,     2, VS::Core::TextCode::kTerminator,
+      VS::Core::TextCode::kPrintString,  0};
   const unsigned char expected[] = {
-      0xA7, 1, 0, 5, 0x8F, 10, 0, 7, 0x8F, 0, Core_TextCode_Terminator};
+      0xA7, 1, 0, 5, 0x8F, 10, 0, 7, 0x8F, 0, VS::Core::TextCode::kTerminator};
   char output[64];
   memset(output, 0x55, sizeof output);
   Battle_stringContext.integers[0] = -105;
@@ -68,11 +69,11 @@ int Tests_EncodedTextFormatting(void) {
   char small[4];
   memset(small, 0x55, sizeof small);
   const uint64_t refused = VS::Render::RefusedLiveEncodedTextCount();
-  passed = passed &&
-           VS::Render::FormatLiveEncodedText(small, format) == small &&
-           static_cast<unsigned char>(small[0]) == Core_TextCode_Terminator &&
-           small[1] == 0x55 &&
-           VS::Render::RefusedLiveEncodedTextCount() == refused + 1;
+  passed =
+      passed && VS::Render::FormatLiveEncodedText(small, format) == small &&
+      static_cast<unsigned char>(small[0]) == VS::Core::TextCode::kTerminator &&
+      small[1] == 0x55 &&
+      VS::Render::RefusedLiveEncodedTextCount() == refused + 1;
   Battle_stringContext = saved;
   return passed;
 }
@@ -496,9 +497,9 @@ int CheckMenuDiscStringsLoaded(void) {
   return status_words > Text_Menu4_status_Offset_values && condition > 0 &&
          condition < status_words && Menu_Inventory_menuText[0] > 0 &&
          Menu_Inventory_menuText[0] < inventory_words &&
-         format[0] == Core_TextCode_PrintString && format[1] == 0 &&
-         format[5] == Core_TextCode_PrintString && format[6] == 1 &&
-         format[7] == Core_TextCode_Terminator;
+         format[0] == VS::Core::TextCode::kPrintString && format[1] == 0 &&
+         format[5] == VS::Core::TextCode::kPrintString && format[6] == 1 &&
+         format[7] == VS::Core::TextCode::kTerminator;
 }
 
 int CheckStatusPacketLinks(int background_first) {
@@ -605,15 +606,17 @@ int CheckDefaultLoadoutNames(void) {
                                       0x2F,
                                       0x28,
                                       0x3C,
-                                      Core_TextCode_Spacing,
+                                      VS::Core::TextCode::kSpacing,
                                       6,
                                       0x1B,
                                       0x2C,
                                       0x32,
                                       0x37,
-                                      Core_TextCode_Terminator};
+                                      VS::Core::TextCode::kTerminator};
   const unsigned char weapon_name[] = {
-      0x0F, 0x24, 0x31, 0x27, 0x24, 0x31, 0x2A, 0x32, Core_TextCode_Terminator};
+      0x0F, 0x24, 0x31,
+      0x27, 0x24, 0x31,
+      0x2A, 0x32, VS::Core::TextCode::kTerminator};
   return memcmp(Actors_ashleyInitialLoadout.name, actor_name,
                 sizeof actor_name) == 0 &&
          memcmp(Actors_ashleyInitialLoadout.weapon.name, weapon_name,

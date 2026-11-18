@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
@@ -41,7 +41,7 @@ struct InformationFixture {
 
   InformationFixture() {
     memory.fill(0xA5);
-    message.fill(static_cast<char>(Core_TextCode_Terminator));
+    message.fill(static_cast<char>(VS::Core::TextCode::kTerminator));
     message[0] = 5;
     message[1] = 0;
     message[2] = 6;
@@ -82,14 +82,14 @@ TEST_CASE("Information messages preserve the original encoded instant prefix",
   VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
   const auto* encoded =
       reinterpret_cast<const unsigned char*>(Menu_textBoxes[7].string);
-  CHECK(encoded[0] == Core_TextCode_ChunkSize);
-  CHECK(encoded[1] == Core_TextCode_NoChunking);
+  CHECK(encoded[0] == VS::Core::TextCode::kChunkSize);
+  CHECK(encoded[1] == VS::Core::TextCode::kNoChunking);
   CHECK(std::memcmp(encoded + 2, fixture.message.data(),
                     fixture.message.size()) == 0);
   const std::array<unsigned char, 3> tail{encoded[98], encoded[99],
                                           encoded[100]};
-  const std::array<unsigned char, 3> expected{Core_TextCode_Terminator,
-                                              Core_TextCode_Terminator, 0};
+  const std::array<unsigned char, 3> expected{
+      VS::Core::TextCode::kTerminator, VS::Core::TextCode::kTerminator, 0};
   CHECK(tail == expected);
 }
 
@@ -107,7 +107,7 @@ TEST_CASE(
     CHECK(Render_frameScratch.primitiveCursor ==
           fixture.memory.data() + 8 + sizeof(u_long) * 3 * 6);
   }
-  fixture.message[0] = static_cast<char>(Core_TextCode_Terminator);
+  fixture.message[0] = static_cast<char>(VS::Core::TextCode::kTerminator);
   VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
   fixture.ResetPackets();
   VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);

@@ -27,7 +27,6 @@
 #include "Battle/StatusEffects.h"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/Random.h"
 #include "Core/RandomLive.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -555,13 +554,13 @@ void CheckRandomPolicy(const RandomEffect& effect, bool mutate) {
 }
 
 struct RandomStateFixture {
-  decltype(std::to_array(Core_randomShuffleTable)) table =
-      std::to_array(Core_randomShuffleTable);
-  int index = Core_randomShuffleIndex;
+  decltype(std::to_array(VS::Core::randomShuffleTable)) table =
+      std::to_array(VS::Core::randomShuffleTable);
+  int index = VS::Core::randomShuffleIndex;
   std::uint32_t bios = VS::Core::BiosRand().State();
   ~RandomStateFixture() {
-    std::ranges::copy(table, Core_randomShuffleTable);
-    Core_randomShuffleIndex = index;
+    std::ranges::copy(table, VS::Core::randomShuffleTable);
+    VS::Core::randomShuffleIndex = index;
     VS::Core::BiosRand().Seed(bios);
   }
 };
@@ -588,19 +587,19 @@ void CheckLiveRandomSample(Handler handler, const RandomEffect& effect,
     SetPending(hit, effect, sample.pending, sample.mode);
     auto expected = hit;
     SetPending(expected, effect, sample.pending + sample.draw + 1, effect.mode);
-    std::ranges::fill(Core_randomShuffleTable, 0);
-    Core_randomShuffleIndex = 96;
-    Core_randomShuffleTable[0] = 32767 - sample.draw * 8192;
+    std::ranges::fill(VS::Core::randomShuffleTable, 0);
+    VS::Core::randomShuffleIndex = 96;
+    VS::Core::randomShuffleTable[0] = 32767 - sample.draw * 8192;
     VS::Core::BiosRand().Seed(12345);
     VS::Core::Rand15 expected_bios(12345);
-    auto expected_table = std::to_array(Core_randomShuffleTable);
+    auto expected_table = std::to_array(VS::Core::randomShuffleTable);
     expected_table.fill(0);
     expected_table.at(0) = expected_bios.Next();
     handler(nullptr, nullptr, &hit, unused, unused);
     CHECK(Bytes(hit) == Bytes(expected));
     CHECK(VS::Core::BiosRand().State() == expected_bios.State());
-    CHECK(Core_randomShuffleIndex == 0);
-    CHECK(std::to_array(Core_randomShuffleTable) == expected_table);
+    CHECK(VS::Core::randomShuffleIndex == 0);
+    CHECK(std::to_array(VS::Core::randomShuffleTable) == expected_table);
   }
 }
 

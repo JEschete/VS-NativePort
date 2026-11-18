@@ -1458,6 +1458,9 @@
     <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>
+    <ClInclude Include="include\Menu\TextBoxUpdateLiveRestore.hpp">
+      <Filter>include\Menu</Filter>
+    </ClInclude>
     <ClInclude Include="include\Menu\TimeAttackTerminalFixture.hpp">
       <Filter>include\Menu</Filter>
     </ClInclude>

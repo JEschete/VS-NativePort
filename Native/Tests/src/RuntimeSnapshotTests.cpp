@@ -41,7 +41,6 @@
 #include "Boot/GameLoop.h"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/Random.h"
 #include "Core/RandomLive.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Field/CameraLive.hpp"
@@ -255,14 +254,14 @@ struct RuntimeFixture {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Battle_Ai_actorAiStates)) ai =
       std::to_array(Battle_Ai_actorAiStates);
-  decltype(std::to_array(Core_randomShuffleTable)) shuffle =
-      std::to_array(Core_randomShuffleTable);
+  decltype(std::to_array(VS::Core::randomShuffleTable)) shuffle =
+      std::to_array(VS::Core::randomShuffleTable);
   decltype(std::to_array(Items_itemCategoryUpperIds)) bounds =
       std::to_array(Items_itemCategoryUpperIds);
   Battle_Actor* character = Battle_characterState;
   unsigned bios = VS::Core::BiosRand().State();
-  unsigned interface_random = Core_interfaceRandomState;
-  int shuffle_index = Core_randomShuffleIndex;
+  unsigned interface_random = VS::Core::interfaceRandomState;
+  int shuffle_index = VS::Core::randomShuffleIndex;
   int movement_random = Battle_Ai_savedMovementRandomState;
   unsigned frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
   int current_cache = State_currentRoomStateSlot;
@@ -427,10 +426,10 @@ struct RuntimeFixture {
     VS::State::sceneTimer.seconds = 17;
     VS::State::sceneTimer.frames = 29;
     VS::Core::SeedBiosRand(0x12345678);
-    Core_interfaceRandomState = 0x87654321;
-    Core_randomShuffleIndex = 96;
+    VS::Core::interfaceRandomState = 0x87654321;
+    VS::Core::randomShuffleIndex = 96;
     for (std::size_t index = 0; index < shuffle.size(); ++index) {
-      Core_randomShuffleTable[index] = static_cast<int>(index) * 337;
+      VS::Core::randomShuffleTable[index] = static_cast<int>(index) * 337;
     }
     Battle_Ai_savedMovementRandomState = std::bit_cast<int>(0xFEDCBA98u);
     State_currentRoomStateSlot = 0;
@@ -622,12 +621,12 @@ struct RuntimeFixture {
     std::copy(actors.begin(), actors.end(), Battle_actors);
     std::copy(models.begin(), models.end(), Actors_actorRecords);
     std::copy(ai.begin(), ai.end(), Battle_Ai_actorAiStates);
-    std::copy(shuffle.begin(), shuffle.end(), Core_randomShuffleTable);
+    std::copy(shuffle.begin(), shuffle.end(), VS::Core::randomShuffleTable);
     std::copy(bounds.begin(), bounds.end(), Items_itemCategoryUpperIds);
     Battle_characterState = character;
     VS::Core::SeedBiosRand(bios);
-    Core_interfaceRandomState = interface_random;
-    Core_randomShuffleIndex = shuffle_index;
+    VS::Core::interfaceRandomState = interface_random;
+    VS::Core::randomShuffleIndex = shuffle_index;
     Battle_Ai_savedMovementRandomState = movement_random;
     VS::Battle::Ai::LiveFrameContext().randomState = frame_random;
     State_currentRoomStateSlot = current_cache;
@@ -691,9 +690,9 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, fixture.enemy_ai);
   Append(bytes, fixture.storage);
   Append(bytes, VS::Core::BiosRand().State());
-  Append(bytes, Core_interfaceRandomState);
-  Append(bytes, Core_randomShuffleTable);
-  Append(bytes, Core_randomShuffleIndex);
+  Append(bytes, VS::Core::interfaceRandomState);
+  Append(bytes, VS::Core::randomShuffleTable);
+  Append(bytes, VS::Core::randomShuffleIndex);
   Append(bytes, Battle_Ai_savedMovementRandomState);
   Append(bytes, VS::Battle::Ai::LiveFrameContext().randomState);
   Append(bytes, Audio_Driver_controlLatches.mixBehavior);
@@ -1354,9 +1353,9 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   VS::State::sceneTimer = {};
   VS::Field::sphericalCamera.values.yaw = 0;
   VS::Core::SeedBiosRand(1);
-  Core_interfaceRandomState = 1;
-  std::fill_n(Core_randomShuffleTable, 97, 0);
-  Core_randomShuffleIndex = 0;
+  VS::Core::interfaceRandomState = 1;
+  std::fill_n(VS::Core::randomShuffleTable, 97, 0);
+  VS::Core::randomShuffleIndex = 0;
   Battle_Ai_savedMovementRandomState = 1;
   VS::Battle::Ai::LiveFrameContext().randomState = 1;
   VS::State::SetLiveScriptFlag(64, 0);
@@ -1390,10 +1389,10 @@ void CheckRestoredClockCamera() {
 
 void CheckRestoredRandom(const Save::Snapshot& state) {
   CHECK(VS::Core::BiosRand().State() == state.random.bios_state);
-  CHECK(Core_interfaceRandomState == state.random.interface_state);
+  CHECK(VS::Core::interfaceRandomState == state.random.interface_state);
   CHECK(std::equal(state.random.shuffle.begin(), state.random.shuffle.end(),
-                   Core_randomShuffleTable));
-  CHECK(Core_randomShuffleIndex == 96);
+                   VS::Core::randomShuffleTable));
+  CHECK(VS::Core::randomShuffleIndex == 96);
   CHECK(VS::Battle::Ai::LiveFrameContext().randomState == 0xFEDCBA98);
   CHECK(std::bit_cast<unsigned>(Battle_Ai_savedMovementRandomState) ==
         0xFEDCBA98);

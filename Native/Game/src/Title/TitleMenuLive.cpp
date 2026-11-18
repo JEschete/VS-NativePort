@@ -32,7 +32,7 @@
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Sounds.hpp"
-#include "Movie/Intro/Playback.h"
+#include "Movie/Intro/Playback.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Render/Display.h"
 #include "Render/UiPacketsLive.hpp"
@@ -350,8 +350,8 @@ class LiveHost final : public Host {
   void StopIntroMovieAfterAudioTail() override {
     Movie::Intro::StopLiveAfterAudioTail();
   }
-  bool IntroMoviePlaying() override { return Movie_Intro_isPlaying != 0; }
-  void ClearIntroMoviePlaying() override { Movie_Intro_isPlaying = 0; }
+  bool IntroMoviePlaying() override { return VS::Movie::Intro::isPlaying != 0; }
+  void ClearIntroMoviePlaying() override { VS::Movie::Intro::isPlaying = 0; }
 
   int VisitCount() override { return titleScreenVisitCount; }
   void SetVisitCount(int count) override { titleScreenVisitCount = count; }

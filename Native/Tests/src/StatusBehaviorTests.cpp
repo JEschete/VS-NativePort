@@ -16,7 +16,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/StatusQueueLive.hpp"
-#include "Core/Random.h"
+#include "Core/RandomLive.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -32,9 +32,9 @@ struct ConditionFixture {
       std::to_array(Battle_statusEffectParams);
   decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
       std::to_array(Battle_actionDefinitions);
-  decltype(std::to_array(Core_randomShuffleTable)) saved_random =
-      std::to_array(Core_randomShuffleTable);
-  int saved_random_index = Core_randomShuffleIndex;
+  decltype(std::to_array(VS::Core::randomShuffleTable)) saved_random =
+      std::to_array(VS::Core::randomShuffleTable);
+  int saved_random_index = VS::Core::randomShuffleIndex;
   Battle_ActorStats stats{};
   Battle_Actor actor{};
   Actors_ActorRecord record{};
@@ -51,8 +51,8 @@ struct ConditionFixture {
     Battle_actionState = &action;
     Battle_floatingLabels = &labels;
     Battle_floatingLabelCount = 0;
-    std::fill_n(Core_randomShuffleTable, saved_random.size(), 0);
-    Core_randomShuffleIndex = 0;
+    std::fill_n(VS::Core::randomShuffleTable, saved_random.size(), 0);
+    VS::Core::randomShuffleIndex = 0;
     InitializeStats();
     InitializePolicies();
   }
@@ -69,8 +69,8 @@ struct ConditionFixture {
     std::copy(saved_definitions.begin(), saved_definitions.end(),
               Battle_actionDefinitions);
     std::copy(saved_random.begin(), saved_random.end(),
-              Core_randomShuffleTable);
-    Core_randomShuffleIndex = saved_random_index;
+              VS::Core::randomShuffleTable);
+    VS::Core::randomShuffleIndex = saved_random_index;
   }
 
   void InitializeStats() {

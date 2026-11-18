@@ -16,7 +16,7 @@
 #include "Battle/Feedback.h"
 #include "Content/DataStore.hpp"
 #include "Content/StringTables.h"
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "Field/Map.h"
 #include "Field/MapProgress.h"
 #include "Field/MinimapScene.hpp"
@@ -135,13 +135,14 @@ bool IsRoomName(std::span<const char> name) {
   bool visible = false;
   for (std::size_t index = 0; index < name.size(); ++index) {
     const auto glyph = static_cast<unsigned char>(name[index]);
-    if (glyph == Core_TextCode_Terminator) return visible;
-    if (glyph == Core_TextCode_Spacing || glyph == Core_TextCode_ChunkSize ||
-        glyph == Core_TextCode_FontTable) {
+    if (glyph == VS::Core::TextCode::kTerminator) return visible;
+    if (glyph == VS::Core::TextCode::kSpacing ||
+        glyph == VS::Core::TextCode::kChunkSize ||
+        glyph == VS::Core::TextCode::kFontTable) {
       if (++index == name.size()) return false;
-    } else if (glyph >= Core_TextCode_NonPrinting) {
+    } else if (glyph >= VS::Core::TextCode::kNonPrinting) {
       return false;
-    } else if (glyph != Core_TextCode_Space) {
+    } else if (glyph != VS::Core::TextCode::kSpace) {
       visible = true;
     }
   }
@@ -332,20 +333,20 @@ class Frontend {
                int right = kScreenWidth) const {
     for (std::size_t index = 0; index < text.size(); ++index) {
       const auto glyph = static_cast<unsigned char>(text[index]);
-      if (glyph == Core_TextCode_Terminator ||
-          glyph == Core_TextCode_PrintString) {
+      if (glyph == VS::Core::TextCode::kTerminator ||
+          glyph == VS::Core::TextCode::kPrintString) {
         return;
       }
-      if (glyph == Core_TextCode_Spacing) {
+      if (glyph == VS::Core::TextCode::kSpacing) {
         if (++index == text.size()) return;
         const auto spacing = static_cast<unsigned char>(text[index]);
         position.x += spacing >= kNegativeSpacingFloor
                           ? static_cast<int>(spacing) - kByteValues
                           : spacing;
-      } else if (glyph == Core_TextCode_ChunkSize ||
-                 glyph == Core_TextCode_FontTable) {
+      } else if (glyph == VS::Core::TextCode::kChunkSize ||
+                 glyph == VS::Core::TextCode::kFontTable) {
         if (++index == text.size()) return;
-      } else if (glyph < Core_TextCode_NonPrinting) {
+      } else if (glyph < VS::Core::TextCode::kNonPrinting) {
         if (position.x + kGlyphExtent > right) return;
         position.x = Glyph(glyph, position, clut);
       } else {
@@ -356,7 +357,7 @@ class Frontend {
 
   void Ascii(std::string_view text, Point position, int clut = 0) const {
     for (const unsigned char character : text) {
-      unsigned glyph = Core_TextCode_Space;
+      unsigned glyph = VS::Core::TextCode::kSpace;
       if (character >= 'A' && character <= 'Z') {
         glyph = character - 'A' + kGlyphUppercase;
       } else if (character >= 'a' && character <= 'z') {
@@ -585,10 +586,10 @@ std::expected<NativeFileSummary, std::string> DescribeNativeFile(
     for (std::size_t index = 0; index < kClearName.size(); ++index) {
       const auto c = kClearName[index];
       summary.room_name[index] = static_cast<char>(
-          c == ' ' ? Core_TextCode_Space : c - 'A' + kGlyphUppercase);
+          c == ' ' ? VS::Core::TextCode::kSpace : c - 'A' + kGlyphUppercase);
     }
     summary.room_name[kClearName.size()] =
-        static_cast<char>(Core_TextCode_Terminator);
+        static_cast<char>(VS::Core::TextCode::kTerminator);
     // F03601 sets saveLocation=0x30, outside the ordinary save-point artwork.
     summary.location_artwork = -1;
     return summary;

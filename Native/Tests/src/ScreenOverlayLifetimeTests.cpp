@@ -8,7 +8,7 @@
 
 #include "Content/DiscLayout.h"
 #include "Content/OverlayWorkspaceLive.hpp"
-#include "Core/Overlays.h"
+#include "Core/Overlays.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
@@ -307,7 +307,7 @@ void CheckQueuedScreff2Read(const Content_DiscQueueSlot& request) {
   CHECK(request.state == Content_DiscRequestState_Enqueued);
   CHECK(request.cdFile.lba == VS_SCREFF2_PRG_LBA);
   CHECK(request.cdFile.size == VS_SCREFF2_PRG_SIZE);
-  CHECK(request.vram == Core_overlaySlots[1]);
+  CHECK(request.vram == VS::Core::kOverlaySlots[1]);
 }
 }  // namespace
 

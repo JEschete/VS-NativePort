@@ -46,7 +46,6 @@
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Random.h"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
@@ -549,15 +548,16 @@ struct LootInventoryFixture {
 };
 
 struct LootRandomFixture {
-  decltype(std::to_array(Core_randomShuffleTable)) saved_table =
-      std::to_array(Core_randomShuffleTable);
-  int saved_index = Core_randomShuffleIndex;
+  decltype(std::to_array(VS::Core::randomShuffleTable)) saved_table =
+      std::to_array(VS::Core::randomShuffleTable);
+  int saved_index = VS::Core::randomShuffleIndex;
 
   LootRandomFixture() { VS::Core::InitializeLiveRandomShuffleTable(); }
 
   ~LootRandomFixture() {
-    std::copy(saved_table.begin(), saved_table.end(), Core_randomShuffleTable);
-    Core_randomShuffleIndex = saved_index;
+    std::copy(saved_table.begin(), saved_table.end(),
+              VS::Core::randomShuffleTable);
+    VS::Core::randomShuffleIndex = saved_index;
     VS::Core::SeedBiosRand(1);
   }
 
@@ -567,19 +567,19 @@ struct LootRandomFixture {
   }
 
   static void ForceFirstRoll(int roll) {
-    std::fill_n(Core_randomShuffleTable, 97, 0);
-    Core_randomShuffleIndex = 96;
-    Core_randomShuffleTable[0] = 32767 - (roll * 32768 + 254) / 255;
+    std::fill_n(VS::Core::randomShuffleTable, 97, 0);
+    VS::Core::randomShuffleIndex = 96;
+    VS::Core::randomShuffleTable[0] = 32767 - (roll * 32768 + 254) / 255;
     VS::Core::SeedBiosRand(1234);
   }
 
   static void CheckOneForcedDraw() {
     VS::Core::Rand15 expected(1234);
-    CHECK(Core_randomShuffleIndex == 0);
-    CHECK(Core_randomShuffleTable[0] == expected.Next());
+    CHECK(VS::Core::randomShuffleIndex == 0);
+    CHECK(VS::Core::randomShuffleTable[0] == expected.Next());
     CHECK(VS::Core::NextBiosRand() == expected.Next());
     for (int index = 1; index < 97; ++index) {
-      CHECK(Core_randomShuffleTable[index] == 0);
+      CHECK(VS::Core::randomShuffleTable[index] == 0);
     }
   }
 };

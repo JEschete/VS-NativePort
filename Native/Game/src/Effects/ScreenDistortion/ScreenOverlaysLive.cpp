@@ -8,7 +8,7 @@
 #include "Content/DiscLayout.h"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Log.hpp"
-#include "Core/Overlays.h"
+#include "Core/Overlays.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
@@ -148,11 +148,12 @@ class LiveScreenOverlayLoader final : public ScreenOverlayLoader {
     return Content::AllocateLiveDiscRequest(&file);
   }
   void EnqueueOverlayRead(Content_DiscQueueSlot* read) override {
-    Content::EnqueueLiveDiscRequest(read, Core_overlaySlots[1]);
+    Content::EnqueueLiveDiscRequest(read, VS::Core::kOverlaySlots[1]);
   }
   Content_DiscQueueSlot* CompleteRefusedOverlayRead() override {
     const Content_DiscFile file = OverlayFile();
-    return Content::CompleteLiveRefusedDiscRequest(&file, Core_overlaySlots[1]);
+    return Content::CompleteLiveRefusedDiscRequest(&file,
+                                                   VS::Core::kOverlaySlots[1]);
   }
   bool OverlayReadLoaded(const Content_DiscQueueSlot* read) override {
     if (read == nullptr) {

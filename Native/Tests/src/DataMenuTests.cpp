@@ -11,8 +11,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Core/Random.h"
-#include "Core/Text/TextCode.h"
+#include "Core/RandomLive.hpp"
+#include "Core/Text/TextCode.hpp"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -102,7 +102,7 @@ struct ClockFixture {
   void* saved_table = Render_legacyOrderingTables[0];
   int saved_framebuffer = Render_frameBuf;
   State_PlayTime saved_time = VS::State::playTime;
-  u_int saved_random = Core_interfaceRandomState;
+  u_int saved_random = VS::Core::interfaceRandomState;
   std::array<u_char, 264> saved_trim{};
   std::array<u_char, 92> saved_widths{};
   std::array<u_char, 60> saved_indices{};
@@ -128,7 +128,7 @@ struct ClockFixture {
     Render_legacyOrderingTables[0] = ordering.data();
     Render_frameScratch.orderingTable = ordering.data() + 18;
     Render_frameScratch.overlayOrderingTable = ordering.data() + 2;
-    Core_interfaceRandomState = 0;
+    VS::Core::interfaceRandomState = 0;
     ResetPackets();
   }
 
@@ -144,7 +144,7 @@ struct ClockFixture {
     Render_legacyOrderingTables[0] = saved_table;
     Render_frameBuf = saved_framebuffer;
     VS::State::playTime = saved_time;
-    Core_interfaceRandomState = saved_random;
+    VS::Core::interfaceRandomState = saved_random;
   }
 
   void ResetPackets() {
@@ -284,7 +284,7 @@ TEST_CASE("Score scroll fades keep every packet in its native ordering chain",
           "[render][menu][score][scroll]") {
   ClockFixture fixture;
   Menu_Framework_MenuRow row{};
-  row.text[0] = static_cast<char>(Core_TextCode_PrintString);
+  row.text[0] = static_cast<char>(VS::Core::TextCode::kPrintString);
   row.x = 60;
   row.y = 80;
   row.w = 100;

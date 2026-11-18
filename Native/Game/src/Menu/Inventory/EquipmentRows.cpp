@@ -21,7 +21,7 @@ using Framework::MenuRow;
 using Framework::RowPlacement;
 using Framework::RowState;
 
-// Core_TextCode_Terminator twice and Core_TextCode_ChunkSize.
+// VS::Core::TextCode::kTerminator twice and VS::Core::TextCode::kChunkSize.
 constexpr std::uint8_t kTerminator = 0xE7;
 constexpr std::uint8_t kChunkSize = 0xF8;
 constexpr std::size_t kDescriptionCopyOffset = 2;

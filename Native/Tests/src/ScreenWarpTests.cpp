@@ -12,7 +12,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/FixedPoint.hpp"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
@@ -35,18 +35,18 @@ struct WarpFixture {
   std::array<u_char, 1296> saved_lookup{};
 
   WarpFixture() {
-    std::copy_n(Core_Math_kArcTangentTable, saved_lookup.size(),
+    std::copy_n(VS::Core::Math::kArcTangentTable, saved_lookup.size(),
                 saved_lookup.begin());
     for (std::size_t index = 0; index < saved_lookup.size(); ++index) {
-      Core_Math_kArcTangentTable[index] =
+      VS::Core::Math::kArcTangentTable[index] =
           static_cast<u_char>((index * 37 + 13) & 255);
     }
     for (unsigned index = 0; index < 192; ++index) {
       const auto value = static_cast<unsigned>(
           std::sqrt(static_cast<double>((index + 64) * 262144)));
-      Core_Math_kArcTangentTable[516 + index * 2] =
+      VS::Core::Math::kArcTangentTable[516 + index * 2] =
           static_cast<u_char>(value & 255);
-      Core_Math_kArcTangentTable[517 + index * 2] =
+      VS::Core::Math::kArcTangentTable[517 + index * 2] =
           static_cast<u_char>(value >> 8);
     }
     overlay.radialWarpArg0 = 2048;
@@ -64,7 +64,7 @@ struct WarpFixture {
 
   ~WarpFixture() {
     std::copy(saved_lookup.begin(), saved_lookup.end(),
-              Core_Math_kArcTangentTable);
+              VS::Core::Math::kArcTangentTable);
     Render_frameScratch = saved_frame;
     Effects_screenEffectOverlay = saved_overlay;
   }
@@ -114,8 +114,8 @@ unsigned ReferenceRadius(int x, int y) {
   const auto normalized =
       FloorDivide(SignedWord(sum), std::int64_t{1} << shift);
   const auto offset = static_cast<std::size_t>(516 + (normalized - 64) * 2);
-  const unsigned sample = Core_Math_kArcTangentTable[offset] +
-                          Core_Math_kArcTangentTable[offset + 1] * 256u;
+  const unsigned sample = VS::Core::Math::kArcTangentTable[offset] +
+                          VS::Core::Math::kArcTangentTable[offset + 1] * 256u;
   const auto scaled = static_cast<std::uint32_t>(
       std::uint64_t{sample} * (std::uint64_t{1} << ((31 - aligned) / 2)));
   const auto radius = FloorDivide(SignedWord(scaled), 4096);
@@ -261,10 +261,11 @@ TEST_CASE(
   fixture.ordering[2047] = LegacyGpu_Handle(sky.data());
   const auto before = sky;
   std::array<u_char, 1296> lookup{};
-  std::copy_n(Core_Math_kArcTangentTable, lookup.size(), lookup.begin());
+  std::copy_n(VS::Core::Math::kArcTangentTable, lookup.size(), lookup.begin());
   VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
   CHECK(sky == before);
-  CHECK(std::equal(lookup.begin(), lookup.end(), Core_Math_kArcTangentTable));
+  CHECK(std::equal(lookup.begin(), lookup.end(),
+                   VS::Core::Math::kArcTangentTable));
 }
 
 TEST_CASE("Screen warp no longer publishes an original overlay entry",

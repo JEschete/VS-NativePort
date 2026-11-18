@@ -21,7 +21,6 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
-#include "Core/Random.h"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
@@ -90,17 +89,17 @@ void CheckRotationDiagonal(const MATRIX& matrix, int x, int y, int z) {
 }
 
 struct OriginalRandomState {
-  decltype(std::to_array(Core_randomShuffleTable)) table =
-      std::to_array(Core_randomShuffleTable);
-  int index = Core_randomShuffleIndex;
+  decltype(std::to_array(VS::Core::randomShuffleTable)) table =
+      std::to_array(VS::Core::randomShuffleTable);
+  int index = VS::Core::randomShuffleIndex;
   unsigned int seed = VS::Core::BiosRand().State();
-  unsigned int interface_state = Core_interfaceRandomState;
+  unsigned int interface_state = VS::Core::interfaceRandomState;
 
   ~OriginalRandomState() {
-    std::copy(table.begin(), table.end(), Core_randomShuffleTable);
-    Core_randomShuffleIndex = index;
+    std::copy(table.begin(), table.end(), VS::Core::randomShuffleTable);
+    VS::Core::randomShuffleIndex = index;
     VS::Core::SeedBiosRand(seed);
-    Core_interfaceRandomState = interface_state;
+    VS::Core::interfaceRandomState = interface_state;
   }
 };
 }  // namespace
@@ -563,9 +562,9 @@ TEST_CASE("Interface random requests return high bits of the previous state",
   OriginalRandomState state;
   constexpr unsigned int kInitial = 0x81234567;
   for (int bits : {1, 8, 10, 31, 32}) {
-    Core_interfaceRandomState = kInitial;
+    VS::Core::interfaceRandomState = kInitial;
     CHECK(Core::NextLiveInterfaceRandomBits(bits) == (kInitial >> (32 - bits)));
-    CHECK(Core_interfaceRandomState == kInitial * 0x19660Du);
+    CHECK(VS::Core::interfaceRandomState == kInitial * 0x19660Du);
   }
 }
 

@@ -46,7 +46,6 @@
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
-#include "Core/Random.h"
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
@@ -213,10 +212,12 @@ int EnterOrFinishEncounter() {
   // The original shuffle initialization always seeds with 1. Initialize that
   // same table from the requested seed; combat still calls its real RNG.
   VS::Core::SeedBiosRand(configuration.seed);
-  for (auto& value : Core_randomShuffleTable) value = VS::Core::NextBiosRand();
-  Core_randomShuffleIndex =
-      static_cast<int>(std::size(Core_randomShuffleTable)) - 1;
-  Core_interfaceRandomState = configuration.seed;
+  for (auto& value : VS::Core::randomShuffleTable) {
+    value = VS::Core::NextBiosRand();
+  }
+  VS::Core::randomShuffleIndex =
+      static_cast<int>(std::size(VS::Core::randomShuffleTable)) - 1;
+  VS::Core::interfaceRandomState = configuration.seed;
   VS::Core::LogInfo("encounter", "starting zone={} room={} enemies={} seed={}",
                     configuration.zone, configuration.room,
                     configuration.enemies.size(), configuration.seed);

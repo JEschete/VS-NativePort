@@ -37,7 +37,6 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Random.h"
 #include "Core/RandomLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -1488,11 +1487,11 @@ std::expected<Snapshot, std::string> Capture(
       time.frames;
   state.scene_timer = VS::State::sceneTimer;
   state.random.bios_state = VS::Core::BiosRand().State();
-  state.random.interface_state = Core_interfaceRandomState;
-  std::copy_n(Core_randomShuffleTable, state.random.shuffle.size(),
+  state.random.interface_state = VS::Core::interfaceRandomState;
+  std::copy_n(VS::Core::randomShuffleTable, state.random.shuffle.size(),
               state.random.shuffle.begin());
   state.random.shuffle_index =
-      static_cast<std::uint32_t>(Core_randomShuffleIndex);
+      static_cast<std::uint32_t>(VS::Core::randomShuffleIndex);
   state.random.movement_state =
       std::bit_cast<std::uint32_t>(Battle_Ai_savedMovementRandomState);
   valid = CaptureActors(state);
@@ -1646,10 +1645,10 @@ std::expected<void, std::string> FinishResume() {
   ApplyCaches(state);
   SyncMonoOutput(state.settings.monoSound == 1);
   VS::Core::SeedBiosRand(state.random.bios_state);
-  Core_interfaceRandomState = state.random.interface_state;
+  VS::Core::interfaceRandomState = state.random.interface_state;
   std::copy(state.random.shuffle.begin(), state.random.shuffle.end(),
-            Core_randomShuffleTable);
-  Core_randomShuffleIndex = static_cast<int>(state.random.shuffle_index);
+            VS::Core::randomShuffleTable);
+  VS::Core::randomShuffleIndex = static_cast<int>(state.random.shuffle_index);
   Battle_Ai_savedMovementRandomState =
       std::bit_cast<int>(state.random.movement_state);
   VS::Battle::Ai::LiveFrameContext().randomState = state.random.movement_state;

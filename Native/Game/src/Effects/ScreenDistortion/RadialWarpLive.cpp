@@ -7,7 +7,7 @@
 #include <span>
 
 #include "Core/Log.hpp"
-#include "Core/Math/FixedPoint.h"
+#include "Core/Math/FixedPoint.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Legacy/Psx.h"
@@ -19,7 +19,8 @@ namespace {
 constexpr std::size_t kLastSceneBucket = 2046;
 constexpr unsigned kLinkMask = 0xFFFFFF;
 constexpr unsigned kTagLengthShift = 24;
-static_assert(sizeof(Core_Math_kArcTangentTable) == kRadialWarpRootTableBytes);
+static_assert(sizeof(VS::Core::Math::kArcTangentTable) ==
+              kRadialWarpRootTableBytes);
 
 [[noreturn]] void InvalidLiveWarp(const char* reason) {
   VS::Core::LogError("effects", "screen radial warp: {}", reason);
@@ -104,6 +105,7 @@ void WarpLivePolygonVertices() {
   };
   OrderingTablePackets packets(
       static_cast<u_long*>(Render_frameScratch.orderingTable));
-  WarpPolygonVertices(settings, std::span(Core_Math_kArcTangentTable), packets);
+  WarpPolygonVertices(settings, std::span(VS::Core::Math::kArcTangentTable),
+                      packets);
 }
 }  // namespace VS::Effects::ScreenDistortion

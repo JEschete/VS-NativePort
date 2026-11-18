@@ -20,7 +20,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Overlays.h"
+#include "Core/Overlays.hpp"
 #include "DiscQueue.h"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
@@ -96,7 +96,7 @@ static_assert(std::extent_v<decltype(Effects_effectEntryPointIndices)> ==
 // The packages whose block views are kept: the action and secondary packages
 // and the ones tests bind.
 constexpr std::size_t kPackageRecords = 4;
-// Core_overlaySlots[3]: EFFPURGE.BIN and the plugins load there.
+// VS::Core::kOverlaySlots[3]: EFFPURGE.BIN and the plugins load there.
 constexpr std::size_t kPurgeOverlaySlot = 3;
 // The owner tag of the overlay workspace and the effect texture pages.
 constexpr int kEffectOwnerTag = 2;
@@ -433,7 +433,7 @@ class LiveResourceHost final : public EffectResourceHost {
 
   // The overlay slot up to the end of the overlay arena.
   EffectBuffer PurgeOverlayBuffer() override {
-    const void* slot = Core_overlaySlots[kPurgeOverlaySlot];
+    const void* slot = VS::Core::kOverlaySlots[kPurgeOverlaySlot];
     const auto address = reinterpret_cast<std::uintptr_t>(slot);
     const auto arena =
         reinterpret_cast<std::uintptr_t>(Core::overlay_arena.data());

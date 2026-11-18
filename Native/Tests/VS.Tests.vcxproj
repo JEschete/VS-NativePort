@@ -567,6 +567,7 @@
     <ClInclude Include="include\Menu\StatusTerminalLiveFixture.hpp" />
     <ClInclude Include="include\Menu\StatusTerminalWorld.hpp" />
     <ClInclude Include="include\Menu\StatusTransitionsWorld.hpp" />
+    <ClInclude Include="include\Menu\TextBoxUpdateLiveRestore.hpp" />
     <ClInclude Include="include\Menu\TimeAttackTerminalFixture.hpp" />
     <ClInclude Include="include\Menu\TimeAttackTerminalLiveFixture.hpp" />
     <ClInclude Include="include\TestSupport\ActionAnimationsFixture.hpp" />

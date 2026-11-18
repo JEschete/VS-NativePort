@@ -402,7 +402,7 @@
     <ClCompile Include="src\Core\Legacy.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Legacy.h">
+    <ClInclude Include="src\Core\Legacy.hpp">
       <Filter>src\Core</Filter>
     </ClInclude>
     <ClCompile Include="src\Core\Log.cpp">
@@ -414,7 +414,7 @@
     <ClCompile Include="src\Core\Math\FixedPoint.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Math\FixedPoint.h">
+    <ClInclude Include="src\Core\Math\FixedPoint.hpp">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
     <ClCompile Include="src\Core\Math\Interpolation.cpp">
@@ -450,7 +450,7 @@
     <ClCompile Include="src\Core\Overlays.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Overlays.h">
+    <ClInclude Include="src\Core\Overlays.hpp">
       <Filter>src\Core</Filter>
     </ClInclude>
     <ClCompile Include="src\Core\PointerSort.cpp">
@@ -459,9 +459,6 @@
     <ClCompile Include="src\Core\Random.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Random.h">
-      <Filter>src\Core</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\RandomGenerator.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -513,7 +510,7 @@
     <ClCompile Include="src\Movie\Intro\Playback.cpp">
       <Filter>src\Movie\Intro</Filter>
     </ClCompile>
-    <ClInclude Include="src\Movie\Intro\Playback.h">
+    <ClInclude Include="src\Movie\Intro\Playback.hpp">
       <Filter>src\Movie\Intro</Filter>
     </ClInclude>
     <ClCompile Include="src\Movie\Intro\Player.cpp">
@@ -525,7 +522,7 @@
     <ClCompile Include="src\Movie\Intro.cpp">
       <Filter>src\Movie</Filter>
     </ClCompile>
-    <ClInclude Include="src\Movie\Intro.h">
+    <ClInclude Include="src\Movie\Intro.hpp">
       <Filter>src\Movie</Filter>
     </ClInclude>
     <ClCompile Include="src\Movie\Movie.cpp">
@@ -945,9 +942,6 @@
     <ClInclude Include="include\Core\Handle.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\IntPair.h">
-      <Filter>include\Core</Filter>
-    </ClInclude>
     <ClInclude Include="include\Core\Log.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
@@ -1017,16 +1011,13 @@
     <ClInclude Include="include\Core\String\GameTextLive.hpp">
       <Filter>include\Core\String</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\Text\TextCode.h">
+    <ClInclude Include="include\Core\Text\TextCode.hpp">
       <Filter>include\Core\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Types.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Unported.hpp">
-      <Filter>include\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Core\WordPair.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Input\Controller.hpp">

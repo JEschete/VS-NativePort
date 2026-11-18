@@ -26,7 +26,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Boot/GameLoop.h"
 #include "Core/Log.hpp"
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Input/ControllerLiveState.hpp"
@@ -127,13 +127,13 @@ unsigned char Glyph(unsigned char c) {
   } else if (c >= 'a' && c <= 'z') {
     return c - 'a' + kLowercaseGlyph;
   } else if (c == ' ') {
-    return Core_TextCode_Space;
+    return VS::Core::TextCode::kSpace;
   } else if (c == ':') {
-    return Core_TextCode_Colon;
+    return VS::Core::TextCode::kColon;
   } else if (c == '/') {
-    return Core_TextCode_ForwardSlash;
+    return VS::Core::TextCode::kForwardSlash;
   } else if (c == '-') {
-    return Core_TextCode_Hyphen;
+    return VS::Core::TextCode::kHyphen;
   }
   throw std::logic_error("Unsupported native save label character");
 }
@@ -146,7 +146,7 @@ void Status(FileMenuScreen screen, std::string_view text) {
   for (const unsigned char c : text) {
     footer[n++] = static_cast<char>(Glyph(c));
   }
-  footer[n] = static_cast<char>(Core_TextCode_Terminator);
+  footer[n] = static_cast<char>(VS::Core::TextCode::kTerminator);
   if (screen == FileMenuScreen::kTitle) {
     Title_memoryCardMessage = footer.data();
   } else {

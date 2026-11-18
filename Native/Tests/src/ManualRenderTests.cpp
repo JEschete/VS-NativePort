@@ -9,7 +9,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Manual.h"
@@ -130,7 +130,7 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
     auto* line = reinterpret_cast<char*>(offsets + offsets[index + 1]);
     line[0] = static_cast<char>(17 + index);
     line[1] = static_cast<char>(40 + index);
-    line[2] = static_cast<char>(Core_TextCode_Terminator);
+    line[2] = static_cast<char>(VS::Core::TextCode::kTerminator);
   }
   // The Live page text reads help text only from a game heap payload.
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -149,16 +149,16 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
   VS::Menu::LiveTextBox(0)->flags.speakerTexture = 32;
   VS::Menu::manual::LiveCopyPageText();
   ReuseReturnedStack();
-  std::string expected{static_cast<char>(Core_TextCode_ChunkSize),
-                       static_cast<char>(Core_TextCode_NoChunking),
-                       static_cast<char>(Core_TextCode_FontTable),
-                       static_cast<char>(Core_TextCode_FontTableZero)};
+  std::string expected{static_cast<char>(VS::Core::TextCode::kChunkSize),
+                       static_cast<char>(VS::Core::TextCode::kNoChunking),
+                       static_cast<char>(VS::Core::TextCode::kFontTable),
+                       static_cast<char>(VS::Core::TextCode::kFontTableZero)};
   for (int index = scroll; index < std::min(scroll + 10, 12); ++index) {
     expected.push_back(static_cast<char>(17 + index));
     expected.push_back(static_cast<char>(40 + index));
-    expected.push_back(static_cast<char>(Core_TextCode_Newline));
+    expected.push_back(static_cast<char>(VS::Core::TextCode::kNewline));
   }
-  expected.back() = static_cast<char>(Core_TextCode_Terminator);
+  expected.back() = static_cast<char>(VS::Core::TextCode::kTerminator);
   CHECK(std::string(VS::Menu::LiveTextBox(0)->string, expected.size()) ==
         expected);
   *VS::Menu::LiveTextBox(0) = saved_box;

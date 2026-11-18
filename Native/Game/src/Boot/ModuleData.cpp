@@ -30,8 +30,8 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
-#include "Core/Math/FixedPoint.h"
-#include "Core/Random.h"
+#include "Core/Math/FixedPoint.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Plugins/Plg045.h"
@@ -342,7 +342,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x835CC, sizeof Battle_defenseAbilityActionIds, &Battle_defenseAbilityActionIds, sizeof Battle_defenseAbilityActionIds}, // G00208 vs_battle_defenseAbilityOffsets
     {"BATTLE/BATTLE.PRG", 0x835DC, sizeof Battle_doorStrings, &Battle_doorStrings, sizeof Battle_doorStrings}, // G00209 D_800EBDDC
     {"BATTLE/BATTLE.PRG", 0x83758, sizeof Menu_kNotificationItemNames, &Menu_kNotificationItemNames, sizeof Menu_kNotificationItemNames}, // G00210 D_800EBF58
-    {"BATTLE/BATTLE.PRG", 0x83A6C, sizeof Core_interfaceRandomState, &Core_interfaceRandomState, sizeof Core_interfaceRandomState}, // G00213 _keystreamState
+    {"BATTLE/BATTLE.PRG", 0x83A6C, sizeof VS::Core::interfaceRandomState, &VS::Core::interfaceRandomState, sizeof VS::Core::interfaceRandomState}, // G00213 _keystreamState
     {"BATTLE/BATTLE.PRG", 0x83A70, sizeof Menu_Framework_cursorBrightnessAnimation, &Menu_Framework_cursorBrightnessAnimation, sizeof Menu_Framework_cursorBrightnessAnimation}, // G00214 vs_battle_cursorBrightnessAnimation
     {"BATTLE/BATTLE.PRG", 0x83A84, sizeof Menu_textBoxAnchors, &Menu_textBoxAnchors, sizeof Menu_textBoxAnchors}, // G00216 D_800EC284
     {"BATTLE/BATTLE.PRG", 0x83ACC, sizeof Menu_informationHeaderPositions, &Menu_informationHeaderPositions, sizeof Menu_informationHeaderPositions}, // G00217 D_800EC2CC
@@ -578,7 +578,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x1FE6C, sizeof Audio_Seq_kNoteRemapTables, &Audio_Seq_kNoteRemapTables, sizeof Audio_Seq_kNoteRemapTables}, // G01836 D_8002F66C
     {"SLUS_010.40", 0x1FE9C, sizeof Audio_Seq_kRandomPitchOffsets, &Audio_Seq_kRandomPitchOffsets, sizeof Audio_Seq_kRandomPitchOffsets}, // G01837 D_8002F69C
     {"SLUS_010.40", 0x1FF9C, sizeof Audio_Mixer_kPanGains, &Audio_Mixer_kPanGains, sizeof Audio_Mixer_kPanGains}, // G01838 g_Sound_StereoPanGainTableQ15
-    {"SLUS_010.40", 0x31214, sizeof Core_Math_kArcTangentTable, &Core_Math_kArcTangentTable, sizeof Core_Math_kArcTangentTable}, // G01903 D_80040A14
+    {"SLUS_010.40", 0x31214, sizeof VS::Core::Math::kArcTangentTable, &VS::Core::Math::kArcTangentTable, sizeof VS::Core::Math::kArcTangentTable}, // G01903 D_80040A14
     {"SLUS_010.40", 0x39950, sizeof Render_legacyLoadingImageHeader, &Render_legacyLoadingImageHeader, sizeof Render_legacyLoadingImageHeader}, // G02006 _nowLoading_header
     {"SLUS_010.40", 0x39954, sizeof Render_loadingScreenPixels, &Render_loadingScreenPixels, sizeof Render_loadingScreenPixels}, // G02005 _nowLoading_data
     {"SLUS_010.40", 0x3C1DC, sizeof Battle_actionDefinitions, &Battle_actionDefinitions, sizeof Battle_actionDefinitions}, // G01904 vs_main_actions

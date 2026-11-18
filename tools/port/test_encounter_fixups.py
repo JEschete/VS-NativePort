@@ -1778,7 +1778,7 @@ int func_800F9800(void) {
         ).read_text(encoding="utf-8")
         self.assertNotIn("ScratchBase", live)
         self.assertNotIn("0x1F800", live)
-        self.assertIn("Core_Math_kArcTangentTable", live)
+        self.assertIn("Core::Math::kArcTangentTable", live)
 
     def test_screen_effect_defaults_own_native_state_and_use_typed_access(self):
         root = Path(__file__).resolve().parents[2]
@@ -3697,10 +3697,11 @@ int func_800F9800(void) {
             .read_text(encoding="utf-8").split()
         )
         self.assertIn("}else{lifetime.read=loader.CompleteRefusedOverlayRead();}", overlay)
-        overlay_live = (root / r"Native\Game\src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp").read_text(
-            encoding="utf-8"
+        overlay_live = "".join(
+            (root / r"Native\Game\src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp")
+            .read_text(encoding="utf-8").split()
         )
-        self.assertIn("Content::CompleteLiveRefusedDiscRequest(&file, Core_overlaySlots[1]);", overlay_live)
+        self.assertIn("Content::CompleteLiveRefusedDiscRequest(&file,VS::Core::kOverlaySlots[1]);", overlay_live)
         runtime = "".join((root / r"Native\Game\src\Effects\EffectRuntime.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(slot!=nullptr){runtime.EnqueueMenuReload(*slot);}", runtime)
         runtime_tests = (root / r"Native\Tests\src\EffectRuntimeTests.cpp").read_text(encoding="utf-8")

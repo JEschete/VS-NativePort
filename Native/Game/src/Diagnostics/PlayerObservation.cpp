@@ -31,7 +31,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/ChestInteractionsLive.hpp"
@@ -130,14 +130,14 @@ std::string InspectGameText(std::span<const char> bytes) {
   std::string result;
   for (std::size_t index = 0; index < bytes.size(); ++index) {
     const auto value = static_cast<unsigned char>(bytes[index]);
-    if (value == Core_TextCode_Terminator) break;
-    if (value >= Core_TextCode_ChunkSize) {
+    if (value == VS::Core::TextCode::kTerminator) break;
+    if (value >= VS::Core::TextCode::kChunkSize) {
       if (++index >= bytes.size()) break;
     } else if (value < kLetters.size()) {
       result += kLetters[value];
-    } else if (value == Core_TextCode_Space) {
+    } else if (value == VS::Core::TextCode::kSpace) {
       result += ' ';
-    } else if (value == Core_TextCode_Hyphen) {
+    } else if (value == VS::Core::TextCode::kHyphen) {
       result += '-';
     } else {
       result += std::format("[{:02X}]", value);

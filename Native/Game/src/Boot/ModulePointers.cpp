@@ -234,10 +234,9 @@
 #include "Battle/TextBoxes.h"
 #include "Battle/ValueLabels.h"
 #include "Boot/GameLoop.h"
-#include "Core/Legacy.h"
-#include "Core/Math/FixedPoint.h"
-#include "Core/Overlays.h"
-#include "Core/Random.h"
+#include "Core/Legacy.hpp"
+#include "Core/Math/FixedPoint.hpp"
+#include "Core/Overlays.hpp"
 #include "DiscQueue.h"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/EffectResourcesLiveState.hpp"
@@ -330,7 +329,7 @@
 #include "Menu/Score/ScoreScreen.h"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
-#include "Movie/Intro.h"
+#include "Movie/Intro.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
 #include "Render/Camera.h"
 #include "Render/Display.h"
@@ -547,7 +546,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EBDBCu, 16u, (void*)&Battle_chainAbilityActionIds, sizeof Battle_chainAbilityActionIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBDCCu, 16u, (void*)&Battle_defenseAbilityActionIds, sizeof Battle_defenseAbilityActionIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC258u, 4u, (void*)&Battle_puzzleTimerTextPointer, sizeof Battle_puzzleTimerTextPointer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800EC26Cu, 4u, (void*)&Core_interfaceRandomState, sizeof Core_interfaceRandomState, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC26Cu, 4u, (void*)&VS::Core::interfaceRandomState, sizeof VS::Core::interfaceRandomState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC270u, 16u, (void*)&Menu_Framework_cursorBrightnessAnimation, sizeof Menu_Framework_cursorBrightnessAnimation, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC284u, 72u, (void*)&Menu_textBoxAnchors, sizeof Menu_textBoxAnchors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2CCu, 12u, (void*)&Menu_informationHeaderPositions, sizeof Menu_informationHeaderPositions, 1u, 1u},
@@ -848,7 +847,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F5918u, 4u, (void*)&Battle_Ai_orbitAngularVelocity, sizeof Battle_Ai_orbitAngularVelocity, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F591Cu, 4u, (void*)&Battle_Ai_orbitHeightOffset, sizeof Battle_Ai_orbitHeightOffset, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5920u, 4u, (void*)&Battle_Ai_arenaOrbit, sizeof Battle_Ai_arenaOrbit, 0u, 0u},
-    {"SLUS_010.40", 0x80010000u, 20u, (void*)&Core_overlaySlots, sizeof Core_overlaySlots, 0u, 0u},
+    {"SLUS_010.40", 0x80010000u, 20u, (void*)&VS::Core::kOverlaySlots, sizeof VS::Core::kOverlaySlots, 0u, 0u},
     {"SLUS_010.40", 0x8002F544u, 4u, (void*)&Audio_Driver_legacySpuEvent, sizeof Audio_Driver_legacySpuEvent, 1u, 1u},
     {"SLUS_010.40", 0x8002F548u, 4u, (void*)&Audio_Driver_recentTickCostTotal, sizeof Audio_Driver_recentTickCostTotal, 1u, 1u},
     {"SLUS_010.40", 0x8002F54Cu, 4u, (void*)&Audio_Seq_tickCounter, sizeof Audio_Seq_tickCounter, 1u, 1u},
@@ -907,10 +906,10 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x80039B68u, 96u, (void*)&Audio_Mixer_voiceOwners, sizeof Audio_Mixer_voiceOwners, 0u, 0u},
     {"SLUS_010.40", 0x80039BC8u, 8u, (void*)&Audio_Samples_bankStream, sizeof Audio_Samples_bankStream, 0u, 0u},
     {"SLUS_010.40", 0x80039BD8u, 12u, (void*)&Audio_Mixer_voiceModes, sizeof Audio_Mixer_voiceModes, 1u, 1u},
-    {"SLUS_010.40", 0x80039C14u, 4u, (void*)&Movie_legacyStreamInterruptFlag, sizeof Movie_legacyStreamInterruptFlag, 1u, 1u},
-    {"SLUS_010.40", 0x80040A14u, 516u, (void*)&Core_Math_kArcTangentTable, sizeof Core_Math_kArcTangentTable, 1u, 1u},
-    {"SLUS_010.40", 0x80049138u, 4u, (void*)&Core_legacyRamSize, sizeof Core_legacyRamSize, 1u, 1u},
-    {"SLUS_010.40", 0x8004913Cu, 4u, (void*)&Core_legacyStackSize, sizeof Core_legacyStackSize, 1u, 1u},
+    {"SLUS_010.40", 0x80039C14u, 4u, (void*)&VS::Movie::legacyStreamInterruptFlag, sizeof VS::Movie::legacyStreamInterruptFlag, 1u, 1u},
+    {"SLUS_010.40", 0x80040A14u, 516u, (void*)&VS::Core::Math::kArcTangentTable, sizeof VS::Core::Math::kArcTangentTable, 1u, 1u},
+    {"SLUS_010.40", 0x80049138u, 4u, (void*)&VS::Core::legacyRamSize, sizeof VS::Core::legacyRamSize, 1u, 1u},
+    {"SLUS_010.40", 0x8004913Cu, 4u, (void*)&VS::Core::legacyStackSize, sizeof VS::Core::legacyStackSize, 1u, 1u},
     {"SLUS_010.40", 0x8004A504u, 24u, (void*)&Input_vibrationPresets, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004A51Cu, 12u, (void*)&Input_legacyActuatorAlignment, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004A528u, 4u, (void*)&VS::Title::titleScreenVisitCount, sizeof VS::Title::titleScreenVisitCount, 0u, 0u},
@@ -930,8 +929,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8004FCCCu, 280u, (void*)&Field_zoneMusicIds, sizeof Field_zoneMusicIds, 1u, 1u},
     {"SLUS_010.40", 0x8004FDE4u, 120u, (void*)&Battle_breakArtPointRequirements, sizeof Battle_breakArtPointRequirements, 1u, 1u},
     {"SLUS_010.40", 0x8004FE5Cu, 300u, (void*)&Battle_battleAbilityPointRequirements, sizeof Battle_battleAbilityPointRequirements, 1u, 1u},
-    {"SLUS_010.40", 0x8004FF88u, 388u, (void*)&Core_randomShuffleTable, sizeof Core_randomShuffleTable, 1u, 1u},
-    {"SLUS_010.40", 0x8005010Cu, 4u, (void*)&Core_randomShuffleIndex, sizeof Core_randomShuffleIndex, 1u, 1u},
+    {"SLUS_010.40", 0x8004FF88u, 388u, (void*)&VS::Core::randomShuffleTable, sizeof VS::Core::randomShuffleTable, 1u, 1u},
+    {"SLUS_010.40", 0x8005010Cu, 4u, (void*)&VS::Core::randomShuffleIndex, sizeof VS::Core::randomShuffleIndex, 1u, 1u},
     {"SLUS_010.40", 0x80050110u, 4u, (void*)&Content_legacyDiscReadBuffer, sizeof Content_legacyDiscReadBuffer, 0u, 0u},
     {"SLUS_010.40", 0x800501C8u, 4u, (void*)&Content_legacyDiscReadLocation, sizeof Content_legacyDiscReadLocation, 1u, 1u},
     {"SLUS_010.40", 0x800501CCu, 4u, (void*)&Content_legacyXaReadyBcdField, sizeof Content_legacyXaReadyBcdField, 1u, 1u},

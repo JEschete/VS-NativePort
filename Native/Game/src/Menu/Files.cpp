@@ -35,7 +35,7 @@ constexpr std::uint32_t kPadDown = 0x4000;
 constexpr std::uint32_t kPadFirstByte = 0xFF;
 constexpr std::uint32_t kPadUpDown = kPadUp | kPadDown;
 
-// Core_TextCode_*: the codes from the first non-printing one, and the space
+// Core::TextCode: the codes from the first non-printing one, and the space
 // and arrow glyphs.
 constexpr std::uint8_t kCodeNonPrinting = 0xE5;
 constexpr std::uint8_t kCodeConfirm = 0xE6;

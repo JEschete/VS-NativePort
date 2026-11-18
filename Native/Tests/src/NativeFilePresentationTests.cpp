@@ -17,7 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/DataStore.hpp"
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
@@ -194,7 +194,7 @@ TEST_CASE("Native file summary rejects missing or inconsistent names",
     const auto offset = fixture.arm.size() - sizeof(Field_MapRoomName);
     auto name = std::span(fixture.arm).subspan(offset, 32);
     std::fill(name.begin(), name.end(), std::uint8_t{10});
-    fixture.arm[offset + 31] = Core_TextCode_Spacing;
+    fixture.arm[offset + 31] = VS::Core::TextCode::kSpacing;
   }
   SECTION("A different scene must not use a stale current-room name") {
     fixture.document.state.location.scene = 2;

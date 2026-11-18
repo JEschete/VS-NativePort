@@ -25,7 +25,7 @@ inline constexpr std::uint32_t kOverlayEnd = 0x8010C000u;
 inline constexpr std::size_t kOverlaySize = kOverlayEnd - kOverlayBase;
 
 // A named object rather than an accessor so slot tables holding addresses in
-// it (Core_overlaySlots) stay constant-initialized.
+// it (VS::Core::kOverlaySlots) stay constant-initialized.
 extern std::array<std::byte, kOverlaySize> overlay_arena;
 
 // The native address of a PS1 overlay-RAM address.

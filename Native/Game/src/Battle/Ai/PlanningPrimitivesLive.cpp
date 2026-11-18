@@ -41,7 +41,7 @@
 #include "Battle/TargetingLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Random.h"
+#include "Core/RandomLive.hpp"
 #include "Field/GimmickPlacementLive.hpp"
 #include "Field/Gimmicks.h"
 #include "State/ScriptFlagsLive.hpp"

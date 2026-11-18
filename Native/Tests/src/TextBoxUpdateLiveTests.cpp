@@ -9,8 +9,8 @@
 
 #include "Battle/Hud.h"
 #include "Content/DataStore.hpp"
-#include "Core/Random.h"
 #include "Core/Random.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
@@ -19,6 +19,7 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
+#include "Menu/TextBoxUpdateLiveRestore.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -34,23 +35,10 @@ constexpr std::uint32_t kRandomSeed = 0x12345678;
 struct LiveUpdateFixture {
   ArrayRestore<Menu_TextBoxState, menu::kTextBoxCount> saved_boxes{
       Menu_textBoxes};
-  ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)> saved_tables{
-      VS::Menu::textBoxOrderingTables};
-  ValueRestore<u_long*> saved_active{Menu_activeTextBoxOrderingTable};
-  ValueRestore<char> saved_index{VS::Menu::textBoxBufferIndex};
   ValueRestore<decltype(Render_frameScratch)> saved_frame{Render_frameScratch};
   ValueRestore<void*> saved_ordering{Render_legacyOrderingTables[0]};
   ValueRestore<int> saved_framebuffer{Render_frameBuf};
-  ValueRestore<decltype(VS::State::tickSpeed)> saved_speed{
-      VS::State::tickSpeed};
-  ValueRestore<decltype(Battle_lowerScreenUiState)> saved_ui{
-      Battle_lowerScreenUiState};
-  ValueRestore<decltype(Core_interfaceRandomState)> saved_random{
-      Core_interfaceRandomState};
-  ValueRestore<decltype(Effects_screenEffectOverlay)> saved_overlay{
-      Effects_screenEffectOverlay};
-  ValueRestore<decltype(VS::Effects::screenEffectDefaults)> saved_defaults{
-      VS::Effects::screenEffectDefaults};
+  text_box_tests::LiveUpdateRestore saved_update;
   std::array<u_long, kFrameEntries> ordering{};
 
   explicit LiveUpdateFixture(std::uint8_t buffer = 0) {
@@ -66,7 +54,7 @@ struct LiveUpdateFixture {
     Render_frameScratch.orderingTable = ordering.data() + kSceneEntry;
     VS::State::tickSpeed = 2;
     Battle_lowerScreenUiState = 0;
-    Core_interfaceRandomState = kRandomSeed;
+    VS::Core::interfaceRandomState = kRandomSeed;
     Effects_screenEffectOverlay = nullptr;
     VS::Effects::screenEffectDefaults = {};
     auto& box = Menu_textBoxes[0];
@@ -99,7 +87,7 @@ TEST_CASE(
         VS::Menu::textBoxOrderingTables + next * menu::kTextBoxOrderingTags);
   CHECK(Menu_activeTextBoxOrderingTable[menu::kTextBoxOrderingTags - 1] ==
         kTerminator);
-  CHECK(Core_interfaceRandomState == expected_random);
+  CHECK(VS::Core::interfaceRandomState == expected_random);
 }
 
 TEST_CASE(
@@ -125,7 +113,7 @@ TEST_CASE(
   menu::UpdateLiveTextBoxes();
   CHECK(menu::ReadLiveTextBox(0) == box);
   CHECK(fixture.ordering == ordering);
-  CHECK(Core_interfaceRandomState == kRandomSeed);
+  CHECK(VS::Core::interfaceRandomState == kRandomSeed);
 }
 
 TEST_CASE("Original text-box update module entry advances the production frame",

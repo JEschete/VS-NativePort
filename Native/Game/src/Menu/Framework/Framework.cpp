@@ -22,7 +22,7 @@
 
 namespace VS::Menu::Framework {
 namespace {
-// Core_TextCode and the row text's end.
+// VS::Core::TextCode and the row text's end.
 constexpr std::uint8_t kTextNonPrinting = 0xE5;
 constexpr std::uint8_t kTextTerminator = 0xE7;
 constexpr std::uint8_t kTextChunkSize = 0xF8;

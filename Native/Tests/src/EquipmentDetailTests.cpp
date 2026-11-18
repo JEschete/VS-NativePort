@@ -18,7 +18,7 @@
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Core/Text/TextCode.h"
+#include "Core/Text/TextCode.hpp"
 #include "Event/ScriptVm.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -197,7 +197,7 @@ struct RenameFrameFixture {
         Text_Menu8_rename_Offset_charTable);
     std::fill_n(grid, 15 * 9, 10);
     VS::Menu::Rename::State& state = VS::Menu::Rename::LiveRenameState();
-    state.name.fill(Core_TextCode_Space);
+    state.name.fill(VS::Core::TextCode::kSpace);
     state.name[0] = 10;
     state.selected_action = 0;
   }

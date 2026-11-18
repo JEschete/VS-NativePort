@@ -16,7 +16,6 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Random.h"
 #include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
@@ -28,6 +27,7 @@
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
+#include "Menu/TextBoxUpdateLiveRestore.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -59,20 +59,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
       Menu_menuStrings};
   ArrayRestore<char, std::size(Menu_kNotificationItemNames[0])> saved_item{
       Menu_kNotificationItemNames[0]};
-  ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)> saved_tables{
-      VS::Menu::textBoxOrderingTables};
-  ValueRestore<u_long*> saved_active{Menu_activeTextBoxOrderingTable};
-  ValueRestore<char> saved_index{VS::Menu::textBoxBufferIndex};
-  ValueRestore<decltype(VS::State::tickSpeed)> saved_speed{
-      VS::State::tickSpeed};
-  ValueRestore<decltype(Battle_lowerScreenUiState)> saved_ui{
-      Battle_lowerScreenUiState};
-  ValueRestore<decltype(Core_interfaceRandomState)> saved_random{
-      Core_interfaceRandomState};
-  ValueRestore<decltype(Effects_screenEffectOverlay)> saved_overlay{
-      Effects_screenEffectOverlay};
-  ValueRestore<decltype(VS::Effects::screenEffectDefaults)> saved_defaults{
-      VS::Effects::screenEffectDefaults};
+  text_box_tests::LiveUpdateRestore saved_update;
 
   NotificationFixture() {
     Menu_sceneNotificationBuffer = nullptr;

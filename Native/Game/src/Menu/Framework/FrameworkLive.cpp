@@ -43,7 +43,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Overlays.h"
+#include "Core/Overlays.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffects.h"
@@ -893,8 +893,9 @@ class LiveHost final : public Host {
     file.lba = static_cast<int>(file_data >> kLbaShift);
     file.size =
         static_cast<int>((file_data & kSectorCountMask) << kSectorShift);
-    void* const slot = Core_overlaySlots[sub_menu == 0 ? kMainMenuOverlaySlot
-                                                       : kSubmenuOverlaySlot];
+    void* const slot =
+        VS::Core::kOverlaySlots[sub_menu == 0 ? kMainMenuOverlaySlot
+                                              : kSubmenuOverlaySlot];
     control.cdQueue = VS::Content::AllocateLiveDiscRequest(&file);
     if (control.cdQueue != nullptr) {
       VS::Content::EnqueueLiveDiscRequest(control.cdQueue, slot);
@@ -973,7 +974,7 @@ class LiveHost final : public Host {
 
   std::span<const std::uint8_t> BackgroundSource() override {
     const auto* const source = static_cast<const std::uint8_t*>(
-        Core_overlaySlots[kSubmenuOverlaySlot]);
+        VS::Core::kOverlaySlots[kSubmenuOverlaySlot]);
     if (source == nullptr) {
       return {};
     }

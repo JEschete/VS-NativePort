@@ -11,7 +11,7 @@
 #include "Content/DiscLayout.h"
 #include "Content/ModuleData.hpp"
 #include "Content/OverlayWorkspaceLive.hpp"
-#include "Core/Overlays.h"
+#include "Core/Overlays.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
@@ -61,7 +61,7 @@ void CheckQueuedRequest(const Content_DiscQueueSlot* request, int waiting) {
   CHECK(request->state == Content_DiscRequestState_Enqueued);
   CHECK(request->cdFile.lba == VS_SCREFF2_PRG_LBA);
   CHECK(request->cdFile.size == VS_SCREFF2_PRG_SIZE);
-  CHECK(request->vram == Core_overlaySlots[1]);
+  CHECK(request->vram == VS::Core::kOverlaySlots[1]);
   CHECK(Content_discRequestCounts.waiting == waiting);
 }
 }  // namespace

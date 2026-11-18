@@ -1,7 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Movie/Intro.h"
+#include "Movie/Intro.hpp"
 
 // decomp: StCdIntrFlag (StCdIntrFlag@SLUS_010.40)
-int Movie_legacyStreamInterruptFlag;
-
+std::int32_t VS::Movie::legacyStreamInterruptFlag;

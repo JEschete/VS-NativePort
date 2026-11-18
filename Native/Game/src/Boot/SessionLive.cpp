@@ -23,7 +23,7 @@
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Overlays.h"
+#include "Core/Overlays.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "DiscQueue.h"
@@ -199,10 +199,10 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     Content_DiscQueueSlot* slot = VS::Content::AllocateLiveDiscRequest(&file);
     if (slot != nullptr) {
       VS::Content::EnqueueLivePriorityDiscRequest(
-          slot, Core_overlaySlots[slot_index]);
+          slot, VS::Core::kOverlaySlots[slot_index]);
     } else {
       slot = VS::Content::CompleteLiveRefusedDiscRequest(
-          &file, Core_overlaySlots[slot_index]);
+          &file, VS::Core::kOverlaySlots[slot_index]);
     }
     while (slot->state != Content_DiscRequestState_Loaded) {
       VS::State::UpdateLivePlayTimeAndLoading(0);

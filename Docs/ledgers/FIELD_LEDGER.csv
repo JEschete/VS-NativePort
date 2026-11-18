@@ -4936,8 +4936,8 @@ T00543.000,T00543,imgHeader_t,0,wLo,0,char,,,,widthLow,Low byte of the width,hig
 T00543.001,T00543,imgHeader_t,1,wHi,0,char,,,,widthHigh,High byte of the width,high,source:main.c:8078
 T00543.002,T00543,imgHeader_t,2,hLo,0,char,,,,heightLow,Low byte of the height,high,source:main.c:8079
 T00543.003,T00543,imgHeader_t,3,hHi,0,char,,,,heightHigh,High byte of the height,high,source:main.c:8079
-T00544.000,T00544,intPair,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\include\Core\IntPair.h:10;source:44F14.c:1497
-T00544.001,T00544,intPair,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\include\Core\IntPair.h:11;declaration-only;source:44F14.c:87
+T00544.000,T00544,intPair,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:44F14.c:1497
+T00544.001,T00544,intPair,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;declaration-only;source:44F14.c:87
 T00545.000,T00545,labelBoxPrim_t,0,tag,0,u_long,,,,tag,Named in the fork; see cited use,med,source:58578.c:704
 T00545.001,T00545,labelBoxPrim_t,1,box,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),,,,box,Named in the fork; see cited use,med,source:58578.c:704
 T00546.000,T00546,limbEffects_t,0,value0,0,short,,,,opaque0,"Used, but its meaning is not established",low,source:146C.c:10641

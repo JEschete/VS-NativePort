@@ -30,7 +30,7 @@
 #include "Battle/StatusEffects.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Random.h"
+#include "Core/RandomLive.hpp"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
 #include "State/ScriptFlagsLive.hpp"
@@ -1938,9 +1938,9 @@ TEST_CASE("AI sorting covers empty/full lists and signed extremes without RNG",
   const auto pattern = GENERATE(0, 1, 2);
   Battle_Ai_ActionPlanView plan{};
   plan.candidateCount = count;
-  const auto random_table = std::to_array(Core_randomShuffleTable);
-  const auto random_index = Core_randomShuffleIndex;
-  const auto interface_random = Core_interfaceRandomState;
+  const auto random_table = std::to_array(VS::Core::randomShuffleTable);
+  const auto random_index = VS::Core::randomShuffleIndex;
+  const auto interface_random = VS::Core::interfaceRandomState;
   for (int index = 0; index < count; ++index) {
     plan.candidates[index].reserved0 =
         pattern == 0 ? index : (pattern == 1 ? -index : 0);
@@ -1958,9 +1958,9 @@ TEST_CASE("AI sorting covers empty/full lists and signed extremes without RNG",
   }
   CHECK(std::memcmp(records.data(), plan.candidates, sizeof(plan.candidates)) ==
         0);
-  CHECK(std::to_array(Core_randomShuffleTable) == random_table);
-  CHECK(Core_randomShuffleIndex == random_index);
-  CHECK(Core_interfaceRandomState == interface_random);
+  CHECK(std::to_array(VS::Core::randomShuffleTable) == random_table);
+  CHECK(VS::Core::randomShuffleIndex == random_index);
+  CHECK(VS::Core::interfaceRandomState == interface_random);
 }
 
 TEST_CASE(

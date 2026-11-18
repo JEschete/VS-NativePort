@@ -179,7 +179,7 @@ be61930f278d,DIV-ZERO,medium,pattern,,LiveDrawVisitedRooms,Native/Game/src/Menu/
 88465dfd39ee,DIV-ZERO,medium,pattern,,DrawOutline,Native/Game/src/Menu/TextBoxFrames.cpp,122,frame.base_vertices,60,34,open,
 3a18e2a82364,DIV-ZERO,low,pattern,F01414,DrawInformationBoxBackdrop,Native/Game/src/Menu/TextBoxFrames.cpp,239,(count + 1),60,34,open,
 e8cd5a414e5c,DIV-ZERO,medium,pattern,F01330,SelectTextBoxChoice,Native/Game/src/Menu/TextBoxState.cpp,249,count,60,34,open,
-3871d5c13bc4,DIV-ZERO,low,pattern,,Stats,Native/Game/src/Save/NativeFilePresentation.cpp,484,(kClockRadix * kClockRadix),45,3,open,
+3871d5c13bc4,DIV-ZERO,low,pattern,,Stats,Native/Game/src/Save/NativeFilePresentation.cpp,485,(kClockRadix * kClockRadix),45,3,open,
 047be567d8a3,GUARD-AFTER-READ,medium,pattern,,RelocateTable,Native/Content/src/ModuleLoader.cpp,234,samples,47,6,open,
 daf4b56a8811,GUARD-AFTER-READ,medium,pattern,,UpdateTrack,Native/Game/src/Event/EventCameraTrackLive.cpp,193,camera,59,26,open,
 a54aeb42a86c,NARROW-ID,medium,pattern,,Items_EquipmentPartStats,Native/Game/include/Items/Equipment.h,15,Items_EquipmentPartStats.subId,none,,open,
