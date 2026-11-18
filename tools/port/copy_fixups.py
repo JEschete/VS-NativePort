@@ -7192,7 +7192,7 @@ REGEX_FIXES += [
          "F00857 30DB0.c:3850 forwards third argument as PlayActorAnimation fourth/blend argument; start frame subtracts tickSpeed/2 and temporarily becomes framesPerStep for initial advancement. v0 propagates failure."),
         ("Actors::SetActorTransitionMode",
          (('arg0', 'control_byte'),),
-         "F00863 30DB0.c:3948 only assigns D_800E8FC0/Actors_reservedControlByte; control_byte names the proven destination, not an unproved transition mode."),
+         "F00863 30DB0.c:3948 only assigns D_800E8FC0/Actors_forcedModelOverrides; control_byte names the proven destination, not an unproved transition mode."),
         ("Actors::SetActorAnimationLocked",
          (('arg0', 'actor_id'), ('arg1', 'locked')),
          "F00865 30DB0.c:3987 sets unk5AC_24/animationLocked; consumed by PlayActorAnimation guard."),

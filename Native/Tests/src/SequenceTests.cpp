@@ -6,6 +6,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/AnimationPoseLive.hpp"
+#include "Actors/ModelDrawing.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/MovementCommand.hpp"
@@ -1392,6 +1393,24 @@ static void DrawWeaponOverrideFixture(const Actors_ModelInstance* instance,
   VS::Render::DrawLiveWeaponFlatPolygonsWithOverrides(weapon, *tint);
 }
 
+// An actor drawing its own geometry: the override drawers when its pulse or
+// appearance selects them (func_800B28A8 49EB8.c:292-304), else the plain pass.
+static void DrawActorPolygonsFixture(const Actors_ActorRecord& actor,
+                                     bool colored, const CVECTOR& tint,
+                                     unsigned pulse_mask, unsigned appearance) {
+  if (VS::Actors::UsesModelOverrides(
+          false, {.pulse_kind = static_cast<uint8_t>(pulse_mask),
+                  .state = static_cast<uint8_t>(appearance)})) {
+    VS::Render::DrawLiveActorPolygonsWithOverrides(
+        actor, colored, tint,
+        {.pulse_mask = pulse_mask, .appearance_state = appearance});
+  } else if (colored) {
+    VS::Render::DrawLiveActorGouraudPolygons(actor, tint);
+  } else {
+    VS::Render::DrawLiveActorFlatPolygons(actor, tint);
+  }
+}
+
 static int ModelPolygonPackets(int colored, int split, int limb,
                                unsigned pulse_mask, unsigned appearance,
                                int override_kind) {
@@ -1440,12 +1459,8 @@ static int ModelPolygonPackets(int colored, int split, int limb,
     DrawGimmickOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
   } else if (override_kind == 2) {
     DrawWeaponOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
-  } else if (pulse_mask != 0 || appearance != 0) {
-    VS::Render::DrawLiveActorPolygons(actor, tint);
-  } else if (colored) {
-    VS::Render::DrawLiveActorGouraudPolygons(actor, tint);
   } else {
-    VS::Render::DrawLiveActorFlatPolygons(actor, tint);
+    DrawActorPolygonsFixture(actor, colored != 0, tint, pulse_mask, appearance);
   }
   VS::Render::ForgetLiveModelExtent(model);
   // The static record must not keep the stack model past this frame.

@@ -631,7 +631,7 @@ void DrawLiveActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source) {
 
 // decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
 void InitializeLiveActorModelResources() {
-  Actors_reservedControlByte = 0;
+  Actors_forcedModelOverrides = 0;
   for (Content_ActorAssetRequest& request : Content_legacyActorAssetRequests) {
     request.assetKind = 0;
   }

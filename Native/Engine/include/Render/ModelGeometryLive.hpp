@@ -39,14 +39,19 @@ void ForgetLiveModelExtent(const void* model);
 // context; false when nothing was projected or every depth was zero.
 [[nodiscard]] bool ProjectLiveActorModel(const Actors_ActorRecord& geometry,
                                          std::span<const MATRIX> matrices);
-// 800B3680..800B38E0: textured actor polygons, with the pulsed palettes and
-// appearance material while either is active.
-void DrawLiveActorPolygons(const Actors_ActorRecord& geometry,
-                           const CVECTOR& tint);
+// The geometry actor's model and counts through func_800B3CF0 (flat) or
+// func_800B4594 (Gouraud).
 void DrawLiveActorGouraudPolygons(const Actors_ActorRecord& geometry,
                                   const CVECTOR& tint);
 void DrawLiveActorFlatPolygons(const Actors_ActorRecord& geometry,
                                const CVECTOR& tint);
+// The geometry actor's model and counts through the override drawers,
+// func_800B516C (flat) or func_800B5C30 (Gouraud), with the pulsed palettes
+// and appearance material of `overrides`, which the original reads from the
+// drawing actor.
+void DrawLiveActorPolygonsWithOverrides(const Actors_ActorRecord& geometry,
+                                        bool colored, const CVECTOR& tint,
+                                        const ModelOverrides& overrides);
 // Writes the shadow anchor to the actor's sound position.
 void DrawLiveActorGroundShadow(Actors_ActorRecord& actor, const MATRIX& camera,
                                const SVECTOR& root_offset);

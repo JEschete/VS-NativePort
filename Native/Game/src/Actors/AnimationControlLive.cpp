@@ -342,7 +342,7 @@ class LiveAnimationHost final : public AnimationControlHost {
     Actors_sharedSequenceBankIndex = static_cast<u_char>(index);
   }
   void SetTransitionControl(int control) override {
-    Actors_reservedControlByte = static_cast<char>(control);
+    Actors_forcedModelOverrides = static_cast<char>(control);
   }
   void QueueSequenceAsset(const Content::ActorAssetRequest& request) override {
     static_cast<void>(Content::QueueLiveActorAsset(request));

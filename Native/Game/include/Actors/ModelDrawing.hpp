@@ -2,6 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <cstdint>
+#include <optional>
 #include <span>
 
 // Actor model drawing order and bone endpoint projection. The model runtime
@@ -25,14 +26,27 @@ enum class ModelDrawRole : std::uint8_t {
 
 [[nodiscard]] ModelDrawRole ClassifyModelDraw(int companion);
 
+// The polygon pass func_800B28A8 draws (49EB8.c:304-407). The drawing actor's
+// own UV layout chooses flat or Gouraud whatever geometry it borrows.
 enum class ModelPolygons : std::uint8_t {
-  // The geometry's own textured polygons in its base color.
-  kTextured,
-  // The companion overlay in the companion color, Gouraud for UV-laid-out
-  // geometry and flat otherwise.
-  kCompanionGouraud,
+  // Flat polygons in the geometry's base color.
+  kFlat,
+  // Gouraud polygons in the drawing actor's own base color, for every role.
+  kGouraud,
+  // The flat companion overlay in the companion color, never overridden.
   kCompanionFlat,
 };
+
+// The palette pulse and appearance state an override decision or drawer reads.
+struct ModelAppearance {
+  std::uint8_t pulse_kind = 0;
+  std::uint8_t state = 0;
+};
+
+// 49EB8.c:292-304 (0x800B3650..0x800B36C4): the geometry's model draws through
+// the override drawers while the first-person transition forces them, its
+// palette pulses, it fades (states 4 to 8 except 6) or its state is 15.
+[[nodiscard]] bool UsesModelOverrides(bool forced, ModelAppearance geometry);
 
 enum class ModelDrawResult : std::uint8_t {
   kNoPose,
@@ -64,14 +78,24 @@ class ActorModelDrawHost {
   virtual void SetCulled(bool culled) = 0;
   // Refreshes the geometry's base and shadow colors for `role`.
   virtual void UpdateColors(ModelDrawRole role) = 0;
-  [[nodiscard]] virtual bool GeometryHasUvLayout() const = 0;
-  virtual void DrawPolygons(ModelPolygons polygons) = 0;
+  // The drawing actor's own UV layout; borrowed geometry does not change it.
+  [[nodiscard]] virtual bool ActorHasUvLayout() const = 0;
+  // Set while the first-person camera transition runs (D_800E8FC0).
+  [[nodiscard]] virtual bool ModelOverridesForced() const = 0;
+  [[nodiscard]] virtual ModelAppearance GeometryAppearance() const = 0;
+  [[nodiscard]] virtual ModelAppearance ActorAppearance() const = 0;
+  // Draws `polygons`, through the override drawers when `overrides` holds the
+  // pulse and appearance they apply (func_800B516C/func_800B5C30 read them
+  // from the drawing actor, not the geometry).
+  virtual void DrawPolygons(
+      ModelPolygons polygons,
+      const std::optional<ModelAppearance>& overrides) = 0;
   [[nodiscard]] virtual bool CastsShadow() const = 0;
   virtual void DrawShadow() = 0;
 };
 
 // Draws one actor model and, for the actor's own draw, its ground shadow
-// (func_800B28A8 material dispatch).
+// (func_800B28A8 material dispatch, 49EB8.c:286-410).
 ModelDrawResult DrawActorModel(ActorModelDrawHost& host, int companion);
 
 // The base channel shifted by four times the signed byte adjustment, clamped to

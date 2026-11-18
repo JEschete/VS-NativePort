@@ -48,7 +48,7 @@ _Static_assert(sizeof(Actors_SeqAnimationBank) == 0x8, "Actors_SeqAnimationBank 
 
 extern u_char Actors_sharedSequenceIdsByKind[592];
 extern u_char Actors_sharedSequenceBankIndex;
-extern char Actors_reservedControlByte;
+extern char Actors_forcedModelOverrides;
 extern u_char Actors_drawnWeaponAnimationBases[3232];
 extern u_char Actors_sheathedWeaponAnimationBases[3220];
 extern Actors_TextureAnimationKey Actors_secondarySlotSequences[188][8];

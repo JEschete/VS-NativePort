@@ -63,7 +63,7 @@ inline auto PreviewOwners() {
                     BytesOf(Field_gimmickInstances),
                     BytesOf(Actors_primarySequenceBuffer),
                     BytesOf(Actors_sequenceWorkBuffer),
-                    BytesOf(Actors_reservedControlByte),
+                    BytesOf(Actors_forcedModelOverrides),
                     BytesOf(Content_legacyWeaponModelBuffers),
                     BytesOf(Render_legacyActorTextureSlots),
                     BytesOf(Render_legacyWeaponTextureSlots),

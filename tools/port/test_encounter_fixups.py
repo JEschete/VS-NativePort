@@ -1933,7 +1933,8 @@ int func_800F9800(void) {
             encoding="utf-8"
         )
         self.assertIn("return {object.palettePulse.kind, object.motionState};", live)
-        self.assertIn("override ? ModelAppearanceMaterial(state) : 0", source)
+        self.assertIn("PolygonKind::kGouraudOverrides, CountsOf(object)", flat(live))
+        self.assertIn("ModelAppearanceMaterial(overrides.appearance_state)", source)
 
     def test_room_tint_pass_shares_the_explicit_native_color_contract(self):
         for identity, name in (

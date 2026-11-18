@@ -378,19 +378,13 @@ bool ProjectLiveActorModel(const Actors_ActorRecord& geometry,
                      matrices);
 }
 
-void DrawLiveActorPolygons(const Actors_ActorRecord& geometry,
-                           const CVECTOR& tint) {
-  const std::uintptr_t limit = PrimitiveLimit();
-  const std::span<const std::byte> model = ActorModelBytes(geometry);
-  if (model.empty() || limit == 0) {
-    return;
-  }
-  LivePacketQueue queue(limit);
-  const Actors_ModelInstance& instance = geometry.instance;
-  ReportDraw(DrawActorModelPolygons(
-      {CountsOf(instance), model, ProjectedVertices()}, instance.uvLayout != 0,
-      TintOf(tint), WorkspaceSurface(),
-      {instance.palettePulse.kind, instance.actionAnimationState}, queue));
+void DrawLiveActorPolygonsWithOverrides(const Actors_ActorRecord& geometry,
+                                        bool colored, const CVECTOR& tint,
+                                        const ModelOverrides& overrides) {
+  DrawLive(
+      colored ? PolygonKind::kGouraudOverrides : PolygonKind::kFlatOverrides,
+      CountsOf(geometry.instance), ActorModelBytes(geometry), TintOf(tint),
+      overrides);
 }
 
 void DrawLiveActorGouraudPolygons(const Actors_ActorRecord& geometry,

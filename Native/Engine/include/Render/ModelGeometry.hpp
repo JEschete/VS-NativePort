@@ -180,14 +180,6 @@ ModelDrawStatus DrawModelGouraudPolygonsWithOverrides(
     const ModelSurface& surface, const ModelOverrides& overrides,
     ModelPacketQueue& queue);
 
-// 800B3680..800B38E0: an actor draws with overrides while its palette pulses
-// or its appearance state fades; `colored` is the instance's UV layout.
-ModelDrawStatus DrawActorModelPolygons(const ModelPolygonSource& source,
-                                       bool colored, std::uint32_t tint,
-                                       const ModelSurface& surface,
-                                       const ModelOverrides& overrides,
-                                       ModelPacketQueue& queue);
-
 inline constexpr std::size_t kShadowVertexCount = 18;
 inline constexpr std::size_t kShadowFaceCount = 24;
 

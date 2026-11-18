@@ -61,11 +61,7 @@ constexpr std::uint32_t kSemiTransparencyFlag = 0x10;
 constexpr std::uint32_t kAppearanceMaterialMask = 0xF0;
 constexpr std::uint32_t kAppearanceSubtractiveBlend = 0x40;
 constexpr std::uint32_t kAppearanceAdditiveBlend = 0x20;
-constexpr std::uint32_t kAppearanceFadeFirstState = 4;
-constexpr std::uint32_t kAppearanceFadeEndState = 9;
-constexpr std::uint32_t kAppearanceOpaqueState = 6;
 constexpr std::uint32_t kAppearanceBlendBoundary = 7;
-constexpr std::uint32_t kAppearanceForcedOverride = 15;
 constexpr std::uint32_t kNoBackfaceCullFlag = 1;
 constexpr std::uint32_t kAdaptiveSplitMode = 3;
 constexpr std::uint32_t kDepthBiasMask = 3;
@@ -855,28 +851,6 @@ ModelDrawStatus DrawModelGouraudPolygonsWithOverrides(
        .tint = tint,
        .pulse_mask = overrides.pulse_mask,
        .material = ModelAppearanceMaterial(overrides.appearance_state)},
-      surface, queue);
-}
-
-ModelDrawStatus DrawActorModelPolygons(const ModelPolygonSource& source,
-                                       bool colored, std::uint32_t tint,
-                                       const ModelSurface& surface,
-                                       const ModelOverrides& overrides,
-                                       ModelPacketQueue& queue) {
-  // 800B51DC..800B51FC chooses the subtractive/additive page mode and
-  // 800B5DD4..800B5DE0 repeats the tint at each Gouraud vertex.
-  const std::uint32_t state = overrides.appearance_state;
-  const bool fading = state >= kAppearanceFadeFirstState &&
-                      state < kAppearanceFadeEndState &&
-                      state != kAppearanceOpaqueState;
-  const bool override =
-      overrides.pulse_mask != 0 || fading || state == kAppearanceForcedOverride;
-  return DrawPolygons(
-      source,
-      {.colored = colored,
-       .tint = tint,
-       .pulse_mask = overrides.pulse_mask,
-       .material = override ? ModelAppearanceMaterial(state) : 0},
       surface, queue);
 }
 

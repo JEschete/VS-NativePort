@@ -433,7 +433,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8F90u, 24u, (void*)&Actors_textureSlotRowOffsets, sizeof Actors_textureSlotRowOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FA8u, 12u, (void*)&Field_gimmickPaletteParameters, sizeof Field_gimmickPaletteParameters, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FB4u, 12u, (void*)&Field_gimmickModelTemplates, sizeof Field_gimmickModelTemplates, 4u, sizeof Field_gimmickModelTemplates[0]},
-    {"BATTLE/BATTLE.PRG", 0x800E8FC0u, 4u, (void*)&Actors_reservedControlByte, sizeof Actors_reservedControlByte, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8FC0u, 4u, (void*)&Actors_forcedModelOverrides, sizeof Actors_forcedModelOverrides, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FC4u, 4u, (void*)&Content_assetQueuePeakUsage, sizeof Content_assetQueuePeakUsage, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E8FC8u, 8u, (void*)&Items_weaponMaterialPaletteIndices, sizeof Items_weaponMaterialPaletteIndices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8FD0u, 96u, (void*)&Field_kGimmickRollOrientations, sizeof Field_kGimmickRollOrientations, 1u, 1u},

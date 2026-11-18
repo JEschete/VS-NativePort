@@ -10,8 +10,10 @@ u_char Actors_sharedSequenceIdsByKind[592]; /* contents: module image (ModuleDat
 // decomp: D_800E8F2C (D_800E8F2C@BATTLE/BATTLE.PRG)
 u_char Actors_sharedSequenceBankIndex; /* contents: module image (ModuleData.cpp) */
 
-// decomp: D_800E8FC0 (D_800E8FC0@BATTLE/BATTLE.PRG)
-char Actors_reservedControlByte; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800E8FC0 (D_800E8FC0@BATTLE/BATTLE.PRG). Nonzero while the
+// first-person camera transition runs (func_800A0870); func_800B28A8
+// (49EB8.c:294) then draws every actor through the override drawers.
+char Actors_forcedModelOverrides; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800E9090 (D_800E9090@BATTLE/BATTLE.PRG)
 u_char Actors_drawnWeaponAnimationBases[3232]; /* contents: module image (ModuleData.cpp) */

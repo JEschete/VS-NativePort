@@ -222,7 +222,7 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80730, sizeof Actors_textureSlotOrigins, &Actors_textureSlotOrigins, sizeof Actors_textureSlotOrigins}, // G00069 D_800E8F30
     {"BATTLE/BATTLE.PRG", 0x80790, sizeof Actors_textureSlotRowOffsets, &Actors_textureSlotRowOffsets, sizeof Actors_textureSlotRowOffsets}, // G00070 D_800E8F90
     {"BATTLE/BATTLE.PRG", 0x807A8, sizeof Field_gimmickPaletteParameters, &Field_gimmickPaletteParameters, sizeof Field_gimmickPaletteParameters}, // G00071 D_800E8FA8
-    {"BATTLE/BATTLE.PRG", 0x807C0, sizeof Actors_reservedControlByte, &Actors_reservedControlByte, sizeof Actors_reservedControlByte}, // G00073 D_800E8FC0
+    {"BATTLE/BATTLE.PRG", 0x807C0, sizeof Actors_forcedModelOverrides, &Actors_forcedModelOverrides, sizeof Actors_forcedModelOverrides}, // G00073 D_800E8FC0
     {"BATTLE/BATTLE.PRG", 0x807C8, sizeof Items_weaponMaterialPaletteIndices, &Items_weaponMaterialPaletteIndices, sizeof Items_weaponMaterialPaletteIndices}, // G00075 _weaponMaterialPaletteMap
     {"BATTLE/BATTLE.PRG", 0x807D0, sizeof Field_kGimmickRollOrientations, &Field_kGimmickRollOrientations, sizeof Field_kGimmickRollOrientations}, // G00076 D_800E8FD0
     {"BATTLE/BATTLE.PRG", 0x80830, sizeof Field_kGimmickOrientationRotations, &Field_kGimmickOrientationRotations, sizeof Field_kGimmickOrientationRotations}, // G00077 D_800E9030

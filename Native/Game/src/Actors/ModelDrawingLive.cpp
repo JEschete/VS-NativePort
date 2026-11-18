@@ -7,7 +7,9 @@
 #include <string.h>
 
 #include <array>
+#include <cstdint>
 #include <iterator>
+#include <optional>
 #include <span>
 #include <type_traits>
 
@@ -305,9 +307,10 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
                                    const SVECTOR* root_offset) {
   // The ground colour is the room's floor light at the actor's position,
   // whatever tile layer it stands on: the original called func_8008C458
-  // (146C.c:16465), which samples layer 0 for every caller.
-  if (!geometry->instance.uvLayout &&
-      role != ModelDrawRole::kCompanionOverlay) {
+  // (146C.c:16465), which samples layer 0 for every caller. The drawing
+  // actor's own UV layout chooses the branch, and the Gouraud branch gates on
+  // its own state (0x800B36C8, 0x800B385C).
+  if (!actor->instance.uvLayout && role != ModelDrawRole::kCompanionOverlay) {
     if (!actor->customTint) {
       if (actor->previewFlag) {
         const unsigned packed =
@@ -335,8 +338,8 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
       shadow_color[1] = actor->instance.tint.green;
       shadow_color[2] = actor->instance.tint.blue;
     }
-  } else if (geometry->instance.uvLayout &&
-             geometry->instance.actionAnimationState < kTintStateLimit) {
+  } else if (actor->instance.uvLayout &&
+             actor->instance.actionAnimationState < kTintStateLimit) {
     const unsigned packed =
         static_cast<uint16_t>(root_offset->vx) |
         (static_cast<unsigned>(static_cast<uint16_t>(root_offset->vz)) << 16);
@@ -352,6 +355,12 @@ static void UpdateActorModelColors(Actors_ActorRecord* actor,
 }
 
 namespace {
+[[nodiscard]] ModelAppearance AppearanceOf(const Actors_ActorRecord& actor) {
+  return {
+      .pulse_kind = actor.instance.palettePulse.kind,
+      .state = static_cast<std::uint8_t>(actor.instance.actionAnimationState)};
+}
+
 class LiveActorModelDraw final : public ActorModelDrawHost {
  public:
   LiveActorModelDraw(Actors_ActorRecord& actor, MATRIX& camera)
@@ -403,23 +412,44 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
   void UpdateColors(ModelDrawRole role) override {
     UpdateActorModelColors(&actor_, geometry_, role, &workspace_->rootOffset);
   }
-  bool GeometryHasUvLayout() const override {
-    return geometry_->instance.uvLayout != 0;
+  bool ActorHasUvLayout() const override {
+    return actor_.instance.uvLayout != 0;
   }
-  void DrawPolygons(ModelPolygons polygons) override {
+  bool ModelOverridesForced() const override {
+    return Actors_forcedModelOverrides != 0;
+  }
+  ModelAppearance GeometryAppearance() const override {
+    return AppearanceOf(*geometry_);
+  }
+  ModelAppearance ActorAppearance() const override {
+    return AppearanceOf(actor_);
+  }
+  void DrawPolygons(ModelPolygons polygons,
+                    const std::optional<ModelAppearance>& overrides) override {
+    // 49EB8.c:362-407: the flat pass takes the geometry's base color, the
+    // Gouraud pass the drawing actor's own.
     CVECTOR color = geometry_->instance.baseColor;
+    bool colored = false;
     switch (polygons) {
-      case ModelPolygons::kTextured:
-        VS::Render::DrawLiveActorPolygons(*geometry_, color);
-        return;
-      case ModelPolygons::kCompanionGouraud:
-        memcpy(&color, &actor_.companionColor, sizeof color);
-        VS::Render::DrawLiveActorGouraudPolygons(*geometry_, color);
-        return;
+      case ModelPolygons::kFlat:
+        break;
+      case ModelPolygons::kGouraud:
+        color = actor_.instance.baseColor;
+        colored = true;
+        break;
       case ModelPolygons::kCompanionFlat:
         memcpy(&color, &actor_.companionColor, sizeof color);
-        VS::Render::DrawLiveActorFlatPolygons(*geometry_, color);
-        return;
+        break;
+    }
+    if (overrides) {
+      VS::Render::DrawLiveActorPolygonsWithOverrides(
+          *geometry_, colored, color,
+          {.pulse_mask = overrides->pulse_kind,
+           .appearance_state = overrides->state});
+    } else if (colored) {
+      VS::Render::DrawLiveActorGouraudPolygons(*geometry_, color);
+    } else {
+      VS::Render::DrawLiveActorFlatPolygons(*geometry_, color);
     }
   }
   bool CastsShadow() const override {

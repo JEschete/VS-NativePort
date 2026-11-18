@@ -167,7 +167,7 @@ struct AssetStateRestore {
       bank_pages{Actors_sharedSequenceBankTexturePages};
   ArrayRestore<void*, std::size(Actors_sharedSequenceData)> shared_sequences{
       Actors_sharedSequenceData};
-  ValueRestore<char> reserved{Actors_reservedControlByte};
+  ValueRestore<char> forced_overrides{Actors_forcedModelOverrides};
   ValueRestore<u_char> bank_index{Actors_sharedSequenceBankIndex};
   ValueRestore<char> update_complete{Actors_isActorUpdateComplete};
   ValueRestore<u_char> pushed_gimmick{Actors_pushedGimmickIndex};

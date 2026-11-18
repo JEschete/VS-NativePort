@@ -4,13 +4,27 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <optional>
 
 namespace VS::Actors {
 namespace {
 constexpr int kByteRange = 256;
 constexpr int kByteSignBit = 128;
 constexpr std::int32_t kDepthLimit = std::numeric_limits<std::uint16_t>::max();
+constexpr std::uint8_t kFirstFadeState = 4;
+constexpr std::uint8_t kFadeStates = 5;
+constexpr std::uint8_t kDelayState = 6;
+constexpr std::uint8_t kForcedOverrideState = 15;
 }  // namespace
+
+bool UsesModelOverrides(bool forced, ModelAppearance geometry) {
+  // The original compares state - 4 unsigned, so states below 4 wrap high.
+  const bool fading = static_cast<std::uint8_t>(
+                          geometry.state - kFirstFadeState) < kFadeStates &&
+                      geometry.state != kDelayState;
+  return forced || geometry.pulse_kind != 0 || fading ||
+         geometry.state == kForcedOverrideState;
+}
 
 ModelDrawRole ClassifyModelDraw(int companion) {
   // The original compares the companion argument as an unsigned byte.
@@ -20,8 +34,8 @@ ModelDrawRole ClassifyModelDraw(int companion) {
   return ModelDrawRole::kCompanionGeometry;
 }
 
-// decomp: BATTLE.PRG func_800B28A8, material dispatch at 0x800B34CC
-// (49268/func_800B28A8.s).
+// decomp: BATTLE.PRG func_800B28A8 (src/BATTLE/BATTLE.PRG/49EB8.c:41), material
+// dispatch at 0x800B3650..0x800B38F8.
 ModelDrawResult DrawActorModel(ActorModelDrawHost& host, int companion) {
   if (!host.BuildPose() || !host.IsVisible()) return ModelDrawResult::kNoPose;
   if (host.Height() >= kHiddenActorHeight &&
@@ -41,13 +55,18 @@ ModelDrawResult DrawActorModel(ActorModelDrawHost& host, int companion) {
     host.SetCulled(true);
   } else {
     host.SetCulled(false);
+    const std::optional<ModelAppearance> overrides =
+        UsesModelOverrides(host.ModelOverridesForced(),
+                           host.GeometryAppearance())
+            ? std::optional(host.ActorAppearance())
+            : std::nullopt;
     host.UpdateColors(role);
-    if (role == ModelDrawRole::kCompanionOverlay) {
-      host.DrawPolygons(host.GeometryHasUvLayout()
-                            ? ModelPolygons::kCompanionGouraud
-                            : ModelPolygons::kCompanionFlat);
+    if (host.ActorHasUvLayout()) {
+      host.DrawPolygons(ModelPolygons::kGouraud, overrides);
+    } else if (role == ModelDrawRole::kCompanionOverlay) {
+      host.DrawPolygons(ModelPolygons::kCompanionFlat, std::nullopt);
     } else {
-      host.DrawPolygons(ModelPolygons::kTextured);
+      host.DrawPolygons(ModelPolygons::kFlat, overrides);
     }
     result = ModelDrawResult::kDrawn;
   }

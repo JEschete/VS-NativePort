@@ -1,9 +1,12 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iterator>
+#include <optional>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -14,9 +17,13 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
+#include "Actors/SkeletonLiveState.h"
 #include "Core/Gte.h"
+#include "Render/ModelDraw.h"
+#include "Render/ModelWorkspace.h"
 }
 
 namespace {
@@ -25,6 +32,7 @@ using VS::Actors::BoneEndpoint;
 using VS::Actors::BoneLookup;
 using VS::Actors::BoneProjectionHost;
 using VS::Actors::BoneSelection;
+using VS::Actors::ModelAppearance;
 using VS::Actors::ModelDrawResult;
 using VS::Actors::ModelDrawRole;
 using VS::Actors::ModelPolygons;
@@ -41,6 +49,9 @@ class RecordingDrawHost final : public ActorModelDrawHost {
   bool bindable = true;
   bool projects = true;
   bool uv_layout = true;
+  bool forced = false;
+  ModelAppearance geometry_appearance;
+  ModelAppearance actor_appearance;
   bool shadow = true;
   int selected_slot = -1;
   std::vector<std::string> calls;
@@ -72,9 +83,21 @@ class RecordingDrawHost final : public ActorModelDrawHost {
   void UpdateColors(ModelDrawRole role) override {
     calls.emplace_back("colors" + std::to_string(static_cast<int>(role)));
   }
-  bool GeometryHasUvLayout() const override { return uv_layout; }
-  void DrawPolygons(ModelPolygons polygons) override {
-    calls.emplace_back("polygons" + std::to_string(static_cast<int>(polygons)));
+  bool ActorHasUvLayout() const override { return uv_layout; }
+  bool ModelOverridesForced() const override { return forced; }
+  ModelAppearance GeometryAppearance() const override {
+    return geometry_appearance;
+  }
+  ModelAppearance ActorAppearance() const override { return actor_appearance; }
+  // Records "polygons<pass>", with ":<pulse>,<state>" for an override draw.
+  void DrawPolygons(ModelPolygons polygons,
+                    const std::optional<ModelAppearance>& overrides) override {
+    std::string call = "polygons" + std::to_string(static_cast<int>(polygons));
+    if (overrides) {
+      call += ":" + std::to_string(overrides->pulse_kind) + "," +
+              std::to_string(overrides->state);
+    }
+    calls.push_back(std::move(call));
   }
   bool CastsShadow() const override { return shadow; }
   void DrawShadow() override { calls.emplace_back("shadow"); }
@@ -171,16 +194,25 @@ TEST_CASE("Model draw keeps the shadow of an actor whose projection failed",
   CHECK(host.calls == Calls{"pose", "select", "bind", "project", "culled"});
 }
 
-TEST_CASE("Model draw orders the actor's own textured draw before its shadow",
+TEST_CASE("Model draw orders the actor's own draw before its shadow",
           "[actors][model-drawing]") {
   RecordingDrawHost host;
   CHECK(VS::Actors::DrawActorModel(host, 0) == ModelDrawResult::kDrawn);
   CHECK(host.selected_slot == 0);
   CHECK(host.calls == Calls{"pose", "select", "bind", "project", "visible",
+                            "colors0", "polygons1", "shadow"});
+
+  host = RecordingDrawHost{};
+  host.uv_layout = false;
+  CHECK(VS::Actors::DrawActorModel(host, 0) == ModelDrawResult::kDrawn);
+  CHECK(host.calls == Calls{"pose", "select", "bind", "project", "visible",
                             "colors0", "polygons0", "shadow"});
 }
 
-TEST_CASE("Model draw overlays the companion color without a shadow",
+// 49EB8.c:304-307: a drawing actor with its own UV layout takes the Gouraud
+// pass even as the companion overlay; only the flat overlay uses the
+// companion color.
+TEST_CASE("Model draw overlays the companion without a shadow",
           "[actors][model-drawing]") {
   RecordingDrawHost host;
   CHECK(VS::Actors::DrawActorModel(host, 1) == ModelDrawResult::kDrawn);
@@ -200,7 +232,65 @@ TEST_CASE("Model draw selects the companion slot's geometry without a shadow",
   CHECK(VS::Actors::DrawActorModel(host, 0x105) == ModelDrawResult::kDrawn);
   CHECK(host.selected_slot == 5);
   CHECK(host.calls == Calls{"pose", "select", "bind", "project", "visible",
-                            "colors2", "polygons0"});
+                            "colors2", "polygons1"});
+
+  host = RecordingDrawHost{};
+  host.uv_layout = false;
+  CHECK(VS::Actors::DrawActorModel(host, 5) == ModelDrawResult::kDrawn);
+  CHECK(host.calls.back() == "polygons0");
+}
+
+// 49EB8.c:292-304 (0x800B3650..0x800B36C4).
+TEST_CASE("Model overrides follow the forced flag, pulse and fade states",
+          "[actors][model-drawing]") {
+  // The appearance state is a 4-bit field.
+  for (int state = 0; state < 16; ++state) {
+    const auto appearance = ModelAppearance{
+        .pulse_kind = 0, .state = static_cast<std::uint8_t>(state)};
+    const bool fading = (state >= 4 && state <= 8 && state != 6) || state == 15;
+    INFO("state " << state);
+    CHECK(VS::Actors::UsesModelOverrides(false, appearance) == fading);
+    CHECK(VS::Actors::UsesModelOverrides(true, appearance));
+    CHECK(VS::Actors::UsesModelOverrides(
+        false, {.pulse_kind = 1, .state = appearance.state}));
+  }
+}
+
+TEST_CASE("Model overrides follow the geometry and draw with the actor",
+          "[actors][model-drawing]") {
+  RecordingDrawHost host;
+  host.geometry_appearance = {.pulse_kind = 0, .state = 4};
+  host.actor_appearance = {.pulse_kind = 3, .state = 9};
+  CHECK(VS::Actors::DrawActorModel(host, 5) == ModelDrawResult::kDrawn);
+  CHECK(host.calls.back() == "polygons1:3,9");
+
+  // The actor's own fade does not select the override drawers.
+  host = RecordingDrawHost{};
+  host.uv_layout = false;
+  host.actor_appearance = {.pulse_kind = 2, .state = 4};
+  CHECK(VS::Actors::DrawActorModel(host, 5) == ModelDrawResult::kDrawn);
+  CHECK(host.calls.back() == "polygons0");
+}
+
+TEST_CASE("The first-person flag forces override drawers except the overlay",
+          "[actors][model-drawing]") {
+  RecordingDrawHost host;
+  host.forced = true;
+  host.uv_layout = false;
+  CHECK(VS::Actors::DrawActorModel(host, 0) == ModelDrawResult::kDrawn);
+  CHECK(host.calls == Calls{"pose", "select", "bind", "project", "visible",
+                            "colors0", "polygons0:0,0", "shadow"});
+
+  host = RecordingDrawHost{};
+  host.forced = true;
+  CHECK(VS::Actors::DrawActorModel(host, 1) == ModelDrawResult::kDrawn);
+  CHECK(host.calls.back() == "polygons1:0,0");
+
+  host = RecordingDrawHost{};
+  host.forced = true;
+  host.uv_layout = false;
+  CHECK(VS::Actors::DrawActorModel(host, 1) == ModelDrawResult::kDrawn);
+  CHECK(host.calls.back() == "polygons2");
 }
 
 TEST_CASE("Model color helpers apply signed adjustments and shadow tint",
@@ -293,4 +383,110 @@ TEST_CASE("Live bone projection bounds the bone by the pose and bone table",
 
   std::copy(saved.begin(), saved.end(), std::begin(Actors_actorRecords));
   Core_Gte_Reset();
+}
+
+namespace {
+// A drawing actor and the geometry it borrows from slot 5, both over a
+// one-vertex model in front of the camera.
+struct BorrowedGeometryFixture {
+  static constexpr int kGeometrySlot = 5;
+  decltype(std::to_array(Actors_actorRecords)) saved_records =
+      std::to_array(Actors_actorRecords);
+  Actors_SkeletonPose saved_pose = Actors_skeletonPose;
+  Actors_ModelRenderContext saved_context = Actors_modelRenderContext;
+  Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
+  std::array<unsigned, 32> model_bytes{};
+  Actors_ActorRecord actor{};
+  Actors_ActorRecord geometry{};
+  MATRIX camera{};
+
+  BorrowedGeometryFixture() {
+    auto* model = reinterpret_cast<Actors_ShpModel*>(model_bytes.data());
+    model->groupSection = 96;
+    model->vertexSection = 100;
+    model->polygonSection = 108;
+    const std::array<std::uint16_t, 2> group{0, 1};
+    std::memcpy(model_bytes.data() + 24, group.data(), sizeof group);
+    for (Actors_ActorRecord* record : {&actor, &geometry}) {
+      record->instance.model = model;
+      record->modelDataSize = sizeof model_bytes;
+      record->instance.boneCount = 1;
+      record->instance.vertexGroupCount = 1;
+      record->instance.isVisible = -1;
+      record->instance.scaleX = record->instance.scaleY =
+          record->instance.scaleZ = record->scale = 4096;
+      record->blendPose.scaleKeys[0] = {64, 64, 64, 0};
+    }
+    actor.customTint = 1;
+    actor.instance.tint = {100, 70, 20, 0};
+    geometry.fadeRed = 255;
+    geometry.fadeGreen = 50;
+    geometry.fadeBlue = 246;
+    Actors_actorRecords[kGeometrySlot] = &geometry;
+    for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
+    setVector(&Render_ModelWorkspace()->rootOffset, 0, 0, 1024);
+    Core_Gte_Reset();
+    Core_Gte_SetGeomScreen(256);
+  }
+  ~BorrowedGeometryFixture() {
+    std::copy(saved_records.begin(), saved_records.end(),
+              std::begin(Actors_actorRecords));
+    Actors_skeletonPose = saved_pose;
+    Actors_modelRenderContext = saved_context;
+    *Render_ModelWorkspace() = saved_workspace;
+    Core_Gte_Reset();
+  }
+  BorrowedGeometryFixture(const BorrowedGeometryFixture&) = delete;
+  BorrowedGeometryFixture& operator=(const BorrowedGeometryFixture&) = delete;
+
+  void Draw() { VS::Actors::DrawLiveActorModel(actor, camera, kGeometrySlot); }
+  [[nodiscard]] static bool Unlit(const Actors_ActorRecord& record) {
+    return record.instance.baseColor.r == 0 &&
+           record.instance.baseColor.g == 0 &&
+           record.instance.baseColor.b == 0 &&
+           (record.shadowBlend.reserved0 & 0xFFFFFF) == 0;
+  }
+  // The flat pass's colour: the actor's tint {100, 70, 20} adjusted by the
+  // geometry's fades {255, 50, 246}, and the tint itself as the shadow.
+  [[nodiscard]] static bool LitInTint(const Actors_ActorRecord& record) {
+    return record.instance.baseColor.r == 96 &&
+           record.instance.baseColor.g == 255 &&
+           record.instance.baseColor.b == 0 &&
+           (record.shadowBlend.reserved0 & 0xFFFFFF) == 0x144664;
+  }
+  // The Gouraud pass's ground shadow is never darker than 64 per channel.
+  [[nodiscard]] static bool GroundShaded(const Actors_ActorRecord& record) {
+    const auto shadow =
+        static_cast<std::uint32_t>(record.shadowBlend.reserved0);
+    return (shadow & 0xFF) >= 64 && ((shadow >> 8) & 0xFF) >= 64 &&
+           ((shadow >> 16) & 0xFF) >= 64;
+  }
+};
+}  // namespace
+
+// #444: 0x800B36C8 tests the drawing actor's UV layout, and the Gouraud
+// lighting at 0x800B385C gates on its own state, whatever geometry it borrows.
+TEST_CASE("Live model lighting follows the drawing actor's layout and state",
+          "[actors][model-drawing]") {
+  BorrowedGeometryFixture fixture;
+  SECTION("a flat actor lights the borrowed UV-laid-out geometry") {
+    fixture.geometry.instance.uvLayout = -1;
+    fixture.Draw();
+    CHECK(BorrowedGeometryFixture::LitInTint(fixture.geometry));
+    CHECK(BorrowedGeometryFixture::Unlit(fixture.actor));
+  }
+  SECTION("a UV-laid-out actor shades itself while the geometry fades") {
+    fixture.actor.instance.uvLayout = -1;
+    fixture.geometry.instance.actionAnimationState = 5;
+    fixture.Draw();
+    CHECK(BorrowedGeometryFixture::GroundShaded(fixture.actor));
+    CHECK(BorrowedGeometryFixture::Unlit(fixture.geometry));
+  }
+  SECTION("a fading UV-laid-out actor skips the lighting") {
+    fixture.actor.instance.uvLayout = -1;
+    fixture.actor.instance.actionAnimationState = 4;
+    fixture.Draw();
+    CHECK(BorrowedGeometryFixture::Unlit(fixture.actor));
+    CHECK(BorrowedGeometryFixture::Unlit(fixture.geometry));
+  }
 }
