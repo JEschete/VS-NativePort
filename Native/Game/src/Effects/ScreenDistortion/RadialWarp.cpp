@@ -35,7 +35,7 @@ constexpr unsigned kVertexScaleShift = 13;
 using RadialScales = std::array<std::uint16_t, kScaleEntries>;
 
 [[noreturn]] void InvalidWarp(const char* reason) {
-  VS_LOG_ERROR("effects", "screen radial warp: {}", reason);
+  VS::Core::LogError("effects", "screen radial warp: {}", reason);
   std::abort();
 }
 

@@ -36,8 +36,8 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -126,13 +126,13 @@ class SavedModuleData {
 };
 
 struct SavedRuntime {
-  unsigned random = Core_Random_State();
+  unsigned random = VS::Core::BiosRand().State();
   render::TexturePageTable pages = render::LiveTexturePages();
   render::PageSpace image = render::GamePages();
   ~SavedRuntime() {
     render::LiveTexturePages() = pages;
     render::GamePages() = std::move(image);
-    Core_Random_Seed(random);
+    VS::Core::SeedBiosRand(random);
   }
 };
 

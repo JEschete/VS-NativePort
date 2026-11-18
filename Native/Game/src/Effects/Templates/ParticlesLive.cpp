@@ -12,7 +12,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
@@ -20,7 +19,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -113,7 +112,7 @@ std::uint64_t dropped_packets = 0;
 
 Effects_ParticleEmitterScratch& EmitterScratch() {
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(Core_ScratchBase()) +
+      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
@@ -304,7 +303,9 @@ class LiveParticleHost final : public ParticleSetHost {
   [[nodiscard]] std::int32_t SampleCurve(std::uint8_t curve,
                                          std::int32_t distance) override;
 
-  [[nodiscard]] std::int32_t Rand() override { return Core_Random_Rand(); }
+  [[nodiscard]] std::int32_t Rand() override {
+    return VS::Core::NextBiosRand();
+  }
 
   [[nodiscard]] std::int32_t RandomRange(std::int32_t first,
                                          std::int32_t second) override {
@@ -370,10 +371,10 @@ std::optional<ParticleSetDefinition> LiveParticleHost::Definition(
     std::uint8_t index) {
   const Effects_ParticleDefinition* definition = PackageDefinition(index);
   if (definition == nullptr) {
-    VS_LOG_WARN("effects",
-                "particle set: definition {} is outside the package's {} "
-                "definitions; set refused",
-                index, LiveParticleDefinitionCount());
+    VS::Core::LogWarn("effects",
+                      "particle set: definition {} is outside the package's {} "
+                      "definitions; set refused",
+                      index, LiveParticleDefinitionCount());
     return std::nullopt;
   }
   return TypedDefinition(*definition);
@@ -398,7 +399,7 @@ void LiveParticleHost::Create(const ParticleSetState& state,
                : offsetof(Effects_ParticleQuadSet, textureAnimation);
   void* storage = Core::Memory::AllocateLiveFromHighEnd(bytes);
   if (storage == nullptr) {
-    VS_LOG_ERROR("effects", "particle set: heap exhausted for state");
+    VS::Core::LogError("effects", "particle set: heap exhausted for state");
     slot_.rendererState = nullptr;
     return;
   }
@@ -411,9 +412,9 @@ void LiveParticleHost::Create(const ParticleSetState& state,
         static_cast<SVECTOR*>(Core::Memory::AllocateLiveFromHighEnd(
             static_cast<std::size_t>(capacity) * kParticleControlPointBytes));
     if (live->controlPoints == nullptr) {
-      VS_LOG_ERROR("effects",
-                   "particle set: heap exhausted for {} ribbons; set refused",
-                   capacity);
+      VS::Core::LogError(
+          "effects", "particle set: heap exhausted for {} ribbons; set refused",
+          capacity);
       Core::Memory::FreeLiveFromHighEnd(live);
       slot_.rendererState = nullptr;
       return;
@@ -432,23 +433,24 @@ std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
     std::uint8_t definition_index) {
   instance_ = Effects_currentInstance;
   if (instance_ == nullptr) {
-    VS_LOG_WARN("effects",
-                "particle set: no current effect instance; set stopped");
+    VS::Core::LogWarn("effects",
+                      "particle set: no current effect instance; set stopped");
     return std::nullopt;
   }
   definition_ = PackageDefinition(definition_index);
   if (definition_ == nullptr) {
-    VS_LOG_WARN("effects",
-                "particle set: the current package no longer holds "
-                "definition {}; set stopped",
-                definition_index);
+    VS::Core::LogWarn("effects",
+                      "particle set: the current package no longer holds "
+                      "definition {}; set stopped",
+                      definition_index);
     return std::nullopt;
   }
   if (definition_->transformIndex >= kTransformCount) {
-    VS_LOG_WARN("effects",
-                "particle set: definition {} names transform {} of {}; set "
-                "stopped",
-                definition_index, definition_->transformIndex, kTransformCount);
+    VS::Core::LogWarn(
+        "effects",
+        "particle set: definition {} names transform {} of {}; set "
+        "stopped",
+        definition_index, definition_->transformIndex, kTransformCount);
     return std::nullopt;
   }
   const bool targets_transform =
@@ -456,11 +458,11 @@ std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
       static_cast<std::uint32_t>(ParticleTargetAnchor::kTransform);
   if (targets_transform &&
       definition_->attractionTransform >= kTransformCount) {
-    VS_LOG_WARN("effects",
-                "particle set: definition {} targets transform {} of {}; set "
-                "stopped",
-                definition_index, definition_->attractionTransform,
-                kTransformCount);
+    VS::Core::LogWarn(
+        "effects",
+        "particle set: definition {} targets transform {} of {}; set "
+        "stopped",
+        definition_index, definition_->attractionTransform, kTransformCount);
     return std::nullopt;
   }
   const math::Transform3 world = math::TransformOf(
@@ -574,10 +576,11 @@ std::int32_t LiveParticleHost::SampleCurve(std::uint8_t curve,
   if (curve > bound ||
       Effects_package->curveBlock->curveSizes[curve - 1] == 0) {
     if (ShouldReport(refused_curves)) {
-      VS_LOG_WARN("effects",
-                  "particle set: curve {} is outside the package's {} bound "
-                  "curves or empty; sampled as 0 ({} refusals)",
-                  curve, bound, refused_curves);
+      VS::Core::LogWarn(
+          "effects",
+          "particle set: curve {} is outside the package's {} bound "
+          "curves or empty; sampled as 0 ({} refusals)",
+          curve, bound, refused_curves);
     }
     return 0;
   }
@@ -600,10 +603,11 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
   }
   if (!bound || animation.textureInfo == nullptr) {
     if (ShouldReport(refused_textures)) {
-      VS_LOG_WARN("effects",
-                  "particle set: texture table {} of {} has no frame; set "
-                  "drawn without quads ({} refusals)",
-                  table, Effects_package->block1TableCount, refused_textures);
+      VS::Core::LogWarn(
+          "effects",
+          "particle set: texture table {} of {} has no frame; set "
+          "drawn without quads ({} refusals)",
+          table, Effects_package->block1TableCount, refused_textures);
     }
     return std::nullopt;
   }
@@ -629,10 +633,11 @@ std::optional<std::pair<u_long*, u_long*>> LiveParticleHost::Reserve(
       entry != nullptr ? Render::ReserveLivePrimitiveWords(words) : nullptr;
   if (packet == nullptr) {
     if (ShouldReport(dropped_packets)) {
-      VS_LOG_WARN("effects",
-                  "particle set: segment at depth {} has no ordering entry or "
-                  "buffer room; dropped ({} drops)",
-                  depth, dropped_packets);
+      VS::Core::LogWarn(
+          "effects",
+          "particle set: segment at depth {} has no ordering entry or "
+          "buffer room; dropped ({} drops)",
+          depth, dropped_packets);
     }
     return std::nullopt;
   }
@@ -687,8 +692,8 @@ using ParticleInstance = bool (*)(ParticleCommand, std::int32_t,
 int RunParticleSet(Effects_RendererSlot* slot, unsigned int command, int packed,
                    ParticleInstance instance) {
   if (slot == nullptr) {
-    VS_LOG_ERROR("effects",
-                 "particle set: renderer called without a slot; ignored");
+    VS::Core::LogError("effects",
+                       "particle set: renderer called without a slot; ignored");
     return 0;
   }
   LiveParticleHost host(*slot);

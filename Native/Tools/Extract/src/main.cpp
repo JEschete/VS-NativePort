@@ -86,13 +86,13 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscFile& file,
   if (auto result =
           disc.ReadRawSectors(file.lba, static_cast<u32>(sectors), raw);
       !result) {
-    VS_LOG_ERROR("extract", "{}: {}", file.path, result.error());
+    VS::Core::LogError("extract", "{}: {}", file.path, result.error());
     return false;
   }
   if (xa_audio) {
     auto selected = Content::SelectXaAudioSectors(raw);
     if (!selected) {
-      VS_LOG_ERROR("extract", "{}: {}", file.path, selected.error());
+      VS::Core::LogError("extract", "{}: {}", file.path, selected.error());
       return false;
     }
     raw = std::move(*selected);
@@ -103,7 +103,7 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscFile& file,
                static_cast<std::streamsize>(raw.size()));
   stream.close();
   if (!stream) {
-    VS_LOG_ERROR("extract", "cannot write {}", Platform::PathText(tmp));
+    VS::Core::LogError("extract", "cannot write {}", Platform::PathText(tmp));
     return false;
   }
   return true;
@@ -142,12 +142,12 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
   std::error_code ec;
   fs::remove(tmp, ec);
   if (!result || *result != 0 || !fs::exists(mkv, ec)) {
-    VS_LOG_ERROR("extract", "{}: FFmpeg failed ({})", file.path,
-                 result ? std::to_string(*result) : result.error());
+    VS::Core::LogError("extract", "{}: FFmpeg failed ({})", file.path,
+                       result ? std::to_string(*result) : result.error());
     return false;
   }
-  VS_LOG_INFO("extract", "{} -> {} ({} bytes)", file.path,
-              Platform::PathText(mkv), fs::file_size(mkv, ec));
+  VS::Core::LogInfo("extract", "{} -> {} ({} bytes)", file.path,
+                    Platform::PathText(mkv), fs::file_size(mkv, ec));
   return true;
 }
 
@@ -164,12 +164,12 @@ bool ConvertXa(const Content::Disc& disc, const fs::path& ffmpeg,
   std::error_code error;
   fs::remove(tmp, error);
   if (!result || *result != 0 || !fs::exists(flac, error)) {
-    VS_LOG_ERROR("extract", "{}: XA conversion failed ({})", file.path,
-                 result ? std::to_string(*result) : result.error());
+    VS::Core::LogError("extract", "{}: XA conversion failed ({})", file.path,
+                       result ? std::to_string(*result) : result.error());
     return false;
   }
-  VS_LOG_INFO("extract", "{} -> {} (lossless decoded XA FLAC)", file.path,
-              Platform::PathText(flac));
+  VS::Core::LogInfo("extract", "{} -> {} (lossless decoded XA FLAC)", file.path,
+                    Platform::PathText(flac));
   return true;
 }
 
@@ -184,7 +184,7 @@ int ConvertAudio(const Content::Disc& disc, int argc, char** argv) {
     if (result.ec != std::errc() ||
         result.ptr != argument.data() + argument.size() ||
         id > kMaximumWaveFile) {
-      VS_LOG_ERROR("extract", "invalid wave-file ID: {}", argument);
+      VS::Core::LogError("extract", "invalid wave-file ID: {}", argument);
       return 1;
     }
     selected.insert(std::format("SOUND/WAVE{:04}.DAT", id));
@@ -199,49 +199,50 @@ int ConvertAudio(const Content::Disc& disc, int argc, char** argv) {
     }
     auto bytes = disc.ReadFile(file);
     if (!bytes) {
-      VS_LOG_ERROR("extract", "{}", bytes.error());
+      VS::Core::LogError("extract", "{}", bytes.error());
       return 1;
     }
     if (bytes->size() == 1 && (*bytes)[0] == 0) {
-      VS_LOG_INFO("extract", "{}: empty wave-bank placeholder", file.path);
+      VS::Core::LogInfo("extract", "{}: empty wave-bank placeholder",
+                        file.path);
       selected.erase(file.path);
       continue;
     }
     auto bank = Content::DecodeAudioBank(*bytes);
     if (!bank) {
-      VS_LOG_ERROR("extract", "{}: {}", file.path, bank.error());
+      VS::Core::LogError("extract", "{}: {}", file.path, bank.error());
       return 1;
     }
     if (auto result = Content::ExportAudioBank(
             *bank, Platform::Utf8Path(argv[kOutputArgument]));
         !result) {
-      VS_LOG_ERROR("extract", "{}: {}", file.path, result.error());
+      VS::Core::LogError("extract", "{}: {}", file.path, result.error());
       return 1;
     }
 
-    VS_LOG_INFO("extract", "{}: bank {}, {} instruments", file.path, bank->id,
-                bank->instruments.size());
+    VS::Core::LogInfo("extract", "{}: bank {}, {} instruments", file.path,
+                      bank->id, bank->instruments.size());
     for (usize index = 0; index < bank->instruments.size(); ++index) {
       if (!bank->instruments[index].available) {
-        VS_LOG_WARN("extract",
-                    "{}: instrument {} has no playable sample/pitch; "
-                    "recorded as unavailable, no sample fabricated",
-                    file.path, index);
+        VS::Core::LogWarn("extract",
+                          "{}: instrument {} has no playable sample/pitch; "
+                          "recorded as unavailable, no sample fabricated",
+                          file.path, index);
       }
     }
     ++count;
     selected.erase(file.path);
   }
   if (!selected.empty()) {
-    VS_LOG_ERROR("extract", "requested wave file was not found: {}",
-                 *selected.begin());
+    VS::Core::LogError("extract", "requested wave file was not found: {}",
+                       *selected.begin());
     return 1;
   }
   if (count == 0) {
-    VS_LOG_ERROR("extract", "no SOUND/WAVE banks in the selected source");
+    VS::Core::LogError("extract", "no SOUND/WAVE banks in the selected source");
     return 1;
   }
-  VS_LOG_INFO("extract", "converted {} audio banks", count);
+  VS::Core::LogInfo("extract", "converted {} audio banks", count);
   return 0;
 }
 
@@ -252,8 +253,8 @@ int ConvertStreams(const Content::Disc& disc, const fs::path& out,
   for (const auto& file : disc.Files()) {
     if (!file.directory && file.path.ends_with(".XA")) {
       if (!ffmpeg) {
-        VS_LOG_ERROR("extract", "{}: FFmpeg is required for XA conversion",
-                     file.path);
+        VS::Core::LogError(
+            "extract", "{}: FFmpeg is required for XA conversion", file.path);
         return 1;
       }
       const auto asset = Content::XaAudioPath(out, file.path);
@@ -273,35 +274,37 @@ int ConvertStreams(const Content::Disc& disc, const fs::path& out,
     }
     auto bytes = disc.ReadFile(file);
     if (!bytes) {
-      VS_LOG_ERROR("extract", "{}", bytes.error());
+      VS::Core::LogError("extract", "{}", bytes.error());
       return 1;
     }
     auto streams = Content::FindEffectAudioStreams(*bytes);
     if (!streams) {
-      VS_LOG_ERROR("extract", "{}: {}", file.path, streams.error());
+      VS::Core::LogError("extract", "{}: {}", file.path, streams.error());
       return 1;
     }
     for (const auto& source : *streams) {
       auto stream = Content::DecodeAudioStream(source.bytes);
       if (!stream) {
-        VS_LOG_ERROR("extract", "{} at {}: {}", file.path, source.offset,
-                     stream.error());
+        VS::Core::LogError("extract", "{} at {}: {}", file.path, source.offset,
+                           stream.error());
         return 1;
       }
       if (auto result = Content::ExportAudioStream(*stream, out); !result) {
-        VS_LOG_ERROR("extract", "{}: {}", file.path, result.error());
+        VS::Core::LogError("extract", "{}: {}", file.path, result.error());
         return 1;
       }
       entries.push_back({{"source", file.path},
                          {"offset", source.offset},
                          {"bytes", source.bytes.size()},
                          {"id", stream->info.id}});
-      VS_LOG_INFO("extract", "{}: stream {}, {} channels, {} frames", file.path,
-                  stream->info.id, stream->info.channels, stream->info.frames);
+      VS::Core::LogInfo("extract", "{}: stream {}, {} channels, {} frames",
+                        file.path, stream->info.id, stream->info.channels,
+                        stream->info.frames);
     }
   }
   if (entries.empty() && xa.empty()) {
-    VS_LOG_ERROR("extract", "no effect-package or XA audio streams found");
+    VS::Core::LogError("extract",
+                       "no effect-package or XA audio streams found");
     return 1;
   }
   std::ofstream index(out / "audio" / "streams" / "index.json");
@@ -310,11 +313,11 @@ int ConvertStreams(const Content::Disc& disc, const fs::path& out,
         << '\n';
   index.close();
   if (!index) {
-    VS_LOG_ERROR("extract", "writing stream provenance index");
+    VS::Core::LogError("extract", "writing stream provenance index");
     return 1;
   }
-  VS_LOG_INFO("extract", "converted {} effect streams and {} XA tracks",
-              entries.size(), xa.size());
+  VS::Core::LogInfo("extract", "converted {} effect streams and {} XA tracks",
+                    entries.size(), xa.size());
   return 0;
 }
 
@@ -338,26 +341,28 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   std::ofstream manifest(out / Content::DataStore::ManifestName,
                          std::ios::binary);
   if (!manifest) {
-    VS_LOG_ERROR("extract", "cannot create the data manifest in {}",
-                 Platform::PathText(out));
+    VS::Core::LogError("extract", "cannot create the data manifest in {}",
+                       Platform::PathText(out));
     return 1;
   }
   manifest << "lba\tsize\tform\tpath\n";
   const auto ffmpeg = FindFfmpeg(argc, argv);
   if (!ffmpeg) {
-    VS_LOG_WARN("extract",
-                "FFmpeg not found (PATH or --ffmpeg): movies are listed, not "
-                "converted");
+    VS::Core::LogWarn(
+        "extract",
+        "FFmpeg not found (PATH or --ffmpeg): movies are listed, not "
+        "converted");
   }
   std::optional<Content::Av1Encoder> encoder;
   if (ffmpeg && disc.IsImage()) {
     auto found = Content::FindAv1Encoder(*ffmpeg, out / "ffmpeg-encoders.txt");
     if (!found) {
-      VS_LOG_ERROR("extract", "{}", found.error());
+      VS::Core::LogError("extract", "{}", found.error());
       return 1;
     }
     encoder = std::move(*found);
-    VS_LOG_INFO("extract", "movies use the FFmpeg encoder {}", encoder->name);
+    VS::Core::LogInfo("extract", "movies use the FFmpeg encoder {}",
+                      encoder->name);
   }
   int written = 0;
   int skipped = 0;
@@ -381,7 +386,7 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
     }
     auto data = disc.ReadFile(f);
     if (!data) {
-      VS_LOG_ERROR("extract", "{}", data.error());
+      VS::Core::LogError("extract", "{}", data.error());
       return 1;
     }
     const fs::path dst = out / "disc" / fs::path(f.path);
@@ -391,7 +396,7 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
                  static_cast<std::streamsize>(data->size()));
     output.close();
     if (!output) {
-      VS_LOG_ERROR("extract", "cannot write {}", Platform::PathText(dst));
+      VS::Core::LogError("extract", "cannot write {}", Platform::PathText(dst));
       return 1;
     }
     manifest << f.lba << '\t' << f.size << "\traw\t" << f.path << '\n';
@@ -399,13 +404,13 @@ int ExtractDisc(const Content::Disc& disc, int argc, char** argv) {
   }
   manifest.close();
   if (!manifest) {
-    VS_LOG_ERROR("extract", "cannot finish the data manifest in {}",
-                 Platform::PathText(out));
+    VS::Core::LogError("extract", "cannot finish the data manifest in {}",
+                       Platform::PathText(out));
     return 1;
   }
-  VS_LOG_INFO("extract",
-              "wrote {} files to {} ({} interleaved listed, not converted)",
-              written, Platform::PathText(out), skipped);
+  VS::Core::LogInfo(
+      "extract", "wrote {} files to {} ({} interleaved listed, not converted)",
+      written, Platform::PathText(out), skipped);
   return ConvertStreams(disc, out, ffmpeg);
 }
 
@@ -424,7 +429,7 @@ int Run(int argc, char** argv) {
   const std::string cmd = argv[1];
   auto disc = Content::Disc::Open(Platform::Utf8Path(argv[2]));
   if (!disc) {
-    VS_LOG_ERROR("extract", "{}", disc.error());
+    VS::Core::LogError("extract", "{}", disc.error());
     return 1;
   }
   if (cmd == "list") {

@@ -4,6 +4,6 @@
 
 
 // decomp: vs_scratch (vs_scratch@src/include/scratch.h): the start of scratch memory
-#define Render_frameScratch (*(Render_FrameScratch*)Core_ScratchBase())
+#define Render_frameScratch (*(Render_FrameScratch*)VS::Core::ScratchBase())
 
 extern int Render_kStatGaugeColors[4];

@@ -59,8 +59,8 @@ std::span<Field_MpdMovingPlatform> LivePlatformRecords() {
   if (Field_roomData.movingPlatforms == nullptr) return {};
   if (bytes % kPlatformRecordBytes != 0 ||
       bytes / kPlatformRecordBytes > kMovingPlatformCapacity) {
-    VS_LOG_WARN("field.collision",
-                "Moving platform section of {} bytes refused", bytes);
+    VS::Core::LogWarn("field.collision",
+                      "Moving platform section of {} bytes refused", bytes);
     return {};
   }
   return {Field_roomData.movingPlatforms, bytes / kPlatformRecordBytes};
@@ -135,8 +135,8 @@ GimmickStates LiveGimmicks() {
 Actors_ActorRecord* LiveActor(int actor_index, const char* caller) {
   if (actor_index < 0 ||
       static_cast<std::size_t>(actor_index) >= kActorSlotCount) {
-    VS_LOG_WARN("field.collision", "{} refused actor slot {}", caller,
-                actor_index);
+    VS::Core::LogWarn("field.collision", "{} refused actor slot {}", caller,
+                      actor_index);
     return nullptr;
   }
   return Actors_actorRecords[actor_index];
@@ -195,8 +195,9 @@ const Field_ZoneBounds* LiveRoomCameraBounds(int /*unused*/) {
       {reinterpret_cast<const std::byte*>(Field_roomData.zoneBounds),
        Field_roomData.header.zoneBoundsLength});
   if (!decoded) {
-    VS_LOG_WARN("field.collision", "Camera bounds section of {} bytes refused",
-                Field_roomData.header.zoneBoundsLength);
+    VS::Core::LogWarn("field.collision",
+                      "Camera bounds section of {} bytes refused",
+                      Field_roomData.header.zoneBoundsLength);
     return nullptr;
   }
   bounds = Field_ZoneBounds{.minX = decoded->min_x,
@@ -231,9 +232,10 @@ int SetLiveCollisionCellBlocked(int tile_x, int tile_z, int layer,
   if (cells.room.empty()) return 0;
   const auto target = SetCollisionCellBlocked(cells, tile_x, tile_z, layer);
   if (!target) {
-    VS_LOG_WARN("field.collision",
-                "Blocking cell x={} z={} layer={} outside the tables refused",
-                tile_x, tile_z, layer);
+    VS::Core::LogWarn(
+        "field.collision",
+        "Blocking cell x={} z={} layer={} outside the tables refused", tile_x,
+        tile_z, layer);
     return 0;
   }
   Field_MpdTileCell* cell = CellPointer(target);
@@ -247,7 +249,8 @@ int SetLiveCollisionCellBlocked(int tile_x, int tile_z, int layer,
 Field_MpdTileCell* FindLiveCollisionCellAtPosition(const SVECTOR* position,
                                                    int layer) {
   if (position == nullptr) {
-    VS_LOG_WARN("field.collision", "Cell lookup without a position refused");
+    VS::Core::LogWarn("field.collision",
+                      "Cell lookup without a position refused");
     return nullptr;
   }
   PlatformWords words{};
@@ -320,7 +323,8 @@ int LiveGimmickSupportHeightBelow(int tile_x, int tile_z,
 
 int LiveIsPointOnMovingPlatform(int platform_layer, const SVECTOR* position) {
   if (position == nullptr) {
-    VS_LOG_WARN("field.collision", "Platform test without a position refused");
+    VS::Core::LogWarn("field.collision",
+                      "Platform test without a position refused");
     return 0;
   }
   const auto platforms = LiveVisiblePlatforms();
@@ -328,8 +332,8 @@ int LiveIsPointOnMovingPlatform(int platform_layer, const SVECTOR* position) {
         return platform.platform_index ==
                platform_layer - kPlatformCollisionLayer;
       })) {
-    VS_LOG_WARN("field.collision", "No visible platform on layer {}",
-                platform_layer);
+    VS::Core::LogWarn("field.collision", "No visible platform on layer {}",
+                      platform_layer);
   }
   return IsPointOnMovingPlatform(platforms, platform_layer, position->vx,
                                  position->vz)

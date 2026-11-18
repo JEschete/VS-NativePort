@@ -1,7 +1,16 @@
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
+
+#include <array>
+#include <cstddef>
+
+namespace VS::Core {
 
 namespace {
-alignas(16) unsigned char g_scratch[1024];
-}
+constexpr std::size_t kScratchBytes = 1024;
+constexpr std::size_t kScratchAlignment = 16;
+alignas(kScratchAlignment) std::array<std::byte, kScratchBytes> g_scratch;
+}  // namespace
 
-void* Core_ScratchBase(void) { return g_scratch; }
+void* ScratchBase() noexcept { return g_scratch.data(); }
+
+}  // namespace VS::Core

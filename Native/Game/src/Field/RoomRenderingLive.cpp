@@ -14,7 +14,7 @@
 #include "Battle/Feedback.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/EnvironmentLive.hpp"
 #include "Field/GimmickAnimationQueueLive.hpp"
@@ -93,13 +93,13 @@ std::uint64_t refused_calls = 0;
 
 void RefuseCall(std::string_view entry, std::string_view reason) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN(kChannel, "{} refused: {} ({} refusals)", entry, reason,
-                refused_calls);
+    VS::Core::LogWarn(kChannel, "{} refused: {} ({} refusals)", entry, reason,
+                      refused_calls);
   }
 }
 
 [[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
 }
 
 template <typename Byte>
@@ -166,10 +166,11 @@ void LinkPacket(const Packet& packet, std::string_view kind) {
       entry != nullptr ? Render::ReserveLivePrimitiveWords(kWords) : nullptr;
   if (slot == nullptr) {
     if (ShouldReport(dropped_packets)) {
-      VS_LOG_WARN(kChannel,
-                  "minimap {} has no ordering entry or buffer room; dropped "
-                  "({} drops)",
-                  kind, dropped_packets);
+      VS::Core::LogWarn(
+          kChannel,
+          "minimap {} has no ordering entry or buffer room; dropped "
+          "({} drops)",
+          kind, dropped_packets);
     }
     return;
   }

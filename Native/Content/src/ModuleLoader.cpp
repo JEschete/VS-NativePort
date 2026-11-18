@@ -44,7 +44,7 @@ class Modules {
         }
       }
       if (bytes.empty()) {
-        VS_LOG_ERROR("content", "module data: {} not extracted", module);
+        VS::Core::LogError("content", "module data: {} not extracted", module);
       }
       it = images_.emplace(module, std::move(bytes)).first;
     }
@@ -129,7 +129,7 @@ int LoadData(Modules& modules) {
     const std::vector<u8>& image = modules.Get(entry.module);
     if (!Content::CopyModuleDataEntry(entry, image)) {
       if (!image.empty()) {
-        VS_LOG_ERROR(
+        VS::Core::LogError(
             "content",
             "module data: {} +0x{:X} ({} bytes, capacity {}) is invalid",
             entry.module, entry.offset, entry.size, entry.capacity);
@@ -167,10 +167,11 @@ class SamplePrograms {
     const auto [entry, inserted] = bounded_.try_emplace(address, false);
     if (inserted) entry->second = Bounded(address);
     if (!entry->second) {
-      VS_LOG_DEBUG("content",
-                   "LFO selector {} at 0x{:08X} leaves source sample data; "
-                   "selection is unavailable",
-                   selector, address);
+      VS::Core::LogDebug(
+          "content",
+          "LFO selector {} at 0x{:08X} leaves source sample data; "
+          "selection is unavailable",
+          selector, address);
       return nullptr;
     }
     return static_cast<u8*>(source_.target) + (address - source_.address);
@@ -220,7 +221,7 @@ bool RelocateTable(const VS::Content::ModulePointerTable& table,
       static_cast<u64>(table.offset) +
               static_cast<u64>(table.count) * sizeof(u32) >
           image.size()) {
-    VS_LOG_ERROR(
+    VS::Core::LogError(
         "content",
         "pointer table {} +0x{:X}: {} entries exceed source or capacity {}",
         table.module ? table.module : "<missing>", table.offset, table.count,
@@ -231,8 +232,9 @@ bool RelocateTable(const VS::Content::ModulePointerTable& table,
   if (table.sample_source != nullptr) {
     samples.emplace(*table.sample_source);
     if (!samples->Valid(table.module)) {
-      VS_LOG_ERROR("content", "LFO table {} has an invalid sample-data owner",
-                   table.module);
+      VS::Core::LogError("content",
+                         "LFO table {} has an invalid sample-data owner",
+                         table.module);
       return false;
     }
   }
@@ -251,10 +253,11 @@ bool RelocateTable(const VS::Content::ModulePointerTable& table,
     }
     if (samples) {
       if (!samples->Contains(address)) {
-        VS_LOG_ERROR("content",
-                     "LFO table {} selector {} address 0x{:08X} is outside "
-                     "source sample data",
-                     table.module, index, address);
+        VS::Core::LogError(
+            "content",
+            "LFO table {} selector {} address 0x{:08X} is outside "
+            "source sample data",
+            table.module, index, address);
         ++unresolved;
       } else {
         resolved[index] = samples->Resolve(address, index);
@@ -263,7 +266,7 @@ bool RelocateTable(const VS::Content::ModulePointerTable& table,
     }
     resolved[index] = symbols.Resolve(table.module, address);
     if (address != 0 && resolved[index] == nullptr) {
-      VS_LOG_ERROR(
+      VS::Core::LogError(
           "content",
           "pointer table {} +0x{:X}: [{}] 0x{:08X} has no safe native mapping",
           table.module, table.offset, index, address);
@@ -322,18 +325,19 @@ bool RelocateModulePointerTable(const ModulePointerTable& table,
 int VS::Content::LoadModuleData(void) {
   const DataStore* store = DataStore::Get();
   if (store == nullptr) {
-    VS_LOG_ERROR("content", "module data: no extracted data");
+    VS::Core::LogError("content", "module data: no extracted data");
     return static_cast<int>(VS::Content::kModuleDataCount +
                             VS::Content::kModulePointerCount);
   }
   Modules modules(*store);
   const int data_failed = LoadData(modules);
   const int pointers_failed = RelocatePointers(modules);
-  VS_LOG_INFO("content",
-              "module data: {} globals, {} pointer tables ({} symbols) from {} "
-              "modules; {} failed",
-              VS::Content::kModuleDataCount, VS::Content::kModulePointerCount,
-              VS::Content::kModuleSymbolCount, modules.Count(),
-              data_failed + pointers_failed);
+  VS::Core::LogInfo(
+      "content",
+      "module data: {} globals, {} pointer tables ({} symbols) from {} "
+      "modules; {} failed",
+      VS::Content::kModuleDataCount, VS::Content::kModulePointerCount,
+      VS::Content::kModuleSymbolCount, modules.Count(),
+      data_failed + pointers_failed);
   return data_failed + pointers_failed;
 }

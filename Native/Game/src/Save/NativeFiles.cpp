@@ -18,7 +18,7 @@ std::expected<Document, std::string> DecodeFile(std::string_view data) {
   if (!document) return std::unexpected(document.error());
   const auto valid = ValidateContent(*document);
   const auto finished = std::chrono::steady_clock::now();
-  VS_LOG_DEBUG(
+  VS::Core::LogDebug(
       "save.perf", "Validate bytes={} decode_us={} content_us={} valid={}",
       data.size(),
       std::chrono::duration_cast<std::chrono::microseconds>(decoded - started)
@@ -58,7 +58,7 @@ std::expected<LoadedDocument, std::string> Files::Load(int slot) const {
         return {};
       });
   const auto validated = std::chrono::steady_clock::now();
-  VS_LOG_DEBUG(
+  VS::Core::LogDebug(
       "save.perf",
       "Load slot={} read_validate_us={} decode_attempts={} valid={}", slot,
       std::chrono::duration_cast<std::chrono::microseconds>(validated - started)

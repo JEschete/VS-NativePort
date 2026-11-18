@@ -124,7 +124,7 @@ class AssemblyGapAuditTests(unittest.TestCase):
                 ("#define Core_Probe Native_Target", "int Native_Target(int);",
                  "missing-definition"),
                 ("#define Core_Probe Native_Target",
-                 'int Native_Target(int value) { VS_UNPORTED("gap"); return 0; }', "stub"),
+                 'int Native_Target(int value) { VS::Core::RecordUnported("gap"); return 0; }', "stub"),
             ]
             with (patch.object(audit_module, "REPO", root),
                   patch.dict(audit_module.NATIVE_FUNCTION_REDIRECTS,
@@ -175,14 +175,14 @@ bool Flags::target(int id) const { return id != 0; }
         self.assertIn("id != 0", found[1].body)
 
     def test_native_stub_and_partial_are_distinguished(self):
-        self.assertEqual(native_status('VS_UNPORTED("gap"); return 0;'), "stub")
-        self.assertEqual(native_status('VS_UNPORTED("gap");'), "stub")
-        self.assertEqual(native_status('return 0; // VS_UNPORTED("not code")'), "implemented")
-        self.assertEqual(native_status('if (x) VS_UNPORTED("gap"); return x;'),
+        self.assertEqual(native_status('VS::Core::RecordUnported("gap"); return 0;'), "stub")
+        self.assertEqual(native_status('VS::Core::RecordUnported("gap");'), "stub")
+        self.assertEqual(native_status('return 0; // VS::Core::RecordUnported("not code")'), "implemented")
+        self.assertEqual(native_status('if (x) VS::Core::RecordUnported("gap"); return x;'),
                          "partial-unported")
 
     def test_zero_record_stub_is_not_counted_as_implementation(self):
-        self.assertEqual(native_status('VS_UNPORTED("gap"); Record result = {0}; return result;'),
+        self.assertEqual(native_status('VS::Core::RecordUnported("gap"); Record result = {0}; return result;'),
                          "stub")
 
     def test_inline_assembly_is_not_plain_c(self):
@@ -231,7 +231,7 @@ bool Flags::target(int id) const { return id != 0; }
                 row["kind"] = "INCLUDE_ASM"
                 row["notes"] = "original source retained;native-template:MACRO"
                 self.assertEqual(template_status(row)[0], "template-instance")
-                body.write_text('void MACRO(void) { VS_UNPORTED("gap"); }', encoding="utf-8")
+                body.write_text('void MACRO(void) { VS::Core::RecordUnported("gap"); }', encoding="utf-8")
                 self.assertEqual(template_status(row)[0], "stub")
                 (source / "Unit.c").write_text(
                     '#define WRONG Effects_Unit\n#include "Effects/Unit.inl"\n',

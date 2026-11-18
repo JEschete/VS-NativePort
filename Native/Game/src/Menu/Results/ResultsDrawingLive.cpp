@@ -35,8 +35,9 @@ std::uint64_t refusals = 0;
 
 void Refuse(const char* what) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.results", "Results drawing refused: {} ({} refusals)",
-                what, refusals);
+    VS::Core::LogWarn("menu.results",
+                      "Results drawing refused: {} ({} refusals)", what,
+                      refusals);
   }
 }
 

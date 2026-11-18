@@ -44,11 +44,11 @@
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/DiscLayout.h"
-#include "Core/BiosRand.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
 #include "Core/Random.h"
-#include "Core/Scratch.h"
+#include "Core/RandomLive.hpp"
+#include "Core/Scratch.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Effects/Runtime.h"
 #include "Ending/ClearResults.h"
@@ -122,7 +122,7 @@ std::optional<EncounterRouletteState> InspectRoulette(int menu) {
       .animation = Menu_Results_elementAnimationState,
       .reel = Menu_Results_buffReelIndex,
       .selection = Menu_Results_buffReelSelection,
-      .bios_state = Core_Random_State()};
+      .bios_state = VS::Core::BiosRand().State()};
 }
 constexpr int kDirectEventTrigger = 0x40;
 int pending_door = -1;
@@ -176,8 +176,8 @@ int EnterOrFinishEncounter() {
     constexpr std::int16_t kStoryProgressFlag = 0x82;
     VS::State::SetLiveScriptFlag(
         kStoryProgressFlag, static_cast<char>(*configuration.story_progress));
-    VS_LOG_INFO("encounter", "declared story progress={}",
-                *configuration.story_progress);
+    VS::Core::LogInfo("encounter", "declared story progress={}",
+                      *configuration.story_progress);
   }
   if (configuration.clear_count) {
     // New Game+ starts from a cleared save, whose stateFlags block (including
@@ -187,15 +187,15 @@ int EnterOrFinishEncounter() {
     // before any room loads; never changed during play.
     Audio_Seq_unusedStateFlags.clearCount =
         static_cast<char>(*configuration.clear_count);
-    VS_LOG_INFO("encounter", "declared clear count={}",
-                *configuration.clear_count);
+    VS::Core::LogInfo("encounter", "declared clear count={}",
+                      *configuration.clear_count);
   }
   for (const int flag : configuration.crossed_puzzles) {
     // Persistent puzzle time-trial unlock flags (e.g. MAP241 entry sets 223
     // when flag 286 == 2, after a MAP291 pass). Declared Lab fixture state,
     // written before any room loads; never changed during play.
     VS::State::SetLiveScriptFlag(static_cast<std::int16_t>(flag), 1);
-    VS_LOG_INFO("encounter", "declared crossed puzzle flag={}", flag);
+    VS::Core::LogInfo("encounter", "declared crossed puzzle flag={}", flag);
   }
   if (configuration.inherited_music) {
     // Zones whose ZND music id is 0 keep the wave bank an earlier zone or
@@ -204,21 +204,22 @@ int EnterOrFinishEncounter() {
     // vs_main_loadAndWaitSoundSlot (SLUS main.c:10439); no music slot is
     // loaded or played.
     VS::Audio::LiveLoadWaveBankBlocking(*configuration.inherited_music);
-    VS_LOG_INFO("encounter", "declared inherited music={} wave bank={}",
-                *configuration.inherited_music,
-                static_cast<int>(
-                    Audio_waveBankFileMap[*configuration.inherited_music]));
+    VS::Core::LogInfo(
+        "encounter", "declared inherited music={} wave bank={}",
+        *configuration.inherited_music,
+        static_cast<int>(
+            Audio_waveBankFileMap[*configuration.inherited_music]));
   }
   // The original shuffle initialization always seeds with 1. Initialize that
   // same table from the requested seed; combat still calls its real RNG.
-  Core_Random_Seed(configuration.seed);
-  for (auto& value : Core_randomShuffleTable) value = Core_Random_Rand();
+  VS::Core::SeedBiosRand(configuration.seed);
+  for (auto& value : Core_randomShuffleTable) value = VS::Core::NextBiosRand();
   Core_randomShuffleIndex =
       static_cast<int>(std::size(Core_randomShuffleTable)) - 1;
   Core_interfaceRandomState = configuration.seed;
-  VS_LOG_INFO("encounter", "starting zone={} room={} enemies={} seed={}",
-              configuration.zone, configuration.room,
-              configuration.enemies.size(), configuration.seed);
+  VS::Core::LogInfo("encounter", "starting zone={} room={} enemies={} seed={}",
+                    configuration.zone, configuration.room,
+                    configuration.enemies.size(), configuration.seed);
   return ResumeEncounter();
 }
 
@@ -330,7 +331,7 @@ void LearnAction(unsigned action) {
       static_cast<unsigned char>(State_learnedActionFlags[index]) |
       (0x80u >> (action % kBitsPerByte)));
   State_learnedActionFlags[index] = std::bit_cast<char>(bits);
-  VS_LOG_INFO("encounter.profile", "learned_action={}", action);
+  VS::Core::LogInfo("encounter.profile", "learned_action={}", action);
 }
 
 unsigned EquippedBreakArt() {
@@ -380,8 +381,8 @@ void StockEncounterItems(EncounterProfile profile) {
     items[slot] = {kItems[first + slot], kStack, index};
     indices[slot] = static_cast<u_char>(index);
   }
-  VS_LOG_INFO("encounter.profile", "misc_stacks={} count_each={}", kHalf,
-              static_cast<int>(kStack));
+  VS::Core::LogInfo("encounter.profile", "misc_stacks={} count_each={}", kHalf,
+                    static_cast<int>(kStack));
 }
 
 struct AdjustmentDefinition {
@@ -575,12 +576,12 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
   } else if (all_abilities || all_break_arts) {
     Battle::ApplyLiveLearnedActionUnlocks();
   }
-  VS_LOG_INFO("encounter.profile",
-              "Ashley={} representative_test_actions={} all_spells={} "
-              "all_abilities={} all_break_arts={}",
-              EncounterProfileId(profile),
-              profile == EncounterProfile::kPostMinotaur, all_spells,
-              all_abilities, all_break_arts);
+  VS::Core::LogInfo("encounter.profile",
+                    "Ashley={} representative_test_actions={} all_spells={} "
+                    "all_abilities={} all_break_arts={}",
+                    EncounterProfileId(profile),
+                    profile == EncounterProfile::kPostMinotaur, all_spells,
+                    all_abilities, all_break_arts);
 }
 
 const char* EncounterWeaponId(EncounterWeapon weapon) {
@@ -684,7 +685,7 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
     const auto placement = PrepareEncounterSpawn(*source, spawn, index);
     if (!placement) return std::unexpected(placement.error());
     staged_placements[index] = *placement;
-    VS_LOG_DEBUG(
+    VS::Core::LogDebug(
         "encounter.spawn",
         "instance={} definition={} source={} row={} "
         "source_retains_after_defeat={} isolated_retains_after_defeat={}",
@@ -734,15 +735,15 @@ void InitializeEncounterPlayerStats(const EncounterStatOverrides& overrides) {
     stats.agility = stats.totalAgility =
         static_cast<u_short>(*overrides.agility);
   }
-  VS_LOG_INFO("encounter.stats",
-              "starting HP={}/{} MP={}/{} STR={} INT={} AGI={}",
-              stats.currentHp, stats.maxHp, stats.currentMp, stats.maxMp,
-              stats.strength, stats.intelligence, stats.agility);
+  VS::Core::LogInfo("encounter.stats",
+                    "starting HP={}/{} MP={}/{} STR={} INT={} AGI={}",
+                    stats.currentHp, stats.maxHp, stats.currentMp, stats.maxMp,
+                    stats.strength, stats.intelligence, stats.agility);
 }
 
 void RunEncounter() {
   if (!configured || active) {
-    VS_LOG_ERROR("encounter", "invalid encounter lifecycle entry");
+    VS::Core::LogError("encounter", "invalid encounter lifecycle entry");
     return;
   }
   active = true;
@@ -756,7 +757,8 @@ void RunEncounter() {
   gameplay_inspection_ready = false;
   configured = false;
   room_prepared = false;
-  VS_LOG_INFO("encounter", "session finished; no normal title entry invoked");
+  VS::Core::LogInfo("encounter",
+                    "session finished; no normal title entry invoked");
 }
 
 void RequestEncounterStop() { stop_requested = true; }
@@ -769,7 +771,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
     EncounterAdjustment adjustment) {
   const auto reject = [](const char* reason)
       -> std::expected<EncounterAdjustmentResult, std::string> {
-    VS_LOG_WARN("encounter.adjust", "rejected: {}", reason);
+    VS::Core::LogWarn("encounter.adjust", "rejected: {}", reason);
     return std::unexpected(reason);
   };
   if (static_cast<std::size_t>(adjustment) >= kAdjustments.size()) {
@@ -795,8 +797,8 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
     return reject(applied.error().c_str());
   }
   result.after = InspectActor(0, *actor);
-  VS_LOG_INFO("encounter.adjust", "applied: {}",
-              EncounterAdjustmentName(adjustment));
+  VS::Core::LogInfo("encounter.adjust", "applied: {}",
+                    EncounterAdjustmentName(adjustment));
   return result;
 }
 
@@ -1056,8 +1058,9 @@ void ApplyPendingDoorRequest() {
   if (pending_door < 0 || !gameplay_inspection_ready || !room_prepared) return;
   if (VS::Field::zoneContext.zndId != pending_door_zone ||
       VS::Field::zoneContext.mapId != pending_door_room) {
-    VS_LOG_ERROR("field.door-test",
-                 "source changed before queued door {} executed", pending_door);
+    VS::Core::LogError("field.door-test",
+                       "source changed before queued door {} executed",
+                       pending_door);
     pending_door = -1;
     return;
   }
@@ -1065,14 +1068,15 @@ void ApplyPendingDoorRequest() {
   if (checked.status == EncounterDoorRequestStatus::kBusy) return;
   const int index = std::exchange(pending_door, -1);
   if (checked.status != EncounterDoorRequestStatus::kAccepted) {
-    VS_LOG_WARN("field.door-test", "queued door {} rejected: {}", index,
-                checked.reason);
+    VS::Core::LogWarn("field.door-test", "queued door {} rejected: {}", index,
+                      checked.reason);
     return;
   }
   auto& door = Field_roomData.doors[index];
-  VS_LOG_INFO("field.door-test", "begin source={}/{} door={} destination={}/{}",
-              pending_door_zone, pending_door_room, index,
-              door.destinationZoneId, door.destinationRoomId);
+  VS::Core::LogInfo("field.door-test",
+                    "begin source={}/{} door={} destination={}/{}",
+                    pending_door_zone, pending_door_room, index,
+                    door.destinationZoneId, door.destinationRoomId);
   // Same handoff as Field_CheckActorTriggers (146C.c), after its door gate.
   constexpr int kTransitionSpeed = 8;
   if (door.destinationZoneId == VS::Field::zoneContext.zndId) {
@@ -1104,15 +1108,16 @@ void VS::Boot::EncounterRoomPlacements(void** data, unsigned int* size) {
   if (!VS::Game::UsesConfiguredEncounterPlacements(
           VS::Game::configuration, VS::Field::zoneContext.zndId,
           VS::Field::zoneContext.mapId, VS::Game::external_event_started)) {
-    VS_LOG_DEBUG("encounter.spawn", "using original placements zone={} room={}",
-                 VS::Field::zoneContext.zndId, VS::Field::zoneContext.mapId);
+    VS::Core::LogDebug(
+        "encounter.spawn", "using original placements zone={} room={}",
+        VS::Field::zoneContext.zndId, VS::Field::zoneContext.mapId);
     return;
   }
   *data = VS::Game::placements.data();
   *size = static_cast<unsigned int>(VS::Game::configuration.enemies.size() *
                                     sizeof(Field_MpdEnemySpawn));
-  VS_LOG_DEBUG("encounter.spawn", "installing {} room placements",
-               VS::Game::configuration.enemies.size());
+  VS::Core::LogDebug("encounter.spawn", "installing {} room placements",
+                     VS::Game::configuration.enemies.size());
 }
 
 int VS::Boot::EncounterUsesRoomEvents() {
@@ -1168,11 +1173,11 @@ void VS::Boot::EncounterPollStop() {
           std::abort();
         }
         VS::Game::external_event_started = true;
-        VS_LOG_INFO("encounter.event",
-                    "Starting external event {} in zone {} room {}; "
-                    "component fixture, not story progression",
-                    event, VS::Field::zoneContext.zndId,
-                    VS::Field::zoneContext.mapId);
+        VS::Core::LogInfo("encounter.event",
+                          "Starting external event {} in zone {} room {}; "
+                          "component fixture, not story progression",
+                          event, VS::Field::zoneContext.zndId,
+                          VS::Field::zoneContext.mapId);
         VS::Event::BeginLiveQueuedCutscene();
       } else if (VS::Game::configuration.room_local_event &&
                  !VS::Game::room_local_event_started && configured_room_ready) {
@@ -1198,11 +1203,11 @@ void VS::Boot::EncounterPollStop() {
         Event_playbackPhase = 1;
         Event_isDirectEventRequest = 0;
         VS::Game::room_local_event_started = true;
-        VS_LOG_INFO("encounter.event",
-                    "Starting room-local event {} in zone {} room {}; "
-                    "trigger conditions not evaluated",
-                    selector, VS::Field::zoneContext.zndId,
-                    VS::Field::zoneContext.mapId);
+        VS::Core::LogInfo("encounter.event",
+                          "Starting room-local event {} in zone {} room {}; "
+                          "trigger conditions not evaluated",
+                          selector, VS::Field::zoneContext.zndId,
+                          VS::Field::zoneContext.mapId);
         VS::Event::BeginLiveQueuedCutscene();
       }
     }

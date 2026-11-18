@@ -17,7 +17,7 @@
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/BoneTrail.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
@@ -63,8 +63,8 @@ std::uint64_t dropped_quads = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects", "bone trail: {} refused: {} ({} refusals)", call,
-                reason, refused_calls);
+    VS::Core::LogWarn("effects", "bone trail: {} refused: {} ({} refusals)",
+                      call, reason, refused_calls);
   }
 }
 
@@ -127,10 +127,11 @@ class LiveTrailSegmentHost final : public TrailSegmentHost {
                          : nullptr;
     if (packet == nullptr) {
       if (ShouldReport(dropped_quads)) {
-        VS_LOG_WARN("effects",
-                    "bone trail: quad at depth {} has no ordering entry or "
-                    "buffer room; dropped ({} drops)",
-                    depth, dropped_quads);
+        VS::Core::LogWarn(
+            "effects",
+            "bone trail: quad at depth {} has no ordering entry or "
+            "buffer room; dropped ({} drops)",
+            depth, dropped_quads);
       }
       return;
     }
@@ -152,10 +153,11 @@ void DrawSegment(const BoneTrail& trail, TrailSegmentWeights weights) {
   if (DrawTrailSegment(trail, weights, host) ==
           TrailSegmentDraw::kUnknownColor &&
       ShouldReport(unknown_colors)) {
-    VS_LOG_WARN("effects",
-                "bone trail: colour {} has no entry for texture {}; segment "
-                "not drawn ({} segments)",
-                trail.config.color, trail.config.texture, unknown_colors);
+    VS::Core::LogWarn(
+        "effects",
+        "bone trail: colour {} has no entry for texture {}; segment "
+        "not drawn ({} segments)",
+        trail.config.color, trail.config.texture, unknown_colors);
   }
 }
 

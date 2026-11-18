@@ -382,8 +382,8 @@ void LiveLoadEffectTimeline(Effects_EffectInstance* instance,
   timeline->trackCount = static_cast<char>(loaded.track_count);
   timeline->flags = static_cast<char>(loaded.flags);
   timeline->activeTracks = static_cast<int>(loaded.active_tracks);
-  VS_LOG_DEBUG("effects", "timeline={} tracks={} active={:#x}", timeline_index,
-               loaded.track_count, loaded.active_tracks);
+  VS::Core::LogDebug("effects", "timeline={} tracks={} active={:#x}",
+                     timeline_index, loaded.track_count, loaded.active_tracks);
 }
 
 // decomp: func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:7950)

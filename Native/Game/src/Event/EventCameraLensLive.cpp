@@ -11,7 +11,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/InterpolationCurveLive.hpp"
@@ -34,7 +34,7 @@ constexpr std::size_t kAxisShakeScratch = 0xE8;
 constexpr std::size_t kHalfBytes = sizeof(std::int16_t);
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("event.camera", "{} refused: {}", operation, reason);
+  VS::Core::LogError("event.camera", "{} refused: {}", operation, reason);
   std::abort();
 }
 
@@ -56,7 +56,7 @@ void StoreAt(unsigned char* base, std::size_t offset, Value value) {
 }
 
 unsigned char* ScratchBytes() {
-  return static_cast<unsigned char*>(Core_ScratchBase());
+  return static_cast<unsigned char*>(VS::Core::ScratchBase());
 }
 
 Position3 LoadPosition(const unsigned char* base, std::size_t offset) {

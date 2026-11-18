@@ -54,8 +54,8 @@ std::uint64_t refused_calls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
   if (std::has_single_bit(++refused_calls)) {
-    VS_LOG_WARN("menu", "map navigation: {} refused: {} ({} refusals)", call,
-                reason, refused_calls);
+    VS::Core::LogWarn("menu", "map navigation: {} refused: {} ({} refusals)",
+                      call, reason, refused_calls);
   }
 }
 

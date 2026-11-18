@@ -33,9 +33,9 @@ std::uint64_t refusals = 0;
 // room for; the warning is logged at powers of two so it cannot flood.
 void Refuse(const char* what) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("battle.markers",
-                "Actor marker drawing refused: {} ({} refusals)", what,
-                refusals);
+    VS::Core::LogWarn("battle.markers",
+                      "Actor marker drawing refused: {} ({} refusals)", what,
+                      refusals);
   }
 }
 

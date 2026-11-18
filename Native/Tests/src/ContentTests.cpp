@@ -737,7 +737,8 @@ struct MovieScope {
       std::error_code error;
       std::filesystem::remove_all(temporary, error);
       if (error) {
-        VS_LOG_ERROR("test", "Movie fixture cleanup: {}", error.message());
+        VS::Core::LogError("test", "Movie fixture cleanup: {}",
+                           error.message());
       }
     }
   }

@@ -226,9 +226,9 @@ void ClearBlockedSector(CollisionSamples& samples, std::int32_t sector) {
   if (sector < kSectors) {
     samples.blocked.at(static_cast<std::size_t>(sector)) = 0;
   } else if (sector > kLastSampleByte) {
-    VS_LOG_WARN("field.collision",
-                "Hanging facing sector {} outside the sample block skipped",
-                sector);
+    VS::Core::LogWarn(
+        "field.collision",
+        "Hanging facing sector {} outside the sample block skipped", sector);
   }
 }
 
@@ -367,8 +367,9 @@ void StoreTurnSectorHeight(CollisionSamples& samples, std::int32_t sector,
     return;
   }
   if (sector < kSectors || sector >= 2 * kSectors) {
-    VS_LOG_WARN("field.collision",
-                "Turn sector {} outside the sample block refused", sector);
+    VS::Core::LogWarn("field.collision",
+                      "Turn sector {} outside the sample block refused",
+                      sector);
     return;
   }
   const auto bits = static_cast<std::uint16_t>(height);
@@ -968,9 +969,9 @@ std::optional<std::size_t> FindActorOccupyingTile(
       const std::optional<GimmickTile> gimmick =
           host.SupportGimmickTile(actor->support_gimmick);
       if (!gimmick) {
-        VS_LOG_WARN("field.collision",
-                    "Leader support gimmick slot {} is empty",
-                    static_cast<int>(actor->support_gimmick));
+        VS::Core::LogWarn("field.collision",
+                          "Leader support gimmick slot {} is empty",
+                          static_cast<int>(actor->support_gimmick));
         continue;
       }
       if (tile_x == gimmick->x && tile_z == gimmick->z) return index;
@@ -1259,9 +1260,9 @@ bool CalcActorLedgeOffset(ActorCollisionHost& host, CollisionActor& actor,
   if (actor.support_layer != 0) {
     platform = host.VisiblePlatform(actor.support_layer);
     if (!platform) {
-      VS_LOG_ERROR("field.platform",
-                   "ledge probe on invisible platform layer {}",
-                   static_cast<int>(actor.support_layer));
+      VS::Core::LogError("field.platform",
+                         "ledge probe on invisible platform layer {}",
+                         static_cast<int>(actor.support_layer));
       return false;
     }
   }

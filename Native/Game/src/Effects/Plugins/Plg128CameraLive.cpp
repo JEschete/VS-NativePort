@@ -16,7 +16,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/Camera.h"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLive.hpp"
@@ -60,7 +60,7 @@ std::uint64_t refused_transforms = 0;
 
 Effects_ParticleEmitterScratch& EmitterScratch() {
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(Core_ScratchBase()) +
+      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
@@ -174,10 +174,11 @@ class LiveCameraEffectHost final : public CameraEffectHost {
     if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
         index >= LiveParticleDefinitionCount()) {
       if (ShouldReport(refused_definitions)) {
-        VS_LOG_WARN("effects",
-                    "plg128 camera: definition {} is outside the package's "
-                    "{} definitions; camera stopped",
-                    index, LiveParticleDefinitionCount());
+        VS::Core::LogWarn(
+            "effects",
+            "plg128 camera: definition {} is outside the package's "
+            "{} definitions; camera stopped",
+            index, LiveParticleDefinitionCount());
       }
       return std::nullopt;
     }
@@ -241,10 +242,11 @@ class LiveCameraEffectHost final : public CameraEffectHost {
   [[nodiscard]] const Effects_TransformSlot* Transform(std::uint8_t index) {
     if (instance_ == nullptr || index >= kTransformCount) {
       if (ShouldReport(refused_transforms)) {
-        VS_LOG_WARN("effects",
-                    "plg128 camera: transform {} is outside the instance's "
-                    "{} transforms; camera stopped",
-                    index, instance_ == nullptr ? 0 : kTransformCount);
+        VS::Core::LogWarn(
+            "effects",
+            "plg128 camera: transform {} is outside the instance's "
+            "{} transforms; camera stopped",
+            index, instance_ == nullptr ? 0 : kTransformCount);
       }
       return nullptr;
     }
@@ -263,21 +265,22 @@ class LiveCameraEffectHost final : public CameraEffectHost {
 int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
                            int packed) {
   if (slot == nullptr) {
-    VS_LOG_WARN("effects", "plg128 camera: command {} without a slot", command);
+    VS::Core::LogWarn("effects", "plg128 camera: command {} without a slot",
+                      command);
     return 0;
   }
   const auto kind = static_cast<CameraCommand>(command);
   if (kind == CameraCommand::kCreate) {
     void* storage = Core::Memory::AllocateLiveFromHighEnd(sizeof(State));
     if (storage == nullptr) {
-      VS_LOG_ERROR("effects", "plg128 camera: heap exhausted for state");
+      VS::Core::LogError("effects", "plg128 camera: heap exhausted for state");
       return 0;
     }
     slot->rendererState = std::construct_at(static_cast<State*>(storage));
   } else if (kind == CameraCommand::kTick || kind == CameraCommand::kRelease) {
     if (slot->rendererState == nullptr) {
-      VS_LOG_WARN("effects", "plg128 camera: command {} without a state",
-                  command);
+      VS::Core::LogWarn("effects", "plg128 camera: command {} without a state",
+                        command);
       return 0;
     }
   } else {

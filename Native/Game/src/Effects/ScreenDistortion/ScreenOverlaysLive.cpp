@@ -57,8 +57,9 @@ void WriteControls(Effects_ScreenEffectOverlay& overlay,
 // The active controller, or null after reporting `operation` as refused.
 Effects_ScreenEffectOverlay* LiveOverlay(const char* operation) {
   if (Effects_screenEffectOverlay == nullptr) {
-    VS_LOG_ERROR("effects", "screen overlay {} refused: no overlay controller",
-                 operation);
+    VS::Core::LogError("effects",
+                       "screen overlay {} refused: no overlay controller",
+                       operation);
   }
   return Effects_screenEffectOverlay;
 }
@@ -115,9 +116,10 @@ int* AppendLiveVignetteCorner(int packed_corner_xy, int first_angular_step,
                               int* packet_words, u_long* ordering_head) {
   if (packet_words == nullptr ||
       static_cast<void*>(packet_words) != Render_frameScratch.primitiveCursor) {
-    VS_LOG_ERROR("effects",
-                 "vignette corner refused: packets must start at the frame "
-                 "primitive cursor");
+    VS::Core::LogError(
+        "effects",
+        "vignette corner refused: packets must start at the frame "
+        "primitive cursor");
     return packet_words;
   }
   Render::LivePacketQueue overlay(ordering_head);
@@ -154,7 +156,8 @@ class LiveScreenOverlayLoader final : public ScreenOverlayLoader {
   }
   bool OverlayReadLoaded(const Content_DiscQueueSlot* read) override {
     if (read == nullptr) {
-      VS_LOG_ERROR("effects", "screen overlay load poll: no read request");
+      VS::Core::LogError("effects",
+                         "screen overlay load poll: no read request");
       return false;
     }
     return read->state == Content_DiscRequestState_Loaded;

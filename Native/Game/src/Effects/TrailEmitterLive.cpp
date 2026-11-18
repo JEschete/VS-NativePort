@@ -11,14 +11,13 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -112,13 +111,13 @@ const Templates::TrailStages& Plg074Stages() {
 }
 
 [[noreturn]] void InvalidEmitter(std::string_view overlay, const char* reason) {
-  VS_LOG_ERROR("effects", "{} trail emitter: {}", overlay, reason);
+  VS::Core::LogError("effects", "{} trail emitter: {}", overlay, reason);
   std::abort();
 }
 
 Effects_ParticleEmitterScratch& EmitterScratch() {
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(Core_ScratchBase()) +
+      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
@@ -146,7 +145,7 @@ std::span<TrailOf<Emitter>> Trails(std::string_view overlay, Emitter& state) {
 
 class LiveOriginServices final : public TrailOriginServices {
  public:
-  std::int32_t Rand() override { return Core_Random_Rand(); }
+  std::int32_t Rand() override { return VS::Core::NextBiosRand(); }
   std::int32_t RandomRangeExclusive(std::int32_t a, std::int32_t b) override {
     return VS::Core::LiveRandomRangeExclusive(a, b);
   }
@@ -217,10 +216,10 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
   if (curve == 0) return samples;
   const std::size_t bound = LiveEffectCurveCount();
   if (curve >= bound) {
-    VS_LOG_WARN("effects",
-                "{} trail emitter: transparency curve {} is outside the "
-                "package's {} bound curves; using opaque samples",
-                overlay, curve, bound);
+    VS::Core::LogWarn("effects",
+                      "{} trail emitter: transparency curve {} is outside the "
+                      "package's {} bound curves; using opaque samples",
+                      overlay, curve, bound);
     return samples;
   }
   const auto sampled = EmitterLayout<Emitter>::kSample(
@@ -228,10 +227,10 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
        static_cast<std::size_t>(
            Effects_package->curveBlock->curveSizes[curve])});
   if (sampled.clamped) {
-    VS_LOG_DEBUG("effects",
-                 "{} trail emitter: one-entry transparency curve {} "
-                 "repeats its entry for the last sample",
-                 overlay, curve);
+    VS::Core::LogDebug("effects",
+                       "{} trail emitter: one-entry transparency curve {} "
+                       "repeats its entry for the last sample",
+                       overlay, curve);
   }
   return sampled.samples;
 }
@@ -351,27 +350,27 @@ void LiveTrailEmitterHost<Emitter>::Create(TrailEmitterPlan plan) {
   const Effects_ParticleDefinition* definition =
       Definition(plan.definition_index);
   if (definition == nullptr) {
-    VS_LOG_WARN("effects",
-                "{} trail emitter: definition {} is outside the package's "
-                "{} definitions; emitter refused",
-                overlay_.name, plan.definition_index,
-                LiveParticleDefinitionCount());
+    VS::Core::LogWarn(
+        "effects",
+        "{} trail emitter: definition {} is outside the package's "
+        "{} definitions; emitter refused",
+        overlay_.name, plan.definition_index, LiveParticleDefinitionCount());
     return;
   }
   const auto count =
       TrailCountFor(definition->intervalRange[0], Layout::kCapacity);
   if (!count) {
-    VS_LOG_WARN("effects",
-                "{} trail emitter: definition {} has a negative trail "
-                "count; emitter refused",
-                overlay_.name, plan.definition_index);
+    VS::Core::LogWarn("effects",
+                      "{} trail emitter: definition {} has a negative trail "
+                      "count; emitter refused",
+                      overlay_.name, plan.definition_index);
     return;
   }
   auto* state = static_cast<Emitter*>(VS::Core::Memory::AllocateLiveFromHighEnd(
       sizeof(Emitter) + Layout::kTailBytes));
   if (state == nullptr) {
-    VS_LOG_ERROR("effects", "{} trail emitter: heap exhausted for state",
-                 overlay_.name);
+    VS::Core::LogError("effects", "{} trail emitter: heap exhausted for state",
+                       overlay_.name);
     return;
   }
   using Trail = TrailOf<Emitter>;
@@ -379,8 +378,9 @@ void LiveTrailEmitterHost<Emitter>::Create(TrailEmitterPlan plan) {
       VS::Core::Memory::AllocateLiveFromHighEnd(*count * sizeof(Trail)));
   if (trails == nullptr) {
     VS::Core::Memory::FreeLiveFromHighEnd(state);
-    VS_LOG_ERROR("effects", "{} trail emitter: heap exhausted for {} trails",
-                 overlay_.name, *count);
+    VS::Core::LogError("effects",
+                       "{} trail emitter: heap exhausted for {} trails",
+                       overlay_.name, *count);
     return;
   }
   // The original left the trail buffer uninitialized; the "no placement" box
@@ -409,27 +409,27 @@ bool LiveTrailEmitterHost<Emitter>::BeginTick() {
   static_cast<void>(Trails(overlay_.name, state));
   instance_ = Effects_currentInstance;
   if (instance_ == nullptr) {
-    VS_LOG_WARN("effects",
-                "{} trail emitter: no current effect instance; emitter "
-                "stopped",
-                overlay_.name);
+    VS::Core::LogWarn("effects",
+                      "{} trail emitter: no current effect instance; emitter "
+                      "stopped",
+                      overlay_.name);
     return false;
   }
   const std::size_t index = state.*Layout::kDefinition;
   definition_ = Definition(index);
   if (definition_ == nullptr) {
-    VS_LOG_WARN("effects",
-                "{} trail emitter: the current package no longer holds "
-                "definition {}; emitter stopped",
-                overlay_.name, index);
+    VS::Core::LogWarn("effects",
+                      "{} trail emitter: the current package no longer holds "
+                      "definition {}; emitter stopped",
+                      overlay_.name, index);
     return false;
   }
   if (definition_->transformIndex >= kTransformCount) {
-    VS_LOG_WARN("effects",
-                "{} trail emitter: definition {} names transform {} of "
-                "{}; emitter stopped",
-                overlay_.name, index, definition_->transformIndex,
-                kTransformCount);
+    VS::Core::LogWarn("effects",
+                      "{} trail emitter: definition {} names transform {} of "
+                      "{}; emitter stopped",
+                      overlay_.name, index, definition_->transformIndex,
+                      kTransformCount);
     return false;
   }
   EmitterScratch().flags = definition_->flags;
@@ -450,10 +450,11 @@ void LiveTrailEmitterHost<Emitter>::DrawTrails() {
   const std::size_t event = definition_->tickEvent - 1U;
   const std::size_t bound = LiveParticleDefinitionCount();
   if (event >= bound) {
-    VS_LOG_WARN("effects",
-                "{} trail emitter: tick event {} is outside the package's "
-                "{} definitions; events skipped",
-                overlay_.name, event, bound);
+    VS::Core::LogWarn(
+        "effects",
+        "{} trail emitter: tick event {} is outside the package's "
+        "{} definitions; events skipped",
+        overlay_.name, event, bound);
     return;
   }
   EmitTickEvents(event);
@@ -504,9 +505,9 @@ int UpdateEmitter(Effects_RendererSlot* slot, unsigned int command, int packed,
   }
   // EFFPURGE's update sweep (F01889) calls every entry without a slot.
   if (slot == nullptr) {
-    VS_LOG_ERROR("effects",
-                 "{} trail emitter: renderer called without a slot; ignored",
-                 overlay.name);
+    VS::Core::LogError(
+        "effects", "{} trail emitter: renderer called without a slot; ignored",
+        overlay.name);
     return 0;
   }
   LiveTrailEmitterHost<Emitter> host(*slot, overlay);

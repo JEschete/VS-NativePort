@@ -186,10 +186,10 @@ class LiveHost final : public RoomEffectHost {
         return binding.run();
       }
     }
-    VS_LOG_WARN(kChannel,
-                "Room entry point refused: no binding for its {} bytes "
-                "(FNV-1a {:08X})",
-                code.size(), hash);
+    VS::Core::LogWarn(kChannel,
+                      "Room entry point refused: no binding for its {} bytes "
+                      "(FNV-1a {:08X})",
+                      code.size(), hash);
     return false;
   }
 };

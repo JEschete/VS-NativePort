@@ -12,13 +12,12 @@
 #include <type_traits>
 #include <utility>
 
-#include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -366,7 +365,9 @@ class LiveTrailHost final : public BasicTrailHost<History> {
 
   [[nodiscard]] std::int32_t SampleCurve(std::uint8_t curve,
                                          std::int32_t distance) override;
-  [[nodiscard]] std::int32_t Rand() override { return Core_Random_Rand(); }
+  [[nodiscard]] std::int32_t Rand() override {
+    return VS::Core::NextBiosRand();
+  }
   [[nodiscard]] std::int32_t RandomRangeExclusive(std::int32_t a,
                                                   std::int32_t b) override {
     return Core::LiveRandomRangeExclusive(a, b);
@@ -411,10 +412,11 @@ std::int32_t LiveTrailHost<History>::SampleCurve(std::uint8_t curve,
     return VS::Effects::LiveSampleEffectCurve(curve, distance);
   }
   if (Reportable(refused_curves)) {
-    VS_LOG_WARN("effects",
-                "trail: curve {} lies past the package's {} bound curves or "
-                "has no entries; sampled as 0 ({} refusals)",
-                curve, curves, refused_curves);
+    VS::Core::LogWarn(
+        "effects",
+        "trail: curve {} lies past the package's {} bound curves or "
+        "has no entries; sampled as 0 ({} refusals)",
+        curve, curves, refused_curves);
   }
   return 0;
 }
@@ -426,10 +428,10 @@ const Effects_TransformSlot* LiveTrailHost<History>::Transform(
     return &instance_.transforms[index];
   }
   if (Reportable(refused_transforms)) {
-    VS_LOG_WARN("effects",
-                "trail: {} transform {} lies past the instance's {} "
-                "transforms; refused ({} refusals)",
-                role, index, kTransformCount, refused_transforms);
+    VS::Core::LogWarn("effects",
+                      "trail: {} transform {} lies past the instance's {} "
+                      "transforms; refused ({} refusals)",
+                      role, index, kTransformCount, refused_transforms);
   }
   return nullptr;
 }
@@ -506,10 +508,11 @@ std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
   }
   if (frame == nullptr) {
     if (Reportable(undrawn_textures)) {
-      VS_LOG_WARN("effects",
-                  "trail: texture table {} of {} gives no frame; trails left "
-                  "undrawn ({} ticks)",
-                  table, Effects_package->block1TableCount, undrawn_textures);
+      VS::Core::LogWarn(
+          "effects",
+          "trail: texture table {} of {} gives no frame; trails left "
+          "undrawn ({} ticks)",
+          table, Effects_package->block1TableCount, undrawn_textures);
     }
     return std::nullopt;
   }
@@ -547,10 +550,11 @@ void LiveTrailHost<History>::Submit(const RingQuad& quad, std::int32_t depth) {
                         : Render::ReserveLivePrimitiveWords(kRingPacketWords);
   if (words == nullptr) {
     if (Reportable(dropped_quads)) {
-      VS_LOG_WARN("effects",
-                  "trail: no ordering entry or primitive room for a quad at "
-                  "depth {}; dropped ({} drops)",
-                  depth, dropped_quads);
+      VS::Core::LogWarn(
+          "effects",
+          "trail: no ordering entry or primitive room for a quad at "
+          "depth {}; dropped ({} drops)",
+          depth, dropped_quads);
     }
     return;
   }
@@ -566,11 +570,11 @@ template <std::size_t History>
 void LiveTrailHost<History>::ReportSkippedTrail(std::size_t index,
                                                 TrailFault fault) {
   if (Reportable(skipped_trails)) {
-    VS_LOG_WARN("effects",
-                "trail: trail {} of definition {} has {}; left undrawn ({} "
-                "skips)",
-                index, context_.definition_index, FaultName(fault),
-                skipped_trails);
+    VS::Core::LogWarn(
+        "effects",
+        "trail: trail {} of definition {} has {}; left undrawn ({} "
+        "skips)",
+        index, context_.definition_index, FaultName(fault), skipped_trails);
   }
 }
 
@@ -580,11 +584,12 @@ template <typename Trail>
     const EmitterView<Trail>& view) {
   constexpr std::size_t kCapacity = LegacyTrail<Trail>::kCapacity;
   if (view.count > kCapacity || (view.count != 0 && view.trails == nullptr)) {
-    VS_LOG_WARN("effects",
-                "trail: definition {} has {} trails in a buffer of {}; stage "
-                "skipped",
-                view.context.definition_index, view.count,
-                view.trails == nullptr ? 0 : kCapacity);
+    VS::Core::LogWarn(
+        "effects",
+        "trail: definition {} has {} trails in a buffer of {}; stage "
+        "skipped",
+        view.context.definition_index, view.count,
+        view.trails == nullptr ? 0 : kCapacity);
     return std::nullopt;
   }
   if (view.count == 0) {

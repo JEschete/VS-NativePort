@@ -166,7 +166,7 @@ def finish_text(text: str) -> str:
     text = TOKEN_RX.sub(lambda m: TOKEN_RENAMES[m[1]], text)
     # string-table data the decomp splices in from its disc build (#include "build/assets/...vsString")
     text = re.sub(r'#\s*include\s+"build/assets/[^"]+\.vsString"', "0 /* disc text table: loaded in Step 5 */", text)
-    # scratch memory addresses (0x1F800000-0x1F8003FF) are Core's scratch block (Core/Scratch.h)
+    # scratch memory addresses (0x1F800000-0x1F8003FF) are Core's scratch block (Core/Scratch.hpp)
     text = SCRATCH_RX.sub(lambda m: f"((uintptr_t)Core_ScratchBase() + 0x{m[1].upper()})", text)
     # SPU registers (0x1F801C00-0x1F801DFF) are the libspu shim's register block (Legacy/Audio/LibSpu.h)
     return SPU_REGISTER_RX.sub(lambda m: f"((uintptr_t)LegacySpu_Registers() + 0x{int(m[1], 16) - 0xC00:03X})", text)

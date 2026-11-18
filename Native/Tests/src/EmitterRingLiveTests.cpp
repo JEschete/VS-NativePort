@@ -11,7 +11,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
@@ -34,7 +34,7 @@ constexpr std::size_t kScratchBytes = 1024;
 constexpr std::size_t kEmitterScratch = 0x1D0;
 
 Effects_ParticleEmitterScratch& Scratch() {
-  const auto base = reinterpret_cast<std::uintptr_t>(Core_ScratchBase());
+  const auto base = reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase());
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(base +
                                                             kEmitterScratch);
 }
@@ -57,7 +57,7 @@ class LiveEmission {
   LiveEmission() {
     std::ranges::copy(std::span(Effects_curveSamples), saved_samples_.begin());
     std::ranges::copy(
-        std::span(static_cast<const std::byte*>(Core_ScratchBase()),
+        std::span(static_cast<const std::byte*>(VS::Core::ScratchBase()),
                   kScratchBytes),
         saved_scratch_.begin());
     Effects_package = &package;
@@ -111,7 +111,7 @@ class LiveEmission {
     Effects_emissionCounter = saved_counter_;
     std::ranges::copy(saved_samples_, Effects_curveSamples);
     std::ranges::copy(saved_scratch_,
-                      static_cast<std::byte*>(Core_ScratchBase()));
+                      static_cast<std::byte*>(VS::Core::ScratchBase()));
     VS::Core::BiosRand().Seed(saved_random_);
     Core_Gte_Reset();
   }

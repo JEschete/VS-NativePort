@@ -13,8 +13,8 @@ int ReturnZero() noexcept { return 0; }
 
 // SLUS_010.40 vs_main_nop9 (main.c:11663) and its copy at 0x800490A0.
 void IgnoreDiagnostic(int code, int detail) {
-  VS_LOG_TRACE("diagnostic", "retail error report {:#x} ({}) ignored", code,
-               detail);
+  VS::Core::LogTrace("diagnostic", "retail error report {:#x} ({}) ignored",
+                     code, detail);
 }
 
 // SLUS_010.40 _asmNop (main.c:11661).

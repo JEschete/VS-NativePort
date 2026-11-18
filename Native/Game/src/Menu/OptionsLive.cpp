@@ -71,7 +71,7 @@ State g_state{};
 class LiveHost final : public Host {
  public:
   void Refuse(std::string_view what) override {
-    VS_LOG_WARN("menu.options", "{}", what);
+    VS::Core::LogWarn("menu.options", "{}", what);
   }
   std::span<const std::uint16_t> MenuStrings() override { return menuStrings; }
   bool RowsIdle() override { return Framework::AreLiveMenuRowsIdle() != 0; }

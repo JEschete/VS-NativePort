@@ -130,9 +130,9 @@ def definitions(text: str, wanted: set[str]) -> list[Definition]:
 
 def native_status(body: str) -> str:
     masked = mask_literals(body)
-    if not re.search(r"\bVS_UNPORTED\s*\(", masked):
+    if not re.search(r"\bRecordUnported\s*\(", masked):
         return "implemented"
-    remaining = re.sub(r"\bVS_UNPORTED\s*\([^)]*\)\s*;", "", masked)
+    remaining = re.sub(r"(?:(?:::)?\bVS::Core::)?\bRecordUnported\s*\([^)]*\)\s*;", "", masked)
     remaining = re.sub(r"\breturn\s+(?:0|NULL|nullptr|false)\s*;", "", remaining)
     remaining = re.sub(r"\breturn\s*;", "", remaining)
     remaining = re.sub(r"\b[\w:]+\s+result\s*=\s*\{\s*0\s*\}\s*;\s*return\s+result\s*;",
@@ -141,7 +141,7 @@ def native_status(body: str) -> str:
 
 
 def plain_source(body: str) -> bool:
-    return not re.search(r"\b(?:__asm__?|asm|INCLUDE_ASM|VS_UNPORTED)\b",
+    return not re.search(r"\b(?:__asm__?|asm|INCLUDE_ASM|RecordUnported)\b",
                          mask_literals(body))
 
 
@@ -595,7 +595,7 @@ def publish_report(summary: dict, records: list[dict[str, str]],
               "Some open compatibility entries may already be bypassed by higher-level",
               "native replacements. This is an entry-point coverage audit, **not** proof",
               "that each entry is a live gameplay defect or should be translated rather",
-              "than retired. It does not certify implementations without `VS_UNPORTED`",
+              "than retired. It does not certify implementations without `VS::Core::RecordUnported`",
               "as behaviorally complete. No native gameplay issue is closed by this audit.",
               "",
               "## Reference snapshot pins", "",

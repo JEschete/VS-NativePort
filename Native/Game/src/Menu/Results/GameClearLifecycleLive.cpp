@@ -16,9 +16,9 @@
 #include "Audio/SoundBanks.h"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.hpp"
@@ -379,7 +379,7 @@ class LiveInit final : public GameClearInitHost {
     return FreeBuffer();
   }
   std::uint32_t Random() override {
-    return static_cast<std::uint32_t>(Core_Random_Rand());
+    return static_cast<std::uint32_t>(VS::Core::NextBiosRand());
   }
   std::optional<GameClearWorld> ReadWorld() override {
     const auto stats = ReadLiveAshleyResultStats();

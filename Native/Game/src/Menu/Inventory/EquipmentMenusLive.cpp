@@ -66,8 +66,8 @@ constexpr EquipmentMenuHandlers kLiveHandlers{
 void Refuse(std::string_view reason) {
   ++g_refusals;
   if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS_LOG_WARN("menu.inventory", "equipment menus: {} (refusal {})", reason,
-                g_refusals);
+    VS::Core::LogWarn("menu.inventory", "equipment menus: {} (refusal {})",
+                      reason, g_refusals);
   }
 }
 

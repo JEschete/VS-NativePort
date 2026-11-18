@@ -254,9 +254,10 @@ void DrawRoomBackground(BackgroundHost& host, const RoomBackgroundState& state,
   if (state.tiled_enabled != 0 && state.layout != BackgroundBufferId::kNone) {
     const std::optional<BackgroundLayout> layout = host.Layout(state.layout);
     if (!layout) {
-      VS_LOG_WARN(kChannel,
-                  "DrawRoomBackground: the tiled layout cannot be read; no "
-                  "background is drawn");
+      VS::Core::LogWarn(
+          kChannel,
+          "DrawRoomBackground: the tiled layout cannot be read; no "
+          "background is drawn");
       return;
     }
     // Out-of-range sizes draw nothing at all, as in the original.
@@ -334,9 +335,9 @@ std::int32_t FinishTiledBackgroundLoad(BackgroundHost& host,
       host.ReadLoaded(state.texture_read)) {
     if (state.tim_buffer == BackgroundBufferId::kNone) {
       // The original stamps and parses the missing buffer at address 0.
-      VS_LOG_WARN(kChannel,
-                  "FinishTiledBackgroundLoad: the texture read finished "
-                  "without a TIM buffer; nothing is uploaded");
+      VS::Core::LogWarn(kChannel,
+                        "FinishTiledBackgroundLoad: the texture read finished "
+                        "without a TIM buffer; nothing is uploaded");
     } else {
       host.StampTimId(state.tim_buffer, kTimId);
       const BackgroundTim tim = host.ParseTim(state.tim_buffer);

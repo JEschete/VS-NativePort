@@ -105,7 +105,7 @@ class LiveStreamHost final : public Cutscene::StreamHost {
     Audio_Cutscene_streamState.voiceMask = 0;
     Audio_Mixer_voiceScheduler.reverbVoices &= ~mask;
     Audio_Driver_controlLatches.updateFlags |= kVoiceModesDirty;
-    VS_LOG_INFO("audio", "stream stopped: voices={:06x}", mask);
+    VS::Core::LogInfo("audio", "stream stopped: voices={:06x}", mask);
   }
 
   void BeginStream(const Cutscene::StreamStart& start) override {
@@ -195,8 +195,8 @@ class LiveStreamHost final : public Cutscene::StreamHost {
     }
     g_bound = std::move(binding);
     Audio_soundState.sfxStreamData[kRoomSlot] = data_;
-    VS_LOG_INFO("audio", "bound stream {}: {} channels, {} frames", info.id,
-                info.channels, info.frames);
+    VS::Core::LogInfo("audio", "bound stream {}: {} channels, {} frames",
+                      info.id, info.channels, info.frames);
   }
 
   void UnbindSlot() override {
@@ -235,11 +235,11 @@ void Report(const char* command, Cutscene::StreamStatus status,
             std::uintptr_t first, std::uintptr_t second) {
   if (status == Cutscene::StreamStatus::kApplied) return;
   if (status == Cutscene::StreamStatus::kNoVoicePair) {
-    VS_LOG_WARN("audio", "{}: {}", command, StatusText(status));
+    VS::Core::LogWarn("audio", "{}: {}", command, StatusText(status));
     return;
   }
-  VS_LOG_ERROR("audio", "{} ({:#x}, {:#x}): {}", command, first, second,
-               StatusText(status));
+  VS::Core::LogError("audio", "{} ({:#x}, {:#x}): {}", command, first, second,
+                     StatusText(status));
 }
 
 // A native-width parameter as the 32-bit command word; wider values saturate
@@ -251,7 +251,7 @@ std::uint32_t CommandWord(std::uintptr_t value) {
 
 bool HasParams(const Audio_CommandParams* params, const char* command) {
   if (params != nullptr) return true;
-  VS_LOG_ERROR("audio", "{}: null command parameters", command);
+  VS::Core::LogError("audio", "{}: null command parameters", command);
   return false;
 }
 }  // namespace
@@ -313,7 +313,7 @@ std::span<std::uint8_t> LiveBoundStreamBytes() {
 namespace VS::Audio {
 int BindLiveRoomCutsceneStream(void* data, std::size_t byte_count) {
   if (data == nullptr) {
-    VS_LOG_ERROR("audio", "stream binding requires data");
+    VS::Core::LogError("audio", "stream binding requires data");
     return 0;
   }
   LiveStreamHost host(data, byte_count);
@@ -323,16 +323,16 @@ int BindLiveRoomCutsceneStream(void* data, std::size_t byte_count) {
     case RoomStreamStatus::kBound:
       break;
     case RoomStreamStatus::kSlotOccupied:
-      VS_LOG_DEBUG("audio", "room stream slot is already bound");
+      VS::Core::LogDebug("audio", "room stream slot is already bound");
       break;
     case RoomStreamStatus::kMissingData:
-      VS_LOG_ERROR("audio", "stream binding requires data");
+      VS::Core::LogError("audio", "stream binding requires data");
       break;
     case RoomStreamStatus::kInvalidStream:
-      VS_LOG_ERROR("audio", "stream binding: {}", result.error);
+      VS::Core::LogError("audio", "stream binding: {}", result.error);
       break;
     case RoomStreamStatus::kMissingAssets:
-      VS_LOG_ERROR("audio", "{}", result.error);
+      VS::Core::LogError("audio", "{}", result.error);
       break;
   }
   return result.handle;

@@ -38,10 +38,11 @@ std::uint64_t refusals = 0;
 void Report(ResultsDrawResult result) {
   if (result == ResultsDrawResult::kInvalidTexture &&
       std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.results",
-                "Time-attack drawing refused a course or glyph outside the "
-                "atlas or best-time table ({} refusals)",
-                refusals);
+    VS::Core::LogWarn(
+        "menu.results",
+        "Time-attack drawing refused a course or glyph outside the "
+        "atlas or best-time table ({} refusals)",
+        refusals);
   }
 }
 

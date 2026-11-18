@@ -142,7 +142,8 @@ void ContinueChain(const ActionRequestView& action, AbilityHost& host) {
     }
   } else {
     if (!ValidAbilitySlot(slot)) {
-      VS_LOG_WARN("battle.ability", "chain step with invalid slot={}", slot);
+      VS::Core::LogWarn("battle.ability", "chain step with invalid slot={}",
+                        slot);
     }
     host.FinishBattleAbilitySequence();
   }
@@ -183,7 +184,8 @@ void CollapseDefenseSelection(AbilityHost& host) {
 void ContinueDefense(AbilityHost& host) {
   const int slot = host.Field(AbilityField::kChainAbilitySlot);
   if (!ValidAbilitySlot(slot)) {
-    VS_LOG_WARN("battle.ability", "defense step with invalid slot={}", slot);
+    VS::Core::LogWarn("battle.ability", "defense step with invalid slot={}",
+                      slot);
     host.FinishBattleAbilitySequence();
     return;
   }
@@ -430,8 +432,8 @@ bool CanTriggerBattleAbility(int ability_input_slot, const AbilityHost& host) {
   if (action.primary_actor == action.first_target_actor) result = false;
   if (ability_input_slot != 0) {
     if (!ValidAbilitySlot(ability_input_slot)) {
-      VS_LOG_WARN("battle.ability", "invalid ability input slot={}",
-                  ability_input_slot);
+      VS::Core::LogWarn("battle.ability", "invalid ability input slot={}",
+                        ability_input_slot);
       return false;
     }
     if (!host.ActionAvailable(

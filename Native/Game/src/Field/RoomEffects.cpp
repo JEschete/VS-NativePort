@@ -77,8 +77,8 @@ std::optional<std::size_t> FindRoomGeometryGroup(
     return std::nullopt;
   }
   if (!Fits(geometry.size(), 0, room_effects::kGeometryCountBytes)) {
-    VS_LOG_WARN(kChannel, "Room geometry of {} bytes has no group count",
-                geometry.size());
+    VS::Core::LogWarn(kChannel, "Room geometry of {} bytes has no group count",
+                      geometry.size());
     return std::nullopt;
   }
   const auto group_count = Load<std::int32_t>(geometry, 0);
@@ -89,10 +89,11 @@ std::optional<std::size_t> FindRoomGeometryGroup(
       room_effects::kGeometryCountBytes +
       (static_cast<std::size_t>(group_index) * room_effects::kGroupRecordBytes);
   if (!Fits(geometry.size(), offset, room_effects::kGroupRecordBytes)) {
-    VS_LOG_WARN(kChannel,
-                "Geometry group {} refused: its record at {} leaves the {} "
-                "byte geometry",
-                group_index, offset, geometry.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Geometry group {} refused: its record at {} leaves the {} "
+        "byte geometry",
+        group_index, offset, geometry.size());
     return std::nullopt;
   }
   return offset;
@@ -168,10 +169,11 @@ void SwapRoomGeometryRedGreen(std::span<std::byte> geometry, int group_index) {
       GroupWord(geometry, *group, room_effects::kGroupPolygonBlockWord));
   if (block < 0 || !Fits(geometry.size(), static_cast<std::size_t>(block),
                          room_effects::kPolygonBlockCountsBytes)) {
-    VS_LOG_WARN(kChannel,
-                "Red-green swap of group {} refused: its polygon block at {} "
-                "leaves the {} byte geometry",
-                group_index, block, geometry.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Red-green swap of group {} refused: its polygon block at {} "
+        "leaves the {} byte geometry",
+        group_index, block, geometry.size());
     return;
   }
   const auto block_offset = static_cast<std::size_t>(block);
@@ -186,10 +188,11 @@ void SwapRoomGeometryRedGreen(std::span<std::byte> geometry, int group_index) {
   const std::uint64_t extent =
       triangle_bytes + (quads * Render::kRoomQuadRecordBytes);
   if (extent > geometry.size() - first) {
-    VS_LOG_WARN(kChannel,
-                "Red-green swap of group {} refused: {} triangles and {} quads "
-                "at {} leave the {} byte geometry",
-                group_index, triangles, quads, first, geometry.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Red-green swap of group {} refused: {} triangles and {} quads "
+        "at {} leave the {} byte geometry",
+        group_index, triangles, quads, first, geometry.size());
     return;
   }
   const auto polygons = geometry.subspan(first);
@@ -220,10 +223,10 @@ std::optional<PolygonUv> CheckedPolygon(std::span<const std::byte> geometry,
   const auto offset = static_cast<std::size_t>(geometry_offset);
   if (geometry_offset < 0 ||
       !Fits(geometry.size(), offset, room_effects::kPolygonTypeOffset + 1)) {
-    VS_LOG_WARN(kChannel,
-                "{} effect stopped: its polygon at {} leaves the {} byte "
-                "geometry",
-                effect, geometry_offset, geometry.size());
+    VS::Core::LogWarn(kChannel,
+                      "{} effect stopped: its polygon at {} leaves the {} byte "
+                      "geometry",
+                      effect, geometry_offset, geometry.size());
     return std::nullopt;
   }
   const auto type =
@@ -233,10 +236,11 @@ std::optional<PolygonUv> CheckedPolygon(std::span<const std::byte> geometry,
   const std::size_t extent =
       triangle ? room_effects::kTriangleUvExtent : room_effects::kQuadUvExtent;
   if (!Fits(geometry.size(), offset, extent)) {
-    VS_LOG_WARN(kChannel,
-                "{} effect stopped: its polygon's UVs at {} leave the {} byte "
-                "geometry",
-                effect, geometry_offset, geometry.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "{} effect stopped: its polygon's UVs at {} leave the {} byte "
+        "geometry",
+        effect, geometry_offset, geometry.size());
     return std::nullopt;
   }
   return PolygonUv{offset, triangle};
@@ -274,10 +278,10 @@ room_effects::UnsignedDivision DivideCell(std::uint8_t frame,
                                           std::uint8_t columns,
                                           std::string_view effect) {
   if (columns == 0) {
-    VS_LOG_WARN(kChannel,
-                "{} effect has no columns; frame {} uses the hardware's "
-                "divide-by-zero result",
-                effect, frame);
+    VS::Core::LogWarn(kChannel,
+                      "{} effect has no columns; frame {} uses the hardware's "
+                      "divide-by-zero result",
+                      effect, frame);
   }
   return room_effects::DivideUnsigned(frame, columns);
 }
@@ -357,9 +361,9 @@ std::optional<std::size_t> CheckedSwingGroup(
   if (geometry_offset < 0 ||
       !Fits(geometry.size(), offset,
             kSwingGroupWords * room_effects::kGroupWordBytes)) {
-    VS_LOG_WARN(kChannel,
-                "{} refused: its group at {} leaves the {} byte geometry",
-                effect, geometry_offset, geometry.size());
+    VS::Core::LogWarn(kChannel,
+                      "{} refused: its group at {} leaves the {} byte geometry",
+                      effect, geometry_offset, geometry.size());
     return std::nullopt;
   }
   return offset;
@@ -565,10 +569,11 @@ template <class Record, class Step>
 bool StepRecord(std::span<std::byte> records, std::size_t offset, Step step) {
   using Codec = RecordCodec<Record>;
   if (!Fits(records.size(), offset, Codec::kBytes)) {
-    VS_LOG_WARN(kChannel,
-                "Texture effect record at {} refused: it leaves the {} byte "
-                "section",
-                offset, records.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Texture effect record at {} refused: it leaves the {} byte "
+        "section",
+        offset, records.size());
     return false;
   }
   const auto bytes = records.subspan(offset).template first<Codec::kBytes>();
@@ -623,8 +628,8 @@ std::size_t ScriptSlotCount(const RoomEffectState& state) {
 std::size_t ReportedSlotCount(std::size_t count, std::size_t limit,
                               std::string_view what) {
   if (count > limit) {
-    VS_LOG_WARN(kChannel, "{} count {} held to the {} slots", what, count,
-                limit);
+    VS::Core::LogWarn(kChannel, "{} count {} held to the {} slots", what, count,
+                      limit);
     return limit;
   }
   return count;
@@ -647,10 +652,11 @@ std::size_t SetUpTextureEffects(RoomEffectState& state,
   std::size_t count = 0;
   while (consumed < effects.size()) {
     if (!Fits(effects.size(), consumed, room_effects::kEffectKindOffset + 1)) {
-      VS_LOG_WARN(kChannel,
-                  "Texture effect at {} refused: its kind leaves the {} byte "
-                  "section",
-                  consumed, effects.size());
+      VS::Core::LogWarn(
+          kChannel,
+          "Texture effect at {} refused: its kind leaves the {} byte "
+          "section",
+          consumed, effects.size());
       break;
     }
     const auto kind =
@@ -660,16 +666,17 @@ std::size_t SetUpTextureEffects(RoomEffectState& state,
       break;
     }
     if (count >= kRoomEffectScriptSlotBase) {
-      VS_LOG_WARN(kChannel, "Texture effects past slot {} refused",
-                  kRoomEffectScriptSlotBase);
+      VS::Core::LogWarn(kChannel, "Texture effects past slot {} refused",
+                        kRoomEffectScriptSlotBase);
       break;
     }
     if (!Fits(effects.size(), consumed,
               room_effects::kTextureEffectRecordBytes.at(kind))) {
-      VS_LOG_WARN(kChannel,
-                  "Texture effect at {} refused: its kind {} record leaves "
-                  "the {} byte section",
-                  consumed, kind, effects.size());
+      VS::Core::LogWarn(
+          kChannel,
+          "Texture effect at {} refused: its kind {} record leaves "
+          "the {} byte section",
+          consumed, kind, effects.size());
       break;
     }
     RoomEffectInstance& instance = state.instances.at(count);
@@ -695,20 +702,21 @@ std::size_t SetUpTextureEffects(RoomEffectState& state,
 std::optional<std::size_t> MeasureEffectScript(
     std::span<const std::byte> scripts, std::size_t start) {
   if (!Fits(scripts.size(), start, room_effects::kScriptHeaderBytes)) {
-    VS_LOG_WARN(kChannel,
-                "Effect script at {} refused: its header leaves the "
-                "{} byte section",
-                start, scripts.size());
+    VS::Core::LogWarn(kChannel,
+                      "Effect script at {} refused: its header leaves the "
+                      "{} byte section",
+                      start, scripts.size());
     return std::nullopt;
   }
   std::size_t offset = start + room_effects::ScriptPreambleBytes(
                                    Load<std::uint8_t>(scripts, start));
   while (true) {
     if (!Fits(scripts.size(), offset, kRoomEffectCommandHeaderBytes)) {
-      VS_LOG_WARN(kChannel,
-                  "Effect script at {} refused: its command at {} leaves the "
-                  "{} byte section",
-                  start, offset, scripts.size());
+      VS::Core::LogWarn(
+          kChannel,
+          "Effect script at {} refused: its command at {} leaves the "
+          "{} byte section",
+          start, offset, scripts.size());
       return std::nullopt;
     }
     const auto opcode = static_cast<RoomEffectOpcode>(Load<std::int16_t>(
@@ -720,9 +728,10 @@ std::optional<std::size_t> MeasureEffectScript(
       break;
     }
     if (size < 0) {
-      VS_LOG_WARN(kChannel,
-                  "Effect script at {} refused: its command at {} has size {}",
-                  start, offset, size);
+      VS::Core::LogWarn(
+          kChannel,
+          "Effect script at {} refused: its command at {} has size {}", start,
+          offset, size);
       return std::nullopt;
     }
     offset += static_cast<std::size_t>(size);
@@ -739,10 +748,10 @@ void SetUpEffectScript(RoomEffectInstance& instance, RoomEffectHost& host,
   instance.data_offset = start;
   if (instance.storage != RoomEffectStorageId::kNone) {
     // The original overwrites the pointer without freeing it.
-    VS_LOG_WARN(kChannel,
-                "Effect script at {} replaces objects that were never "
-                "released; leaving them to the heap",
-                start);
+    VS::Core::LogWarn(kChannel,
+                      "Effect script at {} replaces objects that were never "
+                      "released; leaving them to the heap",
+                      start);
     instance.storage = RoomEffectStorageId::kNone;
   }
   instance.objects.clear();
@@ -823,8 +832,8 @@ void InitializeRoomEffects(RoomEffectState& state, RoomEffectHost& host) {
   while (consumed < scripts.size()) {
     const std::size_t slot = kRoomEffectScriptSlotBase + state.script_count;
     if (slot >= kRoomEffectSlotCount) {
-      VS_LOG_WARN(kChannel, "Effect scripts past slot {} refused",
-                  kRoomEffectSlotCount);
+      VS::Core::LogWarn(kChannel, "Effect scripts past slot {} refused",
+                        kRoomEffectSlotCount);
       return;
     }
     const auto extent = MeasureEffectScript(scripts, consumed);
@@ -843,10 +852,11 @@ void CreateRoomEffectObjects(RoomEffectInstance& instance,
   instance.objects.clear();
   ++instance.generation;
   if (instance.storage != RoomEffectStorageId::kNone) {
-    VS_LOG_WARN(kChannel,
-                "Effect script at {} rebuilt its objects without releasing "
-                "them; releasing them now",
-                instance.data_offset);
+    VS::Core::LogWarn(
+        kChannel,
+        "Effect script at {} rebuilt its objects without releasing "
+        "them; releasing them now",
+        instance.data_offset);
     host.ReleaseObjectStorage(instance.storage);
     instance.storage = RoomEffectStorageId::kNone;
   }
@@ -854,17 +864,19 @@ void CreateRoomEffectObjects(RoomEffectInstance& instance,
   const std::uint8_t count = instance.kind_or_object_count;
   const std::size_t preamble = room_effects::ScriptPreambleBytes(count);
   if (!Fits(scripts.size(), instance.data_offset, preamble)) {
-    VS_LOG_WARN(kChannel,
-                "Effect script at {} refused: its {} group ids leave the {} "
-                "byte section",
-                instance.data_offset, count, scripts.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Effect script at {} refused: its {} group ids leave the {} "
+        "byte section",
+        instance.data_offset, count, scripts.size());
     return;
   }
   const auto storage =
       host.ReserveObjectStorage(count * kRoomEffectObjectRecordBytes);
   if (!storage) {
-    VS_LOG_WARN(kChannel, "Effect script at {}: the heap refused {} objects",
-                instance.data_offset, count);
+    VS::Core::LogWarn(kChannel,
+                      "Effect script at {}: the heap refused {} objects",
+                      instance.data_offset, count);
     return;
   }
   instance.storage = *storage;
@@ -886,8 +898,8 @@ void FinishRoomEffectSetup() {}
 bool StartRoomEffect(RoomEffectState& state, RoomEffectHost& host,
                      int effect_index) {
   if (effect_index < 0) {
-    VS_LOG_WARN(kChannel, "Room effect {} refused: it is negative",
-                effect_index);
+    VS::Core::LogWarn(kChannel, "Room effect {} refused: it is negative",
+                      effect_index);
     return false;
   }
   const auto index = static_cast<std::size_t>(effect_index);
@@ -1000,19 +1012,21 @@ CommandOutcome RunCommand(ScriptRun& run, std::size_t object_index,
                           const RoomEffectCommand& command, bool fast_forward) {
   while (true) {
     if (++run.handler_calls > kHandlerCallLimit) {
-      VS_LOG_WARN(kChannel,
-                  "Effect script slot {} object {} ended: {} handler calls "
-                  "without waiting",
-                  run.slot, object_index, kHandlerCallLimit);
+      VS::Core::LogWarn(
+          kChannel,
+          "Effect script slot {} object {} ended: {} handler calls "
+          "without waiting",
+          run.slot, object_index, kHandlerCallLimit);
       RunObject(run, object_index).cursor.reset();
       return CommandOutcome::kEnded;
     }
     const RoomEffectCommandResult result = Dispatch(run, object_index, command);
     if (run.state.instances.at(run.slot).generation != run.generation) {
-      VS_LOG_WARN(kChannel,
-                  "Effect script slot {} rebuilt its own objects; ending the "
-                  "pass",
-                  run.slot);
+      VS::Core::LogWarn(
+          kChannel,
+          "Effect script slot {} rebuilt its own objects; ending the "
+          "pass",
+          run.slot);
       return CommandOutcome::kInstanceChanged;
     }
     if (result == RoomEffectCommandResult::kAdvance) {
@@ -1034,11 +1048,12 @@ bool RunObjectScript(ScriptRun& run, std::size_t object_index) {
         room_effects::DecodeCommand(run.host.EffectScripts(), cursor);
     if (decoded.status != room_effects::CommandStatus::kDecoded) {
       if (decoded.status != room_effects::CommandStatus::kEnd) {
-        VS_LOG_WARN(kChannel,
-                    "Effect script slot {} object {} ended: command at {} "
-                    "(size {}, opcode {}) refused",
-                    run.slot, object_index, cursor, decoded.command.size,
-                    static_cast<int>(decoded.command.opcode));
+        VS::Core::LogWarn(
+            kChannel,
+            "Effect script slot {} object {} ended: command at {} "
+            "(size {}, opcode {}) refused",
+            run.slot, object_index, cursor, decoded.command.size,
+            static_cast<int>(decoded.command.opcode));
       }
       RunObject(run, object_index).cursor.reset();
       return true;
@@ -1059,10 +1074,11 @@ bool RunObjectScript(ScriptRun& run, std::size_t object_index) {
     const std::int64_t next =
         static_cast<std::int64_t>(cursor) + decoded.command.size;
     if (next < 0) {
-      VS_LOG_WARN(kChannel,
-                  "Effect script slot {} object {} ended: the command at {} "
-                  "jumps before the section",
-                  run.slot, object_index, cursor);
+      VS::Core::LogWarn(
+          kChannel,
+          "Effect script slot {} object {} ended: the command at {} "
+          "jumps before the section",
+          run.slot, object_index, cursor);
       RunObject(run, object_index).cursor.reset();
       return true;
     }
@@ -1125,8 +1141,8 @@ constexpr std::int32_t kRadialSpinYBias = 32;
 bool ExecuteRoomEffectCommands(RoomEffectState& state, RoomEffectHost& host,
                                std::size_t instance_index) {
   if (instance_index >= kRoomEffectSlotCount) {
-    VS_LOG_WARN(kChannel, "Effect script slot {} refused: there are {}",
-                instance_index, kRoomEffectSlotCount);
+    VS::Core::LogWarn(kChannel, "Effect script slot {} refused: there are {}",
+                      instance_index, kRoomEffectSlotCount);
     return false;
   }
   ScriptRun run{state, host, instance_index,
@@ -1210,10 +1226,11 @@ std::optional<std::size_t> ObjectGroup(const RoomEffectObject& object,
   }
   if (!Fits(geometry.size(), object.group_offset,
             room_effects::kGroupRecordBytes)) {
-    VS_LOG_WARN(kChannel,
-                "Effect object {} refused: its group at {} leaves the {} byte "
-                "geometry",
-                object.object_id, object.group_offset, geometry.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Effect object {} refused: its group at {} leaves the {} byte "
+        "geometry",
+        object.object_id, object.group_offset, geometry.size());
     return std::nullopt;
   }
   return object.group_offset;
@@ -1437,9 +1454,9 @@ RoomEffectCommandResult ExecuteRoomEffectStopScript(
       static_cast<std::int64_t>(kRoomEffectScriptSlotBase);
   if (slot < static_cast<std::int64_t>(kRoomEffectScriptSlotBase) ||
       slot >= static_cast<std::int64_t>(kRoomEffectSlotCount)) {
-    VS_LOG_WARN(kChannel,
-                "Stopping effect script {} refused: it is not a script slot",
-                command.Word(kWordOperand));
+    VS::Core::LogWarn(
+        kChannel, "Stopping effect script {} refused: it is not a script slot",
+        command.Word(kWordOperand));
     return RoomEffectCommandResult::kAdvance;
   }
   RoomEffectInstance& instance =
@@ -1454,8 +1471,9 @@ RoomEffectCommandResult ExecuteRoomEffectStopScript(
 // decomp: BATTLE.PRG func_800936F8 (src/BATTLE/BATTLE.PRG/2842C.c:1321)
 bool ToggleRoomEffectUpdates(RoomEffectState& state, int effect_index) {
   if (effect_index < 0) {
-    VS_LOG_WARN(kChannel, "Toggling room effect {} refused: it is negative",
-                effect_index);
+    VS::Core::LogWarn(kChannel,
+                      "Toggling room effect {} refused: it is negative",
+                      effect_index);
     return false;
   }
   const auto index = static_cast<std::size_t>(effect_index);
@@ -1476,8 +1494,8 @@ std::uint8_t IsRoomEffectActive(const RoomEffectState& state,
                                 int effect_index) {
   if (effect_index < 0 ||
       static_cast<std::size_t>(effect_index) >= kRoomEffectSlotCount) {
-    VS_LOG_WARN(kChannel, "Room effect {} refused: there are {} slots",
-                effect_index, kRoomEffectSlotCount);
+    VS::Core::LogWarn(kChannel, "Room effect {} refused: there are {} slots",
+                      effect_index, kRoomEffectSlotCount);
     return 0;
   }
   return state.instances.at(static_cast<std::size_t>(effect_index)).active;
@@ -1487,8 +1505,8 @@ std::uint8_t IsRoomEffectActive(const RoomEffectState& state,
 void FinishRoomDoorRotation(RoomEffectState& state, RoomEffectHost& host,
                             int effect_index) {
   if (effect_index < 0) {
-    VS_LOG_WARN(kChannel, "Door rotation {} refused: it is negative",
-                effect_index);
+    VS::Core::LogWarn(kChannel, "Door rotation {} refused: it is negative",
+                      effect_index);
     return;
   }
   const auto index = static_cast<std::size_t>(effect_index);
@@ -1500,9 +1518,9 @@ void FinishRoomDoorRotation(RoomEffectState& state, RoomEffectHost& host,
     return;
   }
   if (index >= TextureSlotCount(state)) {
-    VS_LOG_WARN(kChannel,
-                "Door rotation {} refused: the room has {} texture effects",
-                effect_index, state.texture_effect_count);
+    VS::Core::LogWarn(
+        kChannel, "Door rotation {} refused: the room has {} texture effects",
+        effect_index, state.texture_effect_count);
     return;
   }
   const bool finished = StepRecord<SwingEffect>(
@@ -1526,16 +1544,17 @@ void FinishRoomTiltRotation(const RoomEffectState& state, RoomEffectHost& host,
                             int effect_index) {
   if (effect_index < 0 ||
       static_cast<std::size_t>(effect_index) >= TextureSlotCount(state)) {
-    VS_LOG_WARN(kChannel,
-                "Tilt rotation {} refused: the room has {} texture effects",
-                effect_index, state.texture_effect_count);
+    VS::Core::LogWarn(
+        kChannel, "Tilt rotation {} refused: the room has {} texture effects",
+        effect_index, state.texture_effect_count);
     return;
   }
   const RoomEffectInstance& instance =
       state.instances.at(static_cast<std::size_t>(effect_index));
   if (instance.kind_or_object_count != kSwingKind) {
-    VS_LOG_WARN(kChannel, "Tilt rotation {} refused: it is a kind {} effect",
-                effect_index, instance.kind_or_object_count);
+    VS::Core::LogWarn(kChannel,
+                      "Tilt rotation {} refused: it is a kind {} effect",
+                      effect_index, instance.kind_or_object_count);
     return;
   }
   StepRecord<SwingEffect>(
@@ -1585,9 +1604,10 @@ void RestartRoomEffectSound(const RoomEffectState& state,
 bool CallRoomEntryPoint(RoomEffectHost& host) {
   const auto section = host.EntryPointSection();
   if (section.size() <= room_effects::kEntryPointHeaderBytes) {
-    VS_LOG_WARN(kChannel,
-                "Room entry point refused: section E has {} bytes and no code",
-                section.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Room entry point refused: section E has {} bytes and no code",
+        section.size());
     return false;
   }
   return host.RunRoomEntryPoint(

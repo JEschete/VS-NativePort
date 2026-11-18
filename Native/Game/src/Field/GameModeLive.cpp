@@ -186,7 +186,8 @@ void LiveBeginBattleActionMenu(int /*unused*/, int /*unused*/) {
 
 void LiveCloseBattleActionMenu(Menu_Framework_ActionSelection* selection) {
   if (selection == nullptr) {
-    VS_LOG_WARN(kChannel, "closing the action menu without its selection");
+    VS::Core::LogWarn(kChannel,
+                      "closing the action menu without its selection");
   }
   RunFieldMode(CloseBattleActionMenu, selection);
 }
@@ -194,7 +195,7 @@ void LiveCloseBattleActionMenu(Menu_Framework_ActionSelection* selection) {
 void LiveDispatchBattleActionMenuResult(
     Menu_Framework_ActionSelection* selection) {
   if (selection == nullptr) {
-    VS_LOG_WARN(kChannel, "action menu result without its selection");
+    VS::Core::LogWarn(kChannel, "action menu result without its selection");
     return;
   }
   const ActionMenuResult result = ActionMenuResultOf(*selection);

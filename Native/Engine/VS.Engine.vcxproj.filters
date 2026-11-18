@@ -924,13 +924,10 @@
     <ClInclude Include="include\Audio\XaPlayback.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\Arena.h">
+    <ClInclude Include="include\Core\Arena.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Assert.hpp">
-      <Filter>include\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Core\BiosRand.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Diagnostics.hpp">
@@ -1011,7 +1008,7 @@
     <ClInclude Include="include\Core\RuntimeLive.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\Scratch.h">
+    <ClInclude Include="include\Core\Scratch.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\String\GameText.hpp">
@@ -1024,9 +1021,6 @@
       <Filter>include\Core\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Types.hpp">
-      <Filter>include\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Core\Unported.h">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Unported.hpp">

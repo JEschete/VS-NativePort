@@ -21,7 +21,6 @@
 #include "Audio/SoundSlotsLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Core/BiosRand.h"
 #include "Core/RandomLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Field/Collision.h"
@@ -218,7 +217,7 @@ class LiveActorSoundHost final : public ActorSoundHost {
     return Core::NextLiveRandomBounded(bound);
   }
 
-  std::int32_t Random() override { return Core_Random_Rand(); }
+  std::int32_t Random() override { return VS::Core::NextBiosRand(); }
 
   void PlaySfx(std::int32_t group, std::int32_t effect_id,
                const SfxMix& mix) override {

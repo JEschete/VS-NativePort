@@ -8,7 +8,7 @@
 
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
-#include "Core/BiosRand.h"
+#include "Core/RandomLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/Triggers.h"
 #include "State/SceneTimer.h"
@@ -29,8 +29,8 @@ class LiveSceneTimerHost final : public SceneTimerHost {
  public:
   void ShowTimer() override { VS::Battle::ShowLivePuzzleTimer(); }
   void HideTimer() override { VS::Battle::HideLivePuzzleTimer(); }
-  // Core_Random_Rand keeps the RNG trace of the BIOS sequence.
-  int Random() override { return Core_Random_Rand(); }
+  // VS::Core::NextBiosRand keeps the RNG trace of the BIOS sequence.
+  int Random() override { return VS::Core::NextBiosRand(); }
 };
 }  // namespace
 

@@ -98,8 +98,9 @@ class LiveTransitionHost final : public TransitionHost {
     FindLiveEntranceDoorNearTile(tile_x, tile_z, floor_layer);
   }
   void ReportRefusedLocation(int location_id) override {
-    VS_LOG_WARN(kChannel, "teleport to location {} outside the {} locations",
-                location_id, kLocationCount);
+    VS::Core::LogWarn(kChannel,
+                      "teleport to location {} outside the {} locations",
+                      location_id, kLocationCount);
   }
 
  private:
@@ -127,7 +128,7 @@ bool RefuseMissingDoor(const Field_MpdDoorRecord* door, const char* what) {
   if (door != nullptr) {
     return false;
   }
-  VS_LOG_WARN(kChannel, "{} without a door", what);
+  VS::Core::LogWarn(kChannel, "{} without a door", what);
   return true;
 }
 

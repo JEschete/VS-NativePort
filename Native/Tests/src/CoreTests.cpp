@@ -12,7 +12,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/BiosRand.h"
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Gte.h"
@@ -94,13 +93,13 @@ struct OriginalRandomState {
   decltype(std::to_array(Core_randomShuffleTable)) table =
       std::to_array(Core_randomShuffleTable);
   int index = Core_randomShuffleIndex;
-  unsigned int seed = Core_Random_State();
+  unsigned int seed = VS::Core::BiosRand().State();
   unsigned int interface_state = Core_interfaceRandomState;
 
   ~OriginalRandomState() {
     std::copy(table.begin(), table.end(), Core_randomShuffleTable);
     Core_randomShuffleIndex = index;
-    Core_Random_Seed(seed);
+    VS::Core::SeedBiosRand(seed);
     Core_interfaceRandomState = interface_state;
   }
 };
@@ -531,7 +530,7 @@ TEST_CASE("Copied shuffled random draws match the native sequence",
     CHECK(Core::NextLiveRandomBounded(maximum) == expected.Next(maximum));
     CHECK(Core::NextLiveRandomAveraged(maximum) ==
           expected.NextSmoothed(maximum));
-    CHECK(Core_Random_Rand() == expected.Raw());
+    CHECK(VS::Core::NextBiosRand() == expected.Raw());
   }
 }
 
@@ -547,14 +546,14 @@ TEST_CASE("Original random ranges preserve unordered and equal bounds",
                                                        {-7, 5},
                                                        {5, -7}}};
   for (const auto& [first, second] : kBounds) {
-    Core_Random_Seed(1);
+    VS::Core::SeedBiosRand(1);
     Core::Rand15 expected(1);
     const auto [low, high] = std::minmax(first, second);
     for (int sample = 0; sample < 64; ++sample) {
       const auto value =
           low == high ? low : low + expected.Next() % (high - low);
       CHECK(Core::LiveRandomRangeExclusive(first, second) == value);
-      CHECK(Core_Random_State() == expected.State());
+      CHECK(VS::Core::BiosRand().State() == expected.State());
     }
   }
 }

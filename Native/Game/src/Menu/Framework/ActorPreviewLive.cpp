@@ -59,7 +59,7 @@ constexpr std::size_t kBattleSequenceBytes = 0x7800;
 constexpr int kMotionResetArgument = kWeaponModelsPerActor;
 
 void Warn(std::string_view what) {
-  VS_LOG_WARN("menu.framework", "actor preview: {}", what);
+  VS::Core::LogWarn("menu.framework", "actor preview: {}", what);
 }
 
 AssetAddress Address(const void* pointer) {

@@ -237,7 +237,7 @@ class LiveHost final : public Host {
   }
 
   void Refuse(std::string_view what) override {
-    VS_LOG_WARN("menu.setup", "{}", what);
+    VS::Core::LogWarn("menu.setup", "{}", what);
   }
   Framework::Buttons Input() override { return Framework::LiveButtons(); }
   void PlaySound(MenuSound sound) override { PlayMenuSound(sound); }
@@ -650,9 +650,9 @@ const RecipeBook* LiveSetupRecipes() {
 void ResetLiveSetupStatics() {
   ResetModuleStatics(g_state);
   if (g_recipes.request != nullptr) {
-    VS_LOG_WARN("menu.setup",
-                "workshop reset while its recipe read was in flight; the "
-                "block stays until the read finishes");
+    VS::Core::LogWarn("menu.setup",
+                      "workshop reset while its recipe read was in flight; the "
+                      "block stays until the read finishes");
     return;
   }
   // The reload dropped _sydData without freeing its block; the native port

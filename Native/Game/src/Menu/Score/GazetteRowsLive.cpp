@@ -63,7 +63,8 @@ std::uint64_t refusals = 0;
 
 void Refuse(std::string_view what) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.score", "gazette rows: {} ({} refusals)", what, refusals);
+    VS::Core::LogWarn("menu.score", "gazette rows: {} ({} refusals)", what,
+                      refusals);
   }
 }
 

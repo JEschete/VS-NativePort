@@ -7,9 +7,9 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/Camera.h"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLiveState.hpp"
@@ -179,13 +179,13 @@ class LiveCameraHost final : public EffectCameraHost {
     return SampleLiveSegmentedEffectCurve(curve_index, distance);
   }
 
-  std::int32_t Random() override { return Core_Random_Rand(); }
+  std::int32_t Random() override { return VS::Core::NextBiosRand(); }
 };
 
 void ReportRefusal(const char* entry, const char* reason) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects", "effect camera: {} refused: {} ({} refusals)", entry,
-                reason, refused_calls);
+    VS::Core::LogWarn("effects", "effect camera: {} refused: {} ({} refusals)",
+                      entry, reason, refused_calls);
   }
 }
 }  // namespace

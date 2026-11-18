@@ -27,7 +27,7 @@
 #include "Battle/EncounterHooks.hpp"
 #include "Boot/GameLoop.h"
 #include "CombatLab/Trace.hpp"
-#include "Core/BiosRand.h"
+#include "Core/RandomLive.hpp"
 #include "Diagnostics/PlayerObservation.hpp"
 #include "Diagnostics/SceneTrace.hpp"
 #include "Event/ScriptVm.h"
@@ -119,7 +119,7 @@ nlohmann::json FlushedFrame(TraceScope& scope,
   scope.run = trace.Directory();
   scope.events = scope.run / "events.jsonl";
   scope.log = scope.run / "session.log";
-  VS_LOG_TRACE("combat.test", "retained buffered diagnostic");
+  VS::Core::LogTrace("combat.test", "retained buffered diagnostic");
   trace.Frame(42, {}, state);
   REQUIRE_FALSE(trace.Failed());
   std::ifstream stream(scope.events);
@@ -281,9 +281,9 @@ TEST_CASE(
                                      instruction.data(), instruction.size(), 0);
     VS::Game::RecordSceneResult(command, 2);
     VS::Game::RecordScriptFlagWrite(180, 0, 1);
-    VS_LOG_TRACE("rng", "unneeded per-draw trace");
-    VS_LOG_DEBUG("event-step", "duplicate instruction text");
-    VS_LOG_DEBUG("content", "disc read: repeated source evidence");
+    VS::Core::LogTrace("rng", "unneeded per-draw trace");
+    VS::Core::LogDebug("event-step", "duplicate instruction text");
+    VS::Core::LogDebug("content", "disc read: repeated source evidence");
     trace.Frame(12, {}, SampleState());
     trace.EndScript(13, {{"status", "test"}});
     CHECK_FALSE(trace.Failed());
@@ -330,8 +330,8 @@ TEST_CASE("Verification logs preserve player root frames and all error gates",
     script_path = trace.BeginScript(1, 10);
     scope.directories.push_back(script_path);
     scope.files.push_back(script_path / "events.jsonl");
-    VS_LOG_WARN("audio", "retained verification warning");
-    VS_LOG_ERROR("audio", "retained verification error");
+    VS::Core::LogWarn("audio", "retained verification warning");
+    VS::Core::LogError("audio", "retained verification error");
     trace.Frame(12, {}, {}, {{"available", true}, {"proof", "source"}});
     trace.EndScript(13, {{"status", "test"}});
     CHECK(trace.Errors() == 1);
@@ -353,7 +353,7 @@ TEST_CASE("Verification logs retain native boot transition receipts",
     script_path = trace.BeginScript(1, 10);
     scope.directories.push_back(script_path);
     scope.files.push_back(script_path / "events.jsonl");
-    VS_LOG_DEBUG("boot", "native session transition: title");
+    VS::Core::LogDebug("boot", "native session transition: title");
     trace.EndScript(13, {{"status", "test"}});
   }
   const auto records = ReadTraceRecords(script_path / "events.jsonl");
@@ -673,7 +673,9 @@ TEST_CASE(
       scope.directories.push_back(path);
       scope.files.push_back(path / "events.jsonl");
       trace.Frame(number * 10 + 2, {}, SampleState());
-      if (number == 2) VS_LOG_ERROR("combat.test", "intentional script error");
+      if (number == 2) {
+        VS::Core::LogError("combat.test", "intentional script error");
+      }
       trace.EndScript(number * 10 + 3, {{"status", "test"}});
       CHECK(CompleteScriptLog(path / "events.jsonl", number));
     }
@@ -731,7 +733,7 @@ TEST_CASE("Desktop diagnostics retain Lab frame data and a live text mirror",
     scope.log = scope.run / "session.log";
     scope.files.push_back(scope.run / "manifest.json");
     VS::Game::WriteTraceManifest(scope.run, {{"detailed_logging", true}});
-    VS_LOG_DEBUG("event-step", "diagnostic opcode test");
+    VS::Core::LogDebug("event-step", "diagnostic opcode test");
     trace.Frame(42, {}, SampleState(),
                 {{"available", true}, {"event", {{"id", 7}}}});
     REQUIRE_FALSE(trace.Failed());
@@ -753,7 +755,8 @@ TEST_CASE("Warning provenance is durable before any later trace boundary",
     const auto script = trace.BeginScript(1, 0);
     scope.directories.push_back(script);
     scope.files.push_back(script / "events.jsonl");
-    VS_LOG_WARN("effects.texture", "warning must survive an immediate crash");
+    VS::Core::LogWarn("effects.texture",
+                      "warning must survive an immediate crash");
     for (const auto& path :
          {scope.events, script / "events.jsonl", scope.log, mirror}) {
       CAPTURE(path.string());
@@ -824,7 +827,7 @@ struct GameplayInspectionFixture {
   u_int saved_results_animation = Menu_Results_elementAnimationState;
   int saved_results_reel = Menu_Results_buffReelIndex;
   u_int saved_results_selection = Menu_Results_buffReelSelection;
-  unsigned saved_random = Core_Random_State();
+  unsigned saved_random = VS::Core::BiosRand().State();
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
   decltype(std::to_array(Actors_actorRecords)) saved_models =
@@ -883,7 +886,7 @@ struct GameplayInspectionFixture {
     Menu_Results_elementAnimationState = saved_results_animation;
     Menu_Results_buffReelIndex = saved_results_reel;
     Menu_Results_buffReelSelection = saved_results_selection;
-    Core_Random_Seed(saved_random);
+    VS::Core::SeedBiosRand(saved_random);
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
     std::copy(saved_waits.begin(), saved_waits.end(),
@@ -1011,7 +1014,7 @@ TEST_CASE(
   Menu_Results_elementAnimationState = 35;
   Menu_Results_buffReelIndex = 2;
   Menu_Results_buffReelSelection = 248;
-  Core_Random_Seed(0xFEEDC0DEu);
+  VS::Core::SeedBiosRand(0xFEEDC0DEu);
   VS::Boot::EncounterPollStop();
   const auto state = VS::Game::InspectGameplay();
   if (state.roulette) {
@@ -1019,7 +1022,7 @@ TEST_CASE(
   } else {
     FAIL("Active game-clear roulette was not captured");
   }
-  CHECK(Core_Random_State() == 0xFEEDC0DEu);
+  CHECK(VS::Core::BiosRand().State() == 0xFEEDC0DEu);
   CHECK(Menu_Results_screenTimer == 490);
   CHECK(Menu_Results_buffReelSelection == 248);
 }
@@ -1286,12 +1289,12 @@ TEST_CASE("Gameplay inspection reads copied plain chars as unsigned bytes",
 TEST_CASE("Player timing observations use production eligibility without costs",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
-  const auto random = Core_Random_State();
+  const auto random = VS::Core::BiosRand().State();
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CheckNativeTiming(state.reaction_timing);
   CheckResourcesUnchanged(fixture);
-  CHECK(Core_Random_State() == random);
+  CHECK(VS::Core::BiosRand().State() == random);
 }
 
 TEST_CASE("Opt-in player target forecasts mirror native cached values",
@@ -1311,12 +1314,12 @@ TEST_CASE("Opt-in player target forecasts mirror native cached values",
   limb.effect = 58;
   limb.previewAmount = 18;
   limb.hitChance = 90;
-  const auto random = Core_Random_State();
+  const auto random = VS::Core::BiosRand().State();
   const auto state = VS::Game::InspectGameplay();
   TraceScope scope;
   const auto data = FlushedFrame(scope, state, true).at("data");
   CheckCachedTargetForecasts(data);
-  CHECK(Core_Random_State() == random);
+  CHECK(VS::Core::BiosRand().State() == random);
   CHECK(head.previewAmount == 3);
   CHECK(limb.previewAmount == 18);
 }
@@ -1506,12 +1509,12 @@ struct NavigationInspectionFixture : ReactionInspectionFixture {
 TEST_CASE("Navigation observes bounded runtime terrain without changing it",
           "[player][diagnostics][inspection]") {
   NavigationInspectionFixture fixture;
-  const auto random = Core_Random_State();
+  const auto random = VS::Core::BiosRand().State();
   const auto probe = Field_collisionProbePosition;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CheckNavigationGeometry(state);
-  CHECK(Core_Random_State() == random);
+  CHECK(VS::Core::BiosRand().State() == random);
   CHECK(Field_collisionProbePosition.vx == probe.vx);
   CHECK(Field_collisionProbePosition.vz == probe.vz);
   TraceScope scope;
@@ -1626,14 +1629,14 @@ void CheckRecoveryItemOption(const VS::Game::EncounterItemOption& item) {
 TEST_CASE("Consumable observations do not consume stock or grant a spell",
           "[player][diagnostics][inspection]") {
   ItemInspectionFixture fixture;
-  const auto random = Core_Random_State();
+  const auto random = VS::Core::BiosRand().State();
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   REQUIRE(state.item_options.size() == 1);
   CheckRecoveryItemOption(state.item_options.front());
   CHECK(Audio_Seq_unusedInventory.misc[0].count == 2);
   CHECK(Battle_actionDefinitions[224].unlocked == 0);
-  CHECK(Core_Random_State() == random);
+  CHECK(VS::Core::BiosRand().State() == random);
   CheckResourcesUnchanged(fixture);
 }
 

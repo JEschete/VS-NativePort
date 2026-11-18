@@ -27,7 +27,7 @@
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SoundBanks.h"
 #include "Audio/VoiceOutput.hpp"
-#include "Core/Arena.h"
+#include "Core/Arena.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 
@@ -634,8 +634,8 @@ std::optional<LiveProgramMemory> LiveProgramRegion(char* address) {
     return idle;
   }
   return Containing(address,
-                    reinterpret_cast<char*>(std::data(Core_overlayArena)),
-                    sizeof(Core_overlayArena));
+                    reinterpret_cast<char*>(Core::overlay_arena.data()),
+                    Core::overlay_arena.size());
 }
 
 char* LiveIdleProgram() {

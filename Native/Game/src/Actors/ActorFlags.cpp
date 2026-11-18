@@ -164,9 +164,9 @@ void SetActorDisplayFlags(ActorStateHost& host, int id, std::uint32_t flags) {
     if (record->companion_slot < kFirstCompanionRecord) return;
     current = record->companion_slot;
   }
-  VS_LOG_WARN("actors",
-              "Display flags stop at a repeating companion chain from actor {}",
-              id);
+  VS::Core::LogWarn(
+      "actors",
+      "Display flags stop at a repeating companion chain from actor {}", id);
 }
 
 void EnableActorModel(ActorModelToggleHost& host, std::size_t slot) {

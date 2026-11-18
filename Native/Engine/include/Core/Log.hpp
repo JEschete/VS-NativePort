@@ -44,6 +44,8 @@ bool FlushLogFile();
 void LogWrite(LogLevel level, std::string_view channel,
               std::string_view message);
 
+// Formatting is skipped when the level/channel is disabled; the arguments are
+// still evaluated.
 template <class... Args>
 void Log(LogLevel level, std::string_view channel,
          std::format_string<Args...> fmt, Args&&... args) {
@@ -52,15 +54,34 @@ void Log(LogLevel level, std::string_view channel,
   }
 }
 
-}  // namespace VS::Core
+template <class... Args>
+void LogTrace(std::string_view channel, std::format_string<Args...> fmt,
+              Args&&... args) {
+  Log<Args...>(LogLevel::Trace, channel, fmt, std::forward<Args>(args)...);
+}
 
-#define VS_LOG_INFO(ch, ...) \
-  ::VS::Core::Log(::VS::Core::LogLevel::Info, ch, __VA_ARGS__)
-#define VS_LOG_WARN(ch, ...) \
-  ::VS::Core::Log(::VS::Core::LogLevel::Warn, ch, __VA_ARGS__)
-#define VS_LOG_ERROR(ch, ...) \
-  ::VS::Core::Log(::VS::Core::LogLevel::Error, ch, __VA_ARGS__)
-#define VS_LOG_DEBUG(ch, ...) \
-  ::VS::Core::Log(::VS::Core::LogLevel::Debug, ch, __VA_ARGS__)
-#define VS_LOG_TRACE(ch, ...) \
-  ::VS::Core::Log(::VS::Core::LogLevel::Trace, ch, __VA_ARGS__)
+template <class... Args>
+void LogDebug(std::string_view channel, std::format_string<Args...> fmt,
+              Args&&... args) {
+  Log<Args...>(LogLevel::Debug, channel, fmt, std::forward<Args>(args)...);
+}
+
+template <class... Args>
+void LogInfo(std::string_view channel, std::format_string<Args...> fmt,
+             Args&&... args) {
+  Log<Args...>(LogLevel::Info, channel, fmt, std::forward<Args>(args)...);
+}
+
+template <class... Args>
+void LogWarn(std::string_view channel, std::format_string<Args...> fmt,
+             Args&&... args) {
+  Log<Args...>(LogLevel::Warn, channel, fmt, std::forward<Args>(args)...);
+}
+
+template <class... Args>
+void LogError(std::string_view channel, std::format_string<Args...> fmt,
+              Args&&... args) {
+  Log<Args...>(LogLevel::Error, channel, fmt, std::forward<Args>(args)...);
+}
+
+}  // namespace VS::Core

@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "Audio/Seq/Channel.h"
-#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
+#include "Core/RandomLive.hpp"
 #include "Field/DoorMatches.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -37,11 +37,12 @@ DoorMatchList* TransitionLiveDoorsAtTile(int x, int z, int layer) {
   if (Field_roomData.doors == nullptr) return nullptr;
   const auto bytes = Field_roomData.header.doorsLength;
   if (bytes % sizeof(Field_MpdDoorRecord) != 0) {
-    VS_LOG_ERROR("field.doors", "invalid transition record bytes={}", bytes);
+    VS::Core::LogError("field.doors", "invalid transition record bytes={}",
+                       bytes);
     return nullptr;
   }
   Audio_Seq_unusedStateFlags.opaqueAC[kDoorQueryRandomByteIndex] =
-      static_cast<char>(Core_Random_Rand());
+      static_cast<char>(VS::Core::NextBiosRand());
   const std::span records(Field_roomData.doors,
                           bytes / sizeof(Field_MpdDoorRecord));
   tiles.clear();

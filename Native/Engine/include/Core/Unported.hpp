@@ -21,7 +21,3 @@ std::vector<UnportedHit> UnportedSnapshot();
 void DumpUnportedToLog();
 
 }  // namespace VS::Core
-
-#ifndef VS_UNPORTED
-#define VS_UNPORTED(site) ::VS::Core::RecordUnported(site)
-#endif

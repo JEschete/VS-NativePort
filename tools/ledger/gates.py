@@ -76,7 +76,7 @@ FORWARD_CALL = re.compile(
     r"([A-Za-z_][\w:]*)\s*\(.*\)\s*;\s*$", re.S)
 LOCAL_TYPE = re.compile(r"\b(?:class|struct)\s+([A-Za-z_]\w*)\s*(?:final\s*)?(?::[^;{}()]*)?\{")
 # A body that only logs (Core/Log.hpp) implements the function; it forwards no behavior.
-LOGGING_MACRO = re.compile(r"^VS_LOG_[A-Z]+$")
+LOGGING_CALL = re.compile(r"^Log(?:Trace|Debug|Info|Warn|Error)$")
 
 
 @dataclass(frozen=True)
@@ -336,7 +336,7 @@ def is_forwarding_wrapper(definition: Definition, siblings: list[Definition],
     if not match or definition.body.count(";") != 1:
         return False
     callee = match.group(1).rsplit("::", 1)[-1]
-    if LOGGING_MACRO.match(callee) or callee in local_types:
+    if LOGGING_CALL.match(callee) or callee in local_types:
         return False
     return not any(
         other is not definition and other.qualified.rsplit("::", 1)[-1] == callee for other in siblings

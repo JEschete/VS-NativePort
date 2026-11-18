@@ -78,10 +78,11 @@ InputSystem::~InputSystem() { CloseGamepad(); }
 bool InputSystem::OpenGamepad(u32 instance_id) {
   m_pad_ = SDL_OpenGamepad(instance_id);
   if (!m_pad_) {
-    VS_LOG_WARN("input", "opening gamepad {}: {}", instance_id, SDL_GetError());
+    VS::Core::LogWarn("input", "opening gamepad {}: {}", instance_id,
+                      SDL_GetError());
     return false;
   }
-  VS_LOG_INFO("input", "gamepad connected: {}", GamepadName());
+  VS::Core::LogInfo("input", "gamepad connected: {}", GamepadName());
   return true;
 }
 
@@ -105,13 +106,13 @@ void InputSystem::HandleEvent(const SDL_Event& ev) {
     OpenGamepad(ev.gdevice.which);
   } else if (ev.type == SDL_EVENT_GAMEPAD_REMOVED && m_pad_ &&
              SDL_GetGamepadID(m_pad_) == ev.gdevice.which) {
-    VS_LOG_INFO("input", "gamepad disconnected: {}", GamepadName());
+    VS::Core::LogInfo("input", "gamepad disconnected: {}", GamepadName());
     CloseGamepad();
     int count = 0;
     const std::unique_ptr<SDL_JoystickID, decltype(&SDL_free)> devices(
         SDL_GetGamepads(&count), SDL_free);
     if (!devices) {
-      VS_LOG_WARN("input", "listing gamepads: {}", SDL_GetError());
+      VS::Core::LogWarn("input", "listing gamepads: {}", SDL_GetError());
       return;
     }
     for (int index = 0; index < count; ++index) {
@@ -136,8 +137,8 @@ void InputSystem::UpdateActuators() {
   if (!SDL_RumbleGamepad(m_pad_, levels.low_frequency, levels.high_frequency,
                          active ? kRumbleDurationMs : 0)) {
     if (!m_rumble_error_) {
-      VS_LOG_WARN("input", "gamepad rumble on {}: {}", GamepadName(),
-                  SDL_GetError());
+      VS::Core::LogWarn("input", "gamepad rumble on {}: {}", GamepadName(),
+                        SDL_GetError());
     }
     m_rumble_error_ = true;
     return;

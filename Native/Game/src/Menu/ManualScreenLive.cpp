@@ -60,7 +60,7 @@ ScreenState g_screen;
 void RefuseLive(std::string_view reason) {
   ++g_refusals;
   if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS_LOG_WARN("menu.manual", "{} (refusal {})", reason, g_refusals);
+    VS::Core::LogWarn("menu.manual", "{} (refusal {})", reason, g_refusals);
   }
 }
 

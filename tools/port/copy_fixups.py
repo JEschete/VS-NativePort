@@ -5960,12 +5960,12 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("((u_long)arg1 & a3)", "LegacyGpu_Handle(arg1)", "link to the spliced packet"),
     ],
     # The game heap is a fixed PS1 RAM range (0x8010C000, 0xF2000 bytes) in three start-up paths; natively the live
-    # game heap is reset over Core's arena (Core/Arena.h, HeapLive.hpp).
+    # game heap is reset over Core's arena (Core/Arena.hpp, HeapLive.hpp).
     **{fid: [("VS::Core::Memory::InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000)",
               "VS::Core::Memory::ResetLiveGameHeap()", "F03467 #276 the live game heap spans Core's arena")]
        for fid in ("F01858", "F03437")},
     # vs_overlay_slots (overlay.c) holds the PS1 load addresses of the overlay modules; natively they are offsets in
-    # Core's overlay block (Core/Arena.h), which keeps the slots that overlap overlapping.
+    # Core's overlay block (Core/Arena.hpp), which keeps the slots that overlap overlapping.
     "G02018": [(f"(void*)0x{a:08X}", f"Core_OverlayAddress(0x{a:08X}u)", "overlay load address")
                for a in (0x80068800, 0x800F9800, 0x80102800)],
     # main.c:8093 reaches the loading image's pixels as the words after its 4-byte size header (one rgb555Sized

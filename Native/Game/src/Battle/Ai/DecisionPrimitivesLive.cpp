@@ -27,8 +27,8 @@
 #include "Battle/Ai/LiveRequire.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Damage.h"
-#include "Core/BiosRand.h"
 #include "Core/Diagnostics.hpp"
+#include "Core/RandomLive.hpp"
 #include "Field/Gimmicks.h"
 
 namespace VS::Battle::Ai {
@@ -193,7 +193,7 @@ class LiveFallbackCache final : public FallbackCandidateCache {
 
 class LiveCandidateRandom final : public CandidateRandom {
  public:
-  [[nodiscard]] int Next() override { return Core_Random_Rand(); }
+  [[nodiscard]] int Next() override { return VS::Core::NextBiosRand(); }
 };
 }  // namespace
 

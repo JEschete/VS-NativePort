@@ -16,7 +16,7 @@
 #include "Battle/FloatingLabelPlacementLive.hpp"
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
-#include "Core/BiosRand.h"
+#include "Core/RandomLive.hpp"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 
@@ -46,7 +46,7 @@ class State {
     Battle_actorMarkerSides = saved_sides_;
     Battle_abilityTimingCuePosition = saved_cue_position_;
     std::ranges::copy(saved_markers_, Battle_actorMarkers);
-    Core_Random_Seed(saved_random_state_);
+    VS::Core::SeedBiosRand(saved_random_state_);
   }
   State(const State&) = delete;
   State& operator=(const State&) = delete;
@@ -79,7 +79,7 @@ class State {
   int saved_sides_ = Battle_actorMarkerSides;
   SVECTOR saved_cue_position_ = Battle_abilityTimingCuePosition;
   std::array<char, 40> saved_markers_ = std::to_array(Battle_actorMarkers);
-  unsigned saved_random_state_ = Core_Random_State();
+  unsigned saved_random_state_ = VS::Core::BiosRand().State();
 };
 
 inline std::array<LabelWords, 32> Snapshot(const State& state) {

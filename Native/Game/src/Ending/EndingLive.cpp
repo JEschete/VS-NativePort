@@ -183,9 +183,9 @@ class LiveDiscRead {
     void* buffer = Core::Memory::AllocateLiveFromHighEnd(
         static_cast<std::size_t>(std::max(file.size, 0)));
     if (buffer == nullptr) {
-      VS_LOG_WARN(kChannel,
-                  "Disc read of sector {} refused: no {}-byte heap buffer",
-                  file.lba, file.size);
+      VS::Core::LogWarn(
+          kChannel, "Disc read of sector {} refused: no {}-byte heap buffer",
+          file.lba, file.size);
       return nullptr;
     }
     slot_ = Content::AllocateLiveDiscRequest(&file_);
@@ -207,8 +207,8 @@ class LiveDiscRead {
       return true;
     }
     if (slot_->state == Content_DiscRequestState_Error) {
-      VS_LOG_WARN(kChannel, "Disc read of sector {} failed; it has no data",
-                  file_.lba);
+      VS::Core::LogWarn(
+          kChannel, "Disc read of sector {} failed; it has no data", file_.lba);
       return true;
     }
     return false;
@@ -362,11 +362,11 @@ class LiveDisplay : public Host {
                                         static_cast<std::size_t>(area.height) *
                                         kPixelBytes;
     if (area.width < 0 || area.height < 0 || pixels.size() < bytes) {
-      VS_LOG_WARN(kChannel,
-                  "VRAM upload refused: {}x{} at ({}, {}) needs {} bytes, "
-                  "has {}",
-                  area.width, area.height, area.x, area.y, bytes,
-                  pixels.size());
+      VS::Core::LogWarn(
+          kChannel,
+          "VRAM upload refused: {}x{} at ({}, {}) needs {} bytes, "
+          "has {}",
+          area.width, area.height, area.x, area.y, bytes, pixels.size());
       return;
     }
     RECT rect = ToRect(area);
@@ -386,10 +386,11 @@ class LiveDisplay : public Host {
   void DrawOrderingTable(int ordering_slot) override {
     u_long* entry = SceneOrderingEntry(ordering_slot);
     if (entry == nullptr) {
-      VS_LOG_WARN(kChannel,
-                  "Frame draw refused: scene slot {} is outside the frame's "
-                  "ordering table",
-                  ordering_slot);
+      VS::Core::LogWarn(
+          kChannel,
+          "Frame draw refused: scene slot {} is outside the frame's "
+          "ordering table",
+          ordering_slot);
       return;
     }
     DrawOTag(entry);
@@ -413,7 +414,7 @@ class LiveDisplay : public Host {
     auto* base = static_cast<u_long*>(Render_legacyOrderingTables[buffer]);
     Render_frameScratch.primitiveCursor = Render_legacyPrimitiveBuffers[buffer];
     if (base == nullptr) {
-      VS_LOG_WARN(kChannel, "Frame {} has no ordering table", buffer);
+      VS::Core::LogWarn(kChannel, "Frame {} has no ordering table", buffer);
       Render_frameScratch.overlayOrderingTable = nullptr;
       Render_frameScratch.orderingTable = nullptr;
       return;
@@ -433,8 +434,9 @@ class LiveDisplay : public Host {
                            std::size_t bytes) override {
     void* allocation = Core::Memory::AllocateLiveFromLowEnd(bytes);
     if (allocation == nullptr) {
-      VS_LOG_WARN(kChannel, "Frame {} buffer of {} bytes refused by the heap",
-                  buffer, bytes);
+      VS::Core::LogWarn(kChannel,
+                        "Frame {} buffer of {} bytes refused by the heap",
+                        buffer, bytes);
     }
     const std::size_t index = BufferIndex(buffer);
     if (kind == FrameBufferKind::kPrimitives) {
@@ -691,8 +693,8 @@ class LiveResultsHost final : public LiveDisplay<ResultsHost> {
 
   void BeginResultsRead(std::size_t file) override {
     if (file >= kResultsFiles.size()) {
-      VS_LOG_WARN(kChannel, "Results file {} refused: there are {}", file,
-                  kResultsFiles.size());
+      VS::Core::LogWarn(kChannel, "Results file {} refused: there are {}", file,
+                        kResultsFiles.size());
       return;
     }
     Ending_resultsTimBuffer = read_.Begin(kResultsFiles[file], false);
@@ -874,8 +876,8 @@ void LiveCreditsHost::BeginIllustrationRead(std::size_t resource) {
   read_.End();
   reading_ = resource;
   if (!IsDiscIllustration(resource)) {
-    VS_LOG_WARN(kChannel, "Illustration {} refused: it is not on the disc",
-                resource);
+    VS::Core::LogWarn(
+        kChannel, "Illustration {} refused: it is not on the disc", resource);
     return;
   }
   loaded_[resource] = false;

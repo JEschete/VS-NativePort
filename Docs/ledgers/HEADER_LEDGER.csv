@@ -26,17 +26,17 @@ H0024,header,Native/Engine/include/Audio/MusicState.hpp,owned,no,pragma-once,0,0
 H0025,header,Native/Engine/include/Audio/SequencerOutput.h,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,retired,merged into Native/Engine/include/Audio/VoiceOutputLive.hpp (#441)
 H0026,header,Native/Engine/include/Audio/StreamPlayback.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0027,header,Native/Engine/include/Audio/XaPlayback.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0028,header,Native/Engine/include/Core/Arena.h,owned,no,pragma-once,0,0,0,0,0,4,2,0,0,remaining,
-H0029,header,Native/Engine/include/Core/BiosRand.h,owned,no,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
+H0028,header,Native/Engine/include/Core/Arena.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
+H0029,header,Native/Engine/include/Core/BiosRand.h,owned,no,pragma-once,0,0,0,0,0,0,3,0,0,retired,merged into Core/RandomLive.hpp (#441)
 H0030,header,Native/Engine/include/Core/Diagnostics.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0031,header,Native/Engine/include/Core/Gte.h,owned,no,pragma-once,0,0,0,0,0,0,41,0,0,remaining,
 H0032,header,Native/Engine/include/Core/IntPair.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
-H0033,header,Native/Engine/include/Core/Log.hpp,owned,no,pragma-once,0,0,0,0,0,5,0,0,0,remaining,
+H0033,header,Native/Engine/include/Core/Log.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0034,header,Native/Engine/include/Core/Memory/HeapLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0035,header,Native/Engine/include/Core/Scratch.h,owned,no,pragma-once,0,0,0,0,0,1,1,0,0,remaining,
+H0035,header,Native/Engine/include/Core/Scratch.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0036,header,Native/Engine/include/Core/Text/TextCode.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
-H0037,header,Native/Engine/include/Core/Unported.h,owned,no,pragma-once,0,0,0,0,0,1,2,0,0,remaining,
-H0038,header,Native/Engine/include/Core/Unported.hpp,owned,no,pragma-once,0,0,0,0,0,1,0,0,0,remaining,
+H0037,header,Native/Engine/include/Core/Unported.h,owned,no,pragma-once,0,0,0,0,0,1,2,0,0,retired,merged into Core/Unported.hpp and Core/Diagnostics.hpp (#441)
+H0038,header,Native/Engine/include/Core/Unported.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0039,header,Native/Engine/include/Core/WordPair.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0040,header,Native/Engine/include/Input/ControllerLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0041,header,Native/Engine/include/Movie/MoviePlayer.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,

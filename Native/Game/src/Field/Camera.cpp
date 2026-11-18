@@ -143,10 +143,11 @@ constexpr std::int32_t kDefaultPitch = -0x180;
 [[nodiscard]] std::int32_t FixedTangent(std::int32_t sine, std::int32_t angle) {
   const std::int32_t cosine = Math::Cosine(angle);
   if (cosine == 0) {
-    VS_LOG_WARN(kChannel,
-                "camera pitch {} has a zero cosine; its slope takes the R3000 "
-                "quotient",
-                angle);
+    VS::Core::LogWarn(
+        kChannel,
+        "camera pitch {} has a zero cosine; its slope takes the R3000 "
+        "quotient",
+        angle);
   }
   return Math::R3000Quotient(Math::WrappingMultiply(sine, kFixedOne), cosine);
 }
@@ -168,9 +169,9 @@ constexpr std::int32_t kDefaultPitch = -0x180;
   const std::optional<Actors::ActorPlacementView> placement =
       host.ActorPlacement(actor_id);
   if (!placement) {
-    VS_LOG_WARN(kChannel,
-                "actor {} has no placement; the camera uses the origin",
-                actor_id);
+    VS::Core::LogWarn(kChannel,
+                      "actor {} has no placement; the camera uses the origin",
+                      actor_id);
     return {};
   }
   return *placement;
@@ -350,10 +351,11 @@ void ZoomOut(SphericalCamera& orbit) {
 }
 
 void RefuseMissingTransition(std::string_view routine) {
-  VS_LOG_WARN(kChannel,
-              "{} has no first-person camera transition; the camera is left "
-              "as it is",
-              routine);
+  VS::Core::LogWarn(
+      kChannel,
+      "{} has no first-person camera transition; the camera is left "
+      "as it is",
+      routine);
 }
 }  // namespace
 
@@ -582,8 +584,8 @@ void TrackActionCameraTarget(CameraHost& host, FieldCameraState& state,
     UpdateCameraOrbitInput(host, state);
     const std::optional<ActionCameraTargets> targets = host.ActionTargets();
     if (!targets) {
-      VS_LOG_WARN(kChannel,
-                  "no battle action for the camera to frame; it holds still");
+      VS::Core::LogWarn(
+          kChannel, "no battle action for the camera to frame; it holds still");
       return;
     }
     if (targets->preview) {
@@ -595,8 +597,8 @@ void TrackActionCameraTarget(CameraHost& host, FieldCameraState& state,
     UpdateCameraOrbitInput(host, state);
     const std::optional<ActionCameraTargets> targets = host.ActionTargets();
     if (!targets) {
-      VS_LOG_WARN(kChannel,
-                  "no battle action for the camera to frame; it holds still");
+      VS::Core::LogWarn(
+          kChannel, "no battle action for the camera to frame; it holds still");
       return;
     }
     target = targets->area_center;
@@ -694,9 +696,10 @@ void ComputeFirstPersonCameraTransition(CameraHost& host,
   const std::int32_t descent_per_frame =
       Math::WrappingMultiply(transition.direction.y, transition.speed);
   if (descent_per_frame == 0) {
-    VS_LOG_WARN(kChannel,
-                "first-person camera transition has no vertical travel; its "
-                "frame count takes the R3000 quotient");
+    VS::Core::LogWarn(
+        kChannel,
+        "first-person camera transition has no vertical travel; its "
+        "frame count takes the R3000 quotient");
   }
   transition.frames = Math::R3000Quotient(
       Math::WrappingSubtract(destination.y, camera.position.y),
@@ -712,9 +715,10 @@ void ComputeFirstPersonCameraTransition(CameraHost& host,
 
   const std::int32_t frames = transition.frames;
   if (frames == 0) {
-    VS_LOG_WARN(kChannel,
-                "first-person camera transition takes no frames; its steps "
-                "take the R3000 quotient");
+    VS::Core::LogWarn(
+        kChannel,
+        "first-person camera transition takes no frames; its steps "
+        "take the R3000 quotient");
   }
   transition.look_at_step = {
       Math::R3000Quotient(
@@ -776,9 +780,10 @@ void BeginFirstPersonView(CameraHost& host, FieldCameraState& state) {
   if (!state.transition) {
     state.transition = host.AllocateTransition();
     if (!state.transition) {
-      VS_LOG_WARN(kChannel,
-                  "no heap for the first-person camera transition; the view "
-                  "is not entered");
+      VS::Core::LogWarn(
+          kChannel,
+          "no heap for the first-person camera transition; the view "
+          "is not entered");
       return;
     }
   }
@@ -920,10 +925,10 @@ void UpdateCameraTileConstraint(CameraHost& host, const FieldCameraState& state,
   const std::optional<std::uint8_t> flags =
       host.CollisionCellFlags(cell_x, cell_z, layer);
   if (!flags) {
-    VS_LOG_WARN(kChannel,
-                "camera tile has no authored collision cell: x={} z={} "
-                "layer={}",
-                cell_x, cell_z, layer);
+    VS::Core::LogWarn(kChannel,
+                      "camera tile has no authored collision cell: x={} z={} "
+                      "layer={}",
+                      cell_x, cell_z, layer);
   }
   if (flags && (*flags & kCellOccludesView) != 0) {
     host.ApplyGeometryOcclusion(
@@ -989,10 +994,11 @@ std::int32_t SyncCameraAnglesFromPosition(FieldCameraState& state,
       orbit->distance = kVerticalCameraDistance;
     } else {
       if (component == 0) {
-        VS_LOG_WARN(kChannel,
-                    "camera offset {} normalizes to a zero axis; its distance "
-                    "takes the R3000 quotient",
-                    offset);
+        VS::Core::LogWarn(
+            kChannel,
+            "camera offset {} normalizes to a zero axis; its distance "
+            "takes the R3000 quotient",
+            offset);
       }
       orbit->distance = Math::R3000Quotient(ToFixed(offset), component);
     }

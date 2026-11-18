@@ -14,7 +14,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-#include "Core/BiosRand.h"
+#include "Core/RandomLive.hpp"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -30,7 +30,7 @@ struct RouletteFixture {
   Battle_Actor* saved_actor = Battle_characterState;
   Battle_Actor actor{};
   Battle_ActorStats stats{};
-  unsigned saved_random = Core_Random_State();
+  unsigned saved_random = VS::Core::BiosRand().State();
   decltype(VS::Input::buttonsPressed.allButtons) saved_input =
       VS::Input::buttonsPressed.allButtons;
   int saved_state = Menu_Results_screenState;
@@ -76,7 +76,7 @@ struct RouletteFixture {
   ~RouletteFixture() {
     VS::Menu::Results::ResetLiveGameClearModuleData();
     Battle_characterState = saved_actor;
-    Core_Random_Seed(saved_random);
+    VS::Core::SeedBiosRand(saved_random);
     VS::Input::buttonsPressed.allButtons = saved_input;
     Menu_Results_screenState = saved_state;
     Menu_Results_screenTimer = saved_timer;
@@ -118,21 +118,21 @@ struct RouletteFixture {
 TEST_CASE("Roulette uses the full BIOS state and unsigned byte reel positions",
           "[menu][roulette][random]") {
   RouletteFixture fixture;
-  Core_Random_Seed(1);
+  VS::Core::SeedBiosRand(1);
   const std::array expected{200, 120, 136, 104};
   for (const auto position : expected) {
-    const auto selected = (Core_Random_Rand() & 0xF0) | 8;
+    const auto selected = (VS::Core::NextBiosRand() & 0xF0) | 8;
     CHECK(selected == position);
     CHECK(static_cast<unsigned char>(selected) / 16 == selected / 16);
   }
-  const auto saved = Core_Random_State();
+  const auto saved = VS::Core::BiosRand().State();
   std::array<int, 32> continuation{};
   for (auto& position : continuation) {
-    position = (Core_Random_Rand() & 0xF0) | 8;
+    position = (VS::Core::NextBiosRand() & 0xF0) | 8;
   }
-  Core_Random_Seed(saved);
+  VS::Core::SeedBiosRand(saved);
   for (const auto position : continuation) {
-    CHECK(((Core_Random_Rand() & 0xF0) | 8) == position);
+    CHECK(((VS::Core::NextBiosRand() & 0xF0) | 8) == position);
   }
 }
 
@@ -164,7 +164,7 @@ TEST_CASE("Native reel deceleration preserves original per-call stop alignment",
     Menu_Results_screenState = 1;
     Menu_Results_elementAnimationState = 48;
     Menu_Results_buffReelSelection = start;
-    const auto random = Core_Random_State();
+    const auto random = VS::Core::BiosRand().State();
     // Speeds48..9 contribute125 units; speed8 then advances to low nibble8.
     const unsigned alignment = (8 - ((start + 125) & 15)) & 15;
     const auto expected_calls = 40 + alignment;
@@ -179,7 +179,7 @@ TEST_CASE("Native reel deceleration preserves original per-call stop alignment",
     CHECK(Menu_Results_elementAnimationState == 8);
     CHECK(Menu_Results_buffReelSelection == ((start + 125 + alignment) & 255));
     CHECK((Menu_Results_buffReelSelection & 15) == 8);
-    CHECK(Core_Random_State() == random);
+    CHECK(VS::Core::BiosRand().State() == random);
   }
 }
 
@@ -192,13 +192,13 @@ TEST_CASE(
   Menu_Results_elementAnimationState = 0;
   Menu_Results_buffReelSelection = 248;
   VS::Input::buttonsPressed.allButtons = PADRright;
-  const auto random = Core_Random_State();
+  const auto random = VS::Core::BiosRand().State();
   CHECK(VS::Menu::Results::LiveUpdateGameClear() == 0);
   CHECK(Menu_Results_screenState == 0);
   CHECK(Menu_Results_screenTimer == 273);
   CHECK(Menu_Results_elementAnimationState == 0);
   CHECK(Menu_Results_buffReelSelection == 248);
-  CHECK(Core_Random_State() == random);
+  CHECK(VS::Core::BiosRand().State() == random);
 }
 
 TEST_CASE("Native roulette awards every original slot and caps only its stat",

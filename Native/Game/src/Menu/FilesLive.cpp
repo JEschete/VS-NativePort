@@ -188,7 +188,9 @@ State g_state{};
 Content_DiscQueueSlot* g_game_over_request = nullptr;
 void* g_game_over_image = nullptr;
 
-void Warn(std::string_view what) { VS_LOG_WARN("menu.files", "{}", what); }
+void Warn(std::string_view what) {
+  VS::Core::LogWarn("menu.files", "{}", what);
+}
 
 // The packet drawn at once from a copy (DrawPrim of the original's primBuf).
 void SubmitLive(std::span<const std::uint32_t> packet) {

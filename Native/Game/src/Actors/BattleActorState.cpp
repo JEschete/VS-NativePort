@@ -14,7 +14,8 @@ constexpr int kFirstOtherActor = 1;
 
 BattleActorState* KnownActor(BattleActorHost& host, int id) {
   if (!IsBattleActorSlot(id)) {
-    VS_LOG_WARN("actors", "Battle actor {} is outside the actor table", id);
+    VS::Core::LogWarn("actors", "Battle actor {} is outside the actor table",
+                      id);
     return nullptr;
   }
   return host.Actor(id);
@@ -32,9 +33,9 @@ void SetActorHostile(BattleActorHost& host, int id, bool hostile) {
 int HpPercentage(int current_hp, int max_hp) {
   if (current_hp <= 0) return 0;
   if (max_hp == 0) {
-    VS_LOG_WARN("actors",
-                "An actor with {} HP has no maximum HP; reporting 1 percent",
-                current_hp);
+    VS::Core::LogWarn(
+        "actors", "An actor with {} HP has no maximum HP; reporting 1 percent",
+        current_hp);
     return 1;
   }
   const int percentage = current_hp * kFullPercentage / max_hp;
@@ -43,7 +44,7 @@ int HpPercentage(int current_hp, int max_hp) {
 
 int ActorHpPercentage(BattleActorHost& host, int id) {
   if (KnownActor(host, id) == nullptr) {
-    VS_LOG_WARN("actors", "No battle actor {} for the HP percentage", id);
+    VS::Core::LogWarn("actors", "No battle actor {} for the HP percentage", id);
     return 0;
   }
   const ActorVitals* vitals = host.Vitals(id);

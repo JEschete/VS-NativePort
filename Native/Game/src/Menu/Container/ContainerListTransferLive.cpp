@@ -75,8 +75,8 @@ struct Refusal {
 
 void Warn(std::string_view entry, std::string_view reason) {
   if (std::has_single_bit(++g_refusals)) {
-    VS_LOG_WARN("menu.container", "{} refused: {} ({} refusals)", entry, reason,
-                g_refusals);
+    VS::Core::LogWarn("menu.container", "{} refused: {} ({} refusals)", entry,
+                      reason, g_refusals);
   }
 }
 

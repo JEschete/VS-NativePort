@@ -36,7 +36,7 @@ namespace VS::Legacy {
 
 ActuatorState ReadActuators(int port) {
   if (port < 0 || port > 1) {
-    VS_LOG_WARN("input", "invalid actuator port index {}", port);
+    VS::Core::LogWarn("input", "invalid actuator port index {}", port);
     return {};
   }
   const Port& p = g_ports[port];
@@ -119,12 +119,13 @@ int PadInfoMode(int port, int term, int offs) {
 int PadSetActAlign(int port, unsigned char* table) {
   Port* p = PortFor(port);
   if (p == nullptr || table == nullptr) {
-    VS_LOG_WARN("input", "invalid actuator alignment for port {}", port);
+    VS::Core::LogWarn("input", "invalid actuator alignment for port {}", port);
     return 0;
   }
   p->aligned = table[0] == 0 && table[1] == 1;
   if (!p->aligned) {
-    VS_LOG_WARN("input", "unsupported actuator alignment for port {}", port);
+    VS::Core::LogWarn("input", "unsupported actuator alignment for port {}",
+                      port);
     return 0;
   }
   return 1;
@@ -140,14 +141,14 @@ int PadSetMainMode(int port, int offs, int lock) {
 void PadSetAct(int port, unsigned char* table, int len) {
   Port* p = PortFor(port);
   if (p == nullptr) {
-    VS_LOG_WARN("input", "invalid actuator registration port {}", port);
+    VS::Core::LogWarn("input", "invalid actuator registration port {}", port);
     return;
   }
   if (len < 0 || len > 2 || (len != 0 && table == nullptr)) {
     p->actuators = nullptr;
     p->actuator_count = 0;
-    VS_LOG_WARN("input", "invalid actuator buffer length {} for port {}", len,
-                port);
+    VS::Core::LogWarn("input", "invalid actuator buffer length {} for port {}",
+                      len, port);
     return;
   }
   p->actuators = len == 0 ? nullptr : table;

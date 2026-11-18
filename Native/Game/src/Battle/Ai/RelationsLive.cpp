@@ -28,8 +28,8 @@
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/BiosRand.h"
 #include "Core/Diagnostics.hpp"
+#include "Core/RandomLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -143,7 +143,7 @@ class LiveAllianceActor final : public AshleyAllianceActor {
         reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&reaction_), command,
         range);
   }
-  [[nodiscard]] int Roll() override { return Core_Random_Rand(); }
+  [[nodiscard]] int Roll() override { return VS::Core::NextBiosRand(); }
 
  private:
   Battle_Ai_ReactionView& reaction_;

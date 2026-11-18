@@ -47,7 +47,8 @@ void VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts() {
   const Audio_MusicConfig* playing = Audio_Seq_activeMusicConfig;
   Audio_SeqChannel* channels = Audio_Seq_secondaryMusicChannels;
   if (playing == nullptr || channels == nullptr) {
-    VS_LOG_ERROR("audio", "secondary music layer has incomplete native state");
+    VS::Core::LogError("audio",
+                       "secondary music layer has incomplete native state");
     return;
   }
   // The secondary table mirrors the music channel table's extent.

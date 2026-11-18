@@ -8,8 +8,13 @@
 // state, the interface keystream and the 97-entry shuffle table that the
 // copied callers share.
 namespace VS::Core {
-// The BIOS rand() (A0h:2Fh) state behind Core_Random_Rand.
+// The BIOS rand() (A0h:2Fh) state: the PS1 rand()/srand() LCG with 15-bit
+// output, seeded with 1 at boot.
 [[nodiscard]] Rand15& BiosRand() noexcept;
+
+// BIOS rand() and srand() over BiosRand(), with the "rng" trace of each call.
+i32 NextBiosRand();
+void SeedBiosRand(u32 seed);
 
 // Random::NextInterfaceRandomBits over the interface keystream.
 u32 NextLiveInterfaceRandomBits(i32 bit_count);

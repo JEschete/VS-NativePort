@@ -49,7 +49,7 @@ architecture changes rather than per-function work, so this ledger is what track
 
 Function bodies: 3,732 found, 0 macro aliases, 0 templates with 0 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 
-SDK shim sites still recording `VS_UNPORTED`: 28.
+SDK shim sites still recording `VS::Core::RecordUnported`: 28.
 
 | Shim source | Sites | Calls |
 | --- | ---: | --- |
@@ -134,4 +134,4 @@ the AI masks that state with a power of two. Replays do not exercise the path th
 - The 8 `copied=stub` catalog rows are implemented: 7 are macro aliases of `Core_Gte_*` and 1 has its own body. Only the label
   is stale.
 - `F03404` and `F03408` name `Native\Engine\src\Render\Lighting.cpp`, which does not exist. They are aliases in `Lighting.h`.
-- The `VS_UNPORTED` count is measured from calls, not text. Comments that mention the macro are not call sites.
+- The `VS::Core::RecordUnported` count is measured from calls, not text. Comments that mention it are not call sites.

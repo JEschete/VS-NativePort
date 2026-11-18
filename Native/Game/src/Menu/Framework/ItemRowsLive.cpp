@@ -109,7 +109,9 @@ constexpr std::array<u_char, kWeaponHandCategories> kInitialWeaponHands{
 Content_DiscQueueSlot* g_item_text_request = nullptr;
 ItemTextLoadState g_item_text_load;
 
-void Warn(std::string_view what) { VS_LOG_WARN("menu.framework", "{}", what); }
+void Warn(std::string_view what) {
+  VS::Core::LogWarn("menu.framework", "{}", what);
+}
 
 [[nodiscard]] std::uint8_t* Bytes(void* block) {
   return static_cast<std::uint8_t*>(block);

@@ -49,7 +49,7 @@ std::uint64_t refusals = 0;
 
 void Report(std::string_view what) {
   ++refusals;
-  VS_LOG_WARN("menu.score", "encyclopedia preview: {}", what);
+  VS::Core::LogWarn("menu.score", "encyclopedia preview: {}", what);
 }
 
 AssetAddress Address(const void* pointer) {

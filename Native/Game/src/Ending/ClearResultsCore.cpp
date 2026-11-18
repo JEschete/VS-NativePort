@@ -198,9 +198,9 @@ class RegionPainter {
  private:
   [[nodiscard]] const Render::TextureRegion* Find(int region_id) const {
     if (region_id < 0 || static_cast<std::size_t>(region_id) >= atlas_.size()) {
-      VS_LOG_WARN("ending",
-                  "Results region {} refused: the atlas has {} regions",
-                  region_id, atlas_.size());
+      VS::Core::LogWarn("ending",
+                        "Results region {} refused: the atlas has {} regions",
+                        region_id, atlas_.size());
       return nullptr;
     }
     return &atlas_[static_cast<std::size_t>(region_id)];
@@ -220,9 +220,9 @@ RegionColorPair Faded(RegionColorPair colors, int fade) {
 int CountVisitedRooms(const ClearProgress& progress,
                       std::span<const std::uint32_t> countable_room_bits) {
   if (countable_room_bits.size() < kRoomFlagWords) {
-    VS_LOG_WARN("ending",
-                "Countable rooms table has {} of {} words; counting those",
-                countable_room_bits.size(), kRoomFlagWords);
+    VS::Core::LogWarn(
+        "ending", "Countable rooms table has {} of {} words; counting those",
+        countable_room_bits.size(), kRoomFlagWords);
   }
   const std::size_t words =
       std::min(countable_room_bits.size(), progress.visited_rooms.size());
@@ -281,10 +281,11 @@ bool UploadMoved(std::span<const std::byte> data, const Render::TimBlock& block,
                             kHalfwordBytes;
   if (area.width < 0 || area.height < 0 || block.pixel_offset > data.size() ||
       data.size() - block.pixel_offset < bytes) {
-    VS_LOG_WARN("ending",
-                "Results image refused: {} bytes at {} lie outside the {}-byte "
-                "file",
-                bytes, block.pixel_offset, data.size());
+    VS::Core::LogWarn(
+        "ending",
+        "Results image refused: {} bytes at {} lie outside the {}-byte "
+        "file",
+        bytes, block.pixel_offset, data.size());
     return false;
   }
   host.LoadImage(area, data.subspan(block.pixel_offset, bytes));
@@ -295,9 +296,9 @@ void UploadAtlasPalette(std::span<const std::byte> data,
                         const Render::TimBlock& palette, ResultsHost& host) {
   if (palette.pixel_offset > data.size() ||
       data.size() - palette.pixel_offset < kAtlasPaletteBytes) {
-    VS_LOG_WARN("ending",
-                "Results atlas palette refused: it lies outside the "
-                "file");
+    VS::Core::LogWarn("ending",
+                      "Results atlas palette refused: it lies outside the "
+                      "file");
     return;
   }
   std::array<std::byte, kAtlasPaletteBytes> colors{};
@@ -314,8 +315,9 @@ void UploadAtlas(std::span<const std::byte> data, ResultsHost& host) {
                          ? Render::ParseTim(data.subspan(offset))
                          : std::nullopt;
     if (!tim) {
-      VS_LOG_WARN("ending", "Results atlas image {} refused: no TIM at {}",
-                  index, offset);
+      VS::Core::LogWarn("ending",
+                        "Results atlas image {} refused: no TIM at {}", index,
+                        offset);
       continue;
     }
     Render::TimBlock image = tim->image;
@@ -334,8 +336,8 @@ void UploadAtlas(std::span<const std::byte> data, ResultsHost& host) {
 void UploadRankScreen(std::span<const std::byte> data, ResultsHost& host) {
   const auto tim = Render::ParseTim(data);
   if (!tim) {
-    VS_LOG_WARN("ending", "Rank screen refused: its {} bytes hold no TIM",
-                data.size());
+    VS::Core::LogWarn("ending", "Rank screen refused: its {} bytes hold no TIM",
+                      data.size());
     return;
   }
   UploadMoved(data, tim->image, {kRankScreenLeft, kRankScreenTop, 0, 0}, host);
@@ -356,8 +358,9 @@ void ScoreFile(ResultsState& state, ClearProgress& progress,
   DetermineRiskbreakerRank(state, progress.score, tables);
   const std::size_t file = static_cast<std::size_t>(state.rank) + 1;
   if (file >= kResultsFileCount) {
-    VS_LOG_WARN("ending", "Rank screen {} refused: there are {} rank screens",
-                state.rank, kRankCount);
+    VS::Core::LogWarn("ending",
+                      "Rank screen {} refused: there are {} rank screens",
+                      state.rank, kRankCount);
     state.load_phase = kLoadDone;
     return;
   }
@@ -734,15 +737,15 @@ void DrawRiskbreakerRank(ScreenPoint origin, int timer,
   const int fade = ClampFade(timer);
   if (fade <= 0) return;
   if (state.rank >= tables.rank_labels.size()) {
-    VS_LOG_WARN("ending", "Rank {} label refused: there are {} labels",
-                state.rank, tables.rank_labels.size());
+    VS::Core::LogWarn("ending", "Rank {} label refused: there are {} labels",
+                      state.rank, tables.rank_labels.size());
     return;
   }
   const RankLabel& label = tables.rank_labels[state.rank];
   std::size_t count = label[0];
   if (count > kRankLabelRegions) {
-    VS_LOG_WARN("ending", "Rank {} label names {} regions; drawing {}",
-                state.rank, count, kRankLabelRegions);
+    VS::Core::LogWarn("ending", "Rank {} label names {} regions; drawing {}",
+                      state.rank, count, kRankLabelRegions);
     count = kRankLabelRegions;
   }
   const auto regions = std::span(label).subspan(1, count);
@@ -765,8 +768,9 @@ void DetermineRiskbreakerRank(ResultsState& state, const ScoreRecord& score,
       std::min({kRankCount, tables.rank_title_thresholds.size(),
                 tables.rank_score_thresholds.size()});
   if (ranks < kRankCount) {
-    VS_LOG_WARN("ending", "Rank tables hold {} of {} ranks; checking those",
-                ranks, kRankCount);
+    VS::Core::LogWarn("ending",
+                      "Rank tables hold {} of {} ranks; checking those", ranks,
+                      kRankCount);
   }
   for (std::size_t rank = 0; rank < ranks; ++rank) {
     if (titles >= tables.rank_title_thresholds[rank] &&

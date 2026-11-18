@@ -15,7 +15,7 @@ GameFiber::GameFiber(Entry entry, usize stack_bytes) : m_entry_(entry) {
       IsThreadAFiber() ? GetCurrentFiber() : ConvertThreadToFiber(nullptr);
   m_fiber_ = CreateFiber(stack_bytes, &GameFiber::Start, this);
   if (m_fiber_ == nullptr) {
-    VS_LOG_ERROR("fiber", "CreateFiber failed ({})", GetLastError());
+    VS::Core::LogError("fiber", "CreateFiber failed ({})", GetLastError());
     m_finished_ = true;
   }
 }
@@ -52,7 +52,7 @@ bool GameFiber::InGame() {
 void __stdcall GameFiber::Start(void* self) {
   auto* fiber = static_cast<GameFiber*>(self);
   fiber->m_entry_();
-  VS_LOG_INFO("fiber", "game entry returned");
+  VS::Core::LogInfo("fiber", "game entry returned");
   fiber->m_finished_ = true;
   // a fiber must never return: hand control back for good
   for (;;) {

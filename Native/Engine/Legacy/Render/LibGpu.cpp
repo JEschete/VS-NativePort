@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "Core/Log.hpp"
-#include "Core/Unported.h"
+#include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
 #include "Render/Frame.h"
@@ -52,11 +52,11 @@ void SubmitPacket(const P_TAG* p) {
   while (at < words.size()) {
     const usize used = GamePages().Execute(words.subspan(at));
     if (used == 0) {
-      VS_LOG_ERROR("render",
-                   "truncated command 0x{:02X} in packet {} ({} words), offset "
-                   "{}; first=0x{:08X}",
-                   words[at] >> 24, static_cast<const void*>(p), len, at,
-                   words[0]);
+      VS::Core::LogError(
+          "render",
+          "truncated command 0x{:02X} in packet {} ({} words), offset "
+          "{}; first=0x{:08X}",
+          words[at] >> 24, static_cast<const void*>(p), len, at, words[0]);
       VS::Platform::LogAddress(p);
       throw std::runtime_error("Truncated render command");
     }
@@ -86,7 +86,8 @@ u_long LegacyGpu_Handle(const void* p) {
       t.handles.try_emplace(p, static_cast<u_long>(t.pointers.size()));
   if (added) {
     if (t.pointers.size() >= LEGACY_GPU_LINK_END) {
-      VS_UNPORTED("libgpu: more than 2^24 packet addresses linked");
+      VS::Core::RecordUnported(
+          "libgpu: more than 2^24 packet addresses linked");
       t.handles.erase(it);
       return LEGACY_GPU_LINK_END;
     }
@@ -111,9 +112,9 @@ int LegacyGpu_WalkList(const void* p) {
   for (; p != nullptr;) {
     const P_TAG* tag = static_cast<const P_TAG*>(p);
     if (!visited.insert(p).second) {
-      VS_LOG_ERROR("render", "cyclic packet chain at {} after {} entries", p,
-                   count);
-      VS_LOG_ERROR(
+      VS::Core::LogError("render", "cyclic packet chain at {} after {} entries",
+                         p, count);
+      VS::Core::LogError(
           "render",
           "cycle len={} link=0x{:X} previous={} previous_len={} "
           "previous_link=0x{:X}; buffers={},{} tables={},{}",

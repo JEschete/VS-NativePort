@@ -34,7 +34,7 @@ constexpr std::uint8_t kFourBits = 0xF;
 template <typename Value>
 Value& Required(Value* value, const char* what) {
   if (value == nullptr) {
-    VS_LOG_ERROR("field.collision", "Actor collision requires {}", what);
+    VS::Core::LogError("field.collision", "Actor collision requires {}", what);
     std::abort();
   }
   return *value;
@@ -208,8 +208,9 @@ class LiveActorCollisionHost final : public ActorCollisionHost {
   void StoreActor(const CollisionActor& actor) override {
     Actors_ActorRecord* record = TableRecord(actor.table_index);
     if (record == nullptr) {
-      VS_LOG_WARN("field.collision", "Actor collision store refused slot {}",
-                  actor.table_index);
+      VS::Core::LogWarn("field.collision",
+                        "Actor collision store refused slot {}",
+                        actor.table_index);
       return;
     }
     StoreRecord(actor, *record);
@@ -227,8 +228,8 @@ class LiveActorCollisionHost final : public ActorCollisionHost {
                              std::int32_t mode) override {
     Actors_ActorRecord* record = TableRecord(actor_index);
     if (record == nullptr) {
-      VS_LOG_WARN("field.collision", "Platform contact update refused slot {}",
-                  actor_index);
+      VS::Core::LogWarn("field.collision",
+                        "Platform contact update refused slot {}", actor_index);
       return;
     }
     Actors::UpdateLiveActorPlatformContact(record, mode);

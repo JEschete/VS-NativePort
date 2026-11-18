@@ -88,7 +88,8 @@ namespace VS::Battle {
 void SetLiveSphereTargets(std::span<Battle_TargetPreview> entries, int mode) {
   ResetTargetPages();
   if (entries.size() > kMaxSphereTargets) {
-    VS_LOG_ERROR("targeting.page", "invalid targets count={}", entries.size());
+    VS::Core::LogError("targeting.page", "invalid targets count={}",
+                       entries.size());
     std::abort();
   }
   std::array<std::uint8_t, kMaxSphereTargets> actor_ids{};
@@ -104,7 +105,8 @@ void SetLiveSphereTargets(std::span<Battle_TargetPreview> entries, int mode) {
 std::span<Battle_TargetPreview> CheckedTargetPreviews(
     std::span<Battle_TargetPreview> previews, int count) {
   if (count < 0 || static_cast<std::size_t>(count) > previews.size()) {
-    VS_LOG_ERROR("targeting.page", "invalid target preview count={}", count);
+    VS::Core::LogError("targeting.page", "invalid target preview count={}",
+                       count);
     std::abort();
   }
   return previews.first(static_cast<std::size_t>(count));
@@ -113,7 +115,8 @@ std::span<Battle_TargetPreview> CheckedTargetPreviews(
 
 int VS::Battle::AdvanceTargetPage(int direction) {
   if (direction != -1 && direction != 1) {
-    VS_LOG_ERROR("targeting.page", "invalid page direction={}", direction);
+    VS::Core::LogError("targeting.page", "invalid page direction={}",
+                       direction);
     std::abort();
   }
   if (book.pages.size() < 2 || Sphere() == nullptr) return 0;
@@ -127,8 +130,9 @@ int VS::Battle::AdvanceTargetPage(int direction) {
             Battle_SphereTargetLabel{});
   ApplyPage(book.pages[book.current], true);
   const auto info = VS::Battle::GetTargetPageInfo();
-  VS_LOG_INFO("targeting.page", "page={}/{} first={} visible={} total={}",
-              info.page, info.pages, info.first, info.visible, info.total);
+  VS::Core::LogInfo("targeting.page", "page={}/{} first={} visible={} total={}",
+                    info.page, info.pages, info.first, info.visible,
+                    info.total);
   return 1;
 }
 
@@ -151,8 +155,8 @@ int VS::Battle::TargetPagesUseShoulders(void) {
 unsigned char VS::Battle::MapTargetPageIndex(unsigned char index) {
   if (index == kNoTarget) return index;
   if (book.pages.empty() || index >= book.pages[book.current].count) {
-    VS_LOG_ERROR("targeting.page", "invalid local target index={}",
-                 static_cast<unsigned>(index));
+    VS::Core::LogError("targeting.page", "invalid local target index={}",
+                       static_cast<unsigned>(index));
     std::abort();
   }
   return static_cast<unsigned char>(book.pages[book.current].first + index);
@@ -160,8 +164,8 @@ unsigned char VS::Battle::MapTargetPageIndex(unsigned char index) {
 
 int VS::Battle::ValidateTargetPreviewIndex(int index) {
   if (!VS::Battle::TargetPreviewIndexIsValid(index)) {
-    VS_LOG_ERROR("targeting", "target preview index exceeds capacity: {}",
-                 index);
+    VS::Core::LogError("targeting", "target preview index exceeds capacity: {}",
+                       index);
     std::abort();
   }
   return index;

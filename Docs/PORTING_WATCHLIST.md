@@ -97,7 +97,7 @@ every pointer-to-4-byte-integer cast and where its value goes):
   their PS1 offsets, e.g. `Actors::CharacterInit`, `Field::ActorPlacement`) and `size_t` members (8 bytes on x64) in
   the `SYSTEM.DAT` header, written as `u_int`. Result: 0 pointer-free layout differences.
 - **Game heap:** the three start-up paths that placed the game heap at PS1 address 0x8010C000 use Core's arena
-  (`Core/Arena.h`, 16 MiB). The heap's block headers hold pointers, so its 16-byte block size assumptions are a 1b
+  (`Core/Arena.hpp`, 16 MiB). The heap's block headers hold pointers, so its 16-byte block size assumptions are a 1b
   runtime check.
 
 Types that hold pointers (111) differ from the PS1 layout by design. Code that reaches their members by literal
@@ -161,7 +161,7 @@ actor and room:
   (`python tools\port\field_at.py <Type> 0xOFF[:bit]` maps a PS1 offset to the member). Still raw, to check when
   reached: ActionPlanning 0x9CC/0xD8C/0x1D8C, Behavior +12, Timeline +0x14, ScriptCamera +0x1DA, Gimmicks +0x16C,
   Appearance 0x55-0x64; the audio `>= 0x80000000` KSEG pointer test.
-- **Debug aids.** `Core_Tracef` (C log), `Platform::LogCallStack` (also on bad data reads),
+- **Debug aids.** `VS::Core::Tracef` and the other printf-style logs (`Core/Diagnostics.hpp`), `Platform::LogCallStack` (also on bad data reads),
   `Platform_WatchWrites(addr, bytes)` (hardware write watchpoint), and the crash handler recovers the caller after a
   call through a null function pointer.
 
@@ -220,7 +220,7 @@ assembly, mostly the 3D math coprocessor macros.
 **How (owner, 2026-10-17):** they are replaced over time, through the rewrite tool (item 3), hopefully within about
 a month. Anything that is only hardware interaction is not ported; it is replaced as part of modernization. To keep
 the 1a compile gate reachable meanwhile, an unported function compiles as a stub that calls
-`VS_UNPORTED("<catalog name>")` (`Core/Unported.hpp`). The log shows which stubs a slice actually reaches, which
+`VS::Core::RecordUnported("<catalog name>")` (`Core/Unported.hpp`). The log shows which stubs a slice actually reaches, which
 sets the order.
 
 Before stubbing, the copy tool follows `dup-of:` in the catalog notes. An assembly row whose bytes equal a function
@@ -241,7 +241,7 @@ code uses as shared temporary memory.
 only, the copy tool maps `getScratchAddr(n)` and `vs_scratch` to a per-module scratch struct (or one `Core` scratch
 area), so the code compiles and runs unchanged until each function is modernized.
 
-As copied: one `Core` scratch block (`Core/Scratch.h`, 1 KiB). `getScratchAddr(n)`, the game's scratch struct
+As copied: one `Core` scratch block (`Core/Scratch.hpp`, `VS::Core::ScratchBase()`, 1 KiB). `getScratchAddr(n)`, the game's scratch struct
 (`Render::frameScratch`, a view of the block's start) and scratch literals (`(T*)0x1F8003EC`) all reach the same
 bytes. Note that the block's struct holds pointers, which are 8 bytes on x64, so its later members sit at other
 offsets than raw literals assume (§2).
@@ -277,7 +277,7 @@ fields). Where it helps this port, without replacing the C++ extractor decision:
 What the mechanical copy kept as it was, so that each item gets a deliberate fix rather than a guess:
 
 - **Shims and stubs.** T shims (`Native\Engine\Legacy\`, `Native\Content\Legacy\`) and the 244 assembly-only
-  functions record `VS_UNPORTED` and do nothing yet. `Core::DumpUnportedToLog` lists the ones a run reaches, which
+  functions record `VS::Core::RecordUnported` and do nothing yet. `Core::DumpUnportedToLog` lists the ones a run reaches, which
   orders the work. libpad, VSync and the root counters (strategy R in the SDK ledger) are still shims with the SDK
   names because Engine\Input and Core::FrameClock have no matching API yet.
 - **GTE math.** `Core/Gte.h` follows the documented GTE arithmetic; its rotation order, `rsin`/`ratan2` rounding,

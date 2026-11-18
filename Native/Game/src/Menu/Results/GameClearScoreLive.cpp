@@ -29,10 +29,11 @@ std::uint64_t refusals = 0;
 void Report(ResultsDrawResult result) {
   if (result == ResultsDrawResult::kInvalidTexture &&
       std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.results",
-                "Game-clear drawing refused a glyph outside the atlas or rank "
-                "table ({} refusals)",
-                refusals);
+    VS::Core::LogWarn(
+        "menu.results",
+        "Game-clear drawing refused a glyph outside the atlas or rank "
+        "table ({} refusals)",
+        refusals);
   }
 }
 

@@ -36,7 +36,8 @@ std::uint64_t refusals = 0;
 
 void Refuse(std::string_view reason) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.score", "time trial: {} ({} refusals)", reason, refusals);
+    VS::Core::LogWarn("menu.score", "time trial: {} ({} refusals)", reason,
+                      refusals);
   }
 }
 

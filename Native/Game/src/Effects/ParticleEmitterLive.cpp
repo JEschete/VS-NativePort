@@ -17,7 +17,7 @@
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/RandomLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -47,8 +47,8 @@ std::uint64_t refused_emissions = 0;
 
 void Refuse(std::string_view reason) {
   if (std::has_single_bit(++refused_emissions)) {
-    VS_LOG_WARN("effects", "particle emission refused: {} ({} refusals)",
-                reason, refused_emissions);
+    VS::Core::LogWarn("effects", "particle emission refused: {} ({} refusals)",
+                      reason, refused_emissions);
   }
 }
 
@@ -417,7 +417,8 @@ void EmitLiveParticleEvent(Effects_EffectInstance* instance, int event,
         .variant = static_cast<std::uint8_t>(parent->variant)};
   }
   auto& live_scratch = *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(Core_ScratchBase()) + kScratchOffset);
+      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
+      kScratchOffset);
   auto scratch = LoadScratch(live_scratch);
   LiveEmissionHost host(*instance);
   const auto result =

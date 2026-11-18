@@ -14,7 +14,7 @@
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
-#include "Core/BiosRand.h"
+#include "Core/RandomLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Event/Triggers.h"
@@ -96,7 +96,7 @@ struct LiveTimerState {
   int saved_tick_speed = VS::State::tickSpeed;
   State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
   char saved_hud = Battle_lowerScreenUiState;
-  unsigned saved_random = Core_Random_State();
+  unsigned saved_random = VS::Core::BiosRand().State();
   void* saved_triggers = Event_roomEventTriggers;
   VS::Event::RoomEventLease saved_room = VS::Event::LiveRoomScriptSections();
   char saved_phase = Event_playbackPhase;
@@ -114,7 +114,7 @@ struct LiveTimerState {
     VS::State::tickSpeed = saved_tick_speed;
     Audio_Seq_unusedStateFlags = saved_flags;
     Battle_lowerScreenUiState = saved_hud;
-    Core_Random_Seed(saved_random);
+    VS::Core::SeedBiosRand(saved_random);
     Event_roomEventTriggers = saved_triggers;
     VS::Event::PublishLiveRoomScriptSections(saved_room);
     Event_playbackPhase = saved_phase;

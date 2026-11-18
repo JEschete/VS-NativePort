@@ -44,10 +44,11 @@ struct CryptoHandles {
         algorithm && BCryptCloseAlgorithmProvider(algorithm, 0) < 0;
     try {
       if (hash_failed) {
-        VS_LOG_WARN("launcher.verify", "Cannot release SHA-256 hash handle");
+        VS::Core::LogWarn("launcher.verify",
+                          "Cannot release SHA-256 hash handle");
       }
       if (provider_failed) {
-        VS_LOG_WARN("launcher.verify", "Cannot release SHA-256 provider");
+        VS::Core::LogWarn("launcher.verify", "Cannot release SHA-256 provider");
       }
     } catch (...) {
       OutputDebugStringW(L"Cannot log the SHA-256 handle release failure");
@@ -203,7 +204,8 @@ std::expected<VerifiedDisc, std::string> VerifyChd(
 
 void CloseDiscHandle::operator()(void* handle) const {
   if (handle && !CloseHandle(handle)) {
-    VS_LOG_WARN("launcher.verify", "Cannot close disc verification handle");
+    VS::Core::LogWarn("launcher.verify",
+                      "Cannot close disc verification handle");
   }
 }
 

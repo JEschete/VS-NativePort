@@ -70,8 +70,8 @@ void DrawLiveSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
   if (sphere == nullptr || shape == nullptr || sphere->vertexCount < 2) return;
   const auto count = static_cast<std::size_t>(sphere->vertexCount);
   if (count > kTargetWireVertices) {
-    VS_LOG_ERROR("targeting", "Invalid wireframe vertex count {}",
-                 sphere->vertexCount);
+    VS::Core::LogError("targeting", "Invalid wireframe vertex count {}",
+                       sphere->vertexCount);
     std::abort();
   }
   std::array<TargetWireVertex, kTargetWireVertices> vertices{};

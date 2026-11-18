@@ -72,9 +72,10 @@ std::uint64_t reported_diagnostics = 0;
 
 void ReportRefusal(const char* entry) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects",
-                "effect script: {} refused: no effect instance ({} refusals)",
-                entry, refused_calls);
+    VS::Core::LogWarn(
+        "effects",
+        "effect script: {} refused: no effect instance ({} refusals)", entry,
+        refused_calls);
   }
 }
 
@@ -88,10 +89,11 @@ void Settle(Effects_EffectInstance& instance, const ScriptCursor& cursor,
             bool refused) {
   instance.scriptOffset = cursor.offset;
   if (refused && ShouldReport(refused_reads)) {
-    VS_LOG_WARN("effects",
-                "effect script: read at {:#x} refused: program has {} bytes "
-                "({} refusals)",
-                cursor.offset, cursor.program.size(), refused_reads);
+    VS::Core::LogWarn(
+        "effects",
+        "effect script: read at {:#x} refused: program has {} bytes "
+        "({} refusals)",
+        cursor.offset, cursor.program.size(), refused_reads);
   }
 }
 
@@ -130,43 +132,46 @@ void ReportOpcodeRefusal(const char* entry, ScriptRefusal refusal,
       return;
     case ScriptRefusal::kRegister:
       if (ShouldReport(refused_registers)) {
-        VS_LOG_WARN("effects",
-                    "effect script: {} before {:#x} names a register past the "
-                    "{} registers ({} refusals)",
-                    entry, offset, kScriptRegisters, refused_registers);
+        VS::Core::LogWarn(
+            "effects",
+            "effect script: {} before {:#x} names a register past the "
+            "{} registers ({} refusals)",
+            entry, offset, kScriptRegisters, refused_registers);
       }
       return;
     case ScriptRefusal::kDefinition:
       if (ShouldReport(refused_definitions)) {
-        VS_LOG_WARN("effects",
-                    "effect script: {} before {:#x} names a particle "
-                    "definition past the package's {} ({} refusals)",
-                    entry, offset, LiveParticleDefinitionCount(),
-                    refused_definitions);
+        VS::Core::LogWarn("effects",
+                          "effect script: {} before {:#x} names a particle "
+                          "definition past the package's {} ({} refusals)",
+                          entry, offset, LiveParticleDefinitionCount(),
+                          refused_definitions);
       }
       return;
     case ScriptRefusal::kColorPreset:
       if (ShouldReport(refused_presets)) {
-        VS_LOG_WARN("effects",
-                    "effect script: {} before {:#x} names a colour preset past "
-                    "the {} presets ({} refusals)",
-                    entry, offset, kParticleColorPresets, refused_presets);
+        VS::Core::LogWarn(
+            "effects",
+            "effect script: {} before {:#x} names a colour preset past "
+            "the {} presets ({} refusals)",
+            entry, offset, kParticleColorPresets, refused_presets);
       }
       return;
     case ScriptRefusal::kTimeline:
       if (ShouldReport(refused_timelines)) {
-        VS_LOG_WARN("effects",
-                    "effect script: {} before {:#x} needs a timeline the "
-                    "instance has not loaded ({} refusals)",
-                    entry, offset, refused_timelines);
+        VS::Core::LogWarn("effects",
+                          "effect script: {} before {:#x} needs a timeline the "
+                          "instance has not loaded ({} refusals)",
+                          entry, offset, refused_timelines);
       }
       return;
     case ScriptRefusal::kRenderer:
       if (ShouldReport(refused_renderers)) {
-        VS_LOG_WARN("effects",
-                    "effect script: {} before {:#x} names a renderer past the "
-                    "{} script renderers ({} refusals)",
-                    entry, offset, kScriptRenderers, refused_renderers);
+        VS::Core::LogWarn(
+            "effects",
+            "effect script: {} before {:#x} names a renderer past the "
+            "{} script renderers ({} refusals)",
+            entry, offset, kScriptRenderers, refused_renderers);
       }
       return;
   }
@@ -221,10 +226,11 @@ void StoreRegisters(Effects_EffectInstance& instance,
   if (!parameters) return 0;
   const std::size_t counted = parameters->transform_count;
   if (counted > kEffectTransformSlots && ShouldReport(clamped_transforms)) {
-    VS_LOG_WARN("effects",
-                "effect script: block 9 counts {} transforms; heights apply to "
-                "the instance's {} ({} clamps)",
-                counted, kEffectTransformSlots, clamped_transforms);
+    VS::Core::LogWarn(
+        "effects",
+        "effect script: block 9 counts {} transforms; heights apply to "
+        "the instance's {} ({} clamps)",
+        counted, kEffectTransformSlots, clamped_transforms);
   }
   return std::min(counted, kEffectTransformSlots);
 }
@@ -318,10 +324,10 @@ PresetTables() {
           LiveBoundPackageBlock(PackageBlockType::kParameters))) {
     remap.ids = parameters->timeline_ids;
   } else if (ShouldReport(unmapped_timelines)) {
-    VS_LOG_WARN("effects",
-                "effect script: the package binds no block 9; register "
-                "timelines load unmapped ({} times)",
-                unmapped_timelines);
+    VS::Core::LogWarn("effects",
+                      "effect script: the package binds no block 9; register "
+                      "timelines load unmapped ({} times)",
+                      unmapped_timelines);
   }
   const std::span timelines =
       LiveBoundPackageBlock(PackageBlockType::kTimelines);
@@ -414,12 +420,12 @@ class InstanceMachine final : public ScriptMachine {
     const std::span handlers{Effects_scriptOpcodeHandlers};
     if (opcode >= handlers.size() || handlers[opcode] == nullptr) {
       if (ShouldReport(refused_opcodes)) {
-        VS_LOG_WARN("effects",
-                    "effect script: opcode {:#x} at {:#x} has no handler ({} "
-                    "refusals)",
-                    opcode,
-                    static_cast<std::uint16_t>(instance_->scriptOffset - 1),
-                    refused_opcodes);
+        VS::Core::LogWarn(
+            "effects",
+            "effect script: opcode {:#x} at {:#x} has no handler ({} "
+            "refusals)",
+            opcode, static_cast<std::uint16_t>(instance_->scriptOffset - 1),
+            refused_opcodes);
       }
       return std::nullopt;
     }
@@ -634,10 +640,11 @@ int LiveCompleteChildEffectScript(Effects_EffectInstance* instance) {
   if (parent == nullptr) return HandlerResult(ContinueScript());
   const auto children = static_cast<std::uint8_t>(parent->childCount);
   if (children == 0 && ShouldReport(wrapped_children)) {
-    VS_LOG_WARN("effects",
-                "effect script: a child completed with its parent counting no "
-                "running children; the count wraps to {} ({} wraps)",
-                kChildCountMask, wrapped_children);
+    VS::Core::LogWarn(
+        "effects",
+        "effect script: a child completed with its parent counting no "
+        "running children; the count wraps to {} ({} wraps)",
+        kChildCountMask, wrapped_children);
   }
   parent->childCount = CompleteChildScript(children).value_or(children);
   return HandlerResult(ContinueScript());
@@ -788,8 +795,8 @@ int LiveEmitParticlesFromScriptRegister(Effects_EffectInstance* instance) {
 void LiveReportEffectDiagnostic(int code) {
   if (!ShouldReport(reported_diagnostics)) return;
   const std::string_view description = DescribeEffectDiagnostic(code);
-  VS_LOG_WARN("effects", "effect diagnostic {:#x}: {} ({} reports)", code,
-              description.empty() ? "unknown code" : description,
-              reported_diagnostics);
+  VS::Core::LogWarn("effects", "effect diagnostic {:#x}: {} ({} reports)", code,
+                    description.empty() ? "unknown code" : description,
+                    reported_diagnostics);
 }
 }  // namespace VS::Effects

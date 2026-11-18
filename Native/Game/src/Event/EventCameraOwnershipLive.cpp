@@ -30,7 +30,7 @@ constexpr std::size_t kEventCameraWorkspaceBytes = 0x28C;
 static_assert(sizeof(CameraState) == kEventCameraWorkspaceBytes);
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("event.camera", "{} refused: {}", operation, reason);
+  VS::Core::LogError("event.camera", "{} refused: {}", operation, reason);
   std::abort();
 }
 

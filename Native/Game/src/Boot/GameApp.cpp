@@ -43,10 +43,11 @@ GameApp::GameApp(Services services) : m_services_(services) {
     Save::ConfigureDirectory(*m_services_.save_directory);
   }
   if (const int failed = VS::Content::LoadModuleData(); failed != 0) {
-    VS_LOG_ERROR("boot",
-                 "{} required module data entries failed; game execution was "
-                 "not started",
-                 failed);
+    VS::Core::LogError(
+        "boot",
+        "{} required module data entries failed; game execution was "
+        "not started",
+        failed);
     throw std::runtime_error("Required module data initialization failed");
   }
   m_runner_ = std::make_unique<Runner>();
@@ -64,7 +65,7 @@ void GameApp::Tick(const Input::PadState& pad, bool pad_connected) {
   if (!m_runner_->fiber.Resume()) {
     static bool logged = false;
     if (!logged) {
-      VS_LOG_WARN("boot", "the game's main loop returned");
+      VS::Core::LogWarn("boot", "the game's main loop returned");
       logged = true;
     }
   }

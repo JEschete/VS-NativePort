@@ -58,8 +58,8 @@ std::uint64_t refused_calls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
   if (std::has_single_bit(++refused_calls)) {
-    VS_LOG_WARN("effects", "effect runtime: {} refused: {} ({} refusals)", call,
-                reason, refused_calls);
+    VS::Core::LogWarn("effects", "effect runtime: {} refused: {} ({} refusals)",
+                      call, reason, refused_calls);
   }
 }
 

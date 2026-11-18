@@ -63,12 +63,13 @@ class LiveBattleModeHost final : public battle::BattleModeHost {
 // state) without a check; an absent one is refused.
 bool CanSetBattleMode(int actor_slot) {
   if (LiveActor(actor_slot) == nullptr) {
-    VS_LOG_WARN("battle.targeting", "battle mode for absent actor slot={}",
-                actor_slot);
+    VS::Core::LogWarn("battle.targeting",
+                      "battle mode for absent actor slot={}", actor_slot);
     return false;
   }
   if (actor_slot == 0 && Battle_characterState == nullptr) {
-    VS_LOG_WARN("battle.targeting", "battle mode without a character state");
+    VS::Core::LogWarn("battle.targeting",
+                      "battle mode without a character state");
     return false;
   }
   return true;
@@ -78,8 +79,8 @@ bool CanSetBattleMode(int actor_slot) {
 namespace VS::Battle {
 bool LiveIsActorWeaponDrawn(int actor_slot) {
   if (LiveActor(actor_slot) == nullptr) {
-    VS_LOG_WARN("battle.targeting", "weapon state of absent actor slot={}",
-                actor_slot);
+    VS::Core::LogWarn("battle.targeting",
+                      "weapon state of absent actor slot={}", actor_slot);
     return false;
   }
   const LiveBattleModeHost host;

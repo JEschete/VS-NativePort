@@ -64,8 +64,8 @@ void PageSpace::SetEffectPathTraceTick(u64 tick) {
   m_effectTrace = m_effectTraceRange && tick >= m_effectTraceRange->first &&
                   tick <= m_effectTraceRange->last;
   if (m_effectTrace) {
-    VS_LOG_TRACE("effect-path", "{{\"kind\":\"frame\",\"logical_tick\":{}}}",
-                 tick);
+    VS::Core::LogTrace("effect-path",
+                       "{{\"kind\":\"frame\",\"logical_tick\":{}}}", tick);
   }
 }
 
@@ -85,7 +85,7 @@ void PageSpace::TracePrimitive(const u32* command,
         vertex.x - m_offX, vertex.y - m_offY, vertex.x, vertex.y, vertex.u,
         vertex.v, vertex.r, vertex.g, vertex.b);
   }
-  VS_LOG_TRACE(
+  VS::Core::LogTrace(
       "effect-path",
       "{{\"kind\":\"primitive\",\"command_address\":{},\"opcode\":{},"
       "\"textured\":{},\"raw\":{},\"clut\":{},\"texture_page\":[{},{}],"

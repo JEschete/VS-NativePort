@@ -70,8 +70,8 @@ std::uint8_t g_cursor_animation = 0;
 void Refuse(std::string_view reason) {
   ++g_refusals;
   if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS_LOG_WARN("menu.inventory", "equipment rows: {} (refusal {})", reason,
-                g_refusals);
+    VS::Core::LogWarn("menu.inventory", "equipment rows: {} (refusal {})",
+                      reason, g_refusals);
   }
 }
 

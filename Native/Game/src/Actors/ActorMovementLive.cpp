@@ -72,8 +72,9 @@ class MovementRegistry {
       }
     }
     if (count_ == entries_.size()) {
-      VS_LOG_ERROR("actors", "Actor movement touched more than {} records",
-                   entries_.size());
+      VS::Core::LogError("actors",
+                         "Actor movement touched more than {} records",
+                         entries_.size());
       std::abort();
     }
     Entry& entry = entries_.at(count_++);
@@ -88,7 +89,8 @@ class MovementRegistry {
         return *entries_.at(index).record;
       }
     }
-    VS_LOG_ERROR("actors", "Actor movement named an actor it never loaded");
+    VS::Core::LogError("actors",
+                       "Actor movement named an actor it never loaded");
     std::abort();
   }
 
@@ -275,8 +277,8 @@ class LiveMovementHost final : public MovementHost {
     if (platform < 0 || platform >= MovingPlatformCount() ||
         static_cast<std::size_t>(platform) >=
             std::size(Field_platformBounceFrames)) {
-      VS_LOG_WARN("actors", "Platform bounce frame refused for platform {}",
-                  platform);
+      VS::Core::LogWarn(
+          "actors", "Platform bounce frame refused for platform {}", platform);
       return 0;
     }
     return Field_platformBounceFrames[platform];
@@ -401,7 +403,7 @@ class LiveMovementHost final : public MovementHost {
 template <typename Rule>
 void WithPointer(Actors_ActorRecord* actor, const char* name, Rule rule) {
   if (actor == nullptr) {
-    VS_LOG_WARN("actors", "{} refused: no actor record", name);
+    VS::Core::LogWarn("actors", "{} refused: no actor record", name);
     return;
   }
   LiveMovementHost host;
@@ -547,8 +549,9 @@ void BeginLiveActorJumpMovement(int actor_id, int direction, int distance) {
 // decomp: BATTLE.PRG func_800A4A88 (src/BATTLE/BATTLE.PRG/3A1A0.c:1107)
 void UpdateLiveActorPlatformContact(Actors_ActorRecord* actor, int mode) {
   if (mode < 0 || mode > kLastContactMode) {
-    VS_LOG_WARN("actors", "Platform contact refused: mode {} is not 0 to {}",
-                mode, kLastContactMode);
+    VS::Core::LogWarn("actors",
+                      "Platform contact refused: mode {} is not 0 to {}", mode,
+                      kLastContactMode);
     return;
   }
   WithPointer(actor, "Platform contact",

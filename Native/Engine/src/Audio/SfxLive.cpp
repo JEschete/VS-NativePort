@@ -20,7 +20,7 @@
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Runtime.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.h"
 
@@ -81,41 +81,47 @@ void StoreCursors(const EffectTagCursors& cursors) {
 void Report(SfxRefusal refusal, const SfxRequest& request) {
   switch (refusal) {
     case SfxRefusal::kNoSelectedBank:
-      VS_LOG_WARN(kLogChannel, "private SFX id={} skipped: no selected bank",
-                  request.effect_id);
+      VS::Core::LogWarn(kLogChannel,
+                        "private SFX id={} skipped: no selected bank",
+                        request.effect_id);
       return;
     case SfxRefusal::kSelectedBankOutOfRange:
-      VS_LOG_ERROR(kLogChannel, "invalid selected SFX bank={}", request.bank);
+      VS::Core::LogError(kLogChannel, "invalid selected SFX bank={}",
+                         request.bank);
       return;
     case SfxRefusal::kBankUnavailable:
-      VS_LOG_ERROR(kLogChannel, "unavailable SFX bank={} or invalid id={}",
-                   request.bank, request.effect_id);
+      VS::Core::LogError(kLogChannel,
+                         "unavailable SFX bank={} or invalid id={}",
+                         request.bank, request.effect_id);
       return;
     case SfxRefusal::kNoRoomBank:
-      VS_LOG_WARN(kLogChannel, "room SFX id={} skipped: no room bank",
-                  request.effect_id);
+      VS::Core::LogWarn(kLogChannel, "room SFX id={} skipped: no room bank",
+                        request.effect_id);
       return;
     case SfxRefusal::kRoomEffectNegative:
-      VS_LOG_ERROR(kLogChannel, "invalid room SFX id={}", request.effect_id);
+      VS::Core::LogError(kLogChannel, "invalid room SFX id={}",
+                         request.effect_id);
       return;
     case SfxRefusal::kUnresolvableBank:
-      VS_LOG_ERROR(kLogChannel,
-                   "cannot resolve banked SFX group=0x{:X} id={} bank={}",
-                   request.group, request.effect_id, request.bank);
+      VS::Core::LogError(kLogChannel,
+                         "cannot resolve banked SFX group=0x{:X} id={} bank={}",
+                         request.group, request.effect_id, request.bank);
       return;
     case SfxRefusal::kProgramUnavailable:
-      VS_LOG_ERROR(kLogChannel, "unavailable bank or invalid SFX id={} bank={}",
-                   request.effect_id, request.bank);
+      VS::Core::LogError(kLogChannel,
+                         "unavailable bank or invalid SFX id={} bank={}",
+                         request.effect_id, request.bank);
       return;
     case SfxRefusal::kProgramOffsetInvalid:
-      VS_LOG_ERROR(kLogChannel, "invalid banked SFX offset={} id={}",
-                   request.offset, request.effect_id);
+      VS::Core::LogError(kLogChannel, "invalid banked SFX offset={} id={}",
+                         request.offset, request.effect_id);
       return;
     case SfxRefusal::kBankUnreadable:
-      VS_LOG_ERROR(kLogChannel,
-                   "SFX bank entry group=0x{:X} id={} lies outside readable "
-                   "memory",
-                   request.group, request.effect_id);
+      VS::Core::LogError(
+          kLogChannel,
+          "SFX bank entry group=0x{:X} id={} lies outside readable "
+          "memory",
+          request.group, request.effect_id);
       return;
   }
 }
@@ -192,7 +198,8 @@ class LiveSfxHost final : public SfxHost {
   // The original loads vs_scratch_t::viewMatrix at 0x1F800014; the native
   // scratch keeps the field but not the PS1 offset.
   SfxProjection Project(const SfxPoint& point) override {
-    auto* const scratch = static_cast<Render_FrameScratch*>(Core_ScratchBase());
+    auto* const scratch =
+        static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
     Core_Gte_SetRotMatrix(&scratch->viewMatrix);
     Core_Gte_SetTransMatrix(&scratch->viewMatrix);
     SVECTOR vector{.vx = point.x, .vy = point.y, .vz = point.z, .pad = 0};
@@ -253,8 +260,9 @@ int LiveSfxPanAndVolume(int screen_xy, int depth) {
 // decomp: SLUS_010.40 vs_main_panSfx (src/SLUS_010.40/main.c:9937)
 void LivePlayWorldSfx(int group, int effect_id, SVECTOR* point) {
   if (point == nullptr) {
-    VS_LOG_ERROR(kLogChannel, "world SFX group=0x{:X} id={} has no position",
-                 group, effect_id);
+    VS::Core::LogError(kLogChannel,
+                       "world SFX group=0x{:X} id={} has no position", group,
+                       effect_id);
     return;
   }
   const SfxPoint world{.x = point->vx, .y = point->vy, .z = point->vz};

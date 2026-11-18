@@ -12,7 +12,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Memory/WordCopyLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -66,7 +66,7 @@ class LiveProgressHost final : public ProgressHost {
         static_cast<std::int32_t>(sizeof Battle_unusedMenu9CursorMemory));
   }
   void BackupCamera() override {
-    auto* scratch = reinterpret_cast<Render_FrameScratch*>(Core_ScratchAddr(0));
+    auto* scratch = static_cast<Render_FrameScratch*>(Core::ScratchBase());
     Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraPositionBackup,
                                        &scratch->camera.position,
                                        sizeof Menu_Score_cameraPositionBackup);

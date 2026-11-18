@@ -17,8 +17,8 @@ using Bytes = std::span<const std::byte>;
 
 void Require(bool condition, const char* message) {
   if (!condition) {
-    VS_LOG_ERROR("effects.material", "Invalid effect texture block: {}",
-                 message);
+    VS::Core::LogError("effects.material", "Invalid effect texture block: {}",
+                       message);
     std::abort();
   }
 }
@@ -87,8 +87,9 @@ TextureBlockLayout BindEffectTextureTables(Bytes block,
     // original assets, frame numbers, UVs and descriptor contents stay intact.
     layout.table_offsets[1] = layout.table_offsets[0];
     layout.table_count = 2;
-    VS_LOG_DEBUG("effects.material",
-                 "E084 material channel 1 shares authored source table 0");
+    VS::Core::LogDebug(
+        "effects.material",
+        "E084 material channel 1 shares authored source table 0");
   }
   return layout;
 }

@@ -32,8 +32,9 @@ std::expected<void, std::string> App::Init(const WindowDesc& desc) {
     return std::unexpected(std::string("SDL_CreateWindow failed: ") +
                            SDL_GetError());
   }
-  VS_LOG_INFO("platform", "SDL {}.{}.{} window {}x{}", SDL_MAJOR_VERSION,
-              SDL_MINOR_VERSION, SDL_MICRO_VERSION, desc.width, desc.height);
+  VS::Core::LogInfo("platform", "SDL {}.{}.{} window {}x{}", SDL_MAJOR_VERSION,
+                    SDL_MINOR_VERSION, SDL_MICRO_VERSION, desc.width,
+                    desc.height);
   return {};
 }
 

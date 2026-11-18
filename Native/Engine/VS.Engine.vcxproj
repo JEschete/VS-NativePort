@@ -610,9 +610,8 @@
     <ClInclude Include="include\Audio\XaMix.hpp" />
     <ClInclude Include="include\Audio\XaMixLive.hpp" />
     <ClInclude Include="include\Audio\XaPlayback.hpp" />
-    <ClInclude Include="include\Core\Arena.h" />
+    <ClInclude Include="include\Core\Arena.hpp" />
     <ClInclude Include="include\Core\Assert.hpp" />
-    <ClInclude Include="include\Core\BiosRand.h" />
     <ClInclude Include="include\Core\Diagnostics.hpp" />
     <ClInclude Include="include\Core\FrameClock.hpp" />
     <ClInclude Include="include\Core\FrameTiming.hpp" />
@@ -639,12 +638,11 @@
     <ClInclude Include="include\Core\RandomLive.hpp" />
     <ClInclude Include="include\Core\Runtime.hpp" />
     <ClInclude Include="include\Core\RuntimeLive.hpp" />
-    <ClInclude Include="include\Core\Scratch.h" />
+    <ClInclude Include="include\Core\Scratch.hpp" />
     <ClInclude Include="include\Core\String\GameText.hpp" />
     <ClInclude Include="include\Core\String\GameTextLive.hpp" />
     <ClInclude Include="include\Core\Text\TextCode.h" />
     <ClInclude Include="include\Core\Types.hpp" />
-    <ClInclude Include="include\Core\Unported.h" />
     <ClInclude Include="include\Core\Unported.hpp" />
     <ClInclude Include="include\Core\WordPair.h" />
     <ClInclude Include="include\Input\Controller.hpp" />

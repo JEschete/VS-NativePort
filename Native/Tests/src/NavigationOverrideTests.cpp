@@ -24,8 +24,8 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Content/ModuleData.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
 #include "Field/GimmickResourcesLive.hpp"
@@ -849,7 +849,7 @@ TEST_CASE(
 TEST_CASE("Scripted path packing preserves every halfword and signed high bits",
           "[ai][scripted-override]") {
   ScriptedOverrideFixture fixture;
-  const auto random = Core_Random_State();
+  const auto random = VS::Core::BiosRand().State();
   for (unsigned value = 0; value < 65536; ++value) {
     VS::Battle::Ai::SetLiveActorNavigationOverride(1, static_cast<int>(value),
                                                    0x1234);
@@ -864,7 +864,7 @@ TEST_CASE("Scripted path packing preserves every halfword and signed high bits",
   CHECK(fixture.source.scriptedTargetXZ == 0xFFFFFFFFu);
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 0x1234, -1);
   CHECK(fixture.source.scriptedTargetXZ == 0xFFFF1234u);
-  CHECK(Core_Random_State() == random);
+  CHECK(VS::Core::BiosRand().State() == random);
 }
 
 TEST_CASE("Scripted path requests retain missing map and AI-state gates",

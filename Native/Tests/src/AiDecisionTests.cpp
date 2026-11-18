@@ -224,15 +224,15 @@ TEST_CASE(
     plan.candidates[index].weight = weight;
     plan.candidateOrder[index] = &plan.candidates[index];
   }
-  Core_Random_Seed(1);
+  VS::Core::SeedBiosRand(1);
   VS::Battle::Ai::PromoteLiveRandomizedActionCandidate(&plan, 4);
   const bool promoted = weight > 1;
   CHECK(plan.candidateOrder[0] == &plan.candidates[promoted ? 2 : 0]);
   CHECK(plan.candidateOrder[1] == &plan.candidates[promoted ? 0 : 1]);
   VS::Core::Rand15 expected(1);
   for (int index = 0; index < (promoted ? 3 : 4); ++index) expected.Next();
-  CHECK(Core_Random_Rand() == expected.Next());
-  Core_Random_Seed(1);
+  CHECK(VS::Core::NextBiosRand() == expected.Next());
+  VS::Core::SeedBiosRand(1);
 }
 
 TEST_CASE("AI actor RNG sign-extends the old halfword before adding its step",
@@ -355,13 +355,13 @@ TEST_CASE("AI randomized promotion handles empty and full zero-action lists",
     plan.candidateOrder[index] = &plan.candidates[index];
   }
   const auto order = std::to_array(plan.candidateOrder);
-  Core_Random_Seed(1234);
+  VS::Core::SeedBiosRand(1234);
   VS::Battle::Ai::PromoteLiveRandomizedActionCandidate(&plan, count);
   CHECK(std::to_array(plan.candidateOrder) == order);
   VS::Core::Rand15 expected(1234);
   for (int index = 0; index < count; ++index) expected.Next();
-  CHECK(Core_Random_Rand() == expected.Next());
-  Core_Random_Seed(1);
+  CHECK(VS::Core::NextBiosRand() == expected.Next());
+  VS::Core::SeedBiosRand(1);
 }
 
 TEST_CASE(

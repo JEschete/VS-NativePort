@@ -38,11 +38,12 @@ std::uint64_t refusals = 0;
 void Report(ResultsDrawResult result) {
   if (result == ResultsDrawResult::kInvalidTexture &&
       std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.results",
-                "Time-attack results drawing refused a course without trial "
-                "scores, a rank outside the leaderboard or a short atlas ({} "
-                "refusals)",
-                refusals);
+    VS::Core::LogWarn(
+        "menu.results",
+        "Time-attack results drawing refused a course without trial "
+        "scores, a rank outside the leaderboard or a short atlas ({} "
+        "refusals)",
+        refusals);
   }
 }
 

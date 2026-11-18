@@ -106,8 +106,8 @@ std::uint64_t refused = 0;
 
 void Refuse(std::string_view operation, std::string_view reason) {
   if (std::has_single_bit(++refused)) {
-    VS_LOG_WARN("menu.map", "{} refused: {} ({} refusals)", operation, reason,
-                refused);
+    VS::Core::LogWarn("menu.map", "{} refused: {} ({} refusals)", operation,
+                      reason, refused);
   }
 }
 

@@ -15,9 +15,9 @@ EC-04,Native/Content/include/Content/ModuleData.hpp,header
 EC-04,Native/Content/src/ModuleLoader.cpp,source
 EC-04,Native/Game/src/Boot/ModuleData.cpp,source
 EC-04,Native/Game/src/Boot/ModulePointers.cpp,source
-EC-05,Native/Engine/include/Core/Scratch.h,header
+EC-05,Native/Engine/include/Core/Scratch.hpp,header
 EC-05,Native/Engine/src/Core/Scratch.cpp,source
-EC-05,Native/Engine/include/Core/Arena.h,header
+EC-05,Native/Engine/include/Core/Arena.hpp,header
 EC-05,Native/Engine/src/Core/Arena.cpp,source
 EC-05,Native/Engine/src/Core/Overlays.cpp,source
 EC-05,Native/Game/src/Boot/OverlayReset.cpp,source

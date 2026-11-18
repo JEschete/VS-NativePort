@@ -72,7 +72,7 @@ std::array<std::uint8_t, kNameBytes + 1> g_prompt_name{};
 class LiveHost final : public Host {
  public:
   void Refuse(std::string_view what) override {
-    VS_LOG_WARN("menu.rename", "{}", what);
+    VS::Core::LogWarn("menu.rename", "{}", what);
   }
   std::span<const std::uint8_t> MenuStrings() override {
     return {reinterpret_cast<const std::uint8_t*>(renderRenameMenuStrings),

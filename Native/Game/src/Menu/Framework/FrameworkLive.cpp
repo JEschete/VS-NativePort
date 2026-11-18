@@ -472,8 +472,8 @@ void ResetLoadedSubmenu(int lba) {
       break;
     case VS_MENU9_PRG_LBA:
       if (!Score::CleanupLiveEnemyPreviewOwnedState()) {
-        VS_LOG_ERROR("menu.framework",
-                     "enemy-preview cleanup refused before MENU9 reload");
+        VS::Core::LogError("menu.framework",
+                           "enemy-preview cleanup refused before MENU9 reload");
         std::abort();
       }
       Boot_ResetMenu9Statics();
@@ -496,8 +496,8 @@ void ResetLoadedSubmenu(int lba) {
     case VS_MENUC_PRG_LBA:
       break;
     default:
-      VS_LOG_WARN("menu.framework", "unknown completed menu program LBA {}",
-                  lba);
+      VS::Core::LogWarn("menu.framework",
+                        "unknown completed menu program LBA {}", lba);
       break;
   }
 }
@@ -651,7 +651,7 @@ class LiveHost final : public Host {
       : caller_chain_(caller_chain) {}
 
   void Refuse(std::string_view what) override {
-    VS_LOG_WARN("menu.framework", "{}", what);
+    VS::Core::LogWarn("menu.framework", "{}", what);
   }
 
   std::span<MenuRow> Rows() override {
@@ -1321,7 +1321,7 @@ int LiveGradientStopColor(u_int gradient, u_int color_index, int brightness) {
 
 void DrawLiveMenuItem(Menu_Framework_MenuRow* row) {
   if (row == nullptr) {
-    VS_LOG_WARN("menu.framework", "drawing an absent menu row");
+    VS::Core::LogWarn("menu.framework", "drawing an absent menu row");
     return;
   }
   LiveCall call;
@@ -1582,7 +1582,7 @@ void SetLiveBackgroundPriority(int ot_offset, int brightness) {
 
 void LoadLiveBackgroundTexture(u_int* buffer) {
   if (buffer == nullptr) {
-    VS_LOG_WARN("menu.framework", "menu background without a buffer");
+    VS::Core::LogWarn("menu.framework", "menu background without a buffer");
     return;
   }
   LiveCall call;
@@ -1631,7 +1631,7 @@ void DrawLiveBackground(int brightness) {
 int DrawLiveFeatheredRowCharacter(u_int character, int x,
                                   Menu_Framework_MenuRow* row, u_long* before) {
   if (row == nullptr) {
-    VS_LOG_WARN("menu.framework", "row character without a menu row");
+    VS::Core::LogWarn("menu.framework", "row character without a menu row");
     return x;
   }
   LiveCall call(before);
@@ -1646,7 +1646,7 @@ void DrawLiveTabNavigation(int mode) {
 
 void DrawLiveScrollableRow(Menu_Framework_MenuRow* row) {
   if (row == nullptr) {
-    VS_LOG_WARN("menu.framework", "drawing an absent scrollable row");
+    VS::Core::LogWarn("menu.framework", "drawing an absent scrollable row");
     return;
   }
   LiveCall call;
@@ -1736,7 +1736,7 @@ void UpdateLiveItemDetailsSelection(int row, char* text[], u_int row_type,
 
 int LiveWeaponSortValue(int stat, Items_WeaponLoadout* weapon) {
   if (weapon == nullptr) {
-    VS_LOG_WARN("menu.framework", "sort key of an absent weapon");
+    VS::Core::LogWarn("menu.framework", "sort key of an absent weapon");
     return 0;
   }
   LiveCall call;
@@ -1745,7 +1745,7 @@ int LiveWeaponSortValue(int stat, Items_WeaponLoadout* weapon) {
 
 int LiveShieldSortValue(int stat, Items_ShieldLoadout* shield) {
   if (shield == nullptr) {
-    VS_LOG_WARN("menu.framework", "sort key of an absent shield");
+    VS::Core::LogWarn("menu.framework", "sort key of an absent shield");
     return 0;
   }
   LiveCall call;
@@ -1754,7 +1754,7 @@ int LiveShieldSortValue(int stat, Items_ShieldLoadout* shield) {
 
 int LiveMiscSortValue(int stat, Items_InventoryMisc* misc) {
   if (misc == nullptr) {
-    VS_LOG_WARN("menu.framework", "sort key of an absent item");
+    VS::Core::LogWarn("menu.framework", "sort key of an absent item");
     return 0;
   }
   return MiscSortValue(stat, {.id = misc->id, .count = Byte(misc->count)});
@@ -1762,7 +1762,7 @@ int LiveMiscSortValue(int stat, Items_InventoryMisc* misc) {
 
 int LiveEquipmentSortValue(int stat, Items_EquipmentPartStats* equipment) {
   if (equipment == nullptr) {
-    VS_LOG_WARN("menu.framework", "sort key of absent equipment");
+    VS::Core::LogWarn("menu.framework", "sort key of absent equipment");
     return 0;
   }
   LiveCall call;
@@ -1781,7 +1781,7 @@ void ClearLiveMenuExceptTitle() {
 
 void BuildLiveYawMatrix(MATRIX* matrix, std::int16_t angle) {
   if (matrix == nullptr) {
-    VS_LOG_WARN("menu.framework", "yaw matrix without a matrix");
+    VS::Core::LogWarn("menu.framework", "yaw matrix without a matrix");
     return;
   }
   CopyRotation(BuildYawMatrix(angle), *matrix);
@@ -1789,7 +1789,7 @@ void BuildLiveYawMatrix(MATRIX* matrix, std::int16_t angle) {
 
 void BuildLivePitchMatrix(MATRIX* matrix, std::int16_t angle) {
   if (matrix == nullptr) {
-    VS_LOG_WARN("menu.framework", "pitch matrix without a matrix");
+    VS::Core::LogWarn("menu.framework", "pitch matrix without a matrix");
     return;
   }
   CopyRotation(BuildPitchMatrix(angle), *matrix);

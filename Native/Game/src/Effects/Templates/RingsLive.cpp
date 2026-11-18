@@ -36,9 +36,9 @@ constexpr std::size_t kFullPaletteEntries = kRingPaletteMask + 1;
 constexpr std::size_t kPaletteEntryBytes = 4;
 }  // namespace
 
-#include "Core/BiosRand.h"
 #include "Core/Gte.h"
-#include "Core/Scratch.h"
+#include "Core/RandomLive.hpp"
+#include "Core/Scratch.hpp"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -190,7 +190,7 @@ std::uint64_t dropped_quads = 0;
 
 Effects_ParticleEmitterScratch& EmitterScratch() {
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(Core_ScratchBase()) +
+      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
@@ -313,7 +313,9 @@ class LiveRingHost final : public RingHost {
   [[nodiscard]] std::int32_t SampleCurve(std::uint8_t curve,
                                          std::int32_t distance) override;
 
-  [[nodiscard]] std::int32_t Rand() override { return Core_Random_Rand(); }
+  [[nodiscard]] std::int32_t Rand() override {
+    return VS::Core::NextBiosRand();
+  }
 
   void PublishScratch(const RingScratch& values) override;
 
@@ -362,16 +364,16 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
   const Effects_ParticleDefinition* definition =
       Definition(state.definition_index);
   if (definition == nullptr) {
-    VS_LOG_WARN("effects",
-                "ring: definition {} is outside the package's {} "
-                "definitions; ring refused",
-                state.definition_index, LiveParticleDefinitionCount());
+    VS::Core::LogWarn("effects",
+                      "ring: definition {} is outside the package's {} "
+                      "definitions; ring refused",
+                      state.definition_index, LiveParticleDefinitionCount());
     return;
   }
   auto* live = static_cast<LiveRingState*>(
       VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(LiveRingState)));
   if (live == nullptr) {
-    VS_LOG_ERROR("effects", "ring: heap exhausted for state");
+    VS::Core::LogError("effects", "ring: heap exhausted for state");
     return;
   }
   *live = LiveRingState{};
@@ -387,16 +389,16 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
   const unsigned request_effect = primary ? Effects_actionRequest.effectId
                                           : Effects_secondaryRequest.effectId;
   const int tables = Effects_package->block1TableCount;
-  VS_LOG_DEBUG("effects",
-               "ring: init definition={} lifetime={} table={} program={} "
-               "context={} request_effect={} tables={}",
-               state.definition_index, state.lifetime, table, program,
-               primary ? "primary" : "secondary", request_effect, tables);
+  VS::Core::LogDebug("effects",
+                     "ring: init definition={} lifetime={} table={} program={} "
+                     "context={} request_effect={} tables={}",
+                     state.definition_index, state.lifetime, table, program,
+                     primary ? "primary" : "secondary", request_effect, tables);
   if (table >= tables || std::cmp_greater_equal(table, kTextureTableCount) ||
       Effects_package->textureInfoTable[table] == nullptr) {
-    VS_LOG_DEBUG("effects",
-                 "ring: definition {} names unbound texture table {} of {}",
-                 state.definition_index, table, tables);
+    VS::Core::LogDebug(
+        "effects", "ring: definition {} names unbound texture table {} of {}",
+        state.definition_index, table, tables);
   }
   // Clearing the record also cleared the texture animation, as
   // func_800D6CCC did.
@@ -407,21 +409,23 @@ std::optional<RingTickInputs> LiveRingHost::BeginTick(
     std::uint8_t definition_index) {
   instance_ = Effects_currentInstance;
   if (instance_ == nullptr) {
-    VS_LOG_WARN("effects", "ring: no current effect instance; ring stopped");
+    VS::Core::LogWarn("effects",
+                      "ring: no current effect instance; ring stopped");
     return std::nullopt;
   }
   definition_ = Definition(definition_index);
   if (definition_ == nullptr) {
-    VS_LOG_WARN("effects",
-                "ring: the current package no longer holds definition {}; "
-                "ring stopped",
-                definition_index);
+    VS::Core::LogWarn(
+        "effects",
+        "ring: the current package no longer holds definition {}; "
+        "ring stopped",
+        definition_index);
     return std::nullopt;
   }
   if (definition_->transformIndex >= kTransformCount) {
-    VS_LOG_WARN("effects",
-                "ring: definition {} names transform {} of {}; ring stopped",
-                definition_index, definition_->transformIndex, kTransformCount);
+    VS::Core::LogWarn(
+        "effects", "ring: definition {} names transform {} of {}; ring stopped",
+        definition_index, definition_->transformIndex, kTransformCount);
     return std::nullopt;
   }
   // The original stored the flags before sampling anything.
@@ -451,10 +455,11 @@ std::int32_t LiveRingHost::SampleCurve(std::uint8_t curve,
   if (curve > bound ||
       Effects_package->curveBlock->curveSizes[curve - 1] == 0) {
     if (ShouldReport(refused_curves)) {
-      VS_LOG_WARN("effects",
-                  "ring: curve {} is outside the package's {} bound curves "
-                  "or empty; sampled as 0 ({} refusals)",
-                  curve, bound, refused_curves);
+      VS::Core::LogWarn(
+          "effects",
+          "ring: curve {} is outside the package's {} bound curves "
+          "or empty; sampled as 0 ({} refusals)",
+          curve, bound, refused_curves);
     }
     return 0;
   }
@@ -494,10 +499,11 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
   }
   if (!bound || animation.textureInfo == nullptr) {
     if (ShouldReport(refused_textures)) {
-      VS_LOG_WARN("effects",
-                  "ring: texture table {} of {} has no frame; ring drawn "
-                  "without quads ({} refusals)",
-                  table, Effects_package->block1TableCount, refused_textures);
+      VS::Core::LogWarn("effects",
+                        "ring: texture table {} of {} has no frame; ring drawn "
+                        "without quads ({} refusals)",
+                        table, Effects_package->block1TableCount,
+                        refused_textures);
     }
     return std::nullopt;
   }
@@ -522,10 +528,11 @@ void LiveRingHost::Submit(const RingQuad& quad, std::int32_t depth) {
                        : nullptr;
   if (packet == nullptr) {
     if (ShouldReport(dropped_quads)) {
-      VS_LOG_WARN("effects",
-                  "ring: quad at depth {} has no ordering entry or buffer "
-                  "room; dropped ({} drops)",
-                  depth, dropped_quads);
+      VS::Core::LogWarn(
+          "effects",
+          "ring: quad at depth {} has no ordering entry or buffer "
+          "room; dropped ({} drops)",
+          depth, dropped_quads);
     }
     return;
   }
@@ -557,10 +564,10 @@ Vec3 LiveRingHost::TransformByActor(RingPoint point) {
 void LiveRingHost::EmitParticleEvent(std::uint8_t event, Vec3 position) {
   const std::size_t bound = LiveParticleDefinitionCount();
   if (event >= bound) {
-    VS_LOG_WARN("effects",
-                "ring: tick event {} is outside the package's {} "
-                "definitions; event skipped",
-                event, bound);
+    VS::Core::LogWarn("effects",
+                      "ring: tick event {} is outside the package's {} "
+                      "definitions; event skipped",
+                      event, bound);
     return;
   }
   // The original left the context's other fields as stack contents; they
@@ -577,7 +584,8 @@ using RingInstance = bool (*)(RingCommand, std::int32_t,
 int RunRing(Effects_RendererSlot* slot, unsigned int command, int packed,
             std::span<const RingPaletteEntry> palette, RingInstance instance) {
   if (slot == nullptr) {
-    VS_LOG_ERROR("effects", "ring: renderer called without a slot; ignored");
+    VS::Core::LogError("effects",
+                       "ring: renderer called without a slot; ignored");
     return 0;
   }
   LiveRingHost host(*slot);

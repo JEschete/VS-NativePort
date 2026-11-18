@@ -139,10 +139,11 @@ std::expected<void, std::string> Device::Init(SDL_Window* window,
     lost_reports = capture.Lost();
   }
   for (const auto& report : reports) {
-    VS_LOG_INFO("render", "SDL GPU: {}", report);
+    VS::Core::LogInfo("render", "SDL GPU: {}", report);
   }
   if (lost_reports) {
-    VS_LOG_WARN("render", "SDL GPU reports were lost while recording them");
+    VS::Core::LogWarn("render",
+                      "SDL GPU reports were lost while recording them");
   }
   if (!m_device_) {
     return std::unexpected(std::string("SDL_CreateGPUDevice failed: ") +
@@ -154,11 +155,11 @@ std::expected<void, std::string> Device::Init(SDL_Window* window,
   }
   m_validation_ = ClassifyGpuValidation(validation, reports);
   if (validation && m_validation_ != GpuValidation::kOn) {
-    VS_LOG_WARN("render", "GPU backend: {}; validation requested but {}",
-                BackendName(), GpuValidationName(m_validation_));
+    VS::Core::LogWarn("render", "GPU backend: {}; validation requested but {}",
+                      BackendName(), GpuValidationName(m_validation_));
   } else {
-    VS_LOG_INFO("render", "GPU backend: {}; validation {}", BackendName(),
-                GpuValidationName(m_validation_));
+    VS::Core::LogInfo("render", "GPU backend: {}; validation {}", BackendName(),
+                      GpuValidationName(m_validation_));
   }
   return {};
 }
@@ -206,8 +207,8 @@ bool Device::EnsureFrameTexture(i32 width, i32 height) {
   ti.num_levels = 1;
   SDL_GPUTexture* frame = SDL_CreateGPUTexture(m_device_, &ti);
   if (!frame) {
-    VS_LOG_ERROR("render", "frame texture {}x{}: {}", width, height,
-                 SDL_GetError());
+    VS::Core::LogError("render", "frame texture {}x{}: {}", width, height,
+                       SDL_GetError());
     return false;
   }
   SDL_GPUTransferBufferCreateInfo bi{};
@@ -216,8 +217,8 @@ bool Device::EnsureFrameTexture(i32 width, i32 height) {
   SDL_GPUTransferBuffer* upload = SDL_CreateGPUTransferBuffer(m_device_, &bi);
   if (!upload) {
     SDL_ReleaseGPUTexture(m_device_, frame);
-    VS_LOG_ERROR("render", "frame upload {}x{}: {}", width, height,
-                 SDL_GetError());
+    VS::Core::LogError("render", "frame upload {}x{}: {}", width, height,
+                       SDL_GetError());
     return false;
   }
   if (m_frame_) SDL_ReleaseGPUTexture(m_device_, m_frame_);

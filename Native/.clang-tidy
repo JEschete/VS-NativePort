@@ -28,6 +28,8 @@ CheckOptions:
   readability-identifier-naming.FunctionIgnoredRegexp: '^((Actors|Audio|Battle|Boot|Content|Core|Diagnostics|Effects|Ending|Event|Field|Input|Items|Menu|Movie|Platform|Render|Save|State|Title)_[A-Za-z0-9_]+|wmain)$'
   readability-identifier-naming.MethodCase: CamelCase
   readability-identifier-naming.VariableCase: lower_case
+  # Global variables have never been case-checked; #453 moves them to camelBack (NAMING_CONVENTIONS.md 8.3).
+  readability-identifier-naming.GlobalVariableCase: aNy_CasE
   readability-identifier-naming.ParameterCase: lower_case
   readability-identifier-naming.MemberCase: lower_case
   readability-identifier-naming.MemberIgnoredRegexp: '^(nativeSize|sourceElementSize|nativeElementSize|polygonOffset|firstFrame|lastFrame|heightMap|tileFlags|terrainRegions|movementResult|roomBounds|roomData|randomState|lastBudgetTick)$'
@@ -39,7 +41,6 @@ CheckOptions:
   readability-identifier-naming.ConstexprVariableIgnoredRegexp: '^(ManifestName|SectorRaw|SectorData|SectorForm2|SampleRate|Channels|TicksPerSecond|TableSize)$'
   readability-identifier-naming.GlobalConstantCase: CamelCase
   readability-identifier-naming.GlobalConstantPrefix: k
-  readability-identifier-naming.GlobalVariableIgnoredRegexp: '^Core_overlayArena$'
   readability-identifier-naming.PrivateMemberCase: lower_case
   readability-identifier-naming.PrivateMemberSuffix: '_'
   readability-magic-numbers.IgnoredIntegerValues: '1;2'

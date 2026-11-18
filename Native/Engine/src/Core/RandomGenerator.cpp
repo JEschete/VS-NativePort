@@ -1,7 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 #include <bit>
 
-#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Random.hpp"  // NOLINT(build/include): native C++ interface.
 #include "Core/RandomLive.hpp"
@@ -22,6 +21,19 @@ bool InTable(i32 index) { return index >= 0 && index <= kTableLast; }
 }  // namespace
 
 Rand15& BiosRand() noexcept { return g_bios_rand; }
+
+i32 NextBiosRand() {
+  const u32 before = g_bios_rand.State();
+  const i32 value = g_bios_rand.Next();
+  LogTrace("rng", "raw before={} after={} value={}", before,
+           g_bios_rand.State(), value);
+  return value;
+}
+
+void SeedBiosRand(u32 seed) {
+  g_bios_rand.Seed(seed);
+  LogTrace("rng", "seed={}", seed);
+}
 
 // decomp: SLUS_010.40 _initRand (src/SLUS_010.40/main.c:8239)
 void Random::FillShuffleTable(Rand15& source, Table table, i32& index) {
@@ -77,8 +89,8 @@ void Random::InitializeShuffleTable(Rand15& source, Table table, i32& index) {
 // decomp: SLUS_010.40 vs_main_getRand (src/SLUS_010.40/main.c:8251)
 i32 Random::NextBounded(Rand15& source, Table table, i32& index, i32 max) {
   if (!InTable(index)) {
-    VS_LOG_WARN("rng", "shuffle cursor {} is outside the table; using {}",
-                index, kTableLast);
+    LogWarn("rng", "shuffle cursor {} is outside the table; using {}", index,
+            kTableLast);
     index = kTableLast;
   }
   const u32 product = static_cast<u32>(table[static_cast<usize>(index)]) *
@@ -89,7 +101,7 @@ i32 Random::NextBounded(Rand15& source, Table table, i32& index, i32 max) {
   }
   index = scaled >> Rand15::kValueBits;
   if (!InTable(index)) {
-    VS_LOG_WARN("rng", "shuffle entry selects {}; using {}", index, kTableLast);
+    LogWarn("rng", "shuffle entry selects {}; using {}", index, kTableLast);
     index = kTableLast;
   }
 
@@ -114,19 +126,3 @@ i32 Random::NextAveraged(Rand15& source, Table table, i32& index, i32 max) {
 }
 
 }  // namespace VS::Core
-
-int Core_Random_Rand(void) {
-  auto& bios = VS::Core::BiosRand();
-  const auto before = bios.State();
-  const int value = bios.Next();
-  VS_LOG_TRACE("rng", "raw before={} after={} value={}", before, bios.State(),
-               value);
-  return value;
-}
-
-void Core_Random_Seed(unsigned int seed) {
-  VS::Core::BiosRand().Seed(seed);
-  VS_LOG_TRACE("rng", "seed={}", seed);
-}
-
-unsigned int Core_Random_State(void) { return VS::Core::BiosRand().State(); }

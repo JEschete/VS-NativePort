@@ -38,8 +38,9 @@ std::uint64_t refused_rings = 0;
 
 [[nodiscard]] bool Refuse(std::string_view reason) {
   if (std::has_single_bit(++refused_rings)) {
-    VS_LOG_WARN("effects", "closed repeating ring refused: {} ({} refusals)",
-                reason, refused_rings);
+    VS::Core::LogWarn("effects",
+                      "closed repeating ring refused: {} ({} refusals)", reason,
+                      refused_rings);
   }
   return false;
 }

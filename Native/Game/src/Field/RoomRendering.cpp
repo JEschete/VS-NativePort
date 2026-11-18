@@ -107,8 +107,9 @@ std::size_t GeometryGroupCount(std::span<const std::byte> geometry,
                                const char* walk) {
   if (!Fits(geometry.size(), 0, room_effects::kGeometryCountBytes)) {
     if (!geometry.empty()) {
-      VS_LOG_WARN(kChannel, "{} refused: {} bytes of geometry hold no count",
-                  walk, geometry.size());
+      VS::Core::LogWarn(kChannel,
+                        "{} refused: {} bytes of geometry hold no count", walk,
+                        geometry.size());
     }
     return 0;
   }
@@ -121,10 +122,11 @@ std::size_t GeometryGroupCount(std::span<const std::byte> geometry,
       room_effects::kGroupRecordBytes;
   const auto groups = static_cast<std::size_t>(count);
   if (groups > whole) {
-    VS_LOG_WARN(kChannel,
-                "{} stopped after {} of {} groups: the rest leave the {} byte "
-                "geometry",
-                walk, whole, groups, geometry.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "{} stopped after {} of {} groups: the rest leave the {} byte "
+        "geometry",
+        walk, whole, groups, geometry.size());
     return whole;
   }
   return groups;
@@ -159,10 +161,11 @@ bool OffsetGroupTextureIds(std::span<std::byte> geometry, std::size_t group,
       static_cast<std::size_t>(block_words) * sizeof(std::int32_t);
   if (block_words < 0 ||
       !Fits(geometry.size(), block, room_effects::kPolygonBlockCountsBytes)) {
-    VS_LOG_WARN(kChannel,
-                "Texture ids of group {} not offset: its polygon block at {} "
-                "leaves the {} byte geometry",
-                group, block_word, geometry.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Texture ids of group {} not offset: its polygon block at {} "
+        "leaves the {} byte geometry",
+        group, block_word, geometry.size());
     return false;
   }
   const auto triangles = static_cast<std::uint64_t>(
@@ -174,10 +177,10 @@ bool OffsetGroupTextureIds(std::span<std::byte> geometry, std::size_t group,
       triangles * Render::kRoomTriangleRecordBytes;
   if (triangle_bytes + (quads * Render::kRoomQuadRecordBytes) >
       geometry.size() - first) {
-    VS_LOG_WARN(kChannel,
-                "Texture ids of group {} not offset: {} triangles and {} "
-                "quads at {} leave the {} byte geometry",
-                group, triangles, quads, first, geometry.size());
+    VS::Core::LogWarn(kChannel,
+                      "Texture ids of group {} not offset: {} triangles and {} "
+                      "quads at {} leave the {} byte geometry",
+                      group, triangles, quads, first, geometry.size());
     return false;
   }
   const auto polygons = geometry.subspan(first);
@@ -194,10 +197,11 @@ bool DisableTriggerGroups(std::span<std::byte> geometry,
                           std::size_t offset, std::size_t effect_count) {
   const std::size_t ids = offset + kViewTriggerHeaderBytes;
   if (!Fits(triggers.size(), ids, effect_count)) {
-    VS_LOG_WARN(kChannel,
-                "View trigger at {} refused: its {} group ids leave the {} "
-                "byte triggers",
-                offset, effect_count, triggers.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "View trigger at {} refused: its {} group ids leave the {} "
+        "byte triggers",
+        offset, effect_count, triggers.size());
     return false;
   }
   for (std::size_t index = 0; index < effect_count; ++index) {
@@ -304,10 +308,11 @@ bool CopyZonePaletteRow(std::span<std::uint16_t> palettes,
       first;
   if (start < 0 || static_cast<std::uint64_t>(start) > palettes.size() ||
       count > palettes.size() - static_cast<std::size_t>(start)) {
-    VS_LOG_WARN(kChannel,
-                "Zone palette row {} from colour {} refused: {} colours leave "
-                "the {} colour palettes",
-                row, first, colors.size(), palettes.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "Zone palette row {} from colour {} refused: {} colours leave "
+        "the {} colour palettes",
+        row, first, colors.size(), palettes.size());
     return false;
   }
   std::ranges::copy(colors.first(count),
@@ -318,10 +323,11 @@ bool CopyZonePaletteRow(std::span<std::uint16_t> palettes,
 bool UploadRoomPalettes(std::span<std::uint16_t> palettes,
                         RoomPaletteHost& host) {
   if (palettes.size() < kRoomPaletteColors) {
-    VS_LOG_WARN(kChannel,
-                "Room palettes not uploaded: {} colours are fewer than the "
-                "room's {}",
-                palettes.size(), kRoomPaletteColors);
+    VS::Core::LogWarn(
+        kChannel,
+        "Room palettes not uploaded: {} colours are fewer than the "
+        "room's {}",
+        palettes.size(), kRoomPaletteColors);
     return false;
   }
   for (int row = 0; row < kUploadedRoomPaletteRows; ++row) {
@@ -373,10 +379,11 @@ bool ApplyCameraGeometryOcclusion(std::span<std::byte> geometry,
   std::size_t offset = 0;
   while (offset < view_triggers.size()) {
     if (!Fits(view_triggers.size(), offset, kViewTriggerHeaderBytes)) {
-      VS_LOG_WARN(kChannel,
-                  "View triggers stopped at {}: a record header leaves the {} "
-                  "byte section",
-                  offset, view_triggers.size());
+      VS::Core::LogWarn(
+          kChannel,
+          "View triggers stopped at {}: a record header leaves the {} "
+          "byte section",
+          offset, view_triggers.size());
       return false;
     }
     const ViewTrigger trigger = DecodeViewTrigger(view_triggers, offset);
@@ -391,7 +398,7 @@ bool ApplyCameraGeometryOcclusion(std::span<std::byte> geometry,
 
 bool DrawRoomGeometry(const RoomTintState& tint, RoomGeometryHost& host) {
   if (!host.GeometryValid()) {
-    VS_LOG_DEBUG("render", "Invalid room geometry extent");
+    VS::Core::LogDebug("render", "Invalid room geometry extent");
     return false;
   }
   host.LoadViewTransform();

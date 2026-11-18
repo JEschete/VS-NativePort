@@ -76,10 +76,11 @@ void ReportRefusal(std::string_view query, std::int32_t curve,
                    std::int32_t distance, CurveSampleStatus status,
                    std::uint64_t& count) {
   if (ShouldReport(count)) {
-    VS_LOG_WARN("effects",
-                "{}: curve {} at {} refused (status {}); sampled as 0 ({} "
-                "refusals)",
-                query, curve, distance, static_cast<int>(status), count);
+    VS::Core::LogWarn(
+        "effects",
+        "{}: curve {} at {} refused (status {}); sampled as 0 ({} "
+        "refusals)",
+        query, curve, distance, static_cast<int>(status), count);
   }
 }
 }  // namespace
@@ -123,11 +124,11 @@ void LiveSampleAllEffectCurves(int distance) {
   const CurveSweep sweep =
       SampleAllEffectCurves(live.block, distance, LiveEffectCurveSamples());
   if (sweep.refused != 0 && ShouldReport(refused_sweeps)) {
-    VS_LOG_WARN("effects",
-                "sample all curves: {} of {} curves at {} refused and kept "
-                "their previous samples ({} sweeps)",
-                sweep.refused, live.block.header_count, distance,
-                refused_sweeps);
+    VS::Core::LogWarn(
+        "effects",
+        "sample all curves: {} of {} curves at {} refused and kept "
+        "their previous samples ({} sweeps)",
+        sweep.refused, live.block.header_count, distance, refused_sweeps);
   }
 }
 

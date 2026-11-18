@@ -26,7 +26,7 @@ constexpr std::int32_t kRingAngleOffset = 0x200;
 // A ring point between two positions takes a Q12 weight from a 15-bit draw.
 constexpr unsigned kRingWeightShift = 3;
 
-// The value Core_Random_Rand() % 6 picks: the box face a point lands on.
+// The value VS::Core::NextBiosRand() % 6 picks: the box face a point lands on.
 enum class BoxFace : std::int32_t {
   kPositiveX = 0,
   kNegativeX = 1,

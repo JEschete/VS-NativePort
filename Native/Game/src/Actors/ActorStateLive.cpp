@@ -320,8 +320,8 @@ class Registry {
       if (entries_.at(index).live == &live) return entries_.at(index).typed;
     }
     if (count_ == entries_.size()) {
-      VS_LOG_ERROR("actors", "Actor state touched more than {} {}",
-                   entries_.size(), Traits::kWhat);
+      VS::Core::LogError("actors", "Actor state touched more than {} {}",
+                         entries_.size(), Traits::kWhat);
       std::abort();
     }
     Entry& entry = entries_.at(count_++);

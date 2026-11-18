@@ -51,7 +51,7 @@ constexpr int kPageSoundEffect = 0x7E;
 EquipmentDetailsState g_state;
 
 void Warn(std::string_view what) {
-  VS_LOG_WARN("menu.framework", "equipment details: {}", what);
+  VS::Core::LogWarn("menu.framework", "equipment details: {}", what);
 }
 
 [[nodiscard]] std::uint8_t Byte(char value) {

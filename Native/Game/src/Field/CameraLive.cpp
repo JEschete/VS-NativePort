@@ -27,7 +27,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Field/Camera.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -109,13 +109,13 @@ std::uint64_t refused_calls = 0;
 
 void RefuseNull(std::string_view entry) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN(kChannel, "{} was given a null record; the call is refused",
-                entry);
+    VS::Core::LogWarn(kChannel,
+                      "{} was given a null record; the call is refused", entry);
   }
 }
 
 [[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
 }
 
 [[nodiscard]] Actors::MotionVector MotionOf(const SVECTOR& vector) {
@@ -384,9 +384,9 @@ std::optional<ActionCameraTargets> LiveCameraHost::ActionTargets() {
 void LiveCameraHost::SetPreferredActionCameraDistance(std::int32_t distance) {
   if (Battle_actionState == nullptr) {
     if (ShouldReport(refused_calls)) {
-      VS_LOG_WARN(kChannel,
-                  "no battle action to keep the preferred camera distance {}",
-                  distance);
+      VS::Core::LogWarn(
+          kChannel, "no battle action to keep the preferred camera distance {}",
+          distance);
     }
     return;
   }

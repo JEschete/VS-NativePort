@@ -35,7 +35,7 @@ constexpr int kBoneEndpoint = 2;
 constexpr std::intptr_t kUnassignedResult = -1;
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("event.camera", "{} refused: {}", operation, reason);
+  VS::Core::LogError("event.camera", "{} refused: {}", operation, reason);
   std::abort();
 }
 
@@ -179,12 +179,12 @@ void UpdateTrack(CameraTrack& record, std::int32_t tick_speed,
   if (track.motion_mode != kEventCameraTrackIdle &&
       track.motion_mode != kCameraMotionTerrainGlide &&
       track.duration_frames == 0) {
-    VS_LOG_WARN("event.camera",
-                "zero duration track={} mode={} easing={} elapsed={} "
-                "tick_speed={}",
-                TrackName(record), unsigned{track.motion_mode},
-                unsigned{track.primary_easing}, unsigned{track.elapsed_frames},
-                tick_speed);
+    VS::Core::LogWarn("event.camera",
+                      "zero duration track={} mode={} easing={} elapsed={} "
+                      "tick_speed={}",
+                      TrackName(record), unsigned{track.motion_mode},
+                      unsigned{track.primary_easing},
+                      unsigned{track.elapsed_frames}, tick_speed);
   }
   CameraState* camera = nullptr;
   Vec3 last_terrain_position;
@@ -218,14 +218,14 @@ std::intptr_t CommandCameraMotionEntry(std::uint8_t* instruction,
     const CameraTrack& started =
         (instruction[0] & kCameraMotionEyeTrackBit) != 0 ? camera.eye
                                                          : camera.look_at;
-    VS_LOG_DEBUG("event.camera", "start track={} mode={} easing={} duration={}",
-                 TrackName(started), unsigned{started.motion_mode},
-                 unsigned{started.easing_primary},
-                 unsigned{started.duration_frames});
+    VS::Core::LogDebug(
+        "event.camera", "start track={} mode={} easing={} duration={}",
+        TrackName(started), unsigned{started.motion_mode},
+        unsigned{started.easing_primary}, unsigned{started.duration_frames});
   }
   if (outcome != CameraMotionOutcome::kUnassigned) return 0;
-  VS_LOG_WARN("event.camera", "{}: opcode {:#04x} has no operation", kOperation,
-              instruction[0]);
+  VS::Core::LogWarn("event.camera", "{}: opcode {:#04x} has no operation",
+                    kOperation, instruction[0]);
   return kUnassignedResult;
 }
 

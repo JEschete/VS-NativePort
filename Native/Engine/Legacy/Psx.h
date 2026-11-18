@@ -4,11 +4,11 @@
 // form (plan §2.2). Every copied file includes this; each piece shrinks as call
 // sites are modernized and is deleted at zero uses (SDK_API_LEDGER.md).
 
-#include "Core/Arena.h"
-#include "Core/BiosRand.h"
+#include "Core/Arena.hpp"
+#include "Core/Diagnostics.hpp"
 #include "Core/Gte.h"
-#include "Core/Scratch.h"
-#include "Core/Unported.h"
+#include "Core/RandomLive.hpp"
+#include "Core/Scratch.hpp"
 #include "Legacy/Audio/LibSpu.h"
 #include "Legacy/Core/LibEtc.h"
 #include "Legacy/Core/PsxTypes.h"

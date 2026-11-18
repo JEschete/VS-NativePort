@@ -55,7 +55,7 @@ std::map<unsigned, VS::Content::AudioBank>& Banks() {
 
 VS::usize CheckedVoice(unsigned voice) {
   if (voice >= VoiceEngine::kVoices) {
-    VS_LOG_ERROR("audio", "invalid sequencer voice {}", voice);
+    VS::Core::LogError("audio", "invalid sequencer voice {}", voice);
     std::abort();
   }
   return voice;
@@ -77,17 +77,17 @@ class LiveVoiceOutput final : public Driver::VoiceOutputHost {
  public:
   void KeyOn(std::uint32_t voice) override {
     if (auto result = Engine().NoteOn(voice); !result) {
-      VS_LOG_ERROR("audio", "voice {} instrument {}: {}", voice,
-                   g_voice_instruments[voice], result.error());
+      VS::Core::LogError("audio", "voice {} instrument {}: {}", voice,
+                         g_voice_instruments[voice], result.error());
       return;
     }
-    VS_LOG_INFO("audio",
-                "note-on sample={} voice={} instrument={} rate={} "
-                "noise={} fm={} reverb={}",
-                g_sample_clock, voice, g_voice_instruments[voice],
-                g_controls[voice].rate, g_controls[voice].noise,
-                g_controls[voice].frequency_modulation,
-                g_controls[voice].reverb);
+    VS::Core::LogInfo("audio",
+                      "note-on sample={} voice={} instrument={} rate={} "
+                      "noise={} fm={} reverb={}",
+                      g_sample_clock, voice, g_voice_instruments[voice],
+                      g_controls[voice].rate, g_controls[voice].noise,
+                      g_controls[voice].frequency_modulation,
+                      g_controls[voice].reverb);
   }
 
   void KeyOff(std::uint32_t voice) override { Engine().NoteOff(voice); }
@@ -124,8 +124,8 @@ class LiveVoiceOutput final : public Driver::VoiceOutputHost {
 
 void ReportMask(const char* operation, const Driver::VoiceMaskResult& result) {
   if (result.ignored != 0) {
-    VS_LOG_DEBUG("audio", "{}: ignored mask bits {:08x} above voice 23",
-                 operation, result.ignored);
+    VS::Core::LogDebug("audio", "{}: ignored mask bits {:08x} above voice 23",
+                       operation, result.ignored);
   }
 }
 
@@ -135,15 +135,16 @@ void ReportVoice(const char* operation, Driver::VoiceStatus status, int voice,
     case Driver::VoiceStatus::kApplied:
       return;
     case Driver::VoiceStatus::kInvalidVoice:
-      VS_LOG_ERROR("audio", "{}: invalid voice {}", operation, voice);
+      VS::Core::LogError("audio", "{}: invalid voice {}", operation, voice);
       return;
     case Driver::VoiceStatus::kInvalidSampleRate:
-      VS_LOG_ERROR("audio", "{}: invalid sample rate {} for voice {}",
-                   operation, first, voice);
+      VS::Core::LogError("audio", "{}: invalid sample rate {} for voice {}",
+                         operation, first, voice);
       return;
     case Driver::VoiceStatus::kInvalidRelease:
-      VS_LOG_ERROR("audio", "{}: invalid release rate {} mode {} for voice {}",
-                   operation, first, second, voice);
+      VS::Core::LogError("audio",
+                         "{}: invalid release rate {} mode {} for voice {}",
+                         operation, first, second, voice);
       return;
   }
 }
@@ -154,7 +155,8 @@ class LiveSampleBanks final : public Samples::SampleBankHost {
       std::uint32_t bank_id) override {
     const auto* store = VS::Content::DataStore::Get();
     if (store == nullptr) {
-      VS_LOG_ERROR("audio", "bank {} requires an open data store", bank_id);
+      VS::Core::LogError("audio", "bank {} requires an open data store",
+                         bank_id);
       return std::nullopt;
     }
     auto& banks = Banks();
@@ -162,7 +164,7 @@ class LiveSampleBanks final : public Samples::SampleBankHost {
     if (found == banks.end()) {
       auto bank = VS::Content::LoadAudioBank(store->Root(), bank_id);
       if (!bank) {
-        VS_LOG_ERROR("audio", "{}", bank.error());
+        VS::Core::LogError("audio", "{}", bank.error());
         return std::nullopt;
       }
       found = banks.emplace(bank_id, std::move(*bank)).first;
@@ -257,7 +259,7 @@ namespace VS::Audio::Samples {
 int UploadLiveBank(const void* bank, int /*wait*/, int first_instrument,
                    int sample_address) {
   if (bank == nullptr) {
-    VS_LOG_ERROR("audio", "null bank source");
+    VS::Core::LogError("audio", "null bank source");
     Audio_Cutscene_legacySpuTransferBusy = -1;
     return -1;
   }
@@ -269,15 +271,16 @@ int UploadLiveBank(const void* bank, int /*wait*/, int first_instrument,
   const auto result = UploadBank(host, header, first_instrument,
                                  static_cast<std::uint32_t>(sample_address));
   if (result.status != BankUploadStatus::kUploaded) {
-    VS_LOG_ERROR("audio", "bank {} at instrument {}: {}", result.header.bank_id,
-                 first_instrument, BankUploadError(result.status));
+    VS::Core::LogError("audio", "bank {} at instrument {}: {}",
+                       result.header.bank_id, first_instrument,
+                       BankUploadError(result.status));
     Audio_Cutscene_legacySpuTransferBusy = -1;
     return -1;
   }
   Audio_Cutscene_legacySpuTransferBusy = 0;
-  VS_LOG_INFO("audio", "native bank {}: instruments {}..{}",
-              result.header.bank_id, first_instrument,
-              first_instrument + result.header.instrument_count - 1);
+  VS::Core::LogInfo("audio", "native bank {}: instruments {}..{}",
+                    result.header.bank_id, first_instrument,
+                    first_instrument + result.header.instrument_count - 1);
   return 0;
 }
 }  // namespace VS::Audio::Samples
@@ -299,7 +302,8 @@ void VS::Audio::Driver::ResetVoiceOutput() {
 void VS::Audio::Driver::ConfigureOutputChannel(Audio_SeqChannel* channel) {
   const auto voice = CheckedVoice(channel->voice.assignedVoice);
   if (channel->instrumentIndex >= g_instruments.size()) {
-    VS_LOG_ERROR("audio", "invalid instrument {}", channel->instrumentIndex);
+    VS::Core::LogError("audio", "invalid instrument {}",
+                       channel->instrumentIndex);
     std::abort();
   }
   auto& controls = g_controls[voice];
@@ -331,13 +335,13 @@ int VS::Audio::Driver::OutputReverbMode() {
 
 void VS::Audio::Driver::SetOutputReverbMode(int mode) {
   if (mode < 0 || mode > static_cast<int>(VS::Audio::ReverbPreset::kPipe)) {
-    VS_LOG_ERROR("audio", "invalid reverb preset {}", mode);
+    VS::Core::LogError("audio", "invalid reverb preset {}", mode);
     std::abort();
   }
   g_reverb.preset = static_cast<VS::Audio::ReverbPreset>(mode);
   g_reverb.left = g_reverb.right = 0;
   Engine().SetReverb(g_reverb, true);
-  VS_LOG_INFO("audio", "reverb preset {}", mode);
+  VS::Core::LogInfo("audio", "reverb preset {}", mode);
 }
 
 void VS::Audio::Driver::SetOutputReverbDepth(std::int16_t left,
@@ -350,7 +354,7 @@ void VS::Audio::Driver::SetOutputReverbDepth(std::int16_t left,
 
 void VS::Audio::Driver::EnableOutputReverb(int enabled) {
   if (enabled != 0 && enabled != 1) {
-    VS_LOG_ERROR("audio", "invalid reverb enable {}", enabled);
+    VS::Core::LogError("audio", "invalid reverb enable {}", enabled);
     std::abort();
   }
   g_reverb.enabled = enabled != 0;
@@ -380,11 +384,11 @@ int VS::Audio::Driver::StartOutputStreamVoice(unsigned voice,
       VS::Audio::DecodeAkaoEnvelope(kAttackDecay, kSustainRelease);
   Engine().Configure(voice, controls);
   if (auto result = Engine().NoteOn(voice); !result) {
-    VS_LOG_ERROR("audio", "stream voice {}: {}", voice, result.error());
+    VS::Core::LogError("audio", "stream voice {}: {}", voice, result.error());
     return 0;
   }
-  VS_LOG_INFO("audio", "stream-note-on sample={} voice={} asset={}",
-              g_sample_clock, voice, instrument);
+  VS::Core::LogInfo("audio", "stream-note-on sample={} voice={} asset={}",
+                    g_sample_clock, voice, instrument);
   return 1;
 }
 
@@ -406,14 +410,16 @@ void VS::Audio::Driver::TickVoiceOutput() {
   if (mono != g_mono) {
     Engine().SetMonoOutput(mono);
     g_mono = mono;
-    VS_LOG_INFO("audio", "native output mode: {}", mono ? "mono" : "stereo");
+    VS::Core::LogInfo("audio", "native output mode: {}",
+                      mono ? "mono" : "stereo");
   }
   Engine().CommitTick();
   g_sample_clock += VoiceEngine::kFramesPerTick;
   auto* device = VS::Audio::AudioDevice::Primary();
   if (device && device->IsRealtime()) {
     if (auto result = device->RenderFrom(Engine()); !result) {
-      VS_LOG_ERROR("audio", "starting native renderer: {}", result.error());
+      VS::Core::LogError("audio", "starting native renderer: {}",
+                         result.error());
       std::abort();
     }
     device->Pump();

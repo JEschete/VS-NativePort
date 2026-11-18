@@ -10,7 +10,7 @@
 
 #include "Core/Gte.h"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/AnalyzeGridLive.hpp"
 #include "Effects/Package.h"
@@ -35,7 +35,7 @@ constexpr std::uint32_t kInitialLink = 0xC4000007;
 
 Effects_ParticleEmitterScratch& Emitter() {
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      static_cast<std::byte*>(Core_ScratchBase()) + kEmitterOffset);
+      static_cast<std::byte*>(VS::Core::ScratchBase()) + kEmitterOffset);
 }
 
 struct Definitions {

@@ -9,7 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLive.hpp"
@@ -186,7 +186,7 @@ TEST_CASE("Room transforms use native camera layout and camera-facing groups",
     unsigned count = 2;
     std::array<RoomGroupRecord, 2> groups{};
   } geometry;
-  auto* frame = static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  auto* frame = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
   frame->viewMatrix = {};
   auto first = GroupOf(geometry, 0);
@@ -270,7 +270,7 @@ TEST_CASE("Room polygons preserve UV order and bound native frame packets",
   std::vector<unsigned char> memory(0x20000 + 16, 0xA5);
   auto* buffer = memory.data() + 8;
   std::array<u_long, 2048> ordering{};
-  auto* frame = static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  auto* frame = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
   void* savedBuffer = Render_legacyPrimitiveBuffers[0];
   const int savedFrame = Render_frameBuf;
@@ -538,7 +538,7 @@ TEST_CASE("Sky background emits visible colored triangles behind room geometry",
   sky.triangles[0][2] = 2;
   std::vector<unsigned char> buffer(0x20000);
   std::array<u_long, 2048> ordering{};
-  auto* frame = static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  auto* frame = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
   const auto saved = *frame;
   void* savedBuffer = Render_legacyPrimitiveBuffers[0];
   const int savedIndex = Render_frameBuf;

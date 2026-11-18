@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Math/Distance.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraLens.hpp"
 #include "Event/EventCameraLensLive.hpp"
@@ -74,7 +74,8 @@ struct LiveLensFixture {
   std::array<unsigned char, 0x100> saved_scratch{};
 
   LiveLensFixture() {
-    std::memcpy(saved_scratch.data(), Core_ScratchBase(), saved_scratch.size());
+    std::memcpy(saved_scratch.data(), VS::Core::ScratchBase(),
+                saved_scratch.size());
     Event_camera = &camera;
   }
   LiveLensFixture(const LiveLensFixture&) = delete;
@@ -84,25 +85,28 @@ struct LiveLensFixture {
   ~LiveLensFixture() {
     Event_camera = saved_camera;
     VS::State::tickSpeed = saved_tick_speed;
-    std::memcpy(Core_ScratchBase(), saved_scratch.data(), saved_scratch.size());
+    std::memcpy(VS::Core::ScratchBase(), saved_scratch.data(),
+                saved_scratch.size());
   }
 };
 
 std::int32_t ScratchWord(std::size_t offset) {
   std::int32_t value = 0;
-  std::memcpy(&value, static_cast<unsigned char*>(Core_ScratchBase()) + offset,
+  std::memcpy(&value,
+              static_cast<unsigned char*>(VS::Core::ScratchBase()) + offset,
               sizeof(value));
   return value;
 }
 
 void SetScratchWord(std::size_t offset, std::int32_t value) {
-  std::memcpy(static_cast<unsigned char*>(Core_ScratchBase()) + offset, &value,
-              sizeof(value));
+  std::memcpy(static_cast<unsigned char*>(VS::Core::ScratchBase()) + offset,
+              &value, sizeof(value));
 }
 
 Position3 ScratchPosition(std::size_t offset) {
   Position3 value;
-  std::memcpy(&value, static_cast<unsigned char*>(Core_ScratchBase()) + offset,
+  std::memcpy(&value,
+              static_cast<unsigned char*>(VS::Core::ScratchBase()) + offset,
               sizeof(value));
   return value;
 }

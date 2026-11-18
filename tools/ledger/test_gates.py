@@ -419,7 +419,7 @@ class PromotionGateTests(GateTestCase):
     def test_logging_only_body_claims_namespace(self) -> None:
         self.fixture.promote()
         self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
-            'namespace VS::Sys {\nvoid Thing(int v) { VS_LOG_TRACE("sys", "{}", v); }\n}\n'
+            'namespace VS::Sys {\nvoid Thing(int v) { VS::Core::LogTrace("sys", "{}", v); }\n}\n'
         )
         self.assertNotIn("claim-vs_namespace", [issue.rule for issue in self.report().issues])
 

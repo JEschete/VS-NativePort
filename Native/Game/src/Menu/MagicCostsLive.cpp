@@ -73,7 +73,7 @@ class LiveHost final : public Host {
     ++g_refusals;
     if (g_refusals <= kRefusalLogLimit ||
         g_refusals % kRefusalLogInterval == 0) {
-      VS_LOG_WARN("menu.magic", "{} (refusal {})", reason, g_refusals);
+      VS::Core::LogWarn("menu.magic", "{} (refusal {})", reason, g_refusals);
     }
   }
 

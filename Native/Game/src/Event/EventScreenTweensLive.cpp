@@ -8,7 +8,7 @@
 #include <optional>
 
 #include "Core/Log.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Event/Camera.hpp"
@@ -30,7 +30,7 @@ std::atomic<std::uint64_t> refused_count{0};
 
 void Skip(const char* operation, const char* reason) {
   refused_count.fetch_add(1, std::memory_order_relaxed);
-  VS_LOG_ERROR("event.camera", "{} skipped: {}", operation, reason);
+  VS::Core::LogError("event.camera", "{} skipped: {}", operation, reason);
 }
 
 EventAngleTween LoadAngleTween(const AngleTween& tween) {
@@ -101,7 +101,7 @@ class LiveTweenEasing final : public EventTweenEasing {
   }
 
   void RecordEasedFraction(std::int32_t fraction) override {
-    auto* scratch = static_cast<std::byte*>(Core_ScratchBase());
+    auto* scratch = static_cast<std::byte*>(VS::Core::ScratchBase());
     if (scratch == nullptr) return;
     std::memcpy(scratch + kEasedFractionScratchOffset, &fraction,
                 sizeof(fraction));

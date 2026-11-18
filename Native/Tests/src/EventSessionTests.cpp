@@ -101,7 +101,7 @@ struct EventCameraFixture {
                 saved_look_at.size());
     std::memcpy(
         scratch.data(),
-        static_cast<std::byte*>(Core_ScratchBase()) + kCameraScratchOffset,
+        static_cast<std::byte*>(VS::Core::ScratchBase()) + kCameraScratchOffset,
         scratch.size());
     Event_camera = &camera;
     VS::State::tickSpeed = 2;
@@ -119,7 +119,7 @@ struct EventCameraFixture {
     std::memcpy(&Event_kOrbitReturnSecondCommand, saved_look_at.data(),
                 saved_look_at.size());
     std::memcpy(
-        static_cast<std::byte*>(Core_ScratchBase()) + kCameraScratchOffset,
+        static_cast<std::byte*>(VS::Core::ScratchBase()) + kCameraScratchOffset,
         scratch.data(), scratch.size());
     Event_camera = saved_camera;
     VS::State::tickSpeed = saved_speed;

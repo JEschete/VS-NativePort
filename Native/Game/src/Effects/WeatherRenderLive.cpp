@@ -13,7 +13,7 @@
 
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/WeatherPool.hpp"
 #include "Effects/WeatherPoolLiveSupport.hpp"
 #include "Effects/WeatherRender.hpp"
@@ -55,8 +55,8 @@ std::uint64_t dropped_packets = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects", "weather draw: {} refused: {} ({} refusals)", call,
-                reason, refused_calls);
+    VS::Core::LogWarn("effects", "weather draw: {} refused: {} ({} refusals)",
+                      call, reason, refused_calls);
   }
 }
 
@@ -134,10 +134,11 @@ class LiveRenderHost final : public WeatherRenderHost {
         entry != nullptr ? Render::ReserveLivePrimitiveWords(words) : nullptr;
     if (tag == nullptr || packet.size > kWeatherPacketMaxWords) {
       if (ShouldReport(dropped_packets)) {
-        VS_LOG_WARN("effects",
-                    "weather draw: packet at slot {} has no ordering entry or "
-                    "buffer room; dropped ({} drops)",
-                    slot, dropped_packets);
+        VS::Core::LogWarn(
+            "effects",
+            "weather draw: packet at slot {} has no ordering entry or "
+            "buffer room; dropped ({} drops)",
+            slot, dropped_packets);
       }
       return;
     }

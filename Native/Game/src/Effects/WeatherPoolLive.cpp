@@ -9,10 +9,10 @@
 #include <string_view>
 #include <vector>
 
-#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/WeatherPool.hpp"
 #include "Effects/WeatherPoolLiveSupport.hpp"
 #include "Field/Background.hpp"
@@ -40,8 +40,8 @@ std::uint64_t refused_calls = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
   if (std::has_single_bit(++refused_calls)) {
-    VS_LOG_WARN("effects", "weather pool: {} refused: {} ({} refusals)", call,
-                reason, refused_calls);
+    VS::Core::LogWarn("effects", "weather pool: {} refused: {} ({} refusals)",
+                      call, reason, refused_calls);
   }
 }
 
@@ -77,7 +77,7 @@ void RunSpawn(std::string_view call, Spawn spawn) {
 }  // namespace
 
 namespace weather_live {
-std::int32_t PoolHost::Random() { return Core_Random_Rand(); }
+std::int32_t PoolHost::Random() { return VS::Core::NextBiosRand(); }
 std::int32_t PoolHost::Sine(std::int32_t angle) {
   return Core::Math::Sine(angle);
 }

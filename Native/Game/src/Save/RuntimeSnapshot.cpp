@@ -35,10 +35,10 @@
 #include "Boot/GameLoop.h"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.h"
+#include "Core/RandomLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
 #include "Field/GameModeLiveState.hpp"
@@ -1487,7 +1487,7 @@ std::expected<Snapshot, std::string> Capture(
           kClockRadix +
       time.frames;
   state.scene_timer = VS::State::sceneTimer;
-  state.random.bios_state = Core_Random_State();
+  state.random.bios_state = VS::Core::BiosRand().State();
   state.random.interface_state = Core_interfaceRandomState;
   std::copy_n(Core_randomShuffleTable, state.random.shuffle.size(),
               state.random.shuffle.begin());
@@ -1575,7 +1575,7 @@ void CancelResume() {
   if (AudioConsumerReady()) {
     SyncMonoOutput((previous.mix_behavior & kMonoOutput) != 0);
   } else {
-    VS_LOG_WARN(
+    VS::Core::LogWarn(
         "save",
         "CancelResume: audio consumer unavailable; restoring output latch");
   }
@@ -1645,7 +1645,7 @@ std::expected<void, std::string> FinishResume() {
   VS::State::sceneTimer = state.scene_timer;
   ApplyCaches(state);
   SyncMonoOutput(state.settings.monoSound == 1);
-  Core_Random_Seed(state.random.bios_state);
+  VS::Core::SeedBiosRand(state.random.bios_state);
   Core_interfaceRandomState = state.random.interface_state;
   std::copy(state.random.shuffle.begin(), state.random.shuffle.end(),
             Core_randomShuffleTable);

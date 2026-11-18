@@ -487,8 +487,9 @@ std::vector<EncounterScript> BuildDoorScripts(
       {"invalidated_passes", plan.invalidated}};
   WriteJson(trace.Directory() / "door-plan.json", selection);
   trace.Event("door.resume.plan", selection);
-  VS_LOG_INFO("combat-lab", "door plan: {} to run, {} prior passes retained",
-              plan.pending.size(), retained_passed.size());
+  VS::Core::LogInfo("combat-lab",
+                    "door plan: {} to run, {} prior passes retained",
+                    plan.pending.size(), retained_passed.size());
   std::vector<EncounterScript> scripts;
   for (const auto& test : plan.pending) {
     EncounterScript script;
@@ -1174,7 +1175,8 @@ int Run(int argc, char** argv) {
               {}, player_observations, verification_log);
   try {
     Platform::InstallCrashHandler();
-    VS_LOG_INFO("combat-lab", "log files: {}", trace.Directory().string());
+    VS::Core::LogInfo("combat-lab", "log files: {}",
+                      trace.Directory().string());
     const auto options = Parse(argc, argv);
     if (options.effect_paths &&
         !Core::IsLogEnabled(Core::LogLevel::Trace, "effect-path")) {
@@ -1232,10 +1234,11 @@ int Run(int argc, char** argv) {
     WriteManifest(options, trace, scripts.size(), &gpu);
     trace.Event("startup.stage", {{"stage", "audio.begin"}});
     Audio::AudioDevice audio(options.speed == 1);
-    VS_LOG_INFO("audio", "Combat Lab native mix timing: {}",
-                audio.IsRealtime() ? "device-demand" : "sequencer-driven");
+    VS::Core::LogInfo(
+        "audio", "Combat Lab native mix timing: {}",
+        audio.IsRealtime() ? "device-demand" : "sequencer-driven");
     if (const auto result = audio.Open(); !result) {
-      VS_LOG_WARN("audio", "{}", result.error());
+      VS::Core::LogWarn("audio", "{}", result.error());
     }
     trace.Event("startup.stage", {{"stage", "audio.end"}});
     LiveSession session(options, trace, std::move(catalog), std::move(scripts),
@@ -1247,7 +1250,7 @@ int Run(int argc, char** argv) {
     return session.Run(app, gpu);
   } catch (const std::exception& error) {
     trace.Event("fatal", {{"message", error.what()}});
-    VS_LOG_ERROR("combat-lab", "{}", error.what());
+    VS::Core::LogError("combat-lab", "{}", error.what());
     throw;
   }
 }
@@ -1257,7 +1260,7 @@ int Run(int argc, char** argv) {
 int main(int argc, char** argv) try {
   return VS::combat_lab::Run(argc, argv);
 } catch (const std::exception& error) {
-  VS_LOG_ERROR("combat-lab", "{}", error.what());
+  VS::Core::LogError("combat-lab", "{}", error.what());
   const bool noninteractive =
       std::any_of(argv + 1, argv + argc, [](std::string_view argument) {
         return argument == "--sequence" || argument == "--scripted" ||

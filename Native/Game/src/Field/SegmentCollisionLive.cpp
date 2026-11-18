@@ -32,7 +32,7 @@ constexpr std::size_t kSourcePlatformBytes = 184;
 static_assert(sizeof(Field_MpdMovingPlatform) == kSourcePlatformBytes);
 
 [[noreturn]] void InvalidTrace(const char* reason) {
-  VS_LOG_ERROR("field.collision", "segment trace: {}", reason);
+  VS::Core::LogError("field.collision", "segment trace: {}", reason);
   std::abort();
 }
 

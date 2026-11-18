@@ -233,12 +233,12 @@ std::expected<Synth, std::string> LoadProgram(const std::filesystem::path& path,
   if (!sfizz_load_file(synth.get(), Platform::PathText(path).c_str())) {
     return std::unexpected("sfizz cannot load " + Platform::PathText(path));
   }
-  VS_LOG_DEBUG("audio", "instrument load: voice={} duration_ms={} path={}",
-               voice,
-               std::chrono::duration<double, std::milli>(
-                   std::chrono::steady_clock::now() - started)
-                   .count(),
-               Platform::PathText(path));
+  VS::Core::LogDebug("audio",
+                     "instrument load: voice={} duration_ms={} path={}", voice,
+                     std::chrono::duration<double, std::milli>(
+                         std::chrono::steady_clock::now() - started)
+                         .count(),
+                     Platform::PathText(path));
   return synth;
 }
 }  // namespace
@@ -343,7 +343,7 @@ struct VoiceEngine::State {
       commands[reclaimed++ % commands.size()].synth.reset();
     }
     if (next - consumed == commands.size()) {
-      VS_LOG_ERROR("audio", "native voice command queue exhausted");
+      VS::Core::LogError("audio", "native voice command queue exhausted");
       std::abort();
     }
     command.epoch = epoch.load(std::memory_order_relaxed);
@@ -495,7 +495,7 @@ void VoiceEngine::SetRelease(usize index, const EnvelopeRate& release) {
 void VoiceEngine::SetNoiseClock(unsigned clock) {
   constexpr unsigned kMaximumClock = 63;
   if (clock > kMaximumClock) {
-    VS_LOG_ERROR("audio", "invalid native noise clock {}", clock);
+    VS::Core::LogError("audio", "invalid native noise clock {}", clock);
     std::abort();
   }
   State::Command command;
@@ -508,7 +508,7 @@ void VoiceEngine::SetReverb(const ReverbControls& controls, bool clear) {
   if (controls.preset < ReverbPreset::kOff ||
       controls.preset > ReverbPreset::kPipe || !std::isfinite(controls.left) ||
       !std::isfinite(controls.right)) {
-    VS_LOG_ERROR("audio", "invalid native reverb controls");
+    VS::Core::LogError("audio", "invalid native reverb controls");
     std::abort();
   }
   State::Command command;

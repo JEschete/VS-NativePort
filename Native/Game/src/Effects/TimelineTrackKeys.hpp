@@ -20,8 +20,8 @@ inline void RefuseTimelineCall(std::string_view call,
                                std::string_view missing) {
   static std::uint64_t refusals = 0;
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("effects", "timeline {} refused: {} ({} refusals)", call,
-                missing, refusals);
+    VS::Core::LogWarn("effects", "timeline {} refused: {} ({} refusals)", call,
+                      missing, refusals);
   }
 }
 

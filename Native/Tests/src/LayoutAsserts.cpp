@@ -402,7 +402,7 @@ int Tests_AiFrameCache(void) {
   const unsigned saved_aux_length = Field_roomData.header.section6Length;
   const int savedRandom = Battle_Ai_savedMovementRandomState;
   u_char savedScratch[132];
-  u_char* scratch = reinterpret_cast<u_char*>(Core_ScratchBase()) + 0x37C;
+  u_char* scratch = reinterpret_cast<u_char*>(VS::Core::ScratchBase()) + 0x37C;
   memcpy(savedScratch, scratch, sizeof savedScratch);
   for (size_t index = 0; index < sizeof savedScratch; ++index) {
     scratch[index] = kScratchSentinel;

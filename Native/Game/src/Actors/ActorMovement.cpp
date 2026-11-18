@@ -181,9 +181,9 @@ void ReleaseCurrentTile(MovementHost& host, const MovementActor& actor) {
 void SetLayerRider(MovementHost& host, int layer, int rider) {
   const int platform = layer - kFirstPlatformLayer;
   if (platform < 0 || platform >= host.MovingPlatformCount()) {
-    VS_LOG_DEBUG("field.platform",
-                 "rider {} skipped for layer {}: no moving platform", rider,
-                 layer);
+    VS::Core::LogDebug("field.platform",
+                       "rider {} skipped for layer {}: no moving platform",
+                       rider, layer);
     return;
   }
   host.SetPlatformRider(platform, rider);
@@ -195,9 +195,9 @@ void SetLayerRider(MovementHost& host, int layer, int rider) {
                                                    const MovementActor& actor) {
   const MovementActor* parent = host.Actor(actor.attach_parent);
   if (parent == nullptr) {
-    VS_LOG_WARN("actors", "actor {} rides absent parent {}",
-                static_cast<int>(actor.motion.slot),
-                static_cast<int>(actor.attach_parent));
+    VS::Core::LogWarn("actors", "actor {} rides absent parent {}",
+                      static_cast<int>(actor.motion.slot),
+                      static_cast<int>(actor.attach_parent));
     return std::nullopt;
   }
   return parent->motion.action_animation_state;
@@ -208,9 +208,9 @@ void SetLayerRider(MovementHost& host, int layer, int rider) {
   if (actor.companion_slot < kFirstCompanionSlot) return false;
   const MovementActor* companion = host.Actor(actor.companion_slot);
   if (companion == nullptr) {
-    VS_LOG_WARN("actors", "actor {} has absent companion {}",
-                static_cast<int>(actor.motion.slot),
-                static_cast<int>(actor.companion_slot));
+    VS::Core::LogWarn("actors", "actor {} has absent companion {}",
+                      static_cast<int>(actor.motion.slot),
+                      static_cast<int>(actor.companion_slot));
     return false;
   }
   return companion->reaction_state != 0;
@@ -422,9 +422,10 @@ void FollowPlatform(MovementHost& host, MovementActor& actor) {
   const std::optional<PlatformPoint> contact =
       host.MovingPlatform(actor.support_layer);
   if (!contact) {
-    VS_LOG_ERROR("field.platform", "actor {} rides invisible platform layer {}",
-                 static_cast<int>(actor.motion.slot),
-                 static_cast<int>(actor.support_layer));
+    VS::Core::LogError("field.platform",
+                       "actor {} rides invisible platform layer {}",
+                       static_cast<int>(actor.motion.slot),
+                       static_cast<int>(actor.support_layer));
     return;
   }
   MotionVector& anchor = actor.platform_anchor;
@@ -458,7 +459,7 @@ void AnchorPlatform(MovementHost& host, MovementActor& actor) {
   const std::optional<PlatformPoint> contact =
       host.MovingPlatform(actor.support_layer);
   if (!contact) {
-    VS_LOG_ERROR(
+    VS::Core::LogError(
         "field.platform", "actor {} anchors to invisible platform layer {}",
         static_cast<int>(motion.slot), static_cast<int>(actor.support_layer));
     return;
@@ -995,8 +996,8 @@ void AddGimmickSpin(MoveContext& ctx) {
   const std::optional<MovementGimmick> gimmick =
       ctx.host.Gimmick(actor.support_gimmick);
   if (!gimmick) {
-    VS_LOG_WARN("field.gimmick", "actor {} hangs from absent gimmick {}",
-                ctx.id, static_cast<int>(actor.support_gimmick));
+    VS::Core::LogWarn("field.gimmick", "actor {} hangs from absent gimmick {}",
+                      ctx.id, static_cast<int>(actor.support_gimmick));
     return;
   }
   if (gimmick->mode != kSpinGimmickMode) return;
@@ -1256,9 +1257,9 @@ void BeginActorJumpToTile(MovementHost& host, MovementActor& actor,
   if (target.layer >= kFirstPlatformLayer) {
     platform = host.MovingPlatform(target.layer);
     if (!platform) {
-      VS_LOG_ERROR("field.platform",
-                   "jump target platform layer {} is not visible",
-                   static_cast<int>(target.layer));
+      VS::Core::LogError("field.platform",
+                         "jump target platform layer {} is not visible",
+                         static_cast<int>(target.layer));
       return;
     }
   }
@@ -1452,15 +1453,16 @@ void CancelActorTeleportTransition(MovementHost& host, MovementActor& actor) {
     const int companion = current->companion_slot;
     if (companion < kFirstCompanionSlot) return;
     if (companion >= kActorSlots || cancelled.at(companion)) {
-      VS_LOG_WARN("actors", "teleport cancel stops at repeated companion {}",
-                  companion);
+      VS::Core::LogWarn("actors",
+                        "teleport cancel stops at repeated companion {}",
+                        companion);
       return;
     }
     cancelled.at(companion) = true;
     current = host.Actor(companion);
     if (current == nullptr) {
-      VS_LOG_WARN("actors", "teleport cancel skips absent companion {}",
-                  companion);
+      VS::Core::LogWarn("actors", "teleport cancel skips absent companion {}",
+                        companion);
       return;
     }
   }
@@ -1518,7 +1520,7 @@ void BeginActorJumpMovement(MovementHost& host, int id, int direction,
                             int distance) {
   MovementActor* actor = host.Actor(id);
   if (actor == nullptr) {
-    VS_LOG_WARN("actors", "jump movement skips absent actor {}", id);
+    VS::Core::LogWarn("actors", "jump movement skips absent actor {}", id);
     return;
   }
   ActorMotion& motion = actor->motion;
@@ -1583,7 +1585,7 @@ void UpdateRoomActorMovement(MovementHost& host) {
 void UpdateActorMovement(MovementHost& host, int id) {
   MovementActor* found = host.Actor(id);
   if (found == nullptr) {
-    VS_LOG_WARN("actors", "movement update skips absent actor {}", id);
+    VS::Core::LogWarn("actors", "movement update skips absent actor {}", id);
     return;
   }
   MovementActor& actor = *found;
@@ -1909,8 +1911,8 @@ void PlayLandingSound(MovementHost& host, int id, MovementActor& actor,
   const std::optional<MovementGimmick> gimmick =
       host.GimmickForActorSlot(gimmick_slot);
   if (!gimmick) {
-    VS_LOG_WARN("field.gimmick", "actor {} lands on absent gimmick {}",
-                static_cast<int>(motion.slot), gimmick_slot);
+    VS::Core::LogWarn("field.gimmick", "actor {} lands on absent gimmick {}",
+                      static_cast<int>(motion.slot), gimmick_slot);
     return false;
   }
   if (gimmick->mode == 0) return false;

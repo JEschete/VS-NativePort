@@ -74,10 +74,11 @@ void LiveRequeueEffectTrack(int track) {
   PrimaryEffectState state = LiveState();
   if (!RequeueTrack(state, track)) {
     if (ShouldReport(refused_tracks)) {
-      VS_LOG_WARN("effects",
-                  "primary effect: requeue of track {} refused: past the {} "
-                  "tracks ({} refusals)",
-                  track, kPrimaryEffectTracks, refused_tracks);
+      VS::Core::LogWarn(
+          "effects",
+          "primary effect: requeue of track {} refused: past the {} "
+          "tracks ({} refusals)",
+          track, kPrimaryEffectTracks, refused_tracks);
     }
     return;
   }
@@ -93,10 +94,11 @@ void LiveSetPrimaryEffectPhase(int phase) {
   const auto known = ToPrimaryEffectPhase(static_cast<std::uint32_t>(phase));
   if (!known) {
     if (ShouldReport(refused_phases)) {
-      VS_LOG_WARN("effects",
-                  "primary effect: phase {} refused: not a runtime phase ({} "
-                  "refusals)",
-                  phase, refused_phases);
+      VS::Core::LogWarn(
+          "effects",
+          "primary effect: phase {} refused: not a runtime phase ({} "
+          "refusals)",
+          phase, refused_phases);
     }
     return;
   }
@@ -115,10 +117,11 @@ int LiveAllocateEffectToken() {
   const auto token = AllocateEffectToken(pool);
   if (!token) {
     if (ShouldReport(exhausted_pools)) {
-      VS_LOG_WARN("effects",
-                  "effect tokens: the pool is full; token 0 handed out ({} "
-                  "times)",
-                  exhausted_pools);
+      VS::Core::LogWarn(
+          "effects",
+          "effect tokens: the pool is full; token 0 handed out ({} "
+          "times)",
+          exhausted_pools);
     }
     return 0;
   }
@@ -130,10 +133,11 @@ void LiveReleaseEffectToken(int token) {
   EffectTokenPool pool = LiveTokenPool();
   if (!ReleaseEffectToken(pool, token)) {
     if (ShouldReport(refused_tokens)) {
-      VS_LOG_WARN("effects",
-                  "effect tokens: release of token {} refused: past the {} "
-                  "tokens ({} refusals)",
-                  token, kEffectTokens, refused_tokens);
+      VS::Core::LogWarn(
+          "effects",
+          "effect tokens: release of token {} refused: past the {} "
+          "tokens ({} refusals)",
+          token, kEffectTokens, refused_tokens);
     }
     return;
   }

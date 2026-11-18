@@ -63,14 +63,14 @@ TEST_CASE("Log observers receive filtered records with production tick context",
     CHECK(Core::IsLogEnabled(record.level, record.channel));
     records.emplace_back(record.message);
   });
-  VS_LOG_INFO("combat", "damage={}", 12);
-  VS_LOG_INFO("other", "filtered");
-  VS_LOG_WARN("other", "important");
+  VS::Core::LogInfo("combat", "damage={}", 12);
+  VS::Core::LogInfo("other", "filtered");
+  VS::Core::LogWarn("other", "important");
   REQUIRE(records.size() == 2);
   CHECK(records[0] == "damage=12");
   CHECK(records[1] == "important");
   Core::SetLogObserver({});
-  VS_LOG_INFO("combat", "detached");
+  VS::Core::LogInfo("combat", "detached");
   CHECK(records.size() == 2);
 }
 
@@ -86,13 +86,13 @@ TEST_CASE("Log observers can be replaced and restored without affecting sinks",
   Core::SetLogObserver([&](const Core::LogRecord&) { ++first; });
   auto previous =
       Core::SetLogObserver([&](const Core::LogRecord&) { ++second; });
-  VS_LOG_INFO("test", "replacement");
+  VS::Core::LogInfo("test", "replacement");
   Core::SetLogObserver(std::move(previous));
-  VS_LOG_INFO("test", "restored");
+  VS::Core::LogInfo("test", "restored");
   CHECK(first == 1);
   CHECK(second == 1);
   Core::SetLogObserver({});
-  VS_LOG_INFO("test", "detached");
+  VS::Core::LogInfo("test", "detached");
   std::ifstream reader(log_file.path);
   REQUIRE(reader.good());
   const std::string text((std::istreambuf_iterator<char>(reader)),
@@ -110,7 +110,7 @@ TEST_CASE("Buffered Core sinks persist warnings without a trace observer",
   REQUIRE(Core::SetLogMirrorFile(sinks.mirror.path.string().c_str()));
   Core::SetLogLevel(Core::LogLevel::Trace);
   Core::SetLogChannels("*");
-  VS_LOG_WARN("effects.texture", "durable warning without observer");
+  VS::Core::LogWarn("effects.texture", "durable warning without observer");
   for (const auto& path : {sinks.primary.path, sinks.mirror.path}) {
     CAPTURE(path.string());
     std::ifstream input(path);

@@ -11,7 +11,7 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventCameraFrame.hpp"
 #include "Event/EventCameraLensLive.hpp"
@@ -42,7 +42,7 @@ std::atomic<std::uint64_t> refused_count{0};
 
 void Skip(const char* operation, const char* reason) {
   refused_count.fetch_add(1, std::memory_order_relaxed);
-  VS_LOG_ERROR("event.camera", "{} skipped: {}", operation, reason);
+  VS::Core::LogError("event.camera", "{} skipped: {}", operation, reason);
 }
 
 CameraState* LiveCamera(const char* operation) {
@@ -185,7 +185,7 @@ class LiveCameraOutput final : public EventCameraOutputPort {
  private:
   template <typename Record>
   static Record* Scratch(std::size_t offset, Record* fallback) {
-    auto* scratch = static_cast<std::byte*>(Core_ScratchBase());
+    auto* scratch = static_cast<std::byte*>(VS::Core::ScratchBase());
     if (scratch == nullptr) return fallback;
     return reinterpret_cast<Record*>(scratch + offset);
   }

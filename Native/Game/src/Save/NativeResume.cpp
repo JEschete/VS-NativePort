@@ -20,17 +20,17 @@ bool FinishStagedResume() {
   const auto finished = FinishResume();
   if (!finished) {
     ResumeError() = finished.error();
-    VS_LOG_ERROR("save", "Native resume failed: {}", ResumeError());
+    VS::Core::LogError("save", "Native resume failed: {}", ResumeError());
     return false;
   }
   ResumeError().clear();
-  VS_LOG_INFO("save", "Native resume applied before room-event dispatch");
+  VS::Core::LogInfo("save", "Native resume applied before room-event dispatch");
   return true;
 }
 
 void ResetSession() {
   if (ResumePending()) {
-    VS_LOG_INFO("save", "Cancelling a staged native resume");
+    VS::Core::LogInfo("save", "Cancelling a staged native resume");
   }
   CancelResume();
   ResetFileMenuSession();

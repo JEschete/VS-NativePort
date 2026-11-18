@@ -233,7 +233,7 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
       {"projection_flags", flags},
       {"outcome", outcome},
       {"command_addresses", std::move(commands)}};
-  VS_LOG_TRACE("effect-path", "{}", record.dump());
+  VS::Core::LogTrace("effect-path", "{}", record.dump());
 }
 
 std::size_t PoolSlot(const Effects_Particle* node) {

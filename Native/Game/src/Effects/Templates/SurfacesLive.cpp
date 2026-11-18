@@ -12,14 +12,14 @@
 #include <type_traits>
 #include <utility>
 
-#include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/RandomLive.hpp"
+#include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -131,7 +131,7 @@ std::uint64_t dropped_primitives = 0;
 
 Effects_ParticleEmitterScratch& EmitterScratch() {
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      reinterpret_cast<std::uintptr_t>(Core_ScratchBase()) +
+      reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
@@ -257,10 +257,11 @@ std::optional<SurfaceDefinition> LiveSurfaceServices::CreateDefinition(
     std::uint8_t definition_index) const {
   const Effects_ParticleDefinition* definition = Definition(definition_index);
   if (definition == nullptr) {
-    VS_LOG_WARN("effects",
-                "{}: definition {} is outside the package's {} definitions; "
-                "{} refused",
-                name_, definition_index, LiveParticleDefinitionCount(), name_);
+    VS::Core::LogWarn(
+        "effects",
+        "{}: definition {} is outside the package's {} definitions; "
+        "{} refused",
+        name_, definition_index, LiveParticleDefinitionCount(), name_);
     return std::nullopt;
   }
   return TypedDefinition(*definition);
@@ -276,10 +277,11 @@ std::span<const std::uint8_t> LiveSurfaceServices::FactorCurve(
   const std::size_t bound = LiveEffectCurveCount();
   if (curve >= bound || Effects_package->curves[curve] == nullptr ||
       Effects_package->curveBlock->curveSizes[curve] == 0) {
-    VS_LOG_WARN("effects",
-                "{}: transparency curve {} is outside the package's {} bound "
-                "curves or empty; rows drawn at full intensity",
-                name_, curve, bound);
+    VS::Core::LogWarn(
+        "effects",
+        "{}: transparency curve {} is outside the package's {} bound "
+        "curves or empty; rows drawn at full intensity",
+        name_, curve, bound);
     return {};
   }
   return {
@@ -291,23 +293,24 @@ std::optional<SurfaceTickInputs> LiveSurfaceServices::BeginTick(
     std::uint8_t definition_index) {
   instance_ = Effects_currentInstance;
   if (instance_ == nullptr) {
-    VS_LOG_WARN("effects", "{}: no current effect instance; {} stopped", name_,
-                name_);
+    VS::Core::LogWarn("effects", "{}: no current effect instance; {} stopped",
+                      name_, name_);
     return std::nullopt;
   }
   definition_ = Definition(definition_index);
   if (definition_ == nullptr) {
-    VS_LOG_WARN("effects",
-                "{}: the current package no longer holds definition {}; {} "
-                "stopped",
-                name_, definition_index, name_);
+    VS::Core::LogWarn(
+        "effects",
+        "{}: the current package no longer holds definition {}; {} "
+        "stopped",
+        name_, definition_index, name_);
     return std::nullopt;
   }
   if (definition_->transformIndex >= kTransformCount) {
-    VS_LOG_WARN("effects",
-                "{}: definition {} names transform {} of {}; {} stopped", name_,
-                definition_index, definition_->transformIndex, kTransformCount,
-                name_);
+    VS::Core::LogWarn("effects",
+                      "{}: definition {} names transform {} of {}; {} stopped",
+                      name_, definition_index, definition_->transformIndex,
+                      kTransformCount, name_);
     return std::nullopt;
   }
   // The original stored the flags before sampling anything.
@@ -338,10 +341,11 @@ std::int32_t LiveSurfaceServices::SampleCurve(std::int32_t curve,
   if (curve < 0 || std::cmp_greater(curve, bound) ||
       Effects_package->curveBlock->curveSizes[curve - 1] == 0) {
     if (ShouldReport(refused_curves)) {
-      VS_LOG_WARN("effects",
-                  "{}: curve {} is outside the package's {} bound curves or "
-                  "empty; sampled as 0 ({} refusals)",
-                  name_, curve, bound, refused_curves);
+      VS::Core::LogWarn(
+          "effects",
+          "{}: curve {} is outside the package's {} bound curves or "
+          "empty; sampled as 0 ({} refusals)",
+          name_, curve, bound, refused_curves);
     }
     return 0;
   }
@@ -428,11 +432,11 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
   }
   if (!bound || animation.textureInfo == nullptr) {
     if (ShouldReport(refused_textures)) {
-      VS_LOG_WARN("effects",
-                  "{}: texture table {} of {} has no frame; drawn without "
-                  "primitives ({} refusals)",
-                  name_, table, Effects_package->block1TableCount,
-                  refused_textures);
+      VS::Core::LogWarn(
+          "effects",
+          "{}: texture table {} of {} has no frame; drawn without "
+          "primitives ({} refusals)",
+          name_, table, Effects_package->block1TableCount, refused_textures);
     }
     return std::nullopt;
   }
@@ -460,10 +464,11 @@ void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
                              : nullptr;
   if (packet == nullptr) {
     if (ShouldReport(dropped_primitives)) {
-      VS_LOG_WARN("effects",
-                  "{}: primitive at depth {} has no ordering entry or buffer "
-                  "room; dropped ({} drops)",
-                  name_, depth, dropped_primitives);
+      VS::Core::LogWarn(
+          "effects",
+          "{}: primitive at depth {} has no ordering entry or buffer "
+          "room; dropped ({} drops)",
+          name_, depth, dropped_primitives);
     }
     return;
   }
@@ -495,10 +500,11 @@ void LiveSurfaceServices::EmitParticleEvent(std::uint8_t event,
                                             Vec3 position) const {
   const std::size_t bound = LiveParticleDefinitionCount();
   if (event >= bound) {
-    VS_LOG_WARN("effects",
-                "{}: tick event {} is outside the package's {} definitions; "
-                "event skipped",
-                name_, event, bound);
+    VS::Core::LogWarn(
+        "effects",
+        "{}: tick event {} is outside the package's {} definitions; "
+        "event skipped",
+        name_, event, bound);
     return;
   }
   // The original left the context's other fields as stack contents; they
@@ -512,7 +518,7 @@ void LiveSurfaceServices::EmitParticleEvent(std::uint8_t event,
 void* LiveSurfaceServices::AllocateState(std::size_t bytes) const {
   void* state = Core::Memory::AllocateLiveFromHighEnd(bytes);
   if (state == nullptr) {
-    VS_LOG_ERROR("effects", "{}: heap exhausted for state", name_);
+    VS::Core::LogError("effects", "{}: heap exhausted for state", name_);
   }
   return state;
 }
@@ -526,8 +532,9 @@ void LiveSurfaceServices::StartAnimation(
   if (source.table >= tables ||
       std::cmp_greater_equal(source.table, kTextureTableCount) ||
       Effects_package->textureInfoTable[source.table] == nullptr) {
-    VS_LOG_DEBUG("effects", "{}: create names unbound texture table {} of {}",
-                 name_, source.table, tables);
+    VS::Core::LogDebug("effects",
+                       "{}: create names unbound texture table {} of {}", name_,
+                       source.table, tables);
   }
   // Clearing the record also cleared the texture animation, as
   // func_800D6CCC did.
@@ -687,7 +694,9 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
                                          std::int32_t distance) override {
     return services_.SampleCurve(curve, distance);
   }
-  [[nodiscard]] std::int32_t Rand() override { return Core_Random_Rand(); }
+  [[nodiscard]] std::int32_t Rand() override {
+    return VS::Core::NextBiosRand();
+  }
   void PublishScratch(const SurfaceScratch& scratch) override {
     LiveSurfaceServices::PublishScratch(scratch);
   }
@@ -734,8 +743,8 @@ int RunSurfaceEntry(Effects_RendererSlot* slot, unsigned int command,
                     int packed, std::string_view name, Instance instance,
                     const Args&... inputs) {
   if (slot == nullptr) {
-    VS_LOG_ERROR("effects", "{}: renderer called without a slot; ignored",
-                 name);
+    VS::Core::LogError("effects", "{}: renderer called without a slot; ignored",
+                       name);
     return 0;
   }
   LiveSurfaceHost<Record, Legacy> host(*slot, name);

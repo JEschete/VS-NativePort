@@ -97,7 +97,7 @@ static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores) ==
 static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores[0]) ==
               kTrialRanks);
 
-void Warn(std::string_view what) { VS_LOG_WARN(kChannel, "{}", what); }
+void Warn(std::string_view what) { VS::Core::LogWarn(kChannel, "{}", what); }
 
 [[nodiscard]] int Pack(int low, int high) {
   return static_cast<int>((static_cast<std::uint32_t>(high) << kHalfwordShift) |
@@ -123,9 +123,9 @@ void Warn(std::string_view what) { VS_LOG_WARN(kChannel, "{}", what); }
       pixels * kPixelBytes >= AreaBytes(area)) {
     return true;
   }
-  VS_LOG_WARN(kChannel,
-              "Title VRAM transfer refused: {}x{} at ({}, {}) has {} pixels",
-              area.width, area.height, area.x, area.y, pixels);
+  VS::Core::LogWarn(
+      kChannel, "Title VRAM transfer refused: {}x{} at ({}, {}) has {} pixels",
+      area.width, area.height, area.x, area.y, pixels);
   return false;
 }
 
@@ -169,7 +169,7 @@ struct ImageSource {
 
 [[nodiscard]] std::size_t BufferIndex(int buffer) {
   if (buffer != 0 && buffer != 1) {
-    VS_LOG_WARN(kChannel, "Title frame buffer {} is not 0 or 1", buffer);
+    VS::Core::LogWarn(kChannel, "Title frame buffer {} is not 0 or 1", buffer);
   }
   return static_cast<std::size_t>(buffer & 1);
 }
@@ -179,8 +179,8 @@ class LiveHost final : public Host {
   void Submit(std::span<const std::uint32_t> packet) override {
     std::array<u_long, kPacketWords> words{};
     if (packet.size() > words.size()) {
-      VS_LOG_WARN(kChannel, "Title packet of {} words exceeds {} words",
-                  packet.size(), words.size());
+      VS::Core::LogWarn(kChannel, "Title packet of {} words exceeds {} words",
+                        packet.size(), words.size());
       return;
     }
     std::ranges::copy(packet, words.begin());
@@ -205,7 +205,8 @@ class LiveHost final : public Host {
   void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
   void SetDiscMixVolume(std::uint32_t volume) override {
     if (!Audio::Control::SetLiveDiscMixVolume(volume)) {
-      VS_LOG_WARN(kChannel, "Title disc mix volume {} was refused", volume);
+      VS::Core::LogWarn(kChannel, "Title disc mix volume {} was refused",
+                        volume);
     }
   }
 
@@ -239,16 +240,16 @@ class LiveHost final : public Host {
     const std::size_t row_bytes =
         area.width > 0 ? static_cast<std::size_t>(area.width) * kPixelBytes : 0;
     if (source.pixels == nullptr || row_bytes == 0 || area.height <= 0) {
-      VS_LOG_WARN(kChannel, "Title image {} upload to {}x{} refused",
-                  static_cast<int>(image), area.width, area.height);
+      VS::Core::LogWarn(kChannel, "Title image {} upload to {}x{} refused",
+                        static_cast<int>(image), area.width, area.height);
       return;
     }
     std::size_t rows = static_cast<std::size_t>(area.height);
     if (rows * row_bytes > source.bytes) {
       rows = source.bytes / row_bytes;
-      VS_LOG_WARN(kChannel,
-                  "Title image {} holds {} bytes; uploading {} of {} rows",
-                  static_cast<int>(image), source.bytes, rows, area.height);
+      VS::Core::LogWarn(
+          kChannel, "Title image {} holds {} bytes; uploading {} of {} rows",
+          static_cast<int>(image), source.bytes, rows, area.height);
     }
     Render::UploadLiveImageRectangle(Pack(area.x, area.y), source.pixels,
                                      Pack(area.width, static_cast<int>(rows)));
@@ -432,10 +433,10 @@ class LiveHost final : public Host {
   }
   void ClearAshleySnapshot(std::size_t bytes) override {
     if (bytes > sizeof State_ashleySnapshot) {
-      VS_LOG_WARN(kChannel,
-                  "Title snapshot clear of {} bytes exceeds the {}-byte "
-                  "snapshot",
-                  bytes, sizeof State_ashleySnapshot);
+      VS::Core::LogWarn(kChannel,
+                        "Title snapshot clear of {} bytes exceeds the {}-byte "
+                        "snapshot",
+                        bytes, sizeof State_ashleySnapshot);
       return;
     }
     Core::Memory::ZeroLiveAlignedWords(&State_ashleySnapshot,

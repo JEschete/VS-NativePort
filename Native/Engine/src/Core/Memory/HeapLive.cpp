@@ -10,7 +10,7 @@
 #include <span>
 #include <utility>
 
-#include "Core/Arena.h"
+#include "Core/Arena.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/Heap.hpp"
 
@@ -87,12 +87,7 @@ Heap& GameHeap() noexcept {
 }
 
 void ResetLiveGameHeap() {
-  Initialized(
-      "ResetLiveGameHeap",
-      InitializeHeap(
-          GameHeap(),
-          std::span<std::byte>(static_cast<std::byte*>(Core_GameHeapArena()),
-                               static_cast<std::size_t>(CORE_GAME_HEAP_SIZE))));
+  Initialized("ResetLiveGameHeap", InitializeHeap(GameHeap(), GameHeapArena()));
 }
 
 void* AllocateLiveFromLowEnd(std::size_t bytes, std::source_location site) {

@@ -30,8 +30,8 @@
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/StatusLifecycleLive.hpp"
 #include "Battle/TargetingState.h"
+#include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
-#include "Core/Unported.h"
 #include "Legacy/Psx.h"
 
 namespace VS::Battle {
@@ -48,8 +48,8 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
 
   void QueueWorldLabel() override {
     if (position_ == nullptr) {
-      VS_LOG_ERROR("combat", "World target {} has no label position",
-                   actor_id_);
+      VS::Core::LogError("combat", "World target {} has no label position",
+                         actor_id_);
       std::abort();
     }
     std::array<u_short, kWorldAxes> world = {
@@ -61,8 +61,8 @@ class LiveActionTargetEffects final : public ActionTargetEffects {
 
   std::size_t HitCount() override {
     if (action_->targetCount > std::size(action_->targets)) {
-      VS_LOG_ERROR("combat", "Invalid action target count {}",
-                   action_->targetCount);
+      VS::Core::LogError("combat", "Invalid action target count {}",
+                         action_->targetCount);
       std::abort();
     }
     return action_->targetCount;
@@ -189,8 +189,8 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
     return;
   }
   if (actor_id < 0 || Battle_actionState == nullptr) {
-    VS_LOG_ERROR("combat", "Invalid action target {} or missing action state",
-                 actor_id);
+    VS::Core::LogError(
+        "combat", "Invalid action target {} or missing action state", actor_id);
     std::abort();
   }
   const std::size_t queue_mask = std::size(Battle_actionState->queue) - 1;
@@ -198,8 +198,8 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
       Battle_actionState->queue[Battle_actionState->queueIndex & queue_mask];
   if (action.targetCount > std::size(action.targets) ||
       action.actionId >= std::size(Battle_actionDefinitions)) {
-    VS_LOG_ERROR("combat", "Invalid action {} with {} targets", action.actionId,
-                 action.targetCount);
+    VS::Core::LogError("combat", "Invalid action {} with {} targets",
+                       action.actionId, action.targetCount);
     std::abort();
   }
   LiveActionTargetEffects effects(actor_id, &action, position);
@@ -209,13 +209,13 @@ void ApplyLiveActionTargetEffects(int actor_id, SVECTOR* position) {
 // decomp: _applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:14018).
 void ApplyLiveActorActionResult(Battle_HitResult* hit) {
   if (hit == nullptr) {
-    VS_LOG_ERROR("combat", "Action result requires a hit");
+    VS::Core::LogError("combat", "Action result requires a hit");
     std::abort();
   }
   LiveActorActionResultWorld world(*hit);
   if (!ApplyActorActionResult(world)) {
-    VS_LOG_ERROR("combat",
-                 "Action result requires valid target stats/used limb");
+    VS::Core::LogError("combat",
+                       "Action result requires valid target stats/used limb");
     std::abort();
   }
 }

@@ -51,8 +51,8 @@ class Packets {
     if (Render_frameScratch.orderingTable == nullptr || base == 0 ||
         cursor < base || cursor - base > kPrimitiveBufferBytes ||
         required > kPrimitiveBufferBytes - (cursor - base)) {
-      VS_LOG_ERROR("minimap", "Primitive buffer cannot hold {} bytes",
-                   required);
+      VS::Core::LogError("minimap", "Primitive buffer cannot hold {} bytes",
+                         required);
       throw std::runtime_error("Minimap primitive capacity exceeded");
     }
     cursor_ = reinterpret_cast<std::byte*>(cursor);
@@ -196,7 +196,7 @@ class LiveMinimapRenderer final : public MinimapRenderer {
 
 Field_MapRoomName* ResolveLiveSceneRoomData(void* data, std::size_t size) {
   if (data == nullptr) {
-    VS_LOG_ERROR("minimap", "Invalid scene at byte 0: null scene");
+    VS::Core::LogError("minimap", "Invalid scene at byte 0: null scene");
     throw std::runtime_error("Missing map scene");
   }
   auto* bytes = static_cast<std::byte*>(data);
@@ -206,7 +206,7 @@ Field_MapRoomName* ResolveLiveSceneRoomData(void* data, std::size_t size) {
 
 void DrawLiveMinimapScene(const void* data, std::size_t size) {
   if (data == nullptr) {
-    VS_LOG_ERROR("minimap", "Invalid scene at byte 0: null scene");
+    VS::Core::LogError("minimap", "Invalid scene at byte 0: null scene");
     throw std::runtime_error("Missing minimap scene");
   }
   LiveMinimapRenderer renderer;

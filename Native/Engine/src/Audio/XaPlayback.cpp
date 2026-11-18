@@ -67,15 +67,16 @@ class XaPlayback {
     Stop();
     auto* device = VS::Audio::AudioDevice::Primary();
     if (!device || !device->IsOpen()) {
-      VS_LOG_ERROR("audio", "XA playback requires an open audio device");
+      VS::Core::LogError("audio", "XA playback requires an open audio device");
       return false;
     }
     const auto path = VS::Content::XaAudioPath(store.Root(), entry.path);
     const std::unique_ptr<drflac, decltype(&drflac_close)> decoder(
         drflac_open_file_w(path.c_str(), nullptr), drflac_close);
     if (!decoder) {
-      VS_LOG_ERROR("audio", "cannot decode XA FLAC {}; run VS.Extract streams",
-                   VS::Platform::PathText(path));
+      VS::Core::LogError("audio",
+                         "cannot decode XA FLAC {}; run VS.Extract streams",
+                         VS::Platform::PathText(path));
       return false;
     }
     const auto frames = decoder->totalPCMFrameCount;
@@ -86,8 +87,9 @@ class XaPlayback {
         rate > kMaximumRate || frames == 0 ||
         frames >
             std::numeric_limits<int>::max() / (channels * sizeof(VS::i16))) {
-      VS_LOG_ERROR("audio", "XA asset must be nonempty mono/stereo PCM16: {}",
-                   VS::Platform::PathText(path));
+      VS::Core::LogError("audio",
+                         "XA asset must be nonempty mono/stereo PCM16: {}",
+                         VS::Platform::PathText(path));
       return false;
     }
     m_channels_ = channels;
@@ -95,15 +97,16 @@ class XaPlayback {
     const auto first_frame = static_cast<VS::u64>(sector - entry.lba) * rate /
                              VS::Content::kXaSectorsPerSecond;
     if (first_frame >= m_frames_) {
-      VS_LOG_ERROR("audio", "XA sector {} is past decoded EOF: {}", sector,
-                   VS::Platform::PathText(path));
+      VS::Core::LogError("audio", "XA sector {} is past decoded EOF: {}",
+                         sector, VS::Platform::PathText(path));
       return false;
     }
     m_samples_.resize(frames * channels);
     if (drflac_read_pcm_frames_s16(decoder.get(), frames, m_samples_.data()) !=
         frames) {
-      VS_LOG_ERROR("audio", "XA FLAC ended before its declared frame count: {}",
-                   VS::Platform::PathText(path));
+      VS::Core::LogError("audio",
+                         "XA FLAC ended before its declared frame count: {}",
+                         VS::Platform::PathText(path));
       Stop();
       return false;
     }
@@ -117,13 +120,13 @@ class XaPlayback {
               static_cast<XaPlayback*>(context)->Supply(additional);
             },
             this)) {
-      VS_LOG_ERROR("audio", "starting XA output: {}", SDL_GetError());
+      VS::Core::LogError("audio", "starting XA output: {}", SDL_GetError());
       Stop();
       return false;
     }
-    VS_LOG_INFO("audio", "XA start: {} sector={} rate={} channels={} frames={}",
-                VS::Platform::PathText(path), sector, rate, m_channels_,
-                m_frames_);
+    VS::Core::LogInfo(
+        "audio", "XA start: {} sector={} rate={} channels={} frames={}",
+        VS::Platform::PathText(path), sector, rate, m_channels_, m_frames_);
     return true;
   }
 
@@ -225,8 +228,8 @@ int VS::Audio::StartXaStream(int sector, int volume) {
                           : nullptr;
   if (!entry || !entry->path.ends_with(".XA") || volume < 0 ||
       static_cast<unsigned>(volume) > kMaximumVolume) {
-    VS_LOG_ERROR("audio", "invalid XA request: sector={} volume={}", sector,
-                 volume);
+    VS::Core::LogError("audio", "invalid XA request: sector={} volume={}",
+                       sector, volume);
     return 0;
   }
   VS::Audio::Control::LiveSetDiscVolume(volume);
@@ -252,7 +255,8 @@ void VS::Audio::StopXaStream(void) {
 int VS::Audio::XaStreamStatus(void) {
   const int status = Playback().Status();
   if (status < 0) {
-    VS_LOG_ERROR("audio", "XA output failed while supplying or draining PCM");
+    VS::Core::LogError("audio",
+                       "XA output failed while supplying or draining PCM");
     Playback().Stop();
   }
   return status;
@@ -268,7 +272,7 @@ void VS::Audio::UpdateXaControls(void) {
 namespace VS::Audio::Control {
 bool SetLiveDiscMixVolume(std::uint32_t volume) {
   if (!SetDiscMixVolume(volume, false)) {
-    VS_LOG_ERROR("audio", "invalid XA mix attenuation: {}", volume);
+    VS::Core::LogError("audio", "invalid XA mix attenuation: {}", volume);
     return false;
   }
   g_mix = volume;

@@ -67,7 +67,7 @@ std::int16_t Half(Bytes bytes, std::size_t offset) {
 }
 
 bool Invalid(const char* reason, std::size_t offset) {
-  VS_LOG_ERROR("minimap", "Invalid scene at byte {}: {}", offset, reason);
+  VS::Core::LogError("minimap", "Invalid scene at byte {}: {}", offset, reason);
   return false;
 }
 

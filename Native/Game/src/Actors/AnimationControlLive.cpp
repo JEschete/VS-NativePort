@@ -204,8 +204,9 @@ class AnimationRegistry {
       }
     }
     if (count_ == entries_.size()) {
-      VS_LOG_ERROR("actors", "Actor animation touched more than {} records",
-                   entries_.size());
+      VS::Core::LogError("actors",
+                         "Actor animation touched more than {} records",
+                         entries_.size());
       std::abort();
     }
     Entry& entry = entries_.at(count_++);
@@ -220,7 +221,8 @@ class AnimationRegistry {
         return *entries_.at(index).record;
       }
     }
-    VS_LOG_ERROR("actors", "Actor animation named an actor it never loaded");
+    VS::Core::LogError("actors",
+                       "Actor animation named an actor it never loaded");
     std::abort();
   }
 
@@ -265,7 +267,7 @@ class Synced {
 template <std::size_t Size>
 int TableByte(const u_char (&table)[Size], int index, const char* what) {
   if (index < 0 || static_cast<std::size_t>(index) >= Size) {
-    VS_LOG_WARN("actors", "{} refused index {}", what, index);
+    VS::Core::LogWarn("actors", "{} refused index {}", what, index);
     return 0;
   }
   return table[index];
@@ -279,7 +281,7 @@ class LiveAnimationHost final : public AnimationControlHost {
 
   AnimationActor* Actor(int id) override {
     if (id < 0 || static_cast<std::size_t>(id) >= kActorSlots) {
-      VS_LOG_WARN("actors", "Actor animation refused actor id {}", id);
+      VS::Core::LogWarn("actors", "Actor animation refused actor id {}", id);
       return nullptr;
     }
     Actors_ActorRecord* record = Actors_actorRecords[id];
@@ -308,8 +310,8 @@ class LiveAnimationHost final : public AnimationControlHost {
   void SetGimmickMode(int slot, std::int16_t mode) override {
     Field_GimmickInstance* gimmick = VS::Field::FindGimmickForActorSlot(slot);
     if (gimmick == nullptr) {
-      VS_LOG_WARN("actors", "Gimmick mode refused: no gimmick in slot {}",
-                  slot);
+      VS::Core::LogWarn("actors", "Gimmick mode refused: no gimmick in slot {}",
+                        slot);
       return;
     }
     gimmick->mode = mode;
@@ -325,8 +327,8 @@ class LiveAnimationHost final : public AnimationControlHost {
   }
   int QuadrantMoveAnimation(bool fast, int quadrant) override {
     if (quadrant < 0 || quadrant >= kQuadrants) {
-      VS_LOG_WARN("actors", "Quadrant move animation refused quadrant {}",
-                  quadrant);
+      VS::Core::LogWarn("actors", "Quadrant move animation refused quadrant {}",
+                        quadrant);
       return 0;
     }
     return fast ? Actors_kFastQuadrantMoveAnimations[quadrant]
@@ -362,7 +364,8 @@ class LiveAnimationHost final : public AnimationControlHost {
     for (int hand = 0; hand < 2; ++hand) {
       const int index = (id * 2) + hand;
       if (index < 0 || index >= kWeaponModelCount) {
-        VS_LOG_WARN("actors", "Weapon model draw refused actor id {}", id);
+        VS::Core::LogWarn("actors", "Weapon model draw refused actor id {}",
+                          id);
         return;
       }
       Actors_WeaponModel* model = weaponModels[index];
@@ -461,7 +464,7 @@ class LiveAnimationHost final : public AnimationControlHost {
   void CaptureBoneAnchor(AnimationActor& actor, int bone,
                          int lock_index) override {
     if (lock_index < 0 || lock_index >= kBonePoseLocks) {
-      VS_LOG_WARN("actors", "Bone anchor refused lock {}", lock_index);
+      VS::Core::LogWarn("actors", "Bone anchor refused lock {}", lock_index);
       return;
     }
     Actors_ActorRecord& record = registry_.RecordOf(actor);
@@ -476,7 +479,7 @@ class LiveAnimationHost final : public AnimationControlHost {
     Actors_ActorRecord& record = registry_.RecordOf(actor);
     Actors_ShpModel* model = record.instance.model;
     if (model == nullptr || bone < 0) {
-      VS_LOG_WARN("actors", "Bone pose lock refused bone {}", bone);
+      VS::Core::LogWarn("actors", "Bone pose lock refused bone {}", bone);
       return;
     }
     model->bones[bone].poseLockSlot = static_cast<u_char>(lock_slot);
@@ -662,7 +665,7 @@ void SetLiveActorSoundOverrides(int actor_id,
 void SetLiveActorSoundOverrides(int actor_id,
                                 Actors_ModelEffectSlot* sound_override) {
   if (sound_override == nullptr) {
-    VS_LOG_WARN("actors", "Sound overrides refused: null override");
+    VS::Core::LogWarn("actors", "Sound overrides refused: null override");
     return;
   }
   SetLiveActorSoundOverrides(actor_id, SlotOf(*sound_override));
@@ -672,7 +675,7 @@ void SetLiveActorSoundOverrides(int actor_id,
 void ApplyLiveActorSoundOverrides(int actor_id,
                                   Actors_ModelEffectSlot* sound_override) {
   if (sound_override == nullptr) {
-    VS_LOG_WARN("actors", "Sound override apply refused: null override");
+    VS::Core::LogWarn("actors", "Sound override apply refused: null override");
     return;
   }
   LiveAnimationHost host;
@@ -688,7 +691,7 @@ int SetLiveActorTravelAnimation(int actor_id, int animation) {
 // decomp: BATTLE.PRG func_8009FC20 (src/BATTLE/BATTLE.PRG/30DB0.c:3498)
 int LiveActorTravelAnimation(int actor_id, int* animation_out) {
   if (animation_out == nullptr) {
-    VS_LOG_WARN("actors", "Travel animation refused: null output");
+    VS::Core::LogWarn("actors", "Travel animation refused: null output");
     return -1;
   }
   LiveAnimationHost host;
@@ -743,7 +746,7 @@ void PlayLiveActorTurnAnimation(int actor_id, int target_facing) {
 int UpdateLiveActorLocomotionAnimation(Actors_ActorRecord* actor, int speed,
                                        int /*direction*/) {
   if (actor == nullptr) {
-    VS_LOG_WARN("actors", "Locomotion animation refused: null actor");
+    VS::Core::LogWarn("actors", "Locomotion animation refused: null actor");
     return 0;
   }
   LiveAnimationHost host;
@@ -754,7 +757,7 @@ int UpdateLiveActorLocomotionAnimation(Actors_ActorRecord* actor, int speed,
 // decomp: BATTLE.PRG func_800AC440 (src/BATTLE/BATTLE.PRG/40564.c:2199)
 void SetLiveActorBonePoseLock(Actors_ActorRecord* actor, int bone, int lock) {
   if (actor == nullptr) {
-    VS_LOG_WARN("actors", "Bone pose lock refused: null actor");
+    VS::Core::LogWarn("actors", "Bone pose lock refused: null actor");
     return;
   }
   LiveAnimationHost host;
@@ -764,7 +767,7 @@ void SetLiveActorBonePoseLock(Actors_ActorRecord* actor, int bone, int lock) {
 // decomp: BATTLE.PRG func_800AC500 (src/BATTLE/BATTLE.PRG/40564.c:2221)
 void ClearLiveActorBonePoseLocks(Actors_ActorRecord* actor) {
   if (actor == nullptr) {
-    VS_LOG_WARN("actors", "Bone pose lock clear refused: null actor");
+    VS::Core::LogWarn("actors", "Bone pose lock clear refused: null actor");
     return;
   }
   LiveAnimationHost host;

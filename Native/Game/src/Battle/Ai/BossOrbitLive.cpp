@@ -22,8 +22,8 @@
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/RadialMovementLive.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Diagnostics.hpp"
+#include "Core/RandomLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle::Ai {
@@ -214,7 +214,7 @@ class LiveBossOrbitWorld final : public BossOrbitWorld {
   void SetProgress(std::uint8_t progress) override {
     State::SetLiveScriptFlag(kArenaProgressFlag, progress);
   }
-  [[nodiscard]] int Random() override { return Core_Random_Rand(); }
+  [[nodiscard]] int Random() override { return VS::Core::NextBiosRand(); }
   [[nodiscard]] std::optional<BossBattleActor> BattleActor() const override {
     const Battle_Actor* actor = Actor();
     if (actor == nullptr || actor->stats == nullptr) return std::nullopt;

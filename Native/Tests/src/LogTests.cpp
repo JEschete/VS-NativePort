@@ -9,8 +9,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Diagnostics.hpp"
 #include "Core/Log.hpp"
-#include "Core/Unported.h"
 #include "Core/Unported.hpp"
 #include "Platform/App.hpp"
 
@@ -92,15 +92,15 @@ TEST_CASE(
 TEST_CASE("Disabled log messages skip formatting", "[core][log]") {
   LogScope scope;
   int formats = 0;
-  VS_LOG_DEBUG("ai", "{}", CountedLogValue{&formats});
+  VS::Core::LogDebug("ai", "{}", CountedLogValue{&formats});
   Core::SetLogLevel(Core::LogLevel::Debug);
   REQUIRE(Core::SetLogChannels("actors"));
-  VS_LOG_DEBUG("ai", "{}", CountedLogValue{&formats});
+  VS::Core::LogDebug("ai", "{}", CountedLogValue{&formats});
   Core::SetLogLevel(Core::LogLevel::Off);
-  VS_LOG_ERROR("ai", "{}", CountedLogValue{&formats});
+  VS::Core::LogError("ai", "{}", CountedLogValue{&formats});
   CHECK(formats == 0);
   Core::SetLogLevel(Core::LogLevel::Debug);
-  VS_LOG_DEBUG("actors", "{}", CountedLogValue{&formats});
+  VS::Core::LogDebug("actors", "{}", CountedLogValue{&formats});
   CHECK(formats == 1);
 }
 
@@ -113,11 +113,11 @@ TEST_CASE("File logging includes tick context and filters C diagnostics",
   REQUIRE(Core::SetLogChannels("ai"));
   VS::Core::Debugf("ai", "actor=%d", 7);
   VS::Core::Debugf("actors", "hidden debug");
-  Core_Tracef("hidden trace");
-  VS_LOG_WARN("content", "still visible");
+  VS::Core::Tracef("trace", "hidden trace");
+  VS::Core::LogWarn("content", "still visible");
   Core::SetLogLevel(Core::LogLevel::Trace);
   REQUIRE(Core::SetLogChannels("trace"));
-  Core_Tracef("selected trace %d", 9);
+  VS::Core::Tracef("trace", "selected trace %d", 9);
   Core::SetLogLevel(Core::LogLevel::Off);
   Core::LogWrite(Core::LogLevel::Error, "crash", "hidden error");
   REQUIRE(Core::SetLogFile(""));

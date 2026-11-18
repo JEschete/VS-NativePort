@@ -20,7 +20,7 @@
 namespace VS::Menu::Status {  // NOLINT(readability-identifier-naming)
 namespace {
 void Refuse(std::string_view message) {
-  VS_LOG_WARN("menu.status", "{}", message);
+  VS::Core::LogWarn("menu.status", "{}", message);
 }
 
 class LiveComponentDisplay final : public ComponentDisplay {

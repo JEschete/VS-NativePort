@@ -22,7 +22,7 @@ constexpr unsigned kTagLengthShift = 24;
 static_assert(sizeof(Core_Math_kArcTangentTable) == kRadialWarpRootTableBytes);
 
 [[noreturn]] void InvalidLiveWarp(const char* reason) {
-  VS_LOG_ERROR("effects", "screen radial warp: {}", reason);
+  VS::Core::LogError("effects", "screen radial warp: {}", reason);
   std::abort();
 }
 

@@ -86,7 +86,7 @@ std::string& ClearError() {
 }
 
 [[noreturn]] void Fail(const char* message) {
-  VS_LOG_ERROR("save", "{}", message);
+  VS::Core::LogError("save", "{}", message);
   std::abort();
 }
 
@@ -163,8 +163,8 @@ std::expected<Files*, std::string> OpenFiles() {
   if (!opened) return std::unexpected(opened.error());
   files = std::move(*opened);
   const auto utf8 = directory->u8string();
-  VS_LOG_INFO("save", "Native save directory: {}",
-              std::string(utf8.begin(), utf8.end()));
+  VS::Core::LogInfo("save", "Native save directory: {}",
+                    std::string(utf8.begin(), utf8.end()));
   return &*files;
 }
 
@@ -212,13 +212,14 @@ std::expected<std::unique_ptr<FilePreview>, FileMenuError> LoadPreview(
     }
     summary = *described;
   }
-  VS_LOG_DEBUG("save.perf", "Preview slot={} inspect_us={} summary_us={}", slot,
-               std::chrono::duration_cast<std::chrono::microseconds>(inspected -
-                                                                     inspecting)
-                   .count(),
-               MicrosecondsSince(inspected));
+  VS::Core::LogDebug("save.perf", "Preview slot={} inspect_us={} summary_us={}",
+                     slot,
+                     std::chrono::duration_cast<std::chrono::microseconds>(
+                         inspected - inspecting)
+                         .count(),
+                     MicrosecondsSince(inspected));
   if (!info->message.empty()) {
-    VS_LOG_WARN("save", "Native slot {}: {}", info->slot, info->message);
+    VS::Core::LogWarn("save", "Native slot {}: {}", info->slot, info->message);
   }
   return std::make_unique<FilePreview>(std::move(*info), summary);
 }
@@ -232,8 +233,9 @@ std::expected<bool, std::string> MatchesPreview(const FileInfo& current,
   if (!current.document) return true;
   const auto started = std::chrono::steady_clock::now();
   const auto same = SameDocument(*preview.document, *current.document);
-  VS_LOG_DEBUG("save.perf", "Compare slot={} semantic_us={} valid={}",
-               current.slot, MicrosecondsSince(started), same.has_value());
+  VS::Core::LogDebug("save.perf", "Compare slot={} semantic_us={} valid={}",
+                     current.slot, MicrosecondsSince(started),
+                     same.has_value());
   return same;
 }
 
@@ -347,7 +349,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
   }
   void PlaySound(file_menu::FileMenuSound sound) override;
   void ReportError(std::string_view text, std::string_view detail) override {
-    VS_LOG_ERROR("save", "{}: {}", text, detail);
+    VS::Core::LogError("save", "{}: {}", text, detail);
   }
   std::optional<std::string> TakeResumeError() override {
     return VS::Game::Save::TakeResumeError();
@@ -458,24 +460,26 @@ LiveFileMenuHost::ReadWindow(int first_slot) {
     picker.summaries[i] = preview->summary;
     rows[i] = SlotOf(preview->file);
   }
-  VS_LOG_DEBUG("save.perf", "ReadFiles first_slot={} cache_hits={} total_us={}",
-               first_slot, cache_hits, MicrosecondsSince(started));
+  VS::Core::LogDebug("save.perf",
+                     "ReadFiles first_slot={} cache_hits={} total_us={}",
+                     first_slot, cache_hits, MicrosecondsSince(started));
   return rows;
 }
 
 std::expected<file_menu::FileSlot, FileMenuError>
 LiveFileMenuHost::ConfirmSelection(const file_menu::FileMenu& menu) {
   const auto& selected = SelectedFile(menu);
-  VS_LOG_INFO("save", "Native {} request: slot={} status={} container={}",
-              menu.select_container ? "container"
-              : menu.save           ? "save"
-                                    : "load",
-              selected.slot, static_cast<int>(selected.status), menu.container);
+  VS::Core::LogInfo("save", "Native {} request: slot={} status={} container={}",
+                    menu.select_container ? "container"
+                    : menu.save           ? "save"
+                                          : "load",
+                    selected.slot, static_cast<int>(selected.status),
+                    menu.container);
   const auto validating = std::chrono::steady_clock::now();
   auto current = ReadConfirmedSelection(selected);
-  VS_LOG_DEBUG("save.perf", "Confirmed slot={} revalidate_us={} valid={}",
-               selected.slot, MicrosecondsSince(validating),
-               current.has_value());
+  VS::Core::LogDebug("save.perf", "Confirmed slot={} revalidate_us={} valid={}",
+                     selected.slot, MicrosecondsSince(validating),
+                     current.has_value());
   if (!current) return std::unexpected(std::move(current.error()));
   picker.confirmed = std::move(*current);
   return SlotOf(*picker.confirmed);
@@ -494,7 +498,7 @@ std::expected<void, std::string> LiveFileMenuHost::WriteSelection(
   if (!written) return std::unexpected(written.error());
   AdoptSettings(*document);
   VS::Menu::Files::dataNotSaved = 1;
-  VS_LOG_INFO(
+  VS::Core::LogInfo(
       "save", "Saved native slot {} generation {} zone {} room {} scene {}",
       selected.slot, document->generation, document->state.location.zone,
       document->state.location.room, document->state.location.scene);
@@ -512,8 +516,8 @@ void LiveFileMenuHost::OpenConfirmedContainer() {
   const auto& current = ConfirmedFile();
   staged_storage = document.state.storage;
   VS::Input::settings.containerEmpty = BankEmpty(*staged_storage);
-  VS_LOG_INFO("save", "Opened native container in slot {} recovered {}",
-              current.slot, current.status == FileStatus::kRecovered);
+  VS::Core::LogInfo("save", "Opened native container in slot {} recovered {}",
+                    current.slot, current.status == FileStatus::kRecovered);
 }
 
 std::expected<void, std::string> LiveFileMenuHost::ResumeConfirmedSelection() {
@@ -521,13 +525,14 @@ std::expected<void, std::string> LiveFileMenuHost::ResumeConfirmedSelection() {
   const auto& current = ConfirmedFile();
   const auto preparing = std::chrono::steady_clock::now();
   const auto prepared = PrepareResume(document);
-  VS_LOG_DEBUG("save.perf", "Prepare slot={} total_us={} valid={}",
-               current.slot, MicrosecondsSince(preparing),
-               prepared.has_value());
+  VS::Core::LogDebug("save.perf", "Prepare slot={} total_us={} valid={}",
+                     current.slot, MicrosecondsSince(preparing),
+                     prepared.has_value());
   if (!prepared) return std::unexpected(prepared.error());
-  VS_LOG_INFO("save", "Prepared native slot {} generation {} recovered {}",
-              current.slot, document.generation,
-              current.status == FileStatus::kRecovered);
+  VS::Core::LogInfo("save",
+                    "Prepared native slot {} generation {} recovered {}",
+                    current.slot, document.generation,
+                    current.status == FileStatus::kRecovered);
   return {};
 }
 
@@ -550,13 +555,15 @@ int RunPicker(PickerEntry entry, int init) {
 int InitialTitleSelection() {
   const auto opened = OpenFiles();
   if (!opened) {
-    VS_LOG_ERROR("save", "Cannot inspect native saves: {}", opened.error());
+    VS::Core::LogError("save", "Cannot inspect native saves: {}",
+                       opened.error());
     // Focus Continue so its picker can display the actual storage failure.
     return 1;
   }
   const auto present = (*opened)->AnyFiles();
   if (!present) {
-    VS_LOG_ERROR("save", "Cannot inspect native saves: {}", present.error());
+    VS::Core::LogError("save", "Cannot inspect native saves: {}",
+                       present.error());
     return 1;
   }
   return *present ? 1 : 0;
@@ -618,7 +625,8 @@ void DrawFileOverlay(bool title) {
 
 Items_ContainerData* ContainerData() {
   if (!staged_storage) {
-    VS_LOG_ERROR("save", "Container access without a selected native file");
+    VS::Core::LogError("save",
+                       "Container access without a selected native file");
     std::abort();
   }
   return &*staged_storage;
@@ -632,12 +640,12 @@ void StageClearGame() {
   auto document = CaptureClearGame();
   if (!document) {
     ClearError() = document.error();
-    VS_LOG_ERROR("save", "Cannot stage ending clear save: {}",
-                 document.error());
+    VS::Core::LogError("save", "Cannot stage ending clear save: {}",
+                       document.error());
     return;
   }
   staged_clear = std::move(*document);
-  VS_LOG_INFO("save", "Staged original ending clear save");
+  VS::Core::LogInfo("save", "Staged original ending clear save");
 }
 }  // namespace VS::Game::Save
 

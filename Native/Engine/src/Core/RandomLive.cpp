@@ -16,36 +16,37 @@ Random::Table ShuffleTable() noexcept {
 u32 NextLiveInterfaceRandomBits(i32 bit_count) {
   const u32 value =
       Random::NextInterfaceRandomBits(Core_interfaceRandomState, bit_count);
-  VS_LOG_TRACE("rng", "keystream bits={} value={:#x} state={:#x}", bit_count,
-               value, Core_interfaceRandomState);
+  VS::Core::LogTrace("rng", "keystream bits={} value={:#x} state={:#x}",
+                     bit_count, value, Core_interfaceRandomState);
   return value;
 }
 
 i32 LiveRandomRangeExclusive(i32 bound_a, i32 bound_b) {
   const i32 value = Random::RandomRangeExclusive(BiosRand(), bound_a, bound_b);
-  VS_LOG_TRACE("rng", "range [{}, {}) value={} state={}", bound_a, bound_b,
-               value, BiosRand().State());
+  VS::Core::LogTrace("rng", "range [{}, {}) value={} state={}", bound_a,
+                     bound_b, value, BiosRand().State());
   return value;
 }
 
 void InitializeLiveRandomShuffleTable() {
   Random::InitializeShuffleTable(BiosRand(), ShuffleTable(),
                                  Core_randomShuffleIndex);
-  VS_LOG_TRACE("rng", "shuffle table seeded state={}", BiosRand().State());
+  VS::Core::LogTrace("rng", "shuffle table seeded state={}",
+                     BiosRand().State());
 }
 
 i32 NextLiveRandomBounded(i32 max) {
   const i32 value = Random::NextBounded(BiosRand(), ShuffleTable(),
                                         Core_randomShuffleIndex, max);
-  VS_LOG_TRACE("rng", "bounded max={} value={} cursor={} state={}", max, value,
-               Core_randomShuffleIndex, BiosRand().State());
+  VS::Core::LogTrace("rng", "bounded max={} value={} cursor={} state={}", max,
+                     value, Core_randomShuffleIndex, BiosRand().State());
   return value;
 }
 
 i32 NextLiveRandomAveraged(i32 max) {
   const i32 value = Random::NextAveraged(BiosRand(), ShuffleTable(),
                                          Core_randomShuffleIndex, max);
-  VS_LOG_TRACE("rng", "averaged max={} value={}", max, value);
+  VS::Core::LogTrace("rng", "averaged max={} value={}", max, value);
   return value;
 }
 }  // namespace VS::Core

@@ -79,8 +79,8 @@ PolicyStatics& Statics() {
 void Refuse(std::string_view reason) {
   ++g_refusals;
   if (g_refusals <= kRefusalLogLimit || g_refusals % kRefusalLogInterval == 0) {
-    VS_LOG_WARN("menu.loot", "loot policies: {} (refusal {})", reason,
-                g_refusals);
+    VS::Core::LogWarn("menu.loot", "loot policies: {} (refusal {})", reason,
+                      g_refusals);
   }
 }
 

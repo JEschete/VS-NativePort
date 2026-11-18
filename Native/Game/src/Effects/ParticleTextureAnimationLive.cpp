@@ -31,8 +31,9 @@ std::uint64_t unbound_frames = 0;
 
 void Refuse(std::string_view call, std::string_view reason) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects", "texture animation: {} refused: {} ({} refusals)",
-                call, reason, refused_calls);
+    VS::Core::LogWarn("effects",
+                      "texture animation: {} refused: {} ({} refusals)", call,
+                      reason, refused_calls);
   }
 }
 
@@ -95,7 +96,7 @@ void SelectFrame(Animation& animation, std::uint16_t frame) {
   if (table == nullptr) {
     if (ShouldReport(unbound_frames)) {
       const PackageContext context = Context();
-      VS_LOG_WARN(
+      VS::Core::LogWarn(
           "effects",
           "texture animation: frame {} of unbound table {} of {} "
           "kept the previous frame (context={} request_effect={}; "
@@ -134,7 +135,7 @@ void LiveInitializeParticleTextureAnimation(Animation* animation,
   }
   if (BoundTextureTable(texture_index) == nullptr) {
     const PackageContext context = Context();
-    VS_LOG_DEBUG(
+    VS::Core::LogDebug(
         "effects",
         "texture animation: unbound texture={} tables={} program={} "
         "context={} request_effect={}",

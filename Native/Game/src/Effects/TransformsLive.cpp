@@ -13,11 +13,11 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/Curves.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
@@ -194,7 +194,7 @@ class LiveTransformHostImpl final : public TransformHost {
     return SampleLiveEffectCurve(curve_id, distance);
   }
 
-  std::int32_t Random() override { return Core_Random_Rand(); }
+  std::int32_t Random() override { return VS::Core::NextBiosRand(); }
 
   Math::Vec3 RotateTranslate(const Math::Transform3& transform,
                              Math::Vec3 point) override {
@@ -214,8 +214,9 @@ class LiveTransformHostImpl final : public TransformHost {
 
 void ReportRefusal(const char* entry, const char* reason) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects", "effect transforms: {} refused: {} ({} refusals)",
-                entry, reason, refused_calls);
+    VS::Core::LogWarn("effects",
+                      "effect transforms: {} refused: {} ({} refusals)", entry,
+                      reason, refused_calls);
   }
 }
 
@@ -247,10 +248,11 @@ std::size_t LiveTransformDefinitions(
       LiveBoundPackageBlock(PackageBlockType::kTransformDefinitions),
       out.first(std::min(counted, out.size())));
   if (decoded < counted && ShouldReport(clamped_counts)) {
-    VS_LOG_WARN("effects",
-                "effect transforms: block 9 counts {} transforms but {} are "
-                "bound ({} clamps)",
-                counted, decoded, clamped_counts);
+    VS::Core::LogWarn(
+        "effects",
+        "effect transforms: block 9 counts {} transforms but {} are "
+        "bound ({} clamps)",
+        counted, decoded, clamped_counts);
   }
   return decoded;
 }
@@ -294,10 +296,10 @@ void LiveUpdateEffectTransforms(Effects_EffectInstance* instance) {
       LiveTransformHost());
   StoreStates(*instance, loaded);
   if (pass.refused != 0 && ShouldReport(refused_transforms)) {
-    VS_LOG_WARN("effects",
-                "effect transforms: {} transforms skipped a frame for a "
-                "curve past the samples ({} reports)",
-                pass.refused, refused_transforms);
+    VS::Core::LogWarn("effects",
+                      "effect transforms: {} transforms skipped a frame for a "
+                      "curve past the samples ({} reports)",
+                      pass.refused, refused_transforms);
   }
 }
 }  // namespace VS::Effects

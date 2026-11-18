@@ -221,9 +221,9 @@ struct Capture {
         SDL_DestroySurface);
     const fs::path file = dir / ("frame_" + std::to_string(tick) + ".bmp");
     if (!surface || !SDL_SaveBMP(surface.get(), file.string().c_str())) {
-      VS_LOG_ERROR("capture", "{}: {}", file.string(), SDL_GetError());
+      VS::Core::LogError("capture", "{}: {}", file.string(), SDL_GetError());
     } else {
-      VS_LOG_INFO("capture", "{} ({}x{})", file.string(), w, h);
+      VS::Core::LogInfo("capture", "{} ({}x{})", file.string(), w, h);
     }
     if (pages) {
       constexpr u32 kChannelBits = 5;
@@ -236,7 +236,8 @@ struct Capture {
       raw.write(reinterpret_cast<const char*>(source.data()),
                 static_cast<std::streamsize>(source.size_bytes()));
       if (!raw) {
-        VS_LOG_ERROR("capture", "Failed to write raw pages at tick {}", tick);
+        VS::Core::LogError("capture", "Failed to write raw pages at tick {}",
+                           tick);
       }
       std::vector<u32> colors(source.size());
       for (usize index = 0; index < source.size(); ++index) {
@@ -259,7 +260,8 @@ struct Capture {
       const fs::path output = dir / ("pages_" + std::to_string(tick) + ".bmp");
       if (!page_surface ||
           !SDL_SaveBMP(page_surface.get(), output.string().c_str())) {
-        VS_LOG_ERROR("capture", "{}: {}", output.string(), SDL_GetError());
+        VS::Core::LogError("capture", "{}: {}", output.string(),
+                           SDL_GetError());
       }
     }
   }
@@ -407,12 +409,12 @@ void ConfigureEffectPathTrace(const RunSettings& settings,
 void BeginLogicalTick(u64 tick) {
   Core::SetLogTick(tick);
   Render::GamePages().SetEffectPathTraceTick(tick);
-  VS_LOG_TRACE("frame", "begin tick");
+  VS::Core::LogTrace("frame", "begin tick");
 }
 
 void ReportStartupFailure(const char* title, const std::string& message,
                           SDL_Window* window) {
-  VS_LOG_ERROR("boot", "{}", message);
+  VS::Core::LogError("boot", "{}", message);
   if constexpr (!kEnableDetailedGameLogging) {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message.c_str(),
                              window);
@@ -435,7 +437,8 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
   input.Inject(settings.script.MaskAt(game.Ticks() + 1));
   const auto& pad = input.Update();
   if (pad.pressed) {
-    VS_LOG_INFO("input", "pressed {}", Input::DescribeButtons(pad.pressed));
+    VS::Core::LogInfo("input", "pressed {}",
+                      Input::DescribeButtons(pad.pressed));
   }
   game.Tick(pad, true);
   if (trace != nullptr) {
@@ -447,8 +450,8 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
   }
   const bool shown =
       Render::GamePages().Present(frame.pixels, frame.width, frame.height);
-  VS_LOG_TRACE("frame", "end tick; presented={}, image={}x{}", shown,
-               frame.width, frame.height);
+  VS::Core::LogTrace("frame", "end tick; presented={}, image={}x{}", shown,
+                     frame.width, frame.height);
   if (shown) {
     settings.capture.Write(game.Ticks(), frame.pixels, frame.width,
                            frame.height);
@@ -461,9 +464,9 @@ bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
 int RunGame(const Content::Disc* disc, const RunSettings& settings,
             Game::GameplayTrace* trace) {
   ConfigureEffectPathTrace(settings, trace);
-  VS_LOG_INFO("boot", "run: tick limit={}, speed={}, scripted presses={}",
-              settings.max_ticks, settings.speed,
-              settings.script.presses.size());
+  VS::Core::LogInfo("boot", "run: tick limit={}, speed={}, scripted presses={}",
+                    settings.max_ticks, settings.speed,
+                    settings.script.presses.size());
 
   Platform::App app;
   if (auto r = app.Init({}); !r) {
@@ -484,7 +487,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
   settings.capture.WriteManifest(gpu, settings.arguments);
   Audio::AudioDevice audio(settings.speed == 1);
   if (auto r = audio.Open(); !r) {
-    VS_LOG_WARN("boot", "{} (continuing without audio)", r.error());
+    VS::Core::LogWarn("boot", "{} (continuing without audio)", r.error());
   }
   struct MovieScope {
     ~MovieScope() { VS::Movie::PlayerClose(); }
@@ -493,7 +496,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
   Input::InputSystem input;
   if (!settings.devices) {
     input.SetDevicesEnabled(false);
-    VS_LOG_INFO("input", "--scripted: keyboard and gamepad ignored");
+    VS::Core::LogInfo("input", "--scripted: keyboard and gamepad ignored");
   }
   Game::GameApp game({disc, settings.save_directory});
   Platform::ProgressWatchdog watchdog(settings.max_ticks != 0);
@@ -532,7 +535,8 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
       gpu.PresentClear({0.0f, 0.0f, 0.0f, 1.0f});
     }
     if (settings.max_ticks != 0 && game.Ticks() >= settings.max_ticks) {
-      VS_LOG_INFO("boot", "stopping after {} ticks (--frames)", game.Ticks());
+      VS::Core::LogInfo("boot", "stopping after {} ticks (--frames)",
+                        game.Ticks());
       break;
     }
   }
@@ -550,17 +554,17 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
   if (auto disc_path = LocateDisc(argc, argv)) {
     if (auto opened = Content::Disc::Open(*disc_path)) {
       disc = std::move(*opened);
-      VS_LOG_INFO("boot", "disc '{}' ({} entries) from {}", disc->Label(),
-                  disc->Files().size(), Platform::PathText(*disc_path));
+      VS::Core::LogInfo("boot", "disc '{}' ({} entries) from {}", disc->Label(),
+                        disc->Files().size(), Platform::PathText(*disc_path));
     } else {
-      VS_LOG_WARN("boot", "{}", opened.error());
+      VS::Core::LogWarn("boot", "{}", opened.error());
     }
   }
   const auto data_root = LocateData(argc, argv);
   if (!data_root) {
-    VS_LOG_ERROR("boot",
-                 "no extracted data; run VS.Extract extract <disc> "
-                 "Native\\data, or pass --data <dir>");
+    VS::Core::LogError("boot",
+                       "no extracted data; run VS.Extract extract <disc> "
+                       "Native\\data, or pass --data <dir>");
     if constexpr (!kEnableDetailedGameLogging) {
       SDL_ShowSimpleMessageBox(
           SDL_MESSAGEBOX_ERROR, "Game data not prepared",
@@ -570,7 +574,7 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
     return 1;
   }
   if (auto result = Content::DataStore::Open(*data_root); !result) {
-    VS_LOG_ERROR("boot", "{}", result.error());
+    VS::Core::LogError("boot", "{}", result.error());
     if constexpr (!kEnableDetailedGameLogging) {
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Game data unavailable",
                                result.error().c_str(), nullptr);
@@ -629,14 +633,14 @@ int main(int argc, char** argv) try {
   try {
     if (ConfigureLogging(argc, argv, trace.get())) {
       if (trace != nullptr) {
-        VS_LOG_INFO("diagnostics", "detailed logs: {}",
-                    trace->Directory().string());
+        VS::Core::LogInfo("diagnostics", "detailed logs: {}",
+                          trace->Directory().string());
         trace->Event("host.start", {{"detailed_logging", true}});
       }
       result = RunDesktop(argc, argv, trace.get());
     }
   } catch (const std::exception& error) {
-    VS_LOG_ERROR("boot", "{}", error.what());
+    VS::Core::LogError("boot", "{}", error.what());
     if constexpr (!kEnableDetailedGameLogging) {
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Game startup failed",
                                error.what(), nullptr);

@@ -32,10 +32,11 @@ void Report(ResultsDrawResult result) {
   }
   ++title_refusals;
   if (std::has_single_bit(title_refusals)) {
-    VS_LOG_WARN("menu.results",
-                "Cube-puzzle drawing refused a title outside the atlas ({} "
-                "refusals)",
-                title_refusals);
+    VS::Core::LogWarn(
+        "menu.results",
+        "Cube-puzzle drawing refused a title outside the atlas ({} "
+        "refusals)",
+        title_refusals);
   }
 }
 

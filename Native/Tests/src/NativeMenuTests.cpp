@@ -111,8 +111,8 @@ struct MenuFixture {
       std::error_code error;
       fs::remove_all(root, error);
       if (error) {
-        VS_LOG_ERROR("test", "Cannot clean native menu fixture: {}",
-                     error.message());
+        VS::Core::LogError("test", "Cannot clean native menu fixture: {}",
+                           error.message());
         std::abort();
       }
     } catch (...) {

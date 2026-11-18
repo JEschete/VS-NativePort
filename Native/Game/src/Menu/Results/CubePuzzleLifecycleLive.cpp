@@ -49,8 +49,8 @@ std::uint64_t refusals = 0;
 
 void RefuseCall(std::string_view call, std::string_view reason) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.results", "Cube-puzzle {} refused {} ({} refusals)", call,
-                reason, refusals);
+    VS::Core::LogWarn("menu.results", "Cube-puzzle {} refused {} ({} refusals)",
+                      call, reason, refusals);
   }
 }
 

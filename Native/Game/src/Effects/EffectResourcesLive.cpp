@@ -16,7 +16,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/OverlayWorkspaceLive.hpp"
-#include "Core/Arena.h"
+#include "Core/Arena.hpp"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -114,8 +114,9 @@ std::uint64_t walk_reports = 0;
 
 void ReportRefusal(const char* entry, const char* reason) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects", "effect resources: {} refused: {} ({} refusals)",
-                entry, reason, refused_calls);
+    VS::Core::LogWarn("effects",
+                      "effect resources: {} refused: {} ({} refusals)", entry,
+                      reason, refused_calls);
   }
 }
 
@@ -287,11 +288,12 @@ void ReportWalk(const PackageWalk& walk) {
     return;
   }
   if (ShouldReport(walk_reports)) {
-    VS_LOG_WARN("effects",
-                "effect package: walk stopped with status {} after {} blocks; "
-                "{} of {} curves refused ({} reports)",
-                static_cast<int>(walk.status), walk.blocks, walk.curves.refused,
-                walk.curves.header_count, walk_reports);
+    VS::Core::LogWarn(
+        "effects",
+        "effect package: walk stopped with status {} after {} blocks; "
+        "{} of {} curves refused ({} reports)",
+        static_cast<int>(walk.status), walk.blocks, walk.curves.refused,
+        walk.curves.header_count, walk_reports);
   }
 }
 
@@ -433,8 +435,9 @@ class LiveResourceHost final : public EffectResourceHost {
   EffectBuffer PurgeOverlayBuffer() override {
     const void* slot = Core_overlaySlots[kPurgeOverlaySlot];
     const auto address = reinterpret_cast<std::uintptr_t>(slot);
-    const auto arena = reinterpret_cast<std::uintptr_t>(Core_overlayArena);
-    const std::uintptr_t end = arena + sizeof(Core_overlayArena);
+    const auto arena =
+        reinterpret_cast<std::uintptr_t>(Core::overlay_arena.data());
+    const std::uintptr_t end = arena + Core::overlay_arena.size();
     if (slot == nullptr) return {};
     return {.id = IdOf<EffectBufferId>(slot),
             .capacity = address < arena || address >= end ? 0 : end - address};
@@ -594,12 +597,13 @@ void ReportConfiguration(const EffectPurgeConfiguration& configuration,
     return;
   }
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN("effects",
-                "effect resources: effect {} refused tables: textures {}, "
-                "plugins {}, package {} ({} refusals)",
-                effect_id, static_cast<int>(configuration.textures),
-                static_cast<int>(configuration.plugins),
-                static_cast<int>(configuration.package), refused_calls);
+    VS::Core::LogWarn(
+        "effects",
+        "effect resources: effect {} refused tables: textures {}, "
+        "plugins {}, package {} ({} refusals)",
+        effect_id, static_cast<int>(configuration.textures),
+        static_cast<int>(configuration.plugins),
+        static_cast<int>(configuration.package), refused_calls);
   }
 }
 }  // namespace

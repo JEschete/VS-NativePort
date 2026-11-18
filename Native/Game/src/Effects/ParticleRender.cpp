@@ -32,7 +32,7 @@ constexpr std::uint32_t kDefaultColorChannel = 128;
 constexpr std::uint16_t kSemiTransparentClut = 0x8000;
 
 [[noreturn]] void Fail(const char* message) {
-  VS_LOG_ERROR("effects", "{}", message);
+  VS::Core::LogError("effects", "{}", message);
   std::abort();
 }
 

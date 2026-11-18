@@ -315,8 +315,8 @@ void LiveAbilityHost::SetField(AbilityField field, int value) {
 battle::SelectionTargetView LiveAbilityHost::SelectionTarget(int index) const {
   battle::SelectionTargetView view;
   if (!InRange(state_->selection.targets, index)) {
-    VS_LOG_WARN("battle.ability", "selection target index={} out of range",
-                index);
+    VS::Core::LogWarn("battle.ability",
+                      "selection target index={} out of range", index);
     return view;
   }
   const Battle_HitResult& target = state_->selection.targets[index];
@@ -329,8 +329,8 @@ battle::SelectionTargetView LiveAbilityHost::SelectionTarget(int index) const {
 
 void LiveAbilityHost::CopySelectionTargetToPrimary(int index) {
   if (!InRange(state_->selection.targets, index)) {
-    VS_LOG_WARN("battle.ability", "selection target index={} out of range",
-                index);
+    VS::Core::LogWarn("battle.ability",
+                      "selection target index={} out of range", index);
     return;
   }
   state_->selection.primaryTarget = state_->selection.targets[index];
@@ -349,8 +349,8 @@ int LiveAbilityHost::MappedAbility(AbilityKind kind, int index) const {
                            ? VS::Input::settings.mappedChainAbilities
                            : VS::Input::settings.mappedDefenseAbilities;
   if (!InRange(mapped, index)) {
-    VS_LOG_WARN("battle.ability", "mapped ability index={} out of range",
-                index);
+    VS::Core::LogWarn("battle.ability", "mapped ability index={} out of range",
+                      index);
     return 0;
   }
   // The settings hold unsigned action ids.
@@ -360,8 +360,8 @@ int LiveAbilityHost::MappedAbility(AbilityKind kind, int index) const {
 bool LiveAbilityHost::ActionAvailable(int action_id) const {
   if (Battle_characterState == nullptr ||
       Battle_characterState->stats == nullptr) {
-    VS_LOG_WARN("battle.ability", "action {} cost without character stats",
-                action_id);
+    VS::Core::LogWarn("battle.ability",
+                      "action {} cost without character stats", action_id);
     return false;
   }
   const auto availability =
@@ -372,8 +372,8 @@ bool LiveAbilityHost::ActionAvailable(int action_id) const {
 
 bool LiveAbilityHost::ActionDefinitionUnlocked(int action_id) const {
   if (!InRange(Battle_actionDefinitions, action_id)) {
-    VS_LOG_WARN("battle.ability", "action definition {} out of range",
-                action_id);
+    VS::Core::LogWarn("battle.ability", "action definition {} out of range",
+                      action_id);
     return false;
   }
   return Battle_actionDefinitions[action_id].unlocked != 0;
@@ -381,8 +381,8 @@ bool LiveAbilityHost::ActionDefinitionUnlocked(int action_id) const {
 
 void LiveAbilityHost::SetActionDefinitionUnlocked(int action_id) {
   if (!InRange(Battle_actionDefinitions, action_id)) {
-    VS_LOG_WARN("battle.ability", "unlock of action definition {} out of range",
-                action_id);
+    VS::Core::LogWarn("battle.ability",
+                      "unlock of action definition {} out of range", action_id);
     return;
   }
   Battle_actionDefinitions[action_id].unlocked = 1;
@@ -391,7 +391,7 @@ void LiveAbilityHost::SetActionDefinitionUnlocked(int action_id) {
 int LiveAbilityHost::ActorRoomSpawnIndex(int actor) const {
   const Battle_Actor* record = LiveActor(actor);
   if (record == nullptr) {
-    VS_LOG_WARN("battle.ability", "spawn slot of absent actor {}", actor);
+    VS::Core::LogWarn("battle.ability", "spawn slot of absent actor {}", actor);
     return 0;
   }
   return record->roomSpawnIndex;
@@ -400,7 +400,7 @@ int LiveAbilityHost::ActorRoomSpawnIndex(int actor) const {
 int LiveAbilityHost::ActorHp(int actor) const {
   const Battle_ActorStats* stats = LiveStats(actor);
   if (stats == nullptr) {
-    VS_LOG_WARN("battle.ability", "hp of absent actor {}", actor);
+    VS::Core::LogWarn("battle.ability", "hp of absent actor {}", actor);
     return 0;
   }
   return stats->currentHp;
@@ -409,7 +409,8 @@ int LiveAbilityHost::ActorHp(int actor) const {
 int LiveAbilityHost::ActorDefaultTargetLimb(int actor) const {
   const Battle_ActorStats* stats = LiveStats(actor);
   if (stats == nullptr) {
-    VS_LOG_WARN("battle.ability", "target limb of absent actor {}", actor);
+    VS::Core::LogWarn("battle.ability", "target limb of absent actor {}",
+                      actor);
     return 0;
   }
   return static_cast<int>(stats->defaultTargetLimb);
@@ -417,7 +418,8 @@ int LiveAbilityHost::ActorDefaultTargetLimb(int actor) const {
 
 int LiveAbilityHost::SpellClassCount(int spell_class) const {
   if (!InRange(Battle_spellClassCounts, spell_class)) {
-    VS_LOG_WARN("battle.ability", "spell class {} out of range", spell_class);
+    VS::Core::LogWarn("battle.ability", "spell class {} out of range",
+                      spell_class);
     return 0;
   }
   return Battle_spellClassCounts[spell_class];
@@ -426,8 +428,8 @@ int LiveAbilityHost::SpellClassCount(int spell_class) const {
 int LiveAbilityHost::SpellClassSpellId(int spell_class, int index) const {
   if (!InRange(Battle_spellClassSpellIds, spell_class) ||
       Battle_spellClassSpellIds[spell_class] == nullptr || index < 0) {
-    VS_LOG_WARN("battle.ability", "spell class {} entry {} unavailable",
-                spell_class, index);
+    VS::Core::LogWarn("battle.ability", "spell class {} entry {} unavailable",
+                      spell_class, index);
     return -1;
   }
   return Battle_spellClassSpellIds[spell_class][index];
@@ -438,8 +440,8 @@ int LiveAbilityHost::AbilityActionId(AbilityKind kind, int index) const {
                         ? Battle_chainAbilityActionIds
                         : Battle_defenseAbilityActionIds;
   if (!InRange(ids, index)) {
-    VS_LOG_WARN("battle.ability", "ability action index={} out of range",
-                index);
+    VS::Core::LogWarn("battle.ability", "ability action index={} out of range",
+                      index);
     return -1;
   }
   // The tables hold unsigned action ids.
@@ -448,7 +450,8 @@ int LiveAbilityHost::AbilityActionId(AbilityKind kind, int index) const {
 
 int LiveAbilityHost::EquippedWeaponCategory() const {
   if (Battle_characterState == nullptr) {
-    VS_LOG_WARN("battle.ability", "weapon category without character state");
+    VS::Core::LogWarn("battle.ability",
+                      "weapon category without character state");
     return 0;
   }
   return Battle_characterState->equippedWeaponCategory;
@@ -456,7 +459,8 @@ int LiveAbilityHost::EquippedWeaponCategory() const {
 
 int LiveAbilityHost::ArtsLearned(int category) const {
   if (!InRange(Audio_Seq_unusedArtsStatus.artsLearned, category)) {
-    VS_LOG_WARN("battle.ability", "arts of category {} out of range", category);
+    VS::Core::LogWarn("battle.ability", "arts of category {} out of range",
+                      category);
     return 0;
   }
   return Audio_Seq_unusedArtsStatus.artsLearned[category];
@@ -465,8 +469,8 @@ int LiveAbilityHost::ArtsLearned(int category) const {
 int LiveAbilityHost::WeaponCategoryKills(int category) const {
   if (!InRange(Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills,
                category)) {
-    VS_LOG_WARN("battle.ability", "kills of category {} out of range",
-                category);
+    VS::Core::LogWarn("battle.ability", "kills of category {} out of range",
+                      category);
     return 0;
   }
   return Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[category];
@@ -475,8 +479,9 @@ int LiveAbilityHost::WeaponCategoryKills(int category) const {
 int LiveAbilityHost::BreakArtRequirement(int category, int tier) const {
   if (!InRange(Battle_breakArtPointRequirements, category) ||
       !InRange(Battle_breakArtPointRequirements[0], tier)) {
-    VS_LOG_WARN("battle.ability", "break art requirement {}/{} out of range",
-                category, tier);
+    VS::Core::LogWarn("battle.ability",
+                      "break art requirement {}/{} out of range", category,
+                      tier);
     return 0;
   }
   return Battle_breakArtPointRequirements[category][tier];
@@ -484,7 +489,8 @@ int LiveAbilityHost::BreakArtRequirement(int category, int tier) const {
 
 int LiveAbilityHost::BattleAbilityRequirement(int index) const {
   if (!InRange(Battle_battleAbilityPointRequirements, index)) {
-    VS_LOG_WARN("battle.ability", "ability requirement {} out of range", index);
+    VS::Core::LogWarn("battle.ability", "ability requirement {} out of range",
+                      index);
     return 0;
   }
   return Battle_battleAbilityPointRequirements[index];
@@ -492,13 +498,13 @@ int LiveAbilityHost::BattleAbilityRequirement(int index) const {
 
 bool HasActionState(const char* caller) {
   if (Battle_actionState != nullptr) return true;
-  VS_LOG_WARN("battle.ability", "{} without an action state", caller);
+  VS::Core::LogWarn("battle.ability", "{} without an action state", caller);
   return false;
 }
 
 bool HasCharacterState(const char* caller) {
   if (Battle_characterState != nullptr) return true;
-  VS_LOG_WARN("battle.ability", "{} without a character state", caller);
+  VS::Core::LogWarn("battle.ability", "{} without a character state", caller);
   return false;
 }
 
@@ -517,17 +523,18 @@ void TraceAbilityTiming(const Battle_ActionState& state) {
                                          ? Actors_actorRecords[actor]
                                          : nullptr;
   if (record == nullptr) return;
-  VS_LOG_DEBUG("combat-flow",
-               "animation id={} state={} active={} held={} timer={} "
-               "window={} effects={} action={}",
-               static_cast<unsigned>(record->animationId),
-               static_cast<unsigned>(record->instance.actionAnimationState),
-               static_cast<unsigned>(record->instance.currentAnimation),
-               static_cast<unsigned>(record->pose.holdingLastFrame),
-               static_cast<int>(state.abilityTimer),
-               static_cast<unsigned>(state.abilityWindow),
-               static_cast<unsigned>(Effects_effectBusyFlags),
-               static_cast<unsigned>(queued.actionId));
+  VS::Core::LogDebug(
+      "combat-flow",
+      "animation id={} state={} active={} held={} timer={} "
+      "window={} effects={} action={}",
+      static_cast<unsigned>(record->animationId),
+      static_cast<unsigned>(record->instance.actionAnimationState),
+      static_cast<unsigned>(record->instance.currentAnimation),
+      static_cast<unsigned>(record->pose.holdingLastFrame),
+      static_cast<int>(state.abilityTimer),
+      static_cast<unsigned>(state.abilityWindow),
+      static_cast<unsigned>(Effects_effectBusyFlags),
+      static_cast<unsigned>(queued.actionId));
 }
 }  // namespace
 

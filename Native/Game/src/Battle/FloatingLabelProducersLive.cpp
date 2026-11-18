@@ -11,8 +11,8 @@
 #include "Battle/FloatingLabelProducers.hpp"
 #include "Battle/FloatingLabelQueue.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
+#include "Core/RandomLive.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -24,10 +24,10 @@ std::uint64_t refusals = 0;
 
 void Refuse(const char* what) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("battle.labels",
-                "Floating label producer refused: {} ({} "
-                "refusals)",
-                what, refusals);
+    VS::Core::LogWarn("battle.labels",
+                      "Floating label producer refused: {} ({} "
+                      "refusals)",
+                      what, refusals);
   }
 }
 
@@ -102,7 +102,7 @@ class LiveProducerWorld final : public FloatingLabelProducerWorld {
     point = std::bit_cast<LabelPoint>(output);
     return status;
   }
-  std::int32_t Random() override { return Core_Random_Rand(); }
+  std::int32_t Random() override { return VS::Core::NextBiosRand(); }
 
  private:
   Battle_FloatingLabel* reserved_ = nullptr;

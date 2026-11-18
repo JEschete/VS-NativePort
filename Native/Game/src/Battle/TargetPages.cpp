@@ -18,7 +18,8 @@ std::vector<TargetPage> PartitionTargetPages(
         ++group_end;
       }
       if (group_end - end > page_size) {
-        VS_LOG_ERROR("targeting.page", "actor group exceeds visible capacity");
+        VS::Core::LogError("targeting.page",
+                           "actor group exceeds visible capacity");
         std::abort();
       }
       if (group_end - first > page_size) break;
@@ -37,12 +38,12 @@ void SetSphereTargets(TargetPageBook& book,
                       TargetSphere& sphere) {
   book = {};
   if (!sphere.Active()) {
-    VS_LOG_DEBUG("targeting.page", "no active sphere for target binding");
+    VS::Core::LogDebug("targeting.page", "no active sphere for target binding");
     return;
   }
   if (actor_ids.size() > kMaxSphereTargets) {
-    VS_LOG_ERROR("targeting.page", "invalid targets count={}",
-                 actor_ids.size());
+    VS::Core::LogError("targeting.page", "invalid targets count={}",
+                       actor_ids.size());
     std::abort();
   }
   book.pages = PartitionTargetPages(actor_ids, sphere.VisibleSlots());

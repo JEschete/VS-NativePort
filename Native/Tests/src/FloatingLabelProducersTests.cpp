@@ -285,7 +285,7 @@ std::array<live::LabelWords, 32> ReplaceSharedLabels(live::State& state) {
   state.labels[0][7].key.bytes[0] = static_cast<char>(kTimingKind);
   state.labels[0][7].key.bytes[1] = 0;
   const auto before = live::Snapshot(state);
-  Core_Random_Seed(77);
+  VS::Core::SeedBiosRand(77);
   CHECK(b::LiveQueueChainCount(1500) == 0);
   CHECK(b::LiveQueueAbilityTimingResult(3) == 0);
   CHECK(b::LiveQueueAbilityTimingResult(4) == 0);

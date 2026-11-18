@@ -84,14 +84,14 @@ class Fixture:
                         "kind": "unit-test", "outcome": "pass"}]
         self.slices = [{**dict.fromkeys(SLICE_FIELDS, ""), "slice": "Done-slice", "ids": "F00003"}]
         self.files = {
-            GENERATED: 'void Battle_Ai_Plan(void* work) { CdRead(work); VS_UNPORTED("not-a-shim"); }\n',
+            GENERATED: 'void Battle_Ai_Plan(void* work) { CdRead(work); VS::Core::RecordUnported("not-a-shim"); }\n',
             OWNED: "#define Local_Thing Other\nvoid Battle_Owned(int value) { Battle_Ai_Plan(0); }\n"
                    "namespace VS::Battle { void Done() { Battle_Owned(1); } }\n",
             AUDIO: "void Audio_Mix(int value) {}\nint Target(int value) { return value; }\n",
             "Native/Game/src/Audio/Math.h": "#define Core_Math_Alias Target\n",
             "Native/Game/src/Boot/ModulePointers.cpp": "void* table[] = {&Battle_Ai_Plan, &Audio_Mix};\n",
-            "Native/Engine/Legacy/LibCd.cpp": 'int CdRead(void* work) { VS_UNPORTED("libcd:CdRead"); return 0; }\n'
-                                              'void CdSync(void) { VS_UNPORTED("libcd:CdSync"); }\n',
+            "Native/Engine/Legacy/LibCd.cpp": 'int CdRead(void* work) { VS::Core::RecordUnported("libcd:CdRead"); return 0; }\n'
+                                              'void CdSync(void) { VS::Core::RecordUnported("libcd:CdSync"); }\n',
             "Native/Tests/src/PlanTests.cpp": "TEST_CASE(\"plan\") { Battle_Ai_Plan(0); Battle_Owned(1); }\n",
         }
         self.manifest = {

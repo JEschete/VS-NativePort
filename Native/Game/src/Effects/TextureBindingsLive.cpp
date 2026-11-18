@@ -23,8 +23,8 @@ static_assert(sizeof(Effects_EffectPackage::textureInfoTable) ==
 namespace {
 void Require(bool condition, const char* message) {
   if (!condition) {
-    VS_LOG_ERROR("effects.material", "Invalid effect texture block: {}",
-                 message);
+    VS::Core::LogError("effects.material", "Invalid effect texture block: {}",
+                       message);
     std::abort();
   }
 }

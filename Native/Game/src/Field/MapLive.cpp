@@ -50,21 +50,21 @@ int SetLiveMinimapVisible(int visible) {
 
 void RestoreLiveSceneRoomVisits(void* scene, std::size_t size) {
   if (scene == nullptr) {
-    VS_LOG_ERROR("field.map", "Missing map scene for room visits");
+    VS::Core::LogError("field.map", "Missing map scene for room visits");
     return;
   }
   LiveRoomLocationIndex locations;
   const RoomVisitFlags flags = ToVisitFlags(State_roomVisitProgress.roomFlags);
   if (!RestoreSceneRoomVisits({static_cast<std::byte*>(scene), size}, flags,
                               locations)) {
-    VS_LOG_ERROR("field.map", "Map scene of {} bytes cannot hold its rooms",
-                 size);
+    VS::Core::LogError("field.map",
+                       "Map scene of {} bytes cannot hold its rooms", size);
   }
 }
 
 void BuildLiveMinimapRotation(MATRIX* rotation, int yaw_angle) {
   if (rotation == nullptr) {
-    VS_LOG_ERROR("field.map", "Missing minimap rotation");
+    VS::Core::LogError("field.map", "Missing minimap rotation");
     return;
   }
   const MinimapRotation built = BuildMinimapRotation(yaw_angle);

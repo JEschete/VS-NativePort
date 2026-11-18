@@ -126,10 +126,10 @@ struct SavedServiceViews {
   decltype(Render_frameScratch) frame = Render_frameScratch;
   decltype(Audio_soundState) audio = Audio_soundState;
   Battle_Actor* actor = Battle_characterState;
-  unsigned random = Core_Random_State();
+  unsigned random = VS::Core::BiosRand().State();
 
   void CheckRestored() const {
-    CHECK(Core_Random_State() == random);
+    CHECK(VS::Core::BiosRand().State() == random);
     CHECK(Render_frameScratch.primitiveCursor == frame.primitiveCursor);
     CHECK(Render_frameScratch.orderingTable == frame.orderingTable);
     CHECK(Render_frameScratch.overlayOrderingTable ==
@@ -454,12 +454,12 @@ TEST_CASE("Game-clear Live initialization commits the real resident score",
   CHECK(VS::Audio::LivePollMusicLoads() == VS::Audio::kLoadInFlight);
   CHECK(results::LiveInitializeGameClear() == 0);
   fixture.CompleteMusicLoad();
-  const auto random_before = Core_Random_State();
+  const auto random_before = VS::Core::BiosRand().State();
   const auto refused_before = VS::Audio::Seq::LiveRefusalCount();
   CHECK(results::LiveInitializeGameClear() == 1);
   CheckCommittedScore();
   CheckPlayingMusic(fixture);
-  CHECK(Core_Random_State() != random_before);
+  CHECK(VS::Core::BiosRand().State() != random_before);
   CHECK(VS::Audio::Seq::LiveRefusalCount() == refused_before);
   fixture.ReleaseMusic();
   CHECK(memory::GameHeap().Empty());

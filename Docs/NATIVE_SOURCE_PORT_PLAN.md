@@ -265,7 +265,7 @@ Current counts and separate status gates are reported in the linked summary.
 
 | Column | `yes` means |
 |---|---|
-| `copied` | The function body exists at `final_location` with a provenance comment (`stub` = assembly-only, a `VS_UNPORTED` stub with the real prototype until ported) |
+| `copied` | The function body exists at `final_location` with a provenance comment (`stub` = assembly-only, a `VS::Core::RecordUnported` stub with the real prototype until ported) |
 | `compiles` | It builds in Debug and Release x64 with zero errors |
 | `named` | `final_name` is set and used in code, all parameters and locals have meaningful names, no `argN`/`varN`/`unk` remain |
 | `understood` | `purpose` is filled, and every struct field it touches is named in the type ledger |
@@ -430,9 +430,9 @@ PS1 layout under the x64 MSVC rules.
 - **Legacy SDK layer** (`Native\Engine\Legacy\`, `Native\Content\Legacy\LibDs.h`, umbrella `Legacy/Psx.h`): own
   PS1 type layouts, packet macros and prototypes for the 287 SDK names in use. R: libgte and the GTE inline macros
   become `Core/Gte.h` (fixed-point math with the GTE's small state), `rand`/`srand` the BIOS LCG
-  (`Core/BiosRand.h`), `getScratchAddr` and scratch literals `Core/Scratch.h`, CRT-clashing libapi file calls
+  (now `Core/RandomLive.hpp`), `getScratchAddr` and scratch literals `Core/Scratch.hpp`, CRT-clashing libapi file calls
   `LegacyApi_*`. D: whole-statement calls are deleted (expression uses keep no-ops in `Legacy/Removed.h`).
-  T: shims record `VS_UNPORTED` until they translate into their system.
+  T: shims record `VS::Core::RecordUnported` until they translate into their system.
 - **Effect templates:** one body per template (`Effects\Templates\<Name>.inl`); each plugin instance is a block in
   `<Name>.c` that defines that plugin's bindings, includes the body and undefines them. EFFPURGE's address-only
   entry table resolves each slot to its effect's plugin (48 shipped plugins are byte-identical twins of covered
@@ -1383,8 +1383,8 @@ has no module-image copying, sector arithmetic or original-address relocation de
 
 #### EC-05: Scratchpad and overlay-offset preservation
 
-**Evidence:** `Native/Engine/src/Core/Scratch.cpp` (`g_scratch[1024]`), `Native/Engine/include/Core/Arena.h`
-(`Core_overlayArena`, `Core_OverlayAddress`), `Native/Engine/src/Core/Overlays.cpp`, and
+**Evidence:** `Native/Engine/src/Core/Scratch.cpp` (`g_scratch[1024]`), `Native/Engine/include/Core/Arena.hpp`
+(`VS::Core::overlay_arena`, `VS::Core::OverlayAddress`), `Native/Engine/src/Core/Overlays.cpp`, and
 `Native/Game/src/Boot/OverlayReset.cpp`.
 
 Scratch users share a byte block; overlay slots retain original relative addresses and overlaps inside native storage.

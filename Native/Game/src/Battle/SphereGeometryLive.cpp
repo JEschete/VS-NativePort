@@ -11,7 +11,7 @@
 
 #include "Battle/Sphere.h"
 #include "Core/Log.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -59,12 +59,12 @@ static_assert(offsetof(Battle_ShapeVertex, opaque6) ==
               kShapeVertexOpaqueOffset);
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("battle.sphere", "{} refused: {}", operation, reason);
+  VS::Core::LogError("battle.sphere", "{} refused: {}", operation, reason);
   std::abort();
 }
 
 std::byte* ScratchBytes() {
-  auto* scratch = static_cast<std::byte*>(Core_ScratchBase());
+  auto* scratch = static_cast<std::byte*>(VS::Core::ScratchBase());
   if (scratch == nullptr) {
     Refuse("sphere geometry", "missing scratch workspace");
   }

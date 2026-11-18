@@ -58,7 +58,7 @@ std::optional<std::span<const std::uint8_t>> NullTerminated(
 class LiveHost final : public Host {
  public:
   void Refuse(std::string_view reason) override {
-    VS_LOG_WARN("menu.break_arts", "{}", reason);
+    VS::Core::LogWarn("menu.break_arts", "{}", reason);
   }
 
   std::span<const std::uint16_t> MenuStrings() override {

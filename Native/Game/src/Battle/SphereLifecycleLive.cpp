@@ -39,7 +39,7 @@ static_assert(offsetof(Battle_TargetSphere, inputLocked) ==
                   sizeof(std::int16_t));
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("battle.sphere", "{} refused: {}", operation, reason);
+  VS::Core::LogError("battle.sphere", "{} refused: {}", operation, reason);
   std::abort();
 }
 

@@ -23,7 +23,7 @@
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -69,13 +69,14 @@ std::uint64_t refusals = 0;
 
 void Refuse(const char* what) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("battle.sphere", "Sphere drawing refused: {} ({} refusals)",
-                what, refusals);
+    VS::Core::LogWarn("battle.sphere",
+                      "Sphere drawing refused: {} ({} refusals)", what,
+                      refusals);
   }
 }
 
 [[nodiscard]] std::byte* Scratch(std::size_t offset) {
-  return static_cast<std::byte*>(Core_ScratchBase()) + offset;
+  return static_cast<std::byte*>(VS::Core::ScratchBase()) + offset;
 }
 
 [[nodiscard]] Battle_TargetSphere* LiveSphere() {

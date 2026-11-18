@@ -298,7 +298,7 @@ class LiveCandidateEvaluation final : public CandidateEvaluationHost {
                           Battle_Ai_ActionCandidate& candidate)
       : state_(state), candidate_(candidate) {}
 
-  int Random() override { return Core_Random_Rand(); }
+  int Random() override { return VS::Core::NextBiosRand(); }
   bool Capture(ActionCandidate& candidate) override {
     candidate_ = RecordOf(candidate);
     CaptureBattleActorConditions(rows_);
@@ -533,7 +533,7 @@ class LiveActorActionPlan final : public ActorActionPlanHost {
     record->threshold = threshold;
     return true;
   }
-  int Random() override { return Core_Random_Rand(); }
+  int Random() override { return VS::Core::NextBiosRand(); }
   void RefreshReadiness() override {
     Require(RefreshLiveActionCandidateReadiness(&state_).has_value(),
             "Action plan requires valid candidate readiness");
@@ -1007,7 +1007,7 @@ class LiveCandidateEnumeration final : public CandidateEnumerationHost {
     const auto record = RecordOf(candidate);
     AppendLiveActionCandidate(&state_, &record);
   }
-  int Random() override { return Core_Random_Rand(); }
+  int Random() override { return VS::Core::NextBiosRand(); }
 
  private:
   void RequireTargetStats(unsigned id) const {

@@ -205,7 +205,7 @@ struct EnumerationFixture : ReadinessFixture {
       Battle_Ai_fallbackCandidates;
   int saved_count = Battle_Ai_fallbackCandidateCount;
   int saved_mask = Battle_Ai_unusedPlanCounter;
-  unsigned saved_random = Core_Random_State();
+  unsigned saved_random = VS::Core::BiosRand().State();
   std::array<Battle_Ai_CandidateEntryView, 24> fallback{};
   Battle_Actor battle_actor{};
   Battle_ActorStats target_stats{};
@@ -214,7 +214,7 @@ struct EnumerationFixture : ReadinessFixture {
     Battle_Ai_fallbackCandidates = fallback.data();
     Battle_Ai_fallbackCandidateCount = 0;
     Battle_Ai_unusedPlanCounter = 0;
-    Core_Random_Seed(1);
+    VS::Core::SeedBiosRand(1);
     state.candidateCount = 0;
     state.settingsModeLow = 1;
     state.pointHeight = -4321;
@@ -238,7 +238,7 @@ struct EnumerationFixture : ReadinessFixture {
     Battle_Ai_fallbackCandidates = saved_fallback;
     Battle_Ai_fallbackCandidateCount = saved_count;
     Battle_Ai_unusedPlanCounter = saved_mask;
-    Core_Random_Seed(saved_random);
+    VS::Core::SeedBiosRand(saved_random);
   }
 };
 
@@ -778,7 +778,7 @@ TEST_CASE(
   expected.opaque0 = 256 * 128 + 128;
   expected.weight = 128;
   std::array<std::byte, 16 * sizeof(Battle_Ai_ActionTiming)> scratch{};
-  auto* scratch_rows = static_cast<std::byte*>(Core_ScratchBase()) + 0x18C;
+  auto* scratch_rows = static_cast<std::byte*>(VS::Core::ScratchBase()) + 0x18C;
   std::memcpy(scratch.data(), scratch_rows, scratch.size());
   REQUIRE(VS::Battle::Ai::EvaluateLiveActionCandidate(&fixture.state,
                                                       &candidate, 0, nullptr));
@@ -879,7 +879,7 @@ TEST_CASE("Native enumeration caches and ranks without its old scratch records",
   fixture.state.actionSlots[2][1].kind = GENERATE(1u, 2u, 3u);
   std::array<std::byte, 4 * sizeof(Battle_Ai_ActionCandidate)> scratch{};
   const auto* scratch_rows =
-      static_cast<const std::byte*>(Core_ScratchBase()) + 0x30C;
+      static_cast<const std::byte*>(VS::Core::ScratchBase()) + 0x30C;
   std::memcpy(scratch.data(), scratch_rows, scratch.size());
   VS::Battle::Ai::EnumerateActionCandidatesEntry(&fixture.state, -1);
   REQUIRE(fixture.state.candidateCount == 1);
@@ -921,7 +921,7 @@ TEST_CASE(
   CHECK(std::bit_cast<StateBytes>(fixture.state) == before);
   CHECK(Battle_Ai_fallbackCandidateCount == 7);
   CHECK(Battle_Ai_unusedPlanCounter == 0);
-  CHECK(Core_Random_State() == 1);
+  CHECK(VS::Core::BiosRand().State() == 1);
 }
 
 TEST_CASE("Native enumeration retains its original module address",
@@ -1067,7 +1067,7 @@ TEST_CASE(
   CHECK(fixture.room.readinessLevel == 0);
   CHECK(fixture.state.candidateCount == 0);
   CHECK(fixture.state.planMode == 7);
-  CHECK(Core_Random_State() == 1);
+  CHECK(VS::Core::BiosRand().State() == 1);
 }
 
 TEST_CASE(
@@ -1081,7 +1081,7 @@ TEST_CASE(
   CHECK(fixture.room.readinessLevel == 100);
   CHECK(fixture.state.candidateCount == 0);
   CHECK(fixture.state.planMode == 7);
-  CHECK(Core_Random_State() == 1);
+  CHECK(VS::Core::BiosRand().State() == 1);
   VS::Core::Memory::FreeLiveFromHighEnd(reserved);
 }
 
@@ -1089,16 +1089,16 @@ TEST_CASE(
     "Native actor plan uses real pass storage ranking and final readiness",
     "[ai][planning][actor-plan-live]") {
   ActorPlanFixture fixture;
-  const auto jitter = Core_Random_Rand() & 7;
-  const auto expected_random = Core_Random_State();
-  Core_Random_Seed(1);
+  const auto jitter = VS::Core::NextBiosRand() & 7;
+  const auto expected_random = VS::Core::BiosRand().State();
+  VS::Core::SeedBiosRand(1);
   VS::Battle::Ai::BuildActorActionPlanEntry(&fixture.state);
   REQUIRE(fixture.state.candidateCount == 1);
   CHECK(fixture.state.candidateOrder[0] == &fixture.state.candidates[0]);
   CHECK(fixture.state.candidates[0].action == 42);
   CHECK(fixture.state.candidates[0].threshold == jitter);
   CHECK(fixture.exclusions[1][42] == 1);
-  CHECK(Core_Random_State() == expected_random);
+  CHECK(VS::Core::BiosRand().State() == expected_random);
   const auto saved = std::bit_cast<VS::Battle::Ai::ActionCandidate::Words>(
       fixture.pass_candidates[0][0]);
   CHECK(VS::Battle::Ai::ActionCandidate(saved).Action() == 42);

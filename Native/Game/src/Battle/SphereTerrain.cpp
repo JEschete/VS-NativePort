@@ -66,7 +66,7 @@ using Rows = std::array<std::vector<Span>, kRows>;
 using Crossings = std::array<std::vector<Point>, kRows>;
 
 [[noreturn]] void Invalid(const char* message) {
-  VS_LOG_ERROR("sphere", "{}", message);
+  VS::Core::LogError("sphere", "{}", message);
   throw std::runtime_error(message);
 }
 

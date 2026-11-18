@@ -56,9 +56,9 @@ std::optional<std::size_t> PlatformIndex(const MovingPlatformRoom& room,
   if (support_layer < kFirstPlatformLayer ||
       support_layer >= kFirstPlatformLayer + kMovingPlatformCapacity ||
       room.platforms.size() > kMovingPlatformCapacity) {
-    VS_LOG_ERROR("field.platform",
-                 "Invalid moving-platform layer {} or {} platforms",
-                 support_layer, room.platforms.size());
+    VS::Core::LogError("field.platform",
+                       "Invalid moving-platform layer {} or {} platforms",
+                       support_layer, room.platforms.size());
     return std::nullopt;
   }
   const auto index =
@@ -72,8 +72,8 @@ std::optional<PlatformContact> ContactOf(const MovingPlatformRoom& room,
   const MovingPlatformPose& platform = room.platforms[index];
   const int frame = platform.bounce_frame;
   if (frame < 0 || std::cmp_greater(frame, room.bounce_offsets.size())) {
-    VS_LOG_ERROR("field.platform", "Invalid bounce frame {} for platform {}",
-                 frame, index);
+    VS::Core::LogError("field.platform",
+                       "Invalid bounce frame {} for platform {}", frame, index);
     return std::nullopt;
   }
   // The original seven-entry table is followed by a zero sentinel in BATTLE.
@@ -85,9 +85,10 @@ std::optional<PlatformContact> ContactOf(const MovingPlatformRoom& room,
   const int z = platform.z / kFixedOne;
   if (!std::in_range<std::int16_t>(x) || !std::in_range<std::int16_t>(height) ||
       !std::in_range<std::int16_t>(z)) {
-    VS_LOG_ERROR("field.platform",
-                 "Platform {} placement exceeds actor coordinates ({},{},{})",
-                 index, x, height, z);
+    VS::Core::LogError(
+        "field.platform",
+        "Platform {} placement exceeds actor coordinates ({},{},{})", index, x,
+        height, z);
     return std::nullopt;
   }
   return PlatformContact{.x = static_cast<std::int16_t>(x),
@@ -190,8 +191,8 @@ std::vector<PlatformContact> CollectMovingPlatformPositions(
     if (platform.hidden) continue;
     const int frame = platform.bounce_frame;
     if (frame < 0 || std::cmp_greater(frame, room.bounce_offsets.size())) {
-      VS_LOG_ERROR("field.platform", "Invalid collector bounce frame {}",
-                   frame);
+      VS::Core::LogError("field.platform", "Invalid collector bounce frame {}",
+                         frame);
       return {};
     }
     const int bounce =
@@ -443,9 +444,9 @@ std::optional<PlatformContact> MovingPlatformPlacement(
     const MovingPlatformRoom& room, int support_layer) {
   const auto index = PlatformIndex(room, support_layer);
   if (!index) {
-    VS_LOG_ERROR("field.platform",
-                 "Placement requires authored platform layer {}",
-                 support_layer);
+    VS::Core::LogError("field.platform",
+                       "Placement requires authored platform layer {}",
+                       support_layer);
     return std::nullopt;
   }
   return ContactOf(room, *index);

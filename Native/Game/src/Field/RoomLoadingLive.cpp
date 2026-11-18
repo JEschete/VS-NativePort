@@ -50,7 +50,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
 #include "Effects/WeatherPoolLive.hpp"
@@ -183,8 +183,8 @@ std::uint64_t refusals = 0;
 
 void RefuseCall(std::string_view entry, std::string_view reason) {
   if (ShouldReport(refusals)) {
-    VS_LOG_WARN(kChannel, "{} refused: {} ({} refusals)", entry, reason,
-                refusals);
+    VS::Core::LogWarn(kChannel, "{} refused: {} ({} refusals)", entry, reason,
+                      refusals);
   }
 }
 
@@ -221,7 +221,7 @@ void RefuseCall(std::string_view entry, std::string_view reason) {
 }
 
 [[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
 }
 
 [[nodiscard]] RECT ToRect(const Render::ScreenRect& area) {
@@ -442,8 +442,8 @@ class LiveReporting : public Host {
 
   void Refuse(RoomLoadRefusal refusal, int value) override {
     if (ShouldReport(refusals)) {
-      VS_LOG_WARN(kChannel, "room load refused: {} ({}; {} refusals)",
-                  RefusalName(refusal), value, refusals);
+      VS::Core::LogWarn(kChannel, "room load refused: {} ({}; {} refusals)",
+                        RefusalName(refusal), value, refusals);
     }
   }
 };

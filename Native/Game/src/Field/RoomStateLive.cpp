@@ -91,8 +91,8 @@ class LiveRoomVisitHost final : public RoomVisitHost {
     return LiveCurrentRoomId();
   }
   void ReportRefusedVisit(const char* record, int id) override {
-    VS_LOG_WARN(kChannel, "visited {} {} outside the visit records", record,
-                id);
+    VS::Core::LogWarn(kChannel, "visited {} {} outside the visit records",
+                      record, id);
   }
 };
 
@@ -260,7 +260,8 @@ void LiveHidePrimaryRoomGeometry() {
 
 void LiveInitializeRoomRuntimeState() {
   if (!Menu::map::DrainMapTerminalLive()) {
-    VS_LOG_ERROR(kChannel, "map cleanup refused before room runtime reset");
+    VS::Core::LogError(kChannel,
+                       "map cleanup refused before room runtime reset");
     std::abort();
   }
   LiveRoomRuntimeHost host;

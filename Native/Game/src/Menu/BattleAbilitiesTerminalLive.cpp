@@ -50,7 +50,8 @@ AbilityListState g_defense;
 AbilityScreenAnimation g_screen_animation;
 
 void Refuse(std::string_view reason) {
-  VS_LOG_WARN("menu.battle-abilities", "Ability terminal refused: {}", reason);
+  VS::Core::LogWarn("menu.battle-abilities", "Ability terminal refused: {}",
+                    reason);
 }
 
 char LegacyByte(int value) {

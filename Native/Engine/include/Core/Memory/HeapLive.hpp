@@ -10,7 +10,7 @@
 #include "Core/Memory/Heap.hpp"
 
 // Live binding for Heap.hpp: the game heap the copied code allocates from,
-// spanning Core's arena (Core/Arena.h). An allocation the heap cannot satisfy
+// spanning Core's arena (Core/Arena.hpp). An allocation the heap cannot satisfy
 // returns null, as the original did; a free the heap refuses (null, outside
 // the arena, not an allocated block, already freed) leaves the heap unchanged.
 // Both, and a damaged block guard, are reported with the caller's site.

@@ -18,7 +18,7 @@
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreview.hpp"
 #include "Menu/Framework/Framework.hpp"

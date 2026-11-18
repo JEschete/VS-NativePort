@@ -26,7 +26,7 @@
 namespace VS::Event {
 namespace {
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("event.scene", "{} refused: {}", operation, reason);
+  VS::Core::LogError("event.scene", "{} refused: {}", operation, reason);
   std::abort();
 }
 
@@ -45,8 +45,8 @@ Field_MpdDoorRecord PackedDoor(const Field::DoorRecord& door) {
 class LiveSceneTransitionServices final : public SceneTransitionHost {
  public:
   void Refuse(SceneTransitionRefusal /*refusal*/, int value) override {
-    VS_LOG_ERROR("event.scene", "scene handoff refused a {}-byte instruction",
-                 value);
+    VS::Core::LogError("event.scene",
+                       "scene handoff refused a {}-byte instruction", value);
     std::abort();
   }
 

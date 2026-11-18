@@ -35,7 +35,7 @@ void RecordUnported(std::string_view site) {
   auto it = registry.hits.find(site);
   if (it == registry.hits.end()) {
     registry.hits.emplace(std::string(site), 1);
-    VS_LOG_WARN("unported", "{}", site);
+    LogWarn("unported", "{}", site);
   } else {
     ++it->second;
   }
@@ -55,25 +55,11 @@ std::vector<UnportedHit> UnportedSnapshot() {
 
 void DumpUnportedToLog() {
   for (const auto& hit : UnportedSnapshot()) {
-    VS_LOG_INFO("unported", "{:>8}  {}", hit.count, hit.site);
+    LogInfo("unported", "{:>8}  {}", hit.count, hit.site);
   }
 }
 
 }  // namespace VS::Core
-
-void Core_RecordUnported(const char* site) { VS::Core::RecordUnported(site); }
-
-void Core_Tracef(const char* format, ...) {
-  if (!VS::Core::IsLogEnabled(VS::Core::LogLevel::Trace, "trace")) {
-    return;
-  }
-  char line[VS::Core::kDiagnosticLineBytes]{};
-  va_list args;
-  va_start(args, format);
-  std::vsnprintf(line, sizeof line, format, args);
-  va_end(args);
-  VS_LOG_TRACE("trace", "{}", line);
-}
 
 namespace {
 void WriteFormatted(VS::Core::LogLevel level, const char* channel,
@@ -86,6 +72,13 @@ void WriteFormatted(VS::Core::LogLevel level, const char* channel,
   VS::Core::LogWrite(level, channel, line);
 }
 }  // namespace
+
+void VS::Core::Tracef(const char* channel, const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  WriteFormatted(VS::Core::LogLevel::Trace, channel, format, args);
+  va_end(args);
+}
 
 void VS::Core::Debugf(const char* channel, const char* format, ...) {
   va_list args;

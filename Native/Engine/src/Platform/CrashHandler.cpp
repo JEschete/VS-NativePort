@@ -190,14 +190,15 @@ LONG WINAPI OnCrash(EXCEPTION_POINTERS* info) {
   const EXCEPTION_RECORD* rec = info->ExceptionRecord;
   if (rec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION &&
       rec->NumberParameters >= 2) {
-    VS_LOG_ERROR("crash", "access violation {} 0x{:X} at 0x{:X}",
-                 rec->ExceptionInformation[0] == 1 ? "writing" : "reading",
-                 rec->ExceptionInformation[1],
-                 reinterpret_cast<uintptr_t>(rec->ExceptionAddress));
+    VS::Core::LogError(
+        "crash", "access violation {} 0x{:X} at 0x{:X}",
+        rec->ExceptionInformation[0] == 1 ? "writing" : "reading",
+        rec->ExceptionInformation[1],
+        reinterpret_cast<uintptr_t>(rec->ExceptionAddress));
   } else {
-    VS_LOG_ERROR("crash", "exception 0x{:08X} at 0x{:X}",
-                 static_cast<unsigned>(rec->ExceptionCode),
-                 reinterpret_cast<uintptr_t>(rec->ExceptionAddress));
+    VS::Core::LogError("crash", "exception 0x{:08X} at 0x{:X}",
+                       static_cast<unsigned>(rec->ExceptionCode),
+                       reinterpret_cast<uintptr_t>(rec->ExceptionAddress));
   }
   HANDLE process = GetCurrentProcess();
   HANDLE thread = GetCurrentThread();
@@ -210,8 +211,8 @@ LONG WINAPI OnCrash(EXCEPTION_POINTERS* info) {
     // the stack
     ctx.Rip = *reinterpret_cast<DWORD64*>(ctx.Rsp);
     ctx.Rsp += sizeof(DWORD64);
-    VS_LOG_ERROR("crash",
-                 "  (called a null function pointer; stack from the caller)");
+    VS::Core::LogError(
+        "crash", "  (called a null function pointer; stack from the caller)");
   }
   STACKFRAME64 frame{};
   frame.AddrPC.Offset = ctx.Rip;
@@ -250,9 +251,9 @@ void InstallCrashHandler() {
       try {
         std::rethrow_exception(error);
       } catch (const std::exception& exception) {
-        VS_LOG_ERROR("crash", "uncaught exception: {}", exception.what());
+        VS::Core::LogError("crash", "uncaught exception: {}", exception.what());
       } catch (...) {
-        VS_LOG_ERROR("crash", "uncaught nonstandard exception");
+        VS::Core::LogError("crash", "uncaught nonstandard exception");
       }
     }
     LogCallStack("runtime termination");
@@ -271,7 +272,7 @@ void LogCallStack(const char* why) {
     SymInitialize(process, nullptr, TRUE);
     initialized = true;
   }
-  VS_LOG_WARN("stack", "{}", why);
+  VS::Core::LogWarn("stack", "{}", why);
   for (USHORT index = 0; index < count && index < kLoggedFrameLimit; ++index) {
     LogStackFrame(process, reinterpret_cast<DWORD64>(frames[index]),
                   Core::LogLevel::Warn, "stack", index);
@@ -289,8 +290,8 @@ void LogAddress(const void* address) {
   DWORD64 displacement = 0;
   if (SymFromAddr(process, reinterpret_cast<DWORD64>(address), &displacement,
                   symbol)) {
-    VS_LOG_ERROR("render", "address {} is {} +0x{:X}", address, symbol->Name,
-                 displacement);
+    VS::Core::LogError("render", "address {} is {} +0x{:X}", address,
+                       symbol->Name, displacement);
   }
 }
 
@@ -332,10 +333,10 @@ void LogContextStack(CONTEXT ctx) {
     line.SizeOfStruct = sizeof(line);
     DWORD line_disp = 0;
     if (SymGetLineFromAddr64(process, frame.AddrPC.Offset, &line_disp, &line)) {
-      VS_LOG_WARN("watch", "  #{} {} ({}:{})", depth, name, line.FileName,
-                  line.LineNumber);
+      VS::Core::LogWarn("watch", "  #{} {} ({}:{})", depth, name, line.FileName,
+                        line.LineNumber);
     } else {
-      VS_LOG_WARN("watch", "  #{} {}", depth, name);
+      VS::Core::LogWarn("watch", "  #{} {}", depth, name);
     }
   }
 }
@@ -363,8 +364,8 @@ LONG WINAPI OnWatch(EXCEPTION_POINTERS* info) {
     if (g_watch_hits++ < kWatchHitLimit) {
       std::uint64_t value = 0;
       std::memcpy(&value, g_watch_address, static_cast<size_t>(g_watch_bytes));
-      VS_LOG_WARN("watch", "write to {} (now 0x{:X}), hit {}", g_watch_address,
-                  value, g_watch_hits);
+      VS::Core::LogWarn("watch", "write to {} (now 0x{:X}), hit {}",
+                        g_watch_address, value, g_watch_hits);
       LogContextStack(*ctx);
     }
     return EXCEPTION_CONTINUE_EXECUTION;
@@ -387,7 +388,7 @@ void WatchWrites(const void* address, int bytes) {
   g_watch_bytes = bytes;
   g_watch_hits = 0;
   RaiseException(kWatchRequest, 0, 0, nullptr);
-  VS_LOG_WARN("watch", "watching {} bytes at {}", bytes, address);
+  VS::Core::LogWarn("watch", "watching {} bytes at {}", bytes, address);
 }
 
 }  // namespace VS::Platform

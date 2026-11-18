@@ -441,7 +441,8 @@ std::expected<std::vector<EncounterZone>, std::string> ReadEncounterCatalog(
       zones.push_back(ReadZone(*store, entry, id));
     } catch (const std::exception& error) {
       if (strict) return std::unexpected(entry.path + ": " + error.what());
-      VS_LOG_WARN("encounter.catalog", "{}: {}", entry.path, error.what());
+      VS::Core::LogWarn("encounter.catalog", "{}: {}", entry.path,
+                        error.what());
     }
   }
   std::ranges::sort(zones, {}, &EncounterZone::id);
@@ -511,10 +512,10 @@ std::expected<Items_WeaponSpawnLoadout, std::string> ReadEncounterWeapon(
                             [](const auto& gem) { return gem.id != 0; })) {
       return std::unexpected("weapon source record changed: " + path);
     }
-    VS_LOG_INFO("encounter.weapon",
-                "choice={} source={} actor={} blade={} grip={} model={}",
-                EncounterWeaponId(weapon), path, source.actor, source.blade,
-                source.grip, source.model);
+    VS::Core::LogInfo("encounter.weapon",
+                      "choice={} source={} actor={} blade={} grip={} model={}",
+                      EncounterWeaponId(weapon), path, source.actor,
+                      source.blade, source.grip, source.model);
     return result;
   } catch (const std::runtime_error& error) {
     return std::unexpected(path + ": " + error.what());

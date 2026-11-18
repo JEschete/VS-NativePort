@@ -102,8 +102,8 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     store->m_entries_.push_back(std::move(e));
   }
   std::ranges::sort(store->m_entries_, {}, &Entry::lba);
-  VS_LOG_INFO("content", "extracted data: {} files from {}",
-              store->m_entries_.size(), Platform::PathText(root));
+  VS::Core::LogInfo("content", "extracted data: {} files from {}",
+                    store->m_entries_.size(), Platform::PathText(root));
   Instance() = std::move(store);
   return {};
 }
@@ -179,7 +179,7 @@ int VS::Content::ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
   while (remaining != 0) {
     const DataStore::Entry* e = store->FindBySector(sector);
     if (e == nullptr) {
-      VS_LOG_ERROR(
+      VS::Core::LogError(
           "content",
           "no extracted file holds sector {} (read of {} bytes at sector {})",
           sector, bytes, lba);
@@ -196,8 +196,8 @@ int VS::Content::ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
     const usize n = static_cast<usize>(
         std::min<u64>(span, offset < e->size ? e->size - offset : 0));
     if (n != 0 && !store->Read(*e, offset, std::span(out, n))) {
-      VS_LOG_ERROR("content", "read failed: {} at {} ({} bytes)", e->path,
-                   offset, n);
+      VS::Core::LogError("content", "read failed: {} at {} ({} bytes)", e->path,
+                         offset, n);
       return 0;
     }
     std::memset(out + n, 0, span - n);

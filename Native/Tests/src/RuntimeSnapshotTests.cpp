@@ -41,8 +41,8 @@
 #include "Boot/GameLoop.h"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Random.h"
+#include "Core/RandomLive.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Field/CameraLive.hpp"
 #include "Field/CameraLiveState.hpp"
@@ -260,7 +260,7 @@ struct RuntimeFixture {
   decltype(std::to_array(Items_itemCategoryUpperIds)) bounds =
       std::to_array(Items_itemCategoryUpperIds);
   Battle_Actor* character = Battle_characterState;
-  unsigned bios = Core_Random_State();
+  unsigned bios = VS::Core::BiosRand().State();
   unsigned interface_random = Core_interfaceRandomState;
   int shuffle_index = Core_randomShuffleIndex;
   int movement_random = Battle_Ai_savedMovementRandomState;
@@ -426,7 +426,7 @@ struct RuntimeFixture {
     VS::State::sceneTimer.resetScope = 2;
     VS::State::sceneTimer.seconds = 17;
     VS::State::sceneTimer.frames = 29;
-    Core_Random_Seed(0x12345678);
+    VS::Core::SeedBiosRand(0x12345678);
     Core_interfaceRandomState = 0x87654321;
     Core_randomShuffleIndex = 96;
     for (std::size_t index = 0; index < shuffle.size(); ++index) {
@@ -625,7 +625,7 @@ struct RuntimeFixture {
     std::copy(shuffle.begin(), shuffle.end(), Core_randomShuffleTable);
     std::copy(bounds.begin(), bounds.end(), Items_itemCategoryUpperIds);
     Battle_characterState = character;
-    Core_Random_Seed(bios);
+    VS::Core::SeedBiosRand(bios);
     Core_interfaceRandomState = interface_random;
     Core_randomShuffleIndex = shuffle_index;
     Battle_Ai_savedMovementRandomState = movement_random;
@@ -690,7 +690,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, fixture.enemy_model);
   Append(bytes, fixture.enemy_ai);
   Append(bytes, fixture.storage);
-  Append(bytes, Core_Random_State());
+  Append(bytes, VS::Core::BiosRand().State());
   Append(bytes, Core_interfaceRandomState);
   Append(bytes, Core_randomShuffleTable);
   Append(bytes, Core_randomShuffleIndex);
@@ -1353,7 +1353,7 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   VS::State::playTime.all = 0;
   VS::State::sceneTimer = {};
   VS::Field::sphericalCamera.values.yaw = 0;
-  Core_Random_Seed(1);
+  VS::Core::SeedBiosRand(1);
   Core_interfaceRandomState = 1;
   std::fill_n(Core_randomShuffleTable, 97, 0);
   Core_randomShuffleIndex = 0;
@@ -1389,7 +1389,7 @@ void CheckRestoredClockCamera() {
 }
 
 void CheckRestoredRandom(const Save::Snapshot& state) {
-  CHECK(Core_Random_State() == state.random.bios_state);
+  CHECK(VS::Core::BiosRand().State() == state.random.bios_state);
   CHECK(Core_interfaceRandomState == state.random.interface_state);
   CHECK(std::equal(state.random.shuffle.begin(), state.random.shuffle.end(),
                    Core_randomShuffleTable));
@@ -1653,7 +1653,7 @@ void CheckResumeKeptLiveState(const RuntimeFixture& fixture) {
   CHECK(fixture.player_model.instance.position.vx == 77);
   CHECK(fixture.player_model.instance.position.vy == -88);
   CHECK(VS::Field::sphericalCamera.values.yaw == 333);
-  CHECK(Core_Random_State() == 777);
+  CHECK(VS::Core::BiosRand().State() == 777);
   CHECK(State_recentRoomEnemyStates[0].nextSlot == 5);
 }
 }  // namespace
@@ -1675,7 +1675,7 @@ TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
   VS::State::playTime.t.frames = 8;
   fixture.player_model.instance.position = {77, -88, 99, 0};
   VS::Field::sphericalCamera.values.yaw = 333;
-  Core_Random_Seed(777);
+  VS::Core::SeedBiosRand(777);
   REQUIRE(Save::FinishResume());
   CHECK_FALSE(Save::ResumePending());
   CheckResumeKeptLiveState(fixture);

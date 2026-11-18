@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
 #include "Event/Camera.hpp"
 #include "Event/EventScreenTweens.hpp"
@@ -385,7 +385,8 @@ TEST_CASE("Live screen tween entries keep the workspace layout",
   CHECK(camera.screen_tint.reserved1a == 0x5678);
   CHECK(camera.screen_tint.duration_frames == 0);
   std::int32_t recorded = 0;
-  std::memcpy(&recorded, static_cast<std::byte*>(Core_ScratchBase()) + 0x88,
+  std::memcpy(&recorded,
+              static_cast<std::byte*>(VS::Core::ScratchBase()) + 0x88,
               sizeof(recorded));
   CHECK(recorded == VS::Event::EvaluateInterpolationCurveEntry(0, 2, 2));
   VS::State::tickSpeed = saved_tick;

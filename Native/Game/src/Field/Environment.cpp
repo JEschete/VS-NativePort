@@ -83,10 +83,11 @@ constexpr std::int32_t kSemiTransparencyShift = 7;
                                                    std::string_view entry) {
   if (intensity < 0 ||
       static_cast<std::size_t>(intensity) >= kWeatherVolumeByIntensity.size()) {
-    VS_LOG_WARN(kChannel,
-                "{}: weather intensity {} is outside the volume table; the "
-                "ambient sound is left unchanged",
-                entry, intensity);
+    VS::Core::LogWarn(
+        kChannel,
+        "{}: weather intensity {} is outside the volume table; the "
+        "ambient sound is left unchanged",
+        entry, intensity);
     return std::nullopt;
   }
   return kWeatherVolumeByIntensity.at(static_cast<std::size_t>(intensity));
@@ -98,10 +99,11 @@ constexpr std::int32_t kSemiTransparencyShift = 7;
                                                        std::string_view drift) {
   if (interval < 0 ||
       static_cast<std::size_t>(interval) >= kIntervalMasks.size()) {
-    VS_LOG_WARN(kChannel,
-                "UpdateRoomWeather: {} interval {} is outside the mask table; "
-                "the {} does not drift this frame",
-                drift, interval, drift);
+    VS::Core::LogWarn(
+        kChannel,
+        "UpdateRoomWeather: {} interval {} is outside the mask table; "
+        "the {} does not drift this frame",
+        drift, interval, drift);
     return std::nullopt;
   }
   return kIntervalMasks.at(static_cast<std::size_t>(interval));
@@ -386,10 +388,11 @@ void DrawRoomBackgroundTiles(BackgroundHost& host,
       Math::WrappingMultiply(layout.height, kCellPixels);
 
   if (!CellsCoverRows(layout, row_end)) {
-    VS_LOG_WARN(kChannel,
-                "DrawRoomBackgroundTiles: a {}x{} layout has {} cells; only "
-                "the backdrop fill is drawn",
-                layout.width, layout.height, layout.tiles.size());
+    VS::Core::LogWarn(
+        kChannel,
+        "DrawRoomBackgroundTiles: a {}x{} layout has {} cells; only "
+        "the backdrop fill is drawn",
+        layout.width, layout.height, layout.tiles.size());
   } else {
     for (std::int32_t row = 0; row < row_end; row += kCellPixels) {
       const std::int32_t y = Math::WrappingSubtract(row, vertical_offset);

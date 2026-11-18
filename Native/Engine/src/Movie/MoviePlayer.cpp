@@ -78,14 +78,14 @@ class Player {
     const std::unique_ptr<std::FILE, decltype(&std::fclose)> input(
         _wfopen(path.c_str(), L"rb"), std::fclose);
     if (!input) {
-      VS_LOG_ERROR("movie", "cannot open {}", file);
+      VS::Core::LogError("movie", "cannot open {}", file);
       return false;
     }
     mkvparser::MkvReader reader(input.get());
     i64 pos = 0;
     mkvparser::EBMLHeader ebml;
     if (ebml.Parse(&reader, pos) < 0) {
-      VS_LOG_ERROR("movie", "{}: not a Matroska file", file);
+      VS::Core::LogError("movie", "{}: not a Matroska file", file);
       return false;
     }
     mkvparser::Segment* raw = nullptr;
@@ -99,7 +99,8 @@ class Player {
     }
     TrackSelection tracks;
     if (!SelectTracks(*segment, tracks)) {
-      VS_LOG_ERROR("movie", "{}: missing or invalid supported tracks", file);
+      VS::Core::LogError("movie", "{}: missing or invalid supported tracks",
+                         file);
       return false;
     }
     if (!ReadPackets(*segment, reader, tracks)) {
@@ -110,7 +111,7 @@ class Player {
     settings.n_threads = 2;
     settings.max_frame_delay = 1;
     if (dav1d_open(&m_decoder_, &settings) != 0) {
-      VS_LOG_ERROR("movie", "dav1d_open failed");
+      VS::Core::LogError("movie", "dav1d_open failed");
       return false;
     }
     const usize row_bytes = static_cast<usize>(m_width_) * kRgbChannels;
@@ -119,7 +120,7 @@ class Player {
     }
     m_rgb_.assign(row_bytes * m_height_, 0);
     StartSoundtrack(tracks.flac);
-    VS_LOG_INFO(
+    VS::Core::LogInfo(
         "movie", "{}: {}x{}, {} frames, {:.1f} s", file, m_width_, m_height_,
         m_video_.size(),
         static_cast<double>(m_video_.back().time_ns) / kNanosecondsPerSecond);
@@ -235,7 +236,7 @@ class Player {
       if (m_pending_.sz != 0) {
         const int r = dav1d_send_data(m_decoder_, &m_pending_);
         if (r < 0 && r != DAV1D_ERR(EAGAIN)) {
-          VS_LOG_ERROR("movie", "dav1d_send_data: {}", r);
+          VS::Core::LogError("movie", "dav1d_send_data: {}", r);
           return false;
         }
       }
@@ -259,7 +260,7 @@ class Player {
     if (pic.p.bpc != CHAR_BIT || pic.p.layout != DAV1D_PIXEL_LAYOUT_I420 ||
         pic.data[0] == nullptr || pic.data[1] == nullptr ||
         pic.data[2] == nullptr) {
-      VS_LOG_ERROR("movie", "unsupported decoded picture layout");
+      VS::Core::LogError("movie", "unsupported decoded picture layout");
       return false;
     }
     const bool full = pic.seq_hdr == nullptr || pic.seq_hdr->color_range != 0;
@@ -298,9 +299,9 @@ class Player {
     Audio::AudioDevice* device = Audio::AudioDevice::Primary();
     if (device == nullptr || flac.size() < kFlacMarkerBytes ||
         m_sample_rate_ <= 0) {
-      VS_LOG_WARN("movie",
-                  "soundtrack not played (device {}, {} bytes of FLAC, {} Hz)",
-                  device != nullptr, flac.size(), m_sample_rate_);
+      VS::Core::LogWarn(
+          "movie", "soundtrack not played (device {}, {} bytes of FLAC, {} Hz)",
+          device != nullptr, flac.size(), m_sample_rate_);
       return;
     }
     unsigned int channels = 0, rate = 0;
@@ -308,7 +309,7 @@ class Player {
     drflac_int16* pcm = drflac_open_memory_and_read_pcm_frames_s16(
         flac.data(), flac.size(), &channels, &rate, &frames, nullptr);
     if (pcm == nullptr) {
-      VS_LOG_ERROR("movie", "soundtrack: FLAC decode failed");
+      VS::Core::LogError("movie", "soundtrack: FLAC decode failed");
       return;
     }
     m_audio_ =
@@ -317,8 +318,8 @@ class Player {
       SDL_PutAudioStreamData(
           m_audio_, pcm,
           static_cast<int>(frames * channels * sizeof(drflac_int16)));
-      VS_LOG_INFO("movie", "soundtrack: {:.1f} s, {} Hz, {} ch",
-                  static_cast<double>(frames) / rate, rate, channels);
+      VS::Core::LogInfo("movie", "soundtrack: {:.1f} s, {} Hz, {} ch",
+                        static_cast<double>(frames) / rate, rate, channels);
     }
     drflac_free(pcm, nullptr);
   }
@@ -342,7 +343,7 @@ int VS::Movie::PlayerOpen(const char* disc_path) {
   const Content::DataStore* store = Content::DataStore::Get();
   const Content::DataStore::Entry* e = store ? store->Find(disc_path) : nullptr;
   if (e == nullptr || e->form == "raw" || e->form == "stream") {
-    VS_LOG_WARN(
+    VS::Core::LogWarn(
         "movie",
         "{}: no converted movie (run VS.Extract extract with FFmpeg available)",
         disc_path);

@@ -47,9 +47,9 @@ std::uint64_t refusals = 0;
 
 void Refuse(std::string_view what) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("battle.labels",
-                "Floating label placement refused: {} ({} refusals)", what,
-                refusals);
+    VS::Core::LogWarn("battle.labels",
+                      "Floating label placement refused: {} ({} refusals)",
+                      what, refusals);
   }
 }
 

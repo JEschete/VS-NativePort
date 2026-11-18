@@ -728,7 +728,7 @@ int func_800F9800(void) {
         ledge = typed[typed.index("\nbool CalcActorLedgeOffset("):]
         guard, facing = ledge.index("if (!platform)"), ledge.index("actor.move_facing =")
         self.assertLess(guard, facing)
-        self.assertIn('VS_LOG_ERROR("field.platform"', ledge[guard:facing])
+        self.assertIn('VS::Core::LogError("field.platform"', ledge[guard:facing])
         self.assertIn("return false;", ledge[guard:facing])
 
     def test_platform_placement_uses_an_owned_authored_contact(self):
@@ -1283,13 +1283,13 @@ int func_800F9800(void) {
             "actor.SetReactionCount(static_cast<std::uint8_t>(reactions));", source
         )
         self.assertIn("if (reactions < kRequiredReactions) return;", source)
-        self.assertNotIn("VS_UNPORTED", source)
+        self.assertNotIn("RecordUnported", source)
         binding = (root / r"Native\Game\src\Battle\Ai\RelationsLive.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("UpdateLiveEngagementApproachBehavior", binding)
         self.assertIn("settings_.savedDecisionCallback = nullptr;", binding)
-        self.assertNotIn("VS_UNPORTED", binding)
+        self.assertNotIn("RecordUnported", binding)
 
     def test_plg074_reuses_identical_code_without_merging_overlay_state(self):
         root = Path(__file__).resolve().parents[2]
@@ -1679,7 +1679,7 @@ int func_800F9800(void) {
         self.assertIn("BuildLiveAiSpecialTerrainHeights();", source)
         self.assertNotIn("Battle_Ai_BuildAiSpecialTerrainHeights", source)
         self.assertNotIn("AllocateFromHighEnd", body)
-        self.assertNotIn("Core_ScratchBase", body)
+        self.assertNotIn("ScratchBase", body)
 
     def test_frame_update_rows_bind_module_addresses_to_the_live_frame_update(self):
         owned = self.owned_items()
@@ -1776,7 +1776,7 @@ int func_800F9800(void) {
         live = (
             root / r"Native\Game\src\Effects\ScreenDistortion\RadialWarpLive.cpp"
         ).read_text(encoding="utf-8")
-        self.assertNotIn("Core_ScratchBase", live)
+        self.assertNotIn("ScratchBase", live)
         self.assertNotIn("0x1F800", live)
         self.assertIn("Core_Math_kArcTangentTable", live)
 
@@ -3252,7 +3252,7 @@ int func_800F9800(void) {
         source = live[start:live.index("\n}\n", start)]
         self.assertIn("BoundTextureTable(texture_index) == nullptr", source)
         self.assertIn("request_effect={}", source)
-        self.assertLess(source.index("VS_LOG_DEBUG"), source.index("RestartTextureAnimation("))
+        self.assertLess(source.index("VS::Core::LogDebug"), source.index("RestartTextureAnimation("))
         self.assertNotIn("Effects_currentInstance", source)
         source = "        Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);"
         for old, new, _ in copy_fixups.FIXES["F01861"]:

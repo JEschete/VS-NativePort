@@ -48,7 +48,7 @@ static_assert(sizeof(Battle_TargetLabelLine) == sizeof(Battle_TargetPreview));
 std::uint64_t unordered_labels = 0;
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("battle.sphere", "{} refused: {}", operation, reason);
+  VS::Core::LogError("battle.sphere", "{} refused: {}", operation, reason);
   std::abort();
 }
 
@@ -96,10 +96,10 @@ u_long* LabelOverlayEntry(int slot) {
   u_long* entry =
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kOverlay, slot);
   if (entry == nullptr && std::has_single_bit(++unordered_labels)) {
-    VS_LOG_ERROR("battle.sphere",
-                 "target label skipped: overlay entry {} is outside the "
-                 "frame's ordering table ({} skipped)",
-                 slot, unordered_labels);
+    VS::Core::LogError("battle.sphere",
+                       "target label skipped: overlay entry {} is outside the "
+                       "frame's ordering table ({} skipped)",
+                       slot, unordered_labels);
   }
   return entry;
 }
@@ -278,7 +278,8 @@ void UpdateSphereTargetHighlightsEntry(Battle_TargetLabelLine* targets,
                                        int count) {
   if (count <= 0) return;
   if (targets == nullptr) {
-    VS_LOG_ERROR("battle.sphere", "{} highlight targets without a list", count);
+    VS::Core::LogError("battle.sphere", "{} highlight targets without a list",
+                       count);
     return;
   }
   const std::span<const Battle_TargetLabelLine> lines(

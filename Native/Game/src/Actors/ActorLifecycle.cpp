@@ -37,8 +37,9 @@ constexpr int kLastAttachParent = 16;
 ActorStateRecord* KnownRecord(ActorStateHost& host, int id,
                               const char* operation) {
   if (id < 0 || id >= kActorStateSlots) {
-    VS_LOG_WARN("actors", "{} refused for actor {} outside the actor table",
-                operation, id);
+    VS::Core::LogWarn("actors",
+                      "{} refused for actor {} outside the actor table",
+                      operation, id);
     return nullptr;
   }
   return host.Record(id);
@@ -213,8 +214,8 @@ void BeginActorDeath(ActorStateHost& host, int id, bool animate) {
     if (record->companion_slot < kFirstCompanionRecord) return;
     current = record->companion_slot;
   }
-  VS_LOG_WARN("actors", "Death stops at a repeating companion chain from {}",
-              id);
+  VS::Core::LogWarn("actors",
+                    "Death stops at a repeating companion chain from {}", id);
 }
 
 void SetActorCompanion(ActorStateHost& host, int id,
@@ -225,8 +226,9 @@ void SetActorCompanion(ActorStateHost& host, int id,
   record->companion_slot = companion_slot;
   if (companion_slot == 0) return;
   if (!style.has_value()) {
-    VS_LOG_WARN("actors", "Companion {} of actor {} has no style; keeping it",
-                companion_slot, id);
+    VS::Core::LogWarn("actors",
+                      "Companion {} of actor {} has no style; keeping it",
+                      companion_slot, id);
     return;
   }
   record->companion = *style;
@@ -236,7 +238,7 @@ void AttachActorToParentBone(ActorStateHost& host, int id,
                              const std::optional<AttachPoint>& point) {
   ActorStateRecord* record = KnownRecord(host, id, "Attachment");
   if (record == nullptr) {
-    VS_LOG_WARN("actors", "No actor {} to attach", id);
+    VS::Core::LogWarn("actors", "No actor {} to attach", id);
     return;
   }
   if (point.has_value()) {
@@ -244,8 +246,9 @@ void AttachActorToParentBone(ActorStateHost& host, int id,
       ActorStateRecord* old_parent = host.Record(record->attach_parent);
       if (old_parent != nullptr) {
         if (old_parent->attached_child_count == 0) {
-          VS_LOG_WARN("actors", "Actor {} has no attached child to release",
-                      record->attach_parent);
+          VS::Core::LogWarn("actors",
+                            "Actor {} has no attached child to release",
+                            record->attach_parent);
         } else {
           --old_parent->attached_child_count;
         }

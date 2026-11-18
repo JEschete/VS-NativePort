@@ -240,9 +240,9 @@ constexpr std::uint32_t kRangeMargin = 0x20;
   if (count < kTargetPreviewCapacity) {
     return true;
   }
-  VS_LOG_ERROR("battle.targeting",
-               "target previews are full ({}); candidate dropped",
-               kTargetPreviewCapacity);
+  VS::Core::LogError("battle.targeting",
+                     "target previews are full ({}); candidate dropped",
+                     kTargetPreviewCapacity);
   return false;
 }
 
@@ -251,8 +251,8 @@ constexpr std::uint32_t kRangeMargin = 0x20;
   if (count <= kTargetPreviewCapacity) {
     return count;
   }
-  VS_LOG_ERROR("battle.targeting", "preview count {} exceeds capacity {}",
-               count, kTargetPreviewCapacity);
+  VS::Core::LogError("battle.targeting", "preview count {} exceeds capacity {}",
+                     count, kTargetPreviewCapacity);
   return kTargetPreviewCapacity;
 }
 
@@ -438,9 +438,10 @@ void SetSelectionTargetFromPreview(ActionTargetingHost& host, int index,
     if (actor) {
       limb = actor->default_limb;
     } else {
-      VS_LOG_ERROR("battle.targeting",
-                   "target actor {} is absent; its default limb is unknown",
-                   preview.actor_id);
+      VS::Core::LogError(
+          "battle.targeting",
+          "target actor {} is absent; its default limb is unknown",
+          preview.actor_id);
     }
   }
   host.SetSelectionActorTarget(
@@ -470,8 +471,8 @@ void CancelAreaSelection(ActionTargetingHost& host) {
   }
   const std::optional<TargetingActor> actor = host.Actor(source.actor_id);
   if (!actor) {
-    VS_LOG_ERROR("battle.targeting", "area target actor {} is absent",
-                 source.actor_id);
+    VS::Core::LogError("battle.targeting", "area target actor {} is absent",
+                       source.actor_id);
     return std::nullopt;
   }
   kept.kind = kWholeActorTargetKind;
@@ -568,8 +569,8 @@ void SelectCommandedPreview(ActionTargetingHost& host,
   if (placement) {
     return placement->pad;
   }
-  VS_LOG_WARN("battle.targeting", "actor {} has no placement; facing kept",
-              actor);
+  VS::Core::LogWarn("battle.targeting",
+                    "actor {} has no placement; facing kept", actor);
   return fallback;
 }
 
@@ -639,9 +640,9 @@ void PopulateActionTargetPreview(const ActionTargetingHost& host,
   const std::optional<TargetingActor> target =
       host.Actor(result.target_actor & kActorSlotMask);
   if (!target) {
-    VS_LOG_ERROR("battle.targeting",
-                 "previewed actor {} is absent; enemy class kept",
-                 result.target_actor & kActorSlotMask);
+    VS::Core::LogError("battle.targeting",
+                       "previewed actor {} is absent; enemy class kept",
+                       result.target_actor & kActorSlotMask);
     return;
   }
   preview.enemy_class = static_cast<std::uint8_t>(target->enemy_class);
@@ -701,8 +702,9 @@ std::optional<TargetPoint> AimActionBehindSource(
   const std::optional<TargetPoint> placement =
       host.ActorPlacement(source_actor);
   if (!placement) {
-    VS_LOG_ERROR("battle.targeting",
-                 "source actor {} has no placement; focus kept", source_actor);
+    VS::Core::LogError("battle.targeting",
+                       "source actor {} has no placement; focus kept",
+                       source_actor);
     return std::nullopt;
   }
   focus.x = Halfword(placement->x + Sine(placement->pad + kHalfTurn));
@@ -715,7 +717,8 @@ std::optional<TargetPoint> AimActionBehindSource(
 void SetSingleActionTarget(ActionTargetingHost& host) {
   const int selected = host.SelectedPreview();
   if (selected < 0 || selected >= kTargetPreviewCapacity) {
-    VS_LOG_ERROR("battle.targeting", "no preview is selected ({})", selected);
+    VS::Core::LogError("battle.targeting", "no preview is selected ({})",
+                       selected);
     return;
   }
   host.SetSelectionTargetCount(1);
@@ -747,8 +750,8 @@ void SetAllActionTargets(ActionTargetingHost& host) {
   }
   const std::optional<TargetingActor> source = host.Actor(primary);
   if (!source) {
-    VS_LOG_ERROR("battle.targeting", "source actor {} is absent; focus kept",
-                 primary);
+    VS::Core::LogError("battle.targeting",
+                       "source actor {} is absent; focus kept", primary);
     return;
   }
   host.SetFocusPosition(source->command_point);
@@ -761,9 +764,9 @@ void CollectEnvironmentActionTargets(ActionTargetingHost& host) {
   int count = 0;
   const auto add_target = [&](int mode, TargetPoint point) {
     if (count >= kSelectionTargetCapacity) {
-      VS_LOG_ERROR("battle.targeting",
-                   "environment targets are full ({}); target dropped",
-                   kSelectionTargetCapacity);
+      VS::Core::LogError("battle.targeting",
+                         "environment targets are full ({}); target dropped",
+                         kSelectionTargetCapacity);
       return;
     }
     host.SetSelectionPositionTarget(count, mode, point);
@@ -812,8 +815,8 @@ void CollectSourceAreaActionTargets(ActionTargetingHost& host) {
       host.SetFocusPosition(source->command_point);
       AimSourceArea(area, origin, source->command_point);
     } else {
-      VS_LOG_ERROR("battle.targeting", "source actor {} is absent; area level",
-                   primary);
+      VS::Core::LogError("battle.targeting",
+                         "source actor {} is absent; area level", primary);
     }
   }
   area.origin = origin;
@@ -839,9 +842,9 @@ void CollectDirectActionTargets(ActionTargetingHost& host, int source_slot) {
   const std::optional<TargetingActor> attacker = host.Actor(primary);
   const std::optional<TargetPoint> placement = host.ActorPlacement(primary);
   if (!attacker || !placement) {
-    VS_LOG_ERROR("battle.targeting",
-                 "attacker {} is absent; direct targets not collected",
-                 primary);
+    VS::Core::LogError("battle.targeting",
+                       "attacker {} is absent; direct targets not collected",
+                       primary);
     return;
   }
   const TargetingActionView definition = host.Action(action);
@@ -890,9 +893,9 @@ void CollectGroundAreaActionTargets(ActionTargetingHost& host,
   const std::optional<TargetingActor> source = host.Actor(primary);
   const std::optional<TargetPoint> placement = host.ActorPlacement(primary);
   if (!source || !placement) {
-    VS_LOG_ERROR("battle.targeting",
-                 "source actor {} is absent; ground area not collected",
-                 primary);
+    VS::Core::LogError("battle.targeting",
+                       "source actor {} is absent; ground area not collected",
+                       primary);
     return;
   }
   const TargetingActionView definition = host.Action(action);
@@ -977,8 +980,9 @@ void BeginActorActionSelection(ActionTargetingHost& host, int source_slot,
                                int action_id) {
   const std::optional<TargetingActor> source = host.Actor(source_slot);
   if (!source) {
-    VS_LOG_ERROR("battle.targeting",
-                 "action selection refused: actor {} is absent", source_slot);
+    VS::Core::LogError("battle.targeting",
+                       "action selection refused: actor {} is absent",
+                       source_slot);
     return;
   }
   host.SetFieldControlMode(kFieldControlTargeting);
@@ -1176,9 +1180,9 @@ enum class SphereButton : std::uint8_t { kNone, kCancel, kConfirm };
     default:
       // decomp: other shapes keep a stale scale; this runs every frame, so
       // the defined 1.0 is logged at debug level.
-      VS_LOG_DEBUG("battle.targeting",
-                   "sphere volume kind {} has no cursor scale; using 1.0",
-                   kind);
+      VS::Core::LogDebug("battle.targeting",
+                         "sphere volume kind {} has no cursor scale; using 1.0",
+                         kind);
       return kUnitCircle;
   }
 }
@@ -1426,8 +1430,9 @@ void AppendTargetGroupToColumn(const TargetSelectionHost& host,
           ? columns.columns[1]
           : columns.columns[0];
   if (column.group_count >= kTargetColumnGroupCapacity) {
-    VS_LOG_ERROR("battle.targeting",
-                 "target column groups are full; group {} dropped", group);
+    VS::Core::LogError("battle.targeting",
+                       "target column groups are full; group {} dropped",
+                       group);
     return;
   }
   int first = 0;
@@ -1440,8 +1445,8 @@ void AppendTargetGroupToColumn(const TargetSelectionHost& host,
       first = index + 1;
     }
     if (column.entry_count >= kTargetColumnCapacity) {
-      VS_LOG_ERROR("battle.targeting",
-                   "target column is full; target {} dropped", index);
+      VS::Core::LogError("battle.targeting",
+                         "target column is full; target {} dropped", index);
       continue;
     }
     column.entries[column.entry_count++] = static_cast<std::uint8_t>(index);
@@ -1520,8 +1525,8 @@ void InitTargetSelectionRow(TargetSelectionHost& host, int target_index,
   label.fade = from_right ? 0 : 1;
   host.SetLabel(target_index, label);
   if (target.kind >= kTargetLimbNameCount) {
-    VS_LOG_ERROR("battle.targeting", "target kind {} has no limb name",
-                 target.kind);
+    VS::Core::LogError("battle.targeting", "target kind {} has no limb name",
+                       target.kind);
     return;
   }
   host.SetLabelText(target_index,
@@ -1571,7 +1576,8 @@ template <std::size_t N>
   const std::optional<int> found =
       FindEntry(second.groups, second.group_count, group);
   if (!found) {
-    VS_LOG_WARN("battle.targeting", "target group {} is in no column", group);
+    VS::Core::LogWarn("battle.targeting", "target group {} is in no column",
+                      group);
     return value;
   }
   const int next = *found + 1;
@@ -1653,7 +1659,7 @@ template <std::size_t N>
   const std::optional<int> row =
       FindEntry(second.entries, second.entry_count, value);
   if (!row || first.entry_count == 0) {
-    VS_LOG_WARN("battle.targeting", "target {} is in no column", value);
+    VS::Core::LogWarn("battle.targeting", "target {} is in no column", value);
     return value;
   }
   return MoveInSecondColumn(columns, *row, pressed, repeated);
@@ -1695,7 +1701,7 @@ constexpr int kMpAmountPreviewAlt = 4;
 [[nodiscard]] bool IsObjectActor(const TargetSelectionHost& host, int actor) {
   const std::optional<int> kind = host.ActorKind(actor);
   if (!kind) {
-    VS_LOG_ERROR("battle.targeting", "target actor {} is absent", actor);
+    VS::Core::LogError("battle.targeting", "target actor {} is absent", actor);
     return false;
   }
   return (*kind & kObjectActorKind) != 0;

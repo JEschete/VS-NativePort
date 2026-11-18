@@ -2,11 +2,12 @@
 
 #include <cstring>
 
-#include "Core/Unported.h"
+#include "Core/Unported.hpp"
 
 // Transitional shims (plan §2.2). Transfers act on the sample memory block
 // synchronously and then report completion through the registered callback, as
-// the DMA interrupt did; the rest record VS_UNPORTED until the audio backend.
+// the DMA interrupt did; the rest call RecordUnported until the audio
+// backend.
 
 namespace {
 
@@ -66,45 +67,45 @@ void SpuStart(void) {}
 
 long SpuSetNoiseClock(long nClock) {
   (void)nClock;
-  VS_UNPORTED("libspu:SpuSetNoiseClock");
+  VS::Core::RecordUnported("libspu:SpuSetNoiseClock");
   return {};
 }
 
 long SpuSetReverb(long onOff) {
   (void)onOff;
-  VS_UNPORTED("libspu:SpuSetReverb");
+  VS::Core::RecordUnported("libspu:SpuSetReverb");
   return {};
 }
 
 void SpuGetVoiceEnvelope(int voice, short* envx) {
   (void)voice;
   (void)envx;
-  VS_UNPORTED("libspu:SpuGetVoiceEnvelope");
+  VS::Core::RecordUnported("libspu:SpuGetVoiceEnvelope");
 }
 
 void SpuSetCommonMasterVolume(short left, short right) {
   (void)left;
   (void)right;
-  VS_UNPORTED("libspu:SpuSetCommonMasterVolume");
+  VS::Core::RecordUnported("libspu:SpuSetCommonMasterVolume");
 }
 
 long SpuSetReverbModeType(long mode) {
   (void)mode;
-  VS_UNPORTED("libspu:SpuSetReverbModeType");
+  VS::Core::RecordUnported("libspu:SpuSetReverbModeType");
   return {};
 }
 
 void SpuSetReverbModeDepth(short left, short right) {
   (void)left;
   (void)right;
-  VS_UNPORTED("libspu:SpuSetReverbModeDepth");
+  VS::Core::RecordUnported("libspu:SpuSetReverbModeDepth");
 }
 
 void SpuGetReverbModeType(long* mode) {
   (void)mode;
-  VS_UNPORTED("libspu:SpuGetReverbModeType");
+  VS::Core::RecordUnported("libspu:SpuGetReverbModeType");
 }
 
-void SsUtReverbOn(void) { VS_UNPORTED("libspu:SsUtReverbOn"); }
+void SsUtReverbOn(void) { VS::Core::RecordUnported("libspu:SsUtReverbOn"); }
 
-void SsUtReverbOff(void) { VS_UNPORTED("libspu:SsUtReverbOff"); }
+void SsUtReverbOff(void) { VS::Core::RecordUnported("libspu:SsUtReverbOff"); }

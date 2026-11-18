@@ -75,10 +75,10 @@ std::expected<void, std::string> AudioDevice::Open() {
     m_capture_pending_ = std::make_unique<CaptureBuffer>();
     m_capture_drain_ = std::make_unique<CaptureBuffer>();
     m_capture_enabled_ = true;
-    VS_LOG_INFO("audio", "native mix capture: {} (f32le, {} Hz, {} ch)",
-                capture, SampleRate, Channels);
+    VS::Core::LogInfo("audio", "native mix capture: {} (f32le, {} Hz, {} ch)",
+                      capture, SampleRate, Channels);
   }
-  VS_LOG_INFO("audio", "output {} Hz, {} ch", SampleRate, Channels);
+  VS::Core::LogInfo("audio", "output {} Hz, {} ch", SampleRate, Channels);
   return {};
 }
 
@@ -210,7 +210,8 @@ void AudioDevice::Pump() {
   ObserveSubmission();
   DrainCapture();
   if (m_callback_failed_.exchange(false)) {
-    VS_LOG_ERROR("audio", "submitting callback-rendered native mix failed");
+    VS::Core::LogError("audio",
+                       "submitting callback-rendered native mix failed");
   }
 }
 
@@ -222,8 +223,8 @@ SDL_AudioStream* AudioDevice::OpenSource(i32 sample_rate, i32 channels) {
   const SDL_AudioSpec dst{SDL_AUDIO_F32, Channels, SampleRate};
   SDL_AudioStream* s = SDL_CreateAudioStream(&src, &dst);
   if (s == nullptr || !SDL_BindAudioStream(m_device_, s)) {
-    VS_LOG_ERROR("audio", "source {} Hz {} ch: {}", sample_rate, channels,
-                 SDL_GetError());
+    VS::Core::LogError("audio", "source {} Hz {} ch: {}", sample_rate, channels,
+                       SDL_GetError());
     SDL_DestroyAudioStream(s);
     return nullptr;
   }
@@ -239,18 +240,19 @@ void AudioDevice::CloseSource(SDL_AudioStream* source) {
 void AudioDevice::Clear() {
   if (!m_stream_) return;
   if (!SDL_LockAudioStream(m_stream_)) {
-    VS_LOG_ERROR("audio", "locking native mix for reset: {}", SDL_GetError());
+    VS::Core::LogError("audio", "locking native mix for reset: {}",
+                       SDL_GetError());
     return;
   }
   if (!SDL_ClearAudioStream(m_stream_)) {
-    VS_LOG_ERROR("audio", "clearing native mix: {}", SDL_GetError());
+    VS::Core::LogError("audio", "clearing native mix: {}", SDL_GetError());
   } else {
     m_rebuffer_ = false;
     Prime();
   }
   if (!SDL_UnlockAudioStream(m_stream_)) {
-    VS_LOG_ERROR("audio", "unlocking native mix after reset: {}",
-                 SDL_GetError());
+    VS::Core::LogError("audio", "unlocking native mix after reset: {}",
+                       SDL_GetError());
   }
 }
 
@@ -260,7 +262,7 @@ bool AudioDevice::Prime() {
                               static_cast<usize>(kBufferFrames) * Channels>
       kSilence{};
   if (!SDL_PutAudioStreamData(m_stream_, kSilence.data(), sizeof(kSilence))) {
-    VS_LOG_ERROR("audio", "priming native mix: {}", SDL_GetError());
+    VS::Core::LogError("audio", "priming native mix: {}", SDL_GetError());
     return false;
   }
   return true;
@@ -279,7 +281,7 @@ void AudioDevice::ObserveSubmission() {
   if (milliseconds - m_last_report_ms_ >= kReportMilliseconds) {
     const auto starved = m_starved_requests_.exchange(0);
     const auto missing = m_missing_bytes_.exchange(0);
-    VS_LOG_DEBUG(
+    VS::Core::LogDebug(
         "audio",
         "output queue: starved_requests={} missing_frames={} "
         "max_submit_gap_ms={} rendered_frames={} max_callback_ms={}",
@@ -297,20 +299,21 @@ void AudioDevice::Submit(std::span<const float> interleaved_frames) {
   constexpr i32 kMaximumQueuedBytes = static_cast<i32>(
       static_cast<usize>(SampleRate) * Channels * sizeof(float) / 4);
   if (m_engine_) {
-    VS_LOG_ERROR("audio", "cannot push PCM into a demand-rendered native mix");
+    VS::Core::LogError("audio",
+                       "cannot push PCM into a demand-rendered native mix");
     return;
   }
   if (interleaved_frames.size() % Channels != 0 ||
       interleaved_frames.size_bytes() > std::numeric_limits<int>::max()) {
-    VS_LOG_ERROR("audio", "invalid native mix block: {} samples",
-                 interleaved_frames.size());
+    VS::Core::LogError("audio", "invalid native mix block: {} samples",
+                       interleaved_frames.size());
     return;
   }
   if (m_capture_) {
     if (SDL_WriteIO(m_capture_, interleaved_frames.data(),
                     interleaved_frames.size_bytes()) !=
         interleaved_frames.size_bytes()) {
-      VS_LOG_ERROR("audio", "writing native mix capture failed");
+      VS::Core::LogError("audio", "writing native mix capture failed");
       CloseCapture();
     }
   }
@@ -318,23 +321,24 @@ void AudioDevice::Submit(std::span<const float> interleaved_frames) {
     ObserveSubmission();
     const auto queued = QueuedBytes();
     if (queued < 0) {
-      VS_LOG_ERROR("audio", "querying native mix queue: {}", SDL_GetError());
+      VS::Core::LogError("audio", "querying native mix queue: {}",
+                         SDL_GetError());
       return;
     }
     if (m_rebuffer_.exchange(false)) {
-      VS_LOG_WARN("audio",
-                  "native mix starved; restoring 50 ms scheduling buffer");
+      VS::Core::LogWarn(
+          "audio", "native mix starved; restoring 50 ms scheduling buffer");
       if (!Prime()) return;
     }
     if (queued > kMaximumQueuedBytes) {
-      VS_LOG_WARN("audio",
-                  "native mix exceeded 250 ms queue; discarding stale output");
+      VS::Core::LogWarn(
+          "audio", "native mix exceeded 250 ms queue; discarding stale output");
       Clear();
     }
     if (!SDL_PutAudioStreamData(
             m_stream_, interleaved_frames.data(),
             static_cast<int>(interleaved_frames.size_bytes()))) {
-      VS_LOG_ERROR("audio", "submitting native mix: {}", SDL_GetError());
+      VS::Core::LogError("audio", "submitting native mix: {}", SDL_GetError());
     }
   }
 }

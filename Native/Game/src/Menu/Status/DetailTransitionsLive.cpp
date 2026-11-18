@@ -22,7 +22,7 @@
 namespace VS::Menu::Status {  // NOLINT(readability-identifier-naming)
 namespace {
 void Refuse(std::string_view reason) {
-  VS_LOG_WARN("menu.status", "{}", reason);
+  VS::Core::LogWarn("menu.status", "{}", reason);
 }
 
 bool RowsAvailable() {

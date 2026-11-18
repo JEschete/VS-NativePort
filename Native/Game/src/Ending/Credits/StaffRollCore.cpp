@@ -280,9 +280,9 @@ std::int32_t Ease(Core::Math::EaseCurve curve, int current, int total) {
 }
 
 void WarnUndefinedPhase(const char* element, std::int16_t phase) {
-  VS_LOG_WARN("ending",
-              "Credits {} phase {} sets no brightness; drawing it at 0",
-              element, phase);
+  VS::Core::LogWarn("ending",
+                    "Credits {} phase {} sets no brightness; drawing it at 0",
+                    element, phase);
 }
 
 template <typename Value>
@@ -344,15 +344,17 @@ void DrawRippleCell(const RippleState& ripple, std::size_t row,
 std::span<const std::uint8_t> TextCharacters(
     std::span<const std::uint8_t> text) {
   if (text.empty()) {
-    VS_LOG_WARN("ending", "Credits text refused: it starts past the script");
+    VS::Core::LogWarn("ending",
+                      "Credits text refused: it starts past the script");
     return {};
   }
   const std::size_t length = text.front();
   const std::size_t available = text.size() - 1;
   if (length > available) {
-    VS_LOG_WARN("ending",
-                "Credits text of {} characters runs past the script; using {}",
-                length, available);
+    VS::Core::LogWarn(
+        "ending",
+        "Credits text of {} characters runs past the script; using {}", length,
+        available);
     return text.subspan(1, available);
   }
   return text.subspan(1, length);
@@ -361,9 +363,9 @@ std::span<const std::uint8_t> TextCharacters(
 std::optional<int> GlyphWidth(std::span<const std::uint8_t> glyph_widths,
                               std::size_t glyph) {
   if (glyph >= glyph_widths.size()) {
-    VS_LOG_WARN("ending",
-                "Credits glyph {} refused: the width table has {} entries",
-                glyph, glyph_widths.size());
+    VS::Core::LogWarn(
+        "ending", "Credits glyph {} refused: the width table has {} entries",
+        glyph, glyph_widths.size());
     return std::nullopt;
   }
   return glyph_widths[glyph];
@@ -451,20 +453,22 @@ bool UploadTimBlock(std::span<const std::byte> tim, std::size_t block,
                     DisplayHost& host) {
   const auto rect = ReadValue<Render::ScreenRect>(tim, block + kTimRectOffset);
   if (!rect || rect->width < 0 || rect->height < 0) {
-    VS_LOG_WARN("ending",
-                "Texture upload refused: the TIM block at {} lies outside its "
-                "{} bytes",
-                block, tim.size());
+    VS::Core::LogWarn(
+        "ending",
+        "Texture upload refused: the TIM block at {} lies outside its "
+        "{} bytes",
+        block, tim.size());
     return false;
   }
   const std::size_t pixels = block + kTimPixelOffset;
   const auto bytes = static_cast<std::size_t>(rect->width) *
                      static_cast<std::size_t>(rect->height) * 2;
   if (pixels > tim.size() || tim.size() - pixels < bytes) {
-    VS_LOG_WARN("ending",
-                "Texture upload refused: the TIM block at {} needs {} pixel "
-                "bytes past its {} bytes",
-                block, bytes, tim.size());
+    VS::Core::LogWarn(
+        "ending",
+        "Texture upload refused: the TIM block at {} needs {} pixel "
+        "bytes past its {} bytes",
+        block, bytes, tim.size());
     return false;
   }
   host.LoadImage(*rect, tim.subspan(pixels, bytes));
@@ -511,7 +515,7 @@ void DrawElement(Element& element, State& state, StaffRollHost& host) {
       FadeOutForSkip(element, state, host);
       break;
     case ElementKind::kNone:
-      VS_LOG_WARN(
+      VS::Core::LogWarn(
           "ending",
           "Credits element refused: phase {} has no renderer; freeing it",
           element.phase);
@@ -523,10 +527,11 @@ void DrawElement(Element& element, State& state, StaffRollHost& host) {
 bool ScriptHolds(State& state, std::span<const std::uint8_t> script,
                  std::size_t at, std::size_t count) {
   if (at <= script.size() && script.size() - at >= count) return true;
-  VS_LOG_WARN("ending",
-              "Credits script read refused: {} bytes at {} pass its {} bytes; "
-              "ending the staff roll",
-              count, at, script.size());
+  VS::Core::LogWarn(
+      "ending",
+      "Credits script read refused: {} bytes at {} pass its {} bytes; "
+      "ending the staff roll",
+      count, at, script.size());
   state.has_finished = true;
   return false;
 }
@@ -548,10 +553,11 @@ void SetHoldFrames(State& state, std::span<const std::uint8_t> operands) {
   const int frames =
       operands[2] + (operands[3] << kByteShift) - kHoldFramesBias;
   if (index >= state.illustration.hold_frames.size()) {
-    VS_LOG_WARN("ending",
-                "Credits hold time refused: illustration {} is past the {} "
-                "timers",
-                index, state.illustration.hold_frames.size());
+    VS::Core::LogWarn(
+        "ending",
+        "Credits hold time refused: illustration {} is past the {} "
+        "timers",
+        index, state.illustration.hold_frames.size());
     return;
   }
   state.illustration.hold_frames[index] = static_cast<std::uint16_t>(frames);
@@ -598,8 +604,8 @@ bool ExecuteOpcode(State& state, std::span<const std::uint8_t> script) {
               ReserveMainElement(state, ElementKind::kFadeOutBackground)) {
         element->width = 0;
       } else {
-        VS_LOG_WARN("ending",
-                    "Credits fade-out refused: the main element is in use");
+        VS::Core::LogWarn(
+            "ending", "Credits fade-out refused: the main element is in use");
       }
       return true;
     case kOpFreezeScroll:
@@ -709,11 +715,12 @@ class ImageDecoder {
   }
 
   DecodeResult Refuse(const char* reason) {
-    VS_LOG_WARN("ending",
-                "Illustration {} decode refused: {} (input {} of {}, output "
-                "{} of {})",
-                state_.resource, reason, state_.input, input_.size(),
-                state_.output, output_.size());
+    VS::Core::LogWarn(
+        "ending",
+        "Illustration {} decode refused: {} (input {} of {}, output "
+        "{} of {})",
+        state_.resource, reason, state_.input, input_.size(), state_.output,
+        output_.size());
     return DecodeResult::kRefused;
   }
 
@@ -746,10 +753,11 @@ void DrawPhantomPainRipple(Element& element, RippleState& ripple,
       element.phase = kPhaseFadeIn;
       ripple.scale_frame = 0;
       FillRippleGrid(ripple);
-      VS_LOG_WARN("ending",
-                  "Phantom pain ripple: the last quad row reads {} distance "
-                  "entries past the 4x16 grid; using the extended grid",
-                  kRippleGridEntries - (kRippleRows * kRippleColumns));
+      VS::Core::LogWarn(
+          "ending",
+          "Phantom pain ripple: the last quad row reads {} distance "
+          "entries past the 4x16 grid; using the extended grid",
+          kRippleGridEntries - (kRippleRows * kRippleColumns));
       [[fallthrough]];
     case kPhaseFadeIn:
       brightness =
@@ -953,9 +961,10 @@ void DrawIllustration(Element& element, State& state, StaffRollHost& host) {
                            ? illustration.hold_frames[index]
                            : 0;
       if (index >= illustration.hold_frames.size()) {
-        VS_LOG_WARN("ending",
-                    "Illustration {} hold refused: past the {} timers; holding",
-                    index, illustration.hold_frames.size());
+        VS::Core::LogWarn(
+            "ending",
+            "Illustration {} hold refused: past the {} timers; holding", index,
+            illustration.hold_frames.size());
       }
       if (++element.animation_frame == hold) {
         element.animation_frame = 0;
@@ -1138,8 +1147,8 @@ void FadeOutForSkip(Element& element, State& state, DisplayHost& host) {
 void RunStaffRoll(State& state, StaffRollHost& host) {
   AllocateRenderBuffers(host);
   if (!host.PrepareEmbeddedArt()) {
-    VS_LOG_WARN("ending",
-                "Staff roll refused: the embedded art could not be prepared");
+    VS::Core::LogWarn(
+        "ending", "Staff roll refused: the embedded art could not be prepared");
     return;
   }
   host.SetGeometryOffset(kGeometryCenterX, kGeometryCenterY);
@@ -1215,8 +1224,9 @@ void RunFrames(State& state, StaffRollHost& host) {
 bool UploadTexture(std::span<const std::byte> tim, DisplayHost& host) {
   const auto mode = ReadValue<std::int32_t>(tim, kTimModeOffset);
   if (!mode) {
-    VS_LOG_WARN("ending", "Texture upload refused: {} bytes hold no TIM header",
-                tim.size());
+    VS::Core::LogWarn("ending",
+                      "Texture upload refused: {} bytes hold no TIM header",
+                      tim.size());
     return false;
   }
   std::size_t block = kTimFirstBlock;
@@ -1224,9 +1234,9 @@ bool UploadTexture(std::span<const std::byte> tim, DisplayHost& host) {
     if (!UploadTimBlock(tim, block, host)) return false;
     const auto length = ReadValue<std::int32_t>(tim, block);
     if (!length || *length < 0) {
-      VS_LOG_WARN("ending",
-                  "Texture upload refused: the CLUT block length is "
-                  "invalid");
+      VS::Core::LogWarn("ending",
+                        "Texture upload refused: the CLUT block length is "
+                        "invalid");
       return false;
     }
     block = static_cast<std::size_t>(*length) + kTimFirstBlock;
@@ -1260,8 +1270,9 @@ Element* AddElement(State& state, ElementKind kind) {
       return StartElement(state.elements[index], kind);
     }
   }
-  VS_LOG_WARN("ending", "Credits element refused: all {} slots are in use",
-              state.elements.size() - 1);
+  VS::Core::LogWarn("ending",
+                    "Credits element refused: all {} slots are in use",
+                    state.elements.size() - 1);
   return nullptr;
 }
 

@@ -38,7 +38,8 @@ AbilityUnlockState g_ability_unlock;
 RiskCostState g_risk;
 
 void Refuse(std::string_view reason) {
-  VS_LOG_WARN("menu.battle-abilities", "Ability menu refused: {}", reason);
+  VS::Core::LogWarn("menu.battle-abilities", "Ability menu refused: {}",
+                    reason);
 }
 
 template <typename Array>

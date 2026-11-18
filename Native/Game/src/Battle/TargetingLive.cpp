@@ -282,8 +282,8 @@ battle::RangeShape WeaponRangeOf(const Battle_ActorStats& stats) {
 
 std::optional<battle::TargetingActionView> ActionView(int action_id) {
   if (!InRange(Battle_actionDefinitions, action_id)) {
-    VS_LOG_ERROR("battle.targeting", "action {} is outside the action table",
-                 action_id);
+    VS::Core::LogError("battle.targeting",
+                       "action {} is outside the action table", action_id);
     return std::nullopt;
   }
   const Battle_ActionDefinition& action = Battle_actionDefinitions[action_id];
@@ -310,9 +310,9 @@ int ActionRangeSquared(int action_id,
     return 0;
   }
   if (action->range.x == battle::kWeaponRangeSentinel && !weapon_range) {
-    VS_LOG_ERROR("battle.targeting",
-                 "action {} range refused: no attacker weapon range",
-                 action_id);
+    VS::Core::LogError("battle.targeting",
+                       "action {} range refused: no attacker weapon range",
+                       action_id);
     return 0;
   }
   return battle::CalculateActionRangeSquared(
@@ -351,32 +351,34 @@ std::vector<battle::PlatformPoint> CollectPlatformPoints() {
   const auto bytes = Field_roomData.header.movingPlatformsLength;
   if (Field_roomData.movingPlatforms == nullptr) {
     if (bytes != 0) {
-      VS_LOG_ERROR("battle.targeting", "moving platform section is missing");
+      VS::Core::LogError("battle.targeting",
+                         "moving platform section is missing");
     }
     return {};
   }
   if (bytes % sizeof(Field_MpdMovingPlatform) != 0) {
-    VS_LOG_ERROR("battle.targeting", "moving platform section is partial");
+    VS::Core::LogError("battle.targeting",
+                       "moving platform section is partial");
     return {};
   }
   const std::size_t capacity = bytes / sizeof(Field_MpdMovingPlatform);
   if (capacity > std::size(Field_platformBounceFrames)) {
-    VS_LOG_ERROR("battle.targeting", "{} moving platforms exceed the room",
-                 capacity);
+    VS::Core::LogError("battle.targeting",
+                       "{} moving platforms exceed the room", capacity);
     return {};
   }
   const auto contacts = VS::Field::CollectLiveMovingPlatformPositions();
   if (contacts.size() > capacity) {
-    VS_LOG_ERROR("battle.targeting",
-                 "moving platform collector returned {} of {}", contacts.size(),
-                 capacity);
+    VS::Core::LogError("battle.targeting",
+                       "moving platform collector returned {} of {}",
+                       contacts.size(), capacity);
     return {};
   }
   std::size_t kept = contacts.size();
   if (kept > kPlatformPointLimit) {
-    VS_LOG_WARN("battle.targeting",
-                "{} moving platform points; the first {} are targets", kept,
-                kPlatformPointLimit);
+    VS::Core::LogWarn("battle.targeting",
+                      "{} moving platform points; the first {} are targets",
+                      kept, kPlatformPointLimit);
     kept = kPlatformPointLimit;
   }
   std::vector<battle::PlatformPoint> points;
@@ -400,8 +402,8 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   [[nodiscard]] battle::TargetCategoryRules CategoryRules(
       int category) const override {
     if (!InRange(Battle_categoryTargetActorMasks, category)) {
-      VS_LOG_ERROR("battle.targeting", "target category {} is unknown",
-                   category);
+      VS::Core::LogError("battle.targeting", "target category {} is unknown",
+                         category);
       return {};
     }
     return {
@@ -506,16 +508,16 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
   [[nodiscard]] ActionTargetPreview Preview(int index) const override {
     if (!InRange(state_.previews, index)) {
-      VS_LOG_ERROR("battle.targeting", "preview {} is outside the previews",
-                   index);
+      VS::Core::LogError("battle.targeting",
+                         "preview {} is outside the previews", index);
       return {};
     }
     return ReadPreview(state_.previews[index]);
   }
   void SetPreview(int index, const ActionTargetPreview& preview) override {
     if (!InRange(state_.previews, index)) {
-      VS_LOG_ERROR("battle.targeting", "preview {} is outside the previews",
-                   index);
+      VS::Core::LogError("battle.targeting",
+                         "preview {} is outside the previews", index);
       return;
     }
     WritePreview(state_.previews[index], preview);
@@ -629,7 +631,8 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
       return {};
     }
     if (chests == nullptr) {
-      VS_LOG_ERROR("battle.targeting", "{} room chests without a table", count);
+      VS::Core::LogError("battle.targeting", "{} room chests without a table",
+                         count);
       return {};
     }
     std::vector<battle::TargetChest> result;
@@ -694,7 +697,8 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
   [[nodiscard]] bool WeaponDrawn() const override {
     if (Battle_characterState == nullptr) {
-      VS_LOG_ERROR("battle.targeting", "no character state; weapon sheathed");
+      VS::Core::LogError("battle.targeting",
+                         "no character state; weapon sheathed");
       return false;
     }
     return (Battle_characterState->weaponDrawn & 1) != 0;
@@ -748,8 +752,8 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
  private:
   [[nodiscard]] Battle_HitResult* SelectionTarget(int index) const {
     if (!InRange(state_.selection.targets, index)) {
-      VS_LOG_ERROR("battle.targeting", "hit target {} is outside the request",
-                   index);
+      VS::Core::LogError("battle.targeting",
+                         "hit target {} is outside the request", index);
       return nullptr;
     }
     return &state_.selection.targets[index];
@@ -757,8 +761,8 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
 
   [[nodiscard]] static bool SphereReady(std::string_view volume) {
     if (Battle_targetSphere == nullptr) {
-      VS_LOG_ERROR("battle.targeting", "{} refused: no targeting sphere",
-                   volume);
+      VS::Core::LogError("battle.targeting", "{} refused: no targeting sphere",
+                         volume);
       return false;
     }
     return true;
@@ -801,8 +805,8 @@ battle::TargetColumn ReadColumn(const ColumnStorage& storage) {
 
 std::uint8_t CheckedCount(int count, int capacity, std::string_view what) {
   if (count < 0 || count > capacity) {
-    VS_LOG_ERROR("battle.targeting", "{} count {} exceeds {}; clamped", what,
-                 count, capacity);
+    VS::Core::LogError("battle.targeting", "{} count {} exceeds {}; clamped",
+                       what, count, capacity);
   }
   return static_cast<std::uint8_t>(std::clamp(count, 0, capacity));
 }
@@ -850,8 +854,9 @@ char* LiveTargetText(battle::TargetText text) {
     case TargetTextSource::kStatusLineTemplate:
       return Battle_targetStatusLineTemplate;
   }
-  VS_LOG_ERROR("battle.targeting", "target text {} of source {} is unknown",
-               text.value, static_cast<int>(text.source));
+  VS::Core::LogError("battle.targeting",
+                     "target text {} of source {} is unknown", text.value,
+                     static_cast<int>(text.source));
   return Battle_emptyStatusString;
 }
 
@@ -862,7 +867,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
 
   [[nodiscard]] battle::SphereVolume Volume(int index) const override {
     if (!InRange(sphere_.volumes, index)) {
-      VS_LOG_ERROR("battle.targeting", "sphere volume {} is unknown", index);
+      VS::Core::LogError("battle.targeting", "sphere volume {} is unknown",
+                         index);
       return {};
     }
     const Battle_TargetVolume& volume = sphere_.volumes[index];
@@ -874,7 +880,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   void SetVolume(int index, const battle::SphereVolume& volume) override {
     if (!InRange(sphere_.volumes, index)) {
-      VS_LOG_ERROR("battle.targeting", "sphere volume {} is unknown", index);
+      VS::Core::LogError("battle.targeting", "sphere volume {} is unknown",
+                         index);
       return;
     }
     Battle_TargetVolume& raw = sphere_.volumes[index];
@@ -929,8 +936,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     if (!InRange(sphere_.targetLists, list) ||
         sphere_.targetLists[list] == nullptr || index < 0 ||
         index >= battle::kTargetPreviewCapacity) {
-      VS_LOG_ERROR("battle.targeting", "sphere target {} of list {} is absent",
-                   index, list);
+      VS::Core::LogError("battle.targeting",
+                         "sphere target {} of list {} is absent", index, list);
       return {};
     }
     const std::span targets(
@@ -947,7 +954,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
         volume.scale.extents, volume.angle);
     VS::Render::LoadLiveFrameViewMatrix();
     if (matrix == nullptr) {
-      VS_LOG_ERROR("battle.targeting", "sphere volume transform is missing");
+      VS::Core::LogError("battle.targeting",
+                         "sphere volume transform is missing");
       transform_.reset();
       return {};
     }
@@ -963,7 +971,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     const int count = Byte(sphere_.sphereMode);
     Battle_TargetPreview* list = sphere_.targetLists[kAreaTargetList];
     if (list == nullptr && count > 0) {
-      VS_LOG_ERROR("battle.targeting", "{} area targets without a list", count);
+      VS::Core::LogError("battle.targeting", "{} area targets without a list",
+                         count);
       return;
     }
     VS::Battle::UpdateSphereTargetHighlightsEntry(
@@ -971,8 +980,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   void DrawTerrainIntersection(TargetPoint point, int scale) override {
     if (!transform_) {
-      VS_LOG_ERROR("battle.targeting",
-                   "terrain intersection refused: no volume transform");
+      VS::Core::LogError("battle.targeting",
+                         "terrain intersection refused: no volume transform");
       return;
     }
     VS::Battle::DrawLiveSphereTerrainIntersection(ToSvector(point), *transform_,
@@ -1052,7 +1061,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   [[nodiscard]] battle::TargetSelectionLabel Label(int index) const override {
     if (!InRange(sphere_.labels, index)) {
-      VS_LOG_ERROR("battle.targeting", "target label {} is unknown", index);
+      VS::Core::LogError("battle.targeting", "target label {} is unknown",
+                         index);
       return {};
     }
     const Battle_SphereTargetLabel& label = sphere_.labels[index];
@@ -1067,7 +1077,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   void SetLabel(int index, const battle::TargetSelectionLabel& label) override {
     if (!InRange(sphere_.labels, index)) {
-      VS_LOG_ERROR("battle.targeting", "target label {} is unknown", index);
+      VS::Core::LogError("battle.targeting", "target label {} is unknown",
+                         index);
       return;
     }
     Battle_SphereTargetLabel& raw = sphere_.labels[index];
@@ -1084,8 +1095,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
     if (!InRange(sphere_.labels, index) ||
         !InRange(Battle_limbNames, text.limb_name) ||
         Battle_limbNames[text.limb_name] == nullptr) {
-      VS_LOG_ERROR("battle.targeting", "label {} text {} is unknown", index,
-                   text.limb_name);
+      VS::Core::LogError("battle.targeting", "label {} text {} is unknown",
+                         index, text.limb_name);
       return;
     }
     const std::span name(Battle_limbNames[text.limb_name], 2);
@@ -1108,7 +1119,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   void ShowNoTargetsMessage() override {
     const int offset = Battle_doorStrings[0];
     if (!InRange(Battle_doorStrings, offset)) {
-      VS_LOG_ERROR("battle.targeting", "no-targets text {} is unknown", offset);
+      VS::Core::LogError("battle.targeting", "no-targets text {} is unknown",
+                         offset);
       return;
     }
     Menu_textBoxes[kInformationTextBox].flags.frameShape = kNoTargetsFrameShape;
@@ -1118,14 +1130,15 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
   void SetContextText(int slot, battle::TargetText text) override {
     if (!InRange(Battle_stringContext.strings, slot)) {
-      VS_LOG_ERROR("battle.targeting", "string slot {} is unknown", slot);
+      VS::Core::LogError("battle.targeting", "string slot {} is unknown", slot);
       return;
     }
     Battle_stringContext.strings[slot] = LiveTargetText(text);
   }
   void SetContextInteger(int slot, int value) override {
     if (!InRange(Battle_stringContext.integers, slot)) {
-      VS_LOG_ERROR("battle.targeting", "integer slot {} is unknown", slot);
+      VS::Core::LogError("battle.targeting", "integer slot {} is unknown",
+                         slot);
       return;
     }
     Battle_stringContext.integers[slot] = value;
@@ -1150,7 +1163,8 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
 template <typename Operation>
 void WithActionHost(std::string_view operation, Operation&& run) {
   if (Battle_actionState == nullptr) {
-    VS_LOG_ERROR("battle.targeting", "{} refused: no action state", operation);
+    VS::Core::LogError("battle.targeting", "{} refused: no action state",
+                       operation);
     return;
   }
   LiveActionTargetingHost host(*Battle_actionState);
@@ -1160,8 +1174,8 @@ void WithActionHost(std::string_view operation, Operation&& run) {
 Battle_TargetSphere* SphereFor(std::string_view operation) {
   Battle_TargetSphere* sphere = LiveSphere();
   if (sphere == nullptr) {
-    VS_LOG_ERROR("battle.targeting", "{} refused: no targeting sphere",
-                 operation);
+    VS::Core::LogError("battle.targeting", "{} refused: no targeting sphere",
+                       operation);
   }
   return sphere;
 }
@@ -1205,8 +1219,8 @@ void LiveInitializeActionTargeting(int action_id) {
 
 void LiveBeginActorActionSelection(int source_actor_slot,
                                    std::uint16_t action_id) {
-  VS_LOG_DEBUG("battle.targeting", "action selection: actor {} action {}",
-               source_actor_slot, action_id);
+  VS::Core::LogDebug("battle.targeting", "action selection: actor {} action {}",
+                     source_actor_slot, action_id);
   WithActionHost("action selection", [&](ActionTargetingHost& host) {
     BeginActorActionSelection(host, source_actor_slot, action_id);
   });
@@ -1214,7 +1228,7 @@ void LiveBeginActorActionSelection(int source_actor_slot,
 
 int LiveUpdateSphereTargetPosition(SVECTOR* target_position) {
   if (target_position == nullptr) {
-    VS_LOG_ERROR("battle.targeting", "sphere cursor refused: no target");
+    VS::Core::LogError("battle.targeting", "sphere cursor refused: no target");
     return 0;
   }
   Battle_TargetSphere* sphere = SphereFor("sphere cursor");
@@ -1282,7 +1296,8 @@ void LiveUpdateTargetSelectionHighlight(int mode) {
 int LiveCalculateRangeShapeExtent(
     const Battle_Ai_ActionRangeShape* range_shape) {
   if (range_shape == nullptr) {
-    VS_LOG_ERROR("battle.targeting", "range extent refused: no range shape");
+    VS::Core::LogError("battle.targeting",
+                       "range extent refused: no range shape");
     return 0;
   }
   return CalculateRangeShapeExtent(RangeOf(*range_shape));

@@ -46,7 +46,7 @@ std::int32_t RoomTrapLevel() { return VS::Field::LiveRoomTrapLevel(); }
 // End of cross-slice calls.
 
 void WarnRefusal(const char* rule, const char* reason) {
-  VS_LOG_WARN("field.traps", "{} refused: {}", rule, reason);
+  VS::Core::LogWarn("field.traps", "{} refused: {}", rule, reason);
 }
 
 template <typename Out, typename In, std::size_t N>

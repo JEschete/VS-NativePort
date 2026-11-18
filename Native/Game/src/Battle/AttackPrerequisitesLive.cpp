@@ -51,8 +51,9 @@ class LivePrerequisiteTarget final : public battle::PrerequisiteTarget {
   // target that names no live actor fails the rule instead.
   [[nodiscard]] bool Valid() const override {
     if (stats_ == nullptr) {
-      VS_LOG_WARN("battle.targeting",
-                  "attack prerequisite for absent target actor={}", actor_);
+      VS::Core::LogWarn("battle.targeting",
+                        "attack prerequisite for absent target actor={}",
+                        actor_);
     }
     return stats_ != nullptr;
   }
@@ -104,22 +105,23 @@ int RunRule(battle::PrerequisiteRule rule, const u_char* target_result_bytes) {
 bool CanCheckHit(const Battle_ActionDefinition* action,
                  const u_char* target_result_bytes, int hit_number) {
   if (action == nullptr || target_result_bytes == nullptr) {
-    VS_LOG_WARN("battle.targeting", "hit prerequisite without {}",
-                action == nullptr ? "an action" : "a target result");
+    VS::Core::LogWarn("battle.targeting", "hit prerequisite without {}",
+                      action == nullptr ? "an action" : "a target result");
     return false;
   }
   if (hit_number < 0 ||
       static_cast<std::size_t>(hit_number) >= std::size(action->hits)) {
-    VS_LOG_WARN("battle.targeting", "hit prerequisite for hit={} of action={}",
-                hit_number, action->id);
+    VS::Core::LogWarn("battle.targeting",
+                      "hit prerequisite for hit={} of action={}", hit_number,
+                      action->id);
     return false;
   }
   const int rule =
       static_cast<int>(action->hits[hit_number].prerequisiteFunctionId);
   if (battle::AttackPrerequisiteRule(rule) == nullptr) {
-    VS_LOG_WARN("battle.targeting",
-                "unknown hit prerequisite rule={} of action={}", rule,
-                action->id);
+    VS::Core::LogWarn("battle.targeting",
+                      "unknown hit prerequisite rule={} of action={}", rule,
+                      action->id);
     return false;
   }
   return true;

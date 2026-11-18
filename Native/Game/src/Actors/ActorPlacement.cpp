@@ -41,8 +41,9 @@ bool InActorTable(int id) { return id >= 0 && id < kActorStateSlots; }
 ActorStateRecord* KnownRecord(ActorStateHost& host, int id,
                               const char* operation) {
   if (!InActorTable(id)) {
-    VS_LOG_WARN("actors", "{} refused for actor {} outside the actor table",
-                operation, id);
+    VS::Core::LogWarn("actors",
+                      "{} refused for actor {} outside the actor table",
+                      operation, id);
     return nullptr;
   }
   return host.Record(id);
@@ -73,10 +74,10 @@ void PlaceOnPlatform(ActorStateHost& host, int id, ActorStateRecord& record,
   const std::optional<Field::PlatformContact> contact =
       host.MovingPlatformContact(layer);
   if (!contact.has_value()) {
-    VS_LOG_WARN("actors",
-                "Actor {} is placed on missing moving platform layer {}; "
-                "keeping it on the floor",
-                id, layer);
+    VS::Core::LogWarn("actors",
+                      "Actor {} is placed on missing moving platform layer {}; "
+                      "keeping it on the floor",
+                      id, layer);
     return;
   }
   record.motion.position = {.x = contact->x,
@@ -132,8 +133,8 @@ bool IsFlightClass(int movement_class) {
 
 std::optional<ActorPlacementView> ActorPlacement(ActorStateHost& host, int id) {
   if (!InActorTable(id)) {
-    VS_LOG_WARN("actors", "No placement for actor {} outside the actor table",
-                id);
+    VS::Core::LogWarn("actors",
+                      "No placement for actor {} outside the actor table", id);
     return std::nullopt;
   }
   if (const ActorStateRecord* record = host.Record(id)) {
@@ -153,7 +154,7 @@ void PlaceActorInRoom(ActorStateHost& host, int id, PackedTile tile,
                       int drop_height, int movement_class) {
   ActorStateRecord* record = KnownRecord(host, id, "Room placement");
   if (record == nullptr) {
-    VS_LOG_WARN("actors", "No actor {} to place in the room", id);
+    VS::Core::LogWarn("actors", "No actor {} to place in the room", id);
     return;
   }
   ActorMotion& motion = record->motion;
@@ -176,8 +177,8 @@ void PlaceActorInRoom(ActorStateHost& host, int id, PackedTile tile,
 std::optional<int> FindActorAtFlightPosition(ActorStateHost& host, int id,
                                              const MotionVector& position) {
   if (id > kActorStateSlots) {
-    VS_LOG_WARN("actors", "Flight placement of actor {} checks only the table",
-                id);
+    VS::Core::LogWarn("actors",
+                      "Flight placement of actor {} checks only the table", id);
   }
   const int end = std::min(id, kActorStateSlots);
   for (int other_id = kFirstFlyerSlot; other_id < end; ++other_id) {
@@ -211,8 +212,8 @@ void SeparateActorFlightPlacement(ActorStateHost& host, int id,
       return;
     }
   }
-  VS_LOG_WARN("actors", "Flight separation of actor {} found no free height",
-              id);
+  VS::Core::LogWarn("actors",
+                    "Flight separation of actor {} found no free height", id);
 }
 
 std::optional<PackedTile> ActorSavedPlacement(ActorStateHost& host, int id,

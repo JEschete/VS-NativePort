@@ -17,7 +17,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "DiscQueue.h"
 #include "Field/BackgroundLiveState.hpp"
 #include "Field/Environment.hpp"
@@ -133,7 +133,7 @@ std::uint64_t refused_sections = 0;
 }
 
 [[nodiscard]] Render_FrameScratch& Scratch() {
-  return *static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  return *static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
 }
 
 // The read and buffer ids name only kNone; each carries the address of a
@@ -196,10 +196,10 @@ void LinkPacket(const Packet& packet, std::string_view kind) {
       entry != nullptr ? Render::ReserveLivePrimitiveWords(kWords) : nullptr;
   if (slot == nullptr) {
     if (ShouldReport(dropped_packets)) {
-      VS_LOG_WARN(kChannel,
-                  "background {} has no ordering entry or buffer room; "
-                  "dropped ({} drops)",
-                  kind, dropped_packets);
+      VS::Core::LogWarn(kChannel,
+                        "background {} has no ordering entry or buffer room; "
+                        "dropped ({} drops)",
+                        kind, dropped_packets);
     }
     return;
   }
@@ -222,8 +222,8 @@ void SetCorners(Primitive& primitive, const TexturedQuad& quad) {
 
 void RefuseNull(std::string_view entry) {
   if (ShouldReport(refused_calls)) {
-    VS_LOG_WARN(kChannel, "{} was given a null record; the call is refused",
-                entry);
+    VS::Core::LogWarn(kChannel,
+                      "{} was given a null record; the call is refused", entry);
   }
 }
 
@@ -426,10 +426,11 @@ std::optional<TiledBackgroundSection> LiveBackgroundHost::TiledBackground() {
   const std::size_t bytes = Field_roomData.header.tiledBackgroundLength;
   if (bytes < kTiledSectionBytes) {
     if (ShouldReport(refused_sections)) {
-      VS_LOG_WARN(kChannel,
-                  "the room's tiled background section has {} bytes, fewer "
-                  "than the {} its files need; no picture is loaded",
-                  bytes, kTiledSectionBytes);
+      VS::Core::LogWarn(
+          kChannel,
+          "the room's tiled background section has {} bytes, fewer "
+          "than the {} its files need; no picture is loaded",
+          bytes, kTiledSectionBytes);
     }
     return std::nullopt;
   }

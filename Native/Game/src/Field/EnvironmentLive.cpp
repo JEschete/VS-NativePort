@@ -7,8 +7,8 @@
 #include <type_traits>
 
 #include "Audio/SfxLive.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Effects/WeatherRenderLive.hpp"
 #include "Field/Background.hpp"
@@ -141,7 +141,7 @@ std::uint16_t LiveWeatherHost::RoomAnimationTicks() {
   return Field_roomAnimationTicks;
 }
 
-std::int32_t LiveWeatherHost::Random() { return Core_Random_Rand(); }
+std::int32_t LiveWeatherHost::Random() { return VS::Core::NextBiosRand(); }
 
 void LiveWeatherHost::RecalculateWeatherVelocity() {
   Escape([] { Effects::LiveRecalculateWeatherVelocity(); });

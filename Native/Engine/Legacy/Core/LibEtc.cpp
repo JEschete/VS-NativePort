@@ -5,7 +5,7 @@
 
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
-#include "Core/Unported.h"
+#include "Core/Unported.hpp"
 #include "Platform/GameFiber.hpp"
 
 // libetc timing (plan §2.2, strategy R). The PS1 waited for vertical blank;
@@ -87,7 +87,7 @@ long SetRCnt(unsigned long spec, unsigned short target, long mode) {
 
 long GetRCnt(unsigned long spec) {
   if (spec != RCntCNT2) {
-    VS_UNPORTED("libetc:GetRCnt (counter other than 2)");
+    VS::Core::RecordUnported("libetc:GetRCnt (counter other than 2)");
     return 0;
   }
   const double seconds =

@@ -558,26 +558,26 @@ struct LootRandomFixture {
   ~LootRandomFixture() {
     std::copy(saved_table.begin(), saved_table.end(), Core_randomShuffleTable);
     Core_randomShuffleIndex = saved_index;
-    Core_Random_Seed(1);
+    VS::Core::SeedBiosRand(1);
   }
 
   static void CheckSequence(VS::Core::Random& expected) {
     CHECK(VS::Core::NextLiveRandomBounded(255) == expected.Next(255));
-    CHECK(Core_Random_Rand() == expected.Raw());
+    CHECK(VS::Core::NextBiosRand() == expected.Raw());
   }
 
   static void ForceFirstRoll(int roll) {
     std::fill_n(Core_randomShuffleTable, 97, 0);
     Core_randomShuffleIndex = 96;
     Core_randomShuffleTable[0] = 32767 - (roll * 32768 + 254) / 255;
-    Core_Random_Seed(1234);
+    VS::Core::SeedBiosRand(1234);
   }
 
   static void CheckOneForcedDraw() {
     VS::Core::Rand15 expected(1234);
     CHECK(Core_randomShuffleIndex == 0);
     CHECK(Core_randomShuffleTable[0] == expected.Next());
-    CHECK(Core_Random_Rand() == expected.Next());
+    CHECK(VS::Core::NextBiosRand() == expected.Next());
     for (int index = 1; index < 97; ++index) {
       CHECK(Core_randomShuffleTable[index] == 0);
     }

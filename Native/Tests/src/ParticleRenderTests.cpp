@@ -15,11 +15,11 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
@@ -777,7 +777,7 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
   fixture.instance.particles = full ? &fixture.particle : nullptr;
   fixture.instance.particleCount = full ? 1 : 0;
   fixture.particle.next = nullptr;
-  Core_Random_Seed(1234);
+  VS::Core::SeedBiosRand(1234);
   const bool emits = requested > 0 && !full;
 
   VS::Effects::EmitLiveParticleEvent(&fixture.instance, 0, 0, 0, nullptr);
@@ -785,13 +785,13 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
   fixture.CheckEmissionPool(full || emits);
   if (!emits) {
     CHECK(fixture.particle.age == 0);
-    CHECK(Core_Random_Rand() == VS::Core::Rand15(1234).Next());
+    CHECK(VS::Core::NextBiosRand() == VS::Core::Rand15(1234).Next());
   } else {
     CHECK(static_cast<unsigned char>(fixture.particle.age) == 255);
     CHECK(fixture.particle.textureAnimation.program ==
           reinterpret_cast<u_char*>(fixture.programs.data()) + 8);
   }
-  Core_Random_Seed(1);
+  VS::Core::SeedBiosRand(1);
 }
 
 TEST_CASE("Effect renderer slots retain eight independent native callbacks",
@@ -908,7 +908,7 @@ TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
       height == 0
           ? -1
           : (((48 * VS::Core::Math::Sine(angle)) >> 12) * vertical) / height;
-  Core_Random_Seed(seed);
+  VS::Core::SeedBiosRand(seed);
 
   VS::Effects::EmitLiveParticleEvent(&fixture.instance, 0, 0, 0, nullptr);
 
@@ -917,8 +917,8 @@ TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
   const std::array actual_position{position.vx, position.vy, position.vz};
   const std::array expected_position{x * 4096, vertical * 4096, z * 4096};
   CHECK(actual_position == expected_position);
-  CHECK(Core_Random_Rand() == expected.Next());
-  Core_Random_Seed(1);
+  CHECK(VS::Core::NextBiosRand() == expected.Next());
+  VS::Core::SeedBiosRand(1);
 }
 
 namespace {

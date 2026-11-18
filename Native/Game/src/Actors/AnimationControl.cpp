@@ -355,8 +355,8 @@ AnimationActor* RequireActor(AnimationControlHost& host, int actor_id,
                              const char* operation) {
   AnimationActor* actor = host.Actor(actor_id);
   if (actor == nullptr) {
-    VS_LOG_WARN("actors", "{} refused: no actor record for actor {}", operation,
-                actor_id);
+    VS::Core::LogWarn("actors", "{} refused: no actor record for actor {}",
+                      operation, actor_id);
   }
   return actor;
 }
@@ -377,9 +377,9 @@ void QueueActorWeaponSequenceLoad(AnimationControlHost& host,
                              (spawn_flags & kSpawnModeMask) == kArmedSpawnMode;
   if (!armed || !spawned_armed) return;
   if (!equipped_weapon_category) {
-    VS_LOG_WARN("actors",
-                "Weapon sequence load refused: no battle actor for actor {}",
-                actor_id);
+    VS::Core::LogWarn(
+        "actors", "Weapon sequence load refused: no battle actor for actor {}",
+        actor_id);
     return;
   }
   QueueSequence(host, actor_id, *equipped_weapon_category, kOwnSequence);
@@ -400,7 +400,8 @@ void QueueSharedSequenceLoad(AnimationControlHost& host, int index,
 // decomp: BATTLE.PRG func_8007CBBC (src/BATTLE/BATTLE.PRG/146C.c:9008)
 int UnloadSharedSequence(AnimationControlHost& host, int bank) {
   if (bank < 1 || bank > kSharedSequenceBanks) {
-    VS_LOG_ERROR("actors.sequence", "invalid shared bank retirement={}", bank);
+    VS::Core::LogError("actors.sequence", "invalid shared bank retirement={}",
+                       bank);
     return -1;
   }
   const auto bank_index = static_cast<std::size_t>(bank - 1);
@@ -417,9 +418,9 @@ int UnloadSharedSequence(AnimationControlHost& host, int bank) {
       continue;
     }
     if (!host.CanUnwindBoundAnimation(*actor)) {
-      VS_LOG_ERROR("actors.sequence",
-                   "bank={} cannot unwind actor={} animation={}", bank, slot,
-                   actor->animation_id);
+      VS::Core::LogError("actors.sequence",
+                         "bank={} cannot unwind actor={} animation={}", bank,
+                         slot, actor->animation_id);
       return -1;
     }
   }
@@ -439,8 +440,9 @@ int UnloadSharedSequence(AnimationControlHost& host, int bank) {
   }
   const int result = host.ReleaseSharedSequence(bank);
   if (result < 0) {
-    VS_LOG_ERROR("actors.sequence",
-                 "shared bank={} retirement failed status={}", bank, result);
+    VS::Core::LogError("actors.sequence",
+                       "shared bank={} retirement failed status={}", bank,
+                       result);
   }
   return result;
 }
@@ -496,10 +498,11 @@ int SelectSharedSequenceBank(AnimationControlHost& host, int bank) {
   if (bank < 1 || bank > kSharedSequenceBanks) return -1;
   const int current = host.SharedSequenceBankIndex();
   if (current < 0 || current >= kSharedSequenceBanks) {
-    VS_LOG_WARN("actors",
-                "Shared bank texture reset refused: bank index {} is not 0 to "
-                "{}",
-                current, kSharedSequenceBanks - 1);
+    VS::Core::LogWarn(
+        "actors",
+        "Shared bank texture reset refused: bank index {} is not 0 to "
+        "{}",
+        current, kSharedSequenceBanks - 1);
   } else {
     const auto from = static_cast<std::size_t>(current);
     const auto to = static_cast<std::size_t>(bank - 1);
@@ -985,11 +988,11 @@ void UpdateActorLocomotionAnimation(AnimationControlHost& host,
 void SetActorBonePoseLock(AnimationControlHost& host, AnimationActor& actor,
                           int bone, int lock) {
   if (!actor.has_model || bone < 0 || bone >= actor.bone_count) {
-    VS_LOG_WARN("actors",
-                "Bone pose lock refused: bone {} is outside the {} bones of "
-                "actor {}'s model",
-                bone, actor.has_model ? actor.bone_count : 0,
-                actor.motion.slot);
+    VS::Core::LogWarn(
+        "actors",
+        "Bone pose lock refused: bone {} is outside the {} bones of "
+        "actor {}'s model",
+        bone, actor.has_model ? actor.bone_count : 0, actor.motion.slot);
     return;
   }
   for (int index = 0; index < kBonePoseLocks; ++index) {
@@ -1014,10 +1017,11 @@ void SetActorBonePoseLock(AnimationControlHost& host, AnimationActor& actor,
 void ClearActorBonePoseLocks(AnimationControlHost& host,
                              AnimationActor& actor) {
   if (!actor.has_model && actor.bone_count != 0) {
-    VS_LOG_WARN("actors",
-                "Bone pose lock clear refused: actor {} has {} bones and no "
-                "model",
-                actor.motion.slot, actor.bone_count);
+    VS::Core::LogWarn(
+        "actors",
+        "Bone pose lock clear refused: actor {} has {} bones and no "
+        "model",
+        actor.motion.slot, actor.bone_count);
     return;
   }
   actor.locked_bones = {};

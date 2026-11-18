@@ -16,7 +16,7 @@
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
@@ -59,7 +59,8 @@ std::uint64_t refusals = 0;
 
 void Refuse(std::string_view detail) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("effects", "Analyze grid: {} ({} refusals)", detail, refusals);
+    VS::Core::LogWarn("effects", "Analyze grid: {} ({} refusals)", detail,
+                      refusals);
   }
 }
 
@@ -135,7 +136,7 @@ bool CurvesAvailable(const grid::SurfaceCurves& curves, std::int32_t age) {
 
 Effects_ParticleEmitterScratch& EmitterScratch() {
   return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
-      static_cast<std::byte*>(Core_ScratchBase()) + kEmitterScratchOffset);
+      static_cast<std::byte*>(VS::Core::ScratchBase()) + kEmitterScratchOffset);
 }
 
 class LiveAnalyzeGridHost final : public AnalyzeGridHost {

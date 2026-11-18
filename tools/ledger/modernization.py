@@ -99,7 +99,7 @@ ROADMAP = {
     "Native\\Game\\src\\Title": ("62", "39"),
 }
 ALIAS = re.compile(r"^[ \t]*#[ \t]*define[ \t]+([A-Za-z_]\w*)[ \t]+([A-Za-z_]\w*)[ \t]*$", re.M)
-SHIM_SITE = re.compile(r'\bVS_UNPORTED\s*\(\s*"([^"]+)"')
+SHIM_SITE = re.compile(r'\bRecordUnported\s*\(\s*"([^"]+)"')
 TEMPLATE_NAME = re.compile(r"^VS_\w+_FUNCTION$")
 HEADER_SUFFIXES = (".h", ".hpp")
 PERCENT = 100
@@ -381,7 +381,7 @@ def summary(rows: list[dict[str, str]], sites: dict[str, list[str]]) -> str:
         f"{bodies['template']:,} templates with {bodies['instance']:,} instances, {bodies['missing']:,} not located. "
         f"{blocked} of {len(open_owned)} open owned functions have generated callers.",
         "",
-        f"SDK shim sites still recording `VS_UNPORTED`: {sum(map(len, sites.values()))}.",
+        f"SDK shim sites still recording `VS::Core::RecordUnported`: {sum(map(len, sites.values()))}.",
         "",
         "| Shim source | Sites | Calls |",
         "| --- | ---: | --- |",

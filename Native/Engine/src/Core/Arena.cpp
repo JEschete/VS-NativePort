@@ -1,10 +1,20 @@
-#include "Core/Arena.h"
+#include "Core/Arena.hpp"
+
+#include <array>
+#include <cstddef>
+#include <span>
+
+namespace VS::Core {
 
 namespace {
-constexpr unsigned kArenaAlignment = 64;
-alignas(kArenaAlignment) unsigned char g_game_heap[CORE_GAME_HEAP_SIZE];
+constexpr std::size_t kArenaAlignment = 64;
+alignas(kArenaAlignment) std::array<std::byte, kGameHeapSize> g_game_heap;
 }  // namespace
 
-alignas(kArenaAlignment) unsigned char Core_overlayArena[CORE_OVERLAY_SIZE];
+alignas(kArenaAlignment) std::array<std::byte, kOverlaySize> overlay_arena;
 
-void* Core_GameHeapArena(void) { return g_game_heap; }
+std::span<std::byte, kGameHeapSize> GameHeapArena() noexcept {
+  return g_game_heap;
+}
+
+}  // namespace VS::Core

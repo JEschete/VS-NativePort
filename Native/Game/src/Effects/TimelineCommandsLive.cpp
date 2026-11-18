@@ -11,9 +11,9 @@
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/ActionOutcomesLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/CameraLive.hpp"
@@ -45,10 +45,10 @@ std::uint64_t refused_records = 0;
                            std::string_view command) {
   if (instance != nullptr) return false;
   if (std::has_single_bit(++refused_instances)) {
-    VS_LOG_WARN("effects",
-                "timeline command {} refused: no effect instance ({} "
-                "refusals)",
-                command, refused_instances);
+    VS::Core::LogWarn("effects",
+                      "timeline command {} refused: no effect instance ({} "
+                      "refusals)",
+                      command, refused_instances);
   }
   return true;
 }
@@ -56,8 +56,9 @@ std::uint64_t refused_records = 0;
 // Reports a missing transform, timeline or track key, rate-limited as Refused.
 void ReportMissing(std::string_view command, std::string_view missing) {
   if (std::has_single_bit(++refused_records)) {
-    VS_LOG_WARN("effects", "timeline command {} refused: {} ({} refusals)",
-                command, missing, refused_records);
+    VS::Core::LogWarn("effects",
+                      "timeline command {} refused: {} ({} refusals)", command,
+                      missing, refused_records);
   }
 }
 
@@ -191,9 +192,9 @@ void LiveSetSourceWeaponBrightness(Effects_EffectInstance* instance,
 void LivePlaySourceActorReactionSound(Effects_EffectInstance* instance,
                                       std::uint8_t variant) {
   if (Refused(instance, "reaction sound")) return;
-  const auto sound =
-      SourceReactionSound(EndpointsOf(*instance), variant,
-                          Effects_lastReactionSoundVariant, Core_Random_Rand);
+  const auto sound = SourceReactionSound(EndpointsOf(*instance), variant,
+                                         Effects_lastReactionSoundVariant,
+                                         VS::Core::NextBiosRand);
   if (!sound) return;
   Effects_lastReactionSoundVariant = sound->last_variant;
   Audio::LivePlayActorModelSoundVariant(sound->actor, sound->variant);

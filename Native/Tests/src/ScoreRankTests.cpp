@@ -12,7 +12,7 @@
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -114,7 +114,7 @@ class LiveGlobals {
                 sizeof Field_countableRoomMask);
     std::memcpy(actions_.data(), Battle_actionDefinitions,
                 sizeof Battle_actionDefinitions);
-    std::memcpy(scratch_.data(), Core_ScratchBase(), scratch_.size());
+    std::memcpy(scratch_.data(), VS::Core::ScratchBase(), scratch_.size());
     Audio_Seq_unusedScoredata = {};
     Audio_Seq_unusedStateFlags = {};
     State_roomVisitProgress = {};
@@ -143,7 +143,7 @@ class LiveGlobals {
                 sizeof Field_countableRoomMask);
     std::memcpy(Battle_actionDefinitions, actions_.data(),
                 sizeof Battle_actionDefinitions);
-    std::memcpy(Core_ScratchBase(), scratch_.data(), scratch_.size());
+    std::memcpy(VS::Core::ScratchBase(), scratch_.data(), scratch_.size());
   }
 
  private:
@@ -456,7 +456,7 @@ TEST_CASE("F04157 live progress binds the room chest and score globals",
   VS::Input::settings.cursorMemory = 0;
   std::memset(&Battle_unusedMenu9CursorMemory, 0xA5,
               sizeof Battle_unusedMenu9CursorMemory);
-  auto* scratch = static_cast<Render_FrameScratch*>(Core_ScratchBase());
+  auto* scratch = static_cast<Render_FrameScratch*>(VS::Core::ScratchBase());
   scratch->camera.position.vy = 1234;
   scratch->camera.angles.vz = -56;
   CHECK(VS::Menu::Score::CalculateLiveProgress() == 1);

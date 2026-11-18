@@ -26,9 +26,9 @@
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/BiosRand.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Core/RandomLive.hpp"
 
 namespace VS::Battle::Ai {
 namespace {
@@ -301,7 +301,7 @@ class LiveHostility final : public HostilityHost {
  public:
   explicit LiveHostility(Battle_Ai_ActorAiState& state) : state_(state) {}
 
-  void DrawBiosRandom() override { (void)Core_Random_Rand(); }
+  void DrawBiosRandom() override { (void)VS::Core::NextBiosRand(); }
   void ShowAwarenessIndicator(HostilityState& state, int indicator,
                               int frames) override {
     StoreHostility(state, state_);

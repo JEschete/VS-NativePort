@@ -16,7 +16,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/Matrix.hpp"
 #include "Core/Math/MatrixLive.hpp"
-#include "Core/Scratch.h"
+#include "Core/Scratch.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Score/GazetteCamera.hpp"
 #include "Menu/Score/Records.h"
@@ -40,8 +40,8 @@ std::uint64_t refusals = 0;
 
 void Refuse(std::string_view what) {
   if (std::has_single_bit(++refusals)) {
-    VS_LOG_WARN("menu.score", "gazette camera: {} ({} refusals)", what,
-                refusals);
+    VS::Core::LogWarn("menu.score", "gazette camera: {} ({} refusals)", what,
+                      refusals);
   }
 }
 

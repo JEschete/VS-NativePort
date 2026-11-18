@@ -15,8 +15,8 @@
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/Trace.hpp"
 #include "Content/DataStore.hpp"
-#include "Core/BiosRand.h"
 #include "Core/Random.hpp"
+#include "Core/RandomLive.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/DoorMatchesLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
@@ -91,7 +91,7 @@ struct DoorQueryFixture {
     VS::Field::TransitionLiveDoorsAtTile(0, 0, 0);
     Field_roomData = saved_room;
     Audio_Seq_unusedStateFlags.opaqueAC[7] = saved_random;
-    Core_Random_Seed(1);
+    VS::Core::SeedBiosRand(1);
   }
 
   void Check(int x, int z, int layer, std::span<const int> expected) {
@@ -184,7 +184,7 @@ TEST_CASE("Door queries preserve ordered tile and platform matches on repeat",
 TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
           "[field][doors][storage]") {
   DoorQueryFixture fixture;
-  Core_Random_Seed(1234);
+  VS::Core::SeedBiosRand(1234);
   VS::Core::Rand15 expected(1234);
   SECTION("present room consumes one raw draw even without a match") {
     fixture.Check(31, 31, 0, std::span<const int>{});
@@ -201,7 +201,7 @@ TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
     CHECK(VS::Field::TransitionLiveDoorsAtTile(0, 0, 0) == nullptr);
     CHECK(VS::Field::matchingDoorRecords.count == 0);
   }
-  CHECK(Core_Random_Rand() == expected.Next());
+  CHECK(VS::Core::NextBiosRand() == expected.Next());
 }
 
 TEST_CASE("Encounter validation rejects overlaps and invalid content",

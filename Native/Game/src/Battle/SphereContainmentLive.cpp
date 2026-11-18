@@ -24,7 +24,7 @@ static_assert(sizeof(Battle_TargetVolume{}.scale) ==
 
 const Battle_TargetVolume& RequiredVolume(const Battle_TargetVolume* volume) {
   if (volume == nullptr) {
-    VS_LOG_ERROR("battle.sphere", "Containment requires a target volume");
+    VS::Core::LogError("battle.sphere", "Containment requires a target volume");
     std::abort();
   }
   return *volume;
@@ -45,9 +45,9 @@ SphereVolumeGeometry Geometry(const Battle_TargetVolume& volume) {
 
 math::Position3 RequiredPoint(std::span<const std::uint16_t> point) {
   if (point.size() < kPointComponents) {
-    VS_LOG_ERROR("battle.sphere",
-                 "Containment point requires three components; got {}",
-                 point.size());
+    VS::Core::LogError("battle.sphere",
+                       "Containment point requires three components; got {}",
+                       point.size());
     std::abort();
   }
   std::array<std::uint16_t, kPointComponents> components{};
@@ -137,13 +137,14 @@ int IsLivePointInCurrentSphereVolume(int volume_index,
                                      std::span<const std::uint16_t> point) {
   if (volume_index < 0 ||
       static_cast<std::size_t>(volume_index) >= kSphereVolumes) {
-    VS_LOG_ERROR("battle.sphere", "Containment volume index {} is invalid",
-                 volume_index);
+    VS::Core::LogError("battle.sphere",
+                       "Containment volume index {} is invalid", volume_index);
     std::abort();
   }
   auto* sphere = reinterpret_cast<Battle_TargetSphere*>(Battle_targetSphere);
   if (sphere == nullptr) {
-    VS_LOG_ERROR("battle.sphere", "Containment requires the current sphere");
+    VS::Core::LogError("battle.sphere",
+                       "Containment requires the current sphere");
     std::abort();
   }
   static_assert(std::size(Battle_TargetSphere{}.volumes) == kSphereVolumes);

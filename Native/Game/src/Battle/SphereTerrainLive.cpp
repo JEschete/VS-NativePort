@@ -71,7 +71,7 @@ void DrawLiveSphereTerrainIntersection(const SVECTOR& position,
       Render_frameScratch.orderingTable == nullptr) {
     constexpr const char* kMessage =
         "sphere terrain drawing requires initialized targeting state";
-    VS_LOG_ERROR("sphere", "{}", kMessage);
+    VS::Core::LogError("sphere", "{}", kMessage);
     throw std::runtime_error(kMessage);
   }
   static_assert(offsetof(Battle_TargetSphere, wireEdges) ==

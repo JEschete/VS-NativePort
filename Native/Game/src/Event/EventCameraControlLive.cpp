@@ -25,7 +25,7 @@ constexpr int kSavedFieldFacingFlag = 0xAF;
 constexpr int kSavedFieldDistanceFlag = 0xB0;
 
 [[noreturn]] void Refuse(const char* operation, const char* reason) {
-  VS_LOG_ERROR("event.camera", "{} refused: {}", operation, reason);
+  VS::Core::LogError("event.camera", "{} refused: {}", operation, reason);
   std::abort();
 }
 
@@ -101,10 +101,11 @@ void StartEventCameraOrbitReturnEntry(char orbit_side) {
   if (!StartEventCameraOrbitReturn(tracks, view,
                                    static_cast<std::uint8_t>(orbit_side),
                                    field_camera, motion)) {
-    VS_LOG_WARN("event.camera",
-                "{}: distance index {} has no height offset; the start is not "
-                "raised",
-                kOperation, view.distance_index);
+    VS::Core::LogWarn(
+        "event.camera",
+        "{}: distance index {} has no height offset; the start is not "
+        "raised",
+        kOperation, view.distance_index);
   }
   StoreLiveEventCameraTracks(camera, tracks);
 }
