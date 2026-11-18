@@ -334,7 +334,9 @@ void ApplySavedActorAiRelations(SavedRelationActors& actors) {
 // decomp: BATTLE.PRG func_800E5998 (src/BATTLE/BATTLE.PRG/7CD68.c:573).
 bool ResolveAiLinkedActors(LinkedActorTable& actors) {
   const std::span<const LinkGroupActor> listed = actors.FollowingActors();
-  // The original reads a missing state through a null table entry (#337).
+  // The original reads a missing state through a null table entry. Only
+  // actor 1 or a room spawn with flags & 3 == 0 is listed without a state, and
+  // no shipped room placement or event script creates either (#337).
   const bool all_have_states =
       std::ranges::all_of(listed, [&actors](const LinkGroupActor& actor) {
         return actors.LinkedActor(actor.id).has_value();
