@@ -72,6 +72,14 @@ constexpr int kResetStats = kWeapon + 1;
 constexpr int kBackFromStats = kResetStats + 1;
 constexpr int kStatRows = kBackFromStats + 1;
 
+// Production rooms keep their original actors even when an external event
+// plays in them; otherwise the event owns every actor.
+const char* GroupEditingDisabledMessage(const Game::EncounterSetup& setup) {
+  return setup.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
+             ? "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED"
+             : "EXTERNAL EVENT ACTORS - GROUP EDITING DISABLED";
+}
+
 std::size_t Cycle(std::size_t index, std::size_t count, int direction) {
   if (count == 0) return 0;
   return (index + count + direction) % count;
@@ -176,9 +184,7 @@ void Editor::Load(const Game::EncounterSetup& setup) {
 void Editor::AddGroup() {
   if (setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom ||
       setup_.external_event) {
-    message_ = setup_.external_event
-                   ? "EXTERNAL EVENT ACTORS - GROUP EDITING DISABLED"
-                   : "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
+    message_ = GroupEditingDisabledMessage(setup_);
     return;
   }
   if (quantity_ == 0) {
@@ -205,9 +211,7 @@ void Editor::Change(int direction) {
        setup_.external_event) &&
       (row_ == kEnemy || row_ == kQuantity || row_ == kOffsetX ||
        row_ == kOffsetZ || row_ == kSpacing)) {
-    message_ = setup_.external_event
-                   ? "EXTERNAL EVENT ACTORS - GROUP EDITING DISABLED"
-                   : "ORIGINAL ROOM ACTORS - GROUP EDITING DISABLED";
+    message_ = GroupEditingDisabledMessage(setup_);
     return;
   }
   switch (row_) {
@@ -282,10 +286,10 @@ Editor::Action Editor::Update(const Input::PadState& pad, bool confirm) {
     case kClearGroups:
       setup_.enemies.clear();
       message_ =
-          setup_.external_event ? "EVENT OWNS ACTORS - NO OVERRIDE GROUPS"
-          : setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
+          setup_.room_policy == Game::EncounterRoomPolicy::kOriginalRoom
               ? "ORIGINAL ROOM ACTORS RETAINED"
-          : quantity_ == 0 ? "GROUPS CLEARED - SOLO ASHLEY"
+          : setup_.external_event ? "EVENT OWNS ACTORS - NO OVERRIDE GROUPS"
+          : quantity_ == 0        ? "GROUPS CLEARED - SOLO ASHLEY"
                            : "GROUPS CLEARED - CURRENT SELECTION WILL BE USED";
       break;
     case kStart:
@@ -412,13 +416,13 @@ void Editor::Draw(Canvas& canvas) const {
   const std::array<std::string, kRowCount> rows = {
       std::format("ZONE: {}", zone.id),
       std::format("ROOM: {} {}", room.index, room.asset),
-      setup_.external_event ? "ENEMIES: SCRIPT-OWNED ACTORS"
-      : original            ? "ENEMIES: ORIGINAL ROOM PLACEMENTS"
-                            : std::format("ENEMY: {}", enemy_name),
-      setup_.external_event ? "QUANTITY: SCRIPT-OWNED"
-      : original            ? "QUANTITY: ORIGINAL ROOM"
-                            : std::format("QUANTITY: {}{}", quantity_,
-                                          quantity_ == 0 ? " (SOLO)" : ""),
+      original                ? "ENEMIES: ORIGINAL ROOM PLACEMENTS"
+      : setup_.external_event ? "ENEMIES: SCRIPT-OWNED ACTORS"
+                              : std::format("ENEMY: {}", enemy_name),
+      original                ? "QUANTITY: ORIGINAL ROOM"
+      : setup_.external_event ? "QUANTITY: SCRIPT-OWNED"
+                              : std::format("QUANTITY: {}{}", quantity_,
+                                            quantity_ == 0 ? " (SOLO)" : ""),
       std::format("ASHLEY TILE X: {}", setup_.player.x),
       std::format("ASHLEY TILE Z: {}", setup_.player.z),
       std::format("ELEVATION: {}", setup_.player.elevation),

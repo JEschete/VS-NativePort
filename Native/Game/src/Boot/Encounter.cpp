@@ -1151,9 +1151,14 @@ extern "C" void Boot_EncounterPollStop() {
       VS::Boot::ResetToTitleLive();
     } else {
       VS::Game::ApplyPendingDoorRequest();
+      // External and room-local components start at the first free-control
+      // frame in the configured room, after any production entry events.
+      const bool configured_room_ready =
+          Event_playbackPhase == 0 && Field_controlMode == 1 &&
+          Field_zoneContext.zndId == VS::Game::configuration.zone &&
+          Field_zoneContext.mapId == VS::Game::configuration.room;
       if (VS::Game::configuration.external_event &&
-          !VS::Game::external_event_started && Event_playbackPhase == 0 &&
-          Field_controlMode == 1) {
+          !VS::Game::external_event_started && configured_room_ready) {
         const int event = *VS::Game::configuration.external_event;
         // Original 4A0A8.c:4302 direct-event request; no story flag mutation.
         const int result = Event_EvaluateRoomEventTriggersEntry(
@@ -1171,10 +1176,7 @@ extern "C" void Boot_EncounterPollStop() {
                     event, Field_zoneContext.zndId, Field_zoneContext.mapId);
         VS::Event::BeginLiveQueuedCutscene();
       } else if (VS::Game::configuration.room_local_event &&
-                 !VS::Game::room_local_event_started &&
-                 Event_playbackPhase == 0 && Field_controlMode == 1 &&
-                 Field_zoneContext.zndId == VS::Game::configuration.zone &&
-                 Field_zoneContext.mapId == VS::Game::configuration.room) {
+                 !VS::Game::room_local_event_started && configured_room_ready) {
         const int selector = *VS::Game::configuration.room_local_event;
         const auto room = VS::Event::LiveRoomScriptSections();
         const auto locals = room ? room->Doors() : VS::Event::ScriptCommand{};

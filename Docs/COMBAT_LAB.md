@@ -173,7 +173,7 @@ Unknown values are rejected. Omitted optional fields keep their defaults, so old
 | `ashley_weapon` | Weapon choice, default `default` (the profile's equipment). |
 | `ashley_stats` | Overrides `max_hp`, `max_mp`, `strength`, `intelligence`, `agility`, each 1..999. |
 | `room_events` | `isolated` (default) or `production`. `production` keeps the original room actors and entry events and needs an empty `enemies`. |
-| `external_event` | Original external EVT number, 0..9999. Needs isolated room events and no enemies. |
+| `external_event` | Original external EVT number, 0..9999. Needs no enemies. With isolated room events the event owns every actor; with production room events the original room actors stay. |
 | `room_local_event` | Room-local event selector, 0..15. Needs production room events and no `external_event`. |
 | `story_progress` | 0..255, written once to the campaign progress counter (script flag 0x82) before the first room loads. |
 | `clear_count` | 1..99, the New Game+ clear counter. |
@@ -219,10 +219,12 @@ Profiles are isolated test setups, not imported saves or completed story events.
 
 - `"room_events": "production"` keeps the original room actors and runs the original entry events. The editor shows
   ORIGINAL ROOM - PRODUCTION ENTRY EVENTS.
-- `"external_event": N` plays original external EVT N through the production direct-event and cutscene APIs once the
-  room is ready. The editor shows EXTERNAL EVENT N - COMPONENT PLAYBACK; the event owns its actors and input stays
-  interactive. Only the initial room entry is isolated: chained scenes, room handoffs and returns use production
-  rules. The EVT file is checked and read before startup; a missing or malformed file is an error.
+- `"external_event": N` plays original external EVT N through the production direct-event and cutscene APIs at the
+  first free-control frame in the configured room. The editor shows EXTERNAL EVENT N - COMPONENT PLAYBACK, and input
+  stays interactive. With isolated room events the event owns its actors and only the initial room entry is
+  isolated: chained scenes, room handoffs and returns use production rules. With production room events the room's
+  original actors and entry events come first, so an event that addresses a room actor (for example a defeated
+  boss) finds it. The EVT file is checked and read before startup; a missing or malformed file is an error.
 - Some events need an earlier event to set up audio or actors. Pick a room, profile and event that match the original
   source; a file number alone does not provide those preconditions.
 - `"room_local_event": N` starts that room's local event once at the first free-control frame, without evaluating

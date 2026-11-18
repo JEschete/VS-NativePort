@@ -756,15 +756,29 @@ TEST_CASE("External event components roundtrip without changing older presets",
   CHECK(restored.enemies.empty());
 }
 
-TEST_CASE(
-    "External event components reject ambiguous entry and actor ownership",
-    "[combat][encounter][event-component]") {
+TEST_CASE("External event components run with production room actors",
+          "[combat][encounter][event-component]") {
   auto setup = TestSetup(0);
+  setup.external_event = 82;
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  REQUIRE(ValidateEncounter(setup, TestZone()).empty());
+  const auto restored =
+      VS::combat_lab::DecodeSetup(VS::combat_lab::EncodeSetup(setup));
+  CHECK(restored.room_policy == VS::Game::EncounterRoomPolicy::kOriginalRoom);
+  CHECK(restored.external_event == 82);
+  // Production rooms keep their original actors and events throughout.
+  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, false));
+  CHECK(VS::Game::UsesEncounterRoomEvents(setup, false));
+}
+
+TEST_CASE(
+    "External event components reject enemy overrides in either room policy",
+    "[combat][encounter][event-component]") {
+  auto setup = TestSetup(1);
   setup.external_event = 82;
   setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
   CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
   setup.room_policy = VS::Game::EncounterRoomPolicy::kIsolatedCombat;
-  setup.enemies = TestSetup(1).enemies;
   CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
   setup.enemies.clear();
   setup.external_event = -1;
@@ -814,15 +828,20 @@ TEST_CASE("External event preset numbers are explicit integers",
 
 TEST_CASE("External event editor retains script-owned actors",
           "[combat][encounter][event-component][editor]") {
-  VS::combat_lab::Editor editor({TestZone()});
-  auto setup = TestSetup(0);
-  setup.external_event = 82;
-  editor.Load(setup);
-  EditorPress(editor, VS::Input::Down, 3);
-  EditorPress(editor, VS::Input::Right, 2);
-  CHECK(editor.Setup().enemies.empty());
-  CHECK(editor.Setup().external_event == 82);
-  CHECK(ValidateEncounter(editor.Setup(), editor.Zone()).empty());
+  for (const auto policy : {VS::Game::EncounterRoomPolicy::kIsolatedCombat,
+                            VS::Game::EncounterRoomPolicy::kOriginalRoom}) {
+    VS::combat_lab::Editor editor({TestZone()});
+    auto setup = TestSetup(0);
+    setup.external_event = 82;
+    setup.room_policy = policy;
+    editor.Load(setup);
+    EditorPress(editor, VS::Input::Down, 3);
+    EditorPress(editor, VS::Input::Right, 2);
+    CHECK(editor.Setup().enemies.empty());
+    CHECK(editor.Setup().external_event == 82);
+    CHECK(editor.Setup().room_policy == policy);
+    CHECK(ValidateEncounter(editor.Setup(), editor.Zone()).empty());
+  }
 }
 
 TEST_CASE("External event components fail preflight without original data",

@@ -540,11 +540,9 @@ std::vector<std::string> ValidateEncounterOptions(const EncounterSetup& setup) {
         *setup.external_event > EncounterLimits::kLastExternalEvent) {
       errors.emplace_back("external event must be a four-digit asset number");
     }
-    if (setup.room_policy != EncounterRoomPolicy::kIsolatedCombat ||
-        !setup.enemies.empty()) {
+    if (!setup.enemies.empty()) {
       errors.emplace_back(
-          "external event components require isolated entry and no enemy "
-          "overrides");
+          "external event components cannot use enemy overrides");
     }
   }
   if (setup.room_local_event) {
