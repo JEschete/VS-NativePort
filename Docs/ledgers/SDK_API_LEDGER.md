@@ -32,6 +32,11 @@ native replacement decodes the converted movie through Engine\Movie. Its `libpre
 `libds` ring-stream shims it alone used (`StSetRing`, `StSetStream`, `StGetNext`, `StFreeRing`,
 `DsControl`, `DsRead2`) are deleted at zero native uses and marked `[x]`.
 
+The 2026-11-18 LibDs trim removes the remaining unused command/ring helpers
+(`StUnSetRing`, `StGetBackloc`, `DsCommand`, `DsPacket`, `DsControlB`,
+`DsIntToPos`), directive constants, callbacks and unused layouts. `DsInit`
+and `DsGetSector` remain compatibility stubs; `DslLOC`, `DslFILTER` and
+`CdlATV` remain consumed layouts. This does not retire EC-04 or change loading.
 
 ## libgpu â†’ Graphics (78 symbols, 1742 uses)
 
@@ -235,38 +240,38 @@ Target: VS.Content: AsyncReadQueue / StreamReader (St* -> VS.Movie)
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
 | [ ] | D | `DsReadyCallback` | function | 8 | 1 | SLUS_010.40 (8) |
-| [ ] | T | `DsControlB` | function | 6 | 2 | SLUS_010.40 (5), TITLE.PRG (1) |
-| [ ] | T | `DsPacket` | function | 6 | 1 | SLUS_010.40 (6) |
-| [ ] | T | `DslModeSpeed` | constant | 6 | 2 | SLUS_010.40 (4), TITLE.PRG (2) |
+| [x] | T | `DsControlB` | function | 6 | 2 | SLUS_010.40 (5), TITLE.PRG (1) |
+| [x] | T | `DsPacket` | function | 6 | 1 | SLUS_010.40 (6) |
+| [x] | T | `DslModeSpeed` | constant | 6 | 2 | SLUS_010.40 (4), TITLE.PRG (2) |
 | [x] | T | `DsControl` | function | 4 | 2 | SLUS_010.40 (2), TITLE.PRG (2) |
-| [ ] | T | `DsIntToPos` | function | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
+| [x] | T | `DsIntToPos` | function | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
 | [ ] | D | `DsSystemStatus` | function | 4 | 1 | SLUS_010.40 (4) |
-| [ ] | T | `DslDiskError` | constant | 4 | 1 | SLUS_010.40 (4) |
-| [ ] | T | `DslModeSize1` | constant | 4 | 1 | SLUS_010.40 (4) |
-| [ ] | T | `DslPause` | constant | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
-| [ ] | T | `DslReady` | constant | 4 | 1 | SLUS_010.40 (4) |
-| [ ] | T | `DslSetmode` | constant | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
-| [ ] | T | `DslComplete` | constant | 3 | 1 | SLUS_010.40 (3) |
-| [ ] | T | `DslModeRT` | constant | 3 | 2 | SLUS_010.40 (2), TITLE.PRG (1) |
-| [ ] | T | `DslModeSF` | constant | 3 | 1 | SLUS_010.40 (3) |
-| [ ] | T | `DslNoIntr` | constant | 3 | 1 | SLUS_010.40 (3) |
-| [ ] | T | `DsCommand` | function | 2 | 1 | SLUS_010.40 (2) |
+| [x] | T | `DslDiskError` | constant | 4 | 1 | SLUS_010.40 (4) |
+| [x] | T | `DslModeSize1` | constant | 4 | 1 | SLUS_010.40 (4) |
+| [x] | T | `DslPause` | constant | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
+| [x] | T | `DslReady` | constant | 4 | 1 | SLUS_010.40 (4) |
+| [x] | T | `DslSetmode` | constant | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
+| [x] | T | `DslComplete` | constant | 3 | 1 | SLUS_010.40 (3) |
+| [x] | T | `DslModeRT` | constant | 3 | 2 | SLUS_010.40 (2), TITLE.PRG (1) |
+| [x] | T | `DslModeSF` | constant | 3 | 1 | SLUS_010.40 (3) |
+| [x] | T | `DslNoIntr` | constant | 3 | 1 | SLUS_010.40 (3) |
+| [x] | T | `DsCommand` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | D | `DsEndReadySystem` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | D | `DsFlush` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `DsGetSector` | function | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | D | `DsMix` | function | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `DslDataReady` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `DslNoResult` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `DslReadN` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `DslReadS` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `DslSeekL` | constant | 2 | 1 | SLUS_010.40 (2) |
-| [ ] | T | `DslSetfilter` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | T | `DslDataReady` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | T | `DslNoResult` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | T | `DslReadN` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | T | `DslReadS` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | T | `DslSeekL` | constant | 2 | 1 | SLUS_010.40 (2) |
+| [x] | T | `DslSetfilter` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `DsInit` | function | 1 | 1 | SLUS_010.40 (1) |
 | [x] | T | `DsRead2` | function | 1 | 1 | TITLE.PRG (1) |
 | [ ] | D | `DsStartReadySystem` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `DslModeDA` | constant | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `DslModeStream2` | constant | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `DslSetloc` | constant | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `DslModeDA` | constant | 1 | 1 | SLUS_010.40 (1) |
+| [x] | T | `DslModeStream2` | constant | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `DslSetloc` | constant | 1 | 1 | TITLE.PRG (1) |
 
 ## libspu â†’ Audio (36 symbols, 78 uses)
 
@@ -383,11 +388,11 @@ Target: VS.Movie: StrDecoder (MDEC/VLC/IDCT) -> RGBA frames + XA stream
 | [x] | T | `DecDCTvlcBuild` | function | 1 | 1 | TITLE.PRG (1) |
 | [ ] | D | `StCdInterrupt` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `StFreeRing` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `StGetBackloc` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `StGetBackloc` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `StGetNext` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `StSetRing` | function | 1 | 1 | TITLE.PRG (1) |
 | [x] | T | `StSetStream` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `StUnSetRing` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `StUnSetRing` | function | 1 | 1 | TITLE.PRG (1) |
 
 ## libcard â†’ Save (4 symbols, 6 uses)
 

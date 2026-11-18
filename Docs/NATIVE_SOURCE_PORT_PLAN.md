@@ -1352,7 +1352,10 @@ contexts do not interfere with one another.
 
 Regular disc files are extracted into a file tree and indexed by original LBA/size. The game still requests sectors;
 module data is copied into globals and original addresses are resolved into native symbols. Desktop startup still opens
-a disc as well as the extracted data. STR converts to Matroska (AV1/FLAC); effect streams convert to WAV/SFZ
+a disc image when one is located, but runtime sector reads use extracted files through `DataStore`.
+The 2026-11-18 LibDs trim removes six unused functions and unused declarations; two compatibility stubs
+and three consumed layouts remain. This is not retirement of the sector-addressed loading state machine.
+STR converts to Matroska (AV1/FLAC); effect streams convert to WAV/SFZ
 and ending XA to FLAC under `audio/streams`. The original XA `files.tsv` row remains `stream` for
 sector-addressed lookup, separately from the native asset index.
 
