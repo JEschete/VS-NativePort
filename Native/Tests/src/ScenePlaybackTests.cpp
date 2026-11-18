@@ -104,12 +104,14 @@ TEST_CASE(
   trial.Observe(ReadyState(), Event(81, 0), 4);
   trial.Observe(ReadyState(), Event(81, 0), 123);
   CHECK_FALSE(trial.Finished());
+  CHECK(trial.Input(124) == 0);
   trial.Observe(ReadyState(), Event(81, 0), 124);
   CHECK(trial.Result().at("status") == "passed");
   CHECK(trial.Result().at("observed_events") == nlohmann::json({80, 82, 81}));
   CHECK(trial.Result().at("control_tick") == 4);
   CHECK(trial.Result().at("passed_tick") == 124);
   CHECK(trial.Result().at("campaign_progression") == "not_established");
+  CHECK_FALSE(trial.Result().contains("control_probe"));
 }
 
 TEST_CASE("Scene endings accept only an explicit terminal contract",
@@ -362,6 +364,164 @@ TEST_CASE(
   CHECK_FALSE(trial.Finished());
   trial.Observe(ReadyState(), Event(81, 0), 244);
   CHECK(trial.Result().at("status") == "passed");
+}
+
+namespace {
+constexpr int kAshleyX = 100;
+constexpr int kAshleyZ = 200;
+constexpr unsigned kBattleActionMode = 2;
+constexpr unsigned kPostActionMovementMode = 12;
+constexpr int kEnemySlot = 2;
+
+VS::Game::EncounterState FieldState(int x = kAshleyX) {
+  auto state = ReadyState();
+  VS::Game::EncounterActorState ashley;
+  ashley.x = x;
+  ashley.z = kAshleyZ;
+  state.actors.push_back(ashley);
+  return state;
+}
+
+VS::Game::EncounterState EnemyAction(unsigned mode = kBattleActionMode) {
+  auto state = FieldState();
+  state.control_mode = mode;
+  state.source_actor = kEnemySlot;
+  return state;
+}
+
+// The hold starts at 4; an enemy acts at 70 and 80; Ashley stands still on
+// the unpressed control ticks 81 and 82, which arms the probe.
+void InterruptHold(SceneTrial& trial) {
+  PlayExpectedEvents(trial);
+  trial.Observe(FieldState(), Event(81, 0), 4);
+  trial.Observe(EnemyAction(), Event(81, 0), 70);
+  trial.Observe(EnemyAction(kPostActionMovementMode), Event(81, 0), 80);
+  CHECK(trial.Input(81) == 0);
+  trial.Observe(FieldState(), Event(81, 0), 81);
+  CHECK(trial.Input(82) == 0);
+  trial.Observe(FieldState(), Event(81, 0), 82);
+}
+
+// An interruption at 90 clears the hold and its probe; a later non-player
+// action cannot reopen the hold, only field control can.
+void CheckHoldRestarts(SceneTrial& trial, const VS::Game::EncounterState& state,
+                       const nlohmann::json& scene) {
+  trial.Observe(state, scene, 90);
+  CHECK(trial.Result().at("control_tick").is_null());
+  CHECK_FALSE(trial.Result().contains("control_probe"));
+  CHECK(trial.Input(95) == 0);
+  trial.Observe(EnemyAction(), Event(81, 0), 96);
+  CHECK(trial.Result().at("control_tick").is_null());
+  trial.Observe(FieldState(), Event(81, 0), 100);
+  trial.Observe(FieldState(), Event(81, 0), 220);
+  CHECK(trial.Result().at("status") == "passed");
+  CHECK(trial.Result().at("control_tick") == 100);
+}
+}  // namespace
+
+TEST_CASE(
+    "Non-player actions require a moved control probe to confirm returned "
+    "control",
+    "[scenes][playback]") {
+  auto trial = Trial();
+  InterruptHold(trial);
+  CHECK(trial.Result().at("control_tick") == 4);
+  CHECK(trial.Input(83) == VS::Input::Up);
+  trial.Observe(FieldState(), Event(81, 0), 83);
+  // The full interval alone no longer proves player control.
+  trial.Observe(FieldState(), Event(81, 0), 124);
+  CHECK_FALSE(trial.Finished());
+  CHECK(trial.Input(125) == VS::Input::Up);
+  trial.Observe(FieldState(kAshleyX + 12), Event(81, 0), 125);
+  CHECK(trial.Result().at("status") == "passed");
+  CHECK(trial.Result().at("passed_tick") == 125);
+  CHECK(trial.Result().at("control_probe") ==
+        nlohmann::json{{"non_player_action_ticks", 2},
+                       {"presses", 2},
+                       {"origin", {kAshleyX, 0, kAshleyZ}},
+                       {"moved_tick", 125},
+                       {"moved_to", {kAshleyX + 12, 0, kAshleyZ}}});
+}
+
+TEST_CASE("Control probe tries each direction and fails if Ashley never moves",
+          "[scenes][playback]") {
+  auto trial = Trial();
+  InterruptHold(trial);
+  std::vector<std::uint32_t> pressed;
+  for (std::uint64_t tick = 83; !trial.Finished(); ++tick) {
+    pressed.push_back(trial.Input(tick));
+    trial.Observe(FieldState(), Event(81, 0), tick);
+  }
+  CHECK(trial.Result().at("status") == "failed");
+  CHECK(trial.Result().at("reason").get<std::string>().contains("probe"));
+  REQUIRE(pressed.size() == SceneTrial::kProbeTicks);
+  const auto step = SceneTrial::kProbeDirectionTicks;
+  CHECK(pressed[0] == VS::Input::Up);
+  CHECK(pressed[step] == VS::Input::Right);
+  CHECK(pressed[2 * step] == VS::Input::Down);
+  CHECK(pressed[3 * step] == VS::Input::Left);
+  CHECK(trial.Input(200) == 0);
+}
+
+TEST_CASE("Knockback and settling motion are not control probe movement",
+          "[scenes][playback]") {
+  auto trial = Trial();
+  PlayExpectedEvents(trial);
+  trial.Observe(FieldState(), Event(81, 0), 4);
+  auto knocked = EnemyAction(kPostActionMovementMode);
+  knocked.actors.front().x = kAshleyX + 60;
+  trial.Observe(EnemyAction(), Event(81, 0), 70);
+  trial.Observe(knocked, Event(81, 0), 80);
+  trial.Observe(FieldState(kAshleyX + 60), Event(81, 0), 81);
+  trial.Observe(FieldState(kAshleyX + 70), Event(81, 0), 82);
+  CHECK(trial.Input(83) == 0);
+  trial.Observe(FieldState(kAshleyX + 70), Event(81, 0), 83);
+  CHECK(trial.Input(84) == VS::Input::Up);
+  trial.Observe(FieldState(kAshleyX + 70), Event(81, 0), 124);
+  CHECK_FALSE(trial.Finished());
+  CHECK(trial.Result().at("control_probe").at("origin") ==
+        nlohmann::json({kAshleyX + 70, 0, kAshleyZ}));
+  trial.Observe(FieldState(kAshleyX + 75), Event(81, 0), 125);
+  CHECK(trial.Result().at("status") == "passed");
+}
+
+TEST_CASE("Non-player actions do not bypass event interruptions",
+          "[scenes][playback]") {
+  auto trial = Trial();
+  InterruptHold(trial);
+  auto scene = Event(81, 0);
+  SECTION("event") { scene["event"]["phase"] = 4; }
+  SECTION("new event") { scene = Event(90); }
+  SECTION("dialogue") { scene["event"]["dialogue_waits"] = {true}; }
+  CheckHoldRestarts(trial, FieldState(), scene);
+}
+
+TEST_CASE("Non-player actions do not bypass field interruptions",
+          "[scenes][playback]") {
+  auto trial = Trial();
+  InterruptHold(trial);
+  auto state = FieldState();
+  SECTION("wrong room") { state.room = 1; }
+  SECTION("transition") { state.transition = 1; }
+  SECTION("Ashley acts") { state.control_mode = kBattleActionMode; }
+  SECTION("event control") { state = EnemyAction(3); }
+  SECTION("enemy action in another room") {
+    state = EnemyAction();
+    state.room = 1;
+  }
+  CheckHoldRestarts(trial, state, Event(81, 0));
+}
+
+TEST_CASE("Defeat during the control probe fails the scene",
+          "[scenes][playback]") {
+  auto trial = Trial();
+  InterruptHold(trial);
+  auto state = EnemyAction();
+  state.game_over = true;
+  trial.Observe(state, Event(81, 0), 90);
+  CHECK(trial.Result().at("status") == "failed");
+  CHECK(trial.Result().at("reason") == "fixture defeated");
+  CHECK(trial.Input(91) == 0);
 }
 
 TEST_CASE("Scene event room binds room-local IDs to the target room",

@@ -297,6 +297,15 @@ Add a `scene` object to a script to check that original events actually play and
   `failed`. Defeat, skips and engine errors never pass. Results keep the observed IDs, matched count, control
   interval, inputs and last state. A scene assertion does not start an ending or set game state, and a pass is
   component playback, not story progression.
+- Rooms with hostile production enemies: once the hold has started in field control, an action by any actor other
+  than Ashley (control mode 2, or its post-action movement wait 12) does not reset it, because enemy turns are not
+  player control. After one, the hold cannot pass until a control probe proves Ashley still responds. The probe
+  waits until Ashley stands still on two unpressed field-control ticks, so knockback cannot count. It then holds
+  Up, Right, Down and Left for 10 ticks each and passes when her position changes. The scene fails if she does not
+  move within 40 pressed ticks. Each enemy action before she moves restarts the probe, and directions are only
+  pressed in field control. Everything else still resets the hold: an event or chained event, a room change, a
+  transition, dialogue, Ashley's own action or any other control mode. Defeat still fails. When this path is used,
+  results add `control_probe`: the non-player action ticks, presses, origin, `moved_tick` and `moved_to`.
 
 ## Directed-door tests
 

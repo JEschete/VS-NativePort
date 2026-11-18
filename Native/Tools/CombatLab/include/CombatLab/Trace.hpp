@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
@@ -71,7 +72,20 @@ class SceneTrial {
   bool Finished() const { return status_ != "running"; }
   nlohmann::json Result() const;
 
+  // Direction-probe bounds once a non-player action interrupts the hold.
+  static constexpr std::uint64_t kProbeDirectionTicks = 10;
+  static constexpr std::uint64_t kProbeTicks = 40;
+
  private:
+  static constexpr std::size_t kPositionAxes = 3;
+  using Position = std::array<int, kPositionAxes>;
+
+  void ObserveControlHold(const Game::EncounterState& state, bool scene_idle,
+                          std::uint64_t tick);
+  void ResetControlHold();
+  void ObserveControlProbe(const Game::EncounterState& state,
+                           std::uint64_t tick);
+
   SceneExpectation expected_;
   std::size_t next_event_ = 0;
   std::vector<int> observed_;
@@ -86,6 +100,14 @@ class SceneTrial {
   std::uint64_t dialogue_pulses_ = 0;
   std::optional<std::uint64_t> game_over_menu_tick_;
   bool title_choice_pressed_ = false;
+  // Non-player action modes inside the control hold (#447).
+  std::uint64_t non_player_action_ticks_ = 0;
+  std::optional<Position> probe_origin_;
+  bool probe_armed_ = false;
+  bool probe_pressing_ = false;
+  std::uint64_t probe_presses_ = 0;
+  std::optional<std::uint64_t> probe_moved_tick_;
+  Position probe_moved_to_{};
   nlohmann::json last_;
   nlohmann::json terminal_;
 };

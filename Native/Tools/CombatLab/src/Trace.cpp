@@ -1,6 +1,7 @@
 #include "CombatLab/Trace.hpp"
 
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <chrono>
 #include <cstdio>
@@ -11,6 +12,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "Field/GameMode.hpp"
+#include "Input/Pad.hpp"
 
 namespace VS::combat_lab {
 namespace {
@@ -254,20 +258,85 @@ void SceneTrial::Observe(const Game::EncounterState& state,
       defeat_terminal) {
     return;
   }
-  const bool returned =
-      next_event_ == expected_.events.size() && state.ready && available &&
-      event.at("phase") == 0 && state.zone == expected_.return_zone &&
-      state.room == expected_.return_room && state.control_mode == 1 &&
-      state.transition == 0 && !dialogue_waiting_;
-  if (!returned) {
-    control_tick_.reset();
-  } else {
-    if (!control_tick_) control_tick_ = tick;
-    if (tick - *control_tick_ >= DoorTrial::kObservationTicks) {
-      status_ = "passed";
-      passed_tick_ = tick;
+  ObserveControlHold(state, available && event.at("phase") == 0, tick);
+}
+
+void SceneTrial::ObserveControlHold(const Game::EncounterState& state,
+                                    bool scene_idle, std::uint64_t tick) {
+  using Field::FieldControlMode;
+  const auto mode = static_cast<FieldControlMode>(state.control_mode);
+  const bool settled = next_event_ == expected_.events.size() && state.ready &&
+                       scene_idle && state.zone == expected_.return_zone &&
+                       state.room == expected_.return_room &&
+                       state.transition == 0 && !dialogue_waiting_;
+  // A production actor other than Ashley (InspectTargeting's source slot) is
+  // acting: action mode or its post-action movement wait. It neither proves nor
+  // breaks player control, so the hold continues and the probe must confirm
+  // Ashley responds afterwards.
+  constexpr int kAshleySlot = 0;
+  const bool non_player_action = settled && control_tick_ &&
+                                 state.source_actor != kAshleySlot &&
+                                 (mode == FieldControlMode::kBattleAction ||
+                                  mode == FieldControlMode::kGimmickMotion);
+  if (non_player_action) {
+    ++non_player_action_ticks_;
+    if (!probe_moved_tick_) {
+      probe_origin_.reset();
+      probe_armed_ = false;
+      probe_presses_ = 0;
     }
+    probe_pressing_ = false;
+    return;
   }
+  if (!settled || mode != FieldControlMode::kExploration) {
+    ResetControlHold();
+    return;
+  }
+  if (!control_tick_) control_tick_ = tick;
+  if (non_player_action_ticks_ != 0 && !probe_moved_tick_) {
+    ObserveControlProbe(state, tick);
+    if (Finished() || !control_tick_) return;
+  }
+  if (tick - *control_tick_ >= DoorTrial::kObservationTicks &&
+      (non_player_action_ticks_ == 0 || probe_moved_tick_)) {
+    status_ = "passed";
+    passed_tick_ = tick;
+  }
+}
+
+void SceneTrial::ResetControlHold() {
+  control_tick_.reset();
+  non_player_action_ticks_ = 0;
+  probe_origin_.reset();
+  probe_armed_ = false;
+  probe_pressing_ = false;
+  probe_presses_ = 0;
+  probe_moved_tick_.reset();
+}
+
+// Ashley must first stand still on consecutive unpressed control ticks, so
+// knockback or settling motion cannot count, then move while directions are
+// held. Each direction is tried in turn in case one faces a wall.
+void SceneTrial::ObserveControlProbe(const Game::EncounterState& state,
+                                     std::uint64_t tick) {
+  const auto ashley =
+      std::ranges::find(state.actors, 0, &Game::EncounterActorState::slot);
+  if (ashley == state.actors.end()) {
+    ResetControlHold();
+    return;
+  }
+  const std::array position{ashley->x, ashley->y, ashley->z};
+  if (!probe_origin_ || (!probe_armed_ && position != *probe_origin_)) {
+    probe_origin_ = position;
+  } else if (!probe_armed_) {
+    probe_armed_ = true;
+  } else if (position != *probe_origin_) {
+    probe_moved_tick_ = tick;
+    probe_moved_to_ = position;
+  } else if (probe_presses_ >= kProbeTicks) {
+    Fail("control probe did not move Ashley after a non-player action");
+  }
+  probe_pressing_ = probe_armed_ && !probe_moved_tick_ && !Finished();
 }
 
 void SceneTrial::ObserveEndingReturn(bool credits_finished,
@@ -367,6 +436,15 @@ std::uint32_t SceneTrial::Input(std::uint64_t tick) {
                     tick % kDialoguePulsePeriod < kDialogueHoldTicks;
   if (held && !dialogue_held_) ++dialogue_pulses_;
   dialogue_held_ = held;
+  if (!Finished() && probe_pressing_) {
+    static constexpr std::array kProbeDirections{
+        VS::Input::Up, VS::Input::Right, VS::Input::Down, VS::Input::Left};
+    const auto direction =
+        kProbeDirections[(probe_presses_ / kProbeDirectionTicks) %
+                         kProbeDirections.size()];
+    ++probe_presses_;
+    return direction;
+  }
   return held ? VS::Input::Circle : 0;
 }
 
@@ -408,6 +486,17 @@ nlohmann::json SceneTrial::Result() const {
       {"passed_tick", passed_tick_},
       {"last", last_},
       {"dialogue_confirm_pulses", dialogue_pulses_}};
+  if (non_player_action_ticks_ != 0) {
+    result["control_probe"] = {
+        {"non_player_action_ticks", non_player_action_ticks_},
+        {"presses", probe_presses_},
+        {"origin",
+         probe_origin_ ? nlohmann::json(*probe_origin_) : nlohmann::json{}},
+        {"moved_tick", probe_moved_tick_ ? nlohmann::json(*probe_moved_tick_)
+                                         : nlohmann::json{}},
+        {"moved_to", probe_moved_tick_ ? nlohmann::json(probe_moved_to_)
+                                       : nlohmann::json{}}};
+  }
   if (expected_.ending_to_title || expected_.attract_to_title ||
       expected_.game_over_to_title) {
     result["coverage"] =
