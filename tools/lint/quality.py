@@ -15,6 +15,8 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.parse
+import urllib.request
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 from collections.abc import Callable
@@ -38,6 +40,21 @@ CPPLINT_BATCH = 30
 # per-file formatter and cpplint processes share the rest.
 WORKERS = max(1, (os.cpu_count() or 1) - 1)
 BACKGROUND_CHECKS = ("clones",)
+# Inputs that decide the result of every file: a change to one checks them all.
+FULL_SCAN_FILES = {
+    ".github/workflows/quality.yml",
+    "Directory.Build.props",
+    "quality-native.cmd",
+    "tools/requirements.txt",
+    "tools/port/copy_manifest.json",
+    "tools/port/owned.csv",
+    "tools/port/relaxed_sources.txt",
+    "tools/scaffold/gen_solution.py",
+}
+FULL_SCAN_NAMES = {
+    ".clang-format", ".clang-tidy", "CPPLINT.cfg", "pyproject.toml",
+    "ruff.toml", ".ruff.toml",
+}
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
     "Native/Engine/include/Core/Gte.h": "EC-03",
@@ -171,9 +188,94 @@ def discover_files() -> tuple[list[str], list[str]]:
 
 
 def changed_files() -> set[str]:
-    tracked = run(["git", "diff", "--name-only", "--diff-filter=ACMR", "HEAD", "--"])
+    tracked = run(["git", "-c", "core.quotepath=off", "diff",
+                   "--name-only", "--no-renames", "HEAD", "--"])
     untracked = run(["git", "ls-files", "--others", "--exclude-standard"])
     return set((tracked + "\n" + untracked).splitlines())
+
+
+def git(*arguments: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-c", "core.quotepath=off", *arguments],
+        cwd=ROOT,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+
+
+def files_changed_since(revision: str) -> set[str] | None:
+    """Paths changed from `revision` to the working tree, or None if unknown.
+
+    A shallow CI checkout fetches the revision; a complete clone must already
+    hold it, since fetching it shallowly would truncate the local history.
+    """
+    if git("cat-file", "-e", f"{revision}^{{commit}}").returncode != 0:
+        shallow = git("rev-parse", "--is-shallow-repository").stdout.strip() == "true"
+        if not shallow or (
+            git("fetch", "--no-tags", "--depth=1", "origin", revision).returncode != 0
+        ):
+            return None
+    committed = git("diff", "--name-only", "--no-renames", revision, "HEAD", "--")
+    if committed.returncode != 0:
+        return None
+    return set(committed.stdout.splitlines()) | changed_files()
+
+
+def full_scan_trigger(path: str) -> bool:
+    """Whether a changed path alters the rules, tools or scope of every file."""
+    name = PurePosixPath(path).name
+    return (
+        path in FULL_SCAN_FILES
+        or name in FULL_SCAN_NAMES
+        or (path.startswith("tools/lint/") and not name.startswith("test_"))
+    )
+
+
+def github_base() -> tuple[str | None, str]:
+    """The revision a GitHub Actions run checks changes from, and why.
+
+    A push is compared with the last commit whose run of this workflow passed
+    on the branch, not with the previous push: files a failed run reported stay
+    in scope until a run passes.
+    """
+    event = os.environ.get("GITHUB_EVENT_NAME", "")
+    if event == "pull_request":
+        payload = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text("utf-8"))
+        return payload["pull_request"]["base"]["sha"], "the pull request base"
+    if event != "push":
+        return None, f"a {event or 'local'} run checks every file"
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if not token:
+        return None, "no token can read earlier runs"
+    workflow = os.environ["GITHUB_WORKFLOW_REF"].split("@", 1)[0].rsplit("/", 1)[-1]
+    query = urllib.parse.urlencode(
+        {
+            "branch": os.environ["GITHUB_REF_NAME"],
+            "event": "push",
+            "status": "success",
+            "exclude_pull_requests": "true",
+            "per_page": 1,
+        }
+    )
+    request = urllib.request.Request(
+        f"{os.environ.get('GITHUB_API_URL', 'https://api.github.com')}/repos/"
+        f"{os.environ['GITHUB_REPOSITORY']}/actions/workflows/{workflow}/runs?{query}",
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            runs = json.load(response)["workflow_runs"]
+    except (OSError, ValueError, KeyError) as error:
+        return None, f"earlier runs could not be read ({error})"
+    if not runs:
+        return None, "the branch has no passing run"
+    return runs[0]["head_sha"], f"the last passing run ({runs[0]['html_url']})"
 
 
 def finding(tool: str, rule: str, path: str, line: int, message: str) -> Finding:
@@ -272,7 +374,16 @@ def check_ruff(files: list[str]) -> list[Finding]:
     return findings
 
 
+def clone_analyzable(path: str) -> bool:
+    """Whether jscpd's default size and the configured line limits admit `path`."""
+    data = (ROOT / path).read_bytes()
+    return len(data) <= 100 * 1024 and 10 <= data.count(b"\n") + 1 <= 1000
+
+
 def check_clones(files: list[str]) -> list[Finding]:
+    if not files:
+        # jscpd scans its working directory when it is given no path.
+        return []
     node = shutil.which("node")
     executable = HERE / "node_modules/jscpd/bin/jscpd"
     if not node or not executable.is_file():
@@ -305,9 +416,12 @@ def check_clones(files: list[str]) -> list[Finding]:
         [node, str(HERE / "jscpd_files.js"), str(sources), "--config", str(config)],
         timeout=CLONE_TIMEOUT,
     )
+    if not report.is_file() and not any(map(clone_analyzable, files)):
+        # jscpd skips files outside its limits and reports nothing if all are skipped.
+        return []
     document = json.loads(report.read_text(encoding="utf-8"))
-    if files and document["statistics"]["total"]["sources"] == 0:
-        raise RuntimeError("Clone checker analyzed no files")
+    if document["statistics"]["total"]["sources"] == 0:
+        print("Clone checker: selected files contain no analyzable tokens", flush=True)
     findings = []
     for duplicate in document["duplicates"]:
         first, second = sorted(
@@ -735,12 +849,19 @@ def run_checks(checks: dict[str, Callable[[], list[Finding]]]) -> list[Finding]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument(
         "--changed",
         action="store_true",
-        help="check changed/untracked owned files; clones still scan the full scope",
+        help="check changed/untracked owned files",
     )
-    parser.add_argument("--files", nargs="*", help="check specific first-party files")
+    selection.add_argument(
+        "--since",
+        metavar="REVISION",
+        help="check files changed since REVISION ('github': since the last passing "
+        "run); a change to the rules, tools or scope checks every file",
+    )
+    selection.add_argument("--files", nargs="*", help="check specific first-party files")
     parser.add_argument(
         "--tidy",
         action="store_true",
@@ -775,7 +896,7 @@ def main() -> int:
         print(f"Scope: {len(native)} native files, {len(python)} Python files")
         return 0
     if (args.update_baseline or args.reconcile_formatting) and (
-        args.changed or args.files is not None
+        args.changed or args.files is not None or args.since
     ):
         parser.error("baseline updates require a complete scan")
     if args.reconcile_formatting and (args.update_baseline or not args.tidy):
@@ -784,6 +905,21 @@ def main() -> int:
     selected = set(scope)
     if args.changed:
         selected = scope & changed_files()
+    if args.since:
+        revision, reason = (
+            github_base() if args.since == "github" else (args.since, args.since)
+        )
+        changed = files_changed_since(revision) if revision else None
+        trigger = sorted(filter(full_scan_trigger, changed or ()))
+        if not revision:
+            print(f"Checking every file: {reason}", flush=True)
+        elif changed is None:
+            print(f"Checking every file: {revision} is unavailable", flush=True)
+        elif trigger:
+            print(f"Checking every file: {trigger[0]} changed", flush=True)
+        else:
+            selected &= changed
+            print(f"Checking files changed since {reason}", flush=True)
     if args.files is not None:
         requested = {relative(path) for path in args.files}
         if requested - scope:
@@ -794,11 +930,15 @@ def main() -> int:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     native_selected = [path for path in native if path in selected]
     python_selected = [path for path in python if path in selected]
+    print(
+        f"Scope: {len(native_selected)} native and {len(python_selected)} Python files",
+        flush=True,
+    )
     checks = {
         "format": lambda: check_format(native_selected),
         "cpplint": lambda: check_cpplint(native_selected),
         "ruff": lambda: check_ruff(python_selected),
-        "clones": lambda: check_clones(native + python),
+        "clones": lambda: check_clones(native_selected + python_selected),
     }
     if args.tidy:
         checks["tidy"] = lambda: check_tidy(

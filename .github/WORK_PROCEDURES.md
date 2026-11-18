@@ -65,7 +65,8 @@ history. Verify each change with the smallest builds, Catch2 tags, replays and q
   callback-heavy cases. After mixed C++/Python edits, run the `--changed` pass over the complete changeset.
 - Changing a widely included header widens tidy to every translation unit that includes it. Avoid editing shared
   headers when a local helper would do.
-- Do not replay the CI workflow locally; CI runs the tool tests and the full quality pass on the pushed revision.
+- Do not replay the CI workflow locally; CI runs tool tests and changed-file quality checks on the pushed revision.
+  Rule/scope changes and manual dispatch run a full source scan.
 
 ### 5. Record, publish and continue
 

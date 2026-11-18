@@ -43,6 +43,7 @@ Run from the repository root:
 ```cmd
 quality-native.cmd
 quality-native.cmd --changed
+quality-native.cmd --since HEAD~1
 quality-native.cmd --changed --tidy
 quality-native.cmd --files Native/Engine/src/Core/FrameClock.cpp --tidy
 quality-native.cmd --tidy
@@ -55,8 +56,9 @@ and file order. `--tidy` adds compilation-based analysis. A header change analyz
 units that include it directly or transitively (resolved over all native sources,
 including copied ones); ambiguous include names over-select rather than skip.
 Translation units run in parallel; `--jobs N` limits the worker count (default:
-logical processors). Clone detection always scans the complete first-party scope
-so duplication with an unchanged file is still caught. Its subprocess has a
+logical processors). Clone detection uses the same selected files as the other
+checks. A partial scan therefore does not detect copies from an unchanged file;
+run the default command for a cross-repository clone audit. Its subprocess has a
 600-second budget, like each tidy invocation; a timeout remains an infrastructure
 failure, never a successful scan (#431).
 
@@ -85,8 +87,16 @@ to close an issue. A previous revision's passing run is not a substitute.
 Manual dispatch uses the same Windows jobs, permissions and quality baselines
 as the automatic triggers. The workflow has two parallel jobs: **Tool and ledger
 controls** (tool tests, ledger gates and the regression baseline) and **Source
-quality** (the quality positive controls and the full quality pass). A run is
+quality** (the quality positive controls and the changed-file quality pass). A run is
 green only when both jobs pass.
+
+Automatic source checks use `--since github`: pull requests compare against their
+base revision; pushes compare against the last successful run of this workflow on
+the branch. Failed-push files therefore stay in scope until fixed. Documentation-only
+changes select no source files. Changed rules, tool dependencies, baselines, build
+properties or ownership/scope metadata require a full scan because they can change
+the result for otherwise unchanged files. Missing history/API access also falls
+back to a full scan with an explicit reason. Manual dispatch always scans everything.
 
 Each `run:` step holds exactly one command. A multi-line PowerShell step reports
 only the last native command's exit code, so an earlier failing check was reported
@@ -106,14 +116,14 @@ generation are separate required checks when changing generator behavior.
 The CLI quality positive controls run the real formatter, lint, clone and tidy
 pipeline over their fixture files with isolated reports. Discovery is bounded
 in those tests so repository growth does not consume their command deadline
-(#424); ordinary quality commands still scan the full first-party clone scope.
+(#424); default quality commands still scan the full first-party scope.
 The controls retain the new-finding exit code, header diagnostic and unchanged
 baseline assertions.
 
 ## What a green run establishes
 
 A green Source Quality run establishes only that, at that exact revision, the
-default scope has no findings beyond the reviewed baseline, the synthetic tool
+selected scope has no findings beyond the reviewed baseline, the synthetic tool
 controls pass, and the ledgers satisfy the gate check below.
 
 It does **not** establish that:

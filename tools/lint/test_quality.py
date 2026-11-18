@@ -5,12 +5,13 @@ from __future__ import annotations
 import ast
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
 import threading
 import unittest
-from contextlib import redirect_stdout
+from contextlib import ExitStack, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -407,6 +408,88 @@ class BaselineTests(unittest.TestCase):
         self.assertIn("Native/Engine/src/Core/FrameClock.cpp", dependents)
 
 
+class SelectionTests(unittest.TestCase):
+    def test_since_checks_only_selected_sources_and_config_changes_widen(self) -> None:
+        native = ["Native/changed.cpp", "Native/unchanged.cpp"]
+        python = ["tools/lint/test_changed.py"]
+        cases = [
+            ({"Native/changed.cpp"}, [native[0]], []),
+            ({"Docs/QUALITY.md"}, [], []),
+            ({"Native/.clang-format"}, native, python),
+            ({"tools/lint/baseline.json"}, native, python),
+            (None, native, python),
+        ]
+        for changed, expected_native, expected_python in cases:
+            with self.subTest(changed=changed), ExitStack() as stack:
+                directory = stack.enter_context(tempfile.TemporaryDirectory())
+                stack.enter_context(patch.object(quality, "OUTPUT", Path(directory)))
+                stack.enter_context(patch.object(quality, "discover_files",
+                                                return_value=(native, python)))
+                stack.enter_context(patch.object(quality, "files_changed_since",
+                                                return_value=changed))
+                stack.enter_context(patch.object(sys, "argv",
+                                                ["quality.py", "--since", "base"]))
+                checks = {
+                    name: stack.enter_context(patch.object(quality, name, return_value=[]))
+                    for name in ("check_format", "check_cpplint", "check_ruff",
+                                 "check_clones")
+                }
+                stack.enter_context(redirect_stdout(io.StringIO()))
+                self.assertEqual(quality.main(), 0)
+                checks["check_format"].assert_called_once_with(expected_native)
+                checks["check_cpplint"].assert_called_once_with(expected_native)
+                checks["check_ruff"].assert_called_once_with(expected_python)
+                checks["check_clones"].assert_called_once_with(
+                    expected_native + expected_python)
+
+    def test_push_uses_last_successful_push_and_failure_requests_full_scan(self) -> None:
+        environment = {
+            "GITHUB_EVENT_NAME": "push", "GH_TOKEN": "test-token",
+            "GITHUB_WORKFLOW_REF": "owner/repo/.github/workflows/quality.yml@refs/heads/work",
+            "GITHUB_REF_NAME": "work", "GITHUB_REPOSITORY": "owner/repo",
+        }
+        response = io.BytesIO(json.dumps({"workflow_runs": [
+            {"head_sha": "last-passing", "html_url": "https://example.test/run"}
+        ]}).encode())
+        with patch.dict(os.environ, environment, clear=True):
+            with patch.object(quality.urllib.request, "urlopen", return_value=response) as get:
+                self.assertEqual(quality.github_base()[0], "last-passing")
+                url = get.call_args.args[0].full_url
+                self.assertIn("event=push", url)
+                self.assertIn("status=success", url)
+                self.assertIn("branch=work", url)
+            with patch.object(quality.urllib.request, "urlopen",
+                              side_effect=OSError("offline")):
+                revision, reason = quality.github_base()
+                self.assertIsNone(revision)
+                self.assertIn("offline", reason)
+
+    def test_pull_request_and_manual_scopes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            payload = Path(directory) / "event.json"
+            payload.write_text('{"pull_request":{"base":{"sha":"base-sha"}}}',
+                               encoding="utf-8")
+            with patch.dict(os.environ, {"GITHUB_EVENT_NAME": "pull_request",
+                                         "GITHUB_EVENT_PATH": str(payload)}, clear=True):
+                self.assertEqual(quality.github_base()[0], "base-sha")
+            with patch.dict(os.environ, {"GITHUB_EVENT_NAME": "workflow_dispatch"},
+                            clear=True):
+                self.assertIsNone(quality.github_base()[0])
+
+    def test_deleted_configuration_is_retained_and_full_clones_are_not_shallowed(self) -> None:
+        success = subprocess.CompletedProcess([], 0, "Native/.clang-format\n", "")
+        with (patch.object(quality, "git", return_value=success),
+              patch.object(quality, "changed_files", return_value={"Native/new.cpp"})):
+            self.assertEqual(quality.files_changed_since("base"),
+                             {"Native/.clang-format", "Native/new.cpp"})
+        with patch.object(quality, "git", side_effect=[
+            subprocess.CompletedProcess([], 1, "", ""),
+            subprocess.CompletedProcess([], 0, "false\n", ""),
+        ]) as git:
+            self.assertIsNone(quality.files_changed_since("missing"))
+            self.assertEqual(git.call_count, 2)
+
+
 class ToolControlTests(unittest.TestCase):
     def setUp(self) -> None:
         quality.OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -604,6 +687,15 @@ class ToolControlTests(unittest.TestCase):
                 for item in findings
             )
         )
+
+    def test_empty_and_tiny_clone_selections_do_not_scan_the_repository(self) -> None:
+        with patch.object(quality, "run") as run:
+            self.assertEqual(quality.check_clones([]), [])
+            run.assert_not_called()
+        tiny = self.source("tiny.cpp", "int Tiny() { return 0; }\n")
+        self.assertEqual(quality.check_clones([tiny]), [])
+        macros = self.source("macros.h", "#pragma once\n" * 20)
+        self.assertEqual(quality.check_clones([macros]), [])
 
 
 if __name__ == "__main__":

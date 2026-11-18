@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 # Two independent jobs run in parallel: the tool and ledger controls, and the
 # source-quality scan, which dominates the wall time.
@@ -76,7 +77,9 @@ jobs:
       - name: Verify tool positive controls
         run: python -m unittest discover -s tools/lint -p test_quality.py -v
       - name: Reject new source-quality findings
-        run: .\quality-native.cmd
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .\quality-native.cmd --since github
       - name: Preserve reports
         if: always()
         uses: actions/upload-artifact@v4
