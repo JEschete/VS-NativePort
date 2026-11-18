@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 
 #include "Field/RoomRenderingLive.hpp"
 #include "Legacy/Render/LibGpu.h"
@@ -31,6 +32,8 @@ struct Packet {
   u_long tag;
   u_long body[3];
 };
+
+void SubmitThroughDrawPrim(Packet* packet) { DrawPrim(packet); }
 
 std::vector<const void*> Walk(u_long* head) {
   std::vector<const void*> out;
@@ -582,4 +585,16 @@ TEST_CASE("GPU frame byte counts reject invalid and overflowing dimensions",
   const VS::u32 pixel = 0;
   CHECK_FALSE(device.PresentImage(&pixel, 32768, 32768));
   CHECK_FALSE(device.PresentImage(nullptr, 1, 1));
+}
+
+// Issue #267: copied code calls the C-linkage DrawPrim, and SubmitPacket throws
+// beneath it. /EHsc lets the exception cross that frame without its cleanups;
+// the first opaque C++ call above it, like the host loop's, still catches it.
+TEST_CASE("Live failures cross the C-linkage DrawPrim with their reason",
+          "[legacy][gpu]") {
+  constexpr u_long kOneWordPacket = 1u << 24;
+  constexpr u_long kFlatTriangle = 0x20u << 24;  // needs four command words
+  Packet packet{.tag = kOneWordPacket, .body = {kFlatTriangle}};
+  void (*volatile submit)(Packet*) = &SubmitThroughDrawPrim;
+  CHECK_THROWS_WITH(submit(&packet), "Truncated render command");
 }
