@@ -18,9 +18,14 @@ published and accepted. F00830 is in `a4a88418242d4a06aca5610472c95a3685120cf8`;
 passes on that exact revision and #296 is closed. Independent-index issues #376/#377/#384
 are closed at `1d891ceb0b369a09f2083fa3c9d2569d297e81af` with
 [Source Quality 44134309733](https://github.com/JEschete/VS-NativePort/actions/runs/44134309733).
-The final audit also records a separate,
-pre-existing 72-function slice-registration gap in #434; those functions
-are outside the requested 112. #296 is closed; #276 remains open for #434. See
+The final audit also found a separate, pre-existing 72-function
+slice-registration gap in #434; those functions are outside the requested 112.
+The gap is resolved in `51a9b2ed8c48030ffc9fa12beb661e5015eb7e63`, with exact-revision
+[Source Quality 44215989935](https://github.com/JEschete/VS-NativePort/actions/runs/44215989935)
+passing. Thirty-nine slices cover all 72 functions; historical counts were measured
+at eight recorded verification revisions. No CPP marks or behavior changed, and
+this does not claim EC-04 retirement. #434 is closed; #276 remains open for its
+broader acceptance criteria. See
 [REMAINING_FUNCTIONS.csv](ledgers/REMAINING_FUNCTIONS.csv) and the
 [promotion plan](ledgers/PROMOTION_PLAN.csv). Older continuation entries below
 are historical snapshots; the current F00830 status above supersedes their
@@ -30,7 +35,8 @@ blocker notes.
 
 - Remaining by plan row: 30: 0, 39: 0, 47: 0, 48: 0, 50: 0, 52: 0.
   F00830's scoped commit, exact-revision CI and #296 closure are complete.
-  #276 remains open for the separate #434 slice-registration gap.
+  #434's slice-registration gap is closed; #276 remains open for its broader
+  acceptance criteria.
   The seven time-attack functions meet the no-bridge
   and exact-revision CI gates; no isolated packet is counted as accepted.
 - Process: one coordinator and at most two isolated workers. Each worker uses
@@ -91,12 +97,16 @@ blocker notes.
   `copy=yes` rows derive CPP marks. Seventeen generated module-reset helpers
   have no original catalog function ID and remain data/module scaffolding,
   not additional unfinished original functions.
-  The broader #276 acceptance is still incomplete: 72 earlier promoted rows
-  have no `GATE_SLICES.csv` membership (#434), despite valid CPP/behavior
-  evidence and zero ordinary gate violations. All 72 belonged to #276's
-  original generated cohort, but none belongs to these final 112.
-  No historical before counts or missing slices were invented, and no
-  existing CPP mark was changed. Historical instrumentation columns
+  The separate 72-row #434 gap is resolved: 39 evidence-backed
+  `GATE_SLICES.csv` rows cover the functions, with historical `before` counts
+  measured against eight canonical verification revisions and current old-symbol
+  counts of zero. The retirement gate now rejects any `copy=yes`/`cpp=x` row
+  absent from every slice. No CPP mark or behavior changed; this records slice
+  coverage only and does not claim EC-04 retirement. #434 closed after exact
+  [Source Quality 44215989935](https://github.com/JEschete/VS-NativePort/actions/runs/44215989935)
+  passed on the fixing commit. All 72 belonged to #276's original generated
+  cohort, but none belongs to these final 112. #276 remains open for broader
+  acceptance. Historical instrumentation columns
   `tests_execute`/`replay_execute` remain preserved, not relabeled as fresh
   coverage; current behavior evidence comes from the linked verification
   records and actual runs. Reproduction and the explicit incomplete-parent
