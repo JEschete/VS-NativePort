@@ -31,7 +31,7 @@
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/PrimaryEffect.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"

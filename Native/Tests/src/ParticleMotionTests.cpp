@@ -17,14 +17,14 @@
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticleTextureAnimation.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Legacy/Psx.h"
 
 namespace {
 namespace fx = VS::Effects;
 using VS::Core::Math::Vec3;
-using Particle = Effects_Particle;
+using Particle = VS::Effects::LiveParticle;
 
 [[nodiscard]] constexpr std::uint32_t Point(std::int16_t x, std::int16_t y) {
   return static_cast<std::uint16_t>(x) |
@@ -202,16 +202,16 @@ TEST_CASE("A line endpoint wraps within its halfwords",
 
 TEST_CASE("The live line step moves the packet's second point",
           "[particle-motion][F01453]") {
-  Effects_ParticleEndpointView view{};
-  view.endX = 0;
-  view.endY = 0;
-  view.startX = 10;
-  view.startY = 8;
-  fx::LiveStepParticleEndpointTowardStart(&view);
-  CHECK(view.startX == 9);
-  CHECK(view.startY == 7);
-  CHECK(view.endX == 0);
-  CHECK(view.endY == 0);
+  fx::LiveParticleLinePacket packet{};
+  packet.line.x0 = 0;
+  packet.line.y0 = 0;
+  packet.line.x1 = 10;
+  packet.line.y1 = 8;
+  fx::LiveStepParticleEndpointTowardStart(&packet);
+  CHECK(packet.line.x1 == 9);
+  CHECK(packet.line.y1 == 7);
+  CHECK(packet.line.x0 == 0);
+  CHECK(packet.line.y0 == 0);
   fx::LiveStepParticleEndpointTowardStart(nullptr);
 }
 
@@ -251,16 +251,16 @@ TEST_CASE("The live spawn rotates through the loaded GTE matrix",
   swap.m[1][0] = 4096;  // y' = x
   swap.m[2][2] = 4096;
   Core_Gte_SetRotMatrix(&swap);
-  Effects_ParticleEmitterScratch scratch{};
+  VS::Effects::LiveParticleEmitterScratch scratch{};
   scratch.flags = rotated ? fx::kParticleRotateSpawnOffset : 0;
   scratch.vector = {5, -6, 7, 0};
   scratch.position = {10, 20, 30, 0};
   Particle particle{};
   fx::LiveSetParticleSpawnPosition(&scratch, &particle);
   const std::array<std::int32_t, 3> aim{
-      static_cast<std::int32_t>(scratch.aimPoint.vx),
-      static_cast<std::int32_t>(scratch.aimPoint.vy),
-      static_cast<std::int32_t>(scratch.aimPoint.vz)};
+      static_cast<std::int32_t>(scratch.aim_point.vx),
+      static_cast<std::int32_t>(scratch.aim_point.vy),
+      static_cast<std::int32_t>(scratch.aim_point.vz)};
   CHECK(aim == (rotated ? std::array{-6, 5, 7} : std::array{5, -6, 7}));
   CHECK(particle.motion.position.vx == 10 + aim[0] * 4096);
   CHECK(particle.motion.position.vy == 20 + aim[1] * 4096);
@@ -392,14 +392,14 @@ TEST_CASE("Integration steps every particle of the list in order",
 
 TEST_CASE("Live integration reads the particle forces and keeps acceleration",
           "[particle-motion][F01554]") {
-  const Effects_ParticleGravity saved_gravity = Effects_particleGravity;
-  const int saved_drag = Effects_particleDrag;
-  Effects_particleGravity = {};
-  Effects_particleGravity.y = 4096;
-  Effects_particleDrag = 2048;
+  const VECTOR saved_gravity = VS::Effects::particleGravity;
+  const int saved_drag = VS::Effects::particleDrag;
+  VS::Effects::particleGravity = {};
+  VS::Effects::particleGravity.vy = 4096;
+  VS::Effects::particleDrag = 2048;
   Particle particle{};
   particle.motion.mass = 4096;
-  particle.motion.gravityScale = 4096;
+  particle.motion.gravity_scale = 4096;
   particle.motion.velocity.vx = 4096;
   particle.motion.acceleration.vz = 7;
   fx::LiveIntegrateParticleMotion(&particle);
@@ -410,8 +410,8 @@ TEST_CASE("Live integration reads the particle forces and keeps acceleration",
   CHECK(particle.motion.force.vz == 7);
   CHECK(particle.motion.acceleration.vz == 7);
   fx::LiveIntegrateParticleMotion(nullptr);
-  Effects_particleGravity = saved_gravity;
-  Effects_particleDrag = saved_drag;
+  VS::Effects::particleGravity = saved_gravity;
+  VS::Effects::particleDrag = saved_drag;
 }
 
 TEST_CASE("A cleared texture animation holds nothing",
@@ -425,21 +425,21 @@ TEST_CASE("A cleared texture animation holds nothing",
   fx::ClearTextureAnimation(state);
   CHECK(state == fx::TextureAnimationState{});
 
-  Effects_ParticleTextureAnimation animation{};
-  animation.frameOffsetX = 5;
+  VS::Effects::LiveParticleTextureAnimation animation{};
+  animation.frame_offset_x = 5;
   animation.cursor = 8;
-  animation.textureIndex = 3;
-  animation.reserved14 = 9;
+  animation.texture_index = 3;
+  animation.rotation = 9;
   Effects_PackageTextureInfo frame{};
   animation.program = reinterpret_cast<u_char*>(&frame);
-  animation.textureInfo = &frame;
+  animation.texture_info = &frame;
   fx::LiveClearParticleTextureState(&animation);
-  CHECK(animation.frameOffsetX == 0);
+  CHECK(animation.frame_offset_x == 0);
   CHECK(animation.cursor == 0);
-  CHECK(animation.textureIndex == 0);
-  CHECK(animation.reserved14 == 0);
+  CHECK(animation.texture_index == 0);
+  CHECK(animation.rotation == 0);
   CHECK(animation.program == nullptr);
-  CHECK(animation.textureInfo == nullptr);
+  CHECK(animation.texture_info == nullptr);
   fx::LiveClearParticleTextureState(nullptr);
 }
 
@@ -463,13 +463,13 @@ TEST_CASE("A restarted texture animation keeps its offset and flags",
 TEST_CASE("The live restart selects the package's animation program",
           "[particle-texture][F01591]") {
   AnimationPackage package;
-  Effects_ParticleTextureAnimation animation{};
+  VS::Effects::LiveParticleTextureAnimation animation{};
   animation.cursor = 8;
-  animation.frameTimer = 6;
+  animation.frame_timer = 6;
   fx::LiveInitializeParticleTextureAnimation(&animation, 0x100, 1);
-  CHECK(animation.textureIndex == 0);
+  CHECK(animation.texture_index == 0);
   CHECK(animation.cursor == 0);
-  CHECK(animation.frameTimer == 0);
+  CHECK(animation.frame_timer == 0);
   CHECK(animation.program == package.Program(20));
   fx::LiveInitializeParticleTextureAnimation(&animation, 0, 2);
   CHECK(animation.program == nullptr);
@@ -553,19 +553,19 @@ TEST_CASE("A wrapping cursor returns to the program's first word",
 TEST_CASE("The live step selects the frame of its texture table",
           "[particle-texture][F01592]") {
   AnimationPackage package;
-  Effects_ParticleTextureAnimation animation{};
+  VS::Effects::LiveParticleTextureAnimation animation{};
   animation.program = const_cast<u_char*>(package.Program(12));
   fx::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.textureInfo == &package.frames[3]);
-  CHECK(animation.frameTimer == 4);
+  CHECK(animation.texture_info == &package.frames[3]);
+  CHECK(animation.frame_timer == 4);
   CHECK(animation.cursor == 4);
 
   // An unbound table keeps the previous frame.
-  animation.frameTimer = 0;
+  animation.frame_timer = 0;
   animation.cursor = 0;
-  animation.textureIndex = 1;
+  animation.texture_index = 1;
   fx::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.textureInfo == &package.frames[3]);
+  CHECK(animation.texture_info == &package.frames[3]);
   CHECK(animation.cursor == 4);
 }
 
@@ -573,12 +573,12 @@ TEST_CASE("The live step refuses a program outside every recorded table",
           "[particle-texture][F01592]") {
   AnimationPackage package;
   std::array<std::uint32_t, 1> unrecorded{FrameWord(1, 2)};
-  Effects_ParticleTextureAnimation animation{};
+  VS::Effects::LiveParticleTextureAnimation animation{};
   animation.program = reinterpret_cast<u_char*>(unrecorded.data());
   fx::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.textureInfo == nullptr);
+  CHECK(animation.texture_info == nullptr);
   CHECK(animation.cursor == 0);
-  CHECK(animation.frameTimer == 0);
+  CHECK(animation.frame_timer == 0);
   fx::LiveAdvanceParticleTextureAnimation(nullptr);
 }
 

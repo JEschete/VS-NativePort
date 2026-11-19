@@ -16,7 +16,7 @@
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TextureBindings.hpp"
 #include "Effects/TransformsLive.hpp"
@@ -66,13 +66,14 @@ struct TextureBindingFixture {
         std::as_writable_bytes(std::span(bytes)));
   }
 
-  static void CheckFirstFrame(const Effects_ParticleTextureAnimation& state) {
-    REQUIRE(state.textureInfo != nullptr);
-    CHECK(state.textureInfo == Effects_actionPackage.textureInfoTable[0] + 1);
-    CHECK(state.textureInfo->dataIndex == 1);
-    CHECK(state.frameOffsetX == 3);
-    CHECK(state.frameOffsetY == 2);
-    CHECK(state.frameTimer == 4);
+  static void CheckFirstFrame(
+      const VS::Effects::LiveParticleTextureAnimation& state) {
+    REQUIRE(state.texture_info != nullptr);
+    CHECK(state.texture_info == Effects_actionPackage.textureInfoTable[0] + 1);
+    CHECK(state.texture_info->dataIndex == 1);
+    CHECK(state.frame_offset_x == 3);
+    CHECK(state.frame_offset_y == 2);
+    CHECK(state.frame_timer == 4);
     CHECK(state.cursor == 8);
   }
 };
@@ -170,18 +171,18 @@ TEST_CASE("Gravity animation keeps authored holds offsets and ended frames",
   std::array<std::uint32_t, 5> program{0x10008003, 0x00040001, 0x30000000, 0,
                                        0};
   const RecordedProgram recorded{program};
-  Effects_ParticleTextureAnimation animation{};
+  VS::Effects::LiveParticleTextureAnimation animation{};
   animation.program = reinterpret_cast<u_char*>(program.data());
-  animation.textureIndex = 1;
+  animation.texture_index = 1;
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   TextureBindingFixture::CheckFirstFrame(animation);
-  const auto* frame = animation.textureInfo;
+  const auto* frame = animation.texture_info;
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.textureInfo == frame);
-  CHECK(animation.frameTimer == 2);
+  CHECK(animation.texture_info == frame);
+  CHECK(animation.frame_timer == 2);
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.textureInfo == frame);
-  CHECK(animation.frameTimer == 0);
+  CHECK(animation.texture_info == frame);
+  CHECK(animation.frame_timer == 0);
   CHECK(animation.cursor == 8);
 }
 
@@ -222,17 +223,17 @@ TEST_CASE("Ended and delayed texture programs preserve explicit frame state",
   fixture.Bind();
   std::array<std::uint32_t, 1> program{0x30000000};
   const RecordedProgram recorded{program};
-  Effects_ParticleTextureAnimation animation{};
+  VS::Effects::LiveParticleTextureAnimation animation{};
   animation.program = reinterpret_cast<u_char*>(program.data());
-  animation.textureIndex = 1;
+  animation.texture_index = 1;
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.textureInfo == nullptr);
+  CHECK(animation.texture_info == nullptr);
   CHECK(animation.cursor == 0);
-  animation.textureInfo = Effects_actionPackage.textureInfoTable[1];
-  animation.frameTimer = 4;
+  animation.texture_info = Effects_actionPackage.textureInfoTable[1];
+  animation.frame_timer = 4;
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.textureInfo == Effects_actionPackage.textureInfoTable[0]);
-  CHECK(animation.frameTimer == 2);
+  CHECK(animation.texture_info == Effects_actionPackage.textureInfoTable[0]);
+  CHECK(animation.frame_timer == 2);
   CHECK(animation.cursor == 0);
 }
 

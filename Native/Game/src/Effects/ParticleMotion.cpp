@@ -64,7 +64,7 @@ void StepAxis(std::int32_t& position, std::int32_t& velocity,
 }
 
 // Counts down a limited lifetime; true when the particle expired.
-[[nodiscard]] bool Expired(Effects_Particle& particle,
+[[nodiscard]] bool Expired(LiveParticle& particle,
                            const ParticleLifecycle& state,
                            ParticleTickHost& host) {
   if (state.lifetime == kUnlimitedLifetime) {
@@ -75,7 +75,7 @@ void StepAxis(std::int32_t& position, std::int32_t& velocity,
   return left == 0;
 }
 
-void AgeParticle(Effects_Particle& particle, ParticleTickHost& host) {
+void AgeParticle(LiveParticle& particle, ParticleTickHost& host) {
   const ParticleLifecycle ticked = host.Lifecycle(particle);
   host.StoreAge(particle, static_cast<std::uint8_t>(ticked.age + 1));
   if (ticked.tick_event != 0) {
@@ -140,10 +140,10 @@ void StepParticleMotion(ParticleMotionState& state,
   state.force = Add(state.force, Add(state.acceleration, pull));
 }
 
-void IntegrateParticleMotion(Effects_Particle* first,
+void IntegrateParticleMotion(LiveParticle* first,
                              ParticleMotionRecords& records,
                              const ParticleForces& forces) {
-  for (Effects_Particle* particle = first; particle != nullptr;
+  for (LiveParticle* particle = first; particle != nullptr;
        particle = records.Next(*particle)) {
     ParticleMotionState state = records.Motion(*particle);
     StepParticleMotion(state, forces);
@@ -152,11 +152,11 @@ void IntegrateParticleMotion(Effects_Particle* first,
 }
 
 // decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:7658)
-void TickEffectParticles(Effects_Particle* first, ParticleTickHost& host) {
+void TickEffectParticles(LiveParticle* first, ParticleTickHost& host) {
   host.Integrate(first);
   host.Draw();
-  for (Effects_Particle* particle = first; particle != nullptr;) {
-    Effects_Particle* const next = host.Next(*particle);
+  for (LiveParticle* particle = first; particle != nullptr;) {
+    LiveParticle* const next = host.Next(*particle);
     AgeParticle(*particle, host);
     particle = next;
   }

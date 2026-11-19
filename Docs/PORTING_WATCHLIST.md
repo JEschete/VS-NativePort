@@ -105,11 +105,12 @@ offsets, or reads them from disc, is where the remaining §2 work is.
 
 **Runtime-prefix aliases:** the pointer-free layout check does not prove that a
 fixed PS1 view still overlays a pointer-bearing native record. F01535 particle
-tick/expiration events previously cast a native `Effects_Particle` to
-`Effects_PluginEffectState`; widened links and texture pointers made position
-and appearance reads land in unrelated storage. Project the actual fields into
-the child-emission context by value instead. This fixes the shared parent-origin
-contract; it does not retire that remaining compatibility-context type.
+tick/expiration events once cast a native particle to the fork's
+`func_800FB4C0_t` view; widened links and texture pointers made position and
+appearance reads land in unrelated storage. The emitter now takes its parent as
+a `LiveParticle`, as upstream's `func_800D2ADC` prototype does, and projects the
+position, transparency and variant into the child-emission context by value;
+the view is retired (#441).
 
 **Partial pointer clears:** widening a field does not repair stores through an
 `int*` alias. F03246 cancelled queued music by clearing only the low 32 bits of

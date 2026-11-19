@@ -123,7 +123,7 @@ struct SurfaceForces {
 };
 
 // The emitter-scratch values a tick leaves behind
-// (Effects_ParticleEmitterScratch); a template leaves the fields it does not
+// (LiveParticleEmitterScratch); a template leaves the fields it does not
 // sample unset.
 struct SurfaceScratch {
   std::uint32_t flags{};

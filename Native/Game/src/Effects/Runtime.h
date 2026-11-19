@@ -20,7 +20,6 @@ struct Effects_PackageBlock5;
 struct Effects_PackageBlock9;
 struct Effects_PackageTexture;
 struct Effects_PackageTextureInfo;
-struct Effects_Particle;
 struct Effects_ParticleTrackKey;
 struct Effects_RendererSlot;
 struct Effects_RendererTrackKey;
@@ -29,6 +28,10 @@ struct Effects_ShakeTrackKey;
 struct Effects_TimelineTrack;
 struct Effects_TimelineTrackHeader;
 struct Effects_TransformControlView;
+
+namespace VS::Effects {
+struct LiveParticle;
+}  // namespace VS::Effects
 
 #include "Battle/ActionResolution.h"
 #include "Effects/TransformsLiveState.hpp"
@@ -80,7 +83,7 @@ struct Effects_EffectInstance {
     u_int busyBits : 3;
     u_int childCount : 5;
     u_int frame : 16;
-    Effects_Particle* particles;
+    VS::Effects::LiveParticle* particles;
     VS::Effects::LiveTransformSlot transforms[16];
     Effects_EffectInstanceTargets context;
 };

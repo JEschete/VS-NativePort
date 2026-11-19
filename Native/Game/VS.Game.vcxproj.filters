@@ -1158,10 +1158,7 @@
     <ClCompile Include="src\Effects\ParticleRenderLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Effects\Particles.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Particles.h">
+    <ClInclude Include="src\Effects\Particles.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\ParticleTextureAnimation.cpp">

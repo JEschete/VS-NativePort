@@ -11,7 +11,7 @@
 #include "Core/Log.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg077.hpp"
 #include "Effects/Plugins/Plg162.hpp"
 #include "Effects/Plugins/Plg236.hpp"
@@ -44,22 +44,22 @@ std::uint64_t refused_rings = 0;
           Effects_package->curveBlock->curveSizes[curve - 1] != 0);
 }
 
-[[nodiscard]] bool BoundTick(const Effects_ParticleDefinition& definition) {
+[[nodiscard]] bool BoundTick(const LiveParticleDefinition& definition) {
   if (Effects_currentInstance == nullptr ||
-      definition.transformIndex >=
+      definition.transform_index >=
           std::span(Effects_currentInstance->transforms).size()) {
     return Refuse("missing current instance or unavailable transform");
   }
-  const std::array curves{definition.innerExtentCurve,
-                          definition.positionCurve,
-                          definition.extentCurve,
-                          definition.forceCurve,
-                          definition.accelerationCurve,
-                          definition.directionCurve,
-                          definition.speedCurve,
-                          definition.rCurve,
-                          definition.gCurve,
-                          definition.bCurve};
+  const std::array curves{definition.inner_extent_curve,
+                          definition.position_curve,
+                          definition.extent_curve,
+                          definition.force_curve,
+                          definition.acceleration_curve,
+                          definition.direction_curve,
+                          definition.speed_curve,
+                          definition.r_curve,
+                          definition.g_curve,
+                          definition.b_curve};
   const auto count = LiveEffectCurveCount();
   if (!std::ranges::all_of(curves, [count](std::uint8_t curve) {
         return BoundCurve(curve, count);

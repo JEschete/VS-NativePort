@@ -202,7 +202,7 @@ H0200,header,Native/Game/src/Effects/CameraLiveState.hpp,owned,no,pragma-once,0,
 H0201,header,Native/Game/src/Effects/EffectResourcesLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0202,header,Native/Game/src/Effects/Loading.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/EffectResourcesLiveState.hpp and Native/Game/include/Effects/EffectResources.hpp (#441)
 H0203,header,Native/Game/src/Effects/Package.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
-H0204,header,Native/Game/src/Effects/Particles.h,generated,yes,pragma-once,0,0,0,0,0,0,24,0,0,remaining,
+H0204,header,Native/Game/src/Effects/Particles.h,generated,yes,pragma-once,0,0,0,0,0,0,24,0,0,retired,replaced by Native/Game/src/Effects/Particles.hpp (#441)
 H0205,header,Native/Game/src/Effects/Plugins/Plg005.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: no file included it; Effects_Plg005_AnalyzeGridQuad duplicated VS::Effects::Templates::GridState (Grid.hpp); TYPE T00292 retired (#441)
 H0206,header,Native/Game/src/Effects/Plugins/Plg044.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0207,header,Native/Game/src/Effects/Plugins/Plg045.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -691,7 +691,7 @@ S0254,source,Native/Game/src/Effects/ParticleMotionLive.cpp,owned,no,,0,,,,,,,,,
 S0255,source,Native/Game/src/Effects/ParticlePoolLive.cpp,owned,no,,0,,,,,,,,,done,
 S0256,source,Native/Game/src/Effects/ParticleRenderLive.cpp,owned,no,,0,,,,,,,,,done,
 S0257,source,Native/Game/src/Effects/ParticleTextureAnimationLive.cpp,owned,no,,0,,,,,,,,,done,
-S0258,source,Native/Game/src/Effects/Particles.cpp,generated,yes,,0,,,,,,,,,done,
+S0258,source,Native/Game/src/Effects/Particles.cpp,generated,yes,,0,,,,,,,,,retired,"deleted: its globals G00223 G00225 G00226 G00552-G00556 G00558 G00559 moved to ParticleEmitterLive.cpp, EffectScriptLive.cpp and ParticlePoolLive.cpp (#441)"
 S0259,source,Native/Game/src/Effects/Plugins/Plg044.cpp,generated,yes,,0,,,,,,,,,done,
 S0260,source,Native/Game/src/Effects/Plugins/Plg045.cpp,generated,yes,,0,,,,,,,,,done,
 S0261,source,Native/Game/src/Effects/Plugins/Plg047.cpp,generated,yes,,0,,,,,,,,,done,

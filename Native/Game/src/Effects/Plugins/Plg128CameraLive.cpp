@@ -23,7 +23,7 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg128Camera.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TransformsLiveState.hpp"
@@ -72,8 +72,8 @@ std::uint64_t refused_transforms = 0;
   return std::has_single_bit(++count);
 }
 
-Effects_ParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
+LiveParticleEmitterScratch& EmitterScratch() {
+  return *reinterpret_cast<LiveParticleEmitterScratch*>(
       reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
@@ -115,36 +115,36 @@ void StoreState(LiveCameraRecord& live, const CameraEffectState& state) {
 }
 
 [[nodiscard]] CameraScratch ScratchOf(
-    const Effects_ParticleEmitterScratch& scratch) {
+    const LiveParticleEmitterScratch& scratch) {
   return {.flags = scratch.flags,
           .vector = ShortOf(scratch.vector),
           .position = math::VectorOf(scratch.position),
           .extent = math::VectorOf(scratch.extent),
-          .base_direction = math::VectorOf(scratch.baseDirection),
-          .speed = {scratch.speedRange[0], scratch.speedRange[1]},
-          .attraction_offset = ShortOf(scratch.attractionOffset),
-          .attraction_jitter = ShortOf(scratch.attractionJitter),
-          .sin_angle0 = scratch.sinAngle0,
-          .sin_angle1 = scratch.sinAngle1,
-          .cos_angle0 = scratch.cosAngle0,
-          .cos_angle1 = scratch.cosAngle1};
+          .base_direction = math::VectorOf(scratch.base_direction),
+          .speed = {scratch.speed_range[0], scratch.speed_range[1]},
+          .attraction_offset = ShortOf(scratch.attraction_offset),
+          .attraction_jitter = ShortOf(scratch.attraction_jitter),
+          .sin_angle0 = scratch.sin_angle0,
+          .sin_angle1 = scratch.sin_angle1,
+          .cos_angle0 = scratch.cos_angle0,
+          .cos_angle1 = scratch.cos_angle1};
 }
 
-void StoreScratch(Effects_ParticleEmitterScratch& live,
+void StoreScratch(LiveParticleEmitterScratch& live,
                   const CameraScratch& scratch) {
   live.flags = scratch.flags;
   StoreShort(live.vector, scratch.vector);
   math::StoreVector(live.position, scratch.position);
   math::StoreVector(live.extent, scratch.extent);
-  math::StoreVector(live.baseDirection, scratch.base_direction);
-  live.speedRange[0] = scratch.speed[0];
-  live.speedRange[1] = scratch.speed[1];
-  StoreShort(live.attractionOffset, scratch.attraction_offset);
-  StoreShort(live.attractionJitter, scratch.attraction_jitter);
-  live.sinAngle0 = scratch.sin_angle0;
-  live.sinAngle1 = scratch.sin_angle1;
-  live.cosAngle0 = scratch.cos_angle0;
-  live.cosAngle1 = scratch.cos_angle1;
+  math::StoreVector(live.base_direction, scratch.base_direction);
+  live.speed_range[0] = scratch.speed[0];
+  live.speed_range[1] = scratch.speed[1];
+  StoreShort(live.attraction_offset, scratch.attraction_offset);
+  StoreShort(live.attraction_jitter, scratch.attraction_jitter);
+  live.sin_angle0 = scratch.sin_angle0;
+  live.sin_angle1 = scratch.sin_angle1;
+  live.cos_angle0 = scratch.cos_angle0;
+  live.cos_angle1 = scratch.cos_angle1;
 }
 
 [[nodiscard]] VectorRange VectorRangeOf(
@@ -154,28 +154,29 @@ void StoreScratch(Effects_ParticleEmitterScratch& live,
 }
 
 [[nodiscard]] CameraDefinition DefinitionOf(
-    const Effects_ParticleDefinition& definition) {
+    const LiveParticleDefinition& definition) {
   const std::span<const std::int16_t, math::kPlaneRangeHalfwords> speed =
-      definition.pairRanges[kSpeedRange];
-  return {.flags = definition.flags,
-          .position_curve = definition.positionCurve,
-          .direction_curve = definition.directionCurve,
-          .speed_curve = definition.speedCurve,
-          .attraction_offset_curve = definition.attractionOffsetCurve,
-          .attraction_jitter_curve = definition.attractionJitterCurve,
-          .inner_extent_curve = definition.innerExtentCurve,
-          .position_range = VectorRangeOf(definition.positionRange),
-          .extent_range = VectorRangeOf(definition.extentRange),
-          .direction_range =
-              VectorRangeOf(definition.vectorRanges[kDirectionRange]),
-          .speed_range = {math::RangePair(speed, 0), math::RangePair(speed, 1)},
-          .attraction_offset_range =
-              VectorRangeOf(definition.vectorRanges[kAttractionOffsetRange]),
-          .attraction_jitter_range =
-              VectorRangeOf(definition.vectorRanges[kAttractionJitterRange]),
-          .inner_extent_range = math::RangePair(definition.innerExtentRange, 0),
-          .transform_index = definition.transformIndex,
-          .attraction_transform = definition.attractionTransform};
+      definition.pair_ranges[kSpeedRange];
+  return {
+      .flags = definition.flags,
+      .position_curve = definition.position_curve,
+      .direction_curve = definition.direction_curve,
+      .speed_curve = definition.speed_curve,
+      .attraction_offset_curve = definition.attraction_offset_curve,
+      .attraction_jitter_curve = definition.attraction_jitter_curve,
+      .inner_extent_curve = definition.inner_extent_curve,
+      .position_range = VectorRangeOf(definition.position_range),
+      .extent_range = VectorRangeOf(definition.extent_range),
+      .direction_range =
+          VectorRangeOf(definition.vector_ranges[kDirectionRange]),
+      .speed_range = {math::RangePair(speed, 0), math::RangePair(speed, 1)},
+      .attraction_offset_range =
+          VectorRangeOf(definition.vector_ranges[kAttractionOffsetRange]),
+      .attraction_jitter_range =
+          VectorRangeOf(definition.vector_ranges[kAttractionJitterRange]),
+      .inner_extent_range = math::RangePair(definition.inner_extent_range, 0),
+      .transform_index = definition.transform_index,
+      .attraction_transform = definition.attraction_transform};
 }
 
 class LiveCameraEffectHost final : public CameraEffectHost {
@@ -303,7 +304,7 @@ int UpdateLiveEffectCamera(Effects_RendererSlot* slot, unsigned int command,
     return kind == CameraCommand::kStop ? 0 : 1;
   }
   auto& live = *static_cast<LiveCameraRecord*>(slot->rendererState);
-  Effects_ParticleEmitterScratch& live_scratch = EmitterScratch();
+  LiveParticleEmitterScratch& live_scratch = EmitterScratch();
   CameraEffectState state = StateOf(live);
   CameraScratch scratch = ScratchOf(live_scratch);
   LiveCameraEffectHost host(Effects_currentInstance);

@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Templates/SurfaceCore.hpp"
 #include "Effects/TrailEmitter.hpp"
 #include "Effects/Trails.hpp"
@@ -37,7 +37,7 @@ struct LiveRingState {
   std::int32_t angle;
   // Ticks since creation; every curve samples at it.
   std::int32_t age;
-  Effects_ParticleTextureAnimation texture;
+  LiveParticleTextureAnimation texture;
 };
 
 // decomp: vs_GridState (src/EFFECT/grids.h:16): a 9x9 grid of waving
@@ -78,7 +78,7 @@ struct LiveMesh10State {
   std::int16_t reserved_2;
   // Ticks since creation; every curve samples at it.
   std::int32_t age;
-  Effects_ParticleTextureAnimation texture;
+  LiveParticleTextureAnimation texture;
   // Accumulated rotation; the sampled spin adds to it each tick
   // (meshes10.h:152-157).
   SVECTOR rotation;
@@ -105,7 +105,7 @@ struct LiveSheetState {
   // create and doubled, with 256 stored as 255; 255 without a curve
   // (surfaces.h:113-134).
   std::array<std::int32_t, Rows> factors;
-  Effects_ParticleTextureAnimation texture;
+  LiveParticleTextureAnimation texture;
 };
 
 // decomp: vs_SurfaceState (src/EFFECT/surfaces.h:45)
@@ -128,7 +128,7 @@ struct LiveRotatingSurfaceState {
   std::int32_t angle;
   std::int32_t age;
   std::array<std::int32_t, Templates::kSurfaceRows> factors;
-  Effects_ParticleTextureAnimation texture;
+  LiveParticleTextureAnimation texture;
 };
 
 // decomp: VS_TRAIL_TYPES (src/EFFECT/trailEffect.h:28): the state of an
@@ -151,7 +151,7 @@ struct BasicLiveTrailState {
   LiveTrailRecord<Samples>* trails;
   // Ticks since creation; every curve samples at it.
   std::int32_t curve_sample_distance;
-  Effects_ParticleTextureAnimation texture;
+  LiveParticleTextureAnimation texture;
   // The definition's transparency curve sampled once per spline sample at
   // create, 128 each without a curve (trailEffect.h:742-757); the original
   // allocated them past the structure.

@@ -13,7 +13,7 @@ struct Effects_PackageFile;
 struct Effects_PackageTexture;
 struct Effects_PackageTextureInfo;
 
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 
 // decomp: pFileBlock1 (src/BATTLE/BATTLE.PRG/6F014.c:293)
 struct Effects_PackageBlock1 {
@@ -47,7 +47,7 @@ static_assert(sizeof(Effects_PackageBlock3) == 0x4, "Effects_PackageBlock3 must 
 // decomp: pFileBlock5 (src/BATTLE/BATTLE.PRG/5BF94.h:329)
 struct Effects_PackageBlock5 {
     int reserved0;
-    Effects_ParticleDefinition definitions[0];
+    VS::Effects::LiveParticleDefinition definitions[0];
 };
 static_assert(sizeof(Effects_PackageBlock5) == 0x4, "Effects_PackageBlock5 must keep its PS1 layout");
 

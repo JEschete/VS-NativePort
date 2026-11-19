@@ -5,9 +5,12 @@
 #include "Effects/TrailEmitter.hpp"
 
 struct Effects_EffectInstance;
-struct Effects_ParticleDefinition;
-struct Effects_ParticleEmitterScratch;
 struct Effects_RendererSlot;
+
+namespace VS::Effects {
+struct LiveParticleDefinition;
+struct LiveParticleEmitterScratch;
+}  // namespace VS::Effects
 
 // Live bindings for the five- and nine-sample trail template instances
 // (TrailTarget.cpp ... TrailRender.cpp). RunLiveTrailStage and
@@ -25,13 +28,13 @@ struct Effects_RendererSlot;
 // stage set.
 namespace VS::Effects::Templates {
 void RunLiveTrailStage(TrailStage stage,
-                       const Effects_ParticleDefinition& definition,
-                       Effects_ParticleEmitterScratch& scratch,
+                       const LiveParticleDefinition& definition,
+                       LiveParticleEmitterScratch& scratch,
                        Effects_EffectInstance& instance, LiveTrailState& state);
 // RunLiveTrailStage over a nine-sample emitter (trails9.h).
 void RunLiveTrailNineStage(TrailNineStage stage,
-                           const Effects_ParticleDefinition& definition,
-                           Effects_ParticleEmitterScratch& scratch,
+                           const LiveParticleDefinition& definition,
+                           LiveParticleEmitterScratch& scratch,
                            Effects_EffectInstance& instance,
                            LiveTrailNineState& state);
 

@@ -23,7 +23,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailControl.hpp"
@@ -45,7 +45,7 @@ using PackageCurves = decltype(Effects_EffectPackage::curves);
 constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
 constexpr std::size_t kCurveSlots = std::extent_v<PackageCurves>;
 static_assert(kCurveSlots == kEffectCurveCapacity);
-static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
+static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 
 // The two emitter states (TemplateLiveState.hpp): the five-sample state of
 // trails5.h and the nine-sample state of trails9.h, each with its
@@ -92,8 +92,8 @@ const Templates::TrailStages& Plg074Stages() {
   std::abort();
 }
 
-Effects_ParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
+LiveParticleEmitterScratch& EmitterScratch() {
+  return *reinterpret_cast<LiveParticleEmitterScratch*>(
       reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
@@ -104,7 +104,8 @@ TrailVector Wide(const VECTOR& value) {
           static_cast<std::int32_t>(value.vz)};
 }
 
-void Store(VECTOR& target, TrailVector value) {
+template <typename Vector>
+void Store(Vector& target, TrailVector value) {
   target.vx = value.x;
   target.vy = value.y;
   target.vz = value.z;
@@ -149,34 +150,34 @@ TrailVector SampledRange(
   return Wide(value);
 }
 
-TrailOriginScratch LoadScratch(const Effects_ParticleEmitterScratch& scratch) {
+TrailOriginScratch LoadScratch(const LiveParticleEmitterScratch& scratch) {
   return {.position = Wide(scratch.position),
           .extent = Wide(scratch.extent),
-          .aim_point = Wide(scratch.aimPoint),
-          .sin_angle0 = scratch.sinAngle0,
-          .sin_angle1 = scratch.sinAngle1,
-          .cos_angle0 = scratch.cosAngle0,
-          .cos_angle1 = scratch.cosAngle1,
-          .ring_segments = scratch.ringSegments,
-          .ring_positions = scratch.ringPositions};
+          .aim_point = Wide(scratch.aim_point),
+          .sin_angle0 = scratch.sin_angle0,
+          .sin_angle1 = scratch.sin_angle1,
+          .cos_angle0 = scratch.cos_angle0,
+          .cos_angle1 = scratch.cos_angle1,
+          .ring_segments = scratch.ring_segments,
+          .ring_positions = scratch.ring_positions};
 }
 
 void StoreScratch(const TrailOriginScratch& values,
-                  Effects_ParticleEmitterScratch& scratch) {
+                  LiveParticleEmitterScratch& scratch) {
   Store(scratch.position, values.position);
   Store(scratch.extent, values.extent);
-  Store(scratch.aimPoint, values.aim_point);
-  scratch.sinAngle0 = values.sin_angle0;
-  scratch.sinAngle1 = values.sin_angle1;
-  scratch.cosAngle0 = values.cos_angle0;
-  scratch.cosAngle1 = values.cos_angle1;
-  scratch.ringSegments = values.ring_segments;
-  scratch.ringPositions = values.ring_positions;
+  Store(scratch.aim_point, values.aim_point);
+  scratch.sin_angle0 = values.sin_angle0;
+  scratch.sin_angle1 = values.sin_angle1;
+  scratch.cos_angle0 = values.cos_angle0;
+  scratch.cos_angle1 = values.cos_angle1;
+  scratch.ring_segments = values.ring_segments;
+  scratch.ring_positions = values.ring_positions;
 }
 
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
-Effects_ParticleDefinition* Definition(std::size_t index) {
+LiveParticleDefinition* Definition(std::size_t index) {
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
@@ -186,10 +187,10 @@ Effects_ParticleDefinition* Definition(std::size_t index) {
 
 template <typename Emitter>
 SamplesOf<Emitter> Transparency(std::string_view overlay,
-                                const Effects_ParticleDefinition& definition) {
+                                const LiveParticleDefinition& definition) {
   SamplesOf<Emitter> samples{};
   samples.fill(kOpaqueTrailTransparency);
-  const std::size_t curve = definition.transparencyCurve;
+  const std::size_t curve = definition.transparency_curve;
   if (curve == 0) return samples;
   const std::size_t bound = LiveEffectCurveCount();
   if (curve >= bound) {
@@ -214,29 +215,29 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
 
 // decomp: src/EFFECT/trails5.h:27 and trails9.h:27 VS_TRAIL_ORIGIN_FUNCTION.
 template <typename Emitter>
-void GenerateOrigins(const Effects_ParticleDefinition& definition,
-                     Effects_ParticleEmitterScratch& scratch,
+void GenerateOrigins(const LiveParticleDefinition& definition,
+                     LiveParticleEmitterScratch& scratch,
                      Effects_EffectInstance& instance, Emitter& state,
                      const OverlayOf<Emitter>& overlay) {
-  if (definition.transformIndex >= kTransformCount) {
+  if (definition.transform_index >= kTransformCount) {
     InvalidEmitter(overlay.name, "definition transform outside the instance");
   }
   const std::span<TrailOf<Emitter>> trails = Trails(overlay.name, state);
-  const MATRIX& matrix = instance.transforms[definition.transformIndex].world;
+  const MATRIX& matrix = instance.transforms[definition.transform_index].world;
   const SVECTOR& origin = *Effects_effectOrigin;
   const TrailOriginRequest request{
       .flags = scratch.flags,
       .position =
-          SampledRange(definition.positionRange, definition.positionCurve,
+          SampledRange(definition.position_range, definition.position_curve,
                        state.curve_sample_distance),
-      .extent = SampledRange(definition.extentRange, definition.extentCurve,
+      .extent = SampledRange(definition.extent_range, definition.extent_curve,
                              state.curve_sample_distance),
       .effect_origin = {origin.vx, origin.vy, origin.vz},
       .caster_translation = {static_cast<std::int32_t>(matrix.t[0]),
                              static_cast<std::int32_t>(matrix.t[1]),
                              static_cast<std::int32_t>(matrix.t[2])},
-      .ring_segments = definition.ringSegments,
-      .ring_positions = definition.ringPositions};
+      .ring_segments = definition.ring_segments,
+      .ring_positions = definition.ring_positions};
   Core_Gte_SetRotMatrix(&matrix);
   Core_Gte_ClearTranslation();
 
@@ -289,7 +290,7 @@ class LiveTrailEmitterHost final : public TrailEmitterHost {
   // origin, target, control and init).
   void InitializeTrails() override {
     Emitter& state = *State();
-    Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+    LiveParticleEmitterScratch& scratch = EmitterScratch();
     GenerateOrigins(*definition_, scratch, *instance_, state, overlay_);
     const auto& stages = *overlay_.stages;
     for (const auto stage : {stages.target, stages.control, stages.init}) {
@@ -318,14 +319,13 @@ class LiveTrailEmitterHost final : public TrailEmitterHost {
 
   Effects_RendererSlot& slot_;
   const OverlayOf<Emitter>& overlay_;
-  Effects_ParticleDefinition* definition_ = nullptr;
+  LiveParticleDefinition* definition_ = nullptr;
   Effects_EffectInstance* instance_ = nullptr;
 };
 
 template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::Create(TrailEmitterPlan plan) {
-  const Effects_ParticleDefinition* definition =
-      Definition(plan.definition_index);
+  const LiveParticleDefinition* definition = Definition(plan.definition_index);
   if (definition == nullptr) {
     VS::Core::LogWarn(
         "effects",
@@ -335,7 +335,7 @@ void LiveTrailEmitterHost<Emitter>::Create(TrailEmitterPlan plan) {
     return;
   }
   const auto count =
-      TrailCountFor(definition->intervalRange[0], Layout::kCapacity);
+      TrailCountFor(definition->interval_range[0], Layout::kCapacity);
   if (!count) {
     VS::Core::LogWarn("effects",
                       "{} trail emitter: definition {} has a negative trail "
@@ -371,10 +371,10 @@ void LiveTrailEmitterHost<Emitter>::Create(TrailEmitterPlan plan) {
   state->trail_count = *count;
   state->initialized = 0;
   state->transparency = Transparency<Emitter>(overlay_.name, *definition);
-  Effects_ParticleTextureAnimation& texture = state->texture;
+  LiveParticleTextureAnimation& texture = state->texture;
   LiveClearParticleTextureState(&texture);
-  LiveInitializeParticleTextureAnimation(&texture, definition->textureIndex,
-                                         definition->animationId);
+  LiveInitializeParticleTextureAnimation(&texture, definition->texture_index,
+                                         definition->animation_id);
 }
 
 template <typename Emitter>
@@ -398,11 +398,11 @@ bool LiveTrailEmitterHost<Emitter>::BeginTick() {
                       overlay_.name, index);
     return false;
   }
-  if (definition_->transformIndex >= kTransformCount) {
+  if (definition_->transform_index >= kTransformCount) {
     VS::Core::LogWarn("effects",
                       "{} trail emitter: definition {} names transform {} of "
                       "{}; emitter stopped",
-                      overlay_.name, index, definition_->transformIndex,
+                      overlay_.name, index, definition_->transform_index,
                       kTransformCount);
     return false;
   }
@@ -415,13 +415,13 @@ bool LiveTrailEmitterHost<Emitter>::BeginTick() {
 template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::DrawTrails() {
   Emitter& state = *State();
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   Layout::kRunStage(overlay_.stages->update, *definition_, scratch, *instance_,
                     state);
   Layout::kRunStage(overlay_.stages->render, *definition_, scratch, *instance_,
                     state);
-  if (definition_->tickEvent == 0) return;
-  const std::size_t event = definition_->tickEvent - 1U;
+  if (definition_->tick_event == 0) return;
+  const std::size_t event = definition_->tick_event - 1U;
   const std::size_t bound = LiveParticleDefinitionCount();
   if (event >= bound) {
     VS::Core::LogWarn(
@@ -440,9 +440,9 @@ template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
   constexpr std::size_t kSplineSampleCount =
       std::tuple_size_v<decltype(TrailOf<Emitter>::spline_samples)>;
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   const MATRIX& world =
-      instance_->transforms[definition_->transformIndex].world;
+      instance_->transforms[definition_->transform_index].world;
   const bool world_events = (definition_->flags & kTrailWorldEvents) != 0;
   for (TrailOf<Emitter>& trail : Trails(overlay_.name, *State())) {
     if (trail.current_spline_sample >= kSplineSampleCount) {
@@ -459,14 +459,14 @@ void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
       scratch.vector.vz = sample.vz;
       Core_Gte_LoadV0(&scratch.vector);
       Core_Gte_Rtv0Tr();
-      Core_Gte_StoreLvnl(&scratch.aimPoint);
-      point = Wide(scratch.aimPoint);
+      Core_Gte_StoreLvnl(&scratch.aim_point);
+      point = Wide(scratch.aim_point);
     }
     // The original left the context's other fields, including its variant,
     // as stack contents; they start cleared here.
-    Effects_PluginEffectState context{};
+    LiveParticle context{};
     context.transparency = 0;
-    Store(context.position, TrailEventPosition(point));
+    Store(context.motion.position, TrailEventPosition(point));
     EmitLiveParticleEvent(instance_, static_cast<int>(event), 0, 0, &context);
   }
 }
@@ -493,8 +493,8 @@ int UpdateEmitter(Effects_RendererSlot* slot, unsigned int command, int packed,
 }  // namespace
 
 // decomp: src/EFFECT/trails5.h:27 VS_TRAIL_ORIGIN_FUNCTION.
-void GenerateLiveTrailOrigins(const Effects_ParticleDefinition& definition,
-                              Effects_ParticleEmitterScratch& scratch,
+void GenerateLiveTrailOrigins(const LiveParticleDefinition& definition,
+                              LiveParticleEmitterScratch& scratch,
                               Effects_EffectInstance& instance,
                               LiveTrailState& state,
                               const LiveTrailOverlay& overlay) {
@@ -508,8 +508,8 @@ int UpdateLiveTrailEmitter(Effects_RendererSlot* slot, unsigned int command,
 }
 
 // decomp: src/EFFECT/trails9.h:27 VS_TRAIL_ORIGIN_FUNCTION.
-void GenerateLiveTrailNineOrigins(const Effects_ParticleDefinition& definition,
-                                  Effects_ParticleEmitterScratch& scratch,
+void GenerateLiveTrailNineOrigins(const LiveParticleDefinition& definition,
+                                  LiveParticleEmitterScratch& scratch,
                                   Effects_EffectInstance& instance,
                                   LiveTrailNineState& state,
                                   const LiveTrailNineOverlay& overlay) {
@@ -524,10 +524,10 @@ int UpdateLiveTrailNineEmitter(Effects_RendererSlot* slot, unsigned int command,
 }
 
 // decomp: PLG074 func_800FB414 (src/EFFECT/trails5.h:27).
-void GenerateLivePlg074TrailOrigins(
-    const Effects_ParticleDefinition& definition,
-    Effects_ParticleEmitterScratch& scratch, Effects_EffectInstance& instance,
-    LiveTrailState& state) {
+void GenerateLivePlg074TrailOrigins(const LiveParticleDefinition& definition,
+                                    LiveParticleEmitterScratch& scratch,
+                                    Effects_EffectInstance& instance,
+                                    LiveTrailState& state) {
   GenerateLiveTrailOrigins(
       definition, scratch, instance, state,
       {"PLG074", &VS::Content::plg074TrailEmissionCounter[0], &Plg074Stages()});

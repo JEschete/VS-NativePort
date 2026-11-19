@@ -16,7 +16,7 @@
 #include "Core/Math/Interpolation.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
@@ -535,8 +535,8 @@ TEST_CASE("Live trail entries refuse definitions and name their overlay",
 
 TEST_CASE("Live trail stages run over the emitter's trail buffer",
           "[effects-trail-templates][effects]") {
-  Effects_ParticleDefinition definition{};
-  Effects_ParticleEmitterScratch scratch{};
+  VS::Effects::LiveParticleDefinition definition{};
+  VS::Effects::LiveParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
   std::array<VS::Effects::LiveTrail, 3> buffer{};
   VS::Effects::LiveTrailState state{};
@@ -551,8 +551,8 @@ TEST_CASE("Live trail stages run over the emitter's trail buffer",
 TEST_CASE("Live trail stages skip a buffer that cannot hold its count",
           "[effects-trail-templates][effects]") {
   const LiveTrailScope scope;
-  Effects_ParticleDefinition definition{};
-  Effects_ParticleEmitterScratch scratch{};
+  VS::Effects::LiveParticleDefinition definition{};
+  VS::Effects::LiveParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
   std::array<VS::Effects::LiveTrail, 1> buffer{};
   VS::Effects::LiveTrailState state{};

@@ -20,7 +20,7 @@
 #include "Effects/Package.h"
 #include "Effects/ParticleRender.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -124,22 +124,22 @@ std::optional<std::uint32_t> ColorSample(unsigned curve, unsigned age) {
       static_cast<int>(curve), static_cast<int>(age)));
 }
 
-bool ProjectNode(Effects_Particle& node, SVECTOR& point, Core_GteWord& xy,
+bool ProjectNode(LiveParticle& node, SVECTOR& point, Core_GteWord& xy,
                  Core_GteWord& depth, Core_GteWord& projection_flags) {
   point = {Half((node.motion.position.vx >> kFixedShift) +
-                node.textureAnimation.frameOffsetX),
+                node.texture_animation.frame_offset_x),
            Half((node.motion.position.vy >> kFixedShift) +
-                node.textureAnimation.frameOffsetY),
+                node.texture_animation.frame_offset_y),
            Half(node.motion.position.vz >> kFixedShift), 0};
   const MATRIX* matrix = &VS::Render::FrameScratchpad().view_matrix;
-  if ((node.emitFlags & kAttached) != 0) {
+  if ((node.emit_flags & kAttached) != 0) {
     Require(Effects_currentInstance != nullptr &&
-                node.transformIndex <
+                node.transform_index <
                     std::size(Effects_currentInstance->transforms),
             "Attached particle has no valid native transform");
     const auto& transform =
-        Effects_currentInstance->transforms[node.transformIndex];
-    if ((node.emitFlags & kCullBelow) != 0) {
+        Effects_currentInstance->transforms[node.transform_index];
+    if ((node.emit_flags & kCullBelow) != 0) {
       Core_Gte_SetRotMatrix(&transform.world);
       Core_Gte_SetTransMatrix(&transform.world);
       VECTOR world{};
@@ -148,7 +148,7 @@ bool ProjectNode(Effects_Particle& node, SVECTOR& point, Core_GteWord& xy,
       if (world.vy > 0) return false;
     }
     matrix = &transform.view;
-  } else if ((node.emitFlags & kCullBelow) != 0 && point.vy > 0) {
+  } else if ((node.emit_flags & kCullBelow) != 0 && point.vy > 0) {
     return false;
   }
   Core_Gte_SetRotMatrix(matrix);
@@ -158,7 +158,7 @@ bool ProjectNode(Effects_Particle& node, SVECTOR& point, Core_GteWord& xy,
   return true;
 }
 
-void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
+void TraceParticle(const LiveParticle& node, SVECTOR point, Core_GteWord xy,
                    Core_GteWord depth, Core_GteWord flags,
                    std::string_view outcome, const u_long* first_quad = nullptr,
                    unsigned quad_count = 0) {
@@ -166,7 +166,7 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
       !VS::Core::IsLogEnabled(VS::Core::LogLevel::Trace, "effect-path")) {
     return;
   }
-  const bool attached = (node.emitFlags & kAttached) != 0;
+  const bool attached = (node.emit_flags & kAttached) != 0;
   const auto matrix = [](const MATRIX& value) -> nlohmann::json {
     return {{"rotation",
              {{value.m[0][0], value.m[0][1], value.m[0][2]},
@@ -179,7 +179,8 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
                                                      point.vz};
   nlohmann::json transform = nullptr;
   if (attached) {
-    const auto& slot = Effects_currentInstance->transforms[node.transformIndex];
+    const auto& slot =
+        Effects_currentInstance->transforms[node.transform_index];
     view = &slot.view;
     transform = matrix(slot.world);
     const std::array<int, kSpatialDimensions> local{point.vx, point.vy,
@@ -201,8 +202,8 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
       VS::Render::GetLiveProjectionScreenOffset();
   nlohmann::json record{
       {"kind", "particle"},
-      {"pool", reinterpret_cast<std::uintptr_t>(Effects_particlePool)},
-      {"slot", &node - Effects_particlePool},
+      {"pool", reinterpret_cast<std::uintptr_t>(particlePool)},
+      {"slot", &node - particlePool},
       {"instance", reinterpret_cast<std::uintptr_t>(Effects_currentInstance)},
       {"effect_id",
        Effects_currentInstance
@@ -210,9 +211,9 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
            : nlohmann::json(nullptr)},
       {"age", node.age},
       {"lifetime", node.lifetime},
-      {"emit_flags", node.emitFlags},
+      {"emit_flags", node.emit_flags},
       {"attached", attached},
-      {"transform_index", node.transformIndex},
+      {"transform_index", node.transform_index},
       {"position_q12",
        {node.motion.position.vx, node.motion.position.vy,
         node.motion.position.vz}},
@@ -237,25 +238,25 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
   VS::Core::LogTrace("effect-path", "{}", record.dump());
 }
 
-std::size_t PoolSlot(const Effects_Particle* node) {
-  const auto base = reinterpret_cast<std::uintptr_t>(Effects_particlePool);
+std::size_t PoolSlot(const LiveParticle* node) {
+  const auto base = reinterpret_cast<std::uintptr_t>(particlePool);
   const auto address = reinterpret_cast<std::uintptr_t>(node);
   Require(address >= base && (address - base) % sizeof(*node) == 0 &&
               (address - base) / sizeof(*node) <
-                  static_cast<unsigned>(Effects_particleCapacity),
+                  static_cast<unsigned>(particleCapacity),
           "Particle render list exceeds its native pool");
   return (address - base) / sizeof(*node);
 }
 
-std::vector<std::size_t> CollectParticleSlots(const Effects_Particle* head) {
+std::vector<std::size_t> CollectParticleSlots(const LiveParticle* head) {
   std::vector<std::size_t> slots;
   if (head == nullptr) return slots;
   Require(Effects_package != nullptr && Effects_package->textures != nullptr,
           "Particle rendering requires a loaded effect package");
-  Require(Effects_particlePool != nullptr && Effects_particleCapacity > 0,
+  Require(particlePool != nullptr && particleCapacity > 0,
           "Particle rendering requires its native pool");
   for (const auto* node = head; node != nullptr; node = node->next) {
-    Require(slots.size() < static_cast<unsigned>(Effects_particleCapacity),
+    Require(slots.size() < static_cast<unsigned>(particleCapacity),
             "Particle render list exceeds its native pool");
     slots.push_back(PoolSlot(node));
   }
@@ -265,7 +266,7 @@ std::vector<std::size_t> CollectParticleSlots(const Effects_Particle* head) {
 class LiveParticleRenderer final : public ParticleRenderer {
  public:
   void AdvanceTextureAnimation(std::size_t particle) override {
-    LiveAdvanceParticleTextureAnimation(&Node(particle).textureAnimation);
+    LiveAdvanceParticleTextureAnimation(&Node(particle).texture_animation);
   }
 
   [[nodiscard]] std::optional<ParticleProjection> Project(
@@ -283,10 +284,10 @@ class LiveParticleRenderer final : public ParticleRenderer {
       std::size_t particle) const override {
     const auto& node = Node(particle);
     return {static_cast<ParticleDepthMode>(
-                node.opaque61Bit0 != 0 ? node.opaque61Bit0
-                                       : node.textureAnimation.reserved7),
-            (static_cast<unsigned>(node.emitFlags) & kFollowVelocity) != 0,
-            node.transparency, node.textureAnimation.reserved14};
+                node.variant != 0 ? node.variant
+                                  : node.texture_animation.frame_flags),
+            (static_cast<unsigned>(node.emit_flags) & kFollowVelocity) != 0,
+            node.transparency, node.texture_animation.rotation};
   }
 
   [[nodiscard]] std::int32_t NearClip() const override {
@@ -299,7 +300,7 @@ class LiveParticleRenderer final : public ParticleRenderer {
 
   [[nodiscard]] std::optional<ParticleTextureFrame> TextureFrame(
       std::size_t particle) const override {
-    const auto* info = Node(particle).textureAnimation.textureInfo;
+    const auto* info = Node(particle).texture_animation.texture_info;
     if (info == nullptr) return std::nullopt;
     return ParticleTextureFrame{static_cast<std::uint32_t>(info->dataIndex),
                                 static_cast<std::uint32_t>(info->reserved0)};
@@ -318,16 +319,16 @@ class LiveParticleRenderer final : public ParticleRenderer {
   }
 
   void SetRotation(std::size_t particle, std::int16_t rotation) override {
-    Node(particle).textureAnimation.reserved14 = rotation;
+    Node(particle).texture_animation.rotation = rotation;
   }
 
   [[nodiscard]] ParticleColorSamples ColorSamples(
       std::size_t particle) override {
     const auto& node = Node(particle);
     const auto age = static_cast<u_char>(node.age + 1);
-    return {ColorSample(node.colorCurves[0], age),
-            ColorSample(node.colorCurves[1], age),
-            ColorSample(node.colorCurves[2], age)};
+    return {ColorSample(node.color_curves[0], age),
+            ColorSample(node.color_curves[1], age),
+            ColorSample(node.color_curves[2], age)};
   }
 
   [[nodiscard]] ParticleTexture Texture(std::uint32_t index) const override {
@@ -398,8 +399,8 @@ class LiveParticleRenderer final : public ParticleRenderer {
   }
 
  private:
-  static Effects_Particle& Node(std::size_t particle) {
-    return Effects_particlePool[particle];
+  static LiveParticle& Node(std::size_t particle) {
+    return particlePool[particle];
   }
 
   static u_long* Ordering(int bucket) {
@@ -414,11 +415,11 @@ class LiveParticleRenderer final : public ParticleRenderer {
 };
 }  // namespace
 
-void DrawLiveEffectParticleList(Effects_Particle* head) {
+void DrawLiveEffectParticleList(LiveParticle* head) {
   DrawLiveAnimatedSpriteParticles(head);
 }
 
-void DrawLiveAnimatedSpriteParticles(Effects_Particle* head) {
+void DrawLiveAnimatedSpriteParticles(LiveParticle* head) {
   if (head == nullptr) return;
   const auto slots = CollectParticleSlots(head);
   LiveParticleRenderer renderer;

@@ -154,7 +154,7 @@
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg128CameraLive.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
@@ -547,10 +547,10 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EC2E8u, 32u, (void*)&VS::Effects::trailAdditiveColors, sizeof VS::Effects::trailAdditiveColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC308u, 28u, (void*)&VS::Effects::trailColors, sizeof VS::Effects::trailColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC324u, 4u, (void*)&Effects_scriptRenderers, sizeof Effects_scriptRenderers, 4u, sizeof Effects_scriptRenderers[0]},
-    {"BATTLE/BATTLE.PRG", 0x800EC328u, 4u, (void*)&Effects_emissionCounter, sizeof Effects_emissionCounter, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC328u, 4u, (void*)&VS::Effects::emissionCounter, sizeof VS::Effects::emissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC32Cu, 4u, (void*)&Effects_actionVariantValues, sizeof Effects_actionVariantValues, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC330u, 56u, (void*)&Effects_pairedParticleColorPresets, sizeof Effects_pairedParticleColorPresets, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC368u, 140u, (void*)&Effects_particleColorPresetTable, sizeof Effects_particleColorPresetTable, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC330u, 56u, (void*)&VS::Effects::pairedParticleColorPresets, sizeof VS::Effects::pairedParticleColorPresets, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC368u, 140u, (void*)&VS::Effects::particleColorPresetTable, sizeof VS::Effects::particleColorPresetTable, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC3F4u, 196u, (void*)&Effects_scriptOpcodeHandlers, sizeof Effects_scriptOpcodeHandlers, 4u, sizeof Effects_scriptOpcodeHandlers[0]},
     {"BATTLE/BATTLE.PRG", 0x800EC4B8u, 4u, (void*)&Effects_lastReactionSoundVariant, sizeof Effects_lastReactionSoundVariant, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC4BCu, 20992u, (void*)&Effects_emptyPackage, sizeof Effects_emptyPackage, 1u, 1u},
@@ -792,14 +792,14 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F55A0u, 4u, (void*)&VS::Effects::cameraMotionDuration, sizeof VS::Effects::cameraMotionDuration, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F55A8u, 64u, (void*)&VS::Effects::savedActionCamera, sizeof VS::Effects::savedActionCamera, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F55E8u, 4u, (void*)&VS::Effects::cameraTransitionMode, sizeof VS::Effects::cameraTransitionMode, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F55F0u, 4u, (void*)&Effects_particleCapacity, sizeof Effects_particleCapacity, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F55F4u, 4u, (void*)&Effects_freeParticles, sizeof Effects_freeParticles, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F55F8u, 4u, (void*)&Effects_usedParticleCount, sizeof Effects_usedParticleCount, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F55FCu, 4u, (void*)&Effects_particlePool, sizeof Effects_particlePool, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5600u, 4u, (void*)&Effects_particlePoolReferences, sizeof Effects_particlePoolReferences, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F55F0u, 4u, (void*)&VS::Effects::particleCapacity, sizeof VS::Effects::particleCapacity, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F55F4u, 4u, (void*)&VS::Effects::freeParticles, sizeof VS::Effects::freeParticles, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F55F8u, 4u, (void*)&VS::Effects::usedParticleCount, sizeof VS::Effects::usedParticleCount, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F55FCu, 4u, (void*)&VS::Effects::particlePool, sizeof VS::Effects::particlePool, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F5600u, 4u, (void*)&VS::Effects::particlePoolReferences, sizeof VS::Effects::particlePoolReferences, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5610u, 4u, (void*)&Effects_scriptSelector, sizeof Effects_scriptSelector, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F5618u, 4u, (void*)&Effects_particleDrag, sizeof Effects_particleDrag, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F5620u, 16u, (void*)&Effects_particleGravity, sizeof Effects_particleGravity, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F5618u, 4u, (void*)&VS::Effects::particleDrag, sizeof VS::Effects::particleDrag, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F5620u, 16u, (void*)&VS::Effects::particleGravity, sizeof VS::Effects::particleGravity, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5630u, 4u, (void*)&VS::Effects::textureLoadIndex, sizeof VS::Effects::textureLoadIndex, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5638u, 68u, (void*)&VS::Effects::textureLoads, sizeof VS::Effects::textureLoads, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F567Cu, 4u, (void*)&VS::Effects::packageBuffer, sizeof VS::Effects::packageBuffer, 0u, 0u},

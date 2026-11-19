@@ -107,9 +107,6 @@ T00227.010,opaque,1,Battle::TargetPreview.opaque16,unk16,0x16,Copied from the ac
 T00483.001,opaque,1,Battle::TargetVolume.opaque1,unk1,0x1,"Used, but its meaning is not established",VS::Battle::(anonymous)::VolumeOf VS::Battle::(anonymous)::RecordOf VS::Battle::(anonymous)::ReadVolume VS::Battle::(anonymous)::WriteVolume (anonymous)::RawVolume (anonymous)::LiveTargetSelectionHost::Volume,,native:read
 T00511.001,opaque,1,Effects::ActionControlKey.opaque2,unk2,0x2,"Used, but its meaning is not established",VS::Effects::(anonymous)::CurrentKeyOf,,native:read
 T00511.002,opaque,1,Effects::ActionControlKey.opaque3,unk3,0x3,"Used, but its meaning is not established",VS::Effects::(anonymous)::CurrentKeyOf,,native:read
-T00497.006,opaque,1,Effects::Particle.opaque61Bit0,unk60_8,0x61.0,"Used, but its meaning is not established",VS::Effects::(anonymous)::LiveEmissionHost::Read VS::Effects::(anonymous)::LiveEmissionHost::Store VS::Effects::(anonymous)::LiveTickHost::Emit VS::Effects::(anonymous)::LiveParticleRenderer::Appearance,*Effects::freeParticles+0x61.0 *Effects::particlePool+0x61.0,native:read
-T00536.000,opaque,1,Effects::ParticleQuadSet.opaque0,unk0,0x0,"Used, but its meaning is not established",VS::Effects::Templates::(anonymous)::LiveParticleHost::State VS::Effects::Templates::(anonymous)::LiveParticleHost::StoreState,,native:read
-T00536.004,opaque,1,Effects::ParticleQuadSet.opaque8,unk8,0x8,"Used, but its meaning is not established",VS::Effects::Templates::(anonymous)::LiveParticleHost::State VS::Effects::Templates::(anonymous)::LiveParticleHost::StoreState,,native:read
 T00234.003,opaque,1,Field::WeatherParticle.opaqueC,unkC,0xC,"Used, but its meaning is not established",VS::Effects::weather_live::ParticleOf VS::Effects::weather_live::StoreParticle,*Field::weatherParticles+0xC,native:read
 T00310.001,opaque,1,Menu::Score::ListRow.opaque1,unk1,0x1,"Used, but its meaning is not established",VS::Menu::Score::(anonymous)::Rows VS::Menu::Score::(anonymous)::StoreRows VS::Menu::Score::CreateLiveTimeTrialRows,,native:read
 T00671.001,opaque,1,Menu::TextBoxState.opaque4,unk4,0x4,"Used, but its meaning is not established",VS::Menu::ReadLiveTextBox VS::Menu::WriteLiveTextBox,Menu::textBoxes=0x800F4FE4 stride 0x30,native:copy-only
@@ -320,13 +317,6 @@ T00343.008,low-named,2,Effects::LiveTrail.first_step,unk,,"Initial speed step (6
 T00732.008,low-named,2,Effects::LiveTrail9.first_step,unk,,"Initial speed step (6*ONE*ONE/steps^2 - 2*speed/steps); set at start, never read",,,native:missing
 T00489.020,low-named,2,Effects::LiveTransformSlot.saved.pad,unkBE,,Facing angle of the attached actor; PLG128 and the 0x4000 attachment mode turn through it,,,native:missing
 T00576.006,low-named,2,Effects::PackageBlock9.frameCount,unk14,0x14,Copied to the effect frame limit when primary effects update,VS::Effects::(anonymous)::LivePrimary::PackageTrackCount,,native:read
-T00490.001,low-named,2,Effects::ParticleEndpointView.endX,unkC,0xC,Moving endpoint x,VS::Effects::LiveStepParticleEndpointTowardStart,,native:read
-T00490.002,low-named,2,Effects::ParticleEndpointView.endY,unkE,0xE,Moving endpoint y,VS::Effects::LiveStepParticleEndpointTowardStart,,native:read
-T00490.003,low-named,2,Effects::ParticleEndpointView.startX,unk10,0x10,Fixed endpoint x,VS::Effects::LiveStepParticleEndpointTowardStart,,native:read
-T00490.004,low-named,2,Effects::ParticleEndpointView.startY,unk12,0x12,Fixed endpoint y,VS::Effects::LiveStepParticleEndpointTowardStart,,native:read
-T00513.004,low-named,2,Effects::ParticleTextureAnimation.frameOffsetX,unk8,0x8,First 14-bit offset of a 0x1 program word,VS::Effects::(anonymous)::ProjectNode VS::Effects::(anonymous)::Load VS::Effects::(anonymous)::Store,,native:read
-T00513.005,low-named,2,Effects::ParticleTextureAnimation.frameOffsetY,unkA,0xA,Second 14-bit offset of a 0x1 program word,VS::Effects::(anonymous)::ProjectNode VS::Effects::(anonymous)::Load VS::Effects::(anonymous)::Store,,native:read
-T00539.004,low-named,2,Effects::PluginEffectState.variant,unk60_8,0x61.0,Variant passed to emitted events,VS::Effects::EmitLiveParticleEvent VS::Effects::(anonymous)::LiveTickHost::Emit,,native:read
 T00501.003,low-named,2,Effects::TimelineTrack.curveFrame,unk8,0x8,Frame passed to the curve sampler while particles are emitted,VS::Effects::(anonymous)::LiveTimelineLoadHost::StartTrack VS::Effects::LiveTickParticleEmissionTrack,,native:read
 T00501.005,low-named,2,Effects::TimelineTrack.keyParameter,unkC,0xC,Parameter of the current key,VS::Effects::(anonymous)::ChildStateOf VS::Effects::(anonymous)::StoreChildState VS::Effects::(anonymous)::LiveTimelineLoadHost::StartTrack VS::Effects::LiveInitializeParticleTimelineKey,,native:read
 G00557,global,2,Effects::scriptSelector,D_800F5610,,Keeps the selector byte read by the effect script; not otherwise read.,VS::Effects::LiveSetEffectScriptSelector,Effects::scriptSelector=0x800F5610,state;native:read
@@ -427,8 +417,6 @@ T00511,type,3,Effects::ActionControlKey,func_800D6894_t,size 0x4,Gives one actio
 T00505,type,3,Effects::ChildTrackKey,func_800D5A98_t,size 0x9,Gives one child-effect key.,,,Value
 T00506,type,3,Effects::ChildTrackView,func_800D5A98_t2,size 0x10,Views a timeline track while child effects are spawned.,,,State
 T00434,type,3,Effects::HitEffectRequest,func_8006C4C4_t,size 0xE4,Holds a hit effect request built when an action hit is presented.,,,Value
-T00490,type,3,Effects::ParticleEndpointView,func_800CFAAC_t,size 0x14,Views a particle's two screen endpoints while one steps toward the other.,,,State
-T00537,type,3,Effects::ParticleQuadWord,func_800FA098_arg3_2,size 0x4,Declares a two-field word of a particle quad set; not read.,,,State
 T00504,type,3,Effects::ShakeTrackKey,func_800D57FC_t2,size 0x4,Gives one camera shake key word.,,,Value
 T00510,type,3,Effects::TransformControlView,func_800D6508_t,size 0xD0,Views a transform slot's attachment and motion bits.,,,State
 T00321,type,3,Field::MpdPolygonGroupHeader,_mpdGeometryHeader,size 0x40,Is the 64-byte header of one MPD polygon group; its contents are not read by decompiled code.,,,OnDisc
@@ -565,8 +553,6 @@ T00214.013,reserved,4,Battle::TargetSphereSetupView.reserved38,unk38,0x38,Cleare
 T00214.014,reserved,4,Battle::TargetSphereSetupView.reserved3C,unk3C,0x3C,Cleared on setup; not read,VS::Battle::(anonymous)::ReadState VS::Battle::(anonymous)::WriteState,*Battle::targetSphere+0x3C,native:read
 T00578.006,reserved,4,Effects::PackageTexture.reserved8,x0,0x8,Not read by decompiled code,VS::Effects::(anonymous)::LiveParticleRenderer::Texture,,native:read
 T00579.000,reserved,4,Effects::PackageTextureInfo.reserved0,unk0,0x0,Not read by decompiled code,VS::Effects::(anonymous)::LiveParticleRenderer::TextureFrame,,native:read
-T00513.009,reserved,4,Effects::ParticleTextureAnimation.reserved14,unk14,0x14,Not read by decompiled code,VS::Effects::(anonymous)::LiveParticleRenderer::Appearance VS::Effects::(anonymous)::LiveParticleRenderer::SetRotation,,native:read
-T00513.003,reserved,4,Effects::ParticleTextureAnimation.reserved7,unk7,0x7,Not read by decompiled code,VS::Effects::(anonymous)::LiveParticleRenderer::Appearance VS::Effects::(anonymous)::Load VS::Effects::(anonymous)::Store,,native:read
 T00259.009,reserved,4,Event::CameraState.reserved1BC,unk1BC,,Tail bytes of the second oscillator view,,,native:missing
 T00255.074,reserved,4,Field::GimmickInstance.reserved178,unk178,0x178,Not read by the decompiled users,,*Field::gimmickInstances+0x178,native:read
 T00255.037,reserved,4,Field::GimmickInstance.reserved22,unk22,0x22,Not read by the decompiled users,VS::Actors::(anonymous)::LiveActorStateHost::Gimmick VS::Actors::LiveActorTaggedBonePosition (anonymous)::LiveGimmickPlacementHost::Gimmick,*Field::gimmickInstances+0x22,native:read

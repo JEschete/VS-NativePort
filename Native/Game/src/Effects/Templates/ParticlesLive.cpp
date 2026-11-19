@@ -25,7 +25,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg045.hpp"
 #include "Effects/Plugins/Plg057.hpp"
 #include "Effects/Plugins/Plg065.hpp"
@@ -85,7 +85,7 @@ constexpr std::size_t kSpeedRange = 2;
 // The line blend is the transparency field's low two bits.
 constexpr unsigned kBlendMask = 3;
 
-static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
+static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 static_assert(sizeof(VS::Render::ParticleQuadPacket) ==
               kParticleQuadWords * sizeof(std::uint32_t));
 static_assert(sizeof(VS::Render::ParticleLinePacket) ==
@@ -104,15 +104,15 @@ std::uint64_t dropped_packets = 0;
   return std::has_single_bit(++count);
 }
 
-Effects_ParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
+LiveParticleEmitterScratch& EmitterScratch() {
+  return *reinterpret_cast<LiveParticleEmitterScratch*>(
       reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
-const Effects_ParticleDefinition* PackageDefinition(std::size_t index) {
+const LiveParticleDefinition* PackageDefinition(std::size_t index) {
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
@@ -132,35 +132,36 @@ const Effects_ParticleDefinition* PackageDefinition(std::size_t index) {
 }
 
 [[nodiscard]] ParticleSetCurves TypedCurves(
-    const Effects_ParticleDefinition& definition) {
-  return {.position = definition.positionCurve,
-          .extent = definition.extentCurve,
-          .direction = definition.directionCurve,
-          .direction_jitter = definition.directionJitterCurve,
-          .speed = definition.speedCurve,
-          .force = definition.forceCurve,
-          .acceleration = definition.accelerationCurve,
-          .attraction_offset = definition.attractionOffsetCurve,
-          .attraction_jitter = definition.attractionJitterCurve,
-          .mass = definition.massCurve,
-          .gravity_scale = definition.gravityScaleCurve,
-          .interval = definition.intervalCurve,
-          .inner_extent = definition.innerExtentCurve,
-          .color = {definition.rCurve, definition.gCurve, definition.bCurve}};
+    const LiveParticleDefinition& definition) {
+  return {
+      .position = definition.position_curve,
+      .extent = definition.extent_curve,
+      .direction = definition.direction_curve,
+      .direction_jitter = definition.direction_jitter_curve,
+      .speed = definition.speed_curve,
+      .force = definition.force_curve,
+      .acceleration = definition.acceleration_curve,
+      .attraction_offset = definition.attraction_offset_curve,
+      .attraction_jitter = definition.attraction_jitter_curve,
+      .mass = definition.mass_curve,
+      .gravity_scale = definition.gravity_scale_curve,
+      .interval = definition.interval_curve,
+      .inner_extent = definition.inner_extent_curve,
+      .color = {definition.r_curve, definition.g_curve, definition.b_curve}};
 }
 
 [[nodiscard]] ParticleSetDefinition TypedDefinition(
-    const Effects_ParticleDefinition& definition) {
-  const auto& vectors = definition.vectorRanges;
-  const auto& pairs = definition.pairRanges;
+    const LiveParticleDefinition& definition) {
+  const auto& vectors = definition.vector_ranges;
+  const auto& pairs = definition.pair_ranges;
   return {.flags = definition.flags,
-          .blend = static_cast<std::uint8_t>(definition.transparencyCurve &
+          .blend = static_cast<std::uint8_t>(definition.transparency_curve &
                                              kBlendMask),
           .curves = TypedCurves(definition),
-          .position = VectorRange(definition.positionRange),
-          .extent = VectorRange(definition.extentRange),
-          .inner_extent = math::RangePair(definition.innerExtentRange, 0),
-          .interval = math::RangePair(definition.intervalRange, 0),
+          .position = VectorRange(definition.position_range),
+          .extent = VectorRange(definition.extent_range),
+          .inner_extent = math::RangePair(definition.inner_extent_range, 0),
+          .interval = math::RangePair(definition.interval_range, 0),
           .direction = VectorRange(vectors[kDirectionRange]),
           .direction_jitter = VectorRange(vectors[kDirectionJitterRange]),
           .speed_jitter = VectorRange(vectors[kSpeedJitterRange]),
@@ -172,8 +173,8 @@ const Effects_ParticleDefinition* PackageDefinition(std::size_t index) {
           .speed = PlaneRange(pairs[kSpeedRange]),
           .cooldown = vectors[kTimingRange][kCooldownHalfword],
           .depth_bias = vectors[kTimingRange][kDepthBiasHalfword],
-          .ring_segments = definition.ringSegments,
-          .ring_positions = definition.ringPositions};
+          .ring_segments = definition.ring_segments,
+          .ring_positions = definition.ring_positions};
 }
 
 [[nodiscard]] ParticlePoint PointOf(const SVECTOR& vector) {
@@ -257,36 +258,36 @@ class LiveParticleHost final : public ParticleSetHost {
               ParticleTexturing texturing) override;
 
   [[nodiscard]] std::optional<ParticleSetState> State() const override {
-    const Effects_ParticleQuadSet* live = LiveState();
+    const LiveParticleQuadSet* live = LiveState();
     if (live == nullptr) {
       return std::nullopt;
     }
-    return ParticleSetState{.lifetime = live->opaque0,
-                            .definition_index = live->definitionIndex,
+    return ParticleSetState{.lifetime = live->lifetime,
+                            .definition_index = live->definition_index,
                             .count = live->count,
-                            .cooldown = live->opaque8,
+                            .cooldown = live->cooldown,
                             .age = live->age};
   }
 
   void StoreState(const ParticleSetState& state) override {
-    Effects_ParticleQuadSet* live = LiveState();
+    LiveParticleQuadSet* live = LiveState();
     if (live == nullptr) {
       return;
     }
-    live->opaque0 = state.lifetime;
-    live->definitionIndex = state.definition_index;
+    live->lifetime = state.lifetime;
+    live->definition_index = state.definition_index;
     live->count = state.count;
-    live->opaque8 = state.cooldown;
+    live->cooldown = state.cooldown;
     live->age = state.age;
   }
 
   void Release() override {
-    Effects_ParticleQuadSet* live = LiveState();
-    if (live == nullptr || live->controlPoints == nullptr) {
+    LiveParticleQuadSet* live = LiveState();
+    if (live == nullptr || live->control_points == nullptr) {
       return;
     }
-    Core::Memory::FreeLiveFromHighEnd(live->controlPoints);
-    live->controlPoints = nullptr;
+    Core::Memory::FreeLiveFromHighEnd(live->control_points);
+    live->control_points = nullptr;
   }
 
   [[nodiscard]] std::optional<ParticleTickInputs> BeginTick(
@@ -323,7 +324,7 @@ class LiveParticleHost final : public ParticleSetHost {
       return;
     }
     const MATRIX& view =
-        instance_->transforms[definition_->transformIndex].view;
+        instance_->transforms[definition_->transform_index].view;
     Core_Gte_SetRotMatrix(&view);
     Core_Gte_SetTransMatrix(&view);
   }
@@ -345,8 +346,8 @@ class LiveParticleHost final : public ParticleSetHost {
   void SubmitLine(const ParticleLine& line, std::int32_t depth) override;
 
  private:
-  [[nodiscard]] Effects_ParticleQuadSet* LiveState() const {
-    return static_cast<Effects_ParticleQuadSet*>(slot_.rendererState);
+  [[nodiscard]] LiveParticleQuadSet* LiveState() const {
+    return static_cast<LiveParticleQuadSet*>(slot_.rendererState);
   }
 
   // The control point records the set's buffer holds, at most
@@ -358,13 +359,13 @@ class LiveParticleHost final : public ParticleSetHost {
   void Link(u_long* entry, u_long* packet, std::size_t words);
 
   Effects_RendererSlot& slot_;
-  const Effects_ParticleDefinition* definition_ = nullptr;
+  const LiveParticleDefinition* definition_ = nullptr;
   Effects_EffectInstance* instance_ = nullptr;
 };
 
 std::optional<ParticleSetDefinition> LiveParticleHost::Definition(
     std::uint8_t index) {
-  const Effects_ParticleDefinition* definition = PackageDefinition(index);
+  const LiveParticleDefinition* definition = PackageDefinition(index);
   if (definition == nullptr) {
     VS::Core::LogWarn("effects",
                       "particle set: definition {} is outside the package's {} "
@@ -382,7 +383,7 @@ std::optional<ParticleSetDefinition> LiveParticleHost::Definition(
 void LiveParticleHost::Create(const ParticleSetState& state,
                               std::int32_t capacity,
                               ParticleTexturing texturing) {
-  const Effects_ParticleDefinition* definition =
+  const LiveParticleDefinition* definition =
       PackageDefinition(state.definition_index);
   if (definition == nullptr) {
     return;
@@ -390,8 +391,8 @@ void LiveParticleHost::Create(const ParticleSetState& state,
   const bool textured = texturing == ParticleTexturing::kTextured;
   // The untextured sets allocate only the record's prefix.
   const std::size_t bytes =
-      textured ? sizeof(Effects_ParticleQuadSet)
-               : offsetof(Effects_ParticleQuadSet, textureAnimation);
+      textured ? sizeof(LiveParticleQuadSet)
+               : offsetof(LiveParticleQuadSet, texture_animation);
   void* storage = Core::Memory::AllocateLiveFromHighEnd(bytes);
   if (storage == nullptr) {
     VS::Core::LogError("effects", "particle set: heap exhausted for state");
@@ -399,14 +400,14 @@ void LiveParticleHost::Create(const ParticleSetState& state,
     return;
   }
   std::memset(storage, 0, bytes);
-  auto* live = static_cast<Effects_ParticleQuadSet*>(storage);
+  auto* live = static_cast<LiveParticleQuadSet*>(storage);
   slot_.rendererState = live;
   StoreState(state);
   if (capacity > 0) {
-    live->controlPoints =
+    live->control_points =
         static_cast<SVECTOR*>(Core::Memory::AllocateLiveFromHighEnd(
             static_cast<std::size_t>(capacity) * kParticleControlPointBytes));
-    if (live->controlPoints == nullptr) {
+    if (live->control_points == nullptr) {
       VS::Core::LogError(
           "effects", "particle set: heap exhausted for {} ribbons; set refused",
           capacity);
@@ -419,8 +420,8 @@ void LiveParticleHost::Create(const ParticleSetState& state,
     // Clearing the record also cleared the texture animation, as
     // func_800D6CCC did.
     VS::Effects::LiveInitializeParticleTextureAnimation(
-        &live->textureAnimation, definition->textureIndex,
-        definition->animationId);
+        &live->texture_animation, definition->texture_index,
+        definition->animation_id);
   }
 }
 
@@ -440,32 +441,32 @@ std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
                       definition_index);
     return std::nullopt;
   }
-  if (definition_->transformIndex >= kTransformCount) {
+  if (definition_->transform_index >= kTransformCount) {
     VS::Core::LogWarn(
         "effects",
         "particle set: definition {} names transform {} of {}; set "
         "stopped",
-        definition_index, definition_->transformIndex, kTransformCount);
+        definition_index, definition_->transform_index, kTransformCount);
     return std::nullopt;
   }
   const bool targets_transform =
       (definition_->flags & kParticleTargetMask) ==
       static_cast<std::uint32_t>(ParticleTargetAnchor::kTransform);
   if (targets_transform &&
-      definition_->attractionTransform >= kTransformCount) {
+      definition_->attraction_transform >= kTransformCount) {
     VS::Core::LogWarn(
         "effects",
         "particle set: definition {} targets transform {} of {}; set "
         "stopped",
-        definition_index, definition_->attractionTransform, kTransformCount);
+        definition_index, definition_->attraction_transform, kTransformCount);
     return std::nullopt;
   }
   const math::Transform3 world = math::TransformOf(
-      instance_->transforms[definition_->transformIndex].world);
+      instance_->transforms[definition_->transform_index].world);
   const Vec3 target_translation =
       targets_transform
           ? math::TransformOf(
-                instance_->transforms[definition_->attractionTransform].world)
+                instance_->transforms[definition_->attraction_transform].world)
                 .translation
           : Vec3{};
   // Effects_effectOrigin: the action request's position.
@@ -478,17 +479,17 @@ std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
 }
 
 std::span<SVECTOR> LiveParticleHost::ControlPoints() const {
-  const Effects_ParticleQuadSet* live = LiveState();
-  if (live == nullptr || live->controlPoints == nullptr) {
+  const LiveParticleQuadSet* live = LiveState();
+  if (live == nullptr || live->control_points == nullptr) {
     return {};
   }
-  const auto bytes = Core::Memory::LivePayloadCapacity(live->controlPoints);
+  const auto bytes = Core::Memory::LivePayloadCapacity(live->control_points);
   if (!bytes) {
     return {};
   }
   const std::size_t ribbons =
       std::min(*bytes / kParticleControlPointBytes, kParticleSetCapacity);
-  return {live->controlPoints, ribbons * kParticleControlPoints};
+  return {live->control_points, ribbons * kParticleControlPoints};
 }
 
 ParticleSetPoints LiveParticleHost::LoadPoints() const {
@@ -510,53 +511,53 @@ void LiveParticleHost::StorePoints(const ParticleSetPoints& points) {
 }
 
 ParticleSetScratch LiveParticleHost::LoadScratch() const {
-  const Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  const LiveParticleEmitterScratch& scratch = EmitterScratch();
   return {.flags = scratch.flags,
           .position = math::VectorOf(scratch.position),
           .extent = math::VectorOf(scratch.extent),
-          .aim_point = math::VectorOf(scratch.aimPoint),
-          .spawn_point = math::VectorOf(scratch.spawnPoint),
-          .direction_jitter = math::VectorOf(scratch.directionJitter),
-          .base_direction = math::VectorOf(scratch.baseDirection),
+          .aim_point = math::VectorOf(scratch.aim_point),
+          .spawn_point = math::VectorOf(scratch.spawn_point),
+          .direction_jitter = math::VectorOf(scratch.direction_jitter),
+          .base_direction = math::VectorOf(scratch.base_direction),
           .vector = PointOf(scratch.vector),
-          .speed_jitter = PointOf(scratch.forceMin),
-          .width = PointOf(scratch.accelerationMin),
-          .target_offset = PointOf(scratch.attractionOffset),
-          .target_jitter = PointOf(scratch.attractionJitter),
-          .speed = PairOf(scratch.speedRange),
-          .first_radius = PairOf(scratch.massRange),
-          .second_radius = PairOf(scratch.gravityScaleRange),
-          .aim = math::MatrixOf(scratch.aimMatrix),
-          .sine = {scratch.sinAngle0, scratch.sinAngle1},
-          .cosine = {scratch.cosAngle0, scratch.cosAngle1},
-          .ring_segments = scratch.ringSegments,
-          .ring_positions = scratch.ringPositions};
+          .speed_jitter = PointOf(scratch.force_min),
+          .width = PointOf(scratch.acceleration_min),
+          .target_offset = PointOf(scratch.attraction_offset),
+          .target_jitter = PointOf(scratch.attraction_jitter),
+          .speed = PairOf(scratch.speed_range),
+          .first_radius = PairOf(scratch.mass_range),
+          .second_radius = PairOf(scratch.gravity_scale_range),
+          .aim = math::MatrixOf(scratch.aim_matrix),
+          .sine = {scratch.sin_angle0, scratch.sin_angle1},
+          .cosine = {scratch.cos_angle0, scratch.cos_angle1},
+          .ring_segments = scratch.ring_segments,
+          .ring_positions = scratch.ring_positions};
 }
 
 void LiveParticleHost::PublishScratch(const ParticleSetScratch& values) {
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   scratch.flags = values.flags;
   math::StoreVector(scratch.position, values.position);
   math::StoreVector(scratch.extent, values.extent);
-  math::StoreVector(scratch.aimPoint, values.aim_point);
-  math::StoreVector(scratch.spawnPoint, values.spawn_point);
-  math::StoreVector(scratch.directionJitter, values.direction_jitter);
-  math::StoreVector(scratch.baseDirection, values.base_direction);
+  math::StoreVector(scratch.aim_point, values.aim_point);
+  math::StoreVector(scratch.spawn_point, values.spawn_point);
+  math::StoreVector(scratch.direction_jitter, values.direction_jitter);
+  math::StoreVector(scratch.base_direction, values.base_direction);
   StorePoint(scratch.vector, values.vector);
-  StorePoint(scratch.forceMin, values.speed_jitter);
-  StorePoint(scratch.accelerationMin, values.width);
-  StorePoint(scratch.attractionOffset, values.target_offset);
-  StorePoint(scratch.attractionJitter, values.target_jitter);
-  StorePair(scratch.speedRange, values.speed);
-  StorePair(scratch.massRange, values.first_radius);
-  StorePair(scratch.gravityScaleRange, values.second_radius);
-  math::StoreMatrix(scratch.aimMatrix, values.aim);
-  scratch.sinAngle0 = values.sine[0];
-  scratch.sinAngle1 = values.sine[1];
-  scratch.cosAngle0 = values.cosine[0];
-  scratch.cosAngle1 = values.cosine[1];
-  scratch.ringSegments = values.ring_segments;
-  scratch.ringPositions = values.ring_positions;
+  StorePoint(scratch.force_min, values.speed_jitter);
+  StorePoint(scratch.acceleration_min, values.width);
+  StorePoint(scratch.attraction_offset, values.target_offset);
+  StorePoint(scratch.attraction_jitter, values.target_jitter);
+  StorePair(scratch.speed_range, values.speed);
+  StorePair(scratch.mass_range, values.first_radius);
+  StorePair(scratch.gravity_scale_range, values.second_radius);
+  math::StoreMatrix(scratch.aim_matrix, values.aim);
+  scratch.sin_angle0 = values.sine[0];
+  scratch.sin_angle1 = values.sine[1];
+  scratch.cos_angle0 = values.cosine[0];
+  scratch.cos_angle1 = values.cosine[1];
+  scratch.ring_segments = values.ring_segments;
+  scratch.ring_positions = values.ring_positions;
 }
 
 // Curve 0 samples 0 without reading the package, as the original's sampler
@@ -587,8 +588,8 @@ std::int32_t LiveParticleHost::SampleCurve(std::uint8_t curve,
 // unchecked; a texture table the package lacks, or a frame without texture
 // info, leaves this tick undrawn here.
 std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
-  Effects_ParticleTextureAnimation& animation = LiveState()->textureAnimation;
-  const std::size_t table = animation.textureIndex;
+  LiveParticleTextureAnimation& animation = LiveState()->texture_animation;
+  const std::size_t table = animation.texture_index;
   const bool bound = Effects_package->textures != nullptr &&
                      table < kTextureTableCount &&
                      std::cmp_less(table, Effects_package->block1TableCount) &&
@@ -596,7 +597,7 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
   if (bound) {
     VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   }
-  if (!bound || animation.textureInfo == nullptr) {
+  if (!bound || animation.texture_info == nullptr) {
     if (ShouldReport(refused_textures)) {
       VS::Core::LogWarn(
           "effects",
@@ -607,7 +608,7 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
     return std::nullopt;
   }
   const Effects_PackageTexture& texture =
-      Effects_package->textures[animation.textureInfo->dataIndex];
+      Effects_package->textures[animation.texture_info->dataIndex];
   return ParticleTexture{.clut = static_cast<std::uint16_t>(texture.clut),
                          .tpage = static_cast<std::uint16_t>(texture.tpage),
                          .u = texture.u,

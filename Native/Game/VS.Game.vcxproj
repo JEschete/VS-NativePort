@@ -725,13 +725,6 @@
     <ClCompile Include="src\Effects\ParticleRenderLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Effects\Particles.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Effects\ParticleTextureAnimation.cpp" />
     <ClCompile Include="src\Effects\ParticleTextureAnimationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2285,7 +2278,7 @@
     <ClInclude Include="src\Effects\CameraLiveState.hpp" />
     <ClInclude Include="src\Effects\EffectResourcesLiveState.hpp" />
     <ClInclude Include="src\Effects\Package.h" />
-    <ClInclude Include="src\Effects\Particles.h" />
+    <ClInclude Include="src\Effects\Particles.hpp" />
     <ClInclude Include="src\Effects\Plugins\Plg044.hpp" />
     <ClInclude Include="src\Effects\Plugins\Plg045.hpp" />
     <ClInclude Include="src\Effects\Plugins\Plg047.hpp" />

@@ -30,7 +30,7 @@
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Effects/Transforms.hpp"
@@ -1979,7 +1979,7 @@ std::vector<std::byte> ScriptPackage(std::uint8_t transforms,
   });
 }
 
-std::span<Effects_ParticleDefinition> BoundDefinitions() {
+std::span<VS::Effects::LiveParticleDefinition> BoundDefinitions() {
   return {Effects_actionPackage.block5Data->definitions,
           Effects::LiveParticleDefinitionCount()};
 }
@@ -1991,8 +1991,8 @@ struct Rgb {
   friend bool operator==(const Rgb&, const Rgb&) = default;
 };
 
-Rgb CurvesOf(const Effects_ParticleDefinition& definition) {
-  return {definition.rCurve, definition.gCurve, definition.bCurve};
+Rgb CurvesOf(const VS::Effects::LiveParticleDefinition& definition) {
+  return {definition.r_curve, definition.g_curve, definition.b_curve};
 }
 
 // Restores the first preset of D_800EC330 and of D_800EC368.
@@ -2011,11 +2011,11 @@ class PresetScope {
  private:
   static std::span<std::byte> Paired() {
     return std::as_writable_bytes(
-        std::span{Effects_pairedParticleColorPresets[0]});
+        std::span{VS::Effects::pairedParticleColorPresets[0]});
   }
   static std::span<std::byte> Table() {
     return std::as_writable_bytes(
-        std::span{Effects_particleColorPresetTable[0]});
+        std::span{VS::Effects::particleColorPresetTable[0]});
   }
   static std::vector<std::byte> Saved(std::span<const std::byte> bytes) {
     return {bytes.begin(), bytes.end()};
@@ -2099,15 +2099,15 @@ TEST_CASE("Live effect script presets read the module's preset tables",
   auto package = ScriptPackage(0, 3);
   REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
   std::ranges::copy(std::array<u_char, 4>{1, 2, 3, 0},
-                    std::begin(Effects_pairedParticleColorPresets[0][0]));
+                    std::begin(VS::Effects::pairedParticleColorPresets[0][0]));
   std::ranges::copy(std::array<u_char, 4>{4, 5, 6, 0},
-                    std::begin(Effects_pairedParticleColorPresets[0][1]));
+                    std::begin(VS::Effects::pairedParticleColorPresets[0][1]));
   Effects_EffectInstance instance{};
   CHECK(Effects::LiveApplyPairedParticleColorPreset(&instance) == 1);
   CHECK(CurvesOf(BoundDefinitions()[0]) == Rgb{1, 2, 3});
   CHECK(CurvesOf(BoundDefinitions()[1]) == Rgb{4, 5, 6});
 
-  for (auto& entry : Effects_particleColorPresetTable[0]) {
+  for (auto& entry : VS::Effects::particleColorPresetTable[0]) {
     std::ranges::copy(std::array<u_char, 4>{7, 8, 9, 2}, std::begin(entry));
   }
   CHECK(Effects::LiveApplyParticleColorPresetTable(&instance) == 1);

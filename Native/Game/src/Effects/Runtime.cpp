@@ -2,7 +2,7 @@
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
 #include "Effects/Package.h"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TransformsLiveState.hpp"
 

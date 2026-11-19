@@ -22,7 +22,7 @@
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg049.hpp"
 #include "Effects/Plugins/Plg050.hpp"
 #include "Effects/Plugins/Plg057.hpp"
@@ -130,11 +130,11 @@ static_assert(std::tuple_size_v<decltype(LiveTrail9::spline_points)> ==
               kTrailSplinePoints);
 static_assert(std::tuple_size_v<decltype(LiveTrail9::spline_samples)> ==
               kTrailNineHistory);
-using Scratch = Effects_ParticleEmitterScratch;
-static_assert(offsetof(Scratch, aimMatrix) == kScratchAimMatrixAt);
-static_assert(offsetof(Scratch, accelerationMin) == kScratchAccelerationAt);
-static_assert(offsetof(Scratch, attractionJitter) == kScratchJitterAt);
-static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
+using Scratch = LiveParticleEmitterScratch;
+static_assert(offsetof(Scratch, aim_matrix) == kScratchAimMatrixAt);
+static_assert(offsetof(Scratch, acceleration_min) == kScratchAccelerationAt);
+static_assert(offsetof(Scratch, attraction_jitter) == kScratchJitterAt);
+static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 
 std::uint64_t refused_curves = 0;
 std::uint64_t refused_transforms = 0;
@@ -174,19 +174,19 @@ std::uint64_t skipped_trails = 0;
 }
 
 [[nodiscard]] TrailDefinition TrailDefinitionOf(
-    const Effects_ParticleDefinition& source) {
-  const auto& vectors = source.vectorRanges;
-  const auto& pairs = source.pairRanges;
-  return {.curves = {.attraction_offset = source.attractionOffsetCurve,
-                     .attraction_jitter = source.attractionJitterCurve,
-                     .mass = source.massCurve,
-                     .gravity_scale = source.gravityScaleCurve,
-                     .speed = source.speedCurve,
-                     .direction_jitter = source.directionJitterCurve,
-                     .direction = source.directionCurve,
-                     .force = source.forceCurve,
-                     .acceleration = source.accelerationCurve,
-                     .color = {source.rCurve, source.gCurve, source.bCurve}},
+    const LiveParticleDefinition& source) {
+  const auto& vectors = source.vector_ranges;
+  const auto& pairs = source.pair_ranges;
+  return {.curves = {.attraction_offset = source.attraction_offset_curve,
+                     .attraction_jitter = source.attraction_jitter_curve,
+                     .mass = source.mass_curve,
+                     .gravity_scale = source.gravity_scale_curve,
+                     .speed = source.speed_curve,
+                     .direction_jitter = source.direction_jitter_curve,
+                     .direction = source.direction_curve,
+                     .force = source.force_curve,
+                     .acceleration = source.acceleration_curve,
+                     .color = {source.r_curve, source.g_curve, source.b_curve}},
           .attraction_offset = VectorRows(vectors[kAttractionOffsetRow]),
           .attraction_jitter = VectorRows(vectors[kAttractionJitterRow]),
           .direction = VectorRows(vectors[kDirectionRow]),
@@ -197,7 +197,7 @@ std::uint64_t skipped_trails = 0;
           .gravity_scale = PlaneRows(pairs[kGravityScalePair]),
           .speed = PlaneRows(pairs[kSpeedPair]),
           .lifetime = PlaneRows(pairs[kLifetimePair]),
-          .inner_extent = math::RangePair(source.innerExtentRange, 0)};
+          .inner_extent = math::RangePair(source.inner_extent_range, 0)};
 }
 
 [[nodiscard]] Vec2 PairOf(std::span<const int, 2> pair) {
@@ -210,41 +210,41 @@ void StorePair(std::span<int, 2> pair, Vec2 value) {
 }
 
 [[nodiscard]] TrailScratch TrailScratchOf(
-    const Effects_ParticleEmitterScratch& source) {
+    const LiveParticleEmitterScratch& source) {
   return {.flags = source.flags,
-          .attraction_offset = math::VectorOf(source.attractionOffset),
-          .attraction_jitter = math::VectorOf(source.attractionJitter),
-          .mass = PairOf(source.massRange),
-          .gravity_scale = PairOf(source.gravityScaleRange),
-          .speed = PairOf(source.speedRange),
-          .lifetime = PairOf(source.lifetimeRange),
-          .direction_jitter = math::VectorOf(source.directionJitter),
-          .base_direction = math::VectorOf(source.baseDirection),
-          .force_min = math::VectorOf(source.forceMin),
-          .aim_point = math::VectorOf(source.aimPoint),
-          .spawn_point = math::VectorOf(source.spawnPoint),
-          .aim_matrix = math::MatrixOf(source.aimMatrix),
-          .acceleration_min = math::VectorOf(source.accelerationMin)};
+          .attraction_offset = math::VectorOf(source.attraction_offset),
+          .attraction_jitter = math::VectorOf(source.attraction_jitter),
+          .mass = PairOf(source.mass_range),
+          .gravity_scale = PairOf(source.gravity_scale_range),
+          .speed = PairOf(source.speed_range),
+          .lifetime = PairOf(source.lifetime_range),
+          .direction_jitter = math::VectorOf(source.direction_jitter),
+          .base_direction = math::VectorOf(source.base_direction),
+          .force_min = math::VectorOf(source.force_min),
+          .aim_point = math::VectorOf(source.aim_point),
+          .spawn_point = math::VectorOf(source.spawn_point),
+          .aim_matrix = math::MatrixOf(source.aim_matrix),
+          .acceleration_min = math::VectorOf(source.acceleration_min)};
 }
 
 // Every field the stages may have written goes back; the rest of the scratch
 // block, and the aim matrix's translation, are left as they were.
 void StoreTrailScratch(const TrailScratch& values,
-                       Effects_ParticleEmitterScratch& target) {
+                       LiveParticleEmitterScratch& target) {
   target.flags = values.flags;
-  math::StoreVector(target.attractionOffset, values.attraction_offset);
-  math::StoreVector(target.attractionJitter, values.attraction_jitter);
-  StorePair(target.massRange, values.mass);
-  StorePair(target.gravityScaleRange, values.gravity_scale);
-  StorePair(target.speedRange, values.speed);
-  StorePair(target.lifetimeRange, values.lifetime);
-  math::StoreVector(target.directionJitter, values.direction_jitter);
-  math::StoreVector(target.baseDirection, values.base_direction);
-  math::StoreVector(target.forceMin, values.force_min);
-  math::StoreVector(target.aimPoint, values.aim_point);
-  math::StoreVector(target.spawnPoint, values.spawn_point);
-  math::StoreMatrix(target.aimMatrix, values.aim_matrix);
-  math::StoreVector(target.accelerationMin, values.acceleration_min);
+  math::StoreVector(target.attraction_offset, values.attraction_offset);
+  math::StoreVector(target.attraction_jitter, values.attraction_jitter);
+  StorePair(target.mass_range, values.mass);
+  StorePair(target.gravity_scale_range, values.gravity_scale);
+  StorePair(target.speed_range, values.speed);
+  StorePair(target.lifetime_range, values.lifetime);
+  math::StoreVector(target.direction_jitter, values.direction_jitter);
+  math::StoreVector(target.base_direction, values.base_direction);
+  math::StoreVector(target.force_min, values.force_min);
+  math::StoreVector(target.aim_point, values.aim_point);
+  math::StoreVector(target.spawn_point, values.spawn_point);
+  math::StoreMatrix(target.aim_matrix, values.aim_matrix);
+  math::StoreVector(target.acceleration_min, values.acceleration_min);
 }
 
 [[nodiscard]] TrailPoint PointOf(const SVECTOR& vector) {
@@ -315,7 +315,7 @@ void StoreTrailRecord(const LegacyRecord<Trail>& record, Trail& target) {
 // The emitter state members the host reads: its texture animation, its
 // transparency samples and its definition, for diagnostics.
 struct EmitterContext {
-  Effects_ParticleTextureAnimation* texture = nullptr;
+  LiveParticleTextureAnimation* texture = nullptr;
   const std::uint8_t* transparency = nullptr;
   std::size_t definition_index = 0;
 };
@@ -346,7 +346,7 @@ template <std::size_t Samples>
 template <std::size_t History>
 class LiveTrailHost final : public BasicTrailHost<History> {
  public:
-  LiveTrailHost(const Effects_ParticleDefinition& definition,
+  LiveTrailHost(const LiveParticleDefinition& definition,
                 Effects_EffectInstance& instance, const EmitterContext& context)
       : definition_(definition), instance_(instance), context_(context) {}
 
@@ -379,7 +379,7 @@ class LiveTrailHost final : public BasicTrailHost<History> {
                                                    std::string_view role);
   [[nodiscard]] bool TextureTableBound(std::size_t table) const;
 
-  const Effects_ParticleDefinition& definition_;
+  const LiveParticleDefinition& definition_;
   Effects_EffectInstance& instance_;
   EmitterContext context_;
 };
@@ -430,7 +430,7 @@ const LiveTransformSlot* LiveTrailHost<History>::Transform(
 template <std::size_t History>
 std::optional<Vec3> LiveTrailHost<History>::AttractionTranslation() {
   const LiveTransformSlot* transform =
-      Transform(definition_.attractionTransform, "attraction");
+      Transform(definition_.attraction_transform, "attraction");
   if (transform == nullptr) {
     return std::nullopt;
   }
@@ -449,7 +449,7 @@ bool LiveTrailHost<History>::BeginProjection(bool effect_view) {
     return true;
   }
   const LiveTransformSlot* transform =
-      Transform(definition_.transformIndex, "view");
+      Transform(definition_.transform_index, "view");
   if (transform == nullptr) {
     return false;
   }
@@ -488,12 +488,12 @@ bool LiveTrailHost<History>::TextureTableBound(std::size_t table) const {
 // lacks, or a frame without texture info, leaves the trails undrawn this tick.
 template <std::size_t History>
 std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
-  Effects_ParticleTextureAnimation& animation = *context_.texture;
-  const std::size_t table = animation.textureIndex;
+  LiveParticleTextureAnimation& animation = *context_.texture;
+  const std::size_t table = animation.texture_index;
   const Effects_PackageTextureInfo* frame = nullptr;
   if (TextureTableBound(table)) {
     LiveAdvanceParticleTextureAnimation(&animation);
-    frame = animation.textureInfo;
+    frame = animation.texture_info;
   }
   if (frame == nullptr) {
     if (Reportable(undrawn_textures)) {
@@ -589,8 +589,8 @@ template <typename Trail>
 
 template <typename Trail>
 void RunStage(BasicTrailStage<LegacyTrail<Trail>::kHistory> stage,
-              const Effects_ParticleDefinition& definition,
-              Effects_ParticleEmitterScratch& scratch,
+              const LiveParticleDefinition& definition,
+              LiveParticleEmitterScratch& scratch,
               Effects_EffectInstance& instance,
               const EmitterView<Trail>& view) {
   const std::optional<std::span<Trail>> trails = HeldTrails(view);
@@ -621,16 +621,16 @@ const TrailNineStages& NineStages() {
 }  // namespace
 
 void RunLiveTrailStage(TrailStage stage,
-                       const Effects_ParticleDefinition& definition,
-                       Effects_ParticleEmitterScratch& scratch,
+                       const LiveParticleDefinition& definition,
+                       LiveParticleEmitterScratch& scratch,
                        Effects_EffectInstance& instance,
                        LiveTrailState& state) {
   RunStage(stage, definition, scratch, instance, ViewOf(state));
 }
 
 void RunLiveTrailNineStage(TrailNineStage stage,
-                           const Effects_ParticleDefinition& definition,
-                           Effects_ParticleEmitterScratch& scratch,
+                           const LiveParticleDefinition& definition,
+                           LiveParticleEmitterScratch& scratch,
                            Effects_EffectInstance& instance,
                            LiveTrailNineState& state) {
   RunStage(stage, definition, scratch, instance, ViewOf(state));

@@ -24,7 +24,7 @@
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"

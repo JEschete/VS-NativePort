@@ -2650,19 +2650,17 @@ int func_800F9800(void) {
         self.assertIn("VS::Audio::Seq::pendingMusicData.param1 = 0;", live)
         self.assertNotIn("*(int*)&VS::Audio::Seq::pendingMusicData", live)
 
-    def test_particle_child_events_project_native_parent_fields(self):
-        # #276 Group N: the tick (F01535) is owned; its Live host builds the
-        # parent from the particle's native fields instead of passing it.
+    def test_particle_child_events_pass_the_particle_as_parent(self):
+        # #276 Group N: the tick (F01535) is owned; #441 made the emitter's
+        # parent a LiveParticle, so its Live host passes the particle itself,
+        # as the original did.
         self.assertNotIn("F01535", copy_fixups.FIXES)
         root = Path(__file__).resolve().parents[2]
         live = (root / r"Native\Game\src\Effects\ParticleMotionLive.cpp").read_text(encoding="utf-8")
         emit = live[live.index("void Emit(Particle& particle"):]
         emit = emit[:emit.index("\n  }\n")]
-        self.assertIn("Effects_PluginEffectState parent{};", emit)
-        self.assertIn("StoreWide(parent.position, Wide(particle.motion.position));", emit)
-        self.assertIn("parent.transparency = particle.transparency;", emit)
-        self.assertIn("parent.variant = particle.opaque61Bit0;", emit)
-        self.assertIn("EmitLiveParticleEvent(instance_, event, 0, 0, &parent);", emit)
+        self.assertIn("EmitLiveParticleEvent(instance_, event, 0, 0, &particle);", emit)
+        self.assertNotIn("Effects_PluginEffectState", live)
 
     def test_original_occlusion_queries_use_the_owned_terrain_decoder(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
@@ -3289,7 +3287,7 @@ int func_800F9800(void) {
         self.assertIn("void LiveClearParticleTextureState(", header)
         self.assertRegex(
             header,
-            r"LiveInitializeParticleTextureAnimation\(\s*Effects_ParticleTextureAnimation\* animation,"
+            r"LiveInitializeParticleTextureAnimation\(\s*LiveParticleTextureAnimation\* animation,"
             r"\s*int texture_index,\s*int program_index\)")
         self.assertIn("void LiveAdvanceParticleTextureAnimation(", header)
 
@@ -4687,7 +4685,7 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
         self.assertNotIn("F01554", copy_fixups.FIXES)
         root = Path(__file__).resolve().parents[2]
         live = (root / r"Native\Game\src\Effects\ParticleMotionLive.cpp").read_text(encoding="utf-8")
-        self.assertIn(".target = {.x = particle.attractionTarget[0],", live)
+        self.assertIn(".target = {.x = particle.attraction_target[0],", live)
         self.assertIn(".attraction = particle.attraction}", live)
         self.assertNotIn("Effects_ParticleAttractionView", live)
 

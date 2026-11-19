@@ -17,7 +17,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/ParticleControl.hpp"
 #include "Effects/Templates/ParticleCore.hpp"
@@ -1222,15 +1222,15 @@ TEST_CASE("Live particle entries refuse definitions the package lacks",
 TEST_CASE("Live particle entries stop sets their package no longer holds",
           "[effects-particles][effects]") {
   const LiveParticleScope scope;
-  Effects_ParticleQuadSet live{};
-  live.definitionIndex = 1;
-  live.opaque0 = 3;
+  VS::Effects::LiveParticleQuadSet live{};
+  live.definition_index = 1;
+  live.lifetime = 3;
   Effects_RendererSlot slot{};
   slot.rendererState = &live;
   CHECK(particles::UpdateLivePlg065ParticleDispatch(&slot, 2, 0) == 0);
   CHECK(scope.Warned("no longer holds definition 1"));
   CHECK(particles::UpdateLivePlg065ParticleDispatch(&slot, 3, 0) == 1);
-  CHECK(live.opaque0 == 1);
+  CHECK(live.lifetime == 1);
   Effects_currentInstance = nullptr;
   CHECK(particles::UpdateLivePlg152ParticleDispatch(&slot, 2, 0) == 0);
   CHECK(scope.Warned("no current effect instance"));

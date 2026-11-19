@@ -17,13 +17,13 @@ bool AcquireParticlePool(ParticlePool& pool, std::int32_t count,
   if (count < 1) {
     return false;
   }
-  Effects_Particle* block = records.Reserve(count);
+  LiveParticle* block = records.Reserve(count);
   if (block == nullptr) {
     return false;
   }
-  Effects_Particle* previous = nullptr;
+  LiveParticle* previous = nullptr;
   for (std::int32_t index = 0; index < count; ++index) {
-    Effects_Particle& particle = records.At(*block, index);
+    LiveParticle& particle = records.At(*block, index);
     records.SetPrevious(particle, previous);
     records.SetNext(
         particle, index + 1 < count ? &records.At(*block, index + 1) : nullptr);
@@ -53,9 +53,9 @@ bool ReleaseParticlePool(ParticlePool& pool, ParticleRecords& records) {
   return true;
 }
 
-Effects_Particle* AllocateEffectParticle(ParticlePool& pool, ParticleList& list,
-                                         ParticleRecords& records) {
-  Effects_Particle* particle = pool.free;
+LiveParticle* AllocateEffectParticle(ParticlePool& pool, ParticleList& list,
+                                     ParticleRecords& records) {
+  LiveParticle* particle = pool.free;
   if (particle == nullptr) {
     return nullptr;
   }
@@ -72,10 +72,10 @@ Effects_Particle* AllocateEffectParticle(ParticlePool& pool, ParticleList& list,
   return particle;
 }
 
-void ReleaseEffectParticle(Effects_Particle& particle, ParticlePool& pool,
+void ReleaseEffectParticle(LiveParticle& particle, ParticlePool& pool,
                            ParticleList& list, ParticleRecords& records) {
-  Effects_Particle* next = records.Next(particle);
-  Effects_Particle* previous = records.Previous(particle);
+  LiveParticle* next = records.Next(particle);
+  LiveParticle* previous = records.Previous(particle);
   if (next != nullptr) {
     records.SetPrevious(*next, previous);
   }
@@ -95,8 +95,8 @@ void ReleaseAllEffectParticles(ParticlePool& pool, ParticleList& list,
   if (list.first == nullptr) {
     return;
   }
-  Effects_Particle* last = list.first;
-  for (Effects_Particle* next = records.Next(*last); next != nullptr;
+  LiveParticle* last = list.first;
+  for (LiveParticle* next = records.Next(*last); next != nullptr;
        next = records.Next(*last)) {
     last = next;
   }

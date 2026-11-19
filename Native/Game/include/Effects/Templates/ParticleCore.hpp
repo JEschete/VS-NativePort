@@ -154,7 +154,7 @@ struct ParticleSetPlan {
                          const ParticleSetPlan&) = default;
 };
 
-// The persistent set record (Effects_ParticleQuadSet without its control
+// The persistent set record (LiveParticleQuadSet without its control
 // point buffer and texture animation, which stay with the host).
 struct ParticleSetState {
   std::uint8_t lifetime{};
@@ -262,7 +262,7 @@ struct ParticleSetPoints {
                          const ParticleSetPoints&) = default;
 };
 
-// The emitter-scratch values the stages write (Effects_ParticleEmitterScratch
+// The emitter-scratch values the stages write (LiveParticleEmitterScratch
 // at scratch + 0x1D0). The host loads them before a tick and publishes them
 // after it, so fields a tick does not write keep their values.
 struct ParticleSetScratch {

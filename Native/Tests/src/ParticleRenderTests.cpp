@@ -29,7 +29,7 @@
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg045.hpp"
 #include "Effects/Plugins/Plg053.hpp"
 #include "Effects/Plugins/Plg065.hpp"
@@ -108,13 +108,13 @@ struct ParticleFixture {
   int saved_projection = VS::Render::projectionDistance;
   Effects_EffectPackage* saved_package = Effects_package;
   Effects_EffectInstance* saved_instance = Effects_currentInstance;
-  Effects_Particle* saved_pool = Effects_particlePool;
-  int saved_capacity = Effects_particleCapacity;
-  int saved_used = Effects_usedParticleCount;
-  Effects_Particle* saved_free = Effects_freeParticles;
+  VS::Effects::LiveParticle* saved_pool = VS::Effects::particlePool;
+  int saved_capacity = VS::Effects::particleCapacity;
+  int saved_used = VS::Effects::usedParticleCount;
+  VS::Effects::LiveParticle* saved_free = VS::Effects::freeParticles;
   Effects_EffectPackage package{};
   Effects_EffectInstance instance{};
-  Effects_Particle particle{};
+  VS::Effects::LiveParticle particle{};
   Effects_PackageTexture texture{};
   Effects_PackageTextureInfo info{1, 0};
   std::array<u_long, 2> script{8u << 16, 0x30000000u};
@@ -126,8 +126,8 @@ struct ParticleFixture {
   ParticleFixture() {
     Effects_package = &package;
     Effects_currentInstance = &instance;
-    Effects_particlePool = &particle;
-    Effects_particleCapacity = 1;
+    VS::Effects::particlePool = &particle;
+    VS::Effects::particleCapacity = 1;
     package.textures = &texture;
     package.block1TableCount = 1;
     package.textureInfoTable[0] = &info;
@@ -145,7 +145,7 @@ struct ParticleFixture {
     texture.reservedE = -4;
     texture.reserved10 = -4;
     texture.reserved12 = texture.reserved14 = texture.reserved16 = 4;
-    particle.textureAnimation.program =
+    particle.texture_animation.program =
         reinterpret_cast<u_char*>(script.data());
     VS::Effects::RecordLiveAnimationTable(
         std::as_writable_bytes(std::span(script)));
@@ -180,18 +180,18 @@ struct ParticleFixture {
     VS::Effects::ForgetLiveAnimationTable(script.data());
     Effects_package = saved_package;
     Effects_currentInstance = saved_instance;
-    Effects_particlePool = saved_pool;
-    Effects_particleCapacity = saved_capacity;
-    Effects_usedParticleCount = saved_used;
-    Effects_freeParticles = saved_free;
+    VS::Effects::particlePool = saved_pool;
+    VS::Effects::particleCapacity = saved_capacity;
+    VS::Effects::usedParticleCount = saved_used;
+    VS::Effects::freeParticles = saved_free;
     Core_Gte_Reset();
   }
 
   void CheckEmissionPool(bool occupied) const {
-    CHECK(Effects_usedParticleCount == (occupied ? 1 : 0));
+    CHECK(VS::Effects::usedParticleCount == (occupied ? 1 : 0));
     CHECK(instance.particleCount == (occupied ? 1 : 0));
     CHECK(instance.particles == (occupied ? &particle : nullptr));
-    CHECK(Effects_freeParticles == (occupied ? nullptr : &particle));
+    CHECK(VS::Effects::freeParticles == (occupied ? nullptr : &particle));
     CHECK(particle.next == nullptr);
   }
 
@@ -274,7 +274,7 @@ TEST_CASE("Particle paths join local world projection and emitted primitives",
   pages.ConfigureEffectPathTrace(VS::Render::EffectPathTraceRange{10, 10});
   VS::Core::SetLogTick(10);
   pages.SetEffectPathTraceTick(10);
-  fixture.particle.emitFlags = 0x20000;
+  fixture.particle.emit_flags = 0x20000;
   fixture.particle.motion.position.vx = 64 << 12;
   fixture.particle.motion.position.vy = 32 << 12;
   fixture.instance.transforms[0].world.t[0] = 100;
@@ -352,7 +352,7 @@ TEST_CASE("Culled particle paths explain absent screen geometry",
   pages.ConfigureEffectPathTrace(VS::Render::EffectPathTraceRange{10, 10});
   VS::Core::SetLogTick(10);
   pages.SetEffectPathTraceTick(10);
-  fixture.particle.emitFlags = 0x80000;
+  fixture.particle.emit_flags = 0x80000;
   fixture.particle.motion.position.vy = 4 << 12;
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   REQUIRE(scope.records.size() == 2);
@@ -368,7 +368,7 @@ TEST_CASE("Particle texture reset clears native pointer tails without overflow",
           "[particle][texture-state]") {
   struct {
     std::uint64_t before = 0x123456789ABCDEF0;
-    Effects_ParticleTextureAnimation animation;
+    VS::Effects::LiveParticleTextureAnimation animation;
     std::uint64_t after = 0x0FEDCBA987654321;
   } fixture;
   std::memset(&fixture.animation, 0xCD, sizeof fixture.animation);
@@ -376,20 +376,20 @@ TEST_CASE("Particle texture reset clears native pointer tails without overflow",
   CHECK(fixture.before == 0x123456789ABCDEF0);
   CHECK(fixture.after == 0x0FEDCBA987654321);
   CHECK(fixture.animation.program == nullptr);
-  CHECK(fixture.animation.textureInfo == nullptr);
+  CHECK(fixture.animation.texture_info == nullptr);
   CHECK(fixture.animation.cursor == 0);
-  CHECK(fixture.animation.frameTimer == 0);
-  CHECK(fixture.animation.frameOffsetX == 0);
-  CHECK(fixture.animation.frameOffsetY == 0);
+  CHECK(fixture.animation.frame_timer == 0);
+  CHECK(fixture.animation.frame_offset_x == 0);
+  CHECK(fixture.animation.frame_offset_y == 0);
 }
 
 TEST_CASE("Particle wrappers forward the real native list and texture program",
           "[effects][particle-render]") {
   ParticleFixture fixture;
   VS::Effects::DrawLiveEffectParticleList(&fixture.particle);
-  CHECK(fixture.particle.textureAnimation.cursor == 4);
-  CHECK(fixture.particle.textureAnimation.frameTimer == 8);
-  CHECK(fixture.particle.textureAnimation.textureInfo == &fixture.info);
+  CHECK(fixture.particle.texture_animation.cursor == 4);
+  CHECK(fixture.particle.texture_animation.frame_timer == 8);
+  CHECK(fixture.particle.texture_animation.texture_info == &fixture.info);
   fixture.CheckQuad();
 }
 
@@ -397,7 +397,7 @@ TEST_CASE("Particles retain each original depth override and native link",
           "[effects][particle-render]") {
   const int mode = GENERATE(0, 1, 2, 3, 4, 5, 6, 7, 8);
   ParticleFixture fixture;
-  fixture.particle.opaque61Bit0 = static_cast<unsigned>(mode);
+  fixture.particle.variant = static_cast<unsigned>(mode);
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   constexpr std::array<int, 9> kDepths{256,  264, 272, 248, 240,
                                        2046, -15, -13, -11};
@@ -413,9 +413,9 @@ TEST_CASE("Particles retain each original depth override and native link",
 TEST_CASE("Particle colors sample the next wrapped age through shared curves",
           "[effects][particle-render]") {
   ParticleFixture fixture;
-  fixture.particle.colorCurves[0] = 1;
-  fixture.particle.colorCurves[1] = 1;
-  fixture.particle.colorCurves[2] = 1;
+  fixture.particle.color_curves[0] = 1;
+  fixture.particle.color_curves[1] = 1;
+  fixture.particle.color_curves[2] = 1;
   fixture.particle.age = 255;
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   CHECK(fixture.storage[5] == 0x2C3F3F3F);
@@ -425,10 +425,10 @@ TEST_CASE("Particle culling preserves texture advancement without emitting",
           "[effects][particle-render]") {
   const bool attached = GENERATE(false, true);
   ParticleFixture fixture;
-  fixture.particle.emitFlags = 0x80000 | (attached ? 0x20000 : 0);
+  fixture.particle.emit_flags = 0x80000 | (attached ? 0x20000 : 0);
   fixture.particle.motion.position.vy = 4096;
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
-  CHECK(fixture.particle.textureAnimation.cursor == 4);
+  CHECK(fixture.particle.texture_animation.cursor == 4);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data() + 1);
 }
@@ -436,7 +436,7 @@ TEST_CASE("Particle culling preserves texture advancement without emitting",
 TEST_CASE("Attached particles project through their own native effect matrix",
           "[effects][particle-render]") {
   ParticleFixture fixture;
-  fixture.particle.emitFlags = 0x20000;
+  fixture.particle.emit_flags = 0x20000;
   fixture.instance.transforms[0].view.t[0] = 128;
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   const auto* quad = fixture.storage.data() + 4;
@@ -448,7 +448,7 @@ TEST_CASE(
     "Particle rotation preserves Q12 geometry and semitransparent commands",
     "[effects][particle-render]") {
   ParticleFixture fixture;
-  fixture.particle.textureAnimation.reserved14 = 1024;
+  fixture.particle.texture_animation.rotation = 1024;
   fixture.texture.clut = static_cast<std::int16_t>(-28108);
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   const auto* quad = fixture.storage.data() + 4;
@@ -462,8 +462,8 @@ TEST_CASE("Particle texture timers advance once per render without resetting",
   ParticleFixture fixture;
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
-  CHECK(fixture.particle.textureAnimation.frameTimer == 6);
-  CHECK(fixture.particle.textureAnimation.cursor == 4);
+  CHECK(fixture.particle.texture_animation.frame_timer == 6);
+  CHECK(fixture.particle.texture_animation.cursor == 4);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.storage.data() + 33);
 }
@@ -484,7 +484,7 @@ namespace {
 struct EmissionFixture : ParticleFixture {
   struct Definitions {
     int reserved;
-    Effects_ParticleDefinition entries[1];
+    VS::Effects::LiveParticleDefinition entries[1];
   } definitions{};
   std::array<u_short, 8> programs{1, 0, 8, 0, 0, 8, 0, 0x3000};
 
@@ -496,30 +496,30 @@ struct EmissionFixture : ParticleFixture {
     VS::Effects::RecordLiveAnimationTable(
         std::as_writable_bytes(std::span(programs)));
     auto& definition = definitions.entries[0];
-    definition.intervalRange[0] = definition.intervalRange[1] = 1;
-    definition.countRange[0] = definition.countRange[1] = 1;
-    Effects_usedParticleCount = 0;
-    Effects_freeParticles = &particle;
+    definition.interval_range[0] = definition.interval_range[1] = 1;
+    definition.count_range[0] = definition.count_range[1] = 1;
+    VS::Effects::usedParticleCount = 0;
+    VS::Effects::freeParticles = &particle;
   }
   ~EmissionFixture() { VS::Effects::ForgetLiveAnimationTable(programs.data()); }
 
-  void CheckTexture(const Effects_ParticleQuadSet& state) const {
-    CHECK(state.textureAnimation.program ==
+  void CheckTexture(const VS::Effects::LiveParticleQuadSet& state) const {
+    CHECK(state.texture_animation.program ==
           reinterpret_cast<const u_char*>(programs.data()) + 8);
-    CHECK(state.textureAnimation.textureInfo == nullptr);
-    CHECK(state.textureAnimation.frameTimer == 0);
-    CHECK(state.textureAnimation.cursor == 0);
-    CHECK(state.textureAnimation.textureIndex == 0);
+    CHECK(state.texture_animation.texture_info == nullptr);
+    CHECK(state.texture_animation.frame_timer == 0);
+    CHECK(state.texture_animation.cursor == 0);
+    CHECK(state.texture_animation.texture_index == 0);
   }
 };
 
 enum class ChildTrigger { kTick, kLifetimeEnd, kTextureEnd };
 
 struct ChildEmissionFixture : EmissionFixture {
-  Effects_ParticleGravity saved_gravity = Effects_particleGravity;
-  int saved_drag = Effects_particleDrag;
+  VECTOR saved_gravity = VS::Effects::particleGravity;
+  int saved_drag = VS::Effects::particleDrag;
   int saved_sample = Effects_curveSamples[0];
-  std::array<Effects_Particle, 2> nodes{};
+  std::array<VS::Effects::LiveParticle, 2> nodes{};
   std::array<u_long, 1> terminal{0x30000000u};
 
   explicit ChildEmissionFixture(ChildTrigger trigger) {
@@ -527,42 +527,42 @@ struct ChildEmissionFixture : EmissionFixture {
     package.block2Count = 1;
     auto& definition = definitions.entries[0];
     definition.flags = 4;
-    std::ranges::fill(definition.pairRanges[0], 1);
-    std::ranges::fill(definition.pairRanges[4], 10);
+    std::ranges::fill(definition.pair_ranges[0], 1);
+    std::ranges::fill(definition.pair_ranges[4], 10);
     Effects_curveSamples[0] = 0;
-    Effects_particleGravity = {};
-    Effects_particleDrag = 0;
+    VS::Effects::particleGravity = {};
+    VS::Effects::particleDrag = 0;
     nodes[0] = particle;
     auto& parent = nodes[0];
     parent.motion.mass = 1;
     parent.motion.position = {100 << 12, -20 * 4096, 1024 << 12};
     parent.transparency = 12;
-    parent.opaque61Bit0 = 3;
+    parent.variant = 3;
     parent.lifetime = 8;
     if (trigger == ChildTrigger::kTick) {
-      parent.tickEvent = 1;
+      parent.tick_event = 1;
     } else {
-      parent.endEvent = 1;
+      parent.end_event = 1;
       parent.lifetime = trigger == ChildTrigger::kLifetimeEnd ? 1 : -1;
     }
     if (trigger == ChildTrigger::kTextureEnd) {
-      parent.textureAnimation.program =
+      parent.texture_animation.program =
           reinterpret_cast<u_char*>(terminal.data());
-      parent.textureAnimation.textureInfo = &info;
+      parent.texture_animation.texture_info = &info;
       VS::Effects::RecordLiveAnimationTable(
           std::as_writable_bytes(std::span(terminal)));
     }
-    Effects_particlePool = nodes.data();
-    Effects_particleCapacity = static_cast<int>(nodes.size());
-    Effects_usedParticleCount = 1;
-    Effects_freeParticles = &nodes[1];
+    VS::Effects::particlePool = nodes.data();
+    VS::Effects::particleCapacity = static_cast<int>(nodes.size());
+    VS::Effects::usedParticleCount = 1;
+    VS::Effects::freeParticles = &nodes[1];
     instance.particles = &parent;
     instance.particleCount = 1;
   }
 
   ~ChildEmissionFixture() {
-    Effects_particleGravity = saved_gravity;
-    Effects_particleDrag = saved_drag;
+    VS::Effects::particleGravity = saved_gravity;
+    VS::Effects::particleDrag = saved_drag;
     Effects_curveSamples[0] = saved_sample;
     VS::Effects::ForgetLiveAnimationTable(terminal.data());
   }
@@ -577,15 +577,15 @@ struct ChildEmissionFixture : EmissionFixture {
   void CheckChildAppearance() const {
     const auto& child = nodes[1];
     CHECK(child.transparency == 12);
-    CHECK(child.opaque61Bit0 == 3);
+    CHECK(child.variant == 3);
     CHECK(child.lifetime == 10);
   }
 
   void CheckChildPopulation(ChildTrigger trigger) const {
     const bool retained = trigger == ChildTrigger::kTick;
     CHECK(instance.particleCount == (retained ? 2 : 1));
-    CHECK(Effects_usedParticleCount == (retained ? 2 : 1));
-    CHECK(Effects_freeParticles == (retained ? nullptr : &nodes[0]));
+    CHECK(VS::Effects::usedParticleCount == (retained ? 2 : 1));
+    CHECK(VS::Effects::freeParticles == (retained ? nullptr : &nodes[0]));
   }
 };
 
@@ -600,11 +600,11 @@ struct DispatchHeap {
     return capacity.value_or(0);
   }
 
-  static void CheckPrefix(const Effects_ParticleQuadSet& state) {
-    CHECK(state.opaque0 == 30);
-    CHECK(state.definitionIndex == 0);
+  static void CheckPrefix(const VS::Effects::LiveParticleQuadSet& state) {
+    CHECK(state.lifetime == 30);
+    CHECK(state.definition_index == 0);
     CHECK(state.age == 0);
-    REQUIRE(state.controlPoints != nullptr);
+    REQUIRE(state.control_points != nullptr);
   }
 };
 
@@ -651,10 +651,11 @@ TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
   REQUIRE(dispatch(&renderer, 1, 30) == 1);
   REQUIRE(renderer.rendererState != nullptr);
   const auto capacity = DispatchHeap::Capacity(renderer.rendererState);
-  CHECK(capacity >= sizeof(Effects_ParticleQuadSet));
-  auto* state = static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
+  CHECK(capacity >= sizeof(VS::Effects::LiveParticleQuadSet));
+  auto* state =
+      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.rendererState);
   DispatchHeap::CheckPrefix(*state);
-  if (capacity >= sizeof(Effects_ParticleQuadSet)) {
+  if (capacity >= sizeof(VS::Effects::LiveParticleQuadSet)) {
     fixture.CheckTexture(*state);
   }
   CHECK(dispatch(&renderer, 4, 0) == 0);
@@ -671,14 +672,15 @@ TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
   const auto dispatch =
       &VS::Effects::Templates::UpdateLivePlg265ParticleDispatch;
   REQUIRE(dispatch(&renderer, 1, 30) == 1);
-  const auto prefix = offsetof(Effects_ParticleQuadSet, textureAnimation);
+  const auto prefix =
+      offsetof(VS::Effects::LiveParticleQuadSet, texture_animation);
   constexpr auto kUnit = VS::Core::Memory::kHeapUnitBytes;
   const auto rounded = (prefix + kUnit - 1) / kUnit * kUnit;
   CHECK(DispatchHeap::Capacity(renderer.rendererState) == rounded);
   const auto* state =
-      static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
+      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.rendererState);
   DispatchHeap::CheckPrefix(*state);
-  CHECK(state->opaque8 == 0);
+  CHECK(state->cooldown == 0);
   CHECK(dispatch(&renderer, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
   CHECK(VS::Core::Memory::GameHeap().Empty());
@@ -718,8 +720,8 @@ void PrepareLiveCornerSet(EmissionFixture& fixture) {
   fixture.package.block2Count = 1;
   auto& definition = fixture.definitions.entries[0];
   definition.flags = 0x1008;
-  definition.positionRange[4] = definition.positionRange[5] = 512;
-  definition.vectorRanges[6][4] = definition.vectorRanges[6][5] = 1024;
+  definition.position_range[4] = definition.position_range[5] = 512;
+  definition.vector_ranges[6][4] = definition.vector_ranges[6][5] = 1024;
 }
 
 // The first segment's packet opens with its draw-mode word, carries the
@@ -754,7 +756,7 @@ TEST_CASE("Live particle ticks link every ribbon segment into the scene table",
   REQUIRE(live.dispatch(&renderer, 1, 0) == 1);
   REQUIRE(live.dispatch(&renderer, 2, 0) == 1);
   const auto* state =
-      static_cast<Effects_ParticleQuadSet*>(renderer.rendererState);
+      static_cast<VS::Effects::LiveParticleQuadSet*>(renderer.rendererState);
   REQUIRE(state != nullptr);
   CHECK(state->age == 1);
   CHECK(*live.counter == 4);
@@ -774,11 +776,11 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
                  sizeof(Effects_PackageBlock5));
   auto& definition = fixture.definitions.entries[0];
   const int requested = GENERATE(0, 1, 5);
-  definition.countRange[0] = definition.countRange[1] =
+  definition.count_range[0] = definition.count_range[1] =
       static_cast<std::int16_t>(requested);
   const bool full = GENERATE(false, true);
-  Effects_usedParticleCount = full ? 1 : 0;
-  Effects_freeParticles = full ? nullptr : &fixture.particle;
+  VS::Effects::usedParticleCount = full ? 1 : 0;
+  VS::Effects::freeParticles = full ? nullptr : &fixture.particle;
   fixture.instance.particles = full ? &fixture.particle : nullptr;
   fixture.instance.particleCount = full ? 1 : 0;
   fixture.particle.next = nullptr;
@@ -793,7 +795,7 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
     CHECK(VS::Core::NextBiosRand() == VS::Core::Rand15(1234).Next());
   } else {
     CHECK(static_cast<unsigned char>(fixture.particle.age) == 255);
-    CHECK(fixture.particle.textureAnimation.program ==
+    CHECK(fixture.particle.texture_animation.program ==
           reinterpret_cast<u_char*>(fixture.programs.data()) + 8);
   }
   VS::Core::SeedBiosRand(1);
@@ -892,11 +894,11 @@ TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
   CAPTURE(height, mode, seed);
   auto& definition = fixture.definitions.entries[0];
   definition.flags = 16 | mode;
-  definition.extentRange[0] = definition.extentRange[1] = 32;
-  definition.extentRange[2] = definition.extentRange[3] =
+  definition.extent_range[0] = definition.extent_range[1] = 32;
+  definition.extent_range[2] = definition.extent_range[3] =
       static_cast<std::int16_t>(height);
-  definition.extentRange[4] = definition.extentRange[5] = 48;
-  definition.innerExtentRange[0] = definition.innerExtentRange[1] = 4096;
+  definition.extent_range[4] = definition.extent_range[5] = 48;
+  definition.inner_extent_range[0] = definition.inner_extent_range[1] = 4096;
   VS::Core::Rand15 expected(seed);
   const auto angle = expected.Next();
   int vertical = 0;
@@ -929,18 +931,18 @@ TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
 
 namespace {
 struct ParticleMotionFixture {
-  int saved_drag = Effects_particleDrag;
-  Effects_ParticleGravity saved_gravity = Effects_particleGravity;
-  Effects_Particle particle{};
+  int saved_drag = VS::Effects::particleDrag;
+  VECTOR saved_gravity = VS::Effects::particleGravity;
+  VS::Effects::LiveParticle particle{};
 
   ParticleMotionFixture() {
-    Effects_particleDrag = 0;
-    Effects_particleGravity = {};
+    VS::Effects::particleDrag = 0;
+    VS::Effects::particleGravity = {};
     particle.motion.mass = 4096;
   }
   ~ParticleMotionFixture() {
-    Effects_particleDrag = saved_drag;
-    Effects_particleGravity = saved_gravity;
+    VS::Effects::particleDrag = saved_drag;
+    VS::Effects::particleGravity = saved_gravity;
   }
 };
 }  // namespace
@@ -949,11 +951,11 @@ TEST_CASE("Particle rendering flags cannot invent target attraction",
           "[effects][particle-motion][native-attraction]") {
   ParticleMotionFixture fixture;
   auto& particle = fixture.particle;
-  particle.emitFlags = GENERATE(0, 1, 0x40, 0x20000, 0x40000, 0x80000);
+  particle.emit_flags = GENERATE(0, 1, 0x40, 0x20000, 0x40000, 0x80000);
   std::array<u_char, 4> program{};
   Effects_PackageTextureInfo texture{};
-  particle.textureAnimation.program = program.data();
-  particle.textureAnimation.textureInfo = &texture;
+  particle.texture_animation.program = program.data();
+  particle.texture_animation.texture_info = &texture;
   particle.motion.velocity.vx = 4096;
   VS::Effects::LiveIntegrateParticleMotion(&particle);
   CHECK(particle.motion.position.vx == 4096);
@@ -962,8 +964,8 @@ TEST_CASE("Particle rendering flags cannot invent target attraction",
   CHECK(particle.motion.force.vx == 0);
   CHECK(particle.motion.force.vy == 0);
   CHECK(particle.motion.force.vz == 0);
-  CHECK(particle.textureAnimation.program == program.data());
-  CHECK(particle.textureAnimation.textureInfo == &texture);
+  CHECK(particle.texture_animation.program == program.data());
+  CHECK(particle.texture_animation.texture_info == &texture);
 }
 
 TEST_CASE("Particle attraction uses its native target and signed strength",
@@ -971,7 +973,7 @@ TEST_CASE("Particle attraction uses its native target and signed strength",
   ParticleMotionFixture fixture;
   const auto axis = GENERATE(0, 1, 2);
   auto& particle = fixture.particle;
-  particle.attractionTarget[axis] = 32;
+  particle.attraction_target[axis] = 32;
   particle.attraction = GENERATE(-4096, 0, 4096);
   VS::Effects::LiveIntegrateParticleMotion(&particle);
   const std::array force{particle.motion.force.vx, particle.motion.force.vy,
@@ -987,11 +989,11 @@ TEST_CASE("Particle attraction uses its native target and signed strength",
 TEST_CASE("Linked particles retain independent native attraction state",
           "[effects][particle-motion][native-attraction]") {
   ParticleMotionFixture fixture;
-  Effects_Particle second{};
+  VS::Effects::LiveParticle second{};
   second.motion.mass = 4096;
   second.attraction = 4096;
-  second.attractionTarget[2] = 32;
-  fixture.particle.emitFlags = 0x20000;
+  second.attraction_target[2] = 32;
+  fixture.particle.emit_flags = 0x20000;
   fixture.particle.next = &second;
   VS::Effects::LiveIntegrateParticleMotion(&fixture.particle);
   CHECK(fixture.particle.motion.force.vx == 0);
@@ -1069,9 +1071,9 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
       {{0, 0, 0, 0}, {256, -64, 0, 0}, {256, 64, 256, 0}, {512, 0, 256, 0}}};
   std::ranges::copy(kPoints, trail.spline_points.begin());
   state.trails = storage.entries.data();
-  Effects_ParticleDefinition definition{};
-  std::ranges::fill(definition.pairRanges[4], 12);
-  Effects_ParticleEmitterScratch scratch{};
+  VS::Effects::LiveParticleDefinition definition{};
+  std::ranges::fill(definition.pair_ranges[4], 12);
+  VS::Effects::LiveParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
   const auto samples = std::size(trail.spline_samples);
   for (int cycle = 0; cycle < 2; ++cycle) {
@@ -1097,8 +1099,8 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
 // The five-sample stages through their live binding, in the pointer shape the
 // shared reference checks use.
 template <VS::Effects::Templates::TrailStage Stage>
-void RunTrailStage(Effects_ParticleDefinition* definition,
-                   Effects_ParticleEmitterScratch* scratch,
+void RunTrailStage(VS::Effects::LiveParticleDefinition* definition,
+                   VS::Effects::LiveParticleEmitterScratch* scratch,
                    Effects_EffectInstance* instance,
                    VS::Effects::LiveTrailState* state) {
   VS::Effects::Templates::RunLiveTrailStage(Stage, *definition, *scratch,
@@ -1107,8 +1109,8 @@ void RunTrailStage(Effects_ParticleDefinition* definition,
 
 // The nine-sample stages through their live binding, in the same shape.
 template <VS::Effects::Templates::TrailNineStage Stage>
-void RunTrailNineStage(Effects_ParticleDefinition* definition,
-                       Effects_ParticleEmitterScratch* scratch,
+void RunTrailNineStage(VS::Effects::LiveParticleDefinition* definition,
+                       VS::Effects::LiveParticleEmitterScratch* scratch,
                        Effects_EffectInstance* instance,
                        VS::Effects::LiveTrailNineState* state) {
   VS::Effects::Templates::RunLiveTrailNineStage(Stage, *definition, *scratch,
@@ -1182,10 +1184,10 @@ void InitializeTrailRenderHistory(std::array<Trail, 2>& trails,
 }
 
 void CheckTrailReferenceRenderState(
-    const Effects_ParticleTextureAnimation& animation,
+    const VS::Effects::LiveParticleTextureAnimation& animation,
     const ParticleFixture& fixture, const u_long* end) {
   CHECK(animation.cursor == 4);
-  CHECK(animation.frameTimer == 8);
+  CHECK(animation.frame_timer == 8);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == end);
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
@@ -1215,10 +1217,9 @@ void CheckTrailReferencePackets(const u_long* begin, std::size_t trail_count,
 }
 
 template <class Trail, class Packet, class State, class Render, class ReadQuad>
-void CheckTrailReferenceRendering(State& state,
-                                  Effects_ParticleTextureAnimation& animation,
-                                  std::span<u_char> transparency, Render render,
-                                  ReadQuad read_quad) {
+void CheckTrailReferenceRendering(
+    State& state, VS::Effects::LiveParticleTextureAnimation& animation,
+    std::span<u_char> transparency, Render render, ReadQuad read_quad) {
   constexpr auto kSamples = std::size(Trail{}.spline_samples);
   const bool attached = GENERATE(false, true);
   const bool clipped = GENERATE(false, true);
@@ -1234,10 +1235,10 @@ void CheckTrailReferenceRendering(State& state,
   for (std::size_t index = 0; index < transparency.size(); ++index) {
     transparency[index] = static_cast<u_char>((index + 1) * 8);
   }
-  Effects_ParticleDefinition definition{};
-  definition.vectorRanges[4][0] = definition.vectorRanges[4][1] = 8;
-  definition.transformIndex = 1;
-  Effects_ParticleEmitterScratch scratch{};
+  VS::Effects::LiveParticleDefinition definition{};
+  definition.vector_ranges[4][0] = definition.vector_ranges[4][1] = 8;
+  definition.transform_index = 1;
+  VS::Effects::LiveParticleEmitterScratch scratch{};
   scratch.flags = attached ? 0x20000 : 0;
   VS::Render::FrameScratchpad().view_matrix.t[0] = -64;
   fixture.instance.transforms[1].view =
@@ -1302,7 +1303,7 @@ struct Plg074Fixture : EmissionFixture {
   Effects_ActionEffectRequest saved_request = Effects_actionRequest;
   std::array<CVECTOR, 8> saved_colors{};
   std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
-  Effects_ParticleEmitterScratch scratch{};
+  VS::Effects::LiveParticleEmitterScratch scratch{};
   std::array<VS::Effects::LiveTrail, 16> trails{};
   VS::Effects::LiveTrailState trail_state{};
 
@@ -1345,17 +1346,19 @@ struct Plg074Fixture : EmissionFixture {
                 sizeof saved_arc_colors);
   }
 
-  Effects_ParticleDefinition& Definition() { return definitions.entries[0]; }
+  VS::Effects::LiveParticleDefinition& Definition() {
+    return definitions.entries[0];
+  }
 
   void ConfigureRing() {
     auto& definition = Definition();
     std::ranges::copy(std::array<std::int16_t, 6>{0, 0, 0, 0, 1024, 1024},
-                      definition.positionRange);
+                      definition.position_range.begin());
     std::ranges::copy(std::array<std::int16_t, 6>{128, 128, 64, 64, 128, 128},
-                      definition.extentRange);
-    std::ranges::fill(definition.innerExtentRange, 2048);
-    definition.vectorRanges[0][0] = definition.vectorRanges[0][1] = 1024;
-    definition.vectorRanges[1][0] = definition.vectorRanges[1][1] = 4096;
+                      definition.extent_range.begin());
+    std::ranges::fill(definition.inner_extent_range, 2048);
+    definition.vector_ranges[0][0] = definition.vector_ranges[0][1] = 1024;
+    definition.vector_ranges[1][0] = definition.vector_ranges[1][1] = 4096;
   }
 
   void ResetPackets() {
@@ -1488,7 +1491,7 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
   const auto mode = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
-  fixture.Definition().transparencyCurve = static_cast<u_int>(mode);
+  fixture.Definition().transparency_curve = static_cast<u_int>(mode);
   DispatchHeap heap;
   Effects_RendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
@@ -1513,7 +1516,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
   Effects_actionRequest.position = {100, -200, 300, 0};
   auto& definition = fixture.Definition();
   std::ranges::copy(std::array<std::int16_t, 6>{10, 10, 20, 20, 30, 30},
-                    definition.extentRange);
+                    definition.extent_range.begin());
   fixture.scratch.flags = 0x1008 | anchor;
   VS::Effects::Plg073::trailEmissionCounter = 5;
   const std::array offsets{std::array{0, 0, 0}, std::array{100, -200, 300},
@@ -1541,7 +1544,7 @@ TEST_CASE("PLG074 F01989 targets world request and actor anchors",
   Plg074Fixture fixture;
   auto& definition = fixture.Definition();
   std::ranges::copy(std::array<std::int16_t, 6>{10, 10, -20, -20, 30, 30},
-                    definition.vectorRanges[6]);
+                    definition.vector_ranges[6].begin());
   fixture.scratch.flags = anchor;
   entry(&definition, &fixture.scratch, &fixture.instance, &fixture.trail_state);
   const auto offset = anchor == 0x80   ? std::array{400, -500, 600}
@@ -1566,7 +1569,7 @@ TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
   points[0] = {10, 20, 30, 0};
   points[3] = {10, 20, 1054, 0};
   std::ranges::copy(std::array<std::int16_t, 4>{64, 64, -64, -64},
-                    fixture.Definition().pairRanges[2]);
+                    fixture.Definition().pair_ranges[2].begin());
   entry(&fixture.Definition(), &fixture.scratch, &fixture.instance,
         &fixture.trail_state);
   CHECK(points[1].vx == 10);
@@ -1642,8 +1645,8 @@ TEST_CASE(
   const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailInit>;
   const std::int16_t duration = GENERATE(0, 1, 12, 255);
   Plg074Fixture fixture;
-  std::ranges::fill(fixture.Definition().pairRanges[4], duration);
-  std::ranges::fill(fixture.Definition().innerExtentRange, 2);
+  std::ranges::fill(fixture.Definition().pair_ranges[4], duration);
+  std::ranges::fill(fixture.Definition().inner_extent_range, 2);
   fixture.trails[0].spline_points[0] = {10, 20, 30, 0};
   entry(&fixture.Definition(), &fixture.scratch, &fixture.instance,
         &fixture.trail_state);
@@ -1686,9 +1689,9 @@ TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
   const bool cancel = GENERATE(false, true);
   Plg074Fixture fixture;
   DispatchHeap heap;
-  fixture.Definition().intervalRange[0] = count;
+  fixture.Definition().interval_range[0] = count;
   fixture.Definition().flags = 0x1008;
-  std::ranges::fill(fixture.Definition().pairRanges[4], 12);
+  std::ranges::fill(fixture.Definition().pair_ranges[4], 12);
   for (int cycle = 0; cycle < 2; ++cycle) {
     Effects_RendererSlot slot{};
     REQUIRE(entry(&slot, 1, 2) == 1);
@@ -1747,7 +1750,7 @@ struct CurveBlockStorage {
 
 std::array<u_char, 5> CreatedTransparency(Plg074Fixture& fixture,
                                           u_char curve) {
-  fixture.Definition().transparencyCurve = curve;
+  fixture.Definition().transparency_curve = curve;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
@@ -1789,7 +1792,7 @@ TEST_CASE("PLG074 trail emitter refuses negative trail counts",
   DispatchHeap heap;
   LogCapture log;
   Effects_RendererSlot slot{};
-  fixture.Definition().intervalRange[0] = -1;
+  fixture.Definition().interval_range[0] = -1;
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   CHECK(slot.rendererState == nullptr);
   CHECK(log.Contains("negative trail count"));
@@ -1802,7 +1805,7 @@ TEST_CASE("PLG074 trail emitter stops when its package is replaced",
   DispatchHeap heap;
   LogCapture log;
   Effects_RendererSlot slot{};
-  fixture.Definition().intervalRange[0] = 2;
+  fixture.Definition().interval_range[0] = 2;
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
   REQUIRE(state != nullptr);
@@ -1821,7 +1824,7 @@ TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
   LogCapture log;
   CurveBlockStorage curves;
   curves.Bind(std::as_bytes(std::span{&fixture.definitions, 1}));
-  fixture.Definition().intervalRange[0] = 1;
+  fixture.Definition().interval_range[0] = 1;
   CHECK(CreatedTransparency(fixture, 0) ==
         std::array<u_char, 5>{128, 128, 128, 128, 128});
   CHECK(CreatedTransparency(fixture, 1) ==
@@ -1839,8 +1842,8 @@ TEST_CASE("PLG074 trail tick events stay within the package's definitions",
   Plg074Fixture fixture;
   DispatchHeap heap;
   LogCapture log;
-  fixture.Definition().intervalRange[0] = 1;
-  fixture.Definition().tickEvent = 2;
+  fixture.Definition().interval_range[0] = 1;
+  fixture.Definition().tick_event = 2;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
@@ -1870,7 +1873,7 @@ struct StaleCurveBlock {
 
 std::array<u_char, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
                                                   u_char curve) {
-  fixture.Definition().transparencyCurve = curve;
+  fixture.Definition().transparency_curve = curve;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 1, 0) == 1);
   auto* state =
@@ -1883,7 +1886,7 @@ std::array<u_char, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
 }
 
 std::array<int, 5> RotatingSurfaceRows(Plg074Fixture& fixture, u_char curve) {
-  fixture.Definition().transparencyCurve = curve;
+  fixture.Definition().transparency_curve = curve;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 1,
                                                                   0) == 1);
@@ -1904,7 +1907,7 @@ TEST_CASE("Nine-sample trail transparency reads only the package's curves",
   DispatchHeap heap;
   LogCapture log;
   const StaleCurveBlock curves(fixture);
-  fixture.Definition().intervalRange[0] = 1;
+  fixture.Definition().interval_range[0] = 1;
   CHECK(NineSampleTrailTransparency(fixture, 1) ==
         std::array<u_char, 9>{10, 10, 10, 20, 20, 20, 30, 30, 40});
   CHECK_FALSE(log.Contains("transparency curve"));
@@ -1926,7 +1929,7 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
   Plg074Fixture fixture;
   DispatchHeap heap;
   LogCapture log;
-  fixture.Definition().intervalRange[0] = 2;
+  fixture.Definition().interval_range[0] = 2;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
@@ -1934,7 +1937,7 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
   if (missing_instance) {
     Effects_currentInstance = nullptr;
   } else {
-    fixture.Definition().transformIndex = 16;
+    fixture.Definition().transform_index = 16;
   }
   const void* before = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
@@ -1954,7 +1957,7 @@ TEST_CASE("Trail emitters refuse an exhausted heap without a partial state",
   const bool state_fits = GENERATE(false, true);
   Plg074Fixture fixture;
   LogCapture log;
-  fixture.Definition().intervalRange[0] = 16;
+  fixture.Definition().interval_range[0] = 16;
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, kArenaBytes>
       arena{};
   VS::Core::Memory::ScopedLiveGameHeap exhausted(
@@ -2012,7 +2015,7 @@ TEST_CASE("Live surfaces stop on a missing instance or transform",
   if (missing_instance) {
     Effects_currentInstance = nullptr;
   } else {
-    fixture.Definition().transformIndex = 16;
+    fixture.Definition().transform_index = 16;
   }
   const void* before = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(entry(&slot, 2, 0) == 0);
@@ -2055,7 +2058,7 @@ TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
   REQUIRE(VS::Effects::effectEntryPoints[90] == entry);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
-  std::ranges::fill(fixture.Definition().vectorRanges[1], 0);
+  std::ranges::fill(fixture.Definition().vector_ranges[1], 0);
   DispatchHeap heap;
   Effects_RendererSlot slot{};
   REQUIRE(entry(&slot, 1, 2) == 1);
@@ -2103,8 +2106,8 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
   fixture.ConfigureRing();
   fixture.package.block1TableCount = 2;
   fixture.package.textureInfoTable[1] = &fixture.info;
-  fixture.Definition().ringSegments = 1;
-  fixture.Definition().ringPositions = 0;
+  fixture.Definition().ring_segments = 1;
+  fixture.Definition().ring_positions = 0;
   const auto saved_color = VS::Effects::Plg053::closedRingColorFactors[0];
   VS::Effects::Plg053::closedRingColorFactors[0] = {32, 64, 96, 0};
   DispatchHeap heap;

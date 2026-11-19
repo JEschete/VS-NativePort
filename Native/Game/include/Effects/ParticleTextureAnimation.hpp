@@ -9,7 +9,7 @@
 // words in the effect package's animation table (block 2) that selects frames
 // of one texture table, holds each for a number of ticks and moves the frame
 // offset. The functions work on the animation's value fields;
-// ParticleTextureAnimationLive.hpp binds the Effects_ParticleTextureAnimation
+// ParticleTextureAnimationLive.hpp binds the LiveParticleTextureAnimation
 // records and their program and frame pointers.
 namespace VS::Effects {
 struct TextureAnimationState {

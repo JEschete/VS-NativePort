@@ -34,7 +34,7 @@
 #include "Core/Math/FixedPoint.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/Package.h"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg045.hpp"
 #include "Effects/Plugins/Plg049.hpp"
 #include "Effects/Plugins/Plg050.hpp"
@@ -733,18 +733,18 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Effects::trailAdditiveColors},  // G00220 D_800EC2E8
     {"BATTLE/BATTLE.PRG", 0x83B08, sizeof VS::Effects::trailColors,
      &VS::Effects::trailColors, sizeof VS::Effects::trailColors},  // G00221 D_800EC308
-    {"BATTLE/BATTLE.PRG", 0x83B28, sizeof Effects_emissionCounter,
-     &Effects_emissionCounter,
-     sizeof Effects_emissionCounter},  // G00223 D_800EC328
+    {"BATTLE/BATTLE.PRG", 0x83B28, sizeof VS::Effects::emissionCounter,
+     &VS::Effects::emissionCounter,
+     sizeof VS::Effects::emissionCounter},  // G00223 D_800EC328
     {"BATTLE/BATTLE.PRG", 0x83B2C, sizeof Effects_actionVariantValues,
      &Effects_actionVariantValues,
      sizeof Effects_actionVariantValues},  // G00224 D_800EC32C
-    {"BATTLE/BATTLE.PRG", 0x83B30, sizeof Effects_pairedParticleColorPresets,
-     &Effects_pairedParticleColorPresets,
-     sizeof Effects_pairedParticleColorPresets},  // G00225 D_800EC330
-    {"BATTLE/BATTLE.PRG", 0x83B68, sizeof Effects_particleColorPresetTable,
-     &Effects_particleColorPresetTable,
-     sizeof Effects_particleColorPresetTable},  // G00226 D_800EC368
+    {"BATTLE/BATTLE.PRG", 0x83B30, sizeof VS::Effects::pairedParticleColorPresets,
+     &VS::Effects::pairedParticleColorPresets,
+     sizeof VS::Effects::pairedParticleColorPresets},  // G00225 D_800EC330
+    {"BATTLE/BATTLE.PRG", 0x83B68, sizeof VS::Effects::particleColorPresetTable,
+     &VS::Effects::particleColorPresetTable,
+     sizeof VS::Effects::particleColorPresetTable},  // G00226 D_800EC368
     {"BATTLE/BATTLE.PRG", 0x83CB8, sizeof Effects_lastReactionSoundVariant,
      &Effects_lastReactionSoundVariant,
      sizeof Effects_lastReactionSoundVariant},  // G00228 D_800EC4B8

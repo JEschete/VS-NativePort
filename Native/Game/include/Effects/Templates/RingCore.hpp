@@ -153,7 +153,7 @@ struct RingTickInputs {
 };
 
 // The emitter-scratch values a tick leaves behind
-// (Effects_ParticleEmitterScratch); force and acceleration are halfword
+// (LiveParticleEmitterScratch); force and acceleration are halfword
 // vectors.
 struct RingScratch {
   std::uint32_t flags{};

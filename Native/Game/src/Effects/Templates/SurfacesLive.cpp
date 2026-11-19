@@ -25,7 +25,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg061.hpp"
 #include "Effects/Plugins/Plg069.hpp"
 #include "Effects/Plugins/Plg077.hpp"
@@ -98,7 +98,7 @@ constexpr std::size_t kSecondStart = 2;
 // The second colour's curve ids: the minimum force range's start halfwords.
 constexpr std::size_t kSecondColorBlue = 4;
 
-static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
+static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 static_assert(sizeof(VS::Render::GridPacket) == kGridPacketWords * kWordBytes);
 static_assert(sizeof(VS::Render::Mesh10Packet) ==
               kMesh10PacketWords * kWordBytes);
@@ -121,15 +121,15 @@ std::uint64_t dropped_primitives = 0;
   return std::has_single_bit(++count);
 }
 
-Effects_ParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
+LiveParticleEmitterScratch& EmitterScratch() {
+  return *reinterpret_cast<LiveParticleEmitterScratch*>(
       reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
-const Effects_ParticleDefinition* Definition(std::size_t index) {
+const LiveParticleDefinition* Definition(std::size_t index) {
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
@@ -155,45 +155,45 @@ const Effects_ParticleDefinition* Definition(std::size_t index) {
 }
 
 [[nodiscard]] SurfaceCurves TypedCurves(
-    const Effects_ParticleDefinition& definition) {
+    const LiveParticleDefinition& definition) {
   const std::span<const std::int16_t, math::kVectorRangeHalfwords> second =
-      definition.vectorRanges[kForceMinRange];
-  return {.position = definition.positionCurve,
-          .extent = definition.extentCurve,
-          .inner_extent = definition.innerExtentCurve,
-          .direction = definition.directionCurve,
-          .direction_jitter = definition.directionJitterCurve,
-          .speed = definition.speedCurve,
-          .force = definition.forceCurve,
-          .acceleration = definition.accelerationCurve,
-          .attraction_jitter = definition.attractionJitterCurve,
-          .mass = definition.massCurve,
-          .gravity = definition.gravityScaleCurve,
-          .color = {definition.rCurve, definition.gCurve, definition.bCurve},
+      definition.vector_ranges[kForceMinRange];
+  return {.position = definition.position_curve,
+          .extent = definition.extent_curve,
+          .inner_extent = definition.inner_extent_curve,
+          .direction = definition.direction_curve,
+          .direction_jitter = definition.direction_jitter_curve,
+          .speed = definition.speed_curve,
+          .force = definition.force_curve,
+          .acceleration = definition.acceleration_curve,
+          .attraction_jitter = definition.attraction_jitter_curve,
+          .mass = definition.mass_curve,
+          .gravity = definition.gravity_scale_curve,
+          .color = {definition.r_curve, definition.g_curve, definition.b_curve},
           .second_color = {second[kFirstStart], second[kSecondStart],
                            second[kSecondColorBlue]}};
 }
 
 [[nodiscard]] SurfaceDefinition TypedDefinition(
-    const Effects_ParticleDefinition& definition) {
-  const auto& vectors = definition.vectorRanges;
-  const auto& pairs = definition.pairRanges;
+    const LiveParticleDefinition& definition) {
+  const auto& vectors = definition.vector_ranges;
+  const auto& pairs = definition.pair_ranges;
   const std::span<const std::int16_t, math::kPlaneRangeHalfwords> mass =
       pairs[kMassRange];
   const std::span<const std::int16_t, math::kPlaneRangeHalfwords> origin =
       pairs[kGridOriginRange];
   return {.flags = definition.flags,
-          .tick_event = definition.tickEvent,
-          .texture_index = definition.textureIndex,
-          .animation_id = definition.animationId,
+          .tick_event = definition.tick_event,
+          .texture_index = definition.texture_index,
+          .animation_id = definition.animation_id,
           .transparency_curve =
-              static_cast<std::uint8_t>(definition.transparencyCurve),
-          .ring_segments = definition.ringSegments,
-          .ring_positions = definition.ringPositions,
+              static_cast<std::uint8_t>(definition.transparency_curve),
+          .ring_segments = definition.ring_segments,
+          .ring_positions = definition.ring_positions,
           .curves = TypedCurves(definition),
-          .position = VectorRange(definition.positionRange),
-          .extent = VectorRange(definition.extentRange),
-          .inner_extent = math::RangePair(definition.innerExtentRange, 0),
+          .position = VectorRange(definition.position_range),
+          .extent = VectorRange(definition.extent_range),
+          .inner_extent = math::RangePair(definition.inner_extent_range, 0),
           .direction = VectorRange(vectors[kDirectionRange]),
           .direction_jitter = VectorRange(vectors[kDirectionJitterRange]),
           .force_min = VectorRange(vectors[kForceMinRange]),
@@ -230,24 +230,24 @@ class LiveSurfaceServices {
   void BeginProjection(bool effect_view) const;
   [[nodiscard]] static RingProjection Project(RingPoint point);
   [[nodiscard]] std::optional<RingTexture> AdvanceTexture(
-      Effects_ParticleTextureAnimation& animation) const;
+      LiveParticleTextureAnimation& animation) const;
   void Submit(std::span<const std::uint32_t> words, std::int32_t depth) const;
   [[nodiscard]] Vec3 TransformByActor(RingPoint point) const;
   void EmitParticleEvent(std::uint8_t event, Vec3 position) const;
   // A cleared state record of `bytes`, or null with a diagnostic.
   [[nodiscard]] void* AllocateState(std::size_t bytes) const;
-  void StartAnimation(Effects_ParticleTextureAnimation& animation,
+  void StartAnimation(LiveParticleTextureAnimation& animation,
                       SurfaceAnimation source) const;
 
  private:
   std::string_view name_;
-  const Effects_ParticleDefinition* definition_ = nullptr;
+  const LiveParticleDefinition* definition_ = nullptr;
   Effects_EffectInstance* instance_ = nullptr;
 };
 
 std::optional<SurfaceDefinition> LiveSurfaceServices::CreateDefinition(
     std::uint8_t definition_index) const {
-  const Effects_ParticleDefinition* definition = Definition(definition_index);
+  const LiveParticleDefinition* definition = Definition(definition_index);
   if (definition == nullptr) {
     VS::Core::LogWarn(
         "effects",
@@ -298,17 +298,17 @@ std::optional<SurfaceTickInputs> LiveSurfaceServices::BeginTick(
         name_, definition_index, name_);
     return std::nullopt;
   }
-  if (definition_->transformIndex >= kTransformCount) {
+  if (definition_->transform_index >= kTransformCount) {
     VS::Core::LogWarn("effects",
                       "{}: definition {} names transform {} of {}; {} stopped",
-                      name_, definition_index, definition_->transformIndex,
+                      name_, definition_index, definition_->transform_index,
                       kTransformCount, name_);
     return std::nullopt;
   }
   // The original stored the flags before sampling anything.
   EmitterScratch().flags = definition_->flags;
   const MATRIX& world =
-      instance_->transforms[definition_->transformIndex].world;
+      instance_->transforms[definition_->transform_index].world;
   // Effects_effectOrigin: the action request's position.
   const SVECTOR& origin = Effects_actionRequest.position;
   return SurfaceTickInputs{
@@ -346,36 +346,38 @@ std::int32_t LiveSurfaceServices::SampleCurve(std::int32_t curve,
 }
 
 void LiveSurfaceServices::PublishScratch(const SurfaceScratch& values) {
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   scratch.flags = values.flags;
   math::StoreVector(scratch.position, values.position);
   math::StoreVector(scratch.extent, values.extent);
   if (values.forces.has_value()) {
-    math::StoreVector(scratch.forceMin, values.forces->force_min);
-    math::StoreVector(scratch.forceMax, values.forces->force_max);
-    math::StoreVector(scratch.accelerationMin, values.forces->acceleration_min);
-    math::StoreVector(scratch.accelerationMax, values.forces->acceleration_max);
+    math::StoreVector(scratch.force_min, values.forces->force_min);
+    math::StoreVector(scratch.force_max, values.forces->force_max);
+    math::StoreVector(scratch.acceleration_min,
+                      values.forces->acceleration_min);
+    math::StoreVector(scratch.acceleration_max,
+                      values.forces->acceleration_max);
   }
   if (values.base_direction.has_value()) {
-    math::StoreVector(scratch.baseDirection, *values.base_direction);
+    math::StoreVector(scratch.base_direction, *values.base_direction);
   }
   if (values.direction_jitter.has_value()) {
-    math::StoreVector(scratch.directionJitter, *values.direction_jitter);
+    math::StoreVector(scratch.direction_jitter, *values.direction_jitter);
   }
   if (values.speed.has_value()) {
-    scratch.speedRange[0] = values.speed->x;
-    scratch.speedRange[1] = values.speed->y;
+    scratch.speed_range[0] = values.speed->x;
+    scratch.speed_range[1] = values.speed->y;
   }
   if (values.mass.has_value()) {
-    scratch.massRange[0] = values.mass->x;
-    scratch.massRange[1] = values.mass->y;
+    scratch.mass_range[0] = values.mass->x;
+    scratch.mass_range[1] = values.mass->y;
   }
   if (values.gravity.has_value()) {
-    scratch.gravityScaleRange[0] = values.gravity->x;
-    scratch.gravityScaleRange[1] = values.gravity->y;
+    scratch.gravity_scale_range[0] = values.gravity->x;
+    scratch.gravity_scale_range[1] = values.gravity->y;
   }
   if (values.attraction_jitter.has_value()) {
-    math::StoreVector(scratch.attractionJitter, *values.attraction_jitter);
+    math::StoreVector(scratch.attraction_jitter, *values.attraction_jitter);
   }
   if (values.aim_angles.has_value()) {
     scratch.vector.vx = values.aim_angles->x;
@@ -383,7 +385,7 @@ void LiveSurfaceServices::PublishScratch(const SurfaceScratch& values) {
     scratch.vector.vz = values.aim_angles->z;
   }
   if (values.aim.has_value()) {
-    math::StoreTransform(scratch.aimMatrix, *values.aim);
+    math::StoreTransform(scratch.aim_matrix, *values.aim);
   }
 }
 
@@ -392,7 +394,7 @@ void LiveSurfaceServices::BeginProjection(bool effect_view) const {
     Render::LoadLiveFrameViewMatrix();
     return;
   }
-  const MATRIX& view = instance_->transforms[definition_->transformIndex].view;
+  const MATRIX& view = instance_->transforms[definition_->transform_index].view;
   Core_Gte_SetRotMatrix(&view);
   Core_Gte_SetTransMatrix(&view);
 }
@@ -413,8 +415,8 @@ RingProjection LiveSurfaceServices::Project(RingPoint point) {
 // unchecked; a texture table the package lacks, or a frame without texture
 // info, leaves this tick undrawn here.
 std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
-    Effects_ParticleTextureAnimation& animation) const {
-  const std::size_t table = animation.textureIndex;
+    LiveParticleTextureAnimation& animation) const {
+  const std::size_t table = animation.texture_index;
   const bool bound = Effects_package->textures != nullptr &&
                      table < kTextureTableCount &&
                      std::cmp_less(table, Effects_package->block1TableCount) &&
@@ -422,7 +424,7 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
   if (bound) {
     LiveAdvanceParticleTextureAnimation(&animation);
   }
-  if (!bound || animation.textureInfo == nullptr) {
+  if (!bound || animation.texture_info == nullptr) {
     if (ShouldReport(refused_textures)) {
       VS::Core::LogWarn(
           "effects",
@@ -433,7 +435,7 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
     return std::nullopt;
   }
   const Effects_PackageTexture& texture =
-      Effects_package->textures[animation.textureInfo->dataIndex];
+      Effects_package->textures[animation.texture_info->dataIndex];
   return RingTexture{.clut = static_cast<std::uint16_t>(texture.clut),
                      .tpage = static_cast<std::uint16_t>(texture.tpage),
                      .u = texture.u,
@@ -475,17 +477,17 @@ void LiveSurfaceServices::Submit(std::span<const std::uint32_t> words,
 // matrix, by way of the scratch vector and aim point).
 Vec3 LiveSurfaceServices::TransformByActor(RingPoint point) const {
   const MATRIX& world =
-      instance_->transforms[definition_->transformIndex].world;
+      instance_->transforms[definition_->transform_index].world;
   Core_Gte_SetRotMatrix(&world);
   Core_Gte_SetTransMatrix(&world);
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   scratch.vector.vx = point.x;
   scratch.vector.vy = point.y;
   scratch.vector.vz = point.z;
   Core_Gte_LoadV0(&scratch.vector);
   Core_Gte_Rtv0Tr();
-  Core_Gte_StoreLvnl(&scratch.aimPoint);
-  return Wide(scratch.aimPoint);
+  Core_Gte_StoreLvnl(&scratch.aim_point);
+  return Wide(scratch.aim_point);
 }
 
 void LiveSurfaceServices::EmitParticleEvent(std::uint8_t event,
@@ -501,8 +503,8 @@ void LiveSurfaceServices::EmitParticleEvent(std::uint8_t event,
   }
   // The original left the context's other fields as stack contents; they
   // start cleared here.
-  Effects_PluginEffectState context{};
-  math::StoreVector(context.position, position);
+  LiveParticle context{};
+  math::StoreVector(context.motion.position, position);
   // Cross-slice calls: retarget when those rows are promoted.
   EmitLiveParticleEvent(instance_, event, 0, 0, &context);
 }
@@ -518,8 +520,7 @@ void* LiveSurfaceServices::AllocateState(std::size_t bytes) const {
 // decomp: meshes10.h:44-50, surfaces.h:91-93, mirroredSurfaces.h:91-93 and
 // rotatingSurfaces.h:100-102 (the animation a create starts).
 void LiveSurfaceServices::StartAnimation(
-    Effects_ParticleTextureAnimation& animation,
-    SurfaceAnimation source) const {
+    LiveParticleTextureAnimation& animation, SurfaceAnimation source) const {
   const int tables = Effects_package->block1TableCount;
   if (source.table >= tables ||
       std::cmp_greater_equal(source.table, kTextureTableCount) ||

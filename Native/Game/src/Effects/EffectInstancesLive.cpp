@@ -16,7 +16,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
 

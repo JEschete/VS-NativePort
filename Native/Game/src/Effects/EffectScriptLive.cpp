@@ -24,7 +24,7 @@
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/Transforms.hpp"
@@ -40,18 +40,17 @@ static_assert(std::extent_v<decltype(Effects_actionVariantValues)> >=
               VS::Effects::kActionVariantValues);
 static_assert(std::extent_v<decltype(Effects_EffectInstance::transforms)> ==
               VS::Effects::kEffectTransformSlots);
-static_assert(std::extent_v<decltype(Effects_pairedParticleColorPresets)> >=
-              VS::Effects::kParticleColorPresets);
-static_assert(std::extent_v<decltype(Effects_pairedParticleColorPresets), 1> ==
-              VS::Effects::kPairedDefinitions);
-static_assert(std::extent_v<decltype(Effects_particleColorPresetTable)> >=
-              VS::Effects::kParticleColorPresets);
-static_assert(std::extent_v<decltype(Effects_particleColorPresetTable), 1> ==
-              VS::Effects::kColorPresetEntries);
 static_assert(std::extent_v<decltype(Effects_scriptRenderers)> ==
               VS::Effects::kScriptRenderers);
 
 namespace VS::Effects {
+// decomp: D_800EC330 (src/BATTLE/BATTLE.PRG/5BF94.c:402); contents: module
+// image (ModuleData.cpp).
+LiveColorPresets<kPairedDefinitions> pairedParticleColorPresets{};
+// decomp: D_800EC368 (src/BATTLE/BATTLE.PRG/5BF94.c:403); contents: module
+// image (ModuleData.cpp).
+LiveColorPresets<kColorPresetEntries> particleColorPresetTable{};
+
 namespace {
 std::uint64_t refused_calls = 0;
 std::uint64_t refused_reads = 0;
@@ -235,7 +234,7 @@ void StoreRegisters(Effects_EffectInstance& instance,
   return std::min(counted, kEffectTransformSlots);
 }
 
-[[nodiscard]] std::span<Effects_ParticleDefinition> PackageDefinitions() {
+[[nodiscard]] std::span<LiveParticleDefinition> PackageDefinitions() {
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr) {
     return {};
   }
@@ -250,29 +249,23 @@ template <typename Apply>
   const std::span definitions = PackageDefinitions();
   std::vector<ParticleColorCurves> curves(definitions.size());
   std::ranges::transform(definitions, curves.begin(),
-                         [](const Effects_ParticleDefinition& definition) {
+                         [](const LiveParticleDefinition& definition) {
                            return ParticleColorCurves{
-                               .red = definition.rCurve,
-                               .green = definition.gCurve,
-                               .blue = definition.bCurve};
+                               .red = definition.r_curve,
+                               .green = definition.g_curve,
+                               .blue = definition.b_curve};
                          });
   const OpcodeStep step = apply(std::span{curves});
   if (!step) return step;
   for (auto&& [definition, curve] : std::views::zip(definitions, curves)) {
-    definition.rCurve = curve.red;
-    definition.gCurve = curve.green;
-    definition.bCurve = curve.blue;
+    definition.r_curve = curve.red;
+    definition.g_curve = curve.green;
+    definition.b_curve = curve.blue;
   }
   return step;
 }
 
-// A preset entry's bytes (D_800EC330 and D_800EC368).
-constexpr std::size_t kPresetEntryBytes = 4;
-static_assert(std::extent_v<decltype(Effects_pairedParticleColorPresets), 2> ==
-              kPresetEntryBytes);
-static_assert(std::extent_v<decltype(Effects_particleColorPresetTable), 2> ==
-              kPresetEntryBytes);
-using PresetBytes = std::span<const u_char, kPresetEntryBytes>;
+using PresetBytes = std::span<const std::uint8_t, kColorPresetEntryBytes>;
 
 // A preset entry's red, green and blue curves; the fourth byte is padding in
 // the paired presets and the definition index in the table.
@@ -284,16 +277,14 @@ using PresetBytes = std::span<const u_char, kPresetEntryBytes>;
 [[nodiscard]] std::array<PairedColorPreset, kParticleColorPresets>
 PairedPresets() {
   std::array<PairedColorPreset, kParticleColorPresets> presets{};
-  std::ranges::transform(std::span{Effects_pairedParticleColorPresets}
-                             .first<kParticleColorPresets>(),
-                         presets.begin(), [](const auto& preset) {
-                           PairedColorPreset paired{};
-                           std::ranges::transform(
-                               preset, paired.begin(), [](const auto& bytes) {
-                                 return CurvesOf(PresetBytes{bytes});
-                               });
-                           return paired;
-                         });
+  std::ranges::transform(
+      pairedParticleColorPresets, presets.begin(), [](const auto& preset) {
+        PairedColorPreset paired{};
+        std::ranges::transform(preset, paired.begin(), [](const auto& bytes) {
+          return CurvesOf(PresetBytes{bytes});
+        });
+        return paired;
+      });
   return presets;
 }
 
@@ -302,9 +293,7 @@ PairedPresets() {
 PresetTables() {
   std::array<ColorPresetTable, kParticleColorPresets> tables{};
   std::ranges::transform(
-      std::span{Effects_particleColorPresetTable}
-          .first<kParticleColorPresets>(),
-      tables.begin(), [](const auto& preset) {
+      particleColorPresetTable, tables.begin(), [](const auto& preset) {
         ColorPresetTable table{};
         std::ranges::transform(preset, table.begin(), [](const auto& bytes) {
           const PresetBytes entry{bytes};

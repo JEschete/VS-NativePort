@@ -14,12 +14,27 @@
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/ParticlePool.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 
 namespace VS::Effects {
+// decomp: D_800F55F0 (src/BATTLE/BATTLE.PRG/5BF94.c:446)
+std::int32_t particleCapacity = 0;
+// decomp: D_800F55F4 (src/BATTLE/BATTLE.PRG/5BF94.c:447)
+LiveParticle* freeParticles = nullptr;
+// decomp: D_800F55F8 (src/BATTLE/BATTLE.PRG/5BF94.c:448)
+std::int32_t usedParticleCount = 0;
+// decomp: D_800F55FC (src/BATTLE/BATTLE.PRG/5BF94.c:453)
+LiveParticle* particlePool = nullptr;
+// decomp: D_800F5600 (src/BATTLE/BATTLE.PRG/5BF94.c:449)
+std::int32_t particlePoolReferences = 0;
+// decomp: D_800F5618 (src/BATTLE/BATTLE.PRG/5BF94.c:451)
+std::int32_t particleDrag = 0;
+// decomp: D_800F5620 (src/BATTLE/BATTLE.PRG/5BF94.c:452)
+VECTOR particleGravity{};
+
 namespace {
-using Particle = Effects_Particle;
+using Particle = LiveParticle;
 using Instance = Effects_EffectInstance;
 
 constexpr std::uint8_t kUnagedParticle = 0xFF;
@@ -63,7 +78,7 @@ class LiveParticleRecords final : public ParticleRecords {
   void Renew(Particle& particle) override {
     // Clears the texture animation, as func_800D6CCC
     // (LiveClearParticleTextureState) does.
-    particle.textureAnimation = {};
+    particle.texture_animation = {};
     particle.age = kUnagedParticle;
   }
 };
@@ -72,21 +87,21 @@ class LiveParticleRecords final : public ParticleRecords {
 class LivePool {
  public:
   LivePool()
-      : pool_{.block = Effects_particlePool,
-              .free = Effects_freeParticles,
-              .capacity = Effects_particleCapacity,
-              .used = Effects_usedParticleCount,
-              .references = Effects_particlePoolReferences} {}
+      : pool_{.block = particlePool,
+              .free = freeParticles,
+              .capacity = particleCapacity,
+              .used = usedParticleCount,
+              .references = particlePoolReferences} {}
   LivePool(const LivePool&) = delete;
   LivePool& operator=(const LivePool&) = delete;
   LivePool(LivePool&&) = delete;
   LivePool& operator=(LivePool&&) = delete;
   ~LivePool() {
-    Effects_particlePool = pool_.block;
-    Effects_freeParticles = pool_.free;
-    Effects_particleCapacity = pool_.capacity;
-    Effects_usedParticleCount = pool_.used;
-    Effects_particlePoolReferences = pool_.references;
+    particlePool = pool_.block;
+    freeParticles = pool_.free;
+    particleCapacity = pool_.capacity;
+    usedParticleCount = pool_.used;
+    particlePoolReferences = pool_.references;
   }
 
   [[nodiscard]] ParticlePool& Pool() { return pool_; }
@@ -127,10 +142,8 @@ class LiveForces {
   LiveForces(LiveForces&&) = delete;
   LiveForces& operator=(LiveForces&&) = delete;
   ~LiveForces() {
-    Effects_particleGravity.x = forces_.gravity.x;
-    Effects_particleGravity.y = forces_.gravity.y;
-    Effects_particleGravity.z = forces_.gravity.z;
-    Effects_particleDrag = forces_.drag;
+    Core::Math::StoreVector(particleGravity, forces_.gravity);
+    particleDrag = forces_.drag;
   }
 
   [[nodiscard]] ParticleForces& Forces() { return forces_; }
@@ -207,17 +220,16 @@ void LiveReleaseAllEffectParticles(Instance* instance) {
 }
 
 // decomp: BATTLE.PRG func_800D5260 (src/BATTLE/BATTLE.PRG/5BF94.c:7826)
-void LiveSetParticleGravity(Effects_ParticleGravity* gravity) {
+void LiveSetParticleGravity(VECTOR* gravity) {
   if (gravity == nullptr) {
     Refuse("gravity", "no vector");
     return;
   }
   {
     LiveForces forces;
-    SetParticleGravity(forces.Forces(),
-                       {.x = gravity->x, .y = gravity->y, .z = gravity->z});
+    SetParticleGravity(forces.Forces(), Core::Math::VectorOf(*gravity));
   }
-  Effects_particleGravity.reservedC = gravity->reservedC;
+  particleGravity.pad = gravity->pad;
 }
 
 // decomp: BATTLE.PRG func_800D5294 (src/BATTLE/BATTLE.PRG/5BF94.c:7828)
@@ -231,9 +243,7 @@ void LiveSetParticleDrag(int* drag) {
 }
 
 ParticleForces LoadLiveParticleForces() {
-  return {.gravity = {.x = Effects_particleGravity.x,
-                      .y = Effects_particleGravity.y,
-                      .z = Effects_particleGravity.z},
-          .drag = Effects_particleDrag};
+  return {.gravity = Core::Math::VectorOf(particleGravity),
+          .drag = particleDrag};
 }
 }  // namespace VS::Effects

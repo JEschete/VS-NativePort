@@ -15,7 +15,7 @@
 #include "Effects/AnalyzeGridLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Render/Camera.hpp"
@@ -33,14 +33,14 @@ constexpr std::size_t kSceneOffset = 32;
 constexpr std::size_t kEmitterOffset = 0x1D0;
 constexpr std::uint32_t kInitialLink = 0xC4000007;
 
-Effects_ParticleEmitterScratch& Emitter() {
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
+VS::Effects::LiveParticleEmitterScratch& Emitter() {
+  return *reinterpret_cast<VS::Effects::LiveParticleEmitterScratch*>(
       static_cast<std::byte*>(VS::Core::ScratchBase()) + kEmitterOffset);
 }
 
 struct Definitions {
   std::uint32_t reserved{};
-  std::array<Effects_ParticleDefinition, 2> entries{};
+  std::array<VS::Effects::LiveParticleDefinition, 2> entries{};
 };
 static_assert(offsetof(Definitions, entries) == 4);
 
@@ -53,8 +53,8 @@ class LiveGrid {
     package.block5Data = reinterpret_cast<Effects_PackageBlock5*>(&definitions);
     effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span{&definitions, 1}));
-    definitions.entries[1].pairRanges[3][0] = 37;
-    definitions.entries[1].pairRanges[3][2] = 19;
+    definitions.entries[1].pair_ranges[3][0] = 37;
+    definitions.entries[1].pair_ranges[3][2] = 19;
     VS::Render::frameBuf = 0;
     VS::Render::nearClip = 0;
     VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
@@ -118,7 +118,7 @@ class LiveGrid {
   int saved_frame_buf_ = VS::Render::frameBuf;
   int saved_near_clip_ = VS::Render::nearClip;
   VS::Render::FrameScratch saved_frame_ = VS::Render::FrameScratchpad();
-  Effects_ParticleEmitterScratch saved_emitter_ = Emitter();
+  VS::Effects::LiveParticleEmitterScratch saved_emitter_ = Emitter();
   void* saved_primitives_ = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering_ = VS::Render::legacyOrderingTables[0];
 };
@@ -177,9 +177,9 @@ void CheckLiveRefusals(Effects_EffectRenderer entry) {
   } else if (failure == 1) {
     Effects_currentInstance = nullptr;
   } else if (failure == 2) {
-    live.definitions.entries[1].transformIndex = 255;
+    live.definitions.entries[1].transform_index = 255;
   } else if (failure == 3) {
-    live.definitions.entries[1].positionCurve = 1;
+    live.definitions.entries[1].position_curve = 1;
   } else {
     effects::ForgetLivePackageExtents();
   }

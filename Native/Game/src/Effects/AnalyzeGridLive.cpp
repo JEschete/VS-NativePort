@@ -21,7 +21,7 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TransformsLiveState.hpp"
 #include "Render/Camera.hpp"
@@ -52,7 +52,7 @@ constexpr std::size_t kTextureOriginRange = 3;
 constexpr std::size_t kSecondPlaneComponent = 2;
 constexpr std::size_t kUsedCurves = 13;
 
-static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
+static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 static_assert(std::is_trivially_destructible_v<AnalyzeGridState>);
 
 std::uint64_t refusals = 0;
@@ -75,45 +75,45 @@ std::array<math::ScalarSpan, 2> PlaneRange(
   return {math::RangePair(values, 0), math::RangePair(values, 1)};
 }
 
-grid::SurfaceDefinition DefinitionOf(const Effects_ParticleDefinition& source) {
-  const auto& vectors = source.vectorRanges;
-  const auto& pairs = source.pairRanges;
-  return {
-      .flags = source.flags,
-      .transparency_curve = static_cast<std::uint8_t>(source.transparencyCurve),
-      .ring_segments = source.ringSegments,
-      .ring_positions = source.ringPositions,
-      .curves = {.position = source.positionCurve,
-                 .extent = source.extentCurve,
-                 .inner_extent = source.innerExtentCurve,
-                 .direction = source.directionCurve,
-                 .direction_jitter = source.directionJitterCurve,
-                 .speed = source.speedCurve,
-                 .force = source.forceCurve,
-                 .acceleration = source.accelerationCurve,
-                 .mass = source.massCurve,
-                 .gravity = source.gravityScaleCurve,
-                 .color = {source.rCurve, source.gCurve, source.bCurve}},
-      .position = VectorRange(source.positionRange),
-      .extent = VectorRange(source.extentRange),
-      .inner_extent = math::RangePair(source.innerExtentRange, 0),
-      .direction = VectorRange(vectors[kDirectionRange]),
-      .direction_jitter = VectorRange(vectors[kJitterRange]),
-      .force_min = VectorRange(vectors[kForceMinRange]),
-      .force_max = VectorRange(vectors[kForceMaxRange]),
-      .acceleration_min = VectorRange(vectors[kAccelerationMinRange]),
-      .acceleration_max = VectorRange(vectors[kAccelerationMaxRange]),
-      .speed = PlaneRange(pairs[kSpeedRange]),
-      .mass = PlaneRange(pairs[kMassRange]),
-      .gravity = PlaneRange(pairs[kGravityRange]),
-      .grid_u = static_cast<std::uint8_t>(pairs[kTextureOriginRange][0]),
-      .grid_v = static_cast<std::uint8_t>(
-          pairs[kTextureOriginRange][kSecondPlaneComponent]),
-      .grid_width = pairs[kMassRange][0],
-      .grid_height = pairs[kMassRange][kSecondPlaneComponent]};
+grid::SurfaceDefinition DefinitionOf(const LiveParticleDefinition& source) {
+  const auto& vectors = source.vector_ranges;
+  const auto& pairs = source.pair_ranges;
+  return {.flags = source.flags,
+          .transparency_curve =
+              static_cast<std::uint8_t>(source.transparency_curve),
+          .ring_segments = source.ring_segments,
+          .ring_positions = source.ring_positions,
+          .curves = {.position = source.position_curve,
+                     .extent = source.extent_curve,
+                     .inner_extent = source.inner_extent_curve,
+                     .direction = source.direction_curve,
+                     .direction_jitter = source.direction_jitter_curve,
+                     .speed = source.speed_curve,
+                     .force = source.force_curve,
+                     .acceleration = source.acceleration_curve,
+                     .mass = source.mass_curve,
+                     .gravity = source.gravity_scale_curve,
+                     .color = {source.r_curve, source.g_curve, source.b_curve}},
+          .position = VectorRange(source.position_range),
+          .extent = VectorRange(source.extent_range),
+          .inner_extent = math::RangePair(source.inner_extent_range, 0),
+          .direction = VectorRange(vectors[kDirectionRange]),
+          .direction_jitter = VectorRange(vectors[kJitterRange]),
+          .force_min = VectorRange(vectors[kForceMinRange]),
+          .force_max = VectorRange(vectors[kForceMaxRange]),
+          .acceleration_min = VectorRange(vectors[kAccelerationMinRange]),
+          .acceleration_max = VectorRange(vectors[kAccelerationMaxRange]),
+          .speed = PlaneRange(pairs[kSpeedRange]),
+          .mass = PlaneRange(pairs[kMassRange]),
+          .gravity = PlaneRange(pairs[kGravityRange]),
+          .grid_u = static_cast<std::uint8_t>(pairs[kTextureOriginRange][0]),
+          .grid_v = static_cast<std::uint8_t>(
+              pairs[kTextureOriginRange][kSecondPlaneComponent]),
+          .grid_width = pairs[kMassRange][0],
+          .grid_height = pairs[kMassRange][kSecondPlaneComponent]};
 }
 
-const Effects_ParticleDefinition* FindDefinition(AnalyzeGridDefinitionId id) {
+const LiveParticleDefinition* FindDefinition(AnalyzeGridDefinitionId id) {
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
       id.value >= LiveParticleDefinitionCount()) {
     Refuse("definition outside the bound package");
@@ -134,8 +134,8 @@ bool CurvesAvailable(const grid::SurfaceCurves& curves, std::int32_t age) {
   });
 }
 
-Effects_ParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
+LiveParticleEmitterScratch& EmitterScratch() {
+  return *reinterpret_cast<LiveParticleEmitterScratch*>(
       static_cast<std::byte*>(VS::Core::ScratchBase()) + kEmitterScratchOffset);
 }
 
@@ -145,7 +145,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
 
   std::optional<grid::SurfaceDefinition> CreateDefinition(
       AnalyzeGridDefinitionId id) override {
-    const Effects_ParticleDefinition* definition = FindDefinition(id);
+    const LiveParticleDefinition* definition = FindDefinition(id);
     return definition != nullptr ? std::optional(DefinitionOf(*definition))
                                  : std::nullopt;
   }
@@ -182,7 +182,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
     definition_ = FindDefinition(id);
     instance_ = Effects_currentInstance;
     if (definition_ == nullptr || instance_ == nullptr ||
-        definition_->transformIndex >= kTransformCount) {
+        definition_->transform_index >= kTransformCount) {
       Refuse("missing instance or transform outside the instance");
       return std::nullopt;
     }
@@ -193,7 +193,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
       return std::nullopt;
     }
     const MATRIX& world =
-        instance_->transforms[definition_->transformIndex].world;
+        instance_->transforms[definition_->transform_index].world;
     const SVECTOR& origin = Effects_actionRequest.position;
     return grid::SurfaceTickInputs{
         .definition = definition,
@@ -210,7 +210,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
   void BeginProjection(bool effect_view) override {
     if (effect_view) {
       const MATRIX& view =
-          instance_->transforms[definition_->transformIndex].view;
+          instance_->transforms[definition_->transform_index].view;
       Core_Gte_SetRotMatrix(&view);
       Core_Gte_SetTransMatrix(&view);
     } else {
@@ -243,38 +243,40 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
   }
 
   Effects_RendererSlot& slot_;
-  const Effects_ParticleDefinition* definition_ = nullptr;
+  const LiveParticleDefinition* definition_ = nullptr;
   const Effects_EffectInstance* instance_ = nullptr;
 };
 
 void LiveAnalyzeGridHost::PublishScratch(const grid::SurfaceScratch& values) {
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   scratch.flags = values.flags;
   math::StoreVector(scratch.position, values.position);
   math::StoreVector(scratch.extent, values.extent);
   if (values.forces.has_value()) {
-    math::StoreVector(scratch.forceMin, values.forces->force_min);
-    math::StoreVector(scratch.forceMax, values.forces->force_max);
-    math::StoreVector(scratch.accelerationMin, values.forces->acceleration_min);
-    math::StoreVector(scratch.accelerationMax, values.forces->acceleration_max);
+    math::StoreVector(scratch.force_min, values.forces->force_min);
+    math::StoreVector(scratch.force_max, values.forces->force_max);
+    math::StoreVector(scratch.acceleration_min,
+                      values.forces->acceleration_min);
+    math::StoreVector(scratch.acceleration_max,
+                      values.forces->acceleration_max);
   }
   if (values.base_direction.has_value()) {
-    math::StoreVector(scratch.baseDirection, *values.base_direction);
+    math::StoreVector(scratch.base_direction, *values.base_direction);
   }
   if (values.direction_jitter.has_value()) {
-    math::StoreVector(scratch.directionJitter, *values.direction_jitter);
+    math::StoreVector(scratch.direction_jitter, *values.direction_jitter);
   }
   if (values.speed.has_value()) {
-    scratch.speedRange[0] = values.speed->x;
-    scratch.speedRange[1] = values.speed->y;
+    scratch.speed_range[0] = values.speed->x;
+    scratch.speed_range[1] = values.speed->y;
   }
   if (values.mass.has_value()) {
-    scratch.massRange[0] = values.mass->x;
-    scratch.massRange[1] = values.mass->y;
+    scratch.mass_range[0] = values.mass->x;
+    scratch.mass_range[1] = values.mass->y;
   }
   if (values.gravity.has_value()) {
-    scratch.gravityScaleRange[0] = values.gravity->x;
-    scratch.gravityScaleRange[1] = values.gravity->y;
+    scratch.gravity_scale_range[0] = values.gravity->x;
+    scratch.gravity_scale_range[1] = values.gravity->y;
   }
 }
 

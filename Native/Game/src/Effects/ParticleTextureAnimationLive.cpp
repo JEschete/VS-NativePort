@@ -14,13 +14,13 @@
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimation.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TextureBindings.hpp"
 
 namespace VS::Effects {
 namespace {
-using Animation = Effects_ParticleTextureAnimation;
+using Animation = LiveParticleTextureAnimation;
 
 std::uint64_t refused_calls = 0;
 std::uint64_t unbound_frames = 0;
@@ -62,21 +62,21 @@ struct PackageContext {
 }
 
 [[nodiscard]] TextureAnimationState Load(const Animation& animation) {
-  return {.frame_timer = animation.frameTimer,
-          .frame_flags = animation.reserved7,
-          .frame_offset_x = animation.frameOffsetX,
-          .frame_offset_y = animation.frameOffsetY,
+  return {.frame_timer = animation.frame_timer,
+          .frame_flags = animation.frame_flags,
+          .frame_offset_x = animation.frame_offset_x,
+          .frame_offset_y = animation.frame_offset_y,
           .cursor = animation.cursor,
-          .texture_index = animation.textureIndex};
+          .texture_index = animation.texture_index};
 }
 
 void Store(Animation& animation, const TextureAnimationState& state) {
-  animation.frameTimer = state.frame_timer;
-  animation.reserved7 = state.frame_flags;
-  animation.frameOffsetX = state.frame_offset_x;
-  animation.frameOffsetY = state.frame_offset_y;
+  animation.frame_timer = state.frame_timer;
+  animation.frame_flags = state.frame_flags;
+  animation.frame_offset_x = state.frame_offset_x;
+  animation.frame_offset_y = state.frame_offset_y;
   animation.cursor = state.cursor;
-  animation.textureIndex = state.texture_index;
+  animation.texture_index = state.texture_index;
 }
 
 // Animation `index` of the current package's recorded animation table.
@@ -92,7 +92,7 @@ void Store(Animation& animation, const TextureAnimationState& state) {
 
 void SelectFrame(Animation& animation, std::uint16_t frame) {
   Effects_PackageTextureInfo* const table =
-      BoundTextureTable(animation.textureIndex);
+      BoundTextureTable(animation.texture_index);
   if (table == nullptr) {
     if (ShouldReport(unbound_frames)) {
       const PackageContext context = Context();
@@ -101,13 +101,13 @@ void SelectFrame(Animation& animation, std::uint16_t frame) {
           "texture animation: frame {} of unbound table {} of {} "
           "kept the previous frame (context={} request_effect={}; "
           "{} reports)",
-          frame, animation.textureIndex,
+          frame, animation.texture_index,
           Effects_package == nullptr ? 0 : Effects_package->block1TableCount,
           context.name, context.request_effect, unbound_frames);
     }
     return;
   }
-  animation.textureInfo =
+  animation.texture_info =
       &std::span(table, static_cast<std::size_t>(frame) + 1).back();
 }
 }  // namespace

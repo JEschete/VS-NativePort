@@ -28,7 +28,7 @@
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TextureBindings.hpp"
@@ -476,7 +476,7 @@ class LiveLifecycleHost final : public EffectLifecycleHost {
 class LiveParticleForceHost final : public ParticleForceHost {
  public:
   void SetParticleGravity(Core::Math::Vec3 gravity) override {
-    Effects_ParticleGravity vector{gravity.x, gravity.y, gravity.z, 0};
+    VECTOR vector{gravity.x, gravity.y, gravity.z, 0};
     LiveSetParticleGravity(&vector);
   }
 

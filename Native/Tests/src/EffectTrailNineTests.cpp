@@ -14,7 +14,7 @@
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Effects/PackageExtents.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/Templates/TemplateLiveState.hpp"
@@ -385,8 +385,8 @@ TEST_CASE("Nine-sample live trail entries refuse definitions by overlay",
 TEST_CASE("Nine-sample live trail stages hold at most eight trails",
           "[effects-trail-nine-templates][effects]") {
   const VS::test_support::ChannelWarnings warnings("effects");
-  Effects_ParticleDefinition definition{};
-  Effects_ParticleEmitterScratch scratch{};
+  VS::Effects::LiveParticleDefinition definition{};
+  VS::Effects::LiveParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
   std::array<VS::Effects::LiveTrail9, 3> buffer{};
   VS::Effects::LiveTrailNineState state{};

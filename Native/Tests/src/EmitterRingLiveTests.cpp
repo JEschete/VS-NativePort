@@ -16,7 +16,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RepeatingRingsLive.hpp"
@@ -33,15 +33,15 @@ using LiveRing = int (*)(Effects_RendererSlot*, unsigned int, int);
 constexpr std::size_t kScratchBytes = 1024;
 constexpr std::size_t kEmitterScratch = 0x1D0;
 
-Effects_ParticleEmitterScratch& Scratch() {
+VS::Effects::LiveParticleEmitterScratch& Scratch() {
   const auto base = reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase());
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(base +
-                                                            kEmitterScratch);
+  return *reinterpret_cast<VS::Effects::LiveParticleEmitterScratch*>(
+      base + kEmitterScratch);
 }
 
 struct Definitions {
   std::uint32_t reserved{};
-  std::array<Effects_ParticleDefinition, 2> values{};
+  std::array<VS::Effects::LiveParticleDefinition, 2> values{};
 };
 
 class LiveEmission {
@@ -50,7 +50,7 @@ class LiveEmission {
   Effects_EffectPackage package{};
   std::unique_ptr<Effects_EffectInstance> instance =
       std::make_unique<Effects_EffectInstance>();
-  std::array<Effects_Particle, 4> particles{};
+  std::array<VS::Effects::LiveParticle, 4> particles{};
   alignas(Effects_CurveBlock) std::array<std::uint8_t, 8> curves{1, 0, 6,  0,
                                                                  1, 0, 64, 0};
 
@@ -70,11 +70,11 @@ class LiveEmission {
     effects::RecordLiveEffectCurves(std::as_bytes(std::span(curves)));
     std::ranges::fill(Effects_curveSamples, 0);
     Effects_curveSamples[1] = 64;
-    Effects_particlePool = particles.data();
-    Effects_freeParticles = particles.data();
-    Effects_particleCapacity = static_cast<int>(particles.size());
-    Effects_usedParticleCount = 0;
-    Effects_emissionCounter = 0;
+    VS::Effects::particlePool = particles.data();
+    VS::Effects::freeParticles = particles.data();
+    VS::Effects::particleCapacity = static_cast<int>(particles.size());
+    VS::Effects::usedParticleCount = 0;
+    VS::Effects::emissionCounter = 0;
     for (std::size_t index = 0; index < particles.size(); ++index) {
       particles.at(index).next =
           index + 1 < particles.size() ? &particles.at(index + 1) : nullptr;
@@ -88,10 +88,10 @@ class LiveEmission {
     }
     auto& definition = definitions.values[0];
     definition.flags = 0xA038;
-    definition.countRange[0] = 1;
-    definition.countRange[1] = 1;
-    definition.intervalRange[0] = 1;
-    definition.intervalRange[1] = 1;
+    definition.count_range[0] = 1;
+    definition.count_range[1] = 1;
+    definition.interval_range[0] = 1;
+    definition.interval_range[1] = 1;
     VS::Core::BiosRand().Seed(1);
     Core_Gte_Reset();
     Scratch() = {};
@@ -104,11 +104,11 @@ class LiveEmission {
     effects::ForgetLivePackageExtents();
     Effects_package = saved_package_;
     Effects_currentInstance = saved_instance_;
-    Effects_particlePool = saved_pool_;
-    Effects_freeParticles = saved_free_;
-    Effects_particleCapacity = saved_capacity_;
-    Effects_usedParticleCount = saved_used_;
-    Effects_emissionCounter = saved_counter_;
+    VS::Effects::particlePool = saved_pool_;
+    VS::Effects::freeParticles = saved_free_;
+    VS::Effects::particleCapacity = saved_capacity_;
+    VS::Effects::usedParticleCount = saved_used_;
+    VS::Effects::emissionCounter = saved_counter_;
     std::ranges::copy(saved_samples_, Effects_curveSamples);
     std::ranges::copy(saved_scratch_,
                       static_cast<std::byte*>(VS::Core::ScratchBase()));
@@ -122,11 +122,11 @@ class LiveEmission {
  private:
   Effects_EffectPackage* saved_package_ = Effects_package;
   Effects_EffectInstance* saved_instance_ = Effects_currentInstance;
-  Effects_Particle* saved_pool_ = Effects_particlePool;
-  Effects_Particle* saved_free_ = Effects_freeParticles;
-  int saved_capacity_ = Effects_particleCapacity;
-  int saved_used_ = Effects_usedParticleCount;
-  int saved_counter_ = Effects_emissionCounter;
+  VS::Effects::LiveParticle* saved_pool_ = VS::Effects::particlePool;
+  VS::Effects::LiveParticle* saved_free_ = VS::Effects::freeParticles;
+  int saved_capacity_ = VS::Effects::particleCapacity;
+  int saved_used_ = VS::Effects::usedParticleCount;
+  int saved_counter_ = VS::Effects::emissionCounter;
   std::uint32_t saved_random_ = VS::Core::BiosRand().State();
   std::array<int, 211> saved_samples_{};
   std::array<std::byte, kScratchBytes> saved_scratch_{};
@@ -155,13 +155,13 @@ class RingSlot {
 void CheckLiveBindings(LiveRing ring, LiveEmission& fixture, RingSlot& owner) {
   auto* state = static_cast<effects::LiveRingState*>(owner.slot.rendererState);
   SECTION("missing current curve refuses without sampling a zero replacement") {
-    fixture.definitions.values[0].positionCurve = 1;
+    fixture.definitions.values[0].position_curve = 1;
     fixture.package.curves[0] = nullptr;
     CHECK(ring(&owner.slot, 2, 0) == 0);
     CHECK(state->age == 0);
   }
   SECTION("unbound transform refuses before drawing or ageing") {
-    fixture.definitions.values[0].transformIndex = 16;
+    fixture.definitions.values[0].transform_index = 16;
     CHECK(ring(&owner.slot, 2, 0) == 0);
     CHECK(state->lifetime == 2);
   }
@@ -200,7 +200,7 @@ void CheckLiveRing(LiveRing ring) {
 TEST_CASE("F01515 Live reads only current bound curves before allocating",
           "[F01515][emitter-rings-live][effects]") {
   LiveEmission fixture;
-  fixture.definitions.values[0].positionCurve = 1;
+  fixture.definitions.values[0].position_curve = 1;
   Scratch().flags = 0x1234;
   SECTION("missing curve bytes") { fixture.package.curves[0] = nullptr; }
   SECTION("detached recorded curve block") {
@@ -209,7 +209,7 @@ TEST_CASE("F01515 Live reads only current bound curves before allocating",
   SECTION("empty curve") { fixture.curves[4] = 0; }
   SECTION("unrecorded current block") { effects::ForgetLivePackageExtents(); }
   fixture.Emit();
-  CHECK(Effects_usedParticleCount == 0);
+  CHECK(VS::Effects::usedParticleCount == 0);
   CHECK(fixture.instance->particleCount == 0);
   CHECK(Scratch().flags == 0x1234);
   CHECK(VS::Core::BiosRand().State() == 1);
@@ -218,14 +218,15 @@ TEST_CASE("F01515 Live reads only current bound curves before allocating",
 TEST_CASE("F01515 Live refuses inconsistent counts cycles and misaligned links",
           "[F01515][emitter-rings-live][effects]") {
   LiveEmission fixture;
-  SECTION("used count exceeds the pool") { Effects_usedParticleCount = 5; }
+  SECTION("used count exceeds the pool") { VS::Effects::usedParticleCount = 5; }
   SECTION("cycle in the free list") {
     fixture.particles[0].next = fixture.particles.data();
   }
   SECTION("misaligned free record") {
     const auto address =
         reinterpret_cast<std::uintptr_t>(fixture.particles.data()) + 1;
-    Effects_freeParticles = reinterpret_cast<Effects_Particle*>(address);
+    VS::Effects::freeParticles =
+        reinterpret_cast<VS::Effects::LiveParticle*>(address);
   }
   fixture.Emit();
   CHECK(fixture.instance->particles == nullptr);
@@ -239,20 +240,20 @@ TEST_CASE(
   LiveEmission fixture;
   Effects_currentInstance = nullptr;
   auto& definition = fixture.definitions.values[0];
-  std::ranges::fill(definition.pairRanges[2], 10);
+  std::ranges::fill(definition.pair_ranges[2], 10);
   fixture.instance->context.emitFrom.value.position = {100, 0, 0, 0};
   fixture.instance->context.emitTo.value.position = {0, 0, 200, 0};
   SECTION("source") {
     definition.flags = 0x44038;
     fixture.Emit();
-    CHECK(Scratch().aimPoint.vx == 100);
+    CHECK(Scratch().aim_point.vx == 100);
     CHECK(fixture.particles[0].motion.velocity.vx > 0);
     CHECK(fixture.particles[0].motion.velocity.vz == 0);
   }
   SECTION("destination") {
     definition.flags = 0x46038;
     fixture.Emit();
-    CHECK(Scratch().aimPoint.vz == 200);
+    CHECK(Scratch().aim_point.vz == 200);
     CHECK(fixture.particles[0].motion.velocity.vx == 0);
     CHECK(fixture.particles[0].motion.velocity.vz > 0);
   }
@@ -264,34 +265,34 @@ TEST_CASE("F01515 Live binds native pool scratch and texture paths",
   LiveEmission fixture;
   auto& definition = fixture.definitions.values[0];
   definition.flags = 0xB008;
-  definition.countRange[0] = 9;
-  definition.countRange[1] = 9;
-  definition.textureIndex = 3;
-  definition.tickEvent = 2;
-  definition.transparencyCurve = 6;
-  std::ranges::fill(definition.extentRange, 2);
+  definition.count_range[0] = 9;
+  definition.count_range[1] = 9;
+  definition.texture_index = 3;
+  definition.tick_event = 2;
+  definition.transparency_curve = 6;
+  std::ranges::fill(definition.extent_range, 2);
   Scratch().transparency = 0x12345600;
   fixture.Emit();
   CHECK(fixture.instance->particles == &fixture.particles[3]);
-  CHECK(Effects_usedParticleCount == 4);
+  CHECK(VS::Effects::usedParticleCount == 4);
   CHECK(fixture.particles[0].age == 255);
-  CHECK(fixture.particles[0].textureAnimation.textureIndex == 3);
-  CHECK(fixture.particles[0].tickEvent == 2);
+  CHECK(fixture.particles[0].texture_animation.texture_index == 3);
+  CHECK(fixture.particles[0].tick_event == 2);
   CHECK(Scratch().transparency == 0x12345606);
 }
 
 TEST_CASE("F01515 Live bulk release returns the emitted list to its owner",
           "[F01515][emitter-rings-live][effects]") {
   LiveEmission fixture;
-  std::ranges::fill(fixture.definitions.values[0].countRange, 9);
+  std::ranges::fill(fixture.definitions.values[0].count_range, 9);
   fixture.Emit();
   REQUIRE(fixture.instance->particleCount == 4);
   effects::LiveReleaseAllEffectParticles(fixture.instance.get());
   // The existing bulk-release contract retains the head until owner
   // destruction.
-  CHECK(Effects_freeParticles == fixture.instance->particles);
+  CHECK(VS::Effects::freeParticles == fixture.instance->particles);
   CHECK(fixture.instance->particleCount == 0);
-  CHECK(Effects_usedParticleCount == 0);
+  CHECK(VS::Effects::usedParticleCount == 0);
 }
 
 TEST_CASE(
@@ -304,7 +305,7 @@ TEST_CASE(
   source.value.actor.actor = 255;
   source.value.actor.part = 9;
   fixture.Emit();
-  CHECK(Effects_usedParticleCount == 0);
+  CHECK(VS::Effects::usedParticleCount == 0);
   CHECK(fixture.instance->particleCount == 0);
   CHECK(VS::Core::BiosRand().State() == 1);
 }
@@ -316,10 +317,10 @@ TEST_CASE(
   effects::EmitLiveParticleEvent(nullptr, 0, 0, 0, nullptr);
   effects::EmitLiveParticleEvent(fixture.instance.get(), -1, 0, 0, nullptr);
   effects::EmitLiveParticleEvent(fixture.instance.get(), 2, 0, 0, nullptr);
-  fixture.definitions.values[0].transformIndex = 16;
+  fixture.definitions.values[0].transform_index = 16;
   fixture.Emit();
   CHECK(fixture.instance->particleCount == 0);
-  CHECK(Effects_usedParticleCount == 0);
+  CHECK(VS::Effects::usedParticleCount == 0);
 }
 
 TEST_CASE("F01920 Live PLG052 checks current bindings and owner cleanup",

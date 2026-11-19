@@ -5,8 +5,6 @@
 
 #include "Core/Math/ScalarMath.hpp"
 
-struct Effects_Particle;
-
 // The shared particle pool (BATTLE.PRG 5BF94.c:6777-6880) and the forces on
 // every particle (5BF94.c:7826-7828). The pool reserves its particles in one
 // block from the high end of the game heap and keeps the unused ones on a free
@@ -15,11 +13,13 @@ struct Effects_Particle;
 // ParticlePoolLive.hpp edits them through ParticleRecords and keeps the
 // original entry points.
 namespace VS::Effects {
-// Effects_particlePool, Effects_freeParticles, Effects_particleCapacity,
-// Effects_usedParticleCount and Effects_particlePoolReferences.
+struct LiveParticle;
+
+// particlePool, freeParticles, particleCapacity,
+// usedParticleCount and particlePoolReferences.
 struct ParticlePool {
-  Effects_Particle* block{};
-  Effects_Particle* free{};
+  LiveParticle* block{};
+  LiveParticle* free{};
   std::int32_t capacity{};
   std::int32_t used{};
   std::int32_t references{};
@@ -31,7 +31,7 @@ struct ParticlePool {
 // particleCount): the newest and the count, an unsigned byte as the original
 // read it.
 struct ParticleList {
-  Effects_Particle* first{};
+  LiveParticle* first{};
   std::uint8_t count{};
 
   friend bool operator==(const ParticleList&, const ParticleList&) = default;
@@ -44,19 +44,17 @@ class ParticleRecords {
   virtual ~ParticleRecords() = default;
   // A block of `count` records from the high end of the heap; null (refused)
   // when the heap has no room.
-  [[nodiscard]] virtual Effects_Particle* Reserve(std::int32_t count) = 0;
-  virtual void Free(Effects_Particle& block) = 0;
+  [[nodiscard]] virtual LiveParticle* Reserve(std::int32_t count) = 0;
+  virtual void Free(LiveParticle& block) = 0;
   // Record `index` of the block.
-  [[nodiscard]] virtual Effects_Particle& At(Effects_Particle& block,
-                                             std::int32_t index) = 0;
-  [[nodiscard]] virtual Effects_Particle* Previous(
-      Effects_Particle& particle) = 0;
-  virtual void SetPrevious(Effects_Particle& particle,
-                           Effects_Particle* previous) = 0;
-  [[nodiscard]] virtual Effects_Particle* Next(Effects_Particle& particle) = 0;
-  virtual void SetNext(Effects_Particle& particle, Effects_Particle* next) = 0;
+  [[nodiscard]] virtual LiveParticle& At(LiveParticle& block,
+                                         std::int32_t index) = 0;
+  [[nodiscard]] virtual LiveParticle* Previous(LiveParticle& particle) = 0;
+  virtual void SetPrevious(LiveParticle& particle, LiveParticle* previous) = 0;
+  [[nodiscard]] virtual LiveParticle* Next(LiveParticle& particle) = 0;
+  virtual void SetNext(LiveParticle& particle, LiveParticle* next) = 0;
   // Clears the particle's texture animation and marks it unaged (age 0xFF).
-  virtual void Renew(Effects_Particle& particle) = 0;
+  virtual void Renew(LiveParticle& particle) = 0;
 
  protected:
   ParticleRecords() = default;
@@ -87,12 +85,13 @@ void ResetParticlePoolReferences(ParticlePool& pool);
 // func_800D27F0 (5BF94.c:6818): renews the first free particle and links it
 // first in `list`. Null (refused) when every particle is in use, where the
 // original wrote through the null particle.
-[[nodiscard]] Effects_Particle* AllocateEffectParticle(
-    ParticlePool& pool, ParticleList& list, ParticleRecords& records);
+[[nodiscard]] LiveParticle* AllocateEffectParticle(ParticlePool& pool,
+                                                   ParticleList& list,
+                                                   ParticleRecords& records);
 
 // func_800D2888 (5BF94.c:6847): unlinks the particle from `list` and returns
 // it first on the free list.
-void ReleaseEffectParticle(Effects_Particle& particle, ParticlePool& pool,
+void ReleaseEffectParticle(LiveParticle& particle, ParticlePool& pool,
                            ParticleList& list, ParticleRecords& records);
 
 // func_800D2904 (5BF94.c:6865): returns the whole list to the front of the
@@ -101,8 +100,8 @@ void ReleaseEffectParticle(Effects_Particle& particle, ParticlePool& pool,
 void ReleaseAllEffectParticles(ParticlePool& pool, ParticleList& list,
                                ParticleRecords& records);
 
-// The forces on every particle (Effects_particleGravity and
-// Effects_particleDrag).
+// The forces on every particle (particleGravity and
+// particleDrag).
 struct ParticleForces {
   Core::Math::Vec3 gravity{};
   std::int32_t drag{};

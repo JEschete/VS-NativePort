@@ -81,7 +81,7 @@ struct TrailDefinition {
 };
 
 // The emitter-scratch values the stages read and leave behind
-// (Effects_ParticleEmitterScratch). The attraction offset and jitter, the
+// (LiveParticleEmitterScratch). The attraction offset and jitter, the
 // force and the acceleration are halfword vectors: the stages store them
 // reduced to signed halfwords and read them back that way.
 struct TrailScratch {

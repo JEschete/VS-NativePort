@@ -14,13 +14,13 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ParticlePool.hpp"
 #include "Effects/ParticlePoolLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 
 namespace {
 namespace fx = VS::Effects;
 namespace Memory = VS::Core::Memory;
-using Particle = Effects_Particle;
+using Particle = VS::Effects::LiveParticle;
 using Instance = Effects_EffectInstance;
 
 constexpr std::size_t kRecords = 6;
@@ -278,27 +278,27 @@ namespace {
 class SavedPool {
  public:
   SavedPool()
-      : pool_(Effects_particlePool),
-        free_(Effects_freeParticles),
-        capacity_(Effects_particleCapacity),
-        used_(Effects_usedParticleCount),
-        references_(Effects_particlePoolReferences),
-        gravity_(Effects_particleGravity),
-        drag_(Effects_particleDrag) {
-    Effects_particlePoolReferences = 0;
+      : pool_(VS::Effects::particlePool),
+        free_(VS::Effects::freeParticles),
+        capacity_(VS::Effects::particleCapacity),
+        used_(VS::Effects::usedParticleCount),
+        references_(VS::Effects::particlePoolReferences),
+        gravity_(VS::Effects::particleGravity),
+        drag_(VS::Effects::particleDrag) {
+    VS::Effects::particlePoolReferences = 0;
   }
   SavedPool(const SavedPool&) = delete;
   SavedPool& operator=(const SavedPool&) = delete;
   SavedPool(SavedPool&&) = delete;
   SavedPool& operator=(SavedPool&&) = delete;
   ~SavedPool() {
-    Effects_particlePool = pool_;
-    Effects_freeParticles = free_;
-    Effects_particleCapacity = capacity_;
-    Effects_usedParticleCount = used_;
-    Effects_particlePoolReferences = references_;
-    Effects_particleGravity = gravity_;
-    Effects_particleDrag = drag_;
+    VS::Effects::particlePool = pool_;
+    VS::Effects::freeParticles = free_;
+    VS::Effects::particleCapacity = capacity_;
+    VS::Effects::usedParticleCount = used_;
+    VS::Effects::particlePoolReferences = references_;
+    VS::Effects::particleGravity = gravity_;
+    VS::Effects::particleDrag = drag_;
   }
 
  private:
@@ -307,7 +307,7 @@ class SavedPool {
   int capacity_;
   int used_;
   int references_;
-  Effects_ParticleGravity gravity_;
+  VECTOR gravity_;
   int drag_;
   alignas(Memory::kHeapUnitBytes)
       std::array<std::byte, Memory::kHeapUnitBytes * 64> arena_{};
@@ -316,11 +316,11 @@ class SavedPool {
 
 // The pool globals, as the typed pool.
 [[nodiscard]] fx::ParticlePool LivePool() {
-  return {.block = Effects_particlePool,
-          .free = Effects_freeParticles,
-          .capacity = Effects_particleCapacity,
-          .used = Effects_usedParticleCount,
-          .references = Effects_particlePoolReferences};
+  return {.block = VS::Effects::particlePool,
+          .free = VS::Effects::freeParticles,
+          .capacity = VS::Effects::particleCapacity,
+          .used = VS::Effects::usedParticleCount,
+          .references = VS::Effects::particlePoolReferences};
 }
 
 // An instance's particles, as the typed list.
@@ -335,7 +335,7 @@ TEST_CASE("Live particle pool serves an instance from the game heap",
   const SavedPool saved;
   auto instance = std::make_unique<Instance>();
   fx::LiveAcquireParticlePool(2);
-  Particle* block = Effects_particlePool;
+  Particle* block = VS::Effects::particlePool;
   REQUIRE(block != nullptr);
 
   Particle* first = fx::LiveAllocateEffectParticle(instance.get());
@@ -363,18 +363,18 @@ TEST_CASE("Live particle pool returns an instance's particles to the heap",
 
   fx::LiveReleaseEffectParticle(second, instance.get());
   CHECK(ListOf(*instance) == fx::ParticleList{.first = first, .count = 1});
-  CHECK(Effects_freeParticles == second);
+  CHECK(VS::Effects::freeParticles == second);
   fx::LiveReleaseAllEffectParticles(instance.get());
   CHECK(LivePool() ==
         fx::ParticlePool{
             .block = first, .free = first, .capacity = 2, .references = 1});
 
   fx::LiveReleaseParticlePool();
-  CHECK(
-      (Effects_particlePool == nullptr && Effects_particlePoolReferences == 0));
+  CHECK((VS::Effects::particlePool == nullptr &&
+         VS::Effects::particlePoolReferences == 0));
   CHECK(Memory::GameHeap().Empty());
   fx::LiveReleaseParticlePool();
-  CHECK(Effects_particlePoolReferences == 0);
+  CHECK(VS::Effects::particlePoolReferences == 0);
 }
 
 TEST_CASE("Live particle list release reads counts above 127 unsigned",
@@ -384,27 +384,27 @@ TEST_CASE("Live particle list release reads counts above 127 unsigned",
   auto instance = std::make_unique<Instance>();
   instance->particles = particle.data();
   instance->particleCount = std::bit_cast<char>(std::uint8_t{0x90});
-  Effects_freeParticles = nullptr;
-  Effects_usedParticleCount = 0x90;
+  VS::Effects::freeParticles = nullptr;
+  VS::Effects::usedParticleCount = 0x90;
   fx::LiveReleaseAllEffectParticles(instance.get());
-  CHECK(Effects_usedParticleCount == 0);
+  CHECK(VS::Effects::usedParticleCount == 0);
   CHECK(instance->particleCount == 0);
-  CHECK(Effects_freeParticles == particle.data());
+  CHECK(VS::Effects::freeParticles == particle.data());
 }
 
 TEST_CASE("Live particle forces keep the whole gravity record",
           "[particle-pool][F01552][F01553]") {
   const SavedPool saved;
-  Effects_ParticleGravity gravity{.x = 1, .y = -2, .z = 3, .reservedC = 4};
+  VECTOR gravity{.vx = 1, .vy = -2, .vz = 3, .pad = 4};
   int drag = 0x55;
   fx::LiveSetParticleGravity(&gravity);
   fx::LiveSetParticleDrag(&drag);
-  CHECK(Effects_particleGravity.x == 1);
-  CHECK(Effects_particleGravity.y == -2);
-  CHECK(Effects_particleGravity.z == 3);
-  CHECK(Effects_particleGravity.reservedC == 4);
-  CHECK(Effects_particleDrag == 0x55);
+  CHECK(VS::Effects::particleGravity.vx == 1);
+  CHECK(VS::Effects::particleGravity.vy == -2);
+  CHECK(VS::Effects::particleGravity.vz == 3);
+  CHECK(VS::Effects::particleGravity.pad == 4);
+  CHECK(VS::Effects::particleDrag == 0x55);
   fx::LiveSetParticleGravity(nullptr);
   fx::LiveSetParticleDrag(nullptr);
-  CHECK(Effects_particleDrag == 0x55);
+  CHECK(VS::Effects::particleDrag == 0x55);
 }

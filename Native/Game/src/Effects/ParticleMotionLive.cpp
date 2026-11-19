@@ -12,14 +12,14 @@
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
 #include "Legacy/Psx.h"
 
 namespace VS::Effects {
 namespace {
 using Core::Math::Vec3;
-using Particle = Effects_Particle;
+using Particle = LiveParticle;
 using Instance = Effects_EffectInstance;
 
 constexpr std::uint32_t kHalfwordBits = 16;
@@ -68,16 +68,16 @@ class LiveMotionRecords final : public ParticleMotionRecords {
  public:
   Particle* Next(Particle& particle) override { return particle.next; }
   ParticleMotionState Motion(Particle& particle) override {
-    const Effects_ParticleMotion& motion = particle.motion;
+    const LiveParticleMotion& motion = particle.motion;
     return {.mass = motion.mass,
-            .gravity_scale = motion.gravityScale,
+            .gravity_scale = motion.gravity_scale,
             .position = Wide(motion.position),
             .velocity = Wide(motion.velocity),
             .force = Wide(motion.force),
             .acceleration = Wide(motion.acceleration),
-            .target = {.x = particle.attractionTarget[0],
-                       .y = particle.attractionTarget[1],
-                       .z = particle.attractionTarget[2]},
+            .target = {.x = particle.attraction_target[0],
+                       .y = particle.attraction_target[1],
+                       .z = particle.attraction_target[2]},
             .attraction = particle.attraction};
   }
   void StoreMotion(Particle& particle,
@@ -101,9 +101,9 @@ class LiveTickHost final : public ParticleTickHost {
   ParticleLifecycle Lifecycle(Particle& particle) override {
     return {.age = particle.age,
             .lifetime = particle.lifetime,
-            .end_event = particle.endEvent,
-            .tick_event = particle.tickEvent,
-            .texture_timer = particle.textureAnimation.frameTimer};
+            .end_event = particle.end_event,
+            .tick_event = particle.tick_event,
+            .texture_timer = particle.texture_animation.frame_timer};
   }
   void StoreAge(Particle& particle, std::uint8_t age) override {
     particle.age = age;
@@ -112,13 +112,8 @@ class LiveTickHost final : public ParticleTickHost {
     particle.lifetime = lifetime;
   }
   void Emit(Particle& particle, std::int32_t event) override {
-    // The original passed the particle itself; func_800D2ADC reads only the
-    // position, transparency and variant of its parent.
-    Effects_PluginEffectState parent{};
-    StoreWide(parent.position, Wide(particle.motion.position));
-    parent.transparency = particle.transparency;
-    parent.variant = particle.opaque61Bit0;
-    EmitLiveParticleEvent(instance_, event, 0, 0, &parent);
+    // The particle is the parent of the events it emits, as in the original.
+    EmitLiveParticleEvent(instance_, event, 0, 0, &particle);
   }
   void Release(Particle& particle) override {
     LiveReleaseEffectParticle(&particle, instance_);
@@ -130,21 +125,20 @@ class LiveTickHost final : public ParticleTickHost {
 }  // namespace
 
 // decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5770)
-void LiveStepParticleEndpointTowardStart(
-    Effects_ParticleEndpointView* endpoints) {
-  if (endpoints == nullptr) {
+void LiveStepParticleEndpointTowardStart(LiveParticleLinePacket* packet) {
+  if (packet == nullptr) {
     Refuse("step endpoint", "no line");
     return;
   }
-  const std::uint32_t stepped =
-      StepScreenPointToward(PackPoint(endpoints->startX, endpoints->startY),
-                            PackPoint(endpoints->endX, endpoints->endY));
-  endpoints->startX = static_cast<std::int16_t>(stepped & kHalfwordMask);
-  endpoints->startY = static_cast<std::int16_t>(stepped >> kHalfwordBits);
+  LINE_F2& line = packet->line;
+  const std::uint32_t stepped = StepScreenPointToward(
+      PackPoint(line.x1, line.y1), PackPoint(line.x0, line.y0));
+  line.x1 = static_cast<std::int16_t>(stepped & kHalfwordMask);
+  line.y1 = static_cast<std::int16_t>(stepped >> kHalfwordBits);
 }
 
 // decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6915)
-void LiveSetParticleSpawnPosition(Effects_ParticleEmitterScratch* scratch,
+void LiveSetParticleSpawnPosition(LiveParticleEmitterScratch* scratch,
                                   Particle* particle) {
   if (scratch == nullptr || particle == nullptr) {
     Refuse("spawn position", "no emitter scratch or particle");
@@ -157,7 +151,7 @@ void LiveSetParticleSpawnPosition(Effects_ParticleEmitterScratch* scratch,
                           .y = scratch->vector.vy,
                           .z = scratch->vector.vz},
                          Wide(scratch->position), rotation);
-  StoreWide(scratch->aimPoint, spawn.aim);
+  StoreWide(scratch->aim_point, spawn.aim);
   StoreWide(particle->motion.position, spawn.position);
 }
 

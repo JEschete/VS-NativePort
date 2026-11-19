@@ -23,7 +23,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
-#include "Effects/Particles.h"
+#include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg044.hpp"
 #include "Effects/Plugins/Plg047.hpp"
 #include "Effects/Plugins/Plg049.hpp"
@@ -109,7 +109,7 @@ constexpr std::size_t kAccelerationMinRange = 4;
 constexpr std::size_t kAccelerationMaxRange = 5;
 constexpr std::size_t kSpeedRange = 2;
 
-static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
+static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 
 std::uint64_t refused_curves = 0;
 std::uint64_t refused_textures = 0;
@@ -121,15 +121,15 @@ std::uint64_t dropped_quads = 0;
   return std::has_single_bit(++count);
 }
 
-Effects_ParticleEmitterScratch& EmitterScratch() {
-  return *reinterpret_cast<Effects_ParticleEmitterScratch*>(
+LiveParticleEmitterScratch& EmitterScratch() {
+  return *reinterpret_cast<LiveParticleEmitterScratch*>(
       reinterpret_cast<std::uintptr_t>(VS::Core::ScratchBase()) +
       kEmitterScratchOffset);
 }
 
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
-const Effects_ParticleDefinition* Definition(std::size_t index) {
+const LiveParticleDefinition* Definition(std::size_t index) {
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
@@ -150,29 +150,29 @@ const Effects_ParticleDefinition* Definition(std::size_t index) {
 }
 
 [[nodiscard]] RingDefinition TypedDefinition(
-    const Effects_ParticleDefinition& definition) {
-  const auto& vectors = definition.vectorRanges;
+    const LiveParticleDefinition& definition) {
+  const auto& vectors = definition.vector_ranges;
   const std::span<const std::int16_t> speed =
-      definition.pairRanges[kSpeedRange];
+      definition.pair_ranges[kSpeedRange];
   return {
       .flags = definition.flags,
       // The palette byte offset is (byte 7 & 0x1C): the transparency
       // field's low three bits.
-      .palette_index = static_cast<std::uint8_t>(definition.transparencyCurve),
-      .tick_event = definition.tickEvent,
-      .curves = {.position = definition.positionCurve,
-                 .extent = definition.extentCurve,
-                 .inner_extent = definition.innerExtentCurve,
-                 .direction = definition.directionCurve,
-                 .direction_jitter = definition.directionJitterCurve,
-                 .speed = definition.speedCurve,
-                 .force = definition.forceCurve,
-                 .acceleration = definition.accelerationCurve,
-                 .color = {definition.rCurve, definition.gCurve,
-                           definition.bCurve}},
-      .position = VectorRange(definition.positionRange),
-      .extent = VectorRange(definition.extentRange),
-      .inner_extent = math::RangePair(definition.innerExtentRange, 0),
+      .palette_index = static_cast<std::uint8_t>(definition.transparency_curve),
+      .tick_event = definition.tick_event,
+      .curves = {.position = definition.position_curve,
+                 .extent = definition.extent_curve,
+                 .inner_extent = definition.inner_extent_curve,
+                 .direction = definition.direction_curve,
+                 .direction_jitter = definition.direction_jitter_curve,
+                 .speed = definition.speed_curve,
+                 .force = definition.force_curve,
+                 .acceleration = definition.acceleration_curve,
+                 .color = {definition.r_curve, definition.g_curve,
+                           definition.b_curve}},
+      .position = VectorRange(definition.position_range),
+      .extent = VectorRange(definition.extent_range),
+      .inner_extent = math::RangePair(definition.inner_extent_range, 0),
       .direction = VectorRange(vectors[kDirectionRange]),
       .direction_jitter = VectorRange(vectors[kDirectionJitterRange]),
       .force_min = VectorRange(vectors[kForceMinRange]),
@@ -259,7 +259,7 @@ class LiveRingHost final : public RingHost {
       return;
     }
     const MATRIX& view =
-        instance_->transforms[definition_->transformIndex].view;
+        instance_->transforms[definition_->transform_index].view;
     Core_Gte_SetRotMatrix(&view);
     Core_Gte_SetTransMatrix(&view);
   }
@@ -287,7 +287,7 @@ class LiveRingHost final : public RingHost {
   }
 
   Effects_RendererSlot& slot_;
-  const Effects_ParticleDefinition* definition_ = nullptr;
+  const LiveParticleDefinition* definition_ = nullptr;
   Effects_EffectInstance* instance_ = nullptr;
 };
 
@@ -295,8 +295,7 @@ class LiveRingHost final : public RingHost {
 // create command). The original indexed the definition and allocated the
 // state unchecked and left reserved_2 as the heap held it.
 void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
-  const Effects_ParticleDefinition* definition =
-      Definition(state.definition_index);
+  const LiveParticleDefinition* definition = Definition(state.definition_index);
   if (definition == nullptr) {
     VS::Core::LogWarn("effects",
                       "ring: definition {} is outside the package's {} "
@@ -315,9 +314,9 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
   StoreState(state);
   const bool segments = source == RingTextureSource::kSegmentsAndPositions;
   const int table =
-      segments ? definition->ringSegments : definition->textureIndex;
+      segments ? definition->ring_segments : definition->texture_index;
   const int program =
-      segments ? definition->ringPositions : definition->animationId;
+      segments ? definition->ring_positions : definition->animation_id;
   // The native closed ring's "effects.texture" diagnostics, for every ring.
   const bool primary = Effects_package == &Effects_actionPackage;
   const unsigned request_effect = primary ? Effects_actionRequest.effectId
@@ -356,16 +355,16 @@ std::optional<RingTickInputs> LiveRingHost::BeginTick(
         definition_index);
     return std::nullopt;
   }
-  if (definition_->transformIndex >= kTransformCount) {
+  if (definition_->transform_index >= kTransformCount) {
     VS::Core::LogWarn(
         "effects", "ring: definition {} names transform {} of {}; ring stopped",
-        definition_index, definition_->transformIndex, kTransformCount);
+        definition_index, definition_->transform_index, kTransformCount);
     return std::nullopt;
   }
   // The original stored the flags before sampling anything.
   EmitterScratch().flags = definition_->flags;
   const MATRIX& world =
-      instance_->transforms[definition_->transformIndex].world;
+      instance_->transforms[definition_->transform_index].world;
   // Effects_effectOrigin: the action request's position.
   const SVECTOR& origin = Effects_actionRequest.position;
   return RingTickInputs{
@@ -402,19 +401,19 @@ std::int32_t LiveRingHost::SampleCurve(std::uint8_t curve,
 }
 
 void LiveRingHost::PublishScratch(const RingScratch& values) {
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   scratch.flags = values.flags;
   math::StoreVector(scratch.position, values.position);
   math::StoreVector(scratch.extent, values.extent);
-  math::StoreVector(scratch.forceMin, values.force_min);
-  math::StoreVector(scratch.forceMax, values.force_max);
-  math::StoreVector(scratch.accelerationMin, values.acceleration_min);
-  math::StoreVector(scratch.accelerationMax, values.acceleration_max);
-  math::StoreVector(scratch.baseDirection, values.base_direction);
-  scratch.speedRange[0] = values.speed.x;
-  scratch.speedRange[1] = values.speed.y;
+  math::StoreVector(scratch.force_min, values.force_min);
+  math::StoreVector(scratch.force_max, values.force_max);
+  math::StoreVector(scratch.acceleration_min, values.acceleration_min);
+  math::StoreVector(scratch.acceleration_max, values.acceleration_max);
+  math::StoreVector(scratch.base_direction, values.base_direction);
+  scratch.speed_range[0] = values.speed.x;
+  scratch.speed_range[1] = values.speed.y;
   if (values.direction_jitter) {
-    math::StoreVector(scratch.directionJitter, *values.direction_jitter);
+    math::StoreVector(scratch.direction_jitter, *values.direction_jitter);
   }
 }
 
@@ -422,8 +421,8 @@ void LiveRingHost::PublishScratch(const RingScratch& values) {
 // unchecked; a texture table the package lacks, or a frame without texture
 // info, leaves this tick undrawn here.
 std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
-  Effects_ParticleTextureAnimation& animation = LiveState()->texture;
-  const std::size_t table = animation.textureIndex;
+  LiveParticleTextureAnimation& animation = LiveState()->texture;
+  const std::size_t table = animation.texture_index;
   const bool bound = Effects_package->textures != nullptr &&
                      table < kTextureTableCount &&
                      std::cmp_less(table, Effects_package->block1TableCount) &&
@@ -431,7 +430,7 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
   if (bound) {
     LiveAdvanceParticleTextureAnimation(&animation);
   }
-  if (!bound || animation.textureInfo == nullptr) {
+  if (!bound || animation.texture_info == nullptr) {
     if (ShouldReport(refused_textures)) {
       VS::Core::LogWarn("effects",
                         "ring: texture table {} of {} has no frame; ring drawn "
@@ -442,7 +441,7 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
     return std::nullopt;
   }
   const Effects_PackageTexture& texture =
-      Effects_package->textures[animation.textureInfo->dataIndex];
+      Effects_package->textures[animation.texture_info->dataIndex];
   return RingTexture{.clut = static_cast<std::uint16_t>(texture.clut),
                      .tpage = static_cast<std::uint16_t>(texture.tpage),
                      .u = texture.u,
@@ -482,17 +481,17 @@ void LiveRingHost::Submit(const RingQuad& quad, std::int32_t depth) {
 // matrix, by way of the scratch vector and aim point).
 Vec3 LiveRingHost::TransformByActor(RingPoint point) {
   const MATRIX& world =
-      instance_->transforms[definition_->transformIndex].world;
+      instance_->transforms[definition_->transform_index].world;
   Core_Gte_SetRotMatrix(&world);
   Core_Gte_SetTransMatrix(&world);
-  Effects_ParticleEmitterScratch& scratch = EmitterScratch();
+  LiveParticleEmitterScratch& scratch = EmitterScratch();
   scratch.vector.vx = point.x;
   scratch.vector.vy = point.y;
   scratch.vector.vz = point.z;
   Core_Gte_LoadV0(&scratch.vector);
   Core_Gte_Rtv0Tr();
-  Core_Gte_StoreLvnl(&scratch.aimPoint);
-  return Wide(scratch.aimPoint);
+  Core_Gte_StoreLvnl(&scratch.aim_point);
+  return Wide(scratch.aim_point);
 }
 
 void LiveRingHost::EmitParticleEvent(std::uint8_t event, Vec3 position) {
@@ -506,9 +505,9 @@ void LiveRingHost::EmitParticleEvent(std::uint8_t event, Vec3 position) {
   }
   // The original left the context's other fields as stack contents; they
   // start cleared here.
-  Effects_PluginEffectState context{};
+  LiveParticle context{};
   context.transparency = 0;
-  math::StoreVector(context.position, position);
+  math::StoreVector(context.motion.position, position);
   EmitLiveParticleEvent(instance_, event, 0, 0, &context);
 }
 
