@@ -3621,6 +3621,9 @@
     <ClInclude Include="include\Battle\HudStateLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
+    <ClInclude Include="include\Battle\LabelScreenPoint.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\RewardFlow.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>

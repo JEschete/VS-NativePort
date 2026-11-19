@@ -8,6 +8,7 @@
 
 #include "Battle/FloatingLabelProducers.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
+#include "Battle/LabelScreenPoint.hpp"
 #include "Render/TextureRegionDraw.hpp"
 
 // The floating label updater, the actor value and status label leaves and the
@@ -31,14 +32,6 @@ inline constexpr std::int32_t kPlacedLabelCapacity = 32;
 inline constexpr std::size_t kStatusLabelCaptions = 2;
 // The equipment kind the weapon stat-change setting covers.
 inline constexpr std::int32_t kWeaponStatChange = 240;
-
-// One DVECTOR of Battle_placedLabelPositions or a projected screen point.
-struct LabelScreenPoint {
-  std::int16_t x{};
-  std::int16_t y{};
-  friend bool operator==(const LabelScreenPoint&,
-                         const LabelScreenPoint&) = default;
-};
 
 // One Battle_StatusLabelLayout (D_800690B4): up to two caption rectangles of
 // Battle_kLabelCaptionRects and the Battle_kStatusLabelColors index.

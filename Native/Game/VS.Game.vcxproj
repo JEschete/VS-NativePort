@@ -2627,6 +2627,7 @@
     <ClInclude Include="include\Battle\HudRenderingLive.hpp" />
     <ClInclude Include="include\Battle\HudState.hpp" />
     <ClInclude Include="include\Battle\HudStateLive.hpp" />
+    <ClInclude Include="include\Battle\LabelScreenPoint.hpp" />
     <ClInclude Include="include\Battle\RewardFlow.hpp" />
     <ClInclude Include="include\Battle\RewardFlowLive.hpp" />
     <ClInclude Include="include\Battle\SphereContainment.hpp" />

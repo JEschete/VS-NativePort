@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <span>
 
+#include "Battle/LabelScreenPoint.hpp"
 #include "Battle/Targeting.hpp"
 #include "Battle/TargetingDraw.hpp"
 
@@ -37,16 +38,6 @@ inline constexpr std::int16_t kTargetLabelHeight = 8;
 // mode inserted after them (getTPage(0, 1, 0, 0): additive blending).
 inline constexpr std::uint32_t kTargetLabelLinkCommand = 0x42000000;
 inline constexpr std::uint32_t kTargetLabelLinkDrawMode = 0xE1000020;
-
-// A screen position as the original packs it: x in the low halfword and y in
-// the high halfword of a GPU word.
-struct LabelScreenPoint {
-  std::int16_t x = 0;
-  std::int16_t y = 0;
-
-  friend bool operator==(const LabelScreenPoint&,
-                         const LabelScreenPoint&) = default;
-};
 
 // One label of Battle_SphereTargetLabel without its text pointer.
 struct SphereTargetLabel {

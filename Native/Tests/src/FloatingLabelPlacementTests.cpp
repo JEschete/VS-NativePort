@@ -6,6 +6,7 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -14,10 +15,15 @@
 #include "Battle/FloatingLabelPlacement.hpp"
 #include "Battle/FloatingLabelProducers.hpp"
 #include "Battle/FloatingLabelRendering.hpp"
+#include "Battle/SphereTargetLabels.hpp"
 
 namespace {
 namespace b = VS::Battle;
 namespace r = VS::Render;
+// The floating labels and the sphere's target labels share one screen point
+// definition, so one unit can include both headers (#473).
+static_assert(std::is_same_v<decltype(b::TargetLabelLinkLine::start),
+                             b::LabelScreenPoint>);
 constexpr b::FloatingLabelScreenPoint kOrigin{100, 100};
 constexpr std::size_t kCapacity = 32;
 constexpr std::uint8_t kActorValue = 1;
