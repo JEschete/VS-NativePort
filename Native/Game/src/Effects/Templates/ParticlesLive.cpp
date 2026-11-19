@@ -21,7 +21,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
@@ -117,7 +117,7 @@ const LiveParticleDefinition* PackageDefinition(std::size_t index) {
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->block5Data->definitions[index];
+  return &Effects_package->block5Data->Definitions()[index];
 }
 
 [[nodiscard]] ParticleVectorRange VectorRange(
@@ -569,8 +569,7 @@ std::int32_t LiveParticleHost::SampleCurve(std::uint8_t curve,
     return 0;
   }
   const std::size_t bound = LiveEffectCurveCount();
-  if (curve > bound ||
-      Effects_package->curveBlock->curveSizes[curve - 1] == 0) {
+  if (curve > bound || Effects_package->curveBlock->Size(curve - 1) == 0) {
     if (ShouldReport(refused_curves)) {
       VS::Core::LogWarn(
           "effects",
@@ -607,10 +606,10 @@ std::optional<ParticleTexture> LiveParticleHost::AdvanceTexture() {
     }
     return std::nullopt;
   }
-  const Effects_PackageTexture& texture =
-      Effects_package->textures[animation.texture_info->dataIndex];
-  return ParticleTexture{.clut = static_cast<std::uint16_t>(texture.clut),
-                         .tpage = static_cast<std::uint16_t>(texture.tpage),
+  const LivePackageTexture& texture =
+      Effects_package->textures[animation.texture_info->first_texture];
+  return ParticleTexture{.clut = texture.clut,
+                         .tpage = texture.tpage,
                          .u = texture.u,
                          .v = texture.v,
                          .w = texture.w,

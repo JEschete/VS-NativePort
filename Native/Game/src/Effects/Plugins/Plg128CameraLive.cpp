@@ -21,7 +21,7 @@
 #include "Effects/CameraLive.hpp"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg128Camera.hpp"
@@ -197,7 +197,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
       }
       return std::nullopt;
     }
-    return DefinitionOf(Effects_package->block5Data->definitions[index]);
+    return DefinitionOf(Effects_package->block5Data->Definitions()[index]);
   }
 
   [[nodiscard]] std::int32_t SampleCurve(std::uint8_t curve,

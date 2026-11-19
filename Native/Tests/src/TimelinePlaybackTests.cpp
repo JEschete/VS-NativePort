@@ -209,7 +209,7 @@ class LiveTimelinePackage {
     REQUIRE(payload_ != nullptr);
     const auto block = TimelineBlock();
     std::memcpy(payload_, block.data(), block.size());
-    package_.block3Data = static_cast<Effects_PackageBlock3*>(payload_);
+    package_.block3Data = static_cast<fx::LiveTimelineTable*>(payload_);
     package_.request = &request_;
   }
   ~LiveTimelinePackage() {

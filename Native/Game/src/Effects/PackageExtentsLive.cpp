@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <span>
 
-#include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Runtime.h"
 #include "Legacy/Psx.h"

@@ -19,7 +19,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitter.hpp"
 #include "Effects/ParticlePoolLive.hpp"
@@ -339,7 +339,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
   return std::ranges::all_of(definition.curves, [bound](std::uint8_t curve) {
     return curve == 0 ||
            (curve <= bound && Effects_package->curves[curve - 1] != nullptr &&
-            Effects_package->curveBlock->curveSizes[curve - 1] != 0);
+            Effects_package->curveBlock->Size(curve - 1) != 0);
   });
 }
 
@@ -411,7 +411,7 @@ void EmitLiveParticleEvent(Effects_EffectInstance* instance, int event,
     return;
   }
   const auto definition =
-      Definition(Effects_package->block5Data->definitions[event]);
+      Definition(Effects_package->block5Data->Definitions()[event]);
   auto context = Context(*instance, definition);
   if (!context) return;
   context->transparency_override = transparency_override;

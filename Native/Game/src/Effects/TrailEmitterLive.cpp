@@ -19,7 +19,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
@@ -182,7 +182,7 @@ LiveParticleDefinition* Definition(std::size_t index) {
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->block5Data->definitions[index];
+  return &Effects_package->block5Data->Definitions()[index];
 }
 
 template <typename Emitter>
@@ -202,8 +202,7 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
   }
   const auto sampled = EmitterLayout<Emitter>::kSample(
       {Effects_package->curves[curve],
-       static_cast<std::size_t>(
-           Effects_package->curveBlock->curveSizes[curve])});
+       Effects_package->curveBlock->Size(curve)});
   if (sampled.clamped) {
     VS::Core::LogDebug("effects",
                        "{} trail emitter: one-entry transparency curve {} "

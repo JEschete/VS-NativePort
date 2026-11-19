@@ -19,7 +19,7 @@
 #include "Content/SystemResources.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 
 namespace {
 namespace Content = VS::Content;
@@ -329,7 +329,7 @@ TEST_CASE("Live timeline lookups bound the block by its game heap payload",
   REQUIRE(payload != nullptr);
   const auto block = TimelineBlock();
   std::memcpy(payload, block.data(), block.size());
-  auto* const timeline = static_cast<Effects_PackageBlock3*>(payload);
+  auto* const timeline = static_cast<VS::Effects::LiveTimelineTable*>(payload);
   auto* const base = static_cast<std::byte*>(payload);
   CHECK(Content::PFileLiveTimelineSection(timeline, 1) == base + 0x18);
   CHECK(Content::PFileLiveTimelineTrackData(timeline, 0, 1) == base + 0x28);
@@ -339,8 +339,8 @@ TEST_CASE("Live timeline lookups bound the block by its game heap payload",
   CHECK(Content::PFileLiveTimelineSection(nullptr, 0) == nullptr);
   auto local = TimelineBlock();
   CHECK(Content::PFileLiveTimelineSection(
-            reinterpret_cast<Effects_PackageBlock3*>(local.data()), 0) ==
-        nullptr);
+            reinterpret_cast<VS::Effects::LiveTimelineTable*>(local.data()),
+            0) == nullptr);
   Memory::FreeLiveFromHighEnd(payload);
 }
 

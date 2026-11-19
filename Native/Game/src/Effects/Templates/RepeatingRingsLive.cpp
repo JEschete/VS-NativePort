@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "Core/Log.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg077.hpp"
@@ -41,7 +41,7 @@ std::uint64_t refused_rings = 0;
   return curve == 0 ||
          (curve <= count && Effects_package->curveBlock != nullptr &&
           Effects_package->curves[curve - 1] != nullptr &&
-          Effects_package->curveBlock->curveSizes[curve - 1] != 0);
+          Effects_package->curveBlock->Size(curve - 1) != 0);
 }
 
 [[nodiscard]] bool BoundTick(const LiveParticleDefinition& definition) {
@@ -94,7 +94,7 @@ std::uint64_t refused_rings = 0;
     return Refuse("definition outside the current bound package");
   }
   return command != RingCommand::kTick ||
-         BoundTick(Effects_package->block5Data->definitions[index]);
+         BoundTick(Effects_package->block5Data->Definitions()[index]);
 }
 
 [[nodiscard]] std::array<RingPaletteEntry, kRingPaletteEntries> Palette(

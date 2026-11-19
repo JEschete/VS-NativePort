@@ -28,7 +28,7 @@
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/Runtime.h"
 #include "Field/GimmickMotion.h"
 #include "Field/Gimmicks.h"
@@ -464,7 +464,7 @@ int Tests_DefaultEffectPackageLoaded(void) {
   const int passed =
       package.block1TableCount == 1 && package.block2Count == 19 &&
       package.block3Data->count == 49 && package.curveBlock->count == 32 &&
-      package.block5Data->reserved0 == 46 &&
+      package.block5Data->count == 46 &&
       reinterpret_cast<uintptr_t>(package.block8Data) == base + 0x4B44 &&
       reinterpret_cast<uintptr_t>(package.block9Data) == base + 0x5078 &&
       reinterpret_cast<uintptr_t>(package.block10Data) == base + 0x50A0 &&

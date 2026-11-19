@@ -25,7 +25,7 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLiveState.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.hpp"
@@ -65,10 +65,6 @@ static_assert(std::extent_v<decltype(Effects_EffectPackage::curves)> ==
               VS::Effects::kEffectCurveCapacity);
 static_assert(std::size(Effects_effectRenderers) ==
               VS::Effects::kEffectRendererCapacity);
-static_assert(sizeof(Effects_PackageBlock9) ==
-              VS::Effects::kPackageParametersBytes);
-static_assert(offsetof(Effects_PackageBlock9, timelineIds) ==
-              VS::Effects::kPackageParametersRequiredBytes);
 
 namespace VS::Effects {
 namespace {
@@ -193,7 +189,7 @@ template <typename T>
 void PublishCurves(Effects_EffectPackage& package,
                    const EffectPackageBlocks& blocks,
                    const CurveBinding& binding) {
-  package.curveBlock = LegacyPointer<Effects_CurveBlock>(blocks.curve_block);
+  package.curveBlock = LegacyPointer<LiveCurveTable>(blocks.curve_block);
   const std::size_t count =
       std::min(static_cast<std::size_t>(std::max(binding.header_count, 0)),
                blocks.curves.size());
@@ -215,21 +211,21 @@ void PublishBlocks(Effects_EffectPackage& package,
     package.block2Data = LegacyPointer<u_short>(blocks.animation_table);
   }
   if (bound(PackageBlockType::kTimelines)) {
-    package.block3Data = LegacyPointer<Effects_PackageBlock3>(blocks.timelines);
+    package.block3Data = LegacyPointer<LiveTimelineTable>(blocks.timelines);
   }
   if (bound(PackageBlockType::kCurves)) {
     PublishCurves(package, blocks, walk.curves);
   }
   if (bound(PackageBlockType::kParticleDefinitions)) {
     package.block5Data =
-        LegacyPointer<Effects_PackageBlock5>(blocks.particle_definitions);
+        LegacyPointer<LiveParticleDefinitionTable>(blocks.particle_definitions);
   }
   if (bound(PackageBlockType::kPrograms)) {
     package.block8Data = LegacyPointer<char>(blocks.programs);
   }
   if (bound(PackageBlockType::kParameters)) {
     package.block9Data =
-        LegacyPointer<Effects_PackageBlock9>(blocks.parameters);
+        LegacyPointer<LivePackageParameters>(blocks.parameters);
   }
   if (bound(PackageBlockType::kTransformDefinitions)) {
     package.block10Data =

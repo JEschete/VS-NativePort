@@ -15,7 +15,7 @@
 #include "Effects/Curves.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Runtime.h"
 #include "Legacy/Psx.h"
@@ -24,9 +24,6 @@ namespace VS::Effects {
 namespace {
 using PackageCurves = decltype(Effects_EffectPackage::curves);
 static_assert(std::extent_v<PackageCurves> == kEffectCurveCapacity);
-// pFileCurveBlock (5BF94.h:203): {u16 count, u16 data offset, u8 sizes[]}.
-constexpr std::size_t kCurveSizesAt = 4;
-static_assert(offsetof(Effects_CurveBlock, curveSizes) == kCurveSizesAt);
 
 std::uint64_t refused_samples = 0;
 std::uint64_t refused_segments = 0;
@@ -50,14 +47,13 @@ struct LiveCurveBlock {
   if (Effects_package == nullptr || Effects_package->curveBlock == nullptr) {
     return live;
   }
-  const Effects_CurveBlock& header = *Effects_package->curveBlock;
+  const LiveCurveTable& header = *Effects_package->curveBlock;
   const std::size_t bound =
       std::min(LiveEffectCurveCount(), live.curves.size());
   for (std::size_t i = 0; i < bound; ++i) {
     // A curve the binder refused stays unbound (no data).
     if (Effects_package->curves[i] != nullptr) {
-      live.curves.at(i) = {Effects_package->curves[i],
-                           static_cast<std::size_t>(header.curveSizes[i])};
+      live.curves.at(i) = {Effects_package->curves[i], header.Size(i)};
     }
   }
   live.block = {.header_count = header.count,

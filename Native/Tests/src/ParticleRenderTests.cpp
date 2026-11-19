@@ -23,7 +23,7 @@
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleMotionLive.hpp"
@@ -116,8 +116,9 @@ struct ParticleFixture {
   Effects_EffectPackage package{};
   Effects_EffectInstance instance{};
   VS::Effects::LiveParticle particle{};
-  Effects_PackageTexture texture{};
-  Effects_PackageTextureInfo info{1, 0};
+  VS::Effects::LivePackageTexture texture{};
+  VS::Effects::LivePackageTextureFrame info{.texture_count = 1,
+                                            .first_texture = 0};
   std::array<u_long, 2> script{8u << 16, 0x30000000u};
   std::array<u_long, 2> curve_block{1, 2};
   std::array<u_char, 2> curve{32, 64};
@@ -133,7 +134,7 @@ struct ParticleFixture {
     package.block1TableCount = 1;
     package.textureInfoTable[0] = &info;
     package.curveBlock =
-        reinterpret_cast<Effects_CurveBlock*>(curve_block.data());
+        reinterpret_cast<VS::Effects::LiveCurveTable*>(curve_block.data());
     package.curves[0] = curve.data();
     VS::Effects::RecordLiveEffectCurves(std::as_bytes(std::span(curve_block)));
     texture.u = 16;
@@ -141,11 +142,7 @@ struct ParticleFixture {
     texture.w = texture.h = 8;
     texture.clut = 0x1234;
     texture.tpage = 0x567;
-    texture.reserved8 = texture.reservedA = -4;
-    texture.reservedC = 4;
-    texture.reservedE = -4;
-    texture.reserved10 = -4;
-    texture.reserved12 = texture.reserved14 = texture.reserved16 = 4;
+    texture.corners = {{{-4, -4}, {4, -4}, {-4, 4}, {4, 4}}};
     particle.texture_animation.program =
         reinterpret_cast<u_char*>(script.data());
     VS::Effects::RecordLiveAnimationTable(
@@ -490,7 +487,9 @@ struct EmissionFixture : ParticleFixture {
   std::array<u_short, 8> programs{1, 0, 8, 0, 0, 8, 0, 0x3000};
 
   EmissionFixture() {
-    package.block5Data = reinterpret_cast<Effects_PackageBlock5*>(&definitions);
+    package.block5Data =
+        reinterpret_cast<VS::Effects::LiveParticleDefinitionTable*>(
+            &definitions);
     VS::Effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span(&definitions, 1)));
     package.block2Data = programs.data();
@@ -774,7 +773,7 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
           "[effects][particle-emission]") {
   EmissionFixture fixture;
   STATIC_REQUIRE(offsetof(EmissionFixture::Definitions, entries) ==
-                 sizeof(Effects_PackageBlock5));
+                 sizeof(VS::Effects::LiveParticleDefinitionTable));
   auto& definition = fixture.definitions.entries[0];
   const int requested = GENERATE(0, 1, 5);
   definition.count_range[0] = definition.count_range[1] =
@@ -954,7 +953,7 @@ TEST_CASE("Particle rendering flags cannot invent target attraction",
   auto& particle = fixture.particle;
   particle.emit_flags = GENERATE(0, 1, 0x40, 0x20000, 0x40000, 0x80000);
   std::array<u_char, 4> program{};
-  Effects_PackageTextureInfo texture{};
+  VS::Effects::LivePackageTextureFrame texture{};
   particle.texture_animation.program = program.data();
   particle.texture_animation.texture_info = &texture;
   particle.motion.velocity.vx = 4096;

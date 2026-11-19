@@ -5,20 +5,14 @@
 #include <span>
 
 #include "Core/Log.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
 
-static_assert(sizeof(Effects_PackageTextureInfo) ==
-              VS::Effects::kTextureFrameRecordBytes);
-static_assert(alignof(Effects_PackageTextureInfo) ==
-              VS::Effects::kTextureFrameRecordAlignment);
-static_assert(sizeof(Effects_PackageTexture) ==
-              VS::Effects::kTextureDescriptorBytes);
 static_assert(sizeof(Effects_EffectPackage::textureInfoTable) ==
               VS::Effects::kTextureTableCapacity *
-                  sizeof(Effects_PackageTextureInfo*));
+                  sizeof(VS::Effects::LivePackageTextureFrame*));
 
 namespace {
 void Require(bool condition, const char* message) {
@@ -34,7 +28,7 @@ void VS::Effects::BindLiveEffectTextureTables(std::span<std::byte> block) {
   Require(block.data() != nullptr && Effects_package != nullptr,
           "missing package or source block");
   Require(reinterpret_cast<std::uintptr_t>(block.data()) %
-                  alignof(Effects_PackageTexture) ==
+                  alignof(LivePackageTexture) ==
               0,
           "unaligned texture storage");
   const EffectTextureOwner owner{
@@ -44,11 +38,11 @@ void VS::Effects::BindLiveEffectTextureTables(std::span<std::byte> block) {
   for (std::size_t table = 0; table < kTextureTableCapacity; ++table) {
     Effects_package->textureInfoTable[table] =
         table < layout.table_count
-            ? reinterpret_cast<Effects_PackageTextureInfo*>(
+            ? reinterpret_cast<LivePackageTextureFrame*>(
                   block.data() + layout.table_offsets.at(table))
             : nullptr;
   }
-  Effects_package->textures = reinterpret_cast<Effects_PackageTexture*>(
+  Effects_package->textures = reinterpret_cast<LivePackageTexture*>(
       block.data() + layout.descriptor_offset);
   Effects_package->block1TableCount = static_cast<int>(layout.table_count);
 }

@@ -13,7 +13,7 @@
 
 #include "Content/ModuleData.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
@@ -45,7 +45,7 @@ struct TextureBindingFixture {
     bytes[2] = 1;
     bytes[3] = 0x00010001;
     auto* textures =
-        reinterpret_cast<Effects_PackageTexture*>(bytes.data() + 4);
+        reinterpret_cast<VS::Effects::LivePackageTexture*>(bytes.data() + 4);
     textures[0].u = 16;
     textures[0].v = 32;
     textures[0].w = textures[0].h = 8;
@@ -70,7 +70,7 @@ struct TextureBindingFixture {
       const VS::Effects::LiveParticleTextureAnimation& state) {
     REQUIRE(state.texture_info != nullptr);
     CHECK(state.texture_info == Effects_actionPackage.textureInfoTable[0] + 1);
-    CHECK(state.texture_info->dataIndex == 1);
+    CHECK(state.texture_info->first_texture == 1);
     CHECK(state.frame_offset_x == 3);
     CHECK(state.frame_offset_y == 2);
     CHECK(state.frame_timer == 4);
@@ -142,9 +142,9 @@ TEST_CASE("Gravity material channels resolve only to its own authored table",
   const auto original = fixture.bytes;
   fixture.Bind();
   CHECK(Effects_actionPackage.block1TableCount == 2);
-  CHECK(
-      Effects_actionPackage.textureInfoTable[0] ==
-      reinterpret_cast<Effects_PackageTextureInfo*>(fixture.bytes.data() + 2));
+  CHECK(Effects_actionPackage.textureInfoTable[0] ==
+        reinterpret_cast<VS::Effects::LivePackageTextureFrame*>(
+            fixture.bytes.data() + 2));
   CHECK(Effects_actionPackage.textureInfoTable[1] ==
         Effects_actionPackage.textureInfoTable[0]);
   CHECK(fixture.bytes == original);
@@ -156,7 +156,8 @@ TEST_CASE(
   TextureBindingFixture fixture;
   Effects_actionRequest.effectId = 53;
   Effects_actionPackage.textureInfoTable[1] =
-      reinterpret_cast<Effects_PackageTextureInfo*>(fixture.bytes.data() + 3);
+      reinterpret_cast<VS::Effects::LivePackageTextureFrame*>(
+          fixture.bytes.data() + 3);
   fixture.Bind();
   CHECK(Effects_actionPackage.block1TableCount == 1);
   CHECK(Effects_actionPackage.textureInfoTable[1] == nullptr);
@@ -201,8 +202,8 @@ TEST_CASE("Material channels preserve distinct authored multi-table bindings",
   CHECK(Effects_actionPackage.block1TableCount == 3);
   CHECK(Effects_actionPackage.textureInfoTable[0] !=
         Effects_actionPackage.textureInfoTable[1]);
-  CHECK(Effects_actionPackage.textureInfoTable[1]->dataIndex == 1);
-  CHECK(Effects_actionPackage.textureInfoTable[2]->dataIndex == 0);
+  CHECK(Effects_actionPackage.textureInfoTable[1]->first_texture == 1);
+  CHECK(Effects_actionPackage.textureInfoTable[2]->first_texture == 0);
   CHECK(Effects_actionPackage.textureInfoTable[3] == nullptr);
 }
 
@@ -305,8 +306,8 @@ namespace {
 // One transform attached to the request origin (actor 0x12) at unit scale:
 // block 9 (padded to a word) and block 10, then the terminator.
 std::vector<std::byte> GravityOriginPackage() {
-  Effects_PackageBlock9 parameters{};
-  parameters.transformCount = 1;
+  VS::Effects::LivePackageParameters parameters{};
+  parameters.transform_count = 1;
   VS::Effects::LiveTransformDefinition definition{};
   definition.flags = 7;
   definition.attach_actor = 0x12;

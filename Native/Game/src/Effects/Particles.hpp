@@ -14,9 +14,9 @@
 #include "Effects/EffectScript.hpp"
 #include "Legacy/Psx.h"
 
-struct Effects_PackageTextureInfo;
-
 namespace VS::Effects {
+struct LivePackageTextureFrame;
+
 inline constexpr std::size_t kParticleAxes = 3;
 inline constexpr std::size_t kParticleColorCurves = 3;
 // A (start, end) range of one value.
@@ -90,7 +90,7 @@ struct LiveParticleTextureAnimation {
   std::uint8_t texture_index;
   std::uint8_t reserved_17;
   std::uint8_t* program;
-  Effects_PackageTextureInfo* texture_info;
+  LivePackageTextureFrame* texture_info;
 };
 
 // decomp: func_800D2904_t (src/BATTLE/BATTLE.PRG/battleEffect.h:257): one

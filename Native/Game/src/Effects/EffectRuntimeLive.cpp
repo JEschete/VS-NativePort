@@ -29,7 +29,7 @@
 #include "Effects/EffectResourcesLiveState.hpp"
 #include "Effects/EffectRuntime.hpp"
 #include "Effects/EffectScriptLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/PrimaryEffect.hpp"
@@ -153,7 +153,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
       Refuse("track count", "the package has no particle block");
       return 0;
     }
-    return package->block9Data->frameCount;
+    return package->block9Data->frame_count;
   }
   Content_DiscQueueSlot* RequestMenuReload() override {
     const Content_DiscFile file{.lba = Content::MainMenuOverlayDiscSector(),

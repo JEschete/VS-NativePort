@@ -149,7 +149,6 @@
 #include "Effects/EffectResourcesLiveState.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/EffectScriptLive.hpp"
-#include "Effects/Package.h"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleMotionLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"

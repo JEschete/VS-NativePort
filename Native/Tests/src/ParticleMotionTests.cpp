@@ -11,7 +11,7 @@
 
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleMotion.hpp"
 #include "Effects/ParticleMotionLive.hpp"
@@ -146,7 +146,7 @@ constexpr std::uint32_t kStop = 0x30000000;
 class AnimationPackage {
  public:
   Effects_EffectPackage package{};
-  std::array<Effects_PackageTextureInfo, 4> frames{};
+  std::array<fx::LivePackageTextureFrame, 4> frames{};
   // {s32 count = 2, u16 offsets {12, 20}, u16 pad}, then the programs.
   std::array<std::uint32_t, 6> table{
       2, 12 | (20u << 16), 0, FrameWord(3, 4), kStop, kStop};
@@ -430,7 +430,7 @@ TEST_CASE("A cleared texture animation holds nothing",
   animation.cursor = 8;
   animation.texture_index = 3;
   animation.rotation = 9;
-  Effects_PackageTextureInfo frame{};
+  fx::LivePackageTextureFrame frame{};
   animation.program = reinterpret_cast<u_char*>(&frame);
   animation.texture_info = &frame;
   fx::LiveClearParticleTextureState(&animation);

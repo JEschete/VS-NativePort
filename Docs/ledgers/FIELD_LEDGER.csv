@@ -5230,47 +5230,47 @@ T00570.000,T00570,obstructionVector,0,x,0,short,,,,x,Named in the fork; see cite
 T00570.001,T00570,obstructionVector,1,y,0,short,,,,y,Named in the fork; see cited use,med,source:771A8.c:810
 T00570.002,T00570,obstructionVector,2,z,0,short,,,,z,Named in the fork; see cited use,med,source:771A8.c:811
 T00570.003,T00570,obstructionVector,3,pad,1,short,,,,reserved6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.h:733;declaration-only;source:771A8.c:771
-T00571.000,T00571,pFileBlock1,0,tableCount,0,short,,,,tableCount,Named in the fork; see cited use,med,source:6F014.c:516
-T00571.001,T00571,pFileBlock1,1,dataOffset,0,u_short,,,,dataOffset,Named in the fork; see cited use,med,source:6F014.c:517
-T00571.002,T00571,pFileBlock1,2,tableOffsets,0,int[0],,,,tableOffsets,Named in the fork; see cited use,med,source:6F014.c:520
-T00572.000,T00572,pFileBlock11,0,count,0,int,,,,count,Named in the fork; see cited use,med,source:5BF94.c:6342
-T00572.001,T00572,pFileBlock11,1,offsets,0,short[0],,,,offsets,Named in the fork; see cited use,med,source:5BF94.c:6343
-T00573.000,T00573,pFileBlock2,0,unk0,1,int,,,,animationCount,Number of texture animations,high,source:6F014.c:526
-T00573.001,T00573,pFileBlock2,1,data,0,u_char[0],,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:36;source:6F014.c:756
-T00574.000,T00574,pFileBlock3,0,count,0,int,,,,count,Named in the fork; see cited use,med,source:5BF94.c:7720
-T00574.001,T00574,pFileBlock3,1,offsets,0,u_short[0],,,,offsets,Named in the fork; see cited use,med,source:5BF94.c:7876
-T00575.000,T00575,pFileBlock5,0,count,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:49;declaration-only;source:5BF94.h:327
-T00575.001,T00575,pFileBlock5,1,unk4,1,func_800FA098_arg0[0],,,,definitions,Particle definitions,high,source:5BF94.c:6955
-T00576.000,T00576,pFileBlock9,0,unk0,1,short[6],,,,gravityRange,Gravity range sampled by gravityCurve,med,source:6F014.c:483
-T00576.001,T00576,pFileBlock9,1,unkC,1,short[2],,,,dragRange,Drag range sampled by dragCurve,med,source:6F014.c:485
-T00576.002,T00576,pFileBlock9,2,unk10,1,u_char,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:58;declaration-only;source:5BF94.h:170
-T00576.003,T00576,pFileBlock9,3,unk11,1,u_char,,,,reserved11,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:59;declaration-only;source:5BF94.h:171
-T00576.004,T00576,pFileBlock9,4,unk12,1,u_char,,,gravityChannel,gravityCurve,Curve selecting the gravity,med,source:6F014.c:483
-T00576.005,T00576,pFileBlock9,5,unk13,1,u_char,,,dragChannel,dragCurve,Curve selecting the drag,med,source:6F014.c:485
-T00576.006,T00576,pFileBlock9,6,unk14,1,u_char,,,,frameCount,Copied to the effect frame limit when primary effects update,low,source:5BF94.c:5223
-T00576.007,T00576,pFileBlock9,7,unk15,1,u_char,,,,transformCount,Number of transforms the package animates,med,source:5BF94.c:5943
-T00576.008,T00576,pFileBlock9,8,unk16,1,u_char[4],,,,timelineIds,Timeline ids loaded by script register,med,source:5BF94.c:7718
-T00577.000,T00577,pFileCurveBlock,0,count,0,u_short,,,,count,Named in the fork; see cited use,med,source:5BF94.c:6319
-T00577.001,T00577,pFileCurveBlock,1,dataOffset,0,u_short,,,curveBytesOffset,dataOffset,Named in the fork; see cited use,med,source:6F014.c:498
-T00577.002,T00577,pFileCurveBlock,2,curveSizes,0,u_char[0],,,,curveSizes,Named in the fork; see cited use,med,source:5BF94.c:6320
-T00578.000,T00578,pFileTexture,0,clut,0,short,,,,clut,Named in the fork; see cited use,med,source:tiledRings.h:252
-T00578.001,T00578,pFileTexture,1,tpage,0,short,,,,tpage,Named in the fork; see cited use,med,source:tiledRings.h:251
-T00578.002,T00578,pFileTexture,2,u,0,u_char,,,,u,Named in the fork; see cited use,med,source:tiledRings.h:222
-T00578.003,T00578,pFileTexture,3,v,0,u_char,,,,v,Named in the fork; see cited use,med,source:tiledRings.h:224
-T00578.004,T00578,pFileTexture,4,w,0,u_char,,,,w,Named in the fork; see cited use,med,source:tiledRings.h:223
-T00578.005,T00578,pFileTexture,5,h,0,u_char,,,,h,Named in the fork; see cited use,med,source:tiledRings.h:226
-T00578.006,T00578,pFileTexture,6,x0,0,short,,,,reserved8,Not read by decompiled code,low,source:EFFECT/PLG077.BIN/18.c:247
-T00578.007,T00578,pFileTexture,7,y0,0,short,,,,reservedA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:85;source:particleRender.h:121
-T00578.008,T00578,pFileTexture,8,x1,0,short,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:86;source:EFFECT/PLG077.BIN/18.c:248
-T00578.009,T00578,pFileTexture,9,y1,0,short,,,,reservedE,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:87;source:particleRender.h:140
-T00578.010,T00578,pFileTexture,10,x2,0,short,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:88;source:EFFECT/PLG077.BIN/18.c:249
-T00578.011,T00578,pFileTexture,11,y2,0,short,,,,reserved12,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:89;source:particleRender.h:123
-T00578.012,T00578,pFileTexture,12,x3,0,short,,,,reserved14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:90;source:EFFECT/PLG077.BIN/18.c:250
-T00578.013,T00578,pFileTexture,13,y3,0,short,,,,reserved16,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:91;source:particleRender.h:142
-T00579.000,T00579,pFileTextureInfo,0,unk0,1,u_short,,,,reserved0,Not read by decompiled code,low,source:EFFECT/PLG077.BIN/18.c:243
-T00579.001,T00579,pFileTextureInfo,1,dataIndex,0,u_short,,,,dataIndex,Named in the fork; see cited use,med,source:tiledRings.h:221
-T00580.000,T00580,p_file_t,0,meta,0,int,,,,meta,Named in the fork; see cited use,med,source:6F014.c:749
-T00580.001,T00580,p_file_t,1,data,0,u_char[0],,,,blocks,Package blocks following the header,high,source:6F014.c:756
+T00571.000,T00571,pFileBlock1,0,tableCount,0,short,,,,tableCount,Named in the fork; see cited use,med,native:TextureBindings.hpp TextureBlockLayout table count (#441);source:6F014.c:516
+T00571.001,T00571,pFileBlock1,1,dataOffset,0,u_short,,,,dataOffset,Named in the fork; see cited use,med,native:TextureBindings.hpp TextureBlockLayout descriptor offset (#441);source:6F014.c:517
+T00571.002,T00571,pFileBlock1,2,tableOffsets,0,int[0],,,,tableOffsets,Named in the fork; see cited use,med,native:TextureBindings.hpp TextureBlockLayout table offsets (#441);source:6F014.c:520
+T00572.000,T00572,pFileBlock11,0,count,0,int,,,,count,Named in the fork; see cited use,med,native:Curves.hpp SampleSegmentedEffectCurve table count (#441);source:5BF94.c:6342
+T00572.001,T00572,pFileBlock11,1,offsets,0,short[0],,,,offsets,Named in the fork; see cited use,med,native:Curves.hpp SampleSegmentedEffectCurve curve offsets (#441);source:5BF94.c:6343
+T00573.000,T00573,pFileBlock2,0,unk0,1,int,,,,animationCount,Number of texture animations,high,native:EffectResources.hpp BindParticleAnimationTable count (#441);source:6F014.c:526
+T00573.001,T00573,pFileBlock2,1,data,0,u_char[0],,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.h:36;native:EffectResources.hpp ParticleAnimationData reads the offsets and data after the count (#441);source:6F014.c:756
+T00574.000,T00574,pFileBlock3,0,count,0,int,,,,count,Number of timeline sections in the block,med,native:Package.hpp LiveTimelineTable::count (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:199;source:5BF94.c:7720
+T00574.001,T00574,pFileBlock3,1,offsets,0,u_short[0],,,,offsets,Section offsets after the header; Content/PFile.hpp reads them within the bound block,med,native:Content/PFile.hpp section offsets after LiveTimelineTable (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:200;source:5BF94.c:7876
+T00575.000,T00575,pFileBlock5,0,count,0,int,,,,count,"Particle definition count; not read by native code, which bounds the definitions by the block's recorded extent",med,native-refs:none;source:native:Native\Game\src\Effects\Package.hpp:32;native:Package.hpp LiveParticleDefinitionTable::count (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:194
+T00575.001,T00575,pFileBlock5,1,unk4,1,func_800FA098_arg0[0],,,,definitions,Particle definitions,high,native:Package.hpp LiveParticleDefinitionTable::Definitions() (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:195;source:5BF94.c:6955
+T00576.000,T00576,pFileBlock9,0,unk0,1,short[6],,,,gravity_range,Gravity range sampled by gravityCurve,med,native:Package.hpp LivePackageParameters::gravity_range (#441);source:6F014.c:483
+T00576.001,T00576,pFileBlock9,1,unkC,1,short[2],,,,drag_range,Drag range sampled by dragCurve,med,native:Package.hpp LivePackageParameters::drag_range (#441);source:6F014.c:485
+T00576.002,T00576,pFileBlock9,2,unk10,1,u_char,,,,reserved_10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.hpp:47;native:Package.hpp LivePackageParameters::reserved_10 (#441);declaration-only;source:5BF94.h:170
+T00576.003,T00576,pFileBlock9,3,unk11,1,u_char,,,,reserved_11,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Package.hpp:48;native:Package.hpp LivePackageParameters::reserved_11 (#441);declaration-only;source:5BF94.h:171
+T00576.004,T00576,pFileBlock9,4,unk12,1,u_char,,,gravityChannel,gravity_curve,Curve selecting the gravity,med,native:Package.hpp LivePackageParameters::gravity_curve (#441);source:6F014.c:483
+T00576.005,T00576,pFileBlock9,5,unk13,1,u_char,,,dragChannel,drag_curve,Curve selecting the drag,med,native:Package.hpp LivePackageParameters::drag_curve (#441);source:6F014.c:485
+T00576.006,T00576,pFileBlock9,6,unk14,1,u_char,,,,frame_count,Copied to the effect frame limit when primary effects update,low,native:Package.hpp LivePackageParameters::frame_count (#441);source:5BF94.c:5223
+T00576.007,T00576,pFileBlock9,7,unk15,1,u_char,,,,transform_count,Number of transforms the package animates,med,native:Package.hpp LivePackageParameters::transform_count (#441);source:5BF94.c:5943
+T00576.008,T00576,pFileBlock9,8,unk16,1,u_char[4],,,,timeline_ids,Timeline ids loaded by script register,med,native:Package.hpp LivePackageParameters::timeline_ids (#441);source:5BF94.c:7718
+T00577.000,T00577,pFileCurveBlock,0,count,0,u_short,,,,count,Number of curves in the block,med,native:Package.hpp LiveCurveTable::count (#441);source:5BF94.c:6319
+T00577.001,T00577,pFileCurveBlock,1,dataOffset,0,u_short,,,curveBytesOffset,data_offset,"Where the first curve starts, from the start of the block",med,native:Package.hpp LiveCurveTable::data_offset (#441);source:6F014.c:498
+T00577.002,T00577,pFileCurveBlock,2,curveSizes,0,u_char[0],,,,curve_sizes,One length byte per curve after the header,med,native:Package.hpp LiveCurveTable::Size() (#441);source:5BF94.c:6320
+T00578.000,T00578,pFileTexture,0,clut,0,short,,,,clut,CLUT word of the descriptor,med,native:Package.hpp LivePackageTexture::clut (#441);source:tiledRings.h:252
+T00578.001,T00578,pFileTexture,1,tpage,0,short,,,,tpage,Texture page word of the descriptor,med,native:Package.hpp LivePackageTexture::tpage (#441);source:tiledRings.h:251
+T00578.002,T00578,pFileTexture,2,u,0,u_char,,,,u,Texture rectangle left,med,native:Package.hpp LivePackageTexture::u (#441);source:tiledRings.h:222
+T00578.003,T00578,pFileTexture,3,v,0,u_char,,,,v,Texture rectangle top,med,native:Package.hpp LivePackageTexture::v (#441);source:tiledRings.h:224
+T00578.004,T00578,pFileTexture,4,w,0,u_char,,,,w,Texture rectangle width,med,native:Package.hpp LivePackageTexture::w (#441);source:tiledRings.h:223
+T00578.005,T00578,pFileTexture,5,h,0,u_char,,,,h,Texture rectangle height,med,native:Package.hpp LivePackageTexture::h (#441);source:tiledRings.h:226
+T00578.006,T00578,pFileTexture,6,x0,0,short,,,,corners[0].x,Sprite quad corner 0's x offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[0].x (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:EFFECT/PLG077.BIN/18.c:247"
+T00578.007,T00578,pFileTexture,7,y0,0,short,,,,corners[0].y,Sprite quad corner 0's y offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[0].y (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:particleRender.h:121"
+T00578.008,T00578,pFileTexture,8,x1,0,short,,,,corners[1].x,Sprite quad corner 1's x offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[1].x (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:EFFECT/PLG077.BIN/18.c:248"
+T00578.009,T00578,pFileTexture,9,y1,0,short,,,,corners[1].y,Sprite quad corner 1's y offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[1].y (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:particleRender.h:140"
+T00578.010,T00578,pFileTexture,10,x2,0,short,,,,corners[2].x,Sprite quad corner 2's x offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[2].x (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:EFFECT/PLG077.BIN/18.c:249"
+T00578.011,T00578,pFileTexture,11,y2,0,short,,,,corners[2].y,Sprite quad corner 2's y offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[2].y (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:particleRender.h:123"
+T00578.012,T00578,pFileTexture,12,x3,0,short,,,,corners[3].x,Sprite quad corner 3's x offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[3].x (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:EFFECT/PLG077.BIN/18.c:250"
+T00578.013,T00578,pFileTexture,13,y3,0,short,,,,corners[3].y,Sprite quad corner 3's y offset from the sprite's centre,med,"native:Package.hpp LivePackageTexture::corners[3].y (#441);ParticleRender.cpp BuildParticleQuad places the corner, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:particleRender.h:142"
+T00579.000,T00579,pFileTextureInfo,0,unk0,1,u_short,,,,texture_count,"Number of descriptors the frame draws, from first_texture",med,"native:Package.hpp LivePackageTextureFrame::texture_count (#441);ParticleRender.cpp DrawAnimatedSpriteParticles draws that many quads, as func_800D6E44 (BATTLE/BATTLE.PRG/6E644.s:19) does;source:EFFECT/PLG077.BIN/18.c:243"
+T00579.001,T00579,pFileTextureInfo,1,dataIndex,0,u_short,,,,first_texture,The frame's first descriptor in the package's textures,med,native:Package.hpp LivePackageTextureFrame::first_texture (#441);source:tiledRings.h:221
+T00580.000,T00580,p_file_t,0,meta,0,int,,,,meta,Named in the fork; see cited use,med,native:EffectResources.cpp BindEffectPackageBlocks block word (#441);source:6F014.c:749
+T00580.001,T00580,p_file_t,1,data,0,u_char[0],,,,blocks,Package blocks following the header,high,native:EffectResources.cpp BindEffectPackageBlocks walks the blocks (#441);source:6F014.c:756
 T00581.000,T00581,padAct_t,0,unk0,1,int[2],,,mixedMotorIntensities,motorLevels,Summed motor levels; only slot 0's copy is used,med,source:main.c:8747;layout-conflict: channels are used as int[2][6] (48 bytes) but only 40 remain; an element likely starts at +8 with motor levels stored separately
 T00581.001,T00581,padAct_t,1,unk8,1,u_short,,,active,active,Pattern is playing,high,source:main.c:8571
 T00581.002,T00581,padAct_t,2,unkA,1,u_short,,,ownerTag,ownerTag,Tag used to stop patterns started by one owner,high,source:main.c:8618

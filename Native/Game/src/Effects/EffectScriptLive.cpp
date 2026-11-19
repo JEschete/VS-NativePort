@@ -21,7 +21,7 @@
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/Particles.hpp"
@@ -238,7 +238,7 @@ void StoreRegisters(Effects_EffectInstance& instance,
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr) {
     return {};
   }
-  return {Effects_package->block5Data->definitions,
+  return {Effects_package->block5Data->Definitions(),
           LiveParticleDefinitionCount()};
 }
 
@@ -320,9 +320,9 @@ PresetTables() {
   }
   const std::span timelines =
       LiveBoundPackageBlock(PackageBlockType::kTimelines);
-  if (timelines.size() >= sizeof(Effects_PackageBlock3::count)) {
+  if (timelines.size() >= sizeof(LiveTimelineTable::count)) {
     remap.timeline_count =
-        reinterpret_cast<const Effects_PackageBlock3*>(timelines.data())->count;
+        reinterpret_cast<const LiveTimelineTable*>(timelines.data())->count;
   }
   return remap;
 }

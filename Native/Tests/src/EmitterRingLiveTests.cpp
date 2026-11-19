@@ -12,7 +12,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
@@ -51,8 +51,8 @@ class LiveEmission {
   std::unique_ptr<Effects_EffectInstance> instance =
       std::make_unique<Effects_EffectInstance>();
   std::array<VS::Effects::LiveParticle, 4> particles{};
-  alignas(Effects_CurveBlock) std::array<std::uint8_t, 8> curves{1, 0, 6,  0,
-                                                                 1, 0, 64, 0};
+  alignas(effects::LiveCurveTable) std::array<std::uint8_t, 8> curves{
+      1, 0, 6, 0, 1, 0, 64, 0};
 
   LiveEmission() {
     std::ranges::copy(std::span(Effects_curveSamples), saved_samples_.begin());
@@ -62,8 +62,10 @@ class LiveEmission {
         saved_scratch_.begin());
     Effects_package = &package;
     Effects_currentInstance = instance.get();
-    package.block5Data = reinterpret_cast<Effects_PackageBlock5*>(&definitions);
-    package.curveBlock = reinterpret_cast<Effects_CurveBlock*>(curves.data());
+    package.block5Data =
+        reinterpret_cast<effects::LiveParticleDefinitionTable*>(&definitions);
+    package.curveBlock =
+        reinterpret_cast<effects::LiveCurveTable*>(curves.data());
     package.curves[0] = curves.data() + 6;
     effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span(&definitions, 1)));

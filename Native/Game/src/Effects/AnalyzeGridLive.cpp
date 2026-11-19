@@ -19,7 +19,7 @@
 #include "Core/Scratch.hpp"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
@@ -119,7 +119,7 @@ const LiveParticleDefinition* FindDefinition(AnalyzeGridDefinitionId id) {
     Refuse("definition outside the bound package");
     return nullptr;
   }
-  return &Effects_package->block5Data->definitions[id.value];
+  return &Effects_package->block5Data->Definitions()[id.value];
 }
 
 bool CurvesAvailable(const grid::SurfaceCurves& curves, std::int32_t age) {

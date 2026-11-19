@@ -13,7 +13,7 @@
 #include "Core/Scratch.hpp"
 #include "Effects/AnalyzeGrid.hpp"
 #include "Effects/AnalyzeGridLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/PurgeTables.hpp"
@@ -50,7 +50,8 @@ class LiveGrid {
     Effects_package = &package;
     Effects_currentInstance = &instance;
     effects::ForgetLivePackageExtents();
-    package.block5Data = reinterpret_cast<Effects_PackageBlock5*>(&definitions);
+    package.block5Data =
+        reinterpret_cast<effects::LiveParticleDefinitionTable*>(&definitions);
     effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span{&definitions, 1}));
     definitions.entries[1].pair_ranges[3][0] = 37;

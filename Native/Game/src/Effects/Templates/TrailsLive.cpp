@@ -19,7 +19,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
@@ -394,8 +394,8 @@ std::int32_t LiveTrailHost<History>::SampleCurve(std::uint8_t curve,
     return 0;
   }
   const std::size_t curves = LiveEffectCurveCount();
-  const bool held = curve <= curves &&
-                    Effects_package->curveBlock->curveSizes[curve - 1] != 0;
+  const bool held =
+      curve <= curves && Effects_package->curveBlock->Size(curve - 1) != 0;
   if (held) {
     // The promoted curve sampler (#276 row 38) through its Live entry.
     return VS::Effects::LiveSampleEffectCurve(curve, distance);
@@ -490,7 +490,7 @@ template <std::size_t History>
 std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
   LiveParticleTextureAnimation& animation = *context_.texture;
   const std::size_t table = animation.texture_index;
-  const Effects_PackageTextureInfo* frame = nullptr;
+  const LivePackageTextureFrame* frame = nullptr;
   if (TextureTableBound(table)) {
     LiveAdvanceParticleTextureAnimation(&animation);
     frame = animation.texture_info;
@@ -505,11 +505,11 @@ std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
     }
     return std::nullopt;
   }
-  const Effects_PackageTexture& source =
-      Effects_package->textures[frame->dataIndex];
+  const LivePackageTexture& source =
+      Effects_package->textures[frame->first_texture];
   RingTexture texture;
-  texture.clut = static_cast<std::uint16_t>(source.clut);
-  texture.tpage = static_cast<std::uint16_t>(source.tpage);
+  texture.clut = source.clut;
+  texture.tpage = source.tpage;
   texture.u = source.u;
   texture.v = source.v;
   texture.w = source.w;

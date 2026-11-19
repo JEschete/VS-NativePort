@@ -21,7 +21,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
@@ -134,7 +134,7 @@ const LiveParticleDefinition* Definition(std::size_t index) {
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->block5Data->definitions[index];
+  return &Effects_package->block5Data->Definitions()[index];
 }
 
 [[nodiscard]] Vec3 Wide(const VECTOR& value) {
@@ -268,7 +268,7 @@ std::span<const std::uint8_t> LiveSurfaceServices::FactorCurve(
     std::uint8_t curve) const {
   const std::size_t bound = LiveEffectCurveCount();
   if (curve >= bound || Effects_package->curves[curve] == nullptr ||
-      Effects_package->curveBlock->curveSizes[curve] == 0) {
+      Effects_package->curveBlock->Size(curve) == 0) {
     VS::Core::LogWarn(
         "effects",
         "{}: transparency curve {} is outside the package's {} bound "
@@ -276,9 +276,8 @@ std::span<const std::uint8_t> LiveSurfaceServices::FactorCurve(
         name_, curve, bound);
     return {};
   }
-  return {
-      Effects_package->curves[curve],
-      static_cast<std::size_t>(Effects_package->curveBlock->curveSizes[curve])};
+  return {Effects_package->curves[curve],
+          Effects_package->curveBlock->Size(curve)};
 }
 
 std::optional<SurfaceTickInputs> LiveSurfaceServices::BeginTick(
@@ -331,7 +330,7 @@ std::int32_t LiveSurfaceServices::SampleCurve(std::int32_t curve,
   }
   const std::size_t bound = LiveEffectCurveCount();
   if (curve < 0 || std::cmp_greater(curve, bound) ||
-      Effects_package->curveBlock->curveSizes[curve - 1] == 0) {
+      Effects_package->curveBlock->Size(curve - 1) == 0) {
     if (ShouldReport(refused_curves)) {
       VS::Core::LogWarn(
           "effects",
@@ -434,10 +433,10 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
     }
     return std::nullopt;
   }
-  const Effects_PackageTexture& texture =
-      Effects_package->textures[animation.texture_info->dataIndex];
-  return RingTexture{.clut = static_cast<std::uint16_t>(texture.clut),
-                     .tpage = static_cast<std::uint16_t>(texture.tpage),
+  const LivePackageTexture& texture =
+      Effects_package->textures[animation.texture_info->first_texture];
+  return RingTexture{.clut = texture.clut,
+                     .tpage = texture.tpage,
                      .u = texture.u,
                      .v = texture.v,
                      .w = texture.w,

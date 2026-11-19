@@ -36,7 +36,7 @@
 #include "Content/PFile.hpp"
 #include "Core/Log.hpp"
 #include "Effects/EffectResources.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/Plugins/Plg044.hpp"
 #include "Effects/Plugins/Plg049.hpp"
 #include "Effects/Plugins/Plg050.hpp"
@@ -1288,7 +1288,7 @@ struct TimelineSectionFixture {
 };
 
 struct TimelineBlockFixture {
-  Effects_PackageBlock3 block{};
+  VS::Effects::LiveTimelineTable block{};
   std::array<std::uint16_t, 2> offsets{};
   std::array<TimelineSectionFixture, 2> sections{};
   std::array<std::byte, 16> keys{};

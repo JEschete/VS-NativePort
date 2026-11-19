@@ -28,7 +28,7 @@
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
@@ -1787,7 +1787,7 @@ TEST_CASE("Live effect package views follow the pointers the walk bound",
   // The pointer a typed reader trusts must still be the one the walk bound.
   std::array<u_long, 2> other_curves{1, 2};
   Effects_actionPackage.curveBlock =
-      reinterpret_cast<Effects_CurveBlock*>(other_curves.data());
+      reinterpret_cast<Effects::LiveCurveTable*>(other_curves.data());
   CHECK(Effects::LiveSampleEffectCurve(1, 0) == 0);
   Effects_actionPackage.block9Data = nullptr;
   CHECK(Effects::LiveBoundPackageBlock(Effects::PackageBlockType::kParameters)
@@ -1980,7 +1980,7 @@ std::vector<std::byte> ScriptPackage(std::uint8_t transforms,
 }
 
 std::span<VS::Effects::LiveParticleDefinition> BoundDefinitions() {
-  return {Effects_actionPackage.block5Data->definitions,
+  return {Effects_actionPackage.block5Data->Definitions(),
           Effects::LiveParticleDefinitionCount()};
 }
 

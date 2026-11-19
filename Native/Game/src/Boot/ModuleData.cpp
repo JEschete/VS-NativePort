@@ -33,7 +33,6 @@
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/FixedPoint.hpp"
 #include "Core/RandomLive.hpp"
-#include "Effects/Package.h"
 #include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg045.hpp"
 #include "Effects/Plugins/Plg049.hpp"

@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <iterator>
 #include <optional>
 #include <string_view>
@@ -17,7 +16,7 @@
 
 #include "Core/Log.hpp"
 #include "Effects/CurvesLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/ParticleRender.hpp"
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
@@ -52,7 +51,6 @@ constexpr unsigned kTexturedQuad = 0x2C000000;
 constexpr u_long kEnableTextureWindow = 0xE1000200;
 constexpr u_long kRestoreDrawMode = 0xE1000000;
 constexpr std::size_t kSpatialDimensions = 3;
-constexpr std::size_t kTextureCornerHalves = kParticleQuadCorners * 2;
 
 enum QuadWord {
   kTag,
@@ -117,7 +115,7 @@ std::optional<std::uint32_t> ColorSample(unsigned curve, unsigned age) {
   const auto* block = Effects_package->curveBlock;
   Require(block != nullptr && curve <= block->count &&
               curve <= std::size(Effects_package->curves) &&
-              block->curveSizes[curve - 1] != 0 &&
+              block->Size(curve - 1) != 0 &&
               Effects_package->curves[curve - 1] != nullptr,
           "Particle color references an invalid effect curve");
   return static_cast<std::uint32_t>(VS::Effects::LiveSampleEffectCurve(
@@ -302,8 +300,7 @@ class LiveParticleRenderer final : public ParticleRenderer {
       std::size_t particle) const override {
     const auto* info = Node(particle).texture_animation.texture_info;
     if (info == nullptr) return std::nullopt;
-    return ParticleTextureFrame{static_cast<std::uint32_t>(info->dataIndex),
-                                static_cast<std::uint32_t>(info->reserved0)};
+    return ParticleTextureFrame{info->first_texture, info->texture_count};
   }
 
   [[nodiscard]] ParticleScreenPoint ProjectVelocityLead(
@@ -332,23 +329,18 @@ class LiveParticleRenderer final : public ParticleRenderer {
   }
 
   [[nodiscard]] ParticleTexture Texture(std::uint32_t index) const override {
-    const auto& texture = Effects_package->textures[index];
-    std::array<std::int16_t, kTextureCornerHalves> halves{};
-    static_assert(sizeof(halves) <=
-                  sizeof(texture) -
-                      offsetof(Effects_PackageTexture, reserved8));
-    std::memcpy(halves.data(), &texture.reserved8, sizeof(halves));
+    const LivePackageTexture& texture = Effects_package->textures[index];
     ParticleTexture typed{};
     for (std::size_t corner = 0; corner < kParticleQuadCorners; ++corner) {
-      typed.corners.at(corner) = {halves.at(corner * 2),
-                                  halves.at(corner * 2 + 1)};
+      typed.corners.at(corner) = {texture.corners.at(corner).x,
+                                  texture.corners.at(corner).y};
     }
     typed.u = texture.u;
     typed.v = texture.v;
     typed.w = texture.w;
     typed.h = texture.h;
-    typed.clut = static_cast<std::uint16_t>(texture.clut);
-    typed.tpage = static_cast<std::uint16_t>(texture.tpage);
+    typed.clut = texture.clut;
+    typed.tpage = texture.tpage;
     return typed;
   }
 

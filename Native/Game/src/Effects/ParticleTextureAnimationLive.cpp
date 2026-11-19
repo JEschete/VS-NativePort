@@ -11,7 +11,7 @@
 
 #include "Core/Log.hpp"
 #include "Effects/EffectResources.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleTextureAnimation.hpp"
 #include "Effects/Particles.hpp"
@@ -52,7 +52,7 @@ struct PackageContext {
 
 // The current package's frame records of texture table `table`; null when
 // the package lacks the table.
-[[nodiscard]] Effects_PackageTextureInfo* BoundTextureTable(int table) {
+[[nodiscard]] LivePackageTextureFrame* BoundTextureTable(int table) {
   if (Effects_package == nullptr || table < 0 ||
       std::cmp_greater_equal(table, kTextureTableCapacity) ||
       table >= Effects_package->block1TableCount) {
@@ -91,7 +91,7 @@ void Store(Animation& animation, const TextureAnimationState& state) {
 }
 
 void SelectFrame(Animation& animation, std::uint16_t frame) {
-  Effects_PackageTextureInfo* const table =
+  LivePackageTextureFrame* const table =
       BoundTextureTable(animation.texture_index);
   if (table == nullptr) {
     if (ShouldReport(unbound_frames)) {

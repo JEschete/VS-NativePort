@@ -8,18 +8,12 @@ struct Effects_ActionEffectTarget;
 struct Effects_ChildTrackKey;
 struct Effects_ChildTrackView;
 struct Effects_ColorTrackKey;
-struct Effects_CurveBlock;
 struct Effects_EffectInstance;
 struct Effects_EffectInstanceTargets;
 struct Effects_EffectPackage;
 struct Effects_EffectSpawnRequest;
 struct Effects_EffectTimeline;
 struct Effects_HitEffectRequest;
-struct Effects_PackageBlock3;
-struct Effects_PackageBlock5;
-struct Effects_PackageBlock9;
-struct Effects_PackageTexture;
-struct Effects_PackageTextureInfo;
 struct Effects_ParticleTrackKey;
 struct Effects_RendererSlot;
 struct Effects_RendererTrackKey;
@@ -30,7 +24,13 @@ struct Effects_TimelineTrackHeader;
 struct Effects_TransformControlView;
 
 namespace VS::Effects {
+struct LiveCurveTable;
+struct LivePackageParameters;
+struct LivePackageTexture;
+struct LivePackageTextureFrame;
 struct LiveParticle;
+struct LiveParticleDefinitionTable;
+struct LiveTimelineTable;
 }  // namespace VS::Effects
 
 #include "Battle/ActionResolution.h"
@@ -135,18 +135,18 @@ struct Effects_EffectTimeline {
 struct Effects_EffectPackage {
     int reserved0;
     int reserved4;
-    Effects_PackageBlock5* block5Data;
+    VS::Effects::LiveParticleDefinitionTable* block5Data;
     u_char* curves[32];
-    Effects_CurveBlock* curveBlock;
+    VS::Effects::LiveCurveTable* curveBlock;
     char* block8Data;
     int block1TableCount;
-    Effects_PackageTextureInfo* textureInfoTable[4];
-    Effects_PackageTexture* textures;
+    VS::Effects::LivePackageTextureFrame* textureInfoTable[4];
+    VS::Effects::LivePackageTexture* textures;
     int block2Count;
     u_short* block2Data;
-    Effects_PackageBlock9* block9Data;
+    VS::Effects::LivePackageParameters* block9Data;
     VS::Effects::LiveTransformDefinition* block10Data;
-    Effects_PackageBlock3* block3Data;
+    VS::Effects::LiveTimelineTable* block3Data;
     u_char* block11Data;
     void* block12Data;
     void* block13Data;

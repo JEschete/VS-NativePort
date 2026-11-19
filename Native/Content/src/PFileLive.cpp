@@ -12,14 +12,12 @@
 #include "Content/PFile.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Effects/Package.h"
+#include "Effects/Package.hpp"
 #include "Effects/Runtime.h"
 
 namespace VS::Content {
 namespace {
-static_assert(sizeof(Effects_PackageBlock3) == kPFileTimelineHeaderBytes);
-static_assert(offsetof(Effects_PackageBlock3, offsets) ==
-              kPFileTimelineHeaderBytes);
+static_assert(sizeof(Effects::LiveTimelineTable) == kPFileTimelineHeaderBytes);
 
 std::optional<std::span<std::byte>> Within(std::byte* at, std::byte* base,
                                            std::size_t bytes) {
@@ -31,7 +29,7 @@ std::optional<std::span<std::byte>> Within(std::byte* at, std::byte* base,
 
 // The timeline block from `block` to the end of the storage that holds it.
 std::optional<std::span<std::byte>> LiveTimelineBlock(
-    Effects_PackageBlock3* block) {
+    Effects::LiveTimelineTable* block) {
   if (block == nullptr) return std::nullopt;
   auto* const at = reinterpret_cast<std::byte*>(block);
   if (const auto payload = Core::Memory::LivePayloadContaining(at)) {
@@ -58,7 +56,8 @@ std::byte* Resolve(std::span<std::byte> block,
 }
 }  // namespace
 
-std::byte* PFileLiveTimelineSection(Effects_PackageBlock3* block, int section) {
+std::byte* PFileLiveTimelineSection(Effects::LiveTimelineTable* block,
+                                    int section) {
   const auto bytes = LiveTimelineBlock(block);
   if (!bytes || section < 0) {
     VS::Core::Warnf("content",
@@ -72,8 +71,8 @@ std::byte* PFileLiveTimelineSection(Effects_PackageBlock3* block, int section) {
       "PFileTimelineSection", section, -1);
 }
 
-std::byte* PFileLiveTimelineTrackData(Effects_PackageBlock3* block, int section,
-                                      int track) {
+std::byte* PFileLiveTimelineTrackData(Effects::LiveTimelineTable* block,
+                                      int section, int track) {
   const auto bytes = LiveTimelineBlock(block);
   if (!bytes || section < 0 || track < 0) {
     VS::Core::Warnf("content",
