@@ -12,8 +12,8 @@
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerDetailHelpers.hpp"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/DetailInputLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -50,9 +50,7 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
   explicit LiveWorld(int category = -1) : category_(category) {}
   std::int32_t ItemCount() override {
     return Items::CountLiveContainerItems(
-        category_, Menu_Container_containerData == nullptr
-                       ? nullptr
-                       : &Menu_Container_containerData->items);
+        category_, containerData == nullptr ? nullptr : &containerData->items);
   }
   void RememberPage(DetailCursor cursor) override {
     const auto category = static_cast<std::size_t>(Category(category_));
@@ -61,7 +59,7 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
   }
   std::span<const std::uint16_t> DisplayOrder() override {
     return Items::LiveContainerCategoryOrder(Category(category_),
-                                             Menu_Container_containerData);
+                                             containerData);
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
     container::Refuse(reason);
@@ -79,10 +77,10 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
     return Framework::LiveMenuRow(row.index);
   }
   void SetIconsVisibility(std::uint8_t visibility) override {
-    Menu_Container_categoryIconsVisible = static_cast<char>(visibility);
+    categoryIconsVisible = static_cast<std::uint8_t>(visibility);
   }
   void SetControlsVisibility(std::uint8_t visibility) override {
-    Menu_Container_controlsPanelMode = static_cast<char>(visibility);
+    controlsPanelMode = static_cast<std::uint8_t>(visibility);
   }
   void ContinueTransition(DetailRow selected) override {
     RequireRows();
@@ -105,10 +103,10 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
     Framework::FlyOutLiveRowLeft(-1);
   }
   void SetPhase(DetailPhase phase) override {
-    Menu_Container_detailsViewPhase = static_cast<char>(phase);
+    detailsViewPhase = static_cast<std::uint8_t>(phase);
   }
   void RememberTriangleClose(bool triangle) override {
-    Menu_Container_detailsClosedWithTriangle = triangle ? Input::Triangle : 0;
+    detailsClosedWithTriangle = triangle ? Input::Triangle : 0;
   }
   void HideDpPpBars() override {
     Framework::UpdateLiveDpPpBars(Framework::dp_pp_bars::kSlideOut);
@@ -146,9 +144,9 @@ void BuildLiveShieldStats(VS::Items::ShieldLoadout* target,
 void SetLivePanelVisibility(char visibility) {
   PanelVisibility panels;
   SetPanelVisibility(panels, static_cast<std::uint8_t>(visibility));
-  Menu_Container_categoryTitleVisible = static_cast<char>(panels.title);
-  Menu_Container_categoryIconsVisible = static_cast<char>(panels.icons);
-  Menu_Container_controlsPanelMode = static_cast<char>(panels.controls);
+  categoryTitleVisible = static_cast<std::uint8_t>(panels.title);
+  categoryIconsVisible = static_cast<std::uint8_t>(panels.icons);
+  controlsPanelMode = static_cast<std::uint8_t>(panels.controls);
 }
 
 // decomp: _pollItemNavigation, MENU/MENUD.PRG/234.c:666; 80103D6C.

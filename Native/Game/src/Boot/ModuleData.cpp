@@ -118,7 +118,7 @@
 #include "LegacyFiles.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BreakArtsLive.hpp"
-#include "Menu/Container/ItemView.h"
+#include "Menu/Container/ItemView.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
@@ -1310,8 +1310,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
          timeAttackDescriptions},  // G01470 _timeAttackDescriptions
     {"MENU/MENU9.PRG", 0x6FDC, 3292u, &VS::Menu::Score::miscInfo,
      sizeof VS::Menu::Score::miscInfo},  // G01450 _miscInfo
-    {"MENU/MENUD.PRG", 0x6D2C, 1380u, &Menu_Container_menuText,
-     sizeof Menu_Container_menuText},  // G01739 _menuText
+    {"MENU/MENUD.PRG", 0x6D2C, 1380u, &VS::Menu::container::menuText,
+     sizeof VS::Menu::container::menuText},  // G01739 _menuText
     {"MENU/MENUE.PRG", 0x2654, 1032u, &Menu_Manual_menuText,
      sizeof Menu_Manual_menuText},  // G01765 _menuText
     {"SLUS_010.40", 0x1FD44, sizeof VS::Audio::Driver::legacySpuEvent,

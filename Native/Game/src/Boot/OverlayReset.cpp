@@ -9,7 +9,7 @@
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -92,7 +92,7 @@ void ResetMenubStatics() {
 
 // MENUD.PRG.
 void ResetMenudStatics() {
-  Menu_Container_Storage_ResetMenudStatics();
+  VS::Menu::container::ResetMenudStatics();
   VS::Menu::container::ResetLiveContainerDialogStatics();
   VS::Menu::container::ResetLiveContainerTransferStatics();
 }

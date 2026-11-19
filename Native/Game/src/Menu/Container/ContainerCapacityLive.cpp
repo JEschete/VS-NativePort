@@ -12,8 +12,8 @@
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Container/ContainerCapacity.hpp"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -40,9 +40,8 @@ std::uint16_t Limit(StorageArea area, Items::ItemCategory category) {
   if (index >= Items::kItemCategoryCount) {
     Refuse("capacity category outside container categories");
   }
-  return area == StorageArea::kGadgetBag
-             ? VS::Items::kCategoryCapacities[index]
-             : Menu_Container_containerItemCapacities[index];
+  return area == StorageArea::kGadgetBag ? VS::Items::kCategoryCapacities[index]
+                                         : containerItemCapacities[index];
 }
 
 class LiveWorld final : public StorageCapacityWorld,
@@ -65,7 +64,7 @@ class LiveWorld final : public StorageCapacityWorld,
     auto* const storage = VS::Menu::Framework::inventoryStorage;
     VS::Items::Container* const owner = storage == nullptr ? nullptr
                                         : area == StorageArea::kGadgetBag
-                                            ? &storage->gadgetBag
+                                            ? &storage->gadget_bag
                                             : &storage->container;
     Items::LiveContainerWorld records(owner == nullptr ? nullptr
                                                        : &owner->items);
@@ -75,27 +74,26 @@ class LiveWorld final : public StorageCapacityWorld,
     return container::Limit(area, category);
   }
   Items::ContainerWorld& Active() override {
-    auto* const owner = Menu_Container_containerData;
+    auto* const owner = containerData;
     return active_.emplace(owner == nullptr ? nullptr : &owner->items);
   }
   Items::ContainerWorld& Receiving() override {
-    auto* const owner = Menu_Container_otherStorage;
+    auto* const owner = otherStorage;
     return receiving_.emplace(owner == nullptr ? nullptr : &owner->items);
   }
   Items::ContainerWorld& Staging() override {
     auto* const storage = VS::Menu::Framework::inventoryStorage;
     return staging_.emplace(storage == nullptr ? nullptr
-                                               : &storage->stagedTransfer);
+                                               : &storage->staged_transfer);
   }
   std::span<const std::uint16_t> PendingTransfers() override {
     auto* const storage = VS::Menu::Framework::inventoryStorage;
     if (storage == nullptr) Refuse("missing pending-transfer owner");
-    return storage->itemsToTransfer;
+    return storage->items_to_transfer;
   }
   std::uint16_t ReceivingLimit(Items::ItemCategory category) override {
-    const auto area = Menu_Container_browsingGadgetBag != 0
-                          ? StorageArea::kContainer
-                          : StorageArea::kGadgetBag;
+    const auto area = browsingGadgetBag != 0 ? StorageArea::kContainer
+                                             : StorageArea::kGadgetBag;
     return Limit(area, category);
   }
   [[noreturn]] void Refuse(std::string_view reason) override {

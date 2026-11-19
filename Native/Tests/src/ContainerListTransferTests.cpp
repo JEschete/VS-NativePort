@@ -12,7 +12,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
-#include "Menu/Container/ItemView.h"
+#include "Menu/Container/ItemView.hpp"
 #include "Menu/ContainerListTransferWorld.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
 #include "Menu/ContainerPendingRowsWorld.hpp"
@@ -1220,15 +1220,15 @@ TEST_CASE("F02985 F02987 live entries refuse missing storage and steps",
           "[container-transfer-live][F02985][F02987]") {
   LiveFixture fixture;
   transfer::ResetLiveContainerTransferStatics();
-  live::equipment::ValueRestore<Menu_Container_InventoryStorage*> storage{
+  live::equipment::ValueRestore<VS::Menu::container::InventoryStorage*> storage{
       VS::Menu::Framework::inventoryStorage};
   VS::Menu::Framework::inventoryStorage = nullptr;
   REQUIRE(transfer::LiveUpdateItemList(1) == 0);
   REQUIRE(transfer::LiveUpdateScreen(nullptr) == 0);
   live::equipment::ValueRestore<VS::Items::Container*> active{
-      Menu_Container_containerData};
+      VS::Menu::container::containerData};
   u_char step = 6;
-  Menu_Container_containerData = nullptr;
+  VS::Menu::container::containerData = nullptr;
   REQUIRE(transfer::LiveUpdateScreen(&step) == 0);
   REQUIRE(step == 6);
   transfer::ResetLiveContainerTransferStatics();

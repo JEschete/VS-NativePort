@@ -1,36 +1,31 @@
 #pragma once
 
-#include <algorithm>
 #include <array>
 
 #include "Items/ContainerIndexing.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 
 namespace container_indexing_tests {
 namespace items = VS::Items;
 
 struct LiveFixture {
   std::array<std::uint16_t, items::kItemCategoryCount> saved_capacities{};
-  std::uint16_t saved_misc_count = Menu_Container_transferredMiscCount;
-  VS::Items::Container* saved_owner = Menu_Container_containerData;
+  std::uint16_t saved_misc_count = VS::Menu::container::transferredMiscCount;
+  VS::Items::Container* saved_owner = VS::Menu::container::containerData;
   VS::Items::Container owner{};
   VS::Items::Container replacement{};
 
   LiveFixture() {
-    std::copy_n(Menu_Container_containerItemCapacities, saved_capacities.size(),
-                saved_capacities.begin());
-    std::copy(items::kContainerCapacities.begin(),
-              items::kContainerCapacities.end(),
-              Menu_Container_containerItemCapacities);
+    saved_capacities = VS::Menu::container::containerItemCapacities;
+    VS::Menu::container::containerItemCapacities = items::kContainerCapacities;
   }
   ~LiveFixture() {
-    std::copy(saved_capacities.begin(), saved_capacities.end(),
-              Menu_Container_containerItemCapacities);
-    Menu_Container_transferredMiscCount = saved_misc_count;
-    Menu_Container_containerData = saved_owner;
+    VS::Menu::container::containerItemCapacities = saved_capacities;
+    VS::Menu::container::transferredMiscCount = saved_misc_count;
+    VS::Menu::container::containerData = saved_owner;
   }
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;

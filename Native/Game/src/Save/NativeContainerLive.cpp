@@ -16,7 +16,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -58,7 +58,7 @@ char* ContainerString(int offset) {
   return reinterpret_cast<char*>(&containerStrings[offset]);
 }
 
-Menu_Container_InventoryStorage& Storage() {
+VS::Menu::container::InventoryStorage& Storage() {
   if (VS::Menu::Framework::inventoryStorage == nullptr) {
     VS::Core::Errorf("save", "Container save submenu used without its storage");
     std::abort();
@@ -73,11 +73,12 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Menu::Framework::containerEmptyBackup =
         static_cast<char>(VS::Input::settings.container_empty);
     VS::Menu::Framework::inventoryStorage =
-        static_cast<Menu_Container_InventoryStorage*>(
+        static_cast<VS::Menu::container::InventoryStorage*>(
             VS::Core::Memory::AllocateLiveFromHighEnd(
                 sizeof *VS::Menu::Framework::inventoryStorage));
-    static_assert(
-        sizeof(Menu_Container_InventoryStorage) % sizeof(std::uint32_t) == 0);
+    static_assert(sizeof(VS::Menu::container::InventoryStorage) %
+                      sizeof(std::uint32_t) ==
+                  0);
     VS::Core::Memory::ZeroWordsBackward(
         std::as_writable_bytes(std::span(&Storage(), 1)),
         static_cast<std::int32_t>(sizeof Storage()));
@@ -144,16 +145,16 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void OpenContainerScreen() override {
-    Menu_Container_InventoryStorage& storage = Storage();
-    VS::Core::Memory::CopyLiveHalfwordBlocks(storage.savedInventory,
+    VS::Menu::container::InventoryStorage& storage = Storage();
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&storage.saved_inventory,
                                              &VS::Items::inventory,
-                                             sizeof storage.savedInventory);
+                                             sizeof storage.saved_inventory);
     VS::Core::Memory::CopyLiveHalfwordBlocks(
-        &storage.savedInventoryIndices, &VS::Items::inventoryIndices,
-        sizeof storage.savedInventoryIndices);
-    VS::Core::Memory::CopyLiveHalfwordBlocks(&storage.storedContainer,
+        &storage.saved_inventory_indices, &VS::Items::inventoryIndices,
+        sizeof storage.saved_inventory_indices);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&storage.stored_container,
                                              VS::Game::Save::ContainerData(),
-                                             sizeof storage.storedContainer);
+                                             sizeof storage.stored_container);
     VS::Save::MemoryCard::ReleaseLiveMenuResources();
     VS::Menu::Framework::menuState.control.return_state =
         VS::Menu::Framework::menuState.control.current_menu;
@@ -173,7 +174,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void BeginWrite() override {
-    Menu_Container_InventoryStorage& storage = Storage();
+    VS::Menu::container::InventoryStorage& storage = Storage();
     VS::Menu::Files::CopyLiveSelectedContainerItems(
         VS::Game::Save::ContainerData(), &storage.container.items,
         &storage.container.indices);
@@ -185,15 +186,15 @@ class LiveContainerSave final : public ContainerSaveHost {
   bool DataNotSaved() override { return dataNotSaved != 0; }
 
   void RestoreInventory() override {
-    Menu_Container_InventoryStorage& storage = Storage();
+    VS::Menu::container::InventoryStorage& storage = Storage();
     VS::Input::settings.container_empty =
         VS::Menu::Framework::containerEmptyBackup;
     VS::Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
-                                             storage.savedInventory,
-                                             sizeof storage.savedInventory);
+                                             &storage.saved_inventory,
+                                             sizeof storage.saved_inventory);
     VS::Core::Memory::CopyLiveHalfwordBlocks(
-        &VS::Items::inventoryIndices, &storage.savedInventoryIndices,
-        sizeof storage.savedInventoryIndices);
+        &VS::Items::inventoryIndices, &storage.saved_inventory_indices,
+        sizeof storage.saved_inventory_indices);
   }
 
   void CloseFilePicker() override {

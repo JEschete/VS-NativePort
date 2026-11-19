@@ -24,8 +24,8 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -165,9 +165,9 @@ template <typename Record>
 }
 
 [[nodiscard]] VS::Items::ContainerData* OpenContainer() {
-  return Menu_Container_containerData == nullptr
+  return VS::Menu::container::containerData == nullptr
              ? nullptr
-             : &Menu_Container_containerData->items;
+             : &VS::Menu::container::containerData->items;
 }
 
 template <typename Record, std::size_t Count>

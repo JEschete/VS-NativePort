@@ -174,14 +174,14 @@ TEST_CASE(
     "[container-menu-dialogs-live]") {
   LiveFixture fixture;
   REQUIRE(dialogs::UpdateLiveTransferConfirmation(1) == 0);
-  REQUIRE(Menu_Container_controlsPanelMode == 5);
+  REQUIRE(VS::Menu::container::controlsPanelMode == 5);
   REQUIRE(VS::Menu::Inventory::freezeTabArrows == 0);
   fixture.RunFrames(dialogs::UpdateLiveTransferConfirmation);
   REQUIRE(fixture.Frame(dialogs::UpdateLiveTransferConfirmation,
                         input::Circle) == 0);
   REQUIRE(fixture.RunFrames(dialogs::UpdateLiveTransferConfirmation) == 1);
-  REQUIRE(Menu_Container_categoryTitleVisible == 0);
-  REQUIRE(Menu_Container_categoryIconsVisible == 0);
+  REQUIRE(VS::Menu::container::categoryTitleVisible == 0);
+  REQUIRE(VS::Menu::container::categoryIconsVisible == 0);
 }
 
 TEST_CASE(
@@ -203,7 +203,7 @@ TEST_CASE("F02970 production-equipped gadget-bag weapons cannot select discard",
   fixture.EquipThroughProductionMenu();
   REQUIRE(VS::Items::inventory.weapons[0].is_equipped != 0);
   fixture.OpenEquippedContainerActions();
-  const auto before = fixture.containers.storage->gadgetBag.items.weapons[0];
+  const auto before = fixture.containers.storage->gadget_bag.items.weapons[0];
   REQUIRE(before.is_equipped != 0);
   REQUIRE(fixture.rows[33].unselectable != 0);
   fixture.Frame(VS::Menu::container::LiveUpdateItemList, input::Down);
@@ -211,7 +211,7 @@ TEST_CASE("F02970 production-equipped gadget-bag weapons cannot select discard",
   REQUIRE(fixture.Frame(VS::Menu::container::LiveUpdateItemList,
                         input::Circle) == 0);
   REQUIRE(framework::LiveActionSelectionResult() == -1);
-  REQUIRE(fixture.containers.storage->gadgetBag.items.weapons[0] == before);
+  REQUIRE(fixture.containers.storage->gadget_bag.items.weapons[0] == before);
 }
 
 TEST_CASE(
@@ -228,7 +228,7 @@ TEST_CASE(
   auto& replacement = fixture.containers.replacement->container;
   std::span(replacement.items.misc).back() = {
       .id = kReplacementItem, .count = kReplacementStack, .index = 0};
-  Menu_Container_containerData = &replacement;
+  VS::Menu::container::containerData = &replacement;
   REQUIRE(fixture.Frame(dialogs::UpdateLiveDiscardMenu, input::Circle) == 1);
   REQUIRE(std::span(replacement.items.misc).back().count == 19);
   REQUIRE(std::span(fixture.containers.storage->container.items.misc)

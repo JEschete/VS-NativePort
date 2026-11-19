@@ -32,8 +32,8 @@ struct TransferText {
 enum class TransferStorage : std::uint8_t {
   kActive,     // vs_menuD_containerData
   kOther,      // D_80109A88
-  kStaged,     // storage->stagedTransfer
-  kPreview,    // storage->transferPreview
+  kStaged,     // storage->staged_transfer
+  kPreview,    // storage->transfer_preview
   kContainer,  // storage->container
 };
 

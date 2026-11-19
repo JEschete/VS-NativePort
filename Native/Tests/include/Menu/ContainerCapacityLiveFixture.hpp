@@ -32,12 +32,12 @@ inline constexpr std::size_t kRealCategories = 7;
 struct LiveFixture : equipment::LiveFixture {
   container_transfers_tests::LiveFixture containers;
   equipment::ValueRestore<u_char> saved_direction{
-      Menu_Container_browsingGadgetBag};
+      VS::Menu::container::browsingGadgetBag};
 
   LiveFixture() {
-    Menu_Container_containerData = &containers.storage->container;
-    Menu_Container_otherStorage = &containers.storage->gadgetBag;
-    Menu_Container_browsingGadgetBag = 0;
+    VS::Menu::container::containerData = &containers.storage->container;
+    VS::Menu::container::otherStorage = &containers.storage->gadget_bag;
+    VS::Menu::container::browsingGadgetBag = 0;
   }
   static void Fill(VS::Items::ContainerData& owner,
                    items::ItemCategory category, std::size_t count) {

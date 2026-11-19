@@ -81,7 +81,7 @@ ea6cd897af4c,CAPACITY,medium,pattern,,LootInventoryText,Native/Game/include/Menu
 a9d5134e7b49,CAPACITY,medium,pattern,,Battle_actors,Native/Game/src/Battle/Damage.h,17,Battle_actors[42],56,24,open,
 485a0b0474c6,CAPACITY,medium,pattern,,Battle_unusedGlobal1,Native/Game/src/Battle/StatusEffects.h,92,Battle_unusedGlobal1[1],56,24,open,
 91d5b0a224b0,CAPACITY,medium,pattern,,Field_gimmickInstances,Native/Game/src/Field/Gimmicks.h,316,Field_gimmickInstances[16],45,3,open,
-14b135da8685,CAPACITY,medium,pattern,,Menu_Container_InventoryStorage,Native/Game/src/Menu/Container/Storage.h,19,Menu_Container_InventoryStorage.itemsToTransfer[64],60,34,open,
+7515fc1e8e03,CAPACITY,medium,pattern,,InventoryStorage,Native/Game/src/Menu/Container/Storage.hpp,26,InventoryStorage.items_to_transfer[kPendingTransferSlots],60,34,open,
 7509963b0c42,CAPACITY,medium,pattern,,cardDirectoryEntries,Native/Game/src/Title/SaveCard.hpp,22,cardDirectoryEntries[kCardDirectoryCapacity],62,39,open,
 f286f867bb37,DIV-ZERO,medium,pattern,,ParseActorTexture,Native/Content/src/ActorAssets.cpp,1366,static_cast,47,6,open,
 287776e0f26f,DIV-ZERO,medium,pattern,,FlatTableEntry,Native/Content/src/ActorAssetsLive.cpp,651,Columns,47,6,open,

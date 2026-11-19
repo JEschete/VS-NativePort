@@ -14,7 +14,7 @@
 #include "Items/ContainerTables.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/Storage.hpp"
 
 namespace VS::Items {
 namespace {
@@ -63,7 +63,7 @@ static_assert(offsetof(VS::Items::Container, indices) ==
 LiveContainerWorld::LiveContainerWorld(VS::Items::ContainerData* owner)
     : owner_(owner) {}
 std::uint16_t LiveContainerWorld::Capacity(ItemCategory category) {
-  return Menu_Container_containerItemCapacities[static_cast<std::size_t>(
+  return VS::Menu::container::containerItemCapacities[static_cast<std::size_t>(
       category)];
 }
 ContainerRecord LiveContainerWorld::Read(ItemCategory category,

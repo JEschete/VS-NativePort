@@ -17,8 +17,8 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 
@@ -44,7 +44,7 @@ ItemCategory Category(int category) {
   return static_cast<ItemCategory>(category);
 }
 
-Menu_Container_InventoryStorage& Storage() {
+VS::Menu::container::InventoryStorage& Storage() {
   if (VS::Menu::Framework::inventoryStorage == nullptr) {
     Refuse("missing inventory-storage owner");
   }
@@ -58,10 +58,10 @@ OrderTables Orders(VS::Items::ContainerIndices& indices) {
 
 class LiveBag final : public GadgetBagWorld {
  public:
-  LiveBag() : owner_(&Storage().gadgetBag), bag_(&owner_->items) {}
+  LiveBag() : owner_(&Storage().gadget_bag), bag_(&owner_->items) {}
   ContainerWorld& Bag() override { return bag_; }
   void ClearBagOrder() override {
-    auto tables = Orders(Storage().gadgetBag.indices);
+    auto tables = Orders(Storage().gadget_bag.indices);
     for (auto table = tables.rbegin(); table != tables.rend(); ++table) {
       std::fill(table->rbegin(), table->rend(), 0);
     }
@@ -110,16 +110,16 @@ class LiveBag final : public GadgetBagWorld {
 
 std::uint16_t Preview(bool count) {
   auto& storage = Storage();
-  LiveContainerWorld preview(&storage.transferPreview);
-  LiveContainerWorld other(Menu_Container_otherStorage == nullptr
+  LiveContainerWorld preview(&storage.transfer_preview);
+  LiveContainerWorld other(VS::Menu::container::otherStorage == nullptr
                                ? nullptr
-                               : &Menu_Container_otherStorage->items);
-  LiveContainerWorld staged(&storage.stagedTransfer);
+                               : &VS::Menu::container::otherStorage->items);
+  LiveContainerWorld staged(&storage.staged_transfer);
   if (count) {
     return RefreshMiscTransferCount(preview, other, staged,
-                                    storage.itemsToTransfer);
+                                    storage.items_to_transfer);
   }
-  PreviewTransferredMisc(preview, other, staged, storage.itemsToTransfer);
+  PreviewTransferredMisc(preview, other, staged, storage.items_to_transfer);
   return 0;
 }
 }  // namespace
@@ -142,7 +142,7 @@ void PreviewLiveTransferredMisc() { static_cast<void>(Preview(false)); }
 
 // decomp: func_80103270 (src/MENU/MENUD.PRG/234.c:276)
 void RefreshLiveMiscTransferCount() {
-  Menu_Container_transferredMiscCount = Preview(true);
+  VS::Menu::container::transferredMiscCount = Preview(true);
 }
 
 // decomp: _copyContainerItem (src/MENU/MENUD.PRG/234.c:283)

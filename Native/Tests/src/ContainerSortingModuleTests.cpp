@@ -56,7 +56,7 @@ TEST_CASE(
     "Ordinary MENUD reload retains sorted tokens and current record owner",
     "[container-sorting-module][container-sorting-reload][F02968]") {
   LiveFixture fixture;
-  Menu_Container_containerData = &fixture.replacement;
+  VS::Menu::container::containerData = &fixture.replacement;
   auto& owner = fixture.replacement;
   constexpr auto kLast = VS::Items::kContainerCapacities[kGem];
   owner.items.gems[0].strength = kNegative;
@@ -66,11 +66,11 @@ TEST_CASE(
   owner.indices.gems[2] = kLast;
   sorting::SortLiveEquipment(kGem, kStrength);
   VS::Boot::ResetMenudStatics();
-  CHECK(Menu_Container_containerData == &owner);
+  CHECK(VS::Menu::container::containerData == &owner);
   CHECK(owner.indices.gems[0] == kLast);
   CHECK(owner.indices.gems[1] == kLast);
   CHECK(owner.indices.gems[2] == 1);
-  CHECK(Menu_Container_containerItemCapacities[kGem] == kLast);
+  CHECK(VS::Menu::container::containerItemCapacities[kGem] == kLast);
   owner.items.gems[0].strength = kPositive;
   std::span(owner.items.gems).back().strength = kNegative;
   sorting::SortLiveEquipment(kGem, kStrength);

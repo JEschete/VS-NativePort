@@ -13,7 +13,7 @@
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerSorting.hpp"
-#include "Menu/Container/ItemView.h"
+#include "Menu/Container/ItemView.hpp"
 #include "Menu/Framework/SortingKeysLive.hpp"
 
 namespace VS::Menu::container {
@@ -25,9 +25,7 @@ namespace {
 }
 
 VS::Items::ContainerData* CurrentData() {
-  return Menu_Container_containerData == nullptr
-             ? nullptr
-             : &Menu_Container_containerData->items;
+  return containerData == nullptr ? nullptr : &containerData->items;
 }
 
 bool Overlap(const void* first, std::size_t first_bytes, const void* second,
@@ -49,13 +47,12 @@ class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
     return current_.value();
   }
   std::span<std::uint16_t> Order(Items::ItemCategory category) override {
-    if (Menu_Container_containerData == nullptr) {
+    if (containerData == nullptr) {
       Items::LiveContainerWorld capacities;
       static_cast<void>(Items::ContainerCategoryIndices(category, capacities));
       return {};
     }
-    return Items::LiveContainerCategoryOrder(category,
-                                             Menu_Container_containerData);
+    return Items::LiveContainerCategoryOrder(category, containerData);
   }
   std::uint16_t Capacity(Items::ItemCategory category) override {
     Items::LiveContainerWorld capacities;

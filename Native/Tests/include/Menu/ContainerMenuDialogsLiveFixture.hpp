@@ -61,12 +61,13 @@ struct DialogLiveFixture : equipment::LiveFixture {
       VS::State::tickSpeed};
   equipment::ArrayRestore<u_int, std::size(VS::Input::buttonHeldFrames)>
       saved_held{VS::Input::buttonHeldFrames};
-  equipment::ArrayRestore<u_short, std::size(Menu_Container_menuText)>
-      saved_container_text{Menu_Container_menuText};
-  equipment::ValueRestore<u_char> saved_direction{
-      Menu_Container_browsingGadgetBag};
-  equipment::ValueRestore<char> saved_controls{
-      Menu_Container_controlsPanelMode};
+  equipment::ArrayRestore<std::uint16_t,
+                          std::size(VS::Menu::container::menuText)>
+      saved_container_text{VS::Menu::container::menuText};
+  equipment::ValueRestore<std::uint8_t> saved_direction{
+      VS::Menu::container::browsingGadgetBag};
+  equipment::ValueRestore<std::uint8_t> saved_controls{
+      VS::Menu::container::controlsPanelMode};
   equipment::ValueRestore<std::uint8_t> saved_freeze{
       VS::Menu::Inventory::freezeTabArrows};
   equipment::ValueRestore<char> saved_animation{
@@ -81,9 +82,9 @@ struct DialogLiveFixture : equipment::LiveFixture {
     framework::ResetLiveMainMenuStatics();
     dialogs::ResetLiveContainerDialogSession();
     LoadDialogTexts();
-    Menu_Container_containerData = &containers.storage->container;
-    Menu_Container_otherStorage = &containers.storage->gadgetBag;
-    Menu_Container_browsingGadgetBag = 0;
+    VS::Menu::container::containerData = &containers.storage->container;
+    VS::Menu::container::otherStorage = &containers.storage->gadget_bag;
+    VS::Menu::container::browsingGadgetBag = 0;
     VS::Input::previousButtons = 0;
     std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
     VS::State::tickSpeed = 2;
@@ -115,7 +116,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
     std::ranges::transform(text, output.begin(),
                            [](unsigned char byte) { return std::byte{byte}; });
     const auto module = ReadData(R"(Native\data\disc\MENU\MENUD.PRG)");
-    auto menu = std::as_writable_bytes(std::span(Menu_Container_menuText));
+    auto menu =
+        std::as_writable_bytes(std::span(VS::Menu::container::menuText));
     if (kMenuTextOffset + menu.size() > module.size()) {
       throw std::runtime_error("short original container dialog text");
     }
@@ -158,7 +160,7 @@ struct DialogLiveFixture : equipment::LiveFixture {
     RunFrames(dialogs::UpdateLiveSortMenu);
   }
   void OpenQuantity(std::uint8_t count, int one_based = kLastMiscToken) {
-    auto& stack = Menu_Container_containerData->items.misc[one_based - 1];
+    auto& stack = VS::Menu::container::containerData->items.misc[one_based - 1];
     stack.id = kMiscItemId;
     stack.count = static_cast<char>(count);
     const int command =

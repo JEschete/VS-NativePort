@@ -266,7 +266,7 @@ TEST_CASE("F02944 merged header does not require unused container text owners",
   constexpr int kFirstCategoryIcon = 24;
   VS::Menu::Framework::menuMemory.container_cursors.category = 1;
   fixture.rows[kHeader].x = kMergeX;
-  Menu_Container_containerData = nullptr;
+  VS::Menu::container::containerData = nullptr;
   VS::Menu::Framework::itemNames = nullptr;
   VS::Menu::Framework::itemHelp = nullptr;
   fixture.ResetFrame();
@@ -293,7 +293,7 @@ TEST_CASE(
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 1);
-  CHECK(Menu_Container_detailsViewPhase == 0);
-  CHECK(Menu_Container_categoryIconsVisible == 1);
-  CHECK(Menu_Container_controlsPanelMode == 1);
+  CHECK(VS::Menu::container::detailsViewPhase == 0);
+  CHECK(VS::Menu::container::categoryIconsVisible == 1);
+  CHECK(VS::Menu::container::controlsPanelMode == 1);
 }

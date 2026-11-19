@@ -360,8 +360,8 @@ H0358,header,Native/Game/src/Items/TreasureChests.h,generated,yes,pragma-once,0,
 H0359,header,Native/Game/src/Items/Weapons.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Items_WeaponRange became VS::Items::WeaponRange in Items/ItemRecords.hpp; TYPE T00662 re-pointed (#441)
 H0360,header,Native/Game/src/Menu/BattleAbilities.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,remaining,
 H0361,header,Native/Game/src/Menu/BreakArts.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,retired,"deleted: _strings became VS::Menu::break_arts::strings (std::uint16_t[kMenuStringHalfwords]) in Menu/BreakArtsLive.hpp, defined in BreakArtsLive.cpp; the unread layout byte G01001 and the unused drawArtsListOpt enum T00017 (superseded by kForceCursorMemoryFlag) were dropped (#441)"
-H0362,header,Native/Game/src/Menu/Container/ItemView.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,remaining,
-H0363,header,Native/Game/src/Menu/Container/Storage.h,generated,yes,pragma-once,0,0,0,0,0,0,5,0,0,remaining,
+H0362,header,Native/Game/src/Menu/Container/ItemView.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
+H0363,header,Native/Game/src/Menu/Container/Storage.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0364,header,Native/Game/src/Menu/Files.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,retired,deleted: its enums duplicated Files.hpp ElementState
 H0365,header,Native/Game/src/Menu/FilesLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0366,header,Native/Game/src/Menu/Framework/ActorPreview.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: PreviewPoseState was a partial view of Actors_WeaponModel

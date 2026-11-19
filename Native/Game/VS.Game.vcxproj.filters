@@ -2499,13 +2499,13 @@
     <ClCompile Include="src\Menu\Container\ItemView.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Container\ItemView.h">
+    <ClInclude Include="src\Menu\Container\ItemView.hpp">
       <Filter>src\Menu\Container</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Container\Storage.cpp">
       <Filter>src\Menu\Container</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Container\Storage.h">
+    <ClInclude Include="src\Menu\Container\Storage.hpp">
       <Filter>src\Menu\Container</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Files.cpp">

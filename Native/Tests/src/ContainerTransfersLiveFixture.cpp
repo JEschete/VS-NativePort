@@ -1,6 +1,5 @@
 #include "Items/ContainerTransfersLiveFixture.hpp"
 
-#include <algorithm>
 #include <array>
 
 #include "Items/ContainerIndexing.hpp"
@@ -8,11 +7,8 @@
 
 namespace container_transfers_tests {
 LiveFixture::LiveFixture() {
-  std::copy_n(Menu_Container_containerItemCapacities, saved_capacities.size(),
-              saved_capacities.begin());
-  std::copy(items::kContainerCapacities.begin(),
-            items::kContainerCapacities.end(),
-            Menu_Container_containerItemCapacities);
+  saved_capacities = VS::Menu::container::containerItemCapacities;
+  VS::Menu::container::containerItemCapacities = items::kContainerCapacities;
   saved_indices = VS::Menu::Inventory::categoryOrders;
   const std::array<unsigned char*, items::kItemCategoryCount - 1> indices{
       order.weapons.data(), order.blades.data(), order.grips.data(),
@@ -20,19 +16,18 @@ LiveFixture::LiveFixture() {
       order.misc.data()};
   VS::Menu::Inventory::categoryOrders = indices;
   VS::Menu::Framework::inventoryStorage = storage.get();
-  Menu_Container_containerData = &storage->container;
-  Menu_Container_otherStorage = &storage->container;
+  VS::Menu::container::containerData = &storage->container;
+  VS::Menu::container::otherStorage = &storage->container;
   VS::Items::inventory = items::InventoryContents{};
 }
 
 LiveFixture::~LiveFixture() {
-  std::copy(saved_capacities.begin(), saved_capacities.end(),
-            Menu_Container_containerItemCapacities);
+  VS::Menu::container::containerItemCapacities = saved_capacities;
   VS::Menu::Inventory::categoryOrders = saved_indices;
   VS::Items::inventory = saved_inventory;
-  Menu_Container_transferredMiscCount = saved_count;
+  VS::Menu::container::transferredMiscCount = saved_count;
   VS::Menu::Framework::inventoryStorage = saved_storage;
-  Menu_Container_containerData = saved_owner;
-  Menu_Container_otherStorage = saved_other;
+  VS::Menu::container::containerData = saved_owner;
+  VS::Menu::container::otherStorage = saved_other;
 }
 }  // namespace container_transfers_tests

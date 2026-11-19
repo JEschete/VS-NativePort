@@ -2454,8 +2454,8 @@
     <ClInclude Include="src\Items\LootLiveState.hpp" />
     <ClInclude Include="src\Items\Materials.hpp" />
     <ClInclude Include="src\Menu\BattleAbilities.h" />
-    <ClInclude Include="src\Menu\Container\ItemView.h" />
-    <ClInclude Include="src\Menu\Container\Storage.h" />
+    <ClInclude Include="src\Menu\Container\ItemView.hpp" />
+    <ClInclude Include="src\Menu\Container\Storage.hpp" />
     <ClInclude Include="src\Menu\FilesLiveState.hpp" />
     <ClInclude Include="src\Menu\Framework\DetailDispatchLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Framework\DetailInputLive.hpp" />

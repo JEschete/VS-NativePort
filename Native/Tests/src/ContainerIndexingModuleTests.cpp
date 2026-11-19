@@ -72,18 +72,18 @@ TEST_CASE(
     "Container policies preserve ordinary MENUD table reload and retained BSS",
     "[container-indexing-module][F02927][F02930][F02932][F02933]") {
   LiveFixture fixture;
-  Menu_Container_containerItemCapacities[0] = 0;
-  Menu_Container_containerItemCapacities[6] = 0;
-  Menu_Container_transferredMiscCount = 91;
-  Menu_Container_containerData = &fixture.owner;
+  VS::Menu::container::containerItemCapacities[0] = 0;
+  VS::Menu::container::containerItemCapacities[6] = 0;
+  VS::Menu::container::transferredMiscCount = 91;
+  VS::Menu::container::containerData = &fixture.owner;
   fixture.owner.items.misc[0].id = 65535;
   fixture.owner.indices.misc[0] = 256;
   CHECK(items::CountLiveContainerItems(6, &fixture.owner.items) == 0);
   VS::Boot::ResetMenudStatics();
   CHECK(items::CountLiveContainerItems(6, &fixture.owner.items) == 1);
   CHECK(items::FindLiveEmptyContainerSlot(6, &fixture.owner.items) == 1);
-  CHECK(Menu_Container_transferredMiscCount == 91);
-  CHECK(Menu_Container_containerData == &fixture.owner);
+  CHECK(VS::Menu::container::transferredMiscCount == 91);
+  CHECK(VS::Menu::container::containerData == &fixture.owner);
   CHECK(fixture.owner.indices.misc[0] == 256);
   CHECK(items::LiveContainerCategoryIndices(6, &fixture.owner) ==
         fixture.owner.indices.misc.data());

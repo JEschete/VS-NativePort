@@ -81,15 +81,15 @@ TEST_CASE(
   auto& owner = fixture.storage->container;
   owner.items.misc[255].id = 15;
   owner.indices.misc[0] = 256;
-  fixture.storage->itemsToTransfer[0] = 0x600;
-  Menu_Container_transferredMiscCount = 91;
-  Menu_Container_containerItemCapacities[6] = 0;
+  fixture.storage->items_to_transfer[0] = 0x600;
+  VS::Menu::container::transferredMiscCount = 91;
+  VS::Menu::container::containerItemCapacities[6] = 0;
   VS::Boot::ResetMenudStatics();
   CHECK(VS::Menu::Framework::inventoryStorage == fixture.storage.get());
-  CHECK(Menu_Container_otherStorage == &owner);
-  CHECK(Menu_Container_containerData == &owner);
-  CHECK(Menu_Container_transferredMiscCount == 91);
-  CHECK(fixture.storage->itemsToTransfer[0] == 0x600);
+  CHECK(VS::Menu::container::otherStorage == &owner);
+  CHECK(VS::Menu::container::containerData == &owner);
+  CHECK(VS::Menu::container::transferredMiscCount == 91);
+  CHECK(fixture.storage->items_to_transfer[0] == 0x600);
   CHECK(items::LiveContainerCategoryIndices(6, &owner) ==
         owner.indices.misc.data());
   CHECK(items::CountLiveContainerItems(6, &owner.items) == 1);

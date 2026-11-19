@@ -10,7 +10,7 @@
 
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/Framework.hpp"
 
 struct Content_DiscQueueSlot;
@@ -105,5 +105,5 @@ extern char itemsListRow;
 // session's heap storage: the inventory snapshot restored on exit and the
 // container copies the transfer screens edit (MENU7.PRG 260.c:711-901,
 // MENUD.PRG 234.c:266-599).
-extern Menu_Container_InventoryStorage* inventoryStorage;
+extern VS::Menu::container::InventoryStorage* inventoryStorage;
 }  // namespace VS::Menu::Framework

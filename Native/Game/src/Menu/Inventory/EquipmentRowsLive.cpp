@@ -31,8 +31,8 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -179,9 +179,9 @@ class LiveRowsHost final : public EquipmentRowsHost {
   if (table == VS::Items::inventory.armor.data()) {
     return VS::Items::inventory.armor;
   }
-  if (Menu_Container_containerData != nullptr &&
-      table == Menu_Container_containerData->items.armor.data()) {
-    return Menu_Container_containerData->items.armor;
+  if (VS::Menu::container::containerData != nullptr &&
+      table == VS::Menu::container::containerData->items.armor.data()) {
+    return VS::Menu::container::containerData->items.armor;
   }
   return {};
 }

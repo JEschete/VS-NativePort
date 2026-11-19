@@ -17,7 +17,7 @@
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
 #include "Menu/Container/ContainerMenuDialogs.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
-#include "Menu/Container/ItemView.h"
+#include "Menu/Container/ItemView.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
@@ -44,7 +44,7 @@ constexpr int kDiscardSoundArgument = 28;
 constexpr unsigned kCategoryShift = 12;
 constexpr unsigned kKindShift = 16;
 constexpr std::uint32_t kCategoryMask = 15;
-constexpr char kTransferControls = 5;
+constexpr std::uint8_t kTransferControls = 5;
 SortMenuState g_sort;
 DiscardMenuState g_discard;
 DiscardPresentation g_presentation;
@@ -89,8 +89,7 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
     return texts.HelpText();
   }
   std::span<const std::uint8_t> ContainerText() override {
-    return {reinterpret_cast<const std::uint8_t*>(Menu_Container_menuText),
-            sizeof Menu_Container_menuText};
+    return {reinterpret_cast<const std::uint8_t*>(menuText), sizeof menuText};
   }
   void SetInformation(std::span<const std::uint8_t> text) override {
     Framework::SetLiveInformationMessageText(text);
@@ -143,9 +142,8 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
     }
   }
   Items::ContainerWorld& ActiveRecords() override {
-    return active_.emplace(Menu_Container_containerData == nullptr
-                               ? nullptr
-                               : &Menu_Container_containerData->items);
+    return active_.emplace(containerData == nullptr ? nullptr
+                                                    : &containerData->items);
   }
   Framework::MenuRow& QuantityRow(std::span<const std::uint8_t> text,
                                   std::int32_t x) override {
@@ -179,11 +177,9 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
     RequirePresentationFrame();
     return Framework::DrawLiveCursor(animation, position);
   }
-  std::uint8_t TransferDirection() override {
-    return Menu_Container_browsingGadgetBag;
-  }
+  std::uint8_t TransferDirection() override { return browsingGadgetBag; }
   void PrepareTransferControls() override {
-    Menu_Container_controlsPanelMode = kTransferControls;
+    controlsPanelMode = kTransferControls;
     VS::Menu::Inventory::freezeTabArrows = 0;
   }
   void FlyOutAction(std::int32_t row) override {

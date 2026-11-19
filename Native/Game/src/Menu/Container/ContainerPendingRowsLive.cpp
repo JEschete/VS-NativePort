@@ -13,8 +13,8 @@
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerPendingRows.hpp"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
@@ -50,24 +50,22 @@ class LiveWorld final : public ContainerItemRowsWorld {
   std::span<std::uint16_t> PendingTransfers() override {
     auto* const owner = VS::Menu::Framework::inventoryStorage;
     if (owner == nullptr) Refuse("missing pending-transfer owner");
-    return owner->itemsToTransfer;
+    return owner->items_to_transfer;
   }
   Items::ContainerWorld& StagingRecords() override {
     auto* const owner = VS::Menu::Framework::inventoryStorage;
-    staged_owner_ = owner == nullptr ? nullptr : &owner->stagedTransfer;
+    staged_owner_ = owner == nullptr ? nullptr : &owner->staged_transfer;
     return staged_.emplace(staged_owner_);
   }
   std::uint16_t Capacity(Items::ItemCategory category) override {
-    return Menu_Container_containerItemCapacities[static_cast<std::size_t>(
-        category)];
+    return containerItemCapacities[static_cast<std::size_t>(category)];
   }
   std::span<const std::uint16_t> CaptureOrder(
       Items::ItemCategory category) override {
-    return Items::LiveContainerCategoryOrder(category,
-                                             Menu_Container_containerData);
+    return Items::LiveContainerCategoryOrder(category, containerData);
   }
   Items::ContainerWorld& ActiveRecords() override {
-    auto* const owner = Menu_Container_containerData;
+    auto* const owner = containerData;
     active_owner_ = owner == nullptr ? nullptr : &owner->items;
     return active_.emplace(active_owner_);
   }

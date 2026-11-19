@@ -70,8 +70,8 @@ struct PendingRowsLiveFixture : equipment::LiveFixture {
              std::as_writable_bytes(std::span(names)),
              framework::kItemNamesBytes);
     VS::Menu::Framework::rowTypeBuf = row_types.data();
-    Menu_Container_containerData = &containers.storage->container;
-    Menu_Container_otherStorage = &containers.storage->container;
+    VS::Menu::container::containerData = &containers.storage->container;
+    VS::Menu::container::otherStorage = &containers.storage->container;
     VS::Input::previousButtons = 0;
     std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
     VS::State::tickSpeed = 2;

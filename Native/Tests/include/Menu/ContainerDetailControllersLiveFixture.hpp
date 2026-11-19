@@ -28,11 +28,16 @@ inline constexpr std::uint8_t kGripCategory = 1;
 
 struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
   container_transfers_tests::LiveFixture containers;
-  ValueRestore<char> saved_container_title{Menu_Container_categoryTitleVisible};
-  ValueRestore<char> saved_container_icons{Menu_Container_categoryIconsVisible};
-  ValueRestore<char> saved_container_controls{Menu_Container_controlsPanelMode};
-  ValueRestore<char> saved_container_phase{Menu_Container_detailsViewPhase};
-  ValueRestore<int> saved_triangle{Menu_Container_detailsClosedWithTriangle};
+  ValueRestore<std::uint8_t> saved_container_title{
+      VS::Menu::container::categoryTitleVisible};
+  ValueRestore<std::uint8_t> saved_container_icons{
+      VS::Menu::container::categoryIconsVisible};
+  ValueRestore<std::uint8_t> saved_container_controls{
+      VS::Menu::container::controlsPanelMode};
+  ValueRestore<std::uint8_t> saved_container_phase{
+      VS::Menu::container::detailsViewPhase};
+  ValueRestore<int> saved_triangle{
+      VS::Menu::container::detailsClosedWithTriangle};
 
   ContainerLiveFixture() {
     detail::ResetLiveContainerDetailControllers();
@@ -41,7 +46,7 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
   ~ContainerLiveFixture() { detail::ResetLiveContainerDetailControllers(); }
 
   static void Bind(VS::Items::Container& owner) {
-    Menu_Container_containerData = &owner;
+    VS::Menu::container::containerData = &owner;
     VS::Menu::Framework::weapons = owner.items.weapons.data();
     VS::Menu::Framework::blades = owner.items.blades.data();
     VS::Menu::Framework::grips = owner.items.grips.data();

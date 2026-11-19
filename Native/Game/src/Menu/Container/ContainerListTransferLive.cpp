@@ -27,8 +27,8 @@
 #include "Menu/Container/ContainerListTransfer.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
-#include "Menu/Container/ItemView.h"
-#include "Menu/Container/Storage.h"
+#include "Menu/Container/ItemView.hpp"
+#include "Menu/Container/Storage.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -104,7 +104,7 @@ class RecordView final : public Items::ContainerWorld {
   Items::LiveContainerWorld live_;
 };
 
-Menu_Container_InventoryStorage& Storage() {
+InventoryStorage& Storage() {
   auto* const storage = VS::Menu::Framework::inventoryStorage;
   if (storage == nullptr) Refuse("missing inventory storage");
   return *storage;
@@ -113,9 +113,9 @@ Menu_Container_InventoryStorage& Storage() {
 VS::Items::Container* Container(TransferStorage storage) {
   switch (storage) {
     case TransferStorage::kActive:
-      return Menu_Container_containerData;
+      return containerData;
     case TransferStorage::kOther:
-      return Menu_Container_otherStorage;
+      return otherStorage;
     case TransferStorage::kContainer:
       return &Storage().container;
     default:
@@ -126,9 +126,9 @@ VS::Items::Container* Container(TransferStorage storage) {
 VS::Items::ContainerData* Data(TransferStorage storage) {
   switch (storage) {
     case TransferStorage::kStaged:
-      return &Storage().stagedTransfer;
+      return &Storage().staged_transfer;
     case TransferStorage::kPreview:
-      return &Storage().transferPreview;
+      return &Storage().transfer_preview;
     default: {
       auto* const container = Container(storage);
       return container == nullptr ? nullptr : &container->items;
@@ -144,10 +144,10 @@ Framework::MenuRow& Row(std::int32_t row) {
 
 char* MenuTextPointer(TransferText text) {
   if (text.table == TransferTextTable::kMenuText) {
-    if (text.offset >= std::size(Menu_Container_menuText)) {
+    if (text.offset >= std::size(menuText)) {
       Refuse("menu text outside MENUD's text table");
     }
-    return reinterpret_cast<char*>(&Menu_Container_menuText[text.offset]);
+    return reinterpret_cast<char*>(&menuText[text.offset]);
   }
   if (VS::Menu::Framework::itemHelp == nullptr) {
     Refuse("item help text not loaded");
@@ -155,24 +155,24 @@ char* MenuTextPointer(TransferText text) {
   return reinterpret_cast<char*>(VS::Menu::Framework::itemHelp + text.offset);
 }
 
-char* FlagByte(TransferFlag flag) {
+std::uint8_t* FlagByte(TransferFlag flag) {
   switch (flag) {
     case TransferFlag::kBrowsingGadgetBag:
-      return reinterpret_cast<char*>(&Menu_Container_browsingGadgetBag);
+      return &browsingGadgetBag;
     case TransferFlag::kTitleVisible:
-      return &Menu_Container_categoryTitleVisible;
+      return &categoryTitleVisible;
     case TransferFlag::kIconsVisible:
-      return &Menu_Container_categoryIconsVisible;
+      return &categoryIconsVisible;
     case TransferFlag::kControlsMode:
-      return &Menu_Container_controlsPanelMode;
+      return &controlsPanelMode;
     case TransferFlag::kTitleSlide:
-      return &Menu_Container_categoryTitleSlideStep;
+      return &categoryTitleSlideStep;
     case TransferFlag::kIconsSlide:
-      return &Menu_Container_categoryIconsSlideStep;
+      return &categoryIconsSlideStep;
     case TransferFlag::kControlsSlide:
-      return &Menu_Container_controlsPanelSlideStep;
+      return &controlsPanelSlideStep;
     case TransferFlag::kDetailsPhase:
-      return &Menu_Container_detailsViewPhase;
+      return &detailsViewPhase;
   }
   Refuse("unknown container panel flag");
 }
@@ -207,11 +207,9 @@ class LiveTransferWorld final : public TransferWorld {
     container::Refuse(reason);
   }
 
-  std::uint8_t Flag(TransferFlag flag) override {
-    return static_cast<std::uint8_t>(*FlagByte(flag));
-  }
+  std::uint8_t Flag(TransferFlag flag) override { return *FlagByte(flag); }
   void SetFlag(TransferFlag flag, std::uint8_t value) override {
-    *FlagByte(flag) = static_cast<char>(value);
+    *FlagByte(flag) = value;
   }
   std::uint8_t CursorMemorySetting() override {
     return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
@@ -267,10 +265,10 @@ class LiveTransferWorld final : public TransferWorld {
     return static_cast<std::uint32_t>(VS::Input::buttonRepeat);
   }
   std::uint16_t MenuTextEntry(std::size_t index) override {
-    if (index >= std::size(Menu_Container_menuText)) {
+    if (index >= std::size(menuText)) {
       Refuse("menu text entry outside MENUD's text table");
     }
-    return Menu_Container_menuText[index];
+    return menuText[index];
   }
   std::uint16_t ItemHelpEntry(std::size_t index) override {
     if (VS::Menu::Framework::itemHelp == nullptr) {
@@ -296,11 +294,9 @@ class LiveTransferWorld final : public TransferWorld {
     if (index >= Items::kItemCategoryCount) {
       Refuse("container capacity outside its table");
     }
-    return Menu_Container_containerItemCapacities[index];
+    return containerItemCapacities[index];
   }
-  std::uint16_t TransferredMiscCount() override {
-    return Menu_Container_transferredMiscCount;
-  }
+  std::uint16_t TransferredMiscCount() override { return transferredMiscCount; }
 
   Items::ContainerWorld& Records(TransferStorage storage) override {
     const auto index = static_cast<std::size_t>(storage);
@@ -317,24 +313,26 @@ class LiveTransferWorld final : public TransferWorld {
             Items::kContainerIndexEntries};
   }
   std::span<std::uint16_t> PendingTransfers() override {
-    return Storage().itemsToTransfer;
+    return Storage().items_to_transfer;
   }
   void SelectStorages(bool browsing_gadget_bag) override {
     auto& storage = Storage();
-    Menu_Container_containerData =
-        browsing_gadget_bag ? &storage.gadgetBag : &storage.container;
-    Menu_Container_otherStorage =
-        browsing_gadget_bag ? &storage.container : &storage.gadgetBag;
+    containerData =
+        browsing_gadget_bag ? &storage.gadget_bag : &storage.container;
+    otherStorage =
+        browsing_gadget_bag ? &storage.container : &storage.gadget_bag;
   }
   void ClearStagedTransfers() override {
     auto& storage = Storage();
-    Core::Memory::ZeroLiveWordsBackward(&storage.stagedTransfer,
-                                        sizeof storage.stagedTransfer);
-    Core::Memory::ZeroLiveWordsBackward(storage.itemsToTransfer,
-                                        sizeof storage.itemsToTransfer);
+    Core::Memory::ZeroLiveWordsBackward(&storage.staged_transfer,
+                                        sizeof storage.staged_transfer);
+    Core::Memory::ZeroLiveWordsBackward(
+        std::as_writable_bytes(
+            std::span<std::uint16_t>(storage.items_to_transfer)),
+        sizeof storage.items_to_transfer);
   }
   void PublishActiveRecords() override {
-    auto* const container = Menu_Container_containerData;
+    auto* const container = containerData;
     if (container == nullptr) Refuse("missing active container");
     VS::Menu::Framework::weapons = container->items.weapons.data();
     VS::Menu::Framework::blades = container->items.blades.data();
@@ -346,7 +344,7 @@ class LiveTransferWorld final : public TransferWorld {
   void StoreContainerSnapshot() override {
     auto& storage = Storage();
     Core::Memory::CopyLiveHalfwordBlocks(&storage.container.items,
-                                         &storage.storedContainer,
+                                         &storage.stored_container,
                                          sizeof storage.container.items);
   }
   void SnapshotGadgetBag() override { Items::SnapshotLiveGadgetBag(); }

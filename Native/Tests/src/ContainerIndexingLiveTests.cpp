@@ -26,7 +26,7 @@ TEST_CASE("F02927 Live maps member arrays without flattening native pointers",
                                               &fixture.owner) ==
           expected[category]);
   }
-  Menu_Container_containerItemCapacities[0] = 1;
+  VS::Menu::container::containerItemCapacities[0] = 1;
   CHECK(items::LiveContainerCategoryIndices(1, &fixture.owner) ==
         fixture.owner.indices.weapons.data() + 1);
 }
@@ -39,7 +39,7 @@ TEST_CASE("F02928 Live retains halfword lookup and empty token convention",
   CHECK(items::FindLiveContainerItemRow(0, 65534, rows) == 32);
   CHECK(items::FindLiveContainerItemRow(0, -1, rows) == 1);
   CHECK(items::FindLiveContainerItemRow(0, 65535, rows) == 0);
-  Menu_Container_containerItemCapacities[0] = 0;
+  VS::Menu::container::containerItemCapacities[0] = 0;
   CHECK(items::FindLiveContainerItemRow(0, 0, nullptr) == 0);
 }
 
@@ -52,7 +52,7 @@ TEST_CASE("F02929 Live appends only the first free halfword",
   CHECK(rows[0] == 8);
   CHECK(rows[1] == 256);
   CHECK(rows[2] == 0);
-  Menu_Container_containerItemCapacities[6] = 0;
+  VS::Menu::container::containerItemCapacities[6] = 0;
   CHECK_NOTHROW(items::AppendLiveContainerItemIndex(6, 0, nullptr));
 }
 
@@ -95,7 +95,7 @@ TEST_CASE("F02931 Live looks up the explicit current owner not a cached global",
   LiveFixture fixture;
   fixture.owner.items.misc[255].id = 65535;
   fixture.replacement.items.misc[255].id = 32768;
-  Menu_Container_containerData = &fixture.replacement;
+  VS::Menu::container::containerData = &fixture.replacement;
   CHECK(items::LiveContainerItemId(6, 255, &fixture.owner.items) == 65535);
   CHECK(items::LiveContainerItemId(6, 255, &fixture.replacement.items) ==
         32768);
@@ -112,7 +112,7 @@ TEST_CASE(
   fixture.owner.items.misc[0].id = 0;
   fixture.owner.items.misc[0].count = 100;
   CHECK(items::CountLiveContainerItems(6, &fixture.owner.items) == 255);
-  Menu_Container_containerItemCapacities[6] = 0;
+  VS::Menu::container::containerItemCapacities[6] = 0;
   CHECK(items::CountLiveContainerItems(6, nullptr) == 0);
   CHECK(items::CountLiveContainerItems(7, nullptr) == 0);
 }
@@ -124,7 +124,7 @@ TEST_CASE("F02933 Live distinguishes full capacity from the first empty slot",
   CHECK(items::FindLiveEmptyContainerSlot(6, &fixture.owner.items) == 256);
   fixture.owner.items.misc[255].id = 0;
   CHECK(items::FindLiveEmptyContainerSlot(6, &fixture.owner.items) == 255);
-  Menu_Container_containerItemCapacities[6] = 0;
+  VS::Menu::container::containerItemCapacities[6] = 0;
   CHECK(items::FindLiveEmptyContainerSlot(6, nullptr) == 0);
   CHECK(items::FindLiveEmptyContainerSlot(7, nullptr) == 0);
 }

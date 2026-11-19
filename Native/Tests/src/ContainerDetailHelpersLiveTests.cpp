@@ -31,18 +31,23 @@ using MemoryBytes = std::array<std::uint8_t, sizeof(fw::MenuMemory)>;
 
 struct LiveFixture : equipment_detail_tests::LiveFixture {
   container_transfers_tests::LiveFixture containers;
-  ValueRestore<char> saved_container_title{Menu_Container_categoryTitleVisible};
-  ValueRestore<char> saved_container_icons{Menu_Container_categoryIconsVisible};
-  ValueRestore<char> saved_container_controls{Menu_Container_controlsPanelMode};
-  ValueRestore<char> saved_container_phase{Menu_Container_detailsViewPhase};
-  ValueRestore<int> saved_triangle{Menu_Container_detailsClosedWithTriangle};
+  ValueRestore<std::uint8_t> saved_container_title{
+      VS::Menu::container::categoryTitleVisible};
+  ValueRestore<std::uint8_t> saved_container_icons{
+      VS::Menu::container::categoryIconsVisible};
+  ValueRestore<std::uint8_t> saved_container_controls{
+      VS::Menu::container::controlsPanelMode};
+  ValueRestore<std::uint8_t> saved_container_phase{
+      VS::Menu::container::detailsViewPhase};
+  ValueRestore<int> saved_triangle{
+      VS::Menu::container::detailsClosedWithTriangle};
 
   LiveFixture() {
-    Menu_Container_categoryTitleVisible = samples::kTitle;
-    Menu_Container_categoryIconsVisible = samples::kIcons;
-    Menu_Container_controlsPanelMode = samples::kControls;
-    Menu_Container_detailsViewPhase = samples::kOldPhase;
-    Menu_Container_detailsClosedWithTriangle = samples::kOldTriangle;
+    VS::Menu::container::categoryTitleVisible = samples::kTitle;
+    VS::Menu::container::categoryIconsVisible = samples::kIcons;
+    VS::Menu::container::controlsPanelMode = samples::kControls;
+    VS::Menu::container::detailsViewPhase = samples::kOldPhase;
+    VS::Menu::container::detailsClosedWithTriangle = samples::kOldTriangle;
   }
 
   void AddContainerWeapon() {
@@ -174,7 +179,7 @@ TEST_CASE("F02925 actual item-row host reloads its current container owner",
   auto& next = fixture.containers.replacement->container;
   constexpr std::uint8_t kReplacementBlade = 17;
   std::span(next.items.blades).back().id = kReplacementBlade;
-  Menu_Container_containerData = &next;
+  VS::Menu::container::containerData = &next;
   loadout = host.InventoryWeaponLoadout(samples::kWeapon);
   if (!loadout) {
     FAIL("missing replacement container weapon loadout");
@@ -189,7 +194,7 @@ TEST_CASE("F02925 zero optional parts do not require a container owner",
   VS::Items::InventoryWeapon source{};
   source.name[std::size(source.name) - 1] = 'z';
   VS::Items::WeaponLoadout target{};
-  Menu_Container_containerData = nullptr;
+  VS::Menu::container::containerData = nullptr;
   VS::Menu::Framework::menuItems = nullptr;
   detail::BuildLiveWeaponStats(&target, &source, nullptr);
   CHECK(target.name[23] == 'z');
@@ -240,13 +245,16 @@ TEST_CASE(
     "[container-detail-helpers-live][F02942]") {
   LiveFixture fixture;
   VS::Menu::Framework::menuItems = nullptr;
-  Menu_Container_containerData = nullptr;
+  VS::Menu::container::containerData = nullptr;
   detail::SetLivePanelVisibility(static_cast<char>(samples::kByteMax));
-  CHECK(static_cast<std::uint8_t>(Menu_Container_categoryTitleVisible) == 255);
-  CHECK(static_cast<std::uint8_t>(Menu_Container_categoryIconsVisible) == 255);
-  CHECK(static_cast<std::uint8_t>(Menu_Container_controlsPanelMode) == 255);
+  CHECK(static_cast<std::uint8_t>(VS::Menu::container::categoryTitleVisible) ==
+        255);
+  CHECK(static_cast<std::uint8_t>(VS::Menu::container::categoryIconsVisible) ==
+        255);
+  CHECK(static_cast<std::uint8_t>(VS::Menu::container::controlsPanelMode) ==
+        255);
   CHECK(Menu_Inventory_secondaryTitleEnabled == fixture.saved_title.previous);
-  CHECK(Menu_Container_detailsViewPhase == 99);
+  CHECK(VS::Menu::container::detailsViewPhase == 99);
 }
 
 TEST_CASE(
@@ -258,10 +266,11 @@ TEST_CASE(
   std::span(owner.items.weapons).back().blade = samples::kWeapon.blade;
   VS::Input::buttonRepeat = VS::Input::L1;
   CHECK(detail::PollLiveDetailsPaging(0, 0) == 1);
-  Menu_Container_containerData = &fixture.containers.replacement->container;
+  VS::Menu::container::containerData =
+      &fixture.containers.replacement->container;
   fixture.containers.replacement->container.items.weapons[0].blade = 1;
   CHECK(detail::PollLiveDetailsPaging(0, 0) == 0);
-  Menu_Container_containerData = nullptr;
+  VS::Menu::container::containerData = nullptr;
   VS::Input::buttonsState = VS::Input::L1 | VS::Input::R1;
   CHECK(detail::PollLiveDetailsPaging(-1, -17) == -17);
 }
@@ -292,9 +301,9 @@ TEST_CASE("F02947 live layout integrates native transition and stat helpers",
           "[container-detail-helpers-live][F02947]") {
   LiveFixture fixture;
   detail::InitializeLiveDetailsLayout(kSelected, samples::kClassAffinityPages);
-  CHECK(Menu_Container_categoryTitleVisible == 7);
-  CHECK(Menu_Container_categoryIconsVisible == 0);
-  CHECK(Menu_Container_controlsPanelMode == 0);
+  CHECK(VS::Menu::container::categoryTitleVisible == 7);
+  CHECK(VS::Menu::container::categoryIconsVisible == 0);
+  CHECK(VS::Menu::container::controlsPanelMode == 0);
   CHECK(Menu_Inventory_ashleyRenderState == 0);
   CHECK(fixture.rows[kHeader].w == 164);
   CHECK(fixture.rows[kHeader].target0 == 16);
@@ -353,7 +362,8 @@ TEST_CASE("F02949 live selection preserves exact container cursor bytes",
   CHECK(detail::SelectLiveDetailsItem(6, 255) == 65535);
   CHECK(std::bit_cast<MemoryBytes>(VS::Menu::Framework::menuMemory) ==
         expected);
-  Menu_Container_containerData = &fixture.containers.replacement->container;
+  VS::Menu::container::containerData =
+      &fixture.containers.replacement->container;
   std::span(fixture.containers.replacement->container.indices.misc).back() =
       samples::kByteOverflowToken;
   CHECK(detail::SelectLiveDetailsItem(6, 255) == 256);
@@ -368,11 +378,11 @@ TEST_CASE("F02950 real exit retains container phase and full triangle mask",
   VS::Input::buttonsPressed = VS::Input::Triangle;
   detail::ExitLiveDetailsView(1);
   CHECK(fixture.rows[kHeader].target0 == -164);
-  CHECK(Menu_Container_detailsViewPhase == 2);
-  CHECK(Menu_Container_detailsClosedWithTriangle ==
+  CHECK(VS::Menu::container::detailsViewPhase == 2);
+  CHECK(VS::Menu::container::detailsClosedWithTriangle ==
         static_cast<int>(VS::Input::Triangle));
   VS::Input::buttonsPressed = VS::Input::Circle;
   detail::ExitLiveDetailsView(0);
-  CHECK(Menu_Container_detailsClosedWithTriangle == 0);
+  CHECK(VS::Menu::container::detailsClosedWithTriangle == 0);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);
 }

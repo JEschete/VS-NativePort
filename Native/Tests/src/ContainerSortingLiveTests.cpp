@@ -44,7 +44,7 @@ TEST_CASE(
     "[container-sorting-live][F02961]") {
   LiveFixture fixture;
   auto& owner = fixture.owner;
-  Menu_Container_containerData = &owner;
+  VS::Menu::container::containerData = &owner;
   owner.items.weapons[0].blade = 1;
   std::span(owner.items.weapons).back().blade = kLastBlade + 1;
   owner.items.blades[0].material = kLowMaterial;
@@ -68,7 +68,7 @@ TEST_CASE("F02963 checked Live folds flagged gems and signed shield attributes",
           "[container-sorting-live][F02963]") {
   LiveFixture fixture;
   auto& owner = fixture.owner;
-  Menu_Container_containerData = &owner;
+  VS::Menu::container::containerData = &owner;
   owner.items.shields[0].base.strength = kPositive;
   auto& last = std::span(owner.items.shields).back();
   last.base.strength = kPositive;
@@ -89,7 +89,7 @@ TEST_CASE(
     "[container-sorting-live][F02965]") {
   LiveFixture fixture;
   auto& owner = fixture.owner;
-  Menu_Container_containerData = &owner;
+  VS::Menu::container::containerData = &owner;
   owner.items.misc[0].id = 1;
   owner.items.misc[0].count = kRawFlaggedByte;
   auto& last = std::span(owner.items.misc).back();
@@ -112,7 +112,7 @@ TEST_CASE(
     "F02967 checked Live preserves opaque blade fields and current owners",
     "[container-sorting-live][F02967]") {
   LiveFixture fixture;
-  Menu_Container_containerData = &fixture.owner;
+  VS::Menu::container::containerData = &fixture.owner;
   auto& blade = fixture.owner.items.blades[kLastBlade];
   blade.id = kFlaggedGem;
   blade.strength = kNegative;
@@ -130,7 +130,7 @@ TEST_CASE(
   CHECK(projected.types == initial.types);
   CHECK(projected.classes.back() == kReserved);
   CHECK(projected.affinities.back() == kReserved);
-  Menu_Container_containerData = &fixture.replacement;
+  VS::Menu::container::containerData = &fixture.replacement;
   fixture.replacement.items.blades[kLastBlade].id = kLowMaterial;
   sorting::CopyLiveEquipmentStats(&target, kBlade, kLastBlade);
   CHECK(target.id == kLowMaterial);
@@ -140,7 +140,7 @@ TEST_CASE(
     "F02967 Live projects grip armor gem without clearing unrelated fields",
     "[container-sorting-live][F02967]") {
   LiveFixture fixture;
-  Menu_Container_containerData = &fixture.owner;
+  VS::Menu::container::containerData = &fixture.owner;
   fixture.owner.items.grips[0].strength = kNegative;
   fixture.owner.items.armor[0].strength = kPositive;
   fixture.owner.items.gems[kLastGem].strength = kNegative;
@@ -163,7 +163,7 @@ TEST_CASE(
     "F02967 unsupported categories are lazy before owner and output access",
     "[container-sorting-live][F02967]") {
   LiveFixture fixture;
-  Menu_Container_containerData = nullptr;
+  VS::Menu::container::containerData = nullptr;
   for (const int category :
        VS::Menu::sorting_test::kUnsupportedEquipmentCategories) {
     CHECK_NOTHROW(sorting::CopyLiveEquipmentStats(
@@ -175,11 +175,11 @@ TEST_CASE(
     "F02968 checked Live handles empty missing owners without stale caches",
     "[container-sorting-live][F02968]") {
   LiveFixture fixture;
-  Menu_Container_containerData = nullptr;
-  Menu_Container_containerItemCapacities[kBlade] = 0;
+  VS::Menu::container::containerData = nullptr;
+  VS::Menu::container::containerItemCapacities[kBlade] = 0;
   CHECK_NOTHROW(sorting::SortLiveEquipment(kBlade, kStrength));
-  Menu_Container_containerData = &fixture.owner;
-  Menu_Container_containerItemCapacities[kBlade] =
+  VS::Menu::container::containerData = &fixture.owner;
+  VS::Menu::container::containerItemCapacities[kBlade] =
       items::kContainerCapacities[kBlade];
   fixture.owner.items.blades[kLastBlade].strength = kPositive;
   fixture.owner.items.blades[0].strength = kNegative;

@@ -15,17 +15,17 @@ TEST_CASE(
     "[container-transfers-live][F02934]") {
   LiveFixture fixture;
   fixture.storage->container.items.misc[0] = {12, 99, 71};
-  fixture.storage->stagedTransfer.misc[255] = {12, 2, 91};
-  fixture.storage->itemsToTransfer[0] = 0x600;
+  fixture.storage->staged_transfer.misc[255] = {12, 2, 91};
+  fixture.storage->items_to_transfer[0] = 0x600;
   items::PreviewLiveTransferredMisc();
-  CHECK(fixture.storage->transferPreview.misc[0].count == 100);
-  CHECK(fixture.storage->transferPreview.misc[1].count == 1);
+  CHECK(fixture.storage->transfer_preview.misc[0].count == 100);
+  CHECK(fixture.storage->transfer_preview.misc[1].count == 1);
   VS::Menu::Framework::inventoryStorage = fixture.replacement.get();
-  Menu_Container_otherStorage = &fixture.replacement->gadgetBag;
-  fixture.replacement->gadgetBag.items.misc[2].id = 15;
+  VS::Menu::container::otherStorage = &fixture.replacement->gadget_bag;
+  fixture.replacement->gadget_bag.items.misc[2].id = 15;
   items::PreviewLiveTransferredMisc();
-  CHECK(fixture.replacement->transferPreview.misc[2].id == 15);
-  CHECK(fixture.storage->transferPreview.misc[0].id == 12);
+  CHECK(fixture.replacement->transfer_preview.misc[2].id == 15);
+  CHECK(fixture.storage->transfer_preview.misc[0].id == 12);
 }
 
 TEST_CASE(
@@ -33,14 +33,14 @@ TEST_CASE(
     "[container-transfers-live][F02935]") {
   LiveFixture fixture;
   fixture.storage->container.items.misc[255].id = 65535;
-  Menu_Container_transferredMiscCount = 99;
+  VS::Menu::container::transferredMiscCount = 99;
   items::RefreshLiveMiscTransferCount();
-  CHECK(Menu_Container_transferredMiscCount == 1);
+  CHECK(VS::Menu::container::transferredMiscCount == 1);
   VS::Menu::Framework::inventoryStorage = fixture.replacement.get();
-  Menu_Container_otherStorage = &fixture.replacement->container;
+  VS::Menu::container::otherStorage = &fixture.replacement->container;
   items::RefreshLiveMiscTransferCount();
-  CHECK(Menu_Container_transferredMiscCount == 0);
-  CHECK(fixture.storage->transferPreview.misc[255].id == 65535);
+  CHECK(VS::Menu::container::transferredMiscCount == 0);
+  CHECK(fixture.storage->transfer_preview.misc[255].id == 65535);
 }
 
 TEST_CASE("F02936 Live copies real typed records and retains source aliases",
@@ -63,10 +63,10 @@ TEST_CASE(
   items::InventoryBlade source{};
   source.recovery_delay = 65535;
   source.type_bits = 255;
-  fixture.storage->stagedTransfer.blades[63] = source;
+  fixture.storage->staged_transfer.blades[63] = source;
   CHECK(items::CopyLiveContainerItem(0xFF11, &fixture.storage->container.items,
                                      63,
-                                     &fixture.storage->stagedTransfer) == 1);
+                                     &fixture.storage->staged_transfer) == 1);
   auto expected = source;
   expected.index = 1;
   expected.assembled_weapon_index = 255;
@@ -83,7 +83,7 @@ TEST_CASE(
   owner.indices.misc[0] = 256;
   owner.indices.misc[2] = 256;
   owner.indices.misc[3] = 2;
-  Menu_Container_containerData = &fixture.replacement->container;
+  VS::Menu::container::containerData = &fixture.replacement->container;
   items::RebuildLiveContainerCategoryIndices(6, &owner);
   CHECK(owner.indices.misc[0] == 256);
   CHECK(owner.indices.misc[1] == 256);
@@ -99,19 +99,19 @@ TEST_CASE(
   LiveFixture fixture;
   VS::Items::inventory.misc[63] = {65535, 255, 91};
   fixture.order.misc[0] = 255;
-  fixture.storage->gadgetBag.items.misc[255].id = 99;
+  fixture.storage->gadget_bag.items.misc[255].id = 99;
   items::SnapshotLiveGadgetBag();
-  CHECK(fixture.storage->gadgetBag.items.misc[63].id == 65535);
-  CHECK(fixture.storage->gadgetBag.items.misc[63].count == 255);
-  CHECK(fixture.storage->gadgetBag.items.misc[255].id == 0);
-  CHECK(fixture.storage->gadgetBag.indices.misc[0] == 255);
-  CHECK(fixture.storage->gadgetBag.indices.misc[64] == 0);
+  CHECK(fixture.storage->gadget_bag.items.misc[63].id == 65535);
+  CHECK(fixture.storage->gadget_bag.items.misc[63].count == 255);
+  CHECK(fixture.storage->gadget_bag.items.misc[255].id == 0);
+  CHECK(fixture.storage->gadget_bag.indices.misc[0] == 255);
+  CHECK(fixture.storage->gadget_bag.indices.misc[64] == 0);
 }
 
 TEST_CASE("F02939 Live commits low token bytes without remapping item records",
           "[container-transfers-live][F02939]") {
   LiveFixture fixture;
-  auto& bag = fixture.storage->gadgetBag;
+  auto& bag = fixture.storage->gadget_bag;
   bag.items.misc[0] = {11, 99, 91};
   bag.items.misc[255].id = 15;
   bag.indices.misc[0] = 256;

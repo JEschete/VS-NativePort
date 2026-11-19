@@ -87,27 +87,27 @@ TEST_CASE("Container detail helpers retain normal MENUD BSS across reload",
           "[container-detail-helpers-module][F02925][F02926][F02942][F02943]"
           "[F02945][F02947][F02949][F02950]") {
   LiveFixture fixture;
-  const char title = Menu_Container_categoryTitleVisible;
-  const char icons = Menu_Container_categoryIconsVisible;
-  const char controls = Menu_Container_controlsPanelMode;
-  const char phase = Menu_Container_detailsViewPhase;
-  const int triangle = Menu_Container_detailsClosedWithTriangle;
+  const std::uint8_t title = VS::Menu::container::categoryTitleVisible;
+  const std::uint8_t icons = VS::Menu::container::categoryIconsVisible;
+  const std::uint8_t controls = VS::Menu::container::controlsPanelMode;
+  const std::uint8_t phase = VS::Menu::container::detailsViewPhase;
+  const int triangle = VS::Menu::container::detailsClosedWithTriangle;
   detail::SetLivePanelVisibility(2);
-  Menu_Container_detailsViewPhase = samples::kOldPhase;
-  Menu_Container_detailsClosedWithTriangle =
+  VS::Menu::container::detailsViewPhase = samples::kOldPhase;
+  VS::Menu::container::detailsClosedWithTriangle =
       static_cast<int>(VS::Input::Triangle);
   VS::Boot::ResetMenudStatics();
-  CHECK(Menu_Container_categoryTitleVisible == 2);
-  CHECK(Menu_Container_categoryIconsVisible == 2);
-  CHECK(Menu_Container_controlsPanelMode == 2);
-  CHECK(Menu_Container_detailsViewPhase == 99);
-  CHECK(Menu_Container_detailsClosedWithTriangle ==
+  CHECK(VS::Menu::container::categoryTitleVisible == 2);
+  CHECK(VS::Menu::container::categoryIconsVisible == 2);
+  CHECK(VS::Menu::container::controlsPanelMode == 2);
+  CHECK(VS::Menu::container::detailsViewPhase == 99);
+  CHECK(VS::Menu::container::detailsClosedWithTriangle ==
         static_cast<int>(VS::Input::Triangle));
-  Menu_Container_categoryTitleVisible = title;
-  Menu_Container_categoryIconsVisible = icons;
-  Menu_Container_controlsPanelMode = controls;
-  Menu_Container_detailsViewPhase = phase;
-  Menu_Container_detailsClosedWithTriangle = triangle;
+  VS::Menu::container::categoryTitleVisible = title;
+  VS::Menu::container::categoryIconsVisible = icons;
+  VS::Menu::container::controlsPanelMode = controls;
+  VS::Menu::container::detailsViewPhase = phase;
+  VS::Menu::container::detailsClosedWithTriangle = triangle;
 }
 
 TEST_CASE("Ordinary MENUD reload retains detail owner and halfword orders",
@@ -116,10 +116,10 @@ TEST_CASE("Ordinary MENUD reload retains detail owner and halfword orders",
   const auto memory = VS::Menu::Framework::menuMemory;
   std::span(fixture.storage->container.indices.misc).back() =
       samples::kHalfwordToken;
-  Menu_Container_containerItemCapacities[samples::kMiscCategory] = 0;
+  VS::Menu::container::containerItemCapacities[samples::kMiscCategory] = 0;
   VS::Boot::ResetMenudStatics();
-  CHECK(Menu_Container_containerData == &fixture.storage->container);
-  CHECK(Menu_Container_containerItemCapacities[6] == 256);
+  CHECK(VS::Menu::container::containerData == &fixture.storage->container);
+  CHECK(VS::Menu::container::containerItemCapacities[6] == 256);
   CHECK(detail::SelectLiveDetailsItem(6, 255) == 65535);
   VS::Menu::Framework::menuMemory = memory;
 }

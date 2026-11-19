@@ -57,7 +57,7 @@
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
-#include "Menu/Container/ItemView.h"
+#include "Menu/Container/ItemView.hpp"
 #include "Menu/FilesLive.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -193,7 +193,7 @@ char VS::Menu::Framework::hideMenu = 0;
 // decomp: vs_mainMenu_itemsListRow (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::itemsListRow = 0;
 // decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG C48.c)
-Menu_Container_InventoryStorage* VS::Menu::Framework::inventoryStorage =
+VS::Menu::container::InventoryStorage* VS::Menu::Framework::inventoryStorage =
     nullptr;
 
 namespace VS::Menu::Framework {

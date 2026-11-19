@@ -17,7 +17,7 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ContainerDetailControllers.hpp"
 #include "Menu/Container/ContainerDetailHelpersLive.hpp"
-#include "Menu/Container/ItemView.h"
+#include "Menu/Container/ItemView.hpp"
 #include "Menu/Framework/DetailDispatchLiveSupport.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -90,10 +90,10 @@ Framework::MenuRow& Row(DetailRow row) {
 }
 
 VS::Items::ContainerData& Records() {
-  if (Menu_Container_containerData == nullptr) {
+  if (containerData == nullptr) {
     Refuse("missing current container record owner");
   }
-  return Menu_Container_containerData->items;
+  return containerData->items;
 }
 
 template <typename Table>
@@ -303,7 +303,7 @@ class LiveControllerWorld final : public ControllerWorld {
     ExitLiveDetailsView(hide_dp_pp ? 1 : 0);
   }
   void RememberTriangleClose(bool triangle) override {
-    Menu_Container_detailsClosedWithTriangle = triangle ? Input::Triangle : 0;
+    detailsClosedWithTriangle = triangle ? Input::Triangle : 0;
   }
   DetailPage PollPaging(DetailPage page) override {
     return {PollLiveDetailsPaging(static_cast<int>(category_), page.index)};
@@ -356,10 +356,10 @@ class LiveControllerWorld final : public ControllerWorld {
 
  private:
   std::span<const std::uint16_t> CurrentOrder() const {
-    if (Menu_Container_containerData == nullptr) {
+    if (containerData == nullptr) {
       Refuse("missing current container display-order owner");
     }
-    const auto& indices = Menu_Container_containerData->indices;
+    const auto& indices = containerData->indices;
     switch (category_) {
       case Category::kWeapon:
         return indices.weapons;
@@ -507,10 +507,10 @@ class LiveDispatcherWorld final
   LiveDispatcherWorld()
       : Base("used container detail cursor outside its elements") {}
   void SetViewMode(DetailViewMode mode) override {
-    Menu_Container_detailsViewPhase = static_cast<char>(mode);
+    detailsViewPhase = static_cast<std::uint8_t>(mode);
   }
   void RememberTriangleClose(bool triangle) override {
-    Menu_Container_detailsClosedWithTriangle = triangle ? Input::Triangle : 0;
+    detailsClosedWithTriangle = triangle ? Input::Triangle : 0;
   }
   Framework::MenuRow& CategoryHeader() override {
     return Row({kCategoryHeader});
@@ -531,14 +531,12 @@ class LiveDispatcherWorld final
     }
     return result.value();
   }
-  bool ClosedWithTriangle() override {
-    return Menu_Container_detailsClosedWithTriangle != 0;
-  }
+  bool ClosedWithTriangle() override { return detailsClosedWithTriangle != 0; }
   void SetIconsVisibility(std::uint8_t visibility) override {
-    Menu_Container_categoryIconsVisible = static_cast<char>(visibility);
+    categoryIconsVisible = static_cast<std::uint8_t>(visibility);
   }
   void SetControlsVisibility(std::uint8_t visibility) override {
-    Menu_Container_controlsPanelMode = static_cast<char>(visibility);
+    controlsPanelMode = static_cast<std::uint8_t>(visibility);
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
     container::Refuse(reason);

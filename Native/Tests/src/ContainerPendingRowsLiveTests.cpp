@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Menu/Container/ContainerListTransferLive.hpp"
-#include "Menu/Container/ItemView.h"
+#include "Menu/Container/ItemView.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
 
 namespace {
@@ -45,12 +45,12 @@ std::vector<std::vector<std::uint32_t>> VariableGlyphs(
 TEST_CASE("F02979 live searches the current workspace and all 64 entries",
           "[container-pending-rows-live][F02979]") {
   LiveFixture fixture;
-  std::span(fixture.containers.storage->itemsToTransfer).back() =
+  std::span(fixture.containers.storage->items_to_transfer).back() =
       data::kLastGemPendingToken;
   REQUIRE(rows::FindLivePendingTransfer(5, data::kLastGemSlot) ==
           kLastPendingPosition);
   VS::Menu::Framework::inventoryStorage = fixture.containers.replacement.get();
-  fixture.containers.replacement->itemsToTransfer[1] =
+  fixture.containers.replacement->items_to_transfer[1] =
       data::kLastGemPendingToken;
   REQUIRE(rows::FindLivePendingTransfer(5, data::kLastGemSlot) == 2);
   REQUIRE(rows::FindLivePendingTransfer(0, -1) == 1);
@@ -61,13 +61,13 @@ TEST_CASE(
     "[container-pending-rows-live][F02980]") {
   LiveFixture fixture;
   rows::AppendLivePendingTransfer(kMiscCategory, data::kLastMiscSlot);
-  REQUIRE(fixture.containers.storage->itemsToTransfer[0] ==
+  REQUIRE(fixture.containers.storage->items_to_transfer[0] ==
           data::kLastMiscPendingToken);
   VS::Menu::Framework::inventoryStorage = fixture.containers.replacement.get();
   rows::AppendLivePendingTransfer(1, 0);
-  REQUIRE(fixture.containers.replacement->itemsToTransfer[0] ==
+  REQUIRE(fixture.containers.replacement->items_to_transfer[0] ==
           data::kBladePendingToken);
-  REQUIRE(fixture.containers.storage->itemsToTransfer[0] ==
+  REQUIRE(fixture.containers.storage->items_to_transfer[0] ==
           data::kLastMiscPendingToken);
 }
 
@@ -75,15 +75,15 @@ TEST_CASE("F02981 live prunes stale entries and appends actual staged records",
           "[container-pending-rows-live][F02981]") {
   LiveFixture fixture;
   auto& storage = *fixture.containers.storage;
-  storage.itemsToTransfer[0] = kEmptyNeighbor;
-  storage.itemsToTransfer[2] = data::kMiscPendingToken;
-  storage.stagedTransfer.misc[0].id = data::kMiscId;
-  storage.stagedTransfer.blades[0].id = 1;
+  storage.items_to_transfer[0] = kEmptyNeighbor;
+  storage.items_to_transfer[2] = data::kMiscPendingToken;
+  storage.staged_transfer.misc[0].id = data::kMiscId;
+  storage.staged_transfer.blades[0].id = 1;
   rows::RebuildLivePendingTransfers();
-  REQUIRE(storage.itemsToTransfer[0] == data::kMiscPendingToken);
-  REQUIRE(storage.itemsToTransfer[1] == data::kBladePendingToken);
-  REQUIRE(storage.itemsToTransfer[2] == 0);
-  REQUIRE(storage.stagedTransfer.misc[0].id == data::kMiscId);
+  REQUIRE(storage.items_to_transfer[0] == data::kMiscPendingToken);
+  REQUIRE(storage.items_to_transfer[1] == data::kBladePendingToken);
+  REQUIRE(storage.items_to_transfer[2] == 0);
+  REQUIRE(storage.staged_transfer.misc[0].id == data::kMiscId);
 }
 
 TEST_CASE(
@@ -92,15 +92,15 @@ TEST_CASE(
     "[container-pending-rows-live][F02981][F02982]") {
   LiveFixture fixture;
   auto& replacement = *fixture.containers.replacement;
-  replacement.stagedTransfer.misc[0] = {
+  replacement.staged_transfer.misc[0] = {
       .id = data::kMiscId + 1, .count = 2, .index = 1};
   VS::Menu::Framework::inventoryStorage = &replacement;
   rows::RebuildLivePendingTransfers();
   REQUIRE(fixture.Build(kPendingCategory) == 1);
-  REQUIRE(replacement.itemsToTransfer[0] == data::kMiscPendingToken);
+  REQUIRE(replacement.items_to_transfer[0] == data::kMiscPendingToken);
   REQUIRE(fixture.workspace.texts[0] ==
           VS::Menu::Framework::itemNames[data::kMiscId + 1]);
-  REQUIRE(fixture.containers.storage->itemsToTransfer[0] == 0);
+  REQUIRE(fixture.containers.storage->items_to_transfer[0] == 0);
 }
 
 TEST_CASE(
@@ -131,8 +131,8 @@ TEST_CASE(
   data::Populate(source);
   auto blade = source.storage.items.blades[0];
   blade.assembled_weapon_index = 1;
-  fixture.containers.storage->stagedTransfer.blades[0] = blade;
-  fixture.containers.storage->itemsToTransfer[0] = data::kBladePendingToken;
+  fixture.containers.storage->staged_transfer.blades[0] = blade;
+  fixture.containers.storage->items_to_transfer[0] = data::kBladePendingToken;
   REQUIRE(fixture.Build(kPendingCategory) == 1);
   REQUIRE((fixture.workspace.types[0] & data::kRestrictionMask) ==
           data::kPendingAttached);
@@ -228,16 +228,16 @@ TEST_CASE(
   LiveFixture fixture;
   fixture.AddMisc();
   auto& storage = *fixture.containers.storage;
-  storage.stagedTransfer.misc[0].id = data::kMiscId;
-  storage.itemsToTransfer[0] = data::kMiscPendingToken;
-  const auto* const owner = Menu_Container_containerData;
+  storage.staged_transfer.misc[0].id = data::kMiscId;
+  storage.items_to_transfer[0] = data::kMiscPendingToken;
+  const auto* const owner = VS::Menu::container::containerData;
   VS::Boot::ResetMenudStatics();
   REQUIRE(VS::Menu::Framework::inventoryStorage == &storage);
-  REQUIRE(Menu_Container_containerData == owner);
+  REQUIRE(VS::Menu::container::containerData == owner);
   REQUIRE(rows::FindLivePendingTransfer(kMiscCategory, 0) == 1);
   rows::AppendLivePendingTransfer(kMiscCategory, data::kLastMiscSlot);
   rows::RebuildLivePendingTransfers();
   REQUIRE(fixture.Build(kPendingCategory) == 1);
-  REQUIRE(storage.itemsToTransfer[0] == data::kMiscPendingToken);
-  REQUIRE(storage.itemsToTransfer[1] == 0);
+  REQUIRE(storage.items_to_transfer[0] == data::kMiscPendingToken);
+  REQUIRE(storage.items_to_transfer[1] == 0);
 }
