@@ -19,11 +19,11 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.hpp"
 #include "Effects/BoneTrail.hpp"
+#include "Effects/BoneTrailLiveState.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
-#include "Effects/Trails.h"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -34,6 +34,13 @@
 #include "Render/UiPrimitives.hpp"
 
 namespace VS::Effects {
+// decomp: D_800EC2E8 (src/BATTLE/BATTLE.PRG/5BF94.c:398); contents: module
+// image (ModuleData.cpp).
+std::array<CVECTOR, kAdditiveTrailColors> trailAdditiveColors{};
+// decomp: D_800EC308 (src/BATTLE/BATTLE.PRG/5BF94.c:399); contents: module
+// image (ModuleData.cpp).
+std::array<CVECTOR, kDistortionTrailColors> trailColors{};
+
 namespace {
 using Templates::kRingLinkMask;
 using Templates::kRingPacketWords;
@@ -75,12 +82,9 @@ void Refuse(std::string_view call, std::string_view reason) {
 // The module's two tables (D_800EC2E8 and D_800EC308), each at its size.
 [[nodiscard]] TrailPalettes LivePalettes() noexcept {
   TrailPalettes palettes{};
-  std::ranges::transform(
-      std::span{Effects_trailAdditiveColors}.first<kAdditiveTrailColors>(),
-      palettes.additive.begin(), ColorOf);
-  std::ranges::transform(
-      std::span{Effects_trailColors}.first<kDistortionTrailColors>(),
-      palettes.distortion.begin(), ColorOf);
+  std::ranges::transform(trailAdditiveColors, palettes.additive.begin(),
+                         ColorOf);
+  std::ranges::transform(trailColors, palettes.distortion.begin(), ColorOf);
   return palettes;
 }
 

@@ -1201,13 +1201,6 @@
     <ClCompile Include="src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Effects\ScreenEffects.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Effects\ScreenEffectState.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -1277,13 +1270,6 @@
     <ClCompile Include="src\Effects\TrailEmitter.cpp" />
     <ClCompile Include="src\Effects\TrailEmitterLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="src\Effects\Trails.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Effects\Transforms.cpp" />
     <ClCompile Include="src\Effects\TransformsLive.cpp">
@@ -2295,6 +2281,7 @@
     <ClInclude Include="src\Boot\GameLoop.hpp" />
     <ClInclude Include="src\Boot\OverlayReset.hpp" />
     <ClInclude Include="src\Boot\PlayerSettings.hpp" />
+    <ClInclude Include="src\Effects\BoneTrailLiveState.hpp" />
     <ClInclude Include="src\Effects\CameraLiveState.hpp" />
     <ClInclude Include="src\Effects\EffectResourcesLiveState.hpp" />
     <ClInclude Include="src\Effects\Package.h" />
@@ -2364,11 +2351,10 @@
     <ClInclude Include="src\Effects\Plugins\PluginData.hpp" />
     <ClInclude Include="src\Effects\PurgeTables.hpp" />
     <ClInclude Include="src\Effects\Runtime.h" />
-    <ClInclude Include="src\Effects\ScreenEffects.h" />
     <ClInclude Include="src\Effects\ScreenEffectState.hpp" />
     <ClInclude Include="src\Effects\Templates\TemplateState.h" />
     <ClInclude Include="src\Effects\TimelineTrackKeys.hpp" />
-    <ClInclude Include="src\Effects\Trails.h" />
+    <ClInclude Include="src\Effects\Trails.hpp" />
     <ClInclude Include="src\Effects\Transforms.h" />
     <ClInclude Include="src\Effects\WeatherPoolLiveSupport.hpp" />
     <ClInclude Include="src\Ending\ClearResults.hpp" />
@@ -2763,6 +2749,7 @@
     <ClInclude Include="include\Effects\TimelineTracksLive.hpp" />
     <ClInclude Include="include\Effects\TrailEmitter.hpp" />
     <ClInclude Include="include\Effects\TrailEmitterLive.hpp" />
+    <ClInclude Include="include\Effects\TrailPoint.hpp" />
     <ClInclude Include="include\Effects\Transforms.hpp" />
     <ClInclude Include="include\Effects\TransformsLive.hpp" />
     <ClInclude Include="include\Effects\WeatherPool.hpp" />

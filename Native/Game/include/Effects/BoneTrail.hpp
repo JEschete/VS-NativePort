@@ -9,6 +9,7 @@
 #include "Actors/ModelDrawing.hpp"
 #include "Effects/EffectInstances.hpp"
 #include "Effects/Templates/RingCore.hpp"
+#include "Effects/TrailPoint.hpp"
 
 struct Effects_EffectInstance;
 struct Effects_RendererSlot;
@@ -77,15 +78,6 @@ struct BoneTrailConfig {
   static constexpr int kColorShift = 16;
   static constexpr int kTextureShift = 20;
   static constexpr int kLifeShift = 24;
-};
-
-// A camera-relative point (an SVECTOR without its pad).
-struct TrailPoint {
-  std::int16_t x{};
-  std::int16_t y{};
-  std::int16_t z{};
-
-  friend bool operator==(const TrailPoint&, const TrailPoint&) = default;
 };
 
 // The bone's base and tip at one moment.

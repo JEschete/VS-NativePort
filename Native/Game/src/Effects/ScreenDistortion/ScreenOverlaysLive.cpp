@@ -14,7 +14,6 @@
 #include "Effects/ScreenDistortion/ScreenOverlayLifetime.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Effects/ScreenEffects.h"
 #include "Render/Display.hpp"
 #include "Render/Render.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -35,38 +34,38 @@ class LiveFeedbackTexturePages final : public FeedbackTexturePages {
   }
 };
 
-ScreenOverlayControls ReadControls(const Effects_ScreenEffectOverlay& overlay) {
-  return {.feedback_pages_reserved = overlay.opaque1,
-          .feedback_layer = overlay.feedbackLayer,
+ScreenOverlayControls ReadControls(const LiveScreenEffectOverlay& overlay) {
+  return {.feedback_pages_reserved = overlay.feedback_pages_reserved,
+          .feedback_layer = overlay.feedback_layer,
           .radial_warp = {.scale = static_cast<std::uint16_t>(
-                              overlay.radialWarpArg0),
-                          .growth = overlay.radialWarpArg1},
-          .vignette_enabled = overlay.vignetteEnabled};
+                              overlay.radial_warp_scale),
+                          .growth = overlay.radial_warp_growth},
+          .vignette_enabled = overlay.vignette_enabled};
 }
 
-void WriteControls(Effects_ScreenEffectOverlay& overlay,
+void WriteControls(LiveScreenEffectOverlay& overlay,
                    const ScreenOverlayControls& controls) {
-  overlay.opaque1 = controls.feedback_pages_reserved;
-  overlay.feedbackLayer = controls.feedback_layer;
-  overlay.radialWarpArg0 =
+  overlay.feedback_pages_reserved = controls.feedback_pages_reserved;
+  overlay.feedback_layer = controls.feedback_layer;
+  overlay.radial_warp_scale =
       static_cast<std::int16_t>(controls.radial_warp.scale);
-  overlay.radialWarpArg1 = controls.radial_warp.growth;
-  overlay.vignetteEnabled = controls.vignette_enabled;
+  overlay.radial_warp_growth = controls.radial_warp.growth;
+  overlay.vignette_enabled = controls.vignette_enabled;
 }
 
 // The active controller, or null after reporting `operation` as refused.
-Effects_ScreenEffectOverlay* LiveOverlay(const char* operation) {
-  if (Effects_screenEffectOverlay == nullptr) {
+LiveScreenEffectOverlay* LiveOverlay(const char* operation) {
+  if (screenEffectOverlay == nullptr) {
     VS::Core::LogError("effects",
                        "screen overlay {} refused: no overlay controller",
                        operation);
   }
-  return Effects_screenEffectOverlay;
+  return screenEffectOverlay;
 }
 
 template <typename Update>
 void UpdateLiveControls(const char* operation, Update update) {
-  Effects_ScreenEffectOverlay* overlay = LiveOverlay(operation);
+  LiveScreenEffectOverlay* overlay = LiveOverlay(operation);
   if (overlay == nullptr) {
     return;
   }
@@ -84,7 +83,7 @@ void SetLiveFeedbackLayer(int ordering_layer) {
 }
 
 void DrawLiveFeedbackTiles() {
-  const Effects_ScreenEffectOverlay* overlay = LiveOverlay("feedback tiles");
+  const LiveScreenEffectOverlay* overlay = LiveOverlay("feedback tiles");
   if (overlay == nullptr) {
     return;
   }
@@ -92,7 +91,7 @@ void DrawLiveFeedbackTiles() {
       Render::LiveFrameOrderingEntry(Render::LiveOrderingBase::kScene, 0));
   Render::LivePacketQueue feedback_entry(Render::LiveFrameOrderingEntry(
       Render::LiveOrderingBase::kScene,
-      FeedbackOrderingSlot(overlay->feedbackLayer)));
+      FeedbackOrderingSlot(overlay->feedback_layer)));
   DrawFeedbackTiles(VS::Render::frameBuf, scene_head, feedback_entry);
 }
 
@@ -188,14 +187,14 @@ class LiveScreenOverlayPainter final : public ScreenOverlayPainter {
 };
 
 // The attached controller, or the defaults the next attach points at.
-Effects_ScreenEffectOverlay& LiveLifetimeRecord() {
-  return Effects_screenEffectOverlay != nullptr ? *Effects_screenEffectOverlay
-                                                : screenEffectDefaults;
+LiveScreenEffectOverlay& LiveLifetimeRecord() {
+  return screenEffectOverlay != nullptr ? *screenEffectOverlay
+                                        : screenEffectDefaults;
 }
 
 ScreenOverlayLifetime ReadLiveLifetime() {
-  const Effects_ScreenEffectOverlay& record = LiveLifetimeRecord();
-  return {.attached = Effects_screenEffectOverlay != nullptr,
+  const LiveScreenEffectOverlay& record = LiveLifetimeRecord();
+  return {.attached = screenEffectOverlay != nullptr,
           .loading = record.loading,
           .controls = ReadControls(record),
           .read = record.slot};
@@ -205,11 +204,11 @@ ScreenOverlayLifetime ReadLiveLifetime() {
 // written to the defaults, as the original's reset cleared them.
 void WriteLiveLifetime(const ScreenOverlayLifetime& lifetime) {
   if (!lifetime.attached) {
-    Effects_screenEffectOverlay = nullptr;
-  } else if (Effects_screenEffectOverlay == nullptr) {
-    Effects_screenEffectOverlay = &screenEffectDefaults;
+    screenEffectOverlay = nullptr;
+  } else if (screenEffectOverlay == nullptr) {
+    screenEffectOverlay = &screenEffectDefaults;
   }
-  Effects_ScreenEffectOverlay& record = LiveLifetimeRecord();
+  LiveScreenEffectOverlay& record = LiveLifetimeRecord();
   record.loading = lifetime.loading;
   WriteControls(record, lifetime.controls);
   record.slot = lifetime.read;

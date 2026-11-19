@@ -15,7 +15,6 @@
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Effects/ScreenEffects.h"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -275,8 +274,10 @@ TEST_CASE("Screen overlay release ignores a detached controller",
 
 namespace {
 struct LiveLifetimeFixture {
-  Effects_ScreenEffectOverlay defaults = VS::Effects::screenEffectDefaults;
-  Effects_ScreenEffectOverlay* active = Effects_screenEffectOverlay;
+  VS::Effects::LiveScreenEffectOverlay defaults =
+      VS::Effects::screenEffectDefaults;
+  VS::Effects::LiveScreenEffectOverlay* active =
+      VS::Effects::screenEffectOverlay;
   decltype(std::to_array(Content_discRequestSlots)) requests =
       std::to_array(Content_discRequestSlots);
   Content_DiscRequestCounts counts = Content_discRequestCounts;
@@ -296,7 +297,7 @@ struct LiveLifetimeFixture {
 
   ~LiveLifetimeFixture() {
     VS::Effects::screenEffectDefaults = defaults;
-    Effects_screenEffectOverlay = active;
+    VS::Effects::screenEffectOverlay = active;
     std::copy(requests.begin(), requests.end(), Content_discRequestSlots);
     Content_discRequestCounts = counts;
     VS::Content::overlayWorkspaceOwner = owner;
@@ -314,10 +315,11 @@ void CheckQueuedScreff2Read(const Content_DiscQueueSlot& request) {
 TEST_CASE("Live screen overlay acquire queues the SCREFF2 read",
           "[screen-overlay-lifetime]") {
   const LiveLifetimeFixture fixture;
-  REQUIRE(Effects_screenEffectOverlay == nullptr);
+  REQUIRE(VS::Effects::screenEffectOverlay == nullptr);
 
   sd::AcquireLiveScreenOverlay();
-  REQUIRE(Effects_screenEffectOverlay == &VS::Effects::screenEffectDefaults);
+  REQUIRE(VS::Effects::screenEffectOverlay ==
+          &VS::Effects::screenEffectDefaults);
   const Content_DiscQueueSlot* const request = &Content_discRequestSlots[0];
   CHECK(VS::Effects::screenEffectDefaults.slot == request);
   CHECK(VS::Effects::screenEffectDefaults.loading == 1);
@@ -353,13 +355,14 @@ TEST_CASE("Live screen overlay release restores the defaults",
           "[screen-overlay-lifetime]") {
   const LiveLifetimeFixture fixture;
   sd::AcquireLiveScreenOverlay();
-  REQUIRE(Effects_screenEffectOverlay == &VS::Effects::screenEffectDefaults);
-  VS::Effects::screenEffectDefaults.vignetteEnabled = 4;
+  REQUIRE(VS::Effects::screenEffectOverlay ==
+          &VS::Effects::screenEffectDefaults);
+  VS::Effects::screenEffectDefaults.vignette_enabled = 4;
   sd::ReleaseLiveScreenOverlay();
-  CHECK(Effects_screenEffectOverlay == nullptr);
+  CHECK(VS::Effects::screenEffectOverlay == nullptr);
   CHECK(VS::Content::overlayWorkspaceOwner == 0);
-  CHECK(VS::Effects::screenEffectDefaults.vignetteEnabled == 0);
-  CHECK(VS::Effects::screenEffectDefaults.radialWarpArg0 == 0x1000);
+  CHECK(VS::Effects::screenEffectDefaults.vignette_enabled == 0);
+  CHECK(VS::Effects::screenEffectDefaults.radial_warp_scale == 0x1000);
   CHECK(VS::Effects::screenEffectDefaults.slot == nullptr);
 }
 
@@ -367,7 +370,7 @@ TEST_CASE("Live screen overlay load refuses a missing controller",
           "[screen-overlay-lifetime]") {
   const LiveLifetimeFixture fixture;
   sd::LoadLiveScreenOverlay(1);
-  CHECK(Effects_screenEffectOverlay == nullptr);
+  CHECK(VS::Effects::screenEffectOverlay == nullptr);
   CHECK(VS::Effects::screenEffectDefaults.loading == 0);
   CHECK(Content_discRequestCounts.waiting == 0);
   CHECK(Content_discRequestSlots[0].state == 0);
@@ -376,13 +379,13 @@ TEST_CASE("Live screen overlay load refuses a missing controller",
 TEST_CASE("Live screen overlay load writes the attached controller",
           "[screen-overlay-lifetime]") {
   const LiveLifetimeFixture fixture;
-  Effects_ScreenEffectOverlay other{};
-  other.vignetteEnabled = 2;
-  Effects_screenEffectOverlay = &other;
+  VS::Effects::LiveScreenEffectOverlay other{};
+  other.vignette_enabled = 2;
+  VS::Effects::screenEffectOverlay = &other;
   sd::LoadLiveScreenOverlay(1);
   CHECK(other.loading == 1);
   CHECK(other.slot == &Content_discRequestSlots[0]);
-  CHECK(other.vignetteEnabled == 2);
+  CHECK(other.vignette_enabled == 2);
   CHECK(VS::Effects::screenEffectDefaults.loading == 0);
   // A missing request is reported and stays pending.
   other.slot = nullptr;

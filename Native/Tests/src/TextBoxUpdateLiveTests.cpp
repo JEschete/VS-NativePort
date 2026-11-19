@@ -12,7 +12,6 @@
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Effects/ScreenEffects.h"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
 #include "Menu/ContainerPendingRowsLiveFixture.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -57,7 +56,7 @@ struct LiveUpdateFixture {
     VS::State::tickSpeed = 2;
     Battle_lowerScreenUiState = 0;
     VS::Core::interfaceRandomState = kRandomSeed;
-    Effects_screenEffectOverlay = nullptr;
+    VS::Effects::screenEffectOverlay = nullptr;
     VS::Effects::screenEffectDefaults = {};
     auto& box = menu::textBoxes[0];
     box.flags.kind = static_cast<unsigned>(menu::TextBoxKind::kHidden);

@@ -10,11 +10,11 @@ struct Effects_RingState;
 struct Effects_RotatingSurfaceState;
 struct Effects_SurfaceState;
 struct Effects_TiledRingState;
-struct Effects_Trail9;
 struct Effects_Trail9State;
 struct Effects_TransposedRingState;
 
 #include "Effects/Particles.h"
+#include "Effects/Trails.hpp"
 
 // decomp: vs_closedRingState (src/EFFECT/PLG077.BIN/18.c:25)
 struct Effects_ClosedRingState {
@@ -97,27 +97,13 @@ struct Effects_TiledRingState {
     Effects_ParticleTextureAnimation texture;
 };
 
-// decomp: vs_trail9 (src/EFFECT/trails9Types.h:16)
-struct Effects_Trail9 {
-    SVECTOR splinePoints[4];
-    u_char stepCount;
-    u_char splineSampleCount;
-    u_char trailCollapseCounter;
-    u_char currentSplineSample;
-    SVECTOR splineSamples[9];
-    int splineProgress;
-    int speed;
-    int opaque74;
-};
-static_assert(sizeof(Effects_Trail9) == 0x78, "Effects_Trail9 must keep its PS1 layout");
-
 // decomp: vs_trail9State (src/EFFECT/trails9Types.h:27)
 struct Effects_Trail9State {
     u_char lifetime;
     u_char effect;
     u_char trailCount;
     u_char opaque3;
-    Effects_Trail9* trails;
+    VS::Effects::LiveTrail9* trails;
     int curveSampleDistance;
     Effects_ParticleTextureAnimation texture;
     u_char sampledTransparencyCurve[0];

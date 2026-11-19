@@ -1253,13 +1253,13 @@ T00212.000,T00212,D_800E8FB4_t,0,unk0,1,int,,,,instanceFlags,Flags copied into t
 T00212.001,T00212,D_800E8FB4_t,1,unk4,1,int,,,,instanceWord4,Word copied into the new instance; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Field\GimmickResourcesLive.cpp:139;declaration-only;source:30DB0.c:33
 T00212.002,T00212,D_800E8FB4_t,2,unk8,1,int,,,,recolorCount,Count passed to the palette recolor routine,low,source:30DB0.c:329;use cited by sanity pass;source:30DB0.c:34
 T00212.003,T00212,D_800E8FB4_t,3,unkC,1,int,,,,modelDataSize,Size passed to the model parser,med,declaration-only;source:30DB0.c:35
-T00213.000,T00213,D_800EB9B4_t,0,unk0,1,u_char,,,,loading,Set while the overlay loads; scripts wait for it,med,source:4A0A8.c:2735
-T00213.001,T00213,D_800EB9B4_t,1,unk1,1,u_char,,,feedbackCallbacksEnabled,opaque1,Tested as 0 or 1 when the overlay is released or its feedback layer set,low,source:5BF94.c:3929
-T00213.002,T00213,D_800EB9B4_t,2,unk2,1,u_short,,,feedbackOtLayer,feedbackLayer,Feedback layer; tiles are drawn from layer 3 up,med,source:GIM/SCREFF2.PRG/0.c:10
-T00213.003,T00213,D_800EB9B4_t,3,unk4,1,short,,,radialScale,radialWarpArg0,First SetRadialWarp argument; 0x1000 in both halves disables the warp,low,source:GIM/SCREFF2.PRG/0.c:116
-T00213.004,T00213,D_800EB9B4_t,4,unk6,1,short,,,radialGrowth,radialWarpArg1,Second SetRadialWarp argument,low,source:GIM/SCREFF2.PRG/0.c:117
-T00213.005,T00213,D_800EB9B4_t,5,unk8,1,int,,,vignetteEnabled,vignetteEnabled,Draws the vignette while set,high,source:5E8.c:8
-T00213.006,T00213,D_800EB9B4_t,6,slot,0,vs_main_CdQueueSlot *,,,,slot,Named in the fork; see cited use,med,source:5BF94.c:3883
+T00213.000,T00213,D_800EB9B4_t,0,unk0,1,u_char,,,,loading,Set while SCREFF2.PRG loads; scripts wait for it to clear,med,native:ScreenEffectState.hpp LiveScreenEffectOverlay::loading (#441);source:GIM/SCREFF2.PRG/0.h:6
+T00213.001,T00213,D_800EB9B4_t,1,unk1,1,u_char,,,feedbackCallbacksEnabled,feedback_pages_reserved,1 while the feedback tiles hold their reserved texture pages,low,native:ScreenEffectState.hpp LiveScreenEffectOverlay::feedback_pages_reserved (#441);source:GIM/SCREFF2.PRG/0.h:7
+T00213.002,T00213,D_800EB9B4_t,2,unk2,1,u_short,,,feedbackOtLayer,feedback_layer,Ordering-table layer of the feedback tiles; 0 turns them off,med,native:ScreenEffectState.hpp LiveScreenEffectOverlay::feedback_layer (#441);source:GIM/SCREFF2.PRG/0.h:8
+T00213.003,T00213,D_800EB9B4_t,3,unk4,1,short,,,radialScale,radial_warp_scale,"Radial warp start scale (0x1000 is 1.0, read unsigned); with zero growth, 0x1000 leaves the frame unwarped",low,native:ScreenEffectState.hpp LiveScreenEffectOverlay::radial_warp_scale (#441);source:GIM/SCREFF2.PRG/0.h:9
+T00213.004,T00213,D_800EB9B4_t,4,unk6,1,short,,,radialGrowth,radial_warp_growth,Radial warp growth added to 1.0 for each step outward,low,native:ScreenEffectState.hpp LiveScreenEffectOverlay::radial_warp_growth (#441);source:GIM/SCREFF2.PRG/0.h:10
+T00213.005,T00213,D_800EB9B4_t,5,unk8,1,int,,,vignetteEnabled,vignette_enabled,Draws the vignette while set,high,native:ScreenEffectState.hpp LiveScreenEffectOverlay::vignette_enabled (#441);source:GIM/SCREFF2.PRG/0.h:11
+T00213.006,T00213,D_800EB9B4_t,6,slot,0,vs_main_CdQueueSlot *,,,,slot,Disc request that loads SCREFF2.PRG,med,native:ScreenEffectState.hpp LiveScreenEffectOverlay::slot (#441);source:GIM/SCREFF2.PRG/0.h:12
 T00214.000,T00214,D_800EB9B8_t,0,unk0,1,D_800EB9B8_t2,,,primary volume,primaryVolume,Primary target volume,high,source:573B8.c:446
 T00214.001,T00214,D_800EB9B8_t,1,unk10,1,D_800EB9B8_t2,,,secondary volume,secondaryVolume,Secondary target volume,high,source:573B8.c:484
 T00214.002,T00214,D_800EB9B8_t,2,unk20,1,int,,,,depthAndYaw,Depth and camera yaw as one word; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TargetVolume.h:29;source:58578.c:128;use cited by sanity pass;source:573B8.c:36
@@ -3051,15 +3051,15 @@ T00342.002,T00342,_texture_t,2,w,0,char,,,,width,Named in the fork; see cited us
 T00342.003,T00342,_texture_t,3,h,0,char,,,,height,Named in the fork; see cited use,med,source:renderTextures.h:15
 T00342.004,T00342,_texture_t,4,tpage,0,u_short,,,,texture_page,Named in the fork; see cited use,med,source:renderTextures.h:41
 T00342.005,T00342,_texture_t,5,clut,0,u_short,,,,clut,Named in the fork; see cited use,med,source:renderTextures.h:40
-T00343.000,T00343,_trail,0,splinePoints,0,SVECTOR[4],,,,splinePoints,Named in the fork; see cited use,med,source:trails5.h:73
-T00343.001,T00343,_trail,1,stepCount,0,u_char,,,,stepCount,Named in the fork; see cited use,med,source:trails5.h:395
-T00343.002,T00343,_trail,2,splineSampleCount,0,u_char,,,,splineSampleCount,Named in the fork; see cited use,med,source:trails5.h:396
-T00343.003,T00343,_trail,3,trailCollapseCounter,0,u_char,,,,trailCollapseCounter,Named in the fork; see cited use,med,source:trails5.h:397
-T00343.004,T00343,_trail,4,currentSplineSample,0,u_char,,,,currentSplineSample,Named in the fork; see cited use,med,source:trails5.h:398
-T00343.005,T00343,_trail,5,splineSamples,0,SVECTOR[5],,,,splineSamples,Named in the fork; see cited use,med,source:trails5.h:399
-T00343.006,T00343,_trail,6,splineProgress,0,int,,,,splineProgress,Named in the fork; see cited use,med,source:trails5.h:400
-T00343.007,T00343,_trail,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,"source:trails5.h:401;source-review:resources\rood-reverseWin\src\EFFECT\trails.h:14;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution splineProgress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
-T00343.008,T00343,_trail,8,unk,1,int,,,,opaque54,"Used, but its meaning is not established",low,source:trails5.h:402
+T00343.000,T00343,_trail,0,splinePoints,0,SVECTOR[4],,,,spline_points,"The origin, two control points and the target",med,native:Trails.hpp LiveTrail::spline_points (#441);source:EFFECT/trailEffect.h:30
+T00343.001,T00343,_trail,1,stepCount,0,u_char,,,,step_count,Emitter steps the trail spends crossing the spline,med,native:Trails.hpp LiveTrail::step_count (#441);source:EFFECT/trailEffect.h:31
+T00343.002,T00343,_trail,2,splineSampleCount,0,u_char,,,,spline_sample_count,"Samples taken so far, up to the sample count",med,native:Trails.hpp LiveTrail::spline_sample_count (#441);source:EFFECT/trailEffect.h:32
+T00343.003,T00343,_trail,3,trailCollapseCounter,0,u_char,,,,trail_collapse_counter,Ticks left once the trail reaches its target (0 ends it); also selects the fade's transparency sample and texture column,med,native:Trails.hpp LiveTrail::trail_collapse_counter (#441);source:EFFECT/trailEffect.h:33
+T00343.004,T00343,_trail,4,currentSplineSample,0,u_char,,,,current_spline_sample,Newest entry of the sample ring,med,native:Trails.hpp LiveTrail::current_spline_sample (#441);source:EFFECT/trailEffect.h:34
+T00343.005,T00343,_trail,5,splineSamples,0,SVECTOR[5],,,,spline_samples,Ring of the spline samples the trail draws,med,native:Trails.hpp LiveTrail::spline_samples (#441);source:EFFECT/trailEffect.h:35
+T00343.006,T00343,_trail,6,splineProgress,0,int,,,,spline_progress,Position along the spline; (spline_progress >> 12) - 0x1000 is the interpolation parameter,med,native:Trails.hpp LiveTrail::spline_progress (#441);source:EFFECT/trailEffect.h:36
+T00343.007,T00343,_trail,7,speed,0,int,,,,speed,"Progress added per tick, eased toward the target",med,"native:Trails.hpp LiveTrail::speed (#441);source:EFFECT/trailEffect.h:37;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution spline_progress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
+T00343.008,T00343,_trail,8,unk,1,int,,,,first_step,"Initial speed step (6*ONE*ONE/steps^2 - 2*speed/steps); set at start, never read",low,native:Trails.hpp LiveTrail::first_step (#441);source:EFFECT/trailEffect.h:38
 T00344.000,T00344,_wepModelOffsets,0,unk0,1,u_char[48],,,,header,WEP header bytes before the section offsets,med,declaration-only;source:3A1A0.h:114
 T00344.001,T00344,_wepModelOffsets,1,texturesOffset,0,int,,,,textureSection,Texture section; file offset relocated to an address,high,source:30DB0.c:663
 T00344.002,T00344,_wepModelOffsets,2,vertexGroupsOffset,0,int,,,,vertexGroupSection,Vertex group section; relocated on load,high,source:30DB0.c:664
@@ -3838,17 +3838,17 @@ T00420.001,T00420,effectTrailConfig,1,bone,0,u_int,8,,,bone,Named in the fork; s
 T00420.002,T00420,effectTrailConfig,2,color,0,u_int,4,,,color,Named in the fork; see cited use,med,source:5BF94.c:4923
 T00420.003,T00420,effectTrailConfig,3,texture,0,u_int,4,,,texture,Named in the fork; see cited use,med,source:5BF94.c:4941
 T00420.004,T00420,effectTrailConfig,4,life,0,u_int,8,,,life,Named in the fork; see cited use,med,source:5BF94.c:5023
-T00421.000,T00421,effectTrailState,0,config,0,effectTrailConfig,,,,config,Named in the fork; see cited use,med,source:5BF94.c:4922
-T00421.001,T00421,effectTrailState,1,index,0,int,,,,index,Named in the fork; see cited use,med,source:5BF94.c:4967
-T00421.002,T00421,effectTrailState,2,age,0,int,,,,age,Named in the fork; see cited use,med,source:5BF94.c:4968
-T00421.003,T00421,effectTrailState,3,first,0,SVECTOR[8],,,,first,Named in the fork; see cited use,med,source:5BF94.c:4973
-T00421.004,T00421,effectTrailState,4,second,0,SVECTOR[8],,,,second,Named in the fork; see cited use,med,source:5BF94.c:4974
-T00421.005,T00421,effectTrailState,5,previousFirst,0,SVECTOR,,,,previousFirst,Named in the fork; see cited use,med,source:5BF94.c:4902
-T00421.006,T00421,effectTrailState,6,currentFirst,0,SVECTOR,,,,currentFirst,Named in the fork; see cited use,med,source:5BF94.c:4902
-T00421.007,T00421,effectTrailState,7,previousSecond,0,SVECTOR,,,,previousSecond,Named in the fork; see cited use,med,source:5BF94.c:4902
-T00421.008,T00421,effectTrailState,8,currentSecond,0,SVECTOR,,,,currentSecond,Named in the fork; see cited use,med,source:5BF94.c:4903
-T00421.009,T00421,effectTrailState,9,projectionDepth,0,long,,,,projectionDepth,Named in the fork; see cited use,med,source:5BF94.c:4903
-T00421.010,T00421,effectTrailState,10,projectionFlags,0,long,,,,projectionFlags,Named in the fork; see cited use,med,source:5BF94.c:4904
+T00421.000,T00421,effectTrailState,0,config,0,effectTrailConfig,,,,config,"Packed actor, bone, colour, texture and remaining-life fields",med,native:Effects/BoneTrail.hpp BoneTrail::config (#441);source:BATTLE/BATTLE.PRG/5BF94.c:148
+T00421.001,T00421,effectTrailState,1,index,0,int,,,,index,Newest entry of the two history rings,med,native:Effects/BoneTrail.hpp BoneTrail::newest (#441);source:BATTLE/BATTLE.PRG/5BF94.c:149
+T00421.002,T00421,effectTrailState,2,age,0,int,,,,age,Samples taken; wraps,med,native:Effects/BoneTrail.hpp BoneTrail::age (#441);source:BATTLE/BATTLE.PRG/5BF94.c:150
+T00421.003,T00421,effectTrailState,3,first,0,SVECTOR[8],,,,first,Ring of the bone's base points,med,native:Effects/BoneTrail.hpp BoneTrail::history.base (#441);source:BATTLE/BATTLE.PRG/5BF94.c:151
+T00421.004,T00421,effectTrailState,4,second,0,SVECTOR[8],,,,second,Ring of the bone's tip points,med,native:Effects/BoneTrail.hpp BoneTrail::history.tip (#441);source:BATTLE/BATTLE.PRG/5BF94.c:152
+T00421.005,T00421,effectTrailState,5,previousFirst,0,SVECTOR,,,,previousFirst,Base of the older edge of the segment being drawn,med,native:Effects/BoneTrail.hpp BoneTrail::previous.base (#441);source:BATTLE/BATTLE.PRG/5BF94.c:153
+T00421.006,T00421,effectTrailState,6,currentFirst,0,SVECTOR,,,,currentFirst,Base of the newer edge of the segment being drawn,med,native:Effects/BoneTrail.hpp BoneTrail::current.base (#441);source:BATTLE/BATTLE.PRG/5BF94.c:154
+T00421.007,T00421,effectTrailState,7,previousSecond,0,SVECTOR,,,,previousSecond,Tip of the older edge of the segment being drawn,med,native:Effects/BoneTrail.hpp BoneTrail::previous.tip (#441);source:BATTLE/BATTLE.PRG/5BF94.c:155
+T00421.008,T00421,effectTrailState,8,currentSecond,0,SVECTOR,,,,currentSecond,Tip of the newer edge of the segment being drawn,med,native:Effects/BoneTrail.hpp BoneTrail::current.tip (#441);source:BATTLE/BATTLE.PRG/5BF94.c:156
+T00421.009,T00421,effectTrailState,9,projectionDepth,0,long,,,,projectionDepth,Ordering depth RotAverage4 returned for the segment; natively TrailProjection::depth,med,native:Effects/BoneTrail.hpp BoneTrail::projection.depth (#441);source:BATTLE/BATTLE.PRG/5BF94.c:157
+T00421.010,T00421,effectTrailState,10,projectionFlags,0,long,,,,projectionFlags,"Flags RotAverage4 returned for the segment; never read, so natively not kept",med,native:Effects/BoneTrail.hpp BoneTrail::projection.flags (#441);source:BATTLE/BATTLE.PRG/5BF94.c:158
 T00422.000,T00422,effectTransformState,0,rotation,0,short[3],,,,rotation,Named in the fork; see cited use,med,source:5BF94.c:5947
 T00422.001,T00422,effectTransformState,1,flags,0,u_short,,,,opaque6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:62;source:5BF94.c:5954
 T00422.002,T00422,effectTransformState,2,pad8,1,u_char[6],,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:63;declaration-only;source:5BF94.c:594
@@ -6649,15 +6649,15 @@ T00730.008,T00730,vs_tiledRingState,8,age,0,int,,,,age,Named in the fork; see ci
 T00730.009,T00730,vs_tiledRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:tiledRings.h:82
 T00731.000,T00731,vs_tiledRingUV,0,u,0,u_char,,,,u,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:29
 T00731.001,T00731,vs_tiledRingUV,1,v,0,u_char,,,,v,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:30
-T00732.000,T00732,vs_trail9,0,splinePoints,0,SVECTOR[4],,,,splinePoints,Named in the fork; see cited use,med,source:trails9.h:73
-T00732.001,T00732,vs_trail9,1,stepCount,0,u_char,,,,stepCount,Named in the fork; see cited use,med,source:trails9.h:402
-T00732.002,T00732,vs_trail9,2,splineSampleCount,0,u_char,,,,splineSampleCount,Named in the fork; see cited use,med,source:trails9.h:403
-T00732.003,T00732,vs_trail9,3,trailCollapseCounter,0,u_char,,,,trailCollapseCounter,Named in the fork; see cited use,med,source:trails9.h:404
-T00732.004,T00732,vs_trail9,4,currentSplineSample,0,u_char,,,,currentSplineSample,Named in the fork; see cited use,med,source:trails9.h:405
-T00732.005,T00732,vs_trail9,5,splineSamples,0,SVECTOR[9],,,,splineSamples,Named in the fork; see cited use,med,source:trails9.h:406
-T00732.006,T00732,vs_trail9,6,splineProgress,0,int,,,,splineProgress,Named in the fork; see cited use,med,source:trails9.h:407
-T00732.007,T00732,vs_trail9,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,"source:trails9.h:408;source-review:resources\rood-reverseWin\src\EFFECT\trails9Types.h:14;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution splineProgress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
-T00732.008,T00732,vs_trail9,8,unk,1,int,,,,opaque74,"Used, but its meaning is not established",low,source:trails9.h:409
+T00732.000,T00732,vs_trail9,0,splinePoints,0,SVECTOR[4],,,,spline_points,"The origin, two control points and the target",med,native:Trails.hpp LiveTrail9::spline_points (#441);source:EFFECT/trailEffect.h:30
+T00732.001,T00732,vs_trail9,1,stepCount,0,u_char,,,,step_count,Emitter steps the trail spends crossing the spline,med,native:Trails.hpp LiveTrail9::step_count (#441);source:EFFECT/trailEffect.h:31
+T00732.002,T00732,vs_trail9,2,splineSampleCount,0,u_char,,,,spline_sample_count,"Samples taken so far, up to the sample count",med,native:Trails.hpp LiveTrail9::spline_sample_count (#441);source:EFFECT/trailEffect.h:32
+T00732.003,T00732,vs_trail9,3,trailCollapseCounter,0,u_char,,,,trail_collapse_counter,Ticks left once the trail reaches its target (0 ends it); also selects the fade's transparency sample and texture column,med,native:Trails.hpp LiveTrail9::trail_collapse_counter (#441);source:EFFECT/trailEffect.h:33
+T00732.004,T00732,vs_trail9,4,currentSplineSample,0,u_char,,,,current_spline_sample,Newest entry of the sample ring,med,native:Trails.hpp LiveTrail9::current_spline_sample (#441);source:EFFECT/trailEffect.h:34
+T00732.005,T00732,vs_trail9,5,splineSamples,0,SVECTOR[9],,,,spline_samples,Ring of the spline samples the trail draws,med,native:Trails.hpp LiveTrail9::spline_samples (#441);source:EFFECT/trailEffect.h:35
+T00732.006,T00732,vs_trail9,6,splineProgress,0,int,,,,spline_progress,Position along the spline; (spline_progress >> 12) - 0x1000 is the interpolation parameter,med,native:Trails.hpp LiveTrail9::spline_progress (#441);source:EFFECT/trailEffect.h:36
+T00732.007,T00732,vs_trail9,7,speed,0,int,,,,speed,"Progress added per tick, eased toward the target",med,"native:Trails.hpp LiveTrail9::speed (#441);source:EFFECT/trailEffect.h:37;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution spline_progress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
+T00732.008,T00732,vs_trail9,8,unk,1,int,,,,first_step,"Initial speed step (6*ONE*ONE/steps^2 - 2*speed/steps); set at start, never read",low,native:Trails.hpp LiveTrail9::first_step (#441);source:EFFECT/trailEffect.h:38
 T00733.000,T00733,vs_trail9Prim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:241;declaration-only;source:trails9.h:17
 T00733.001,T00733,vs_trail9Prim,1,unk1,1,u_char,,,,tag1,Byte of the ordering-table tag; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:242;declaration-only;source:trails9.h:18
 T00733.002,T00733,vs_trail9Prim,2,unk2,1,u_char,,,,tag2,Byte of the ordering-table tag; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:243;declaration-only;source:trails9.h:19

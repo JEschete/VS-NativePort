@@ -388,18 +388,18 @@ TEST_CASE("Nine-sample live trail stages hold at most eight trails",
   Effects_ParticleDefinition definition{};
   Effects_ParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
-  std::array<Effects_Trail9, 3> buffer{};
+  std::array<VS::Effects::LiveTrail9, 3> buffer{};
   Effects_Trail9State state{};
   state.trails = buffer.data();
   state.trailCount = 2;
   trails::RunLiveTrailNineStage(&MarkNine, definition, scratch, instance,
                                 state);
-  CHECK(buffer[0].currentSplineSample == 7);
-  CHECK(buffer[1].splineSamples[kNine - 1].vz == 6);
-  CHECK(buffer[2].currentSplineSample == 0);
+  CHECK(buffer[0].current_spline_sample == 7);
+  CHECK(buffer[1].spline_samples[kNine - 1].vz == 6);
+  CHECK(buffer[2].current_spline_sample == 0);
   state.trailCount = static_cast<std::uint8_t>(kNine);
   trails::RunLiveTrailNineStage(&MarkNine, definition, scratch, instance,
                                 state);
-  CHECK(buffer[2].currentSplineSample == 0);
+  CHECK(buffer[2].current_spline_sample == 0);
   CHECK(Logged(warnings.messages, "9 trails in a buffer of 8; stage skipped"));
 }

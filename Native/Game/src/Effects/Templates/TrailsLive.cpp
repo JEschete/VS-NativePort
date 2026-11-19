@@ -58,7 +58,7 @@
 #include "Effects/Templates/TrailTarget.hpp"
 #include "Effects/Templates/TrailUpdate.hpp"
 #include "Effects/TrailEmitterLive.hpp"
-#include "Effects/Trails.h"
+#include "Effects/Trails.hpp"
 #include "Effects/Transforms.h"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
@@ -104,31 +104,31 @@ constexpr std::size_t kScratchAccelerationAt = 0x108;
 constexpr std::size_t kScratchJitterAt = 0x144;
 
 // The trail and its typed record share the PS1 layout's members; the record
-// keeps the unused initial speed step in opaque54.
-static_assert(sizeof(Effects_Trail) == kTrailBytes);
-static_assert(offsetof(Effects_Trail, stepCount) == kTrailStepCountAt);
-static_assert(offsetof(Effects_Trail, currentSplineSample) == kTrailCursorAt);
-static_assert(offsetof(Effects_Trail, splineSamples) == kTrailSamplesAt);
-static_assert(offsetof(Effects_Trail, splineProgress) == kTrailProgressAt);
-static_assert(offsetof(Effects_Trail, opaque54) == kTrailFirstStepAt);
-static_assert(std::extent_v<decltype(Effects_Trail::splinePoints)> ==
+// keeps the unused initial speed step in first_step.
+static_assert(sizeof(LiveTrail) == kTrailBytes);
+static_assert(offsetof(LiveTrail, step_count) == kTrailStepCountAt);
+static_assert(offsetof(LiveTrail, current_spline_sample) == kTrailCursorAt);
+static_assert(offsetof(LiveTrail, spline_samples) == kTrailSamplesAt);
+static_assert(offsetof(LiveTrail, spline_progress) == kTrailProgressAt);
+static_assert(offsetof(LiveTrail, first_step) == kTrailFirstStepAt);
+static_assert(std::tuple_size_v<decltype(LiveTrail::spline_points)> ==
               kTrailSplinePoints);
-static_assert(std::extent_v<decltype(Effects_Trail::splineSamples)> ==
+static_assert(std::tuple_size_v<decltype(LiveTrail::spline_samples)> ==
               kTrailHistory);
 // The nine-sample trail (TemplateState.h) shares that layout up to its longer
-// history; it keeps the unused initial speed step in opaque74.
+// history; it keeps the unused initial speed step in first_step.
 constexpr std::size_t kTrailNineBytes = 0x78;
 constexpr std::size_t kTrailNineProgressAt = 0x6C;
 constexpr std::size_t kTrailNineFirstStepAt = 0x74;
-static_assert(sizeof(Effects_Trail9) == kTrailNineBytes);
-static_assert(offsetof(Effects_Trail9, stepCount) == kTrailStepCountAt);
-static_assert(offsetof(Effects_Trail9, currentSplineSample) == kTrailCursorAt);
-static_assert(offsetof(Effects_Trail9, splineSamples) == kTrailSamplesAt);
-static_assert(offsetof(Effects_Trail9, splineProgress) == kTrailNineProgressAt);
-static_assert(offsetof(Effects_Trail9, opaque74) == kTrailNineFirstStepAt);
-static_assert(std::extent_v<decltype(Effects_Trail9::splinePoints)> ==
+static_assert(sizeof(LiveTrail9) == kTrailNineBytes);
+static_assert(offsetof(LiveTrail9, step_count) == kTrailStepCountAt);
+static_assert(offsetof(LiveTrail9, current_spline_sample) == kTrailCursorAt);
+static_assert(offsetof(LiveTrail9, spline_samples) == kTrailSamplesAt);
+static_assert(offsetof(LiveTrail9, spline_progress) == kTrailNineProgressAt);
+static_assert(offsetof(LiveTrail9, first_step) == kTrailNineFirstStepAt);
+static_assert(std::tuple_size_v<decltype(LiveTrail9::spline_points)> ==
               kTrailSplinePoints);
-static_assert(std::extent_v<decltype(Effects_Trail9::splineSamples)> ==
+static_assert(std::tuple_size_v<decltype(LiveTrail9::spline_samples)> ==
               kTrailNineHistory);
 using Scratch = Effects_ParticleEmitterScratch;
 static_assert(offsetof(Scratch, aimMatrix) == kScratchAimMatrixAt);
@@ -263,17 +263,17 @@ template <typename Trail>
 struct LegacyTrail;
 
 template <>
-struct LegacyTrail<Effects_Trail> {
+struct LegacyTrail<LiveTrail> {
   static constexpr std::size_t kHistory = kTrailHistory;
   static constexpr std::size_t kCapacity = kMaxTrailsPerEmitter;
-  static constexpr auto kFirstStep = &Effects_Trail::opaque54;
+  static constexpr auto kFirstStep = &LiveTrail::first_step;
 };
 
 template <>
-struct LegacyTrail<Effects_Trail9> {
+struct LegacyTrail<LiveTrail9> {
   static constexpr std::size_t kHistory = kTrailNineHistory;
   static constexpr std::size_t kCapacity = kMaxNineSampleTrailsPerEmitter;
-  static constexpr auto kFirstStep = &Effects_Trail9::opaque74;
+  static constexpr auto kFirstStep = &LiveTrail9::first_step;
 };
 
 template <typename Trail>
@@ -282,31 +282,32 @@ using LegacyRecord = BasicTrailRecord<LegacyTrail<Trail>::kHistory>;
 template <typename Trail>
 [[nodiscard]] LegacyRecord<Trail> TrailRecordOf(const Trail& source) {
   LegacyRecord<Trail> record{
-      .step_count = source.stepCount,
-      .sample_count = source.splineSampleCount,
-      .collapse = source.trailCollapseCounter,
-      .current = source.currentSplineSample,
-      .progress = source.splineProgress,
+      .step_count = source.step_count,
+      .sample_count = source.spline_sample_count,
+      .collapse = source.trail_collapse_counter,
+      .current = source.current_spline_sample,
+      .progress = source.spline_progress,
       .speed = source.speed,
       .first_step = source.*LegacyTrail<Trail>::kFirstStep};
-  std::ranges::transform(source.splinePoints, record.points.begin(), PointOf);
-  std::ranges::transform(source.splineSamples, record.samples.begin(), PointOf);
+  std::ranges::transform(source.spline_points, record.points.begin(), PointOf);
+  std::ranges::transform(source.spline_samples, record.samples.begin(),
+                         PointOf);
   return record;
 }
 
 template <typename Trail>
 void StoreTrailRecord(const LegacyRecord<Trail>& record, Trail& target) {
   for (std::size_t index = 0; index < kTrailSplinePoints; ++index) {
-    StorePoint(target.splinePoints[index], record.points.at(index));
+    StorePoint(target.spline_points[index], record.points.at(index));
   }
   for (std::size_t index = 0; index < LegacyTrail<Trail>::kHistory; ++index) {
-    StorePoint(target.splineSamples[index], record.samples.at(index));
+    StorePoint(target.spline_samples[index], record.samples.at(index));
   }
-  target.stepCount = record.step_count;
-  target.splineSampleCount = record.sample_count;
-  target.trailCollapseCounter = record.collapse;
-  target.currentSplineSample = record.current;
-  target.splineProgress = record.progress;
+  target.step_count = record.step_count;
+  target.spline_sample_count = record.sample_count;
+  target.trail_collapse_counter = record.collapse;
+  target.current_spline_sample = record.current;
+  target.spline_progress = record.progress;
   target.speed = record.speed;
   target.*LegacyTrail<Trail>::kFirstStep = record.first_step;
 }
@@ -335,7 +336,7 @@ template <typename State>
          offsetof(State, sampledTransparencyCurve);
 }
 
-[[nodiscard]] EmitterView<Effects_Trail> ViewOf(Effects_TrailQuadSet& state) {
+[[nodiscard]] EmitterView<LiveTrail> ViewOf(Effects_TrailQuadSet& state) {
   return {.trails = state.trails,
           .count = state.trailcount,
           .distance = state.curveSampleDistance,
@@ -344,7 +345,7 @@ template <typename State>
                       .definition_index = state.definitionIndex}};
 }
 
-[[nodiscard]] EmitterView<Effects_Trail9> ViewOf(Effects_Trail9State& state) {
+[[nodiscard]] EmitterView<LiveTrail9> ViewOf(Effects_Trail9State& state) {
   return {.trails = state.trails,
           .count = state.trailCount,
           .distance = state.curveSampleDistance,

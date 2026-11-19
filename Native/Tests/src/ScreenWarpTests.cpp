@@ -15,7 +15,7 @@
 #include "Core/Math/FixedPoint.hpp"
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Effects/ScreenEffects.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
@@ -28,8 +28,9 @@ std::uint32_t Point(int x, int y) {
 
 struct WarpFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
-  Effects_ScreenEffectOverlay* saved_overlay = Effects_screenEffectOverlay;
-  Effects_ScreenEffectOverlay overlay{};
+  VS::Effects::LiveScreenEffectOverlay* saved_overlay =
+      VS::Effects::screenEffectOverlay;
+  VS::Effects::LiveScreenEffectOverlay overlay{};
   std::array<u_long, 2048> ordering{};
   std::array<u_long, 5> triangle{};
   std::array<u_char, 1296> saved_lookup{};
@@ -49,8 +50,8 @@ struct WarpFixture {
       VS::Core::Math::kArcTangentTable[517 + index * 2] =
           static_cast<u_char>(value >> 8);
     }
-    overlay.radialWarpArg0 = 2048;
-    Effects_screenEffectOverlay = &overlay;
+    overlay.radial_warp_scale = 2048;
+    VS::Effects::screenEffectOverlay = &overlay;
     VS::Render::FrameScratchpad() = {};
     VS::Render::FrameScratchpad().ordering_table = ordering.data();
     ordering[0] = 0x12FFFFFF;
@@ -66,7 +67,7 @@ struct WarpFixture {
     std::copy(saved_lookup.begin(), saved_lookup.end(),
               VS::Core::Math::kArcTangentTable);
     VS::Render::FrameScratchpad() = saved_frame;
-    Effects_screenEffectOverlay = saved_overlay;
+    VS::Effects::screenEffectOverlay = saved_overlay;
   }
 };
 
@@ -214,8 +215,8 @@ TEST_CASE(
     const auto base = static_cast<std::uint16_t>(state);
     const auto growth =
         std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(state >> 16));
-    fixture.overlay.radialWarpArg0 = std::bit_cast<std::int16_t>(base);
-    fixture.overlay.radialWarpArg1 = growth;
+    fixture.overlay.radial_warp_scale = std::bit_cast<std::int16_t>(base);
+    fixture.overlay.radial_warp_growth = growth;
     const auto scales = ReferenceScales(base, growth);
     const std::array<u_long, 3> points{state, ~state, Point(164, 112)};
     CheckWarpPoints(fixture, points, scales);
@@ -227,8 +228,8 @@ TEST_CASE(
     "case",
     "[effects][screen-warp]") {
   WarpFixture fixture;
-  fixture.overlay.radialWarpArg0 = 4371;
-  fixture.overlay.radialWarpArg1 = -19;
+  fixture.overlay.radial_warp_scale = 4371;
+  fixture.overlay.radial_warp_growth = -19;
   const auto scales = ReferenceScales(4371, -19);
   for (unsigned bits = 0; bits <= UINT16_MAX; ++bits) {
     const std::array<u_long, 3> points{
@@ -242,8 +243,8 @@ TEST_CASE(
     "Screen warp keeps the original masked-shift prefix lookup near the center",
     "[effects][screen-warp]") {
   WarpFixture fixture;
-  fixture.overlay.radialWarpArg0 = 4096;
-  fixture.overlay.radialWarpArg1 = 64;
+  fixture.overlay.radial_warp_scale = 4096;
+  fixture.overlay.radial_warp_growth = 64;
   const auto scales = ReferenceScales(4096, 64);
   for (const int distance : {0, 1, 2, 3, 4, 7, 8, 15, 16, 443, 444, 1023}) {
     const auto original = Point(160 + distance, 112);
@@ -305,7 +306,7 @@ TEST_CASE(
 TEST_CASE("Identity screen warp preserves all signed coordinate words",
           "[effects][screen-warp]") {
   WarpFixture fixture;
-  fixture.overlay.radialWarpArg0 = 4096;
+  fixture.overlay.radial_warp_scale = 4096;
   fixture.triangle[2] = Point(-32768, 32767);
   fixture.triangle[3] = Point(32767, -32768);
   fixture.triangle[4] = Point(-32608, -32656);

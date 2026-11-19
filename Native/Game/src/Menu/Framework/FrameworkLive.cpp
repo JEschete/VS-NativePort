@@ -45,7 +45,7 @@
 #include "Core/Overlays.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Effects/ScreenEffects.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -1044,7 +1044,7 @@ class LiveHost final : public Host {
     Battle_reuseSphereVolumes = 0;
     Battle_hudStatusIconsHidden = 0;
     Battle_hudSlideOffset = 0;
-    Effects_screenEffectOverlay = nullptr;
+    VS::Effects::screenEffectOverlay = nullptr;
     Battle_targetSphere = nullptr;
     VS::Render::ForgetLiveGimImages();
     VS::Menu::textBoxBufferIndex = 0;

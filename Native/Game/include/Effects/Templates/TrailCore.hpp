@@ -106,7 +106,7 @@ struct TrailScratch {
 // A trail's four spline points: the origin, two control points and the target.
 using TrailSpline = std::array<TrailPoint, kTrailSplinePoints>;
 
-// One trail (Effects_Trail, or Effects_Trail9 with a nine-sample history): its
+// One trail (LiveTrail, or LiveTrail9 with a nine-sample history): its
 // spline, the step count it spends crossing the spline, the history of spline
 // samples it draws and the recurrence that moves it along. `current` is the
 // newest history entry; `collapse` counts the ticks left once the trail has

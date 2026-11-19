@@ -49,7 +49,7 @@
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/TrailEmitterLive.hpp"
-#include "Effects/Trails.h"
+#include "Effects/Trails.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
@@ -1029,11 +1029,11 @@ constexpr std::array<TrailGolden, 12> kTrailGolden{{
 
 template <class Trail>
 void CheckTrailInitialState(const Trail& trail) {
-  CHECK(trail.stepCount == 12);
-  CHECK(trail.splineSampleCount == 1);
-  CHECK(trail.trailCollapseCounter == std::size(trail.splineSamples) - 1);
-  CHECK(trail.currentSplineSample == 0);
-  CHECK(trail.splineProgress == 0);
+  CHECK(trail.step_count == 12);
+  CHECK(trail.spline_sample_count == 1);
+  CHECK(trail.trail_collapse_counter == std::size(trail.spline_samples) - 1);
+  CHECK(trail.current_spline_sample == 0);
+  CHECK(trail.spline_progress == 0);
   CHECK(trail.speed == 0);
 }
 
@@ -1041,16 +1041,16 @@ template <class Trail>
 void CheckTrailReferenceStep(const std::array<Trail, 2>& entries,
                              std::size_t frame) {
   const auto& trail = entries[0];
-  const auto samples = std::size(trail.splineSamples);
-  CHECK(trail.splineProgress == kTrailGolden[frame].progress);
+  const auto samples = std::size(trail.spline_samples);
+  CHECK(trail.spline_progress == kTrailGolden[frame].progress);
   CHECK(trail.speed == kTrailGolden[frame].speed);
-  CHECK(trail.currentSplineSample == (frame + 1) % samples);
-  CHECK(trail.splineSampleCount == std::min(frame + 2, samples));
-  const auto& point = trail.splineSamples[trail.currentSplineSample];
+  CHECK(trail.current_spline_sample == (frame + 1) % samples);
+  CHECK(trail.spline_sample_count == std::min(frame + 2, samples));
+  const auto& point = trail.spline_samples[trail.current_spline_sample];
   const std::array actual{point.vx, point.vy, point.vz};
   CHECK(actual == kTrailGolden[frame].point);
   const auto& separate = entries[1];
-  const auto& zero = separate.splineSamples[separate.currentSplineSample];
+  const auto& zero = separate.spline_samples[separate.current_spline_sample];
   CHECK(zero.vx == 0);
   CHECK(zero.vy == 0);
   CHECK(zero.vz == 0);
@@ -1067,13 +1067,13 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
   auto& trail = storage.entries[0];
   constexpr std::array<SVECTOR, 4> kPoints{
       {{0, 0, 0, 0}, {256, -64, 0, 0}, {256, 64, 256, 0}, {512, 0, 256, 0}}};
-  std::ranges::copy(kPoints, trail.splinePoints);
+  std::ranges::copy(kPoints, trail.spline_points.begin());
   state.trails = storage.entries.data();
   Effects_ParticleDefinition definition{};
   std::ranges::fill(definition.pairRanges[4], 12);
   Effects_ParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
-  const auto samples = std::size(trail.splineSamples);
+  const auto samples = std::size(trail.spline_samples);
   for (int cycle = 0; cycle < 2; ++cycle) {
     state.curveSampleDistance = 0;
     initialize(&definition, &scratch, &instance, &state);
@@ -1087,10 +1087,10 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
     for (std::size_t tail = 0; tail < samples - 1; ++tail) {
       state.curveSampleDistance = 12 + static_cast<int>(tail);
       update(&definition, &scratch, &instance, &state);
-      CHECK(trail.trailCollapseCounter == samples - 2 - tail);
+      CHECK(trail.trail_collapse_counter == samples - 2 - tail);
       CHECK(storage.guard == kGuard);
     }
-    CHECK(trail.splineSampleCount == 1);
+    CHECK(trail.spline_sample_count == 1);
   }
 }
 
@@ -1121,7 +1121,7 @@ TEST_CASE(
     "[effects][trails][reference]") {
   Effects_TrailQuadSet state{};
   state.trailcount = 2;
-  CheckTrailReferencePath<Effects_Trail>(
+  CheckTrailReferencePath<VS::Effects::LiveTrail>(
       state, RunTrailStage<&VS::Effects::Plg057::TrailInit>,
       RunTrailStage<&VS::Effects::Plg057::TrailUpdate>);
 }
@@ -1130,7 +1130,7 @@ TEST_CASE("Nine-sample trails preserve source trajectory and separate history",
           "[effects][trails][reference]") {
   Effects_Trail9State state{};
   state.trailCount = 2;
-  CheckTrailReferencePath<Effects_Trail9>(
+  CheckTrailReferencePath<VS::Effects::LiveTrail9>(
       state, RunTrailNineStage<&VS::Effects::Templates::TrailNineInit>,
       RunTrailNineStage<&VS::Effects::Templates::TrailNineUpdate>);
 }
@@ -1167,14 +1167,14 @@ void CheckTrailReferenceQuad(const POLY_GT4& quad, int x, int y, int fade,
 template <class Trail>
 void InitializeTrailRenderHistory(std::array<Trail, 2>& trails,
                                   std::size_t count, std::size_t current) {
-  constexpr auto kSamples = std::size(Trail{}.splineSamples);
+  constexpr auto kSamples = std::size(Trail{}.spline_samples);
   for (std::size_t actor = 0; actor < trails.size(); ++actor) {
     auto& trail = trails[actor];
-    trail.splineSampleCount = static_cast<u_char>(count);
-    trail.trailCollapseCounter = static_cast<u_char>(count - 1);
-    trail.currentSplineSample = static_cast<u_char>(current);
+    trail.spline_sample_count = static_cast<u_char>(count);
+    trail.trail_collapse_counter = static_cast<u_char>(count - 1);
+    trail.current_spline_sample = static_cast<u_char>(current);
     for (std::size_t index = 0; index < kSamples; ++index) {
-      trail.splineSamples[(current + kSamples - index) % kSamples] = {
+      trail.spline_samples[(current + kSamples - index) % kSamples] = {
           static_cast<std::int16_t>(index * 32),
           static_cast<std::int16_t>(actor * 64), 1024, 0};
     }
@@ -1196,7 +1196,7 @@ void CheckTrailReferencePackets(const u_long* begin, std::size_t trail_count,
                                 std::size_t count, int origin_x,
                                 ReadQuad read_quad) {
   constexpr auto kPacketWords = sizeof(Packet) / sizeof(u_long);
-  constexpr auto kSamples = std::size(Trail{}.splineSamples);
+  constexpr auto kSamples = std::size(Trail{}.spline_samples);
   for (std::size_t actor = 0; actor < trail_count; ++actor) {
     for (std::size_t segment = 0; segment < count - 1; ++segment) {
       const auto packet_index = actor * (count - 1) + segment;
@@ -1219,7 +1219,7 @@ void CheckTrailReferenceRendering(State& state,
                                   Effects_ParticleTextureAnimation& animation,
                                   std::span<u_char> transparency, Render render,
                                   ReadQuad read_quad) {
-  constexpr auto kSamples = std::size(Trail{}.splineSamples);
+  constexpr auto kSamples = std::size(Trail{}.spline_samples);
   const bool attached = GENERATE(false, true);
   const bool clipped = GENERATE(false, true);
   const bool at_boundary = GENERATE(false, true);
@@ -1273,7 +1273,7 @@ TEST_CASE("Five-sample trail ribbons retain source geometry and render spaces",
   static_assert(offsetof(Storage, transparency) ==
                 offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
   storage.state.trailcount = 2;
-  CheckTrailReferenceRendering<Effects_Trail,
+  CheckTrailReferenceRendering<VS::Effects::LiveTrail,
                                VS::Render::EffectGouraudQuadPacket>(
       storage.state, storage.state.textureAnimation, storage.transparency,
       RunTrailStage<&VS::Effects::Plg057::TrailRender>,
@@ -1289,7 +1289,8 @@ TEST_CASE("Nine-sample trail ribbons retain source geometry and render spaces",
   static_assert(offsetof(Storage, transparency) ==
                 offsetof(Effects_Trail9State, sampledTransparencyCurve));
   storage.state.trailCount = 2;
-  CheckTrailReferenceRendering<Effects_Trail9, VS::Render::Trail9Packet>(
+  CheckTrailReferenceRendering<VS::Effects::LiveTrail9,
+                               VS::Render::Trail9Packet>(
       storage.state, storage.state.texture, storage.transparency,
       RunTrailNineStage<&VS::Effects::Templates::TrailNineRender>,
       [](const auto& packet) -> const POLY_GT4& { return packet.poly; });
@@ -1312,7 +1313,7 @@ struct Plg074Fixture : EmissionFixture {
   std::array<CVECTOR, 8> saved_colors{};
   std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
   Effects_ParticleEmitterScratch scratch{};
-  std::array<Effects_Trail, 16> trails{};
+  std::array<VS::Effects::LiveTrail, 16> trails{};
   Effects_TrailQuadSet trail_state{};
 
   Plg074Fixture() {
@@ -1531,7 +1532,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
     VS::Effects::GenerateLivePlg074TrailOrigins(
         definition, fixture.scratch, fixture.instance, fixture.trail_state);
     for (int index = 0; index < 8; ++index) {
-      const auto& point = fixture.trails[index].splinePoints[0];
+      const auto& point = fixture.trails[index].spline_points[0];
       const int corner = index + 1;
       CHECK(point.vx == offsets[anchor][0] + (corner & 1 ? 10 : -10));
       CHECK(point.vy == offsets[anchor][1] + (corner & 2 ? 20 : -20));
@@ -1539,7 +1540,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
     }
     CHECK(VS::Content::plg074TrailEmissionCounter[0] == 0);
     CHECK(VS::Effects::Plg073::trailEmissionCounter == 5);
-    CHECK(fixture.trails[8].splinePoints[0].vx == 0);
+    CHECK(fixture.trails[8].spline_points[0].vx == 0);
   }
 }
 
@@ -1557,13 +1558,13 @@ TEST_CASE("PLG074 F01989 targets world request and actor anchors",
                       : anchor == 0xC0 ? std::array{700, -800, 900}
                                        : std::array{0, 0, 0};
   for (int index = 0; index < 8; ++index) {
-    const auto& point = fixture.trails[index].splinePoints[3];
+    const auto& point = fixture.trails[index].spline_points[3];
     CHECK(point.vx == offset[0] + 10);
     CHECK(point.vy == offset[1] - 20);
     CHECK(point.vz == offset[2] + 30);
-    CHECK(fixture.trails[index].splinePoints[0].vx == 0);
+    CHECK(fixture.trails[index].spline_points[0].vx == 0);
   }
-  CHECK(fixture.trails[8].splinePoints[3].vx == 0);
+  CHECK(fixture.trails[8].spline_points[3].vx == 0);
 }
 
 TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
@@ -1571,7 +1572,7 @@ TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
   const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailControl>;
   Plg074Fixture fixture;
   fixture.trail_state.trailcount = 1;
-  auto& points = fixture.trails[0].splinePoints;
+  auto& points = fixture.trails[0].spline_points;
   points[0] = {10, 20, 30, 0};
   points[3] = {10, 20, 1054, 0};
   std::ranges::copy(std::array<std::int16_t, 4>{64, 64, -64, -64},
@@ -1586,18 +1587,19 @@ TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
   CHECK(points[2].vz == 798);
   CHECK(points[0].vz == 30);
   CHECK(points[3].vz == 1054);
-  CHECK(fixture.trails[1].splinePoints[1].vz == 0);
+  CHECK(fixture.trails[1].spline_points[1].vz == 0);
 }
 
 namespace {
-void CheckPlg074TrailInitialization(const Effects_Trail& trail, int steps) {
-  CHECK(trail.stepCount == steps);
-  CHECK(trail.splineSampleCount == 1);
-  CHECK(trail.trailCollapseCounter == 4);
-  CHECK(trail.currentSplineSample == 0);
-  CHECK(trail.splineProgress == 0);
+void CheckPlg074TrailInitialization(const VS::Effects::LiveTrail& trail,
+                                    int steps) {
+  CHECK(trail.step_count == steps);
+  CHECK(trail.spline_sample_count == 1);
+  CHECK(trail.trail_collapse_counter == 4);
+  CHECK(trail.current_spline_sample == 0);
+  CHECK(trail.spline_progress == 0);
   CHECK(trail.speed == 8192);
-  CHECK(trail.opaque54 == 0x06000000 / (steps * steps) - 16384 / steps);
+  CHECK(trail.first_step == 0x06000000 / (steps * steps) - 16384 / steps);
 }
 
 void CheckPlg074EmitterInitialization(const Effects_TrailQuadSet& state,
@@ -1652,16 +1654,16 @@ TEST_CASE(
   Plg074Fixture fixture;
   std::ranges::fill(fixture.Definition().pairRanges[4], duration);
   std::ranges::fill(fixture.Definition().innerExtentRange, 2);
-  fixture.trails[0].splinePoints[0] = {10, 20, 30, 0};
+  fixture.trails[0].spline_points[0] = {10, 20, 30, 0};
   entry(&fixture.Definition(), &fixture.scratch, &fixture.instance,
         &fixture.trail_state);
   for (int index = 0; index < 8; ++index) {
     const auto& trail = fixture.trails[index];
     const int steps = duration == 0 ? 1 : duration;
     CheckPlg074TrailInitialization(trail, steps);
-    CHECK(trail.splineSamples[0].vx == (index == 0 ? 10 : 0));
+    CHECK(trail.spline_samples[0].vx == (index == 0 ? 10 : 0));
   }
-  CHECK(fixture.trails[8].stepCount == 0);
+  CHECK(fixture.trails[8].step_count == 0);
 }
 
 TEST_CASE("PLG074 F01992 matches the source recurrence and tail collapse",
@@ -1669,7 +1671,7 @@ TEST_CASE("PLG074 F01992 matches the source recurrence and tail collapse",
   const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailUpdate>;
   Effects_TrailQuadSet state{};
   state.trailcount = 2;
-  CheckTrailReferencePath<Effects_Trail>(
+  CheckTrailReferencePath<VS::Effects::LiveTrail>(
       state, RunTrailStage<&VS::Effects::Plg073::TrailInit>, entry);
 }
 
@@ -1684,7 +1686,7 @@ TEST_CASE(
   static_assert(offsetof(Storage, transparency) ==
                 offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
   storage.state.trailcount = 2;
-  CheckTrailReferenceRendering<Effects_Trail,
+  CheckTrailReferenceRendering<VS::Effects::LiveTrail,
                                VS::Render::EffectGouraudQuadPacket>(
       storage.state, storage.state.textureAnimation, storage.transparency,
       entry,
@@ -1970,7 +1972,7 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
 TEST_CASE("Trail emitters refuse an exhausted heap without a partial state",
           "[effects][plg074][trail-emitter][trail-surface-refusals]") {
   constexpr std::size_t kArenaBytes = 512;
-  static_assert(16 * sizeof(Effects_Trail) > kArenaBytes);
+  static_assert(16 * sizeof(VS::Effects::LiveTrail) > kArenaBytes);
   const bool state_fits = GENERATE(false, true);
   Plg074Fixture fixture;
   LogCapture log;

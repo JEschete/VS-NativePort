@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #pragma once
 #include "Legacy/Psx.h"
+#include "Effects/Trails.hpp"
 
 struct Effects_FixedVector;
 struct Effects_PackageTextureInfo;
@@ -17,7 +18,6 @@ struct Effects_ParticleQuadSet;
 struct Effects_ParticleQuadWord;
 struct Effects_ParticleTextureAnimation;
 struct Effects_PluginEffectState;
-struct Effects_Trail;
 struct Effects_TrailQuadSet;
 
 // decomp: D_800F5620_t (src/BATTLE/BATTLE.PRG/5BF94.c:113)
@@ -240,7 +240,7 @@ struct Effects_TrailQuadSet {
     u_char definitionIndex;
     u_char trailcount;
     u_char opaque3;
-    Effects_Trail* trails;
+    VS::Effects::LiveTrail* trails;
     int curveSampleDistance;
     Effects_ParticleTextureAnimation textureAnimation;
     u_char sampledTransparencyCurve[0];

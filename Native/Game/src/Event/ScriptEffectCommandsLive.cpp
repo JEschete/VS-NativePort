@@ -23,7 +23,7 @@
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Effects/ScreenEffects.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Effects/ScriptedEffectTriggersLive.hpp"
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/ScriptActors.h"
@@ -204,8 +204,8 @@ class LiveScriptEffectHost final : public event::ScriptEffectHost {
   }
 
   [[nodiscard]] bool ScreenEffectsLoading() const override {
-    return Effects_screenEffectOverlay != nullptr &&
-           Effects_screenEffectOverlay->loading != 0;
+    return VS::Effects::screenEffectOverlay != nullptr &&
+           VS::Effects::screenEffectOverlay->loading != 0;
   }
   void AcquireScreenEffects() override {
     VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay();

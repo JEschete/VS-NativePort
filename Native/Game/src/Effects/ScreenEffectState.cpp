@@ -1,9 +1,13 @@
 #include "Effects/ScreenEffectState.hpp"
 
-#include "Effects/ScreenEffects.h"
-#include "Legacy/Psx.h"
+namespace VS::Effects {
 
-// decomp: BATTLE.PRG D_800F4ED8 (5BF94.c:3481/3919).
+// decomp: D_800EB9B4 (src/GIM/SCREFF2.PRG/0.h:22)
+LiveScreenEffectOverlay* screenEffectOverlay;
+
+// decomp: D_800F4ED8 (src/BATTLE/BATTLE.PRG/5BF94.c:425; reset 5BF94.c:3046).
 // Original short[8] aliases a 16-byte overlay; native pointer ownership needs
 // the complete native type, not the original byte capacity.
-Effects_ScreenEffectOverlay VS::Effects::screenEffectDefaults{};
+LiveScreenEffectOverlay screenEffectDefaults{};
+
+}  // namespace VS::Effects

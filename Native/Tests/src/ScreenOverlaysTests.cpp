@@ -8,7 +8,7 @@
 
 #include "Effects/ScreenDistortion/ScreenOverlays.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Effects/ScreenEffects.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.hpp"
 #include "Render/UiPackets.hpp"
@@ -73,11 +73,12 @@ std::uint32_t Tag(std::uint32_t link, std::uint32_t words) {
 }
 
 struct OverlayController {
-  Effects_ScreenEffectOverlay overlay{};
-  Effects_ScreenEffectOverlay* saved = Effects_screenEffectOverlay;
+  VS::Effects::LiveScreenEffectOverlay overlay{};
+  VS::Effects::LiveScreenEffectOverlay* saved =
+      VS::Effects::screenEffectOverlay;
 
-  OverlayController() { Effects_screenEffectOverlay = &overlay; }
-  ~OverlayController() { Effects_screenEffectOverlay = saved; }
+  OverlayController() { VS::Effects::screenEffectOverlay = &overlay; }
+  ~OverlayController() { VS::Effects::screenEffectOverlay = saved; }
   OverlayController(const OverlayController&) = delete;
   OverlayController& operator=(const OverlayController&) = delete;
   OverlayController(OverlayController&&) = delete;
@@ -262,31 +263,31 @@ TEST_CASE("Feedback capture and restore packets follow the frame buffer",
 TEST_CASE("Live screen overlay setters write the controller",
           "[screen-distortion]") {
   OverlayController controller;
-  controller.overlay.feedbackLayer = 0x44;
+  controller.overlay.feedback_layer = 0x44;
 
   sd::SetLiveRadialWarpWords(0x11000, -2);
-  CHECK(controller.overlay.radialWarpArg0 == 0x1000);
-  CHECK(controller.overlay.radialWarpArg1 == -2);
+  CHECK(controller.overlay.radial_warp_scale == 0x1000);
+  CHECK(controller.overlay.radial_warp_growth == -2);
   sd::SetLiveRadialWarp({.scale = 0x8000, .growth = 3});
-  CHECK(controller.overlay.radialWarpArg0 == -0x8000);
-  CHECK(controller.overlay.radialWarpArg1 == 3);
+  CHECK(controller.overlay.radial_warp_scale == -0x8000);
+  CHECK(controller.overlay.radial_warp_growth == 3);
 
   sd::SetLiveVignetteEnabled(5);
-  CHECK(controller.overlay.vignetteEnabled == 5);
+  CHECK(controller.overlay.vignette_enabled == 5);
   // Layer zero with no pages lent touches no texture page.
   sd::SetLiveFeedbackLayer(0);
-  CHECK(controller.overlay.feedbackLayer == 0);
-  CHECK(controller.overlay.opaque1 == 0);
+  CHECK(controller.overlay.feedback_layer == 0);
+  CHECK(controller.overlay.feedback_pages_reserved == 0);
 }
 
 TEST_CASE("Live screen overlays refuse a missing controller or cursor",
           "[screen-distortion]") {
   OverlayController controller;
-  Effects_screenEffectOverlay = nullptr;
+  VS::Effects::screenEffectOverlay = nullptr;
   sd::SetLiveVignetteEnabled(1);
   sd::SetLiveRadialWarpWords(1, 1);
-  CHECK(controller.overlay.vignetteEnabled == 0);
-  CHECK(controller.overlay.radialWarpArg0 == 0);
+  CHECK(controller.overlay.vignette_enabled == 0);
+  CHECK(controller.overlay.radial_warp_scale == 0);
 
   std::vector<int> words(8, 0x5A5A5A5A);
   u_long head = 0x77;

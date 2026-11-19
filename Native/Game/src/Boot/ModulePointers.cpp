@@ -160,7 +160,6 @@
 #include "Effects/Runtime.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Effects/ScreenEffects.h"
 #include "Effects/ScriptedEffectTriggersLive.hpp"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
 #include "Effects/Templates/RepeatingRingsLive.hpp"
@@ -169,7 +168,7 @@
 #include "Effects/TimelineCommandsLive.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/TimelineTracksLive.hpp"
-#include "Effects/Trails.h"
+#include "Effects/BoneTrailLiveState.hpp"
 #include "Effects/Transforms.h"
 #include "Effects/WeatherPoolLive.hpp"
 #include "Effects/WeatherRenderLive.hpp"
@@ -493,7 +492,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EB98Cu, 32u, (void*)&VS::Render::kGlyphPixelExpansion, sizeof VS::Render::kGlyphPixelExpansion, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EB9ACu, 4u, (void*)&Battle_reuseSphereVolumes, sizeof Battle_reuseSphereVolumes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EB9B0u, 4u, (void*)&Battle_hudSlideOffset, sizeof Battle_hudSlideOffset, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EB9B4u, 4u, (void*)&Effects_screenEffectOverlay, sizeof Effects_screenEffectOverlay, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800EB9B4u, 4u, (void*)&VS::Effects::screenEffectOverlay, sizeof VS::Effects::screenEffectOverlay, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9B8u, 4u, (void*)&Battle_targetSphere, sizeof Battle_targetSphere, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9C0u, 4u, (void*)&VS::Menu::Framework::menuItems, sizeof VS::Menu::Framework::menuItems, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9C4u, 4u, (void*)&VS::Menu::Framework::lootLists, sizeof VS::Menu::Framework::lootLists, 0u, 0u},
@@ -545,8 +544,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EC2CCu, 12u, (void*)&VS::Menu::informationHeaderPositions, sizeof VS::Menu::informationHeaderPositions, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2D8u, 12u, (void*)&VS::Menu::kInformationHeaderSpriteWords, sizeof VS::Menu::kInformationHeaderSpriteWords, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2E4u, 4u, (void*)&Effects_effectBufferIndex, sizeof Effects_effectBufferIndex, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC2E8u, 32u, (void*)&Effects_trailAdditiveColors, sizeof Effects_trailAdditiveColors, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC308u, 28u, (void*)&Effects_trailColors, sizeof Effects_trailColors, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC2E8u, 32u, (void*)&VS::Effects::trailAdditiveColors, sizeof VS::Effects::trailAdditiveColors, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC308u, 28u, (void*)&VS::Effects::trailColors, sizeof VS::Effects::trailColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC324u, 4u, (void*)&Effects_scriptRenderers, sizeof Effects_scriptRenderers, 4u, sizeof Effects_scriptRenderers[0]},
     {"BATTLE/BATTLE.PRG", 0x800EC328u, 4u, (void*)&Effects_emissionCounter, sizeof Effects_emissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC32Cu, 4u, (void*)&Effects_actionVariantValues, sizeof Effects_actionVariantValues, 1u, 1u},

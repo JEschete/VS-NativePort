@@ -33,7 +33,7 @@
 #include "Effects/Templates/TrailUpdate.hpp"
 #include "Effects/Templates/TrailsLive.hpp"
 #include "Effects/TrailEmitter.hpp"
-#include "Effects/Trails.h"
+#include "Effects/Trails.hpp"
 #include "Effects/Transforms.h"
 #include "Legacy/Psx.h"
 
@@ -55,7 +55,7 @@ struct EmitterLayout;
 
 template <>
 struct EmitterLayout<Effects_TrailQuadSet> {
-  using Trail = Effects_Trail;
+  using Trail = LiveTrail;
   using Overlay = LiveTrailOverlay;
   static constexpr std::size_t kCapacity = kMaxTrailsPerEmitter;
   static constexpr std::size_t kSamples = kTrailTransparencySamples;
@@ -70,7 +70,7 @@ struct EmitterLayout<Effects_TrailQuadSet> {
 
 template <>
 struct EmitterLayout<Effects_Trail9State> {
-  using Trail = Effects_Trail9;
+  using Trail = LiveTrail9;
   using Overlay = LiveTrailNineOverlay;
   static constexpr std::size_t kCapacity = kMaxNineSampleTrailsPerEmitter;
   static constexpr std::size_t kSamples = kTrailNineTransparencySamples;
@@ -265,7 +265,7 @@ void GenerateOrigins(const Effects_ParticleDefinition& definition,
 
   std::array<TrailPoint, kMaxTrailsPerEmitter> points{};
   for (std::size_t index = 0; index < trails.size(); ++index) {
-    const SVECTOR& point = trails[index].splinePoints[0];
+    const SVECTOR& point = trails[index].spline_points[0];
     points.at(index) = {point.vx, point.vy, point.vz};
   }
   TrailOriginScratch values = LoadScratch(scratch);
@@ -274,7 +274,7 @@ void GenerateOrigins(const Effects_ParticleDefinition& definition,
                        *overlay.corner, values, services);
   StoreScratch(values, scratch);
   for (std::size_t index = 0; index < trails.size(); ++index) {
-    SVECTOR& point = trails[index].splinePoints[0];
+    SVECTOR& point = trails[index].spline_points[0];
     point.vx = points.at(index).x;
     point.vy = points.at(index).y;
     point.vz = points.at(index).z;
@@ -465,17 +465,17 @@ void LiveTrailEmitterHost<Emitter>::DrawTrails() {
 template <typename Emitter>
 void LiveTrailEmitterHost<Emitter>::EmitTickEvents(std::size_t event) {
   constexpr std::size_t kSplineSampleCount =
-      std::extent_v<decltype(TrailOf<Emitter>::splineSamples)>;
+      std::tuple_size_v<decltype(TrailOf<Emitter>::spline_samples)>;
   Effects_ParticleEmitterScratch& scratch = EmitterScratch();
   const MATRIX& world =
       instance_->transforms[definition_->transformIndex].world;
   const bool world_events = (definition_->flags & kTrailWorldEvents) != 0;
   for (TrailOf<Emitter>& trail : Trails(overlay_.name, *State())) {
-    if (trail.currentSplineSample >= kSplineSampleCount) {
+    if (trail.current_spline_sample >= kSplineSampleCount) {
       InvalidEmitter(overlay_.name,
                      "spline sample cursor outside the trail history");
     }
-    const SVECTOR& sample = trail.splineSamples[trail.currentSplineSample];
+    const SVECTOR& sample = trail.spline_samples[trail.current_spline_sample];
     TrailVector point{sample.vx, sample.vy, sample.vz};
     if (world_events) {
       Core_Gte_SetRotMatrix(&world);

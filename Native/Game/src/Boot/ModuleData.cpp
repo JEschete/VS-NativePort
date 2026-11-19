@@ -95,7 +95,7 @@
 #include "Effects/Plugins/Plg300.hpp"
 #include "Effects/Plugins/Plg301.hpp"
 #include "Effects/Runtime.h"
-#include "Effects/Trails.h"
+#include "Effects/BoneTrailLiveState.hpp"
 #include "Ending/ClearResults.hpp"
 #include "Ending/Credits.hpp"
 #include "Ending/Credits/StaffRoll.hpp"
@@ -728,11 +728,11 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83AE4, sizeof Effects_effectBufferIndex,
      &Effects_effectBufferIndex,
      sizeof Effects_effectBufferIndex},  // G00219 D_800EC2E4
-    {"BATTLE/BATTLE.PRG", 0x83AE8, sizeof Effects_trailAdditiveColors,
-     &Effects_trailAdditiveColors,
-     sizeof Effects_trailAdditiveColors},  // G00220 D_800EC2E8
-    {"BATTLE/BATTLE.PRG", 0x83B08, sizeof Effects_trailColors,
-     &Effects_trailColors, sizeof Effects_trailColors},  // G00221 D_800EC308
+    {"BATTLE/BATTLE.PRG", 0x83AE8, sizeof VS::Effects::trailAdditiveColors,
+     &VS::Effects::trailAdditiveColors,
+     sizeof VS::Effects::trailAdditiveColors},  // G00220 D_800EC2E8
+    {"BATTLE/BATTLE.PRG", 0x83B08, sizeof VS::Effects::trailColors,
+     &VS::Effects::trailColors, sizeof VS::Effects::trailColors},  // G00221 D_800EC308
     {"BATTLE/BATTLE.PRG", 0x83B28, sizeof Effects_emissionCounter,
      &Effects_emissionCounter,
      sizeof Effects_emissionCounter},  // G00223 D_800EC328

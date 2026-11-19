@@ -9,7 +9,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/FixedPoint.hpp"
 #include "Effects/ScreenDistortion/RadialWarp.hpp"
-#include "Effects/ScreenEffects.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
@@ -94,14 +94,14 @@ class OrderingTablePackets final : public PrimitivePacketCursor {
 
 // decomp: SCREFF2.PRG func_800F9BD8 (src/GIM/SCREFF2.PRG/3D8.s:9).
 void WarpLivePolygonVertices() {
-  if (Effects_screenEffectOverlay == nullptr ||
+  if (screenEffectOverlay == nullptr ||
       VS::Render::FrameScratchpad().ordering_table == nullptr) {
     InvalidLiveWarp("active controller and ordering table are required");
   }
   const RadialWarpSettings settings{
-      .scale = static_cast<std::uint16_t>(
-          Effects_screenEffectOverlay->radialWarpArg0),
-      .growth = Effects_screenEffectOverlay->radialWarpArg1,
+      .scale =
+          static_cast<std::uint16_t>(screenEffectOverlay->radial_warp_scale),
+      .growth = screenEffectOverlay->radial_warp_growth,
   };
   OrderingTablePackets packets(
       static_cast<u_long*>(VS::Render::FrameScratchpad().ordering_table));

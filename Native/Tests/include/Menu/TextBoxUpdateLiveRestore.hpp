@@ -7,7 +7,6 @@
 #include "Battle/Hud.h"
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Effects/ScreenEffects.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/TextBox.hpp"
@@ -28,8 +27,9 @@ struct LiveUpdateRestore {
       saved_ui{Battle_lowerScreenUiState};
   equipment_detail_tests::ValueRestore<decltype(VS::Core::interfaceRandomState)>
       saved_random{VS::Core::interfaceRandomState};
-  equipment_detail_tests::ValueRestore<decltype(Effects_screenEffectOverlay)>
-      saved_overlay{Effects_screenEffectOverlay};
+  equipment_detail_tests::ValueRestore<
+      decltype(VS::Effects::screenEffectOverlay)>
+      saved_overlay{VS::Effects::screenEffectOverlay};
   equipment_detail_tests::ValueRestore<
       decltype(VS::Effects::screenEffectDefaults)>
       saved_defaults{VS::Effects::screenEffectDefaults};

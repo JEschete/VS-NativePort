@@ -1080,6 +1080,9 @@
     <ClCompile Include="src\Effects\BoneTrailLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClInclude Include="src\Effects\BoneTrailLiveState.hpp">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\Camera.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1581,12 +1584,6 @@
     <ClCompile Include="src\Effects\ScreenDistortion\ScreenOverlaysLive.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>
-    <ClCompile Include="src\Effects\ScreenEffects.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\ScreenEffects.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\ScreenEffectState.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1728,10 +1725,7 @@
     <ClCompile Include="src\Effects\TrailEmitterLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="src\Effects\Trails.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Trails.h">
+    <ClInclude Include="src\Effects\Trails.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Transforms.cpp">
@@ -3973,6 +3967,9 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\TrailEmitterLive.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TrailPoint.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\Transforms.hpp">

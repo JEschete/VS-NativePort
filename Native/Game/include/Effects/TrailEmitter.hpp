@@ -6,6 +6,8 @@
 #include <optional>
 #include <span>
 
+#include "Effects/TrailPoint.hpp"
+
 // The trail emitter behind PLG074's Radial Surge ribbons and the nine-sample
 // trails of PLG049, PLG050 and the other trails9.h overlays: an origin stage
 // that places the first spline point of every trail inside a sphere, box or
@@ -19,13 +21,6 @@ struct TrailVector {
   std::int32_t y{};
   std::int32_t z{};
   friend bool operator==(const TrailVector&, const TrailVector&) = default;
-};
-
-struct TrailPoint {
-  std::int16_t x{};
-  std::int16_t y{};
-  std::int16_t z{};
-  friend bool operator==(const TrailPoint&, const TrailPoint&) = default;
 };
 
 inline constexpr std::size_t kMaxTrailsPerEmitter = 16;

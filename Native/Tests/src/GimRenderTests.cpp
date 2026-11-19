@@ -17,7 +17,7 @@
 #include "Core/Text/TextCode.hpp"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
-#include "Effects/ScreenEffects.h"
+#include "Effects/ScreenEffectState.hpp"
 #include "Event/ScriptVm.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
@@ -248,10 +248,11 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
       VS::Render::legacyPrimitiveBuffers[framebuffer & 1];
   void* const saved_ordering =
       VS::Render::legacyOrderingTables[framebuffer & 1];
-  Effects_ScreenEffectOverlay* saved_effect = Effects_screenEffectOverlay;
-  Effects_ScreenEffectOverlay effect = {0};
-  effect.feedbackLayer = feedback_layer;
-  Effects_screenEffectOverlay = &effect;
+  VS::Effects::LiveScreenEffectOverlay* saved_effect =
+      VS::Effects::screenEffectOverlay;
+  VS::Effects::LiveScreenEffectOverlay effect = {0};
+  effect.feedback_layer = feedback_layer;
+  VS::Effects::screenEffectOverlay = &effect;
   VS::Render::frameBuf = framebuffer;
   ClearOTagR(ordering, kOrderingEntries);
   setlen(dialogue, 3);
@@ -293,7 +294,7 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   VS::Render::legacyPrimitiveBuffers[framebuffer & 1] = saved_buffer;
   VS::Render::legacyOrderingTables[framebuffer & 1] = saved_ordering;
   VS::Render::frameBuf = saved_framebuffer;
-  Effects_screenEffectOverlay = saved_effect;
+  VS::Effects::screenEffectOverlay = saved_effect;
   return passed;
 }
 

@@ -17,7 +17,6 @@
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/Menus.hpp"
@@ -89,7 +88,7 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
               static_cast<int>(menu::kTextBoxOrderingTags));
     VS::State::tickSpeed = 2;
     Battle_lowerScreenUiState = 0;
-    Effects_screenEffectOverlay = nullptr;
+    VS::Effects::screenEffectOverlay = nullptr;
     VS::Effects::screenEffectDefaults = {};
   }
   ~NotificationFixture() { menu::ReleaseLiveSceneNotification(); }

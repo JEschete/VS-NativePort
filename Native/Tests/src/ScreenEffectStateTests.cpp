@@ -15,14 +15,15 @@
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Effects/ScreenEffectState.hpp"
-#include "Effects/ScreenEffects.h"
 #include "Field/DoorMatchList.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
 struct ScreenStateFixture {
-  Effects_ScreenEffectOverlay defaults = VS::Effects::screenEffectDefaults;
-  Effects_ScreenEffectOverlay* active = Effects_screenEffectOverlay;
+  VS::Effects::LiveScreenEffectOverlay defaults =
+      VS::Effects::screenEffectDefaults;
+  VS::Effects::LiveScreenEffectOverlay* active =
+      VS::Effects::screenEffectOverlay;
   decltype(std::to_array(Content_discRequestSlots)) requests =
       std::to_array(Content_discRequestSlots);
   Content_DiscRequestCounts counts = Content_discRequestCounts;
@@ -38,7 +39,7 @@ struct ScreenStateFixture {
 
   ~ScreenStateFixture() {
     VS::Effects::screenEffectDefaults = defaults;
-    Effects_screenEffectOverlay = active;
+    VS::Effects::screenEffectOverlay = active;
     std::copy(requests.begin(), requests.end(), Content_discRequestSlots);
     Content_discRequestCounts = counts;
     VS::Content::overlayWorkspaceOwner = owner;
@@ -47,11 +48,11 @@ struct ScreenStateFixture {
 
 void CheckDefaultState() {
   CHECK(VS::Effects::screenEffectDefaults.loading == 0);
-  CHECK(VS::Effects::screenEffectDefaults.opaque1 == 0);
-  CHECK(VS::Effects::screenEffectDefaults.feedbackLayer == 0);
-  CHECK(VS::Effects::screenEffectDefaults.radialWarpArg0 == 4096);
-  CHECK(VS::Effects::screenEffectDefaults.radialWarpArg1 == 0);
-  CHECK(VS::Effects::screenEffectDefaults.vignetteEnabled == 0);
+  CHECK(VS::Effects::screenEffectDefaults.feedback_pages_reserved == 0);
+  CHECK(VS::Effects::screenEffectDefaults.feedback_layer == 0);
+  CHECK(VS::Effects::screenEffectDefaults.radial_warp_scale == 4096);
+  CHECK(VS::Effects::screenEffectDefaults.radial_warp_growth == 0);
+  CHECK(VS::Effects::screenEffectDefaults.vignette_enabled == 0);
   CHECK(VS::Effects::screenEffectDefaults.slot == nullptr);
 }
 
@@ -69,14 +70,14 @@ void CheckQueuedRequest(const Content_DiscQueueSlot* request, int waiting) {
 TEST_CASE("Screen-effect defaults own the complete native overlay state",
           "[effects][screen-state]") {
   CHECK(sizeof VS::Effects::screenEffectDefaults >=
-        sizeof(Effects_ScreenEffectOverlay));
+        sizeof(VS::Effects::LiveScreenEffectOverlay));
   CHECK(alignof(decltype(VS::Effects::screenEffectDefaults)) >=
-        alignof(Effects_ScreenEffectOverlay));
-  CHECK(offsetof(Effects_ScreenEffectOverlay, slot) +
+        alignof(VS::Effects::LiveScreenEffectOverlay));
+  CHECK(offsetof(VS::Effects::LiveScreenEffectOverlay, slot) +
             sizeof(Content_DiscQueueSlot*) <=
         sizeof VS::Effects::screenEffectDefaults);
   CHECK((std::is_same_v<decltype(VS::Effects::screenEffectDefaults),
-                        Effects_ScreenEffectOverlay>));
+                        VS::Effects::LiveScreenEffectOverlay>));
 }
 
 TEST_CASE("Screen-effect reset clears the entire native request pointer",
@@ -84,9 +85,9 @@ TEST_CASE("Screen-effect reset clears the entire native request pointer",
   const ScreenStateFixture fixture;
   VS::Effects::screenEffectDefaults = {
       1, 1, 7, -1, -2, 99, &Content_discRequestSlots[31]};
-  Effects_screenEffectOverlay = &VS::Effects::screenEffectDefaults;
+  VS::Effects::screenEffectOverlay = &VS::Effects::screenEffectDefaults;
   VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
-  CHECK(Effects_screenEffectOverlay == nullptr);
+  CHECK(VS::Effects::screenEffectOverlay == nullptr);
   CheckDefaultState();
   VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   CheckDefaultState();
@@ -97,7 +98,8 @@ TEST_CASE("Screen-effect acquisition and reentry use one typed native state",
   const ScreenStateFixture fixture;
   for (int cycle = 0; cycle < 2; ++cycle) {
     VS::Effects::ScreenDistortion::AcquireLiveScreenOverlay();
-    REQUIRE(Effects_screenEffectOverlay == &VS::Effects::screenEffectDefaults);
+    REQUIRE(VS::Effects::screenEffectOverlay ==
+            &VS::Effects::screenEffectDefaults);
     auto* request = &Content_discRequestSlots[cycle];
     CHECK(VS::Effects::screenEffectDefaults.slot == request);
     CheckQueuedRequest(request, cycle + 1);
@@ -105,7 +107,7 @@ TEST_CASE("Screen-effect acquisition and reentry use one typed native state",
     CHECK(VS::Effects::screenEffectDefaults.slot == request);
     CHECK(Content_discRequestCounts.waiting == cycle + 1);
     VS::Effects::ScreenDistortion::ReleaseLiveScreenOverlay();
-    CHECK(Effects_screenEffectOverlay == nullptr);
+    CHECK(VS::Effects::screenEffectOverlay == nullptr);
     CHECK(VS::Content::overlayWorkspaceOwner == 0);
     CheckDefaultState();
   }
@@ -116,10 +118,10 @@ TEST_CASE("Screen-effect queue pointer writes stay within native object guards",
   const ScreenStateFixture fixture;
   struct GuardedState {
     std::uint64_t prefix = 0x123456789ABCDEF0;
-    Effects_ScreenEffectOverlay state{};
+    VS::Effects::LiveScreenEffectOverlay state{};
     std::uint64_t suffix = 0x0FEDCBA987654321;
   } guarded;
-  Effects_screenEffectOverlay = &guarded.state;
+  VS::Effects::screenEffectOverlay = &guarded.state;
   VS::Effects::ScreenDistortion::LoadLiveScreenOverlay(1);
   CHECK(guarded.state.slot == &Content_discRequestSlots[0]);
   CHECK(guarded.state.loading == 1);
@@ -154,12 +156,12 @@ TEST_CASE("Screen-effect default binding retains original address provenance",
 TEST_CASE("Screen-effect parameter setters retain the typed default controller",
           "[effects][screen-state]") {
   const ScreenStateFixture fixture;
-  Effects_screenEffectOverlay = &VS::Effects::screenEffectDefaults;
+  VS::Effects::screenEffectOverlay = &VS::Effects::screenEffectDefaults;
   VS::Effects::ScreenDistortion::SetLiveRadialWarpWords(1234, -567);
   VS::Effects::ScreenDistortion::SetLiveVignetteEnabled(7);
-  CHECK(VS::Effects::screenEffectDefaults.radialWarpArg0 == 1234);
-  CHECK(VS::Effects::screenEffectDefaults.radialWarpArg1 == -567);
-  CHECK(VS::Effects::screenEffectDefaults.vignetteEnabled == 7);
+  CHECK(VS::Effects::screenEffectDefaults.radial_warp_scale == 1234);
+  CHECK(VS::Effects::screenEffectDefaults.radial_warp_growth == -567);
+  CHECK(VS::Effects::screenEffectDefaults.vignette_enabled == 7);
   CHECK(VS::Effects::screenEffectDefaults.slot == nullptr);
   VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
   CheckDefaultState();
