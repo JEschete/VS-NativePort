@@ -39,7 +39,7 @@ struct LivePresentation {
   Battle_ActionRequest action{};
   struct Guarded {
     std::uint32_t before = 0x12345678;
-    Effects_ActionEffectRequest request{};
+    VS::Effects::LiveActionEffectRequest request{};
     std::uint32_t after = 0x87654321;
   } output;
   LivePresentation() {
@@ -95,12 +95,12 @@ TEST_CASE("F00109 production builder excludes real targets from bystanders",
   fixture->Build();
   const auto& request = fixture->output.request;
   CHECK(request.count == 1);
-  CHECK(request.targets[0].value.actor.part == 2);
-  CHECK(request.otherCount == 1);
+  CHECK(request.targets[0].Actor().part == 2);
+  CHECK(request.other_count == 1);
   CHECK(request.others[0] == 2);
-  CHECK(request.source.value.actor.part == 0);
-  CHECK(request.source.value.actor.eventActorSlot == 0);
-  CHECK(request.targets[0].value.actor.eventActorSlot == 0);
+  CHECK(request.source.Actor().part == 0);
+  CHECK(request.source.Actor().event_actor_slot == 0);
+  CHECK(request.targets[0].Actor().event_actor_slot == 0);
   CHECK(request.position.pad == 0);
 }
 TEST_CASE("F00109 production duplicate does not change a later default limb",
@@ -113,10 +113,10 @@ TEST_CASE("F00109 production duplicate does not change a later default limb",
   fixture->Build();
   const auto& request = fixture->output.request;
   CHECK(request.count == 2);
-  CHECK(request.targets[0].value.actor.part == 0);
-  CHECK(request.targets[1].value.actor.actor == 2);
-  CHECK(request.targets[1].value.actor.part == 4);
-  CHECK(request.otherCount == 0);
+  CHECK(request.targets[0].Actor().part == 0);
+  CHECK(request.targets[1].Actor().actor == 2);
+  CHECK(request.targets[1].Actor().part == 4);
+  CHECK(request.other_count == 0);
 }
 TEST_CASE("F00109 production compacted world is never mistaken for an actor",
           "[action-presentation][F00109][redirect-binding]") {
@@ -130,11 +130,11 @@ TEST_CASE("F00109 production compacted world is never mistaken for an actor",
   const auto& request = fixture->output.request;
   CHECK(request.count == 3);
   CHECK(request.targets[1].type == 5);
-  CHECK(std::bit_cast<std::array<std::int16_t, 4>>(
-            request.targets[1].value.position) ==
-        std::array<std::int16_t, 4>{2, -3, 17, -99});
-  CHECK(request.targets[2].value.actor.actor == 2);
-  CHECK(request.otherCount == 0);
+  CHECK(
+      std::bit_cast<std::array<std::int16_t, 4>>(request.targets[1].position) ==
+      std::array<std::int16_t, 4>{2, -3, 17, -99});
+  CHECK(request.targets[2].Actor().actor == 2);
+  CHECK(request.other_count == 0);
 }
 TEST_CASE(
     "F00109 production sixteen-world boundary preserves neighboring storage",
@@ -155,11 +155,11 @@ TEST_CASE("F00109 production deduplication remains valid at full capacity",
   for (std::size_t i = 0; i < 17; ++i) fixture->ActorHit(i, 1, 3);
   fixture->Build();
   CHECK(fixture->output.request.count == 1);
-  CHECK(fixture->output.request.targets[0].value.actor.part == 0);
+  CHECK(fixture->output.request.targets[0].Actor().part == 0);
   for (std::size_t i = 0; i < 15; ++i) fixture->WorldHit(i);
   fixture->Build();
   CHECK(fixture->output.request.count == 16);
-  CHECK(fixture->output.request.targets[15].value.actor.part == 0);
+  CHECK(fixture->output.request.targets[15].Actor().part == 0);
   CHECK(fixture->output.before == 0x12345678);
   CHECK(fixture->output.after == 0x87654321);
 }

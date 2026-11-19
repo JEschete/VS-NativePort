@@ -21,7 +21,7 @@ struct Effects_RendererSlot;
 // binds the hosts below to them, and each host read returns the current
 // record, as the original reread its globals after every call.
 namespace VS::Effects {
-// Effects_ActionEffectTarget.type of an endpoint on an actor's bone.
+// LiveActionEffectTarget.type of an endpoint on an actor's bone.
 inline constexpr std::uint16_t kActorBoneEndpoint = 4;
 
 // A track's script starts at its index times this in the package's script.
@@ -268,10 +268,10 @@ class EffectRuntimeFrame {
 [[nodiscard]] std::uint8_t UpdateEffectRuntime(EffectRuntimeFrame& frame);
 
 // The targets an action effect request holds
-// (Effects_ActionEffectRequest.targets).
+// (LiveActionEffectRequest.targets).
 inline constexpr std::size_t kActionEffectTargets = 16;
 
-// Effects_ActionEffectTarget.type of an endpoint at a position.
+// LiveActionEffectTarget.type of an endpoint at a position.
 inline constexpr std::uint16_t kPositionEndpoint = 5;
 
 // Whether `effect_id`'s secondary instances emit from each target toward the

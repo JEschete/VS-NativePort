@@ -155,7 +155,7 @@ H0153,header,Native/Game/src/Actors/WeaponModel.h,generated,yes,pragma-once,0,0,
 H0154,header,Native/Game/src/Actors/Zud.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0155,header,Native/Game/src/Battle/AbilityState.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
 H0156,header,Native/Game/src/Battle/ActionAnimation.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
-H0157,header,Native/Game/src/Battle/ActionEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0157,header,Native/Game/src/Battle/ActionEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted; its only record Battle_SoundEventTargets had no reader (T00604) (#441)
 H0158,header,Native/Game/src/Battle/ActionExecution.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
 H0159,header,Native/Game/src/Battle/ActionFlow.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
 H0160,header,Native/Game/src/Battle/ActionMenu.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
@@ -176,7 +176,7 @@ H0174,header,Native/Game/src/Battle/Ai/PlanningPrimitivesLive.h,owned,no,pragma-
 H0175,header,Native/Game/src/Battle/Ai/RoomState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0176,header,Native/Game/src/Battle/AttackPrerequisiteTable.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0177,header,Native/Game/src/Battle/AttackPrerequisites.h,owned,no,pragma-once,0,0,0,0,0,0,33,0,0,retired,merged into Native/Game/include/Battle/AttackPrerequisitesLive.hpp (#441)
-H0178,header,Native/Game/src/Battle/BattleTypes.h,generated,yes,pragma-once,0,0,0,0,0,0,23,0,0,remaining,
+H0178,header,Native/Game/src/Battle/BattleTypes.h,generated,yes,pragma-once,0,0,0,0,0,0,22,0,0,remaining,
 H0179,header,Native/Game/src/Battle/Damage.h,generated,yes,pragma-once,0,0,0,0,0,0,6,0,0,remaining,
 H0180,header,Native/Game/src/Battle/EncounterHooks.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0181,header,Native/Game/src/Battle/Feedback.h,generated,yes,pragma-once,0,0,0,0,0,2,22,0,0,remaining,
@@ -267,7 +267,7 @@ H0265,header,Native/Game/src/Effects/Plugins/Plg297.hpp,generated,no,pragma-once
 H0266,header,Native/Game/src/Effects/Plugins/Plg300.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0267,header,Native/Game/src/Effects/Plugins/Plg301.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0268,header,Native/Game/src/Effects/PurgeTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,2,39,0,0,remaining,
+H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,0,37,0,0,remaining,
 H0270,header,Native/Game/src/Effects/ScreenEffectState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0271,header,Native/Game/src/Effects/ScreenEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/ScreenEffectState.hpp (#441)
 H0272,header,Native/Game/src/Effects/Templates/TemplateState.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,retired,replaced by Native/Game/src/Effects/Templates/TemplateLiveState.hpp (#441)

@@ -1021,7 +1021,8 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Battle_Actor* saved_battle[kSlots];
   Actors_ActorRecord* saved_actor[kSlots];
   Field_GimmickInstance* saved_object[kSlots];
-  const Effects_ActionEffectRequest saved_request = Effects_actionRequest;
+  const VS::Effects::LiveActionEffectRequest saved_request =
+      Effects_actionRequest;
   const VS::Effects::LiveEffectCamera saved_camera = VS::Effects::effectCamera;
   const VS::Effects::LiveEffectCamera saved_action_camera =
       VS::Effects::savedActionCamera;
@@ -1073,10 +1074,10 @@ int TestScriptedEffectTargetBinding(int scenario) {
   int passed = result == (queued ? 0 : 1);
   if (queued) {
     passed &= Effects_primaryPhase == 6 &&
-              Effects_actionRequest.effectId == effect &&
+              Effects_actionRequest.effect_id == effect &&
               Effects_actionRequest.count == 1 &&
               Effects_actionRequest.targets[0].type == 4 &&
-              Effects_actionRequest.targets[0].value.actor.actor == slot;
+              Effects_actionRequest.targets[0].Actor().actor == slot;
     if (empty) {
       passed &= Battle_actors[slot] == nullptr &&
                 Actors_actorRecords[slot] == nullptr &&

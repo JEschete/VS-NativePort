@@ -45,7 +45,7 @@ int Effects_startedTrackCount;
 u_char Effects_actionVariant;
 
 // decomp: D_800F5230 (D_800F5230@BATTLE/BATTLE.PRG)
-Effects_ActionEffectRequest Effects_actionRequest;
+VS::Effects::LiveActionEffectRequest Effects_actionRequest;
 
 // decomp: D_800F5318 (D_800F5318@BATTLE/BATTLE.PRG)
 char Effects_primaryToken;
@@ -69,7 +69,7 @@ Effects_EffectInstance* Effects_primaryInstances;
 Effects_EffectInstance* Effects_currentInstance;
 
 // decomp: D_800F53C0 (D_800F53C0@BATTLE/BATTLE.PRG)
-Effects_ActionEffectRequest Effects_secondaryRequest;
+VS::Effects::LiveActionEffectRequest Effects_secondaryRequest;
 
 // decomp: D_800F54A8 (D_800F54A8@BATTLE/BATTLE.PRG)
 char Effects_primaryLoaded;

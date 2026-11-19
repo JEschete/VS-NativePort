@@ -13,6 +13,7 @@
 
 #include "Actors/ActorFlags.hpp"
 #include "Actors/ActorStateLive.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Timeline.hpp"
@@ -28,12 +29,12 @@ namespace {
 constexpr std::size_t kParticleKeyWords = 1;
 constexpr std::size_t kShakeKeyWords = 2;
 constexpr std::size_t kShakeParametersWord = 1;
-using Request = Effects_ActionEffectRequest;
+using Request = LiveActionEffectRequest;
 // A colour key is two words, stored as ColourKey lays them out.
 static_assert(sizeof(ColourKey) == 2 * sizeof(std::uint32_t));
 static_assert(std::is_trivially_copyable_v<ColourKey>);
-constexpr auto kActionTargets = std::extent_v<decltype(Request::targets)>;
-constexpr auto kActionOthers = std::extent_v<decltype(Request::others)>;
+constexpr auto kActionTargets = std::tuple_size_v<decltype(Request::targets)>;
+constexpr auto kActionOthers = std::tuple_size_v<decltype(Request::others)>;
 
 class LiveColourTrackHost final : public ColourTrackHost {
  public:
@@ -186,7 +187,7 @@ int LiveTickOtherActorColorTrack(Effects_EffectInstance* instance,
         std::ranges::copy(Effects_actionRequest.others, others.begin());
         return TickOtherActorColourTrack(
             key, frame,
-            FirstActionEntries(others, Effects_actionRequest.otherCount,
+            FirstActionEntries(others, Effects_actionRequest.other_count,
                                "other actor colour track"),
             host);
       });

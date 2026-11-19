@@ -12,6 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -32,14 +33,14 @@ namespace {
 struct TextureBindingFixture {
   Effects_EffectPackage saved_primary = Effects_actionPackage;
   Effects_EffectPackage* saved_package = Effects_package;
-  decltype(Effects_actionRequest.effectId) saved_effect =
-      Effects_actionRequest.effectId;
+  decltype(Effects_actionRequest.effect_id) saved_effect =
+      Effects_actionRequest.effect_id;
   std::array<std::uint32_t, 16> bytes{};
 
   TextureBindingFixture() {
     Effects_actionPackage = {};
     Effects_package = &Effects_actionPackage;
-    Effects_actionRequest.effectId = 84;
+    Effects_actionRequest.effect_id = 84;
     bytes[0] = 0x00100001;
     bytes[1] = 8;
     bytes[2] = 1;
@@ -57,7 +58,7 @@ struct TextureBindingFixture {
 
   ~TextureBindingFixture() {
     Effects_actionPackage = saved_primary;
-    Effects_actionRequest.effectId = saved_effect;
+    Effects_actionRequest.effect_id = saved_effect;
     Effects_package = saved_package;
   }
 
@@ -113,7 +114,7 @@ void CheckSourceTextureBlocks(const std::filesystem::path& path) {
     REQUIRE(header[0] >= 4);
     REQUIRE(header[0] <= bytes.size() - offset);
     if (header[1] == 1) {
-      Effects_actionRequest.effectId = path.filename() == "E084.P" ? 84 : 53;
+      Effects_actionRequest.effect_id = path.filename() == "E084.P" ? 84 : 53;
       VS::Effects::BindLiveEffectTextureTables(std::as_writable_bytes(
           std::span(bytes).subspan(offset + 4, header[0] - 4)));
       if (path.filename() == "E084.P") {
@@ -154,7 +155,7 @@ TEST_CASE(
     "Effect material reentry clears bindings not owned by the new package",
     "[effects][texture-binding][binding-red]") {
   TextureBindingFixture fixture;
-  Effects_actionRequest.effectId = 53;
+  Effects_actionRequest.effect_id = 53;
   Effects_actionPackage.textureInfoTable[1] =
       reinterpret_cast<VS::Effects::LivePackageTextureFrame*>(
           fixture.bytes.data() + 3);
@@ -287,19 +288,17 @@ TEST_CASE(
 
 TEST_CASE("Effect origin is the canonical primary request focus position",
           "[effects][gravity-placement][placement-red]") {
-  const auto saved = Effects_actionRequest;
-  Effects_actionRequest.position = {1200, -384, 900, 0x1234};
-  CHECK(Effects_effectOrigin == &Effects_actionRequest.position);
-  CHECK(Effects_effectOrigin[0].vx == 1200);
-  CHECK(Effects_effectOrigin[0].vy == -384);
-  CHECK(Effects_effectOrigin[0].vz == 900);
+  // D_800F5310, the original's effect origin, is the request's focus point.
+  constexpr std::uint32_t kRequestAddress = 0x800F5230;
+  constexpr std::uint32_t kOriginAddress = 0x800F5310;
+  STATIC_CHECK(offsetof(VS::Effects::LiveActionEffectRequest, position) ==
+               kOriginAddress - kRequestAddress);
   const auto symbols = VS::Content::ModuleSymbols();
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800F5310) == nullptr);
+                                          kOriginAddress) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800F5230) ==
+                                          kRequestAddress) ==
         &Effects_actionRequest);
-  Effects_actionRequest = saved;
 }
 
 namespace {

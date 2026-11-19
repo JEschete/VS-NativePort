@@ -108,7 +108,7 @@ struct TransformState {
                          const TransformState&) = default;
 };
 
-// An action effect endpoint (Effects_ActionEffectTarget): an actor part when
+// An action effect endpoint (LiveActionEffectTarget): an actor part when
 // `type` is kActorPartEndpoint, otherwise a point.
 inline constexpr std::uint16_t kActorPartEndpoint = 4;
 struct TransformEndpoint {
@@ -147,7 +147,7 @@ class TransformHost {
                                  TransformPoint& position) = 0;
   [[nodiscard]] virtual TransformCameraView FrameCamera() = 0;
   [[nodiscard]] virtual Core::Math::Transform3 ViewMatrix() = 0;
-  // The action request's target point (Effects_effectOrigin).
+  // The action request's focus point (LiveActionEffectRequest::position).
   [[nodiscard]] virtual TransformPoint EffectOrigin() = 0;
   // The curve samples of the current frame, by curve id.
   [[nodiscard]] virtual std::span<const std::int32_t> CurveSamples() = 0;

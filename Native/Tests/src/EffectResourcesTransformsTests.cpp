@@ -401,21 +401,22 @@ struct TrapTileProducerScope {
   }
 };
 
-void CheckTrapTileRequestHeader(const Effects_ActionEffectRequest& request) {
-  CHECK(request.effectId == 33);
+void CheckTrapTileRequestHeader(
+    const VS::Effects::LiveActionEffectRequest& request) {
+  CHECK(request.effect_id == 33);
   CHECK(request.count == 1);
-  CHECK(request.otherCount == 0);
+  CHECK(request.other_count == 0);
   CHECK(request.source.type == 4);
-  CHECK(request.source.value.actor.actor == 0);
-  CHECK(request.source.value.actor.part == 0);
+  CHECK(request.source.Actor().actor == 0);
+  CHECK(request.source.Actor().part == 0);
 }
 
-void CheckTrapTileTarget(const Effects_ActionEffectTarget& target) {
+void CheckTrapTileTarget(const VS::Effects::LiveActionEffectTarget& target) {
   CHECK(target.type == 5);
-  CHECK(target.value.position.vx == 320);
-  CHECK(target.value.position.vz == 448);
-  CHECK(target.value.position.vy == -12);
-  CHECK(target.value.position.pad == 0);
+  CHECK(target.position.vx == 320);
+  CHECK(target.position.vz == 448);
+  CHECK(target.position.vy == -12);
+  CHECK(target.position.pad == 0);
 }
 }  // namespace
 
@@ -433,9 +434,9 @@ TEST_CASE("Trap tile producer initializes copied actor endpoint and busy gate",
   CheckTrapTileTarget(Effects_secondaryRequest.targets[0]);
   CHECK(std::bit_cast<LocationBytes>(location) == before);
   Effects_effectBusyFlags = 2;
-  Effects_secondaryRequest.effectId = 77;
+  Effects_secondaryRequest.effect_id = 77;
   VS::Effects::LiveSpawnTrapTileEffect(&location);
-  CHECK(Effects_secondaryRequest.effectId == 77);
+  CHECK(Effects_secondaryRequest.effect_id == 77);
 }
 
 TEST_CASE("Effect curves sample by id",
@@ -2112,6 +2113,6 @@ TEST_CASE("Live effect script presets read the module's preset tables",
   }
   CHECK(Effects::LiveApplyParticleColorPresetTable(&instance) == 1);
   CHECK(CurvesOf(BoundDefinitions()[2]) == Rgb{7, 8, 9});
-  instance.context.target.colorPreset = Effects::kParticleColorPresets;
+  instance.context.target.color_preset = Effects::kParticleColorPresets;
   CHECK(Effects::LiveApplyParticleColorPresetTable(&instance) == 2);
 }

@@ -115,7 +115,7 @@ class LiveGrid {
  private:
   Effects_EffectPackage* saved_package_ = Effects_package;
   Effects_EffectInstance* saved_instance_ = Effects_currentInstance;
-  Effects_ActionEffectRequest saved_request_ = Effects_actionRequest;
+  VS::Effects::LiveActionEffectRequest saved_request_ = Effects_actionRequest;
   int saved_frame_buf_ = VS::Render::frameBuf;
   int saved_near_clip_ = VS::Render::nearClip;
   VS::Render::FrameScratch saved_frame_ = VS::Render::FrameScratchpad();

@@ -18,6 +18,7 @@
 #include "Content/PFileLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectInstancesLive.hpp"
@@ -36,9 +37,9 @@
 
 namespace VS::Effects {
 namespace {
-using Request = Effects_ActionEffectRequest;
+using Request = LiveActionEffectRequest;
 using Instance = Effects_EffectInstance;
-constexpr auto kActionTargets = std::extent_v<decltype(Request::targets)>;
+constexpr auto kActionTargets = std::tuple_size_v<decltype(Request::targets)>;
 constexpr auto kTransforms = std::extent_v<decltype(Instance::transforms)>;
 constexpr auto kRenderers = std::extent_v<decltype(Effects_effectRenderers)>;
 // Particle and sound keys are one word, renderer and shake keys two and
@@ -178,7 +179,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
     RefuseTimelineCall("child effect track", "no action target");
     return false;
   }
-  Effects_ActionEffectTarget& endpoint = std::span(request_->targets)[target];
+  LiveActionEffectTarget& endpoint = std::span(request_->targets)[target];
   Effects_EffectSpawnRequest spawn{};
   spawn.source = &request_->source;
   spawn.emitFrom = &request_->source;
@@ -218,10 +219,10 @@ int RunTrack(Effects_EffectInstance* instance, LiveTimelineTrack* track,
   return key;
 }
 
-[[nodiscard]] ChildTarget ChildTargetOf(const Effects_ActionEffectTarget& at) {
+[[nodiscard]] ChildTarget ChildTargetOf(const LiveActionEffectTarget& at) {
   return {.type = at.type,
           .event_actor_slot =
-              static_cast<std::uint8_t>(at.value.actor.eventActorSlot)};
+              static_cast<std::uint8_t>(at.Actor().event_actor_slot)};
 }
 
 [[nodiscard]] ChildTrackState ChildStateOf(

@@ -13,7 +13,7 @@
 // writes; the others stay zero (the original left them as stack bytes).
 namespace VS::Effects {
 
-// Effects_ActionEffectTarget.type of the endpoints these requests use.
+// LiveActionEffectTarget.type of the endpoints these requests use.
 // kUnset is a zero type the producers here never write.
 enum class EffectEndpointKind : std::uint16_t {
   kUnset = 0,

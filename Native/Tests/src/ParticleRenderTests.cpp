@@ -836,26 +836,21 @@ TEST_CASE("Primary effect request aliases the canonical native package field",
           "[effects][request-context]") {
   auto* saved_context = Effects_package;
   auto* saved_primary = Effects_actionPackage.request;
-  auto* saved_alias = Effects_actionRequestPointer;
   auto* saved_secondary = Effects_secondaryPackage.request;
 
-  Effects_actionPackage.request = nullptr;
+  // D_800F5798, the original's primary request pointer, is this field.
+  Effects_actionPackage.request = &Effects_actionRequest;
   Effects_secondaryPackage.request = &Effects_secondaryRequest;
-  Effects_actionRequestPointer = &Effects_actionRequest;
-  CHECK(Effects_actionPackage.request == &Effects_actionRequest);
-  CHECK(&Effects_actionRequestPointer == &Effects_actionPackage.request);
   VS::Effects::LiveSelectEffectResourceContext(1);
   CHECK(Effects_package == &Effects_actionPackage);
   CHECK(Effects_package->request == &Effects_actionRequest);
 
   Effects_actionPackage.request = &Effects_secondaryRequest;
-  CHECK(Effects_actionRequestPointer == &Effects_secondaryRequest);
   VS::Effects::LiveSelectEffectResourceContext(0);
   CHECK(Effects_package == &Effects_secondaryPackage);
   CHECK(Effects_package->request == &Effects_secondaryRequest);
 
   Effects_actionPackage.request = saved_primary;
-  Effects_actionRequestPointer = saved_alias;
   Effects_secondaryPackage.request = saved_secondary;
   Effects_package = saved_context;
 }
@@ -863,7 +858,7 @@ TEST_CASE("Primary effect request aliases the canonical native package field",
 TEST_CASE("Child effect tracks wait for the native outstanding child count",
           "[effects][child-tracks]") {
   ParticleFixture fixture;
-  Effects_ActionEffectRequest request{};
+  VS::Effects::LiveActionEffectRequest request{};
   std::array<std::uint32_t, 3> key{};
   VS::Effects::LiveTimelineTrack track{};
   VS::Effects::LiveEffectTimeline timeline{};
@@ -1306,7 +1301,7 @@ struct Plg074Fixture : EmissionFixture {
   int saved_sample = Effects_curveSamples[0];
   int saved_corner = VS::Effects::Plg073::trailEmissionCounter;
   int saved_plg074_corner = VS::Content::plg074TrailEmissionCounter[0];
-  Effects_ActionEffectRequest saved_request = Effects_actionRequest;
+  VS::Effects::LiveActionEffectRequest saved_request = Effects_actionRequest;
   std::array<CVECTOR, 8> saved_colors{};
   std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
   VS::Effects::LiveParticleEmitterScratch scratch{};

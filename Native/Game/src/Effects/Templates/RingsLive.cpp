@@ -319,8 +319,8 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
       segments ? definition->ring_positions : definition->animation_id;
   // The native closed ring's "effects.texture" diagnostics, for every ring.
   const bool primary = Effects_package == &Effects_actionPackage;
-  const unsigned request_effect = primary ? Effects_actionRequest.effectId
-                                          : Effects_secondaryRequest.effectId;
+  const unsigned request_effect = primary ? Effects_actionRequest.effect_id
+                                          : Effects_secondaryRequest.effect_id;
   const int tables = Effects_package->block1TableCount;
   VS::Core::LogDebug("effects",
                      "ring: init definition={} lifetime={} table={} program={} "
@@ -365,7 +365,7 @@ std::optional<RingTickInputs> LiveRingHost::BeginTick(
   EmitterScratch().flags = definition_->flags;
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;
-  // Effects_effectOrigin: the action request's position.
+  // The effect origin (D_800F5310): the action request's focus point.
   const SVECTOR& origin = Effects_actionRequest.position;
   return RingTickInputs{
       .definition = TypedDefinition(*definition_),

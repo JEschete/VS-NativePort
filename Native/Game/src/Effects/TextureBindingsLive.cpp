@@ -33,7 +33,7 @@ void VS::Effects::BindLiveEffectTextureTables(std::span<std::byte> block) {
           "unaligned texture storage");
   const EffectTextureOwner owner{
       Effects_package == &Effects_actionPackage,
-      static_cast<int>(Effects_actionRequest.effectId)};
+      static_cast<int>(Effects_actionRequest.effect_id)};
   const TextureBlockLayout layout = BindEffectTextureTables(block, owner);
   for (std::size_t table = 0; table < kTextureTableCapacity; ++table) {
     Effects_package->textureInfoTable[table] =

@@ -5,7 +5,6 @@
 
 #include "Effects/TimelineCommands.hpp"
 
-struct Effects_ActionEffectTarget;
 struct Effects_EffectInstance;
 
 // Live binding for the effect timeline action-control commands
@@ -15,11 +14,12 @@ struct Effects_EffectInstance;
 // a null instance or a transform past the instance's slots is refused with a
 // diagnostic.
 namespace VS::Effects {
+struct LiveActionEffectTarget;
 struct LiveTimelineTrack;
 
 // An action effect endpoint as the typed commands and tracks read it.
 [[nodiscard]] CommandEndpoint CommandEndpointOf(
-    const Effects_ActionEffectTarget& endpoint);
+    const LiveActionEffectTarget& endpoint);
 
 // func_800D6388 (5BF94.c:8213): the battle action's target effects.
 void LiveApplyTargetActionImpact(Effects_EffectInstance* instance);

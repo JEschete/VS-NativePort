@@ -750,7 +750,7 @@ int LiveInvokeAllPluginUpdates(Effects_RendererSlot* /*slot*/,
 
 // decomp: EFFPURGE.BIN vs_effpurge_exec (src/EFFECT/EFFPURGE.BIN/0.c:911)
 void LiveConfigureEffectResources() {
-  const int effect_id = Effects_actionRequest.effectId;
+  const int effect_id = Effects_actionRequest.effect_id;
   EffectResourceState state = LoadLiveEffectResourceState();
   EffectRendererTable renderers{};
   const EffectPurgeConfiguration configuration = ConfigureEffectResources(

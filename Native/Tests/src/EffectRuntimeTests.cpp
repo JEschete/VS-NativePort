@@ -1036,21 +1036,22 @@ class LiveSecondaryScope {
   Effects_EffectPackage package_{};
   Effects_EffectPackage* saved_package_;
   Instance* saved_secondaries_;
-  Effects_ActionEffectRequest saved_request_;
+  VS::Effects::LiveActionEffectRequest saved_request_;
   std::array<int, std::size(Effects_tokenBitmaps)> saved_tokens_{};
 };
 
-Effects_ActionEffectRequest TwoTargetRequest() {
-  Effects_ActionEffectRequest request{};
-  request.effectId = 23;
+VS::Effects::LiveActionEffectRequest TwoTargetRequest() {
+  VS::Effects::LiveActionEffectRequest request{};
+  request.effect_id = 23;
   request.count = 2;
   request.source.type = fx::kActorBoneEndpoint;
-  request.source.value.actor.actor = 3;
+  request.source.SetActor(
+      {.actor = 3, .event_actor_slot = 0, .part = 0, .reserved3 = 0});
   const std::span targets{request.targets};
   targets[0].type = fx::kPositionEndpoint;
-  targets[0].value.position = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
+  targets[0].position = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
   targets[1].type = 7;
-  targets[1].value.position = {.vx = 4, .vy = 5, .vz = 6, .pad = 0};
+  targets[1].position = {.vx = 4, .vy = 5, .vz = 6, .pad = 0};
   return request;
 }
 
@@ -1089,10 +1090,10 @@ void CheckStartedInstance(const Instance& instance, const char* script,
 TEST_CASE("F01437 the Live spawn starts each target's secondary instance",
           "[effect-runtime][F01435][F01437]") {
   const LiveSecondaryScope scope;
-  Effects_ActionEffectRequest request = TwoTargetRequest();
+  VS::Effects::LiveActionEffectRequest request = TwoTargetRequest();
   const int token = fx::LiveSpawnSecondaryEffectRequest(&request, 0, 0x1234);
   CHECK(token != 0);
-  CHECK(Effects_secondaryRequest.effectId == 23);
+  CHECK(Effects_secondaryRequest.effect_id == 23);
 
   const std::vector<Instance*> spawned = SecondaryInstances();
   REQUIRE(spawned.size() == 2);

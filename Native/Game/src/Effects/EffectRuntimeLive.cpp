@@ -20,6 +20,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/CurvesLive.hpp"
@@ -109,7 +110,7 @@ class LivePlayback : public Host {
 class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
  public:
   LivePrimary() = default;
-  explicit LivePrimary(const Effects_ActionEffectRequest& request)
+  explicit LivePrimary(const LiveActionEffectRequest& request)
       : request_(&request) {}
 
   PrimaryEffectState Primary() override { return LivePrimaryEffectState(); }
@@ -135,7 +136,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   void WaitForOverlay() override { Boot::WaitForOverlayReadyLive(); }
   void ConfigureResources() override { LiveConfigureEffectResources(); }
   bool ActionHasEffect() override {
-    return Effects_actionRequest.effectId != 0;
+    return Effects_actionRequest.effect_id != 0;
   }
   bool PackageOnDisc() override { return packageFile.lba != 0; }
   bool PurgeOverlayHeld() override { return purgeOverlayLoaded != 0; }
@@ -248,7 +249,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   }
 
  private:
-  const Effects_ActionEffectRequest* request_ = nullptr;
+  const LiveActionEffectRequest* request_ = nullptr;
 };
 
 class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
@@ -285,7 +286,7 @@ class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
 // caller's request, which the instances copy as they start.
 class LiveSecondarySpawner final : public SecondaryEffectSpawner {
  public:
-  explicit LiveSecondarySpawner(Effects_ActionEffectRequest& request)
+  explicit LiveSecondarySpawner(LiveActionEffectRequest& request)
       : request_(&request) {}
 
   bool HasPackage() override {
@@ -299,8 +300,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
     return std::span(request_->targets)[target].type;
   }
   Instance* CreateSecondary(const SecondarySpawn& spawn) override {
-    Effects_ActionEffectTarget& target =
-        std::span(request_->targets)[spawn.target];
+    LiveActionEffectTarget& target = std::span(request_->targets)[spawn.target];
     Effects_EffectSpawnRequest request{};
     request.source = &request_->source;
     request.emitFrom = spawn.toward_source ? &target : &request_->source;
@@ -338,13 +338,13 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
   }
 
  private:
-  Effects_ActionEffectRequest* request_;
+  LiveActionEffectRequest* request_;
 };
 
 // The request, or null with a diagnostic; a count past the request's targets
 // is reported and clamped.
-[[nodiscard]] Effects_ActionEffectRequest* CheckedSecondaryRequest(
-    Effects_ActionEffectRequest* request, std::string_view call) {
+[[nodiscard]] LiveActionEffectRequest* CheckedSecondaryRequest(
+    LiveActionEffectRequest* request, std::string_view call) {
   if (request == nullptr) {
     Refuse(call, "no effect request");
   } else if (request->count > kActionEffectTargets) {
@@ -354,8 +354,8 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
 }
 
 [[nodiscard]] SecondaryEffectRequest SecondaryRequestOf(
-    const Effects_ActionEffectRequest& request) {
-  return {.effect_id = request.effectId, .target_count = request.count};
+    const LiveActionEffectRequest& request) {
+  return {.effect_id = request.effect_id, .target_count = request.count};
 }
 
 class LiveStartup final : public EffectRuntimeStartup {
@@ -433,8 +433,8 @@ int LiveUpdateEffectRuntime() {
   return UpdateEffectRuntime(frame);
 }
 
-int LiveBeginActionEffect(Effects_ActionEffectRequest* request,
-                          int action_variant, int /*variant_argument*/) {
+int LiveBeginActionEffect(LiveActionEffectRequest* request, int action_variant,
+                          int /*variant_argument*/) {
   if (request == nullptr) {
     Refuse("action effect", "no action request");
     return 0;
@@ -450,8 +450,8 @@ void LiveClearPrimaryEffects() {
   ClearPrimaryEffects(primary);
 }
 
-int LiveSpawnSecondaryEffects(Effects_ActionEffectRequest* request,
-                              int /*unused*/, int parameter) {
+int LiveSpawnSecondaryEffects(LiveActionEffectRequest* request, int /*unused*/,
+                              int parameter) {
   if (CheckedSecondaryRequest(request, "secondary spawn") == nullptr) {
     return 0;
   }
@@ -460,8 +460,7 @@ int LiveSpawnSecondaryEffects(Effects_ActionEffectRequest* request,
                                spawner);
 }
 
-int LiveBeginSecondaryEffects(Effects_ActionEffectRequest* request,
-                              int parameter) {
+int LiveBeginSecondaryEffects(LiveActionEffectRequest* request, int parameter) {
   if (CheckedSecondaryRequest(request, "secondary effects") == nullptr) {
     return 0;
   }
@@ -470,28 +469,29 @@ int LiveBeginSecondaryEffects(Effects_ActionEffectRequest* request,
                                spawner);
 }
 
-int LiveSpawnSecondaryEffectRequest(Effects_ActionEffectRequest* request,
+int LiveSpawnSecondaryEffectRequest(LiveActionEffectRequest* request,
                                     int unused, int parameter) {
   return LiveSpawnSecondaryEffects(request, unused, parameter);
 }
 
 void LiveSpawnSourceActorEffect() {
-  const SourceActorEffect effect =
-      MakeSourceActorEffect(static_cast<std::uint8_t>(
-          Effects_actionRequest.source.value.actor.actor));
-  Effects_ActionEffectRequest request{};
-  request.effectId = effect.effect_id;
+  const SourceActorEffect effect = MakeSourceActorEffect(
+      static_cast<std::uint8_t>(Effects_actionRequest.source.Actor().actor));
+  LiveActionEffectRequest request{};
+  request.effect_id = effect.effect_id;
   request.count = effect.target_count;
-  request.otherCount = effect.other_count;
+  request.other_count = effect.other_count;
   request.source.type = effect.source_type;
-  request.source.value.actor.actor = effect.actor;
-  request.source.value.actor.part = effect.part;
-  Effects_ActionEffectTarget& target = std::span{request.targets}.front();
+  request.source.SetActor({.actor = effect.actor,
+                           .event_actor_slot = 0,
+                           .part = effect.part,
+                           .reserved3 = 0});
+  LiveActionEffectTarget& target = std::span{request.targets}.front();
   target.type = effect.target_type;
-  target.value.position = {.vx = effect.target_x,
-                           .vy = effect.target_y,
-                           .vz = effect.target_z,
-                           .pad = 0};
+  target.position = {.vx = effect.target_x,
+                     .vy = effect.target_y,
+                     .vz = effect.target_z,
+                     .pad = 0};
   static_cast<void>(LiveBeginSecondaryEffects(&request, 0));
 }
 

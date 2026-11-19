@@ -290,9 +290,10 @@ TEST_CASE("Live colour tracks refuse missing records and extra targets",
   CHECK(fx::LiveTickSceneColorTrack(&instance, &track) == 0);
 
   // Targets past the request's sixteen are not read.
-  const Effects_ActionEffectRequest saved = Effects_actionRequest;
+  const VS::Effects::LiveActionEffectRequest saved = Effects_actionRequest;
   Effects_actionRequest = {};
-  for (Effects_ActionEffectTarget& target : Effects_actionRequest.targets) {
+  for (VS::Effects::LiveActionEffectTarget& target :
+       Effects_actionRequest.targets) {
     target.type = fx::kRoomPointEndpoint;
   }
   Effects_actionRequest.count = 0xFF;

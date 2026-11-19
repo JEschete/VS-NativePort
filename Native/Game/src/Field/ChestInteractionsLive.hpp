@@ -8,8 +8,11 @@ struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
 struct Actors_ActorLocationQuery;
 struct Actors_ActorRecord;
-struct Effects_ActionEffectRequest;
 struct SVECTOR;
+
+namespace VS::Effects {
+struct LiveActionEffectRequest;
+}  // namespace VS::Effects
 
 namespace VS::Field {
 inline constexpr int kEntranceRecordBytes = 12;
@@ -61,7 +64,7 @@ bool BeginLiveTrapInteraction(TrapTarget target,
                               std::int32_t actor);
 bool TriggerLiveActorTrap(TrapTarget target, const TrapPosition& point,
                           std::int32_t actor);
-Effects_ActionEffectRequest LiveTrapEffectRecord(
+Effects::LiveActionEffectRequest LiveTrapEffectRecord(
     const TrapEffectRequest& effect);
 std::optional<RoomObjectTarget> FindLiveFacingRoomObject(std::int32_t actor);
 std::optional<ChestTarget> FindLiveFacingUnlootedChest(std::int32_t actor);

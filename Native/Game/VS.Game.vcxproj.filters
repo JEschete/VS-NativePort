@@ -426,9 +426,6 @@
     <ClCompile Include="src\Battle\ActionEffectDispatchLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\ActionEffects.h">
-      <Filter>src\Battle</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\ActionExecution.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -1068,6 +1065,9 @@
     <ClCompile Include="src\Effects\ActionEffectCallbacksLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClInclude Include="src\Effects\ActionRequest.hpp">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\AnalyzeGrid.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>

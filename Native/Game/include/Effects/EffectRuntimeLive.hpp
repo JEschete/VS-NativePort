@@ -1,8 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Effects_ActionEffectRequest;
-
 // Live binding for the effect runtime and the primary effect's action
 // lifecycle (EffectRuntime.hpp) over Runtime.cpp's globals, the current
 // effect package (Effects_package), the loader state
@@ -14,6 +12,8 @@ struct Effects_ActionEffectRequest;
 // detached as finished. A secondary request with more targets than it holds
 // spawns only those it holds, and a refused secondary instance is skipped.
 namespace VS::Effects {
+struct LiveActionEffectRequest;
+
 // func_800CE64C (5BF94.c:5047).
 void LiveInitEffectRuntime();
 // func_800CE67C (5BF94.c:5054).
@@ -28,20 +28,19 @@ int LiveStartEffectTrack(int track);
 int LiveUpdateEffectRuntime();
 // func_800CF0E8 (5BF94.c:5444): the action's effect token; 0 when refused.
 // The third argument only reached the write-only D_800F54A9 and is unused.
-int LiveBeginActionEffect(Effects_ActionEffectRequest* request,
-                          int action_variant, int variant_argument);
+int LiveBeginActionEffect(LiveActionEffectRequest* request, int action_variant,
+                          int variant_argument);
 // func_800CF1A8 (5BF94.c:5462).
 void LiveClearPrimaryEffects();
 // func_800CF218 (5BF94.c:5479): the secondary instances' token; 0 when the
 // request or package is missing. The second argument is unused.
-int LiveSpawnSecondaryEffects(Effects_ActionEffectRequest* request, int unused,
+int LiveSpawnSecondaryEffects(LiveActionEffectRequest* request, int unused,
                               int parameter);
 // func_800CF3F8 (5BF94.c:5532): the secondary instances' token.
-int LiveBeginSecondaryEffects(Effects_ActionEffectRequest* request,
-                              int parameter);
+int LiveBeginSecondaryEffects(LiveActionEffectRequest* request, int parameter);
 // func_800CF458 (5BF94.c:5541): LiveSpawnSecondaryEffects under its other
 // entry.
-int LiveSpawnSecondaryEffectRequest(Effects_ActionEffectRequest* request,
+int LiveSpawnSecondaryEffectRequest(LiveActionEffectRequest* request,
                                     int unused, int parameter);
 // func_800CF8BC (5BF94.c:5697): effect 0x38 on the acting actor.
 void LiveSpawnSourceActorEffect();

@@ -308,7 +308,7 @@ std::optional<SurfaceTickInputs> LiveSurfaceServices::BeginTick(
   EmitterScratch().flags = definition_->flags;
   const MATRIX& world =
       instance_->transforms[definition_->transform_index].world;
-  // Effects_effectOrigin: the action request's position.
+  // The effect origin (D_800F5310): the action request's focus point.
   const SVECTOR& origin = Effects_actionRequest.position;
   return SurfaceTickInputs{
       .definition = TypedDefinition(*definition_),

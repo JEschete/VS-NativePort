@@ -46,8 +46,8 @@ struct PackageContext {
 [[nodiscard]] PackageContext Context() {
   const bool primary = Effects_package == &Effects_actionPackage;
   return {.name = primary ? "primary" : "secondary",
-          .request_effect = primary ? Effects_actionRequest.effectId
-                                    : Effects_secondaryRequest.effectId};
+          .request_effect = primary ? Effects_actionRequest.effect_id
+                                    : Effects_secondaryRequest.effect_id};
 }
 
 // The current package's frame records of texture table `table`; null when

@@ -18,6 +18,7 @@
 #include "Core/Log.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/BoneTrailLive.hpp"
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
@@ -144,11 +145,11 @@ class LiveActionControlHost final : public ActionControlHost {
 }
 }  // namespace
 
-CommandEndpoint CommandEndpointOf(const Effects_ActionEffectTarget& endpoint) {
-  const SVECTOR& point = endpoint.value.position;
+CommandEndpoint CommandEndpointOf(const LiveActionEffectTarget& endpoint) {
+  const SVECTOR& point = endpoint.position;
   return {
       .type = endpoint.type,
-      .actor = static_cast<std::uint8_t>(endpoint.value.actor.actor),
+      .actor = static_cast<std::uint8_t>(endpoint.Actor().actor),
       .point = {.x = point.vx, .y = point.vy, .z = point.vz, .pad = point.pad}};
 }
 

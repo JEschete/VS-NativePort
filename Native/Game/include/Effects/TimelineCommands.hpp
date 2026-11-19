@@ -14,8 +14,7 @@
 // flags; TickActionControlTrack runs a track's due key.
 // TimelineCommandsLive.hpp performs them on the effect instance records.
 namespace VS::Effects {
-// An endpoint on a room tile or room object (Effects_ActionEffectTarget type
-// 5).
+// An endpoint on a room tile or room object (LiveActionEffectTarget type 5).
 inline constexpr std::uint16_t kRoomPointEndpoint = 5;
 // Reaction sound variants below this play as given; the others pick one of the
 // random variants.
@@ -25,8 +24,8 @@ inline constexpr std::int32_t kRandomReactionVariants = 3;
 // One draw from the BIOS rand() sequence.
 using RandomDraw = std::function<std::int32_t()>;
 
-// Effects_ActionEffectTarget.value.position; `pad` names the actor or room
-// object the point belongs to.
+// LiveActionEffectTarget.position; `pad` names the actor or room object the
+// point belongs to.
 struct EndpointPoint {
   std::int16_t x{};
   std::int16_t y{};

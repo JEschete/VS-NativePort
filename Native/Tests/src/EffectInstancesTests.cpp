@@ -226,7 +226,7 @@ class LiveInstances {
   alignas(Memory::kHeapUnitBytes)
       std::array<std::byte, Memory::kHeapUnitBytes * 2048> arena_{};
   Memory::ScopedLiveGameHeap heap_{arena_};
-  Effects_ActionEffectTarget endpoint_{};
+  VS::Effects::LiveActionEffectTarget endpoint_{};
   Effects_EffectSpawnRequest spawn_{};
   Instance* saved_primaries_;
   Instance* saved_secondaries_;
@@ -390,7 +390,7 @@ TEST_CASE("Live effect instances start from their spawn request",
   auto instance = std::make_unique<Instance>();
   std::ranges::fill(std::as_writable_bytes(std::span(instance.get(), 1)),
                     std::byte{0xA5});
-  std::array<Effects_ActionEffectTarget, 4> endpoints{};
+  std::array<VS::Effects::LiveActionEffectTarget, 4> endpoints{};
   for (std::size_t index = 0; index < endpoints.size(); ++index) {
     std::ranges::fill(std::as_writable_bytes(std::span(&endpoints[index], 1)),
                       static_cast<std::byte>(0x11 * (index + 1)));

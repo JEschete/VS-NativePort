@@ -12,6 +12,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleEmitterLive.hpp"
@@ -243,8 +244,8 @@ TEST_CASE(
   Effects_currentInstance = nullptr;
   auto& definition = fixture.definitions.values[0];
   std::ranges::fill(definition.pair_ranges[2], 10);
-  fixture.instance->context.emitFrom.value.position = {100, 0, 0, 0};
-  fixture.instance->context.emitTo.value.position = {0, 0, 200, 0};
+  fixture.instance->context.emitFrom.position = {100, 0, 0, 0};
+  fixture.instance->context.emitTo.position = {0, 0, 200, 0};
   SECTION("source") {
     definition.flags = 0x44038;
     fixture.Emit();
@@ -304,8 +305,10 @@ TEST_CASE(
   fixture.definitions.values[0].flags = 0x44038;
   auto& source = fixture.instance->context.emitFrom;
   source.type = 4;
-  source.value.actor.actor = 255;
-  source.value.actor.part = 9;
+  VS::Effects::LiveActorEndpoint actor = source.Actor();
+  actor.actor = 255;
+  actor.part = 9;
+  source.SetActor(actor);
   fixture.Emit();
   CHECK(VS::Effects::usedParticleCount == 0);
   CHECK(fixture.instance->particleCount == 0);

@@ -18,6 +18,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Scratch.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -343,12 +344,11 @@ class LiveEmissionHost final : public ParticleEmissionHost {
   });
 }
 
-[[nodiscard]] std::optional<Vec3> Aim(
-    const Effects_ActionEffectTarget& target) {
-  if (target.type != kActorTarget) return math::VectorOf(target.value.position);
+[[nodiscard]] std::optional<Vec3> Aim(const LiveActionEffectTarget& target) {
+  if (target.type != kActorTarget) return math::VectorOf(target.position);
   SVECTOR point{};
-  if (Actors::LiveActorBonePosition(target.value.actor.actor,
-                                    target.value.actor.part, &point, 0) < 0) {
+  if (Actors::LiveActorBonePosition(target.Actor().actor, target.Actor().part,
+                                    &point, 0) < 0) {
     return std::nullopt;
   }
   return math::VectorOf(point);
@@ -376,7 +376,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
       .frame = static_cast<std::uint16_t>(instance.frame),
       .capacity = particleCapacity,
       .used = usedParticleCount,
-      .effect_origin = math::VectorOf(*Effects_effectOrigin),
+      .effect_origin = math::VectorOf(Effects_actionRequest.position),
       .transform = math::TransformOf(transforms[definition.transform].world),
       .samples = LiveEffectCurveSamples().first(LiveEffectCurveCount() + 1)};
   if ((definition.flags & kAttractionMask) == kActorAttraction) {

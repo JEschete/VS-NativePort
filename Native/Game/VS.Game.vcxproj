@@ -2235,7 +2235,6 @@
     <ClInclude Include="src\Actors\Zud.h" />
     <ClInclude Include="src\Battle\AbilityState.h" />
     <ClInclude Include="src\Battle\ActionAnimation.h" />
-    <ClInclude Include="src\Battle\ActionEffects.h" />
     <ClInclude Include="src\Battle\ActionExecution.h" />
     <ClInclude Include="src\Battle\ActionFlow.h" />
     <ClInclude Include="src\Battle\ActionMenu.h" />
@@ -2274,6 +2273,7 @@
     <ClInclude Include="src\Boot\GameLoop.hpp" />
     <ClInclude Include="src\Boot\OverlayReset.hpp" />
     <ClInclude Include="src\Boot\PlayerSettings.hpp" />
+    <ClInclude Include="src\Effects\ActionRequest.hpp" />
     <ClInclude Include="src\Effects\BoneTrailLiveState.hpp" />
     <ClInclude Include="src\Effects\CameraLiveState.hpp" />
     <ClInclude Include="src\Effects\EffectResourcesLiveState.hpp" />

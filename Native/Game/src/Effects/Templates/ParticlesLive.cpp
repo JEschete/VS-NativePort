@@ -469,7 +469,7 @@ std::optional<ParticleTickInputs> LiveParticleHost::BeginTick(
                 instance_->transforms[definition_->attraction_transform].world)
                 .translation
           : Vec3{};
-  // Effects_effectOrigin: the action request's position.
+  // The effect origin (D_800F5310): the action request's focus point.
   return ParticleTickInputs{
       .definition = TypedDefinition(*definition_),
       .effect_origin = math::VectorOf(Effects_actionRequest.position),

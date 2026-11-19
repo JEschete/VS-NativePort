@@ -7,7 +7,6 @@ struct Battle_EffectParameterBytes;
 struct Battle_EffectRendererState;
 struct Battle_EffectScriptWord;
 struct Battle_EffectTrailConfig;
-struct Battle_EffectTransformBlock;
 struct Battle_EffectTransformDefinition;
 struct Battle_EffectTransformState;
 struct Battle_EnvironmentTarget;
@@ -26,7 +25,6 @@ struct Battle_TargetVolumeFlags;
 struct Battle_TargetVolumeMatrix;
 union Battle_VectorWords;
 
-#include "Effects/Runtime.h"
 #include "Render/LegacyPackets.hpp"
 
 // decomp: effectDefinitionView (src/BATTLE/BATTLE.PRG/5BF94.c:617)
@@ -256,12 +254,6 @@ struct Battle_EffectRendererState {
     short reservedBE;
 };
 static_assert(sizeof(Battle_EffectRendererState) == 0xC0, "Battle_EffectRendererState must keep its PS1 layout");
-
-// decomp: func_800D6048_t (src/BATTLE/BATTLE.PRG/5BF94.c:562)
-struct Battle_EffectTransformBlock {
-    char reserved0[0x10];
-    Effects_ActionEffectTarget reserved10[16];
-};
 
 // decomp: func_80103080_t (src/BATTLE/BATTLE.PRG/146C.h:295)
 struct Battle_EffectParameterBytes {

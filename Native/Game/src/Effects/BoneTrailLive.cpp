@@ -18,6 +18,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/BoneTrail.hpp"
 #include "Effects/BoneTrailLiveState.hpp"
 #include "Effects/EffectInstances.hpp"
@@ -255,15 +256,15 @@ class LiveBoneTrailChains final : public BoneTrailChains {
 
 // decomp: 5BF94.c:5670-5678 (the request on the stack, then func_800CF3F8).
 void Begin(const BoneTrailRequest& trail) {
-  Effects_ActionEffectRequest request{};
-  request.effectId = trail.effect_id;
+  LiveActionEffectRequest request{};
+  request.effect_id = trail.effect_id;
   request.count = trail.target_count;
-  request.otherCount = trail.other_count;
+  request.other_count = trail.other_count;
   request.source.type = trail.source_type;
-  request.source.value.position = {.vx = 0, .vy = 0, .vz = 0, .pad = 0};
-  Effects_ActionEffectTarget& target = std::span{request.targets}.front();
+  request.source.position = {.vx = 0, .vy = 0, .vz = 0, .pad = 0};
+  LiveActionEffectTarget& target = std::span{request.targets}.front();
   target.type = trail.target_type;
-  target.value.position = {.vx = 0, .vy = 0, .vz = 0, .pad = 0};
+  target.position = {.vx = 0, .vy = 0, .vz = 0, .pad = 0};
   static_cast<void>(
       LiveBeginSecondaryEffects(&request, static_cast<int>(trail.parameter)));
 }

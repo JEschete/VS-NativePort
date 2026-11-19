@@ -2,8 +2,6 @@
 #pragma once
 #include "Legacy/Psx.h"
 
-struct Effects_ActionEffectRequest;
-struct Effects_ActionEffectTarget;
 struct Effects_EffectInstance;
 struct Effects_EffectInstanceTargets;
 struct Effects_EffectPackage;
@@ -21,35 +19,15 @@ struct LiveParticleDefinitionTable;
 struct LiveTimelineTable;
 }  // namespace VS::Effects
 
+#include "Effects/ActionRequest.hpp"
 #include "Effects/TransformsLiveState.hpp"
-
-// decomp: D_800F5310 (D_800F5310@BATTLE/BATTLE.PRG): a view into another global
-#define Effects_effectOrigin ((SVECTOR*)(&Effects_actionRequest.position))
-
-// decomp: D_800F5798 (D_800F5798@BATTLE/BATTLE.PRG): a view into another global
-#define Effects_actionRequestPointer (*(Effects_ActionEffectRequest**)(&Effects_actionPackage.request))
-
-// decomp: actionEffectTarget (src/BATTLE/BATTLE.PRG/6E644.h:21)
-struct Effects_ActionEffectTarget {
-    u_short type;
-    u_short colorPreset;
-    union {
-        struct {
-            u_int actor : 8;
-            u_int eventActorSlot : 8;
-            u_int part : 8;
-            u_int reserved3 : 8;
-        } actor;
-        SVECTOR position;
-    } value;
-};
 
 // decomp: D_800F53B8_t3 (src/BATTLE/BATTLE.PRG/5BF94.h:473)
 struct Effects_EffectInstanceTargets {
-    Effects_ActionEffectTarget source;
-    Effects_ActionEffectTarget emitFrom;
-    Effects_ActionEffectTarget target;
-    Effects_ActionEffectTarget emitTo;
+    VS::Effects::LiveActionEffectTarget source;
+    VS::Effects::LiveActionEffectTarget emitFrom;
+    VS::Effects::LiveActionEffectTarget target;
+    VS::Effects::LiveActionEffectTarget emitTo;
     VS::Effects::LiveEffectTimeline* timeline;
     Effects_RendererSlot* renderer;
     short effectId;
@@ -77,10 +55,10 @@ struct Effects_EffectInstance {
 
 // decomp: D_800F53B8_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:98)
 struct Effects_EffectSpawnRequest {
-    Effects_ActionEffectTarget* source;
-    Effects_ActionEffectTarget* emitFrom;
-    Effects_ActionEffectTarget* target;
-    Effects_ActionEffectTarget* emitTo;
+    VS::Effects::LiveActionEffectTarget* source;
+    VS::Effects::LiveActionEffectTarget* emitFrom;
+    VS::Effects::LiveActionEffectTarget* target;
+    VS::Effects::LiveActionEffectTarget* emitTo;
     int priority;
     char* script;
     int scriptOffset;
@@ -112,18 +90,7 @@ struct Effects_EffectPackage {
     void* block12Data;
     void* block13Data;
     int auxiliarySoundHandle;
-    Effects_ActionEffectRequest* request;
-};
-
-// decomp: actionEffectRequest (src/BATTLE/BATTLE.PRG/6E644.h:31)
-struct Effects_ActionEffectRequest {
-    u_short effectId;
-    u_char count;
-    u_char otherCount;
-    Effects_ActionEffectTarget source;
-    Effects_ActionEffectTarget targets[16];
-    u_char others[16];
-    SVECTOR position;
+    VS::Effects::LiveActionEffectRequest* request;
 };
 
 // decomp: effectExec (src/BATTLE/BATTLE.PRG/6E644.h:35)
@@ -152,7 +119,7 @@ extern u_int Effects_pendingTracks;
 extern int Effects_trackCount;
 extern int Effects_startedTrackCount;
 extern u_char Effects_actionVariant;
-extern Effects_ActionEffectRequest Effects_actionRequest;
+extern VS::Effects::LiveActionEffectRequest Effects_actionRequest;
 extern char Effects_primaryToken;
 extern u_int Effects_primaryPhase;
 extern int Effects_tokenBitmaps[215];
@@ -160,7 +127,7 @@ extern int Effects_curveSamples[211];
 extern int Effects_unusedPrimaryWord;
 extern Effects_EffectInstance* Effects_primaryInstances;
 extern Effects_EffectInstance* Effects_currentInstance;
-extern Effects_ActionEffectRequest Effects_secondaryRequest;
+extern VS::Effects::LiveActionEffectRequest Effects_secondaryRequest;
 extern char Effects_primaryLoaded;
 extern Effects_EffectInstance* Effects_secondaryInstances;
 extern int Effects_scriptSelector;

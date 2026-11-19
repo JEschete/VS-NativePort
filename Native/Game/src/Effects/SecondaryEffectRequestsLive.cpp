@@ -15,6 +15,7 @@
 #include "Battle/ActionTable.h"
 #include "Battle/Hit.h"
 #include "Core/Log.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/SecondaryEffectRequests.hpp"
@@ -42,20 +43,21 @@ void Refuse(const char* what) {
           .at_position = hit.targetsPosition != 0};
 }
 
-[[nodiscard]] Effects_ActionEffectTarget LiveEndpoint(
+[[nodiscard]] LiveActionEffectTarget LiveEndpoint(
     const EffectEndpoint& endpoint) {
-  Effects_ActionEffectTarget target{};
+  LiveActionEffectTarget target{};
   target.type = static_cast<u_short>(endpoint.kind);
-  target.colorPreset = endpoint.color_preset;
+  target.color_preset = endpoint.color_preset;
   if (endpoint.kind == EffectEndpointKind::kActor) {
-    target.value.actor.actor = endpoint.actor;
-    target.value.actor.eventActorSlot = endpoint.slot;
-    target.value.actor.part = endpoint.part;
+    target.SetActor({.actor = endpoint.actor,
+                     .event_actor_slot = endpoint.slot,
+                     .part = endpoint.part,
+                     .reserved3 = 0});
   } else {
-    target.value.position.vx = endpoint.position.x;
-    target.value.position.vy = endpoint.position.y;
-    target.value.position.vz = endpoint.position.z;
-    target.value.position.pad = endpoint.position.w;
+    target.position.vx = endpoint.position.x;
+    target.position.vy = endpoint.position.y;
+    target.position.vz = endpoint.position.z;
+    target.position.pad = endpoint.position.w;
   }
   return target;
 }
@@ -64,10 +66,10 @@ class LiveWorld final : public ActionImpactWorld {
  public:
   void Begin(const SingleTargetEffectRequest& request,
              std::int32_t parameter) override {
-    Effects_ActionEffectRequest live{};
-    live.effectId = request.effect_id;
+    LiveActionEffectRequest live{};
+    live.effect_id = request.effect_id;
     live.count = 1;
-    live.otherCount = 0;
+    live.other_count = 0;
     live.source = LiveEndpoint(request.source);
     live.targets[0] = LiveEndpoint(request.target);
     static_cast<void>(LiveBeginSecondaryEffects(&live, parameter));

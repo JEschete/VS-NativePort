@@ -241,7 +241,7 @@ class LiveTimelinePackage {
   alignas(Memory::kHeapUnitBytes)
       std::array<std::byte, Memory::kHeapUnitBytes * 128> arena_{};
   Memory::ScopedLiveGameHeap heap_{arena_};
-  Effects_ActionEffectRequest request_{};
+  VS::Effects::LiveActionEffectRequest request_{};
   Effects_EffectPackage package_{};
   PackageScope scope_{&package_};
   void* payload_;

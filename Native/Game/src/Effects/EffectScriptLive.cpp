@@ -17,6 +17,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/ActionEffectCallbacksLive.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLive.hpp"
@@ -587,9 +588,9 @@ int LiveSignalSourceActorFromScript(Effects_EffectInstance* instance) {
     ReportRefusal("signal source actor");
     return HandlerResult(ScriptStep::kEnd);
   }
-  const Effects_ActionEffectTarget& source = instance->context.source;
+  const LiveActionEffectTarget& source = instance->context.source;
   if (const auto actor = SourceActorToSignal(
-          source.type, static_cast<std::uint8_t>(source.value.actor.actor))) {
+          source.type, static_cast<std::uint8_t>(source.Actor().actor))) {
     VS::Effects::LiveSignalActorEffectAnimation(*actor);
   }
   return HandlerResult(ContinueScript());
@@ -615,7 +616,7 @@ int LiveApplyPairedParticleColorPreset(Effects_EffectInstance* instance) {
         const auto presets = PairedPresets();
         return WithDefinitionCurves(
             [&effect, &presets](std::span<ParticleColorCurves> curves) {
-              return ApplyPairedColorPreset(effect.context.target.colorPreset,
+              return ApplyPairedColorPreset(effect.context.target.color_preset,
                                             presets, curves);
             });
       });
@@ -649,7 +650,7 @@ int LiveApplyParticleColorPresetTable(Effects_EffectInstance* instance) {
         const auto tables = PresetTables();
         return WithDefinitionCurves(
             [&effect, &tables](std::span<ParticleColorCurves> curves) {
-              return ApplyColorPresetTable(effect.context.target.colorPreset,
+              return ApplyColorPresetTable(effect.context.target.color_preset,
                                            tables, curves);
             });
       });

@@ -223,7 +223,7 @@ void GenerateOrigins(const LiveParticleDefinition& definition,
   }
   const std::span<TrailOf<Emitter>> trails = Trails(overlay.name, state);
   const MATRIX& matrix = instance.transforms[definition.transform_index].world;
-  const SVECTOR& origin = *Effects_effectOrigin;
+  const SVECTOR& origin = Effects_actionRequest.position;
   const TrailOriginRequest request{
       .flags = scratch.flags,
       .position =

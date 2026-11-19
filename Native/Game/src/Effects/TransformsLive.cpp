@@ -18,6 +18,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/RandomLive.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/Curves.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
@@ -107,11 +108,11 @@ void StoreState(LiveTransformSlot& record, const TransformState& state) {
 }
 
 [[nodiscard]] TransformEndpoint EndpointOf(
-    const Effects_ActionEffectTarget& target) {
+    const LiveActionEffectTarget& target) {
   return {.type = target.type,
-          .actor = static_cast<std::uint8_t>(target.value.actor.actor),
-          .part = static_cast<std::uint8_t>(target.value.actor.part),
-          .position = PointOf(target.value.position)};
+          .actor = static_cast<std::uint8_t>(target.Actor().actor),
+          .part = static_cast<std::uint8_t>(target.Actor().part),
+          .position = PointOf(target.position)};
 }
 
 class LiveTransformHostImpl final : public TransformHost {
@@ -152,7 +153,7 @@ class LiveTransformHostImpl final : public TransformHost {
   }
 
   TransformPoint EffectOrigin() override {
-    return PointOf(*Effects_effectOrigin);
+    return PointOf(Effects_actionRequest.position);
   }
 
   std::span<const std::int32_t> CurveSamples() override {

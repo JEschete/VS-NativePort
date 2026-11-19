@@ -27,7 +27,8 @@ struct ImpactFixture {
   Effects_EffectPackage* previous_package = Effects_package;
   Effects_EffectPackage* previous_saved = Effects_savedPackage;
   Effects_EffectPackage previous_secondary = Effects_secondaryPackage;
-  Effects_ActionEffectRequest previous_request = Effects_secondaryRequest;
+  VS::Effects::LiveActionEffectRequest previous_request =
+      Effects_secondaryRequest;
   Effects_EffectInstance* previous_instances = Effects_secondaryInstances;
   decltype(VS::Effects::savedActionCamera) previous_camera =
       VS::Effects::savedActionCamera;
@@ -82,7 +83,7 @@ TEST_CASE("F00832 gated production prefix still creates actual impact effects",
                                               std::numeric_limits<int>::min());
   CHECK(fixture->actor.instance.movementMode == 0);
   CHECK(fixture->actor.instance.jumpCountdown == 0);
-  CHECK(Effects_secondaryRequest.effectId == 0x26);
+  CHECK(Effects_secondaryRequest.effect_id == 0x26);
   CHECK(Effects_secondaryRequest.count == 1);
   REQUIRE(Effects_secondaryInstances != nullptr);
   CHECK(Effects_secondaryInstances->context.effectId == 0x26);

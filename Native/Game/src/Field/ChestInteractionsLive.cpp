@@ -31,6 +31,7 @@
 #include "Battle/FloatingLabelProducersLive.hpp"
 #include "Battle/FloatingLabelQueueLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/SecondaryEffectRequestsLive.hpp"
@@ -1010,21 +1011,22 @@ RoomObjectInteractionResult InteractLiveRoomObject(RoomObjectTarget target) {
   return InteractWithLockedRoomObject(host);
 }
 
-Effects_ActionEffectRequest LiveTrapEffectRecord(
+VS::Effects::LiveActionEffectRequest LiveTrapEffectRecord(
     const TrapEffectRequest& effect) {
-  Effects_ActionEffectRequest request{};
-  request.effectId = effect.effect_id;
+  VS::Effects::LiveActionEffectRequest request{};
+  request.effect_id = effect.effect_id;
   request.count = 1;
   request.source.type = kTrapSourcePointType;
   if (effect.source_position) {
-    request.source.value.position.vx = effect.source_position->x;
-    request.source.value.position.vy = effect.source_position->y;
-    request.source.value.position.vz = effect.source_position->z;
+    request.source.position.vx = effect.source_position->x;
+    request.source.position.vy = effect.source_position->y;
+    request.source.position.vz = effect.source_position->z;
   }
   request.targets[0].type = kTrapActorTargetType;
-  request.targets[0].value.actor.actor =
-      static_cast<std::uint8_t>(effect.actor);
-  request.targets[0].value.actor.part = effect.ground_anchor;
+  request.targets[0].SetActor({.actor = static_cast<std::uint8_t>(effect.actor),
+                               .event_actor_slot = 0,
+                               .part = effect.ground_anchor,
+                               .reserved3 = 0});
   return request;
 }
 

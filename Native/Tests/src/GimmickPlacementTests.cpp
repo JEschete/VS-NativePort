@@ -2066,22 +2066,24 @@ void CheckStagedTrapEffect(const RecordingTrapActionHost& host) {
   CHECK_FALSE(host.effect->source_position);
 }
 
-void CheckTrapCompatibilitySource(const Effects_ActionEffectRequest& request) {
+void CheckTrapCompatibilitySource(
+    const VS::Effects::LiveActionEffectRequest& request) {
   CHECK(request.source.type == 5);
-  CHECK(request.source.colorPreset == 0);
-  CHECK(request.source.value.position.vx == 0);
-  CHECK(request.source.value.position.vy == 0);
-  CHECK(request.source.value.position.vz == 0);
-  CHECK(request.source.value.position.pad == 0);
+  CHECK(request.source.color_preset == 0);
+  CHECK(request.source.position.vx == 0);
+  CHECK(request.source.position.vy == 0);
+  CHECK(request.source.position.vz == 0);
+  CHECK(request.source.position.pad == 0);
 }
 
-void CheckTrapCompatibilityVictim(const Effects_ActionEffectRequest& request) {
+void CheckTrapCompatibilityVictim(
+    const VS::Effects::LiveActionEffectRequest& request) {
   CHECK(request.targets[0].type == 4);
-  CHECK(request.targets[0].colorPreset == 0);
-  CHECK(request.targets[0].value.actor.actor == 3);
-  CHECK(request.targets[0].value.actor.part == 0xFD);
-  CHECK(request.targets[0].value.actor.eventActorSlot == 0);
-  CHECK(request.targets[0].value.actor.reserved3 == 0);
+  CHECK(request.targets[0].color_preset == 0);
+  CHECK(request.targets[0].Actor().actor == 3);
+  CHECK(request.targets[0].Actor().part == 0xFD);
+  CHECK(request.targets[0].Actor().event_actor_slot == 0);
+  CHECK(request.targets[0].Actor().reserved3 == 0);
 }
 
 void CheckInvalidTrapActors(RecordingTrapActionHost& host) {
@@ -2116,9 +2118,9 @@ TEST_CASE("Trap effect compatibility record initializes every supplied field",
           "[trap-action-live][field]") {
   const auto request = VS::Field::LiveTrapEffectRecord(
       {.effect_id = 6, .actor = 3, .source_position = std::nullopt});
-  CHECK(request.effectId == 6);
+  CHECK(request.effect_id == 6);
   CHECK(request.count == 1);
-  CHECK(request.otherCount == 0);
+  CHECK(request.other_count == 0);
   CheckTrapCompatibilitySource(request);
   CheckTrapCompatibilityVictim(request);
   CHECK(request.targets[1].type == 0);
@@ -2132,9 +2134,9 @@ TEST_CASE("Trap effect compatibility record retains explicitly supplied source",
           "[trap-action-live][field]") {
   const auto request = VS::Field::LiveTrapEffectRecord(
       {.effect_id = 9, .actor = 0, .source_position = {{123, -234, 345}}});
-  CHECK(request.source.value.position.vx == 123);
-  CHECK(request.source.value.position.vy == -234);
-  CHECK(request.source.value.position.vz == 345);
+  CHECK(request.source.position.vx == 123);
+  CHECK(request.source.position.vy == -234);
+  CHECK(request.source.position.vz == 345);
 }
 
 TEST_CASE("Trap action refuses invalid actor state or kind before mutation",

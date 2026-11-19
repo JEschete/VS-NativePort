@@ -39,6 +39,7 @@
 #include "Battle/TargetingLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Diagnostics.hpp"
+#include "Effects/ActionRequest.hpp"
 #include "Effects/EffectRuntimeLive.hpp"
 #include "Effects/Runtime.h"
 #include "Field/CameraLive.hpp"
@@ -113,24 +114,27 @@ struct LiveAction final : PresentationAction {
     return std::bit_cast<ActionPoint>(record.focusPosition);
   }
 };
-Effects_ActionEffectTarget LiveTarget(const PresentationTarget& source) {
-  Effects_ActionEffectTarget target{};
+VS::Effects::LiveActionEffectTarget LiveTarget(
+    const PresentationTarget& source) {
+  VS::Effects::LiveActionEffectTarget target{};
   target.type = source.kind;
   constexpr int kActor = 4;
   if (source.kind == kActor) {
-    target.value.actor.actor = source.actor;
-    target.value.actor.part = source.part;
+    target.SetActor({.actor = source.actor,
+                     .event_actor_slot = 0,
+                     .part = source.part,
+                     .reserved3 = 0});
   } else {
-    target.value.position = std::bit_cast<SVECTOR>(source.position);
+    target.position = std::bit_cast<SVECTOR>(source.position);
   }
   return target;
 }
-Effects_ActionEffectRequest LiveRequest(
+VS::Effects::LiveActionEffectRequest LiveRequest(
     const ActionPresentationRequest& source) {
-  Effects_ActionEffectRequest request{};
-  request.effectId = source.effect;
+  VS::Effects::LiveActionEffectRequest request{};
+  request.effect_id = source.effect;
   request.count = source.count;
-  request.otherCount = source.other_count;
+  request.other_count = source.other_count;
   request.source = LiveTarget(source.source);
   for (std::size_t i = 0; i < source.count; ++i) {
     request.targets[i] = LiveTarget(source.targets.at(i));
@@ -413,8 +417,9 @@ void StartLiveActionPresentation() {
   LiveWorld world;
   Require(StartActionPresentation(world));
 }
-void BuildLiveActionPresentationRequest(Battle_ActionRequest* action,
-                                        Effects_ActionEffectRequest* request) {
+void BuildLiveActionPresentationRequest(
+    Battle_ActionRequest* action,
+    VS::Effects::LiveActionEffectRequest* request) {
   Require(action != nullptr && request != nullptr);
   LiveAction owner(*action);
   LiveWorld world;

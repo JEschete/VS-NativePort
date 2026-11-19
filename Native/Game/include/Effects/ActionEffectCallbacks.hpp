@@ -18,7 +18,7 @@
 // every effect on actors, palettes, the effect runtime, the HUD, the minimap
 // and the game clock.
 namespace VS::Effects {
-// Effects_ActionEffectRequest.others: the actors a primary request includes
+// LiveActionEffectRequest.others: the actors a primary request includes
 // besides its target.
 inline constexpr std::size_t kPrimaryEffectOthers = 16;
 
