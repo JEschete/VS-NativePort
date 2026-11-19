@@ -1174,9 +1174,9 @@ namespace {
 // Points the effect globals at an empty package and a bare effect instance
 // for one test and collects the effects channel's warnings.
 struct LiveParticleScope {
-  Effects_EffectPackage package{};
+  fx::LiveEffectPackage package{};
   Effects_EffectInstance instance{};
-  Effects_EffectPackage* saved_package = Effects_package;
+  fx::LiveEffectPackage* saved_package = Effects_package;
   Effects_EffectInstance* saved_instance = Effects_currentInstance;
   std::vector<std::string> warnings;
   VS::Core::LogObserver previous;

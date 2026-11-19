@@ -343,8 +343,8 @@ class EmptyPackageScope {
   }
 
  private:
-  Effects_EffectPackage* saved_ = Effects_package;
-  Effects_EffectPackage empty_{};
+  VS::Effects::LiveEffectPackage* saved_ = Effects_package;
+  VS::Effects::LiveEffectPackage empty_{};
 };
 
 // A stage that marks every nine-sample trail it is given.

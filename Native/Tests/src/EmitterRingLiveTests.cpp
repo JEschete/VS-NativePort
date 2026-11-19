@@ -48,7 +48,7 @@ struct Definitions {
 class LiveEmission {
  public:
   Definitions definitions;
-  Effects_EffectPackage package{};
+  VS::Effects::LiveEffectPackage package{};
   std::unique_ptr<Effects_EffectInstance> instance =
       std::make_unique<Effects_EffectInstance>();
   std::array<VS::Effects::LiveParticle, 4> particles{};
@@ -63,9 +63,9 @@ class LiveEmission {
         saved_scratch_.begin());
     Effects_package = &package;
     Effects_currentInstance = instance.get();
-    package.block5Data =
+    package.particle_definitions =
         reinterpret_cast<effects::LiveParticleDefinitionTable*>(&definitions);
-    package.curveBlock =
+    package.curve_block =
         reinterpret_cast<effects::LiveCurveTable*>(curves.data());
     package.curves[0] = curves.data() + 6;
     effects::RecordLiveParticleDefinitions(
@@ -123,7 +123,7 @@ class LiveEmission {
   }
 
  private:
-  Effects_EffectPackage* saved_package_ = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
   Effects_EffectInstance* saved_instance_ = Effects_currentInstance;
   VS::Effects::LiveParticle* saved_pool_ = VS::Effects::particlePool;
   VS::Effects::LiveParticle* saved_free_ = VS::Effects::freeParticles;
@@ -207,7 +207,7 @@ TEST_CASE("F01515 Live reads only current bound curves before allocating",
   Scratch().flags = 0x1234;
   SECTION("missing curve bytes") { fixture.package.curves[0] = nullptr; }
   SECTION("detached recorded curve block") {
-    fixture.package.curveBlock = nullptr;
+    fixture.package.curve_block = nullptr;
   }
   SECTION("empty curve") { fixture.curves[4] = 0; }
   SECTION("unrecorded current block") { effects::ForgetLivePackageExtents(); }

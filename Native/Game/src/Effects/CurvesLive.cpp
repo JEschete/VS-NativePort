@@ -22,8 +22,8 @@
 
 namespace VS::Effects {
 namespace {
-using PackageCurves = decltype(Effects_EffectPackage::curves);
-static_assert(std::extent_v<PackageCurves> == kEffectCurveCapacity);
+using PackageCurves = decltype(LiveEffectPackage::curves);
+static_assert(std::tuple_size_v<PackageCurves> == kEffectCurveCapacity);
 
 std::uint64_t refused_samples = 0;
 std::uint64_t refused_segments = 0;
@@ -44,10 +44,10 @@ struct LiveCurveBlock {
 
 [[nodiscard]] LiveCurveBlock CurrentCurveBlock() {
   LiveCurveBlock live;
-  if (Effects_package == nullptr || Effects_package->curveBlock == nullptr) {
+  if (Effects_package == nullptr || Effects_package->curve_block == nullptr) {
     return live;
   }
-  const LiveCurveTable& header = *Effects_package->curveBlock;
+  const LiveCurveTable& header = *Effects_package->curve_block;
   const std::size_t bound =
       std::min(LiveEffectCurveCount(), live.curves.size());
   for (std::size_t i = 0; i < bound; ++i) {
@@ -89,7 +89,7 @@ std::span<std::int32_t> LiveEffectCurveSamples() {
 
 CurveSample SampleLiveEffectCurve(std::int32_t curve_id,
                                   std::int32_t distance) {
-  if (Effects_package == nullptr || Effects_package->curveBlock == nullptr) {
+  if (Effects_package == nullptr || Effects_package->curve_block == nullptr) {
     return {.value = 0, .status = CurveSampleStatus::kNoBlock};
   }
   const LiveCurveBlock live = CurrentCurveBlock();
@@ -111,7 +111,7 @@ int LiveSampleEffectCurve(int curve_id, int distance) {
 }
 
 void LiveSampleAllEffectCurves(int distance) {
-  if (Effects_package == nullptr || Effects_package->curveBlock == nullptr) {
+  if (Effects_package == nullptr || Effects_package->curve_block == nullptr) {
     ReportRefusal("sample all curves", 0, distance, CurveSampleStatus::kNoBlock,
                   refused_sweeps);
     return;

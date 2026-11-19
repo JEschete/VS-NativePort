@@ -1012,7 +1012,7 @@ class LiveSecondaryScope {
       : saved_package_(std::exchange(Effects_package, &package_)),
         saved_secondaries_(std::exchange(Effects_secondaryInstances, nullptr)),
         saved_request_(Effects_secondaryRequest) {
-    package_.block8Data = script_.data();
+    package_.programs = script_.data();
     std::ranges::copy(Effects_tokenBitmaps, saved_tokens_.begin());
   }
   LiveSecondaryScope(const LiveSecondaryScope&) = delete;
@@ -1033,8 +1033,8 @@ class LiveSecondaryScope {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 2048> arena_{};
   VS::Core::Memory::ScopedLiveGameHeap heap_{arena_};
   std::array<char, 128> script_{};
-  Effects_EffectPackage package_{};
-  Effects_EffectPackage* saved_package_;
+  fx::LiveEffectPackage package_{};
+  fx::LiveEffectPackage* saved_package_;
   Instance* saved_secondaries_;
   VS::Effects::LiveActionEffectRequest saved_request_;
   std::array<int, std::size(Effects_tokenBitmaps)> saved_tokens_{};

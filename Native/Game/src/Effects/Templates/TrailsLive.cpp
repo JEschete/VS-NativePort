@@ -75,9 +75,9 @@ using math::Vec2;
 using math::Vec3;
 
 using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
-using TextureTables = decltype(Effects_EffectPackage::textureInfoTable);
+using TextureTables = decltype(LiveEffectPackage::texture_tables);
 constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
-constexpr std::size_t kTextureTableCount = std::extent_v<TextureTables>;
+constexpr std::size_t kTextureTableCount = std::tuple_size_v<TextureTables>;
 // vectorRanges[] and pairRanges[] rows of a particle definition the trails
 // read (trails5.h:243-449, trails9.h:243-456).
 constexpr std::size_t kDirectionRow = 0;
@@ -395,7 +395,7 @@ std::int32_t LiveTrailHost<History>::SampleCurve(std::uint8_t curve,
   }
   const std::size_t curves = LiveEffectCurveCount();
   const bool held =
-      curve <= curves && Effects_package->curveBlock->Size(curve - 1) != 0;
+      curve <= curves && Effects_package->curve_block->Size(curve - 1) != 0;
   if (held) {
     // The promoted curve sampler (#276 row 38) through its Live entry.
     return VS::Effects::LiveSampleEffectCurve(curve, distance);
@@ -475,12 +475,12 @@ RingProjection LiveTrailHost<History>::Project(TrailPoint point) {
 
 template <std::size_t History>
 bool LiveTrailHost<History>::TextureTableBound(std::size_t table) const {
-  const Effects_EffectPackage& package = *Effects_package;
+  const LiveEffectPackage& package = *Effects_package;
   if (package.textures == nullptr || table >= kTextureTableCount) {
     return false;
   }
-  return std::cmp_less(table, package.block1TableCount) &&
-         package.textureInfoTable[table] != nullptr;
+  return std::cmp_less(table, package.texture_table_count) &&
+         package.texture_tables[table] != nullptr;
 }
 
 // decomp: trails5.h:507-509 and trails9.h:514-516. The original stepped the
@@ -501,7 +501,7 @@ std::optional<RingTexture> LiveTrailHost<History>::AdvanceTexture() {
           "effects",
           "trail: texture table {} of {} gives no frame; trails left "
           "undrawn ({} ticks)",
-          table, Effects_package->block1TableCount, undrawn_textures);
+          table, Effects_package->texture_table_count, undrawn_textures);
     }
     return std::nullopt;
   }

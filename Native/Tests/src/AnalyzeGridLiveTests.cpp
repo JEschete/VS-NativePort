@@ -50,7 +50,7 @@ class LiveGrid {
     Effects_package = &package;
     Effects_currentInstance = &instance;
     effects::ForgetLivePackageExtents();
-    package.block5Data =
+    package.particle_definitions =
         reinterpret_cast<effects::LiveParticleDefinitionTable*>(&definitions);
     effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span{&definitions, 1}));
@@ -106,14 +106,14 @@ class LiveGrid {
   std::array<std::byte, 4096> arena{};
   memory::ScopedLiveGameHeap heap{arena};
   Definitions definitions{};
-  Effects_EffectPackage package{};
+  VS::Effects::LiveEffectPackage package{};
   Effects_EffectInstance instance{};
   Effects_RendererSlot slot{};
   std::array<u_long, kPrimitiveWords> primitives{};
   std::array<u_long, kOrderingWords> ordering{};
 
  private:
-  Effects_EffectPackage* saved_package_ = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
   Effects_EffectInstance* saved_instance_ = Effects_currentInstance;
   VS::Effects::LiveActionEffectRequest saved_request_ = Effects_actionRequest;
   int saved_frame_buf_ = VS::Render::frameBuf;

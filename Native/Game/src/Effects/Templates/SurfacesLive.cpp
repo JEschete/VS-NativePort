@@ -73,9 +73,9 @@ using math::Vec3;
 
 constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
-using TextureTables = decltype(Effects_EffectPackage::textureInfoTable);
+using TextureTables = decltype(LiveEffectPackage::texture_tables);
 constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
-constexpr std::size_t kTextureTableCount = std::extent_v<TextureTables>;
+constexpr std::size_t kTextureTableCount = std::tuple_size_v<TextureTables>;
 constexpr std::uint32_t kOrderingHighMask = ~kRingLinkMask;
 constexpr std::size_t kWordBytes = 4;
 // vectorRanges[] and pairRanges[] rows of a particle definition the
@@ -130,11 +130,12 @@ LiveParticleEmitterScratch& EmitterScratch() {
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
 const LiveParticleDefinition* Definition(std::size_t index) {
-  if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
+  if (Effects_package == nullptr ||
+      Effects_package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->block5Data->Definitions()[index];
+  return &Effects_package->particle_definitions->Definitions()[index];
 }
 
 [[nodiscard]] Vec3 Wide(const VECTOR& value) {
@@ -268,7 +269,7 @@ std::span<const std::uint8_t> LiveSurfaceServices::FactorCurve(
     std::uint8_t curve) const {
   const std::size_t bound = LiveEffectCurveCount();
   if (curve >= bound || Effects_package->curves[curve] == nullptr ||
-      Effects_package->curveBlock->Size(curve) == 0) {
+      Effects_package->curve_block->Size(curve) == 0) {
     VS::Core::LogWarn(
         "effects",
         "{}: transparency curve {} is outside the package's {} bound "
@@ -277,7 +278,7 @@ std::span<const std::uint8_t> LiveSurfaceServices::FactorCurve(
     return {};
   }
   return {Effects_package->curves[curve],
-          Effects_package->curveBlock->Size(curve)};
+          Effects_package->curve_block->Size(curve)};
 }
 
 std::optional<SurfaceTickInputs> LiveSurfaceServices::BeginTick(
@@ -330,7 +331,7 @@ std::int32_t LiveSurfaceServices::SampleCurve(std::int32_t curve,
   }
   const std::size_t bound = LiveEffectCurveCount();
   if (curve < 0 || std::cmp_greater(curve, bound) ||
-      Effects_package->curveBlock->Size(curve - 1) == 0) {
+      Effects_package->curve_block->Size(curve - 1) == 0) {
     if (ShouldReport(refused_curves)) {
       VS::Core::LogWarn(
           "effects",
@@ -416,10 +417,10 @@ RingProjection LiveSurfaceServices::Project(RingPoint point) {
 std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
     LiveParticleTextureAnimation& animation) const {
   const std::size_t table = animation.texture_index;
-  const bool bound = Effects_package->textures != nullptr &&
-                     table < kTextureTableCount &&
-                     std::cmp_less(table, Effects_package->block1TableCount) &&
-                     Effects_package->textureInfoTable[table] != nullptr;
+  const bool bound =
+      Effects_package->textures != nullptr && table < kTextureTableCount &&
+      std::cmp_less(table, Effects_package->texture_table_count) &&
+      Effects_package->texture_tables[table] != nullptr;
   if (bound) {
     LiveAdvanceParticleTextureAnimation(&animation);
   }
@@ -429,7 +430,7 @@ std::optional<RingTexture> LiveSurfaceServices::AdvanceTexture(
           "effects",
           "{}: texture table {} of {} has no frame; drawn without "
           "primitives ({} refusals)",
-          name_, table, Effects_package->block1TableCount, refused_textures);
+          name_, table, Effects_package->texture_table_count, refused_textures);
     }
     return std::nullopt;
   }
@@ -520,10 +521,10 @@ void* LiveSurfaceServices::AllocateState(std::size_t bytes) const {
 // rotatingSurfaces.h:100-102 (the animation a create starts).
 void LiveSurfaceServices::StartAnimation(
     LiveParticleTextureAnimation& animation, SurfaceAnimation source) const {
-  const int tables = Effects_package->block1TableCount;
+  const int tables = Effects_package->texture_table_count;
   if (source.table >= tables ||
       std::cmp_greater_equal(source.table, kTextureTableCount) ||
-      Effects_package->textureInfoTable[source.table] == nullptr) {
+      Effects_package->texture_tables[source.table] == nullptr) {
     VS::Core::LogDebug("effects",
                        "{}: create names unbound texture table {} of {}", name_,
                        source.table, tables);

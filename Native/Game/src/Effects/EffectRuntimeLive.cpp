@@ -66,7 +66,7 @@ void Refuse(std::string_view call, std::string_view reason) {
 }
 
 // The current package; null, with a diagnostic, when there is none.
-[[nodiscard]] Effects_EffectPackage* CurrentPackage(std::string_view call) {
+[[nodiscard]] LiveEffectPackage* CurrentPackage(std::string_view call) {
   if (Effects_package == nullptr) {
     Refuse(call, "no current effect package");
   }
@@ -86,8 +86,8 @@ class LivePlayback : public Host {
     Effects_currentInstance = &instance;
   }
   bool HasCurves() override {
-    const Effects_EffectPackage* package = CurrentPackage("curve sampling");
-    return package != nullptr && package->curveBlock != nullptr;
+    const LiveEffectPackage* package = CurrentPackage("curve sampling");
+    return package != nullptr && package->curve_block != nullptr;
   }
   void SampleCurves(std::uint16_t frame) override {
     LiveSampleAllEffectCurves(frame);
@@ -147,15 +147,15 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   }
   void BindPackage() override { LiveBindEffectPackageBlocks(packageBuffer); }
   std::uint8_t PackageTrackCount() override {
-    const Effects_EffectPackage* package = CurrentPackage("track count");
+    const LiveEffectPackage* package = CurrentPackage("track count");
     if (package == nullptr) {
       return 0;
     }
-    if (package->block9Data == nullptr) {
+    if (package->parameters == nullptr) {
       Refuse("track count", "the package has no particle block");
       return 0;
     }
-    return package->block9Data->frame_count;
+    return package->parameters->frame_count;
   }
   Content_DiscQueueSlot* RequestMenuReload() override {
     const Content_DiscFile file{.lba = Content::MainMenuOverlayDiscSector(),
@@ -173,7 +173,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   }
 
   bool SpawnTrack(std::int32_t script_offset, std::uint8_t token) override {
-    const Effects_EffectPackage* package = CurrentPackage("track start");
+    const LiveEffectPackage* package = CurrentPackage("track start");
     if (package == nullptr) {
       return false;
     }
@@ -183,7 +183,7 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
     spawn.target = std::data(Effects_actionRequest.targets);
     spawn.emit_to = std::data(Effects_actionRequest.targets);
     spawn.priority = 0;
-    spawn.script = package->block8Data;
+    spawn.script = package->programs;
     spawn.script_offset = script_offset;
     spawn.parent = nullptr;
     spawn.token = token;
@@ -195,21 +195,21 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
   }
 
   bool HasSfxBank() override {
-    const Effects_EffectPackage* package = CurrentPackage("sound release");
-    return package != nullptr && package->block12Data != nullptr;
+    const LiveEffectPackage* package = CurrentPackage("sound release");
+    return package != nullptr && package->sound_bank != nullptr;
   }
   void UnbindSfxBank() override {
     Audio::LiveUnbindRoomSfxBank();
-    Effects_package->block12Data = nullptr;
+    Effects_package->sound_bank = nullptr;
   }
   bool HasCutsceneStream() override {
-    const Effects_EffectPackage* package = CurrentPackage("stream release");
-    return package != nullptr && package->block13Data != nullptr;
+    const LiveEffectPackage* package = CurrentPackage("stream release");
+    return package != nullptr && package->auxiliary_sound != nullptr;
   }
   void UnbindCutsceneStream() override {
     Audio::UnbindLiveRoomCutsceneStream();
-    Effects_package->block13Data = nullptr;
-    Effects_package->auxiliarySoundHandle = 0;
+    Effects_package->auxiliary_sound = nullptr;
+    Effects_package->auxiliary_sound_handle = 0;
   }
   void StopVibration() override {
     Input::StopLiveVibrationPatterns(kAllVibrationPatterns,
@@ -308,7 +308,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
     request.target = &target;
     request.emit_to = spawn.toward_source ? &request_->source : &target;
     request.priority = spawn.priority;
-    request.script = Effects_package->block8Data;
+    request.script = Effects_package->programs;
     request.script_offset = spawn.script_offset;
     request.parent = nullptr;
     request.token = spawn.token;

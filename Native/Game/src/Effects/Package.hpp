@@ -2,7 +2,8 @@
 // The effect package's blocks as the live bindings read them in place
 // (EffectResourcesLive.cpp binds them): the timeline and particle definition
 // block headers, block 9's parameters, the curve block header, and the
-// texture tables' frame records and descriptors (TextureBindingsLive.cpp).
+// texture tables' frame records and descriptors (TextureBindingsLive.cpp),
+// and the package record holding the bound blocks' pointers.
 // The typed readers are in Effects/EffectResources.hpp, Effects/Curves.hpp
 // and Effects/TextureBindings.hpp; Content/PFile.hpp reads the timeline
 // sections.
@@ -95,6 +96,40 @@ struct LivePackageTexture {
   std::uint8_t w;
   std::uint8_t h;
   std::array<LivePackageTextureCorner, kParticleQuadCorners> corners;
+};
+
+struct LiveTransformDefinition;
+struct LiveActionEffectRequest;
+
+// decomp: D_800F569C_t (src/BATTLE/BATTLE.PRG/battleEffect.h:220): the
+// loaded effect package. PublishBlocks (EffectResourcesLive.cpp) stores each
+// bound block's pointer; a block the package lacks keeps the previous one.
+struct LiveEffectPackage {
+  std::int32_t reserved0;
+  std::int32_t reserved4;
+  LiveParticleDefinitionTable* particle_definitions;
+  // Each curve's samples; curve_block holds their sizes.
+  std::array<std::uint8_t*, kEffectCurveCapacity> curves;
+  LiveCurveTable* curve_block;
+  // The effect scripts; a spawn's script offset is from here.
+  char* programs;
+  // How many of texture_tables the package bound.
+  std::int32_t texture_table_count;
+  std::array<LivePackageTextureFrame*, kTextureTableCapacity> texture_tables;
+  LivePackageTexture* textures;
+  std::int32_t animation_count;
+  std::uint16_t* animation_table;
+  LivePackageParameters* parameters;
+  LiveTransformDefinition* transform_definitions;
+  LiveTimelineTable* timelines;
+  std::uint8_t* sound_sequences;
+  void* sound_bank;
+  void* auxiliary_sound;
+  // Returned when the auxiliary sound bank is bound; its sound keys play only
+  // while it is set.
+  std::int32_t auxiliary_sound_handle;
+  // The action effect request being presented.
+  LiveActionEffectRequest* request;
 };
 
 namespace layout {

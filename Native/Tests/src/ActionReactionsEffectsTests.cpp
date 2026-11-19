@@ -24,9 +24,9 @@ struct ImpactFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   Battle_ActionState* previous_action = Battle_actionState;
   Actors_ActorRecord* previous_actor = Actors_actorRecords[16];
-  Effects_EffectPackage* previous_package = Effects_package;
-  Effects_EffectPackage* previous_saved = Effects_savedPackage;
-  Effects_EffectPackage previous_secondary = Effects_secondaryPackage;
+  VS::Effects::LiveEffectPackage* previous_package = Effects_package;
+  VS::Effects::LiveEffectPackage* previous_saved = Effects_savedPackage;
+  VS::Effects::LiveEffectPackage previous_secondary = Effects_secondaryPackage;
   VS::Effects::LiveActionEffectRequest previous_request =
       Effects_secondaryRequest;
   Effects_EffectInstance* previous_instances = Effects_secondaryInstances;
@@ -45,7 +45,7 @@ struct ImpactFixture {
     Battle_actionState = &action;
     Actors_actorRecords[16] = &actor;
     Effects_secondaryPackage = {};
-    Effects_secondaryPackage.block8Data = script.data();
+    Effects_secondaryPackage.programs = script.data();
     Effects_secondaryInstances = nullptr;
     Effects_secondaryRequest = {};
     Effects_effectBusyFlags = 0;

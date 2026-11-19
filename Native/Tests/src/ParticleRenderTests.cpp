@@ -108,13 +108,13 @@ struct ParticleFixture {
   int saved_framebuffer = VS::Render::frameBuf;
   int saved_near = VS::Render::nearClip;
   int saved_projection = VS::Render::projectionDistance;
-  Effects_EffectPackage* saved_package = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_package = Effects_package;
   Effects_EffectInstance* saved_instance = Effects_currentInstance;
   VS::Effects::LiveParticle* saved_pool = VS::Effects::particlePool;
   int saved_capacity = VS::Effects::particleCapacity;
   int saved_used = VS::Effects::usedParticleCount;
   VS::Effects::LiveParticle* saved_free = VS::Effects::freeParticles;
-  Effects_EffectPackage package{};
+  VS::Effects::LiveEffectPackage package{};
   Effects_EffectInstance instance{};
   VS::Effects::LiveParticle particle{};
   VS::Effects::LivePackageTexture texture{};
@@ -132,9 +132,9 @@ struct ParticleFixture {
     VS::Effects::particlePool = &particle;
     VS::Effects::particleCapacity = 1;
     package.textures = &texture;
-    package.block1TableCount = 1;
-    package.textureInfoTable[0] = &info;
-    package.curveBlock =
+    package.texture_table_count = 1;
+    package.texture_tables[0] = &info;
+    package.curve_block =
         reinterpret_cast<VS::Effects::LiveCurveTable*>(curve_block.data());
     package.curves[0] = curve.data();
     VS::Effects::RecordLiveEffectCurves(std::as_bytes(std::span(curve_block)));
@@ -488,12 +488,12 @@ struct EmissionFixture : ParticleFixture {
   std::array<u_short, 8> programs{1, 0, 8, 0, 0, 8, 0, 0x3000};
 
   EmissionFixture() {
-    package.block5Data =
+    package.particle_definitions =
         reinterpret_cast<VS::Effects::LiveParticleDefinitionTable*>(
             &definitions);
     VS::Effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span(&definitions, 1)));
-    package.block2Data = programs.data();
+    package.animation_table = programs.data();
     VS::Effects::RecordLiveAnimationTable(
         std::as_writable_bytes(std::span(programs)));
     auto& definition = definitions.entries[0];
@@ -524,8 +524,8 @@ struct ChildEmissionFixture : EmissionFixture {
   std::array<u_long, 1> terminal{0x30000000u};
 
   explicit ChildEmissionFixture(ChildTrigger trigger) {
-    package.block1TableCount = 1;
-    package.block2Count = 1;
+    package.texture_table_count = 1;
+    package.animation_count = 1;
     auto& definition = definitions.entries[0];
     definition.flags = 4;
     std::ranges::fill(definition.pair_ranges[0], 1);
@@ -644,8 +644,8 @@ TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
   const RecordedDefinitions recorded{fixture};
   DispatchHeap heap;
   Effects_RendererSlot renderer{};
-  fixture.package.block1TableCount = 1;
-  fixture.package.block2Count = 1;
+  fixture.package.texture_table_count = 1;
+  fixture.package.animation_count = 1;
   const auto dispatch =
       GENERATE(&VS::Effects::Templates::UpdateLivePlg045ParticleDispatch,
                &VS::Effects::Templates::UpdateLivePlg265ParticleDispatch2);
@@ -717,8 +717,8 @@ class SavedCounter {
 // One scene table entry and a box-corner origin at z 512 aiming at a target
 // at z 1024 on the view axis.
 void PrepareLiveCornerSet(EmissionFixture& fixture) {
-  fixture.package.block1TableCount = 1;
-  fixture.package.block2Count = 1;
+  fixture.package.texture_table_count = 1;
+  fixture.package.animation_count = 1;
   auto& definition = fixture.definitions.entries[0];
   definition.flags = 0x1008;
   definition.position_range[4] = definition.position_range[5] = 512;
@@ -1228,7 +1228,7 @@ void CheckTrailReferenceRendering(
   const auto count = GENERATE_COPY(std::size_t{1}, std::size_t{2}, kSamples);
   const auto current = GENERATE_COPY(std::size_t{0}, kSamples - 1);
   ParticleFixture fixture;
-  fixture.package.block1TableCount = 1;
+  fixture.package.texture_table_count = 1;
   std::array<Trail, 2> trails{};
   InitializeTrailRenderHistory(trails, count, current);
   state.trails = trails.data();
@@ -1309,8 +1309,8 @@ struct Plg074Fixture : EmissionFixture {
   VS::Effects::LiveTrailState trail_state{};
 
   Plg074Fixture() {
-    package.block1TableCount = 1;
-    package.block2Count = 1;
+    package.texture_table_count = 1;
+    package.animation_count = 1;
     Effects_curveSamples[0] = 0;
     VS::Effects::Plg073::trailEmissionCounter = 0;
     VS::Content::plg074TrailEmissionCounter[0] = 0;
@@ -2200,8 +2200,8 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
           "[effects][gravity-material][closed-ring]") {
   Plg074Fixture fixture;
   fixture.ConfigureRing();
-  fixture.package.block1TableCount = 2;
-  fixture.package.textureInfoTable[1] = &fixture.info;
+  fixture.package.texture_table_count = 2;
+  fixture.package.texture_tables[1] = &fixture.info;
   fixture.Definition().ring_segments = 1;
   fixture.Definition().ring_positions = 0;
   const auto saved_color = VS::Effects::Plg053::closedRingColorFactors[0];

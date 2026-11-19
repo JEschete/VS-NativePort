@@ -505,13 +505,13 @@ void TestsRestoreStreamPlayback(void) {
 }
 
 int TestsBindEffectStream(void* bytes, size_t size) {
-  Effects_EffectPackage package = {0};
-  Effects_EffectPackage* saved = Effects_package;
+  VS::Effects::LiveEffectPackage package = {0};
+  VS::Effects::LiveEffectPackage* saved = Effects_package;
   Effects_package = &package;
   static_cast<void>(VS::Effects::BindLiveEffectPackage(
       std::span(static_cast<std::byte*>(bytes), size)));
   Effects_package = saved;
-  return package.auxiliarySoundHandle;
+  return package.auxiliary_sound_handle;
 }
 
 int TestsPlayStreamSlot(int slot, int pan, int volume) {

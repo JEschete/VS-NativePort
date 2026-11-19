@@ -340,9 +340,9 @@ class FakePluginHost final : public Effects::PluginUpdateHost {
 // the package pointers, the action record and the curve samples are
 // restored afterwards.
 struct LivePackageScope {
-  Effects_EffectPackage saved_action = Effects_actionPackage;
-  Effects_EffectPackage* saved_package = Effects_package;
-  Effects_EffectPackage* saved_saved = Effects_savedPackage;
+  VS::Effects::LiveEffectPackage saved_action = Effects_actionPackage;
+  VS::Effects::LiveEffectPackage* saved_package = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_saved = Effects_savedPackage;
   std::vector<std::int32_t> saved_samples;
 
   LivePackageScope() {
@@ -384,7 +384,7 @@ struct TrapTileProducerScope {
 
   TrapTileProducerScope() {
     Effects_secondaryPackage = {};
-    Effects_secondaryPackage.block8Data = script.data();
+    Effects_secondaryPackage.programs = script.data();
     Effects_secondaryRequest = {};
     Effects_secondaryInstances = nullptr;
     Effects_effectBusyFlags = 0;
@@ -1756,7 +1756,7 @@ TEST_CASE("Live effect packages bind typed views beside the legacy pointers",
   auto package = LiveTestPackage();
   auto walk = Effects::BindLiveEffectPackage(package);
   CHECK(Required(walk).status == Effects::PackageWalkStatus::kEnded);
-  REQUIRE(Effects_actionPackage.curveBlock != nullptr);
+  REQUIRE(Effects_actionPackage.curve_block != nullptr);
   CHECK(Effects_actionPackage.curves[0][0] == 7);
   CHECK(Effects::LiveSampleEffectCurve(1, 4) == 8);
   CHECK(Effects::LiveSampleEffectCurve(2, 0) == 0);
@@ -1787,16 +1787,16 @@ TEST_CASE("Live effect package views follow the pointers the walk bound",
 
   // The pointer a typed reader trusts must still be the one the walk bound.
   std::array<u_long, 2> other_curves{1, 2};
-  Effects_actionPackage.curveBlock =
+  Effects_actionPackage.curve_block =
       reinterpret_cast<Effects::LiveCurveTable*>(other_curves.data());
   CHECK(Effects::LiveSampleEffectCurve(1, 0) == 0);
-  Effects_actionPackage.block9Data = nullptr;
+  Effects_actionPackage.parameters = nullptr;
   CHECK(Effects::LiveBoundPackageBlock(Effects::PackageBlockType::kParameters)
             .empty());
 
   // Only the package buffer and the empty package walk through the C entry.
   Effects::LiveBindEffectPackageBlocks(package.data());
-  CHECK(Effects_actionPackage.block9Data == nullptr);
+  CHECK(Effects_actionPackage.parameters == nullptr);
 
   Effects_package = nullptr;
   CHECK_FALSE(Effects::BindLiveEffectPackage(package).has_value());
@@ -1839,7 +1839,7 @@ std::vector<std::byte> AnimatedProgramPackage(std::uint8_t marker) {
 // one. The records are restored and every bound program and table withdrawn.
 struct ResidentPackageScope {
   LivePackageScope action;
-  Effects_EffectPackage saved_secondary = Effects_secondaryPackage;
+  VS::Effects::LiveEffectPackage saved_secondary = Effects_secondaryPackage;
   std::vector<std::byte> resident = AnimatedProgramPackage(kResidentMarker);
   std::vector<std::vector<std::byte>> loaded;
   std::vector<const void*> programs;
@@ -1860,12 +1860,13 @@ struct ResidentPackageScope {
     Effects_secondaryPackage = saved_secondary;
   }
 
-  void Bind(Effects_EffectPackage& record, std::span<std::byte> package) {
+  void Bind(VS::Effects::LiveEffectPackage& record,
+            std::span<std::byte> package) {
     Effects_package = &record;
     auto walk = Effects::BindLiveEffectPackage(package);
     CHECK(Required(walk).status == Effects::PackageWalkStatus::kEnded);
-    programs.push_back(record.block8Data);
-    tables.push_back(record.block2Data);
+    programs.push_back(record.programs);
+    tables.push_back(record.animation_table);
   }
 
   void BindResidentThenLoad() {
@@ -1885,15 +1886,13 @@ TEST_CASE("Loaded effect packages keep the resident package's blocks recorded",
   ResidentPackageScope scope;
   scope.BindResidentThenLoad();
 
-  CHECK(
-      Effects::LiveEffectPrograms(Effects_secondaryPackage.block8Data).size() ==
-      kProgramBytes);
-  CHECK(
-      Effects::LiveAnimationTable(Effects_secondaryPackage.block2Data).size() ==
-      4);
+  CHECK(Effects::LiveEffectPrograms(Effects_secondaryPackage.programs).size() ==
+        kProgramBytes);
+  CHECK(Effects::LiveAnimationTable(Effects_secondaryPackage.animation_table)
+            .size() == 4);
   // A melee hit's secondary script still reads its operand (#442).
   Effects_EffectInstance hit{};
-  hit.script = Effects_secondaryPackage.block8Data;
+  hit.script = Effects_secondaryPackage.programs;
   hit.scriptOffset = kHitScriptOffset;
   CHECK(Effects::LiveReadScriptByte(&hit) == kResidentMarker);
   CHECK(hit.scriptOffset == kHitScriptOffset + 1);
@@ -1905,7 +1904,7 @@ TEST_CASE("Loaded effect packages keep the resident package's blocks recorded",
   CHECK(Effects::LiveEffectPrograms(scope.programs.at(4)).size() ==
         kProgramBytes);
   CHECK(Effects::LiveAnimationTable(scope.tables.at(4)).size() == 4);
-  CHECK(Effects::LiveEffectPrograms(Effects_actionPackage.block8Data).size() ==
+  CHECK(Effects::LiveEffectPrograms(Effects_actionPackage.programs).size() ==
         kProgramBytes);
 }
 
@@ -1981,7 +1980,7 @@ std::vector<std::byte> ScriptPackage(std::uint8_t transforms,
 }
 
 std::span<VS::Effects::LiveParticleDefinition> BoundDefinitions() {
-  return {Effects_actionPackage.block5Data->Definitions(),
+  return {Effects_actionPackage.particle_definitions->Definitions(),
           Effects::LiveParticleDefinitionCount()};
 }
 

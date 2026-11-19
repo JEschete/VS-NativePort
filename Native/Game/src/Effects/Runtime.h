@@ -3,21 +3,15 @@
 #include "Legacy/Psx.h"
 
 struct Effects_EffectInstance;
-struct Effects_EffectPackage;
 struct Effects_RendererSlot;
 
 namespace VS::Effects {
-struct LiveCurveTable;
 struct LiveEffectTimeline;
-struct LivePackageParameters;
-struct LivePackageTexture;
-struct LivePackageTextureFrame;
 struct LiveParticle;
-struct LiveParticleDefinitionTable;
-struct LiveTimelineTable;
 }  // namespace VS::Effects
 
 #include "Effects/ActionRequest.hpp"
+#include "Effects/Package.hpp"
 #include "Effects/SpawnRequest.hpp"
 #include "Effects/TransformsLiveState.hpp"
 
@@ -37,29 +31,6 @@ struct Effects_EffectInstance {
     VS::Effects::LiveParticle* particles;
     VS::Effects::LiveTransformSlot transforms[16];
     VS::Effects::LiveEffectInstanceTargets context;
-};
-
-// decomp: D_800F569C_t (src/BATTLE/BATTLE.PRG/5BF94.h:373)
-struct Effects_EffectPackage {
-    int reserved0;
-    int reserved4;
-    VS::Effects::LiveParticleDefinitionTable* block5Data;
-    u_char* curves[32];
-    VS::Effects::LiveCurveTable* curveBlock;
-    char* block8Data;
-    int block1TableCount;
-    VS::Effects::LivePackageTextureFrame* textureInfoTable[4];
-    VS::Effects::LivePackageTexture* textures;
-    int block2Count;
-    u_short* block2Data;
-    VS::Effects::LivePackageParameters* block9Data;
-    VS::Effects::LiveTransformDefinition* block10Data;
-    VS::Effects::LiveTimelineTable* block3Data;
-    u_char* block11Data;
-    void* block12Data;
-    void* block13Data;
-    int auxiliarySoundHandle;
-    VS::Effects::LiveActionEffectRequest* request;
 };
 
 // decomp: effectExec (src/BATTLE/BATTLE.PRG/6E644.h:35)
@@ -100,9 +71,9 @@ extern VS::Effects::LiveActionEffectRequest Effects_secondaryRequest;
 extern char Effects_primaryLoaded;
 extern Effects_EffectInstance* Effects_secondaryInstances;
 extern int Effects_scriptSelector;
-extern Effects_EffectPackage* Effects_savedPackage;
-extern Effects_EffectPackage* Effects_package;
+extern VS::Effects::LiveEffectPackage* Effects_savedPackage;
+extern VS::Effects::LiveEffectPackage* Effects_package;
 extern Effects_EffectRenderer Effects_rendererTableAlias[];
 extern Effects_EffectRenderer Effects_effectRenderers[8];
-extern Effects_EffectPackage Effects_actionPackage;
-extern Effects_EffectPackage Effects_secondaryPackage;
+extern VS::Effects::LiveEffectPackage Effects_actionPackage;
+extern VS::Effects::LiveEffectPackage Effects_secondaryPackage;

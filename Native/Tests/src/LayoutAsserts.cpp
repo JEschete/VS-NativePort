@@ -456,19 +456,20 @@ int Tests_DefaultEffectPackageLoaded(void) {
       Effects_emptyPackage[0x51FC / sizeof(u_int)] != 0) {
     return 0;
   }
-  Effects_EffectPackage package = {0};
-  Effects_EffectPackage* saved = Effects_package;
+  VS::Effects::LiveEffectPackage package = {0};
+  VS::Effects::LiveEffectPackage* saved = Effects_package;
   const uintptr_t base = reinterpret_cast<uintptr_t>(Effects_emptyPackage);
   Effects_package = &package;
   VS::Effects::LiveBindEffectPackageBlocks(Effects_emptyPackage);
   const int passed =
-      package.block1TableCount == 1 && package.block2Count == 19 &&
-      package.block3Data->count == 49 && package.curveBlock->count == 32 &&
-      package.block5Data->count == 46 &&
-      reinterpret_cast<uintptr_t>(package.block8Data) == base + 0x4B44 &&
-      reinterpret_cast<uintptr_t>(package.block9Data) == base + 0x5078 &&
-      reinterpret_cast<uintptr_t>(package.block10Data) == base + 0x50A0 &&
-      reinterpret_cast<uintptr_t>(package.block11Data) == base + 0x51BC;
+      package.texture_table_count == 1 && package.animation_count == 19 &&
+      package.timelines->count == 49 && package.curve_block->count == 32 &&
+      package.particle_definitions->count == 46 &&
+      reinterpret_cast<uintptr_t>(package.programs) == base + 0x4B44 &&
+      reinterpret_cast<uintptr_t>(package.parameters) == base + 0x5078 &&
+      reinterpret_cast<uintptr_t>(package.transform_definitions) ==
+          base + 0x50A0 &&
+      reinterpret_cast<uintptr_t>(package.sound_sequences) == base + 0x51BC;
   Effects_package = saved;
   return passed;
 }

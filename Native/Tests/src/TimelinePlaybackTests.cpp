@@ -150,7 +150,7 @@ constexpr fx::ChildTrackKey ChildKey(std::uint8_t delay) {
 // Restores the effect package pointer after a test.
 class PackageScope {
  public:
-  explicit PackageScope(Effects_EffectPackage* package)
+  explicit PackageScope(fx::LiveEffectPackage* package)
       : saved_(Effects_package) {
     Effects_package = package;
   }
@@ -161,7 +161,7 @@ class PackageScope {
   PackageScope& operator=(PackageScope&&) = delete;
 
  private:
-  Effects_EffectPackage* saved_;
+  fx::LiveEffectPackage* saved_;
 };
 
 void PutU16(std::span<std::byte> bytes, std::size_t at, std::uint16_t value) {
@@ -211,7 +211,7 @@ class LiveTimelinePackage {
     REQUIRE(payload_ != nullptr);
     const auto block = TimelineBlock();
     std::memcpy(payload_, block.data(), block.size());
-    package_.block3Data = static_cast<fx::LiveTimelineTable*>(payload_);
+    package_.timelines = static_cast<fx::LiveTimelineTable*>(payload_);
     package_.request = &request_;
   }
   ~LiveTimelinePackage() {
@@ -242,7 +242,7 @@ class LiveTimelinePackage {
       std::array<std::byte, Memory::kHeapUnitBytes * 128> arena_{};
   Memory::ScopedLiveGameHeap heap_{arena_};
   VS::Effects::LiveActionEffectRequest request_{};
-  Effects_EffectPackage package_{};
+  fx::LiveEffectPackage package_{};
   PackageScope scope_{&package_};
   void* payload_;
 };

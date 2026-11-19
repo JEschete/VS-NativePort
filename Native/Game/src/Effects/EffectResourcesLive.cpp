@@ -61,8 +61,9 @@ int VS::Effects::pluginEntryPointCount;
 // decomp: D_800F5874 (D_800F5874@BATTLE/BATTLE.PRG)
 int VS::Effects::loadedTextureSlots;
 
-static_assert(std::extent_v<decltype(Effects_EffectPackage::curves)> ==
-              VS::Effects::kEffectCurveCapacity);
+static_assert(
+    std::tuple_size_v<decltype(VS::Effects::LiveEffectPackage::curves)> ==
+    VS::Effects::kEffectCurveCapacity);
 static_assert(std::size(Effects_effectRenderers) ==
               VS::Effects::kEffectRendererCapacity);
 
@@ -100,7 +101,7 @@ void ReportRefusal(const char* entry, const char* reason) {
 // A package's typed block views, kept beside the legacy pointers the walk
 // publishes into it.
 struct PackageRecord {
-  const Effects_EffectPackage* package{};
+  const LiveEffectPackage* package{};
   EffectPackageBlocks blocks;
 };
 
@@ -108,14 +109,14 @@ std::array<PackageRecord, kPackageRecords> package_records{};
 std::size_t next_package_record = 0;
 
 [[nodiscard]] PackageRecord* FindPackageRecord(
-    const Effects_EffectPackage* package) {
+    const LiveEffectPackage* package) {
   const auto found =
       std::ranges::find(package_records, package, &PackageRecord::package);
   return found == package_records.end() ? nullptr : &*found;
 }
 
 [[nodiscard]] PackageRecord& PackageRecordFor(
-    const Effects_EffectPackage* package) {
+    const LiveEffectPackage* package) {
   if (PackageRecord* record = FindPackageRecord(package)) return *record;
   PackageRecord& record = package_records.at(next_package_record);
   next_package_record = (next_package_record + 1) % package_records.size();
@@ -152,29 +153,29 @@ std::size_t next_package_record = 0;
   return {};
 }
 
-[[nodiscard]] const void* LegacyBlock(const Effects_EffectPackage& package,
+[[nodiscard]] const void* LegacyBlock(const LiveEffectPackage& package,
                                       PackageBlockType type) {
   switch (type) {
     case PackageBlockType::kAnimationTable:
-      return package.block2Data;
+      return package.animation_table;
     case PackageBlockType::kTimelines:
-      return package.block3Data;
+      return package.timelines;
     case PackageBlockType::kCurves:
-      return package.curveBlock;
+      return package.curve_block;
     case PackageBlockType::kParticleDefinitions:
-      return package.block5Data;
+      return package.particle_definitions;
     case PackageBlockType::kPrograms:
-      return package.block8Data;
+      return package.programs;
     case PackageBlockType::kParameters:
-      return package.block9Data;
+      return package.parameters;
     case PackageBlockType::kTransformDefinitions:
-      return package.block10Data;
+      return package.transform_definitions;
     case PackageBlockType::kSoundSequences:
-      return package.block11Data;
+      return package.sound_sequences;
     case PackageBlockType::kSoundBank:
-      return package.block12Data;
+      return package.sound_bank;
     case PackageBlockType::kAuxiliarySound:
-      return package.block13Data;
+      return package.auxiliary_sound;
     case PackageBlockType::kTextureTables:
       break;
   }
@@ -186,10 +187,10 @@ template <typename T>
   return reinterpret_cast<T*>(view.data());
 }
 
-void PublishCurves(Effects_EffectPackage& package,
+void PublishCurves(LiveEffectPackage& package,
                    const EffectPackageBlocks& blocks,
                    const CurveBinding& binding) {
-  package.curveBlock = LegacyPointer<LiveCurveTable>(blocks.curve_block);
+  package.curve_block = LegacyPointer<LiveCurveTable>(blocks.curve_block);
   const std::size_t count =
       std::min(static_cast<std::size_t>(std::max(binding.header_count, 0)),
                blocks.curves.size());
@@ -201,45 +202,45 @@ void PublishCurves(Effects_EffectPackage& package,
 
 // The pointers the original's binders stored, for each block type the walk
 // bound; the others keep the previous package's pointers.
-void PublishBlocks(Effects_EffectPackage& package,
+void PublishBlocks(LiveEffectPackage& package,
                    const EffectPackageBlocks& blocks, const PackageWalk& walk) {
   const auto bound = [&walk](PackageBlockType type) {
     return (walk.bound_types & PackageBlockBit(type)) != 0;
   };
   if (bound(PackageBlockType::kAnimationTable)) {
-    package.block2Count = blocks.animation_count;
-    package.block2Data = LegacyPointer<u_short>(blocks.animation_table);
+    package.animation_count = blocks.animation_count;
+    package.animation_table = LegacyPointer<u_short>(blocks.animation_table);
   }
   if (bound(PackageBlockType::kTimelines)) {
-    package.block3Data = LegacyPointer<LiveTimelineTable>(blocks.timelines);
+    package.timelines = LegacyPointer<LiveTimelineTable>(blocks.timelines);
   }
   if (bound(PackageBlockType::kCurves)) {
     PublishCurves(package, blocks, walk.curves);
   }
   if (bound(PackageBlockType::kParticleDefinitions)) {
-    package.block5Data =
+    package.particle_definitions =
         LegacyPointer<LiveParticleDefinitionTable>(blocks.particle_definitions);
   }
   if (bound(PackageBlockType::kPrograms)) {
-    package.block8Data = LegacyPointer<char>(blocks.programs);
+    package.programs = LegacyPointer<char>(blocks.programs);
   }
   if (bound(PackageBlockType::kParameters)) {
-    package.block9Data =
+    package.parameters =
         LegacyPointer<LivePackageParameters>(blocks.parameters);
   }
   if (bound(PackageBlockType::kTransformDefinitions)) {
-    package.block10Data =
+    package.transform_definitions =
         LegacyPointer<LiveTransformDefinition>(blocks.transform_definitions);
   }
   if (bound(PackageBlockType::kSoundSequences)) {
-    package.block11Data = LegacyPointer<u_char>(blocks.sound_sequences);
+    package.sound_sequences = LegacyPointer<u_char>(blocks.sound_sequences);
   }
   if (bound(PackageBlockType::kSoundBank)) {
-    package.block12Data = blocks.sound_bank.data();
+    package.sound_bank = blocks.sound_bank.data();
   }
   if (bound(PackageBlockType::kAuxiliarySound)) {
-    package.block13Data = blocks.auxiliary_sound.data();
-    package.auxiliarySoundHandle = blocks.auxiliary_sound_handle;
+    package.auxiliary_sound = blocks.auxiliary_sound.data();
+    package.auxiliary_sound_handle = blocks.auxiliary_sound_handle;
   }
 }
 
@@ -440,13 +441,13 @@ class LiveResourceHost final : public EffectResourceHost {
 class LiveLifecycleHost final : public EffectLifecycleHost {
  public:
   void ResetPackageRequests() override {
-    Effects_secondaryPackage.curveBlock = nullptr;
+    Effects_secondaryPackage.curve_block = nullptr;
     Effects_secondaryPackage.request = &Effects_secondaryRequest;
     Effects_actionPackage.request = &Effects_actionRequest;
   }
 
   void BindEmptyPackage(EffectPackageId package) override {
-    Effects_package = PointerOf<Effects_EffectPackage>(package);
+    Effects_package = PointerOf<LiveEffectPackage>(package);
     LiveBindEffectPackageBlocks(Effects_emptyPackage);
   }
 
@@ -455,11 +456,11 @@ class LiveLifecycleHost final : public EffectLifecycleHost {
   }
 
   void ClearReloadedBlocks() override {
-    if (Effects_package != nullptr) Effects_package->block9Data = nullptr;
-    Effects_actionPackage.curveBlock = nullptr;
-    Effects_actionPackage.block11Data = nullptr;
-    Effects_actionPackage.block12Data = nullptr;
-    Effects_actionPackage.block13Data = nullptr;
+    if (Effects_package != nullptr) Effects_package->parameters = nullptr;
+    Effects_actionPackage.curve_block = nullptr;
+    Effects_actionPackage.sound_sequences = nullptr;
+    Effects_actionPackage.sound_bank = nullptr;
+    Effects_actionPackage.auxiliary_sound = nullptr;
   }
 };
 
@@ -634,8 +635,8 @@ EffectResourceContext LoadLiveEffectResourceContext() {
 }
 
 void StoreLiveEffectResourceContext(const EffectResourceContext& context) {
-  Effects_package = PointerOf<Effects_EffectPackage>(context.current);
-  Effects_savedPackage = PointerOf<Effects_EffectPackage>(context.saved);
+  Effects_package = PointerOf<LiveEffectPackage>(context.current);
+  Effects_savedPackage = PointerOf<LiveEffectPackage>(context.saved);
 }
 
 EffectPurgeTables LiveEffectPurgeTables() {

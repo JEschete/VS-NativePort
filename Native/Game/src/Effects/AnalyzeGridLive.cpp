@@ -114,12 +114,13 @@ grid::SurfaceDefinition DefinitionOf(const LiveParticleDefinition& source) {
 }
 
 const LiveParticleDefinition* FindDefinition(AnalyzeGridDefinitionId id) {
-  if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
+  if (Effects_package == nullptr ||
+      Effects_package->particle_definitions == nullptr ||
       id.value >= LiveParticleDefinitionCount()) {
     Refuse("definition outside the bound package");
     return nullptr;
   }
-  return &Effects_package->block5Data->Definitions()[id.value];
+  return &Effects_package->particle_definitions->Definitions()[id.value];
 }
 
 bool CurvesAvailable(const grid::SurfaceCurves& curves, std::int32_t age) {

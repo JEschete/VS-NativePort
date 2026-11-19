@@ -95,9 +95,9 @@ using math::Vec3;
 
 constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
-using TextureTables = decltype(Effects_EffectPackage::textureInfoTable);
+using TextureTables = decltype(LiveEffectPackage::texture_tables);
 constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
-constexpr std::size_t kTextureTableCount = std::extent_v<TextureTables>;
+constexpr std::size_t kTextureTableCount = std::tuple_size_v<TextureTables>;
 constexpr std::uint32_t kOrderingHighMask = ~kRingLinkMask;
 // vectorRanges[] and pairRanges[] rows of a particle definition the rings
 // read.
@@ -130,11 +130,12 @@ LiveParticleEmitterScratch& EmitterScratch() {
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
 const LiveParticleDefinition* Definition(std::size_t index) {
-  if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
+  if (Effects_package == nullptr ||
+      Effects_package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->block5Data->Definitions()[index];
+  return &Effects_package->particle_definitions->Definitions()[index];
 }
 
 [[nodiscard]] Vec3 Wide(const VECTOR& value) {
@@ -321,14 +322,14 @@ void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
   const bool primary = Effects_package == &Effects_actionPackage;
   const unsigned request_effect = primary ? Effects_actionRequest.effect_id
                                           : Effects_secondaryRequest.effect_id;
-  const int tables = Effects_package->block1TableCount;
+  const int tables = Effects_package->texture_table_count;
   VS::Core::LogDebug("effects",
                      "ring: init definition={} lifetime={} table={} program={} "
                      "context={} request_effect={} tables={}",
                      state.definition_index, state.lifetime, table, program,
                      primary ? "primary" : "secondary", request_effect, tables);
   if (table >= tables || std::cmp_greater_equal(table, kTextureTableCount) ||
-      Effects_package->textureInfoTable[table] == nullptr) {
+      Effects_package->texture_tables[table] == nullptr) {
     VS::Core::LogDebug(
         "effects", "ring: definition {} names unbound texture table {} of {}",
         state.definition_index, table, tables);
@@ -385,7 +386,7 @@ std::int32_t LiveRingHost::SampleCurve(std::uint8_t curve,
     return 0;
   }
   const std::size_t bound = LiveEffectCurveCount();
-  if (curve > bound || Effects_package->curveBlock->Size(curve - 1) == 0) {
+  if (curve > bound || Effects_package->curve_block->Size(curve - 1) == 0) {
     if (ShouldReport(refused_curves)) {
       VS::Core::LogWarn(
           "effects",
@@ -422,10 +423,10 @@ void LiveRingHost::PublishScratch(const RingScratch& values) {
 std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
   LiveParticleTextureAnimation& animation = LiveState()->texture;
   const std::size_t table = animation.texture_index;
-  const bool bound = Effects_package->textures != nullptr &&
-                     table < kTextureTableCount &&
-                     std::cmp_less(table, Effects_package->block1TableCount) &&
-                     Effects_package->textureInfoTable[table] != nullptr;
+  const bool bound =
+      Effects_package->textures != nullptr && table < kTextureTableCount &&
+      std::cmp_less(table, Effects_package->texture_table_count) &&
+      Effects_package->texture_tables[table] != nullptr;
   if (bound) {
     LiveAdvanceParticleTextureAnimation(&animation);
   }
@@ -434,7 +435,7 @@ std::optional<RingTexture> LiveRingHost::AdvanceTexture() {
       VS::Core::LogWarn("effects",
                         "ring: texture table {} of {} has no frame; ring drawn "
                         "without quads ({} refusals)",
-                        table, Effects_package->block1TableCount,
+                        table, Effects_package->texture_table_count,
                         refused_textures);
     }
     return std::nullopt;

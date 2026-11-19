@@ -145,16 +145,16 @@ constexpr std::uint32_t kStop = 0x30000000;
 // The current package with one texture table and a recorded animation table.
 class AnimationPackage {
  public:
-  Effects_EffectPackage package{};
+  fx::LiveEffectPackage package{};
   std::array<fx::LivePackageTextureFrame, 4> frames{};
   // {s32 count = 2, u16 offsets {12, 20}, u16 pad}, then the programs.
   std::array<std::uint32_t, 6> table{
       2, 12 | (20u << 16), 0, FrameWord(3, 4), kStop, kStop};
 
   AnimationPackage() {
-    package.block1TableCount = 1;
-    package.textureInfoTable[0] = frames.data();
-    package.block2Data = reinterpret_cast<u_short*>(table.data());
+    package.texture_table_count = 1;
+    package.texture_tables[0] = frames.data();
+    package.animation_table = reinterpret_cast<u_short*>(table.data());
     Effects_package = &package;
     fx::RecordLiveAnimationTable(std::as_writable_bytes(std::span(table)));
   }
@@ -172,7 +172,7 @@ class AnimationPackage {
   }
 
  private:
-  Effects_EffectPackage* saved_ = Effects_package;
+  fx::LiveEffectPackage* saved_ = Effects_package;
 };
 }  // namespace
 

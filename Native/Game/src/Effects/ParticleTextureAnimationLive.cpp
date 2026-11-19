@@ -55,10 +55,10 @@ struct PackageContext {
 [[nodiscard]] LivePackageTextureFrame* BoundTextureTable(int table) {
   if (Effects_package == nullptr || table < 0 ||
       std::cmp_greater_equal(table, kTextureTableCapacity) ||
-      table >= Effects_package->block1TableCount) {
+      table >= Effects_package->texture_table_count) {
     return nullptr;
   }
-  return Effects_package->textureInfoTable[table];
+  return Effects_package->texture_tables[table];
 }
 
 [[nodiscard]] TextureAnimationState Load(const Animation& animation) {
@@ -85,8 +85,8 @@ void Store(Animation& animation, const TextureAnimationState& state) {
     return std::nullopt;
   }
   EffectPackageBlocks blocks{};
-  BindParticleAnimationTable(blocks,
-                             LiveAnimationTable(Effects_package->block2Data));
+  BindParticleAnimationTable(
+      blocks, LiveAnimationTable(Effects_package->animation_table));
   return ParticleAnimationData(blocks, index);
 }
 
@@ -102,7 +102,7 @@ void SelectFrame(Animation& animation, std::uint16_t frame) {
           "kept the previous frame (context={} request_effect={}; "
           "{} reports)",
           frame, animation.texture_index,
-          Effects_package == nullptr ? 0 : Effects_package->block1TableCount,
+          Effects_package == nullptr ? 0 : Effects_package->texture_table_count,
           context.name, context.request_effect, unbound_frames);
     }
     return;
@@ -140,7 +140,7 @@ void LiveInitializeParticleTextureAnimation(Animation* animation,
         "texture animation: unbound texture={} tables={} program={} "
         "context={} request_effect={}",
         texture_index,
-        Effects_package == nullptr ? 0 : Effects_package->block1TableCount,
+        Effects_package == nullptr ? 0 : Effects_package->texture_table_count,
         program_index, context.name, context.request_effect);
   }
   TextureAnimationState state = Load(*animation);

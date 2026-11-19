@@ -186,7 +186,8 @@ class LiveCameraEffectHost final : public CameraEffectHost {
 
   [[nodiscard]] std::optional<CameraDefinition> Definition(
       std::uint8_t index) override {
-    if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
+    if (Effects_package == nullptr ||
+        Effects_package->particle_definitions == nullptr ||
         index >= LiveParticleDefinitionCount()) {
       if (ShouldReport(refused_definitions)) {
         VS::Core::LogWarn(
@@ -197,7 +198,8 @@ class LiveCameraEffectHost final : public CameraEffectHost {
       }
       return std::nullopt;
     }
-    return DefinitionOf(Effects_package->block5Data->Definitions()[index]);
+    return DefinitionOf(
+        Effects_package->particle_definitions->Definitions()[index]);
   }
 
   [[nodiscard]] std::int32_t SampleCurve(std::uint8_t curve,

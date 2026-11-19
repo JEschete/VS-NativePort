@@ -605,8 +605,8 @@ class EmptyLivePackage {
   ~EmptyLivePackage() { Effects_package = saved_; }
 
  private:
-  Effects_EffectPackage* saved_ = Effects_package;
-  Effects_EffectPackage package_{};
+  VS::Effects::LiveEffectPackage* saved_ = Effects_package;
+  VS::Effects::LiveEffectPackage package_{};
 };
 }  // namespace
 

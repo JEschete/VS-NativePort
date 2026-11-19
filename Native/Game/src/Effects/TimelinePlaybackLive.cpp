@@ -186,7 +186,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
   spawn.emit_from = &request_->source;
   spawn.target = &endpoint;
   spawn.emit_to = &endpoint;
-  spawn.script = Effects_package->block8Data;
+  spawn.script = Effects_package->programs;
   spawn.script_offset = child_script_offset_;
   spawn.parent = instance_;
   spawn.token = static_cast<u_char>(instance_->token);
@@ -256,7 +256,7 @@ class LiveTimelineLoadHost final : public TimelineLoadHost {
   // found inside the timeline block.
   std::optional<std::uint16_t> TrackHeader(std::size_t track) override {
     auto* keys = Content::PFileLiveTimelineTrackData(
-        Effects_package->block3Data, timeline_index_, static_cast<int>(track));
+        Effects_package->timelines, timeline_index_, static_cast<int>(track));
     if (keys == nullptr) return std::nullopt;
     tracks_[track].keys = reinterpret_cast<const std::uint32_t*>(keys);
     std::uint16_t header{};
@@ -353,7 +353,7 @@ void LiveLoadEffectTimeline(Effects_EffectInstance* instance,
     return;
   }
   const std::byte* section = Content::PFileLiveTimelineSection(
-      Effects_package->block3Data, timeline_index);
+      Effects_package->timelines, timeline_index);
   if (section == nullptr) return;
   // The original reads the count word's low byte; the section lookup bounds
   // only the section's first byte.
@@ -406,9 +406,9 @@ int LiveTickEffectSoundTrack(Effects_EffectInstance* instance,
       [](std::span<const std::uint32_t> key, std::int16_t frame,
          TimelinePlaybackHost& host) {
         // Without a package there is no stream to play.
-        const std::int32_t stream = Effects_package != nullptr
-                                        ? Effects_package->auxiliarySoundHandle
-                                        : 0;
+        const std::int32_t stream =
+            Effects_package != nullptr ? Effects_package->auxiliary_sound_handle
+                                       : 0;
         return TickSoundTrack(key.front(), frame, stream, host);
       });
 }

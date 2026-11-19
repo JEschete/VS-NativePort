@@ -340,7 +340,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
   return std::ranges::all_of(definition.curves, [bound](std::uint8_t curve) {
     return curve == 0 ||
            (curve <= bound && Effects_package->curves[curve - 1] != nullptr &&
-            Effects_package->curveBlock->Size(curve - 1) != 0);
+            Effects_package->curve_block->Size(curve - 1) != 0);
   });
 }
 
@@ -405,13 +405,13 @@ void EmitLiveParticleEvent(Effects_EffectInstance* instance, int event,
                            int transparency_override, int particle_variant,
                            const LiveParticle* parent) {
   if (instance == nullptr || Effects_package == nullptr ||
-      Effects_package->block5Data == nullptr || event < 0 ||
+      Effects_package->particle_definitions == nullptr || event < 0 ||
       !std::cmp_less(event, LiveParticleDefinitionCount())) {
     Refuse("missing instance or definition outside the current package");
     return;
   }
   const auto definition =
-      Definition(Effects_package->block5Data->Definitions()[event]);
+      Definition(Effects_package->particle_definitions->Definitions()[event]);
   auto context = Context(*instance, definition);
   if (!context) return;
   context->transparency_override = transparency_override;

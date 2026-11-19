@@ -112,7 +112,7 @@ void Mode(u_long word, u_long* ordering) {
 
 std::optional<std::uint32_t> ColorSample(unsigned curve, unsigned age) {
   if (curve == 0) return std::nullopt;
-  const auto* block = Effects_package->curveBlock;
+  const auto* block = Effects_package->curve_block;
   Require(block != nullptr && curve <= block->count &&
               curve <= std::size(Effects_package->curves) &&
               block->Size(curve - 1) != 0 &&

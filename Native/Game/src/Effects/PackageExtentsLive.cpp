@@ -15,7 +15,7 @@ namespace {
 constexpr std::size_t kRecordCapacity = 4;
 
 struct PackageExtentRecord {
-  const Effects_EffectPackage* package = nullptr;
+  const LiveEffectPackage* package = nullptr;
   const void* definitions = nullptr;
   std::size_t definition_count = 0;
   const void* curves = nullptr;
@@ -31,7 +31,7 @@ std::size_t next_replacement = 0;
 // blocks once, while every loaded package takes a new buffer, so a bound
 // extent must outlive the loads after it (#442).
 template <typename Block>
-bool IsBound(const void* data, Block Effects_EffectPackage::* block) {
+bool IsBound(const void* data, Block LiveEffectPackage::* block) {
   if (data == nullptr) return false;
   return static_cast<const void*>(Effects_actionPackage.*block) == data ||
          static_cast<const void*>(Effects_secondaryPackage.*block) == data;
@@ -40,8 +40,7 @@ bool IsBound(const void* data, Block Effects_EffectPackage::* block) {
 // A free extent, else the oldest one no package binds, else the oldest; a
 // free extent has the lowest order.
 template <typename Extents, typename Block>
-auto& ReplaceableExtent(Extents& extents,
-                        Block Effects_EffectPackage::* block) {
+auto& ReplaceableExtent(Extents& extents, Block LiveEffectPackage::* block) {
   auto* oldest = &*std::ranges::min_element(
       extents, {}, [](const auto& extent) { return extent.recorded; });
   decltype(oldest) oldest_unbound = nullptr;
@@ -141,7 +140,7 @@ void RecordLiveEffectCurves(std::span<const std::byte> payload) {
 std::size_t LiveParticleDefinitionCount() {
   const auto* record = Find();
   if (record == nullptr || record->definitions == nullptr ||
-      record->definitions != Effects_package->block5Data) {
+      record->definitions != Effects_package->particle_definitions) {
     return 0;
   }
   return record->definition_count;
@@ -150,7 +149,7 @@ std::size_t LiveParticleDefinitionCount() {
 std::size_t LiveEffectCurveCount() {
   const auto* record = Find();
   if (record == nullptr || record->curves == nullptr ||
-      record->curves != Effects_package->curveBlock) {
+      record->curves != Effects_package->curve_block) {
     return 0;
   }
   return record->curve_count;
@@ -160,7 +159,7 @@ void RecordLiveEffectPrograms(std::span<const std::byte> payload) {
   if (payload.data() == nullptr) return;
   auto* extent = FindProgram(payload.data());
   if (extent == nullptr) {
-    extent = &ReplaceableExtent(programs, &Effects_EffectPackage::block8Data);
+    extent = &ReplaceableExtent(programs, &LiveEffectPackage::programs);
   }
   *extent = {.data = payload.data(),
              .size = payload.size(),
@@ -188,7 +187,7 @@ void RecordLiveAnimationTable(std::span<std::byte> table) {
       extent = {};
     }
   }
-  ReplaceableExtent(animation_tables, &Effects_EffectPackage::block2Data) =
+  ReplaceableExtent(animation_tables, &LiveEffectPackage::animation_table) =
       recorded;
 }
 

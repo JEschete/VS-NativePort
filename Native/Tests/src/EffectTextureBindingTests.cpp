@@ -31,8 +31,8 @@
 
 namespace {
 struct TextureBindingFixture {
-  Effects_EffectPackage saved_primary = Effects_actionPackage;
-  Effects_EffectPackage* saved_package = Effects_package;
+  VS::Effects::LiveEffectPackage saved_primary = Effects_actionPackage;
+  VS::Effects::LiveEffectPackage* saved_package = Effects_package;
   decltype(Effects_actionRequest.effect_id) saved_effect =
       Effects_actionRequest.effect_id;
   std::array<std::uint32_t, 16> bytes{};
@@ -70,7 +70,7 @@ struct TextureBindingFixture {
   static void CheckFirstFrame(
       const VS::Effects::LiveParticleTextureAnimation& state) {
     REQUIRE(state.texture_info != nullptr);
-    CHECK(state.texture_info == Effects_actionPackage.textureInfoTable[0] + 1);
+    CHECK(state.texture_info == Effects_actionPackage.texture_tables[0] + 1);
     CHECK(state.texture_info->first_texture == 1);
     CHECK(state.frame_offset_x == 3);
     CHECK(state.frame_offset_y == 2);
@@ -97,9 +97,9 @@ class RecordedProgram {
 };
 
 void CheckGravityBinding() {
-  CHECK(Effects_actionPackage.block1TableCount == 2);
-  CHECK(Effects_actionPackage.textureInfoTable[0] ==
-        Effects_actionPackage.textureInfoTable[1]);
+  CHECK(Effects_actionPackage.texture_table_count == 2);
+  CHECK(Effects_actionPackage.texture_tables[0] ==
+        Effects_actionPackage.texture_tables[1]);
 }
 
 void CheckSourceTextureBlocks(const std::filesystem::path& path) {
@@ -142,12 +142,12 @@ TEST_CASE("Gravity material channels resolve only to its own authored table",
   TextureBindingFixture fixture;
   const auto original = fixture.bytes;
   fixture.Bind();
-  CHECK(Effects_actionPackage.block1TableCount == 2);
-  CHECK(Effects_actionPackage.textureInfoTable[0] ==
+  CHECK(Effects_actionPackage.texture_table_count == 2);
+  CHECK(Effects_actionPackage.texture_tables[0] ==
         reinterpret_cast<VS::Effects::LivePackageTextureFrame*>(
             fixture.bytes.data() + 2));
-  CHECK(Effects_actionPackage.textureInfoTable[1] ==
-        Effects_actionPackage.textureInfoTable[0]);
+  CHECK(Effects_actionPackage.texture_tables[1] ==
+        Effects_actionPackage.texture_tables[0]);
   CHECK(fixture.bytes == original);
 }
 
@@ -156,14 +156,14 @@ TEST_CASE(
     "[effects][texture-binding][binding-red]") {
   TextureBindingFixture fixture;
   Effects_actionRequest.effect_id = 53;
-  Effects_actionPackage.textureInfoTable[1] =
+  Effects_actionPackage.texture_tables[1] =
       reinterpret_cast<VS::Effects::LivePackageTextureFrame*>(
           fixture.bytes.data() + 3);
   fixture.Bind();
-  CHECK(Effects_actionPackage.block1TableCount == 1);
-  CHECK(Effects_actionPackage.textureInfoTable[1] == nullptr);
-  CHECK(Effects_actionPackage.textureInfoTable[2] == nullptr);
-  CHECK(Effects_actionPackage.textureInfoTable[3] == nullptr);
+  CHECK(Effects_actionPackage.texture_table_count == 1);
+  CHECK(Effects_actionPackage.texture_tables[1] == nullptr);
+  CHECK(Effects_actionPackage.texture_tables[2] == nullptr);
+  CHECK(Effects_actionPackage.texture_tables[3] == nullptr);
 }
 
 TEST_CASE("Gravity animation keeps authored holds offsets and ended frames",
@@ -200,23 +200,23 @@ TEST_CASE("Material channels preserve distinct authored multi-table bindings",
   bytes[5] = 0x00010001;
   VS::Effects::BindLiveEffectTextureTables(
       std::as_writable_bytes(std::span(bytes)));
-  CHECK(Effects_actionPackage.block1TableCount == 3);
-  CHECK(Effects_actionPackage.textureInfoTable[0] !=
-        Effects_actionPackage.textureInfoTable[1]);
-  CHECK(Effects_actionPackage.textureInfoTable[1]->first_texture == 1);
-  CHECK(Effects_actionPackage.textureInfoTable[2]->first_texture == 0);
-  CHECK(Effects_actionPackage.textureInfoTable[3] == nullptr);
+  CHECK(Effects_actionPackage.texture_table_count == 3);
+  CHECK(Effects_actionPackage.texture_tables[0] !=
+        Effects_actionPackage.texture_tables[1]);
+  CHECK(Effects_actionPackage.texture_tables[1]->first_texture == 1);
+  CHECK(Effects_actionPackage.texture_tables[2]->first_texture == 0);
+  CHECK(Effects_actionPackage.texture_tables[3] == nullptr);
 }
 
 TEST_CASE("Gravity channel normalization never leaks into secondary resources",
           "[effects][texture-binding]") {
   TextureBindingFixture fixture;
-  Effects_EffectPackage secondary{};
+  VS::Effects::LiveEffectPackage secondary{};
   Effects_package = &secondary;
   fixture.Bind();
-  CHECK(secondary.block1TableCount == 1);
-  CHECK(secondary.textureInfoTable[1] == nullptr);
-  CHECK(Effects_actionPackage.block1TableCount == 0);
+  CHECK(secondary.texture_table_count == 1);
+  CHECK(secondary.texture_tables[1] == nullptr);
+  CHECK(Effects_actionPackage.texture_table_count == 0);
 }
 
 TEST_CASE("Ended and delayed texture programs preserve explicit frame state",
@@ -231,10 +231,10 @@ TEST_CASE("Ended and delayed texture programs preserve explicit frame state",
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
   CHECK(animation.texture_info == nullptr);
   CHECK(animation.cursor == 0);
-  animation.texture_info = Effects_actionPackage.textureInfoTable[1];
+  animation.texture_info = Effects_actionPackage.texture_tables[1];
   animation.frame_timer = 4;
   VS::Effects::LiveAdvanceParticleTextureAnimation(&animation);
-  CHECK(animation.texture_info == Effects_actionPackage.textureInfoTable[0]);
+  CHECK(animation.texture_info == Effects_actionPackage.texture_tables[0]);
   CHECK(animation.frame_timer == 2);
   CHECK(animation.cursor == 0);
 }

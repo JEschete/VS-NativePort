@@ -238,10 +238,11 @@ void StoreRegisters(Effects_EffectInstance& instance,
 }
 
 [[nodiscard]] std::span<LiveParticleDefinition> PackageDefinitions() {
-  if (Effects_package == nullptr || Effects_package->block5Data == nullptr) {
+  if (Effects_package == nullptr ||
+      Effects_package->particle_definitions == nullptr) {
     return {};
   }
-  return {Effects_package->block5Data->Definitions(),
+  return {Effects_package->particle_definitions->Definitions(),
           LiveParticleDefinitionCount()};
 }
 

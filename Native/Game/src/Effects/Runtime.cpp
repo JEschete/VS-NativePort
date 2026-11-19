@@ -84,10 +84,10 @@ Effects_EffectInstance* Effects_secondaryInstances;
 int Effects_scriptSelector;
 
 // decomp: D_800F5698 (D_800F5698@BATTLE/BATTLE.PRG)
-Effects_EffectPackage* Effects_savedPackage;
+VS::Effects::LiveEffectPackage* Effects_savedPackage;
 
 // decomp: D_800F569C (D_800F569C@BATTLE/BATTLE.PRG)
-Effects_EffectPackage* Effects_package;
+VS::Effects::LiveEffectPackage* Effects_package;
 
 // decomp: D_800F56A8 (D_800F56A8@BATTLE/BATTLE.PRG)
 Effects_EffectRenderer Effects_rendererTableAlias[1];
@@ -96,8 +96,8 @@ Effects_EffectRenderer Effects_rendererTableAlias[1];
 Effects_EffectRenderer Effects_effectRenderers[8];
 
 // decomp: D_800F56C8 (D_800F56C8@BATTLE/BATTLE.PRG)
-Effects_EffectPackage Effects_actionPackage;
+VS::Effects::LiveEffectPackage Effects_actionPackage;
 
 // decomp: D_800F57A0 (D_800F57A0@BATTLE/BATTLE.PRG)
-Effects_EffectPackage Effects_secondaryPackage;
+VS::Effects::LiveEffectPackage Effects_secondaryPackage;
 

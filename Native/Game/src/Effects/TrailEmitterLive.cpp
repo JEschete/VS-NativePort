@@ -41,9 +41,9 @@ namespace VS::Effects {
 namespace {
 constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
 using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
-using PackageCurves = decltype(Effects_EffectPackage::curves);
+using PackageCurves = decltype(LiveEffectPackage::curves);
 constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
-constexpr std::size_t kCurveSlots = std::extent_v<PackageCurves>;
+constexpr std::size_t kCurveSlots = std::tuple_size_v<PackageCurves>;
 static_assert(kCurveSlots == kEffectCurveCapacity);
 static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
 
@@ -178,11 +178,12 @@ void StoreScratch(const TrailOriginScratch& values,
 // The current package's definition `index`, or null when its recorded
 // definition block does not hold it.
 LiveParticleDefinition* Definition(std::size_t index) {
-  if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
+  if (Effects_package == nullptr ||
+      Effects_package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return nullptr;
   }
-  return &Effects_package->block5Data->Definitions()[index];
+  return &Effects_package->particle_definitions->Definitions()[index];
 }
 
 template <typename Emitter>
@@ -202,7 +203,7 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
   }
   const auto sampled = EmitterLayout<Emitter>::kSample(
       {Effects_package->curves[curve],
-       Effects_package->curveBlock->Size(curve)});
+       Effects_package->curve_block->Size(curve)});
   if (sampled.clamped) {
     VS::Core::LogDebug("effects",
                        "{} trail emitter: one-entry transparency curve {} "

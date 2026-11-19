@@ -180,7 +180,7 @@ compile settings, is part of #248.
 | `void_params` | 0 | 0 |
 | `gnu_attributes` | 0 | 0 |
 | `macros` | 14 | 10,443 |
-| `global_decls` | 104 | 993 |
+| `global_decls` | 104 | 992 |
 | `c_wrapped` | 0 | 0 |
 | `baseline` | 2 | 9 |
 

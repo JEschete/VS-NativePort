@@ -829,8 +829,8 @@ class BlankLivePackage {
   ~BlankLivePackage() { Effects_package = previous_; }
 
  private:
-  Effects_EffectPackage blank_{};
-  Effects_EffectPackage* previous_;
+  VS::Effects::LiveEffectPackage blank_{};
+  VS::Effects::LiveEffectPackage* previous_;
 };
 }  // namespace
 

@@ -10,7 +10,7 @@
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
 
-static_assert(sizeof(Effects_EffectPackage::textureInfoTable) ==
+static_assert(sizeof(VS::Effects::LiveEffectPackage::texture_tables) ==
               VS::Effects::kTextureTableCapacity *
                   sizeof(VS::Effects::LivePackageTextureFrame*));
 
@@ -36,7 +36,7 @@ void VS::Effects::BindLiveEffectTextureTables(std::span<std::byte> block) {
       static_cast<int>(Effects_actionRequest.effect_id)};
   const TextureBlockLayout layout = BindEffectTextureTables(block, owner);
   for (std::size_t table = 0; table < kTextureTableCapacity; ++table) {
-    Effects_package->textureInfoTable[table] =
+    Effects_package->texture_tables[table] =
         table < layout.table_count
             ? reinterpret_cast<LivePackageTextureFrame*>(
                   block.data() + layout.table_offsets.at(table))
@@ -44,5 +44,5 @@ void VS::Effects::BindLiveEffectTextureTables(std::span<std::byte> block) {
   }
   Effects_package->textures = reinterpret_cast<LivePackageTexture*>(
       block.data() + layout.descriptor_offset);
-  Effects_package->block1TableCount = static_cast<int>(layout.table_count);
+  Effects_package->texture_table_count = static_cast<int>(layout.table_count);
 }

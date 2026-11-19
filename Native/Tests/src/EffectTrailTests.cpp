@@ -505,8 +505,8 @@ class LiveTrailScope {
  private:
   std::vector<std::string> messages_;
   VS::Core::LogObserver previous_observer_;
-  Effects_EffectPackage* saved_package_ = Effects_package;
-  Effects_EffectPackage empty_package_{};
+  VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
+  VS::Effects::LiveEffectPackage empty_package_{};
 };
 
 // A stage that marks every trail it is given.

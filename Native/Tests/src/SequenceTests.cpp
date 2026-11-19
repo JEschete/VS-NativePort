@@ -1026,7 +1026,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
   const VS::Effects::LiveEffectCamera saved_camera = VS::Effects::effectCamera;
   const VS::Effects::LiveEffectCamera saved_action_camera =
       VS::Effects::savedActionCamera;
-  Effects_EffectPackage* saved_package = Effects_package;
+  VS::Effects::LiveEffectPackage* saved_package = Effects_package;
   const u_int saved_phase = Effects_primaryPhase;
   const char saved_token = Effects_primaryToken;
   int saved_bitmaps[4];

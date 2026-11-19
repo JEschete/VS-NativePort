@@ -39,9 +39,9 @@ std::uint64_t refused_rings = 0;
 
 [[nodiscard]] bool BoundCurve(std::uint8_t curve, std::size_t count) {
   return curve == 0 ||
-         (curve <= count && Effects_package->curveBlock != nullptr &&
+         (curve <= count && Effects_package->curve_block != nullptr &&
           Effects_package->curves[curve - 1] != nullptr &&
-          Effects_package->curveBlock->Size(curve - 1) != 0);
+          Effects_package->curve_block->Size(curve - 1) != 0);
 }
 
 [[nodiscard]] bool BoundTick(const LiveParticleDefinition& definition) {
@@ -89,12 +89,13 @@ std::uint64_t refused_rings = 0;
       command == RingCommand::kCreate
           ? PlanRing(packed).definition_index
           : static_cast<const LiveRingState*>(slot->rendererState)->effect;
-  if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
+  if (Effects_package == nullptr ||
+      Effects_package->particle_definitions == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return Refuse("definition outside the current bound package");
   }
   return command != RingCommand::kTick ||
-         BoundTick(Effects_package->block5Data->Definitions()[index]);
+         BoundTick(Effects_package->particle_definitions->Definitions()[index]);
 }
 
 [[nodiscard]] std::array<RingPaletteEntry, kRingPaletteEntries> Palette(
