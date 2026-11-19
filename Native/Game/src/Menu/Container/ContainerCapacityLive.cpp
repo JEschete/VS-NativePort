@@ -62,7 +62,7 @@ class LiveWorld final : public StorageCapacityWorld,
   }
   std::int32_t Occupied(StorageArea area,
                         Items::ItemCategory category) override {
-    auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
+    auto* const storage = VS::Menu::Framework::inventoryStorage;
     Items_Container* const owner = storage == nullptr ? nullptr
                                    : area == StorageArea::kGadgetBag
                                        ? &storage->gadgetBag
@@ -83,12 +83,12 @@ class LiveWorld final : public StorageCapacityWorld,
     return receiving_.emplace(owner == nullptr ? nullptr : &owner->items);
   }
   Items::ContainerWorld& Staging() override {
-    auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
+    auto* const storage = VS::Menu::Framework::inventoryStorage;
     return staging_.emplace(storage == nullptr ? nullptr
                                                : &storage->stagedTransfer);
   }
   std::span<const std::uint16_t> PendingTransfers() override {
-    auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
+    auto* const storage = VS::Menu::Framework::inventoryStorage;
     if (storage == nullptr) Refuse("missing pending-transfer owner");
     return storage->itemsToTransfer;
   }

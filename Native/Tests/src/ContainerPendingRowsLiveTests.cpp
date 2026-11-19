@@ -49,8 +49,7 @@ TEST_CASE("F02979 live searches the current workspace and all 64 entries",
       data::kLastGemPendingToken;
   REQUIRE(rows::FindLivePendingTransfer(5, data::kLastGemSlot) ==
           kLastPendingPosition);
-  VS::Menu::Framework::unusedInventoryStorage =
-      fixture.containers.replacement.get();
+  VS::Menu::Framework::inventoryStorage = fixture.containers.replacement.get();
   fixture.containers.replacement->itemsToTransfer[1] =
       data::kLastGemPendingToken;
   REQUIRE(rows::FindLivePendingTransfer(5, data::kLastGemSlot) == 2);
@@ -64,8 +63,7 @@ TEST_CASE(
   rows::AppendLivePendingTransfer(kMiscCategory, data::kLastMiscSlot);
   REQUIRE(fixture.containers.storage->itemsToTransfer[0] ==
           data::kLastMiscPendingToken);
-  VS::Menu::Framework::unusedInventoryStorage =
-      fixture.containers.replacement.get();
+  VS::Menu::Framework::inventoryStorage = fixture.containers.replacement.get();
   rows::AppendLivePendingTransfer(1, 0);
   REQUIRE(fixture.containers.replacement->itemsToTransfer[0] ==
           data::kBladePendingToken);
@@ -96,7 +94,7 @@ TEST_CASE(
   auto& replacement = *fixture.containers.replacement;
   replacement.stagedTransfer.misc[0] = {
       .id = data::kMiscId + 1, .count = 2, .index = 1};
-  VS::Menu::Framework::unusedInventoryStorage = &replacement;
+  VS::Menu::Framework::inventoryStorage = &replacement;
   rows::RebuildLivePendingTransfers();
   REQUIRE(fixture.Build(kPendingCategory) == 1);
   REQUIRE(replacement.itemsToTransfer[0] == data::kMiscPendingToken);
@@ -237,7 +235,7 @@ TEST_CASE(
   storage.itemsToTransfer[0] = data::kMiscPendingToken;
   const auto* const owner = Menu_Container_containerData;
   Boot_ResetMenudStatics();
-  REQUIRE(VS::Menu::Framework::unusedInventoryStorage == &storage);
+  REQUIRE(VS::Menu::Framework::inventoryStorage == &storage);
   REQUIRE(Menu_Container_containerData == owner);
   REQUIRE(rows::FindLivePendingTransfer(kMiscCategory, 0) == 1);
   rows::AppendLivePendingTransfer(kMiscCategory, data::kLastMiscSlot);

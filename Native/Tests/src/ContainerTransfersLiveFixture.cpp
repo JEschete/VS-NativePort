@@ -19,7 +19,7 @@ LiveFixture::LiveFixture() {
       order.weapons, order.blades, order.grips, order.shields,
       order.armor,   order.gems,   order.misc};
   std::copy(indices.begin(), indices.end(), Menu_Inventory_inventoryIndices);
-  VS::Menu::Framework::unusedInventoryStorage = storage.get();
+  VS::Menu::Framework::inventoryStorage = storage.get();
   Menu_Container_containerData = &storage->container;
   Menu_Container_otherStorage = &storage->container;
   items::Live::Commit(VS::Items::inventory, items::InventoryContents{});
@@ -32,7 +32,7 @@ LiveFixture::~LiveFixture() {
             Menu_Inventory_inventoryIndices);
   items::Live::Commit(VS::Items::inventory, saved_inventory);
   Menu_Container_transferredMiscCount = saved_count;
-  VS::Menu::Framework::unusedInventoryStorage = saved_storage;
+  VS::Menu::Framework::inventoryStorage = saved_storage;
   Menu_Container_containerData = saved_owner;
   Menu_Container_otherStorage = saved_other;
 }

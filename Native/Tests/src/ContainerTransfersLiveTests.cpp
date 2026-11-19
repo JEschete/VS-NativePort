@@ -20,7 +20,7 @@ TEST_CASE(
   items::PreviewLiveTransferredMisc();
   CHECK(fixture.storage->transferPreview.misc[0].count == 100);
   CHECK(fixture.storage->transferPreview.misc[1].count == 1);
-  VS::Menu::Framework::unusedInventoryStorage = fixture.replacement.get();
+  VS::Menu::Framework::inventoryStorage = fixture.replacement.get();
   Menu_Container_otherStorage = &fixture.replacement->gadgetBag;
   fixture.replacement->gadgetBag.items.misc[2].id = 15;
   items::PreviewLiveTransferredMisc();
@@ -36,7 +36,7 @@ TEST_CASE(
   Menu_Container_transferredMiscCount = 99;
   items::RefreshLiveMiscTransferCount();
   CHECK(Menu_Container_transferredMiscCount == 1);
-  VS::Menu::Framework::unusedInventoryStorage = fixture.replacement.get();
+  VS::Menu::Framework::inventoryStorage = fixture.replacement.get();
   Menu_Container_otherStorage = &fixture.replacement->container;
   items::RefreshLiveMiscTransferCount();
   CHECK(Menu_Container_transferredMiscCount == 0);

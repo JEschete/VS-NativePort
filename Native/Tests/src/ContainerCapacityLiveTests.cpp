@@ -143,7 +143,7 @@ TEST_CASE("F02972 isolated callback retains the original workspace and packets",
   LogScope observer([&](const VS::Core::LogRecord& record) {
     if (record.channel == "render" && !replaced) {
       replaced = true;
-      VS::Menu::Framework::unusedInventoryStorage = &next;
+      VS::Menu::Framework::inventoryStorage = &next;
       VS::Render::legacyPrimitiveBuffers[0] = fixture.primitives.data() + 1;
     }
   });
@@ -229,7 +229,7 @@ TEST_CASE(
   std::fill_n(Menu_Container_containerItemCapacities, items::kItemCategoryCount,
               0);
   Menu_Container_otherStorage = nullptr;
-  VS::Menu::Framework::unusedInventoryStorage = nullptr;
+  VS::Menu::Framework::inventoryStorage = nullptr;
   Menu_Container_browsingGadgetBag = 1;
   constexpr int kMisc = static_cast<int>(items::ItemCategory::kMisc);
   CHECK(capacity::WouldExceedLiveCapacity(kMisc, 0) == 0);
@@ -375,7 +375,7 @@ TEST_CASE(
   Boot_ResetMenudStatics();
   CHECK(Menu_Container_containerData == &storage.container);
   CHECK(Menu_Container_otherStorage == &storage.gadgetBag);
-  CHECK(VS::Menu::Framework::unusedInventoryStorage == &storage);
+  CHECK(VS::Menu::Framework::inventoryStorage == &storage);
   CHECK(Menu_Container_browsingGadgetBag == 2);
   CHECK(storage.itemsToTransfer[0] == kToken);
   CHECK(storage.stagedTransfer.gems[live::kLastGem].id == 2);

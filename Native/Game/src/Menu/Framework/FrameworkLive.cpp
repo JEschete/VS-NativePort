@@ -193,8 +193,8 @@ Menu_Framework_TextHeader
 char VS::Menu::Framework::actionMenuState = 0;
 // decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG 58EC.c)
 int VS::Menu::Framework::backgroundFadeStep = 0;
-// decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG): never read.
-char VS::Menu::Framework::unusedContainerEmptyBackup = 0;
+// decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG 58EC.c)
+char VS::Menu::Framework::containerEmptyBackup = 0;
 // decomp: vs_mainMenu_cursorColor (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::cursorColor = 0;
 // decomp: vs_mainMenu_displayActionCost (MENU/MAINMENU.PRG 58EC.c)
@@ -203,8 +203,8 @@ char VS::Menu::Framework::displayActionCost = 0;
 char VS::Menu::Framework::hideMenu = 0;
 // decomp: vs_mainMenu_itemsListRow (MENU/MAINMENU.PRG 58EC.c)
 char VS::Menu::Framework::itemsListRow = 0;
-// decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG): never read.
-Menu_Container_InventoryStorage* VS::Menu::Framework::unusedInventoryStorage =
+// decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG C48.c)
+Menu_Container_InventoryStorage* VS::Menu::Framework::inventoryStorage =
     nullptr;
 
 namespace VS::Menu::Framework {

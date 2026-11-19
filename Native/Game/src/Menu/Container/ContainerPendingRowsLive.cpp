@@ -48,12 +48,12 @@ class LiveWorld final : public ContainerItemRowsWorld {
       : text_(text), types_(types), descriptions_(descriptions) {}
 
   std::span<std::uint16_t> PendingTransfers() override {
-    auto* const owner = VS::Menu::Framework::unusedInventoryStorage;
+    auto* const owner = VS::Menu::Framework::inventoryStorage;
     if (owner == nullptr) Refuse("missing pending-transfer owner");
     return owner->itemsToTransfer;
   }
   Items::ContainerWorld& StagingRecords() override {
-    auto* const owner = VS::Menu::Framework::unusedInventoryStorage;
+    auto* const owner = VS::Menu::Framework::inventoryStorage;
     staged_owner_ = owner == nullptr ? nullptr : &owner->stagedTransfer;
     return staged_.emplace(staged_owner_);
   }

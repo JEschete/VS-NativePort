@@ -23,7 +23,7 @@ struct LiveFixture {
       items::Live::Typed(VS::Items::inventory);
   std::uint16_t saved_count = Menu_Container_transferredMiscCount;
   Menu_Container_InventoryStorage* saved_storage =
-      VS::Menu::Framework::unusedInventoryStorage;
+      VS::Menu::Framework::inventoryStorage;
   Items_Container* saved_owner = Menu_Container_containerData;
   Items_Container* saved_other = Menu_Container_otherStorage;
   std::unique_ptr<Menu_Container_InventoryStorage> storage =

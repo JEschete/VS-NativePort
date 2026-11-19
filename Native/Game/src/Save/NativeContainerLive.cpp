@@ -60,23 +60,23 @@ char* ContainerString(int offset) {
 }
 
 Menu_Container_InventoryStorage& Storage() {
-  if (VS::Menu::Framework::unusedInventoryStorage == nullptr) {
+  if (VS::Menu::Framework::inventoryStorage == nullptr) {
     VS::Core::Errorf("save", "Container save submenu used without its storage");
     std::abort();
   }
-  return *VS::Menu::Framework::unusedInventoryStorage;
+  return *VS::Menu::Framework::inventoryStorage;
 }
 
 class LiveContainerSave final : public ContainerSaveHost {
  public:
   void BeginSession() override {
     VS::Menu::PlayOpenSound();
-    VS::Menu::Framework::unusedContainerEmptyBackup =
+    VS::Menu::Framework::containerEmptyBackup =
         static_cast<char>(VS::Input::settings.containerEmpty);
-    VS::Menu::Framework::unusedInventoryStorage =
+    VS::Menu::Framework::inventoryStorage =
         static_cast<Menu_Container_InventoryStorage*>(
             VS::Core::Memory::AllocateLiveFromHighEnd(
-                sizeof *VS::Menu::Framework::unusedInventoryStorage));
+                sizeof *VS::Menu::Framework::inventoryStorage));
     static_assert(
         sizeof(Menu_Container_InventoryStorage) % sizeof(std::uint32_t) == 0);
     VS::Core::Memory::ZeroWordsBackward(
@@ -187,7 +187,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   void RestoreInventory() override {
     Menu_Container_InventoryStorage& storage = Storage();
     VS::Input::settings.containerEmpty =
-        VS::Menu::Framework::unusedContainerEmptyBackup;
+        VS::Menu::Framework::containerEmptyBackup;
     VS::Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
                                              storage.savedInventory,
                                              sizeof storage.savedInventory);
@@ -222,8 +222,8 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   void EndSession() override {
     VS::Core::Memory::FreeLiveFromHighEnd(
-        VS::Menu::Framework::unusedInventoryStorage);
-    VS::Menu::Framework::unusedInventoryStorage = nullptr;
+        VS::Menu::Framework::inventoryStorage);
+    VS::Menu::Framework::inventoryStorage = nullptr;
     VS::Game::Save::ReleaseContainer();
   }
 

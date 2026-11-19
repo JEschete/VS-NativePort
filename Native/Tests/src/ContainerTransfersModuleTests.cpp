@@ -85,7 +85,7 @@ TEST_CASE(
   Menu_Container_transferredMiscCount = 91;
   Menu_Container_containerItemCapacities[6] = 0;
   Boot_ResetMenudStatics();
-  CHECK(VS::Menu::Framework::unusedInventoryStorage == fixture.storage.get());
+  CHECK(VS::Menu::Framework::inventoryStorage == fixture.storage.get());
   CHECK(Menu_Container_otherStorage == &owner);
   CHECK(Menu_Container_containerData == &owner);
   CHECK(Menu_Container_transferredMiscCount == 91);

@@ -108,7 +108,7 @@ class RecordView final : public Items::ContainerWorld {
 };
 
 Menu_Container_InventoryStorage& Storage() {
-  auto* const storage = VS::Menu::Framework::unusedInventoryStorage;
+  auto* const storage = VS::Menu::Framework::inventoryStorage;
   if (storage == nullptr) Refuse("missing inventory storage");
   return *storage;
 }

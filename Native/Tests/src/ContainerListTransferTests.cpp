@@ -1220,8 +1220,8 @@ TEST_CASE("F02985 F02987 live entries refuse missing storage and steps",
   LiveFixture fixture;
   transfer::ResetLiveContainerTransferStatics();
   live::equipment::ValueRestore<Menu_Container_InventoryStorage*> storage{
-      VS::Menu::Framework::unusedInventoryStorage};
-  VS::Menu::Framework::unusedInventoryStorage = nullptr;
+      VS::Menu::Framework::inventoryStorage};
+  VS::Menu::Framework::inventoryStorage = nullptr;
   REQUIRE(transfer::LiveUpdateItemList(1) == 0);
   REQUIRE(transfer::LiveUpdateScreen(nullptr) == 0);
   live::equipment::ValueRestore<Items_Container*> active{

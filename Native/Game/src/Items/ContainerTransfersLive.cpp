@@ -45,10 +45,10 @@ ItemCategory Category(int category) {
 }
 
 Menu_Container_InventoryStorage& Storage() {
-  if (VS::Menu::Framework::unusedInventoryStorage == nullptr) {
+  if (VS::Menu::Framework::inventoryStorage == nullptr) {
     Refuse("missing inventory-storage owner");
   }
-  return *VS::Menu::Framework::unusedInventoryStorage;
+  return *VS::Menu::Framework::inventoryStorage;
 }
 
 OrderTables Orders(Items_ContainerIndices& indices) {

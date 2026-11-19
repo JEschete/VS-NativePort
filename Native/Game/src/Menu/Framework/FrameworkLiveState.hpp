@@ -81,8 +81,10 @@ extern Menu_Framework_TextHeader textHeaders[2];
 extern char actionMenuState;
 // decomp: vs_mainMenu_backgroundFadeStep (MENU/MAINMENU.PRG 58EC.c)
 extern int backgroundFadeStep;
-// decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG): never read.
-extern char unusedContainerEmptyBackup;
+// decomp: vs_mainMenu_containerEmptyBackup (MENU/MAINMENU.PRG 58EC.c). The
+// container save submenu keeps the "container empty" setting here for the
+// session and restores it on exit (MENU7.PRG 260.c:710, 876).
+extern char containerEmptyBackup;
 // decomp: vs_mainMenu_cursorColor (MENU/MAINMENU.PRG 58EC.c)
 extern char cursorColor;
 // decomp: vs_mainMenu_displayActionCost (MENU/MAINMENU.PRG 58EC.c)
@@ -91,6 +93,9 @@ extern char displayActionCost;
 extern char hideMenu;
 // decomp: vs_mainMenu_itemsListRow (MENU/MAINMENU.PRG 58EC.c)
 extern char itemsListRow;
-// decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG): never read.
-extern Menu_Container_InventoryStorage* unusedInventoryStorage;
+// decomp: vs_menu_inventoryStorage (MENU/MAINMENU.PRG C48.c). The container
+// session's heap storage: the inventory snapshot restored on exit and the
+// container copies the transfer screens edit (MENU7.PRG 260.c:711-901,
+// MENUD.PRG 234.c:266-599).
+extern Menu_Container_InventoryStorage* inventoryStorage;
 }  // namespace VS::Menu::Framework
