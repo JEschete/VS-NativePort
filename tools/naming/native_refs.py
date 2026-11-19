@@ -112,6 +112,21 @@ def strip(cursor: ci.Cursor) -> ci.Cursor:
     return cursor
 
 
+OFFSETOF_TYPE = {"NAMESPACE_REF", "TYPE_REF", "TEMPLATE_REF"}
+
+
+def offsetof_members(children: list[ci.Cursor]) -> list[ci.Cursor]:
+    """The member designators of an `offsetof` expression: its type, spelled with any namespace or enclosing-type
+    qualifiers (`VS::Audio::MusicConfig` begins with NAMESPACE_REFs, #456), then MEMBER_REFs. Empty for anything
+    else, such as a designated initializer, which begins with its MEMBER_REF."""
+    kinds = [kind(child) for child in children]
+    first = kinds.index("MEMBER_REF") if "MEMBER_REF" in kinds else 0
+    qualifiers = kinds[:first]
+    if "TYPE_REF" not in qualifiers or not OFFSETOF_TYPE.issuperset(qualifiers):
+        return []
+    return [child for child, child_kind in zip(children, kinds, strict=True) if child_kind == "MEMBER_REF"]
+
+
 RECORDS = {"STRUCT_DECL", "UNION_DECL", "CLASS_DECL"}
 
 
@@ -240,9 +255,10 @@ class Walker:
                 self.record(cursor, usr, function, "layout" if layout else "write", None)
             return
         if k == "UNEXPOSED_EXPR" and not layout and children:
-            if kind(children[0]) == "TYPE_REF" and any(kind(child) == "MEMBER_REF" for child in children):
-                for child in children:  # offsetof evaluated at run time: a raw member access
-                    usr = self.tracked(child.referenced) if kind(child) == "MEMBER_REF" else None
+            designators = offsetof_members(children)
+            if designators:
+                for child in designators:  # offsetof evaluated at run time: a raw member access
+                    usr = self.tracked(child.referenced)
                     if usr:
                         self.record(child, usr, function, "address", None)
                 return
