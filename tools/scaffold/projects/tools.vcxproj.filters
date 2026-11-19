@@ -993,6 +993,9 @@
     <None Include="..\..\naming\symbol_support.py">
       <Filter>tools\naming</Filter>
     </None>
+    <None Include="..\..\naming\test_disc_refs.py">
+      <Filter>tools\naming</Filter>
+    </None>
     <None Include="..\..\naming\test_merge_symbols.py">
       <Filter>tools\naming</Filter>
     </None>

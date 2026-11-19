@@ -10,18 +10,24 @@ each is listed with its file offset for review. A range with only stores and no 
 
   python tools\\naming\\disc_refs.py G01981 G01982        ranges of DATA_LEDGER rows (address and size)
   python tools\\naming\\disc_refs.py 0x8005FFB0:2           an address and size in bytes
+
+A C-defined static has no ledger address; a D_XXXXXXXX name supplies it, and any other such row needs 0xADDRESS:SIZE.
 """
 from __future__ import annotations
 
 import argparse
 import collections
 import csv
+import re
 import struct
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DISC = ROOT / "Native" / "data" / "disc"
+LEDGER = ROOT / "Docs" / "ledgers" / "DATA_LEDGER.csv"
+# A C-defined static has no ledger address (the decomp's linker places it), but a D_XXXXXXXX name is its address.
+DECOMP_ADDRESS_NAME = re.compile(r"D_([0-9A-Fa-f]{8})")
 LOADS = {0x20: "lb", 0x21: "lh", 0x22: "lwl", 0x23: "lw", 0x24: "lbu", 0x25: "lhu", 0x26: "lwr", 0x32: "lwc2"}
 STORES = {0x28: "sb", 0x29: "sh", 0x2A: "swl", 0x2B: "sw", 0x2E: "swr", 0x3A: "swc2"}
 WINDOW = 1024
@@ -96,20 +102,32 @@ def scan(data: bytes, ranges: list[tuple[int, int]]) -> list[tuple[int, int, str
     return hits
 
 
+def row_address(row: dict[str, str]) -> int | None:
+    if row["address"]:
+        return int(row["address"], 16)
+    match = DECOMP_ADDRESS_NAME.fullmatch(row["name"])
+    return int(match.group(1), 16) if match else None
+
+
 def ranges_from(arguments: list[str]) -> list[tuple[str, int, int]]:
+    """Each target's label, address and size; ValueError names a target that cannot be scanned."""
     rows = {}
     if any(not argument.startswith("0x") for argument in arguments):
-        with (ROOT / "Docs" / "ledgers" / "DATA_LEDGER.csv").open(encoding="utf-8", newline="") as stream:
+        with LEDGER.open(encoding="utf-8", newline="") as stream:
             rows = {row["id"]: row for row in csv.DictReader(stream)}
     found = []
     for argument in arguments:
         if argument.startswith("0x"):
             address, _, size = argument.partition(":")
             found.append((argument, int(address, 16), int(size or "1")))
-        else:
-            row = rows[argument]
-            found.append((f"{argument} {row['final_name'] or row['name']}", int(row["address"], 16),
-                          int(row["size"] or "1")))
+            continue
+        row = rows.get(argument)
+        if row is None:
+            raise ValueError(f"{argument} is not a DATA_LEDGER id; give 0xADDRESS[:SIZE] instead")
+        address = row_address(row)
+        if address is None:
+            raise ValueError(f"{argument} {row['name']} has no recorded address; give 0xADDRESS[:SIZE] instead")
+        found.append((f"{argument} {row['final_name'] or row['name']}", address, int(row["size"] or "1")))
     return found
 
 
@@ -117,10 +135,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("targets", nargs="+", help="DATA_LEDGER ids or 0xADDRESS[:SIZE]")
     args = parser.parse_args()
+    try:
+        targets = ranges_from(args.targets)
+    except ValueError as error:
+        parser.error(str(error))
     if not DISC.is_dir():
         print(f"{DISC} is missing; extract the disc first (Docs\\BUILDING.md)")
         return 1
-    targets = ranges_from(args.targets)
     spans = [(address, size) for _label, address, size in targets]
     found = collections.defaultdict(list)
     files = executables()
