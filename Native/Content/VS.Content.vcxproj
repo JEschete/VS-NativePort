@@ -100,7 +100,6 @@
     <ClInclude Include="src\DiscQueue.h" />
     <ClInclude Include="src\LegacyFiles.h" />
     <ClInclude Include="src\ModelLoading.h" />
-    <ClInclude Include="src\PFile.h" />
     <ClInclude Include="src\SystemResources.h" />
     <ClInclude Include="include\Content\ActorAssets.hpp" />
     <ClInclude Include="include\Content\ActorAssetsLive.hpp" />

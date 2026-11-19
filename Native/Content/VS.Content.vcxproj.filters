@@ -84,9 +84,6 @@
     <ClCompile Include="src\PFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\PFile.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\PFileLive.cpp">
       <Filter>src</Filter>
     </ClCompile>

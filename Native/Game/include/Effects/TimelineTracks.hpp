@@ -15,7 +15,7 @@
 // when their key is due. TimelineTracksLive.hpp runs them on the effect
 // instance records.
 namespace VS::Effects {
-// Effects_TimelineTrackHeader.kind values whose keys set up timing.
+// LiveTimelineTrackHeader.kind values whose keys set up timing.
 inline constexpr std::uint8_t kParticleEmissionTrack = 1;
 inline constexpr std::uint8_t kCameraShakeTrack = 13;
 
@@ -40,8 +40,8 @@ struct TimelineKeyAdvance {
 [[nodiscard]] std::optional<TimelineKeyAdvance> AdvanceTimelineKey(
     std::int16_t key_index, std::uint8_t key_count, std::uint8_t kind);
 
-// Effects_ParticleTrackKey's timing: the frames the key lasts (bits 8-15) and
-// its emission parameter (bits 20-25).
+// A particle emission key's (func_800D57FC_t) timing: the frames the key lasts
+// (bits 8-15) and its emission parameter (bits 20-25).
 struct ParticleKeyTiming {
   std::int16_t timer{};
   std::int32_t parameter{};
@@ -62,8 +62,8 @@ using CurveDuration = std::function<auto(std::uint8_t curve)->std::int32_t>;
 [[nodiscard]] std::int16_t ShakeKeyTimer(std::uint32_t parameters,
                                          const CurveDuration& duration);
 
-// Effects_ColorTrackKey: a colour shift due on `frame`. Each channel is
-// centred on kNeutralColourChannel.
+// A colour track key (func_800D6310_t): a colour shift due on `frame`. Each
+// channel is centred on kNeutralColourChannel.
 struct ColourKey {
   std::int16_t frame{};
   std::int16_t duration{};

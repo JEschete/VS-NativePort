@@ -10,7 +10,7 @@ H0008,header,Native/Content/src/DiscQueue.h,generated,yes,pragma-once,0,0,0,0,0,
 H0009,header,Native/Content/src/LegacyFiles.h,generated,yes,pragma-once,0,0,0,0,0,0,12,0,0,remaining,
 H0010,header,Native/Content/src/ModelLoading.h,generated,yes,pragma-once,0,0,0,0,0,0,27,0,0,remaining,
 H0011,header,Native/Content/src/OverlayWorkspaceLiveState.h,owned,no,pragma-once,0,0,0,0,0,0,1,0,0,retired,merged into Native/Content/include/Content/OverlayWorkspaceLive.hpp (#441)
-H0012,header,Native/Content/src/PFile.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0012,header,Native/Content/src/PFile.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted; its records are replaced by the Content/PFile.hpp byte readers (#441)
 H0013,header,Native/Content/src/SystemResources.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0014,header,Native/Engine/Legacy/Audio/LibSpu.h,legacy,no,pragma-once,0,0,0,0,0,7,18,0,0,remaining,
 H0015,header,Native/Engine/Legacy/Core/LibEtc.h,legacy,no,pragma-once,0,0,0,0,0,15,12,0,0,remaining,
@@ -267,7 +267,7 @@ H0265,header,Native/Game/src/Effects/Plugins/Plg297.hpp,generated,no,pragma-once
 H0266,header,Native/Game/src/Effects/Plugins/Plg300.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0267,header,Native/Game/src/Effects/Plugins/Plg301.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0268,header,Native/Game/src/Effects/PurgeTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,2,52,0,0,remaining,
+H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,2,39,0,0,remaining,
 H0270,header,Native/Game/src/Effects/ScreenEffectState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0271,header,Native/Game/src/Effects/ScreenEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/ScreenEffectState.hpp (#441)
 H0272,header,Native/Game/src/Effects/Templates/TemplateState.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,retired,replaced by Native/Game/src/Effects/Templates/TemplateLiveState.hpp (#441)

@@ -13,6 +13,7 @@
 #include "Audio/SoundBanks.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelinePlayback.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
@@ -192,12 +193,13 @@ std::array<std::byte, kTimelineBlockBytes> TimelineBlock() {
 }
 
 // A track over `keys` on its first key.
-Effects_TimelineTrack TrackOver(std::uint8_t kind, std::span<u_long> keys,
+fx::LiveTimelineTrack TrackOver(std::uint8_t kind,
+                                std::span<const std::uint32_t> keys,
                                 std::uint8_t key_count) {
-  Effects_TimelineTrack track{};
+  fx::LiveTimelineTrack track{};
   track.keys = keys.data();
   track.header.kind = kind;
-  track.header.keyCount = key_count;
+  track.header.key_count = key_count;
   return track;
 }
 
@@ -224,7 +226,7 @@ class LiveTimelinePackage {
   LiveTimelinePackage& operator=(LiveTimelinePackage&&) = delete;
 
   // Loads section 0's timeline into `instance`.
-  Effects_EffectTimeline& Load() {
+  fx::LiveEffectTimeline& Load() {
     fx::LiveLoadEffectTimeline(&instance, 0, 0);
     REQUIRE(instance.context.timeline != nullptr);
     return *instance.context.timeline;
@@ -588,24 +590,26 @@ TEST_CASE("Timeline loads start each track until one is missing",
 TEST_CASE("Live timelines load the package's timeline section",
           "[timeline-playback]") {
   LiveTimelinePackage live;
-  const Effects_EffectTimeline& timeline = live.Load();
-  CHECK(timeline.trackCount == 2);
+  const fx::LiveEffectTimeline& timeline = live.Load();
+  CHECK(timeline.track_count == 2);
   CHECK(timeline.flags == fx::kTimelineHasChildTracks);
-  CHECK(timeline.activeTracks == 0b11);
+  CHECK(timeline.active_tracks == 0b11);
   CHECK(timeline.frame == 0);
-  const std::span tracks(timeline.tracks, 2);
-  CHECK(reinterpret_cast<std::byte*>(tracks[0].keys) == live.Block() + 0x20);
-  CHECK(reinterpret_cast<std::byte*>(tracks[1].keys) == live.Block() + 0x30);
+  const auto tracks = timeline.Tracks();
+  CHECK(reinterpret_cast<const std::byte*>(tracks[0].keys) ==
+        live.Block() + 0x20);
+  CHECK(reinterpret_cast<const std::byte*>(tracks[1].keys) ==
+        live.Block() + 0x30);
 }
 
 TEST_CASE("Live timelines start their tracks and keep them on a bad section",
           "[timeline-playback]") {
   LiveTimelinePackage live;
-  const Effects_EffectTimeline& timeline = live.Load();
-  const std::span tracks(timeline.tracks, 2);
+  const fx::LiveEffectTimeline& timeline = live.Load();
+  const auto tracks = timeline.Tracks();
   CHECK(tracks[0].header.kind == 3);
-  CHECK(tracks[1].header.keyCount == 2);
-  CHECK(tracks[1].keyIndex == 0);
+  CHECK(tracks[1].header.key_count == 2);
+  CHECK(tracks[1].key_index == 0);
   // A section outside the block keeps the current timeline.
   fx::LiveLoadEffectTimeline(&live.instance, 1000, 0);
   CHECK(live.instance.context.timeline == &timeline);
@@ -613,32 +617,35 @@ TEST_CASE("Live timelines start their tracks and keep them on a bad section",
 
 TEST_CASE("Live timelines tick their tracks", "[timeline-playback]") {
   LiveTimelinePackage live;
-  Effects_EffectTimeline& timeline = live.Load();
-  const std::span tracks(timeline.tracks, 2);
+  fx::LiveEffectTimeline& timeline = live.Load();
+  const auto tracks = timeline.Tracks();
   for (int frame = 0; frame < 5; ++frame) {
     fx::LiveTickEffectTimeline(&live.instance, 0);
   }
   CHECK(timeline.frame == 5);
   // The sound track's due key plays the (absent) stream and moves on.
-  std::span(tracks[1].keys, 2)[0] |= 2UL << 18;
+  std::uint32_t sound_key = 0;
+  std::memcpy(&sound_key, live.Block() + 0x30, sizeof sound_key);
+  sound_key |= 2U << 18;
+  std::memcpy(live.Block() + 0x30, &sound_key, sizeof sound_key);
   fx::LiveTickEffectTimeline(&live.instance, 0);
-  CHECK(tracks[1].keyIndex == 1);
-  CHECK(timeline.activeTracks == 0b11);
+  CHECK(tracks[1].key_index == 1);
+  CHECK(timeline.active_tracks == 0b11);
   // Kinds without a tick are retired; a held frame stays.
   tracks[1].header.kind = 11;
-  timeline.flags = static_cast<char>(fx::kTimelineFrameHeld);
+  timeline.flags = fx::kTimelineFrameHeld;
   fx::LiveTickEffectTimeline(&live.instance, 0);
-  CHECK(timeline.activeTracks == 0b01);
+  CHECK(timeline.active_tracks == 0b01);
   CHECK(timeline.frame == 6);
 }
 
 TEST_CASE("Live timeline tracks refuse missing records",
           "[timeline-playback]") {
   const PackageScope scope(nullptr);
-  static Effects_EffectTimeline timeline;
+  static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
-  std::array<u_long, 2> keys{9, 0};
-  Effects_TimelineTrack track = TrackOver(4, keys, 1);
+  std::array<std::uint32_t, 2> keys{9, 0};
+  fx::LiveTimelineTrack track = TrackOver(4, keys, 1);
 
   fx::LiveTickEffectTimeline(nullptr, 0);
   fx::LiveTickEffectTimeline(&instance, 0);
@@ -651,9 +658,9 @@ TEST_CASE("Live timeline tracks refuse missing records",
   CHECK(fx::LiveTickEffectRendererTrack(&instance, nullptr) == 0);
   CHECK(fx::LiveTickControllerVibrationTrack(&instance, &track) == 0);
   CHECK(fx::LiveTickChildEffectTrack(&instance, &track, 0) == 0);
-  track.keyIndex = 1;
+  track.key_index = 1;
   CHECK(fx::LiveTickEffectSoundTrack(&instance, &track) == 0);
-  track.keyIndex = 0;
+  track.key_index = 0;
   timeline.frame = 8;
   CHECK(fx::LiveTickEffectRendererTrack(&instance, &track) == 1);
   instance.context.timeline = nullptr;
@@ -661,19 +668,19 @@ TEST_CASE("Live timeline tracks refuse missing records",
 
 TEST_CASE("Live shake tracks count down even while the frame is held",
           "[timeline-playback]") {
-  static Effects_EffectTimeline timeline;
+  static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
   instance.context.timeline = &timeline;
-  std::array<u_long, 4> keys{6, 0, 7, 0};
-  Effects_TimelineTrack track = TrackOver(13, keys, 2);
-  track.keyTimer = 3;
+  std::array<std::uint32_t, 4> keys{6, 0, 7, 0};
+  fx::LiveTimelineTrack track = TrackOver(13, keys, 2);
+  track.key_timer = 3;
   timeline.frame = 5;
   CHECK(fx::LiveTickCameraShakeTrack(&instance, &track) == 1);
-  CHECK(track.keyTimer == 3);
+  CHECK(track.key_timer == 3);
   timeline.frame = 9;
-  timeline.flags = static_cast<char>(fx::kTimelineFrameHeld);
+  timeline.flags = fx::kTimelineFrameHeld;
   CHECK(fx::LiveTickCameraShakeTrack(&instance, &track) == 1);
-  CHECK(track.keyTimer == 2);
+  CHECK(track.key_timer == 2);
   timeline.flags = 0;
   instance.context.timeline = nullptr;
 }

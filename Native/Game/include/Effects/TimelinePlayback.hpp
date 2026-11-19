@@ -18,7 +18,7 @@
 // child once the others finish. TimelinePlaybackLive.hpp runs them on the
 // effect instance records.
 namespace VS::Effects {
-// Effects_TimelineTrackHeader.kind.
+// LiveTimelineTrackHeader.kind.
 enum class TimelineTrackKind : std::uint8_t {
   kParticleEmission = 1,
   kSound = 2,
@@ -39,7 +39,7 @@ enum class TimelineTrackKind : std::uint8_t {
 [[nodiscard]] std::optional<TimelineTrackKind> TimelineTrackKindOf(
     std::uint8_t kind);
 
-// Effects_EffectTimeline.flags: the timeline has child effect tracks, so the
+// LiveEffectTimeline.flags: the timeline has child effect tracks, so the
 // target colour tracks shift every action target.
 inline constexpr std::uint8_t kTimelineHasChildTracks = 0x2;
 
@@ -59,8 +59,8 @@ struct TrackTimers {
   friend bool operator==(const TrackTimers&, const TrackTimers&) = default;
 };
 
-// Effects_ParticleTrackKey's emission: the particle event (bits 20-25), its
-// transparency override (26-31) and variant (16-19).
+// A particle emission key's (func_800D57FC_t) emission: the particle event
+// (bits 20-25), its transparency override (26-31) and variant (16-19).
 struct ParticleEmission {
   std::uint8_t event{};
   std::uint8_t transparency{};
@@ -88,9 +88,9 @@ struct SoundPoint {
   friend bool operator==(const SoundPoint&, const SoundPoint&) = default;
 };
 
-// Effects_RendererTrackKey: the due frame (bits 0-8), the parameter's low
-// byte (9-17), the renderer (18-20) and the parameter's next six bits (21-26)
-// in `timing`; the parameter's high half follows.
+// A renderer track key (func_800D5D74_t): the due frame (bits 0-8), the
+// parameter's low byte (9-17), the renderer (18-20) and the parameter's next
+// six bits (21-26) in `timing`; the parameter's high half follows.
 struct RendererKey {
   std::uint32_t timing{};
   std::uint16_t parameter_high{};
@@ -109,12 +109,12 @@ struct ShakeChannels {
   friend bool operator==(const ShakeChannels&, const ShakeChannels&) = default;
 };
 
-// Effects_ShakeChannelKey's second word.
+// A camera shake key's (func_800D6A18_t) second word.
 [[nodiscard]] ShakeChannels ShakeChannelsOf(std::uint32_t channels);
 
-// Effects_ChildTrackKey: the child's actor for each event actor slot, the
-// final child's actor, the frame the children start and the frames between
-// them.
+// A child track key (func_800D5A98_t): the child's actor for each event actor
+// slot, the final child's actor, the frame the children start and the frames
+// between them.
 inline constexpr std::size_t kChildTrackActors = 6;
 struct ChildTrackKey {
   std::array<std::uint8_t, kChildTrackActors> actors{};
@@ -164,7 +164,7 @@ struct VibrationEndpoints {
 class TimelinePlaybackHost {
  public:
   virtual ~TimelinePlaybackHost() = default;
-  // Effects_EffectTimeline.flags has kTimelineFrameHeld.
+  // LiveEffectTimeline.flags has kTimelineFrameHeld.
   [[nodiscard]] virtual bool FrameHeld() = 0;
   // LiveSampleAllEffectCurves.
   virtual void SampleCurves(std::int16_t curve_frame) = 0;
@@ -253,7 +253,7 @@ class TimelinePlaybackHost {
                                              std::int16_t& key_timer,
                                              TimelinePlaybackHost& host);
 
-// The dispatcher's view of Effects_EffectTimeline.
+// The dispatcher's view of LiveEffectTimeline.
 struct TimelineProgress {
   std::uint8_t track_count{};
   std::int16_t frame{};
@@ -267,9 +267,9 @@ struct TimelineProgress {
 class TimelineRunner {
  public:
   virtual ~TimelineRunner() = default;
-  // Effects_EffectTimeline.flags, which a track tick may change.
+  // LiveEffectTimeline.flags, which a track tick may change.
   [[nodiscard]] virtual std::uint8_t Flags() = 0;
-  // Effects_TimelineTrackHeader.kind of track `track`.
+  // LiveTimelineTrackHeader.kind of track `track`.
   [[nodiscard]] virtual std::uint8_t KindOf(std::size_t track) = 0;
   // Ticks track `track`; false once it has finished. `all_targets` is the
   // target colour track's argument.

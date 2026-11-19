@@ -7,7 +7,6 @@
 
 struct Effects_ActionEffectTarget;
 struct Effects_EffectInstance;
-struct Effects_TimelineTrack;
 
 // Live binding for the effect timeline action-control commands
 // (TimelineCommands.hpp): each reads the instance's endpoints, transforms or
@@ -16,6 +15,8 @@ struct Effects_TimelineTrack;
 // a null instance or a transform past the instance's slots is refused with a
 // diagnostic.
 namespace VS::Effects {
+struct LiveTimelineTrack;
+
 // An action effect endpoint as the typed commands and tracks read it.
 [[nodiscard]] CommandEndpoint CommandEndpointOf(
     const Effects_ActionEffectTarget& endpoint);
@@ -62,5 +63,5 @@ void LiveInvalidateEffectTransformAttachments(Effects_EffectInstance* instance,
 // the track has no more keys, or (refused) without an instance, timeline or
 // current key.
 int LiveTickActionControlTrack(Effects_EffectInstance* instance,
-                               Effects_TimelineTrack* track);
+                               LiveTimelineTrack* track);
 }  // namespace VS::Effects

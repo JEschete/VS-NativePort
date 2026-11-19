@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "Core/Log.hpp"
-#include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 
 // The effect timeline Live bindings' refusal report and current-key view
 // (TimelineTracksLive.cpp, TimelinePlaybackLive.cpp).
@@ -29,14 +29,14 @@ inline void RefuseTimelineCall(std::string_view call,
 // without a track, keys or a current key.
 template <typename Unit>
 [[nodiscard]] std::span<const Unit> TimelineKeyUnits(
-    const Effects_TimelineTrack* track, std::size_t units_per_key,
+    const LiveTimelineTrack* track, std::size_t units_per_key,
     std::string_view call) {
   if (track == nullptr || track->keys == nullptr) {
     RefuseTimelineCall(call, "no track keys");
     return {};
   }
-  const int index = track->keyIndex;
-  if (index < 0 || index >= track->header.keyCount) {
+  const int index = track->key_index;
+  if (index < 0 || index >= track->header.key_count) {
     RefuseTimelineCall(call, "no current key");
     return {};
   }

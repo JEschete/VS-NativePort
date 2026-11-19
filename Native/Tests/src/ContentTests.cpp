@@ -93,7 +93,6 @@
 #include "Legacy/Psx.h"
 #include "ModelLoading.h"
 #include "Movie/MoviePlayer.hpp"
-#include "PFile.h"
 #include "Render/PageSpace.hpp"
 
 using VS::u16;
@@ -1282,10 +1281,20 @@ struct ActorAssetState {
   }
 };
 
-struct TimelineSectionFixture {
-  Content_PFileTimelineTable table{};
-  std::array<Content_PFileTimelineTrackEntry, 2> tracks{};
+// A timeline section as the block stores it: its track count word, then each
+// track's header halfword and block-relative data offset.
+struct TimelineTrackEntryFixture {
+  std::uint16_t header{};
+  std::uint16_t data_offset{};
 };
+struct TimelineSectionFixture {
+  std::int32_t track_count{};
+  std::array<TimelineTrackEntryFixture, 2> tracks{};
+};
+static_assert(sizeof(TimelineTrackEntryFixture) ==
+              Content::kPFileTimelineTrackEntryBytes);
+static_assert(offsetof(TimelineSectionFixture, tracks) ==
+              Content::kPFileTimelineHeaderBytes);
 
 struct TimelineBlockFixture {
   VS::Effects::LiveTimelineTable block{};
@@ -1348,9 +1357,9 @@ TEST_CASE("Timeline section and track indices retain block-relative offsets",
                                  section * sizeof(TimelineSectionFixture);
     fixture.offsets[section] = static_cast<std::uint16_t>(table_at);
     auto& table = fixture.sections[section];
-    table.table.trackCount = 2;
+    table.track_count = 2;
     for (std::size_t track = 0; track < table.tracks.size(); ++track) {
-      table.tracks[track].dataOffset = static_cast<std::uint16_t>(
+      table.tracks[track].data_offset = static_cast<std::uint16_t>(
           offsetof(TimelineBlockFixture, keys) + section * 8 + track * 4);
     }
   }

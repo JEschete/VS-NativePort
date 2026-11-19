@@ -48,6 +48,7 @@
 #include "Effects/Templates/TrailTarget.hpp"
 #include "Effects/Templates/TrailUpdate.hpp"
 #include "Effects/Templates/TrailsLive.hpp"
+#include "Effects/Timeline.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Trails.hpp"
@@ -863,9 +864,9 @@ TEST_CASE("Child effect tracks wait for the native outstanding child count",
           "[effects][child-tracks]") {
   ParticleFixture fixture;
   Effects_ActionEffectRequest request{};
-  std::array<u_long, 3> key{};
-  Effects_TimelineTrack track{};
-  Effects_EffectTimeline timeline{};
+  std::array<std::uint32_t, 3> key{};
+  VS::Effects::LiveTimelineTrack track{};
+  VS::Effects::LiveEffectTimeline timeline{};
   fixture.package.request = &request;
   fixture.instance.context.timeline = &timeline;
   fixture.instance.childCount = 1;
@@ -876,7 +877,7 @@ TEST_CASE("Child effect tracks wait for the native outstanding child count",
   CHECK(VS::Effects::LiveTickChildEffectTrack(&fixture.instance, &track, 0) ==
         1);
   CHECK(fixture.instance.childCount == 1);
-  CHECK(track.keyParameter == 0);
+  CHECK(track.key_parameter == 0);
   CHECK(Effects_primaryInstances == nullptr);
 
   while (Effects_primaryInstances != nullptr) {

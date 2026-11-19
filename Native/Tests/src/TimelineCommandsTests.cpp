@@ -12,6 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
 #include "Effects/TransformsLiveState.hpp"
@@ -222,11 +223,12 @@ InstanceBytes BytesOf(const Effects_EffectInstance& instance) {
 }
 
 // An action-control track (kind 12) over `keys`, at its first key.
-Effects_TimelineTrack ControlTrack(std::span<Effects_ActionControlKey> keys) {
-  Effects_TimelineTrack track{};
-  track.keys = reinterpret_cast<u_long*>(keys.data());
+// The keys are word-aligned, as in the timeline block.
+fx::LiveTimelineTrack ControlTrack(std::span<const fx::ActionControlKey> keys) {
+  fx::LiveTimelineTrack track{};
+  track.keys = reinterpret_cast<const std::uint32_t*>(keys.data());
   track.header.kind = 12;
-  track.header.keyCount = static_cast<u_char>(keys.size());
+  track.header.key_count = static_cast<std::uint8_t>(keys.size());
   return track;
 }
 }  // namespace
@@ -327,23 +329,23 @@ TEST_CASE("Live transform commands update the instance's own transforms",
 
 TEST_CASE("Live action-control track runs due keys on the instance",
           "[timeline-commands]") {
-  static Effects_EffectTimeline timeline;
+  static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
-  static std::array<Effects_ActionControlKey, 2> keys{{
-      {.frame = Timing(6, 12), .opaque2 = 0, .opaque3 = 0},
-      {.frame = Timing(5, 12), .opaque2 = 4, .opaque3 = 0},
+  alignas(std::uint32_t) static std::array<fx::ActionControlKey, 2> keys{{
+      {.timing = Timing(6, 12), .operand0 = 0, .operand1 = 0},
+      {.timing = Timing(5, 12), .operand0 = 4, .operand1 = 0},
   }};
   timeline.frame = 12;
   instance.context.timeline = &timeline;
-  Effects_TimelineTrack track = ControlTrack(keys);
+  fx::LiveTimelineTrack track = ControlTrack(keys);
 
   CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 1);
   CHECK((timeline.flags & fx::kTimelineFrameHeld) != 0);
-  CHECK(track.keyIndex == 1);
+  CHECK(track.key_index == 1);
   // The last key resumes transform 4 and ends the track.
   CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
   CHECK(MotionOf(instance, 4).flags == fx::kTransformFrameAdvances);
-  CHECK(track.keyIndex == 1);
+  CHECK(track.key_index == 1);
 
   timeline.frame = 13;
   CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 1);
@@ -351,23 +353,23 @@ TEST_CASE("Live action-control track runs due keys on the instance",
 
 TEST_CASE("Live action-control track refuses a missing or unread key",
           "[timeline-commands]") {
-  static Effects_EffectTimeline timeline;
+  static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
-  static std::array<Effects_ActionControlKey, 2> keys{{
-      {.frame = Timing(6, 0), .opaque2 = 0, .opaque3 = 0},
-      {.frame = Timing(6, 0), .opaque2 = 0, .opaque3 = 0},
+  alignas(std::uint32_t) static std::array<fx::ActionControlKey, 2> keys{{
+      {.timing = Timing(6, 0), .operand0 = 0, .operand1 = 0},
+      {.timing = Timing(6, 0), .operand0 = 0, .operand1 = 0},
   }};
   instance.context.timeline = &timeline;
-  Effects_TimelineTrack track = ControlTrack(keys);
+  fx::LiveTimelineTrack track = ControlTrack(keys);
 
-  track.keyIndex = -1;
+  track.key_index = -1;
   CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
-  track.keyIndex = 2;
+  track.key_index = 2;
   CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
   CHECK(fx::LiveTickActionControlTrack(&instance, nullptr) == 0);
   CHECK(fx::LiveTickActionControlTrack(nullptr, &track) == 0);
   instance.context.timeline = nullptr;
-  track.keyIndex = 0;
+  track.key_index = 0;
   CHECK(fx::LiveTickActionControlTrack(&instance, &track) == 0);
   track.keys = nullptr;
   instance.context.timeline = &timeline;

@@ -26,6 +26,7 @@
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/Transforms.hpp"
 #include "Effects/TransformsLive.hpp"
@@ -698,11 +699,10 @@ int LiveBranchIfEffectTimelineFinished(Effects_EffectInstance* instance) {
   return RunOpcode(
       instance, "branch if timeline finished",
       [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
-        const Effects_EffectTimeline* timeline = effect.context.timeline;
-        const auto active_tracks =
-            timeline == nullptr ? std::nullopt
-                                : std::optional{std::bit_cast<std::uint32_t>(
-                                      timeline->activeTracks)};
+        const LiveEffectTimeline* timeline = effect.context.timeline;
+        const auto active_tracks = timeline == nullptr
+                                       ? std::nullopt
+                                       : std::optional{timeline->active_tracks};
         return BranchIfTimelineFinished(active_tracks, cursor);
       });
 }

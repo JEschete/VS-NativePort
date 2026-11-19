@@ -2346,6 +2346,7 @@
     <ClInclude Include="src\Effects\Runtime.h" />
     <ClInclude Include="src\Effects\ScreenEffectState.hpp" />
     <ClInclude Include="src\Effects\Templates\TemplateLiveState.hpp" />
+    <ClInclude Include="src\Effects\Timeline.hpp" />
     <ClInclude Include="src\Effects\TimelineTrackKeys.hpp" />
     <ClInclude Include="src\Effects\Trails.hpp" />
     <ClInclude Include="src\Effects\TransformsLiveState.hpp" />

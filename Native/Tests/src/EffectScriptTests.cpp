@@ -17,6 +17,7 @@
 #include "Effects/EffectScript.hpp"
 #include "Effects/EffectScriptLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 #include "TestSupport/EffectProgramScope.hpp"
 
 namespace {
@@ -950,8 +951,8 @@ TEST_CASE("Live effect script timeline branches read the instance timeline",
   auto program = Program({0xC5, 0x00});
   const VS::test_support::EffectProgramScope recorded{program};
   auto instance = InstanceAt(program, 0);
-  Effects_EffectTimeline timeline{};
-  timeline.activeTracks = 0;
+  fx::LiveEffectTimeline timeline{};
+  timeline.active_tracks = 0;
   instance.context.timeline = &timeline;
   CHECK(fx::LiveBranchIfEffectTimelineFinished(&instance) == 1);
   CHECK(instance.scriptOffset == 0xC5);

@@ -9,6 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracks.hpp"
 #include "Effects/TimelineTracksLive.hpp"
@@ -83,21 +84,22 @@ class RecordingColourHost final : public fx::ColourTrackHost {
 };
 
 // A track of `kind` over `keys`, before its first key.
-Effects_TimelineTrack TrackOver(std::uint8_t kind, std::span<u_long> keys,
+fx::LiveTimelineTrack TrackOver(std::uint8_t kind,
+                                std::span<const std::uint32_t> keys,
                                 std::uint8_t key_count) {
-  Effects_TimelineTrack track{};
+  fx::LiveTimelineTrack track{};
   track.keys = keys.data();
   track.header.kind = kind;
-  track.header.keyCount = key_count;
-  track.keyIndex = -1;
+  track.header.key_count = key_count;
+  track.key_index = -1;
   return track;
 }
 
 // Two colour keys: the first due on frame 3, the second on frame 7.
-std::array<u_long, 4> ColourKeys() {
-  constexpr u_long kFirst = 3 | (10UL << 16);
-  constexpr u_long kSecond = 7 | (20UL << 16);
-  constexpr u_long kChannels = 0x01808080;
+std::array<std::uint32_t, 4> ColourKeys() {
+  constexpr std::uint32_t kFirst = 3 | (10U << 16);
+  constexpr std::uint32_t kSecond = 7 | (20U << 16);
+  constexpr std::uint32_t kChannels = 0x01808080;
   return {kFirst, kChannels, kSecond, kChannels};
 }
 }  // namespace
@@ -206,85 +208,85 @@ TEST_CASE("Other actor colour track shifts the visible other actors",
 
 TEST_CASE("Live key advance sets up each new particle key",
           "[timeline-tracks]") {
-  constexpr u_long kParticle = (0x15UL << 20) | (0x3CUL << 8);
-  std::array<u_long, 2> keys{kParticle, 0x3FUL << 20};
-  Effects_TimelineTrack track =
+  constexpr std::uint32_t kParticle = (0x15U << 20) | (0x3CU << 8);
+  std::array<std::uint32_t, 2> keys{kParticle, 0x3FU << 20};
+  fx::LiveTimelineTrack track =
       TrackOver(fx::kParticleEmissionTrack, keys, keys.size());
   CHECK(fx::LiveAdvanceEffectTimelineKey(&track) == 1);
-  CHECK(track.keyIndex == 0);
-  CHECK(track.keyTimer == 0x3C);
-  CHECK(track.keyParameter == 0x15);
+  CHECK(track.key_index == 0);
+  CHECK(track.key_timer == 0x3C);
+  CHECK(track.key_parameter == 0x15);
   CHECK(fx::LiveAdvanceEffectTimelineKey(&track) == 1);
-  CHECK(track.keyTimer == 0);
-  CHECK(track.keyParameter == 0x3F);
+  CHECK(track.key_timer == 0);
+  CHECK(track.key_parameter == 0x3F);
 }
 
 TEST_CASE("Live key advance stops on the last key", "[timeline-tracks]") {
-  std::array<u_long, 2> keys{0xFFFFFFFF, 0xFFFFFFFF};
-  Effects_TimelineTrack track =
+  std::array<std::uint32_t, 2> keys{0xFFFFFFFF, 0xFFFFFFFF};
+  fx::LiveTimelineTrack track =
       TrackOver(fx::kParticleEmissionTrack, keys, keys.size());
-  track.keyIndex = 1;
-  track.keyTimer = 4;
+  track.key_index = 1;
+  track.key_timer = 4;
   CHECK(fx::LiveAdvanceEffectTimelineKey(&track) == 0);
-  CHECK(track.keyIndex == 1);
-  CHECK(track.keyTimer == 4);
+  CHECK(track.key_index == 1);
+  CHECK(track.key_timer == 4);
   CHECK(fx::LiveAdvanceEffectTimelineKey(nullptr) == 0);
 }
 
 TEST_CASE("Live key setup refuses a missing or out-of-track key",
           "[timeline-tracks]") {
-  std::array<u_long, 2> keys{0xFFFFFFFF, 0xFFFFFFFF};
-  Effects_TimelineTrack track = TrackOver(fx::kParticleEmissionTrack, keys, 1);
-  track.keyTimer = 4;
-  track.keyParameter = 9;
+  std::array<std::uint32_t, 2> keys{0xFFFFFFFF, 0xFFFFFFFF};
+  fx::LiveTimelineTrack track = TrackOver(fx::kParticleEmissionTrack, keys, 1);
+  track.key_timer = 4;
+  track.key_parameter = 9;
   fx::LiveInitializeParticleTimelineKey(&track);
   fx::LiveInitializeShakeTimelineKey(&track);
-  track.keyIndex = 1;
+  track.key_index = 1;
   fx::LiveInitializeParticleTimelineKey(&track);
   track.keys = nullptr;
-  track.keyIndex = 0;
+  track.key_index = 0;
   fx::LiveInitializeParticleTimelineKey(&track);
   fx::LiveInitializeParticleTimelineKey(nullptr);
   fx::LiveInitializeShakeTimelineKey(nullptr);
-  CHECK(track.keyTimer == 4);
-  CHECK(track.keyParameter == 9);
+  CHECK(track.key_timer == 4);
+  CHECK(track.key_parameter == 9);
 }
 
 TEST_CASE("Live colour tracks read their current key on the instance",
           "[timeline-tracks]") {
-  static Effects_EffectTimeline timeline;
+  static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
   instance.context.emitFrom.type = fx::kRoomPointEndpoint;
   instance.context.timeline = &timeline;
   auto keys = ColourKeys();
-  Effects_TimelineTrack track = TrackOver(6, keys, 2);
-  track.keyIndex = 0;
+  fx::LiveTimelineTrack track = TrackOver(6, keys, 2);
+  track.key_index = 0;
 
   timeline.frame = 7;
   CHECK(fx::LiveTickSourceActorColorTrack(&instance, &track) == 1);
-  CHECK(track.keyIndex == 0);
+  CHECK(track.key_index == 0);
   timeline.frame = 3;
   CHECK(fx::LiveTickSourceActorColorTrack(&instance, &track) == 1);
-  CHECK(track.keyIndex == 1);
+  CHECK(track.key_index == 1);
   timeline.frame = 7;
   CHECK(fx::LiveTickSourceActorColorTrack(&instance, &track) == 0);
-  CHECK(track.keyIndex == 1);
+  CHECK(track.key_index == 1);
 }
 
 TEST_CASE("Live colour tracks refuse missing records and extra targets",
           "[timeline-tracks]") {
-  static Effects_EffectTimeline timeline;
+  static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
   instance.context.emitTo.type = fx::kRoomPointEndpoint;
   auto keys = ColourKeys();
-  Effects_TimelineTrack track = TrackOver(7, keys, 2);
-  track.keyIndex = 0;
+  fx::LiveTimelineTrack track = TrackOver(7, keys, 2);
+  track.key_index = 0;
 
   CHECK(fx::LiveTickSceneColorTrack(&instance, &track) == 0);
   instance.context.timeline = &timeline;
   CHECK(fx::LiveTickBackgroundColorTrack(&instance, nullptr) == 0);
   CHECK(fx::LiveTickOtherActorColorTrack(nullptr, &track) == 0);
-  track.keyIndex = 2;
+  track.key_index = 2;
   CHECK(fx::LiveTickSceneColorTrack(&instance, &track) == 0);
 
   // Targets past the request's sixteen are not read.
@@ -294,9 +296,9 @@ TEST_CASE("Live colour tracks refuse missing records and extra targets",
     target.type = fx::kRoomPointEndpoint;
   }
   Effects_actionRequest.count = 0xFF;
-  track.keyIndex = 0;
+  track.key_index = 0;
   timeline.frame = 3;
   CHECK(fx::LiveTickTargetActorColorTrack(&instance, &track, 2) == 1);
-  CHECK(track.keyIndex == 1);
+  CHECK(track.key_index == 1);
   Effects_actionRequest = saved;
 }

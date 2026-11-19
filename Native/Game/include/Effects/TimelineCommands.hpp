@@ -113,7 +113,7 @@ struct ReactionSound {
 [[nodiscard]] std::optional<std::uint8_t> DefenseTimingTarget(
     const CommandEndpoints& endpoints);
 
-// Effects_EffectTimeline.flags: the timeline stays on its frame.
+// LiveEffectTimeline.flags: the timeline stays on its frame.
 inline constexpr std::uint8_t kTimelineFrameHeld = 0x1;
 // A packed trail style's low decimal digit picks the colour, the rest the
 // texture.
@@ -183,8 +183,8 @@ void PauseMovingRoomObjects(TimelineEffectHost& host);
 // flags with its attachment and target to resolve again.
 [[nodiscard]] std::uint16_t InvalidateTransformAttachments(std::uint16_t flags);
 
-// Effects_ActionControlKey (5BF94.c:57): `timing` holds the frame the key is
-// due in bits 0-8 and its command in bits 9-15.
+// An action-control key (func_800D6894_t, 5BF94.c:84): `timing` holds the frame
+// the key is due in bits 0-8 and its command in bits 9-15.
 struct ActionControlKey {
   std::uint16_t timing{};
   std::uint8_t operand0{};

@@ -5,6 +5,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -14,6 +15,7 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
 #include "Effects/TimelineTrackKeys.hpp"
@@ -26,16 +28,16 @@ namespace {
 constexpr std::size_t kParticleKeyWords = 1;
 constexpr std::size_t kShakeKeyWords = 2;
 constexpr std::size_t kShakeParametersWord = 1;
-using KeyRecord = Effects_ColorTrackKey;
 using Request = Effects_ActionEffectRequest;
-constexpr std::size_t kColourKeyWords = sizeof(KeyRecord) / sizeof(u_long);
-static_assert(kColourKeyWords * sizeof(u_long) == sizeof(KeyRecord));
+// A colour key is two words, stored as ColourKey lays them out.
+static_assert(sizeof(ColourKey) == 2 * sizeof(std::uint32_t));
+static_assert(std::is_trivially_copyable_v<ColourKey>);
 constexpr auto kActionTargets = std::extent_v<decltype(Request::targets)>;
 constexpr auto kActionOthers = std::extent_v<decltype(Request::others)>;
 
 class LiveColourTrackHost final : public ColourTrackHost {
  public:
-  explicit LiveColourTrackHost(Effects_TimelineTrack& track) : track_(&track) {}
+  explicit LiveColourTrackHost(LiveTimelineTrack& track) : track_(&track) {}
 
   bool ActorVisible(std::uint8_t actor) override {
     return (Actors::LiveActorStateFlags(actor) & Actors::StateFlag::kVisible) !=
@@ -59,7 +61,7 @@ class LiveColourTrackHost final : public ColourTrackHost {
   }
 
  private:
-  Effects_TimelineTrack* track_;
+  LiveTimelineTrack* track_;
 };
 
 // The current colour key and the timeline frame a colour track compares, or
@@ -70,31 +72,26 @@ struct ColourTrackState {
 };
 
 [[nodiscard]] std::optional<ColourTrackState> ColourTrackStateOf(
-    const Effects_EffectInstance* instance, const Effects_TimelineTrack* track,
+    const Effects_EffectInstance* instance, const LiveTimelineTrack* track,
     std::string_view call) {
   if (instance == nullptr || instance->context.timeline == nullptr) {
     RefuseTimelineCall(call, "no effect instance or timeline");
     return std::nullopt;
   }
-  const auto words = TimelineKeyUnits<u_long>(track, kColourKeyWords, call);
-  if (words.empty()) return std::nullopt;
-  const auto& key =
-      *reinterpret_cast<const Effects_ColorTrackKey*>(words.data());
-  return ColourTrackState{.key = {.frame = key.frame,
-                                  .duration = key.duration,
-                                  .red = key.red,
-                                  .green = key.green,
-                                  .blue = key.blue,
-                                  .mode = key.mode},
+  const auto bytes =
+      TimelineKeyUnits<std::byte>(track, sizeof(ColourKey), call);
+  if (bytes.empty()) return std::nullopt;
+  ColourKey key;
+  std::memcpy(&key, bytes.data(), sizeof key);
+  return ColourTrackState{.key = key,
                           .frame = instance->context.timeline->frame};
 }
 
 // Runs a colour track's tick on its current key: 1 while it runs, 0 once it
 // has no more keys or when refused.
 template <typename Tick>
-int RunColourTrack(Effects_EffectInstance* instance,
-                   Effects_TimelineTrack* track, std::string_view call,
-                   Tick tick) {
+int RunColourTrack(Effects_EffectInstance* instance, LiveTimelineTrack* track,
+                   std::string_view call, Tick tick) {
   const auto state = ColourTrackStateOf(instance, track, call);
   if (!state) return 0;
   LiveColourTrackHost host(*track);
@@ -102,37 +99,37 @@ int RunColourTrack(Effects_EffectInstance* instance,
 }
 }  // namespace
 
-void LiveInitializeParticleTimelineKey(Effects_TimelineTrack* track) {
+void LiveInitializeParticleTimelineKey(LiveTimelineTrack* track) {
   const auto words =
-      TimelineKeyUnits<u_long>(track, kParticleKeyWords, "particle key");
+      TimelineKeyUnits<std::uint32_t>(track, kParticleKeyWords, "particle key");
   if (words.empty()) return;
   const ParticleKeyTiming timing =
       ParticleKeyTimingOf(static_cast<std::uint32_t>(words.front()));
-  track->keyParameter = timing.parameter;
-  track->keyTimer = timing.timer;
+  track->key_parameter = timing.parameter;
+  track->key_timer = timing.timer;
 }
 
-void LiveInitializeShakeTimelineKey(Effects_TimelineTrack* track) {
+void LiveInitializeShakeTimelineKey(LiveTimelineTrack* track) {
   const auto words =
-      TimelineKeyUnits<u_long>(track, kShakeKeyWords, "shake key");
+      TimelineKeyUnits<std::uint32_t>(track, kShakeKeyWords, "shake key");
   if (words.empty()) return;
-  track->keyTimer =
+  track->key_timer =
       ShakeKeyTimer(static_cast<std::uint32_t>(words[kShakeParametersWord]),
                     [](std::uint8_t curve) {
                       return LiveSegmentedEffectCurveDuration(curve);
                     });
 }
 
-int LiveAdvanceEffectTimelineKey(Effects_TimelineTrack* track) {
+int LiveAdvanceEffectTimelineKey(LiveTimelineTrack* track) {
   if (track == nullptr) {
     RefuseTimelineCall("key advance", "no track");
     return 0;
   }
   const auto next = AdvanceTimelineKey(
-      track->keyIndex, static_cast<std::uint8_t>(track->header.keyCount),
+      track->key_index, static_cast<std::uint8_t>(track->header.key_count),
       static_cast<std::uint8_t>(track->header.kind));
   if (!next) return 0;
-  track->keyIndex = next->key_index;
+  track->key_index = next->key_index;
   switch (next->setup) {
     case TimelineKeySetup::kParticleEmission:
       LiveInitializeParticleTimelineKey(track);
@@ -147,7 +144,7 @@ int LiveAdvanceEffectTimelineKey(Effects_TimelineTrack* track) {
 }
 
 int LiveTickSourceActorColorTrack(Effects_EffectInstance* instance,
-                                  Effects_TimelineTrack* track) {
+                                  LiveTimelineTrack* track) {
   return RunColourTrack(
       instance, track, "source actor colour track",
       [instance](const ColourKey& key, std::int16_t frame,
@@ -158,7 +155,7 @@ int LiveTickSourceActorColorTrack(Effects_EffectInstance* instance,
 }
 
 int LiveTickTargetActorColorTrack(Effects_EffectInstance* instance,
-                                  Effects_TimelineTrack* track,
+                                  LiveTimelineTrack* track,
                                   int apply_to_all_targets) {
   return RunColourTrack(
       instance, track, "target actor colour track",
@@ -181,7 +178,7 @@ int LiveTickTargetActorColorTrack(Effects_EffectInstance* instance,
 }
 
 int LiveTickOtherActorColorTrack(Effects_EffectInstance* instance,
-                                 Effects_TimelineTrack* track) {
+                                 LiveTimelineTrack* track) {
   return RunColourTrack(
       instance, track, "other actor colour track",
       [](const ColourKey& key, std::int16_t frame, ColourTrackHost& host) {
@@ -196,13 +193,13 @@ int LiveTickOtherActorColorTrack(Effects_EffectInstance* instance,
 }
 
 int LiveTickSceneColorTrack(Effects_EffectInstance* instance,
-                            Effects_TimelineTrack* track) {
+                            LiveTimelineTrack* track) {
   return RunColourTrack(instance, track, "scene colour track",
                         TickSceneColourTrack);
 }
 
 int LiveTickBackgroundColorTrack(Effects_EffectInstance* instance,
-                                 Effects_TimelineTrack* track) {
+                                 LiveTimelineTrack* track) {
   return RunColourTrack(instance, track, "background colour track",
                         TickBackgroundColourTrack);
 }

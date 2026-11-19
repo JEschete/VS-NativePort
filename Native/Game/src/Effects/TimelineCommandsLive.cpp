@@ -3,8 +3,11 @@
 
 #include <bit>
 #include <cstdint>
+#include <cstring>
 #include <optional>
+#include <span>
 #include <string_view>
+#include <type_traits>
 
 #include "Actors/AppearanceLive.hpp"
 #include "Audio/ActorSoundLive.hpp"
@@ -19,6 +22,7 @@
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracksLive.hpp"
 #include "Effects/TransformsLiveState.hpp"
@@ -27,11 +31,12 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
-static_assert(sizeof(Effects_ActionControlKey) ==
-              sizeof(VS::Effects::ActionControlKey));
-
 namespace VS::Effects {
 namespace {
+// An action-control key is one word, stored as ActionControlKey lays it out.
+static_assert(sizeof(ActionControlKey) == sizeof(std::uint32_t));
+static_assert(std::is_trivially_copyable_v<ActionControlKey>);
+
 std::uint64_t refused_instances = 0;
 std::uint64_t refused_records = 0;
 
@@ -111,7 +116,7 @@ class LiveTimelineEffectHost final : public TimelineEffectHost {
 class LiveActionControlHost final : public ActionControlHost {
  public:
   LiveActionControlHost(Effects_EffectInstance& instance,
-                        Effects_TimelineTrack& track)
+                        LiveTimelineTrack& track)
       : instance_(&instance), track_(&track) {}
 
   void Perform(const ActionControl& control) override;
@@ -121,21 +126,21 @@ class LiveActionControlHost final : public ActionControlHost {
 
  private:
   Effects_EffectInstance* instance_;
-  Effects_TimelineTrack* track_;
+  LiveTimelineTrack* track_;
 };
 
 // The track's current key, or nullopt (refused) without keys or past them.
 [[nodiscard]] std::optional<ActionControlKey> CurrentKeyOf(
-    const Effects_TimelineTrack& track) {
-  const int index = track.keyIndex;
-  if (track.keys == nullptr || index < 0 || index >= track.header.keyCount) {
+    const LiveTimelineTrack& track) {
+  const int index = track.key_index;
+  if (track.keys == nullptr || index < 0 || index >= track.header.key_count) {
     ReportMissing("action-control track", "no current key");
     return std::nullopt;
   }
-  const auto& key =
-      reinterpret_cast<const Effects_ActionControlKey*>(track.keys)[index];
-  return ActionControlKey{
-      .timing = key.frame, .operand0 = key.opaque2, .operand1 = key.opaque3};
+  ActionControlKey key;
+  std::memcpy(&key, &std::span(track.keys, track.header.key_count)[index],
+              sizeof key);
+  return key;
 }
 }  // namespace
 
@@ -236,13 +241,12 @@ void LiveResumeEffectTransformMotion(Effects_EffectInstance* instance,
 
 void LiveHoldEffectTimelineFrame(Effects_EffectInstance* instance) {
   if (Refused(instance, "hold frame")) return;
-  Effects_EffectTimeline* timeline = instance->context.timeline;
+  LiveEffectTimeline* timeline = instance->context.timeline;
   if (timeline == nullptr) {
     ReportMissing("hold frame", "no timeline");
     return;
   }
-  timeline->flags = static_cast<char>(
-      HoldTimelineFrame(static_cast<std::uint8_t>(timeline->flags)));
+  timeline->flags = HoldTimelineFrame(timeline->flags);
 }
 
 void LivePauseMovingRoomObjects() {
@@ -302,7 +306,7 @@ void LiveActionControlHost::Perform(const ActionControl& control) {
 }
 
 int LiveTickActionControlTrack(Effects_EffectInstance* instance,
-                               Effects_TimelineTrack* track) {
+                               LiveTimelineTrack* track) {
   if (Refused(instance, "action-control track")) return 0;
   if (track == nullptr || instance->context.timeline == nullptr) {
     ReportMissing("action-control track", "no track or timeline");
