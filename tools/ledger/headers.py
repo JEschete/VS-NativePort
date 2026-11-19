@@ -463,6 +463,11 @@ def check(workspace: HeaderWorkspace) -> list[Issue]:
         if c_style(path, values):
             found.append(issue(f"{kind_of(path)}-new", path, f"untracked C-style {kind_of(path)} fails "
                                f"{', '.join(failures(path, values))}; write it as C++ (Docs/CPP_HEADERS.md)"))
+    # check_leftovers.py and the copier tools read every manifest path, so a deleted file must leave the manifest (#468).
+    for path in sorted(scanner.manifest):
+        if not scanner.exists(path):
+            found.append(issue("manifest-stale", path, "copy_manifest.json lists a file that no longer exists; "
+                               "remove its entry"))
     return found + gates.stale_tracker("headers", workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 

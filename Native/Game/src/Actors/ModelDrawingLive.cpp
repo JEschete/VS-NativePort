@@ -37,7 +37,6 @@
 #include "Field/Gimmicks.h"
 #include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
 #include "Render/Camera.hpp"
 #include "Render/ModelDraw.hpp"

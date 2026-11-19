@@ -17,6 +17,7 @@
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Content/ActorAssets.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -29,7 +30,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/EquipmentRows.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/TextBox.h"
 
 // Contracts of the equipment menus' choice list (MENU3.PRG 16C.c:39-336) and
@@ -833,12 +834,12 @@ TEST_CASE("QueueEquipmentModel skips model zero and refuses a missing slot",
 
 // The live list globals, rows and a game heap for the list text.
 struct LiveRowsFixture {
-  Restore<char*> saved_text{Menu_Inventory_itemsText};
-  Restore<int> saved_selected{Menu_Inventory_selectedItemRow};
-  Restore<u_char> saved_step{Menu_Inventory_equipListStep};
-  Restore<char> saved_count{Menu_Inventory_menuRowCount};
-  Restore<char> saved_first{Menu_Inventory_itemsFirstRow};
-  Restore<char> saved_equipped{Menu_Inventory_equippedItem};
+  Restore<fw::ItemText*> saved_text{VS::Menu::Inventory::itemsText};
+  Restore<int> saved_selected{VS::Menu::Inventory::selectedItemRow};
+  Restore<std::uint8_t> saved_step{VS::Menu::Inventory::equipListStep};
+  Restore<std::uint8_t> saved_count{VS::Menu::Inventory::menuRowCount};
+  Restore<std::uint8_t> saved_first{VS::Menu::Inventory::itemsFirstRow};
+  Restore<std::uint8_t> saved_equipped{VS::Menu::Inventory::equippedItem};
   Restore<fw::MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
   Restore<decltype(VS::Input::buttonsPressed)> saved_pressed{
       VS::Input::buttonsPressed};
@@ -855,7 +856,7 @@ struct LiveRowsFixture {
 
   LiveRowsFixture() {
     VS::Menu::Framework::menuItems = rows.data();
-    Menu_Inventory_itemsText = nullptr;
+    VS::Menu::Inventory::itemsText = nullptr;
     VS::Input::buttonsPressed = 0;
     VS::Input::buttonRepeat = 0;
     texts[0] = reinterpret_cast<u_short*>(first.name.data());
@@ -865,8 +866,8 @@ struct LiveRowsFixture {
     inv::ResetEquipmentRowsLive();
   }
   ~LiveRowsFixture() {
-    if (Menu_Inventory_itemsText != nullptr) {
-      VS::Core::Memory::FreeLiveFromHighEnd(Menu_Inventory_itemsText);
+    if (VS::Menu::Inventory::itemsText != nullptr) {
+      VS::Core::Memory::FreeLiveFromHighEnd(VS::Menu::Inventory::itemsText);
     }
     inv::ResetEquipmentRowsLive();
   }
@@ -877,16 +878,16 @@ struct LiveRowsFixture {
 TEST_CASE("LiveCreateEquipmentRows allocates the list text from the game heap",
           "[equipment-rows-live]") {
   LiveRowsFixture fixture;
-  Menu_Inventory_itemsFirstRow = 3;
+  VS::Menu::Inventory::itemsFirstRow = 3;
   inv::LiveCreateEquipmentRows(2, fixture.texts.data(), fixture.flags.data());
-  REQUIRE(Menu_Inventory_itemsText != nullptr);
-  CHECK(VS::Core::Memory::LivePayloadContaining(Menu_Inventory_itemsText)
+  REQUIRE(VS::Menu::Inventory::itemsText != nullptr);
+  CHECK(VS::Core::Memory::LivePayloadContaining(VS::Menu::Inventory::itemsText)
             .has_value());
-  CHECK(Menu_Inventory_menuRowCount == 2);
-  CHECK(Menu_Inventory_itemsFirstRow == 0);
-  CHECK(Menu_Inventory_selectedItemRow == 0);
-  CHECK(Menu_Inventory_equipListStep == 1);
-  CHECK(Menu_Inventory_equippedItem == 1);
+  CHECK(VS::Menu::Inventory::menuRowCount == 2);
+  CHECK(VS::Menu::Inventory::itemsFirstRow == 0);
+  CHECK(VS::Menu::Inventory::selectedItemRow == 0);
+  CHECK(VS::Menu::Inventory::equipListStep == 1);
+  CHECK(VS::Menu::Inventory::equippedItem == 1);
   CHECK(inv::LiveSelectedEquipmentRow() == -1);
 }
 
@@ -894,9 +895,8 @@ TEST_CASE("LiveCreateEquipmentRows copies the records and sets the title row",
           "[equipment-rows-live]") {
   LiveRowsFixture fixture;
   inv::LiveCreateEquipmentRows(2, fixture.texts.data(), fixture.flags.data());
-  REQUIRE(Menu_Inventory_itemsText != nullptr);
-  const auto* text =
-      reinterpret_cast<const fw::ItemText*>(Menu_Inventory_itemsText);
+  REQUIRE(VS::Menu::Inventory::itemsText != nullptr);
+  const fw::ItemText* text = VS::Menu::Inventory::itemsText;
   CHECK(text[0].name[0] == 1);
   CHECK(text[1].name[0] == 60);
   CHECK(text[1].description[0] == 0xE7);
@@ -910,22 +910,22 @@ TEST_CASE("LiveCreateEquipmentRows copies the records and sets the title row",
 TEST_CASE("LiveCreateEquipmentRows refuses counts outside the list capacity",
           "[equipment-rows-live]") {
   LiveRowsFixture fixture;
-  Menu_Inventory_equipListStep = 9;
+  VS::Menu::Inventory::equipListStep = 9;
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   inv::LiveCreateEquipmentRows(0, fixture.texts.data(), fixture.flags.data());
   inv::LiveCreateEquipmentRows(65, fixture.texts.data(), fixture.flags.data());
   inv::LiveCreateEquipmentRows(2, nullptr, fixture.flags.data());
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before + 3);
-  CHECK(Menu_Inventory_itemsText == nullptr);
-  CHECK(Menu_Inventory_equipListStep == 9);
+  CHECK(VS::Menu::Inventory::itemsText == nullptr);
+  CHECK(VS::Menu::Inventory::equipListStep == 9);
 }
 
 TEST_CASE("LiveSelectedEquipmentRow reports the choice once the text is freed",
           "[equipment-rows-live]") {
   LiveRowsFixture fixture;
-  Menu_Inventory_selectedItemRow = -2;
+  VS::Menu::Inventory::selectedItemRow = -2;
   CHECK(inv::LiveSelectedEquipmentRow() == -2);
-  Menu_Inventory_selectedItemRow = 4;
+  VS::Menu::Inventory::selectedItemRow = 4;
   CHECK(inv::LiveSelectedEquipmentRow() == 4);
 }
 
@@ -934,35 +934,34 @@ TEST_CASE("UpdateLiveEquipmentChoices slides rows in and closes on Cross",
   LiveRowsFixture fixture;
   inv::LiveCreateEquipmentRows(2, fixture.texts.data(), fixture.flags.data());
   inv::UpdateLiveEquipmentChoices(0);
-  CHECK(Menu_Inventory_equipListStep == 2);
+  CHECK(VS::Menu::Inventory::equipListStep == 2);
   const fw::MenuRow& row = fw::LiveMenuRow(21);
   CHECK(row.state == fw::RowState::kSlideX);
   CHECK(row.target0 == 169);
   CHECK(row.unselectable == 1);
   inv::UpdateLiveEquipmentChoices(0);
-  CHECK(Menu_Inventory_equipListStep == inv::kEquipmentRowsWaiting);
-  Menu_Inventory_equipListStep = inv::kEquipmentRowsInput;
+  CHECK(VS::Menu::Inventory::equipListStep == inv::kEquipmentRowsWaiting);
+  VS::Menu::Inventory::equipListStep = inv::kEquipmentRowsInput;
   VS::Input::buttonsPressed = kCross;
   inv::UpdateLiveEquipmentChoices(0);
-  CHECK(Menu_Inventory_itemsText == nullptr);
-  CHECK(Menu_Inventory_selectedItemRow == inv::kEquipmentChoiceCancel);
+  CHECK(VS::Menu::Inventory::itemsText == nullptr);
+  CHECK(VS::Menu::Inventory::selectedItemRow == inv::kEquipmentChoiceCancel);
   CHECK(inv::LiveSelectedEquipmentRow() == inv::kEquipmentChoiceCancel);
 }
 
 TEST_CASE("UpdateLiveEquipmentChoices refuses text outside the game heap",
           "[equipment-rows-live]") {
   LiveRowsFixture fixture;
-  alignas(fw::ItemText) std::array<std::byte, 2 * sizeof(fw::ItemText)>
-      foreign{};
-  Menu_Inventory_itemsText = reinterpret_cast<char*>(foreign.data());
-  Menu_Inventory_menuRowCount = 2;
-  Menu_Inventory_equipListStep = 1;
+  std::array<fw::ItemText, 2> foreign{};
+  VS::Menu::Inventory::itemsText = foreign.data();
+  VS::Menu::Inventory::menuRowCount = 2;
+  VS::Menu::Inventory::equipListStep = 1;
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   inv::UpdateLiveEquipmentChoices(0);
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before + 1);
-  CHECK(Menu_Inventory_equipListStep == 1);
+  CHECK(VS::Menu::Inventory::equipListStep == 1);
   CHECK(fw::LiveMenuRow(21).state == fw::RowState::kInactive);
-  Menu_Inventory_itemsText = nullptr;
+  VS::Menu::Inventory::itemsText = nullptr;
 }
 
 struct LiveAccessoryFixture {
@@ -1019,7 +1018,7 @@ TEST_CASE("SetLiveAccessoryPreviewStats refuses an unbound armor table",
 
 struct LiveModelFixture {
   Restore<Actors_ActorRecord*> saved_actor{Actors_actorRecords[1]};
-  Restore<char> saved_step{Menu_Inventory_equipmentModelLoadStep};
+  Restore<std::uint8_t> saved_step{VS::Content::objectDataLoadStep};
   Restore<Battle_Actor*> saved_character{Battle_characterState};
   std::unique_ptr<Actors_ActorRecord> actor =
       std::make_unique<Actors_ActorRecord>();
@@ -1029,27 +1028,27 @@ TEST_CASE("ReloadLiveEquipmentModels waits for the settled preview animation",
           "[equipment-rows-live]") {
   LiveModelFixture fixture;
   Actors_actorRecords[1] = fixture.actor.get();
-  Menu_Inventory_equipmentModelLoadStep = 3;
+  VS::Content::objectDataLoadStep = 3;
   fixture.actor->animationId = 1;
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 1);
-  CHECK(Menu_Inventory_equipmentModelLoadStep == 3);
+  CHECK(VS::Content::objectDataLoadStep == 3);
   fixture.actor->animationId = 101;
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
-  CHECK(Menu_Inventory_equipmentModelLoadStep == 0);
+  CHECK(VS::Content::objectDataLoadStep == 0);
 }
 
 TEST_CASE("ReloadLiveEquipmentModels refuses without a preview actor",
           "[equipment-rows-live]") {
   LiveModelFixture fixture;
   Actors_actorRecords[1] = nullptr;
-  Menu_Inventory_equipmentModelLoadStep = 0;
+  VS::Content::objectDataLoadStep = 0;
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
   Actors_actorRecords[1] = fixture.actor.get();
   Battle_characterState = nullptr;
   CHECK(inv::ReloadLiveEquipmentModels(1, 5, 0) == 0);
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before + 2);
-  CHECK(Menu_Inventory_equipmentModelLoadStep == 0);
+  CHECK(VS::Content::objectDataLoadStep == 0);
 }
 
 TEST_CASE("QueueLiveEquipmentModel refuses without Ashley's model slots",

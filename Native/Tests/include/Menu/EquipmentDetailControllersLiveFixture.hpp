@@ -30,7 +30,7 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/TextBox.h"
 #include "Render/Display.hpp"
@@ -133,13 +133,17 @@ struct LiveFixture {
   ValueRestore<int> saved_repeat{VS::Input::buttonRepeat};
   ValueRestore<decltype(VS::Input::buttonsPressed)> saved_pressed{
       VS::Input::buttonsPressed};
-  ValueRestore<int> saved_preview{Menu_Inventory_ashleyRenderState};
-  ValueRestore<int> saved_y{Menu_Inventory_ashleyYOffset};
-  ValueRestore<int> saved_return{Menu_Inventory_exitToBattle};
-  ValueRestore<char> saved_title{Menu_Inventory_secondaryTitleEnabled};
-  ValueRestore<char> saved_categories{Menu_Inventory_itemCategoryIconsEnabled};
-  ValueRestore<char> saved_command{Menu_Inventory_statusCommandState};
-  ValueRestore<char> saved_header{Menu_Inventory_selectedItemCategoryIconOnTop};
+  ValueRestore<int> saved_preview{VS::Menu::Inventory::ashleyRenderState};
+  ValueRestore<int> saved_y{VS::Menu::Inventory::ashleyYOffset};
+  ValueRestore<int> saved_return{VS::Menu::Inventory::exitToBattle};
+  ValueRestore<std::uint8_t> saved_title{
+      VS::Menu::Inventory::secondaryTitleEnabled};
+  ValueRestore<std::uint8_t> saved_categories{
+      VS::Menu::Inventory::itemCategoryIconsEnabled};
+  ValueRestore<std::uint8_t> saved_command{
+      VS::Menu::Inventory::statusCommandState};
+  ValueRestore<std::uint8_t> saved_header{
+      VS::Menu::Inventory::selectedItemCategoryIconOnTop};
   ValueRestore<char> saved_pages{VS::Menu::Framework::enabledStatPages};
   ValueRestore<char> saved_page{VS::Menu::Framework::itemStatPage};
   ValueRestore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
@@ -264,10 +268,10 @@ struct LiveFixture {
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
     VS::Input::buttonsPressed = 0;
-    Menu_Inventory_selectedItemCategoryIconOnTop = 1;
-    Menu_Inventory_exitToBattle = 0;
-    Menu_Inventory_ashleyRenderState = 0;
-    Menu_Inventory_ashleyYOffset = kPreviewOffset;
+    VS::Menu::Inventory::selectedItemCategoryIconOnTop = 1;
+    VS::Menu::Inventory::exitToBattle = 0;
+    VS::Menu::Inventory::ashleyRenderState = 0;
+    VS::Menu::Inventory::ashleyYOffset = kPreviewOffset;
   }
   void BuildText() {
     constexpr std::size_t kTextOffset = 2048;

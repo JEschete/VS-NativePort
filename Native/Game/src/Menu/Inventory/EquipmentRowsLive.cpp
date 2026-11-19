@@ -39,7 +39,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Inventory/EquipmentRows.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Sounds.hpp"
 
 namespace VS::Menu::Inventory {
@@ -82,9 +82,9 @@ void Refuse(std::string_view reason) {
   return {reinterpret_cast<const std::uint8_t*>(text), bytes};
 }
 
-// _itemsText's first `count` records, inside the live game heap payload that
+// itemsText's first `count` records, inside the live game heap payload that
 // holds them.
-[[nodiscard]] std::optional<std::span<ItemText>> LiveText(char* text,
+[[nodiscard]] std::optional<std::span<ItemText>> LiveText(ItemText* text,
                                                           std::size_t count) {
   if (reinterpret_cast<std::uintptr_t>(text) % alignof(ItemText) != 0) {
     return std::nullopt;
@@ -99,24 +99,24 @@ void Refuse(std::string_view reason) {
       static_cast<std::size_t>(end - begin) / sizeof(ItemText) < count) {
     return std::nullopt;
   }
-  return std::span<ItemText>(reinterpret_cast<ItemText*>(text), count);
+  return std::span<ItemText>(text, count);
 }
 
 [[nodiscard]] EquipmentRowsState LoadScalars() {
   EquipmentRowsState state;
-  state.selected_row = Menu_Inventory_selectedItemRow;
-  state.step = Menu_Inventory_equipListStep;
-  state.row_count = static_cast<std::uint8_t>(Menu_Inventory_menuRowCount);
-  state.first_row = static_cast<std::uint8_t>(Menu_Inventory_itemsFirstRow);
-  state.equipped_item = static_cast<std::uint8_t>(Menu_Inventory_equippedItem);
+  state.selected_row = VS::Menu::Inventory::selectedItemRow;
+  state.step = VS::Menu::Inventory::equipListStep;
+  state.row_count = VS::Menu::Inventory::menuRowCount;
+  state.first_row = VS::Menu::Inventory::itemsFirstRow;
+  state.equipped_item = VS::Menu::Inventory::equippedItem;
   state.cursor_animation = g_cursor_animation;
   return state;
 }
 
 [[nodiscard]] std::optional<EquipmentRowsState> LoadState() {
   EquipmentRowsState state = LoadScalars();
-  if (Menu_Inventory_itemsText != nullptr) {
-    const auto text = LiveText(Menu_Inventory_itemsText, state.row_count);
+  if (VS::Menu::Inventory::itemsText != nullptr) {
+    const auto text = LiveText(VS::Menu::Inventory::itemsText, state.row_count);
     if (!text) {
       Refuse("the list text is outside a live game heap payload");
       return std::nullopt;
@@ -127,12 +127,12 @@ void Refuse(std::string_view reason) {
 }
 
 void StoreState(const EquipmentRowsState& state) {
-  Menu_Inventory_itemsText = reinterpret_cast<char*>(state.text.data());
-  Menu_Inventory_selectedItemRow = state.selected_row;
-  Menu_Inventory_equipListStep = state.step;
-  Menu_Inventory_menuRowCount = static_cast<char>(state.row_count);
-  Menu_Inventory_itemsFirstRow = static_cast<char>(state.first_row);
-  Menu_Inventory_equippedItem = static_cast<char>(state.equipped_item);
+  VS::Menu::Inventory::itemsText = state.text.data();
+  VS::Menu::Inventory::selectedItemRow = state.selected_row;
+  VS::Menu::Inventory::equipListStep = state.step;
+  VS::Menu::Inventory::menuRowCount = state.row_count;
+  VS::Menu::Inventory::itemsFirstRow = state.first_row;
+  VS::Menu::Inventory::equippedItem = state.equipped_item;
   g_cursor_animation = state.cursor_animation;
 }
 
@@ -343,8 +343,7 @@ void LiveCreateEquipmentRows(int count, u_short** menu_text, int* row_types) {
 int LiveSelectedEquipmentRow() {
   EquipmentRowsState state = LoadScalars();
   // Only whether the text is held matters here, not its records.
-  state.text = std::span<ItemText>(
-      reinterpret_cast<ItemText*>(Menu_Inventory_itemsText), 0);
+  state.text = std::span<ItemText>(VS::Menu::Inventory::itemsText, 0);
   return SelectedEquipmentRow(state);
 }
 
@@ -372,11 +371,11 @@ void SetLiveAccessoryPreviewStats(int accessory_id) {
 }
 
 int ReloadLiveEquipmentModels(int category, int wep_id, int material) {
-  auto step = static_cast<std::uint8_t>(Menu_Inventory_equipmentModelLoadStep);
+  auto step = VS::Content::objectDataLoadStep;
   LiveModelHost host;
   const ModelReload result =
       ReloadEquipmentModels(step, host, {category, wep_id, material});
-  Menu_Inventory_equipmentModelLoadStep = static_cast<char>(step);
+  VS::Content::objectDataLoadStep = step;
   if (result == ModelReload::kRefused) {
     Refuse("a model reload without the preview actor or Ashley's model slots");
     return 0;

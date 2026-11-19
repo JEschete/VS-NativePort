@@ -23,7 +23,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -497,13 +497,13 @@ int CheckMenuDiscStringsLoaded(void) {
       &Menu_Status_statusStrings[Text_Menu4_status_Offset_values]);
   const size_t status_words =
       sizeof Menu_Status_statusStrings / sizeof Menu_Status_statusStrings[0];
-  const size_t inventory_words =
-      sizeof Menu_Inventory_menuText / sizeof Menu_Inventory_menuText[0];
+  const size_t inventory_words = sizeof VS::Menu::Inventory::menuText /
+                                 sizeof VS::Menu::Inventory::menuText[0];
   const unsigned int condition =
       Menu_Status_statusStrings[Text_Menu4_status_Index_critical];
   return status_words > Text_Menu4_status_Offset_values && condition > 0 &&
-         condition < status_words && Menu_Inventory_menuText[0] > 0 &&
-         Menu_Inventory_menuText[0] < inventory_words &&
+         condition < status_words && VS::Menu::Inventory::menuText[0] > 0 &&
+         VS::Menu::Inventory::menuText[0] < inventory_words &&
          format[0] == VS::Core::TextCode::kPrintString && format[1] == 0 &&
          format[5] == VS::Core::TextCode::kPrintString && format[6] == 1 &&
          format[7] == VS::Core::TextCode::kTerminator;

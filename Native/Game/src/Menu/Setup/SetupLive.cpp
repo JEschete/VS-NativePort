@@ -43,7 +43,6 @@
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Setup/Combination.hpp"  // NOLINT(build/include): typed API
 #include "Menu/Setup/SetupScreen.hpp"  // NOLINT(build/include): typed API
 #include "Menu/Sounds.hpp"
@@ -546,10 +545,10 @@ class LiveHost final : public Host {
     Framework::ResetLiveAshleyEquipmentPose();
   }
   int EquipmentModelLoadStep() override {
-    return Menu_Inventory_equipmentModelLoadStep;
+    return VS::Content::objectDataLoadStep;
   }
   void SetEquipmentModelLoadStep(int step) override {
-    Menu_Inventory_equipmentModelLoadStep = static_cast<char>(step);
+    VS::Content::objectDataLoadStep = static_cast<std::uint8_t>(step);
   }
 
  private:

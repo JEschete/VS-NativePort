@@ -16,6 +16,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Hud.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -26,7 +27,7 @@
 #include "Menu/Inventory/EquipmentMenus.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 
 // Contracts of the equipment menu (MENU3.PRG 16C.c:343-1233): the four slot
 // menus, the handler table that picks one for a top-menu row, and the top
@@ -1264,21 +1265,22 @@ constexpr std::uint64_t kEquipmentMenuReferenceDigest = 0xF5FF06A0898FEA0BULL;
 // MENU3.PRG's list and preview globals the menus write; restored after each
 // run (constructed before the fixture loads _menuText).
 struct MenuGlobals {
-  detail::ValueRestore<u_char> step{Menu_Inventory_equipListStep};
-  detail::ValueRestore<int> selected{Menu_Inventory_selectedItemRow};
-  detail::ValueRestore<char> count{Menu_Inventory_menuRowCount};
-  detail::ValueRestore<char> first{Menu_Inventory_itemsFirstRow};
-  detail::ValueRestore<char> equipped{Menu_Inventory_equippedItem};
-  detail::ValueRestore<char*> items{Menu_Inventory_itemsText};
-  detail::ValueRestore<char> load{Menu_Inventory_equipmentModelLoadStep};
-  detail::ArrayRestore<u_short, std::size(Menu_Inventory_menuText)> text{
-      Menu_Inventory_menuText};
+  detail::ValueRestore<std::uint8_t> step{VS::Menu::Inventory::equipListStep};
+  detail::ValueRestore<int> selected{VS::Menu::Inventory::selectedItemRow};
+  detail::ValueRestore<std::uint8_t> count{VS::Menu::Inventory::menuRowCount};
+  detail::ValueRestore<std::uint8_t> first{VS::Menu::Inventory::itemsFirstRow};
+  detail::ValueRestore<std::uint8_t> equipped{
+      VS::Menu::Inventory::equippedItem};
+  detail::ValueRestore<fw::ItemText*> items{VS::Menu::Inventory::itemsText};
+  detail::ValueRestore<std::uint8_t> load{VS::Content::objectDataLoadStep};
+  detail::ArrayRestore<std::uint16_t, std::size(VS::Menu::Inventory::menuText)>
+      text{VS::Menu::Inventory::menuText};
   detail::ArrayRestore<u_char, std::size(VS::Menu::Framework::weaponHands)>
       hands{VS::Menu::Framework::weaponHands};
 
   MenuGlobals() {
-    Menu_Inventory_itemsText = nullptr;
-    Menu_Inventory_equipListStep = 0;
+    VS::Menu::Inventory::itemsText = nullptr;
+    VS::Menu::Inventory::equipListStep = 0;
     std::ranges::fill(VS::Menu::Framework::weaponHands, u_char{0});
     inv::ResetEquipmentRowsLive();
     inv::ResetEquipmentMenusLive();
@@ -1315,13 +1317,15 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
     std::ranges::copy(armor, std::begin(VS::Items::inventoryIndices.armor));
   }
 
-  [[nodiscard]] std::int64_t Classify(const char* text) const {
+  [[nodiscard]] std::int64_t Classify(const void* text) const {
     if (text == nullptr) {
       return kNullText;
     }
     const auto address = reinterpret_cast<std::uintptr_t>(text);
-    const auto menu = reinterpret_cast<std::uintptr_t>(Menu_Inventory_menuText);
-    if (address >= menu && address < menu + sizeof Menu_Inventory_menuText) {
+    const auto menu =
+        reinterpret_cast<std::uintptr_t>(VS::Menu::Inventory::menuText);
+    if (address >= menu &&
+        address < menu + sizeof VS::Menu::Inventory::menuText) {
       return static_cast<std::int64_t>(address - menu);
     }
     const auto heap = reinterpret_cast<std::uintptr_t>(heap_bytes.data());
@@ -1342,9 +1346,8 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
   // (the slot menus' choices and the top menu's rows) and in those of lists
   // already freed.
   void MaskTextTails(std::span<std::uint8_t> heap) {
-    Track(Menu_Inventory_itemsText, Menu_Inventory_menuRowCount);
-    Track(reinterpret_cast<const char*>(VS::Menu::Framework::itemsText),
-          VS::Menu::Framework::subMenuRowCount);
+    Track(VS::Menu::Inventory::itemsText, VS::Menu::Inventory::menuRowCount);
+    Track(VS::Menu::Framework::itemsText, VS::Menu::Framework::subMenuRowCount);
     for (const std::size_t record : text_records) {
       if (record + sizeof(fw::ItemText) > heap.size()) {
         continue;
@@ -1356,7 +1359,7 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
                                          fw::kItemDescriptionBytes));
     }
   }
-  void Track(const char* records, int count) {
+  void Track(const void* records, int count) {
     const std::int64_t text = Classify(records);
     if (text < kHeapText || text >= kStringBufferText) {
       return;
@@ -1425,17 +1428,17 @@ struct Snapshot {
                          bytes.begin() + kRowBytes);
     snapshot.sub_texts.push_back(fixture.Classify(row.sub_text));
   }
-  snapshot.scalars = {Menu_Inventory_ashleyRenderState,
-                      Menu_Inventory_itemCategoryIconsEnabled,
-                      Menu_Inventory_statusCommandState,
-                      Menu_Inventory_selectedItemCategoryIconOnTop,
-                      Menu_Inventory_equippedItem,
-                      Menu_Inventory_equipListStep,
-                      Menu_Inventory_selectedItemRow,
-                      Menu_Inventory_menuRowCount,
-                      Menu_Inventory_itemsFirstRow,
-                      fixture.Classify(Menu_Inventory_itemsText),
-                      Menu_Inventory_equipmentModelLoadStep,
+  snapshot.scalars = {VS::Menu::Inventory::ashleyRenderState,
+                      VS::Menu::Inventory::itemCategoryIconsEnabled,
+                      VS::Menu::Inventory::statusCommandState,
+                      VS::Menu::Inventory::selectedItemCategoryIconOnTop,
+                      VS::Menu::Inventory::equippedItem,
+                      VS::Menu::Inventory::equipListStep,
+                      VS::Menu::Inventory::selectedItemRow,
+                      VS::Menu::Inventory::menuRowCount,
+                      VS::Menu::Inventory::itemsFirstRow,
+                      fixture.Classify(VS::Menu::Inventory::itemsText),
+                      VS::Content::objectDataLoadStep,
                       VS::Menu::Framework::enabledStatPages,
                       VS::Menu::Framework::itemStatPage,
                       VS::Menu::Framework::equipmentSubtype,
@@ -1530,19 +1533,23 @@ void HashNumbers(std::uint64_t& hash, const std::vector<T>& values) {
 template <typename Setup, typename Steps>
 [[nodiscard]] MenuRun Play(Entry entry, Setup setup, Steps steps) {
   MenusFixture fixture;
-  detail::ValueRestore<char> saved_categories{
-      Menu_Inventory_itemCategoryIconsEnabled};
-  detail::ValueRestore<char> saved_command{Menu_Inventory_statusCommandState};
-  detail::ValueRestore<char> saved_equipped{Menu_Inventory_equippedItem};
-  detail::ValueRestore<int> saved_selected{Menu_Inventory_selectedItemRow};
-  detail::ValueRestore<char> saved_row_count{Menu_Inventory_menuRowCount};
+  detail::ValueRestore<std::uint8_t> saved_categories{
+      VS::Menu::Inventory::itemCategoryIconsEnabled};
+  detail::ValueRestore<std::uint8_t> saved_command{
+      VS::Menu::Inventory::statusCommandState};
+  detail::ValueRestore<std::uint8_t> saved_equipped{
+      VS::Menu::Inventory::equippedItem};
+  detail::ValueRestore<int> saved_selected{
+      VS::Menu::Inventory::selectedItemRow};
+  detail::ValueRestore<std::uint8_t> saved_row_count{
+      VS::Menu::Inventory::menuRowCount};
   detail::ArrayRestore<char*, std::size(Battle_limbNames)> saved_limb_names{
       Battle_limbNames};
-  Menu_Inventory_itemCategoryIconsEnabled = 0;
-  Menu_Inventory_statusCommandState = 0;
-  Menu_Inventory_equippedItem = 0;
-  Menu_Inventory_selectedItemRow = 0;
-  Menu_Inventory_menuRowCount = 0;
+  VS::Menu::Inventory::itemCategoryIconsEnabled = 0;
+  VS::Menu::Inventory::statusCommandState = 0;
+  VS::Menu::Inventory::equippedItem = 0;
+  VS::Menu::Inventory::selectedItemRow = 0;
+  VS::Menu::Inventory::menuRowCount = 0;
   std::ranges::fill(Battle_limbNames, nullptr);
   setup(fixture);
   Script script(fixture, entry);

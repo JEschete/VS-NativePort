@@ -18,6 +18,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/Menus.hpp"
+#include "Menu/Inventory/Inventory.hpp"
 
 namespace {
 namespace detail = VS::Menu::container;
@@ -253,7 +254,8 @@ TEST_CASE(
         255);
   CHECK(static_cast<std::uint8_t>(VS::Menu::container::controlsPanelMode) ==
         255);
-  CHECK(Menu_Inventory_secondaryTitleEnabled == fixture.saved_title.previous);
+  CHECK(VS::Menu::Inventory::secondaryTitleEnabled ==
+        fixture.saved_title.previous);
   CHECK(VS::Menu::container::detailsViewPhase == 99);
 }
 
@@ -304,7 +306,7 @@ TEST_CASE("F02947 live layout integrates native transition and stat helpers",
   CHECK(VS::Menu::container::categoryTitleVisible == 7);
   CHECK(VS::Menu::container::categoryIconsVisible == 0);
   CHECK(VS::Menu::container::controlsPanelMode == 0);
-  CHECK(Menu_Inventory_ashleyRenderState == 0);
+  CHECK(VS::Menu::Inventory::ashleyRenderState == 0);
   CHECK(fixture.rows[kHeader].w == 164);
   CHECK(fixture.rows[kHeader].target0 == 16);
   CHECK(fixture.rows[kSelected].target0 == 18);
@@ -384,5 +386,5 @@ TEST_CASE("F02950 real exit retains container phase and full triangle mask",
   VS::Input::buttonsPressed = VS::Input::Circle;
   detail::ExitLiveDetailsView(0);
   CHECK(VS::Menu::container::detailsClosedWithTriangle == 0);
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 1);
 }

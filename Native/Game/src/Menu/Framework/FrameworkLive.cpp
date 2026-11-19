@@ -66,7 +66,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
@@ -1100,13 +1100,13 @@ class LiveHost final : public Host {
   }
 
   AshleyPreviewState AshleyPreview() override {
-    return {.y_offset = Menu_Inventory_ashleyYOffset,
-            .render_state = Menu_Inventory_ashleyRenderState};
+    return {.y_offset = VS::Menu::Inventory::ashleyYOffset,
+            .render_state = VS::Menu::Inventory::ashleyRenderState};
   }
 
   void SetAshleyPreview(const AshleyPreviewState& preview) override {
-    Menu_Inventory_ashleyYOffset = preview.y_offset;
-    Menu_Inventory_ashleyRenderState = preview.render_state;
+    VS::Menu::Inventory::ashleyYOffset = preview.y_offset;
+    VS::Menu::Inventory::ashleyRenderState = preview.render_state;
   }
 
   std::optional<AshleyMetrics> Ashley() override {

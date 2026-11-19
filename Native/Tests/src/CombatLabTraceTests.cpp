@@ -40,7 +40,6 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Magic.h"
 #include "Menu/Results/Results.hpp"
@@ -1633,6 +1632,19 @@ TEST_CASE("Consumable observations do not consume stock or grant a spell",
   CHECK(Battle_actionDefinitions[224].unlocked == 0);
   CHECK(VS::Core::BiosRand().State() == random);
   CheckResourcesUnchanged(fixture);
+}
+
+TEST_CASE("Consumable observations skip items past the misc action map",
+          "[player][diagnostics][inspection]") {
+  ItemInspectionFixture fixture;
+  // Item 457 passes upstream's bronzeKey guard but is one past the 134-entry
+  // map (#467).
+  VS::Items::inventory.misc[1].id = 457;
+  VS::Items::inventory.misc[1].count = 1;
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  REQUIRE(state.item_options.size() == 1);
+  CheckRecoveryItemOption(state.item_options.front());
 }
 
 TEST_CASE("Consumable menu rows retain native inventory identity and bounds",

@@ -34,7 +34,7 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
@@ -120,15 +120,14 @@ void RequireFrame() {
 }
 void ReadRuntime(LootTerminalRuntime& runtime) {
   runtime.cursor = {lootListCount, lootListOffset, selectedLoot};
-  runtime.inventory_ui = {
-      static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleEnabled),
-      static_cast<std::uint8_t>(Menu_Inventory_itemCategoryIconsEnabled),
-      static_cast<std::uint8_t>(Menu_Inventory_statusCommandState),
-      static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleAnimationStep),
-      static_cast<std::uint8_t>(Menu_Inventory_itemCategoryIconsAnimationStep),
-      static_cast<std::uint8_t>(Menu_Inventory_statusCommandAnimationStep),
-      static_cast<std::uint8_t>(Menu_Inventory_selectedItemCategoryIconOnTop),
-      Menu_Inventory_ashleyRenderState};
+  runtime.inventory_ui = {VS::Menu::Inventory::secondaryTitleEnabled,
+                          VS::Menu::Inventory::itemCategoryIconsEnabled,
+                          VS::Menu::Inventory::statusCommandState,
+                          VS::Menu::Inventory::secondaryTitleAnimationStep,
+                          VS::Menu::Inventory::itemCategoryIconsAnimationStep,
+                          VS::Menu::Inventory::statusCommandAnimationStep,
+                          VS::Menu::Inventory::selectedItemCategoryIconOnTop,
+                          VS::Menu::Inventory::ashleyRenderState};
   runtime.inventory_category =
       VS::Menu::Framework::menuMemory.inventory_cursors.category;
   runtime.show_inventory = showInventory;
@@ -149,18 +148,21 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   lootListOffset = runtime.cursor.offset;
   selectedLoot = runtime.cursor.selected;
   const auto& ui = runtime.inventory_ui;
-  Menu_Inventory_secondaryTitleEnabled = static_cast<char>(ui.secondary_title);
-  Menu_Inventory_itemCategoryIconsEnabled =
-      static_cast<char>(ui.category_icons);
-  Menu_Inventory_statusCommandState = static_cast<char>(ui.status_command);
-  Menu_Inventory_secondaryTitleAnimationStep =
-      static_cast<char>(ui.secondary_step);
-  Menu_Inventory_itemCategoryIconsAnimationStep =
-      static_cast<char>(ui.icons_step);
-  Menu_Inventory_statusCommandAnimationStep = static_cast<char>(ui.status_step);
-  Menu_Inventory_selectedItemCategoryIconOnTop =
-      static_cast<char>(ui.icon_on_top);
-  Menu_Inventory_ashleyRenderState = ui.ashley_layout;
+  VS::Menu::Inventory::secondaryTitleEnabled =
+      static_cast<std::uint8_t>(ui.secondary_title);
+  VS::Menu::Inventory::itemCategoryIconsEnabled =
+      static_cast<std::uint8_t>(ui.category_icons);
+  VS::Menu::Inventory::statusCommandState =
+      static_cast<std::uint8_t>(ui.status_command);
+  VS::Menu::Inventory::secondaryTitleAnimationStep =
+      static_cast<std::uint8_t>(ui.secondary_step);
+  VS::Menu::Inventory::itemCategoryIconsAnimationStep =
+      static_cast<std::uint8_t>(ui.icons_step);
+  VS::Menu::Inventory::statusCommandAnimationStep =
+      static_cast<std::uint8_t>(ui.status_step);
+  VS::Menu::Inventory::selectedItemCategoryIconOnTop =
+      static_cast<std::uint8_t>(ui.icon_on_top);
+  VS::Menu::Inventory::ashleyRenderState = ui.ashley_layout;
   VS::Menu::Framework::menuMemory.inventory_cursors.category =
       runtime.inventory_category;
   showInventory = runtime.show_inventory;

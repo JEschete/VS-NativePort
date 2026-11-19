@@ -17,6 +17,7 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/StringTables.h"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Text/TextCode.hpp"
@@ -26,7 +27,6 @@
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/RenameLive.hpp"
 #include "Menu/RenameLiveState.hpp"
 #include "Render/Display.hpp"
@@ -231,7 +231,7 @@ struct EquipmentReloadFixture {
   VS::Render::TextureSlot saved_texture =
       VS::Render::legacyWeaponTextureSlots[0];
   decltype(Event_playbackPhase) saved_event_phase = Event_playbackPhase;
-  char saved_reload = Menu_Inventory_equipmentModelLoadStep;
+  std::uint8_t saved_reload = VS::Content::objectDataLoadStep;
   int saved_alias = Battle_unusedGlobal2;
   Actors_ActorRecord preview{};
   Actors_WeaponModel shield{};
@@ -246,7 +246,7 @@ struct EquipmentReloadFixture {
     VS::Actors::weaponModels[3] = has_preview ? &preview_shield : nullptr;
     VS::Render::legacyWeaponTextureSlots[0].reference_count = 2;
     Event_playbackPhase = 0;
-    Menu_Inventory_equipmentModelLoadStep = 0;
+    VS::Content::objectDataLoadStep = 0;
     Battle_unusedGlobal2 = unused_alias;
   }
 
@@ -256,7 +256,7 @@ struct EquipmentReloadFixture {
               VS::Actors::weaponModels);
     VS::Render::legacyWeaponTextureSlots[0] = saved_texture;
     Event_playbackPhase = saved_event_phase;
-    Menu_Inventory_equipmentModelLoadStep = saved_reload;
+    VS::Content::objectDataLoadStep = saved_reload;
     Battle_unusedGlobal2 = saved_alias;
   }
 };
@@ -377,7 +377,7 @@ TEST_CASE("Equipment reload releases shields through the actual preview slot",
   CHECK(VS::Menu::Inventory::LiveIsTwoHandedWeapon(category) ==
         (two_handed ? 1 : 0));
   CHECK(VS::Menu::Inventory::ReloadLiveEquipmentModels(category, 0, 0) == 1);
-  CHECK(Menu_Inventory_equipmentModelLoadStep == 1);
+  CHECK(VS::Content::objectDataLoadStep == 1);
   CHECK(VS::Actors::weaponModels[1] == (release ? nullptr : &fixture.shield));
   CHECK(VS::Actors::weaponModels[3] ==
         (has_preview ? &fixture.preview_shield : nullptr));

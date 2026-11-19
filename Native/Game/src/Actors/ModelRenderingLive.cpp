@@ -46,7 +46,6 @@
 #include "Event/ScriptVmLive.hpp"
 #include "Field/GimmickDynamicsLive.hpp"
 #include "Field/Gimmicks.h"
-#include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelDraw.hpp"
@@ -665,7 +664,7 @@ void InitializeLiveActorModelResources() {
   Content_legacySequenceParsePhase = 0;
   Content_legacyEtmLoadPhase = 0;
   VS::Content::modelParseResetFlag = 0;
-  Menu_Inventory_equipmentModelLoadStep = 0;
+  VS::Content::objectDataLoadStep = 0;
   Content_legacyModelLoadPhase = 0;
   Actors_sharedSequenceBankIndex = 0;
   VECTOR unit_room_scale{};

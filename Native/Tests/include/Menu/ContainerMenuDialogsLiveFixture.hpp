@@ -25,6 +25,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -239,7 +240,8 @@ struct EquippedFixture : DialogLiveFixture {
     const auto module = ReadData(R"(Native\data\disc\MENU\MENU3.PRG)");
     const auto entries = VS::Content::ModuleDataEntries();
     const auto text = std::ranges::find_if(entries, [](const auto& entry) {
-      return entry.target == static_cast<void*>(Menu_Inventory_menuText) &&
+      return entry.target ==
+                 static_cast<void*>(VS::Menu::Inventory::menuText) &&
              std::string_view(entry.module) == "MENU/MENU3.PRG";
     });
     if (text == entries.end() ||

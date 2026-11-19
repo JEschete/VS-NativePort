@@ -12,7 +12,7 @@
 #include "Menu/Container/Storage.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
@@ -49,7 +49,7 @@ void ResetMenu2Statics() {
 
 // MENU3.PRG.
 void ResetMenu3Statics() {
-  Menu_Inventory_ResetMenu3Statics();
+  VS::Menu::Inventory::ResetMenu3Statics();
   VS::Menu::Inventory::ResetEquipmentRowsLive();
   VS::Menu::Inventory::ResetEquipmentMenusLive();
   VS::Menu::Inventory::ResetInventoryTerminalModuleData();
@@ -83,7 +83,7 @@ void ResetMenu9Statics() {
 
 // MENUB.PRG.
 void ResetMenubStatics() {
-  Menu_Inventory_ResetMenubStatics();
+  VS::Menu::Inventory::ResetMenubStatics();
   VS::Menu::Loot::ResetMenubStatics();
   VS::Menu::Loot::Live::ResetPolicyStatics();
   VS::Menu::Loot::ResetLootTerminalModuleData();

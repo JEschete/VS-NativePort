@@ -20,7 +20,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/ItemListRows.hpp"
 #include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/InventorySortingLiveFixture.hpp"
@@ -487,12 +487,12 @@ struct RowsLiveFixture : inventory::sorting_test::LiveFixture {
   std::byte* block = nullptr;
 
   RowsLiveFixture() {
-    std::ranges::copy(Menu_Inventory_unusedMiscActions, saved_actions.begin());
+    std::ranges::copy(VS::Menu::Inventory::miscActions, saved_actions.begin());
     block = static_cast<std::byte*>(
         VS::Core::Memory::AllocateLiveFromHighEnd(kCallerBytes));
   }
   ~RowsLiveFixture() {
-    std::ranges::copy(saved_actions, Menu_Inventory_unusedMiscActions);
+    std::ranges::copy(saved_actions, VS::Menu::Inventory::miscActions);
   }
   RowsLiveFixture(const RowsLiveFixture&) = delete;
   RowsLiveFixture& operator=(const RowsLiveFixture&) = delete;
@@ -583,14 +583,14 @@ TEST_CASE("Inventory live rows fill the caller heap block and misc actions",
   items.misc[1] = {.id = kFirstMisc + 1, .count = 2, .index = 0};
   VS::Items::inventoryIndices.misc[0] = 2;
   VS::Items::inventoryIndices.misc[1] = 1;
-  std::ranges::fill(Menu_Inventory_unusedMiscActions, char{0});
+  std::ranges::fill(VS::Menu::Inventory::miscActions, std::uint8_t{0});
   REQUIRE(fixture.Build(kMisc) == 2);
   CHECK(fixture.Types()[0] == FormattedMiscType(items.misc[1]));
   CHECK(fixture.Types()[1] == FormattedMiscType(items.misc[0]));
-  CHECK(static_cast<std::uint8_t>(Menu_Inventory_unusedMiscActions[0]) ==
-        Menu_Inventory_miscItemToActionMap[1]);
-  CHECK(static_cast<std::uint8_t>(Menu_Inventory_unusedMiscActions[1]) ==
-        Menu_Inventory_miscItemToActionMap[0]);
+  CHECK(VS::Menu::Inventory::miscActions[0] ==
+        VS::Menu::Inventory::kMiscItemToActionMap[1]);
+  CHECK(VS::Menu::Inventory::miscActions[1] ==
+        VS::Menu::Inventory::kMiscItemToActionMap[0]);
 }
 
 TEST_CASE("Inventory live loot rows leave the misc actions alone",
@@ -599,10 +599,10 @@ TEST_CASE("Inventory live loot rows leave the misc actions alone",
   REQUIRE(fixture.block != nullptr);
   VS::Items::inventory.misc[0] = {.id = 1, .count = 1, .index = 0};
   VS::Items::inventoryIndices.misc[0] = 1;
-  std::ranges::fill(Menu_Inventory_unusedMiscActions, char{0x55});
+  std::ranges::fill(VS::Menu::Inventory::miscActions, std::uint8_t{0x55});
   const auto before = inventory::ItemListRowsLiveRefusalCount();
   REQUIRE(fixture.Build(kMisc, true) == 1);
-  CHECK(std::ranges::all_of(Menu_Inventory_unusedMiscActions,
+  CHECK(std::ranges::all_of(VS::Menu::Inventory::miscActions,
                             [](char value) { return value == 0x55; }));
   CHECK(inventory::ItemListRowsLiveRefusalCount() == before);
   REQUIRE(fixture.Build(kMisc) == 0);

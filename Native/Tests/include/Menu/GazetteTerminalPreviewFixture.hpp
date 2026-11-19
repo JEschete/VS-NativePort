@@ -27,7 +27,6 @@
 #include "Field/Gimmicks.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/GazetteTerminalLiveFixture.hpp"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "ModelLoading.h"
@@ -109,7 +108,7 @@ inline auto PreviewOwners() {
                     BytesOf(VS::Content::lastLoadPhaseSnapshot),
                     BytesOf(VS::Content::assetQueueFrameTicks),
                     BytesOf(VS::Content::lastAssetRequestType),
-                    BytesOf(Menu_Inventory_equipmentModelLoadStep),
+                    BytesOf(VS::Content::objectDataLoadStep),
                     BytesOf(score::LiveEnemyPreviewState())};
 }
 

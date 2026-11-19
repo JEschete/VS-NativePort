@@ -167,8 +167,8 @@ struct AssetStateRestore {
   ValueRestore<u_char> bank_index{Actors_sharedSequenceBankIndex};
   ValueRestore<char> update_complete{Actors_isActorUpdateComplete};
   ValueRestore<u_char> pushed_gimmick{Actors_pushedGimmickIndex};
-  ValueRestore<decltype(Menu_Inventory_equipmentModelLoadStep)> equipment_step{
-      Menu_Inventory_equipmentModelLoadStep};
+  ValueRestore<decltype(VS::Content::objectDataLoadStep)> equipment_step{
+      VS::Content::objectDataLoadStep};
   ValueRestore<void*> sequence_work{Actors_sequenceWorkBuffer};
 };
 

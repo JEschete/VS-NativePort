@@ -421,7 +421,7 @@ class Host {
   virtual void QueueWeaponAnimations(int sequence_model) = 0;
   [[nodiscard]] virtual bool ActorAssetsPending() = 0;
   virtual void ResetEquipmentPose() = 0;
-  // Menu_Inventory_equipmentModelLoadStep.
+  // VS::Content::objectDataLoadStep.
   [[nodiscard]] virtual int EquipmentModelLoadStep() = 0;
   virtual void SetEquipmentModelLoadStep(int step) = 0;
 };

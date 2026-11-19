@@ -24,7 +24,7 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/ItemDetailDispatch.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
 #include "Render/Frame.hpp"
@@ -200,7 +200,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
     ExitLiveDetailsView(clear_dp_pp ? 1 : 0);
   }
   void SetBattleReturnIntent(BattleReturnIntent intent) override {
-    Menu_Inventory_exitToBattle =
+    VS::Menu::Inventory::exitToBattle =
         intent == BattleReturnIntent::kBattle ? Input::Triangle : 0;
   }
   DetailPage PollPaging(DetailPage page) override {
@@ -283,10 +283,11 @@ class LiveDispatcherWorld final
  public:
   LiveDispatcherWorld() : Base("used detail cursor outside its elements") {}
   void SetHeaderPlacement(DetailHeaderPlacement placement) override {
-    Menu_Inventory_selectedItemCategoryIconOnTop = static_cast<char>(placement);
+    VS::Menu::Inventory::selectedItemCategoryIconOnTop =
+        static_cast<std::uint8_t>(placement);
   }
   void SetBattleReturnIntent(BattleReturnIntent intent) override {
-    Menu_Inventory_exitToBattle =
+    VS::Menu::Inventory::exitToBattle =
         intent == BattleReturnIntent::kBattle ? Input::Triangle : 0;
   }
   Framework::MenuRow& CategoryHeader() override {
@@ -308,15 +309,19 @@ class LiveDispatcherWorld final
     }
     return result.value();
   }
-  bool ReturnsToBattle() override { return Menu_Inventory_exitToBattle != 0; }
+  bool ReturnsToBattle() override {
+    return VS::Menu::Inventory::exitToBattle != 0;
+  }
   void SetCategoryVisibility(std::uint8_t visibility) override {
-    Menu_Inventory_itemCategoryIconsEnabled = static_cast<char>(visibility);
+    VS::Menu::Inventory::itemCategoryIconsEnabled =
+        static_cast<std::uint8_t>(visibility);
   }
   void SetCommandVisibility(std::uint8_t visibility) override {
-    Menu_Inventory_statusCommandState = static_cast<char>(visibility);
+    VS::Menu::Inventory::statusCommandState =
+        static_cast<std::uint8_t>(visibility);
   }
   void SetPreviewLayout(PreviewLayout layout) override {
-    Menu_Inventory_ashleyRenderState = static_cast<int>(layout);
+    VS::Menu::Inventory::ashleyRenderState = static_cast<int>(layout);
   }
   [[noreturn]] void Refuse(std::string_view reason) override {
     VS::Core::Errorf("menu.inventory", "Item details refused: %.*s",

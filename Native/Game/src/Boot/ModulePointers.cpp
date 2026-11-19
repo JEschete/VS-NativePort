@@ -274,7 +274,6 @@
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
@@ -415,7 +414,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E8E80u, 40u, (void*)&Battle_chainAbilityAnimationGroups, sizeof Battle_chainAbilityAnimationGroups, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8EA8u, 84u, (void*)&Content_legacyMaterialModelSequenceDiscOffsets, sizeof Content_legacyMaterialModelSequenceDiscOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8EFCu, 44u, (void*)&Content_legacyMaterialModelSequenceSectorCounts, sizeof Content_legacyMaterialModelSequenceSectorCounts, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E8F28u, 4u, (void*)&Menu_Inventory_equipmentModelLoadStep, sizeof Menu_Inventory_equipmentModelLoadStep, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E8F28u, 4u, (void*)&VS::Content::objectDataLoadStep, sizeof VS::Content::objectDataLoadStep, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F2Cu, 4u, (void*)&Actors_sharedSequenceBankIndex, sizeof Actors_sharedSequenceBankIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F30u, 96u, (void*)&Actors_textureSlotOrigins, sizeof Actors_textureSlotOrigins, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E8F90u, 24u, (void*)&Actors_textureSlotRowOffsets, sizeof Actors_textureSlotRowOffsets, 1u, 1u},

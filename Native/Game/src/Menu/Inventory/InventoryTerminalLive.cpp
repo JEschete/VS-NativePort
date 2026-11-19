@@ -37,11 +37,12 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/InventoryTerminal.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
+#include "Menu/Inventory/ItemListRows.hpp"
 #include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
@@ -158,15 +159,14 @@ std::span<std::uint8_t> FixedOrder(Category category) {
 
 void ReadRuntime(TerminalRuntime& runtime) {
   runtime.cursor = VS::Menu::Framework::menuMemory.inventory_cursors;
-  runtime.presentation = {
-      static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleEnabled),
-      static_cast<std::uint8_t>(Menu_Inventory_itemCategoryIconsEnabled),
-      static_cast<std::uint8_t>(Menu_Inventory_statusCommandState),
-      static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleAnimationStep),
-      static_cast<std::uint8_t>(Menu_Inventory_itemCategoryIconsAnimationStep),
-      static_cast<std::uint8_t>(Menu_Inventory_statusCommandAnimationStep),
-      static_cast<std::uint8_t>(Menu_Inventory_selectedItemCategoryIconOnTop),
-      Menu_Inventory_ashleyRenderState};
+  runtime.presentation = {VS::Menu::Inventory::secondaryTitleEnabled,
+                          VS::Menu::Inventory::itemCategoryIconsEnabled,
+                          VS::Menu::Inventory::statusCommandState,
+                          VS::Menu::Inventory::secondaryTitleAnimationStep,
+                          VS::Menu::Inventory::itemCategoryIconsAnimationStep,
+                          VS::Menu::Inventory::statusCommandAnimationStep,
+                          VS::Menu::Inventory::selectedItemCategoryIconOnTop,
+                          VS::Menu::Inventory::ashleyRenderState};
   const auto& control = VS::Menu::Framework::menuState.control;
   runtime.control.current_menu = control.current_menu;
   runtime.control.return_state = control.return_state;
@@ -185,20 +185,21 @@ void ReadRuntime(TerminalRuntime& runtime) {
 void WriteRuntime(const TerminalRuntime& runtime) {
   VS::Menu::Framework::menuMemory.inventory_cursors = runtime.cursor;
   const auto& panels = runtime.presentation;
-  Menu_Inventory_secondaryTitleEnabled =
-      static_cast<char>(panels.secondary_title);
-  Menu_Inventory_itemCategoryIconsEnabled =
-      static_cast<char>(panels.category_icons);
-  Menu_Inventory_statusCommandState = static_cast<char>(panels.status_command);
-  Menu_Inventory_secondaryTitleAnimationStep =
-      static_cast<char>(panels.secondary_step);
-  Menu_Inventory_itemCategoryIconsAnimationStep =
-      static_cast<char>(panels.icons_step);
-  Menu_Inventory_statusCommandAnimationStep =
-      static_cast<char>(panels.status_step);
-  Menu_Inventory_selectedItemCategoryIconOnTop =
-      static_cast<char>(panels.icon_on_top);
-  Menu_Inventory_ashleyRenderState = panels.ashley_layout;
+  VS::Menu::Inventory::secondaryTitleEnabled =
+      static_cast<std::uint8_t>(panels.secondary_title);
+  VS::Menu::Inventory::itemCategoryIconsEnabled =
+      static_cast<std::uint8_t>(panels.category_icons);
+  VS::Menu::Inventory::statusCommandState =
+      static_cast<std::uint8_t>(panels.status_command);
+  VS::Menu::Inventory::secondaryTitleAnimationStep =
+      static_cast<std::uint8_t>(panels.secondary_step);
+  VS::Menu::Inventory::itemCategoryIconsAnimationStep =
+      static_cast<std::uint8_t>(panels.icons_step);
+  VS::Menu::Inventory::statusCommandAnimationStep =
+      static_cast<std::uint8_t>(panels.status_step);
+  VS::Menu::Inventory::selectedItemCategoryIconOnTop =
+      static_cast<std::uint8_t>(panels.icon_on_top);
+  VS::Menu::Inventory::ashleyRenderState = panels.ashley_layout;
   auto& control = VS::Menu::Framework::menuState.control;
   control.current_menu = runtime.control.current_menu;
   control.return_state = runtime.control.return_state;
@@ -278,7 +279,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     Framework::LiveItemRowsHost texts;
     const auto help = texts.HelpText();
     const auto menu = context_ == ItemRowsContext::kItemMenu
-                          ? ByteView(Menu_Inventory_menuText)
+                          ? ByteView(VS::Menu::Inventory::menuText)
                           : LiveLootInventoryText();
     switch (text) {
       case TerminalText::kSortName:
@@ -524,12 +525,12 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     });
   }
   std::uint8_t MiscAction(std::size_t row) override {
-    const auto actions = std::span(Menu_Inventory_unusedMiscActions);
+    const auto actions = std::span(VS::Menu::Inventory::miscActions);
     if (row >= actions.size()) Refuse("misc action row outside its table");
-    return static_cast<std::uint8_t>(actions[row]);
+    return actions[row];
   }
   std::span<const std::uint8_t> MiscActionMap() override {
-    return {Menu_Inventory_miscItemToActionMap, kMiscActionMapEntries};
+    return VS::Menu::Inventory::kMiscItemToActionMap;
   }
   bool ActionUnlocked(std::uint32_t action) override {
     const auto actions = std::span(Battle_actionDefinitions);
@@ -648,9 +649,9 @@ class LiveTerminalHost final : public InventoryTerminalHost,
         static_cast<std::uint32_t>(active_rows_->flags[row]) | flags);
   }
   void StoreMiscAction(std::size_t row, std::uint8_t action) override {
-    auto actions = std::span(Menu_Inventory_unusedMiscActions);
+    auto actions = std::span(VS::Menu::Inventory::miscActions);
     if (row >= actions.size()) Refuse("misc action write outside row table");
-    actions[row] = static_cast<char>(action);
+    actions[row] = action;
   }
   void CreateList(std::int32_t menu, std::span<const Framework::RowText> rows,
                   std::span<const std::int32_t> flags) override {

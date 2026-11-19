@@ -34,6 +34,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/Menus.hpp"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootScreen.hpp"
@@ -118,14 +119,14 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   ValueRestore<std::uint8_t> saved_freeze{VS::Menu::Inventory::freezeTabArrows};
-  ValueRestore<char> saved_title_step{
-      Menu_Inventory_secondaryTitleAnimationStep};
-  ValueRestore<char> saved_icons_step{
-      Menu_Inventory_itemCategoryIconsAnimationStep};
-  ValueRestore<char> saved_status_step{
-      Menu_Inventory_statusCommandAnimationStep};
-  ArrayRestore<u_short, std::size(Menu_Inventory_menuText)> saved_menu_text{
-      Menu_Inventory_menuText};
+  ValueRestore<std::uint8_t> saved_title_step{
+      VS::Menu::Inventory::secondaryTitleAnimationStep};
+  ValueRestore<std::uint8_t> saved_icons_step{
+      VS::Menu::Inventory::itemCategoryIconsAnimationStep};
+  ValueRestore<std::uint8_t> saved_status_step{
+      VS::Menu::Inventory::statusCommandAnimationStep};
+  ArrayRestore<std::uint16_t, std::size(VS::Menu::Inventory::menuText)>
+      saved_menu_text{VS::Menu::Inventory::menuText};
   ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_titles{
       VS::Menu::menuStrings};
   std::array<int, framework::kRowTypeCount> row_types{};
@@ -154,13 +155,13 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     VS::Menu::Framework::actionRestrictions = 0;
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::rowTypeBuf = row_types.data();
-    Menu_Inventory_secondaryTitleEnabled = 0;
-    Menu_Inventory_itemCategoryIconsEnabled = 0;
-    Menu_Inventory_statusCommandState = 0;
-    Menu_Inventory_secondaryTitleAnimationStep = 0;
-    Menu_Inventory_itemCategoryIconsAnimationStep = 0;
-    Menu_Inventory_statusCommandAnimationStep = 0;
-    for (auto text : {std::span<u_short>(Menu_Inventory_menuText),
+    VS::Menu::Inventory::secondaryTitleEnabled = 0;
+    VS::Menu::Inventory::itemCategoryIconsEnabled = 0;
+    VS::Menu::Inventory::statusCommandState = 0;
+    VS::Menu::Inventory::secondaryTitleAnimationStep = 0;
+    VS::Menu::Inventory::itemCategoryIconsAnimationStep = 0;
+    VS::Menu::Inventory::statusCommandAnimationStep = 0;
+    for (auto text : {std::span<u_short>(VS::Menu::Inventory::menuText),
                       std::span<u_short>(VS::Menu::menuStrings)}) {
       std::ranges::fill(text, u_short{0xE7E7});
       std::fill_n(text.begin(), 32, u_short{32});
@@ -494,9 +495,9 @@ TEST_CASE(
     menu_overlay_tests::Load load(4, {VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
     CHECK(load.Complete() == 1);
   }
-  Menu_Inventory_selectedItemCategoryIconOnTop = 1;
+  VS::Menu::Inventory::selectedItemCategoryIconOnTop = 1;
   REQUIRE(loot::UpdateLiveInventoryTransition(0) == 0);
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 0);
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 0);
   framework::ClearLiveMenuExcept(framework::kNoRow);
   REQUIRE(fixture.SettleRows());
   menu_overlay_tests::Load load(12, {VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE});

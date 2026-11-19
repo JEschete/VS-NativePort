@@ -19,7 +19,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Inventory/ItemListRows.hpp"
 
@@ -166,8 +166,8 @@ class LiveItemRowsWorld final : public ItemRowsWorld {
   }
 
   void StoreMiscAction(std::size_t row, std::uint8_t action) override {
-    const std::span<char> actions(Menu_Inventory_unusedMiscActions);
-    actions[row] = static_cast<char>(action);
+    const std::span<std::uint8_t> actions(VS::Menu::Inventory::miscActions);
+    actions[row] = action;
   }
 
  private:
@@ -214,8 +214,7 @@ int BuildLiveRows(ItemRowsContext context, int item_category, char* menu_text[],
       .capacity =
           std::span(VS::Items::kCategoryCapacities)[static_cast<std::size_t>(
               item_category)],
-      .misc_action_map = std::span<const std::uint8_t>(
-          Menu_Inventory_miscItemToActionMap, kMiscActionMapEntries),
+      .misc_action_map = VS::Menu::Inventory::kMiscItemToActionMap,
       .row_capacity = RowCapacity(menu_text, row_types, text_buf),
   };
   LiveItemRowsWorld world(menu_text, row_types, text_buf);

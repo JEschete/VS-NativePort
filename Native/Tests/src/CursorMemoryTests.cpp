@@ -37,7 +37,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/OptionsLive.hpp"
@@ -211,8 +211,8 @@ struct BreakArtMenuFixture {
 
 struct EquipmentGateFixture {
   CursorFixture rows;
-  decltype(std::to_array(Menu_Inventory_menuText)) saved_strings =
-      std::to_array(Menu_Inventory_menuText);
+  decltype(std::to_array(VS::Menu::Inventory::menuText)) saved_strings =
+      std::to_array(VS::Menu::Inventory::menuText);
   decltype(VS::State::stateFlags) saved_flags = VS::State::stateFlags;
   decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
   decltype(VS::Items::inventoryIndices) saved_indices =
@@ -225,8 +225,8 @@ struct EquipmentGateFixture {
 
   EquipmentGateFixture() {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
-    std::fill_n(Menu_Inventory_menuText, saved_strings.size(), 0xE7E7);
-    std::fill_n(Menu_Inventory_menuText, 128, 128);
+    std::fill_n(VS::Menu::Inventory::menuText, saved_strings.size(), 0xE7E7);
+    std::fill_n(VS::Menu::Inventory::menuText, 128, 128);
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
     actor.stats = &stats;
@@ -236,7 +236,7 @@ struct EquipmentGateFixture {
   ~EquipmentGateFixture() {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
     std::copy(saved_strings.begin(), saved_strings.end(),
-              Menu_Inventory_menuText);
+              VS::Menu::Inventory::menuText);
     VS::State::stateFlags = saved_flags;
     VS::Items::inventory = saved_inventory;
     VS::Items::inventoryIndices = saved_indices;

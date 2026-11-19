@@ -27,7 +27,7 @@
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentMenus.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Sounds.hpp"
 
 namespace VS::Menu::Inventory {
@@ -39,7 +39,8 @@ constexpr std::uint32_t kRefusalLogLimit = 16;
 constexpr std::uint32_t kRefusalLogInterval = 1024;
 // The description buffer each formatted row writes (ItemRowsLive.hpp).
 constexpr std::size_t kRowBufferBytes = 96;
-static_assert(std::size(Menu_Inventory_menuText) == kEquipmentMenuTextEntries,
+static_assert(std::size(VS::Menu::Inventory::menuText) ==
+                  kEquipmentMenuTextEntries,
               "_menuText holds 472 halfwords");
 
 std::uint64_t g_refusals = 0;
@@ -201,7 +202,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
     if (index >= kEquipmentMenuTextEntries) {
       return kEquipmentMenuTextEntries;
     }
-    return std::span(Menu_Inventory_menuText)[index];
+    return std::span(VS::Menu::Inventory::menuText)[index];
   }
   std::int32_t FormatRow(EquipmentTable table, std::int32_t slot,
                          std::int32_t row) override {
@@ -243,7 +244,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
   }
   std::int32_t SelectedChoice() override { return LiveSelectedEquipmentRow(); }
   std::uint8_t HighlightedItem() override {
-    return static_cast<std::uint8_t>(Menu_Inventory_equippedItem);
+    return VS::Menu::Inventory::equippedItem;
   }
 
   void PreviewItem(EquipmentMenu menu, std::int32_t item) override {
@@ -302,9 +303,9 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
 
   MenuRow& SetMenuItem(const RowPlacement& placement,
                        std::uint16_t text) override {
-    const auto bytes =
-        std::as_bytes(std::span(Menu_Inventory_menuText))
-            .subspan(MenuTextIndex(text) * sizeof(Menu_Inventory_menuText[0]));
+    const auto bytes = std::as_bytes(std::span(VS::Menu::Inventory::menuText))
+                           .subspan(MenuTextIndex(text) *
+                                    sizeof(VS::Menu::Inventory::menuText[0]));
     return Framework::SetLiveMenuItemText(
         placement,
         {reinterpret_cast<const std::uint8_t*>(bytes.data()), bytes.size()});
@@ -331,16 +332,18 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
     Framework::ContinueLiveItemDetailsTransition(row);
   }
   void SetPreviewState(std::int32_t state) override {
-    Menu_Inventory_ashleyRenderState = state;
+    VS::Menu::Inventory::ashleyRenderState = state;
   }
   void SetCategoryIconsEnabled(std::uint8_t enabled) override {
-    Menu_Inventory_itemCategoryIconsEnabled = static_cast<char>(enabled);
+    VS::Menu::Inventory::itemCategoryIconsEnabled =
+        static_cast<std::uint8_t>(enabled);
   }
   void SetStatusCommandState(std::uint8_t state) override {
-    Menu_Inventory_statusCommandState = static_cast<char>(state);
+    VS::Menu::Inventory::statusCommandState = static_cast<std::uint8_t>(state);
   }
   void SetCategoryIconOnTop(std::int32_t icon) override {
-    Menu_Inventory_selectedItemCategoryIconOnTop = static_cast<char>(icon);
+    VS::Menu::Inventory::selectedItemCategoryIconOnTop =
+        static_cast<std::uint8_t>(icon);
   }
   std::int32_t Dispatch(std::int32_t row) override {
     return DispatchLiveEquipmentMenu(row);
@@ -356,7 +359,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
   }
   [[nodiscard]] static char* MenuText(std::uint16_t offset) {
     return reinterpret_cast<char*>(
-        &std::span(Menu_Inventory_menuText)[MenuTextIndex(offset)]);
+        &std::span(VS::Menu::Inventory::menuText)[MenuTextIndex(offset)]);
   }
 
   // The rows' texts and description buffers, as the original's stack

@@ -6,6 +6,7 @@
 #include "Items/InventoryLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/Inventory/Inventory.hpp"
 
 namespace {
 namespace inventory = VS::Menu::Inventory;
@@ -25,7 +26,7 @@ TEST_CASE("F02575 live initialization uses production weapon stats and layout",
   CHECK(VS::Menu::Framework::enabledStatPages == 7);
   CHECK(fixture.rows[31].target0 == 16);
   CHECK(fixture.rows[20].target0 == 18);
-  CHECK(Menu_Inventory_ashleyYOffset == 5);
+  CHECK(VS::Menu::Inventory::ashleyYOffset == 5);
 }
 
 TEST_CASE(
@@ -109,7 +110,7 @@ TEST_CASE(
   REQUIRE(expected.size() >= 3);
   CHECK(actual == expected);
   CHECK(fixture.CountLabel(actual) == "X     2");
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 1);
   VS::Items::inventory.grips[0].gem_slots = VS::Items::kWeaponGemCount;
   fixture.ResetFrame();
   CHECK(inventory::UpdateLiveGripDetails(0) == 0);
@@ -125,8 +126,9 @@ TEST_CASE("F02577 exit draws current grip count through actual presentation",
   fixture.ResetFrame();
   VS::Input::buttonsPressed = VS::Input::Triangle;
   CHECK(inventory::UpdateLiveGripDetails(0) == 0);
-  CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 2);
+  CHECK(VS::Menu::Inventory::exitToBattle ==
+        static_cast<int>(VS::Input::Triangle));
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 2);
   const auto actual = fixture.Sprites();
   CHECK(actual.size() >= 3);
   CHECK(fixture.CountLabel(actual) == "X     2");
@@ -154,10 +156,10 @@ TEST_CASE("F02578 live shield waits for real row idle before accepting exit",
   fixture.Wait(inventory::UpdateLiveShieldDetails);
   VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inventory::UpdateLiveShieldDetails(0) == 0);
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 1);
   fixture.IdleRows();
   CHECK(inventory::UpdateLiveShieldDetails(0) == 0);
   CHECK(inventory::UpdateLiveShieldDetails(0) == 0);
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 2);
-  CHECK(Menu_Inventory_exitToBattle == 0);
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 2);
+  CHECK(VS::Menu::Inventory::exitToBattle == 0);
 }

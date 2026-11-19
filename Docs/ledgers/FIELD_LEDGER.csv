@@ -183,10 +183,10 @@ T00033.000,T00033,state,0,init,0,,,0,,Init,EquipmentDetailsState Init,med,declar
 T00033.001,T00033,state,1,wait,0,,,1,,Wait,EquipmentDetailsState Wait,med,declaration-only;source:items1.h:197
 T00033.002,T00033,state,2,manageInput,0,,,2,,ManageInput,EquipmentDetailsState ManageInput,med,declaration-only;source:items1.h:100
 T00033.003,T00033,state,3,returnMenuReady,0,,,3,,ReturnMenuReady,EquipmentDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
-T00034.000,T00034,state,0,init,0,,,0,,Init,EquipmentSlotMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00034.001,T00034,state,1,handleInput,0,,,1,,HandleInput,EquipmentSlotMenuState HandleInput,med,declaration-only;source:15AC.c:24
-T00034.002,T00034,state,2,loadObject,0,,,2,,LoadObject,EquipmentSlotMenuState LoadObject,med,declaration-only;source:16C.c:345
-T00034.003,T00034,state,3,waitMenuReady,0,,,3,,WaitMenuReady,EquipmentSlotMenuState WaitMenuReady,med,declaration-only;source:16C.c:345
+T00034.000,T00034,state,0,init,0,,,0,,kInit,EquipmentSlotMenuState Init,med,native:EquipmentMenus.hpp EquipmentSlotStep::kInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00034.001,T00034,state,1,handleInput,0,,,1,,kHandleInput,EquipmentSlotMenuState HandleInput,med,native:EquipmentMenus.hpp EquipmentSlotStep::kHandleInput (#441);declaration-only;source:15AC.c:24
+T00034.002,T00034,state,2,loadObject,0,,,2,,kLoadObject,EquipmentSlotMenuState LoadObject,med,native:EquipmentMenus.hpp EquipmentSlotStep::kLoadObject (#441);declaration-only;source:16C.c:345
+T00034.003,T00034,state,3,waitMenuReady,0,,,3,,kWaitMenuReady,EquipmentSlotMenuState WaitMenuReady,med,native:EquipmentMenus.hpp EquipmentSlotStep::kWaitMenuReady (#441);declaration-only;source:16C.c:345
 T00035.000,T00035,state,0,init,0,,,0,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00036.000,T00036,state,0,init,0,,,0,,Init,SpellListMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00036.001,T00036,state,1,handleInput,0,,,1,,HandleInput,SpellListMenuState HandleInput,med,declaration-only;source:15AC.c:24
@@ -286,11 +286,11 @@ T00052.000,T00052,state,0,init,0,,,0,,kInitialize,EquipmentDetailsState Init,med
 T00052.001,T00052,state,1,animate,0,,,1,,kAnimate,EquipmentDetailsState Animate,med,native:ContainerDetailControllers.hpp ControllerStage::kAnimate (#441);declaration-only;source:234.c:837
 T00052.002,T00052,state,2,handleInput,0,,,2,,kInput,EquipmentDetailsState HandleInput,med,native:ContainerDetailControllers.hpp ControllerStage::kInput (#441);declaration-only;source:15AC.c:24
 T00052.003,T00052,state,3,exit,0,,,3,,kReturn,EquipmentDetailsState Exit,med,native:ContainerDetailControllers.hpp ControllerStage::kReturn (#441);declaration-only;source:15AC.c:184
-T00053.000,T00053,state,0,init,0,,,0,,Init,MiscItemShortcutState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00053.001,T00053,state,1,waitTitle,0,,,1,,WaitTitle,MiscItemShortcutState WaitTitle,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00053.002,T00053,state,2,initItemRows,0,,,2,,InitItemRows,MiscItemShortcutState InitItemRows,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00053.003,T00053,state,3,waitForInput,0,,,3,,WaitForInput,MiscItemShortcutState WaitForInput,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00053.004,T00053,state,4,quit,0,,,4,,Quit,MiscItemShortcutState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.000,T00053,state,0,init,0,,,0,,kShortcutInitialize,MiscItemShortcutState Init,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutInitialize (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.001,T00053,state,1,waitTitle,0,,,1,,kShortcutWaitTitle,MiscItemShortcutState WaitTitle,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutWaitTitle (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.002,T00053,state,2,initItemRows,0,,,2,,kShortcutPopulate,MiscItemShortcutState InitItemRows,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutPopulate (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.003,T00053,state,3,waitForInput,0,,,3,,kShortcutInput,MiscItemShortcutState WaitForInput,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutInput (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00053.004,T00053,state,4,quit,0,,,4,,kShortcutClose,MiscItemShortcutState Quit,med,native:InventoryTerminal.cpp ShortcutStep::kShortcutClose (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00054.000,T00054,state,0,initTeleport,0,,,0,,InitTeleport,TeleportMenuState InitTeleport,med,declaration-only;source:15AC.c:24
 T00054.001,T00054,state,1,handleInput,0,,,1,,HandleInput,TeleportMenuState HandleInput,med,declaration-only;source:15AC.c:24
 T00054.002,T00054,state,2,returnIfReady,0,,,2,,ReturnIfReady,TeleportMenuState ReturnIfReady,med,declaration-only;source:15AC.c:24
@@ -371,19 +371,19 @@ T00066.005,T00066,state,5,processAction,0,,,9,,ProcessAction,ItemListState Proce
 T00066.006,T00066,state,6,search,0,,,10,,Search,ItemListState Search,med,declaration-only;source:items2.h:210
 T00066.007,T00066,state,7,discard,0,,,11,,Discard,ItemListState Discard,med,declaration-only;source:items2.h:211
 T00066.008,T00066,state,8,sort,0,,,12,,Sort,ItemListState Sort,med,declaration-only;source:items1.h:1079
-T00067.000,T00067,state,0,init,0,,,0,,Init,EquipmentMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00067.001,T00067,state,1,initMenu,0,,,1,,InitMenu,EquipmentMenuState InitMenu,med,declaration-only;source:16C.c:1056
-T00067.002,T00067,state,2,topMenu,0,,,2,,TopMenu,EquipmentMenuState TopMenu,med,declaration-only;source:16C.c:1056
-T00067.003,T00067,state,3,quit,0,,,3,,Quit,EquipmentMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00067.004,T00067,state,4,initEquipSubMenu,0,,,4,,InitEquipSubMenu,EquipmentMenuState InitEquipSubMenu,med,declaration-only;source:16C.c:1056
-T00067.005,T00067,state,5,equipSubMenu,0,,,5,,EquipSubMenu,EquipmentMenuState EquipSubMenu,med,declaration-only;source:16C.c:1056
-T00068.000,T00068,state,0,none,0,,,0,,None,InventoryMenuState None,med,declaration-only;source:15AC.c:169
-T00068.001,T00068,state,1,init,0,,,3,,Init,InventoryMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00068.002,T00068,state,2,loadItemNamesWait,0,,,4,,LoadItemNamesWait,InventoryMenuState LoadItemNamesWait,med,declaration-only;source:16C.c:1241
-T00068.003,T00068,state,3,itemsTop,0,,,5,,ItemsTop,InventoryMenuState ItemsTop,med,declaration-only;source:16C.c:1242
-T00068.004,T00068,state,4,equip,0,,,6,,Equip,InventoryMenuState Equip,med,declaration-only;source:16C.c:1243
-T00068.005,T00068,state,5,quit,0,,,9,,Quit,InventoryMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00068.006,T00068,state,6,quitToBattle,0,,,10,,QuitToBattle,InventoryMenuState QuitToBattle,med,declaration-only;source:16C.c:1245
+T00067.000,T00067,state,0,init,0,,,0,,kInit,EquipmentMenuState Init,med,native:EquipmentMenus.hpp EquipmentMenuStep::kInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00067.001,T00067,state,1,initMenu,0,,,1,,kInitMenu,EquipmentMenuState InitMenu,med,native:EquipmentMenus.hpp EquipmentMenuStep::kInitMenu (#441);declaration-only;source:16C.c:1056
+T00067.002,T00067,state,2,topMenu,0,,,2,,kTopMenu,EquipmentMenuState TopMenu,med,native:EquipmentMenus.hpp EquipmentMenuStep::kTopMenu (#441);declaration-only;source:16C.c:1056
+T00067.003,T00067,state,3,quit,0,,,3,,kQuit,EquipmentMenuState Quit,med,native:EquipmentMenus.hpp EquipmentMenuStep::kQuit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00067.004,T00067,state,4,initEquipSubMenu,0,,,4,,kInitSubMenu,EquipmentMenuState InitEquipSubMenu,med,native:EquipmentMenus.hpp EquipmentMenuStep::kInitSubMenu (#441);declaration-only;source:16C.c:1056
+T00067.005,T00067,state,5,equipSubMenu,0,,,5,,kSubMenu,EquipmentMenuState EquipSubMenu,med,native:EquipmentMenus.hpp EquipmentMenuStep::kSubMenu (#441);declaration-only;source:16C.c:1056
+T00068.000,T00068,state,0,none,0,,,0,,kScreenIdle,InventoryMenuState None,med,native:InventoryTerminal.cpp ScreenStep::kScreenIdle (#441);declaration-only;source:15AC.c:169
+T00068.001,T00068,state,1,init,0,,,3,,kScreenInitialize,InventoryMenuState Init,med,native:InventoryTerminal.cpp ScreenStep::kScreenInitialize (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00068.002,T00068,state,2,loadItemNamesWait,0,,,4,,kScreenWaitText,InventoryMenuState LoadItemNamesWait,med,native:InventoryTerminal.cpp ScreenStep::kScreenWaitText (#441);declaration-only;source:16C.c:1241
+T00068.003,T00068,state,3,itemsTop,0,,,5,,kScreenInventory,InventoryMenuState ItemsTop,med,native:InventoryTerminal.cpp ScreenStep::kScreenInventory (#441);declaration-only;source:16C.c:1242
+T00068.004,T00068,state,4,equip,0,,,6,,kScreenEquipment,InventoryMenuState Equip,med,native:InventoryTerminal.cpp ScreenStep::kScreenEquipment (#441);declaration-only;source:16C.c:1243
+T00068.005,T00068,state,5,quit,0,,,9,,kScreenCloseMenu,InventoryMenuState Quit,med,native:InventoryTerminal.cpp ScreenStep::kScreenCloseMenu (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00068.006,T00068,state,6,quitToBattle,0,,,10,,kScreenCloseBattle,InventoryMenuState QuitToBattle,med,native:InventoryTerminal.cpp ScreenStep::kScreenCloseBattle (#441);declaration-only;source:16C.c:1245
 T00069.000,T00069,state,0,menuLoaded,0,,,0,,MenuLoaded,ActorSwitchState MenuLoaded,med,declaration-only;source:120.c:582
 T00069.001,T00069,state,1,menuLoading,0,,,1,,MenuLoading,ActorSwitchState MenuLoading,med,declaration-only;source:120.c:583
 T00069.002,T00069,state,2,animateForward,0,,,2,,AnimateForward,ActorSwitchState AnimateForward,med,declaration-only;source:120.c:584

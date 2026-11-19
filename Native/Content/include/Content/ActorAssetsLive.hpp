@@ -50,8 +50,13 @@ int ReleaseLiveSequenceEffectTexture(int bank);
 
 // The battle asset queue's legacy globals. ActorAssetsLive.cpp defines them
 // and binds them to the typed loaders (ActorAssets.hpp); the battle start-up
-// (ModelRendering.cpp) still clears the parse flag directly.
+// (ModelRenderingLive.cpp) still clears the load step and parse flag directly.
 
+// decomp: vs_battle_loadObjectDataState
+// (src/BATTLE/BATTLE.PRG/objectData.h:19): the step of the menus' object-data
+// reloads (MENU3.PRG _loadObjectData, the MENUC.PRG and MENU9.PRG model
+// previews).
+extern std::uint8_t objectDataLoadStep;
 // decomp: D_800E8F29 (BATTLE/BATTLE.PRG 30DB0.c): the parse phase of the
 // model being parsed; 1 while its primitives wait for the second frame.
 extern unsigned char modelParseResetFlag;

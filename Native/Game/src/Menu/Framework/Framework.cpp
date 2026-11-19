@@ -3099,7 +3099,7 @@ void UpdateAndDrawRows(Context& ctx) {
   }
 }
 namespace {
-// Menu_Inventory_ashleyRenderState: the preview slides in (2) and then
+// VS::Menu::Inventory::ashleyRenderState: the preview slides in (2) and then
 // holds (0), or slides out (1) or drops away (3).
 constexpr std::int32_t kPreviewShown = 0;
 constexpr std::int32_t kPreviewLeaving = 1;

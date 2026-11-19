@@ -14,7 +14,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/DetailsPolicies.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Sounds.hpp"
 
@@ -79,13 +79,15 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
     return Framework::LiveMenuRow(row.index);
   }
   void SetPreviewLayout(PreviewLayout layout) override {
-    Menu_Inventory_ashleyRenderState = static_cast<int>(layout);
+    VS::Menu::Inventory::ashleyRenderState = static_cast<int>(layout);
   }
   void SetCategoryVisibility(std::uint8_t visibility) override {
-    Menu_Inventory_itemCategoryIconsEnabled = static_cast<char>(visibility);
+    VS::Menu::Inventory::itemCategoryIconsEnabled =
+        static_cast<std::uint8_t>(visibility);
   }
   void SetCommandVisibility(std::uint8_t visibility) override {
-    Menu_Inventory_statusCommandState = static_cast<char>(visibility);
+    VS::Menu::Inventory::statusCommandState =
+        static_cast<std::uint8_t>(visibility);
   }
   void ContinueTransition(DetailRowId row) override {
     RequireRow(row);
@@ -104,10 +106,11 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
     Framework::FlyOutLiveRowLeft(-1);
   }
   void SetHeaderPlacement(CategoryHeaderPlacement placement) override {
-    Menu_Inventory_selectedItemCategoryIconOnTop = static_cast<char>(placement);
+    VS::Menu::Inventory::selectedItemCategoryIconOnTop =
+        static_cast<std::uint8_t>(placement);
   }
   void SetBattleReturnIntent(BattleReturnIntent intent) override {
-    Menu_Inventory_exitToBattle =
+    VS::Menu::Inventory::exitToBattle =
         intent == BattleReturnIntent::kBattle ? Input::Triangle : 0;
   }
   void HideDpPpBars() override {
@@ -128,11 +131,12 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
 void SetLivePanelVisibility(char visibility) {
   PanelVisibility panels;
   SetPanelVisibility(panels, static_cast<std::uint8_t>(visibility));
-  Menu_Inventory_secondaryTitleEnabled =
-      static_cast<char>(panels.secondary_title);
-  Menu_Inventory_itemCategoryIconsEnabled =
-      static_cast<char>(panels.category_icons);
-  Menu_Inventory_statusCommandState = static_cast<char>(panels.status_command);
+  VS::Menu::Inventory::secondaryTitleEnabled =
+      static_cast<std::uint8_t>(panels.secondary_title);
+  VS::Menu::Inventory::itemCategoryIconsEnabled =
+      static_cast<std::uint8_t>(panels.category_icons);
+  VS::Menu::Inventory::statusCommandState =
+      static_cast<std::uint8_t>(panels.status_command);
 }
 
 // decomp: _itemPaging (src/MENU/items0.h:15-41).

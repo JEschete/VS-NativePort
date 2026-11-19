@@ -14,7 +14,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 
 namespace {
@@ -32,13 +32,15 @@ struct LiveFixture {
   int previous_repeat = VS::Input::buttonRepeat;
   decltype(VS::Input::buttonsPressed) previous_pressed =
       VS::Input::buttonsPressed;
-  int previous_preview = Menu_Inventory_ashleyRenderState;
-  int previous_y = Menu_Inventory_ashleyYOffset;
-  int previous_return = Menu_Inventory_exitToBattle;
-  char previous_title = Menu_Inventory_secondaryTitleEnabled;
-  char previous_categories = Menu_Inventory_itemCategoryIconsEnabled;
-  char previous_command = Menu_Inventory_statusCommandState;
-  char previous_header = Menu_Inventory_selectedItemCategoryIconOnTop;
+  int previous_preview = VS::Menu::Inventory::ashleyRenderState;
+  int previous_y = VS::Menu::Inventory::ashleyYOffset;
+  int previous_return = VS::Menu::Inventory::exitToBattle;
+  std::uint8_t previous_title = VS::Menu::Inventory::secondaryTitleEnabled;
+  std::uint8_t previous_categories =
+      VS::Menu::Inventory::itemCategoryIconsEnabled;
+  std::uint8_t previous_command = VS::Menu::Inventory::statusCommandState;
+  std::uint8_t previous_header =
+      VS::Menu::Inventory::selectedItemCategoryIconOnTop;
   char previous_pages = VS::Menu::Framework::enabledStatPages;
   char previous_page = VS::Menu::Framework::itemStatPage;
   std::array<u_char*, kIndexedCategories> previous_orders{};
@@ -54,11 +56,11 @@ struct LiveFixture {
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
     VS::Input::buttonsPressed = 0;
-    Menu_Inventory_ashleyRenderState = 0;
-    Menu_Inventory_ashleyYOffset = 5;
-    Menu_Inventory_secondaryTitleEnabled = 7;
-    Menu_Inventory_itemCategoryIconsEnabled = 8;
-    Menu_Inventory_statusCommandState = 9;
+    VS::Menu::Inventory::ashleyRenderState = 0;
+    VS::Menu::Inventory::ashleyYOffset = 5;
+    VS::Menu::Inventory::secondaryTitleEnabled = 7;
+    VS::Menu::Inventory::itemCategoryIconsEnabled = 8;
+    VS::Menu::Inventory::statusCommandState = 9;
     fw::ResetLiveEquipmentDetailsStatics();
   }
 
@@ -69,13 +71,13 @@ struct LiveFixture {
     VS::Input::buttonsState = previous_held;
     VS::Input::buttonRepeat = previous_repeat;
     VS::Input::buttonsPressed = previous_pressed;
-    Menu_Inventory_ashleyRenderState = previous_preview;
-    Menu_Inventory_ashleyYOffset = previous_y;
-    Menu_Inventory_exitToBattle = previous_return;
-    Menu_Inventory_secondaryTitleEnabled = previous_title;
-    Menu_Inventory_itemCategoryIconsEnabled = previous_categories;
-    Menu_Inventory_statusCommandState = previous_command;
-    Menu_Inventory_selectedItemCategoryIconOnTop = previous_header;
+    VS::Menu::Inventory::ashleyRenderState = previous_preview;
+    VS::Menu::Inventory::ashleyYOffset = previous_y;
+    VS::Menu::Inventory::exitToBattle = previous_return;
+    VS::Menu::Inventory::secondaryTitleEnabled = previous_title;
+    VS::Menu::Inventory::itemCategoryIconsEnabled = previous_categories;
+    VS::Menu::Inventory::statusCommandState = previous_command;
+    VS::Menu::Inventory::selectedItemCategoryIconOnTop = previous_header;
     fw::ResetLiveEquipmentDetailsStatics();
     VS::Menu::Framework::enabledStatPages = previous_pages;
     VS::Menu::Framework::itemStatPage = previous_page;
@@ -97,12 +99,10 @@ TEST_CASE("F02566 live panels need no row or actor owner",
   LiveFixture fixture;
   VS::Menu::Framework::menuItems = nullptr;
   inventory::SetLivePanelVisibility(static_cast<char>(0xFF));
-  CHECK(static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleEnabled) ==
-        0xFF);
-  CHECK(static_cast<std::uint8_t>(Menu_Inventory_itemCategoryIconsEnabled) ==
-        0xFF);
-  CHECK(static_cast<std::uint8_t>(Menu_Inventory_statusCommandState) == 0xFF);
-  CHECK(Menu_Inventory_ashleyYOffset == 5);
+  CHECK(VS::Menu::Inventory::secondaryTitleEnabled == 0xFF);
+  CHECK(VS::Menu::Inventory::itemCategoryIconsEnabled == 0xFF);
+  CHECK(VS::Menu::Inventory::statusCommandState == 0xFF);
+  CHECK(VS::Menu::Inventory::ashleyYOffset == 5);
 }
 
 TEST_CASE("F02567 live paging uses the production inventory count lazily",
@@ -141,11 +141,11 @@ TEST_CASE("F02571 live layout uses real transition and stat page helpers",
           "[inventory-detail-helpers-live][F02571]") {
   LiveFixture fixture;
   inventory::InitializeLiveDetailsLayout(kSelectedRow, 7);
-  CHECK(Menu_Inventory_ashleyRenderState == 1);
-  CHECK(Menu_Inventory_ashleyYOffset == 5);
-  CHECK(Menu_Inventory_secondaryTitleEnabled == 7);
-  CHECK(Menu_Inventory_itemCategoryIconsEnabled == 0);
-  CHECK(Menu_Inventory_statusCommandState == 0);
+  CHECK(VS::Menu::Inventory::ashleyRenderState == 1);
+  CHECK(VS::Menu::Inventory::ashleyYOffset == 5);
+  CHECK(VS::Menu::Inventory::secondaryTitleEnabled == 7);
+  CHECK(VS::Menu::Inventory::itemCategoryIconsEnabled == 0);
+  CHECK(VS::Menu::Inventory::statusCommandState == 0);
   CHECK(fixture.rows[31].w == 164);
   CHECK(fixture.rows[31].target0 == 16);
   CHECK(fixture.rows[kSelectedRow].target0 == 18);
@@ -179,9 +179,10 @@ TEST_CASE("F02574 live close integrates rows and retains the source exit mask",
   inventory::ExitLiveDetailsView(1);
   CHECK(fixture.rows[31].state == fw::RowState::kDismiss);
   CHECK(fixture.rows[31].target0 == -164);
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 2);
-  CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 2);
+  CHECK(VS::Menu::Inventory::exitToBattle ==
+        static_cast<int>(VS::Input::Triangle));
   VS::Input::buttonsPressed = VS::Input::Circle;
   inventory::ExitLiveDetailsView(0);
-  CHECK(Menu_Inventory_exitToBattle == 0);
+  CHECK(VS::Menu::Inventory::exitToBattle == 0);
 }

@@ -377,7 +377,7 @@ H0375,header,Native/Game/src/Menu/Framework/MenuMemory.h,generated,yes,pragma-on
 H0376,header,Native/Game/src/Menu/Framework/MenuRows.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,"deleted: Menu_Framework_ItemText duplicated VS::Menu::Framework::ItemText in Menu/Framework/Framework.hpp, which now asserts the record's 0x80 layout; TYPE T00313 re-pointed (#441)"
 H0377,header,Native/Game/src/Menu/Framework/Menus.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0378,header,Native/Game/src/Menu/Framework/TextBoxes.h,generated,yes,pragma-once,0,0,0,0,0,0,7,0,0,remaining,
-H0379,header,Native/Game/src/Menu/Inventory/Inventory.h,generated,yes,pragma-once,0,0,0,0,0,0,22,0,0,remaining,
+H0379,header,Native/Game/src/Menu/Inventory/Inventory.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0380,header,Native/Game/src/Menu/Inventory/ItemDetailLiveSupport.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0381,header,Native/Game/src/Menu/Inventory/ItemList.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0382,header,Native/Game/src/Menu/Legacy.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: the __unused_vertices__ table G00000 has no reader in the original or native code (#441)

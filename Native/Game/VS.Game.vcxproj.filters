@@ -2607,7 +2607,7 @@
     <ClCompile Include="src\Menu\Inventory\Inventory.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Inventory\Inventory.h">
+    <ClInclude Include="src\Menu\Inventory\Inventory.hpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Inventory\InventorySorting.cpp">

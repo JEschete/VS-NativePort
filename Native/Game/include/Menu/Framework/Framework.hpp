@@ -456,7 +456,8 @@ struct StoryFlags {
   std::int32_t game_over = 0;
 };
 
-// Menu_Inventory_ashleyYOffset and Menu_Inventory_ashleyRenderState.
+// VS::Menu::Inventory::ashleyYOffset and
+// VS::Menu::Inventory::ashleyRenderState.
 struct AshleyPreviewState {
   std::int32_t y_offset = 0;
   std::int32_t render_state = 0;

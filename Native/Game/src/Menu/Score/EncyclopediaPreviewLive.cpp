@@ -27,7 +27,6 @@
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 
@@ -93,11 +92,11 @@ T* Pointer(AssetAddress address) {
 class LiveEnemyPreviewHost final : public EnemyPreviewHost {
  public:
   [[nodiscard]] std::uint8_t LoadStep() const override {
-    return static_cast<std::uint8_t>(Menu_Inventory_equipmentModelLoadStep);
+    return VS::Content::objectDataLoadStep;
   }
 
   void SetLoadStep(std::uint8_t step) override {
-    Menu_Inventory_equipmentModelLoadStep = static_cast<char>(step);
+    VS::Content::objectDataLoadStep = step;
   }
 
   [[nodiscard]] EnemyPreviewFile File(int zud_id) const override {

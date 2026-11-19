@@ -30,6 +30,7 @@
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/FixedPoint.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/Package.h"
@@ -122,7 +123,7 @@
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Magic.h"
 #include "Menu/Manual.h"
 #include "Menu/Map.h"
@@ -310,10 +311,10 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &Content_legacyMaterialModelSequenceSectorCounts,
      sizeof Content_legacyMaterialModelSequenceSectorCounts},  // G00062
                                                                // D_800E8EFC
-    {"BATTLE/BATTLE.PRG", 0x80728, sizeof Menu_Inventory_equipmentModelLoadStep,
-     &Menu_Inventory_equipmentModelLoadStep,
-     sizeof Menu_Inventory_equipmentModelLoadStep},  // G00063
-                                                     // vs_battle_loadObjectDataState
+    {"BATTLE/BATTLE.PRG", 0x80728, sizeof VS::Content::objectDataLoadStep,
+     &VS::Content::objectDataLoadStep,
+     sizeof VS::Content::objectDataLoadStep},  // G00063
+                                               // vs_battle_loadObjectDataState
     {"BATTLE/BATTLE.PRG", 0x8072A, sizeof Content_legacyModelLoadPhase,
      &Content_legacyModelLoadPhase,
      sizeof Content_legacyModelLoadPhase},  // G00065 _loadShpState
@@ -1274,8 +1275,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &Menu_BattleAbilities_battleAbilityMenuStrings,
      sizeof Menu_BattleAbilities_battleAbilityMenuStrings},  // G01024
                                                              // _battleAbilityMenuStrings
-    {"MENU/MENU3.PRG", 0x6BB8, 944u, &Menu_Inventory_menuText,
-     sizeof Menu_Inventory_menuText},  // G01068 _menuText
+    {"MENU/MENU3.PRG", 0x6BB8, 944u, &VS::Menu::Inventory::menuText,
+     sizeof VS::Menu::Inventory::menuText},  // G01068 _menuText
     {"MENU/MENU4.PRG", 0x4C48, 3520u, &Menu_Status_statusStrings,
      sizeof Menu_Status_statusStrings},  // G01183 _statusStrings
     {"MENU/MENU5.PRG", 0x5BFC, 564u, &Menu_Map_mapNames,

@@ -54,6 +54,9 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/Textures.hpp"
 
+// decomp: vs_battle_loadObjectDataState
+// (vs_battle_loadObjectDataState@BATTLE/BATTLE.PRG)
+std::uint8_t VS::Content::objectDataLoadStep;
 // decomp: D_800E8F29 (D_800E8F29@BATTLE/BATTLE.PRG)
 unsigned char VS::Content::modelParseResetFlag;
 // decomp: D_800E8FC4 (D_800E8FC4@BATTLE/BATTLE.PRG)

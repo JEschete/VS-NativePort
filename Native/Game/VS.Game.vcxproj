@@ -2467,7 +2467,7 @@
     <ClInclude Include="src\Menu\Framework\Menus.hpp" />
     <ClInclude Include="src\Menu\Framework\SortingKeysLive.hpp" />
     <ClInclude Include="src\Menu\Framework\TextBoxes.h" />
-    <ClInclude Include="src\Menu\Inventory\Inventory.h" />
+    <ClInclude Include="src\Menu\Inventory\Inventory.hpp" />
     <ClInclude Include="src\Menu\Inventory\ItemDetailLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Inventory\ItemList.hpp" />
     <ClInclude Include="src\Menu\Loot\LootScreen.hpp" />

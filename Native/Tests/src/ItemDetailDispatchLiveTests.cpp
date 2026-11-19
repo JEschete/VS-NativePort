@@ -3,6 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Input/Pad.hpp"
+#include "Menu/Inventory/Inventory.hpp"
 #include "Menu/ItemDetailDispatchLiveFixture.hpp"
 
 namespace {
@@ -114,7 +115,7 @@ TEST_CASE("F02581 packed list selection enters the real gem controller",
   CHECK(inv::UpdateLiveItemDetails(kGemDispatchEntry) == 0);
   CHECK(fixture.rows[31].item_page == 1);
   CHECK(VS::Menu::Framework::selectedStatusViewElement == 9);
-  CHECK(Menu_Inventory_exitToBattle == 0);
+  CHECK(VS::Menu::Inventory::exitToBattle == 0);
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 48);
@@ -161,10 +162,10 @@ TEST_CASE("F02581 normal close restores list commands and Ashley presentation",
   VS::Input::buttonsPressed = 0;
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == 1);
-  CHECK(Menu_Inventory_itemCategoryIconsEnabled == 1);
-  CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 0);
-  CHECK(Menu_Inventory_statusCommandState == 1);
-  CHECK(Menu_Inventory_ashleyRenderState == 0);
+  CHECK(VS::Menu::Inventory::itemCategoryIconsEnabled == 1);
+  CHECK(VS::Menu::Inventory::selectedItemCategoryIconOnTop == 0);
+  CHECK(VS::Menu::Inventory::statusCommandState == 1);
+  CHECK(VS::Menu::Inventory::ashleyRenderState == 0);
 }
 
 TEST_CASE("F02581 battle close consumes the actual triangle return intent",
@@ -180,5 +181,6 @@ TEST_CASE("F02581 battle close consumes the actual triangle return intent",
   VS::Input::buttonsPressed = 0;
   fixture.IdleRows();
   CHECK(inv::UpdateLiveItemDetails(0) == -2);
-  CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));
+  CHECK(VS::Menu::Inventory::exitToBattle ==
+        static_cast<int>(VS::Input::Triangle));
 }

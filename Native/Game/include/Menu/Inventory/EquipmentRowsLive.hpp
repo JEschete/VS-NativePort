@@ -6,7 +6,7 @@
 #include "Legacy/Psx.h"
 
 // Bindings from the equipment choice list and preview model reload
-// (EquipmentRows.hpp) to MENU3.PRG's list globals (Inventory.h), the game
+// (EquipmentRows.hpp) to MENU3.PRG's list globals (Inventory.hpp), the game
 // heap, the menu rows, the controller, the equipment stat panel, the preview
 // actor and the asset queue, keeping the original call shapes. A row count
 // outside the list's capacity, a list text outside a live game heap payload,

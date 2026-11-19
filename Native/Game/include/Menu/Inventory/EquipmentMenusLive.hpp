@@ -6,7 +6,7 @@
 #include "Menu/Inventory/EquipmentMenus.hpp"
 
 // Bindings from the equipment menu (EquipmentMenus.hpp) to Ashley's
-// inventory, MENU3.PRG's globals (Inventory.h), the menu rows, the equipment
+// inventory, MENU3.PRG's globals (Inventory.hpp), the menu rows, the equipment
 // stat panels, the choice list (EquipmentRowsLive.hpp) and Ashley's
 // equipment, keeping the original call shapes. Each entry keeps its menu's
 // statics here. A count, listed slot or chosen item outside its inventory

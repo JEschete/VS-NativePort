@@ -264,6 +264,10 @@ class LedgerTests(unittest.TestCase):
         rows = ledger(self.workspace)
         self.assertEqual(rows["Native/Game/src/Menu/Map.h"]["status"], "retired")
         self.assertNotIn("Native/Game/src/Menu/Map.hpp", rows)
+        # The deleted header must also leave the copier manifest, which check_leftovers.py reads (#468).
+        self.assertEqual(rules(self.workspace), ["manifest-stale"])
+        del self.fixture.manifest["Native/Game/src/Menu/Map.h"]
+        self.fixture.write()
         self.assertEqual(rules(self.workspace), [])
 
     def test_an_edited_tracker_block_is_stale(self) -> None:

@@ -30,7 +30,6 @@
 #include "LegacyFiles.h"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteTimesLiveFixture.hpp"
-#include "Menu/Inventory/Inventory.h"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
@@ -525,7 +524,7 @@ struct LivePreviewFixture {
   std::array<Content_DiscQueueSlot, 32> saved_slots{};
   Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
   std::array<Content_ActorAssetRequest, 16> saved_requests{};
-  char saved_step = Menu_Inventory_equipmentModelLoadStep;
+  std::uint8_t saved_step = VS::Content::objectDataLoadStep;
   score::EnemyPreviewState saved_state = score::LiveEnemyPreviewState();
 
   LivePreviewFixture() {
@@ -537,7 +536,7 @@ struct LivePreviewFixture {
                 saved_requests.begin());
     std::fill_n(Content_legacyActorAssetRequests, saved_requests.size(),
                 Content_ActorAssetRequest{});
-    Menu_Inventory_equipmentModelLoadStep = 0;
+    VS::Content::objectDataLoadStep = 0;
     score::ResetLiveEnemyPreview();
   }
   ~LivePreviewFixture() {
@@ -546,7 +545,7 @@ struct LivePreviewFixture {
     Content_discRequestCounts = saved_counts;
     std::copy(saved_requests.begin(), saved_requests.end(),
               Content_legacyActorAssetRequests);
-    Menu_Inventory_equipmentModelLoadStep = saved_step;
+    VS::Content::objectDataLoadStep = saved_step;
     score::LiveEnemyPreviewState() = saved_state;
   }
   LivePreviewFixture(const LivePreviewFixture&) = delete;
@@ -587,7 +586,7 @@ void CheckColdPreviewRelease(const score::EnemyPreviewState& before,
           .has_value());
   CHECK(VS::Content::LiveDiscRequestGeneration(Pointer<Content_DiscQueueSlot>(
             before.read)) == expected_read_generation);
-  CHECK(Menu_Inventory_equipmentModelLoadStep == 0);
+  CHECK(VS::Content::objectDataLoadStep == 0);
 }
 
 void DiscardUnparsedPreview(const score::EnemyPreviewState& before,
@@ -608,7 +607,7 @@ void DiscardUnparsedPreview(const score::EnemyPreviewState& before,
     VS::Core::Memory::FreeLiveFromHighEnd(model);
   }
   score::ResetLiveEnemyPreview();
-  Menu_Inventory_equipmentModelLoadStep = 0;
+  VS::Content::objectDataLoadStep = 0;
 }
 
 struct PreviewLifecycleFixture : LivePreviewFixture {
@@ -777,7 +776,7 @@ TEST_CASE("Live enemy preview releases the read after queueing parts",
           "[encyclopedia-preview][encyclopedia-preview-live]") {
   LivePreviewFixture fixture;
   REQUIRE(score::LoadLiveEnemyPreview(31) == 1);
-  CHECK(Menu_Inventory_equipmentModelLoadStep == 1);
+  CHECK(VS::Content::objectDataLoadStep == 1);
   const score::EnemyPreviewState& state = score::LiveEnemyPreviewState();
   REQUIRE(state.read != AssetAddress::kNone);
   REQUIRE(state.file_bytes >= 0x200);
@@ -979,9 +978,9 @@ TEST_CASE("Preview cleanup preserves reused disc slots and empty foreign loads",
   CHECK(VS::Content::LiveDiscRequestGeneration(foreign) == generation);
   CHECK_FALSE(
       VS::Core::Memory::LivePayloadCapacity(Pointer(before.file)).has_value());
-  Menu_Inventory_equipmentModelLoadStep = 7;
+  VS::Content::objectDataLoadStep = 7;
   REQUIRE(score::CleanupLiveEnemyPreviewOwnedState());
-  CHECK(Menu_Inventory_equipmentModelLoadStep == 7);
+  CHECK(VS::Content::objectDataLoadStep == 7);
   VS::Content::ReleaseLiveDiscRequest(foreign);
 }
 

@@ -49,7 +49,7 @@
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Inventory/Inventory.h"
+#include "Menu/Inventory/ItemListRows.hpp"
 #include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Magic.h"
 #include "State/ScriptFlagsLive.hpp"
@@ -207,15 +207,20 @@ void InspectActionOptions(PlayerObservationState& state) {
 void InspectItemOptions(PlayerObservationState& state) {
   const auto* player = Battle_actors[0];
   if (player == nullptr || player->stats == nullptr) return;
-  constexpr int kFirstItem = 323, kLastUsableItem = 457;
+  constexpr int kFirstItem = 323;
   constexpr unsigned kFirstRankedSpell = 106, kRankedSpellCount = 28;
   constexpr unsigned kRanks = 3;
+  const auto& action_map = VS::Menu::Inventory::kMiscItemToActionMap;
   // MENU/Inventory.c item shortcut uses this map without granting a spell.
+  // Ids past the map (upstream's bronzeKey guard admits 457) get no option,
+  // like the native shortcut and item-list refusals (#467).
   for (const auto& item : state.items) {
-    if (item.id < kFirstItem || item.id > kLastUsableItem || item.count <= 0) {
+    if (item.id < kFirstItem || item.count <= 0 ||
+        static_cast<std::size_t>(item.id - kFirstItem) >= action_map.size()) {
       continue;
     }
-    unsigned action = Menu_Inventory_miscItemToActionMap[item.id - kFirstItem];
+    unsigned action =
+        action_map[static_cast<std::size_t>(item.id - kFirstItem)];
     if (action - kFirstRankedSpell < kRankedSpellCount) {
       for (unsigned rank = 0; rank < kRanks; ++rank) {
         if (Battle_actionDefinitions[action].unlocked) ++action;
