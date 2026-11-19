@@ -77,6 +77,9 @@ FORWARD_CALL = re.compile(
 LOCAL_TYPE = re.compile(r"\b(?:class|struct)\s+([A-Za-z_]\w*)\s*(?:final\s*)?(?::[^;{}()]*)?\{")
 # A body that only logs (Core/Log.hpp) implements the function; it forwards no behavior.
 LOGGING_CALL = re.compile(r"^Log(?:Trace|Debug|Info|Warn|Error)$")
+# tools\naming\trace_queue.py CITATION; that module loads libclang, so it is not imported. Its refresh only updates
+# a citation that starts the notes (#471).
+NATIVE_CITATION = re.compile(r"native-refs:(?P<use>[\w-]+);source:native:[^;]+:\d+")
 
 
 @dataclass(frozen=True)
@@ -125,6 +128,7 @@ class Workspace:
         self.catalog = ledgers / "FUNCTION_CATALOG.csv"
         self.data_ledger = ledgers / "DATA_LEDGER.csv"
         self.type_ledger = ledgers / "TYPE_LEDGER.csv"
+        self.field_ledger = ledgers / "FIELD_LEDGER.csv"
         self.promotion = ledgers / "CPP_PROMOTION.csv"
         self.verify = ledgers / "VERIFY_LEDGER.csv"
         self.bridges = ledgers / "EC_BRIDGES.csv"
@@ -573,13 +577,32 @@ class Gates:
                 report.add("ownership", "unregistered-row-in-owned-file", identifier,
                            f"{row['final_location']} is owned but the row is neither registered nor retired")
         report.ownership_counts = dict(sorted(Counter(report.ownership_states.values()).items()))
-        for ledger in (self.workspace.data_ledger, self.workspace.type_ledger):
-            for row in read_csv(ledger) if ledger.is_file() else []:
-                if row.get("copied") == "retired" and "retired-by:" not in row.get("notes", ""):
-                    report.add("ownership", "retired-without-evidence", row["id"],
-                               "a retired data or type row requires a retired-by: note")
+        data_rows, type_rows = read_csv(self.workspace.data_ledger), read_csv(self.workspace.type_ledger)
+        for row in (*data_rows, *type_rows):
+            if row.get("copied") == "retired" and "retired-by:" not in row.get("notes", ""):
+                report.add("ownership", "retired-without-evidence", row["id"],
+                           "a retired data or type row requires a retired-by: note")
+        self.ledger_references(data_rows, type_rows)
         for column in ("copied", "compiles", "named", "understood", "modernized", "cpp", "verified"):
             report.status_counts[column] = dict(sorted(Counter(row.get(column, "") for row in self.catalog).items()))
+
+    def ledger_references(self, data_rows: list[dict[str, str]], type_rows: list[dict[str, str]]) -> None:
+        """A live type row names an existing file, and a native finding leads its row's notes (#471). Retired rows
+        keep the location and evidence they were retired with."""
+        report = self.report
+        retired_types = {row["id"] for row in type_rows if row.get("copied") == "retired"}
+        for row in type_rows:
+            location = row.get("final_location", "")
+            if row.get("copied") != "retired" and location and not (self.workspace.root / slash(location)).is_file():
+                report.add("ownership", "type-location-missing", row["id"],
+                           f"final_location {location!r} does not exist; point the row at its native type or retire it")
+        cited = [(row, row.get("type_id") in retired_types) for row in read_csv(self.workspace.field_ledger)]
+        cited += [(row, row.get("copied") == "retired") for row in data_rows]
+        for row, retired in cited:
+            match = NATIVE_CITATION.search(row.get("notes", ""))
+            if match and match.start() and not retired:
+                report.add("ownership", "native-citation-not-leading", row["id"],
+                           f"{match[0]!r} must start the notes, where trace_queue.py refreshes it")
 
     def ledger_row(self, identifier: str) -> dict[str, str] | None:
         if identifier.startswith("F"):

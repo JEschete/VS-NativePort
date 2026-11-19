@@ -86,7 +86,18 @@ class Fixture:
         self.verify: list[dict[str, str]] = []
         self.slices: list[dict[str, str]] = []
         self.data = [{"id": "G00001", "copied": "retired", "notes": "retired-by:VS::Sys::Thing"}]
-        self.types = [{"id": "T00001", "copied": "retired", "notes": "retired-by:VS::Sys::Thing"}]
+        # A retired row keeps the location and evidence it was retired with.
+        self.types = [
+            {"id": "T00001", "copied": "retired", "final_location": r"Native\Game\src\Sys\Gone.h",
+             "notes": "retired-by:VS::Sys::Thing"},
+            {"id": "T00002", "copied": "", "final_location": r"Native\Game\src\Sys\Thing.hpp", "notes": ""},
+        ]
+        self.fields = [
+            {"id": "T00001.000", "type_id": "T00001",
+             "notes": r"native:Gone.h;native-refs:none;source:native:Native\Game\src\Sys\Gone.h:3"},
+            {"id": "T00002.000", "type_id": "T00002",
+             "notes": r"native-refs:none;source:native:Native\Game\src\Sys\Thing.hpp:1;native:Thing.hpp Thing::spare"},
+        ]
         self.bridges = [
             {"ec": "EC-03", "path": "Native/Engine/include/Core/Gte.h", "kind": "header"},
             {"ec": "EC-03", "path": "Native/Engine/src/Core/Gte.cpp", "kind": "source"},
@@ -136,7 +147,8 @@ class Fixture:
         write_csv(self.root / "Docs/ledgers/VERIFY_LEDGER.csv", gates.VERIFY_FIELDS, self.verify)
         write_csv(self.root / "Docs/ledgers/GATE_SLICES.csv", gates.SLICE_FIELDS, self.slices)
         write_csv(self.root / "Docs/ledgers/DATA_LEDGER.csv", ["id", "copied", "notes"], self.data)
-        write_csv(self.root / "Docs/ledgers/TYPE_LEDGER.csv", ["id", "copied", "notes"], self.types)
+        write_csv(self.root / "Docs/ledgers/TYPE_LEDGER.csv", ["id", "copied", "final_location", "notes"], self.types)
+        write_csv(self.root / "Docs/ledgers/FIELD_LEDGER.csv", ["id", "type_id", "notes"], self.fields)
         write_csv(self.root / "Docs/ledgers/EC_BRIDGES.csv", gates.BRIDGE_FIELDS, self.bridges)
         manifest = self.root / "tools/port/copy_manifest.json"
         manifest.write_text(json.dumps(self.manifest), encoding="utf-8")
@@ -273,6 +285,22 @@ class OwnershipGateTests(GateTestCase):
                 self.assertIn("retired-without-evidence", self.rules("ownership"))
                 ledger[0]["notes"] = "retired-by:VS::Sys::Thing"
 
+    def test_live_type_row_must_name_an_existing_file(self) -> None:
+        self.assertNotIn("type-location-missing", self.rules("ownership"))
+        self.fixture.types[1]["final_location"] = r"Native\Game\src\Sys\Thing.h"
+        self.assertIn("type-location-missing", self.rules("ownership"))
+
+    def test_native_citation_must_lead_a_live_row(self) -> None:
+        self.assertNotIn("native-citation-not-leading", self.rules("ownership"))
+        citation = r"native-refs:write-only;source:native:Native\Game\src\Sys\Thing.cpp:2"
+        self.fixture.data.append({"id": "G00002", "copied": "x", "notes": citation})
+        self.assertNotIn("native-citation-not-leading", self.rules("ownership"))
+        for ledger in (self.fixture.fields, self.fixture.data):
+            with self.subTest(row=ledger[-1]["id"]):
+                notes = ledger[-1]["notes"]
+                ledger[-1]["notes"] = f"native:Thing.hpp;{notes}"
+                self.assertIn("native-citation-not-leading", self.rules("ownership"))
+                ledger[-1]["notes"] = notes
     def test_retired_row_in_an_owned_file_is_not_missing_ownership(self) -> None:
         self.assertNotIn("unregistered-row-in-owned-file", self.rules("ownership"))
 

@@ -31,11 +31,11 @@ T00008.002,T00008,actionTypes,2,actionTypeBreakArt,0,,,3,,BreakArt,ActionType Br
 T00008.003,T00008,actionTypes,3,actionTypeItem,0,,,5,,Item,ActionType Item,med,declaration-only;source:main.h:55
 T00008.004,T00008,actionTypes,4,actionTypeBaseAttack,0,,,6,,BaseAttack,ActionType BaseAttack,med,declaration-only;source:main.h:56
 T00008.005,T00008,actionTypes,5,actionTypeTrap,0,,,7,,Trap,ActionType Trap,med,declaration-only;source:main.h:57
-T00009.000,T00009,actions,0,useItem,0,,,1,,UseItem,ItemAction UseItem,med,declaration-only;source:items2.h:216
-T00009.001,T00009,actions,1,searchItem,0,,,2,,SearchItem,ItemAction SearchItem,med,declaration-only;source:items2.h:217
-T00009.002,T00009,actions,2,discardItem,0,,,3,,DiscardItem,ItemAction DiscardItem,med,declaration-only;source:items2.h:218
-T00009.003,T00009,actions,3,discardAllItems,0,,,4,,DiscardAllItems,ItemAction DiscardAllItems,med,declaration-only;source:items2.h:219
-T00009.004,T00009,actions,4,sortItems,0,,,5,,SortItems,ItemAction SortItems,med,declaration-only;source:items2.h:220
+T00009.000,T00009,actions,0,useItem,0,,,1,,kUse,ItemAction UseItem,med,native:InventoryTerminal.hpp InventoryAction::kUse (#471);declaration-only;source:items2.h:216
+T00009.001,T00009,actions,1,searchItem,0,,,2,,kSearch,ItemAction SearchItem,med,native:InventoryTerminal.hpp InventoryAction::kSearch (#471);declaration-only;source:items2.h:217
+T00009.002,T00009,actions,2,discardItem,0,,,3,,kDiscard,ItemAction DiscardItem,med,native:InventoryTerminal.hpp InventoryAction::kDiscard (#471);declaration-only;source:items2.h:218
+T00009.003,T00009,actions,3,discardAllItems,0,,,4,,kDiscardAll,ItemAction DiscardAllItems,med,native:InventoryTerminal.hpp InventoryAction::kDiscardAll (#471);declaration-only;source:items2.h:219
+T00009.004,T00009,actions,4,sortItems,0,,,5,,kSort,ItemAction SortItems,med,native:InventoryTerminal.hpp InventoryAction::kSort (#471);declaration-only;source:items2.h:220
 T00010.000,T00010,actions_e,0,vs_main_actions_daggerArt1,0,,,184,,DaggerArtOne,ActionId DaggerArtOne,med,declaration-only;source:main.h:44
 T00011.000,T00011,arrowType_e,0,arrowTypeUp,0,,,0,,kUp,ArrowType Up,med,native:ManualPage.hpp PageArrow::kUp (#441);declaration-only;source:MENU/MENUE.PRG/494.c:38
 T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,kDown,ArrowType Down,med,native:ManualPage.hpp PageArrow::kDown (#441);declaration-only;source:MENU/MENUE.PRG/494.c:39
@@ -179,31 +179,31 @@ T00031.002,T00031,slotState_e,2,slotStateTemporary,0,,,2,,Temporary,Slot contain
 T00031.003,T00031,slotState_e,3,slotStateInUse,0,,,3,,InUse,Slot contains an occupied save,high,source:22C.c:132
 T00032.000,T00032,statType_e,0,statTypeHP,0,,,0,,kHp,StatType HP,med,native:Files.hpp Stat::kHp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1265
 T00032.001,T00032,statType_e,1,statTypeMP,0,,,1,,kMp,StatType MP,med,native:Files.hpp Stat::kMp (#441);declaration-only;source:MENU/MENU7.PRG/260.c:1265
-T00033.000,T00033,state,0,init,0,,,0,,Init,EquipmentDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00033.001,T00033,state,1,wait,0,,,1,,Wait,EquipmentDetailsState Wait,med,declaration-only;source:items1.h:197
-T00033.002,T00033,state,2,manageInput,0,,,2,,ManageInput,EquipmentDetailsState ManageInput,med,declaration-only;source:items1.h:100
-T00033.003,T00033,state,3,returnMenuReady,0,,,3,,ReturnMenuReady,EquipmentDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
+T00033.000,T00033,state,0,init,0,,,0,,kInitialize,EquipmentDetailsState Init,med,native:EquipmentDetailControllers.hpp DetailStage::kInitialize (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00033.001,T00033,state,1,wait,0,,,1,,kAnimate,EquipmentDetailsState Wait,med,native:EquipmentDetailControllers.hpp DetailStage::kAnimate (#471);declaration-only;source:items1.h:197
+T00033.002,T00033,state,2,manageInput,0,,,2,,kInput,EquipmentDetailsState ManageInput,med,native:EquipmentDetailControllers.hpp DetailStage::kInput (#471);declaration-only;source:items1.h:100
+T00033.003,T00033,state,3,returnMenuReady,0,,,3,,kReturn,EquipmentDetailsState ReturnMenuReady,med,native:EquipmentDetailControllers.hpp DetailStage::kReturn (#471);declaration-only;source:items1.h:100
 T00034.000,T00034,state,0,init,0,,,0,,kInit,EquipmentSlotMenuState Init,med,native:EquipmentMenus.hpp EquipmentSlotStep::kInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00034.001,T00034,state,1,handleInput,0,,,1,,kHandleInput,EquipmentSlotMenuState HandleInput,med,native:EquipmentMenus.hpp EquipmentSlotStep::kHandleInput (#441);declaration-only;source:15AC.c:24
 T00034.002,T00034,state,2,loadObject,0,,,2,,kLoadObject,EquipmentSlotMenuState LoadObject,med,native:EquipmentMenus.hpp EquipmentSlotStep::kLoadObject (#441);declaration-only;source:16C.c:345
 T00034.003,T00034,state,3,waitMenuReady,0,,,3,,kWaitMenuReady,EquipmentSlotMenuState WaitMenuReady,med,native:EquipmentMenus.hpp EquipmentSlotStep::kWaitMenuReady (#441);declaration-only;source:16C.c:345
-T00035.000,T00035,state,0,init,0,,,0,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00035.000,T00035,state,0,init,0,,,0,,Init,InitOnlyState Init,med,"native:no named enumerator; EquipmentDetailState::phase 0, ContainerSaveState::kInitialize and TransitionStep kTransitionBegin (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482"
 T00036.000,T00036,state,0,init,0,,,0,,kInit,SpellListMenuState Init,med,native:MagicMenus.hpp SpellMenuStep::kInit (#441);declaration-only;source:MENU/MENU0.PRG/84.c:630 and 84.c:731
 T00036.001,T00036,state,1,handleInput,0,,,1,,kInput,SpellListMenuState HandleInput,med,native:MagicMenus.hpp SpellMenuStep::kInput (#441);declaration-only;source:MENU/MENU0.PRG/84.c:630 and 84.c:731
 T00036.002,T00036,state,2,returnIfready,0,,,2,,kReturn,SpellListMenuState ReturnIfready,med,native:MagicMenus.hpp SpellMenuStep::kReturn (#441);declaration-only;source:MENU/MENU0.PRG/84.c:630 and 84.c:731
-T00037.000,T00037,state,0,init,0,,,0,,Init,ArtSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00037.001,T00037,state,1,waitForSelection,0,,,1,,WaitForSelection,ArtSelectionState WaitForSelection,med,declaration-only;source:30.c:106
-T00037.002,T00037,state,2,returnSelection,0,,,2,,ReturnSelection,ArtSelectionState ReturnSelection,med,declaration-only;source:30.c:106
+T00037.000,T00037,state,0,init,0,,,0,,kInit,ArtSelectionState Init,med,native:BreakArts.hpp ArtListStep::kInit and CategoryStep::kInit (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00037.001,T00037,state,1,waitForSelection,0,,,1,,kWaitForSelection,ArtSelectionState WaitForSelection,med,native:BreakArts.hpp ArtListStep::kWaitForSelection and CategoryStep::kWaitForSelection (#471);declaration-only;source:30.c:106
+T00037.002,T00037,state,2,returnSelection,0,,,2,,kReturnSelection,ArtSelectionState ReturnSelection,med,native:BreakArts.hpp ArtListStep::kReturnSelection and CategoryStep::kReturnSelection (#471);declaration-only;source:30.c:106
 T00038.000,T00038,state,0,init,0,,,0,,kInit,AbilityListState Init,med,native:BattleAbilitiesTerminal.hpp AbilityListPhase::kInit (#441);declaration-only;source:MENU/MENU2.PRG/64.c:503 and 64.c:564
 T00038.001,T00038,state,1,abilityMenu,0,,,1,,kAssignments,AbilityListState AbilityMenu,med,native:BattleAbilitiesTerminal.hpp AbilityListPhase::kAssignments (#441);declaration-only;source:MENU/MENU2.PRG/64.c:503 and 64.c:564
-T00039.000,T00039,state,0,init,0,,,0,,Init,DiscardMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00039.001,T00039,state,1,discardOneInit,0,,,1,,DiscardOneInit,DiscardMenuState DiscardOneInit,med,declaration-only;source:items1.h:1191
-T00039.002,T00039,state,2,discardMultipleInit,0,,,2,,DiscardMultipleInit,DiscardMenuState DiscardMultipleInit,med,declaration-only;source:items1.h:1192
-T00039.003,T00039,state,3,discardOne,0,,,3,,DiscardOne,DiscardMenuState DiscardOne,med,declaration-only;source:items1.h:1193
-T00039.004,T00039,state,4,clearTemplate,0,,,4,,ClearTemplate,DiscardMenuState ClearTemplate,med,declaration-only;source:items1.h:1194
-T00039.005,T00039,state,5,determineDiscardAmount,0,,,5,,DetermineDiscardAmount,DiscardMenuState DetermineDiscardAmount,med,declaration-only;source:items1.h:1195
-T00039.006,T00039,state,6,discardMultipleConfirm,0,,,6,,DiscardMultipleConfirm,DiscardMenuState DiscardMultipleConfirm,med,declaration-only;source:items1.h:1196
-T00039.007,T00039,state,7,discardMultiple,0,,,7,,DiscardMultiple,DiscardMenuState DiscardMultiple,med,declaration-only;source:items1.h:1197
+T00039.000,T00039,state,0,init,0,,,0,,kDiscardWaitPrompt,DiscardMenuState Init,med,native:InventoryTerminal.cpp DiscardStep::kDiscardWaitPrompt (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00039.001,T00039,state,1,discardOneInit,0,,,1,,kDiscardSingleConfirm,DiscardMenuState DiscardOneInit,med,native:InventoryTerminal.cpp DiscardStep::kDiscardSingleConfirm (#471);declaration-only;source:items1.h:1191
+T00039.002,T00039,state,2,discardMultipleInit,0,,,2,,kDiscardCreateQuantity,DiscardMenuState DiscardMultipleInit,med,native:InventoryTerminal.cpp DiscardStep::kDiscardCreateQuantity (#471);declaration-only;source:items1.h:1192
+T00039.003,T00039,state,3,discardOne,0,,,3,,kDiscardSingleInput,DiscardMenuState DiscardOne,med,native:InventoryTerminal.cpp DiscardStep::kDiscardSingleInput (#471);declaration-only;source:items1.h:1193
+T00039.004,T00039,state,4,clearTemplate,0,,,4,,kDiscardWaitQuantity,DiscardMenuState ClearTemplate,med,native:InventoryTerminal.cpp DiscardStep::kDiscardWaitQuantity (#471);declaration-only;source:items1.h:1194
+T00039.005,T00039,state,5,determineDiscardAmount,0,,,5,,kDiscardQuantityInput,DiscardMenuState DetermineDiscardAmount,med,native:InventoryTerminal.cpp DiscardStep::kDiscardQuantityInput (#471);declaration-only;source:items1.h:1195
+T00039.006,T00039,state,6,discardMultipleConfirm,0,,,6,,kDiscardQuantityConfirm,DiscardMenuState DiscardMultipleConfirm,med,native:InventoryTerminal.cpp DiscardStep::kDiscardQuantityConfirm (#471);declaration-only;source:items1.h:1196
+T00039.007,T00039,state,7,discardMultiple,0,,,7,,kDiscardQuantityDecision,DiscardMenuState DiscardMultiple,med,native:InventoryTerminal.cpp DiscardStep::kDiscardQuantityDecision (#471);declaration-only;source:items1.h:1197
 T00040.000,T00040,state,0,init,0,,,0,,Init,CardReadinessState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00040.001,T00040,state,1,ready,0,,,1,,Ready,CardReadinessState Ready,med,declaration-only;source:MENU/MENU7.PRG/260.c:567
 T00040.002,T00040,state,2,unformatted,0,,,2,,Unformatted,CardReadinessState Unformatted,med,declaration-only;source:MENU/MENU7.PRG/260.c:568
@@ -318,15 +318,15 @@ T00056.004,T00056,state,4,levelledSpell,0,,,4,,kRanks,WarlockMenuState LevelledS
 T00057.000,T00057,state,0,init,0,,,0,,kInit,ShamanMenuState Init,med,native:MagicMenus.hpp SpellMenuStep::kInit (#441);declaration-only;source:MENU/MENU0.PRG/84.c:527
 T00057.001,T00057,state,1,handleInput,0,,,1,,kInput,ShamanMenuState HandleInput,med,native:MagicMenus.hpp SpellMenuStep::kInput (#441);declaration-only;source:MENU/MENU0.PRG/84.c:527
 T00057.002,T00057,state,2,returnIfReady,0,,,2,,kReturn,ShamanMenuState ReturnIfReady,med,native:MagicMenus.hpp SpellMenuStep::kReturn (#441);declaration-only;source:MENU/MENU0.PRG/84.c:527
-T00058.000,T00058,state,0,none,0,,,0,,None,BreakArtsMenuState None,med,declaration-only;source:15AC.c:169
-T00058.001,T00058,state,1,init,0,,,3,,Init,BreakArtsMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00058.002,T00058,state,2,artsInit,0,,,4,,ArtsInit,BreakArtsMenuState ArtsInit,med,declaration-only;source:30.c:363
-T00058.003,T00058,state,3,artsInitWithTitle,0,,,5,,ArtsInitWithTitle,BreakArtsMenuState ArtsInitWithTitle,med,declaration-only;source:30.c:364
-T00058.004,T00058,state,4,artsMenu,0,,,6,,ArtsMenu,BreakArtsMenuState ArtsMenu,med,declaration-only;source:30.c:365
-T00058.005,T00058,state,5,weaponCategoryMenu,0,,,7,,WeaponCategoryMenu,BreakArtsMenuState WeaponCategoryMenu,med,declaration-only;source:30.c:366
-T00058.006,T00058,state,6,exitToMainMenu,0,,,8,,ExitToMainMenu,BreakArtsMenuState ExitToMainMenu,med,declaration-only;source:15AC.c:182
-T00058.007,T00058,state,7,executeArt,0,,,9,,ExecuteArt,BreakArtsMenuState ExecuteArt,med,declaration-only;source:30.c:368
-T00058.008,T00058,state,8,exit,0,,,10,,Exit,BreakArtsMenuState Exit,med,declaration-only;source:15AC.c:184
+T00058.000,T00058,state,0,none,0,,,0,,kNone,BreakArtsMenuState None,med,native:BreakArts.hpp ScreenStep::kNone (#471);declaration-only;source:15AC.c:169
+T00058.001,T00058,state,1,init,0,,,3,,kInit,BreakArtsMenuState Init,med,native:BreakArts.hpp ScreenStep::kInit (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00058.002,T00058,state,2,artsInit,0,,,4,,kArtsInit,BreakArtsMenuState ArtsInit,med,native:BreakArts.hpp ScreenStep::kArtsInit (#471);declaration-only;source:30.c:363
+T00058.003,T00058,state,3,artsInitWithTitle,0,,,5,,kArtsInitWithTitle,BreakArtsMenuState ArtsInitWithTitle,med,native:BreakArts.hpp ScreenStep::kArtsInitWithTitle (#471);declaration-only;source:30.c:364
+T00058.004,T00058,state,4,artsMenu,0,,,6,,kArtsMenu,BreakArtsMenuState ArtsMenu,med,native:BreakArts.hpp ScreenStep::kArtsMenu (#471);declaration-only;source:30.c:365
+T00058.005,T00058,state,5,weaponCategoryMenu,0,,,7,,kWeaponCategoryMenu,BreakArtsMenuState WeaponCategoryMenu,med,native:BreakArts.hpp ScreenStep::kWeaponCategoryMenu (#471);declaration-only;source:30.c:366
+T00058.006,T00058,state,6,exitToMainMenu,0,,,8,,kExitToMainMenu,BreakArtsMenuState ExitToMainMenu,med,native:BreakArts.hpp ScreenStep::kExitToMainMenu (#471);declaration-only;source:15AC.c:182
+T00058.007,T00058,state,7,executeArt,0,,,9,,kExecuteArt,BreakArtsMenuState ExecuteArt,med,native:BreakArts.hpp ScreenStep::kExecuteArt (#471);declaration-only;source:30.c:368
+T00058.008,T00058,state,8,exit,0,,,10,,kExit,BreakArtsMenuState Exit,med,native:BreakArts.hpp ScreenStep::kExit (#471);declaration-only;source:15AC.c:184
 T00059.000,T00059,state,0,init,0,,,0,,kInit,AbilityUnlockState Init,med,native:BattleAbilities.hpp AbilityUnlockPhase::kInit (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
 T00059.001,T00059,state,1,bothRemaining,0,,,1,,kBothRemaining,AbilityUnlockState BothRemaining,med,native:BattleAbilities.hpp AbilityUnlockPhase::kBothRemaining (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
 T00059.002,T00059,state,2,chainOnly,0,,,2,,kChainOnly,AbilityUnlockState ChainOnly,med,native:BattleAbilities.hpp AbilityUnlockPhase::kChainOnly (#441);declaration-only;source:MENU/MENU2.PRG/143C.c:131
@@ -352,25 +352,25 @@ T00062.004,T00062,state,4,chain,0,,,6,,kChain,BattleAbilitiesMenuState Chain,med
 T00062.005,T00062,state,5,defense,0,,,7,,kDefense,BattleAbilitiesMenuState Defense,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kDefense (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
 T00062.006,T00062,state,6,exitToMainMenu,0,,,8,,kExitToMainMenu,BattleAbilitiesMenuState ExitToMainMenu,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kExitToMainMenu (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
 T00062.007,T00062,state,7,exitToBattle,0,,,9,,kExitToBattle,BattleAbilitiesMenuState ExitToBattle,med,native:BattleAbilitiesTerminal.hpp AbilityScreenPhase::kExitToBattle (#441);declaration-only;source:MENU/MENU2.PRG/64.c:667
-T00063.000,T00063,state,0,init,0,,,0,,Init,WeaponDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00063.001,T00063,state,1,initWeapon,0,,,1,,InitWeapon,WeaponDetailsState InitWeapon,med,declaration-only;source:items1.h:100
-T00063.002,T00063,state,2,manageInput,0,,,2,,ManageInput,WeaponDetailsState ManageInput,med,declaration-only;source:items1.h:100
-T00063.003,T00063,state,3,returnMenuReady,0,,,3,,ReturnMenuReady,WeaponDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
-T00064.000,T00064,state,0,init,0,,,0,,Init,ShieldDetailsState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00064.001,T00064,state,1,initShield,0,,,1,,InitShield,ShieldDetailsState InitShield,med,declaration-only;source:items1.h:367
-T00064.002,T00064,state,2,manageInput,0,,,2,,ManageInput,ShieldDetailsState ManageInput,med,declaration-only;source:items1.h:100
-T00064.003,T00064,state,3,returnMenuReady,0,,,3,,ReturnMenuReady,ShieldDetailsState ReturnMenuReady,med,declaration-only;source:items1.h:100
-T00065.000,T00065,state,0,init,0,,,0,,Init,SortMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00065.001,T00065,state,1,sort,0,,,1,,Sort,SortMenuState Sort,med,declaration-only;source:items1.h:1079
-T00066.000,T00066,state,0,none,0,,,0,,None,ItemListState None,med,declaration-only;source:15AC.c:169
-T00066.001,T00066,state,1,init,0,,,1,,Init,ItemListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00066.002,T00066,state,2,waitInit,0,,,5,,WaitInit,ItemListState WaitInit,med,declaration-only;source:items2.h:206
-T00066.003,T00066,state,3,viewDetails,0,,,7,,ViewDetails,ItemListState ViewDetails,med,declaration-only;source:items2.h:207
-T00066.004,T00066,state,4,populateActions,0,,,8,,PopulateActions,ItemListState PopulateActions,med,declaration-only;source:items2.h:208
-T00066.005,T00066,state,5,processAction,0,,,9,,ProcessAction,ItemListState ProcessAction,med,declaration-only;source:items2.h:209
-T00066.006,T00066,state,6,search,0,,,10,,Search,ItemListState Search,med,declaration-only;source:items2.h:210
-T00066.007,T00066,state,7,discard,0,,,11,,Discard,ItemListState Discard,med,declaration-only;source:items2.h:211
-T00066.008,T00066,state,8,sort,0,,,12,,Sort,ItemListState Sort,med,declaration-only;source:items1.h:1079
+T00063.000,T00063,state,0,init,0,,,0,,kInitialize,WeaponDetailsState Init,med,native:EquipmentDetailControllers.hpp DetailStage::kInitialize (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00063.001,T00063,state,1,initWeapon,0,,,1,,kAnimate,WeaponDetailsState InitWeapon,med,native:EquipmentDetailControllers.hpp DetailStage::kAnimate (#471);declaration-only;source:items1.h:100
+T00063.002,T00063,state,2,manageInput,0,,,2,,kInput,WeaponDetailsState ManageInput,med,native:EquipmentDetailControllers.hpp DetailStage::kInput (#471);declaration-only;source:items1.h:100
+T00063.003,T00063,state,3,returnMenuReady,0,,,3,,kReturn,WeaponDetailsState ReturnMenuReady,med,native:EquipmentDetailControllers.hpp DetailStage::kReturn (#471);declaration-only;source:items1.h:100
+T00064.000,T00064,state,0,init,0,,,0,,kInitialize,ShieldDetailsState Init,med,native:EquipmentDetailControllers.hpp DetailStage::kInitialize (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00064.001,T00064,state,1,initShield,0,,,1,,kAnimate,ShieldDetailsState InitShield,med,native:EquipmentDetailControllers.hpp DetailStage::kAnimate (#471);declaration-only;source:items1.h:367
+T00064.002,T00064,state,2,manageInput,0,,,2,,kInput,ShieldDetailsState ManageInput,med,native:EquipmentDetailControllers.hpp DetailStage::kInput (#471);declaration-only;source:items1.h:100
+T00064.003,T00064,state,3,returnMenuReady,0,,,3,,kReturn,ShieldDetailsState ReturnMenuReady,med,native:EquipmentDetailControllers.hpp DetailStage::kReturn (#471);declaration-only;source:items1.h:100
+T00065.000,T00065,state,0,init,0,,,0,,Init,SortMenuState Init,med,native:no named enumerator; InventorySortState::step 0 (UpdateSortMenu stores and tests the literal) (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00065.001,T00065,state,1,sort,0,,,1,,Sort,SortMenuState Sort,med,native:no named enumerator; InventorySortState::step 1 (UpdateSortMenu stores and tests the literal) (#471);declaration-only;source:items1.h:1079
+T00066.000,T00066,state,0,none,0,,,0,,kListRestore,ItemListState None,med,native:InventoryTerminal.cpp NavigationStep::kListRestore (#471);declaration-only;source:15AC.c:169
+T00066.001,T00066,state,1,init,0,,,1,,kListPopulate,ItemListState Init,med,native:InventoryTerminal.cpp NavigationStep::kListPopulate (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00066.002,T00066,state,2,waitInit,0,,,5,,kListWait,ItemListState WaitInit,med,native:InventoryTerminal.cpp NavigationStep::kListWait (#471);declaration-only;source:items2.h:206
+T00066.003,T00066,state,3,viewDetails,0,,,7,,kListDetails,ItemListState ViewDetails,med,native:InventoryTerminal.cpp NavigationStep::kListDetails (#471);declaration-only;source:items2.h:207
+T00066.004,T00066,state,4,populateActions,0,,,8,,kListBuildActions,ItemListState PopulateActions,med,native:InventoryTerminal.cpp NavigationStep::kListBuildActions (#471);declaration-only;source:items2.h:208
+T00066.005,T00066,state,5,processAction,0,,,9,,kListActions,ItemListState ProcessAction,med,native:InventoryTerminal.cpp NavigationStep::kListActions (#471);declaration-only;source:items2.h:209
+T00066.006,T00066,state,6,search,0,,,10,,kListParent,ItemListState Search,med,native:InventoryTerminal.cpp NavigationStep::kListParent (#471);declaration-only;source:items2.h:210
+T00066.007,T00066,state,7,discard,0,,,11,,kListDiscard,ItemListState Discard,med,native:InventoryTerminal.cpp NavigationStep::kListDiscard (#471);declaration-only;source:items2.h:211
+T00066.008,T00066,state,8,sort,0,,,12,,kListSort,ItemListState Sort,med,native:InventoryTerminal.cpp NavigationStep::kListSort (#471);declaration-only;source:items1.h:1079
 T00067.000,T00067,state,0,init,0,,,0,,kInit,EquipmentMenuState Init,med,native:EquipmentMenus.hpp EquipmentMenuStep::kInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00067.001,T00067,state,1,initMenu,0,,,1,,kInitMenu,EquipmentMenuState InitMenu,med,native:EquipmentMenus.hpp EquipmentMenuStep::kInitMenu (#441);declaration-only;source:16C.c:1056
 T00067.002,T00067,state,2,topMenu,0,,,2,,kTopMenu,EquipmentMenuState TopMenu,med,native:EquipmentMenus.hpp EquipmentMenuStep::kTopMenu (#441);declaration-only;source:16C.c:1056
@@ -391,12 +391,12 @@ T00069.003,T00069,state,3,menuLoadedReverse,0,,,3,,kMenuLoadedReverse,ActorSwitc
 T00069.004,T00069,state,4,menuLoadingReverse,0,,,4,,kMenuLoadingReverse,ActorSwitchState MenuLoadingReverse,med,native:ActorSwitching.hpp actor_switch_phase::kMenuLoadingReverse (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
 T00069.005,T00069,state,5,animateReverse,0,,,5,,kAnimateReverse,ActorSwitchState AnimateReverse,med,native:ActorSwitching.hpp actor_switch_phase::kAnimateReverse (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
 T00069.006,T00069,state,6,complete,0,,,6,,kComplete,ActorSwitchState Complete,med,native:ActorSwitching.hpp actor_switch_phase::kComplete (#441);declaration-only;source:MENU/MENU4.PRG/120.c:585
-T00070.000,T00070,state,0,init,0,,,0,,Init,EquipmentListState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00070.001,T00070,state,1,animWait,0,,,1,,AnimWait,EquipmentListState AnimWait,med,declaration-only;source:120.c:1879
-T00070.002,T00070,state,2,handleInput,0,,,2,,HandleInput,EquipmentListState HandleInput,med,declaration-only;source:15AC.c:24
-T00070.003,T00070,state,3,waitChangeActor,0,,,3,,WaitChangeActor,EquipmentListState WaitChangeActor,med,declaration-only;source:120.c:1881
-T00070.004,T00070,state,4,waitActorInit,0,,,4,,WaitActorInit,EquipmentListState WaitActorInit,med,declaration-only;source:120.c:1882
-T00070.005,T00070,state,5,equipDetailScreen,0,,,5,,EquipDetailScreen,EquipmentListState EquipDetailScreen,med,declaration-only;source:120.c:1883
+T00070.000,T00070,state,0,init,0,,,0,,Init,EquipmentListState Init,med,native:no named enumerator; EquipmentListState::phase 0 (UpdateEquipmentList stores and tests the literal) (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00070.001,T00070,state,1,animWait,0,,,1,,AnimWait,EquipmentListState AnimWait,med,native:no named enumerator; EquipmentListState::phase 1 (UpdateEquipmentList stores and tests the literal) (#471);declaration-only;source:120.c:1879
+T00070.002,T00070,state,2,handleInput,0,,,2,,HandleInput,EquipmentListState HandleInput,med,native:no named enumerator; EquipmentListState::phase 2 (UpdateEquipmentList stores and tests the literal) (#471);declaration-only;source:15AC.c:24
+T00070.003,T00070,state,3,waitChangeActor,0,,,3,,WaitChangeActor,EquipmentListState WaitChangeActor,med,native:TerminalEquipment.cpp list_phase::kWaitingSwitch (#471);declaration-only;source:120.c:1881
+T00070.004,T00070,state,4,waitActorInit,0,,,4,,WaitActorInit,EquipmentListState WaitActorInit,med,native:TerminalEquipment.cpp list_phase::kReturningRow (#471);declaration-only;source:120.c:1882
+T00070.005,T00070,state,5,equipDetailScreen,0,,,5,,EquipDetailScreen,EquipmentListState EquipDetailScreen,med,native:TerminalEquipment.cpp list_phase::kDetails (#471);declaration-only;source:120.c:1883
 T00071.000,T00071,state,0,none,0,,,0,,kNone,StatusMenuState None,med,native:TerminalController.cpp phase::kNone (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
 T00071.001,T00071,state,1,init,0,,,3,,kInitialize,StatusMenuState Init,med,native:TerminalController.cpp phase::kInitialize (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
 T00071.002,T00071,state,2,waitForMenu,0,,,4,,kWaitMenu,StatusMenuState WaitForMenu,med,native:TerminalController.cpp phase::kWaitMenu (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
@@ -405,7 +405,7 @@ T00071.004,T00071,state,4,waitQuitToMenu,0,,,11,,kWaitQuitMenu,StatusMenuState W
 T00071.005,T00071,state,5,quitToMenu,0,,,12,,kQuitMenu,StatusMenuState QuitToMenu,med,native:TerminalController.cpp phase::kQuitMenu (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
 T00071.006,T00071,state,6,waitQuitToBattle,0,,,13,,kWaitQuitBattle,StatusMenuState WaitQuitToBattle,med,native:TerminalController.cpp phase::kWaitQuitBattle (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
 T00071.007,T00071,state,7,quitToBattle,0,,,14,,kQuitBattle,StatusMenuState QuitToBattle,med,native:TerminalController.cpp phase::kQuitBattle (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
-T00072.000,T00072,state,0,init,0,,,3,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00072.000,T00072,state,0,init,0,,,3,,Init,InitOnlyState Init,med,native:no named enumerator; MapTerminal.cpp UpdateScreen kCaptureScreen = 3 (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00073.000,T00073,state,0,init,0,,,0,,kInitialPhase,MapMenuState Init,med,native:MapTerminal.cpp kInitialPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:536
 T00073.001,T00073,state,1,processInput,0,,,1,,kInputPhase,MapMenuState ProcessInput,med,native:MapTerminal.cpp kInputPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:537
 T00073.002,T00073,state,2,displayMapMenu,0,,,2,,kAreaPhase,MapMenuState DisplayMapMenu,med,native:MapTerminal.cpp kAreaPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:538
@@ -433,28 +433,28 @@ T00077.003,T00077,state,3,initSaveMenu,0,,,7,,kDataSaveOpen,DataMenuState InitSa
 T00077.004,T00077,state,4,showSaveMenu,0,,,8,,kDataSave,DataMenuState ShowSaveMenu,med,native:Files.cpp DataMenuStep::kDataSave (#441);declaration-only;source:MENU/MENU7.PRG/260.c:2547
 T00077.005,T00077,state,5,initLoadMenu,0,,,9,,kDataLoadOpen,DataMenuState InitLoadMenu,med,native:Files.cpp DataMenuStep::kDataLoadOpen (#441);declaration-only;source:MENU/MENU7.PRG/260.c:4195
 T00077.006,T00077,state,6,handleInput,0,,,10,,kDataLoad,DataMenuState HandleInput,med,native:Files.cpp DataMenuStep::kDataLoad (#441);declaration-only;source:15AC.c:24
-T00078.000,T00078,state,0,init,0,,,0,,Init,NameEditorState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00078.001,T00078,state,1,state1,0,,,1,,State1,NameEditorState State1,med,declaration-only;source:21A0.c:467
-T00078.002,T00078,state,2,state2,0,,,2,,State2,NameEditorState State2,med,declaration-only;source:21A0.c:468
-T00078.003,T00078,state,3,leaveRenameScreen,0,,,3,,LeaveRenameScreen,NameEditorState LeaveRenameScreen,med,declaration-only;source:21A0.c:469
-T00078.004,T00078,state,4,initConfirmationScreen,0,,,4,,InitConfirmationScreen,NameEditorState InitConfirmationScreen,med,declaration-only;source:21A0.c:470
-T00078.005,T00078,state,5,confirmationScreen,0,,,5,,ConfirmationScreen,NameEditorState ConfirmationScreen,med,declaration-only;source:21A0.c:471
-T00078.006,T00078,state,6,returnToRenameScreen,0,,,6,,ReturnToRenameScreen,NameEditorState ReturnToRenameScreen,med,declaration-only;source:21A0.c:472
-T00079.000,T00079,state,0,none,0,,,0,,None,OptionsMenuState None,med,declaration-only;source:15AC.c:169
-T00079.001,T00079,state,1,waitReady,0,,,3,,WaitReady,OptionsMenuState WaitReady,med,declaration-only;source:64.c:219
-T00079.002,T00079,state,2,init,0,,,4,,Init,OptionsMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00079.003,T00079,state,3,handleInput,0,,,5,,HandleInput,OptionsMenuState HandleInput,med,declaration-only;source:15AC.c:24
-T00079.004,T00079,state,4,simpleMap,0,,,6,,SimpleMap,OptionsMenuState SimpleMap,med,declaration-only;source:88.c:558
-T00079.005,T00079,state,5,abilityTiming,0,,,7,,AbilityTiming,OptionsMenuState AbilityTiming,med,declaration-only;source:88.c:559
-T00079.006,T00079,state,6,weaponStatus,0,,,8,,WeaponStatus,OptionsMenuState WeaponStatus,med,declaration-only;source:88.c:560
-T00079.007,T00079,state,7,armorStatus,0,,,9,,ArmorStatus,OptionsMenuState ArmorStatus,med,declaration-only;source:88.c:561
-T00079.008,T00079,state,8,cursorMemory,0,,,10,,CursorMemory,OptionsMenuState CursorMemory,med,declaration-only;source:88.c:562
-T00079.009,T00079,state,9,information,0,,,11,,Information,OptionsMenuState Information,med,declaration-only;source:88.c:563
-T00079.010,T00079,state,10,puzzleMode,0,,,12,,PuzzleMode,OptionsMenuState PuzzleMode,med,declaration-only;source:88.c:564
-T00079.011,T00079,state,11,sound,0,,,13,,Sound,OptionsMenuState Sound,med,declaration-only;source:88.c:565
-T00079.012,T00079,state,12,vibration,0,,,14,,Vibration,OptionsMenuState Vibration,med,declaration-only;source:88.c:566
-T00079.013,T00079,state,13,exitToMenu,0,,,15,,ExitToMenu,OptionsMenuState ExitToMenu,med,declaration-only;source:88.c:567
-T00079.014,T00079,state,14,exitToBattle,0,,,16,,ExitToBattle,OptionsMenuState ExitToBattle,med,declaration-only;source:64.c:666
+T00078.000,T00078,state,0,init,0,,,0,,kDelay,NameEditorState Init,med,native:Rename.hpp EditorStep::kDelay (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00078.001,T00078,state,1,state1,0,,,1,,kCommands,NameEditorState State1,med,native:Rename.hpp EditorStep::kCommands (#471);declaration-only;source:21A0.c:467
+T00078.002,T00078,state,2,state2,0,,,2,,kGrid,NameEditorState State2,med,native:Rename.hpp EditorStep::kGrid (#471);declaration-only;source:21A0.c:468
+T00078.003,T00078,state,3,leaveRenameScreen,0,,,3,,kLeave,NameEditorState LeaveRenameScreen,med,native:Rename.hpp EditorStep::kLeave (#471);declaration-only;source:21A0.c:469
+T00078.004,T00078,state,4,initConfirmationScreen,0,,,4,,kInitConfirmation,NameEditorState InitConfirmationScreen,med,native:Rename.hpp EditorStep::kInitConfirmation (#471);declaration-only;source:21A0.c:470
+T00078.005,T00078,state,5,confirmationScreen,0,,,5,,kConfirmation,NameEditorState ConfirmationScreen,med,native:Rename.hpp EditorStep::kConfirmation (#471);declaration-only;source:21A0.c:471
+T00078.006,T00078,state,6,returnToRenameScreen,0,,,6,,kReturnToGrid,NameEditorState ReturnToRenameScreen,med,native:Rename.hpp EditorStep::kReturnToGrid (#471);declaration-only;source:21A0.c:472
+T00079.000,T00079,state,0,none,0,,,0,,kNone,OptionsMenuState None,med,native:Options.hpp Step::kNone (#471);declaration-only;source:15AC.c:169
+T00079.001,T00079,state,1,waitReady,0,,,3,,kWaitReady,OptionsMenuState WaitReady,med,native:Options.hpp Step::kWaitReady (#471);declaration-only;source:64.c:219
+T00079.002,T00079,state,2,init,0,,,4,,kInit,OptionsMenuState Init,med,native:Options.hpp Step::kInit (#471);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
+T00079.003,T00079,state,3,handleInput,0,,,5,,kHandleInput,OptionsMenuState HandleInput,med,native:Options.hpp Step::kHandleInput (#471);declaration-only;source:15AC.c:24
+T00079.004,T00079,state,4,simpleMap,0,,,6,,kSimpleMap,OptionsMenuState SimpleMap,med,native:Options.hpp Step::kSimpleMap (#471);declaration-only;source:88.c:558
+T00079.005,T00079,state,5,abilityTiming,0,,,7,,kAbilityTiming,OptionsMenuState AbilityTiming,med,native:Options.hpp Step::kAbilityTiming (#471);declaration-only;source:88.c:559
+T00079.006,T00079,state,6,weaponStatus,0,,,8,,kWeaponStatus,OptionsMenuState WeaponStatus,med,native:Options.hpp Step::kWeaponStatus (#471);declaration-only;source:88.c:560
+T00079.007,T00079,state,7,armorStatus,0,,,9,,kArmorStatus,OptionsMenuState ArmorStatus,med,native:Options.hpp Step::kArmorStatus (#471);declaration-only;source:88.c:561
+T00079.008,T00079,state,8,cursorMemory,0,,,10,,kCursorMemory,OptionsMenuState CursorMemory,med,native:Options.hpp Step::kCursorMemory (#471);declaration-only;source:88.c:562
+T00079.009,T00079,state,9,information,0,,,11,,kInformation,OptionsMenuState Information,med,native:Options.hpp Step::kInformation (#471);declaration-only;source:88.c:563
+T00079.010,T00079,state,10,puzzleMode,0,,,12,,kPuzzleMode,OptionsMenuState PuzzleMode,med,native:Options.hpp Step::kPuzzleMode (#471);declaration-only;source:88.c:564
+T00079.011,T00079,state,11,sound,0,,,13,,kSound,OptionsMenuState Sound,med,native:Options.hpp Step::kSound (#471);declaration-only;source:88.c:565
+T00079.012,T00079,state,12,vibration,0,,,14,,kVibration,OptionsMenuState Vibration,med,native:Options.hpp Step::kVibration (#471);declaration-only;source:88.c:566
+T00079.013,T00079,state,13,exitToMenu,0,,,15,,kExitToMenu,OptionsMenuState ExitToMenu,med,native:Options.hpp Step::kExitToMenu (#471);declaration-only;source:88.c:567
+T00079.014,T00079,state,14,exitToBattle,0,,,16,,kExitToBattle,OptionsMenuState ExitToBattle,med,native:Options.hpp Step::kExitToBattle (#471);declaration-only;source:64.c:666
 T00080.000,T00080,state,0,init,0,,,3,,Init,ScoreOverlayState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00080.001,T00080,state,1,initData,0,,,4,,InitData,ScoreOverlayState InitData,med,declaration-only;source:238.c:277
 T00080.002,T00080,state,2,waitMenuReady,0,,,5,,WaitMenuReady,ScoreOverlayState WaitMenuReady,med,declaration-only;source:16C.c:345
@@ -501,11 +501,11 @@ T00087.001,T00087,state,1,selectRow,0,,,1,,kTopicStepSelectRow,TopicMenuState Se
 T00088.000,T00088,state,0,init,0,,,0,,Initialize,Initialize the load screen,high,source:22C.c:3131
 T00088.001,T00088,state,1,loadMemcardMenu,0,,,1,,LoadCardResources,Wait for memory-card UI resources,high,source:22C.c:3131
 T00088.002,T00088,state,2,loadFileMenu,0,,,2,,RunFileMenu,Execute the load-file menu,high,source:22C.c:3131
-T00089.000,T00089,state,0,initSlot1,0,,,0,,InitializeSlotOne,Initialize the first card slot,high,source:22C.c:2215
-T00089.001,T00089,state,1,initSlot2,0,,,1,,InitializeSlotTwo,Initialize the second card slot,high,source:22C.c:2215
-T00089.002,T00089,state,2,waitForSlotAnimation,0,,,2,,WaitForSlotAnimation,Wait for card slot menu animations,high,source:22C.c:2215
-T00089.003,T00089,state,3,handleInput,0,,,3,,HandleInput,Handle card slot selection input,high,source:22C.c:2215
-T00089.004,T00089,state,4,returnSelectedOption,0,,,4,,ReturnSelection,Return the selected card option,high,source:22C.c:2215
+T00089.000,T00089,state,0,initSlot1,0,,,0,,kReminderYes,Initialize the first card slot,high,native:Files.cpp ReminderStep::kReminderYes (#471);source:22C.c:2215
+T00089.001,T00089,state,1,initSlot2,0,,,1,,kReminderNo,Initialize the second card slot,high,native:Files.cpp ReminderStep::kReminderNo (#471);source:22C.c:2215
+T00089.002,T00089,state,2,waitForSlotAnimation,0,,,2,,kReminderWait,Wait for card slot menu animations,high,native:Files.cpp ReminderStep::kReminderWait (#471);source:22C.c:2215
+T00089.003,T00089,state,3,handleInput,0,,,3,,kReminderInput,Handle card slot selection input,high,native:Files.cpp ReminderStep::kReminderInput (#471);source:22C.c:2215
+T00089.004,T00089,state,4,returnSelectedOption,0,,,4,,kReminderReturn,Return the selected card option,high,native:Files.cpp ReminderStep::kReminderReturn (#471);source:22C.c:2215
 T00090.000,T00090,state,0,init,0,,,0,,Initialize,Initialize the clear-save screen,high,source:22C.c:3315
 T00090.001,T00090,state,1,loading,0,,,1,,Loading,Load the clear-save UI resources,high,source:22C.c:3315
 T00090.002,T00090,state,2,loaded,0,,,2,,Ready,Run the loaded clear-save menu,high,source:22C.c:3315
@@ -751,10 +751,10 @@ T00822.001,T00822,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00128.000,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),0,count,0,u_char,,,,count,Number of label sprites; 0 for none,high,source:2842C.c:2220
 T00128.001,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),1,labels,0,u_char[2],,,,labels,Label sprite indices,high,source:2842C.c:2257
 T00128.002,T00128,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:1518:1),2,color,0,u_char,,,,spacing,Read as the width offset between sprites,low,source:2842C.c:2266
-T00129.000,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),0,x,0,u_char,,,,tileX,Tile x of the gimmick tile target,med,declaration-only;source:3A1A0.c:732
-T00129.001,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),1,y,0,u_char,,,,tileY,Tile y of the gimmick tile target,med,declaration-only;source:3A1A0.c:733
-T00129.002,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),2,z,0,u_char,,,,tileZ,Tile z of the gimmick tile target,med,declaration-only;source:3A1A0.c:734
-T00129.003,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),3,direction,0,u_char,,,,direction,Direction of the gimmick tile target,med,declaration-only;source:3A1A0.c:735
+T00129.000,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),0,x,0,u_char,,,,x,Tile x of the gimmick tile target,med,native:MotionRequests.hpp PackedTile::x (#471);declaration-only;source:3A1A0.c:732
+T00129.001,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),1,y,0,u_char,,,,layer,Tile y of the gimmick tile target,med,native:MotionRequests.hpp PackedTile::layer (#471);declaration-only;source:3A1A0.c:733
+T00129.002,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),2,z,0,u_char,,,,z,Tile z of the gimmick tile target,med,native:MotionRequests.hpp PackedTile::z (#471);declaration-only;source:3A1A0.c:734
+T00129.003,T00129,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\3A1A0.c:731:5),3,direction,0,u_char,,,,spare,Direction of the gimmick tile target,med,native:MotionRequests.hpp PackedTile::spare (#471);declaration-only;source:3A1A0.c:735
 T00130.000,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),0,corners,0,int[5],,,,corners,Projected corners,high,source:58578.c:393
 T00130.001,T00130,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:350:5),1,clip,0,int,,,,normalClip,Normal-clip result of the corners,high,source:58578.c:402
 T00131.000,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:354:5),0,local,0,short[4],,,,localPoint,Point in shape space,high,source:58578.c:372
@@ -763,15 +763,15 @@ T00131.002,T00131,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00132.000,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),0,tile,0,VS_TILE,,,,tile,Box tile,high,source:58578.c:705
 T00132.001,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),1,poly,0,VS_POLY_G4_TPAGE,,,,shadePoly,Shaded polygon,high,source:58578.c:708
 T00132.002,T00132,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\58578.c:73:5),2,tpage,0,u_long,,,,texturePageCommand,Texture-page command word,low,declaration-only;source:58578.c:76
-T00133.000,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,currentCategory,Selected category + 1,high,source:items0.h:49
-T00133.001,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\MenuMemory.h:13;declaration-only;source:5BF94.h:128
-T00133.002,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00133.000,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,category,Selected category + 1,high,native:Framework.hpp CategoryCursorMemory::category (#471);source:items0.h:49
+T00133.001,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Menu\Framework\Framework.hpp:216;native:Framework.hpp CategoryCursorMemory::reserved (#471);declaration-only;source:5BF94.h:128
+T00133.002,T00133,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,positions,List cursor of each category,high,native:Framework.hpp CategoryCursorMemory::positions (#471);source:items2.h:922
 T00823.000,T00823,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:130:13),0,index,0,u_char,,,,row,Remembered cursor row,med,declaration-only;source:5BF94.h:131
 T00823.001,T00823,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:130:13),1,page,0,u_char,,,,page,Remembered list page,med,declaration-only;source:5BF94.h:132
 T00824.000,T00824,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),0,unk0_0,1,u_int,9,,,location,Teleport destination location index,high,source:146C.c:4705
-T00824.001,T00824,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),1,unk0_9,1,u_int,5,,,tileX,Destination tile X,high,source:146C.c:4706
-T00824.002,T00824,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),2,unk0_14,1,u_int,5,,,tileZ,Destination tile Z,high,source:146C.c:4706
-T00824.003,T00824,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),3,unk0_19,1,u_int,13,,,mpCost,MP subtracted from Ashley when the teleport runs,high,source:146C.c:4709
+T00824.001,T00824,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),1,unk0_9,1,u_int,5,,,tile_x,Destination tile X,high,native:MagicCosts.hpp TeleportDestination::tile_x (#471);source:146C.c:4706
+T00824.002,T00824,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),2,unk0_14,1,u_int,5,,,tile_z,Destination tile Z,high,native:MagicCosts.hpp TeleportDestination::tile_z (#471);source:146C.c:4706
+T00824.003,T00824,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:151:9),3,unk0_19,1,u_int,13,,,mp_cost,MP subtracted from Ashley when the teleport runs,high,native:MagicCosts.hpp TeleportDestination::mp_cost (#471);source:146C.c:4709
 T00134.000,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,red_curve,Red curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::red_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
 T00134.001,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,green_curve,Green curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::green_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
 T00134.002,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,blue_curve,Blue curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::blue_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
@@ -908,15 +908,15 @@ T00155.000,T00155,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00155.001,T00155,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,stats,Statistics block,high,source:146C.c:6088
 T00828.000,T00828,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:90:9),0,state,0,char,,,,state,"Lock state: 0 open, 1 or 3 locked by a key or sigil; cleared when opened",high,source:146C.c:4849
 T00828.001,T00828,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\146C.h:90:9),1,unk1,1,char,,,,roomEffect,Room effect started or tested for this trigger,high,source:146C.c:16320
-T00156.000,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,currentCategory,Selected category + 1,high,source:items0.h:49
-T00156.001,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved1,Not read,low,declaration-only;source:5BF94.h:128
-T00156.002,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:129:9)[8],,,,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00156.000,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,category,Selected category + 1,high,native:Framework.hpp CategoryCursorMemory::category (#471);source:items0.h:49
+T00156.001,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved,Not read,low,native:Framework.hpp CategoryCursorMemory::reserved (#471);declaration-only;source:5BF94.h:128
+T00156.002,T00156,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:129:9)[8],,,,positions,List cursor of each category,high,native:Framework.hpp CategoryCursorMemory::positions (#471);source:items2.h:922
 T00829.000,T00829,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:130:13),0,index,0,u_char,,,,row,Remembered cursor row,med,declaration-only;source:5BF94.h:131
 T00829.001,T00829,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:130:13),1,page,0,u_char,,,,page,Remembered list page,med,declaration-only;source:5BF94.h:132
 T00830.000,T00830,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),0,unk0_0,1,u_int,9,,,location,Teleport destination location index,high,source:146C.c:4705
-T00830.001,T00830,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),1,unk0_9,1,u_int,5,,,tileX,Destination tile X,high,source:146C.c:4706
-T00830.002,T00830,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),2,unk0_14,1,u_int,5,,,tileZ,Destination tile Z,high,source:146C.c:4706
-T00830.003,T00830,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),3,unk0_19,1,u_int,13,,,mpCost,MP subtracted from Ashley when the teleport runs,high,source:146C.c:4709
+T00830.001,T00830,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),1,unk0_9,1,u_int,5,,,tile_x,Destination tile X,high,native:MagicCosts.hpp TeleportDestination::tile_x (#471);source:146C.c:4706
+T00830.002,T00830,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),2,unk0_14,1,u_int,5,,,tile_z,Destination tile Z,high,native:MagicCosts.hpp TeleportDestination::tile_z (#471);source:146C.c:4706
+T00830.003,T00830,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:151:9),3,unk0_19,1,u_int,13,,,mp_cost,MP subtracted from Ashley when the teleport runs,high,native:MagicCosts.hpp TeleportDestination::mp_cost (#471);source:146C.c:4709
 T00157.000,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,red_curve,Red curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::red_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
 T00157.001,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,green_curve,Green curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::green_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
 T00157.002,T00157,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\INITBTL.PRG\..\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,blue_curve,Blue curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::blue_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
@@ -985,15 +985,15 @@ T00167.000,T00167,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00167.001,T00167,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:606:5),1,unk50,1,vs_battle_actor2,,,,stats,Statistics block,high,source:146C.c:6088
 T00832.000,T00832,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:90:9),0,state,0,char,,,,state,"Lock state: 0 open, 1 or 3 locked by a key or sigil; cleared when opened",high,source:146C.c:4849
 T00832.001,T00832,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\146C.h:90:9),1,unk1,1,char,,,,roomEffect,Room effect started or tested for this trigger,high,source:146C.c:16320
-T00168.000,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,currentCategory,Selected category + 1,high,source:items0.h:49
-T00168.001,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved1,Not read,low,declaration-only;source:5BF94.h:128
-T00168.002,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,categoryCursors,List cursor of each category,high,source:items2.h:922
+T00168.000,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),0,currentItemCategory,0,char,,,,category,Selected category + 1,high,native:Framework.hpp CategoryCursorMemory::category (#471);source:items0.h:49
+T00168.001,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),1,unk1,1,char,,,,reserved,Not read,low,native:Framework.hpp CategoryCursorMemory::reserved (#471);declaration-only;source:5BF94.h:128
+T00168.002,T00168,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:126:5),2,unk2,1,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:129:9)[8],,,,positions,List cursor of each category,high,native:Framework.hpp CategoryCursorMemory::positions (#471);source:items2.h:922
 T00833.000,T00833,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:130:13),0,index,0,u_char,,,,row,Remembered cursor row,med,declaration-only;source:5BF94.h:131
 T00833.001,T00833,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:130:13),1,page,0,u_char,,,,page,Remembered list page,med,declaration-only;source:5BF94.h:132
 T00834.000,T00834,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),0,unk0_0,1,u_int,9,,,location,Teleport destination location index,high,source:146C.c:4705
-T00834.001,T00834,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),1,unk0_9,1,u_int,5,,,tileX,Destination tile X,high,source:146C.c:4706
-T00834.002,T00834,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),2,unk0_14,1,u_int,5,,,tileZ,Destination tile Z,high,source:146C.c:4706
-T00834.003,T00834,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),3,unk0_19,1,u_int,13,,,mpCost,MP subtracted from Ashley when the teleport runs,high,source:146C.c:4709
+T00834.001,T00834,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),1,unk0_9,1,u_int,5,,,tile_x,Destination tile X,high,native:MagicCosts.hpp TeleportDestination::tile_x (#471);source:146C.c:4706
+T00834.002,T00834,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),2,unk0_14,1,u_int,5,,,tile_z,Destination tile Z,high,native:MagicCosts.hpp TeleportDestination::tile_z (#471);source:146C.c:4706
+T00834.003,T00834,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:151:9),3,unk0_19,1,u_int,13,,,mp_cost,MP subtracted from Ashley when the teleport runs,high,native:MagicCosts.hpp TeleportDestination::mp_cost (#471);source:146C.c:4709
 T00169.000,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),0,rCurve,0,u_char,,,,red_curve,Red curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::red_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
 T00169.001,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),1,gCurve,0,u_char,,,,green_curve,Green curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::green_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
 T00169.002,T00169,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\5BF94.h:274:5),2,bCurve,0,u_char,,,,blue_curve,Blue curve copied to the emitted particles,med,native:Particles.hpp LiveParticleColorCurves::blue_curve (#441);upstream keeps these bytes in func_800FA098_arg1's u_char unk14C[0x1C];source:BATTLE/BATTLE.PRG/battleEffect.h:181
@@ -1055,10 +1055,10 @@ T00180.003,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00180.004,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),4,statFactor,0,u_int,5,,,statFactor,Stat scaling factor,med,declaration-only;source:main.h:102
 T00180.005,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),5,type,0,u_int,2,,,damageType,Damage type,med,declaration-only;source:main.h:103
 T00180.006,T00180,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:97:5),6,affinity,0,u_int,3,,,affinity,Elemental affinity,med,declaration-only;source:main.h:104
-T00181.000,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),0,zoneId,0,short,,,,zoneId,Named in the fork; see cited use,med,source:3B8.c:2321
-T00181.001,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),1,mapId,0,short,,,,mapId,Named in the fork; see cited use,med,source:3B8.c:2322
-T00181.002,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),2,par,0,short,,,,par,Named in the fork; see cited use,med,source:3B8.c:2323
-T00181.003,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),3,rankCap,0,short,,,,rankCap,Named in the fork; see cited use,med,source:3B8.c:2324
+T00181.000,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),0,zoneId,0,short,,,,zone_id,Named in the fork; see cited use,med,native:CubePuzzleLifecycle.hpp CubePuzzleRecord::zone_id (#471);source:3B8.c:2321
+T00181.001,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),1,mapId,0,short,,,,map_id,Named in the fork; see cited use,med,native:CubePuzzleLifecycle.hpp CubePuzzleRecord::map_id (#471);source:3B8.c:2322
+T00181.002,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),2,par,0,short,,,,par_seconds,Named in the fork; see cited use,med,native:CubePuzzleLifecycle.hpp CubePuzzleRecord::par_seconds (#471);source:3B8.c:2323
+T00181.003,T00181,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUF.PRG\3B8.c:2267:5),3,rankCap,0,short,,,,rank_cap,Named in the fork; see cited use,med,native:CubePuzzleLifecycle.hpp CubePuzzleRecord::rank_cap (#471);source:3B8.c:2324
 T00182.000,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),0,geometrySectionLen,0,u_int,,,,geometryLength,Geometry section length,med,declaration-only;source:146C.h:221
 T00182.001,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),1,collisionMapSectionLen,0,u_int,,,,collisionMapLength,Collision map section length,med,declaration-only;source:146C.h:222
 T00182.002,T00182,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\SLUS_010.40\..\BATTLE\BATTLE.PRG\146C.h:220:5),2,section3Len,0,u_int,,,,tileCellsLength,Tile cell section length,med,declaration-only;source:146C.h:223
@@ -2084,14 +2084,14 @@ T00260.021,T00260,D_800F4BA4_t2,21,target,0,VECTOR,,,,partnerPosition,Current po
 T00261.000,T00261,D_800F4EE8_t,0,cursorMemories,0,char[52],,,,cursor_memories,Named in the fork; see cited use,med,native:Framework.hpp MenuMemory::cursor_memories (#441);source:58EC.c:74
 T00261.001,T00261,D_800F4EE8_t,1,unk34,1,char[6],,,,ability_unlock_cursors,"Cursor slots 26-28, cleared when a battle ability unlocks",med,native:Framework.hpp MenuMemory::ability_unlock_cursors; MENU2.PRG 143C.c:175 (#441);source:143C.c:171
 T00261.002,T00261,D_800F4EE8_t,2,unk3A,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:126:5),,,inventory-category-and-cursor-memory,inventory_cursors,The inventory screens' selected category and each category's row and page cursor,med,"native:Framework.hpp MenuMemory::inventory_cursors, a CategoryCursorMemory (#441);source:items0.h:49"
-T00261.003,T00261,D_800F4EE8_t,3,unk4C,1,char[4],,,,reserved_4c,Not used by native code; kept for the original layout,med,native:Framework.hpp MenuMemory::reserved_4c (#441);native-refs:none;source:native:Native\Game\src\Menu\Framework\MenuMemory.h:22;declaration-only;source:5BF94.h:137
-T00261.004,T00261,D_800F4EE8_t,4,unk50,1,char,,,,reserved_4c,Not used by native code; kept for the original layout,med,native:Framework.hpp MenuMemory::reserved_4c (#441);native-refs:none;source:native:Native\Game\src\Menu\Framework\MenuMemory.h:23;declaration-only;source:5BF94.h:138
+T00261.003,T00261,D_800F4EE8_t,3,unk4C,1,char[4],,,,reserved_4c,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Menu\Framework\Framework.hpp:251;native:Framework.hpp MenuMemory::reserved_4c (#441);declaration-only;source:5BF94.h:137
+T00261.004,T00261,D_800F4EE8_t,4,unk50,1,char,,,,reserved_4c,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Menu\Framework\Framework.hpp:251;native:Framework.hpp MenuMemory::reserved_4c (#441);declaration-only;source:5BF94.h:138
 T00261.005,T00261,D_800F4EE8_t,5,unk51,1,char[51],,,,limb_selection_and_dimming,Only [49] is used: the status limb panel's step and selection,med,"native:Framework.hpp [49] is MenuMemory::limb_selection_and_dimming, [0-48] are in reserved_4c and [50] is reserved_83; MENU4.PRG 120.c:1172, 1239 (#441);source:120.c:1169"
 T00261.006,T00261,D_800F4EE8_t,6,selectedEquipment,0,char,,,,selected_equipment,Named in the fork; see cited use,med,native:Framework.hpp MenuMemory::selected_equipment (#441);source:120.c:1910
 T00261.007,T00261,D_800F4EE8_t,7,unk85,1,char[25],,,,options_row,[3] is the file menu's selected file and [5] the options menu's remembered row,med,"native:Framework.hpp [3] is MenuMemory::file_cursor (MENU7.PRG 260.c:50-52) and [5] options_row (MENU8.PRG 88.c:610); [0-2], [4] and [6-24] are reserved_85, reserved_89 and reserved_8b (#441);source:MENU/MENU7.PRG/260.c:2703"
 T00261.008,T00261,D_800F4EE8_t,8,unk9E,1,u_short,,,container-transfer-direction-selection,direction_selection,The container transfer's direction choice,med,native:Framework.hpp MenuMemory::direction_selection; MENUD.PRG 234.c:3060-3117 (#441);source:234.c:3057
 T00261.009,T00261,D_800F4EE8_t,9,unkA0,1,char[18],,,container-category-and-cursor-memory,container_cursors,The container screens' selected category and each category's row and page cursor,med,"native:Framework.hpp MenuMemory::container_cursors, a CategoryCursorMemory; MENUD.PRG 234.c:2432-2944 (#441);source:234.c:2431"
-T00261.010,T00261,D_800F4EE8_t,10,unkB2,1,char[64],,,,reserved_b2,Not used by native code; kept for the original layout,med,native:Framework.hpp MenuMemory::reserved_b2 (#441);native-refs:none;source:native:Native\Game\src\Menu\Framework\MenuMemory.h:29;declaration-only;source:5BF94.h:144
+T00261.010,T00261,D_800F4EE8_t,10,unkB2,1,char[64],,,,reserved_b2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Menu\Framework\Framework.hpp:268;native:Framework.hpp MenuMemory::reserved_b2 (#441);declaration-only;source:5BF94.h:144
 T00262.000,T00262,D_800F53B8_t,0,next,0,struct D_800F53B8_t *,,,,next,Named in the fork; see cited use,med,source:5BF94.c:5124
 T00262.001,T00262,D_800F53B8_t,1,previous,0,struct D_800F53B8_t *,,,,parent,Parent instance that spawned this one (fork name previous),high,source:5BF94.c:7779
 T00262.002,T00262,D_800F53B8_t,2,unk8,1,char,,,particleCount,particleCount,Particles the instance owns,high,source:5BF94.c:6839
@@ -2739,7 +2739,7 @@ T00315.000,T00315,_loadFileContext,0,lba,0,u_short,,,,lba,"First sector of the f
 T00315.001,T00315,_loadFileContext,1,size,0,u_short,,,,size,Size of the file in bytes,med,native:Effects/EffectResources.hpp EffectFileExtent::size (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:8
 T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,category,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::category (#441);source:MENU/MENUB.PRG/260.c:265
 T00316.001,T00316,_lootListItem,1,itemIndex,0,u_char,,,zeroBasedWorkingInventoryIndex,item_index,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::item_index (#441);source:MENU/MENUB.PRG/260.c:274
-T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,slide_step,Not used by native code; kept for the original layout,med,native:LootRows.hpp LootRow::slide_step (#441);native-refs:none;source:native:Native\Game\src\Menu\Loot\LootInventory.h:21;source:MENU/MENUB.PRG/260.c:545
+T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,slide_step,Slide-in step of the row; staging clears it and SlideRow advances it,med,native:LootRows.hpp LootRow::slide_step (#441);source:MENU/MENUB.PRG/260.c:545
 T00316.003,T00316,_lootListItem,3,state,0,char,,,claimabilityOrComponentIndentation,state,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::state (#441);source:MENU/MENUB.PRG/260.c:286
 T00317.000,T00317,_menuBgChunkWidths_t,0,unk0,1,int,,,,kScrollFadeChunkWidths[0],"Scroll-fade chunk width (128, 128, 64)",med,"native:ManualPage.hpp kScrollFadeChunkWidths[0], chunk 0's width (#441);declaration-only;source:MENU/MENUE.PRG/494.c:32"
 T00317.001,T00317,_menuBgChunkWidths_t,1,unk4,1,int,,,,kScrollFadeChunkWidths[1],"Scroll-fade chunk width (128, 128, 64)",med,"native:ManualPage.hpp kScrollFadeChunkWidths[1], chunk 1's width (#441);declaration-only;source:MENU/MENUE.PRG/494.c:33"
@@ -2757,7 +2757,7 @@ T00319.005,T00319,_monBinData_t,5,animationState,0,short,,,,animation_state,Name
 T00319.006,T00319,_monBinData_t,6,unlocked,0,u_char,,,,unlocked,Named in the fork; see cited use,med,source:238.c:1416
 T00319.007,T00319,_monBinData_t,7,prev,0,u_char,,,,prev,Named in the fork; see cited use,med,source:238.c:1102
 T00319.008,T00319,_monBinData_t,8,next,0,u_char,,,,next,Named in the fork; see cited use,med,source:238.c:1253
-T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,reserved_f,Not used by native code; kept for the original layout,med,native:ScoreScreen.hpp EnemyEntry::reserved_f (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:33;declaration-only;source:238.c:375
+T00319.009,T00319,_monBinData_t,9,_,0,u_char,,,,reserved_f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.hpp:51;native:ScoreScreen.hpp EnemyEntry::reserved_f (#441);declaration-only;source:238.c:375
 T00319.010,T00319,_monBinData_t,10,name,0,char[28],,,,name,Named in the fork; see cited use,med,source:238.c:2036
 T00320.000,T00320,_mpdEnemy,0,type,0,u_char,,,,kind,Enemy kind,med,source:146C.c:14926;use cited by sanity pass;source:146C.h:662
 T00320.001,T00320,_mpdEnemy,1,index,0,u_char,,,,index,Enemy table index,med,declaration-only;source:146C.h:663
@@ -3107,17 +3107,17 @@ T00348.025,T00348,_zoneContext_t,25,mpdEnemies,0,_mpdEnemy *,,,,mpdEnemies,Room 
 T00348.026,T00348,_zoneContext_t,26,unk68,1,int,,,,currentSceneId,Scene identifier used to detect scene changes,high,source:146C.c:15308
 T00349.000,T00349,_zudData_t,0,characterId,0,u_char,,,,character_id,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::character_id (#441);source:592C.c:218
 T00349.001,T00349,_zudData_t,1,weapon,0,u_char,,,,weapon,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::weapon (#441);source:592C.c:236
-T00349.002,T00349,_zudData_t,2,unk2,1,u_char,,,battleSequenceModelSelector,battle_sequence_model,Model id sent with the battle sequence's parse request,high,native:EncyclopediaPreview.hpp ZudHeader::battle_sequence_model; 592C.c:269 slot.modelId = zudData->unk2 (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:42;source:592C.c:266
+T00349.002,T00349,_zudData_t,2,unk2,1,u_char,,,battleSequenceModelSelector,battle_sequence_model,Model id sent with the battle sequence's parse request,high,native:EncyclopediaPreview.hpp ZudHeader::battle_sequence_model; 592C.c:269 slot.modelId = zudData->unk2 (#441);source:592C.c:266
 T00349.003,T00349,_zudData_t,3,weaponMaterial,0,u_char,,,,weapon_material,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::weapon_material (#441);source:592C.c:244
 T00349.004,T00349,_zudData_t,4,shield,0,u_char,,,,shield,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shield (#441);source:592C.c:248
 T00349.005,T00349,_zudData_t,5,shieldMaterial,0,u_char,,,,shield_material,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shield_material (#441);source:592C.c:256
 T00349.006,T00349,_zudData_t,6,defaultMaterial,0,u_char,,,,default_material,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::default_material (#441);source:592C.c:222
 T00349.007,T00349,_zudData_t,7,shpOffset,0,u_long,,,,shape.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shape.offset (#441);source:592C.c:217
-T00349.008,T00349,_zudData_t,8,shpLen,0,int,,,,shape.bytes,Byte length of the SHP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::shape.bytes (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:48;declaration-only;source:592C.c:16
+T00349.008,T00349,_zudData_t,8,shpLen,0,int,,,,shape.bytes,Byte length of the SHP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::shape.bytes (#441);declaration-only;source:592C.c:16
 T00349.009,T00349,_zudData_t,9,weaponWepOffset,0,u_long,,,,weapon_model.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::weapon_model.offset (#441);source:592C.c:239
-T00349.010,T00349,_zudData_t,10,wepLen,0,int,,,,weapon_model.bytes,Byte length of the weapon WEP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::weapon_model.bytes (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:50;declaration-only;source:592C.c:18
+T00349.010,T00349,_zudData_t,10,wepLen,0,int,,,,weapon_model.bytes,Byte length of the weapon WEP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::weapon_model.bytes (#441);declaration-only;source:592C.c:18
 T00349.011,T00349,_zudData_t,11,shieldWepOffset,0,u_long,,,,shield_model.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::shield_model.offset (#441);source:592C.c:251
-T00349.012,T00349,_zudData_t,12,shieldWepLen,0,int,,,,shield_model.bytes,Byte length of the shield WEP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::shield_model.bytes (#441);native-refs:none;source:native:Native\Game\src\Menu\Score\ScoreScreen.h:52;declaration-only;source:592C.c:20
+T00349.012,T00349,_zudData_t,12,shieldWepLen,0,int,,,,shield_model.bytes,Byte length of the shield WEP section; the native parse bounds-checks the section against the file (ZudSectionFits),high,native:EncyclopediaPreview.hpp ZudHeader::shield_model.bytes (#441);declaration-only;source:592C.c:20
 T00349.013,T00349,_zudData_t,13,commonSeqOffset,0,u_long,,,,common_sequence.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::common_sequence.offset (#441);source:592C.c:273
 T00349.014,T00349,_zudData_t,14,commonSeqLen,0,int,,,,common_sequence.bytes,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::common_sequence.bytes (#441);source:592C.c:270
 T00349.015,T00349,_zudData_t,15,battleSeqOffset,0,u_long,,,,battle_sequence.offset,Named in the fork; see cited use,med,native:EncyclopediaPreview.hpp ZudHeader::battle_sequence.offset (#441);source:592C.c:264

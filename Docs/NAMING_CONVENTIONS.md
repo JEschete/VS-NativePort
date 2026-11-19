@@ -260,7 +260,9 @@ used by several systems goes to that system's `State.c` (e.g. `Native\Game\src\B
 - `Namespace::PascalCase` (`Battle::ActionState`, `Items::BladeDef`). C spelling `Battle_ActionState`, unique across
   the port. `Value` types normally live in `Core` (`Core::Vec3s`).
 - `final_location` is the **header** that will declare it: `Native\<ProjectDir>\include\<Area>\<File>.h` for types
-  used across projects, or `Native\<ProjectDir>\src\<Area>\<File>.h` for types private to one module.
+  used across projects, or `Native\<ProjectDir>\src\<Area>\<File>.h` for types private to one module. Once the native
+  type exists it is that type's file; `gates.py --check` rejects a live row naming a file that does not exist (#471),
+  so a type whose file is deleted is pointed at its native replacement or retired.
 - Rows with `layouts > 1` share a decomp name but have different layouts. Give each its own name, unless one is a
   partial view of the other (then `same-as:T#####` in `notes`, and the merged layout is resolved when copying).
 - The generic decomp names (`D_800F19CC_t`, `func_8006B57C_t`, `unk_t`) must all go. The `aliases` column lists the
@@ -306,7 +308,8 @@ Settle a row by editing its ledger row directly, then regenerate the queue. Each
   declaration). Every `trace_queue.py` run recomputes the line from the index, so header edits do not leave it
   stale, and lists recorded classes that native code no longer matches for review (#457). It also lists field rows
   whose `final_name` matches the native member only when letter case is ignored: `final_name` gives the code's
-  exact spelling (#458).
+  exact spelling (#458). The run refreshes a citation only when the `native-refs:` part starts `notes`, so
+  `gates.py --check` rejects one placed later in a live row (#471).
 - `trace:<scenario>:<observation>`: a runtime result. `<scenario>` names the log
   `tools\naming\traces\<scenario>.md`, `<observation>` is a short kebab-case result
   (`trace:map009-door:read-on-open`). A trace that establishes the meaning raises the row to `med` or `high`.

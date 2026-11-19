@@ -149,7 +149,7 @@ as evidence (#46):
 
 | Gate | Inputs | `--check` rejects |
 | --- | --- | --- |
-| Ownership | catalog, `owned.csv`, copy manifest | unknown/duplicate owned IDs, missing paths, owned paths in the manifest, location mismatches, unregistered rows in owned files, invalid `copied`, `retired` without `copy=no` and `retired-by:` |
+| Ownership | catalog, `owned.csv`, copy manifest, data/type/field ledgers | unknown/duplicate owned IDs, missing paths, owned paths in the manifest, location mismatches, unregistered rows in owned files, invalid `copied`, `retired` without `copy=no` and `retired-by:`, a live type row whose `final_location` does not exist, a live row whose `native-refs:` citation does not start its notes |
 | C++ promotion | `CPP_PROMOTION.csv`, source, projects | a §8.2 claim that does not verify, a missing record for an owned C++ function, catalog `cpp` differing from the derived value, remaining consumers of the old symbol |
 | Quality | generated `.vcxproj` files, `baseline.json` | owned C++ or any promotion claim compiled relaxed, `strict_clean` on a file with baseline debt |
 | Behavior | `VERIFY_LEDGER.csv`, Catch2 sources | `verified=x` without a passing record, unresolved references, missing revision, configuration or limits, invalid values |
