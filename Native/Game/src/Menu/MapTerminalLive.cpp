@@ -32,7 +32,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
@@ -125,14 +125,14 @@ void StoreAngles(SVECTOR& target, MapAngles value) {
 
 MapMenuState ReadState() {
   return {.view = ReadLiveMapView(),
-          .selected_map = Menu_Map_selectedMap,
-          .label_y = Menu_Map_mapLabelY};
+          .selected_map = chosenMap,
+          .label_y = mapLabelY};
 }
 
 void StoreState(const MapMenuState& state) {
   WriteLiveMapView(state.view);
-  Menu_Map_selectedMap = state.selected_map;
-  Menu_Map_mapLabelY = state.label_y;
+  chosenMap = state.selected_map;
+  mapLabelY = state.label_y;
 }
 
 std::span<std::byte> Payload(void* pointer) {
@@ -156,7 +156,7 @@ bool ReleaseScene() {
   const auto bytes = Payload(Battle_unusedSceneBuffer);
   ClearLiveMapTextBorrow(bytes);
   if (!Content::CancelLiveDiscWrites(bytes)) return false;
-  Menu_Map_roomNamesTable = nullptr;
+  roomNamesTable = nullptr;
   ForgetLiveMapScene(Battle_unusedSceneBuffer);
   memory::FreeLiveFromHighEnd(Battle_unusedSceneBuffer);
   Battle_unusedSceneBuffer = nullptr;
@@ -166,14 +166,14 @@ bool ReleaseScene() {
 bool ShowRoomText(std::int32_t room) {
   const auto bytes = LoadedScene();
   if (!bytes || bytes->size() < sizeof(std::int32_t) || room < 0 ||
-      Menu_Map_roomNamesTable == nullptr) {
+      roomNamesTable == nullptr) {
     return false;
   }
   std::int32_t count = 0;
   std::memcpy(&count, bytes->data(), sizeof(count));
   if (room >= count) return false;
   const auto first = reinterpret_cast<std::uintptr_t>(bytes->data());
-  const auto names = reinterpret_cast<std::uintptr_t>(Menu_Map_roomNamesTable);
+  const auto names = reinterpret_cast<std::uintptr_t>(roomNamesTable);
   if (names < first || names - first > bytes->size()) return false;
   const auto start = static_cast<std::size_t>(names - first);
   if (static_cast<std::size_t>(room) >=
@@ -311,13 +311,13 @@ class LiveMapMenu final : public MapMenuHost {
   }
   void ShowAreaName(std::int32_t scene, bool current) override {
     if (!ValidScene(scene)) return;
-    const std::size_t offset = Menu_Map_mapNames[scene];
-    if (offset >= std::size(Menu_Map_mapNames)) {
+    const std::size_t offset = mapNames[scene];
+    if (offset >= std::size(mapNames)) {
       Refuse("ShowAreaName", "offset outside names");
       return;
     }
     Call([&] {
-      LiveShowAreaName(reinterpret_cast<char*>(&Menu_Map_mapNames[offset]),
+      LiveShowAreaName(reinterpret_cast<char*>(&mapNames[offset]),
                        static_cast<char>(current));
     });
   }
@@ -329,7 +329,7 @@ class LiveMapMenu final : public MapMenuHost {
     auto* destination =
         memory::AllocateLiveFromHighEnd(static_cast<std::size_t>(file.bytes));
     if (destination == nullptr) return false;
-    const auto* original_file = &Menu_Map_kSceneArmFiles[scene];
+    const auto* original_file = &kSceneArmFiles[scene];
     auto* request = Content::AllocateLiveDiscRequest(original_file);
     if (request != nullptr) {
       Content::EnqueueLiveDiscRequest(request, destination);
@@ -339,8 +339,8 @@ class LiveMapMenu final : public MapMenuHost {
     }
     pending_scene = {request, Content::LiveDiscRequestGeneration(request),
                      destination, file};
-    Menu_Map_armFileBuff = destination;
-    Menu_Map_sceneCdQueueSlot = request;
+    armFileBuff = destination;
+    sceneCdQueueSlot = request;
     return request != nullptr;
   }
   std::int32_t SceneReadState() override {
@@ -372,7 +372,7 @@ class LiveMapMenu final : public MapMenuHost {
       pending_scene.request = nullptr;
       pending_scene.generation = 0;
       pending_scene.read_completed = true;
-      Menu_Map_sceneCdQueueSlot = nullptr;
+      sceneCdQueueSlot = nullptr;
     }
     if (!ReleaseScene()) return false;
     auto* destination =
@@ -382,10 +382,10 @@ class LiveMapMenu final : public MapMenuHost {
                                  file.bytes);
     memory::FreeLiveFromHighEnd(pending_scene.destination);
     pending_scene = {};
-    Menu_Map_armFileBuff = nullptr;
+    armFileBuff = nullptr;
     Battle_unusedSceneBuffer = destination;
     BindLiveMapScene(destination, static_cast<std::size_t>(file.bytes));
-    Menu_Map_roomNamesTable = Field::ResolveLiveSceneRoomData(
+    roomNamesTable = Field::ResolveLiveSceneRoomData(
         destination, static_cast<std::size_t>(file.bytes));
     Field::RestoreLiveSceneRoomVisits(destination,
                                       static_cast<std::size_t>(file.bytes));
@@ -448,7 +448,7 @@ class LiveScreen final : public MapScreenHost {
  public:
   bool CaptureBackground() override {
     if (resources.background != nullptr) return false;
-    Menu_Map_currentMapRow = -1;
+    currentMapRow = -1;
     resources.background = memory::AllocateLiveFromHighEnd(kBackgroundBytes);
     if (resources.background == nullptr) return false;
     resources.projection_offset = Render::GetLiveProjectionScreenOffset();
@@ -528,11 +528,11 @@ bool DrainPendingScene() {
           pending_scene.generation) {
     Content::ReleaseLiveDiscRequest(pending_scene.request);
   }
-  if (Menu_Map_sceneCdQueueSlot == pending_scene.request) {
-    Menu_Map_sceneCdQueueSlot = nullptr;
+  if (sceneCdQueueSlot == pending_scene.request) {
+    sceneCdQueueSlot = nullptr;
   }
-  if (Menu_Map_armFileBuff == pending_scene.destination) {
-    Menu_Map_armFileBuff = nullptr;
+  if (armFileBuff == pending_scene.destination) {
+    armFileBuff = nullptr;
   }
   memory::FreeLiveFromHighEnd(pending_scene.destination);
   pending_scene = {};
@@ -542,14 +542,13 @@ bool DrainPendingScene() {
 
 // F02689: _renderScreen, src/MENU/MENU5.PRG/4D8.c:905.
 void LiveDrawFrame() {
-  if (!ValidScene(Menu_Map_currentScene)) {
+  if (!ValidScene(currentScene)) {
     Refuse("DrawFrame", "scene outside Paling flags");
     return;
   }
   LiveFrame host;
-  if (!DrawFrame(host,
-                 VS::State::stateFlags.map_paling[Menu_Map_currentScene] != 0,
-                 Menu_Map_isPaling != 0)) {
+  if (!DrawFrame(host, VS::State::stateFlags.map_paling[currentScene] != 0,
+                 isPaling != 0)) {
     Refuse("DrawFrame", "mask command has no frame capacity");
   }
 }
@@ -557,9 +556,8 @@ void LiveDrawFrame() {
 // F02690: _setCamera, src/MENU/MENU5.PRG/4D8.c:948.
 void LiveApplyCamera() {
   const auto camera =
-      ApplyCamera(AnglesOf(Menu_Map_cameraAngles), Menu_Map_cameraDistance,
-                  AnglesOf(Menu_Map_cameraPos));
-  StoreAngles(Menu_Map_cameraPos, camera.position);
+      ApplyCamera(AnglesOf(cameraAngles), cameraDistance, AnglesOf(cameraPos));
+  StoreAngles(cameraPos, camera.position);
   MATRIX matrix{};
   Core::Math::StoreTransform(matrix, camera.transform);
   Core_Gte_SetRotMatrix(&matrix);
@@ -578,7 +576,7 @@ void LiveDarkenBackground() {
 void LiveDrawPalingDistortion() {
   LiveFramebuffer host;
   if (!DrawPalingDistortion(host, VS::Render::frameBuf != 0,
-                            Menu_Map_menuFramesCounter)) {
+                            menuFramesCounter)) {
     Refuse("DrawPalingDistortion", "packet capacity or ordering table");
   }
 }
@@ -586,9 +584,9 @@ void LiveDrawPalingDistortion() {
 // F04151: _menuManager, src/MENU/MENU5.PRG/4D8.c:523.
 int LiveUpdateMapMenu() {
   try {
-    if (!LoadedScene() && !(Menu_Map_menuState == kSceneReadPhase &&
-                            pending_scene.read_completed &&
-                            !Payload(pending_scene.destination).empty())) {
+    if (!LoadedScene() &&
+        !(menuState == kSceneReadPhase && pending_scene.read_completed &&
+          !Payload(pending_scene.destination).empty())) {
       Refuse("UpdateMapMenu",
              "no owned loaded scene or completed staging read");
       return 0;
@@ -607,14 +605,13 @@ int LiveUpdateMapMenu() {
             VS::Render::FrameScratchpad().camera.angles.vy)};
     std::array<DiscFileRange, kSceneCount> files{};
     for (std::size_t index = 0; index < files.size(); ++index) {
-      files[index] = {Menu_Map_kSceneArmFiles[index].lba,
-                      Menu_Map_kSceneArmFiles[index].size};
+      files[index] = {kSceneArmFiles[index].lba, kSceneArmFiles[index].size};
     }
     const auto result = UpdateMapMenu(host, state, input,
                                       {reinterpret_cast<const std::uint8_t*>(
                                            VS::State::stateFlags.map_paling),
                                        kSceneCount},
-                                      Menu_Map_sceneRowIdMap, files);
+                                      sceneRowIdMap, files);
     StoreState(state);
     if (!result) Refuse("UpdateMapMenu", "scene, selection or owned resource");
     return result.value_or(0);
@@ -694,7 +691,7 @@ bool DrainMapTerminalLive() {
     host.SetFieldRendering(true);
     host.ClearCommand();
   }
-  Menu_Map_roomNamesTable = nullptr;
+  roomNamesTable = nullptr;
   return true;
 }
 
@@ -703,17 +700,15 @@ bool ResetMapTerminalModuleData() {
   screen = {};
   resources = {};
   StoreState({});
-  Menu_Map_currentMapRow = -1;
-  Menu_Map_isCurrentScene = 0;
-  Menu_Map_centerPoint = {};
-  Menu_Map_sceneCdQueueSlot = nullptr;
-  Menu_Map_armFileBuff = nullptr;
-  std::ranges::fill(Menu_Map_sceneRowIdMap, 0);
-  std::ranges::fill(Menu_Map_layoutPadding1, 0);
-  std::ranges::fill(Menu_Map_layoutPadding2, 0);
-  std::ranges::fill(Menu_Map_compassBounds, Menu_Map_CompassBound{});
-  std::ranges::fill(Menu_Map_mapLabels, Menu_Map_MapLabel{});
-  Menu_Map_mapLabelCount = 0;
+  currentMapRow = -1;
+  isCurrentScene = 0;
+  centerPoint = {};
+  sceneCdQueueSlot = nullptr;
+  armFileBuff = nullptr;
+  std::ranges::fill(sceneRowIdMap, 0);
+  std::ranges::fill(compassBounds, CompassPoint{});
+  std::ranges::fill(mapLabels, MapLabel{});
+  mapLabelCount = 0;
   ResetMapDrawingModuleData();
   return true;
 }

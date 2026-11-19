@@ -16,7 +16,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPage.hpp"
 #include "Render/Display.hpp"
@@ -140,13 +140,13 @@ void DrawChecked(std::string_view refused, Draw draw) {
 }
 
 PageArrowState ArrowState() {
-  return {.animation_state = Menu_Manual_pageArrowAnimState,
+  return {.animation_state = pageArrowAnimState,
           .square_held = (VS::Input::previousButtons & PADRleft) != 0};
 }
 
 // The help text from its first halfword to the end of its heap payload.
 std::optional<std::span<const std::int16_t>> HelpText() {
-  const auto* first = reinterpret_cast<const std::byte*>(Menu_Manual_helpText);
+  const auto* first = reinterpret_cast<const std::byte*>(helpText);
   const auto payload = Core::Memory::LivePayloadContaining(first);
   if (first == nullptr || !payload.has_value() || first < payload->data() ||
       first >= payload->data() + payload->size()) {
@@ -204,8 +204,7 @@ void LiveDrawPageContent() {
       .height =
           VS::Render::legacyDrawEnvironments[(VS::Render::frameBuf + 1) & 1]
               .clip.h};
-  LiveContentTarget target(
-      reinterpret_cast<std::int16_t*>(Menu_Manual_helpText));
+  LiveContentTarget target(reinterpret_cast<std::int16_t*>(helpText));
   if (DrawPageContent(*help_text, clip, target) == PageDrawResult::kRefused) {
     Refuse("Manual illustration list lies past its help text");
   }
@@ -241,15 +240,11 @@ void LiveDrawLowerScrollFade() {
 }
 
 // decomp: MENUE.PRG _drawPaginationArrow (494.c:844)
-void LiveDrawPageArrow(enum Menu_Manual_ArrowType arrow_type) {
-  if (arrow_type != Menu_Manual_ArrowType_Up &&
-      arrow_type != Menu_Manual_ArrowType_Down) {
+void LiveDrawPageArrow(PageArrow arrow) {
+  if (arrow != PageArrow::kUp && arrow != PageArrow::kDown) {
     Refuse("Manual page arrow type is unknown");
     return;
   }
-  const PageArrow arrow = arrow_type == Menu_Manual_ArrowType_Up
-                              ? PageArrow::kUp
-                              : PageArrow::kDown;
   const PageArrowState state = ArrowState();
   DrawChecked("Manual page arrow refused", [&](PagePrimitiveTarget& target) {
     DrawPageArrow(arrow, state, target);

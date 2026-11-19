@@ -2703,7 +2703,7 @@
     <ClCompile Include="src\Menu\Manual.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Manual.h">
+    <ClInclude Include="src\Menu\Manual.hpp">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\ManualIllustration.cpp">
@@ -2733,7 +2733,7 @@
     <ClCompile Include="src\Menu\Map.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Map.h">
+    <ClInclude Include="src\Menu\Map.hpp">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\MapDrawing.cpp">

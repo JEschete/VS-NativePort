@@ -6,7 +6,7 @@
 #include "Legacy/Psx.h"
 
 // Bindings from the manual screen and help page cores (ManualScreen.hpp) to
-// MENUE.PRG's statics (Menu/Manual.h), the menu framework, the HUD, the game
+// MENUE.PRG's statics (Menu/Manual.hpp), the menu framework, the HUD, the game
 // heap, the disc queue, the display state, the buttons and the frame's
 // ordering table, keeping the original call shapes. The help page statics
 // are published before every call out, as the original's stores precede its

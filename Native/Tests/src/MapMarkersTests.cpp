@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapMarkers.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "State/StateFlags.hpp"
@@ -300,7 +300,7 @@ TEST_CASE("A door state marker shows below flag 2 unless its sigil is open",
 
 struct LiveLabelState {
   LiveLabelState() {
-    std::memcpy(labels.data(), Menu_Map_mapLabels, sizeof(labels));
+    std::memcpy(labels.data(), map::mapLabels, sizeof(labels));
     std::memcpy(&flags, &VS::State::stateFlags, sizeof(flags));
   }
   LiveLabelState(const LiveLabelState&) = delete;
@@ -308,29 +308,29 @@ struct LiveLabelState {
   LiveLabelState(LiveLabelState&&) = delete;
   LiveLabelState& operator=(LiveLabelState&&) = delete;
   ~LiveLabelState() {
-    std::memcpy(Menu_Map_mapLabels, labels.data(), sizeof(labels));
+    std::memcpy(map::mapLabels, labels.data(), sizeof(labels));
     std::memcpy(&VS::State::stateFlags, &flags, sizeof(flags));
-    Menu_Map_mapLabelCount = count;
-    Menu_Map_mapLabelY = label_y;
+    map::mapLabelCount = count;
+    map::mapLabelY = label_y;
   }
 
-  std::array<Menu_Map_MapLabel, map::kMapLabelCapacity> labels{};
+  std::array<map::MapLabel, map::kMapLabelCapacity> labels{};
   VS::State::StateFlags flags{};
-  int count = Menu_Map_mapLabelCount;
-  int label_y = Menu_Map_mapLabelY;
+  int count = map::mapLabelCount;
+  int label_y = map::mapLabelY;
 };
 
 TEST_CASE("The live label queue refuses an append past its capacity",
           "[map-markers][map-markers-live]") {
   const LiveLabelState state;
-  Menu_Map_mapLabelCount = 7;
+  map::mapLabelCount = 7;
   map::LiveQueueLabel(11, 22, 1, 33);
-  CHECK(Menu_Map_mapLabelCount == 8);
-  CHECK(Menu_Map_mapLabels[7].x == 11);
-  CHECK(Menu_Map_mapLabels[7].y == 22);
+  CHECK(map::mapLabelCount == 8);
+  CHECK(map::mapLabels[7].x == 11);
+  CHECK(map::mapLabels[7].y == 22);
   map::LiveQueueLabel(44, 55, 0, 66);
-  CHECK(Menu_Map_mapLabelCount == 8);
-  CHECK(Menu_Map_mapLabels[7].x == 11);
+  CHECK(map::mapLabelCount == 8);
+  CHECK(map::mapLabels[7].x == 11);
 }
 
 TEST_CASE("The live door state test reads its flag unsigned",
@@ -346,8 +346,8 @@ TEST_CASE("The live door state test reads its flag unsigned",
 TEST_CASE("The live markers refuse states icons and names outside tables",
           "[map-markers][map-markers-live]") {
   const LiveLabelState state;
-  Menu_Map_mapLabelCount = 0;
-  Menu_Map_mapLabelY = 77;
+  map::mapLabelCount = 0;
+  map::mapLabelY = 77;
   CHECK(map::LiveShouldDrawDoorStateMarker(0x100000, 0, 0) == 0);
   CHECK(map::LiveShouldDrawDoorStateMarker(-0x400, 0, 0) == 0);
   map::LiveDrawDoorStateMarker(0, 0, 0x100000);
@@ -355,7 +355,7 @@ TEST_CASE("The live markers refuse states icons and names outside tables",
   map::LiveDrawFeatureMarker(-1, 0, 0);
   map::LiveDrawDoorLabel(0, 0, 0x10000);
   map::LiveDrawConnectingAreaLabel(0, 0, 64);
-  CHECK(Menu_Map_mapLabelCount == 0);
-  CHECK(Menu_Map_mapLabelY == 77);
+  CHECK(map::mapLabelCount == 0);
+  CHECK(map::mapLabelY == 77);
 }
 }  // namespace

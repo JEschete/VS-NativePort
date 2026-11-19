@@ -125,8 +125,8 @@
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Magic.hpp"
-#include "Menu/Manual.h"
-#include "Menu/Map.h"
+#include "Menu/Manual.hpp"
+#include "Menu/Map.hpp"
 #include "Menu/OptionsLiveState.hpp"
 #include "Menu/RenameLiveState.hpp"
 #include "Menu/Score/Records.hpp"
@@ -1285,12 +1285,12 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Menu::Inventory::menuText},  // G01068 _menuText
     {"MENU/MENU4.PRG", 0x4C48, 3520u, &VS::Menu::Status::statusStrings,
      sizeof VS::Menu::Status::statusStrings},  // G01183 _statusStrings
-    {"MENU/MENU5.PRG", 0x5BFC, 564u, &Menu_Map_mapNames,
-     sizeof Menu_Map_mapNames},  // G01228 _mapNames
-    {"MENU/MENU5.PRG", 0x5E30, 640u, &Menu_Map_connectingMaps,
-     sizeof Menu_Map_connectingMaps},  // G01213 _connectingMaps
-    {"MENU/MENU5.PRG", 0x60B0, 1044u, &Menu_Map_doors,
-     sizeof Menu_Map_doors},  // G01218 _doors
+    {"MENU/MENU5.PRG", 0x5BFC, 564u, &VS::Menu::map::mapNames,
+     sizeof VS::Menu::map::mapNames},  // G01228 _mapNames
+    {"MENU/MENU5.PRG", 0x5E30, 640u, &VS::Menu::map::connectingMaps,
+     sizeof VS::Menu::map::connectingMaps},  // G01213 _connectingMaps
+    {"MENU/MENU5.PRG", 0x60B0, 1044u, &VS::Menu::map::doors,
+     sizeof VS::Menu::map::doors},  // G01218 _doors
     {"MENU/MENU7.PRG", 0x81B0, 1790u, &VS::Menu::Files::containerStrings,
      sizeof VS::Menu::Files::containerStrings},  // G01269 _containerStrings
     {"MENU/MENU8.PRG", 0x2D58, 2140u, &VS::Menu::Options::menuStrings,
@@ -1319,8 +1319,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Menu::Score::miscInfo},  // G01450 _miscInfo
     {"MENU/MENUD.PRG", 0x6D2C, 1380u, &VS::Menu::container::menuText,
      sizeof VS::Menu::container::menuText},  // G01739 _menuText
-    {"MENU/MENUE.PRG", 0x2654, 1032u, &Menu_Manual_menuText,
-     sizeof Menu_Manual_menuText},  // G01765 _menuText
+    {"MENU/MENUE.PRG", 0x2654, 1032u, &VS::Menu::manual::menuTextTable,
+     sizeof VS::Menu::manual::menuTextTable},  // G01765 _menuText
     {"SLUS_010.40", 0x1FD44, sizeof VS::Audio::Driver::legacySpuEvent,
      &VS::Audio::Driver::legacySpuEvent,
      sizeof VS::Audio::Driver::legacySpuEvent},  // G01826 _soundEvent

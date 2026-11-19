@@ -1,14 +1,14 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // Binds MapLoading.hpp to the generated map menu: the area chooser over
-// VS::State::roomVisitProgress.area_flags, Menu_Map_sceneRowIdMap,
-// Menu_Map_currentMapRow, Menu_Map_mapNames and the framework's menu rows;
-// the background over its own disc request and image; and the ARM scene map
-// over Battle_unusedSceneBuffer, Menu_Map_sceneCdQueueSlot and the Menu_Map_
-// view globals, through MapNavigationLive.hpp's room rules. Each entry keeps
-// the original call shape. Missing menu text or names, a name offset or
-// scene outside its table, a missing disc request and a missing menu row are
-// refused and logged, where the original reads or writes unchecked.
+// VS::State::roomVisitProgress.area_flags, sceneRowIdMap, currentMapRow,
+// mapNames and the framework's menu rows; the background over its own disc
+// request and image; and the ARM scene map over Battle_unusedSceneBuffer,
+// sceneCdQueueSlot and the map view statics (Menu/Map.hpp), through
+// MapNavigationLive.hpp's room rules. Each entry keeps the original call shape.
+// Missing menu text or names, a name offset or scene outside its table, a
+// missing disc request and a missing menu row are refused and logged, where the
+// original reads or writes unchecked.
 
 namespace VS::Menu::map {
 struct SceneMapView;

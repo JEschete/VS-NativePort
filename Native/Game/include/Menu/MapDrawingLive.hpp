@@ -3,7 +3,7 @@
 // Binds MapDrawing.hpp to the generated map menu: the GTE projection and
 // depth cue, the frame's primitive cursor and ordering table, the map
 // markers (MapMarkersLive.hpp), text box 0, the button and caption glyphs and
-// the copied map globals (Menu_Map_*). Each entry keeps the original call
+// MENU5.PRG's map statics (Menu/Map.hpp). Each entry keeps the original call
 // shape. A room outside the menu's loaded scene, a malformed room, a scene
 // outside the state flags, an over-full label queue, an oversized backdrop
 // and a primitive buffer or ordering-table entry without room are refused
@@ -19,7 +19,7 @@ int LiveDrawRoom(int room_index, void* room_data, int zone_id, int map_id);
 void LiveDrawControlBackdrop(int x, int y, int w, int h);
 void LiveDrawControls();
 void LiveDrawCompass(int x, int y, int angle);
-// Leaves the corners in Menu_Map_compassBounds.
+// Leaves the corners in compassBounds.
 void LiveComputeCompassCorners(int center_x, int center_y, int width,
                                int height, int angle);
 void LiveDrawLabels();

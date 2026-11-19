@@ -21,7 +21,7 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapNavigation.hpp"
 #include "Menu/MapSceneStorageLive.hpp"
 
@@ -37,8 +37,6 @@ constexpr std::size_t kZoneOffset = 8;
 constexpr std::size_t kMapOffset = 10;
 constexpr std::size_t kLinkPreviousOffset = 32;
 constexpr std::size_t kLinkNextOffset = 34;
-// Menu_Map_kSceneArmFiles' entries.
-constexpr int kSceneArmFileCount = 32;
 
 static_assert(sizeof(Field_MapRoom) == Field::kMapSceneRoomRecordBytes);
 static_assert(sizeof(Field_MapRoomName) == Field::kMapSceneRoomNameBytes);
@@ -82,11 +80,10 @@ void Write(std::span<std::byte> bytes, std::size_t offset, T value) {
   if (scene == nullptr) return std::nullopt;
   if (scene == Battle_unusedSceneBuffer) {
     if (const auto loaded = BoundLiveMapScene(scene)) return loaded;
-    if (Menu_Map_currentScene < 0 ||
-        Menu_Map_currentScene >= kSceneArmFileCount) {
+    if (currentScene < 0 || currentScene >= kSceneCount) {
       return std::nullopt;
     }
-    const int size = Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size;
+    const int size = kSceneArmFiles[currentScene].size;
     if (size < 0) return std::nullopt;
     return std::span{static_cast<std::byte*>(Battle_unusedSceneBuffer),
                      static_cast<std::size_t>(size)};
@@ -230,15 +227,13 @@ struct LiveScene {
 }
 
 [[nodiscard]] MapPoint CenterPoint() {
-  return {.x = Menu_Map_centerPoint.vx,
-          .y = Menu_Map_centerPoint.vy,
-          .z = Menu_Map_centerPoint.vz};
+  return {.x = centerPoint.vx, .y = centerPoint.vy, .z = centerPoint.vz};
 }
 
 void SetCenterPoint(MapPoint center) {
-  Menu_Map_centerPoint.vx = center.x;
-  Menu_Map_centerPoint.vy = center.y;
-  Menu_Map_centerPoint.vz = center.z;
+  centerPoint.vx = center.x;
+  centerPoint.vy = center.y;
+  centerPoint.vz = center.z;
 }
 
 class LiveMapNavigationHost final : public MapNavigationHost {
@@ -339,7 +334,7 @@ int LiveInitialRoomIndex(Field_MapScene* scene) {
   }
   const InitialRoom initial =
       InitialRoomOf(RoomsOf(live->bytes, live->room_count), current);
-  Menu_Map_isCurrentScene = initial.current;
+  isCurrentScene = initial.current;
   return initial.selected;
 }
 
@@ -348,8 +343,7 @@ void LiveSelectAdjacentVisitedRoom(int search_forward) {
   constexpr std::string_view kCall = "SelectAdjacentVisitedRoom";
   const auto live = LiveSceneOf(kCall, Battle_unusedSceneBuffer);
   if (!live.has_value()) return;
-  const auto* names =
-      reinterpret_cast<const std::byte*>(Menu_Map_roomNamesTable);
+  const auto* names = reinterpret_cast<const std::byte*>(roomNamesTable);
   const std::byte* scene_begin = live->bytes.data();
   const std::byte* scene_end = scene_begin + live->bytes.size();
   if (names == nullptr || names < scene_begin || names > scene_end ||
@@ -369,12 +363,12 @@ void LiveSelectAdjacentVisitedRoom(int search_forward) {
   }
   LiveMapNavigationHost host;
   const auto selected = SelectAdjacentVisitedRoom(
-      host, links, RoomsOf(live->bytes, live->room_count),
-      Menu_Map_currentRoomIndex, search_forward);
+      host, links, RoomsOf(live->bytes, live->room_count), currentRoomIndex,
+      search_forward);
   if (!selected.has_value()) {
     Refuse(kCall, "a link leaves the rooms or no room is visited");
     return;
   }
-  Menu_Map_currentRoomIndex = *selected;
+  currentRoomIndex = *selected;
 }
 }  // namespace VS::Menu::map

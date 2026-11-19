@@ -12,7 +12,7 @@
 #include "Field/Map.h"
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapTerminalLive.hpp"
 #include "Render/DepthCueLive.hpp"
@@ -35,7 +35,7 @@ struct MapFixture {
   Field_MapScene* saved_minimap = Field_roomData.minimapScene;
   u_int saved_minimap_length = Field_roomData.header.minimapSceneLength;
   int saved_framebuffer = VS::Render::frameBuf;
-  int saved_room = Menu_Map_currentRoomIndex;
+  int saved_room = VS::Menu::map::currentRoomIndex;
   std::vector<u_long> storage =
       std::vector<u_long>(0x20000 / sizeof(u_long) + 2, 0xDEADBEEF);
   std::array<u_long, 2084> ordering{};
@@ -58,7 +58,7 @@ struct MapFixture {
     std::copy_n(static_cast<unsigned char*>(VS::Core::ScratchBase()) +
                     sizeof(VS::Render::FrameScratch),
                 saved_tail.size(), saved_tail.begin());
-    Menu_Map_currentRoomIndex = 0;
+    VS::Menu::map::currentRoomIndex = 0;
     VS::Menu::map::ResetMapDrawingLive();
   }
 
@@ -72,7 +72,7 @@ struct MapFixture {
     Field_roomData.header.minimapSceneLength = saved_minimap_length;
     VS::Menu::map::ResetMapDrawingLive();
     VS::Render::frameBuf = saved_framebuffer;
-    Menu_Map_currentRoomIndex = saved_room;
+    VS::Menu::map::currentRoomIndex = saved_room;
     Core_Gte_Reset();
   }
 

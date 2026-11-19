@@ -12,7 +12,7 @@
 #include "Core/Text/TextCode.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -34,8 +34,8 @@ struct ManualFrameFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  int saved_scroll = Menu_Manual_scrollPosition;
-  int saved_arrow = Menu_Manual_pageArrowAnimState;
+  int saved_scroll = VS::Menu::manual::scrollPosition;
+  int saved_arrow = VS::Menu::manual::pageArrowAnimState;
   std::vector<u_long> storage = std::vector<u_long>(0x8002, 0xDEADBEEF);
   std::array<u_long, 64> ordering{};
 
@@ -46,8 +46,8 @@ struct ManualFrameFixture {
     VS::Render::legacyOrderingTables[0] = ordering.data();
     VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
     VS::Render::FrameScratchpad().ordering_table = ordering.data() + 16;
-    Menu_Manual_scrollPosition = 0;
-    Menu_Manual_pageArrowAnimState = 0;
+    VS::Menu::manual::scrollPosition = 0;
+    VS::Menu::manual::pageArrowAnimState = 0;
   }
 
   ~ManualFrameFixture() {
@@ -55,8 +55,8 @@ struct ManualFrameFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
-    Menu_Manual_scrollPosition = saved_scroll;
-    Menu_Manual_pageArrowAnimState = saved_arrow;
+    VS::Menu::manual::scrollPosition = saved_scroll;
+    VS::Menu::manual::pageArrowAnimState = saved_arrow;
   }
 
   void CheckPackets(std::size_t bytes, unsigned expected) const {
@@ -109,9 +109,9 @@ TEST_CASE("Manual panels use full native frame pointers and packet links",
       packets = 66;
       break;
     default:
-      VS::Menu::manual::LiveDrawPageArrow(operation == 4
-                                              ? Menu_Manual_ArrowType_Up
-                                              : Menu_Manual_ArrowType_Down);
+      VS::Menu::manual::LiveDrawPageArrow(
+          operation == 4 ? VS::Menu::manual::PageArrow::kUp
+                         : VS::Menu::manual::PageArrow::kDown);
       bytes = sizeof(POLY_FT4);
       packets = 1;
       break;
@@ -142,10 +142,10 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
   REQUIRE(payload != nullptr);
   std::ranges::copy(help, payload);
   const auto saved_box = *VS::Menu::LiveTextBox(0);
-  auto* saved_help = Menu_Manual_helpText;
-  const int saved_scroll = Menu_Manual_scrollPosition;
-  Menu_Manual_helpText = payload;
-  Menu_Manual_scrollPosition = scroll;
+  auto* saved_help = VS::Menu::manual::helpText;
+  const int saved_scroll = VS::Menu::manual::scrollPosition;
+  VS::Menu::manual::helpText = payload;
+  VS::Menu::manual::scrollPosition = scroll;
   VS::Menu::LiveTextBox(0)->flags.speakerTexture = 32;
   VS::Menu::manual::LiveCopyPageText();
   ReuseReturnedStack();
@@ -162,6 +162,6 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
   CHECK(std::string(VS::Menu::LiveTextBox(0)->string, expected.size()) ==
         expected);
   *VS::Menu::LiveTextBox(0) = saved_box;
-  Menu_Manual_helpText = saved_help;
-  Menu_Manual_scrollPosition = saved_scroll;
+  VS::Menu::manual::helpText = saved_help;
+  VS::Menu::manual::scrollPosition = saved_scroll;
 }

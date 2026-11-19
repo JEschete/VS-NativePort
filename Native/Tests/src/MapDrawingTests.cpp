@@ -18,7 +18,7 @@
 #include "Field/Map.h"
 #include "Field/Room.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -849,7 +849,7 @@ class LiveMap {
 
   LiveMap() {
     std::memcpy(&saved_flags_, &VS::State::stateFlags, sizeof(saved_flags_));
-    std::memcpy(saved_bounds_.data(), Menu_Map_compassBounds,
+    std::memcpy(saved_bounds_.data(), map::compassBounds,
                 sizeof(saved_bounds_));
     std::memcpy(saved_trims_.data(), VS::Render::compactGlyphLeftTrim,
                 sizeof(saved_trims_));
@@ -872,13 +872,13 @@ class LiveMap {
     VS::Render::legacyOrderingTables[0] = ordering.data();
     VS::Render::legacyPrimitiveBuffers[0] = primitives.data();
     Reset();
-    Menu_Map_currentRoomIndex = 0;
-    Menu_Map_isCurrentScene = 0;
-    Menu_Map_menuFramesCounter = 0;
-    Menu_Map_mapLabelCount = 0;
-    Menu_Map_menuCommandsState = 0;
-    Menu_Map_triggerHideUi = 0;
-    Menu_Map_currentScene = 0;
+    map::currentRoomIndex = 0;
+    map::isCurrentScene = 0;
+    map::menuFramesCounter = 0;
+    map::mapLabelCount = 0;
+    map::menuCommandsState = 0;
+    map::triggerHideUi = 0;
+    map::currentScene = 0;
     Field_enteredDoorId = -1;
     map::ResetMapDrawingLive();
   }
@@ -888,7 +888,7 @@ class LiveMap {
   LiveMap& operator=(LiveMap&&) = delete;
   ~LiveMap() {
     std::memcpy(&VS::State::stateFlags, &saved_flags_, sizeof(saved_flags_));
-    std::memcpy(Menu_Map_compassBounds, saved_bounds_.data(),
+    std::memcpy(map::compassBounds, saved_bounds_.data(),
                 sizeof(saved_bounds_));
     std::memcpy(VS::Render::compactGlyphLeftTrim, saved_trims_.data(),
                 sizeof(saved_trims_));
@@ -953,22 +953,22 @@ class LiveMap {
   Restore<int> frame_{VS::Render::frameBuf};
   Restore<void*> ordering_table_{VS::Render::legacyOrderingTables[0]};
   Restore<void*> primitive_buffer_{VS::Render::legacyPrimitiveBuffers[0]};
-  Restore<int> room_{Menu_Map_currentRoomIndex};
-  Restore<int> scene_room_{Menu_Map_isCurrentScene};
-  Restore<int> frames_{Menu_Map_menuFramesCounter};
-  Restore<int> label_count_{Menu_Map_mapLabelCount};
-  Restore<std::int16_t> commands_{Menu_Map_menuCommandsState};
-  Restore<std::int16_t> animation_{Menu_Map_uiAnimationState};
-  Restore<int> hide_{Menu_Map_triggerHideUi};
-  Restore<int> scene_{Menu_Map_currentScene};
-  Restore<int> geom_x_{Menu_Map_geomOffsetX};
-  Restore<int> geom_y_{Menu_Map_geomOffsetY};
-  Restore<SVECTOR> angles_{Menu_Map_cameraAngles};
+  Restore<int> room_{map::currentRoomIndex};
+  Restore<int> scene_room_{map::isCurrentScene};
+  Restore<int> frames_{map::menuFramesCounter};
+  Restore<int> label_count_{map::mapLabelCount};
+  Restore<std::int16_t> commands_{map::menuCommandsState};
+  Restore<std::int16_t> animation_{map::uiAnimationState};
+  Restore<int> hide_{map::triggerHideUi};
+  Restore<int> scene_{map::currentScene};
+  Restore<int> geom_x_{map::geomOffsetX};
+  Restore<int> geom_y_{map::geomOffsetY};
+  Restore<SVECTOR> angles_{map::cameraAngles};
   Restore<std::int16_t> door_{Field_enteredDoorId};
   Restore<Field_MapScene*> minimap_{Field_roomData.minimapScene};
   Restore<u_int> minimap_length_{Field_roomData.header.minimapSceneLength};
   VS::State::StateFlags saved_flags_{};
-  std::array<Menu_Map_CompassBound, 4> saved_bounds_{};
+  std::array<map::CompassPoint, 4> saved_bounds_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphLeftTrim)> saved_trims_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphWidths)> saved_widths_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphIndices)> saved_indices_{};
@@ -1001,8 +1001,8 @@ void LoadMinimap(std::vector<u_long>& scene) {
 // The four compass corners the drawing leaves in _compassBounds.
 std::array<std::int32_t, 8> CompassBounds() {
   std::array<std::int32_t, 8> bounds{};
-  static_assert(sizeof(bounds) == sizeof(Menu_Map_compassBounds));
-  std::memcpy(bounds.data(), Menu_Map_compassBounds, sizeof(bounds));
+  static_assert(sizeof(bounds) == sizeof(map::compassBounds));
+  std::memcpy(bounds.data(), map::compassBounds, sizeof(bounds));
   return bounds;
 }
 
@@ -1264,7 +1264,7 @@ TEST_CASE("The live room outside the current one draws no marker",
   LiveMap frame;
   auto scene = OneRoomScene(1);
   LoadMinimap(scene);
-  Menu_Map_currentRoomIndex = 1;
+  map::currentRoomIndex = 1;
   CHECK(map::LiveDrawRoom(0, scene.data() + 4, 1, 2) == 1);
   CHECK(frame.UsedWords() == 46);
   CHECK(frame.Chain() == OtherRoomChain());
@@ -1290,13 +1290,13 @@ TEST_CASE("Live visited rooms draw centred and clear the label queue",
   const std::int32_t visited = GENERATE(0, 1);
   auto scene = OneRoomScene(visited);
   LoadMinimap(scene);
-  Menu_Map_geomOffsetX = -20;
-  Menu_Map_geomOffsetY = 8;
-  Menu_Map_mapLabelCount = 5;
+  map::geomOffsetX = -20;
+  map::geomOffsetY = 8;
+  map::mapLabelCount = 5;
   const VS::Render::ScreenOffset before =
       VS::Render::GetLiveProjectionScreenOffset();
   map::LiveDrawVisitedRooms(reinterpret_cast<Field_MapScene*>(scene.data()));
-  CHECK(Menu_Map_mapLabelCount == 0);
+  CHECK(map::mapLabelCount == 0);
   const VS::Render::ScreenOffset after =
       VS::Render::GetLiveProjectionScreenOffset();
   CHECK(after.x == before.x);
@@ -1315,13 +1315,13 @@ TEST_CASE("Live visited rooms refuse a scene the menu did not load",
   LiveMap frame;
   auto scene = OneRoomScene(1);
   Field_roomData.minimapScene = nullptr;
-  Menu_Map_mapLabelCount = 5;
+  map::mapLabelCount = 5;
   map::LiveDrawVisitedRooms(reinterpret_cast<Field_MapScene*>(scene.data()));
-  CHECK(Menu_Map_mapLabelCount == 5);
+  CHECK(map::mapLabelCount == 5);
   LoadMinimap(scene);
   scene[0] = 100;
   map::LiveDrawVisitedRooms(reinterpret_cast<Field_MapScene*>(scene.data()));
-  CHECK(Menu_Map_mapLabelCount == 5);
+  CHECK(map::mapLabelCount == 5);
   CHECK(frame.UsedWords() == 0);
 }
 
@@ -1366,7 +1366,7 @@ TEST_CASE("The live compass needle turns with the angle and camera roll",
       std::tuple{-1234, 0, Bounds{47, 196, 42, 183, 62, 191, 57, 178}},
       std::tuple{-1234, 300, Bounds{55, 202, 44, 191, 66, 191, 55, 180}});
   LiveMap frame;
-  Menu_Map_cameraAngles.vz = static_cast<std::int16_t>(roll);
+  map::cameraAngles.vz = static_cast<std::int16_t>(roll);
   map::LiveDrawCompass(62, 184, angle);
   const auto chain = frame.Chain();
   REQUIRE(chain.size() == 17);
@@ -1387,7 +1387,7 @@ TEST_CASE("The live compass corners store the rotated rectangle",
                std::tuple{1000, Bounds{38, 33, 38, 47, 22, 33, 22, 47}},
                std::tuple{-3000, Bounds{39, 34, 37, 48, 23, 32, 21, 46}});
   LiveMap frame;
-  std::memset(Menu_Map_compassBounds, 0, sizeof(Menu_Map_compassBounds));
+  std::memset(map::compassBounds, 0, sizeof(map::compassBounds));
   map::LiveComputeCompassCorners(30, 40, 15, 17, angle);
   CHECK(CompassBounds() == expected);
   CHECK(frame.UsedWords() == 0);
@@ -1416,17 +1416,17 @@ void CheckLegendButtons(const std::vector<ChainedPacket>& chain,
 TEST_CASE("The live legend slides in 16 pixels a frame with text box 0",
           "[map-drawing-live]") {
   LiveMap frame;
-  Menu_Map_menuCommandsState = static_cast<std::int16_t>(GENERATE(0, 1, 5));
+  map::menuCommandsState = static_cast<std::int16_t>(GENERATE(0, 1, 5));
   VS::State::stateFlags.map_paling[0] = 0;
   Menu_TextBoxState* box = VS::Menu::LiveTextBox(0);
   REQUIRE(box != nullptr);
   box->y = 0;
   box->yIndent = 0;
-  Menu_Map_uiAnimationState = 0;
+  map::uiAnimationState = 0;
   for (std::int32_t step = 0; step < 3; ++step) {
     frame.Reset();
     map::LiveDrawControls();
-    CHECK(Menu_Map_uiAnimationState == 1);
+    CHECK(map::uiAnimationState == 1);
     CHECK(box->y == -8 * step);
     CHECK(box->yIndent == -8 * step);
     CHECK(frame.UsedWords() == 457);
@@ -1442,8 +1442,8 @@ TEST_CASE("The live legend slides in 16 pixels a frame with text box 0",
 TEST_CASE("The live legend refuses a scene outside the paling flags",
           "[map-drawing-live]") {
   LiveMap frame;
-  Menu_Map_uiAnimationState = 3;
-  Menu_Map_currentScene = GENERATE(32, -1);
+  map::uiAnimationState = 3;
+  map::currentScene = GENERATE(32, -1);
   map::LiveDrawControls();
   CHECK(frame.UsedWords() == 0);
 }
@@ -1451,8 +1451,8 @@ TEST_CASE("The live legend refuses a scene outside the paling flags",
 TEST_CASE("The live legend shows the jamming caption alone",
           "[map-drawing-live]") {
   LiveMap frame;
-  Menu_Map_uiAnimationState = 3;
-  Menu_Map_currentScene = 4;
+  map::uiAnimationState = 3;
+  map::currentScene = 4;
   VS::State::stateFlags.map_paling[4] = 1;
   map::LiveDrawControls();
   const std::size_t jammed = frame.UsedWords();
@@ -1466,11 +1466,11 @@ TEST_CASE("The live legend shows the jamming caption alone",
 TEST_CASE("Resetting the live drawing restarts the legend's slide",
           "[map-drawing-live]") {
   LiveMap frame;
-  Menu_Map_triggerHideUi = 1;
+  map::triggerHideUi = 1;
   Menu_TextBoxState* box = VS::Menu::LiveTextBox(0);
   REQUIRE(box != nullptr);
   box->y = 50;
-  Menu_Map_uiAnimationState = 1;
+  map::uiAnimationState = 1;
   for (int step = 0; step < 9; ++step) map::LiveDrawControls();
   CHECK(box->y == -14);
   map::ResetMapDrawingLive();
@@ -1481,8 +1481,8 @@ TEST_CASE("Resetting the live drawing restarts the legend's slide",
 TEST_CASE("The live label drain draws nothing past a hidden legend",
           "[map-drawing-live]") {
   LiveMap frame;
-  Menu_Map_menuCommandsState = 5;
-  Menu_Map_mapLabelCount = 9;
+  map::menuCommandsState = 5;
+  map::mapLabelCount = 9;
   map::LiveDrawLabels();
   CHECK(frame.UsedWords() == 0);
 }

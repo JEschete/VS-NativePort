@@ -13,7 +13,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualPage.hpp"
 #include "Menu/ManualPageLive.hpp"
 #include "Render/Display.hpp"
@@ -457,9 +457,9 @@ class PageGlobalsSnapshot {
         back_env_(VS::Render::legacyDrawEnvironments[1]),
         primitives_(VS::Render::legacyPrimitiveBuffers[0]),
         ordering_(VS::Render::legacyOrderingTables[0]),
-        help_(Menu_Manual_helpText),
+        help_(manual::helpText),
         frame_index_(VS::Render::frameBuf),
-        arrow_state_(Menu_Manual_pageArrowAnimState),
+        arrow_state_(manual::pageArrowAnimState),
         held_(VS::Input::previousButtons) {}
   PageGlobalsSnapshot(const PageGlobalsSnapshot&) = delete;
   PageGlobalsSnapshot& operator=(const PageGlobalsSnapshot&) = delete;
@@ -467,9 +467,9 @@ class PageGlobalsSnapshot {
   PageGlobalsSnapshot& operator=(PageGlobalsSnapshot&&) = delete;
   ~PageGlobalsSnapshot() {
     VS::Input::previousButtons = held_;
-    Menu_Manual_pageArrowAnimState = arrow_state_;
+    manual::pageArrowAnimState = arrow_state_;
     VS::Render::frameBuf = frame_index_;
-    Menu_Manual_helpText = help_;
+    manual::helpText = help_;
     VS::Render::legacyOrderingTables[0] = ordering_;
     VS::Render::legacyPrimitiveBuffers[0] = primitives_;
     VS::Render::legacyDrawEnvironments[1] = back_env_;
@@ -509,7 +509,7 @@ struct PageFrame {
     VS::Render::FrameScratchpad().primitive_cursor = storage.data();
     VS::Render::frameBuf = 0;
     VS::Input::previousButtons = 0;
-    Menu_Manual_pageArrowAnimState = 0;
+    manual::pageArrowAnimState = 0;
   }
 
   [[nodiscard]] u_long* Word(std::size_t index) {
@@ -580,7 +580,7 @@ TEST_CASE(
     "[manual-page-live]") {
   PageFrame frame;
   VS::Input::previousButtons = PADRleft;
-  Menu_Manual_pageArrowAnimState = 4;
+  manual::pageArrowAnimState = 4;
   manual::LiveDrawUpperScrollFade();
   CheckLiveUpperFade(frame);
 
@@ -593,12 +593,12 @@ TEST_CASE("Live page arrows refuse unknown types and full buffers",
           "[manual-page-live]") {
   PageFrame frame;
   const std::uint64_t refusals = manual::LivePageRefusalCount();
-  manual::LiveDrawPageArrow(Menu_Manual_ArrowType_Down);
+  manual::LiveDrawPageArrow(manual::PageArrow::kDown);
   CHECK(frame.Used() == 10);
   CHECK(nextPrim(frame.Slot(-7)) == frame.Word(0));
   // A generated caller passing a value outside the enum is refused.
   // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-  manual::LiveDrawPageArrow(static_cast<Menu_Manual_ArrowType>(2));
+  manual::LiveDrawPageArrow(static_cast<manual::PageArrow>(2));
   CHECK(manual::LivePageRefusalCount() == refusals + 1);
 
   // Room for the arrow but not the whole fade: nothing is linked.
@@ -611,7 +611,7 @@ TEST_CASE("Live page arrows refuse unknown types and full buffers",
 
   VS::Render::FrameScratchpad().primitive_cursor = frame.Word(0);
   VS::Render::FrameScratchpad().ordering_table = frame.ordering.data() + 3;
-  manual::LiveDrawPageArrow(Menu_Manual_ArrowType_Up);
+  manual::LiveDrawPageArrow(manual::PageArrow::kUp);
   CHECK(manual::LivePageRefusalCount() == refusals + 3);
   CHECK(frame.Used() == 0);
 }
@@ -659,7 +659,7 @@ TEST_CASE("Live page content restores the back buffer clip around the panel",
       VS::Core::Memory::AllocateLiveFromHighEnd(text.size() * 2));
   REQUIRE(payload != nullptr);
   std::ranges::copy(text, payload);
-  Menu_Manual_helpText = reinterpret_cast<int*>(payload);
+  manual::helpText = reinterpret_cast<int*>(payload);
   setRECT(&VS::Render::legacyDrawEnvironments[1].clip, 320, 0, 320, 240);
 
   manual::LiveDrawPageContent();
@@ -668,7 +668,7 @@ TEST_CASE("Live page content restores the back buffer clip around the panel",
   const std::uint64_t refusals = manual::LivePageRefusalCount();
   payload[12] = 100;
   manual::LiveDrawPageContent();
-  Menu_Manual_helpText = reinterpret_cast<int*>(text.data());
+  manual::helpText = reinterpret_cast<int*>(text.data());
   manual::LiveDrawPageContent();
   CHECK(manual::LivePageRefusalCount() == refusals + 2);
   CHECK(frame.Used() == 6);

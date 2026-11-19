@@ -2467,8 +2467,8 @@
     <ClInclude Include="src\Menu\Loot\LootScreen.hpp" />
     <ClInclude Include="src\Menu\Loot\Paging.hpp" />
     <ClInclude Include="src\Menu\Magic.hpp" />
-    <ClInclude Include="src\Menu\Manual.h" />
-    <ClInclude Include="src\Menu\Map.h" />
+    <ClInclude Include="src\Menu\Manual.hpp" />
+    <ClInclude Include="src\Menu\Map.hpp" />
     <ClInclude Include="src\Menu\OptionsLiveState.hpp" />
     <ClInclude Include="src\Menu\RenameLiveState.hpp" />
     <ClInclude Include="src\Menu\Results\CubePuzzle.hpp" />

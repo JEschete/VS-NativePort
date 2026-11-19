@@ -14,7 +14,7 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualIllustration.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -22,7 +22,7 @@
 namespace VS::Menu::manual {
 namespace {
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
-static_assert(sizeof(Menu_Manual_AnimationState) ==
+static_assert(sizeof(VisibilityAnimation) ==
               kAnimationHalfwords * sizeof(std::int16_t));
 
 constexpr std::uint32_t kRefusalLogLimit = 16;
@@ -171,7 +171,7 @@ void LiveDrawIllustration(std::int16_t* data) {
     return;
   }
   LiveIllustrationTarget target;
-  if (DrawIllustration(*record, Menu_Manual_scrollPosition, target) ==
+  if (DrawIllustration(*record, scrollPosition, target) ==
       DrawResult::kRefused) {
     Refuse("Manual illustration record runs past its help text");
   }
@@ -180,36 +180,25 @@ void LiveDrawIllustration(std::int16_t* data) {
 // decomp: MENUE.PRG _drawContentLines (494.c:883).
 void LiveDrawDiagramLines() {
   const auto help_text =
-      LivePayloadTail(reinterpret_cast<std::int16_t*>(Menu_Manual_helpText));
+      LivePayloadTail(reinterpret_cast<std::int16_t*>(helpText));
   if (!help_text) {
     Refuse("Manual help text is outside the game heap");
     return;
   }
   LiveDiagramLineTarget target;
-  if (DrawDiagramLines(*help_text, Menu_Manual_scrollPosition, target) ==
+  if (DrawDiagramLines(*help_text, scrollPosition, target) ==
       DrawResult::kRefused) {
     Refuse("Manual diagram lines run past their help text");
   }
 }
 
 // decomp: MENUE.PRG _getAnimationState (494.c:940).
-std::int16_t LiveAdvanceVisibilityAnimation(Menu_Manual_AnimationState* state) {
+std::int16_t LiveAdvanceVisibilityAnimation(VisibilityAnimation* state) {
   if (state == nullptr) {
     Refuse("Manual visibility animation is null");
     return 0;
   }
-  VisibilityAnimation animation{.enabled = state->reserved0,
-                                .frame_mask = state->frameMask,
-                                .frame_duration = state->frameDuration,
-                                .repeat = state->repeat,
-                                .current_frame = state->currentFrame,
-                                .timer = state->timer,
-                                .hidden = state->isActive};
-  const std::int16_t hidden = AdvanceVisibilityAnimation(animation);
-  state->currentFrame = animation.current_frame;
-  state->timer = animation.timer;
-  state->isActive = animation.hidden;
-  return hidden;
+  return AdvanceVisibilityAnimation(*state);
 }
 
 std::uint64_t LiveIllustrationRefusalCount() { return g_refusals; }

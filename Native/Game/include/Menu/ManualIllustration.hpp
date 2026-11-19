@@ -65,7 +65,7 @@ UploadResult UploadSpriteTiles(std::span<const std::uint32_t> words,
 UploadResult UploadCluts(std::span<const std::uint32_t> words,
                          std::int32_t count, ImageUploader& uploader);
 
-// A visibility animation: AnimationState_t (494.c:36), the first seven
+// A visibility animation: AnimationState (494.c:42), the first seven
 // halfwords of every illustration and diagram-line record.
 inline constexpr std::size_t kAnimationHalfwords = 7;
 // Each record's animation header occupies eight halfwords.

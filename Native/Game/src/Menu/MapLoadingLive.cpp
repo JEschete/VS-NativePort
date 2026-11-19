@@ -25,7 +25,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapNavigationLive.hpp"
 #include "Menu/MapSceneStorageLive.hpp"
@@ -40,13 +40,13 @@
 
 namespace VS::Menu::map {
 namespace {
-// Menu_Map_mapNames' halfwords: the offsets, then the names.
-constexpr std::size_t kMapNameHalfwords = std::size(Menu_Map_mapNames);
+// mapNames' halfwords: the offsets, then the names.
+constexpr std::size_t kMapNameHalfwords = std::size(mapNames);
 // A chooser row's two menu text entries: the name and no description.
 constexpr std::size_t kMenuTextPerRow = 2;
 
 static_assert(sizeof(Content_DiscFile) == sizeof(DiscFileRange));
-static_assert(std::size(Menu_Map_sceneRowIdMap) == kSceneCount);
+static_assert(std::size(sceneRowIdMap) == kSceneCount);
 static_assert(sizeof(VS::State::stateFlags.map_paling) == kSceneCount);
 
 std::uint64_t refused_calls = 0;
@@ -58,21 +58,21 @@ void Refuse(std::string_view call, std::string_view reason) {
   }
 }
 
-// Scene `scene`'s name in Menu_Map_mapNames, or null when the scene or its
+// Scene `scene`'s name in mapNames, or null when the scene or its
 // offset is outside the table.
 [[nodiscard]] char* AreaNameOf(std::int32_t scene) {
   if (scene < 0 || static_cast<std::size_t>(scene) >= kMapNameHalfwords) {
     return nullptr;
   }
-  const std::size_t offset = Menu_Map_mapNames[scene];
+  const std::size_t offset = mapNames[scene];
   if (offset >= kMapNameHalfwords) return nullptr;
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return reinterpret_cast<char*>(&Menu_Map_mapNames[offset]);
+  return reinterpret_cast<char*>(&mapNames[offset]);
 }
 
 [[nodiscard]] std::span<const DiscFileRange> SceneFiles() {
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  return {reinterpret_cast<const DiscFileRange*>(Menu_Map_kSceneArmFiles),
+  return {reinterpret_cast<const DiscFileRange*>(kSceneArmFiles),
           static_cast<std::size_t>(kSceneCount)};
 }
 
@@ -236,44 +236,44 @@ class LiveSceneMap final : public SceneMapHost {
     BindLiveMapScene(Battle_unusedSceneBuffer, static_cast<std::size_t>(bytes));
   }
   void AllocateSceneRead(std::int32_t scene) override {
-    file_ = &Menu_Map_kSceneArmFiles[scene];
-    Menu_Map_sceneCdQueueSlot = Content::AllocateLiveDiscRequest(file_);
+    file_ = &kSceneArmFiles[scene];
+    sceneCdQueueSlot = Content::AllocateLiveDiscRequest(file_);
   }
   void EnqueueSceneRead() override {
-    if (Menu_Map_sceneCdQueueSlot != nullptr) {
-      Content::EnqueueLiveDiscRequest(Menu_Map_sceneCdQueueSlot,
+    if (sceneCdQueueSlot != nullptr) {
+      Content::EnqueueLiveDiscRequest(sceneCdQueueSlot,
                                       Battle_unusedSceneBuffer);
     } else {
-      Menu_Map_sceneCdQueueSlot = Content::CompleteLiveRefusedDiscRequest(
+      sceneCdQueueSlot = Content::CompleteLiveRefusedDiscRequest(
           file_, Battle_unusedSceneBuffer);
     }
-    initial_scene_request = Menu_Map_sceneCdQueueSlot;
+    initial_scene_request = sceneCdQueueSlot;
     initial_scene_generation =
         Content::LiveDiscRequestGeneration(initial_scene_request);
     initial_scene_destination = Battle_unusedSceneBuffer;
     initial_scene_bytes = static_cast<std::size_t>(file_->size);
   }
   std::int32_t SceneReadState() override {
-    if (Menu_Map_sceneCdQueueSlot == nullptr ||
-        Menu_Map_sceneCdQueueSlot != initial_scene_request ||
+    if (sceneCdQueueSlot == nullptr ||
+        sceneCdQueueSlot != initial_scene_request ||
         initial_scene_generation == 0 ||
         Content::LiveDiscRequestGeneration(initial_scene_request) !=
             initial_scene_generation) {
       Refuse("LoadSceneMap", "missing or reused scene read");
       return Content_DiscRequestState_Free;
     }
-    return Menu_Map_sceneCdQueueSlot->state;
+    return sceneCdQueueSlot->state;
   }
   void ReleaseSceneRead() override {
-    Content::ReleaseLiveDiscRequest(Menu_Map_sceneCdQueueSlot);
-    Menu_Map_sceneCdQueueSlot = nullptr;
+    Content::ReleaseLiveDiscRequest(sceneCdQueueSlot);
+    sceneCdQueueSlot = nullptr;
     initial_scene_request = nullptr;
     initial_scene_generation = 0;
     initial_scene_destination = nullptr;
     initial_scene_bytes = 0;
   }
   void ResolveRoomNames() override {
-    Menu_Map_roomNamesTable =
+    roomNamesTable =
         Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, SceneBytes());
   }
   void RestoreRoomVisits() override {
@@ -284,7 +284,7 @@ class LiveSceneMap final : public SceneMapHost {
   }
   std::int32_t InitialRoom() override { return LiveInitialRoomIndex(Scene()); }
   void CenterOnRoom(std::int32_t room) override {
-    Menu_Map_currentRoomIndex = room;
+    currentRoomIndex = room;
     LiveCenterOnRoom(Scene(), room);
   }
   void SetFogNear(std::int32_t near_distance) override {
@@ -303,11 +303,10 @@ class LiveSceneMap final : public SceneMapHost {
   [[nodiscard]] static Field_MapScene* Scene() {
     return static_cast<Field_MapScene*>(Battle_unusedSceneBuffer);
   }
-  // The loaded scene's ARM file size (Menu_Map_currentScene is checked
+  // The loaded scene's ARM file size (currentScene is checked
   // before the read is polled).
   [[nodiscard]] static std::size_t SceneBytes() {
-    return static_cast<std::size_t>(
-        Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
+    return static_cast<std::size_t>(kSceneArmFiles[currentScene].size);
   }
 
   const Content_DiscFile* file_ = nullptr;
@@ -318,23 +317,23 @@ class LiveSceneMap final : public SceneMapHost {
     return MapAngles{
         .x = value.vx, .y = value.vy, .z = value.vz, .pad = value.pad};
   };
-  return {.trigger_hide_ui = Menu_Map_triggerHideUi,
-          .hide_ui = Menu_Map_hideUi,
-          .camera_angles = angles(Menu_Map_cameraAngles),
-          .camera_position = angles(Menu_Map_cameraPos),
-          .current_room = Menu_Map_currentRoomIndex,
-          .current_scene = Menu_Map_currentScene,
-          .current_scene_row = Menu_Map_currentSceneRow,
-          .menu_state = Menu_Map_menuState,
-          .background_brightness = Menu_Map_backgroundBrightness,
-          .menu_frames = Menu_Map_menuFramesCounter,
-          .geometry_offset_x = Menu_Map_geomOffsetX,
-          .geometry_offset_y = Menu_Map_geomOffsetY,
-          .quit_state = Menu_Map_quitState,
-          .camera_distance = Menu_Map_cameraDistance,
-          .menu_commands_state = Menu_Map_menuCommandsState,
-          .ui_animation_state = Menu_Map_uiAnimationState,
-          .is_paling = Menu_Map_isPaling};
+  return {.trigger_hide_ui = triggerHideUi,
+          .hide_ui = hideUi,
+          .camera_angles = angles(cameraAngles),
+          .camera_position = angles(cameraPos),
+          .current_room = currentRoomIndex,
+          .current_scene = currentScene,
+          .current_scene_row = currentSceneRow,
+          .menu_state = menuState,
+          .background_brightness = backgroundBrightness,
+          .menu_frames = menuFramesCounter,
+          .geometry_offset_x = geomOffsetX,
+          .geometry_offset_y = geomOffsetY,
+          .quit_state = quitState,
+          .camera_distance = cameraDistance,
+          .menu_commands_state = menuCommandsState,
+          .ui_animation_state = uiAnimationState,
+          .is_paling = isPaling};
 }
 
 void StoreView(const SceneMapView& view) {
@@ -344,23 +343,23 @@ void StoreView(const SceneMapView& view) {
     target.vz = value.z;
     target.pad = value.pad;
   };
-  Menu_Map_triggerHideUi = view.trigger_hide_ui;
-  Menu_Map_hideUi = view.hide_ui;
-  store(Menu_Map_cameraAngles, view.camera_angles);
-  store(Menu_Map_cameraPos, view.camera_position);
-  Menu_Map_currentRoomIndex = view.current_room;
-  Menu_Map_currentScene = view.current_scene;
-  Menu_Map_currentSceneRow = view.current_scene_row;
-  Menu_Map_menuState = view.menu_state;
-  Menu_Map_backgroundBrightness = view.background_brightness;
-  Menu_Map_menuFramesCounter = view.menu_frames;
-  Menu_Map_geomOffsetX = view.geometry_offset_x;
-  Menu_Map_geomOffsetY = view.geometry_offset_y;
-  Menu_Map_quitState = view.quit_state;
-  Menu_Map_cameraDistance = view.camera_distance;
-  Menu_Map_menuCommandsState = view.menu_commands_state;
-  Menu_Map_uiAnimationState = view.ui_animation_state;
-  Menu_Map_isPaling = view.is_paling;
+  triggerHideUi = view.trigger_hide_ui;
+  hideUi = view.hide_ui;
+  store(cameraAngles, view.camera_angles);
+  store(cameraPos, view.camera_position);
+  currentRoomIndex = view.current_room;
+  currentScene = view.current_scene;
+  currentSceneRow = view.current_scene_row;
+  menuState = view.menu_state;
+  backgroundBrightness = view.background_brightness;
+  menuFramesCounter = view.menu_frames;
+  geomOffsetX = view.geometry_offset_x;
+  geomOffsetY = view.geometry_offset_y;
+  quitState = view.quit_state;
+  cameraDistance = view.camera_distance;
+  menuCommandsState = view.menu_commands_state;
+  uiAnimationState = view.ui_animation_state;
+  isPaling = view.is_paling;
 }
 
 AreaSelection area_selection;
@@ -381,7 +380,7 @@ void LiveConfigureAreaList(int row_count, int current_map, char* menu_text[]) {
     return;
   }
   LiveAreaMenu host(menu_text);
-  ConfigureAreaList(host, row_count, current_map, Menu_Map_currentMapRow);
+  ConfigureAreaList(host, row_count, current_map, currentMapRow);
 }
 
 // decomp: MENU5.PRG _mapSelection (4D8.c:175).
@@ -425,7 +424,7 @@ int LiveLoadBackground(int begin_background_load) {
 // decomp: MENU5.PRG _loadArmFile (4D8.c:448).
 int LiveLoadSceneMap() {
   if (Battle_unusedSceneBuffer != nullptr &&
-      (Menu_Map_currentScene < 0 || Menu_Map_currentScene >= kSceneCount)) {
+      (currentScene < 0 || currentScene >= kSceneCount)) {
     Refuse("LoadSceneMap", "scene outside the ARM files");
     return 0;
   }
@@ -462,12 +461,11 @@ int LiveUpdateAreaSelection(int initialize) {
   const AreaSelectionInput input{
       .visited_areas = static_cast<std::uint32_t>(
           VS::State::roomVisitProgress.area_flags[0]),
-      .current_scene = Menu_Map_currentScene,
-      .current_scene_row = Menu_Map_currentSceneRow};
+      .current_scene = currentScene,
+      .current_scene_row = currentSceneRow};
   LiveAreaMenu host(nullptr);
-  return UpdateAreaSelection(host, area_selection, input,
-                             Menu_Map_sceneRowIdMap, Menu_Map_currentMapRow,
-                             initialize);
+  return UpdateAreaSelection(host, area_selection, input, sceneRowIdMap,
+                             currentMapRow, initialize);
 }
 
 bool DrainMapLoadingLive() {
@@ -509,14 +507,14 @@ bool DrainMapLoadingLive() {
           initial_scene_generation) {
     Content::ReleaseLiveDiscRequest(initial_scene_request);
   }
-  if (Menu_Map_sceneCdQueueSlot == initial_scene_request) {
-    Menu_Map_sceneCdQueueSlot = nullptr;
+  if (sceneCdQueueSlot == initial_scene_request) {
+    sceneCdQueueSlot = nullptr;
   }
   if (initial_scene_destination != nullptr) {
     ForgetLiveMapScene(initial_scene_destination);
     if (Battle_unusedSceneBuffer == initial_scene_destination) {
       Battle_unusedSceneBuffer = nullptr;
-      Menu_Map_roomNamesTable = nullptr;
+      roomNamesTable = nullptr;
     }
     Core::Memory::FreeLiveFromHighEnd(initial_scene_destination);
   }

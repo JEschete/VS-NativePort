@@ -15,7 +15,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualTopics.hpp"
 #include "Menu/ManualTopicsLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -442,9 +442,9 @@ struct LiveTopicFixture {
   u_short* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
   u_short saved_count = VS::Menu::Framework::subMenuRowCount;
-  std::array<u_short, 516> saved_table = std::to_array(Menu_Manual_menuText);
-  int saved_step = Menu_Manual_topMenuState;
-  int saved_row = Menu_Manual_selectedRow;
+  std::array<u_short, 516> saved_table = std::to_array(manual::menuTextTable);
+  int saved_step = manual::topMenu_state;
+  int saved_row = manual::menuSelectedRow;
   u_short saved_manual = Field_manualDisplayState.currentManual;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
@@ -459,10 +459,10 @@ struct LiveTopicFixture {
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuMemory = {};
     VS::Input::settings.menu_flags = 0x3FF;
-    std::fill(std::begin(Menu_Manual_menuText), std::end(Menu_Manual_menuText),
-              u_short{0});
+    std::fill(std::begin(manual::menuTextTable),
+              std::end(manual::menuTextTable), u_short{0});
     const std::vector<std::uint16_t> table = TopicTable();
-    std::copy(table.begin(), table.end(), Menu_Manual_menuText);
+    std::copy(table.begin(), table.end(), manual::menuTextTable);
   }
   LiveTopicFixture(const LiveTopicFixture&) = delete;
   LiveTopicFixture& operator=(const LiveTopicFixture&) = delete;
@@ -476,9 +476,9 @@ struct LiveTopicFixture {
     VS::Menu::Framework::itemsText = saved_text;
     VS::Menu::Framework::selectedRow = saved_selected;
     VS::Menu::Framework::subMenuRowCount = saved_count;
-    std::copy(saved_table.begin(), saved_table.end(), Menu_Manual_menuText);
-    Menu_Manual_topMenuState = saved_step;
-    Menu_Manual_selectedRow = saved_row;
+    std::copy(saved_table.begin(), saved_table.end(), manual::menuTextTable);
+    manual::topMenu_state = saved_step;
+    manual::menuSelectedRow = saved_row;
     Field_manualDisplayState.currentManual = saved_manual;
   }
 
@@ -491,15 +491,15 @@ struct LiveTopicFixture {
 };
 
 struct LivePageFixture {
-  int* saved_help_text = Menu_Manual_helpText;
-  int saved_scroll = Menu_Manual_scrollPosition;
+  int* saved_help_text = manual::helpText;
+  int saved_scroll = manual::scrollPosition;
   Menu_TextBoxState saved_box = *VS::Menu::LiveTextBox(0);
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{16} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 
   LivePageFixture() {
-    Menu_Manual_scrollPosition = 0;
+    manual::scrollPosition = 0;
     VS::Menu::LiveTextBox(0)->flags.speakerTexture = 32;
   }
   LivePageFixture(const LivePageFixture&) = delete;
@@ -508,8 +508,8 @@ struct LivePageFixture {
   LivePageFixture& operator=(LivePageFixture&&) = delete;
   ~LivePageFixture() {
     *VS::Menu::LiveTextBox(0) = saved_box;
-    Menu_Manual_helpText = saved_help_text;
-    Menu_Manual_scrollPosition = saved_scroll;
+    manual::helpText = saved_help_text;
+    manual::scrollPosition = saved_scroll;
   }
 
   void Load(std::span<const std::uint8_t> help) {
@@ -517,7 +517,7 @@ struct LivePageFixture {
         VS::Core::Memory::AllocateLiveFromHighEnd(help.size()));
     REQUIRE(payload != nullptr);
     std::ranges::copy(help, payload);
-    Menu_Manual_helpText = reinterpret_cast<int*>(payload);
+    manual::helpText = reinterpret_cast<int*>(payload);
   }
 
   static std::vector<std::uint8_t> BoxText(std::size_t length) {
@@ -536,14 +536,14 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
   LiveTopicFixture fixture;
   Field_manualDisplayState.currentManual = 10;
   CHECK(manual::LiveUpdateTopicMenu(1) == -1);
-  CHECK(Menu_Manual_topMenuState == 1);
+  CHECK(manual::topMenu_state == 1);
   CHECK(VS::Menu::Framework::menuMemory.cursor_memories[4] == 5);
   CHECK(VS::Menu::Framework::menuMemory.cursor_memories[5] == 5);
   CHECK(VS::Input::settings.cursor_memory ==
         fixture.saved_settings.cursor_memory);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(manual::LiveUpdateTopicMenu(0) == -1);
-  CHECK(Menu_Manual_topMenuState == 1);
+  CHECK(manual::topMenu_state == 1);
 }
 
 TEST_CASE("Live topic selection returns chosen and cancelled rows",
@@ -551,9 +551,9 @@ TEST_CASE("Live topic selection returns chosen and cancelled rows",
   LiveTopicFixture fixture;
   VS::Menu::Framework::menuMemory.cursor_memories[4] = 3;
   VS::Menu::Framework::selectedRow = 2;
-  Menu_Manual_topMenuState = 1;
+  manual::topMenu_state = 1;
   CHECK(manual::LiveUpdateTopicMenu(0) == 2);
-  CHECK(Menu_Manual_selectedRow == 2);
+  CHECK(manual::menuSelectedRow == 2);
   VS::Menu::Framework::selectedRow = -2;
   CHECK(manual::LiveGetSelectedTopicRow() == -2);
 }
@@ -561,12 +561,12 @@ TEST_CASE("Live topic selection returns chosen and cancelled rows",
 TEST_CASE("Live topic menu refuses an unterminated table as a cancel",
           "[manual-topics-live]") {
   LiveTopicFixture fixture;
-  std::fill(std::begin(Menu_Manual_menuText) + manual::kTopicStrings,
-            std::end(Menu_Manual_menuText), u_short{0x2020});
+  std::fill(std::begin(manual::menuTextTable) + manual::kTopicStrings,
+            std::end(manual::menuTextTable), u_short{0x2020});
   const auto refusals = manual::LiveTopicRefusalCount();
   CHECK(manual::LiveUpdateTopicMenu(1) == -2);
   CHECK(manual::LiveTopicRefusalCount() == refusals + 1);
-  CHECK(Menu_Manual_topMenuState == 0);
+  CHECK(manual::topMenu_state == 0);
   CHECK(VS::Menu::Framework::itemsText == nullptr);
 }
 
@@ -574,7 +574,7 @@ TEST_CASE("Live topic rows refuse strings outside the topic table",
           "[manual-topics-live]") {
   LiveTopicFixture fixture;
   std::array<char, 4> outside{};
-  std::array<char*, 2> strings{reinterpret_cast<char*>(Menu_Manual_menuText),
+  std::array<char*, 2> strings{reinterpret_cast<char*>(manual::menuTextTable),
                                outside.data()};
   const auto refusals = manual::LiveTopicRefusalCount();
   manual::LiveSetTopicRows(1, 0, strings.data());
@@ -586,7 +586,7 @@ TEST_CASE("Live topic rows refuse strings outside the topic table",
 TEST_CASE("Live topic rows list strings inside the topic table",
           "[manual-topics-live]") {
   LiveTopicFixture fixture;
-  auto* table = reinterpret_cast<char*>(Menu_Manual_menuText);
+  auto* table = reinterpret_cast<char*>(manual::menuTextTable);
   std::array<char*, 2> strings{table + 56, table + 84};
   const auto refusals = manual::LiveTopicRefusalCount();
   manual::LiveSetTopicRows(1, 0, strings.data());
@@ -600,7 +600,7 @@ TEST_CASE("Live page text hands the composed page to text box zero",
   LivePageFixture fixture;
   const std::vector<std::uint8_t> help = HelpText(Lines(12));
   fixture.Load(help);
-  Menu_Manual_scrollPosition = 10;
+  manual::scrollPosition = 10;
   manual::LiveCopyPageText();
   const std::vector<std::uint8_t> expected = ExpectedPage(10, 12);
   CHECK(LivePageFixture::BoxText(expected.size()) == expected);
@@ -611,7 +611,7 @@ TEST_CASE("Live page text refuses help text outside the game heap",
           "[manual-topics-live]") {
   LivePageFixture fixture;
   std::vector<std::uint8_t> help = HelpText(Lines(23));
-  Menu_Manual_helpText = reinterpret_cast<int*>(help.data());
+  manual::helpText = reinterpret_cast<int*>(help.data());
   const char* before = VS::Menu::LiveTextBox(0)->string;
   const auto refusals = manual::LiveTopicRefusalCount();
   manual::LiveCopyPageText();
@@ -625,7 +625,7 @@ TEST_CASE("Live page text refuses a negative scroll position untouched",
   LivePageFixture fixture;
   fixture.Load(HelpText(Lines(23)));
   CHECK(manual::LiveLastPageLineOffset() == 20);
-  Menu_Manual_scrollPosition = -10;
+  manual::scrollPosition = -10;
   const char* before = VS::Menu::LiveTextBox(0)->string;
   const auto refusals = manual::LiveTopicRefusalCount();
   manual::LiveCopyPageText();

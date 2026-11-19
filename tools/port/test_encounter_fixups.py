@@ -3727,7 +3727,7 @@ int func_800F9800(void) {
             map_loading_live,
         )
         self.assertIn(
-            "Menu_Map_sceneCdQueueSlot=Content::CompleteLiveRefusedDiscRequest(file_,Battle_unusedSceneBuffer);",
+            "sceneCdQueueSlot=Content::CompleteLiveRefusedDiscRequest(file_,Battle_unusedSceneBuffer);",
             map_loading_live,
         )
         map_terminal_live = "".join(

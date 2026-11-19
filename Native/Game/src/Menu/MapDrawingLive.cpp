@@ -1,6 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Menu/MapDrawingLive.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstddef>
@@ -24,7 +25,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapMarkersLive.hpp"
 #include "Menu/MapSceneStorageLive.hpp"
@@ -42,8 +43,7 @@ namespace VS::Menu::map {
 namespace {
 constexpr std::size_t kWordBytes = 4;
 constexpr std::size_t kDataOffset = 4;
-// Menu_Map_kSceneArmFiles' entries and the state flags' map_paling bytes.
-constexpr int kSceneArmFileCount = 32;
+// The state flags' map_paling bytes.
 constexpr int kMapPalingScenes = 32;
 // The ordering-table words the original links into.
 constexpr int kBackdropSlot = 7;
@@ -64,11 +64,9 @@ struct LegendTexturePage {
 // The legend's slide starts and stops here (uiXOffset).
 constexpr int kHiddenLegendOffset = -128;
 
-static_assert(sizeof(Menu_Map_MapLabel) == sizeof(MapLabel));
 static_assert(sizeof(Field_MapRoom) == Field::kMapSceneRoomRecordBytes);
 static_assert(offsetof(Field_MapRoom, dataAddress) == kDataOffset);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
-static_assert(sizeof(Menu_Map_CompassBound) == sizeof(CompassPoint));
 static_assert(std::size(VS::State::StateFlags{}.map_paling) ==
               kMapPalingScenes);
 
@@ -115,13 +113,10 @@ void Link(u_long* entry, Primitive* packet) {
   VS::Render::FrameScratchpad().primitive_cursor = packet + 1;
 }
 
-[[nodiscard]] std::span<const MapLabel> Labels() {
-  return {reinterpret_cast<const MapLabel*>(Menu_Map_mapLabels),
-          kMapLabelCapacity};
-}
+[[nodiscard]] std::span<const MapLabel> Labels() { return mapLabels; }
 
 void StoreCompassBounds(const CompassCorners& corners) {
-  std::memcpy(Menu_Map_compassBounds, corners.data(), sizeof(corners));
+  std::ranges::copy(corners, compassBounds);
 }
 
 // The buffer `scene` was loaded into: the ARM scene the menu loaded or the
@@ -131,11 +126,10 @@ void StoreCompassBounds(const CompassCorners& corners) {
   if (scene == nullptr) return std::nullopt;
   if (scene == Battle_unusedSceneBuffer) {
     if (const auto loaded = BoundLiveMapScene(scene)) return *loaded;
-    if (Menu_Map_currentScene < 0 ||
-        Menu_Map_currentScene >= kSceneArmFileCount) {
+    if (currentScene < 0 || currentScene >= kSceneCount) {
       return std::nullopt;
     }
-    const int size = Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size;
+    const int size = kSceneArmFiles[currentScene].size;
     if (size < 0) return std::nullopt;
     return std::span{static_cast<const std::byte*>(Battle_unusedSceneBuffer),
                      static_cast<std::size_t>(size)};
@@ -279,16 +273,14 @@ class LiveRoomHost final : public RoomDrawHost {
 
 [[nodiscard]] int DrawRoomBytes(std::span<const std::byte> room, int room_index,
                                 int zone_id, int map_id) {
-  const RoomContext context{
-      .room_index = room_index,
-      .current_room = Menu_Map_currentRoomIndex,
-      .scene_room = Menu_Map_isCurrentScene,
-      .entered_door = Field_enteredDoorId,
-      .frame_counter = Menu_Map_menuFramesCounter,
-      .zone_id = zone_id,
-      .map_id = map_id,
-      .brightness =
-          std::span{Menu_Map_kAshleyIconBrightness, kAshleyBrightnessSteps}};
+  const RoomContext context{.room_index = room_index,
+                            .current_room = currentRoomIndex,
+                            .scene_room = isCurrentScene,
+                            .entered_door = Field_enteredDoorId,
+                            .frame_counter = menuFramesCounter,
+                            .zone_id = zone_id,
+                            .map_id = map_id,
+                            .brightness = std::span{kAshleyIconBrightness}};
   LiveRoomHost host;
   switch (DrawRoom(host, room, context, room_workspace)) {
     case RoomDrawResult::kDrawn:
@@ -317,7 +309,7 @@ class LiveVisitedRoomsHost final : public VisitedRoomsHost {
     Render::SetLiveProjectionScreenOffset({.x = offset.x, .y = offset.y});
   }
 
-  void ClearLabels() override { Menu_Map_mapLabelCount = 0; }
+  void ClearLabels() override { mapLabelCount = 0; }
 
   void DrawRoom(std::size_t index, std::int32_t zone_id,
                 std::int32_t map_id) override {
@@ -427,12 +419,11 @@ class LiveControlsHost final : public ControlsHost {
   }
 
   std::optional<bool> IsJammed() override {
-    if (Menu_Map_currentScene < 0 ||
-        Menu_Map_currentScene >= kMapPalingScenes) {
+    if (currentScene < 0 || currentScene >= kMapPalingScenes) {
       Refuse(kCall, "scene outside the map paling flags");
       return std::nullopt;
     }
-    return VS::State::stateFlags.map_paling[Menu_Map_currentScene] != 0;
+    return VS::State::stateFlags.map_paling[currentScene] != 0;
   }
 
   void DrawButton(Framework::ButtonIcon button, std::int32_t x,
@@ -518,7 +509,7 @@ void LiveDrawVisitedRooms(Field_MapScene* scene) {
                      .map_id = record.mapId};
   }
   LiveVisitedRoomsHost host(*bytes);
-  DrawVisitedRooms(host, Menu_Map_geomOffsetX, Menu_Map_geomOffsetY, records);
+  DrawVisitedRooms(host, geomOffsetX, geomOffsetY, records);
 }
 
 // decomp: MENU5.PRG _renderRoom (4D8.c:1112).
@@ -541,21 +532,21 @@ void LiveDrawControlBackdrop(int x, int y, int w, int h) {
 
 // decomp: MENU5.PRG _drawUIControls (4D8.c:1991).
 void LiveDrawControls() {
-  ControlsState state{.animation_state = Menu_Map_uiAnimationState,
+  ControlsState state{.animation_state = uiAnimationState,
                       .x_offset = legend_offset};
-  const ControlsFrame frame{.hide_ui = Menu_Map_triggerHideUi != 0,
-                            .commands_state = Menu_Map_menuCommandsState,
-                            .compass_angle = Menu_Map_cameraAngles.vy};
+  const ControlsFrame frame{.hide_ui = triggerHideUi != 0,
+                            .commands_state = menuCommandsState,
+                            .compass_angle = cameraAngles.vy};
   LiveControlsHost host;
   static_cast<void>(DrawControls(host, state, frame));
-  Menu_Map_uiAnimationState = state.animation_state;
+  uiAnimationState = state.animation_state;
   legend_offset = state.x_offset;
 }
 
 // decomp: MENU5.PRG _renderCompass (4D8.c:2272).
 void LiveDrawCompass(int x, int y, int angle) {
   LiveCompassHost host;
-  StoreCompassBounds(DrawCompass(host, x, y, angle, Menu_Map_cameraAngles.vz));
+  StoreCompassBounds(DrawCompass(host, x, y, angle, cameraAngles.vz));
 }
 
 // decomp: MENU5.PRG _computeRotatedRect (4D8.c:2377).
@@ -570,8 +561,8 @@ void LiveComputeCompassCorners(int center_x, int center_y, int width,
 // decomp: MENU5.PRG renderMapLabels (4D8.c:2450).
 void LiveDrawLabels() {
   LiveLabelHost host;
-  if (!DrawLabels(host, Menu_Map_menuCommandsState, Menu_Map_triggerHideUi != 0,
-                  Labels(), Menu_Map_mapLabelCount)) {
+  if (!DrawLabels(host, menuCommandsState, triggerHideUi != 0, Labels(),
+                  mapLabelCount)) {
     Refuse("DrawLabels", "label count past _mapLabels");
   }
 }

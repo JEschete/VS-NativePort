@@ -47,7 +47,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapDrawingLive.hpp"
 #include "Menu/MapLoadingLive.hpp"
 #include "Menu/MapNavigationLive.hpp"
@@ -108,22 +108,19 @@ struct HeapBlocker {
 struct LiveWorld {
   RestoreMapView saved_view;
   ValueRestore<void*> saved_scene{Battle_unusedSceneBuffer};
-  ValueRestore<void*> saved_staging{Menu_Map_armFileBuff};
-  ValueRestore<Content_DiscQueueSlot*> saved_scene_slot{
-      Menu_Map_sceneCdQueueSlot};
-  ValueRestore<Field_MapRoomName*> saved_names{Menu_Map_roomNamesTable};
-  ValueRestore<int> saved_map_row{Menu_Map_currentMapRow};
-  ValueRestore<int> saved_selected{Menu_Map_selectedMap};
-  ValueRestore<int> saved_label_y{Menu_Map_mapLabelY};
-  ValueRestore<int> saved_label_count{Menu_Map_mapLabelCount};
-  ValueRestore<int> saved_current{Menu_Map_isCurrentScene};
-  ValueRestore<SVECTOR> saved_center{Menu_Map_centerPoint};
-  ArrayRestore<int, 32> saved_scene_rows{Menu_Map_sceneRowIdMap};
-  ArrayRestore<u_short, 282> saved_map_names{Menu_Map_mapNames};
-  ArrayRestore<Menu_Map_CompassBound, 4> saved_compass{Menu_Map_compassBounds};
-  ArrayRestore<Menu_Map_MapLabel, 8> saved_labels{Menu_Map_mapLabels};
-  ArrayRestore<std::int16_t, 2> saved_padding1{Menu_Map_layoutPadding1};
-  ArrayRestore<int, 2> saved_padding2{Menu_Map_layoutPadding2};
+  ValueRestore<void*> saved_staging{map::armFileBuff};
+  ValueRestore<Content_DiscQueueSlot*> saved_scene_slot{map::sceneCdQueueSlot};
+  ValueRestore<Field_MapRoomName*> saved_names{map::roomNamesTable};
+  ValueRestore<int> saved_map_row{map::currentMapRow};
+  ValueRestore<int> saved_selected{map::chosenMap};
+  ValueRestore<int> saved_label_y{map::mapLabelY};
+  ValueRestore<int> saved_label_count{map::mapLabelCount};
+  ValueRestore<int> saved_current{map::isCurrentScene};
+  ValueRestore<SVECTOR> saved_center{map::centerPoint};
+  ArrayRestore<int, 32> saved_scene_rows{map::sceneRowIdMap};
+  ArrayRestore<u_short, 282> saved_map_names{map::mapNames};
+  ArrayRestore<map::CompassPoint, 4> saved_compass{map::compassBounds};
+  ArrayRestore<map::MapLabel, 8> saved_labels{map::mapLabels};
   ValueRestore<VS::Render::FrameScratch> saved_frame{
       VS::Render::FrameScratchpad()};
   ArrayRestore<void*, 2> saved_buffers{VS::Render::legacyPrimitiveBuffers};
@@ -215,8 +212,8 @@ struct LiveWorld {
       REQUIRE(entry != nullptr);
       REQUIRE(content::DataStore::Get()->Read(
           *entry, 0x5BFC,
-          {reinterpret_cast<std::uint8_t*>(Menu_Map_mapNames),
-           sizeof(Menu_Map_mapNames)}));
+          {reinterpret_cast<std::uint8_t*>(map::mapNames),
+           sizeof(map::mapNames)}));
       minimap = SceneFile(1);
       Field_roomData.minimapScene =
           reinterpret_cast<Field_MapScene*>(minimap.data());
@@ -261,7 +258,7 @@ struct LiveWorld {
   void LoadScene(int scene) {
     const auto file = SceneFile(scene);
     const auto length =
-        static_cast<std::size_t>(Menu_Map_kSceneArmFiles[scene].size);
+        static_cast<std::size_t>(map::kSceneArmFiles[scene].size);
     auto* buffer = memory::AllocateLiveFromHighEnd(length);
     REQUIRE(buffer != nullptr);
     std::memset(buffer, 0, length);
@@ -271,18 +268,17 @@ struct LiveWorld {
         {static_cast<const std::byte*>(buffer), length}));
     Battle_unusedSceneBuffer = buffer;
     map::BindLiveMapScene(buffer, length);
-    Menu_Map_roomNamesTable =
-        VS::Field::ResolveLiveSceneRoomData(buffer, length);
-    REQUIRE(Menu_Map_roomNamesTable != nullptr);
-    Menu_Map_currentScene = scene;
-    Menu_Map_currentSceneRow = scene;
-    Menu_Map_currentRoomIndex = 0;
-    Menu_Map_menuState = 1;
-    Menu_Map_backgroundBrightness = 32;
-    Menu_Map_quitState = 1;
-    Menu_Map_cameraDistance = 768;
-    Menu_Map_cameraAngles = {568, 2048, 0, 0};
-    Menu_Map_centerPoint = {};
+    map::roomNamesTable = VS::Field::ResolveLiveSceneRoomData(buffer, length);
+    REQUIRE(map::roomNamesTable != nullptr);
+    map::currentScene = scene;
+    map::currentSceneRow = scene;
+    map::currentRoomIndex = 0;
+    map::menuState = 1;
+    map::backgroundBrightness = 32;
+    map::quitState = 1;
+    map::cameraDistance = 768;
+    map::cameraAngles = {568, 2048, 0, 0};
+    map::centerPoint = {};
     map::LiveMarkAllRoomsVisited(static_cast<int*>(buffer));
     VS::Menu::InitLiveTextBox(0, 0, 60, 224, 16, 1, 60, 224);
   }
@@ -303,26 +299,26 @@ struct LiveWorld {
       ResetFrame();
       framework::UpdateLiveScreen();
       if (map::LiveUpdateScreen(&screen_step) != 0) return false;
-      if (screen_step == 7 && Menu_Map_menuState == 1) return true;
+      if (screen_step == 7 && map::menuState == 1) return true;
     }
     return false;
   }
 
   bool OpenChooser() {
     VS::State::roomVisitProgress.area_flags[0] = (1 << 1) | (1 << 11);
-    if (Tick(0x20) != 0 || Menu_Map_menuState != 2) return false;
+    if (Tick(0x20) != 0 || map::menuState != 2) return false;
     for (std::size_t tick = 0; tick < 40; ++tick) Tick(0, 0, 0, true);
-    return Menu_Map_menuState == 2;
+    return map::menuState == 2;
   }
 
   bool ChooseOtherScene() {
-    const int original = Menu_Map_currentScene;
+    const int original = map::currentScene;
     if (!OpenChooser()) return false;
     Tick(0, original == 1 ? 0x4000 : 0x1000, original == 1 ? 0x4000 : 0x1000,
          true);
     Tick(0x20, 0, 0, true);
     for (std::size_t tick = 0; tick < 40; ++tick) {
-      if (Menu_Map_menuState == 4) return true;
+      if (map::menuState == 4) return true;
       Tick(0, 0, 0, true);
     }
     return false;
@@ -330,26 +326,26 @@ struct LiveWorld {
 };
 
 void CheckNoPendingRead() {
-  CHECK(Menu_Map_armFileBuff == nullptr);
-  CHECK(Menu_Map_sceneCdQueueSlot == nullptr);
+  CHECK(map::armFileBuff == nullptr);
+  CHECK(map::sceneCdQueueSlot == nullptr);
 }
 
 void CheckNoSceneOwners() {
   CHECK(Battle_unusedSceneBuffer == nullptr);
-  CHECK(Menu_Map_roomNamesTable == nullptr);
+  CHECK(map::roomNamesTable == nullptr);
   CheckNoPendingRead();
   CHECK(VS::Menu::ReadLiveTextBox(0).text == nullptr);
 }
 
 void HideResetAndCancel(LiveWorld& world) {
   REQUIRE(world.Tick(0x100) == 0);
-  CHECK(std::pair<int, int>{Menu_Map_triggerHideUi,
+  CHECK(std::pair<int, int>{map::triggerHideUi,
                             VS::Menu::Framework::hideMenu} == std::pair{1, 1});
   REQUIRE(world.Tick(0, 0x800) == 0);
-  CHECK(std::pair<int, int>{Menu_Map_geomOffsetX, Menu_Map_cameraDistance} ==
+  CHECK(std::pair<int, int>{map::geomOffsetX, map::cameraDistance} ==
         std::pair{0, 768});
   REQUIRE(world.Tick(0x40) == 0);
-  CHECK(Menu_Map_menuState == 3);
+  CHECK(map::menuState == 3);
   int result = 0;
   for (int tick = 0; tick < 8 && result == 0; ++tick) result = world.Tick();
   CHECK(result == 1);
@@ -387,19 +383,17 @@ void CheckRestoredPixels() {
 
 void CheckResetExports() {
   CHECK(map::ReadLiveMapView() == map::SceneMapView{});
-  CHECK(Menu_Map_currentMapRow == -1);
-  CHECK(std::to_array<int>({Menu_Map_selectedMap, Menu_Map_layoutPadding1[0],
-                            Menu_Map_layoutPadding2[0], Menu_Map_mapLabelCount,
-                            Menu_Map_mapLabels[0].x,
-                            Menu_Map_compassBounds[0].x}) ==
-        std::array{0, 0, 0, 0, 0, 0});
+  CHECK(map::currentMapRow == -1);
+  CHECK(std::to_array<int>({map::chosenMap, map::mapLabelCount,
+                            map::mapLabels[0].x, map::compassBounds[0].x}) ==
+        std::array{0, 0, 0, 0});
   CheckNoSceneOwners();
 }
 
 void CheckPreservedData(
-    const decltype(std::to_array(Menu_Map_mapNames))& names,
+    const decltype(std::to_array(map::mapNames))& names,
     const decltype(VS::Render::FrameScratchpad().camera)& camera) {
-  CHECK(std::to_array(Menu_Map_mapNames) == names);
+  CHECK(std::to_array(map::mapNames) == names);
   CHECK(VS::State::stateFlags.map_paling[5] == 19);
   CHECK(std::memcmp(&VS::Render::FrameScratchpad().camera, &camera,
                     sizeof(camera)) == 0);
@@ -467,17 +461,17 @@ void CheckSceneExtent(void* scene, std::size_t bytes) {
 }
 
 void CheckPendingExtent(void* old, int initial) {
-  CHECK(Menu_Map_currentScene == (initial == 1 ? 11 : 1));
+  CHECK(map::currentScene == (initial == 1 ? 11 : 1));
   CHECK(Battle_unusedSceneBuffer == old);
-  CheckSceneExtent(
-      old, static_cast<std::size_t>(Menu_Map_kSceneArmFiles[initial].size));
+  CheckSceneExtent(old,
+                   static_cast<std::size_t>(map::kSceneArmFiles[initial].size));
 }
 
 void KeepDrawingWhileReading(LiveWorld& world, void* old, std::size_t size,
                              void* staging) {
   REQUIRE(world.Tick(0x40) == 0);
-  CHECK(Menu_Map_menuState == 4);
-  CHECK(Menu_Map_armFileBuff == staging);
+  CHECK(map::menuState == 4);
+  CHECK(map::armFileBuff == staging);
   const std::vector<std::byte> before(static_cast<std::byte*>(old),
                                       static_cast<std::byte*>(old) + size);
   map::LiveScaleRoomVertices(static_cast<Field_MapScene*>(old), 2);
@@ -511,9 +505,9 @@ void FailSwapAllocation(LiveWorld& world, void* staging) {
     REQUIRE(world.Tick() == 0);
   }
   REQUIRE(Battle_unusedSceneBuffer == nullptr);
-  CHECK(Menu_Map_menuState == 4);
-  CHECK(Menu_Map_armFileBuff == staging);
-  CHECK(Menu_Map_sceneCdQueueSlot == nullptr);
+  CHECK(map::menuState == 4);
+  CHECK(map::armFileBuff == staging);
+  CHECK(map::sceneCdQueueSlot == nullptr);
   CHECK(memory::LivePayloadCapacity(staging).has_value());
   CHECK(memory::RefusedLiveHeapRequestCount() > refusals);
 }
@@ -550,7 +544,7 @@ TEST_CASE("F02702 Live scanlines retain the second strip's prior CLUT",
           "[map-terminal][map-terminal-live][F02702]") {
   LiveWorld world;
   VS::Render::frameBuf = GENERATE(0, 1);
-  Menu_Map_menuFramesCounter = -1;
+  map::menuFramesCounter = -1;
   map::LiveDrawPalingDistortion();
   const auto* packets = world.primitives.data() + 1;
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == packets + 3827);
@@ -567,9 +561,9 @@ TEST_CASE(
     "F02690 Live camera leaves the field's stored view and projection intact",
     "[map-terminal][map-terminal-live][F02690]") {
   LiveWorld world;
-  Menu_Map_cameraAngles = {0, 1024, 17, -19};
-  Menu_Map_cameraPos = {51, 52, 53, -1234};
-  Menu_Map_cameraDistance = 768;
+  map::cameraAngles = {0, 1024, 17, -19};
+  map::cameraPos = {51, 52, 53, -1234};
+  map::cameraDistance = 768;
   const auto frame_view = VS::Render::FrameScratchpad().view_matrix;
   map::LiveApplyCamera();
   CHECK(map::ReadLiveMapView().camera_position ==
@@ -590,7 +584,7 @@ TEST_CASE(
     "borrow",
     "[map-terminal][map-terminal-live][F02689]") {
   LiveWorld world(true);
-  Menu_Map_currentScene = 1;
+  map::currentScene = 1;
   VS::State::stateFlags.map_paling[1] = 1;
   VS::Menu::InitLiveTextBox(0, 0, 60, 224, 16, 1, 60, 224);
   map::LiveDrawFrame();
@@ -614,12 +608,12 @@ TEST_CASE(
   LiveWorld world(true);
   world.LoadScene(1);
   REQUIRE(world.Tick(0, 0x8001) == 0);
-  CHECK(Menu_Map_cameraAngles.vy == 1984);
-  CHECK(Menu_Map_menuCommandsState == 3);
+  CHECK(map::cameraAngles.vy == 1984);
+  CHECK(map::menuCommandsState == 3);
   REQUIRE(world.Tick(0, 0x4002) == 0);
-  CHECK(Menu_Map_cameraDistance == 784);
+  CHECK(map::cameraDistance == 784);
   REQUIRE(world.Tick(0, 0x2000) == 0);
-  CHECK(Menu_Map_geomOffsetX == 4);
+  CHECK(map::geomOffsetX == 4);
   HideResetAndCancel(world);
 }
 
@@ -656,14 +650,14 @@ TEST_CASE(
   REQUIRE(world.Tick(0x100) == 0);
   REQUIRE(world.OpenChooser());
   CHECK(std::pair<int, int>{VS::Menu::Framework::hideMenu,
-                            Menu_Map_triggerHideUi} == std::pair{0, 1});
+                            map::triggerHideUi} == std::pair{0, 1});
   const bool triangle = GENERATE(false, true);
   REQUIRE(world.Tick(triangle ? 0x10U : 0x40U, 0, 0, true) == 0);
-  for (std::size_t tick = 0; tick < 40 && Menu_Map_menuState == 2; ++tick) {
+  for (std::size_t tick = 0; tick < 40 && map::menuState == 2; ++tick) {
     world.Tick(0, 0, 0, true);
   }
-  CHECK(Menu_Map_menuState == (triangle ? 3 : 1));
-  CHECK(Menu_Map_quitState == (triangle ? 2 : 1));
+  CHECK(map::menuState == (triangle ? 3 : 1));
+  CHECK(map::quitState == (triangle ? 2 : 1));
   CHECK(Battle_unusedSceneBuffer == scene);
   CheckNoPendingRead();
 }
@@ -675,20 +669,18 @@ TEST_CASE(
   LiveWorld world(true);
   REQUIRE(map::LiveLoadSceneMap() == 0);
   REQUIRE(Battle_unusedSceneBuffer != nullptr);
-  auto* request = Menu_Map_sceneCdQueueSlot;
+  auto* request = map::sceneCdQueueSlot;
   REQUIRE(request != nullptr);
   const auto generation = content::LiveDiscRequestGeneration(request);
   auto* buffer = Battle_unusedSceneBuffer;
   VS::Menu::InitLiveTextBox(0, 0, 60, 224, 16, 1, 60, 224);
   VS::Menu::SetLiveTextBoxText(0, static_cast<char*>(buffer));
-  const auto names = std::to_array(Menu_Map_mapNames);
-  Menu_Map_selectedMap = 27;
-  Menu_Map_cameraDistance = 512;
-  Menu_Map_layoutPadding1[0] = 13;
-  Menu_Map_layoutPadding2[0] = 17;
-  Menu_Map_mapLabelCount = 8;
-  Menu_Map_mapLabels[0].x = 123;
-  Menu_Map_compassBounds[0].x = 456;
+  const auto names = std::to_array(map::mapNames);
+  map::chosenMap = 27;
+  map::cameraDistance = 512;
+  map::mapLabelCount = 8;
+  map::mapLabels[0].x = 123;
+  map::compassBounds[0].x = 456;
   VS::State::stateFlags.map_paling[5] = 19;
   const auto field_camera = VS::Render::FrameScratchpad().camera;
   REQUIRE(map::ResetMapTerminalModuleData());
@@ -722,19 +714,19 @@ TEST_CASE(
   world.LoadScene(initial);
   auto* old = Battle_unusedSceneBuffer;
   const auto old_size =
-      static_cast<std::size_t>(Menu_Map_kSceneArmFiles[initial].size);
+      static_cast<std::size_t>(map::kSceneArmFiles[initial].size);
   REQUIRE(world.ChooseOtherScene());
   CheckPendingExtent(old, initial);
-  REQUIRE(Menu_Map_armFileBuff != nullptr);
-  auto* staging = Menu_Map_armFileBuff;
-  auto* request = Menu_Map_sceneCdQueueSlot;
+  REQUIRE(map::armFileBuff != nullptr);
+  auto* staging = map::armFileBuff;
+  auto* request = map::sceneCdQueueSlot;
   REQUIRE(request != nullptr);
   KeepDrawingWhileReading(world, old, old_size, staging);
   content::UpdateLiveDiscQueue();
   REQUIRE(request->state != Content_DiscRequestState_Loaded);
   const auto failures = memory::RefusedLiveHeapRequestCount();
-  const auto staging_bytes = static_cast<std::size_t>(
-      Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
+  const auto staging_bytes =
+      static_cast<std::size_t>(map::kSceneArmFiles[map::currentScene].size);
   REQUIRE(map::DrainMapTerminalLive());
   CheckDrainedRead(old, staging, request, staging_bytes, failures);
 }
@@ -765,19 +757,19 @@ TEST_CASE(
   LiveWorld world(true);
   world.LoadScene(11);
   REQUIRE(world.ChooseOtherScene());
-  auto* staging = Menu_Map_armFileBuff;
-  for (std::size_t tick = 0; tick < kTickBudget && Menu_Map_menuState != 1;
+  auto* staging = map::armFileBuff;
+  for (std::size_t tick = 0; tick < kTickBudget && map::menuState != 1;
        ++tick) {
     content::UpdateLiveDiscQueue();
     world.Tick(0, 0, 0, true);
   }
-  REQUIRE(std::pair<int, int>{Menu_Map_menuState, Menu_Map_currentScene} ==
+  REQUIRE(std::pair<int, int>{map::menuState, map::currentScene} ==
           std::pair{1, 1});
   CheckNoPendingRead();
   CheckSceneExtent(Battle_unusedSceneBuffer, 8192);
   CHECK(VS::Menu::ReadLiveTextBox(0).text != nullptr);
   CHECK_FALSE(memory::LivePayloadCapacity(staging));
-  CHECK(Menu_Map_geomOffsetX == 0);
+  CHECK(map::geomOffsetX == 0);
 }
 
 TEST_CASE(
@@ -786,7 +778,7 @@ TEST_CASE(
   LiveWorld world(true);
   world.LoadScene(11);
   REQUIRE(world.ChooseOtherScene());
-  auto* request = Menu_Map_sceneCdQueueSlot;
+  auto* request = map::sceneCdQueueSlot;
   REQUIRE(request != nullptr);
   for (std::size_t tick = 0;
        tick < kTickBudget && request->state != Content_DiscRequestState_Loaded;
@@ -795,11 +787,11 @@ TEST_CASE(
   }
   REQUIRE(request->state == Content_DiscRequestState_Loaded);
   HeapBlocker blocker;
-  FailSwapAllocation(world, Menu_Map_armFileBuff);
+  FailSwapAllocation(world, map::armFileBuff);
   if (GENERATE(false, true)) {
     blocker.Release();
     REQUIRE(world.Tick() == 0);
-    CHECK(Menu_Map_menuState == 5);
+    CHECK(map::menuState == 5);
     CheckSceneExtent(Battle_unusedSceneBuffer, 8192);
   } else {
     REQUIRE(map::DrainMapTerminalLive());
@@ -814,10 +806,10 @@ TEST_CASE("Map refuses a foreign scene and does not report completed quit",
   std::array<std::byte, 64> foreign{};
   Battle_unusedSceneBuffer = foreign.data();
   map::BindLiveMapScene(foreign.data(), foreign.size());
-  Menu_Map_currentScene = 1;
-  Menu_Map_menuState = 3;
-  Menu_Map_backgroundBrightness = 128;
-  Menu_Map_quitState = 2;
+  map::currentScene = 1;
+  map::menuState = 3;
+  map::backgroundBrightness = 128;
+  map::quitState = 2;
   const auto refusals = map::MapTerminalLiveRefusalCount();
   CHECK(map::LiveUpdateMapMenu() == 0);
   CHECK(map::MapTerminalLiveRefusalCount() > refusals);
@@ -847,9 +839,9 @@ struct InitialRead {
   static InitialRead Begin() {
     REQUIRE(map::LiveLoadSceneMap() == 0);
     REQUIRE(Battle_unusedSceneBuffer != nullptr);
-    REQUIRE(Menu_Map_sceneCdQueueSlot != nullptr);
-    return {Battle_unusedSceneBuffer, Menu_Map_sceneCdQueueSlot,
-            content::LiveDiscRequestGeneration(Menu_Map_sceneCdQueueSlot)};
+    REQUIRE(map::sceneCdQueueSlot != nullptr);
+    return {Battle_unusedSceneBuffer, map::sceneCdQueueSlot,
+            content::LiveDiscRequestGeneration(map::sceneCdQueueSlot)};
   }
   void CheckReleased() const {
     CheckNoSceneOwners();
@@ -863,8 +855,8 @@ void BeginVisibleMapSwap(LiveWorld& world) {
   REQUIRE(world.ReachInput(phase));
   REQUIRE(world.ChooseOtherScene());
   REQUIRE(Battle_unusedSceneBuffer != nullptr);
-  REQUIRE(Menu_Map_armFileBuff != nullptr);
-  REQUIRE(Menu_Map_sceneCdQueueSlot != nullptr);
+  REQUIRE(map::armFileBuff != nullptr);
+  REQUIRE(map::sceneCdQueueSlot != nullptr);
 }
 
 struct FullDiscQueue {
@@ -873,8 +865,7 @@ struct FullDiscQueue {
 
   FullDiscQueue() {
     for (std::size_t index = 0; index < requests.size(); ++index) {
-      auto* request =
-          content::AllocateLiveDiscRequest(&Menu_Map_kSceneArmFiles[1]);
+      auto* request = content::AllocateLiveDiscRequest(&map::kSceneArmFiles[1]);
       REQUIRE(request != nullptr);
       requests[index] = request;
       generations[index] = content::LiveDiscRequestGeneration(request);
@@ -939,8 +930,8 @@ TEST_CASE("Original map drawing entries execute the native frame and camera",
           "[F02689][F02690][F02699][F02702]") {
   LiveWorld world(true);
   CheckMapFrameEntries(world);
-  Menu_Map_cameraAngles = {0, 1024, 0, 0};
-  Menu_Map_cameraDistance = 768;
+  map::cameraAngles = {0, 1024, 0, 0};
+  map::cameraDistance = 768;
   MapModuleEntry(0x80104384, &map::LiveApplyCamera)();
   CHECK(TransformOrigin() == std::array{0, 0, 768});
 }
@@ -956,7 +947,7 @@ TEST_CASE("Original map controller entries consume native loading and input",
   VS::Input::previousButtons = 0x4002;
   world.ResetFrame();
   CHECK(MapModuleEntry(0x80103684, &map::LiveUpdateMapMenu)() == 0);
-  CHECK(Menu_Map_cameraDistance == 784);
+  CHECK(map::cameraDistance == 784);
 }
 
 TEST_CASE("Production framework dispatch uses the real map state byte",
@@ -975,14 +966,14 @@ TEST_CASE("Production framework dispatch uses the real map state byte",
   VS::Menu::Framework::actionRestrictions = 0;
   VS::Menu::Framework::submenuStates[kMapScreen] = 3;
   VS::Menu::Framework::submenuStates[kMapScreen - 1] = static_cast<char>(0xAA);
-  Menu_Map_currentMapRow = 23;
+  map::currentMapRow = 23;
   REQUIRE(VS::Save::MemoryCard::LiveMenuAssetPhase() ==
           VS::Save::MemoryCard::MenuAssetPhase::kIdle);
   framework::UpdateLiveMainMenu(kMapScreen);
   CHECK(VS::Menu::Framework::submenuStates[kMapScreen] == 4);
   CHECK(static_cast<unsigned char>(
             VS::Menu::Framework::submenuStates[kMapScreen - 1]) == 0xAA);
-  CHECK(Menu_Map_currentMapRow == -1);
+  CHECK(map::currentMapRow == -1);
   CHECK(Content_discRequestCounts.waiting != 0);
   CHECK(std::ranges::any_of(Content_discRequestSlots, [](const auto& slot) {
     return slot.cdFile.lba == VS_MAPBG_BIN_LBA &&
@@ -999,9 +990,9 @@ TEST_CASE("Only completed MENU5 drains map reads and restores its module state",
   LiveWorld world(true);
   const bool map_reload = GENERATE(false, true);
   const auto owner = InitialRead::Begin();
-  Menu_Map_selectedMap = 27;
-  Menu_Map_cameraDistance = 512;
-  const auto names = std::to_array(Menu_Map_mapNames);
+  map::chosenMap = 27;
+  map::cameraDistance = 512;
+  const auto names = std::to_array(map::mapNames);
   VS::State::stateFlags.map_paling[5] = 19;
   const auto camera = VS::Render::FrameScratchpad().camera;
   const Content_DiscFile file =
@@ -1010,13 +1001,13 @@ TEST_CASE("Only completed MENU5 drains map reads and restores its module state",
   menu_overlay_tests::Load overlay(kMapScreen, file);
   CHECK(overlay.Poll() == 0);
   CHECK(memory::LivePayloadCapacity(owner.buffer).has_value());
-  CHECK(Menu_Map_selectedMap == 27);
+  CHECK(map::chosenMap == 27);
   CHECK(overlay.Complete() != 0);
   if (!map_reload) {
     CHECK(memory::LivePayloadCapacity(owner.buffer).has_value());
     CHECK(content::LiveDiscRequestGeneration(owner.request) ==
           owner.generation);
-    CHECK(Menu_Map_selectedMap == 27);
+    CHECK(map::chosenMap == 27);
     return;
   }
   owner.CheckReleased();
@@ -1092,7 +1083,7 @@ TEST_CASE("Map completed-scene release cancels writes into its storage",
   LiveWorld world(true);
   world.LoadScene(1);
   auto* owner = Battle_unusedSceneBuffer;
-  auto* request = content::AllocateLiveDiscRequest(&Menu_Map_kSceneArmFiles[1]);
+  auto* request = content::AllocateLiveDiscRequest(&map::kSceneArmFiles[1]);
   REQUIRE(request != nullptr);
   const auto generation = content::LiveDiscRequestGeneration(request);
   content::EnqueueLiveDiscRequest(request, owner);
@@ -1120,16 +1111,16 @@ TEST_CASE("Full production queue still completes both map size transitions",
   FullDiscQueue busy;
   for (int destination : {11, 1}) {
     REQUIRE(world.ChooseOtherScene());
-    auto* request = Menu_Map_sceneCdQueueSlot;
+    auto* request = map::sceneCdQueueSlot;
     REQUIRE(request != nullptr);
     CHECK(std::ranges::find(busy.requests, request) == busy.requests.end());
     CHECK(request->state == Content_DiscRequestState_Loaded);
-    for (std::size_t tick = 0; tick < kTickBudget && Menu_Map_menuState != 1;
+    for (std::size_t tick = 0; tick < kTickBudget && map::menuState != 1;
          ++tick) {
       world.Tick();
     }
-    CHECK(Menu_Map_menuState == 1);
-    CHECK(Menu_Map_currentScene == destination);
+    CHECK(map::menuState == 1);
+    CHECK(map::currentScene == destination);
     CHECK(content::LiveDiscRequestGeneration(request) == 0);
     CheckSceneExtent(Battle_unusedSceneBuffer, destination == 1 ? 8192 : 2048);
     busy.CheckPreserved();
@@ -1143,8 +1134,8 @@ TEST_CASE("Actual heap replacement drains a visible map and its pending swap",
   SetFieldView();
   BeginVisibleMapSwap(world);
   auto* scene = Battle_unusedSceneBuffer;
-  auto* staging = Menu_Map_armFileBuff;
-  auto* request = Menu_Map_sceneCdQueueSlot;
+  auto* staging = map::armFileBuff;
+  auto* request = map::sceneCdQueueSlot;
   const auto refusals = memory::RefusedLiveHeapRequestCount();
   VS::Boot::ResetLiveSessionHeap();
   CheckDrainedRead(scene, staging, request, 2048, refusals);
@@ -1164,8 +1155,7 @@ TEST_CASE(
   REQUIRE(Field_pendingGimmickAnimationCount == 0);
   world.LoadScene(1);
   auto* scene = Battle_unusedSceneBuffer;
-  VS::Menu::SetLiveTextBoxText(
-      0, reinterpret_cast<char*>(Menu_Map_roomNamesTable));
+  VS::Menu::SetLiveTextBoxText(0, reinterpret_cast<char*>(map::roomNamesTable));
   VS::Field::LiveInitializeRoomRuntimeState();
   CheckNoSceneOwners();
   CHECK_FALSE(map::BoundLiveMapScene(scene));

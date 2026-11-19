@@ -33,7 +33,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualScreen.hpp"
 #include "Menu/ManualScreenLive.hpp"
 #include "Menu/ManualTopics.hpp"
@@ -890,10 +890,10 @@ struct LiveManualFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 1024> arena{};
   fw::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
-  int* saved_text = Menu_Manual_helpText;
-  u_long* saved_assets = Menu_Manual_helpAssets;
-  Content_DiscQueueSlot* saved_text_request = Menu_Manual_helpTextCdQueue;
-  Content_DiscQueueSlot* saved_assets_request = Menu_Manual_helpAssetsCdQueue;
+  int* saved_text = manual::helpText;
+  u_long* saved_assets = manual::helpAssets;
+  Content_DiscQueueSlot* saved_text_request = manual::helpTextCdQueue;
+  Content_DiscQueueSlot* saved_assets_request = manual::helpAssetsCdQueue;
   void* saved_primitives = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   VS::Menu::Framework::LiveMenuControl saved_menu_state =
@@ -915,13 +915,13 @@ struct LiveManualFixture {
   u_int saved_pressed = VS::Input::buttonsPressed;
   int saved_previous = VS::Input::previousButtons;
   int saved_repeat = VS::Input::buttonRepeat;
-  int saved_step = Menu_Manual_showMenuState;
-  int saved_scroll = Menu_Manual_scrollPosition;
-  int saved_line_count = Menu_Manual_lineCount;
-  int saved_arrow = Menu_Manual_pageArrowAnimState;
-  int saved_load_counter = Menu_Manual_helpPageLoadCounter;
-  int saved_topic_step = Menu_Manual_topMenuState;
-  int saved_topic_row = Menu_Manual_selectedRow;
+  int saved_step = manual::showMenuState;
+  int saved_scroll = manual::scrollPosition;
+  int saved_line_count = manual::totalLineCount;
+  int saved_arrow = manual::pageArrowAnimState;
+  int saved_load_counter = manual::helpPageLoadCounter;
+  int saved_topic_step = manual::topMenu_state;
+  int saved_topic_row = manual::menuSelectedRow;
   int saved_frame_index = VS::Render::frameBuf;
   ScreenState saved_screen = manual::LiveManualScreenState();
   VS::Input::Settings saved_settings = VS::Input::settings;
@@ -942,15 +942,15 @@ struct LiveManualFixture {
     VS::Input::buttonsPressed = 0;
     VS::Input::previousButtons = 0;
     VS::Input::buttonRepeat = 0;
-    Menu_Manual_showMenuState = manual::kHelpStart;
-    Menu_Manual_scrollPosition = 0;
-    Menu_Manual_lineCount = 0;
-    Menu_Manual_pageArrowAnimState = 0;
-    Menu_Manual_helpPageLoadCounter = 0;
-    Menu_Manual_helpText = nullptr;
-    Menu_Manual_helpAssets = nullptr;
-    Menu_Manual_helpTextCdQueue = nullptr;
-    Menu_Manual_helpAssetsCdQueue = nullptr;
+    manual::showMenuState = manual::kHelpStart;
+    manual::scrollPosition = 0;
+    manual::totalLineCount = 0;
+    manual::pageArrowAnimState = 0;
+    manual::helpPageLoadCounter = 0;
+    manual::helpText = nullptr;
+    manual::helpAssets = nullptr;
+    manual::helpTextCdQueue = nullptr;
+    manual::helpAssetsCdQueue = nullptr;
     Field_manualDisplayState = Field_ManualDisplayState{};
     // The page text box as the manual opens it (ManualTopicsTests).
     VS::Menu::LiveTextBox(manual::kPageTextBox)->flags.speakerTexture = 32;
@@ -985,17 +985,17 @@ struct LiveManualFixture {
     VS::Input::previousButtons = saved_previous;
     VS::Input::buttonRepeat = saved_repeat;
     Field_manualDisplayState = saved_display;
-    Menu_Manual_showMenuState = saved_step;
-    Menu_Manual_scrollPosition = saved_scroll;
-    Menu_Manual_lineCount = saved_line_count;
-    Menu_Manual_pageArrowAnimState = saved_arrow;
-    Menu_Manual_helpPageLoadCounter = saved_load_counter;
-    Menu_Manual_helpText = saved_text;
-    Menu_Manual_helpAssets = saved_assets;
-    Menu_Manual_helpTextCdQueue = saved_text_request;
-    Menu_Manual_helpAssetsCdQueue = saved_assets_request;
-    Menu_Manual_topMenuState = saved_topic_step;
-    Menu_Manual_selectedRow = saved_topic_row;
+    manual::showMenuState = saved_step;
+    manual::scrollPosition = saved_scroll;
+    manual::totalLineCount = saved_line_count;
+    manual::pageArrowAnimState = saved_arrow;
+    manual::helpPageLoadCounter = saved_load_counter;
+    manual::helpText = saved_text;
+    manual::helpAssets = saved_assets;
+    manual::helpTextCdQueue = saved_text_request;
+    manual::helpAssetsCdQueue = saved_assets_request;
+    manual::topMenu_state = saved_topic_step;
+    manual::menuSelectedRow = saved_topic_row;
     std::ranges::copy(saved_requests, std::begin(Content_discRequestSlots));
     Content_discRequestCounts = saved_request_counts;
     *VS::Menu::LiveTextBox(manual::kPageTextBox) = saved_box;
@@ -1062,11 +1062,11 @@ LiveHud CurrentHud() {
 
 // The help page statics as the typed state.
 HelpPagesState CurrentHelpPages() {
-  return {.step = Menu_Manual_showMenuState,
-          .scroll = Menu_Manual_scrollPosition,
-          .line_count = Menu_Manual_lineCount,
-          .arrow_frame = Menu_Manual_pageArrowAnimState,
-          .load_counter = Menu_Manual_helpPageLoadCounter};
+  return {.step = manual::showMenuState,
+          .scroll = manual::scrollPosition,
+          .line_count = manual::totalLineCount,
+          .arrow_frame = manual::pageArrowAnimState,
+          .load_counter = manual::helpPageLoadCounter};
 }
 
 // The row fields a menu row animation moves.
@@ -1157,13 +1157,13 @@ TEST_CASE("F04161 LiveUpdateScreen initializes the help and hides the HUD",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   VS::Input::settings.cursor_memory = 1;
-  Menu_Manual_showMenuState = 5;
+  manual::showMenuState = 5;
   Battle_hudHidden = 0;
   VS::Field::isFieldRenderingEnabled = 1;
   u_char step = manual::kScreenInitialize;
   CHECK(manual::LiveUpdateScreen(&step) == 0);
   CHECK(manual::LiveManualScreenState().initialized == 1);
-  CHECK(Menu_Manual_showMenuState == manual::kHelpStart);
+  CHECK(manual::showMenuState == manual::kHelpStart);
   CHECK(VS::Render::LiveTexturePages()[0x1D].state ==
         VS::Render::TexturePageState::kOwned);
   CHECK(step == manual::kScreenWaitReady);
@@ -1176,7 +1176,7 @@ TEST_CASE("F04161 LiveUpdateScreen leaves the help for the game",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   REQUIRE(VS::Render::ReserveLiveTexturePageRange(0x1D, 3, 5) == 0x1D);
-  Menu_Manual_showMenuState = manual::kHelpLeaveToGame;
+  manual::showMenuState = manual::kHelpLeaveToGame;
   Battle_hudHidden = 1;
   Battle_hudSlideOffset = manual::kHudSlideHidden;
   VS::Field::isFieldRenderingEnabled = 0;
@@ -1217,18 +1217,18 @@ TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
   Field_manualDisplayState.scrollPositions[3] = 20;
   std::array<int, 2> text{};
   std::array<u_long, 2> assets{};
-  Menu_Manual_helpText = text.data();
-  Menu_Manual_helpAssets = assets.data();
-  Menu_Manual_showMenuState = 5;
-  Menu_Manual_scrollPosition = 20;
-  Menu_Manual_lineCount = 30;
-  Menu_Manual_pageArrowAnimState = 6;
-  Menu_Manual_helpPageLoadCounter = 8;
+  manual::helpText = text.data();
+  manual::helpAssets = assets.data();
+  manual::showMenuState = 5;
+  manual::scrollPosition = 20;
+  manual::totalLineCount = 30;
+  manual::pageArrowAnimState = 6;
+  manual::helpPageLoadCounter = 8;
   CHECK(manual::LiveInitHelpState() == 1);
   CHECK(Field_manualDisplayState.currentManual == 0);
   CHECK(Field_manualDisplayState.scrollPositions[3] == 0);
-  CHECK(Menu_Manual_helpText == nullptr);
-  CHECK(Menu_Manual_helpAssets == nullptr);
+  CHECK(manual::helpText == nullptr);
+  CHECK(manual::helpAssets == nullptr);
   CHECK(CurrentHelpPages() == HelpPagesState{.step = 0,
                                              .scroll = 0,
                                              .line_count = 0,
@@ -1255,8 +1255,8 @@ TEST_CASE("F04162 LiveInitHelpState keeps the display state with memory on",
 TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Menu_Manual_showMenuState = manual::kHelpSelectTopic;
-  Menu_Manual_topMenuState = 1;
+  manual::showMenuState = manual::kHelpSelectTopic;
+  manual::topMenu_state = 1;
   const auto [selected, step] = GENERATE(
       std::pair{-2, manual::kHelpLeaveToMenu},
       std::pair{manual::kTopicMenuExitToGame, manual::kHelpLeaveToGame});
@@ -1264,7 +1264,7 @@ TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
   VS::Menu::Framework::menuMemory.cursor_memories[4] = 4;
   VS::Menu::Framework::menuMemory.cursor_memories[5] = 6;
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_showMenuState == step);
+  CHECK(manual::showMenuState == step);
   CHECK(Field_manualDisplayState.currentManual == 10);
   CHECK(Content_discRequestSlots[0].state == Content_DiscRequestState_Free);
 }
@@ -1273,16 +1273,16 @@ TEST_CASE("F04163 LiveUpdateHelpPages uploads the loaded assets and frees them",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
   const std::array<std::uint8_t, 16> assets{};
-  Menu_Manual_helpAssets = LiveManualFixture::Payload<u_long>(assets);
-  u_long* const buffer = Menu_Manual_helpAssets;
+  manual::helpAssets = LiveManualFixture::Payload<u_long>(assets);
+  u_long* const buffer = manual::helpAssets;
   Content_DiscQueueSlot* const request = LiveManualFixture::LoadedRequest();
-  Menu_Manual_helpAssetsCdQueue = request;
-  Menu_Manual_showMenuState = manual::kHelpLoadAssets;
+  manual::helpAssetsCdQueue = request;
+  manual::showMenuState = manual::kHelpLoadAssets;
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_showMenuState == manual::kHelpLoadText);
-  CHECK(Menu_Manual_helpAssets == nullptr);
-  CHECK(Menu_Manual_helpAssetsCdQueue == nullptr);
+  CHECK(manual::showMenuState == manual::kHelpLoadText);
+  CHECK(manual::helpAssets == nullptr);
+  CHECK(manual::helpAssetsCdQueue == nullptr);
   CHECK(request->state == Content_DiscRequestState_Free);
   CHECK(Freed(buffer));
   CHECK(manual::LiveManualScreenRefusalCount() == refusals);
@@ -1291,57 +1291,57 @@ TEST_CASE("F04163 LiveUpdateHelpPages uploads the loaded assets and frees them",
 TEST_CASE("F04163 LiveUpdateHelpPages refuses missing requests and uploads",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Menu_Manual_showMenuState = manual::kHelpLoadAssets;
+  manual::showMenuState = manual::kHelpLoadAssets;
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   // A missing request can never load: the topic is abandoned (#408).
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_showMenuState == manual::kHelpListTopics);
+  CHECK(manual::showMenuState == manual::kHelpListTopics);
   CHECK(manual::LiveManualScreenRefusalCount() == refusals + 2);
 
   // A header whose tiles run past the buffer: the CLUT upload is refused.
   const std::array<std::uint8_t, 16> assets{1, 0, 0, 0, 1, 0, 0, 0};
-  Menu_Manual_helpAssets = LiveManualFixture::Payload<u_long>(assets);
-  Menu_Manual_helpAssetsCdQueue = LiveManualFixture::LoadedRequest();
-  Menu_Manual_showMenuState = manual::kHelpLoadAssets;
+  manual::helpAssets = LiveManualFixture::Payload<u_long>(assets);
+  manual::helpAssetsCdQueue = LiveManualFixture::LoadedRequest();
+  manual::showMenuState = manual::kHelpLoadAssets;
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_showMenuState == manual::kHelpLoadText);
+  CHECK(manual::showMenuState == manual::kHelpLoadText);
   CHECK(manual::LiveManualScreenRefusalCount() == refusals + 3);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages opens the loaded text where it was left",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Menu_Manual_helpText = LiveManualFixture::Payload<int>(HelpText(23));
-  Menu_Manual_helpTextCdQueue = LiveManualFixture::LoadedRequest();
-  Menu_Manual_showMenuState = manual::kHelpLoadText;
-  Menu_Manual_helpPageLoadCounter = 5;
+  manual::helpText = LiveManualFixture::Payload<int>(HelpText(23));
+  manual::helpTextCdQueue = LiveManualFixture::LoadedRequest();
+  manual::showMenuState = manual::kHelpLoadText;
+  manual::helpPageLoadCounter = 5;
   Field_manualDisplayState.currentManual = 2;
   Field_manualDisplayState.scrollPositions[2] = 10;
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_showMenuState == manual::kHelpShowPage);
-  CHECK(Menu_Manual_scrollPosition == 10);
-  CHECK(Menu_Manual_lineCount == 20);
-  CHECK(Menu_Manual_helpPageLoadCounter == 0);
-  CHECK(Menu_Manual_helpTextCdQueue == nullptr);
+  CHECK(manual::showMenuState == manual::kHelpShowPage);
+  CHECK(manual::scrollPosition == 10);
+  CHECK(manual::totalLineCount == 20);
+  CHECK(manual::helpPageLoadCounter == 0);
+  CHECK(manual::helpTextCdQueue == nullptr);
   CHECK(Content_discRequestSlots[0].state == Content_DiscRequestState_Free);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages draws a page into the frame",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Menu_Manual_helpText = LiveManualFixture::Payload<int>(HelpText(23));
-  Menu_Manual_showMenuState = manual::kHelpShowPage;
-  Menu_Manual_scrollPosition = 10;
-  Menu_Manual_lineCount = 20;
-  Menu_Manual_pageArrowAnimState = 15;
+  manual::helpText = LiveManualFixture::Payload<int>(HelpText(23));
+  manual::showMenuState = manual::kHelpShowPage;
+  manual::scrollPosition = 10;
+  manual::totalLineCount = 20;
+  manual::pageArrowAnimState = 15;
   Field_manualDisplayState.currentManual = 2;
   VS::Input::buttonRepeat = static_cast<int>(manual::kButtonDown);
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_scrollPosition == 11);
+  CHECK(manual::scrollPosition == 11);
   CHECK(Field_manualDisplayState.scrollPositions[2] == 11);
-  CHECK(Menu_Manual_pageArrowAnimState == 0);
-  CHECK(Menu_Manual_helpPageLoadCounter == 1);
+  CHECK(manual::pageArrowAnimState == 0);
+  CHECK(manual::helpPageLoadCounter == 1);
   CHECK(fixture.Linked(manual::kControlsLayer));
   CHECK(fixture.Linked(manual::kPageNumberLayer));
   CHECK(manual::LiveManualScreenRefusalCount() == refusals);
@@ -1350,31 +1350,31 @@ TEST_CASE("F04163 LiveUpdateHelpPages draws a page into the frame",
 TEST_CASE("F04163 LiveUpdateHelpPages refuses drawing without a frame table",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Menu_Manual_helpText = LiveManualFixture::Payload<int>(HelpText(3));
-  Menu_Manual_showMenuState = manual::kHelpShowPage;
+  manual::helpText = LiveManualFixture::Payload<int>(HelpText(3));
+  manual::showMenuState = manual::kHelpShowPage;
   VS::Render::legacyOrderingTables[0] = nullptr;
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   CHECK(manual::LiveUpdateHelpPages() == 0);
   // Two button icons and five texts.
   CHECK(manual::LiveManualScreenRefusalCount() == refusals + 7);
-  CHECK(Menu_Manual_helpPageLoadCounter == 1);
+  CHECK(manual::helpPageLoadCounter == 1);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages leaves the page and frees its text",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  Menu_Manual_helpText = LiveManualFixture::Payload<int>(HelpText(3));
-  int* const text = Menu_Manual_helpText;
-  Menu_Manual_showMenuState = manual::kHelpShowPage;
-  Menu_Manual_helpPageLoadCounter = 3;
+  manual::helpText = LiveManualFixture::Payload<int>(HelpText(3));
+  int* const text = manual::helpText;
+  manual::showMenuState = manual::kHelpShowPage;
+  manual::helpPageLoadCounter = 3;
   VS::Input::buttonsPressed = manual::kButtonCircle;
   VS::Menu::LiveTextBox(manual::kPageTextBox)->state = 3;
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  CHECK(Menu_Manual_showMenuState == manual::kHelpListTopics);
+  CHECK(manual::showMenuState == manual::kHelpListTopics);
   CHECK(VS::Menu::LiveTextBox(manual::kPageTextBox)->state == 0);
-  CHECK(Menu_Manual_helpText == nullptr);
+  CHECK(manual::helpText == nullptr);
   CHECK(Freed(text));
-  CHECK(Menu_Manual_helpPageLoadCounter == 3);
+  CHECK(manual::helpPageLoadCounter == 3);
 }
 
 TEST_CASE("F04163 LiveUpdateHelpPages frees both buffers and keeps them",
@@ -1382,16 +1382,16 @@ TEST_CASE("F04163 LiveUpdateHelpPages frees both buffers and keeps them",
   LiveManualFixture fixture;
   REQUIRE(VS::Render::ReserveLiveTexturePageRange(0x1D, 3, 5) == 0x1D);
   const std::array<std::uint8_t, 16> bytes{};
-  Menu_Manual_helpText = LiveManualFixture::Payload<int>(bytes);
-  Menu_Manual_helpAssets = LiveManualFixture::Payload<u_long>(bytes);
-  int* const text = Menu_Manual_helpText;
-  u_long* const assets = Menu_Manual_helpAssets;
-  Menu_Manual_showMenuState = manual::kHelpLeaveToMenu;
+  manual::helpText = LiveManualFixture::Payload<int>(bytes);
+  manual::helpAssets = LiveManualFixture::Payload<u_long>(bytes);
+  int* const text = manual::helpText;
+  u_long* const assets = manual::helpAssets;
+  manual::showMenuState = manual::kHelpLeaveToMenu;
   CHECK(manual::LiveUpdateHelpPages() == manual::kHelpExitToMenu);
   CHECK(Freed(text));
   CHECK(Freed(assets));
-  CHECK(Menu_Manual_helpText == text);
-  CHECK(Menu_Manual_helpAssets == assets);
+  CHECK(manual::helpText == text);
+  CHECK(manual::helpAssets == assets);
   CHECK(VS::Render::LiveTexturePages()[0x1F].state ==
         VS::Render::TexturePageState::kRetiring);
 }
@@ -1464,7 +1464,7 @@ struct MissingHelpFiles {
     manifest << "lba\tsize\tform\tpath\n";
     for (const auto file : {HelpFile::kAssets, HelpFile::kText}) {
       const Content_DiscFile& listed =
-          Menu_Manual_kHelpFileCdFiles[static_cast<std::size_t>(file)];
+          manual::kHelpFileCdFiles[static_cast<std::size_t>(file)];
       manifest << listed.lba << '\t' << listed.size << "\traw\tSMALL/MISSING"
                << static_cast<int>(file) << ".BIN\n";
     }
@@ -1490,12 +1490,12 @@ struct MissingHelpFiles {
 // topic list shown again after one refusal.
 void CheckTopicAbandoned(const int* text, const u_long* assets,
                          std::uint64_t refusals) {
-  CHECK(Menu_Manual_showMenuState == manual::kHelpListTopics);
+  CHECK(manual::showMenuState == manual::kHelpListTopics);
   CHECK(manual::LiveManualScreenRefusalCount() == refusals + 1);
-  CHECK(Menu_Manual_helpText == nullptr);
-  CHECK(Menu_Manual_helpAssets == nullptr);
-  CHECK(Menu_Manual_helpTextCdQueue == nullptr);
-  CHECK(Menu_Manual_helpAssetsCdQueue == nullptr);
+  CHECK(manual::helpText == nullptr);
+  CHECK(manual::helpAssets == nullptr);
+  CHECK(manual::helpTextCdQueue == nullptr);
+  CHECK(manual::helpAssetsCdQueue == nullptr);
   CHECK(Freed(text));
   CHECK(Freed(assets));
   CHECK(std::ranges::all_of(Content_discRequestSlots, [](const auto& slot) {
@@ -1509,23 +1509,23 @@ TEST_CASE(
     "[manual-screen-live]") {
   LiveManualFixture fixture;
   MissingHelpFiles missing;
-  Menu_Manual_showMenuState = manual::kHelpSelectTopic;
-  Menu_Manual_topMenuState = manual::kTopicStepSelectRow;
+  manual::showMenuState = manual::kHelpSelectTopic;
+  manual::topMenu_state = manual::kTopicStepSelectRow;
   VS::Menu::Framework::selectedRow = 0;
   CHECK(manual::LiveUpdateHelpPages() == 0);
-  REQUIRE(Menu_Manual_showMenuState == manual::kHelpLoadAssets);
-  int* const text = Menu_Manual_helpText;
-  u_long* const assets = Menu_Manual_helpAssets;
+  REQUIRE(manual::showMenuState == manual::kHelpLoadAssets);
+  int* const text = manual::helpText;
+  u_long* const assets = manual::helpAssets;
   REQUIRE(text != nullptr);
   REQUIRE(assets != nullptr);
-  REQUIRE(Menu_Manual_helpTextCdQueue != nullptr);
-  REQUIRE(Menu_Manual_helpAssetsCdQueue != nullptr);
+  REQUIRE(manual::helpTextCdQueue != nullptr);
+  REQUIRE(manual::helpAssetsCdQueue != nullptr);
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
 
   // Without the native return, the pages wait in kHelpLoadAssets for good.
   constexpr int kFrameBudget = 120;
-  for (int frame = 0; frame < kFrameBudget &&
-                      Menu_Manual_showMenuState == manual::kHelpLoadAssets;
+  for (int frame = 0;
+       frame < kFrameBudget && manual::showMenuState == manual::kHelpLoadAssets;
        ++frame) {
     VS::Content::UpdateLiveDiscQueue();
     CHECK(manual::LiveUpdateHelpPages() == 0);

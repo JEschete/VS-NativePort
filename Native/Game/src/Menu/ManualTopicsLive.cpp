@@ -20,7 +20,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualTopics.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 
@@ -45,7 +45,7 @@ void Refuse(std::string_view reason) {
 }
 
 std::span<const std::uint16_t> TopicTable() {
-  return std::span<const std::uint16_t>(Menu_Manual_menuText);
+  return std::span<const std::uint16_t>(menuTextTable);
 }
 
 class LiveTopicMenuHost final : public TopicMenuHost {
@@ -68,7 +68,7 @@ class LiveTopicMenuHost final : public TopicMenuHost {
   void CreateRows(std::int32_t row_count, std::int32_t row_info,
                   std::span<const std::uint32_t> text_offsets,
                   std::span<const std::int32_t> row_types) override {
-    auto* const table = reinterpret_cast<char*>(Menu_Manual_menuText);
+    auto* const table = reinterpret_cast<char*>(menuTextTable);
     std::vector<char*> strings;
     strings.reserve(text_offsets.size());
     for (const std::uint32_t offset : text_offsets) {
@@ -114,7 +114,7 @@ std::optional<std::vector<std::uint32_t>> TopicStringOffsets(
 
 // The loaded help text file, from its start to the end of its heap payload.
 std::optional<std::span<const std::uint8_t>> HelpText() {
-  const auto* first = reinterpret_cast<const std::byte*>(Menu_Manual_helpText);
+  const auto* first = reinterpret_cast<const std::byte*>(helpText);
   if (first == nullptr) {
     return std::nullopt;
   }
@@ -173,14 +173,13 @@ int LiveGetSelectedTopicRow() {
 
 // decomp: MENUE.PRG _topMenu (494.c:450).
 int LiveUpdateTopicMenu(int init) {
-  TopicMenuState state{.step = Menu_Manual_topMenuState,
-                       .selected_row = Menu_Manual_selectedRow};
+  TopicMenuState state{.step = topMenu_state, .selected_row = menuSelectedRow};
   LiveTopicMenuHost host;
   const auto result =
       UpdateTopicMenu(state, init != 0, TopicTable(),
                       Field_manualDisplayState.currentManual, host);
-  Menu_Manual_topMenuState = state.step;
-  Menu_Manual_selectedRow = state.selected_row;
+  topMenu_state = state.step;
+  menuSelectedRow = state.selected_row;
   if (!result.has_value()) {
     Refuse("Manual topic table cannot be listed");
     return kTopicMenuCancelled;
@@ -211,8 +210,7 @@ void LiveCopyPageText() {
     return;
   }
   std::array<std::uint8_t, kPageTextCapacity> page{};
-  const auto length =
-      ComposePageText(*help_text, Menu_Manual_scrollPosition, page);
+  const auto length = ComposePageText(*help_text, scrollPosition, page);
   if (!length.has_value()) {
     Refuse(PageRefusal(length.error()));
     return;

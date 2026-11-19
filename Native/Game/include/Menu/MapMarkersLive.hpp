@@ -2,7 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Binds MapMarkers.hpp to the generated map menu: the frame's primitive
 // cursor and ordering tables, row 0 of the menu framework, _mapLabels and
-// its count (Menu_Map_mapLabels, Menu_Map_mapLabelCount), Menu_Map_mapLabelY,
+// its count (mapLabels, mapLabelCount), mapLabelY,
 // the icon RECT tables, the door and connecting-area name tables, the area
 // visit flags and the state flags. Each entry keeps the original call shape.
 // An icon, name, area or state flag outside its table, a full label queue

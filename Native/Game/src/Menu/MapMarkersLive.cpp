@@ -14,7 +14,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapMarkers.hpp"
 #include "Render/Render.hpp"
 #include "Render/Sprites.hpp"
@@ -25,16 +25,12 @@
 
 namespace VS::Menu::map {
 namespace {
-// _iconRects, D_80108D04 and D_80108D14's entries.
-constexpr std::size_t kFeatureIcons = 4;
-constexpr std::size_t kDoorStateVariants = 2;
 // The state flags func_80107630 and func_8010839C index by door state.
 constexpr std::size_t kDoorStateFlagsOffset = 0x33F;
 // Ordering-table byte offset of the icon quads and word slot of the lines.
 constexpr std::size_t kMarkerQuadSlotBytes = 28;
 constexpr std::size_t kLabelLineSlot = 8;
 
-static_assert(sizeof(Menu_Map_MapLabel) == sizeof(MapLabel));
 static_assert(offsetof(VS::State::StateFlags, opaque_33f) ==
               kDoorStateFlagsOffset);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
@@ -48,20 +44,7 @@ void Refuse(std::string_view call, std::string_view reason) {
   }
 }
 
-[[nodiscard]] MarkerRect RectOf(const RECT& rect) {
-  return {.x = rect.x, .y = rect.y, .w = rect.w, .h = rect.h};
-}
-
-[[nodiscard]] std::array<MarkerRect, kDoorStateVariants> VariantsOf(
-    const RECT* rects) {
-  const std::span<const RECT, kDoorStateVariants> table{rects,
-                                                        kDoorStateVariants};
-  return {RectOf(table[0]), RectOf(table[1])};
-}
-
-[[nodiscard]] std::span<MapLabel> Labels() {
-  return {reinterpret_cast<MapLabel*>(Menu_Map_mapLabels), kMapLabelCapacity};
-}
+[[nodiscard]] std::span<MapLabel> Labels() { return mapLabels; }
 
 // The state flag byte for `state_id`, read unsigned as the original's lbu;
 // false when it lies outside the state flags.
@@ -147,9 +130,8 @@ class LiveMapMarkerHost final : public MapMarkerHost {
   }
 
   void DrawLabelText(const LabelText& text) override {
-    u_short* table = text.table == LabelTextTable::kDoorNames
-                         ? Menu_Map_doors
-                         : Menu_Map_connectingMaps;
+    u_short* table =
+        text.table == LabelTextTable::kDoorNames ? doors : connectingMaps;
     Framework::MenuRow* row = Framework::SetLiveMenuItem(
         0, text.x, text.y, text.width, 0,
         reinterpret_cast<char*>(&table[text.text_offset]));
@@ -180,14 +162,8 @@ void LiveDrawAshleyMarker(int id, int xy, int brightness, u_long* next_prim) {
 // decomp: MENU5.PRG _renderIcon (4D8.c:2158).
 void LiveDrawFeatureMarker(int id, int x, int y) {
   constexpr std::string_view kCall = "DrawFeatureMarker";
-  const std::span<const RECT, kFeatureIcons> rects{Menu_Map_iconRects,
-                                                   kFeatureIcons};
-  std::array<MarkerRect, kFeatureIcons> icons{};
-  for (std::size_t icon = 0; icon < kFeatureIcons; ++icon) {
-    icons.at(icon) = RectOf(rects[icon]);
-  }
   LiveMapMarkerHost host(kCall);
-  if (!DrawFeatureMarker(host, icons, id, x, y)) {
+  if (!DrawFeatureMarker(host, kIconRects, id, x, y)) {
     Refuse(kCall, "icon outside _iconRects");
   }
 }
@@ -201,9 +177,8 @@ void LiveDrawDoorStateMarker(int x, int y, int id) {
     return;
   }
   LiveMapMarkerHost host(kCall);
-  if (!DrawDoorStateMarker(host, VariantsOf(Menu_Map_kDoorMarkerUpperRects),
-                           VariantsOf(Menu_Map_kDoorMarkerLowerRects), Labels(),
-                           Menu_Map_mapLabelCount, x, y, id, flag)) {
+  if (!DrawDoorStateMarker(host, kDoorMarkerUpperRects, kDoorMarkerLowerRects,
+                           Labels(), mapLabelCount, x, y, id, flag)) {
     Refuse(kCall, "label queue full");
   }
 }
@@ -212,7 +187,7 @@ void LiveDrawDoorStateMarker(int x, int y, int id) {
 void LiveDrawDoorLabel(int x, int y, int door_id) {
   constexpr std::string_view kCall = "DrawDoorLabel";
   LiveMapMarkerHost host(kCall);
-  if (!DrawDoorLabel(host, Menu_Map_doors, Menu_Map_mapLabelY, x, y, door_id)) {
+  if (!DrawDoorLabel(host, doors, mapLabelY, x, y, door_id)) {
     Refuse(kCall, "door name outside _doors");
   }
 }
@@ -231,15 +206,15 @@ void LiveDrawConnectingAreaLabel(int x, int y, int map_id) {
   std::memcpy(flags.data(), VS::State::roomVisitProgress.area_flags,
               sizeof(flags));
   LiveMapMarkerHost host(kCall);
-  if (!DrawConnectingAreaLabel(host, Menu_Map_connectingMaps, flags,
-                               Menu_Map_mapLabelY, x, y, map_id)) {
+  if (!DrawConnectingAreaLabel(host, connectingMaps, flags, mapLabelY, x, y,
+                               map_id)) {
     Refuse(kCall, "area outside the visit flags or _connectingMaps");
   }
 }
 
 // decomp: MENU5.PRG _addMapLabel (4D8.c:2441).
 void LiveQueueLabel(int x, int y, int type, int label_id) {
-  if (!QueueLabel(Labels(), Menu_Map_mapLabelCount, x, y, type, label_id)) {
+  if (!QueueLabel(Labels(), mapLabelCount, x, y, type, label_id)) {
     Refuse("QueueLabel", "label queue full");
   }
 }

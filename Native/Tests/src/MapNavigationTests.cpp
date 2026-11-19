@@ -15,7 +15,7 @@
 #include "Field/MinimapScene.hpp"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapNavigation.hpp"
 #include "Menu/MapNavigationLive.hpp"
 
@@ -271,11 +271,11 @@ struct LiveMapState {
       : minimap(Field_roomData.minimapScene),
         minimap_length(Field_roomData.header.minimapSceneLength),
         arm(Battle_unusedSceneBuffer),
-        scene(Menu_Map_currentScene),
-        center(Menu_Map_centerPoint),
-        room(Menu_Map_currentRoomIndex),
-        current(Menu_Map_isCurrentScene),
-        names(Menu_Map_roomNamesTable) {}
+        scene(nav::currentScene),
+        center(nav::centerPoint),
+        room(nav::currentRoomIndex),
+        current(nav::isCurrentScene),
+        names(nav::roomNamesTable) {}
   LiveMapState(const LiveMapState&) = delete;
   LiveMapState& operator=(const LiveMapState&) = delete;
   LiveMapState(LiveMapState&&) = delete;
@@ -284,11 +284,11 @@ struct LiveMapState {
     Field_roomData.minimapScene = minimap;
     Field_roomData.header.minimapSceneLength = minimap_length;
     Battle_unusedSceneBuffer = arm;
-    Menu_Map_currentScene = scene;
-    Menu_Map_centerPoint = center;
-    Menu_Map_currentRoomIndex = room;
-    Menu_Map_isCurrentScene = current;
-    Menu_Map_roomNamesTable = names;
+    nav::currentScene = scene;
+    nav::centerPoint = center;
+    nav::currentRoomIndex = room;
+    nav::isCurrentScene = current;
+    nav::roomNamesTable = names;
   }
   static void UseMinimap(SceneImage& image) {
     Field_roomData.minimapScene =
@@ -325,11 +325,11 @@ TEST_CASE("The live map centers on a minimap scene room",
   auto* scene = Field_roomData.minimapScene;
 
   nav::LiveSetRoomCenterTarget(scene, 1);
-  CHECK(Menu_Map_centerPoint.vx == 100);
-  CHECK(Menu_Map_centerPoint.vy == 0);
+  CHECK(nav::centerPoint.vx == 100);
+  CHECK(nav::centerPoint.vy == 0);
 
   nav::LiveCenterOnRoom(scene, 0);
-  CHECK(Menu_Map_centerPoint.vx == 0);
+  CHECK(nav::centerPoint.vx == 0);
   CHECK(VertexAt(image, kFirstVertex) == MapVertex{.x = -5, .y = -4, .z = -6});
   CHECK(VertexAt(image, kSecondVertex) == MapVertex{.x = 85, .y = -8, .z = 0});
   CHECK(Get<std::int16_t>(image.bytes, kSecondVertex + 6) == 0x5A5A);
@@ -342,9 +342,9 @@ TEST_CASE("The live map eases scales and marks a minimap scene",
   LiveMapState::UseMinimap(image);
   auto* scene = Field_roomData.minimapScene;
 
-  Menu_Map_centerPoint = {.vx = 15, .vy = 0, .vz = 0, .pad = 0};
+  nav::centerPoint = {.vx = 15, .vy = 0, .vz = 0, .pad = 0};
   nav::LiveAnimateCentering(scene);
-  CHECK(Menu_Map_centerPoint.vx == 7);
+  CHECK(nav::centerPoint.vx == 7);
   CHECK(VertexAt(image, kSecondVertex) == MapVertex{.x = 92, .y = 0, .z = 0});
 
   nav::LiveScaleRoomVertices(scene, 4);
@@ -361,14 +361,14 @@ TEST_CASE("The live map refuses unknown scenes rooms and blocks",
                                {}, kSceneBytes);
   SceneImage other = image;
   LiveMapState::UseMinimap(image);
-  Menu_Map_centerPoint = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
+  nav::centerPoint = {.vx = 1, .vy = 2, .vz = 3, .pad = 0};
 
   nav::LiveCenterOnRoom(reinterpret_cast<Field_MapScene*>(other.bytes.data()),
                         0);
   nav::LiveCenterOnRoom(Field_roomData.minimapScene, 1);
   nav::LiveSetRoomCenterTarget(Field_roomData.minimapScene, -1);
-  CHECK(Menu_Map_centerPoint.vx == 1);
-  CHECK(Menu_Map_centerPoint.vz == 3);
+  CHECK(nav::centerPoint.vx == 1);
+  CHECK(nav::centerPoint.vz == 3);
 
   // The vertex block's count runs past the scene.
   Put(image.bytes, 4 + kRecord, std::int32_t{0x100});
@@ -383,7 +383,7 @@ TEST_CASE("The live initial room matches the minimap scene's first room",
   SceneImage minimap = MakeScene(
       {{}}, {{.visited = 1, .zone_id = 7, .map_id = 9}}, {}, kSceneBytes);
   LiveMapState::UseMinimap(minimap);
-  const auto size = static_cast<std::size_t>(Menu_Map_kSceneArmFiles[1].size);
+  const auto size = static_cast<std::size_t>(nav::kSceneArmFiles[1].size);
   REQUIRE(size >= kSceneBytes);
   SceneImage scene = MakeScene({{}, {}, {}},
                                {{.visited = 0, .zone_id = 7, .map_id = 8},
@@ -391,26 +391,26 @@ TEST_CASE("The live initial room matches the minimap scene's first room",
                                 {.visited = 0, .zone_id = 7, .map_id = 9}},
                                {}, size);
   Battle_unusedSceneBuffer = scene.bytes.data();
-  Menu_Map_currentScene = 1;
+  nav::currentScene = 1;
   auto* data = static_cast<Field_MapScene*>(Battle_unusedSceneBuffer);
   CHECK(nav::LiveInitialRoomIndex(data) == 2);
-  CHECK(Menu_Map_isCurrentScene == 2);
+  CHECK(nav::isCurrentScene == 2);
 
   // The minimap's first room moves to map 4, which the scene lacks.
   Put(minimap.bytes, 4 + 10, std::int16_t{4});
   CHECK(nav::LiveInitialRoomIndex(data) == 1);
-  CHECK(Menu_Map_isCurrentScene == -1);
+  CHECK(nav::isCurrentScene == -1);
 
   Field_roomData.minimapScene = nullptr;
-  Menu_Map_isCurrentScene = 5;
+  nav::isCurrentScene = 5;
   CHECK(nav::LiveInitialRoomIndex(data) == 1);
-  CHECK(Menu_Map_isCurrentScene == -1);
+  CHECK(nav::isCurrentScene == -1);
 }
 
 TEST_CASE("The live room step follows the ARM scene's name links",
           "[map-navigation][map-navigation-live]") {
   LiveMapState state;
-  const auto size = static_cast<std::size_t>(Menu_Map_kSceneArmFiles[1].size);
+  const auto size = static_cast<std::size_t>(nav::kSceneArmFiles[1].size);
   REQUIRE(size >= kSceneBytes);
   SceneImage scene =
       MakeScene({{}, {}, {}}, {{.visited = 1}, {.visited = 0}, {.visited = 1}},
@@ -419,24 +419,24 @@ TEST_CASE("The live room step follows the ARM scene's name links",
                  {.previous = 1, .next = 0}},
                 size);
   Battle_unusedSceneBuffer = scene.bytes.data();
-  Menu_Map_currentScene = 1;
-  Menu_Map_roomNamesTable =
+  nav::currentScene = 1;
+  nav::roomNamesTable =
       reinterpret_cast<Field_MapRoomName*>(scene.bytes.data() + scene.names);
-  Menu_Map_currentRoomIndex = 0;
+  nav::currentRoomIndex = 0;
   nav::LiveSelectAdjacentVisitedRoom(1);
-  CHECK(Menu_Map_currentRoomIndex == 2);
+  CHECK(nav::currentRoomIndex == 2);
   nav::LiveSelectAdjacentVisitedRoom(0);
-  CHECK(Menu_Map_currentRoomIndex == 0);
+  CHECK(nav::currentRoomIndex == 0);
 
   // Every room unvisited: the original never returns.
   Put(scene.bytes, 4, std::int32_t{0});
   Put(scene.bytes, 4 + (2 * kRecord), std::int32_t{0});
   nav::LiveSelectAdjacentVisitedRoom(1);
-  CHECK(Menu_Map_currentRoomIndex == 0);
+  CHECK(nav::currentRoomIndex == 0);
 
-  Menu_Map_roomNamesTable = nullptr;
+  nav::roomNamesTable = nullptr;
   Put(scene.bytes, 4, std::int32_t{1});
   nav::LiveSelectAdjacentVisitedRoom(1);
-  CHECK(Menu_Map_currentRoomIndex == 0);
+  CHECK(nav::currentRoomIndex == 0);
 }
 }  // namespace

@@ -10,7 +10,7 @@
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualIllustration.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Render/Display.hpp"
@@ -498,8 +498,8 @@ struct LiveFrameFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_table = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  int saved_scroll = Menu_Manual_scrollPosition;
-  int* saved_help_text = Menu_Manual_helpText;
+  int saved_scroll = manual::scrollPosition;
+  int* saved_help_text = manual::helpText;
   std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4, 0xDEADBEEF);
   std::vector<u_long> ordering = std::vector<u_long>(0x2088 / 4);
   alignas(VS::Core::Memory::kHeapUnitBytes)
@@ -513,7 +513,7 @@ struct LiveFrameFixture {
     VS::Render::FrameScratchpad().primitive_cursor = storage.data();
     VS::Render::FrameScratchpad().ordering_table = ordering.data() + 18;
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
-    Menu_Manual_scrollPosition = 0;
+    manual::scrollPosition = 0;
   }
   LiveFrameFixture(const LiveFrameFixture&) = delete;
   LiveFrameFixture& operator=(const LiveFrameFixture&) = delete;
@@ -524,8 +524,8 @@ struct LiveFrameFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_table;
     VS::Render::frameBuf = saved_framebuffer;
-    Menu_Manual_scrollPosition = saved_scroll;
-    Menu_Manual_helpText = saved_help_text;
+    manual::scrollPosition = saved_scroll;
+    manual::helpText = saved_help_text;
   }
 
   template <typename T>
@@ -545,7 +545,7 @@ TEST_CASE("Live illustrations queue a sprite and texture page per tile",
       IllustrationRecord({.x = 10, .y = 20, .width = 8, .height = 8}, tiles);
   std::int16_t* data = frame.Allocate<std::int16_t>(record);
   REQUIRE(data != nullptr);
-  Menu_Manual_scrollPosition = 1;
+  manual::scrollPosition = 1;
 
   manual::LiveDrawIllustration(data);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
@@ -583,9 +583,8 @@ TEST_CASE("Live diagram lines queue flat lines from the help text",
   const std::array<LineShape, 2> lines{
       {{.x1 = 100, .y1 = 50}, {.y0 = -20, .y1 = -1}}};
   const std::vector<std::int16_t> text = HelpText(lines);
-  Menu_Manual_helpText =
-      reinterpret_cast<int*>(frame.Allocate<std::int16_t>(text));
-  REQUIRE(Menu_Manual_helpText != nullptr);
+  manual::helpText = reinterpret_cast<int*>(frame.Allocate<std::int16_t>(text));
+  REQUIRE(manual::helpText != nullptr);
 
   manual::LiveDrawDiagramLines();
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
@@ -602,13 +601,12 @@ TEST_CASE("Live diagram lines without a heap help text are refused",
   const std::array<LineShape, 1> lines{{{.y1 = 5}}};
   std::vector<std::int16_t> text = HelpText(lines);
   const std::uint64_t refusals = manual::LiveIllustrationRefusalCount();
-  Menu_Manual_helpText = nullptr;
+  manual::helpText = nullptr;
   manual::LiveDrawDiagramLines();
-  Menu_Manual_helpText = reinterpret_cast<int*>(text.data());
+  manual::helpText = reinterpret_cast<int*>(text.data());
   manual::LiveDrawDiagramLines();
   text[14] = 3;
-  Menu_Manual_helpText =
-      reinterpret_cast<int*>(frame.Allocate<std::int16_t>(text));
+  manual::helpText = reinterpret_cast<int*>(frame.Allocate<std::int16_t>(text));
   manual::LiveDrawDiagramLines();
   CHECK(manual::LiveIllustrationRefusalCount() == refusals + 3);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == frame.storage.data());
@@ -651,18 +649,18 @@ TEST_CASE("Live uploads outside the heap or past their buffer are refused",
 
 TEST_CASE("Live visibility animation updates the original state record",
           "[manual-illustration-live]") {
-  Menu_Manual_AnimationState state{.reserved0 = 1,
-                                   .frameMask = 0x0002,
-                                   .frameDuration = 1,
-                                   .repeat = 0,
-                                   .currentFrame = 0,
-                                   .timer = 0,
-                                   .isActive = 0};
+  manual::VisibilityAnimation state{.enabled = 1,
+                                    .frame_mask = 0x0002,
+                                    .frame_duration = 1,
+                                    .repeat = 0,
+                                    .current_frame = 0,
+                                    .timer = 0,
+                                    .hidden = 0};
   CHECK(manual::LiveAdvanceVisibilityAnimation(&state) == 1);
-  CHECK(state.isActive == 1);
-  CHECK(state.currentFrame == 1);
+  CHECK(state.hidden == 1);
+  CHECK(state.current_frame == 1);
   CHECK(manual::LiveAdvanceVisibilityAnimation(&state) == 0);
-  CHECK(state.reserved0 == 1);
+  CHECK(state.enabled == 1);
   const std::uint64_t refusals = manual::LiveIllustrationRefusalCount();
   CHECK(manual::LiveAdvanceVisibilityAnimation(nullptr) == 0);
   CHECK(manual::LiveIllustrationRefusalCount() == refusals + 1);

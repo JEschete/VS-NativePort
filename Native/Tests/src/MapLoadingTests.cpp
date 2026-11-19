@@ -14,7 +14,7 @@
 #include "DiscQueue.h"
 #include "Field/Map.h"
 #include "Legacy/Psx.h"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapLoadingLive.hpp"
 #include "State/Progress.hpp"
@@ -453,27 +453,27 @@ TEST_CASE("The scene map waits for its read then prepares the rooms",
 struct LiveLoadingState {
   LiveLoadingState()
       : arm(Battle_unusedSceneBuffer),
-        slot(Menu_Map_sceneCdQueueSlot),
-        scene(Menu_Map_currentScene),
-        scene_row(Menu_Map_currentSceneRow),
-        room(Menu_Map_currentRoomIndex),
-        map_row(Menu_Map_currentMapRow),
+        slot(map::sceneCdQueueSlot),
+        scene(map::currentScene),
+        scene_row(map::currentSceneRow),
+        room(map::currentRoomIndex),
+        map_row(map::currentMapRow),
         areas(VS::State::roomVisitProgress.area_flags[0]),
-        rows(std::to_array(Menu_Map_sceneRowIdMap)) {}
+        rows(std::to_array(map::sceneRowIdMap)) {}
   LiveLoadingState(const LiveLoadingState&) = delete;
   LiveLoadingState& operator=(const LiveLoadingState&) = delete;
   LiveLoadingState(LiveLoadingState&&) = delete;
   LiveLoadingState& operator=(LiveLoadingState&&) = delete;
   ~LiveLoadingState() {
     Battle_unusedSceneBuffer = arm;
-    Menu_Map_sceneCdQueueSlot = slot;
-    Menu_Map_currentScene = scene;
-    Menu_Map_currentSceneRow = scene_row;
-    Menu_Map_currentRoomIndex = room;
-    Menu_Map_currentMapRow = map_row;
+    map::sceneCdQueueSlot = slot;
+    map::currentScene = scene;
+    map::currentSceneRow = scene_row;
+    map::currentRoomIndex = room;
+    map::currentMapRow = map_row;
     VS::State::roomVisitProgress.area_flags[0] = areas;
     for (std::size_t row = 0; row < rows.size(); ++row) {
-      Menu_Map_sceneRowIdMap[row] = rows[row];
+      map::sceneRowIdMap[row] = rows[row];
     }
   }
 
@@ -491,23 +491,23 @@ TEST_CASE("The live chooser without visited areas lists nothing",
           "[map-loading-live]") {
   const LiveLoadingState saved;
   VS::State::roomVisitProgress.area_flags[0] = 1;
-  Menu_Map_sceneRowIdMap[0] = 17;
-  Menu_Map_currentMapRow = -1;
+  map::sceneRowIdMap[0] = 17;
+  map::currentMapRow = -1;
   CHECK(map::LiveUpdateAreaSelection(1) == map::kNoVisitedAreas);
-  CHECK(Menu_Map_sceneRowIdMap[0] == 17);
-  CHECK(Menu_Map_currentMapRow == -1);
+  CHECK(map::sceneRowIdMap[0] == 17);
+  CHECK(map::currentMapRow == -1);
 }
 
 TEST_CASE("The live area list refuses missing text and names",
           "[map-loading-live]") {
   const LiveLoadingState saved;
-  Menu_Map_currentMapRow = -1;
+  map::currentMapRow = -1;
   map::LiveConfigureAreaList(2, 1, nullptr);
   map::LiveConfigureAreaList(-1, 1, nullptr);
-  CHECK(Menu_Map_currentMapRow == -1);
+  CHECK(map::currentMapRow == -1);
   map::LiveShowAreaName(nullptr, 1);
   map::LiveConfigureAreaList(-3, 0, nullptr);
-  CHECK(Menu_Map_currentMapRow == -1);
+  CHECK(map::currentMapRow == -1);
 }
 
 TEST_CASE("The live scene map refuses a missing read or scene",
@@ -515,16 +515,16 @@ TEST_CASE("The live scene map refuses a missing read or scene",
   const LiveLoadingState saved;
   std::array<std::byte, 16> buffer{};
   Battle_unusedSceneBuffer = buffer.data();
-  Menu_Map_currentRoomIndex = 3;
-  Menu_Map_currentScene = 40;
+  map::currentRoomIndex = 3;
+  map::currentScene = 40;
   CHECK(map::LiveLoadSceneMap() == 0);
-  Menu_Map_currentScene = -1;
+  map::currentScene = -1;
   CHECK(map::LiveLoadSceneMap() == 0);
-  Menu_Map_currentScene = 2;
-  Menu_Map_sceneCdQueueSlot = nullptr;
+  map::currentScene = 2;
+  map::sceneCdQueueSlot = nullptr;
   CHECK(map::LiveLoadSceneMap() == 0);
-  CHECK(Menu_Map_currentRoomIndex == 3);
-  CHECK(Menu_Map_currentScene == 2);
+  CHECK(map::currentRoomIndex == 3);
+  CHECK(map::currentScene == 2);
 }
 
 struct LiveBackgroundState {

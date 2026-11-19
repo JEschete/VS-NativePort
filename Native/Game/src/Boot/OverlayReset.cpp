@@ -19,7 +19,7 @@
 #include "Menu/Loot/LootScreen.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/ManualScreenLive.hpp"
-#include "Menu/Map.h"
+#include "Menu/Map.hpp"
 #include "Menu/MapTerminalLive.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
@@ -68,7 +68,7 @@ void ResetMenu5Statics() {
   if (!VS::Menu::map::ResetMapTerminalModuleData()) {
     std::abort();
   }
-  Menu_Map_ResetMenu5Statics();
+  VS::Menu::map::ResetMenu5Statics();
 }
 
 // MENU9.PRG.

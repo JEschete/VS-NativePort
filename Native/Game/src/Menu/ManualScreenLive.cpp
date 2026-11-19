@@ -25,7 +25,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Manual.h"
+#include "Menu/Manual.hpp"
 #include "Menu/ManualIllustrationLive.hpp"
 #include "Menu/ManualPageLive.hpp"
 #include "Menu/ManualScreen.hpp"
@@ -104,37 +104,36 @@ class LiveScreenHost final : public ScreenHost {
 };
 
 [[nodiscard]] HelpPagesState LoadHelpState() {
-  return {.step = Menu_Manual_showMenuState,
-          .scroll = Menu_Manual_scrollPosition,
-          .line_count = Menu_Manual_lineCount,
-          .arrow_frame = Menu_Manual_pageArrowAnimState,
-          .load_counter = Menu_Manual_helpPageLoadCounter};
+  return {.step = showMenuState,
+          .scroll = scrollPosition,
+          .line_count = totalLineCount,
+          .arrow_frame = pageArrowAnimState,
+          .load_counter = helpPageLoadCounter};
 }
 
 void StoreHelpState(const HelpPagesState& state) {
-  Menu_Manual_showMenuState = state.step;
-  Menu_Manual_scrollPosition = state.scroll;
-  Menu_Manual_lineCount = state.line_count;
-  Menu_Manual_pageArrowAnimState = state.arrow_frame;
-  Menu_Manual_helpPageLoadCounter = state.load_counter;
+  showMenuState = state.step;
+  scrollPosition = state.scroll;
+  totalLineCount = state.line_count;
+  pageArrowAnimState = state.arrow_frame;
+  helpPageLoadCounter = state.load_counter;
 }
 
 [[nodiscard]] void* HelpBuffer(HelpFile file) {
-  return file == HelpFile::kText ? static_cast<void*>(Menu_Manual_helpText)
-                                 : static_cast<void*>(Menu_Manual_helpAssets);
+  return file == HelpFile::kText ? static_cast<void*>(helpText)
+                                 : static_cast<void*>(helpAssets);
 }
 
 void SetHelpBuffer(HelpFile file, void* buffer) {
   if (file == HelpFile::kText) {
-    Menu_Manual_helpText = static_cast<int*>(buffer);
+    helpText = static_cast<int*>(buffer);
   } else {
-    Menu_Manual_helpAssets = static_cast<u_long*>(buffer);
+    helpAssets = static_cast<u_long*>(buffer);
   }
 }
 
 [[nodiscard]] Content_DiscQueueSlot*& HelpRequest(HelpFile file) {
-  return file == HelpFile::kText ? Menu_Manual_helpTextCdQueue
-                                 : Menu_Manual_helpAssetsCdQueue;
+  return file == HelpFile::kText ? helpTextCdQueue : helpAssetsCdQueue;
 }
 
 // _helpFileCdFiles[topic * 2 + file]; the core checks the topic.
@@ -142,17 +141,16 @@ void SetHelpBuffer(HelpFile file, void* buffer) {
                                                  std::int32_t topic) {
   const auto index = (static_cast<std::size_t>(topic) * kHelpFilesPerTopic) +
                      static_cast<std::size_t>(file);
-  return Menu_Manual_kHelpFileCdFiles[index];
+  return kHelpFileCdFiles[index];
 }
 
 // The asset buffer's bytes, or nothing when it is missing or not a live
 // game heap payload.
 [[nodiscard]] std::optional<std::size_t> HelpAssetBytes() {
-  if (Menu_Manual_helpAssets == nullptr) {
+  if (helpAssets == nullptr) {
     return std::nullopt;
   }
-  const auto capacity =
-      Core::Memory::LivePayloadCapacity(Menu_Manual_helpAssets);
+  const auto capacity = Core::Memory::LivePayloadCapacity(helpAssets);
   if (!capacity) {
     return std::nullopt;
   }
@@ -274,10 +272,9 @@ class LiveHelpPagesHost final : public HelpPagesHost {
       return std::nullopt;
     }
     HelpAssetHeader header;
-    std::memcpy(&header.sprite_tiles, Menu_Manual_helpAssets,
-                sizeof header.sprite_tiles);
+    std::memcpy(&header.sprite_tiles, helpAssets, sizeof header.sprite_tiles);
     std::memcpy(&header.cluts,
-                reinterpret_cast<const std::byte*>(Menu_Manual_helpAssets) +
+                reinterpret_cast<const std::byte*>(helpAssets) +
                     sizeof header.sprite_tiles,
                 sizeof header.cluts);
     return header;
@@ -381,8 +378,8 @@ class LiveHelpPagesHost final : public HelpPagesHost {
       RefuseLive("Manual help upload starts past its asset buffer");
       return nullptr;
     }
-    return reinterpret_cast<u_long*>(
-        reinterpret_cast<std::byte*>(Menu_Manual_helpAssets) + byte_offset);
+    return reinterpret_cast<u_long*>(reinterpret_cast<std::byte*>(helpAssets) +
+                                     byte_offset);
   }
 
   const HelpPagesState& state_;

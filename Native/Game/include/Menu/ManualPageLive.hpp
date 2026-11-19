@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Menu/Manual.h"
+#include "Menu/ManualPage.hpp"
 
 // Bindings from the manual page cores (ManualPage.hpp) to the help text,
 // the back buffer's draw environment, the page arrow counter, last frame's
@@ -23,7 +23,7 @@ void LiveDrawUpperScrollFade();
 // decomp: MENUE.PRG _fadeMenuLower (494.c:791).
 void LiveDrawLowerScrollFade();
 // decomp: MENUE.PRG _drawPaginationArrow (494.c:844).
-void LiveDrawPageArrow(enum Menu_Manual_ArrowType arrow_type);
+void LiveDrawPageArrow(PageArrow arrow);
 // decomp: MENUE.PRG _drawControlsBg (494.c:962).
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.
 void LiveDrawControlsBackground(int x, int y, int w, int h);

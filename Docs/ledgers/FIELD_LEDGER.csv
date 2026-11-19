@@ -37,8 +37,8 @@ T00009.002,T00009,actions,2,discardItem,0,,,3,,DiscardItem,ItemAction DiscardIte
 T00009.003,T00009,actions,3,discardAllItems,0,,,4,,DiscardAllItems,ItemAction DiscardAllItems,med,declaration-only;source:items2.h:219
 T00009.004,T00009,actions,4,sortItems,0,,,5,,SortItems,ItemAction SortItems,med,declaration-only;source:items2.h:220
 T00010.000,T00010,actions_e,0,vs_main_actions_daggerArt1,0,,,184,,DaggerArtOne,ActionId DaggerArtOne,med,declaration-only;source:main.h:44
-T00011.000,T00011,arrowType_e,0,arrowTypeUp,0,,,0,,Up,ArrowType Up,med,declaration-only;source:494.c:32
-T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,Down,ArrowType Down,med,declaration-only;source:494.c:33
+T00011.000,T00011,arrowType_e,0,arrowTypeUp,0,,,0,,kUp,ArrowType Up,med,native:ManualPage.hpp PageArrow::kUp (#441);declaration-only;source:MENU/MENUE.PRG/494.c:38
+T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,kDown,ArrowType Down,med,native:ManualPage.hpp PageArrow::kDown (#441);declaration-only;source:MENU/MENUE.PRG/494.c:39
 T00012.000,T00012,ashleyRenderMode,0,ashleyRenderModeRender,0,,,0,,kRender,AshleyRenderMode Render,med,declaration-only;source:_renderAshley.h:12
 T00012.001,T00012,ashleyRenderMode,1,ashleyRenderModeInit,0,,,1,,kInit,AshleyRenderMode Init,med,declaration-only;source:_renderAshley.h:13
 T00012.002,T00012,ashleyRenderMode,2,ashleyRenderModeRestore,0,,,2,,kRestore,AshleyRenderMode Restore,med,declaration-only;source:_renderAshley.h:14
@@ -406,14 +406,14 @@ T00071.005,T00071,state,5,quitToMenu,0,,,12,,kQuitMenu,StatusMenuState QuitToMen
 T00071.006,T00071,state,6,waitQuitToBattle,0,,,13,,kWaitQuitBattle,StatusMenuState WaitQuitToBattle,med,native:TerminalController.cpp phase::kWaitQuitBattle (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
 T00071.007,T00071,state,7,quitToBattle,0,,,14,,kQuitBattle,StatusMenuState QuitToBattle,med,native:TerminalController.cpp phase::kQuitBattle (#441);declaration-only;source:MENU/MENU4.PRG/120.c:2274
 T00072.000,T00072,state,0,init,0,,,3,,Init,InitOnlyState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00073.000,T00073,state,0,init,0,,,0,,Init,MapMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00073.001,T00073,state,1,processInput,0,,,1,,ProcessInput,MapMenuState ProcessInput,med,declaration-only;source:4D8.c:527
-T00073.002,T00073,state,2,displayMapMenu,0,,,2,,DisplayMapMenu,MapMenuState DisplayMapMenu,med,declaration-only;source:4D8.c:528
-T00073.003,T00073,state,3,quit,0,,,3,,Quit,MapMenuState Quit,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00073.004,T00073,state,4,initNewMap,0,,,4,,InitNewMap,MapMenuState InitNewMap,med,declaration-only;source:4D8.c:530
-T00073.005,T00073,state,5,waitForMapAnimation,0,,,5,,WaitForMapAnimation,MapMenuState WaitForMapAnimation,med,declaration-only;source:4D8.c:531
-T00074.000,T00074,state,0,init,0,,,0,,Init,AreaSelectionState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00074.001,T00074,state,1,getSelection,0,,,1,,GetSelection,AreaSelectionState GetSelection,med,declaration-only;source:4D8.c:981
+T00073.000,T00073,state,0,init,0,,,0,,kInitialPhase,MapMenuState Init,med,native:MapTerminal.cpp kInitialPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:536
+T00073.001,T00073,state,1,processInput,0,,,1,,kInputPhase,MapMenuState ProcessInput,med,native:MapTerminal.cpp kInputPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:537
+T00073.002,T00073,state,2,displayMapMenu,0,,,2,,kAreaPhase,MapMenuState DisplayMapMenu,med,native:MapTerminal.cpp kAreaPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:538
+T00073.003,T00073,state,3,quit,0,,,3,,kQuitPhase,MapMenuState Quit,med,native:MapTerminal.cpp kQuitPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:539
+T00073.004,T00073,state,4,initNewMap,0,,,4,,kReadPhase,MapMenuState InitNewMap,med,native:MapTerminal.cpp kReadPhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:540
+T00073.005,T00073,state,5,waitForMapAnimation,0,,,5,,kSlidePhase,MapMenuState WaitForMapAnimation,med,native:MapTerminal.cpp kSlidePhase (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:541
+T00074.000,T00074,state,0,init,0,,,0,,Init,AreaSelectionState Init,med,"native:no named constant; AreaSelection::step 0, the literal MapLoading.cpp tests before listing the visited areas (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:986"
+T00074.001,T00074,state,1,getSelection,0,,,1,,GetSelection,AreaSelectionState GetSelection,med,"native:no named constant; AreaSelection::step 1, the literal MapLoading.cpp tests while reading the selection (#441);declaration-only;source:MENU/MENU5.PRG/4D8.c:986"
 T00075.000,T00075,state,0,init,0,,,0,,kGameOverInit,GameOverState Init,med,native:Files.cpp GameOverStep::kGameOverInit (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00075.001,T00075,state,1,loadAssets,0,,,1,,kGameOverLoadAssets,GameOverState LoadAssets,med,native:Files.cpp GameOverStep::kGameOverLoadAssets (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3607
 T00075.002,T00075,state,2,displayGameOver,0,,,2,,kGameOverChoices,GameOverState DisplayGameOver,med,native:Files.cpp GameOverStep::kGameOverChoices (#441);declaration-only;source:MENU/MENU7.PRG/260.c:3608
@@ -481,23 +481,23 @@ T00083.008,T00083,state,8,waitForTopMenu,0,,,8,,kWaitPanels,LootSelectionState W
 T00083.009,T00083,state,9,updateLoot,0,,,9,,kRemoveClaimed,LootSelectionState UpdateLoot,med,native:LootTerminal.cpp SelectionStep::kRemoveClaimed (#441);declaration-only;source:MENU/MENUB.PRG/260.c:1634
 T00084.000,T00084,state,0,init,0,,,0,,kCreate,SortMenuState Init,med,native:ContainerMenuDialogs.hpp ActionDialogStep::kCreate (#441);declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
 T00084.001,T00084,state,1,display,0,,,1,,kInput,SortMenuState Display,med,native:ContainerMenuDialogs.hpp ActionDialogStep::kInput (#441);declaration-only;source:234.c:1621
-T00085.000,T00085,state,0,none,0,,,0,,None,ManualOverlayState None,med,declaration-only;source:15AC.c:169
-T00085.001,T00085,state,1,init,0,,,3,,Init,ManualOverlayState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00085.002,T00085,state,2,initMenu,0,,,4,,InitMenu,ManualOverlayState InitMenu,med,declaration-only;source:16C.c:1056
-T00085.003,T00085,state,3,waitReady,0,,,5,,WaitReady,ManualOverlayState WaitReady,med,declaration-only;source:64.c:219
-T00085.004,T00085,state,4,showMenu,0,,,6,,ShowMenu,ManualOverlayState ShowMenu,med,declaration-only;source:494.c:144
-T00085.005,T00085,state,5,shutDown,0,,,7,,ShutDown,ManualOverlayState ShutDown,med,declaration-only;source:494.c:144
-T00085.006,T00085,state,6,exit,0,,,8,,Exit,ManualOverlayState Exit,med,declaration-only;source:15AC.c:184
-T00086.000,T00086,state,0,init,0,,,0,,Init,ManualMenuState Init,med,declaration-only;source:MENU/MAINMENU.PRG/C48.c:482
-T00086.001,T00086,state,1,initMenu,0,,,1,,InitMenu,ManualMenuState InitMenu,med,declaration-only;source:16C.c:1056
-T00086.002,T00086,state,2,getSelection,0,,,2,,GetSelection,ManualMenuState GetSelection,med,declaration-only;source:4D8.c:981
-T00086.003,T00086,state,3,loadSubMenu,0,,,3,,LoadSubMenu,ManualMenuState LoadSubMenu,med,declaration-only;source:494.c:251
-T00086.004,T00086,state,4,initSubMenu,0,,,4,,InitSubMenu,ManualMenuState InitSubMenu,med,declaration-only;source:494.c:252
-T00086.005,T00086,state,5,showSubMenu,0,,,5,,ShowSubMenu,ManualMenuState ShowSubMenu,med,declaration-only;source:494.c:253
-T00086.006,T00086,state,6,exitToMenu,0,,,6,,ExitToMenu,ManualMenuState ExitToMenu,med,declaration-only;source:88.c:567
-T00086.007,T00086,state,7,exitToBattle,0,,,7,,ExitToBattle,ManualMenuState ExitToBattle,med,declaration-only;source:64.c:666
-T00087.000,T00087,state,0,initRows,0,,,0,,InitRows,TopicMenuState InitRows,med,declaration-only;source:494.c:452
-T00087.001,T00087,state,1,selectRow,0,,,1,,SelectRow,TopicMenuState SelectRow,med,declaration-only;source:494.c:452
+T00085.000,T00085,state,0,none,0,,,0,,kScreenClosed,ManualOverlayState None,med,native:ManualScreen.hpp kScreenClosed (#441);declaration-only;source:MENU/MENUE.PRG/494.c:150
+T00085.001,T00085,state,1,init,0,,,3,,kScreenOpen,ManualOverlayState Init,med,native:ManualScreen.hpp kScreenOpen (#441);declaration-only;source:MENU/MENUE.PRG/494.c:150
+T00085.002,T00085,state,2,initMenu,0,,,4,,kScreenInitialize,ManualOverlayState InitMenu,med,native:ManualScreen.hpp kScreenInitialize (#441);declaration-only;source:MENU/MENUE.PRG/494.c:150
+T00085.003,T00085,state,3,waitReady,0,,,5,,kScreenWaitReady,ManualOverlayState WaitReady,med,native:ManualScreen.hpp kScreenWaitReady (#441);declaration-only;source:MENU/MENUE.PRG/494.c:150
+T00085.004,T00085,state,4,showMenu,0,,,6,,kScreenShow,ManualOverlayState ShowMenu,med,native:ManualScreen.hpp kScreenShow (#441);declaration-only;source:MENU/MENUE.PRG/494.c:150
+T00085.005,T00085,state,5,shutDown,0,,,7,,kScreenShutDown,ManualOverlayState ShutDown,med,native:ManualScreen.hpp kScreenShutDown (#441);declaration-only;source:MENU/MENUE.PRG/494.c:150
+T00085.006,T00085,state,6,exit,0,,,8,,kScreenExit,ManualOverlayState Exit,med,native:ManualScreen.hpp kScreenExit (#441);declaration-only;source:MENU/MENUE.PRG/494.c:150
+T00086.000,T00086,state,0,init,0,,,0,,kHelpStart,ManualMenuState Init,med,native:ManualScreen.hpp kHelpStart (#441);declaration-only;source:MENU/MENUE.PRG/494.c:254
+T00086.001,T00086,state,1,initMenu,0,,,1,,kHelpListTopics,ManualMenuState InitMenu,med,native:ManualScreen.hpp kHelpListTopics (#441);declaration-only;source:MENU/MENUE.PRG/494.c:255
+T00086.002,T00086,state,2,getSelection,0,,,2,,kHelpSelectTopic,ManualMenuState GetSelection,med,native:ManualScreen.hpp kHelpSelectTopic (#441);declaration-only;source:MENU/MENUE.PRG/494.c:256
+T00086.003,T00086,state,3,loadSubMenu,0,,,3,,kHelpLoadAssets,ManualMenuState LoadSubMenu,med,native:ManualScreen.hpp kHelpLoadAssets (#441);declaration-only;source:MENU/MENUE.PRG/494.c:257
+T00086.004,T00086,state,4,initSubMenu,0,,,4,,kHelpLoadText,ManualMenuState InitSubMenu,med,native:ManualScreen.hpp kHelpLoadText (#441);declaration-only;source:MENU/MENUE.PRG/494.c:258
+T00086.005,T00086,state,5,showSubMenu,0,,,5,,kHelpShowPage,ManualMenuState ShowSubMenu,med,native:ManualScreen.hpp kHelpShowPage (#441);declaration-only;source:MENU/MENUE.PRG/494.c:259
+T00086.006,T00086,state,6,exitToMenu,0,,,6,,kHelpLeaveToMenu,ManualMenuState ExitToMenu,med,native:ManualScreen.hpp kHelpLeaveToMenu (#441);declaration-only;source:MENU/MENUE.PRG/494.c:260
+T00086.007,T00086,state,7,exitToBattle,0,,,7,,kHelpLeaveToGame,ManualMenuState ExitToBattle,med,native:ManualScreen.hpp kHelpLeaveToGame (#441);declaration-only;source:MENU/MENUE.PRG/494.c:261
+T00087.000,T00087,state,0,initRows,0,,,0,,kTopicStepListRows,TopicMenuState InitRows,med,native:ManualTopics.hpp kTopicStepListRows (#441);declaration-only;source:MENU/MENUE.PRG/494.c:456
+T00087.001,T00087,state,1,selectRow,0,,,1,,kTopicStepSelectRow,TopicMenuState SelectRow,med,native:ManualTopics.hpp kTopicStepSelectRow (#441);declaration-only;source:MENU/MENUE.PRG/494.c:456
 T00088.000,T00088,state,0,init,0,,,0,,Initialize,Initialize the load screen,high,source:22C.c:3131
 T00088.001,T00088,state,1,loadMemcardMenu,0,,,1,,LoadCardResources,Wait for memory-card UI resources,high,source:22C.c:3131
 T00088.002,T00088,state,2,loadFileMenu,0,,,2,,RunFileMenu,Execute the load-file menu,high,source:22C.c:3131
@@ -1002,12 +1002,12 @@ T00835.000,T00835,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00835.001,T00835,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:13:9),1,unk1,1,u_int,8,,,eventActorSlot,Slot in the event's actor list; battle code sets 0,med,source:5BF94.c:8031
 T00835.002,T00835,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:13:9),2,part,0,u_int,8,,,part,Targeted body part; 0xFD is a special marker,med,source:146C.c:3308
 T00835.003,T00835,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU3.PRG\..\..\BATTLE\BATTLE.PRG\6E644.h:13:9),3,unk3,1,u_int,8,,,reserved3,Not read,low,declaration-only;source:6E644.h:17
-T00170.000,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),0,x,0,int,,,,x,Named in the fork; see cited use,med,source:4D8.c:2301
-T00170.001,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),1,y,0,int,,,,y,Named in the fork; see cited use,med,source:4D8.c:2301
-T00171.000,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),0,x,0,short,,,,x,Named in the fork; see cited use,med,source:4D8.c:2443
-T00171.001,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),1,y,0,short,,,,y,Named in the fork; see cited use,med,source:4D8.c:2444
-T00171.002,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),2,type,0,short,,,,type,Named in the fork; see cited use,med,source:4D8.c:2445
-T00171.003,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),3,id,0,short,,,,id,Named in the fork; see cited use,med,source:4D8.c:2446
+T00170.000,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),0,x,0,int,,,,x,Named in the fork; see cited use,med,native:MapDrawing.hpp CompassPoint::x (#441);source:MENU/MENU5.PRG/4D8.c:1070
+T00170.001,T00170,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1064:8),1,y,0,int,,,,y,Named in the fork; see cited use,med,native:MapDrawing.hpp CompassPoint::y (#441);source:MENU/MENU5.PRG/4D8.c:1071
+T00171.000,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),0,x,0,short,,,,x,Named in the fork; see cited use,med,native:MapMarkers.hpp MapLabel::x (#441);source:MENU/MENU5.PRG/4D8.c:1075
+T00171.001,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),1,y,0,short,,,,y,Named in the fork; see cited use,med,native:MapMarkers.hpp MapLabel::y (#441);source:MENU/MENU5.PRG/4D8.c:1076
+T00171.002,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),2,type,0,short,,,,kind,Named in the fork; see cited use,med,native:MapMarkers.hpp MapLabel::kind (#441);source:MENU/MENU5.PRG/4D8.c:1077
+T00171.003,T00171,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU5.PRG\4D8.c:1069:8),3,id,0,short,,,,id,Named in the fork; see cited use,med,native:MapMarkers.hpp MapLabel::id (#441);source:MENU/MENU5.PRG/4D8.c:1078
 T00836.000,T00836,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:144:9),0,tile,0,VS_TILE_TPAGE,,,,tileTpage,Textured tile with its texture page,high,source:MENU/MENU7.PRG/260.c:1308
 T00836.001,T00836,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:144:9),1,polyG4,0,VS_POLY_G4,,,,polyG4,Gradient quad,high,source:MENU/MENU7.PRG/260.c:1315
 T00172.000,T00172,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUC.PRG\168.c:4937:5),0,subId,0,char,,,,reserved0,Not read by decompiled code,low,source:168.c:4961
@@ -1137,13 +1137,13 @@ T00195.002,T00195,AkaoTimeStamp,2,day_bcd,0,char,,,,day_bcd,BCD day of the times
 T00195.003,T00195,AkaoTimeStamp,3,hours_bcd,0,char,,,,hours_bcd,BCD hours of the timestamp,med,declaration-only;source:25AC.c:30
 T00195.004,T00195,AkaoTimeStamp,4,minutes_bcd,0,char,,,,minutes_bcd,BCD minutes of the timestamp,med,declaration-only;source:25AC.c:31
 T00195.005,T00195,AkaoTimeStamp,5,seconds_bcd,0,char,,,,seconds_bcd,BCD seconds of the timestamp,med,declaration-only;source:25AC.c:32
-T00196.000,T00196,AnimationState_t,0,enabled,0,short,,,,reserved0,Not read by decompiled code,low,declaration-only;source:494.c:37
-T00196.001,T00196,AnimationState_t,1,frameMask,0,u_short,,,per-frame-visible-bits,frameMask,Named in the fork; see cited use,med,source:494.c:948
-T00196.002,T00196,AnimationState_t,2,frameDuration,0,short,,,,frameDuration,Named in the fork; see cited use,med,source:494.c:951
-T00196.003,T00196,AnimationState_t,3,repeat,0,short,,,,repeat,Named in the fork; see cited use,med,source:494.c:954
-T00196.004,T00196,AnimationState_t,4,currentFrame,0,short,,,,currentFrame,Named in the fork; see cited use,med,source:494.c:944
-T00196.005,T00196,AnimationState_t,5,timer,0,short,,,,timer,Named in the fork; see cited use,med,source:494.c:951
-T00196.006,T00196,AnimationState_t,6,isActive,0,short,,,hidden-when-one,isActive,Named in the fork; see cited use,med,source:494.c:945
+T00196.000,T00196,AnimationState_t,0,enabled,0,short,,,,enabled,Not read by decompiled code,low,native:ManualIllustration.hpp VisibilityAnimation::enabled (#441);declaration-only;source:MENU/MENUE.PRG/494.c:43
+T00196.001,T00196,AnimationState_t,1,frameMask,0,u_short,,,per-frame-visible-bits,frame_mask,Named in the fork; see cited use,med,native:ManualIllustration.hpp VisibilityAnimation::frame_mask (#441);source:MENU/MENUE.PRG/494.c:44
+T00196.002,T00196,AnimationState_t,2,frameDuration,0,short,,,,frame_duration,Named in the fork; see cited use,med,native:ManualIllustration.hpp VisibilityAnimation::frame_duration (#441);source:MENU/MENUE.PRG/494.c:45
+T00196.003,T00196,AnimationState_t,3,repeat,0,short,,,,repeat,Named in the fork; see cited use,med,native:ManualIllustration.hpp VisibilityAnimation::repeat (#441);source:MENU/MENUE.PRG/494.c:46
+T00196.004,T00196,AnimationState_t,4,currentFrame,0,short,,,,current_frame,Named in the fork; see cited use,med,native:ManualIllustration.hpp VisibilityAnimation::current_frame (#441);source:MENU/MENUE.PRG/494.c:47
+T00196.005,T00196,AnimationState_t,5,timer,0,short,,,,timer,Named in the fork; see cited use,med,native:ManualIllustration.hpp VisibilityAnimation::timer (#441);source:MENU/MENUE.PRG/494.c:48
+T00196.006,T00196,AnimationState_t,6,isActive,0,short,,,hidden-when-one,hidden,Named in the fork; see cited use,med,native:ManualIllustration.hpp VisibilityAnimation::hidden (#441);source:MENU/MENUE.PRG/494.c:49
 T00197.000,T00197,ColorInfo,0,r,0,char,,,,red,Current 5-bit red,high,source:main.c:10535
 T00197.001,T00197,ColorInfo,1,g,0,char,,,,green,Current 5-bit green,high,source:main.c:10536
 T00197.002,T00197,ColorInfo,2,b,0,char,,,,blue,Current 5-bit blue,high,source:main.c:10537
@@ -2741,13 +2741,13 @@ T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,category,Named in the f
 T00316.001,T00316,_lootListItem,1,itemIndex,0,u_char,,,zeroBasedWorkingInventoryIndex,item_index,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::item_index (#441);source:MENU/MENUB.PRG/260.c:274
 T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,slide_step,Not used by native code; kept for the original layout,med,native:LootRows.hpp LootRow::slide_step (#441);native-refs:none;source:native:Native\Game\src\Menu\Loot\LootInventory.h:21;source:MENU/MENUB.PRG/260.c:545
 T00316.003,T00316,_lootListItem,3,state,0,char,,,claimabilityOrComponentIndentation,state,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::state (#441);source:MENU/MENUB.PRG/260.c:286
-T00317.000,T00317,_menuBgChunkWidths_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:32;declaration-only;source:494.c:26
-T00317.001,T00317,_menuBgChunkWidths_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:33;declaration-only;source:494.c:27
-T00317.002,T00317,_menuBgChunkWidths_t,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:34;declaration-only;source:494.c:28
-T00318.000,T00318,_menuBgTransparencies_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:40;declaration-only;source:494.c:19
-T00318.001,T00318,_menuBgTransparencies_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:41;declaration-only;source:494.c:20
-T00318.002,T00318,_menuBgTransparencies_t,2,unk8,1,int,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:42;declaration-only;source:494.c:21
-T00318.003,T00318,_menuBgTransparencies_t,3,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Manual.h:43;declaration-only;source:494.c:22
+T00317.000,T00317,_menuBgChunkWidths_t,0,unk0,1,int,,,,kScrollFadeChunkWidths[0],"Scroll-fade chunk width (128, 128, 64)",med,"native:ManualPage.hpp kScrollFadeChunkWidths[0], chunk 0's width (#441);declaration-only;source:MENU/MENUE.PRG/494.c:32"
+T00317.001,T00317,_menuBgChunkWidths_t,1,unk4,1,int,,,,kScrollFadeChunkWidths[1],"Scroll-fade chunk width (128, 128, 64)",med,"native:ManualPage.hpp kScrollFadeChunkWidths[1], chunk 1's width (#441);declaration-only;source:MENU/MENUE.PRG/494.c:33"
+T00317.002,T00317,_menuBgChunkWidths_t,2,unk8,1,int,,,,kScrollFadeChunkWidths[2],"Scroll-fade chunk width (128, 128, 64)",med,"native:ManualPage.hpp kScrollFadeChunkWidths[2], chunk 2's width (#441);declaration-only;source:MENU/MENUE.PRG/494.c:34"
+T00318.000,T00318,_menuBgTransparencies_t,0,unk0,1,int,,,,kScrollFadeLevels[4 * row + 0],"Scroll-fade level within each row of four (row 0: 128, 115, 121, 88)",med,"native:ManualPage.hpp kScrollFadeLevels[4 * row + 0], level 0 of each four-level row (#441);declaration-only;source:MENU/MENUE.PRG/494.c:25"
+T00318.001,T00318,_menuBgTransparencies_t,1,unk4,1,int,,,,kScrollFadeLevels[4 * row + 1],"Scroll-fade level within each row of four (row 0: 128, 115, 121, 88)",med,"native:ManualPage.hpp kScrollFadeLevels[4 * row + 1], level 1 of each four-level row (#441);declaration-only;source:MENU/MENUE.PRG/494.c:26"
+T00318.002,T00318,_menuBgTransparencies_t,2,unk8,1,int,,,,kScrollFadeLevels[4 * row + 2],"Scroll-fade level within each row of four (row 0: 128, 115, 121, 88)",med,"native:ManualPage.hpp kScrollFadeLevels[4 * row + 2], level 2 of each four-level row (#441);declaration-only;source:MENU/MENUE.PRG/494.c:27"
+T00318.003,T00318,_menuBgTransparencies_t,3,unkC,1,int,,,,kScrollFadeLevels[4 * row + 3],"Scroll-fade level within each row of four (row 0: 128, 115, 121, 88)",med,"native:ManualPage.hpp kScrollFadeLevels[4 * row + 3], level 3 of each four-level row (#441);declaration-only;source:MENU/MENUE.PRG/494.c:28"
 T00319.000,T00319,_monBinData_t,0,zudId,0,short,,,,zud_id,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::zud_id (#441);source:238.c:1352
 T00319.001,T00319,_monBinData_t,1,classId,0,short,,,,class_id,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::class_id (#441);source:238.c:2137
 T00319.002,T00319,_monBinData_t,2,killFlagsOffset,0,short,,,firstDefeatBit,kill_flags_offset,Named in the fork; see cited use,med,native:ScoreScreen.hpp EnemyEntry::kill_flags_offset (#441);source:238.c:1926
