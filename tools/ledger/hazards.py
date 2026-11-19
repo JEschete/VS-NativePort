@@ -176,11 +176,23 @@ SCALAR_ELEMENTS = re.compile(r"\b(?:char|short|u_char|u_short|u_int|void|int)\b"
 # The head of a named struct definition, C++ (`struct X {`) or the C form the headers are leaving (`typedef struct X {`).
 STRUCT_HEAD = r"\b(?:typedef\s+)?struct\s+{name}\s*\{{"
 STRUCT = re.compile(STRUCT_HEAD.format(name=r"(?P<name>\w+)"))
-FIELD = re.compile(r"^\s*(?P<type>[A-Za-z_][\w ]*?)\s+(?P<name>[A-Za-z_]\w*)(?:\[(?P<size>\w+)\])?\s*;", re.M)
+# A data member in C (`u_char gems[48];`) or C++ form (`std::array<Gem, kGems> gems{};`, `VS::Items::Part part;`).
+FIELD = re.compile(r"^\s*(?P<type>[A-Za-z_][\w:]*(?:\s*<[^;{}()]*>)?(?:\s+[A-Za-z_][\w:]*)*?)\s+(?P<name>[A-Za-z_]\w*)"
+                   r"(?:\[(?P<size>[^\[\]]+)\])?\s*(?:\{[^;{}]*\}|=[^;{}]*)?;", re.M)
+# Statements and declarations that FIELD's shape also fits but that declare no instance member.
+NOT_A_MEMBER_TYPE = {"return", "using", "typedef", "static", "friend", "goto", "delete", "throw", "case", "else",
+                     "do", "co_return", "co_yield", "template", "namespace", "constexpr", "inline"}
+# The closing parenthesis and qualifiers before an inline member function's body.
+METHOD_BODY = re.compile(r"\)\s*(?:const\b\s*)?(?:noexcept\b\s*)?(?:override\b\s*)?(?:final\b\s*)?"
+                         r"(?:->\s*[^{};]+?)?\{")
+ARRAY_ALIAS = re.compile(r"\busing\s+(?P<name>\w+)\s*=\s*(?P<type>(?:std::)?array\s*<[^;]*>)\s*;")
+ARRAY_TYPE = re.compile(r"^(?:std::)?array\s*<(?P<arguments>.*)>$")
+# The items system's records: the copied `Items_` names, and the typed records declared in the Items headers.
 CAPACITY_STRUCT = re.compile(r"^(?:Items_\w+|\w*(?:Inventory|Container)\w*)$")
-NARROW_TYPES = {"u_char", "char", "unsigned char", "signed char"}
+ITEMS_HEADERS = ("Native/Game/include/Items/", "Native/Game/src/Items/")
+NARROW_TYPES = {"u_char", "char", "unsigned char", "signed char", "std::uint8_t", "uint8_t", "std::int8_t", "int8_t"}
 NARROW_NAME = re.compile(r"^(?:id|index|subId|blade|grip|shield|weapon|armor|gem|gems|item|slot|\w+Index|\w+Id|weapons|blades"
-                         r"|grips|shields|misc)$")
+                         r"|grips|shields|misc|\w+_index|\w+_id)$")
 TEXT_FIELD = re.compile(r"^(?:name|text|label|types)$")
 LOOKUP = r"\w*(?:Find|Lookup|Try)[A-Z]\w*|\w*(?:CellAt|AtTile)\b"
 # A namespace qualifier before a lookup call, e.g. `VS::Field::`.
@@ -387,8 +399,33 @@ def declared_tables(sources: gates.Sources) -> dict[str, str]:
     return tables
 
 
+def array_aliases(sources: gates.Sources) -> dict[str, str]:
+    """`using Name = std::array<...>;` declarations, so a member of the alias type is still seen as an array."""
+    aliases: dict[str, str] = {}
+    for path, code in sources.code.items():
+        if in_scope(path) and path.endswith(HEADER_SUFFIXES):
+            for match in ARRAY_ALIAS.finditer(code):
+                aliases[match["name"]] = " ".join(match["type"].split())
+    return aliases
+
+
+def array_parts(kind: str) -> tuple[str, str] | None:
+    """(element, size) of a `std::array<T, N>` type; the size follows the last top-level comma."""
+    match = ARRAY_TYPE.match(kind)
+    if not match:
+        return None
+    arguments = match["arguments"]
+    depth = 0
+    for position in range(len(arguments) - 1, -1, -1):
+        depth += {">": 1, "<": -1}.get(arguments[position], 0)
+        if arguments[position] == "," and depth == 0:
+            return arguments[:position].strip(), arguments[position + 1:].strip()
+    return None
+
+
 def capacity_rows(sources: gates.Sources, tables: dict[str, str]) -> list[Hazard]:
     rows = []
+    aliases = array_aliases(sources)
     for path, code in sorted(sources.code.items()):
         if not in_scope(path) or not path.endswith(HEADER_SUFFIXES):
             continue
@@ -398,9 +435,25 @@ def capacity_rows(sources: gates.Sources, tables: dict[str, str]) -> list[Hazard
                 rows.append(Hazard("CAPACITY", path, line_of(text, f"{match['name']}["), match["name"], "",
                                    f"{match['name']}[{match['size']}]", "pattern", "medium"))
         for name, body in struct_definitions(code):
-            if CAPACITY_STRUCT.match(name):
-                rows += struct_rows(path, text, name, body)
+            if CAPACITY_STRUCT.match(name) or path.startswith(ITEMS_HEADERS):
+                rows += struct_rows(path, text, name, body, aliases)
     return rows
+
+
+def without_method_bodies(body: str) -> str:
+    """A struct body without its inline member functions' bodies, whose locals are not members."""
+    kept = []
+    position = 0
+    while match := METHOD_BODY.search(body, position):
+        kept.append(body[position:match.end() - 1])
+        depth = 1
+        position = match.end()
+        while depth and position < len(body):
+            depth += {"{": 1, "}": -1}.get(body[position], 0)
+            position += 1
+        kept.append(";\n")
+    kept.append(body[position:])
+    return "".join(kept)
 
 
 def struct_definitions(code: str) -> list[tuple[str, str]]:
@@ -416,19 +469,30 @@ def struct_definitions(code: str) -> list[tuple[str, str]]:
     return found
 
 
-def struct_rows(path: str, text: str, struct: str, body: str) -> list[Hazard]:
+def member_line(text: str, name: str, start: int) -> int:
+    """The line declaring a member: the whole name in declarator position, not inside a longer name."""
+    match = re.compile(rf"\b{re.escape(name)}\b(?=\s*[\[{{=;])").search(text, start)
+    return line_of(text, "", match.start()) if match else line_of(text, name, start)
+
+
+def struct_rows(path: str, text: str, struct: str, body: str, aliases: dict[str, str]) -> list[Hazard]:
     rows = []
-    for field in FIELD.finditer(body):
+    for field in FIELD.finditer(without_method_bodies(body)):
         name = field["name"]
-        kind = " ".join(field["type"].split())
-        if TEXT_FIELD.match(name):
+        words = field["type"].split()
+        if TEXT_FIELD.match(name) or words[0] in NOT_A_MEMBER_TYPE:
             continue
+        kind = " ".join(word for word in words if word not in {"const", "volatile", "mutable"})
+        size = field["size"]
+        array = array_parts(aliases.get(kind, kind))
+        if array and not size:
+            kind, size = array
+        size = " ".join(size.split()) if size else size
         qualified = f"{struct}.{name}"
         definition = re.search(STRUCT_HEAD.format(name=struct), text)
-        line = line_of(text, name, definition.start() if definition else 0)
-        if field["size"] and kind not in {"char", "signed char"}:
-            rows.append(Hazard("CAPACITY", path, line, struct, "", f"{qualified}[{field['size']}]",
-                               "pattern", "medium"))
+        line = member_line(text, name, definition.start() if definition else 0)
+        if size and kind not in {"char", "signed char"}:
+            rows.append(Hazard("CAPACITY", path, line, struct, "", f"{qualified}[{size}]", "pattern", "medium"))
         if kind in NARROW_TYPES and NARROW_NAME.match(name):
             rows.append(Hazard("NARROW-ID", path, line, struct, "", qualified, "pattern", "medium"))
     return rows

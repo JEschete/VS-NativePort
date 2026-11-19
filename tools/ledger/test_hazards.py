@@ -255,6 +255,34 @@ class CapacityTests(unittest.TestCase):
         found = [item.detail for item in scan_all("int x;\n") if item.hazard_class == "CAPACITY"]
         self.assertEqual(found, ["Actors_actorRecords[17]"])
 
+    def test_cpp_records_in_an_items_header_are_scanned(self) -> None:
+        # The typed records keep the copied capacities and one-byte ids in C++ syntax and without the Items_ prefix.
+        header = ("#pragma once\nnamespace VS::Items {\nusing Gems = std::array<InventoryGem, kGemSlots>;\n"
+                  "struct InventoryBlade {\n  std::uint8_t assembled_weapon_index{};\n  std::uint8_t index{};\n"
+                  "  [[nodiscard]] constexpr std::uint8_t Slot() const {\n    std::uint8_t slot_index = index;\n"
+                  "    return slot_index;\n  }\n};\nstruct Contents {\n  Gems gems{};\n"
+                  "  std::array<std::uint8_t, kMiscSlots> misc{};\n  const std::int8_t sub_id = 0;\n};\n}\n")
+        found = {(item.hazard_class, item.detail, item.line)
+                 for item in scan_all(header, "Native/Game/include/Items/Records.hpp")
+                 if item.hazard_class in ("CAPACITY", "NARROW-ID") and item.path.endswith("Records.hpp")}
+        self.assertEqual(found, {
+            ("NARROW-ID", "InventoryBlade.assembled_weapon_index", 5), ("NARROW-ID", "InventoryBlade.index", 6),
+            ("CAPACITY", "Contents.gems[kGemSlots]", 13), ("CAPACITY", "Contents.misc[kMiscSlots]", 14),
+            ("NARROW-ID", "Contents.misc", 14), ("NARROW-ID", "Contents.sub_id", 15),
+        })
+
+    def test_a_qualified_element_type_is_a_capacity_row(self) -> None:
+        header = "struct Items_WeaponLoadout {\n    VS::Items::EquipmentPart gems[3];\n};\n"
+        found = [item.detail for item in scan_all(header, self.INVENTORY)
+                 if item.hazard_class == "CAPACITY" and item.path == self.INVENTORY]
+        self.assertEqual(found, ["Items_WeaponLoadout.gems[3]"])
+
+    def test_a_record_outside_the_items_system_is_not_scanned(self) -> None:
+        header = "struct Mixer {\n  std::array<std::uint8_t, 24> voice_id{};\n};\n"
+        found = [item for item in scan_all(header, HEADER) if item.hazard_class in ("CAPACITY", "NARROW-ID")
+                 and item.symbol == "Mixer"]
+        self.assertEqual(found, [])
+
 
 class ModuleDataTests(unittest.TestCase):
     def test_the_copy_tools_placeholder_row_is_found(self) -> None:
