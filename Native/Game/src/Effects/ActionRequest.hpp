@@ -73,5 +73,9 @@ static_assert(sizeof(LiveActionEffectTarget) ==
 // (0xE8 bytes, battleEffect.h:25).
 inline constexpr std::size_t kActionEffectRequestBytes = 0xE8;
 static_assert(sizeof(LiveActionEffectRequest) == kActionEffectRequestBytes);
+// The effect origin (D_800F5310) was a view of the request's position.
+inline constexpr std::size_t kEffectOriginOffset = 0xE0;
+static_assert(offsetof(LiveActionEffectRequest, position) ==
+              kEffectOriginOffset);
 }  // namespace layout
 }  // namespace VS::Effects

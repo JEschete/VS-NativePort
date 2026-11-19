@@ -1048,22 +1048,25 @@ int func_800F9800(void) {
             row = next(item for item in csv.DictReader(stream)
                        if item["id"] == "G00532")
         self.assertIn("view-of:G00529+0xE0", row["notes"])
-        self.assertIn("Effects_ActionEffectRequest.position", row["notes"])
+        self.assertIn("LiveActionEffectRequest::position", row["notes"])
         self.assertEqual(row["size"], "8")
         self.assertEqual(row["type"], "SVECTOR[1]")
-        header = (root / r"Native\Game\src\Effects\Runtime.h").read_text(
+        # #441 retired the D_800F5310 view: readers take the request's
+        # position, which sits where the view pointed.
+        request = (root / r"Native\Game\src\Effects\ActionRequest.hpp").read_text(
             encoding="utf-8"
         )
-        source = (root / r"Native\Game\src\Effects\Runtime.cpp").read_text(
-            encoding="utf-8"
+        self.assertRegex(
+            request,
+            r"offsetof\(LiveActionEffectRequest,\s*position\)\s*==\s*kEffectOriginOffset",
         )
-        self.assertIn(
-            "#define Effects_effectOrigin ((SVECTOR*)(&Effects_actionRequest.position))",
-            header,
-        )
-        self.assertNotRegex(
-            source, r"SVECTOR\s+Effects_effectOrigin\s*\["
-        )
+        self.assertIn("kEffectOriginOffset = 0xE0;", request)
+        for name in ("Runtime.h", "Runtime.cpp"):
+            text = (root / "Native" / "Game" / "src" / "Effects" / name).read_text(
+                encoding="utf-8"
+            )
+            with self.subTest(name=name):
+                self.assertNotIn("Effects_effectOrigin", text)
 
     def test_texture_binding_receives_its_payload_extent(self):
         # #276 slice 38: the package walk is owned; its typed binder hands each block its payload extent.
@@ -3262,15 +3265,17 @@ int func_800F9800(void) {
     def test_texture_provenance_does_not_read_secondary_only_instance_metadata(self):
         root = Path(__file__).resolve().parents[2]
         live = (root / r"Native\Game\src\Effects\ParticleTextureAnimationLive.cpp").read_text(encoding="utf-8")
+        # The retired copier's F01861 text keeps the decomp member name; the
+        # native request record names it effect_id (#441).
         replacements = {
-            "F01861": "\n".join(new for _, new, _ in copy_fixups.FIXES["F01861"]),
-            "ParticleTextureAnimationLive": live,
+            "F01861": ("\n".join(new for _, new, _ in copy_fixups.FIXES["F01861"]), "effectId"),
+            "ParticleTextureAnimationLive": (live, "effect_id"),
         }
-        for name, replacement in replacements.items():
+        for name, (replacement, member) in replacements.items():
             with self.subTest(name=name):
                 self.assertNotIn("Effects_currentInstance", replacement)
-                self.assertIn("Effects_secondaryRequest.effectId", replacement)
-                self.assertIn("Effects_actionRequest.effectId", replacement)
+                self.assertIn(f"Effects_secondaryRequest.{member}", replacement)
+                self.assertIn(f"Effects_actionRequest.{member}", replacement)
 
     def test_texture_names_preserve_state_and_stream_roles(self):
         # #276 Group N: the texture animation calls are owned Live adapters
