@@ -47,9 +47,9 @@
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
-#include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
@@ -317,16 +317,15 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
     if (VS::Menu::Framework::subMenuRowCount > kMaximumObservedRows) {
       throw std::runtime_error("menu inspection exceeds supported row count");
     }
-    const auto* text = reinterpret_cast<const Menu_Framework_ItemText*>(
+    const auto* text = reinterpret_cast<const VS::Menu::Framework::ItemText*>(
         VS::Menu::Framework::itemsText);
     for (unsigned index = 0; index < VS::Menu::Framework::subMenuRowCount;
          ++index) {
-      const auto* name = reinterpret_cast<const char*>(text[index].name);
+      const auto* name = reinterpret_cast<const char*>(text[index].name.data());
       result.rows.push_back(
           {static_cast<int>(index),
-           InspectGameText(std::span(name, sizeof(text[index].name))),
-           (text[index].menuRowFlags & Menu_Framework_RowTypeFlag_Disabled) !=
-               0,
+           InspectGameText(std::span(name, text[index].name.size())),
+           (text[index].flags & Menu_Framework_RowTypeFlag_Disabled) != 0,
            static_cast<int>(index) == result.selected_row});
       constexpr int kInventoryMenu = 4, kItemShortcut = 5, kInputReady = 17;
       if (result.selected_menu == kInventoryMenu &&

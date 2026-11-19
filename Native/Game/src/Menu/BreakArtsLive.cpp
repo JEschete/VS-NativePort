@@ -26,7 +26,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Render/GameFontLive.hpp"
 #include "State/Progress.hpp"
 
@@ -64,7 +64,7 @@ class LiveHost final : public Host {
     return Menu_BreakArts_strings;
   }
   std::span<const std::uint16_t> BattleMenuStrings() override {
-    return Menu_menuStrings;
+    return VS::Menu::menuStrings;
   }
   std::uint16_t DaggerArtDescriptionIndex() const override {
     return Text_Menu1_strings_Index_daggerArt1;
@@ -156,14 +156,10 @@ class LiveHost final : public Host {
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
   int HighlightedRow() override { return Framework::LiveHighlightedRow(); }
   std::span<const std::uint8_t> AnimationIndices() override {
-    return {
-        reinterpret_cast<const std::uint8_t*>(Menu_Framework_animationIndices),
-        kAnimationCount};
+    return {VS::Menu::Framework::animationIndices, kAnimationCount};
   }
-  std::span<const std::int8_t> RowAnimationSteps() override {
-    return {
-        reinterpret_cast<const std::int8_t*>(Menu_Framework_rowAnimationSteps),
-        sizeof Menu_Framework_rowAnimationSteps};
+  std::span<const std::uint8_t> RowAnimationSteps() override {
+    return VS::Menu::Framework::rowAnimationSteps;
   }
 
   bool SetMenuItem(const RowPlacement& placement, TextRef text) override {
@@ -237,7 +233,7 @@ class LiveHost final : public Host {
     Framework::SetLiveCommandLabel(command);
   }
   void SetActionSelection(std::uint16_t action_id) override {
-    VS::Menu::Framework::actionSelection.executeAbility.word = action_id;
+    VS::Menu::Framework::actionSelection.execute_ability = action_id;
   }
   void SetExecuteAbilityType(std::uint8_t type) override {
     VS::Menu::Framework::menuState.executeAbilityType = ToStorageChar(type);
@@ -252,7 +248,7 @@ class LiveHost final : public Host {
     VS::Menu::Framework::menuState.returnState = ToStorageChar(state);
   }
   void SetSelectionKind(std::int16_t kind) override {
-    VS::Menu::Framework::actionSelection.selectionKind = kind;
+    VS::Menu::Framework::actionSelection.selection_kind = kind;
   }
 
  private:
@@ -281,15 +277,15 @@ class LiveHost final : public Host {
                                   Battle_actionDefinitions[text.value].name),
                               kActionNameBytes);
       case TextKind::kBattleMenuIndex: {
-        const auto size = std::size(Menu_menuStrings);
-        if (text.value >= size || Menu_menuStrings[text.value] >= size) {
+        const auto size = std::size(VS::Menu::menuStrings);
+        if (text.value >= size || VS::Menu::menuStrings[text.value] >= size) {
           return std::nullopt;
         }
-        const std::uint16_t offset = Menu_menuStrings[text.value];
-        const auto* const bytes =
-            reinterpret_cast<const std::uint8_t*>(&Menu_menuStrings[offset]);
+        const std::uint16_t offset = VS::Menu::menuStrings[text.value];
+        const auto* const bytes = reinterpret_cast<const std::uint8_t*>(
+            &VS::Menu::menuStrings[offset]);
         const std::size_t remaining =
-            (size - offset) * sizeof(Menu_menuStrings[0]);
+            (size - offset) * sizeof(VS::Menu::menuStrings[0]);
         return NullTerminated(bytes, remaining);
       }
     }

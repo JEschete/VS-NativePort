@@ -21,7 +21,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
@@ -372,10 +372,10 @@ class LiveScreenHost final : public AbilityScreenHost {
   }
   std::optional<std::uint8_t> AnimationOffset(
       std::uint8_t step) const override {
-    if (step >= std::size(Menu_Framework_rowAnimationSteps)) {
+    if (step >= std::size(VS::Menu::Framework::rowAnimationSteps)) {
       return std::nullopt;
     }
-    return static_cast<std::uint8_t>(Menu_Framework_rowAnimationSteps[step]);
+    return VS::Menu::Framework::rowAnimationSteps[step];
   }
   void DrawNextUnlockPoints(int x_offset) override {
     LiveDrawNextUnlockPoints(x_offset);

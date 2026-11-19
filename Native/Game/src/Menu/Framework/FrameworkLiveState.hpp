@@ -9,7 +9,6 @@
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Container/Storage.h"
-#include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/MenuMemory.h"
@@ -50,7 +49,7 @@ extern char unlockedBreakArt;
 // decomp: vs_battle_stringBuf (BATTLE/BATTLE.PRG 5BF94.c)
 extern char* stringBuf;
 // decomp: D_800F4E98 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Menu_Framework_ActionSelection actionSelection;
+extern ActionSelection actionSelection;
 // decomp: D_800F4EA0 (BATTLE/BATTLE.PRG 5BF94.c)
 extern int actionRestrictions;
 // decomp: D_800F4EE8 (BATTLE/BATTLE.PRG 5BF94.c)

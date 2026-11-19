@@ -119,7 +119,7 @@
 #include "Menu/BreakArts.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/FilesLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Magic.h"
@@ -304,10 +304,10 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x831B0, sizeof Battle_hudSlideOffset, &Battle_hudSlideOffset, sizeof Battle_hudSlideOffset}, // G00158 D_800EB9B0
     {"BATTLE/BATTLE.PRG", 0x831CC, sizeof Battle_hudBattleMode, &Battle_hudBattleMode, sizeof Battle_hudBattleMode}, // G00165 D_800EB9CC
     {"BATTLE/BATTLE.PRG", 0x831CD, sizeof Battle_battleModeIndicatorStep, &Battle_battleModeIndicatorStep, sizeof Battle_battleModeIndicatorStep}, // G00166 D_800EB9CD
-    {"BATTLE/BATTLE.PRG", 0x831DC, sizeof Menu_menuStrings, &Menu_menuStrings, sizeof Menu_menuStrings}, // G00171 vs_battle_menuStrings
-    {"BATTLE/BATTLE.PRG", 0x833B8, sizeof Menu_Framework_gradientTopColors, &Menu_Framework_gradientTopColors, sizeof Menu_Framework_gradientTopColors}, // G00173 D_800EBBB8
-    {"BATTLE/BATTLE.PRG", 0x833C0, sizeof Menu_Framework_gradientBottomColors, &Menu_Framework_gradientBottomColors, sizeof Menu_Framework_gradientBottomColors}, // G00174 D_800EBBC0
-    {"BATTLE/BATTLE.PRG", 0x833C8, sizeof Menu_Framework_rowAnimationSteps, &Menu_Framework_rowAnimationSteps, sizeof Menu_Framework_rowAnimationSteps}, // G00175 vs_battle_rowAnimationSteps
+    {"BATTLE/BATTLE.PRG", 0x831DC, sizeof VS::Menu::menuStrings, &VS::Menu::menuStrings, sizeof VS::Menu::menuStrings}, // G00171 vs_battle_menuStrings
+    {"BATTLE/BATTLE.PRG", 0x833B8, sizeof VS::Menu::Framework::gradientTopColors, &VS::Menu::Framework::gradientTopColors, sizeof VS::Menu::Framework::gradientTopColors}, // G00173 D_800EBBB8
+    {"BATTLE/BATTLE.PRG", 0x833C0, sizeof VS::Menu::Framework::gradientBottomColors, &VS::Menu::Framework::gradientBottomColors, sizeof VS::Menu::Framework::gradientBottomColors}, // G00174 D_800EBBC0
+    {"BATTLE/BATTLE.PRG", 0x833C8, sizeof VS::Menu::Framework::rowAnimationSteps, &VS::Menu::Framework::rowAnimationSteps, sizeof VS::Menu::Framework::rowAnimationSteps}, // G00175 vs_battle_rowAnimationSteps
     {"BATTLE/BATTLE.PRG", 0x833DC, sizeof Battle_hudGaugePositions, &Battle_hudGaugePositions, sizeof Battle_hudGaugePositions}, // G00176 D_800EBBDC
     {"BATTLE/BATTLE.PRG", 0x833EC, sizeof Battle_hudGaugeLabelPositions, &Battle_hudGaugeLabelPositions, sizeof Battle_hudGaugeLabelPositions}, // G00177 D_800EBBEC
     {"BATTLE/BATTLE.PRG", 0x833FC, sizeof Battle_hudGaugeLabelWidths, &Battle_hudGaugeLabelWidths, sizeof Battle_hudGaugeLabelWidths}, // G00178 D_800EBBFC
@@ -317,7 +317,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83454, sizeof Battle_limbStatusColors, &Battle_limbStatusColors, sizeof Battle_limbStatusColors}, // G00182 D_800EBC54
     {"BATTLE/BATTLE.PRG", 0x83468, sizeof Battle_upperStatusIconFlags, &Battle_upperStatusIconFlags, sizeof Battle_upperStatusIconFlags}, // G00183 D_800EBC68
     {"BATTLE/BATTLE.PRG", 0x83478, sizeof Battle_shortcutHudRequested, &Battle_shortcutHudRequested, sizeof Battle_shortcutHudRequested}, // G00184 D_800EBC78
-    {"BATTLE/BATTLE.PRG", 0x8347C, sizeof Menu_Framework_animationIndices, &Menu_Framework_animationIndices, sizeof Menu_Framework_animationIndices}, // G00185 vs_battle_animationIndices
+    {"BATTLE/BATTLE.PRG", 0x8347C, sizeof VS::Menu::Framework::animationIndices, &VS::Menu::Framework::animationIndices, sizeof VS::Menu::Framework::animationIndices}, // G00185 vs_battle_animationIndices
     {"BATTLE/BATTLE.PRG", 0x83488, sizeof Battle_firstShortcutDigitOffsets, &Battle_firstShortcutDigitOffsets, sizeof Battle_firstShortcutDigitOffsets}, // G00186 D_800EBC88
     {"BATTLE/BATTLE.PRG", 0x83498, sizeof Battle_secondShortcutMarkerPositions, &Battle_secondShortcutMarkerPositions, sizeof Battle_secondShortcutMarkerPositions}, // G00187 D_800EBC98
     {"BATTLE/BATTLE.PRG", 0x834A0, sizeof Battle_secondShortcutIconPositions, &Battle_secondShortcutIconPositions, sizeof Battle_secondShortcutIconPositions}, // G00188 D_800EBCA0
@@ -332,7 +332,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83514, sizeof Battle_limbDisplaySpriteSizes, &Battle_limbDisplaySpriteSizes, sizeof Battle_limbDisplaySpriteSizes}, // G00197 D_800EBD14
     {"BATTLE/BATTLE.PRG", 0x8353C, sizeof Battle_limbDisplaySpriteTexCoords, &Battle_limbDisplaySpriteTexCoords, sizeof Battle_limbDisplaySpriteTexCoords}, // G00198 D_800EBD3C
     {"BATTLE/BATTLE.PRG", 0x83564, sizeof Battle_battleModeIndicatorWobble, &Battle_battleModeIndicatorWobble, sizeof Battle_battleModeIndicatorWobble}, // G00199 D_800EBD64
-    {"BATTLE/BATTLE.PRG", 0x83568, sizeof Menu_Framework_abilityGroupActionRanges, &Menu_Framework_abilityGroupActionRanges, sizeof Menu_Framework_abilityGroupActionRanges}, // G00200 D_800EBD68
+    {"BATTLE/BATTLE.PRG", 0x83568, sizeof VS::Menu::Framework::abilityGroupActionRanges, &VS::Menu::Framework::abilityGroupActionRanges, sizeof VS::Menu::Framework::abilityGroupActionRanges}, // G00200 D_800EBD68
     {"BATTLE/BATTLE.PRG", 0x83570, sizeof Menu_Magic_warlockSpellIds, &Menu_Magic_warlockSpellIds, sizeof Menu_Magic_warlockSpellIds}, // G00201 vs_battle_warlockSpellIds
     {"BATTLE/BATTLE.PRG", 0x83584, sizeof Menu_Magic_shamanSpellIds, &Menu_Magic_shamanSpellIds, sizeof Menu_Magic_shamanSpellIds}, // G00202 vs_battle_shamanSpellIds
     {"BATTLE/BATTLE.PRG", 0x8358C, sizeof Menu_Magic_sorcererSpellIds, &Menu_Magic_sorcererSpellIds, sizeof Menu_Magic_sorcererSpellIds}, // G00203 vs_battle_sorcererSpellIds
@@ -343,7 +343,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x835DC, sizeof Battle_doorStrings, &Battle_doorStrings, sizeof Battle_doorStrings}, // G00209 D_800EBDDC
     {"BATTLE/BATTLE.PRG", 0x83758, sizeof Menu_kNotificationItemNames, &Menu_kNotificationItemNames, sizeof Menu_kNotificationItemNames}, // G00210 D_800EBF58
     {"BATTLE/BATTLE.PRG", 0x83A6C, sizeof VS::Core::interfaceRandomState, &VS::Core::interfaceRandomState, sizeof VS::Core::interfaceRandomState}, // G00213 _keystreamState
-    {"BATTLE/BATTLE.PRG", 0x83A70, sizeof Menu_Framework_cursorBrightnessAnimation, &Menu_Framework_cursorBrightnessAnimation, sizeof Menu_Framework_cursorBrightnessAnimation}, // G00214 vs_battle_cursorBrightnessAnimation
+    {"BATTLE/BATTLE.PRG", 0x83A70, sizeof VS::Menu::Framework::cursorBrightnessAnimation, &VS::Menu::Framework::cursorBrightnessAnimation, sizeof VS::Menu::Framework::cursorBrightnessAnimation}, // G00214 vs_battle_cursorBrightnessAnimation
     {"BATTLE/BATTLE.PRG", 0x83A84, sizeof Menu_textBoxAnchors, &Menu_textBoxAnchors, sizeof Menu_textBoxAnchors}, // G00216 D_800EC284
     {"BATTLE/BATTLE.PRG", 0x83ACC, sizeof Menu_informationHeaderPositions, &Menu_informationHeaderPositions, sizeof Menu_informationHeaderPositions}, // G00217 D_800EC2CC
     {"BATTLE/BATTLE.PRG", 0x83AD8, sizeof Menu_kInformationHeaderSpriteWords, &Menu_kInformationHeaderSpriteWords, sizeof Menu_kInformationHeaderSpriteWords}, // G00218 D_800EC2D8

@@ -20,6 +20,7 @@
 #include "Field/DoorRecordLive.hpp"
 #include "Field/Mpd.h"
 #include "Field/TransitionsLive.hpp"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -82,12 +83,12 @@ class LiveSceneTransitionServices final : public SceneTransitionHost {
     Menu::Framework::UpdateLiveMenuOverlay();
   }
   std::int16_t GameMenuStatus() override {
-    const Menu_Framework_ActionSelection* selection =
+    const Menu::Framework::ActionSelection* selection =
         Menu::Framework::LiveActionSelectionState();
     if (selection == nullptr) {
       VS::Event::Refuse("ScriptRunMenuTransition", "missing menu state");
     }
-    return selection->menuStatus;
+    return selection->menu_status;
   }
   void ReleaseMenuRows() override { Menu::Framework::ReleaseLiveMenuRows(); }
 

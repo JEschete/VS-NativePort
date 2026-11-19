@@ -291,8 +291,8 @@ struct Fixture {
       Battle_statusStrings};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
       VS::Menu::Framework::equipmentStats};
-  ArrayRestore<char, std::size(Menu_Framework_animationIndices)>
-      saved_animation{Menu_Framework_animationIndices};
+  ArrayRestore<std::uint8_t, std::size(VS::Menu::Framework::animationIndices)>
+      saved_animation{VS::Menu::Framework::animationIndices};
   std::vector<std::byte> arena = std::vector<std::byte>(kArenaBytes);
   memory::ScopedLiveGameHeap heap{arena};
   PreviewOwner preview_owner{arena};
@@ -463,7 +463,7 @@ struct Fixture {
     std::ranges::fill(Battle_statusStrings, u_short{0xE7E7});
     Battle_statusStrings[1] = 400;
     Battle_statusStrings[400] = 0xE731;
-    std::ranges::fill(Menu_Framework_animationIndices, char{10});
+    std::ranges::fill(VS::Menu::Framework::animationIndices, std::uint8_t{10});
   }
   void BindFrame() {
     VS::Render::frameBuf = 0;

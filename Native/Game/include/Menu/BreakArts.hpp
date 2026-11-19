@@ -121,7 +121,7 @@ class Host {
   [[nodiscard]] virtual int SelectedRow() = 0;
   [[nodiscard]] virtual int HighlightedRow() = 0;
   [[nodiscard]] virtual std::span<const std::uint8_t> AnimationIndices() = 0;
-  [[nodiscard]] virtual std::span<const std::int8_t> RowAnimationSteps() = 0;
+  [[nodiscard]] virtual std::span<const std::uint8_t> RowAnimationSteps() = 0;
 
   virtual bool SetMenuItem(const RowPlacement& placement, TextRef text) = 0;
   virtual bool CreateRows(int row_info, std::span<const Row> rows) = 0;

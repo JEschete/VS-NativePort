@@ -23,7 +23,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorStatus.h"
 #include "Render/GameFontLive.hpp"
@@ -246,9 +246,7 @@ class LiveNavigation final : public StatusEffectNavigationHost {
               VS::Menu::Framework::menuMemory.opaque51[kSelectionDimmingIndex]),
           .fade_screen = Menu_Status_fadeScreen,
           .background_first = Menu_Status_drawBackgroundFirst,
-          .row_offsets = {reinterpret_cast<const std::uint8_t*>(
-                              Menu_Framework_rowAnimationSteps),
-                          std::size(Menu_Framework_rowAnimationSteps)}};
+          .row_offsets = VS::Menu::Framework::rowAnimationSteps};
 }
 [[nodiscard]] std::expected<std::int32_t, LimbControllerError> UpdateLivePanel(
     int request) {

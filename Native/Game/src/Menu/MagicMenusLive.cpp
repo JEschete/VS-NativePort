@@ -22,7 +22,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Magic.h"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenus.hpp"
@@ -224,13 +224,13 @@ class LiveHost final : public MenuHost {
     }
     text_queue_ = Render::LivePacketQueue(text);
     icon_queue_ = Render::LivePacketQueue(icons);
-    return RankTarget{
-        text_queue_,
-        icon_queue_,
-        {.widths = VS::Render::compactGlyphWidths,
-         .left_trim = VS::Render::compactGlyphLeftTrim,
-         .indices = VS::Render::compactGlyphIndices},
-        Bytes(Menu_Framework_cursorBrightnessAnimation).first(kBlinkSteps)};
+    return RankTarget{text_queue_,
+                      icon_queue_,
+                      {.widths = VS::Render::compactGlyphWidths,
+                       .left_trim = VS::Render::compactGlyphLeftTrim,
+                       .indices = VS::Render::compactGlyphIndices},
+                      Bytes(VS::Menu::Framework::cursorBrightnessAnimation)
+                          .first(kBlinkSteps)};
   }
   bool SchoolUnlocked(School school) override {
     return VS::Battle::LiveHasUnlockedSpellClass(static_cast<int>(school)) != 0;
@@ -263,7 +263,7 @@ class LiveHost final : public MenuHost {
   }
   bool CreateHeader() override {
     constexpr auto kHeader = Text_Battle_menuStrings_Index_magic;
-    if (!TableText(Menu_menuStrings, Menu_menuStrings[kHeader])) {
+    if (!TableText(VS::Menu::menuStrings, VS::Menu::menuStrings[kHeader])) {
       Refuse("Magic header text is invalid or unterminated");
       return false;
     }
@@ -286,13 +286,13 @@ class LiveHost final : public MenuHost {
   }
   int RunTeleport(int init) override { return UpdateTeleportMenuLive(init); }
   void SetActionSelection(std::int32_t action) override {
-    VS::Menu::Framework::actionSelection.executeAbility.word = action;
+    VS::Menu::Framework::actionSelection.execute_ability = action;
   }
   void SetAbilityType(std::uint8_t type) override {
     VS::Menu::Framework::menuState.executeAbilityType = StorageByte(type);
   }
   void SetSelectionKind(std::int16_t kind) override {
-    VS::Menu::Framework::actionSelection.selectionKind = kind;
+    VS::Menu::Framework::actionSelection.selection_kind = kind;
   }
   std::uint8_t CurrentMenu() override {
     return static_cast<std::uint8_t>(

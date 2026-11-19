@@ -40,7 +40,7 @@ class FakeHost final : public break_arts::Host {
   std::array<int, 10> kills{};
   std::array<std::array<int, 4>, 15> requirements{};
   std::array<std::uint8_t, 11> animation_indices{};
-  std::array<std::int8_t, 36> row_animation_steps{};
+  std::array<std::uint8_t, 36> row_animation_steps{};
   std::optional<int> equipped = 1;
   std::uint16_t art_description_index = 40;
   std::uint16_t view_name_offset = 400;
@@ -162,7 +162,7 @@ class FakeHost final : public break_arts::Host {
   std::span<const std::uint8_t> AnimationIndices() override {
     return animation_indices;
   }
-  std::span<const std::int8_t> RowAnimationSteps() override {
+  std::span<const std::uint8_t> RowAnimationSteps() override {
     return row_animation_steps;
   }
   bool SetMenuItem(const break_arts::RowPlacement& placement,
@@ -300,6 +300,32 @@ TEST_CASE("Break Arts UpdateArtList confirms and returns a row",
   CHECK(break_arts::UpdateArtList(0, context) == 0);
   CHECK(host.cleared_rows.back() == 1);
   CHECK(break_arts::UpdateArtList(0, context) == 0xFFFF);
+}
+
+// Issue #462: the slide steps are unsigned bytes. Step 10 is 128 on the disc,
+// which places the unlock progress at x 334, past the right edge, while the
+// row slides in.
+TEST_CASE("Break Arts UpdateArtList slides the unlock progress unsigned",
+          "[menu-break-arts]") {
+  FakeHost host;
+  host.kills[1] = 3;
+  host.requirements[1][0] = 10;
+  host.row_animation_steps[10] = 128;
+  break_arts::State state{};
+  state.art_list.step = break_arts::ArtListStep::kWaitForSelection;
+  state.art_list.weapon_type = 1;
+  state.art_list.row_count = 2;
+  state.art_list.remaining_rows = 2;
+  state.art_list.animation_index = 10;
+  state.art_list.action_ids[0] = 184;
+  break_arts::Context context{.state = state, .host = host};
+  CHECK(break_arts::UpdateArtList(0, context) == 0);
+  CHECK(host.refusals.empty());
+  REQUIRE(host.drawings.size() == 2);
+  CHECK((host.drawings[0] ==
+         std::pair<std::string, std::uint32_t>{"NEXT", 0x0052014E}));
+  CHECK((host.drawings[1] ==
+         std::pair<std::string, std::uint32_t>{"#7PT", 0x005201AE}));
 }
 
 TEST_CASE("Break Arts UpdateWeaponCategories initializes its title",

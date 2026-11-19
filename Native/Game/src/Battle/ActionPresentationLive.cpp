@@ -47,7 +47,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
-#include "Menu/Framework/ActionSelection.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
@@ -88,7 +88,7 @@ Battle_ActionDefinition& Definition(std::uint16_t action) {
   Require(action < std::size(Battle_actionDefinitions));
   return Battle_actionDefinitions[action];
 }
-Menu_Framework_ActionSelection& MenuSelection() {
+Menu::Framework::ActionSelection& MenuSelection() {
   Require(Battle_actionSelection != nullptr);
   return *Battle_actionSelection;
 }
@@ -210,15 +210,15 @@ class LiveWorld final : public ActionPresentationWorld {
   void Recover() override { BeginLivePostActionRecovery(0); }
   void ReturnToMenu() override { LiveReturnToBattleActionMenu(); }
   std::int16_t SelectionKind() override {
-    return MenuSelection().selectionKind;
+    return MenuSelection().selection_kind;
   }
   std::uint16_t SelectedItem() override {
-    return MenuSelection().executeAbility.halves[1];
+    return Menu::Framework::ExecuteAbilityItem(MenuSelection());
   }
   void ConsumeItem(std::uint16_t item) override {
     Items::ConsumeLiveMiscItem(item);
   }
-  void ClearSelectionKind() override { MenuSelection().selectionKind = 0; }
+  void ClearSelectionKind() override { MenuSelection().selection_kind = 0; }
   void Disengage(int actor) override { Ai::DisengageLiveActorById(actor); }
   void CollectEnvironment() override { LiveCollectEnvironmentActionTargets(); }
   void CollectAll() override { LiveSetAllActionTargets(); }

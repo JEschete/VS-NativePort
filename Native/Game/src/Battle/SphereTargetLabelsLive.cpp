@@ -22,7 +22,7 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -41,7 +41,7 @@ constexpr std::size_t kPointAxes = 3;
 
 static_assert(std::size(Battle_TargetSphere{}.labels) ==
               kSphereTargetLabelCount);
-static_assert(std::size(Menu_Framework_rowAnimationSteps) >=
+static_assert(std::size(VS::Menu::Framework::rowAnimationSteps) >=
               kTargetLabelSlideStepCount);
 static_assert(sizeof(Battle_TargetLabelLine) == sizeof(Battle_TargetPreview));
 
@@ -260,8 +260,8 @@ void UpdateSphereTargetLabelsEntry() {
   std::ranges::transform(live, labels.begin(), ReadLabel);
   // The original reads the steps unsigned (lbu).
   LabelSlideSteps slide_steps{};
-  std::transform(std::begin(Menu_Framework_rowAnimationSteps),
-                 std::next(std::begin(Menu_Framework_rowAnimationSteps),
+  std::transform(std::begin(VS::Menu::Framework::rowAnimationSteps),
+                 std::next(std::begin(VS::Menu::Framework::rowAnimationSteps),
                            kTargetLabelSlideStepCount),
                  slide_steps.begin(),
                  [](char step) { return static_cast<std::uint8_t>(step); });

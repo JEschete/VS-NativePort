@@ -16,7 +16,7 @@
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/ActorSwitchingLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
@@ -69,13 +69,9 @@ class HostBase : public Interface {
   ~HostBase() override { Publish(); }
   TerminalFrame& Frame() override { return frame; }
   TerminalTables Tables() override {
-    return {
-        {reinterpret_cast<const std::uint8_t*>(
-             Menu_Framework_rowAnimationSteps),
-         std::size(Menu_Framework_rowAnimationSteps)},
-        {reinterpret_cast<const std::uint8_t*>(Menu_Framework_animationIndices),
-         std::size(Menu_Framework_animationIndices)},
-        VS::Menu::Framework::statusViewCursorPositions};
+    return {VS::Menu::Framework::rowAnimationSteps,
+            VS::Menu::Framework::animationIndices,
+            VS::Menu::Framework::statusViewCursorPositions};
   }
   std::optional<TerminalActor> Actor(int slot) override {
     return ActorView(slot);

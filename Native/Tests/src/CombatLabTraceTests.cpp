@@ -39,9 +39,9 @@
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/MenuItems.h"
-#include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
@@ -1640,7 +1640,7 @@ TEST_CASE("Consumable menu rows retain native inventory identity and bounds",
           "[player][diagnostics][inspection]") {
   ItemInspectionFixture fixture;
   std::array<Menu_Framework_MenuRow, 10> rows{};
-  std::array<Menu_Framework_ItemText, 1> text{};
+  std::array<VS::Menu::Framework::ItemText, 1> text{};
   Field_controlMode = 5;
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::itemsText =

@@ -299,6 +299,21 @@ std::int32_t PackTeleportDestination(
   return static_cast<std::int32_t>(packed);
 }
 
+// decomp: D_800F18EC_t executeAbility bits
+// (src/BATTLE/BATTLE.PRG/5BF94.h:160).
+TeleportDestination UnpackTeleportDestination(std::int32_t packed) noexcept {
+  const auto word = static_cast<std::uint32_t>(packed);
+  return TeleportDestination{
+      .save_point = 0,
+      .location = static_cast<std::uint16_t>(word & kLocationMask),
+      .tile_x =
+          static_cast<std::uint8_t>((word >> kPackedTileXShift) & kTileMask),
+      .tile_z =
+          static_cast<std::uint8_t>((word >> kPackedTileZShift) & kTileMask),
+      .mp_cost = static_cast<std::uint16_t>(word >> kPackedCostShift),
+  };
+}
+
 // decomp: MENU0.PRG _setMPCost (src/MENU/MENU0.PRG/84.c:18).
 void SetSpellMpCost(int signed_action_id, Host& host) {
   if (signed_action_id == std::numeric_limits<int>::min()) {

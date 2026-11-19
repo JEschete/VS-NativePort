@@ -186,7 +186,7 @@ void DrawTile(Context& ctx, Layer layer, std::uint32_t position,
   return target - AnimationStep(ctx, step - 1);
 }
 
-// Menu_menuStrings: halfword offsets (in halfwords) to the strings.
+// VS::Menu::menuStrings: halfword offsets (in halfwords) to the strings.
 [[nodiscard]] std::span<const std::uint8_t> MenuString(Context& ctx,
                                                        int index) {
   const auto strings = ctx.tables.menu_strings;
@@ -668,7 +668,7 @@ constexpr int kDataMenu = 7;
 constexpr int kLootMenu = 12;
 constexpr int kChallengeMenu = 15;
 constexpr int kUnlockMenu = 3;
-// VS::Menu::Framework::actionSelection.menuStatus.
+// VS::Menu::Framework::actionSelection.menu_status.
 constexpr std::int16_t kMenuOpen = 1;
 constexpr std::int16_t kMenuDone = 2;
 // The item shortcut runs MAINMENU.PRG's item screen alone.
@@ -3107,11 +3107,6 @@ void UpdateAndDrawRows(Context& ctx) {
   }
 }
 namespace {
-// Menu_Framework_AshleyRenderMode.
-constexpr int kAshleyRender = 0;
-constexpr int kAshleyInit = 1;
-constexpr int kAshleyRestore = 2;
-
 // Menu_Inventory_ashleyRenderState: the preview slides in (2) and then
 // holds (0), or slides out (1) or drops away (3).
 constexpr std::int32_t kPreviewShown = 0;
@@ -3203,10 +3198,10 @@ void DrawAshley(Context& ctx, std::int32_t y_offset) {
 }  // namespace
 
 // decomp: MENU _renderAshley (src/MENU/_renderAshley.h:27)
-void RenderAshley(Context& ctx, int mode) {
+void RenderAshley(Context& ctx, AshleyRenderMode mode) {
   AshleyPreviewStatics& ashley = ctx.state.ashley;
   switch (mode) {
-    case kAshleyRender: {
+    case AshleyRenderMode::kRender: {
       const std::int32_t y_offset = AdvanceAshleyPreview(ctx);
       if (ashley.skip_frame != 0) {
         ashley.skip_frame = 0;
@@ -3217,7 +3212,7 @@ void RenderAshley(Context& ctx, int mode) {
       }
       break;
     }
-    case kAshleyInit:
+    case AshleyRenderMode::kInit:
       if (ashley.render == 0) {
         ctx.host.SetAshleyPreview(
             {.y_offset = 0, .render_state = kPreviewEntering});
@@ -3228,15 +3223,13 @@ void RenderAshley(Context& ctx, int mode) {
         ctx.host.LoadActorPreview();
       }
       break;
-    case kAshleyRestore:
+    case AshleyRenderMode::kRestore:
       if (ashley.render != 0) {
         ctx.host.ReleaseActorPreview();
         SetBackgroundPriority(ctx, kMenuBackgroundOt, kFullBrightness);
         ctx.host.EndAshleyPreview();
         ashley.render = 0;
       }
-      break;
-    default:
       break;
   }
 }

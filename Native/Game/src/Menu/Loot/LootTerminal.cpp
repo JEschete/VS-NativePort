@@ -191,7 +191,7 @@ void RenderInventoryPanels(LootTerminalHost& host) {
       row.count = static_cast<std::uint16_t>(host.CountItems(category));
     }
   }
-  host.RenderAshley(0);
+  host.RenderAshley(Framework::AshleyRenderMode::kRender);
   if (ui.icons_step > kIconSteps) {
     host.Refuse("loot icon animation outside curve");
   }
@@ -219,7 +219,7 @@ void BeginInventoryView(InventoryTransitionState& state,
     host.SetHudHidden(true);
     runtime.hud_slide_offset = kHiddenHudOffset;
   }
-  host.RenderAshley(1);
+  host.RenderAshley(Framework::AshleyRenderMode::kInit);
   static_cast<void>(host.LootInventory(true));
   state.step = kTransitionInventory;
 }
@@ -232,7 +232,7 @@ void EndInventoryView(InventoryTransitionState& state, LootTerminalHost& host) {
     host.SetHudHidden(false);
     host.Runtime().hud_slide_offset = 0;
   }
-  host.RenderAshley(2);
+  host.RenderAshley(Framework::AshleyRenderMode::kRestore);
   state.step = kTransitionReturn;
   if (host.Runtime().information_shown == 0) host.DismissInformation();
 }

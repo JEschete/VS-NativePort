@@ -127,7 +127,7 @@ class LootTerminalHost {
   virtual void ClearMenu() = 0;
   virtual void SetFieldRenderingEnabled(bool enabled) = 0;
   virtual void SetHudHidden(bool hidden) = 0;
-  virtual void RenderAshley(std::int32_t mode) = 0;
+  virtual void RenderAshley(Framework::AshleyRenderMode mode) = 0;
   // Always MENUB's controller, never MENU3's _ITEMMENU specialization.
   [[nodiscard]] virtual std::int32_t LootInventory(bool initialize) = 0;
   [[nodiscard]] virtual std::int32_t AnimationOffset(std::size_t step) = 0;

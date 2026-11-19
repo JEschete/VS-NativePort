@@ -28,8 +28,9 @@
 #include "Field/RoomStateLive.hpp"
 #include "Field/TransitionsLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/ActionSelection.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
+#include "Menu/MagicCosts.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
@@ -46,7 +47,7 @@ int Flag(bool value) { return value ? 1 : 0; }
 class LiveFieldModeHost final : public FieldModeHost {
  public:
   explicit LiveFieldModeHost(
-      Menu_Framework_ActionSelection* selection = nullptr)
+      Menu::Framework::ActionSelection* selection = nullptr)
       : selection_(selection) {}
 
   void SetControlMode(FieldControlMode mode) override {
@@ -105,7 +106,7 @@ class LiveFieldModeHost final : public FieldModeHost {
   void ReleaseMenuRows() override { Menu::Framework::ReleaseLiveMenuRows(); }
   void ClearActionMenuStatus() override {
     if (selection_ != nullptr) {
-      selection_->menuStatus = 0;
+      selection_->menu_status = 0;
     }
   }
   void BeginActorActionSelection(int actor_id,
@@ -136,27 +137,28 @@ class LiveFieldModeHost final : public FieldModeHost {
   }
 
  private:
-  Menu_Framework_ActionSelection* selection_;
+  Menu::Framework::ActionSelection* selection_;
 };
 
 template <typename Rule>
 void RunFieldMode(Rule&& rule,
-                  Menu_Framework_ActionSelection* selection = nullptr) {
+                  Menu::Framework::ActionSelection* selection = nullptr) {
   LiveFieldModeHost host(selection);
   rule(host);
 }
 }  // namespace
 
 ActionMenuResult ActionMenuResultOf(
-    const Menu_Framework_ActionSelection& selection) {
-  const auto& ability = selection.executeAbility;
+    const Menu::Framework::ActionSelection& selection) {
+  const Menu::Magic::TeleportDestination teleport =
+      Menu::Magic::UnpackTeleportDestination(selection.execute_ability);
   return ActionMenuResult{
-      .kind = selection.selectionKind,
-      .action_id = static_cast<std::uint16_t>(ability.word),
-      .location_id = static_cast<int>(ability.bits.location),
-      .tile_x = static_cast<int>(ability.bits.tileX),
-      .tile_z = static_cast<int>(ability.bits.tileZ),
-      .mp_cost = static_cast<int>(ability.bits.mpCost),
+      .kind = selection.selection_kind,
+      .action_id = Menu::Framework::ExecuteAbilityAction(selection),
+      .location_id = teleport.location,
+      .tile_x = teleport.tile_x,
+      .tile_z = teleport.tile_z,
+      .mp_cost = teleport.mp_cost,
   };
 }
 
@@ -184,7 +186,7 @@ void LiveBeginBattleActionMenu(int /*unused*/, int /*unused*/) {
   RunFieldMode(BeginBattleActionMenu);
 }
 
-void LiveCloseBattleActionMenu(Menu_Framework_ActionSelection* selection) {
+void LiveCloseBattleActionMenu(Menu::Framework::ActionSelection* selection) {
   if (selection == nullptr) {
     VS::Core::LogWarn(kChannel,
                       "closing the action menu without its selection");
@@ -193,7 +195,7 @@ void LiveCloseBattleActionMenu(Menu_Framework_ActionSelection* selection) {
 }
 
 void LiveDispatchBattleActionMenuResult(
-    Menu_Framework_ActionSelection* selection) {
+    Menu::Framework::ActionSelection* selection) {
   if (selection == nullptr) {
     VS::Core::LogWarn(kChannel, "action menu result without its selection");
     return;

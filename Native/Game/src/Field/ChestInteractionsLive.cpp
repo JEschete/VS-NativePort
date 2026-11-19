@@ -58,7 +58,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
-#include "Menu/Framework/ActionSelection.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
@@ -777,10 +777,10 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
   VS::Field::ChestSelectionResult UpdateContentsSelection() override {
     VS::Menu::Framework::UpdateLiveMenuOverlay();
     const auto* selection = VS::Menu::Framework::LiveActionSelectionState();
-    if (selection == nullptr || selection->menuStatus == 1) {
+    if (selection == nullptr || selection->menu_status == 1) {
       return VS::Field::ChestSelectionResult::kPending;
     }
-    return selection->selectionKind != 0
+    return selection->selection_kind != 0
                ? VS::Field::ChestSelectionResult::kAccepted
                : VS::Field::ChestSelectionResult::kCancelled;
   }

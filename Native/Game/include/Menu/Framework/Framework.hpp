@@ -36,6 +36,10 @@ inline constexpr std::size_t kTextHeaderCount = 2;
 inline constexpr std::size_t kTextHeaderBytes = 14;
 inline constexpr std::size_t kItemNameBytes = 28;
 inline constexpr std::size_t kItemDescriptionBytes = 96;
+inline constexpr std::size_t kItemTextRecordBytes = 0x80;
+inline constexpr std::size_t kActionSelectionBytes = 8;
+// The item's halfword in ActionSelection::execute_ability.
+inline constexpr unsigned kExecuteAbilityItemShift = 16U;
 // The fixed copies the row builders take from caller text.
 inline constexpr std::size_t kRowNameCopyBytes = 26;
 inline constexpr std::size_t kRowDescriptionCopyBytes = 92;
@@ -125,6 +129,8 @@ struct ItemText {
   std::int32_t flags = 0;
   std::array<std::uint8_t, kItemDescriptionBytes> description{};
 };
+static_assert(sizeof(ItemText) == kItemTextRecordBytes,
+              "ItemText keeps the record's layout");
 
 // textHeader_t (MAINMENU.PRG 58EC.c:21).
 struct TextHeader {
@@ -133,12 +139,39 @@ struct TextHeader {
   std::uint8_t x = 0;
 };
 
-// D_800F18EC_t (BATTLE.PRG 5BF94.h:160).
+// D_800F18EC_t (BATTLE.PRG 5BF94.h:160). execute_ability holds the chosen
+// action in its low halfword and the item in its high halfword, or a teleport
+// destination (Magic::PackTeleportDestination).
 struct ActionSelection {
   std::int16_t menu_status = 0;
   std::int16_t selection_kind = 0;
   std::int32_t execute_ability = 0;
 };
+static_assert(sizeof(ActionSelection) == kActionSelectionBytes,
+              "ActionSelection keeps the record's layout");
+
+// execute_ability's halfwords (D_800F18EC_t's u16[2]).
+[[nodiscard]] constexpr std::uint16_t ExecuteAbilityAction(
+    const ActionSelection& selection) noexcept {
+  return static_cast<std::uint16_t>(
+      static_cast<std::uint32_t>(selection.execute_ability));
+}
+[[nodiscard]] constexpr std::uint16_t ExecuteAbilityItem(
+    const ActionSelection& selection) noexcept {
+  return static_cast<std::uint16_t>(
+      static_cast<std::uint32_t>(selection.execute_ability) >>
+      kExecuteAbilityItemShift);
+}
+constexpr void SetExecuteAbility(ActionSelection& selection,
+                                 std::uint16_t action,
+                                 std::uint16_t item) noexcept {
+  selection.execute_ability = static_cast<std::int32_t>(
+      static_cast<std::uint32_t>(action) |
+      (static_cast<std::uint32_t>(item) << kExecuteAbilityItemShift));
+}
+
+// decomp: ashleyRenderMode (src/MENU/_renderAshley.h:11)
+enum class AshleyRenderMode : std::int32_t { kRender, kInit, kRestore };
 
 // vs_battle_menuState_t without its disc request (the host keeps it).
 struct MenuControl {
@@ -240,7 +273,7 @@ struct Tables {
   std::span<const std::uint8_t> row_animation_steps;
   std::span<const std::uint8_t> ability_group_action_ranges;
   std::span<const std::uint8_t> cursor_brightness;
-  // Menu_menuStrings as bytes: halfword offsets, then the strings.
+  // VS::Menu::menuStrings as bytes: halfword offsets, then the strings.
   std::span<const std::uint8_t> menu_strings;
   std::span<const std::uint8_t> glyph_widths;
   std::span<const std::uint8_t> main_menu_help_text;
@@ -619,7 +652,7 @@ void LoadBackgroundTexture(Context& ctx, std::span<std::uint32_t> buffer);
 void DrawBackground(Context& ctx, int brightness);
 
 // The Ashley preview and the actor asset queue.
-void RenderAshley(Context& ctx, int mode);
+void RenderAshley(Context& ctx, AshleyRenderMode mode);
 [[nodiscard]] Core::Math::Mat3 BuildYawMatrix(std::int16_t angle);
 [[nodiscard]] Core::Math::Mat3 BuildPitchMatrix(std::int16_t angle);
 [[nodiscard]] int NextFreeActorAssetRequest(Context& ctx);

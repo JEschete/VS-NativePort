@@ -25,7 +25,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Magic.h"
 #include "Menu/MagicCosts.hpp"
 #include "State/StateFlags.hpp"
@@ -176,13 +176,13 @@ class LiveHost final : public Host {
   }
 
   std::span<const std::uint16_t> BattleMenuStrings() override {
-    return Menu_menuStrings;
+    return VS::Menu::menuStrings;
   }
   std::uint16_t MagicHeaderIndex() const override {
     return Text_Battle_menuStrings_Index_magic;
   }
   void SetMenuItem(const MenuItem& item) override {
-    const auto text = NullTerminated(Menu_menuStrings, item.text_offset);
+    const auto text = NullTerminated(VS::Menu::menuStrings, item.text_offset);
     if (!text) {
       Refuse("Magic header text is unavailable or unterminated");
       return;

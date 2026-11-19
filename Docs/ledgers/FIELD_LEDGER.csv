@@ -39,9 +39,9 @@ T00009.004,T00009,actions,4,sortItems,0,,,5,,SortItems,ItemAction SortItems,med,
 T00010.000,T00010,actions_e,0,vs_main_actions_daggerArt1,0,,,184,,DaggerArtOne,ActionId DaggerArtOne,med,declaration-only;source:main.h:44
 T00011.000,T00011,arrowType_e,0,arrowTypeUp,0,,,0,,Up,ArrowType Up,med,declaration-only;source:494.c:32
 T00011.001,T00011,arrowType_e,1,arrowTypeDown,0,,,1,,Down,ArrowType Down,med,declaration-only;source:494.c:33
-T00012.000,T00012,ashleyRenderMode,0,ashleyRenderModeRender,0,,,0,,Render,AshleyRenderMode Render,med,declaration-only;source:_renderAshley.h:12
-T00012.001,T00012,ashleyRenderMode,1,ashleyRenderModeInit,0,,,1,,Init,AshleyRenderMode Init,med,declaration-only;source:_renderAshley.h:13
-T00012.002,T00012,ashleyRenderMode,2,ashleyRenderModeRestore,0,,,2,,Restore,AshleyRenderMode Restore,med,declaration-only;source:_renderAshley.h:14
+T00012.000,T00012,ashleyRenderMode,0,ashleyRenderModeRender,0,,,0,,kRender,AshleyRenderMode Render,med,declaration-only;source:_renderAshley.h:12
+T00012.001,T00012,ashleyRenderMode,1,ashleyRenderModeInit,0,,,1,,kInit,AshleyRenderMode Init,med,declaration-only;source:_renderAshley.h:13
+T00012.002,T00012,ashleyRenderMode,2,ashleyRenderModeRestore,0,,,2,,kRestore,AshleyRenderMode Restore,med,declaration-only;source:_renderAshley.h:14
 T00013.000,T00013,cdBufferModes_e,0,cdBufferModeNone,0,,,0,,Direct,Sectors are read straight into the destination,high,source:main.c:9039
 T00013.001,T00013,cdBufferModes_e,1,cdBufferModeBuffered,0,,,1,,Buffered,Sectors go to the ring and are copied out each frame,high,source:main.c:9305
 T00013.002,T00013,cdBufferModes_e,2,cdBufferModeManual,0,,,2,,Manual,Sectors go to the ring and the caller consumes them,med,source:main.c:9058
@@ -1373,9 +1373,9 @@ T00221.007,T00221,D_800F18C8_t,7,unk10,1,int,,,,reserved10,Cleared on room load;
 T00221.008,T00221,D_800F18C8_t,8,unk14,1,int,,,,reserved14,Cleared on room load; no reader identified; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Zone.h:23;source:146C.c:15382;use cited by sanity pass;source:146C.c:312
 T00222.000,T00222,D_800F18E8_t,0,unk0_0,1,u_short,10,,,requiredFlagId,State flag id copied to the saved door's requiredFlagId,med,source:main.c:8399
 T00222.001,T00222,D_800F18E8_t,1,unk0_10,1,u_short,6,,,reservedBits10,Upper six bits; no access found; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Field\Doors.h:14;declaration-only;source:146C.h:730
-T00223.000,T00223,D_800F18EC_t,0,unk0,1,short,,,,menuStatus,"Menu status: 1 while the menu is still open, 2 once a selection is made",med,source:146C.c:7771
-T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,selectionKind,"Kind of selection (6-8 actions or items, 8 consumes a misc item, 10 a field command)",med,source:146C.c:4693
-T00223.002,T00223,D_800F18EC_t,2,executeAbility,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),,,,executeAbility,Packed execute-ability parameters,med,source:146C.c:3816;use cited by sanity pass;source:5BF94.h:159
+T00223.000,T00223,D_800F18EC_t,0,unk0,1,short,,,,menu_status,"Menu status: 1 while the menu is still open, 2 once a selection is made",med,source:146C.c:7771
+T00223.001,T00223,D_800F18EC_t,1,unk2,1,short,,,,selection_kind,"Kind of selection (6-8 actions or items, 8 consumes a misc item, 10 a field command)",med,source:146C.c:4693
+T00223.002,T00223,D_800F18EC_t,2,executeAbility,0,union (unnamed union at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:150:5),,,,execute_ability,Packed execute-ability parameters,med,source:146C.c:3816;use cited by sanity pass;source:5BF94.h:159
 T00224.000,T00224,D_800F1910_t,0,unk0,1,_mpdRoomSectionA *,,,,triggerRecord,Trigger record being shown,med,source:146C.c:5049;use cited by sanity pass;source:146C.c:157
 T00224.001,T00224,D_800F1910_t,1,unk4,1,func_8006EBF8_t,,,,actorQuery,Actor position query and parameter,med,source:146C.c:5049;use cited by sanity pass;source:146C.c:158
 T00225.000,T00225,D_800F19CC_t,0,unk0,1,u_int,,,Chain count or action sequence offset | chain action index,queueIndex,Index of the executing entry (low two bits),high,source:146C.c:1930
@@ -2724,7 +2724,7 @@ T00312.020,T00312,_hitIntermediate,20,statFactor,0,short,,,,statFactor,Named in 
 T00312.021,T00312,_hitIntermediate,21,shieldStatFactor,0,short,,,,shieldStatFactor,Named in the fork; see cited use,med,source:146C.c:11381
 T00312.022,T00312,_hitIntermediate,22,armorStatFactor,0,short,,,,armorStatFactor,Named in the fork; see cited use,med,source:146C.c:11380
 T00313.000,T00313,_itemsText_t,0,name,0,u_short[14],,,,name,Named in the fork; see cited use,med,source:58EC.c:166
-T00313.001,T00313,_itemsText_t,1,menuRowFlags,0,int,,,packed disabled/style/count/material/capacity/icon flags,menuRowFlags,Named in the fork; see cited use,med,source:58EC.c:120
+T00313.001,T00313,_itemsText_t,1,menuRowFlags,0,int,,,packed disabled/style/count/material/capacity/icon flags,flags,Named in the fork; see cited use,med,source:58EC.c:120
 T00313.002,T00313,_itemsText_t,2,description,0,u_short[48],,,,description,Named in the fork; see cited use,med,source:58EC.c:134
 T00314.000,T00314,_limbInit,0,hp,0,u_short,,,,hp,Hit points (also the maximum),high,source:146C.c:6230
 T00314.001,T00314,_limbInit,1,agilityDefenseBonus,0,char,,,,agilityDefenseBonus,Agility defense bonus,high,source:146C.c:6231

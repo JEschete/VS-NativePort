@@ -6,7 +6,6 @@
 
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/ActionSelection.h"
 
 struct Menu_Framework_MenuRow;
 
@@ -16,6 +15,8 @@ struct Menu_Framework_MenuRow;
 // menus and the battle flow call. Each entry runs the typed function over the
 // live State and writes the State back before it returns.
 namespace VS::Menu::Framework {
+struct ActionSelection;
+enum class AshleyRenderMode : std::int32_t;
 struct Buttons;
 struct MenuRow;
 struct RowPlacement;
@@ -51,7 +52,7 @@ void OpenLiveLootEntryMenu(VS::Items::BattleLoot* entry);
 void OpenLiveChestStorageMenu(int location);
 void OpenLiveAbilityUnlockMenu(int art, int ability);
 void OpenLiveChallengeMenu();
-Menu_Framework_ActionSelection* LiveActionSelectionState();
+ActionSelection* LiveActionSelectionState();
 int DrawLiveMainMenuCursor(int step, int position);
 
 // MAINMENU.PRG (58EC.c, C48.c).
@@ -115,7 +116,7 @@ int ReturnLiveFromSubmenu(int packed_menu_state);
 void UpdateLiveMainMenu(int packed_menu_state);
 
 // The MENU*.PRG copies.
-void RenderLiveAshley(int mode);
+void RenderLiveAshley(AshleyRenderMode mode);
 void ContinueLiveItemDetailsTransition(int row);
 void UpdateLiveItemDetailsSelection(int row, char* text[], u_int row_type,
                                     int page);

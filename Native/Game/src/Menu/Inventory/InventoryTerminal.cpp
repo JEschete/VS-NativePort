@@ -849,7 +849,7 @@ void LeaveInventory(InventoryTerminalHost& host, bool toggle_first) {
   if (toggle_first) host.SetFieldRenderingEnabled(true);
   host.SetHudHidden(false);
   host.Runtime().hud_slide_offset = 0;
-  host.RenderAshley(2);
+  host.RenderAshley(Framework::AshleyRenderMode::kRestore);
 }
 void ClosingPresentation(InventoryTerminalHost& host) {
   host.CloseBackground();
@@ -931,7 +931,7 @@ void ScreenSelection(std::uint8_t& step, InventoryTerminalHost& host) {
       step = kScreenItemAction;
       host.SetHudHidden(false);
       host.Runtime().hud_slide_offset = 0;
-      host.RenderAshley(2);
+      host.RenderAshley(Framework::AshleyRenderMode::kRestore);
       break;
     default:
       break;
@@ -970,7 +970,7 @@ void PresentScreen(InventoryTerminalHost& host) {
       row.count = static_cast<std::uint16_t>(host.CountItems(category));
     }
   }
-  host.RenderAshley(0);
+  host.RenderAshley(Framework::AshleyRenderMode::kRender);
   if (panels.category_icons != 0) {
     if (panels.icons_step < kIconSteps) ++panels.icons_step;
   } else if (panels.icons_step != 0) {
@@ -1252,7 +1252,7 @@ std::int32_t UpdateInventoryScreen(InventoryScreenState& state,
       host.InitializeInformation();
       host.SetHudHidden(true);
       runtime.hud_slide_offset = kHudMenuOffset;
-      host.RenderAshley(1);
+      host.RenderAshley(Framework::AshleyRenderMode::kInit);
       static_cast<void>(host.Navigation(state.resume_without_cursor_reset + 1));
       state.resume_without_cursor_reset = 0;
       menu_step = kScreenWaitText;
@@ -1282,7 +1282,7 @@ std::int32_t UpdateInventoryScreen(InventoryScreenState& state,
     }
     case kScreenWaitContainer:
       if (host.RowsReady()) {
-        host.RenderAshley(2);
+        host.RenderAshley(Framework::AshleyRenderMode::kRestore);
         menu_step = kScreenContainerReturn;
         runtime.control.return_state = runtime.control.current_menu;
         runtime.control.current_menu = kContainerMenu;
@@ -1303,7 +1303,7 @@ std::int32_t UpdateInventoryScreen(InventoryScreenState& state,
       } else if (host.RowsReady()) {
         SetPanels(runtime, 0);
         ResetAnimations(runtime);
-        host.RenderAshley(1);
+        host.RenderAshley(Framework::AshleyRenderMode::kInit);
         static_cast<void>(host.Navigation(1));
         menu_step = kScreenInventory;
       }

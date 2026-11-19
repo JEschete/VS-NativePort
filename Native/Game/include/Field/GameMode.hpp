@@ -56,7 +56,7 @@ struct ColorTransform {
 inline constexpr ColorTransform kMenuRoomPaletteTransform{13, 4, -4, -4, 0};
 inline constexpr ColorTransform kResumeSceneColorTransform{8, 4, 0, 0, 0};
 
-// What the battle action menu chose (Menu_Framework_ActionSelection).
+// What the battle action menu chose (Menu::Framework::ActionSelection).
 enum class ActionMenuChoice : std::int16_t {
   kBreakArt = 6,
   kSpell = 7,

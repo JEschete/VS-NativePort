@@ -452,7 +452,7 @@ bool AdvanceArtListAnimation(Context& context) {
     }
     state.animation_index = indices[state.animation_index];
   }
-  const std::span<const std::int8_t> steps = host.RowAnimationSteps();
+  const std::span<const std::uint8_t> steps = host.RowAnimationSteps();
   if (state.animation_index >= steps.size()) {
     host.Refuse("Break Arts row-animation index exceeds its lookup table");
     return false;

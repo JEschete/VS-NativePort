@@ -55,6 +55,10 @@ struct TeleportDestination {
 // in 9..13, tile z in 14..18 and the MP cost from bit 19.
 [[nodiscard]] std::int32_t PackTeleportDestination(
     const TeleportDestination& destination) noexcept;
+// The word read back as the battle flow reads it (D_800F18EC_t's bitfields);
+// the save point is not packed.
+[[nodiscard]] TeleportDestination UnpackTeleportDestination(
+    std::int32_t packed) noexcept;
 
 // A teleport row: halfword offsets into the teleportation strings and the
 // framework row type (bit 0 disabled, bit 2 the current save point).

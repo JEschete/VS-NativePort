@@ -33,7 +33,7 @@
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
@@ -146,7 +146,7 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
       static_cast<std::uint8_t>(VS::Input::settings.information);
   runtime.hud_hidden = static_cast<std::uint8_t>(Battle_hudHidden);
   runtime.hud_slide_offset = Battle_hudSlideOffset;
-  runtime.result_kind = VS::Menu::Framework::actionSelection.selectionKind;
+  runtime.result_kind = VS::Menu::Framework::actionSelection.selection_kind;
 }
 void WriteRuntime(const LootTerminalRuntime& runtime) {
   Menu_Loot_lootListCount = runtime.cursor.count;
@@ -178,7 +178,7 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
       static_cast<char>(runtime.information_shown);
   Battle_hudHidden = static_cast<char>(runtime.hud_hidden);
   Battle_hudSlideOffset = runtime.hud_slide_offset;
-  VS::Menu::Framework::actionSelection.selectionKind = runtime.result_kind;
+  VS::Menu::Framework::actionSelection.selection_kind = runtime.result_kind;
 }
 void InvalidateWorkspace() {
   if (g_workspace) {
@@ -331,9 +331,10 @@ class LiveTerminalHost final : public LootTerminalHost {
   std::span<const std::uint8_t> Text(LootTerminalText text,
                                      std::int32_t index) override {
     if (text == LootTerminalText::kItemsTitle) {
-      return EntryText({reinterpret_cast<const std::uint8_t*>(Menu_menuStrings),
-                        sizeof(Menu_menuStrings)},
-                       Text_Battle_menuStrings_Index_items);
+      return EntryText(
+          {reinterpret_cast<const std::uint8_t*>(VS::Menu::menuStrings),
+           sizeof(VS::Menu::menuStrings)},
+          Text_Battle_menuStrings_Index_items);
     }
     const auto menu = Inventory::LiveLootInventoryText();
     switch (text) {
@@ -471,8 +472,8 @@ class LiveTerminalHost final : public LootTerminalHost {
   void SetHudHidden(bool hidden) override {
     Call(Battle::SetLiveHudHidden, hidden ? 1 : 0);
   }
-  void RenderAshley(std::int32_t mode) override {
-    if (mode == 0) RequireFrame();
+  void RenderAshley(Framework::AshleyRenderMode mode) override {
+    if (mode == Framework::AshleyRenderMode::kRender) RequireFrame();
     Call([&] { Framework::RenderLiveAshley(mode); });
   }
   std::int32_t LootInventory(bool initialize) override {
@@ -480,9 +481,9 @@ class LiveTerminalHost final : public LootTerminalHost {
         [&] { return Inventory::UpdateLiveLootItemList(initialize ? 1 : 0); });
   }
   std::int32_t AnimationOffset(std::size_t step) override {
-    const auto curve = std::span(Menu_Framework_rowAnimationSteps);
+    const auto curve = std::span(VS::Menu::Framework::rowAnimationSteps);
     if (step >= curve.size()) Refuse("loot animation outside its curve");
-    return static_cast<std::uint8_t>(curve[step]);
+    return curve[step];
   }
   std::uint8_t Capacity(LootCategory category) override {
     const auto capacities = std::span(VS::Items::kCategoryCapacities);

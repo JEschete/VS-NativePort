@@ -2535,9 +2535,6 @@
     <ClCompile Include="src\Menu\Framework\ActorPreviewLive.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\AshleyPreview.h">
-      <Filter>src\Menu\Framework</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Framework\CategoryIcons.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
@@ -2589,13 +2586,10 @@
     <ClInclude Include="src\Menu\Framework\MenuMemory.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="src\Menu\Framework\MenuRows.h">
-      <Filter>src\Menu\Framework</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Framework\Menus.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\Menus.h">
+    <ClInclude Include="src\Menu\Framework\Menus.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="src\Menu\Framework\SortingKeysLive.hpp">
@@ -4436,9 +4430,6 @@
     </ClInclude>
     <ClInclude Include="include\Menu\FilesLive.hpp">
       <Filter>include\Menu</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Menu\Framework\ActionSelection.h">
-      <Filter>include\Menu\Framework</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\ActorPreview.hpp">
       <Filter>include\Menu\Framework</Filter>

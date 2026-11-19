@@ -27,7 +27,7 @@
 #include "Field/MapProgress.h"
 #include "Field/RoomRenderingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/GazetteCameraLive.hpp"
@@ -181,7 +181,7 @@ class TerminalFixture
     for (const auto owner : ControlOwners()) saved_.Keep(owner);
     ImportTable(Menu_Score_menuText);
     ImportTable(Menu_Score_rankText);
-    ImportTable(Menu_menuStrings);
+    ImportTable(VS::Menu::menuStrings);
     if (!content::DataStore::Open(R"(Native\data)")) {
       throw std::runtime_error("terminal fixture needs extracted data");
     }

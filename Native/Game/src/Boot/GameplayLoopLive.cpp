@@ -81,8 +81,8 @@
 #include "Items/ItemRecords.hpp"
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
@@ -326,7 +326,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   int SelectActionMenu() override {
     action_menu_ = VS::Menu::Framework::LiveActionSelectionState();
     Battle_actionSelection = action_menu_;
-    return action_menu_->menuStatus;
+    return action_menu_->menu_status;
   }
   void DispatchActionMenuResult() override {
     VS::Field::LiveDispatchBattleActionMenuResult(action_menu_);
@@ -549,7 +549,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   Actors_ActorLocationQuery ashley_placement_{};
   std::optional<VS::Field::RoomObjectTarget> facing_room_object_;
   std::optional<VS::Field::ChestTarget> facing_chest_;
-  Menu_Framework_ActionSelection* action_menu_ = nullptr;
+  VS::Menu::Framework::ActionSelection* action_menu_ = nullptr;
 };
 }  // namespace
 

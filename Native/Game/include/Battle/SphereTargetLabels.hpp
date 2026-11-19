@@ -69,8 +69,8 @@ struct SphereTargetLabel {
                          const SphereTargetLabel&) = default;
 };
 
-// The first entries of Menu_Framework_rowAnimationSteps: how far a label is
-// from its rest position on each of its final slide steps.
+// The first entries of VS::Menu::Framework::rowAnimationSteps: how far a label
+// is from its rest position on each of its final slide steps.
 using LabelSlideSteps = std::array<std::uint8_t, kTargetLabelSlideStepCount>;
 
 // One link segment: the line command and colour word and its two ends.

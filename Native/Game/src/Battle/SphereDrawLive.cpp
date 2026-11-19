@@ -32,7 +32,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
@@ -183,7 +183,7 @@ class LiveSphereDrawPort final : public SphereDrawPort {
   // D_800EC270 is read with lbu: the brightness bytes are unsigned.
   for (std::size_t frame = 0; frame < kSphereCursorBlinkFrames; ++frame) {
     tables.brightness[frame] = static_cast<std::uint8_t>(
-        Menu_Framework_cursorBrightnessAnimation[frame]);
+        VS::Menu::Framework::cursorBrightnessAnimation[frame]);
   }
   return tables;
 }

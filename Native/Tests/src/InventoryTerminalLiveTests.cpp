@@ -34,7 +34,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootScreen.h"
@@ -127,8 +127,8 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
       Menu_Inventory_statusCommandAnimationStep};
   ArrayRestore<u_short, std::size(Menu_Inventory_menuText)> saved_menu_text{
       Menu_Inventory_menuText};
-  ArrayRestore<u_short, std::size(Menu_menuStrings)> saved_titles{
-      Menu_menuStrings};
+  ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_titles{
+      VS::Menu::menuStrings};
   std::array<int, framework::kRowTypeCount> row_types{};
   std::remove_pointer_t<decltype(Battle_characterState)> actor{};
   std::remove_pointer_t<decltype(actor.stats)> stats{};
@@ -162,7 +162,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     Menu_Inventory_itemCategoryIconsAnimationStep = 0;
     Menu_Inventory_statusCommandAnimationStep = 0;
     for (auto text : {std::span<u_short>(Menu_Inventory_menuText),
-                      std::span<u_short>(Menu_menuStrings)}) {
+                      std::span<u_short>(VS::Menu::menuStrings)}) {
       std::ranges::fill(text, u_short{0xE7E7});
       std::fill_n(text.begin(), 32, u_short{32});
       text[32] = 0xE701;

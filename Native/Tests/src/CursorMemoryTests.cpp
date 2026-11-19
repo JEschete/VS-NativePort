@@ -35,10 +35,10 @@
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/MenuRows.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.h"
@@ -298,12 +298,12 @@ struct WorkshopGateFixture {
     Field_roomData.header.environmentLength = saved_environment_length;
   }
 
-  const Menu_Framework_ItemText* Open() {
+  const VS::Menu::Framework::ItemText* Open() {
     std::uint8_t state = 2;
     REQUIRE(setup::UpdateLiveSetup(state) == 0);
     REQUIRE(state == 3);
     REQUIRE(VS::Menu::Framework::subMenuRowCount == 6);
-    const auto* items = reinterpret_cast<const Menu_Framework_ItemText*>(
+    const auto* items = reinterpret_cast<const VS::Menu::Framework::ItemText*>(
         VS::Menu::Framework::itemsText);
     REQUIRE(items != nullptr);
     return items;
@@ -1016,7 +1016,7 @@ TEST_CASE("Setup actions obey original workshop and weapon-capacity gates",
     const bool disabled = (row == 0 && (workshop == 0 || weapon_count == 8)) ||
                           (row == 3 && weapon_count == 0) ||
                           ((row == 4 || row == 5) && workshop == 0);
-    CHECK((rows[row].menuRowFlags & 1) == disabled);
+    CHECK((rows[row].flags & 1) == disabled);
   }
 }
 
@@ -1033,11 +1033,11 @@ TEST_CASE("Equipment management obeys progression tarnish and action gates",
   REQUIRE(VS::Menu::Inventory::UpdateLiveItemList(0) == 0);
   REQUIRE(VS::Menu::Framework::subMenuRowCount == 2);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
-  const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
+  const auto* rows = reinterpret_cast<const VS::Menu::Framework::ItemText*>(
       VS::Menu::Framework::itemsText);
   const bool disabled = intro < 3 || tarnished || (restrictions & 7) != 0;
   for (int row = 0; row < 2; ++row) {
-    CHECK(((rows[row].menuRowFlags & 1) != 0) == disabled);
+    CHECK(((rows[row].flags & 1) != 0) == disabled);
   }
 }
 
@@ -1100,11 +1100,11 @@ TEST_CASE("Options retain the real Puzzle Mode availability gate",
   CHECK(state == 5);
   CHECK(VS::Input::settings.cursor_memory == 0);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
-  const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
+  const auto* rows = reinterpret_cast<const VS::Menu::Framework::ItemText*>(
       VS::Menu::Framework::itemsText);
   for (int row = 0; row < 9; ++row) {
     CAPTURE(disabled, row);
-    CHECK(rows[row].menuRowFlags ==
+    CHECK(rows[row].flags ==
           (row == 6 && disabled ? Menu_Framework_RowTypeFlag_Disabled : 0));
   }
 }
@@ -1131,14 +1131,14 @@ TEST_CASE(
   REQUIRE(VS::Menu::Framework::subMenuRowCount == (shortcut ? 4 : 5));
   REQUIRE(VS::Menu::Framework::LiveHighlightedRow() == (cursor_memory ? 3 : 0));
   CHECK(VS::Input::settings.cursor_memory == cursor_memory);
-  const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
+  const auto* rows = reinterpret_cast<const VS::Menu::Framework::ItemText*>(
       VS::Menu::Framework::itemsText);
   for (int index = 0; index < 4; ++index) {
-    CHECK(rows[index].menuRowFlags ==
+    CHECK(rows[index].flags ==
           (equipped ? 0 : Menu_Framework_RowTypeFlag_Disabled));
   }
   if (!shortcut) {
-    CHECK(rows[4].menuRowFlags == 2);
+    CHECK(rows[4].flags == 2);
     CHECK(fixture.SelectRow(4) == 0xFFFF);
   }
 }

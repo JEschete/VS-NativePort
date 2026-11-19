@@ -375,7 +375,9 @@ class World final : public Inventory::InventoryTerminalHost {
     Record(Call::kActionState, enabled);
   }
   void SetHudHidden(bool hidden) override { Record(Call::kHud, hidden); }
-  void RenderAshley(std::int32_t mode) override { Record(Call::kAshley, mode); }
+  void RenderAshley(Framework::AshleyRenderMode mode) override {
+    Record(Call::kAshley, mode);
+  }
   std::int32_t Navigation(std::int32_t initialize) override {
     Record(Call::kNavigation, initialize);
     if (nested_navigation_changes_panels) {

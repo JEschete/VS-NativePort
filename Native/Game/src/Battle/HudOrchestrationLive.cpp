@@ -19,7 +19,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Frame.hpp"
@@ -141,14 +141,14 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
     std::span(Battle_statusIconCarousel.bytes)[slot] = icon;
   }
   std::optional<std::uint8_t> ClosingShortcutStep(std::uint8_t step) override {
-    const auto steps = std::span(Menu_Framework_animationIndices)
+    const auto steps = std::span(VS::Menu::Framework::animationIndices)
                            .first<kShortcutClosingSteps>();
     if (step >= steps.size()) return std::nullopt;
     return static_cast<std::uint8_t>(steps[step]);
   }
   std::optional<std::uint8_t> ShortcutDisplacement(std::uint8_t step) override {
-    const auto steps =
-        std::span(Menu_Framework_rowAnimationSteps).first<kShortcutRowSteps>();
+    const auto steps = std::span(VS::Menu::Framework::rowAnimationSteps)
+                           .first<kShortcutRowSteps>();
     if (step >= steps.size()) return std::nullopt;
     return static_cast<std::uint8_t>(steps[step]);
   }

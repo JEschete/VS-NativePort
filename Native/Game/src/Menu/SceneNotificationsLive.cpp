@@ -14,7 +14,7 @@
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
@@ -111,10 +111,11 @@ class LiveHost final : public SceneNotificationHost {
   std::optional<SceneNotificationText> ActionText(
       std::uint8_t type) const override {
     if (type >= kActionTextCount) return std::nullopt;
-    return TextAt(Menu_menuStrings, Menu_menuStrings[kActionTextStart + type]);
+    return TextAt(VS::Menu::menuStrings,
+                  VS::Menu::menuStrings[kActionTextStart + type]);
   }
   std::optional<SceneNotificationText> SpellMasteredText() const override {
-    return TextAt(Menu_menuStrings,
+    return TextAt(VS::Menu::menuStrings,
                   Text_Battle_menuStrings_Offset_spellMastered);
   }
   bool CanFormat(SceneNotificationText source, SceneNotificationText subject,

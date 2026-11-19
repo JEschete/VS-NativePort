@@ -12,7 +12,7 @@
 #include "Battle/SphereTargetLabelsLive.hpp"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 
 namespace {
 namespace battle = VS::Battle;
@@ -191,12 +191,13 @@ struct SpherePointerRestorer {
   SpherePointerRestorer& operator=(SpherePointerRestorer&&) = delete;
   ~SpherePointerRestorer() {
     Battle_targetSphere = saved;
-    std::ranges::copy(steps, std::begin(Menu_Framework_rowAnimationSteps));
+    std::ranges::copy(steps,
+                      std::begin(VS::Menu::Framework::rowAnimationSteps));
   }
 
   Battle_TargetSphereSetupView* saved = Battle_targetSphere;
-  std::array<char, std::size(Menu_Framework_rowAnimationSteps)> steps =
-      std::to_array(Menu_Framework_rowAnimationSteps);
+  std::array<std::uint8_t, std::size(VS::Menu::Framework::rowAnimationSteps)>
+      steps = std::to_array(VS::Menu::Framework::rowAnimationSteps);
 };
 }  // namespace
 
@@ -592,7 +593,7 @@ TEST_CASE("Live target label update reads unsigned slide steps",
 
   // Steps above 0x7F are unsigned; read signed, this label would land on
   // screen instead of moving past it.
-  std::fill_n(std::begin(Menu_Framework_rowAnimationSteps),
+  std::fill_n(std::begin(VS::Menu::Framework::rowAnimationSteps),
               battle::kTargetLabelSlideStepCount, static_cast<char>(0xC8));
   sphere.labels[0].state = battle::kTargetLabelSlidingLeft;
   sphere.labels[0].screenX = 32752;

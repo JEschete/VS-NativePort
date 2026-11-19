@@ -215,7 +215,9 @@ class World final : public loot::LootTerminalHost {
     Record(Call::kHud, hidden);
     runtime.hud_hidden = hidden ? 1 : 0;
   }
-  void RenderAshley(std::int32_t mode) override { Record(Call::kAshley, mode); }
+  void RenderAshley(Framework::AshleyRenderMode mode) override {
+    Record(Call::kAshley, mode);
+  }
   std::int32_t LootInventory(bool initialize) override {
     Record(Call::kInventory, initialize);
     if (change_inventory_ui) {

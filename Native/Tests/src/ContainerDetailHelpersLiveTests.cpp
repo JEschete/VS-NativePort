@@ -17,7 +17,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 
 namespace {
 namespace detail = VS::Menu::container;
@@ -119,7 +119,7 @@ void CheckTabGlyphs(std::span<const DrawnSprite> sprites) {
                                 sprite.draw_mode == samples::kVariableDrawMode;
                        });
   std::vector<DrawnSprite> expected;
-  int x = -Menu_Framework_rowAnimationSteps[1] + samples::kTabX;
+  int x = -VS::Menu::Framework::rowAnimationSteps[1] + samples::kTabX;
   for (std::size_t index = 0; index < samples::kTabGlyphs.size(); ++index) {
     const auto glyph = samples::kTabGlyphs[index];
     const auto clut = samples::kClutBase |
@@ -316,8 +316,9 @@ TEST_CASE(
     "F02947 real stat-page glyphs and ordering match original helper calls",
     "[container-detail-helpers-live][container-detail-helpers-font][F02947]") {
   LiveFixture fixture;
-  ValueRestore<char> saved_slide_step{Menu_Framework_rowAnimationSteps[1]};
-  Menu_Framework_rowAnimationSteps[1] = samples::kFinalSlideStep;
+  ValueRestore<std::uint8_t> saved_slide_step{
+      VS::Menu::Framework::rowAnimationSteps[1]};
+  VS::Menu::Framework::rowAnimationSteps[1] = samples::kFinalSlideStep;
   const auto font_before = VS::Render::LiveFontStyle();
   detail::InitializeLiveDetailsLayout(kSelected, samples::kClassAffinityPages);
   DrawClassPage(fixture);

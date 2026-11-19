@@ -20,7 +20,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Magic.h"
 #include "Menu/MagicCostsLive.hpp"
 #include "Menu/MagicMenusLive.hpp"
@@ -85,8 +85,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
       Menu_Magic_magicStrings};
   ArrayRestore<u_short, std::size(Menu_Magic_teleportationStrings)>
       saved_teleport{Menu_Magic_teleportationStrings};
-  ArrayRestore<u_short, std::size(Menu_menuStrings)> saved_titles{
-      Menu_menuStrings};
+  ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_titles{
+      VS::Menu::menuStrings};
   ArrayRestore<char, std::size(Menu_Magic_warlockSpellIds)> saved_warlock{
       Menu_Magic_warlockSpellIds};
   ArrayRestore<char, std::size(Menu_Magic_shamanSpellIds)> saved_shaman{
@@ -95,8 +95,9 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
       Menu_Magic_sorcererSpellIds};
   ArrayRestore<char, std::size(Menu_Magic_enchanterSpellIds)> saved_enchanter{
       Menu_Magic_enchanterSpellIds};
-  ArrayRestore<char, std::size(Menu_Framework_cursorBrightnessAnimation)>
-      saved_brightness{Menu_Framework_cursorBrightnessAnimation};
+  ArrayRestore<std::uint8_t,
+               std::size(VS::Menu::Framework::cursorBrightnessAnimation)>
+      saved_brightness{VS::Menu::Framework::cursorBrightnessAnimation};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
 
@@ -133,9 +134,9 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
                   static_cast<u_short>(kTextOffset));
       text[kTextOffset] = 0xE701;
     }
-    std::ranges::fill(Menu_menuStrings, u_short{0});
-    std::fill_n(Menu_menuStrings, 16, u_short{64});
-    Menu_menuStrings[64] = 0xE701;
+    std::ranges::fill(VS::Menu::menuStrings, std::uint16_t{0});
+    std::fill_n(VS::Menu::menuStrings, 16, std::uint16_t{64});
+    VS::Menu::menuStrings[64] = 0xE701;
   }
   void InitializeSpells() {
     const std::array<std::span<char>, 4> schools{
@@ -329,8 +330,9 @@ TEST_CASE("MENU0 reload and cold entry restart visible rank blinking",
   MagicLiveFixture fixture;
   const bool cold = GENERATE(false, true);
   for (std::size_t step = 0;
-       step < std::size(Menu_Framework_cursorBrightnessAnimation); ++step) {
-    Menu_Framework_cursorBrightnessAnimation[step] =
+       step < std::size(VS::Menu::Framework::cursorBrightnessAnimation);
+       ++step) {
+    VS::Menu::Framework::cursorBrightnessAnimation[step] =
         static_cast<char>(step + 1);
   }
   fixture.EnterRanks();

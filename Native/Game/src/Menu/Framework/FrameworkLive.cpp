@@ -60,7 +60,6 @@
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/FilesLive.hpp"
-#include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
@@ -69,8 +68,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/MenuMemory.h"
-#include "Menu/Framework/MenuRows.h"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.h"
@@ -156,7 +154,7 @@ char VS::Menu::Framework::unlockedBreakArt = 0;
 // decomp: vs_battle_stringBuf (BATTLE/BATTLE.PRG 5BF94.c)
 char* VS::Menu::Framework::stringBuf = nullptr;
 // decomp: D_800F4E98 (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_ActionSelection VS::Menu::Framework::actionSelection = {};
+VS::Menu::Framework::ActionSelection VS::Menu::Framework::actionSelection = {};
 // decomp: D_800F4EA0 (BATTLE/BATTLE.PRG 5BF94.c)
 int VS::Menu::Framework::actionRestrictions = 0;
 // decomp: D_800F4EE8 (BATTLE/BATTLE.PRG 5BF94.c)
@@ -216,11 +214,6 @@ static_assert(offsetof(MenuRow, text) ==
 static_assert(offsetof(MenuRow, sub_text) ==
               offsetof(Menu_Framework_MenuRow, subText));
 static_assert(std::is_standard_layout_v<ItemText>);
-static_assert(sizeof(ItemText) == sizeof(Menu_Framework_ItemText));
-static_assert(offsetof(ItemText, flags) ==
-              offsetof(Menu_Framework_ItemText, menuRowFlags));
-static_assert(offsetof(ItemText, description) ==
-              offsetof(Menu_Framework_ItemText, description));
 static_assert(sizeof(TextHeader) == sizeof(Menu_Framework_TextHeader));
 static_assert(sizeof(Menu_Framework_MenuMemory) == kMenuMemoryBytes);
 static_assert(sizeof(Content_battleMainMenuHelpText) ==
@@ -333,10 +326,7 @@ void LoadControl() {
                      .return_state = Byte(menuState.returnState),
                      .execute_ability_type = Byte(menuState.executeAbilityType),
                      .loading = Byte(menuState.loading)};
-  g_state.action_selection = {
-      .menu_status = actionSelection.menuStatus,
-      .selection_kind = actionSelection.selectionKind,
-      .execute_ability = actionSelection.executeAbility.word};
+  g_state.action_selection = actionSelection;
   g_state.shortcut_invoked = Byte(shortcutInvoked);
   g_state.opened_without_main_menu = Byte(openedWithoutMainMenu);
   g_state.unlocked_break_art = Byte(unlockedBreakArt);
@@ -380,10 +370,7 @@ void StoreControl() {
   menuState.returnState = Char(g_state.control.return_state);
   menuState.executeAbilityType = Char(g_state.control.execute_ability_type);
   menuState.loading = Char(g_state.control.loading);
-  actionSelection.menuStatus = g_state.action_selection.menu_status;
-  actionSelection.selectionKind = g_state.action_selection.selection_kind;
-  actionSelection.executeAbility.word =
-      g_state.action_selection.execute_ability;
+  actionSelection = g_state.action_selection;
   shortcutInvoked = Char(g_state.shortcut_invoked);
   openedWithoutMainMenu = Char(g_state.opened_without_main_menu);
   unlockedBreakArt = Char(g_state.unlocked_break_art);
@@ -515,20 +502,23 @@ template <typename T>
 [[nodiscard]] Tables LiveTables() {
   static std::array<std::uint32_t, kGradientWindowWords> gradient{};
   gradient[0] = Content_battleMainMenuHelpText[kHelpTextWords - 1];
-  gradient[kGradientWindowTop] = Menu_Framework_gradientTopColors[0];
-  gradient[kGradientWindowTop + 1] = Menu_Framework_gradientTopColors[1];
-  gradient[kGradientWindowBottom] = Menu_Framework_gradientBottomColors[0];
-  gradient[kGradientWindowBottom + 1] = Menu_Framework_gradientBottomColors[1];
+  gradient[kGradientWindowTop] = VS::Menu::Framework::gradientTopColors[0];
+  gradient[kGradientWindowTop + 1] = VS::Menu::Framework::gradientTopColors[1];
+  gradient[kGradientWindowBottom] =
+      VS::Menu::Framework::gradientBottomColors[0];
+  gradient[kGradientWindowBottom + 1] =
+      VS::Menu::Framework::gradientBottomColors[1];
   std::memcpy(
-      &gradient[kGradientRowStepWord], Menu_Framework_rowAnimationSteps,
+      &gradient[kGradientRowStepWord], VS::Menu::Framework::rowAnimationSteps,
       (kGradientWindowWords - kGradientRowStepWord) * sizeof(std::uint32_t));
   return {
       .gradient_colors = gradient,
-      .row_animation_steps = BytesOf(Menu_Framework_rowAnimationSteps),
+      .row_animation_steps = BytesOf(VS::Menu::Framework::rowAnimationSteps),
       .ability_group_action_ranges =
-          BytesOf(Menu_Framework_abilityGroupActionRanges),
-      .cursor_brightness = BytesOf(Menu_Framework_cursorBrightnessAnimation),
-      .menu_strings = BytesOf(Menu_menuStrings),
+          BytesOf(VS::Menu::Framework::abilityGroupActionRanges),
+      .cursor_brightness =
+          BytesOf(VS::Menu::Framework::cursorBrightnessAnimation),
+      .menu_strings = BytesOf(VS::Menu::menuStrings),
       .glyph_widths = VS::Render::LiveVariableFontGlyphWidths(),
       .main_menu_help_text = BytesOf(Content_battleMainMenuHelpText),
   };
@@ -1396,7 +1386,7 @@ void OpenLiveChallengeMenu() {
   OpenChallengeMenu(call.Ctx());
 }
 
-Menu_Framework_ActionSelection* LiveActionSelectionState() {
+ActionSelection* LiveActionSelectionState() {
   {
     LiveCall call;
     static_cast<void>(ActionSelectionState(call.Ctx()));
@@ -1711,7 +1701,7 @@ void UpdateLiveMainMenu(int packed_menu_state) {
 }
 
 // The MENU*.PRG copies.
-void RenderLiveAshley(int mode) {
+void RenderLiveAshley(AshleyRenderMode mode) {
   LiveCall call;
   RenderAshley(call.Ctx(), mode);
 }

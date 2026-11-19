@@ -21,7 +21,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Score/GazetteTimes.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/Records.h"
@@ -66,10 +66,10 @@ inline auto TableOwners() {
                     BytesOf(VS::Render::compactGlyphWidths),
                     BytesOf(VS::Render::compactGlyphIndices),
                     BytesOf(VS::Render::variableFontGlyphWidths),
-                    BytesOf(Menu_Framework_gradientTopColors),
-                    BytesOf(Menu_Framework_gradientBottomColors),
-                    BytesOf(Menu_Framework_rowAnimationSteps),
-                    BytesOf(Menu_Framework_cursorBrightnessAnimation)};
+                    BytesOf(VS::Menu::Framework::gradientTopColors),
+                    BytesOf(VS::Menu::Framework::gradientBottomColors),
+                    BytesOf(VS::Menu::Framework::rowAnimationSteps),
+                    BytesOf(VS::Menu::Framework::cursorBrightnessAnimation)};
 }
 
 inline auto MutableOwners() {

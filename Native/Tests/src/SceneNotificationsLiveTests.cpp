@@ -20,7 +20,7 @@
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
@@ -55,8 +55,8 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
       Battle_actionDefinitions[kAction]};
   ArrayRestore<u_short, std::size(Battle_doorStrings)> saved_door{
       Battle_doorStrings};
-  ArrayRestore<u_short, std::size(Menu_menuStrings)> saved_menu{
-      Menu_menuStrings};
+  ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_menu{
+      VS::Menu::menuStrings};
   ArrayRestore<char, std::size(Menu_kNotificationItemNames[0])> saved_item{
       Menu_kNotificationItemNames[0]};
   text_box_tests::LiveUpdateRestore saved_update;
@@ -68,12 +68,12 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     Battle_stringContext = {};
     std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
     std::ranges::fill(Battle_doorStrings, u_short{0});
-    std::ranges::fill(Menu_menuStrings, u_short{0});
+    std::ranges::fill(VS::Menu::menuStrings, std::uint16_t{0});
     Battle_doorStrings[1] = kNotificationText;
     SetTemplate(Battle_doorStrings, kNotificationText);
-    Menu_menuStrings[kActionTextIndex] = kActionText;
-    SetTemplate(Menu_menuStrings, kActionText);
-    SetTemplate(Menu_menuStrings, kSpellText);
+    VS::Menu::menuStrings[kActionTextIndex] = kActionText;
+    SetTemplate(VS::Menu::menuStrings, kActionText);
+    SetTemplate(VS::Menu::menuStrings, kSpellText);
     auto& action = Battle_actionDefinitions[kAction];
     action = {};
     action.type = kActionType;

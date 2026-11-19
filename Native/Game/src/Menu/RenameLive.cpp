@@ -23,7 +23,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Rename.hpp"
 #include "Menu/RenameLiveState.hpp"
@@ -132,9 +132,7 @@ class LiveHost final : public Host {
   void FlyOutRowRight(int row) override { Framework::FlyOutLiveRowRight(row); }
   void FlyOutRowLeft(int row) override { Framework::FlyOutLiveRowLeft(row); }
   std::span<const std::uint8_t> RowAnimationSteps() override {
-    return {
-        reinterpret_cast<const std::uint8_t*>(Menu_Framework_rowAnimationSteps),
-        sizeof Menu_Framework_rowAnimationSteps};
+    return VS::Menu::Framework::rowAnimationSteps;
   }
 
   void DismissInformationBox() override {

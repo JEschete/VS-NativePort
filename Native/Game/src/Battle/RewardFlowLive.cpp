@@ -23,7 +23,7 @@
 #include "Field/PlatformPlacementLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Items/LootLiveState.hpp"
-#include "Menu/Framework/ActionSelection.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
@@ -136,7 +136,7 @@ class LiveWorld final : public RewardDispatchWorld {
   std::int16_t MenuStatus() override {
     const auto* owner = Menu::Framework::LiveActionSelectionState();
     Require(owner != nullptr, "missing menu selection state");
-    return owner->menuStatus;
+    return owner->menu_status;
   }
   void ReleaseMenuRows() override { Menu::Framework::ReleaseLiveMenuRows(); }
   std::uint32_t EffectsBusyFlags() override {

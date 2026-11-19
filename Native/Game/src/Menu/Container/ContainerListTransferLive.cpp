@@ -37,7 +37,7 @@
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
@@ -286,10 +286,10 @@ class LiveTransferWorld final : public TransferWorld {
     return VS::Menu::Framework::itemHelp[index];
   }
   std::uint8_t RowAnimationStep(std::size_t index) override {
-    if (index >= std::size(Menu_Framework_rowAnimationSteps)) {
+    if (index >= std::size(VS::Menu::Framework::rowAnimationSteps)) {
       Refuse("row animation step outside its table");
     }
-    return static_cast<std::uint8_t>(Menu_Framework_rowAnimationSteps[index]);
+    return VS::Menu::Framework::rowAnimationSteps[index];
   }
   std::uint8_t InventoryCapacity(Category category) override {
     const auto index = static_cast<std::size_t>(category);

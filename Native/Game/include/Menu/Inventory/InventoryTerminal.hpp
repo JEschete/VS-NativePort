@@ -254,7 +254,7 @@ class InventoryTerminalHost {
   virtual void PopulateBaseStats(std::int32_t actor) = 0;
   virtual void SetFieldRenderingEnabled(bool enabled) = 0;
   virtual void SetHudHidden(bool hidden) = 0;
-  virtual void RenderAshley(std::int32_t mode) = 0;
+  virtual void RenderAshley(Framework::AshleyRenderMode mode) = 0;
   [[nodiscard]] virtual std::int32_t Navigation(std::int32_t initialize) = 0;
   [[nodiscard]] virtual std::int32_t EquipmentMenu(bool initialize) = 0;
   virtual void SetBackgroundPriority(std::int32_t offset,

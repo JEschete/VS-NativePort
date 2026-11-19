@@ -290,6 +290,26 @@ TEST_CASE("Magic save point words decode and pack the legacy destination",
                                         .tile_x = 0x1F,
                                         .tile_z = 0x1F,
                                         .mp_cost = 0xFFFF}) == -1);
+
+  // The battle flow reads the word back unsigned: a cost reaching bit 31
+  // must not come back negative.
+  CHECK(magic::UnpackTeleportDestination(
+            magic::PackTeleportDestination({.save_point = 4,
+                                            .location = 0x1A5,
+                                            .tile_x = 0x11,
+                                            .tile_z = 0x1D,
+                                            .mp_cost = 0x1ABC})) ==
+        magic::TeleportDestination{.save_point = 0,
+                                   .location = 0x1A5,
+                                   .tile_x = 0x11,
+                                   .tile_z = 0x1D,
+                                   .mp_cost = 0x1ABC});
+  CHECK(magic::UnpackTeleportDestination(-1) ==
+        magic::TeleportDestination{.save_point = 0,
+                                   .location = 0x1FF,
+                                   .tile_x = 0x1F,
+                                   .tile_z = 0x1F,
+                                   .mp_cost = 0x1FFF});
 }
 
 TEST_CASE("Magic UpdateTeleportMenu init flies rows out and captures MP",

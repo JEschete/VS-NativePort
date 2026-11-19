@@ -722,7 +722,7 @@ TEST_CASE(
     append(live::PreviewOwners());
     append(std::array{live::BytesOf(Menu_Score_menuText),
                       live::BytesOf(Menu_Score_rankText),
-                      live::BytesOf(Menu_menuStrings),
+                      live::BytesOf(VS::Menu::menuStrings),
                       live::BytesOf(Actors_textureSlotOrigins),
                       live::BytesOf(Actors_textureSlotRowOffsets),
                       live::BytesOf(Actors_sheathedWeaponAnimationBases),

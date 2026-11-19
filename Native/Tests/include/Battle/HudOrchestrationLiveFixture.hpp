@@ -17,7 +17,7 @@
 #include "Battle/HudRenderingLiveFixture.hpp"
 #include "Battle/HudShortcutLiveFixture.hpp"
 #include "Content/ModuleData.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Text/CompactFont.hpp"
@@ -84,8 +84,8 @@ class ProductionTables {
   SavedArray<VS::Render::compactGlyphLeftTrim> trims_;
   SavedArray<VS::Render::compactGlyphWidths> widths_;
   SavedArray<VS::Render::compactGlyphIndices> indices_;
-  SavedArray<Menu_Framework_animationIndices> animation_;
-  SavedArray<Menu_Framework_rowAnimationSteps> steps_;
+  SavedArray<VS::Menu::Framework::animationIndices> animation_;
+  SavedArray<VS::Menu::Framework::rowAnimationSteps> steps_;
   SavedArray<Battle_secondShortcutMarkerPositions> ability_markers_;
   SavedArray<Battle_secondShortcutIconPositions> ability_icons_;
   SavedArray<Battle_secondShortcutIconSizes> ability_sizes_;

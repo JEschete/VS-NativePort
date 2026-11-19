@@ -43,7 +43,7 @@ inline constexpr std::uint32_t kClutBias = 0x34;
 inline constexpr std::uint32_t kClutMask = 0x3F;
 inline constexpr int kTabX = 0x22;
 inline constexpr int kTabY = 0x30;
-inline constexpr char kFinalSlideStep = 9;
+inline constexpr std::uint8_t kFinalSlideStep = 9;
 inline constexpr std::size_t kCompleteClassPageSprites = 59;
 inline constexpr auto kTabGlyphs = [] {
   constexpr std::array<std::uint8_t, 19> kGlyphs{12,  21, 10, 28, 28, 161, 10,

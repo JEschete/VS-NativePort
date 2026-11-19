@@ -29,7 +29,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/EquipmentStats.hpp"
 #include "Render/GameFontLive.hpp"
@@ -184,9 +184,7 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
   Buttons Input() override { return LiveButtons(); }
 
   std::span<const std::uint8_t> RowAnimationSteps() override {
-    return {
-        reinterpret_cast<const std::uint8_t*>(Menu_Framework_rowAnimationSteps),
-        sizeof Menu_Framework_rowAnimationSteps};
+    return VS::Menu::Framework::rowAnimationSteps;
   }
 
   void PlaySound(MenuSound sound) override {

@@ -266,10 +266,10 @@
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
 #include "Menu/Container/ContainerPendingRowsLive.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
-#include "Menu/Framework/ActionSelection.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ActorPreview.h"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
@@ -505,9 +505,9 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EB9D0u, 4u, (void*)&Battle_statusIconCarousel, sizeof Battle_statusIconCarousel, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9D4u, 4u, (void*)&VS::Menu::Framework::menuBackgroundBuffer, sizeof VS::Menu::Framework::menuBackgroundBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9D8u, 4u, (void*)&Menu_sceneNotificationBuffer, sizeof Menu_sceneNotificationBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800EBBB8u, 8u, (void*)&Menu_Framework_gradientTopColors, sizeof Menu_Framework_gradientTopColors, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBBC0u, 8u, (void*)&Menu_Framework_gradientBottomColors, sizeof Menu_Framework_gradientBottomColors, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBBC8u, 20u, (void*)&Menu_Framework_rowAnimationSteps, sizeof Menu_Framework_rowAnimationSteps, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBBB8u, 8u, (void*)&VS::Menu::Framework::gradientTopColors, sizeof VS::Menu::Framework::gradientTopColors, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBBC0u, 8u, (void*)&VS::Menu::Framework::gradientBottomColors, sizeof VS::Menu::Framework::gradientBottomColors, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBBC8u, 20u, (void*)&VS::Menu::Framework::rowAnimationSteps, sizeof VS::Menu::Framework::rowAnimationSteps, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBBDCu, 16u, (void*)&Battle_hudGaugePositions, sizeof Battle_hudGaugePositions, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBBECu, 16u, (void*)&Battle_hudGaugeLabelPositions, sizeof Battle_hudGaugeLabelPositions, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBBFCu, 4u, (void*)&Battle_hudGaugeLabelWidths, sizeof Battle_hudGaugeLabelWidths, 1u, 1u},
@@ -517,7 +517,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EBC54u, 20u, (void*)&Battle_limbStatusColors, sizeof Battle_limbStatusColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBC68u, 16u, (void*)&Battle_upperStatusIconFlags, sizeof Battle_upperStatusIconFlags, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBC78u, 4u, (void*)&Battle_shortcutHudRequested, sizeof Battle_shortcutHudRequested, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBC7Cu, 12u, (void*)&Menu_Framework_animationIndices, sizeof Menu_Framework_animationIndices, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBC7Cu, 12u, (void*)&VS::Menu::Framework::animationIndices, sizeof VS::Menu::Framework::animationIndices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBC88u, 16u, (void*)&Battle_firstShortcutDigitOffsets, sizeof Battle_firstShortcutDigitOffsets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBC98u, 8u, (void*)&Battle_secondShortcutMarkerPositions, sizeof Battle_secondShortcutMarkerPositions, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBCA0u, 8u, (void*)&Battle_secondShortcutIconPositions, sizeof Battle_secondShortcutIconPositions, 1u, 1u},
@@ -532,7 +532,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EBD14u, 40u, (void*)&Battle_limbDisplaySpriteSizes, sizeof Battle_limbDisplaySpriteSizes, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBD3Cu, 40u, (void*)&Battle_limbDisplaySpriteTexCoords, sizeof Battle_limbDisplaySpriteTexCoords, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBD64u, 4u, (void*)&Battle_battleModeIndicatorWobble, sizeof Battle_battleModeIndicatorWobble, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EBD68u, 8u, (void*)&Menu_Framework_abilityGroupActionRanges, sizeof Menu_Framework_abilityGroupActionRanges, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EBD68u, 8u, (void*)&VS::Menu::Framework::abilityGroupActionRanges, sizeof VS::Menu::Framework::abilityGroupActionRanges, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBD70u, 20u, (void*)&Menu_Magic_warlockSpellIds, sizeof Menu_Magic_warlockSpellIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBD84u, 8u, (void*)&Menu_Magic_shamanSpellIds, sizeof Menu_Magic_shamanSpellIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBD8Cu, 20u, (void*)&Menu_Magic_sorcererSpellIds, sizeof Menu_Magic_sorcererSpellIds, 1u, 1u},
@@ -543,7 +543,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EBDCCu, 16u, (void*)&Battle_defenseAbilityActionIds, sizeof Battle_defenseAbilityActionIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC258u, 4u, (void*)&Battle_puzzleTimerTextPointer, sizeof Battle_puzzleTimerTextPointer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EC26Cu, 4u, (void*)&VS::Core::interfaceRandomState, sizeof VS::Core::interfaceRandomState, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC270u, 16u, (void*)&Menu_Framework_cursorBrightnessAnimation, sizeof Menu_Framework_cursorBrightnessAnimation, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC270u, 16u, (void*)&VS::Menu::Framework::cursorBrightnessAnimation, sizeof VS::Menu::Framework::cursorBrightnessAnimation, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC284u, 72u, (void*)&Menu_textBoxAnchors, sizeof Menu_textBoxAnchors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2CCu, 12u, (void*)&Menu_informationHeaderPositions, sizeof Menu_informationHeaderPositions, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2D8u, 12u, (void*)&Menu_kInformationHeaderSpriteWords, sizeof Menu_kInformationHeaderSpriteWords, 1u, 1u},

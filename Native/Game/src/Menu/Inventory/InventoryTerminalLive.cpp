@@ -36,7 +36,7 @@
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/Menus.h"
+#include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventorySortingLive.hpp"
@@ -178,9 +178,9 @@ void ReadRuntime(TerminalRuntime& runtime) {
   runtime.control.execute_ability_type =
       static_cast<std::uint8_t>(control.executeAbilityType);
   const auto& use = VS::Menu::Framework::actionSelection;
-  runtime.use = {use.menuStatus, use.selectionKind,
-                 static_cast<std::uint16_t>(use.executeAbility.halves[0]),
-                 static_cast<std::uint16_t>(use.executeAbility.halves[1]),
+  runtime.use = {use.menu_status, use.selection_kind,
+                 VS::Menu::Framework::ExecuteAbilityAction(use),
+                 VS::Menu::Framework::ExecuteAbilityItem(use),
                  VS::Items::miscItemInvoked};
   runtime.cursor_memory_enabled =
       static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
@@ -214,10 +214,10 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   control.executeAbilityType =
       static_cast<char>(runtime.control.execute_ability_type);
   auto& use = VS::Menu::Framework::actionSelection;
-  use.menuStatus = runtime.use.command;
-  use.selectionKind = runtime.use.kind;
-  use.executeAbility.halves[0] = static_cast<std::int16_t>(runtime.use.action);
-  use.executeAbility.halves[1] = static_cast<std::int16_t>(runtime.use.item);
+  use.menu_status = runtime.use.command;
+  use.selection_kind = runtime.use.kind;
+  VS::Menu::Framework::SetExecuteAbility(use, runtime.use.action,
+                                         runtime.use.item);
   VS::Items::miscItemInvoked = runtime.use.slot;
   VS::Input::settings.cursor_memory =
       static_cast<char>(runtime.cursor_memory_enabled);
@@ -350,7 +350,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
       case TerminalText::kSortHint:
         return OffsetText(help, Text_Menu_ITEMHELP_BIN_Offset_sortItemDesc);
       case TerminalText::kItemsTitle:
-        return EntryText(ByteView(Menu_menuStrings),
+        return EntryText(ByteView(VS::Menu::menuStrings),
                          Text_Battle_menuStrings_Index_items);
       case TerminalText::kMiscTitle:
         return ByteView(kMiscTitle);
@@ -764,8 +764,8 @@ class LiveTerminalHost final : public InventoryTerminalHost,
   void SetHudHidden(bool hidden) override {
     Call([&] { Battle::SetLiveHudHidden(hidden ? 1 : 0); });
   }
-  void RenderAshley(std::int32_t mode) override {
-    if (mode == 0) RequireFrame();
+  void RenderAshley(Framework::AshleyRenderMode mode) override {
+    if (mode == Framework::AshleyRenderMode::kRender) RequireFrame();
     Call([&] { Framework::RenderLiveAshley(mode); });
   }
   std::int32_t Navigation(std::int32_t initialize) override {
@@ -788,7 +788,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     return VS::Menu::Framework::backgroundFadeStep;
   }
   std::int32_t AnimationOffset(std::size_t step) override {
-    const auto offsets = std::span(Menu_Framework_rowAnimationSteps);
+    const auto offsets = std::span(VS::Menu::Framework::rowAnimationSteps);
     if (step >= offsets.size()) Refuse("panel animation outside its curve");
     return static_cast<std::uint8_t>(offsets[step]);
   }
