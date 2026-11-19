@@ -6,7 +6,7 @@
 // (Framework.hpp); the menu table, the string buffer, the row types and the
 // item lists stay where the workspace allocation put them.
 
-#include "Items/Loot.h"
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/ActionSelection.h"
@@ -32,9 +32,9 @@ extern signed char loadedSubMenu;
 // the workspace block, or null with no workspace.
 extern Menu_Framework_MenuRow* menuItems;
 // decomp: D_800EB9C4 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Items_LootListNode* lootLists;
+extern VS::Items::LootListNode* lootLists;
 // decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Items_BattleLoot* lootEntry;
+extern VS::Items::BattleLoot* lootEntry;
 // decomp: _menuBgUnpackedBuf (BATTLE/BATTLE.PRG 5BF94.c)
 extern u_int* menuBackgroundBuffer;
 // decomp: D_800F4CC0 (BATTLE/BATTLE.PRG 5BF94.c)

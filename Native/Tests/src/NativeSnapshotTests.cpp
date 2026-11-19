@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <bit>
 #include <cstdint>
 #include <format>
@@ -53,12 +52,11 @@ void SetEquipment(Save::Snapshot& state) {
   blade.index = 15;
   blade.strength = -128;
   blade.agility = 127;
-  // These plain-char bit fields have signed C++ views; the wire keeps source
-  // bits.
-  blade.damageType = -1;
-  blade.costType = -1;
-  blade.reserved10Bit5 = -3;
-  blade.opaque12 = 0xBEEF;
+  // Saturated damage/cost bits and nonzero reserved bits must round-trip.
+  blade.SetDamageType(3);
+  blade.SetCostType(7);
+  blade.SetReservedBits(5);
+  blade.recovery_delay = 0xBEEF;
   blade.range.SetAttackShape(std::numeric_limits<std::uint8_t>::max());
   blade.range.SetAttackShapeAngle(std::numeric_limits<std::uint8_t>::max());
   blade.classes[7] = -128;
@@ -68,17 +66,17 @@ void SetEquipment(Save::Snapshot& state) {
   weapon.blade = 15;
   weapon.grip = 15;
   weapon.gems[3] = 47;
-  std::fill_n(weapon.name, 24, static_cast<char>(0xE7));
+  weapon.name.fill(static_cast<char>(0xE7));
   weapon.name[0] = static_cast<char>(0xFA);
   weapon.name[1] = 0;
   weapon.name[23] = static_cast<char>(255);
   state.inventory.grips[15].id = 96;
   state.inventory.armor[15].id = 2;
-  state.inventory.armor[15].currentDp = 65535;
+  state.inventory.armor[15].current_dp = 65535;
   state.inventory.shields[7].base = state.inventory.armor[15];
   state.inventory.shields[7].gems[3] = 47;
   state.inventory.gems[47].id = 282;
-  state.inventory.gems[47].setItemIndex = 65535;
+  state.inventory.gems[47].set_item_index = 65535;
   state.inventory.misc[63].id = 323;
   state.inventory.misc[63].count = 99;
   state.inventory_order.misc[63] = 63;
@@ -184,13 +182,13 @@ void CheckRejected(const Json& document, std::string_view expected) {
 
 void CheckInventory(const Save::Snapshot& state) {
   CHECK(state.inventory.blades[15].strength == -128);
-  CHECK(state.inventory.blades[15].opaque12 == 0xBEEF);
-  CHECK((static_cast<unsigned>(state.inventory.blades[15].damageType) & 3u) ==
-        3);
-  CHECK((static_cast<unsigned>(state.inventory.blades[15].costType) & 7u) == 7);
+  CHECK(state.inventory.blades[15].recovery_delay == 0xBEEF);
+  CHECK(state.inventory.blades[15].DamageType() == 3);
+  CHECK(state.inventory.blades[15].CostType() == 7);
+  CHECK(state.inventory.blades[15].ReservedBits() == 5);
   CHECK(state.inventory.blades[15].range.AttackShape() == 7);
   CHECK(state.inventory.gems[47].id == 282);
-  CHECK(state.inventory.gems[47].setItemIndex == 65535);
+  CHECK(state.inventory.gems[47].set_item_index == 65535);
   CHECK(state.inventory_order.misc[63] == 63);
   CHECK(static_cast<unsigned char>(state.storage.misc[255].count) == 255);
 }

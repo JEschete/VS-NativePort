@@ -1,7 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Loot/LootScreen.h"
 
-#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Loot/LootInventory.h"
@@ -16,10 +15,10 @@ char Menu_Loot_controlsEnabled = 0;
 char Menu_Loot_gradientStateIndex = 0;
 
 // decomp: _inventory (_inventory@src/MENU/MENUB.PRG/260.c)
-Items_Inventory* Menu_Loot_inventory;
+VS::Items::InventoryContents* Menu_Loot_inventory;
 
 // decomp: _inventoryBackup (_inventoryBackup@src/MENU/MENUB.PRG/260.c)
-Items_Inventory* Menu_Loot_inventoryBackup;
+VS::Items::InventoryContents* Menu_Loot_inventoryBackup;
 
 // decomp: _inventoryCapacityFlyinTimer (_inventoryCapacityFlyinTimer@src/MENU/MENUB.PRG/260.c)
 u_char Menu_Loot_inventoryCapacityFlyinTimer;

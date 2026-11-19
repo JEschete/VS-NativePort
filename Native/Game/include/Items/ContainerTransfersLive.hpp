@@ -4,25 +4,22 @@
 
 #include "Items/ItemRecords.hpp"
 
-struct Items_Container;
-struct Items_ContainerData;
-
 namespace VS::Items {
 // The original offset resolver, bounded to its actual array subobject.
 [[nodiscard]] std::span<std::uint16_t> LiveContainerCategoryOrder(
-    ItemCategory category, Items_Container* container);
+    ItemCategory category, VS::Items::Container* container);
 void PreviewLiveTransferredMisc();
 void RefreshLiveMiscTransferCount();
 [[nodiscard]] int CopyLiveContainerItem(int category_flags,
-                                        Items_ContainerData* target,
+                                        VS::Items::ContainerData* target,
                                         int source_slot,
-                                        Items_ContainerData* source);
+                                        VS::Items::ContainerData* source);
 void RebuildLiveContainerCategoryIndices(int category,
-                                         Items_Container* container);
+                                         VS::Items::Container* container);
 void SnapshotLiveGadgetBag();
 void CommitLiveGadgetBag();
 [[nodiscard]] int LiveContainerParentWeaponIndex(
-    int category, int index, Items_ContainerData* container);
+    int category, int index, VS::Items::ContainerData* container);
 [[nodiscard]] int LiveContainerParentShieldIndex(
-    int category, int index, Items_ContainerData* container);
+    int category, int index, VS::Items::ContainerData* container);
 }  // namespace VS::Items

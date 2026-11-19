@@ -1,19 +1,19 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Field/Gimmicks.h"
+
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Field/Doors.h"
-#include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
+#include "Items/ItemRecords.hpp"
+#include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 
 // decomp: D_800E856C (D_800E856C@BATTLE/BATTLE.PRG)

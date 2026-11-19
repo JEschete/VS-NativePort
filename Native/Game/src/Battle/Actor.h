@@ -12,7 +12,7 @@ struct Battle_ActorStats;
 struct Battle_ActorStatsFlags;
 struct Battle_LimbStats;
 
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 
 // decomp: vs_battle_limbStatus (src/BATTLE/BATTLE.PRG/5BF94.h:502)
@@ -137,8 +137,8 @@ struct Battle_ActorStats {
     /* 0x956 */ u_char isAnalyzed : 1;
     /* 0x956 */ u_char recoveryDelayBonus : 6;
     /* 0x957 */ u_char actorId;
-    /* 0x958 */ Items_MiscItemStack dropItem;
-    /* 0x95C */ Items_MiscItemStack secondDropItem;
+    /* 0x958 */ VS::Items::MiscItemStack dropItem;
+    /* 0x95C */ VS::Items::MiscItemStack secondDropItem;
     /* 0x960 */ Items_MiscItemDrop randomDropItem;
     /* 0x964 */
 };

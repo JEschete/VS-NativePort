@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-struct Items_ContainerData;
+#include "Items/ItemRecords.hpp"
 
 namespace VS::Game::Save {
 
@@ -19,7 +19,7 @@ int InitialTitleSelection();
 // the in-game (false) menu.
 void DrawFileOverlay(bool title);
 // The selected file's container storage; aborts without a selection.
-Items_ContainerData* ContainerData();
+VS::Items::ContainerData* ContainerData();
 void ReleaseContainer();
 // TITLE calls only while VS::Boot::isClearSavePending still identifies the
 // ending. Reset/return to title/shutdown release the owned staging copy.

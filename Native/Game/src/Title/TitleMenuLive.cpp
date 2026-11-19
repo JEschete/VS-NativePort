@@ -27,7 +27,7 @@
 #include "Field/Mpd.h"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
@@ -434,10 +434,7 @@ class LiveHost final : public Host {
     VS::State::savedEntryDoor.tileLocation.entryDirection = door.direction;
     VS::State::savedEntryDoor.entryElevation = door.elevation;
   }
-  void ClearInventoryIndices() override {
-    std::memset(&VS::Items::inventoryIndices, 0,
-                sizeof VS::Items::inventoryIndices);
-  }
+  void ClearInventoryIndices() override { VS::Items::inventoryIndices = {}; }
   void SetGameModes(const GameModes& modes) override {
     VS::State::stateFlags.difficulty = static_cast<char>(modes.difficulty);
     VS::State::stateFlags.puzzle_mode = static_cast<char>(modes.puzzle_mode);

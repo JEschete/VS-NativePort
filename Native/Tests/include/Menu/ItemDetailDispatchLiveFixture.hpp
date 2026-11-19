@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 
@@ -25,9 +25,9 @@ struct DispatchLiveFixture : equipment_detail_tests::LiveFixture {
         .material = 1};
     armor.classes[0] = -3;
     armor.affinities[0] = 4;
-    VS::Items::Live::Commit(VS::Items::inventory.armor[0], armor);
+    VS::Items::inventory.armor[0] = armor;
     ++armor.id;
-    VS::Items::Live::Commit(VS::Items::inventory.armor[15], armor);
+    VS::Items::inventory.armor[15] = armor;
     VS::Items::inventoryIndices.armor[0] = 16;
     VS::Items::inventoryIndices.armor[1] = 1;
   }
@@ -35,10 +35,10 @@ struct DispatchLiveFixture : equipment_detail_tests::LiveFixture {
     VS::Items::InventoryGem gem{.id = 261, .strength = 5};
     gem.classes[0] = -4;
     gem.affinities[0] = 7;
-    VS::Items::Live::Commit(VS::Items::inventory.gems[0], gem);
+    VS::Items::inventory.gems[0] = gem;
     gem.id = 262;
     gem.strength = 9;
-    VS::Items::Live::Commit(VS::Items::inventory.gems[47], gem);
+    VS::Items::inventory.gems[47] = gem;
     VS::Items::inventoryIndices.gems[0] = 48;
     VS::Items::inventoryIndices.gems[1] = 1;
   }

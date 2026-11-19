@@ -28,7 +28,7 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Files.h"
 #include "Menu/Files.hpp"
@@ -79,33 +79,6 @@ char VS::Menu::Files::frameBuf;
 
 namespace VS::Menu::Files {
 namespace {
-static_assert(sizeof(ContainerData) == sizeof(Items_ContainerData));
-static_assert(offsetof(ContainerData, shields) ==
-              offsetof(Items_ContainerData, shields));
-static_assert(offsetof(ContainerData, blades) ==
-              offsetof(Items_ContainerData, blades));
-static_assert(offsetof(ContainerData, grips) ==
-              offsetof(Items_ContainerData, grips));
-static_assert(offsetof(ContainerData, armor) ==
-              offsetof(Items_ContainerData, armor));
-static_assert(offsetof(ContainerData, gems) ==
-              offsetof(Items_ContainerData, gems));
-static_assert(offsetof(ContainerData, misc) ==
-              offsetof(Items_ContainerData, misc));
-static_assert(sizeof(ContainerIndices) == sizeof(Items_ContainerIndices));
-static_assert(offsetof(ContainerIndices, blades) ==
-              offsetof(Items_ContainerIndices, blades));
-static_assert(offsetof(ContainerIndices, grips) ==
-              offsetof(Items_ContainerIndices, grips));
-static_assert(offsetof(ContainerIndices, shields) ==
-              offsetof(Items_ContainerIndices, shields));
-static_assert(offsetof(ContainerIndices, armor) ==
-              offsetof(Items_ContainerIndices, armor));
-static_assert(offsetof(ContainerIndices, gems) ==
-              offsetof(Items_ContainerIndices, gems));
-static_assert(offsetof(ContainerIndices, misc) ==
-              offsetof(Items_ContainerIndices, misc));
-
 static_assert(sizeof(VS::Input::Settings) == kSettingsBytes);
 static_assert(sizeof(containerStrings) ==
               kContainerStringHalfwords * sizeof(std::uint16_t));
@@ -932,17 +905,14 @@ bool AreLiveTitleAnimationsComplete() {
   return AreAnimationsComplete(g_title_state);
 }
 
-void CopyLiveSelectedContainerItems(Items_ContainerData* target,
-                                    const Items_ContainerData* source,
-                                    const Items_ContainerIndices* to_copy) {
+void CopyLiveSelectedContainerItems(
+    VS::Items::ContainerData* target, const VS::Items::ContainerData* source,
+    const VS::Items::ContainerIndices* to_copy) {
   if (target == nullptr || source == nullptr || to_copy == nullptr) {
     Warn("container copy without its records");
     return;
   }
-  CopySelectedContainerItems(
-      *reinterpret_cast<ContainerData*>(target),
-      *reinterpret_cast<const ContainerData*>(source),
-      *reinterpret_cast<const ContainerIndices*>(to_copy));
+  CopySelectedContainerItems(*target, *source, *to_copy);
 }
 
 int DrawLiveGlyph(std::uint32_t glyph, int x, int y, int clut) {

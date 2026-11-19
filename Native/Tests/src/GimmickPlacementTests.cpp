@@ -1275,7 +1275,7 @@ struct UnlockEffectLiveFixture {
       VS::Core::randomShuffleIndex;
   Battle_Actor character{};
   Battle_ActorStats stats{};
-  std::array<Items_TreasureChest, 1> chests{};
+  std::array<VS::Items::TreasureChest, 1> chests{};
   std::remove_pointer_t<decltype(Battle_floatingLabels)> labels{};
 
   UnlockEffectLiveFixture() {
@@ -1289,7 +1289,7 @@ struct UnlockEffectLiveFixture {
     Field_roomData.header.containersLength = sizeof chests;
     std::memset(&VS::State::stateFlags, 0, sizeof(VS::State::stateFlags));
     room.locks[0].trigger.lockState.lock.state = 2;
-    chests[0].lockLevel = 3;
+    chests[0].lock_level = 3;
   }
   ~UnlockEffectLiveFixture() {
     Battle_characterState = saved_character;
@@ -1702,16 +1702,16 @@ struct ChestTargetFixture {
   decltype(Battle_actionFlowMode) action_flow = Battle_actionFlowMode;
   Actors_ActorLocationQuery actor_query = Field_interactionFocus.actor_query;
   AnimationQueueFixture queue;
-  std::array<Items_TreasureChest, 1> chests{};
+  std::array<VS::Items::TreasureChest, 1> chests{};
 
   ChestTargetFixture() {
     Field_roomData.containers = chests.data();
     Field_roomData.header.containersLength = 0x234;
     VS::Field::InvalidateLiveInteractionTargets();
-    chests[0].tileX = -1;
-    chests[0].tileZ = -1;
+    chests[0].tile_x = -1;
+    chests[0].tile_z = -1;
     chests[0].layer = -1;
-    chests[0].lidRotationId = -1;
+    chests[0].lid_rotation_id = -1;
   }
   ~ChestTargetFixture() {
     Field_roomData = saved;
@@ -3247,7 +3247,7 @@ TEST_CASE("Live interaction target indexes refuse room-generation replacement",
     }
   } restore{saved};
   std::array<Field_MpdFloorTrigger, 2> traps{};
-  std::array<Items_TreasureChest, 2> chests{};
+  std::array<VS::Items::TreasureChest, 2> chests{};
   Field_roomData.floorTriggers = traps.data();
   Field_roomData.header.floorTriggersLength = 24;
   Field_roomData.containers = chests.data();
@@ -3274,11 +3274,11 @@ TEST_CASE("Typed chest animation never stores a lock-record alias",
   CHECK(Field_pendingGimmickAnimationCount == 1);
   CHECK(Field_gimmickAnimationQueue[0].jobKind == 2);
   CHECK(Field_gimmickAnimationQueue[0].trigger == nullptr);
-  CHECK(static_cast<std::uint16_t>(fixture.chests[0].reservedA) == 0x0114);
-  fixture.chests[0].reservedA = 0x0101;
+  CHECK(static_cast<std::uint16_t>(fixture.chests[0].reserved_a) == 0x0114);
+  fixture.chests[0].reserved_a = 0x0101;
   VS::Field::UpdateGimmickAnimationQueueEntry();
-  CHECK(fixture.chests[0].isOpen == 1);
-  CHECK(fixture.chests[0].reservedA == 0);
+  CHECK(fixture.chests[0].is_open == 1);
+  CHECK(fixture.chests[0].reserved_a == 0);
   CHECK(Field_pendingGimmickAnimationCount == 0);
 }
 
@@ -3289,10 +3289,10 @@ TEST_CASE("Typed chest animation refuses a stale room-generation target",
   REQUIRE(target);
   REQUIRE(VS::Field::BeginLiveChestSwitch(*target));
   VS::Field::InvalidateLiveInteractionTargets();
-  const auto before = fixture.chests[0].reservedA;
+  const auto before = fixture.chests[0].reserved_a;
   VS::Field::UpdateGimmickAnimationQueueEntry();
   CHECK(Field_pendingGimmickAnimationCount == 0);
-  CHECK(fixture.chests[0].reservedA == before);
+  CHECK(fixture.chests[0].reserved_a == before);
   CHECK_FALSE(VS::Field::BeginLiveChestSwitch(*target));
 }
 
@@ -3973,11 +3973,11 @@ TEST_CASE("Native unlock effect clears eligible doors and both chest tags",
   CHECK(std::bit_cast<std::array<std::byte, sizeof(point)>>(point) == original);
   point.pad = 0x20;
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
-  CHECK(fixture.chests[0].lockLevel == 0);
-  fixture.chests[0].lockLevel = 2;
+  CHECK(fixture.chests[0].lock_level == 0);
+  fixture.chests[0].lock_level = 2;
   point.pad = 0x100;
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
-  CHECK(fixture.chests[0].lockLevel == 0);
+  CHECK(fixture.chests[0].lock_level == 0);
 }
 
 TEST_CASE("Native unlock effect invalid indices label without reading a record",
@@ -3992,7 +3992,7 @@ TEST_CASE("Native unlock effect invalid indices label without reading a record",
   point.pad = 0x2F;
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
   CHECK(Battle_floatingLabelCount == 2);
-  CHECK(fixture.chests[0].lockLevel == 3);
+  CHECK(fixture.chests[0].lock_level == 3);
   CHECK(VS::Core::randomShuffleIndex == saved_risk);
 }
 
@@ -4006,18 +4006,18 @@ TEST_CASE("Native unlock effect unknown and null targets remain no ops",
   CHECK(Battle_floatingLabelCount == 0);
   CHECK(VS::Core::randomShuffleIndex == saved_risk);
   CHECK(fixture.room.locks[0].trigger.lockState.lock.state == 2);
-  CHECK(fixture.chests[0].lockLevel == 3);
+  CHECK(fixture.chests[0].lock_level == 3);
 }
 
 TEST_CASE("Native opened chest unlock effect skips risk and preserves its lock",
           "[unlock-effect-live][field]") {
   UnlockEffectLiveFixture fixture;
-  fixture.chests[0].openedFlag = 1;
+  fixture.chests[0].opened_flag = 1;
   VS::State::SetLiveScriptFlag(0x3C1, 1);
   const auto saved_risk = VS::Core::randomShuffleIndex;
   SVECTOR point{.vx = 1, .vy = -2, .vz = 3, .pad = 0x20};
   VS::Field::ApplyUnlockEffectToRoomObjectEntry(&point);
-  CHECK(fixture.chests[0].lockLevel == 3);
+  CHECK(fixture.chests[0].lock_level == 3);
   CHECK(Battle_floatingLabelCount == 1);
   CHECK(VS::Core::randomShuffleIndex == saved_risk);
 }

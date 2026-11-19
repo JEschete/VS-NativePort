@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "Field/InteractionTarget.hpp"
+#include "Items/ItemRecords.hpp"
 
 struct Field_MpdLockTrigger;
 struct Field_MpdFloorTrigger;
-struct Items_TreasureChest;
 struct SVECTOR;
 
 namespace VS::Field {
@@ -23,10 +23,10 @@ std::optional<TrapTarget> FindLiveTrapTarget(
     const Field_MpdFloorTrigger* record);
 std::optional<TrapTarget> FindLiveTrapTargetAddress(const void* address);
 std::optional<ChestTarget> FindLiveChestTarget(
-    const Items_TreasureChest* record);
+    const VS::Items::TreasureChest* record);
 std::optional<ChestTarget> FindLiveChestTargetAddress(const void* address);
 Field_MpdFloorTrigger* ResolveLiveTrapTarget(TrapTarget target);
-Items_TreasureChest* ResolveLiveChestTarget(ChestTarget target);
+VS::Items::TreasureChest* ResolveLiveChestTarget(ChestTarget target);
 InteractionTargetState& LiveInteractionTargetState();
 InteractionTargetDomain LiveInteractionTargetDomain();
 void InvalidateLiveInteractionTargets();

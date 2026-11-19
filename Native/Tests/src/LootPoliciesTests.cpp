@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -240,16 +240,16 @@ loot::OrganizeMenu OpenOrganize(FakePromptHost& host, const loot::LootRow& row,
 }
 
 struct LivePoliciesFixture {
-  Items_Inventory staged{};
-  Items_Inventory backup{};
+  VS::Items::InventoryContents staged{};
+  VS::Items::InventoryContents backup{};
   std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   std::array<Menu_Framework_MenuRow, 40> menu_rows{};
   Menu_Framework_MenuRow* previous_menu_rows{VS::Menu::Framework::menuItems};
-  Items_Inventory* previous_inventory{Menu_Loot_inventory};
-  Items_Inventory* previous_backup{Menu_Loot_inventoryBackup};
+  VS::Items::InventoryContents* previous_inventory{Menu_Loot_inventory};
+  VS::Items::InventoryContents* previous_backup{Menu_Loot_inventoryBackup};
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
-  Items_BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
-  Items_Inventory previous_ashley{VS::Items::inventory};
+  VS::Items::BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
+  VS::Items::InventoryContents previous_ashley{VS::Items::inventory};
   char previous_claimed{Menu_Loot_lootClaimed};
 
   LivePoliciesFixture() {
@@ -642,7 +642,7 @@ TEST_CASE("Live leave confirmation returns the empty and single-entry results",
   LivePoliciesFixture fixture;
   CHECK(live::UpdateLeaveConfirmation(1) == 0);
   CHECK(live::UpdateLeaveConfirmation(0) == 1);
-  Items_BattleLoot chest{};
+  VS::Items::BattleLoot chest{};
   VS::Menu::Framework::lootEntry = &chest;
   Menu_Loot_lootListCount = 1;
   CHECK(live::UpdateLeaveConfirmation(1) == 0);

@@ -8,15 +8,9 @@
 
 #include <stdint.h>
 
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetails.hpp"
-
-struct Items_InventoryArmor;
-struct Items_InventoryBlade;
-struct Items_InventoryGem;
-struct Items_InventoryGrip;
-struct Items_InventoryShield;
-struct Items_InventoryWeapon;
 
 namespace VS::Menu::Framework {
 // decomp: D_80102488 (MENU/MAINMENU.PRG C48.c): [0..2] the actor's base
@@ -31,12 +25,12 @@ extern char rangeRiskData[kRangeRiskBytes];
 // decomp: vs_mainMenu_weapons .. vs_mainMenu_armor (MENU/MAINMENU.PRG
 // 2D10.c): the item tables the menus show, Ashley's inventory's or the open
 // container's.
-extern Items_InventoryWeapon* weapons;
-extern Items_InventoryBlade* blades;
-extern Items_InventoryGrip* grips;
-extern Items_InventoryShield* shields;
-extern Items_InventoryArmor* armor;
-extern Items_InventoryGem* gems;
+extern VS::Items::InventoryWeapon* weapons;
+extern VS::Items::InventoryBlade* blades;
+extern VS::Items::InventoryGrip* grips;
+extern VS::Items::InventoryShield* shields;
+extern VS::Items::InventoryArmor* armor;
+extern VS::Items::InventoryGem* gems;
 // decomp: vs_mainMenu_currentStatusViewItem (MENU/MAINMENU.PRG 2D10.c)
 extern char currentStatusViewItem;
 // decomp: vs_mainMenu_enabledStatPages (MENU/MAINMENU.PRG C48.c)

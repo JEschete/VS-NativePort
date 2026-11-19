@@ -45,7 +45,6 @@
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacementLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"

@@ -4,7 +4,7 @@
 
 struct Menu_Container_InventoryStorage;
 
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 
 // decomp: copyContainerFlags (src/MENU/MENUD.PRG/234.c:17)
 enum Menu_Container_CopyContainerFlag { Menu_Container_CopyContainerFlag_CopyContainerFlagsCopy = 0x10 };
@@ -12,13 +12,13 @@ enum Menu_Container_CopyContainerFlag { Menu_Container_CopyContainerFlag_CopyCon
 // decomp: vs_menu_inventoryStorage_t (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:153)
 struct Menu_Container_InventoryStorage {
     char savedInventory[15][256];
-    Items_InventoryIndices savedInventoryIndices;
-    Items_ContainerData storedContainer;
-    Items_ContainerData transferPreview;
-    Items_ContainerData stagedTransfer;
+    VS::Items::InventoryIndices savedInventoryIndices;
+    VS::Items::ContainerData storedContainer;
+    VS::Items::ContainerData transferPreview;
+    VS::Items::ContainerData stagedTransfer;
     u_short itemsToTransfer[64];
-    Items_Container container;
-    Items_Container gadgetBag;
+    VS::Items::Container container;
+    VS::Items::Container gadgetBag;
 };
 static_assert(sizeof(Menu_Container_InventoryStorage) == 0x14730, "Menu_Container_InventoryStorage must keep its PS1 layout");
 

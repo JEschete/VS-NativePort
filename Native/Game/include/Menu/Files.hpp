@@ -167,34 +167,17 @@ struct GameFlags {
   std::uint8_t difficulty = 0;
 };
 
-// vs_menu_containerData and vs_menu_containerIndices (BATTLE.PRG
-// func_8006B57C_t.h:117, 127) in the records' layout.
-inline constexpr std::size_t kContainerWeapons = 32;
-inline constexpr std::size_t kContainerShields = 32;
-inline constexpr std::size_t kContainerBlades = 64;
-inline constexpr std::size_t kContainerGrips = 64;
-inline constexpr std::size_t kContainerArmor = 64;
-inline constexpr std::size_t kContainerGems = 192;
-inline constexpr std::size_t kContainerMisc = 256;
-inline constexpr std::size_t kContainerSections = 7;
-struct ContainerData {
-  std::array<Items::InventoryWeapon, kContainerWeapons> weapons{};
-  std::array<Items::InventoryShield, kContainerShields> shields{};
-  std::array<Items::InventoryBlade, kContainerBlades> blades{};
-  std::array<Items::InventoryGrip, kContainerGrips> grips{};
-  std::array<Items::InventoryArmor, kContainerArmor> armor{};
-  std::array<Items::InventoryGem, kContainerGems> gems{};
-  std::array<Items::InventoryMisc, kContainerMisc> misc{};
-};
-struct ContainerIndices {
-  std::array<std::uint16_t, kContainerWeapons> weapons{};
-  std::array<std::uint16_t, kContainerBlades> blades{};
-  std::array<std::uint16_t, kContainerGrips> grips{};
-  std::array<std::uint16_t, kContainerShields> shields{};
-  std::array<std::uint16_t, kContainerArmor> armor{};
-  std::array<std::uint16_t, kContainerGems> gems{};
-  std::array<std::uint16_t, kContainerMisc> misc{};
-};
+// The container's records (Items/ItemRecords.hpp).
+using Items::ContainerData;
+using Items::ContainerIndices;
+using Items::kContainerArmor;
+using Items::kContainerBlades;
+using Items::kContainerGems;
+using Items::kContainerGrips;
+using Items::kContainerMisc;
+using Items::kContainerSections;
+using Items::kContainerShields;
+using Items::kContainerWeapons;
 
 // _findCurrentSave's statics (both overlays).
 struct SaveSearch {

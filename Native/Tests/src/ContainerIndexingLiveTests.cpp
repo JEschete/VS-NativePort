@@ -1,6 +1,4 @@
-#include <algorithm>
 #include <array>
-#include <iterator>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -15,14 +13,14 @@ TEST_CASE("F02927 Live maps member arrays without flattening native pointers",
           "[container-indexing-live][F02927]") {
   LiveFixture fixture;
   const std::array<std::uint16_t*, 8> expected{
-      fixture.owner.indices.weapons,
-      fixture.owner.indices.blades,
-      fixture.owner.indices.grips,
-      fixture.owner.indices.shields,
-      fixture.owner.indices.armor,
-      fixture.owner.indices.gems,
-      fixture.owner.indices.misc,
-      fixture.owner.indices.misc + std::size(fixture.owner.indices.misc)};
+      fixture.owner.indices.weapons.data(),
+      fixture.owner.indices.blades.data(),
+      fixture.owner.indices.grips.data(),
+      fixture.owner.indices.shields.data(),
+      fixture.owner.indices.armor.data(),
+      fixture.owner.indices.gems.data(),
+      fixture.owner.indices.misc.data(),
+      fixture.owner.indices.misc.data() + fixture.owner.indices.misc.size()};
   for (std::size_t category = 0; category < expected.size(); ++category) {
     CHECK(items::LiveContainerCategoryIndices(static_cast<int>(category),
                                               &fixture.owner) ==
@@ -30,13 +28,13 @@ TEST_CASE("F02927 Live maps member arrays without flattening native pointers",
   }
   Menu_Container_containerItemCapacities[0] = 1;
   CHECK(items::LiveContainerCategoryIndices(1, &fixture.owner) ==
-        fixture.owner.indices.weapons + 1);
+        fixture.owner.indices.weapons.data() + 1);
 }
 
 TEST_CASE("F02928 Live retains halfword lookup and empty token convention",
           "[container-indexing-live][F02928]") {
   LiveFixture fixture;
-  auto* rows = fixture.owner.indices.weapons;
+  auto* rows = fixture.owner.indices.weapons.data();
   rows[31] = 65535;
   CHECK(items::FindLiveContainerItemRow(0, 65534, rows) == 32);
   CHECK(items::FindLiveContainerItemRow(0, -1, rows) == 1);
@@ -48,7 +46,7 @@ TEST_CASE("F02928 Live retains halfword lookup and empty token convention",
 TEST_CASE("F02929 Live appends only the first free halfword",
           "[container-indexing-live][F02929]") {
   LiveFixture fixture;
-  auto* rows = fixture.owner.indices.misc;
+  auto* rows = fixture.owner.indices.misc.data();
   rows[0] = 8;
   items::AppendLiveContainerItemIndex(6, 255, rows);
   CHECK(rows[0] == 8);
@@ -71,14 +69,10 @@ TEST_CASE("F02930 Live uses production Typed and Commit for attached parts",
   contents.gems[191].id = 65535;
   contents.gems[0].id = 7;
   items::ClearLiveContainerItem(0, 0, &contents);
-  CHECK(items::Live::Typed(contents.weapons[0]) ==
-        items::InventoryWeapon{.index = 1});
-  CHECK(items::Live::Typed(contents.blades[63]) ==
-        items::InventoryBlade{.index = 64});
-  CHECK(items::Live::Typed(contents.grips[63]) ==
-        items::InventoryGrip{.index = 64});
-  CHECK(items::Live::Typed(contents.gems[191]) ==
-        items::InventoryGem{.index = 192});
+  CHECK(contents.weapons[0] == items::InventoryWeapon{.index = 1});
+  CHECK(contents.blades[63] == items::InventoryBlade{.index = 64});
+  CHECK(contents.grips[63] == items::InventoryGrip{.index = 64});
+  CHECK(contents.gems[191] == items::InventoryGem{.index = 192});
   CHECK(contents.gems[0].id == 7);
 }
 
@@ -90,10 +84,8 @@ TEST_CASE(
   fixture.owner.items.gems[127].id = 9;
   fixture.owner.items.gems[0].id = 8;
   items::ClearLiveContainerItem(3, 31, &fixture.owner.items);
-  CHECK(items::Live::Typed(fixture.owner.items.shields[31]) ==
-        items::InventoryShield{.index = 32});
-  CHECK(items::Live::Typed(fixture.owner.items.gems[127]) ==
-        items::InventoryGem{.index = 128});
+  CHECK(fixture.owner.items.shields[31] == items::InventoryShield{.index = 32});
+  CHECK(fixture.owner.items.gems[127] == items::InventoryGem{.index = 128});
   CHECK(fixture.owner.items.gems[0].id == 8);
   CHECK_NOTHROW(items::ClearLiveContainerItem(7, -1, nullptr));
 }

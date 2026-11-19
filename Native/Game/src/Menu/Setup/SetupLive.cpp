@@ -29,7 +29,6 @@
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Materials.hpp"
@@ -231,8 +230,8 @@ class LiveHost final : public Host {
 
   // Writes the inventory and its display order back.
   void Commit() {
-    Items::Live::Commit(VS::Items::inventory, inventory_);
-    Items::Live::Commit(VS::Items::inventoryIndices, indices_);
+    VS::Items::inventory = inventory_;
+    VS::Items::inventoryIndices = indices_;
   }
 
   void Refuse(std::string_view what) override {
@@ -555,8 +554,8 @@ class LiveHost final : public Host {
 
  private:
   void Reload() {
-    inventory_ = Items::Live::Typed(VS::Items::inventory);
-    indices_ = Items::Live::Typed(VS::Items::inventoryIndices);
+    inventory_ = VS::Items::inventory;
+    indices_ = VS::Items::inventoryIndices;
   }
 
   Items::InventoryContents inventory_{};

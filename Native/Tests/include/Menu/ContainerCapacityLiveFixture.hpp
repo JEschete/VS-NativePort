@@ -39,8 +39,8 @@ struct LiveFixture : equipment::LiveFixture {
     Menu_Container_otherStorage = &containers.storage->gadgetBag;
     Menu_Container_browsingGadgetBag = 0;
   }
-  static void Fill(Items_ContainerData& owner, items::ItemCategory category,
-                   std::size_t count) {
+  static void Fill(VS::Items::ContainerData& owner,
+                   items::ItemCategory category, std::size_t count) {
     items::LiveContainerWorld records(&owner);
     for (std::size_t slot = 0; slot < count; ++slot) {
       auto record = records.Read(category, slot);
@@ -58,13 +58,13 @@ struct LiveFixture : equipment::LiveFixture {
       records.Write(category, slot, record);
     }
   }
-  static void AddWeapon(Items_ContainerData& owner) {
+  static void AddWeapon(VS::Items::ContainerData& owner) {
     auto grip = samples::kGrip;
     grip.gem_slots = items::kWeaponGemCount;
-    items::Live::Commit(std::span(owner.blades).back(), samples::kBlade);
-    items::Live::Commit(std::span(owner.grips).back(), grip);
-    items::Live::Commit(std::span(owner.gems).back(), samples::kWeaponGem);
-    items::Live::Commit(std::span(owner.weapons).back(), samples::kWeapon);
+    std::span(owner.blades).back() = samples::kBlade;
+    std::span(owner.grips).back() = grip;
+    std::span(owner.gems).back() = samples::kWeaponGem;
+    std::span(owner.weapons).back() = samples::kWeapon;
   }
   std::string Line(int y) const {
     std::vector<std::pair<std::int16_t, char>> glyphs;

@@ -31,7 +31,7 @@
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Files.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Save/FileMenuLive.hpp"
@@ -370,7 +370,7 @@ void CheckSounds(const MenuFixture& fixture,
   CHECK(fixture.sounds == expected);
 }
 
-void CheckStagedBank(const Items_ContainerData* bank) {
+void CheckStagedBank(const VS::Items::ContainerData* bank) {
   CHECK(VS::Game::Save::ContainerData() == bank);
   CHECK(bank->misc[0].id == 323);
   CHECK(bank->misc[0].count == 2);
@@ -390,7 +390,7 @@ void CheckTitlePickerWrapAndCancel() {
   CHECK_FALSE(Save::FileMenuPresentation());
 }
 
-void CheckContainerTail(const Items_ContainerData* bank) {
+void CheckContainerTail(const VS::Items::ContainerData* bank) {
   CHECK(VS::Game::Save::ContainerData() == bank);
   CHECK(VS::Game::Save::ContainerData()->misc[255].id == 308);
   CHECK(VS::Game::Save::ContainerData()->misc[255].count == 2);

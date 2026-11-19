@@ -21,7 +21,7 @@
 #include "Battle/Damage.h"
 #include "Core/Log.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
@@ -156,10 +156,8 @@ class LiveEquipmentDetailsHost final : public EquipmentDetailsHost {
 
   std::optional<Items::ArmorLoadout> InventoryArmorLoadout(
       const Items::InventoryArmor& armor) override {
-    Items_InventoryArmor legacy{};
-    Items::Live::Commit(legacy, armor);
     Items_ArmorLoadout loadout{};
-    Items::LoadLiveInventoryArmorStats(&loadout, &legacy);
+    Items::LoadLiveInventoryArmorStats(&loadout, &armor);
     return Items::Live::Typed(loadout);
   }
 
@@ -576,12 +574,12 @@ std::int16_t VS::Menu::Framework::comparisonAccessoryStats
 // decomp: _rangeRiskData (MENU/MAINMENU.PRG C48.c)
 char VS::Menu::Framework::rangeRiskData[VS::Menu::Framework::kRangeRiskBytes];
 // decomp: vs_mainMenu_weapons .. vs_mainMenu_gems (MENU/MAINMENU.PRG)
-Items_InventoryWeapon* VS::Menu::Framework::weapons;
-Items_InventoryBlade* VS::Menu::Framework::blades;
-Items_InventoryGrip* VS::Menu::Framework::grips;
-Items_InventoryShield* VS::Menu::Framework::shields;
-Items_InventoryArmor* VS::Menu::Framework::armor;
-Items_InventoryGem* VS::Menu::Framework::gems;
+VS::Items::InventoryWeapon* VS::Menu::Framework::weapons;
+VS::Items::InventoryBlade* VS::Menu::Framework::blades;
+VS::Items::InventoryGrip* VS::Menu::Framework::grips;
+VS::Items::InventoryShield* VS::Menu::Framework::shields;
+VS::Items::InventoryArmor* VS::Menu::Framework::armor;
+VS::Items::InventoryGem* VS::Menu::Framework::gems;
 // decomp: vs_mainMenu_currentStatusViewItem (MENU/MAINMENU.PRG)
 char VS::Menu::Framework::currentStatusViewItem;
 // decomp: vs_mainMenu_enabledStatPages (MENU/MAINMENU.PRG)

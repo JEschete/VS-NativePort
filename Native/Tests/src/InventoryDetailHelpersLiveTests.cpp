@@ -8,7 +8,7 @@
 
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -27,7 +27,7 @@ constexpr int kSelectedRow = 20;
 struct LiveFixture {
   Menu_Framework_MenuRow* previous_rows = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuMemory previous_memory = VS::Menu::Framework::menuMemory;
-  Items_Inventory previous_inventory = VS::Items::inventory;
+  VS::Items::InventoryContents previous_inventory = VS::Items::inventory;
   int previous_held = VS::Input::buttonsState;
   int previous_repeat = VS::Input::buttonRepeat;
   decltype(VS::Input::buttonsPressed) previous_pressed =

@@ -4,6 +4,7 @@
 #include <array>
 #include <bit>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <format>
 #include <limits>
@@ -50,7 +51,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Items/Materials.hpp"
@@ -470,7 +471,7 @@ template <typename Collection>
 Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
                        std::string_view scope) {
   const auto valid_durability = [](const auto& item) {
-    return item.currentDp <= item.maxDp && item.currentPp <= item.maxPp;
+    return item.current_dp <= item.max_dp && item.current_pp <= item.max_pp;
   };
   for (const auto& blade : items.blades) {
     if (blade.id != 0 &&
@@ -480,38 +481,38 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
          static_cast<unsigned char>(blade.category) >=
              std::size(VS::State::ArtsStatus{}.kills.weapon_category_kills))) {
       return ItemError(scope, "blades",
-                       static_cast<std::size_t>(&blade - items.blades),
+                       static_cast<std::size_t>(&blade - items.blades.data()),
                        "invalid ID, category, material or DP/PP");
     }
   }
   for (const auto& grip : items.grips) {
     if (grip.id != 0 &&
         (!InCategory(grip.id, bounds[kBladeEnd], bounds[kGripEnd]) ||
-         grip.gemSlots < 0 || grip.gemSlots > kEquipmentGems ||
+         grip.gem_slots < 0 || grip.gem_slots > kEquipmentGems ||
          grip.category >= kGripCategoryCount)) {
       return ItemError(scope, "grips",
-                       static_cast<std::size_t>(&grip - items.grips),
+                       static_cast<std::size_t>(&grip - items.grips.data()),
                        "invalid ID, category or gem capacity");
     }
   }
   const auto valid_armor = [&](const auto& armor) {
     return InCategory(armor.id, bounds[kGripEnd], bounds[kArmorAccessoryEnd]) &&
-           valid_durability(armor) && armor.gemSlots >= 0 &&
-           armor.gemSlots <= kEquipmentGems && armor.limb <= kAccessoryLimb &&
+           valid_durability(armor) && armor.gem_slots >= 0 &&
+           armor.gem_slots <= kEquipmentGems && armor.limb <= kAccessoryLimb &&
            armor.material < std::size(VS::Items::materialModifiers) &&
            static_cast<unsigned char>(armor.category) < kArmorCategoryCount;
   };
   for (const auto& armor : items.armor) {
     if (armor.id != 0 && !valid_armor(armor)) {
       return ItemError(scope, "armor",
-                       static_cast<std::size_t>(&armor - items.armor),
+                       static_cast<std::size_t>(&armor - items.armor.data()),
                        "invalid ID, limb, material or DP/PP");
     }
   }
   for (const auto& shield : items.shields) {
     if (shield.base.id != 0 && !valid_armor(shield.base)) {
       return ItemError(scope, "shields",
-                       static_cast<std::size_t>(&shield - items.shields),
+                       static_cast<std::size_t>(&shield - items.shields.data()),
                        "invalid ID, gem capacity, material or DP/PP");
     }
   }
@@ -519,7 +520,7 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
     if (gem.id != 0 &&
         !InCategory(gem.id, bounds[kArmorAccessoryEnd], bounds[kGemEnd])) {
       return ItemError(scope, "gems",
-                       static_cast<std::size_t>(&gem - items.gems),
+                       static_cast<std::size_t>(&gem - items.gems.data()),
                        "invalid definition ID");
     }
   }
@@ -528,7 +529,7 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
         (!InCategory(misc.id, bounds[kGemEnd], bounds[kMiscEnd]) ||
          static_cast<unsigned char>(misc.count) == 0)) {
       return ItemError(scope, "misc",
-                       static_cast<std::size_t>(&misc - items.misc),
+                       static_cast<std::size_t>(&misc - items.misc.data()),
                        "invalid ID or count");
     }
   }
@@ -567,7 +568,7 @@ Result ValidateItems(const Collection& items, const CategoryBounds& bounds,
   for (std::size_t index = 0; index < std::size(items.weapons); ++index) {
     const auto& weapon = items.weapons[index];
     if (weapon.blade == 0) {
-      if (weapon.isEquipped != 0) {
+      if (weapon.is_equipped != 0) {
         return ItemError(scope, "weapons", index, "empty slot is equipped");
       }
       continue;
@@ -587,26 +588,27 @@ Result ValidateItems(const Collection& items, const CategoryBounds& bounds,
     grip_parents[weapon.grip - 1] = parent;
     const auto result =
         gems(weapon.gems,
-             static_cast<unsigned>(items.grips[weapon.grip - 1].gemSlots),
+             static_cast<unsigned>(items.grips[weapon.grip - 1].gem_slots),
              parent, false);
     if (!result) return result;
   }
   for (std::size_t index = 0; index < std::size(items.shields); ++index) {
     const auto& shield = items.shields[index];
     if (shield.base.id == 0) {
-      if (shield.isEquipped != 0) {
+      if (shield.is_equipped != 0) {
         return ItemError(scope, "shields", index, "empty slot is equipped");
       }
       continue;
     }
     const auto result =
-        gems(shield.gems, static_cast<unsigned>(shield.base.gemSlots),
+        gems(shield.gems, static_cast<unsigned>(shield.base.gem_slots),
              static_cast<unsigned>(index + 1) | kShieldParent, true);
     if (!result) return result;
   }
   for (std::size_t index = 0; index < std::size(items.blades); ++index) {
     if (items.blades[index].id != 0 &&
-        static_cast<unsigned char>(items.blades[index].assembledWeaponIndex) !=
+        static_cast<unsigned char>(
+            items.blades[index].assembled_weapon_index) !=
             blade_parents[index]) {
       return ItemError(scope, "blades", index,
                        "parent disagrees with weapon references");
@@ -614,14 +616,14 @@ Result ValidateItems(const Collection& items, const CategoryBounds& bounds,
   }
   for (std::size_t index = 0; index < std::size(items.grips); ++index) {
     if (items.grips[index].id != 0 &&
-        items.grips[index].assembledWeaponIndex != grip_parents[index]) {
+        items.grips[index].assembled_weapon_index != grip_parents[index]) {
       return ItemError(scope, "grips", index,
                        "parent disagrees with weapon references");
     }
   }
   for (std::size_t index = 0; index < std::size(items.gems); ++index) {
     if (items.gems[index].id != 0 &&
-        items.gems[index].setItemIndex != gem_parents[index]) {
+        items.gems[index].set_item_index != gem_parents[index]) {
       return ItemError(scope, "gems", index,
                        "parent disagrees with equipment references");
     }
@@ -633,11 +635,16 @@ template <typename T>
 bool Occupied(const T& item) {
   return item.id != 0;
 }
-bool Occupied(const Items_InventoryWeapon& item) { return item.blade != 0; }
-bool Occupied(const Items_InventoryShield& item) { return item.base.id != 0; }
+bool Occupied(const VS::Items::InventoryWeapon& item) {
+  return item.blade != 0;
+}
+bool Occupied(const VS::Items::InventoryShield& item) {
+  return item.base.id != 0;
+}
 
 template <typename T, std::size_t N>
-Result CaptureOrder(const T (&items)[N], unsigned char (&order)[N],
+Result CaptureOrder(const std::array<T, N>& items,
+                    std::array<std::uint8_t, N>& order,
                     std::string_view category) {
   std::array<bool, N> seen{};
   std::size_t count = 0;
@@ -658,7 +665,7 @@ Result CaptureOrder(const T (&items)[N], unsigned char (&order)[N],
     seen[reference - 1] = true;
     if (Occupied(items[reference - 1])) order[count++] = reference;
   }
-  std::fill(order + count, order + N, 0);
+  std::ranges::fill(std::span(order).subspan(count), 0);
   return {};
 }
 
@@ -680,7 +687,8 @@ Result CaptureInventoryOrder(Snapshot& state) {
 }
 
 template <typename T, std::size_t N>
-Result ValidateOrder(const T (&items)[N], const unsigned char (&order)[N],
+Result ValidateOrder(const std::array<T, N>& items,
+                     const std::array<std::uint8_t, N>& order,
                      std::string_view category) {
   std::array<bool, N> seen{};
   bool empty_seen = false;
@@ -749,18 +757,18 @@ Result ValidateInventory(const Snapshot& state, const CategoryBounds& bounds) {
   unsigned shields = 0;
   std::array<bool, kAccessoryLimb + 1> limbs{};
   for (const auto& weapon : state.inventory.weapons) {
-    if (weapon.isEquipped != 0 && ++weapons > 1) {
+    if (weapon.is_equipped != 0 && ++weapons > 1) {
       return ItemError(
           "inventory", "weapons",
-          static_cast<std::size_t>(&weapon - state.inventory.weapons),
+          static_cast<std::size_t>(&weapon - state.inventory.weapons.data()),
           "multiple equipped weapons");
     }
   }
   for (const auto& shield : state.inventory.shields) {
-    if (shield.isEquipped != 0 && ++shields > 1) {
+    if (shield.is_equipped != 0 && ++shields > 1) {
       return ItemError(
           "inventory", "shields",
-          static_cast<std::size_t>(&shield - state.inventory.shields),
+          static_cast<std::size_t>(&shield - state.inventory.shields.data()),
           "multiple equipped shields");
     }
   }
@@ -769,7 +777,7 @@ Result ValidateInventory(const Snapshot& state, const CategoryBounds& bounds) {
     if (armor.id == 0 || armor.limb >= limbs.size() || limbs[armor.limb]) {
       return ItemError(
           "inventory", "armor",
-          static_cast<std::size_t>(&armor - state.inventory.armor),
+          static_cast<std::size_t>(&armor - state.inventory.armor.data()),
           std::format("duplicate or invalid equipped limb {}", armor.limb));
     }
     limbs[armor.limb] = true;
@@ -781,11 +789,13 @@ Result ValidateModels(const Snapshot& state, const Content::DataStore& store) {
   std::set<unsigned> models;
   const auto collect = [&](const auto& items) {
     for (const auto& blade : items.blades) {
-      if (blade.id != 0) models.insert(static_cast<unsigned char>(blade.wepId));
+      if (blade.id != 0) {
+        models.insert(static_cast<unsigned char>(blade.weapon_model_id));
+      }
     }
     for (const auto& shield : items.shields) {
       if (shield.base.id != 0) {
-        models.insert(static_cast<unsigned char>(shield.base.wepId));
+        models.insert(static_cast<unsigned char>(shield.base.weapon_model_id));
       }
     }
   };
@@ -936,10 +946,10 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
   // Here only copied loadouts and the staged inventory may be written.
   const auto has_weapon = std::ranges::any_of(
       state.inventory.weapons,
-      [](const auto& weapon) { return weapon.isEquipped != 0; });
+      [](const auto& weapon) { return weapon.is_equipped != 0; });
   const auto has_shield = std::ranges::any_of(
       state.inventory.shields,
-      [](const auto& shield) { return shield.isEquipped != 0; });
+      [](const auto& shield) { return shield.is_equipped != 0; });
   if (has_weapon != (stats.weapon.index != 0) ||
       has_shield != (stats.shield.index != 0)) {
     return std::unexpected("live equipment presence disagrees with inventory");
@@ -950,7 +960,7 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
     }
     auto weapon = stats.weapon;
     auto& target = state.inventory.weapons[weapon.index - 1];
-    if (!target.isEquipped || weapon.blade.id == 0 || target.blade == 0 ||
+    if (!target.is_equipped || weapon.blade.id == 0 || target.blade == 0 ||
         target.blade > std::size(state.inventory.blades) || target.grip == 0 ||
         target.grip > std::size(state.inventory.grips)) {
       return std::unexpected("live weapon does not match its inventory slot");
@@ -981,7 +991,7 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
       VS::Items::WriteLiveInventoryGemStats(
           &state.inventory.gems[reference - 1], &weapon.gems[index]);
     }
-    std::copy_n(weapon.name, std::size(target.name), target.name);
+    std::copy_n(weapon.name, target.name.size(), target.name.begin());
   }
   if (stats.shield.index != 0) {
     if (stats.shield.index > std::size(state.inventory.shields)) {
@@ -989,7 +999,7 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
     }
     auto shield = stats.shield;
     auto& target = state.inventory.shields[shield.index - 1];
-    if (!target.isEquipped || shield.base.id == 0 ||
+    if (!target.is_equipped || shield.base.id == 0 ||
         shield.base.id != target.base.id) {
       return std::unexpected("live shield does not match its inventory slot");
     }
@@ -1021,7 +1031,7 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
   for (std::size_t limb = 0; limb < std::size(stats.limbs); ++limb) {
     auto armor = stats.limbs[limb].armor;
     const auto equipped = std::ranges::find(state.inventory.armor, limb + 1,
-                                            &Items_InventoryArmor::limb);
+                                            &VS::Items::InventoryArmor::limb);
     if (armor.index == 0) {
       if (equipped != std::end(state.inventory.armor)) {
         return std::unexpected("live limb armor is missing");
@@ -1040,7 +1050,7 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
   auto accessory = stats.accessory;
   if (accessory.index == 0 &&
       std::ranges::find(state.inventory.armor, kAccessoryLimb,
-                        &Items_InventoryArmor::limb) !=
+                        &VS::Items::InventoryArmor::limb) !=
           std::end(state.inventory.armor)) {
     return std::unexpected("live accessory is missing");
   }
@@ -1408,7 +1418,7 @@ std::expected<Document, std::string> CaptureClearGame() {
       static_cast<std::uint8_t>(
           (~(state.settings.mode_flags >> kPuzzleSettingShift)) & 1);
   std::fill(std::begin(state.inventory.misc), std::end(state.inventory.misc),
-            Items_InventoryMisc{});
+            VS::Items::InventoryMisc{});
   std::fill(std::begin(state.inventory_order.misc),
             std::end(state.inventory_order.misc), 0);
   state.location.zone = 1;
@@ -1418,7 +1428,7 @@ std::expected<Document, std::string> CaptureClearGame() {
 }
 
 std::expected<Snapshot, std::string> Capture(
-    const Items_ContainerData& storage) {
+    const VS::Items::ContainerData& storage) {
   if (pending || !VS::Boot::isGameplayActive ||
       Battle_characterState == nullptr ||
       Battle_characterState != Battle_actors[0] ||

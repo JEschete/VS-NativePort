@@ -12,7 +12,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexing.hpp"
 #include "Items/ContainerTables.hpp"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/Storage.h"
 
@@ -32,7 +32,7 @@ ItemCategory Category(int category) {
   return static_cast<ItemCategory>(category);
 }
 
-std::uint16_t* IndexPointer(Items_ContainerIndices& indices,
+std::uint16_t* IndexPointer(VS::Items::ContainerIndices& indices,
                             std::size_t offset) {
   const std::array<std::span<std::uint16_t>, kItemCategoryCount - 1> tables{
       indices.weapons, indices.blades, indices.grips, indices.shields,
@@ -53,13 +53,14 @@ std::span<std::uint16_t> Order(ItemCategory category, std::uint16_t* indices) {
   return {indices, kContainerCapacities[static_cast<std::size_t>(category)]};
 }
 
-static_assert(sizeof(Items_ContainerIndices) ==
+static_assert(sizeof(VS::Items::ContainerIndices) ==
               kContainerIndexEntries * sizeof(std::uint16_t));
 constexpr std::size_t kOriginalIndicesOffset = 0x3C00;
-static_assert(offsetof(Items_Container, indices) == kOriginalIndicesOffset);
+static_assert(offsetof(VS::Items::Container, indices) ==
+              kOriginalIndicesOffset);
 }  // namespace
 
-LiveContainerWorld::LiveContainerWorld(Items_ContainerData* owner)
+LiveContainerWorld::LiveContainerWorld(VS::Items::ContainerData* owner)
     : owner_(owner) {}
 std::uint16_t LiveContainerWorld::Capacity(ItemCategory category) {
   return Menu_Container_containerItemCapacities[static_cast<std::size_t>(
@@ -73,7 +74,7 @@ ContainerRecord LiveContainerWorld::Read(ItemCategory category,
         if (index >= std::size(table)) {
           Refuse("record index outside live container table");
         }
-        return Live::Typed(table[index]);
+        return table[index];
       });
 }
 void LiveContainerWorld::Write(ItemCategory category, std::size_t index,
@@ -83,12 +84,12 @@ void LiveContainerWorld::Write(ItemCategory category, std::size_t index,
     if (index >= std::size(table)) {
       Refuse("record index outside live container table");
     }
-    using Legacy = std::remove_reference_t<decltype(table[index])>;
-    const auto* record = std::get_if<Live::TypedRecordOf<Legacy>>(&item);
+    using Record = std::remove_cvref_t<decltype(table[index])>;
+    const auto* record = std::get_if<Record>(&item);
     if (record == nullptr) {
       Refuse("record type disagrees with live container table");
     }
-    Live::Commit(table[index], *record);
+    table[index] = *record;
   });
 }
 [[noreturn]] void LiveContainerWorld::Refuse(std::string_view reason) {
@@ -97,7 +98,7 @@ void LiveContainerWorld::Write(ItemCategory category, std::size_t index,
 
 // decomp: _getContainerIndicesOffset (src/MENU/MENUD.PRG/234.c:85)
 std::uint16_t* LiveContainerCategoryIndices(int category,
-                                            Items_Container* container) {
+                                            VS::Items::Container* container) {
   LiveContainerWorld world;
   const auto offset = ContainerCategoryIndices(Category(category), world);
   if (container == nullptr) Refuse("missing container index owner");
@@ -123,26 +124,27 @@ void AppendLiveContainerItemIndex(int category, int index,
 
 // decomp: _initContainerObject (src/MENU/MENUD.PRG/234.c:121)
 void ClearLiveContainerItem(int category, int index,
-                            Items_ContainerData* container) {
+                            VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);
   ClearContainerItem(Category(category), index, world);
 }
 
 // decomp: _getContainerItemId (src/MENU/MENUD.PRG/234.c:191)
 int LiveContainerItemId(int category, int index,
-                        Items_ContainerData* container) {
+                        VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);
   return ContainerItemId(Category(category), index, world);
 }
 
 // decomp: _countContainerItems (src/MENU/MENUD.PRG/234.c:221)
-int CountLiveContainerItems(int category, Items_ContainerData* container) {
+int CountLiveContainerItems(int category, VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);
   return CountContainerItems(Category(category), world);
 }
 
 // decomp: _getEmptyContainerSlot (src/MENU/MENUD.PRG/234.c:234)
-int FindLiveEmptyContainerSlot(int category, Items_ContainerData* container) {
+int FindLiveEmptyContainerSlot(int category,
+                               VS::Items::ContainerData* container) {
   LiveContainerWorld world(container);
   return FindEmptyContainerSlot(Category(category), world);
 }

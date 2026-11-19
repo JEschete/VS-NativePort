@@ -26,7 +26,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
@@ -484,9 +483,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
           animation, static_cast<int>(Framework::PackXy(x, y)));
     });
   }
-  Items::InventoryContents Inventory() override {
-    return Items::Live::Typed(VS::Items::inventory);
-  }
+  Items::InventoryContents Inventory() override { return VS::Items::inventory; }
   std::span<std::uint8_t> Order(Category category) override {
     if (shortcut_) return FixedOrder(category);
     const auto index = static_cast<std::size_t>(category);

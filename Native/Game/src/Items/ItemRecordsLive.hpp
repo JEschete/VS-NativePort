@@ -24,11 +24,8 @@
 #include "Core/Diagnostics.hpp"
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
-#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
 #include "Legacy/Psx.h"
 
 namespace VS::Items::Live {
@@ -60,73 +57,8 @@ struct TypedRecord<Items_ShieldSpawnLoadout> {
   using type = ShieldSpawnLoadout;
 };
 template <>
-struct TypedRecord<Items_InventoryArmor> {
-  using type = InventoryArmor;
-};
-template <>
-struct TypedRecord<Items_InventoryBlade> {
-  using type = InventoryBlade;
-};
-template <>
-struct TypedRecord<Items_InventoryGem> {
-  using type = InventoryGem;
-};
-template <>
-struct TypedRecord<Items_InventoryGrip> {
-  using type = InventoryGrip;
-};
-template <>
-struct TypedRecord<Items_InventoryMisc> {
-  using type = InventoryMisc;
-};
-template <>
-struct TypedRecord<Items_InventoryShield> {
-  using type = InventoryShield;
-};
-template <>
-struct TypedRecord<Items_InventoryWeapon> {
-  using type = InventoryWeapon;
-};
-template <>
-struct TypedRecord<Items_Inventory> {
-  using type = InventoryContents;
-};
-template <>
-struct TypedRecord<Items_InventoryIndices> {
-  using type = InventoryIndices;
-};
-template <>
-struct TypedRecord<Items_MiscItemStack> {
-  using type = MiscItemStack;
-};
-template <>
 struct TypedRecord<Items_MiscItemDrop> {
   using type = MiscItemDrop;
-};
-template <>
-struct TypedRecord<Items_LootedWeapon> {
-  using type = LootedWeapon;
-};
-template <>
-struct TypedRecord<Items_LootedShield> {
-  using type = LootedShield;
-};
-template <>
-struct TypedRecord<Items_LootedArmor> {
-  using type = LootedArmor;
-};
-// The accessory slot of the loot holds the looted-armour record.
-template <>
-struct TypedRecord<Items_LootedAccessory> {
-  using type = LootedArmor;
-};
-template <>
-struct TypedRecord<Items_BattleLoot> {
-  using type = BattleLoot;
-};
-template <>
-struct TypedRecord<Items_TreasureChest> {
-  using type = TreasureChest;
 };
 
 template <typename Legacy>
@@ -206,50 +138,6 @@ static_assert(offsetof(Items_WeaponSpawnLoadout, name) ==
               offsetof(WeaponSpawnLoadout, name));
 static_assert(offsetof(Items_ShieldSpawnLoadout, index) ==
               offsetof(ShieldSpawnLoadout, index));
-static_assert(offsetof(Items_InventoryArmor, types) ==
-              offsetof(InventoryArmor, types));
-static_assert(offsetof(Items_InventoryArmor, material) ==
-              offsetof(InventoryArmor, material));
-static_assert(offsetof(Items_InventoryBlade, cost) ==
-              offsetof(InventoryBlade, cost));
-static_assert(offsetof(Items_InventoryBlade, range) ==
-              offsetof(InventoryBlade, range));
-static_assert(offsetof(Items_InventoryBlade, material) ==
-              offsetof(InventoryBlade, material));
-static_assert(offsetof(Items_InventoryGem, gemEffects) ==
-              offsetof(InventoryGem, gem_effects));
-static_assert(offsetof(Items_InventoryGem, setItemIndex) ==
-              offsetof(InventoryGem, set_item_index));
-static_assert(offsetof(Items_InventoryGrip, types) ==
-              offsetof(InventoryGrip, types));
-static_assert(offsetof(Items_InventoryShield, base) ==
-              offsetof(InventoryShield, base));
-static_assert(offsetof(Items_InventoryShield, gems) ==
-              offsetof(InventoryShield, gems));
-static_assert(offsetof(Items_InventoryWeapon, gems) ==
-              offsetof(InventoryWeapon, gems));
-static_assert(offsetof(Items_InventoryWeapon, name) ==
-              offsetof(InventoryWeapon, name));
-static_assert(offsetof(Items_Inventory, shields) ==
-              offsetof(InventoryContents, shields));
-static_assert(offsetof(Items_Inventory, gems) ==
-              offsetof(InventoryContents, gems));
-static_assert(offsetof(Items_Inventory, misc) ==
-              offsetof(InventoryContents, misc));
-static_assert(offsetof(Items_InventoryIndices, gems) ==
-              offsetof(InventoryIndices, gems));
-static_assert(offsetof(Items_InventoryIndices, misc) ==
-              offsetof(InventoryIndices, misc));
-static_assert(offsetof(Items_BattleLoot, shield) ==
-              offsetof(BattleLoot, shield));
-static_assert(offsetof(Items_BattleLoot, armor) == offsetof(BattleLoot, armor));
-static_assert(offsetof(Items_BattleLoot, accessory) ==
-              offsetof(BattleLoot, accessory));
-static_assert(offsetof(Items_BattleLoot, misc) == offsetof(BattleLoot, misc));
-static_assert(offsetof(Items_TreasureChest, openedFlag) ==
-              offsetof(TreasureChest, opened_flag));
-static_assert(offsetof(Items_TreasureChest, loot) ==
-              offsetof(TreasureChest, loot));
 // The battle actor records the bindings read and write by name.
 inline constexpr std::size_t kActorStatsWeaponOffset = 0x3C;
 static_assert(offsetof(Battle_ActorStats, weapon) == kActorStatsWeaponOffset);

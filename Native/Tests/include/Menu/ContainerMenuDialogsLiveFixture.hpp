@@ -18,7 +18,7 @@
 #include "Input/LegacyPad.hpp"
 #include "Items/ContainerTransfersLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Legacy/Input/LibPad.h"
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ContainerMenuDialogsLive.hpp"
@@ -254,7 +254,7 @@ struct EquippedFixture : DialogLiveFixture {
     Frame(VS::Menu::Inventory::UpdateLiveWeaponMenu, VS::Input::Down);
     Frame(VS::Menu::Inventory::UpdateLiveWeaponMenu);
     Frame(VS::Menu::Inventory::UpdateLiveWeaponMenu, VS::Input::Circle);
-    if (VS::Items::inventory.weapons[0].isEquipped == 0) {
+    if (VS::Items::inventory.weapons[0].is_equipped == 0) {
       throw std::runtime_error(
           "real equipment-menu input did not equip the weapon");
     }

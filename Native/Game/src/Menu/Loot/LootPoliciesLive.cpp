@@ -21,7 +21,6 @@
 #include "Core/Log.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -399,7 +398,7 @@ void RenderLootRows(int x) {
                     .cursor = LiveCursor(),
                     .gradient_state_index = static_cast<std::uint8_t>(
                         Menu_Loot_gradientStateIndex)};
-  const auto inventory = item_live::Typed(*Menu_Loot_inventory);
+  const auto inventory = *Menu_Loot_inventory;
   LiveLootRowsHost host;
   item_live::WarnRefusal("RenderLootRows", VS::Menu::Loot::RenderLootRows(
                                                x, view, inventory, host));
@@ -437,8 +436,7 @@ int UpdateLeaveConfirmation(int init) {
                                .single_entry = Framework::lootEntry != nullptr};
     item_live::WarnRefusal(
         "UpdateLeaveConfirmation",
-        InitLeaveConfirmation(prompt, context,
-                              item_live::Typed(*Menu_Loot_inventory)));
+        InitLeaveConfirmation(prompt, context, *Menu_Loot_inventory));
     return 0;
   }
   LivePromptHost host;
@@ -459,10 +457,9 @@ int UpdateOrganizationMenu(Menu_Loot_LootListItem* loot) {
       item_live::WarnNullRecord("UpdateOrganizationMenu");
       return 0;
     }
-    item_live::WarnRefusal(
-        "UpdateOrganizationMenu",
-        InitOrganizeMenu(menu, std::bit_cast<LootRow>(*loot),
-                         item_live::Typed(*Menu_Loot_inventory), host));
+    item_live::WarnRefusal("UpdateOrganizationMenu",
+                           InitOrganizeMenu(menu, std::bit_cast<LootRow>(*loot),
+                                            *Menu_Loot_inventory, host));
     return 0;
   }
   const auto result = UpdateOrganizeMenu(menu, LiveInput(), host);

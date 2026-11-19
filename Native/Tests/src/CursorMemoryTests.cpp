@@ -28,7 +28,6 @@
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
@@ -340,7 +339,7 @@ struct WorkshopChoicesFixture {
     VS::Menu::Framework::itemHelp = help.data();
     VS::Menu::Framework::itemNames = names;
     VS::Menu::Framework::rowTypeBuf = types.data();
-    VS::Menu::Framework::shields = VS::Items::inventory.shields;
+    VS::Menu::Framework::shields = VS::Items::inventory.shields.data();
     setup::LiveSetupState().combination.workshop = 6;
     VS::Items::inventoryIndices = {};
     FillParts();
@@ -363,7 +362,8 @@ struct WorkshopChoicesFixture {
       auto& blade = VS::Items::inventory.blades[index];
       blade.id = 1;
       blade.index = static_cast<char>(index + 1);
-      blade.category = blade.damageType = 1;
+      blade.category = 1;
+      blade.SetDamageType(1);
       blade.material = 3;
       auto& grip = VS::Items::inventory.grips[index];
       grip.id = 97;
@@ -384,18 +384,19 @@ struct WorkshopChoicesFixture {
       armor.index = static_cast<u_char>(index + 1);
       armor.category = 1;
       armor.material = 3;
-      armor.maxDp = 1000;
+      armor.max_dp = 1000;
       if (index < 8) {
         auto& shield = VS::Items::inventory.shields[index];
         shield.base.id = 132;
         shield.base.material = 3;
-        shield.base.maxDp = 1000;
+        shield.base.max_dp = 1000;
       }
     }
   }
 
-  std::array<std::byte, sizeof(Items_Inventory)> InventoryBytes() const {
-    std::array<std::byte, sizeof(Items_Inventory)> bytes{};
+  std::array<std::byte, sizeof(VS::Items::InventoryContents)> InventoryBytes()
+      const {
+    std::array<std::byte, sizeof(VS::Items::InventoryContents)> bytes{};
     std::memcpy(bytes.data(), &VS::Items::inventory, bytes.size());
     return bytes;
   }
@@ -456,10 +457,10 @@ struct WorkshopRepairFixture {
     inventory = {};
     auto initialize = [missing_dp, pp](auto& item, int id) {
       item.id = static_cast<decltype(item.id)>(id);
-      item.maxDp = 10000;
-      item.currentDp = static_cast<u_short>(10000 - missing_dp);
-      item.maxPp = 200;
-      item.currentPp = static_cast<u_short>(pp);
+      item.max_dp = 10000;
+      item.current_dp = static_cast<u_short>(10000 - missing_dp);
+      item.max_pp = 200;
+      item.current_pp = static_cast<u_short>(pp);
     };
     initialize(inventory.blades[0], 14);
     inventory.blades[0].index = 1;
@@ -497,13 +498,13 @@ struct WorkshopRepairFixture {
     actor.stats = &stats;
     inventory.weapons[0].index = 1;
     inventory.weapons[0].blade = inventory.weapons[0].grip = 1;
-    inventory.weapons[0].isEquipped = 1;
-    inventory.blades[0].assembledWeaponIndex = 1;
+    inventory.weapons[0].is_equipped = 1;
+    inventory.blades[0].assembled_weapon_index = 1;
     inventory.blades[0].category = 2;
     inventory.grips[0].id = 96;
     inventory.grips[0].category = 1;
-    inventory.grips[0].index = inventory.grips[0].assembledWeaponIndex = 1;
-    inventory.shields[0].isEquipped = 1;
+    inventory.grips[0].index = inventory.grips[0].assembled_weapon_index = 1;
+    inventory.shields[0].is_equipped = 1;
     inventory.armor[0].limb = 1;
     VS::Items::Inventory::RebuildLiveDisplayIndices(0);
     VS::Items::EquipLiveAshleyWeapon(&inventory.weapons[0]);
@@ -610,7 +611,7 @@ struct WorkshopRecipeFixture {
         result.id,           result.sub_id,     result.weapon_model_id,
         result.category,     result.material,   result.strength,
         result.intelligence, result.agility,    result.DamageType(),
-        result.CostType(),   result.cost,       result.opaque12,
+        result.CostType(),   result.cost,       result.recovery_delay,
         result.max_dp,       result.current_dp, result.max_pp,
         result.current_pp,   result.index,      result.assembled_weapon_index};
     const std::array<int, 18> expected{31, 31, 35, 4,    5,    13,  4,  -2, 2,
@@ -657,8 +658,8 @@ TEST_CASE("Workshop repair restores DP with original rounded PP cost",
   REQUIRE(fixture.Tick() == -1);
   auto expected = original;
   auto repaired = [missing, pp](auto& item) {
-    item.currentDp = item.maxDp;
-    item.currentPp = static_cast<u_short>(std::max(0, pp - missing / 100));
+    item.current_dp = item.max_dp;
+    item.current_pp = static_cast<u_short>(std::max(0, pp - missing / 100));
   };
   repaired(expected.blades[0]);
   repaired(expected.shields[0].base);
@@ -725,8 +726,8 @@ TEST_CASE("Workshop repair refreshes equipped runtime DP and PP",
   const std::array<int, 5> expected{10000, 10000, 10000, remaining_pp,
                                     remaining_pp};
   CHECK(actual == expected);
-  CHECK(VS::Items::inventory.weapons[0].isEquipped == 1);
-  CHECK(VS::Items::inventory.shields[0].isEquipped == 1);
+  CHECK(VS::Items::inventory.weapons[0].is_equipped == 1);
+  CHECK(VS::Items::inventory.shields[0].is_equipped == 1);
   CHECK(VS::Items::inventory.armor[0].limb == 1);
 }
 
@@ -871,17 +872,17 @@ TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
   WorkshopChoicesFixture fixture;
   auto& inventory = VS::Items::inventory;
   inventory.weapons[2].index = 3;
-  inventory.grips[0].gemSlots = static_cast<char>(slots);
+  inventory.grips[0].gem_slots = static_cast<char>(slots);
   setup::LiveSetupState().combining_item = 2;
   auto expected = inventory;
   auto& weapon = expected.weapons[2];
   weapon.blade = weapon.grip = 1;
-  std::fill_n(weapon.name, std::size(weapon.name), static_cast<char>(0xE7));
-  expected.blades[0].assembledWeaponIndex = 3;
-  expected.grips[0].assembledWeaponIndex = 3;
+  weapon.name.fill(static_cast<char>(0xE7));
+  expected.blades[0].assembled_weapon_index = 3;
+  expected.grips[0].assembled_weapon_index = 3;
   for (int index = 0; index < slots; ++index) {
     weapon.gems[index] = static_cast<u_char>(index + 1);
-    expected.gems[index].setItemIndex = 3;
+    expected.gems[index].set_item_index = 3;
   }
   constexpr std::array<std::uint8_t, 4> kGems{1, 2, 3, 0};
   for (int repeat = 0; repeat < 2; ++repeat) {
@@ -890,10 +891,10 @@ TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
   }
   expected.weapons[2] = {};
   expected.weapons[2].index = 3;
-  expected.blades[0].assembledWeaponIndex = 0;
-  expected.grips[0].assembledWeaponIndex = 0;
+  expected.blades[0].assembled_weapon_index = 0;
+  expected.grips[0].assembled_weapon_index = 0;
   for (int index = 0; index < slots; ++index) {
-    expected.gems[index].setItemIndex = 0;
+    expected.gems[index].set_item_index = 0;
   }
   for (int repeat = 0; repeat < 2; ++repeat) {
     RunSetup([](setup::Context& c) { setup::DisassembleWeapon(c, 2); });
@@ -906,15 +907,15 @@ TEST_CASE("Shield disassembly releases only its attached gem ownership",
   const int slots = GENERATE(0, 1, 2, 3);
   WorkshopChoicesFixture fixture;
   auto& inventory = VS::Items::inventory;
-  inventory.shields[4].base.gemSlots = static_cast<char>(slots);
+  inventory.shields[4].base.gem_slots = static_cast<char>(slots);
   for (int index = 0; index < slots; ++index) {
     inventory.shields[4].gems[index] = static_cast<u_char>(index + 1);
-    inventory.gems[index].setItemIndex = 0x85;
+    inventory.gems[index].set_item_index = 0x85;
   }
   auto expected = inventory;
-  std::fill_n(expected.shields[4].gems, slots, 0);
+  std::fill_n(expected.shields[4].gems.begin(), slots, 0);
   for (int index = 0; index < slots; ++index) {
-    expected.gems[index].setItemIndex = 0;
+    expected.gems[index].set_item_index = 0;
   }
   RunSetup([](setup::Context& c) { setup::DetachShieldGems(c, 4); });
   CHECK(std::memcmp(&inventory, &expected, sizeof(inventory)) == 0);

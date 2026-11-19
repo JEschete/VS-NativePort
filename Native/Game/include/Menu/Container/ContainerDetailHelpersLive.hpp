@@ -1,18 +1,16 @@
 #pragma once
+#include "Items/ItemRecords.hpp"
 
 struct Items_WeaponLoadout;
 struct Items_ShieldLoadout;
-struct Items_InventoryWeapon;
-struct Items_InventoryShield;
-struct Items_ContainerData;
 
 namespace VS::Menu::container {
 void BuildLiveWeaponStats(Items_WeaponLoadout* target,
-                          Items_InventoryWeapon* source,
-                          Items_ContainerData* container);
+                          const VS::Items::InventoryWeapon* source,
+                          VS::Items::ContainerData* container);
 void BuildLiveShieldStats(Items_ShieldLoadout* target,
-                          Items_InventoryShield* source,
-                          Items_ContainerData* container);
+                          const VS::Items::InventoryShield* source,
+                          VS::Items::ContainerData* container);
 void SetLivePanelVisibility(char visibility);
 [[nodiscard]] int PollLiveDetailsPaging(int category, int page);
 void BeginLiveDetailsTransition(int selected_row);

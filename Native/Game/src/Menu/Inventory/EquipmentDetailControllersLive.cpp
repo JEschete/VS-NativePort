@@ -11,7 +11,7 @@
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
@@ -61,7 +61,7 @@ void RequireRows() {
 }
 
 template <typename Record, std::size_t Count>
-Record& Referenced(Record (&table)[Count], std::uint32_t reference) {
+Record& Referenced(std::array<Record, Count>& table, std::uint32_t reference) {
   if (reference == 0 || reference > Count) {
     Refuse("equipment reference outside its inventory table");
   }
@@ -69,8 +69,9 @@ Record& Referenced(Record (&table)[Count], std::uint32_t reference) {
 }
 
 template <typename Record, std::size_t Count>
-void RequireBoundTable(const Record* bound, Record (&table)[Count]) {
-  if (bound != table) {
+void RequireBoundTable(const Record* bound,
+                       const std::array<Record, Count>& table) {
+  if (bound != table.data()) {
     Refuse("equipment table is not the current inventory");
   }
 }
@@ -95,7 +96,7 @@ void RequireGem(std::uint8_t reference) {
   (void)Referenced(VS::Items::inventory.gems, reference);
 }
 
-void RequireWeaponParts(const Items_InventoryWeapon& weapon) {
+void RequireWeaponParts(const VS::Items::InventoryWeapon& weapon) {
   RequireBoundTable(VS::Menu::Framework::blades, VS::Items::inventory.blades);
   RequireBoundTable(VS::Menu::Framework::grips, VS::Items::inventory.grips);
   (void)Referenced(VS::Items::inventory.blades, weapon.blade);
@@ -154,7 +155,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
                             VS::Items::inventory.weapons);
           const auto& weapon =
               Referenced(VS::Items::inventory.weapons, reference);
-          if (weapon.isEquipped != 0) {
+          if (weapon.is_equipped != 0) {
             RequireAshleyStats();
           } else {
             RequireWeaponParts(weapon);
@@ -180,7 +181,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
                             VS::Items::inventory.shields);
           const auto& shield =
               Referenced(VS::Items::inventory.shields, reference);
-          if (shield.isEquipped != 0) {
+          if (shield.is_equipped != 0) {
             RequireAshleyStats();
           } else {
             for (std::size_t gem = 0; gem < Items::kWeaponGemCount; ++gem) {
@@ -279,9 +280,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
                                               text.row_type, page.index);
   }
   std::uint8_t GripGemSlots(InventorySlot slot) override {
-    return Items::Live::Typed(
-               Referenced(VS::Items::inventory.grips, slot.one_based))
-        .gem_slots;
+    return Referenced(VS::Items::inventory.grips, slot.one_based).gem_slots;
   }
   void DrawGripGemSlotCount(std::uint8_t slots) override {
     g_gem_count_text[kGemDigit] =
@@ -328,7 +327,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
     if (row == 2) {
       RequireText(false, true);
     } else if (row >= kFirstWeaponGemRow && row <= kLastWeaponGemRow &&
-               row - kFirstWeaponGemRow < grip.gemSlots) {
+               row - kFirstWeaponGemRow < grip.gem_slots) {
       RequireGem(
           weapon.gems[static_cast<std::size_t>(row - kFirstWeaponGemRow)]);
       RequireText(false, false);
@@ -340,7 +339,7 @@ class LiveWorld final : public LiveDetailWorld<EquipmentDetailWorld> {
     const auto& shield =
         Referenced(VS::Items::inventory.shields, slot.one_based);
     if (row >= 1 && row <= kLastShieldGemRow &&
-        row - 1 < shield.base.gemSlots) {
+        row - 1 < shield.base.gem_slots) {
       RequireGem(shield.gems[static_cast<std::size_t>(row - 1)]);
       RequireText(false, false);
     }

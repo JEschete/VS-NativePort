@@ -12,7 +12,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/DetailDispatchLiveSupport.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
@@ -75,7 +75,7 @@ Framework::MenuRow& Row(DetailRowId row) {
 }
 
 template <typename Record, std::size_t Count>
-Record& Referenced(Record (&table)[Count], InventorySlot slot) {
+Record& Referenced(std::array<Record, Count>& table, InventorySlot slot) {
   if (slot.one_based == 0 || slot.one_based > Count) {
     Refuse("item detail reference outside its inventory table");
   }
@@ -83,8 +83,9 @@ Record& Referenced(Record (&table)[Count], InventorySlot slot) {
 }
 
 template <typename Record, std::size_t Count>
-void RequireBoundTable(const Record* bound, Record (&table)[Count]) {
-  if (bound != table) {
+void RequireBoundTable(const Record* bound,
+                       const std::array<Record, Count>& table) {
+  if (bound != table.data()) {
     Refuse("item detail table is not the current inventory");
   }
 }
@@ -174,8 +175,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
       if (slot.one_based != 0) {
         RequireBoundTable(VS::Menu::Framework::armor,
                           VS::Items::inventory.armor);
-        const auto armor =
-            Items::Live::Typed(Referenced(VS::Items::inventory.armor, slot));
+        const auto armor = Referenced(VS::Items::inventory.armor, slot);
         if (armor.limb >= 1 && armor.limb <= Items::kLimbCount &&
             (Battle_characterState == nullptr ||
              Battle_characterState->stats == nullptr)) {
@@ -190,8 +190,8 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
     }
   }
   bool ArmorShowsDp(InventorySlot slot) override {
-    return Items::Live::Typed(Referenced(VS::Items::inventory.armor, slot))
-               .category != kAccessoryCategory;
+    return Referenced(VS::Items::inventory.armor, slot).category !=
+           kAccessoryCategory;
   }
   void OpenDpBar() override {
     Framework::UpdateLiveDpPpBars(Framework::dp_pp_bars::kDp);
@@ -218,7 +218,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
         buffer, buffer == nullptr ? 0 : Framework::kStringBufferBytes};
     if (category_ == Category::kArmor) {
       auto& record = Referenced(VS::Items::inventory.armor, slot);
-      const auto armor = Items::Live::Typed(record);
+      const auto armor = record;
       if (armor.category == 0 || armor.category > kAccessoryCategory) {
         Refuse("used armor row category outside its help entries");
       }

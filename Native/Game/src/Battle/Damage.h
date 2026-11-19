@@ -1,8 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #pragma once
-#include "Legacy/Psx.h"
-
-
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
@@ -11,8 +8,9 @@
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
+#include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 
 extern u_short Battle_bladePpDamageBonuses[12];

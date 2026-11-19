@@ -44,7 +44,7 @@
 #include "Field/Room.h"
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"

@@ -82,7 +82,7 @@ constexpr std::size_t kBladeCategoryByte = 2;
 constexpr std::size_t kBladeDamageTypeByte = 3;
 constexpr std::size_t kBladeCostTypeByte = 4;
 constexpr std::size_t kBladeCostByte = 5;
-constexpr std::size_t kBladeOpaqueByte = 6;
+constexpr std::size_t kBladeRecoveryDelayByte = 6;
 constexpr std::size_t kBladeStrengthByte = 8;
 constexpr std::size_t kBladeIntelligenceByte = 9;
 constexpr std::size_t kBladeAgilityByte = 10;
@@ -1181,7 +1181,7 @@ BladeRecipe DecodeBladeRecipe(
           .damage_type = record[kBladeDamageTypeByte],
           .cost_type = record[kBladeCostTypeByte],
           .cost = record[kBladeCostByte],
-          .opaque = record[kBladeOpaqueByte],
+          .recovery_delay = record[kBladeRecoveryDelayByte],
           .strength = record[kBladeStrengthByte],
           .intelligence = record[kBladeIntelligenceByte],
           .agility = record[kBladeAgilityByte],
@@ -1278,15 +1278,9 @@ std::expected<Items::InventoryBlade, std::string> BuildCombinedBlade(
   result.category = info->category;
   result.cost = info->cost;
   // The blade's type byte keeps its bits above the damage and cost types.
-  constexpr std::uint8_t kBladeTypeBits =
-      Items::kBladeDamageTypeMask |
-      (Items::kBladeCostTypeMask << Items::kBladeCostTypeShift);
-  result.type_bits = static_cast<std::uint8_t>(
-      (first.type_bits & ~kBladeTypeBits) |
-      (info->damage_type & Items::kBladeDamageTypeMask) |
-      ((info->cost_type & Items::kBladeCostTypeMask)
-       << Items::kBladeCostTypeShift));
-  result.opaque12 = info->opaque;
+  result.SetDamageType(info->damage_type);
+  result.SetCostType(info->cost_type);
+  result.recovery_delay = info->recovery_delay;
   result.range = info->range;
   result.strength = WithBonus(info->strength, recipe->bonus.strength);
   result.intelligence =

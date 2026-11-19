@@ -1,8 +1,8 @@
 #pragma once
+#include "Items/ItemRecords.hpp"
 // Hand-maintained (tools/port/owned.csv).
 
 struct Battle_Actor;
-struct Items_TreasureChest;
 
 // Binds the loot rules (Loot.hpp) to the battle loot list
 // (VS::Items::lootListHead, whose nodes live on the game heap), the battle flow
@@ -18,12 +18,12 @@ void PresentLiveScriptedLoot(int id0, int count0, int id1, int count1);
 void ClearLiveRoomLootList();
 
 // The chest standing on the tile, or null.
-Items_TreasureChest* FindLiveTreasureChestAtTile(int tile_x, int tile_z,
-                                                 int tile_layer);
+VS::Items::TreasureChest* FindLiveTreasureChestAtTile(int tile_x, int tile_z,
+                                                      int tile_layer);
 void RestoreLiveRoomChestStates();
 // The room's chests and their count; null and 0 without a loot section.
-Items_TreasureChest* LiveRoomTreasureChests(int* chest_count_out);
-// Copies a room's MPD loot section (one Items_BattleLoot) into its first
+VS::Items::TreasureChest* LiveRoomTreasureChests(int* chest_count_out);
+// Copies a room's MPD loot section (one VS::Items::BattleLoot) into its first
 // chest.
 void LoadLiveRoomChestLoot(const void* loot_section);
 }  // namespace VS::Items

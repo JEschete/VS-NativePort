@@ -47,10 +47,10 @@ struct LiveFixture : equipment_detail_tests::LiveFixture {
 
   void AddContainerWeapon() {
     auto& owner = containers.storage->container.items;
-    items::Live::Commit(std::span(owner.blades).back(), samples::kBlade);
-    items::Live::Commit(std::span(owner.grips).back(), samples::kGrip);
-    items::Live::Commit(std::span(owner.gems).back(), samples::kWeaponGem);
-    items::Live::Commit(std::span(owner.weapons).back(), samples::kWeapon);
+    owner.blades.back() = samples::kBlade;
+    owner.grips.back() = samples::kGrip;
+    owner.gems.back() = samples::kWeaponGem;
+    owner.weapons.back() = samples::kWeapon;
   }
 
   void ActivateOtherRow() {
@@ -147,8 +147,7 @@ TEST_CASE("F02925 live stats use actual record conversion and equipment rules",
   auto& owner = fixture.containers.storage->container.items;
   const auto source = samples::kWeapon;
   Items_WeaponLoadout target{};
-  detail::BuildLiveWeaponStats(&target, &std::span(owner.weapons).back(),
-                               &owner);
+  detail::BuildLiveWeaponStats(&target, &owner.weapons.back(), &owner);
   const auto native = items::Live::Typed(target);
   CHECK(native.blade.id == 41);
   CHECK(native.grip.id == 300);
@@ -164,7 +163,7 @@ TEST_CASE("F02925 actual item-row host reloads its current container owner",
   LiveFixture fixture;
   fixture.AddContainerWeapon();
   VS::Menu::Framework::weapons =
-      fixture.containers.storage->container.items.weapons;
+      fixture.containers.storage->container.items.weapons.data();
   fw::LiveItemRowsHost host;
   auto loadout = host.InventoryWeaponLoadout(samples::kWeapon);
   if (!loadout) {
@@ -188,7 +187,7 @@ TEST_CASE("F02925 actual item-row host reloads its current container owner",
 TEST_CASE("F02925 zero optional parts do not require a container owner",
           "[container-detail-helpers-live][F02925]") {
   LiveFixture fixture;
-  Items_InventoryWeapon source{};
+  VS::Items::InventoryWeapon source{};
   source.name[std::size(source.name) - 1] = 'z';
   Items_WeaponLoadout target{};
   Menu_Container_containerData = nullptr;
@@ -203,13 +202,11 @@ TEST_CASE(
     "[container-detail-helpers-live][F02926]") {
   LiveFixture fixture;
   auto& owner = fixture.containers.storage->container.items;
-  items::Live::Commit(owner.gems[samples::kFlaggedGemIndex],
-                      samples::kShieldGem);
-  items::Live::Commit(std::span(owner.shields).back(), samples::kShield);
+  owner.gems[samples::kFlaggedGemIndex] = samples::kShieldGem;
+  owner.shields.back() = samples::kShield;
   Items_ShieldLoadout target{};
   std::span(target.reserved0).back() = samples::kReservedHeaderTail;
-  detail::BuildLiveShieldStats(&target, &std::span(owner.shields).back(),
-                               &owner);
+  detail::BuildLiveShieldStats(&target, &owner.shields.back(), &owner);
   CHECK(target.index == 255);
   CHECK(target.base.id == 31);
   CHECK(target.gems[0].id == 500);
@@ -226,9 +223,8 @@ TEST_CASE("F02926 actual item-row host uses flagged container gem records",
           "[container-detail-helpers-live][F02926]") {
   LiveFixture fixture;
   auto& owner = fixture.containers.storage->container.items;
-  items::Live::Commit(owner.gems[samples::kFlaggedGemIndex],
-                      samples::kShieldGem);
-  VS::Menu::Framework::shields = owner.shields;
+  owner.gems[samples::kFlaggedGemIndex] = samples::kShieldGem;
+  VS::Menu::Framework::shields = owner.shields.data();
   fw::LiveItemRowsHost host;
   const auto loadout = host.InventoryShieldLoadout(samples::kShield);
   if (!loadout) {

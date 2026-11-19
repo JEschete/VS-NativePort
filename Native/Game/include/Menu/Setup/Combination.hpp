@@ -47,7 +47,8 @@ inline constexpr std::size_t kBladeRecipeBytes = 16;
 inline constexpr std::size_t kArmorRecipeBytes = 8;
 
 // A BLADE.SYD result record (_combineBlades' info): the combined blade's
-// model, category, damage and cost types, cost, unknown byte 6, base
+// model, category, damage and cost types, cost, recovery delay (byte 6, the
+// decomp's unk6, copied to the blade's unk12 at MENUC.PRG 168.c:4973), base
 // strength, intelligence and agility and its ranges and shape.
 struct BladeRecipe {
   std::uint8_t model = 0;
@@ -55,7 +56,7 @@ struct BladeRecipe {
   std::uint8_t damage_type = 0;
   std::uint8_t cost_type = 0;
   std::uint8_t cost = 0;
-  std::uint8_t opaque = 0;
+  std::uint8_t recovery_delay = 0;
   std::uint8_t strength = 0;
   std::uint8_t intelligence = 0;
   std::uint8_t agility = 0;

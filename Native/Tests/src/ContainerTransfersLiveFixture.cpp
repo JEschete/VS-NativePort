@@ -4,7 +4,7 @@
 #include <array>
 
 #include "Items/ContainerIndexing.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 
 namespace container_transfers_tests {
 LiveFixture::LiveFixture() {
@@ -16,13 +16,14 @@ LiveFixture::LiveFixture() {
   std::copy_n(Menu_Inventory_inventoryIndices, saved_indices.size(),
               saved_indices.begin());
   const std::array<unsigned char*, items::kItemCategoryCount - 1> indices{
-      order.weapons, order.blades, order.grips, order.shields,
-      order.armor,   order.gems,   order.misc};
+      order.weapons.data(), order.blades.data(), order.grips.data(),
+      order.shields.data(), order.armor.data(),  order.gems.data(),
+      order.misc.data()};
   std::copy(indices.begin(), indices.end(), Menu_Inventory_inventoryIndices);
   VS::Menu::Framework::inventoryStorage = storage.get();
   Menu_Container_containerData = &storage->container;
   Menu_Container_otherStorage = &storage->container;
-  items::Live::Commit(VS::Items::inventory, items::InventoryContents{});
+  VS::Items::inventory = items::InventoryContents{};
 }
 
 LiveFixture::~LiveFixture() {
@@ -30,7 +31,7 @@ LiveFixture::~LiveFixture() {
             Menu_Container_containerItemCapacities);
   std::copy(saved_indices.begin(), saved_indices.end(),
             Menu_Inventory_inventoryIndices);
-  items::Live::Commit(VS::Items::inventory, saved_inventory);
+  VS::Items::inventory = saved_inventory;
   Menu_Container_transferredMiscCount = saved_count;
   VS::Menu::Framework::inventoryStorage = saved_storage;
   Menu_Container_containerData = saved_owner;

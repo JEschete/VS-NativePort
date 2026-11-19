@@ -76,7 +76,7 @@ struct LivePicker {
 LivePicker picker;
 std::optional<std::filesystem::path> directory;
 std::optional<Files> files;
-std::optional<Items_ContainerData> staged_storage;
+std::optional<VS::Items::ContainerData> staged_storage;
 std::optional<Document> staged_clear;
 std::array<char, kFooterTextLimit + 1> footer{};
 
@@ -105,7 +105,7 @@ void ForgetPicker() {
   picker.confirmed.reset();
 }
 
-bool BankEmpty(const Items_ContainerData& bank) {
+bool BankEmpty(const VS::Items::ContainerData& bank) {
   const auto empty = [](const auto& item) { return item.id == 0; };
   return std::ranges::all_of(
              bank.weapons, [](const auto& item) { return item.blade == 0; }) &&
@@ -265,7 +265,7 @@ std::expected<FileInfo, FileMenuError> ReadConfirmedSelection(
   return std::move(*current);
 }
 
-std::expected<Items_ContainerData, std::string> BankFor(
+std::expected<VS::Items::ContainerData, std::string> BankFor(
     const file_menu::FileMenu& menu, const FileInfo& selected) {
   if (menu.container) {
     if (!staged_storage) {
@@ -274,7 +274,7 @@ std::expected<Items_ContainerData, std::string> BankFor(
     return *staged_storage;
   }
   if (selected.document) return selected.document->state.storage;
-  return Items_ContainerData{};
+  return VS::Items::ContainerData{};
 }
 
 std::expected<Document, std::string> BuildDocument(
@@ -289,7 +289,7 @@ std::expected<Document, std::string> BuildDocument(
     document = *staged_clear;
     // F03601 TITLE 22C.c:698 preserves the source's partial container reset.
     std::fill_n(std::begin(bank->misc), kClearContainerResetStacks,
-                Items_InventoryMisc{});
+                VS::Items::InventoryMisc{});
     document.state.storage = *bank;
   } else {
     auto captured = Capture(*bank);
@@ -624,7 +624,7 @@ void DrawFileOverlay(bool title) {
   if (screen && screen->title == title) DrawNativeFileScreen(*screen);
 }
 
-Items_ContainerData* ContainerData() {
+VS::Items::ContainerData* ContainerData() {
   if (!staged_storage) {
     VS::Core::LogError("save",
                        "Container access without a selected native file");

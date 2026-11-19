@@ -36,8 +36,8 @@ TEST_CASE("F02935 binds actual MENUD zero-argument refresh entry",
 TEST_CASE("F02936 binds actual MENUD four-argument int record-copy entry",
           "[container-transfers-module][F02936]") {
   static_assert(std::is_same_v<decltype(&items::CopyLiveContainerItem),
-                               int (*)(int, Items_ContainerData*, int,
-                                       Items_ContainerData*)>);
+                               int (*)(int, VS::Items::ContainerData*, int,
+                                       VS::Items::ContainerData*)>);
   CHECK(IsBound(0x801032AC, &items::CopyLiveContainerItem));
 }
 
@@ -45,7 +45,7 @@ TEST_CASE("F02937 binds actual MENUD void category rebuild entry",
           "[container-transfers-module][F02937]") {
   static_assert(
       std::is_same_v<decltype(&items::RebuildLiveContainerCategoryIndices),
-                     void (*)(int, Items_Container*)>);
+                     void (*)(int, VS::Items::Container*)>);
   CHECK(IsBound(0x801037D8, &items::RebuildLiveContainerCategoryIndices));
 }
 
@@ -62,14 +62,14 @@ TEST_CASE("F02939 binds actual MENUD zero-argument commit entry",
 TEST_CASE("F02940 binds actual MENUD three-argument int weapon parent entry",
           "[container-transfers-module][F02940]") {
   static_assert(std::is_same_v<decltype(&items::LiveContainerParentWeaponIndex),
-                               int (*)(int, int, Items_ContainerData*)>);
+                               int (*)(int, int, VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80103C9C, &items::LiveContainerParentWeaponIndex));
 }
 
 TEST_CASE("F02941 binds actual MENUD three-argument int shield parent entry",
           "[container-transfers-module][F02941]") {
   static_assert(std::is_same_v<decltype(&items::LiveContainerParentShieldIndex),
-                               int (*)(int, int, Items_ContainerData*)>);
+                               int (*)(int, int, VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80103D14, &items::LiveContainerParentShieldIndex));
 }
 
@@ -90,6 +90,7 @@ TEST_CASE(
   CHECK(Menu_Container_containerData == &owner);
   CHECK(Menu_Container_transferredMiscCount == 91);
   CHECK(fixture.storage->itemsToTransfer[0] == 0x600);
-  CHECK(items::LiveContainerCategoryIndices(6, &owner) == owner.indices.misc);
+  CHECK(items::LiveContainerCategoryIndices(6, &owner) ==
+        owner.indices.misc.data());
   CHECK(items::CountLiveContainerItems(6, &owner.items) == 1);
 }

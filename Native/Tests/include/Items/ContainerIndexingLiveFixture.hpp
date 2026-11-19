@@ -15,9 +15,9 @@ namespace items = VS::Items;
 struct LiveFixture {
   std::array<std::uint16_t, items::kItemCategoryCount> saved_capacities{};
   std::uint16_t saved_misc_count = Menu_Container_transferredMiscCount;
-  Items_Container* saved_owner = Menu_Container_containerData;
-  Items_Container owner{};
-  Items_Container replacement{};
+  VS::Items::Container* saved_owner = Menu_Container_containerData;
+  VS::Items::Container owner{};
+  VS::Items::Container replacement{};
 
   LiveFixture() {
     std::copy_n(Menu_Container_containerItemCapacities, saved_capacities.size(),

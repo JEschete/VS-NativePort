@@ -11,7 +11,7 @@
 #include "Actors/RoomActorCache.h"
 #include "Field/Mpd.h"
 #include "Input/Settings.hpp"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 #include "State/Ashley.hpp"
 #include "State/Progress.hpp"
@@ -87,9 +87,9 @@ struct Snapshot {
   std::array<bool, kLearnedActionCount> learned_actions{};
   VS::Input::Settings settings{};
   VS::State::AshleyStatsSnapshot ashley{};
-  Items_Inventory inventory{};
-  Items_InventoryIndices inventory_order{};
-  Items_ContainerData storage{};
+  VS::Items::InventoryContents inventory{};
+  VS::Items::InventoryIndices inventory_order{};
+  VS::Items::ContainerData storage{};
   VS::State::RoomVisitFlags visits{};
   VS::State::ArtsStatus arts{};
   VS::State::ScoreData score{};

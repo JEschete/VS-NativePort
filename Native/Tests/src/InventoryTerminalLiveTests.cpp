@@ -30,8 +30,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/RoomRenderingLiveState.hpp"
-#include "Items/Inventory.h"
-#include "Items/Loot.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
@@ -234,8 +233,10 @@ struct LootFixture : TextLoadingFixture {
   static constexpr std::array kConsolidationRows{loot::LootRow{1, 0, 0, 0},
                                                  loot::LootRow{6, 0, 0, 0},
                                                  loot::LootRow{6, 1, 0, 0}};
-  ValueRestore<Items_Inventory*> saved_loot_inventory{Menu_Loot_inventory};
-  ValueRestore<Items_Inventory*> saved_backup{Menu_Loot_inventoryBackup};
+  ValueRestore<VS::Items::InventoryContents*> saved_loot_inventory{
+      Menu_Loot_inventory};
+  ValueRestore<VS::Items::InventoryContents*> saved_backup{
+      Menu_Loot_inventoryBackup};
   ValueRestore<Menu_Loot_LootListItem*> saved_loot_rows{Menu_Loot_lootList};
   ValueRestore<Menu_Loot_LootListItem*> saved_working{
       Menu_Loot_lootListWorkingCopy};
@@ -523,7 +524,8 @@ TEST_CASE(
   const auto refusals = loot::LootTerminalLiveRefusalCount();
   for (int visit = 0; visit < 2; ++visit) {
     fixture.OpenAndLoad();
-    Battle_stringContext.strings[0] = Menu_Loot_inventory->weapons[0].name;
+    Battle_stringContext.strings[0] =
+        Menu_Loot_inventory->weapons[0].name.data();
     if (cold) {
       const auto entry = +[] { return 0; };
       CHECK(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
@@ -546,13 +548,13 @@ TEST_CASE(
   fixture.OpenAndLoad();
   fixture.SeedConsolidation();
   auto& staged = *Menu_Loot_inventory;
-  const auto before = VS::Items::Live::Typed(staged);
+  const auto before = staged;
   REQUIRE(loot::UpdateLiveStackConsolidation(0) == 0);
   CHECK(Menu_Loot_lootListCount == 1);
   CHECK(staged.misc[0].count == 5);
   fixture.OpenConsolidationPrompt();
   fixture.AnswerConsolidation(confirm);
-  const auto after = VS::Items::Live::Typed(staged);
+  const auto after = staged;
   std::uint32_t total = 0;
   for (const auto& item : after.misc) {
     if (item.id == 323) total += item.count;

@@ -2,6 +2,7 @@
 
 #include "Field/ChestInteractions.hpp"
 #include "Field/InteractionTarget.hpp"
+#include "Items/ItemRecords.hpp"
 
 struct Field_MpdLockTrigger;
 struct Actors_ActorLocation;
@@ -9,7 +10,6 @@ struct Actors_ActorLocationQuery;
 struct Actors_ActorRecord;
 struct Effects_ActionEffectRequest;
 struct SVECTOR;
-struct Items_TreasureChest;
 
 namespace VS::Field {
 inline constexpr int kEntranceRecordBytes = 12;
@@ -23,7 +23,7 @@ int CheckAshleyTileTriggersEntry(int actor, unsigned char* location);
 int CheckActorTrapAndFallTriggersEntry(int actor,
                                        Actors_ActorLocation* location);
 Field_MpdLockTrigger* FindFacingRoomObjectEntry(int actor);
-Items_TreasureChest* FindFacingUnlootedChestEntry(int actor);
+VS::Items::TreasureChest* FindFacingUnlootedChestEntry(int actor);
 int TryTriggerFacingTileEventEntry(int actor);
 int TileInFrontOfActorEntry(Actors_ActorLocationQuery* actor,
                             unsigned char* output);

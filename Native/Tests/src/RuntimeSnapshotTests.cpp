@@ -56,7 +56,6 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
@@ -297,7 +296,7 @@ struct RuntimeFixture {
   Battle_Ai_ActorAiState enemy_ai{};
   Field_MpdEnvironment environment{};
   Field_CameraTransition camera_transition{};
-  Items_ContainerData storage{};
+  VS::Items::ContainerData storage{};
 
   RuntimeFixture() {
     REQUIRE_FALSE(Save::ResumePending());
@@ -456,13 +455,13 @@ struct RuntimeFixture {
     stored_weapon.blade = stored_weapon.grip = 64;
     stored_weapon.gems[0] = 192;
     storage.blades[63].id = 95;
-    storage.blades[63].wepId = 1;
-    storage.blades[63].assembledWeaponIndex = 32;
+    storage.blades[63].weapon_model_id = 1;
+    storage.blades[63].assembled_weapon_index = 32;
     storage.grips[63].id = 126;
-    storage.grips[63].gemSlots = 1;
-    storage.grips[63].assembledWeaponIndex = 32;
+    storage.grips[63].gem_slots = 1;
+    storage.grips[63].assembled_weapon_index = 32;
     storage.gems[191].id = 307;
-    storage.gems[191].setItemIndex = 32;
+    storage.gems[191].set_item_index = 32;
     storage.gems[191].index = 192;
   }
 
@@ -471,41 +470,41 @@ struct RuntimeFixture {
     auto& blade = items.blades[0];
     blade.id = 14;
     blade.index = 1;
-    blade.wepId = 1;
+    blade.weapon_model_id = 1;
     blade.category = 3;
-    blade.assembledWeaponIndex = 1;
-    blade.maxDp = 500;
-    blade.currentDp = 400;
-    blade.maxPp = 200;
-    blade.currentPp = 150;
+    blade.assembled_weapon_index = 1;
+    blade.max_dp = 500;
+    blade.current_dp = 400;
+    blade.max_pp = 200;
+    blade.current_pp = 150;
     auto& grip = items.grips[0];
     grip.id = 96;
     grip.index = 1;
-    grip.gemSlots = 3;
-    grip.assembledWeaponIndex = 1;
+    grip.gem_slots = 3;
+    grip.assembled_weapon_index = 1;
     auto& weapon = items.weapons[0];
     weapon.index = 1;
-    weapon.isEquipped = 1;
+    weapon.is_equipped = 1;
     weapon.blade = weapon.grip = 1;
     weapon.gems[0] = 1;
     auto& shield = items.shields[0];
-    shield.index = shield.isEquipped = 1;
+    shield.index = shield.is_equipped = 1;
     shield.base.id = 127;
-    shield.base.wepId = 2;
-    shield.base.gemSlots = 1;
-    shield.base.maxDp = shield.base.currentDp = 300;
-    shield.base.maxPp = shield.base.currentPp = 100;
+    shield.base.weapon_model_id = 2;
+    shield.base.gem_slots = 1;
+    shield.base.max_dp = shield.base.current_dp = 300;
+    shield.base.max_pp = shield.base.current_pp = 100;
     shield.gems[0] = 2;
     items.gems[0].id = 261;
     items.gems[0].index = 1;
-    items.gems[0].setItemIndex = 1;
+    items.gems[0].set_item_index = 1;
     items.gems[1].id = 262;
     items.gems[1].index = 2;
-    items.gems[1].setItemIndex = 0x81;
+    items.gems[1].set_item_index = 0x81;
     auto& armor = items.armor[0];
     armor.id = 140;
     armor.index = armor.limb = 1;
-    armor.maxDp = armor.currentDp = 500;
+    armor.max_dp = armor.current_dp = 500;
     auto& accessory = items.armor[1];
     accessory.id = 150;
     accessory.category = 7;
@@ -732,11 +731,11 @@ void CheckCapturedStats(const Save::Snapshot& state) {
 }
 
 void CheckCapturedEquipment(const Save::Snapshot& state) {
-  CHECK(state.inventory.blades[0].currentDp == 101);
-  CHECK(state.inventory.blades[0].currentPp == 67);
-  CHECK(state.inventory.shields[0].base.currentDp == 201);
-  CHECK(state.inventory.shields[0].base.currentPp == 37);
-  CHECK(state.inventory.armor[0].currentDp == 321);
+  CHECK(state.inventory.blades[0].current_dp == 101);
+  CHECK(state.inventory.blades[0].current_pp == 67);
+  CHECK(state.inventory.shields[0].base.current_dp == 201);
+  CHECK(state.inventory.shields[0].base.current_pp == 37);
+  CHECK(state.inventory.armor[0].current_dp == 321);
   CHECK(state.inventory.weapons[0].name[3] == static_cast<char>(0xE7));
   CHECK(state.inventory_order.armor[1] == 2);
 }
@@ -986,10 +985,10 @@ void InvalidateSnapshot(Save::Snapshot& state, int defect) {
   InvalidateCameraSnapshot(state, defect);
   if (defect == 0) state.inventory.weapons[0].blade = 17;
   if (defect == 1) state.inventory.grips[0].id = 127;
-  if (defect == 2) state.inventory.gems[1].setItemIndex = 0xFFFF;
+  if (defect == 2) state.inventory.gems[1].set_item_index = 0xFFFF;
   if (defect == 3) state.inventory.shields[0].gems[0] = 0x80;
   if (defect == 4) state.inventory_order.gems[1] = 1;
-  if (defect == 5) state.inventory.blades[0].wepId = 127;
+  if (defect == 5) state.inventory.blades[0].weapon_model_id = 127;
   if (defect == 6) state.location.zone = 13;
   if (defect == 7) state.location.room = 1;
   if (defect == 8) state.location.scene = 38;

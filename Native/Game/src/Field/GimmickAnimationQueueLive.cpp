@@ -10,7 +10,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/InteractionTargetLive.hpp"
 #include "Field/RoomSwitchesLive.hpp"
-#include "Items/TreasureChests.h"
+#include "Items/ItemRecords.hpp"
 
 namespace {
 
@@ -122,7 +122,7 @@ class LiveAnimationDispatchHost final
           chest != nullptr &&
           kind == VS::Field::GimmickAnimationKind::kToggleSwitch;
       if (valid_chest) {
-        countdown = static_cast<std::uint8_t>(chest->reservedA);
+        countdown = static_cast<std::uint8_t>(chest->reserved_a);
       }
       return VS::Field::GimmickAnimationJobSnapshot{
           kind, countdown, job_serials[slot], valid_chest};
@@ -152,8 +152,9 @@ class LiveAnimationDispatchHost final
       if (chest == nullptr) {
         return false;
       }
-      const auto marker = static_cast<std::uint16_t>(chest->reservedA) & 0xFF00;
-      chest->reservedA = static_cast<std::int16_t>(marker | countdown);
+      const auto marker =
+          static_cast<std::uint16_t>(chest->reserved_a) & 0xFF00;
+      chest->reserved_a = static_cast<std::int16_t>(marker | countdown);
       return true;
     }
     auto& target = *targets_[slot];

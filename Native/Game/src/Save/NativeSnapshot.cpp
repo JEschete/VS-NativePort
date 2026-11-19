@@ -112,26 +112,26 @@ void Fields(VS::Items::WeaponRange& r, V&& v) {
 }
 
 template <class V>
-void Fields(Items_InventoryWeapon& r, V&& v) {
+void Fields(VS::Items::InventoryWeapon& r, V&& v) {
   v("index", r.index);
   v("blade_slot", r.blade);
   v("grip_slot", r.grip);
-  v("equipped", r.isEquipped);
+  v("equipped", r.is_equipped);
   v("gem_slots", r.gems);
   v("name_glyphs", r.name);
 }
 
 template <class V>
-void Fields(Items_InventoryArmor& r, V&& v) {
+void Fields(VS::Items::InventoryArmor& r, V&& v) {
   Id(v, "definition", "armor", r.id);
-  v("sub_id", r.subId);
-  Id(v, "model", "weapon-model", r.wepId);
+  v("sub_id", r.sub_id);
+  Id(v, "model", "weapon-model", r.weapon_model_id);
   v("category", r.category);
-  v("maximum_dp", r.maxDp);
-  v("maximum_pp", r.maxPp);
-  v("dp", r.currentDp);
-  v("pp", r.currentPp);
-  v("gem_capacity", r.gemSlots);
+  v("maximum_dp", r.max_dp);
+  v("maximum_pp", r.max_pp);
+  v("dp", r.current_dp);
+  v("pp", r.current_pp);
+  v("gem_capacity", r.gem_slots);
   v("strength", r.strength);
   v("intelligence", r.intelligence);
   v("agility", r.agility);
@@ -144,76 +144,76 @@ void Fields(Items_InventoryArmor& r, V&& v) {
 }
 
 template <class V>
-void Fields(Items_InventoryShield& r, V&& v) {
+void Fields(VS::Items::InventoryShield& r, V&& v) {
   v("index", r.index);
-  v("equipped", r.isEquipped);
+  v("equipped", r.is_equipped);
   v("base", r.base);
   v("gem_slots", r.gems);
 }
 
 template <class V>
-void Fields(Items_InventoryBlade& r, V&& v) {
+void Fields(VS::Items::InventoryBlade& r, V&& v) {
   Id(v, "definition", "blade", r.id);
-  v("sub_id", r.subId);
-  Id(v, "model", "weapon-model", r.wepId);
+  v("sub_id", r.sub_id);
+  Id(v, "model", "weapon-model", r.weapon_model_id);
   v("category", r.category);
-  v("maximum_dp", r.maxDp);
-  v("maximum_pp", r.maxPp);
-  v("dp", r.currentDp);
-  v("pp", r.currentPp);
+  v("maximum_dp", r.max_dp);
+  v("maximum_pp", r.max_pp);
+  v("dp", r.current_dp);
+  v("pp", r.current_pp);
   v("strength", r.strength);
   v("intelligence", r.intelligence);
   v("agility", r.agility);
   v("cost", r.cost);
-  Bits damage{static_cast<unsigned>(r.damageType) & kTwoBitMask, kTwoBitMask};
-  Bits cost{static_cast<unsigned>(r.costType) & kThreeBitMask, kThreeBitMask};
-  Bits source{static_cast<unsigned>(r.reserved10Bit5) & kThreeBitMask,
+  Bits damage{static_cast<unsigned>(r.DamageType()) & kTwoBitMask, kTwoBitMask};
+  Bits cost{static_cast<unsigned>(r.CostType()) & kThreeBitMask, kThreeBitMask};
+  Bits source{static_cast<unsigned>(r.ReservedBits()) & kThreeBitMask,
               kThreeBitMask};
   v("damage_type", damage);
   v("cost_type", cost);
   v("source_flags", source);
-  r.damageType = static_cast<char>(damage.value);
-  r.costType = static_cast<char>(cost.value);
-  r.reserved10Bit5 = static_cast<char>(source.value);
-  v("source_parameter_12", r.opaque12);
+  r.SetDamageType(static_cast<std::uint8_t>(damage.value));
+  r.SetCostType(static_cast<std::uint8_t>(cost.value));
+  r.SetReservedBits(static_cast<std::uint8_t>(source.value));
+  v("source_parameter_12", r.recovery_delay);
   v("range", r.range);
   v("classes", r.classes);
   v("affinities", r.affinities);
   v("material", r.material);
-  v("assembled_weapon_slot", r.assembledWeaponIndex);
+  v("assembled_weapon_slot", r.assembled_weapon_index);
   v("index", r.index);
 }
 
 template <class V>
-void Fields(Items_InventoryGrip& r, V&& v) {
+void Fields(VS::Items::InventoryGrip& r, V&& v) {
   Id(v, "definition", "grip", r.id);
-  v("sub_id", r.subId);
+  v("sub_id", r.sub_id);
   v("category", r.category);
-  v("gem_capacity", r.gemSlots);
+  v("gem_capacity", r.gem_slots);
   v("strength", r.strength);
   v("intelligence", r.intelligence);
   v("agility", r.agility);
   v("types", r.types);
-  v("assembled_weapon_slot", r.assembledWeaponIndex);
+  v("assembled_weapon_slot", r.assembled_weapon_index);
   v("index", r.index);
 }
 
 template <class V>
-void Fields(Items_InventoryGem& r, V&& v) {
+void Fields(VS::Items::InventoryGem& r, V&& v) {
   Id(v, "definition", "gem", r.id);
-  v("sub_id", r.subId);
-  v("effects", r.gemEffects);
+  v("sub_id", r.sub_id);
+  v("effects", r.gem_effects);
   v("strength", r.strength);
   v("intelligence", r.intelligence);
   v("agility", r.agility);
   v("classes", r.classes);
   v("affinities", r.affinities);
-  v("equipped_item_slot", r.setItemIndex);
+  v("equipped_item_slot", r.set_item_index);
   v("index", r.index);
 }
 
 template <class V>
-void Fields(Items_InventoryMisc& r, V&& v) {
+void Fields(VS::Items::InventoryMisc& r, V&& v) {
   Id(v, "definition", "item", r.id);
   v("count", r.count);
   v("index", r.index);
@@ -231,17 +231,17 @@ void InventoryFields(T& r, V&& v) {
 }
 
 template <class V>
-void Fields(Items_Inventory& r, V&& v) {
+void Fields(VS::Items::InventoryContents& r, V&& v) {
   InventoryFields(r, v);
 }
 
 template <class V>
-void Fields(Items_ContainerData& r, V&& v) {
+void Fields(VS::Items::ContainerData& r, V&& v) {
   InventoryFields(r, v);
 }
 
 template <class V>
-void Fields(Items_InventoryIndices& r, V&& v) {
+void Fields(VS::Items::InventoryIndices& r, V&& v) {
   InventoryFields(r, v);
 }
 

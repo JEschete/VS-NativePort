@@ -18,7 +18,7 @@
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
@@ -123,8 +123,9 @@ struct DrawnSprite {
 struct LiveFixture {
   ValueRestore<Menu_Framework_MenuRow*> saved_rows{
       VS::Menu::Framework::menuItems};
-  ValueRestore<Items_Inventory> saved_inventory{VS::Items::inventory};
-  ValueRestore<Items_InventoryIndices> saved_indices{
+  ValueRestore<VS::Items::InventoryContents> saved_inventory{
+      VS::Items::inventory};
+  ValueRestore<VS::Items::InventoryIndices> saved_indices{
       VS::Items::inventoryIndices};
   ValueRestore<Menu_Framework_MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
@@ -159,14 +160,17 @@ struct LiveFixture {
       VS::Menu::Framework::comparisonStatTotals};
   ArrayRestore<int16_t, fw::kComparisonStatCount> saved_accessory{
       VS::Menu::Framework::comparisonAccessoryStats};
-  ValueRestore<Items_InventoryWeapon*> saved_weapons{
+  ValueRestore<VS::Items::InventoryWeapon*> saved_weapons{
       VS::Menu::Framework::weapons};
-  ValueRestore<Items_InventoryBlade*> saved_blades{VS::Menu::Framework::blades};
-  ValueRestore<Items_InventoryGrip*> saved_grips{VS::Menu::Framework::grips};
-  ValueRestore<Items_InventoryShield*> saved_shields{
+  ValueRestore<VS::Items::InventoryBlade*> saved_blades{
+      VS::Menu::Framework::blades};
+  ValueRestore<VS::Items::InventoryGrip*> saved_grips{
+      VS::Menu::Framework::grips};
+  ValueRestore<VS::Items::InventoryShield*> saved_shields{
       VS::Menu::Framework::shields};
-  ValueRestore<Items_InventoryArmor*> saved_armor{VS::Menu::Framework::armor};
-  ValueRestore<Items_InventoryGem*> saved_gems{VS::Menu::Framework::gems};
+  ValueRestore<VS::Items::InventoryArmor*> saved_armor{
+      VS::Menu::Framework::armor};
+  ValueRestore<VS::Items::InventoryGem*> saved_gems{VS::Menu::Framework::gems};
   ValueRestore<u_short*> saved_help{VS::Menu::Framework::itemHelp};
   ValueRestore<decltype(VS::Menu::Framework::itemNames)> saved_names{
       VS::Menu::Framework::itemNames};
@@ -244,20 +248,20 @@ struct LiveFixture {
     VS::Menu::Framework::menuItems = rows.data();
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
-    VS::Menu::Framework::weapons = VS::Items::inventory.weapons;
-    VS::Menu::Framework::blades = VS::Items::inventory.blades;
-    VS::Menu::Framework::grips = VS::Items::inventory.grips;
-    VS::Menu::Framework::shields = VS::Items::inventory.shields;
-    VS::Menu::Framework::armor = VS::Items::inventory.armor;
-    VS::Menu::Framework::gems = VS::Items::inventory.gems;
+    VS::Menu::Framework::weapons = VS::Items::inventory.weapons.data();
+    VS::Menu::Framework::blades = VS::Items::inventory.blades.data();
+    VS::Menu::Framework::grips = VS::Items::inventory.grips.data();
+    VS::Menu::Framework::shields = VS::Items::inventory.shields.data();
+    VS::Menu::Framework::armor = VS::Items::inventory.armor.data();
+    VS::Menu::Framework::gems = VS::Items::inventory.gems.data();
     const std::array<u_char*, kIndexedCategories> orders{
-        VS::Items::inventoryIndices.weapons,
-        VS::Items::inventoryIndices.blades,
-        VS::Items::inventoryIndices.grips,
-        VS::Items::inventoryIndices.shields,
-        VS::Items::inventoryIndices.armor,
-        VS::Items::inventoryIndices.gems,
-        VS::Items::inventoryIndices.misc};
+        VS::Items::inventoryIndices.weapons.data(),
+        VS::Items::inventoryIndices.blades.data(),
+        VS::Items::inventoryIndices.grips.data(),
+        VS::Items::inventoryIndices.shields.data(),
+        VS::Items::inventoryIndices.armor.data(),
+        VS::Items::inventoryIndices.gems.data(),
+        VS::Items::inventoryIndices.misc.data()};
     std::copy(orders.begin(), orders.end(), Menu_Inventory_inventoryIndices);
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
@@ -324,19 +328,17 @@ struct LiveFixture {
                                     .material = 1};
     blade.classes[0] = kBladeClass;
     blade.affinities[0] = kBladeAffinity;
-    VS::Items::Live::Commit(VS::Items::inventory.blades[0], blade);
+    VS::Items::inventory.blades[0] = blade;
     blade.id = 2;
     blade.strength = kSecondBladeStrength;
-    VS::Items::Live::Commit(
-        VS::Items::inventory.blades[VS::Items::kBladeSlots - 1], blade);
+    VS::Items::inventory.blades[VS::Items::kBladeSlots - 1] = blade;
     VS::Items::InventoryGrip grip{
         .id = 1, .gem_slots = 2, .strength = kGripStrength};
     grip.types[1] = -2;
-    VS::Items::Live::Commit(VS::Items::inventory.grips[0], grip);
+    VS::Items::inventory.grips[0] = grip;
     grip.id = 2;
     grip.gem_slots = VS::Items::kWeaponGemCount;
-    VS::Items::Live::Commit(
-        VS::Items::inventory.grips[VS::Items::kGripSlots - 1], grip);
+    VS::Items::inventory.grips[VS::Items::kGripSlots - 1] = grip;
     VS::Items::inventoryIndices.blades[0] = VS::Items::kBladeSlots;
     VS::Items::inventoryIndices.blades[1] = 1;
     VS::Items::inventoryIndices.grips[0] = 1;
@@ -347,7 +349,7 @@ struct LiveFixture {
     VS::Items::InventoryWeapon weapon{.blade = 1, .grip = 1};
     weapon.name.fill(static_cast<char>(VS::Render::kTextTerminator));
     weapon.name[0] = 1;
-    VS::Items::Live::Commit(VS::Items::inventory.weapons[0], weapon);
+    VS::Items::inventory.weapons[0] = weapon;
     VS::Items::inventoryIndices.weapons[0] = 1;
   }
   void AddShield() {
@@ -358,7 +360,7 @@ struct LiveFixture {
     shield.base.max_dp = kMaxDp;
     shield.base.max_pp = kMaxPp;
     shield.base.gem_slots = VS::Items::kWeaponGemCount;
-    VS::Items::Live::Commit(VS::Items::inventory.shields[0], shield);
+    VS::Items::inventory.shields[0] = shield;
     VS::Items::inventoryIndices.shields[0] = 1;
   }
   void Open(int (*entry)(int)) {

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Battle/Damage.h"
+
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
@@ -7,10 +8,10 @@
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
 #include "Battle/BattleTypes.h"
-#include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
+#include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 
 // decomp: D_800E82F4 (D_800E82F4@BATTLE/BATTLE.PRG)

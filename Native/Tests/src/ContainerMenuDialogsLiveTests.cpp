@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
 
 namespace {
@@ -201,10 +201,9 @@ TEST_CASE("F02970 production-equipped gadget-bag weapons cannot select discard",
           "[container-menu-dialogs-live]") {
   container_dialog_live_tests::EquippedFixture fixture;
   fixture.EquipThroughProductionMenu();
-  REQUIRE(VS::Items::inventory.weapons[0].isEquipped != 0);
+  REQUIRE(VS::Items::inventory.weapons[0].is_equipped != 0);
   fixture.OpenEquippedContainerActions();
-  const auto before = VS::Items::Live::Typed(
-      fixture.containers.storage->gadgetBag.items.weapons[0]);
+  const auto before = fixture.containers.storage->gadgetBag.items.weapons[0];
   REQUIRE(before.is_equipped != 0);
   REQUIRE(fixture.rows[33].unselectable != 0);
   fixture.Frame(VS::Menu::container::LiveUpdateItemList, input::Down);
@@ -212,9 +211,7 @@ TEST_CASE("F02970 production-equipped gadget-bag weapons cannot select discard",
   REQUIRE(fixture.Frame(VS::Menu::container::LiveUpdateItemList,
                         input::Circle) == 0);
   REQUIRE(framework::LiveActionSelectionResult() == -1);
-  REQUIRE(VS::Items::Live::Typed(
-              fixture.containers.storage->gadgetBag.items.weapons[0]) ==
-          before);
+  REQUIRE(fixture.containers.storage->gadgetBag.items.weapons[0] == before);
 }
 
 TEST_CASE(

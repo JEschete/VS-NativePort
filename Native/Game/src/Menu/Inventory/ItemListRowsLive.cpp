@@ -11,7 +11,7 @@
 #include "Battle/ActionTable.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -219,8 +219,7 @@ int BuildLiveRows(ItemRowsContext context, int item_category, char* menu_text[],
       .row_capacity = RowCapacity(menu_text, row_types, text_buf),
   };
   LiveItemRowsWorld world(menu_text, row_types, text_buf);
-  const auto rows =
-      BuildItemRows(input, Items::Live::Typed(VS::Items::inventory), world);
+  const auto rows = BuildItemRows(input, VS::Items::inventory, world);
   if (!rows) {
     Refuse(Describe(rows.error()));
     return 0;
@@ -231,8 +230,8 @@ int BuildLiveRows(ItemRowsContext context, int item_category, char* menu_text[],
 
 // decomp: MENU3.PRG _getParentWeaponIndex (items2.h:11), 80104EC0.
 int LiveParentWeaponIndex(int item_category, int index) {
-  const auto parent = ParentWeaponIndex(
-      item_category, index, Items::Live::Typed(VS::Items::inventory));
+  const auto parent =
+      ParentWeaponIndex(item_category, index, VS::Items::inventory);
   if (!parent || *parent > Items::kWeaponSlots) {
     Refuse(parent ? Describe(ItemRowsRefusal::kParentWeapon)
                   : Describe(ItemRowsRefusal::kSlot));
@@ -243,8 +242,8 @@ int LiveParentWeaponIndex(int item_category, int index) {
 
 // decomp: MENU3.PRG _getParentShieldIndex (items2.h:38), 80104F50.
 int LiveParentShieldIndex(int item_category, int item_index) {
-  const auto parent = ParentShieldIndex(
-      item_category, item_index, Items::Live::Typed(VS::Items::inventory));
+  const auto parent =
+      ParentShieldIndex(item_category, item_index, VS::Items::inventory);
   if (!parent || *parent > Items::kShieldSlots) {
     Refuse(parent ? Describe(ItemRowsRefusal::kParentShield)
                   : Describe(ItemRowsRefusal::kSlot));

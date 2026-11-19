@@ -63,10 +63,10 @@ class LiveWorld final : public StorageCapacityWorld,
   std::int32_t Occupied(StorageArea area,
                         Items::ItemCategory category) override {
     auto* const storage = VS::Menu::Framework::inventoryStorage;
-    Items_Container* const owner = storage == nullptr ? nullptr
-                                   : area == StorageArea::kGadgetBag
-                                       ? &storage->gadgetBag
-                                       : &storage->container;
+    VS::Items::Container* const owner = storage == nullptr ? nullptr
+                                        : area == StorageArea::kGadgetBag
+                                            ? &storage->gadgetBag
+                                            : &storage->container;
     Items::LiveContainerWorld records(owner == nullptr ? nullptr
                                                        : &owner->items);
     return Items::CountContainerItems(category, records);

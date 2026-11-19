@@ -130,14 +130,14 @@ TEST_CASE(
   items::ContainerStorage source;
   source.items.weapons[0].blade = 1;
   source.items.weapons[0].grip = 64;
-  source.items.blades[0].opaque12 = 32769;
+  source.items.blades[0].recovery_delay = 32769;
   source.items.grips[63].sub_id = 231;
   CHECK(items::CopyContainerItem(Copy(ItemCategory::kWeapon), target, 0,
                                  source) == 1);
   CHECK(target.items.weapons[0].blade == 1);
   CHECK(target.items.weapons[0].grip == 1);
   CHECK(target.items.blades[0].id == 0);
-  CHECK(target.items.blades[0].opaque12 == 32769);
+  CHECK(target.items.blades[0].recovery_delay == 32769);
   CHECK(target.items.grips[0].sub_id == 231);
 }
 
@@ -178,7 +178,7 @@ TEST_CASE(
     "[container-transfers][F02936]") {
   items::ContainerStorage target;
   items::ContainerStorage source;
-  source.items.blades[63].opaque12 = 49152;
+  source.items.blades[63].recovery_delay = 49152;
   source.items.grips[63].sub_id = 231;
   source.items.gems[191].reserved3 = 199;
   CHECK(items::CopyContainerItem(Copy(ItemCategory::kBlade, -1), target, 63,
@@ -190,7 +190,7 @@ TEST_CASE(
   CHECK(target.items.blades[0].assembled_weapon_index == 255);
   CHECK(target.items.grips[0].assembled_weapon_index == 65535);
   CHECK(target.items.gems[0].set_item_index == 65535);
-  CHECK(target.items.blades[0].opaque12 == 49152);
+  CHECK(target.items.blades[0].recovery_delay == 49152);
 }
 
 TEST_CASE(
@@ -336,7 +336,7 @@ TEST_CASE(
   world.storage.items.weapons[31].index = 32;
   world.storage.indices.fill(65535);
   world.inventory.weapons[0].is_equipped = 1;
-  world.inventory.blades[15].opaque12 = 32769;
+  world.inventory.blades[15].recovery_delay = 32769;
   world.inventory.misc[63] = {.id = 65535, .count = 255, .index = 99};
   world.indices.misc[0] = 255;
   items::SnapshotGadgetBag(world);
@@ -344,7 +344,7 @@ TEST_CASE(
   CHECK(world.storage.items.misc[255].id == 0);
   CHECK(world.storage.items.weapons[31].index == 0);
   CHECK(world.storage.items.weapons[0].is_equipped == 1);
-  CHECK(world.storage.items.blades[15].opaque12 == 32769);
+  CHECK(world.storage.items.blades[15].recovery_delay == 32769);
   CHECK(world.BagOrder(ItemCategory::kMisc)[0] == 255);
   CHECK(world.BagOrder(ItemCategory::kMisc)[64] == 0);
 }

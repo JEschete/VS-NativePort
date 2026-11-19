@@ -16,7 +16,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Battle/Hud.h"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -1301,7 +1301,7 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
                                     .strength = 2,
                                     .material = 1,
                                     .limb = limb};
-    VS::Items::Live::Commit(std::span(VS::Items::inventory.armor)[slot], armor);
+    std::span(VS::Items::inventory.armor)[slot] = armor;
   }
   // A shield, two arm armors (one worn on part 1) and two accessories (one
   // worn), besides the fixture's spare weapon.
@@ -1594,7 +1594,7 @@ TEST_CASE("Live weapon menu matches the frozen MENU3 digest",
   // A two-handed blade with a shield held: equipping drops the shield.
   const auto setup = [](MenusFixture& fixture) {
     fixture.AddEquipment();
-    VS::Items::inventory.shields[0].isEquipped = 1;
+    VS::Items::inventory.shields[0].is_equipped = 1;
     VS::Menu::Framework::weaponHands[0] = 1;
   };
   const auto steps = [](Script& script) { BackThenChoose(script, 1); };

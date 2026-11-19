@@ -108,7 +108,7 @@ H0106,header,Native/Game/include/Diagnostics/SceneTrace.hpp,owned,no,pragma-once
 H0107,header,Native/Game/include/Effects/ScreenDistortion/ScreenOverlaysLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0108,header,Native/Game/include/Effects/TrailEmitterLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0109,header,Native/Game/include/Items/Equipment.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,"deleted: Items_EquipmentPartStats became VS::Items::EquipmentPart and Items_GemTarget became kShieldGemFlag in Items/ItemRecords.hpp; TYPE T00675 re-pointed, T00101 retired (#441)"
-H0110,header,Native/Game/include/Items/Inventory.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,remaining,
+H0110,header,Native/Game/include/Items/Inventory.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,retired,"deleted: the inventory, container and item-stack records became VS::Items::InventoryContents, InventoryIndices, ContainerData, ContainerIndices, Container, MiscItemStack and the Inventory* part records in Items/ItemRecords.hpp, and Items_ItemCategory became VS::Items::ItemCategory; TYPE T00102 T00677 T00696-T00704 T00711-T00713 re-pointed (#441)"
 H0111,header,Native/Game/include/Items/KeyItems.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Items_KeyItemId had no native users; TYPE T00021 retired (#441)
 H0112,header,Native/Game/include/Items/Loadout.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
 H0113,header,Native/Game/include/Menu/Framework/ActionSelection.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
@@ -353,10 +353,10 @@ H0351,header,Native/Game/src/Items/Categories.hpp,generated,no,pragma-once,0,0,0
 H0352,header,Native/Game/src/Items/EquipmentInit.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: Items_ArmorInit and Items_AccessoryInit became VS::Items::ArmorInit and AccessoryInit in Items/ItemRecords.hpp; TYPE T00305 and T00301 re-pointed (#441)
 H0353,header,Native/Game/src/Items/InventoryLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0354,header,Native/Game/src/Items/ItemRecordsLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0355,header,Native/Game/src/Items/Loot.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
+H0355,header,Native/Game/src/Items/Loot.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,retired,"deleted: Items_BattleLoot, Items_LootListNode and the Looted* records became VS::Items::BattleLoot, LootListNode and Looted* in Items/ItemRecords.hpp; TYPE T00645 T00646 T00648-T00654 re-pointed, T00647 retired (#441)"
 H0356,header,Native/Game/src/Items/LootLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0357,header,Native/Game/src/Items/Materials.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0358,header,Native/Game/src/Items/TreasureChests.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0358,header,Native/Game/src/Items/TreasureChests.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Items_TreasureChest became VS::Items::TreasureChest in Items/ItemRecords.hpp; TYPE T00332 re-pointed (#441)
 H0359,header,Native/Game/src/Items/Weapons.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: Items_WeaponRange became VS::Items::WeaponRange in Items/ItemRecords.hpp; TYPE T00662 re-pointed (#441)
 H0360,header,Native/Game/src/Menu/BattleAbilities.h,generated,yes,pragma-once,0,0,0,0,0,0,14,0,0,remaining,
 H0361,header,Native/Game/src/Menu/BreakArts.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,

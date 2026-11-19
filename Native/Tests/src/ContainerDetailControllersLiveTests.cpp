@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Input/Pad.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/ContainerDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"

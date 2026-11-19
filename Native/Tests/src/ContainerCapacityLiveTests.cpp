@@ -181,14 +181,13 @@ TEST_CASE("F02974 live respects unsigned fourth references and changed owners",
   constexpr std::uint8_t kFourSlots = 4;
   constexpr std::uint8_t kFlagOnly = 128;
   constexpr std::uint8_t kHighReference = 255;
-  items::Live::Commit(
-      std::span(owner.shields).back(),
+  std::span(owner.shields).back() =
       items::InventoryShield{.base = {.gem_slots = kFourSlots},
-                             .gems = {0, 1, kFlagOnly, kHighReference}});
+                             .gems = {0, 1, kFlagOnly, kHighReference}};
   CHECK(items::CountLiveContainerShieldGems(live::kLastWeapon) ==
         kFourSlots - 1);
   auto& next = fixture.containers.replacement->gadgetBag;
-  next.items.shields[live::kLastWeapon].base.gemSlots = 1;
+  next.items.shields[live::kLastWeapon].base.gem_slots = 1;
   next.items.shields[live::kLastWeapon].gems[0] = 1;
   Menu_Container_containerData = &next;
   CHECK(items::CountLiveContainerShieldGems(live::kLastWeapon) == 1);
@@ -272,7 +271,7 @@ TEST_CASE("F02976 live shield attached gems enforce real receiving equality",
   LiveFixture fixture;
   auto& owner = fixture.containers.storage->container.items;
   auto& shield = owner.shields[live::kLastWeapon];
-  shield.base.gemSlots = items::kWeaponGemCount;
+  shield.base.gem_slots = items::kWeaponGemCount;
   shield.gems[0] = 1;
   shield.gems[2] = 1;
   constexpr int kShield = static_cast<int>(items::ItemCategory::kShield);
@@ -335,7 +334,7 @@ TEST_CASE("F02978 live stages native-width parts and clears the source tree",
   CHECK(storage.stagedTransfer.weapons[0].blade == 1);
   CHECK(storage.stagedTransfer.weapons[0].grip == 1);
   CHECK(storage.stagedTransfer.weapons[0].gems[2] == 2);
-  CHECK(storage.stagedTransfer.gems[1].setItemIndex == 1);
+  CHECK(storage.stagedTransfer.gems[1].set_item_index == 1);
   CHECK(storage.container.items.weapons[live::kLastWeapon].blade == 0);
   CHECK(storage.container.items.grips[live::kLastPart].id == 0);
   CHECK(storage.itemsToTransfer[0] == 0);

@@ -21,7 +21,7 @@
 #include "Core/Memory/Heap.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -966,8 +966,8 @@ TEST_CASE("UpdateLiveEquipmentChoices refuses text outside the game heap",
 }
 
 struct LiveAccessoryFixture {
-  Restore<Items_InventoryArmor*> saved_armor{VS::Menu::Framework::armor};
-  Restore<Items_Inventory> saved_inventory{VS::Items::inventory};
+  Restore<VS::Items::InventoryArmor*> saved_armor{VS::Menu::Framework::armor};
+  Restore<VS::Items::InventoryContents> saved_inventory{VS::Items::inventory};
   Restore<char> saved_pages{VS::Menu::Framework::enabledStatPages};
   Restore<char> saved_page{VS::Menu::Framework::itemStatPage};
   Restore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
@@ -986,13 +986,13 @@ struct LiveAccessoryFixture {
 TEST_CASE("SetLiveAccessoryPreviewStats spreads Ashley's accessory",
           "[equipment-rows-live]") {
   LiveAccessoryFixture fixture;
-  Items_InventoryArmor& accessory = VS::Items::inventory.armor[1];
+  VS::Items::InventoryArmor& accessory = VS::Items::inventory.armor[1];
   accessory = {};
   accessory.id = 1;
   accessory.classes[0] = 6;
   accessory.affinities[2] = -4;
   accessory.types[1] = -7;
-  VS::Menu::Framework::armor = VS::Items::inventory.armor;
+  VS::Menu::Framework::armor = VS::Items::inventory.armor.data();
   inv::SetLiveAccessoryPreviewStats(2);
   CHECK(VS::Menu::Framework::equipmentStats[0] == 6);
   CHECK(VS::Menu::Framework::equipmentStats[8] == 6);
@@ -1006,12 +1006,12 @@ TEST_CASE("SetLiveAccessoryPreviewStats spreads Ashley's accessory",
 TEST_CASE("SetLiveAccessoryPreviewStats refuses an unbound armor table",
           "[equipment-rows-live]") {
   LiveAccessoryFixture fixture;
-  std::array<Items_InventoryArmor, 4> foreign{};
+  std::array<VS::Items::InventoryArmor, 4> foreign{};
   VS::Menu::Framework::armor = foreign.data();
   VS::Menu::Framework::equipmentSubtype = 5;
   const std::uint64_t before = inv::LiveEquipmentRowsRefusalCount();
   inv::SetLiveAccessoryPreviewStats(1);
-  VS::Menu::Framework::armor = VS::Items::inventory.armor;
+  VS::Menu::Framework::armor = VS::Items::inventory.armor.data();
   inv::SetLiveAccessoryPreviewStats(17);
   CHECK(inv::LiveEquipmentRowsRefusalCount() == before + 2);
   CHECK(VS::Menu::Framework::equipmentSubtype == 5);

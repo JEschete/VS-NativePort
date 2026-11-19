@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #pragma once
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 
 struct Field_MapScene;
@@ -15,7 +16,6 @@ struct Field_MpdViewTrigger;
 struct Field_RoomRecord;
 struct Field_RoomTint;
 struct Field_ZoneBounds;
-struct Items_TreasureChest;
 
 // decomp: D_800F1BB0_t (src/BATTLE/BATTLE.PRG/146C.c:168)
 struct Field_RoomTint {
@@ -77,7 +77,7 @@ struct Field_RoomRecord {
     u_short* tiledBackground;
     Field_MpdViewTrigger* viewTriggers;
     Field_MpdMovingPlatform* movingPlatforms;
-    Items_TreasureChest* containers;
+    VS::Items::TreasureChest* containers;
     u_int* soundData;
     void* section15; /* a section pointer (filled with the others) */
     void* section16; /* a section pointer (filled with the others) */

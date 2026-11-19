@@ -8,7 +8,7 @@
 #include <string_view>
 
 #include "Core/Diagnostics.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/SortingKeysLive.hpp"
@@ -51,7 +51,7 @@ bool OverlapsInventory(const VS::Items::EquipmentPart* target) {
 class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
  public:
   Items::InventoryContents CurrentInventory() override {
-    return Items::Live::Typed(VS::Items::inventory);
+    return VS::Items::inventory;
   }
   std::span<std::uint8_t> FixedOrder(Items::ItemCategory category) override {
     return OrderTables()[static_cast<std::size_t>(category)];

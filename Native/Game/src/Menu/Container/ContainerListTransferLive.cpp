@@ -83,7 +83,7 @@ void Warn(std::string_view entry, std::string_view reason) {
 // A record view whose refusals unwind to the Live entry.
 class RecordView final : public Items::ContainerWorld {
  public:
-  explicit RecordView(Items_ContainerData* owner)
+  explicit RecordView(VS::Items::ContainerData* owner)
       : owner_(owner), live_(owner) {}
   std::uint16_t Capacity(Category category) override {
     return live_.Capacity(category);
@@ -100,10 +100,10 @@ class RecordView final : public Items::ContainerWorld {
   [[noreturn]] void Refuse(std::string_view reason) override {
     container::Refuse(reason);
   }
-  [[nodiscard]] const Items_ContainerData* Owner() const { return owner_; }
+  [[nodiscard]] const VS::Items::ContainerData* Owner() const { return owner_; }
 
  private:
-  Items_ContainerData* owner_;
+  VS::Items::ContainerData* owner_;
   Items::LiveContainerWorld live_;
 };
 
@@ -113,7 +113,7 @@ Menu_Container_InventoryStorage& Storage() {
   return *storage;
 }
 
-Items_Container* Container(TransferStorage storage) {
+VS::Items::Container* Container(TransferStorage storage) {
   switch (storage) {
     case TransferStorage::kActive:
       return Menu_Container_containerData;
@@ -126,7 +126,7 @@ Items_Container* Container(TransferStorage storage) {
   }
 }
 
-Items_ContainerData* Data(TransferStorage storage) {
+VS::Items::ContainerData* Data(TransferStorage storage) {
   switch (storage) {
     case TransferStorage::kStaged:
       return &Storage().stagedTransfer;
@@ -343,12 +343,12 @@ class LiveTransferWorld final : public TransferWorld {
   void PublishActiveRecords() override {
     auto* const container = Menu_Container_containerData;
     if (container == nullptr) Refuse("missing active container");
-    VS::Menu::Framework::weapons = container->items.weapons;
-    VS::Menu::Framework::blades = container->items.blades;
-    VS::Menu::Framework::grips = container->items.grips;
-    VS::Menu::Framework::shields = container->items.shields;
-    VS::Menu::Framework::armor = container->items.armor;
-    VS::Menu::Framework::gems = container->items.gems;
+    VS::Menu::Framework::weapons = container->items.weapons.data();
+    VS::Menu::Framework::blades = container->items.blades.data();
+    VS::Menu::Framework::grips = container->items.grips.data();
+    VS::Menu::Framework::shields = container->items.shields.data();
+    VS::Menu::Framework::armor = container->items.armor.data();
+    VS::Menu::Framework::gems = container->items.gems.data();
   }
   void StoreContainerSnapshot() override {
     auto& storage = Storage();
@@ -589,7 +589,7 @@ class LiveTransferWorld final : public TransferWorld {
 };
 
 struct RowArguments {
-  Items_ContainerData* container;
+  VS::Items::ContainerData* container;
   char** row_strings;
   int* row_types;
   char* buffer;
@@ -638,7 +638,7 @@ auto Guard(std::string_view name, Entry&& entry) -> decltype(entry()) {
 }
 }  // namespace
 
-void LiveBuildWeaponRow(Items_ContainerData* container, char** row_strings,
+void LiveBuildWeaponRow(VS::Items::ContainerData* container, char** row_strings,
                         int* row_types, char* buffer, int index) {
   Guard("BuildWeaponRow", [&] {
     const RowArguments arguments{container, row_strings, row_types, buffer,
@@ -648,14 +648,13 @@ void LiveBuildWeaponRow(Items_ContainerData* container, char** row_strings,
     auto& legacy = container->weapons[index];
     RecordView records(container);
     Framework::LiveItemRowsHost host;
-    const auto row = BuildWeaponRow(host, Items::Live::Typed(legacy), records,
-                                    RowBuffer(buffer));
+    const auto row = BuildWeaponRow(host, legacy, records, RowBuffer(buffer));
     Items::Live::WarnRefusal("BuildContainerWeaponRow", row.status);
-    StoreRowText(row.text, arguments, legacy.name);
+    StoreRowText(row.text, arguments, legacy.name.data());
   });
 }
 
-void LiveBuildShieldRow(Items_ContainerData* container, char** row_strings,
+void LiveBuildShieldRow(VS::Items::ContainerData* container, char** row_strings,
                         int* row_types, char* buffer, int index) {
   Guard("BuildShieldRow", [&] {
     const RowArguments arguments{container, row_strings, row_types, buffer,
@@ -664,9 +663,8 @@ void LiveBuildShieldRow(Items_ContainerData* container, char** row_strings,
     RequireRow(arguments, container->shields);
     RecordView records(container);
     Framework::LiveItemRowsHost host;
-    const auto text =
-        BuildShieldRow(host, Items::Live::Typed(container->shields[index]),
-                       records, RowBuffer(buffer));
+    const auto text = BuildShieldRow(host, container->shields[index], records,
+                                     RowBuffer(buffer));
     StoreRowText(text, arguments, nullptr);
   });
 }

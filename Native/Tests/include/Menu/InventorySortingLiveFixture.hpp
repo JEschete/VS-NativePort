@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <span>
 
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Inventory/ItemList.h"
 
@@ -21,8 +21,8 @@ inline auto LiveOrders() {
 }
 
 struct LiveFixture {
-  Items_Inventory saved_inventory = VS::Items::inventory;
-  Items_InventoryIndices saved_indices = VS::Items::inventoryIndices;
+  VS::Items::InventoryContents saved_inventory = VS::Items::inventory;
+  VS::Items::InventoryIndices saved_indices = VS::Items::inventoryIndices;
   std::array<std::uint8_t*, kOrderTables> saved_routes{};
 
   LiveFixture() {

@@ -1,8 +1,7 @@
 #pragma once
 
+#include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
-
-struct Items_ContainerData;
 
 // Binds the container list transfer (ContainerListTransfer.hpp) to MENUD's
 // variables, the menu framework and the container helpers in the shapes the
@@ -10,10 +9,10 @@ struct Items_ContainerData;
 // on the "menu.container" channel and the entry returns 0.
 namespace VS::Menu::container {
 // decomp: _setWeaponUi (src/MENU/MENUD.PRG/234.c:810), 801041E0.
-void LiveBuildWeaponRow(Items_ContainerData* container, char** row_strings,
+void LiveBuildWeaponRow(VS::Items::ContainerData* container, char** row_strings,
                         int* row_types, char* buffer, int index);
 // decomp: _setShieldUi (src/MENU/MENUD.PRG/234.c:820), 8010425C.
-void LiveBuildShieldRow(Items_ContainerData* container, char** row_strings,
+void LiveBuildShieldRow(VS::Items::ContainerData* container, char** row_strings,
                         int* row_types, char* buffer, int index);
 // decomp: func_80107490 (src/MENU/MENUD.PRG/234.c:2393), 80107490.
 int LiveUpdateItemList(int transfer_direction_selection);

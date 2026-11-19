@@ -42,10 +42,8 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
-#include "Items/Loot.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
-#include "Items/TreasureChests.h"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
@@ -476,7 +474,8 @@ void InspectRoomChests(PlayerObservationState& state) {
   int count = 0;
   const auto* chests = VS::Items::LiveRoomTreasureChests(&count);
   if (chests == nullptr) return;
-  if (Field_roomData.header.containersLength % sizeof(Items_TreasureChest) !=
+  if (Field_roomData.header.containersLength %
+          sizeof(VS::Items::TreasureChest) !=
       0) {
     throw std::runtime_error(
         "observed room container storage has an incomplete record");
@@ -486,19 +485,19 @@ void InspectRoomChests(PlayerObservationState& state) {
     const auto& chest = chests[index];
     EncounterChestState snapshot;
     snapshot.index = index;
-    snapshot.tile_x = chest.tileX;
-    snapshot.tile_z = chest.tileZ;
+    snapshot.tile_x = chest.tile_x;
+    snapshot.tile_z = chest.tile_z;
     snapshot.layer = chest.layer;
     snapshot.facing = chest.facing;
-    snapshot.lock_level = chest.lockLevel;
-    snapshot.opened_flag = chest.openedFlag + kChestOpenedFlagBase;
+    snapshot.lock_level = chest.lock_level;
+    snapshot.opened_flag = chest.opened_flag + kChestOpenedFlagBase;
     snapshot.opened = VS::State::LiveScriptFlag(
                           static_cast<std::int16_t>(snapshot.opened_flag)) != 0;
     for (std::size_t slot = 0; slot < std::size(chest.loot.misc); ++slot) {
       const auto& item = chest.loot.misc[slot];
-      if (item.itemId != 0 && item.count != 0) {
+      if (item.item_id != 0 && item.count != 0) {
         snapshot.misc.push_back(
-            {static_cast<int>(slot), item.itemId, item.count});
+            {static_cast<int>(slot), item.item_id, item.count});
       }
     }
     state.chests.push_back(std::move(snapshot));

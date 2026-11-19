@@ -35,8 +35,7 @@
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
-#include "Items/Loot.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
@@ -1226,16 +1225,16 @@ TEST_CASE("Player observations expose original room chests and opened flags",
       VS::State::SetLiveScriptFlag(0x3C6, static_cast<char>(flag));
     }
   } guard;
-  std::array<Items_TreasureChest, 2> chests{};
-  chests[0].tileX = 4;
-  chests[0].tileZ = 7;
+  std::array<VS::Items::TreasureChest, 2> chests{};
+  chests[0].tile_x = 4;
+  chests[0].tile_z = 7;
   chests[0].facing = 2;
-  chests[0].openedFlag = 5;
-  chests[0].loot.misc[2].itemId = 472;
+  chests[0].opened_flag = 5;
+  chests[0].loot.misc[2].item_id = 472;
   chests[0].loot.misc[2].count = 1;
-  chests[1].tileX = 9;
-  chests[1].lockLevel = 3;
-  chests[1].openedFlag = 6;
+  chests[1].tile_x = 9;
+  chests[1].lock_level = 3;
+  chests[1].opened_flag = 6;
   Field_roomData.containers = chests.data();
   Field_roomData.header.containersLength = sizeof(chests);
   VS::State::SetLiveScriptFlag(0x3C6, 1);
@@ -1579,10 +1578,9 @@ struct ItemInspectionFixture : ReactionInspectionFixture {
   decltype(Menu_Loot_controlsEnabled) saved_loot_controls =
       Menu_Loot_controlsEnabled;
   decltype(Menu_Loot_lootListCount) saved_loot_count = Menu_Loot_lootListCount;
-  decltype(std::to_array(VS::Items::inventory.misc)) saved_items =
-      std::to_array(VS::Items::inventory.misc);
-  decltype(std::to_array(VS::Items::inventoryIndices.misc)) saved_indices =
-      std::to_array(VS::Items::inventoryIndices.misc);
+  decltype(VS::Items::inventory.misc) saved_items = VS::Items::inventory.misc;
+  decltype(VS::Items::inventoryIndices.misc) saved_indices =
+      VS::Items::inventoryIndices.misc;
   decltype(VS::Menu::Framework::shortcutInvoked) saved_shortcut =
       VS::Menu::Framework::shortcutInvoked;
   decltype(VS::Menu::Framework::itemsListRow) saved_list =
@@ -1591,8 +1589,7 @@ struct ItemInspectionFixture : ReactionInspectionFixture {
       VS::Menu::Framework::subMenuRowCount;
 
   ItemInspectionFixture() {
-    std::fill_n(VS::Items::inventory.misc, saved_items.size(),
-                Items_InventoryMisc{});
+    VS::Items::inventory.misc.fill(VS::Items::InventoryMisc{});
     VS::Items::inventory.misc[0].id = 323;
     VS::Items::inventory.misc[0].count = 2;
     auto& definition = Battle_actionDefinitions[224];
@@ -1604,10 +1601,8 @@ struct ItemInspectionFixture : ReactionInspectionFixture {
     definition.hits[0].statFactor = 10;
   }
   ~ItemInspectionFixture() {
-    std::copy(saved_items.begin(), saved_items.end(),
-              VS::Items::inventory.misc);
-    std::copy(saved_indices.begin(), saved_indices.end(),
-              VS::Items::inventoryIndices.misc);
+    VS::Items::inventory.misc = saved_items;
+    VS::Items::inventoryIndices.misc = saved_indices;
     VS::Menu::Framework::shortcutInvoked = saved_shortcut;
     VS::Menu::Framework::itemsListRow = saved_list;
     VS::Menu::Framework::subMenuRowCount = saved_rows;

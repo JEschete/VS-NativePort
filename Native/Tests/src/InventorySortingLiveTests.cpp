@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/OverlayReset.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/InventorySortingLiveFixture.hpp"
 #include "Menu/SortingKeysFixture.hpp"
@@ -32,7 +32,7 @@ constexpr std::uint8_t kLowMaterial = 2;
 constexpr std::uint8_t kHighMaterial = 9;
 constexpr std::int8_t kReserved = 91;
 constexpr std::uint16_t kWide = 65535;
-using RecordBytes = std::array<std::byte, sizeof(Items_Inventory)>;
+using RecordBytes = std::array<std::byte, sizeof(VS::Items::InventoryContents)>;
 }  // namespace
 
 TEST_CASE("F02583 checked Live uses real weapon stats and fixed byte orders",
@@ -166,15 +166,15 @@ TEST_CASE(
   order[0] = 1;
   order[1] = items::kGemSlots;
   order[2] = items::kGemSlots;
-  Menu_Inventory_inventoryIndices[kGem] = order;
+  Menu_Inventory_inventoryIndices[kGem] = order.data();
   sorting::SortLiveEquipment(kGem, kStrength);
   VS::Boot::ResetMenu3Statics();
-  CHECK(Menu_Inventory_inventoryIndices[kGem] == order);
+  CHECK(Menu_Inventory_inventoryIndices[kGem] == order.data());
   CHECK(order[0] == items::kGemSlots);
   CHECK(order[1] == items::kGemSlots);
   CHECK(order[2] == 1);
   VS::Boot::ResetMenubStatics();
-  CHECK(Menu_Inventory_inventoryIndices[kGem] == order);
+  CHECK(Menu_Inventory_inventoryIndices[kGem] == order.data());
   CHECK(order[2] == 1);
   records.gems[0].strength = kHigh;
   std::span(records.gems).back().strength = kLow;
@@ -190,9 +190,9 @@ TEST_CASE(
   auto& order = VS::Items::inventoryIndices;
   order.misc[0] = items::kMiscSlots;
   VS::Items::inventory.misc[0].id = kWide;
-  Menu_Inventory_inventoryIndices[kBlade] = order.misc;
+  Menu_Inventory_inventoryIndices[kBlade] = order.misc.data();
   VS::Boot::ResetMainMenuStatics();
-  CHECK(Menu_Inventory_inventoryIndices[kBlade] == order.blades);
+  CHECK(Menu_Inventory_inventoryIndices[kBlade] == order.blades.data());
   CHECK(order.misc[0] == items::kMiscSlots);
   CHECK(VS::Items::inventory.misc[0].id == kWide);
 }

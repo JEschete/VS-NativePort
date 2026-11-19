@@ -14,7 +14,7 @@
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfers.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
@@ -51,7 +51,7 @@ Menu_Container_InventoryStorage& Storage() {
   return *VS::Menu::Framework::inventoryStorage;
 }
 
-OrderTables Orders(Items_ContainerIndices& indices) {
+OrderTables Orders(VS::Items::ContainerIndices& indices) {
   return {indices.weapons, indices.blades, indices.grips, indices.shields,
           indices.armor,   indices.gems,   indices.misc};
 }
@@ -85,7 +85,7 @@ class LiveBag final : public GadgetBagWorld {
           if (index >= std::size(table)) {
             Refuse("record index outside inventory category storage");
           }
-          return Live::Typed(table[index]);
+          return table[index];
         });
   }
   void WriteInventory(ItemCategory category, std::size_t index,
@@ -94,17 +94,17 @@ class LiveBag final : public GadgetBagWorld {
       if (index >= std::size(table)) {
         Refuse("record index outside inventory category storage");
       }
-      using Legacy = std::remove_reference_t<decltype(table[index])>;
-      const auto* record = std::get_if<Live::TypedRecordOf<Legacy>>(&item);
+      using Record = std::remove_cvref_t<decltype(table[index])>;
+      const auto* record = std::get_if<Record>(&item);
       if (record == nullptr) {
         Refuse("record type disagrees with inventory category");
       }
-      Live::Commit(table[index], *record);
+      table[index] = *record;
     });
   }
 
  private:
-  Items_Container* const owner_;
+  VS::Items::Container* const owner_;
   LiveContainerWorld bag_;
 };
 
@@ -125,7 +125,7 @@ std::uint16_t Preview(bool count) {
 }  // namespace
 
 std::span<std::uint16_t> LiveContainerCategoryOrder(
-    ItemCategory category, Items_Container* container) {
+    ItemCategory category, VS::Items::Container* container) {
   auto* selected =
       LiveContainerCategoryIndices(static_cast<int>(category), container);
   if (container == nullptr) Refuse("missing container index owner");
@@ -146,8 +146,8 @@ void RefreshLiveMiscTransferCount() {
 }
 
 // decomp: _copyContainerItem (src/MENU/MENUD.PRG/234.c:283)
-int CopyLiveContainerItem(int category_flags, Items_ContainerData* target,
-                          int source_slot, Items_ContainerData* source) {
+int CopyLiveContainerItem(int category_flags, VS::Items::ContainerData* target,
+                          int source_slot, VS::Items::ContainerData* source) {
   const auto flags = static_cast<unsigned>(category_flags);
   const ContainerTransfer transfer{
       Category(static_cast<int>(flags & kTransferCategoryMask)),
@@ -161,7 +161,7 @@ int CopyLiveContainerItem(int category_flags, Items_ContainerData* target,
 
 // decomp: _defragmentContainerItems (src/MENU/MENUD.PRG/234.c:498)
 void RebuildLiveContainerCategoryIndices(int category,
-                                         Items_Container* container) {
+                                         VS::Items::Container* container) {
   const auto typed_category = Category(category);
   auto order = LiveContainerCategoryOrder(typed_category, container);
   LiveContainerWorld world(container == nullptr ? nullptr : &container->items);
@@ -182,7 +182,7 @@ void CommitLiveGadgetBag() {
 
 // decomp: _getParentItemIndex (src/MENU/MENUD.PRG/234.c:625)
 int LiveContainerParentWeaponIndex(int category, int index,
-                                   Items_ContainerData* container) {
+                                   VS::Items::ContainerData* container) {
   if (category != static_cast<int>(ItemCategory::kBlade) &&
       category != static_cast<int>(ItemCategory::kGrip) &&
       category != static_cast<int>(ItemCategory::kGem)) {
@@ -195,7 +195,7 @@ int LiveContainerParentWeaponIndex(int category, int index,
 
 // decomp: _getSetShieldIndex (src/MENU/MENUD.PRG/234.c:645)
 int LiveContainerParentShieldIndex(int category, int index,
-                                   Items_ContainerData* container) {
+                                   VS::Items::ContainerData* container) {
   if (category != static_cast<int>(ItemCategory::kGem)) return 0;
   LiveContainerWorld world(container);
   return ContainerParentShieldIndex(ItemCategory::kGem, index, world);

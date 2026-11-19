@@ -22,7 +22,7 @@ bool IsBound(unsigned address, Entry entry) {
 TEST_CASE("F02927 binds its actual MENUD pointer two-argument entry",
           "[container-indexing-module][F02927]") {
   static_assert(std::is_same_v<decltype(&items::LiveContainerCategoryIndices),
-                               std::uint16_t* (*)(int, Items_Container*)>);
+                               std::uint16_t* (*)(int, VS::Items::Container*)>);
   CHECK(IsBound(0x80102C94, &items::LiveContainerCategoryIndices));
 }
 
@@ -43,28 +43,28 @@ TEST_CASE("F02929 binds its actual MENUD void three-argument entry",
 TEST_CASE("F02930 binds its actual MENUD void record-clear entry",
           "[container-indexing-module][F02930]") {
   static_assert(std::is_same_v<decltype(&items::ClearLiveContainerItem),
-                               void (*)(int, int, Items_ContainerData*)>);
+                               void (*)(int, int, VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80102D80, &items::ClearLiveContainerItem));
 }
 
 TEST_CASE("F02931 binds its actual MENUD occupancy entry",
           "[container-indexing-module][F02931]") {
   static_assert(std::is_same_v<decltype(&items::LiveContainerItemId),
-                               int (*)(int, int, Items_ContainerData*)>);
+                               int (*)(int, int, VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80102F88, &items::LiveContainerItemId));
 }
 
 TEST_CASE("F02932 binds its actual MENUD int two-argument count entry",
           "[container-indexing-module][F02932]") {
   static_assert(std::is_same_v<decltype(&items::CountLiveContainerItems),
-                               int (*)(int, Items_ContainerData*)>);
+                               int (*)(int, VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80103070, &items::CountLiveContainerItems));
 }
 
 TEST_CASE("F02933 binds its actual MENUD int two-argument empty-slot entry",
           "[container-indexing-module][F02933]") {
   static_assert(std::is_same_v<decltype(&items::FindLiveEmptyContainerSlot),
-                               int (*)(int, Items_ContainerData*)>);
+                               int (*)(int, VS::Items::ContainerData*)>);
   CHECK(IsBound(0x80103110, &items::FindLiveEmptyContainerSlot));
 }
 
@@ -86,5 +86,5 @@ TEST_CASE(
   CHECK(Menu_Container_containerData == &fixture.owner);
   CHECK(fixture.owner.indices.misc[0] == 256);
   CHECK(items::LiveContainerCategoryIndices(6, &fixture.owner) ==
-        fixture.owner.indices.misc);
+        fixture.owner.indices.misc.data());
 }

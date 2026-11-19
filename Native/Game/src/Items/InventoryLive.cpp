@@ -14,7 +14,6 @@
 
 #include "Items/Categories.hpp"
 #include "Items/EquipmentStats.hpp"
-#include "Items/Inventory.h"
 #include "Items/Inventory.hpp"
 #include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
@@ -23,9 +22,9 @@
 unsigned char VS::Items::miscItemInvoked = 0;
 
 // decomp: vs_main_inventory (vs_main_inventory@SLUS_010.40)
-Items_Inventory VS::Items::inventory;
+VS::Items::InventoryContents VS::Items::inventory;
 // decomp: vs_main_inventoryIndices (vs_main_inventoryIndices@SLUS_010.40)
-Items_InventoryIndices VS::Items::inventoryIndices;
+VS::Items::InventoryIndices VS::Items::inventoryIndices;
 
 static_assert(std::extent_v<decltype(VS::Items::itemCategoryUpperIds)> ==
               VS::Items::kItemIdCategoryCount);
@@ -60,7 +59,8 @@ std::optional<ItemCategory> ToListedCategory(int category,
   return ToCategory(category, operation);
 }
 
-const Items_Inventory& OrAshleyInventory(const Items_Inventory* inventory) {
+const VS::Items::InventoryContents& OrAshleyInventory(
+    const VS::Items::InventoryContents* inventory) {
   return inventory != nullptr ? *inventory : VS::Items::inventory;
 }
 }  // namespace
@@ -70,17 +70,16 @@ const Items_Inventory& OrAshleyInventory(const Items_Inventory* inventory) {
 int CountLiveInventoryItem(int id) {
   const std::span<const std::uint32_t, kItemIdCategoryCount> upper_ids(
       VS::Items::itemCategoryUpperIds);
-  return InventoryItemCount(id, upper_ids, Typed(VS::Items::inventory));
+  return InventoryItemCount(id, upper_ids, VS::Items::inventory);
 }
 
 // decomp: BATTLE.PRG vs_battle_decreaseMiscCount
 // (src/BATTLE/BATTLE.PRG/5BF94.c:4454)
 int ConsumeLiveMiscItem(int misc_id) {
-  auto inventory = Typed(VS::Items::inventory);
   std::uint8_t invoked_slot = miscItemInvoked;
-  const bool consumed = ConsumeMiscItem(misc_id, invoked_slot, inventory);
+  const bool consumed =
+      ConsumeMiscItem(misc_id, invoked_slot, VS::Items::inventory);
   miscItemInvoked = invoked_slot;
-  Commit(VS::Items::inventory, inventory);
   return consumed ? 1 : 0;
 }
 }  // namespace VS::Items
@@ -95,10 +94,10 @@ void UnequipLiveWeapon() {
   auto ashley = Live::ToAshleyWeapon(*stats, actor);
   Live::LiveEquipStatusHost host(
       *stats, [&] { Live::CommitAshleyWeapon(*stats, actor, ashley); });
-  auto inventory = Typed(VS::Items::inventory);
+  auto inventory = VS::Items::inventory;
   const auto status = UnequipWeapon(ashley, inventory, host);
   host.Finish();
-  Commit(VS::Items::inventory, inventory);
+  VS::Items::inventory = inventory;
   WarnRefusal("UnequipWeapon", status);
 }
 
@@ -110,10 +109,10 @@ void UnequipLiveShield() {
   auto shield = Typed(stats->shield);
   Live::LiveEquipStatusHost host(*stats,
                                  [&] { Commit(stats->shield, shield); });
-  auto inventory = Typed(VS::Items::inventory);
+  auto inventory = VS::Items::inventory;
   const auto status = UnequipShield(shield, inventory, host);
   host.Finish();
-  Commit(VS::Items::inventory, inventory);
+  VS::Items::inventory = inventory;
   WarnRefusal("UnequipShield", status);
 }
 
@@ -122,9 +121,8 @@ void UnequipLiveShield() {
 void ClearLiveItemSlot(int category, int slot) {
   const auto typed_category = ToCategory(category, "ClearItemSlot");
   if (!typed_category) return;
-  auto inventory = Typed(VS::Items::inventory);
-  const auto status = ClearItemSlot(*typed_category, slot, inventory);
-  Commit(VS::Items::inventory, inventory);
+  const auto status =
+      ClearItemSlot(*typed_category, slot, VS::Items::inventory);
   WarnRefusal("ClearItemSlot", status);
 }
 
@@ -133,8 +131,8 @@ void ClearLiveItemSlot(int category, int slot) {
 int FindLiveDisplayPosition(int category, int slot) {
   const auto typed_category = ToListedCategory(category, "FindDisplayPosition");
   if (!typed_category) return 0;
-  auto indices = Typed(VS::Items::inventoryIndices);
-  return FindDisplayPosition(DisplayOrder(indices, *typed_category), slot);
+  return FindDisplayPosition(
+      DisplayOrder(VS::Items::inventoryIndices, *typed_category), slot);
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_rebuildInventory
@@ -143,28 +141,28 @@ void RebuildLiveDisplayIndices(int category) {
   const auto typed_category =
       ToListedCategory(category, "RebuildDisplayIndices");
   if (!typed_category) return;
-  auto indices = Typed(VS::Items::inventoryIndices);
-  const auto status = RebuildDisplayIndices(*typed_category, indices,
-                                            Typed(VS::Items::inventory));
-  Commit(VS::Items::inventoryIndices, indices);
+  const auto status = RebuildDisplayIndices(
+      *typed_category, VS::Items::inventoryIndices, VS::Items::inventory);
   WarnRefusal("RebuildDisplayIndices", status);
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getItemCount
 // (src/MENU/MAINMENU.PRG/2D10.c:1307)
-int CountLiveItems(int category, const Items_Inventory* inventory) {
+int CountLiveItems(int category,
+                   const VS::Items::InventoryContents* inventory) {
   const auto typed_category = ToCategory(category, "CountItems");
   if (!typed_category) return 0;
-  return CountItems(*typed_category, Typed(OrAshleyInventory(inventory)));
+  return CountItems(*typed_category, OrAshleyInventory(inventory));
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_getFirstEmptyItemSlot
 // (src/MENU/MAINMENU.PRG/2D10.c:1321)
-int FindLiveFirstEmptySlot(int category, const Items_Inventory* inventory) {
+int FindLiveFirstEmptySlot(int category,
+                           const VS::Items::InventoryContents* inventory) {
   const auto typed_category = ToCategory(category, "FirstEmptySlot");
   if (!typed_category) return 0;
   const auto slot =
-      FirstEmptySlot(*typed_category, Typed(OrAshleyInventory(inventory)));
+      FirstEmptySlot(*typed_category, OrAshleyInventory(inventory));
   return static_cast<int>(slot);
 }
 
@@ -172,25 +170,24 @@ int FindLiveFirstEmptySlot(int category, const Items_Inventory* inventory) {
 // (src/MENU/MAINMENU.PRG/2D10.c:1334)
 // A misc copy rebuilds Ashley's misc display order and merges into the
 // target's stacks in that order, whichever inventory the target is.
-int CopyLiveItem(int flags, Items_Inventory* target, int source_index,
-                 const Items_Inventory* source) {
+int CopyLiveItem(int flags, VS::Items::InventoryContents* target,
+                 int source_index, const VS::Items::InventoryContents* source) {
   if (target == nullptr || source == nullptr) {
     WarnNullRecord("CopyItem");
     return 0;
   }
   const bool target_is_ashley = target == &VS::Items::inventory;
-  auto typed_target = Typed(*target);
+  auto typed_target = *target;
   const auto typed_source =
-      source == target ? std::nullopt : std::optional(Typed(*source));
-  const auto ashley = target_is_ashley
-                          ? std::nullopt
-                          : std::optional(Typed(VS::Items::inventory));
-  auto indices = Typed(VS::Items::inventoryIndices);
+      source == target ? std::nullopt : std::optional(*source);
+  const auto ashley =
+      target_is_ashley ? std::nullopt : std::optional(VS::Items::inventory);
+  auto indices = VS::Items::inventoryIndices;
   const auto copy = CopyItem(flags, typed_target, source_index,
                              typed_source ? *typed_source : typed_target,
                              indices, ashley ? *ashley : typed_target);
-  Commit(*target, typed_target);
-  Commit(VS::Items::inventoryIndices, indices);
+  *target = typed_target;
+  VS::Items::inventoryIndices = indices;
   WarnRefusal("CopyItem", copy.status);
   return copy.slot;
 }
@@ -209,9 +206,7 @@ void StoreLiveEquippedStats() {
   for (std::size_t limb = 0; limb < kLimbCount; ++limb) {
     loadouts.limb_armor[limb] = Typed(stats->limbs[limb].armor);
   }
-  auto inventory = Typed(VS::Items::inventory);
-  const auto status = StoreEquippedStats(loadouts, inventory);
-  Commit(VS::Items::inventory, inventory);
+  const auto status = StoreEquippedStats(loadouts, VS::Items::inventory);
   Commit(stats->weapon, loadouts.weapon);
   Commit(stats->shield, loadouts.shield);
   for (std::size_t limb = 0; limb < kLimbCount; ++limb) {

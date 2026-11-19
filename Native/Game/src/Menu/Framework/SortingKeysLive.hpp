@@ -23,9 +23,7 @@ class LiveSortingKeys : public World {
   }
   std::int32_t MiscValue(std::int32_t stat,
                          const Items::InventoryMisc& item) override {
-    Items_InventoryMisc legacy{};
-    Items::Live::Commit(legacy, item);
-    return LiveMiscSortValue(stat, &legacy);
+    return LiveMiscSortValue(stat, &item);
   }
   std::int32_t EquipmentValue(std::int32_t stat,
                               const Items::EquipmentPart& part) override {

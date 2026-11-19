@@ -24,7 +24,7 @@ namespace {
   std::abort();
 }
 
-Items_ContainerData* CurrentData() {
+VS::Items::ContainerData* CurrentData() {
   return Menu_Container_containerData == nullptr
              ? nullptr
              : &Menu_Container_containerData->items;

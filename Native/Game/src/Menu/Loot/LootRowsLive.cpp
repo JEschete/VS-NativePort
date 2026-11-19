@@ -12,8 +12,8 @@
 #include <utility>
 #include <vector>
 
-#include "Items/Inventory.h"
 #include "Items/Inventory.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -36,7 +36,7 @@ namespace item_live = VS::Items::Live;
 // The batch the current rows came from and the loot records it reads.
 struct Paging {
   StagingBatch batch{};
-  std::vector<Items_BattleLoot*> sources;
+  std::vector<VS::Items::BattleLoot*> sources;
 };
 
 Paging& PagingState() {
@@ -49,8 +49,8 @@ class AshleyClaimCheck final : public ClaimCheck {
  public:
   explicit AshleyClaimCheck(const char* operation)
       : operation_(operation),
-        ashley_(item_live::Typed(VS::Items::inventory)),
-        indices_(item_live::Typed(VS::Items::inventoryIndices)) {}
+        ashley_(VS::Items::inventory),
+        indices_(VS::Items::inventoryIndices) {}
 
   bool Fits(const LootRow& row,
             const items::InventoryContents& staged) override {
@@ -62,8 +62,8 @@ class AshleyClaimCheck final : public ClaimCheck {
 
   // A misc check rebuilds Ashley's display order, as the original copy did.
   void Commit() const {
-    item_live::Commit(VS::Items::inventory, ashley_);
-    item_live::Commit(VS::Items::inventoryIndices, indices_);
+    VS::Items::inventory = ashley_;
+    VS::Items::inventoryIndices = indices_;
   }
 
  private:
@@ -85,7 +85,7 @@ std::optional<LootStaging> Load(const char* operation) {
     return std::nullopt;
   }
   std::optional<LootStaging> staging(std::in_place);
-  staging->inventory = item_live::Typed(*Menu_Loot_inventory);
+  staging->inventory = *Menu_Loot_inventory;
   const auto rows = LiveRows();
   for (std::size_t i = 0; i < rows.size(); ++i) {
     staging->rows[i] = std::bit_cast<LootRow>(rows[i]);
@@ -102,7 +102,7 @@ std::optional<LootStaging> Load(const char* operation) {
 }
 
 void Store(const LootStaging& staging) {
-  item_live::Commit(*Menu_Loot_inventory, staging.inventory);
+  *Menu_Loot_inventory = staging.inventory;
   const auto rows = LiveRows();
   for (std::size_t i = 0; i < rows.size(); ++i) {
     rows[i] = std::bit_cast<Menu_Loot_LootListItem>(staging.rows[i]);
@@ -128,7 +128,7 @@ std::vector<items::BattleLoot> TypedSources() {
   std::vector<items::BattleLoot> records;
   records.reserve(PagingState().sources.size());
   for (const auto* source : PagingState().sources) {
-    records.push_back(item_live::Typed(*source));
+    records.push_back(*source);
   }
   return records;
 }
@@ -171,7 +171,7 @@ int CountContainedCategory(int counted_category, Menu_Loot_LootListItem* row) {
   }
   const auto count = VS::Menu::Loot::CountContainedCategory(
       static_cast<items::ItemCategory>(counted_category),
-      std::bit_cast<LootRow>(*row), item_live::Typed(*Menu_Loot_inventory));
+      std::bit_cast<LootRow>(*row), *Menu_Loot_inventory);
   item_live::WarnRefusal(kOperation, count.status);
   return count.count;
 }
@@ -182,7 +182,7 @@ int IsDropAllowed(int difficulty_flags) {
       static_cast<std::uint8_t>(VS::State::stateFlags.difficulty));
 }
 
-void StageDropRecord(Items_BattleLoot* record) {
+void StageDropRecord(VS::Items::BattleLoot* record) {
   constexpr const char* kOperation = "Menu::Loot::StageDropRecord";
   if (record == nullptr) {
     item_live::WarnNullRecord(kOperation);
@@ -192,13 +192,13 @@ void StageDropRecord(Items_BattleLoot* record) {
   std::size_t index = 0;
   while (index < sources.size() && sources[index] != record) ++index;
   if (index == sources.size()) sources.push_back(record);
-  const auto typed = item_live::Typed(*record);
+  const auto typed = *record;
   Update(kOperation, [&typed, index](LootStaging& staging, ClaimCheck& check) {
     VS::Menu::Loot::StageDropRecord(typed, index, staging, check);
   });
 }
 
-void BuildStagedInventory(Items_LootListNode* node) {
+void BuildStagedInventory(VS::Items::LootListNode* node) {
   constexpr const char* kOperation = "Menu::Loot::BuildStagedInventory";
   auto& sources = PagingState().sources;
   sources.clear();
@@ -240,7 +240,7 @@ int AdvanceStagedInventory() {
            advanced = loot::AdvanceStagedInventory(records, staging, check);
          });
   for (std::size_t i = 0; i < records.size(); ++i) {
-    item_live::Commit(*paging.sources[i], records[i]);
+    *paging.sources[i] = records[i];
   }
   return advanced ? 1 : 0;
 }

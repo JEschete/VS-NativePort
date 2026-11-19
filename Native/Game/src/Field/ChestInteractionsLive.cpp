@@ -58,7 +58,6 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
-#include "Items/TreasureChests.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
@@ -425,7 +424,7 @@ class LiveFacingResourceHost final : public VS::Field::FacingResourceHost {
     }
     return VS::Field::FacingChestState{.target = *target,
                                        .facing = record->facing,
-                                       .opened_flag = record->openedFlag};
+                                       .opened_flag = record->opened_flag};
   }
   std::int32_t FloorHeight(const VS::Field::FacingTile& tile) override {
     return VS::Field::LiveFloorHeightAt(
@@ -539,9 +538,9 @@ class LiveUnlockEffectHost final : public VS::Field::UnlockEffectHost {
     const auto* record = VS::Field::ResolveLiveChestTarget(
         std::get<VS::Field::ChestTarget>(target));
     return record ? std::optional{VS::Field::UnlockEffectState{
-                        .lock_level = record->lockLevel,
+                        .lock_level = record->lock_level,
                         .opened_flag =
-                            std::bit_cast<std::uint16_t>(record->openedFlag)}}
+                            std::bit_cast<std::uint16_t>(record->opened_flag)}}
                   : std::nullopt;
   }
   bool ChestOpened(std::int16_t flag) const override {
@@ -560,7 +559,7 @@ class LiveUnlockEffectHost final : public VS::Field::UnlockEffectHost {
     auto* record = VS::Field::ResolveLiveChestTarget(
         std::get<VS::Field::ChestTarget>(target));
     if (record == nullptr) return false;
-    record->lockLevel = 0;
+    record->lock_level = 0;
     return true;
   }
   void PlaySound(std::int32_t sound) override {
@@ -674,9 +673,9 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
     if (chest == nullptr) {
       return std::nullopt;
     }
-    return VS::Field::ChestLockState{chest->tileX, chest->tileZ,
-                                     chest->lockLevel, chest->reservedE,
-                                     chest->openedFlag};
+    return VS::Field::ChestLockState{chest->tile_x, chest->tile_z,
+                                     chest->lock_level, chest->reserved_e,
+                                     chest->opened_flag};
   }
   bool ScriptFlag(std::int32_t flag) override {
     return VS::State::LiveScriptFlag(flag);
@@ -695,7 +694,7 @@ class LiveChestInteractionHost final : public VS::Field::ChestInteractionHost {
     if (chest == nullptr) {
       return false;
     }
-    chest->lockLevel = 0;
+    chest->lock_level = 0;
     return true;
   }
   void ShowUnlocked(std::int16_t item) override {
@@ -1306,7 +1305,7 @@ Field_MpdLockTrigger* VS::Field::FindFacingRoomObjectEntry(int actor) {
 }
 
 // decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5290).
-Items_TreasureChest* VS::Field::FindFacingUnlootedChestEntry(int actor) {
+VS::Items::TreasureChest* VS::Field::FindFacingUnlootedChestEntry(int actor) {
   const auto target = VS::Field::FindLiveFacingUnlootedChest(actor);
   return target ? VS::Field::ResolveLiveChestTarget(*target) : nullptr;
 }

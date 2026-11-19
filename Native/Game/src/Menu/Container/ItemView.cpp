@@ -1,7 +1,9 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Items/Inventory.h"
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's
+// decomp line.
 #include "Menu/Container/ItemView.h"
+
+#include "Items/ItemRecords.hpp"
+#include "Legacy/Psx.h"
 
 // decomp: D_80109A08 (D_80109A08@src/MENU/MENUD.PRG/234.c)
 char const* Menu_Container_kStorageNames[] = { "GADGET BAG", "CONTAINER" };
@@ -38,11 +40,10 @@ char Menu_Container_detailsViewPhase;
 int Menu_Container_detailsClosedWithTriangle;
 
 // decomp: D_80109A88 (D_80109A88@src/MENU/MENUD.PRG/234.c)
-Items_Container* Menu_Container_otherStorage;
+VS::Items::Container* Menu_Container_otherStorage;
 
 // decomp: _menuText (_menuText@src/MENU/MENUD.PRG/234.c)
 u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData.cpp) */
 
 // decomp: vs_menuD_containerData (vs_menuD_containerData@MENU/MENUD.PRG)
-Items_Container* Menu_Container_containerData;
-
+VS::Items::Container* Menu_Container_containerData;

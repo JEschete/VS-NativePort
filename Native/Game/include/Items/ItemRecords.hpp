@@ -360,7 +360,7 @@ struct AccessoryInit {
   std::uint8_t reserved33{};
 };
 
-// Inventory records (decomp: vs_battle_inventory*).
+// Inventory records (decomp: vs_Inventory* in src/SLUS_010.40/inventory.h).
 struct InventoryArmor {
   std::uint8_t id{};
   std::uint8_t sub_id{};
@@ -384,11 +384,24 @@ struct InventoryArmor {
                          const InventoryArmor&) = default;
 };
 
-// The blade's damage type (bits 0-1) and cost type (bits 2-4) share a byte.
+// The blade's damage type (bits 0-1) and cost type (bits 2-4) share a byte
+// with three bits (5-7, decomp unk10_5) the game never reads.
 inline constexpr std::uint8_t kBladeDamageTypeMask = 0x3;
 inline constexpr int kBladeCostTypeShift = 2;
 inline constexpr std::uint8_t kBladeCostTypeMask = 0x7;
+inline constexpr int kBladeReservedBitsShift = 5;
+inline constexpr std::uint8_t kBladeReservedBitsMask = 0x7;
 
+// `bits` with the `mask`-wide field at `shift` replaced by the low bits of
+// `value`.
+[[nodiscard]] constexpr std::uint8_t ReplaceBits(std::uint8_t bits,
+                                                 std::uint8_t value, int shift,
+                                                 std::uint8_t mask) {
+  const auto field = static_cast<unsigned>(mask) << shift;
+  return static_cast<std::uint8_t>((bits & ~field) | ((value & mask) << shift));
+}
+
+// decomp: vs_InventoryBlade (src/SLUS_010.40/inventory.h:36)
 struct InventoryBlade {
   std::uint8_t id{};
   std::uint8_t sub_id{};
@@ -404,7 +417,9 @@ struct InventoryBlade {
   std::uint8_t cost{};
   std::uint8_t type_bits{};
   std::uint8_t reserved11{};
-  std::uint16_t opaque12{};
+  // decomp: unk12, which the equipment part's recovery delay (unk14) is
+  // copied to and from (146C.c:815, 1103).
+  std::uint16_t recovery_delay{};
   WeaponRange range{};
   PartClasses classes{};
   PartAffinities affinities{};
@@ -416,6 +431,21 @@ struct InventoryBlade {
   }
   [[nodiscard]] constexpr std::uint8_t CostType() const {
     return (type_bits >> kBladeCostTypeShift) & kBladeCostTypeMask;
+  }
+  [[nodiscard]] constexpr std::uint8_t ReservedBits() const {
+    return (type_bits >> kBladeReservedBitsShift) & kBladeReservedBitsMask;
+  }
+  // Each setter keeps the low bits of its value, as the bitfields do.
+  constexpr void SetDamageType(std::uint8_t value) {
+    type_bits = ReplaceBits(type_bits, value, 0, kBladeDamageTypeMask);
+  }
+  constexpr void SetCostType(std::uint8_t value) {
+    type_bits =
+        ReplaceBits(type_bits, value, kBladeCostTypeShift, kBladeCostTypeMask);
+  }
+  constexpr void SetReservedBits(std::uint8_t value) {
+    type_bits = ReplaceBits(type_bits, value, kBladeReservedBitsShift,
+                            kBladeReservedBitsMask);
   }
   friend bool operator==(const InventoryBlade&,
                          const InventoryBlade&) = default;
@@ -460,7 +490,7 @@ struct InventoryMisc {
 // A gem set in a shield names its owner with kShieldGemFlag over the shield's
 // 1-based slot; loading a shield masks its gem references with
 // kShieldGemSlotMask.
-// decomp: vs_gemTargets (src/BATTLE/BATTLE.PRG/func_8006B57C_t.h:166)
+// decomp: vs_gemTargets (src/SLUS_010.40/inventory.h:167)
 inline constexpr std::uint8_t kShieldGemFlag = 0x80;
 inline constexpr std::uint8_t kShieldGemSlotMask = 0x7F;
 
@@ -486,7 +516,8 @@ struct InventoryWeapon {
                          const InventoryWeapon&) = default;
 };
 
-// decomp: vs_battle_inventory: Ashley's (or a staged) inventory.
+// Ashley's (or a staged) inventory.
+// decomp: vs_Inventory (src/SLUS_010.40/gameState.h:123)
 struct InventoryContents {
   std::array<InventoryWeapon, kWeaponSlots> weapons{};
   std::array<InventoryShield, kShieldSlots> shields{};
@@ -501,6 +532,7 @@ struct InventoryContents {
 
 // The menus' display order: per category, 1-based slots in list order, 0 for
 // an empty row.
+// decomp: vs_InventoryIndices (src/SLUS_010.40/inventory.h:143)
 struct InventoryIndices {
   std::array<std::uint8_t, kWeaponSlots> weapons{};
   std::array<std::uint8_t, kBladeSlots> blades{};
@@ -513,7 +545,47 @@ struct InventoryIndices {
                          const InventoryIndices&) = default;
 };
 
+// The container's records in the inventory's table order and, per category,
+// its display order of 1-based slots (0 for an empty row).
+// decomp: vs_ContainerData, vs_ContainerIndices and vs_Container
+// (src/SLUS_010.40/inventory.h:118, 128, 133)
+inline constexpr std::size_t kContainerWeapons = 32;
+inline constexpr std::size_t kContainerShields = 32;
+inline constexpr std::size_t kContainerBlades = 64;
+inline constexpr std::size_t kContainerGrips = 64;
+inline constexpr std::size_t kContainerArmor = 64;
+inline constexpr std::size_t kContainerGems = 192;
+inline constexpr std::size_t kContainerMisc = 256;
+inline constexpr std::size_t kContainerSections = 7;
+struct ContainerData {
+  std::array<InventoryWeapon, kContainerWeapons> weapons{};
+  std::array<InventoryShield, kContainerShields> shields{};
+  std::array<InventoryBlade, kContainerBlades> blades{};
+  std::array<InventoryGrip, kContainerGrips> grips{};
+  std::array<InventoryArmor, kContainerArmor> armor{};
+  std::array<InventoryGem, kContainerGems> gems{};
+  std::array<InventoryMisc, kContainerMisc> misc{};
+  friend bool operator==(const ContainerData&, const ContainerData&) = default;
+};
+struct ContainerIndices {
+  std::array<std::uint16_t, kContainerWeapons> weapons{};
+  std::array<std::uint16_t, kContainerBlades> blades{};
+  std::array<std::uint16_t, kContainerGrips> grips{};
+  std::array<std::uint16_t, kContainerShields> shields{};
+  std::array<std::uint16_t, kContainerArmor> armor{};
+  std::array<std::uint16_t, kContainerGems> gems{};
+  std::array<std::uint16_t, kContainerMisc> misc{};
+  friend bool operator==(const ContainerIndices&,
+                         const ContainerIndices&) = default;
+};
+struct Container {
+  ContainerData items{};
+  ContainerIndices indices{};
+  friend bool operator==(const Container&, const Container&) = default;
+};
+
 // An enemy's guaranteed drop and its random drop chance.
+// decomp: UiMisc and UiMiscRand (src/BATTLE/BATTLE.PRG/uiEquipment.h:151, 157)
 struct MiscItemStack {
   std::uint16_t id{};
   std::uint8_t count{};
@@ -590,7 +662,8 @@ inline constexpr std::size_t kLootItemSlots = 3;
 inline constexpr std::size_t kGuaranteedDropCount = 2;
 inline constexpr std::size_t kRandomDropSlot = 2;
 
-// decomp: vs_battle_lootList's payload: one enemy's or chest's loot.
+// One enemy's or chest's loot.
+// decomp: vs_Loot (src/BATTLE/BATTLE.PRG/loot.h:80)
 struct BattleLoot {
   LootedWeapon weapon{};
   LootedBlade blade{};
@@ -603,7 +676,18 @@ struct BattleLoot {
   friend bool operator==(const BattleLoot&, const BattleLoot&) = default;
 };
 
-// decomp: vs_battle_treasureChest: one chest in a room's MPD loot section.
+// One enemy's loot in the battle's list. actor_id names the enemy that dropped
+// it; dropLoot (146C.c) ORs the drop rolls' results into it before listing the
+// node.
+// decomp: vs_LootListNode (src/BATTLE/BATTLE.PRG/menuState.h:27)
+struct LootListNode {
+  LootListNode* next{};
+  std::int32_t actor_id{};
+  BattleLoot loot{};
+};
+
+// One chest in a room's MPD loot section.
+// decomp: MpdRoomSection13 (src/BATTLE/BATTLE.PRG/mpd.h:164)
 struct TreasureChest {
   std::int16_t tile_x{};
   std::int16_t tile_z{};
@@ -820,6 +904,17 @@ static_assert(offsetof(InventoryContents, misc) ==
               kInventoryContentsMiscOffset);
 inline constexpr std::size_t kInventoryIndicesBytes = 0xB0;
 static_assert(sizeof(InventoryIndices) == kInventoryIndicesBytes);
+inline constexpr std::size_t kContainerDataBytes = 0x3C00;
+static_assert(sizeof(ContainerData) == kContainerDataBytes);
+inline constexpr std::size_t kContainerDataBladesOffset = 0xA00;
+static_assert(offsetof(ContainerData, blades) == kContainerDataBladesOffset);
+inline constexpr std::size_t kContainerDataMiscOffset = 0x3800;
+static_assert(offsetof(ContainerData, misc) == kContainerDataMiscOffset);
+inline constexpr std::size_t kContainerIndicesBytes = 0x580;
+static_assert(sizeof(ContainerIndices) == kContainerIndicesBytes);
+inline constexpr std::size_t kContainerBytes = 0x4180;
+static_assert(sizeof(Container) == kContainerBytes);
+static_assert(offsetof(Container, indices) == kContainerDataBytes);
 inline constexpr std::size_t kMiscItemStackBytes = 0x4;
 static_assert(sizeof(MiscItemStack) == kMiscItemStackBytes);
 inline constexpr std::size_t kMiscItemDropBytes = 0x4;

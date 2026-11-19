@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Items/Loot.h"
+#include "Items/ItemRecords.hpp"
 #include "Menu/Loot/LootInventory.h"
 
 namespace VS::Menu::Loot::Live {  // NOLINT(readability-identifier-naming)
@@ -9,7 +9,7 @@ void AppendLootRow(int category, int slot);
 [[nodiscard]] int CountContainedCategory(int counted_category,
                                          Menu_Loot_LootListItem* row);
 [[nodiscard]] int IsDropAllowed(int difficulty_flags);
-void StageDropRecord(Items_BattleLoot* record);
-void BuildStagedInventory(Items_LootListNode* node);
+void StageDropRecord(VS::Items::BattleLoot* record);
+void BuildStagedInventory(VS::Items::LootListNode* node);
 void RecordClaimedKey(int item_id);
 }  // namespace VS::Menu::Loot::Live

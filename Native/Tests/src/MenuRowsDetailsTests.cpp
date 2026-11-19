@@ -16,7 +16,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -895,7 +894,7 @@ TEST_CASE("Live gem rows point into the loaded text block",
       reinterpret_cast<decltype(VS::Menu::Framework::itemNames)>(block.data());
   VS::Menu::Framework::itemHelp = block.data() + (fw::kItemNamesBytes / 2);
   VS::Menu::Framework::itemHelp[122] = 2000;
-  Items_InventoryGem gem{};
+  VS::Items::InventoryGem gem{};
   gem.id = 262;
   std::array<char*, 2> menu_text{};
   int row_type = 0;

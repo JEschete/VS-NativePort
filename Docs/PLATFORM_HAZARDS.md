@@ -63,10 +63,10 @@ there would have hidden the defect and left the wrong behavior in place.
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 2 | 2 | 2 | 0 | 0 | 2 |
 | `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 4 | 0 | 0 | 4 | 0 | 4 |
-| `CAPACITY` | Fixed storage capacity | 129 | 0 | 0 | 129 | 0 | 129 |
+| `CAPACITY` | Fixed storage capacity | 95 | 0 | 0 | 95 | 0 | 95 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 0 | 0 | 0 | 0 | 0 | 0 |
-| `NARROW-ID` | Identity or index stored in one byte | 69 | 0 | 0 | 69 | 0 | 69 |
-| **Total** | | 568 | 239 | 239 | 316 | 13 | 558 |
+| `NARROW-ID` | Identity or index stored in one byte | 44 | 0 | 0 | 44 | 0 | 44 |
+| **Total** | | 509 | 239 | 239 | 257 | 13 | 499 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Roadmap issue | Sites |
 | --- | ---: |
-| no roadmap issue | 186 |
+| no roadmap issue | 131 |
 | #56 | 92 |
 | #60 | 56 |
 | #253 | 50 |
@@ -98,9 +98,9 @@ there would have hidden the defect and left the wrong behavior in place.
 | #55 | 34 |
 | #45 | 29 |
 | #47 | 12 |
-| #58 | 12 |
 | #50 | 11 |
 | #59 | 9 |
+| #58 | 8 |
 | #57 | 7 |
 | #62 | 7 |
 | #48 | 7 |
@@ -193,13 +193,13 @@ Inventory today, from the ledger:
 
 | Category | Capacity | Stored as |
 | --- | ---: | --- |
-| Weapons | 8 | `Items_InventoryWeapon weapons[8]`, indexed by `u_char` |
-| Shields | 8 | `Items_InventoryShield shields[8]`, indexed by `u_char` |
-| Blades | 16 | `Items_InventoryBlade blades[16]`, indexed by `u_char` |
-| Grips | 16 | `Items_InventoryGrip grips[16]`, indexed by `u_char` |
-| Armor | 16 | `Items_InventoryArmor armor[16]`, indexed by `u_char` |
-| Gems | 48 | `Items_InventoryGem gems[48]`, indexed by `u_char` |
-| Misc items | 64 | `Items_InventoryMisc misc[64]`, indexed by `u_char` |
+| Weapons | 8 | `std::array<InventoryWeapon, kWeaponSlots> weapons`, indexed by `std::uint8_t` |
+| Shields | 8 | `std::array<InventoryShield, kShieldSlots> shields`, indexed by `std::uint8_t` |
+| Blades | 16 | `std::array<InventoryBlade, kBladeSlots> blades`, indexed by `std::uint8_t` |
+| Grips | 16 | `std::array<InventoryGrip, kGripSlots> grips`, indexed by `std::uint8_t` |
+| Armor | 16 | `std::array<InventoryArmor, kArmorSlots> armor`, indexed by `std::uint8_t` |
+| Gems | 48 | `std::array<InventoryGem, kGemSlots> gems`, indexed by `std::uint8_t` |
+| Misc items | 64 | `std::array<InventoryMisc, kMiscSlots> misc`, indexed by `std::uint8_t` |
 
 Raising one of these today means finding every hard-coded loop, every one-byte index, the fixed menu index tables and the
 save layout, and missing one corrupts data silently. The `CAPACITY-LITERAL` and `NARROW-ID` rows are that list.

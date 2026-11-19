@@ -9,12 +9,6 @@ struct Battle_ActorStats;
 struct Battle_HitResult;
 struct Items_AccessorySpawnLoadout;
 struct Items_ArmorLoadout;
-struct Items_InventoryArmor;
-struct Items_InventoryBlade;
-struct Items_InventoryGem;
-struct Items_InventoryGrip;
-struct Items_InventoryShield;
-struct Items_InventoryWeapon;
 struct Items_ShieldLoadout;
 struct Items_ShieldSpawnLoadout;
 struct Items_WeaponLoadout;
@@ -37,45 +31,47 @@ void BuildLiveArmorStatsFromPart(Items_ArmorLoadout* target,
                                  const VS::Items::ArmorInit* source);
 
 void ReadLiveInventoryBladeStats(VS::Items::EquipmentPart* target,
-                                 const Items_InventoryBlade* source);
+                                 const VS::Items::InventoryBlade* source);
 void ReadLiveInventoryGripStats(VS::Items::EquipmentPart* target,
-                                const Items_InventoryGrip* source);
+                                const VS::Items::InventoryGrip* source);
 void ReadLiveInventoryArmorStats(VS::Items::EquipmentPart* target,
-                                 const Items_InventoryArmor* source);
+                                 const VS::Items::InventoryArmor* source);
 void ReadLiveInventoryGemStats(VS::Items::EquipmentPart* target,
-                               const Items_InventoryGem* source);
+                               const VS::Items::InventoryGem* source);
 
 // The part references name slots of Ashley's inventory.
 void LoadLiveInventoryWeaponStats(Items_WeaponLoadout* target,
-                                  const Items_InventoryWeapon* source);
+                                  const VS::Items::InventoryWeapon* source);
 void LoadLiveInventoryShieldStats(Items_ShieldLoadout* target,
-                                  const Items_InventoryShield* source);
+                                  const VS::Items::InventoryShield* source);
 void LoadLiveInventoryArmorStats(Items_ArmorLoadout* target,
-                                 const Items_InventoryArmor* source);
+                                 const VS::Items::InventoryArmor* source);
 void LoadLiveInventoryAccessoryStats(Items_AccessorySpawnLoadout* target,
-                                     const Items_InventoryArmor* source);
+                                     const VS::Items::InventoryArmor* source);
 
 // Equip Ashley (Battle_characterState) from her inventory.
-void EquipLiveAshleyWeapon(const Items_InventoryWeapon* weapon);
-void EquipLiveAshleyShield(const Items_InventoryShield* shield);
-void EquipLiveAshleyArmor(int body_part, const Items_InventoryArmor* armor);
-void EquipLiveAshleyAccessory(const Items_InventoryArmor* accessory);
+void EquipLiveAshleyWeapon(const VS::Items::InventoryWeapon* weapon);
+void EquipLiveAshleyShield(const VS::Items::InventoryShield* shield);
+void EquipLiveAshleyArmor(int body_part,
+                          const VS::Items::InventoryArmor* armor);
+void EquipLiveAshleyAccessory(const VS::Items::InventoryArmor* accessory);
 
-void WriteLiveInventoryBladeStats(Items_InventoryBlade* target,
+void WriteLiveInventoryBladeStats(VS::Items::InventoryBlade* target,
                                   const VS::Items::EquipmentPart* source);
-void WriteLiveInventoryGripStats(Items_InventoryGrip* target,
+void WriteLiveInventoryGripStats(VS::Items::InventoryGrip* target,
                                  const VS::Items::EquipmentPart* source);
-void WriteLiveInventoryGemStats(Items_InventoryGem* target,
+void WriteLiveInventoryGemStats(VS::Items::InventoryGem* target,
                                 const VS::Items::EquipmentPart* source);
-void WriteLiveInventoryArmorStats(Items_InventoryArmor* target,
+void WriteLiveInventoryArmorStats(VS::Items::InventoryArmor* target,
                                   const VS::Items::EquipmentPart* source);
 
 // Store a loadout back into `target` and the parts it references in
 // Ashley's inventory.
-void StoreLiveInventoryWeaponStats(Items_InventoryWeapon* target,
+void StoreLiveInventoryWeaponStats(VS::Items::InventoryWeapon* target,
                                    Items_WeaponLoadout* source);
 void StoreLiveInventoryAccessoryStats(
-    Items_InventoryArmor* target, const Items_AccessorySpawnLoadout* source);
+    VS::Items::InventoryArmor* target,
+    const Items_AccessorySpawnLoadout* source);
 
 void RebuildLiveArmorClassAffinity(Battle_ActorStats* actor_stats,
                                    int limb_index);

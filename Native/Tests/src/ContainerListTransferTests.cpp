@@ -1057,20 +1057,20 @@ std::vector<DirectionFrame> RunDirection(Entry entry) {
   return frames;
 }
 
-std::array<char*, 2> WeaponStrings(Items_ContainerData& owner,
-                                   void (*entry)(Items_ContainerData*, char**,
-                                                 int*, char*, int),
+std::array<char*, 2> WeaponStrings(VS::Items::ContainerData& owner,
+                                   void (*entry)(VS::Items::ContainerData*,
+                                                 char**, int*, char*, int),
                                    int& type, std::span<char> buffer) {
   std::array<char*, 2> strings{};
   entry(&owner, strings.data(), &type, buffer.data(), 0);
   return strings;
 }
 
-using RowEntry = void (*)(Items_ContainerData*, char**, int*, char*, int);
+using RowEntry = void (*)(VS::Items::ContainerData*, char**, int*, char*, int);
 constexpr auto kRowBytes = VS::Menu::Framework::kRowDescriptionBufferBytes;
 using RowBuffer = std::array<char, kRowBytes>;
 
-void RequireRowTextInBuffer(Items_ContainerData& owner, RowEntry entry) {
+void RequireRowTextInBuffer(VS::Items::ContainerData& owner, RowEntry entry) {
   RowBuffer buffer{};
   int type = 0;
   const auto strings = WeaponStrings(owner, entry, type, buffer);
@@ -1081,7 +1081,7 @@ void RequireRowTextInBuffer(Items_ContainerData& owner, RowEntry entry) {
   REQUIRE(buffer.front() != 0);
 }
 
-void RequireRowRepeats(Items_ContainerData& owner, RowEntry entry) {
+void RequireRowRepeats(VS::Items::ContainerData& owner, RowEntry entry) {
   RowBuffer buffer{};
   RowBuffer again{};
   int type = 0;
@@ -1094,13 +1094,13 @@ void RequireRowRepeats(Items_ContainerData& owner, RowEntry entry) {
   REQUIRE(repeated[1] - again.data() == strings[1] - buffer.data());
 }
 
-void CommitRows(Items_ContainerData& owner) {
+void CommitRows(VS::Items::ContainerData& owner) {
   rows_data::Records source;
   rows_data::Populate(source);
-  VS::Items::Live::Commit(owner.weapons[0], source.storage.items.weapons[0]);
-  VS::Items::Live::Commit(owner.blades[0], source.storage.items.blades[0]);
-  VS::Items::Live::Commit(owner.grips[0], source.storage.items.grips[0]);
-  VS::Items::Live::Commit(owner.shields[0], source.storage.items.shields[0]);
+  owner.weapons[0] = source.storage.items.weapons[0];
+  owner.blades[0] = source.storage.items.blades[0];
+  owner.grips[0] = source.storage.items.grips[0];
+  owner.shields[0] = source.storage.items.shields[0];
 }
 }  // namespace
 
@@ -1117,7 +1117,7 @@ TEST_CASE("F02951 F02952 live rows store their text in the caller buffer",
   int type = 0;
   RowBuffer buffer{};
   REQUIRE(WeaponStrings(owner, transfer::LiveBuildWeaponRow, type, buffer)[0] ==
-          owner.weapons[0].name);
+          owner.weapons[0].name.data());
 }
 
 TEST_CASE("F02951 F02952 live rows refuse missing outputs and records",
@@ -1225,7 +1225,7 @@ TEST_CASE("F02985 F02987 live entries refuse missing storage and steps",
   VS::Menu::Framework::inventoryStorage = nullptr;
   REQUIRE(transfer::LiveUpdateItemList(1) == 0);
   REQUIRE(transfer::LiveUpdateScreen(nullptr) == 0);
-  live::equipment::ValueRestore<Items_Container*> active{
+  live::equipment::ValueRestore<VS::Items::Container*> active{
       Menu_Container_containerData};
   u_char step = 6;
   Menu_Container_containerData = nullptr;

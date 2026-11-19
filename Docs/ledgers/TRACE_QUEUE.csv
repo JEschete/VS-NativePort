@@ -116,7 +116,6 @@ T00732.008,opaque,1,Effects::Trail9.opaque74,unk,0x74,"Used, but its meaning is 
 T00538.000,opaque,1,Effects::TrailQuadSet.opaque0,unk0,0x0,"Used, but its meaning is not established",,,native:read
 T00489.020,opaque,1,Effects::TransformSlot.opaqueBE,unkBE,0xBE,"Used, but its meaning is not established",VS::Effects::Plg128::(anonymous)::LiveCameraEffectHost::TransformFacing,,native:read
 T00234.003,opaque,1,Field::WeatherParticle.opaqueC,unkC,0xC,"Used, but its meaning is not established",VS::Effects::weather_live::ParticleOf VS::Effects::weather_live::StoreParticle,*Field::weatherParticles+0xC,native:read
-T00697.016,opaque,1,Items::InventoryBlade.opaque12,unk12,0x12,"Used, but its meaning is not established",VS::Game::Save::(anonymous)::Fields,,native:read
 T00261.001,opaque,1,Menu::Framework::MenuMemory.opaque34,unk34,0x34,"Used, but its meaning is not established",VS::Menu::BattleAbilities::(anonymous)::LiveAbilityHost::ResetUnlockMenuMemory,Menu::Framework::menuMemory=0x800F4F1C,native:read
 T00261.002,opaque,1,Menu::Framework::MenuMemory.opaque3A,unk3A,0x3A,"Used, but its meaning is not established",VS::Menu::Inventory::(anonymous)::LiveWorld::RememberPage VS::Menu::Inventory::(anonymous)::ReadRuntime VS::Menu::Inventory::(anonymous)::WriteRuntime VS::Menu::Inventory::(anonymous)::LiveIconWorld::CurrentCategory VS::Menu::Loot::(anonymous)::ReadRuntime VS::Menu::Loot::(anonymous)::WriteRuntime,Menu::Framework::menuMemory=0x800F4F22,native:read
 T00261.005,opaque,1,Menu::Framework::MenuMemory.opaque51,unk51,0x51,"Used, but its meaning is not established",VS::Menu::Status::(anonymous)::PanelFrame VS::Menu::Status::(anonymous)::UpdateLivePanel,Menu::Framework::menuMemory=0x800F4F39,native:read
@@ -594,9 +593,9 @@ T00328.013,reserved,4,Field::MpdDoorRecord.reserved0B,unkB,0xB,Remaining door id
 T00320.025,reserved,4,Field::MpdEnemySpawn.reserved26,unk26,0x26,Unidentified byte,VS::Actors::DecodeRoomSpawn,,native:read
 T00348.019,reserved,4,Field::ZoneContext.reserved4C,unk4C,0x4C,Unreferenced word,VS::Field::(anonymous)::LiveRoomLoadHost::ClearRoomResetWords,Field::zoneContext=0x800F18CC,native:read
 T00348.021,reserved,4,Field::ZoneContext.reserved54,unk54,0x54,Unreferenced word,VS::Field::(anonymous)::LiveRoomLoadHost::ClearRoomResetWords,Field::zoneContext=0x800F18D4,native:read
-T00697.014,reserved,4,Items::InventoryBlade.reserved10Bit5,unk10_5,0x10.5,Not read by decompiled code,VS::Game::Save::(anonymous)::Fields,,native:read
-T00332.005,reserved,4,Items::TreasureChest.reservedA,unkA,0xA,Not read,(anonymous)::LiveAnimationDispatchHost::Job (anonymous)::LiveAnimationDispatchHost::StoreCountdown (anonymous)::LiveChestSwitchHost::State (anonymous)::LiveChestSwitchHost::StoreSwitch (anonymous)::LiveChestSwitchHost::StoreStartState,,native:read
-T00332.007,reserved,4,Items::TreasureChest.reservedE,unkE,0xE,Not read,(anonymous)::LiveChestInteractionHost::Chest,,native:read
+T00697.014,reserved,4,Items::InventoryBlade.reserved_bits,unk10_5,,Not read by decompiled code,,,native:missing
+T00332.005,reserved,4,Items::TreasureChest.reserved_a,unkA,0xA,Not read,(anonymous)::LiveAnimationDispatchHost::Job (anonymous)::LiveAnimationDispatchHost::StoreCountdown (anonymous)::LiveChestSwitchHost::State (anonymous)::LiveChestSwitchHost::StoreSwitch (anonymous)::LiveChestSwitchHost::StoreStartState,,native:read
+T00332.007,reserved,4,Items::TreasureChest.reserved_e,unkE,0xE,Not read,(anonymous)::LiveChestInteractionHost::Chest,,native:read
 T00196.000,reserved,4,Menu::Manual::AnimationState.reserved0,enabled,0x0,Not read by decompiled code,VS::Menu::manual::LiveAdvanceVisibilityAnimation,,native:read
 T00671.014,reserved,4,Menu::TextBoxState.reserved1F,unk1F,0x1F,Not read by decompiled code,VS::Menu::ReadLiveTextBox VS::Menu::WriteLiveTextBox,Menu::textBoxes=0x800F4FFF stride 0x30,native:read
 T00671.018,reserved,4,Menu::TextBoxState.reserved23,unk23,0x23,Not read by decompiled code,VS::Menu::ReadLiveTextBox VS::Menu::WriteLiveTextBox,Menu::textBoxes=0x800F5003 stride 0x30,native:read

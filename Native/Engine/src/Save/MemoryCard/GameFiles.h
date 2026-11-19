@@ -12,7 +12,7 @@ struct Save_SaveSlotBase;
 
 #include "Field/Mpd.h"
 #include "Input/Settings.hpp"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "State/Ashley.hpp"
 #include "State/GameClock.hpp"
 #include "State/Progress.hpp"
@@ -128,13 +128,13 @@ struct Save_GameSaveImage {
     char mapStatus[0x48];
     VS::Input::Settings settings;
     VS::State::AshleySnapshot ashleySnapshot;
-    Items_Inventory inventory;
-    Items_InventoryIndices inventoryIndices;
+    VS::Items::InventoryContents inventory;
+    VS::Items::InventoryIndices inventoryIndices;
     Field_MpdDoorRecord entryDoor;
     VS::State::ScoreData scoreData;
     int roomStateSlot;
     char recentRoomEnemyStates[0x520];
     VS::State::ArtsStatus artsStatus;
-    Items_ContainerData containerData;
+    VS::Items::ContainerData containerData;
     char reserved59E0[0x220];
 };

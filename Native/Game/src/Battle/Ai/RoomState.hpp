@@ -13,7 +13,7 @@
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Field/Gimmicks.h"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Render/Palette.hpp"

@@ -49,11 +49,9 @@
 #include "Field/RoomLoadingLive.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
-#include "Items/Loot.h"
 #include "Legacy/Psx.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
@@ -133,9 +131,9 @@ signed char VS::Menu::Framework::loadedSubMenu = 0;
 // decomp: vs_battle_menuItems (BATTLE/BATTLE.PRG 5BF94.c)
 Menu_Framework_MenuRow* VS::Menu::Framework::menuItems = nullptr;
 // decomp: D_800EB9C4 (BATTLE/BATTLE.PRG 5BF94.c)
-Items_LootListNode* VS::Menu::Framework::lootLists = nullptr;
+VS::Items::LootListNode* VS::Menu::Framework::lootLists = nullptr;
 // decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)
-Items_BattleLoot* VS::Menu::Framework::lootEntry = nullptr;
+VS::Items::BattleLoot* VS::Menu::Framework::lootEntry = nullptr;
 // decomp: D_800EB9CE (BATTLE/BATTLE.PRG 5BF94.c): the module image byte is 0.
 char VS::Menu::textBoxBufferIndex = 0;
 // decomp: _menuBgUnpackedBuf (BATTLE/BATTLE.PRG 5BF94.c)
@@ -397,9 +395,9 @@ void StoreControl() {
   std::memcpy(submenuStates, g_state.submenu_states.data(),
               sizeof(submenuStates));
   std::memcpy(textHeaders, g_state.text_headers.data(), sizeof(textHeaders));
-  lootLists = reinterpret_cast<Items_LootListNode*>(
+  lootLists = reinterpret_cast<VS::Items::LootListNode*>(
       static_cast<std::uintptr_t>(g_state.loot_lists));
-  lootEntry = reinterpret_cast<Items_BattleLoot*>(
+  lootEntry = reinterpret_cast<VS::Items::BattleLoot*>(
       static_cast<std::uintptr_t>(g_state.loot_entry));
 }
 
@@ -1030,13 +1028,13 @@ class LiveHost final : public Host {
   }
 
   void BindInventoryViews() override {
-    Items_Inventory& inventory = VS::Items::inventory;
-    VS::Menu::Framework::weapons = inventory.weapons;
-    VS::Menu::Framework::blades = inventory.blades;
-    VS::Menu::Framework::grips = inventory.grips;
-    VS::Menu::Framework::shields = inventory.shields;
-    VS::Menu::Framework::armor = inventory.armor;
-    VS::Menu::Framework::gems = inventory.gems;
+    VS::Items::InventoryContents& inventory = VS::Items::inventory;
+    VS::Menu::Framework::weapons = inventory.weapons.data();
+    VS::Menu::Framework::blades = inventory.blades.data();
+    VS::Menu::Framework::grips = inventory.grips.data();
+    VS::Menu::Framework::shields = inventory.shields.data();
+    VS::Menu::Framework::armor = inventory.armor.data();
+    VS::Menu::Framework::gems = inventory.gems.data();
   }
 
   void UpdateStatPanels() override {
@@ -1372,13 +1370,13 @@ void ReleaseLiveMenuRows() {
   ReleaseMenuRows(call.Ctx());
 }
 
-void OpenLiveLootListMenu(Items_LootListNode* lists) {
+void OpenLiveLootListMenu(VS::Items::LootListNode* lists) {
   LiveCall call;
   OpenLootListMenu(call.Ctx(),
                    LootListId{reinterpret_cast<std::uintptr_t>(lists)});
 }
 
-void OpenLiveLootEntryMenu(Items_BattleLoot* entry) {
+void OpenLiveLootEntryMenu(VS::Items::BattleLoot* entry) {
   LiveCall call;
   OpenLootEntryMenu(call.Ctx(),
                     LootEntryId{reinterpret_cast<std::uintptr_t>(entry)});
@@ -1752,12 +1750,12 @@ int LiveShieldSortValue(int stat, Items_ShieldLoadout* shield) {
   return ShieldSortValue(call.Ctx(), stat, ShieldStats(*shield));
 }
 
-int LiveMiscSortValue(int stat, Items_InventoryMisc* misc) {
+int LiveMiscSortValue(int stat, const VS::Items::InventoryMisc* misc) {
   if (misc == nullptr) {
     VS::Core::LogWarn("menu.framework", "sort key of an absent item");
     return 0;
   }
-  return MiscSortValue(stat, {.id = misc->id, .count = Byte(misc->count)});
+  return MiscSortValue(stat, {.id = misc->id, .count = misc->count});
 }
 
 int LiveEquipmentSortValue(int stat,

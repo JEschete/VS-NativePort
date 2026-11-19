@@ -4,7 +4,6 @@
 
 #include "Battle/Actor.h"
 #include "Battle/Ai/AiViews.h"
-#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Items/Inventory.h"
-#include "Items/Loot.h"
+#include "Items/ItemRecords.hpp"
 
 namespace VS::Menu::Loot::Live {  // NOLINT(readability-identifier-naming)
-[[nodiscard]] int StageBlade(Items_InventoryBlade* blade, int weapon_index);
-[[nodiscard]] int StageGrip(Items_InventoryGrip* grip, int weapon_index);
-[[nodiscard]] int StageGem(Items_InventoryGem* gem, int item_index);
-[[nodiscard]] int StageWeapon(Items_LootedWeapon* weapon);
-[[nodiscard]] int StageArmor(Items_InventoryArmor* armor);
-[[nodiscard]] int StageShield(Items_LootedShield* shield);
-[[nodiscard]] int StageMiscItem(Items_LootedItem* item);
+[[nodiscard]] int StageBlade(VS::Items::InventoryBlade* blade,
+                             int weapon_index);
+[[nodiscard]] int StageGrip(VS::Items::InventoryGrip* grip, int weapon_index);
+[[nodiscard]] int StageGem(VS::Items::InventoryGem* gem, int item_index);
+[[nodiscard]] int StageWeapon(VS::Items::LootedWeapon* weapon);
+[[nodiscard]] int StageArmor(VS::Items::InventoryArmor* armor);
+[[nodiscard]] int StageShield(VS::Items::LootedShield* shield);
+[[nodiscard]] int StageMiscItem(VS::Items::LootedItem* item);
 }  // namespace VS::Menu::Loot::Live

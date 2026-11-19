@@ -17,8 +17,8 @@ namespace live = VS::Menu::Loot::Live;
 namespace inventory = VS::Items::Inventory;
 
 struct LiveStageFixture {
-  Items_Inventory staged{};
-  Items_Inventory* previous{Menu_Loot_inventory};
+  VS::Items::InventoryContents staged{};
+  VS::Items::InventoryContents* previous{Menu_Loot_inventory};
 
   LiveStageFixture() { Menu_Loot_inventory = &staged; }
   ~LiveStageFixture() { Menu_Loot_inventory = previous; }
@@ -410,57 +410,57 @@ TEST_CASE("F02852 misc staging uses every inventory slot",
 TEST_CASE("F02846 live binding writes staged blades through the menu inventory",
           "[loot-staging][F02846][live]") {
   static_assert(std::is_same_v<decltype(&live::StageBlade),
-                               int (*)(Items_InventoryBlade*, int)>);
+                               int (*)(VS::Items::InventoryBlade*, int)>);
   LiveStageFixture fixture;
-  Items_InventoryBlade blade{};
+  VS::Items::InventoryBlade blade{};
   blade.id = 0x35;
-  blade.assembledWeaponIndex = static_cast<char>(-31);
+  blade.assembled_weapon_index = static_cast<char>(-31);
   blade.index = static_cast<char>(-30);
 
   CHECK(live::StageBlade(&blade, 7) == 1);
   CHECK(fixture.staged.blades[0].id == blade.id);
-  CHECK(fixture.staged.blades[0].assembledWeaponIndex == 7);
+  CHECK(fixture.staged.blades[0].assembled_weapon_index == 7);
   CHECK(fixture.staged.blades[0].index == 1);
 }
 
 TEST_CASE("F02847 live binding writes staged grips through the menu inventory",
           "[loot-staging][F02847][live]") {
   static_assert(std::is_same_v<decltype(&live::StageGrip),
-                               int (*)(Items_InventoryGrip*, int)>);
+                               int (*)(VS::Items::InventoryGrip*, int)>);
   LiveStageFixture fixture;
-  Items_InventoryGrip grip{};
+  VS::Items::InventoryGrip grip{};
   grip.id = 0x1234;
-  grip.assembledWeaponIndex = 0xE1;
+  grip.assembled_weapon_index = 0xE1;
   grip.index = 0xE2;
 
   CHECK(live::StageGrip(&grip, 6) == 1);
   CHECK(fixture.staged.grips[0].id == grip.id);
-  CHECK(fixture.staged.grips[0].assembledWeaponIndex == 6);
+  CHECK(fixture.staged.grips[0].assembled_weapon_index == 6);
   CHECK(fixture.staged.grips[0].index == 1);
 }
 
 TEST_CASE("F02848 live binding writes staged gems through the menu inventory",
           "[loot-staging][F02848][live]") {
   static_assert(std::is_same_v<decltype(&live::StageGem),
-                               int (*)(Items_InventoryGem*, int)>);
+                               int (*)(VS::Items::InventoryGem*, int)>);
   LiveStageFixture fixture;
-  Items_InventoryGem gem{};
+  VS::Items::InventoryGem gem{};
   gem.id = 0x1234;
-  gem.setItemIndex = 0xE1;
+  gem.set_item_index = 0xE1;
   gem.index = 0xE2;
 
   CHECK(live::StageGem(&gem, 0x82) == 1);
   CHECK(fixture.staged.gems[0].id == gem.id);
-  CHECK(fixture.staged.gems[0].setItemIndex == 0x82);
+  CHECK(fixture.staged.gems[0].set_item_index == 0x82);
   CHECK(fixture.staged.gems[0].index == 1);
 }
 
 TEST_CASE("F02849 live binding stages a weapon and its components",
           "[loot-staging][F02849][live]") {
   static_assert(std::is_same_v<decltype(&live::StageWeapon),
-                               int (*)(Items_LootedWeapon*)>);
+                               int (*)(VS::Items::LootedWeapon*)>);
   LiveStageFixture fixture;
-  Items_LootedWeapon weapon{};
+  VS::Items::LootedWeapon weapon{};
   weapon.blade.id = 0x31;
   weapon.grip.id = 0x1234;
   weapon.gems[0].id = 0x234;
@@ -472,17 +472,17 @@ TEST_CASE("F02849 live binding stages a weapon and its components",
   CHECK(fixture.staged.weapons[0].grip == 1);
   CHECK(fixture.staged.weapons[0].gems[0] == 1);
   CHECK(fixture.staged.weapons[0].name[0] == 'W');
-  CHECK(fixture.staged.blades[0].assembledWeaponIndex == 1);
-  CHECK(fixture.staged.grips[0].assembledWeaponIndex == 1);
-  CHECK(fixture.staged.gems[0].setItemIndex == 1);
+  CHECK(fixture.staged.blades[0].assembled_weapon_index == 1);
+  CHECK(fixture.staged.grips[0].assembled_weapon_index == 1);
+  CHECK(fixture.staged.gems[0].set_item_index == 1);
 }
 
 TEST_CASE("F02850 live binding writes staged armor through the menu inventory",
           "[loot-staging][F02850][live]") {
   static_assert(std::is_same_v<decltype(&live::StageArmor),
-                               int (*)(Items_InventoryArmor*)>);
+                               int (*)(VS::Items::InventoryArmor*)>);
   LiveStageFixture fixture;
-  Items_InventoryArmor armor{};
+  VS::Items::InventoryArmor armor{};
   armor.id = 0x35;
   armor.limb = 4;
   armor.index = 0xE2;
@@ -496,9 +496,9 @@ TEST_CASE("F02850 live binding writes staged armor through the menu inventory",
 TEST_CASE("F02851 live binding stages a shield with its shield gem owner flag",
           "[loot-staging][F02851][live]") {
   static_assert(std::is_same_v<decltype(&live::StageShield),
-                               int (*)(Items_LootedShield*)>);
+                               int (*)(VS::Items::LootedShield*)>);
   LiveStageFixture fixture;
-  Items_LootedShield shield{};
+  VS::Items::LootedShield shield{};
   shield.shield.id = 0x45;
   shield.gems[0].id = 0x234;
 
@@ -506,22 +506,22 @@ TEST_CASE("F02851 live binding stages a shield with its shield gem owner flag",
   CHECK(fixture.staged.shields[0].index == 0);
   CHECK(fixture.staged.shields[0].base.limb == 1);
   CHECK(fixture.staged.shields[0].gems[0] == 1);
-  CHECK(fixture.staged.gems[0].setItemIndex == (1 | items::kShieldGemFlag));
+  CHECK(fixture.staged.gems[0].set_item_index == (1 | items::kShieldGemFlag));
 }
 
 TEST_CASE("F02852 live binding writes the misc ID and count",
           "[loot-staging][F02852][live]") {
   static_assert(std::is_same_v<decltype(&live::StageMiscItem),
-                               int (*)(Items_LootedItem*)>);
+                               int (*)(VS::Items::LootedItem*)>);
   LiveStageFixture fixture;
-  Items_LootedItem item{};
-  item.itemId = 0x1234;
-  item.difficultyFlags = 0x7F;
+  VS::Items::LootedItem item{};
+  item.item_id = 0x1234;
+  item.difficulty_flags = 0x7F;
   item.count = 9;
   fixture.staged.misc[0].index = 0x77;
 
   CHECK(live::StageMiscItem(&item) == 1);
-  CHECK(fixture.staged.misc[0].id == item.itemId);
+  CHECK(fixture.staged.misc[0].id == item.item_id);
   CHECK(fixture.staged.misc[0].count == item.count);
   CHECK(fixture.staged.misc[0].index == 0x77);
 }

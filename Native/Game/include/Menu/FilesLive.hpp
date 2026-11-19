@@ -3,10 +3,8 @@
 
 #include <cstdint>
 
+#include "Items/ItemRecords.hpp"
 #include "Menu/Files.hpp"
-
-struct Items_ContainerData;
-struct Items_ContainerIndices;
 
 // Binds the file screens (Files.hpp) to the memory-card driver, the native
 // file menu, the menu framework, the save summaries, the pad, the disc queue
@@ -25,9 +23,9 @@ void ResetLiveElements();
 void DrawLiveFrame(int frame_buffer);
 // MENU7.PRG _copyContainer (260.c:3821) over the live container records; a
 // null record is refused.
-void CopyLiveSelectedContainerItems(Items_ContainerData* target,
-                                    const Items_ContainerData* source,
-                                    const Items_ContainerIndices* to_copy);
+void CopyLiveSelectedContainerItems(VS::Items::ContainerData* target,
+                                    const VS::Items::ContainerData* source,
+                                    const VS::Items::ContainerIndices* to_copy);
 
 // The native file presentation's drawing in the original call shapes.
 // MENU7.PRG _printCharacter (260.c:1524): the next x.

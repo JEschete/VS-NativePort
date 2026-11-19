@@ -9,11 +9,8 @@
 #include "Menu/Framework/ActionSelection.h"
 
 struct Menu_Framework_MenuRow;
-struct Items_LootListNode;
-struct Items_BattleLoot;
 struct Items_WeaponLoadout;
 struct Items_ShieldLoadout;
-struct Items_InventoryMisc;
 
 // Binds the menu framework (Framework.hpp) to its variables
 // (FrameworkLiveState.hpp), the frame ordering tables, the disc queue, the text
@@ -51,8 +48,8 @@ int LiveActionRestrictionFlags(int mode);
 int OpenLiveGameMenu(int menu_state, int mode);
 int OpenLiveShortcutMenu(int shortcut);
 void ReleaseLiveMenuRows();
-void OpenLiveLootListMenu(Items_LootListNode* lists);
-void OpenLiveLootEntryMenu(Items_BattleLoot* entry);
+void OpenLiveLootListMenu(VS::Items::LootListNode* lists);
+void OpenLiveLootEntryMenu(VS::Items::BattleLoot* entry);
 void OpenLiveChestStorageMenu(int location);
 void OpenLiveAbilityUnlockMenu(int art, int ability);
 void OpenLiveChallengeMenu();
@@ -126,7 +123,7 @@ void UpdateLiveItemDetailsSelection(int row, char* text[], u_int row_type,
                                     int page);
 int LiveWeaponSortValue(int stat, Items_WeaponLoadout* weapon);
 int LiveShieldSortValue(int stat, Items_ShieldLoadout* shield);
-int LiveMiscSortValue(int stat, Items_InventoryMisc* misc);
+int LiveMiscSortValue(int stat, const VS::Items::InventoryMisc* misc);
 int LiveEquipmentSortValue(int stat, const VS::Items::EquipmentPart* equipment);
 void SetLiveMenuVisible(int display);
 void ClearLiveMenuExceptTitle();

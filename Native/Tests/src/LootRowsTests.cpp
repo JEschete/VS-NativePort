@@ -11,7 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -115,13 +115,13 @@ bool IsBound(unsigned address, Entry entry) {
 }
 
 struct LiveRowsFixture {
-  Items_Inventory staged{};
+  VS::Items::InventoryContents staged{};
   std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
-  Items_Inventory* previous_inventory{Menu_Loot_inventory};
+  VS::Items::InventoryContents* previous_inventory{Menu_Loot_inventory};
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
-  Items_Inventory previous_ashley{VS::Items::inventory};
-  Items_InventoryIndices previous_indices{VS::Items::inventoryIndices};
-  Items_BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
+  VS::Items::InventoryContents previous_ashley{VS::Items::inventory};
+  VS::Items::InventoryIndices previous_indices{VS::Items::inventoryIndices};
+  VS::Items::BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
   std::uint8_t previous_difficulty{VS::State::stateFlags.difficulty};
 
   LiveRowsFixture() {
@@ -426,27 +426,28 @@ TEST_CASE("Live loot rows use the screen's rows, cursor and difficulty",
   CHECK(live::IsDropAllowed(2) == 2);
   CHECK(live::IsDropAllowed(1) == 0);
 
-  live::AppendLootRow(Items_ItemCategory_Armor, 3);
+  live::AppendLootRow(static_cast<int>(ItemCategory::kArmor), 3);
   CHECK(Menu_Loot_lootListCount == 1);
-  CHECK(fixture.rows[0].itemCategory == Items_ItemCategory_Armor);
+  CHECK(fixture.rows[0].itemCategory == static_cast<int>(ItemCategory::kArmor));
   CHECK(fixture.rows[0].itemIndex == 2);
   live::AppendLootRow(static_cast<int>(ItemCategory::kManage), 1);
   CHECK(Menu_Loot_lootListCount == 1);
 
-  CHECK(live::CountContainedCategory(Items_ItemCategory_Armor,
+  CHECK(live::CountContainedCategory(static_cast<int>(ItemCategory::kArmor),
                                      &fixture.rows[0]) == 1);
   CHECK(live::CountContainedCategory(8, &fixture.rows[0]) == 0);
-  CHECK(live::CountContainedCategory(Items_ItemCategory_Armor, nullptr) == 0);
+  CHECK(live::CountContainedCategory(static_cast<int>(ItemCategory::kArmor),
+                                     nullptr) == 0);
 }
 
 TEST_CASE("Live chest staging pages the single loot entry",
           "[loot-rows][F02853][F02858][F02859]") {
   LiveRowsFixture fixture;
-  Items_BattleLoot chest{};
+  VS::Items::BattleLoot chest{};
   items::BattleLoot typed{};
   typed.misc[0] = {.item_id = 323, .difficulty_flags = 3, .count = 2};
   typed.misc[1] = {.item_id = 467, .difficulty_flags = 3, .count = 1};
-  items::Live::Commit(chest, typed);
+  chest = typed;
   VS::Menu::Framework::lootEntry = &chest;
   live::BuildStagedInventory(nullptr);
   REQUIRE(Menu_Loot_lootListCount == 2);
@@ -454,7 +455,7 @@ TEST_CASE("Live chest staging pages the single loot entry",
   CHECK(fixture.rows[1].state == 1);
   CHECK(fixture.staged.misc[0].id == 323);
   CHECK(VS::Menu::Loot::Live::AdvanceStagedInventory() == 0);
-  CHECK(items::Live::Typed(chest) == typed);
+  CHECK(chest == typed);
 }
 
 TEST_CASE("Live key claims set the key item's script flag",

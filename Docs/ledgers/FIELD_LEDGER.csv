@@ -593,14 +593,14 @@ T00100.007,T00100,vs_fileMenuUiIds_e,7,vs_uiids_hp,0,,,7,,Hp,FileMenuUiId Hp,med
 T00100.008,T00100,vs_fileMenuUiIds_e,8,vs_uiids_mp,0,,,8,,Mp,FileMenuUiId Mp,med,declaration-only;source:MENU/MENU7.PRG/260.c:1215
 T00100.009,T00100,vs_fileMenuUiIds_e,9,vs_uiids_dot,0,,,9,,Dot,FileMenuUiId Dot,med,declaration-only;source:MENU/MENU7.PRG/260.c:1216
 T00101.000,T00101,vs_gemTargets,0,gemTargetShield,0,,,128,,Shield,GemTarget Shield,med,declaration-only;source:func_8006B57C_t.h:166
-T00102.000,T00102,vs_itemCategories,0,itemCategoryWeapon,0,,,0,,Weapon,ItemCategory Weapon,med,declaration-only;source:func_8006B57C_t.h:156
-T00102.001,T00102,vs_itemCategories,1,itemCategoryBlade,0,,,1,,Blade,ItemCategory Blade,med,declaration-only;source:func_8006B57C_t.h:157
-T00102.002,T00102,vs_itemCategories,2,itemCategoryGrip,0,,,2,,Grip,ItemCategory Grip,med,declaration-only;source:func_8006B57C_t.h:158
-T00102.003,T00102,vs_itemCategories,3,itemCategoryShield,0,,,3,,Shield,ItemCategory Shield,med,declaration-only;source:func_8006B57C_t.h:159
-T00102.004,T00102,vs_itemCategories,4,itemCategoryArmor,0,,,4,,Armor,ItemCategory Armor,med,declaration-only;source:func_8006B57C_t.h:160
-T00102.005,T00102,vs_itemCategories,5,itemCategoryGem,0,,,5,,Gem,ItemCategory Gem,med,declaration-only;source:func_8006B57C_t.h:161
-T00102.006,T00102,vs_itemCategories,6,itemCategoryMisc,0,,,6,,Misc,ItemCategory Misc,med,declaration-only;source:func_8006B57C_t.h:162
-T00102.007,T00102,vs_itemCategories,7,itemCategoryManage,0,,,7,,Manage,ItemCategory Manage,med,declaration-only;source:func_8006B57C_t.h:163
+T00102.000,T00102,vs_itemCategories,0,itemCategoryWeapon,0,,,0,,kWeapon,ItemCategory Weapon,med,declaration-only;source:func_8006B57C_t.h:156
+T00102.001,T00102,vs_itemCategories,1,itemCategoryBlade,0,,,1,,kBlade,ItemCategory Blade,med,declaration-only;source:func_8006B57C_t.h:157
+T00102.002,T00102,vs_itemCategories,2,itemCategoryGrip,0,,,2,,kGrip,ItemCategory Grip,med,declaration-only;source:func_8006B57C_t.h:158
+T00102.003,T00102,vs_itemCategories,3,itemCategoryShield,0,,,3,,kShield,ItemCategory Shield,med,declaration-only;source:func_8006B57C_t.h:159
+T00102.004,T00102,vs_itemCategories,4,itemCategoryArmor,0,,,4,,kArmor,ItemCategory Armor,med,declaration-only;source:func_8006B57C_t.h:160
+T00102.005,T00102,vs_itemCategories,5,itemCategoryGem,0,,,5,,kGem,ItemCategory Gem,med,declaration-only;source:func_8006B57C_t.h:161
+T00102.006,T00102,vs_itemCategories,6,itemCategoryMisc,0,,,6,,kMisc,ItemCategory Misc,med,declaration-only;source:func_8006B57C_t.h:162
+T00102.007,T00102,vs_itemCategories,7,itemCategoryManage,0,,,7,,kManage,ItemCategory Manage,med,declaration-only;source:func_8006B57C_t.h:163
 T00103.000,T00103,vs_mainMenu_actionsMenuActions,0,actionMenuDiscard,0,,,4,,Discard,ActionsMenuAction Discard,med,declaration-only;source:58EC.h:7
 T00103.001,T00103,vs_mainMenu_actionsMenuActions,1,actionMenuSort,0,,,45,,Sort,ActionsMenuAction Sort,med,declaration-only;source:58EC.h:7
 T00104.000,T00104,vs_mainMenu_buttonIDs,0,buttonIdTriangle,0,,,0,,Triangle,ButtonId Triangle,med,declaration-only;source:58EC.h:90
@@ -2958,15 +2958,15 @@ T00331.018,T00331,_mpdRoomSection12,18,unkA8,1,int,,,fixed-point x,positionX,Cur
 T00331.019,T00331,_mpdRoomSection12,19,unkAC,1,int,,,fixed-point y,positionY,Current Y in 20.12 fixed point,high,source:146C.c:16516
 T00331.020,T00331,_mpdRoomSection12,20,unkB0,1,int,,,fixed-point z,positionZ,Current Z in 20.12 fixed point,high,source:146C.c:16517
 T00331.021,T00331,_mpdRoomSection12,21,unkB4,1,_mpdRoomSection3,,,,tileCell,Tile cell carried with the platform,high,source:146C.c:16636
-T00332.000,T00332,_mpdRoomSection13,0,unk0,1,short,,,,tileX,Tile X,high,source:146C.c:16844
-T00332.001,T00332,_mpdRoomSection13,1,unk2,1,short,,,,tileZ,Tile Z,high,source:146C.c:16844
+T00332.000,T00332,_mpdRoomSection13,0,unk0,1,short,,,,tile_x,Tile X,high,source:146C.c:16844
+T00332.001,T00332,_mpdRoomSection13,1,unk2,1,short,,,,tile_z,Tile Z,high,source:146C.c:16844
 T00332.002,T00332,_mpdRoomSection13,2,unk4,1,short,,,,layer,Third tile coordinate matched with X and Z,med,source:146C.c:16845
-T00332.003,T00332,_mpdRoomSection13,3,unk6,1,short,,,,lidRotationId,Room rotation snapped open when the chest is restored as opened,med,source:146C.c:16921
-T00332.004,T00332,_mpdRoomSection13,4,unk8,1,short,,,opened,isOpen,Set when the chest's opened flag is set,high,source:146C.c:16920
-T00332.005,T00332,_mpdRoomSection13,5,unkA,1,short,,,,reservedA,Not read,low,declaration-only;source:146C.h:201
-T00332.006,T00332,_mpdRoomSection13,6,unkC,1,short,,,,lockLevel,Magic lock level; 2 and 3 yield to unlock spells; 0 when unlocked,med,source:146C.c:2195;source:146C.c:2199
-T00332.007,T00332,_mpdRoomSection13,7,unkE,1,short,,,,reservedE,Not read,low,declaration-only;source:146C.h:203
-T00332.008,T00332,_mpdRoomSection13,8,unk10,1,short,,,chest state flag index,openedFlag,Index of the opened flag (state flag 0x3C0 + n),high,source:146C.c:16919
+T00332.003,T00332,_mpdRoomSection13,3,unk6,1,short,,,,lid_rotation_id,Room rotation snapped open when the chest is restored as opened,med,source:146C.c:16921
+T00332.004,T00332,_mpdRoomSection13,4,unk8,1,short,,,opened,is_open,Set when the chest's opened flag is set,high,source:146C.c:16920
+T00332.005,T00332,_mpdRoomSection13,5,unkA,1,short,,,,reserved_a,Not read,low,declaration-only;source:146C.h:201
+T00332.006,T00332,_mpdRoomSection13,6,unkC,1,short,,,,lock_level,Magic lock level; 2 and 3 yield to unlock spells; 0 when unlocked,med,source:146C.c:2195;source:146C.c:2199
+T00332.007,T00332,_mpdRoomSection13,7,unkE,1,short,,,,reserved_e,Not read,low,declaration-only;source:146C.h:203
+T00332.008,T00332,_mpdRoomSection13,8,unk10,1,short,,,chest state flag index,opened_flag,Index of the opened flag (state flag 0x3C0 + n),high,source:146C.c:16919
 T00332.009,T00332,_mpdRoomSection13,9,unk12,1,short,,,,facing,Direction the chest is opened from,high,source:146C.c:5302
 T00332.010,T00332,_mpdRoomSection13,10,unk14,1,vs_battle_loot,,,,loot,Chest contents,high,source:146C.c:17392
 T00333.000,T00333,_mpdRoomSection3,0,unk0_0,1,u_int,5,,,surfaceKind,Surface kind for footsteps and impacts,high,source:44F14.c:765;source:3A1A0.c:2222
@@ -5855,46 +5855,46 @@ T00645.005,T00645,vs_battle_loot,5,accessory,0,vs_battle_lootedAccessory,,,,acce
 T00645.006,T00645,vs_battle_loot,6,gem,0,vs_battle_lootedGem,,,,gem,Named in the fork; see cited use,med,source:MENU/MENUB.PRG/260.c:1156
 T00645.007,T00645,vs_battle_loot,7,misc,0,vs_battle_lootedMisc[3],,,,misc,Named in the fork; see cited use,med,source:146C.c:1693
 T00646.000,T00646,vs_battle_lootListNode,0,next,0,struct vs_battle_lootListNode *,,,,next,Next node,high,source:146C.c:1756
-T00646.001,T00646,vs_battle_lootListNode,1,actorId,0,int,,,,droppedMask,Nonzero when a drop roll produced an item,med,source:146C.c:1732
+T00646.001,T00646,vs_battle_lootListNode,1,actorId,0,int,,,,actor_id,Id of the enemy whose loot the node holds; dropLoot ORs the drop rolls' results into it to decide whether to list the node,high,source:upstream:src/BATTLE/BATTLE.PRG/146C.c:1375;source:upstream:src/BATTLE/BATTLE.PRG/146C.c:1405;renamed from droppedMask (#441)
 T00646.002,T00646,vs_battle_lootListNode,2,loot,0,vs_battle_loot,,,,loot,Rolled loot,high,source:146C.c:1732
 T00647.000,T00647,vs_battle_lootedAccessory,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1658
 T00647.001,T00647,vs_battle_lootedAccessory,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:21;declaration-only;source:func_8006B57C_t.h:214
 T00647.002,T00647,vs_battle_lootedAccessory,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:22;declaration-only;source:func_8006B57C_t.h:215
 T00647.003,T00647,vs_battle_lootedAccessory,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:23;declaration-only;source:func_8006B57C_t.h:216
 T00647.004,T00647,vs_battle_lootedAccessory,4,accessory,0,vs_main_inventoryArmor,,,,accessory,Accessory,high,source:146C.c:1656
-T00648.000,T00648,vs_battle_lootedArmor,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1675
-T00648.001,T00648,vs_battle_lootedArmor,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:31;declaration-only;source:func_8006B57C_t.h:206
-T00648.002,T00648,vs_battle_lootedArmor,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:32;declaration-only;source:func_8006B57C_t.h:207
-T00648.003,T00648,vs_battle_lootedArmor,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:33;declaration-only;source:func_8006B57C_t.h:208
+T00648.000,T00648,vs_battle_lootedArmor,0,difficultyFlags,0,char,,,,difficulty_flags,Difficulties under which the drop is kept,high,"source:146C.c:1675;native:LootHeader::difficulty_flags, reached through the record's header member"
+T00648.001,T00648,vs_battle_lootedArmor,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:206;native:LootHeader::reserved[0], reached through the record's header member"
+T00648.002,T00648,vs_battle_lootedArmor,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:207;native:LootHeader::reserved[1], reached through the record's header member"
+T00648.003,T00648,vs_battle_lootedArmor,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:208;native:LootHeader::reserved[2], reached through the record's header member"
 T00648.004,T00648,vs_battle_lootedArmor,4,armor,0,vs_main_inventoryArmor,,,,armor,Armor,high,source:146C.c:1671
-T00649.000,T00649,vs_battle_lootedBlade,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1132
-T00649.001,T00649,vs_battle_lootedBlade,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:41;declaration-only;source:func_8006B57C_t.h:181
-T00649.002,T00649,vs_battle_lootedBlade,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:42;declaration-only;source:func_8006B57C_t.h:182
-T00649.003,T00649,vs_battle_lootedBlade,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:43;declaration-only;source:func_8006B57C_t.h:183
+T00649.000,T00649,vs_battle_lootedBlade,0,difficultyFlags,0,char,,,,difficulty_flags,Difficulties under which the item drops,med,"source:MENU/MENUB.PRG/260.c:1132;native:LootHeader::difficulty_flags, reached through the record's header member"
+T00649.001,T00649,vs_battle_lootedBlade,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:181;native:LootHeader::reserved[0], reached through the record's header member"
+T00649.002,T00649,vs_battle_lootedBlade,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:182;native:LootHeader::reserved[1], reached through the record's header member"
+T00649.003,T00649,vs_battle_lootedBlade,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:183;native:LootHeader::reserved[2], reached through the record's header member"
 T00649.004,T00649,vs_battle_lootedBlade,4,blade,0,vs_main_inventoryBlade,,,,blade,The looted blade,med,source:MENU/MENUB.PRG/260.c:1133
-T00650.000,T00650,vs_battle_lootedGem,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1156
-T00650.001,T00650,vs_battle_lootedGem,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:51;declaration-only;source:func_8006B57C_t.h:222
-T00650.002,T00650,vs_battle_lootedGem,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:52;declaration-only;source:func_8006B57C_t.h:223
-T00650.003,T00650,vs_battle_lootedGem,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:53;declaration-only;source:func_8006B57C_t.h:224
+T00650.000,T00650,vs_battle_lootedGem,0,difficultyFlags,0,char,,,,difficulty_flags,Difficulties under which the item drops,med,"source:MENU/MENUB.PRG/260.c:1156;native:LootHeader::difficulty_flags, reached through the record's header member"
+T00650.001,T00650,vs_battle_lootedGem,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:222;native:LootHeader::reserved[0], reached through the record's header member"
+T00650.002,T00650,vs_battle_lootedGem,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:223;native:LootHeader::reserved[1], reached through the record's header member"
+T00650.003,T00650,vs_battle_lootedGem,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:224;native:LootHeader::reserved[2], reached through the record's header member"
 T00650.004,T00650,vs_battle_lootedGem,4,gem,0,vs_main_inventoryGem,,,,gem,The looted gem,med,source:MENU/MENUB.PRG/260.c:1157
-T00651.000,T00651,vs_battle_lootedGrip,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the item drops,med,source:MENU/MENUB.PRG/260.c:1136
-T00651.001,T00651,vs_battle_lootedGrip,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:61;declaration-only;source:func_8006B57C_t.h:189
-T00651.002,T00651,vs_battle_lootedGrip,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:62;declaration-only;source:func_8006B57C_t.h:190
-T00651.003,T00651,vs_battle_lootedGrip,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:63;declaration-only;source:func_8006B57C_t.h:191
+T00651.000,T00651,vs_battle_lootedGrip,0,difficultyFlags,0,char,,,,difficulty_flags,Difficulties under which the item drops,med,"source:MENU/MENUB.PRG/260.c:1136;native:LootHeader::difficulty_flags, reached through the record's header member"
+T00651.001,T00651,vs_battle_lootedGrip,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:189;native:LootHeader::reserved[0], reached through the record's header member"
+T00651.002,T00651,vs_battle_lootedGrip,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:190;native:LootHeader::reserved[1], reached through the record's header member"
+T00651.003,T00651,vs_battle_lootedGrip,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:191;native:LootHeader::reserved[2], reached through the record's header member"
 T00651.004,T00651,vs_battle_lootedGrip,4,grip,0,vs_main_inventoryGrip,,,,grip,The looted grip,med,source:MENU/MENUB.PRG/260.c:1137
-T00652.000,T00652,vs_battle_lootedMisc,0,id,0,u_short,,,,itemId,Item,high,source:146C.c:1693
-T00652.001,T00652,vs_battle_lootedMisc,1,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1697
+T00652.000,T00652,vs_battle_lootedMisc,0,id,0,u_short,,,,item_id,Item,high,source:146C.c:1693
+T00652.001,T00652,vs_battle_lootedMisc,1,difficultyFlags,0,char,,,,difficulty_flags,Difficulties under which the drop is kept,high,source:146C.c:1697
 T00652.002,T00652,vs_battle_lootedMisc,2,count,0,char,,,,count,Count,high,source:146C.c:1696
-T00653.000,T00653,vs_battle_lootedShield,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1645
-T00653.001,T00653,vs_battle_lootedShield,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:79;declaration-only;source:func_8006B57C_t.h:197
-T00653.002,T00653,vs_battle_lootedShield,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:80;declaration-only;source:func_8006B57C_t.h:198
-T00653.003,T00653,vs_battle_lootedShield,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:81;declaration-only;source:func_8006B57C_t.h:199
+T00653.000,T00653,vs_battle_lootedShield,0,difficultyFlags,0,char,,,,difficulty_flags,Difficulties under which the drop is kept,high,"source:146C.c:1645;native:LootHeader::difficulty_flags, reached through the record's header member"
+T00653.001,T00653,vs_battle_lootedShield,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:197;native:LootHeader::reserved[0], reached through the record's header member"
+T00653.002,T00653,vs_battle_lootedShield,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:198;native:LootHeader::reserved[1], reached through the record's header member"
+T00653.003,T00653,vs_battle_lootedShield,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:199;native:LootHeader::reserved[2], reached through the record's header member"
 T00653.004,T00653,vs_battle_lootedShield,4,shield,0,vs_main_inventoryArmor,,,,shield,Shield,high,source:146C.c:1637
 T00653.005,T00653,vs_battle_lootedShield,5,gems,0,vs_main_inventoryGem[3],,,,gems,Attached gems,high,source:146C.c:1641
-T00654.000,T00654,vs_battle_lootedWeapon,0,difficultyFlags,0,char,,,,difficultyFlags,Difficulties under which the drop is kept,high,source:146C.c:1624
-T00654.001,T00654,vs_battle_lootedWeapon,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:90;declaration-only;source:func_8006B57C_t.h:170
-T00654.002,T00654,vs_battle_lootedWeapon,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:91;declaration-only;source:func_8006B57C_t.h:171
-T00654.003,T00654,vs_battle_lootedWeapon,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Items\Loot.h:92;declaration-only;source:func_8006B57C_t.h:172
+T00654.000,T00654,vs_battle_lootedWeapon,0,difficultyFlags,0,char,,,,difficulty_flags,Difficulties under which the drop is kept,high,"source:146C.c:1624;native:LootHeader::difficulty_flags, reached through the record's header member"
+T00654.001,T00654,vs_battle_lootedWeapon,1,unk1,1,char,,,,reserved1,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:170;native:LootHeader::reserved[0], reached through the record's header member"
+T00654.002,T00654,vs_battle_lootedWeapon,2,unk2,1,char,,,,reserved2,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:171;native:LootHeader::reserved[1], reached through the record's header member"
+T00654.003,T00654,vs_battle_lootedWeapon,3,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,"declaration-only;source:func_8006B57C_t.h:172;native:LootHeader::reserved[2], reached through the record's header member"
 T00654.004,T00654,vs_battle_lootedWeapon,4,blade,0,vs_main_inventoryBlade,,,,blade,Blade,high,source:146C.c:1613
 T00654.005,T00654,vs_battle_lootedWeapon,5,grip,0,vs_main_inventoryGrip,,,,grip,Grip,high,source:146C.c:1614
 T00654.006,T00654,vs_battle_lootedWeapon,6,gems,0,vs_main_inventoryGem[3],,,,gems,Attached gems,high,source:146C.c:1618
@@ -6082,7 +6082,7 @@ T00676.007,T00676,vs_battle_uiEquipment_limb,7,affinities,0,short[8],,,,affiniti
 T00676.008,T00676,vs_battle_uiEquipment_limb,8,armor,0,vs_battle_uiArmor,,,,armor,Equipped armor statistics,high,source:146C.c:1421
 T00677.000,T00677,vs_battle_uiMisc,0,id,0,u_short,,,,id,Consumable item identifier,med,declaration-only;source:146C.h:427
 T00677.001,T00677,vs_battle_uiMisc,1,count,0,char,,,,count,Item count,med,source:146C.c:6748;use cited by sanity pass;source:146C.h:428
-T00677.002,T00677,vs_battle_uiMisc,2,unk3,1,char,,,,reserved03,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Inventory.h:37;declaration-only;source:146C.h:429
+T00677.002,T00677,vs_battle_uiMisc,2,unk3,1,char,,,,reserved03,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:593;declaration-only;source:146C.h:429
 T00678.000,T00678,vs_battle_uiMiscRand,0,id,0,u_short,,,,id,Consumable item identifier,med,declaration-only;source:146C.h:433
 T00678.001,T00678,vs_battle_uiMiscRand,1,dropRate,0,char,,,,dropRate,Drop chance,med,source:146C.c:1710;use cited by sanity pass;source:146C.h:434
 T00678.002,T00678,vs_battle_uiMiscRand,2,unk3,1,char,,,,reserved03,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Loadout.h:86;declaration-only;source:146C.h:435
@@ -6271,9 +6271,9 @@ T00695.008,T00695,vs_main_flags_t,8,unk8,1,char,,,,reserved_8,Not used by native
 T00695.009,T00695,vs_main_flags_t,9,unk9,1,char,,,,reserved_9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:36;declaration-only;source:main.h:250
 T00695.010,T00695,vs_main_flags_t,10,unkA,1,char,,,,reserved_a,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:37;declaration-only;source:main.h:251
 T00695.011,T00695,vs_main_flags_t,11,unkB,1,char,,,,reserved_b,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:38;declaration-only;source:main.h:252
-T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaque_c,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:446;source:22C.c:4745;source-review:#148 Every _setTitleExitFlags branch writes vs_main_stateFlags.unkC=0. Direct original symbol search finds only these writes; generic event flag access is not a field-specific semantic reader. No nonzero producer or full event meaning was established by this scope. Do not call it a boolean demo flag simply because neighboring D changes for attract scenes.
-T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaque_d,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:447;source:22C.c:4746;source-review:#148 _setTitleExitFlags writes byte D=1 for both attract destinations and D=0 otherwise. This establishes title-side mode initialization, but direct source consumers do not distinguish its general event-script role from adjacent E. Retain the offset name rather than invent an authoritative attract/demo semantic across all event readers."
-T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaque_e,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:449;source:22C.c:4753;source-review:#148 _setTitleExitFlags sets E=1 only for attract scene cases3/4; other branches leave it unchanged, unlike D. Initial new-game state clearing is bytewise. No field-specific consumer establishes whether it is initialization, progression or mode state. Do not conflate E with D or rename both to the same guessed flag."
+T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaque_c,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:445;source:22C.c:4745;source-review:#148 Every _setTitleExitFlags branch writes vs_main_stateFlags.unkC=0. Direct original symbol search finds only these writes; generic event flag access is not a field-specific semantic reader. No nonzero producer or full event meaning was established by this scope. Do not call it a boolean demo flag simply because neighboring D changes for attract scenes.
+T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaque_d,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:446;source:22C.c:4746;source-review:#148 _setTitleExitFlags writes byte D=1 for both attract destinations and D=0 otherwise. This establishes title-side mode initialization, but direct source consumers do not distinguish its general event-script role from adjacent E. Retain the offset name rather than invent an authoritative attract/demo semantic across all event readers."
+T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaque_e,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:448;source:22C.c:4753;source-review:#148 _setTitleExitFlags sets E=1 only for attract scene cases3/4; other branches leave it unchanged, unlike D. Initial new-game state clearing is bytewise. No field-specific consumer establishes whether it is initialization, progression or mode state. Do not conflate E with D or rename both to the same guessed flag."
 T00695.015,T00695,vs_main_flags_t,15,unkF,1,char,,,,reserved_f,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:42;declaration-only;source:main.h:256
 T00695.016,T00695,vs_main_flags_t,16,textBoxSelection,0,char,,,,text_box_selection,Named in the fork; see cited use,med,source:4A0A8.c:724
 T00695.017,T00695,vs_main_flags_t,17,unk11,1,char,,,,opaque_11,"Used, but its meaning is not established",low,source:5BF94.c:1590
@@ -6385,14 +6385,14 @@ T00695.122,T00695,vs_main_flags_t,122,unk3A8,1,char[32],,,,reserved_3a0,Not used
 T00695.123,T00695,vs_main_flags_t,123,chestsOpened,0,char[64],,,,chests_opened,Named in the fork; see cited use,med,source:D4.c:1635
 T00695.124,T00695,vs_main_flags_t,124,unk400,1,char[64],,,,reserved_400,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.hpp:151;declaration-only;source:main.h:365
 T00696.000,T00696,vs_main_inventoryArmor,0,id,0,u_char,,,,id,Named in the fork; see cited use,med,source:146C.c:1204
-T00696.001,T00696,vs_main_inventoryArmor,1,subId,0,u_char,,,,subId,Named in the fork; see cited use,med,source:146C.c:1205
-T00696.002,T00696,vs_main_inventoryArmor,2,wepId,0,char,,,,wepId,Named in the fork; see cited use,med,source:146C.c:1206
+T00696.001,T00696,vs_main_inventoryArmor,1,subId,0,u_char,,,,sub_id,Named in the fork; see cited use,med,source:146C.c:1205
+T00696.002,T00696,vs_main_inventoryArmor,2,wepId,0,char,,,,weapon_model_id,Named in the fork; see cited use,med,source:146C.c:1206
 T00696.003,T00696,vs_main_inventoryArmor,3,category,0,char,,,,category,Named in the fork; see cited use,med,source:146C.c:1207
-T00696.004,T00696,vs_main_inventoryArmor,4,maxDp,0,u_short,,,,maxDp,Named in the fork; see cited use,med,source:146C.c:1209
-T00696.005,T00696,vs_main_inventoryArmor,5,maxPp,0,u_short,,,,maxPp,Named in the fork; see cited use,med,source:146C.c:1211
-T00696.006,T00696,vs_main_inventoryArmor,6,currentDp,0,u_short,,,,currentDp,Named in the fork; see cited use,med,source:146C.c:1208
-T00696.007,T00696,vs_main_inventoryArmor,7,currentPp,0,u_short,,,,currentPp,Named in the fork; see cited use,med,source:146C.c:1210
-T00696.008,T00696,vs_main_inventoryArmor,8,gemSlots,0,char,,,,gemSlots,Named in the fork; see cited use,med,source:146C.c:1212
+T00696.004,T00696,vs_main_inventoryArmor,4,maxDp,0,u_short,,,,max_dp,Named in the fork; see cited use,med,source:146C.c:1209
+T00696.005,T00696,vs_main_inventoryArmor,5,maxPp,0,u_short,,,,max_pp,Named in the fork; see cited use,med,source:146C.c:1211
+T00696.006,T00696,vs_main_inventoryArmor,6,currentDp,0,u_short,,,,current_dp,Named in the fork; see cited use,med,source:146C.c:1208
+T00696.007,T00696,vs_main_inventoryArmor,7,currentPp,0,u_short,,,,current_pp,Named in the fork; see cited use,med,source:146C.c:1210
+T00696.008,T00696,vs_main_inventoryArmor,8,gemSlots,0,char,,,,gem_slots,Named in the fork; see cited use,med,source:146C.c:1212
 T00696.009,T00696,vs_main_inventoryArmor,9,strength,0,signed char,,,,strength,Named in the fork; see cited use,med,source:146C.c:1213
 T00696.010,T00696,vs_main_inventoryArmor,10,intelligence,0,signed char,,,,intelligence,Named in the fork; see cited use,med,source:146C.c:1214
 T00696.011,T00696,vs_main_inventoryArmor,11,agility,0,signed char,,,,agility,Named in the fork; see cited use,med,source:146C.c:1215
@@ -6403,48 +6403,48 @@ T00696.015,T00696,vs_main_inventoryArmor,15,material,0,u_short,,,,material,Named
 T00696.016,T00696,vs_main_inventoryArmor,16,limb,0,u_char,,,,limb,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:438
 T00696.017,T00696,vs_main_inventoryArmor,17,index,0,u_char,,,,index,Named in the fork; see cited use,med,source:146C.c:1216
 T00697.000,T00697,vs_main_inventoryBlade,0,id,0,u_char,,,,id,Named in the fork; see cited use,med,source:146C.c:1148
-T00697.001,T00697,vs_main_inventoryBlade,1,subId,0,char,,,,subId,Named in the fork; see cited use,med,source:146C.c:1149
-T00697.002,T00697,vs_main_inventoryBlade,2,wepId,0,char,,,,wepId,Named in the fork; see cited use,med,source:146C.c:1150
+T00697.001,T00697,vs_main_inventoryBlade,1,subId,0,char,,,,sub_id,Named in the fork; see cited use,med,source:146C.c:1149
+T00697.002,T00697,vs_main_inventoryBlade,2,wepId,0,char,,,,weapon_model_id,Named in the fork; see cited use,med,source:146C.c:1150
 T00697.003,T00697,vs_main_inventoryBlade,3,category,0,char,,,,category,Named in the fork; see cited use,med,source:146C.c:1151
-T00697.004,T00697,vs_main_inventoryBlade,4,maxDp,0,u_short,,,,maxDp,Named in the fork; see cited use,med,source:146C.c:1153
-T00697.005,T00697,vs_main_inventoryBlade,5,maxPp,0,u_short,,,,maxPp,Named in the fork; see cited use,med,source:146C.c:1155
-T00697.006,T00697,vs_main_inventoryBlade,6,currentDp,0,u_short,,,,currentDp,Named in the fork; see cited use,med,source:146C.c:1152
-T00697.007,T00697,vs_main_inventoryBlade,7,currentPp,0,u_short,,,,currentPp,Named in the fork; see cited use,med,source:146C.c:1154
+T00697.004,T00697,vs_main_inventoryBlade,4,maxDp,0,u_short,,,,max_dp,Named in the fork; see cited use,med,source:146C.c:1153
+T00697.005,T00697,vs_main_inventoryBlade,5,maxPp,0,u_short,,,,max_pp,Named in the fork; see cited use,med,source:146C.c:1155
+T00697.006,T00697,vs_main_inventoryBlade,6,currentDp,0,u_short,,,,current_dp,Named in the fork; see cited use,med,source:146C.c:1152
+T00697.007,T00697,vs_main_inventoryBlade,7,currentPp,0,u_short,,,,current_pp,Named in the fork; see cited use,med,source:146C.c:1154
 T00697.008,T00697,vs_main_inventoryBlade,8,strength,0,signed char,,,,strength,Named in the fork; see cited use,med,source:146C.c:1156
 T00697.009,T00697,vs_main_inventoryBlade,9,intelligence,0,signed char,,,,intelligence,Named in the fork; see cited use,med,source:146C.c:1157
 T00697.010,T00697,vs_main_inventoryBlade,10,agility,0,signed char,,,,agility,Named in the fork; see cited use,med,source:146C.c:1158
 T00697.011,T00697,vs_main_inventoryBlade,11,cost,0,char,,,,cost,Named in the fork; see cited use,med,source:146C.c:1159
-T00697.012,T00697,vs_main_inventoryBlade,12,damageType,0,char,2,,,damageType,Named in the fork; see cited use,med,source:146C.c:1160
-T00697.013,T00697,vs_main_inventoryBlade,13,costType,0,char,3,,,costType,Named in the fork; see cited use,med,source:146C.c:1161
-T00697.014,T00697,vs_main_inventoryBlade,14,unk10_5,1,char,3,,,reserved10Bit5,Not read by decompiled code,low,declaration-only;source:func_8006B57C_t.h:26
-T00697.015,T00697,vs_main_inventoryBlade,15,unk11,1,char,,,,reserved11,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Inventory.h:81;declaration-only;source:func_8006B57C_t.h:27
-T00697.016,T00697,vs_main_inventoryBlade,16,unk12,1,u_short,,,,opaque12,"Used, but its meaning is not established",low,source:146C.c:1162
+T00697.012,T00697,vs_main_inventoryBlade,12,damageType,0,char,2,,,damage_type,Named in the fork; see cited use,med,"source:146C.c:1160;native:bits 0-1 of InventoryBlade::type_bits, read through DamageType() and written through SetDamageType()"
+T00697.013,T00697,vs_main_inventoryBlade,13,costType,0,char,3,,,cost_type,Named in the fork; see cited use,med,"source:146C.c:1161;native:bits 2-4 of InventoryBlade::type_bits, read through CostType() and written through SetCostType()"
+T00697.014,T00697,vs_main_inventoryBlade,14,unk10_5,1,char,3,,,reserved_bits,Not read by decompiled code,low,"declaration-only;source:func_8006B57C_t.h:26;native:bits 5-7 of InventoryBlade::type_bits, read through ReservedBits() and written through SetReservedBits()"
+T00697.015,T00697,vs_main_inventoryBlade,15,unk11,1,char,,,,reserved11,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:420;declaration-only;source:func_8006B57C_t.h:27
+T00697.016,T00697,vs_main_inventoryBlade,16,unk12,1,u_short,,,,recovery_delay,"The equipment part's recovery delay, saved with the inventory blade and restored when the weapon is assembled",high,source:upstream:src/BATTLE/BATTLE.PRG/146C.c:815;source:upstream:src/BATTLE/BATTLE.PRG/146C.c:1103;renamed from opaque12 (#441);source:146C.c:1162
 T00697.017,T00697,vs_main_inventoryBlade,17,range,0,vs_battle_range_t,,,,range,Named in the fork; see cited use,med,source:146C.c:1163
 T00697.018,T00697,vs_main_inventoryBlade,18,classes,0,signed char[8],,,,classes,Named in the fork; see cited use,med,source:146C.c:1169
 T00697.019,T00697,vs_main_inventoryBlade,19,affinities,0,signed char[8],,,,affinities,Named in the fork; see cited use,med,source:146C.c:1173
 T00697.020,T00697,vs_main_inventoryBlade,20,material,0,u_short,,,,material,Named in the fork; see cited use,med,source:146C.c:1176
-T00697.021,T00697,vs_main_inventoryBlade,21,assembledWeaponIndex,0,char,,,,assembledWeaponIndex,Named in the fork; see cited use,med,source:2D10.c:1415
+T00697.021,T00697,vs_main_inventoryBlade,21,assembledWeaponIndex,0,char,,,,assembled_weapon_index,Named in the fork; see cited use,med,source:2D10.c:1415
 T00697.022,T00697,vs_main_inventoryBlade,22,index,0,char,,,,index,Named in the fork; see cited use,med,source:146C.c:1164
 T00698.000,T00698,vs_main_inventoryGem,0,id,0,u_short,,,,id,Named in the fork; see cited use,med,source:146C.c:1240
-T00698.001,T00698,vs_main_inventoryGem,1,subId,0,char,,,,subId,Named in the fork; see cited use,med,source:146C.c:1241
-T00698.002,T00698,vs_main_inventoryGem,2,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Inventory.h:96;declaration-only;source:func_8006B57C_t.h:53
-T00698.003,T00698,vs_main_inventoryGem,3,gemEffects,0,char,,,,gemEffects,Named in the fork; see cited use,med,source:146C.c:1242
+T00698.001,T00698,vs_main_inventoryGem,1,subId,0,char,,,,sub_id,Named in the fork; see cited use,med,source:146C.c:1241
+T00698.002,T00698,vs_main_inventoryGem,2,unk3,1,char,,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:458;declaration-only;source:func_8006B57C_t.h:53
+T00698.003,T00698,vs_main_inventoryGem,3,gemEffects,0,char,,,,gem_effects,Named in the fork; see cited use,med,source:146C.c:1242
 T00698.004,T00698,vs_main_inventoryGem,4,strength,0,signed char,,,,strength,Named in the fork; see cited use,med,source:146C.c:1243
 T00698.005,T00698,vs_main_inventoryGem,5,intelligence,0,signed char,,,,intelligence,Named in the fork; see cited use,med,source:146C.c:1244
 T00698.006,T00698,vs_main_inventoryGem,6,agility,0,signed char,,,,agility,Named in the fork; see cited use,med,source:146C.c:1245
 T00698.007,T00698,vs_main_inventoryGem,7,classes,0,signed char[8],,,,classes,Named in the fork; see cited use,med,source:146C.c:1249
 T00698.008,T00698,vs_main_inventoryGem,8,affinities,0,signed char[8],,,,affinities,Named in the fork; see cited use,med,source:146C.c:1253
-T00698.009,T00698,vs_main_inventoryGem,9,setItemIndex,0,u_short,,,oneBasedOwnerIndexWithShieldBit0x80,setItemIndex,Named in the fork; see cited use,med,source:2D10.c:1503
+T00698.009,T00698,vs_main_inventoryGem,9,setItemIndex,0,u_short,,,oneBasedOwnerIndexWithShieldBit0x80,set_item_index,Named in the fork; see cited use,med,source:2D10.c:1503
 T00698.010,T00698,vs_main_inventoryGem,10,index,0,short,,,,index,Named in the fork; see cited use,med,source:146C.c:1246
 T00699.000,T00699,vs_main_inventoryGrip,0,id,0,u_short,,,,id,Named in the fork; see cited use,med,source:146C.c:1184
-T00699.001,T00699,vs_main_inventoryGrip,1,subId,0,char,,,,subId,Named in the fork; see cited use,med,source:146C.c:1185
+T00699.001,T00699,vs_main_inventoryGrip,1,subId,0,char,,,,sub_id,Named in the fork; see cited use,med,source:146C.c:1185
 T00699.002,T00699,vs_main_inventoryGrip,2,category,0,u_char,,,,category,Named in the fork; see cited use,med,source:146C.c:1186
-T00699.003,T00699,vs_main_inventoryGrip,3,gemSlots,0,char,,,,gemSlots,Named in the fork; see cited use,med,source:146C.c:1187
+T00699.003,T00699,vs_main_inventoryGrip,3,gemSlots,0,char,,,,gem_slots,Named in the fork; see cited use,med,source:146C.c:1187
 T00699.004,T00699,vs_main_inventoryGrip,4,strength,0,signed char,,,,strength,Named in the fork; see cited use,med,source:146C.c:1188
 T00699.005,T00699,vs_main_inventoryGrip,5,intelligence,0,signed char,,,,intelligence,Named in the fork; see cited use,med,source:146C.c:1189
 T00699.006,T00699,vs_main_inventoryGrip,6,agility,0,signed char,,,,agility,Named in the fork; see cited use,med,source:146C.c:1190
 T00699.007,T00699,vs_main_inventoryGrip,7,types,0,signed char[4],,,,types,Named in the fork; see cited use,med,source:146C.c:1194
-T00699.008,T00699,vs_main_inventoryGrip,8,assembledWeaponIndex,0,u_short,,,,assembledWeaponIndex,Named in the fork; see cited use,med,source:2D10.c:1415
+T00699.008,T00699,vs_main_inventoryGrip,8,assembledWeaponIndex,0,u_short,,,,assembled_weapon_index,Named in the fork; see cited use,med,source:2D10.c:1415
 T00699.009,T00699,vs_main_inventoryGrip,9,index,0,u_short,,,,index,Named in the fork; see cited use,med,source:146C.c:1191
 T00700.000,T00700,vs_main_inventoryIndices_t,0,weapons,0,u_char[8],,,,weapons,Named in the fork; see cited use,med,source:items1.h:130
 T00700.001,T00700,vs_main_inventoryIndices_t,1,blades,0,u_char[16],,,,blades,Named in the fork; see cited use,med,source:items1.h:224
@@ -6457,14 +6457,14 @@ T00701.000,T00701,vs_main_inventoryMisc,0,id,0,u_short,,,,id,Named in the fork; 
 T00701.001,T00701,vs_main_inventoryMisc,1,count,0,char,,,,count,Named in the fork; see cited use,med,source:146C.c:9699
 T00701.002,T00701,vs_main_inventoryMisc,2,index,0,char,,,,index,Named in the fork; see cited use,med,declaration-only;source:func_8006B57C_t.h:105
 T00702.000,T00702,vs_main_inventoryShield,0,index,0,char,,,,index,Named in the fork; see cited use,med,source:146C.c:1303
-T00702.001,T00702,vs_main_inventoryShield,1,isEquipped,0,char,,,,isEquipped,Named in the fork; see cited use,med,source:2D10.c:453;use cited by sanity pass;source:func_8006B57C_t.h:96
-T00702.002,T00702,vs_main_inventoryShield,2,unk2,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\Inventory.h:147;declaration-only;source:func_8006B57C_t.h:97
+T00702.001,T00702,vs_main_inventoryShield,1,isEquipped,0,char,,,,is_equipped,Named in the fork; see cited use,med,source:2D10.c:453;use cited by sanity pass;source:func_8006B57C_t.h:96
+T00702.002,T00702,vs_main_inventoryShield,2,unk2,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Items\ItemRecords.hpp:501;declaration-only;source:func_8006B57C_t.h:97
 T00702.003,T00702,vs_main_inventoryShield,3,base,0,vs_main_inventoryArmor,,,,base,Named in the fork; see cited use,med,source:146C.c:1305
 T00702.004,T00702,vs_main_inventoryShield,4,gems,0,u_char[4],,,,gems,Named in the fork; see cited use,med,source:146C.c:1310
 T00703.000,T00703,vs_main_inventoryWeapon,0,index,0,char,,,,index,Named in the fork; see cited use,med,source:146C.c:1266
 T00703.001,T00703,vs_main_inventoryWeapon,1,blade,0,u_char,,,,blade,Named in the fork; see cited use,med,source:146C.c:1268
 T00703.002,T00703,vs_main_inventoryWeapon,2,grip,0,u_char,,,,grip,Named in the fork; see cited use,med,source:146C.c:1274
-T00703.003,T00703,vs_main_inventoryWeapon,3,isEquipped,0,char,,,,isEquipped,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:383
+T00703.003,T00703,vs_main_inventoryWeapon,3,isEquipped,0,char,,,,is_equipped,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:383
 T00703.004,T00703,vs_main_inventoryWeapon,4,gems,0,u_char[4],,,,gems,Named in the fork; see cited use,med,source:146C.c:1280
 T00703.005,T00703,vs_main_inventoryWeapon,5,name,0,char[24],,,,name,Named in the fork; see cited use,med,source:146C.c:1287
 T00704.000,T00704,vs_main_inventory_t,0,weapons,0,vs_main_inventoryWeapon[8],,,,weapons,Named in the fork; see cited use,med,source:BATTLE/INITBTL.PRG/18.c:383

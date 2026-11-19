@@ -278,8 +278,7 @@ struct Field_GimmickPhysicsView;
 #include "Field/Room.h"
 #include "Field/TriggerMarkers.h"
 #include "Field/Zone.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
+#include "Items/ItemRecords.hpp"
 
 extern MATRIX Field_triggerMarkerMatrix;
 extern Field_TriggerMarkerVertex Field_triggerMarkerVertex;

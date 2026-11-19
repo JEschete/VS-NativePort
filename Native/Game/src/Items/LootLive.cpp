@@ -4,18 +4,14 @@
 // loot menu and the treasure chests of the loaded room (Field_roomData).
 #include "Items/LootLive.hpp"
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <iterator>
 #include <new>
 #include <optional>
 #include <span>
-#include <type_traits>
 #include <utility>
-#include <vector>
 
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
@@ -42,11 +38,10 @@
 #include "State/ScriptFlagsLive.hpp"
 
 // decomp: _lootListHead (_lootListHead@BATTLE/BATTLE.PRG)
-Items_LootListNode* VS::Items::lootListHead = nullptr;
+VS::Items::LootListNode* VS::Items::lootListHead = nullptr;
 
 namespace VS::Items {
 namespace {
-using Live::Commit;
 using Live::Typed;
 using Live::WarnNullRecord;
 using Live::WarnRefusal;
@@ -59,11 +54,6 @@ constexpr std::uint32_t kMenuControlMode = 2;
 // open.
 constexpr std::uint32_t kEnemyLootFlowMode = 12;
 constexpr std::uint32_t kScriptedLootFlowMode = 4;
-
-static_assert(sizeof(Items_LootListNode::loot) == sizeof(BattleLoot));
-static_assert(std::is_same_v<decltype(Items_LootListNode::droppedMask), int>);
-static_assert(sizeof(Items_TreasureChest) == sizeof(TreasureChest));
-static_assert(sizeof(Items_TreasureChest) == layout::kTreasureChestBytes);
 
 // VS::Items::lootListHead's nodes. The reserved node is a game heap block that
 // is not yet listed; it is pushed or freed before the list is dropped.
@@ -79,9 +69,9 @@ class LiveLootList final : public LootList {
   bool ReserveEntry() override {
     FreeReserved();
     void* const block =
-        Core::Memory::AllocateLiveFromHighEnd(sizeof(Items_LootListNode));
+        Core::Memory::AllocateLiveFromHighEnd(sizeof(VS::Items::LootListNode));
     if (block == nullptr) return false;
-    reserved_ = ::new (block) Items_LootListNode{};
+    reserved_ = ::new (block) VS::Items::LootListNode{};
     return true;
   }
 
@@ -91,8 +81,8 @@ class LiveLootList final : public LootList {
       WarnNullRecord("PushReservedLootEntry");
       return;
     }
-    Commit(reserved_->loot, loot);
-    reserved_->droppedMask = dropper;
+    reserved_->loot = loot;
+    reserved_->actor_id = dropper;
     reserved_->next = lootListHead;
     lootListHead = std::exchange(reserved_, nullptr);
   }
@@ -101,7 +91,7 @@ class LiveLootList final : public LootList {
 
   bool HasEntryFrom(std::int32_t dropper) const override {
     for (const auto* node = lootListHead; node != nullptr; node = node->next) {
-      if (node->droppedMask == dropper) return true;
+      if (node->actor_id == dropper) return true;
     }
     return false;
   }
@@ -123,7 +113,7 @@ class LiveLootList final : public LootList {
     Core::Memory::FreeLiveFromHighEnd(std::exchange(reserved_, nullptr));
   }
 
-  Items_LootListNode* reserved_ = nullptr;
+  VS::Items::LootListNode* reserved_ = nullptr;
 };
 
 class LiveLootFlowHost final : public LootFlowHost {
@@ -185,26 +175,16 @@ std::optional<EnemyDrops> ToEnemyDrops(const Battle_Actor* enemy) {
   for (std::size_t i = 0; i < kLimbCount; ++i) {
     drops.limb_armor[i] = Typed(stats.limbs[i].armor);
   }
-  drops.guaranteed_items = {Typed(stats.dropItem), Typed(stats.secondDropItem)};
+  drops.guaranteed_items = {stats.dropItem, stats.secondDropItem};
   drops.random_item = Typed(stats.randomDropItem);
   return drops;
 }
 
 // The room's chest records; none without a loot section.
-std::span<Items_TreasureChest> LiveRoomChestRecords() {
+std::span<TreasureChest> LiveRoomChestRecords() {
   if (Field_roomData.containers == nullptr) return {};
   return {Field_roomData.containers,
           RoomTreasureChests(Field_roomData.header.containersLength)};
-}
-
-std::vector<TreasureChest> TypedChests(
-    std::span<const Items_TreasureChest> legacy) {
-  std::vector<TreasureChest> chests;
-  chests.reserve(legacy.size());
-  std::ranges::transform(
-      legacy, std::back_inserter(chests),
-      [](const Items_TreasureChest& chest) { return Typed(chest); });
-  return chests;
 }
 }  // namespace
 
@@ -247,27 +227,23 @@ void ClearLiveRoomLootList() {
 }
 
 // decomp: BATTLE.PRG func_8008D508 (src/BATTLE/BATTLE.PRG/146C.c:16832)
-Items_TreasureChest* FindLiveTreasureChestAtTile(int tile_x, int tile_z,
-                                                 int tile_layer) {
-  const auto legacy = LiveRoomChestRecords();
-  const auto chests = TypedChests(legacy);
+TreasureChest* FindLiveTreasureChestAtTile(int tile_x, int tile_z,
+                                           int tile_layer) {
+  const auto chests = LiveRoomChestRecords();
   const auto index = TreasureChestAtTile(chests, tile_x, tile_z, tile_layer);
-  return index ? &legacy[*index] : nullptr;
+  return index ? &chests[*index] : nullptr;
 }
 
 // decomp: BATTLE.PRG func_8008D710 (src/BATTLE/BATTLE.PRG/146C.c:16903)
 void RestoreLiveRoomChestStates() {
-  const auto legacy = LiveRoomChestRecords();
-  auto chests = TypedChests(legacy);
   LiveChestStateHost host;
-  RestoreRoomChestStates(chests, host);
-  for (std::size_t i = 0; i < legacy.size(); ++i) Commit(legacy[i], chests[i]);
+  RestoreRoomChestStates(LiveRoomChestRecords(), host);
 }
 
 // decomp: BATTLE.PRG func_8008E370 (src/BATTLE/BATTLE.PRG/146C.c:17285)
 // A room with a chest section of less than one record keeps its (non-null)
 // records with a count of 0, as the original returned.
-Items_TreasureChest* LiveRoomTreasureChests(int* chest_count_out) {
+TreasureChest* LiveRoomTreasureChests(int* chest_count_out) {
   if (chest_count_out == nullptr) {
     WarnNullRecord("RoomTreasureChests");
     return nullptr;
@@ -283,19 +259,15 @@ void LoadLiveRoomChestLoot(const void* loot_section) {
     WarnNullRecord("LoadRoomChestLoot");
     return;
   }
-  Items_BattleLoot section{};
+  BattleLoot section{};
   std::memcpy(&section, loot_section, sizeof section);
-  const auto legacy = LiveRoomChestRecords();
-  auto chests = TypedChests(legacy);
-  const auto status = LoadRoomChestLoot(chests, Typed(section));
+  const auto status = LoadRoomChestLoot(LiveRoomChestRecords(), section);
   if (status != ItemsStatus::kOk) {
     // A room without a chest section ignores the loot, as the original did;
     // one too short for a chest refuses it.
     if (Field_roomData.containers != nullptr) {
       WarnRefusal("LoadRoomChestLoot", status);
     }
-    return;
   }
-  Commit(legacy.front(), chests.front());
 }
 }  // namespace VS::Items

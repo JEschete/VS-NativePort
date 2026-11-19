@@ -26,7 +26,7 @@
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Loadout.h"
@@ -64,7 +64,7 @@ struct ProfileFixture {
     VS::Input::settings.menu_flags = 0x2D8;
     VS::State::stateFlags.intro_state = 0;
     VS::Items::inventory = {};
-    VS::Items::inventory.weapons[0].isEquipped = 1;
+    VS::Items::inventory.weapons[0].is_equipped = 1;
     VS::Items::inventory.weapons[0].blade = 1;
     VS::Items::inventory.blades[0].category = 3;
     std::fill_n(VS::State::learnedActionFlags, saved_learned.size(), 0);
@@ -441,7 +441,7 @@ TEST_CASE(
     VS::Game::InitializeEncounterPlayerProfile(profile);
     CHECK(std::size(VS::Items::inventory.misc) == 64);
     CHECK(std::memcmp(&equipment, &VS::Items::inventory,
-                      offsetof(Items_Inventory, misc)) == 0);
+                      offsetof(VS::Items::InventoryContents, misc)) == 0);
     CHECK(std::to_array(VS::State::learnedActionFlags) == learned);
     CHECK(VS::Input::settings.menu_flags == 0x3F8);
     CHECK(VS::State::stateFlags.intro_state == 3);
@@ -678,7 +678,7 @@ TEST_CASE("Default and bare-hands setup preserve stock parts and inventory",
   auto expected = VS::Items::inventory;
   VS::Game::InitializeEncounterPlayerWeapon(Weapon::kDefault);
   CHECK(std::memcmp(&expected, &VS::Items::inventory, sizeof expected) == 0);
-  for (auto& weapon : expected.weapons) weapon.isEquipped = 0;
+  for (auto& weapon : expected.weapons) weapon.is_equipped = 0;
   VS::Game::InitializeEncounterPlayerWeapon(Weapon::kBareHands);
   CHECK(std::memcmp(&expected, &VS::Items::inventory, sizeof expected) == 0);
   VS::Game::InitializeEncounterPlayerProfile(
@@ -729,8 +729,9 @@ void CheckWeaponStats(const Items_WeaponLoadout& actual,
                     sizeof actual.classAffinityBaseline) == 0);
 }
 
-Items_Inventory CheckWeaponParts(const Items_Inventory& original,
-                                 Items_InventoryWeapon& slot, int category) {
+VS::Items::InventoryContents CheckWeaponParts(
+    const VS::Items::InventoryContents& original,
+    VS::Items::InventoryWeapon& slot, int category) {
   auto& inventory = VS::Items::inventory;
   if (slot.blade == 0 || slot.blade > std::size(inventory.blades) ||
       slot.grip == 0 || slot.grip > std::size(inventory.grips)) {
@@ -742,33 +743,32 @@ Items_Inventory CheckWeaponParts(const Items_Inventory& original,
   const std::array<int, 9> models{1, 15, 28, 35, 55, 60, 68, 71, 83};
   const std::array<bool, 9> two_handed{false, false, true, false, true,
                                        false, true,  true, true};
-  const auto index =
-      static_cast<std::size_t>(&slot - std::begin(inventory.weapons));
+  const auto index = static_cast<std::size_t>(&slot - inventory.weapons.data());
   auto& blade = inventory.blades[slot.blade - 1];
   auto& grip = inventory.grips[slot.grip - 1];
-  CHECK(std::tuple(blade.id, grip.id, blade.wepId, blade.category) ==
+  CHECK(std::tuple(blade.id, grip.id, blade.weapon_model_id, blade.category) ==
         std::tuple(blades[category - 1], grips[category - 1],
                    models[category - 1], category));
-  const auto typed_blade = VS::Items::Live::Typed(blade);
-  const auto typed_grip = VS::Items::Live::Typed(grip);
+  const auto typed_blade = blade;
+  const auto typed_grip = grip;
   CHECK(VS::Menu::Setup::RunLiveSetup([&](VS::Menu::Setup::Context& context) {
           return VS::Menu::Setup::IsGripCompatible(context, &typed_blade,
                                                    &typed_grip)
                      ? 1
                      : 0;
         }) != 0);
-  CHECK(std::tuple(blade.assembledWeaponIndex, grip.assembledWeaponIndex,
+  CHECK(std::tuple(blade.assembled_weapon_index, grip.assembled_weapon_index,
                    slot.blade, slot.grip) ==
-        std::tuple(original.blades[slot.blade - 1].assembledWeaponIndex,
-                   original.grips[slot.grip - 1].assembledWeaponIndex,
+        std::tuple(original.blades[slot.blade - 1].assembled_weapon_index,
+                   original.grips[slot.grip - 1].assembled_weapon_index,
                    original.weapons[index].blade,
                    original.weapons[index].grip));
   auto expected = original;
   expected.blades[slot.blade - 1] = blade;
   expected.grips[slot.grip - 1] = grip;
-  std::copy_n(slot.name, std::size(slot.name), expected.weapons[index].name);
+  expected.weapons[index].name = slot.name;
   if (two_handed[category - 1]) {
-    for (auto& shield : expected.shields) shield.isEquipped = 0;
+    for (auto& shield : expected.shields) shield.is_equipped = 0;
   }
   return expected;
 }
@@ -783,7 +783,7 @@ TEST_CASE(
   auto& inventory = VS::Items::inventory;
   std::memcpy(&inventory, VS::Title::newGameInventoryTemplate,
               sizeof inventory);
-  if (GENERATE(false, true)) inventory.shields[0].isEquipped = 1;
+  if (GENERATE(false, true)) inventory.shields[0].is_equipped = 1;
   const auto original = inventory;
   const auto indices = VS::Items::inventoryIndices;
   for (int category = 1; category <= 9; ++category) {
@@ -793,7 +793,7 @@ TEST_CASE(
     VS::Game::InitializeEncounterPlayerWeapon(choice);
     const auto slot = std::ranges::find_if(
         inventory.weapons,
-        [](const auto& weapon) { return weapon.isEquipped != 0; });
+        [](const auto& weapon) { return weapon.is_equipped != 0; });
     REQUIRE(slot != std::end(inventory.weapons));
     const auto expected = CheckWeaponParts(original, *slot, category);
     CHECK(std::memcmp(&inventory, &expected, sizeof inventory) == 0);
@@ -802,7 +802,7 @@ TEST_CASE(
     const auto source = VS::Game::ReadEncounterWeapon(choice);
     REQUIRE(source);
     Items_WeaponLoadout actual{};
-    VS::Items::LoadLiveInventoryWeaponStats(&actual, slot);
+    VS::Items::LoadLiveInventoryWeaponStats(&actual, &*slot);
     CheckWeaponStats(actual, *source);
     VS::Game::InitializeEncounterPlayerWeapon(choice);
     CHECK(std::memcmp(&inventory, &expected, sizeof inventory) == 0);
@@ -824,8 +824,8 @@ TEST_CASE("Weapon setup rejects invalid stock links without mutating inventory",
   SECTION("grip missing") { inventory.weapons[0].grip = 0; }
   SECTION("grip outside capacity") { inventory.weapons[0].grip = 17; }
   SECTION("existing gems") { inventory.weapons[0].gems[0] = 1; }
-  SECTION("no equipped weapon") { inventory.weapons[0].isEquipped = 0; }
-  SECTION("multiple equipped weapons") { inventory.weapons[1].isEquipped = 1; }
+  SECTION("no equipped weapon") { inventory.weapons[0].is_equipped = 0; }
+  SECTION("multiple equipped weapons") { inventory.weapons[1].is_equipped = 1; }
   const auto expected = inventory;
   CHECK_THROWS(VS::Game::InitializeEncounterPlayerWeapon(
       VS::Game::EncounterWeapon::kDagger));

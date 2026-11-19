@@ -2493,10 +2493,8 @@
     <ClInclude Include="src\Items\ContainerTables.hpp" />
     <ClInclude Include="src\Items\InventoryLiveState.hpp" />
     <ClInclude Include="src\Items\ItemRecordsLive.hpp" />
-    <ClInclude Include="src\Items\Loot.h" />
     <ClInclude Include="src\Items\LootLiveState.hpp" />
     <ClInclude Include="src\Items\Materials.hpp" />
-    <ClInclude Include="src\Items\TreasureChests.h" />
     <ClInclude Include="src\Menu\BattleAbilities.h" />
     <ClInclude Include="src\Menu\BreakArts.h" />
     <ClInclude Include="src\Menu\Container\ItemView.h" />
@@ -2937,7 +2935,6 @@
     <ClInclude Include="include\Items\EquipmentLive.hpp" />
     <ClInclude Include="include\Items\EquipmentStats.hpp" />
     <ClInclude Include="include\Items\EquipmentWear.hpp" />
-    <ClInclude Include="include\Items\Inventory.h" />
     <ClInclude Include="include\Items\Inventory.hpp" />
     <ClInclude Include="include\Items\InventoryLive.hpp" />
     <ClInclude Include="include\Items\ItemRecords.hpp" />

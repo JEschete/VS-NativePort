@@ -18,7 +18,7 @@
 #include "Field/Room.h"
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomSwitches.hpp"
-#include "Items/TreasureChests.h"
+#include "Items/ItemRecords.hpp"
 #include "State/StateFlags.hpp"
 
 namespace {
@@ -298,14 +298,14 @@ class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
     if (chest == nullptr) {
       return std::nullopt;
     }
-    const auto bytes = static_cast<std::uint16_t>(chest->reservedA);
+    const auto bytes = static_cast<std::uint16_t>(chest->reserved_a);
     return VS::Field::RoomSwitchState{
-        .switch_value = static_cast<std::uint16_t>(chest->isOpen),
+        .switch_value = static_cast<std::uint16_t>(chest->is_open),
         .marker_fade = static_cast<std::uint8_t>(bytes >> kMarkerByteShift),
         .activation = static_cast<std::uint8_t>(bytes),
-        .effect_kind = chest->lidRotationId,
-        .tile_x = chest->tileX,
-        .tile_z = chest->tileZ,
+        .effect_kind = chest->lid_rotation_id,
+        .tile_x = chest->tile_x,
+        .tile_z = chest->tile_z,
         .floor_layer = chest->layer};
   }
   void PlaySound(std::int32_t sound) override {
@@ -319,9 +319,9 @@ class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
     if (chest == nullptr) {
       return;
     }
-    chest->isOpen = static_cast<std::int16_t>(value);
-    const auto activation = static_cast<std::uint8_t>(chest->reservedA);
-    chest->reservedA = static_cast<std::int16_t>(
+    chest->is_open = static_cast<std::int16_t>(value);
+    const auto activation = static_cast<std::uint8_t>(chest->reserved_a);
+    chest->reserved_a = static_cast<std::int16_t>(
         (static_cast<std::uint16_t>(marker) << kMarkerByteShift) | activation);
   }
   void SetCellPassability(const VS::Field::RoomSwitchState& state,
@@ -337,7 +337,7 @@ class LiveChestSwitchHost final : public VS::Field::RoomSwitchHost,
     if (chest == nullptr) {
       return false;
     }
-    chest->reservedA = static_cast<std::int16_t>(
+    chest->reserved_a = static_cast<std::int16_t>(
         (static_cast<std::uint16_t>(marker) << kMarkerByteShift) | activation);
     return true;
   }

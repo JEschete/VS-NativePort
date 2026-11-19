@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <iterator>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -88,24 +89,24 @@ Framework::MenuRow& Row(DetailRow row) {
   return Framework::LiveMenuRow(row.index);
 }
 
-Items_ContainerData& Records() {
+VS::Items::ContainerData& Records() {
   if (Menu_Container_containerData == nullptr) {
     Refuse("missing current container record owner");
   }
   return Menu_Container_containerData->items;
 }
 
-template <typename Record, std::size_t Count>
-Record& Referenced(Record (&table)[Count], ContainerSlot item) {
-  if (item.one_based == 0 || item.one_based > Count) {
+template <typename Table>
+auto& Referenced(Table& table, ContainerSlot item) {
+  if (item.one_based == 0 || item.one_based > std::size(table)) {
     Refuse("container detail reference outside its used record table");
   }
   return table[item.one_based - 1];
 }
 
-template <typename Record, std::size_t Count>
-void RequireBound(const Record* bound, Record (&current)[Count]) {
-  if (bound != current) {
+template <typename Record, typename Table>
+void RequireBound(const Record* bound, Table& current) {
+  if (bound != std::data(current)) {
     Refuse("container detail bound table is not the current container");
   }
 }
@@ -239,7 +240,7 @@ class LiveControllerWorld final : public ControllerWorld {
         if (item.one_based != 0) {
           auto& table = Records().weapons;
           RequireBound(VS::Menu::Framework::weapons, table);
-          if (Referenced(table, item).isEquipped != 0) {
+          if (Referenced(table, item).is_equipped != 0) {
             RequireAshleyStats();
           }
         }
@@ -259,7 +260,7 @@ class LiveControllerWorld final : public ControllerWorld {
         if (item.one_based != 0) {
           auto& table = Records().shields;
           RequireBound(VS::Menu::Framework::shields, table);
-          if (Referenced(table, item).isEquipped != 0) {
+          if (Referenced(table, item).is_equipped != 0) {
             RequireAshleyStats();
           }
         }
@@ -322,8 +323,7 @@ class LiveControllerWorld final : public ControllerWorld {
     const auto owners = BorrowTextOwners(name);
     const bool buffer =
         category_ != Category::kArmor ||
-        Items::Live::Typed(Referenced(records.armor, item)).category !=
-            kAccessoryCategory;
+        Referenced(records.armor, item).category != kAccessoryCategory;
     RequireText(category_ != Category::kGrip, buffer);
     FormatRecord(item, text, row_type);
     return {.name = BorrowedText(text[0], owners),
@@ -338,7 +338,7 @@ class LiveControllerWorld final : public ControllerWorld {
                                               text.row_type, page.index);
   }
   std::uint8_t GripGemSlots(ContainerSlot item) override {
-    return Items::Live::Typed(Referenced(Records().grips, item)).gem_slots;
+    return Referenced(Records().grips, item).gem_slots;
   }
   void DrawGripGemSlotCount(std::uint8_t slots) override {
     g_gem_count_text[kGemDigit] =
@@ -351,8 +351,7 @@ class LiveControllerWorld final : public ControllerWorld {
   }
   bool SelectedArmorShowsDp(ContainerSlot item) override {
     // #366: the original inventory owner disagrees with this container view.
-    return Items::Live::Typed(Referenced(Records().armor, item)).category !=
-           kAccessoryCategory;
+    return Referenced(Records().armor, item).category != kAccessoryCategory;
   }
 
  private:
@@ -381,7 +380,7 @@ class LiveControllerWorld final : public ControllerWorld {
   void SetArmorStatistics(ContainerSlot item) const {
     if (item.one_based != 0) {
       RequireBound(VS::Menu::Framework::armor, Records().armor);
-      const auto armor = Items::Live::Typed(Referenced(Records().armor, item));
+      const auto armor = Referenced(Records().armor, item);
       if (armor.limb >= 1 && armor.limb <= Items::kLimbCount) {
         RequireAshleyStats();
       }
@@ -425,7 +424,7 @@ class LiveControllerWorld final : public ControllerWorld {
   }
   void RequireWeaponRow(int row, ContainerSlot item) const {
     RequireBound(VS::Menu::Framework::weapons, Records().weapons);
-    const auto weapon = Items::Live::Typed(Referenced(Records().weapons, item));
+    const auto weapon = Referenced(Records().weapons, item);
     if (row == 1) {
       RequireBound(VS::Menu::Framework::blades, Records().blades);
       (void)Referenced(Records().blades, {weapon.blade});
@@ -433,8 +432,7 @@ class LiveControllerWorld final : public ControllerWorld {
       return;
     }
     RequireBound(VS::Menu::Framework::grips, Records().grips);
-    const auto grip =
-        Items::Live::Typed(Referenced(Records().grips, {weapon.grip}));
+    const auto grip = Referenced(Records().grips, {weapon.grip});
     if (row == 2) {
       RequireText(false, true);
     } else if (row >= kWeaponFirstGemRow &&
@@ -451,7 +449,7 @@ class LiveControllerWorld final : public ControllerWorld {
   }
   void RequireShieldRow(int row, ContainerSlot item) const {
     RequireBound(VS::Menu::Framework::shields, Records().shields);
-    const auto shield = Items::Live::Typed(Referenced(Records().shields, item));
+    const auto shield = Referenced(Records().shields, item);
     if (row >= 1 && std::cmp_less_equal(row, Items::kWeaponGemCount) &&
         row - 1 < shield.base.gem_slots) {
       const auto gem = shield.gems[static_cast<std::size_t>(row - 1)];

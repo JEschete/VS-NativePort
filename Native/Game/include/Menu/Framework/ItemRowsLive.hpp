@@ -1,14 +1,8 @@
 #pragma once
+#include "Items/ItemRecords.hpp"
 // Hand-maintained (tools/port/owned.csv).
 
 struct Items_ArmorLoadout;
-struct Items_InventoryArmor;
-struct Items_InventoryBlade;
-struct Items_InventoryGem;
-struct Items_InventoryGrip;
-struct Items_InventoryMisc;
-struct Items_InventoryShield;
-struct Items_InventoryWeapon;
 struct Items_ShieldLoadout;
 struct Items_WeaponLoadout;
 struct Menu_Framework_MenuRow;
@@ -32,25 +26,26 @@ Menu_Framework_MenuRow* CreateLiveShieldGemRow(int row, int shield_index,
                                                int slide);
 void FormatLiveWeaponRow(Items_WeaponLoadout* weapon, char* menu_text[],
                          int* row_type, void* buffer);
-void FormatLiveInventoryWeaponRow(Items_InventoryWeapon* weapon,
+void FormatLiveInventoryWeaponRow(VS::Items::InventoryWeapon* weapon,
                                   char* menu_text[], int* row_type,
                                   void* buffer);
-void FormatLiveBladeRow(Items_InventoryBlade* blade, char* menu_text[],
+void FormatLiveBladeRow(VS::Items::InventoryBlade* blade, char* menu_text[],
                         int* row_type, void* buffer);
-void FormatLiveGripRow(Items_InventoryGrip* grip, char* menu_text[],
+void FormatLiveGripRow(VS::Items::InventoryGrip* grip, char* menu_text[],
                        int* row_type, void* buffer);
 void FormatLiveShieldRow(Items_ShieldLoadout* shield, char* menu_text[],
                          int* row_type, void* buffer);
-void FormatLiveInventoryShieldRow(Items_InventoryShield* shield,
+void FormatLiveInventoryShieldRow(VS::Items::InventoryShield* shield,
                                   char* menu_text[], int* row_type,
                                   void* buffer);
 void FormatLiveArmorRow(Items_ArmorLoadout* armor, char* menu_text[],
                         int* row_type, void* buffer);
-void FormatLiveInventoryArmorRow(Items_InventoryArmor* armor, char* menu_text[],
-                                 int* row_type, void* buffer);
-void FormatLiveGemRow(Items_InventoryGem* gem, char* menu_text[], int* row_type,
-                      void* buffer);
-void FormatLiveMiscItemRow(Items_InventoryMisc* misc, char* menu_text[],
+void FormatLiveInventoryArmorRow(VS::Items::InventoryArmor* armor,
+                                 char* menu_text[], int* row_type,
+                                 void* buffer);
+void FormatLiveGemRow(VS::Items::InventoryGem* gem, char* menu_text[],
+                      int* row_type, void* buffer);
+void FormatLiveMiscItemRow(VS::Items::InventoryMisc* misc, char* menu_text[],
                            int* row_type, void* buffer);
 int LoadLiveItemText(int load);
 int UnloadLiveItemTextWhenReady();

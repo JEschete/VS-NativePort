@@ -17,7 +17,6 @@
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -81,11 +80,11 @@ void Refuse(std::string_view reason) {
 
 // The record at a 0-based slot, or nullptr outside the table.
 template <typename T, std::size_t N>
-[[nodiscard]] T* Slot(T (&table)[N], std::int32_t slot) {
+[[nodiscard]] T* Slot(std::array<T, N>& table, std::int32_t slot) {
   if (slot < 0 || static_cast<std::size_t>(slot) >= N) {
     return nullptr;
   }
-  return &std::span(table)[static_cast<std::size_t>(slot)];
+  return &table[static_cast<std::size_t>(slot)];
 }
 
 [[nodiscard]] std::span<const u_char> IndexList(EquipmentTable table) {
@@ -120,20 +119,20 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
   bool IsEquipped(EquipmentTable table, std::int32_t slot) override {
     if (table == EquipmentTable::kWeapons) {
       const auto* weapon = Slot(VS::Items::inventory.weapons, slot);
-      return weapon != nullptr && weapon->isEquipped != 0;
+      return weapon != nullptr && weapon->is_equipped != 0;
     }
     const auto* shield = Slot(VS::Items::inventory.shields, slot);
     return table == EquipmentTable::kShields && shield != nullptr &&
-           shield->isEquipped != 0;
+           shield->is_equipped != 0;
   }
   void MarkEquipped(EquipmentTable table, std::int32_t slot) override {
     if (table == EquipmentTable::kWeapons) {
       if (auto* weapon = Slot(VS::Items::inventory.weapons, slot)) {
-        weapon->isEquipped = 1;
+        weapon->is_equipped = 1;
       }
     } else if (table == EquipmentTable::kShields) {
       if (auto* shield = Slot(VS::Items::inventory.shields, slot)) {
-        shield->isEquipped = 1;
+        shield->is_equipped = 1;
       }
     }
   }
@@ -160,7 +159,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
       return {};
     }
     return {.category = static_cast<std::uint8_t>(blade->category),
-            .model_id = static_cast<std::uint8_t>(blade->wepId),
+            .model_id = static_cast<std::uint8_t>(blade->weapon_model_id),
             .material = static_cast<std::uint8_t>(blade->material)};
   }
   ShieldModel Shield(std::int32_t slot) override {
@@ -168,7 +167,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
     if (shield == nullptr) {
       return {};
     }
-    return {.model_id = static_cast<std::uint8_t>(shield->base.wepId),
+    return {.model_id = static_cast<std::uint8_t>(shield->base.weapon_model_id),
             .material = static_cast<std::uint8_t>(shield->base.material)};
   }
   std::optional<HeldBlade> HeldWeapon() override {

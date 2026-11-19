@@ -94,7 +94,7 @@ class LiveWorld final : public ContainerItemRowsWorld {
           static_cast<std::size_t>(output.slot) >= std::size(owner->weapons)) {
         Refuse("weapon name outside captured item records");
       }
-      name = owner->weapons[output.slot].name;
+      name = owner->weapons[output.slot].name.data();
     }
     const auto buffer = Description(output.row);
     auto* const bytes = buffer.empty() ? nullptr : buffer.data();
@@ -130,8 +130,8 @@ class LiveWorld final : public ContainerItemRowsWorld {
   char** const text_;
   int* const types_;
   char* const descriptions_;
-  Items_ContainerData* active_owner_ = nullptr;
-  Items_ContainerData* staged_owner_ = nullptr;
+  VS::Items::ContainerData* active_owner_ = nullptr;
+  VS::Items::ContainerData* staged_owner_ = nullptr;
   std::optional<Items::LiveContainerWorld> active_;
   std::optional<Items::LiveContainerWorld> staged_;
   Framework::LiveItemRowsHost host_;

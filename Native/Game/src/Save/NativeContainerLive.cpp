@@ -14,7 +14,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Container/Storage.h"
 #include "Menu/FilesLive.hpp"

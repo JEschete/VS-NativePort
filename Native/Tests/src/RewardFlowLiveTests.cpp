@@ -61,7 +61,7 @@ struct LiveFixture {
   u_char saved_platform_pause = Field_areMovingPlatformsPaused;
   Battle_ActionState* saved_action = Battle_actionState;
   Battle_Actor* saved_character = Battle_characterState;
-  Items_LootListNode* saved_loot = VS::Items::lootListHead;
+  VS::Items::LootListNode* saved_loot = VS::Items::lootListHead;
   decltype(VS::State::artsStatus) saved_progress = VS::State::artsStatus;
   u_short saved_requirement = Battle_battleAbilityPointRequirements[0];
   std::uint8_t saved_ab = VS::State::LiveScriptFlag(0xAB);
@@ -124,8 +124,8 @@ struct LiveMenuFixture : LiveFixture {
       VS::Menu::Framework::menuState;
   decltype(VS::Menu::Framework::actionSelection) saved_selection =
       VS::Menu::Framework::actionSelection;
-  Items_LootListNode* saved_lists = VS::Menu::Framework::lootLists;
-  Items_BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
+  VS::Items::LootListNode* saved_lists = VS::Menu::Framework::lootLists;
+  VS::Items::BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
   Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int saved_restrictions = VS::Menu::Framework::actionRestrictions;
   char saved_shortcut = VS::Menu::Framework::shortcutInvoked;
@@ -265,7 +265,7 @@ TEST_CASE("F00220 live acquisition uses the actual pending and menu policies",
 TEST_CASE("F00221 live loot uses the actual native list owner and menu",
           "[reward-flow][reward-live][F00221]") {
   LiveMenuFixture fixture;
-  Items_LootListNode node{};
+  VS::Items::LootListNode node{};
   VS::Items::lootListHead = &node;
   Battle_actionState = nullptr;
   VS::State::SetLiveScriptFlag(0xAB, 255);
@@ -549,7 +549,7 @@ TEST_CASE(
     "F00228 live post action resets full flags before the actual loot menu",
     "[reward-dispatch][reward-live][F00228]") {
   LiveDialogFixture fixture;
-  Items_LootListNode node{};
+  VS::Items::LootListNode node{};
   VS::Items::lootListHead = &node;
   Battle_lootMenuOpened = INT32_MIN;
   Battle_rewardsFollowAction = INT32_MIN;

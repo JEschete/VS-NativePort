@@ -23,7 +23,6 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -88,8 +87,8 @@ struct Controllers {
 // These are views for the remaining checked Live helpers, not a PS1 heap
 // layout. Ownership is one native allocation, invalidated on release/reset.
 struct WorkspaceViews {
-  Items_Inventory inventory{};
-  Items_Inventory inventory_backup{};
+  VS::Items::InventoryContents inventory{};
+  VS::Items::InventoryContents inventory_backup{};
   std::array<Menu_Loot_LootListItem, kLootRowCapacity> rows{};
   std::array<Menu_Loot_LootListItem, kLootRowCapacity> working_rows{};
 };
@@ -184,7 +183,7 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
 void InvalidateWorkspace() {
   if (g_workspace) {
     for (auto& weapon : g_workspace->inventory.weapons) {
-      if (Battle_stringContext.strings[0] == weapon.name) {
+      if (Battle_stringContext.strings[0] == weapon.name.data()) {
         Battle_stringContext.strings[0] = nullptr;
       }
     }
@@ -261,8 +260,7 @@ class LiveTerminalHost final : public LootTerminalHost {
         Refuse("missing staged inventory backup");
       }
       if (!inventory_backup_loaded_) {
-        workspace_.inventory_backup =
-            Items::Live::Typed(*Menu_Loot_inventoryBackup);
+        workspace_.inventory_backup = *Menu_Loot_inventoryBackup;
         inventory_backup_loaded_ = true;
       }
     }
@@ -273,7 +271,7 @@ class LiveTerminalHost final : public LootTerminalHost {
       if (Menu_Loot_inventory == nullptr || Menu_Loot_lootList == nullptr) {
         Refuse("staged workspace was invalidated during a loot call");
       }
-      Items::Live::Commit(*Menu_Loot_inventory, workspace_.inventory);
+      *Menu_Loot_inventory = workspace_.inventory;
       const auto rows = std::span(Menu_Loot_lootList, kLootRowCapacity);
       for (std::size_t index = 0; index < rows.size(); ++index) {
         rows[index] =
@@ -295,8 +293,7 @@ class LiveTerminalHost final : public LootTerminalHost {
       if (Menu_Loot_inventoryBackup == nullptr) {
         Refuse("inventory backup was invalidated");
       }
-      Items::Live::Commit(*Menu_Loot_inventoryBackup,
-                          workspace_.inventory_backup);
+      *Menu_Loot_inventoryBackup = workspace_.inventory_backup;
     }
   }
   template <typename Function, typename... Arguments>
@@ -317,7 +314,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     }
   }
   Items::InventoryContents AshleyInventory() override {
-    return Items::Live::Typed(VS::Items::inventory);
+    return VS::Items::inventory;
   }
   Input::PadState Buttons() override {
     return {.pressed = VS::Input::buttonsPressed,
@@ -379,7 +376,8 @@ class LiveTerminalHost final : public LootTerminalHost {
       Refuse("weapon name outside staged inventory");
     }
     Publish();
-    Battle_stringContext.strings[0] = Menu_Loot_inventory->weapons[slot].name;
+    Battle_stringContext.strings[0] =
+        Menu_Loot_inventory->weapons[slot].name.data();
   }
   void SetItemName(std::uint16_t id) override {
     constexpr auto kItemNameCount =
@@ -653,7 +651,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     if (Menu_Loot_inventory == nullptr || Menu_Loot_lootList == nullptr) {
       Refuse("missing staged inventory or loot rows");
     }
-    workspace_.inventory = Items::Live::Typed(*Menu_Loot_inventory);
+    workspace_.inventory = *Menu_Loot_inventory;
     const auto rows = std::span(Menu_Loot_lootList, kLootRowCapacity);
     for (std::size_t index = 0; index < rows.size(); ++index) {
       workspace_.rows[index] = std::bit_cast<LootRow>(rows[index]);
@@ -677,8 +675,7 @@ class LiveTerminalHost final : public LootTerminalHost {
       if (Menu_Loot_inventoryBackup == nullptr) {
         Refuse("inventory backup was invalidated");
       }
-      workspace_.inventory_backup =
-          Items::Live::Typed(*Menu_Loot_inventoryBackup);
+      workspace_.inventory_backup = *Menu_Loot_inventoryBackup;
     }
   }
   void ForgetWorkspace() {

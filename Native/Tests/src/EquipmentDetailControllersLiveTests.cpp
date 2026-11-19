@@ -3,7 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Input/Pad.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 
@@ -110,7 +110,7 @@ TEST_CASE(
   CHECK(actual == expected);
   CHECK(fixture.CountLabel(actual) == "X     2");
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 1);
-  VS::Items::inventory.grips[0].gemSlots = VS::Items::kWeaponGemCount;
+  VS::Items::inventory.grips[0].gem_slots = VS::Items::kWeaponGemCount;
   fixture.ResetFrame();
   CHECK(inventory::UpdateLiveGripDetails(0) == 0);
   CHECK(fixture.CountLabel(fixture.Sprites()) == "X     3");

@@ -74,10 +74,9 @@
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
-#include "Items/Loot.h"
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
@@ -340,7 +339,7 @@ unsigned EquippedBreakArt() {
   constexpr unsigned kWeaponFamilies = 9;
   constexpr unsigned kArtsPerWeapon = 4;
   for (const auto& weapon : VS::Items::inventory.weapons) {
-    if (!weapon.isEquipped) continue;
+    if (!weapon.is_equipped) continue;
     if (weapon.blade == 0 ||
         weapon.blade > std::size(VS::Items::inventory.blades)) {
       throw std::runtime_error("encounter profile has no valid equipped blade");
@@ -371,17 +370,17 @@ void StockEncounterItems(EncounterProfile profile) {
        465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477,
        478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489});
   constexpr std::size_t kHalf = kItems.size() / 2;
-  constexpr char kStack = 10;
+  constexpr std::uint8_t kStack = 10;
   auto& items = VS::Items::inventory.misc;
   auto& indices = VS::Items::inventoryIndices.misc;
   static_assert(kItems.size() % 2 == 0 && kHalf <= std::size(items));
-  std::ranges::fill(items, Items_InventoryMisc{});
+  std::ranges::fill(items, VS::Items::InventoryMisc{});
   std::ranges::fill(indices, 0);
   const auto first = profile == EncounterProfile::kAllItemsA ? 0 : kHalf;
   for (std::size_t slot = 0; slot < kHalf; ++slot) {
-    const auto index = static_cast<char>(slot + 1);
+    const auto index = static_cast<std::uint8_t>(slot + 1);
     items[slot] = {kItems[first + slot], kStack, index};
-    indices[slot] = static_cast<u_char>(index);
+    indices[slot] = index;
   }
   VS::Core::LogInfo("encounter.profile", "misc_stacks={} count_each={}", kHalf,
                     static_cast<int>(kStack));
@@ -614,13 +613,13 @@ void InitializeEncounterPlayerWeapon(EncounterWeapon choice) {
   if (choice == EncounterWeapon::kDefault) return;
   auto& inventory = VS::Items::inventory;
   if (choice == EncounterWeapon::kBareHands) {
-    for (auto& weapon : inventory.weapons) weapon.isEquipped = 0;
+    for (auto& weapon : inventory.weapons) weapon.is_equipped = 0;
     return;
   }
   auto source = ReadEncounterWeapon(choice);
   if (!source) throw std::runtime_error(source.error());
   const auto equipped = [](const auto& weapon) {
-    return weapon.isEquipped != 0;
+    return weapon.is_equipped != 0;
   };
   if (std::ranges::count_if(inventory.weapons, equipped) != 1) {
     throw std::runtime_error(
@@ -640,7 +639,7 @@ void InitializeEncounterPlayerWeapon(EncounterWeapon choice) {
   VS::Items::StoreLiveInventoryWeaponStats(&weapon, &stats);
   // Match MAINMENU/2D10.c's weapon equip restriction (staves are one-handed).
   if (VS::Menu::Framework::weaponHands[static_cast<int>(choice) - 1] != 0) {
-    for (auto& shield : inventory.shields) shield.isEquipped = 0;
+    for (auto& shield : inventory.shields) shield.is_equipped = 0;
   }
 }
 
@@ -837,11 +836,12 @@ void InspectPendingLoot(EncounterState& state) {
       throw std::runtime_error("encounter loot list exceeds actor storage");
     }
     EncounterLootState loot;
-    loot.source_actor = node->droppedMask;
+    loot.source_actor = node->actor_id;
     for (std::size_t slot = 0; slot < std::size(node->loot.misc); ++slot) {
       const auto& item = node->loot.misc[slot];
-      if (item.itemId != 0 && item.count != 0) {
-        loot.items.push_back({static_cast<int>(slot), item.itemId, item.count});
+      if (item.item_id != 0 && item.count != 0) {
+        loot.items.push_back(
+            {static_cast<int>(slot), item.item_id, item.count});
       }
     }
     state.pending_loot.push_back(std::move(loot));

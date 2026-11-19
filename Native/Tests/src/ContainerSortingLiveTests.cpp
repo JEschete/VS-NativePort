@@ -53,14 +53,14 @@ TEST_CASE(
   owner.indices.weapons[1] = 1;
   owner.indices.weapons[2] = kWeaponCount;
   const auto before =
-      std::bit_cast<std::array<std::byte, sizeof(Items_ContainerData)>>(
+      std::bit_cast<std::array<std::byte, sizeof(VS::Items::ContainerData)>>(
           owner.items);
   sorting::SortLiveWeapons(kMaterial);
   CHECK(owner.indices.weapons[0] == 1);
   CHECK(owner.indices.weapons[1] == 32);
   CHECK(owner.indices.weapons[2] == 32);
   CHECK(owner.indices.weapons[3] == 0);
-  CHECK((std::bit_cast<std::array<std::byte, sizeof(Items_ContainerData)>>(
+  CHECK((std::bit_cast<std::array<std::byte, sizeof(VS::Items::ContainerData)>>(
              owner.items) == before));
 }
 
@@ -144,7 +144,7 @@ TEST_CASE(
   fixture.owner.items.grips[0].strength = kNegative;
   fixture.owner.items.armor[0].strength = kPositive;
   fixture.owner.items.gems[kLastGem].strength = kNegative;
-  fixture.owner.items.gems[kLastGem].gemEffects = kRawFlaggedByte;
+  fixture.owner.items.gems[kLastGem].gem_effects = kRawFlaggedByte;
   VS::Items::EquipmentPart target{};
   target.current_dp = kWideMaterial;
   sorting::CopyLiveEquipmentStats(&target, kGrip, 0);

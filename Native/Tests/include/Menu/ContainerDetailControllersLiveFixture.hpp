@@ -5,7 +5,7 @@
 #include <span>
 
 #include "Items/ContainerTransfersLiveFixture.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/ItemDetailDispatchLiveFixture.hpp"
 
@@ -40,14 +40,14 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
   }
   ~ContainerLiveFixture() { detail::ResetLiveContainerDetailControllers(); }
 
-  static void Bind(Items_Container& owner) {
+  static void Bind(VS::Items::Container& owner) {
     Menu_Container_containerData = &owner;
-    VS::Menu::Framework::weapons = owner.items.weapons;
-    VS::Menu::Framework::blades = owner.items.blades;
-    VS::Menu::Framework::grips = owner.items.grips;
-    VS::Menu::Framework::shields = owner.items.shields;
-    VS::Menu::Framework::armor = owner.items.armor;
-    VS::Menu::Framework::gems = owner.items.gems;
+    VS::Menu::Framework::weapons = owner.items.weapons.data();
+    VS::Menu::Framework::blades = owner.items.blades.data();
+    VS::Menu::Framework::grips = owner.items.grips.data();
+    VS::Menu::Framework::shields = owner.items.shields.data();
+    VS::Menu::Framework::armor = owner.items.armor.data();
+    VS::Menu::Framework::gems = owner.items.gems.data();
   }
   void AddContainerWeapon() {
     AddWeapon();
@@ -56,11 +56,11 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
     owner.items.grips[kContainerPart] = VS::Items::inventory.grips[0];
     owner.items.grips[kContainerPart].id = kFirstGripHelpId;
     owner.items.grips[kContainerPart].category = kGripCategory;
-    auto weapon = items::Live::Typed(VS::Items::inventory.weapons[0]);
+    auto weapon = VS::Items::inventory.weapons[0];
     weapon.blade = kContainerPart + 1;
     weapon.grip = kContainerPart + 1;
-    items::Live::Commit(owner.items.weapons[kContainerWeapon], weapon);
-    items::Live::Commit(owner.items.weapons[0], weapon);
+    owner.items.weapons[kContainerWeapon] = weapon;
+    owner.items.weapons[0] = weapon;
     owner.indices.weapons[0] = kContainerWeapon + 1;
     owner.indices.weapons[1] = 1;
   }

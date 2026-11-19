@@ -68,8 +68,8 @@
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Items/ItemRecords.hpp"
 #include "Items/LootLive.hpp"
-#include "Items/TreasureChests.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/TextBoxes.h"
@@ -625,7 +625,7 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
   }
   [[nodiscard]] std::vector<battle::TargetChest> RoomChests() const override {
     int count = 0;
-    const Items_TreasureChest* chests =
+    const VS::Items::TreasureChest* chests =
         VS::Items::LiveRoomTreasureChests(&count);
     if (count <= 0) {
       return {};
@@ -637,13 +637,13 @@ class LiveActionTargetingHost final : public battle::ActionTargetingHost {
     }
     std::vector<battle::TargetChest> result;
     result.reserve(static_cast<std::size_t>(count));
-    for (const Items_TreasureChest& chest :
+    for (const VS::Items::TreasureChest& chest :
          std::span(chests, static_cast<std::size_t>(count))) {
-      result.push_back({.tile_x = chest.tileX,
-                        .tile_z = chest.tileZ,
-                        .opened_flag = chest.openedFlag,
-                        .lock_level = chest.lockLevel,
-                        .is_open = chest.isOpen != 0});
+      result.push_back({.tile_x = chest.tile_x,
+                        .tile_z = chest.tile_z,
+                        .opened_flag = chest.opened_flag,
+                        .lock_level = chest.lock_level,
+                        .is_open = chest.is_open != 0});
     }
     return result;
   }

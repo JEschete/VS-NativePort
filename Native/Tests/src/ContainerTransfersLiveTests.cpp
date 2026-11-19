@@ -3,7 +3,7 @@
 #include "Items/ContainerIndexing.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 
 namespace {
 namespace items = VS::Items;
@@ -61,17 +61,16 @@ TEST_CASE(
     "[container-transfers-live][F02936]") {
   LiveFixture fixture;
   items::InventoryBlade source{};
-  source.opaque12 = 65535;
+  source.recovery_delay = 65535;
   source.type_bits = 255;
-  items::Live::Commit(fixture.storage->stagedTransfer.blades[63], source);
+  fixture.storage->stagedTransfer.blades[63] = source;
   CHECK(items::CopyLiveContainerItem(0xFF11, &fixture.storage->container.items,
                                      63,
                                      &fixture.storage->stagedTransfer) == 1);
   auto expected = source;
   expected.index = 1;
   expected.assembled_weapon_index = 255;
-  CHECK(items::Live::Typed(fixture.storage->container.items.blades[0]) ==
-        expected);
+  CHECK(fixture.storage->container.items.blades[0] == expected);
 }
 
 TEST_CASE(
@@ -98,13 +97,12 @@ TEST_CASE(
     "rows",
     "[container-transfers-live][F02938]") {
   LiveFixture fixture;
-  VS::Items::inventory.misc[63] = {65535, static_cast<char>(255), 91};
+  VS::Items::inventory.misc[63] = {65535, 255, 91};
   fixture.order.misc[0] = 255;
   fixture.storage->gadgetBag.items.misc[255].id = 99;
   items::SnapshotLiveGadgetBag();
   CHECK(fixture.storage->gadgetBag.items.misc[63].id == 65535);
-  CHECK(fixture.storage->gadgetBag.items.misc[63].count ==
-        static_cast<char>(255));
+  CHECK(fixture.storage->gadgetBag.items.misc[63].count == 255);
   CHECK(fixture.storage->gadgetBag.items.misc[255].id == 0);
   CHECK(fixture.storage->gadgetBag.indices.misc[0] == 255);
   CHECK(fixture.storage->gadgetBag.indices.misc[64] == 0);
@@ -131,8 +129,8 @@ TEST_CASE(
     "categories lazily",
     "[container-transfers-live][F02940]") {
   LiveFixture fixture;
-  fixture.storage->container.items.grips[63].assembledWeaponIndex = 65535;
-  fixture.replacement->container.items.grips[63].assembledWeaponIndex = 2;
+  fixture.storage->container.items.grips[63].assembled_weapon_index = 65535;
+  fixture.replacement->container.items.grips[63].assembled_weapon_index = 2;
   CHECK(items::LiveContainerParentWeaponIndex(
             2, 63, &fixture.storage->container.items) == 65535);
   CHECK(items::LiveContainerParentWeaponIndex(
@@ -145,9 +143,9 @@ TEST_CASE(
     "[container-transfers-live][F02941]") {
   LiveFixture fixture;
   auto& owner = fixture.storage->container.items;
-  owner.gems[191].setItemIndex = 0xFF81;
+  owner.gems[191].set_item_index = 0xFF81;
   CHECK(items::LiveContainerParentShieldIndex(5, 191, &owner) == 1);
-  owner.gems[191].setItemIndex = 0xFF01;
+  owner.gems[191].set_item_index = 0xFF01;
   CHECK(items::LiveContainerParentShieldIndex(5, 191, &owner) == 0);
   CHECK(items::LiveContainerParentShieldIndex(261, -1, nullptr) == 0);
 }

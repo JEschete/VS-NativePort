@@ -27,7 +27,7 @@
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Settings.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Framework.h"

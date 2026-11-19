@@ -18,75 +18,73 @@ int Apply(LegacySource* source, const char* operation, Convert&& convert,
     item_live::WarnNullRecord(operation);
     return 0;
   }
-  auto inventory = item_live::Typed(*Menu_Loot_inventory);
+  auto inventory = *Menu_Loot_inventory;
   const auto result = stage(convert(*source), inventory);
-  item_live::Commit(*Menu_Loot_inventory, inventory);
+  *Menu_Loot_inventory = inventory;
   return result;
 }
 }  // namespace
 
-int StageBlade(Items_InventoryBlade* blade, int weapon_index) {
+int StageBlade(VS::Items::InventoryBlade* blade, int weapon_index) {
   return Apply(
       blade, "Menu::Loot::StageBlade",
-      [](const auto& source) { return item_live::Typed(source); },
+      [](const auto& source) { return source; },
       [weapon_index](const auto& source, auto& inventory) {
         return VS::Menu::Loot::StageBlade(source, weapon_index, inventory);
       });
 }
 
-int StageGrip(Items_InventoryGrip* grip, int weapon_index) {
+int StageGrip(VS::Items::InventoryGrip* grip, int weapon_index) {
   return Apply(
-      grip, "Menu::Loot::StageGrip",
-      [](const auto& source) { return item_live::Typed(source); },
+      grip, "Menu::Loot::StageGrip", [](const auto& source) { return source; },
       [weapon_index](const auto& source, auto& inventory) {
         return VS::Menu::Loot::StageGrip(source, weapon_index, inventory);
       });
 }
 
-int StageGem(Items_InventoryGem* gem, int item_index) {
+int StageGem(VS::Items::InventoryGem* gem, int item_index) {
   return Apply(
-      gem, "Menu::Loot::StageGem",
-      [](const auto& source) { return item_live::Typed(source); },
+      gem, "Menu::Loot::StageGem", [](const auto& source) { return source; },
       [item_index](const auto& source, auto& inventory) {
         return VS::Menu::Loot::StageGem(source, item_index, inventory);
       });
 }
 
-int StageWeapon(Items_LootedWeapon* weapon) {
+int StageWeapon(VS::Items::LootedWeapon* weapon) {
   return Apply(
       weapon, "Menu::Loot::StageWeapon",
-      [](const auto& source) { return item_live::Typed(source); },
+      [](const auto& source) { return source; },
       [](const auto& source, auto& inventory) {
         return VS::Menu::Loot::StageWeapon(source, inventory);
       });
 }
 
-int StageArmor(Items_InventoryArmor* armor) {
+int StageArmor(VS::Items::InventoryArmor* armor) {
   return Apply(
       armor, "Menu::Loot::StageArmor",
-      [](const auto& source) { return item_live::Typed(source); },
+      [](const auto& source) { return source; },
       [](const auto& source, auto& inventory) {
         return VS::Menu::Loot::StageArmor(source, inventory);
       });
 }
 
-int StageShield(Items_LootedShield* shield) {
+int StageShield(VS::Items::LootedShield* shield) {
   return Apply(
       shield, "Menu::Loot::StageShield",
-      [](const auto& source) { return item_live::Typed(source); },
+      [](const auto& source) { return source; },
       [](const auto& source, auto& inventory) {
         return VS::Menu::Loot::StageShield(source, inventory);
       });
 }
 
-int StageMiscItem(Items_LootedItem* item) {
+int StageMiscItem(VS::Items::LootedItem* item) {
   return Apply(
       item, "Menu::Loot::StageMiscItem",
-      [](const Items_LootedItem& source) {
+      [](const VS::Items::LootedItem& source) {
         return items::LootedItem{
-            .item_id = source.itemId,
+            .item_id = source.item_id,
             .difficulty_flags =
-                static_cast<std::uint8_t>(source.difficultyFlags),
+                static_cast<std::uint8_t>(source.difficulty_flags),
             .count = static_cast<std::uint8_t>(source.count),
         };
       },

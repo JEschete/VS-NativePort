@@ -11,7 +11,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Items/TreasureChests.h"
+#include "Items/ItemRecords.hpp"
 #include "State/StateFlags.hpp"
 
 namespace VS::Field {
@@ -36,7 +36,7 @@ std::span<Field_MpdFloorTrigger> TrapRecords() {
       Field_roomData.header.floorTriggersLength / kOriginalFloorRecordBytes};
 }
 
-std::span<Items_TreasureChest> ChestRecords() {
+std::span<VS::Items::TreasureChest> ChestRecords() {
   if (Field_roomData.containers == nullptr) {
     return {};
   }
@@ -183,7 +183,7 @@ std::optional<TrapTarget> FindLiveTrapTargetAddress(const void* address) {
 }
 
 std::optional<ChestTarget> FindLiveChestTarget(
-    const Items_TreasureChest* record) {
+    const VS::Items::TreasureChest* record) {
   const auto index = RecordIndex(ChestRecords(), record);
   return index ? std::optional{ChestTarget{*index, room_generation}}
                : std::nullopt;
@@ -205,7 +205,7 @@ Field_MpdFloorTrigger* ResolveLiveTrapTarget(TrapTarget target) {
   return index ? &records[*index] : nullptr;
 }
 
-Items_TreasureChest* ResolveLiveChestTarget(ChestTarget target) {
+VS::Items::TreasureChest* ResolveLiveChestTarget(ChestTarget target) {
   const auto records = ChestRecords();
   const auto index = ResolveChestTarget(target, LiveInteractionTargetDomain());
   return index ? &records[*index] : nullptr;

@@ -111,15 +111,13 @@ TEST_CASE(
   data::Records source;
   data::Populate(source);
   auto& owner = fixture.containers.storage->container;
-  VS::Items::Live::Commit(owner.items.weapons[0],
-                          source.storage.items.weapons[0]);
-  VS::Items::Live::Commit(owner.items.blades[0],
-                          source.storage.items.blades[0]);
-  VS::Items::Live::Commit(owner.items.grips[0], source.storage.items.grips[0]);
-  owner.items.weapons[0].isEquipped = 1;
+  owner.items.weapons[0] = source.storage.items.weapons[0];
+  owner.items.blades[0] = source.storage.items.blades[0];
+  owner.items.grips[0] = source.storage.items.grips[0];
+  owner.items.weapons[0].is_equipped = 1;
   owner.indices.weapons[0] = 1;
   REQUIRE(fixture.Build(0) == 1);
-  REQUIRE(fixture.workspace.texts[0] == owner.items.weapons[0].name);
+  REQUIRE(fixture.workspace.texts[0] == owner.items.weapons[0].name.data());
   REQUIRE((fixture.workspace.types[0] & data::kRestrictionMask) ==
           data::kEquipped);
   REQUIRE(fixture.workspace.texts[1] == fixture.workspace.descriptions.data());
@@ -133,8 +131,7 @@ TEST_CASE(
   data::Populate(source);
   auto blade = source.storage.items.blades[0];
   blade.assembled_weapon_index = 1;
-  VS::Items::Live::Commit(fixture.containers.storage->stagedTransfer.blades[0],
-                          blade);
+  fixture.containers.storage->stagedTransfer.blades[0] = blade;
   fixture.containers.storage->itemsToTransfer[0] = data::kBladePendingToken;
   REQUIRE(fixture.Build(kPendingCategory) == 1);
   REQUIRE((fixture.workspace.types[0] & data::kRestrictionMask) ==

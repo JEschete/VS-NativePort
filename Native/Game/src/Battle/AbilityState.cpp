@@ -1,12 +1,13 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
+#include "Battle/AbilityState.h"
+
 #include "Actors/ActorModelSlot.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
-#include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
-#include "Items/Inventory.h"
+#include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
+#include "Legacy/Psx.h"
 #include "Render/Palette.hpp"
 
 // decomp: vs_battle_characterState (vs_battle_characterState@BATTLE/BATTLE.PRG)

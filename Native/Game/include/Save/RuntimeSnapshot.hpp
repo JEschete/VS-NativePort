@@ -16,7 +16,7 @@ namespace VS::Game::Save {
 // first-person, non-orbit/custom projection and unfinished transitions remain
 // unsupported.
 std::expected<Snapshot, std::string> Capture(
-    const Items_ContainerData& storage);
+    const VS::Items::ContainerData& storage);
 // No application/mutation. Requires stable DataStore and module-table lifetime;
 // concurrent DataStore::Open or module initialization is not synchronized here.
 std::expected<void, std::string> ValidateContent(const Snapshot& state);

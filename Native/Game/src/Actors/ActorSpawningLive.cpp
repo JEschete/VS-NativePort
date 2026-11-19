@@ -54,7 +54,7 @@
 #include "Field/Zone.h"
 #include "Items/Categories.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
@@ -849,20 +849,20 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   [[nodiscard]] AshleyInventory ReadAshleyInventory() const override {
-    const Items_Inventory& live = VS::Items::inventory;
+    const VS::Items::InventoryContents& live = VS::Items::inventory;
     AshleyInventory inventory;
     for (std::size_t i = 0; i < kInventoryWeapons; ++i) {
-      inventory.weapons.at(i) = {.equipped = live.weapons[i].isEquipped != 0,
+      inventory.weapons.at(i) = {.equipped = live.weapons[i].is_equipped != 0,
                                  .blade = live.weapons[i].blade};
     }
     for (std::size_t i = 0; i < kInventoryBlades; ++i) {
-      inventory.blades.at(i) = {.model = Byte(live.blades[i].wepId),
+      inventory.blades.at(i) = {.model = live.blades[i].weapon_model_id,
                                 .material = live.blades[i].material};
     }
     for (std::size_t i = 0; i < kInventoryShields; ++i) {
-      const Items_InventoryShield& shield = live.shields[i];
-      inventory.shields.at(i) = {.equipped = shield.isEquipped != 0,
-                                 .model = Byte(shield.base.wepId),
+      const VS::Items::InventoryShield& shield = live.shields[i];
+      inventory.shields.at(i) = {.equipped = shield.is_equipped != 0,
+                                 .model = shield.base.weapon_model_id,
                                  .material = shield.base.material};
     }
     for (std::size_t i = 0; i < kInventoryArmor; ++i) {

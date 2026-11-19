@@ -17,7 +17,7 @@
 #include "Content/DiscLayout.h"
 #include "Core/Log.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -45,14 +45,15 @@ static_assert(sizeof(renderRenameMenuStrings) ==
 // vs_main_inventoryWeapon and vs_main_inventoryBlade (func_8006B57C_t.h).
 constexpr std::size_t kEquippedOffset = 3;
 constexpr std::size_t kWeaponNameOffset = 8;
-static_assert(offsetof(Items_InventoryWeapon, blade) == 1);
-static_assert(offsetof(Items_InventoryWeapon, isEquipped) == kEquippedOffset);
-static_assert(offsetof(Items_InventoryWeapon, name) == kWeaponNameOffset);
-static_assert(sizeof(Items_InventoryWeapon::name) == kNameBytes);
-static_assert(offsetof(Items_InventoryBlade, id) == 0);
+static_assert(offsetof(VS::Items::InventoryWeapon, blade) == 1);
+static_assert(offsetof(VS::Items::InventoryWeapon, is_equipped) ==
+              kEquippedOffset);
+static_assert(offsetof(VS::Items::InventoryWeapon, name) == kWeaponNameOffset);
+static_assert(sizeof(VS::Items::InventoryWeapon::name) == kNameBytes);
+static_assert(offsetof(VS::Items::InventoryBlade, id) == 0);
 
-using Weapons = decltype(Items_Inventory::weapons);
-using Blades = decltype(Items_Inventory::blades);
+using Weapons = decltype(VS::Items::InventoryContents::weapons);
+using Blades = decltype(VS::Items::InventoryContents::blades);
 constexpr int kWeaponSlots = static_cast<int>(std::extent_v<Weapons>);
 constexpr int kBladeSlots = static_cast<int>(std::extent_v<Blades>);
 // ITEMNAME.BIN: one 24-byte name an item.
@@ -185,9 +186,10 @@ class LiveHost final : public Host {
     if (weapon < 0 || weapon >= kWeaponSlots) {
       return std::nullopt;
     }
-    const Items_InventoryWeapon& source = VS::Items::inventory.weapons[weapon];
-    Weapon loaded{.blade = source.blade, .equipped = source.isEquipped != 0};
-    std::memcpy(loaded.name.data(), source.name, kNameBytes);
+    const VS::Items::InventoryWeapon& source =
+        VS::Items::inventory.weapons[weapon];
+    Weapon loaded{.blade = source.blade, .equipped = source.is_equipped != 0};
+    std::memcpy(loaded.name.data(), source.name.data(), kNameBytes);
     return loaded;
   }
   std::optional<std::uint16_t> BladeItem(int blade) override {
@@ -211,7 +213,7 @@ class LiveHost final : public Host {
       Refuse("renamed weapon lies outside the inventory");
       return;
     }
-    std::memcpy(VS::Items::inventory.weapons[weapon].name, name.data(),
+    std::memcpy(VS::Items::inventory.weapons[weapon].name.data(), name.data(),
                 std::min(name.size(), kNameBytes));
   }
   void EquipWeapon(int weapon) override {

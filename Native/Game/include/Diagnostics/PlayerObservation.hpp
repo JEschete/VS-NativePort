@@ -136,7 +136,8 @@ struct EncounterNavigationState {
   std::vector<std::array<int, kTileSampleFields>> samples;
 };
 
-// Original MPD section 13 container (Items_TreasureChest) plus its opened flag.
+// Original MPD section 13 container (VS::Items::TreasureChest) plus its opened
+// flag.
 struct EncounterChestState {
   int index = 0;
   int tile_x = 0;

@@ -129,7 +129,7 @@ class LiveWorld final : public RewardDispatchWorld {
   }
   void OpenLoot(Menu::Framework::LootListId owner) override {
     Menu::Framework::OpenLiveLootListMenu(
-        reinterpret_cast<Items_LootListNode*>(owner));
+        reinterpret_cast<VS::Items::LootListNode*>(owner));
   }
   void OpenResults() override { Menu::Framework::OpenLiveChallengeMenu(); }
   void UpdateMenu() override { Menu::Framework::UpdateLiveMenuOverlay(); }

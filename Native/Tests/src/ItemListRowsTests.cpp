@@ -13,7 +13,7 @@
 
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -514,7 +514,7 @@ struct RowsLiveFixture : inventory::sorting_test::LiveFixture {
   }
 };
 
-int FormattedMiscType(Items_InventoryMisc misc) {
+int FormattedMiscType(VS::Items::InventoryMisc misc) {
   std::array<char*, 2> texts{};
   int type = 0;
   std::array<char, framework::kRowDescriptionBufferBytes> buffer{};
@@ -526,9 +526,9 @@ int FormattedMiscType(Items_InventoryMisc misc) {
 TEST_CASE("Inventory live parent links read the inventory and refuse strays",
           "[inventory-rows-live][F02593][F02594]") {
   const inventory::sorting_test::LiveFixture fixture;
-  VS::Items::inventory.blades[0].assembledWeaponIndex = 2;
-  VS::Items::inventory.gems[1].setItemIndex = kShieldThreeGem;
-  VS::Items::inventory.blades[1].assembledWeaponIndex = 9;
+  VS::Items::inventory.blades[0].assembled_weapon_index = 2;
+  VS::Items::inventory.gems[1].set_item_index = kShieldThreeGem;
+  VS::Items::inventory.blades[1].assembled_weapon_index = 9;
   CHECK(inventory::LiveParentWeaponIndex(kBlade, 0) == 2);
   CHECK(inventory::LiveParentWeaponIndex(kGem, 1) == 0);
   CHECK(inventory::LiveParentShieldIndex(kGem, 1) == 3);

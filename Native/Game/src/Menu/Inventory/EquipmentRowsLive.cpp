@@ -28,7 +28,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/EquipmentLive.hpp"
-#include "Items/Inventory.h"
+#include "Items/InventoryLive.hpp"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
 #include "Menu/Container/ItemView.h"
@@ -171,16 +171,16 @@ class LiveRowsHost final : public EquipmentRowsHost {
 };
 
 // vs_mainMenu_armor: Ashley's armor or the open container's.
-[[nodiscard]] std::span<const Items_InventoryArmor> BoundArmor() {
-  const Items_InventoryArmor* table = VS::Menu::Framework::armor;
+[[nodiscard]] std::span<const VS::Items::InventoryArmor> BoundArmor() {
+  const VS::Items::InventoryArmor* table = VS::Menu::Framework::armor;
   if (table == nullptr) {
     return {};
   }
-  if (table == VS::Items::inventory.armor) {
+  if (table == VS::Items::inventory.armor.data()) {
     return VS::Items::inventory.armor;
   }
   if (Menu_Container_containerData != nullptr &&
-      table == Menu_Container_containerData->items.armor) {
+      table == Menu_Container_containerData->items.armor.data()) {
     return Menu_Container_containerData->items.armor;
   }
   return {};
@@ -233,7 +233,7 @@ class LiveAccessoryHost final : public AccessoryPreviewHost {
   }
 
  private:
-  std::span<const Items_InventoryArmor> armor_ = BoundArmor();
+  std::span<const VS::Items::InventoryArmor> armor_ = BoundArmor();
 };
 
 [[nodiscard]] AssetAddress Address(const void* pointer) {
