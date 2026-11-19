@@ -196,11 +196,10 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   }
   [[nodiscard]] TopicCursor TopicMenuCursor() const override {
     return {
-        .row = static_cast<std::uint8_t>(
-            VS::Menu::Framework::menuMemory.cursorMemories[kCursorRowMemory]),
-        .scroll = static_cast<std::uint8_t>(
-            VS::Menu::Framework::menuMemory
-                .cursorMemories[kCursorScrollMemory])};
+        .row =
+            VS::Menu::Framework::menuMemory.cursor_memories[kCursorRowMemory],
+        .scroll = VS::Menu::Framework::menuMemory
+                      .cursor_memories[kCursorScrollMemory]};
   }
   [[nodiscard]] std::uint16_t CurrentManual() const override {
     return Field_manualDisplayState.currentManual;

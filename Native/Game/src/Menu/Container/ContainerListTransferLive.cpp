@@ -4,7 +4,6 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <iterator>
 #include <new>
 #include <optional>
@@ -53,7 +52,6 @@ static_assert(offsetof(ItemRowsWorkspace, types) == kRowTypesOffset);
 static_assert(offsetof(ItemRowsWorkspace, texts) == kRowTextsOffset);
 
 constexpr std::size_t kStorageCount = 5;
-constexpr std::size_t kFirstCategoryCursor = 2;
 constexpr std::size_t kTextsPerRow = 2;
 // "OK" is linked 0xC bytes in front of the frame's ordering table.
 constexpr std::size_t kAboveMenuChainBytes = 0xC;
@@ -228,34 +226,31 @@ class LiveTransferWorld final : public TransferWorld {
     VS::Menu::Inventory::freezeTabArrows = value;
   }
   std::uint8_t CategoryToken() override {
-    return static_cast<std::uint8_t>(
-        VS::Menu::Framework::menuMemory.opaqueA0[0]);
+    return VS::Menu::Framework::menuMemory.container_cursors.category;
   }
   void SetCategoryToken(std::uint8_t token) override {
-    VS::Menu::Framework::menuMemory.opaqueA0[0] = static_cast<char>(token);
+    VS::Menu::Framework::menuMemory.container_cursors.category = token;
   }
   void ClearCategoryMemory() override {
-    std::memset(VS::Menu::Framework::menuMemory.opaqueA0, 0,
-                sizeof VS::Menu::Framework::menuMemory.opaqueA0);
+    VS::Menu::Framework::menuMemory.container_cursors = {};
   }
   // The original wrote cursorMemories[(category + 0x51) * 2], past that
-  // array's end into opaqueA0's row/page pair for the category.
+  // array's end into container_cursors' position for the category.
   void SetCategoryCursor(Category category, std::uint8_t row,
                          std::uint8_t page) override {
-    const auto offset =
-        kFirstCategoryCursor + static_cast<std::size_t>(category) * 2;
-    if (offset + 1 >= std::size(VS::Menu::Framework::menuMemory.opaqueA0)) {
+    auto& positions =
+        VS::Menu::Framework::menuMemory.container_cursors.positions;
+    const auto index = static_cast<std::size_t>(category);
+    if (index >= positions.size()) {
       Refuse("category cursor outside menu memory");
     }
-    VS::Menu::Framework::menuMemory.opaqueA0[offset] = static_cast<char>(row);
-    VS::Menu::Framework::menuMemory.opaqueA0[offset + 1] =
-        static_cast<char>(page);
+    positions[index] = {.row = row, .page = page};
   }
   std::uint16_t DirectionSelection() override {
-    return VS::Menu::Framework::menuMemory.opaque9E;
+    return VS::Menu::Framework::menuMemory.direction_selection;
   }
   void SetDirectionSelection(std::uint16_t selection) override {
-    VS::Menu::Framework::menuMemory.opaque9E = selection;
+    VS::Menu::Framework::menuMemory.direction_selection = selection;
   }
   void ReturnFromMenu(std::uint8_t return_state) override {
     VS::Menu::Framework::menuState.control.current_menu =

@@ -2571,9 +2571,6 @@
     <ClInclude Include="src\Menu\Framework\ItemSorting.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="src\Menu\Framework\MenuMemory.h">
-      <Filter>src\Menu\Framework</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\Framework\Menus.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>

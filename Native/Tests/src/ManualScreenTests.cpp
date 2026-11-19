@@ -928,7 +928,8 @@ struct LiveManualFixture {
   DRAWENV saved_back_env = VS::Render::legacyDrawEnvironments[1];
   Content_DiscRequestCounts saved_request_counts = Content_discRequestCounts;
   Field_ManualDisplayState saved_display = Field_manualDisplayState;
-  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  VS::Menu::Framework::MenuMemory saved_memory =
+      VS::Menu::Framework::menuMemory;
   char saved_hud_hidden = Battle_hudHidden;
   char saved_lower_screen = Battle_lowerScreenUiState;
   char saved_hide_menu = VS::Menu::Framework::hideMenu;
@@ -1260,8 +1261,8 @@ TEST_CASE("F04163 LiveUpdateHelpPages chooses a cancel from the topic rows",
       std::pair{-2, manual::kHelpLeaveToMenu},
       std::pair{manual::kTopicMenuExitToGame, manual::kHelpLeaveToGame});
   VS::Menu::Framework::selectedRow = selected;
-  VS::Menu::Framework::menuMemory.cursorMemories[4] = 4;
-  VS::Menu::Framework::menuMemory.cursorMemories[5] = 6;
+  VS::Menu::Framework::menuMemory.cursor_memories[4] = 4;
+  VS::Menu::Framework::menuMemory.cursor_memories[5] = 6;
   CHECK(manual::LiveUpdateHelpPages() == 0);
   CHECK(Menu_Manual_showMenuState == step);
   CHECK(Field_manualDisplayState.currentManual == 10);

@@ -66,8 +66,8 @@ TEST_CASE(
   VS::Input::buttonRepeat = VS::Input::R1;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
-  CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[1]
-            .position.page == 1);
+  CHECK(VS::Menu::Framework::menuMemory.inventory_cursors.positions[1].page ==
+        1);
   CHECK(fixture.rows[31].item_page == 2);
   CHECK(fixture.rows[20].selected == 1);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 7);

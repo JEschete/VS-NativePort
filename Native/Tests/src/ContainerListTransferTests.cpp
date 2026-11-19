@@ -1036,16 +1036,16 @@ template <typename Entry>
 std::vector<DirectionFrame> RunDirection(Entry entry) {
   LiveFixture fixture;
   VS::Menu::Framework::ResetLiveMainMenuStatics();
-  VS::Menu::Framework::menuMemory.opaque9E = 1;
+  VS::Menu::Framework::menuMemory.direction_selection = 1;
   std::vector<DirectionFrame> frames;
   frames.push_back(
-      {entry(1), VS::Menu::Framework::menuMemory.opaque9E, {}, {}});
+      {entry(1), VS::Menu::Framework::menuMemory.direction_selection, {}, {}});
   for (int frame = 0; frame < kDirectionFrames; ++frame) {
     fixture.Frame();
     PressForFrame(frame);
     DirectionFrame record{};
     record.result = entry(0);
-    record.selection = VS::Menu::Framework::menuMemory.opaque9E;
+    record.selection = VS::Menu::Framework::menuMemory.direction_selection;
     for (std::size_t row = 0; row < 2; ++row) {
       const auto& item = fixture.rows.at(kFirstDirectionRow + row);
       record.x.at(row) = item.x;
@@ -1157,15 +1157,15 @@ TEST_CASE("F02986 live reset restores the first-entry direction reset",
       VS::Input::settings.cursor_memory};
   VS::Input::settings.cursor_memory = 0;
   transfer::ResetLiveContainerTransferStatics();
-  VS::Menu::Framework::menuMemory.opaque9E = 2;
+  VS::Menu::Framework::menuMemory.direction_selection = 2;
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);
-  REQUIRE(VS::Menu::Framework::menuMemory.opaque9E == 0);
-  VS::Menu::Framework::menuMemory.opaque9E = 2;
+  REQUIRE(VS::Menu::Framework::menuMemory.direction_selection == 0);
+  VS::Menu::Framework::menuMemory.direction_selection = 2;
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);
-  REQUIRE(VS::Menu::Framework::menuMemory.opaque9E == 2);
+  REQUIRE(VS::Menu::Framework::menuMemory.direction_selection == 2);
   transfer::ResetLiveContainerTransferStatics();
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);
-  REQUIRE(VS::Menu::Framework::menuMemory.opaque9E == 0);
+  REQUIRE(VS::Menu::Framework::menuMemory.direction_selection == 0);
   transfer::ResetLiveContainerTransferStatics();
 }
 
@@ -1187,7 +1187,7 @@ std::vector<ListFrame> RunItemList(Entry entry) {
   fixture.AddMisc();
   std::vector<ListFrame> frames;
   frames.push_back({entry(1), {}});
-  VS::Menu::Framework::menuMemory.opaqueA0[0] = kMiscToken;
+  VS::Menu::Framework::menuMemory.container_cursors.category = kMiscToken;
   const auto guard_before = VS::Core::Memory::DamagedLiveHeapGuardCount();
   for (int frame = 0; frame < kListFrames; ++frame) {
     ListFrame record{entry(0), {}};

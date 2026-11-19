@@ -144,8 +144,7 @@ class LiveAbilityHost final : public AbilityUnlockHost {
     BattleAbilities::Refuse(reason);
   }
   void ResetUnlockMenuMemory() override {
-    std::memset(VS::Menu::Framework::menuMemory.opaque34, 0,
-                sizeof(VS::Menu::Framework::menuMemory.opaque34));
+    VS::Menu::Framework::menuMemory.ability_unlock_cursors = {};
   }
   int SelectedRow() const override { return Framework::LiveSelectedRow(); }
   bool ShowCategory(const AbilityCategoryRow& row) override {
@@ -259,10 +258,8 @@ class LiveRowsHost final : public AbilityRowsHost {
   }
   AbilityCursor SavedCursor(AbilityMenuType type) const override {
     const auto index = static_cast<std::size_t>(type) * kPointersPerRow;
-    return {static_cast<std::uint8_t>(
-                VS::Menu::Framework::menuMemory.cursorMemories[index]),
-            static_cast<std::uint8_t>(
-                VS::Menu::Framework::menuMemory.cursorMemories[index + 1])};
+    return {VS::Menu::Framework::menuMemory.cursor_memories[index],
+            VS::Menu::Framework::menuMemory.cursor_memories[index + 1]};
   }
   std::optional<std::uint8_t> ActionAt(AbilityMenuType type,
                                        int index) const override {

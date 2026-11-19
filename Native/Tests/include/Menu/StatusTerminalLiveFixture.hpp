@@ -260,7 +260,7 @@ struct Fixture {
       VS::Menu::Framework::itemNames};
   ValueRestore<u_short*> saved_help{VS::Menu::Framework::itemHelp};
   ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
-  ValueRestore<Menu_Framework_MenuMemory> saved_memory{
+  ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
   ValueRestore<Menu_StringContext> saved_context{Battle_stringContext};
   ArrayRestore<char, VS::Menu::Framework::kSubmenuStateCount> saved_submenus{

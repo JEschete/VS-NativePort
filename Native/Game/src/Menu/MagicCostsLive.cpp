@@ -129,10 +129,9 @@ class LiveHost final : public Host {
     return static_cast<std::uint32_t>(VS::Menu::Framework::actionRestrictions);
   }
   void SetTeleportCursorMemory(std::uint8_t row, std::uint8_t scroll) override {
-    VS::Menu::Framework::menuMemory.cursorMemories[kTeleportCursorRow] =
-        ToStorageChar(row);
-    VS::Menu::Framework::menuMemory.cursorMemories[kTeleportCursorScroll] =
-        ToStorageChar(scroll);
+    VS::Menu::Framework::menuMemory.cursor_memories[kTeleportCursorRow] = row;
+    VS::Menu::Framework::menuMemory.cursor_memories[kTeleportCursorScroll] =
+        scroll;
   }
   std::uint8_t CursorMemorySetting() override {
     return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);

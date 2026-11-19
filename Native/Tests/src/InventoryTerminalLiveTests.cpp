@@ -376,7 +376,7 @@ TEST_CASE("F02597 Live loot does not inherit item-menu global restrictions",
   TerminalFixture fixture;
   fixture.AddWeapon();
   VS::Menu::Framework::actionRestrictions = 7;
-  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::menuMemory.inventory_cursors.category = 1;
   REQUIRE(Navigate(kItemModule, kItemNavigation, 2) == 0);
   REQUIRE(Navigate(kItemModule, kItemNavigation, 0) == 0);
   CHECK((fixture.FirstItem().flags & 1) != 0);
@@ -400,7 +400,7 @@ TEST_CASE(
       loot ? 12 : 4,
       loot ? Content_DiscFile{VS_MENUB_PRG_LBA, VS_MENUB_PRG_SIZE}
            : Content_DiscFile{VS_MENU3_PRG_LBA, VS_MENU3_PRG_SIZE});
-  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::menuMemory.inventory_cursors.category = 1;
   EnterEmptyNavigation(other_module, other_address);
   EnterEmptyNavigation(module, address);
   fixture.AddWeapon();

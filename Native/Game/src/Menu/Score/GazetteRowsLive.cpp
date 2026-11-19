@@ -148,14 +148,13 @@ class LiveGazetteMenu final : public GazetteMenuHost {
     return Battle_unusedMenu9CursorMemory.gazetteRow;
   }
   void SetTopMenuCursor(TopMenuCursor cursor) override {
-    VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuCursorRow] =
-        static_cast<char>(cursor.row);
-    VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuFirstRow] =
-        static_cast<char>(cursor.first_row);
+    VS::Menu::Framework::menuMemory.cursor_memories[kTopMenuCursorRow] =
+        cursor.row;
+    VS::Menu::Framework::menuMemory.cursor_memories[kTopMenuFirstRow] =
+        cursor.first_row;
   }
   std::uint8_t TopMenuCursorRow() override {
-    return static_cast<std::uint8_t>(
-        VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuCursorRow]);
+    return VS::Menu::Framework::menuMemory.cursor_memories[kTopMenuCursorRow];
   }
   std::uint8_t CursorMemorySetting() override {
     return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);

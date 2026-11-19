@@ -453,7 +453,8 @@ TEST_CASE("RenderLiveScrollableRow refuses a null row or ordering table",
 // with a game heap for the rows' text.
 struct LiveMenuFixture {
   fw::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
-  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  VS::Menu::Framework::MenuMemory saved_memory =
+      VS::Menu::Framework::menuMemory;
   VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Score_CursorMemory saved_cursor = Battle_unusedMenu9CursorMemory;
   std::array<u_short, std::size(Menu_Score_menuText)> saved_text{};
@@ -497,8 +498,8 @@ TEST_CASE("RestoreLiveTopMenuCursor recalls the row and restores the setting",
           "[gazette-rows-live]") {
   LiveMenuFixture fixture;
   score::RestoreLiveTopMenuCursor(4, 2, fixture.text.data());
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 2);
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[3] == 0);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[2] == 2);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[3] == 0);
   CHECK(VS::Input::settings.cursor_memory == 0);
   CHECK(fw::LiveSelectedRow() == -1);
   CHECK(fw::LiveHighlightedRow() == 2);
@@ -507,12 +508,12 @@ TEST_CASE("RestoreLiveTopMenuCursor recalls the row and restores the setting",
 TEST_CASE("RestoreLiveTopMenuCursor refuses missing text and bad counts",
           "[gazette-rows-live]") {
   LiveMenuFixture fixture;
-  VS::Menu::Framework::menuMemory.cursorMemories[2] = 6;
+  VS::Menu::Framework::menuMemory.cursor_memories[2] = 6;
   const std::uint64_t refused = score::LiveGazetteRowsRefusals();
   score::RestoreLiveTopMenuCursor(2, 1, nullptr);
   score::RestoreLiveTopMenuCursor(-1, 1, fixture.text.data());
   CHECK(score::LiveGazetteRowsRefusals() == refused + 2);
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 6);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[2] == 6);
   CHECK(fixture.rows[10].state == fw::RowState::kInactive);
 }
 
@@ -522,7 +523,7 @@ TEST_CASE("UpdateLiveTopMenu shows the choices and returns the chosen row",
   Battle_unusedMenu9CursorMemory.gazetteRow = 3;
   CHECK(score::UpdateLiveTopMenu(1) == score::kTopMenuPending);
   CHECK(score::LiveTopMenuState() == score::TopMenuState{1, 0});
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 3);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[2] == 3);
   CHECK(fw::LiveHighlightedRow() == 3);
   CHECK(fw::LiveSelectedRow() == -1);
   CHECK(score::UpdateLiveTopMenu(0) == score::kTopMenuPending);

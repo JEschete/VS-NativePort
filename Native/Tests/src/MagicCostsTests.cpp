@@ -592,7 +592,8 @@ TEST_CASE("Magic CreateHeader refuses a label outside the menu strings",
 namespace {
 struct TeleportLiveFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
-  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  VS::Menu::Framework::MenuMemory saved_memory =
+      VS::Menu::Framework::menuMemory;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;

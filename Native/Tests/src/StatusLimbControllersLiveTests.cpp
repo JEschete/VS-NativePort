@@ -47,7 +47,7 @@ struct LiveLimbFixture {
   ValueRestore<char> saved_cursor{VS::Menu::Framework::cursorColor};
   ValueRestore<char> saved_subtype{VS::Menu::Framework::equipmentSubtype};
   ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
-  ValueRestore<Menu_Framework_MenuMemory> saved_memory{
+  ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
   ValueRestore<Menu_StringContext> saved_context{Battle_stringContext};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
@@ -98,7 +98,7 @@ struct LiveLimbFixture {
     Menu_Status_selectedActor = 2;
     REQUIRE(status::LiveUpdateLimbPanel(-1) == 0);
     Menu_Status_selectedElement = 11;
-    VS::Menu::Framework::menuMemory.opaque51[49] = static_cast<char>(0x85);
+    VS::Menu::Framework::menuMemory.limb_selection_and_dimming = 0x85;
   }
   static void CheckResetState() {
     const auto& navigation =
@@ -122,8 +122,7 @@ struct LiveLimbFixture {
     CHECK(Battle_actors[1] == &actor);
     CHECK(actor.stats == &stats);
     CHECK(Menu_Status_statusStrings[74] == 0xE741);
-    CHECK(static_cast<std::uint8_t>(
-              VS::Menu::Framework::menuMemory.opaque51[49]) == 0x85);
+    CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x85);
   }
   static void ResetThroughBoundary(bool cold) {
     {
@@ -172,7 +171,7 @@ TEST_CASE(
   CHECK(navigate(&fixture.stats, 0) == 0);
   CHECK(status::LiveStatusEffectNavigationControllerState().count == 2);
   Menu_Status_selectedElement = 11;
-  VS::Menu::Framework::menuMemory.opaque51[49] = static_cast<char>(0x85);
+  VS::Menu::Framework::menuMemory.limb_selection_and_dimming = 0x85;
   status::ResetLiveLimbControllersModuleData();
   const auto& state = status::LiveStatusEffectNavigationControllerState();
   CHECK(state.count == 0);
@@ -182,8 +181,7 @@ TEST_CASE(
   CHECK(Menu_Status_selectedElement == 0);
   CHECK(VS::Menu::Framework::stringBuf == fixture.output.data());
   CHECK(Menu_Status_statusStrings[74] == 0xE741);
-  CHECK(static_cast<std::uint8_t>(
-            VS::Menu::Framework::menuMemory.opaque51[49]) == 0x85);
+  CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x85);
 }
 
 TEST_CASE("F02668 owner hook clears steps and phase before reentry",
@@ -244,7 +242,7 @@ TEST_CASE(
         reinterpret_cast<char*>(&Battle_statusStrings[64]));
   CHECK(Battle_stringContext.strings[1] ==
         reinterpret_cast<char*>(&Menu_Status_statusStrings[70]));
-  CHECK(VS::Menu::Framework::menuMemory.opaque51[49] == 2);
+  CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 2);
 }
 
 TEST_CASE("F02681 Live writes the selected limb not the first limb",
@@ -262,8 +260,7 @@ TEST_CASE("F02681 Live writes the selected limb not the first limb",
   CHECK(VS::Menu::Framework::equipmentStats[24] == -32768);
   CHECK(VS::Menu::Framework::equipmentStats[35] == -123);
   CHECK(VS::Menu::Framework::equipmentStats[36] == 444);
-  CHECK(static_cast<std::uint8_t>(
-            VS::Menu::Framework::menuMemory.opaque51[49]) == 0x84);
+  CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x84);
 }
 
 TEST_CASE(

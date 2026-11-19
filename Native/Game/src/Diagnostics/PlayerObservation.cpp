@@ -299,10 +299,10 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   // after the selector closes; consumers pair them with a levelled option.
   constexpr int kRankCursorMemory = 12;
   constexpr int kRankCountMemory = 13;
-  result.spell_level = static_cast<unsigned char>(
-      VS::Menu::Framework::menuMemory.cursorMemories[kRankCursorMemory]);
-  result.spell_level_count = static_cast<unsigned char>(
-      VS::Menu::Framework::menuMemory.cursorMemories[kRankCountMemory]);
+  result.spell_level =
+      VS::Menu::Framework::menuMemory.cursor_memories[kRankCursorMemory];
+  result.spell_level_count =
+      VS::Menu::Framework::menuMemory.cursor_memories[kRankCountMemory];
   if (result.selected_menu == 0) {
     for (int index = 0; index < kMainMenuEntries; ++index) {
       if ((VS::Input::settings.menu_flags & (1u << index)) == 0) continue;

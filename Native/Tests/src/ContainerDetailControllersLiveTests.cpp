@@ -247,8 +247,8 @@ TEST_CASE("F02958 live re-entry resolves the new owner before loading stats",
 TEST_CASE("F02944 real queue traversal preserves container layer and palettes",
           "[container-detail-controllers-live][F02944]") {
   LiveFixture fixture;
-  VS::Menu::Framework::menuMemory.opaqueA0[0] = 1;
-  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 2;
+  VS::Menu::Framework::menuMemory.container_cursors.category = 1;
+  VS::Menu::Framework::menuMemory.inventory_cursors.category = 2;
   fixture.ResetFrame();
   detail::DrawLiveCategoryIcons(0, 0);
   const auto actual = fixture.Sprites();
@@ -264,7 +264,7 @@ TEST_CASE("F02944 merged header does not require unused container text owners",
   LiveFixture fixture;
   constexpr int kMergeX = 60;
   constexpr int kFirstCategoryIcon = 24;
-  VS::Menu::Framework::menuMemory.opaqueA0[0] = 1;
+  VS::Menu::Framework::menuMemory.container_cursors.category = 1;
   fixture.rows[kHeader].x = kMergeX;
   Menu_Container_containerData = nullptr;
   VS::Menu::Framework::itemNames = nullptr;

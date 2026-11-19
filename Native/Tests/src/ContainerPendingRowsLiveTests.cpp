@@ -172,7 +172,7 @@ TEST_CASE("F02985 controller allocates the full native row workspace",
     item.count = 1;
   }
   REQUIRE(VS::Menu::container::LiveUpdateItemList(1) == 0);
-  VS::Menu::Framework::menuMemory.opaqueA0[0] = 7;
+  VS::Menu::Framework::menuMemory.container_cursors.category = 7;
   const auto guard_before = VS::Core::Memory::DamagedLiveHeapGuardCount();
   REQUIRE(VS::Menu::container::LiveUpdateItemList(0) == 0);
   CHECK(VS::Core::Memory::DamagedLiveHeapGuardCount() == guard_before);

@@ -70,16 +70,11 @@ enum class TerminalText : std::uint8_t {
   kCategoryTitle,
 };
 
-struct InventoryCursorPosition {
-  std::uint8_t row = 0;
-  std::uint8_t page = 0;
-};
-struct InventoryCursorMemory {
-  // 1..7 name the item categories; 0 is Manage.
-  std::uint8_t category = 0;
-  std::uint8_t reserved = 0;
-  std::array<InventoryCursorPosition, Items::kItemCategoryCount> positions{};
-};
+// MenuMemory's inventory_cursors: category 1..7 names an item category and 0
+// is Manage.
+using InventoryCursorPosition = Framework::CursorPosition;
+using InventoryCursorMemory = Framework::CategoryCursorMemory;
+static_assert(Framework::kCategoryCursorCount == Items::kItemCategoryCount);
 struct TerminalPresentation {
   std::uint8_t secondary_title = 0;
   std::uint8_t category_icons = 0;

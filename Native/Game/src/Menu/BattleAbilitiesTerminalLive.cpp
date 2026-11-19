@@ -193,10 +193,10 @@ class LiveAssignmentHost final : public AssignmentHost {
   }
   void RememberCursor(AbilityMenuType type, AbilityCursor cursor) override {
     const auto slot = static_cast<std::size_t>(type) * kPointersPerRow;
-    VS::Menu::Framework::menuMemory.cursorMemories[slot] =
-        LegacyByte(cursor.highlighted);
-    VS::Menu::Framework::menuMemory.cursorMemories[slot + 1] =
-        LegacyByte(cursor.first);
+    VS::Menu::Framework::menuMemory.cursor_memories[slot] =
+        static_cast<std::uint8_t>(cursor.highlighted);
+    VS::Menu::Framework::menuMemory.cursor_memories[slot + 1] =
+        static_cast<std::uint8_t>(cursor.first);
   }
   int DrawCursor(int animation, int position) override {
     return Framework::DrawLiveCursor(static_cast<std::uint32_t>(animation),

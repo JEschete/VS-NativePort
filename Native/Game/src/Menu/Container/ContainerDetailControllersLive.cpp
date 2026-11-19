@@ -465,8 +465,7 @@ class LiveControllerWorld final : public ControllerWorld {
 class LiveIconWorld final : public CategoryIconWorld {
  public:
   std::uint8_t CurrentCategory() override {
-    return static_cast<std::uint8_t>(
-        VS::Menu::Framework::menuMemory.opaqueA0[0]);
+    return VS::Menu::Framework::menuMemory.container_cursors.category;
   }
   void DrawListTabNavigation() override {
     RequireFrame(true);

@@ -1275,8 +1275,8 @@ TEST_CASE("Gameplay inspection reads copied plain chars as unsigned bytes",
   Field_controlMode = kMenuControl;
   VS::Menu::Framework::menuState.control.current_menu = kResultsMenu;
   VS::State::stateFlags.menu_f_submenu = static_cast<char>(200);
-  VS::Menu::Framework::menuMemory.cursorMemories[12] = static_cast<char>(200);
-  VS::Menu::Framework::menuMemory.cursorMemories[13] = static_cast<char>(201);
+  VS::Menu::Framework::menuMemory.cursor_memories[12] = 200;
+  VS::Menu::Framework::menuMemory.cursor_memories[13] = 201;
   const auto state =
       VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(state.results_screen == 200);

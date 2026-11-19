@@ -27,7 +27,7 @@ namespace samples = container_detail_helpers_tests::samples;
 using equipment_detail_tests::ValueRestore;
 constexpr int kSelected = 20;
 constexpr std::size_t kHeader = 31;
-using MemoryBytes = std::array<std::uint8_t, sizeof(Menu_Framework_MenuMemory)>;
+using MemoryBytes = std::array<std::uint8_t, sizeof(fw::MenuMemory)>;
 
 struct LiveFixture : equipment_detail_tests::LiveFixture {
   container_transfers_tests::LiveFixture containers;
@@ -343,7 +343,7 @@ TEST_CASE("F02949 live selection preserves exact container cursor bytes",
   MemoryBytes expected{};
   expected.fill(samples::kReservedByte);
   VS::Menu::Framework::menuMemory =
-      std::bit_cast<Menu_Framework_MenuMemory>(expected);
+      std::bit_cast<VS::Menu::Framework::MenuMemory>(expected);
   std::span(fixture.containers.storage->container.indices.misc).back() =
       samples::kHalfwordToken;
   expected[samples::kCursorBase + samples::kMiscCategory * 2] = 0;

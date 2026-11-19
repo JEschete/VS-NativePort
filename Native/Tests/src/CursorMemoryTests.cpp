@@ -53,7 +53,8 @@
 namespace {
 struct CursorFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
-  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  VS::Menu::Framework::MenuMemory saved_memory =
+      VS::Menu::Framework::menuMemory;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
@@ -1066,8 +1067,8 @@ TEST_CASE("Cursor Memory restores shared row and scroll positions",
   const std::uint8_t enabled = GENERATE(std::uint8_t{0}, std::uint8_t{1});
   CursorFixture fixture;
   VS::Input::settings.cursor_memory = enabled;
-  VS::Menu::Framework::menuMemory.cursorMemories[0] = 3;
-  VS::Menu::Framework::menuMemory.cursorMemories[1] = 5;
+  VS::Menu::Framework::menuMemory.cursor_memories[0] = 3;
+  VS::Menu::Framework::menuMemory.cursor_memories[1] = 5;
   fixture.OpenRows(20);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(VS::Menu::Framework::LiveHighlightedRow() == (enabled ? 8 : 0));
@@ -1075,8 +1076,8 @@ TEST_CASE("Cursor Memory restores shared row and scroll positions",
   VS::Menu::Framework::subMenuPage = 6;
   VS::Menu::Framework::CloseLiveRowsAndRememberCursor();
   CHECK(VS::Menu::Framework::itemsText == nullptr);
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[0] == 4);
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[1] == 6);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[0] == 4);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[1] == 6);
   fixture.OpenRows(20);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(VS::Menu::Framework::LiveHighlightedRow() == (enabled ? 10 : 0));
@@ -1086,8 +1087,8 @@ TEST_CASE("Cursor Memory clamps a remembered selection after rows shrink",
           "[menu][options][cursor]") {
   CursorFixture fixture;
   VS::Input::settings.cursor_memory = 1;
-  VS::Menu::Framework::menuMemory.cursorMemories[0] = 4;
-  VS::Menu::Framework::menuMemory.cursorMemories[1] = 6;
+  VS::Menu::Framework::menuMemory.cursor_memories[0] = 4;
+  VS::Menu::Framework::menuMemory.cursor_memories[1] = 6;
   fixture.OpenRows(3);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(VS::Menu::Framework::LiveHighlightedRow() == 0);
@@ -1129,7 +1130,7 @@ TEST_CASE(
   }
   VS::Input::settings.cursor_memory = cursor_memory;
   VS::Menu::Framework::menuMemory
-      .cursorMemories[static_cast<std::size_t>(category + 11) * 2] = 3;
+      .cursor_memories[static_cast<std::size_t>(category + 11) * 2] = 3;
   fixture.Open();
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   REQUIRE(VS::Menu::Framework::subMenuRowCount == (shortcut ? 4 : 5));

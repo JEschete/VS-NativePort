@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <cstdlib>
-#include <iterator>
 #include <optional>
 #include <string_view>
 
@@ -24,12 +23,7 @@
 
 namespace VS::Menu::container {
 namespace {
-constexpr std::size_t kFirstContainerCursor = 2;
-constexpr std::size_t kContainerCursorFieldOffset = 0xA0;
-static_assert(offsetof(Menu_Framework_MenuMemory, opaqueA0) ==
-              kContainerCursorFieldOffset);
-static_assert(std::size(VS::Menu::Framework::menuMemory.opaqueA0) ==
-              kFirstContainerCursor + Items::kItemCategoryCount * 2);
+static_assert(Framework::kCategoryCursorCount == Items::kItemCategoryCount);
 
 [[noreturn]] void Refuse(std::string_view reason) {
   VS::Core::Errorf("menu.container", "Container details refused: %.*s",
@@ -62,11 +56,8 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
   }
   void RememberPage(DetailCursor cursor) override {
     const auto category = static_cast<std::size_t>(Category(category_));
-    const auto offset = kFirstContainerCursor + category * sizeof(DetailCursor);
-    VS::Menu::Framework::menuMemory.opaqueA0[offset] =
-        static_cast<char>(cursor.row);
-    VS::Menu::Framework::menuMemory.opaqueA0[offset + 1] =
-        static_cast<char>(cursor.page);
+    VS::Menu::Framework::menuMemory.container_cursors.positions[category] = {
+        .row = cursor.row, .page = cursor.page};
   }
   std::span<const std::uint16_t> DisplayOrder() override {
     return Items::LiveContainerCategoryOrder(Category(category_),

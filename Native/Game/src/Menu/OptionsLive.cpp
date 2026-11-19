@@ -36,10 +36,8 @@ constexpr std::uint8_t kPuzzleModeOffBit = 0x08;
 constexpr std::uint8_t kAbilityTimingBit = 0x20;
 constexpr std::uint8_t kWeaponStatusBit = 0x40;
 constexpr std::uint8_t kArmorStatusBit = 0x80;
-// The information text box, the options screen's slot in the menu memory and
-// vs_battle_menuState.currentMenu's battle value.
+// The information text box and vs_battle_menuState.currentMenu's battle value.
 constexpr std::size_t kInformationTextBox = 7;
-constexpr std::size_t kRememberedRowSlot = 5;
 constexpr char kBattleMenu = 8;
 
 std::uint8_t FlagByte() {
@@ -82,8 +80,7 @@ class LiveHost final : public Host {
     Framework::FlyOutLiveRowsAndHoistSelection(row, offset);
   }
   int RememberedRow() override {
-    return static_cast<unsigned char>(
-        VS::Menu::Framework::menuMemory.opaque85[kRememberedRowSlot]);
+    return VS::Menu::Framework::menuMemory.options_row;
   }
   void DismissInformationBox() override {
     Framework::DismissLiveInformationBox();

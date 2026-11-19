@@ -25,7 +25,8 @@ constexpr int kSelectedRow = 20;
 
 struct LiveFixture {
   fw::MenuRow* previous_rows = VS::Menu::Framework::menuItems;
-  Menu_Framework_MenuMemory previous_memory = VS::Menu::Framework::menuMemory;
+  VS::Menu::Framework::MenuMemory previous_memory =
+      VS::Menu::Framework::menuMemory;
   VS::Items::InventoryContents previous_inventory = VS::Items::inventory;
   int previous_held = VS::Input::buttonsState;
   int previous_repeat = VS::Input::buttonRepeat;
@@ -84,9 +85,10 @@ struct LiveFixture {
   }
 };
 
-auto MemoryBytes(const Menu_Framework_MenuMemory& memory) {
+auto MemoryBytes(const VS::Menu::Framework::MenuMemory& memory) {
   return std::bit_cast<
-      std::array<std::uint8_t, sizeof(Menu_Framework_MenuMemory)>>(memory);
+      std::array<std::uint8_t, sizeof(VS::Menu::Framework::MenuMemory)>>(
+      memory);
 }
 }  // namespace
 
@@ -153,10 +155,10 @@ TEST_CASE("F02571 live layout uses real transition and stat page helpers",
 TEST_CASE("F02573 live selection preserves the full cursor record and peers",
           "[inventory-detail-helpers-live][F02573]") {
   LiveFixture fixture;
-  std::array<std::uint8_t, sizeof(Menu_Framework_MenuMemory)> initial{};
+  std::array<std::uint8_t, sizeof(VS::Menu::Framework::MenuMemory)> initial{};
   initial.fill(0xA5);
   VS::Menu::Framework::menuMemory =
-      std::bit_cast<Menu_Framework_MenuMemory>(initial);
+      std::bit_cast<VS::Menu::Framework::MenuMemory>(initial);
   VS::Menu::Inventory::categoryOrders[5] = fixture.order.data();
   fixture.order[47] = 48;
   auto expected = initial;

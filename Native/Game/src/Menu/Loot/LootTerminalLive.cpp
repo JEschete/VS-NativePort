@@ -131,8 +131,8 @@ void ReadRuntime(LootTerminalRuntime& runtime) {
       static_cast<std::uint8_t>(Menu_Inventory_statusCommandAnimationStep),
       static_cast<std::uint8_t>(Menu_Inventory_selectedItemCategoryIconOnTop),
       Menu_Inventory_ashleyRenderState};
-  runtime.inventory_category = static_cast<std::uint8_t>(
-      VS::Menu::Framework::menuMemory.opaque3A.currentCategory);
+  runtime.inventory_category =
+      VS::Menu::Framework::menuMemory.inventory_cursors.category;
   runtime.show_inventory = static_cast<std::uint8_t>(Menu_Loot_showInventory);
   runtime.inventory_step = Menu_Loot_inventoryCapacityFlyinTimer;
   runtime.show_loot = static_cast<std::uint8_t>(Menu_Loot_showLoot);
@@ -164,8 +164,8 @@ void WriteRuntime(const LootTerminalRuntime& runtime) {
   Menu_Inventory_selectedItemCategoryIconOnTop =
       static_cast<char>(ui.icon_on_top);
   Menu_Inventory_ashleyRenderState = ui.ashley_layout;
-  VS::Menu::Framework::menuMemory.opaque3A.currentCategory =
-      static_cast<char>(runtime.inventory_category);
+  VS::Menu::Framework::menuMemory.inventory_cursors.category =
+      runtime.inventory_category;
   Menu_Loot_showInventory = static_cast<char>(runtime.show_inventory);
   Menu_Loot_inventoryCapacityFlyinTimer = runtime.inventory_step;
   Menu_Loot_showLoot = static_cast<char>(runtime.show_loot);

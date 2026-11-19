@@ -33,7 +33,6 @@
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status {
 namespace {
-constexpr std::size_t kSelectionDimmingIndex = 49;
 constexpr int kStatusIconChain = -2;  // original byte offset -8
 constexpr int kLeaderChain = -1;
 constexpr int kPreviewActor = 1;
@@ -242,8 +241,8 @@ class LiveNavigation final : public StatusEffectNavigationHost {
 
 [[nodiscard]] LimbPanelFrame PanelFrame() {
   return {.selected_actor = Menu_Status_selectedActor,
-          .selection_and_dimming = static_cast<std::uint8_t>(
-              VS::Menu::Framework::menuMemory.opaque51[kSelectionDimmingIndex]),
+          .selection_and_dimming =
+              VS::Menu::Framework::menuMemory.limb_selection_and_dimming,
           .fade_screen = Menu_Status_fadeScreen,
           .background_first = Menu_Status_drawBackgroundFirst,
           .row_offsets = VS::Menu::Framework::rowAnimationSteps};
@@ -253,8 +252,8 @@ class LiveNavigation final : public StatusEffectNavigationHost {
   LimbPanelFrame frame = PanelFrame();
   LivePanel host;
   const auto result = UpdateLimbPanel(panel_state, frame, request, host);
-  VS::Menu::Framework::menuMemory.opaque51[kSelectionDimmingIndex] =
-      static_cast<char>(frame.selection_and_dimming);
+  VS::Menu::Framework::menuMemory.limb_selection_and_dimming =
+      frame.selection_and_dimming;
   return result;
 }
 

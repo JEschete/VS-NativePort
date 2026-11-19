@@ -65,7 +65,6 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
-#include "Menu/Framework/MenuMemory.h"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
@@ -155,7 +154,7 @@ VS::Menu::Framework::ActionSelection VS::Menu::Framework::actionSelection = {};
 // decomp: D_800F4EA0 (BATTLE/BATTLE.PRG 5BF94.c)
 int VS::Menu::Framework::actionRestrictions = 0;
 // decomp: D_800F4EE8 (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_MenuMemory VS::Menu::Framework::menuMemory = {};
+VS::Menu::Framework::MenuMemory VS::Menu::Framework::menuMemory = {};
 // decomp: vs_battle_unlockedBattleAbility (BATTLE/BATTLE.PRG 5BF94.c)
 char VS::Menu::Framework::unlockedBattleAbility = 0;
 // decomp: D_800F4FDB (BATTLE/BATTLE.PRG 5BF94.c)
@@ -203,7 +202,7 @@ namespace {
 // The typed records view the live ones in place.
 static_assert(std::is_standard_layout_v<MenuRow>);
 static_assert(std::is_standard_layout_v<ItemText>);
-static_assert(sizeof(Menu_Framework_MenuMemory) == kMenuMemoryBytes);
+static_assert(std::is_standard_layout_v<MenuMemory>);
 static_assert(sizeof(Content_battleMainMenuHelpText) ==
               kHelpTextWords * sizeof(std::uint32_t));
 

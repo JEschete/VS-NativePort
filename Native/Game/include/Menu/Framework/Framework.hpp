@@ -199,6 +199,92 @@ struct MenuControl {
   std::uint8_t loading = 0;
 };
 
+// A remembered list cursor: the row and the page (or first row) it reopens at.
+struct CursorPosition {
+  std::uint8_t row = 0;
+  std::uint8_t page = 0;
+};
+
+inline constexpr std::size_t kCategoryCursorCount = 8;
+
+// D_800F4EE8_t's unk3A and unkA0 (BATTLE.PRG battleUi.h:134, 145): a category
+// list screen's selected category, which the screens read as
+// (category - 1) & 7, and each category's cursor.
+struct CategoryCursorMemory {
+  std::uint8_t category = 0;
+  std::uint8_t reserved = 0;
+  std::array<CursorPosition, kCategoryCursorCount> positions{};
+};
+
+namespace menu_memory_layout {
+inline constexpr std::size_t kCursorMemoryBytes = 0x34;
+inline constexpr std::size_t kAbilityUnlockCursorBytes = 6;
+inline constexpr std::size_t kInventoryCursorsOffset = 0x3A;
+inline constexpr std::size_t kReserved4CBytes = 0x36;
+inline constexpr std::size_t kLimbSelectionOffset = 0x82;
+inline constexpr std::size_t kSelectedEquipmentOffset = 0x84;
+inline constexpr std::size_t kReserved85Bytes = 3;
+inline constexpr std::size_t kFileCursorOffset = 0x88;
+inline constexpr std::size_t kOptionsRowOffset = 0x8A;
+inline constexpr std::size_t kReserved8BBytes = 0x13;
+inline constexpr std::size_t kDirectionSelectionOffset = 0x9E;
+inline constexpr std::size_t kContainerCursorsOffset = 0xA0;
+inline constexpr std::size_t kReservedB2Offset = 0xB2;
+inline constexpr std::size_t kReservedB2Bytes = 0x40;
+}  // namespace menu_memory_layout
+
+// decomp: D_800F4EE8_t (src/BATTLE/BATTLE.PRG/battleUi.h:131): the menus'
+// remembered cursors and selections. The framework addresses the record as
+// two-byte cursor slots, one per menu (Host::MenuMemory), and like the
+// original those slots run on past cursor_memories into the members after it.
+// The original compiled its char fields unsigned (-funsigned-char).
+struct MenuMemory {
+  std::array<std::uint8_t, menu_memory_layout::kCursorMemoryBytes>
+      cursor_memories{};
+  // Cursor slots 26-28, cleared when a battle ability unlocks (MENU2.PRG
+  // 143C.c:175).
+  std::array<std::uint8_t, menu_memory_layout::kAbilityUnlockCursorBytes>
+      ability_unlock_cursors{};
+  // The inventory screens' (MENU3.PRG, MENUB.PRG items2.h).
+  CategoryCursorMemory inventory_cursors;
+  std::array<std::uint8_t, menu_memory_layout::kReserved4CBytes> reserved_4c{};
+  // The status limb panel's step and selection (MENU4.PRG 120.c:1172, 1239).
+  std::uint8_t limb_selection_and_dimming = 0;
+  std::uint8_t reserved_83 = 0;
+  // The status screen's equipment row (MENU4.PRG 120.c:1912).
+  std::uint8_t selected_equipment = 0;
+  std::array<std::uint8_t, menu_memory_layout::kReserved85Bytes> reserved_85{};
+  // The file menu's selected file (MENU7.PRG 260.c:50-52).
+  std::uint8_t file_cursor = 0;
+  std::uint8_t reserved_89 = 0;
+  // The options menu's remembered row (MENU8.PRG 88.c:610).
+  std::uint8_t options_row = 0;
+  std::array<std::uint8_t, menu_memory_layout::kReserved8BBytes> reserved_8b{};
+  // The container transfer's direction choice (MENUD.PRG 234.c:3060-3117).
+  std::uint16_t direction_selection = 0;
+  // The container screens' (MENUD.PRG 234.c:2432-2944).
+  CategoryCursorMemory container_cursors;
+  std::array<std::uint8_t, menu_memory_layout::kReservedB2Bytes> reserved_b2{};
+};
+static_assert(sizeof(MenuMemory) == kMenuMemoryBytes,
+              "MenuMemory keeps the record's layout");
+static_assert(offsetof(MenuMemory, inventory_cursors) ==
+              menu_memory_layout::kInventoryCursorsOffset);
+static_assert(offsetof(MenuMemory, limb_selection_and_dimming) ==
+              menu_memory_layout::kLimbSelectionOffset);
+static_assert(offsetof(MenuMemory, selected_equipment) ==
+              menu_memory_layout::kSelectedEquipmentOffset);
+static_assert(offsetof(MenuMemory, file_cursor) ==
+              menu_memory_layout::kFileCursorOffset);
+static_assert(offsetof(MenuMemory, options_row) ==
+              menu_memory_layout::kOptionsRowOffset);
+static_assert(offsetof(MenuMemory, direction_selection) ==
+              menu_memory_layout::kDirectionSelectionOffset);
+static_assert(offsetof(MenuMemory, container_cursors) ==
+              menu_memory_layout::kContainerCursorsOffset);
+static_assert(offsetof(MenuMemory, reserved_b2) ==
+              menu_memory_layout::kReservedB2Offset);
+
 // The MAINMENU.PRG statics a fresh load of the overlay restores, with their
 // module-image values (its bss is not among them).
 inline constexpr std::int16_t kInitialBackgroundBrightness = 128;

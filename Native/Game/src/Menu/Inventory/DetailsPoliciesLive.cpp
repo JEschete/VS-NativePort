@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <cstdlib>
-#include <iterator>
 
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
@@ -22,12 +21,6 @@
 namespace VS::Menu::Inventory {
 namespace {
 constexpr std::size_t kIndexedCategories = Items::kItemCategoryCount - 1;
-constexpr std::size_t kCategoryCursorWorkspaceOffset = 0x3A;
-static_assert(offsetof(Menu_Framework_MenuMemory, opaque3A) ==
-              kCategoryCursorWorkspaceOffset);
-static_assert(
-    sizeof(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[0]) ==
-    sizeof(CursorMemory));
 
 [[noreturn]] void Refuse(const char* reason) {
   VS::Core::Errorf("menu.inventory", "Inventory details refused: %s", reason);
@@ -58,9 +51,8 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
   }
   void RememberPage(CursorMemory memory) override {
     RequireCategory(kIndexedCategories);
-    auto& cursor = VS::Menu::Framework::menuMemory.opaque3A
-                       .categoryCursors[static_cast<std::size_t>(category_)]
-                       .position;
+    auto& cursor = VS::Menu::Framework::menuMemory.inventory_cursors
+                       .positions[static_cast<std::size_t>(category_)];
     cursor.row = memory.row;
     cursor.page = memory.page;
   }

@@ -125,7 +125,7 @@ struct LiveFixture {
       VS::Items::inventory};
   ValueRestore<VS::Items::InventoryIndices> saved_indices{
       VS::Items::inventoryIndices};
-  ValueRestore<Menu_Framework_MenuMemory> saved_memory{
+  ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
   ValueRestore<decltype(VS::Menu::Inventory::categoryOrders)> saved_orders{
       VS::Menu::Inventory::categoryOrders};

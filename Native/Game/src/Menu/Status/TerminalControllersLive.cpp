@@ -94,8 +94,7 @@ TerminalFrame LoadFrame() {
       .stat_page = static_cast<std::uint8_t>(VS::Menu::Framework::itemStatPage),
       .enabled_pages =
           static_cast<std::uint8_t>(VS::Menu::Framework::enabledStatPages),
-      .selected_equipment = static_cast<std::uint8_t>(
-          VS::Menu::Framework::menuMemory.selectedEquipment),
+      .selected_equipment = VS::Menu::Framework::menuMemory.selected_equipment,
       .cursor_memory =
           static_cast<std::uint8_t>(VS::Input::settings.cursor_memory),
       .hud_hidden = static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
@@ -125,8 +124,7 @@ void StoreFrame(const TerminalFrame& frame) {
   VS::Menu::Framework::itemStatPage = static_cast<char>(frame.stat_page);
   VS::Menu::Framework::enabledStatPages =
       static_cast<char>(frame.enabled_pages);
-  VS::Menu::Framework::menuMemory.selectedEquipment =
-      static_cast<char>(frame.selected_equipment);
+  VS::Menu::Framework::menuMemory.selected_equipment = frame.selected_equipment;
   VS::Input::settings.cursor_memory = static_cast<char>(frame.cursor_memory);
   Battle_hudStatusIconsHidden = static_cast<char>(frame.hud_hidden);
   VS::Menu::Framework::menuState.control.current_menu = frame.current_menu;

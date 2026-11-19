@@ -51,14 +51,13 @@ std::span<const std::uint16_t> TopicTable() {
 class LiveTopicMenuHost final : public TopicMenuHost {
  public:
   void SetTopicCursor(TopicCursor cursor) override {
-    VS::Menu::Framework::menuMemory.cursorMemories[kCursorRowMemory] =
-        static_cast<char>(cursor.row);
-    VS::Menu::Framework::menuMemory.cursorMemories[kCursorScrollMemory] =
-        static_cast<char>(cursor.scroll);
+    VS::Menu::Framework::menuMemory.cursor_memories[kCursorRowMemory] =
+        cursor.row;
+    VS::Menu::Framework::menuMemory.cursor_memories[kCursorScrollMemory] =
+        cursor.scroll;
   }
   [[nodiscard]] std::uint8_t TopicCursorRow() const override {
-    return static_cast<std::uint8_t>(
-        VS::Menu::Framework::menuMemory.cursorMemories[kCursorRowMemory]);
+    return VS::Menu::Framework::menuMemory.cursor_memories[kCursorRowMemory];
   }
   [[nodiscard]] std::uint8_t CursorMemorySetting() const override {
     return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);

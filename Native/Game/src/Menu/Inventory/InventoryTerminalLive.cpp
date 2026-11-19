@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -60,7 +59,6 @@ using Category = TerminalCategory;
 constexpr std::size_t kControllerCount = 5;
 constexpr std::size_t kContextCount = 2;
 constexpr std::size_t kInformationBox = 7;
-constexpr std::size_t kCursorBytes = 18;
 constexpr std::size_t kLootTextModuleOffset = 0x7A80;
 constexpr std::int32_t kQuantityFont = 5;
 constexpr std::int32_t kQuantityY = 130;
@@ -159,10 +157,7 @@ std::span<std::uint8_t> FixedOrder(Category category) {
 }
 
 void ReadRuntime(TerminalRuntime& runtime) {
-  auto& memory = VS::Menu::Framework::menuMemory.opaque3A;
-  static_assert(sizeof(memory) == kCursorBytes);
-  static_assert(sizeof(InventoryCursorMemory) == kCursorBytes);
-  runtime.cursor = std::bit_cast<InventoryCursorMemory>(memory);
+  runtime.cursor = VS::Menu::Framework::menuMemory.inventory_cursors;
   runtime.presentation = {
       static_cast<std::uint8_t>(Menu_Inventory_secondaryTitleEnabled),
       static_cast<std::uint8_t>(Menu_Inventory_itemCategoryIconsEnabled),
@@ -188,9 +183,7 @@ void ReadRuntime(TerminalRuntime& runtime) {
   runtime.hud_slide_offset = Battle_hudSlideOffset;
 }
 void WriteRuntime(const TerminalRuntime& runtime) {
-  auto& memory = VS::Menu::Framework::menuMemory.opaque3A;
-  memory =
-      std::bit_cast<std::remove_reference_t<decltype(memory)>>(runtime.cursor);
+  VS::Menu::Framework::menuMemory.inventory_cursors = runtime.cursor;
   const auto& panels = runtime.presentation;
   Menu_Inventory_secondaryTitleEnabled =
       static_cast<char>(panels.secondary_title);

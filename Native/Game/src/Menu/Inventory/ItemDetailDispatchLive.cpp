@@ -249,7 +249,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
 class LiveIconWorld final : public CategoryIconWorld {
  public:
   std::uint8_t CurrentCategory() override {
-    return VS::Menu::Framework::menuMemory.opaque3A.currentCategory;
+    return VS::Menu::Framework::menuMemory.inventory_cursors.category;
   }
   void DrawListTabNavigation() override {
     RequireFrame(true);

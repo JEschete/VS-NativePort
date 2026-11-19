@@ -12,7 +12,6 @@
 #include "Legacy/Psx.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/Framework.hpp"
-#include "Menu/Framework/MenuMemory.h"
 
 struct Content_DiscQueueSlot;
 
@@ -63,7 +62,7 @@ extern ActionSelection actionSelection;
 // decomp: D_800F4EA0 (BATTLE/BATTLE.PRG 5BF94.c)
 extern int actionRestrictions;
 // decomp: D_800F4EE8 (BATTLE/BATTLE.PRG 5BF94.c)
-extern Menu_Framework_MenuMemory menuMemory;
+extern MenuMemory menuMemory;
 // decomp: vs_battle_unlockedBattleAbility (BATTLE/BATTLE.PRG 5BF94.c)
 extern char unlockedBattleAbility;
 // decomp: D_800F4FDB (BATTLE/BATTLE.PRG 5BF94.c)

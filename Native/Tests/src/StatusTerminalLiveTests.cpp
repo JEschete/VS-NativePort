@@ -127,8 +127,7 @@ TEST_CASE("F02676 Live enters real list phase and resets before repeated entry",
   CHECK(st::LiveEquipmentListControllerState() == st::EquipmentListState{});
   CHECK(Menu_Status_selectedStatRow == 0);
   REQUIRE(st::LiveUpdateEquipmentList(257) == 0);
-  CHECK(static_cast<std::uint8_t>(
-            VS::Menu::Framework::menuMemory.selectedEquipment) == 2);
+  CHECK(VS::Menu::Framework::menuMemory.selected_equipment == 2);
 }
 
 TEST_CASE("F02677 and F02678 Live draw into the registered frame storage",
@@ -280,7 +279,7 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
   REQUIRE(st::LiveUpdateLimbPanel(-1) == 0);
   const auto limb = st::LiveLimbPanelControllerState();
   Menu_Status_selectedElement = 4;
-  VS::Menu::Framework::menuMemory.opaque51[49] = static_cast<char>(0x85);
+  VS::Menu::Framework::menuMemory.limb_selection_and_dimming = 0x85;
   Battle_stringContext.strings[0] = VS::Menu::Framework::stringBuf;
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveEquipmentDetailControllerState() == st::EquipmentDetailState{});
@@ -289,8 +288,7 @@ TEST_CASE("MENU4 terminal reload preserves BATTLE limb and MAINMENU ownership",
   CHECK(st::LiveLimbPanelControllerState().animation_steps ==
         limb.animation_steps);
   CHECK(Menu_Status_selectedElement == 4);
-  CHECK(static_cast<std::uint8_t>(
-            VS::Menu::Framework::menuMemory.opaque51[49]) == 0x85);
+  CHECK(VS::Menu::Framework::menuMemory.limb_selection_and_dimming == 0x85);
 }
 
 TEST_CASE("Terminal reload retains the actual allocations and text arguments",

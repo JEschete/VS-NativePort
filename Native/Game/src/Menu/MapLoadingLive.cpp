@@ -100,14 +100,11 @@ class LiveAreaMenu final : public AreaMenuHost {
     menu_text_ = listed_text_.data();
   }
   void SetAreaCursor(AreaListCursor cursor) override {
-    VS::Menu::Framework::menuMemory.cursorMemories[0] =
-        static_cast<char>(cursor.row);
-    VS::Menu::Framework::menuMemory.cursorMemories[1] =
-        static_cast<char>(cursor.first_row);
+    VS::Menu::Framework::menuMemory.cursor_memories[0] = cursor.row;
+    VS::Menu::Framework::menuMemory.cursor_memories[1] = cursor.first_row;
   }
   std::uint8_t AreaCursorRow() override {
-    return static_cast<std::uint8_t>(
-        VS::Menu::Framework::menuMemory.cursorMemories[0]);
+    return VS::Menu::Framework::menuMemory.cursor_memories[0];
   }
   std::uint8_t CursorMemorySetting() override {
     return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);

@@ -15,7 +15,7 @@ constexpr int kGemDispatchEntry = (((20 << 8) | 1) << 4) | 5;
 TEST_CASE("F02568 production renderer merges only the selected category icon",
           "[item-detail-dispatch-live][F02568]") {
   DispatchLiveFixture fixture;
-  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::menuMemory.inventory_cursors.category = 1;
   fixture.rows[31].x = 60;
   inv::DrawLiveItemCategoryIcons(2, 1);
   const auto sprites = fixture.Sprites();
@@ -27,7 +27,7 @@ TEST_CASE("F02568 production renderer merges only the selected category icon",
 TEST_CASE("F02568 native sprite queues preserve overlay position and palette",
           "[item-detail-dispatch-live][F02568]") {
   DispatchLiveFixture fixture;
-  VS::Menu::Framework::menuMemory.opaque3A.currentCategory = 1;
+  VS::Menu::Framework::menuMemory.inventory_cursors.category = 1;
   fixture.rows[31].x = 61;
   inv::DrawLiveItemCategoryIcons(0, 1);
   const auto sprites = fixture.Sprites();
@@ -71,8 +71,8 @@ TEST_CASE("F02579 paging integrates the real armor formatter and cursor memory",
   VS::Input::buttonRepeat = VS::Input::R1;
   CHECK(inv::UpdateLiveArmorDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
-  CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[4]
-            .position.page == 1);
+  CHECK(VS::Menu::Framework::menuMemory.inventory_cursors.positions[4].page ==
+        1);
   CHECK(fixture.rows[31].item_page == 2);
   CHECK(fixture.rows[20].selected == 1);
 }
@@ -101,8 +101,8 @@ TEST_CASE(
   VS::Input::buttonRepeat = VS::Input::R1;
   CHECK(inv::UpdateLiveGemDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
-  CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[5]
-            .position.page == 1);
+  CHECK(VS::Menu::Framework::menuMemory.inventory_cursors.positions[5].page ==
+        1);
   CHECK(fixture.rows[31].item_page == 2);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 5);
 }

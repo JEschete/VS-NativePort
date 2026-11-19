@@ -436,7 +436,8 @@ TEST_CASE("Page text refuses lines that overflow the page buffer",
 namespace {
 struct LiveTopicFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
-  Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
+  VS::Menu::Framework::MenuMemory saved_memory =
+      VS::Menu::Framework::menuMemory;
   VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
@@ -536,8 +537,8 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
   Field_manualDisplayState.currentManual = 10;
   CHECK(manual::LiveUpdateTopicMenu(1) == -1);
   CHECK(Menu_Manual_topMenuState == 1);
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[4] == 5);
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[5] == 5);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[4] == 5);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[5] == 5);
   CHECK(VS::Input::settings.cursor_memory ==
         fixture.saved_settings.cursor_memory);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
@@ -548,7 +549,7 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
 TEST_CASE("Live topic selection returns chosen and cancelled rows",
           "[manual-topics-live]") {
   LiveTopicFixture fixture;
-  VS::Menu::Framework::menuMemory.cursorMemories[4] = 3;
+  VS::Menu::Framework::menuMemory.cursor_memories[4] = 3;
   VS::Menu::Framework::selectedRow = 2;
   Menu_Manual_topMenuState = 1;
   CHECK(manual::LiveUpdateTopicMenu(0) == 2);
@@ -591,7 +592,7 @@ TEST_CASE("Live topic rows list strings inside the topic table",
   manual::LiveSetTopicRows(1, 0, strings.data());
   CHECK(manual::LiveTopicRefusalCount() == refusals);
   CHECK(VS::Menu::Framework::itemsText != nullptr);
-  CHECK(VS::Menu::Framework::menuMemory.cursorMemories[4] == 0);
+  CHECK(VS::Menu::Framework::menuMemory.cursor_memories[4] == 0);
 }
 
 TEST_CASE("Live page text hands the composed page to text box zero",

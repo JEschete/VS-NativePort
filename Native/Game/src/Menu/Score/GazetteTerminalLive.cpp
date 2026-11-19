@@ -527,7 +527,7 @@ class LiveGazetteHost final : public GazetteHost {
     return UpdateLiveTopMenu(initialize ? 1 : 0);
   }
   std::uint8_t OverviewCursor() override {
-    const auto& memory = VS::Menu::Framework::menuMemory.cursorMemories;
+    const auto& memory = VS::Menu::Framework::menuMemory.cursor_memories;
     return static_cast<std::uint8_t>(memory[kOverviewMemoryRow] +
                                      memory[kOverviewMemoryPage]);
   }
