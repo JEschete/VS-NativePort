@@ -20,8 +20,6 @@
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Legacy/Psx.h"
-#include "Menu/BreakArts.h"
 #include "Menu/BreakArts.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -31,6 +29,9 @@
 #include "State/Progress.hpp"
 
 namespace VS::Menu::break_arts {
+// decomp: _strings (_strings@src/MENU/MENU1.PRG/30.c)
+std::uint16_t strings[kMenuStringHalfwords];
+
 namespace {
 constexpr std::size_t kActionCount = 256;
 constexpr std::size_t kActionNameBytes = 24;
@@ -60,9 +61,7 @@ class LiveHost final : public Host {
     VS::Core::LogWarn("menu.break_arts", "{}", reason);
   }
 
-  std::span<const std::uint16_t> MenuStrings() override {
-    return Menu_BreakArts_strings;
-  }
+  std::span<const std::uint16_t> MenuStrings() override { return strings; }
   std::span<const std::uint16_t> BattleMenuStrings() override {
     return VS::Menu::menuStrings;
   }
@@ -188,7 +187,7 @@ class LiveHost final : public Host {
       Refuse("Break Arts row count exceeds the live row buffer");
       return false;
     }
-    std::array<char*, kCategoryCount * 2> strings{};
+    std::array<char*, kCategoryCount * 2> row_text{};
     std::array<int, kCategoryCount> types{};
     for (std::size_t i = 0; i < rows.size(); ++i) {
       const auto name = Resolve(rows[i].name);
@@ -197,14 +196,14 @@ class LiveHost final : public Host {
         Refuse("Break Arts row text is unavailable or unterminated");
         return false;
       }
-      strings[i * 2] =
+      row_text[i * 2] =
           reinterpret_cast<char*>(const_cast<std::uint8_t*>(name->data()));
-      strings[i * 2 + 1] = reinterpret_cast<char*>(
+      row_text[i * 2 + 1] = reinterpret_cast<char*>(
           const_cast<std::uint8_t*>(description->data()));
       types[i] = rows[i].type;
     }
     Framework::CreateLiveMenuRows(static_cast<int>(rows.size()), row_info,
-                                  strings.data(), types.data());
+                                  row_text.data(), types.data());
     return true;
   }
   void SetActionCostText(int index, std::string_view text, int x,
@@ -259,14 +258,13 @@ class LiveHost final : public Host {
   std::optional<std::span<const std::uint8_t>> Resolve(TextRef text) {
     switch (text.kind) {
       case TextKind::kMenuOffset: {
-        const auto size = std::size(Menu_BreakArts_strings);
+        const auto size = std::size(strings);
         if (text.value >= size) {
           return std::nullopt;
         }
-        const auto* const bytes = reinterpret_cast<const std::uint8_t*>(
-            &Menu_BreakArts_strings[text.value]);
-        const std::size_t remaining =
-            (size - text.value) * sizeof(Menu_BreakArts_strings[0]);
+        const auto* const bytes =
+            reinterpret_cast<const std::uint8_t*>(&strings[text.value]);
+        const std::size_t remaining = (size - text.value) * sizeof(strings[0]);
         return NullTerminated(bytes, remaining);
       }
       case TextKind::kActionName:
@@ -330,13 +328,13 @@ void CreateHeaderLive() {
 }
 
 // decomp: MENU1.PRG vs_menu1_exec (src/MENU/MENU1.PRG/30.c:358).
-int UpdateLive(u_char* step) {
+int UpdateLive(std::uint8_t* step) {
   if (step == nullptr) {
     LiveHost host;
     host.Refuse("Break Arts update state pointer is null");
     return 0;
   }
-  if (*step == static_cast<u_char>(ScreenStep::kInit)) {
+  if (*step == static_cast<std::uint8_t>(ScreenStep::kInit)) {
     g_state = {};
   }
   LiveHost host;

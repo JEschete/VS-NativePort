@@ -47,7 +47,7 @@ TEST_CASE("F02583 checked Live uses real weapon stats and fixed byte orders",
   order[0] = items::kWeaponSlots;
   order[1] = 1;
   order[2] = items::kWeaponSlots;
-  Menu_Inventory_inventoryIndices[kWeapon] = nullptr;
+  VS::Menu::Inventory::categoryOrders[kWeapon] = nullptr;
   const auto before = std::bit_cast<RecordBytes>(records);
   sorting::SortLiveWeapons(kMaterial);
   CHECK(order[0] == 1);
@@ -166,15 +166,15 @@ TEST_CASE(
   order[0] = 1;
   order[1] = items::kGemSlots;
   order[2] = items::kGemSlots;
-  Menu_Inventory_inventoryIndices[kGem] = order.data();
+  VS::Menu::Inventory::categoryOrders[kGem] = order.data();
   sorting::SortLiveEquipment(kGem, kStrength);
   VS::Boot::ResetMenu3Statics();
-  CHECK(Menu_Inventory_inventoryIndices[kGem] == order.data());
+  CHECK(VS::Menu::Inventory::categoryOrders[kGem] == order.data());
   CHECK(order[0] == items::kGemSlots);
   CHECK(order[1] == items::kGemSlots);
   CHECK(order[2] == 1);
   VS::Boot::ResetMenubStatics();
-  CHECK(Menu_Inventory_inventoryIndices[kGem] == order.data());
+  CHECK(VS::Menu::Inventory::categoryOrders[kGem] == order.data());
   CHECK(order[2] == 1);
   records.gems[0].strength = kHigh;
   std::span(records.gems).back().strength = kLow;
@@ -190,9 +190,9 @@ TEST_CASE(
   auto& order = VS::Items::inventoryIndices;
   order.misc[0] = items::kMiscSlots;
   VS::Items::inventory.misc[0].id = kWide;
-  Menu_Inventory_inventoryIndices[kBlade] = order.misc.data();
+  VS::Menu::Inventory::categoryOrders[kBlade] = order.misc.data();
   VS::Boot::ResetMainMenuStatics();
-  CHECK(Menu_Inventory_inventoryIndices[kBlade] == order.blades.data());
+  CHECK(VS::Menu::Inventory::categoryOrders[kBlade] == order.blades.data());
   CHECK(order.misc[0] == items::kMiscSlots);
   CHECK(VS::Items::inventory.misc[0].id == kWide);
 }

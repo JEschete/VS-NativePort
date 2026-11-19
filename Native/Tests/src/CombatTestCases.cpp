@@ -71,7 +71,7 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootRowsLive.hpp"
@@ -473,13 +473,13 @@ struct ArtResolutionFixture : AbilityEffectFixture {
 struct LootInventoryFixture {
   VS::Items::InventoryContents saved_inventory = VS::Items::inventory;
   VS::Items::InventoryIndices saved_indices = VS::Items::inventoryIndices;
-  std::uint8_t* saved_index_pointer = Menu_Inventory_inventoryIndices[6];
+  std::uint8_t* saved_index_pointer = VS::Menu::Inventory::categoryOrders[6];
   VS::Items::InventoryContents source{};
 
   LootInventoryFixture() {
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
-    Menu_Inventory_inventoryIndices[6] =
+    VS::Menu::Inventory::categoryOrders[6] =
         VS::Items::inventoryIndices.misc.data();
     for (auto& item : VS::Items::inventory.misc) {
       item.id = 324;
@@ -494,7 +494,7 @@ struct LootInventoryFixture {
   ~LootInventoryFixture() {
     VS::Items::inventory = saved_inventory;
     VS::Items::inventoryIndices = saved_indices;
-    Menu_Inventory_inventoryIndices[6] = saved_index_pointer;
+    VS::Menu::Inventory::categoryOrders[6] = saved_index_pointer;
   }
 
   int Copy(bool write) {

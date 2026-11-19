@@ -31,7 +31,6 @@
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/BreakArts.h"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.h"
@@ -41,7 +40,7 @@
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/OptionsLiveState.hpp"
 #include "Menu/Setup/Assembly.hpp"
@@ -129,8 +128,8 @@ struct PuzzleOptionsFixture {
 
 struct BreakArtMenuFixture {
   CursorFixture rows;
-  std::array<u_short, 2151> saved_strings =
-      std::to_array(Menu_BreakArts_strings);
+  std::array<std::uint16_t, VS::Menu::break_arts::kMenuStringHalfwords>
+      saved_strings = std::to_array(VS::Menu::break_arts::strings);
   std::array<Battle_ActionDefinition, 4> saved_actions{};
   Battle_Actor* saved_character = Battle_characterState;
   Battle_Actor* saved_actor = Battle_actors[0];
@@ -151,11 +150,11 @@ struct BreakArtMenuFixture {
         first_action(Battle_ActionId_DaggerArtOne + (category - 1) * 4),
         saved_arts(VS::State::artsStatus.arts_learned[category % 10]) {
     VS::Menu::break_arts::ResetLiveStatics();
-    std::fill_n(Menu_BreakArts_strings, saved_strings.size(), 0xE7E7);
-    std::fill_n(Menu_BreakArts_strings, 72, 96);
-    Menu_BreakArts_strings[96] = 0;
-    Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArts] = 0;
-    Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArtsDesc] = 0;
+    std::fill_n(VS::Menu::break_arts::strings, saved_strings.size(), 0xE7E7);
+    std::fill_n(VS::Menu::break_arts::strings, 72, 96);
+    VS::Menu::break_arts::strings[96] = 0;
+    VS::Menu::break_arts::strings[Text_Menu1_strings_Offset_viewArts] = 0;
+    VS::Menu::break_arts::strings[Text_Menu1_strings_Offset_viewArtsDesc] = 0;
     VS::State::artsStatus.arts_learned[category % 10] = 4;
     Battle_characterState = Battle_actors[0] = &actor;
     actor.stats = &stats;
@@ -178,7 +177,7 @@ struct BreakArtMenuFixture {
   ~BreakArtMenuFixture() {
     VS::Menu::break_arts::ResetLiveStatics();
     std::copy(saved_strings.begin(), saved_strings.end(),
-              Menu_BreakArts_strings);
+              VS::Menu::break_arts::strings);
     std::copy(saved_actions.begin(), saved_actions.end(),
               &Battle_actionDefinitions[first_action]);
     Battle_characterState = saved_character;

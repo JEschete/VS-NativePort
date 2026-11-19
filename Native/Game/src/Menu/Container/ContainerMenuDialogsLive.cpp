@@ -21,7 +21,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
@@ -184,7 +184,7 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
   }
   void PrepareTransferControls() override {
     Menu_Container_controlsPanelMode = kTransferControls;
-    Menu_Inventory_freezeTabArrows = 0;
+    VS::Menu::Inventory::freezeTabArrows = 0;
   }
   void FlyOutAction(std::int32_t row) override {
     RequireRows();

@@ -13,7 +13,7 @@
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/SortingKeysLive.hpp"
 #include "Menu/Inventory/InventorySorting.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {
@@ -59,7 +59,8 @@ class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
   std::span<std::uint8_t> EquipmentOrder(
       Items::ItemCategory category) override {
     return KnownOrder(
-        Menu_Inventory_inventoryIndices[static_cast<std::size_t>(category)]);
+        VS::Menu::Inventory::categoryOrders[static_cast<std::size_t>(
+            category)]);
   }
   std::uint8_t Capacity(Items::ItemCategory category) override {
     return VS::Items::kCategoryCapacities[static_cast<std::size_t>(category)];

@@ -20,7 +20,7 @@
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Inventory/ItemListRows.hpp"
 
 namespace VS::Menu::Inventory {
@@ -29,7 +29,7 @@ using Items::ItemCategory;
 
 constexpr std::uint64_t kRefusalLogLimit = 16;
 constexpr std::uint64_t kRefusalLogInterval = 1024;
-// Menu_Inventory_inventoryIndices names the seven item tables.
+// VS::Menu::Inventory::categoryOrders names the seven item tables.
 constexpr auto kManage = ItemCategory::kManage;
 constexpr auto kOrderedCategories = static_cast<std::size_t>(kManage);
 std::uint64_t g_refusals = 0;
@@ -75,11 +75,11 @@ std::span<const std::uint8_t> OrderTable(ItemCategory category) {
   return tables[static_cast<std::size_t>(category)];
 }
 
-// The order from Menu_Inventory_inventoryIndices[category] to the end of the
-// index table holding it, or nullopt outside every table.
+// The order from VS::Menu::Inventory::categoryOrders[category] to the end of
+// the index table holding it, or nullopt outside every table.
 std::optional<std::span<const std::uint8_t>> KnownOrder(ItemCategory category) {
   const auto* pointer =
-      Menu_Inventory_inventoryIndices[static_cast<std::size_t>(category)];
+      VS::Menu::Inventory::categoryOrders[static_cast<std::size_t>(category)];
   if (pointer == nullptr) return std::nullopt;
   for (std::size_t table = 0; table < kOrderedCategories; ++table) {
     const auto entries = OrderTable(static_cast<ItemCategory>(table));

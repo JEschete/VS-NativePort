@@ -16,7 +16,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Inventory/DetailsPolicies.hpp"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Sounds.hpp"
 
 namespace VS::Menu::Inventory {
@@ -67,7 +67,7 @@ class LiveWorld final : public Framework::LiveDetailInputWorld<DetailsWorld> {
   std::span<const std::uint8_t> DisplayOrder() override {
     RequireCategory(kIndexedCategories);
     const auto index = static_cast<std::size_t>(category_);
-    const auto* order = Menu_Inventory_inventoryIndices[index];
+    const auto* order = VS::Menu::Inventory::categoryOrders[index];
     if (order == nullptr) {
       Inventory::Refuse("missing current inventory display order");
     }

@@ -55,7 +55,6 @@
 #include "Menu/BattleAbilities.h"
 #include "Menu/BattleAbilitiesTerminalLive.hpp"
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
-#include "Menu/BreakArts.h"
 #include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ContainerListTransferLive.hpp"
 #include "Menu/Container/ItemView.h"
@@ -71,7 +70,7 @@
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/MagicCostsLive.hpp"
@@ -1117,7 +1116,7 @@ class LiveHost final : public Host {
   int FrameBufferIndex() override { return VS::Render::frameBuf; }
 
   bool TabArrowsFrozen() override {
-    return Menu_Inventory_freezeTabArrows != 0;
+    return VS::Menu::Inventory::freezeTabArrows != 0;
   }
 
   AshleyPreviewState AshleyPreview() override {

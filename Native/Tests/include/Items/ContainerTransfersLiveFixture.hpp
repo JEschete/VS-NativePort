@@ -11,7 +11,7 @@
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 
 namespace container_transfers_tests {
 namespace items = VS::Items;

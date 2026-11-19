@@ -67,7 +67,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
       Menu_Container_browsingGadgetBag};
   equipment::ValueRestore<char> saved_controls{
       Menu_Container_controlsPanelMode};
-  equipment::ValueRestore<char> saved_freeze{Menu_Inventory_freezeTabArrows};
+  equipment::ValueRestore<std::uint8_t> saved_freeze{
+      VS::Menu::Inventory::freezeTabArrows};
   equipment::ValueRestore<char> saved_animation{
       VS::Menu::Framework::itemsListRow};
   equipment::ValueRestore<u_long*> saved_text_ordering{

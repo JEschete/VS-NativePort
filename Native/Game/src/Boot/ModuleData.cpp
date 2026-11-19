@@ -116,7 +116,7 @@
 #include "Items/Materials.hpp"
 #include "LegacyFiles.h"
 #include "Menu/BattleAbilities.h"
-#include "Menu/BreakArts.h"
+#include "Menu/BreakArtsLive.hpp"
 #include "Menu/Container/ItemView.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
@@ -529,7 +529,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"ENDING/ENDING.PRG", 0x732D8, sizeof VS::Ending::rankScoreThresholds, &VS::Ending::rankScoreThresholds, sizeof VS::Ending::rankScoreThresholds}, // G00817 rankScores
     {"MENU/MENU0.PRG", 0x2258, 4924u, &Menu_Magic_magicStrings, sizeof Menu_Magic_magicStrings}, // G00978 _magicStrings
     {"MENU/MENU0.PRG", 0x3594, 3197u, &Menu_Magic_teleportationStrings, sizeof Menu_Magic_teleportationStrings}, // G00980 _teleportationStrings
-    {"MENU/MENU1.PRG", 0xC78, 4302u, &Menu_BreakArts_strings, sizeof Menu_BreakArts_strings}, // G01004 _strings
+    {"MENU/MENU1.PRG", 0xC78, 4302u, &VS::Menu::break_arts::strings, sizeof VS::Menu::break_arts::strings}, // G01004 _strings
     {"MENU/MENU2.PRG", 0x1E90, 2120u, &Menu_BattleAbilities_battleAbilityStrings, sizeof Menu_BattleAbilities_battleAbilityStrings}, // G01025 _battleAbilityStrings
     {"MENU/MENU2.PRG", 0x26D8, 584u, &Menu_BattleAbilities_battleAbilityMenuStrings, sizeof Menu_BattleAbilities_battleAbilityMenuStrings}, // G01024 _battleAbilityMenuStrings
     {"MENU/MENU3.PRG", 0x6BB8, 944u, &Menu_Inventory_menuText, sizeof Menu_Inventory_menuText}, // G01068 _menuText

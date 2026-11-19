@@ -14,7 +14,7 @@
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Loot/LootPoliciesLive.hpp"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/LootTerminalLive.hpp"
@@ -37,7 +37,7 @@
 namespace VS::Boot {
 // MAINMENU.PRG.
 void ResetMainMenuStatics() {
-  Menu_Inventory_ItemList_ResetMainMenuStatics();
+  VS::Menu::Inventory::ResetItemListStatics();
   VS::Menu::Inventory::ResetMiscItemShortcutModuleData();
 }
 

@@ -2448,12 +2448,6 @@
     <ClCompile Include="src\Menu\BattleAbilityAssignments.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClCompile Include="src\Menu\BreakArts.cpp">
-      <Filter>src\Menu</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Menu\BreakArts.h">
-      <Filter>src\Menu</Filter>
-    </ClInclude>
     <ClCompile Include="src\Menu\BreakArtsCore.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
@@ -2655,7 +2649,7 @@
     <ClCompile Include="src\Menu\Inventory\ItemList.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Inventory\ItemList.h">
+    <ClInclude Include="src\Menu\Inventory\ItemList.hpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Inventory\ItemListRows.cpp">
@@ -2664,12 +2658,6 @@
     <ClCompile Include="src\Menu\Inventory\ItemListRowsLive.cpp">
       <Filter>src\Menu\Inventory</Filter>
     </ClCompile>
-    <ClCompile Include="src\Menu\Legacy.cpp">
-      <Filter>src\Menu</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Menu\Legacy.h">
-      <Filter>src\Menu</Filter>
-    </ClInclude>
     <ClInclude Include="src\Menu\Loot\LootInventory.h">
       <Filter>src\Menu\Loot</Filter>
     </ClInclude>

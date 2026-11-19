@@ -1744,13 +1744,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Menu\BattleAbilityAssignments.cpp" />
-    <ClCompile Include="src\Menu\BreakArts.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Menu\BreakArtsCore.cpp" />
     <ClCompile Include="src\Menu\BreakArtsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1861,23 +1854,10 @@
     <ClCompile Include="src\Menu\Inventory\ItemDetailDispatchLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Menu\Inventory\ItemList.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Menu\Inventory\ItemList.cpp" />
     <ClCompile Include="src\Menu\Inventory\ItemListRows.cpp" />
     <ClCompile Include="src\Menu\Inventory\ItemListRowsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="src\Menu\Legacy.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Menu\Loot\LootPolicies.cpp" />
     <ClCompile Include="src\Menu\Loot\LootPoliciesLive.cpp">
@@ -2490,7 +2470,6 @@
     <ClInclude Include="src\Items\LootLiveState.hpp" />
     <ClInclude Include="src\Items\Materials.hpp" />
     <ClInclude Include="src\Menu\BattleAbilities.h" />
-    <ClInclude Include="src\Menu\BreakArts.h" />
     <ClInclude Include="src\Menu\Container\ItemView.h" />
     <ClInclude Include="src\Menu\Container\Storage.h" />
     <ClInclude Include="src\Menu\Files.h" />
@@ -2511,8 +2490,7 @@
     <ClInclude Include="src\Menu\Framework\TextBoxes.h" />
     <ClInclude Include="src\Menu\Inventory\Inventory.h" />
     <ClInclude Include="src\Menu\Inventory\ItemDetailLiveSupport.hpp" />
-    <ClInclude Include="src\Menu\Inventory\ItemList.h" />
-    <ClInclude Include="src\Menu\Legacy.h" />
+    <ClInclude Include="src\Menu\Inventory\ItemList.hpp" />
     <ClInclude Include="src\Menu\Loot\LootInventory.h" />
     <ClInclude Include="src\Menu\Loot\LootScreen.h" />
     <ClInclude Include="src\Menu\Loot\Paging.hpp" />

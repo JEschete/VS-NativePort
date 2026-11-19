@@ -13,13 +13,12 @@ LiveFixture::LiveFixture() {
   std::copy(items::kContainerCapacities.begin(),
             items::kContainerCapacities.end(),
             Menu_Container_containerItemCapacities);
-  std::copy_n(Menu_Inventory_inventoryIndices, saved_indices.size(),
-              saved_indices.begin());
+  saved_indices = VS::Menu::Inventory::categoryOrders;
   const std::array<unsigned char*, items::kItemCategoryCount - 1> indices{
       order.weapons.data(), order.blades.data(), order.grips.data(),
       order.shields.data(), order.armor.data(),  order.gems.data(),
       order.misc.data()};
-  std::copy(indices.begin(), indices.end(), Menu_Inventory_inventoryIndices);
+  VS::Menu::Inventory::categoryOrders = indices;
   VS::Menu::Framework::inventoryStorage = storage.get();
   Menu_Container_containerData = &storage->container;
   Menu_Container_otherStorage = &storage->container;
@@ -29,8 +28,7 @@ LiveFixture::LiveFixture() {
 LiveFixture::~LiveFixture() {
   std::copy(saved_capacities.begin(), saved_capacities.end(),
             Menu_Container_containerItemCapacities);
-  std::copy(saved_indices.begin(), saved_indices.end(),
-            Menu_Inventory_inventoryIndices);
+  VS::Menu::Inventory::categoryOrders = saved_indices;
   VS::Items::inventory = saved_inventory;
   Menu_Container_transferredMiscCount = saved_count;
   VS::Menu::Framework::inventoryStorage = saved_storage;

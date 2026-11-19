@@ -175,7 +175,7 @@ TEST_CASE(
   LiveFixture fixture;
   REQUIRE(dialogs::UpdateLiveTransferConfirmation(1) == 0);
   REQUIRE(Menu_Container_controlsPanelMode == 5);
-  REQUIRE(Menu_Inventory_freezeTabArrows == 0);
+  REQUIRE(VS::Menu::Inventory::freezeTabArrows == 0);
   fixture.RunFrames(dialogs::UpdateLiveTransferConfirmation);
   REQUIRE(fixture.Frame(dialogs::UpdateLiveTransferConfirmation,
                         input::Circle) == 0);

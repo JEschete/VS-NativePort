@@ -38,7 +38,7 @@
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -226,7 +226,7 @@ class LiveTransferWorld final : public TransferWorld {
     VS::Input::settings.container_empty = empty ? 1U : 0U;
   }
   void SetFreezeTabArrows(std::uint8_t value) override {
-    Menu_Inventory_freezeTabArrows = static_cast<char>(value);
+    VS::Menu::Inventory::freezeTabArrows = value;
   }
   std::uint8_t CategoryToken() override {
     return static_cast<std::uint8_t>(

@@ -47,7 +47,7 @@ std::optional<ItemCategory> ToCategory(int category, const char* operation) {
 }
 
 // A category with a display order; the manage row has none (the original read
-// past Menu_Inventory_inventoryIndices for it).
+// past VS::Menu::Inventory::categoryOrders for it).
 std::optional<ItemCategory> ToListedCategory(int category,
                                              const char* operation) {
   if (category == static_cast<int>(ItemCategory::kManage)) {

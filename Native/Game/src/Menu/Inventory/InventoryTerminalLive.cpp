@@ -42,7 +42,7 @@
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/Inventory/InventoryTerminal.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
@@ -184,8 +184,7 @@ void ReadRuntime(TerminalRuntime& runtime) {
                  VS::Items::miscItemInvoked};
   runtime.cursor_memory_enabled =
       static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
-  runtime.freeze_tabs =
-      static_cast<std::uint8_t>(Menu_Inventory_freezeTabArrows);
+  runtime.freeze_tabs = VS::Menu::Inventory::freezeTabArrows;
   runtime.restrictions = VS::Menu::Framework::actionRestrictions;
   runtime.hud_slide_offset = Battle_hudSlideOffset;
 }
@@ -221,7 +220,7 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   VS::Items::miscItemInvoked = runtime.use.slot;
   VS::Input::settings.cursor_memory =
       static_cast<char>(runtime.cursor_memory_enabled);
-  Menu_Inventory_freezeTabArrows = static_cast<char>(runtime.freeze_tabs);
+  VS::Menu::Inventory::freezeTabArrows = runtime.freeze_tabs;
   VS::Menu::Framework::actionRestrictions = runtime.restrictions;
   Battle_hudSlideOffset = runtime.hud_slide_offset;
 }
@@ -490,7 +489,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     if (index >= static_cast<std::size_t>(Category::kManage)) {
       Refuse("inventory order category outside bound tables");
     }
-    auto* pointer = Menu_Inventory_inventoryIndices[index];
+    auto* pointer = VS::Menu::Inventory::categoryOrders[index];
     for (std::size_t table = 0;
          table < static_cast<std::size_t>(Category::kManage); ++table) {
       const auto entries = FixedOrder(static_cast<Category>(table));

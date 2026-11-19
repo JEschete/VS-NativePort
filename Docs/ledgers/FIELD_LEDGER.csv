@@ -122,7 +122,7 @@ T00016.005,T00016,diskState_e,5,diskReadXaInit,0,,,6,,ReadXaInit,DiscDriveState 
 T00016.006,T00016,diskState_e,6,diskStreamXa,0,,,7,,StreamXa,DiscDriveState StreamXa,med,declaration-only;source:main.c:84
 T00016.007,T00016,diskState_e,7,diskCommandFailed,0,,,8,,CommandFailed,DiscDriveState CommandFailed,med,declaration-only;source:main.c:85
 T00016.008,T00016,diskState_e,8,diskStreamXaEnd,0,,,9,,StreamXaEnd,DiscDriveState StreamXaEnd,med,declaration-only;source:main.c:86
-T00017.000,T00017,drawArtsListOpt,0,opt_forceCursorMemory,0,,,16,,OptForceCursorMemory,ArtListOption OptForceCursorMemory,med,declaration-only;source:30.c:94
+T00017.000,T00017,drawArtsListOpt,0,opt_forceCursorMemory,0,,,16,,kForceCursorMemoryFlag,ArtListOption OptForceCursorMemory,med,native:BreakArtsCore.cpp kForceCursorMemoryFlag (#441);declaration-only;source:30.c:94
 T00018.000,T00018,easeMode,0,easeModeLinear,0,,,0,,Linear,Linear interpolation,high,source:D4.c:1289
 T00018.001,T00018,easeMode,1,easeModeEaseOut,0,,,1,,EaseOut,Quarter-sine ease-out interpolation,high,source:D4.c:1289
 T00018.002,T00018,easeMode,2,easeModeEaseInOut,0,,,2,,EaseInOut,Half-cosine ease-in-out interpolation,high,source:D4.c:1289

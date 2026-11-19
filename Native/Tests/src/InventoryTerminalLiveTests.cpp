@@ -118,7 +118,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<int> saved_restrictions{VS::Menu::Framework::actionRestrictions};
   ValueRestore<u_short*> saved_items{VS::Menu::Framework::itemsText};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
-  ValueRestore<char> saved_freeze{Menu_Inventory_freezeTabArrows};
+  ValueRestore<std::uint8_t> saved_freeze{VS::Menu::Inventory::freezeTabArrows};
   ValueRestore<char> saved_title_step{
       Menu_Inventory_secondaryTitleAnimationStep};
   ValueRestore<char> saved_icons_step{

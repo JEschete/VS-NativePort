@@ -8,7 +8,7 @@
 
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 
 namespace VS::Menu::Inventory::sorting_test {
 inline constexpr auto kOrderTables = Items::kItemCategoryCount - 1;
@@ -26,20 +26,18 @@ struct LiveFixture {
   std::array<std::uint8_t*, kOrderTables> saved_routes{};
 
   LiveFixture() {
-    std::copy_n(Menu_Inventory_inventoryIndices, saved_routes.size(),
-                saved_routes.begin());
+    saved_routes = VS::Menu::Inventory::categoryOrders;
     VS::Items::inventory = {};
     VS::Items::inventoryIndices = {};
     const auto tables = LiveOrders();
     for (std::size_t row = 0; row < tables.size(); ++row) {
-      Menu_Inventory_inventoryIndices[row] = tables[row].data();
+      VS::Menu::Inventory::categoryOrders[row] = tables[row].data();
     }
   }
   ~LiveFixture() {
     VS::Items::inventory = saved_inventory;
     VS::Items::inventoryIndices = saved_indices;
-    std::copy(saved_routes.begin(), saved_routes.end(),
-              Menu_Inventory_inventoryIndices);
+    VS::Menu::Inventory::categoryOrders = saved_routes;
   }
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;

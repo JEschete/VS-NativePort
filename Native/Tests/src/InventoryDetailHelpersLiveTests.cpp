@@ -16,7 +16,7 @@
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 
 namespace {
 namespace inventory = VS::Menu::Inventory;
@@ -47,7 +47,7 @@ struct LiveFixture {
 
   LiveFixture() {
     for (std::size_t i = 0; i < previous_orders.size(); ++i) {
-      previous_orders[i] = Menu_Inventory_inventoryIndices[i];
+      previous_orders[i] = VS::Menu::Inventory::categoryOrders[i];
     }
     VS::Menu::Framework::menuItems = rows.data();
     VS::Items::inventory = {};
@@ -80,7 +80,7 @@ struct LiveFixture {
     VS::Menu::Framework::enabledStatPages = previous_pages;
     VS::Menu::Framework::itemStatPage = previous_page;
     for (std::size_t i = 0; i < previous_orders.size(); ++i) {
-      Menu_Inventory_inventoryIndices[i] = previous_orders[i];
+      VS::Menu::Inventory::categoryOrders[i] = previous_orders[i];
     }
   }
 };
@@ -159,7 +159,7 @@ TEST_CASE("F02573 live selection preserves the full cursor record and peers",
   initial.fill(0xA5);
   VS::Menu::Framework::menuMemory =
       std::bit_cast<Menu_Framework_MenuMemory>(initial);
-  Menu_Inventory_inventoryIndices[5] = fixture.order.data();
+  VS::Menu::Inventory::categoryOrders[5] = fixture.order.data();
   fixture.order[47] = 48;
   auto expected = initial;
   expected[0x3C + 5 * 2] = 0;

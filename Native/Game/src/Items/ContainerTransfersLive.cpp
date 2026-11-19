@@ -20,7 +20,7 @@
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 
 namespace VS::Items {
 namespace {
@@ -74,7 +74,7 @@ class LiveBag final : public GadgetBagWorld {
   }
   std::span<std::uint8_t> InventoryOrder(ItemCategory category) override {
     const auto value = static_cast<std::size_t>(category);
-    auto* pointer = Menu_Inventory_inventoryIndices[value];
+    auto* pointer = VS::Menu::Inventory::categoryOrders[value];
     if (pointer == nullptr) return {};
     return {pointer, kCategoryCapacities[value]};
   }

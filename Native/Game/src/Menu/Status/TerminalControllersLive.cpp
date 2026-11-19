@@ -19,7 +19,7 @@
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLiveInternal.hpp"
@@ -90,7 +90,7 @@ TerminalFrame LoadFrame() {
       .selected_stat = static_cast<std::uint8_t>(Menu_Status_selectedStatRow),
       .cursor_color =
           static_cast<std::uint8_t>(VS::Menu::Framework::cursorColor),
-      .freeze_tabs = static_cast<std::uint8_t>(Menu_Inventory_freezeTabArrows),
+      .freeze_tabs = VS::Menu::Inventory::freezeTabArrows,
       .stat_page = static_cast<std::uint8_t>(VS::Menu::Framework::itemStatPage),
       .enabled_pages =
           static_cast<std::uint8_t>(VS::Menu::Framework::enabledStatPages),
@@ -122,7 +122,7 @@ void StoreFrame(const TerminalFrame& frame) {
   Menu_Status_selectedElement = frame.selected_element;
   Menu_Status_selectedStatRow = static_cast<char>(frame.selected_stat);
   VS::Menu::Framework::cursorColor = static_cast<char>(frame.cursor_color);
-  Menu_Inventory_freezeTabArrows = static_cast<char>(frame.freeze_tabs);
+  VS::Menu::Inventory::freezeTabArrows = frame.freeze_tabs;
   VS::Menu::Framework::itemStatPage = static_cast<char>(frame.stat_page);
   VS::Menu::Framework::enabledStatPages =
       static_cast<char>(frame.enabled_pages);

@@ -653,7 +653,7 @@ TEST_CASE("Inventory live rows refuse categories without an order table",
   const auto before = inventory::ItemListRowsLiveRefusalCount();
   CHECK(fixture.Build(kManage) == 0);
   CHECK(fixture.Build(-1) == 0);
-  Menu_Inventory_inventoryIndices[kWeapon] = nullptr;
+  VS::Menu::Inventory::categoryOrders[kWeapon] = nullptr;
   CHECK(fixture.Build(kWeapon) == 0);
   CHECK(inventory::ItemListRowsLiveRefusalCount() == before + 3);
 }

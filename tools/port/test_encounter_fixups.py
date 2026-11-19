@@ -4948,9 +4948,9 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
 
     def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
         root = Path(__file__).resolve().parents[2]
-        generated = (root / "Native/Game/src/Menu/BreakArts.cpp").read_text()
-        self.assertNotIn("Menu_BreakArts_artListActionIds", generated)
-        self.assertNotIn("Menu_BreakArts_ResetMenu1Statics", generated)
+        # The copied BreakArts.h/.cpp pair is gone (#441); its string table lives in BreakArtsLive.
+        self.assertFalse((root / "Native/Game/src/Menu/BreakArts.cpp").exists())
+        self.assertFalse((root / "Native/Game/src/Menu/BreakArts.h").exists())
 
         ownership = (root / "tools/port/owned.csv").read_text()
         self.assertIn(
@@ -4964,6 +4964,8 @@ VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress]
 
         live = (root / "Native/Game/src/Menu/BreakArtsLive.cpp").read_text()
         self.assertIn("void ResetLiveStatics() { g_state = {}; }", live)
+        self.assertNotIn("Menu_BreakArts_artListActionIds", live)
+        self.assertNotIn("Menu_BreakArts_ResetMenu1Statics", live)
         cursor_tests = (root / "Native/Tests/src/CursorMemoryTests.cpp").read_text()
         self.assertIn("Four learned Break Arts preserve their navigation row", cursor_tests)
         self.assertIn("ResetLiveStatics()", cursor_tests)

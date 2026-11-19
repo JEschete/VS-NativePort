@@ -32,7 +32,7 @@
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/Inventory.h"
-#include "Menu/Inventory/ItemList.h"
+#include "Menu/Inventory/ItemList.hpp"
 #include "Menu/TextBox.h"
 #include "Render/Display.hpp"
 #include "Render/EncodedText.hpp"
@@ -129,8 +129,8 @@ struct LiveFixture {
       VS::Items::inventoryIndices};
   ValueRestore<Menu_Framework_MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
-  ArrayRestore<u_char*, kIndexedCategories> saved_orders{
-      Menu_Inventory_inventoryIndices};
+  ValueRestore<decltype(VS::Menu::Inventory::categoryOrders)> saved_orders{
+      VS::Menu::Inventory::categoryOrders};
   ValueRestore<int> saved_held{VS::Input::buttonsState};
   ValueRestore<int> saved_repeat{VS::Input::buttonRepeat};
   ValueRestore<decltype(VS::Input::buttonsPressed)> saved_pressed{
@@ -262,7 +262,7 @@ struct LiveFixture {
         VS::Items::inventoryIndices.armor.data(),
         VS::Items::inventoryIndices.gems.data(),
         VS::Items::inventoryIndices.misc.data()};
-    std::copy(orders.begin(), orders.end(), Menu_Inventory_inventoryIndices);
+    VS::Menu::Inventory::categoryOrders = orders;
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
     VS::Input::buttonsPressed = 0;
