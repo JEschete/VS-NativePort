@@ -16,16 +16,16 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/PlaybackReset.hpp"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
-#include "Audio/SoundBanks.h"
+#include "Audio/SoundState.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Core/Arena.hpp"
 #include "Core/Diagnostics.hpp"
@@ -57,245 +57,260 @@ constexpr std::size_t kNativePointerBytes = sizeof(void*);
 
 // FSoundChannel (src/include/sound.h:410): the leading pointers by slot.
 constexpr std::array kChannelPointerSlots{
-    FieldPin{offsetof(Audio_SeqChannel, programCounter) / kNativePointerBytes,
-             0x00 / kPs1PointerBytes},
-    FieldPin{offsetof(Audio_SeqChannel, loopStarts) / kNativePointerBytes,
+    FieldPin{
+        offsetof(VS::Audio::SeqChannel, program_counter) / kNativePointerBytes,
+        0x00 / kPs1PointerBytes},
+    FieldPin{offsetof(VS::Audio::SeqChannel, loop_starts) / kNativePointerBytes,
              0x04 / kPs1PointerBytes},
-    FieldPin{offsetof(Audio_SeqChannel, returnAddress) / kNativePointerBytes,
-             0x14 / kPs1PointerBytes},
-    FieldPin{offsetof(Audio_SeqChannel, keymap) / kNativePointerBytes,
+    FieldPin{
+        offsetof(VS::Audio::SeqChannel, return_address) / kNativePointerBytes,
+        0x14 / kPs1PointerBytes},
+    FieldPin{offsetof(VS::Audio::SeqChannel, keymap) / kNativePointerBytes,
              0x18 / kPs1PointerBytes},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoWave) / kNativePointerBytes,
-             0x1C / kPs1PointerBytes},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloWave) / kNativePointerBytes,
-             0x20 / kPs1PointerBytes},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanWave) / kNativePointerBytes,
-             0x24 / kPs1PointerBytes},
-    FieldPin{offsetof(Audio_SeqChannel, effectTags) / kNativePointerBytes,
+    FieldPin{
+        offsetof(VS::Audio::SeqChannel, vibrato_wave) / kNativePointerBytes,
+        0x1C / kPs1PointerBytes},
+    FieldPin{
+        offsetof(VS::Audio::SeqChannel, tremolo_wave) / kNativePointerBytes,
+        0x20 / kPs1PointerBytes},
+    FieldPin{
+        offsetof(VS::Audio::SeqChannel, auto_pan_wave) / kNativePointerBytes,
+        0x24 / kPs1PointerBytes},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_tags) / kNativePointerBytes,
              0x28 / kPs1PointerBytes},
 };
 static_assert(PinsMatch(kChannelPointerSlots, {0, 0}));
-static_assert(offsetof(Audio_SeqChannel, effectTags) % kNativePointerBytes ==
+static_assert(offsetof(VS::Audio::SeqChannel, effect_tags) %
+                  kNativePointerBytes ==
               0);
-static_assert(std::size(Audio_SeqChannel{}.loopStarts) == kLoopDepthCount);
+static_assert(std::size(VS::Audio::SeqChannel{}.loop_starts) ==
+              kLoopDepthCount);
 
 constexpr FieldPin kChannelTagsAnchor{
-    offsetof(Audio_SeqChannel, effectTags),
+    offsetof(VS::Audio::SeqChannel, effect_tags),
     0x28,
 };
 constexpr std::array kChannelTagFields{
-    FieldPin{offsetof(Audio_SeqChannel, pitchBase), 0x2C},
-    FieldPin{offsetof(Audio_SeqChannel, pitchSlide), 0x30},
-    FieldPin{offsetof(Audio_SeqChannel, updateFlags), 0x34},
-    FieldPin{offsetof(Audio_SeqChannel, effectVoiceMask), 0x38},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pitch_base), 0x2C},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pitch_slide), 0x30},
+    FieldPin{offsetof(VS::Audio::SeqChannel, update_flags), 0x34},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_voice_mask), 0x38},
 };
 static_assert(PinsMatch(kChannelTagFields, kChannelTagsAnchor));
 // The effect identity is pointer-wide here; the fields after it are pinned
 // from the next one.
-static_assert(offsetof(Audio_SeqChannel, effectId) + sizeof(std::uintptr_t) ==
-              offsetof(Audio_SeqChannel, effectPitchScale));
+static_assert(offsetof(VS::Audio::SeqChannel, effect_id) +
+                  sizeof(std::uintptr_t) ==
+              offsetof(VS::Audio::SeqChannel, effect_pitch_scale));
 
 constexpr FieldPin kChannelScaleAnchor{
-    offsetof(Audio_SeqChannel, effectPitchScale),
+    offsetof(VS::Audio::SeqChannel, effect_pitch_scale),
     0x40,
 };
 constexpr std::array kChannelLevelFields{
-    FieldPin{offsetof(Audio_SeqChannel, effectPitchScaleSlideStep), 0x44},
-    FieldPin{offsetof(Audio_SeqChannel, volume), 0x48},
-    FieldPin{offsetof(Audio_SeqChannel, volumeSlideStep), 0x4C},
-    FieldPin{offsetof(Audio_SeqChannel, pitchSlideStep), 0x50},
-    FieldPin{offsetof(Audio_SeqChannel, finePitchDelta), 0x54},
-    FieldPin{offsetof(Audio_SeqChannel, priority), 0x58},
-    FieldPin{offsetof(Audio_SeqChannel, keyOnVolume), 0x5C},
-    FieldPin{offsetof(Audio_SeqChannel, keyOnVolumeSlideStep), 0x60},
-    FieldPin{offsetof(Audio_SeqChannel, type), 0x64},
-    FieldPin{offsetof(Audio_SeqChannel, noteLength), 0x66},
-    FieldPin{offsetof(Audio_SeqChannel, gateLength), 0x68},
-    FieldPin{offsetof(Audio_SeqChannel, instrumentIndex), 0x6A},
-    FieldPin{offsetof(Audio_SeqChannel, effectPan), 0x6C},
-    FieldPin{offsetof(Audio_SeqChannel, effectPanSlideLength), 0x6E},
-    FieldPin{offsetof(Audio_SeqChannel, opcodeStepCounter), 0x70},
-    FieldPin{offsetof(Audio_SeqChannel, loopIterations), 0x72},
-    FieldPin{offsetof(Audio_SeqChannel, loopStepSnapshots), 0x7A},
-    FieldPin{offsetof(Audio_SeqChannel, volumeBalance), 0x82},
-    FieldPin{offsetof(Audio_SeqChannel, volumeBalanceSlideLength), 0x84},
-    FieldPin{offsetof(Audio_SeqChannel, effectPitchScaleSlideLength), 0x86},
-    FieldPin{offsetof(Audio_SeqChannel, volumeSlideLength), 0x88},
-    FieldPin{offsetof(Audio_SeqChannel, keyOnVolumeSlideLength), 0x8A},
-    FieldPin{offsetof(Audio_SeqChannel, effectVolumeSlideLength), 0x8C},
-    FieldPin{offsetof(Audio_SeqChannel, pan), 0x8E},
-    FieldPin{offsetof(Audio_SeqChannel, panSlideLength), 0x90},
-    FieldPin{offsetof(Audio_SeqChannel, pitchSlideTicksLeft), 0x92},
-    FieldPin{offsetof(Audio_SeqChannel, octave), 0x94},
-    FieldPin{offsetof(Audio_SeqChannel, pitchBendSlideLength), 0x96},
-    FieldPin{offsetof(Audio_SeqChannel, portamentoKey), 0x98},
-    FieldPin{offsetof(Audio_SeqChannel, portamentoSteps), 0x9A},
-    FieldPin{offsetof(Audio_SeqChannel, playModes), 0x9C},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_pitch_scale_slide_step),
+             0x44},
+    FieldPin{offsetof(VS::Audio::SeqChannel, volume), 0x48},
+    FieldPin{offsetof(VS::Audio::SeqChannel, volume_slide_step), 0x4C},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pitch_slide_step), 0x50},
+    FieldPin{offsetof(VS::Audio::SeqChannel, fine_pitch_delta), 0x54},
+    FieldPin{offsetof(VS::Audio::SeqChannel, priority), 0x58},
+    FieldPin{offsetof(VS::Audio::SeqChannel, key_on_volume), 0x5C},
+    FieldPin{offsetof(VS::Audio::SeqChannel, key_on_volume_slide_step), 0x60},
+    FieldPin{offsetof(VS::Audio::SeqChannel, type), 0x64},
+    FieldPin{offsetof(VS::Audio::SeqChannel, note_length), 0x66},
+    FieldPin{offsetof(VS::Audio::SeqChannel, gate_length), 0x68},
+    FieldPin{offsetof(VS::Audio::SeqChannel, instrument_index), 0x6A},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_pan), 0x6C},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_pan_slide_length), 0x6E},
+    FieldPin{offsetof(VS::Audio::SeqChannel, opcode_step_counter), 0x70},
+    FieldPin{offsetof(VS::Audio::SeqChannel, loop_iterations), 0x72},
+    FieldPin{offsetof(VS::Audio::SeqChannel, loop_step_snapshots), 0x7A},
+    FieldPin{offsetof(VS::Audio::SeqChannel, volume_balance), 0x82},
+    FieldPin{offsetof(VS::Audio::SeqChannel, volume_balance_slide_length),
+             0x84},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_pitch_scale_slide_length),
+             0x86},
+    FieldPin{offsetof(VS::Audio::SeqChannel, volume_slide_length), 0x88},
+    FieldPin{offsetof(VS::Audio::SeqChannel, key_on_volume_slide_length), 0x8A},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_volume_slide_length), 0x8C},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pan), 0x8E},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pan_slide_length), 0x90},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pitch_slide_ticks_left), 0x92},
+    FieldPin{offsetof(VS::Audio::SeqChannel, octave), 0x94},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pitch_bend_slide_length), 0x96},
+    FieldPin{offsetof(VS::Audio::SeqChannel, portamento_key), 0x98},
+    FieldPin{offsetof(VS::Audio::SeqChannel, portamento_steps), 0x9A},
+    FieldPin{offsetof(VS::Audio::SeqChannel, play_modes), 0x9C},
 };
 static_assert(PinsMatch(kChannelLevelFields, kChannelScaleAnchor));
 
 constexpr std::array kChannelOscillatorFields{
-    FieldPin{offsetof(Audio_SeqChannel, vibratoDelay), 0x9E},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoDelayLeft), 0xA0},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoRate), 0xA2},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoRateCounter), 0xA4},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoShape), 0xA6},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoBase), 0xA8},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoDepth), 0xAA},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoDepthSlideLength), 0xAC},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoDepthSlideStep), 0xAE},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloDelay), 0xB0},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloDelayLeft), 0xB2},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloRate), 0xB4},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloRateCounter), 0xB6},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloShape), 0xB8},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloDepth), 0xBA},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloDepthSlideLength), 0xBC},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloDepthSlideStep), 0xBE},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanRate), 0xC0},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanRateCounter), 0xC2},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanShape), 0xC4},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanDepth), 0xC6},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanDepthSlideLength), 0xC8},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanDepthSlideStep), 0xCA},
-    FieldPin{offsetof(Audio_SeqChannel, noiseTimer), 0xCC},
-    FieldPin{offsetof(Audio_SeqChannel, fmTimer), 0xCE},
-    FieldPin{offsetof(Audio_SeqChannel, loopDepth), 0xD0},
-    FieldPin{offsetof(Audio_SeqChannel, randomPitchDepth), 0xD2},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_delay), 0x9E},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_delay_left), 0xA0},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_rate), 0xA2},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_rate_counter), 0xA4},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_shape), 0xA6},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_base), 0xA8},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_depth), 0xAA},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_depth_slide_length), 0xAC},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_depth_slide_step), 0xAE},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_delay), 0xB0},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_delay_left), 0xB2},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_rate), 0xB4},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_rate_counter), 0xB6},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_shape), 0xB8},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_depth), 0xBA},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_depth_slide_length), 0xBC},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_depth_slide_step), 0xBE},
+    FieldPin{offsetof(VS::Audio::SeqChannel, auto_pan_rate), 0xC0},
+    FieldPin{offsetof(VS::Audio::SeqChannel, auto_pan_rate_counter), 0xC2},
+    FieldPin{offsetof(VS::Audio::SeqChannel, auto_pan_shape), 0xC4},
+    FieldPin{offsetof(VS::Audio::SeqChannel, auto_pan_depth), 0xC6},
+    FieldPin{offsetof(VS::Audio::SeqChannel, auto_pan_depth_slide_length),
+             0xC8},
+    FieldPin{offsetof(VS::Audio::SeqChannel, auto_pan_depth_slide_step), 0xCA},
+    FieldPin{offsetof(VS::Audio::SeqChannel, noise_timer), 0xCC},
+    FieldPin{offsetof(VS::Audio::SeqChannel, fm_timer), 0xCE},
+    FieldPin{offsetof(VS::Audio::SeqChannel, loop_depth), 0xD0},
+    FieldPin{offsetof(VS::Audio::SeqChannel, random_pitch_depth), 0xD2},
 };
 static_assert(PinsMatch(kChannelOscillatorFields, kChannelScaleAnchor));
 
 constexpr std::array kChannelTailFields{
-    FieldPin{offsetof(Audio_SeqChannel, storedNoteLength), 0xD4},
-    FieldPin{offsetof(Audio_SeqChannel, fixedNoteLength), 0xD6},
-    FieldPin{offsetof(Audio_SeqChannel, volumeBalanceSlideStep), 0xD8},
-    FieldPin{offsetof(Audio_SeqChannel, effectPanSlideStep), 0xDA},
-    FieldPin{offsetof(Audio_SeqChannel, effectVolume), 0xDC},
-    FieldPin{offsetof(Audio_SeqChannel, effectVolumeSlideStep), 0xDE},
-    FieldPin{offsetof(Audio_SeqChannel, panSlideStep), 0xE0},
-    FieldPin{offsetof(Audio_SeqChannel, transpose), 0xE2},
-    FieldPin{offsetof(Audio_SeqChannel, fineTune), 0xE4},
-    FieldPin{offsetof(Audio_SeqChannel, key), 0xE6},
-    FieldPin{offsetof(Audio_SeqChannel, pitchBendTarget), 0xE8},
-    FieldPin{offsetof(Audio_SeqChannel, portamentoTranspose), 0xEA},
-    FieldPin{offsetof(Audio_SeqChannel, vibratoPitch), 0xEC},
-    FieldPin{offsetof(Audio_SeqChannel, tremoloVolume), 0xEE},
-    FieldPin{offsetof(Audio_SeqChannel, autoPanOffset), 0xF0},
-    FieldPin{offsetof(Audio_SeqChannel, voice), 0xF4},
-    FieldPin{sizeof(Audio_SeqChannel), 0x110},
+    FieldPin{offsetof(VS::Audio::SeqChannel, stored_note_length), 0xD4},
+    FieldPin{offsetof(VS::Audio::SeqChannel, fixed_note_length), 0xD6},
+    FieldPin{offsetof(VS::Audio::SeqChannel, volume_balance_slide_step), 0xD8},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_pan_slide_step), 0xDA},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_volume), 0xDC},
+    FieldPin{offsetof(VS::Audio::SeqChannel, effect_volume_slide_step), 0xDE},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pan_slide_step), 0xE0},
+    FieldPin{offsetof(VS::Audio::SeqChannel, transpose), 0xE2},
+    FieldPin{offsetof(VS::Audio::SeqChannel, fine_tune), 0xE4},
+    FieldPin{offsetof(VS::Audio::SeqChannel, key), 0xE6},
+    FieldPin{offsetof(VS::Audio::SeqChannel, pitch_bend_target), 0xE8},
+    FieldPin{offsetof(VS::Audio::SeqChannel, portamento_transpose), 0xEA},
+    FieldPin{offsetof(VS::Audio::SeqChannel, vibrato_pitch), 0xEC},
+    FieldPin{offsetof(VS::Audio::SeqChannel, tremolo_volume), 0xEE},
+    FieldPin{offsetof(VS::Audio::SeqChannel, auto_pan_offset), 0xF0},
+    FieldPin{offsetof(VS::Audio::SeqChannel, voice), 0xF4},
+    FieldPin{sizeof(VS::Audio::SeqChannel), 0x110},
 };
 static_assert(PinsMatch(kChannelTailFields, kChannelScaleAnchor));
 
 // FSoundVoiceParams (src/include/sound.h:316).
 constexpr std::array kVoiceFields{
-    FieldPin{offsetof(Audio_VoiceParams, assignedVoice), 0x00},
-    FieldPin{offsetof(Audio_VoiceParams, dirtyFlags), 0x04},
-    FieldPin{offsetof(Audio_VoiceParams, sampleStart), 0x08},
-    FieldPin{offsetof(Audio_VoiceParams, loopStart), 0x0C},
-    FieldPin{offsetof(Audio_VoiceParams, sampleRate), 0x10},
-    FieldPin{offsetof(Audio_VoiceParams, adsrLower), 0x12},
-    FieldPin{offsetof(Audio_VoiceParams, adsrUpper), 0x14},
-    FieldPin{offsetof(Audio_VoiceParams, volumeScale), 0x16},
-    FieldPin{sizeof(Audio_VoiceParams), 0x1C},
+    FieldPin{offsetof(VS::Audio::VoiceParams, assigned_voice), 0x00},
+    FieldPin{offsetof(VS::Audio::VoiceParams, dirty_flags), 0x04},
+    FieldPin{offsetof(VS::Audio::VoiceParams, sample_start), 0x08},
+    FieldPin{offsetof(VS::Audio::VoiceParams, loop_start), 0x0C},
+    FieldPin{offsetof(VS::Audio::VoiceParams, sample_rate), 0x10},
+    FieldPin{offsetof(VS::Audio::VoiceParams, adsr_lower), 0x12},
+    FieldPin{offsetof(VS::Audio::VoiceParams, adsr_upper), 0x14},
+    FieldPin{offsetof(VS::Audio::VoiceParams, volume_scale), 0x16},
+    FieldPin{sizeof(VS::Audio::VoiceParams), 0x1C},
 };
 static_assert(PinsMatch(kVoiceFields, {0, 0}));
 
 // FSoundInstrumentInfo, the instrument table entries.
 constexpr std::array kInstrumentFields{
-    FieldPin{offsetof(Audio_Instrument, sampleStart), 0x00},
-    FieldPin{offsetof(Audio_Instrument, loopStart), 0x04},
-    FieldPin{offsetof(Audio_Instrument, fineTune), 0x08},
-    FieldPin{offsetof(Audio_Instrument, rootNote), 0x0A},
-    FieldPin{offsetof(Audio_Instrument, adsrLower), 0x0C},
-    FieldPin{offsetof(Audio_Instrument, adsrUpper), 0x0E},
-    FieldPin{sizeof(Audio_Instrument), 0x10},
+    FieldPin{offsetof(VS::Audio::Instrument, sample_start), 0x00},
+    FieldPin{offsetof(VS::Audio::Instrument, loop_start), 0x04},
+    FieldPin{offsetof(VS::Audio::Instrument, fine_tune), 0x08},
+    FieldPin{offsetof(VS::Audio::Instrument, root_note), 0x0A},
+    FieldPin{offsetof(VS::Audio::Instrument, adsr_lower), 0x0C},
+    FieldPin{offsetof(VS::Audio::Instrument, adsr_upper), 0x0E},
+    FieldPin{sizeof(VS::Audio::Instrument), 0x10},
 };
 static_assert(PinsMatch(kInstrumentFields, {0, 0}));
 
 // FSoundChannelConfig (src/include/sound.h:492): the masks and tempo before
 // the sequence pointers, then the fields after them from voiceSearchStart.
 constexpr std::array kMusicLayerFields{
-    FieldPin{offsetof(Audio_MusicConfig, statusFlags), 0x00},
-    FieldPin{offsetof(Audio_MusicConfig, activeChannels), 0x04},
-    FieldPin{offsetof(Audio_MusicConfig, keyedVoices), 0x08},
-    FieldPin{offsetof(Audio_MusicConfig, allocatedVoices), 0x0C},
-    FieldPin{offsetof(Audio_MusicConfig, pendingKeyOn), 0x10},
-    FieldPin{offsetof(Audio_MusicConfig, activeNotes), 0x14},
-    FieldPin{offsetof(Audio_MusicConfig, pendingKeyOff), 0x18},
-    FieldPin{offsetof(Audio_MusicConfig, pausedChannels), 0x1C},
-    FieldPin{offsetof(Audio_MusicConfig, tempo), 0x20},
-    FieldPin{offsetof(Audio_MusicConfig, tempoSlideStep), 0x24},
-    FieldPin{offsetof(Audio_MusicConfig, tickAccumulator), 0x28},
-    FieldPin{offsetof(Audio_MusicConfig, resumeKeyOnMask), 0x2C},
-    FieldPin{offsetof(Audio_MusicConfig, pushReleaseMask), 0x30},
-    FieldPin{offsetof(Audio_MusicConfig, reserved34), 0x34},
-    FieldPin{offsetof(Audio_MusicConfig, sequenceBase), 0x38},
+    FieldPin{offsetof(VS::Audio::MusicConfig, status_flags), 0x00},
+    FieldPin{offsetof(VS::Audio::MusicConfig, active_channels), 0x04},
+    FieldPin{offsetof(VS::Audio::MusicConfig, keyed_voices), 0x08},
+    FieldPin{offsetof(VS::Audio::MusicConfig, allocated_voices), 0x0C},
+    FieldPin{offsetof(VS::Audio::MusicConfig, pending_key_on), 0x10},
+    FieldPin{offsetof(VS::Audio::MusicConfig, active_notes), 0x14},
+    FieldPin{offsetof(VS::Audio::MusicConfig, pending_key_off), 0x18},
+    FieldPin{offsetof(VS::Audio::MusicConfig, paused_channels), 0x1C},
+    FieldPin{offsetof(VS::Audio::MusicConfig, tempo), 0x20},
+    FieldPin{offsetof(VS::Audio::MusicConfig, tempo_slide_step), 0x24},
+    FieldPin{offsetof(VS::Audio::MusicConfig, tick_accumulator), 0x28},
+    FieldPin{offsetof(VS::Audio::MusicConfig, resume_key_on_mask), 0x2C},
+    FieldPin{offsetof(VS::Audio::MusicConfig, push_release_mask), 0x30},
+    FieldPin{offsetof(VS::Audio::MusicConfig, reserved34), 0x34},
+    FieldPin{offsetof(VS::Audio::MusicConfig, sequence_base), 0x38},
 };
 static_assert(PinsMatch(kMusicLayerFields, {0, 0}));
-static_assert(offsetof(Audio_MusicConfig, patchTable) ==
-              offsetof(Audio_MusicConfig, sequenceBase) +
+static_assert(offsetof(VS::Audio::MusicConfig, patch_table) ==
+              offsetof(VS::Audio::MusicConfig, sequence_base) +
                   sizeof(std::uintptr_t));
-static_assert(offsetof(Audio_MusicConfig, keymapTable) ==
-              offsetof(Audio_MusicConfig, patchTable) + kNativePointerBytes);
-static_assert(offsetof(Audio_MusicConfig, noteRemapTable) ==
-              offsetof(Audio_MusicConfig, keymapTable) + kNativePointerBytes);
-static_assert(offsetof(Audio_MusicConfig, voiceSearchStart) ==
-              offsetof(Audio_MusicConfig, noteRemapTable) +
+static_assert(offsetof(VS::Audio::MusicConfig, keymap_table) ==
+              offsetof(VS::Audio::MusicConfig, patch_table) +
+                  kNativePointerBytes);
+static_assert(offsetof(VS::Audio::MusicConfig, note_remap_table) ==
+              offsetof(VS::Audio::MusicConfig, keymap_table) +
+                  kNativePointerBytes);
+static_assert(offsetof(VS::Audio::MusicConfig, voice_search_start) ==
+              offsetof(VS::Audio::MusicConfig, note_remap_table) +
                   kNativePointerBytes);
 constexpr FieldPin kMusicLayerModeAnchor{
-    offsetof(Audio_MusicConfig, voiceSearchStart),
+    offsetof(VS::Audio::MusicConfig, voice_search_start),
     0x48,
 };
 constexpr std::array kMusicLayerModeFields{
-    FieldPin{offsetof(Audio_MusicConfig, noiseChannels), 0x4C},
-    FieldPin{offsetof(Audio_MusicConfig, reverbChannels), 0x50},
-    FieldPin{offsetof(Audio_MusicConfig, fmChannels), 0x54},
-    FieldPin{offsetof(Audio_MusicConfig, reverbDepth), 0x58},
-    FieldPin{offsetof(Audio_MusicConfig, reverbDepthSlideStep), 0x5C},
-    FieldPin{offsetof(Audio_MusicConfig, masterVolume), 0x60},
-    FieldPin{offsetof(Audio_MusicConfig, masterVolumeStep), 0x64},
-    FieldPin{offsetof(Audio_MusicConfig, masterVolumeSlideLength), 0x68},
-    FieldPin{offsetof(Audio_MusicConfig, reverbDepthSlideLength), 0x6A},
-    FieldPin{offsetof(Audio_MusicConfig, tempoSlideLength), 0x6C},
-    FieldPin{offsetof(Audio_MusicConfig, musicId), 0x6E},
-    FieldPin{offsetof(Audio_MusicConfig, jumpThreshold), 0x70},
-    FieldPin{offsetof(Audio_MusicConfig, noiseClock), 0x72},
-    FieldPin{offsetof(Audio_MusicConfig, timerUpper), 0x74},
-    FieldPin{offsetof(Audio_MusicConfig, timerUpperCount), 0x76},
-    FieldPin{offsetof(Audio_MusicConfig, timerLower), 0x78},
-    FieldPin{offsetof(Audio_MusicConfig, timerLowerCount), 0x7A},
-    FieldPin{offsetof(Audio_MusicConfig, timerTop), 0x7C},
-    FieldPin{offsetof(Audio_MusicConfig, reserved80), 0x80},
-    FieldPin{sizeof(Audio_MusicConfig), 0xA0},
+    FieldPin{offsetof(VS::Audio::MusicConfig, noise_channels), 0x4C},
+    FieldPin{offsetof(VS::Audio::MusicConfig, reverb_channels), 0x50},
+    FieldPin{offsetof(VS::Audio::MusicConfig, fm_channels), 0x54},
+    FieldPin{offsetof(VS::Audio::MusicConfig, reverb_depth), 0x58},
+    FieldPin{offsetof(VS::Audio::MusicConfig, reverb_depth_slide_step), 0x5C},
+    FieldPin{offsetof(VS::Audio::MusicConfig, master_volume), 0x60},
+    FieldPin{offsetof(VS::Audio::MusicConfig, master_volume_step), 0x64},
+    FieldPin{offsetof(VS::Audio::MusicConfig, master_volume_slide_length),
+             0x68},
+    FieldPin{offsetof(VS::Audio::MusicConfig, reverb_depth_slide_length), 0x6A},
+    FieldPin{offsetof(VS::Audio::MusicConfig, tempo_slide_length), 0x6C},
+    FieldPin{offsetof(VS::Audio::MusicConfig, music_id), 0x6E},
+    FieldPin{offsetof(VS::Audio::MusicConfig, jump_threshold), 0x70},
+    FieldPin{offsetof(VS::Audio::MusicConfig, noise_clock), 0x72},
+    FieldPin{offsetof(VS::Audio::MusicConfig, timer_upper), 0x74},
+    FieldPin{offsetof(VS::Audio::MusicConfig, timer_upper_count), 0x76},
+    FieldPin{offsetof(VS::Audio::MusicConfig, timer_lower), 0x78},
+    FieldPin{offsetof(VS::Audio::MusicConfig, timer_lower_count), 0x7A},
+    FieldPin{offsetof(VS::Audio::MusicConfig, timer_top), 0x7C},
+    FieldPin{offsetof(VS::Audio::MusicConfig, reserved80), 0x80},
+    FieldPin{sizeof(VS::Audio::MusicConfig), 0xA0},
 };
 static_assert(PinsMatch(kMusicLayerModeFields, kMusicLayerModeAnchor));
 
 // FSoundVoiceSchedulerState (src/include/sound.h:274) and the driver flags.
 constexpr std::array kSchedulerFields{
-    FieldPin{offsetof(Audio_VoiceScheduler, activeVoices), 0x00},
-    FieldPin{offsetof(Audio_VoiceScheduler, pendingKeyOn), 0x04},
-    FieldPin{offsetof(Audio_VoiceScheduler, keyedVoices), 0x08},
-    FieldPin{offsetof(Audio_VoiceScheduler, pendingKeyOff), 0x0C},
-    FieldPin{offsetof(Audio_VoiceScheduler, pausedEffectVoices), 0x10},
-    FieldPin{offsetof(Audio_VoiceScheduler, effectTempo), 0x14},
-    FieldPin{offsetof(Audio_VoiceScheduler, tempoAccumulator), 0x18},
-    FieldPin{offsetof(Audio_VoiceScheduler, noiseVoices), 0x1C},
-    FieldPin{offsetof(Audio_VoiceScheduler, reverbVoices), 0x20},
-    FieldPin{offsetof(Audio_VoiceScheduler, fmVoices), 0x24},
-    FieldPin{offsetof(Audio_VoiceScheduler, noiseClock), 0x28},
-    FieldPin{sizeof(Audio_VoiceScheduler), 0x30},
-    FieldPin{offsetof(Audio_DriverFlags, controlLatches), 0x00},
-    FieldPin{offsetof(Audio_DriverFlags, mixBehavior), 0x04},
-    FieldPin{offsetof(Audio_DriverFlags, updateFlags), 0x08},
-    FieldPin{sizeof(Audio_DriverFlags), 0x0C},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, active_voices), 0x00},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, pending_key_on), 0x04},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, keyed_voices), 0x08},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, pending_key_off), 0x0C},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, paused_effect_voices), 0x10},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, effect_tempo), 0x14},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, tempo_accumulator), 0x18},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, noise_voices), 0x1C},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, reverb_voices), 0x20},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, fm_voices), 0x24},
+    FieldPin{offsetof(VS::Audio::VoiceScheduler, noise_clock), 0x28},
+    FieldPin{sizeof(VS::Audio::VoiceScheduler), 0x30},
+    FieldPin{offsetof(VS::Audio::DriverFlags, control_latches), 0x00},
+    FieldPin{offsetof(VS::Audio::DriverFlags, mix_behavior), 0x04},
+    FieldPin{offsetof(VS::Audio::DriverFlags, update_flags), 0x08},
+    FieldPin{sizeof(VS::Audio::DriverFlags), 0x0C},
 };
 static_assert(PinsMatch(kSchedulerFields, {0, 0}));
 
 // Every byte selector names a waveform slot and every instrument index the
 // table check accepts names an entry.
-static_assert(std::size(Audio_Seq_kLfoWaveforms) ==
+static_assert(std::size(VS::Audio::Seq::kLfoWaveforms) ==
               std::size_t{std::numeric_limits<std::uint8_t>::max()} + 1);
-static_assert(std::size(Audio_Samples_instruments) ==
+static_assert(std::size(VS::Audio::Samples::instruments) ==
               Samples::kInstrumentSlotCount);
 
 // Copies between a typed field and the legacy field it mirrors, which keep
@@ -323,81 +338,81 @@ struct StoreField {
 };
 template <typename Typed, typename Legacy, typename Visit>
 void VisitLevelFields(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.update_flags, legacy.updateFlags);
+  visit(typed.update_flags, legacy.update_flags);
   visit(typed.volume, legacy.volume);
-  visit(typed.volume_slide_step, legacy.volumeSlideStep);
-  visit(typed.fine_pitch_delta, legacy.finePitchDelta);
-  visit(typed.key_on_volume, legacy.keyOnVolume);
-  visit(typed.key_on_volume_slide_step, legacy.keyOnVolumeSlideStep);
-  visit(typed.note_length, legacy.noteLength);
-  visit(typed.gate_length, legacy.gateLength);
-  visit(typed.instrument_index, legacy.instrumentIndex);
-  visit(typed.volume_balance, legacy.volumeBalance);
-  visit(typed.volume_balance_slide_length, legacy.volumeBalanceSlideLength);
-  visit(typed.volume_slide_length, legacy.volumeSlideLength);
-  visit(typed.key_on_volume_slide_length, legacy.keyOnVolumeSlideLength);
-  visit(typed.effect_volume_slide_length, legacy.effectVolumeSlideLength);
+  visit(typed.volume_slide_step, legacy.volume_slide_step);
+  visit(typed.fine_pitch_delta, legacy.fine_pitch_delta);
+  visit(typed.key_on_volume, legacy.key_on_volume);
+  visit(typed.key_on_volume_slide_step, legacy.key_on_volume_slide_step);
+  visit(typed.note_length, legacy.note_length);
+  visit(typed.gate_length, legacy.gate_length);
+  visit(typed.instrument_index, legacy.instrument_index);
+  visit(typed.volume_balance, legacy.volume_balance);
+  visit(typed.volume_balance_slide_length, legacy.volume_balance_slide_length);
+  visit(typed.volume_slide_length, legacy.volume_slide_length);
+  visit(typed.key_on_volume_slide_length, legacy.key_on_volume_slide_length);
+  visit(typed.effect_volume_slide_length, legacy.effect_volume_slide_length);
   visit(typed.pan, legacy.pan);
-  visit(typed.pan_slide_length, legacy.panSlideLength);
+  visit(typed.pan_slide_length, legacy.pan_slide_length);
   visit(typed.octave, legacy.octave);
-  visit(typed.pitch_bend_slide_length, legacy.pitchBendSlideLength);
-  visit(typed.portamento_key, legacy.portamentoKey);
-  visit(typed.portamento_steps, legacy.portamentoSteps);
-  visit(typed.play_modes, legacy.playModes);
-  visit(typed.stored_note_length, legacy.storedNoteLength);
-  visit(typed.fixed_note_length, legacy.fixedNoteLength);
-  visit(typed.volume_balance_slide_step, legacy.volumeBalanceSlideStep);
-  visit(typed.effect_volume, legacy.effectVolume);
-  visit(typed.effect_volume_slide_step, legacy.effectVolumeSlideStep);
-  visit(typed.pan_slide_step, legacy.panSlideStep);
+  visit(typed.pitch_bend_slide_length, legacy.pitch_bend_slide_length);
+  visit(typed.portamento_key, legacy.portamento_key);
+  visit(typed.portamento_steps, legacy.portamento_steps);
+  visit(typed.play_modes, legacy.play_modes);
+  visit(typed.stored_note_length, legacy.stored_note_length);
+  visit(typed.fixed_note_length, legacy.fixed_note_length);
+  visit(typed.volume_balance_slide_step, legacy.volume_balance_slide_step);
+  visit(typed.effect_volume, legacy.effect_volume);
+  visit(typed.effect_volume_slide_step, legacy.effect_volume_slide_step);
+  visit(typed.pan_slide_step, legacy.pan_slide_step);
   visit(typed.transpose, legacy.transpose);
-  visit(typed.fine_tune, legacy.fineTune);
+  visit(typed.fine_tune, legacy.fine_tune);
   visit(typed.key, legacy.key);
-  visit(typed.pitch_bend_target, legacy.pitchBendTarget);
-  visit(typed.portamento_transpose, legacy.portamentoTranspose);
+  visit(typed.pitch_bend_target, legacy.pitch_bend_target);
+  visit(typed.portamento_transpose, legacy.portamento_transpose);
 }
 
 template <typename Typed, typename Legacy, typename Visit>
 void VisitOscillatorFields(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.vibrato_delay, legacy.vibratoDelay);
-  visit(typed.vibrato_delay_left, legacy.vibratoDelayLeft);
-  visit(typed.vibrato_rate, legacy.vibratoRate);
-  visit(typed.vibrato_rate_counter, legacy.vibratoRateCounter);
-  visit(typed.vibrato_shape, legacy.vibratoShape);
-  visit(typed.vibrato_base, legacy.vibratoBase);
-  visit(typed.vibrato_depth, legacy.vibratoDepth);
-  visit(typed.vibrato_depth_slide_length, legacy.vibratoDepthSlideLength);
-  visit(typed.vibrato_depth_slide_step, legacy.vibratoDepthSlideStep);
-  visit(typed.vibrato_pitch, legacy.vibratoPitch);
-  visit(typed.tremolo_delay, legacy.tremoloDelay);
-  visit(typed.tremolo_delay_left, legacy.tremoloDelayLeft);
-  visit(typed.tremolo_rate, legacy.tremoloRate);
-  visit(typed.tremolo_rate_counter, legacy.tremoloRateCounter);
-  visit(typed.tremolo_shape, legacy.tremoloShape);
-  visit(typed.tremolo_depth, legacy.tremoloDepth);
-  visit(typed.tremolo_depth_slide_length, legacy.tremoloDepthSlideLength);
-  visit(typed.tremolo_depth_slide_step, legacy.tremoloDepthSlideStep);
-  visit(typed.tremolo_volume, legacy.tremoloVolume);
-  visit(typed.auto_pan_rate, legacy.autoPanRate);
-  visit(typed.auto_pan_rate_counter, legacy.autoPanRateCounter);
-  visit(typed.auto_pan_shape, legacy.autoPanShape);
-  visit(typed.auto_pan_depth, legacy.autoPanDepth);
-  visit(typed.auto_pan_depth_slide_length, legacy.autoPanDepthSlideLength);
-  visit(typed.auto_pan_depth_slide_step, legacy.autoPanDepthSlideStep);
-  visit(typed.auto_pan_offset, legacy.autoPanOffset);
-  visit(typed.noise_timer, legacy.noiseTimer);
-  visit(typed.fm_timer, legacy.fmTimer);
-  visit(typed.random_pitch_depth, legacy.randomPitchDepth);
+  visit(typed.vibrato_delay, legacy.vibrato_delay);
+  visit(typed.vibrato_delay_left, legacy.vibrato_delay_left);
+  visit(typed.vibrato_rate, legacy.vibrato_rate);
+  visit(typed.vibrato_rate_counter, legacy.vibrato_rate_counter);
+  visit(typed.vibrato_shape, legacy.vibrato_shape);
+  visit(typed.vibrato_base, legacy.vibrato_base);
+  visit(typed.vibrato_depth, legacy.vibrato_depth);
+  visit(typed.vibrato_depth_slide_length, legacy.vibrato_depth_slide_length);
+  visit(typed.vibrato_depth_slide_step, legacy.vibrato_depth_slide_step);
+  visit(typed.vibrato_pitch, legacy.vibrato_pitch);
+  visit(typed.tremolo_delay, legacy.tremolo_delay);
+  visit(typed.tremolo_delay_left, legacy.tremolo_delay_left);
+  visit(typed.tremolo_rate, legacy.tremolo_rate);
+  visit(typed.tremolo_rate_counter, legacy.tremolo_rate_counter);
+  visit(typed.tremolo_shape, legacy.tremolo_shape);
+  visit(typed.tremolo_depth, legacy.tremolo_depth);
+  visit(typed.tremolo_depth_slide_length, legacy.tremolo_depth_slide_length);
+  visit(typed.tremolo_depth_slide_step, legacy.tremolo_depth_slide_step);
+  visit(typed.tremolo_volume, legacy.tremolo_volume);
+  visit(typed.auto_pan_rate, legacy.auto_pan_rate);
+  visit(typed.auto_pan_rate_counter, legacy.auto_pan_rate_counter);
+  visit(typed.auto_pan_shape, legacy.auto_pan_shape);
+  visit(typed.auto_pan_depth, legacy.auto_pan_depth);
+  visit(typed.auto_pan_depth_slide_length, legacy.auto_pan_depth_slide_length);
+  visit(typed.auto_pan_depth_slide_step, legacy.auto_pan_depth_slide_step);
+  visit(typed.auto_pan_offset, legacy.auto_pan_offset);
+  visit(typed.noise_timer, legacy.noise_timer);
+  visit(typed.fm_timer, legacy.fm_timer);
+  visit(typed.random_pitch_depth, legacy.random_pitch_depth);
 }
 
 template <typename Typed, typename Legacy, typename Visit>
 void VisitVoiceFields(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.dirty_flags, legacy.dirtyFlags);
-  visit(typed.sample_start, legacy.sampleStart);
-  visit(typed.loop_start, legacy.loopStart);
-  visit(typed.adsr_lower, legacy.adsrLower);
-  visit(typed.adsr_upper, legacy.adsrUpper);
-  visit(typed.volume_scale, legacy.volumeScale);
+  visit(typed.dirty_flags, legacy.dirty_flags);
+  visit(typed.sample_start, legacy.sample_start);
+  visit(typed.loop_start, legacy.loop_start);
+  visit(typed.adsr_lower, legacy.adsr_lower);
+  visit(typed.adsr_upper, legacy.adsr_upper);
+  visit(typed.volume_scale, legacy.volume_scale);
 }
 
 template <typename Typed, typename Legacy, typename Visit>
@@ -410,96 +425,98 @@ void VisitChannelFields(Typed& typed, Legacy& legacy, Visit visit) {
 // The loop stack's counters; its positions are pointers (LoadProgram).
 template <typename Typed, typename Legacy, typename Visit>
 void VisitProgramFields(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.step_counter, legacy.opcodeStepCounter);
+  visit(typed.step_counter, legacy.opcode_step_counter);
   for (std::size_t depth = 0; depth < kLoopDepthCount; ++depth) {
-    visit(typed.loop_iterations[depth], legacy.loopIterations[depth]);
-    visit(typed.loop_step_snapshots[depth], legacy.loopStepSnapshots[depth]);
+    visit(typed.loop_iterations[depth], legacy.loop_iterations[depth]);
+    visit(typed.loop_step_snapshots[depth], legacy.loop_step_snapshots[depth]);
   }
-  visit(typed.loop_depth, legacy.loopDepth);
+  visit(typed.loop_depth, legacy.loop_depth);
 }
 
 template <typename Typed, typename Legacy, typename Visit>
 void VisitPitchSlideFields(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.slide, legacy.pitchSlide);
-  visit(typed.step, legacy.pitchSlideStep);
-  visit(typed.ticks_left, legacy.pitchSlideTicksLeft);
+  visit(typed.slide, legacy.pitch_slide);
+  visit(typed.step, legacy.pitch_slide_step);
+  visit(typed.ticks_left, legacy.pitch_slide_ticks_left);
 }
 
 template <typename Typed, typename Legacy, typename Visit>
 void VisitLayerMasks(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.status_flags, legacy.statusFlags);
-  visit(typed.active_channels, legacy.activeChannels);
-  visit(typed.keyed_voices, legacy.keyedVoices);
-  visit(typed.allocated_voices, legacy.allocatedVoices);
-  visit(typed.pending_key_on, legacy.pendingKeyOn);
-  visit(typed.active_notes, legacy.activeNotes);
-  visit(typed.pending_key_off, legacy.pendingKeyOff);
-  visit(typed.paused_channels, legacy.pausedChannels);
+  visit(typed.status_flags, legacy.status_flags);
+  visit(typed.active_channels, legacy.active_channels);
+  visit(typed.keyed_voices, legacy.keyed_voices);
+  visit(typed.allocated_voices, legacy.allocated_voices);
+  visit(typed.pending_key_on, legacy.pending_key_on);
+  visit(typed.active_notes, legacy.active_notes);
+  visit(typed.pending_key_off, legacy.pending_key_off);
+  visit(typed.paused_channels, legacy.paused_channels);
   visit(typed.tempo, legacy.tempo);
-  visit(typed.tempo_slide_step, legacy.tempoSlideStep);
-  visit(typed.tick_accumulator, legacy.tickAccumulator);
-  visit(typed.resume_key_on_mask, legacy.resumeKeyOnMask);
-  visit(typed.push_release_mask, legacy.pushReleaseMask);
+  visit(typed.tempo_slide_step, legacy.tempo_slide_step);
+  visit(typed.tick_accumulator, legacy.tick_accumulator);
+  visit(typed.resume_key_on_mask, legacy.resume_key_on_mask);
+  visit(typed.push_release_mask, legacy.push_release_mask);
   visit(typed.sequence_control_value, legacy.reserved34);
-  visit(typed.voice_search_start, legacy.voiceSearchStart);
-  visit(typed.noise_channels, legacy.noiseChannels);
-  visit(typed.reverb_channels, legacy.reverbChannels);
-  visit(typed.fm_channels, legacy.fmChannels);
+  visit(typed.voice_search_start, legacy.voice_search_start);
+  visit(typed.noise_channels, legacy.noise_channels);
+  visit(typed.reverb_channels, legacy.reverb_channels);
+  visit(typed.fm_channels, legacy.fm_channels);
 }
 
 template <typename Typed, typename Legacy, typename Visit>
 void VisitLayerLevels(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.reverb_depth, legacy.reverbDepth);
-  visit(typed.reverb_depth_slide_step, legacy.reverbDepthSlideStep);
-  visit(typed.master_volume, legacy.masterVolume);
-  visit(typed.master_volume_step, legacy.masterVolumeStep);
-  visit(typed.master_volume_slide_length, legacy.masterVolumeSlideLength);
-  visit(typed.reverb_depth_slide_length, legacy.reverbDepthSlideLength);
-  visit(typed.tempo_slide_length, legacy.tempoSlideLength);
-  visit(typed.music_id, legacy.musicId);
-  visit(typed.jump_threshold, legacy.jumpThreshold);
-  visit(typed.noise_clock, legacy.noiseClock);
-  visit(typed.timer_upper, legacy.timerUpper);
-  visit(typed.timer_upper_count, legacy.timerUpperCount);
-  visit(typed.timer_lower, legacy.timerLower);
-  visit(typed.timer_lower_count, legacy.timerLowerCount);
-  visit(typed.timer_top, legacy.timerTop);
+  visit(typed.reverb_depth, legacy.reverb_depth);
+  visit(typed.reverb_depth_slide_step, legacy.reverb_depth_slide_step);
+  visit(typed.master_volume, legacy.master_volume);
+  visit(typed.master_volume_step, legacy.master_volume_step);
+  visit(typed.master_volume_slide_length, legacy.master_volume_slide_length);
+  visit(typed.reverb_depth_slide_length, legacy.reverb_depth_slide_length);
+  visit(typed.tempo_slide_length, legacy.tempo_slide_length);
+  visit(typed.music_id, legacy.music_id);
+  visit(typed.jump_threshold, legacy.jump_threshold);
+  visit(typed.noise_clock, legacy.noise_clock);
+  visit(typed.timer_upper, legacy.timer_upper);
+  visit(typed.timer_upper_count, legacy.timer_upper_count);
+  visit(typed.timer_lower, legacy.timer_lower);
+  visit(typed.timer_lower_count, legacy.timer_lower_count);
+  visit(typed.timer_top, legacy.timer_top);
 }
 
 template <typename Typed, typename Legacy, typename Visit>
 void VisitSchedulerFields(Typed& typed, Legacy& legacy, Visit visit) {
-  visit(typed.active_voices, legacy.activeVoices);
-  visit(typed.pending_key_on, legacy.pendingKeyOn);
-  visit(typed.keyed_voices, legacy.keyedVoices);
-  visit(typed.pending_key_off, legacy.pendingKeyOff);
-  visit(typed.paused_effect_voices, legacy.pausedEffectVoices);
-  visit(typed.effect_tempo, legacy.effectTempo);
-  visit(typed.tempo_accumulator, legacy.tempoAccumulator);
-  visit(typed.noise_voices, legacy.noiseVoices);
-  visit(typed.reverb_voices, legacy.reverbVoices);
-  visit(typed.fm_voices, legacy.fmVoices);
-  visit(typed.noise_clock, legacy.noiseClock);
+  visit(typed.active_voices, legacy.active_voices);
+  visit(typed.pending_key_on, legacy.pending_key_on);
+  visit(typed.keyed_voices, legacy.keyed_voices);
+  visit(typed.pending_key_off, legacy.pending_key_off);
+  visit(typed.paused_effect_voices, legacy.paused_effect_voices);
+  visit(typed.effect_tempo, legacy.effect_tempo);
+  visit(typed.tempo_accumulator, legacy.tempo_accumulator);
+  visit(typed.noise_voices, legacy.noise_voices);
+  visit(typed.reverb_voices, legacy.reverb_voices);
+  visit(typed.fm_voices, legacy.fm_voices);
+  visit(typed.noise_clock, legacy.noise_clock);
 }
 std::int16_t* Waveform(std::uint8_t shape) {
-  return Audio_Seq_kLfoWaveforms[shape];
+  return VS::Audio::Seq::kLfoWaveforms[shape];
 }
 
 // The note remap table `table` names as an offset into the remap tables.
-std::optional<std::uint16_t> NoteRemapOffset(const Audio_KeymapEntry* table) {
+std::optional<std::uint16_t> NoteRemapOffset(
+    const VS::Audio::KeymapEntry* table) {
   const auto address = reinterpret_cast<std::uintptr_t>(table);
-  const auto start =
-      reinterpret_cast<std::uintptr_t>(std::data(Audio_Seq_kNoteRemapTables));
+  const auto start = reinterpret_cast<std::uintptr_t>(
+      std::data(VS::Audio::Seq::kNoteRemapTables));
   if (table == nullptr || address < start ||
-      address - start >= sizeof(Audio_Seq_kNoteRemapTables)) {
+      address - start >= sizeof(VS::Audio::Seq::kNoteRemapTables)) {
     return std::nullopt;
   }
   return static_cast<std::uint16_t>(address - start);
 }
 
 // The block of `size` bytes at `base` when `address` lies in it.
-std::optional<LiveProgramMemory> Containing(char* address, char* base,
+std::optional<LiveProgramMemory> Containing(std::uint8_t* address,
+                                            std::uint8_t* base,
                                             std::size_t size) {
-  const std::less<const char*> before;
+  const std::less<const std::uint8_t*> before;
   if (before(address, base) || !before(address, base + size)) {
     return std::nullopt;
   }
@@ -507,8 +524,9 @@ std::optional<LiveProgramMemory> Containing(char* address, char* base,
 }
 
 // The offset of `pointer` in `memory`; its end is a position too.
-std::uint32_t OffsetOf(const char* pointer, const LiveProgramMemory& memory) {
-  const std::less<const char*> before;
+std::uint32_t OffsetOf(const std::uint8_t* pointer,
+                       const LiveProgramMemory& memory) {
+  const std::less<const std::uint8_t*> before;
   if (pointer == nullptr || memory.base == nullptr ||
       before(pointer, memory.base) ||
       before(memory.base + memory.size, pointer)) {
@@ -517,7 +535,7 @@ std::uint32_t OffsetOf(const char* pointer, const LiveProgramMemory& memory) {
   return static_cast<std::uint32_t>(pointer - memory.base);
 }
 
-void StorePosition(char*& pointer, std::uint32_t offset,
+void StorePosition(std::uint8_t*& pointer, std::uint32_t offset,
                    const LiveProgramMemory& memory) {
   if (offset == kOutsideProgram || memory.base == nullptr ||
       offset > memory.size) {
@@ -527,122 +545,127 @@ void StorePosition(char*& pointer, std::uint32_t offset,
 }
 
 std::uint64_t refusals = 0;
-const Audio_SeqChannel* scoped_channel = nullptr;
+const VS::Audio::SeqChannel* scoped_channel = nullptr;
 LiveProgramMemory scoped_memory;
 }  // namespace
 
 ProgramData LiveProgramMemory::View() const {
   if (base == nullptr) return {};
-  return {reinterpret_cast<const std::uint8_t*>(base), size};
+  return {base, size};
 }
 
-LiveProgramMemory LiveProgramMemory::From(char* start) const {
+LiveProgramMemory LiveProgramMemory::From(std::uint8_t* start) const {
   const std::uint32_t offset = OffsetOf(start, *this);
   if (offset == kOutsideProgram) return {};
   return {start, size - offset};
 }
 
-Driver::ChannelKind LiveChannelKind(const Audio_SeqChannel& legacy) {
+Driver::ChannelKind LiveChannelKind(const VS::Audio::SeqChannel& legacy) {
   return legacy.type == kMusicChannelType ? Driver::ChannelKind::kMusic
                                           : Driver::ChannelKind::kSoundEffect;
 }
 
-ChannelState LoadChannelState(const Audio_SeqChannel& legacy) {
+ChannelState LoadChannelState(const VS::Audio::SeqChannel& legacy) {
   ChannelState state;
   state.kind = LiveChannelKind(legacy);
-  Transfer(state.pitch_base, legacy.pitchBase);
-  Transfer(state.effect_voice_mask, legacy.effectVoiceMask);
+  Transfer(state.pitch_base, legacy.pitch_base);
+  Transfer(state.effect_voice_mask, legacy.effect_voice_mask);
   VisitChannelFields(state, legacy, LoadField{});
   return state;
 }
 
-void StoreChannelState(Audio_SeqChannel& legacy, const ChannelState& state) {
-  Transfer(legacy.pitchBase, state.pitch_base);
+void StoreChannelState(VS::Audio::SeqChannel& legacy,
+                       const ChannelState& state) {
+  Transfer(legacy.pitch_base, state.pitch_base);
   VisitChannelFields(state, legacy, StoreField{});
-  if (state.vibrato_wave) legacy.vibratoWave = Waveform(*state.vibrato_wave);
-  if (state.tremolo_wave) legacy.tremoloWave = Waveform(*state.tremolo_wave);
+  if (state.vibrato_wave) legacy.vibrato_wave = Waveform(*state.vibrato_wave);
+  if (state.tremolo_wave) legacy.tremolo_wave = Waveform(*state.tremolo_wave);
   if (state.auto_pan_wave) {
-    legacy.autoPanWave = Waveform(*state.auto_pan_wave);
+    legacy.auto_pan_wave = Waveform(*state.auto_pan_wave);
   }
-  const Audio_MusicConfig* layer = Audio_Seq_activeMusicConfig;
-  if (state.keymap_offset && layer != nullptr && layer->patchTable != nullptr) {
-    legacy.keymap =
-        reinterpret_cast<char*>(layer->patchTable) + *state.keymap_offset;
+  const VS::Audio::MusicConfig* layer = VS::Audio::Seq::activeMusicConfig;
+  if (state.keymap_offset && layer != nullptr &&
+      layer->patch_table != nullptr) {
+    legacy.keymap = reinterpret_cast<std::uint8_t*>(layer->patch_table) +
+                    *state.keymap_offset;
   }
 }
 
-MusicLayerState LoadMusicLayer(const Audio_MusicConfig& legacy) {
+MusicLayerState LoadMusicLayer(const VS::Audio::MusicConfig& legacy) {
   MusicLayerState state;
   VisitLayerMasks(state, legacy, LoadField{});
   VisitLayerLevels(state, legacy, LoadField{});
-  state.note_remap_offset = NoteRemapOffset(legacy.noteRemapTable);
+  state.note_remap_offset = NoteRemapOffset(legacy.note_remap_table);
   return state;
 }
 
-void StoreMusicLayer(Audio_MusicConfig& legacy, const MusicLayerState& state) {
+void StoreMusicLayer(VS::Audio::MusicConfig& legacy,
+                     const MusicLayerState& state) {
   VisitLayerMasks(state, legacy, StoreField{});
   VisitLayerLevels(state, legacy, StoreField{});
   if (state.note_remap_offset &&
-      *state.note_remap_offset < sizeof(Audio_Seq_kNoteRemapTables)) {
-    legacy.noteRemapTable = reinterpret_cast<Audio_KeymapEntry*>(
-        std::data(Audio_Seq_kNoteRemapTables) + *state.note_remap_offset);
+      *state.note_remap_offset < sizeof(VS::Audio::Seq::kNoteRemapTables)) {
+    legacy.note_remap_table = reinterpret_cast<VS::Audio::KeymapEntry*>(
+        std::data(VS::Audio::Seq::kNoteRemapTables) + *state.note_remap_offset);
   }
 }
 
-VoiceSchedulerState LoadVoiceScheduler(const Audio_VoiceScheduler& legacy) {
+VoiceSchedulerState LoadVoiceScheduler(
+    const VS::Audio::VoiceScheduler& legacy) {
   VoiceSchedulerState state;
   VisitSchedulerFields(state, legacy, LoadField{});
   return state;
 }
 
-void StoreVoiceScheduler(Audio_VoiceScheduler& legacy,
+void StoreVoiceScheduler(VS::Audio::VoiceScheduler& legacy,
                          const VoiceSchedulerState& state) {
   VisitSchedulerFields(state, legacy, StoreField{});
 }
 
 std::optional<Samples::InstrumentRecord> LiveInstrument(std::int32_t index) {
-  if (index < 0 ||
-      static_cast<std::size_t>(index) >= std::size(Audio_Samples_instruments)) {
+  if (index < 0 || static_cast<std::size_t>(index) >=
+                       std::size(VS::Audio::Samples::instruments)) {
     return std::nullopt;
   }
-  const Audio_Instrument& entry =
-      Audio_Samples_instruments[static_cast<std::size_t>(index)];
+  const VS::Audio::Instrument& entry =
+      VS::Audio::Samples::instruments[static_cast<std::size_t>(index)];
   Samples::InstrumentRecord record;
-  Transfer(record.sample_start, entry.sampleStart);
-  Transfer(record.loop_start, entry.loopStart);
-  Transfer(record.fine_tune, entry.fineTune);
-  Transfer(record.root_note, entry.rootNote);
-  Transfer(record.adsr_lower, entry.adsrLower);
-  Transfer(record.adsr_upper, entry.adsrUpper);
+  Transfer(record.sample_start, entry.sample_start);
+  Transfer(record.loop_start, entry.loop_start);
+  Transfer(record.fine_tune, entry.fine_tune);
+  Transfer(record.root_note, entry.root_note);
+  Transfer(record.adsr_lower, entry.adsr_lower);
+  Transfer(record.adsr_upper, entry.adsr_upper);
   return record;
 }
 
-std::optional<LiveProgramMemory> LiveProgramRegion(char* address) {
+std::optional<LiveProgramMemory> LiveProgramRegion(std::uint8_t* address) {
   if (address == nullptr) return std::nullopt;
   if (const auto payload = Core::Memory::LivePayloadContaining(address)) {
     const auto offset = static_cast<std::size_t>(
         reinterpret_cast<const std::byte*>(address) - payload->data());
     return LiveProgramMemory{address - offset, payload->size()};
   }
-  if (auto menu = Containing(
-          address, reinterpret_cast<char*>(std::data(Audio_menuSoundEffects)),
-          sizeof(Audio_menuSoundEffects))) {
+  if (auto menu = Containing(address,
+                             reinterpret_cast<std::uint8_t*>(
+                                 std::data(VS::Audio::menuSoundEffects)),
+                             sizeof(VS::Audio::menuSoundEffects))) {
     return menu;
   }
   if (auto idle = Containing(address, LiveIdleProgram(),
-                             sizeof(Audio_Seq_kIdleProgram))) {
+                             sizeof(VS::Audio::Seq::kIdleProgram))) {
     return idle;
   }
   return Containing(address,
-                    reinterpret_cast<char*>(Core::overlay_arena.data()),
+                    reinterpret_cast<std::uint8_t*>(Core::overlay_arena.data()),
                     Core::overlay_arena.size());
 }
 
-char* LiveIdleProgram() {
-  return reinterpret_cast<char*>(&Audio_Seq_kIdleProgram);
+std::uint8_t* LiveIdleProgram() {
+  return reinterpret_cast<std::uint8_t*>(&VS::Audio::Seq::kIdleProgram);
 }
 
-ScopedChannelProgram::ScopedChannelProgram(const Audio_SeqChannel& channel,
+ScopedChannelProgram::ScopedChannelProgram(const VS::Audio::SeqChannel& channel,
                                            const LiveProgramMemory& memory)
     : previous_channel_(scoped_channel), previous_memory_(scoped_memory) {
   scoped_channel = &channel;
@@ -655,12 +678,12 @@ ScopedChannelProgram::~ScopedChannelProgram() {
 }
 
 std::optional<LiveProgramMemory> LiveChannelProgram(
-    const Audio_SeqChannel& channel) {
+    const VS::Audio::SeqChannel& channel) {
   if (&channel == scoped_channel && scoped_memory.base != nullptr &&
-      OffsetOf(channel.programCounter, scoped_memory) != kOutsideProgram) {
+      OffsetOf(channel.program_counter, scoped_memory) != kOutsideProgram) {
     return scoped_memory;
   }
-  char* const counter = channel.programCounter;
+  std::uint8_t* const counter = channel.program_counter;
   if (auto region = LiveProgramRegion(counter)) return region;
   if (counter == nullptr) return std::nullopt;
   // A program that ran to the end of its memory still names that memory.
@@ -669,47 +692,48 @@ std::optional<LiveProgramMemory> LiveChannelProgram(
   return std::nullopt;
 }
 
-ProgramState LoadProgram(const Audio_SeqChannel& legacy,
+ProgramState LoadProgram(const VS::Audio::SeqChannel& legacy,
                          const LiveProgramMemory& memory) {
   ProgramState program;
-  program.counter = OffsetOf(legacy.programCounter, memory);
+  program.counter = OffsetOf(legacy.program_counter, memory);
   for (std::size_t depth = 0; depth < kLoopDepthCount; ++depth) {
-    program.loop_starts[depth] = OffsetOf(legacy.loopStarts[depth], memory);
+    program.loop_starts[depth] = OffsetOf(legacy.loop_starts[depth], memory);
   }
-  program.return_address = OffsetOf(legacy.returnAddress, memory);
+  program.return_address = OffsetOf(legacy.return_address, memory);
   VisitProgramFields(program, legacy, LoadField{});
   return program;
 }
 
-void StoreProgram(Audio_SeqChannel& legacy, const ProgramState& program,
+void StoreProgram(VS::Audio::SeqChannel& legacy, const ProgramState& program,
                   const LiveProgramMemory& memory) {
-  StorePosition(legacy.programCounter, program.counter, memory);
+  StorePosition(legacy.program_counter, program.counter, memory);
   for (std::size_t depth = 0; depth < kLoopDepthCount; ++depth) {
-    StorePosition(legacy.loopStarts[depth], program.loop_starts[depth], memory);
+    StorePosition(legacy.loop_starts[depth], program.loop_starts[depth],
+                  memory);
   }
-  StorePosition(legacy.returnAddress, program.return_address, memory);
+  StorePosition(legacy.return_address, program.return_address, memory);
   VisitProgramFields(program, legacy, StoreField{});
 }
 
-SequenceChannel LoadSequenceChannel(const Audio_SeqChannel& legacy,
+SequenceChannel LoadSequenceChannel(const VS::Audio::SeqChannel& legacy,
                                     const LiveProgramMemory& memory) {
   SequenceChannel record;
   record.channel = LoadChannelState(legacy);
   record.program = LoadProgram(legacy, memory);
   VisitPitchSlideFields(record.pitch_slide, legacy, LoadField{});
-  Transfer(record.assigned_voice, legacy.voice.assignedVoice);
-  record.idle = legacy.programCounter == LiveIdleProgram();
+  Transfer(record.assigned_voice, legacy.voice.assigned_voice);
+  record.idle = legacy.program_counter == LiveIdleProgram();
   return record;
 }
 
-void StoreSequenceChannel(Audio_SeqChannel& legacy,
+void StoreSequenceChannel(VS::Audio::SeqChannel& legacy,
                           const SequenceChannel& record,
                           const LiveProgramMemory& memory) {
   StoreChannelState(legacy, record.channel);
   StoreProgram(legacy, record.program, memory);
-  if (record.idle) legacy.programCounter = LiveIdleProgram();
+  if (record.idle) legacy.program_counter = LiveIdleProgram();
   VisitPitchSlideFields(record.pitch_slide, legacy, StoreField{});
-  Transfer(legacy.voice.assignedVoice, record.assigned_voice);
+  Transfer(legacy.voice.assigned_voice, record.assigned_voice);
 }
 
 std::uint64_t LiveRefusalCount() noexcept { return refusals; }

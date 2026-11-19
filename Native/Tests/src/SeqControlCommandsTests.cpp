@@ -7,9 +7,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqControlCommandsLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
@@ -419,40 +419,40 @@ namespace {
 // A music channel whose program lies in a live game heap block, over saved
 // and restored sequencer, mixer and driver state.
 struct LiveControlFixture {
-  Audio_MusicConfig* saved_config = Audio_Seq_activeMusicConfig;
-  Audio_VoiceScheduler saved_scheduler = Audio_Mixer_voiceScheduler;
-  Audio_DriverFlags saved_latches = Audio_Driver_controlLatches;
-  u_int saved_loops = Audio_Seq_musicLoopsRemaining;
+  VS::Audio::MusicConfig* saved_config = VS::Audio::Seq::activeMusicConfig;
+  VS::Audio::VoiceScheduler saved_scheduler = VS::Audio::Mixer::voiceScheduler;
+  VS::Audio::DriverFlags saved_latches = VS::Audio::Driver::controlLatches;
+  u_int saved_loops = VS::Audio::Seq::musicLoopsRemaining;
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 256> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Audio_MusicConfig config{};
-  Audio_SeqChannel channel{};
+  VS::Audio::MusicConfig config{};
+  VS::Audio::SeqChannel channel{};
   std::span<std::uint8_t> block;
 
   LiveControlFixture() {
-    Audio_Seq_activeMusicConfig = &config;
-    Audio_Mixer_voiceScheduler = {};
-    Audio_Driver_controlLatches = {};
+    VS::Audio::Seq::activeMusicConfig = &config;
+    VS::Audio::Mixer::voiceScheduler = {};
+    VS::Audio::Driver::controlLatches = {};
     auto* const data =
         static_cast<std::uint8_t*>(VS::Core::Memory::AllocateLiveFromLowEnd(8));
     REQUIRE(data != nullptr);
     block = {data, VS::Core::Memory::LivePayloadCapacity(data).value()};
-    config.sequenceBase = reinterpret_cast<std::uintptr_t>(data);
-    channel.programCounter = At(0);
+    config.sequence_base = reinterpret_cast<std::uintptr_t>(data);
+    channel.program_counter = At(0);
   }
 
   ~LiveControlFixture() {
-    Audio_Seq_activeMusicConfig = saved_config;
-    Audio_Mixer_voiceScheduler = saved_scheduler;
-    Audio_Driver_controlLatches = saved_latches;
-    Audio_Seq_musicLoopsRemaining = saved_loops;
+    VS::Audio::Seq::activeMusicConfig = saved_config;
+    VS::Audio::Mixer::voiceScheduler = saved_scheduler;
+    VS::Audio::Driver::controlLatches = saved_latches;
+    VS::Audio::Seq::musicLoopsRemaining = saved_loops;
   }
 
   LiveControlFixture(const LiveControlFixture&) = delete;
   LiveControlFixture& operator=(const LiveControlFixture&) = delete;
 
-  [[nodiscard]] char* At(std::size_t offset) const {
-    return reinterpret_cast<char*>(block.data()) + offset;
+  [[nodiscard]] std::uint8_t* At(std::size_t offset) const {
+    return block.data() + offset;
   }
 };
 
@@ -498,14 +498,14 @@ TEST_CASE("Live flow-control commands run over the channel's heap block",
   const std::uint64_t refused = Seq::LiveRefusalCount();
   Seq::LiveSetTempo(&fixture.channel, static_cast<int>(kChannelBit));
   CHECK(fixture.config.tempo == 0x12340000);
-  CHECK(fixture.channel.programCounter == fixture.At(2));
+  CHECK(fixture.channel.program_counter == fixture.At(2));
   Seq::LivePushLoop(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.loopDepth == 1);
-  CHECK(fixture.channel.loopStarts[1] == fixture.At(2));
+  CHECK(fixture.channel.loop_depth == 1);
+  CHECK(fixture.channel.loop_starts[1] == fixture.At(2));
   Seq::LiveJumpRelative(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == fixture.At(0));
+  CHECK(fixture.channel.program_counter == fixture.At(0));
   Seq::LiveMarkChannelKeyed(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.config.keyedVoices == kChannelBit);
+  CHECK(fixture.config.keyed_voices == kChannelBit);
   CHECK(Seq::LiveRefusalCount() == refused);
 }
 
@@ -513,23 +513,23 @@ TEST_CASE("Live flow-control commands refuse reads past the heap block",
           "[audio-seq-control][audio]") {
   LiveControlFixture fixture;
   const WarningCounter warnings;
-  char* const last = fixture.At(fixture.block.size() - 1);
-  fixture.channel.programCounter = last;
+  std::uint8_t* const last = fixture.At(fixture.block.size() - 1);
+  fixture.channel.program_counter = last;
   fixture.config.tempo = 0x100;
   const std::uint64_t refused = Seq::LiveRefusalCount();
   Seq::LiveSetTempo(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == last);
+  CHECK(fixture.channel.program_counter == last);
   CHECK(fixture.config.tempo == 0x100);
   Seq::LivePlayEmbeddedSoundEffect(&fixture.channel,
                                    static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == last);
+  CHECK(fixture.channel.program_counter == last);
 
   // A jump back past the start of the block is refused too.
-  fixture.channel.programCounter = fixture.At(0);
+  fixture.channel.program_counter = fixture.At(0);
   fixture.block[0] = 0xF0;
   fixture.block[1] = 0xFF;
   Seq::LiveJumpRelative(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == fixture.At(0));
+  CHECK(fixture.channel.program_counter == fixture.At(0));
   CHECK(Seq::LiveRefusalCount() == refused + 3);
   CHECK(warnings.Count() == ReportedRefusals(refused, Seq::LiveRefusalCount()));
 }
@@ -537,27 +537,27 @@ TEST_CASE("Live flow-control commands refuse reads past the heap block",
 TEST_CASE("Live layer commands refuse without an active music layer",
           "[audio-seq-control][audio]") {
   LiveControlFixture fixture;
-  Audio_Seq_activeMusicConfig = nullptr;
+  VS::Audio::Seq::activeMusicConfig = nullptr;
   fixture.block[0] = 0x34;
   fixture.block[1] = 0x12;
   fixture.block[2] = 0x01;
   fixture.block[3] = 0x00;
   const std::uint64_t refused = Seq::LiveRefusalCount();
   Seq::LiveSetTempo(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == fixture.At(0));
+  CHECK(fixture.channel.program_counter == fixture.At(0));
   Seq::LiveFinishChannel(&fixture.channel, static_cast<int>(kChannelBit));
   CHECK(Seq::LiveRefusalCount() == refused + 2);
   // Jumps need no layer.
-  fixture.channel.programCounter = fixture.At(2);
+  fixture.channel.program_counter = fixture.At(2);
   Seq::LiveJumpRelative(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == fixture.At(3));
+  CHECK(fixture.channel.program_counter == fixture.At(3));
   Seq::LiveSetTempo(nullptr, static_cast<int>(kChannelBit));
   CHECK(Seq::LiveRefusalCount() == refused + 3);
 }
 
 TEST_CASE("Flow-control handlers keep module bindings only in opcode tables",
           "[audio-seq-control][audio]") {
-  using Handler = void (*)(Audio_SeqChannel*, int);
+  using Handler = void (*)(VS::Audio::SeqChannel*, int);
   const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, Handler>, 27> kept{{
       {0x8001B138U, &Seq::LiveFinishChannel},

@@ -11,9 +11,9 @@
 #include <string_view>
 
 #include "Audio/MusicLive.hpp"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Audio/SoundBanks.h"
+#include "Audio/SoundState.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Diagnostics.hpp"
@@ -573,7 +573,7 @@ void LiveQueueResultsMusic() {
     }
   };
   Host host;
-  QueueResultsMusic(Audio_soundState.currentMusicId, host);
+  QueueResultsMusic(VS::Audio::soundState.current_music_id, host);
 }
 
 // decomp: _renderCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:755.

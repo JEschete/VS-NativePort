@@ -1,33 +1,33 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/AkaoFormat.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/AkaoFormat.hpp"
+#include "Audio/Seq/Channel.hpp"
 
 // decomp: g_ActiveMusicChannels (g_ActiveMusicChannels@SLUS_010.40)
-Audio_SeqChannel Audio_Seq_musicChannels[0x20];
+VS::Audio::SeqChannel VS::Audio::Seq::musicChannels[VS::Audio::Seq::kMusicChannelCount];
 
 // decomp: g_PushedMusicConfig (g_PushedMusicConfig@SLUS_010.40)
-Audio_MusicConfig Audio_Seq_savedMusicConfig;
+VS::Audio::MusicConfig VS::Audio::Seq::savedMusicConfig;
 
 // decomp: g_pSecondaryMusicChannels (g_pSecondaryMusicChannels@SLUS_010.40)
-Audio_SeqChannel* Audio_Seq_secondaryMusicChannels;
+VS::Audio::SeqChannel* VS::Audio::Seq::secondaryMusicChannels;
 
 // decomp: g_pSavedMousicConfig (g_pSavedMousicConfig@SLUS_010.40)
-Audio_MusicConfig* Audio_Seq_secondaryMusicConfig;
+VS::Audio::MusicConfig* VS::Audio::Seq::secondaryMusicConfig;
 
 // decomp: D_800366F0 (D_800366F0@SLUS_010.40)
-Audio_MusicConfig Audio_Seq_primaryMusicConfig;
+VS::Audio::MusicConfig VS::Audio::Seq::primaryMusicConfig;
 
 // decomp: D_80037788 (D_80037788@SLUS_010.40)
-Audio_CommandParams Audio_Seq_pendingMusicData;
+VS::Audio::CommandParams VS::Audio::Seq::pendingMusicData;
 
 // decomp: g_Music_LoopCounter (g_Music_LoopCounter@SLUS_010.40)
-u_int Audio_Seq_musicLoopsRemaining;
+u_int VS::Audio::Seq::musicLoopsRemaining;
 
 // decomp: g_pActiveMusicConfig (g_pActiveMusicConfig@SLUS_010.40)
-Audio_MusicConfig* Audio_Seq_activeMusicConfig;
+VS::Audio::MusicConfig* VS::Audio::Seq::activeMusicConfig;
 
 // decomp: D_800378E8 (D_800378E8@SLUS_010.40)
-Audio_SeqChannel Audio_Seq_savedMusicChannels[32];
+VS::Audio::SeqChannel VS::Audio::Seq::savedMusicChannels[VS::Audio::Seq::kMusicChannelCount];

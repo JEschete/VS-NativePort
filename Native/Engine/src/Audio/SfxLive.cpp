@@ -12,11 +12,11 @@
 #include <span>
 
 #include "Audio/SeqRecordsLive.hpp"
-#include "Audio/Sfx.h"
 #include "Audio/Sfx.hpp"
-#include "Audio/SoundBanks.h"
+#include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Runtime.hpp"
@@ -29,7 +29,8 @@ namespace {
 using Playback::DataRef;
 using Playback::EffectSelector;
 
-static_assert(std::size(Audio_soundState.sfxBankData) == kSfxBankSlotCount);
+static_assert(std::size(VS::Audio::soundState.sfx_bank_data) ==
+              kSfxBankSlotCount);
 static_assert(sizeof(EffectSelector) == sizeof(std::intptr_t));
 // The pan's place in vs_main_computeSfxPan's result.
 constexpr unsigned kPanShift = 16;
@@ -54,26 +55,27 @@ void* Pointer(DataRef data) {
 
 SfxState LoadState() {
   SfxState state{
-      .cursors = {.group_1 = Audio_nextSfxChannelGroup1,
-                  .group_7e = Audio_nextSfxChannelGroup7E,
-                  .group_180 = Audio_nextSfxChannelGroup180,
-                  .group_200 = Audio_nextSfxChannelGroup200,
-                  .group_ff000 = Audio_nextSfxChannelGroupFF000,
-                  .group_f00000 = Audio_nextSfxChannelGroupF00000},
-      .selected_bank = Same<std::uint32_t>(Audio_soundState.currentSfxBank)};
+      .cursors = {.group_1 = VS::Audio::nextSfxChannelGroup1,
+                  .group_7e = VS::Audio::nextSfxChannelGroup7E,
+                  .group_180 = VS::Audio::nextSfxChannelGroup180,
+                  .group_200 = VS::Audio::nextSfxChannelGroup200,
+                  .group_ff000 = VS::Audio::nextSfxChannelGroupFF000,
+                  .group_f00000 = VS::Audio::nextSfxChannelGroupF00000},
+      .selected_bank =
+          Same<std::uint32_t>(VS::Audio::soundState.current_sfx_bank)};
   for (std::size_t slot = 0; slot < kSfxBankSlotCount; ++slot) {
-    state.banks[slot] = Reference(Audio_soundState.sfxBankData[slot]);
+    state.banks[slot] = Reference(VS::Audio::soundState.sfx_bank_data[slot]);
   }
   return state;
 }
 
 void StoreCursors(const EffectTagCursors& cursors) {
-  Audio_nextSfxChannelGroup1 = cursors.group_1;
-  Audio_nextSfxChannelGroup7E = cursors.group_7e;
-  Audio_nextSfxChannelGroup180 = cursors.group_180;
-  Audio_nextSfxChannelGroup200 = cursors.group_200;
-  Audio_nextSfxChannelGroupFF000 = cursors.group_ff000;
-  Audio_nextSfxChannelGroupF00000 = cursors.group_f00000;
+  VS::Audio::nextSfxChannelGroup1 = cursors.group_1;
+  VS::Audio::nextSfxChannelGroup7E = cursors.group_7e;
+  VS::Audio::nextSfxChannelGroup180 = cursors.group_180;
+  VS::Audio::nextSfxChannelGroup200 = cursors.group_200;
+  VS::Audio::nextSfxChannelGroupFF000 = cursors.group_ff000;
+  VS::Audio::nextSfxChannelGroupF00000 = cursors.group_f00000;
 }
 
 // The reports the original's native checks made (a warning for an effect
@@ -186,7 +188,7 @@ class LiveSfxHost final : public SfxHost {
   }
 
   std::span<const std::byte> BankBytes(DataRef bank) override {
-    auto* const start = static_cast<char*>(Pointer(bank));
+    auto* const start = static_cast<std::uint8_t*>(Pointer(bank));
     if (start == nullptr) return {};
     const std::optional<Seq::LiveProgramMemory> region =
         Seq::LiveProgramRegion(start);

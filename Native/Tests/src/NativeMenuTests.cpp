@@ -16,10 +16,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Boot/GameLoop.h"
 #include "Content/DataStore.hpp"
@@ -54,7 +54,7 @@ namespace Save = VS::Game::Save;
 constexpr std::size_t kSoundCount = 12;
 std::array<unsigned, kSoundCount>* sound_calls = nullptr;
 
-void CountSound(Audio_CommandParams* parameters) {
+void CountSound(VS::Audio::CommandParams* parameters) {
   if (sound_calls != nullptr && parameters->param1 < sound_calls->size()) {
     ++(*sound_calls)[parameters->param1];
   }
@@ -72,10 +72,12 @@ struct MenuFixture {
       {.program_offsets = sound_offsets,
        .bank_selectors = sound_selectors,
        .program_data = {}}};
-  Audio_CommandHandler sound_handler = Audio_Mixer_kCommandHandlers[0x20];
-  Audio_CommandArguments sound_arguments = Audio_Driver_commandArguments;
-  Audio_CommandParams sound_params = Audio_Mixer_commandParams;
-  int sound_group = Audio_nextSfxChannelGroup7E;
+  VS::Audio::CommandHandler sound_handler =
+      VS::Audio::Mixer::kCommandHandlers[0x20];
+  VS::Audio::LegacyCommandArguments sound_arguments =
+      VS::Audio::Driver::commandArguments;
+  VS::Audio::CommandParams sound_params = VS::Audio::Mixer::commandParams;
+  int sound_group = VS::Audio::nextSfxChannelGroup7E;
   std::array<unsigned, kSoundCount> sounds{};
   std::array<unsigned, kSoundCount>* previous_calls = sound_calls;
 
@@ -93,8 +95,8 @@ struct MenuFixture {
     VS::Input::buttonsPressed = 0;
     VS::Input::buttonRepeat = 0;
     sound_selectors.fill(0x8000);
-    Audio_Mixer_kCommandHandlers[0x20] = CountSound;
-    Audio_nextSfxChannelGroup7E = 2;
+    VS::Audio::Mixer::kCommandHandlers[0x20] = CountSound;
+    VS::Audio::nextSfxChannelGroup7E = 2;
     sound_calls = &sounds;
   }
 
@@ -105,10 +107,10 @@ struct MenuFixture {
       Boot_isGameplayActive = active;
       VS::Input::buttonsPressed = pressed;
       VS::Input::buttonRepeat = repeat;
-      Audio_Mixer_kCommandHandlers[0x20] = sound_handler;
-      Audio_Driver_commandArguments = sound_arguments;
-      Audio_Mixer_commandParams = sound_params;
-      Audio_nextSfxChannelGroup7E = sound_group;
+      VS::Audio::Mixer::kCommandHandlers[0x20] = sound_handler;
+      VS::Audio::Driver::commandArguments = sound_arguments;
+      VS::Audio::Mixer::commandParams = sound_params;
+      VS::Audio::nextSfxChannelGroup7E = sound_group;
       sound_calls = previous_calls;
       std::error_code error;
       fs::remove_all(root, error);

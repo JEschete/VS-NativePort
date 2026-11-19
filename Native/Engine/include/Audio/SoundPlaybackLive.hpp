@@ -53,7 +53,7 @@ void LiveWriteCommandArguments(const CommandArguments& arguments);
 struct LiveEffectTables {
   std::span<std::uint32_t> program_offsets;
   std::span<std::uint16_t> bank_selectors;
-  std::span<char> program_data;
+  std::span<std::uint8_t> program_data;
 };
 void BindLiveEffectTables(const LiveEffectTables& tables);
 // The bound tables; empty when none are bound, or when the legacy table
@@ -75,6 +75,6 @@ class ScopedLiveEffectTables {
   std::optional<LiveEffectTables> saved_binding_;
   std::uint32_t* saved_offsets_;
   std::uint16_t* saved_selectors_;
-  char* saved_program_data_;
+  std::uint8_t* saved_program_data_;
 };
 }  // namespace VS::Audio::Playback

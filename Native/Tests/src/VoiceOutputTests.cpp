@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Cutscene/Stream.h"
+#include "Audio/Cutscene/Stream.hpp"
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/VoiceOutput.hpp"
 #include "Audio/VoiceOutputLive.hpp"
@@ -432,18 +432,18 @@ TEST_CASE("Bank uploads refuse unavailable or mismatched banks",
 
 TEST_CASE("Live bank uploads mark every refused upload as failed",
           "[audio][samples]") {
-  const int saved = Audio_Cutscene_legacySpuTransferBusy;
-  Audio_Cutscene_legacySpuTransferBusy = 1;
+  const int saved = VS::Audio::Cutscene::legacySpuTransferBusy;
+  VS::Audio::Cutscene::legacySpuTransferBusy = 1;
   auto bytes = AkaoHeader(1, 1);
   bytes[0] = std::byte{0};
   CHECK(Samples::UploadLiveBank(bytes.data(), 0, 0, 0) == -1);
-  CHECK(Audio_Cutscene_legacySpuTransferBusy == -1);
-  Audio_Cutscene_legacySpuTransferBusy = 1;
+  CHECK(VS::Audio::Cutscene::legacySpuTransferBusy == -1);
+  VS::Audio::Cutscene::legacySpuTransferBusy = 1;
   const auto valid = AkaoHeader(1, 1);
   CHECK(Samples::UploadLiveBank(valid.data(), 0, 256, 0) == -1);
-  CHECK(Audio_Cutscene_legacySpuTransferBusy == -1);
-  Audio_Cutscene_legacySpuTransferBusy = 1;
+  CHECK(VS::Audio::Cutscene::legacySpuTransferBusy == -1);
+  VS::Audio::Cutscene::legacySpuTransferBusy = 1;
   CHECK(Samples::UploadLiveBank(nullptr, 0, 0, 0) == -1);
-  CHECK(Audio_Cutscene_legacySpuTransferBusy == -1);
-  Audio_Cutscene_legacySpuTransferBusy = saved;
+  CHECK(VS::Audio::Cutscene::legacySpuTransferBusy == -1);
+  VS::Audio::Cutscene::legacySpuTransferBusy = saved;
 }

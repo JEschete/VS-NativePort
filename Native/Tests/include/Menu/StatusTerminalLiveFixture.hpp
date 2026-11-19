@@ -23,9 +23,9 @@
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Hud.h"
@@ -173,20 +173,26 @@ struct AssetStateRestore {
 };
 
 struct AudioRestore {
-  ArrayRestore<Audio_CommandHandler, std::size(Audio_Mixer_kCommandHandlers)>
-      handlers{Audio_Mixer_kCommandHandlers};
-  ValueRestore<Audio_CommandArguments> arguments{Audio_Driver_commandArguments};
-  ValueRestore<Audio_CommandParams> parameters{Audio_Mixer_commandParams};
-  ValueRestore<Audio_DriverFlags> controls{Audio_Driver_controlLatches};
-  ValueRestore<Audio_VoiceScheduler> voices{Audio_Mixer_voiceScheduler};
-  ArrayRestore<Audio_SeqChannel, std::size(Audio_SoundEffects_channels)>
-      effects{Audio_SoundEffects_channels};
+  ArrayRestore<VS::Audio::CommandHandler,
+               std::size(VS::Audio::Mixer::kCommandHandlers)>
+      handlers{VS::Audio::Mixer::kCommandHandlers};
+  ValueRestore<VS::Audio::LegacyCommandArguments> arguments{
+      VS::Audio::Driver::commandArguments};
+  ValueRestore<VS::Audio::CommandParams> parameters{
+      VS::Audio::Mixer::commandParams};
+  ValueRestore<VS::Audio::DriverFlags> controls{
+      VS::Audio::Driver::controlLatches};
+  ValueRestore<VS::Audio::VoiceScheduler> voices{
+      VS::Audio::Mixer::voiceScheduler};
+  ArrayRestore<VS::Audio::SeqChannel,
+               std::size(VS::Audio::SoundEffects::channels)>
+      effects{VS::Audio::SoundEffects::channels};
 
   AudioRestore() {
     const auto image = ReadOriginal(R"(Native\data\disc\SLUS_010.40)");
     const auto tables = VS::Content::ModulePointerTables();
     const auto table = std::ranges::find(
-        tables, reinterpret_cast<void**>(Audio_Mixer_kCommandHandlers),
+        tables, reinterpret_cast<void**>(VS::Audio::Mixer::kCommandHandlers),
         &VS::Content::ModulePointerTable::target);
     if (table == tables.end() ||
         !VS::Content::RelocateModulePointerTable(

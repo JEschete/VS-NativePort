@@ -1,16 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Audio/Legacy.h"
+#include "Audio/Legacy.hpp"
 
 // decomp: D_80094FAC (D_80094FAC@BATTLE/BATTLE.PRG)
-int Audio_legacyUnreferencedTable[795]; /* contents: module image (ModuleData.cpp) */
+int VS::Audio::legacyUnreferencedTable[VS::Audio::kLegacyUnreferencedTableWords]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_80094FFC (D_80094FFC@BATTLE/BATTLE.PRG)
-int Audio_legacyUnreferencedWord; /* contents: module image (ModuleData.cpp) */
+int VS::Audio::legacyUnreferencedWord; /* contents: module image (ModuleData.cpp) */
 
 // decomp: g_SpuMallocRecTable (g_SpuMallocRecTable@SLUS_010.40)
-char Audio_legacySpuAllocationTable[SPU_MALLOC_RECSIZ * (SPU_MALLOC_NUM_BLOCKS + 1)];
+u_char VS::Audio::legacySpuAllocationTable[VS::Audio::kLegacySpuAllocationTableBytes];
 
 // decomp: g_bSpuTransferring (g_bSpuTransferring@SLUS_010.40)
-volatile int Audio_legacySpuTransferBusy;
+volatile int VS::Audio::legacySpuTransferBusy;
 

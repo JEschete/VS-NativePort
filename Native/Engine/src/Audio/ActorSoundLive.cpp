@@ -12,13 +12,13 @@
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Audio/ActorSound.h"
 #include "Audio/ActorSound.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/Sfx.hpp"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundSlotsLive.hpp"
+#include "Audio/SurfaceSounds.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Core/RandomLive.hpp"
@@ -53,7 +53,7 @@ constexpr std::size_t kSoundSectionBytes = 4;
 static_assert(std::size(Actors_actorRecords) == kActorRecordCount);
 static_assert(std::size(Battle_actors) == kBattleActorCount);
 static_assert(std::size(Field_gimmickInstances) == kGimmickCount);
-static_assert(std::size(Audio_objectSurfaceSoundIds) ==
+static_assert(std::size(VS::Audio::objectSurfaceSoundIds) ==
               kObjectSurfaceSoundBytes);
 static_assert(std::size(Field_kTileSurfaceIds) == kTileSurfaceSoundBytes);
 static_assert(sizeof(Actors_ModelEffectSlot) == kModelEffectSlotBytes);
@@ -200,7 +200,7 @@ class LiveActorSoundHost final : public ActorSoundHost {
   }
 
   std::span<const std::uint8_t> ObjectSurfaceSounds() override {
-    return Audio_objectSurfaceSoundIds;
+    return VS::Audio::objectSurfaceSoundIds;
   }
 
   std::span<const std::uint8_t> TileSurfaceSounds() override {

@@ -15,50 +15,55 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SampleBanksLive.hpp"
-#include "Audio/Seq/AkaoFormat.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Seq/AkaoFormat.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundEffectPrograms.hpp"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Audio::SoundEffects {
 namespace {
-static_assert(std::size(Audio_SoundEffects_channels) >= kChannelCount);
-static_assert(std::size(Audio_Seq_musicChannels) == Seq::kMusicChannelCount);
-static_assert(std::size(Audio_Mixer_voiceOwners) == Mixer::kVoiceCount);
-static_assert(sizeof(Audio_CommandParams::param1) == sizeof(EffectSelector));
-static_assert(
-    std::is_convertible_v<decltype(&LivePlayInterfaceProgramPair),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LivePlayInterfaceProgram),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LivePlaySharedProgram),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LivePlayBlobPrograms),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveStopPrograms), Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveSetProgramVolume),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveFadeProgramVolume),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveSetSceneVolume),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveFadeSceneVolume),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveSetProgramPan), Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveFadeProgramPan),
-                          Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveSetScenePan), Audio_CommandHandler> &&
-    std::is_convertible_v<decltype(&LiveFadeScenePan), Audio_CommandHandler>);
+static_assert(std::size(VS::Audio::SoundEffects::channels) >= kChannelCount);
+static_assert(std::size(VS::Audio::Seq::musicChannels) ==
+              Seq::kMusicChannelCount);
+static_assert(std::size(VS::Audio::Mixer::voiceOwners) == Mixer::kVoiceCount);
+static_assert(sizeof(VS::Audio::CommandParams::param1) ==
+              sizeof(EffectSelector));
+static_assert(std::is_convertible_v<decltype(&LivePlayInterfaceProgramPair),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LivePlayInterfaceProgram),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LivePlaySharedProgram),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LivePlayBlobPrograms),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveStopPrograms),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveSetProgramVolume),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveFadeProgramVolume),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveSetSceneVolume),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveFadeSceneVolume),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveSetProgramPan),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveFadeProgramPan),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveSetScenePan),
+                                    VS::Audio::CommandHandler> &&
+              std::is_convertible_v<decltype(&LiveFadeScenePan),
+                                    VS::Audio::CommandHandler>);
 
 // Pins a legacy field to the width of its typed copy.
 template <typename To, typename From>
@@ -93,8 +98,8 @@ const char* RefusalReason(EffectRefusal refusal) {
   return "refused";
 }
 
-char* Pointer(DataRef data) {
-  return std::bit_cast<char*>(static_cast<std::uintptr_t>(data));
+std::uint8_t* Pointer(DataRef data) {
+  return std::bit_cast<std::uint8_t*>(static_cast<std::uintptr_t>(data));
 }
 
 // The handles name only kNone; the live addresses they carry are made here.
@@ -107,54 +112,56 @@ EffectSelector SelectorOf(std::uintptr_t effect_id) {
   return static_cast<EffectSelector>(Same<std::intptr_t>(effect_id));
 }
 
-EffectChannel LoadChannel(const Audio_SeqChannel& legacy) {
+EffectChannel LoadChannel(const VS::Audio::SeqChannel& legacy) {
   EffectChannel channel;
-  channel.effect = SelectorOf(legacy.effectId);
-  channel.tags = Same<std::int32_t>(legacy.effectTags);
-  channel.update_flags = Same<std::uint32_t>(legacy.updateFlags);
+  channel.effect = SelectorOf(legacy.effect_id);
+  channel.tags = Same<std::int32_t>(legacy.effect_tags);
+  channel.update_flags = Same<std::uint32_t>(legacy.update_flags);
   channel.priority = Same<std::int32_t>(legacy.priority);
-  channel.voice_mask = Same<std::int32_t>(legacy.effectVoiceMask);
+  channel.voice_mask = Same<std::int32_t>(legacy.effect_voice_mask);
   channel.type = Same<std::uint16_t>(legacy.type);
-  channel.note_length = Same<std::uint16_t>(legacy.noteLength);
-  channel.gate_length = Same<std::uint16_t>(legacy.gateLength);
+  channel.note_length = Same<std::uint16_t>(legacy.note_length);
+  channel.gate_length = Same<std::uint16_t>(legacy.gate_length);
   channel.pan = Same<std::uint16_t>(legacy.pan);
-  channel.pan_slide_length = Same<std::uint16_t>(legacy.panSlideLength);
-  channel.effect_pan = Same<std::uint16_t>(legacy.effectPan);
-  channel.effect_pan_step = Same<std::int16_t>(legacy.effectPanSlideStep);
-  channel.effect_pan_length = Same<std::uint16_t>(legacy.effectPanSlideLength);
-  channel.effect_volume = Same<std::int16_t>(legacy.effectVolume);
-  channel.effect_volume_step = Same<std::int16_t>(legacy.effectVolumeSlideStep);
+  channel.pan_slide_length = Same<std::uint16_t>(legacy.pan_slide_length);
+  channel.effect_pan = Same<std::uint16_t>(legacy.effect_pan);
+  channel.effect_pan_step = Same<std::int16_t>(legacy.effect_pan_slide_step);
+  channel.effect_pan_length =
+      Same<std::uint16_t>(legacy.effect_pan_slide_length);
+  channel.effect_volume = Same<std::int16_t>(legacy.effect_volume);
+  channel.effect_volume_step =
+      Same<std::int16_t>(legacy.effect_volume_slide_step);
   channel.effect_volume_length =
-      Same<std::uint16_t>(legacy.effectVolumeSlideLength);
-  channel.pitch_scale = Same<std::int32_t>(legacy.effectPitchScale);
+      Same<std::uint16_t>(legacy.effect_volume_slide_length);
+  channel.pitch_scale = Same<std::int32_t>(legacy.effect_pitch_scale);
   channel.pitch_scale_length =
-      Same<std::uint16_t>(legacy.effectPitchScaleSlideLength);
-  channel.assigned_voice = Same<std::uint32_t>(legacy.voice.assignedVoice);
-  channel.dirty_flags = Same<std::uint32_t>(legacy.voice.dirtyFlags);
+      Same<std::uint16_t>(legacy.effect_pitch_scale_slide_length);
+  channel.assigned_voice = Same<std::uint32_t>(legacy.voice.assigned_voice);
+  channel.dirty_flags = Same<std::uint32_t>(legacy.voice.dirty_flags);
   return channel;
 }
 
-void StoreChannel(Audio_SeqChannel& legacy, const EffectChannel& channel) {
-  legacy.effectId = static_cast<std::uintptr_t>(channel.effect);
-  legacy.effectTags = channel.tags;
-  legacy.updateFlags = channel.update_flags;
+void StoreChannel(VS::Audio::SeqChannel& legacy, const EffectChannel& channel) {
+  legacy.effect_id = static_cast<std::uintptr_t>(channel.effect);
+  legacy.effect_tags = channel.tags;
+  legacy.update_flags = channel.update_flags;
   legacy.priority = channel.priority;
-  legacy.effectVoiceMask = channel.voice_mask;
+  legacy.effect_voice_mask = channel.voice_mask;
   legacy.type = channel.type;
-  legacy.noteLength = channel.note_length;
-  legacy.gateLength = channel.gate_length;
+  legacy.note_length = channel.note_length;
+  legacy.gate_length = channel.gate_length;
   legacy.pan = channel.pan;
-  legacy.panSlideLength = channel.pan_slide_length;
-  legacy.effectPan = channel.effect_pan;
-  legacy.effectPanSlideStep = channel.effect_pan_step;
-  legacy.effectPanSlideLength = channel.effect_pan_length;
-  legacy.effectVolume = channel.effect_volume;
-  legacy.effectVolumeSlideStep = channel.effect_volume_step;
-  legacy.effectVolumeSlideLength = channel.effect_volume_length;
-  legacy.effectPitchScale = channel.pitch_scale;
-  legacy.effectPitchScaleSlideLength = channel.pitch_scale_length;
-  legacy.voice.assignedVoice = channel.assigned_voice;
-  legacy.voice.dirtyFlags = channel.dirty_flags;
+  legacy.pan_slide_length = channel.pan_slide_length;
+  legacy.effect_pan = channel.effect_pan;
+  legacy.effect_pan_slide_step = channel.effect_pan_step;
+  legacy.effect_pan_slide_length = channel.effect_pan_length;
+  legacy.effect_volume = channel.effect_volume;
+  legacy.effect_volume_slide_step = channel.effect_volume_step;
+  legacy.effect_volume_slide_length = channel.effect_volume_length;
+  legacy.effect_pitch_scale = channel.pitch_scale;
+  legacy.effect_pitch_scale_slide_length = channel.pitch_scale_length;
+  legacy.voice.assigned_voice = channel.assigned_voice;
+  legacy.voice.dirty_flags = channel.dirty_flags;
 }
 
 // The blob each channel last started on, or 0. The legacy channel keeps one
@@ -163,10 +170,10 @@ void StoreChannel(Audio_SeqChannel& legacy, const EffectChannel& channel) {
 // word (a release, a reset, a shared start) ends the program kind.
 std::array<std::uintptr_t, kChannelCount> started_blobs{};
 
-EffectKind KindOf(std::size_t index, const Audio_SeqChannel& legacy) {
+EffectKind KindOf(std::size_t index, const VS::Audio::SeqChannel& legacy) {
   const std::uintptr_t blob = started_blobs[index];
-  return blob != 0 && legacy.effectId == blob ? EffectKind::kProgram
-                                              : EffectKind::kShared;
+  return blob != 0 && legacy.effect_id == blob ? EffectKind::kProgram
+                                               : EffectKind::kShared;
 }
 
 void RecordKind(std::size_t index, const EffectChannel& channel) {
@@ -178,60 +185,64 @@ void RecordKind(std::size_t index, const EffectChannel& channel) {
 EffectState LoadState() {
   EffectState state;
   for (std::size_t i = 0; i < state.channels.size(); ++i) {
-    state.channels[i] = LoadChannel(Audio_SoundEffects_channels[i]);
-    state.channels[i].kind = KindOf(i, Audio_SoundEffects_channels[i]);
+    state.channels[i] = LoadChannel(VS::Audio::SoundEffects::channels[i]);
+    state.channels[i].kind = KindOf(i, VS::Audio::SoundEffects::channels[i]);
   }
-  state.scheduler = Seq::LoadVoiceScheduler(Audio_Mixer_voiceScheduler);
+  state.scheduler = Seq::LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler);
   state.stream_voices =
-      Same<std::uint32_t>(Audio_Cutscene_streamState.voiceMask);
+      Same<std::uint32_t>(VS::Audio::Cutscene::streamState.voice_mask);
   state.stream_control_flags =
-      Same<std::int32_t>(Audio_Cutscene_streamState.controlFlags);
+      Same<std::int32_t>(VS::Audio::Cutscene::streamState.control_flags);
   state.driver_update_flags =
-      Same<std::uint32_t>(Audio_Driver_controlLatches.updateFlags);
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.update_flags);
   for (std::size_t i = 0; i < state.music_voices.size(); ++i) {
-    state.music_voices[i] =
-        Same<std::uint32_t>(Audio_Seq_musicChannels[i].voice.assignedVoice);
+    state.music_voices[i] = Same<std::uint32_t>(
+        VS::Audio::Seq::musicChannels[i].voice.assigned_voice);
   }
-  if (const Audio_MusicConfig* active = Audio_Seq_activeMusicConfig) {
-    state.active_music_notes = Same<std::uint32_t>(active->activeNotes);
+  if (const VS::Audio::MusicConfig* active =
+          VS::Audio::Seq::activeMusicConfig) {
+    state.active_music_notes = Same<std::uint32_t>(active->active_notes);
   }
   return state;
 }
 
 void StoreState(const EffectState& state) {
   for (std::size_t i = 0; i < state.channels.size(); ++i) {
-    StoreChannel(Audio_SoundEffects_channels[i], state.channels[i]);
+    StoreChannel(VS::Audio::SoundEffects::channels[i], state.channels[i]);
     RecordKind(i, state.channels[i]);
   }
-  Seq::StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
-  Audio_Cutscene_streamState.voiceMask = static_cast<int>(state.stream_voices);
-  Audio_Cutscene_streamState.controlFlags = state.stream_control_flags;
-  Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
+  Seq::StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
+  VS::Audio::Cutscene::streamState.voice_mask =
+      static_cast<int>(state.stream_voices);
+  VS::Audio::Cutscene::streamState.control_flags = state.stream_control_flags;
+  VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
   for (std::size_t i = 0; i < state.music_voices.size(); ++i) {
-    Audio_Seq_musicChannels[i].voice.assignedVoice = state.music_voices[i];
+    VS::Audio::Seq::musicChannels[i].voice.assigned_voice =
+        state.music_voices[i];
   }
-  if (Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
+  if (VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
       active != nullptr && state.active_music_notes) {
-    active->activeNotes = *state.active_music_notes;
+    active->active_notes = *state.active_music_notes;
   }
 }
 
 // FSoundCommandParams' words; extParam2 is not part of a sound-effect
 // command.
-EffectCommand CommandOf(const Audio_CommandParams& params) {
+EffectCommand CommandOf(const VS::Audio::CommandParams& params) {
   return {.first = SelectorOf(params.param1),
           .second = Same<std::uint32_t>(params.param2),
           .third = Same<std::uint32_t>(params.param3),
           .fourth = Same<std::uint32_t>(params.param4),
-          .bank_slot = Same<std::uint32_t>(params.extParam1)};
+          .bank_slot = Same<std::uint32_t>(params.ext_param1)};
 }
 
-void StoreCommand(Audio_CommandParams& params, const EffectCommand& command) {
+void StoreCommand(VS::Audio::CommandParams& params,
+                  const EffectCommand& command) {
   params.param1 = static_cast<std::uintptr_t>(command.first);
   params.param2 = command.second;
   params.param3 = command.third;
   params.param4 = command.fourth;
-  params.extParam1 = command.bank_slot;
+  params.ext_param1 = command.bank_slot;
 }
 
 class LiveEffectHost final : public EffectHost {
@@ -240,11 +251,11 @@ class LiveEffectHost final : public EffectHost {
 
   void ResetChannel(std::size_t index, EffectChannel& channel,
                     ProgramStart program) override {
-    Audio_SeqChannel& legacy = Audio_SoundEffects_channels[index];
+    VS::Audio::SeqChannel& legacy = VS::Audio::SoundEffects::channels[index];
     StoreChannel(legacy, channel);
-    char* start = program.data == DataRef::kNone
-                      ? nullptr
-                      : Pointer(program.data) + program.offset;
+    std::uint8_t* start = program.data == DataRef::kNone
+                              ? nullptr
+                              : Pointer(program.data) + program.offset;
     Seq::LiveResetSoundEffectChannel(&legacy, start);
     const EffectKind kind = channel.kind;
     channel = LoadChannel(legacy);
@@ -252,7 +263,7 @@ class LiveEffectHost final : public EffectHost {
   }
 
   void ClearVoiceOwner(std::uint32_t voice) override {
-    Audio_Mixer_voiceOwners[voice] = nullptr;
+    VS::Audio::Mixer::voiceOwners[voice] = nullptr;
   }
 
   void SetVoiceRelease(std::uint32_t voice, std::int32_t rate,
@@ -277,7 +288,7 @@ class LiveEffectHost final : public EffectHost {
 
   // The memory from `blob` to the end of the sequence memory it lies in.
   std::span<const std::byte> ProgramBytes(DataRef blob) override {
-    char* start = Pointer(blob);
+    std::uint8_t* start = Pointer(blob);
     const std::optional<Seq::LiveProgramMemory> region =
         Seq::LiveProgramRegion(start);
     if (!region) return {};
@@ -305,7 +316,8 @@ void RunEffects(const char* operation, Core core) {
 // Runs a command core over the live state and `params`, and writes the
 // command's words back as the original's handlers leave them.
 template <typename Core>
-void RunCommand(const char* operation, Audio_CommandParams* params, Core core) {
+void RunCommand(const char* operation, VS::Audio::CommandParams* params,
+                Core core) {
   if (params == nullptr) {
     Seq::ReportRefusal(operation, "no command parameters");
     return;
@@ -317,7 +329,7 @@ void RunCommand(const char* operation, Audio_CommandParams* params, Core core) {
   StoreCommand(*params, command);
 }
 
-std::optional<ProgramStart> ProgramAt(const char* program) {
+std::optional<ProgramStart> ProgramAt(const std::uint8_t* program) {
   if (program == nullptr) return std::nullopt;
   return ProgramStart{.data = Reference(program)};
 }
@@ -333,8 +345,9 @@ void LiveReleaseMatchingVoices(std::intptr_t selector, int flags) {
 }
 
 // decomp: SLUS_010.40 Sound_PlaySfxProgram (src/SLUS_010.40/25AC.c:2709)
-void LivePlayProgramPair(Audio_CommandParams* params, char* first_program,
-                         char* second_program, int skip_release) {
+void LivePlayProgramPair(VS::Audio::CommandParams* params,
+                         std::uint8_t* first_program,
+                         std::uint8_t* second_program, int skip_release) {
   const ProgramPair programs{.first = ProgramAt(first_program),
                              .second = ProgramAt(second_program)};
   RunCommand(
@@ -347,23 +360,23 @@ void LivePlayProgramPair(Audio_CommandParams* params, char* first_program,
 // decomp: SLUS_010.40 Sound_MarkActiveChannelsVolumeDirty
 // (src/SLUS_010.40/25AC.c:2797) Only the channels up to the layer's highest
 // active channel are touched, as in the original.
-void LiveInvalidateMusicChannelVolumes(Audio_MusicConfig* layer,
-                                       Audio_SeqChannel* channels) {
+void LiveInvalidateMusicChannelVolumes(VS::Audio::MusicConfig* layer,
+                                       VS::Audio::SeqChannel* channels) {
   if (layer == nullptr || channels == nullptr) {
     Seq::ReportRefusal("InvalidateMusicChannelVolumes",
                        "no music layer or channels");
     return;
   }
-  const auto active = Same<std::uint32_t>(layer->activeChannels);
+  const auto active = Same<std::uint32_t>(layer->active_channels);
   const auto used = static_cast<std::size_t>(std::bit_width(active));
-  const std::span<Audio_SeqChannel> table(channels, used);
+  const std::span<VS::Audio::SeqChannel> table(channels, used);
   std::array<std::uint32_t, Seq::kMusicChannelCount> dirty{};
   for (std::size_t i = 0; i < table.size(); ++i) {
-    dirty[i] = Same<std::uint32_t>(table[i].voice.dirtyFlags);
+    dirty[i] = Same<std::uint32_t>(table[i].voice.dirty_flags);
   }
   InvalidateMusicChannelVolumes(active, dirty);
   for (std::size_t i = 0; i < table.size(); ++i) {
-    table[i].voice.dirtyFlags = dirty[i];
+    table[i].voice.dirty_flags = dirty[i];
   }
 }
 
@@ -377,32 +390,32 @@ void LiveInvalidateSoundEffectVolumes() {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_34_unk (src/SLUS_010.40/25AC.c:3046)
-void LivePlayInterfaceProgramPair(Audio_CommandParams* params) {
+void LivePlayInterfaceProgramPair(VS::Audio::CommandParams* params) {
   RunCommand("34 PlayInterfaceProgramPair", params, PlayInterfaceProgramPair);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_30_unk (src/SLUS_010.40/25AC.c:3061)
-void LivePlayInterfaceProgram(Audio_CommandParams* params) {
+void LivePlayInterfaceProgram(VS::Audio::CommandParams* params) {
   RunCommand("30 PlayInterfaceProgram", params, PlayInterfaceProgram);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_20_unk (src/SLUS_010.40/25AC.c:3074)
-void LivePlaySharedProgram(Audio_CommandParams* params) {
+void LivePlaySharedProgram(VS::Audio::CommandParams* params) {
   RunCommand("20 PlaySharedProgram", params, PlaySharedProgram);
 }
 
 // decomp: SLUS_010.40 func_8001733C (src/SLUS_010.40/25AC.c:3085)
-void LivePlayBlobPrograms(Audio_CommandParams* params) {
+void LivePlayBlobPrograms(VS::Audio::CommandParams* params) {
   RunCommand("24 PlayBlobPrograms", params, PlayBlobPrograms);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_21_unk (src/SLUS_010.40/25AC.c:3118)
-void LiveStopPrograms(Audio_CommandParams* params) {
+void LiveStopPrograms(VS::Audio::CommandParams* params) {
   RunCommand("21 StopPrograms", params, StopPrograms);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A0_unk (src/SLUS_010.40/25AC.c:3250)
-void LiveSetProgramVolume(Audio_CommandParams* params) {
+void LiveSetProgramVolume(VS::Audio::CommandParams* params) {
   RunCommand("A0 SetProgramVolume", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
                SetProgramVolume(state, command);
@@ -410,12 +423,12 @@ void LiveSetProgramVolume(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A1_unk (src/SLUS_010.40/25AC.c:3276)
-void LiveFadeProgramVolume(Audio_CommandParams* params) {
+void LiveFadeProgramVolume(VS::Audio::CommandParams* params) {
   RunCommand("A1 FadeProgramVolume", params, FadeProgramVolume);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A8_unk (src/SLUS_010.40/25AC.c:3302)
-void LiveSetSceneVolume(Audio_CommandParams* params) {
+void LiveSetSceneVolume(VS::Audio::CommandParams* params) {
   RunCommand("A8 SetSceneVolume", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
                SetSceneVolume(state, command);
@@ -423,12 +436,12 @@ void LiveSetSceneVolume(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A9_unk (src/SLUS_010.40/25AC.c:3318)
-void LiveFadeSceneVolume(Audio_CommandParams* params) {
+void LiveFadeSceneVolume(VS::Audio::CommandParams* params) {
   RunCommand("A9 FadeSceneVolume", params, FadeSceneVolume);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A2_unk (src/SLUS_010.40/25AC.c:3339)
-void LiveSetProgramPan(Audio_CommandParams* params) {
+void LiveSetProgramPan(VS::Audio::CommandParams* params) {
   RunCommand("A2 SetProgramPan", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
                SetProgramPan(state, command);
@@ -436,12 +449,12 @@ void LiveSetProgramPan(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A3_unk (src/SLUS_010.40/25AC.c:3365)
-void LiveFadeProgramPan(Audio_CommandParams* params) {
+void LiveFadeProgramPan(VS::Audio::CommandParams* params) {
   RunCommand("A3 FadeProgramPan", params, FadeProgramPan);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AA_unk (src/SLUS_010.40/25AC.c:3391)
-void LiveSetScenePan(Audio_CommandParams* params) {
+void LiveSetScenePan(VS::Audio::CommandParams* params) {
   RunCommand("AA SetScenePan", params,
              [](EffectState& state, EffectHost&, EffectCommand& command) {
                SetScenePan(state, command);
@@ -449,7 +462,7 @@ void LiveSetScenePan(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AB_unk (src/SLUS_010.40/25AC.c:3407)
-void LiveFadeScenePan(Audio_CommandParams* params) {
+void LiveFadeScenePan(VS::Audio::CommandParams* params) {
   RunCommand("AB FadeScenePan", params, FadeScenePan);
 }
 }  // namespace VS::Audio::SoundEffects

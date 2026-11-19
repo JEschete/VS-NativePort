@@ -14,9 +14,9 @@
 #include <optional>
 #include <span>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
@@ -28,23 +28,23 @@
 
 namespace VS::Audio::Cutscene {
 namespace {
-static_assert(std::size(Audio_Mixer_kPanGains) == kPanGainCount);
-static_assert(sizeof(Audio_CutsceneStreamState::totalPages) ==
+static_assert(std::size(VS::Audio::Mixer::kPanGains) == kPanGainCount);
+static_assert(sizeof(VS::Audio::CutsceneStreamState::total_pages) ==
               sizeof(std::uint32_t));
-static_assert(sizeof(Audio_CutsceneStreamState::repeatPages) ==
+static_assert(sizeof(VS::Audio::CutsceneStreamState::repeat_pages) ==
               sizeof(std::int32_t));
-static_assert(sizeof(Audio_CutsceneStreamState::voiceMask) ==
+static_assert(sizeof(VS::Audio::CutsceneStreamState::voice_mask) ==
               sizeof(std::int32_t));
-static_assert(sizeof(Audio_CutsceneStreamState::voiceIndex) ==
+static_assert(sizeof(VS::Audio::CutsceneStreamState::voice_index) ==
               sizeof(std::int32_t));
-static_assert(sizeof(Audio_CutsceneStreamState::volume) ==
+static_assert(sizeof(VS::Audio::CutsceneStreamState::volume) ==
               sizeof(std::int32_t));
-static_assert(sizeof(Audio_CutsceneStreamState::sampleRate) ==
+static_assert(sizeof(VS::Audio::CutsceneStreamState::sample_rate) ==
               sizeof(std::int32_t));
-static_assert(sizeof(Audio_Cutscene_legacySpuTransferBusy) ==
+static_assert(sizeof(VS::Audio::Cutscene::legacySpuTransferBusy) ==
               sizeof(std::int32_t));
 // The pan byte is byte 1 of the packed pan word.
-static_assert(sizeof(Audio_Cutscene_streamState.pan.bytes) ==
+static_assert(sizeof(VS::Audio::Cutscene::streamState.pan.bytes) ==
               sizeof(std::int32_t));
 constexpr std::size_t kPanByte = 1;
 constexpr unsigned kMonoOutput = 2;
@@ -87,36 +87,38 @@ class LiveStreamBuffers final : public StreamBufferHost {
   LiveStreamBuffers() : stream_(LiveBoundStreamBytes()) {}
 
   StreamBufferState State() override {
-    const Audio_CutsceneStreamState& state = Audio_Cutscene_streamState;
-    std::optional<std::size_t> chunk = OffsetIn(stream_, state.currentChunk);
+    const VS::Audio::CutsceneStreamState& state =
+        VS::Audio::Cutscene::streamState;
+    std::optional<std::size_t> chunk = OffsetIn(stream_, state.current_chunk);
     std::optional<std::size_t> repeat_chunk;
-    if (state.repeatChunk != nullptr) {
-      repeat_chunk = OffsetIn(stream_, state.repeatChunk);
+    if (state.repeat_chunk != nullptr) {
+      repeat_chunk = OffsetIn(stream_, state.repeat_chunk);
       // A repeat section outside the stream detaches the stream as a whole.
       if (!repeat_chunk) chunk.reset();
     }
     return {.chunk = chunk,
             .repeat_chunk = repeat_chunk,
-            .pages = state.totalPages,
-            .repeat_pages = static_cast<std::uint32_t>(state.repeatPages),
-            .voice = state.voiceIndex,
-            .voice_mask = static_cast<std::uint32_t>(state.voiceMask),
-            .transfer_busy = Audio_Cutscene_legacySpuTransferBusy != 0};
+            .pages = state.total_pages,
+            .repeat_pages = static_cast<std::uint32_t>(state.repeat_pages),
+            .voice = state.voice_index,
+            .voice_mask = static_cast<std::uint32_t>(state.voice_mask),
+            .transfer_busy = VS::Audio::Cutscene::legacySpuTransferBusy != 0};
   }
 
   std::uint32_t BusyVoices() override {
-    const Audio_VoiceScheduler& scheduler = Audio_Mixer_voiceScheduler;
-    return scheduler.activeVoices | scheduler.pausedEffectVoices;
+    const VS::Audio::VoiceScheduler& scheduler =
+        VS::Audio::Mixer::voiceScheduler;
+    return scheduler.active_voices | scheduler.paused_effect_voices;
   }
 
   // A detached cursor is left as the core found it.
   void StoreState(const StreamBufferState& typed) override {
-    Audio_CutsceneStreamState& state = Audio_Cutscene_streamState;
-    if (typed.chunk) state.currentChunk = stream_.subspan(*typed.chunk).data();
-    state.totalPages = typed.pages;
-    state.voiceIndex = typed.voice;
-    state.voiceMask = static_cast<int>(typed.voice_mask);
-    Audio_Cutscene_legacySpuTransferBusy = typed.transfer_busy ? 1 : 0;
+    VS::Audio::CutsceneStreamState& state = VS::Audio::Cutscene::streamState;
+    if (typed.chunk) state.current_chunk = stream_.subspan(*typed.chunk).data();
+    state.total_pages = typed.pages;
+    state.voice_index = typed.voice;
+    state.voice_mask = static_cast<int>(typed.voice_mask);
+    VS::Audio::Cutscene::legacySpuTransferBusy = typed.transfer_busy ? 1 : 0;
   }
 
   void ReleaseLowestEffectVoice() override {
@@ -132,12 +134,13 @@ class LiveStreamBuffers final : public StreamBufferHost {
   }
 
   StreamVoiceMix VoiceMix() override {
-    const Audio_CutsceneStreamState& state = Audio_Cutscene_streamState;
+    const VS::Audio::CutsceneStreamState& state =
+        VS::Audio::Cutscene::streamState;
     return {.volume = state.volume,
             .pan = state.pan.bytes[kPanByte],
-            .sample_rate = state.sampleRate,
-            .mono_output =
-                (Audio_Driver_controlLatches.mixBehavior & kMonoOutput) != 0};
+            .sample_rate = state.sample_rate,
+            .mono_output = (VS::Audio::Driver::controlLatches.mix_behavior &
+                            kMonoOutput) != 0};
   }
 
   void SetVoiceStartAddress(std::int32_t voice,
@@ -146,7 +149,7 @@ class LiveStreamBuffers final : public StreamBufferHost {
   }
 
   std::span<const std::int16_t, kPanGainCount> PanGains() override {
-    return Audio_Mixer_kPanGains;
+    return VS::Audio::Mixer::kPanGains;
   }
 
   void SetVoiceSampleRate(std::int32_t voice,

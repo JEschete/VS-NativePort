@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <span>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/PlaybackResetLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencerLive.hpp"
@@ -24,8 +24,9 @@ namespace {
 constexpr std::size_t kRegistersPerVoice = 8;
 static_assert(LEGACY_SPU_REGISTER_BYTES >=
               kVoiceCount * kRegistersPerVoice * sizeof(std::uint16_t));
-static_assert(sizeof(Audio_Driver_legacySpuEvent) == sizeof(std::int32_t));
-static_assert(sizeof(Audio_Cutscene_legacySpuTransferBusy) ==
+static_assert(sizeof(VS::Audio::Driver::legacySpuEvent) ==
+              sizeof(std::int32_t));
+static_assert(sizeof(VS::Audio::Cutscene::legacySpuTransferBusy) ==
               sizeof(std::int32_t));
 
 std::uint16_t& Register(std::uint32_t voice, VoiceRegister reg) {
@@ -77,11 +78,11 @@ class LiveSoundDriver final : public SoundDriverHost {
   }
 
   std::int32_t TransferState() override {
-    return Audio_Cutscene_legacySpuTransferBusy;
+    return VS::Audio::Cutscene::legacySpuTransferBusy;
   }
 
   void SetTransferState(std::int32_t state) override {
-    Audio_Cutscene_legacySpuTransferBusy = state;
+    VS::Audio::Cutscene::legacySpuTransferBusy = state;
   }
 
   void SetTransferCallback(TransferCallback callback) override {
@@ -115,10 +116,12 @@ class LiveSoundDriver final : public SoundDriverHost {
         OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, &Seq::LiveTickPlayback));
   }
 
-  std::int32_t TickEvent() override { return Audio_Driver_legacySpuEvent; }
+  std::int32_t TickEvent() override {
+    return VS::Audio::Driver::legacySpuEvent;
+  }
 
   void SetTickEvent(std::int32_t event) override {
-    Audio_Driver_legacySpuEvent = event;
+    VS::Audio::Driver::legacySpuEvent = event;
   }
 
   bool EnableTickEvent(std::int32_t event) override {

@@ -20,9 +20,9 @@
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
@@ -208,7 +208,7 @@ int EnterOrFinishEncounter() {
         "encounter", "declared inherited music={} wave bank={}",
         *configuration.inherited_music,
         static_cast<int>(
-            Audio_waveBankFileMap[*configuration.inherited_music]));
+            VS::Audio::waveBankFileMap[*configuration.inherited_music]));
   }
   // The original shuffle initialization always seeds with 1. Initialize that
   // same table from the requested seed; combat still calls its real RNG.

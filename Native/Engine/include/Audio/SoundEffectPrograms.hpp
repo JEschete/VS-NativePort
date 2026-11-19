@@ -253,7 +253,7 @@ void InvalidateMusicChannelVolumes(
 // active sound-effect channel.
 void InvalidateSoundEffectVolumes(EffectState& state, EffectHost& host);
 
-// The sound-effect commands (Audio_Mixer_kCommandHandlers).
+// The sound-effect commands (VS::Audio::Mixer::kCommandHandlers).
 // Sound_Cmd_34_unk (0x34): the two programs `first` and `second` name.
 void PlayInterfaceProgramPair(EffectState& state, EffectHost& host,
                               EffectCommand& command);

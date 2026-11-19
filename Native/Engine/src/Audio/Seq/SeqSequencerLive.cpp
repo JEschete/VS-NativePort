@@ -13,20 +13,20 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/Control/SoundControl.hpp"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/StreamPlayback.hpp"
 #include "Audio/VoiceMixerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
@@ -35,25 +35,28 @@
 
 namespace VS::Audio::Seq {
 namespace {
-using OpcodeHandler = std::decay_t<decltype(Audio_Seq_kOpcodeHandlers[0])>;
+using OpcodeHandler = SeqOpcodeHandler;
 
-static_assert(std::size(Audio_Seq_kOpcodeHandlers) == kOpcodeCount);
-static_assert(std::size(Audio_Seq_kExtendedOpcodeHandlers) ==
+static_assert(std::size(VS::Audio::Seq::kOpcodeHandlers) == kOpcodeCount);
+static_assert(std::size(VS::Audio::Seq::kExtendedOpcodeHandlers) ==
               kExtendedOpcodeCount);
-static_assert(std::size(Audio_Seq_kOpcodeLengths) >= kOpcodeCount);
-static_assert(std::size(Audio_Seq_kExtendedOpcodeLengths) >=
+static_assert(std::size(VS::Audio::Seq::kOpcodeLengths) >= kOpcodeCount);
+static_assert(std::size(VS::Audio::Seq::kExtendedOpcodeLengths) >=
               kExtendedOpcodeCount);
-static_assert(std::size(Audio_Seq_kNoteLengths) == kNoteLengthCount);
-static_assert(std::size(Audio_Seq_kSemitonePitches) >= kSemitoneCount);
-static_assert(std::size(Audio_Seq_kRandomPitchOffsets) ==
+static_assert(std::size(VS::Audio::Seq::kNoteLengths) == kNoteLengthCount);
+static_assert(std::size(VS::Audio::Seq::kSemitonePitches) >= kSemitoneCount);
+static_assert(std::size(VS::Audio::Seq::kRandomPitchOffsets) ==
               kRandomPitchOffsetCount);
-static_assert(std::size(Audio_Seq_musicChannels) == kMusicChannelCount);
-static_assert(std::size(Audio_SoundEffects_channels) >= kEffectChannelCount);
-static_assert(std::size(Audio_Driver_recentTickCosts) ==
+static_assert(std::size(VS::Audio::Seq::musicChannels) == kMusicChannelCount);
+static_assert(std::size(VS::Audio::SoundEffects::channels) >=
+              kEffectChannelCount);
+static_assert(std::size(VS::Audio::Driver::recentTickCosts) ==
               std::tuple_size_v<decltype(PlaybackState::recent_tick_costs)>);
-static_assert(sizeof(Audio_Seq_kOpcodeLengths[0]) == sizeof(std::uint8_t));
-static_assert(sizeof(Audio_Seq_kNoteLengths[0]) == sizeof(std::uint16_t));
-static_assert(sizeof(Audio_Seq_kSemitonePitches[0]) == sizeof(std::uint32_t));
+static_assert(sizeof(VS::Audio::Seq::kOpcodeLengths[0]) ==
+              sizeof(std::uint8_t));
+static_assert(sizeof(VS::Audio::Seq::kNoteLengths[0]) == sizeof(std::uint16_t));
+static_assert(sizeof(VS::Audio::Seq::kSemitonePitches[0]) ==
+              sizeof(std::uint32_t));
 
 // Pins a legacy field to the width of its typed copy.
 template <typename To, typename From>
@@ -64,24 +67,23 @@ To Same(From value) {
 
 const SequencerTables& LiveTables() {
   static const SequencerTables tables{
-      std::span<const std::uint8_t>(Audio_Seq_kOpcodeLengths, kOpcodeCount),
-      std::span<const std::uint8_t>(Audio_Seq_kExtendedOpcodeLengths,
+      std::span<const std::uint8_t>(VS::Audio::Seq::kOpcodeLengths,
+                                    kOpcodeCount),
+      std::span<const std::uint8_t>(VS::Audio::Seq::kExtendedOpcodeLengths,
                                     kExtendedOpcodeCount),
-      std::span<const std::uint16_t, kNoteLengthCount>(Audio_Seq_kNoteLengths),
+      std::span<const std::uint16_t, kNoteLengthCount>(
+          VS::Audio::Seq::kNoteLengths),
       std::span<const std::uint32_t, kSemitoneCount>(
-          std::data(Audio_Seq_kSemitonePitches), kSemitoneCount),
-      std::span<const std::int8_t>(
-          reinterpret_cast<const std::int8_t*>(Audio_Seq_kNoteRemapTables),
-          std::size(Audio_Seq_kNoteRemapTables)),
+          std::data(VS::Audio::Seq::kSemitonePitches), kSemitoneCount),
+      std::span<const std::int8_t>(VS::Audio::Seq::kNoteRemapTables),
       std::span<const std::uint8_t, kRandomPitchOffsetCount>(
-          reinterpret_cast<const std::uint8_t*>(Audio_Seq_kRandomPitchOffsets),
-          kRandomPitchOffsetCount),
+          VS::Audio::Seq::kRandomPitchOffsets),
   };
   return tables;
 }
 
 // The bytes from `start` to the end of the program memory it lies in.
-std::span<const std::uint8_t> BytesFrom(char* start) {
+std::span<const std::uint8_t> BytesFrom(std::uint8_t* start) {
   const std::optional<LiveProgramMemory> memory = LiveProgramRegion(start);
   if (!memory) return {};
   return memory->From(start).View();
@@ -123,7 +125,7 @@ const char* StepRefusalReason(StepRefusal refusal) {
 // channel record; the step's state is stored before and loaded after it.
 class LiveStepHost final : public StepHost {
  public:
-  explicit LiveStepHost(Audio_SeqChannel& channel)
+  explicit LiveStepHost(VS::Audio::SeqChannel& channel)
       : channel_(channel),
         region_(LiveChannelProgram(channel).value_or(LiveProgramMemory{})) {}
 
@@ -135,11 +137,11 @@ class LiveStepHost final : public StepHost {
     state.program = record.program;
     state.pitch_slide = record.pitch_slide;
     state.assigned_voice = record.assigned_voice;
-    state.layer = LoadMusicLayer(*Audio_Seq_activeMusicConfig);
-    state.scheduler = LoadVoiceScheduler(Audio_Mixer_voiceScheduler);
-    state.mix_behavior = Audio_Driver_controlLatches.mixBehavior;
-    state.driver_update_flags = Audio_Driver_controlLatches.updateFlags;
-    state.random_pitch_phase = Audio_Seq_randomPitchPhase;
+    state.layer = LoadMusicLayer(*VS::Audio::Seq::activeMusicConfig);
+    state.scheduler = LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler);
+    state.mix_behavior = VS::Audio::Driver::controlLatches.mix_behavior;
+    state.driver_update_flags = VS::Audio::Driver::controlLatches.update_flags;
+    state.random_pitch_phase = VS::Audio::Seq::randomPitchPhase;
   }
 
   void StoreStep(const StepState& state) {
@@ -147,9 +149,9 @@ class LiveStepHost final : public StepHost {
                          {state.channel, state.program, state.pitch_slide,
                           state.assigned_voice, false},
                          region_);
-    StoreMusicLayer(*Audio_Seq_activeMusicConfig, state.layer);
-    StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
-    Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
+    StoreMusicLayer(*VS::Audio::Seq::activeMusicConfig, state.layer);
+    StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
+    VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
   }
 
   ProgramData Program() override { return region_.View(); }
@@ -159,18 +161,19 @@ class LiveStepHost final : public StepHost {
   CommandOutcome RunCommand(StepState& state, std::uint8_t opcode,
                             std::uint32_t channel_bit) override {
     const std::size_t index = std::size_t{opcode} - kEndOfTrackOpcode;
-    if (index >= std::size(Audio_Seq_kOpcodeHandlers)) {
+    if (index >= std::size(VS::Audio::Seq::kOpcodeHandlers)) {
       return CommandOutcome::kMissing;
     }
-    return Run(state, Audio_Seq_kOpcodeHandlers[index], channel_bit);
+    return Run(state, VS::Audio::Seq::kOpcodeHandlers[index], channel_bit);
   }
 
   CommandOutcome RunExtendedCommand(StepState& state, std::uint8_t opcode,
                                     std::uint32_t channel_bit) override {
-    if (opcode >= std::size(Audio_Seq_kExtendedOpcodeHandlers)) {
+    if (opcode >= std::size(VS::Audio::Seq::kExtendedOpcodeHandlers)) {
       return CommandOutcome::kMissing;
     }
-    return Run(state, Audio_Seq_kExtendedOpcodeHandlers[opcode], channel_bit);
+    return Run(state, VS::Audio::Seq::kExtendedOpcodeHandlers[opcode],
+               channel_bit);
   }
 
   std::optional<Samples::InstrumentRecord> Instrument(
@@ -183,13 +186,13 @@ class LiveStepHost final : public StepHost {
   }
 
   std::span<const std::uint8_t> DrumKeymap() override {
-    return BytesFrom(
-        reinterpret_cast<char*>(Audio_Seq_activeMusicConfig->keymapTable));
+    return BytesFrom(reinterpret_cast<std::uint8_t*>(
+        VS::Audio::Seq::activeMusicConfig->keymap_table));
   }
 
   bool HasLfoWaveform(std::uint16_t shape) override {
-    return shape < std::size(Audio_Seq_kLfoWaveforms) &&
-           Audio_Seq_kLfoWaveforms[shape] != nullptr;
+    return shape < std::size(VS::Audio::Seq::kLfoWaveforms) &&
+           VS::Audio::Seq::kLfoWaveforms[shape] != nullptr;
   }
 
   void Refuse(StepRefusal refusal) override {
@@ -216,7 +219,7 @@ class LiveStepHost final : public StepHost {
                                           : CommandOutcome::kRefused;
   }
 
-  Audio_SeqChannel& channel_;
+  VS::Audio::SeqChannel& channel_;
   LiveProgramMemory region_;
 };
 
@@ -228,22 +231,22 @@ std::uint32_t ChannelBit(ChannelGroup group, std::size_t index) {
 }
 
 // The channel table `group` names: empty without a secondary layer's.
-Audio_SeqChannel* ChannelOf(ChannelGroup group, std::size_t index) {
+VS::Audio::SeqChannel* ChannelOf(ChannelGroup group, std::size_t index) {
   switch (group) {
     case ChannelGroup::kMusic:
-      if (index < std::size(Audio_Seq_musicChannels)) {
-        return &Audio_Seq_musicChannels[index];
+      if (index < std::size(VS::Audio::Seq::musicChannels)) {
+        return &VS::Audio::Seq::musicChannels[index];
       }
       break;
     case ChannelGroup::kSecondaryMusic:
-      if (Audio_Seq_secondaryMusicChannels != nullptr &&
+      if (VS::Audio::Seq::secondaryMusicChannels != nullptr &&
           index < kMusicChannelCount) {
-        return &Audio_Seq_secondaryMusicChannels[index];
+        return &VS::Audio::Seq::secondaryMusicChannels[index];
       }
       break;
     case ChannelGroup::kSoundEffects:
       if (index < kEffectChannelCount) {
-        return &Audio_SoundEffects_channels[index];
+        return &VS::Audio::SoundEffects::channels[index];
       }
       break;
   }
@@ -256,17 +259,17 @@ Audio_SeqChannel* ChannelOf(ChannelGroup group, std::size_t index) {
 class ScopedActiveLayer {
  public:
   explicit ScopedActiveLayer(ChannelGroup group)
-      : previous_(Audio_Seq_activeMusicConfig) {
+      : previous_(VS::Audio::Seq::activeMusicConfig) {
     if (group == ChannelGroup::kSecondaryMusic) {
-      Audio_Seq_activeMusicConfig = Audio_Seq_secondaryMusicConfig;
+      VS::Audio::Seq::activeMusicConfig = VS::Audio::Seq::secondaryMusicConfig;
     }
   }
-  ~ScopedActiveLayer() { Audio_Seq_activeMusicConfig = previous_; }
+  ~ScopedActiveLayer() { VS::Audio::Seq::activeMusicConfig = previous_; }
   ScopedActiveLayer(const ScopedActiveLayer&) = delete;
   ScopedActiveLayer& operator=(const ScopedActiveLayer&) = delete;
 
  private:
-  Audio_MusicConfig* previous_;
+  VS::Audio::MusicConfig* previous_;
 };
 
 LevelSlide LoadSlide(std::int32_t value, std::int32_t step,
@@ -275,73 +278,76 @@ LevelSlide LoadSlide(std::int32_t value, std::int32_t step,
 }
 
 void LoadPlayback(PlaybackState& state) {
-  const Audio_DriverFlags& latches = Audio_Driver_controlLatches;
-  state.control_latches = latches.controlLatches;
-  state.mix_behavior = latches.mixBehavior;
-  state.driver_update_flags = latches.updateFlags;
-  state.stream_control_flags = Audio_Cutscene_streamControlFlags;
-  state.active = LoadMusicLayer(*Audio_Seq_activeMusicConfig);
+  const VS::Audio::DriverFlags& latches = VS::Audio::Driver::controlLatches;
+  state.control_latches = latches.control_latches;
+  state.mix_behavior = latches.mix_behavior;
+  state.driver_update_flags = latches.update_flags;
+  state.stream_control_flags = VS::Audio::Cutscene::streamState.control_flags;
+  state.active = LoadMusicLayer(*VS::Audio::Seq::activeMusicConfig);
   state.active_is_primary =
-      Audio_Seq_activeMusicConfig == &Audio_Seq_primaryMusicConfig;
+      VS::Audio::Seq::activeMusicConfig == &VS::Audio::Seq::primaryMusicConfig;
   state.secondary.reset();
-  if (const Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig) {
+  if (const VS::Audio::MusicConfig* secondary =
+          VS::Audio::Seq::secondaryMusicConfig) {
     state.secondary = LoadMusicLayer(*secondary);
   }
-  state.scheduler = LoadVoiceScheduler(Audio_Mixer_voiceScheduler);
-  state.music_loops_remaining = Audio_Seq_musicLoopsRemaining;
-  state.music_transition_timer = Audio_Seq_musicTransitionTimer;
-  state.tick_counter = Same<std::uint16_t>(Audio_Seq_tickCounter);
-  state.music_pending = Audio_Seq_pendingMusicData.param1 != 0;
-  state.master_fade = {Audio_Seq_masterFade.value, Audio_Seq_masterFade.step,
-                       Audio_Seq_masterFade.ticksRemaining};
-  state.random_pitch_phase = Audio_Seq_randomPitchPhase;
+  state.scheduler = LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler);
+  state.music_loops_remaining = VS::Audio::Seq::musicLoopsRemaining;
+  state.music_transition_timer = VS::Audio::Driver::commandArguments.ext_param2;
+  state.tick_counter = Same<std::uint16_t>(VS::Audio::Seq::tickCounter);
+  state.music_pending = VS::Audio::Seq::pendingMusicData.param1 != 0;
+  state.master_fade = {VS::Audio::Seq::masterFade.value,
+                       VS::Audio::Seq::masterFade.step,
+                       VS::Audio::Seq::masterFade.ticks_remaining};
+  state.random_pitch_phase = VS::Audio::Seq::randomPitchPhase;
   state.disc_volume =
-      LoadSlide(Audio_Seq_discVolume, Audio_Seq_discVolumeFadeStep,
-                Audio_Seq_discVolumeFadeLength);
+      LoadSlide(VS::Audio::Seq::discVolume, VS::Audio::Seq::discVolumeFadeStep,
+                VS::Audio::Seq::discVolumeFadeLength);
   state.tempo_scale =
-      LoadSlide(Audio_Mixer_tempoScale, Audio_Mixer_tempoScaleStep,
-                Audio_Mixer_tempoScaleSlideLength);
-  state.music_pitch_scale =
-      LoadSlide(Audio_Mixer_musicPitchScale, Audio_Mixer_musicPitchScaleStep,
-                Audio_Mixer_musicPitchScaleSlideLength);
-  std::copy(std::begin(Audio_Driver_recentTickCosts),
-            std::end(Audio_Driver_recentTickCosts),
+      LoadSlide(VS::Audio::Mixer::tempoScale, VS::Audio::Mixer::tempoScaleStep,
+                VS::Audio::Mixer::tempoScaleSlideLength);
+  state.music_pitch_scale = LoadSlide(
+      VS::Audio::Mixer::musicPitchScale, VS::Audio::Mixer::musicPitchScaleStep,
+      VS::Audio::Mixer::musicPitchScaleSlideLength);
+  std::copy(std::begin(VS::Audio::Driver::recentTickCosts),
+            std::end(VS::Audio::Driver::recentTickCosts),
             state.recent_tick_costs.begin());
-  state.recent_tick_cost_total = Audio_Driver_recentTickCostTotal;
+  state.recent_tick_cost_total = VS::Audio::Driver::recentTickCostTotal;
 }
 
 void StorePlayback(const PlaybackState& state) {
-  Audio_DriverFlags& latches = Audio_Driver_controlLatches;
-  latches.controlLatches = state.control_latches;
-  latches.mixBehavior = state.mix_behavior;
-  latches.updateFlags = state.driver_update_flags;
-  Audio_Cutscene_streamControlFlags = state.stream_control_flags;
-  StoreMusicLayer(*Audio_Seq_activeMusicConfig, state.active);
-  if (Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig;
+  VS::Audio::DriverFlags& latches = VS::Audio::Driver::controlLatches;
+  latches.control_latches = state.control_latches;
+  latches.mix_behavior = state.mix_behavior;
+  latches.update_flags = state.driver_update_flags;
+  VS::Audio::Cutscene::streamState.control_flags = state.stream_control_flags;
+  StoreMusicLayer(*VS::Audio::Seq::activeMusicConfig, state.active);
+  if (VS::Audio::MusicConfig* secondary = VS::Audio::Seq::secondaryMusicConfig;
       secondary != nullptr && state.secondary &&
-      secondary != Audio_Seq_activeMusicConfig) {
+      secondary != VS::Audio::Seq::activeMusicConfig) {
     StoreMusicLayer(*secondary, *state.secondary);
   }
-  StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
-  Audio_Seq_musicLoopsRemaining = state.music_loops_remaining;
-  Audio_Seq_musicTransitionTimer = state.music_transition_timer;
-  Audio_Seq_tickCounter = state.tick_counter;
-  Audio_Seq_masterFade.value = state.master_fade.value;
-  Audio_Seq_masterFade.step = state.master_fade.step;
-  Audio_Seq_masterFade.ticksRemaining = state.master_fade.ticks_remaining;
-  Audio_Seq_randomPitchPhase = state.random_pitch_phase;
-  Audio_Seq_discVolume = state.disc_volume.value;
-  Audio_Seq_discVolumeFadeStep = state.disc_volume.step;
-  Audio_Seq_discVolumeFadeLength = state.disc_volume.length;
-  Audio_Mixer_tempoScale = state.tempo_scale.value;
-  Audio_Mixer_tempoScaleStep = state.tempo_scale.step;
-  Audio_Mixer_tempoScaleSlideLength = state.tempo_scale.length;
-  Audio_Mixer_musicPitchScale = state.music_pitch_scale.value;
-  Audio_Mixer_musicPitchScaleStep = state.music_pitch_scale.step;
-  Audio_Mixer_musicPitchScaleSlideLength = state.music_pitch_scale.length;
+  StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
+  VS::Audio::Seq::musicLoopsRemaining = state.music_loops_remaining;
+  VS::Audio::Driver::commandArguments.ext_param2 = state.music_transition_timer;
+  VS::Audio::Seq::tickCounter = state.tick_counter;
+  VS::Audio::Seq::masterFade.value = state.master_fade.value;
+  VS::Audio::Seq::masterFade.step = state.master_fade.step;
+  VS::Audio::Seq::masterFade.ticks_remaining =
+      state.master_fade.ticks_remaining;
+  VS::Audio::Seq::randomPitchPhase = state.random_pitch_phase;
+  VS::Audio::Seq::discVolume = state.disc_volume.value;
+  VS::Audio::Seq::discVolumeFadeStep = state.disc_volume.step;
+  VS::Audio::Seq::discVolumeFadeLength = state.disc_volume.length;
+  VS::Audio::Mixer::tempoScale = state.tempo_scale.value;
+  VS::Audio::Mixer::tempoScaleStep = state.tempo_scale.step;
+  VS::Audio::Mixer::tempoScaleSlideLength = state.tempo_scale.length;
+  VS::Audio::Mixer::musicPitchScale = state.music_pitch_scale.value;
+  VS::Audio::Mixer::musicPitchScaleStep = state.music_pitch_scale.step;
+  VS::Audio::Mixer::musicPitchScaleSlideLength = state.music_pitch_scale.length;
   std::copy(state.recent_tick_costs.begin(), state.recent_tick_costs.end(),
-            std::begin(Audio_Driver_recentTickCosts));
-  Audio_Driver_recentTickCostTotal = state.recent_tick_cost_total;
+            std::begin(VS::Audio::Driver::recentTickCosts));
+  VS::Audio::Driver::recentTickCostTotal = state.recent_tick_cost_total;
 }
 
 const char* PlaybackRefusalReason(PlaybackRefusal refusal) {
@@ -360,16 +366,18 @@ const char* PlaybackRefusalReason(PlaybackRefusal refusal) {
 // The music layer and channels `group` names; empty for sound effects and a
 // missing secondary layer.
 struct LiveMusicGroup {
-  Audio_MusicConfig* config = nullptr;
-  Audio_SeqChannel* channels = nullptr;
+  VS::Audio::MusicConfig* config = nullptr;
+  VS::Audio::SeqChannel* channels = nullptr;
 };
 
 LiveMusicGroup MusicGroupOf(ChannelGroup group) {
   if (group == ChannelGroup::kMusic) {
-    return {Audio_Seq_activeMusicConfig, std::data(Audio_Seq_musicChannels)};
+    return {VS::Audio::Seq::activeMusicConfig,
+            std::data(VS::Audio::Seq::musicChannels)};
   }
   if (group == ChannelGroup::kSecondaryMusic) {
-    return {Audio_Seq_secondaryMusicConfig, Audio_Seq_secondaryMusicChannels};
+    return {VS::Audio::Seq::secondaryMusicConfig,
+            VS::Audio::Seq::secondaryMusicChannels};
   }
   return {};
 }
@@ -390,7 +398,7 @@ class LivePlaybackHost final : public PlaybackHost {
 
   void DetachSecondaryLayer(PlaybackState& state) override {
     StorePlayback(state);
-    Audio_Seq_secondaryMusicConfig = nullptr;
+    VS::Audio::Seq::secondaryMusicConfig = nullptr;
     LoadPlayback(state);
   }
 
@@ -398,26 +406,27 @@ class LivePlaybackHost final : public PlaybackHost {
   // channels (0x2200 bytes); the native records are copied whole.
   void PromoteSecondaryLayer(PlaybackState& state) override {
     StorePlayback(state);
-    Audio_MusicConfig* promoted = Audio_Seq_secondaryMusicConfig;
-    Audio_SeqChannel* channels = Audio_Seq_secondaryMusicChannels;
-    if (promoted != Audio_Seq_activeMusicConfig) {
-      std::memcpy(Audio_Seq_activeMusicConfig, promoted,
-                  offsetof(Audio_MusicConfig, reserved80));
+    VS::Audio::MusicConfig* promoted = VS::Audio::Seq::secondaryMusicConfig;
+    VS::Audio::SeqChannel* channels = VS::Audio::Seq::secondaryMusicChannels;
+    if (promoted != VS::Audio::Seq::activeMusicConfig) {
+      std::memcpy(VS::Audio::Seq::activeMusicConfig, promoted,
+                  offsetof(VS::Audio::MusicConfig, reserved80));
     }
-    if (channels != nullptr && channels != std::data(Audio_Seq_musicChannels)) {
+    if (channels != nullptr &&
+        channels != std::data(VS::Audio::Seq::musicChannels)) {
       std::copy_n(channels, kMusicChannelCount,
-                  std::data(Audio_Seq_musicChannels));
+                  std::data(VS::Audio::Seq::musicChannels));
     }
-    Audio_Seq_secondaryMusicConfig = nullptr;
-    promoted->musicId = 0;
-    promoted->activeChannels = 0;
+    VS::Audio::Seq::secondaryMusicConfig = nullptr;
+    promoted->music_id = 0;
+    promoted->active_channels = 0;
     LoadPlayback(state);
   }
 
   void StartPendingMusic(PlaybackState& state) override {
     StorePlayback(state);
-    const std::uintptr_t pending = Audio_Seq_pendingMusicData.param1;
-    auto* const start = reinterpret_cast<char*>(pending);
+    const std::uintptr_t pending = VS::Audio::Seq::pendingMusicData.param1;
+    auto* const start = reinterpret_cast<std::uint8_t*>(pending);
     const std::optional<LiveProgramMemory> region = LiveProgramRegion(start);
     std::uint16_t music_id = 0;
     if (!region || region->From(start).size < kPendingMusicHeaderBytes) {
@@ -425,11 +434,11 @@ class LivePlaybackHost final : public PlaybackHost {
                     "the pending track lies outside the sequence data");
     } else {
       std::memcpy(&music_id, start + kPendingMusicIdOffset, sizeof(music_id));
-      Audio_Seq_embeddedSoundEffectParams.param1 = pending;
-      Audio_Seq_embeddedSoundEffectParams.param3 = music_id;
-      LiveStartOrResumeMusic(&Audio_Seq_embeddedSoundEffectParams);
+      VS::Audio::Seq::embeddedSoundEffectParams.param1 = pending;
+      VS::Audio::Seq::embeddedSoundEffectParams.param3 = music_id;
+      LiveStartOrResumeMusic(&VS::Audio::Seq::embeddedSoundEffectParams);
     }
-    Audio_Seq_pendingMusicData.param1 = 0;
+    VS::Audio::Seq::pendingMusicData.param1 = 0;
     LoadPlayback(state);
   }
 
@@ -440,27 +449,27 @@ class LivePlaybackHost final : public PlaybackHost {
   }
 
   ChannelTimers Timers(ChannelGroup group, std::size_t index) override {
-    const Audio_SeqChannel* channel = ChannelOf(group, index);
+    const VS::Audio::SeqChannel* channel = ChannelOf(group, index);
     if (channel == nullptr) return {};
-    return {Same<std::uint16_t>(channel->noteLength),
-            Same<std::uint16_t>(channel->gateLength),
+    return {Same<std::uint16_t>(channel->note_length),
+            Same<std::uint16_t>(channel->gate_length),
             Same<std::int32_t>(channel->priority),
-            Same<std::int32_t>(channel->effectTags)};
+            Same<std::int32_t>(channel->effect_tags)};
   }
 
   void SetTimers(ChannelGroup group, std::size_t index,
                  const ChannelTimers& timers) override {
-    Audio_SeqChannel* channel = ChannelOf(group, index);
+    VS::Audio::SeqChannel* channel = ChannelOf(group, index);
     if (channel == nullptr) return;
-    channel->noteLength = timers.note_length;
-    channel->gateLength = timers.gate_length;
+    channel->note_length = timers.note_length;
+    channel->gate_length = timers.gate_length;
     channel->priority = timers.priority;
-    channel->effectTags = timers.effect_tags;
+    channel->effect_tags = timers.effect_tags;
   }
 
   void StepChannel(PlaybackState& state, ChannelGroup group,
                    std::size_t index) override {
-    Audio_SeqChannel* channel = ChannelOf(group, index);
+    VS::Audio::SeqChannel* channel = ChannelOf(group, index);
     if (channel == nullptr) return;
     StorePlayback(state);
     {
@@ -473,7 +482,7 @@ class LivePlaybackHost final : public PlaybackHost {
 
   void UpdateChannelSlides(PlaybackState& state, ChannelGroup group,
                            std::size_t index) override {
-    Audio_SeqChannel* channel = ChannelOf(group, index);
+    VS::Audio::SeqChannel* channel = ChannelOf(group, index);
     if (channel == nullptr) return;
     StorePlayback(state);
     {
@@ -489,7 +498,7 @@ class LivePlaybackHost final : public PlaybackHost {
 
   void ActivatePrimaryLayer(PlaybackState& state) override {
     StorePlayback(state);
-    Audio_Seq_activeMusicConfig = &Audio_Seq_primaryMusicConfig;
+    VS::Audio::Seq::activeMusicConfig = &VS::Audio::Seq::primaryMusicConfig;
     LoadPlayback(state);
   }
 
@@ -504,40 +513,41 @@ class LivePlaybackHost final : public PlaybackHost {
   }
 
   void MarkMusicPitchDirty() override {
-    for (Audio_SeqChannel& channel : Audio_Seq_musicChannels) {
-      channel.voice.dirtyFlags |= kSampleRateDirtyFlag;
+    for (VS::Audio::SeqChannel& channel : VS::Audio::Seq::musicChannels) {
+      channel.voice.dirty_flags |= kSampleRateDirtyFlag;
     }
   }
 
   EffectSlides EffectSlidesOf(std::size_t index) override {
-    const Audio_SeqChannel* channel =
+    const VS::Audio::SeqChannel* channel =
         ChannelOf(ChannelGroup::kSoundEffects, index);
     if (channel == nullptr) return {};
-    return {Same<std::int16_t>(channel->effectVolume),
-            Same<std::int16_t>(channel->effectVolumeSlideStep),
-            Same<std::uint16_t>(channel->effectVolumeSlideLength),
-            Same<std::uint16_t>(channel->effectPan),
-            Same<std::int16_t>(channel->effectPanSlideStep),
-            Same<std::uint16_t>(channel->effectPanSlideLength),
-            Same<std::int32_t>(channel->effectPitchScale),
-            Same<std::uint32_t>(channel->effectPitchScaleSlideStep),
-            Same<std::uint16_t>(channel->effectPitchScaleSlideLength),
-            Same<std::uint32_t>(channel->voice.dirtyFlags)};
+    return {Same<std::int16_t>(channel->effect_volume),
+            Same<std::int16_t>(channel->effect_volume_slide_step),
+            Same<std::uint16_t>(channel->effect_volume_slide_length),
+            Same<std::uint16_t>(channel->effect_pan),
+            Same<std::int16_t>(channel->effect_pan_slide_step),
+            Same<std::uint16_t>(channel->effect_pan_slide_length),
+            Same<std::int32_t>(channel->effect_pitch_scale),
+            Same<std::uint32_t>(channel->effect_pitch_scale_slide_step),
+            Same<std::uint16_t>(channel->effect_pitch_scale_slide_length),
+            Same<std::uint32_t>(channel->voice.dirty_flags)};
   }
 
   void SetEffectSlides(std::size_t index, const EffectSlides& slides) override {
-    Audio_SeqChannel* channel = ChannelOf(ChannelGroup::kSoundEffects, index);
+    VS::Audio::SeqChannel* channel =
+        ChannelOf(ChannelGroup::kSoundEffects, index);
     if (channel == nullptr) return;
-    channel->effectVolume = slides.volume;
-    channel->effectVolumeSlideStep = slides.volume_step;
-    channel->effectVolumeSlideLength = slides.volume_length;
-    channel->effectPan = slides.pan;
-    channel->effectPanSlideStep = slides.pan_step;
-    channel->effectPanSlideLength = slides.pan_length;
-    channel->effectPitchScale = slides.pitch_scale;
-    channel->effectPitchScaleSlideStep = slides.pitch_scale_step;
-    channel->effectPitchScaleSlideLength = slides.pitch_scale_length;
-    channel->voice.dirtyFlags = slides.dirty_flags;
+    channel->effect_volume = slides.volume;
+    channel->effect_volume_slide_step = slides.volume_step;
+    channel->effect_volume_slide_length = slides.volume_length;
+    channel->effect_pan = slides.pan;
+    channel->effect_pan_slide_step = slides.pan_step;
+    channel->effect_pan_slide_length = slides.pan_length;
+    channel->effect_pitch_scale = slides.pitch_scale;
+    channel->effect_pitch_scale_slide_step = slides.pitch_scale_step;
+    channel->effect_pitch_scale_slide_length = slides.pitch_scale_length;
+    channel->voice.dirty_flags = slides.dirty_flags;
   }
 
   void WriteDiscVolume(PlaybackState& state) override {
@@ -574,11 +584,12 @@ class LivePlaybackHost final : public PlaybackHost {
 // The driver tick needs an active music layer, and a secondary layer distinct
 // from it.
 bool PlaybackLayersValid(const char* operation) {
-  if (Audio_Seq_activeMusicConfig == nullptr) {
+  if (VS::Audio::Seq::activeMusicConfig == nullptr) {
     ReportRefusal(operation, "no music layer is active");
     return false;
   }
-  if (Audio_Seq_secondaryMusicConfig == Audio_Seq_activeMusicConfig) {
+  if (VS::Audio::Seq::secondaryMusicConfig ==
+      VS::Audio::Seq::activeMusicConfig) {
     ReportRefusal(operation, "the secondary music layer is the active one");
     return false;
   }
@@ -587,8 +598,8 @@ bool PlaybackLayersValid(const char* operation) {
 }  // namespace
 
 // decomp: SLUS_010.40 func_8001A8D8 (src/SLUS_010.40/25AC.c:4760)
-void LiveExecuteChannelStep(Audio_SeqChannel* channel, int channel_bit) {
-  if (channel == nullptr || Audio_Seq_activeMusicConfig == nullptr) {
+void LiveExecuteChannelStep(VS::Audio::SeqChannel* channel, int channel_bit) {
+  if (channel == nullptr || VS::Audio::Seq::activeMusicConfig == nullptr) {
     ReportRefusal("ExecuteChannelStep", "no channel or music layer");
     return;
   }
@@ -622,19 +633,20 @@ void LiveUpdateGlobalSlides() {
 
 // decomp: SLUS_010.40 Sound_ClearVoiceFromSchedulerState
 // (src/SLUS_010.40/25AC.c:4970)
-void LiveReleaseSoundEffectVoice(Audio_SeqChannel* channel, int voice_bit) {
+void LiveReleaseSoundEffectVoice(VS::Audio::SeqChannel* channel,
+                                 int voice_bit) {
   if (channel == nullptr) {
     ReportRefusal("ReleaseSoundEffectVoice", "no channel");
     return;
   }
   VoiceSchedulerState scheduler =
-      LoadVoiceScheduler(Audio_Mixer_voiceScheduler);
-  EffectIdentity effect{Same<std::int32_t>(channel->effectTags),
-                        channel->effectId != 0};
+      LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler);
+  EffectIdentity effect{Same<std::int32_t>(channel->effect_tags),
+                        channel->effect_id != 0};
   ReleaseSoundEffectVoice(scheduler, effect,
                           static_cast<std::uint32_t>(voice_bit));
-  StoreVoiceScheduler(Audio_Mixer_voiceScheduler, scheduler);
-  channel->effectTags = effect.tags;
-  if (!effect.has_effect) channel->effectId = 0;
+  StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, scheduler);
+  channel->effect_tags = effect.tags;
+  if (!effect.has_effect) channel->effect_id = 0;
 }
 }  // namespace VS::Audio::Seq

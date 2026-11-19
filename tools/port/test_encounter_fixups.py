@@ -2288,7 +2288,7 @@ int func_800F9800(void) {
         self.assertIn("UpdateActorSoundTransition(*actor);", source)
         self.assertIn('#include "Actors/SoundTransitionBinding.hpp"', source)
         self.assertNotIn("soundEffect.parameter -= step;", source)
-        header = (root / r"Native\Engine\src\Audio\ActorSound.h").read_text(
+        header = (root / r"Native\Engine\src\Audio\SurfaceSounds.hpp").read_text(
             encoding="utf-8"
         )
         self.assertNotIn("int Audio_UpdateActorSoundTransition()", header)
@@ -2647,8 +2647,8 @@ int func_800F9800(void) {
         self.assertNotIn("F03246", copy_fixups.FIXES)
         root = Path(__file__).resolve().parents[2]
         live = (root / "Native/Engine/src/Audio/Mixer/MixControlLive.cpp").read_text()
-        self.assertIn("Audio_Seq_pendingMusicData.param1 = 0;", live)
-        self.assertNotIn("*(int*)&Audio_Seq_pendingMusicData", live)
+        self.assertIn("VS::Audio::Seq::pendingMusicData.param1 = 0;", live)
+        self.assertNotIn("*(int*)&VS::Audio::Seq::pendingMusicData", live)
 
     def test_particle_child_events_project_native_parent_fields(self):
         # #276 Group N: the tick (F01535) is owned; its Live host builds the

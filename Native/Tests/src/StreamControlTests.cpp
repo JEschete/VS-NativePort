@@ -10,9 +10,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/SoundBanks.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/SoundState.hpp"
 #include "Audio/StreamControl.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Content/AudioStream.hpp"
@@ -193,24 +193,24 @@ std::vector<std::uint8_t> MonoStreamBytes() {
 class LiveStreamState {
  public:
   LiveStreamState()
-      : stream_(Audio_Cutscene_streamState),
-        slot_(Audio_soundState.sfxStreamData[2]) {
-    Audio_Cutscene_streamState.voiceMask = 0;
-    Audio_Cutscene_streamState.volume = 0x1234;
-    Audio_Cutscene_streamState.volumeFadeStep = 0;
-    Audio_Cutscene_streamState.volumeFadeTicksLeft = 0;
-    Audio_Cutscene_streamState.pan.word = 0x4000;
-    Audio_soundState.sfxStreamData[2] = nullptr;
+      : stream_(VS::Audio::Cutscene::streamState),
+        slot_(VS::Audio::soundState.sfx_stream_data[2]) {
+    VS::Audio::Cutscene::streamState.voice_mask = 0;
+    VS::Audio::Cutscene::streamState.volume = 0x1234;
+    VS::Audio::Cutscene::streamState.volume_fade_step = 0;
+    VS::Audio::Cutscene::streamState.volume_fade_ticks_left = 0;
+    VS::Audio::Cutscene::streamState.pan.word = 0x4000;
+    VS::Audio::soundState.sfx_stream_data[2] = nullptr;
   }
   LiveStreamState(const LiveStreamState&) = delete;
   LiveStreamState& operator=(const LiveStreamState&) = delete;
   ~LiveStreamState() {
-    Audio_Cutscene_streamState = stream_;
-    Audio_soundState.sfxStreamData[2] = slot_;
+    VS::Audio::Cutscene::streamState = stream_;
+    VS::Audio::soundState.sfx_stream_data[2] = slot_;
   }
 
  private:
-  Audio_CutsceneStreamState stream_;
+  VS::Audio::CutsceneStreamState stream_;
   void* slot_;
 };
 
@@ -548,32 +548,32 @@ TEST_CASE("Live stream commands ignore null parameter blocks",
   Cutscene::PauseLiveStream(nullptr);
   Cutscene::ResumeLiveStream(nullptr);
   Cutscene::StopLiveStream(nullptr);
-  CHECK(Audio_Cutscene_streamState.volume == 0x1234);
-  CHECK(Audio_Cutscene_streamState.volumeFadeTicksLeft == 0);
-  CHECK(Audio_Cutscene_streamState.pan.word == 0x4000);
-  CHECK(Audio_Cutscene_streamState.voiceMask == 0);
+  CHECK(VS::Audio::Cutscene::streamState.volume == 0x1234);
+  CHECK(VS::Audio::Cutscene::streamState.volume_fade_ticks_left == 0);
+  CHECK(VS::Audio::Cutscene::streamState.pan.word == 0x4000);
+  CHECK(VS::Audio::Cutscene::streamState.voice_mask == 0);
 }
 
 TEST_CASE("Live stream commands refuse parameters wider than a command word",
           "[audio][stream]") {
   const LiveStreamState state;
-  Audio_CommandParams params{};
+  VS::Audio::CommandParams params{};
   if constexpr (sizeof(std::uintptr_t) > sizeof(std::uint32_t)) {
     params.param1 = (std::uintptr_t{1} << 32U) | 0x4000U;
     Cutscene::SetLiveStreamVolume(&params);
-    CHECK(Audio_Cutscene_streamState.volume == 0x1234);
+    CHECK(VS::Audio::Cutscene::streamState.volume == 0x1234);
     params.param1 = (std::uintptr_t{1} << 32U) | 0x8000U;
     Cutscene::SetLiveStreamPan(&params);
-    CHECK(Audio_Cutscene_streamState.pan.word == 0x4000);
+    CHECK(VS::Audio::Cutscene::streamState.pan.word == 0x4000);
   }
   params.param1 = 0x4000;
   Cutscene::SetLiveStreamVolume(&params);
-  CHECK(Audio_Cutscene_streamState.volume == 0x4000);
+  CHECK(VS::Audio::Cutscene::streamState.volume == 0x4000);
   params.param1 = 8;
   params.param2 = 0;
   Cutscene::SlideLiveStreamVolume(&params);
-  CHECK(Audio_Cutscene_streamState.volumeFadeTicksLeft == 8);
-  CHECK(Audio_Cutscene_streamState.volumeFadeStep == -0x800);
+  CHECK(VS::Audio::Cutscene::streamState.volume_fade_ticks_left == 8);
+  CHECK(VS::Audio::Cutscene::streamState.volume_fade_step == -0x800);
 }
 
 TEST_CASE("Live room stream bindings report an empty slot and missing data",
@@ -581,5 +581,5 @@ TEST_CASE("Live room stream bindings report an empty slot and missing data",
   const LiveStreamState state;
   CHECK(VS::Audio::UnbindLiveRoomCutsceneStream() == 0);
   CHECK(VS::Audio::BindLiveRoomCutsceneStream(nullptr, 0) == 0);
-  CHECK(Audio_soundState.sfxStreamData[2] == nullptr);
+  CHECK(VS::Audio::soundState.sfx_stream_data[2] == nullptr);
 }

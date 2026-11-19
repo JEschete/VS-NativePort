@@ -11,15 +11,15 @@
 #include <iterator>
 #include <optional>
 
-#include "Audio/LegacyFiles.h"
+#include "Audio/LegacyFiles.hpp"
 #include "Audio/Music.hpp"
 #include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/SoundSlotsLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Content/CdDrive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/RoomLoadingLiveState.hpp"
@@ -29,12 +29,15 @@
 
 namespace VS::Audio {
 namespace {
-static_assert(std::size(Audio_soundState.musicIds) == kMusicSlotCount);
-static_assert(std::size(Audio_soundState.musicHandles) == kMusicSlotCount);
-static_assert(std::size(Audio_soundState.musicData) == kMusicSlotCount);
-static_assert(std::size(Audio_soundState.musicRequests) == kMusicSlotCount);
-static_assert(sizeof(Audio_soundState.musicIds[0]) == sizeof(std::uint8_t));
-static_assert(sizeof(Audio_soundState.currentMusicSlot) ==
+static_assert(std::size(VS::Audio::soundState.music_ids) == kMusicSlotCount);
+static_assert(std::size(VS::Audio::soundState.music_handles) ==
+              kMusicSlotCount);
+static_assert(std::size(VS::Audio::soundState.music_data) == kMusicSlotCount);
+static_assert(std::size(VS::Audio::soundState.music_requests) ==
+              kMusicSlotCount);
+static_assert(sizeof(VS::Audio::soundState.music_ids[0]) ==
+              sizeof(std::uint8_t));
+static_assert(sizeof(VS::Audio::soundState.current_music_slot) ==
               sizeof(std::int32_t));
 static_assert(sizeof(Field_ZoneContext::isMusicFadeEnabled) ==
               sizeof(std::int32_t));
@@ -56,43 +59,43 @@ class LiveMusic final : public MusicHost {
   explicit LiveMusic(const char* operation) : operation_(operation) {}
 
   MusicPlayback Playback() override {
-    const Audio_SoundState& state = Audio_soundState;
-    return {.slot = state.currentMusicSlot,
-            .handle = state.playingMusicHandle,
-            .music_id = state.currentMusicId,
-            .data = LiveBankBuffer(state.currentMusicData)};
+    const VS::Audio::SoundState& state = VS::Audio::soundState;
+    return {.slot = state.current_music_slot,
+            .handle = state.playing_music_handle,
+            .music_id = state.current_music_id,
+            .data = LiveBankBuffer(state.current_music_data)};
   }
 
   void StorePlayback(const MusicPlayback& playback) override {
-    Audio_SoundState& state = Audio_soundState;
-    state.currentMusicSlot = playback.slot;
-    state.playingMusicHandle = playback.handle;
-    state.currentMusicId = playback.music_id;
-    state.currentMusicData = LiveBufferPointer(playback.data);
+    VS::Audio::SoundState& state = VS::Audio::soundState;
+    state.current_music_slot = playback.slot;
+    state.playing_music_handle = playback.handle;
+    state.current_music_id = playback.music_id;
+    state.current_music_data = LiveBufferPointer(playback.data);
   }
 
   // The ids are bytes the original read with lbu.
   MusicSlot Music(std::size_t index) override {
     if (index >= kMusicSlotCount) return {};
-    const Audio_SoundState& state = Audio_soundState;
-    return {.id = static_cast<std::uint8_t>(state.musicIds[index]),
-            .handle = state.musicHandles[index],
-            .data = LiveBankBuffer(state.musicData[index]),
-            .request = LiveBankRequest(state.musicRequests[index])};
+    const VS::Audio::SoundState& state = VS::Audio::soundState;
+    return {.id = static_cast<std::uint8_t>(state.music_ids[index]),
+            .handle = state.music_handles[index],
+            .data = LiveBankBuffer(state.music_data[index]),
+            .request = LiveBankRequest(state.music_requests[index])};
   }
 
   void StoreMusic(std::size_t index, const MusicSlot& slot) override {
     if (index >= kMusicSlotCount) return;
-    Audio_SoundState& state = Audio_soundState;
-    state.musicIds[index] = static_cast<char>(slot.id);
-    state.musicHandles[index] = slot.handle;
-    state.musicData[index] = LiveBufferPointer(slot.data);
-    state.musicRequests[index] = LiveRequestSlot(slot.request);
+    VS::Audio::SoundState& state = VS::Audio::soundState;
+    state.music_ids[index] = static_cast<std::uint8_t>(slot.id);
+    state.music_handles[index] = slot.handle;
+    state.music_data[index] = LiveBufferPointer(slot.data);
+    state.music_requests[index] = LiveRequestSlot(slot.request);
   }
 
   std::optional<Content::DiscFileExtent> MusicFile(std::int32_t id) override {
-    return LiveTableFile(Audio_legacyMusicDiscOffsets,
-                         Audio_legacyMusicFileSizes, kMusicFileCount, id);
+    return LiveTableFile(VS::Audio::legacyMusicDiscOffsets,
+                         VS::Audio::legacyMusicFileSizes, kMusicFileCount, id);
   }
 
   std::uint32_t StartMusic(BankBuffer music) override {

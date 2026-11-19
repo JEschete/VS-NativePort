@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
+#include "Audio/Seq/Channel.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
@@ -618,11 +618,12 @@ TEST_CASE("Time-attack production fixture uses real music and render storage",
   fixture.LoadThroughTextures(Asset::kResults);
   fixture.CompleteMusicLoad();
   REQUIRE(r::LiveInitializeTimeAttackResults() == 1);
-  CHECK(Audio_soundState.playingMusicHandle != VS::Audio::kNoMusicHandle);
-  CHECK(Audio_soundState.playingMusicHandle ==
-        Audio_soundState.musicHandles[LiveFixture::kMusicIndex]);
+  CHECK(VS::Audio::soundState.playing_music_handle !=
+        VS::Audio::kNoMusicHandle);
+  CHECK(VS::Audio::soundState.playing_music_handle ==
+        VS::Audio::soundState.music_handles[LiveFixture::kMusicIndex]);
   CHECK(memory::LivePayloadCapacity(
-            Audio_soundState.musicData[LiveFixture::kMusicIndex])
+            VS::Audio::soundState.music_data[LiveFixture::kMusicIndex])
             .has_value());
   fixture.BeginFrame();
   Menu_Results_screenState = 1;
@@ -674,7 +675,8 @@ TEST_CASE(
     fixture.LoadThroughTextures(Asset::kResults);
     fixture.CompleteMusicLoad();
     REQUIRE(r::LiveInitializeTimeAttackResults() == 1);
-    void* const music = Audio_soundState.musicData[LiveFixture::kMusicIndex];
+    void* const music =
+        VS::Audio::soundState.music_data[LiveFixture::kMusicIndex];
     REQUIRE(memory::LivePayloadCapacity(music).has_value());
     Menu_Results_screenState = 2;
     REQUIRE(r::LiveUpdateTimeAttackStart() == 0);

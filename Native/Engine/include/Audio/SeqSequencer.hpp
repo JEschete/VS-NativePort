@@ -20,7 +20,8 @@
 // operands lie outside it refuses and finishes the channel.
 namespace VS::Audio::Seq {
 inline constexpr std::size_t kMusicChannelCount = 32;
-// Sound-effect channels use voice bits 12 and up (Audio_SoundEffects_channels).
+// Sound-effect channels use voice bits 12 and up
+// (VS::Audio::SoundEffects::channels).
 inline constexpr std::uint32_t kFirstEffectVoice = 12;
 inline constexpr std::size_t kEffectChannelCount = 32 - kFirstEffectVoice;
 inline constexpr std::size_t kSemitoneCount = 12;

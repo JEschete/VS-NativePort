@@ -184,22 +184,22 @@
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
-#include "Audio/ActorSound.h"
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/LegacyFiles.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Playback/SoundPlayback.h"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/AkaoFormat.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
-#include "Audio/Sfx.h"
-#include "Audio/SoundBanks.h"
-#include "Audio/SoundEffects/SoundEffects.h"
-#include "Audio/Stream.h"
+#include "Audio/SurfaceSounds.hpp"
+#include "Audio/Control/SoundControl.hpp"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/LegacyFiles.hpp"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Playback/SoundPlayback.hpp"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/AkaoFormat.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
+#include "Audio/SfxChannelGroups.hpp"
+#include "Audio/SoundState.hpp"
+#include "Audio/SoundEffects/SoundEffects.hpp"
+#include "Audio/StreamFormat.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -442,7 +442,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E90D0u, 156u, (void*)&Actors_kFastQuadrantMoveAnimations, sizeof Actors_kFastQuadrantMoveAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E916Cu, 48u, (void*)&Actors_secondarySlotSequences, sizeof Actors_secondarySlotSequences, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E919Cu, 8u, (void*)&Field_gimmickTemplateIndices, sizeof Field_gimmickTemplateIndices, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E91A4u, 8u, (void*)&Audio_objectSurfaceSoundIds, sizeof Audio_objectSurfaceSoundIds, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E91A4u, 8u, (void*)&VS::Audio::objectSurfaceSoundIds, sizeof VS::Audio::objectSurfaceSoundIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E91ACu, 16u, (void*)&Field_kGimmickSpinHeightSteps, sizeof Field_kGimmickSpinHeightSteps, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E91BCu, 16u, (void*)&Field_kGimmickSpinPitchSteps, sizeof Field_kGimmickSpinPitchSteps, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E91CCu, 16u, (void*)&Field_kGimmickSpinYawSteps, sizeof Field_kGimmickSpinYawSteps, 1u, 1u},
@@ -848,64 +848,64 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F591Cu, 4u, (void*)&Battle_Ai_orbitHeightOffset, sizeof Battle_Ai_orbitHeightOffset, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5920u, 4u, (void*)&Battle_Ai_arenaOrbit, sizeof Battle_Ai_arenaOrbit, 0u, 0u},
     {"SLUS_010.40", 0x80010000u, 20u, (void*)&VS::Core::kOverlaySlots, sizeof VS::Core::kOverlaySlots, 0u, 0u},
-    {"SLUS_010.40", 0x8002F544u, 4u, (void*)&Audio_Driver_legacySpuEvent, sizeof Audio_Driver_legacySpuEvent, 1u, 1u},
-    {"SLUS_010.40", 0x8002F548u, 4u, (void*)&Audio_Driver_recentTickCostTotal, sizeof Audio_Driver_recentTickCostTotal, 1u, 1u},
-    {"SLUS_010.40", 0x8002F54Cu, 4u, (void*)&Audio_Seq_tickCounter, sizeof Audio_Seq_tickCounter, 1u, 1u},
-    {"SLUS_010.40", 0x8002F550u, 16u, (void*)&Audio_Driver_recentTickCosts, sizeof Audio_Driver_recentTickCosts, 1u, 1u},
-    {"SLUS_010.40", 0x8002F560u, 64u, (void*)&Audio_Driver_legacySpuFlushBytes, sizeof Audio_Driver_legacySpuFlushBytes, 1u, 1u},
-    {"SLUS_010.40", 0x8002F5A0u, 96u, (void*)&Audio_Seq_kOpcodeLengths, sizeof Audio_Seq_kOpcodeLengths, 1u, 1u},
-    {"SLUS_010.40", 0x8002F600u, 32u, (void*)&Audio_Seq_kExtendedOpcodeLengths, sizeof Audio_Seq_kExtendedOpcodeLengths, 1u, 1u},
-    {"SLUS_010.40", 0x8002F620u, 24u, (void*)&Audio_Seq_kNoteLengths, sizeof Audio_Seq_kNoteLengths, 1u, 1u},
-    {"SLUS_010.40", 0x8002F638u, 4u, (void*)&Audio_Seq_kIdleProgram, sizeof Audio_Seq_kIdleProgram, 1u, 1u},
-    {"SLUS_010.40", 0x8002F63Cu, 48u, (void*)&Audio_Seq_kSemitonePitches, sizeof Audio_Seq_kSemitonePitches, 1u, 1u},
-    {"SLUS_010.40", 0x8002F66Cu, 48u, (void*)&Audio_Seq_kNoteRemapTables, sizeof Audio_Seq_kNoteRemapTables, 1u, 1u},
-    {"SLUS_010.40", 0x8002F69Cu, 256u, (void*)&Audio_Seq_kRandomPitchOffsets, sizeof Audio_Seq_kRandomPitchOffsets, 1u, 1u},
-    {"SLUS_010.40", 0x8002F79Cu, 512u, (void*)&Audio_Mixer_kPanGains, sizeof Audio_Mixer_kPanGains, 1u, 1u},
-    {"SLUS_010.40", 0x800301A0u, 64u, (void*)&Audio_Seq_kLfoWaveforms, sizeof Audio_Seq_kLfoWaveforms, 4u, sizeof Audio_Seq_kLfoWaveforms[0]},
-    {"SLUS_010.40", 0x800301E0u, 832u, (void*)&Audio_Mixer_kCommandHandlers, sizeof Audio_Mixer_kCommandHandlers, 4u, sizeof Audio_Mixer_kCommandHandlers[0]},
-    {"SLUS_010.40", 0x800305E0u, 384u, (void*)&Audio_Seq_kOpcodeHandlers, sizeof Audio_Seq_kOpcodeHandlers, 4u, sizeof Audio_Seq_kOpcodeHandlers[0]},
-    {"SLUS_010.40", 0x80030760u, 128u, (void*)&Audio_Seq_kExtendedOpcodeHandlers, sizeof Audio_Seq_kExtendedOpcodeHandlers, 4u, sizeof Audio_Seq_kExtendedOpcodeHandlers[0]},
-    {"SLUS_010.40", 0x80033690u, 8704u, (void*)&Audio_Seq_musicChannels, sizeof Audio_Seq_musicChannels, 0u, 0u},
-    {"SLUS_010.40", 0x80035890u, 128u, (void*)&Audio_Seq_savedMusicConfig, sizeof Audio_Seq_savedMusicConfig, 0u, 0u},
-    {"SLUS_010.40", 0x80035910u, 2720u, (void*)&Audio_SoundEffects_channels, sizeof Audio_SoundEffects_channels, 0u, 0u},
-    {"SLUS_010.40", 0x800365D0u, 4u, (void*)&Audio_Control_legacyDiscMixAttenuation, sizeof Audio_Control_legacyDiscMixAttenuation, 1u, 1u},
-    {"SLUS_010.40", 0x800365D4u, 4u, (void*)&Audio_Seq_secondaryMusicChannels, sizeof Audio_Seq_secondaryMusicChannels, 0u, 0u},
-    {"SLUS_010.40", 0x80036628u, 4u, (void*)&Audio_Seq_secondaryMusicConfig, sizeof Audio_Seq_secondaryMusicConfig, 0u, 0u},
-    {"SLUS_010.40", 0x80036630u, 192u, (void*)&Audio_Mixer_voiceEnvelopes, sizeof Audio_Mixer_voiceEnvelopes, 1u, 1u},
-    {"SLUS_010.40", 0x800366F0u, 56u, (void*)&Audio_Seq_primaryMusicConfig, sizeof Audio_Seq_primaryMusicConfig, 0u, 0u},
-    {"SLUS_010.40", 0x80036770u, 4u, (void*)&Audio_Samples_musicSampleBankIds, sizeof Audio_Samples_musicSampleBankIds, 1u, 1u},
-    {"SLUS_010.40", 0x80036778u, 4u, (void*)&Audio_Mixer_musicPitchScaleStep, sizeof Audio_Mixer_musicPitchScaleStep, 1u, 1u},
-    {"SLUS_010.40", 0x8003677Cu, 4u, (void*)&Audio_Mixer_tempoScaleStep, sizeof Audio_Mixer_tempoScaleStep, 1u, 1u},
-    {"SLUS_010.40", 0x80036780u, 4u, (void*)&Audio_Mixer_musicPitchScaleSlideLength, sizeof Audio_Mixer_musicPitchScaleSlideLength, 1u, 1u},
-    {"SLUS_010.40", 0x80036788u, 4096u, (void*)&Audio_Samples_instruments, sizeof Audio_Samples_instruments, 1u, 1u},
-    {"SLUS_010.40", 0x80037788u, 8u, (void*)&Audio_Seq_pendingMusicData, sizeof Audio_Seq_pendingMusicData, 0u, 0u},
-    {"SLUS_010.40", 0x80037790u, 24u, (void*)&Audio_Mixer_commandParams, sizeof Audio_Mixer_commandParams, 0u, 0u},
-    {"SLUS_010.40", 0x800377B0u, 4u, (void*)&Audio_Driver_legacySpuAllocatorTable, sizeof Audio_Driver_legacySpuAllocatorTable, 1u, 1u},
-    {"SLUS_010.40", 0x800377D8u, 4u, (void*)&Audio_Seq_musicLoopsRemaining, sizeof Audio_Seq_musicLoopsRemaining, 1u, 1u},
-    {"SLUS_010.40", 0x800377E0u, 4u, (void*)&Audio_Samples_soundEffectBankIds, sizeof Audio_Samples_soundEffectBankIds, 1u, 1u},
-    {"SLUS_010.40", 0x800377ECu, 4u, (void*)&Audio_Playback_soundEffectProgramOffsets, sizeof Audio_Playback_soundEffectProgramOffsets, 0u, 0u},
-    {"SLUS_010.40", 0x800377F0u, 4u, (void*)&Audio_Cutscene_legacySpuTransferBusy, sizeof Audio_Cutscene_legacySpuTransferBusy, 1u, 1u},
-    {"SLUS_010.40", 0x800377F4u, 4u, (void*)&Audio_Playback_soundEffectBankSelectors, sizeof Audio_Playback_soundEffectBankSelectors, 0u, 0u},
-    {"SLUS_010.40", 0x800377F8u, 4u, (void*)&Audio_Playback_soundEffectProgramData, sizeof Audio_Playback_soundEffectProgramData, 0u, 0u},
-    {"SLUS_010.40", 0x80037800u, 24u, (void*)&Audio_Seq_embeddedSoundEffectParams, sizeof Audio_Seq_embeddedSoundEffectParams, 0u, 0u},
-    {"SLUS_010.40", 0x80037820u, 4u, (void*)&Audio_Seq_activeMusicConfig, sizeof Audio_Seq_activeMusicConfig, 0u, 0u},
-    {"SLUS_010.40", 0x80037838u, 12u, (void*)&Audio_Seq_masterFade, sizeof Audio_Seq_masterFade, 1u, 1u},
-    {"SLUS_010.40", 0x80037848u, 4u, (void*)&Audio_Seq_discVolumeFadeStep, sizeof Audio_Seq_discVolumeFadeStep, 1u, 1u},
-    {"SLUS_010.40", 0x8003784Cu, 4u, (void*)&Audio_Seq_discVolumeFadeLength, sizeof Audio_Seq_discVolumeFadeLength, 1u, 1u},
-    {"SLUS_010.40", 0x80037850u, 64u, (void*)&Audio_Samples_bankChunkHeader, sizeof Audio_Samples_bankChunkHeader, 1u, 1u},
-    {"SLUS_010.40", 0x80037890u, 40u, (void*)&Audio_Mixer_voiceScheduler, sizeof Audio_Mixer_voiceScheduler, 1u, 1u},
-    {"SLUS_010.40", 0x800378C0u, 24u, (void*)&Audio_Driver_commandArguments, sizeof Audio_Driver_commandArguments, 0u, 0u},
-    {"SLUS_010.40", 0x800378E0u, 4u, (void*)&Audio_Seq_discVolume, sizeof Audio_Seq_discVolume, 1u, 1u},
-    {"SLUS_010.40", 0x800378E4u, 4u, (void*)&Audio_Mixer_mutedMusicChannels, sizeof Audio_Mixer_mutedMusicChannels, 1u, 1u},
-    {"SLUS_010.40", 0x800378E8u, 8704u, (void*)&Audio_Seq_savedMusicChannels, sizeof Audio_Seq_savedMusicChannels, 0u, 0u},
-    {"SLUS_010.40", 0x80039AE8u, 4u, (void*)&Audio_Seq_randomPitchPhase, sizeof Audio_Seq_randomPitchPhase, 1u, 1u},
-    {"SLUS_010.40", 0x80039AECu, 4u, (void*)&Audio_Mixer_musicPitchScale, sizeof Audio_Mixer_musicPitchScale, 1u, 1u},
-    {"SLUS_010.40", 0x80039AF0u, 4u, (void*)&Audio_Mixer_tempoScale, sizeof Audio_Mixer_tempoScale, 1u, 1u},
-    {"SLUS_010.40", 0x80039AF8u, 12u, (void*)&Audio_Driver_controlLatches, sizeof Audio_Driver_controlLatches, 1u, 1u},
-    {"SLUS_010.40", 0x80039B08u, 88u, (void*)&Audio_Cutscene_streamState, sizeof Audio_Cutscene_streamState, 0u, 0u},
-    {"SLUS_010.40", 0x80039B68u, 96u, (void*)&Audio_Mixer_voiceOwners, sizeof Audio_Mixer_voiceOwners, 0u, 0u},
-    {"SLUS_010.40", 0x80039BC8u, 8u, (void*)&Audio_Samples_bankStream, sizeof Audio_Samples_bankStream, 0u, 0u},
-    {"SLUS_010.40", 0x80039BD8u, 12u, (void*)&Audio_Mixer_voiceModes, sizeof Audio_Mixer_voiceModes, 1u, 1u},
+    {"SLUS_010.40", 0x8002F544u, 4u, (void*)&VS::Audio::Driver::legacySpuEvent, sizeof VS::Audio::Driver::legacySpuEvent, 1u, 1u},
+    {"SLUS_010.40", 0x8002F548u, 4u, (void*)&VS::Audio::Driver::recentTickCostTotal, sizeof VS::Audio::Driver::recentTickCostTotal, 1u, 1u},
+    {"SLUS_010.40", 0x8002F54Cu, 4u, (void*)&VS::Audio::Seq::tickCounter, sizeof VS::Audio::Seq::tickCounter, 1u, 1u},
+    {"SLUS_010.40", 0x8002F550u, 16u, (void*)&VS::Audio::Driver::recentTickCosts, sizeof VS::Audio::Driver::recentTickCosts, 1u, 1u},
+    {"SLUS_010.40", 0x8002F560u, 64u, (void*)&VS::Audio::Driver::legacySpuFlushBytes, sizeof VS::Audio::Driver::legacySpuFlushBytes, 1u, 1u},
+    {"SLUS_010.40", 0x8002F5A0u, 96u, (void*)&VS::Audio::Seq::kOpcodeLengths, sizeof VS::Audio::Seq::kOpcodeLengths, 1u, 1u},
+    {"SLUS_010.40", 0x8002F600u, 32u, (void*)&VS::Audio::Seq::kExtendedOpcodeLengths, sizeof VS::Audio::Seq::kExtendedOpcodeLengths, 1u, 1u},
+    {"SLUS_010.40", 0x8002F620u, 24u, (void*)&VS::Audio::Seq::kNoteLengths, sizeof VS::Audio::Seq::kNoteLengths, 1u, 1u},
+    {"SLUS_010.40", 0x8002F638u, 4u, (void*)&VS::Audio::Seq::kIdleProgram, sizeof VS::Audio::Seq::kIdleProgram, 1u, 1u},
+    {"SLUS_010.40", 0x8002F63Cu, 48u, (void*)&VS::Audio::Seq::kSemitonePitches, sizeof VS::Audio::Seq::kSemitonePitches, 1u, 1u},
+    {"SLUS_010.40", 0x8002F66Cu, 48u, (void*)&VS::Audio::Seq::kNoteRemapTables, sizeof VS::Audio::Seq::kNoteRemapTables, 1u, 1u},
+    {"SLUS_010.40", 0x8002F69Cu, 256u, (void*)&VS::Audio::Seq::kRandomPitchOffsets, sizeof VS::Audio::Seq::kRandomPitchOffsets, 1u, 1u},
+    {"SLUS_010.40", 0x8002F79Cu, 512u, (void*)&VS::Audio::Mixer::kPanGains, sizeof VS::Audio::Mixer::kPanGains, 1u, 1u},
+    {"SLUS_010.40", 0x800301A0u, 64u, (void*)&VS::Audio::Seq::kLfoWaveforms, sizeof VS::Audio::Seq::kLfoWaveforms, 4u, sizeof VS::Audio::Seq::kLfoWaveforms[0]},
+    {"SLUS_010.40", 0x800301E0u, 832u, (void*)&VS::Audio::Mixer::kCommandHandlers, sizeof VS::Audio::Mixer::kCommandHandlers, 4u, sizeof VS::Audio::Mixer::kCommandHandlers[0]},
+    {"SLUS_010.40", 0x800305E0u, 384u, (void*)&VS::Audio::Seq::kOpcodeHandlers, sizeof VS::Audio::Seq::kOpcodeHandlers, 4u, sizeof VS::Audio::Seq::kOpcodeHandlers[0]},
+    {"SLUS_010.40", 0x80030760u, 128u, (void*)&VS::Audio::Seq::kExtendedOpcodeHandlers, sizeof VS::Audio::Seq::kExtendedOpcodeHandlers, 4u, sizeof VS::Audio::Seq::kExtendedOpcodeHandlers[0]},
+    {"SLUS_010.40", 0x80033690u, 8704u, (void*)&VS::Audio::Seq::musicChannels, sizeof VS::Audio::Seq::musicChannels, 0u, 0u},
+    {"SLUS_010.40", 0x80035890u, 128u, (void*)&VS::Audio::Seq::savedMusicConfig, sizeof VS::Audio::Seq::savedMusicConfig, 0u, 0u},
+    {"SLUS_010.40", 0x80035910u, 2720u, (void*)&VS::Audio::SoundEffects::channels, sizeof VS::Audio::SoundEffects::channels, 0u, 0u},
+    {"SLUS_010.40", 0x800365D0u, 4u, (void*)&VS::Audio::Control::legacyDiscMixAttenuation, sizeof VS::Audio::Control::legacyDiscMixAttenuation, 1u, 1u},
+    {"SLUS_010.40", 0x800365D4u, 4u, (void*)&VS::Audio::Seq::secondaryMusicChannels, sizeof VS::Audio::Seq::secondaryMusicChannels, 0u, 0u},
+    {"SLUS_010.40", 0x80036628u, 4u, (void*)&VS::Audio::Seq::secondaryMusicConfig, sizeof VS::Audio::Seq::secondaryMusicConfig, 0u, 0u},
+    {"SLUS_010.40", 0x80036630u, 192u, (void*)&VS::Audio::Mixer::voiceEnvelopes, sizeof VS::Audio::Mixer::voiceEnvelopes, 1u, 1u},
+    {"SLUS_010.40", 0x800366F0u, 56u, (void*)&VS::Audio::Seq::primaryMusicConfig, sizeof VS::Audio::Seq::primaryMusicConfig, 0u, 0u},
+    {"SLUS_010.40", 0x80036770u, 4u, (void*)&VS::Audio::Samples::musicSampleBankIds, sizeof VS::Audio::Samples::musicSampleBankIds, 1u, 1u},
+    {"SLUS_010.40", 0x80036778u, 4u, (void*)&VS::Audio::Mixer::musicPitchScaleStep, sizeof VS::Audio::Mixer::musicPitchScaleStep, 1u, 1u},
+    {"SLUS_010.40", 0x8003677Cu, 4u, (void*)&VS::Audio::Mixer::tempoScaleStep, sizeof VS::Audio::Mixer::tempoScaleStep, 1u, 1u},
+    {"SLUS_010.40", 0x80036780u, 4u, (void*)&VS::Audio::Mixer::musicPitchScaleSlideLength, sizeof VS::Audio::Mixer::musicPitchScaleSlideLength, 1u, 1u},
+    {"SLUS_010.40", 0x80036788u, 4096u, (void*)&VS::Audio::Samples::instruments, sizeof VS::Audio::Samples::instruments, 1u, 1u},
+    {"SLUS_010.40", 0x80037788u, 8u, (void*)&VS::Audio::Seq::pendingMusicData, sizeof VS::Audio::Seq::pendingMusicData, 0u, 0u},
+    {"SLUS_010.40", 0x80037790u, 24u, (void*)&VS::Audio::Mixer::commandParams, sizeof VS::Audio::Mixer::commandParams, 0u, 0u},
+    {"SLUS_010.40", 0x800377B0u, 4u, (void*)&VS::Audio::Driver::legacySpuAllocatorTable, sizeof VS::Audio::Driver::legacySpuAllocatorTable, 1u, 1u},
+    {"SLUS_010.40", 0x800377D8u, 4u, (void*)&VS::Audio::Seq::musicLoopsRemaining, sizeof VS::Audio::Seq::musicLoopsRemaining, 1u, 1u},
+    {"SLUS_010.40", 0x800377E0u, 4u, (void*)&VS::Audio::Samples::soundEffectBankIds, sizeof VS::Audio::Samples::soundEffectBankIds, 1u, 1u},
+    {"SLUS_010.40", 0x800377ECu, 4u, (void*)&VS::Audio::Playback::soundEffectProgramOffsets, sizeof VS::Audio::Playback::soundEffectProgramOffsets, 0u, 0u},
+    {"SLUS_010.40", 0x800377F0u, 4u, (void*)&VS::Audio::Cutscene::legacySpuTransferBusy, sizeof VS::Audio::Cutscene::legacySpuTransferBusy, 1u, 1u},
+    {"SLUS_010.40", 0x800377F4u, 4u, (void*)&VS::Audio::Playback::soundEffectBankSelectors, sizeof VS::Audio::Playback::soundEffectBankSelectors, 0u, 0u},
+    {"SLUS_010.40", 0x800377F8u, 4u, (void*)&VS::Audio::Playback::soundEffectProgramData, sizeof VS::Audio::Playback::soundEffectProgramData, 0u, 0u},
+    {"SLUS_010.40", 0x80037800u, 24u, (void*)&VS::Audio::Seq::embeddedSoundEffectParams, sizeof VS::Audio::Seq::embeddedSoundEffectParams, 0u, 0u},
+    {"SLUS_010.40", 0x80037820u, 4u, (void*)&VS::Audio::Seq::activeMusicConfig, sizeof VS::Audio::Seq::activeMusicConfig, 0u, 0u},
+    {"SLUS_010.40", 0x80037838u, 12u, (void*)&VS::Audio::Seq::masterFade, sizeof VS::Audio::Seq::masterFade, 1u, 1u},
+    {"SLUS_010.40", 0x80037848u, 4u, (void*)&VS::Audio::Seq::discVolumeFadeStep, sizeof VS::Audio::Seq::discVolumeFadeStep, 1u, 1u},
+    {"SLUS_010.40", 0x8003784Cu, 4u, (void*)&VS::Audio::Seq::discVolumeFadeLength, sizeof VS::Audio::Seq::discVolumeFadeLength, 1u, 1u},
+    {"SLUS_010.40", 0x80037850u, 64u, (void*)&VS::Audio::Samples::bankChunkHeader, sizeof VS::Audio::Samples::bankChunkHeader, 1u, 1u},
+    {"SLUS_010.40", 0x80037890u, 40u, (void*)&VS::Audio::Mixer::voiceScheduler, sizeof VS::Audio::Mixer::voiceScheduler, 1u, 1u},
+    {"SLUS_010.40", 0x800378C0u, 24u, (void*)&VS::Audio::Driver::commandArguments, sizeof VS::Audio::Driver::commandArguments, 0u, 0u},
+    {"SLUS_010.40", 0x800378E0u, 4u, (void*)&VS::Audio::Seq::discVolume, sizeof VS::Audio::Seq::discVolume, 1u, 1u},
+    {"SLUS_010.40", 0x800378E4u, 4u, (void*)&VS::Audio::Mixer::mutedMusicChannels, sizeof VS::Audio::Mixer::mutedMusicChannels, 1u, 1u},
+    {"SLUS_010.40", 0x800378E8u, 8704u, (void*)&VS::Audio::Seq::savedMusicChannels, sizeof VS::Audio::Seq::savedMusicChannels, 0u, 0u},
+    {"SLUS_010.40", 0x80039AE8u, 4u, (void*)&VS::Audio::Seq::randomPitchPhase, sizeof VS::Audio::Seq::randomPitchPhase, 1u, 1u},
+    {"SLUS_010.40", 0x80039AECu, 4u, (void*)&VS::Audio::Mixer::musicPitchScale, sizeof VS::Audio::Mixer::musicPitchScale, 1u, 1u},
+    {"SLUS_010.40", 0x80039AF0u, 4u, (void*)&VS::Audio::Mixer::tempoScale, sizeof VS::Audio::Mixer::tempoScale, 1u, 1u},
+    {"SLUS_010.40", 0x80039AF8u, 12u, (void*)&VS::Audio::Driver::controlLatches, sizeof VS::Audio::Driver::controlLatches, 1u, 1u},
+    {"SLUS_010.40", 0x80039B08u, 88u, (void*)&VS::Audio::Cutscene::streamState, sizeof VS::Audio::Cutscene::streamState, 0u, 0u},
+    {"SLUS_010.40", 0x80039B68u, 96u, (void*)&VS::Audio::Mixer::voiceOwners, sizeof VS::Audio::Mixer::voiceOwners, 0u, 0u},
+    {"SLUS_010.40", 0x80039BC8u, 8u, (void*)&VS::Audio::Samples::bankStream, sizeof VS::Audio::Samples::bankStream, 0u, 0u},
+    {"SLUS_010.40", 0x80039BD8u, 12u, (void*)&VS::Audio::Mixer::voiceModes, sizeof VS::Audio::Mixer::voiceModes, 1u, 1u},
     {"SLUS_010.40", 0x80039C14u, 4u, (void*)&VS::Movie::legacyStreamInterruptFlag, sizeof VS::Movie::legacyStreamInterruptFlag, 1u, 1u},
     {"SLUS_010.40", 0x80040A14u, 516u, (void*)&VS::Core::Math::kArcTangentTable, sizeof VS::Core::Math::kArcTangentTable, 1u, 1u},
     {"SLUS_010.40", 0x80049138u, 4u, (void*)&VS::Core::legacyRamSize, sizeof VS::Core::legacyRamSize, 1u, 1u},
@@ -914,13 +914,13 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8004A51Cu, 12u, (void*)&VS::Input::legacyActuatorAlignment, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004A528u, 4u, (void*)&VS::Title::titleScreenVisitCount, sizeof VS::Title::titleScreenVisitCount, 0u, 0u},
     {"SLUS_010.40", 0x8004A52Cu, 4u, (void*)&VS::Render::isFrameStepPaused, sizeof VS::Render::isFrameStepPaused, 1u, 1u},
-    {"SLUS_010.40", 0x8004A530u, 400u, (void*)&Audio_legacyWaveBankDiscOffsets, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004A6C0u, 800u, (void*)&Audio_legacyMusicDiscOffsets, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004A9E0u, 400u, (void*)&Audio_legacySfxBankDiscOffsets, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004AB70u, 400u, (void*)&Audio_legacyWaveBankFileSizes, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004AD00u, 800u, (void*)&Audio_legacyMusicFileSizes, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004B020u, 400u, (void*)&Audio_legacySfxBankFileSizes, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004B1B0u, 200u, (void*)&Audio_waveBankFileMap, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004A530u, 400u, (void*)&VS::Audio::legacyWaveBankDiscOffsets, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004A6C0u, 800u, (void*)&VS::Audio::legacyMusicDiscOffsets, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004A9E0u, 400u, (void*)&VS::Audio::legacySfxBankDiscOffsets, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004AB70u, 400u, (void*)&VS::Audio::legacyWaveBankFileSizes, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004AD00u, 800u, (void*)&VS::Audio::legacyMusicFileSizes, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004B020u, 400u, (void*)&VS::Audio::legacySfxBankFileSizes, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004B1B0u, 200u, (void*)&VS::Audio::waveBankFileMap, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004B9DCu, 13312u, (void*)&Battle_actionDefinitions, sizeof Battle_actionDefinitions, 1u, 1u},
     {"SLUS_010.40", 0x8004EDDCu, 240u, (void*)&VS::Items::materialModifiers, sizeof VS::Items::materialModifiers, 1u, 1u},
     {"SLUS_010.40", 0x8004EECCu, 512u, (void*)&Battle_statusEffectParams, sizeof Battle_statusEffectParams, 1u, 1u},
@@ -942,14 +942,14 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x80050468u, 8u, (void*)&VS::State::sceneTimer, sizeof VS::State::sceneTimer, 0u, 0u},
     {"SLUS_010.40", 0x80050470u, 4u, (void*)&Boot_gameEntryMode, sizeof Boot_gameEntryMode, 1u, 1u},
     {"SLUS_010.40", 0x80050474u, 4u, (void*)&Boot_titleReturnStackPointer, sizeof Boot_titleReturnStackPointer, 1u, 1u},
-    {"SLUS_010.40", 0x80050478u, 22528u, (void*)&Audio_menuSoundEffects, sizeof Audio_menuSoundEffects, 1u, 1u},
+    {"SLUS_010.40", 0x80050478u, 22528u, (void*)&VS::Audio::menuSoundEffects, sizeof VS::Audio::menuSoundEffects, 1u, 1u},
     {"SLUS_010.40", 0x80055C80u, 8u, (void*)&VS::Render::legacyOrderingTables, sizeof VS::Render::legacyOrderingTables, 0u, 0u},
     {"SLUS_010.40", 0x80055C88u, 4u, (void*)&Boot_isSoftResetEnabled, sizeof Boot_isSoftResetEnabled, 1u, 1u},
     {"SLUS_010.40", 0x80055D10u, 28u, (void*)&Content_discDriveState, sizeof Content_discDriveState, 0u, 0u},
     {"SLUS_010.40", 0x80055D2Cu, 11u, (void*)&Content_discControlResponseBytes, sizeof Content_discControlResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005DFD0u, 4u, (void*)&Boot_battleReturnStackPointer, sizeof Boot_battleReturnStackPointer, 1u, 1u},
     {"SLUS_010.40", 0x8005DFF0u, 68u, (void*)&VS::Input::legacyPadResponseBytes, sizeof VS::Input::legacyPadResponseBytes, 1u, 1u},
-    {"SLUS_010.40", 0x8005E038u, 136u, (void*)&Audio_soundState, sizeof Audio_soundState, 0u, 0u},
+    {"SLUS_010.40", 0x8005E038u, 136u, (void*)&VS::Audio::soundState, sizeof VS::Audio::soundState, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C0u, 8u, (void*)&VS::Render::legacyPrimitiveBuffers, sizeof VS::Render::legacyPrimitiveBuffers, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C8u, 4u, (void*)&VS::Render::nearClip, sizeof VS::Render::nearClip, 1u, 1u},
     {"SLUS_010.40", 0x8005E0D0u, 184u, (void*)&VS::Render::legacyDrawEnvironments, sizeof VS::Render::legacyDrawEnvironments, 1u, 1u},
@@ -960,12 +960,12 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8005E240u, 4u, (void*)&Boot_isGameplayActive, sizeof Boot_isGameplayActive, 1u, 1u},
     {"SLUS_010.40", 0x8005E248u, 4u, (void*)&VS::Render::projectionDistance, sizeof VS::Render::projectionDistance, 1u, 1u},
     {"SLUS_010.40", 0x8005E24Cu, 4u, (void*)&VS::State::tickSpeed, sizeof VS::State::tickSpeed, 0u, 0u},
-    {"SLUS_010.40", 0x8005FE70u, 4u, (void*)&Audio_nextSfxChannelGroup1, sizeof Audio_nextSfxChannelGroup1, 1u, 1u},
-    {"SLUS_010.40", 0x8005FE74u, 4u, (void*)&Audio_nextSfxChannelGroup7E, sizeof Audio_nextSfxChannelGroup7E, 1u, 1u},
-    {"SLUS_010.40", 0x8005FE78u, 4u, (void*)&Audio_nextSfxChannelGroup180, sizeof Audio_nextSfxChannelGroup180, 1u, 1u},
-    {"SLUS_010.40", 0x8005FE7Cu, 4u, (void*)&Audio_nextSfxChannelGroup200, sizeof Audio_nextSfxChannelGroup200, 1u, 1u},
-    {"SLUS_010.40", 0x8005FE80u, 4u, (void*)&Audio_nextSfxChannelGroupFF000, sizeof Audio_nextSfxChannelGroupFF000, 1u, 1u},
-    {"SLUS_010.40", 0x8005FE84u, 4u, (void*)&Audio_nextSfxChannelGroupF00000, sizeof Audio_nextSfxChannelGroupF00000, 1u, 1u},
+    {"SLUS_010.40", 0x8005FE70u, 4u, (void*)&VS::Audio::nextSfxChannelGroup1, sizeof VS::Audio::nextSfxChannelGroup1, 1u, 1u},
+    {"SLUS_010.40", 0x8005FE74u, 4u, (void*)&VS::Audio::nextSfxChannelGroup7E, sizeof VS::Audio::nextSfxChannelGroup7E, 1u, 1u},
+    {"SLUS_010.40", 0x8005FE78u, 4u, (void*)&VS::Audio::nextSfxChannelGroup180, sizeof VS::Audio::nextSfxChannelGroup180, 1u, 1u},
+    {"SLUS_010.40", 0x8005FE7Cu, 4u, (void*)&VS::Audio::nextSfxChannelGroup200, sizeof VS::Audio::nextSfxChannelGroup200, 1u, 1u},
+    {"SLUS_010.40", 0x8005FE80u, 4u, (void*)&VS::Audio::nextSfxChannelGroupFF000, sizeof VS::Audio::nextSfxChannelGroupFF000, 1u, 1u},
+    {"SLUS_010.40", 0x8005FE84u, 4u, (void*)&VS::Audio::nextSfxChannelGroupF00000, sizeof VS::Audio::nextSfxChannelGroupF00000, 1u, 1u},
     {"SLUS_010.40", 0x8005FEA0u, 276u, (void*)&VS::State::scoreData, sizeof VS::State::scoreData, 1u, 1u},
     {"SLUS_010.40", 0x8005FFB8u, 32u, (void*)&State_learnedActionFlags, sizeof State_learnedActionFlags, 1u, 1u},
     {"SLUS_010.40", 0x8005FFD8u, 72u, (void*)&State_roomVisitProgress, sizeof State_roomVisitProgress, 1u, 1u},
@@ -2452,10 +2452,10 @@ const VS::Content::ModulePointerTable VS::Content::kModulePointers[] = {
     {"BATTLE/BATTLE.PRG", 0x83B24, 2u, (void**)Effects_scriptRenderers, sizeof Effects_scriptRenderers / sizeof Effects_scriptRenderers[0], NULL}, // G00222 D_800EC324
     {"BATTLE/BATTLE.PRG", 0x83BF4, 49u, (void**)Effects_scriptOpcodeHandlers, sizeof Effects_scriptOpcodeHandlers / sizeof Effects_scriptOpcodeHandlers[0], NULL}, // G00227 D_800EC3F4
     {"BATTLE/BATTLE.PRG", 0x88F90, 9u, (void**)Battle_Ai_decisionCallbacks, sizeof Battle_Ai_decisionCallbacks / sizeof Battle_Ai_decisionCallbacks[0], NULL}, // G00233 D_800F1790
-    {"SLUS_010.40", 0x209A0, 256u, (void**)Audio_Seq_kLfoWaveforms, sizeof Audio_Seq_kLfoWaveforms / sizeof Audio_Seq_kLfoWaveforms[0], &Content_residentLfoSamplesSource}, // G01840 g_Sound_LfoTable
-    {"SLUS_010.40", 0x209E0, 256u, (void**)Audio_Mixer_kCommandHandlers, sizeof Audio_Mixer_kCommandHandlers / sizeof Audio_Mixer_kCommandHandlers[0], NULL}, // G01841 D_800301E0
-    {"SLUS_010.40", 0x20DE0, 96u, (void**)Audio_Seq_kOpcodeHandlers, sizeof Audio_Seq_kOpcodeHandlers / sizeof Audio_Seq_kOpcodeHandlers[0], NULL}, // G01842 D_800305E0
-    {"SLUS_010.40", 0x20F60, 32u, (void**)Audio_Seq_kExtendedOpcodeHandlers, sizeof Audio_Seq_kExtendedOpcodeHandlers / sizeof Audio_Seq_kExtendedOpcodeHandlers[0], NULL}, // G01843 D_80030760
+    {"SLUS_010.40", 0x209A0, 256u, (void**)VS::Audio::Seq::kLfoWaveforms, sizeof VS::Audio::Seq::kLfoWaveforms / sizeof VS::Audio::Seq::kLfoWaveforms[0], &Content_residentLfoSamplesSource}, // G01840 g_Sound_LfoTable
+    {"SLUS_010.40", 0x209E0, 256u, (void**)VS::Audio::Mixer::kCommandHandlers, sizeof VS::Audio::Mixer::kCommandHandlers / sizeof VS::Audio::Mixer::kCommandHandlers[0], NULL}, // G01841 D_800301E0
+    {"SLUS_010.40", 0x20DE0, 96u, (void**)VS::Audio::Seq::kOpcodeHandlers, sizeof VS::Audio::Seq::kOpcodeHandlers / sizeof VS::Audio::Seq::kOpcodeHandlers[0], NULL}, // G01842 D_800305E0
+    {"SLUS_010.40", 0x20F60, 32u, (void**)VS::Audio::Seq::kExtendedOpcodeHandlers, sizeof VS::Audio::Seq::kExtendedOpcodeHandlers / sizeof VS::Audio::Seq::kExtendedOpcodeHandlers[0], NULL}, // G01843 D_80030760
 };
 const unsigned VS::Content::kModulePointerCount = sizeof VS::Content::kModulePointers / sizeof VS::Content::kModulePointers[0];
 

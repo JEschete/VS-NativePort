@@ -54,7 +54,7 @@ enum class DriverRefusal : std::uint8_t {
   kTickEventUnavailable,
 };
 
-// Audio_VoiceParams: one channel voice's SPU parameters at the original
+// VS::Audio::VoiceParams: one channel voice's SPU parameters at the original
 // widths and signedness.
 struct VoiceParameters {
   std::uint32_t dirty_flags = 0;

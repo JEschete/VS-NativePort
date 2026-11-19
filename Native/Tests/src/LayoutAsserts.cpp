@@ -8,8 +8,8 @@
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRenderingLiveState.hpp"
-#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanksLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -52,27 +52,28 @@ static_assert(offsetof(Battle_Ai_ActorAiState, awarenessMarker) == 340,
               "Awareness marker layout changed");
 
 int TestsRoomSfxBankBinding(void) {
-  const Audio_SoundState saved_state = Audio_soundState;
-  Audio_soundState = (Audio_SoundState){0};
+  const VS::Audio::SoundState saved_state = VS::Audio::soundState;
+  VS::Audio::soundState = (VS::Audio::SoundState){0};
   unsigned char bank = 0;
   unsigned char replacement = 0;
   int passed =
       VS::Audio::LiveBindRoomSfxBank(reinterpret_cast<uintptr_t>(&bank)) == 1 &&
-      Audio_soundState.sfxBankData[2] == &bank;
+      VS::Audio::soundState.sfx_bank_data[2] == &bank;
   passed = passed &&
            VS::Audio::LiveBindRoomSfxBank(
                reinterpret_cast<uintptr_t>(&replacement)) == 0 &&
-           Audio_soundState.sfxBankData[2] == &bank &&
-           Audio_soundState.sfxBankData[0] == nullptr &&
-           Audio_soundState.sfxBankData[1] == nullptr;
-  for (size_t slot = 0; slot < sizeof Audio_soundState.musicHandles /
-                                   sizeof Audio_soundState.musicHandles[0];
+           VS::Audio::soundState.sfx_bank_data[2] == &bank &&
+           VS::Audio::soundState.sfx_bank_data[0] == nullptr &&
+           VS::Audio::soundState.sfx_bank_data[1] == nullptr;
+  for (size_t slot = 0;
+       slot < sizeof VS::Audio::soundState.music_handles /
+                  sizeof VS::Audio::soundState.music_handles[0];
        ++slot) {
-    passed = passed && Audio_soundState.musicHandles[slot] == 0 &&
-             Audio_soundState.musicData[slot] == nullptr &&
-             Audio_soundState.musicRequests[slot] == nullptr;
+    passed = passed && VS::Audio::soundState.music_handles[slot] == 0 &&
+             VS::Audio::soundState.music_data[slot] == nullptr &&
+             VS::Audio::soundState.music_requests[slot] == nullptr;
   }
-  Audio_soundState = saved_state;
+  VS::Audio::soundState = saved_state;
   return passed;
 }
 

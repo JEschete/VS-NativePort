@@ -17,18 +17,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/Music.hpp"
 #include "Audio/MusicLive.hpp"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SoundBanks.h"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/SoundSlotsLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
@@ -144,16 +144,17 @@ class Fixture {
  private:
   SavedModuleData saved_module_data_;
   SavedGlobals<
-      Audio_soundState, Audio_Seq_activeMusicConfig,
-      Audio_Seq_secondaryMusicConfig, Audio_Seq_secondaryMusicChannels,
-      Audio_Seq_primaryMusicConfig, Audio_Seq_savedMusicConfig,
-      Audio_Seq_musicChannels, Audio_Seq_savedMusicChannels,
-      Audio_Seq_pendingMusicData, Audio_Seq_musicLoopsRemaining,
-      Audio_Seq_masterFade, Audio_Driver_commandArguments,
-      Audio_Driver_controlLatches, Audio_Driver_legacySpuEvent,
-      Audio_Mixer_commandParams, Audio_Mixer_voiceScheduler,
-      Audio_Mixer_voiceOwners, Audio_SoundEffects_channels,
-      Audio_Cutscene_streamState, Audio_Samples_musicSampleBankIds,
+      VS::Audio::soundState, VS::Audio::Seq::activeMusicConfig,
+      VS::Audio::Seq::secondaryMusicConfig,
+      VS::Audio::Seq::secondaryMusicChannels,
+      VS::Audio::Seq::primaryMusicConfig, VS::Audio::Seq::savedMusicConfig,
+      VS::Audio::Seq::musicChannels, VS::Audio::Seq::savedMusicChannels,
+      VS::Audio::Seq::pendingMusicData, VS::Audio::Seq::musicLoopsRemaining,
+      VS::Audio::Seq::masterFade, VS::Audio::Driver::commandArguments,
+      VS::Audio::Driver::controlLatches, VS::Audio::Driver::legacySpuEvent,
+      VS::Audio::Mixer::commandParams, VS::Audio::Mixer::voiceScheduler,
+      VS::Audio::Mixer::voiceOwners, VS::Audio::SoundEffects::channels,
+      VS::Audio::Cutscene::streamState, VS::Audio::Samples::musicSampleBankIds,
       VS::State::scoreData, VS::State::stateFlags, State_roomVisitProgress,
       Battle_characterState, Battle_unusedSubmenuState,
       VS::Input::buttonsPressed, Content_discRequestSlots,
@@ -177,7 +178,7 @@ class Fixture {
   memory::ScopedLiveGameHeap heap{arena};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
-  Audio_MusicConfig music{};
+  VS::Audio::MusicConfig music{};
   VS::test_support::time_attack::LiveTimeAttackFixture frame;
 
   Fixture() {
@@ -223,16 +224,16 @@ class Fixture {
   // The actual music loader allocates this request and high-heap destination.
   // Supply a bounded one-channel AKAO fixture, not a physical-disc I/O claim.
   void CompleteMusicLoad() {
-    auto* const request = Audio_soundState.musicRequests[kMusicIndex];
+    auto* const request = VS::Audio::soundState.music_requests[kMusicIndex];
     REQUIRE(request != nullptr);
     REQUIRE(content::LiveDiscRequestGeneration(request) != 0);
     REQUIRE(request->state == Content_DiscRequestState_Enqueued);
-    void* const data = Audio_soundState.musicData[kMusicIndex];
+    void* const data = VS::Audio::soundState.music_data[kMusicIndex];
     REQUIRE(request->vram == data);
     const auto capacity = memory::LivePayloadCapacity(data);
     REQUIRE(capacity.has_value());
     constexpr std::size_t kProgram = 0x44;
-    REQUIRE(*capacity >= kProgram + sizeof(Audio_Seq_kIdleProgram));
+    REQUIRE(*capacity >= kProgram + sizeof(VS::Audio::Seq::kIdleProgram));
     std::span bytes(static_cast<std::byte*>(data), *capacity);
     std::ranges::fill(bytes, std::byte{0});
     const auto put = [&](std::size_t at, auto value) {
@@ -245,7 +246,7 @@ class Fixture {
     put(8, static_cast<std::uint16_t>(VS::Audio::Driver::OutputReverbMode()));
     put(0x20, std::uint32_t{1});
     put(0x40, std::uint16_t{4});
-    put(kProgram, Audio_Seq_kIdleProgram);
+    put(kProgram, VS::Audio::Seq::kIdleProgram);
     REQUIRE(Content_discRequestCounts.waiting > 0);
     request->state = Content_DiscRequestState_Loaded;
     --Content_discRequestCounts.waiting;
@@ -253,9 +254,9 @@ class Fixture {
 
   void ReleaseMusic() {
     for (std::size_t index = 0; index < audio::kMusicSlotCount; ++index) {
-      void* const data = Audio_soundState.musicData[index];
+      void* const data = VS::Audio::soundState.music_data[index];
       const auto request =
-          audio::LiveBankRequest(Audio_soundState.musicRequests[index]);
+          audio::LiveBankRequest(VS::Audio::soundState.music_requests[index]);
       auto* const queued = request.mark == audio::RequestMark::kActive
                                ? audio::LiveRequestSlot(request)
                                : nullptr;
@@ -273,7 +274,7 @@ class Fixture {
           content::LiveDiscRequestGeneration(queued) == generation) {
         content::ReleaseLiveDiscRequest(queued);
       }
-      Audio_soundState.musicRequests[index] = nullptr;
+      VS::Audio::soundState.music_requests[index] = nullptr;
       if (data == nullptr) continue;
       const int slot = static_cast<int>(index + 1);
       if (capacity.has_value()) {
@@ -282,8 +283,8 @@ class Fixture {
         // A production bulk heap reset may already have discarded this block.
         // Stop the sequencer without trying to free an obsolete allocation.
         CHECK(audio::LiveStopMusicSlotPlayback(slot) == 1);
-        Audio_soundState.musicData[index] = nullptr;
-        Audio_soundState.musicIds[index] = 0;
+        VS::Audio::soundState.music_data[index] = nullptr;
+        VS::Audio::soundState.music_ids[index] = 0;
       }
     }
   }
@@ -310,40 +311,42 @@ class Fixture {
         std::istreambuf_iterator<char>(stream), {}};
     const auto tables = VS::Content::ModulePointerTables();
     const auto handlers = std::ranges::find(
-        tables, reinterpret_cast<void**>(Audio_Mixer_kCommandHandlers),
+        tables, reinterpret_cast<void**>(VS::Audio::Mixer::kCommandHandlers),
         &VS::Content::ModulePointerTable::target);
     REQUIRE(handlers != tables.end());
     REQUIRE(content::RelocateModulePointerTable(*handlers, image,
                                                 VS::Content::ModuleSymbols()));
     const auto entries = VS::Content::ModuleDataEntries();
-    const auto idle =
-        std::ranges::find(entries, static_cast<void*>(&Audio_Seq_kIdleProgram),
-                          &VS::Content::ModuleDataEntry::target);
+    const auto idle = std::ranges::find(
+        entries, static_cast<void*>(&VS::Audio::Seq::kIdleProgram),
+        &VS::Content::ModuleDataEntry::target);
     REQUIRE(idle != entries.end());
     REQUIRE(std::string_view(idle->module) == "SLUS_010.40");
     REQUIRE(content::CopyModuleDataEntry(*idle, image));
-    Audio_soundState = {};
-    Audio_soundState.playingMusicHandle = audio::kNoMusicHandle;
-    std::ranges::fill(Audio_soundState.musicHandles, audio::kNoMusicHandle);
-    Audio_Seq_activeMusicConfig = &music;
-    Audio_Seq_secondaryMusicConfig = nullptr;
-    Audio_Seq_secondaryMusicChannels = nullptr;
-    Audio_Seq_savedMusicConfig = {};
-    Audio_Seq_pendingMusicData = {};
-    Audio_Seq_musicLoopsRemaining = 0;
-    Audio_Seq_masterFade = {};
-    Audio_Driver_controlLatches = {};
+    VS::Audio::soundState = {};
+    VS::Audio::soundState.playing_music_handle = audio::kNoMusicHandle;
+    std::ranges::fill(VS::Audio::soundState.music_handles,
+                      audio::kNoMusicHandle);
+    VS::Audio::Seq::activeMusicConfig = &music;
+    VS::Audio::Seq::secondaryMusicConfig = nullptr;
+    VS::Audio::Seq::secondaryMusicChannels = nullptr;
+    VS::Audio::Seq::savedMusicConfig = {};
+    VS::Audio::Seq::pendingMusicData = {};
+    VS::Audio::Seq::musicLoopsRemaining = 0;
+    VS::Audio::Seq::masterFade = {};
+    VS::Audio::Driver::controlLatches = {};
     // Dispatch synchronously without enabling a caller's sequencer tick event.
-    Audio_Driver_legacySpuEvent = 0;
-    Audio_Mixer_voiceScheduler = {};
-    std::ranges::fill(Audio_Mixer_voiceOwners, nullptr);
-    Audio_Samples_musicSampleBankIds = {};
-    Audio_Cutscene_streamState = {};
-    std::ranges::fill(Audio_SoundEffects_channels, Audio_SeqChannel{});
-    for (auto& channel : Audio_Seq_musicChannels) {
+    VS::Audio::Driver::legacySpuEvent = 0;
+    VS::Audio::Mixer::voiceScheduler = {};
+    std::ranges::fill(VS::Audio::Mixer::voiceOwners, nullptr);
+    VS::Audio::Samples::musicSampleBankIds = {};
+    VS::Audio::Cutscene::streamState = {};
+    std::ranges::fill(VS::Audio::SoundEffects::channels,
+                      VS::Audio::SeqChannel{});
+    for (auto& channel : VS::Audio::Seq::musicChannels) {
       channel = {};
-      channel.programCounter = audio::Seq::LiveIdleProgram();
-      channel.voice.assignedVoice = audio::Seq::kUnassignedVoice;
+      channel.program_counter = audio::Seq::LiveIdleProgram();
+      channel.voice.assigned_voice = audio::Seq::kUnassignedVoice;
     }
   }
 };

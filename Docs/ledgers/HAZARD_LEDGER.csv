@@ -3,7 +3,7 @@ dee4aac7e8f1,ALWAYS-TRUE-GUARD,high,compiler,F01870,VS_PARTICLE_CONTROL_FUNCTION
 cc057034744f,ALWAYS-TRUE-GUARD,high,compiler,F01877,VS_TRAIL_CONTROL_FUNCTION,Native/Game/src/Effects/Templates/TrailControl.inl,59,-Wpointer-bool-conversion: address of 'emitter_scratch->aimPoint' will always evaluate to 'true',61,31,open,
 d0c8615f684b,ALWAYS-TRUE-GUARD,high,compiler,F01877,VS_TRAIL_CONTROL_FUNCTION,Native/Game/src/Effects/Templates/TrailNineControl.inl,99,-Wpointer-bool-conversion: address of 'emitter_scratch->aimPoint' will always evaluate to 'true',61,31,open,
 ccde3e14c3ec,CAPACITY,medium,pattern,,Content_legacyWeaponModelBuffers,Native/Content/src/ModelLoading.h,37,Content_legacyWeaponModelBuffers[84],47,6,open,
-8549ef9cf2c7,CAPACITY,medium,pattern,,Audio_Mixer_voiceOwners,Native/Engine/src/Audio/Mixer/VoiceMixer.h,98,Audio_Mixer_voiceOwners[VOICE_COUNT],253,30A,open,
+cd16e365a329,CAPACITY,medium,pattern,,voiceOwners,Native/Engine/src/Audio/Mixer/VoiceMixer.hpp,107,voiceOwners[kVoiceCount],253,30A,open,
 b69555d4d431,CAPACITY,medium,pattern,,Items_InventoryIndices,Native/Game/include/Items/Inventory.h,125,Items_InventoryIndices.weapons[8],none,,open,
 e9a207d45c79,CAPACITY,medium,pattern,,Items_InventoryIndices,Native/Game/include/Items/Inventory.h,126,Items_InventoryIndices.blades[16],none,,open,
 7ea9372ba525,CAPACITY,medium,pattern,,Items_InventoryIndices,Native/Game/include/Items/Inventory.h,127,Items_InventoryIndices.grips[16],none,,open,
@@ -70,7 +70,7 @@ f5a19ff76c15,DIV-ZERO,medium,pattern,,InspectAudioStream,Native/Content/src/Audi
 981ecc802501,DIV-ZERO,medium,pattern,,SelectXaAudioSectors,Native/Content/src/AudioStream.cpp,291,channels,48,7,open,
 bca3b9ef41b4,DIV-ZERO,medium,pattern,F03395,SlideStreamVolume,Native/Engine/src/Audio/Cutscene/StreamControl.cpp,156,static_cast,253,30A,guarded,"divisor is std::max(1, ticks); StreamControlTests.cpp ""Stream fades take at least one tick and clamp loud sources"" covers the zero-tick fade"
 f0c00d1abc4b,DIV-ZERO,medium,pattern,,SlideEffectPitch,Native/Engine/src/Audio/Mixer/MixControl.cpp,92,std,253,30A,open,
-983dcf6f825b,DIV-ZERO,medium,pattern,,Aligned,Native/Engine/src/Audio/Playback/SoundPlaybackLive.cpp,77,alignof(Element),253,30A,false-positive,"alignof yields a positive power of two for every complete type, so the modulus never divides by zero"
+983dcf6f825b,DIV-ZERO,medium,pattern,,Aligned,Native/Engine/src/Audio/Playback/SoundPlaybackLive.cpp,78,alignof(Element),253,30A,false-positive,"alignof yields a positive power of two for every complete type, so the modulus never divides by zero"
 ff924b350363,DIV-ZERO,medium,pattern,,Divide,Native/Engine/src/Audio/Seq/MusicSequence.cpp,79,divisor,253,30A,open,
 57329d1cf05c,DIV-ZERO,medium,pattern,F03215,CrossfadeMusicLayers,Native/Engine/src/Audio/Seq/MusicSequence.cpp,501,static_cast,253,30A,open,
 33d40a9c12bb,DIV-ZERO,medium,pattern,F03274,CalculateNotePitch,Native/Engine/src/Audio/Seq/SequencerCore.cpp,303,static_cast,253,30A,open,

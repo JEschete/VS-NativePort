@@ -7,7 +7,7 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/SoundTransitionBinding.hpp"
-#include "Audio/ActorSound.h"
+#include "Audio/SurfaceSounds.hpp"
 #include "Legacy/Psx.h"
 #include "State/Timers.hpp"
 

@@ -113,7 +113,7 @@ class StreamHost {
   virtual void SetVolume(std::uint32_t volume) = 0;
   virtual void StartFade(const StreamFade& fade) = 0;
   virtual void SetPan(std::uint32_t pan) = 0;
-  // The room stream slot (Audio_soundState slot 2).
+  // The room stream slot (VS::Audio::soundState slot 2).
   [[nodiscard]] virtual bool SlotBound() const = 0;
   virtual std::expected<void, std::string> ValidateAssets(
       const Content::AudioStreamInfo& info) = 0;

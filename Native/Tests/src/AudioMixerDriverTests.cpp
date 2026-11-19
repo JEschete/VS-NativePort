@@ -16,12 +16,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Cutscene/Stream.h"
+#include "Audio/Cutscene/Stream.hpp"
 #include "Audio/MixControl.hpp"
 #include "Audio/MixControlLive.hpp"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundDriver.hpp"
 #include "Audio/SoundDriverLive.hpp"
@@ -2723,7 +2723,8 @@ TEST_CASE("Live SPU voice writes reach the legacy registers and refuse others",
 TEST_CASE("Live sample transfers arm and complete the legacy transfer state",
           "[audio-mixer-driver][audio]") {
   const auto transfer = [] {
-    return static_cast<std::int32_t>(Audio_Cutscene_legacySpuTransferBusy);
+    return static_cast<std::int32_t>(
+        VS::Audio::Cutscene::legacySpuTransferBusy);
   };
   const std::int32_t saved = transfer();
   const std::uint64_t refused = Seq::LiveRefusalCount();
@@ -2739,12 +2740,12 @@ TEST_CASE("Live sample transfers arm and complete the legacy transfer state",
   Driver::LiveReadSampleMemory(nullptr, 4);
   CHECK(Seq::LiveRefusalCount() == refused + 2);
   CHECK(transfer() == Driver::kTransferIdle);
-  Audio_Cutscene_legacySpuTransferBusy = saved;
+  VS::Audio::Cutscene::legacySpuTransferBusy = saved;
 }
 
 TEST_CASE("Live mixer commands refuse missing parameters",
           "[audio-mixer-driver][audio]") {
-  const std::array<Audio_CommandHandler, 13> handlers{
+  const std::array<VS::Audio::CommandHandler, 13> handlers{
       &Mixer::LiveSetSoundEffectPitchScale,
       &Mixer::LiveSlideSoundEffectPitchScale,
       &Mixer::LiveSetWorldSoundEffectPitchScale,
@@ -2760,7 +2761,7 @@ TEST_CASE("Live mixer commands refuse missing parameters",
       &Mixer::LiveSetMusicJumpThreshold,
   };
   const std::uint64_t refused = Seq::LiveRefusalCount();
-  for (const Audio_CommandHandler handler : handlers) {
+  for (const VS::Audio::CommandHandler handler : handlers) {
     handler(nullptr);
   }
   Mixer::LiveIgnoreCommand(nullptr);
@@ -2770,20 +2771,21 @@ TEST_CASE("Live mixer commands refuse missing parameters",
 namespace {
 // Restores the legacy tempo and music pitch slides a test changes.
 struct LiveSlideFixture {
-  std::array<int, 4> values{Audio_Mixer_tempoScale, Audio_Mixer_tempoScaleStep,
-                            Audio_Mixer_musicPitchScale,
-                            Audio_Mixer_musicPitchScaleStep};
-  std::array<std::int16_t, 2> lengths{Audio_Mixer_tempoScaleSlideLength,
-                                      Audio_Mixer_musicPitchScaleSlideLength};
+  std::array<int, 4> values{
+      VS::Audio::Mixer::tempoScale, VS::Audio::Mixer::tempoScaleStep,
+      VS::Audio::Mixer::musicPitchScale, VS::Audio::Mixer::musicPitchScaleStep};
+  std::array<std::int16_t, 2> lengths{
+      VS::Audio::Mixer::tempoScaleSlideLength,
+      VS::Audio::Mixer::musicPitchScaleSlideLength};
 
   LiveSlideFixture() = default;
   ~LiveSlideFixture() {
-    Audio_Mixer_tempoScale = values[0];
-    Audio_Mixer_tempoScaleStep = values[1];
-    Audio_Mixer_musicPitchScale = values[2];
-    Audio_Mixer_musicPitchScaleStep = values[3];
-    Audio_Mixer_tempoScaleSlideLength = lengths[0];
-    Audio_Mixer_musicPitchScaleSlideLength = lengths[1];
+    VS::Audio::Mixer::tempoScale = values[0];
+    VS::Audio::Mixer::tempoScaleStep = values[1];
+    VS::Audio::Mixer::musicPitchScale = values[2];
+    VS::Audio::Mixer::musicPitchScaleStep = values[3];
+    VS::Audio::Mixer::tempoScaleSlideLength = lengths[0];
+    VS::Audio::Mixer::musicPitchScaleSlideLength = lengths[1];
   }
 
   LiveSlideFixture(const LiveSlideFixture&) = delete;
@@ -2795,18 +2797,18 @@ TEST_CASE("Live tempo and music pitch commands update the legacy slides",
           "[audio-mixer-driver][audio]") {
   const LiveSlideFixture fixture;
   const std::uint64_t refused = Seq::LiveRefusalCount();
-  Audio_CommandParams params{};
+  VS::Audio::CommandParams params{};
   // Only the low byte of the first word is read, signed.
   params.param1 = 0x1FE;
   Mixer::LiveSetTempoScale(&params);
-  CHECK(Audio_Mixer_tempoScale == -0x20000);
-  CHECK(Audio_Mixer_tempoScaleSlideLength == 0);
+  CHECK(VS::Audio::Mixer::tempoScale == -0x20000);
+  CHECK(VS::Audio::Mixer::tempoScaleSlideLength == 0);
   params.param1 = 4;
   params.param2 = 2;
   Mixer::LiveSlideTempoScale(&params);
-  CHECK(Audio_Mixer_tempoScale == -0x20000);
-  CHECK(Audio_Mixer_tempoScaleStep == 0x10000);
-  CHECK(Audio_Mixer_tempoScaleSlideLength == 4);
+  CHECK(VS::Audio::Mixer::tempoScale == -0x20000);
+  CHECK(VS::Audio::Mixer::tempoScaleStep == 0x10000);
+  CHECK(VS::Audio::Mixer::tempoScaleSlideLength == 4);
   CHECK(Seq::LiveRefusalCount() == refused);
 }
 
@@ -2814,32 +2816,32 @@ TEST_CASE("Live music pitch commands update the legacy pitch slide",
           "[audio-mixer-driver][audio]") {
   const LiveSlideFixture fixture;
   const std::uint64_t refused = Seq::LiveRefusalCount();
-  Audio_CommandParams params{};
+  VS::Audio::CommandParams params{};
   params.param1 = 3;
   Mixer::LiveSetMusicPitchScale(&params);
-  CHECK(Audio_Mixer_musicPitchScale == 0x30000);
+  CHECK(VS::Audio::Mixer::musicPitchScale == 0x30000);
   params = {};
   params.param2 = 0x10;
   params.param3 = 0x20;
   Mixer::LiveSetMusicPitchScaleRamp(&params);
-  CHECK(Audio_Mixer_musicPitchScale == 0x100000);
-  CHECK(Audio_Mixer_musicPitchScaleStep == 0x100000);
-  CHECK(Audio_Mixer_musicPitchScaleSlideLength == 0);
+  CHECK(VS::Audio::Mixer::musicPitchScale == 0x100000);
+  CHECK(VS::Audio::Mixer::musicPitchScaleStep == 0x100000);
+  CHECK(VS::Audio::Mixer::musicPitchScaleSlideLength == 0);
   CHECK(Seq::LiveRefusalCount() == refused + 1);
 }
 
 namespace {
 // Restores the music layer pointers a test rebinds.
 struct LiveLayerFixture {
-  Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
-  Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig;
-  Audio_SeqChannel* channels = Audio_Seq_secondaryMusicChannels;
+  VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
+  VS::Audio::MusicConfig* secondary = VS::Audio::Seq::secondaryMusicConfig;
+  VS::Audio::SeqChannel* channels = VS::Audio::Seq::secondaryMusicChannels;
 
   LiveLayerFixture() = default;
   ~LiveLayerFixture() {
-    Audio_Seq_activeMusicConfig = active;
-    Audio_Seq_secondaryMusicConfig = secondary;
-    Audio_Seq_secondaryMusicChannels = channels;
+    VS::Audio::Seq::activeMusicConfig = active;
+    VS::Audio::Seq::secondaryMusicConfig = secondary;
+    VS::Audio::Seq::secondaryMusicChannels = channels;
   }
 
   LiveLayerFixture(const LiveLayerFixture&) = delete;
@@ -2851,13 +2853,13 @@ TEST_CASE("Live mixer passes refuse missing channels and unbound layers",
           "[audio-mixer-driver][audio]") {
   const LiveLayerFixture fixture;
   const std::uint64_t refused = Seq::LiveRefusalCount();
-  Audio_SeqChannel channel{};
+  VS::Audio::SeqChannel channel{};
   Mixer::LiveUpdateChannelSlidesAndDelays(nullptr, 1, ChannelKind::kMusic);
   Mixer::LiveUpdateMusicChannelModulation(nullptr);
   Mixer::LiveUpdateSoundEffectModulation(nullptr);
   CHECK(Seq::LiveRefusalCount() == refused + 3);
 
-  Audio_Seq_activeMusicConfig = nullptr;
+  VS::Audio::Seq::activeMusicConfig = nullptr;
   Mixer::LiveUpdateChannelSlidesAndDelays(&channel, 1, ChannelKind::kMusic);
   Mixer::LiveUpdateMusicChannelModulation(&channel);
   Mixer::LiveCommitPlaybackVoices();
@@ -2865,54 +2867,56 @@ TEST_CASE("Live mixer passes refuse missing channels and unbound layers",
   CHECK(Seq::LiveRefusalCount() == refused + 7);
 
   // A secondary layer must be a record of its own with channels of its own.
-  Audio_MusicConfig other{};
-  Audio_MusicConfig stray{};
-  std::vector<Audio_SeqChannel> own(Seq::kMusicChannelCount);
-  Audio_Seq_activeMusicConfig = &Audio_Seq_primaryMusicConfig;
-  Audio_Seq_secondaryMusicConfig = &Audio_Seq_primaryMusicConfig;
-  Audio_Seq_secondaryMusicChannels = own.data();
+  VS::Audio::MusicConfig other{};
+  VS::Audio::MusicConfig stray{};
+  std::vector<VS::Audio::SeqChannel> own(Seq::kMusicChannelCount);
+  VS::Audio::Seq::activeMusicConfig = &VS::Audio::Seq::primaryMusicConfig;
+  VS::Audio::Seq::secondaryMusicConfig = &VS::Audio::Seq::primaryMusicConfig;
+  VS::Audio::Seq::secondaryMusicChannels = own.data();
   Mixer::LiveCommitPlaybackVoices();
-  Audio_Seq_secondaryMusicConfig = &other;
-  Audio_Seq_secondaryMusicChannels = nullptr;
+  VS::Audio::Seq::secondaryMusicConfig = &other;
+  VS::Audio::Seq::secondaryMusicChannels = nullptr;
   Mixer::LiveCommitPlaybackVoices();
-  Audio_Seq_secondaryMusicChannels = std::data(Audio_Seq_musicChannels);
+  VS::Audio::Seq::secondaryMusicChannels =
+      std::data(VS::Audio::Seq::musicChannels);
   Mixer::LiveReleasePendingVoices();
   // The active layer must be one of the two.
-  Audio_Seq_secondaryMusicChannels = own.data();
-  Audio_Seq_activeMusicConfig = &stray;
+  VS::Audio::Seq::secondaryMusicChannels = own.data();
+  VS::Audio::Seq::activeMusicConfig = &stray;
   Mixer::LiveReleasePendingVoices();
   CHECK(Seq::LiveRefusalCount() == refused + 11);
-  CHECK(Audio_Seq_activeMusicConfig == &stray);
+  CHECK(VS::Audio::Seq::activeMusicConfig == &stray);
 }
 
 TEST_CASE(
     "Mixer commands keep their live bindings and retired helpers keep none",
     "[audio-mixer-driver][audio]") {
   const auto symbols = VS::Content::ModuleSymbols();
-  const std::array<std::pair<std::uint32_t, Audio_CommandHandler>, 22> kept{{
-      {0x80017FB0U, &Mixer::LiveSetSoundEffectPitchScale},
-      {0x80018090U, &Mixer::LiveSlideSoundEffectPitchScale},
-      {0x80018218U, &Mixer::LiveSetWorldSoundEffectPitchScale},
-      {0x80018270U, &Mixer::LiveSlideWorldSoundEffectPitchScale},
-      {0x8001833CU, &Mixer::LiveSetTempoScale},
-      {0x80018358U, &Mixer::LiveSlideTempoScale},
-      {0x800183C0U, &Mixer::LiveSetTempoScaleRamp},
-      {0x80018434U, &Mixer::LiveSetMusicPitchScale},
-      {0x80018450U, &Mixer::LiveSlideMusicPitchScale},
-      {0x800184B8U, &Mixer::LiveSetMusicPitchScaleRamp},
-      {0x8001852CU, &Mixer::LiveStopMusicAndCancelReplacement},
-      {0x800185A0U, &Mixer::LiveStopMatchingMusic},
-      {0x80018608U, &Mixer::LiveStopWorldSoundEffects},
-      {0x800186E4U, &Mixer::LiveEnableStereoOutput},
-      {0x80018744U, &Mixer::LiveEnableMonoOutput},
-      {0x800187A4U, &Mixer::LiveSetMusicMuteMask},
-      {0x800187E4U, &Mixer::LiveSetMusicJumpThreshold},
-      {0x800187F8U, &Mixer::LivePauseMusic},
-      {0x800188E8U, &Mixer::LiveResumeMusic},
-      {0x80018984U, &Mixer::LivePauseWorldSoundEffects},
-      {0x80018AA0U, &Mixer::LiveResumeWorldSoundEffects},
-      {0x80018BD8U, &Mixer::LiveIgnoreCommand},
-  }};
+  const std::array<std::pair<std::uint32_t, VS::Audio::CommandHandler>, 22>
+      kept{{
+          {0x80017FB0U, &Mixer::LiveSetSoundEffectPitchScale},
+          {0x80018090U, &Mixer::LiveSlideSoundEffectPitchScale},
+          {0x80018218U, &Mixer::LiveSetWorldSoundEffectPitchScale},
+          {0x80018270U, &Mixer::LiveSlideWorldSoundEffectPitchScale},
+          {0x8001833CU, &Mixer::LiveSetTempoScale},
+          {0x80018358U, &Mixer::LiveSlideTempoScale},
+          {0x800183C0U, &Mixer::LiveSetTempoScaleRamp},
+          {0x80018434U, &Mixer::LiveSetMusicPitchScale},
+          {0x80018450U, &Mixer::LiveSlideMusicPitchScale},
+          {0x800184B8U, &Mixer::LiveSetMusicPitchScaleRamp},
+          {0x8001852CU, &Mixer::LiveStopMusicAndCancelReplacement},
+          {0x800185A0U, &Mixer::LiveStopMatchingMusic},
+          {0x80018608U, &Mixer::LiveStopWorldSoundEffects},
+          {0x800186E4U, &Mixer::LiveEnableStereoOutput},
+          {0x80018744U, &Mixer::LiveEnableMonoOutput},
+          {0x800187A4U, &Mixer::LiveSetMusicMuteMask},
+          {0x800187E4U, &Mixer::LiveSetMusicJumpThreshold},
+          {0x800187F8U, &Mixer::LivePauseMusic},
+          {0x800188E8U, &Mixer::LiveResumeMusic},
+          {0x80018984U, &Mixer::LivePauseWorldSoundEffects},
+          {0x80018AA0U, &Mixer::LiveResumeWorldSoundEffects},
+          {0x80018BD8U, &Mixer::LiveIgnoreCommand},
+      }};
   for (const auto& [address, handler] : kept) {
     CAPTURE(address);
     CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", address) ==

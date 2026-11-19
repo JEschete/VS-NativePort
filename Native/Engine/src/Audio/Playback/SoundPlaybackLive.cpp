@@ -12,28 +12,29 @@
 #include <span>
 #include <variant>
 
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Control/SoundControl.hpp"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/MixControlLive.hpp"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Playback/SoundPlayback.h"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Playback/SoundPlayback.hpp"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundDriverLive.hpp"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/SoundPlayback.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Audio::Playback {
 namespace {
-static_assert(std::size(Audio_SoundEffects_channels) >= kEffectVoiceCount);
-static_assert(sizeof(*Audio_Playback_soundEffectProgramOffsets) ==
+static_assert(std::size(VS::Audio::SoundEffects::channels) >=
+              kEffectVoiceCount);
+static_assert(sizeof(*VS::Audio::Playback::soundEffectProgramOffsets) ==
               sizeof(std::uint32_t));
-static_assert(sizeof(*Audio_Playback_soundEffectBankSelectors) ==
+static_assert(sizeof(*VS::Audio::Playback::soundEffectBankSelectors) ==
               sizeof(std::uint16_t));
 
 // The bound shared sound-effect tables (BindLiveEffectTables).
@@ -55,8 +56,8 @@ const char* RefusalReason(PlaybackRefusal refusal) {
   return "refused";
 }
 
-char* Pointer(DataRef data) {
-  return std::bit_cast<char*>(static_cast<std::uintptr_t>(data));
+std::uint8_t* Pointer(DataRef data) {
+  return std::bit_cast<std::uint8_t*>(static_cast<std::uintptr_t>(data));
 }
 
 DataRef Reference(const void* data) {
@@ -64,7 +65,7 @@ DataRef Reference(const void* data) {
 }
 
 // The memory from `start` to the end of the sequence memory it lies in.
-std::span<std::byte> SequenceBytes(char* start) {
+std::span<std::byte> SequenceBytes(std::uint8_t* start) {
   const std::optional<Seq::LiveProgramMemory> region =
       Seq::LiveProgramRegion(start);
   if (!region) return {};
@@ -92,7 +93,8 @@ class LivePlayback final : public PlaybackHost {
 
   CommandResult Dispatch(Command command,
                          const CommandArguments& arguments) override {
-    Audio_CommandArguments& words = Audio_Driver_commandArguments;
+    VS::Audio::LegacyCommandArguments& words =
+        VS::Audio::Driver::commandArguments;
     LiveWriteCommandArguments(arguments);
     const auto code = static_cast<unsigned>(command);
     CommandResult result;
@@ -115,28 +117,30 @@ class LivePlayback final : public PlaybackHost {
 
   PlaybackStatus Status() override {
     PlaybackStatus status;
-    if (Audio_Seq_activeMusicConfig != nullptr) {
-      status.active = Seq::LoadMusicLayer(*Audio_Seq_activeMusicConfig);
+    if (VS::Audio::Seq::activeMusicConfig != nullptr) {
+      status.active = Seq::LoadMusicLayer(*VS::Audio::Seq::activeMusicConfig);
     } else {
       Seq::ReportRefusal(operation_, "no music layer is active");
     }
-    if (Audio_Seq_secondaryMusicConfig != nullptr) {
-      status.secondary = Seq::LoadMusicLayer(*Audio_Seq_secondaryMusicConfig);
+    if (VS::Audio::Seq::secondaryMusicConfig != nullptr) {
+      status.secondary =
+          Seq::LoadMusicLayer(*VS::Audio::Seq::secondaryMusicConfig);
     }
-    status.transition_queued = Audio_Seq_pendingMusicData.param1 != 0;
-    status.active_voices = Audio_Mixer_voiceScheduler.activeVoices;
-    status.stream_voices = Audio_Cutscene_streamVoices;
-    status.tempo_slide_length = Audio_Mixer_tempoScaleSlideLength;
-    status.pitch_slide_length = Audio_Mixer_musicPitchScaleSlideLength;
+    status.transition_queued = VS::Audio::Seq::pendingMusicData.param1 != 0;
+    status.active_voices = VS::Audio::Mixer::voiceScheduler.active_voices;
+    status.stream_voices = VS::Audio::Cutscene::streamState.voice_mask;
+    status.tempo_slide_length = VS::Audio::Mixer::tempoScaleSlideLength;
+    status.pitch_slide_length = VS::Audio::Mixer::musicPitchScaleSlideLength;
     return status;
   }
 
   EffectVoice EffectVoiceAt(std::size_t voice) override {
     if (voice >= kEffectVoiceCount) return {};
-    const Audio_SeqChannel& channel = Audio_SoundEffects_channels[voice];
-    return {.tags = channel.effectTags,
+    const VS::Audio::SeqChannel& channel =
+        VS::Audio::SoundEffects::channels[voice];
+    return {.tags = channel.effect_tags,
             .effect = static_cast<EffectSelector>(
-                static_cast<std::intptr_t>(channel.effectId))};
+                static_cast<std::intptr_t>(channel.effect_id))};
   }
 
   std::span<const std::byte> ProgramBytes(DataRef data) override {
@@ -158,15 +162,18 @@ class LivePlayback final : public PlaybackHost {
     BindLiveEffectTables(
         {.program_offsets = Elements<std::uint32_t>(blob.program_offsets),
          .bank_selectors = Elements<std::uint16_t>(blob.bank_selectors),
-         .program_data = Elements<char>(blob.program_data)});
+         .program_data = Elements<std::uint8_t>(blob.program_data)});
     return true;
   }
 
-  void ClearSavedMusicId() override { Audio_Seq_savedMusicId = 0; }
+  void ClearSavedMusicId() override {
+    VS::Audio::Seq::savedMusicConfig.music_id = 0;
+  }
 
   MusicBankIds MusicBanks() override {
-    return {.bank = Audio_Samples_musicSampleBankIds.bankId,
-            .alternate = Audio_Samples_musicSampleBankIds.alternateBankId};
+    return {
+        .bank = VS::Audio::Samples::musicSampleBankIds.bank_id,
+        .alternate = VS::Audio::Samples::musicSampleBankIds.alternate_bank_id};
   }
 
   void Refuse(PlaybackRefusal refusal) override {
@@ -180,17 +187,18 @@ class LivePlayback final : public PlaybackHost {
 
 void BindLiveEffectTables(const LiveEffectTables& tables) {
   bound_tables = tables;
-  Audio_Playback_soundEffectProgramOffsets = tables.program_offsets.data();
-  Audio_Playback_soundEffectBankSelectors = tables.bank_selectors.data();
-  Audio_Playback_soundEffectProgramData = tables.program_data.data();
+  VS::Audio::Playback::soundEffectProgramOffsets =
+      tables.program_offsets.data();
+  VS::Audio::Playback::soundEffectBankSelectors = tables.bank_selectors.data();
+  VS::Audio::Playback::soundEffectProgramData = tables.program_data.data();
 }
 
 std::optional<LiveEffectTables> BoundLiveEffectTables() {
   if (!bound_tables || bound_tables->program_offsets.data() == nullptr ||
       bound_tables->program_offsets.data() !=
-          Audio_Playback_soundEffectProgramOffsets ||
+          VS::Audio::Playback::soundEffectProgramOffsets ||
       bound_tables->bank_selectors.data() !=
-          Audio_Playback_soundEffectBankSelectors) {
+          VS::Audio::Playback::soundEffectBankSelectors) {
     return std::nullopt;
   }
   return bound_tables;
@@ -198,17 +206,17 @@ std::optional<LiveEffectTables> BoundLiveEffectTables() {
 
 ScopedLiveEffectTables::ScopedLiveEffectTables(const LiveEffectTables& tables)
     : saved_binding_(bound_tables),
-      saved_offsets_(Audio_Playback_soundEffectProgramOffsets),
-      saved_selectors_(Audio_Playback_soundEffectBankSelectors),
-      saved_program_data_(Audio_Playback_soundEffectProgramData) {
+      saved_offsets_(VS::Audio::Playback::soundEffectProgramOffsets),
+      saved_selectors_(VS::Audio::Playback::soundEffectBankSelectors),
+      saved_program_data_(VS::Audio::Playback::soundEffectProgramData) {
   BindLiveEffectTables(tables);
 }
 
 ScopedLiveEffectTables::~ScopedLiveEffectTables() {
   bound_tables = saved_binding_;
-  Audio_Playback_soundEffectProgramOffsets = saved_offsets_;
-  Audio_Playback_soundEffectBankSelectors = saved_selectors_;
-  Audio_Playback_soundEffectProgramData = saved_program_data_;
+  VS::Audio::Playback::soundEffectProgramOffsets = saved_offsets_;
+  VS::Audio::Playback::soundEffectBankSelectors = saved_selectors_;
+  VS::Audio::Playback::soundEffectProgramData = saved_program_data_;
 }
 
 // decomp: SLUS_010.40 InitSound (src/SLUS_010.40/25AC.c:195)
@@ -226,7 +234,8 @@ int LiveShutdown() {
 // decomp: SLUS_010.40 Sound_BindAkaoSfxBlob (src/SLUS_010.40/25AC.c:207)
 int LiveBindSoundEffectPrograms(void* blob) {
   LivePlayback host("BindSoundEffectPrograms");
-  return BindSoundEffectPrograms(host, SequenceBytes(static_cast<char*>(blob)));
+  return BindSoundEffectPrograms(
+      host, SequenceBytes(static_cast<std::uint8_t*>(blob)));
 }
 
 // decomp: SLUS_010.40 func_80011EBC (src/SLUS_010.40/25AC.c:243)
@@ -335,7 +344,8 @@ void LiveSetMonoOutput(int mono_enabled) {
 }
 
 void LiveWriteCommandArguments(const CommandArguments& arguments) {
-  Audio_CommandArguments& words = Audio_Driver_commandArguments;
+  VS::Audio::LegacyCommandArguments& words =
+      VS::Audio::Driver::commandArguments;
   if (const auto* const data = std::get_if<DataRef>(&arguments.first)) {
     words.param1 = Pointer(*data);
   } else if (const auto* const number =

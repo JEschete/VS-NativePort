@@ -6,14 +6,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Control/SoundControl.hpp"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/PlaybackReset.hpp"
 #include "Audio/PlaybackResetLive.hpp"
-#include "Audio/Seq/Channel.h"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 
 namespace {
 
@@ -163,34 +163,37 @@ constexpr std::size_t kEffectTableSize = 22;
 class LiveDriverFixture {
  public:
   LiveDriverFixture() {
-    std::memcpy(saved_music_, Audio_Seq_musicChannels, sizeof(saved_music_));
-    std::memcpy(saved_effects_, Audio_SoundEffects_channels,
+    std::memcpy(saved_music_, VS::Audio::Seq::musicChannels,
+                sizeof(saved_music_));
+    std::memcpy(saved_effects_, VS::Audio::SoundEffects::channels,
                 sizeof(saved_effects_));
-    for (auto& channel : Audio_Seq_musicChannels) {
-      channel.voice.assignedVoice = 3;
+    for (auto& channel : VS::Audio::Seq::musicChannels) {
+      channel.voice.assigned_voice = 3;
       channel.type = 1;
-      channel.updateFlags = 0xFF;
+      channel.update_flags = 0xFF;
     }
-    for (auto& channel : Audio_SoundEffects_channels) {
-      channel.voice.assignedVoice = 2;
-      channel.effectVolume = 5;
-      channel.effectPitchScale = 9;
+    for (auto& channel : VS::Audio::SoundEffects::channels) {
+      channel.voice.assigned_voice = 2;
+      channel.effect_volume = 5;
+      channel.effect_pitch_scale = 9;
     }
-    Audio_Driver_controlLatches.updateFlags = 0x01;
-    Audio_Driver_controlLatches.controlLatches = 0xFF;
-    Audio_Seq_activeMusicConfig = &Audio_Seq_savedMusicConfig;
+    VS::Audio::Driver::controlLatches.update_flags = 0x01;
+    VS::Audio::Driver::controlLatches.control_latches = 0xFF;
+    VS::Audio::Seq::activeMusicConfig = &VS::Audio::Seq::savedMusicConfig;
   }
   ~LiveDriverFixture() {
-    std::memcpy(Audio_Seq_musicChannels, saved_music_, sizeof(saved_music_));
-    std::memcpy(Audio_SoundEffects_channels, saved_effects_,
+    std::memcpy(VS::Audio::Seq::musicChannels, saved_music_,
+                sizeof(saved_music_));
+    std::memcpy(VS::Audio::SoundEffects::channels, saved_effects_,
                 sizeof(saved_effects_));
   }
   LiveDriverFixture(const LiveDriverFixture&) = delete;
   LiveDriverFixture& operator=(const LiveDriverFixture&) = delete;
 
  private:
-  Audio_SeqChannel saved_music_[std::size(Audio_Seq_musicChannels)]{};
-  Audio_SeqChannel saved_effects_[kEffectTableSize]{};
+  VS::Audio::SeqChannel
+      saved_music_[std::size(VS::Audio::Seq::musicChannels)]{};
+  VS::Audio::SeqChannel saved_effects_[kEffectTableSize]{};
 };
 
 }  // namespace
@@ -199,33 +202,34 @@ TEST_CASE("Live playback reset makes the primary music layer active",
           "[audio][driver]") {
   const LiveDriverFixture fixture;
   VS::Audio::Driver::ResetLivePlaybackState();
-  CHECK(Audio_Seq_activeMusicConfig == &Audio_Seq_primaryMusicConfig);
-  CHECK(Audio_Seq_secondaryMusicConfig == nullptr);
-  CHECK(Audio_Seq_secondaryMusicChannels == nullptr);
-  CHECK(Audio_Seq_primaryMusicConfig.masterVolume == 0x7F0000);
-  CHECK(Audio_Seq_primaryMusicConfig.reverbDepth == 0x3FFF000);
+  CHECK(VS::Audio::Seq::activeMusicConfig ==
+        &VS::Audio::Seq::primaryMusicConfig);
+  CHECK(VS::Audio::Seq::secondaryMusicConfig == nullptr);
+  CHECK(VS::Audio::Seq::secondaryMusicChannels == nullptr);
+  CHECK(VS::Audio::Seq::primaryMusicConfig.master_volume == 0x7F0000);
+  CHECK(VS::Audio::Seq::primaryMusicConfig.reverb_depth == 0x3FFF000);
 }
 
 TEST_CASE("Live playback reset restores the mixer and driver controls",
           "[audio][driver]") {
   const LiveDriverFixture fixture;
   VS::Audio::Driver::ResetLivePlaybackState();
-  CHECK(Audio_Mixer_voiceScheduler.effectTempo == 0x66A80000U);
-  CHECK(Audio_Mixer_voiceScheduler.tempoAccumulator == 1);
-  CHECK(Audio_Seq_discVolume == 0x7FFF0000);
-  CHECK(Audio_Cutscene_streamState.volume == 0x7F00);
-  CHECK(Audio_Driver_controlLatches.controlLatches == 0);
-  CHECK(Audio_Driver_controlLatches.mixBehavior == 1);
-  CHECK(Audio_Driver_controlLatches.updateFlags == 0x81);
+  CHECK(VS::Audio::Mixer::voiceScheduler.effect_tempo == 0x66A80000U);
+  CHECK(VS::Audio::Mixer::voiceScheduler.tempo_accumulator == 1);
+  CHECK(VS::Audio::Seq::discVolume == 0x7FFF0000);
+  CHECK(VS::Audio::Cutscene::streamState.volume == 0x7F00);
+  CHECK(VS::Audio::Driver::controlLatches.control_latches == 0);
+  CHECK(VS::Audio::Driver::controlLatches.mix_behavior == 1);
+  CHECK(VS::Audio::Driver::controlLatches.update_flags == 0x81);
 }
 
 TEST_CASE("Live playback reset frees the music channels", "[audio][driver]") {
   const LiveDriverFixture fixture;
   VS::Audio::Driver::ResetLivePlaybackState();
-  for (const auto& channel : Audio_Seq_musicChannels) {
-    CHECK(channel.voice.assignedVoice == 24);
+  for (const auto& channel : VS::Audio::Seq::musicChannels) {
+    CHECK(channel.voice.assigned_voice == 24);
     CHECK(channel.type == 0);
-    CHECK(channel.updateFlags == 0);
+    CHECK(channel.update_flags == 0);
   }
 }
 
@@ -234,16 +238,16 @@ TEST_CASE("Live playback reset leaves effect slots past the twelve voices",
   const LiveDriverFixture fixture;
   VS::Audio::Driver::ResetLivePlaybackState();
   for (std::size_t index = 0; index < 12; ++index) {
-    const auto& channel = Audio_SoundEffects_channels[index];
-    CHECK(channel.voice.assignedVoice == 12 + index);
+    const auto& channel = VS::Audio::SoundEffects::channels[index];
+    CHECK(channel.voice.assigned_voice == 12 + index);
     CHECK(channel.type == 1);
-    CHECK(channel.effectVolume == 0x7F00);
-    CHECK(channel.effectPitchScale == 0);
+    CHECK(channel.effect_volume == 0x7F00);
+    CHECK(channel.effect_pitch_scale == 0);
   }
   for (std::size_t index = 12; index < kEffectTableSize; ++index) {
-    const auto& channel = Audio_SoundEffects_channels[index];
-    CHECK(channel.voice.assignedVoice == 2);
-    CHECK(channel.effectVolume == 5);
-    CHECK(channel.effectPitchScale == 9);
+    const auto& channel = VS::Audio::SoundEffects::channels[index];
+    CHECK(channel.voice.assigned_voice == 2);
+    CHECK(channel.effect_volume == 5);
+    CHECK(channel.effect_pitch_scale == 9);
   }
 }

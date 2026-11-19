@@ -9,11 +9,11 @@
 #include <iterator>
 
 #include "Audio/Sfx.hpp"
-#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundSlotsLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Audio/Stream.hpp"
 #include "Content/CdDrive.hpp"
 #include "DiscQueue.h"
@@ -21,7 +21,7 @@
 
 namespace VS::Audio {
 namespace {
-static_assert(std::size(Audio_soundState.sfxStreamData) ==
+static_assert(std::size(VS::Audio::soundState.sfx_stream_data) ==
               kEffectStreamSlotCount);
 static_assert(sizeof(Content_DiscDrive::state) == sizeof(std::uint8_t));
 static_assert(sizeof(Content_DiscDrive::failureCount) == sizeof(std::uint8_t));
@@ -67,7 +67,7 @@ class LiveEffectStreams final : public EffectStreamHost {
   void StopCutsceneStream() override { Control::LiveStopCutsceneStream(); }
 
   BankBuffer EffectStream(std::size_t index) override {
-    return LiveBankBuffer(Audio_soundState.sfxStreamData[index]);
+    return LiveBankBuffer(VS::Audio::soundState.sfx_stream_data[index]);
   }
 
   void FadeCutsceneVolume(Control::Fade fade) override {
@@ -75,7 +75,7 @@ class LiveEffectStreams final : public EffectStreamHost {
   }
 
   void StoreEffectStream(std::size_t index, BankBuffer stream) override {
-    Audio_soundState.sfxStreamData[index] = LiveBufferPointer(stream);
+    VS::Audio::soundState.sfx_stream_data[index] = LiveBufferPointer(stream);
   }
 
   void SetDiscVolume(std::int32_t volume) override {

@@ -11,9 +11,11 @@
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/VoiceOutput.hpp"
 
-struct Audio_SeqChannel;
-struct Audio_MusicConfig;
-struct Audio_VoiceScheduler;
+namespace VS::Audio {
+struct SeqChannel;
+struct MusicConfig;
+struct VoiceScheduler;
+}  // namespace VS::Audio
 
 // Typed copies of the sequencer's legacy records (FSoundChannel,
 // FSoundChannelConfig and FSoundVoiceSchedulerState), and the memory a
@@ -21,15 +23,17 @@ struct Audio_VoiceScheduler;
 // same fields at the same widths, so storing an unchanged state leaves the
 // record unchanged.
 namespace VS::Audio::Seq {
-Driver::ChannelKind LiveChannelKind(const Audio_SeqChannel& legacy);
-ChannelState LoadChannelState(const Audio_SeqChannel& legacy);
-void StoreChannelState(Audio_SeqChannel& legacy, const ChannelState& state);
+Driver::ChannelKind LiveChannelKind(const VS::Audio::SeqChannel& legacy);
+ChannelState LoadChannelState(const VS::Audio::SeqChannel& legacy);
+void StoreChannelState(VS::Audio::SeqChannel& legacy,
+                       const ChannelState& state);
 
-MusicLayerState LoadMusicLayer(const Audio_MusicConfig& legacy);
-void StoreMusicLayer(Audio_MusicConfig& legacy, const MusicLayerState& state);
+MusicLayerState LoadMusicLayer(const VS::Audio::MusicConfig& legacy);
+void StoreMusicLayer(VS::Audio::MusicConfig& legacy,
+                     const MusicLayerState& state);
 
-VoiceSchedulerState LoadVoiceScheduler(const Audio_VoiceScheduler& legacy);
-void StoreVoiceScheduler(Audio_VoiceScheduler& legacy,
+VoiceSchedulerState LoadVoiceScheduler(const VS::Audio::VoiceScheduler& legacy);
+void StoreVoiceScheduler(VS::Audio::VoiceScheduler& legacy,
                          const VoiceSchedulerState& state);
 
 // Instrument table entry `index`; empty outside the table.
@@ -38,34 +42,34 @@ std::optional<Samples::InstrumentRecord> LiveInstrument(std::int32_t index);
 // A block of memory sequence programs run from. `base` is the legacy pointer
 // the block starts at, so offsets into it become channel pointers again.
 struct LiveProgramMemory {
-  char* base = nullptr;
+  std::uint8_t* base = nullptr;
   std::size_t size = 0;
 
   [[nodiscard]] ProgramData View() const;
   // The memory from `start`, which lies in this block, to its end.
-  [[nodiscard]] LiveProgramMemory From(char* start) const;
+  [[nodiscard]] LiveProgramMemory From(std::uint8_t* start) const;
 };
 
 // The block of memory holding `address` that sequence programs live in: a
 // game heap block, the menu sound effects, the idle program or the overlay
 // arena. Empty for any other address.
-std::optional<LiveProgramMemory> LiveProgramRegion(char* address);
+std::optional<LiveProgramMemory> LiveProgramRegion(std::uint8_t* address);
 // The program a finished or unused channel runs.
-char* LiveIdleProgram();
+std::uint8_t* LiveIdleProgram();
 
 // While a channel step runs, the memory the stepped channel's program lies in.
 // Its commands then read no further than that memory even when the program
 // counter has reached its end.
 class ScopedChannelProgram {
  public:
-  ScopedChannelProgram(const Audio_SeqChannel& channel,
+  ScopedChannelProgram(const VS::Audio::SeqChannel& channel,
                        const LiveProgramMemory& memory);
   ~ScopedChannelProgram();
   ScopedChannelProgram(const ScopedChannelProgram&) = delete;
   ScopedChannelProgram& operator=(const ScopedChannelProgram&) = delete;
 
  private:
-  const Audio_SeqChannel* previous_channel_;
+  const VS::Audio::SeqChannel* previous_channel_;
   LiveProgramMemory previous_memory_;
 };
 
@@ -74,20 +78,20 @@ class ScopedChannelProgram {
 // else LiveProgramRegion's for the counter or, when the counter is just past
 // a region, for the byte before it.
 std::optional<LiveProgramMemory> LiveChannelProgram(
-    const Audio_SeqChannel& channel);
+    const VS::Audio::SeqChannel& channel);
 
 // The channel's program positions as offsets into `memory`. Pointers outside
 // it load as kOutsideProgram, and kOutsideProgram stores the pointer back
 // unchanged.
-ProgramState LoadProgram(const Audio_SeqChannel& legacy,
+ProgramState LoadProgram(const VS::Audio::SeqChannel& legacy,
                          const LiveProgramMemory& memory);
-void StoreProgram(Audio_SeqChannel& legacy, const ProgramState& program,
+void StoreProgram(VS::Audio::SeqChannel& legacy, const ProgramState& program,
                   const LiveProgramMemory& memory);
 
 // A whole channel record; `idle` reads and writes the idle program.
-SequenceChannel LoadSequenceChannel(const Audio_SeqChannel& legacy,
+SequenceChannel LoadSequenceChannel(const VS::Audio::SeqChannel& legacy,
                                     const LiveProgramMemory& memory);
-void StoreSequenceChannel(Audio_SeqChannel& legacy,
+void StoreSequenceChannel(VS::Audio::SeqChannel& legacy,
                           const SequenceChannel& record,
                           const LiveProgramMemory& memory);
 

@@ -19,9 +19,9 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
@@ -145,9 +145,9 @@ struct PendingResume {
 std::optional<PendingResume> pending;
 
 bool AudioConsumerReady() {
-  return Audio_Seq_activeMusicConfig != nullptr &&
-         Audio_Mixer_kCommandHandlers[kStereoCommand] != nullptr &&
-         Audio_Mixer_kCommandHandlers[kMonoCommand] != nullptr;
+  return VS::Audio::Seq::activeMusicConfig != nullptr &&
+         VS::Audio::Mixer::kCommandHandlers[kStereoCommand] != nullptr &&
+         VS::Audio::Mixer::kCommandHandlers[kMonoCommand] != nullptr;
 }
 
 Result ValidateAudioConsumer() {
@@ -158,14 +158,14 @@ Result ValidateAudioConsumer() {
 }
 
 void SyncMonoOutput(bool mono) {
-  const auto before = Audio_Driver_controlLatches.mixBehavior;
+  const auto before = VS::Audio::Driver::controlLatches.mix_behavior;
   if (((before & kMonoOutput) != 0) == mono) return;
   // Original loaded-save apply ends with vs_main_setMonoSound. The production
   // 0x80/0x81 handlers invalidate voice volumes and update the very same latch
   // consumed by native sequencer/XA/stream output. Preserve unrelated live
   // music-stack bits; only the output mode belongs to saved settings.
   VS::Audio::LiveSetMonoOutput(mono ? 1 : 0);
-  Audio_Driver_controlLatches.mixBehavior |= before & ~kOutputModeMask;
+  VS::Audio::Driver::controlLatches.mix_behavior |= before & ~kOutputModeMask;
 }
 
 template <typename T>
@@ -1530,7 +1530,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
   std::copy_n(State_learnedActionFlags, staged.previous.learned.size(),
               staged.previous.learned.begin());
   staged.previous.unlocked = staged.previous.state.learned_actions;
-  staged.previous.mix_behavior = Audio_Driver_controlLatches.mixBehavior;
+  staged.previous.mix_behavior = VS::Audio::Driver::controlLatches.mix_behavior;
   staged.previous.play_time = VS::State::playTime;
   // All fallible work, including owning the staging copy, precedes mutation.
   pending.emplace(std::move(staged));
@@ -1581,7 +1581,7 @@ void CancelResume() {
         "save",
         "CancelResume: audio consumer unavailable; restoring output latch");
   }
-  Audio_Driver_controlLatches.mixBehavior = previous.mix_behavior;
+  VS::Audio::Driver::controlLatches.mix_behavior = previous.mix_behavior;
   if (pending->new_game) VS::State::playTime = previous.play_time;
   pending.reset();
 }

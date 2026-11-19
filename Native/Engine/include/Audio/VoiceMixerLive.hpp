@@ -3,7 +3,9 @@
 
 #include "Audio/PlaybackReset.hpp"
 
-struct Audio_SeqChannel;
+namespace VS::Audio {
+struct SeqChannel;
+}  // namespace VS::Audio
 
 // Live bindings for VoiceMixer.hpp over the music and sound-effect channel
 // tables, the active, primary and secondary music layers, the voice
@@ -18,13 +20,13 @@ struct Audio_SeqChannel;
 namespace VS::Audio::Mixer {
 // Sound_UpdateSlidesAndDelays: `channel_bit` is the channel's bit in the
 // active layer's (music) or the voice scheduler's (sound effects) masks.
-void LiveUpdateChannelSlidesAndDelays(Audio_SeqChannel* channel,
+void LiveUpdateChannelSlidesAndDelays(VS::Audio::SeqChannel* channel,
                                       unsigned channel_bit,
                                       Driver::ChannelKind kind);
 // func_8001436C over the active music layer.
-void LiveUpdateMusicChannelModulation(Audio_SeqChannel* channel);
+void LiveUpdateMusicChannelModulation(VS::Audio::SeqChannel* channel);
 // func_800147CC.
-void LiveUpdateSoundEffectModulation(Audio_SeqChannel* channel);
+void LiveUpdateSoundEffectModulation(VS::Audio::SeqChannel* channel);
 // func_80015220: the tick's voice allocation, modulation and key-on.
 void LiveCommitPlaybackVoices();
 // Sound_ProcessKeyOffRequests: the tick's key-off.

@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "Audio/AudioDevice.hpp"
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Control/SoundControl.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/XaMix.hpp"
 #include "Audio/XaMixLive.hpp"
@@ -244,8 +244,8 @@ void VS::Audio::StopXaStream(void) {
   if (drive.state == Content_DiscDriveState_ReadXaInit ||
       drive.state == Content_DiscDriveState_StreamXa ||
       drive.state == Content_DiscDriveState_StreamXaEnd) {
-    Audio_Seq_discVolume = 0;
-    Audio_Seq_discVolumeFadeLength = 0;
+    VS::Audio::Seq::discVolume = 0;
+    VS::Audio::Seq::discVolumeFadeLength = 0;
     drive.xaModeMarker = static_cast<char>(kInactiveMarker);
     drive.position.minute = kInactiveMarker;
     drive.state = Content_DiscDriveState_Idle;
@@ -263,10 +263,12 @@ int VS::Audio::XaStreamStatus(void) {
 }
 
 void VS::Audio::UpdateXaControls(void) {
-  const bool mono = (Audio_Driver_controlLatches.mixBehavior & kMono) != 0;
-  Playback().Configure(VS::Audio::Seq::WriteDiscVolume(Audio_Seq_discVolume),
-                       VS::Audio::Control::SetDiscMixVolume(g_mix, mono)
-                           .value_or(VS::Audio::DiscMixMatrix{}));
+  const bool mono =
+      (VS::Audio::Driver::controlLatches.mix_behavior & kMono) != 0;
+  Playback().Configure(
+      VS::Audio::Seq::WriteDiscVolume(VS::Audio::Seq::discVolume),
+      VS::Audio::Control::SetDiscMixVolume(g_mix, mono)
+          .value_or(VS::Audio::DiscMixMatrix{}));
 }
 
 namespace VS::Audio::Control {

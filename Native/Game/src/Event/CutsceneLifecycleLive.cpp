@@ -5,7 +5,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Audio/MusicLive.hpp"
-#include "Audio/SoundBanks.h"
+#include "Audio/SoundState.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
@@ -152,7 +152,8 @@ class LiveCutsceneHost final : public CutsceneHost {
   void ShowGameplayHud() override { VS::Battle::SetLiveGameplayHudHidden(0); }
   CutsceneMusic Music() override {
     return {VS::Field::zoneContext.musicSlot,
-            Audio_soundState.playingMusicHandle, Audio_soundState.musicHandles};
+            VS::Audio::soundState.playing_music_handle,
+            VS::Audio::soundState.music_handles};
   }
   void PlayRoomMusic(int slot) override {
     Audio::LivePlayMusicSlot(slot, kRoomMusicVolume, 0);

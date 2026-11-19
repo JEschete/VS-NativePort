@@ -126,8 +126,8 @@ std::uint32_t RestoreMusicSequence(MusicStartState& state,
                                    const SequenceHeader& header,
                                    bool swap_with_saved);
 
-// A music driver command's parameters (Audio_CommandParams); `param1` is the
-// track's sequence for the start commands.
+// A music driver command's parameters (VS::Audio::CommandParams); `param1` is
+// the track's sequence for the start commands.
 struct MusicCommand {
   std::uint32_t param1 = 0;
   std::uint32_t param2 = 0;

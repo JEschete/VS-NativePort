@@ -8,9 +8,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Sfx.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
@@ -24,7 +24,7 @@
 #include "Render/TexturePagesLive.hpp"
 
 namespace {
-void IgnoreAudio(Audio_CommandParams*) {}
+void IgnoreAudio(VS::Audio::CommandParams*) {}
 
 struct RouletteFixture {
   Battle_Actor* saved_actor = Battle_characterState;
@@ -47,11 +47,12 @@ struct RouletteFixture {
   decltype(Menu_Results_rank) saved_rank = Menu_Results_rank;
   decltype(Menu_Results_clearCount) saved_clear_count = Menu_Results_clearCount;
   VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
-  decltype(std::to_array(Audio_Mixer_kCommandHandlers)) saved_handlers =
-      std::to_array(Audio_Mixer_kCommandHandlers);
-  Audio_CommandArguments saved_arguments = Audio_Driver_commandArguments;
-  Audio_CommandParams saved_parameters = Audio_Mixer_commandParams;
-  int saved_channel = Audio_nextSfxChannelGroup7E;
+  decltype(std::to_array(VS::Audio::Mixer::kCommandHandlers)) saved_handlers =
+      std::to_array(VS::Audio::Mixer::kCommandHandlers);
+  VS::Audio::LegacyCommandArguments saved_arguments =
+      VS::Audio::Driver::commandArguments;
+  VS::Audio::CommandParams saved_parameters = VS::Audio::Mixer::commandParams;
+  int saved_channel = VS::Audio::nextSfxChannelGroup7E;
   std::array<u_int, 256> offsets{};
   std::array<u_short, 256> selectors{};
   VS::Audio::Playback::ScopedLiveEffectTables sound_tables{
@@ -65,9 +66,9 @@ struct RouletteFixture {
     actor.stats = &stats;
     Battle_characterState = &actor;
     selectors.fill(0x8000);
-    std::fill(std::begin(Audio_Mixer_kCommandHandlers),
-              std::end(Audio_Mixer_kCommandHandlers), IgnoreAudio);
-    Audio_nextSfxChannelGroup7E = 2;
+    std::fill(std::begin(VS::Audio::Mixer::kCommandHandlers),
+              std::end(VS::Audio::Mixer::kCommandHandlers), IgnoreAudio);
+    VS::Audio::nextSfxChannelGroup7E = 2;
     VS::Input::buttonsPressed = 0;
     Menu_Results_screenTimer = -4096;
   }
@@ -92,10 +93,10 @@ struct RouletteFixture {
     Menu_Results_clearCount = saved_clear_count;
     VS::Render::LiveTexturePages() = saved_pages;
     std::copy(saved_handlers.begin(), saved_handlers.end(),
-              Audio_Mixer_kCommandHandlers);
-    Audio_Driver_commandArguments = saved_arguments;
-    Audio_Mixer_commandParams = saved_parameters;
-    Audio_nextSfxChannelGroup7E = saved_channel;
+              VS::Audio::Mixer::kCommandHandlers);
+    VS::Audio::Driver::commandArguments = saved_arguments;
+    VS::Audio::Mixer::commandParams = saved_parameters;
+    VS::Audio::nextSfxChannelGroup7E = saved_channel;
   }
 
   // Original MENUF/3B8.c:755 keeps a private per-state timer. Confirming state2

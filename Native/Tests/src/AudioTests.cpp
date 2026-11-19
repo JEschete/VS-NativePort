@@ -24,8 +24,8 @@
 
 #include "Audio/AudioDevice.hpp"
 #include "Audio/LfoWaveforms.hpp"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
@@ -1912,36 +1912,36 @@ TEST_CASE("Accelerated native audio drains every tick and bounds speaker PCM",
 
 namespace {
 struct LfoSourceFixture {
-  decltype(std::to_array(Audio_Seq_kLfoWaveforms)) saved =
-      std::to_array(Audio_Seq_kLfoWaveforms);
-  Audio_MusicConfig* saved_config = Audio_Seq_activeMusicConfig;
+  decltype(std::to_array(VS::Audio::Seq::kLfoWaveforms)) saved =
+      std::to_array(VS::Audio::Seq::kLfoWaveforms);
+  VS::Audio::MusicConfig* saved_config = VS::Audio::Seq::activeMusicConfig;
   VS::Core::LogObserver saved_observer = VS::Core::SetLogObserver({});
-  Audio_MusicConfig config{};
-  Audio_SeqChannel channel{};
+  VS::Audio::MusicConfig config{};
+  VS::Audio::SeqChannel channel{};
   std::array<std::int16_t, 5> wave{1000, -1000, 0, 0, -2};
   std::array<unsigned char, 3> command{};
 
   LfoSourceFixture() {
-    config.masterVolume = 0x7F0000;
-    Audio_Seq_activeMusicConfig = &config;
+    config.master_volume = 0x7F0000;
+    VS::Audio::Seq::activeMusicConfig = &config;
     for (const int shape : {65, 128, 255}) {
-      Audio_Seq_kLfoWaveforms[shape] = wave.data();
+      VS::Audio::Seq::kLfoWaveforms[shape] = wave.data();
     }
     Reset();
   }
 
   ~LfoSourceFixture() {
-    std::copy(saved.begin(), saved.end(), Audio_Seq_kLfoWaveforms);
-    Audio_Seq_activeMusicConfig = saved_config;
+    std::copy(saved.begin(), saved.end(), VS::Audio::Seq::kLfoWaveforms);
+    VS::Audio::Seq::activeMusicConfig = saved_config;
     VS::Core::SetLogObserver(std::move(saved_observer));
   }
 
   void Reset() {
     channel = {};
     channel.volume = 0x40000000;
-    channel.volumeBalance = 0x7F00;
-    channel.pitchBase = 0x1000;
-    channel.vibratoDepth = 0x4000;
+    channel.volume_balance = 0x7F00;
+    channel.pitch_base = 0x1000;
+    channel.vibrato_depth = 0x4000;
   }
 
   void Enable(int kind, int shape, int rate) {
@@ -1951,7 +1951,7 @@ struct LfoSourceFixture {
       command = {static_cast<unsigned char>(rate),
                  static_cast<unsigned char>(shape), 0};
     }
-    channel.programCounter = reinterpret_cast<char*>(command.data());
+    channel.program_counter = command.data();
     if (kind == 0) {
       VS::Audio::Seq::LiveEnableVibrato(&channel, 1);
     } else if (kind == 1) {
@@ -1963,21 +1963,21 @@ struct LfoSourceFixture {
 
   std::array<int, 4> Settings(int kind) const {
     if (kind == 0) {
-      return {channel.vibratoDelay, channel.vibratoRate,
-              channel.vibratoRateCounter, channel.vibratoShape};
+      return {channel.vibrato_delay, channel.vibrato_rate,
+              channel.vibrato_rate_counter, channel.vibrato_shape};
     }
     if (kind == 1) {
-      return {channel.tremoloDelay, channel.tremoloRate,
-              channel.tremoloRateCounter, channel.tremoloShape};
+      return {channel.tremolo_delay, channel.tremolo_rate,
+              channel.tremolo_rate_counter, channel.tremolo_shape};
     }
-    return {0, channel.autoPanRate, channel.autoPanRateCounter,
-            channel.autoPanShape};
+    return {0, channel.auto_pan_rate, channel.auto_pan_rate_counter,
+            channel.auto_pan_shape};
   }
 
   std::int16_t* Cursor(int kind) const {
-    if (kind == 0) return channel.vibratoWave;
-    if (kind == 1) return channel.tremoloWave;
-    return channel.autoPanWave;
+    if (kind == 0) return channel.vibrato_wave;
+    if (kind == 1) return channel.tremolo_wave;
+    return channel.auto_pan_wave;
   }
 
   void CheckEnabled(int kind, int shape, int rate) const {
@@ -1985,34 +1985,32 @@ struct LfoSourceFixture {
                                       rate == 0 ? 256 : rate, 1, shape};
     CHECK(Settings(kind) == expected);
     CHECK(Cursor(kind) == wave.data());
-    CHECK(channel.updateFlags == (1u << kind));
-    CHECK(channel.programCounter ==
-          reinterpret_cast<const char*>(command.data()) + (kind == 2 ? 2 : 3));
+    CHECK(channel.update_flags == (1u << kind));
+    CHECK(channel.program_counter == command.data() + (kind == 2 ? 2 : 3));
   }
 
   void CheckRefused(int kind, const std::array<int, 4>& before,
                     std::int16_t* cursor) const {
     CHECK(Settings(kind) == before);
     CHECK(Cursor(kind) == cursor);
-    CHECK(channel.updateFlags == 0x1000);
-    CHECK(channel.programCounter ==
-          reinterpret_cast<const char*>(command.data()) + (kind == 2 ? 2 : 3));
+    CHECK(channel.update_flags == 0x1000);
+    CHECK(channel.program_counter == command.data() + (kind == 2 ? 2 : 3));
   }
 
   void Step() { VS::Audio::Mixer::LiveUpdateMusicChannelModulation(&channel); }
 
   void CheckPhase(int step, int depth) const {
-    CHECK(channel.autoPanWave == wave.data() + ((step & 1) ? 2 : 1));
-    CHECK(channel.autoPanOffset == (depth == 0 ? 0 : ((step & 1) ? -4 : 3)));
+    CHECK(channel.auto_pan_wave == wave.data() + ((step & 1) ? 2 : 1));
+    CHECK(channel.auto_pan_offset == (depth == 0 ? 0 : ((step & 1) ? -4 : 3)));
   }
 
   void CheckDisabled() {
-    auto* cursor = channel.autoPanWave;
+    auto* cursor = channel.auto_pan_wave;
     VS::Audio::Seq::LiveDisableAutoPan(&channel, 1);
-    CHECK((channel.updateFlags & VS::Audio::Seq::kAutoPanActive) == 0);
-    CHECK(channel.autoPanOffset == 0);
+    CHECK((channel.update_flags & VS::Audio::Seq::kAutoPanActive) == 0);
+    CHECK(channel.auto_pan_offset == 0);
     Step();
-    CHECK(channel.autoPanWave == cursor);
+    CHECK(channel.auto_pan_wave == cursor);
   }
 };
 }  // namespace
@@ -2039,7 +2037,7 @@ TEST_CASE(
   SECTION("zero depth still advances the original cursor") {}
   SECTION("nonzero depth retains the actual sample signal") { depth = 127; }
   fixture.Enable(2, 65, 1);
-  fixture.channel.autoPanDepth = static_cast<std::uint16_t>(depth << 8);
+  fixture.channel.auto_pan_depth = static_cast<std::uint16_t>(depth << 8);
   for (int step = 0; step < 8; ++step) {
     fixture.Step();
     fixture.CheckPhase(step, depth);
@@ -2059,12 +2057,12 @@ TEST_CASE("Unavailable LFO selections error before changing active modulation",
       ++errors;
     }
   });
-  Audio_Seq_kLfoWaveforms[65] = nullptr;
+  VS::Audio::Seq::kLfoWaveforms[65] = nullptr;
   for (int kind = 0; kind < 3; ++kind) {
     fixture.Reset();
-    fixture.channel.updateFlags = 0x1000;
-    fixture.channel.vibratoWave = fixture.channel.tremoloWave =
-        fixture.channel.autoPanWave = fixture.wave.data() + 1;
+    fixture.channel.update_flags = 0x1000;
+    fixture.channel.vibrato_wave = fixture.channel.tremolo_wave =
+        fixture.channel.auto_pan_wave = fixture.wave.data() + 1;
     const auto before = fixture.Settings(kind);
     auto* cursor = fixture.Cursor(kind);
     fixture.Enable(kind, 65, 1);

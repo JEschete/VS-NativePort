@@ -1,16 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Audio/Control/SoundControl.h"
+#include "Audio/Control/SoundControl.hpp"
 
 // decomp: _cdlAtv (_cdlAtv@SLUS_010.40)
-CdlATV Audio_Control_legacyDiscMixAttenuation;
+CdlATV VS::Audio::Control::legacyDiscMixAttenuation;
 
 // decomp: g_Sound_CdVolumeFadeStep (g_Sound_CdVolumeFadeStep@SLUS_010.40)
-int Audio_Seq_discVolumeFadeStep;
+int VS::Audio::Seq::discVolumeFadeStep;
 
 // decomp: g_Sound_CdVolumeFadeLength (g_Sound_CdVolumeFadeLength@SLUS_010.40)
-short Audio_Seq_discVolumeFadeLength;
+short VS::Audio::Seq::discVolumeFadeLength;
 
 // decomp: g_CdVolume (g_CdVolume@SLUS_010.40)
-int Audio_Seq_discVolume;
+int VS::Audio::Seq::discVolume;
 

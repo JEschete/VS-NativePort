@@ -506,25 +506,25 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Audio\ActorSound.h" />
-    <ClInclude Include="src\Audio\Akao.h" />
-    <ClInclude Include="src\Audio\Control\SoundControl.h" />
-    <ClInclude Include="src\Audio\Cutscene\Stream.h" />
-    <ClInclude Include="src\Audio\Driver\SoundDriver.h" />
-    <ClInclude Include="src\Audio\Legacy.h" />
-    <ClInclude Include="src\Audio\LegacyFiles.h" />
-    <ClInclude Include="src\Audio\Mixer\MixControl.h" />
-    <ClInclude Include="src\Audio\Mixer\VoiceMixer.h" />
-    <ClInclude Include="src\Audio\Playback\SoundPlayback.h" />
-    <ClInclude Include="src\Audio\Samples\SampleBanks.h" />
-    <ClInclude Include="src\Audio\Seq\AkaoFormat.h" />
-    <ClInclude Include="src\Audio\Seq\Channel.h" />
-    <ClInclude Include="src\Audio\Seq\Sequencer.h" />
-    <ClInclude Include="src\Audio\Sfx.h" />
-    <ClInclude Include="src\Audio\SoundBanks.h" />
-    <ClInclude Include="src\Audio\SoundEffects\SoundEffects.h" />
-    <ClInclude Include="src\Audio\Stream.h" />
-    <ClInclude Include="src\Audio\Voices.h" />
+    <ClInclude Include="src\Audio\Akao.hpp" />
+    <ClInclude Include="src\Audio\Control\SoundControl.hpp" />
+    <ClInclude Include="src\Audio\Cutscene\Stream.hpp" />
+    <ClInclude Include="src\Audio\Driver\SoundDriver.hpp" />
+    <ClInclude Include="src\Audio\Legacy.hpp" />
+    <ClInclude Include="src\Audio\LegacyFiles.hpp" />
+    <ClInclude Include="src\Audio\Mixer\MixControl.hpp" />
+    <ClInclude Include="src\Audio\Mixer\VoiceMixer.hpp" />
+    <ClInclude Include="src\Audio\Playback\SoundPlayback.hpp" />
+    <ClInclude Include="src\Audio\Samples\SampleBanks.hpp" />
+    <ClInclude Include="src\Audio\Seq\AkaoFormat.hpp" />
+    <ClInclude Include="src\Audio\Seq\Channel.hpp" />
+    <ClInclude Include="src\Audio\Seq\Sequencer.hpp" />
+    <ClInclude Include="src\Audio\SfxChannelGroups.hpp" />
+    <ClInclude Include="src\Audio\SoundEffects\SoundEffects.hpp" />
+    <ClInclude Include="src\Audio\SoundState.hpp" />
+    <ClInclude Include="src\Audio\StreamFormat.hpp" />
+    <ClInclude Include="src\Audio\SurfaceSounds.hpp" />
+    <ClInclude Include="src\Audio\Voices.hpp" />
     <ClInclude Include="src\Core\Legacy.hpp" />
     <ClInclude Include="src\Core\Math\FixedPoint.hpp" />
     <ClInclude Include="src\Core\Overlays.hpp" />

@@ -129,16 +129,13 @@
     <ClCompile Include="src\Audio\ActorSound.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\ActorSound.h">
-      <Filter>src\Audio</Filter>
-    </ClInclude>
     <ClCompile Include="src\Audio\ActorSoundCore.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClCompile Include="src\Audio\ActorSoundLive.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Akao.h">
+    <ClInclude Include="src\Audio\Akao.hpp">
       <Filter>src\Audio</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\AmbienceCore.cpp">
@@ -153,7 +150,7 @@
     <ClCompile Include="src\Audio\Control\SoundControl.cpp">
       <Filter>src\Audio\Control</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Control\SoundControl.h">
+    <ClInclude Include="src\Audio\Control\SoundControl.hpp">
       <Filter>src\Audio\Control</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Control\SoundControlCore.cpp">
@@ -165,7 +162,7 @@
     <ClCompile Include="src\Audio\Cutscene\Stream.cpp">
       <Filter>src\Audio\Cutscene</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Cutscene\Stream.h">
+    <ClInclude Include="src\Audio\Cutscene\Stream.hpp">
       <Filter>src\Audio\Cutscene</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Cutscene\StreamBuffersCore.cpp">
@@ -189,7 +186,7 @@
     <ClCompile Include="src\Audio\Driver\SoundDriver.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Driver\SoundDriver.h">
+    <ClInclude Include="src\Audio\Driver\SoundDriver.hpp">
       <Filter>src\Audio\Driver</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Driver\SoundDriverCore.cpp">
@@ -207,19 +204,19 @@
     <ClCompile Include="src\Audio\Legacy.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Legacy.h">
+    <ClInclude Include="src\Audio\Legacy.hpp">
       <Filter>src\Audio</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\LegacyFiles.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\LegacyFiles.h">
+    <ClInclude Include="src\Audio\LegacyFiles.hpp">
       <Filter>src\Audio</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Mixer\MixControl.cpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Mixer\MixControl.h">
+    <ClInclude Include="src\Audio\Mixer\MixControl.hpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Mixer\MixControlLive.cpp">
@@ -228,7 +225,7 @@
     <ClCompile Include="src\Audio\Mixer\VoiceMixer.cpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Mixer\VoiceMixer.h">
+    <ClInclude Include="src\Audio\Mixer\VoiceMixer.hpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Mixer\VoiceMixerCore.cpp">
@@ -252,7 +249,7 @@
     <ClCompile Include="src\Audio\Playback\SoundPlayback.cpp">
       <Filter>src\Audio\Playback</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Playback\SoundPlayback.h">
+    <ClInclude Include="src\Audio\Playback\SoundPlayback.hpp">
       <Filter>src\Audio\Playback</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Playback\SoundPlaybackCore.cpp">
@@ -267,7 +264,7 @@
     <ClCompile Include="src\Audio\Samples\SampleBanks.cpp">
       <Filter>src\Audio\Samples</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Samples\SampleBanks.h">
+    <ClInclude Include="src\Audio\Samples\SampleBanks.hpp">
       <Filter>src\Audio\Samples</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Samples\SampleBanksCore.cpp">
@@ -276,13 +273,13 @@
     <ClCompile Include="src\Audio\Samples\SampleBanksLive.cpp">
       <Filter>src\Audio\Samples</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Seq\AkaoFormat.h">
+    <ClInclude Include="src\Audio\Seq\AkaoFormat.hpp">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Seq\Channel.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Seq\Channel.h">
+    <ClInclude Include="src\Audio\Seq\Channel.hpp">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Seq\ChannelCommands.cpp">
@@ -315,7 +312,7 @@
     <ClCompile Include="src\Audio\Seq\Sequencer.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Seq\Sequencer.h">
+    <ClInclude Include="src\Audio\Seq\Sequencer.hpp">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\Seq\SequencerCore.cpp">
@@ -327,7 +324,7 @@
     <ClCompile Include="src\Audio\Sfx.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Sfx.h">
+    <ClInclude Include="src\Audio\SfxChannelGroups.hpp">
       <Filter>src\Audio</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\SfxCore.cpp">
@@ -339,9 +336,6 @@
     <ClCompile Include="src\Audio\SoundBanks.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\SoundBanks.h">
-      <Filter>src\Audio</Filter>
-    </ClInclude>
     <ClCompile Include="src\Audio\SoundBanksCore.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -357,7 +351,7 @@
     <ClCompile Include="src\Audio\SoundEffects\SoundEffects.cpp">
       <Filter>src\Audio\SoundEffects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\SoundEffects\SoundEffects.h">
+    <ClInclude Include="src\Audio\SoundEffects\SoundEffects.hpp">
       <Filter>src\Audio\SoundEffects</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\SoundEffectsLive.cpp">
@@ -366,19 +360,25 @@
     <ClCompile Include="src\Audio\SoundSlotsLive.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Stream.h">
+    <ClInclude Include="src\Audio\SoundState.hpp">
       <Filter>src\Audio</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\StreamCore.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
+    <ClInclude Include="src\Audio\StreamFormat.hpp">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
     <ClCompile Include="src\Audio\StreamLive.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
+    <ClInclude Include="src\Audio\SurfaceSounds.hpp">
+      <Filter>src\Audio</Filter>
+    </ClInclude>
     <ClCompile Include="src\Audio\VoiceEngine.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Voices.h">
+    <ClInclude Include="src\Audio\Voices.hpp">
       <Filter>src\Audio</Filter>
     </ClInclude>
     <ClCompile Include="src\Audio\XaMix.cpp">

@@ -24,9 +24,9 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/Spawning.h"
 #include "Audio/MusicLive.hpp"
-#include "Audio/Seq/Channel.h"
-#include "Audio/SoundBanks.h"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -884,7 +884,7 @@ class LiveZoneLoadHost final
 
   void FadeOutCurrentMusic() override {
     static_cast<void>(Audio::LiveFadeMusicSlotVolume(
-        Audio_soundState.currentMusicSlot, 0, kZoneMusicFadeTicks));
+        VS::Audio::soundState.current_music_slot, 0, kZoneMusicFadeTicks));
   }
 
   [[nodiscard]] bool NativeResumePending() const override {

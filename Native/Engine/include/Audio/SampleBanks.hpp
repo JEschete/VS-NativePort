@@ -55,7 +55,7 @@ inline constexpr std::uint32_t kAlternateBankSampleOffset = 0x20000;
 inline constexpr std::uint32_t kMusicBankInstrumentLimit = 0x20;
 inline constexpr std::uint32_t kMusicBankSampleLimit = 0x20000;
 
-// The active music's flags (Audio_MusicConfig.statusFlags) that choose a
+// The active music's flags (VS::Audio::MusicConfig.statusFlags) that choose a
 // music bank: load the next bank into the alternate bank, and play the
 // music's instruments from the alternate bank. Music with no active channels
 // drops both.

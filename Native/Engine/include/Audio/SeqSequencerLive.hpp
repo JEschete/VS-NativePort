@@ -1,7 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Audio_SeqChannel;
+namespace VS::Audio {
+struct SeqChannel;
+}  // namespace VS::Audio
 
 // Binds the typed sequencer (SequencerCore.cpp in src\Audio\Seq) to the live
 // driver: the music and sound-effect channel tables, the active, primary and
@@ -18,7 +20,7 @@ using CounterEventResult = long;
 // func_8001A8D8: runs the channel's commands up to its next note and starts
 // it. `channel_bit` is the channel's bit in its layer's or the voice
 // scheduler's masks.
-void LiveExecuteChannelStep(Audio_SeqChannel* channel, int channel_bit);
+void LiveExecuteChannelStep(VS::Audio::SeqChannel* channel, int channel_bit);
 // func_80019A58: one driver tick, the root counter 2 event handler. Returns
 // the tick's cost in timer counts.
 CounterEventResult LiveTickPlayback();
@@ -26,5 +28,5 @@ CounterEventResult LiveTickPlayback();
 void LiveUpdateGlobalSlides();
 // Sound_ClearVoiceFromSchedulerState: releases `voice_bit` from the voice
 // scheduler and clears the channel's sound-effect identity.
-void LiveReleaseSoundEffectVoice(Audio_SeqChannel* channel, int voice_bit);
+void LiveReleaseSoundEffectVoice(VS::Audio::SeqChannel* channel, int voice_bit);
 }  // namespace VS::Audio::Seq

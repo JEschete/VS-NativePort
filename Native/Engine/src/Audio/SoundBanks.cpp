@@ -1,16 +1,16 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Audio/SoundBanks.h"
+#include "Audio/SoundState.hpp"
 #include "DiscQueue.h"
 
 // decomp: _sfxData (_sfxData@SLUS_010.40)
-u_short Audio_menuSoundEffects[11264];
+u_short VS::Audio::menuSoundEffects[VS::Audio::kMenuSoundEffectWords];
 
 // decomp: vs_main_soundData (vs_main_soundData@SLUS_010.40)
-Audio_SoundState Audio_soundState;
+VS::Audio::SoundState VS::Audio::soundState;
 
 // decomp: _soundFileMap (_soundFileMap@SLUS_010.40)
-char Audio_waveBankFileMap[] = { 0, 65, 66, 66, 68, 69, 67, 85, 68, 93, 69, 68, 0, 69, 69, 0, 69,
+u_char VS::Audio::waveBankFileMap[] = { 0, 65, 66, 66, 68, 69, 67, 85, 68, 93, 69, 68, 0, 69, 69, 0, 69,
     69, 69, 69, 69, 68, 62, 61, 68, 68, 68, 68, 68, 57, 56, 72, 74, 77, 76, 86, 87, 80,
     88, 55, 70, 81, 70, 73, 75, 78, 89, 90, 79, 84, 10, 10, 10, 10, 11, 11, 11, 11, 12,
     12, 12, 12, 13, 13, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 18, 18, 19, 19,

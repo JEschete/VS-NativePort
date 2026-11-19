@@ -9,12 +9,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/LfoWaveforms.hpp"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/PlaybackReset.hpp"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqChannelCommands.hpp"
 #include "Audio/SeqEnvelopeCommands.hpp"
 #include "Audio/SeqModulationCommands.hpp"
@@ -1017,38 +1017,37 @@ namespace {
 // Saves and restores the sequencer, mixer and driver state the Live binding
 // reads and writes.
 struct LiveVoiceFixture {
-  Audio_MusicConfig* saved_config = Audio_Seq_activeMusicConfig;
-  Audio_VoiceScheduler saved_scheduler = Audio_Mixer_voiceScheduler;
-  Audio_DriverFlags saved_latches = Audio_Driver_controlLatches;
-  decltype(std::to_array(Audio_Seq_kLfoWaveforms)) saved_waves =
-      std::to_array(Audio_Seq_kLfoWaveforms);
-  decltype(std::to_array(Audio_Samples_instruments)) saved_instruments =
-      std::to_array(Audio_Samples_instruments);
-  Audio_MusicConfig config{};
-  Audio_SeqChannel channel{};
+  VS::Audio::MusicConfig* saved_config = VS::Audio::Seq::activeMusicConfig;
+  VS::Audio::VoiceScheduler saved_scheduler = VS::Audio::Mixer::voiceScheduler;
+  VS::Audio::DriverFlags saved_latches = VS::Audio::Driver::controlLatches;
+  decltype(std::to_array(VS::Audio::Seq::kLfoWaveforms)) saved_waves =
+      std::to_array(VS::Audio::Seq::kLfoWaveforms);
+  decltype(std::to_array(VS::Audio::Samples::instruments)) saved_instruments =
+      std::to_array(VS::Audio::Samples::instruments);
+  VS::Audio::MusicConfig config{};
+  VS::Audio::SeqChannel channel{};
   std::array<std::uint8_t, 8> sequence{};
 
   LiveVoiceFixture() {
-    Audio_Seq_activeMusicConfig = &config;
-    Audio_Mixer_voiceScheduler = {};
-    Audio_Driver_controlLatches = {};
-    channel.programCounter = reinterpret_cast<char*>(sequence.data());
+    VS::Audio::Seq::activeMusicConfig = &config;
+    VS::Audio::Mixer::voiceScheduler = {};
+    VS::Audio::Driver::controlLatches = {};
+    channel.program_counter = sequence.data();
   }
 
   ~LiveVoiceFixture() {
-    Audio_Seq_activeMusicConfig = saved_config;
-    Audio_Mixer_voiceScheduler = saved_scheduler;
-    Audio_Driver_controlLatches = saved_latches;
-    std::ranges::copy(saved_waves, Audio_Seq_kLfoWaveforms);
-    std::ranges::copy(saved_instruments, Audio_Samples_instruments);
+    VS::Audio::Seq::activeMusicConfig = saved_config;
+    VS::Audio::Mixer::voiceScheduler = saved_scheduler;
+    VS::Audio::Driver::controlLatches = saved_latches;
+    std::ranges::copy(saved_waves, VS::Audio::Seq::kLfoWaveforms);
+    std::ranges::copy(saved_instruments, VS::Audio::Samples::instruments);
   }
 
   LiveVoiceFixture(const LiveVoiceFixture&) = delete;
   LiveVoiceFixture& operator=(const LiveVoiceFixture&) = delete;
 
   [[nodiscard]] std::ptrdiff_t Advance() const {
-    return channel.programCounter -
-           reinterpret_cast<const char*>(sequence.data());
+    return channel.program_counter - sequence.data();
   }
 };
 
@@ -1076,10 +1075,10 @@ TEST_CASE(
   CHECK(fixture.channel.octave == 1);
   Seq::LiveSetKeyOnVolumeRamp(&fixture.channel, 1);
   CHECK(fixture.Advance() == 4);
-  CHECK(std::pair(fixture.channel.keyOnVolume,
-                  fixture.channel.keyOnVolumeSlideStep) ==
+  CHECK(std::pair(fixture.channel.key_on_volume,
+                  fixture.channel.key_on_volume_slide_step) ==
         std::pair(0x20000000, -4194304));
-  CHECK(fixture.channel.keyOnVolumeSlideLength == 256);
+  CHECK(fixture.channel.key_on_volume_slide_length == 256);
   CHECK(Seq::RefusedLiveVoiceCommandCount() == refused);
 }
 
@@ -1095,22 +1094,22 @@ TEST_CASE("Live music operands stop at the end of the sequence heap block",
   const std::size_t capacity = Memory::LivePayloadCapacity(data).value();
   const std::span<std::uint8_t> block(data, capacity);
   block.back() = 0x40;
-  fixture.config.sequenceBase = reinterpret_cast<std::uintptr_t>(data);
-  auto* const last = reinterpret_cast<char*>(&block.back());
-  fixture.channel.programCounter = last;
-  fixture.channel.volumeSlideLength = 3;
+  fixture.config.sequence_base = reinterpret_cast<std::uintptr_t>(data);
+  auto* const last = &block.back();
+  fixture.channel.program_counter = last;
+  fixture.channel.volume_slide_length = 3;
 
   const std::uint64_t refused = Seq::RefusedLiveVoiceCommandCount();
   Seq::LiveSlideVolume(&fixture.channel, 1);
-  CHECK(fixture.channel.programCounter == last);
-  CHECK(fixture.channel.volumeSlideLength == 3);
+  CHECK(fixture.channel.program_counter == last);
+  CHECK(fixture.channel.volume_slide_length == 3);
   CHECK(Seq::RefusedLiveVoiceCommandCount() == refused + 1);
 
   Seq::LiveSetVolume(&fixture.channel, 1);
-  CHECK(fixture.channel.programCounter == last + 1);
+  CHECK(fixture.channel.program_counter == last + 1);
   CHECK(fixture.channel.volume == 0x20000000);
   Seq::LiveSetOctave(&fixture.channel, 1);
-  CHECK(fixture.channel.programCounter == last + 1);
+  CHECK(fixture.channel.program_counter == last + 1);
   CHECK(Seq::RefusedLiveVoiceCommandCount() == refused + 2);
 }
 
@@ -1125,21 +1124,21 @@ TEST_CASE("Live commands needing a music layer refuse without one and skip",
           ++warnings;
         }
       });
-  Audio_Seq_activeMusicConfig = nullptr;
+  VS::Audio::Seq::activeMusicConfig = nullptr;
   fixture.sequence = {5, 6};
-  fixture.channel.instrumentIndex = 2;
+  fixture.channel.instrument_index = 2;
   const std::uint64_t refused = Seq::RefusedLiveVoiceCommandCount();
   Seq::LiveLoadInstrument(&fixture.channel, 1);
   CHECK(fixture.Advance() == 1);
-  CHECK(fixture.channel.instrumentIndex == 2);
+  CHECK(fixture.channel.instrument_index == 2);
 
   fixture.channel.type = kSoundEffectType;
   Seq::LiveSelectPatch(&fixture.channel, 1);
   Seq::LiveEnableDrumKeymap(&fixture.channel, 1);
   CHECK(fixture.Advance() == 2);
   Seq::LiveEnableNoise(&fixture.channel, 8);
-  CHECK(Audio_Mixer_voiceScheduler.noiseVoices == 8);
-  CHECK(Audio_Driver_controlLatches.updateFlags == 0x110);
+  CHECK(VS::Audio::Mixer::voiceScheduler.noise_voices == 8);
+  CHECK(VS::Audio::Driver::controlLatches.update_flags == 0x110);
   Seq::LiveSetVolume(nullptr, 1);
 
   const std::uint64_t last = Seq::RefusedLiveVoiceCommandCount();
@@ -1151,28 +1150,28 @@ TEST_CASE("Live commands needing a music layer refuse without one and skip",
 TEST_CASE("Live voice modes update the music layer or the voice scheduler",
           "[audio-seq-voices][audio]") {
   LiveVoiceFixture fixture;
-  fixture.config.reverbChannels = 0xC;
-  fixture.config.noiseClock = 0x3F;
+  fixture.config.reverb_channels = 0xC;
+  fixture.config.noise_clock = 0x3F;
   fixture.sequence = {0xC1, 0x12};
   Seq::LiveEnableNoise(&fixture.channel, 8);
   Seq::LiveDisableReverb(&fixture.channel, 8);
   Seq::LiveSetNoiseClock(&fixture.channel, 8);
-  CHECK(std::array<std::uint32_t, 3>{fixture.config.noiseChannels,
-                                     fixture.config.reverbChannels,
-                                     fixture.config.fmChannels} ==
+  CHECK(std::array<std::uint32_t, 3>{fixture.config.noise_channels,
+                                     fixture.config.reverb_channels,
+                                     fixture.config.fm_channels} ==
         std::array<std::uint32_t, 3>{8, 4, 0});
-  CHECK(fixture.config.noiseClock == 0);
+  CHECK(fixture.config.noise_clock == 0);
 
   fixture.channel.type = kSoundEffectType;
   Seq::LiveEnableFrequencyModulation(&fixture.channel, 8);
-  CHECK(Audio_Mixer_voiceScheduler.fmVoices == 0);
-  fixture.channel.updateFlags = Seq::kFrequencyModulationAllowed;
+  CHECK(VS::Audio::Mixer::voiceScheduler.fm_voices == 0);
+  fixture.channel.update_flags = Seq::kFrequencyModulationAllowed;
   Seq::LiveEnableFrequencyModulation(&fixture.channel, 8);
   Seq::LiveSetNoiseClock(&fixture.channel, 8);
-  CHECK(Audio_Mixer_voiceScheduler.fmVoices == 8);
-  CHECK(Audio_Mixer_voiceScheduler.noiseClock == 0x12);
+  CHECK(VS::Audio::Mixer::voiceScheduler.fm_voices == 8);
+  CHECK(VS::Audio::Mixer::voiceScheduler.noise_clock == 0x12);
   CHECK(fixture.Advance() == 2);
-  CHECK(Audio_Driver_controlLatches.updateFlags == 0x110);
+  CHECK(VS::Audio::Driver::controlLatches.update_flags == 0x110);
 }
 
 TEST_CASE("Live patch selection points the keymap into the patch table",
@@ -1182,44 +1181,43 @@ TEST_CASE("Live patch selection points the keymap into the patch table",
   patches[0] = 0x01;
   patches[1] = 0x80;
   patches[2] = 0x10;
-  fixture.config.patchTable =
-      reinterpret_cast<Audio_AkaoSequenceFile*>(patches.data());
+  fixture.config.patch_table =
+      reinterpret_cast<VS::Audio::AkaoSequenceFile*>(patches.data());
   fixture.sequence = {1, 0};
-  fixture.channel.voice.volumeScale = 0x7F;
+  fixture.channel.voice.volume_scale = 0x7F;
   Seq::LiveSelectPatch(&fixture.channel, 1);
-  CHECK(fixture.channel.keymap ==
-        reinterpret_cast<char*>(patches.data()) + 0x30);
-  CHECK(fixture.channel.updateFlags == Seq::kPatchKeymapActive);
+  CHECK(fixture.channel.keymap == patches.data() + 0x30);
+  CHECK(fixture.channel.update_flags == Seq::kPatchKeymapActive);
   CHECK(fixture.channel.key == 0xFF);
-  CHECK(fixture.channel.voice.volumeScale == 0x7F);
+  CHECK(fixture.channel.voice.volume_scale == 0x7F);
   Seq::LiveSelectPatch(&fixture.channel, 1);
-  CHECK(fixture.channel.voice.volumeScale == 0);
-  CHECK(fixture.channel.updateFlags == 0);
+  CHECK(fixture.channel.voice.volume_scale == 0);
+  CHECK(fixture.channel.update_flags == 0);
   CHECK(fixture.Advance() == 2);
 }
 
 TEST_CASE("Live instrument and LFO commands read their legacy tables",
           "[audio-seq-voices][audio]") {
   LiveVoiceFixture fixture;
-  Audio_Instrument& entry = Audio_Samples_instruments[0x61];
+  VS::Audio::Instrument& entry = VS::Audio::Samples::instruments[0x61];
   entry = {0x4000, 0x4100, 3, 60, 0x8F00, 0x1234};
-  fixture.config.statusFlags = 0x40;
+  fixture.config.status_flags = 0x40;
   std::array<std::int16_t, 4> wave{};
-  Audio_Seq_kLfoWaveforms[0x21] = wave.data();
+  VS::Audio::Seq::kLfoWaveforms[0x21] = wave.data();
   fixture.sequence = {0x41, 0, 2, 0x21};
   Seq::LiveLoadInstrument(&fixture.channel, 1);
-  CHECK(fixture.channel.instrumentIndex == 0x61);
-  CHECK(std::pair(fixture.channel.voice.sampleStart,
-                  fixture.channel.voice.loopStart) ==
+  CHECK(fixture.channel.instrument_index == 0x61);
+  CHECK(std::pair(fixture.channel.voice.sample_start,
+                  fixture.channel.voice.loop_start) ==
         std::pair<std::uint32_t, std::uint32_t>(0x4000, 0x4100));
-  fixture.channel.voice.adsrLower = 0;
-  fixture.channel.voice.adsrUpper = 0;
+  fixture.channel.voice.adsr_lower = 0;
+  fixture.channel.voice.adsr_upper = 0;
   Seq::LiveResetEnvelope(&fixture.channel, 1);
-  CHECK(std::pair(fixture.channel.voice.adsrLower,
-                  fixture.channel.voice.adsrUpper) ==
+  CHECK(std::pair(fixture.channel.voice.adsr_lower,
+                  fixture.channel.voice.adsr_upper) ==
         std::pair<std::uint16_t, std::uint16_t>(0x8F00, 0x1234));
   Seq::LiveEnableTremolo(&fixture.channel, 1);
-  CHECK(fixture.channel.tremoloWave == wave.data());
+  CHECK(fixture.channel.tremolo_wave == wave.data());
   CHECK(fixture.Advance() == 4);
 }
 

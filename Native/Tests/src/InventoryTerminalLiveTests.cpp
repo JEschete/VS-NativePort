@@ -15,7 +15,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Sfx.h"
+#include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
@@ -101,7 +101,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<decltype(Battle_characterState)> saved_actor{
       Battle_characterState};
   ValueRestore<Battle_Actor*> saved_ashley{Battle_actors[kAshleyActor]};
-  ValueRestore<int> saved_sound_group{Audio_nextSfxChannelGroup7E};
+  ValueRestore<int> saved_sound_group{VS::Audio::nextSfxChannelGroup7E};
   ValueRestore<decltype(VS::State::stateFlags)> saved_flags{
       VS::State::stateFlags};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{

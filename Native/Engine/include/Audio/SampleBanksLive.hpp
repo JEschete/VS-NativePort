@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
-struct Audio_SeqChannel;
+namespace VS::Audio {
+struct SeqChannel;
+}  // namespace VS::Audio
 
 // Live bindings for SampleBanks.hpp over the music and sound-effect bank ids
 // (D_80036770, D_800377E0), the active music's flags, the mixer's music bank
@@ -21,8 +23,8 @@ int LiveLoadSoundEffectBank(void* bank, int slot, int wait);
 // Sound_IsNotAkaoFile; a null sequence is refused as not AKAO.
 int LiveSequenceMagicDifference(const void* data);
 std::uint16_t LiveMapInstrumentToAlternateBank(unsigned music_flags,
-                                               Audio_SeqChannel* channel);
+                                               VS::Audio::SeqChannel* channel);
 std::uint16_t LiveMapInstrumentToBaseBank(unsigned music_flags,
-                                          Audio_SeqChannel* channel);
+                                          VS::Audio::SeqChannel* channel);
 int LiveSoundEffectBankSlot(int selector);
 }  // namespace VS::Audio::Samples

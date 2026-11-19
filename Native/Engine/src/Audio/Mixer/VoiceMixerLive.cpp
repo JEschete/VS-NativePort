@@ -15,43 +15,44 @@
 #include <span>
 #include <vector>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/VoiceMixer.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 
 namespace VS::Audio::Mixer {
 namespace {
-static_assert(std::size(Audio_Seq_musicChannels) == kMusicChannelCount);
-static_assert(std::size(Audio_SoundEffects_channels) >= kEffectChannelCount);
-static_assert(std::size(Audio_Mixer_voiceEnvelopes) == kVoiceCount);
-static_assert(std::size(Audio_Mixer_voiceOwners) == kVoiceCount);
-static_assert(std::size(Audio_Mixer_kPanGains) == kPanGainCount);
-static_assert(sizeof(Audio_Mixer_kPanGains[0]) == sizeof(std::int16_t));
+static_assert(std::size(VS::Audio::Seq::musicChannels) == kMusicChannelCount);
+static_assert(std::size(VS::Audio::SoundEffects::channels) >=
+              kEffectChannelCount);
+static_assert(std::size(VS::Audio::Mixer::voiceEnvelopes) == kVoiceCount);
+static_assert(std::size(VS::Audio::Mixer::voiceOwners) == kVoiceCount);
+static_assert(std::size(VS::Audio::Mixer::kPanGains) == kPanGainCount);
+static_assert(sizeof(VS::Audio::Mixer::kPanGains[0]) == sizeof(std::int16_t));
 // A legacy field's offset and the offset the original reads it at.
 struct FieldPin {
   std::size_t offset = 0;
   std::size_t expected = 0;
 };
 constexpr std::array kFieldPins{
-    FieldPin{offsetof(Audio_VoiceParams, sampleRate), 0x10},
-    FieldPin{offsetof(Audio_VoiceParams, volume), 0x18},
-    FieldPin{offsetof(Audio_VoiceEnvelope, envelopeLevel), 0x4},
-    FieldPin{offsetof(Audio_VoiceModeMasks, noise), 0x4},
-    FieldPin{offsetof(Audio_VoiceModeMasks, fm), 0x8},
-    FieldPin{offsetof(Audio_FadeTimer, savedValue), 0xC},
-    FieldPin{offsetof(Audio_DriverFlags, updateFlags), 0x8},
+    FieldPin{offsetof(VS::Audio::VoiceParams, sample_rate), 0x10},
+    FieldPin{offsetof(VS::Audio::VoiceParams, volume), 0x18},
+    FieldPin{offsetof(VS::Audio::LegacyVoiceEnvelope, envelope_level), 0x4},
+    FieldPin{offsetof(VS::Audio::VoiceModeMasks, noise), 0x4},
+    FieldPin{offsetof(VS::Audio::VoiceModeMasks, fm), 0x8},
+    FieldPin{offsetof(VS::Audio::LegacyFadeTimer, saved_value), 0xC},
+    FieldPin{offsetof(VS::Audio::DriverFlags, update_flags), 0x8},
 };
 static_assert(std::ranges::all_of(kFieldPins, [](const FieldPin& pin) {
   return pin.offset == pin.expected;
 }));
-static_assert(sizeof(Audio_CutsceneStreamState::voiceMask) ==
+static_assert(sizeof(VS::Audio::CutsceneStreamState::voice_mask) ==
               sizeof(std::int32_t));
 
 // Pins a legacy field to the width of its typed copy.
@@ -81,14 +82,14 @@ std::size_t MarkerEnd(const std::int16_t* base) {
   return 0;
 }
 
-// The waveforms Audio_Seq_kLfoWaveforms names, rebuilt whenever a shape
+// The waveforms VS::Audio::Seq::kLfoWaveforms names, rebuilt whenever a shape
 // pointer changes.
 class LfoWaveforms {
  public:
   static const LfoWaveforms& Current() {
     thread_local LfoWaveforms waveforms;
-    if (!std::equal(std::begin(Audio_Seq_kLfoWaveforms),
-                    std::end(Audio_Seq_kLfoWaveforms),
+    if (!std::equal(std::begin(VS::Audio::Seq::kLfoWaveforms),
+                    std::end(VS::Audio::Seq::kLfoWaveforms),
                     waveforms.table_.begin())) {
       waveforms.Rebuild();
     }
@@ -122,8 +123,8 @@ class LfoWaveforms {
 
  private:
   void Rebuild() {
-    std::copy(std::begin(Audio_Seq_kLfoWaveforms),
-              std::end(Audio_Seq_kLfoWaveforms), table_.begin());
+    std::copy(std::begin(VS::Audio::Seq::kLfoWaveforms),
+              std::end(VS::Audio::Seq::kLfoWaveforms), table_.begin());
     spans_.clear();
     for (std::int16_t* base : table_) {
       if (base == nullptr) continue;
@@ -136,64 +137,65 @@ class LfoWaveforms {
               });
   }
 
-  std::array<std::int16_t*, std::size(Audio_Seq_kLfoWaveforms)> table_{};
+  std::array<std::int16_t*, std::size(VS::Audio::Seq::kLfoWaveforms)> table_{};
   std::vector<WaveSpan> spans_;
 };
 
-MixChannel LoadMixChannel(const Audio_SeqChannel& legacy,
+MixChannel LoadMixChannel(const VS::Audio::SeqChannel& legacy,
                           const LfoWaveforms& waves) {
   MixChannel channel;
   channel.state = Seq::LoadChannelState(legacy);
-  channel.pitch_slide = {Same<std::int32_t>(legacy.pitchSlide),
-                         Same<std::int32_t>(legacy.pitchSlideStep),
-                         Same<std::uint16_t>(legacy.pitchSlideTicksLeft)};
-  channel.assigned_voice = Same<std::uint32_t>(legacy.voice.assignedVoice);
-  channel.sample_rate = Same<std::uint16_t>(legacy.voice.sampleRate);
+  channel.pitch_slide = {Same<std::int32_t>(legacy.pitch_slide),
+                         Same<std::int32_t>(legacy.pitch_slide_step),
+                         Same<std::uint16_t>(legacy.pitch_slide_ticks_left)};
+  channel.assigned_voice = Same<std::uint32_t>(legacy.voice.assigned_voice);
+  channel.sample_rate = Same<std::uint16_t>(legacy.voice.sample_rate);
   channel.volume_left = Same<std::int16_t>(legacy.voice.volume.left);
   channel.volume_right = Same<std::int16_t>(legacy.voice.volume.right);
-  channel.effect_tags = Same<std::int32_t>(legacy.effectTags);
-  channel.effect_pan = Same<std::uint16_t>(legacy.effectPan);
-  channel.effect_pitch_scale = Same<std::int32_t>(legacy.effectPitchScale);
-  channel.vibrato = waves.Cursor(legacy.vibratoWave);
-  channel.tremolo = waves.Cursor(legacy.tremoloWave);
-  channel.auto_pan = waves.Cursor(legacy.autoPanWave);
+  channel.effect_tags = Same<std::int32_t>(legacy.effect_tags);
+  channel.effect_pan = Same<std::uint16_t>(legacy.effect_pan);
+  channel.effect_pitch_scale = Same<std::int32_t>(legacy.effect_pitch_scale);
+  channel.vibrato = waves.Cursor(legacy.vibrato_wave);
+  channel.tremolo = waves.Cursor(legacy.tremolo_wave);
+  channel.auto_pan = waves.Cursor(legacy.auto_pan_wave);
   return channel;
 }
 
-void StoreMixChannel(Audio_SeqChannel& legacy, const MixChannel& channel,
+void StoreMixChannel(VS::Audio::SeqChannel& legacy, const MixChannel& channel,
                      const LfoWaveforms& waves) {
   Seq::StoreChannelState(legacy, channel.state);
-  legacy.pitchSlide = channel.pitch_slide.slide;
-  legacy.pitchSlideStep = channel.pitch_slide.step;
-  legacy.pitchSlideTicksLeft = channel.pitch_slide.ticks_left;
-  legacy.voice.assignedVoice = channel.assigned_voice;
-  legacy.voice.sampleRate = channel.sample_rate;
+  legacy.pitch_slide = channel.pitch_slide.slide;
+  legacy.pitch_slide_step = channel.pitch_slide.step;
+  legacy.pitch_slide_ticks_left = channel.pitch_slide.ticks_left;
+  legacy.voice.assigned_voice = channel.assigned_voice;
+  legacy.voice.sample_rate = channel.sample_rate;
   legacy.voice.volume.left = channel.volume_left;
   legacy.voice.volume.right = channel.volume_right;
-  legacy.effectTags = channel.effect_tags;
-  legacy.effectPan = channel.effect_pan;
-  legacy.effectPitchScale = channel.effect_pitch_scale;
-  waves.Store(legacy.vibratoWave, channel.vibrato);
-  waves.Store(legacy.tremoloWave, channel.tremolo);
-  waves.Store(legacy.autoPanWave, channel.auto_pan);
+  legacy.effect_tags = channel.effect_tags;
+  legacy.effect_pan = channel.effect_pan;
+  legacy.effect_pitch_scale = channel.effect_pitch_scale;
+  waves.Store(legacy.vibrato_wave, channel.vibrato);
+  waves.Store(legacy.tremolo_wave, channel.tremolo);
+  waves.Store(legacy.auto_pan_wave, channel.auto_pan);
 }
 
-PanGains LivePanGains() { return PanGains(Audio_Mixer_kPanGains); }
+PanGains LivePanGains() { return PanGains(VS::Audio::Mixer::kPanGains); }
 
 // The record before `channel` when both lie in one channel table.
 std::optional<std::uint16_t> PreviousSampleRate(
-    const Audio_SeqChannel* channel) {
-  const auto follows_first = [channel](const Audio_SeqChannel* first,
+    const VS::Audio::SeqChannel* channel) {
+  const auto follows_first = [channel](const VS::Audio::SeqChannel* first,
                                        std::size_t count) {
     return first != nullptr && std::less<>{}(first, channel) &&
            std::less<>{}(channel, first + count);
   };
-  if (follows_first(std::data(Audio_Seq_musicChannels),
-                    std::size(Audio_Seq_musicChannels)) ||
-      follows_first(Audio_Seq_secondaryMusicChannels, kMusicChannelCount) ||
-      follows_first(std::data(Audio_SoundEffects_channels),
-                    std::size(Audio_SoundEffects_channels))) {
-    return Same<std::uint16_t>(std::prev(channel)->voice.sampleRate);
+  if (follows_first(std::data(VS::Audio::Seq::musicChannels),
+                    std::size(VS::Audio::Seq::musicChannels)) ||
+      follows_first(VS::Audio::Seq::secondaryMusicChannels,
+                    kMusicChannelCount) ||
+      follows_first(std::data(VS::Audio::SoundEffects::channels),
+                    std::size(VS::Audio::SoundEffects::channels))) {
+    return Same<std::uint16_t>(std::prev(channel)->voice.sample_rate);
   }
   return std::nullopt;
 }
@@ -231,45 +233,46 @@ class LiveRefusals : public virtual RefusalSink {
 
 // The legacy music layers a mixer pass runs over.
 struct LiveLayers {
-  Audio_MusicConfig* primary = nullptr;
-  Audio_MusicConfig* secondary = nullptr;
-  Audio_SeqChannel* secondary_channels = nullptr;
+  VS::Audio::MusicConfig* primary = nullptr;
+  VS::Audio::MusicConfig* secondary = nullptr;
+  VS::Audio::SeqChannel* secondary_channels = nullptr;
 };
 
 // Without a secondary layer the active layer is the primary one. With one,
 // the active layer must be g_PrimaryMusicConfig or the secondary layer, and
 // the secondary layer and its channels must be records of their own.
 std::optional<LiveLayers> BindLayers(const char* operation) {
-  Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
-  Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig;
+  VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
+  VS::Audio::MusicConfig* secondary = VS::Audio::Seq::secondaryMusicConfig;
   if (active == nullptr) {
     Seq::ReportRefusal(operation, "no music layer is active");
     return std::nullopt;
   }
   if (secondary == nullptr) return LiveLayers{active, nullptr, nullptr};
-  Audio_SeqChannel* channels = Audio_Seq_secondaryMusicChannels;
-  if (secondary == &Audio_Seq_primaryMusicConfig || channels == nullptr ||
-      channels == std::data(Audio_Seq_musicChannels)) {
+  VS::Audio::SeqChannel* channels = VS::Audio::Seq::secondaryMusicChannels;
+  if (secondary == &VS::Audio::Seq::primaryMusicConfig || channels == nullptr ||
+      channels == std::data(VS::Audio::Seq::musicChannels)) {
     Seq::ReportRefusal(operation,
                        "the secondary music layer aliases the primary one");
     return std::nullopt;
   }
-  if (active != &Audio_Seq_primaryMusicConfig && active != secondary) {
+  if (active != &VS::Audio::Seq::primaryMusicConfig && active != secondary) {
     Seq::ReportRefusal(operation, "the active music layer is neither layer");
     return std::nullopt;
   }
-  return LiveLayers{&Audio_Seq_primaryMusicConfig, secondary, channels};
+  return LiveLayers{&VS::Audio::Seq::primaryMusicConfig, secondary, channels};
 }
 
-void LoadChannels(std::span<MixChannel> typed, const Audio_SeqChannel* legacy,
+void LoadChannels(std::span<MixChannel> typed,
+                  const VS::Audio::SeqChannel* legacy,
                   const LfoWaveforms& waves) {
   for (std::size_t index = 0; index < typed.size(); ++index) {
     typed[index] = LoadMixChannel(legacy[index], waves);
   }
 }
 
-void StoreChannels(std::span<const MixChannel> typed, Audio_SeqChannel* legacy,
-                   const LfoWaveforms& waves) {
+void StoreChannels(std::span<const MixChannel> typed,
+                   VS::Audio::SeqChannel* legacy, const LfoWaveforms& waves) {
   for (std::size_t index = 0; index < typed.size(); ++index) {
     StoreMixChannel(legacy[index], typed[index], waves);
   }
@@ -278,7 +281,7 @@ void StoreChannels(std::span<const MixChannel> typed, Audio_SeqChannel* legacy,
 void LoadMixer(MixerState& state, const LiveLayers& layers,
                const LfoWaveforms& waves) {
   state.primary.config = Seq::LoadMusicLayer(*layers.primary);
-  LoadChannels(state.primary.channels, std::data(Audio_Seq_musicChannels),
+  LoadChannels(state.primary.channels, std::data(VS::Audio::Seq::musicChannels),
                waves);
   state.secondary.reset();
   state.active = LayerId::kPrimary;
@@ -286,59 +289,65 @@ void LoadMixer(MixerState& state, const LiveLayers& layers,
     state.secondary.emplace();
     state.secondary->config = Seq::LoadMusicLayer(*layers.secondary);
     LoadChannels(state.secondary->channels, layers.secondary_channels, waves);
-    if (Audio_Seq_activeMusicConfig == layers.secondary) {
+    if (VS::Audio::Seq::activeMusicConfig == layers.secondary) {
       state.active = LayerId::kSecondary;
     }
   }
-  LoadChannels(state.effects, std::data(Audio_SoundEffects_channels), waves);
-  state.scheduler = Seq::LoadVoiceScheduler(Audio_Mixer_voiceScheduler);
+  LoadChannels(state.effects, std::data(VS::Audio::SoundEffects::channels),
+               waves);
+  state.scheduler = Seq::LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler);
   for (std::size_t voice = 0; voice < kVoiceCount; ++voice) {
-    state.envelopes[voice] =
-        Same<std::int16_t>(Audio_Mixer_voiceEnvelopes[voice].envelopeLevel);
+    state.envelopes[voice] = Same<std::int16_t>(
+        VS::Audio::Mixer::voiceEnvelopes[voice].envelope_level);
   }
-  state.voice_modes = {Same<std::uint32_t>(Audio_Mixer_voiceModes.reverb),
-                       Same<std::uint32_t>(Audio_Mixer_voiceModes.noise),
-                       Same<std::uint32_t>(Audio_Mixer_voiceModes.fm)};
+  state.voice_modes = {Same<std::uint32_t>(VS::Audio::Mixer::voiceModes.reverb),
+                       Same<std::uint32_t>(VS::Audio::Mixer::voiceModes.noise),
+                       Same<std::uint32_t>(VS::Audio::Mixer::voiceModes.fm)};
   state.stream_voices =
-      Same<std::uint32_t>(Audio_Cutscene_streamState.voiceMask);
+      Same<std::uint32_t>(VS::Audio::Cutscene::streamState.voice_mask);
   state.mix_behavior =
-      Same<std::uint32_t>(Audio_Driver_controlLatches.mixBehavior);
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.mix_behavior);
   state.driver_update_flags =
-      Same<std::uint32_t>(Audio_Driver_controlLatches.updateFlags);
-  state.muted_channels = Same<std::int32_t>(Audio_Mixer_mutedMusicChannels);
-  state.music_pitch_scale = Same<std::int32_t>(Audio_Mixer_musicPitchScale);
-  state.master_fade = {Same<std::int32_t>(Audio_Seq_masterFade.value),
-                       Same<std::int32_t>(Audio_Seq_masterFade.savedValue)};
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.update_flags);
+  state.muted_channels =
+      Same<std::int32_t>(VS::Audio::Mixer::mutedMusicChannels);
+  state.music_pitch_scale =
+      Same<std::int32_t>(VS::Audio::Mixer::musicPitchScale);
+  state.master_fade = {
+      Same<std::int32_t>(VS::Audio::Seq::masterFade.value),
+      Same<std::int32_t>(VS::Audio::Seq::masterFade.saved_value)};
 }
 
 void StoreMixer(const MixerState& state, const LiveLayers& layers,
                 const LfoWaveforms& waves) {
   Seq::StoreMusicLayer(*layers.primary, state.primary.config);
-  StoreChannels(state.primary.channels, std::data(Audio_Seq_musicChannels),
-                waves);
+  StoreChannels(state.primary.channels,
+                std::data(VS::Audio::Seq::musicChannels), waves);
   if (layers.secondary != nullptr && state.secondary) {
     Seq::StoreMusicLayer(*layers.secondary, state.secondary->config);
     StoreChannels(state.secondary->channels, layers.secondary_channels, waves);
   }
-  Audio_Seq_activeMusicConfig =
+  VS::Audio::Seq::activeMusicConfig =
       state.active == LayerId::kSecondary && layers.secondary != nullptr
           ? layers.secondary
           : layers.primary;
-  StoreChannels(state.effects, std::data(Audio_SoundEffects_channels), waves);
-  Seq::StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
+  StoreChannels(state.effects, std::data(VS::Audio::SoundEffects::channels),
+                waves);
+  Seq::StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
   for (std::size_t voice = 0; voice < kVoiceCount; ++voice) {
-    Audio_Mixer_voiceEnvelopes[voice].envelopeLevel = state.envelopes[voice];
+    VS::Audio::Mixer::voiceEnvelopes[voice].envelope_level =
+        state.envelopes[voice];
   }
-  Audio_Mixer_voiceModes.reverb = Same<int>(state.voice_modes.reverb);
-  Audio_Mixer_voiceModes.noise = Same<int>(state.voice_modes.noise);
-  Audio_Mixer_voiceModes.fm = Same<int>(state.voice_modes.fm);
-  Audio_Cutscene_streamState.voiceMask = Same<int>(state.stream_voices);
-  Audio_Driver_controlLatches.mixBehavior = state.mix_behavior;
-  Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
-  Audio_Mixer_mutedMusicChannels = state.muted_channels;
-  Audio_Mixer_musicPitchScale = state.music_pitch_scale;
-  Audio_Seq_masterFade.value = state.master_fade.value;
-  Audio_Seq_masterFade.savedValue = state.master_fade.saved_value;
+  VS::Audio::Mixer::voiceModes.reverb = Same<int>(state.voice_modes.reverb);
+  VS::Audio::Mixer::voiceModes.noise = Same<int>(state.voice_modes.noise);
+  VS::Audio::Mixer::voiceModes.fm = Same<int>(state.voice_modes.fm);
+  VS::Audio::Cutscene::streamState.voice_mask = Same<int>(state.stream_voices);
+  VS::Audio::Driver::controlLatches.mix_behavior = state.mix_behavior;
+  VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
+  VS::Audio::Mixer::mutedMusicChannels = state.muted_channels;
+  VS::Audio::Mixer::musicPitchScale = state.music_pitch_scale;
+  VS::Audio::Seq::masterFade.value = state.master_fade.value;
+  VS::Audio::Seq::masterFade.saved_value = state.master_fade.saved_value;
 }
 
 // One mixer pass over the live voice output. A channel to configure is
@@ -356,16 +365,16 @@ class LiveMixer final : public MixerHost, private LiveRefusals {
   }
 
   void ConfigureChannel(ChannelRef ref, MixChannel& channel) override {
-    Audio_SeqChannel* record = Record(ref);
+    VS::Audio::SeqChannel* record = Record(ref);
     if (record == nullptr) return;
     StoreMixChannel(*record, channel, waves_);
     VS::Audio::Driver::ConfigureOutputChannel(record);
     channel.state.voice.dirty_flags =
-        Same<std::uint32_t>(record->voice.dirtyFlags);
+        Same<std::uint32_t>(record->voice.dirty_flags);
   }
 
   void SetVoiceOwner(std::uint32_t voice, LayerId layer) override {
-    Audio_Mixer_voiceOwners[voice] =
+    VS::Audio::Mixer::voiceOwners[voice] =
         layer == LayerId::kSecondary ? layers_.secondary : layers_.primary;
   }
 
@@ -396,11 +405,11 @@ class LiveMixer final : public MixerHost, private LiveRefusals {
   }
 
  private:
-  Audio_SeqChannel* Record(ChannelRef ref) const {
+  VS::Audio::SeqChannel* Record(ChannelRef ref) const {
     switch (ref.group) {
       case Seq::ChannelGroup::kMusic:
         if (ref.index < kMusicChannelCount) {
-          return &Audio_Seq_musicChannels[ref.index];
+          return &VS::Audio::Seq::musicChannels[ref.index];
         }
         break;
       case Seq::ChannelGroup::kSecondaryMusic:
@@ -411,7 +420,7 @@ class LiveMixer final : public MixerHost, private LiveRefusals {
         break;
       case Seq::ChannelGroup::kSoundEffects:
         if (ref.index < kEffectChannelCount) {
-          return &Audio_SoundEffects_channels[ref.index];
+          return &VS::Audio::SoundEffects::channels[ref.index];
         }
         break;
     }
@@ -438,18 +447,18 @@ void RunMixerPass(const char* operation, MixerPass pass) {
 // The channel modulation passes; music reads the active layer's master
 // volume and the music pitch scale.
 template <typename Modulate>
-void ModulateLiveChannel(const char* operation, Audio_SeqChannel* channel,
+void ModulateLiveChannel(const char* operation, VS::Audio::SeqChannel* channel,
                          bool music, Modulate modulate) {
-  const Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
+  const VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
   if (channel == nullptr || (music && active == nullptr)) {
     Seq::ReportRefusal(operation, "the channel or the active layer is missing");
     return;
   }
   const LfoWaveforms& waves = LfoWaveforms::Current();
   const MixLevels levels{
-      music ? Same<std::int32_t>(active->masterVolume) : 0,
-      music ? Same<std::int32_t>(Audio_Mixer_musicPitchScale) : 0,
-      Same<std::uint32_t>(Audio_Driver_controlLatches.mixBehavior),
+      music ? Same<std::int32_t>(active->master_volume) : 0,
+      music ? Same<std::int32_t>(VS::Audio::Mixer::musicPitchScale) : 0,
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.mix_behavior),
       LivePanGains()};
   MixChannel typed = LoadMixChannel(*channel, waves);
   LiveRefusals refusals(operation);
@@ -460,11 +469,11 @@ void ModulateLiveChannel(const char* operation, Audio_SeqChannel* channel,
 
 // decomp: SLUS_010.40 Sound_UpdateSlidesAndDelays
 // (src/SLUS_010.40/25AC.c:1400)
-void LiveUpdateChannelSlidesAndDelays(Audio_SeqChannel* channel,
+void LiveUpdateChannelSlidesAndDelays(VS::Audio::SeqChannel* channel,
                                       unsigned channel_bit,
                                       Driver::ChannelKind kind) {
   constexpr const char* kOperation = "UpdateChannelSlidesAndDelays";
-  Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
+  VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
   if (channel == nullptr || active == nullptr) {
     Seq::ReportRefusal(kOperation,
                        "the channel or the active layer is missing");
@@ -473,25 +482,25 @@ void LiveUpdateChannelSlidesAndDelays(Audio_SeqChannel* channel,
   const LfoWaveforms& waves = LfoWaveforms::Current();
   SlideState state{
       Seq::LoadMusicLayer(*active),
-      Seq::LoadVoiceScheduler(Audio_Mixer_voiceScheduler),
-      Same<std::uint32_t>(Audio_Driver_controlLatches.updateFlags)};
+      Seq::LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler),
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.update_flags)};
   MixChannel typed = LoadMixChannel(*channel, waves);
   LiveRefusals refusals(kOperation);
   UpdateChannelSlidesAndDelays(typed, state, channel_bit, kind, refusals);
   StoreMixChannel(*channel, typed, waves);
   Seq::StoreMusicLayer(*active, state.active);
-  Seq::StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
-  Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
+  Seq::StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
+  VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
 }
 
 // decomp: SLUS_010.40 func_8001436C (src/SLUS_010.40/25AC.c:1566)
-void LiveUpdateMusicChannelModulation(Audio_SeqChannel* channel) {
+void LiveUpdateMusicChannelModulation(VS::Audio::SeqChannel* channel) {
   ModulateLiveChannel("UpdateMusicChannelModulation", channel, true,
                       &UpdateMusicChannelModulation);
 }
 
 // decomp: SLUS_010.40 func_800147CC (src/SLUS_010.40/25AC.c:1678)
-void LiveUpdateSoundEffectModulation(Audio_SeqChannel* channel) {
+void LiveUpdateSoundEffectModulation(VS::Audio::SeqChannel* channel) {
   ModulateLiveChannel("UpdateSoundEffectModulation", channel, false,
                       &UpdateSoundEffectModulation);
 }

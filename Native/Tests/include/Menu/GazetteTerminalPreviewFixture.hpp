@@ -19,9 +19,9 @@
 #include "Actors/Movement.h"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/Textures.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Field/Gimmicks.h"
@@ -48,12 +48,12 @@ inline bool AssetsIdle() {
 }
 
 inline auto PreviewOwners() {
-  return std::array{BytesOf(Audio_Mixer_kCommandHandlers),
-                    BytesOf(Audio_Driver_commandArguments),
-                    BytesOf(Audio_Mixer_commandParams),
-                    BytesOf(Audio_Driver_controlLatches),
-                    BytesOf(Audio_Mixer_voiceScheduler),
-                    BytesOf(Audio_SoundEffects_channels),
+  return std::array{BytesOf(VS::Audio::Mixer::kCommandHandlers),
+                    BytesOf(VS::Audio::Driver::commandArguments),
+                    BytesOf(VS::Audio::Mixer::commandParams),
+                    BytesOf(VS::Audio::Driver::controlLatches),
+                    BytesOf(VS::Audio::Mixer::voiceScheduler),
+                    BytesOf(VS::Audio::SoundEffects::channels),
                     BytesOf(Actors_actorRecords),
                     BytesOf(VS::Actors::weaponModels),
                     BytesOf(Field_gimmickInstances),
@@ -134,12 +134,12 @@ class PreviewFixture : public TerminalFixture {
     const auto pointers = VS::Content::ModulePointerTables();
     const auto commands = std::ranges::find_if(pointers, [](const auto& entry) {
       return static_cast<void*>(entry.target) ==
-             static_cast<void*>(Audio_Mixer_kCommandHandlers);
+             static_cast<void*>(VS::Audio::Mixer::kCommandHandlers);
     });
     const auto executable =
         shared::ReadImage(R"(Native\data\disc\SLUS_010.40)");
     if (commands == pointers.end() ||
-        commands->capacity != std::size(Audio_Mixer_kCommandHandlers) ||
+        commands->capacity != std::size(VS::Audio::Mixer::kCommandHandlers) ||
         commands->module == nullptr ||
         std::string_view(commands->module) != "SLUS_010.40" ||
         !content::RelocateModulePointerTable(*commands, executable,

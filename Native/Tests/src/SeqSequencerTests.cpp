@@ -9,10 +9,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SeqSequencerLive.hpp"
@@ -504,11 +504,11 @@ TEST_CASE("A driver tick records its cost and refuses a missing layer",
 }
 
 namespace {
-using OpcodeHandler = std::decay_t<decltype(Audio_Seq_kOpcodeHandlers[0])>;
+using OpcodeHandler = VS::Audio::SeqOpcodeHandler;
 
 int track_end_calls = 0;
 
-void RecordTrackEnd(Audio_SeqChannel* /*channel*/, int /*channel_bit*/) {
+void RecordTrackEnd(VS::Audio::SeqChannel* /*channel*/, int /*channel_bit*/) {
   ++track_end_calls;
 }
 
@@ -516,45 +516,46 @@ void RecordTrackEnd(Audio_SeqChannel* /*channel*/, int /*channel_bit*/) {
 // and restored sequencer, mixer and driver state. The track end handler
 // only counts its calls.
 struct LiveStepFixture {
-  Audio_MusicConfig* saved_config = Audio_Seq_activeMusicConfig;
-  Audio_MusicConfig* saved_secondary = Audio_Seq_secondaryMusicConfig;
-  Audio_VoiceScheduler saved_scheduler = Audio_Mixer_voiceScheduler;
-  Audio_DriverFlags saved_latches = Audio_Driver_controlLatches;
-  OpcodeHandler saved_track_end = Audio_Seq_kOpcodeHandlers[0];
+  VS::Audio::MusicConfig* saved_config = VS::Audio::Seq::activeMusicConfig;
+  VS::Audio::MusicConfig* saved_secondary =
+      VS::Audio::Seq::secondaryMusicConfig;
+  VS::Audio::VoiceScheduler saved_scheduler = VS::Audio::Mixer::voiceScheduler;
+  VS::Audio::DriverFlags saved_latches = VS::Audio::Driver::controlLatches;
+  OpcodeHandler saved_track_end = VS::Audio::Seq::kOpcodeHandlers[0];
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 256> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Audio_MusicConfig config{};
-  Audio_SeqChannel channel{};
+  VS::Audio::MusicConfig config{};
+  VS::Audio::SeqChannel channel{};
   std::span<std::uint8_t> block;
 
   LiveStepFixture() {
-    Audio_Seq_activeMusicConfig = &config;
-    Audio_Seq_secondaryMusicConfig = nullptr;
-    Audio_Mixer_voiceScheduler = {};
-    Audio_Driver_controlLatches = {};
-    Audio_Seq_kOpcodeHandlers[0] = &RecordTrackEnd;
+    VS::Audio::Seq::activeMusicConfig = &config;
+    VS::Audio::Seq::secondaryMusicConfig = nullptr;
+    VS::Audio::Mixer::voiceScheduler = {};
+    VS::Audio::Driver::controlLatches = {};
+    VS::Audio::Seq::kOpcodeHandlers[0] = &RecordTrackEnd;
     track_end_calls = 0;
     auto* const data =
         static_cast<std::uint8_t*>(VS::Core::Memory::AllocateLiveFromLowEnd(8));
     REQUIRE(data != nullptr);
     block = {data, VS::Core::Memory::LivePayloadCapacity(data).value()};
-    config.sequenceBase = reinterpret_cast<std::uintptr_t>(data);
-    channel.programCounter = At(0);
+    config.sequence_base = reinterpret_cast<std::uintptr_t>(data);
+    channel.program_counter = At(0);
   }
 
   ~LiveStepFixture() {
-    Audio_Seq_kOpcodeHandlers[0] = saved_track_end;
-    Audio_Seq_activeMusicConfig = saved_config;
-    Audio_Seq_secondaryMusicConfig = saved_secondary;
-    Audio_Mixer_voiceScheduler = saved_scheduler;
-    Audio_Driver_controlLatches = saved_latches;
+    VS::Audio::Seq::kOpcodeHandlers[0] = saved_track_end;
+    VS::Audio::Seq::activeMusicConfig = saved_config;
+    VS::Audio::Seq::secondaryMusicConfig = saved_secondary;
+    VS::Audio::Mixer::voiceScheduler = saved_scheduler;
+    VS::Audio::Driver::controlLatches = saved_latches;
   }
 
   LiveStepFixture(const LiveStepFixture&) = delete;
   LiveStepFixture& operator=(const LiveStepFixture&) = delete;
 
-  [[nodiscard]] char* At(std::size_t offset) const {
-    return reinterpret_cast<char*>(block.data()) + offset;
+  [[nodiscard]] std::uint8_t* At(std::size_t offset) const {
+    return block.data() + offset;
   }
 };
 }  // namespace
@@ -566,8 +567,8 @@ TEST_CASE("A live channel step stays inside its program's heap block",
   fixture.block[1] = 0x8F;
   const std::uint64_t refused = Seq::LiveRefusalCount();
   Seq::LiveExecuteChannelStep(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == fixture.At(1));
-  CHECK(fixture.channel.opcodeStepCounter == 1);
+  CHECK(fixture.channel.program_counter == fixture.At(1));
+  CHECK(fixture.channel.opcode_step_counter == 1);
   CHECK(Seq::LiveRefusalCount() == refused);
   CHECK(track_end_calls == 0);
 }
@@ -576,15 +577,15 @@ TEST_CASE("A live channel step at the end of its heap block ends the track",
           "[audio-seq-control][audio]") {
   LiveStepFixture fixture;
   const std::uint64_t refused = Seq::LiveRefusalCount();
-  char* const end = fixture.At(fixture.block.size());
-  fixture.channel.programCounter = end;
-  fixture.channel.opcodeStepCounter = 1;
-  fixture.config.pendingKeyOff = 0;
+  std::uint8_t* const end = fixture.At(fixture.block.size());
+  fixture.channel.program_counter = end;
+  fixture.channel.opcode_step_counter = 1;
+  fixture.config.pending_key_off = 0;
   Seq::LiveExecuteChannelStep(&fixture.channel, static_cast<int>(kChannelBit));
-  CHECK(fixture.channel.programCounter == end);
-  CHECK(fixture.channel.opcodeStepCounter == 1);
+  CHECK(fixture.channel.program_counter == end);
+  CHECK(fixture.channel.opcode_step_counter == 1);
   CHECK(track_end_calls == 1);
-  CHECK(fixture.config.pendingKeyOff == static_cast<int>(kChannelBit));
+  CHECK(fixture.config.pending_key_off == static_cast<int>(kChannelBit));
   CHECK(Seq::LiveRefusalCount() == refused + 1);
   Seq::LiveExecuteChannelStep(nullptr, static_cast<int>(kChannelBit));
   CHECK(Seq::LiveRefusalCount() == refused + 2);
@@ -593,14 +594,14 @@ TEST_CASE("A live channel step at the end of its heap block ends the track",
 TEST_CASE("The live driver tick refuses the active layer as its secondary",
           "[audio-seq-control][audio]") {
   LiveStepFixture fixture;
-  Audio_Seq_secondaryMusicConfig = &fixture.config;
+  VS::Audio::Seq::secondaryMusicConfig = &fixture.config;
   fixture.config.tempo = 0x1234;
   const std::uint64_t refused = Seq::LiveRefusalCount();
   CHECK(Seq::LiveTickPlayback() == 0);
   Seq::LiveUpdateGlobalSlides();
   CHECK(Seq::LiveRefusalCount() == refused + 2);
   CHECK(fixture.config.tempo == 0x1234);
-  Audio_Seq_activeMusicConfig = nullptr;
+  VS::Audio::Seq::activeMusicConfig = nullptr;
   CHECK(Seq::LiveTickPlayback() == 0);
   CHECK(Seq::LiveRefusalCount() == refused + 3);
 }

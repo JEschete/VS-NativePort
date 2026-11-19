@@ -9,8 +9,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
@@ -585,20 +585,20 @@ namespace {
 // A 16-byte live heap block, too short for an AKAO header, and an active
 // music layer, over saved and restored layer pointers.
 struct LiveMusicFixture {
-  Audio_MusicConfig* saved_config = Audio_Seq_activeMusicConfig;
+  VS::Audio::MusicConfig* saved_config = VS::Audio::Seq::activeMusicConfig;
   alignas(VS::Core::Memory::kHeapUnitBytes) std::array<std::byte, 256> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  Audio_MusicConfig config{};
-  Audio_AkaoSequenceFile* sequence = nullptr;
+  VS::Audio::MusicConfig config{};
+  VS::Audio::AkaoSequenceFile* sequence = nullptr;
 
   LiveMusicFixture() {
-    Audio_Seq_activeMusicConfig = &config;
+    VS::Audio::Seq::activeMusicConfig = &config;
     void* const data = VS::Core::Memory::AllocateLiveFromLowEnd(8);
     REQUIRE(data != nullptr);
-    sequence = static_cast<Audio_AkaoSequenceFile*>(data);
+    sequence = static_cast<VS::Audio::AkaoSequenceFile*>(data);
   }
 
-  ~LiveMusicFixture() { Audio_Seq_activeMusicConfig = saved_config; }
+  ~LiveMusicFixture() { VS::Audio::Seq::activeMusicConfig = saved_config; }
 
   LiveMusicFixture(const LiveMusicFixture&) = delete;
   LiveMusicFixture& operator=(const LiveMusicFixture&) = delete;
@@ -611,21 +611,21 @@ TEST_CASE("Live track loads refuse sequences shorter than their header",
   const std::uint64_t refused = Seq::LiveRefusalCount();
   Seq::LiveLoadMusicSequence(fixture.sequence);
   CHECK(Seq::LiveRefusalCount() == refused + 1);
-  CHECK(fixture.config.sequenceBase == 0);
+  CHECK(fixture.config.sequence_base == 0);
   Seq::LiveRestoreMusicSequence(fixture.sequence, 0);
   CHECK(Seq::LiveRefusalCount() == refused + 2);
-  CHECK(fixture.config.sequenceBase == 0);
+  CHECK(fixture.config.sequence_base == 0);
   Seq::LiveSetMusicVolume(nullptr);
   CHECK(Seq::LiveRefusalCount() == refused + 3);
-  Audio_Seq_activeMusicConfig = nullptr;
-  Audio_CommandParams params{};
+  VS::Audio::Seq::activeMusicConfig = nullptr;
+  VS::Audio::CommandParams params{};
   Seq::LiveFadeDiscVolume(&params);
   CHECK(Seq::LiveRefusalCount() == refused + 4);
 }
 
 TEST_CASE("Music commands keep their live bindings and helpers keep none",
           "[audio-seq-control][audio]") {
-  using CommandHandler = void (*)(Audio_CommandParams*);
+  using CommandHandler = void (*)(VS::Audio::CommandParams*);
   const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, CommandHandler>, 11> kept{{
       {0x80016DF8U, &Seq::LiveStartOrResumeMusic},

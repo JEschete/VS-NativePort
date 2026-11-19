@@ -12,14 +12,14 @@
 #include <iterator>
 #include <optional>
 
-#include "Audio/LegacyFiles.h"
+#include "Audio/LegacyFiles.hpp"
 #include "Audio/SampleBanksLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
-#include "Audio/Sfx.h"
-#include "Audio/SoundBanks.h"
+#include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Audio/SoundSlotsLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Audio/StreamPlayback.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -31,10 +31,13 @@
 
 namespace VS::Audio {
 namespace {
-static_assert(std::size(Audio_soundState.sfxBankData) == kSfxBankSlotCount);
-static_assert(std::size(Audio_soundState.sfxBankRequests) == kSfxBankSlotCount);
-static_assert(std::size(Audio_soundState.musicHandles) == kMusicSlotCount);
-static_assert(std::size(Audio_soundState.sfxStreamData) ==
+static_assert(std::size(VS::Audio::soundState.sfx_bank_data) ==
+              kSfxBankSlotCount);
+static_assert(std::size(VS::Audio::soundState.sfx_bank_requests) ==
+              kSfxBankSlotCount);
+static_assert(std::size(VS::Audio::soundState.music_handles) ==
+              kMusicSlotCount);
+static_assert(std::size(VS::Audio::soundState.sfx_stream_data) ==
               kEffectStreamSlotCount);
 
 // The file tables' entries (ModulePointers.cpp: 400-byte word tables at
@@ -68,58 +71,63 @@ class LiveSoundBanks final : public SoundBankHost {
   SfxBankSlot SfxBank(std::size_t index) override {
     if (index >= kSfxBankSlotCount) return {};
     return {
-        .id = static_cast<std::int8_t>(Audio_soundState.sfxBankIds[index]),
-        .data = LiveBankBuffer(Audio_soundState.sfxBankData[index]),
-        .request = LiveBankRequest(Audio_soundState.sfxBankRequests[index])};
+        .id =
+            static_cast<std::int8_t>(VS::Audio::soundState.sfx_bank_ids[index]),
+        .data = LiveBankBuffer(VS::Audio::soundState.sfx_bank_data[index]),
+        .request =
+            LiveBankRequest(VS::Audio::soundState.sfx_bank_requests[index])};
   }
 
   void StoreSfxBank(std::size_t index, const SfxBankSlot& slot) override {
     if (index >= kSfxBankSlotCount) return;
-    Audio_soundState.sfxBankIds[index] = static_cast<char>(slot.id);
-    Audio_soundState.sfxBankData[index] = LiveBufferPointer(slot.data);
-    Audio_soundState.sfxBankRequests[index] = LiveRequestSlot(slot.request);
+    VS::Audio::soundState.sfx_bank_ids[index] =
+        static_cast<std::int8_t>(slot.id);
+    VS::Audio::soundState.sfx_bank_data[index] = LiveBufferPointer(slot.data);
+    VS::Audio::soundState.sfx_bank_requests[index] =
+        LiveRequestSlot(slot.request);
   }
 
   std::uint32_t CurrentSfxBank() override {
-    return Audio_soundState.currentSfxBank;
+    return VS::Audio::soundState.current_sfx_bank;
   }
 
   void StoreCurrentSfxBank(std::uint32_t slot) override {
-    Audio_soundState.currentSfxBank = slot;
+    VS::Audio::soundState.current_sfx_bank = slot;
   }
 
   WaveBankSlot WaveBank() override {
-    return {.file = Audio_soundState.waveBankId,
-            .data = LiveBankBuffer(Audio_soundState.waveBankData),
-            .request = LiveBankRequest(Audio_soundState.waveBankRequest)};
+    return {
+        .file = VS::Audio::soundState.wave_bank_id,
+        .data = LiveBankBuffer(VS::Audio::soundState.wave_bank_data),
+        .request = LiveBankRequest(VS::Audio::soundState.wave_bank_request)};
   }
 
   void StoreWaveBank(const WaveBankSlot& bank) override {
-    Audio_soundState.waveBankId = bank.file;
-    Audio_soundState.waveBankData = LiveBufferPointer(bank.data);
-    Audio_soundState.waveBankRequest = LiveRequestSlot(bank.request);
+    VS::Audio::soundState.wave_bank_id = bank.file;
+    VS::Audio::soundState.wave_bank_data = LiveBufferPointer(bank.data);
+    VS::Audio::soundState.wave_bank_request = LiveRequestSlot(bank.request);
   }
 
   void StoreSoundSlots(const SoundSlots& slots) override {
-    Audio_SoundState& state = Audio_soundState;
-    state.currentMusicSlot = slots.current_music_slot;
-    state.playingMusicHandle = slots.playing_music_handle;
-    state.currentMusicId = slots.current_music_id;
-    state.currentMusicData = LiveBufferPointer(slots.current_music_data);
+    VS::Audio::SoundState& state = VS::Audio::soundState;
+    state.current_music_slot = slots.current_music_slot;
+    state.playing_music_handle = slots.playing_music_handle;
+    state.current_music_id = slots.current_music_id;
+    state.current_music_data = LiveBufferPointer(slots.current_music_data);
     for (std::size_t slot = 0; slot < kMusicSlotCount; ++slot) {
       const MusicSlot& music = slots.music.at(slot);
-      state.musicIds[slot] = static_cast<char>(music.id);
-      state.musicHandles[slot] = music.handle;
-      state.musicData[slot] = LiveBufferPointer(music.data);
-      state.musicRequests[slot] = LiveRequestSlot(music.request);
+      state.music_ids[slot] = static_cast<std::uint8_t>(music.id);
+      state.music_handles[slot] = music.handle;
+      state.music_data[slot] = LiveBufferPointer(music.data);
+      state.music_requests[slot] = LiveRequestSlot(music.request);
     }
-    state.currentSfxBank = slots.current_sfx_bank;
+    state.current_sfx_bank = slots.current_sfx_bank;
     for (std::size_t slot = 0; slot < kSfxBankSlotCount; ++slot) {
       StoreSfxBank(slot, slots.sfx_banks.at(slot));
     }
     for (std::size_t slot = 0; slot < kEffectStreamSlotCount; ++slot) {
       const EffectStreamSlot& stream = slots.effect_streams.at(slot);
-      state.sfxStreamData[slot] = LiveBufferPointer(stream.data);
+      state.sfx_stream_data[slot] = LiveBufferPointer(stream.data);
       state.reserved70[slot] =
           static_cast<int*>(LiveBufferPointer(stream.reserved));
     }
@@ -127,29 +135,30 @@ class LiveSoundBanks final : public SoundBankHost {
   }
 
   void StoreEffectTagCursors(const EffectTagCursors& cursors) override {
-    Audio_nextSfxChannelGroup1 = cursors.group_1;
-    Audio_nextSfxChannelGroup7E = cursors.group_7e;
-    Audio_nextSfxChannelGroup180 = cursors.group_180;
-    Audio_nextSfxChannelGroup200 = cursors.group_200;
-    Audio_nextSfxChannelGroupFF000 = cursors.group_ff000;
-    Audio_nextSfxChannelGroupF00000 = cursors.group_f00000;
+    VS::Audio::nextSfxChannelGroup1 = cursors.group_1;
+    VS::Audio::nextSfxChannelGroup7E = cursors.group_7e;
+    VS::Audio::nextSfxChannelGroup180 = cursors.group_180;
+    VS::Audio::nextSfxChannelGroup200 = cursors.group_200;
+    VS::Audio::nextSfxChannelGroupFF000 = cursors.group_ff000;
+    VS::Audio::nextSfxChannelGroupF00000 = cursors.group_f00000;
   }
 
   std::optional<Content::DiscFileExtent> SfxBankFile(std::int32_t id) override {
-    return LiveTableFile(Audio_legacySfxBankDiscOffsets,
-                         Audio_legacySfxBankFileSizes, kSfxBankFileCount, id);
+    return LiveTableFile(VS::Audio::legacySfxBankDiscOffsets,
+                         VS::Audio::legacySfxBankFileSizes, kSfxBankFileCount,
+                         id);
   }
 
   std::optional<Content::DiscFileExtent> WaveBankFile(
       std::int32_t file) override {
-    return LiveTableFile(Audio_legacyWaveBankDiscOffsets,
-                         Audio_legacyWaveBankFileSizes, kWaveBankFileCount,
+    return LiveTableFile(VS::Audio::legacyWaveBankDiscOffsets,
+                         VS::Audio::legacyWaveBankFileSizes, kWaveBankFileCount,
                          file);
   }
 
   std::optional<std::int32_t> MappedWaveBankFile(std::int32_t id) override {
     if (id < 0 || id >= kWaveBankMapEntries) return std::nullopt;
-    return Audio_waveBankFileMap[static_cast<std::size_t>(id)];
+    return VS::Audio::waveBankFileMap[static_cast<std::size_t>(id)];
   }
 
   Content::DiscFileExtent MenuFile(MenuSoundFile file) override {
@@ -167,7 +176,7 @@ class LiveSoundBanks final : public SoundBankHost {
   }
 
   BankBuffer MenuSoundEffects() override {
-    return LiveBankBuffer(Audio_menuSoundEffects);
+    return LiveBankBuffer(VS::Audio::menuSoundEffects);
   }
 
   std::optional<DiscRequestRef> AllocateRequest(

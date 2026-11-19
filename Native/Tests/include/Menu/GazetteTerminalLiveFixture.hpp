@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-#include "Audio/Sfx.h"
+#include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/ActionTable.h"
 #include "Battle/Hud.h"
@@ -88,7 +88,7 @@ inline auto ControlOwners() {
                     BytesOf(VS::Input::stickPosBuf),
                     BytesOf(VS::Input::settings),
                     BytesOf(VS::State::stateFlags),
-                    BytesOf(Audio_nextSfxChannelGroup7E),
+                    BytesOf(VS::Audio::nextSfxChannelGroup7E),
                     BytesOf(Menu_Score_menuState),
                     BytesOf(Menu_Score_nextState),
                     BytesOf(Menu_Score_cameraAngles),

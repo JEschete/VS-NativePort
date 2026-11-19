@@ -12,12 +12,12 @@
 #include <cstring>
 #include <span>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SampleBanks.hpp"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/VoiceOutput.hpp"
@@ -26,14 +26,16 @@
 
 namespace VS::Audio::Samples {
 namespace {
-static_assert(sizeof(Audio_Instrument) == kInstrumentRecordBytes);
-static_assert(std::size(Audio_Samples_instruments) == kInstrumentSlotCount);
-static_assert(std::size(Audio_Samples_soundEffectBankIds) ==
+static_assert(sizeof(VS::Audio::Instrument) == kInstrumentRecordBytes);
+static_assert(std::size(VS::Audio::Samples::instruments) ==
+              kInstrumentSlotCount);
+static_assert(std::size(VS::Audio::Samples::soundEffectBankIds) ==
               kSoundEffectBankSlots);
-static_assert(std::size(Audio_Samples_bankChunkHeader) == kChunkHeaderWords);
+static_assert(std::size(VS::Audio::Samples::bankChunkHeader) ==
+              kChunkHeaderWords);
 
-// The mixer's music bank bit (Audio_DriverFlags.mixBehavior) and the
-// driver's bank stream latch (Audio_DriverFlags.controlLatches).
+// The mixer's music bank bit (VS::Audio::DriverFlags.mixBehavior) and the
+// driver's bank stream latch (VS::Audio::DriverFlags.controlLatches).
 constexpr std::uint32_t kMusicBankSelected = 0x10000;
 constexpr std::uint32_t kBankStreamActive = 1;
 
@@ -48,7 +50,7 @@ const char* RefusalReason(BankRefusal refusal) {
 }
 
 std::span<std::byte> InstrumentTableBytes() {
-  return std::as_writable_bytes(std::span(Audio_Samples_instruments));
+  return std::as_writable_bytes(std::span(VS::Audio::Samples::instruments));
 }
 
 class LiveBankLoads final : public BankLoadHost {
@@ -57,13 +59,15 @@ class LiveBankLoads final : public BankLoadHost {
 
   MusicBankState MusicBanks() override {
     MusicBankState state{
-        .music_bank_selected =
-            (Audio_Driver_controlLatches.mixBehavior & kMusicBankSelected) != 0,
-        .bank_id = Audio_Samples_musicSampleBankIds.bankId,
-        .alternate_bank_id = Audio_Samples_musicSampleBankIds.alternateBankId};
-    if (const Audio_MusicConfig* active = Audio_Seq_activeMusicConfig) {
-      state.active_channels = active->activeChannels;
-      state.music_flags = active->statusFlags;
+        .music_bank_selected = (VS::Audio::Driver::controlLatches.mix_behavior &
+                                kMusicBankSelected) != 0,
+        .bank_id = VS::Audio::Samples::musicSampleBankIds.bank_id,
+        .alternate_bank_id =
+            VS::Audio::Samples::musicSampleBankIds.alternate_bank_id};
+    if (const VS::Audio::MusicConfig* active =
+            VS::Audio::Seq::activeMusicConfig) {
+      state.active_channels = active->active_channels;
+      state.music_flags = active->status_flags;
     } else {
       Seq::ReportRefusal(operation_, "no music is active");
     }
@@ -71,26 +75,27 @@ class LiveBankLoads final : public BankLoadHost {
   }
 
   void StoreMusicBanks(const MusicBankState& state) override {
-    if (Audio_MusicConfig* active = Audio_Seq_activeMusicConfig) {
-      active->statusFlags = state.music_flags;
+    if (VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig) {
+      active->status_flags = state.music_flags;
     }
     if (state.music_bank_selected) {
-      Audio_Driver_controlLatches.mixBehavior |= kMusicBankSelected;
+      VS::Audio::Driver::controlLatches.mix_behavior |= kMusicBankSelected;
     } else {
-      Audio_Driver_controlLatches.mixBehavior &= ~kMusicBankSelected;
+      VS::Audio::Driver::controlLatches.mix_behavior &= ~kMusicBankSelected;
     }
-    Audio_Samples_musicSampleBankIds.bankId = state.bank_id;
-    Audio_Samples_musicSampleBankIds.alternateBankId = state.alternate_bank_id;
+    VS::Audio::Samples::musicSampleBankIds.bank_id = state.bank_id;
+    VS::Audio::Samples::musicSampleBankIds.alternate_bank_id =
+        state.alternate_bank_id;
   }
 
   SoundEffectBankIds SoundEffectBanks() override {
     SoundEffectBankIds ids{};
-    std::ranges::copy(Audio_Samples_soundEffectBankIds, ids.begin());
+    std::ranges::copy(VS::Audio::Samples::soundEffectBankIds, ids.begin());
     return ids;
   }
 
   void StoreSoundEffectBanks(const SoundEffectBankIds& ids) override {
-    std::ranges::copy(ids, std::begin(Audio_Samples_soundEffectBankIds));
+    std::ranges::copy(ids, std::begin(VS::Audio::Samples::soundEffectBankIds));
   }
 
   void UploadBank(std::span<const std::byte> bank, bool wait,
@@ -100,39 +105,40 @@ class LiveBankLoads final : public BankLoadHost {
   }
 
   std::int32_t TransferStatus() override {
-    return Audio_Cutscene_legacySpuTransferBusy;
+    return VS::Audio::Cutscene::legacySpuTransferBusy;
   }
 
   BankStreamState Stream() override {
-    const Audio_BankStreamState& legacy = Audio_Samples_bankStream;
+    const VS::Audio::LegacyBankStreamState& legacy =
+        VS::Audio::Samples::bankStream;
     BankStreamState state{
-        .active = (Audio_Driver_controlLatches.controlLatches &
+        .active = (VS::Audio::Driver::controlLatches.control_latches &
                    kBankStreamActive) != 0,
-        .sample_address = static_cast<std::uint32_t>(legacy.spuAddress),
-        .sample_bytes_remaining = legacy.spuBytesRemaining,
-        .instrument_bytes_remaining = legacy.instrumentBytesRemaining,
-        .instrument_offset = InstrumentOffset(legacy.instrumentDestination)};
+        .sample_address = static_cast<std::uint32_t>(legacy.spu_address),
+        .sample_bytes_remaining = legacy.spu_bytes_remaining,
+        .instrument_bytes_remaining = legacy.instrument_bytes_remaining,
+        .instrument_offset = InstrumentOffset(legacy.instrument_destination)};
     std::ranges::transform(
-        Audio_Samples_bankChunkHeader, state.header.begin(),
+        VS::Audio::Samples::bankChunkHeader, state.header.begin(),
         [](int word) { return static_cast<std::uint32_t>(word); });
     return state;
   }
 
   void StoreStream(const BankStreamState& state) override {
-    Audio_BankStreamState& legacy = Audio_Samples_bankStream;
+    VS::Audio::LegacyBankStreamState& legacy = VS::Audio::Samples::bankStream;
     if (state.active) {
-      Audio_Driver_controlLatches.controlLatches |= kBankStreamActive;
+      VS::Audio::Driver::controlLatches.control_latches |= kBankStreamActive;
     } else {
-      Audio_Driver_controlLatches.controlLatches &= ~kBankStreamActive;
+      VS::Audio::Driver::controlLatches.control_latches &= ~kBankStreamActive;
     }
-    legacy.spuAddress = static_cast<int>(state.sample_address);
-    legacy.spuBytesRemaining = state.sample_bytes_remaining;
-    legacy.instrumentBytesRemaining = state.instrument_bytes_remaining;
+    legacy.spu_address = static_cast<int>(state.sample_address);
+    legacy.spu_bytes_remaining = state.sample_bytes_remaining;
+    legacy.instrument_bytes_remaining = state.instrument_bytes_remaining;
     const std::span<std::byte> table = InstrumentTableBytes();
-    legacy.instrumentDestination = reinterpret_cast<int*>(
+    legacy.instrument_destination = reinterpret_cast<int*>(
         table.data() + std::min(state.instrument_offset, table.size()));
     std::ranges::transform(
-        state.header, std::begin(Audio_Samples_bankChunkHeader),
+        state.header, std::begin(VS::Audio::Samples::bankChunkHeader),
         [](std::uint32_t word) { return static_cast<int>(word); });
   }
 
@@ -148,25 +154,25 @@ class LiveBankLoads final : public BankLoadHost {
 
   InstrumentRecord Instrument(std::size_t slot) override {
     if (slot >= kInstrumentSlotCount) return {};
-    const Audio_Instrument& legacy = Audio_Samples_instruments[slot];
-    return {.sample_start = legacy.sampleStart,
-            .loop_start = legacy.loopStart,
-            .fine_tune = legacy.fineTune,
-            .root_note = legacy.rootNote,
-            .adsr_lower = legacy.adsrLower,
-            .adsr_upper = legacy.adsrUpper};
+    const VS::Audio::Instrument& legacy = VS::Audio::Samples::instruments[slot];
+    return {.sample_start = legacy.sample_start,
+            .loop_start = legacy.loop_start,
+            .fine_tune = legacy.fine_tune,
+            .root_note = legacy.root_note,
+            .adsr_lower = legacy.adsr_lower,
+            .adsr_upper = legacy.adsr_upper};
   }
 
   void StoreInstrument(std::size_t slot,
                        const InstrumentRecord& record) override {
     if (slot >= kInstrumentSlotCount) return;
-    Audio_Instrument& legacy = Audio_Samples_instruments[slot];
-    legacy.sampleStart = record.sample_start;
-    legacy.loopStart = record.loop_start;
-    legacy.fineTune = record.fine_tune;
-    legacy.rootNote = record.root_note;
-    legacy.adsrLower = record.adsr_lower;
-    legacy.adsrUpper = record.adsr_upper;
+    VS::Audio::Instrument& legacy = VS::Audio::Samples::instruments[slot];
+    legacy.sample_start = record.sample_start;
+    legacy.loop_start = record.loop_start;
+    legacy.fine_tune = record.fine_tune;
+    legacy.root_note = record.root_note;
+    legacy.adsr_lower = record.adsr_lower;
+    legacy.adsr_upper = record.adsr_upper;
   }
 
   void WriteSampleMemory(std::uint32_t address,
@@ -205,17 +211,17 @@ std::span<const std::byte> HeaderBytes(const void* bank) {
   return {static_cast<const std::byte*>(bank), kBankHeaderBytes};
 }
 
-ChannelInstrument LoadChannelInstrument(const Audio_SeqChannel& channel) {
-  return {.instrument_index = channel.instrumentIndex,
-          .sample_start = channel.voice.sampleStart,
-          .loop_start = channel.voice.loopStart};
+ChannelInstrument LoadChannelInstrument(const VS::Audio::SeqChannel& channel) {
+  return {.instrument_index = channel.instrument_index,
+          .sample_start = channel.voice.sample_start,
+          .loop_start = channel.voice.loop_start};
 }
 
-void StoreChannelInstrument(Audio_SeqChannel& channel,
+void StoreChannelInstrument(VS::Audio::SeqChannel& channel,
                             const ChannelInstrument& instrument) {
-  channel.instrumentIndex = instrument.instrument_index;
-  channel.voice.sampleStart = instrument.sample_start;
-  channel.voice.loopStart = instrument.loop_start;
+  channel.instrument_index = instrument.instrument_index;
+  channel.voice.sample_start = instrument.sample_start;
+  channel.voice.loop_start = instrument.loop_start;
 }
 }  // namespace
 
@@ -265,7 +271,7 @@ int LiveSequenceMagicDifference(const void* data) {
 // decomp: SLUS_010.40 Sound_MapInstrumentToAltSampleBank
 // (src/SLUS_010.40/25AC.c:2303)
 std::uint16_t LiveMapInstrumentToAlternateBank(unsigned music_flags,
-                                               Audio_SeqChannel* channel) {
+                                               VS::Audio::SeqChannel* channel) {
   if (channel == nullptr) return 0;
   ChannelInstrument instrument = LoadChannelInstrument(*channel);
   const std::uint16_t index =
@@ -277,7 +283,7 @@ std::uint16_t LiveMapInstrumentToAlternateBank(unsigned music_flags,
 // decomp: SLUS_010.40 Sound_MapInstrumentToBaseSampleBank
 // (src/SLUS_010.40/25AC.c:2315)
 std::uint16_t LiveMapInstrumentToBaseBank(unsigned music_flags,
-                                          Audio_SeqChannel* channel) {
+                                          VS::Audio::SeqChannel* channel) {
   if (channel == nullptr) return 0;
   ChannelInstrument instrument = LoadChannelInstrument(*channel);
   const std::uint16_t index = MapInstrumentToBaseBank(music_flags, instrument);

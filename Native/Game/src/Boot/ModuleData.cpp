@@ -5,12 +5,12 @@
 #include "Actors/Spawning.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
-#include "Audio/ActorSound.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Legacy.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/SurfaceSounds.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Legacy.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -175,8 +175,8 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x1418, sizeof Battle_Ai_kSettingsBits30Values, &Battle_Ai_kSettingsBits30Values, sizeof Battle_Ai_kSettingsBits30Values}, // G00014 D_80069C18
     {"BATTLE/BATTLE.PRG", 0x141C, sizeof Battle_Ai_kPerceptionRangesSquared, &Battle_Ai_kPerceptionRangesSquared, sizeof Battle_Ai_kPerceptionRangesSquared}, // G00015 D_80069C1C
     {"BATTLE/BATTLE.PRG", 0x143C, sizeof Battle_Ai_kWanderTimingPresets, &Battle_Ai_kWanderTimingPresets, sizeof Battle_Ai_kWanderTimingPresets}, // G00016 D_80069C3C
-    {"BATTLE/BATTLE.PRG", 0x2C7AC, sizeof Audio_legacyUnreferencedTable, &Audio_legacyUnreferencedTable, sizeof Audio_legacyUnreferencedTable}, // G00017 D_80094FAC
-    {"BATTLE/BATTLE.PRG", 0x2C7FC, sizeof Audio_legacyUnreferencedWord, &Audio_legacyUnreferencedWord, sizeof Audio_legacyUnreferencedWord}, // G00018 D_80094FFC
+    {"BATTLE/BATTLE.PRG", 0x2C7AC, sizeof VS::Audio::legacyUnreferencedTable, &VS::Audio::legacyUnreferencedTable, sizeof VS::Audio::legacyUnreferencedTable}, // G00017 D_80094FAC
+    {"BATTLE/BATTLE.PRG", 0x2C7FC, sizeof VS::Audio::legacyUnreferencedWord, &VS::Audio::legacyUnreferencedWord, sizeof VS::Audio::legacyUnreferencedWord}, // G00018 D_80094FFC
     {"BATTLE/BATTLE.PRG", 0x7F984, sizeof Battle_categoryNeedsTargetSelection, &Battle_categoryNeedsTargetSelection, sizeof Battle_categoryNeedsTargetSelection}, // G00019 D_800E8184
     {"BATTLE/BATTLE.PRG", 0x7F994, sizeof Battle_categoryIsAreaTarget, &Battle_categoryIsAreaTarget, sizeof Battle_categoryIsAreaTarget}, // G00020 D_800E8194
     {"BATTLE/BATTLE.PRG", 0x7F9B4, sizeof Battle_categoryIncludesActingActor, &Battle_categoryIncludesActingActor, sizeof Battle_categoryIncludesActingActor}, // G00021 D_800E81B4
@@ -239,7 +239,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"BATTLE/BATTLE.PRG", 0x808D0, sizeof Actors_kFastQuadrantMoveAnimations, &Actors_kFastQuadrantMoveAnimations, sizeof Actors_kFastQuadrantMoveAnimations}, // G00088 D_800E90D0
     {"BATTLE/BATTLE.PRG", 0x8096C, sizeof Actors_secondarySlotSequences, &Actors_secondarySlotSequences, sizeof Actors_secondarySlotSequences}, // G00089 D_800E916C
     {"BATTLE/BATTLE.PRG", 0x8099C, sizeof Field_gimmickTemplateIndices, &Field_gimmickTemplateIndices, sizeof Field_gimmickTemplateIndices}, // G00090 D_800E919C
-    {"BATTLE/BATTLE.PRG", 0x809A4, sizeof Audio_objectSurfaceSoundIds, &Audio_objectSurfaceSoundIds, sizeof Audio_objectSurfaceSoundIds}, // G00091 D_800E91A4
+    {"BATTLE/BATTLE.PRG", 0x809A4, sizeof VS::Audio::objectSurfaceSoundIds, &VS::Audio::objectSurfaceSoundIds, sizeof VS::Audio::objectSurfaceSoundIds}, // G00091 D_800E91A4
     {"BATTLE/BATTLE.PRG", 0x809AC, sizeof Field_kGimmickSpinHeightSteps, &Field_kGimmickSpinHeightSteps, sizeof Field_kGimmickSpinHeightSteps}, // G00092 D_800E91AC
     {"BATTLE/BATTLE.PRG", 0x809BC, sizeof Field_kGimmickSpinPitchSteps, &Field_kGimmickSpinPitchSteps, sizeof Field_kGimmickSpinPitchSteps}, // G00093 D_800E91BC
     {"BATTLE/BATTLE.PRG", 0x809CC, sizeof Field_kGimmickSpinYawSteps, &Field_kGimmickSpinYawSteps, sizeof Field_kGimmickSpinYawSteps}, // G00094 D_800E91CC
@@ -565,19 +565,19 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"MENU/MENU9.PRG", 0x6FDC, 3292u, &Menu_Score_miscInfo, sizeof Menu_Score_miscInfo}, // G01450 _miscInfo
     {"MENU/MENUD.PRG", 0x6D2C, 1380u, &Menu_Container_menuText, sizeof Menu_Container_menuText}, // G01739 _menuText
     {"MENU/MENUE.PRG", 0x2654, 1032u, &Menu_Manual_menuText, sizeof Menu_Manual_menuText}, // G01765 _menuText
-    {"SLUS_010.40", 0x1FD44, sizeof Audio_Driver_legacySpuEvent, &Audio_Driver_legacySpuEvent, sizeof Audio_Driver_legacySpuEvent}, // G01826 _soundEvent
-    {"SLUS_010.40", 0x1FD48, sizeof Audio_Driver_recentTickCostTotal, &Audio_Driver_recentTickCostTotal, sizeof Audio_Driver_recentTickCostTotal}, // G01827 D_8002F548
-    {"SLUS_010.40", 0x1FD4C, sizeof Audio_Seq_tickCounter, &Audio_Seq_tickCounter, sizeof Audio_Seq_tickCounter}, // G01828 D_8002F54C
-    {"SLUS_010.40", 0x1FD50, sizeof Audio_Driver_recentTickCosts, &Audio_Driver_recentTickCosts, sizeof Audio_Driver_recentTickCosts}, // G01829 D_8002F550
-    {"SLUS_010.40", 0x1FD60, sizeof Audio_Driver_legacySpuFlushBytes, &Audio_Driver_legacySpuFlushBytes, sizeof Audio_Driver_legacySpuFlushBytes}, // G01830 _soundFlush
-    {"SLUS_010.40", 0x1FDA0, sizeof Audio_Seq_kOpcodeLengths, &Audio_Seq_kOpcodeLengths, sizeof Audio_Seq_kOpcodeLengths}, // G01831 D_8002F5A0
-    {"SLUS_010.40", 0x1FE00, sizeof Audio_Seq_kExtendedOpcodeLengths, &Audio_Seq_kExtendedOpcodeLengths, sizeof Audio_Seq_kExtendedOpcodeLengths}, // G01832 D_8002F600
-    {"SLUS_010.40", 0x1FE20, sizeof Audio_Seq_kNoteLengths, &Audio_Seq_kNoteLengths, sizeof Audio_Seq_kNoteLengths}, // G01833 D_8002F620
-    {"SLUS_010.40", 0x1FE38, sizeof Audio_Seq_kIdleProgram, &Audio_Seq_kIdleProgram, sizeof Audio_Seq_kIdleProgram}, // G01834 g_Sound_ProgramCounter
-    {"SLUS_010.40", 0x1FE3C, sizeof Audio_Seq_kSemitonePitches, &Audio_Seq_kSemitonePitches, sizeof Audio_Seq_kSemitonePitches}, // G01835 D_8002F63C
-    {"SLUS_010.40", 0x1FE6C, sizeof Audio_Seq_kNoteRemapTables, &Audio_Seq_kNoteRemapTables, sizeof Audio_Seq_kNoteRemapTables}, // G01836 D_8002F66C
-    {"SLUS_010.40", 0x1FE9C, sizeof Audio_Seq_kRandomPitchOffsets, &Audio_Seq_kRandomPitchOffsets, sizeof Audio_Seq_kRandomPitchOffsets}, // G01837 D_8002F69C
-    {"SLUS_010.40", 0x1FF9C, sizeof Audio_Mixer_kPanGains, &Audio_Mixer_kPanGains, sizeof Audio_Mixer_kPanGains}, // G01838 g_Sound_StereoPanGainTableQ15
+    {"SLUS_010.40", 0x1FD44, sizeof VS::Audio::Driver::legacySpuEvent, &VS::Audio::Driver::legacySpuEvent, sizeof VS::Audio::Driver::legacySpuEvent}, // G01826 _soundEvent
+    {"SLUS_010.40", 0x1FD48, sizeof VS::Audio::Driver::recentTickCostTotal, &VS::Audio::Driver::recentTickCostTotal, sizeof VS::Audio::Driver::recentTickCostTotal}, // G01827 D_8002F548
+    {"SLUS_010.40", 0x1FD4C, sizeof VS::Audio::Seq::tickCounter, &VS::Audio::Seq::tickCounter, sizeof VS::Audio::Seq::tickCounter}, // G01828 D_8002F54C
+    {"SLUS_010.40", 0x1FD50, sizeof VS::Audio::Driver::recentTickCosts, &VS::Audio::Driver::recentTickCosts, sizeof VS::Audio::Driver::recentTickCosts}, // G01829 D_8002F550
+    {"SLUS_010.40", 0x1FD60, sizeof VS::Audio::Driver::legacySpuFlushBytes, &VS::Audio::Driver::legacySpuFlushBytes, sizeof VS::Audio::Driver::legacySpuFlushBytes}, // G01830 _soundFlush
+    {"SLUS_010.40", 0x1FDA0, sizeof VS::Audio::Seq::kOpcodeLengths, &VS::Audio::Seq::kOpcodeLengths, sizeof VS::Audio::Seq::kOpcodeLengths}, // G01831 D_8002F5A0
+    {"SLUS_010.40", 0x1FE00, sizeof VS::Audio::Seq::kExtendedOpcodeLengths, &VS::Audio::Seq::kExtendedOpcodeLengths, sizeof VS::Audio::Seq::kExtendedOpcodeLengths}, // G01832 D_8002F600
+    {"SLUS_010.40", 0x1FE20, sizeof VS::Audio::Seq::kNoteLengths, &VS::Audio::Seq::kNoteLengths, sizeof VS::Audio::Seq::kNoteLengths}, // G01833 D_8002F620
+    {"SLUS_010.40", 0x1FE38, sizeof VS::Audio::Seq::kIdleProgram, &VS::Audio::Seq::kIdleProgram, sizeof VS::Audio::Seq::kIdleProgram}, // G01834 g_Sound_ProgramCounter
+    {"SLUS_010.40", 0x1FE3C, sizeof VS::Audio::Seq::kSemitonePitches, &VS::Audio::Seq::kSemitonePitches, sizeof VS::Audio::Seq::kSemitonePitches}, // G01835 D_8002F63C
+    {"SLUS_010.40", 0x1FE6C, sizeof VS::Audio::Seq::kNoteRemapTables, &VS::Audio::Seq::kNoteRemapTables, sizeof VS::Audio::Seq::kNoteRemapTables}, // G01836 D_8002F66C
+    {"SLUS_010.40", 0x1FE9C, sizeof VS::Audio::Seq::kRandomPitchOffsets, &VS::Audio::Seq::kRandomPitchOffsets, sizeof VS::Audio::Seq::kRandomPitchOffsets}, // G01837 D_8002F69C
+    {"SLUS_010.40", 0x1FF9C, sizeof VS::Audio::Mixer::kPanGains, &VS::Audio::Mixer::kPanGains, sizeof VS::Audio::Mixer::kPanGains}, // G01838 g_Sound_StereoPanGainTableQ15
     {"SLUS_010.40", 0x31214, sizeof VS::Core::Math::kArcTangentTable, &VS::Core::Math::kArcTangentTable, sizeof VS::Core::Math::kArcTangentTable}, // G01903 D_80040A14
     {"SLUS_010.40", 0x39950, sizeof VS::Render::legacyLoadingImageHeader, &VS::Render::legacyLoadingImageHeader, sizeof VS::Render::legacyLoadingImageHeader}, // G02006 _nowLoading_header
     {"SLUS_010.40", 0x39954, sizeof VS::Render::loadingScreenPixels, &VS::Render::loadingScreenPixels, sizeof VS::Render::loadingScreenPixels}, // G02005 _nowLoading_data

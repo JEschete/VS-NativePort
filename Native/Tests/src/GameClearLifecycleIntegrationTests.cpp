@@ -192,14 +192,15 @@ TEST_CASE("Game-clear module renderers submit real current-frame packets",
 TEST_CASE("Game-clear module music entry loads and plays the selected track",
           "[game-clear-integration][game-clear-module][F03013]") {
   game_clear_live_tests::Fixture fixture;
-  Audio_soundState.currentMusicId = 31;
+  VS::Audio::soundState.current_music_id = 31;
   ModuleEntry(0x80103748, &results::LiveQueueResultsMusic)();
   constexpr auto kSlot = game_clear_live_tests::Fixture::kMusicIndex;
-  CHECK(static_cast<unsigned char>(Audio_soundState.musicIds[kSlot]) == 131);
-  REQUIRE(Audio_soundState.musicData[kSlot] != nullptr);
-  REQUIRE(Audio_soundState.musicRequests[kSlot] != nullptr);
+  CHECK(static_cast<unsigned char>(VS::Audio::soundState.music_ids[kSlot]) ==
+        131);
+  REQUIRE(VS::Audio::soundState.music_data[kSlot] != nullptr);
+  REQUIRE(VS::Audio::soundState.music_requests[kSlot] != nullptr);
   CHECK(content::LiveDiscRequestGeneration(
-            Audio_soundState.musicRequests[kSlot]) != 0);
+            VS::Audio::soundState.music_requests[kSlot]) != 0);
   fixture.CompleteMusicLoad();
   REQUIRE(VS::Audio::LivePollMusicLoads() == VS::Audio::kLoadIdle);
   VS::Audio::LivePlayMusicSlot(game_clear_live_tests::Fixture::kMusicSlot, 127,

@@ -14,13 +14,13 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/MixControl.hpp"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/AkaoFormat.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/AkaoFormat.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
@@ -28,24 +28,27 @@
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SoundDriverLive.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Audio::Mixer {
 namespace {
-static_assert(std::size(Audio_Seq_musicChannels) == Seq::kMusicChannelCount);
-static_assert(std::size(Audio_Seq_savedMusicChannels) ==
+static_assert(std::size(VS::Audio::Seq::musicChannels) ==
               Seq::kMusicChannelCount);
-static_assert(std::size(Audio_SoundEffects_channels) >= kEffectChannelCount);
+static_assert(std::size(VS::Audio::Seq::savedMusicChannels) ==
+              Seq::kMusicChannelCount);
+static_assert(std::size(VS::Audio::SoundEffects::channels) >=
+              kEffectChannelCount);
 // func_80018C30 dispatches on the command's low byte.
 constexpr std::size_t kCommandCount = 0x100;
-static_assert(std::size(Audio_Mixer_kCommandHandlers) == kCommandCount);
-static_assert(sizeof(Audio_Driver_commandArguments.param2) ==
+static_assert(std::size(VS::Audio::Mixer::kCommandHandlers) == kCommandCount);
+static_assert(sizeof(VS::Audio::Driver::commandArguments.param2) ==
               sizeof(std::uint32_t));
-static_assert(sizeof(Audio_Driver_legacySpuEvent) == sizeof(std::int32_t));
-static_assert(
-    std::is_convertible_v<decltype(&LiveSetTempoScale), Audio_CommandHandler>);
+static_assert(sizeof(VS::Audio::Driver::legacySpuEvent) ==
+              sizeof(std::int32_t));
+static_assert(std::is_convertible_v<decltype(&LiveSetTempoScale),
+                                    VS::Audio::CommandHandler>);
 
 // Pins a legacy field to the width of its typed copy.
 template <typename To, typename From>
@@ -73,98 +76,101 @@ const char* RefusalReason(CommandRefusal refusal) {
   return "refused";
 }
 
-Seq::MusicCommand CommandOf(const Audio_CommandParams& params) {
+Seq::MusicCommand CommandOf(const VS::Audio::CommandParams& params) {
   return {static_cast<std::uint32_t>(params.param1),
           Same<std::uint32_t>(params.param2),
           Same<std::uint32_t>(params.param3),
           Same<std::uint32_t>(params.param4),
-          Same<std::uint32_t>(params.extParam1),
-          Same<std::uint32_t>(params.extParam2)};
+          Same<std::uint32_t>(params.ext_param1),
+          Same<std::uint32_t>(params.ext_param2)};
 }
 
 // param1 is the selected effect's whole native identity.
-EffectSelection SelectionOf(const Audio_CommandParams& params) {
+EffectSelection SelectionOf(const VS::Audio::CommandParams& params) {
   static_assert(sizeof(params.param1) == sizeof(EffectId));
   return {static_cast<EffectId>(params.param1),
           Same<std::uint32_t>(params.param2)};
 }
 
 // The secondary layer's record when it is one of its own.
-Audio_MusicConfig* SecondaryRecord() {
-  Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig;
-  return secondary != Audio_Seq_activeMusicConfig ? secondary : nullptr;
+VS::Audio::MusicConfig* SecondaryRecord() {
+  VS::Audio::MusicConfig* secondary = VS::Audio::Seq::secondaryMusicConfig;
+  return secondary != VS::Audio::Seq::activeMusicConfig ? secondary : nullptr;
 }
 
-EffectControl LoadEffect(const Audio_SeqChannel& legacy) {
+EffectControl LoadEffect(const VS::Audio::SeqChannel& legacy) {
   EffectControl effect;
-  effect.tags = Same<std::int32_t>(legacy.effectTags);
-  effect.effect_id = static_cast<EffectId>(legacy.effectId);
-  effect.update_flags = Same<std::uint32_t>(legacy.updateFlags);
-  effect.pitch_scale = Same<std::int32_t>(legacy.effectPitchScale);
+  effect.tags = Same<std::int32_t>(legacy.effect_tags);
+  effect.effect_id = static_cast<EffectId>(legacy.effect_id);
+  effect.update_flags = Same<std::uint32_t>(legacy.update_flags);
+  effect.pitch_scale = Same<std::int32_t>(legacy.effect_pitch_scale);
   effect.pitch_scale_step =
-      Same<std::uint32_t>(legacy.effectPitchScaleSlideStep);
+      Same<std::uint32_t>(legacy.effect_pitch_scale_slide_step);
   effect.pitch_scale_length =
-      Same<std::uint16_t>(legacy.effectPitchScaleSlideLength);
-  effect.dirty_flags = Same<std::uint32_t>(legacy.voice.dirtyFlags);
+      Same<std::uint16_t>(legacy.effect_pitch_scale_slide_length);
+  effect.dirty_flags = Same<std::uint32_t>(legacy.voice.dirty_flags);
   return effect;
 }
 
-void StoreEffect(Audio_SeqChannel& legacy, const EffectControl& effect) {
-  legacy.effectTags = effect.tags;
-  legacy.effectId = static_cast<std::uintptr_t>(effect.effect_id);
-  legacy.updateFlags = effect.update_flags;
-  legacy.effectPitchScale = effect.pitch_scale;
-  legacy.effectPitchScaleSlideStep = effect.pitch_scale_step;
-  legacy.effectPitchScaleSlideLength = effect.pitch_scale_length;
-  legacy.voice.dirtyFlags = effect.dirty_flags;
+void StoreEffect(VS::Audio::SeqChannel& legacy, const EffectControl& effect) {
+  legacy.effect_tags = effect.tags;
+  legacy.effect_id = static_cast<std::uintptr_t>(effect.effect_id);
+  legacy.update_flags = effect.update_flags;
+  legacy.effect_pitch_scale = effect.pitch_scale;
+  legacy.effect_pitch_scale_slide_step = effect.pitch_scale_step;
+  legacy.effect_pitch_scale_slide_length = effect.pitch_scale_length;
+  legacy.voice.dirty_flags = effect.dirty_flags;
 }
 
 CommandState LoadCommandState() {
   CommandState state;
   for (std::size_t i = 0; i < state.effects.size(); ++i) {
-    state.effects[i] = LoadEffect(Audio_SoundEffects_channels[i]);
+    state.effects[i] = LoadEffect(VS::Audio::SoundEffects::channels[i]);
   }
   for (std::size_t i = 0; i < state.music_dirty_flags.size(); ++i) {
     state.music_dirty_flags[i] =
-        Same<std::uint32_t>(Audio_Seq_musicChannels[i].voice.dirtyFlags);
+        Same<std::uint32_t>(VS::Audio::Seq::musicChannels[i].voice.dirty_flags);
   }
-  if (const Audio_MusicConfig* active = Audio_Seq_activeMusicConfig) {
+  if (const VS::Audio::MusicConfig* active =
+          VS::Audio::Seq::activeMusicConfig) {
     state.active = Seq::LoadMusicLayer(*active);
   }
-  state.has_secondary = Audio_Seq_secondaryMusicConfig != nullptr;
-  state.scheduler = Seq::LoadVoiceScheduler(Audio_Mixer_voiceScheduler);
+  state.has_secondary = VS::Audio::Seq::secondaryMusicConfig != nullptr;
+  state.scheduler = Seq::LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler);
   state.mix_behavior =
-      Same<std::uint32_t>(Audio_Driver_controlLatches.mixBehavior);
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.mix_behavior);
   state.driver_update_flags =
-      Same<std::uint32_t>(Audio_Driver_controlLatches.updateFlags);
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.update_flags);
   state.muted_music_channels =
-      Same<std::int32_t>(Audio_Mixer_mutedMusicChannels);
+      Same<std::int32_t>(VS::Audio::Mixer::mutedMusicChannels);
   state.stream_voices =
-      Same<std::uint32_t>(Audio_Cutscene_streamState.voiceMask);
+      Same<std::uint32_t>(VS::Audio::Cutscene::streamState.voice_mask);
   state.stream_control_flags =
-      Same<std::int32_t>(Audio_Cutscene_streamState.controlFlags);
-  state.music_queued = Audio_Seq_pendingMusicData.param1 != 0;
+      Same<std::int32_t>(VS::Audio::Cutscene::streamState.control_flags);
+  state.music_queued = VS::Audio::Seq::pendingMusicData.param1 != 0;
   return state;
 }
 
 void StoreCommandState(const CommandState& state) {
   for (std::size_t i = 0; i < state.effects.size(); ++i) {
-    StoreEffect(Audio_SoundEffects_channels[i], state.effects[i]);
+    StoreEffect(VS::Audio::SoundEffects::channels[i], state.effects[i]);
   }
   for (std::size_t i = 0; i < state.music_dirty_flags.size(); ++i) {
-    Audio_Seq_musicChannels[i].voice.dirtyFlags = state.music_dirty_flags[i];
+    VS::Audio::Seq::musicChannels[i].voice.dirty_flags =
+        state.music_dirty_flags[i];
   }
-  if (Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
+  if (VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
       active != nullptr && state.active) {
     Seq::StoreMusicLayer(*active, *state.active);
   }
-  Seq::StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
-  Audio_Driver_controlLatches.mixBehavior = state.mix_behavior;
-  Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
-  Audio_Mixer_mutedMusicChannels = state.muted_music_channels;
-  Audio_Cutscene_streamState.voiceMask = static_cast<int>(state.stream_voices);
-  Audio_Cutscene_streamState.controlFlags = state.stream_control_flags;
-  if (!state.music_queued) Audio_Seq_pendingMusicData.param1 = 0;
+  Seq::StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
+  VS::Audio::Driver::controlLatches.mix_behavior = state.mix_behavior;
+  VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
+  VS::Audio::Mixer::mutedMusicChannels = state.muted_music_channels;
+  VS::Audio::Cutscene::streamState.voice_mask =
+      static_cast<int>(state.stream_voices);
+  VS::Audio::Cutscene::streamState.control_flags = state.stream_control_flags;
+  if (!state.music_queued) VS::Audio::Seq::pendingMusicData.param1 = 0;
 }
 
 class LiveControlHost final : public ControlHost {
@@ -175,12 +181,12 @@ class LiveControlHost final : public ControlHost {
                     std::uint32_t music_id_filter) override {
     StoreCommandState(state);
     if (layer == Seq::ChannelGroup::kMusic) {
-      Seq::LiveReleaseMusicConfiguration(Audio_Seq_activeMusicConfig,
-                                         std::data(Audio_Seq_musicChannels),
-                                         music_id_filter);
+      Seq::LiveReleaseMusicConfiguration(
+          VS::Audio::Seq::activeMusicConfig,
+          std::data(VS::Audio::Seq::musicChannels), music_id_filter);
     } else {
-      Seq::LiveReleaseMusicConfiguration(Audio_Seq_secondaryMusicConfig,
-                                         Audio_Seq_secondaryMusicChannels,
+      Seq::LiveReleaseMusicConfiguration(VS::Audio::Seq::secondaryMusicConfig,
+                                         VS::Audio::Seq::secondaryMusicChannels,
                                          music_id_filter);
     }
     state = LoadCommandState();
@@ -188,11 +194,11 @@ class LiveControlHost final : public ControlHost {
 
   void InvalidateMusicVolumes(CommandState& state,
                               Seq::ChannelGroup layer) override {
-    Audio_MusicConfig* config = Audio_Seq_activeMusicConfig;
-    Audio_SeqChannel* channels = std::data(Audio_Seq_musicChannels);
+    VS::Audio::MusicConfig* config = VS::Audio::Seq::activeMusicConfig;
+    VS::Audio::SeqChannel* channels = std::data(VS::Audio::Seq::musicChannels);
     if (layer != Seq::ChannelGroup::kMusic) {
-      config = Audio_Seq_secondaryMusicConfig;
-      channels = Audio_Seq_secondaryMusicChannels;
+      config = VS::Audio::Seq::secondaryMusicConfig;
+      channels = VS::Audio::Seq::secondaryMusicChannels;
     }
     if (config == nullptr || channels == nullptr) {
       Refuse(CommandRefusal::kActiveLayerMissing);
@@ -257,45 +263,45 @@ void RunCommand(const char* operation, Core core) {
   StoreCommandState(state);
 }
 
-bool HasParams(const char* operation, const Audio_CommandParams* params) {
+bool HasParams(const char* operation, const VS::Audio::CommandParams* params) {
   if (params != nullptr) return true;
   Seq::ReportRefusal(operation, "no command parameters");
   return false;
 }
 
 Seq::LevelSlide LoadTempoScale() {
-  return {Same<std::int32_t>(Audio_Mixer_tempoScale),
-          Same<std::int32_t>(Audio_Mixer_tempoScaleStep),
-          Same<std::int16_t>(Audio_Mixer_tempoScaleSlideLength)};
+  return {Same<std::int32_t>(VS::Audio::Mixer::tempoScale),
+          Same<std::int32_t>(VS::Audio::Mixer::tempoScaleStep),
+          Same<std::int16_t>(VS::Audio::Mixer::tempoScaleSlideLength)};
 }
 
 void StoreTempoScale(const Seq::LevelSlide& slide) {
-  Audio_Mixer_tempoScale = slide.value;
-  Audio_Mixer_tempoScaleStep = slide.step;
-  Audio_Mixer_tempoScaleSlideLength = slide.length;
+  VS::Audio::Mixer::tempoScale = slide.value;
+  VS::Audio::Mixer::tempoScaleStep = slide.step;
+  VS::Audio::Mixer::tempoScaleSlideLength = slide.length;
 }
 
 Seq::LevelSlide LoadMusicPitchScale() {
-  return {Same<std::int32_t>(Audio_Mixer_musicPitchScale),
-          Same<std::int32_t>(Audio_Mixer_musicPitchScaleStep),
-          Same<std::int16_t>(Audio_Mixer_musicPitchScaleSlideLength)};
+  return {Same<std::int32_t>(VS::Audio::Mixer::musicPitchScale),
+          Same<std::int32_t>(VS::Audio::Mixer::musicPitchScaleStep),
+          Same<std::int16_t>(VS::Audio::Mixer::musicPitchScaleSlideLength)};
 }
 
 void StoreMusicPitchScale(const Seq::LevelSlide& slide) {
-  Audio_Mixer_musicPitchScale = slide.value;
-  Audio_Mixer_musicPitchScaleStep = slide.step;
-  Audio_Mixer_musicPitchScaleSlideLength = slide.length;
+  VS::Audio::Mixer::musicPitchScale = slide.value;
+  VS::Audio::Mixer::musicPitchScaleStep = slide.step;
+  VS::Audio::Mixer::musicPitchScaleSlideLength = slide.length;
 }
 
 // The low byte of the first command word (lb 0x0 of the parameters).
-std::int8_t ScaleByte(const Audio_CommandParams& params) {
+std::int8_t ScaleByte(const VS::Audio::CommandParams& params) {
   return static_cast<std::int8_t>(static_cast<std::uint8_t>(params.param1));
 }
 
 using SlideCore = void (*)(Seq::LevelSlide&, const Seq::MusicCommand&,
                            CommandRefusalSink&);
 
-void SlideTempo(const char* operation, Audio_CommandParams* params,
+void SlideTempo(const char* operation, VS::Audio::CommandParams* params,
                 SlideCore core) {
   if (!HasParams(operation, params)) return;
   LiveRefusals sink(operation);
@@ -304,7 +310,7 @@ void SlideTempo(const char* operation, Audio_CommandParams* params,
   StoreTempoScale(slide);
 }
 
-void SlideMusicPitch(const char* operation, Audio_CommandParams* params,
+void SlideMusicPitch(const char* operation, VS::Audio::CommandParams* params,
                      SlideCore core) {
   if (!HasParams(operation, params)) return;
   LiveRefusals sink(operation);
@@ -329,39 +335,41 @@ class LiveReverb final : public ReverbHost {
 };
 
 CommandWords LoadArguments() {
-  const Audio_CommandArguments& arguments = Audio_Driver_commandArguments;
+  const VS::Audio::LegacyCommandArguments& arguments =
+      VS::Audio::Driver::commandArguments;
   return {Same<std::uint32_t>(arguments.param2),
           Same<std::uint32_t>(arguments.param3),
           Same<std::uint32_t>(arguments.param4),
-          Same<std::uint32_t>(arguments.extParam1),
-          Same<std::uint32_t>(arguments.extParam2)};
+          Same<std::uint32_t>(arguments.ext_param1),
+          Same<std::uint32_t>(arguments.ext_param2)};
 }
 
 void StoreArguments(const CommandWords& words) {
-  Audio_CommandArguments& arguments = Audio_Driver_commandArguments;
+  VS::Audio::LegacyCommandArguments& arguments =
+      VS::Audio::Driver::commandArguments;
   arguments.param2 = static_cast<int>(words.param2);
   arguments.param3 = static_cast<int>(words.param3);
   arguments.param4 = static_cast<int>(words.param4);
-  arguments.extParam1 = static_cast<int>(words.ext_param1);
-  arguments.extParam2 = static_cast<int>(words.ext_param2);
+  arguments.ext_param1 = static_cast<int>(words.ext_param1);
+  arguments.ext_param2 = static_cast<int>(words.ext_param2);
 }
 
 CommandWords LoadParameters() {
-  const Audio_CommandParams& parameters = Audio_Mixer_commandParams;
+  const VS::Audio::CommandParams& parameters = VS::Audio::Mixer::commandParams;
   return {Same<std::uint32_t>(parameters.param2),
           Same<std::uint32_t>(parameters.param3),
           Same<std::uint32_t>(parameters.param4),
-          Same<std::uint32_t>(parameters.extParam1),
-          Same<std::uint32_t>(parameters.extParam2)};
+          Same<std::uint32_t>(parameters.ext_param1),
+          Same<std::uint32_t>(parameters.ext_param2)};
 }
 
 void StoreParameters(const CommandWords& words) {
-  Audio_CommandParams& parameters = Audio_Mixer_commandParams;
+  VS::Audio::CommandParams& parameters = VS::Audio::Mixer::commandParams;
   parameters.param2 = words.param2;
   parameters.param3 = words.param3;
   parameters.param4 = words.param4;
-  parameters.extParam1 = words.ext_param1;
-  parameters.extParam2 = words.ext_param2;
+  parameters.ext_param1 = words.ext_param1;
+  parameters.ext_param2 = words.ext_param2;
 }
 
 DispatchState LoadDispatch() {
@@ -369,11 +377,12 @@ DispatchState LoadDispatch() {
   state.arguments = LoadArguments();
   state.parameters = LoadParameters();
   state.control_latches =
-      Same<std::uint32_t>(Audio_Driver_controlLatches.controlLatches);
-  if (const Audio_MusicConfig* active = Audio_Seq_activeMusicConfig) {
+      Same<std::uint32_t>(VS::Audio::Driver::controlLatches.control_latches);
+  if (const VS::Audio::MusicConfig* active =
+          VS::Audio::Seq::activeMusicConfig) {
     state.active = Seq::LoadMusicLayer(*active);
   }
-  if (const Audio_MusicConfig* secondary = SecondaryRecord()) {
+  if (const VS::Audio::MusicConfig* secondary = SecondaryRecord()) {
     state.secondary = Seq::LoadMusicLayer(*secondary);
   }
   return state;
@@ -384,12 +393,12 @@ DispatchState LoadDispatch() {
 void StoreDispatch(const DispatchState& state) {
   StoreArguments(state.arguments);
   StoreParameters(state.parameters);
-  Audio_Driver_controlLatches.controlLatches = state.control_latches;
-  if (Audio_MusicConfig* secondary = SecondaryRecord();
+  VS::Audio::Driver::controlLatches.control_latches = state.control_latches;
+  if (VS::Audio::MusicConfig* secondary = SecondaryRecord();
       secondary != nullptr && state.secondary) {
     Seq::StoreMusicLayer(*secondary, *state.secondary);
   }
-  if (Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
+  if (VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
       active != nullptr && state.active) {
     Seq::StoreMusicLayer(*active, *state.active);
   }
@@ -398,22 +407,25 @@ void StoreDispatch(const DispatchState& state) {
 class LiveDispatchHost final : public DispatchHost {
  public:
   LiveDispatchHost()
-      : LiveDispatchHost(reinterpret_cast<char*>(
-            static_cast<std::intptr_t>(Audio_Driver_commandArguments.param2))) {
-  }
-  explicit LiveDispatchHost(char* second_sequence)
-      : first_(static_cast<char*>(Audio_Driver_commandArguments.param1)),
+      : LiveDispatchHost(
+            reinterpret_cast<std::uint8_t*>(static_cast<std::intptr_t>(
+                VS::Audio::Driver::commandArguments.param2))) {}
+  explicit LiveDispatchHost(std::uint8_t* second_sequence)
+      : first_(static_cast<std::uint8_t*>(
+            VS::Audio::Driver::commandArguments.param1)),
         second_(second_sequence) {}
 
   std::int32_t ReverbMode() override { return LiveReverbMode(); }
   void EnableReverb(bool enabled) override { EnableLiveReverb(enabled); }
   void SetReverbMode(std::int32_t mode) override { SetLiveReverbMode(mode); }
 
-  void BeginCommand() override { DisableEvent(Audio_Driver_legacySpuEvent); }
-  void EndCommand() override { EnableEvent(Audio_Driver_legacySpuEvent); }
+  void BeginCommand() override {
+    DisableEvent(VS::Audio::Driver::legacySpuEvent);
+  }
+  void EndCommand() override { EnableEvent(VS::Audio::Driver::legacySpuEvent); }
 
   std::optional<AkaoHeader> SequenceAt(ArgumentSlot slot) override {
-    char* const start = Sequence(slot);
+    std::uint8_t* const start = Sequence(slot);
     if (start == nullptr) return std::nullopt;
     const std::optional<Seq::LiveProgramMemory> region =
         Seq::LiveProgramRegion(start);
@@ -426,24 +438,24 @@ class LiveDispatchHost final : public DispatchHost {
   }
 
   void CopyFirstArgument() override {
-    Audio_Mixer_commandParams.param1 =
-        reinterpret_cast<std::uintptr_t>(Audio_Driver_commandArguments.param1);
+    VS::Audio::Mixer::commandParams.param1 = reinterpret_cast<std::uintptr_t>(
+        VS::Audio::Driver::commandArguments.param1);
   }
 
   void QueueFirstSequence() override {
-    Audio_Seq_pendingMusicData.param1 =
-        reinterpret_cast<std::uintptr_t>(Audio_Driver_commandArguments.param1);
+    VS::Audio::Seq::pendingMusicData.param1 = reinterpret_cast<std::uintptr_t>(
+        VS::Audio::Driver::commandArguments.param1);
   }
 
   void ReplaceFirstArgument(std::uint32_t music_id) override {
-    Audio_Driver_commandArguments.param1 =
+    VS::Audio::Driver::commandArguments.param1 =
         reinterpret_cast<void*>(static_cast<std::uintptr_t>(music_id));
   }
 
   void LoadSequence(DispatchState& state, ArgumentSlot slot) override {
     StoreDispatch(state);
     Seq::LiveLoadMusicSequence(
-        reinterpret_cast<Audio_AkaoSequenceFile*>(Sequence(slot)));
+        reinterpret_cast<VS::Audio::AkaoSequenceFile*>(Sequence(slot)));
     state = LoadDispatch();
   }
 
@@ -451,28 +463,32 @@ class LiveDispatchHost final : public DispatchHost {
   // channels (0x2200 bytes); the native records are copied whole.
   void SaveActiveLayer(DispatchState& state) override {
     StoreDispatch(state);
-    std::copy_n(std::data(Audio_Seq_musicChannels), Seq::kMusicChannelCount,
-                std::data(Audio_Seq_savedMusicChannels));
-    std::memcpy(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig,
-                offsetof(Audio_MusicConfig, reserved80));
+    std::copy_n(std::data(VS::Audio::Seq::musicChannels),
+                Seq::kMusicChannelCount,
+                std::data(VS::Audio::Seq::savedMusicChannels));
+    std::memcpy(&VS::Audio::Seq::savedMusicConfig,
+                &VS::Audio::Seq::primaryMusicConfig,
+                offsetof(VS::Audio::MusicConfig, reserved80));
     state = LoadDispatch();
   }
 
   void AttachSavedLayer(DispatchState& state) override {
     StoreDispatch(state);
-    Audio_Seq_secondaryMusicConfig = &Audio_Seq_savedMusicConfig;
-    Audio_Seq_secondaryMusicChannels = std::data(Audio_Seq_savedMusicChannels);
+    VS::Audio::Seq::secondaryMusicConfig = &VS::Audio::Seq::savedMusicConfig;
+    VS::Audio::Seq::secondaryMusicChannels =
+        std::data(VS::Audio::Seq::savedMusicChannels);
     state = LoadDispatch();
   }
 
   void RunHandler(DispatchState& state, std::uint32_t command) override {
-    const Audio_CommandHandler handler = Audio_Mixer_kCommandHandlers[command];
+    const VS::Audio::CommandHandler handler =
+        VS::Audio::Mixer::kCommandHandlers[command];
     if (handler == nullptr) {
       Refuse(CommandRefusal::kNoCommandHandler);
       return;
     }
     StoreDispatch(state);
-    handler(&Audio_Mixer_commandParams);
+    handler(&VS::Audio::Mixer::commandParams);
     state = LoadDispatch();
   }
 
@@ -481,17 +497,17 @@ class LiveDispatchHost final : public DispatchHost {
   }
 
  private:
-  [[nodiscard]] char* Sequence(ArgumentSlot slot) const {
+  [[nodiscard]] std::uint8_t* Sequence(ArgumentSlot slot) const {
     return slot == ArgumentSlot::kFirst ? first_ : second_;
   }
 
-  char* first_;
-  char* second_;
+  std::uint8_t* first_;
+  std::uint8_t* second_;
 };
 }  // namespace
 
 // decomp: SLUS_010.40 Sound_Cmd_A4_unk (src/SLUS_010.40/25AC.c:3427)
-void LiveSetSoundEffectPitchScale(Audio_CommandParams* params) {
+void LiveSetSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetSoundEffectPitchScale", params)) return;
   RunCommand("SetSoundEffectPitchScale",
              [params](CommandState& state, ControlHost&) {
@@ -501,7 +517,7 @@ void LiveSetSoundEffectPitchScale(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A5_unk (src/SLUS_010.40/25AC.c:3453)
-void LiveSlideSoundEffectPitchScale(Audio_CommandParams* params) {
+void LiveSlideSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SlideSoundEffectPitchScale", params)) return;
   RunCommand("SlideSoundEffectPitchScale", [params](CommandState& state,
                                                     ControlHost& host) {
@@ -512,7 +528,7 @@ void LiveSlideSoundEffectPitchScale(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AC_unk (src/SLUS_010.40/25AC.c:3481)
-void LiveSetWorldSoundEffectPitchScale(Audio_CommandParams* params) {
+void LiveSetWorldSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetWorldSoundEffectPitchScale", params)) return;
   RunCommand("SetWorldSoundEffectPitchScale",
              [params](CommandState& state, ControlHost&) {
@@ -521,7 +537,7 @@ void LiveSetWorldSoundEffectPitchScale(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AD_unk (src/SLUS_010.40/25AC.c:3494)
-void LiveSlideWorldSoundEffectPitchScale(Audio_CommandParams* params) {
+void LiveSlideWorldSoundEffectPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SlideWorldSoundEffectPitchScale", params)) return;
   RunCommand("SlideWorldSoundEffectPitchScale",
              [params](CommandState& state, ControlHost& host) {
@@ -530,7 +546,7 @@ void LiveSlideWorldSoundEffectPitchScale(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 func_8001833C (src/SLUS_010.40/25AC.c:3515)
-void LiveSetTempoScale(Audio_CommandParams* params) {
+void LiveSetTempoScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetTempoScale", params)) return;
   Seq::LevelSlide slide = LoadTempoScale();
   SetTempoScale(slide, ScaleByte(*params));
@@ -538,17 +554,17 @@ void LiveSetTempoScale(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 func_80018358 (src/SLUS_010.40/25AC.c:3521)
-void LiveSlideTempoScale(Audio_CommandParams* params) {
+void LiveSlideTempoScale(VS::Audio::CommandParams* params) {
   SlideTempo("SlideTempoScale", params, &SlideTempoScale);
 }
 
 // decomp: SLUS_010.40 func_800183C0 (src/SLUS_010.40/25AC.c:3532)
-void LiveSetTempoScaleRamp(Audio_CommandParams* params) {
+void LiveSetTempoScaleRamp(VS::Audio::CommandParams* params) {
   SlideTempo("SetTempoScaleRamp", params, &SetTempoScaleRamp);
 }
 
 // decomp: SLUS_010.40 func_80018434 (src/SLUS_010.40/25AC.c:3546)
-void LiveSetMusicPitchScale(Audio_CommandParams* params) {
+void LiveSetMusicPitchScale(VS::Audio::CommandParams* params) {
   if (!HasParams("SetMusicPitchScale", params)) return;
   Seq::LevelSlide slide = LoadMusicPitchScale();
   SetMusicPitchScale(slide, ScaleByte(*params));
@@ -556,22 +572,22 @@ void LiveSetMusicPitchScale(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 func_80018450 (src/SLUS_010.40/25AC.c:3552)
-void LiveSlideMusicPitchScale(Audio_CommandParams* params) {
+void LiveSlideMusicPitchScale(VS::Audio::CommandParams* params) {
   SlideMusicPitch("SlideMusicPitchScale", params, &SlideMusicPitchScale);
 }
 
 // decomp: SLUS_010.40 func_800184B8 (src/SLUS_010.40/25AC.c:3568)
-void LiveSetMusicPitchScaleRamp(Audio_CommandParams* params) {
+void LiveSetMusicPitchScaleRamp(VS::Audio::CommandParams* params) {
   SlideMusicPitch("SetMusicPitchScaleRamp", params, &SetMusicPitchScaleRamp);
 }
 
 // decomp: SLUS_010.40 func_8001852C (src/SLUS_010.40/25AC.c:3582)
-void LiveStopMusicAndCancelReplacement(Audio_CommandParams* /*params*/) {
+void LiveStopMusicAndCancelReplacement(VS::Audio::CommandParams* /*params*/) {
   RunCommand("StopMusicAndCancelReplacement", &StopMusicAndCancelReplacement);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_11_StopAllMusic (src/SLUS_010.40/25AC.c:3594)
-void LiveStopMatchingMusic(Audio_CommandParams* params) {
+void LiveStopMatchingMusic(VS::Audio::CommandParams* params) {
   if (!HasParams("StopMatchingMusic", params)) return;
   RunCommand("StopMatchingMusic",
              [params](CommandState& state, ControlHost& host) {
@@ -580,24 +596,24 @@ void LiveStopMatchingMusic(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 func_80018608 (src/SLUS_010.40/25AC.c:3607)
-void LiveStopWorldSoundEffects(Audio_CommandParams* /*params*/) {
+void LiveStopWorldSoundEffects(VS::Audio::CommandParams* /*params*/) {
   RunCommand("StopWorldSoundEffects", [](CommandState& state, ControlHost&) {
     StopWorldSoundEffects(state);
   });
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_80_unk (src/SLUS_010.40/25AC.c:3626)
-void LiveEnableStereoOutput(Audio_CommandParams* /*params*/) {
+void LiveEnableStereoOutput(VS::Audio::CommandParams* /*params*/) {
   RunCommand("EnableStereoOutput", &EnableStereoOutput);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_81_unk (src/SLUS_010.40/25AC.c:3637)
-void LiveEnableMonoOutput(Audio_CommandParams* /*params*/) {
+void LiveEnableMonoOutput(VS::Audio::CommandParams* /*params*/) {
   RunCommand("EnableMonoOutput", &EnableMonoOutput);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_90_unk (src/SLUS_010.40/25AC.c:3648)
-void LiveSetMusicMuteMask(Audio_CommandParams* params) {
+void LiveSetMusicMuteMask(VS::Audio::CommandParams* params) {
   if (!HasParams("SetMusicMuteMask", params)) return;
   RunCommand("SetMusicMuteMask", [params](CommandState& state, ControlHost&) {
     SetMusicMuteMask(state, CommandOf(*params));
@@ -605,7 +621,7 @@ void LiveSetMusicMuteMask(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_92_unk (src/SLUS_010.40/25AC.c:3660)
-void LiveSetMusicJumpThreshold(Audio_CommandParams* params) {
+void LiveSetMusicJumpThreshold(VS::Audio::CommandParams* params) {
   if (!HasParams("SetMusicJumpThreshold", params)) return;
   RunCommand("SetMusicJumpThreshold",
              [params](CommandState& state, ControlHost& host) {
@@ -614,24 +630,24 @@ void LiveSetMusicJumpThreshold(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_9B_unk (src/SLUS_010.40/25AC.c:3665)
-void LivePauseMusic(Audio_CommandParams* /*params*/) {
+void LivePauseMusic(VS::Audio::CommandParams* /*params*/) {
   RunCommand("PauseMusic", &PauseMusic);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_9A_unk (src/SLUS_010.40/25AC.c:3698)
-void LiveResumeMusic(Audio_CommandParams* /*params*/) {
+void LiveResumeMusic(VS::Audio::CommandParams* /*params*/) {
   RunCommand("ResumeMusic", [](CommandState& state, ControlHost& host) {
     ResumeMusic(state, host);
   });
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_9D_unk (src/SLUS_010.40/25AC.c:3722)
-void LivePauseWorldSoundEffects(Audio_CommandParams* /*params*/) {
+void LivePauseWorldSoundEffects(VS::Audio::CommandParams* /*params*/) {
   RunCommand("PauseWorldSoundEffects", &PauseWorldSoundEffects);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_9C_unk (src/SLUS_010.40/25AC.c:3761)
-void LiveResumeWorldSoundEffects(Audio_CommandParams* /*params*/) {
+void LiveResumeWorldSoundEffects(VS::Audio::CommandParams* /*params*/) {
   RunCommand("ResumeWorldSoundEffects",
              [](CommandState& state, ControlHost& host) {
                ResumeWorldSoundEffects(state, host);
@@ -639,7 +655,9 @@ void LiveResumeWorldSoundEffects(Audio_CommandParams* /*params*/) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_11_Nop (src/SLUS_010.40/25AC.c:3804)
-void LiveIgnoreCommand(Audio_CommandParams* /*params*/) { IgnoreCommand(); }
+void LiveIgnoreCommand(VS::Audio::CommandParams* /*params*/) {
+  IgnoreCommand();
+}
 
 // decomp: SLUS_010.40 Sound_SetReverbMode (src/SLUS_010.40/25AC.c:3806)
 void LiveSetReverbMode(int mode) {
@@ -657,7 +675,7 @@ unsigned LiveDispatchCommand(unsigned command) {
 }
 
 // LiveDispatchCommand for SoundPlaybackLive's kStartMusicPair.
-unsigned LiveDispatchCommand(unsigned command, char* second_sequence) {
+unsigned LiveDispatchCommand(unsigned command, std::uint8_t* second_sequence) {
   LiveDispatchHost host(second_sequence);
   DispatchState state = LoadDispatch();
   const std::uint32_t result = DispatchCommand(state, host, command);

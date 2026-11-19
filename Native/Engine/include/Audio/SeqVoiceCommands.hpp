@@ -39,7 +39,7 @@ inline constexpr std::uint32_t kInstrumentFlags{
         kSustainOverridden | kReleaseOverridden,
 };
 
-// Voice parameter dirty flags (Audio_VoiceParams.dirtyFlags).
+// Voice parameter dirty flags (VS::Audio::VoiceParams.dirtyFlags).
 inline constexpr std::uint32_t kVolumeDirty = 0x3;
 inline constexpr std::uint32_t kSampleRateDirty = 0x10;
 inline constexpr std::uint32_t kAttackModeDirty = 0x100;
@@ -54,7 +54,7 @@ inline constexpr std::uint32_t kEnvelopeDirty = 0xFF00;
 // Sound_CopyInstrumentInfoToChannel (SLUS_010.40/25AC.c:4953).
 inline constexpr std::uint32_t kInstrumentDirty = 0x1FF80;
 
-// Driver update requests (Audio_DriverFlags.updateFlags).
+// Driver update requests (VS::Audio::DriverFlags.updateFlags).
 inline constexpr std::uint32_t kNoiseClockUpdate = 0x10;
 inline constexpr std::uint32_t kVoiceModeUpdate = 0x100;
 
@@ -66,7 +66,7 @@ inline constexpr std::uint16_t kFullLengthPlay = 4;
 // (SLUS_010.40/25AC.c:5329).
 inline constexpr std::uint32_t kSilentSampleStart = 0x1010;
 
-// One channel voice's SPU parameters (Audio_VoiceParams).
+// One channel voice's SPU parameters (VS::Audio::VoiceParams).
 struct VoiceState {
   std::uint32_t dirty_flags = 0;
   std::uint32_t sample_start = 0;

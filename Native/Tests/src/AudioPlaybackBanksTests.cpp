@@ -17,11 +17,11 @@
 #include "Audio/SampleBanks.hpp"
 #include "Audio/SampleBanksLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
-#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/SoundPlayback.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
+#include "Audio/SoundState.hpp"
 #include "Content/CdDrive.hpp"
 #include "Content/ModuleData.hpp"
 
@@ -1276,7 +1276,7 @@ TEST_CASE("Scoped live effect tables bind for the scope",
           "[audio-playback-banks][audio]") {
   std::array<std::uint32_t, 2> offsets{0x10, Playback::kNoEffectProgram};
   std::array<std::uint16_t, 2> selectors{0x8000, 0};
-  std::array<char, 4> data{};
+  std::array<std::uint8_t, 4> data{};
   const Playback::ScopedLiveEffectTables scope({.program_offsets = offsets,
                                                 .bank_selectors = selectors,
                                                 .program_data = data});
@@ -1299,7 +1299,7 @@ TEST_CASE("Scoped live effect tables restore the earlier binding",
       Playback::BoundLiveEffectTables();
   std::array<std::uint32_t, 1> offsets{0x10};
   std::array<std::uint16_t, 1> selectors{0};
-  std::array<char, 4> data{};
+  std::array<std::uint8_t, 4> data{};
   {
     const Playback::ScopedLiveEffectTables scope({.program_offsets = offsets,
                                                   .bank_selectors = selectors,
@@ -1316,10 +1316,10 @@ TEST_CASE("Scoped live effect tables restore the earlier binding",
 
 namespace {
 struct SoundStateScope {
-  Audio_SoundState saved = Audio_soundState;
+  VS::Audio::SoundState saved = VS::Audio::soundState;
 
-  SoundStateScope() { Audio_soundState = {}; }
-  ~SoundStateScope() { Audio_soundState = saved; }
+  SoundStateScope() { VS::Audio::soundState = {}; }
+  ~SoundStateScope() { VS::Audio::soundState = saved; }
   SoundStateScope(const SoundStateScope&) = delete;
   SoundStateScope& operator=(const SoundStateScope&) = delete;
   SoundStateScope(SoundStateScope&&) = delete;
@@ -1334,18 +1334,18 @@ TEST_CASE("Live slots keep the room bank's address and the failed marker",
   std::array<std::byte, 16> other{};
   CHECK(Audio::LiveBindRoomSfxBank(
             std::bit_cast<std::uintptr_t>(bank.data())) == 1);
-  CHECK(Audio_soundState.sfxBankData[2] == bank.data());
+  CHECK(VS::Audio::soundState.sfx_bank_data[2] == bank.data());
   CHECK(Audio::LiveBindRoomSfxBank(
             std::bit_cast<std::uintptr_t>(other.data())) == 0);
   CHECK(Audio::LiveSelectSfxBankSlot(3) == 1);
-  CHECK(Audio_soundState.currentSfxBank == 3U);
+  CHECK(VS::Audio::soundState.current_sfx_bank == 3U);
 
   auto* const failed =
       std::bit_cast<Content_DiscQueueSlot*>(~std::uintptr_t{0});
-  Audio_soundState.sfxBankData[0] = bank.data();
-  Audio_soundState.sfxBankRequests[0] = failed;
+  VS::Audio::soundState.sfx_bank_data[0] = bank.data();
+  VS::Audio::soundState.sfx_bank_requests[0] = failed;
   CHECK(Audio::LivePollSfxBankSlotLoad(1) == Audio::kLoadIdle);
-  CHECK(Audio_soundState.sfxBankRequests[0] == failed);
+  CHECK(VS::Audio::soundState.sfx_bank_requests[0] == failed);
   CHECK(Audio::LivePollSfxBankLoads() == Audio::kLoadIdle);
 }
 

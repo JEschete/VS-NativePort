@@ -13,33 +13,34 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/Control/SoundControl.h"
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Control/SoundControl.hpp"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/MusicState.hpp"
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/SampleBanksLive.hpp"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/AkaoFormat.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/AkaoFormat.hpp"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Audio/SeqControlCommands.hpp"
 #include "Audio/SeqMusicSequence.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Audio/XaMixLive.hpp"
 
 namespace VS::Audio::Seq {
 namespace {
 static_assert(std::is_convertible_v<decltype(&LiveStartOrResumeMusic),
-                                    Audio_CommandHandler>);
-static_assert(std::size(Audio_Seq_musicChannels) == kMusicChannelCount);
-static_assert(std::size(Audio_Seq_savedMusicChannels) == kMusicChannelCount);
+                                    VS::Audio::CommandHandler>);
+static_assert(std::size(VS::Audio::Seq::musicChannels) == kMusicChannelCount);
+static_assert(std::size(VS::Audio::Seq::savedMusicChannels) ==
+              kMusicChannelCount);
 
 // Pins a legacy field to the width of its typed copy.
 template <typename To, typename From>
@@ -56,8 +57,8 @@ constexpr unsigned kReleaseMode = 3U;
 // The memory from `sequence` to the end of the block it lies in; empty when
 // it lies in no sequence memory.
 std::optional<LiveProgramMemory> SequenceMemory(
-    Audio_AkaoSequenceFile* sequence) {
-  auto* const start = reinterpret_cast<char*>(sequence);
+    VS::Audio::AkaoSequenceFile* sequence) {
+  auto* const start = reinterpret_cast<std::uint8_t*>(sequence);
   const std::optional<LiveProgramMemory> region = LiveProgramRegion(start);
   if (!region) return std::nullopt;
   return region->From(start);
@@ -68,61 +69,69 @@ std::optional<LiveProgramMemory> SequenceMemory(
 template <typename T>
 void Rebase(T*& pointer, const LiveProgramMemory& from,
             const LiveProgramMemory& to) {
-  const LiveProgramMemory rest = from.From(reinterpret_cast<char*>(pointer));
+  const LiveProgramMemory rest =
+      from.From(reinterpret_cast<std::uint8_t*>(pointer));
   if (rest.base == nullptr) return;
   pointer = reinterpret_cast<T*>(to.base + (from.size - rest.size));
 }
 
 std::array<std::uint32_t, kMusicChannelCount> AssignedVoices(
-    const Audio_SeqChannel* channels) {
+    const VS::Audio::SeqChannel* channels) {
   std::array<std::uint32_t, kMusicChannelCount> voices{};
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
-    voices[i] = Same<std::uint32_t>(channels[i].voice.assignedVoice);
+    voices[i] = Same<std::uint32_t>(channels[i].voice.assigned_voice);
   }
   return voices;
 }
 
 // func_80015D38 over the secondary layer's channels.
 std::uint32_t SecondaryVoices() {
-  const Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig;
-  if (secondary == nullptr || Audio_Seq_secondaryMusicChannels == nullptr) {
+  const VS::Audio::MusicConfig* secondary =
+      VS::Audio::Seq::secondaryMusicConfig;
+  if (secondary == nullptr ||
+      VS::Audio::Seq::secondaryMusicChannels == nullptr) {
     return 0;
   }
-  return AssignedVoiceMask(AssignedVoices(Audio_Seq_secondaryMusicChannels),
-                           Same<std::uint32_t>(secondary->activeChannels));
+  return AssignedVoiceMask(
+      AssignedVoices(VS::Audio::Seq::secondaryMusicChannels),
+      Same<std::uint32_t>(secondary->active_channels));
 }
 
 // The music layer state a track start or restore reads, with each channel's
 // program as offsets into `memory`.
 MusicStartState LoadMusicStart(const LiveProgramMemory& memory) {
   MusicStartState state;
-  state.layer = LoadMusicLayer(*Audio_Seq_activeMusicConfig);
+  state.layer = LoadMusicLayer(*VS::Audio::Seq::activeMusicConfig);
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
-    state.channels[i] = LoadSequenceChannel(Audio_Seq_musicChannels[i], memory);
+    state.channels[i] =
+        LoadSequenceChannel(VS::Audio::Seq::musicChannels[i], memory);
   }
-  state.scheduler = LoadVoiceScheduler(Audio_Mixer_voiceScheduler);
-  state.driver_update_flags = Audio_Driver_controlLatches.updateFlags;
-  state.stream_control_flags = Audio_Cutscene_streamControlFlags;
-  state.stream_voices = Same<std::uint32_t>(Audio_Cutscene_streamVoices);
-  state.alternate_bank_id =
-      Same<std::uint32_t>(Audio_Samples_musicSampleBankIds.alternateBankId);
+  state.scheduler = LoadVoiceScheduler(VS::Audio::Mixer::voiceScheduler);
+  state.driver_update_flags = VS::Audio::Driver::controlLatches.update_flags;
+  state.stream_control_flags = VS::Audio::Cutscene::streamState.control_flags;
+  state.stream_voices =
+      Same<std::uint32_t>(VS::Audio::Cutscene::streamState.voice_mask);
+  state.alternate_bank_id = Same<std::uint32_t>(
+      VS::Audio::Samples::musicSampleBankIds.alternate_bank_id);
   state.secondary_voices = SecondaryVoices();
-  if (const Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig) {
-    state.secondary_reverb_depth = secondary->reverbDepth;
+  if (const VS::Audio::MusicConfig* secondary =
+          VS::Audio::Seq::secondaryMusicConfig) {
+    state.secondary_reverb_depth = secondary->reverb_depth;
   }
-  state.saved_music_id = Audio_Seq_savedMusicConfig.musicId;
+  state.saved_music_id = VS::Audio::Seq::savedMusicConfig.music_id;
   return state;
 }
 
 void StoreMusicStart(const MusicStartState& state,
                      const LiveProgramMemory& memory) {
-  Audio_Seq_savedMusicConfig.musicId = state.saved_music_id;
-  StoreMusicLayer(*Audio_Seq_activeMusicConfig, state.layer);
+  VS::Audio::Seq::savedMusicConfig.music_id = state.saved_music_id;
+  StoreMusicLayer(*VS::Audio::Seq::activeMusicConfig, state.layer);
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
-    StoreSequenceChannel(Audio_Seq_musicChannels[i], state.channels[i], memory);
+    StoreSequenceChannel(VS::Audio::Seq::musicChannels[i], state.channels[i],
+                         memory);
   }
-  StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
-  Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
+  StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
+  VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
 }
 
 // A loaded track's table at `position` in `memory`; null when it has none or
@@ -140,54 +149,59 @@ T* TableAt(const std::optional<std::int64_t>& position,
 
 MusicCommandState LoadMusicCommand() {
   MusicCommandState state;
-  state.active = LoadMusicLayer(*Audio_Seq_activeMusicConfig);
-  if (const Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig) {
+  state.active = LoadMusicLayer(*VS::Audio::Seq::activeMusicConfig);
+  if (const VS::Audio::MusicConfig* secondary =
+          VS::Audio::Seq::secondaryMusicConfig) {
     state.secondary = LoadMusicLayer(*secondary);
   }
-  state.saved_music_id = Audio_Seq_savedMusicConfig.musicId;
-  state.mix_behavior = Audio_Driver_controlLatches.mixBehavior;
-  state.master_fade = {Audio_Seq_masterFade.value, Audio_Seq_masterFade.step,
-                       Audio_Seq_masterFade.ticksRemaining};
-  state.music_loops_remaining = Audio_Seq_musicLoopsRemaining;
-  state.disc_volume = {Audio_Seq_discVolume, Audio_Seq_discVolumeFadeStep,
-                       Audio_Seq_discVolumeFadeLength};
+  state.saved_music_id = VS::Audio::Seq::savedMusicConfig.music_id;
+  state.mix_behavior = VS::Audio::Driver::controlLatches.mix_behavior;
+  state.master_fade = {VS::Audio::Seq::masterFade.value,
+                       VS::Audio::Seq::masterFade.step,
+                       VS::Audio::Seq::masterFade.ticks_remaining};
+  state.music_loops_remaining = VS::Audio::Seq::musicLoopsRemaining;
+  state.disc_volume = {VS::Audio::Seq::discVolume,
+                       VS::Audio::Seq::discVolumeFadeStep,
+                       VS::Audio::Seq::discVolumeFadeLength};
   return state;
 }
 
 // The saved layer's track is stored first: a layer that is the saved one
 // stores its own track over it.
 void StoreMusicCommand(const MusicCommandState& state) {
-  Audio_Seq_savedMusicConfig.musicId = state.saved_music_id;
-  StoreMusicLayer(*Audio_Seq_activeMusicConfig, state.active);
-  if (Audio_MusicConfig* secondary = Audio_Seq_secondaryMusicConfig;
+  VS::Audio::Seq::savedMusicConfig.music_id = state.saved_music_id;
+  StoreMusicLayer(*VS::Audio::Seq::activeMusicConfig, state.active);
+  if (VS::Audio::MusicConfig* secondary = VS::Audio::Seq::secondaryMusicConfig;
       secondary != nullptr && state.secondary &&
-      secondary != Audio_Seq_activeMusicConfig) {
+      secondary != VS::Audio::Seq::activeMusicConfig) {
     StoreMusicLayer(*secondary, *state.secondary);
   }
-  Audio_Driver_controlLatches.mixBehavior = state.mix_behavior;
-  Audio_Seq_masterFade.value = state.master_fade.value;
-  Audio_Seq_masterFade.step = state.master_fade.step;
-  Audio_Seq_masterFade.ticksRemaining = state.master_fade.ticks_remaining;
-  Audio_Seq_musicLoopsRemaining = state.music_loops_remaining;
-  Audio_Seq_discVolume = state.disc_volume.value;
-  Audio_Seq_discVolumeFadeStep = state.disc_volume.step;
-  Audio_Seq_discVolumeFadeLength = state.disc_volume.length;
+  VS::Audio::Driver::controlLatches.mix_behavior = state.mix_behavior;
+  VS::Audio::Seq::masterFade.value = state.master_fade.value;
+  VS::Audio::Seq::masterFade.step = state.master_fade.step;
+  VS::Audio::Seq::masterFade.ticks_remaining =
+      state.master_fade.ticks_remaining;
+  VS::Audio::Seq::musicLoopsRemaining = state.music_loops_remaining;
+  VS::Audio::Seq::discVolume = state.disc_volume.value;
+  VS::Audio::Seq::discVolumeFadeStep = state.disc_volume.step;
+  VS::Audio::Seq::discVolumeFadeLength = state.disc_volume.length;
 }
 
-MusicCommand CommandOf(const Audio_CommandParams& params) {
+MusicCommand CommandOf(const VS::Audio::CommandParams& params) {
   return {static_cast<std::uint32_t>(params.param1),
           params.param2,
           params.param3,
           params.param4,
-          params.extParam1,
-          params.extParam2};
+          params.ext_param1,
+          params.ext_param2};
 }
 
 // One music command over the live driver state. Every effect that takes the
 // state stores it before and loads it after.
 class LiveMusicHost final : public MusicHost {
  public:
-  explicit LiveMusicHost(const Audio_CommandParams* params) : params_(params) {}
+  explicit LiveMusicHost(const VS::Audio::CommandParams* params)
+      : params_(params) {}
 
   void LoadSequence(MusicCommandState& state) override {
     StoreMusicCommand(state);
@@ -210,8 +224,9 @@ class LiveMusicHost final : public MusicHost {
 
   void MapSavedInstrumentsToBaseBank(MusicCommandState& state) override {
     StoreMusicCommand(state);
-    const auto flags = Same<u_int>(Audio_Seq_savedMusicConfig.statusFlags);
-    for (Audio_SeqChannel& channel : Audio_Seq_savedMusicChannels) {
+    const auto flags =
+        Same<u_int>(VS::Audio::Seq::savedMusicConfig.status_flags);
+    for (VS::Audio::SeqChannel& channel : VS::Audio::Seq::savedMusicChannels) {
       Samples::LiveMapInstrumentToBaseBank(flags, &channel);
     }
     state = LoadMusicCommand();
@@ -219,8 +234,9 @@ class LiveMusicHost final : public MusicHost {
 
   void AttachSavedLayer(MusicCommandState& state) override {
     StoreMusicCommand(state);
-    Audio_Seq_secondaryMusicConfig = &Audio_Seq_savedMusicConfig;
-    Audio_Seq_secondaryMusicChannels = std::data(Audio_Seq_savedMusicChannels);
+    VS::Audio::Seq::secondaryMusicConfig = &VS::Audio::Seq::savedMusicConfig;
+    VS::Audio::Seq::secondaryMusicChannels =
+        std::data(VS::Audio::Seq::savedMusicChannels);
     state = LoadMusicCommand();
   }
 
@@ -232,11 +248,11 @@ class LiveMusicHost final : public MusicHost {
 
   void InvalidateMusicVolumes(MusicCommandState& state,
                               ChannelGroup group) override {
-    Audio_MusicConfig* config = Audio_Seq_activeMusicConfig;
-    Audio_SeqChannel* channels = std::data(Audio_Seq_musicChannels);
+    VS::Audio::MusicConfig* config = VS::Audio::Seq::activeMusicConfig;
+    VS::Audio::SeqChannel* channels = std::data(VS::Audio::Seq::musicChannels);
     if (group == ChannelGroup::kSecondaryMusic) {
-      config = Audio_Seq_secondaryMusicConfig;
-      channels = Audio_Seq_secondaryMusicChannels;
+      config = VS::Audio::Seq::secondaryMusicConfig;
+      channels = VS::Audio::Seq::secondaryMusicChannels;
     }
     if (config == nullptr || channels == nullptr) return;
     StoreMusicCommand(state);
@@ -258,20 +274,20 @@ class LiveMusicHost final : public MusicHost {
   }
 
  private:
-  [[nodiscard]] Audio_AkaoSequenceFile* Sequence() const {
+  [[nodiscard]] VS::Audio::AkaoSequenceFile* Sequence() const {
     if (params_ == nullptr) return nullptr;
-    return reinterpret_cast<Audio_AkaoSequenceFile*>(params_->param1);
+    return reinterpret_cast<VS::Audio::AkaoSequenceFile*>(params_->param1);
   }
 
-  const Audio_CommandParams* params_;
+  const VS::Audio::CommandParams* params_;
 };
 
 using CommandCore = void (*)(MusicCommandState&, MusicHost&,
                              const MusicCommand&);
 
-void RunCommand(const char* operation, Audio_CommandParams* params,
+void RunCommand(const char* operation, VS::Audio::CommandParams* params,
                 CommandCore command) {
-  if (params == nullptr || Audio_Seq_activeMusicConfig == nullptr) {
+  if (params == nullptr || VS::Audio::Seq::activeMusicConfig == nullptr) {
     ReportRefusal(operation, "no command parameters or active music layer");
     return;
   }
@@ -283,8 +299,8 @@ void RunCommand(const char* operation, Audio_CommandParams* params,
 }  // namespace
 
 // decomp: SLUS_010.40 func_80015C9C (src/SLUS_010.40/25AC.c:2330)
-void LiveResetSoundEffectChannel(Audio_SeqChannel* channel,
-                                 char* program_start) {
+void LiveResetSoundEffectChannel(VS::Audio::SeqChannel* channel,
+                                 std::uint8_t* program_start) {
   const std::optional<LiveProgramMemory> region =
       LiveProgramRegion(program_start);
   const std::optional<Samples::InstrumentRecord> first_instrument =
@@ -303,8 +319,8 @@ void LiveResetSoundEffectChannel(Audio_SeqChannel* channel,
 }
 
 // decomp: SLUS_010.40 Sound_LoadAkaoSequence (src/SLUS_010.40/25AC.c:2380)
-void LiveLoadMusicSequence(Audio_AkaoSequenceFile* sequence) {
-  Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
+void LiveLoadMusicSequence(VS::Audio::AkaoSequenceFile* sequence) {
+  VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
   const std::optional<LiveProgramMemory> memory = SequenceMemory(sequence);
   const std::optional<Samples::InstrumentRecord> first_instrument =
       LiveInstrument(0);
@@ -322,11 +338,11 @@ void LiveLoadMusicSequence(Audio_AkaoSequenceFile* sequence) {
     return;
   }
   StoreMusicStart(state, *memory);
-  active->sequenceBase = reinterpret_cast<std::uintptr_t>(sequence);
-  active->patchTable = TableAt<Audio_AkaoSequenceFile>(
+  active->sequence_base = reinterpret_cast<std::uintptr_t>(sequence);
+  active->patch_table = TableAt<VS::Audio::AkaoSequenceFile>(
       result.tables.patch_table, *memory, "LoadMusicSequence");
-  active->keymapTable = TableAt<u_short>(result.tables.keymap_table, *memory,
-                                         "LoadMusicSequence");
+  active->keymap_table = TableAt<u_short>(result.tables.keymap_table, *memory,
+                                          "LoadMusicSequence");
   if (result.channels_outside != 0) {
     ReportRefusal("LoadMusicSequence",
                   "a channel's program starts outside the sequence");
@@ -334,17 +350,17 @@ void LiveLoadMusicSequence(Audio_AkaoSequenceFile* sequence) {
 }
 
 // decomp: SLUS_010.40 Sound_KillMusicConfig (src/SLUS_010.40/25AC.c:2506)
-void LiveReleaseMusicConfiguration(Audio_MusicConfig* config,
-                                   Audio_SeqChannel* channels,
+void LiveReleaseMusicConfiguration(VS::Audio::MusicConfig* config,
+                                   VS::Audio::SeqChannel* channels,
                                    unsigned music_id_filter) {
   if (config == nullptr || channels == nullptr) {
     ReportRefusal("ReleaseMusicConfiguration", "no music layer or channels");
     return;
   }
   std::uint32_t owned = 0;
-  for (std::size_t voice = 0; voice < std::size(Audio_Mixer_voiceOwners);
+  for (std::size_t voice = 0; voice < std::size(VS::Audio::Mixer::voiceOwners);
        ++voice) {
-    if (Audio_Mixer_voiceOwners[voice] == config) owned |= 1U << voice;
+    if (VS::Audio::Mixer::voiceOwners[voice] == config) owned |= 1U << voice;
   }
   const LiveProgramMemory unchanged;
   MusicLayerState layer = LoadMusicLayer(*config);
@@ -359,10 +375,10 @@ void LiveReleaseMusicConfiguration(Audio_MusicConfig* config,
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
     StoreSequenceChannel(channels[i], records[i], unchanged);
   }
-  for (std::size_t voice = 0; voice < std::size(Audio_Mixer_voiceOwners);
+  for (std::size_t voice = 0; voice < std::size(VS::Audio::Mixer::voiceOwners);
        ++voice) {
     if ((*released & (1U << voice)) == 0) continue;
-    Audio_Mixer_voiceOwners[voice] = nullptr;
+    VS::Audio::Mixer::voiceOwners[voice] = nullptr;
     Driver::SetLiveVoiceReleaseRateAndMode(static_cast<int>(voice),
                                            kReleaseRate, kReleaseMode);
   }
@@ -373,67 +389,68 @@ void LiveReleaseMusicConfiguration(Audio_MusicConfig* config,
 // distance between the old and new sequence; here each pointer into the old
 // sequence moves to the same offset in the new one, and pointers elsewhere
 // keep their value.
-void LiveRestoreMusicSequence(Audio_AkaoSequenceFile* sequence,
+void LiveRestoreMusicSequence(VS::Audio::AkaoSequenceFile* sequence,
                               int swap_with_saved) {
   const std::optional<LiveProgramMemory> memory = SequenceMemory(sequence);
   const std::optional<SequenceHeader> header =
       memory ? ReadSequenceHeader(memory->View()) : std::nullopt;
-  if (Audio_Seq_activeMusicConfig == nullptr || !header) {
+  if (VS::Audio::Seq::activeMusicConfig == nullptr || !header) {
     ReportRefusal("RestoreMusicSequence",
                   "the track lies outside the sequence data");
     return;
   }
   VS::Audio::RestoreMusicSnapshot(swap_with_saved);
-  Audio_MusicConfig* active = Audio_Seq_activeMusicConfig;
+  VS::Audio::MusicConfig* active = VS::Audio::Seq::activeMusicConfig;
   const LiveProgramMemory previous{
-      reinterpret_cast<char*>(Audio_Seq_primaryMusicConfig.sequenceBase),
+      reinterpret_cast<std::uint8_t*>(
+          VS::Audio::Seq::primaryMusicConfig.sequence_base),
       memory->size};
-  const auto playing = Same<std::uint32_t>(active->activeChannels);
+  const auto playing = Same<std::uint32_t>(active->active_channels);
   const LiveProgramMemory unchanged;
   MusicStartState state = LoadMusicStart(unchanged);
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
     if ((playing & (1U << i)) == 0) continue;
     SequenceChannel& record = state.channels[i];
-    record = LoadSequenceChannel(Audio_Seq_musicChannels[i], previous);
+    record = LoadSequenceChannel(VS::Audio::Seq::musicChannels[i], previous);
     if (!record.idle && record.program.counter == kOutsideProgram) {
       ReportRefusal("RestoreMusicSequence",
                     "a channel's program lies outside the restored track");
       record.idle = true;
     }
   }
-  Rebase(active->patchTable, previous, *memory);
-  Rebase(active->keymapTable, previous, *memory);
-  active->sequenceBase = reinterpret_cast<std::uintptr_t>(sequence);
+  Rebase(active->patch_table, previous, *memory);
+  Rebase(active->keymap_table, previous, *memory);
+  active->sequence_base = reinterpret_cast<std::uintptr_t>(sequence);
   const std::uint32_t remapped =
       RestoreMusicSequence(state, *header, swap_with_saved != 0);
-  Audio_Seq_savedMusicConfig.musicId = state.saved_music_id;
+  VS::Audio::Seq::savedMusicConfig.music_id = state.saved_music_id;
   StoreMusicLayer(*active, state.layer);
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
-    Audio_SeqChannel& channel = Audio_Seq_musicChannels[i];
+    VS::Audio::SeqChannel& channel = VS::Audio::Seq::musicChannels[i];
     const bool moved = (playing & (1U << i)) != 0;
     StoreSequenceChannel(channel, state.channels[i],
                          moved ? *memory : unchanged);
     if (moved) Rebase(channel.keymap, previous, *memory);
   }
-  StoreVoiceScheduler(Audio_Mixer_voiceScheduler, state.scheduler);
-  Audio_Driver_controlLatches.updateFlags = state.driver_update_flags;
+  StoreVoiceScheduler(VS::Audio::Mixer::voiceScheduler, state.scheduler);
+  VS::Audio::Driver::controlLatches.update_flags = state.driver_update_flags;
   for (std::size_t i = 0; i < kMusicChannelCount; ++i) {
     if ((remapped & (1U << i)) != 0) {
       Samples::LiveMapInstrumentToAlternateBank(
-          Same<u_int>(active->statusFlags), &Audio_Seq_musicChannels[i]);
+          Same<u_int>(active->status_flags), &VS::Audio::Seq::musicChannels[i]);
     }
   }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_10_StartFieldMusic
 // (src/SLUS_010.40/25AC.c:2958)
-void LiveStartOrResumeMusic(Audio_CommandParams* params) {
+void LiveStartOrResumeMusic(VS::Audio::CommandParams* params) {
   RunCommand("StartOrResumeMusic", params, &StartOrResumeMusic);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_40_PushMusicState (src/SLUS_010.40/25AC.c:2969)
-void LiveSaveCurrentMusic(Audio_CommandParams* params) {
-  if (Audio_Seq_activeMusicConfig == nullptr) {
+void LiveSaveCurrentMusic(VS::Audio::CommandParams* params) {
+  if (VS::Audio::Seq::activeMusicConfig == nullptr) {
     ReportRefusal("SaveCurrentMusic", "no active music layer");
     return;
   }
@@ -444,42 +461,42 @@ void LiveSaveCurrentMusic(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_19_Unk (src/SLUS_010.40/25AC.c:2983)
-void LiveStartMusicLayer(Audio_CommandParams* params) {
+void LiveStartMusicLayer(VS::Audio::CommandParams* params) {
   RunCommand("StartMusicLayer", params, &StartMusicLayer);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_1A_Unk (src/SLUS_010.40/25AC.c:3001)
-void LiveCrossfadeMusicLayers(Audio_CommandParams* params) {
+void LiveCrossfadeMusicLayers(VS::Audio::CommandParams* params) {
   RunCommand("CrossfadeMusicLayers", params, &CrossfadeMusicLayers);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_12_unk (src/SLUS_010.40/25AC.c:3034)
-void LiveStartMusicWithLoopCounter(Audio_CommandParams* params) {
+void LiveStartMusicWithLoopCounter(VS::Audio::CommandParams* params) {
   RunCommand("StartMusicWithLoopCounter", params, &StartMusicWithLoopCounter);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C0_unk (src/SLUS_010.40/25AC.c:3123)
-void LiveSetMusicVolume(Audio_CommandParams* params) {
+void LiveSetMusicVolume(VS::Audio::CommandParams* params) {
   RunCommand("SetMusicVolume", params, &SetMusicVolume);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C1_unk (src/SLUS_010.40/25AC.c:3147)
-void LiveFadeMusicVolume(Audio_CommandParams* params) {
+void LiveFadeMusicVolume(VS::Audio::CommandParams* params) {
   RunCommand("FadeMusicVolume", params, &FadeMusicVolume);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C2_unk (src/SLUS_010.40/25AC.c:3184)
-void LiveFadeMusicVolumeFrom(Audio_CommandParams* params) {
+void LiveFadeMusicVolumeFrom(VS::Audio::CommandParams* params) {
   RunCommand("FadeMusicVolumeFrom", params, &FadeMusicVolumeFrom);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C8_unk (src/SLUS_010.40/25AC.c:3216)
-void LiveSetDiscVolume(Audio_CommandParams* params) {
+void LiveSetDiscVolume(VS::Audio::CommandParams* params) {
   RunCommand("SetDiscVolume", params, &SetDiscVolume);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C9_unk (src/SLUS_010.40/25AC.c:3223)
-void LiveFadeDiscVolume(Audio_CommandParams* params) {
+void LiveFadeDiscVolume(VS::Audio::CommandParams* params) {
   RunCommand(
       "FadeDiscVolume", params,
       [](MusicCommandState& state, MusicHost& /*host*/,
@@ -487,7 +504,7 @@ void LiveFadeDiscVolume(Audio_CommandParams* params) {
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_CA_unk (src/SLUS_010.40/25AC.c:3237)
-void LiveFadeDiscVolumeFrom(Audio_CommandParams* params) {
+void LiveFadeDiscVolumeFrom(VS::Audio::CommandParams* params) {
   RunCommand(
       "FadeDiscVolumeFrom", params,
       [](MusicCommandState& state, MusicHost& /*host*/,

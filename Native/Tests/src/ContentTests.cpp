@@ -24,7 +24,7 @@
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
 #include "Actors/SequencePlaybackLive.hpp"
-#include "Audio/Seq/Sequencer.h"
+#include "Audio/Seq/Sequencer.hpp"
 #include "Battle/Damage.h"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/DataAccess.hpp"
@@ -1028,7 +1028,7 @@ TEST_CASE("LFO relocation imports source data instead of host code pointers",
 
 TEST_CASE("Native LFO catalogue covers the encoded unsigned byte domain",
           "[content][module][lfo-source]") {
-  CHECK(std::size(Audio_Seq_kLfoWaveforms) == 256);
+  CHECK(std::size(VS::Audio::Seq::kLfoWaveforms) == 256);
 }
 
 TEST_CASE(
@@ -1097,7 +1097,7 @@ std::vector<u8> ReadOriginalLfoImage() {
 const VS::Content::ModuleSymbol& LoadedLfoOwner() {
   const auto tables = VS::Content::ModulePointerTables();
   const auto found = std::ranges::find(
-      tables, reinterpret_cast<void**>(Audio_Seq_kLfoWaveforms),
+      tables, reinterpret_cast<void**>(VS::Audio::Seq::kLfoWaveforms),
       &VS::Content::ModulePointerTable::target);
   REQUIRE(found != tables.end());
   REQUIRE(found->sample_source != nullptr);
@@ -1141,7 +1141,7 @@ void CheckOriginalLfoProgram(std::span<const u8> image,
   const auto offset = std::size_t{0x209A0} + selector * sizeof(std::uint32_t);
   std::uint32_t address = 0;
   std::memcpy(&address, image.data() + offset, sizeof address);
-  auto* cursor = Audio_Seq_kLfoWaveforms[selector];
+  auto* cursor = VS::Audio::Seq::kLfoWaveforms[selector];
   REQUIRE(reinterpret_cast<const u8*>(cursor) ==
           static_cast<const u8*>(owner.target) + (address - owner.address));
   for (int sample = 0; sample < 1024; ++sample) {
@@ -1158,10 +1158,10 @@ TEST_CASE("Original LFO source aliases retain every bounded sample and loop",
   const auto image = ReadOriginalLfoImage();
   const auto& owner = LoadedLfoOwner();
   CheckOriginalLfoOwner(owner, image);
-  REQUIRE(Audio_Seq_kLfoWaveforms[65] != nullptr);
+  REQUIRE(VS::Audio::Seq::kLfoWaveforms[65] != nullptr);
   unsigned supported = 0;
   for (unsigned selector = 0; selector < 256; ++selector) {
-    if (Audio_Seq_kLfoWaveforms[selector] != nullptr) {
+    if (VS::Audio::Seq::kLfoWaveforms[selector] != nullptr) {
       CheckOriginalLfoProgram(image, owner, selector);
       ++supported;
     }

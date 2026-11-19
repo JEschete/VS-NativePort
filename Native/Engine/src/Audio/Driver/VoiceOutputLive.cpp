@@ -13,10 +13,10 @@
 #include <utility>
 
 #include "Audio/AudioDevice.hpp"
-#include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/SoundDriver.h"
-#include "Audio/Samples/SampleBanks.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Cutscene/Stream.hpp"
+#include "Audio/Driver/SoundDriver.hpp"
+#include "Audio/Samples/SampleBanks.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/StreamPlayback.hpp"
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/VoiceOutput.hpp"
@@ -177,9 +177,9 @@ class LiveSampleBanks final : public Samples::SampleBankHost {
   void BindInstrument(std::size_t slot, const Samples::InstrumentRecord& record,
                       std::uint32_t bank_id, std::size_t index,
                       bool available) override {
-    Audio_Samples_instruments[slot] = {record.sample_start, record.loop_start,
-                                       record.fine_tune,    record.root_note,
-                                       record.adsr_lower,   record.adsr_upper};
+    VS::Audio::Samples::instruments[slot] = {
+        record.sample_start, record.loop_start, record.fine_tune,
+        record.root_note,    record.adsr_lower, record.adsr_upper};
     g_instruments[slot] =
         available ? VS::Content::AudioInstrumentPath(root_, bank_id, index)
                   : std::filesystem::path{};
@@ -260,7 +260,7 @@ int UploadLiveBank(const void* bank, int /*wait*/, int first_instrument,
                    int sample_address) {
   if (bank == nullptr) {
     VS::Core::LogError("audio", "null bank source");
-    Audio_Cutscene_legacySpuTransferBusy = -1;
+    VS::Audio::Cutscene::legacySpuTransferBusy = -1;
     return -1;
   }
   // The generated loaders pass the bank's bare address; the AKAO header is
@@ -274,10 +274,10 @@ int UploadLiveBank(const void* bank, int /*wait*/, int first_instrument,
     VS::Core::LogError("audio", "bank {} at instrument {}: {}",
                        result.header.bank_id, first_instrument,
                        BankUploadError(result.status));
-    Audio_Cutscene_legacySpuTransferBusy = -1;
+    VS::Audio::Cutscene::legacySpuTransferBusy = -1;
     return -1;
   }
-  Audio_Cutscene_legacySpuTransferBusy = 0;
+  VS::Audio::Cutscene::legacySpuTransferBusy = 0;
   VS::Core::LogInfo("audio", "native bank {}: instruments {}..{}",
                     result.header.bank_id, first_instrument,
                     first_instrument + result.header.instrument_count - 1);
@@ -299,26 +299,26 @@ void VS::Audio::Driver::ResetVoiceOutput() {
   }
 }
 
-void VS::Audio::Driver::ConfigureOutputChannel(Audio_SeqChannel* channel) {
-  const auto voice = CheckedVoice(channel->voice.assignedVoice);
-  if (channel->instrumentIndex >= g_instruments.size()) {
+void VS::Audio::Driver::ConfigureOutputChannel(VS::Audio::SeqChannel* channel) {
+  const auto voice = CheckedVoice(channel->voice.assigned_voice);
+  if (channel->instrument_index >= g_instruments.size()) {
     VS::Core::LogError("audio", "invalid instrument {}",
-                       channel->instrumentIndex);
+                       channel->instrument_index);
     std::abort();
   }
   auto& controls = g_controls[voice];
-  controls.instrument = g_instruments[channel->instrumentIndex];
-  controls.rate = Driver::VoiceSampleRateRatio(channel->voice.sampleRate);
+  controls.instrument = g_instruments[channel->instrument_index];
+  controls.rate = Driver::VoiceSampleRateRatio(channel->voice.sample_rate);
   controls.left = Driver::VoiceVolumeGain(Driver::VoiceVolumeRegister(
-      channel->voice.volume.left, channel->voice.volumeScale));
+      channel->voice.volume.left, channel->voice.volume_scale));
   controls.right = Driver::VoiceVolumeGain(Driver::VoiceVolumeRegister(
-      channel->voice.volume.right, channel->voice.volumeScale));
-  controls.envelope = VS::Audio::DecodeAkaoEnvelope(channel->voice.adsrLower,
-                                                    channel->voice.adsrUpper);
-  g_voice_instruments[voice] = channel->instrumentIndex;
-  controls.silent = channel->voice.sampleStart == kSilentSource;
+      channel->voice.volume.right, channel->voice.volume_scale));
+  controls.envelope = VS::Audio::DecodeAkaoEnvelope(channel->voice.adsr_lower,
+                                                    channel->voice.adsr_upper);
+  g_voice_instruments[voice] = channel->instrument_index;
+  controls.silent = channel->voice.sample_start == kSilentSource;
   Engine().Configure(voice, controls);
-  channel->voice.dirtyFlags = 0;
+  channel->voice.dirty_flags = 0;
 }
 
 // decomp: SpuSetNoiseClock, SLUS_010.40/libspu/S_SNC.c.
@@ -406,7 +406,7 @@ void VS::Audio::Driver::TickVoiceOutput() {
   VS::Audio::UpdateXaControls();
   constexpr unsigned kMonoOutput = 2;
   const bool mono =
-      (Audio_Driver_controlLatches.mixBehavior & kMonoOutput) != 0;
+      (VS::Audio::Driver::controlLatches.mix_behavior & kMonoOutput) != 0;
   if (mono != g_mono) {
     Engine().SetMonoOutput(mono);
     g_mono = mono;

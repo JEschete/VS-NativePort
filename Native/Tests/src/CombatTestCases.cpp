@@ -13,8 +13,8 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Audio/Seq/Channel.h"
-#include "Audio/Sfx.h"
+#include "Audio/Seq/Channel.hpp"
+#include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
@@ -1117,7 +1117,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  int saved_sound_group = Audio_nextSfxChannelGroup7E;
+  int saved_sound_group = VS::Audio::nextSfxChannelGroup7E;
   decltype(Menu_Loot_lootClaimed) saved_claimed = Menu_Loot_lootClaimed;
   decltype(Menu_Loot_controlsEnabled) saved_controls =
       Menu_Loot_controlsEnabled;
@@ -1172,7 +1172,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
-    Audio_nextSfxChannelGroup7E = saved_sound_group;
+    VS::Audio::nextSfxChannelGroup7E = saved_sound_group;
     Menu_Loot_lootClaimed = saved_claimed;
     Menu_Loot_controlsEnabled = saved_controls;
     Menu_Loot_showLoot = saved_show;

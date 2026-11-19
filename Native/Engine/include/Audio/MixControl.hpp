@@ -143,8 +143,8 @@ class ControlHost : public CommandRefusalSink {
                                std::uint32_t mode) = 0;
 };
 
-// The effects a sound-effect command selects (Audio_CommandParams param1 and
-// param2): those carrying one of `tags`, or, without tags, those playing
+// The effects a sound-effect command selects (VS::Audio::CommandParams param1
+// and param2): those carrying one of `tags`, or, without tags, those playing
 // `effect`.
 struct EffectSelection {
   EffectId effect{};
@@ -233,7 +233,7 @@ inline constexpr std::size_t kAkaoHeaderBytes = 10;
 [[nodiscard]] std::optional<AkaoHeader> ReadAkaoHeader(
     std::span<const std::uint8_t> bytes);
 
-// Command words 2-6 of D_800378C0 and Audio_CommandParams; word 1 is a
+// Command words 2-6 of D_800378C0 and VS::Audio::CommandParams; word 1 is a
 // sequence pointer and stays with the host.
 struct CommandWords {
   std::uint32_t param2 = 0;
@@ -269,7 +269,7 @@ class DispatchHost : public ReverbHost, public CommandRefusalSink {
   // The header of the sequence argument `slot` names, as the command
   // started; empty when it names no AKAO sequence.
   virtual std::optional<AkaoHeader> SequenceAt(ArgumentSlot slot) = 0;
-  // Audio_CommandParams.param1 = D_800378C0.param1.
+  // VS::Audio::CommandParams.param1 = D_800378C0.param1.
   virtual void CopyFirstArgument() = 0;
   // g_Sound_PendingMusicData.param1 = D_800378C0.param1.
   virtual void QueueFirstSequence() = 0;

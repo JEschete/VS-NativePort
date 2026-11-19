@@ -14,14 +14,14 @@
 #include "Audio/ActorSound.hpp"
 #include "Audio/ActorSoundLive.hpp"
 #include "Audio/Ambience.hpp"
-#include "Audio/Cutscene/Stream.h"
+#include "Audio/Cutscene/Stream.hpp"
 #include "Audio/Music.hpp"
 #include "Audio/MusicLive.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/Sfx.hpp"
-#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
+#include "Audio/SoundState.hpp"
 #include "Audio/Stream.hpp"
 #include "Audio/StreamBuffers.hpp"
 #include "Audio/StreamBuffersLive.hpp"
@@ -1694,14 +1694,15 @@ TEST_CASE(
     "Live music entries refuse slots and ids past their tables and read ids "
     "unsigned",
     "[audio-music-streams][audio]") {
-  const GlobalScope sound(Audio_soundState);
+  const GlobalScope sound(VS::Audio::soundState);
   const std::uint64_t refused = Seq::LiveRefusalCount();
   CHECK(Audio::LiveMusicSlotVolume(kSlotPastLast) == 0);
   CHECK(Audio::LiveStopMusicSlotPlayback(kSlotPastLast) == 0);
   CHECK(Audio::LiveLoadMusicSlot(Audio::kMusicFileCount, 1) == 0);
   CHECK(Seq::LiveRefusalCount() == refused + 3);
-  Audio_soundState.musicIds[kSecondSlot] = static_cast<char>(kHighMusicId);
-  Audio_soundState.currentMusicSlot = 2;
+  VS::Audio::soundState.music_ids[kSecondSlot] =
+      static_cast<std::uint8_t>(kHighMusicId);
+  VS::Audio::soundState.current_music_slot = 2;
   CHECK(Audio::LiveCurrentMusicSlot() == 2);
   CHECK(Audio::LiveCurrentMusicId() == kHighMusicId);
   constexpr int kStreamSlotPastLast = 4;
@@ -1736,19 +1737,20 @@ TEST_CASE(
     "Live stream buffer callbacks stay silent while idle and refuse a voice "
     "past the pairs",
     "[audio-music-streams][audio]") {
-  const GlobalScope stream(Audio_Cutscene_streamState);
+  const GlobalScope stream(VS::Audio::Cutscene::streamState);
   const std::uint64_t refused = Seq::LiveRefusalCount();
   Cutscene::LiveRefillMonoFirstBuffer();
   CHECK(Seq::LiveRefusalCount() == refused);
   constexpr unsigned kPages = 0x2000;
-  Audio_Cutscene_streamState.voiceMask = static_cast<int>(kPairMask);
-  Audio_Cutscene_streamState.totalPages = kPages;
-  Audio_Cutscene_streamState.voiceIndex = Cutscene::kStreamVoiceCount;
+  VS::Audio::Cutscene::streamState.voice_mask = static_cast<int>(kPairMask);
+  VS::Audio::Cutscene::streamState.total_pages = kPages;
+  VS::Audio::Cutscene::streamState.voice_index = Cutscene::kStreamVoiceCount;
   Cutscene::LiveRefillStereoSecondBuffer();
   Cutscene::LiveBeginMonoPlayback();
   CHECK(Seq::LiveRefusalCount() == refused + 2);
-  CHECK(Audio_Cutscene_streamState.totalPages == kPages);
-  CHECK(Audio_Cutscene_streamState.voiceIndex == Cutscene::kStreamVoiceCount);
+  CHECK(VS::Audio::Cutscene::streamState.total_pages == kPages);
+  CHECK(VS::Audio::Cutscene::streamState.voice_index ==
+        Cutscene::kStreamVoiceCount);
 }
 
 TEST_CASE("Promoted music and stream functions keep no module binding",

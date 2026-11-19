@@ -25,11 +25,11 @@
 #include "Actors/ActorSpawningLive.hpp"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
-#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/MixControlLive.hpp"
-#include "Audio/Mixer/MixControl.h"
-#include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Mixer/MixControl.hpp"
+#include "Audio/Mixer/VoiceMixer.hpp"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
@@ -274,15 +274,20 @@ struct RuntimeFixture {
   unsigned control_mode = Field_controlMode;
   int interaction_paused = VS::Field::isInteractionPaused;
   Field_CameraTransition* transition = VS::Field::cameraTransition;
-  Audio_DriverFlags audio_flags = Audio_Driver_controlLatches;
-  Audio_CommandArguments audio_arguments = Audio_Driver_commandArguments;
-  Audio_CommandParams audio_params = Audio_Mixer_commandParams;
-  Audio_MusicConfig* active_music = Audio_Seq_activeMusicConfig;
-  Audio_MusicConfig* secondary_music = Audio_Seq_secondaryMusicConfig;
-  Audio_CommandHandler stereo_handler = Audio_Mixer_kCommandHandlers[0x80];
-  Audio_CommandHandler mono_handler = Audio_Mixer_kCommandHandlers[0x81];
-  unsigned active_effect_voices = Audio_Mixer_voiceScheduler.activeVoices;
-  Audio_MusicConfig silent_music{};
+  VS::Audio::DriverFlags audio_flags = VS::Audio::Driver::controlLatches;
+  VS::Audio::LegacyCommandArguments audio_arguments =
+      VS::Audio::Driver::commandArguments;
+  VS::Audio::CommandParams audio_params = VS::Audio::Mixer::commandParams;
+  VS::Audio::MusicConfig* active_music = VS::Audio::Seq::activeMusicConfig;
+  VS::Audio::MusicConfig* secondary_music =
+      VS::Audio::Seq::secondaryMusicConfig;
+  VS::Audio::CommandHandler stereo_handler =
+      VS::Audio::Mixer::kCommandHandlers[0x80];
+  VS::Audio::CommandHandler mono_handler =
+      VS::Audio::Mixer::kCommandHandlers[0x81];
+  unsigned active_effect_voices =
+      VS::Audio::Mixer::voiceScheduler.active_voices;
+  VS::Audio::MusicConfig silent_music{};
   Battle_Actor player{};
   Battle_Actor enemy{};
   Battle_ActorStats player_stats{};
@@ -410,12 +415,13 @@ struct RuntimeFixture {
   }
 
   void SetAudio() {
-    Audio_Seq_activeMusicConfig = &silent_music;
-    Audio_Seq_secondaryMusicConfig = nullptr;
-    Audio_Mixer_voiceScheduler.activeVoices = 0;
-    Audio_Mixer_kCommandHandlers[0x80] =
+    VS::Audio::Seq::activeMusicConfig = &silent_music;
+    VS::Audio::Seq::secondaryMusicConfig = nullptr;
+    VS::Audio::Mixer::voiceScheduler.active_voices = 0;
+    VS::Audio::Mixer::kCommandHandlers[0x80] =
         VS::Audio::Mixer::LiveEnableStereoOutput;
-    Audio_Mixer_kCommandHandlers[0x81] = VS::Audio::Mixer::LiveEnableMonoOutput;
+    VS::Audio::Mixer::kCommandHandlers[0x81] =
+        VS::Audio::Mixer::LiveEnableMonoOutput;
     VS::Audio::LiveSetMonoOutput(0);
   }
 
@@ -638,14 +644,14 @@ struct RuntimeFixture {
     Field_controlMode = control_mode;
     VS::Field::isInteractionPaused = interaction_paused;
     VS::Field::cameraTransition = transition;
-    Audio_Driver_controlLatches = audio_flags;
-    Audio_Driver_commandArguments = audio_arguments;
-    Audio_Mixer_commandParams = audio_params;
-    Audio_Seq_activeMusicConfig = active_music;
-    Audio_Seq_secondaryMusicConfig = secondary_music;
-    Audio_Mixer_kCommandHandlers[0x80] = stereo_handler;
-    Audio_Mixer_kCommandHandlers[0x81] = mono_handler;
-    Audio_Mixer_voiceScheduler.activeVoices = active_effect_voices;
+    VS::Audio::Driver::controlLatches = audio_flags;
+    VS::Audio::Driver::commandArguments = audio_arguments;
+    VS::Audio::Mixer::commandParams = audio_params;
+    VS::Audio::Seq::activeMusicConfig = active_music;
+    VS::Audio::Seq::secondaryMusicConfig = secondary_music;
+    VS::Audio::Mixer::kCommandHandlers[0x80] = stereo_handler;
+    VS::Audio::Mixer::kCommandHandlers[0x81] = mono_handler;
+    VS::Audio::Mixer::voiceScheduler.active_voices = active_effect_voices;
   }
 };
 
@@ -696,7 +702,7 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, VS::Core::randomShuffleIndex);
   Append(bytes, Battle_Ai_savedMovementRandomState);
   Append(bytes, VS::Battle::Ai::LiveFrameContext().randomState);
-  Append(bytes, Audio_Driver_controlLatches.mixBehavior);
+  Append(bytes, VS::Audio::Driver::controlLatches.mix_behavior);
   return bytes;
 }
 }  // namespace
@@ -1256,8 +1262,8 @@ TEST_CASE("Only an actually paused field menu permits residual walking",
 namespace {
 void CheckAudioSettings(bool mono) {
   CHECK((VS::Input::settings.monoSound == 1) == mono);
-  CHECK(((Audio_Driver_controlLatches.mixBehavior & 2) != 0) == mono);
-  CHECK((Audio_Driver_controlLatches.mixBehavior & 0x10) != 0);
+  CHECK(((VS::Audio::Driver::controlLatches.mix_behavior & 2) != 0) == mono);
+  CHECK((VS::Audio::Driver::controlLatches.mix_behavior & 0x10) != 0);
   CHECK(VS::Input::settings.slotState == 0xFEDCBA98u);
   CHECK(VS::Input::settings.key == 0xF00DCAFEu);
 }
@@ -1272,7 +1278,7 @@ TEST_CASE(
   const bool mono = GENERATE(false, true);
   VS::Input::settings.monoSound = static_cast<char>(!mono);
   VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
-  Audio_Driver_controlLatches.mixBehavior |= 0x10;
+  VS::Audio::Driver::controlLatches.mix_behavior |= 0x10;
   const auto before = LiveFingerprint(fixture);
   state.settings.monoSound = static_cast<char>(mono);
   state.settings.slotState = 0xFEDCBA98u;
@@ -1284,7 +1290,7 @@ TEST_CASE(
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
   State_ashleySnapshot.stats.isPending = 0;
   VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
-  Audio_Driver_controlLatches.mixBehavior |= 0x10;
+  VS::Audio::Driver::controlLatches.mix_behavior |= 0x10;
   REQUIRE(Save::FinishResume().has_value());
   CheckAudioSettings(mono);
 }
@@ -1293,7 +1299,7 @@ TEST_CASE("Uninitialized audio consumer cannot partially prepare a resume",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   const auto state = fixture.Capture();
-  Audio_Mixer_kCommandHandlers[0x81] = nullptr;
+  VS::Audio::Mixer::kCommandHandlers[0x81] = nullptr;
   const auto before = LiveFingerprint(fixture);
   const auto prepared = Save::PrepareResume({1, 0, state});
   REQUIRE_FALSE(prepared.has_value());
@@ -1309,13 +1315,13 @@ TEST_CASE("Failed room-ready audio validation leaves cancellation safe",
   state.settings.monoSound = 1;
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
   State_ashleySnapshot.stats.isPending = 0;
-  Audio_Mixer_kCommandHandlers[0x81] = nullptr;
+  VS::Audio::Mixer::kCommandHandlers[0x81] = nullptr;
   const auto before = LiveFingerprint(fixture);
   REQUIRE_FALSE(Save::FinishResume().has_value());
   CHECK(LiveFingerprint(fixture) == before);
   Save::CancelResume();
   CHECK_FALSE(Save::ResumePending());
-  CHECK((Audio_Driver_controlLatches.mixBehavior & 2) == 0);
+  CHECK((VS::Audio::Driver::controlLatches.mix_behavior & 2) == 0);
   CHECK(VS::Input::settings.monoSound == 0);
 }
 

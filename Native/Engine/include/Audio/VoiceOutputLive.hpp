@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
-struct Audio_SeqChannel;
+namespace VS::Audio {
+struct SeqChannel;
+}  // namespace VS::Audio
 
 // Bindings from the generated sound driver to the typed voice writes and bank
 // upload (VoiceOutput.cpp) over the native voice engine. None is stored in a
@@ -26,7 +28,7 @@ void SetLiveVoiceReleaseRateAndMode(int voice, int rate, unsigned mode);
 // place of the SPU (VoiceOutputLive.cpp).
 void ResetVoiceOutput();
 void TickVoiceOutput();
-void ConfigureOutputChannel(Audio_SeqChannel* channel);
+void ConfigureOutputChannel(VS::Audio::SeqChannel* channel);
 std::int16_t OutputVoiceEnvelope(unsigned voice);
 void SetOutputNoiseClock(int clock);
 int OutputReverbMode();

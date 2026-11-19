@@ -10,14 +10,14 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/Driver/SoundDriver.h"
+#include "Audio/Driver/SoundDriver.hpp"
 #include "Audio/MixControlLive.hpp"
-#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Mixer/VoiceMixer.hpp"
 #include "Audio/SampleBanksLive.hpp"
-#include "Audio/Seq/Channel.h"
+#include "Audio/Seq/Channel.hpp"
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SoundControl.hpp"
-#include "Audio/SoundEffects/SoundEffects.h"
+#include "Audio/SoundEffects/SoundEffects.hpp"
 #include "Audio/SoundPlayback.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
 
@@ -28,11 +28,12 @@ using Playback::DataRef;
 using Playback::EffectSelector;
 using Playback::kEffectVoiceCount;
 
-static_assert(std::size(Audio_SoundEffects_channels) >= kEffectVoiceCount);
+static_assert(std::size(VS::Audio::SoundEffects::channels) >=
+              kEffectVoiceCount);
 static_assert(
-    std::is_same_v<decltype(Audio_SeqChannel::effectId), std::uintptr_t>);
-static_assert(
-    std::is_same_v<decltype(Audio_DriverFlags::mixBehavior), unsigned int>);
+    std::is_same_v<decltype(VS::Audio::SeqChannel::effect_id), std::uintptr_t>);
+static_assert(std::is_same_v<decltype(VS::Audio::DriverFlags::mix_behavior),
+                             unsigned int>);
 
 void* Pointer(DataRef data) {
   return std::bit_cast<void*>(static_cast<std::uintptr_t>(data));
@@ -51,11 +52,11 @@ class LiveControl final : public ControlHost {
   }
 
   std::uint32_t MixBehavior() override {
-    return Audio_Driver_controlLatches.mixBehavior;
+    return VS::Audio::Driver::controlLatches.mix_behavior;
   }
 
   void SetMixBehavior(std::uint32_t behavior) override {
-    Audio_Driver_controlLatches.mixBehavior = behavior;
+    VS::Audio::Driver::controlLatches.mix_behavior = behavior;
   }
 
   bool IsSequence(DataRef data) override {
@@ -63,13 +64,13 @@ class LiveControl final : public ControlHost {
   }
 
   std::uint32_t ActiveVoices() override {
-    return Audio_Mixer_voiceScheduler.activeVoices;
+    return VS::Audio::Mixer::voiceScheduler.active_voices;
   }
 
   EffectSelector EffectAt(std::size_t voice) override {
     if (voice >= kEffectVoiceCount) return EffectSelector::kNone;
     return static_cast<EffectSelector>(static_cast<std::intptr_t>(
-        Audio_SoundEffects_channels[voice].effectId));
+        VS::Audio::SoundEffects::channels[voice].effect_id));
   }
 };
 

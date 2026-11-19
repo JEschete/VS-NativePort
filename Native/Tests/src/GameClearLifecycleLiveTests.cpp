@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
+#include "Audio/Seq/Channel.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/StatusEffects.h"
@@ -98,17 +98,17 @@ void CheckCommittedScore() {
 }
 
 void CheckPlayingMusic(const LiveFixture& fixture) {
-  CHECK(Audio_soundState.currentMusicSlot == LiveFixture::kMusicSlot);
-  CHECK(Audio_soundState.playingMusicHandle == LiveFixture::kSequenceId);
-  CHECK(fixture.music.musicId == LiveFixture::kSequenceId);
-  CHECK(fixture.music.activeChannels == 1);
+  CHECK(VS::Audio::soundState.current_music_slot == LiveFixture::kMusicSlot);
+  CHECK(VS::Audio::soundState.playing_music_handle == LiveFixture::kSequenceId);
+  CHECK(fixture.music.music_id == LiveFixture::kSequenceId);
+  CHECK(fixture.music.active_channels == 1);
   // The production zero-tick request schedules a one-tick volume fade.
-  CHECK(fixture.music.masterVolumeSlideLength == 1);
-  CHECK(fixture.music.masterVolume + fixture.music.masterVolumeStep ==
+  CHECK(fixture.music.master_volume_slide_length == 1);
+  CHECK(fixture.music.master_volume + fixture.music.master_volume_step ==
         0x7F0000);
-  CHECK(fixture.music.sequenceBase ==
+  CHECK(fixture.music.sequence_base ==
         reinterpret_cast<std::uintptr_t>(
-            Audio_soundState.musicData[LiveFixture::kMusicIndex]));
+            VS::Audio::soundState.music_data[LiveFixture::kMusicIndex]));
 }
 
 void CheckRealReelFrame(LiveFixture& fixture) {
@@ -124,7 +124,7 @@ void CheckRealReelFrame(LiveFixture& fixture) {
 
 struct SavedServiceViews {
   decltype(VS::Render::FrameScratchpad()) frame = VS::Render::FrameScratchpad();
-  decltype(Audio_soundState) audio = Audio_soundState;
+  decltype(VS::Audio::soundState) audio = VS::Audio::soundState;
   Battle_Actor* actor = Battle_characterState;
   unsigned random = VS::Core::BiosRand().State();
 
@@ -136,14 +136,15 @@ struct SavedServiceViews {
     CHECK(VS::Render::FrameScratchpad().overlay_ordering_table ==
           frame.overlay_ordering_table);
     CHECK(Battle_characterState == actor);
-    CHECK(Audio_soundState.currentMusicData == audio.currentMusicData);
-    CHECK(Audio_soundState.currentMusicSlot == audio.currentMusicSlot);
+    CHECK(VS::Audio::soundState.current_music_data == audio.current_music_data);
+    CHECK(VS::Audio::soundState.current_music_slot == audio.current_music_slot);
   }
 };
 
 void ResetHeapWithMusicStorage() {
   REQUIRE(results::CleanupLiveGameClearOwnedState());
-  void* const music = Audio_soundState.musicData[LiveFixture::kMusicIndex];
+  void* const music =
+      VS::Audio::soundState.music_data[LiveFixture::kMusicIndex];
   REQUIRE(memory::LivePayloadCapacity(music).has_value());
   memory::ResetLiveGameHeap();
   CHECK_FALSE(memory::LivePayloadCapacity(music).has_value());
@@ -526,14 +527,14 @@ TEST_CASE("Game-clear fixture releases a pending production music request",
   LiveFixture fixture;
   results::LiveQueueResultsMusic();
   auto* const request =
-      Audio_soundState.musicRequests[LiveFixture::kMusicIndex];
+      VS::Audio::soundState.music_requests[LiveFixture::kMusicIndex];
   REQUIRE(request != nullptr);
   REQUIRE(content::LiveDiscRequestGeneration(request) != 0);
   CHECK(VS::Audio::LivePollMusicLoads() == VS::Audio::kLoadInFlight);
   fixture.ReleaseMusic();
   CHECK(content::LiveDiscRequestGeneration(request) == 0);
   CHECK(Content_discRequestCounts.waiting == 0);
-  CHECK(Audio_soundState.musicData[LiveFixture::kMusicIndex] == nullptr);
+  CHECK(VS::Audio::soundState.music_data[LiveFixture::kMusicIndex] == nullptr);
   CHECK(memory::GameHeap().Empty());
 }
 

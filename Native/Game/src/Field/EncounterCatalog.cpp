@@ -14,7 +14,7 @@
 
 #include "Actors/CharacterInit.h"
 #include "Actors/Spawning.h"
-#include "Audio/SoundBanks.h"
+#include "Audio/SoundState.hpp"
 #include "Battle/Encounter.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
@@ -558,7 +558,7 @@ std::vector<std::string> ValidateEncounterOptions(const EncounterSetup& setup) {
   if (setup.inherited_music &&
       (*setup.inherited_music < 1 ||
        *setup.inherited_music > EncounterLimits::kLastMusic ||
-       Audio_waveBankFileMap[*setup.inherited_music] == 0)) {
+       VS::Audio::waveBankFileMap[*setup.inherited_music] == 0)) {
     errors.emplace_back("inherited music has no mapped wave bank");
   }
   if (!setup.stat_overrides.Valid()) {

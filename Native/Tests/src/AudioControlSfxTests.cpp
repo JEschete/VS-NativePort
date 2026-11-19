@@ -17,13 +17,13 @@
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/Sfx.hpp"
 #include "Audio/SfxLive.hpp"
-#include "Audio/SoundBanks.h"
 #include "Audio/SoundBanks.hpp"
 #include "Audio/SoundControl.hpp"
 #include "Audio/SoundControlLive.hpp"
 #include "Audio/SoundEffectPrograms.hpp"
 #include "Audio/SoundEffectProgramsLive.hpp"
 #include "Audio/SoundPlayback.hpp"
+#include "Audio/SoundState.hpp"
 #include "Content/ModuleData.hpp"
 
 namespace {
@@ -1558,10 +1558,10 @@ TEST_CASE("Bank effect volume fades keep the low byte of their ticks",
 
 namespace {
 struct SoundStateScope {
-  Audio_SoundState saved = Audio_soundState;
+  VS::Audio::SoundState saved = VS::Audio::soundState;
 
-  SoundStateScope() { Audio_soundState = {}; }
-  ~SoundStateScope() { Audio_soundState = saved; }
+  SoundStateScope() { VS::Audio::soundState = {}; }
+  ~SoundStateScope() { VS::Audio::soundState = saved; }
   SoundStateScope(const SoundStateScope&) = delete;
   SoundStateScope& operator=(const SoundStateScope&) = delete;
   SoundStateScope(SoundStateScope&&) = delete;
@@ -1598,12 +1598,12 @@ TEST_CASE("The live resolve returns -1 for a refused bank and 0 for built-ins",
   std::array<std::uint32_t, 2> bank{1, 8};
   CHECK(Audio::LiveResolveSfxProgram(Audio::kSharedEffectTags, 1) == 0);
   CHECK(Audio::LiveResolveSfxProgram(Audio::kSfxBankEffectTags, 0) == -1);
-  Audio_soundState.currentSfxBank = 1;
+  VS::Audio::soundState.current_sfx_bank = 1;
   CHECK(Audio::LiveResolveSfxProgram(Audio::kSfxBankEffectTags, 0) == -1);
   // Test memory lies outside the program regions the live bank reads accept.
-  Audio_soundState.sfxBankData[0] = bank.data();
+  VS::Audio::soundState.sfx_bank_data[0] = bank.data();
   CHECK(Audio::LiveResolveSfxProgram(Audio::kSfxBankEffectTags, 0) == -1);
-  CHECK(Audio_soundState.sfxBankData[0] == bank.data());
+  CHECK(VS::Audio::soundState.sfx_bank_data[0] == bank.data());
 }
 
 TEST_CASE("Promoted sound control and effect functions keep no module binding",
@@ -1636,7 +1636,7 @@ TEST_CASE(
     "Sound effect command handlers keep module bindings only in the "
     "command table",
     "[audio-control-sfx][audio][redirect-binding]") {
-  using Handler = void (*)(Audio_CommandParams*);
+  using Handler = void (*)(VS::Audio::CommandParams*);
   const auto symbols = VS::Content::ModuleSymbols();
   const std::array<std::pair<std::uint32_t, Handler>, 13> kept{{
       {0x80017208U, &SoundEffects::LivePlayInterfaceProgramPair},
