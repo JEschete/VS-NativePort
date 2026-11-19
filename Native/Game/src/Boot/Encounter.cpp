@@ -50,8 +50,8 @@
 #include "Core/Scratch.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Effects/Runtime.h"
-#include "Ending/ClearResults.h"
-#include "Ending/Credits/StaffRoll.h"
+#include "Ending/ClearResults.hpp"
+#include "Ending/Credits/StaffRoll.hpp"
 #include "Event/CutsceneLifecycleLive.hpp"
 #include "Event/RoomTriggerEntryLive.hpp"
 #include "Event/ScriptActors.h"
@@ -973,10 +973,10 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
   // ENDING.PRG staff roll (Start skips it) and _renderCongratulationsScreen,
   // which holds until any pressed button once the credits have finished.
   scene["ending"] = {
-      {"credits_finished", Ending_Credits_hasFinished != 0},
-      {"credits_skip_requested", Ending_Credits_wasSkipRequested != 0},
-      {"results_frame", Ending_resultsAnimationFrame},
-      {"results_leaving", Ending_isLeavingResults != 0}};
+      {"credits_finished", VS::Ending::Credits::hasFinished != 0},
+      {"credits_skip_requested", VS::Ending::Credits::wasSkipRequested != 0},
+      {"results_frame", VS::Ending::resultsAnimationFrame},
+      {"results_leaving", VS::Ending::isLeavingResults != 0}};
   if (!available) return scene;
   const auto& camera = VS::Field::sphericalCamera;
   const auto script =

@@ -16,7 +16,7 @@
 #include "Content/ModuleData.hpp"
 #include "Ending/ClearResultsCore.hpp"
 #include "Ending/EndingLive.hpp"
-#include "Ending/Results.h"
+#include "Ending/Results.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Render/TextureRegionDraw.hpp"
 #include "State/Location.h"
@@ -919,7 +919,7 @@ class LiveClearRecords {
     State_savedEntryDoor = {};
     VS::Input::settings = {};
     std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
-    std::ranges::fill(Ending_countableRoomBits, 0);
+    std::ranges::fill(VS::Ending::countableRoomBits, 0);
   }
   LiveClearRecords(const LiveClearRecords&) = delete;
   LiveClearRecords& operator=(const LiveClearRecords&) = delete;
@@ -933,7 +933,7 @@ class LiveClearRecords {
     State_savedEntryDoor = door_;
     VS::Input::settings = settings_;
     std::ranges::copy(actions_, std::begin(Battle_actionDefinitions));
-    std::ranges::copy(countable_, std::begin(Ending_countableRoomBits));
+    std::ranges::copy(countable_, std::begin(VS::Ending::countableRoomBits));
   }
 
  private:
@@ -945,8 +945,8 @@ class LiveClearRecords {
   State_Settings settings_ = VS::Input::settings;
   decltype(std::to_array(Battle_actionDefinitions)) actions_ =
       std::to_array(Battle_actionDefinitions);
-  decltype(std::to_array(Ending_countableRoomBits)) countable_ =
-      std::to_array(Ending_countableRoomBits);
+  decltype(std::to_array(VS::Ending::countableRoomBits)) countable_ =
+      std::to_array(VS::Ending::countableRoomBits);
 };
 
 // A 2:05 clear on the second difficulty with magic used, Asura defeated, one
@@ -961,7 +961,7 @@ void CommitLiveClear() {
   flags.asuraDefeated = 1;
   flags.chestsOpened[0] = 1;
   State_roomVisitProgress.roomFlags[0] = 0xF;
-  Ending_countableRoomBits[0] = 0x3;
+  VS::Ending::countableRoomBits[0] = 0x3;
   State_savedEntryDoor.destinationZoneId = 9;
   VS::Ending::LiveCommitClearProgress();
 }

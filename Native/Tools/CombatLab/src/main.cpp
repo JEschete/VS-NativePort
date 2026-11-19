@@ -25,7 +25,7 @@
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Log.hpp"
-#include "Ending/Credits/StaffRoll.h"
+#include "Ending/Credits/StaffRoll.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.h"
@@ -737,15 +737,16 @@ class LiveSession {
     }
     if (scene_trial_->ExpectsAttractReturn()) {
       scene_trial_->ObserveAttractReturn(
-          Boot_gameEntryMode, Ending_Credits_hasFinished != 0,
+          Boot_gameEntryMode, VS::Ending::Credits::hasFinished != 0,
           Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
     } else if (scene_trial_->ExpectsGameOverReturn()) {
-      scene_trial_->ObserveGameOverReturn(Ending_Credits_hasFinished != 0,
+      scene_trial_->ObserveGameOverReturn(VS::Ending::Credits::hasFinished != 0,
                                           Boot_isClearSavePending != 0,
                                           ticks_ - script_start_tick_);
     } else {
       scene_trial_->ObserveEndingReturn(
-          Ending_Credits_hasFinished != 0, Ending_Credits_wasSkipRequested != 0,
+          VS::Ending::Credits::hasFinished != 0,
+          VS::Ending::Credits::wasSkipRequested != 0,
           Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
     }
     const auto result = scene_trial_->Result();

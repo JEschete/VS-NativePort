@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <type_traits>
 
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -105,8 +106,7 @@ inline constexpr std::uint32_t kSlotAvailable = 1;
 inline constexpr std::uint32_t kSlotTemporary = 2;
 inline constexpr std::uint32_t kSlotInUse = 3;
 
-// fileMenuElements_t (260.c:134) in the record's layout (0x34 bytes);
-// FilesLive.cpp pins it against Menu_Files_FileMenuElement.
+// fileMenuElements_t (260.c:134) in the record's layout (0x34 bytes).
 struct Element {
   std::uint8_t state = 0;
   std::uint8_t slot_id = 0;
@@ -125,8 +125,17 @@ struct Element {
   std::array<std::uint8_t, kElementTextBytes> text{};
   friend bool operator==(const Element&, const Element&) = default;
 };
+namespace layout {
+inline constexpr std::size_t kElementBytes = 0x34;
+inline constexpr std::size_t kElementTargetOffset = 0x8;
+inline constexpr std::size_t kElementTextOffset = 0x14;
+}  // namespace layout
+static_assert(sizeof(Element) == layout::kElementBytes);
+static_assert(std::is_trivially_copyable_v<Element>);
+static_assert(offsetof(Element, target) == layout::kElementTargetOffset);
+static_assert(offsetof(Element, text) == layout::kElementTextOffset);
 
-// What the slot boxes read of Title_saveFileSummaries[slot].
+// What the slot boxes read of VS::Title::saveFileSummaries[slot].
 struct SlotSummary {
   std::uint32_t status = kSlotUnavailable;
   std::int8_t hours = 0;
@@ -142,7 +151,7 @@ struct SlotSummary {
   std::uint8_t map_completion = 0;
 };
 
-// Title_transferProgress* and Title_saveTransferErrorOffset.
+// VS::Title::transferProgress* and VS::Title::saveTransferErrorOffset.
 struct TransferProgress {
   std::uint16_t position = 0;
   std::uint16_t previous = 0;
@@ -285,7 +294,7 @@ class CardHost {
   // MCMAN.BIN's table: halfword offsets, then the strings. Empty before the
   // menu resources load.
   [[nodiscard]] virtual std::span<const std::uint16_t> TextTable() = 0;
-  // _memoryCardMessage (Title_memoryCardMessage on the title screen): the
+  // _memoryCardMessage (VS::Title::memoryCardMessage on the title screen): the
   // table's text at `offset`, or none.
   virtual void SetCardMessage(std::optional<std::uint16_t> offset) = 0;
   // _memcardEventHandler: starts the port's check, or polls with 0.
@@ -345,14 +354,14 @@ class Host : public Render::ImmediatePacketTarget, public CardHost {
   [[nodiscard]] virtual TransferProgress Transfer() = 0;
   virtual void SetTransferTarget(std::uint16_t target) = 0;
 
-  // Title_saveFileSummaries.
+  // VS::Title::saveFileSummaries.
   [[nodiscard]] virtual SlotSummary Summary(int slot) = 0;
   virtual void ZeroSummary(int slot) = 0;
   virtual void SetSummaryStatus(int slot, std::uint32_t status) = 0;
   // The slot's summary copied from the save workspace's fourth 0x80-byte
   // record (_spmcimg + 0x180) and decoded.
   virtual void LoadWrittenSummary(int slot) = 0;
-  // Title_cardDirectoryEntries.
+  // VS::Title::cardDirectoryEntries.
   virtual void ClearCardDirectory() = 0;
   [[nodiscard]] virtual int NewestSaveSlot() = 0;
   virtual int CreateSaveFile(int port, int file) = 0;
@@ -441,7 +450,7 @@ class TitleHost : public Render::ImmediatePacketTarget, public CardHost {
   virtual void PutDisplay(int display_x, int draw_x) = 0;
   virtual void ClearScreen() = 0;
   virtual void SetDisplayMask(bool shown) = 0;
-  // Title_fileMenuElements.
+  // VS::Title::fileMenuElements.
   virtual void InitializeElement(int id, std::uint32_t position,
                                  std::uint32_t size,
                                  std::uint16_t text_offset) = 0;
@@ -449,7 +458,7 @@ class TitleHost : public Render::ImmediatePacketTarget, public CardHost {
                               std::int16_t target) = 0;
   virtual void SetElementSelected(int id, bool selected) = 0;
   [[nodiscard]] virtual bool AnimationsComplete() = 0;
-  // Title_selectionCursorPosition.
+  // VS::Title::selectionCursorPosition.
   virtual void SetCursorPosition(std::int32_t position) = 0;
   virtual void PlaySound(MenuSound sound) = 0;
   virtual void PlaySoundEffect(int effect) = 0;

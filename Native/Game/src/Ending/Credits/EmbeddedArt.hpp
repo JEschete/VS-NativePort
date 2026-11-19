@@ -1,10 +1,10 @@
 #pragma once
 
-struct Ending_Credits_TimHeader;
-
 namespace VS::Ending::Credits {
 
+struct TimHeader;
+
 int PrepareEmbeddedArt();
-Ending_Credits_TimHeader* EmbeddedArt(unsigned index);
+TimHeader* EmbeddedArt(unsigned index);
 
 }  // namespace VS::Ending::Credits

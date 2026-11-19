@@ -95,10 +95,10 @@
 #include "Effects/Plugins/Plg301.h"
 #include "Effects/Runtime.h"
 #include "Effects/Trails.h"
-#include "Ending/ClearResults.h"
-#include "Ending/Credits.h"
-#include "Ending/Credits/StaffRoll.h"
-#include "Ending/Results.h"
+#include "Ending/ClearResults.hpp"
+#include "Ending/Credits.hpp"
+#include "Ending/Credits/StaffRoll.hpp"
+#include "Ending/Results.hpp"
 #include "Event/Actors.h"
 #include "Event/Script.h"
 #include "Event/ScriptCamera.h"
@@ -138,9 +138,9 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/Text/VariableFont.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "Title/Credits.h"
-#include "Title/SaveFiles.h"
-#include "Title/TitleScreen.h"
+#include "Title/Credits.hpp"
+#include "Title/SaveFiles.hpp"
+#include "Title/TitleScreen.hpp"
 
 // Globals whose contents are in the module images (DATA_LEDGER segment data/rodata/asset, no pointers).
 #include "Content/ModuleData.hpp"
@@ -512,35 +512,22 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"EFFECT/PLG300.BIN", 0x4B70, sizeof Effects_Plg300_ringColorFactors2, &Effects_Plg300_ringColorFactors2, sizeof Effects_Plg300_ringColorFactors2}, // G00784 D_800FE370
     {"EFFECT/PLG301.BIN", 0x2D24, sizeof Effects_Plg301_particleEmissionCounter, &Effects_Plg301_particleEmissionCounter, sizeof Effects_Plg301_particleEmissionCounter}, // G00785 D_800FC524
     {"EFFECT/PLG301.BIN", 0x2D28, sizeof Effects_Plg301_closedRingColorFactors, &Effects_Plg301_closedRingColorFactors, sizeof Effects_Plg301_closedRingColorFactors}, // G00786 D_800FC528
-    {"ENDING/ENDING.PRG", 0x5BFC, sizeof Ending_Credits_scriptBytes, &Ending_Credits_scriptBytes, sizeof Ending_Credits_scriptBytes}, // G00787 D_8006E3FC
-    {"ENDING/ENDING.PRG", 0x777C, sizeof Ending_Credits_glyphWidths, &Ending_Credits_glyphWidths, sizeof Ending_Credits_glyphWidths}, // G00788 _glyphWidths
-    {"ENDING/ENDING.PRG", 0x785C, sizeof Ending_Credits_embeddedTextureOne, &Ending_Credits_embeddedTextureOne, sizeof Ending_Credits_embeddedTextureOne}, // G00789 D_8007005C
-    {"ENDING/ENDING.PRG", 0xE89C, sizeof Ending_Credits_embeddedTextureEight, &Ending_Credits_embeddedTextureEight, sizeof Ending_Credits_embeddedTextureEight}, // G00790 D_8007709C
-    {"ENDING/ENDING.PRG", 0x202BC, sizeof Ending_Credits_embeddedTextureNine, &Ending_Credits_embeddedTextureNine, sizeof Ending_Credits_embeddedTextureNine}, // G00791 D_80088ABC
-    {"ENDING/ENDING.PRG", 0x31CDC, sizeof Ending_Credits_embeddedTextureTen, &Ending_Credits_embeddedTextureTen, sizeof Ending_Credits_embeddedTextureTen}, // G00792 D_8009A4DC
-    {"ENDING/ENDING.PRG", 0x436FC, sizeof Ending_Credits_embeddedTextureEleven, &Ending_Credits_embeddedTextureEleven, sizeof Ending_Credits_embeddedTextureEleven}, // G00793 D_800ABEFC
-    {"ENDING/ENDING.PRG", 0x5511C, sizeof Ending_Credits_embeddedTextureTwelve, &Ending_Credits_embeddedTextureTwelve, sizeof Ending_Credits_embeddedTextureTwelve}, // G00794 D_800BD91C
-    {"ENDING/ENDING.PRG", 0x66B3C, sizeof Ending_Credits_embeddedTextureTwo, &Ending_Credits_embeddedTextureTwo, sizeof Ending_Credits_embeddedTextureTwo}, // G00795 D_800CF33C
-    {"ENDING/ENDING.PRG", 0x6F77C, sizeof Ending_Credits_embeddedTextureThree, &Ending_Credits_embeddedTextureThree, sizeof Ending_Credits_embeddedTextureThree}, // G00796 D_800D7F7C
-    {"ENDING/ENDING.PRG", 0x6FB7C, sizeof Ending_Credits_embeddedTextureFive, &Ending_Credits_embeddedTextureFive, sizeof Ending_Credits_embeddedTextureFive}, // G00797 D_800D837C
-    {"ENDING/ENDING.PRG", 0x70F5C, sizeof Ending_Credits_embeddedTextureFour, &Ending_Credits_embeddedTextureFour, sizeof Ending_Credits_embeddedTextureFour}, // G00798 D_800D975C
-    {"ENDING/ENDING.PRG", 0x7289C, sizeof Ending_Credits_embeddedTextureSix, &Ending_Credits_embeddedTextureSix, sizeof Ending_Credits_embeddedTextureSix}, // G00799 D_800DB09C
-    {"ENDING/ENDING.PRG", 0x72A6C, sizeof Ending_Credits_embeddedTextureSeven, &Ending_Credits_embeddedTextureSeven, sizeof Ending_Credits_embeddedTextureSeven}, // G00800 D_800DB26C
-    {"ENDING/ENDING.PRG", 0x72F2C, sizeof Ending_Credits_illustrationDecodePhase, &Ending_Credits_illustrationDecodePhase, sizeof Ending_Credits_illustrationDecodePhase}, // G00801 D_800DB72C
-    {"ENDING/ENDING.PRG", 0x72FB4, sizeof Ending_Credits_illustrationHoldFrames, &Ending_Credits_illustrationHoldFrames, sizeof Ending_Credits_illustrationHoldFrames}, // G00803 _illustrationTimers
-    {"ENDING/ENDING.PRG", 0x72FD4, sizeof Ending_countableRoomBits, &Ending_countableRoomBits, sizeof Ending_countableRoomBits}, // G00804 _countableRooms
-    {"ENDING/ENDING.PRG", 0x73014, sizeof Ending_resultAtlasRegions, &Ending_resultAtlasRegions, sizeof Ending_resultAtlasRegions}, // G00805 _disMap
-    {"ENDING/ENDING.PRG", 0x73076, sizeof Ending_kRankHeadingWidth, &Ending_kRankHeadingWidth, sizeof Ending_kRankHeadingWidth}, // G00807 D_800DB876
-    {"ENDING/ENDING.PRG", 0x7323C, sizeof Ending_rankLabelRegionIds, &Ending_rankLabelRegionIds, sizeof Ending_rankLabelRegionIds}, // G00808 _riskbreakerRanks
-    {"ENDING/ENDING.PRG", 0x7327C, sizeof Ending_congratulationsTint, &Ending_congratulationsTint, sizeof Ending_congratulationsTint}, // G00809 D_800DBA7C
-    {"ENDING/ENDING.PRG", 0x73288, sizeof Ending_scoreTint, &Ending_scoreTint, sizeof Ending_scoreTint}, // G00810 D_800DBA88
-    {"ENDING/ENDING.PRG", 0x73290, sizeof Ending_countingScoreTint, &Ending_countingScoreTint, sizeof Ending_countingScoreTint}, // G00811 D_800DBA90
-    {"ENDING/ENDING.PRG", 0x73298, sizeof Ending_mapCompletionTint, &Ending_mapCompletionTint, sizeof Ending_mapCompletionTint}, // G00812 D_800DBA98
-    {"ENDING/ENDING.PRG", 0x732A0, sizeof Ending_countingMapCompletionTint, &Ending_countingMapCompletionTint, sizeof Ending_countingMapCompletionTint}, // G00813 D_800DBAA0
-    {"ENDING/ENDING.PRG", 0x732A8, sizeof Ending_rankHeadingTint, &Ending_rankHeadingTint, sizeof Ending_rankHeadingTint}, // G00814 D_800DBAA8
-    {"ENDING/ENDING.PRG", 0x732B0, sizeof Ending_rankLabelTint, &Ending_rankLabelTint, sizeof Ending_rankLabelTint}, // G00815 D_800DBAB0
-    {"ENDING/ENDING.PRG", 0x732B8, sizeof Ending_rankTitleThresholds, &Ending_rankTitleThresholds, sizeof Ending_rankTitleThresholds}, // G00816 titleThresholds
-    {"ENDING/ENDING.PRG", 0x732D8, sizeof Ending_rankScoreThresholds, &Ending_rankScoreThresholds, sizeof Ending_rankScoreThresholds}, // G00817 rankScores
+    {"ENDING/ENDING.PRG", 0x5BFC, sizeof VS::Ending::Credits::scriptBytes, &VS::Ending::Credits::scriptBytes, sizeof VS::Ending::Credits::scriptBytes}, // G00787 D_8006E3FC
+    {"ENDING/ENDING.PRG", 0x777C, sizeof VS::Ending::Credits::glyphWidths, &VS::Ending::Credits::glyphWidths, sizeof VS::Ending::Credits::glyphWidths}, // G00788 _glyphWidths
+    {"ENDING/ENDING.PRG", 0x72F2C, sizeof VS::Ending::Credits::illustrationDecodePhase, &VS::Ending::Credits::illustrationDecodePhase, sizeof VS::Ending::Credits::illustrationDecodePhase}, // G00801 D_800DB72C
+    {"ENDING/ENDING.PRG", 0x72FB4, sizeof VS::Ending::Credits::illustrationHoldFrames, &VS::Ending::Credits::illustrationHoldFrames, sizeof VS::Ending::Credits::illustrationHoldFrames}, // G00803 _illustrationTimers
+    {"ENDING/ENDING.PRG", 0x72FD4, sizeof VS::Ending::countableRoomBits, &VS::Ending::countableRoomBits, sizeof VS::Ending::countableRoomBits}, // G00804 _countableRooms
+    {"ENDING/ENDING.PRG", 0x73014, sizeof VS::Ending::resultAtlasRegions, &VS::Ending::resultAtlasRegions, sizeof VS::Ending::resultAtlasRegions}, // G00805 _disMap
+    {"ENDING/ENDING.PRG", 0x7323C, sizeof VS::Ending::rankLabelRegionIds, &VS::Ending::rankLabelRegionIds, sizeof VS::Ending::rankLabelRegionIds}, // G00808 _riskbreakerRanks
+    {"ENDING/ENDING.PRG", 0x7327C, sizeof VS::Ending::congratulationsTint, &VS::Ending::congratulationsTint, sizeof VS::Ending::congratulationsTint}, // G00809 D_800DBA7C
+    {"ENDING/ENDING.PRG", 0x73288, sizeof VS::Ending::scoreTint, &VS::Ending::scoreTint, sizeof VS::Ending::scoreTint}, // G00810 D_800DBA88
+    {"ENDING/ENDING.PRG", 0x73290, sizeof VS::Ending::countingScoreTint, &VS::Ending::countingScoreTint, sizeof VS::Ending::countingScoreTint}, // G00811 D_800DBA90
+    {"ENDING/ENDING.PRG", 0x73298, sizeof VS::Ending::mapCompletionTint, &VS::Ending::mapCompletionTint, sizeof VS::Ending::mapCompletionTint}, // G00812 D_800DBA98
+    {"ENDING/ENDING.PRG", 0x732A0, sizeof VS::Ending::countingMapCompletionTint, &VS::Ending::countingMapCompletionTint, sizeof VS::Ending::countingMapCompletionTint}, // G00813 D_800DBAA0
+    {"ENDING/ENDING.PRG", 0x732A8, sizeof VS::Ending::rankHeadingTint, &VS::Ending::rankHeadingTint, sizeof VS::Ending::rankHeadingTint}, // G00814 D_800DBAA8
+    {"ENDING/ENDING.PRG", 0x732B0, sizeof VS::Ending::rankLabelTint, &VS::Ending::rankLabelTint, sizeof VS::Ending::rankLabelTint}, // G00815 D_800DBAB0
+    {"ENDING/ENDING.PRG", 0x732B8, sizeof VS::Ending::rankTitleThresholds, &VS::Ending::rankTitleThresholds, sizeof VS::Ending::rankTitleThresholds}, // G00816 titleThresholds
+    {"ENDING/ENDING.PRG", 0x732D8, sizeof VS::Ending::rankScoreThresholds, &VS::Ending::rankScoreThresholds, sizeof VS::Ending::rankScoreThresholds}, // G00817 rankScores
     {"MENU/MENU0.PRG", 0x2258, 4924u, &Menu_Magic_magicStrings, sizeof Menu_Magic_magicStrings}, // G00978 _magicStrings
     {"MENU/MENU0.PRG", 0x3594, 3197u, &Menu_Magic_teleportationStrings, sizeof Menu_Magic_teleportationStrings}, // G00980 _teleportationStrings
     {"MENU/MENU1.PRG", 0xC78, 4302u, &Menu_BreakArts_strings, sizeof Menu_BreakArts_strings}, // G01004 _strings
@@ -590,14 +577,14 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x405E4, sizeof Battle_breakArtPointRequirements, &Battle_breakArtPointRequirements, sizeof Battle_breakArtPointRequirements}, // G01916 vs_main_artsPointsRequirements
     {"SLUS_010.40", 0x4065C, sizeof Battle_battleAbilityPointRequirements, &Battle_battleAbilityPointRequirements, sizeof Battle_battleAbilityPointRequirements}, // G01917 vs_main_battleAbilitiesPointsRequirements
     {"SLUS_010.40", 0x40688, sizeof Actors_usesSecondaryBodyModel, &Actors_usesSecondaryBodyModel, sizeof Actors_usesSecondaryBodyModel}, // G01918 D_8004FE88
-    {"TITLE/TITLE.PRG", 0xA70C, sizeof Title_publisherLogo, &Title_publisherLogo, sizeof Title_publisherLogo}, // G02143 publisher_clut
-    {"TITLE/TITLE.PRG", 0xBF2C, sizeof Title_developerLogo, &Title_developerLogo, sizeof Title_developerLogo}, // G02019 developer
-    {"TITLE/TITLE.PRG", 0xE2D4, sizeof Title_titleScreenBackground, &Title_titleScreenBackground, sizeof Title_titleScreenBackground}, // G02020 _titleScreenBg
-    {"TITLE/TITLE.PRG", 0x449A8, sizeof Title_copyrightImage, &Title_copyrightImage, sizeof Title_copyrightImage}, // G02021 _menuCopyright
-    {"TITLE/TITLE.PRG", 0x46B68, sizeof Title_saveMenuFontAtlas, &Title_saveMenuFontAtlas, sizeof Title_saveMenuFontAtlas}, // G02022 _fontTable
-    {"TITLE/TITLE.PRG", 0x54B68, sizeof Title_debugFontAtlas, &Title_debugFontAtlas, sizeof Title_debugFontAtlas}, // G02023 _debugFont
-    {"TITLE/TITLE.PRG", 0x59A68, sizeof Title_saveMenuUiAtlas, &Title_saveMenuUiAtlas, sizeof Title_saveMenuUiAtlas}, // G02024 _uiTable
-    {"TITLE/TITLE.PRG", 0x68A68, sizeof Title_saveMenuBackground, &Title_saveMenuBackground, sizeof Title_saveMenuBackground}, // G02089 _saveMenuBg_clut
+    {"TITLE/TITLE.PRG", 0xA70C, sizeof VS::Title::publisherLogo, &VS::Title::publisherLogo, sizeof VS::Title::publisherLogo}, // G02143 publisher_clut
+    {"TITLE/TITLE.PRG", 0xBF2C, sizeof VS::Title::developerLogo, &VS::Title::developerLogo, sizeof VS::Title::developerLogo}, // G02019 developer
+    {"TITLE/TITLE.PRG", 0xE2D4, sizeof VS::Title::titleScreenBackground, &VS::Title::titleScreenBackground, sizeof VS::Title::titleScreenBackground}, // G02020 _titleScreenBg
+    {"TITLE/TITLE.PRG", 0x449A8, sizeof VS::Title::copyrightImage, &VS::Title::copyrightImage, sizeof VS::Title::copyrightImage}, // G02021 _menuCopyright
+    {"TITLE/TITLE.PRG", 0x46B68, sizeof VS::Title::saveMenuFontAtlas, &VS::Title::saveMenuFontAtlas, sizeof VS::Title::saveMenuFontAtlas}, // G02022 _fontTable
+    {"TITLE/TITLE.PRG", 0x54B68, sizeof VS::Title::debugFontAtlas, &VS::Title::debugFontAtlas, sizeof VS::Title::debugFontAtlas}, // G02023 _debugFont
+    {"TITLE/TITLE.PRG", 0x59A68, sizeof VS::Title::saveMenuUiAtlas, &VS::Title::saveMenuUiAtlas, sizeof VS::Title::saveMenuUiAtlas}, // G02024 _uiTable
+    {"TITLE/TITLE.PRG", 0x68A68, sizeof VS::Title::saveMenuBackground, &VS::Title::saveMenuBackground, sizeof VS::Title::saveMenuBackground}, // G02089 _saveMenuBg_clut
     {"EFFECT/PLG074.BIN", 0x577C, 4u, VS::Content::plg074TrailEmissionCounter, sizeof VS::Content::plg074TrailEmissionCounter},
     {"BATTLE/BATTLE.PRG", 0x81268, 72u, Content_battleShadowVertices, sizeof Content_battleShadowVertices},
     {"BATTLE/BATTLE.PRG", 0x812D4, 96u, Content_battleShadowFaces, sizeof Content_battleShadowFaces},

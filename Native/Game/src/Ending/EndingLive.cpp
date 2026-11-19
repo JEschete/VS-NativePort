@@ -27,13 +27,13 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
-#include "Ending/ClearResults.h"
+#include "Ending/ClearResults.hpp"
 #include "Ending/ClearResultsCore.hpp"
-#include "Ending/Credits.h"
+#include "Ending/Credits.hpp"
 #include "Ending/Credits/EmbeddedArt.hpp"
-#include "Ending/Credits/StaffRoll.h"
+#include "Ending/Credits/StaffRoll.hpp"
 #include "Ending/Credits/StaffRollCore.hpp"
-#include "Ending/Results.h"
+#include "Ending/Results.hpp"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Input/ControllerLive.hpp"
@@ -74,12 +74,6 @@ constexpr unsigned kHalfwordShift = 16;
 constexpr std::size_t kStateFlagsBytes = 0x440;
 constexpr std::size_t kRetainedFlagBytes = 0x10;
 static_assert(sizeof(State_StateFlags) == kStateFlagsBytes);
-static_assert(sizeof(Ending_Credits_rippleDistanceGrid) ==
-              Credits::kRippleRows * Credits::kRippleColumns);
-static_assert(std::size(Ending_Credits_illustrationHoldFrames) ==
-              Credits::kIllustrationCount);
-static_assert(std::size(Ending_Credits_illustrationResources) ==
-              Credits::kIllustrationCount);
 
 constexpr std::array<Content_DiscFile, kResultsFileCount> kResultsFiles{{
     {VS_END_DIS_LBA, VS_END_DIS_SIZE},
@@ -402,9 +396,11 @@ class LiveDisplay : public Host {
     return State::UpdateLivePlayTimeAndLoading(0);
   }
   void ResetPresentedFrameCount() override {
-    Ending_Credits_xaResumeFrameCount = 0;
+    VS::Ending::Credits::xaResumeFrameCount = 0;
   }
-  void CountPresentedFrame() override { ++Ending_Credits_xaResumeFrameCount; }
+  void CountPresentedFrame() override {
+    ++VS::Ending::Credits::xaResumeFrameCount;
+  }
   void UpdateControllers() override { Input::UpdateLiveControllers(); }
   [[nodiscard]] std::uint32_t ButtonsPressed() const override {
     return static_cast<std::uint32_t>(VS::Input::buttonsPressed);
@@ -559,34 +555,25 @@ class LiveProgressHost final : public ProgressHost {
 using RoomBits = std::array<std::uint32_t, kRoomFlagWords>;
 
 RoomBits CountableRoomBits() {
-  static_assert(std::size(Ending_countableRoomBits) == kRoomFlagWords);
   RoomBits bits{};
-  std::ranges::transform(Ending_countableRoomBits, bits.begin(), [](int word) {
-    return static_cast<std::uint32_t>(word);
-  });
+  std::ranges::transform(
+      VS::Ending::countableRoomBits, bits.begin(),
+      [](std::int32_t word) { return static_cast<std::uint32_t>(word); });
   return bits;
 }
 
 // ---- clear results
 
-Render::RegionColor Color(const CVECTOR& color) {
-  return {color.r, color.g, color.b, color.cd};
-}
-
-RegionColorPair Pair(std::span<const CVECTOR> colors) {
-  return {Color(colors[0]), Color(colors[1])};
-}
-
 ResultsTints LoadTints() {
   ResultsTints tints{
-      .score = Pair(Ending_scoreTint),
-      .counting_score = Pair(Ending_countingScoreTint),
-      .map_completion = Pair(Ending_mapCompletionTint),
-      .counting_map_completion = Pair(Ending_countingMapCompletionTint),
-      .rank_heading = Pair(Ending_rankHeadingTint),
-      .rank_label = Pair(Ending_rankLabelTint)};
-  std::ranges::transform(Ending_congratulationsTint,
-                         tints.congratulations.begin(), Color);
+      .score = VS::Ending::scoreTint,
+      .counting_score = VS::Ending::countingScoreTint,
+      .map_completion = VS::Ending::mapCompletionTint,
+      .counting_map_completion = VS::Ending::countingMapCompletionTint,
+      .rank_heading = VS::Ending::rankHeadingTint,
+      .rank_label = VS::Ending::rankLabelTint};
+  std::ranges::copy(VS::Ending::congratulationsTint,
+                    tints.congratulations.begin());
   return tints;
 }
 
@@ -594,56 +581,54 @@ ResultsTints LoadTints() {
 class LiveResultsTables {
  public:
   LiveResultsTables() : rooms_(CountableRoomBits()) {
-    std::ranges::copy(Ending_resultAtlasRegions, atlas_.begin());
-    for (std::size_t rank = 0; rank < labels_.size(); ++rank) {
-      std::ranges::copy(Ending_rankLabelRegionIds[rank], labels_[rank].begin());
-    }
+    std::ranges::copy(VS::Ending::resultAtlasRegions, atlas_.begin());
+    std::ranges::copy(VS::Ending::rankLabelRegionIds, labels_.begin());
   }
 
   [[nodiscard]] ResultsTables Tables() const {
     return {.countable_room_bits = rooms_,
             .atlas = atlas_,
             .rank_labels = labels_,
-            .rank_title_thresholds = Ending_rankTitleThresholds,
-            .rank_score_thresholds = Ending_rankScoreThresholds,
-            .rank_heading_width = Ending_kRankHeadingWidth,
+            .rank_title_thresholds = VS::Ending::rankTitleThresholds,
+            .rank_score_thresholds = VS::Ending::rankScoreThresholds,
+            .rank_heading_width = atlas_[kRankHeadingRegion].width,
             .tints = LoadTints()};
   }
 
  private:
   RoomBits rooms_;
-  std::array<Render::TextureRegion, std::size(Ending_resultAtlasRegions)>
+  std::array<Render::TextureRegion, std::size(VS::Ending::resultAtlasRegions)>
       atlas_{};
-  std::array<RankLabel, std::size(Ending_rankLabelRegionIds)> labels_{};
+  std::array<RankLabel, std::size(VS::Ending::rankLabelRegionIds)> labels_{};
 };
 
 ResultsState LoadResultsState() {
-  return {.load_phase = Ending_resultsLoadPhase,
-          .rank = Ending_riskbreakerRankIndex,
-          .clear_count = Ending_clearCount,
-          .final_score = Ending_finalScore,
-          .map_completion = Ending_mapCompletion,
-          .displayed_map_completion = Ending_displayedMapCompletion,
-          .displayed_score = Ending_displayedScore,
-          .animation_frame = Ending_resultsAnimationFrame,
-          .is_leaving = Ending_isLeavingResults != 0,
-          .is_score_incrementing = Ending_isScoreIncrementing != 0,
+  return {.load_phase = VS::Ending::resultsLoadPhase,
+          .rank = VS::Ending::riskbreakerRankIndex,
+          .clear_count = VS::Ending::clearCount,
+          .final_score = VS::Ending::finalScore,
+          .map_completion = VS::Ending::mapCompletion,
+          .displayed_map_completion = VS::Ending::displayedMapCompletion,
+          .displayed_score = VS::Ending::displayedScore,
+          .animation_frame = VS::Ending::resultsAnimationFrame,
+          .is_leaving = VS::Ending::isLeavingResults != 0,
+          .is_score_incrementing = VS::Ending::isScoreIncrementing != 0,
           .is_map_completion_incrementing =
-              Ending_isMapCompletionIncrementing != 0};
+              VS::Ending::isMapCompletionIncrementing != 0};
 }
 
 void StoreResultsState(const ResultsState& state) {
-  Ending_resultsLoadPhase = state.load_phase;
-  Ending_riskbreakerRankIndex = state.rank;
-  Ending_clearCount = state.clear_count;
-  Ending_finalScore = state.final_score;
-  Ending_mapCompletion = state.map_completion;
-  Ending_displayedMapCompletion = state.displayed_map_completion;
-  Ending_displayedScore = state.displayed_score;
-  Ending_resultsAnimationFrame = state.animation_frame;
-  Ending_isLeavingResults = state.is_leaving ? 1 : 0;
-  Ending_isScoreIncrementing = state.is_score_incrementing ? 1 : 0;
-  Ending_isMapCompletionIncrementing =
+  VS::Ending::resultsLoadPhase = state.load_phase;
+  VS::Ending::riskbreakerRankIndex = state.rank;
+  VS::Ending::clearCount = state.clear_count;
+  VS::Ending::finalScore = state.final_score;
+  VS::Ending::mapCompletion = state.map_completion;
+  VS::Ending::displayedMapCompletion = state.displayed_map_completion;
+  VS::Ending::displayedScore = state.displayed_score;
+  VS::Ending::resultsAnimationFrame = state.animation_frame;
+  VS::Ending::isLeavingResults = state.is_leaving ? 1 : 0;
+  VS::Ending::isScoreIncrementing = state.is_score_incrementing ? 1 : 0;
+  VS::Ending::isMapCompletionIncrementing =
       state.is_map_completion_incrementing ? 1 : 0;
 }
 
@@ -688,26 +673,26 @@ class LiveResultsHost final : public LiveDisplay<ResultsHost> {
                         kResultsFiles.size());
       return;
     }
-    Ending_resultsTimBuffer = read_.Begin(kResultsFiles[file], false);
-    Ending_resultsDiscReadSlot = read_.Slot();
+    VS::Ending::resultsTimBuffer = read_.Begin(kResultsFiles[file], false);
+    VS::Ending::resultsDiscReadSlot = read_.Slot();
   }
   [[nodiscard]] bool IsResultsReadComplete() override {
     return read_.IsComplete();
   }
   [[nodiscard]] std::span<const std::byte> ResultsData() override {
-    if (!read_.IsLoaded() || Ending_resultsTimBuffer == nullptr) return {};
-    return {static_cast<const std::byte*>(Ending_resultsTimBuffer),
+    if (!read_.IsLoaded() || VS::Ending::resultsTimBuffer == nullptr) return {};
+    return {static_cast<const std::byte*>(VS::Ending::resultsTimBuffer),
             read_.Size()};
   }
   void EndResultsRead() override {
     read_.End();
-    Ending_resultsDiscReadSlot = nullptr;
+    VS::Ending::resultsDiscReadSlot = nullptr;
   }
   void FreeResultsData() override {
-    if (Ending_resultsTimBuffer != nullptr) {
-      Core::Memory::FreeLiveFromHighEnd(Ending_resultsTimBuffer);
+    if (VS::Ending::resultsTimBuffer != nullptr) {
+      Core::Memory::FreeLiveFromHighEnd(VS::Ending::resultsTimBuffer);
     }
-    Ending_resultsTimBuffer = nullptr;
+    VS::Ending::resultsTimBuffer = nullptr;
   }
 
  private:
@@ -784,12 +769,13 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
             kEmbeddedTimBytes};
   }
   [[nodiscard]] std::span<std::byte> IllustrationWorkspace() override {
-    if (!prepared_ || Ending_Credits_illustrationTimWorkspace == nullptr) {
+    if (!prepared_ ||
+        VS::Ending::Credits::illustrationTimWorkspace == nullptr) {
       return {};
     }
-    return {
-        reinterpret_cast<std::byte*>(Ending_Credits_illustrationTimWorkspace),
-        kEmbeddedTimBytes};
+    return {reinterpret_cast<std::byte*>(
+                VS::Ending::Credits::illustrationTimWorkspace),
+            kEmbeddedTimBytes};
   }
 
   void BeginIllustrationRead(std::size_t resource) override;
@@ -805,10 +791,10 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
       std::size_t resource) override;
 
   [[nodiscard]] std::span<const std::uint8_t> Script() override {
-    return Ending_Credits_scriptBytes;
+    return VS::Ending::Credits::scriptBytes;
   }
   [[nodiscard]] std::span<const std::uint8_t> GlyphWidths() override {
-    return Ending_Credits_glyphWidths;
+    return VS::Ending::Credits::glyphWidths;
   }
   void UpdateClearProgress() override { LiveCommitClearProgress(); }
   void ShowClearResults() override { RunLiveClearResults(); }
@@ -818,10 +804,10 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
   // illustration.
   static Content_DiscFile DiscFile(std::size_t resource) {
     const std::size_t index = resource - Credits::kFirstDiscIllustration;
-    const std::span<const int, Credits::kIllustrationCount> locations(
-        Ending_Credits_illustrationDiscLocations, Credits::kIllustrationCount);
-    const std::span<const int, Credits::kIllustrationCount> sizes(
-        Ending_Credits_illustrationDiscSizes, Credits::kIllustrationCount);
+    const std::span<const std::int32_t, Credits::kIllustrationCount> locations(
+        VS::Ending::Credits::illustrationDiscLocations);
+    const std::span<const std::int32_t, Credits::kIllustrationCount> sizes(
+        VS::Ending::Credits::illustrationDiscSizes);
     return {locations[index], sizes[index]};
   }
   static bool IsDiscIllustration(std::size_t resource) {
@@ -837,30 +823,30 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
 };
 
 void LiveCreditsHost::PublishState() {
-  Ending_Credits_hasFinished = state_.has_finished ? 1 : 0;
-  Ending_Credits_isBackgroundFading = state_.is_background_fading ? 1 : 0;
-  Ending_Credits_wasSkipRequested = state_.was_skip_requested ? 1 : 0;
-  Ending_Credits_elapsedFrames = state_.elapsed_frames;
-  Ending_Credits_scriptDelayFrames = state_.script_delay_frames;
-  const std::span<u_char> script(Ending_Credits_scriptBytes);
-  Ending_Credits_scriptCursor =
+  VS::Ending::Credits::hasFinished = state_.has_finished ? 1 : 0;
+  VS::Ending::Credits::isBackgroundFading = state_.is_background_fading ? 1 : 0;
+  VS::Ending::Credits::wasSkipRequested = state_.was_skip_requested ? 1 : 0;
+  VS::Ending::Credits::elapsedFrames = state_.elapsed_frames;
+  VS::Ending::Credits::scriptDelayFrames = state_.script_delay_frames;
+  const std::span<std::uint8_t> script(VS::Ending::Credits::scriptBytes);
+  VS::Ending::Credits::scriptCursor =
       script.subspan(std::min(state_.script_cursor, script.size())).data();
-  Ending_Credits_scrollSpeedFixed8 = state_.scroll_speed_fixed8;
-  Ending_Credits_backgroundBrightness = state_.background_brightness;
-  Ending_Credits_ripplePhaseAngle = state_.ripple.phase_angle;
-  Ending_Credits_rippleScaleFrame = state_.ripple.scale_frame;
-  std::memcpy(Ending_Credits_rippleDistanceGrid,
+  VS::Ending::Credits::scrollSpeedFixed8 = state_.scroll_speed_fixed8;
+  VS::Ending::Credits::backgroundBrightness = state_.background_brightness;
+  VS::Ending::Credits::ripplePhaseAngle = state_.ripple.phase_angle;
+  VS::Ending::Credits::rippleScaleFrame = state_.ripple.scale_frame;
+  std::memcpy(VS::Ending::Credits::rippleDistanceGrid,
               state_.ripple.distance_grid.data(),
-              sizeof Ending_Credits_rippleDistanceGrid);
+              sizeof VS::Ending::Credits::rippleDistanceGrid);
   const Credits::IllustrationState& illustration = state_.illustration;
-  Ending_Credits_illustrationBrightness = illustration.brightness;
-  Ending_Credits_illustrationTexturePageX = illustration.texture_page_x;
-  Ending_Credits_illustrationPaletteY = illustration.palette_y;
+  VS::Ending::Credits::illustrationBrightness = illustration.brightness;
+  VS::Ending::Credits::illustrationTexturePageX = illustration.texture_page_x;
+  VS::Ending::Credits::illustrationPaletteY = illustration.palette_y;
   std::ranges::copy(illustration.hold_frames,
-                    std::begin(Ending_Credits_illustrationHoldFrames));
-  Ending_Credits_illustrationDecodePhase =
-      static_cast<u_char>(state_.decoder.phase);
-  Ending_Credits_decodeBudgetStartTick = state_.decoder.budget_start_tick;
+                    std::begin(VS::Ending::Credits::illustrationHoldFrames));
+  VS::Ending::Credits::illustrationDecodePhase =
+      static_cast<std::uint8_t>(state_.decoder.phase);
+  VS::Ending::Credits::decodeBudgetStartTick = state_.decoder.budget_start_tick;
 }
 
 void LiveCreditsHost::BeginIllustrationRead(std::size_t resource) {
@@ -872,13 +858,13 @@ void LiveCreditsHost::BeginIllustrationRead(std::size_t resource) {
     return;
   }
   loaded_[resource] = false;
-  Ending_Credits_illustrationResources[resource] =
+  VS::Ending::Credits::illustrationResources[resource] =
       read_.Begin(DiscFile(resource), true);
 }
 
 void LiveCreditsHost::FreeIllustration(std::size_t resource) {
   if (resource >= Credits::kIllustrationCount) return;
-  void*& buffer = Ending_Credits_illustrationResources[resource];
+  void*& buffer = VS::Ending::Credits::illustrationResources[resource];
   if (buffer != nullptr) Core::Memory::FreeLiveFromHighEnd(buffer);
   buffer = nullptr;
   loaded_[resource] = false;
@@ -887,7 +873,7 @@ void LiveCreditsHost::FreeIllustration(std::size_t resource) {
 std::span<const std::byte> LiveCreditsHost::IllustrationResource(
     std::size_t resource) {
   if (!IsDiscIllustration(resource) || !loaded_[resource]) return {};
-  const void* buffer = Ending_Credits_illustrationResources[resource];
+  const void* buffer = VS::Ending::Credits::illustrationResources[resource];
   if (buffer == nullptr) return {};
   const auto size =
       static_cast<std::size_t>(std::max(DiscFile(resource).size, 0));
@@ -898,7 +884,7 @@ std::span<const std::byte> LiveCreditsHost::IllustrationResource(
 // decomp: ENDING.PRG vs_ending_exec (src/ENDING/ENDING.PRG/D4.c:999)
 void LiveRunStaffRoll() {
   Credits::State state;
-  std::ranges::copy(Ending_Credits_illustrationHoldFrames,
+  std::ranges::copy(VS::Ending::Credits::illustrationHoldFrames,
                     state.illustration.hold_frames.begin());
   LiveCreditsHost host(state);
   Credits::RunStaffRoll(state, host);

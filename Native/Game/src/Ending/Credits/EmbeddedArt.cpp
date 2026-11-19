@@ -9,7 +9,7 @@
 #include <span>
 
 #include "Core/Diagnostics.hpp"
-#include "Ending/Credits.h"
+#include "Ending/Credits.hpp"
 #include "Legacy/Psx.h"
 
 namespace {
@@ -35,8 +35,9 @@ constexpr auto kSourceAddresses = std::to_array<std::uint32_t>({
 });
 
 struct TimStorage {
-  Ending_Credits_TimHeader header{};
-  std::array<unsigned char, kTimCapacity - sizeof(Ending_Credits_TimHeader)>
+  VS::Ending::Credits::TimHeader header{};
+  std::array<unsigned char,
+             kTimCapacity - sizeof(VS::Ending::Credits::TimHeader)>
       payload{};
 };
 static_assert(sizeof(TimStorage) == kTimCapacity);
@@ -86,8 +87,8 @@ std::optional<std::size_t> TimLength(std::span<const unsigned char> source) {
 // trailing module span contains the complete TIMs, not just glyph widths.
 int VS::Ending::Credits::PrepareEmbeddedArt() {
   prepared = false;
-  Ending_Credits_illustrationTimWorkspace = nullptr;
-  const std::span<const unsigned char> source(Ending_Credits_glyphWidths);
+  VS::Ending::Credits::illustrationTimWorkspace = nullptr;
+  const std::span<const unsigned char> source(VS::Ending::Credits::glyphWidths);
   for (std::size_t index = 0; index < kSourceAddresses.size(); ++index) {
     const auto offset =
         static_cast<std::size_t>(kSourceAddresses[index] - kSourceBase);
@@ -105,13 +106,14 @@ int VS::Ending::Credits::PrepareEmbeddedArt() {
     }
     std::memcpy(&embedded_art[index], source.data() + offset, *bytes);
   }
-  Ending_Credits_illustrationTimWorkspace =
+  VS::Ending::Credits::illustrationTimWorkspace =
       &embedded_art[kIllustrationIndex].header;
   prepared = true;
   return 1;
 }
 
-Ending_Credits_TimHeader* VS::Ending::Credits::EmbeddedArt(unsigned index) {
+VS::Ending::Credits::TimHeader* VS::Ending::Credits::EmbeddedArt(
+    unsigned index) {
   if (!prepared || index >= embedded_art.size()) {
     VS::Core::Errorf("ending.art",
                      "unprepared or invalid embedded TIM index=%u", index);

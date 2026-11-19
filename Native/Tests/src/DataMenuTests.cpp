@@ -33,7 +33,7 @@
 #include "Render/UiPrimitives.hpp"
 #include "Save/MemoryCard/GameFiles.h"
 #include "State/PlayTime.hpp"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 
 namespace {
 namespace files = VS::Menu::Files;
@@ -45,7 +45,7 @@ files::Context LiveFiles() {
 struct EmptySlotsFixture {
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   decltype(VS::Input::buttonRepeat) saved_repeat = VS::Input::buttonRepeat;
-  Save_CardFileInfoRecord* saved_summaries = Title_saveFileSummaries;
+  Save_CardFileInfoRecord* saved_summaries = VS::Title::saveFileSummaries;
   u_short* saved_table = VS::Menu::Files::textTable;
   char* saved_message = VS::Menu::Files::memoryCardMessage;
   int saved_cursor = VS::Menu::Files::selectCursorXy;
@@ -64,7 +64,7 @@ struct EmptySlotsFixture {
     for (auto& summary : summaries) {
       summary.summary.base.slotState = Save_CardFileSlotStatus_Available;
     }
-    Title_saveFileSummaries = summaries.data();
+    VS::Title::saveFileSummaries = summaries.data();
     VS::Menu::Files::textTable = text.data();
     // Input feedback needs a bound bank, even when no sound programs exist.
     sfx_offsets.fill(UINT32_MAX);
@@ -74,7 +74,7 @@ struct EmptySlotsFixture {
 
   ~EmptySlotsFixture() {
     files::LiveFilesState().elements = saved_elements;
-    Title_saveFileSummaries = saved_summaries;
+    VS::Title::saveFileSummaries = saved_summaries;
     VS::Menu::Files::textTable = saved_table;
     VS::Menu::Files::memoryCardMessage = saved_message;
     VS::Menu::Files::selectCursorXy = saved_cursor;

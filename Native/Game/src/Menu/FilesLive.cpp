@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <array>
-#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -59,8 +58,8 @@
 #include "State/PlayTime.hpp"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
-#include "Title/SaveCard.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveCard.hpp"
+#include "Title/SaveFiles.hpp"
 
 // decomp: _containerStrings (_containerStrings@src/MENU/MENU7.PRG/260.c)
 u_short
@@ -80,28 +79,6 @@ char VS::Menu::Files::frameBuf;
 
 namespace VS::Menu::Files {
 namespace {
-using Element_ = Menu_Files_FileMenuElement;
-static_assert(sizeof(Element) == sizeof(Element_));
-static_assert(std::is_trivially_copyable_v<Element>);
-static_assert(offsetof(Element, state) == offsetof(Element_, state));
-static_assert(offsetof(Element, slot_id) == offsetof(Element_, slotId));
-static_assert(offsetof(Element, outer_blend) ==
-              offsetof(Element_, outertextBlendFactor));
-static_assert(offsetof(Element, inner_blend) ==
-              offsetof(Element_, innertextBlendFactor));
-static_assert(offsetof(Element, selected) == offsetof(Element_, selected));
-static_assert(offsetof(Element, slot_unavailable) ==
-              offsetof(Element_, slotUnavailable));
-static_assert(offsetof(Element, save_location) ==
-              offsetof(Element_, saveLocation));
-static_assert(offsetof(Element, target) == offsetof(Element_, targetPosition));
-static_assert(offsetof(Element, x) == offsetof(Element_, x));
-static_assert(offsetof(Element, y) == offsetof(Element_, y));
-static_assert(offsetof(Element, w) == offsetof(Element_, w));
-static_assert(offsetof(Element, h) == offsetof(Element_, h));
-static_assert(offsetof(Element, text) == offsetof(Element_, text));
-static_assert(sizeof(Element::text) == sizeof(Element_::text));
-
 static_assert(sizeof(ContainerData) == sizeof(Items_ContainerData));
 static_assert(offsetof(ContainerData, shields) ==
               offsetof(Items_ContainerData, shields));
@@ -134,7 +111,6 @@ static_assert(sizeof(containerStrings) ==
               kContainerStringHalfwords * sizeof(std::uint16_t));
 static_assert(VS_GAMEOVER_BIN_SIZE >=
               kGameOverImageHalfwords * sizeof(std::uint16_t));
-static_assert(std::extent_v<decltype(Title_fileMenuElements)> == kElementCount);
 
 // MCMAN.BIN's table (Save_CardUiResources::textTable) in halfwords and
 // bytes.
@@ -265,8 +241,8 @@ void ClearBothBuffers() {
   const std::array<std::span<const std::uint8_t>, 3> regions{
       std::span(reinterpret_cast<const std::uint8_t*>(textTable),
                 textTable != nullptr ? kTextTableBytes : 0),
-      std::span(reinterpret_cast<const std::uint8_t*>(Title_saveMenuText),
-                Title_saveMenuText != nullptr ? kTextTableBytes : 0),
+      std::span(reinterpret_cast<const std::uint8_t*>(VS::Title::saveMenuText),
+                VS::Title::saveMenuText != nullptr ? kTextTableBytes : 0),
       std::span(reinterpret_cast<const std::uint8_t*>(footer.data()),
                 footer.size())};
   for (const std::span<const std::uint8_t> region : regions) {
@@ -296,18 +272,18 @@ char* TableMessage(u_short* table, std::optional<std::uint16_t> offset,
 }
 
 Save_CardFileInfoRecord* SummaryRecord(int slot) {
-  if (Title_saveFileSummaries == nullptr || slot < 0 ||
+  if (VS::Title::saveFileSummaries == nullptr || slot < 0 ||
       slot >= static_cast<int>(kSaveSlots)) {
     return nullptr;
   }
-  return &Title_saveFileSummaries[slot];
+  return &VS::Title::saveFileSummaries[slot];
 }
 
-Menu_Files_FileMenuElement* TitleElement(int id) {
+Element* TitleElement(int id) {
   if (id < 0 || id >= static_cast<int>(kElementCount)) {
     return nullptr;
   }
-  return &Title_fileMenuElements[id];
+  return &VS::Title::fileMenuElements[id];
 }
 
 // The ordering table and GPU half of the data and game-over screens.
@@ -439,14 +415,13 @@ class LiveCardHost : public LiveGpuHost {
     fileProgressCounter = counter;
   }
   TransferProgress Transfer() override {
-    return {.position = Title_transferProgressPosition,
-            .previous = Title_previousTransferProgress,
-            .target = Title_transferProgressTarget,
-            .error_offset =
-                static_cast<std::uint8_t>(Title_saveTransferErrorOffset)};
+    return {.position = VS::Title::transferProgressPosition,
+            .previous = VS::Title::previousTransferProgress,
+            .target = VS::Title::transferProgressTarget,
+            .error_offset = VS::Title::saveTransferErrorOffset};
   }
   void SetTransferTarget(std::uint16_t target) override {
-    Title_transferProgressTarget = target;
+    VS::Title::transferProgressTarget = target;
   }
 
   SlotSummary Summary(int slot) override {
@@ -488,18 +463,18 @@ class LiveCardHost : public LiveGpuHost {
   }
   void LoadWrittenSummary(int slot) override {
     Save_CardFileInfoRecord* const record = SummaryRecord(slot);
-    if (record == nullptr || Title_memoryCardUiResource == nullptr) {
+    if (record == nullptr || VS::Title::memoryCardUiResource == nullptr) {
       Refuse("written save summary without the loaded save workspace");
       return;
     }
-    std::memcpy(record, Title_memoryCardUiResource + kWrittenSummaryOffset,
+    std::memcpy(record, VS::Title::memoryCardUiResource + kWrittenSummaryOffset,
                 sizeof *record);
     VS::Save::MemoryCard::DecodeLiveSaveBytes(
         record->key, &record->summary.base.slotState,
         sizeof *record - sizeof record->key);
   }
   void ClearCardDirectory() override {
-    std::ranges::fill(Title_cardDirectoryEntries, nullptr);
+    std::ranges::fill(VS::Title::cardDirectoryEntries, nullptr);
   }
   int NewestSaveSlot() override {
     return VS::Save::MemoryCard::NewestLiveSaveSlot();
@@ -536,12 +511,12 @@ class LiveCardHost : public LiveGpuHost {
   // One save image of the workspace over another (_rMemcpy of
   // (savedata_t*)_spmcimg + from); the images do not overlap.
   void MoveSaveImage(std::size_t to, std::size_t from) {
-    if (Title_memoryCardUiResource == nullptr) {
+    if (VS::Title::memoryCardUiResource == nullptr) {
       Refuse("save image copy without the loaded save workspace");
       return;
     }
-    std::memcpy(Title_memoryCardUiResource + (to * kSaveImageBytes),
-                Title_memoryCardUiResource + (from * kSaveImageBytes),
+    std::memcpy(VS::Title::memoryCardUiResource + (to * kSaveImageBytes),
+                VS::Title::memoryCardUiResource + (from * kSaveImageBytes),
                 kSaveImageBytes);
   }
 };
@@ -718,82 +693,74 @@ class LiveHost : public LiveCardHost {
 class TitleFilesLiveHost final : public LiveHost {
  public:
   std::span<const std::uint16_t> TextTable() override {
-    return TableSpan(Title_saveMenuText);
+    return TableSpan(VS::Title::saveMenuText);
   }
   void SetCardMessage(std::optional<std::uint16_t> offset) override {
-    Title_memoryCardMessage = TableMessage(Title_saveMenuText, offset, *this);
+    VS::Title::memoryCardMessage =
+        TableMessage(VS::Title::saveMenuText, offset, *this);
   }
   int AdvanceCardReadiness(int port) override {
     return VS::Save::MemoryCard::AdvanceLiveTitleCardReadiness(port);
   }
   bool CardMessageIs(std::uint16_t offset) override {
-    return Title_saveMenuText != nullptr && offset < kTextTableHalfwords &&
-           Title_memoryCardMessage ==
-               reinterpret_cast<char*>(Title_saveMenuText + offset);
+    return VS::Title::saveMenuText != nullptr && offset < kTextTableHalfwords &&
+           VS::Title::memoryCardMessage ==
+               reinterpret_cast<char*>(VS::Title::saveMenuText + offset);
   }
   std::span<const std::uint8_t> CardMessage() override {
-    if (Title_memoryCardMessage == nullptr) {
+    if (VS::Title::memoryCardMessage == nullptr) {
       return {};
     }
     const std::span<const std::uint8_t> text =
-        TextTail(Title_memoryCardMessage);
+        TextTail(VS::Title::memoryCardMessage);
     if (text.empty()) {
       Refuse("title memory-card message outside the MCMAN.BIN table");
     }
     return text;
   }
   std::int32_t CursorPosition() override {
-    return Title_selectionCursorPosition;
+    return VS::Title::selectionCursorPosition;
   }
   void SetCursorPosition(std::int32_t position) override {
-    Title_selectionCursorPosition = position;
+    VS::Title::selectionCursorPosition = position;
   }
-  std::uint8_t DataNotSaved() override {
-    return static_cast<std::uint8_t>(Title_hasUnsavedData);
-  }
+  std::uint8_t DataNotSaved() override { return VS::Title::hasUnsavedData; }
   void SetDataNotSaved(std::uint8_t not_saved) override {
-    Title_hasUnsavedData = static_cast<char>(not_saved);
+    VS::Title::hasUnsavedData = not_saved;
   }
   std::int32_t ProgressCounter() override {
-    return Title_transferProgressCounter;
+    return VS::Title::transferProgressCounter;
   }
   void SetProgressCounter(std::int32_t counter) override {
-    Title_transferProgressCounter = counter;
+    VS::Title::transferProgressCounter = counter;
   }
   void DrawFileOverlay() override { VS::Game::Save::DrawFileOverlay(true); }
 };
 
-// TITLE.PRG's file screen variables as their own State: Title_fileMenuElements
-// and the scalars are read in before each call and written back after it, so
-// the copied title code and the tests keep seeing them.
+// TITLE.PRG's file screen variables as their own State:
+// VS::Title::fileMenuElements and the scalars are read in before each call and
+// written back after it, so the copied title code and the tests keep seeing
+// them.
 State g_title_state{};
 
 void LoadTitleState() {
-  for (std::size_t i = 0; i < kElementCount; ++i) {
-    g_title_state.elements.at(i) =
-        std::bit_cast<Element>(Title_fileMenuElements[i]);
-  }
-  g_title_state.is_saving = Title_isSaving != 0;
-  g_title_state.container_data_empty = Title_isContainerDataEmpty != 0;
-  g_title_state.backup_main_setting =
-      static_cast<std::uint8_t>(Title_savedMainMenuSetting);
-  g_title_state.screen_fade =
-      static_cast<std::uint8_t>(Title_fileMenuScreenFade);
-  g_title_state.cursor_color = Title_selectionCursorColor;
+  std::ranges::copy(VS::Title::fileMenuElements,
+                    g_title_state.elements.begin());
+  g_title_state.is_saving = VS::Title::isSaving != 0;
+  g_title_state.container_data_empty = VS::Title::isContainerDataEmpty != 0;
+  g_title_state.backup_main_setting = VS::Title::savedMainMenuSetting;
+  g_title_state.screen_fade = VS::Title::fileMenuScreenFade;
+  g_title_state.cursor_color = VS::Title::selectionCursorColor;
 }
 
 void StoreTitleState() {
-  for (std::size_t i = 0; i < kElementCount; ++i) {
-    Title_fileMenuElements[i] =
-        std::bit_cast<Menu_Files_FileMenuElement>(g_title_state.elements.at(i));
-  }
-  Title_isSaving = static_cast<char>(g_title_state.is_saving);
-  Title_isContainerDataEmpty =
-      static_cast<char>(g_title_state.container_data_empty);
-  Title_savedMainMenuSetting =
-      static_cast<char>(g_title_state.backup_main_setting);
-  Title_fileMenuScreenFade = static_cast<char>(g_title_state.screen_fade);
-  Title_selectionCursorColor = g_title_state.cursor_color;
+  std::ranges::copy(g_title_state.elements,
+                    std::begin(VS::Title::fileMenuElements));
+  VS::Title::isSaving = g_title_state.is_saving ? 1 : 0;
+  VS::Title::isContainerDataEmpty = g_title_state.container_data_empty ? 1 : 0;
+  VS::Title::savedMainMenuSetting = g_title_state.backup_main_setting;
+  VS::Title::fileMenuScreenFade = g_title_state.screen_fade;
+  VS::Title::selectionCursorColor = g_title_state.cursor_color;
 }
 
 class TitleStateBinding {
@@ -822,10 +789,11 @@ class TitleLiveHost final : public TitleHost {
   }
   void Refuse(std::string_view what) override { Warn(what); }
   std::span<const std::uint16_t> TextTable() override {
-    return TableSpan(Title_saveMenuText);
+    return TableSpan(VS::Title::saveMenuText);
   }
   void SetCardMessage(std::optional<std::uint16_t> offset) override {
-    Title_memoryCardMessage = TableMessage(Title_saveMenuText, offset, *this);
+    VS::Title::memoryCardMessage =
+        TableMessage(VS::Title::saveMenuText, offset, *this);
   }
   int AdvanceCardReadiness(int port) override {
     return VS::Save::MemoryCard::AdvanceLiveTitleCardReadiness(port);
@@ -864,16 +832,16 @@ class TitleLiveHost final : public TitleHost {
   }
   void AnimateElement(int id, ElementState state,
                       std::int16_t target) override {
-    Menu_Files_FileMenuElement* const element = TitleElement(id);
+    Element* const element = TitleElement(id);
     if (element == nullptr) {
       Refuse("title reminder element outside the table");
       return;
     }
-    element->state = static_cast<char>(state);
-    element->targetPosition = target;
+    element->state = static_cast<std::uint8_t>(state);
+    element->target = target;
   }
   void SetElementSelected(int id, bool selected) override {
-    Menu_Files_FileMenuElement* const element = TitleElement(id);
+    Element* const element = TitleElement(id);
     if (element == nullptr) {
       Refuse("title reminder element outside the table");
       return;
@@ -884,7 +852,7 @@ class TitleLiveHost final : public TitleHost {
     return AreLiveTitleAnimationsComplete();
   }
   void SetCursorPosition(std::int32_t position) override {
-    Title_selectionCursorPosition = position;
+    VS::Title::selectionCursorPosition = position;
   }
   // TITLE.PRG's _playMenuSelectSfx, _playMenuLeaveSfx and
   // _playMenuChangeSfx play the same 0x7E effects.
@@ -943,11 +911,12 @@ void DrawLiveTitleElement(Element& element) {
 
 bool InitializeLiveTitleElement(int id, std::uint32_t position,
                                 std::uint32_t size, std::uint16_t text_offset) {
-  if (Title_saveMenuText == nullptr || text_offset >= kTextTableHalfwords) {
+  if (VS::Title::saveMenuText == nullptr ||
+      text_offset >= kTextTableHalfwords) {
     return false;
   }
   const std::span<const std::uint8_t> text =
-      std::span(reinterpret_cast<const std::uint8_t*>(Title_saveMenuText),
+      std::span(reinterpret_cast<const std::uint8_t*>(VS::Title::saveMenuText),
                 kTextTableBytes)
           .subspan(static_cast<std::size_t>(text_offset) *
                    sizeof(std::uint16_t));

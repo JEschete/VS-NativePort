@@ -38,8 +38,8 @@ inline constexpr std::uint32_t kFirstInUseSlotState = 3;
 
 using SaveImage = std::span<std::byte, kSaveImageBytes>;
 using ConstSaveImage = std::span<const std::byte, kSaveImageBytes>;
-// Title_saveFileSummaries: one 0x80-byte summary record per slot, laid out as
-// the image's bytes 0x180..0x1FF (key, slot state, generation, signature,
+// VS::Title::saveFileSummaries: one 0x80-byte summary record per slot, laid out
+// as the image's bytes 0x180..0x1FF (key, slot state, generation, signature,
 // statistics, block checksums).
 using SummaryTable = std::span<std::byte, kSlotCount * kRecordBytes>;
 using ConstSummaryTable = std::span<const std::byte, kSlotCount * kRecordBytes>;
@@ -262,7 +262,7 @@ struct SaveWriteState {
   std::int32_t file = 0;
 };
 
-// The transfer progress bar both steps advance (Title_transferProgress*).
+// The transfer progress bar both steps advance (VS::Title::transferProgress*).
 struct TransferProgress {
   std::uint16_t position = 0;
   std::uint16_t previous = 0;

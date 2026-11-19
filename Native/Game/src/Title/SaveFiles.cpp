@@ -1,66 +1,63 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Menu/Files.h"
-#include "Save/MemoryCard/GameFiles.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 
 // decomp: _fontTable (_fontTable@TITLE/TITLE.PRG)
-Title_SaveMenuFontRecord Title_saveMenuFontAtlas[2]; /* contents: module image (ModuleData.cpp) */
+VS::Title::SaveMenuFontRecord VS::Title::saveMenuFontAtlas[VS::Title::kSaveFontPages]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _debugFont (_debugFont@TITLE/TITLE.PRG)
-u_long Title_debugFontAtlas[4928]; /* contents: module image (ModuleData.cpp) */
+std::uint32_t VS::Title::debugFontAtlas[VS::Title::kDebugFontWords]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _uiTable (_uiTable@TITLE/TITLE.PRG)
-Title_SaveMenuUiRecord Title_saveMenuUiAtlas; /* contents: module image (ModuleData.cpp) */
+VS::Title::SaveMenuUiRecord VS::Title::saveMenuUiAtlas; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _backupMainSetting (_backupMainSetting@src/TITLE/TITLE.PRG/22C.c)
-char Title_savedMainMenuSetting;
+std::uint8_t VS::Title::savedMainMenuSetting;
 
 // decomp: _containerDataEmpty (_containerDataEmpty@src/TITLE/TITLE.PRG/22C.c)
-char Title_isContainerDataEmpty;
+std::uint8_t VS::Title::isContainerDataEmpty;
 
 // decomp: _dataNotSaved (_dataNotSaved@src/TITLE/TITLE.PRG/22C.c)
-char Title_hasUnsavedData;
+std::uint8_t VS::Title::hasUnsavedData;
 
 // decomp: _fileMenuElements (_fileMenuElements@src/TITLE/TITLE.PRG/22C.c)
-Menu_Files_FileMenuElement Title_fileMenuElements[10];
+VS::Menu::Files::Element VS::Title::fileMenuElements[VS::Menu::Files::kElementCount];
 
 // decomp: _fileMenuScreenFade (_fileMenuScreenFade@src/TITLE/TITLE.PRG/22C.c)
-char Title_fileMenuScreenFade;
+std::uint8_t VS::Title::fileMenuScreenFade;
 
 // decomp: _filePreviousProgressCounter (_filePreviousProgressCounter@src/TITLE/TITLE.PRG/22C.c)
-u_short Title_previousTransferProgress;
+std::uint16_t VS::Title::previousTransferProgress;
 
 // decomp: _fileProgressCounter (_fileProgressCounter@src/TITLE/TITLE.PRG/22C.c)
-int Title_transferProgressCounter;
+std::int32_t VS::Title::transferProgressCounter;
 
 // decomp: _fileProgressPosition (_fileProgressPosition@src/TITLE/TITLE.PRG/22C.c)
-u_short Title_transferProgressPosition;
+std::uint16_t VS::Title::transferProgressPosition;
 
 // decomp: _fileProgressTarget (_fileProgressTarget@src/TITLE/TITLE.PRG/22C.c)
-u_short Title_transferProgressTarget;
+std::uint16_t VS::Title::transferProgressTarget;
 
 // decomp: _isSaving (_isSaving@src/TITLE/TITLE.PRG/22C.c)
-char Title_isSaving;
+std::uint8_t VS::Title::isSaving;
 
 // decomp: _memoryCardMessage (_memoryCardMessage@src/TITLE/TITLE.PRG/22C.c)
-char* Title_memoryCardMessage;
+char* VS::Title::memoryCardMessage;
 
 // decomp: _saveFileInfo (_saveFileInfo@src/TITLE/TITLE.PRG/22C.c)
-Save_CardFileInfoRecord* Title_saveFileSummaries;
+Save_CardFileInfoRecord* VS::Title::saveFileSummaries;
 
 // decomp: _saveMenuBg_clut (_saveMenuBg_clut@TITLE/TITLE.PRG)
-Title_SaveMenuBackgroundRecord Title_saveMenuBackground; /* contents: module image (ModuleData.cpp) */
+VS::Title::SaveMenuBackgroundRecord VS::Title::saveMenuBackground; /* contents: module image (ModuleData.cpp) */
 
 // decomp: _selectCursorColor (_selectCursorColor@src/TITLE/TITLE.PRG/22C.c)
-u_char Title_selectionCursorColor;
+std::uint8_t VS::Title::selectionCursorColor;
 
 // decomp: _selectCursorXy (_selectCursorXy@src/TITLE/TITLE.PRG/22C.c)
-int Title_selectionCursorPosition;
+std::int32_t VS::Title::selectionCursorPosition;
 
 // decomp: _spmcimg (_spmcimg@src/TITLE/TITLE.PRG/22C.c)
-char* Title_memoryCardUiResource;
+char* VS::Title::memoryCardUiResource;
 
 // decomp: _textTable (_textTable@src/TITLE/TITLE.PRG/22C.c)
-u_short* Title_saveMenuText;
+std::uint16_t* VS::Title::saveMenuText;
 

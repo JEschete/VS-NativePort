@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Ending/Credits.h"
+#include "Ending/Credits.hpp"
 #include "Ending/Credits/EmbeddedArt.hpp"
 #include "Ending/EndingLive.hpp"
 #include "Legacy/Psx.h"
@@ -38,26 +38,28 @@ void WriteInteger(unsigned char* destination, Integer value) {
 }
 
 struct EndingArtFixture {
-  std::vector<unsigned char> original{std::begin(Ending_Credits_glyphWidths),
-                                      std::end(Ending_Credits_glyphWidths)};
-  Ending_Credits_TimHeader* original_workspace =
-      Ending_Credits_illustrationTimWorkspace;
+  std::vector<unsigned char> original{
+      std::begin(VS::Ending::Credits::glyphWidths),
+      std::end(VS::Ending::Credits::glyphWidths)};
+  VS::Ending::Credits::TimHeader* original_workspace =
+      VS::Ending::Credits::illustrationTimWorkspace;
 
   EndingArtFixture() {
-    std::fill_n(Ending_Credits_glyphWidths,
-                std::size(Ending_Credits_glyphWidths), 0);
+    std::fill_n(VS::Ending::Credits::glyphWidths,
+                std::size(VS::Ending::Credits::glyphWidths), 0);
     for (std::size_t index = 0; index < kOffsets.size(); ++index) {
       SetTim(index, 16, 1, 2, 1);
     }
   }
   ~EndingArtFixture() {
-    std::copy(original.begin(), original.end(), Ending_Credits_glyphWidths);
-    Ending_Credits_illustrationTimWorkspace = original_workspace;
+    std::copy(original.begin(), original.end(),
+              VS::Ending::Credits::glyphWidths);
+    VS::Ending::Credits::illustrationTimWorkspace = original_workspace;
   }
 
   void SetTim(std::size_t index, std::uint16_t colors, std::uint16_t rows,
               std::uint16_t width, std::uint16_t height) {
-    auto* tim = Ending_Credits_glyphWidths + kOffsets[index];
+    auto* tim = VS::Ending::Credits::glyphWidths + kOffsets[index];
     WriteInteger<std::uint32_t>(tim, 0x10);
     WriteInteger<std::uint32_t>(tim + 4, colors == 256 ? 9 : 8);
     auto* block = tim + 8;
@@ -123,11 +125,11 @@ TEST_CASE(
     const auto* tim = VS::Ending::Credits::EmbeddedArt(index);
     const auto* bytes = reinterpret_cast<const unsigned char*>(tim);
     CHECK(tim->identifier == 0x10);
-    CHECK(bytes != Ending_Credits_glyphWidths + kOffsets[index]);
+    CHECK(bytes != VS::Ending::Credits::glyphWidths + kOffsets[index]);
     CHECK(bytes[20] == 0x55);
     CHECK(bytes[64] == index + 1);
   }
-  CHECK(Ending_Credits_illustrationTimWorkspace ==
+  CHECK(VS::Ending::Credits::illustrationTimWorkspace ==
         VS::Ending::Credits::EmbeddedArt(7));
 }
 
@@ -136,11 +138,11 @@ TEST_CASE("Credits preserve the full original72224-byte writable TIM workspace",
   EndingArtFixture fixture;
   fixture.SetTim(7, 256, 1, 160, 224);
   REQUIRE(VS::Ending::Credits::PrepareEmbeddedArt() == 1);
-  auto* bytes =
-      reinterpret_cast<unsigned char*>(Ending_Credits_illustrationTimWorkspace);
+  auto* bytes = reinterpret_cast<unsigned char*>(
+      VS::Ending::Credits::illustrationTimWorkspace);
   CHECK(bytes[72223] == 8);
   bytes[72223] = 0xA5;
-  CHECK(Ending_Credits_glyphWidths[kOffsets[7] + 72223] == 8);
+  CHECK(VS::Ending::Credits::glyphWidths[kOffsets[7] + 72223] == 8);
   REQUIRE(VS::Ending::Credits::PrepareEmbeddedArt() == 1);
   CHECK(bytes[72223] == 8);
 }
@@ -149,22 +151,22 @@ TEST_CASE("Credits reject invalid or oversized TIM blocks without a workspace",
           "[ending][render][ending-art]") {
   EndingArtFixture fixture;
   SECTION("Missing original TIM") {
-    Ending_Credits_glyphWidths[kOffsets[0]] = 0;
+    VS::Ending::Credits::glyphWidths[kOffsets[0]] = 0;
   }
   SECTION("Truncated block header") {
-    WriteInteger<std::uint32_t>(Ending_Credits_glyphWidths + kOffsets[0] + 8,
-                                8);
+    WriteInteger<std::uint32_t>(
+        VS::Ending::Credits::glyphWidths + kOffsets[0] + 8, 8);
   }
   SECTION("Block exceeds source extent") {
-    WriteInteger<std::uint32_t>(Ending_Credits_glyphWidths + kOffsets[0] + 8,
-                                0xFFFFFFFF);
+    WriteInteger<std::uint32_t>(
+        VS::Ending::Credits::glyphWidths + kOffsets[0] + 8, 0xFFFFFFFF);
   }
   SECTION("Pixels disagree with the block length") {
-    WriteInteger<std::uint16_t>(Ending_Credits_glyphWidths + kOffsets[0] + 16,
-                                256);
+    WriteInteger<std::uint16_t>(
+        VS::Ending::Credits::glyphWidths + kOffsets[0] + 16, 256);
   }
   CHECK(VS::Ending::Credits::PrepareEmbeddedArt() == 0);
-  CHECK(Ending_Credits_illustrationTimWorkspace == nullptr);
+  CHECK(VS::Ending::Credits::illustrationTimWorkspace == nullptr);
 }
 
 TEST_CASE("Clear results retain five strips in the native penultimate bucket",

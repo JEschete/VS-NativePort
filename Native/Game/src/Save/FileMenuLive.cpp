@@ -40,7 +40,7 @@
 #include "Save/NativeResume.hpp"
 #include "Save/RuntimeSnapshot.hpp"
 #include "State/StateFlags.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 
 namespace VS::Game::Save {
 namespace {
@@ -148,7 +148,7 @@ void Status(FileMenuScreen screen, std::string_view text) {
   }
   footer[n] = static_cast<char>(VS::Core::TextCode::kTerminator);
   if (screen == FileMenuScreen::kTitle) {
-    Title_memoryCardMessage = footer.data();
+    VS::Title::memoryCardMessage = footer.data();
   } else {
     VS::Menu::Files::memoryCardMessage = footer.data();
   }
@@ -337,7 +337,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
     ForgetPicker();
     if (screen == FileMenuScreen::kTitle) {
       file_menu::ResetLiveTitleElements();
-      Title_selectionCursorPosition = 0;
+      VS::Title::selectionCursorPosition = 0;
     } else {
       VS::Menu::Files::ResetLiveElements();
       VS::Menu::Files::selectCursorXy = 0;
@@ -584,8 +584,8 @@ void ResetFileMenuSession() {
   staged_storage.reset();
   staged_clear.reset();
   ClearError().clear();
-  if (Title_memoryCardMessage == footer.data()) {
-    Title_memoryCardMessage = nullptr;
+  if (VS::Title::memoryCardMessage == footer.data()) {
+    VS::Title::memoryCardMessage = nullptr;
   }
   if (VS::Menu::Files::memoryCardMessage == footer.data()) {
     VS::Menu::Files::memoryCardMessage = nullptr;

@@ -134,7 +134,7 @@ constexpr std::uint16_t kRankBackgroundPageBits = 0x180;
 
 // Atlas regions: digits 0-9 come first.
 constexpr int kRegionDigitSeparator = 0xA;
-constexpr int kRegionRankHeading = 12;
+constexpr int kRegionRankHeading = static_cast<int>(kRankHeadingRegion);
 constexpr int kRegionScoreLabel = 0x12;
 constexpr int kRegionPercentSign = 0x13;
 constexpr int kRegionScoreUnit = 0x14;

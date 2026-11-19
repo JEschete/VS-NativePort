@@ -49,12 +49,12 @@
 #include "State/RoomMemory.h"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
-#include "Title/Credits.h"
-#include "Title/NewGame.h"
-#include "Title/SaveFiles.h"
+#include "Title/Credits.hpp"
+#include "Title/NewGame.hpp"
+#include "Title/SaveFiles.hpp"
 #include "Title/TitleMenu.hpp"  // NOLINT(build/include): typed API
 #include "Title/TitleMenuLiveState.hpp"
-#include "Title/TitleScreen.h"
+#include "Title/TitleScreen.hpp"
 
 // decomp: vs_main_titleScreenCount (vs_main_titleScreenCount@SLUS_010.40)
 int VS::Title::titleScreenVisitCount = 0;
@@ -73,24 +73,9 @@ constexpr std::size_t kStateFlagsBytes = 0x440;
 constexpr std::size_t kTrialBosses = 8;
 constexpr std::size_t kTrialRanks = 3;
 constexpr std::uint32_t kTrialTimeMask = 0xFFFFFF;
-// The sizes of the TITLE.PRG data the module globals stand in for.
-constexpr std::size_t kSaveUiBytes = 0xF000;
-constexpr std::size_t kSaveFontBytes = 0x7000;
-constexpr std::size_t kSaveBackgroundBytes = 0xB600;
-constexpr std::size_t kBackgroundEncodingBytes = 222932;
-constexpr std::size_t kCopyrightBytes = std::size_t{180} * 24 * kPixelBytes;
-constexpr std::size_t kPublisherLogoBytes = 6176;
-constexpr std::size_t kDeveloperLogoBytes = 896;
 
 static_assert(sizeof(State_StateFlags) == kStateFlagsBytes);
-static_assert(sizeof(Title_SaveMenuUiRecord) == kSaveUiBytes);
-static_assert(sizeof(Title_SaveMenuFontRecord) == kSaveFontBytes);
-static_assert(sizeof(Title_SaveMenuBackgroundRecord) == kSaveBackgroundBytes);
-static_assert(sizeof(Title_titleScreenBackground) == kBackgroundEncodingBytes);
-static_assert(sizeof(Title_copyrightImage) == kCopyrightBytes);
-static_assert(sizeof(Title_publisherLogo) == kPublisherLogoBytes);
-static_assert(sizeof(Title_developerLogo) == kDeveloperLogoBytes);
-static_assert(sizeof(Title_initialLearnedActionBits) ==
+static_assert(sizeof(VS::Title::initialLearnedActionBits) ==
               sizeof(State_learnedActionFlags));
 static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
               kTrialBosses);
@@ -139,30 +124,32 @@ struct ImageSource {
   constexpr std::size_t kPaletteBytes = 32;
   switch (image) {
     case Image::kSaveUiPageZero:
-      return {Title_saveMenuUiAtlas.pageZeroPixels,
-              sizeof Title_saveMenuUiAtlas.pageZeroPixels};
+      return {VS::Title::saveMenuUiAtlas.page_zero_pixels,
+              sizeof VS::Title::saveMenuUiAtlas.page_zero_pixels};
     case Image::kSaveUiPageOne:
-      return {Title_saveMenuUiAtlas.pageOnePixels,
-              sizeof Title_saveMenuUiAtlas.pageOnePixels};
+      return {VS::Title::saveMenuUiAtlas.page_one_pixels,
+              sizeof VS::Title::saveMenuUiAtlas.page_one_pixels};
     case Image::kSaveFontPageZero:
-      return {&Title_saveMenuFontAtlas[0], sizeof Title_saveMenuFontAtlas[0]};
+      return {&VS::Title::saveMenuFontAtlas[0],
+              sizeof VS::Title::saveMenuFontAtlas[0]};
     case Image::kSaveFontPageOne:
-      return {&Title_saveMenuFontAtlas[1], sizeof Title_saveMenuFontAtlas[1]};
+      return {&VS::Title::saveMenuFontAtlas[1],
+              sizeof VS::Title::saveMenuFontAtlas[1]};
     case Image::kDebugFont:
-      return {Title_debugFontAtlas, sizeof Title_debugFontAtlas};
+      return {VS::Title::debugFontAtlas, sizeof VS::Title::debugFontAtlas};
     case Image::kSaveBackgroundPalette:
-      return {Title_saveMenuBackground.palette,
-              sizeof Title_saveMenuBackground.palette};
+      return {VS::Title::saveMenuBackground.palette,
+              sizeof VS::Title::saveMenuBackground.palette};
     case Image::kSaveBackgroundPixels:
-      return {Title_saveMenuBackground.indexedPixels,
-              sizeof Title_saveMenuBackground.indexedPixels};
+      return {VS::Title::saveMenuBackground.indexed_pixels,
+              sizeof VS::Title::saveMenuBackground.indexed_pixels};
     case Image::kPublisherPalette:
-      return {Title_publisherLogo, kPaletteBytes};
+      return {VS::Title::publisherLogo, kPaletteBytes};
     case Image::kPublisherPixels:
-      return {Title_publisherLogo + kPaletteBytes,
-              sizeof Title_publisherLogo - kPaletteBytes};
+      return {VS::Title::publisherLogo + kPaletteBytes,
+              sizeof VS::Title::publisherLogo - kPaletteBytes};
     case Image::kDeveloperLogo:
-      return {Title_developerLogo, sizeof Title_developerLogo};
+      return {VS::Title::developerLogo, sizeof VS::Title::developerLogo};
   }
   return {nullptr, 0};
 }
@@ -338,10 +325,10 @@ class LiveHost final : public Host {
     Core::Memory::FreeLiveFromLowEnd(block.data());
   }
   std::span<const std::uint32_t> BackgroundWords() override {
-    return std::span<const std::uint32_t>(Title_titleScreenBackground);
+    return std::span<const std::uint32_t>(VS::Title::titleScreenBackground);
   }
   std::span<const std::uint16_t> CopyrightPixels() override {
-    return std::span<const std::uint16_t>(Title_copyrightImage);
+    return std::span<const std::uint16_t>(VS::Title::copyrightImage);
   }
 
   void StartIntroMovie() override { Movie::Intro::StartLive(); }
@@ -383,12 +370,12 @@ class LiveHost final : public Host {
     return Menu::UpdateLiveSaveMenu(init);
   }
   void ShowSavePrompt() override {
-    if (Title_saveMenuText == nullptr) {
+    if (VS::Title::saveMenuText == nullptr) {
       Warn("title save prompt refused: MCMAN.BIN is not loaded");
       return;
     }
-    Title_memoryCardMessage = reinterpret_cast<char*>(
-        Title_saveMenuText + Text_Menu_MCMAN_BIN_Offset_savePrompt);
+    VS::Title::memoryCardMessage = reinterpret_cast<char*>(
+        VS::Title::saveMenuText + Text_Menu_MCMAN_BIN_Offset_savePrompt);
   }
   int UpdateClearSaveReminder(int init) override {
     return Menu::Files::UpdateLiveClearSaveReminder(init);
@@ -404,9 +391,9 @@ class LiveHost final : public Host {
     std::memset(&VS::State::stateFlags, 0, sizeof VS::State::stateFlags);
   }
   void RestoreInitialLearnedActions() override {
-    Core::Memory::CopyLiveAlignedWords(State_learnedActionFlags,
-                                       Title_initialLearnedActionBits,
-                                       sizeof Title_initialLearnedActionBits);
+    Core::Memory::CopyLiveAlignedWords(
+        State_learnedActionFlags, VS::Title::initialLearnedActionBits,
+        sizeof VS::Title::initialLearnedActionBits);
   }
   void ClearProgressRecords() override {
     Core::Memory::ZeroLiveAlignedWords(&State_roomVisitProgress,
@@ -447,7 +434,7 @@ class LiveHost final : public Host {
   }
   void RestoreNewGameInventory() override {
     Core::Memory::CopyLiveAlignedWords(&VS::Items::inventory,
-                                       Title_newGameInventoryTemplate,
+                                       VS::Title::newGameInventoryTemplate,
                                        sizeof VS::Items::inventory);
   }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }

@@ -1,50 +1,45 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Ending/Credits.h"
-#include "Ending/Credits/StaffRoll.h"
+#include "Ending/Credits/StaffRoll.hpp"
 
 // decomp: _illustrationTimers (_illustrationTimers@ENDING/ENDING.PRG)
-u_short Ending_Credits_illustrationHoldFrames[16]; /* contents: module image (ModuleData.cpp) */
+std::uint16_t VS::Ending::Credits::illustrationHoldFrames[VS::Ending::Credits::kIllustrationCount]; /* contents: module image (ModuleData.cpp) */
 
 // decomp: D_800DBB18 (D_800DBB18@ENDING/ENDING.PRG)
-int Ending_Credits_ripplePhaseAngle;
+std::int32_t VS::Ending::Credits::ripplePhaseAngle;
 
 // decomp: D_800DBB1C (D_800DBB1C@ENDING/ENDING.PRG)
-int Ending_Credits_rippleScaleFrame;
+std::int32_t VS::Ending::Credits::rippleScaleFrame;
 
 // decomp: D_800DBB28 (D_800DBB28@ENDING/ENDING.PRG)
-u_char Ending_Credits_rippleDistanceGrid[4][16];
+std::uint8_t VS::Ending::Credits::rippleDistanceGrid[VS::Ending::Credits::kRippleRows][VS::Ending::Credits::kRippleColumns];
 
 // decomp: D_800DBB68 (D_800DBB68@ENDING/ENDING.PRG)
-short Ending_Credits_illustrationBrightness;
-
-// decomp: _creditsElements (_creditsElements@ENDING/ENDING.PRG)
-Ending_Credits_Element Ending_Credits_elements[32];
+std::int16_t VS::Ending::Credits::illustrationBrightness;
 
 // decomp: D_800DC188 (D_800DC188@ENDING/ENDING.PRG)
-u_char Ending_Credits_hasFinished;
+std::uint8_t VS::Ending::Credits::hasFinished;
 
 // decomp: D_800DC189 (D_800DC189@ENDING/ENDING.PRG)
-u_char Ending_Credits_isBackgroundFading;
+std::uint8_t VS::Ending::Credits::isBackgroundFading;
 
 // decomp: _skipInvoked (_skipInvoked@ENDING/ENDING.PRG)
-u_char Ending_Credits_wasSkipRequested;
+std::uint8_t VS::Ending::Credits::wasSkipRequested;
 
 // decomp: D_800DC18C (D_800DC18C@ENDING/ENDING.PRG)
-int Ending_Credits_elapsedFrames;
+std::int32_t VS::Ending::Credits::elapsedFrames;
 
 // decomp: _textStreamDelay (_textStreamDelay@ENDING/ENDING.PRG)
-int Ending_Credits_scriptDelayFrames;
+std::int32_t VS::Ending::Credits::scriptDelayFrames;
 
 // decomp: _creditsBytestreamHead (_creditsBytestreamHead@ENDING/ENDING.PRG)
-u_char* Ending_Credits_scriptCursor;
+std::uint8_t* VS::Ending::Credits::scriptCursor;
 
 // decomp: _scrollSpeed (_scrollSpeed@ENDING/ENDING.PRG)
-short Ending_Credits_scrollSpeedFixed8;
+std::int16_t VS::Ending::Credits::scrollSpeedFixed8;
 
 // decomp: D_800DC19C (D_800DC19C@ENDING/ENDING.PRG)
-u_short Ending_Credits_backgroundBrightness;
+std::uint16_t VS::Ending::Credits::backgroundBrightness;
 
 // decomp: vs_main_frameDuration (vs_main_frameDuration@SLUS_010.40)
-u_int Ending_Credits_xaResumeFrameCount;
+std::uint32_t VS::Ending::Credits::xaResumeFrameCount;
 

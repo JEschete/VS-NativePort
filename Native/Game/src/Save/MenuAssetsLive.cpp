@@ -15,8 +15,8 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
-#include "Title/SaveCard.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveCard.hpp"
+#include "Title/SaveFiles.hpp"
 
 namespace VS::Save::MemoryCard {
 namespace {
@@ -92,32 +92,32 @@ class LiveMenuAssets final : public MenuAssetHost {
         VS::Core::Memory::AllocateLiveFromLowEnd(kImageBytes));
     // #301: a refused buffer derives no views.
     if (buffer == nullptr) return false;
-    Title_memoryCardUiResource = buffer;
+    VS::Title::memoryCardUiResource = buffer;
     Save_MemoryCard_uiResources = reinterpret_cast<Save_CardUiResources*>(
-        Title_memoryCardUiResource + kResourceOffset);
+        VS::Title::memoryCardUiResource + kResourceOffset);
     if (owner == MenuAssetOwner::kDataMenu) {
       VS::Menu::Files::textTable = Save_MemoryCard_uiResources->textTable;
     } else {
-      Title_saveMenuText = Save_MemoryCard_uiResources->textTable;
+      VS::Title::saveMenuText = Save_MemoryCard_uiResources->textTable;
     }
-    Title_saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
-    Title_cardDirectoryEntryBuffer =
+    VS::Title::saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
+    VS::Title::cardDirectoryEntryBuffer =
         &Save_MemoryCard_uiResources->directoryEntry;
     return true;
   }
   void FreeAssets() override {
-    VS::Core::Memory::FreeLiveFromLowEnd(Title_memoryCardUiResource);
-    Title_memoryCardUiResource = nullptr;
+    VS::Core::Memory::FreeLiveFromLowEnd(VS::Title::memoryCardUiResource);
+    VS::Title::memoryCardUiResource = nullptr;
     Save_MemoryCard_uiResources = nullptr;
     // #300: every view AllocateAssets derived pointed into the freed block, so
     // clear them all for the readers' null guards to refuse later reads.
     VS::Menu::Files::textTable = nullptr;
-    Title_saveMenuText = nullptr;
-    Title_saveFileSummaries = nullptr;
-    Title_cardDirectoryEntryBuffer = nullptr;
+    VS::Title::saveMenuText = nullptr;
+    VS::Title::saveFileSummaries = nullptr;
+    VS::Title::cardDirectoryEntryBuffer = nullptr;
   }
   void RequestImage() override {
-    Request(VS_SPMCIMG_BIN_LBA, kImageBytes, Title_memoryCardUiResource);
+    Request(VS_SPMCIMG_BIN_LBA, kImageBytes, VS::Title::memoryCardUiResource);
   }
   void RequestText() override {
     Request(VS_MCDATA_BIN_LBA, kTextBytes, Save_MemoryCard_uiResources);
@@ -132,7 +132,7 @@ class LiveMenuAssets final : public MenuAssetHost {
   }
   void UploadImage() override {
     VS::Render::UploadLiveImageRectangle(PackedPair(kImageX, kImageY),
-                                         Title_memoryCardUiResource,
+                                         VS::Title::memoryCardUiResource,
                                          PackedPair(kImageWidth, kImageHeight));
   }
   void SetSoftResetEnabled(bool enabled) override {

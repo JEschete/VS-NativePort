@@ -24,8 +24,11 @@ inline constexpr std::size_t kWeaponCategoryCount = 10;
 inline constexpr std::size_t kActionCount = 256;
 inline constexpr std::size_t kRankCount = 16;
 inline constexpr std::size_t kRankLabelRegions = 3;
-// Ending_congratulationsTint's entries.
+// VS::Ending::congratulationsTint's entries.
 inline constexpr std::size_t kCongratulationsTints = 3;
+// The atlas region the Riskbreaker rank heading draws; the original reads its
+// width alone as D_800DB876 (D4.c:2231).
+inline constexpr std::size_t kRankHeadingRegion = 12;
 // END.DIS (the results atlas), then ENDSCR00..15.DIS, one screen per rank.
 inline constexpr std::size_t kResultsAtlasFile = 0;
 inline constexpr std::size_t kResultsFileCount = kRankCount + 1;

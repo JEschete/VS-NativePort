@@ -25,7 +25,7 @@
 #include "Menu/FilesLiveState.hpp"
 #include "Save/MemoryCard/Resources.h"
 #include "Save/NativeFilePresentation.hpp"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 
 namespace {
 namespace fs = std::filesystem;
@@ -235,18 +235,18 @@ TEST_CASE("Native file drawing is inert outside the original asset lifetime",
   auto* saved_resources = Save_MemoryCard_uiResources;
   Save_MemoryCard_uiResources = nullptr;
   const auto before_menu = VS::Menu::Files::LiveFilesState().elements[0];
-  const auto before_title = Title_fileMenuElements[0];
+  const auto before_title = VS::Title::fileMenuElements[0];
   const int menu_cursor = VS::Menu::Files::selectCursorXy;
-  const int title_cursor = Title_selectionCursorPosition;
+  const int title_cursor = VS::Title::selectionCursorPosition;
   Save::DrawNativeFileScreen({});
   Save::NativeFileScreen title;
   title.title = true;
   title.confirmation = true;
   Save::DrawNativeFileScreen(title);
   CHECK(VS::Menu::Files::LiveFilesState().elements[0] == before_menu);
-  CHECK(std::memcmp(&before_title, &Title_fileMenuElements[0],
+  CHECK(std::memcmp(&before_title, &VS::Title::fileMenuElements[0],
                     sizeof(before_title)) == 0);
   CHECK(VS::Menu::Files::selectCursorXy == menu_cursor);
-  CHECK(Title_selectionCursorPosition == title_cursor);
+  CHECK(VS::Title::selectionCursorPosition == title_cursor);
   Save_MemoryCard_uiResources = saved_resources;
 }

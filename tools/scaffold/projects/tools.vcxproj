@@ -64,6 +64,7 @@
     <None Include="..\..\naming\sanity_pass.py" />
     <None Include="..\..\naming\symbol_support.py" />
     <None Include="..\..\naming\test_merge_symbols.py" />
+    <None Include="..\..\naming\test_native_refs.py" />
     <None Include="..\..\naming\test_native_symbol_inventory.py" />
     <None Include="..\..\naming\test_symbol_support.py" />
     <None Include="..\..\naming\test_trace_queue.py" />

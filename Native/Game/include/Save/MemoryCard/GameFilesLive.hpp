@@ -9,15 +9,15 @@ struct Save_GameSaveImage;
 // Binds the memory-card save cores (GameFiles.hpp) to the libapi card calls,
 // the card globals both save screens share and the game state, in the shapes
 // the copied MENU7.PRG and TITLE.PRG callers use. The save workspace is the
-// two images at the start of Title_memoryCardUiResource and the slot
-// summaries are Title_saveFileSummaries; a missing buffer is reported and
+// two images at the start of VS::Title::memoryCardUiResource and the slot
+// summaries are VS::Title::saveFileSummaries; a missing buffer is reported and
 // fails the call.
 namespace VS::Save::MemoryCard {
 // A NUL-terminated card path. Each builder reuses its own buffer, so one of
 // each can be live at once (a rename passes both).
 char* BuildLiveSaveFilename(int channel, int file_number);
 char* BuildLiveTemporaryFilename(int channel, int file_number);
-// NewestSaveSlot over Title_saveFileSummaries; 0 without summaries.
+// NewestSaveSlot over VS::Title::saveFileSummaries; 0 without summaries.
 int NewestLiveSaveSlot();
 // The matching slot plus one, or 0.
 int FindLiveMatchingSaveSlot();
@@ -28,10 +28,10 @@ int ParseLiveSaveFileNumber(const char* name);
 // max(block_count, 2) blocks of `image`.
 int HasLiveChecksumError(const Save_GameSaveImage* image, int block_count);
 void DecodeLiveSaveBytes(std::uint32_t key, void* bytes, std::size_t count);
-// Over the directory in Title_cardDirectoryEntries: the mask of the
+// Over the directory in VS::Title::cardDirectoryEntries: the mask of the
 // temporary files erased, or 0x80 when an erase failed.
 int DeleteLiveRedundantTemporaryFiles(int channel);
-// Lists `port`'s directory into Title_cardDirectoryEntries and fills the
+// Lists `port`'s directory into VS::Title::cardDirectoryEntries and fills the
 // slot summaries; nonzero when a redundant temporary file could not be
 // erased.
 int ScanLiveSaveDirectory(int port);

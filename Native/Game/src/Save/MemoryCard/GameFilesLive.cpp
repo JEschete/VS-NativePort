@@ -43,8 +43,8 @@
 #include "State/RoomMemory.h"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
-#include "Title/SaveCard.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveCard.hpp"
+#include "Title/SaveFiles.hpp"
 
 namespace VS::Save::MemoryCard {
 namespace {
@@ -100,9 +100,9 @@ static_assert(sizeof(Save_CardUiResources::fileIconPalettes) ==
 static_assert(sizeof(Save_CardUiResources::fileIconBitmaps) ==
               kFileIconCount * kIconBitmapBytes);
 static_assert(sizeof(DIRENTRY::name) == kDirectoryNameBytes);
-static_assert(std::extent_v<decltype(Title_cardDirectoryEntries)> ==
+static_assert(std::extent_v<decltype(VS::Title::cardDirectoryEntries)> ==
               kDirectoryCapacity);
-static_assert(std::extent_v<decltype(Title_cardEventDescriptors)> ==
+static_assert(std::extent_v<decltype(VS::Title::cardEventDescriptors)> ==
               kEventDescriptorCount);
 // The workspace is the first two images of the save-screen image buffer.
 static_assert(kWorkspaceBytes <= VS_SPMCIMG_BIN_SIZE);
@@ -178,25 +178,25 @@ const char* SaveErrorName(SaveImageError error) {
 // The image being written and the image last read, at the start of the
 // save-screen image buffer.
 std::optional<SaveWorkspace> LiveWorkspace() {
-  if (Title_memoryCardUiResource == nullptr) {
+  if (VS::Title::memoryCardUiResource == nullptr) {
     VS::Core::Errorf(kDiagnosticChannel, "Memory-card workspace is not loaded");
     return std::nullopt;
   }
   const std::span<std::byte, kWorkspaceBytes> bytes{
-      reinterpret_cast<std::byte*>(Title_memoryCardUiResource),
+      reinterpret_cast<std::byte*>(VS::Title::memoryCardUiResource),
       kWorkspaceBytes};
   return SaveWorkspace{.outgoing = bytes.first<kSaveImageBytes>(),
                        .incoming = bytes.last<kSaveImageBytes>()};
 }
 
 std::optional<SummaryTable> LiveSummaries() {
-  if (Title_saveFileSummaries == nullptr) {
+  if (VS::Title::saveFileSummaries == nullptr) {
     VS::Core::Errorf(kDiagnosticChannel,
                      "Memory-card slot summaries are not loaded");
     return std::nullopt;
   }
   return std::as_writable_bytes(std::span<Save_CardFileInfoRecord, kSlotCount>{
-      Title_saveFileSummaries, kSlotCount});
+      VS::Title::saveFileSummaries, kSlotCount});
 }
 
 std::span<const std::byte, kSettingsBytes> LiveSettings() {
@@ -211,11 +211,11 @@ CardDirectoryEntry EntryOf(const DIRENTRY& entry) {
   return copy;
 }
 
-// The directory the last scan published in Title_cardDirectoryEntries.
+// The directory the last scan published in VS::Title::cardDirectoryEntries.
 CardDirectory PublishedDirectory() {
   CardDirectory directory;
   for (std::size_t index = 0; index < kDirectoryCapacity; ++index) {
-    if (const DIRENTRY* entry = Title_cardDirectoryEntries[index];
+    if (const DIRENTRY* entry = VS::Title::cardDirectoryEntries[index];
         entry != nullptr) {
       directory.at(index) = EntryOf(*entry);
     }
@@ -232,10 +232,11 @@ class LiveCardHost final : public CardHost {
   bool TestEvent(CardEventGroup group, CardEvent event) override {
     const auto index =
         static_cast<std::size_t>(group) + static_cast<std::size_t>(event);
-    if (index >= std::size(Title_cardEventDescriptors)) {
+    if (index >= std::size(VS::Title::cardEventDescriptors)) {
       return false;
     }
-    return ::TestEvent(Title_cardEventDescriptors[index]) == kTestEventFired;
+    return ::TestEvent(VS::Title::cardEventDescriptors[index]) ==
+           kTestEventFired;
   }
   bool StartCardInfo(std::int32_t channel) override {
     return _card_info(channel) != 0;
@@ -295,11 +296,11 @@ class LiveCardHost final : public CardHost {
   }
 
  private:
-  // Title_cardDirectoryEntries keeps what the calls returned, as
+  // VS::Title::cardDirectoryEntries keeps what the calls returned, as
   // _memcardFiles does.
   static std::optional<CardDirectoryEntry> Publish(std::size_t index,
                                                    DIRENTRY* found) {
-    Title_cardDirectoryEntries[index] = found;
+    VS::Title::cardDirectoryEntries[index] = found;
     if (found == nullptr) {
       return std::nullopt;
     }
@@ -460,18 +461,19 @@ CardFilename live_save_filename{};
 CardFilename live_temporary_filename{};
 
 TransferProgress LoadProgress() {
-  return TransferProgress{
-      .position = Title_transferProgressPosition,
-      .previous = Title_previousTransferProgress,
-      .target = Title_transferProgressTarget,
-      .error_offset = static_cast<std::int8_t>(Title_saveTransferErrorOffset)};
+  return TransferProgress{.position = VS::Title::transferProgressPosition,
+                          .previous = VS::Title::previousTransferProgress,
+                          .target = VS::Title::transferProgressTarget,
+                          .error_offset = static_cast<std::int8_t>(
+                              VS::Title::saveTransferErrorOffset)};
 }
 
 void StoreProgress(const TransferProgress& progress) {
-  Title_transferProgressPosition = progress.position;
-  Title_previousTransferProgress = progress.previous;
-  Title_transferProgressTarget = progress.target;
-  Title_saveTransferErrorOffset = static_cast<char>(progress.error_offset);
+  VS::Title::transferProgressPosition = progress.position;
+  VS::Title::previousTransferProgress = progress.previous;
+  VS::Title::transferProgressTarget = progress.target;
+  VS::Title::saveTransferErrorOffset =
+      static_cast<std::uint8_t>(progress.error_offset);
 }
 
 void ReportPackageError(const std::expected<void, SaveImageError>& packaged) {
@@ -550,7 +552,7 @@ int DeleteLiveRedundantTemporaryFiles(int channel) {
 }
 
 int ScanLiveSaveDirectory(int port) {
-  std::ranges::fill(Title_cardDirectoryEntries, nullptr);
+  std::ranges::fill(VS::Title::cardDirectoryEntries, nullptr);
   const auto summaries = LiveSummaries();
   if (!summaries.has_value()) {
     return kLiveFailure;

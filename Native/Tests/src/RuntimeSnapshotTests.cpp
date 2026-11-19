@@ -70,7 +70,7 @@
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
-#include "Title/NewGame.h"
+#include "Title/NewGame.hpp"
 
 namespace {
 namespace Save = VS::Game::Save;
@@ -1077,9 +1077,9 @@ TEST_CASE("Original New Game inventory accepts its lazy display-index state",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   auto state = fixture.Capture();
-  static_assert(sizeof(Title_newGameInventoryTemplate) ==
+  static_assert(sizeof(VS::Title::newGameInventoryTemplate) ==
                 sizeof(state.inventory));
-  std::memcpy(&state.inventory, Title_newGameInventoryTemplate,
+  std::memcpy(&state.inventory, VS::Title::newGameInventoryTemplate,
               sizeof(state.inventory));
   state.inventory_order = {};
   const auto before = LiveFingerprint(fixture);

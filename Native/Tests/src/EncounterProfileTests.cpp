@@ -35,7 +35,7 @@
 #include "Menu/Setup/SetupLive.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
-#include "Title/NewGame.h"
+#include "Title/NewGame.hpp"
 
 namespace {
 struct ProfileFixture {
@@ -781,7 +781,8 @@ TEST_CASE(
   ProfileFixture fixture;
   WeaponHeap heap;
   auto& inventory = VS::Items::inventory;
-  std::memcpy(&inventory, Title_newGameInventoryTemplate, sizeof inventory);
+  std::memcpy(&inventory, VS::Title::newGameInventoryTemplate,
+              sizeof inventory);
   if (GENERATE(false, true)) inventory.shields[0].isEquipped = 1;
   const auto original = inventory;
   const auto indices = VS::Items::inventoryIndices;

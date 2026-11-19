@@ -1,16 +1,15 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Title/SaveCard.h"
+#include "Title/SaveCard.hpp"
 
 // decomp: _dirEntBuf (_dirEntBuf@src/TITLE/TITLE.PRG/22C.c)
-struct DIRENTRY* Title_cardDirectoryEntryBuffer;
+DIRENTRY* VS::Title::cardDirectoryEntryBuffer;
 
 // decomp: _loadSaveDataErrorOffset (_loadSaveDataErrorOffset@src/TITLE/TITLE.PRG/22C.c)
-char Title_saveTransferErrorOffset;
+std::uint8_t VS::Title::saveTransferErrorOffset;
 
 // decomp: _memcardEventDescriptors (_memcardEventDescriptors@src/TITLE/TITLE.PRG/22C.c)
-long Title_cardEventDescriptors[8];
+std::int32_t VS::Title::cardEventDescriptors[VS::Title::kCardEventDescriptors];
 
 // decomp: _memcardFiles (_memcardFiles@src/TITLE/TITLE.PRG/22C.c)
-struct DIRENTRY* Title_cardDirectoryEntries[15];
+DIRENTRY* VS::Title::cardDirectoryEntries[VS::Title::kCardDirectoryCapacity];
 

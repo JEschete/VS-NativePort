@@ -996,6 +996,9 @@
     <None Include="..\..\naming\test_merge_symbols.py">
       <Filter>tools\naming</Filter>
     </None>
+    <None Include="..\..\naming\test_native_refs.py">
+      <Filter>tools\naming</Filter>
+    </None>
     <None Include="..\..\naming\test_native_symbol_inventory.py">
       <Filter>tools\naming</Filter>
     </None>

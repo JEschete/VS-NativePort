@@ -28,7 +28,7 @@
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/Resources.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 
 namespace VS::Game::Save {
 namespace {
@@ -309,23 +309,24 @@ class Frontend {
 
   void Panel(Point position, Extent size, bool selected,
              bool breadcrumb = false) const {
-    Menu_Files_FileMenuElement element{};
-    element.state = Menu_Files_ElementState_Static;
-    // Original C consumers use /J; 255 takes the generic-background path,
-    // without manufacturing Save_CardFileInfoRecord data or file headers.
-    element.slotId = static_cast<char>(kGenericElementId);
-    element.text[0] = static_cast<char>(kGenericElementId);
+    VS::Menu::Files::Element element{};
+    element.state =
+        static_cast<std::uint8_t>(VS::Menu::Files::ElementState::kStatic);
+    // 255 takes the generic-background path, without manufacturing
+    // Save_CardFileInfoRecord data or file headers.
+    element.slot_id = static_cast<std::uint8_t>(kGenericElementId);
+    element.text[0] = static_cast<std::uint8_t>(kGenericElementId);
     element.x = static_cast<std::int16_t>(position.x);
     element.y = static_cast<std::int16_t>(position.y);
     element.w = size.width;
     element.h = size.height;
-    element.selected = static_cast<char>(selected);
-    element.innertextBlendFactor = breadcrumb ? kSelectedBlend : 0;
-    auto typed = std::bit_cast<VS::Menu::Files::Element>(element);
+    element.selected = selected ? 1 : 0;
+    element.inner_blend =
+        static_cast<std::uint8_t>(breadcrumb ? kSelectedBlend : 0);
     if (title_) {
-      VS::Menu::Files::DrawLiveTitleElement(typed);
+      VS::Menu::Files::DrawLiveTitleElement(element);
     } else {
-      VS::Menu::Files::DrawLiveElement(typed);
+      VS::Menu::Files::DrawLiveElement(element);
     }
   }
 
@@ -609,9 +610,9 @@ void DrawNativeFileScreen(const NativeFileScreen& screen) {
   constexpr Point kOperationHeader{180, 34}, kLocalHeader{180, 50};
   constexpr Point kOperationText{186, 34}, kLocalText{186, 50};
   constexpr Extent kHeaderSize{140, 12};
-  if (Title_memoryCardUiResource == nullptr ||
+  if (VS::Title::memoryCardUiResource == nullptr ||
       Save_MemoryCard_uiResources == nullptr ||
-      (screen.title ? Title_saveMenuText : VS::Menu::Files::textTable) ==
+      (screen.title ? VS::Title::saveMenuText : VS::Menu::Files::textTable) ==
           nullptr) {
     return;
   }

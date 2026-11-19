@@ -3878,21 +3878,21 @@ T00424.001,T00424,environmentTargetList,1,reserved2,0,char[72],,,,reserved2,Not 
 T00424.002,T00424,environmentTargetList,2,count,0,u_short,,,,count,Named in the fork; see cited use,med,source:146C.c:3736
 T00424.003,T00424,environmentTargetList,3,targets,0,environmentTarget[30],,,,targets,Named in the fork; see cited use,med,source:146C.c:3745
 T00425.000,T00425,fileMenuElements_t,0,state,0,char,,,,state,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1471
-T00425.001,T00425,fileMenuElements_t,1,slotId,0,char,,,,slotId,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1472
-T00425.002,T00425,fileMenuElements_t,2,outertextBlendFactor,0,char,,,,outertextBlendFactor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1782
-T00425.003,T00425,fileMenuElements_t,3,innertextBlendFactor,0,char,,,,innertextBlendFactor,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1790
+T00425.001,T00425,fileMenuElements_t,1,slotId,0,char,,,,slot_id,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1472
+T00425.002,T00425,fileMenuElements_t,2,outertextBlendFactor,0,char,,,,outer_blend,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1782
+T00425.003,T00425,fileMenuElements_t,3,innertextBlendFactor,0,char,,,,inner_blend,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1790
 T00425.004,T00425,fileMenuElements_t,4,selected,0,char,,,,selected,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1781
-T00425.005,T00425,fileMenuElements_t,5,slotUnavailable,0,char,,,,slotUnavailable,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1786
-T00425.006,T00425,fileMenuElements_t,6,saveLocation,0,char,,,,saveLocation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1833
-T00425.007,T00425,fileMenuElements_t,7,unk7,1,char,,,,reserved7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Files.h:45;declaration-only;source:MENU/MENU7.PRG/260.c:126
-T00425.008,T00425,fileMenuElements_t,8,targetPosition,0,short,,,,targetPosition,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1974
-T00425.009,T00425,fileMenuElements_t,9,unkA,1,short,,,,reservedA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Files.h:47;declaration-only;source:MENU/MENU7.PRG/260.c:128
+T00425.005,T00425,fileMenuElements_t,5,slotUnavailable,0,char,,,,slot_unavailable,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1786
+T00425.006,T00425,fileMenuElements_t,6,saveLocation,0,char,,,,save_location,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1833
+T00425.007,T00425,fileMenuElements_t,7,unk7,1,char,,,,reserved7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Menu\Files.hpp:118;declaration-only;source:MENU/MENU7.PRG/260.c:126
+T00425.008,T00425,fileMenuElements_t,8,targetPosition,0,short,,,,target,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1974
+T00425.009,T00425,fileMenuElements_t,9,unkA,1,short,,,,reserved_a,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\include\Menu\Files.hpp:120;declaration-only;source:MENU/MENU7.PRG/260.c:128
 T00425.010,T00425,fileMenuElements_t,10,x,0,short,,,,x,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1473
 T00425.011,T00425,fileMenuElements_t,11,y,0,short,,,,y,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1789
 T00425.012,T00425,fileMenuElements_t,12,w,0,short,,,,w,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1474
 T00425.013,T00425,fileMenuElements_t,13,h,0,short,,,,h,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1805
 T00425.014,T00425,fileMenuElements_t,14,text,0,char[32],,,,text,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1480
-T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,indexedPixels,Four-bit indexed font pixels in 128-byte rows,high,source:22C.c:3109
+T00426.000,T00426,fontTable_t,0,data,0,char[220][128],,,,indexed_pixels,Four-bit indexed font pixels in 128-byte rows,high,source:22C.c:3109
 T00426.001,T00426,fontTable_t,1,clut,0,u_short[16][16],,,,palettes,Sixteen palettes of sixteen RGB555 colors,high,source:22C.c:3109
 T00427.000,T00427,frameScratch,0,unused,0,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:66;declaration-only;source:44F14.c:138
 T00427.001,T00427,frameScratch,1,depth,0,int,,,,depth,Ordering-table depth offset,high,source:44F14.c:1065
@@ -3947,15 +3947,15 @@ T00431.009,T00431,func_80069EF0_t,9,totalAgility,0,short,,,,agility,Agility incl
 T00431.010,T00431,func_80069EF0_t,10,limbHp,0,short[6],,,,limbHp,Hit points of each limb,high,source:146C.c:864
 T00431.011,T00431,func_80069EF0_t,11,unk20,1,int,,,statuses,statuses,Status bits,high,source:146C.c:867
 T00431.012,T00431,func_80069EF0_t,12,unk24,1,int,,,packed position,placement,Packed tile placement word,high,source:146C.c:881
-T00432.000,T00432,func_8006A9C0_t,0,size,0,int,,,,blockSizeBytes,Total TIM block size including its header,high,source:D4.c:1126
-T00432.001,T00432,func_8006A9C0_t,1,rect,0,RECT,,,,uploadRect,PS1 VRAM upload rectangle,high,decoder-only;source:D4.c:1119
+T00432.000,T00432,func_8006A9C0_t,0,size,0,int,,,,block_size_bytes,Total TIM block size including its header,high,source:D4.c:1126
+T00432.001,T00432,func_8006A9C0_t,1,rect,0,RECT,,,,upload_rect,PS1 VRAM upload rectangle,high,decoder-only;source:D4.c:1119
 T00432.002,T00432,func_8006A9C0_t,2,data,0,char[0],,,,pixelBytes,Variable-length palette or image payload,high,decoder-only;source:D4.c:1123
 T00433.000,T00433,func_8006A9C0_t2,0,unk0,1,u_char,,,,identifier,TIM format identifier byte,med,TIM header layout;decoder must validate against 0x10;declaration-only;source:D4.c:73
 T00433.001,T00433,func_8006A9C0_t2,1,unk1,1,u_char,,,,reserved01,Reserved TIM header byte at offset one,med,TIM header layout;declaration-only;source:D4.c:74
 T00433.002,T00433,func_8006A9C0_t2,2,unk2,1,u_char,,,,reserved02,Reserved TIM header byte at offset two,med,TIM header layout;declaration-only;source:D4.c:75
 T00433.003,T00433,func_8006A9C0_t2,3,unk3,1,u_char,,,,reserved03,Reserved TIM header byte at offset three,med,TIM header layout;declaration-only;source:D4.c:76
 T00433.004,T00433,func_8006A9C0_t2,4,unk4,1,int,,,timMode,mode,Pixel depth and optional CLUT flag,high,source:D4.c:1118
-T00433.005,T00433,func_8006A9C0_t2,5,unk8,1,func_8006A9C0_t,,,firstImageBlock,firstBlock,First palette or pixel-data block,high,source:D4.c:1116
+T00433.005,T00433,func_8006A9C0_t2,5,unk8,1,func_8006A9C0_t,,,firstImageBlock,first_block,First palette or pixel-data block,high,source:D4.c:1116
 T00434.000,T00434,func_8006C4C4_t,0,unk0,1,short,,,,opaque0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:168;source:146C.c:1932
 T00434.001,T00434,func_8006C4C4_t,1,unk2,1,char,,,,opaque2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:169;source:146C.c:1933
 T00434.002,T00434,func_8006C4C4_t,2,unk3,1,char,,,,opaque3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:170;source:146C.c:1934
@@ -4952,7 +4952,7 @@ T00547.006,T00547,mcdata_t,6,textTable,0,u_short[2048],,,,textTable,Menu text ta
 T00547.007,T00547,mcdata_t,7,saveFileInfo,0,saveFileInfo_t[5],,,,fileHeaders,Card header of each of the five save files,high,source:260.c:1102
 T00547.008,T00547,mcdata_t,8,_dirEntBuf,0,struct DIRENTRY,,,,directoryEntry,Card directory entry buffer,high,source:260.c:1103
 T00548.000,T00548,menuBg_t,0,clut,0,u_short[256],,,,palette,256 RGB555 colors for the background,high,source:22C.c:3119
-T00548.001,T00548,menuBg_t,1,data,0,char[240][192],,,,indexedPixels,240 rows of 192 eight-bit palette indices,high,source:22C.c:3119
+T00548.001,T00548,menuBg_t,1,data,0,char[240][192],,,,indexed_pixels,240 rows of 192 eight-bit palette indices,high,source:22C.c:3119
 T00549.000,T00549,menuItemPrim_t,0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render sprite commands;source:22C.c:4099;use cited by sanity pass;source:22C.c:4076
 T00549.001,T00549,menuItemPrim_t,1,sprt,0,VS_SPRT,,,,sprite,Sprite and texture-page packet,med,replaced-by:Render sprite commands;source:22C.c:4099;use cited by sanity pass;source:22C.c:4077
 T00550.000,T00550,menuItemState_t,0,enabled,0,char,,,,isEnabled,Whether the menu item is animated and rendered,high,source:22C.c:4006
@@ -5643,8 +5643,8 @@ T00623.012,T00623,trackingMotionState,12,targetY,0,int,,,,moveY,Target Y in 20.1
 T00624.000,T00624,trackingMotionStats,0,pad,1,char[24],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.h:839;declaration-only;source:7EE98.c:568
 T00624.001,T00624,trackingMotionStats,1,current,0,short,,,,currentHp,Current HP (same offset as Battle::ActorStats.currentHp),high,source:7EE98.c:690
 T00624.002,T00624,trackingMotionStats,2,maximum,0,short,,,,maxHp,Maximum HP (same offset as Battle::ActorStats.maxHp),high,source:7EE98.c:690
-T00625.000,T00625,uiTable_t,0,page0,0,char[224][128],,,,pageZeroPixels,224 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
-T00625.001,T00625,uiTable_t,1,page1,0,char[256][128],,,,pageOnePixels,256 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
+T00625.000,T00625,uiTable_t,0,page0,0,char[224][128],,,,page_zero_pixels,224 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
+T00625.001,T00625,uiTable_t,1,page1,0,char[256][128],,,,page_one_pixels,256 rows of 128 packed indexed texture bytes,high,source:22C.c:3114
 T00626.000,T00626,unkPrim,0,unk0,1,u_long,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:128;declaration-only;source:EFFECT/PLG005.BIN/18.c:29
 T00626.001,T00626,unkPrim,1,unk4,1,POLY_FT4,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:129;declaration-only;source:EFFECT/PLG005.BIN/18.c:30
 T00626.002,T00626,unkPrim,2,unk2C,1,int,,,,draw_mode,Draw mode command word (0xE1),med,source:EFFECT/PLG005.BIN/18.c:257;use cited by sanity pass;source:EFFECT/PLG005.BIN/18.c:31
@@ -6271,9 +6271,9 @@ T00695.008,T00695,vs_main_flags_t,8,unk8,1,char,,,,reserved8,Not used by native 
 T00695.009,T00695,vs_main_flags_t,9,unk9,1,char,,,,reserved9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.h:18;declaration-only;source:main.h:250
 T00695.010,T00695,vs_main_flags_t,10,unkA,1,char,,,,reservedA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.h:19;declaration-only;source:main.h:251
 T00695.011,T00695,vs_main_flags_t,11,unkB,1,char,,,,reservedB,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.h:20;declaration-only;source:main.h:252
-T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaqueC,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:469;source:22C.c:4745;source-review:#148 Every _setTitleExitFlags branch writes vs_main_stateFlags.unkC=0. Direct original symbol search finds only these writes; generic event flag access is not a field-specific semantic reader. No nonzero producer or full event meaning was established by this scope. Do not call it a boolean demo flag simply because neighboring D changes for attract scenes.
-T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaqueD,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:470;source:22C.c:4746;source-review:#148 _setTitleExitFlags writes byte D=1 for both attract destinations and D=0 otherwise. This establishes title-side mode initialization, but direct source consumers do not distinguish its general event-script role from adjacent E. Retain the offset name rather than invent an authoritative attract/demo semantic across all event readers."
-T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaqueE,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:472;source:22C.c:4753;source-review:#148 _setTitleExitFlags sets E=1 only for attract scene cases3/4; other branches leave it unchanged, unlike D. Initial new-game state clearing is bytewise. No field-specific consumer establishes whether it is initialization, progression or mode state. Do not conflate E with D or rename both to the same guessed flag."
+T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaqueC,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:456;source:22C.c:4745;source-review:#148 Every _setTitleExitFlags branch writes vs_main_stateFlags.unkC=0. Direct original symbol search finds only these writes; generic event flag access is not a field-specific semantic reader. No nonzero producer or full event meaning was established by this scope. Do not call it a boolean demo flag simply because neighboring D changes for attract scenes.
+T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaqueD,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:457;source:22C.c:4746;source-review:#148 _setTitleExitFlags writes byte D=1 for both attract destinations and D=0 otherwise. This establishes title-side mode initialization, but direct source consumers do not distinguish its general event-script role from adjacent E. Retain the offset name rather than invent an authoritative attract/demo semantic across all event readers."
+T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaqueE,Written but never read by native code; kept for the original layout,med,"native-refs:write-only;source:native:Native\Game\src\Title\TitleMenuLive.cpp:459;source:22C.c:4753;source-review:#148 _setTitleExitFlags sets E=1 only for attract scene cases3/4; other branches leave it unchanged, unlike D. Initial new-game state clearing is bytewise. No field-specific consumer establishes whether it is initialization, progression or mode state. Do not conflate E with D or rename both to the same guessed flag."
 T00695.015,T00695,vs_main_flags_t,15,unkF,1,char,,,,reservedF,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\State\StateFlags.h:24;declaration-only;source:main.h:256
 T00695.016,T00695,vs_main_flags_t,16,textBoxSelection,0,char,,,,textBoxSelection,Named in the fork; see cited use,med,source:4A0A8.c:724
 T00695.017,T00695,vs_main_flags_t,17,unk11,1,char,,,,opaque11,"Used, but its meaning is not established",low,source:5BF94.c:1590
@@ -6834,7 +6834,7 @@ T00784.002,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00784.003,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),3,polyG4_tpage,0,VS_POLY_G4_TPAGE,,,,polyG4Tpage,Gouraud quad with a texture page command,med,source:MENU/MENU7.PRG/260.c:142
 T00784.004,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),4,polyG4,0,VS_POLY_G4,,,,polyG4,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1424
 T00784.005,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),5,tilePoly,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:144:9),,,,tilePoly,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:1307
-T00784.006,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),6,raw,0,u_long[15],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Files.h:69;declaration-only;source:MENU/MENU7.PRG/260.c:148
+T00784.006,T00784,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENU7.PRG\260.c:138:5),6,raw,0,u_long[15],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Files.h:48;declaration-only;source:MENU/MENU7.PRG/260.c:148
 T00785.000,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483
 T00785.001,T00785,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:482:8),1,pad,1,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUD.PRG\..\..\SLUS_010.40\main.h:484:5)[2],,,,ports,Pressed button byte pairs per port,med,declaration-only;source:main.h:487
 T00786.000,T00786,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\MENU\MENUE.PRG\..\..\SLUS_010.40\main.h:482:8),0,all,0,u_int,,,,allButtons,Pressed buttons for both ports,med,declaration-only;source:main.h:483

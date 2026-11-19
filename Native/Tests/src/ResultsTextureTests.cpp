@@ -8,7 +8,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Ending/Results.h"
+#include "Ending/Results.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
 #include "Menu/Results/Results.h"
@@ -25,7 +25,8 @@ struct ResultsTextureFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  VS::Render::TextureRegion saved_ending_region = Ending_resultAtlasRegions[12];
+  VS::Render::TextureRegion saved_ending_region =
+      VS::Ending::resultAtlasRegions[12];
   int saved_time = Menu_Results_timeTrialTime;
   std::vector<u_long> storage = std::vector<u_long>(
       32 * sizeof(POLY_GT4) / sizeof(u_long) + 2, 0xDEADBEEF);
@@ -37,14 +38,14 @@ struct ResultsTextureFixture {
     VS::Render::legacyPrimitiveBuffers[0] = storage.data() + 1;
     VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
     VS::Render::FrameScratchpad().ordering_table = ordering.data() + 16;
-    Ending_resultAtlasRegions[12] = {23, 45, 26, 19, 0x15, 0x345};
+    VS::Ending::resultAtlasRegions[12] = {23, 45, 26, 19, 0x15, 0x345};
   }
 
   ~ResultsTextureFixture() {
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::frameBuf = saved_framebuffer;
-    Ending_resultAtlasRegions[12] = saved_ending_region;
+    VS::Ending::resultAtlasRegions[12] = saved_ending_region;
     Menu_Results_timeTrialTime = saved_time;
   }
 
@@ -169,14 +170,14 @@ TEST_CASE("Shared tint and flash fades retain each explicitly selected atlas",
   auto draw = flash ? VS::Render::DrawLiveTextureFlashFade
                     : VS::Render::DrawLiveTextureTintFade;
   draw(Menu_Results_disMap, 10, 20, 12, colors);
-  draw(Ending_resultAtlasRegions, 30, 40, 12, colors);
+  draw(VS::Ending::resultAtlasRegions, 30, 40, 12, colors);
   draw(Menu_Results_disMap, 50, 60, 12, colors);
   fixture.CheckCount(fade == 0 ? 0 : 3);
   if (fade == 0) return;
 
   const bool fading = fade < (flash ? 10 : 8);
   CheckRegion(fixture.Packets()[0], Menu_Results_disMap[12], 10, 20, fading);
-  CheckRegion(fixture.Packets()[1], Ending_resultAtlasRegions[12], 30, 40,
+  CheckRegion(fixture.Packets()[1], VS::Ending::resultAtlasRegions[12], 30, 40,
               fading);
   CheckRegion(fixture.Packets()[2], Menu_Results_disMap[12], 50, 60, fading);
   for (int index = 0; index < 3; ++index) {
@@ -243,13 +244,14 @@ TEST_CASE(
                                   edge);
   const auto* ending_begin = static_cast<const POLY_GT4*>(
       VS::Render::FrameScratchpad().primitive_cursor);
-  VS::Render::DrawLiveTextureWipe(Ending_resultAtlasRegions, 10, 20, 12, colors,
-                                  edge);
+  VS::Render::DrawLiveTextureWipe(VS::Ending::resultAtlasRegions, 10, 20, 12,
+                                  colors, edge);
   if (edge == 10) {
     fixture.CheckCount(0);
   } else if (edge == 600) {
     fixture.CheckCount(2);
-    CheckRegion(ending_begin[0], Ending_resultAtlasRegions[12], 10, 20, false);
+    CheckRegion(ending_begin[0], VS::Ending::resultAtlasRegions[12], 10, 20,
+                false);
   } else {
     fixture.CheckCount(
         (static_cast<unsigned char>(Menu_Results_disMap[12].width) + 11) / 12 +

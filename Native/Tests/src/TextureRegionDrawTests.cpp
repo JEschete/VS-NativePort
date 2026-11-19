@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Ending/ClearResults.h"
+#include "Ending/ClearResults.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -210,6 +210,6 @@ TEST_CASE("Live region draws stop at a missing primitive buffer",
 TEST_CASE("ENDING congratulations tint holds the third color its draw reads",
           "[render][texture-region][ending]") {
   // D4.c:1970 draws glyph 0x17 from &D_800DBA7C[1]; issue #259.
-  STATIC_REQUIRE(std::size(Ending_congratulationsTint) == 3);
-  STATIC_REQUIRE(sizeof Ending_congratulationsTint == 12);
+  STATIC_REQUIRE(std::size(VS::Ending::congratulationsTint) == 3);
+  STATIC_REQUIRE(sizeof VS::Ending::congratulationsTint == 12);
 }

@@ -45,7 +45,7 @@
 #include "State/Progress.h"
 #include "State/RoomMemory.h"
 #include "State/StateFlags.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 
 namespace {
 namespace fs = std::filesystem;
@@ -439,8 +439,8 @@ TEST_CASE("Native Continue scrolls all one hundred files vertically",
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
   CHECK(SelectedSlot() == 0);
   CHECK(Screen().summaries.size() == 3);
-  CHECK(Text(Title_memoryCardMessage) == "Select a file");
-  REQUIRE(Title_memoryCardMessage != nullptr);
+  CHECK(Text(VS::Title::memoryCardMessage) == "Select a file");
+  REQUIRE(VS::Title::memoryCardMessage != nullptr);
   for (int slot = 1; slot < 100; ++slot) {
     Move(PADLdown, VS::Menu::UpdateLiveLoadMenu);
     CHECK(SelectedSlot() == slot);
@@ -457,7 +457,8 @@ TEST_CASE("Native file screens have three cards without generic row panels",
   CHECK(Screen().title);
   CHECK_FALSE(Screen().save);
   for (int i = 0; i < 10; ++i) {
-    CHECK(Title_fileMenuElements[i].state == Menu_Files_ElementState_Inactive);
+    CHECK(VS::Title::fileMenuElements[i].state ==
+          Menu_Files_ElementState_Inactive);
   }
   for (const auto& file : Screen().files) {
     CHECK(file.status == Save::FileStatus::kEmpty);
@@ -573,10 +574,10 @@ TEST_CASE("Native session reset clears borrowed presentation and footer",
   REQUIRE(VS::Menu::UpdateLiveLoadMenu(2) == 0);
   REQUIRE(VS::Menu::UpdateLiveLoadMenu(0) == 0);
   REQUIRE(Save::FileMenuPresentation());
-  REQUIRE(Title_memoryCardMessage != nullptr);
+  REQUIRE(VS::Title::memoryCardMessage != nullptr);
   Save::ResetFileMenuSession();
   CHECK_FALSE(Save::FileMenuPresentation());
-  CHECK(Title_memoryCardMessage == nullptr);
+  CHECK(VS::Title::memoryCardMessage == nullptr);
   VS::Game::Save::DrawFileOverlay(false);
   VS::Game::Save::DrawFileOverlay(true);
 }
@@ -585,7 +586,7 @@ TEST_CASE("Native clear saves require staged original ending inputs",
           "[save-menu]") {
   MenuFixture fixture;
   REQUIRE(VS::Menu::UpdateLiveSaveMenu(1) == 0);
-  CHECK(Text(Title_memoryCardMessage) == "No ending clear save available");
+  CHECK(Text(VS::Title::memoryCardMessage) == "No ending clear save available");
   Buttons(PADRright);
   CHECK(VS::Menu::UpdateLiveSaveMenu(0) == -1);
   CHECK(fs::is_empty(fixture.root));
@@ -707,7 +708,7 @@ TEST_CASE("Original ending component writes a distinct native clear save",
   MenuContentFixture content(fixture);
   ClearInputsFixture ending;
   ExecuteClearSave();
-  REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
+  REQUIRE(Text(VS::Title::memoryCardMessage) == "Save complete");
   auto files = Save::Files::Open(fixture.root);
   REQUIRE(files);
   const auto loaded = files->Load(0);
@@ -752,7 +753,7 @@ void CheckReplacedRecoveredFile(const fs::path& root) {
 
 void CheckFailedClearSaveChangedNothing(const fs::path& path,
                                         const std::string& bytes) {
-  CHECK(Text(Title_memoryCardMessage) == "Save failed - see log");
+  CHECK(Text(VS::Title::memoryCardMessage) == "Save failed - see log");
   CHECK(VS::Input::settings.cumulativeSaveCount == 19);
   CHECK(VS::Input::settings.currentGameSaveCount == 7);
   CHECK(VS::Input::settings.saveFileGeneration == 3);
@@ -774,7 +775,7 @@ TEST_CASE("Clear overwrite preserves per-file bank and exact original reset",
   const auto original = FileBytes(path);
   ClearInputsFixture ending;
   ExecuteClearSave();
-  REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
+  REQUIRE(Text(VS::Title::memoryCardMessage) == "Save complete");
   CHECK(FileBytes(path.string() + ".bak") == original);
   CheckOverwrittenBank(fixture.root);
 }
@@ -790,13 +791,13 @@ TEST_CASE("Clear-save consent rejects changed content and reset releases input",
   const auto original = FileBytes(fixture.root / "slot00.vssave");
   Buttons(0);
   Tick(VS::Menu::UpdateLiveSaveMenu);
-  CHECK(Text(Title_memoryCardMessage) == "File changed - select again");
+  CHECK(Text(VS::Title::memoryCardMessage) == "File changed - select again");
   CHECK(FileBytes(fixture.root / "slot00.vssave") == original);
   CHECK(VS::Input::settings.cumulativeSaveCount == 19);
   CHECK(VS::Input::settings.currentGameSaveCount == 7);
   Save::ResetFileMenuSession();
   REQUIRE(VS::Menu::UpdateLiveSaveMenu(1) == 0);
-  CHECK(Text(Title_memoryCardMessage) == "No ending clear save available");
+  CHECK(Text(VS::Title::memoryCardMessage) == "No ending clear save available");
 }
 
 TEST_CASE("Clear saves retain explicit recovered-file replacement consent",
@@ -816,7 +817,7 @@ TEST_CASE("Clear saves retain explicit recovered-file replacement consent",
   BeginPicker(VS::Menu::UpdateLiveSaveMenu, 1);
   REQUIRE(Screen().files[0].status == Save::FileStatus::kRecovered);
   Press(PADRright, VS::Menu::UpdateLiveSaveMenu);
-  CHECK(Text(Title_memoryCardMessage) == "Replace invalid original");
+  CHECK(Text(VS::Title::memoryCardMessage) == "Replace invalid original");
   CHECK_FALSE(Screen().affirmative);
   Press(PADRright, VS::Menu::UpdateLiveSaveMenu);  // Default No.
   CHECK_FALSE(Screen().confirmation);
@@ -824,7 +825,7 @@ TEST_CASE("Clear saves retain explicit recovered-file replacement consent",
   CHECK(FileBytes(path.string() + ".bak") == backup);
   ChooseYes(VS::Menu::UpdateLiveSaveMenu);
   Press(0, VS::Menu::UpdateLiveSaveMenu);
-  REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
+  REQUIRE(Text(VS::Title::memoryCardMessage) == "Save complete");
   CHECK(FileBytes(path.string() + ".bak") == backup);
   CheckReplacedRecoveredFile(fixture.root);
 }
@@ -849,7 +850,7 @@ TEST_CASE("Clear-save failure leaves counters and original bytes unchanged",
   Press(0, VS::Menu::UpdateLiveSaveMenu);
   ChooseYes(VS::Menu::UpdateLiveSaveMenu);
   Press(0, VS::Menu::UpdateLiveSaveMenu);
-  CHECK(Text(Title_memoryCardMessage) == "Save complete");
+  CHECK(Text(VS::Title::memoryCardMessage) == "Save complete");
   CHECK(VS::Input::settings.cumulativeSaveCount == 20);
 }
 
@@ -921,7 +922,7 @@ TEST_CASE(
   REQUIRE(Screen().files.size() == 3);
   CheckSelectedSlot(0);
   CHECK(Screen().files.front().status == Save::FileStatus::kValid);
-  CHECK(Text(Title_memoryCardMessage) == "Select a file");
+  CHECK(Text(VS::Title::memoryCardMessage) == "Select a file");
   Buttons(PADRdown);
   REQUIRE(VS::Menu::UpdateLiveLoadMenu(0) == -1);
   BeginPicker(VS::Menu::UpdateLiveLoadMenu, 2);
@@ -960,7 +961,7 @@ TEST_CASE("Native browsing surfaces filesystem errors on uncached slots",
   Move(PADLdown, VS::Menu::UpdateLiveLoadMenu);
   Move(PADLdown, VS::Menu::UpdateLiveLoadMenu);
   Move(PADLdown, VS::Menu::UpdateLiveLoadMenu);
-  CHECK(Text(Title_memoryCardMessage) == "Cannot read native saves");
+  CHECK(Text(VS::Title::memoryCardMessage) == "Cannot read native saves");
   Buttons(PADRdown);
   REQUIRE(VS::Menu::UpdateLiveLoadMenu(0) == -1);
 }
@@ -988,7 +989,7 @@ TEST_CASE(
   document.state.ashley.currentHp = 249;
   content.Store(document);
   Press(0, VS::Menu::UpdateLiveLoadMenu);
-  CHECK(Text(Title_memoryCardMessage) == "File changed - select again");
+  CHECK(Text(VS::Title::memoryCardMessage) == "File changed - select again");
   CHECK_FALSE(Save::ResumePending());
   CheckSounds(fixture, {1, 2, 0, 0, 0});
   Press(PADRdown, VS::Menu::UpdateLiveLoadMenu);
@@ -1057,7 +1058,7 @@ TEST_CASE("Native cached previews cannot conceal missing load content",
   REQUIRE(fs::remove(content.root / "disc" / "MAP" / "MAP009.MPD"));
   ChooseYes(VS::Menu::UpdateLiveLoadMenu);
   Press(0, VS::Menu::UpdateLiveLoadMenu);
-  CHECK(Text(Title_memoryCardMessage) == "File changed - select again");
+  CHECK(Text(VS::Title::memoryCardMessage) == "File changed - select again");
   CHECK_FALSE(Save::ResumePending());
   Press(PADRdown, VS::Menu::UpdateLiveLoadMenu);
   Press(0, VS::Menu::UpdateLiveLoadMenu);

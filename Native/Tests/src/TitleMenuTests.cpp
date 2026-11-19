@@ -23,7 +23,7 @@
 #include "Save/MemoryCard/GameFilesLive.hpp"
 #include "State/Location.h"
 #include "State/StateFlags.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 #include "Title/TitleMenu.hpp"
 #include "Title/TitleMenuLive.hpp"
 #include "Title/TitleMenuLiveState.hpp"
@@ -684,40 +684,41 @@ void ApplyLiveGameDisplay() {
 class DirtyLiveTitleFiles {
  public:
   DirtyLiveTitleFiles() {
-    std::ranges::copy(Title_fileMenuElements, elements_.begin());
-    Title_saveMenuText = nullptr;
-    Title_fileMenuElements[3].state = 2;
-    Title_fileMenuScreenFade = 9;
-    Title_selectionCursorColor = 5;
-    Title_selectionCursorPosition = 77;
-    Title_transferProgressCounter = 4;
-    Title_transferProgressTarget = 0;
-    Title_memoryCardMessage = message_.data();
+    std::ranges::copy(VS::Title::fileMenuElements, elements_.begin());
+    VS::Title::saveMenuText = nullptr;
+    VS::Title::fileMenuElements[3].state = 2;
+    VS::Title::fileMenuScreenFade = 9;
+    VS::Title::selectionCursorColor = 5;
+    VS::Title::selectionCursorPosition = 77;
+    VS::Title::transferProgressCounter = 4;
+    VS::Title::transferProgressTarget = 0;
+    VS::Title::memoryCardMessage = message_.data();
   }
   DirtyLiveTitleFiles(const DirtyLiveTitleFiles&) = delete;
   DirtyLiveTitleFiles& operator=(const DirtyLiveTitleFiles&) = delete;
   DirtyLiveTitleFiles(DirtyLiveTitleFiles&&) = delete;
   DirtyLiveTitleFiles& operator=(DirtyLiveTitleFiles&&) = delete;
   ~DirtyLiveTitleFiles() {
-    std::ranges::copy(elements_, std::begin(Title_fileMenuElements));
-    Title_fileMenuScreenFade = fade_;
-    Title_selectionCursorColor = color_;
-    Title_selectionCursorPosition = position_;
-    Title_transferProgressCounter = counter_;
-    Title_transferProgressTarget = target_;
-    Title_memoryCardMessage = saved_message_;
-    Title_saveMenuText = text_;
+    std::ranges::copy(elements_, std::begin(VS::Title::fileMenuElements));
+    VS::Title::fileMenuScreenFade = fade_;
+    VS::Title::selectionCursorColor = color_;
+    VS::Title::selectionCursorPosition = position_;
+    VS::Title::transferProgressCounter = counter_;
+    VS::Title::transferProgressTarget = target_;
+    VS::Title::memoryCardMessage = saved_message_;
+    VS::Title::saveMenuText = text_;
   }
 
  private:
-  std::array<Menu_Files_FileMenuElement, 10> elements_{};
-  char fade_ = Title_fileMenuScreenFade;
-  u_char color_ = Title_selectionCursorColor;
-  int position_ = Title_selectionCursorPosition;
-  int counter_ = Title_transferProgressCounter;
-  u_short target_ = Title_transferProgressTarget;
-  char* saved_message_ = Title_memoryCardMessage;
-  u_short* text_ = Title_saveMenuText;
+  std::array<VS::Menu::Files::Element, VS::Menu::Files::kElementCount>
+      elements_{};
+  std::uint8_t fade_ = VS::Title::fileMenuScreenFade;
+  std::uint8_t color_ = VS::Title::selectionCursorColor;
+  std::int32_t position_ = VS::Title::selectionCursorPosition;
+  std::int32_t counter_ = VS::Title::transferProgressCounter;
+  std::uint16_t target_ = VS::Title::transferProgressTarget;
+  char* saved_message_ = VS::Title::memoryCardMessage;
+  std::uint16_t* text_ = VS::Title::saveMenuText;
   std::array<char, 4> message_{'m', 's', 'g', '\0'};
 };
 }  // namespace
@@ -1717,19 +1718,19 @@ TEST_CASE("Title live host shows the game from the other buffer",
 
 TEST_CASE("Title live file elements reset to the title's defaults",
           "[title][title-savefiles]") {
-  constexpr u_short kDefaultTarget = 0x180;
+  constexpr std::uint16_t kDefaultTarget = 0x180;
   const DirtyLiveTitleFiles dirty;
   VS::Menu::Files::ResetLiveTitleElements();
-  CHECK(std::ranges::all_of(Title_fileMenuElements,
-                            [](const Menu_Files_FileMenuElement& element) {
+  CHECK(std::ranges::all_of(VS::Title::fileMenuElements,
+                            [](const VS::Menu::Files::Element& element) {
                               return element.state == 0;
                             }));
-  CHECK(Title_fileMenuScreenFade == 0);
-  CHECK(Title_selectionCursorColor == 0);
-  CHECK(Title_selectionCursorPosition == 0);
-  CHECK(Title_transferProgressCounter == 0);
-  CHECK(Title_transferProgressTarget == kDefaultTarget);
-  CHECK(Title_memoryCardMessage == nullptr);
+  CHECK(VS::Title::fileMenuScreenFade == 0);
+  CHECK(VS::Title::selectionCursorColor == 0);
+  CHECK(VS::Title::selectionCursorPosition == 0);
+  CHECK(VS::Title::transferProgressCounter == 0);
+  CHECK(VS::Title::transferProgressTarget == kDefaultTarget);
+  CHECK(VS::Title::memoryCardMessage == nullptr);
 }
 
 TEST_CASE("Title live file animations complete after a reset",

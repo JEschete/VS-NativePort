@@ -31,7 +31,7 @@
 #include "Save/Snapshot.hpp"
 #include "Save/SnapshotLive.hpp"
 #include "State/Ashley.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveFiles.hpp"
 
 namespace Files = VS::Save::MemoryCard;
 namespace Save = VS::Save;
@@ -917,17 +917,17 @@ TEST_CASE("The newest and the current save slot come from the summaries",
 
 TEST_CASE("The live slot lookups read the published summaries and settings",
           "[save][save-memory-card]") {
-  Restore summaries_global{Title_saveFileSummaries};
+  Restore summaries_global{VS::Title::saveFileSummaries};
   Restore settings_global{VS::Input::settings};
   const Summaries table = SlotTable();
   std::array<Save_CardFileInfoRecord, Files::kSlotCount> records{};
   std::memcpy(records.data(), table.data(), table.size());
   const auto settings = SettingsFor(kCurrentSlot);
   std::memcpy(&VS::Input::settings, settings.data(), settings.size());
-  Title_saveFileSummaries = records.data();
+  VS::Title::saveFileSummaries = records.data();
   CHECK(Files::NewestLiveSaveSlot() == 3);
   CHECK(Files::FindLiveMatchingSaveSlot() == 4);
-  Title_saveFileSummaries = nullptr;
+  VS::Title::saveFileSummaries = nullptr;
   CHECK(Files::NewestLiveSaveSlot() == 0);
   CHECK(Files::FindLiveMatchingSaveSlot() == 0);
 }
@@ -1759,10 +1759,10 @@ TEST_CASE("Marking the snapshot valid sets only its pending flag",
 
 TEST_CASE("The live save check decodes the workspace's incoming image",
           "[save][save-memory-card]") {
-  Restore resource_global{Title_memoryCardUiResource};
+  Restore resource_global{VS::Title::memoryCardUiResource};
   std::vector<char> workspace(2 * kImageBytes);
   const std::span<std::byte> incoming = IncomingOf(workspace);
-  Title_memoryCardUiResource = workspace.data();
+  VS::Title::memoryCardUiResource = workspace.data();
   const Bytes image = SealedImage();
   std::ranges::copy(image, incoming.begin());
   CHECK(Files::ValidateAndApplyLiveLoadedSave(0) == 0);
@@ -1771,20 +1771,20 @@ TEST_CASE("The live save check decodes the workspace's incoming image",
   corrupt.at(kCorruptOffset) ^= std::byte{0x40};
   std::ranges::copy(corrupt, incoming.begin());
   CHECK(Files::ValidateAndApplyLiveLoadedSave(0) == 1);
-  Title_memoryCardUiResource = nullptr;
+  VS::Title::memoryCardUiResource = nullptr;
   CHECK(Files::ValidateAndApplyLiveLoadedSave(0) == 1);
 }
 
 TEST_CASE("Live packaging refuses a save without the save menu's icons",
           "[save][save-memory-card]") {
-  Restore resource_global{Title_memoryCardUiResource};
-  Restore summaries_global{Title_saveFileSummaries};
+  Restore resource_global{VS::Title::memoryCardUiResource};
+  Restore summaries_global{VS::Title::saveFileSummaries};
   Restore icons_global{Save_MemoryCard_uiResources};
   Restore settings_global{VS::Input::settings};
   std::vector<char> workspace(2 * kImageBytes, '\x5A');
   std::array<Save_CardFileInfoRecord, Files::kSlotCount> records{};
-  Title_memoryCardUiResource = workspace.data();
-  Title_saveFileSummaries = records.data();
+  VS::Title::memoryCardUiResource = workspace.data();
+  VS::Title::saveFileSummaries = records.data();
   Save_MemoryCard_uiResources = nullptr;
   const State_Settings settings = VS::Input::settings;
   Files::PackageLiveGameSave(1);

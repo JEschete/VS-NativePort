@@ -247,7 +247,7 @@
 #include "Effects/ScreenEffects.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
-#include "Ending/Credits/StaffRoll.h"
+#include "Ending/Credits/StaffRoll.hpp"
 #include "Event/Actors.h"
 #include "Event/InterpolationCurveLive.hpp"
 #include "Event/Playback.h"
@@ -954,7 +954,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8005E0C8u, 4u, (void*)&VS::Render::nearClip, sizeof VS::Render::nearClip, 1u, 1u},
     {"SLUS_010.40", 0x8005E0D0u, 184u, (void*)&VS::Render::legacyDrawEnvironments, sizeof VS::Render::legacyDrawEnvironments, 1u, 1u},
     {"SLUS_010.40", 0x8005E188u, 40u, (void*)&VS::Render::legacyDisplayEnvironments, sizeof VS::Render::legacyDisplayEnvironments, 1u, 1u},
-    {"SLUS_010.40", 0x8005E1D8u, 4u, (void*)&Ending_Credits_xaResumeFrameCount, sizeof Ending_Credits_xaResumeFrameCount, 1u, 1u},
+    {"SLUS_010.40", 0x8005E1D8u, 4u, (void*)&VS::Ending::Credits::xaResumeFrameCount, sizeof VS::Ending::Credits::xaResumeFrameCount, 1u, 1u},
     {"SLUS_010.40", 0x8005E210u, 4u, (void*)&VS::Render::frameBuf, sizeof VS::Render::frameBuf, 1u, 1u},
     {"SLUS_010.40", 0x8005E214u, 4u, (void*)&Boot_isClearSavePending, sizeof Boot_isClearSavePending, 1u, 1u},
     {"SLUS_010.40", 0x8005E240u, 4u, (void*)&Boot_isGameplayActive, sizeof Boot_isGameplayActive, 1u, 1u},

@@ -2,7 +2,6 @@
 #pragma once
 #include "Legacy/Psx.h"
 
-struct Menu_Files_FileMenuElement;
 struct Menu_Files_PrimitiveBuffer;
 
 #include "Render/LegacyPackets.hpp"
@@ -32,26 +31,6 @@ enum Menu_Files_FileMenuUiId {
     Menu_Files_FileMenuUiId_Mp = 8,
     Menu_Files_FileMenuUiId_Dot = 9,
 };
-
-// decomp: fileMenuElements_t (src/MENU/MENU7.PRG/260.c:134)
-struct Menu_Files_FileMenuElement {
-    char state;
-    char slotId;
-    char outertextBlendFactor;
-    char innertextBlendFactor;
-    char selected;
-    char slotUnavailable;
-    char saveLocation;
-    char reserved7;
-    short targetPosition;
-    short reservedA;
-    short x;
-    short y;
-    short w;
-    short h;
-    char text[32];
-};
-static_assert(sizeof(Menu_Files_FileMenuElement) == 0x34, "Menu_Files_FileMenuElement must keep its PS1 layout");
 
 // decomp: primBuf_t (src/MENU/MENU7.PRG/260.c:150)
 struct Menu_Files_PrimitiveBuffer {

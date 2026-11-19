@@ -18,8 +18,8 @@
 #include "Save/MemoryCard/Resources.h"
 #include "Save/MenuAssets.hpp"
 #include "Save/MenuAssetsLive.hpp"
-#include "Title/SaveCard.h"
-#include "Title/SaveFiles.h"
+#include "Title/SaveCard.hpp"
+#include "Title/SaveFiles.hpp"
 
 namespace {
 using VS::Save::MemoryCard::InitializeMenuResourcesStep;
@@ -313,9 +313,9 @@ class LiveAssetFixture {
     LoadImage(&image_, reinterpret_cast<u_long*>(saved_vram_.data()));
     DrawSync(0);
     VS::Menu::Files::textTable = saved_menu_text_;
-    Title_saveMenuText = saved_title_text_;
-    Title_saveFileSummaries = saved_summaries_;
-    Title_cardDirectoryEntryBuffer = saved_directory_;
+    VS::Title::saveMenuText = saved_title_text_;
+    VS::Title::saveFileSummaries = saved_summaries_;
+    VS::Title::cardDirectoryEntryBuffer = saved_directory_;
     Boot_isSoftResetEnabled = saved_soft_reset_;
     std::memcpy(Content_discRequestSlots, saved_slots_.data(),
                 sizeof Content_discRequestSlots);
@@ -336,9 +336,9 @@ class LiveAssetFixture {
   Content_DiscDrive saved_drive_ = Content_discDriveState;
   int saved_soft_reset_ = Boot_isSoftResetEnabled;
   u_short* saved_menu_text_ = VS::Menu::Files::textTable;
-  u_short* saved_title_text_ = Title_saveMenuText;
-  Save_CardFileInfoRecord* saved_summaries_ = Title_saveFileSummaries;
-  DIRENTRY* saved_directory_ = Title_cardDirectoryEntryBuffer;
+  u_short* saved_title_text_ = VS::Title::saveMenuText;
+  Save_CardFileInfoRecord* saved_summaries_ = VS::Title::saveFileSummaries;
+  DIRENTRY* saved_directory_ = VS::Title::cardDirectoryEntryBuffer;
   RECT image_{};
   std::vector<std::uint16_t> saved_vram_ =
       std::vector<std::uint16_t>(std::size_t{kImagePixels});
@@ -374,8 +374,9 @@ void LoadLiveText(int (*step)(int)) {
   REQUIRE(step(0) == 1);
   REQUIRE(LiveMenuAssetPhase() == MenuAssetPhase::kReady);
   REQUIRE(Save_MemoryCard_uiResources != nullptr);
-  REQUIRE(Title_saveFileSummaries == Save_MemoryCard_uiResources->fileHeaders);
-  REQUIRE(Title_cardDirectoryEntryBuffer ==
+  REQUIRE(VS::Title::saveFileSummaries ==
+          Save_MemoryCard_uiResources->fileHeaders);
+  REQUIRE(VS::Title::cardDirectoryEntryBuffer ==
           &Save_MemoryCard_uiResources->directoryEntry);
 }
 
@@ -387,12 +388,12 @@ void LoadLive(int (*step)(int)) {
 
 // The asset views a refused buffer must leave unchanged (#301).
 struct AssetViews {
-  char* image = Title_memoryCardUiResource;
+  char* image = VS::Title::memoryCardUiResource;
   Save_CardUiResources* resources = Save_MemoryCard_uiResources;
   u_short* menu_text = VS::Menu::Files::textTable;
-  u_short* title_text = Title_saveMenuText;
-  Save_CardFileInfoRecord* summaries = Title_saveFileSummaries;
-  DIRENTRY* directory = Title_cardDirectoryEntryBuffer;
+  u_short* title_text = VS::Title::saveMenuText;
+  Save_CardFileInfoRecord* summaries = VS::Title::saveFileSummaries;
+  DIRENTRY* directory = VS::Title::cardDirectoryEntryBuffer;
 
   bool operator==(const AssetViews&) const = default;
 };
@@ -433,12 +434,12 @@ bool AnyReadQueued() {
 // #300: no view the load derived may outlive the freed block.
 void CheckViewsCleared() {
   CHECK(LiveMenuAssetPhase() == MenuAssetPhase::kIdle);
-  CHECK(Title_memoryCardUiResource == nullptr);
+  CHECK(VS::Title::memoryCardUiResource == nullptr);
   CHECK(Save_MemoryCard_uiResources == nullptr);
   CHECK(VS::Menu::Files::textTable == nullptr);
-  CHECK(Title_saveMenuText == nullptr);
-  CHECK(Title_saveFileSummaries == nullptr);
-  CHECK(Title_cardDirectoryEntryBuffer == nullptr);
+  CHECK(VS::Title::saveMenuText == nullptr);
+  CHECK(VS::Title::saveFileSummaries == nullptr);
+  CHECK(VS::Title::cardDirectoryEntryBuffer == nullptr);
 }
 }  // namespace
 
@@ -457,7 +458,7 @@ TEST_CASE("Live title asset release clears every view into the block",
           "[menu-assets]") {
   const LiveAssetFixture fixture;
   LoadLive(&VS::Save::MemoryCard::StepLiveTitleResources);
-  CHECK(Title_saveMenuText == Save_MemoryCard_uiResources->textTable);
+  CHECK(VS::Title::saveMenuText == Save_MemoryCard_uiResources->textTable);
   VS::Save::MemoryCard::ReleaseLiveTitleResources();
   CheckViewsCleared();
 }

@@ -1,9 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Title/NewGame.h"
+#include "Title/NewGame.hpp"
 
 // decomp: D_80074C24 (D_80074C24@TITLE/TITLE.PRG)
-int Title_newGameInventoryTemplate[15][64] = {
+VS::Title::InventoryTemplateRow VS::Title::newGameInventoryTemplate[VS::Title::kInventoryTemplateRows] = {
     { 0x01010101, 0x00000000, 0x2731240F, 0x322A3124, 0x000000E7, 0x00000000, 0x00000000,
         0x00000000, 0x00000002, 0x00000000, 0x2B373231, -97898196, 0x0000E706,
         0x00000000, 0x00000000, 0x00000000, 0x00000003, 0x00000000, 0x2B373231,
@@ -172,6 +171,6 @@ int Title_newGameInventoryTemplate[15][64] = {
 };
 
 // decomp: actionsLearned (actionsLearned@TITLE/TITLE.PRG)
-int Title_initialLearnedActionBits[8] = { 0x0074FE7F, 0x00000000, 0x00000000, 0x00000000, -131837,
+std::int32_t VS::Title::initialLearnedActionBits[VS::Title::kLearnedActionWords] = { 0x0074FE7F, 0x00000000, 0x00000000, 0x00000000, -131837,
     0x007EFEFD, 0x00000000, -1 };
 

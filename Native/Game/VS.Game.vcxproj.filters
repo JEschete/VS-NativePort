@@ -1767,7 +1767,7 @@
     <ClCompile Include="src\Ending\ClearResults.cpp">
       <Filter>src\Ending</Filter>
     </ClCompile>
-    <ClInclude Include="src\Ending\ClearResults.h">
+    <ClInclude Include="src\Ending\ClearResults.hpp">
       <Filter>src\Ending</Filter>
     </ClInclude>
     <ClCompile Include="src\Ending\ClearResultsCore.cpp">
@@ -1782,7 +1782,7 @@
     <ClCompile Include="src\Ending\Credits\StaffRoll.cpp">
       <Filter>src\Ending\Credits</Filter>
     </ClCompile>
-    <ClInclude Include="src\Ending\Credits\StaffRoll.h">
+    <ClInclude Include="src\Ending\Credits\StaffRoll.hpp">
       <Filter>src\Ending\Credits</Filter>
     </ClInclude>
     <ClCompile Include="src\Ending\Credits\StaffRollCore.cpp">
@@ -1791,7 +1791,7 @@
     <ClCompile Include="src\Ending\Credits.cpp">
       <Filter>src\Ending</Filter>
     </ClCompile>
-    <ClInclude Include="src\Ending\Credits.h">
+    <ClInclude Include="src\Ending\Credits.hpp">
       <Filter>src\Ending</Filter>
     </ClInclude>
     <ClCompile Include="src\Ending\EndingLive.cpp">
@@ -1800,7 +1800,7 @@
     <ClCompile Include="src\Ending\Results.cpp">
       <Filter>src\Ending</Filter>
     </ClCompile>
-    <ClInclude Include="src\Ending\Results.h">
+    <ClInclude Include="src\Ending\Results.hpp">
       <Filter>src\Ending</Filter>
     </ClInclude>
     <ClCompile Include="src\Event\Actors.cpp">
@@ -3183,25 +3183,25 @@
     <ClCompile Include="src\Title\Credits.cpp">
       <Filter>src\Title</Filter>
     </ClCompile>
-    <ClInclude Include="src\Title\Credits.h">
+    <ClInclude Include="src\Title\Credits.hpp">
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClCompile Include="src\Title\NewGame.cpp">
       <Filter>src\Title</Filter>
     </ClCompile>
-    <ClInclude Include="src\Title\NewGame.h">
+    <ClInclude Include="src\Title\NewGame.hpp">
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClCompile Include="src\Title\SaveCard.cpp">
       <Filter>src\Title</Filter>
     </ClCompile>
-    <ClInclude Include="src\Title\SaveCard.h">
+    <ClInclude Include="src\Title\SaveCard.hpp">
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClCompile Include="src\Title\SaveFiles.cpp">
       <Filter>src\Title</Filter>
     </ClCompile>
-    <ClInclude Include="src\Title\SaveFiles.h">
+    <ClInclude Include="src\Title\SaveFiles.hpp">
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClCompile Include="src\Title\TitleMenu.cpp">
@@ -3216,7 +3216,7 @@
     <ClCompile Include="src\Title\TitleScreen.cpp">
       <Filter>src\Title</Filter>
     </ClCompile>
-    <ClInclude Include="src\Title\TitleScreen.h">
+    <ClInclude Include="src\Title\TitleScreen.hpp">
       <Filter>src\Title</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\ActorCommands.hpp">
