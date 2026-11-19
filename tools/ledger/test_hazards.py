@@ -428,6 +428,23 @@ class LedgerTests(unittest.TestCase):
         hazards.sync(self.workspace)
         self.assertIn("UNINITIALIZED", {row["class"] for row in self.rows()})
 
+    def test_a_compiler_log_keeps_triage_and_counts_dropped_sites(self) -> None:
+        self.source("int Battle_Hit(int id) {\n  int x;\n  int y;\n  if (id) return x;\n  return y;\n}\n")
+        warning = (rf"{self.fixture.root}\Native\Game\src\Battle\Sample.cpp({{line}},10): warning : variable "
+                   r"'{name}' is uninitialized when used here [-Wuninitialized]")
+        both = "\n".join((warning.format(line=4, name="x"), warning.format(line=5, name="y")))
+        self.assertEqual(hazards.sync(self.workspace, both), {"kept": 0, "added": 2, "dropped": 0})
+        rows = self.rows()
+        triaged = next(row for row in rows if "'x'" in row["detail"])
+        triaged.update(status="false-positive", notes="set before use")
+        hazards.write_ledger(self.workspace, rows)
+        self.source("\n" + self.fixture.files[SOURCE])
+        changes = hazards.sync(self.workspace, warning.format(line=5, name="x"))
+        self.assertEqual(changes, {"kept": 1, "added": 0, "dropped": 1})
+        compiler = [row for row in self.rows() if row["evidence"] == "compiler"]
+        self.assertEqual([(row["line"], row["status"], row["notes"]) for row in compiler],
+                         [("5", "false-positive", "set before use")])
+
     def test_a_compiler_row_names_the_function_it_is_in(self) -> None:
         self.source("int Battle_Other(void) {\n  return 1;\n}\nint Battle_Hit(int id) {\n  int x;\n  return x;\n}\n")
         log = rf"{self.fixture.root}\Native\Game\src\Battle\Sample.cpp(6,10): warning : uninitialized [-Wuninitialized]"

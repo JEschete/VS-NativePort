@@ -5,7 +5,9 @@
   python tools\\test\\regression.py record --config both      record Debug and Release together, for a replay change
                                                               that both configurations make (they must still agree)
   python tools\\test\\regression.py static                     no build needed: every baseline test still exists in source
-  python tools\\test\\regression.py coverage                   measure what the tests and replays execute, per function
+  python tools\\test\\regression.py coverage                   measure what the tests and replays execute, per function,
+                                                              from a clean instrumented build whose warnings refresh
+                                                              the hazard ledger's compiler rows
 
 tools\\test\\regression_baseline.json holds test names, the assertion total and per-window hashes of each replay's frame
 state: no disc data. A replay steps the frame counter (--fixed-frame-ticks), the wall-clock input to the AI's randomness.
@@ -336,6 +338,15 @@ def export_coverage(directory: Path, name: str, raw: Path, objects: list[Path]) 
     return output
 
 
+def coverage_builds(msbuild_path: str) -> list[list[str]]:
+    """Clean every coverage project, then build them all. An incremental build logs warnings only for the files it
+    recompiles, and the hazard refresh replaces every compiler row from this log (#469)."""
+    common = ["/m", "/restore", "/nologo", "/v:minimal", f"/p:Configuration={COVERAGE_CONFIG}", "/p:Platform=x64",
+              "/p:VSCoverage=true"]
+    return [[msbuild_path, project, f"/t:{target}", *common]
+            for target in ("Clean", "Build") for project in COVERAGE_PROJECTS]
+
+
 def coverage() -> list[Problem]:
     directory = ROOT / "build" / "Coverage"
     ledger = ROOT / "Docs" / "ledgers" / "MODERNIZATION_LEDGER.csv"
@@ -343,12 +354,8 @@ def coverage() -> list[Problem]:
     directory.mkdir(parents=True, exist_ok=True)
     log = directory / "build.log"
     with log.open("w", encoding="utf-8") as stream:
-        for project in COVERAGE_PROJECTS:
-            subprocess.run(
-                [msbuild(), project, "/m", "/restore", "/nologo", "/v:minimal", f"/p:Configuration={COVERAGE_CONFIG}",
-                 "/p:Platform=x64", "/p:VSCoverage=true"],
-                cwd=ROOT, check=True, stdout=stream, stderr=subprocess.STDOUT,
-            )
+        for command in coverage_builds(msbuild()):
+            subprocess.run(command, cwd=ROOT, check=True, stdout=stream, stderr=subprocess.STDOUT)
     objects = [directory / "VS.Tests.exe", directory / "VS.CombatLab.exe"]
     environment = dict(os.environ)
     raw_tests = directory / "tests.profraw"

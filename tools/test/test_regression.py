@@ -116,6 +116,17 @@ class CoverageLossTests(unittest.TestCase):
     def test_a_removed_row_is_not_a_coverage_loss(self) -> None:
         self.assertEqual(regression.coverage_losses([self.row("F1", "yes")], []), [])
 
+    def test_every_coverage_project_is_cleaned_before_any_is_built(self) -> None:
+        # The hazard refresh replaces every compiler row from this log, so it must hold the whole warning set (#469).
+        commands = regression.coverage_builds("msbuild")
+        targets = [(command[1], command[2]) for command in commands]
+        cleaned = [index for index, (_project, target) in enumerate(targets) if target == "/t:Clean"]
+        built = [index for index, (_project, target) in enumerate(targets) if target == "/t:Build"]
+        self.assertEqual([targets[index][0] for index in cleaned], regression.COVERAGE_PROJECTS)
+        self.assertEqual([targets[index][0] for index in built], regression.COVERAGE_PROJECTS)
+        self.assertLess(max(cleaned), min(built))
+        self.assertTrue(all("/p:VSCoverage=true" in command for command in commands))
+
 
 class ReplayTests(unittest.TestCase):
     def test_fingerprint_ignores_wall_clock_and_sequence_fields(self) -> None:

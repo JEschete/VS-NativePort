@@ -1,7 +1,8 @@
 """Log every place that may rely on what PS1 hardware tolerated and this platform does not (#251).
 
   python tools\\ledger\\hazards.py --sync                  rescan source, keep triage, refresh the tracker block
-  python tools\\ledger\\hazards.py --sync --compiler-log L  also replace the compiler-reported rows from a build log
+  python tools\\ledger\\hazards.py --sync --compiler-log L  also replace the compiler-reported rows from a full build's
+                                                          log (regression.py coverage writes one)
   python tools\\ledger\\hazards.py --check                 exit 1 on a site the ledger has not acknowledged
 
 Docs\\ledgers\\HAZARD_LEDGER.csv has one row per candidate site; Docs\\PLATFORM_HAZARDS.md explains each class and its
@@ -629,20 +630,29 @@ def write_tracker(workspace: HazardWorkspace, rows: list[dict[str, str]]) -> Non
     gates.write_tracker_block(workspace.tracker, SUMMARY_BEGIN, SUMMARY_END, summary(rows))
 
 
-def sync(workspace: HazardWorkspace, compiler_log: str | None = None) -> None:
+def sync(workspace: HazardWorkspace, compiler_log: str | None = None) -> Counter[str]:
+    """Rescan the patterns, and with `compiler_log` replace the compiler rows by its warnings: the log must come from
+    a full build (#469). Triage survives for every key still present. Returns the compiler rows kept, added and
+    dropped by the log."""
     previous = {row["key"]: row for row in read_csv(workspace.ledger)}
     rows = keyed(scan(workspace))
+    changes: Counter[str] = Counter()
     if compiler_log is not None:
-        rows += keyed(attributed(parse_compiler_log(compiler_log, str(workspace.root)), workspace))
+        compiler = keyed(attributed(parse_compiler_log(compiler_log, str(workspace.root)), workspace))
+        old = {key for key, row in previous.items() if row["evidence"] == "compiler"}
+        new = {row["key"] for row in compiler}
+        changes.update(kept=len(old & new), added=len(new - old), dropped=len(old - new))
+        rows += compiler
     else:
         rows += [row for row in previous.values() if row["evidence"] == "compiler"]
     merged = {}
     for row in rows:
-        old = previous.get(row["key"])
-        merged[row["key"]] = {**row, "status": old["status"], "notes": old["notes"]} if old else row
+        old_row = previous.get(row["key"])
+        merged[row["key"]] = {**row, "status": old_row["status"], "notes": old_row["notes"]} if old_row else row
     ordered = sorted(merged.values(), key=lambda row: (row["class"], row["path"], int(row["line"]), row["key"]))
     write_ledger(workspace, ordered)
     write_tracker(workspace, ordered)
+    return changes
 
 
 def check(workspace: HazardWorkspace) -> list[Issue]:
@@ -674,14 +684,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--sync", action="store_true")
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--compiler-log", type=Path, help="build output whose warnings replace the compiler rows")
+    parser.add_argument("--compiler-log", type=Path,
+                        help="output of a full (clean) build, whose warnings replace the compiler rows")
     arguments = parser.parse_args()
     workspace = HazardWorkspace()
     if arguments.sync:
         log = None
         if arguments.compiler_log:
             log = arguments.compiler_log.read_bytes().decode("utf-8", errors="replace").replace("\x00", "")
-        sync(workspace, log)
+        changes = sync(workspace, log)
+        if log is not None:
+            print(f"compiler rows: {changes['kept']:,} kept with their triage, {changes['added']:,} added, "
+                  f"{changes['dropped']:,} dropped")
     issues = check(workspace)
     for found in issues[:50]:
         print(f"{found.rule}: {found.subject}: {found.message}")

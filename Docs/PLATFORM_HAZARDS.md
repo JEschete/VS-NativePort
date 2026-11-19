@@ -52,21 +52,21 @@ there would have hidden the defect and left the wrong behavior in place.
 | `NULL-TABLE` | Sparse table entry read without a check | 4 | 0 | 0 | 4 | 0 | 3 |
 | `NULL-RETURN` | Lookup result read without a check | 0 | 0 | 0 | 0 | 0 | 0 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 2 | 0 | 0 | 2 | 0 | 2 |
-| `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
+| `ALWAYS-TRUE-GUARD` | Null check that can never fail | 0 | 0 | 0 | 0 | 0 | 0 |
 | `DIV-ZERO` | Division by a value that was not checked | 121 | 0 | 0 | 108 | 13 | 114 |
-| `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 82 |
-| `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
-| `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
+| `UNINITIALIZED` | Read of a variable that may never have been set | 0 | 0 | 0 | 0 | 0 | 0 |
+| `RETURN-FALLOFF` | Non-void function that can end without returning | 0 | 0 | 0 | 0 | 0 | 0 |
+| `POINTER-INT` | Pointer and integer converted to each other | 5 | 5 | 5 | 0 | 0 | 5 |
 | `BYTE-OFFSET` | Field reached by a literal byte offset | 0 | 0 | 0 | 0 | 0 | 0 |
 | `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 0 | 0 | 0 | 0 | 0 | 0 |
 | `PS1-ADDRESS` | Original memory address used as a value | 0 | 0 | 0 | 0 | 0 | 0 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 0 | 0 | 0 | 0 | 0 | 0 |
-| `OUT-OF-BOUNDS` | Index or pointer outside its array | 2 | 2 | 2 | 0 | 0 | 2 |
+| `OUT-OF-BOUNDS` | Index or pointer outside its array | 0 | 0 | 0 | 0 | 0 | 0 |
 | `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 4 | 0 | 0 | 4 | 0 | 4 |
 | `CAPACITY` | Fixed storage capacity | 81 | 0 | 0 | 81 | 0 | 81 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 0 | 0 | 0 | 0 | 0 | 0 |
 | `NARROW-ID` | Identity or index stored in one byte | 38 | 0 | 0 | 38 | 0 | 38 |
-| **Total** | | 489 | 239 | 239 | 237 | 13 | 479 |
+| **Total** | | 255 | 5 | 5 | 237 | 13 | 247 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -91,22 +91,20 @@ there would have hidden the defect and left the wrong behavior in place.
 | Roadmap issue | Sites |
 | --- | ---: |
 | no roadmap issue | 111 |
-| #56 | 92 |
-| #60 | 56 |
-| #253 | 50 |
-| #61 | 44 |
-| #55 | 34 |
-| #45 | 29 |
-| #47 | 12 |
-| #50 | 11 |
-| #59 | 9 |
-| #58 | 8 |
-| #57 | 7 |
-| #62 | 7 |
-| #48 | 7 |
-| #54 | 5 |
-| #44 | 4 |
-| #51 | 2 |
+| #60 | 23 |
+| #55 | 21 |
+| #45 | 19 |
+| #61 | 18 |
+| #56 | 16 |
+| #253 | 12 |
+| #50 | 10 |
+| #48 | 6 |
+| #47 | 5 |
+| #57 | 5 |
+| #54 | 3 |
+| #59 | 2 |
+| #44 | 2 |
+| #62 | 1 |
 | #52 | 1 |
 
 <!-- hazards:end -->
@@ -241,8 +239,10 @@ The ledger also lists fixed tables outside inventory that later features may rea
 
 - **Pattern rows can miss sites as well as over-report.** The scanner covers table entries, lookups, and direct reads. It does
   not trace a pointer through function arguments or into another function.
-- **Compiler rows** come from one build's warning set and are refreshed with `--compiler-log`. CI cannot re-measure them because
-  it does not build, so a new compiler-reported site appears only at the next refresh.
+- **Compiler rows** come from one build's warning set and are refreshed with `--compiler-log`, which replaces them all, so the
+  log must come from a full build: `tools\test\regression.py coverage` cleans the coverage projects first (#469). Triage
+  carries over for sites that still exist; the sync prints how many rows it kept, added and dropped. CI cannot re-measure
+  them because it does not build, so a new compiler-reported site appears only at the next refresh.
 - **Runtime evidence is still missing.** Nothing here shows which sites actually fire. A sanitizer build
   (`-fsanitize=null,bounds`) running the regression suite would show that, and it has not been attempted.
 - **The roadmap mapping is proposed,** from each path's system and each issue's title.
