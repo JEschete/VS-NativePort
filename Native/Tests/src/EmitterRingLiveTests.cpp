@@ -20,7 +20,7 @@
 #include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RepeatingRingsLive.hpp"
-#include "Effects/Templates/TemplateState.h"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
@@ -153,7 +153,7 @@ class RingSlot {
 };
 
 void CheckLiveBindings(LiveRing ring, LiveEmission& fixture, RingSlot& owner) {
-  auto* state = static_cast<Effects_ClosedRingState*>(owner.slot.rendererState);
+  auto* state = static_cast<effects::LiveRingState*>(owner.slot.rendererState);
   SECTION("missing current curve refuses without sampling a zero replacement") {
     fixture.definitions.values[0].positionCurve = 1;
     fixture.package.curves[0] = nullptr;
@@ -168,7 +168,7 @@ void CheckLiveBindings(LiveRing ring, LiveEmission& fixture, RingSlot& owner) {
 }
 
 void CheckLiveLifecycle(LiveRing ring, RingSlot& owner) {
-  auto* state = static_cast<Effects_ClosedRingState*>(owner.slot.rendererState);
+  auto* state = static_cast<effects::LiveRingState*>(owner.slot.rendererState);
   SECTION("repeated create does not overwrite or leak the existing state") {
     CHECK(ring(&owner.slot, 1, 3) == 0);
     CHECK(owner.slot.rendererState == state);

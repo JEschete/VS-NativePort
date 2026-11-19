@@ -77,7 +77,7 @@
 #include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/Ring.hpp"
 #include "Effects/Templates/RingCore.hpp"
-#include "Effects/Templates/TemplateState.h"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TiledRing.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
@@ -109,18 +109,6 @@ constexpr std::size_t kAccelerationMinRange = 4;
 constexpr std::size_t kAccelerationMaxRange = 5;
 constexpr std::size_t kSpeedRange = 2;
 
-// One record serves all three templates: the C ring states share a layout.
-using LiveRingState = Effects_RingState;
-static_assert(sizeof(LiveRingState) == sizeof(Effects_ClosedRingState));
-static_assert(sizeof(LiveRingState) == sizeof(Effects_TiledRingState));
-static_assert(offsetof(LiveRingState, age) ==
-              offsetof(Effects_ClosedRingState, age));
-static_assert(offsetof(LiveRingState, age) ==
-              offsetof(Effects_TiledRingState, age));
-static_assert(offsetof(LiveRingState, texture) ==
-              offsetof(Effects_ClosedRingState, texture));
-static_assert(offsetof(LiveRingState, texture) ==
-              offsetof(Effects_TiledRingState, texture));
 static_assert(sizeof(Effects_ParticleDefinition) == kParticleDefinitionBytes);
 
 std::uint64_t refused_curves = 0;
@@ -232,9 +220,9 @@ class LiveRingHost final : public RingHost {
     return RingState{.lifetime = live->lifetime,
                      .definition_index = live->effect,
                      .radius = live->radius,
-                     .radius_speed = live->radiusSpeed,
+                     .radius_speed = live->radius_speed,
                      .height = live->height,
-                     .height_speed = live->heightSpeed,
+                     .height_speed = live->height_speed,
                      .angle = live->angle,
                      .age = live->age};
   }
@@ -247,9 +235,9 @@ class LiveRingHost final : public RingHost {
     live->lifetime = state.lifetime;
     live->effect = state.definition_index;
     live->radius = state.radius;
-    live->radiusSpeed = state.radius_speed;
+    live->radius_speed = state.radius_speed;
     live->height = state.height;
-    live->heightSpeed = state.height_speed;
+    live->height_speed = state.height_speed;
     live->angle = state.angle;
     live->age = state.age;
   }
@@ -305,7 +293,7 @@ class LiveRingHost final : public RingHost {
 
 // decomp: rings.h:41-55, closedRings.h:63-75 and tiledRings.h:57-69 (the
 // create command). The original indexed the definition and allocated the
-// state unchecked and left reserved2 as the heap held it.
+// state unchecked and left reserved_2 as the heap held it.
 void LiveRingHost::Create(const RingState& state, RingTextureSource source) {
   const Effects_ParticleDefinition* definition =
       Definition(state.definition_index);

@@ -17,7 +17,7 @@
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
-#include "Effects/Templates/TemplateState.h"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailCore.hpp"
 #include "Effects/Templates/TrailInit.hpp"
 #include "Effects/Templates/TrailRender.hpp"
@@ -389,15 +389,15 @@ TEST_CASE("Nine-sample live trail stages hold at most eight trails",
   Effects_ParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
   std::array<VS::Effects::LiveTrail9, 3> buffer{};
-  Effects_Trail9State state{};
+  VS::Effects::LiveTrailNineState state{};
   state.trails = buffer.data();
-  state.trailCount = 2;
+  state.trail_count = 2;
   trails::RunLiveTrailNineStage(&MarkNine, definition, scratch, instance,
                                 state);
   CHECK(buffer[0].current_spline_sample == 7);
   CHECK(buffer[1].spline_samples[kNine - 1].vz == 6);
   CHECK(buffer[2].current_spline_sample == 0);
-  state.trailCount = static_cast<std::uint8_t>(kNine);
+  state.trail_count = static_cast<std::uint8_t>(kNine);
   trails::RunLiveTrailNineStage(&MarkNine, definition, scratch, instance,
                                 state);
   CHECK(buffer[2].current_spline_sample == 0);

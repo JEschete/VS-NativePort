@@ -20,7 +20,7 @@
 #include "Effects/Plugins/PluginData.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RepeatingRings.hpp"
-#include "Effects/Templates/TemplateState.h"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 
@@ -88,8 +88,7 @@ std::uint64_t refused_rings = 0;
   const auto index =
       command == RingCommand::kCreate
           ? PlanRing(packed).definition_index
-          : static_cast<const Effects_ClosedRingState*>(slot->rendererState)
-                ->effect;
+          : static_cast<const LiveRingState*>(slot->rendererState)->effect;
   if (Effects_package == nullptr || Effects_package->block5Data == nullptr ||
       index >= LiveParticleDefinitionCount()) {
     return Refuse("definition outside the current bound package");

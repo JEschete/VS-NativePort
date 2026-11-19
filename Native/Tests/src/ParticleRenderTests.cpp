@@ -40,7 +40,7 @@
 #include "Effects/Templates/ParticlesLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Effects/Templates/SurfacesLive.hpp"
-#include "Effects/Templates/TemplateState.h"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailInit.hpp"
 #include "Effects/Templates/TrailRender.hpp"
@@ -1075,17 +1075,17 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
   Effects_EffectInstance instance{};
   const auto samples = std::size(trail.spline_samples);
   for (int cycle = 0; cycle < 2; ++cycle) {
-    state.curveSampleDistance = 0;
+    state.curve_sample_distance = 0;
     initialize(&definition, &scratch, &instance, &state);
     CheckTrailInitialState(trail);
     for (std::size_t frame = 0; frame < kTrailGolden.size(); ++frame) {
-      state.curveSampleDistance = static_cast<int>(frame);
+      state.curve_sample_distance = static_cast<int>(frame);
       update(&definition, &scratch, &instance, &state);
       CheckTrailReferenceStep(storage.entries, frame);
       CHECK(storage.guard == kGuard);
     }
     for (std::size_t tail = 0; tail < samples - 1; ++tail) {
-      state.curveSampleDistance = 12 + static_cast<int>(tail);
+      state.curve_sample_distance = 12 + static_cast<int>(tail);
       update(&definition, &scratch, &instance, &state);
       CHECK(trail.trail_collapse_counter == samples - 2 - tail);
       CHECK(storage.guard == kGuard);
@@ -1100,7 +1100,7 @@ template <VS::Effects::Templates::TrailStage Stage>
 void RunTrailStage(Effects_ParticleDefinition* definition,
                    Effects_ParticleEmitterScratch* scratch,
                    Effects_EffectInstance* instance,
-                   Effects_TrailQuadSet* state) {
+                   VS::Effects::LiveTrailState* state) {
   VS::Effects::Templates::RunLiveTrailStage(Stage, *definition, *scratch,
                                             *instance, *state);
 }
@@ -1110,7 +1110,7 @@ template <VS::Effects::Templates::TrailNineStage Stage>
 void RunTrailNineStage(Effects_ParticleDefinition* definition,
                        Effects_ParticleEmitterScratch* scratch,
                        Effects_EffectInstance* instance,
-                       Effects_Trail9State* state) {
+                       VS::Effects::LiveTrailNineState* state) {
   VS::Effects::Templates::RunLiveTrailNineStage(Stage, *definition, *scratch,
                                                 *instance, *state);
 }
@@ -1119,8 +1119,8 @@ void RunTrailNineStage(Effects_ParticleDefinition* definition,
 TEST_CASE(
     "Five-sample trails preserve source trajectory and repeat-entry state",
     "[effects][trails][reference]") {
-  Effects_TrailQuadSet state{};
-  state.trailcount = 2;
+  VS::Effects::LiveTrailState state{};
+  state.trail_count = 2;
   CheckTrailReferencePath<VS::Effects::LiveTrail>(
       state, RunTrailStage<&VS::Effects::Plg057::TrailInit>,
       RunTrailStage<&VS::Effects::Plg057::TrailUpdate>);
@@ -1128,8 +1128,8 @@ TEST_CASE(
 
 TEST_CASE("Nine-sample trails preserve source trajectory and separate history",
           "[effects][trails][reference]") {
-  Effects_Trail9State state{};
-  state.trailCount = 2;
+  VS::Effects::LiveTrailNineState state{};
+  state.trail_count = 2;
   CheckTrailReferencePath<VS::Effects::LiveTrail9>(
       state, RunTrailNineStage<&VS::Effects::Templates::TrailNineInit>,
       RunTrailNineStage<&VS::Effects::Templates::TrailNineUpdate>);
@@ -1266,32 +1266,22 @@ void CheckTrailReferenceRendering(State& state,
 
 TEST_CASE("Five-sample trail ribbons retain source geometry and render spaces",
           "[effects][trails][reference][trail-render]") {
-  struct Storage {
-    Effects_TrailQuadSet state{};
-    std::array<u_char, 5> transparency{};
-  } storage;
-  static_assert(offsetof(Storage, transparency) ==
-                offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
-  storage.state.trailcount = 2;
+  VS::Effects::LiveTrailState state{};
+  state.trail_count = 2;
   CheckTrailReferenceRendering<VS::Effects::LiveTrail,
                                VS::Render::EffectGouraudQuadPacket>(
-      storage.state, storage.state.textureAnimation, storage.transparency,
+      state, state.texture, state.transparency,
       RunTrailStage<&VS::Effects::Plg057::TrailRender>,
       [](const auto& packet) -> const POLY_GT4& { return packet.opaque4; });
 }
 
 TEST_CASE("Nine-sample trail ribbons retain source geometry and render spaces",
           "[effects][trails][reference][trail-render]") {
-  struct Storage {
-    Effects_Trail9State state{};
-    std::array<u_char, 9> transparency{};
-  } storage;
-  static_assert(offsetof(Storage, transparency) ==
-                offsetof(Effects_Trail9State, sampledTransparencyCurve));
-  storage.state.trailCount = 2;
+  VS::Effects::LiveTrailNineState state{};
+  state.trail_count = 2;
   CheckTrailReferenceRendering<VS::Effects::LiveTrail9,
                                VS::Render::Trail9Packet>(
-      storage.state, storage.state.texture, storage.transparency,
+      state, state.texture, state.transparency,
       RunTrailNineStage<&VS::Effects::Templates::TrailNineRender>,
       [](const auto& packet) -> const POLY_GT4& { return packet.poly; });
 }
@@ -1314,7 +1304,7 @@ struct Plg074Fixture : EmissionFixture {
   std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
   Effects_ParticleEmitterScratch scratch{};
   std::array<VS::Effects::LiveTrail, 16> trails{};
-  Effects_TrailQuadSet trail_state{};
+  VS::Effects::LiveTrailState trail_state{};
 
   Plg074Fixture() {
     package.block1TableCount = 1;
@@ -1338,7 +1328,7 @@ struct Plg074Fixture : EmissionFixture {
     instance.transforms[0].world.t[1] = -800;
     instance.transforms[0].world.t[2] = 900;
     trail_state.trails = trails.data();
-    trail_state.trailcount = 8;
+    trail_state.trail_count = 8;
     VS::Effects::ForgetLivePackageExtents();
     VS::Effects::RecordLiveParticleDefinitions(
         std::as_bytes(std::span{&definitions, 1}));
@@ -1383,8 +1373,8 @@ template <class State>
 void CheckPlg074RingInitialState(const State& state) {
   CHECK(state.age == 0);
   CHECK(state.angle == 0);
-  CHECK(state.radiusSpeed == 0);
-  CHECK(state.heightSpeed == 0);
+  CHECK(state.radius_speed == 0);
+  CHECK(state.height_speed == 0);
 }
 
 template <class State>
@@ -1487,7 +1477,7 @@ TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
   fixture.CheckGuards();
   VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
   fixture.ResetPackets();
-  CheckPlg074RingLifecycle<Effects_TiledRingState>(entry, fixture);
+  CheckPlg074RingLifecycle<VS::Effects::LiveRingState>(entry, fixture);
 }
 
 TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
@@ -1513,7 +1503,7 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
   fixture.CheckGuards();
   VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
   fixture.ResetPackets();
-  CheckPlg074RingLifecycle<Effects_RingState>(entry, fixture);
+  CheckPlg074RingLifecycle<VS::Effects::LiveRingState>(entry, fixture);
 }
 
 TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
@@ -1571,7 +1561,7 @@ TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
           "[effects][plg074][f01990]") {
   const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailControl>;
   Plg074Fixture fixture;
-  fixture.trail_state.trailcount = 1;
+  fixture.trail_state.trail_count = 1;
   auto& points = fixture.trails[0].spline_points;
   points[0] = {10, 20, 30, 0};
   points[3] = {10, 20, 1054, 0};
@@ -1602,19 +1592,19 @@ void CheckPlg074TrailInitialization(const VS::Effects::LiveTrail& trail,
   CHECK(trail.first_step == 0x06000000 / (steps * steps) - 16384 / steps);
 }
 
-void CheckPlg074EmitterInitialization(const Effects_TrailQuadSet& state,
+void CheckPlg074EmitterInitialization(const VS::Effects::LiveTrailState& state,
                                       int count) {
-  CHECK(state.trailcount == std::min(count, 16));
-  CHECK(state.curveSampleDistance == 0);
-  CHECK(state.opaque3 == 0);
-  CHECK(state.sampledTransparencyCurve[0] == 128);
-  CHECK(state.sampledTransparencyCurve[4] == 128);
+  CHECK(state.trail_count == std::min(count, 16));
+  CHECK(state.curve_sample_distance == 0);
+  CHECK(state.initialized == 0);
+  CHECK(state.transparency[0] == 128);
+  CHECK(state.transparency[4] == 128);
 }
 
-void CheckPlg074EmitterTick(const Effects_TrailQuadSet& state, int count,
+void CheckPlg074EmitterTick(const VS::Effects::LiveTrailState& state, int count,
                             int cycle) {
-  CHECK(state.opaque3 == 1);
-  CHECK(state.curveSampleDistance == 1);
+  CHECK(state.initialized == 1);
+  CHECK(state.curve_sample_distance == 1);
   CHECK(VS::Content::plg074TrailEmissionCounter[0] ==
         ((cycle + 1) * std::min(count, 16)) % 8);
   CHECK(VS::Effects::Plg073::trailEmissionCounter == 0);
@@ -1669,8 +1659,8 @@ TEST_CASE(
 TEST_CASE("PLG074 F01992 matches the source recurrence and tail collapse",
           "[effects][plg074][f01992]") {
   const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailUpdate>;
-  Effects_TrailQuadSet state{};
-  state.trailcount = 2;
+  VS::Effects::LiveTrailState state{};
+  state.trail_count = 2;
   CheckTrailReferencePath<VS::Effects::LiveTrail>(
       state, RunTrailStage<&VS::Effects::Plg073::TrailInit>, entry);
 }
@@ -1679,17 +1669,11 @@ TEST_CASE(
     "PLG074 F01993 preserves ribbon packets clipping and circular history",
     "[effects][plg074][f01993]") {
   const auto entry = RunTrailStage<&VS::Effects::Plg073::TrailRender>;
-  struct Storage {
-    Effects_TrailQuadSet state{};
-    std::array<u_char, 5> transparency{};
-  } storage;
-  static_assert(offsetof(Storage, transparency) ==
-                offsetof(Effects_TrailQuadSet, sampledTransparencyCurve));
-  storage.state.trailcount = 2;
+  VS::Effects::LiveTrailState state{};
+  state.trail_count = 2;
   CheckTrailReferenceRendering<VS::Effects::LiveTrail,
                                VS::Render::EffectGouraudQuadPacket>(
-      storage.state, storage.state.textureAnimation, storage.transparency,
-      entry,
+      state, state.texture, state.transparency, entry,
       [](const auto& packet) -> const POLY_GT4& { return packet.opaque4; });
 }
 
@@ -1708,7 +1692,7 @@ TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
   for (int cycle = 0; cycle < 2; ++cycle) {
     Effects_RendererSlot slot{};
     REQUIRE(entry(&slot, 1, 2) == 1);
-    auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+    auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
     REQUIRE(state != nullptr);
     CheckPlg074EmitterInitialization(*state, count);
     REQUIRE(entry(&slot, 2, 0) == 1);
@@ -1766,13 +1750,9 @@ std::array<u_char, 5> CreatedTransparency(Plg074Fixture& fixture,
   fixture.Definition().transparencyCurve = curve;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
   REQUIRE(state != nullptr);
-  std::array<u_char, 5> samples{};
-  std::memcpy(samples.data(),
-              reinterpret_cast<const u_char*>(state) +
-                  offsetof(Effects_TrailQuadSet, sampledTransparencyCurve),
-              samples.size());
+  std::array<u_char, 5> samples = state->transparency;
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(state);
   return samples;
@@ -1824,7 +1804,7 @@ TEST_CASE("PLG074 trail emitter stops when its package is replaced",
   Effects_RendererSlot slot{};
   fixture.Definition().intervalRange[0] = 2;
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
   REQUIRE(state != nullptr);
   VS::Effects::ForgetLivePackageExtents();
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
@@ -1863,7 +1843,7 @@ TEST_CASE("PLG074 trail tick events stay within the package's definitions",
   fixture.Definition().tickEvent = 2;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
   REQUIRE(state != nullptr);
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 1);
   CHECK(log.Contains("tick event 1 is outside"));
@@ -1893,13 +1873,10 @@ std::array<u_char, 9> NineSampleTrailTransparency(Plg074Fixture& fixture,
   fixture.Definition().transparencyCurve = curve;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 1, 0) == 1);
-  auto* state = static_cast<Effects_Trail9State*>(slot.rendererState);
+  auto* state =
+      static_cast<VS::Effects::LiveTrailNineState*>(slot.rendererState);
   REQUIRE(state != nullptr);
-  std::array<u_char, 9> samples{};
-  std::memcpy(samples.data(),
-              reinterpret_cast<const u_char*>(state) +
-                  offsetof(Effects_Trail9State, sampledTransparencyCurve),
-              samples.size());
+  std::array<u_char, 9> samples = state->transparency;
   REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(state);
   return samples;
@@ -1910,7 +1887,8 @@ std::array<int, 5> RotatingSurfaceRows(Plg074Fixture& fixture, u_char curve) {
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::Templates::UpdateLivePlg073RotatingSurface(&slot, 1,
                                                                   0) == 1);
-  auto* state = static_cast<Effects_RotatingSurfaceState*>(slot.rendererState);
+  auto* state =
+      static_cast<VS::Effects::LiveRotatingSurfaceState*>(slot.rendererState);
   REQUIRE(state != nullptr);
   std::array<int, 5> rows{};
   std::ranges::copy(state->factors, rows.begin());
@@ -1951,7 +1929,7 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
   fixture.Definition().intervalRange[0] = 2;
   Effects_RendererSlot slot{};
   REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
-  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  auto* state = static_cast<VS::Effects::LiveTrailState*>(slot.rendererState);
   REQUIRE(state != nullptr);
   if (missing_instance) {
     Effects_currentInstance = nullptr;
@@ -1961,7 +1939,7 @@ TEST_CASE("Trail emitters stop on a missing instance or transform",
   const void* before = VS::Render::FrameScratchpad().primitive_cursor;
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
   CHECK(state->trails == nullptr);
-  CHECK(state->opaque3 == 0);
+  CHECK(state->initialized == 0);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor == before);
   CHECK(log.Contains(missing_instance ? "no current effect instance"
                                       : "names transform 16 of 16"));
@@ -2090,7 +2068,8 @@ TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
   fixture.CheckGuards();
   VS::Core::Memory::FreeLiveFromHighEnd(slot.rendererState);
   fixture.ResetPackets();
-  CheckPlg074RingLifecycle<Effects_RotatingSurfaceState>(entry, fixture);
+  CheckPlg074RingLifecycle<VS::Effects::LiveRotatingSurfaceState>(entry,
+                                                                  fixture);
 }
 
 TEST_CASE(

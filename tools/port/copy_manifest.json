@@ -194,7 +194,6 @@
 "Native\\Game\\src\\Effects\\PurgeTables.cpp": "eae721fcf9b4cb6f91cafa9e45af6dee0b9707a2548c97194c1db413043593fe",
 "Native\\Game\\src\\Effects\\Runtime.cpp": "b15f7c8355d52471cbcb14a036ab12e3b0d3cd8b9c0001593a427cb824847c8c",
 "Native\\Game\\src\\Effects\\Runtime.h": "98a939e6166617b3c799971d9628c9e1bb4fc59c1fa0740cf4a975a406103719",
-"Native\\Game\\src\\Effects\\Templates\\TemplateState.h": "4294d69b1d75634ec161fbe8889773aaa1206a344c3ac6b3ceec3d2bf637628f",
 "Native\\Game\\src\\Ending\\ClearResults.cpp": "a87be7cd7f009863760bc12142f521279bc710f2fb509dc4cb58f1e55c6ad2a2",
 "Native\\Game\\src\\Ending\\Credits.cpp": "1dc0caeae91c45e7d8509f8ca436064e01ac7fb29db78472467e7a7916e65020",
 "Native\\Game\\src\\Ending\\Credits\\StaffRoll.cpp": "74a43488f60ca390c487c2b4f45db5c3eea9a270adad31024341bef40a012193",

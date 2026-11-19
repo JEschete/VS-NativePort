@@ -779,7 +779,7 @@ T00134.003,T00134,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00825.000,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),0,actor,0,u_int,8,,,actor,Target actor index,high,source:146C.c:3970
 T00825.001,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),1,unk1,1,u_int,8,,,eventActorSlot,Slot in the event's actor list; battle code sets 0,med,source:5BF94.c:8031
 T00825.002,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),2,part,0,u_int,8,,,part,Targeted body part; 0xFD is a special marker,med,source:146C.c:3308
-T00825.003,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),3,unk3,1,u_int,8,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:52;declaration-only;source:6E644.h:17
+T00825.003,T00825,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6E644.h:13:9),3,unk3,1,u_int,8,,,reserved3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:51;declaration-only;source:6E644.h:17
 T00135.000,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),0,x,0,unsigned int,8,,,tileX,Tile X,high,source:771A8.c:583
 T00135.001,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),1,y,0,unsigned int,8,,,tag,"Extra byte: gate index in routes, layer in placements, height in steps",low,source:771A8.c:631
 T00135.002,T00135,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),2,z,0,unsigned int,8,,,tileZ,Tile Z,high,source:771A8.c:583
@@ -1154,7 +1154,7 @@ T00197.006,T00197,ColorInfo,6,bindex,0,u_char,,,,blueStepRow,Target minus curren
 T00198.000,T00198,D_1F80035C_t,0,unk0,1,u_char[52],,,,reserved0,Bytes not read by the decompiled users; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:27;declaration-only;source:30DB0.h:28
 T00198.001,T00198,D_1F80035C_t,1,tpage,0,u_short,,,,texture_page,Texture page of the model being drawn,high,source:49268.c:134
 T00198.002,T00198,D_1F80035C_t,2,clut,0,u_short,,,,palette,Palette of the model being drawn,high,source:49268.c:137
-T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:403;declaration-only;source:30DB0.h:31
+T00198.003,T00198,D_1F80035C_t,3,unk38,1,u_short,,,,reserved38,Written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Actors\ModelDrawingLive.cpp:402;declaration-only;source:30DB0.h:31
 T00198.004,T00198,D_1F80035C_t,4,unk3A,1,u_short,,,,angle_x,Actor X angle staged for the transform,med,source:44F14.c:849
 T00198.005,T00198,D_1F80035C_t,5,unk3C,1,u_short,,,,angle_y,Actor Y angle staged for the transform,med,source:44F14.c:850
 T00198.006,T00198,D_1F80035C_t,6,unk3E,1,u_char[14],,,,reserved3e,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\ModelDraw.hpp:33;declaration-only;source:30DB0.h:34
@@ -1592,7 +1592,7 @@ T00239.086,T00239,D_800F4538_t,86,spSeqLbas,0,u_int[4],,,,specialSequenceLbas,Di
 T00239.087,T00239,D_800F4538_t,87,unk6BC,1,int[4],,,,reserved6BC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:114;declaration-only;source:3A1A0.h:333
 T00239.088,T00239,D_800F4538_t,88,spSeqSizes,0,u_short[4],,,,specialSequenceSizes,Byte sizes of the special-attack sequences,high,source:30DB0.c:1572
 T00239.089,T00239,D_800F4538_t,89,unk6D4,1,int[2],,,,reserved6D4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\ActorRecord.h:116;declaration-only;source:3A1A0.h:335
-T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:511;source:30DB0.c:1360
+T00239.090,T00239,D_800F4538_t,90,unk6DC,1,int,,,,opaque6DC,Cleared when parsed; not read; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:514;source:30DB0.c:1360
 T00239.091,T00239,D_800F4538_t,91,unk6E0,1,u_char,,,queued animation | queuedAnimationId,queuedAnimation,Animation queued to play next; 0 when none,high,source:30DB0.c:3718
 T00239.092,T00239,D_800F4538_t,92,unk6E1,1,u_char,,,queued blend frames,queuedParameterA,First parameter of the queued animation,low,source:30DB0.c:3719
 T00239.093,T00239,D_800F4538_t,93,unk6E2,1,u_char,,,queued starting-frame parameter,queuedParameterB,Second parameter of the queued animation,low,source:30DB0.c:3720
@@ -1601,7 +1601,7 @@ T00239.095,T00239,D_800F4538_t,95,unk6E4,1,u_char,,,,contactKind,Kind of surface
 T00239.096,T00239,D_800F4538_t,96,unk6E5,1,u_char,,,idle animation | travelAnimationId,travelAnimation,Animation played while travelling,high,source:30DB0.c:1350
 T00239.097,T00239,D_800F4538_t,97,unk6E6,1,u_short,,,,modelId,Model id,high,source:30DB0.c:1097
 T00239.098,T00239,D_800F4538_t,98,unk6E8,1,short,,,,clutA,First palette slot,low,source:30DB0.c:1333
-T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:514;source:30DB0.c:1334
+T00239.099,T00239,D_800F4538_t,99,unk6EA,1,short,,,,clutB,Second palette slot; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Content\src\ActorAssetsLive.cpp:517;source:30DB0.c:1334
 T00239.100,T00239,D_800F4538_t,100,unk6EC,1,short,,,,ledgeHeight,Height compared when hanging from a ledge,low,source:3A1A0.c:1966
 T00239.101,T00239,D_800F4538_t,101,unk6EE,1,signed char,,,,platformOffsetX,X offset from the platform anchor,med,source:3A1A0.c:1121
 T00239.102,T00239,D_800F4538_t,102,unk6EF,1,signed char,,,,platformOffsetZ,Z offset from the platform anchor,med,source:3A1A0.c:1122
@@ -2115,10 +2115,10 @@ T00263.005,T00263,D_800F53B8_t2,5,unk14,1,char *,,,,script,Script bytecode,high,
 T00263.006,T00263,D_800F53B8_t2,6,unk18,1,int,,,,scriptOffset,Start offset in the script,high,source:5BF94.c:5081
 T00263.007,T00263,D_800F53B8_t2,7,unk1C,1,D_800F53B8_t *,,,,parent,"Parent instance, or null",high,source:5BF94.c:5078
 T00263.008,T00263,D_800F53B8_t2,8,unk20,1,u_char,,,,token,Effect token,high,source:5BF94.c:5084
-T00263.009,T00263,D_800F53B8_t2,9,unk21,1,u_char,,,,reserved21,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:100;declaration-only;source:5BF94.c:94
-T00263.010,T00263,D_800F53B8_t2,10,unk22,1,u_char,,,,reserved22,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:101;declaration-only;source:5BF94.c:95
-T00263.011,T00263,D_800F53B8_t2,11,unk23,1,u_char,,,,reserved23,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:102;declaration-only;source:5BF94.c:96
-T00263.012,T00263,D_800F53B8_t2,12,unk24,1,int,,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:103;declaration-only;source:5BF94.c:97
+T00263.009,T00263,D_800F53B8_t2,9,unk21,1,u_char,,,,reserved21,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:99;declaration-only;source:5BF94.c:94
+T00263.010,T00263,D_800F53B8_t2,10,unk22,1,u_char,,,,reserved22,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:100;declaration-only;source:5BF94.c:95
+T00263.011,T00263,D_800F53B8_t2,11,unk23,1,u_char,,,,reserved23,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:101;declaration-only;source:5BF94.c:96
+T00263.012,T00263,D_800F53B8_t2,12,unk24,1,int,,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:102;declaration-only;source:5BF94.c:97
 T00264.000,T00264,D_800F53B8_t3,0,unk0,1,actionEffectTarget,,,,source,Effect source,med,source:5BF94.c:5104
 T00264.001,T00264,D_800F53B8_t3,1,unkC,1,actionEffectTarget,,,,emitFrom,"Where the effect starts: the source, or the target for reversed effects",low,source:5BF94.c:5105
 T00264.002,T00264,D_800F53B8_t3,2,unk18,1,actionEffectTarget,,,,target,Effect target; byte 2 also selects a color preset,low,source:5BF94.c:5106
@@ -2160,8 +2160,8 @@ T00269.000,T00269,D_800F5638_t,0,unk0,1,int,,,,asset_count,Number of effect text
 T00269.001,T00269,D_800F5638_t,1,loadContexts,0,_loadFileContext[8],,,,files,"Disc location (lba, size) of each texture file",high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::files (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:20;sanity pass 2026-10-17
 T00269.002,T00269,D_800F5638_t,2,slots,0,u_short[8],,,,slots,Texture or CLUT slot each file is uploaded to,high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::slots (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:21;sanity pass 2026-10-17
 T00269.003,T00269,D_800F5638_t,3,isClut,0,u_short[8],,,,is_clut,Set when the file is a CLUT rather than texture pixels,high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::is_clut (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:22;sanity pass 2026-10-17
-T00270.000,T00270,D_800F569C_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:134;declaration-only;source:5BF94.h:354
-T00270.001,T00270,D_800F569C_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:135;declaration-only;source:5BF94.h:355
+T00270.000,T00270,D_800F569C_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:133;declaration-only;source:5BF94.h:354
+T00270.001,T00270,D_800F569C_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:134;declaration-only;source:5BF94.h:355
 T00270.002,T00270,D_800F569C_t,2,block5Data,0,pFileBlock5 *,,,,block5Data,Named in the fork; see cited use,med,source:5BF94.c:6955
 T00270.003,T00270,D_800F569C_t,3,curves,0,u_char *[32],,,,curves,Named in the fork; see cited use,med,source:5BF94.c:6320
 T00270.004,T00270,D_800F569C_t,4,curveBlock,0,pFileCurveBlock *,,,,curveBlock,Named in the fork; see cited use,med,source:5BF94.c:5244
@@ -3801,11 +3801,11 @@ T00416.001,T00416,directionalCacheState,1,tile,0,directionalCachePoint,,,,tile,C
 T00416.002,T00416,directionalCacheState,2,previous,0,directionalCachePoint,,,,previousTile,Previous tile word; -1 to forget,high,source:771A8.c:922
 T00416.003,T00416,directionalCacheState,3,pad3C,1,char[130],,,,reserved3C,Not read through this view,low,declaration-only;source:771A8.c:894
 T00416.004,T00416,directionalCacheState,4,minimumHeight,0,short,,,,flightHeight,Flight height above the ground,med,source:771A8.c:926
-T00417.000,T00417,effectAttractionView,0,prefix,0,char[98],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:34;declaration-only;source:5BF94.c:627
+T00417.000,T00417,effectAttractionView,0,prefix,0,char[98],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:32;declaration-only;source:5BF94.c:627
 T00417.001,T00417,effectAttractionView,1,targetX,0,short,,,,targetX,Named in the fork; see cited use,med,source:5BF94.c:7854;use cited by sanity pass;source:5BF94.c:628
 T00417.002,T00417,effectAttractionView,2,targetY,0,short,,,,targetY,Named in the fork; see cited use,med,source:5BF94.c:7855;use cited by sanity pass;source:5BF94.c:628
 T00417.003,T00417,effectAttractionView,3,targetZ,0,short,,,,targetZ,Named in the fork; see cited use,med,source:5BF94.c:7856;use cited by sanity pass;source:5BF94.c:628
-T00417.004,T00417,effectAttractionView,4,padding,0,char[8],,,,reserved68,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:36;declaration-only;source:5BF94.c:629
+T00417.004,T00417,effectAttractionView,4,padding,0,char[8],,,,reserved68,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:34;declaration-only;source:5BF94.c:629
 T00417.005,T00417,effectAttractionView,5,attraction,0,int,,,,attraction,Named in the fork; see cited use,med,source:5BF94.c:7852;use cited by sanity pass;source:5BF94.c:630
 T00418.000,T00418,effectDefinitionView,0,unk0,1,u_short,,,,flags,"Bit 1 attaches to an actor (bits 3-4 pick the source), bit 7 targets an actor (bits 10-11 pick the source)",med,source:5BF94.c:5958
 T00418.001,T00418,effectDefinitionView,1,unk2,1,u_short,,,,attachment,Attached actor in byte 0 and bone in byte 1,med,source:5BF94.c:5980
@@ -3819,7 +3819,7 @@ T00418.008,T00418,effectDefinitionView,8,unk10,1,int,,,,rotationZ,Initial rotati
 T00418.009,T00418,effectDefinitionView,9,unk14,1,short[6],,,,reserved14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:43;declaration-only;source:5BF94.c:614
 T00418.010,T00418,effectDefinitionView,10,unk20,1,short[6],,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:44;declaration-only;source:5BF94.c:615
 T00418.011,T00418,effectDefinitionView,11,unk2C,1,short[6],,,,reserved2C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:45;declaration-only;source:5BF94.c:616
-T00419.000,T00419,effectMotionState,0,mass,0,short,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:43;declaration-only;source:5BF94.c:619
+T00419.000,T00419,effectMotionState,0,mass,0,short,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:41;declaration-only;source:5BF94.c:619
 T00419.001,T00419,effectMotionState,1,gravityScale,0,short,,,,gravityScale,Named in the fork; see cited use,med,source:5BF94.c:7844
 T00419.002,T00419,effectMotionState,2,x,0,int,,,,x,Named in the fork; see cited use,med,source:5BF94.c:7845
 T00419.003,T00419,effectMotionState,3,y,0,int,,,,y,Named in the fork; see cited use,med,source:5BF94.c:7848
@@ -3956,20 +3956,20 @@ T00433.002,T00433,func_8006A9C0_t2,2,unk2,1,u_char,,,,reserved02,Reserved TIM he
 T00433.003,T00433,func_8006A9C0_t2,3,unk3,1,u_char,,,,reserved03,Reserved TIM header byte at offset three,med,TIM header layout;declaration-only;source:D4.c:76
 T00433.004,T00433,func_8006A9C0_t2,4,unk4,1,int,,,timMode,mode,Pixel depth and optional CLUT flag,high,source:D4.c:1118
 T00433.005,T00433,func_8006A9C0_t2,5,unk8,1,func_8006A9C0_t,,,firstImageBlock,first_block,First palette or pixel-data block,high,source:D4.c:1116
-T00434.000,T00434,func_8006C4C4_t,0,unk0,1,short,,,,opaque0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:168;source:146C.c:1932
-T00434.001,T00434,func_8006C4C4_t,1,unk2,1,char,,,,opaque2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:169;source:146C.c:1933
-T00434.002,T00434,func_8006C4C4_t,2,unk3,1,char,,,,opaque3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:170;source:146C.c:1934
-T00434.003,T00434,func_8006C4C4_t,3,unk4,1,short,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:171;source:146C.c:1935
-T00434.004,T00434,func_8006C4C4_t,4,unk6,1,short,,,,reserved6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:172;declaration-only;source:146C.c:234
+T00434.000,T00434,func_8006C4C4_t,0,unk0,1,short,,,,opaque0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:167;source:146C.c:1932
+T00434.001,T00434,func_8006C4C4_t,1,unk2,1,char,,,,opaque2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:168;source:146C.c:1933
+T00434.002,T00434,func_8006C4C4_t,2,unk3,1,char,,,,opaque3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:169;source:146C.c:1934
+T00434.003,T00434,func_8006C4C4_t,3,unk4,1,short,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:170;source:146C.c:1935
+T00434.004,T00434,func_8006C4C4_t,4,unk6,1,short,,,,reserved6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:171;declaration-only;source:146C.c:234
 T00434.005,T00434,func_8006C4C4_t,5,targetActor,0,char,,,,targetActor,Named in the fork; see cited use,med,source:146C.c:1936
-T00434.006,T00434,func_8006C4C4_t,6,unk9,1,char,,,,reserved9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:174;declaration-only;source:146C.c:236
-T00434.007,T00434,func_8006C4C4_t,7,unkA,1,char,,,,opaqueA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:175;source:146C.c:1937
-T00434.008,T00434,func_8006C4C4_t,8,unkB,1,char,,,,reservedB,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:176;declaration-only;source:146C.c:238
-T00434.009,T00434,func_8006C4C4_t,9,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:177;declaration-only;source:146C.c:239
-T00434.010,T00434,func_8006C4C4_t,10,unk10,1,short,,,,opaque10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:178;source:146C.c:1940
-T00434.011,T00434,func_8006C4C4_t,11,unk12,1,short,,,,opaque12,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:179;source:146C.c:1950
-T00434.012,T00434,func_8006C4C4_t,12,unk14,1,func_8008631C_t2,,,,opaque14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:180;source:146C.c:1941
-T00434.013,T00434,func_8006C4C4_t,13,unk18,1,int[50],,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:181;declaration-only;source:146C.c:243
+T00434.006,T00434,func_8006C4C4_t,6,unk9,1,char,,,,reserved9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:173;declaration-only;source:146C.c:236
+T00434.007,T00434,func_8006C4C4_t,7,unkA,1,char,,,,opaqueA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:174;source:146C.c:1937
+T00434.008,T00434,func_8006C4C4_t,8,unkB,1,char,,,,reservedB,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:175;declaration-only;source:146C.c:238
+T00434.009,T00434,func_8006C4C4_t,9,unkC,1,int,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:176;declaration-only;source:146C.c:239
+T00434.010,T00434,func_8006C4C4_t,10,unk10,1,short,,,,opaque10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:177;source:146C.c:1940
+T00434.011,T00434,func_8006C4C4_t,11,unk12,1,short,,,,opaque12,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:178;source:146C.c:1950
+T00434.012,T00434,func_8006C4C4_t,12,unk14,1,func_8008631C_t2,,,,opaque14,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:179;source:146C.c:1941
+T00434.013,T00434,func_8006C4C4_t,13,unk18,1,int[50],,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:180;declaration-only;source:146C.c:243
 T00435.000,T00435,func_8006EBF8_t,0,unk0,1,func_8006EBF8_t3,,,,location,Actor tile and position,high,source:146C.c:1969
 T00435.001,T00435,func_8006EBF8_t,1,unkC,1,int,,,,actorIndex,Actor that triggered the trap or opens the chest,high,source:146C.c:5004;source:146C.c:5052;sanity pass 2026-10-17
 T00436.000,T00436,func_8006EBF8_t2,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\Spawn.h:14;declaration-only;source:146C.c:171
@@ -4320,7 +4320,7 @@ T00489.018,T00489,func_800CE714_t2_2,18,unk58,1,MATRIX,,,,view,world composed wi
 T00489.019,T00489,func_800CE714_t2_2,19,unk78,1,u_char[70],,,,attachment+facing+saved.vx+saved.vy+saved.vz,The attachment and facing matrices and the resolved target point,med,native:TransformsLiveState.hpp LiveTransformSlot::attachment+facing+saved.vx+saved.vy+saved.vz (#441);the fork's word view; upstream addresses the merged layout;source:BATTLE/BATTLE.PRG/5BF94.c:5834;source:BATTLE/BATTLE.PRG/5BF94.c:5871;source:BATTLE/BATTLE.PRG/5BF94.c:5811
 T00489.020,T00489,func_800CE714_t2_2,20,unkBE,1,short,,,,saved.pad,Facing angle of the attached actor; PLG128 and the 0x4000 attachment mode turn through it,low,native:TransformsLiveState.hpp LiveTransformSlot::saved.pad (#441);the fork's word view; upstream addresses the merged layout;source:BATTLE/BATTLE.PRG/5BF94.c:5782;source:BATTLE/BATTLE.PRG/5BF94.c:5828
 T00489.021,T00489,func_800CE714_t2_2,21,unkC0,1,u_char[16],,,,control0+control1,The two spline control points,med,native:TransformsLiveState.hpp LiveTransformSlot::control0+control1 (#441);the fork's word view; upstream addresses the merged layout;source:BATTLE/BATTLE.PRG/5BF94.c:5718;source:BATTLE/BATTLE.PRG/5BF94.c:5719
-T00490.000,T00490,func_800CFAAC_t,0,unk0,1,char[12],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:54;declaration-only;source:5BF94.c:172
+T00490.000,T00490,func_800CFAAC_t,0,unk0,1,char[12],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:52;declaration-only;source:5BF94.c:172
 T00490.001,T00490,func_800CFAAC_t,1,unkC,1,short,,,starting x,endX,Moving endpoint x,low,source:5BF94.c:5777
 T00490.002,T00490,func_800CFAAC_t,2,unkE,1,short,,,starting y,endY,Moving endpoint y,low,source:5BF94.c:5783
 T00490.003,T00490,func_800CFAAC_t,3,unk10,1,short,,,endpoint x,startX,Fixed endpoint x,low,source:5BF94.c:5777
@@ -4399,14 +4399,14 @@ T00497.003,T00497,func_800D2904_t,3,unk3C,1,func_800D6CF_t,,,,textureAnimation,T
 T00497.004,T00497,func_800D2904_t,4,unk5C,1,char[4],,,,emitFlags,Emission flags of the event that spawned it,high,source:5BF94.c:7495
 T00497.005,T00497,func_800D2904_t,5,unk60,1,u_char,,,layout:upstream,transparency,"Transparency mode (from the definition, the event or the parent)",med,source:upstream:tiledRings.h:290;use cited by sanity pass;source:upstream:5BF94.h:384;written as unk60_0 in the pinned layout;source:5BF94.c:7500
 T00497.006,T00497,func_800D2904_t,6,unk60_8,1,u_int,4,,,opaque61Bit0,"Used, but its meaning is not established",low,source:5BF94.c:6973
-T00497.007,T00497,func_800D2904_t,7,unk60_12,1,u_int,4,,,reserved61Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:108;declaration-only;source:5BF94.h:403
+T00497.007,T00497,func_800D2904_t,7,unk60_12,1,u_int,4,,,reserved61Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:106;declaration-only;source:5BF94.h:403
 T00497.008,T00497,func_800D2904_t,8,unk62,1,short[3],,,,attractionTarget,Point the particle is attracted to (effectAttractionView targetX),med,source:5BF94.c:7458
 T00497.009,T00497,func_800D2904_t,9,lifetime,0,short,,,,lifetime,Named in the fork; see cited use,med,source:5BF94.c:7444
 T00497.010,T00497,func_800D2904_t,10,unk6A,1,u_char,,,,transformIndex,Transform it spawned from,high,source:5BF94.c:6993
 T00497.011,T00497,func_800D2904_t,11,unk6B,1,u_char,,,,attractionTransform,Transform it is attracted to,high,source:5BF94.c:6994
 T00497.012,T00497,func_800D2904_t,12,endEvent,0,u_char,,,,endEvent,Named in the fork; see cited use,med,source:5BF94.c:7499
 T00497.013,T00497,func_800D2904_t,13,tickEvent,0,u_char,,,,tickEvent,Named in the fork; see cited use,med,source:5BF94.c:7670
-T00497.014,T00497,func_800D2904_t,14,unk6E,1,char[2],,,,reserved6E,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:115;declaration-only;source:5BF94.h:410
+T00497.014,T00497,func_800D2904_t,14,unk6E,1,char[2],,,,reserved6E,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:113;declaration-only;source:5BF94.h:410
 T00497.015,T00497,func_800D2904_t,15,unk70,1,int,,,,attraction,Attraction strength (effectAttractionView attraction),med,source:5BF94.c:7498
 T00497.016,T00497,func_800D2904_t,16,unk74,1,u_char[3],,,,colorCurves,"Red, green and blue curves",high,source:5BF94.c:7497
 T00497.017,T00497,func_800D2904_t,17,unk77,1,u_char,,,age,age,Ticks since it spawned; 0xFF when allocated,high,source:5BF94.c:7669
@@ -4436,28 +4436,28 @@ T00502.000,T00502,func_800D5780_t2,0,unk0_0,1,u_short,8,,,kind,"Track kind (3 pa
 T00502.001,T00502,func_800D5780_t2,1,unk0_8,1,u_short,8,,,keyCount,Number of keys,med,source:5BF94.c:7935
 T00503.000,T00503,func_800D57FC_t,0,unk0_0,1,u_int,8,,,frame,Frame at which the key starts,med,source:5BF94.c:7954
 T00503.001,T00503,func_800D57FC_t,1,unk0_8,1,u_int,8,,,duration,Frames the key lasts,med,source:5BF94.c:7924
-T00503.002,T00503,func_800D57FC_t,2,unk0_16,1,u_int,4,,,opaque2Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:200;source:5BF94.c:7962
-T00503.003,T00503,func_800D57FC_t,3,unk0_20,1,u_int,6,,,opaque2Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:201;source:5BF94.c:7923
-T00503.004,T00503,func_800D57FC_t,4,unk0_26,1,u_int,6,,,opaque3Bit2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:202;source:5BF94.c:7962
-T00504.000,T00504,func_800D57FC_t2,0,unk0_0,1,unsigned int,4,,,reserved0Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:208;declaration-only;source:5BF94.c:39
-T00504.001,T00504,func_800D57FC_t2,1,unk0_4,1,unsigned int,5,,,curve,Curve passed to the shake start; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:209;source:5BF94.c:7930
+T00503.002,T00503,func_800D57FC_t,2,unk0_16,1,u_int,4,,,opaque2Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:199;source:5BF94.c:7962
+T00503.003,T00503,func_800D57FC_t,3,unk0_20,1,u_int,6,,,opaque2Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:200;source:5BF94.c:7923
+T00503.004,T00503,func_800D57FC_t,4,unk0_26,1,u_int,6,,,opaque3Bit2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:201;source:5BF94.c:7962
+T00504.000,T00504,func_800D57FC_t2,0,unk0_0,1,unsigned int,4,,,reserved0Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:207;declaration-only;source:5BF94.c:39
+T00504.001,T00504,func_800D57FC_t2,1,unk0_4,1,unsigned int,5,,,curve,Curve passed to the shake start; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:208;source:5BF94.c:7930
 T00505.000,T00505,func_800D5A98_t,0,actors,0,u_char[6],,,,actors,Named in the fork; see cited use,med,source:5BF94.c:8031
 T00505.001,T00505,func_800D5A98_t,1,final,0,u_char,,,,final,Named in the fork; see cited use,med,source:5BF94.c:8059
 T00505.002,T00505,func_800D5A98_t,2,frame,0,u_char,,,,frame,Named in the fork; see cited use,med,source:5BF94.c:8012
 T00505.003,T00505,func_800D5A98_t,3,delay,0,u_char,,,,delay,Named in the fork; see cited use,med,source:5BF94.c:8017
 T00506.000,T00506,func_800D5A98_t2,0,event,0,func_800D5A98_t *,,,,event,Named in the fork; see cited use,med,source:5BF94.c:8008
-T00506.001,T00506,func_800D5A98_t2,1,unk4,1,func_800D5780_t2,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:225;source:5BF94.c:8022
-T00506.002,T00506,func_800D5A98_t2,2,unk6,1,short,,,,reserved6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:226;declaration-only;source:5BF94.c:340
-T00506.003,T00506,func_800D5A98_t2,3,unk8,1,short,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:227;source:5BF94.c:8023
-T00506.004,T00506,func_800D5A98_t2,4,unkA,1,short,,,,reservedA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:228;declaration-only;source:5BF94.c:342
+T00506.001,T00506,func_800D5A98_t2,1,unk4,1,func_800D5780_t2,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:224;source:5BF94.c:8022
+T00506.002,T00506,func_800D5A98_t2,2,unk6,1,short,,,,reserved6,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:225;declaration-only;source:5BF94.c:340
+T00506.003,T00506,func_800D5A98_t2,3,unk8,1,short,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:226;source:5BF94.c:8023
+T00506.004,T00506,func_800D5A98_t2,4,unkA,1,short,,,,reservedA,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:227;declaration-only;source:5BF94.c:342
 T00506.005,T00506,func_800D5A98_t2,5,delay,0,short,,,,delay,Named in the fork; see cited use,med,source:5BF94.c:8017
 T00506.006,T00506,func_800D5A98_t2,6,index,0,short,,,,index,Named in the fork; see cited use,med,source:5BF94.c:8016
 T00507.000,T00507,func_800D5D74_t,0,unk0_0,1,u_int,9,,,frame,Frame at which the key applies,med,source:5BF94.c:8073
-T00507.001,T00507,func_800D5D74_t,1,unk0_9,1,u_int,9,,,opaque1Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:236;source:5BF94.c:8075
+T00507.001,T00507,func_800D5D74_t,1,unk0_9,1,u_int,9,,,opaque1Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:235;source:5BF94.c:8075
 T00507.002,T00507,func_800D5D74_t,2,effectRenderer,0,u_int,3,,,effectRenderer,Named in the fork; see cited use,med,source:5BF94.c:8074
-T00507.003,T00507,func_800D5D74_t,3,unk0_21,1,u_int,6,,,opaque2Bit5,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:238;source:5BF94.c:8075
-T00507.004,T00507,func_800D5D74_t,4,unk0_27,1,u_int,5,,,reserved3Bit3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:239;declaration-only;source:5BF94.c:216
-T00507.005,T00507,func_800D5D74_t,5,unk4,1,u_short,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:240;source:5BF94.c:8075
+T00507.003,T00507,func_800D5D74_t,3,unk0_21,1,u_int,6,,,opaque2Bit5,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:237;source:5BF94.c:8075
+T00507.004,T00507,func_800D5D74_t,4,unk0_27,1,u_int,5,,,reserved3Bit3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:238;declaration-only;source:5BF94.c:216
+T00507.005,T00507,func_800D5D74_t,5,unk4,1,u_short,,,,opaque4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:239;source:5BF94.c:8075
 T00508.000,T00508,func_800D6048_t,0,unk0,1,char[16],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:262;declaration-only;source:5BF94.c:560
 T00508.001,T00508,func_800D6048_t,1,unk10,1,actionEffectTarget[16],,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:263;declaration-only;source:5BF94.c:561
 T00509.000,T00509,func_800D6310_t,0,unk0,1,short,,,,frame,Frame at which the key applies,med,source:5BF94.c:8132
@@ -4466,36 +4466,36 @@ T00509.002,T00509,func_800D6310_t,2,unk4,1,unsigned char,,,,red,"Red, biased by 
 T00509.003,T00509,func_800D6310_t,3,unk5,1,unsigned char,,,,green,"Green, biased by 0x80",med,source:5BF94.c:8137
 T00509.004,T00509,func_800D6310_t,4,unk6,1,unsigned char,,,,blue,"Blue, biased by 0x80",med,source:5BF94.c:8137
 T00509.005,T00509,func_800D6310_t,5,unk7,1,unsigned char,,,,mode,Fade mode passed to the color fade,low,source:5BF94.c:8135
-T00510.000,T00510,func_800D6508_t,0,unk0,1,char[34],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:257;declaration-only;source:5BF94.c:101
-T00510.001,T00510,func_800D6508_t,1,unk22_0,1,u_short,2,,attachmentAndTargetResolved,attachmentMode,Attachment bits cleared to invalidate attachments; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:258;source:5BF94.c:8269
-T00510.002,T00510,func_800D6508_t,2,unk22_2,1,u_short,1,,transformMotionEnabled,motionResumed,Set to resume the transform's motion; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:259;source:5BF94.c:8252
-T00510.003,T00510,func_800D6508_t,3,unk22_3,1,u_short,13,,,reserved22Bit3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:260;declaration-only;source:5BF94.c:104
-T00510.004,T00510,func_800D6508_t,4,unk24,1,char[172],,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:261;declaration-only;source:5BF94.c:105
+T00510.000,T00510,func_800D6508_t,0,unk0,1,char[34],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:256;declaration-only;source:5BF94.c:101
+T00510.001,T00510,func_800D6508_t,1,unk22_0,1,u_short,2,,attachmentAndTargetResolved,attachmentMode,Attachment bits cleared to invalidate attachments; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:257;source:5BF94.c:8269
+T00510.002,T00510,func_800D6508_t,2,unk22_2,1,u_short,1,,transformMotionEnabled,motionResumed,Set to resume the transform's motion; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:258;source:5BF94.c:8252
+T00510.003,T00510,func_800D6508_t,3,unk22_3,1,u_short,13,,,reserved22Bit3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:259;declaration-only;source:5BF94.c:104
+T00510.004,T00510,func_800D6508_t,4,unk24,1,char[172],,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:260;declaration-only;source:5BF94.c:105
 T00511.000,T00511,func_800D6894_t,0,unk0,1,u_short,,,,frame,Frame in the low nine bits,med,source:5BF94.c:8346
 T00511.001,T00511,func_800D6894_t,1,unk2,1,u_char,,,,opaque2,"Used, but its meaning is not established",low,source:5BF94.c:8347
 T00511.002,T00511,func_800D6894_t,2,unk3,1,u_char,,,,opaque3,"Used, but its meaning is not established",low,source:5BF94.c:8348
 T00512.000,T00512,func_800D6A18_t,0,unk0_0,1,u_short,9,,,frame,Frame at which the key applies,med,source:5BF94.c:7954
-T00512.001,T00512,func_800D6A18_t,1,unk0_9,1,u_short,7,,,reserved1Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:276;declaration-only;source:5BF94.c:222
-T00512.002,T00512,func_800D6A18_t,2,unk2,1,u_short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:277;declaration-only;source:5BF94.c:223
-T00512.003,T00512,func_800D6A18_t,3,unk4_0,1,u_int,4,,,opaque4Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:278;source:5BF94.c:8433
-T00512.004,T00512,func_800D6A18_t,4,unk4_4,1,u_int,5,,,opaque4Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:279;source:5BF94.c:8433
-T00512.005,T00512,func_800D6A18_t,5,unk4_9,1,u_int,7,,,opaque5Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:280;source:5BF94.c:8433
-T00512.006,T00512,func_800D6A18_t,6,unk4_16,1,u_int,1,,,opaque6Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:281;source:5BF94.c:8433
-T00512.007,T00512,func_800D6A18_t,7,unk4_17,1,u_int,7,,,opaque6Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:282;source:5BF94.c:8433
-T00512.008,T00512,func_800D6A18_t,8,unk4_24,1,u_int,1,,,opaque7Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:283;source:5BF94.c:8433
-T00512.009,T00512,func_800D6A18_t,9,unk4_25,1,u_int,7,,,opaque7Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:284;source:5BF94.c:8434
-T00513.000,T00513,func_800D6CF_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:64;declaration-only;source:5BF94.h:216
-T00513.001,T00513,func_800D6CF_t,1,unk4,1,short,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:65;declaration-only;source:5BF94.h:217
+T00512.001,T00512,func_800D6A18_t,1,unk0_9,1,u_short,7,,,reserved1Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:275;declaration-only;source:5BF94.c:222
+T00512.002,T00512,func_800D6A18_t,2,unk2,1,u_short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:276;declaration-only;source:5BF94.c:223
+T00512.003,T00512,func_800D6A18_t,3,unk4_0,1,u_int,4,,,opaque4Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:277;source:5BF94.c:8433
+T00512.004,T00512,func_800D6A18_t,4,unk4_4,1,u_int,5,,,opaque4Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:278;source:5BF94.c:8433
+T00512.005,T00512,func_800D6A18_t,5,unk4_9,1,u_int,7,,,opaque5Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:279;source:5BF94.c:8433
+T00512.006,T00512,func_800D6A18_t,6,unk4_16,1,u_int,1,,,opaque6Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:280;source:5BF94.c:8433
+T00512.007,T00512,func_800D6A18_t,7,unk4_17,1,u_int,7,,,opaque6Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:281;source:5BF94.c:8433
+T00512.008,T00512,func_800D6A18_t,8,unk4_24,1,u_int,1,,,opaque7Bit0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:282;source:5BF94.c:8433
+T00512.009,T00512,func_800D6A18_t,9,unk4_25,1,u_int,7,,,opaque7Bit1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:283;source:5BF94.c:8434
+T00513.000,T00513,func_800D6CF_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:62;declaration-only;source:5BF94.h:216
+T00513.001,T00513,func_800D6CF_t,1,unk4,1,short,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:63;declaration-only;source:5BF94.h:217
 T00513.002,T00513,func_800D6CF_t,2,unk6,1,u_char,,,frameDuration,frameTimer,Ticks left on the current frame; zero when the program has ended,med,source:5BF94.c:8524
 T00513.003,T00513,func_800D6CF_t,3,unk7,1,u_char,,,,reserved7,Not read by decompiled code,low,declaration-only;source:5BF94.h:219
 T00513.004,T00513,func_800D6CF_t,4,unk8,1,short,,,horizontalOffset,frameOffsetX,First 14-bit offset of a 0x1 program word,low,source:5BF94.c:8541
 T00513.005,T00513,func_800D6CF_t,5,unkA,1,short,,,verticalOffset,frameOffsetY,Second 14-bit offset of a 0x1 program word,low,source:5BF94.c:8542
-T00513.006,T00513,func_800D6CF_t,6,unkC,1,short,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:70;declaration-only;source:5BF94.h:222
+T00513.006,T00513,func_800D6CF_t,6,unkC,1,short,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:68;declaration-only;source:5BF94.h:222
 T00513.007,T00513,func_800D6CF_t,7,unkE,1,u_short,,,byteOffset,cursor,Byte offset of the next program word,high,source:5BF94.c:8531
-T00513.008,T00513,func_800D6CF_t,8,unk10,1,int,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:72;declaration-only;source:5BF94.h:224
+T00513.008,T00513,func_800D6CF_t,8,unk10,1,int,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:70;declaration-only;source:5BF94.h:224
 T00513.009,T00513,func_800D6CF_t,9,unk14,1,short,,,,reserved14,Not read by decompiled code,low,declaration-only;source:5BF94.h:225
 T00513.010,T00513,func_800D6CF_t,10,textureIndex,0,u_char,,,,textureIndex,Named in the fork; see cited use,med,source:5BF94.c:8515
-T00513.011,T00513,func_800D6CF_t,11,unk17,1,u_char,,,,reserved17,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:75;declaration-only;source:5BF94.h:227
+T00513.011,T00513,func_800D6CF_t,11,unk17,1,u_char,,,,reserved17,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:73;declaration-only;source:5BF94.h:227
 T00513.012,T00513,func_800D6CF_t,12,unk18,1,u_char *,,,animationBytes,program,Animation program in package block 2,high,source:5BF94.c:8516
 T00513.013,T00513,func_800D6CF_t,13,textureInfo,0,pFileTextureInfo *,,,,textureInfo,Named in the fork; see cited use,med,source:5BF94.c:8535
 T00514.000,T00514,func_800D8400_t,0,pad,1,unsigned char[7],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiState.h:735;declaration-only;source:6FC00.c:420
@@ -4823,23 +4823,23 @@ T00534.028,T00534,func_800FA098_arg0,28,unkC0,1,short[2],,,,intervalRange,Frames
 T00534.029,T00534,func_800FA098_arg0,29,rCurve,0,u_char,,,,rCurve,Named in the fork; see cited use,med,source:5BF94.c:7492
 T00534.030,T00534,func_800FA098_arg0,30,gCurve,0,u_char,,,,gCurve,Named in the fork; see cited use,med,source:5BF94.c:7757
 T00534.031,T00534,func_800FA098_arg0,31,bCurve,0,u_char,,,,bCurve,Named in the fork; see cited use,med,source:5BF94.c:7758
-T00534.032,T00534,func_800FA098_arg0,32,unkC7,1,u_char,,,,reservedC7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:155;declaration-only;source:5BF94.h:265
+T00534.032,T00534,func_800FA098_arg0,32,unkC7,1,u_char,,,,reservedC7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:153;declaration-only;source:5BF94.h:265
 T00534.033,T00534,func_800FA098_arg0,33,unkC8,1,u_char,,,,transformIndex,Transform the particles spawn from,high,source:5BF94.c:6959
 T00534.034,T00534,func_800FA098_arg0,34,unkC9,1,u_char,,,,attractionTransform,Transform the particles are attracted to,high,source:5BF94.c:6960
 T00534.035,T00534,func_800FA098_arg0,35,unkCA,1,u_char,,,,ringSegments,Ring emission segments,med,source:5BF94.c:7258
 T00534.036,T00534,func_800FA098_arg0,36,unkCB,1,u_char,,,,ringPositions,Ring emission positions; defaults to ringSegments,med,source:5BF94.c:7262
-T00535.000,T00535,func_800FA098_arg1,0,unk0,1,VECTOR,,,,opaque0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:176;source:upstream:EFFECT/PLG128.BIN/F8.c:54;use cited by sanity pass;source:5BF94.h:283
-T00535.001,T00535,func_800FA098_arg1,1,unk10,1,VECTOR,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:177;source:5BF94.c:6925
-T00535.002,T00535,func_800FA098_arg1,2,unk20,1,int,,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:178;declaration-only;source:5BF94.h:285
+T00535.000,T00535,func_800FA098_arg1,0,unk0,1,VECTOR,,,,opaque0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:174;source:upstream:EFFECT/PLG128.BIN/F8.c:54;use cited by sanity pass;source:5BF94.h:283
+T00535.001,T00535,func_800FA098_arg1,1,unk10,1,VECTOR,,,,reserved10,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:175;source:5BF94.c:6925
+T00535.002,T00535,func_800FA098_arg1,2,unk20,1,int,,,,reserved20,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:176;declaration-only;source:5BF94.h:285
 T00535.003,T00535,func_800FA098_arg1,3,flags,0,u_int,,,,flags,Emission flags copied from the definition,high,source:5BF94.c:6957
 T00535.004,T00535,func_800FA098_arg1,4,unk28,1,u_short,,,,savedFlags,Copy of the emission flags; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Effects\ParticleEmitterLive.cpp:101;source:5BF94.c:6958
-T00535.005,T00535,func_800FA098_arg1,5,unk2A,1,u_short,,,,reserved2A,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:181;declaration-only;source:5BF94.h:288
+T00535.005,T00535,func_800FA098_arg1,5,unk2A,1,u_short,,,,reserved2A,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:179;declaration-only;source:5BF94.h:288
 T00535.006,T00535,func_800FA098_arg1,6,unk2C,1,SVECTOR,,,,vector,Working vector,med,source:5BF94.c:7349
 T00535.007,T00535,func_800FA098_arg1,7,unk34,1,VECTOR,,,,aimPoint,Point the particles aim at,med,source:5BF94.c:7332
 T00535.008,T00535,func_800FA098_arg1,8,unk44,1,VECTOR,,,,spawnPoint,Spawn point in world units,med,source:5BF94.c:7333
-T00535.009,T00535,func_800FA098_arg1,9,unk54,1,u_char[16],,,,reserved54,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:185;declaration-only;source:5BF94.h:292
+T00535.009,T00535,func_800FA098_arg1,9,unk54,1,u_char[16],,,,reserved54,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:183;declaration-only;source:5BF94.h:292
 T00535.010,T00535,func_800FA098_arg1,10,unk64,1,MATRIX,,,,aimMatrix,Look-at matrix from spawnPoint to aimPoint,med,source:5BF94.c:7336
-T00535.011,T00535,func_800FA098_arg1,11,unk84,1,u_char[20],,,,reserved84,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:187;declaration-only;source:5BF94.h:294
+T00535.011,T00535,func_800FA098_arg1,11,unk84,1,u_char[20],,,,reserved84,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:185;declaration-only;source:5BF94.h:294
 T00535.012,T00535,func_800FA098_arg1,12,unk98,1,VECTOR,,,,position,Sampled spawn position,high,source:5BF94.c:6999
 T00535.013,T00535,func_800FA098_arg1,13,unkA8,1,VECTOR,,,,extent,Sampled emission extent,high,source:5BF94.c:7027
 T00535.014,T00535,func_800FA098_arg1,14,unkB8,1,VECTOR,,,,direction,Unit direction of one particle,med,source:5BF94.c:7353
@@ -4859,7 +4859,7 @@ T00535.027,T00535,func_800FA098_arg1,27,unk13C,1,SVECTOR,,,,attractionOffset,Sam
 T00535.028,T00535,func_800FA098_arg1,28,unk144,1,SVECTOR,,,,attractionJitter,Sampled attraction target jitter,high,source:5BF94.c:7451
 T00535.029,T00535,func_800FA098_arg1,29,unk14C,1,int[2],,,,attractionRange,Sampled attraction strength min and max,high,source:5BF94.c:7490
 T00535.030,T00535,func_800FA098_arg1,30,unk154,1,func_800D2904_curves,,,,colorCurves,"Red, green and blue curves and the particle age",high,source:5BF94.c:7492
-T00535.031,T00535,func_800FA098_arg1,31,unk158,1,u_char[16],,,,reserved158,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:207;declaration-only;source:5BF94.h:314
+T00535.031,T00535,func_800FA098_arg1,31,unk158,1,u_char[16],,,,reserved158,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:205;declaration-only;source:5BF94.h:314
 T00535.032,T00535,func_800FA098_arg1,32,unk168,1,int,,,,transformIndex,Transform the particles spawn from,high,source:5BF94.c:6959
 T00535.033,T00535,func_800FA098_arg1,33,unk16C,1,int,,,,attractionTransform,Transform the particles are attracted to,high,source:5BF94.c:6960
 T00535.034,T00535,func_800FA098_arg1,34,unk170,1,int,,,,sinAngle0,Sine of the first random emission angle,med,source:5BF94.c:7041
@@ -4876,23 +4876,23 @@ T00536.003,T00536,func_800FA098_arg3,3,unk4,1,SVECTOR *,,,splinePoints,controlPo
 T00536.004,T00536,func_800FA098_arg3,4,unk8,1,int,,,endpointRegenerationCountdown,opaque8,"Used, but its meaning is not established",low,source:particleDispatch.h:25
 T00536.005,T00536,func_800FA098_arg3,5,unkC,1,int,,,age,age,Age used to sample the curves,med,source:particleSetup.h:55
 T00536.006,T00536,func_800FA098_arg3,6,unk10,1,func_800D6CF_t,,,textureAnimation,textureAnimation,Texture animation state,med,source:particleRender.h:79
-T00537.000,T00537,func_800FA098_arg3_2,0,unk0,1,short,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:232;declaration-only;source:particleSetup.h:15
-T00537.001,T00537,func_800FA098_arg3_2,1,unk2,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:233;declaration-only;source:particleSetup.h:16
-T00538.000,T00538,func_800FA76C_arg3,0,unk0,1,u_char,,,lifetime,opaque0,"Used, but its meaning is not established",low,source:trails5.h:695
-T00538.001,T00538,func_800FA76C_arg3,1,unk1,1,u_char,,,effectDefinitionIndex,definitionIndex,Particle definition in package block 5,med,source:trails5.h:697
-T00538.002,T00538,func_800FA76C_arg3,2,trailcount,0,u_char,,,,trailcount,Named in the fork; see cited use,med,source:trails5.h:71
-T00538.003,T00538,func_800FA76C_arg3,3,unk3,1,u_char,,,splineInitialized,opaque3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:242;source:trails5.h:706
-T00538.004,T00538,func_800FA76C_arg3,4,trails,0,_trail *,,,,trails,Named in the fork; see cited use,med,source:trails5.h:73
-T00538.005,T00538,func_800FA76C_arg3,5,curveSampleDistance,0,int,,,,curveSampleDistance,Named in the fork; see cited use,med,source:trails5.h:46
-T00538.006,T00538,func_800FA76C_arg3,6,unkC,1,func_800D6CF_t,,,textureAnimation,textureAnimation,Texture animation state,med,source:trails5.h:507
-T00538.007,T00538,func_800FA76C_arg3,7,sampledTransparencyCurve,0,u_char[0],,,,sampledTransparencyCurve,Named in the fork; see cited use,med,source:trails5.h:548
-T00539.000,T00539,func_800FB4C0_t,0,unk0,1,u_char[12],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:251;declaration-only;source:5BF94.h:493
+T00537.000,T00537,func_800FA098_arg3_2,0,unk0,1,short,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:230;declaration-only;source:particleSetup.h:15
+T00537.001,T00537,func_800FA098_arg3_2,1,unk2,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:231;declaration-only;source:particleSetup.h:16
+T00538.000,T00538,func_800FA76C_arg3,0,unk0,1,u_char,,,lifetime,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveTrailState::lifetime (#441);source:EFFECT/trailEffect.h:42;source:EFFECT/trailEffect.h:729;source:EFFECT/trailEffect.h:825;source:EFFECT/trailEffect.h:836
+T00538.001,T00538,func_800FA76C_arg3,1,unk1,1,u_char,,,effectDefinitionIndex,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveTrailState::effect (#441);source:EFFECT/trailEffect.h:43;source:EFFECT/trailEffect.h:728
+T00538.002,T00538,func_800FA76C_arg3,2,trailcount,0,u_char,,,,trail_count,Trails in the buffer: the definition's count capped at the emitter's capacity,med,native:TemplateLiveState.hpp LiveTrailState::trail_count (#441);source:EFFECT/trailEffect.h:44;source:EFFECT/trailEffect.h:739;source:EFFECT/trailEffect.h:101
+T00538.003,T00538,func_800FA76C_arg3,3,unk3,1,u_char,,,splineInitialized,initialized,Set once the first tick has placed the trails,med,native:TemplateLiveState.hpp LiveTrailState::initialized (#441);source:EFFECT/trailEffect.h:45;source:EFFECT/trailEffect.h:740;source:EFFECT/trailEffect.h:768;source:EFFECT/trailEffect.h:773
+T00538.004,T00538,func_800FA76C_arg3,4,trails,0,_trail *,,,,trails,"The trail buffer, allocated from the high end of the heap",med,native:TemplateLiveState.hpp LiveTrailState::trails (#441);source:EFFECT/trailEffect.h:46;source:EFFECT/trailEffect.h:738
+T00538.005,T00538,func_800FA76C_arg3,5,curveSampleDistance,0,int,,,,curve_sample_distance,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveTrailState::curve_sample_distance (#441);source:EFFECT/trailEffect.h:47;source:EFFECT/trailEffect.h:730;source:EFFECT/trailEffect.h:823
+T00538.006,T00538,func_800FA76C_arg3,6,unkC,1,func_800D6CF_t,,,textureAnimation,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveTrailState::texture (#441);source:EFFECT/trailEffect.h:48;source:EFFECT/trailEffect.h:760
+T00538.007,T00538,func_800FA76C_arg3,7,sampledTransparencyCurve,0,u_char[0],,,,transparency,The definition's transparency curve sampled once per spline sample at create; 128 each without a curve,med,native:TemplateLiveState.hpp LiveTrailState::transparency (#441);source:EFFECT/trailEffect.h:49;source:EFFECT/trailEffect.h:750;source:EFFECT/trailEffect.h:756
+T00539.000,T00539,func_800FB4C0_t,0,unk0,1,u_char[12],,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:237;declaration-only;source:5BF94.h:493
 T00539.001,T00539,func_800FB4C0_t,1,unkC,1,VECTOR,,,,position,Position (20.12) added to the spawn position for emission flag 4,med,source:5BF94.c:7015
-T00539.002,T00539,func_800FB4C0_t,2,unk1C,1,u_char[68],,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:253;declaration-only;source:5BF94.h:495
+T00539.002,T00539,func_800FB4C0_t,2,unk1C,1,u_char[68],,,,reserved1C,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:239;declaration-only;source:5BF94.h:495
 T00539.003,T00539,func_800FB4C0_t,3,unk60,1,u_int,8,,,transparency,Transparency given to emitted particles,med,source:5BF94.c:6967
 T00539.004,T00539,func_800FB4C0_t,4,unk60_8,1,u_int,4,,,variant,Variant passed to emitted events,low,source:5BF94.c:6973
-T00539.005,T00539,func_800FB4C0_t,5,unk60_12,1,u_int,20,,,reserved61Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:256;declaration-only;source:5BF94.h:498
-T00539.006,T00539,func_800FB4C0_t,6,unk64,1,u_char[20],,,,reserved64,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:257;declaration-only;source:5BF94.h:499
+T00539.005,T00539,func_800FB4C0_t,5,unk60_12,1,u_int,20,,,reserved61Bit4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:242;declaration-only;source:5BF94.h:498
+T00539.006,T00539,func_800FB4C0_t,6,unk64,1,u_char[20],,,,reserved64,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Particles.h:243;declaration-only;source:5BF94.h:499
 T00540.000,T00540,func_800FD9A4_t,0,lifetime,0,u_char,,,,lifetime,Ticks left; each tick decrements it and the slot ends at zero,med,native:Plg128CameraLive.cpp LiveCameraRecord::lifetime (#441);source:EFFECT/PLG128.BIN/F8.c:11
 T00540.001,T00540,func_800FD9A4_t,1,effect,0,u_char,,,,definition,Index of the camera definition in the current package (the create word's high byte),med,native:Plg128CameraLive.cpp LiveCameraRecord::definition (#441);source:EFFECT/PLG128.BIN/F8.c:11
 T00540.002,T00540,func_800FD9A4_t,2,mode,0,short,,,,mode,Camera mode selecting endpoint or actor-facing placement,med,native:Plg128CameraLive.cpp LiveCameraRecord::mode (#441);source:EFFECT/PLG128.BIN/F8.c:12
@@ -6194,37 +6194,37 @@ T00684.003,T00684,vs_camera_t,3,farClip,0,int,,,,far_clip,Named in the fork; see
 T00685.000,T00685,vs_closedRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:closedRings.h:34
 T00685.001,T00685,vs_closedRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:closedRings.h:259;use cited by sanity pass;source:closedRings.h:35
 T00685.002,T00685,vs_closedRingPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:closedRings.h:260;use cited by sanity pass;source:closedRings.h:36
-T00686.000,T00686,vs_closedRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:closedRings.h:77
-T00686.001,T00686,vs_closedRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:closedRings.h:78
-T00686.002,T00686,vs_closedRingState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:23;declaration-only;source:closedRings.h:24
-T00686.003,T00686,vs_closedRingState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:closedRings.h:80
-T00686.004,T00686,vs_closedRingState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:closedRings.h:79
-T00686.005,T00686,vs_closedRingState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:closedRings.h:82
-T00686.006,T00686,vs_closedRingState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:closedRings.h:81
-T00686.007,T00686,vs_closedRingState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:closedRings.h:83
-T00686.008,T00686,vs_closedRingState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:closedRings.h:84
-T00686.009,T00686,vs_closedRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:closedRings.h:86
+T00686.000,T00686,vs_closedRingState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveRingState::lifetime (#441);source:EFFECT/effectCommon.h:23;source:EFFECT/closedRings.h:103;source:EFFECT/closedRings.h:359
+T00686.001,T00686,vs_closedRingState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveRingState::effect (#441);source:EFFECT/effectCommon.h:24;source:EFFECT/closedRings.h:104
+T00686.002,T00686,vs_closedRingState,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveRingState::reserved_2 (#441);never accessed upstream;source:EFFECT/effectCommon.h:25
+T00686.003,T00686,vs_closedRingState,3,radius,0,int,,,,radius,Radius; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::radius (#441);source:EFFECT/effectCommon.h:26;source:EFFECT/closedRings.h:106;source:EFFECT/closedRings.h:147
+T00686.004,T00686,vs_closedRingState,4,radiusSpeed,0,int,,,,radius_speed,Radius speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::radius_speed (#441);source:EFFECT/effectCommon.h:27;source:EFFECT/closedRings.h:105;source:EFFECT/closedRings.h:145
+T00686.005,T00686,vs_closedRingState,5,height,0,int,,,,height,Height; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::height (#441);source:EFFECT/effectCommon.h:28;source:EFFECT/closedRings.h:108;source:EFFECT/closedRings.h:151
+T00686.006,T00686,vs_closedRingState,6,heightSpeed,0,int,,,,height_speed,Height speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::height_speed (#441);source:EFFECT/effectCommon.h:29;source:EFFECT/closedRings.h:107;source:EFFECT/closedRings.h:150
+T00686.007,T00686,vs_closedRingState,7,angle,0,int,,,,angle,Angle of the first segment; advances by the sampled spin each tick,med,native:TemplateLiveState.hpp LiveRingState::angle (#441);source:EFFECT/effectCommon.h:30;source:EFFECT/closedRings.h:109;source:EFFECT/closedRings.h:161
+T00686.008,T00686,vs_closedRingState,8,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveRingState::age (#441);source:EFFECT/effectCommon.h:31;source:EFFECT/closedRings.h:110;source:EFFECT/closedRings.h:357
+T00686.009,T00686,vs_closedRingState,9,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveRingState::texture (#441);source:EFFECT/effectCommon.h:32;source:EFFECT/closedRings.h:112;source:EFFECT/closedRings.h:245
 T00687.000,T00687,vs_closedRingUV,0,u,0,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:153;declaration-only;source:EFFECT/PLG077.BIN/18.c:32
 T00687.001,T00687,vs_closedRingUV,1,v,0,u_char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:154;declaration-only;source:EFFECT/PLG077.BIN/18.c:33
 T00688.000,T00688,vs_gridPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:grids.h:16
 T00688.001,T00688,vs_gridPrim,1,poly,0,POLY_FT4,,,,poly,Named in the fork; see cited use,med,source:grids.h:240;use cited by sanity pass;source:grids.h:17
 T00688.002,T00688,vs_gridPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:grids.h:241;use cited by sanity pass;source:grids.h:18
 T00688.003,T00688,vs_gridPrim,3,pad,1,int[3],,,layout:upstream,reserved30,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:162;declaration-only;source:upstream:grids.h:31
-T00689.000,T00689,vs_gridState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:grids.h:62
-T00689.001,T00689,vs_gridState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:grids.h:61
-T00689.002,T00689,vs_gridState,2,u,0,u_char,,,,u,Named in the fork; see cited use,med,source:grids.h:71
-T00689.003,T00689,vs_gridState,3,v,0,u_char,,,,v,Named in the fork; see cited use,med,source:grids.h:72
-T00689.004,T00689,vs_gridState,4,uScroll,0,u_char,,,,uScroll,Named in the fork; see cited use,med,source:grids.h:73
-T00689.005,T00689,vs_gridState,5,vScroll,0,u_char,,,,vScroll,Named in the fork; see cited use,med,source:grids.h:73
-T00689.006,T00689,vs_gridState,6,tpage,0,short,,,,tpage,Named in the fork; see cited use,med,source:grids.h:68
-T00689.007,T00689,vs_gridState,7,clut,0,short,,,,clut,Named in the fork; see cited use,med,source:grids.h:70
-T00689.008,T00689,vs_gridState,8,xSpacing,0,short,,,,xSpacing,Named in the fork; see cited use,med,source:grids.h:64
-T00689.009,T00689,vs_gridState,9,xSpeed,0,short,,,,xSpeed,Named in the fork; see cited use,med,source:grids.h:64
-T00689.010,T00689,vs_gridState,10,zSpacing,0,short,,,,zSpacing,Named in the fork; see cited use,med,source:grids.h:65
-T00689.011,T00689,vs_gridState,11,zSpeed,0,short,,,,zSpeed,Named in the fork; see cited use,med,source:grids.h:65
-T00689.012,T00689,vs_gridState,12,xPhase,0,short,,,,xPhase,Named in the fork; see cited use,med,source:grids.h:66
-T00689.013,T00689,vs_gridState,13,zPhase,0,short,,,,zPhase,Named in the fork; see cited use,med,source:grids.h:66
-T00689.014,T00689,vs_gridState,14,age,0,int,,,,age,Named in the fork; see cited use,med,source:grids.h:63
+T00689.000,T00689,vs_gridState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveGridState::lifetime (#441);source:EFFECT/grids.h:17;source:EFFECT/grids.h:73;source:EFFECT/grids.h:280
+T00689.001,T00689,vs_gridState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveGridState::effect (#441);source:EFFECT/grids.h:18;source:EFFECT/grids.h:72
+T00689.002,T00689,vs_gridState,2,u,0,u_char,,,,u,"Texture origin u within the page, from the definition",med,native:TemplateLiveState.hpp LiveGridState::u (#441);source:EFFECT/grids.h:19;source:EFFECT/grids.h:82;source:EFFECT/grids.h:186
+T00689.003,T00689,vs_gridState,3,v,0,u_char,,,,v,"Texture origin v within the page, from the definition",med,native:TemplateLiveState.hpp LiveGridState::v (#441);source:EFFECT/grids.h:20;source:EFFECT/grids.h:83;source:EFFECT/grids.h:193
+T00689.004,T00689,vs_gridState,4,uScroll,0,u_char,,,,u_scroll,Texture scroll in u; advances by the sampled scroll modulo the texture width each tick,med,native:TemplateLiveState.hpp LiveGridState::u_scroll (#441);source:EFFECT/grids.h:21;source:EFFECT/grids.h:84;source:EFFECT/grids.h:187
+T00689.005,T00689,vs_gridState,5,vScroll,0,u_char,,,,v_scroll,Texture scroll in v; advances by the sampled scroll modulo the texture height each tick,med,native:TemplateLiveState.hpp LiveGridState::v_scroll (#441);source:EFFECT/grids.h:22;source:EFFECT/grids.h:84;source:EFFECT/grids.h:194
+T00689.006,T00689,vs_gridState,6,tpage,0,short,,,,tpage,"Texture page and blend mode of the grid's quads, from the definition",med,native:TemplateLiveState.hpp LiveGridState::tpage (#441);source:EFFECT/grids.h:23;source:EFFECT/grids.h:79;source:EFFECT/grids.h:269
+T00689.007,T00689,vs_gridState,7,clut,0,short,,,,clut,"Palette of the grid's quads, from the definition",med,native:TemplateLiveState.hpp LiveGridState::clut (#441);source:EFFECT/grids.h:24;source:EFFECT/grids.h:81;source:EFFECT/grids.h:270
+T00689.008,T00689,vs_gridState,8,xSpacing,0,short,,,,x_spacing,Cell spacing along x; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveGridState::x_spacing (#441);source:EFFECT/grids.h:25;source:EFFECT/grids.h:75;source:EFFECT/grids.h:117
+T00689.009,T00689,vs_gridState,9,xSpeed,0,short,,,,x_speed,Speed of the x spacing; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveGridState::x_speed (#441);source:EFFECT/grids.h:26;source:EFFECT/grids.h:75;source:EFFECT/grids.h:116
+T00689.010,T00689,vs_gridState,10,zSpacing,0,short,,,,z_spacing,Cell spacing along z; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveGridState::z_spacing (#441);source:EFFECT/grids.h:27;source:EFFECT/grids.h:76;source:EFFECT/grids.h:120
+T00689.011,T00689,vs_gridState,11,zSpeed,0,short,,,,z_speed,Speed of the z spacing; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveGridState::z_speed (#441);source:EFFECT/grids.h:28;source:EFFECT/grids.h:76;source:EFFECT/grids.h:119
+T00689.012,T00689,vs_gridState,12,xPhase,0,short,,,,x_phase,Wave phase along x; advances by the sampled phase speed each tick,med,native:TemplateLiveState.hpp LiveGridState::x_phase (#441);source:EFFECT/grids.h:29;source:EFFECT/grids.h:77;source:EFFECT/grids.h:122
+T00689.013,T00689,vs_gridState,13,zPhase,0,short,,,,z_phase,Wave phase along z; advances by the sampled phase speed each tick,med,native:TemplateLiveState.hpp LiveGridState::z_phase (#441);source:EFFECT/grids.h:30;source:EFFECT/grids.h:77;source:EFFECT/grids.h:124
+T00689.014,T00689,vs_gridState,14,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveGridState::age (#441);source:EFFECT/grids.h:31;source:EFFECT/grids.h:74;source:EFFECT/grids.h:278
 T00690.000,T00690,vs_main_CdFile,0,lba,0,int,,,,lba,Named in the fork; see cited use,med,source:146C.c:6629
 T00690.001,T00690,vs_main_CdFile,1,size,0,int,,,,size,Named in the fork; see cited use,med,source:146C.c:6630
 T00691.000,T00691,vs_main_CdQueueSlot,0,state,0,short,,,,state,Named in the fork; see cited use,med,source:146C.c:6637
@@ -6554,27 +6554,27 @@ T00714.007,T00714,vs_menu_inventoryStorage_t,7,unk105B0,1,vs_menu_container,,,wo
 T00715.000,T00715,vs_mesh10Prim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:18
 T00715.001,T00715,vs_mesh10Prim,1,poly,0,POLY_GT3,,,,poly,Named in the fork; see cited use,med,source:meshes10.h:213;use cited by sanity pass;source:meshes10.h:19
 T00715.002,T00715,vs_mesh10Prim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:meshes10.h:214;use cited by sanity pass;source:meshes10.h:20
-T00716.000,T00716,vs_mesh10State,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:meshes10.h:55
-T00716.001,T00716,vs_mesh10State,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:meshes10.h:54
-T00716.002,T00716,vs_mesh10State,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:45;declaration-only;source:meshes10.h:12
-T00716.003,T00716,vs_mesh10State,3,age,0,int,,,,age,Named in the fork; see cited use,med,source:meshes10.h:58
-T00716.004,T00716,vs_mesh10State,4,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:meshes10.h:60
-T00716.005,T00716,vs_mesh10State,5,rotation,0,SVECTOR,,,,rotation,Named in the fork; see cited use,med,source:meshes10.h:56
+T00716.000,T00716,vs_mesh10State,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveMesh10State::lifetime (#441);source:EFFECT/meshes10.h:19;source:EFFECT/meshes10.h:74;source:EFFECT/meshes10.h:237
+T00716.001,T00716,vs_mesh10State,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveMesh10State::effect (#441);source:EFFECT/meshes10.h:20;source:EFFECT/meshes10.h:73
+T00716.002,T00716,vs_mesh10State,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveMesh10State::reserved_2 (#441);never accessed upstream;source:EFFECT/meshes10.h:21
+T00716.003,T00716,vs_mesh10State,3,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveMesh10State::age (#441);source:EFFECT/meshes10.h:22;source:EFFECT/meshes10.h:77;source:EFFECT/meshes10.h:235
+T00716.004,T00716,vs_mesh10State,4,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveMesh10State::texture (#441);source:EFFECT/meshes10.h:23;source:EFFECT/meshes10.h:79;source:EFFECT/meshes10.h:187
+T00716.005,T00716,vs_mesh10State,5,rotation,0,SVECTOR,,,,rotation,Accumulated rotation; the sampled spin adds to it each tick,med,native:TemplateLiveState.hpp LiveMesh10State::rotation (#441);source:EFFECT/meshes10.h:24;source:EFFECT/meshes10.h:75;source:EFFECT/meshes10.h:152
 T00717.000,T00717,vs_mesh10UV,0,u,0,u_char,,,,u,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:23
 T00717.001,T00717,vs_mesh10UV,1,v,0,u_char,,,,v,Named in the fork; see cited use,med,declaration-only;source:meshes10.h:23
 T00718.000,T00718,vs_mirrorSurfacePrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:mirroredSurfaces.h:19
 T00718.001,T00718,vs_mirrorSurfacePrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:mirroredSurfaces.h:224;use cited by sanity pass;source:mirroredSurfaces.h:20
 T00718.002,T00718,vs_mirrorSurfacePrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:mirroredSurfaces.h:225;use cited by sanity pass;source:mirroredSurfaces.h:21
-T00719.000,T00719,vs_mirrorSurfaceState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:mirroredSurfaces.h:68
-T00719.001,T00719,vs_mirrorSurfaceState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:mirroredSurfaces.h:67
-T00719.002,T00719,vs_mirrorSurfaceState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:54;declaration-only;source:mirroredSurfaces.h:13
-T00719.003,T00719,vs_mirrorSurfaceState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:mirroredSurfaces.h:70
-T00719.004,T00719,vs_mirrorSurfaceState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:mirroredSurfaces.h:69
-T00719.005,T00719,vs_mirrorSurfaceState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:mirroredSurfaces.h:72
-T00719.006,T00719,vs_mirrorSurfaceState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:mirroredSurfaces.h:71
-T00719.007,T00719,vs_mirrorSurfaceState,7,age,0,int,,,,age,Named in the fork; see cited use,med,source:mirroredSurfaces.h:73
-T00719.008,T00719,vs_mirrorSurfaceState,8,factors,0,int[9],,,,factors,Named in the fork; see cited use,med,source:mirroredSurfaces.h:82
-T00719.009,T00719,vs_mirrorSurfaceState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:mirroredSurfaces.h:95
+T00719.000,T00719,vs_mirrorSurfaceState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::lifetime (#441);source:EFFECT/surfaces.h:33;source:EFFECT/surfaces.h:98;source:EFFECT/surfaces.h:346
+T00719.001,T00719,vs_mirrorSurfaceState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::effect (#441);source:EFFECT/surfaces.h:34;source:EFFECT/surfaces.h:97
+T00719.002,T00719,vs_mirrorSurfaceState,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::reserved_2 (#441);never accessed upstream;source:EFFECT/surfaces.h:35
+T00719.003,T00719,vs_mirrorSurfaceState,3,radius,0,int,,,,radius,Radius; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::radius (#441);source:EFFECT/surfaces.h:36;source:EFFECT/surfaces.h:100;source:EFFECT/surfaces.h:173
+T00719.004,T00719,vs_mirrorSurfaceState,4,radiusSpeed,0,int,,,,radius_speed,Radius speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::radius_speed (#441);source:EFFECT/surfaces.h:37;source:EFFECT/surfaces.h:99;source:EFFECT/surfaces.h:172
+T00719.005,T00719,vs_mirrorSurfaceState,5,height,0,int,,,,height,Height; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::height (#441);source:EFFECT/surfaces.h:38;source:EFFECT/surfaces.h:102;source:EFFECT/surfaces.h:170
+T00719.006,T00719,vs_mirrorSurfaceState,6,heightSpeed,0,int,,,,height_speed,Height speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::height_speed (#441);source:EFFECT/surfaces.h:39;source:EFFECT/surfaces.h:101;source:EFFECT/surfaces.h:169
+T00719.007,T00719,vs_mirrorSurfaceState,7,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::age (#441);source:EFFECT/surfaces.h:40;source:EFFECT/surfaces.h:103;source:EFFECT/surfaces.h:344
+T00719.008,T00719,vs_mirrorSurfaceState,8,factors,0,int[9],,,,factors,"Each row's colour factor: the definition's transparency curve sampled at create and doubled, with 256 stored as 255; 255 without a curve",med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::factors (#441);source:EFFECT/surfaces.h:41;source:EFFECT/surfaces.h:121;source:EFFECT/surfaces.h:134;source:EFFECT/surfaces.h:228
+T00719.009,T00719,vs_mirrorSurfaceState,9,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveMirrorSurfaceState::texture (#441);source:EFFECT/surfaces.h:42;source:EFFECT/surfaces.h:138;source:EFFECT/surfaces.h:268
 T00720.000,T00720,vs_particleLine,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:187;declaration-only;source:particleLineRender.h:6
 T00720.001,T00720,vs_particleLine,1,unk1,1,u_char,,,,tag1,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:188;declaration-only;source:particleLineRender.h:6
 T00720.002,T00720,vs_particleLine,2,unk2,1,u_char,,,,tag2,"Byte of the ordering-table tag, written when the packet is added; not used by native code; kept for the original layout",med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:189;declaration-only;source:particleLineRender.h:6
@@ -6590,30 +6590,30 @@ T00721.005,T00721,vs_particlePrim,5,unk38,1,int,,,,draw_mode,Draw mode command w
 T00722.000,T00722,vs_ringPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:rings.h:19
 T00722.001,T00722,vs_ringPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:rings.h:244;use cited by sanity pass;source:rings.h:20
 T00722.002,T00722,vs_ringPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:rings.h:245;use cited by sanity pass;source:rings.h:21
-T00723.000,T00723,vs_ringState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:rings.h:74
-T00723.001,T00723,vs_ringState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:rings.h:73
-T00723.002,T00723,vs_ringState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:63;declaration-only;source:rings.h:14
-T00723.003,T00723,vs_ringState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:rings.h:76
-T00723.004,T00723,vs_ringState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:rings.h:75
-T00723.005,T00723,vs_ringState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:rings.h:78
-T00723.006,T00723,vs_ringState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:rings.h:77
-T00723.007,T00723,vs_ringState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:rings.h:79
-T00723.008,T00723,vs_ringState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:rings.h:80
-T00723.009,T00723,vs_ringState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:rings.h:82
+T00723.000,T00723,vs_ringState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveRingState::lifetime (#441);source:EFFECT/effectCommon.h:23;source:EFFECT/rings.h:57;source:EFFECT/rings.h:277;source:EFFECT/rings.h:287
+T00723.001,T00723,vs_ringState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveRingState::effect (#441);source:EFFECT/effectCommon.h:24;source:EFFECT/rings.h:56
+T00723.002,T00723,vs_ringState,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveRingState::reserved_2 (#441);never accessed upstream;source:EFFECT/effectCommon.h:25
+T00723.003,T00723,vs_ringState,3,radius,0,int,,,,radius,Radius; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::radius (#441);source:EFFECT/effectCommon.h:26;source:EFFECT/rings.h:59;source:EFFECT/rings.h:100
+T00723.004,T00723,vs_ringState,4,radiusSpeed,0,int,,,,radius_speed,Radius speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::radius_speed (#441);source:EFFECT/effectCommon.h:27;source:EFFECT/rings.h:58;source:EFFECT/rings.h:98
+T00723.005,T00723,vs_ringState,5,height,0,int,,,,height,Height; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::height (#441);source:EFFECT/effectCommon.h:28;source:EFFECT/rings.h:61;source:EFFECT/rings.h:104
+T00723.006,T00723,vs_ringState,6,heightSpeed,0,int,,,,height_speed,Height speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::height_speed (#441);source:EFFECT/effectCommon.h:29;source:EFFECT/rings.h:60;source:EFFECT/rings.h:103
+T00723.007,T00723,vs_ringState,7,angle,0,int,,,,angle,Angle of the first segment; advances by the sampled spin each tick,med,native:TemplateLiveState.hpp LiveRingState::angle (#441);source:EFFECT/effectCommon.h:30;source:EFFECT/rings.h:62;source:EFFECT/rings.h:120
+T00723.008,T00723,vs_ringState,8,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveRingState::age (#441);source:EFFECT/effectCommon.h:31;source:EFFECT/rings.h:63;source:EFFECT/rings.h:275
+T00723.009,T00723,vs_ringState,9,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveRingState::texture (#441);source:EFFECT/effectCommon.h:32;source:EFFECT/rings.h:65;source:EFFECT/rings.h:203
 T00724.000,T00724,vs_rotatingSurfacePrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:rotatingSurfaces.h:20
 T00724.001,T00724,vs_rotatingSurfacePrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:rotatingSurfaces.h:239;use cited by sanity pass;source:rotatingSurfaces.h:21
 T00724.002,T00724,vs_rotatingSurfacePrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:rotatingSurfaces.h:240;use cited by sanity pass;source:rotatingSurfaces.h:22
-T00725.000,T00725,vs_rotatingSurfaceState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:rotatingSurfaces.h:75
-T00725.001,T00725,vs_rotatingSurfaceState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:rotatingSurfaces.h:74
-T00725.002,T00725,vs_rotatingSurfaceState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:71;declaration-only;source:rotatingSurfaces.h:14
-T00725.003,T00725,vs_rotatingSurfaceState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:rotatingSurfaces.h:77
-T00725.004,T00725,vs_rotatingSurfaceState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:rotatingSurfaces.h:76
-T00725.005,T00725,vs_rotatingSurfaceState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:rotatingSurfaces.h:79
-T00725.006,T00725,vs_rotatingSurfaceState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:rotatingSurfaces.h:78
-T00725.007,T00725,vs_rotatingSurfaceState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:rotatingSurfaces.h:80
-T00725.008,T00725,vs_rotatingSurfaceState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:rotatingSurfaces.h:81
-T00725.009,T00725,vs_rotatingSurfaceState,9,factors,0,int[5],,,,factors,Named in the fork; see cited use,med,source:rotatingSurfaces.h:90
-T00725.010,T00725,vs_rotatingSurfaceState,10,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:rotatingSurfaces.h:103
+T00725.000,T00725,vs_rotatingSurfaceState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::lifetime (#441);source:EFFECT/rotatingSurfaces.h:30;source:EFFECT/rotatingSurfaces.h:79;source:EFFECT/rotatingSurfaces.h:318
+T00725.001,T00725,vs_rotatingSurfaceState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::effect (#441);source:EFFECT/rotatingSurfaces.h:31;source:EFFECT/rotatingSurfaces.h:78
+T00725.002,T00725,vs_rotatingSurfaceState,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::reserved_2 (#441);never accessed upstream;source:EFFECT/rotatingSurfaces.h:32
+T00725.003,T00725,vs_rotatingSurfaceState,3,radius,0,int,,,,radius,Radius; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::radius (#441);source:EFFECT/rotatingSurfaces.h:33;source:EFFECT/rotatingSurfaces.h:81;source:EFFECT/rotatingSurfaces.h:141
+T00725.004,T00725,vs_rotatingSurfaceState,4,radiusSpeed,0,int,,,,radius_speed,Radius speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::radius_speed (#441);source:EFFECT/rotatingSurfaces.h:34;source:EFFECT/rotatingSurfaces.h:80;source:EFFECT/rotatingSurfaces.h:140
+T00725.005,T00725,vs_rotatingSurfaceState,5,height,0,int,,,,height,Height; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::height (#441);source:EFFECT/rotatingSurfaces.h:35;source:EFFECT/rotatingSurfaces.h:83;source:EFFECT/rotatingSurfaces.h:138
+T00725.006,T00725,vs_rotatingSurfaceState,6,heightSpeed,0,int,,,,height_speed,Height speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::height_speed (#441);source:EFFECT/rotatingSurfaces.h:36;source:EFFECT/rotatingSurfaces.h:82;source:EFFECT/rotatingSurfaces.h:137
+T00725.007,T00725,vs_rotatingSurfaceState,7,angle,0,int,,,,angle,Angle of the first segment; advances by the sampled spin each tick,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::angle (#441);source:EFFECT/rotatingSurfaces.h:37;source:EFFECT/rotatingSurfaces.h:84;source:EFFECT/rotatingSurfaces.h:143
+T00725.008,T00725,vs_rotatingSurfaceState,8,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::age (#441);source:EFFECT/rotatingSurfaces.h:38;source:EFFECT/rotatingSurfaces.h:85;source:EFFECT/rotatingSurfaces.h:316
+T00725.009,T00725,vs_rotatingSurfaceState,9,factors,0,int[5],,,,factors,"Each row's colour factor: the definition's transparency curve sampled at create and doubled, with 256 stored as 255; 255 without a curve",med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::factors (#441);source:EFFECT/rotatingSurfaces.h:39;source:EFFECT/rotatingSurfaces.h:96;source:EFFECT/rotatingSurfaces.h:196
+T00725.010,T00725,vs_rotatingSurfaceState,10,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveRotatingSurfaceState::texture (#441);source:EFFECT/rotatingSurfaces.h:40;source:EFFECT/rotatingSurfaces.h:112;source:EFFECT/rotatingSurfaces.h:236
 T00726.000,T00726,vs_scratch_t,0,unk0,1,void *,,,,primitive_cursor,Next free primitive in the frame's primitive buffer,high,source:146C.c:7587
 T00726.001,T00726,vs_scratch_t,1,unk4,1,void *,,,,ordering_table,Main ordering table,high,source:146C.c:7585
 T00726.002,T00726,vs_scratch_t,2,unk8,1,void *,,,,overlay_ordering_table,"Ordering table entry for overlay sprites, in front of the main table",high,source:146C.c:7584
@@ -6624,29 +6624,29 @@ T00726.006,T00726,vs_scratch_t,6,camera,0,vs_camera_t,,,,camera,Camera,med,sourc
 T00727.000,T00727,vs_surfacePrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:surfaces.h:19
 T00727.001,T00727,vs_surfacePrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:surfaces.h:204;use cited by sanity pass;source:surfaces.h:20
 T00727.002,T00727,vs_surfacePrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:surfaces.h:205;use cited by sanity pass;source:surfaces.h:21
-T00728.000,T00728,vs_surfaceState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:surfaces.h:68
-T00728.001,T00728,vs_surfaceState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:surfaces.h:67
-T00728.002,T00728,vs_surfaceState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:80;declaration-only;source:surfaces.h:13
-T00728.003,T00728,vs_surfaceState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:surfaces.h:70
-T00728.004,T00728,vs_surfaceState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:surfaces.h:69
-T00728.005,T00728,vs_surfaceState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:surfaces.h:72
-T00728.006,T00728,vs_surfaceState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:surfaces.h:71
-T00728.007,T00728,vs_surfaceState,7,age,0,int,,,,age,Named in the fork; see cited use,med,source:surfaces.h:73
-T00728.008,T00728,vs_surfaceState,8,factors,0,int[5],,,,factors,Named in the fork; see cited use,med,source:surfaces.h:82
-T00728.009,T00728,vs_surfaceState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:surfaces.h:95
+T00728.000,T00728,vs_surfaceState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveSurfaceState::lifetime (#441);source:EFFECT/surfaces.h:33;source:EFFECT/surfaces.h:98;source:EFFECT/surfaces.h:346
+T00728.001,T00728,vs_surfaceState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveSurfaceState::effect (#441);source:EFFECT/surfaces.h:34;source:EFFECT/surfaces.h:97
+T00728.002,T00728,vs_surfaceState,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveSurfaceState::reserved_2 (#441);never accessed upstream;source:EFFECT/surfaces.h:35
+T00728.003,T00728,vs_surfaceState,3,radius,0,int,,,,radius,Radius; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveSurfaceState::radius (#441);source:EFFECT/surfaces.h:36;source:EFFECT/surfaces.h:100;source:EFFECT/surfaces.h:173
+T00728.004,T00728,vs_surfaceState,4,radiusSpeed,0,int,,,,radius_speed,Radius speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveSurfaceState::radius_speed (#441);source:EFFECT/surfaces.h:37;source:EFFECT/surfaces.h:99;source:EFFECT/surfaces.h:172
+T00728.005,T00728,vs_surfaceState,5,height,0,int,,,,height,Height; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveSurfaceState::height (#441);source:EFFECT/surfaces.h:38;source:EFFECT/surfaces.h:102;source:EFFECT/surfaces.h:170
+T00728.006,T00728,vs_surfaceState,6,heightSpeed,0,int,,,,height_speed,Height speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveSurfaceState::height_speed (#441);source:EFFECT/surfaces.h:39;source:EFFECT/surfaces.h:101;source:EFFECT/surfaces.h:169
+T00728.007,T00728,vs_surfaceState,7,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveSurfaceState::age (#441);source:EFFECT/surfaces.h:40;source:EFFECT/surfaces.h:103;source:EFFECT/surfaces.h:344
+T00728.008,T00728,vs_surfaceState,8,factors,0,int[5],,,,factors,"Each row's colour factor: the definition's transparency curve sampled at create and doubled, with 256 stored as 255; 255 without a curve",med,native:TemplateLiveState.hpp LiveSurfaceState::factors (#441);source:EFFECT/surfaces.h:41;source:EFFECT/surfaces.h:121;source:EFFECT/surfaces.h:134;source:EFFECT/surfaces.h:228
+T00728.009,T00728,vs_surfaceState,9,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveSurfaceState::texture (#441);source:EFFECT/surfaces.h:42;source:EFFECT/surfaces.h:138;source:EFFECT/surfaces.h:268
 T00729.000,T00729,vs_tiledRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:24
 T00729.001,T00729,vs_tiledRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:tiledRings.h:237;use cited by sanity pass;source:tiledRings.h:25
 T00729.002,T00729,vs_tiledRingPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:tiledRings.h:238;use cited by sanity pass;source:tiledRings.h:26
-T00730.000,T00730,vs_tiledRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:tiledRings.h:73
-T00730.001,T00730,vs_tiledRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:tiledRings.h:74
-T00730.002,T00730,vs_tiledRingState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:90;declaration-only;source:tiledRings.h:14
-T00730.003,T00730,vs_tiledRingState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:tiledRings.h:76
-T00730.004,T00730,vs_tiledRingState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:tiledRings.h:75
-T00730.005,T00730,vs_tiledRingState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:tiledRings.h:78
-T00730.006,T00730,vs_tiledRingState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:tiledRings.h:77
-T00730.007,T00730,vs_tiledRingState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:tiledRings.h:79
-T00730.008,T00730,vs_tiledRingState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:tiledRings.h:80
-T00730.009,T00730,vs_tiledRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:tiledRings.h:82
+T00730.000,T00730,vs_tiledRingState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveRingState::lifetime (#441);source:EFFECT/effectCommon.h:23;source:EFFECT/closedRings.h:103;source:EFFECT/closedRings.h:359
+T00730.001,T00730,vs_tiledRingState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveRingState::effect (#441);source:EFFECT/effectCommon.h:24;source:EFFECT/closedRings.h:104
+T00730.002,T00730,vs_tiledRingState,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveRingState::reserved_2 (#441);never accessed upstream;source:EFFECT/effectCommon.h:25
+T00730.003,T00730,vs_tiledRingState,3,radius,0,int,,,,radius,Radius; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::radius (#441);source:EFFECT/effectCommon.h:26;source:EFFECT/closedRings.h:106;source:EFFECT/closedRings.h:147
+T00730.004,T00730,vs_tiledRingState,4,radiusSpeed,0,int,,,,radius_speed,Radius speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::radius_speed (#441);source:EFFECT/effectCommon.h:27;source:EFFECT/closedRings.h:105;source:EFFECT/closedRings.h:145
+T00730.005,T00730,vs_tiledRingState,5,height,0,int,,,,height,Height; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::height (#441);source:EFFECT/effectCommon.h:28;source:EFFECT/closedRings.h:108;source:EFFECT/closedRings.h:151
+T00730.006,T00730,vs_tiledRingState,6,heightSpeed,0,int,,,,height_speed,Height speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::height_speed (#441);source:EFFECT/effectCommon.h:29;source:EFFECT/closedRings.h:107;source:EFFECT/closedRings.h:150
+T00730.007,T00730,vs_tiledRingState,7,angle,0,int,,,,angle,Angle of the first segment; advances by the sampled spin each tick,med,native:TemplateLiveState.hpp LiveRingState::angle (#441);source:EFFECT/effectCommon.h:30;source:EFFECT/closedRings.h:109;source:EFFECT/closedRings.h:161
+T00730.008,T00730,vs_tiledRingState,8,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveRingState::age (#441);source:EFFECT/effectCommon.h:31;source:EFFECT/closedRings.h:110;source:EFFECT/closedRings.h:357
+T00730.009,T00730,vs_tiledRingState,9,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveRingState::texture (#441);source:EFFECT/effectCommon.h:32;source:EFFECT/closedRings.h:112;source:EFFECT/closedRings.h:245
 T00731.000,T00731,vs_tiledRingUV,0,u,0,u_char,,,,u,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:29
 T00731.001,T00731,vs_tiledRingUV,1,v,0,u_char,,,,v,Named in the fork; see cited use,med,declaration-only;source:tiledRings.h:30
 T00732.000,T00732,vs_trail9,0,splinePoints,0,SVECTOR[4],,,,spline_points,"The origin, two control points and the target",med,native:Trails.hpp LiveTrail9::spline_points (#441);source:EFFECT/trailEffect.h:30
@@ -6664,27 +6664,27 @@ T00733.002,T00733,vs_trail9Prim,2,unk2,1,u_char,,,,tag2,Byte of the ordering-tab
 T00733.003,T00733,vs_trail9Prim,3,unk3,1,u_char,,,,word_count,Packet length in words,med,source:trails9.h:607
 T00733.004,T00733,vs_trail9Prim,4,unk4,1,POLY_GT4,,,,poly,Gouraud textured quad,med,source:trails9.h:543
 T00733.005,T00733,vs_trail9Prim,5,unk38,1,int,,,,draw_mode,Draw mode command word (0xE1),med,source:trails9.h:610
-T00734.000,T00734,vs_trail9State,0,unk0,1,u_char,,,lifetime,lifetime,"Lifetime (low byte of the spawn argument), as in the other template states",med,source:trails9.h:703
-T00734.001,T00734,vs_trail9State,1,unk1,1,u_char,,,effectDefinitionIndex,effect,Particle definition (high byte of the spawn argument),med,source:trails9.h:705
-T00734.002,T00734,vs_trail9State,2,trailcount,0,u_char,,,,trailCount,Number of trails,med,source:trails9.h:71
-T00734.003,T00734,vs_trail9State,3,unk3,1,u_char,,,splineInitialized,opaque3,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:119;source:trails9.h:714
-T00734.004,T00734,vs_trail9State,4,trails,0,vs_trail9 *,,,,trails,Named in the fork; see cited use,med,source:trails9.h:73
-T00734.005,T00734,vs_trail9State,5,curveSampleDistance,0,int,,,,curveSampleDistance,Named in the fork; see cited use,med,source:trails9.h:46
-T00734.006,T00734,vs_trail9State,6,unkC,1,func_800D6CF_t,,,textureAnimation,texture,Texture animation state,med,source:trails9.h:514
-T00734.007,T00734,vs_trail9State,7,sampledTransparencyCurve,0,u_char[0],,,,sampledTransparencyCurve,Named in the fork; see cited use,med,source:trails9.h:555
+T00734.000,T00734,vs_trail9State,0,unk0,1,u_char,,,lifetime,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveTrailNineState::lifetime (#441);source:EFFECT/trailEffect.h:42;source:EFFECT/trailEffect.h:729;source:EFFECT/trailEffect.h:825;source:EFFECT/trailEffect.h:836
+T00734.001,T00734,vs_trail9State,1,unk1,1,u_char,,,effectDefinitionIndex,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveTrailNineState::effect (#441);source:EFFECT/trailEffect.h:43;source:EFFECT/trailEffect.h:728
+T00734.002,T00734,vs_trail9State,2,trailcount,0,u_char,,,,trail_count,Trails in the buffer: the definition's count capped at the emitter's capacity,med,native:TemplateLiveState.hpp LiveTrailNineState::trail_count (#441);source:EFFECT/trailEffect.h:44;source:EFFECT/trailEffect.h:739;source:EFFECT/trailEffect.h:101
+T00734.003,T00734,vs_trail9State,3,unk3,1,u_char,,,splineInitialized,initialized,Set once the first tick has placed the trails,med,native:TemplateLiveState.hpp LiveTrailNineState::initialized (#441);source:EFFECT/trailEffect.h:45;source:EFFECT/trailEffect.h:740;source:EFFECT/trailEffect.h:768;source:EFFECT/trailEffect.h:773
+T00734.004,T00734,vs_trail9State,4,trails,0,vs_trail9 *,,,,trails,"The trail buffer, allocated from the high end of the heap",med,native:TemplateLiveState.hpp LiveTrailNineState::trails (#441);source:EFFECT/trailEffect.h:46;source:EFFECT/trailEffect.h:738
+T00734.005,T00734,vs_trail9State,5,curveSampleDistance,0,int,,,,curve_sample_distance,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveTrailNineState::curve_sample_distance (#441);source:EFFECT/trailEffect.h:47;source:EFFECT/trailEffect.h:730;source:EFFECT/trailEffect.h:823
+T00734.006,T00734,vs_trail9State,6,unkC,1,func_800D6CF_t,,,textureAnimation,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveTrailNineState::texture (#441);source:EFFECT/trailEffect.h:48;source:EFFECT/trailEffect.h:760
+T00734.007,T00734,vs_trail9State,7,sampledTransparencyCurve,0,u_char[0],,,,transparency,The definition's transparency curve sampled once per spline sample at create; 128 each without a curve,med,native:TemplateLiveState.hpp LiveTrailNineState::transparency (#441);source:EFFECT/trailEffect.h:49;source:EFFECT/trailEffect.h:750;source:EFFECT/trailEffect.h:756
 T00735.000,T00735,vs_transposedRingPrim,0,tag,0,int,,,,tag,Named in the fork; see cited use,med,declaration-only;source:EFFECT/PLG162.BIN/0.c:22
 T00735.001,T00735,vs_transposedRingPrim,1,poly,0,POLY_GT4,,,,poly,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:240;use cited by sanity pass;source:EFFECT/PLG162.BIN/0.c:23
 T00735.002,T00735,vs_transposedRingPrim,2,drawMode,0,int,,,,draw_mode,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:241;use cited by sanity pass;source:EFFECT/PLG162.BIN/0.c:24
-T00736.000,T00736,vs_transposedRingState,0,lifetime,0,u_char,,,,lifetime,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:74
-T00736.001,T00736,vs_transposedRingState,1,effect,0,u_char,,,,effect,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:75
-T00736.002,T00736,vs_transposedRingState,2,pad,1,short,,,,reserved2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Templates\TemplateState.h:130;declaration-only;source:EFFECT/PLG162.BIN/0.c:12
-T00736.003,T00736,vs_transposedRingState,3,radius,0,int,,,,radius,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:77
-T00736.004,T00736,vs_transposedRingState,4,radiusSpeed,0,int,,,,radiusSpeed,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:76
-T00736.005,T00736,vs_transposedRingState,5,height,0,int,,,,height,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:79
-T00736.006,T00736,vs_transposedRingState,6,heightSpeed,0,int,,,,heightSpeed,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:78
-T00736.007,T00736,vs_transposedRingState,7,angle,0,int,,,,angle,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:80
-T00736.008,T00736,vs_transposedRingState,8,age,0,int,,,,age,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:81
-T00736.009,T00736,vs_transposedRingState,9,texture,0,func_800D6CF_t,,,,texture,Named in the fork; see cited use,med,source:EFFECT/PLG162.BIN/0.c:83
+T00736.000,T00736,vs_transposedRingState,0,lifetime,0,u_char,,,,lifetime,"Ticks left, from the create argument's low byte; 0 runs until stopped, and a stop sets 1 so the next tick ends the effect",med,native:TemplateLiveState.hpp LiveRingState::lifetime (#441);source:EFFECT/effectCommon.h:23;source:EFFECT/closedRings.h:103;source:EFFECT/closedRings.h:359
+T00736.001,T00736,vs_transposedRingState,1,effect,0,u_char,,,,effect,"Particle definition, from the create argument's high byte",med,native:TemplateLiveState.hpp LiveRingState::effect (#441);source:EFFECT/effectCommon.h:24;source:EFFECT/closedRings.h:104
+T00736.002,T00736,vs_transposedRingState,2,pad,1,short,,,,reserved_2,Not used; kept for the original layout,med,native:TemplateLiveState.hpp LiveRingState::reserved_2 (#441);never accessed upstream;source:EFFECT/effectCommon.h:25
+T00736.003,T00736,vs_transposedRingState,3,radius,0,int,,,,radius,Radius; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::radius (#441);source:EFFECT/effectCommon.h:26;source:EFFECT/closedRings.h:106;source:EFFECT/closedRings.h:147
+T00736.004,T00736,vs_transposedRingState,4,radiusSpeed,0,int,,,,radius_speed,Radius speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::radius_speed (#441);source:EFFECT/effectCommon.h:27;source:EFFECT/closedRings.h:105;source:EFFECT/closedRings.h:145
+T00736.005,T00736,vs_transposedRingState,5,height,0,int,,,,height,Height; moves by its speed and the sampled offset each tick,med,native:TemplateLiveState.hpp LiveRingState::height (#441);source:EFFECT/effectCommon.h:28;source:EFFECT/closedRings.h:108;source:EFFECT/closedRings.h:151
+T00736.006,T00736,vs_transposedRingState,6,heightSpeed,0,int,,,,height_speed,Height speed; the sampled force accelerates it each tick,med,native:TemplateLiveState.hpp LiveRingState::height_speed (#441);source:EFFECT/effectCommon.h:29;source:EFFECT/closedRings.h:107;source:EFFECT/closedRings.h:150
+T00736.007,T00736,vs_transposedRingState,7,angle,0,int,,,,angle,Angle of the first segment; advances by the sampled spin each tick,med,native:TemplateLiveState.hpp LiveRingState::angle (#441);source:EFFECT/effectCommon.h:30;source:EFFECT/closedRings.h:109;source:EFFECT/closedRings.h:161
+T00736.008,T00736,vs_transposedRingState,8,age,0,int,,,,age,Ticks since creation; every curve samples at it,med,native:TemplateLiveState.hpp LiveRingState::age (#441);source:EFFECT/effectCommon.h:31;source:EFFECT/closedRings.h:110;source:EFFECT/closedRings.h:357
+T00736.009,T00736,vs_transposedRingState,9,texture,0,func_800D6CF_t,,,,texture,Texture animation state of the definition's texture,med,native:TemplateLiveState.hpp LiveRingState::texture (#441);source:EFFECT/effectCommon.h:32;source:EFFECT/closedRings.h:112;source:EFFECT/closedRings.h:245
 T00737.000,T00737,vs_transposedRingUV,0,u,0,u_char,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:258;declaration-only;source:EFFECT/PLG162.BIN/0.c:27
 T00737.001,T00737,vs_transposedRingUV,1,v,0,u_char,,,,reserved1,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Engine\src\Render\LegacyPackets.hpp:259;declaration-only;source:EFFECT/PLG162.BIN/0.c:28
 T00738.000,T00738,vs_trialScore_t,0,time,0,u_int,24,,,time,Named in the fork; see cited use,med,source:D4.c:2294

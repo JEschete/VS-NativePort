@@ -55,7 +55,7 @@
 #include "Effects/Templates/RotatingSurface.hpp"
 #include "Effects/Templates/Surface.hpp"
 #include "Effects/Templates/SurfaceCore.hpp"
-#include "Effects/Templates/TemplateState.h"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/TransformsLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Render/Camera.hpp"
@@ -110,12 +110,6 @@ static_assert(sizeof(VS::Render::RotatingSurfacePacket) ==
               kRingPacketWords * kWordBytes);
 static_assert(sizeof(plugins::SurfaceProfile) ==
               kSurfaceProfilePoints * sizeof(SVECTOR));
-static_assert(std::extent_v<decltype(Effects_SurfaceState::factors)> ==
-              kSurfaceRows);
-static_assert(std::extent_v<decltype(Effects_RotatingSurfaceState::factors)> ==
-              kSurfaceRows);
-static_assert(std::extent_v<decltype(Effects_MirrorSurfaceState::factors)> ==
-              kMirrorSurfaceRows);
 
 std::uint64_t refused_curves = 0;
 std::uint64_t refused_textures = 0;
@@ -540,56 +534,56 @@ void LiveSurfaceServices::StartAnimation(
                                          source.program);
 }
 
-template <typename Legacy>
-concept AnimatedRecord = requires(Legacy& live) { live.texture; };
+template <typename Live>
+concept AnimatedRecord = requires(Live& live) { live.texture; };
 
-template <typename Legacy>
-concept TurningRecord = requires(Legacy& live) { live.angle; };
+template <typename Live>
+concept TurningRecord = requires(Live& live) { live.angle; };
 
-[[nodiscard]] GridState RecordOf(const Effects_GridState& live) {
+[[nodiscard]] GridState RecordOf(const LiveGridState& live) {
   return {.lifetime = live.lifetime,
           .definition_index = live.effect,
           .u = live.u,
           .v = live.v,
-          .u_scroll = live.uScroll,
-          .v_scroll = live.vScroll,
+          .u_scroll = live.u_scroll,
+          .v_scroll = live.v_scroll,
           .tpage = static_cast<std::uint16_t>(live.tpage),
           .clut = static_cast<std::uint16_t>(live.clut),
-          .x_spacing = live.xSpacing,
-          .x_speed = live.xSpeed,
-          .z_spacing = live.zSpacing,
-          .z_speed = live.zSpeed,
-          .x_phase = live.xPhase,
-          .z_phase = live.zPhase,
+          .x_spacing = live.x_spacing,
+          .x_speed = live.x_speed,
+          .z_spacing = live.z_spacing,
+          .z_speed = live.z_speed,
+          .x_phase = live.x_phase,
+          .z_phase = live.z_phase,
           .age = live.age};
 }
 
-void StoreRecord(Effects_GridState& live, const GridState& state) {
+void StoreRecord(LiveGridState& live, const GridState& state) {
   live.lifetime = state.lifetime;
   live.effect = state.definition_index;
   live.u = state.u;
   live.v = state.v;
-  live.uScroll = state.u_scroll;
-  live.vScroll = state.v_scroll;
+  live.u_scroll = state.u_scroll;
+  live.v_scroll = state.v_scroll;
   live.tpage = static_cast<std::int16_t>(state.tpage);
   live.clut = static_cast<std::int16_t>(state.clut);
-  live.xSpacing = state.x_spacing;
-  live.xSpeed = state.x_speed;
-  live.zSpacing = state.z_spacing;
-  live.zSpeed = state.z_speed;
-  live.xPhase = state.x_phase;
-  live.zPhase = state.z_phase;
+  live.x_spacing = state.x_spacing;
+  live.x_speed = state.x_speed;
+  live.z_spacing = state.z_spacing;
+  live.z_speed = state.z_speed;
+  live.x_phase = state.x_phase;
+  live.z_phase = state.z_phase;
   live.age = state.age;
 }
 
-[[nodiscard]] Mesh10State RecordOf(const Effects_Mesh10State& live) {
+[[nodiscard]] Mesh10State RecordOf(const LiveMesh10State& live) {
   return {.lifetime = live.lifetime,
           .definition_index = live.effect,
           .age = live.age,
           .rotation = {live.rotation.vx, live.rotation.vy, live.rotation.vz}};
 }
 
-void StoreRecord(Effects_Mesh10State& live, const Mesh10State& state) {
+void StoreRecord(LiveMesh10State& live, const Mesh10State& state) {
   live.lifetime = state.lifetime;
   live.effect = state.definition_index;
   live.age = state.age;
@@ -600,42 +594,42 @@ void StoreRecord(Effects_Mesh10State& live, const Mesh10State& state) {
 
 // The three sheet records: the surface and the mirrored surface keep no
 // angle, and each keeps as many row intensities as it has rows.
-template <typename Legacy>
-[[nodiscard]] SheetState RecordOf(const Legacy& live) {
+template <typename Live>
+[[nodiscard]] SheetState RecordOf(const Live& live) {
   SheetState state{.lifetime = live.lifetime,
                    .definition_index = live.effect,
                    .radius = live.radius,
-                   .radius_speed = live.radiusSpeed,
+                   .radius_speed = live.radius_speed,
                    .height = live.height,
-                   .height_speed = live.heightSpeed,
+                   .height_speed = live.height_speed,
                    .age = live.age};
-  if constexpr (TurningRecord<Legacy>) {
+  if constexpr (TurningRecord<Live>) {
     state.angle = live.angle;
   }
   std::ranges::copy(live.factors, state.factors.begin());
   return state;
 }
 
-template <typename Legacy>
-void StoreRecord(Legacy& live, const SheetState& state) {
-  constexpr std::size_t kRows = std::extent_v<decltype(Legacy::factors)>;
+template <typename Live>
+void StoreRecord(Live& live, const SheetState& state) {
+  constexpr std::size_t kRows = std::tuple_size_v<decltype(Live::factors)>;
   live.lifetime = state.lifetime;
   live.effect = state.definition_index;
   live.radius = state.radius;
-  live.radiusSpeed = state.radius_speed;
+  live.radius_speed = state.radius_speed;
   live.height = state.height;
-  live.heightSpeed = state.height_speed;
+  live.height_speed = state.height_speed;
   live.age = state.age;
-  if constexpr (TurningRecord<Legacy>) {
+  if constexpr (TurningRecord<Live>) {
     live.angle = state.angle;
   }
   std::ranges::copy(std::span(state.factors).template first<kRows>(),
                     std::span(live.factors).begin());
 }
 
-// One template's host over its C record (`Legacy`) in the slot; every
+// One template's host over its state (`Live`) in the slot; every
 // service is LiveSurfaceServices'.
-template <typename Record, typename Legacy>
+template <typename Record, typename Live>
 class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
  public:
   LiveSurfaceHost(Effects_RendererSlot& slot, std::string_view name)
@@ -647,14 +641,14 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
   // reserved fields as the heap held them.
   void Create(const Record& state,
               std::optional<SurfaceAnimation> animation) override {
-    auto* live = static_cast<Legacy*>(services_.AllocateState(sizeof(Legacy)));
+    auto* live = static_cast<Live*>(services_.AllocateState(sizeof(Live)));
     if (live == nullptr) {
       return;
     }
-    *live = Legacy{};
+    *live = Live{};
     slot_.rendererState = live;
     StoreState(state);
-    if constexpr (AnimatedRecord<Legacy>) {
+    if constexpr (AnimatedRecord<Live>) {
       if (animation.has_value()) {
         services_.StartAnimation(live->texture, *animation);
       }
@@ -662,7 +656,7 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
   }
 
   [[nodiscard]] std::optional<Record> State() const override {
-    const Legacy* live = LiveState();
+    const Live* live = LiveState();
     if (live == nullptr) {
       return std::nullopt;
     }
@@ -670,7 +664,7 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
   }
 
   void StoreState(const Record& state) override {
-    Legacy* live = LiveState();
+    Live* live = LiveState();
     if (live != nullptr) {
       StoreRecord(*live, state);
     }
@@ -705,8 +699,8 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
     return LiveSurfaceServices::Project(point);
   }
   [[nodiscard]] std::optional<RingTexture> AdvanceTexture() override {
-    if constexpr (AnimatedRecord<Legacy>) {
-      Legacy* live = LiveState();
+    if constexpr (AnimatedRecord<Live>) {
+      Live* live = LiveState();
       if (live != nullptr) {
         return services_.AdvanceTexture(live->texture);
       }
@@ -725,18 +719,18 @@ class LiveSurfaceHost final : public SurfaceRecordHost<Record> {
   }
 
  private:
-  [[nodiscard]] Legacy* LiveState() const {
-    return static_cast<Legacy*>(slot_.rendererState);
+  [[nodiscard]] Live* LiveState() const {
+    return static_cast<Live*>(slot_.rendererState);
   }
 
   Effects_RendererSlot& slot_;
   LiveSurfaceServices services_;
 };
 
-// Runs one renderer command of `instance` over the slot's `Legacy` record;
+// Runs one renderer command of `instance` over the slot's `Live` state;
 // `inputs` (a profile or a model) go between the packed parameter and the
 // host.
-template <typename Record, typename Legacy, typename Instance, typename... Args>
+template <typename Record, typename Live, typename Instance, typename... Args>
 int RunSurfaceEntry(Effects_RendererSlot* slot, unsigned int command,
                     int packed, std::string_view name, Instance instance,
                     const Args&... inputs) {
@@ -745,7 +739,7 @@ int RunSurfaceEntry(Effects_RendererSlot* slot, unsigned int command,
                        name);
     return 0;
   }
-  LiveSurfaceHost<Record, Legacy> host(*slot, name);
+  LiveSurfaceHost<Record, Live> host(*slot, name);
   return instance(static_cast<SurfaceCommand>(command), packed, inputs..., host)
              ? 1
              : 0;
@@ -804,33 +798,33 @@ using Mesh10Instance = bool (*)(SurfaceCommand, std::int32_t, Mesh10Model,
 
 int RunGrid(Effects_RendererSlot* slot, unsigned int command, int packed,
             GridInstance instance) {
-  return RunSurfaceEntry<GridState, Effects_GridState>(slot, command, packed,
-                                                       "grid", instance);
+  return RunSurfaceEntry<GridState, LiveGridState>(slot, command, packed,
+                                                   "grid", instance);
 }
 
 int RunSurface(Effects_RendererSlot* slot, unsigned int command, int packed,
                const SurfaceProfilePoints& profile, SheetInstance instance) {
-  return RunSurfaceEntry<SheetState, Effects_SurfaceState>(
+  return RunSurfaceEntry<SheetState, LiveSurfaceState>(
       slot, command, packed, "surface", instance, SurfaceProfile(profile));
 }
 
 int RunMirrorSurface(Effects_RendererSlot* slot, unsigned int command,
                      int packed, const SurfaceProfilePoints& profile,
                      SheetInstance instance) {
-  return RunSurfaceEntry<SheetState, Effects_MirrorSurfaceState>(
+  return RunSurfaceEntry<SheetState, LiveMirrorSurfaceState>(
       slot, command, packed, "mirrored surface", instance,
       SurfaceProfile(profile));
 }
 
 int RunRotatingSurface(Effects_RendererSlot* slot, unsigned int command,
                        int packed, RotatingSurfaceInstance instance) {
-  return RunSurfaceEntry<SheetState, Effects_RotatingSurfaceState>(
+  return RunSurfaceEntry<SheetState, LiveRotatingSurfaceState>(
       slot, command, packed, "rotating surface", instance);
 }
 
 int RunMesh10(Effects_RendererSlot* slot, unsigned int command, int packed,
               const LiveMesh10Model& model, Mesh10Instance instance) {
-  return RunSurfaceEntry<Mesh10State, Effects_Mesh10State>(
+  return RunSurfaceEntry<Mesh10State, LiveMesh10State>(
       slot, command, packed, "mesh", instance,
       Mesh10Model{.vertices = model.vertices, .faces = model.faces});
 }

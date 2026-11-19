@@ -30,6 +30,13 @@ inline constexpr std::size_t kMaxNineSampleTrailsPerEmitter = 8;
 inline constexpr std::size_t kTrailNineTransparencySamples = 9;
 inline constexpr std::uint8_t kOpaqueTrailTransparency = 0x80;
 using TrailTransparency = std::array<std::uint8_t, kTrailTransparencySamples>;
+// The live emitter state with `Samples` spline and transparency samples
+// (Effects/Templates/TemplateLiveState.hpp), declared for the live
+// bindings' signatures.
+template <std::size_t Samples>
+struct BasicLiveTrailState;
+using LiveTrailState = BasicLiveTrailState<kTrailTransparencySamples>;
+using LiveTrailNineState = BasicLiveTrailState<kTrailNineTransparencySamples>;
 
 // Particle definition flags the origin stage reads.
 inline constexpr std::uint32_t kTrailAnchorMask = 0x7;

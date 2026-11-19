@@ -2,13 +2,12 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include "Effects/Templates/TrailCore.hpp"
+#include "Effects/TrailEmitter.hpp"
 
 struct Effects_EffectInstance;
 struct Effects_ParticleDefinition;
 struct Effects_ParticleEmitterScratch;
 struct Effects_RendererSlot;
-struct Effects_Trail9State;
-struct Effects_TrailQuadSet;
 
 // Live bindings for the five- and nine-sample trail template instances
 // (TrailTarget.cpp ... TrailRender.cpp). RunLiveTrailStage and
@@ -28,14 +27,13 @@ namespace VS::Effects::Templates {
 void RunLiveTrailStage(TrailStage stage,
                        const Effects_ParticleDefinition& definition,
                        Effects_ParticleEmitterScratch& scratch,
-                       Effects_EffectInstance& instance,
-                       Effects_TrailQuadSet& state);
-// RunLiveTrailStage over a nine-sample emitter (trails9.h; TemplateState.h).
+                       Effects_EffectInstance& instance, LiveTrailState& state);
+// RunLiveTrailStage over a nine-sample emitter (trails9.h).
 void RunLiveTrailNineStage(TrailNineStage stage,
                            const Effects_ParticleDefinition& definition,
                            Effects_ParticleEmitterScratch& scratch,
                            Effects_EffectInstance& instance,
-                           Effects_Trail9State& state);
+                           LiveTrailNineState& state);
 
 int UpdateLivePlg057Trail(Effects_RendererSlot* slot, unsigned int command,
                           int packed);

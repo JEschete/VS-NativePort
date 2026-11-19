@@ -11,8 +11,6 @@ struct Effects_EffectInstance;
 struct Effects_ParticleDefinition;
 struct Effects_ParticleEmitterScratch;
 struct Effects_RendererSlot;
-struct Effects_Trail9State;
-struct Effects_TrailQuadSet;
 
 namespace VS::Content {
 // PLG074's emission cursor in the overlay module image (ModuleData.cpp).
@@ -45,7 +43,7 @@ using LiveTrailNineOverlay = BasicLiveTrailOverlay<Templates::TrailNineStages>;
 void GenerateLiveTrailOrigins(const Effects_ParticleDefinition& definition,
                               Effects_ParticleEmitterScratch& scratch,
                               Effects_EffectInstance& instance,
-                              Effects_TrailQuadSet& state,
+                              LiveTrailState& state,
                               const LiveTrailOverlay& overlay);
 // trails5.h:677 VS_TRAIL_DISPATCH_FUNCTION: one lifecycle command for the
 // overlay's renderer slot; returns whether the emitter stays attached.
@@ -56,7 +54,7 @@ int UpdateLiveTrailEmitter(Effects_RendererSlot* slot, unsigned int command,
 void GenerateLiveTrailNineOrigins(const Effects_ParticleDefinition& definition,
                                   Effects_ParticleEmitterScratch& scratch,
                                   Effects_EffectInstance& instance,
-                                  Effects_Trail9State& state,
+                                  LiveTrailNineState& state,
                                   const LiveTrailNineOverlay& overlay);
 // trails9.h:685 VS_TRAIL_DISPATCH_FUNCTION: the lifecycle of a nine-sample
 // emitter, which holds at most eight trails and nine transparency samples.
@@ -67,7 +65,7 @@ int UpdateLiveTrailNineEmitter(Effects_RendererSlot* slot, unsigned int command,
 void GenerateLivePlg074TrailOrigins(
     const Effects_ParticleDefinition& definition,
     Effects_ParticleEmitterScratch& scratch, Effects_EffectInstance& instance,
-    Effects_TrailQuadSet& state);
+    LiveTrailState& state);
 // PLG074 func_800FCFEC: the renderer slot entry (EFFPURGE.BIN entry 89), with
 // PLG074's own cursor and PLG073's byte-identical stages.
 int UpdateLivePlg074TrailEmitter(Effects_RendererSlot* slot,

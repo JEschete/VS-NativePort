@@ -202,7 +202,7 @@ H0200,header,Native/Game/src/Effects/CameraLiveState.hpp,owned,no,pragma-once,0,
 H0201,header,Native/Game/src/Effects/EffectResourcesLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0202,header,Native/Game/src/Effects/Loading.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/EffectResourcesLiveState.hpp and Native/Game/include/Effects/EffectResources.hpp (#441)
 H0203,header,Native/Game/src/Effects/Package.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
-H0204,header,Native/Game/src/Effects/Particles.h,generated,yes,pragma-once,0,0,0,0,0,0,25,0,0,remaining,
+H0204,header,Native/Game/src/Effects/Particles.h,generated,yes,pragma-once,0,0,0,0,0,0,24,0,0,remaining,
 H0205,header,Native/Game/src/Effects/Plugins/Plg005.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: no file included it; Effects_Plg005_AnalyzeGridQuad duplicated VS::Effects::Templates::GridState (Grid.hpp); TYPE T00292 retired (#441)
 H0206,header,Native/Game/src/Effects/Plugins/Plg044.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0207,header,Native/Game/src/Effects/Plugins/Plg045.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -270,7 +270,7 @@ H0268,header,Native/Game/src/Effects/PurgeTables.hpp,generated,no,pragma-once,0,
 H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,2,52,0,0,remaining,
 H0270,header,Native/Game/src/Effects/ScreenEffectState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0271,header,Native/Game/src/Effects/ScreenEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/ScreenEffectState.hpp (#441)
-H0272,header,Native/Game/src/Effects/Templates/TemplateState.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
+H0272,header,Native/Game/src/Effects/Templates/TemplateState.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,retired,replaced by Native/Game/src/Effects/Templates/TemplateLiveState.hpp (#441)
 H0273,header,Native/Game/src/Effects/TimelineTrackKeys.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0274,header,Native/Game/src/Effects/Trails.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0275,header,Native/Game/src/Effects/Transforms.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,retired,replaced by Native/Game/src/Effects/TransformsLiveState.hpp (#441)

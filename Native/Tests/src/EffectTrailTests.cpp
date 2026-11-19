@@ -19,6 +19,7 @@
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailCore.hpp"
 #include "Effects/Templates/TrailInit.hpp"
@@ -538,9 +539,9 @@ TEST_CASE("Live trail stages run over the emitter's trail buffer",
   Effects_ParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
   std::array<VS::Effects::LiveTrail, 3> buffer{};
-  Effects_TrailQuadSet state{};
+  VS::Effects::LiveTrailState state{};
   state.trails = buffer.data();
-  state.trailcount = 2;
+  state.trail_count = 2;
   trails::RunLiveTrailStage(&MarkTrails, definition, scratch, instance, state);
   CHECK(buffer[0].step_count == 99);
   CHECK(buffer[1].spline_points[3].vz == 3);
@@ -554,12 +555,12 @@ TEST_CASE("Live trail stages skip a buffer that cannot hold its count",
   Effects_ParticleEmitterScratch scratch{};
   Effects_EffectInstance instance{};
   std::array<VS::Effects::LiveTrail, 1> buffer{};
-  Effects_TrailQuadSet state{};
+  VS::Effects::LiveTrailState state{};
   state.trails = buffer.data();
-  state.trailcount = 17;
+  state.trail_count = 17;
   trails::RunLiveTrailStage(&MarkTrails, definition, scratch, instance, state);
   state.trails = nullptr;
-  state.trailcount = 1;
+  state.trail_count = 1;
   trails::RunLiveTrailStage(&MarkTrails, definition, scratch, instance, state);
   CHECK(buffer[0].step_count == 0);
   CHECK(scope.Logged("17 trails in a buffer of 16; stage skipped"));

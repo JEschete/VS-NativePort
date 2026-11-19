@@ -50,7 +50,7 @@
 #include "Effects/Plugins/Plg291.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingCore.hpp"
-#include "Effects/Templates/TemplateState.h"
+#include "Effects/Templates/TemplateLiveState.hpp"
 #include "Effects/Templates/TrailControl.hpp"
 #include "Effects/Templates/TrailCore.hpp"
 #include "Effects/Templates/TrailInit.hpp"
@@ -115,7 +115,7 @@ static_assert(std::tuple_size_v<decltype(LiveTrail::spline_points)> ==
               kTrailSplinePoints);
 static_assert(std::tuple_size_v<decltype(LiveTrail::spline_samples)> ==
               kTrailHistory);
-// The nine-sample trail (TemplateState.h) shares that layout up to its longer
+// The nine-sample trail (Trails.hpp) shares that layout up to its longer
 // history; it keeps the unused initial speed step in first_step.
 constexpr std::size_t kTrailNineBytes = 0x78;
 constexpr std::size_t kTrailNineProgressAt = 0x6C;
@@ -312,9 +312,8 @@ void StoreTrailRecord(const LegacyRecord<Trail>& record, Trail& target) {
   target.*LegacyTrail<Trail>::kFirstStep = record.first_step;
 }
 
-// The emitter state members the host reads: its texture animation, the
-// transparency samples its allocation carries past the structure
-// (TrailEmitterLive.cpp) and its definition, for diagnostics.
+// The emitter state members the host reads: its texture animation, its
+// transparency samples and its definition, for diagnostics.
 struct EmitterContext {
   Effects_ParticleTextureAnimation* texture = nullptr;
   const std::uint8_t* transparency = nullptr;
@@ -330,27 +329,14 @@ struct EmitterView {
   EmitterContext context;
 };
 
-template <typename State>
-[[nodiscard]] const std::uint8_t* TransparencyTail(const State& state) {
-  return reinterpret_cast<const std::uint8_t*>(&state) +
-         offsetof(State, sampledTransparencyCurve);
-}
-
-[[nodiscard]] EmitterView<LiveTrail> ViewOf(Effects_TrailQuadSet& state) {
+template <std::size_t Samples>
+[[nodiscard]] EmitterView<LiveTrailRecord<Samples>> ViewOf(
+    BasicLiveTrailState<Samples>& state) {
   return {.trails = state.trails,
-          .count = state.trailcount,
-          .distance = state.curveSampleDistance,
-          .context = {.texture = &state.textureAnimation,
-                      .transparency = TransparencyTail(state),
-                      .definition_index = state.definitionIndex}};
-}
-
-[[nodiscard]] EmitterView<LiveTrail9> ViewOf(Effects_Trail9State& state) {
-  return {.trails = state.trails,
-          .count = state.trailCount,
-          .distance = state.curveSampleDistance,
+          .count = state.trail_count,
+          .distance = state.curve_sample_distance,
           .context = {.texture = &state.texture,
-                      .transparency = TransparencyTail(state),
+                      .transparency = state.transparency.data(),
                       .definition_index = state.effect}};
 }
 
@@ -638,7 +624,7 @@ void RunLiveTrailStage(TrailStage stage,
                        const Effects_ParticleDefinition& definition,
                        Effects_ParticleEmitterScratch& scratch,
                        Effects_EffectInstance& instance,
-                       Effects_TrailQuadSet& state) {
+                       LiveTrailState& state) {
   RunStage(stage, definition, scratch, instance, ViewOf(state));
 }
 
@@ -646,7 +632,7 @@ void RunLiveTrailNineStage(TrailNineStage stage,
                            const Effects_ParticleDefinition& definition,
                            Effects_ParticleEmitterScratch& scratch,
                            Effects_EffectInstance& instance,
-                           Effects_Trail9State& state) {
+                           LiveTrailNineState& state) {
   RunStage(stage, definition, scratch, instance, ViewOf(state));
 }
 
