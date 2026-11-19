@@ -1,6 +1,7 @@
 """Tests for the libclang reference walker in native_refs.py."""
 from __future__ import annotations
 
+import itertools
 import os
 import sys
 import tempfile
@@ -111,6 +112,53 @@ class DefaultedTests(LibclangTest):
         for order in (["test", "production"], ["production", "test"]):
             with self.subTest(order=order):
                 self.assertEqual(self.reads(COMPARES, order), {"left", "right", "value"})
+
+
+REDECLARED = {
+    "definition": ("Game\\src\\Data.cpp", "int shadowCount = 4;\n"),
+    "production": ("Game\\src\\Pointers.cpp",
+                   "extern int pendingCount;\nextern int shadowCount;\n"
+                   "int Read() { return shadowCount + pendingCount; }\n"),
+    "test": ("Tests\\src\\ShadowTests.cpp",
+             "extern int shadowCount;\nextern int pendingCount;\n"
+             "int Check() { return shadowCount + pendingCount; }\n"),
+}
+
+
+class RedeclarationTests(LibclangTest):
+    """A redeclared variable's recorded location does not depend on unit or merge order (#472)."""
+
+    def walk(self, groups: list[list[str]]) -> dict[str, tuple[str, int]]:
+        """Walk each group of units in its own walker, in order, and merge the walkers in order."""
+        with tempfile.TemporaryDirectory() as root:
+            for path, text in REDECLARED.values():
+                full = os.path.join(root, path)
+                os.makedirs(os.path.dirname(full), exist_ok=True)
+                Path(full).write_text(text, encoding="utf-8")
+            native_refs.relative.cache_clear()
+            decls: dict[str, dict] = {}
+            ranks: dict[str, tuple] = {}
+            try:
+                with mock.patch.object(native_refs, "NATIVE_PREFIX", os.path.normcase(root) + os.sep):
+                    index = native_refs.ci.Index.create()
+                    for group in groups:
+                        walker = native_refs.Walker()
+                        for name in group:
+                            path = os.path.join(root, REDECLARED[name][0])
+                            self.assertEqual(walker.unit(path, ["-x", "c++", "-std=c++20"], index), 0)
+                        native_refs.merge_decls(decls, ranks, walker.decls, walker.ranks)
+            finally:
+                native_refs.relative.cache_clear()
+        return {entry["name"]: (entry["path"], entry["line"]) for entry in decls.values()}
+
+    def test_the_definition_then_production_code_is_recorded_in_every_order(self):
+        expected = {"shadowCount": ("Native\\Game\\src\\Data.cpp", 1),
+                    "pendingCount": ("Native\\Game\\src\\Pointers.cpp", 1)}
+        for order in itertools.permutations(REDECLARED):
+            with self.subTest(walker=order):
+                self.assertEqual(self.walk([list(order)]), expected)
+            with self.subTest(merge=order):
+                self.assertEqual(self.walk([[name] for name in order]), expected)
 
 
 if __name__ == "__main__":

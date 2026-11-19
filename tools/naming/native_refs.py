@@ -175,9 +175,24 @@ def placement(field: ci.Cursor) -> tuple[int | None, int | None, ci.Cursor | Non
     return offset, size, owner, known(owner.type.get_offset(field.spelling)), known(owner.type.get_size())
 
 
+def precedence(cursor: ci.Cursor, path: str) -> tuple:
+    """Which of a USR's declarations the index records, lowest first: a definition, then production code, then the
+    lowest path and line, whatever order the units are walked in (#472)."""
+    return not cursor.is_definition(), path.startswith(TESTS), os.path.normcase(path), cursor.location.line, path
+
+
+def merge_decls(decls: dict[str, dict], ranks: dict[str, tuple], found: dict[str, dict],
+                found_ranks: dict[str, tuple]) -> None:
+    """Merge one walker's declarations into `decls`, keeping the one of lowest precedence per USR."""
+    for usr, entry in found.items():
+        if usr not in decls or found_ranks[usr] < ranks[usr]:
+            decls[usr], ranks[usr] = entry, found_ranks[usr]
+
+
 class Walker:
     def __init__(self) -> None:
         self.decls: dict[str, dict] = {}
+        self.ranks: dict[str, tuple] = {}
         self.refs: set[tuple] = set()
         self.loose: dict[str, str] = {}
         self.seen: set[tuple] = set()
@@ -199,13 +214,16 @@ class Walker:
                 return None
         elif decl_kind != "FIELD_DECL":
             return None
-        if cursor.location.file is None or relative(cursor.location.file.name) is None:
+        path = relative(cursor.location.file.name) if cursor.location.file is not None else None
+        if path is None:
             return None
         usr = cursor.get_usr()
-        if usr and usr not in self.decls:
+        if not usr:
+            return usr
+        rank = precedence(cursor, path)
+        if usr not in self.decls or rank < self.ranks[usr]:
             entry = {"kind": "field" if decl_kind == "FIELD_DECL" else "var", "name": cursor.spelling,
-                     "path": relative(cursor.location.file.name), "line": cursor.location.line,
-                     "type": cursor.type.spelling}
+                     "path": path, "line": cursor.location.line, "type": cursor.type.spelling}
             if decl_kind == "FIELD_DECL":
                 offset, size, owner, owner_offset, owner_size = placement(cursor)
                 entry["record"] = qualified(cursor.semantic_parent)
@@ -217,7 +235,7 @@ class Walker:
                     entry["owner_offset"], entry["owner_size"] = owner_offset, owner_size
             else:
                 entry["record"] = qualified(cursor.semantic_parent)
-            self.decls[usr] = entry
+            self.decls[usr], self.ranks[usr] = entry, rank
         return usr
 
     def target(self, cursor: ci.Cursor) -> str | None:
@@ -409,7 +427,7 @@ class Walker:
         return errors
 
 
-def work(job: tuple[str, list[list]]) -> tuple[dict, list, dict, list, list]:
+def work(job: tuple[str, list[list]]) -> tuple[dict, dict, list, dict, list, list]:
     """Index (path, arguments, subject) units; `subject` names the file a failure is reported against."""
     library, units = job
     configure(Path(library))
@@ -420,7 +438,7 @@ def work(job: tuple[str, list[list]]) -> tuple[dict, list, dict, list, list]:
         errors = walker.unit(path, arguments, index)
         if errors:
             failures.append([subject, errors])
-    return walker.decls, sorted(walker.refs), walker.loose, failures, sorted(walker.included)
+    return walker.decls, walker.ranks, sorted(walker.refs), walker.loose, failures, sorted(walker.included)
 
 
 LAYOUT_SCOPES = {"NAMESPACE", "LINKAGE_SPEC", "STRUCT_DECL", "UNION_DECL", "CLASS_DECL", "UNEXPOSED_DECL"}
@@ -527,10 +545,9 @@ def orphan_units(units: list[tuple[str, list[str], str]], included: set[str]) ->
 def run(pool: multiprocessing.pool.Pool, library: Path, units: list, jobs: int, merged: dict) -> set[str]:
     included: set[str] = set()
     chunks = [units[index::jobs] for index in range(jobs)]
-    for decls, refs, loose, failures, chunk_included in pool.imap_unordered(
+    for decls, ranks, refs, loose, failures, chunk_included in pool.imap_unordered(
             work, [(str(library), chunk) for chunk in chunks if chunk]):
-        for usr, entry in decls.items():
-            merged["decls"].setdefault(usr, entry)
+        merge_decls(merged["decls"], merged["ranks"], decls, ranks)
         merged["refs"].update(map(tuple, refs))
         for name, where in loose.items():
             merged["loose"][name] = min(merged["loose"].get(name, where), where)
@@ -542,7 +559,7 @@ def run(pool: multiprocessing.pool.Pool, library: Path, units: list, jobs: int, 
 def build(jobs: int) -> dict:
     library = libclang_path()
     units = commands()
-    merged: dict = {"decls": {}, "refs": set(), "loose": {}, "failures": [], "layout_failures": []}
+    merged: dict = {"decls": {}, "ranks": {}, "refs": set(), "loose": {}, "failures": [], "layout_failures": []}
     with multiprocessing.Pool(jobs) as pool:
         orphans = orphan_units(units, run(pool, library, units, jobs, merged))
         run(pool, library, orphans, jobs, merged)
