@@ -3847,8 +3847,10 @@ int func_800F9800(void) {
         self.assertIn("}else{slot=VS::Content::CompleteLiveRefusedDiscRequest(", session)
         menu = (root / r"Native\Game\src\Menu\Framework\FrameworkLive.cpp").read_text(encoding="utf-8")
         menu = "".join(menu.split())
-        self.assertIn("if(control.cdQueue!=nullptr){VS::Content::EnqueueLiveDiscRequest(control.cdQueue,", menu)
-        self.assertIn("}else{control.cdQueue=VS::Content::CompleteLiveRefusedDiscRequest(", menu)
+        self.assertIn("Content_DiscQueueSlot*&request=menuState.cd_queue;", menu)
+        self.assertIn("request=VS::Content::AllocateLiveDiscRequest(&file);"
+                      "if(request!=nullptr){VS::Content::EnqueueLiveDiscRequest(request,", menu)
+        self.assertIn("}else{request=VS::Content::CompleteLiveRefusedDiscRequest(", menu)
         files = "".join((root / r"Native\Game\src\Menu\FilesLive.cpp").read_text(encoding="utf-8").split())
         self.assertIn("if(g_game_over_request!=nullptr){Content::EnqueueLiveDiscRequest(g_game_over_request,", files)
         self.assertIn("}else{g_game_over_request=Content::CompleteLiveRefusedDiscRequest(&file,", files)
