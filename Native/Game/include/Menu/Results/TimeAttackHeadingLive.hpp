@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // The original MENUF.PRG time-attack heading, countdown and palette pulse
-// signatures bound to Menu_Results_disMap, the time-attack course, its best
+// signatures bound to kDisMap, the time-attack course, its best
 // times, clutBuf and the live atlas draws. A course digit, boss
 // name or countdown number outside the atlas, or a course without a best time,
 // draws nothing and logs a throttled warning.

@@ -45,7 +45,7 @@
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Platform/App.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -824,9 +824,9 @@ struct GameplayInspectionFixture {
       std::to_array(VS::Menu::Framework::submenuStates);
   int saved_results_state = VS::Menu::Results::screenState;
   int saved_results_timer = VS::Menu::Results::screenTimer;
-  u_int saved_results_animation = Menu_Results_elementAnimationState;
-  int saved_results_reel = Menu_Results_buffReelIndex;
-  u_int saved_results_selection = Menu_Results_buffReelSelection;
+  u_int saved_results_animation = VS::Menu::Results::elementAnimationState;
+  int saved_results_reel = VS::Menu::Results::buffReelIndex;
+  u_int saved_results_selection = VS::Menu::Results::buffReelSelection;
   unsigned saved_random = VS::Core::BiosRand().State();
   decltype(std::to_array(Battle_actors)) saved_actors =
       std::to_array(Battle_actors);
@@ -883,9 +883,9 @@ struct GameplayInspectionFixture {
               VS::Menu::Framework::submenuStates);
     VS::Menu::Results::screenState = saved_results_state;
     VS::Menu::Results::screenTimer = saved_results_timer;
-    Menu_Results_elementAnimationState = saved_results_animation;
-    Menu_Results_buffReelIndex = saved_results_reel;
-    Menu_Results_buffReelSelection = saved_results_selection;
+    VS::Menu::Results::elementAnimationState = saved_results_animation;
+    VS::Menu::Results::buffReelIndex = saved_results_reel;
+    VS::Menu::Results::buffReelSelection = saved_results_selection;
     VS::Core::SeedBiosRand(saved_random);
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
     std::copy(saved_models.begin(), saved_models.end(), Actors_actorRecords);
@@ -1011,9 +1011,9 @@ TEST_CASE(
   VS::Menu::Framework::submenuStates[15] = 2;
   VS::Menu::Results::screenState = 1;
   VS::Menu::Results::screenTimer = 490;
-  Menu_Results_elementAnimationState = 35;
-  Menu_Results_buffReelIndex = 2;
-  Menu_Results_buffReelSelection = 248;
+  VS::Menu::Results::elementAnimationState = 35;
+  VS::Menu::Results::buffReelIndex = 2;
+  VS::Menu::Results::buffReelSelection = 248;
   VS::Core::SeedBiosRand(0xFEEDC0DEu);
   VS::Boot::EncounterPollStop();
   const auto state = VS::Game::InspectGameplay();
@@ -1024,7 +1024,7 @@ TEST_CASE(
   }
   CHECK(VS::Core::BiosRand().State() == 0xFEEDC0DEu);
   CHECK(VS::Menu::Results::screenTimer == 490);
-  CHECK(Menu_Results_buffReelSelection == 248);
+  CHECK(VS::Menu::Results::buffReelSelection == 248);
 }
 
 TEST_CASE(

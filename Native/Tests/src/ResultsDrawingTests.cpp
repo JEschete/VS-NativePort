@@ -10,7 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Legacy/Psx.h"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/Display.hpp"
@@ -417,7 +417,7 @@ TEST_CASE(
     "Live fading texture links the atlas quad seven entries before the scene",
     "[results-drawing-live]") {
   LiveResultsFixture frame;
-  const VS::Render::TextureRegion& entry = Menu_Results_disMap[10];
+  const VS::Render::TextureRegion& entry = r::kDisMap[10];
   r::LiveDrawFadingTexture(30, 40, 10, 2);
   REQUIRE(frame.Used() == 10);
   CHECK(nextPrim(&frame.QuadEntry()) == frame.storage.data());

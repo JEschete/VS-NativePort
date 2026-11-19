@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 // Binds the typed time-attack heading, countdown and palette pulse
-// (TimeAttackHeading.cpp) to Menu_Results_disMap, the time-attack course and
+// (TimeAttackHeading.cpp) to kDisMap, the time-attack course and
 // best times, clutBuf, the live atlas draws and LoadImage.
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
 
@@ -14,7 +14,7 @@
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsPalette.hpp"
@@ -55,7 +55,7 @@ class LiveTimeAttackHost final : public TimeAttackDrawHost {
           return CVECTOR{
               .r = color.r, .g = color.g, .b = color.b, .cd = color.step};
         });
-    Render::DrawLiveTextureFlashFade(Menu_Results_disMap, origin.x, origin.y,
+    Render::DrawLiveTextureFlashFade(kDisMap, origin.x, origin.y,
                                      static_cast<int>(texture_index), vectors);
   }
   void DrawFade(ResultsPoint origin, std::size_t texture_index,

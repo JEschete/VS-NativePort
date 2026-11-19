@@ -1977,13 +1977,7 @@
     <ClCompile Include="src\Menu\Results\GameClearScoreLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Menu\Results\Results.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Menu\Results\Results.cpp" />
     <ClCompile Include="src\Menu\Results\ResultsDrawing.cpp" />
     <ClCompile Include="src\Menu\Results\ResultsDrawingLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2490,7 +2484,7 @@
     <ClInclude Include="src\Menu\OptionsLiveState.hpp" />
     <ClInclude Include="src\Menu\RenameLiveState.hpp" />
     <ClInclude Include="src\Menu\Results\CubePuzzle.hpp" />
-    <ClInclude Include="src\Menu\Results\Results.h" />
+    <ClInclude Include="src\Menu\Results\Results.hpp" />
     <ClInclude Include="src\Menu\Results\TimeAttack.hpp" />
     <ClInclude Include="src\Menu\Score\Encyclopedia.h" />
     <ClInclude Include="src\Menu\Score\Records.h" />

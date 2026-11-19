@@ -1,9 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
-// The original MENUF.PRG draw signatures bound to Menu_Results_disMap and the
-// current frame's primitive buffer and ordering table. A texture index outside
-// the atlas, a missing ordering entry or a full primitive buffer draws nothing
-// for that quad and logs a throttled warning.
+// The original MENUF.PRG draw signatures bound to the results atlas (kDisMap)
+// and the current frame's primitive buffer and ordering table. A texture index
+// outside the atlas, a missing ordering entry or a full primitive buffer draws
+// nothing for that quad and logs a throttled warning.
 
 #include <array>
 #include <cstddef>
@@ -13,9 +13,9 @@
 namespace VS::Menu::Results {
 inline constexpr std::size_t kResultsAtlasEntries = 127;
 
-// A typed copy of Menu_Results_disMap.
-[[nodiscard]] std::array<Render::TextureRegion, kResultsAtlasEntries>
-LiveResultsAtlas();
+// The results atlas, kDisMap (Results.hpp).
+[[nodiscard]] const std::array<Render::TextureRegion, kResultsAtlasEntries>&
+LiveResultsAtlas() noexcept;
 
 void LiveDrawFadingTexture(int x, int y, int texture_index, int brightness);
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the original order.

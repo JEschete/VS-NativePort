@@ -15,7 +15,7 @@
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsRankLive.hpp"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreRank.hpp"
@@ -441,12 +441,12 @@ TEST_CASE("F03061 F03060 live entries bind the results screen globals",
   const LiveGlobals globals;
   SetLiveScoreInputs();
   VS::State::scoreData.titles = static_cast<int>(kLiveTitles);
-  Menu_Results_clearCount = 1;
-  Menu_Results_rank = 99;
+  VS::Menu::Results::clearCount = 1;
+  VS::Menu::Results::rank = 99;
   VS::Menu::Results::CalculateLiveScore();
-  CHECK(Menu_Results_score == kLiveScore);
+  CHECK(VS::Menu::Results::score == kLiveScore);
   VS::Menu::Results::DetermineLiveRiskbreakerRank();
-  CHECK(Menu_Results_rank == 11);
+  CHECK(VS::Menu::Results::rank == 11);
 }
 
 TEST_CASE("F04157 live progress binds the room chest and score globals",

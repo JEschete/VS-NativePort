@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
-// Binds the typed results draws (ResultsDrawing.cpp) to Menu_Results_disMap
-// and the current frame's primitive buffer and ordering tables.
+// Binds the typed results draws (ResultsDrawing.cpp) to the results atlas
+// (kDisMap) and the current frame's primitive buffer and ordering tables.
 #include "Menu/Results/ResultsDrawingLive.hpp"
 
 #include <algorithm>
@@ -13,7 +13,7 @@
 
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Images.hpp"
@@ -27,7 +27,6 @@ namespace {
 // The quads link seven entries before the frame's ordering table (`p[1] -
 // 0x1C`).
 constexpr int kQuadOrderingSlot = -7;
-static_assert(std::size(Menu_Results_disMap) == kResultsAtlasEntries);
 constexpr std::size_t kTextBytes = 8;
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
@@ -89,15 +88,14 @@ void Report(ResultsDrawResult result) {
 }
 }  // namespace
 
-std::array<Render::TextureRegion, kResultsAtlasEntries> LiveResultsAtlas() {
-  std::array<Render::TextureRegion, kResultsAtlasEntries> atlas{};
-  std::ranges::copy(Menu_Results_disMap, atlas.begin());
-  return atlas;
+const std::array<Render::TextureRegion, kResultsAtlasEntries>&
+LiveResultsAtlas() noexcept {
+  return kDisMap;
 }
 
 // decomp: MENUF.PRG _renderTextureFadeIn (3B8.c:1877).
 void LiveDrawFadingTexture(int x, int y, int texture_index, int brightness) {
-  const auto atlas = LiveResultsAtlas();
+  const auto& atlas = LiveResultsAtlas();
   LiveResultsTarget target;
   Report(DrawFadingTexture(atlas, x, y, texture_index, brightness, target));
 }
@@ -105,7 +103,7 @@ void LiveDrawFadingTexture(int x, int y, int texture_index, int brightness) {
 // decomp: MENUF.PRG _renderTextureFadeInClut (3B8.c:1914).
 void LiveDrawFadingTextureClut(int x, int y, int texture_index, int brightness,
                                int clut) {
-  const auto atlas = LiveResultsAtlas();
+  const auto& atlas = LiveResultsAtlas();
   LiveResultsTarget target;
   Report(DrawFadingTextureClut(atlas, x, y, texture_index, brightness, clut,
                                target));
@@ -113,7 +111,7 @@ void LiveDrawFadingTextureClut(int x, int y, int texture_index, int brightness,
 
 // decomp: MENUF.PRG _renderTime (3B8.c:1951).
 void LiveDrawTime(int x, int y, int timer, int time, int is_new_record) {
-  const auto atlas = LiveResultsAtlas();
+  const auto& atlas = LiveResultsAtlas();
   LiveResultsTarget target;
   Report(DrawTime(atlas, x, y, timer, time, is_new_record != 0, target));
 }

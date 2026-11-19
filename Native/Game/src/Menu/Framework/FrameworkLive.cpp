@@ -82,7 +82,6 @@
 #include "Menu/MapTerminalLive.hpp"
 #include "Menu/OptionsLive.hpp"
 #include "Menu/RenameLive.hpp"
-#include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
 #include "Menu/Score/GazetteTerminalLive.hpp"

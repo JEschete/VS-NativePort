@@ -26,7 +26,7 @@
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttack.hpp"
@@ -500,10 +500,10 @@ struct LiveScreenFixture {
   int saved_step = Battle_unusedSubmenuState;
   int saved_timer = r::screenTimer;
   int saved_state = r::screenState;
-  u_int saved_animation = Menu_Results_elementAnimationState;
-  int saved_completion = Menu_Results_onScreenMapCompletion;
-  int saved_score = Menu_Results_onScreenScore;
-  u_int saved_reel = Menu_Results_buffReelSelection;
+  u_int saved_animation = r::elementAnimationState;
+  int saved_completion = r::onScreenMapCompletion;
+  int saved_score = r::onScreenScore;
+  u_int saved_reel = r::buffReelSelection;
   std::int16_t saved_par = r::puzzleParTime;
   std::int16_t saved_cap = r::puzzleRankCap;
   VS::State::StateFlags saved_flags = VS::State::stateFlags;
@@ -516,10 +516,10 @@ struct LiveScreenFixture {
     Battle_unusedSubmenuState = saved_step;
     r::screenTimer = saved_timer;
     r::screenState = saved_state;
-    Menu_Results_elementAnimationState = saved_animation;
-    Menu_Results_onScreenMapCompletion = saved_completion;
-    Menu_Results_onScreenScore = saved_score;
-    Menu_Results_buffReelSelection = saved_reel;
+    r::elementAnimationState = saved_animation;
+    r::onScreenMapCompletion = saved_completion;
+    r::onScreenScore = saved_score;
+    r::buffReelSelection = saved_reel;
     r::puzzleParTime = saved_par;
     r::puzzleRankCap = saved_cap;
     VS::State::stateFlags = saved_flags;
@@ -657,7 +657,7 @@ struct LiveReadFixture {
 
 // Starts the IQ.DIS read from the first step; returns its queued request.
 [[nodiscard]] Content_DiscQueueSlot* StartLiveIqRead() {
-  const Content_DiscFile& file = r::kDisFiles[Menu_Results_DisFile_Iq];
+  const Content_DiscFile& file = r::DiscFileFor(r::DisFile::kIq);
   CHECK(r::LiveInitializeCubePuzzleStart() == 0);
   CHECK(Battle_unusedSubmenuState == 1);
   Content_DiscQueueSlot* const request = LiveReadFixture::Pending();
@@ -671,7 +671,7 @@ struct LiveReadFixture {
 // Completes the read with an IQ.DIS whose third record is zone 4 map 12's;
 // returns the asset.
 std::vector<std::byte> CompleteLiveIqRead(Content_DiscQueueSlot& request) {
-  const Content_DiscFile& file = r::kDisFiles[Menu_Results_DisFile_Iq];
+  const Content_DiscFile& file = r::DiscFileFor(r::DisFile::kIq);
   std::vector<std::byte> asset = IqAsset();
   asset.resize(static_cast<std::size_t>(file.size));
   PutRecord(asset, 1,
@@ -1098,14 +1098,14 @@ TEST_CASE("F03050 live results pulse clutBuf while the screen state is set",
   std::ranges::copy(expected, std::begin(r::clutBuf));
   r::screenState = 1;
   r::screenTimer = 140;
-  Menu_Results_elementAnimationState = 0x400;
+  r::elementAnimationState = 0x400;
   VS::State::scoreData.misc_score = 3;
   CHECK(r::LiveUpdateCubePuzzleResults() == 0);
   RecordClut target;
   r::PulseCubePuzzleClut(expected, 16, target);
   CHECK(std::ranges::equal(r::clutBuf, expected));
   CHECK(fixture.clut.Vram() == expected);
-  CHECK(Menu_Results_elementAnimationState == 0x440);
+  CHECK(r::elementAnimationState == 0x440);
   CHECK(r::screenTimer == 140);
   CHECK(VS::State::scoreData.misc_score == 3);
 }
@@ -1160,12 +1160,12 @@ TEST_CASE("F03051 live quit pulses clutBuf while the screen state is set",
   std::ranges::copy(expected, std::begin(r::clutBuf));
   r::screenState = 1;
   r::screenTimer = 9;
-  Menu_Results_elementAnimationState = 0xFFF;
+  r::elementAnimationState = 0xFFF;
   CHECK(r::LiveUpdateCubePuzzleQuit() == 0);
   RecordClut target;
   r::PulseCubePuzzleClut(expected, r::CubePuzzlePulseWeight(0xFFF), target);
   CHECK(std::ranges::equal(r::clutBuf, expected));
-  CHECK(Menu_Results_elementAnimationState == 0x3F);
+  CHECK(r::elementAnimationState == 0x3F);
   CHECK(r::screenTimer == 9);
 }
 

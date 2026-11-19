@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <span>
+#include <utility>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -18,7 +19,7 @@
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -72,10 +73,13 @@ std::span<std::byte> InjectLoadedRank() {
 }
 
 void PrimeClosing(LiveFixture& fixture) {
-  Menu_Results_buffReels[0][15] = {.stat = Menu_Results_BuffReelStat_Str,
-                                   .amount = 7};
+  // Entry 12 of the original first reel awards Strength +3.
+  REQUIRE(results::kBuffReels[0][12].stat ==
+          std::to_underlying(results::BonusReelStat::kStrength));
+  REQUIRE(results::kBuffReels[0][12].amount == 3);
   fixture.stats.strength = 100;
-  Menu_Results_buffReelSelection = 0xFFFF'FFF8;
+  results::buffReelIndex = 0;
+  results::buffReelSelection = 0xFFFF'FFC8;
   results::screenState = 3;
   REQUIRE(render::ReserveLiveTexturePageRange(29, 3, 5) == 29);
   for (int tick = 0; tick < 8; ++tick) {
@@ -92,7 +96,7 @@ void QueueGameClearMusic() {
 
 void CheckCommittedScore() {
   CHECK(Battle_unusedSubmenuState == 0);
-  CHECK(Menu_Results_buffReelIndex == 0);
+  CHECK(results::buffReelIndex == 0);
   CHECK(VS::State::scoreData.misc_score == 90100);
   CHECK(VS::State::scoreData.heal_count == 0);
 }
@@ -211,18 +215,18 @@ TEST_CASE("Game-clear Live ordinary MENUF reload resets file-backed counters",
   LiveFixture fixture;
   results::screenState = 2;
   results::screenTimer = -1000;
-  Menu_Results_buffReelSelection = 248;
-  Menu_Results_score = 400;
-  Menu_Results_incrementingScore = 7;
+  results::buffReelSelection = 248;
+  results::score = 400;
+  results::incrementingScore = 7;
   CHECK(results::LiveUpdateGameClear() == 0);
   CHECK(results::InspectLiveGameClear().state_timer == 1);
   results::ResetLiveGameClearModuleData();
   CHECK(results::InspectLiveGameClear().state_timer == 0);
   CHECK(results::screenState == 0);
   CHECK(results::screenTimer == 0);
-  CHECK(Menu_Results_buffReelSelection == 0);
-  CHECK(Menu_Results_score == 0);
-  CHECK(Menu_Results_incrementingScore == 0);
+  CHECK(results::buffReelSelection == 0);
+  CHECK(results::score == 0);
+  CHECK(results::incrementingScore == 0);
 }
 
 TEST_CASE("Game-clear Live MENUF reload does not reset resident owners",
@@ -231,18 +235,18 @@ TEST_CASE("Game-clear Live MENUF reload does not reset resident owners",
   Battle_unusedSubmenuState = 7;
   fixture.stats.strength = 77;
   VS::State::scoreData.misc_score = 12345;
-  Menu_Results_mapCompletion = 89;
-  Menu_Results_rank = 15;
-  Menu_Results_clearCount = 8;
-  Menu_Results_incrementingMapCompletion = 9;
+  results::mapCompletion = 89;
+  results::rank = 15;
+  results::clearCount = 8;
+  results::incrementingMapCompletion = 9;
   results::ResetLiveGameClearModuleData();
   CHECK(Battle_unusedSubmenuState == 7);
   CHECK(fixture.stats.strength == 77);
   CHECK(VS::State::scoreData.misc_score == 12345);
-  CHECK(Menu_Results_mapCompletion == 0);
-  CHECK(Menu_Results_rank == 0);
-  CHECK(Menu_Results_clearCount == 0);
-  CHECK(Menu_Results_incrementingMapCompletion == 0);
+  CHECK(results::mapCompletion == 0);
+  CHECK(results::rank == 0);
+  CHECK(results::clearCount == 0);
+  CHECK(results::incrementingMapCompletion == 0);
 }
 
 TEST_CASE(
@@ -479,7 +483,7 @@ TEST_CASE("Game-clear Live missing actor cannot complete a reward",
         render::TexturePageState::kOwned);
   Battle_characterState = &fixture.actor;
   CHECK(results::LiveUpdateGameClear() == 1);
-  CHECK(fixture.stats.strength == 107);
+  CHECK(fixture.stats.strength == 103);
   CHECK(render::LiveTexturePages()[29].state ==
         render::TexturePageState::kRetiring);
 }
@@ -491,9 +495,9 @@ TEST_CASE(
   LiveFixture fixture;
   PrimeClosing(fixture);
   CHECK(results::LiveUpdateGameClear() == 1);
-  CHECK(fixture.stats.strength == 107);
+  CHECK(fixture.stats.strength == 103);
   CHECK(results::LiveUpdateGameClear() == 1);
-  CHECK(fixture.stats.strength == 114);
+  CHECK(fixture.stats.strength == 106);
   CHECK(results::InspectLiveGameClear().state_timer == 8);
   CHECK(results::screenTimer == 8);
 }
@@ -503,11 +507,11 @@ TEST_CASE("Game-clear Live no-frame and invalid glyph calls preserve owners",
   LiveFixture fixture;
   VS::Render::FrameScratchpad() = {};
   results::LiveDrawBonusReelTexture(0, 0, -1);
-  Menu_Results_buffReelIndex = -1;
+  results::buffReelIndex = -1;
   results::LiveDrawBonusReel(130, 190, 64, 2);
   CHECK(memory::GameHeap().Empty());
   CHECK_FALSE(results::InspectLiveGameClear().owns_pages);
-  CHECK(Menu_Results_buffReelIndex == -1);
+  CHECK(results::buffReelIndex == -1);
 }
 
 TEST_CASE("Game-clear Live healing touches only its score and heal count",

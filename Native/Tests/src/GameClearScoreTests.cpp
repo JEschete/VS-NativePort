@@ -10,7 +10,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearScore.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/Display.hpp"
@@ -427,13 +427,13 @@ struct LiveGameClearFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  u_int saved_score = Menu_Results_score;
-  u_int saved_map = Menu_Results_mapCompletion;
-  int saved_rank = Menu_Results_rank;
-  int saved_shown_score = Menu_Results_onScreenScore;
-  int saved_counting_score = Menu_Results_incrementingScore;
-  int saved_shown_map = Menu_Results_onScreenMapCompletion;
-  int saved_counting_map = Menu_Results_incrementingMapCompletion;
+  u_int saved_score = r::score;
+  u_int saved_map = r::mapCompletion;
+  int saved_rank = r::rank;
+  int saved_shown_score = r::onScreenScore;
+  int saved_counting_score = r::incrementingScore;
+  int saved_shown_map = r::onScreenMapCompletion;
+  int saved_counting_map = r::incrementingMapCompletion;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
   std::array<u_long, kLiveOrderingWords> ordering{};
 
@@ -442,13 +442,13 @@ struct LiveGameClearFixture {
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::frameBuf = saved_framebuffer;
-    Menu_Results_score = saved_score;
-    Menu_Results_mapCompletion = saved_map;
-    Menu_Results_rank = saved_rank;
-    Menu_Results_onScreenScore = saved_shown_score;
-    Menu_Results_incrementingScore = saved_counting_score;
-    Menu_Results_onScreenMapCompletion = saved_shown_map;
-    Menu_Results_incrementingMapCompletion = saved_counting_map;
+    r::score = saved_score;
+    r::mapCompletion = saved_map;
+    r::rank = saved_rank;
+    r::onScreenScore = saved_shown_score;
+    r::incrementingScore = saved_counting_score;
+    r::onScreenMapCompletion = saved_shown_map;
+    r::incrementingMapCompletion = saved_counting_map;
   }
   LiveGameClearFixture(const LiveGameClearFixture&) = delete;
   LiveGameClearFixture& operator=(const LiveGameClearFixture&) = delete;
@@ -483,14 +483,14 @@ void Replay(const RecordHost& host) {
     }};
     const auto index = static_cast<int>(call.index);
     if (call.kind == Kind::kTint) {
-      render::DrawLiveTextureTintFade(Menu_Results_disMap, call.x, call.y,
-                                      index, colors);
+      render::DrawLiveTextureTintFade(r::kDisMap, call.x, call.y, index,
+                                      colors);
     } else if (call.kind == Kind::kFlash) {
-      render::DrawLiveTextureFlashFade(Menu_Results_disMap, call.x, call.y,
-                                       index, colors);
+      render::DrawLiveTextureFlashFade(r::kDisMap, call.x, call.y, index,
+                                       colors);
     } else if (call.kind == Kind::kWipe) {
-      render::DrawLiveTextureWipe(Menu_Results_disMap, call.x, call.y, index,
-                                  colors, call.edge);
+      render::DrawLiveTextureWipe(r::kDisMap, call.x, call.y, index, colors,
+                                  call.edge);
     }
   }
 }
@@ -498,7 +498,7 @@ void Replay(const RecordHost& host) {
 TEST_CASE("Live score draws the results score through the atlas",
           "[gameclear-score-live]") {
   LiveGameClearFixture frame;
-  Menu_Results_score = 987654321;
+  r::score = 987654321;
   r::LiveDrawScore(160, 100, 64, 0);
   const auto live = frame.Used();
   REQUIRE(!live.empty());
@@ -512,31 +512,31 @@ TEST_CASE("Live score draws the results score through the atlas",
 TEST_CASE("Live counting score advances the results readout statics",
           "[gameclear-score-live]") {
   LiveGameClearFixture frame;
-  Menu_Results_score = 3200;
-  Menu_Results_onScreenScore = 5;
-  Menu_Results_incrementingScore = 1;
+  r::score = 3200;
+  r::onScreenScore = 5;
+  r::incrementingScore = 1;
   r::LiveDrawCountingScore(160, 100, 40, 0);
-  CHECK(Menu_Results_onScreenScore == 800);
-  CHECK(Menu_Results_incrementingScore == 1);
+  CHECK(r::onScreenScore == 800);
+  CHECK(r::incrementingScore == 1);
   CHECK(!frame.Used().empty());
   frame.Reset();
-  Menu_Results_score = 0x80000000U;
+  r::score = 0x80000000U;
   r::LiveDrawCountingScore(160, 100, 64, 0);
-  CHECK(Menu_Results_onScreenScore == INT32_MIN);
+  CHECK(r::onScreenScore == INT32_MIN);
   CHECK(frame.Used().empty());
 }
 
 TEST_CASE("Live map completion draws through the atlas and counts its readout",
           "[gameclear-score-live]") {
   LiveGameClearFixture frame;
-  Menu_Results_mapCompletion = 0;
-  Menu_Results_onScreenMapCompletion = 0;
-  Menu_Results_incrementingMapCompletion = 0;
+  r::mapCompletion = 0;
+  r::onScreenMapCompletion = 0;
+  r::incrementingMapCompletion = 0;
   r::LiveDrawCountingMapCompletion(160, 120, 50, 0);
-  CHECK(Menu_Results_onScreenMapCompletion == 0);
+  CHECK(r::onScreenMapCompletion == 0);
   CHECK(!frame.Used().empty());
   frame.Reset();
-  Menu_Results_mapCompletion = 100;
+  r::mapCompletion = 100;
   r::LiveDrawMapCompletion(160, 120, 20, 0);
   const auto live = frame.Used();
   RecordHost host;
@@ -549,22 +549,18 @@ TEST_CASE("Live map completion draws through the atlas and counts its readout",
 TEST_CASE("Live rank draws the results rank row and refuses a rank outside it",
           "[gameclear-score-live]") {
   LiveGameClearFixture frame;
-  Menu_Results_rank = 0;
+  r::rank = 0;
   r::LiveDrawRiskbreakerRank(160, 140, 64);
   const auto live = frame.Used();
   RecordHost host;
-  const std::array<r::RiskbreakerRankRow, 1> first{
-      {{Menu_Results_riskbreakerRanks[0][0],
-        Menu_Results_riskbreakerRanks[0][1],
-        Menu_Results_riskbreakerRanks[0][2],
-        Menu_Results_riskbreakerRanks[0][3]}}};
+  const std::array<r::RiskbreakerRankRow, 1> first{r::kRiskbreakerRanks[0]};
   r::DrawRiskbreakerRank(r::LiveResultsAtlas(), 160, 140, 64, 0, first, host);
   CHECK(host.calls.size() == 3);
   frame.Reset();
   Replay(host);
   CHECK(frame.Used() == live);
   frame.Reset();
-  Menu_Results_rank = 16;
+  r::rank = 16;
   r::LiveDrawRiskbreakerRank(160, 140, 64);
   CHECK(frame.Used().empty());
 }

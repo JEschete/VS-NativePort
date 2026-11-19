@@ -38,13 +38,13 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
     REQUIRE(results::LiveInitializeGameClear() == 0);
     results::screenState = 2;
     results::screenTimer = -1000;
-    Menu_Results_buffReelSelection = 248;
-    Menu_Results_score = 400;
-    Menu_Results_incrementingScore = 7;
-    Menu_Results_incrementingMapCompletion = 9;
-    Menu_Results_mapCompletion = 89;
-    Menu_Results_rank = 15;
-    Menu_Results_clearCount = 8;
+    results::buffReelSelection = 248;
+    results::score = 400;
+    results::incrementingScore = 7;
+    results::incrementingMapCompletion = 9;
+    results::mapCompletion = 89;
+    results::rank = 15;
+    results::clearCount = 8;
     REQUIRE(results::LiveUpdateGameClear() == 0);
     REQUIRE(results::InspectLiveGameClear().state_timer == 1);
     stats.strength = 77;
@@ -58,17 +58,17 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
     CHECK_FALSE(status.buffer_bound);
     CHECK(results::screenState == 0);
     CHECK(results::screenTimer == 0);
-    CHECK(Menu_Results_buffReelSelection == 0);
+    CHECK(results::buffReelSelection == 0);
     CheckScoreReset();
   }
 
   static void CheckScoreReset() {
-    CHECK(Menu_Results_score == 0);
-    CHECK(Menu_Results_incrementingScore == 0);
-    CHECK(Menu_Results_incrementingMapCompletion == 0);
-    CHECK(Menu_Results_mapCompletion == 0);
-    CHECK(Menu_Results_rank == 0);
-    CHECK(Menu_Results_clearCount == 0);
+    CHECK(results::score == 0);
+    CHECK(results::incrementingScore == 0);
+    CHECK(results::incrementingMapCompletion == 0);
+    CHECK(results::mapCompletion == 0);
+    CHECK(results::rank == 0);
+    CHECK(results::clearCount == 0);
   }
 
   static void CheckOtherAndPending() {
@@ -182,8 +182,8 @@ TEST_CASE("Game-clear module renderers submit real current-frame packets",
   CHECK_FALSE(fixture.frame.Empty());
   CHECK((fixture.frame.storage.at(1) & 0xFF000000UL) == 0x2E000000UL);
   fixture.BeginFrame();
-  Menu_Results_buffReelIndex = 0;
-  Menu_Results_buffReelSelection = 0;
+  results::buffReelIndex = 0;
+  results::buffReelSelection = 0;
   ModuleEntry(0x801060A8, &results::LiveDrawBonusReel)(130, 190, 64, 2);
   CHECK_FALSE(fixture.frame.Empty());
   CHECK(render::DroppedLiveUiPacketCount() == dropped);

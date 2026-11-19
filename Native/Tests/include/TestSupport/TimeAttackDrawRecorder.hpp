@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "Legacy/Psx.h"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/TimeAttack.hpp"
@@ -180,8 +180,8 @@ inline void Replay(const RecordHost& host) {
     const auto index = static_cast<int>(call.index);
     switch (call.kind) {
       case Kind::kFlash:
-        VS::Render::DrawLiveTextureFlashFade(
-            Menu_Results_disMap, call.x, call.y, index, Cvectors(call.colors));
+        VS::Render::DrawLiveTextureFlashFade(results::kDisMap, call.x, call.y,
+                                             index, Cvectors(call.colors));
         break;
       case Kind::kFade:
         results::LiveDrawFadingTexture(call.x, call.y, index, call.brightness);
@@ -195,9 +195,8 @@ inline void Replay(const RecordHost& host) {
                               call.record ? 1 : 0);
         break;
       case Kind::kWipe:
-        VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, call.x, call.y,
-                                        index, Cvectors(call.colors),
-                                        call.edge);
+        VS::Render::DrawLiveTextureWipe(results::kDisMap, call.x, call.y, index,
+                                        Cvectors(call.colors), call.edge);
         break;
     }
   }

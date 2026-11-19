@@ -5,8 +5,7 @@
 
 #include <cstdint>
 
-#include "Legacy/Psx.h"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Score/ScoreRank.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "State/Progress.hpp"
@@ -15,20 +14,18 @@ namespace VS::Menu::Results {
 // decomp: MENUF.PRG _calculateScore (src/MENU/MENUF.PRG/3B8.c:2801). The int
 // clear count (lw) is the 32-bit value ScoreFromRecord multiplies.
 void CalculateLiveScore() {
-  Menu_Results_score = Score::ScoreFromRecord(
-      Score::ReadLiveScoreRecord(),
-      static_cast<std::uint32_t>(Menu_Results_clearCount));
+  score = Score::ScoreFromRecord(Score::ReadLiveScoreRecord(),
+                                 static_cast<std::uint32_t>(clearCount));
 }
 
 // decomp: MENUF.PRG _determineRank (src/MENU/MENUF.PRG/3B8.c:2774). The rank
 // row index is stored as the original's 32-bit int (sw); no matching row keeps
 // the previous rank.
 void DetermineLiveRiskbreakerRank() {
-  const auto rank = Score::RiskbreakerRankIndex(
-      static_cast<std::uint32_t>(VS::State::scoreData.titles),
-      Menu_Results_score);
-  if (rank.has_value()) {
-    Menu_Results_rank = static_cast<std::int32_t>(*rank);
+  const auto row = Score::RiskbreakerRankIndex(
+      static_cast<std::uint32_t>(VS::State::scoreData.titles), score);
+  if (row.has_value()) {
+    rank = static_cast<std::int32_t>(*row);
   }
 }
 }  // namespace VS::Menu::Results

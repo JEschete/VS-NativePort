@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // The original MENUF.PRG cube-puzzle text, rank and time draw signatures bound
-// to Menu_Results_disMap, the par time, the puzzle clock of
+// to kDisMap, the par time, the puzzle clock of
 // vs_main_stateFlags and the live atlas and time draws. A rank title outside
 // the atlas draws nothing and logs a throttled warning.
 

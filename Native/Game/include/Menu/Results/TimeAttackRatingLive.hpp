@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // The original MENUF.PRG time-attack results signatures bound to
-// Menu_Results_disMap, the completed time (_timeTrialTime), the new record's
+// kDisMap, the completed time (_timeTrialTime), the new record's
 // rank (_newTimeSlot), the time-attack course and its trial scores and the
 // live atlas draws. A course past the eight trial-score rows or a leaderboard
 // slot outside the three ranks draws nothing and logs a throttled warning.

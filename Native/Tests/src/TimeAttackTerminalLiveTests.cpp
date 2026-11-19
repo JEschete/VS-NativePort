@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -19,7 +20,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackTerminalLive.hpp"
 #include "Menu/TimeAttackTerminalLiveFixture.hpp"
@@ -380,16 +381,16 @@ TEST_CASE("F03012 Live explicit initialization preserves unrelated counters",
           "[time-attack-terminal-live][F03012]") {
   LiveFixture fixture;
   fixture.LoadThroughTextures(Asset::kStart);
-  Menu_Results_onScreenMapCompletion = 44;
-  Menu_Results_onScreenScore = 55;
-  Menu_Results_buffReelSelection = 66;
-  Menu_Results_incrementingScore = 77;
+  r::onScreenMapCompletion = 44;
+  r::onScreenScore = 55;
+  r::buffReelSelection = 66;
+  r::incrementingScore = 77;
   r::timeTrialTime = 88;
   CHECK(r::LiveInitializeTimeAttackStart() == 1);
-  CHECK(Menu_Results_onScreenMapCompletion == 0);
-  CHECK(Menu_Results_onScreenScore == 0);
-  CHECK(Menu_Results_buffReelSelection == 0);
-  CHECK(Menu_Results_incrementingScore == 77);
+  CHECK(r::onScreenMapCompletion == 0);
+  CHECK(r::onScreenScore == 0);
+  CHECK(r::buffReelSelection == 0);
+  CHECK(r::incrementingScore == 77);
   CHECK(r::timeTrialTime == 88);
   CHECK(Battle_unusedSubmenuState == 0);
   CheckTextureStorageFreed(Asset::kStart);
@@ -427,7 +428,7 @@ TEST_CASE(
         render::TexturePageState::kRetiring);
   CHECK(r::LiveUpdateTimeAttackResults() == 1);
   CHECK(r::screenState == 3);
-  CHECK(Menu_Results_elementAnimationState == 128);
+  CHECK(r::elementAnimationState == 128);
 }
 
 TEST_CASE(
@@ -436,10 +437,10 @@ TEST_CASE(
   LiveFixture fixture;
   VS::State::stateFlags.time_attack_boss = 255;
   r::screenTimer = 191;
-  Menu_Results_elementAnimationState = 4095;
+  r::elementAnimationState = 4095;
   CHECK(r::LiveUpdateTimeAttackResults() == 0);
   CHECK(r::screenTimer == 191);
-  CHECK(Menu_Results_elementAnimationState == 4095);
+  CHECK(r::elementAnimationState == 4095);
   CHECK(r::screenState == 0);
 }
 
@@ -520,14 +521,24 @@ TEST_CASE("F03008 Live drives all three real start initializer stages",
   CHECK_FALSE(r::InspectLiveTimeAttackLoad(Asset::kStart).owns_buffer);
 }
 
+namespace {
+// Stops the roulette on entry 12 of the original first reel: Strength +3.
+void SelectStrengthAward() {
+  REQUIRE(r::kBuffReels[0][12].stat ==
+          std::to_underlying(r::BonusReelStat::kStrength));
+  REQUIRE(r::kBuffReels[0][12].amount == 3);
+  r::buffReelIndex = 0;
+  r::buffReelSelection = 0xC8;
+}
+}  // namespace
+
 TEST_CASE(
     "F03008 Live completion uses actual game-clear reward and clears outer "
     "state",
     "[time-attack-terminal-live][F03008][F03014]") {
   LiveFixture fixture;
   fixture.stats.strength = 100;
-  Menu_Results_buffReels[0][0] = {.stat = Menu_Results_BuffReelStat_Str,
-                                  .amount = 7};
+  SelectStrengthAward();
   r::screenState = 3;
   REQUIRE(render::ReserveLiveTexturePageRange(29, 3, 5) == 29);
   for (int tick = 0; tick < 8; ++tick) {
@@ -536,10 +547,10 @@ TEST_CASE(
   }
   std::array<unsigned char, 2> outer{2, 0xAA};
   CHECK(r::LiveUpdateResultsScreen(outer.data()) == 1);
-  CHECK(fixture.stats.strength == 107);
+  CHECK(fixture.stats.strength == 103);
   CHECK(outer == std::array<unsigned char, 2>{0, 0xAA});
   CHECK(r::LiveUpdateResultsScreen(outer.data()) == 0);
-  CHECK(fixture.stats.strength == 107);
+  CHECK(fixture.stats.strength == 103);
   CHECK(outer.front() == 1);
 }
 

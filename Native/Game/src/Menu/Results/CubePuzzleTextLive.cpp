@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 // Binds the typed cube-puzzle text, rank and time draws (CubePuzzleText.cpp)
-// to Menu_Results_disMap, the par time, the puzzle clock and the live atlas
+// to kDisMap, the par time, the puzzle clock and the live atlas
 // and time draws.
 #include "Menu/Results/CubePuzzleTextLive.hpp"
 
@@ -13,7 +13,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/Images.hpp"
@@ -53,7 +53,7 @@ class LiveCubePuzzleTextHost final : public CubePuzzleTextHost {
   void DrawFlashFade(ResultsPoint origin, std::size_t texture_index,
                      const CubeTextColors& colors) override {
     const std::array vectors{ToCvector(colors[0]), ToCvector(colors[1])};
-    Render::DrawLiveTextureFlashFade(Menu_Results_disMap, origin.x, origin.y,
+    Render::DrawLiveTextureFlashFade(kDisMap, origin.x, origin.y,
                                      static_cast<int>(texture_index), vectors);
   }
   void DrawTime(ResultsPoint origin, std::int32_t timer,

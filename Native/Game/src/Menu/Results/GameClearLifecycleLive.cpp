@@ -26,7 +26,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Results/GameClearLifecycle.hpp"
 #include "Menu/Results/GameClearScoreLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsStatsLive.hpp"
 #include "Menu/Results/TimeAttack.hpp"
@@ -137,30 +137,29 @@ bool RetirePageLoan(const TexturePageLoan& loan) {
 }
 
 GameClearState LoadState() {
-  return {.init_phase = Battle_unusedSubmenuState,
-          .screen = {.timer = screenTimer,
-                     .phase = screenState,
-                     .state_timer = state_timer,
-                     .reel = {.selection = Menu_Results_buffReelSelection,
-                              .speed = Menu_Results_elementAnimationState,
-                              .reel_index = Menu_Results_buffReelIndex},
-                     .score = Menu_Results_score,
-                     .map_completion = Menu_Results_mapCompletion,
-                     .readouts =
-                         {.score = {.shown = Menu_Results_onScreenScore,
-                                    .counting = Menu_Results_incrementingScore},
-                          .map = {.shown = Menu_Results_onScreenMapCompletion,
-                                  .counting =
-                                      Menu_Results_incrementingMapCompletion}}},
-          .clear_count = Menu_Results_clearCount,
-          .rank = Menu_Results_rank};
+  return {
+      .init_phase = Battle_unusedSubmenuState,
+      .screen = {.timer = screenTimer,
+                 .phase = screenState,
+                 .state_timer = state_timer,
+                 .reel = {.selection = buffReelSelection,
+                          .speed = elementAnimationState,
+                          .reel_index = buffReelIndex},
+                 .score = score,
+                 .map_completion = mapCompletion,
+                 .readouts = {.score = {.shown = onScreenScore,
+                                        .counting = incrementingScore},
+                              .map = {.shown = onScreenMapCompletion,
+                                      .counting = incrementingMapCompletion}}},
+      .clear_count = clearCount,
+      .rank = rank};
 }
 
 void StoreReadouts(const GameClearReadouts& readouts) {
-  Menu_Results_onScreenScore = readouts.score.shown;
-  Menu_Results_incrementingScore = readouts.score.counting;
-  Menu_Results_onScreenMapCompletion = readouts.map.shown;
-  Menu_Results_incrementingMapCompletion = readouts.map.counting;
+  onScreenScore = readouts.score.shown;
+  incrementingScore = readouts.score.counting;
+  onScreenMapCompletion = readouts.map.shown;
+  incrementingMapCompletion = readouts.map.counting;
 }
 
 void StoreState(const GameClearState& game) {
@@ -169,28 +168,14 @@ void StoreState(const GameClearState& game) {
   screenTimer = screen.timer;
   screenState = screen.phase;
   state_timer = screen.state_timer;
-  Menu_Results_buffReelSelection = screen.reel.selection;
-  Menu_Results_elementAnimationState = screen.reel.speed;
-  Menu_Results_buffReelIndex = screen.reel.reel_index;
-  Menu_Results_score = screen.score;
-  Menu_Results_mapCompletion = screen.map_completion;
+  buffReelSelection = screen.reel.selection;
+  elementAnimationState = screen.reel.speed;
+  buffReelIndex = screen.reel.reel_index;
+  score = screen.score;
+  mapCompletion = screen.map_completion;
   StoreReadouts(screen.readouts);
-  Menu_Results_clearCount = game.clear_count;
-  Menu_Results_rank = game.rank;
-}
-
-std::array<BonusReel, kBonusReelCount> LiveReels() {
-  std::array<BonusReel, kBonusReelCount> reels{};
-  const std::span<const Menu_Results_BuffReel[kBonusReelEntries]> source(
-      Menu_Results_buffReels, kBonusReelCount);
-  for (std::size_t index = 0; index < reels.size(); ++index) {
-    std::ranges::transform(source[index], reels.at(index).begin(),
-                           [](const Menu_Results_BuffReel& entry) {
-                             return BonusReelEntry{.stat = entry.stat,
-                                                   .amount = entry.amount};
-                           });
-  }
-  return reels;
+  clearCount = game.clear_count;
+  rank = game.rank;
 }
 
 void Report(ResultsDrawResult result) {
@@ -231,8 +216,8 @@ class LiveReel final : public BonusReelTarget {
           return CVECTOR{
               .r = color.r, .g = color.g, .b = color.b, .cd = color.step};
         });
-    Render::DrawLiveTextureTintFade(Menu_Results_disMap, origin.x, origin.y,
-                                    texture, vectors);
+    Render::DrawLiveTextureTintFade(kDisMap, origin.x, origin.y, texture,
+                                    vectors);
   }
   void Animated(ResultsPoint origin, std::int32_t texture) override {
     LiveDrawBonusReelTexture(origin.x, origin.y, texture);
@@ -258,13 +243,11 @@ class LiveReel final : public BonusReelTarget {
 
 void DrawLiveReel(ResultsPoint origin, std::int32_t timer, std::int32_t phase,
                   const BonusReelView& view) {
-  const auto atlas = LiveResultsAtlas();
-  const auto reels = LiveReels();
   const auto frame = (static_cast<std::uint32_t>(VS::Render::frameBuf) + 1) & 1;
   const auto& clip = VS::Render::legacyDrawEnvironments[frame].clip;
   const BonusReelScene scene{
-      .atlas = atlas,
-      .reels = reels,
+      .atlas = kDisMap,
+      .reels = kBuffReels,
       .back_clip = {
           .x = clip.x, .y = clip.y, .width = clip.w, .height = clip.h}};
   LiveReel target;
@@ -283,7 +266,7 @@ class LiveInit final : public GameClearInitHost {
     return owner.pages;
   }
   bool BeginTextureRead() override {
-    const auto& file = kDisFiles[Menu_Results_DisFile_Rank];
+    const auto& file = DiscFileFor(DisFile::kRank);
     if (file.size <= 0) {
       Refuse("invalid RANK.DIS size");
       return false;
@@ -579,14 +562,13 @@ void LiveQueueResultsMusic() {
 // decomp: _renderCongratulationsScreen, src/MENU/MENUF.PRG/3B8.c:755.
 int LiveUpdateGameClear() {
   auto game = LoadState();
-  const auto reels = LiveReels();
-  if (!CanAward(game.screen, reels)) {
+  if (!CanAward(game.screen, kBuffReels)) {
     Refuse("award without a valid reel and character stats");
     return 0;
   }
   const bool confirm = (VS::Input::buttonsPressed & PADRright) != 0;
   LiveScreen host;
-  const auto step = UpdateGameClear(game.screen, reels, confirm, host);
+  const auto step = UpdateGameClear(game.screen, kBuffReels, confirm, host);
   StoreState(game);
   if (step == GameClearStep::kRefused) Refuse("invalid presentation context");
   return step == GameClearStep::kComplete ? 1 : 0;
@@ -599,9 +581,9 @@ void LiveDrawBonusReel(int x, int y, int timer, int screen_state) {
 
 // decomp: _renderAnimatedStatWheel, src/MENU/MENUF.PRG/3B8.c:2168.
 void LiveDrawBonusReelTexture(int x, int y, int texture_index) {
-  const auto atlas = LiveResultsAtlas();
   LiveRows target;
-  Report(DrawBonusReelTexture(atlas, {.x = x, .y = y}, texture_index, target));
+  Report(
+      DrawBonusReelTexture(kDisMap, {.x = x, .y = y}, texture_index, target));
 }
 
 // decomp: _addHealBonus, src/MENU/MENUF.PRG/3B8.c:2865.

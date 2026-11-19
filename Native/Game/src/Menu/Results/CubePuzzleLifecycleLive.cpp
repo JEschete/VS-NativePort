@@ -29,7 +29,7 @@
 #include "Menu/Results/CubePuzzleLifecycle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsPalette.hpp"
@@ -244,20 +244,20 @@ class LiveCubePuzzleScreen final : public CubePuzzleScreenHost {
   return {.load_step = Battle_unusedSubmenuState,
           .timer = screenTimer,
           .screen_state = screenState,
-          .animation = Menu_Results_elementAnimationState,
-          .on_screen_map_completion = Menu_Results_onScreenMapCompletion,
-          .on_screen_score = Menu_Results_onScreenScore,
-          .buff_reel_selection = Menu_Results_buffReelSelection};
+          .animation = elementAnimationState,
+          .on_screen_map_completion = onScreenMapCompletion,
+          .on_screen_score = onScreenScore,
+          .buff_reel_selection = buffReelSelection};
 }
 
 void StoreScreen(const CubePuzzleScreen& screen) {
   Battle_unusedSubmenuState = screen.load_step;
   screenTimer = screen.timer;
   screenState = screen.screen_state;
-  Menu_Results_elementAnimationState = screen.animation;
-  Menu_Results_onScreenMapCompletion = screen.on_screen_map_completion;
-  Menu_Results_onScreenScore = screen.on_screen_score;
-  Menu_Results_buffReelSelection = screen.buff_reel_selection;
+  elementAnimationState = screen.animation;
+  onScreenMapCompletion = screen.on_screen_map_completion;
+  onScreenScore = screen.on_screen_score;
+  buffReelSelection = screen.buff_reel_selection;
 }
 
 [[nodiscard]] CubePuzzleRating LiveRating() {
@@ -303,7 +303,7 @@ void LivePulseCubePuzzleClut(int blend_weight) {
 // decomp: MENUF.PRG _initCubePuzzleStart (src/MENU/MENUF.PRG/3B8.c:2260),
 // 0x80107A8C
 int LiveInitializeCubePuzzleStart() {
-  LiveCubePuzzleLoad host("start", iq_load, kDisFiles[Menu_Results_DisFile_Iq]);
+  LiveCubePuzzleLoad host("start", iq_load, DiscFileFor(DisFile::kIq));
   CubePuzzleScreen screen = LiveScreen();
   CubePuzzleRating rating = LiveRating();
   const CubePuzzleLoad load =
@@ -316,8 +316,7 @@ int LiveInitializeCubePuzzleStart() {
 // decomp: MENUF.PRG _initCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:2351),
 // 0x80107D4C
 int LiveInitializeCubePuzzleResults() {
-  LiveCubePuzzleLoad host("results", iq_load,
-                          kDisFiles[Menu_Results_DisFile_Iq]);
+  LiveCubePuzzleLoad host("results", iq_load, DiscFileFor(DisFile::kIq));
   CubePuzzleScreen screen = LiveScreen();
   CubePuzzleRating rating = LiveRating();
   CubePuzzleTimer timer{.clock = LiveClock(),
@@ -341,8 +340,7 @@ int LiveInitializeCubePuzzleResults() {
 // decomp: MENUF.PRG _initCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2363),
 // 0x80107D98
 int LiveInitializeCubePuzzleQuit() {
-  LiveCubePuzzleLoad host("quit", esc_load,
-                          kDisFiles[Menu_Results_DisFile_Esc]);
+  LiveCubePuzzleLoad host("quit", esc_load, DiscFileFor(DisFile::kEsc));
   CubePuzzleScreen screen = LiveScreen();
   const CubePuzzleLoad load =
       InitializeCubePuzzleQuit(screen, LiveClut(), host);

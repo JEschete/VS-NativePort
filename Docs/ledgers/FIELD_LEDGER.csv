@@ -1,14 +1,14 @@
 id,type_id,type_name,index,name,generic,type,bits,value,hints,final_name,meaning,confidence,notes
-T00000.000,T00000,BuffReelStats,0,buffReelStatStr,0,,,13,,Str,BuffReelStat Str,med,declaration-only;source:3B8.c:709
-T00000.001,T00000,BuffReelStats,1,buffReelStatAgi,0,,,14,,Agi,BuffReelStat Agi,med,declaration-only;source:3B8.c:710
-T00000.002,T00000,BuffReelStats,2,buffReelStatInt,0,,,15,,Int,BuffReelStat Int,med,declaration-only;source:3B8.c:711
-T00000.003,T00000,BuffReelStats,3,buffReelStatHp,0,,,16,,Hp,BuffReelStat Hp,med,declaration-only;source:3B8.c:712
-T00000.004,T00000,BuffReelStats,4,buffReelStatMp,0,,,17,,Mp,BuffReelStat Mp,med,declaration-only;source:3B8.c:713
-T00001.000,T00001,_disFileIndices,0,rankDis,0,,,0,,Rank,DisFile Rank,med,declaration-only;source:3B8.c:44
-T00001.001,T00001,_disFileIndices,1,timeDis,0,,,1,,Time,DisFile Time,med,declaration-only;source:3B8.c:44
-T00001.002,T00001,_disFileIndices,2,attackDis,0,,,2,,Attack,DisFile Attack,med,declaration-only;source:3B8.c:44
-T00001.003,T00001,_disFileIndices,3,iqDis,0,,,3,,Iq,DisFile Iq,med,declaration-only;source:3B8.c:44
-T00001.004,T00001,_disFileIndices,4,escDis,0,,,4,,Esc,DisFile Esc,med,declaration-only;source:3B8.c:44
+T00000.000,T00000,BuffReelStats,0,buffReelStatStr,0,,,13,,kStrength,BuffReelStat Str,med,native:GameClearLifecycle.hpp BonusReelStat::kStrength (#441);declaration-only;source:3B8.c:709
+T00000.001,T00000,BuffReelStats,1,buffReelStatAgi,0,,,14,,kAgility,BuffReelStat Agi,med,native:GameClearLifecycle.hpp BonusReelStat::kAgility (#441);declaration-only;source:3B8.c:710
+T00000.002,T00000,BuffReelStats,2,buffReelStatInt,0,,,15,,kIntelligence,BuffReelStat Int,med,native:GameClearLifecycle.hpp BonusReelStat::kIntelligence (#441);declaration-only;source:3B8.c:711
+T00000.003,T00000,BuffReelStats,3,buffReelStatHp,0,,,16,,kHp,BuffReelStat Hp,med,native:GameClearLifecycle.hpp BonusReelStat::kHp (#441);declaration-only;source:3B8.c:712
+T00000.004,T00000,BuffReelStats,4,buffReelStatMp,0,,,17,,kMp,BuffReelStat Mp,med,native:GameClearLifecycle.hpp BonusReelStat::kMp (#441);declaration-only;source:3B8.c:713
+T00001.000,T00001,_disFileIndices,0,rankDis,0,,,0,,kRank,DisFile Rank,med,declaration-only;source:3B8.c:44
+T00001.001,T00001,_disFileIndices,1,timeDis,0,,,1,,kTime,DisFile Time,med,declaration-only;source:3B8.c:44
+T00001.002,T00001,_disFileIndices,2,attackDis,0,,,2,,kAttack,DisFile Attack,med,declaration-only;source:3B8.c:44
+T00001.003,T00001,_disFileIndices,3,iqDis,0,,,3,,kIq,DisFile Iq,med,declaration-only;source:3B8.c:44
+T00001.004,T00001,_disFileIndices,4,escDis,0,,,4,,kEsc,DisFile Esc,med,declaration-only;source:3B8.c:44
 T00002.000,T00002,_findCurrentSave_e,0,findSaveTimeout,0,,,-2,,Timeout,FindSaveResult Timeout,med,declaration-only;source:MENU/MENU7.PRG/260.c:1562
 T00002.001,T00002,_findCurrentSave_e,1,findSaveNotFound,0,,,-1,,NotFound,FindSaveResult NotFound,med,declaration-only;source:MENU/MENU7.PRG/260.c:1563
 T00002.002,T00002,_findCurrentSave_e,2,findSavePending,0,,,0,,Pending,FindSaveResult Pending,med,declaration-only;source:MENU/MENU7.PRG/260.c:1564
@@ -46,73 +46,73 @@ T00013.000,T00013,cdBufferModes_e,0,cdBufferModeNone,0,,,0,,Direct,Sectors are r
 T00013.001,T00013,cdBufferModes_e,1,cdBufferModeBuffered,0,,,1,,Buffered,Sectors go to the ring and are copied out each frame,high,source:main.c:9305
 T00013.002,T00013,cdBufferModes_e,2,cdBufferModeManual,0,,,2,,Manual,Sectors go to the ring and the caller consumes them,med,source:main.c:9058
 T00014.000,T00014,copyContainerFlags,0,copyContainerFlagsCopy,0,,,16,,CopyContainerFlagsCopy,CopyContainerFlag CopyContainerFlagsCopy,med,declaration-only;source:234.c:17
-T00015.000,T00015,disIndices,0,disIndexCommonZero,0,,,0,,CommonZero,DisIndex CommonZero,med,declaration-only;source:3B8.c:492
-T00015.001,T00015,disIndices,1,disIndexRank0Comma,0,,,10,,Rank0Comma,DisIndex Rank0Comma,med,declaration-only;source:3B8.c:493
-T00015.002,T00015,disIndices,2,disIndexRank0Bonus,0,,,11,,Rank0Bonus,DisIndex Rank0Bonus,med,declaration-only;source:3B8.c:494
-T00015.003,T00015,disIndices,3,disIndexRank0RiskbreakerRank,0,,,12,,Rank0RiskbreakerRank,DisIndex Rank0RiskbreakerRank,med,declaration-only;source:3B8.c:495
-T00015.004,T00015,disIndices,4,disIndexRank0Str,0,,,13,,Rank0Str,DisIndex Rank0Str,med,declaration-only;source:3B8.c:496
-T00015.005,T00015,disIndices,5,disIndexRank0Agl,0,,,14,,Rank0Agl,DisIndex Rank0Agl,med,declaration-only;source:3B8.c:497
-T00015.006,T00015,disIndices,6,disIndexRank0Int,0,,,15,,Rank0Int,DisIndex Rank0Int,med,declaration-only;source:3B8.c:498
-T00015.007,T00015,disIndices,7,disIndexRank0Hp,0,,,16,,Rank0Hp,DisIndex Rank0Hp,med,declaration-only;source:3B8.c:499
-T00015.008,T00015,disIndices,8,disIndexRank0Mp,0,,,17,,Rank0Mp,DisIndex Rank0Mp,med,declaration-only;source:3B8.c:500
-T00015.009,T00015,disIndices,9,disIndexRank0Score,0,,,18,,Rank0Score,DisIndex Rank0Score,med,declaration-only;source:3B8.c:501
-T00015.010,T00015,disIndices,10,disIndexRank0Percent,0,,,19,,Rank0Percent,DisIndex Rank0Percent,med,declaration-only;source:3B8.c:502
-T00015.011,T00015,disIndices,11,disIndexRank0Pts,0,,,20,,Rank0Pts,DisIndex Rank0Pts,med,declaration-only;source:3B8.c:503
-T00015.012,T00015,disIndices,12,disIndexRank0MapCompleted,0,,,21,,Rank0MapCompleted,DisIndex Rank0MapCompleted,med,declaration-only;source:3B8.c:504
-T00015.013,T00015,disIndices,13,disIndexRank0Congratulations,0,,,22,,Rank0Congratulations,DisIndex Rank0Congratulations,med,declaration-only;source:3B8.c:505
-T00015.014,T00015,disIndices,14,disIndexRank0Plus,0,,,24,,Rank0Plus,DisIndex Rank0Plus,med,declaration-only;source:3B8.c:506
-T00015.015,T00015,disIndices,15,disIndexRank0Minus,0,,,25,,Rank0Minus,DisIndex Rank0Minus,med,declaration-only;source:3B8.c:507
-T00015.016,T00015,disIndices,16,disIndexRank0Colon,0,,,26,,Rank0Colon,DisIndex Rank0Colon,med,declaration-only;source:3B8.c:508
-T00015.017,T00015,disIndices,17,disIndexRank1Grand,0,,,27,,Rank1Grand,DisIndex Rank1Grand,med,declaration-only;source:3B8.c:509
-T00015.018,T00015,disIndices,18,disIndexRank1Master,0,,,28,,Rank1Master,DisIndex Rank1Master,med,declaration-only;source:3B8.c:510
-T00015.019,T00015,disIndices,19,disIndexRank1Breaker,0,,,29,,Rank1Breaker,DisIndex Rank1Breaker,med,declaration-only;source:3B8.c:511
-T00015.020,T00015,disIndices,20,disIndexRank1Paladin,0,,,30,,Rank1Paladin,DisIndex Rank1Paladin,med,declaration-only;source:3B8.c:512
-T00015.021,T00015,disIndices,21,disIndexRank1Gladiator,0,,,31,,Rank1Gladiator,DisIndex Rank1Gladiator,med,declaration-only;source:3B8.c:513
-T00015.022,T00015,disIndices,22,disIndexRank1Raging,0,,,32,,Rank1Raging,DisIndex Rank1Raging,med,declaration-only;source:3B8.c:514
-T00015.023,T00015,disIndices,23,disIndexRank1Berserker,0,,,33,,Rank1Berserker,DisIndex Rank1Berserker,med,declaration-only;source:3B8.c:515
-T00015.024,T00015,disIndices,24,disIndexRank1Radiant,0,,,34,,Rank1Radiant,DisIndex Rank1Radiant,med,declaration-only;source:3B8.c:516
-T00015.025,T00015,disIndices,25,disIndexRank1Couragous,0,,,35,,Rank1Couragous,DisIndex Rank1Couragous,med,declaration-only;source:3B8.c:517
-T00015.026,T00015,disIndices,26,disIndexRank1Adventurer,0,,,36,,Rank1Adventurer,DisIndex Rank1Adventurer,med,declaration-only;source:3B8.c:518
-T00015.027,T00015,disIndices,27,disIndexRank1Knight,0,,,37,,Rank1Knight,DisIndex Rank1Knight,med,declaration-only;source:3B8.c:519
-T00015.028,T00015,disIndices,28,disIndexRank1Archer,0,,,39,,Rank1Archer,DisIndex Rank1Archer,med,declaration-only;source:3B8.c:520
-T00015.029,T00015,disIndices,29,disIndexRank1DareDevil,0,,,42,,Rank1DareDevil,DisIndex Rank1DareDevil,med,declaration-only;source:3B8.c:521
-T00015.030,T00015,disIndices,30,disIndexRank1Blade,0,,,44,,Rank1Blade,DisIndex Rank1Blade,med,declaration-only;source:3B8.c:522
-T00015.031,T00015,disIndices,31,disIndexRank2Of,0,,,48,,Rank2Of,DisIndex Rank2Of,med,declaration-only;source:3B8.c:523
-T00015.032,T00015,disIndices,32,disIndexRank2Mystic,0,,,55,,Rank2Mystic,DisIndex Rank2Mystic,med,declaration-only;source:3B8.c:524
-T00015.033,T00015,disIndices,33,disIndexRank2Wanderer,0,,,56,,Rank2Wanderer,DisIndex Rank2Wanderer,med,declaration-only;source:3B8.c:525
-T00015.034,T00015,disIndices,34,disIndexRank2Destroyer,0,,,57,,Rank2Destroyer,DisIndex Rank2Destroyer,med,declaration-only;source:3B8.c:526
-T00015.035,T00015,disIndices,35,disIndexRank2Gladiator,0,,,58,,Rank2Gladiator,DisIndex Rank2Gladiator,med,declaration-only;source:3B8.c:527
-T00015.036,T00015,disIndices,36,disIndexRank2Spectrebane,0,,,59,,Rank2Spectrebane,DisIndex Rank2Spectrebane,med,declaration-only;source:3B8.c:528
-T00015.037,T00015,disIndices,37,disIndexRank2Normal,0,,,60,,Rank2Normal,DisIndex Rank2Normal,med,declaration-only;source:3B8.c:529
-T00015.038,T00015,disIndices,38,disIndexRank2Phantom,0,,,61,,Rank2Phantom,DisIndex Rank2Phantom,med,declaration-only;source:3B8.c:530
-T00015.039,T00015,disIndices,39,disIndexRank2Fighter,0,,,62,,Rank2Fighter,DisIndex Rank2Fighter,med,declaration-only;source:3B8.c:531
-T00015.040,T00015,disIndices,40,disIndexRank2Demon,0,,,63,,Rank2Demon,DisIndex Rank2Demon,med,declaration-only;source:3B8.c:532
-T00015.041,T00015,disIndices,41,disIndexRank2Eater,0,,,64,,Rank2Eater,DisIndex Rank2Eater,med,declaration-only;source:3B8.c:533
-T00015.042,T00015,disIndices,42,disIndexRank2Agent,0,,,65,,Rank2Agent,DisIndex Rank2Agent,med,declaration-only;source:3B8.c:534
-T00015.043,T00015,disIndices,43,disIndexRank2Dragon,0,,,66,,Rank2Dragon,DisIndex Rank2Dragon,med,declaration-only;source:3B8.c:535
-T00015.044,T00015,disIndices,44,disIndexRank2Slayer,0,,,67,,Rank2Slayer,DisIndex Rank2Slayer,med,declaration-only;source:3B8.c:536
-T00015.045,T00015,disIndices,45,disIndexRank2Cartographer,0,,,68,,Rank2Cartographer,DisIndex Rank2Cartographer,med,declaration-only;source:3B8.c:537
-T00015.046,T00015,disIndices,46,disIndexTime0NewRecord,0,,,69,,Time0NewRecord,DisIndex Time0NewRecord,med,declaration-only;source:3B8.c:538
-T00015.047,T00015,disIndices,47,disIndexTime0TimeAttackResults,0,,,70,,Time0TimeAttackResults,DisIndex Time0TimeAttackResults,med,declaration-only;source:3B8.c:539
-T00015.048,T00015,disIndices,48,disIndexTime0Time,0,,,72,,Time0Time,DisIndex Time0Time,med,declaration-only;source:3B8.c:540
-T00015.049,T00015,disIndices,49,disIndexTime0Prime,0,,,73,,Time0Prime,DisIndex Time0Prime,med,declaration-only;source:3B8.c:541
-T00015.050,T00015,disIndices,50,disIndexTime0DoublePrime,0,,,74,,Time0DoublePrime,DisIndex Time0DoublePrime,med,declaration-only;source:3B8.c:542
-T00015.051,T00015,disIndices,51,disIndexTime0First,0,,,75,,Time0First,DisIndex Time0First,med,declaration-only;source:3B8.c:543
-T00015.052,T00015,disIndices,52,disIndexTime0Excellent,0,,,78,,Time0Excellent,DisIndex Time0Excellent,med,declaration-only;source:3B8.c:544
-T00015.053,T00015,disIndices,53,disIndexTime0Dash,0,,,83,,Time0Dash,DisIndex Time0Dash,med,declaration-only;source:3B8.c:545
-T00015.054,T00015,disIndices,54,disIndexAttack0Course,0,,,84,,Attack0Course,DisIndex Attack0Course,med,declaration-only;source:3B8.c:546
-T00015.055,T00015,disIndices,55,disIndexAttack0Minotaur,0,,,85,,Attack0Minotaur,DisIndex Attack0Minotaur,med,declaration-only;source:3B8.c:547
-T00015.056,T00015,disIndices,56,disIndexAttack0Death,0,,,91,,Attack0Death,DisIndex Attack0Death,med,declaration-only;source:3B8.c:548
-T00015.057,T00015,disIndices,57,disIndexAttack0OgreZombie,0,,,93,,Attack0OgreZombie,DisIndex Attack0OgreZombie,med,declaration-only;source:3B8.c:549
-T00015.058,T00015,disIndices,58,disIndexAttack0BestTime,0,,,95,,Attack0BestTime,DisIndex Attack0BestTime,med,declaration-only;source:3B8.c:550
-T00015.059,T00015,disIndices,59,disIndexAttack0Three,0,,,96,,Attack0Three,DisIndex Attack0Three,med,declaration-only;source:3B8.c:551
-T00015.060,T00015,disIndices,60,disIndexAttack0TimeAttack,0,,,100,,Attack0TimeAttack,DisIndex Attack0TimeAttack,med,declaration-only;source:3B8.c:552
-T00015.061,T00015,disIndices,61,disIndexIq0EvolveOrDie,0,,,102,,Iq0EvolveOrDie,DisIndex Iq0EvolveOrDie,med,declaration-only;source:3B8.c:553
-T00015.062,T00015,disIndices,62,disIndexIq0AverageTime,0,,,104,,Iq0AverageTime,DisIndex Iq0AverageTime,med,declaration-only;source:3B8.c:554
-T00015.063,T00015,disIndices,63,disIndexIq0Foodchain,0,,,105,,Iq0Foodchain,DisIndex Iq0Foodchain,med,declaration-only;source:3B8.c:555
-T00015.064,T00015,disIndices,64,disIndexIq1GameDesigner,0,,,107,,Iq1GameDesigner,DisIndex Iq1GameDesigner,med,declaration-only;source:3B8.c:556
-T00015.065,T00015,disIndices,65,disIndexEsc0GivingUp,0,,,123,,Esc0GivingUp,DisIndex Esc0GivingUp,med,declaration-only;source:3B8.c:557
-T00015.066,T00015,disIndices,66,disIndexEsc0Chicken,0,,,125,,Esc0Chicken,DisIndex Esc0Chicken,med,declaration-only;source:3B8.c:558
+T00015.000,T00015,disIndices,0,disIndexCommonZero,0,,,0,,kCommonZero,DisIndex CommonZero,med,declaration-only;source:3B8.c:492
+T00015.001,T00015,disIndices,1,disIndexRank0Comma,0,,,10,,kRank0Comma,DisIndex Rank0Comma,med,declaration-only;source:3B8.c:493
+T00015.002,T00015,disIndices,2,disIndexRank0Bonus,0,,,11,,kRank0Bonus,DisIndex Rank0Bonus,med,declaration-only;source:3B8.c:494
+T00015.003,T00015,disIndices,3,disIndexRank0RiskbreakerRank,0,,,12,,kRank0RiskbreakerRank,DisIndex Rank0RiskbreakerRank,med,declaration-only;source:3B8.c:495
+T00015.004,T00015,disIndices,4,disIndexRank0Str,0,,,13,,kRank0Str,DisIndex Rank0Str,med,declaration-only;source:3B8.c:496
+T00015.005,T00015,disIndices,5,disIndexRank0Agl,0,,,14,,kRank0Agl,DisIndex Rank0Agl,med,declaration-only;source:3B8.c:497
+T00015.006,T00015,disIndices,6,disIndexRank0Int,0,,,15,,kRank0Int,DisIndex Rank0Int,med,declaration-only;source:3B8.c:498
+T00015.007,T00015,disIndices,7,disIndexRank0Hp,0,,,16,,kRank0Hp,DisIndex Rank0Hp,med,declaration-only;source:3B8.c:499
+T00015.008,T00015,disIndices,8,disIndexRank0Mp,0,,,17,,kRank0Mp,DisIndex Rank0Mp,med,declaration-only;source:3B8.c:500
+T00015.009,T00015,disIndices,9,disIndexRank0Score,0,,,18,,kRank0Score,DisIndex Rank0Score,med,declaration-only;source:3B8.c:501
+T00015.010,T00015,disIndices,10,disIndexRank0Percent,0,,,19,,kRank0Percent,DisIndex Rank0Percent,med,declaration-only;source:3B8.c:502
+T00015.011,T00015,disIndices,11,disIndexRank0Pts,0,,,20,,kRank0Pts,DisIndex Rank0Pts,med,declaration-only;source:3B8.c:503
+T00015.012,T00015,disIndices,12,disIndexRank0MapCompleted,0,,,21,,kRank0MapCompleted,DisIndex Rank0MapCompleted,med,declaration-only;source:3B8.c:504
+T00015.013,T00015,disIndices,13,disIndexRank0Congratulations,0,,,22,,kRank0Congratulations,DisIndex Rank0Congratulations,med,declaration-only;source:3B8.c:505
+T00015.014,T00015,disIndices,14,disIndexRank0Plus,0,,,24,,kRank0Plus,DisIndex Rank0Plus,med,declaration-only;source:3B8.c:506
+T00015.015,T00015,disIndices,15,disIndexRank0Minus,0,,,25,,kRank0Minus,DisIndex Rank0Minus,med,declaration-only;source:3B8.c:507
+T00015.016,T00015,disIndices,16,disIndexRank0Colon,0,,,26,,kRank0Colon,DisIndex Rank0Colon,med,declaration-only;source:3B8.c:508
+T00015.017,T00015,disIndices,17,disIndexRank1Grand,0,,,27,,kRank1Grand,DisIndex Rank1Grand,med,declaration-only;source:3B8.c:509
+T00015.018,T00015,disIndices,18,disIndexRank1Master,0,,,28,,kRank1Master,DisIndex Rank1Master,med,declaration-only;source:3B8.c:510
+T00015.019,T00015,disIndices,19,disIndexRank1Breaker,0,,,29,,kRank1Breaker,DisIndex Rank1Breaker,med,declaration-only;source:3B8.c:511
+T00015.020,T00015,disIndices,20,disIndexRank1Paladin,0,,,30,,kRank1Paladin,DisIndex Rank1Paladin,med,declaration-only;source:3B8.c:512
+T00015.021,T00015,disIndices,21,disIndexRank1Gladiator,0,,,31,,kRank1Gladiator,DisIndex Rank1Gladiator,med,declaration-only;source:3B8.c:513
+T00015.022,T00015,disIndices,22,disIndexRank1Raging,0,,,32,,kRank1Raging,DisIndex Rank1Raging,med,declaration-only;source:3B8.c:514
+T00015.023,T00015,disIndices,23,disIndexRank1Berserker,0,,,33,,kRank1Berserker,DisIndex Rank1Berserker,med,declaration-only;source:3B8.c:515
+T00015.024,T00015,disIndices,24,disIndexRank1Radiant,0,,,34,,kRank1Radiant,DisIndex Rank1Radiant,med,declaration-only;source:3B8.c:516
+T00015.025,T00015,disIndices,25,disIndexRank1Couragous,0,,,35,,kRank1Couragous,DisIndex Rank1Couragous,med,declaration-only;source:3B8.c:517
+T00015.026,T00015,disIndices,26,disIndexRank1Adventurer,0,,,36,,kRank1Adventurer,DisIndex Rank1Adventurer,med,declaration-only;source:3B8.c:518
+T00015.027,T00015,disIndices,27,disIndexRank1Knight,0,,,37,,kRank1Knight,DisIndex Rank1Knight,med,declaration-only;source:3B8.c:519
+T00015.028,T00015,disIndices,28,disIndexRank1Archer,0,,,39,,kRank1Archer,DisIndex Rank1Archer,med,declaration-only;source:3B8.c:520
+T00015.029,T00015,disIndices,29,disIndexRank1DareDevil,0,,,42,,kRank1DareDevil,DisIndex Rank1DareDevil,med,declaration-only;source:3B8.c:521
+T00015.030,T00015,disIndices,30,disIndexRank1Blade,0,,,44,,kRank1Blade,DisIndex Rank1Blade,med,declaration-only;source:3B8.c:522
+T00015.031,T00015,disIndices,31,disIndexRank2Of,0,,,48,,kRank2Of,DisIndex Rank2Of,med,declaration-only;source:3B8.c:523
+T00015.032,T00015,disIndices,32,disIndexRank2Mystic,0,,,55,,kRank2Mystic,DisIndex Rank2Mystic,med,declaration-only;source:3B8.c:524
+T00015.033,T00015,disIndices,33,disIndexRank2Wanderer,0,,,56,,kRank2Wanderer,DisIndex Rank2Wanderer,med,declaration-only;source:3B8.c:525
+T00015.034,T00015,disIndices,34,disIndexRank2Destroyer,0,,,57,,kRank2Destroyer,DisIndex Rank2Destroyer,med,declaration-only;source:3B8.c:526
+T00015.035,T00015,disIndices,35,disIndexRank2Gladiator,0,,,58,,kRank2Gladiator,DisIndex Rank2Gladiator,med,declaration-only;source:3B8.c:527
+T00015.036,T00015,disIndices,36,disIndexRank2Spectrebane,0,,,59,,kRank2Spectrebane,DisIndex Rank2Spectrebane,med,declaration-only;source:3B8.c:528
+T00015.037,T00015,disIndices,37,disIndexRank2Normal,0,,,60,,kRank2Normal,DisIndex Rank2Normal,med,declaration-only;source:3B8.c:529
+T00015.038,T00015,disIndices,38,disIndexRank2Phantom,0,,,61,,kRank2Phantom,DisIndex Rank2Phantom,med,declaration-only;source:3B8.c:530
+T00015.039,T00015,disIndices,39,disIndexRank2Fighter,0,,,62,,kRank2Fighter,DisIndex Rank2Fighter,med,declaration-only;source:3B8.c:531
+T00015.040,T00015,disIndices,40,disIndexRank2Demon,0,,,63,,kRank2Demon,DisIndex Rank2Demon,med,declaration-only;source:3B8.c:532
+T00015.041,T00015,disIndices,41,disIndexRank2Eater,0,,,64,,kRank2Eater,DisIndex Rank2Eater,med,declaration-only;source:3B8.c:533
+T00015.042,T00015,disIndices,42,disIndexRank2Agent,0,,,65,,kRank2Agent,DisIndex Rank2Agent,med,declaration-only;source:3B8.c:534
+T00015.043,T00015,disIndices,43,disIndexRank2Dragon,0,,,66,,kRank2Dragon,DisIndex Rank2Dragon,med,declaration-only;source:3B8.c:535
+T00015.044,T00015,disIndices,44,disIndexRank2Slayer,0,,,67,,kRank2Slayer,DisIndex Rank2Slayer,med,declaration-only;source:3B8.c:536
+T00015.045,T00015,disIndices,45,disIndexRank2Cartographer,0,,,68,,kRank2Cartographer,DisIndex Rank2Cartographer,med,declaration-only;source:3B8.c:537
+T00015.046,T00015,disIndices,46,disIndexTime0NewRecord,0,,,69,,kTime0NewRecord,DisIndex Time0NewRecord,med,declaration-only;source:3B8.c:538
+T00015.047,T00015,disIndices,47,disIndexTime0TimeAttackResults,0,,,70,,kTime0TimeAttackResults,DisIndex Time0TimeAttackResults,med,declaration-only;source:3B8.c:539
+T00015.048,T00015,disIndices,48,disIndexTime0Time,0,,,72,,kTime0Time,DisIndex Time0Time,med,declaration-only;source:3B8.c:540
+T00015.049,T00015,disIndices,49,disIndexTime0Prime,0,,,73,,kTime0Prime,DisIndex Time0Prime,med,declaration-only;source:3B8.c:541
+T00015.050,T00015,disIndices,50,disIndexTime0DoublePrime,0,,,74,,kTime0DoublePrime,DisIndex Time0DoublePrime,med,declaration-only;source:3B8.c:542
+T00015.051,T00015,disIndices,51,disIndexTime0First,0,,,75,,kTime0First,DisIndex Time0First,med,declaration-only;source:3B8.c:543
+T00015.052,T00015,disIndices,52,disIndexTime0Excellent,0,,,78,,kTime0Excellent,DisIndex Time0Excellent,med,declaration-only;source:3B8.c:544
+T00015.053,T00015,disIndices,53,disIndexTime0Dash,0,,,83,,kTime0Dash,DisIndex Time0Dash,med,declaration-only;source:3B8.c:545
+T00015.054,T00015,disIndices,54,disIndexAttack0Course,0,,,84,,kAttack0Course,DisIndex Attack0Course,med,declaration-only;source:3B8.c:546
+T00015.055,T00015,disIndices,55,disIndexAttack0Minotaur,0,,,85,,kAttack0Minotaur,DisIndex Attack0Minotaur,med,declaration-only;source:3B8.c:547
+T00015.056,T00015,disIndices,56,disIndexAttack0Death,0,,,91,,kAttack0Death,DisIndex Attack0Death,med,declaration-only;source:3B8.c:548
+T00015.057,T00015,disIndices,57,disIndexAttack0OgreZombie,0,,,93,,kAttack0OgreZombie,DisIndex Attack0OgreZombie,med,declaration-only;source:3B8.c:549
+T00015.058,T00015,disIndices,58,disIndexAttack0BestTime,0,,,95,,kAttack0BestTime,DisIndex Attack0BestTime,med,declaration-only;source:3B8.c:550
+T00015.059,T00015,disIndices,59,disIndexAttack0Three,0,,,96,,kAttack0Three,DisIndex Attack0Three,med,declaration-only;source:3B8.c:551
+T00015.060,T00015,disIndices,60,disIndexAttack0TimeAttack,0,,,100,,kAttack0TimeAttack,DisIndex Attack0TimeAttack,med,declaration-only;source:3B8.c:552
+T00015.061,T00015,disIndices,61,disIndexIq0EvolveOrDie,0,,,102,,kIq0EvolveOrDie,DisIndex Iq0EvolveOrDie,med,declaration-only;source:3B8.c:553
+T00015.062,T00015,disIndices,62,disIndexIq0AverageTime,0,,,104,,kIq0AverageTime,DisIndex Iq0AverageTime,med,declaration-only;source:3B8.c:554
+T00015.063,T00015,disIndices,63,disIndexIq0Foodchain,0,,,105,,kIq0Foodchain,DisIndex Iq0Foodchain,med,declaration-only;source:3B8.c:555
+T00015.064,T00015,disIndices,64,disIndexIq1GameDesigner,0,,,107,,kIq1GameDesigner,DisIndex Iq1GameDesigner,med,declaration-only;source:3B8.c:556
+T00015.065,T00015,disIndices,65,disIndexEsc0GivingUp,0,,,123,,kEsc0GivingUp,DisIndex Esc0GivingUp,med,declaration-only;source:3B8.c:557
+T00015.066,T00015,disIndices,66,disIndexEsc0Chicken,0,,,125,,kEsc0Chicken,DisIndex Esc0Chicken,med,declaration-only;source:3B8.c:558
 T00016.000,T00016,diskState_e,0,diskIdle,0,,,0,,Idle,DiscDriveState Idle,med,declaration-only;source:main.c:78
 T00016.001,T00016,diskState_e,1,diskSeekReady,0,,,1,,SeekReady,DiscDriveState SeekReady,med,declaration-only;source:main.c:79
 T00016.002,T00016,diskState_e,2,diskReadReady,0,,,2,,ReadReady,DiscDriveState ReadReady,med,declaration-only;source:main.c:80
@@ -2626,8 +2626,8 @@ T00305.001,T00305,_armorIntermediate,1,material,0,char,,,,material,Material,high
 T00305.002,T00305,_armorIntermediate,2,dropRate,0,char,,,,drop_rate,Drop rate,high,source:146C.c:1138
 T00305.003,T00305,_armorIntermediate,3,unk32,1,char,,,,opaque32,Copied into the armor state; meaning not established; only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Items\EquipmentStats.cpp:214;source:146C.c:1139
 T00305.004,T00305,_armorIntermediate,4,index,0,char,,,,index,Index,high,source:146C.c:1117
-T00306.000,T00306,_buffReels_t,0,stat,0,short,,,,stat,Named in the fork; see cited use,med,source:3B8.c:860
-T00306.001,T00306,_buffReels_t,1,amount,0,short,,,,amount,Named in the fork; see cited use,med,source:3B8.c:859
+T00306.000,T00306,_buffReels_t,0,stat,0,short,,,,stat,Named in the fork; see cited use,med,native:GameClearLifecycle.hpp BonusReelEntry (#441);source:3B8.c:860
+T00306.001,T00306,_buffReels_t,1,amount,0,short,,,,amount,Named in the fork; see cited use,med,native:GameClearLifecycle.hpp BonusReelEntry (#441);source:3B8.c:859
 T00307.000,T00307,_clutSlot,0,unk4,1,char,,,,reserved0,First byte; no access found,low,declaration-only;source:main.c:35
 T00307.001,T00307,_clutSlot,1,locked,0,char,,,,locked,Prevents vs_main_loadClut from replacing the slot,high,source:main.c:11483
 T00307.002,T00307,_clutSlot,2,animState,0,struct clutAnimState_t,,,,transition,Fade timer of the slot,high,source:main.c:10543

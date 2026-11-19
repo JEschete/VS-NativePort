@@ -1,6 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
 // Binds the typed time-attack results draws (TimeAttackRating.cpp) to
-// Menu_Results_disMap, the completed time, the new record's rank, the
+// kDisMap, the completed time, the new record's rank, the
 // time-attack course and its trial scores and the live atlas draws.
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 
@@ -11,7 +11,7 @@
 
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/TimeAttack.hpp"
@@ -72,7 +72,7 @@ class LiveResultsHost final : public TimeAttackResultsDrawHost {
         {colors[0].r, colors[0].g, colors[0].b, colors[0].step},
         {colors[1].r, colors[1].g, colors[1].b, colors[1].step},
     }};
-    Render::DrawLiveTextureWipe(Menu_Results_disMap, origin.x, origin.y,
+    Render::DrawLiveTextureWipe(kDisMap, origin.x, origin.y,
                                 static_cast<int>(texture_index), vectors,
                                 wipe_edge_x);
   }

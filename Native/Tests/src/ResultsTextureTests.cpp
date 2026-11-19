@@ -11,7 +11,7 @@
 #include "Ending/Results.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/Display.hpp"
@@ -102,9 +102,9 @@ TEST_CASE("Cube results draw both food-chain pieces and every rank from MENUF",
   fixture.CheckCount(3);
 
   const auto* packets = fixture.Packets();
-  const auto& left = Menu_Results_disMap[105];
-  const auto& right = Menu_Results_disMap[106];
-  const auto& label = Menu_Results_disMap[107 + rank];
+  const auto& left = VS::Menu::Results::kDisMap[105];
+  const auto& right = VS::Menu::Results::kDisMap[106];
+  const auto& label = VS::Menu::Results::kDisMap[107 + rank];
   const int left_width = static_cast<unsigned char>(left.width);
   const int left_x = 160 - ((left_width + right.width) >> 1);
   CheckRegion(packets[0], left, left_x, 80, fade < 10);
@@ -169,17 +169,19 @@ TEST_CASE("Shared tint and flash fades retain each explicitly selected atlas",
   colors[0].cd = static_cast<u_char>(fade);
   auto draw = flash ? VS::Render::DrawLiveTextureFlashFade
                     : VS::Render::DrawLiveTextureTintFade;
-  draw(Menu_Results_disMap, 10, 20, 12, colors);
+  draw(VS::Menu::Results::kDisMap, 10, 20, 12, colors);
   draw(VS::Ending::resultAtlasRegions, 30, 40, 12, colors);
-  draw(Menu_Results_disMap, 50, 60, 12, colors);
+  draw(VS::Menu::Results::kDisMap, 50, 60, 12, colors);
   fixture.CheckCount(fade == 0 ? 0 : 3);
   if (fade == 0) return;
 
   const bool fading = fade < (flash ? 10 : 8);
-  CheckRegion(fixture.Packets()[0], Menu_Results_disMap[12], 10, 20, fading);
+  CheckRegion(fixture.Packets()[0], VS::Menu::Results::kDisMap[12], 10, 20,
+              fading);
   CheckRegion(fixture.Packets()[1], VS::Ending::resultAtlasRegions[12], 30, 40,
               fading);
-  CheckRegion(fixture.Packets()[2], Menu_Results_disMap[12], 50, 60, fading);
+  CheckRegion(fixture.Packets()[2], VS::Menu::Results::kDisMap[12], 50, 60,
+              fading);
   for (int index = 0; index < 3; ++index) {
     CheckFadedPacket(fixture.Packets()[index], colors, fade, flash);
     CheckGradientCorners(fixture.Packets()[index]);
@@ -217,7 +219,7 @@ TEST_CASE("Time-attack rating wipes use MENUF for full and partial strips",
   ResultsTextureFixture fixture;
   VS::Menu::Results::timeTrialTime = kTimes[rating];
   VS::Menu::Results::LiveDrawTimeAttackRatingWipe(10, 20, fade);
-  const auto& region = Menu_Results_disMap[78 + rating];
+  const auto& region = VS::Menu::Results::kDisMap[78 + rating];
   const int count = fade == 64 ? 1 : (region.width + 11) / 12;
   fixture.CheckCount(count);
   if (fade == 64) {
@@ -240,8 +242,8 @@ TEST_CASE(
   const int edge = GENERATE(10, 18, 600);
   ResultsTextureFixture fixture;
   std::array<CVECTOR, 2> colors{{{128, 96, 64, 0}, {200, 180, 160, 0}}};
-  VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, 10, 20, 12, colors,
-                                  edge);
+  VS::Render::DrawLiveTextureWipe(VS::Menu::Results::kDisMap, 10, 20, 12,
+                                  colors, edge);
   const auto* ending_begin = static_cast<const POLY_GT4*>(
       VS::Render::FrameScratchpad().primitive_cursor);
   VS::Render::DrawLiveTextureWipe(VS::Ending::resultAtlasRegions, 10, 20, 12,
@@ -254,7 +256,9 @@ TEST_CASE(
                 false);
   } else {
     fixture.CheckCount(
-        (static_cast<unsigned char>(Menu_Results_disMap[12].width) + 11) / 12 +
+        (static_cast<unsigned char>(VS::Menu::Results::kDisMap[12].width) +
+         11) /
+            12 +
         3);
     CHECK(ending_begin[0].u0 == 23);
     CHECK(ending_begin[0].v0 == 45);

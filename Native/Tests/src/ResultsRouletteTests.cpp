@@ -19,7 +19,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Render/TexturePagesLive.hpp"
 
@@ -34,18 +34,19 @@ struct RouletteFixture {
   decltype(VS::Input::buttonsPressed) saved_input = VS::Input::buttonsPressed;
   int saved_state = VS::Menu::Results::screenState;
   int saved_timer = VS::Menu::Results::screenTimer;
-  int saved_reel = Menu_Results_buffReelIndex;
-  u_int saved_selection = Menu_Results_buffReelSelection;
-  u_int saved_animation = Menu_Results_elementAnimationState;
-  int saved_counting_score = Menu_Results_incrementingScore;
-  int saved_counting_map = Menu_Results_incrementingMapCompletion;
-  int saved_visible_score = Menu_Results_onScreenScore;
-  int saved_visible_map = Menu_Results_onScreenMapCompletion;
-  decltype(Menu_Results_score) saved_score = Menu_Results_score;
-  decltype(Menu_Results_mapCompletion) saved_completion =
-      Menu_Results_mapCompletion;
-  decltype(Menu_Results_rank) saved_rank = Menu_Results_rank;
-  decltype(Menu_Results_clearCount) saved_clear_count = Menu_Results_clearCount;
+  int saved_reel = VS::Menu::Results::buffReelIndex;
+  u_int saved_selection = VS::Menu::Results::buffReelSelection;
+  u_int saved_animation = VS::Menu::Results::elementAnimationState;
+  int saved_counting_score = VS::Menu::Results::incrementingScore;
+  int saved_counting_map = VS::Menu::Results::incrementingMapCompletion;
+  int saved_visible_score = VS::Menu::Results::onScreenScore;
+  int saved_visible_map = VS::Menu::Results::onScreenMapCompletion;
+  decltype(VS::Menu::Results::score) saved_score = VS::Menu::Results::score;
+  decltype(VS::Menu::Results::mapCompletion) saved_completion =
+      VS::Menu::Results::mapCompletion;
+  decltype(VS::Menu::Results::rank) saved_rank = VS::Menu::Results::rank;
+  decltype(VS::Menu::Results::clearCount) saved_clear_count =
+      VS::Menu::Results::clearCount;
   VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
   decltype(std::to_array(VS::Audio::Mixer::kCommandHandlers)) saved_handlers =
       std::to_array(VS::Audio::Mixer::kCommandHandlers);
@@ -80,17 +81,17 @@ struct RouletteFixture {
     VS::Input::buttonsPressed = saved_input;
     VS::Menu::Results::screenState = saved_state;
     VS::Menu::Results::screenTimer = saved_timer;
-    Menu_Results_buffReelIndex = saved_reel;
-    Menu_Results_buffReelSelection = saved_selection;
-    Menu_Results_elementAnimationState = saved_animation;
-    Menu_Results_incrementingScore = saved_counting_score;
-    Menu_Results_incrementingMapCompletion = saved_counting_map;
-    Menu_Results_onScreenScore = saved_visible_score;
-    Menu_Results_onScreenMapCompletion = saved_visible_map;
-    Menu_Results_score = saved_score;
-    Menu_Results_mapCompletion = saved_completion;
-    Menu_Results_rank = saved_rank;
-    Menu_Results_clearCount = saved_clear_count;
+    VS::Menu::Results::buffReelIndex = saved_reel;
+    VS::Menu::Results::buffReelSelection = saved_selection;
+    VS::Menu::Results::elementAnimationState = saved_animation;
+    VS::Menu::Results::incrementingScore = saved_counting_score;
+    VS::Menu::Results::incrementingMapCompletion = saved_counting_map;
+    VS::Menu::Results::onScreenScore = saved_visible_score;
+    VS::Menu::Results::onScreenMapCompletion = saved_visible_map;
+    VS::Menu::Results::score = saved_score;
+    VS::Menu::Results::mapCompletion = saved_completion;
+    VS::Menu::Results::rank = saved_rank;
+    VS::Menu::Results::clearCount = saved_clear_count;
     VS::Render::LiveTexturePages() = saved_pages;
     std::copy(saved_handlers.begin(), saved_handlers.end(),
               VS::Audio::Mixer::kCommandHandlers);
@@ -138,6 +139,10 @@ TEST_CASE("Roulette uses the full BIOS state and unsigned byte reel positions",
 
 TEST_CASE("Original roulette tables favor the selected attribute and HP",
           "[menu][roulette][random]") {
+  constexpr auto kFirstStat =
+      static_cast<std::int16_t>(VS::Menu::Results::BonusReelStat::kStrength);
+  constexpr auto kLastStat =
+      static_cast<std::int16_t>(VS::Menu::Results::BonusReelStat::kMp);
   const std::array<std::array<int, 5>, 3> expected{{
       {4, 1, 1, 7, 3},
       {1, 1, 4, 8, 2},
@@ -145,12 +150,12 @@ TEST_CASE("Original roulette tables favor the selected attribute and HP",
   }};
   for (int reel = 0; reel < 3; ++reel) {
     std::array<int, 5> counts{};
-    for (const auto& award : Menu_Results_buffReels[reel]) {
-      REQUIRE(award.stat >= Menu_Results_BuffReelStat_Str);
-      REQUIRE(award.stat <= Menu_Results_BuffReelStat_Mp);
+    for (const auto& award : VS::Menu::Results::kBuffReels[reel]) {
+      REQUIRE(award.stat >= kFirstStat);
+      REQUIRE(award.stat <= kLastStat);
       CHECK(award.amount >= 1);
       CHECK(award.amount <= 5);
-      ++counts[award.stat - Menu_Results_BuffReelStat_Str];
+      ++counts[award.stat - kFirstStat];
     }
     CHECK(counts == expected[reel]);
   }
@@ -162,8 +167,8 @@ TEST_CASE("Native reel deceleration preserves original per-call stop alignment",
   for (unsigned start = 0; start < 256; ++start) {
     fixture.PrimeStateTimer(48);
     VS::Menu::Results::screenState = 1;
-    Menu_Results_elementAnimationState = 48;
-    Menu_Results_buffReelSelection = start;
+    VS::Menu::Results::elementAnimationState = 48;
+    VS::Menu::Results::buffReelSelection = start;
     const auto random = VS::Core::BiosRand().State();
     // Speeds48..9 contribute125 units; speed8 then advances to low nibble8.
     const unsigned alignment = (8 - ((start + 125) & 15)) & 15;
@@ -176,9 +181,10 @@ TEST_CASE("Native reel deceleration preserves original per-call stop alignment",
     INFO("starting byte " << start);
     CHECK(calls == expected_calls);
     CHECK(VS::Menu::Results::screenState == 2);
-    CHECK(Menu_Results_elementAnimationState == 8);
-    CHECK(Menu_Results_buffReelSelection == ((start + 125 + alignment) & 255));
-    CHECK((Menu_Results_buffReelSelection & 15) == 8);
+    CHECK(VS::Menu::Results::elementAnimationState == 8);
+    CHECK(VS::Menu::Results::buffReelSelection ==
+          ((start + 125 + alignment) & 255));
+    CHECK((VS::Menu::Results::buffReelSelection & 15) == 8);
     CHECK(VS::Core::BiosRand().State() == random);
   }
 }
@@ -189,15 +195,15 @@ TEST_CASE(
   RouletteFixture fixture;
   VS::Menu::Results::screenState = 0;
   VS::Menu::Results::screenTimer = 0;
-  Menu_Results_elementAnimationState = 0;
-  Menu_Results_buffReelSelection = 248;
+  VS::Menu::Results::elementAnimationState = 0;
+  VS::Menu::Results::buffReelSelection = 248;
   VS::Input::buttonsPressed = PADRright;
   const auto random = VS::Core::BiosRand().State();
   CHECK(VS::Menu::Results::LiveUpdateGameClear() == 0);
   CHECK(VS::Menu::Results::screenState == 0);
   CHECK(VS::Menu::Results::screenTimer == 273);
-  CHECK(Menu_Results_elementAnimationState == 0);
-  CHECK(Menu_Results_buffReelSelection == 248);
+  CHECK(VS::Menu::Results::elementAnimationState == 0);
+  CHECK(VS::Menu::Results::buffReelSelection == 248);
   CHECK(VS::Core::BiosRand().State() == random);
 }
 
@@ -220,29 +226,30 @@ TEST_CASE("Native roulette awards every original slot and caps only its stat",
     stats.currentMp = near_cap ? 998 : 40;
     stats.maxMp = near_cap ? 998 : 60;
     auto expected = stats;
-    const auto award = Menu_Results_buffReels[reel][slot];
+    const auto award = VS::Menu::Results::kBuffReels[reel][slot];
     const auto increment = [award](auto& value) {
       value = static_cast<std::remove_reference_t<decltype(value)>>(
           std::min(999, static_cast<int>(value) + award.amount));
     };
-    switch (award.stat) {
-      case Menu_Results_BuffReelStat_Str:
+    using enum VS::Menu::Results::BonusReelStat;
+    switch (static_cast<VS::Menu::Results::BonusReelStat>(award.stat)) {
+      case kStrength:
         increment(expected.strength);
         increment(expected.totalStrength);
         break;
-      case Menu_Results_BuffReelStat_Agi:
+      case kAgility:
         increment(expected.agility);
         increment(expected.totalAgility);
         break;
-      case Menu_Results_BuffReelStat_Int:
+      case kIntelligence:
         increment(expected.intelligence);
         increment(expected.totalIntelligence);
         break;
-      case Menu_Results_BuffReelStat_Hp:
+      case kHp:
         increment(expected.currentHp);
         increment(expected.maxHp);
         break;
-      case Menu_Results_BuffReelStat_Mp:
+      case kMp:
         increment(expected.currentMp);
         increment(expected.maxMp);
         break;
@@ -251,8 +258,8 @@ TEST_CASE("Native roulette awards every original slot and caps only its stat",
     }
     fixture.PrimeStateTimer(8);
     VS::Menu::Results::screenState = 3;
-    Menu_Results_buffReelIndex = reel;
-    Menu_Results_buffReelSelection = slot * 16 + 8;
+    VS::Menu::Results::buffReelIndex = reel;
+    VS::Menu::Results::buffReelSelection = slot * 16 + 8;
     INFO("reel " << reel << " slot " << slot << " cap " << near_cap);
     CHECK(VS::Menu::Results::LiveUpdateGameClear() == 1);
     CHECK(std::memcmp(&stats, &expected, sizeof stats) == 0);

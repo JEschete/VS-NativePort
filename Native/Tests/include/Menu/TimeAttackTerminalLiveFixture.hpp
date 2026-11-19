@@ -58,11 +58,11 @@ inline void PutTim(std::span<std::byte> bytes) {
 }
 
 inline Content_DiscQueueSlot& RequestFor(Asset asset) {
-  const auto file = asset == Asset::kResults ? Menu_Results_DisFile_Time
-                                             : Menu_Results_DisFile_Attack;
+  const auto file = asset == Asset::kResults ? results::DisFile::kTime
+                                             : results::DisFile::kAttack;
   for (auto& request : Content_discRequestSlots) {
     if (content::LiveDiscRequestGeneration(&request) != 0 &&
-        request.cdFile.lba == results::kDisFiles[file].lba) {
+        request.cdFile.lba == results::DiscFileFor(file).lba) {
       return request;
     }
   }

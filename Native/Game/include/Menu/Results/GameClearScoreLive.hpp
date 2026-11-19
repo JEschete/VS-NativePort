@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // The original MENUF.PRG game-clear draw signatures bound to
-// Menu_Results_disMap, the results score, map completion and rank statics, the
+// kDisMap, the results score, map completion and rank statics, the
 // counting readouts and the live atlas draws and sound effects. A value that
 // prints negative, a rank outside the table or a rank word outside the atlas
 // draws nothing and logs a throttled warning.

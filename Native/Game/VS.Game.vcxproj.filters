@@ -2838,7 +2838,7 @@
     <ClCompile Include="src\Menu\Results\Results.cpp">
       <Filter>src\Menu\Results</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Results\Results.h">
+    <ClInclude Include="src\Menu\Results\Results.hpp">
       <Filter>src\Menu\Results</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Results\ResultsDrawing.cpp">

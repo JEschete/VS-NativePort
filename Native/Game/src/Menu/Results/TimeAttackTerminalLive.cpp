@@ -22,7 +22,7 @@
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleLifecycleLive.hpp"
 #include "Menu/Results/GameClearLifecycleLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsPalette.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Menu/Results/TimeAttackHeadingLive.hpp"
@@ -138,24 +138,24 @@ TimeAttackState LoadState() {
   return {.init_phase = Battle_unusedSubmenuState,
           .timer = screenTimer,
           .phase = screenState,
-          .animation = Menu_Results_elementAnimationState,
+          .animation = elementAnimationState,
           .new_slot = newTimeSlot,
           .time = timeTrialTime,
-          .shown_map = Menu_Results_onScreenMapCompletion,
-          .shown_score = Menu_Results_onScreenScore,
-          .selection = Menu_Results_buffReelSelection};
+          .shown_map = onScreenMapCompletion,
+          .shown_score = onScreenScore,
+          .selection = buffReelSelection};
 }
 
 void StoreState(const TimeAttackState& state) {
   Battle_unusedSubmenuState = state.init_phase;
   screenTimer = state.timer;
   screenState = state.phase;
-  Menu_Results_elementAnimationState = state.animation;
+  elementAnimationState = state.animation;
   newTimeSlot = state.new_slot;
   timeTrialTime = state.time;
-  Menu_Results_onScreenMapCompletion = state.shown_map;
-  Menu_Results_onScreenScore = state.shown_score;
-  Menu_Results_buffReelSelection = state.selection;
+  onScreenMapCompletion = state.shown_map;
+  onScreenScore = state.shown_score;
+  buffReelSelection = state.selection;
 }
 
 bool ValidCourse() {
@@ -181,10 +181,9 @@ class LiveLoad final : public TimeAttackLoadHost {
     return owner_.pages;
   }
   bool BeginTextureRead(TimeAttackAsset asset) override {
-    const auto index = asset == TimeAttackAsset::kResults
-                           ? Menu_Results_DisFile_Time
-                           : Menu_Results_DisFile_Attack;
-    const auto& file = kDisFiles[index];
+    const auto index =
+        asset == TimeAttackAsset::kResults ? DisFile::kTime : DisFile::kAttack;
+    const auto& file = DiscFileFor(index);
     if (file.size <= 0) {
       Refuse("invalid texture file size");
       return false;

@@ -9,7 +9,6 @@
 
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.hpp"
-#include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/ResultsPalette.hpp"

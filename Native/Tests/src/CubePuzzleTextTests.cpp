@@ -11,7 +11,7 @@
 #include "Menu/Results/CubePuzzle.hpp"
 #include "Menu/Results/CubePuzzleText.hpp"
 #include "Menu/Results/CubePuzzleTextLive.hpp"
-#include "Menu/Results/Results.h"
+#include "Menu/Results/Results.hpp"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/Display.hpp"
@@ -401,8 +401,8 @@ void Replay(const RecordHost& host) {
           {call.colors[1].r, call.colors[1].g, call.colors[1].b,
            call.colors[1].step},
       }};
-      render::DrawLiveTextureFlashFade(Menu_Results_disMap, call.x, call.y,
-                                       index, colors);
+      render::DrawLiveTextureFlashFade(r::kDisMap, call.x, call.y, index,
+                                       colors);
     } else {
       r::LiveDrawTime(call.x, call.y, call.level, index, 0);
     }

@@ -358,8 +358,6 @@
 "Native\\Game\\src\\Menu\\Manual.h": "12ba63c8a955f3cecb3a430417acd2624e686c606314470a391fa5dc2461c5bb",
 "Native\\Game\\src\\Menu\\Map.cpp": "993e334e035ed4cc6d043990aa9dda9aac8b84fa1924e0653df995f2d67fc225",
 "Native\\Game\\src\\Menu\\Map.h": "c54f1ca4c9ad95ce75feec0a35494b3cdf97ed1b255565ff1f865fb85f837759",
-"Native\\Game\\src\\Menu\\Results\\Results.cpp": "cbe0eba784962faabca8b5d59134717a9bf61c2debe72489b2acb246e6236f53",
-"Native\\Game\\src\\Menu\\Results\\Results.h": "19c523a14a0193b45e28fff21806413c1e967d3b034d4b2d32ff76f2b5bf83eb",
 "Native\\Game\\src\\Menu\\Score\\Encyclopedia.cpp": "5505c199a647d839be73807416105b20a75d86802141d1e2f9a76605ab7302a6",
 "Native\\Game\\src\\Menu\\Score\\Encyclopedia.h": "56e1f0cee5633a01a64b3b9d5d4a5e4d2c877d30a9c6c1fa740b71fdead4153a",
 "Native\\Game\\src\\Menu\\Score\\Records.cpp": "0b7113f95a462d75a7c6046d6b7408ac1eeba92c633fcc3b864b8387fdc065ee",
