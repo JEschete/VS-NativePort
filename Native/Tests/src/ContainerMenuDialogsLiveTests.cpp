@@ -163,8 +163,8 @@ TEST_CASE(
                                 types.data());
   dialogs::RestoreLiveItemRows(0);
   REQUIRE(static_cast<std::uint8_t>(VS::Menu::Framework::itemsListRow) >= 16);
-  REQUIRE(fixture.rows[20].state == Menu_Framework_MenuItemState_Idle);
-  REQUIRE(fixture.rows[20].x == fixture.rows[20].targetPosition0);
+  REQUIRE(fixture.rows[20].state == VS::Menu::Framework::RowState::kIdle);
+  REQUIRE(fixture.rows[20].x == fixture.rows[20].target0);
   REQUIRE(fixture.rows[20].selected == 1);
   REQUIRE(fixture.rows[21].selected == 0);
 }

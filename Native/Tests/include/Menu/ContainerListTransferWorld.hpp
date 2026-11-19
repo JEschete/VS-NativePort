@@ -258,9 +258,9 @@ struct World final : transfer::TransferWorld {
   void SetRowX(std::int32_t row, std::int16_t x) override {
     Log("row-x", row, x);
   }
-  void SlideRow(std::int32_t row, std::uint8_t state,
+  void SlideRow(std::int32_t row, VS::Menu::Framework::RowState state,
                 std::int16_t target) override {
-    Log("slide", row, state * 0x10000 + target);
+    Log("slide", row, (static_cast<int>(state) * 0x10000) + target);
   }
   void SetRowCounts(std::int32_t row, std::uint16_t count,
                     std::uint16_t max) override {

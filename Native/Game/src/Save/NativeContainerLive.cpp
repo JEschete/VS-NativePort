@@ -43,11 +43,11 @@ namespace {
 constexpr int kContainerComparisonActor = 16;
 constexpr int kConfirmContainerOpening = 5;
 constexpr int kConfirmContainerDiscard = 1;
-constexpr int kContainerHeadingWidth = 320;
+constexpr int kContainerHeadingX = 320;
 constexpr int kContainerHeadingY = 18;
-constexpr int kContainerHeadingColor = 126;
-constexpr int kContainerHeadingHeight = 8;
-constexpr int kContainerHeadingPosition = 180;
+constexpr int kContainerHeadingWidth = 126;
+constexpr int kContainerHeadingBackgroundWidth = 8;
+constexpr std::int16_t kContainerHeadingTargetX = 180;
 constexpr int kContainerInventoryMenu = 14;
 constexpr int kContainerHiddenHudOffset = 0x200000;
 constexpr int kContainerBackgroundPriority = 2046;
@@ -107,12 +107,12 @@ class LiveContainerSave final : public ContainerSaveHost {
     VS::Save::MemoryCard::StepLiveMenuResources(1);
     VS::Menu::Framework::SetLiveBackgroundFade(1);
     VS::Menu::Framework::SetLiveCommandLabel(Menu_Framework_MenuCommand_Menu);
-    Menu_Framework_MenuRow* row = VS::Menu::Framework::SetLiveMenuItem(
-        0, kContainerHeadingWidth, kContainerHeadingY, kContainerHeadingColor,
-        kContainerHeadingHeight,
+    VS::Menu::Framework::MenuRow* row = VS::Menu::Framework::SetLiveMenuItem(
+        0, kContainerHeadingX, kContainerHeadingY, kContainerHeadingWidth,
+        kContainerHeadingBackgroundWidth,
         ContainerString(Text_Menu7_container_Offset_container));
-    row->state = 2;
-    row->targetPosition0 = kContainerHeadingPosition;
+    row->state = VS::Menu::Framework::RowState::kSlideX;
+    row->target0 = kContainerHeadingTargetX;
     row->selected = 1;
   }
 

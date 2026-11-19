@@ -13,7 +13,6 @@
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemList.hpp"
@@ -25,7 +24,7 @@ constexpr std::size_t kIndexedCategories = 7;
 constexpr int kSelectedRow = 20;
 
 struct LiveFixture {
-  Menu_Framework_MenuRow* previous_rows = VS::Menu::Framework::menuItems;
+  fw::MenuRow* previous_rows = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuMemory previous_memory = VS::Menu::Framework::menuMemory;
   VS::Items::InventoryContents previous_inventory = VS::Items::inventory;
   int previous_held = VS::Input::buttonsState;
@@ -42,7 +41,7 @@ struct LiveFixture {
   char previous_pages = VS::Menu::Framework::enabledStatPages;
   char previous_page = VS::Menu::Framework::itemStatPage;
   std::array<u_char*, kIndexedCategories> previous_orders{};
-  std::array<Menu_Framework_MenuRow, fw::kRowCount> rows{};
+  std::array<fw::MenuRow, fw::kRowCount> rows{};
   std::array<std::uint8_t, 48> order{};
 
   LiveFixture() {
@@ -121,20 +120,19 @@ TEST_CASE("F02567 live paging uses the production inventory count lazily",
 TEST_CASE("F02569 live transition integrates real framework row services",
           "[inventory-detail-helpers-live][F02569]") {
   LiveFixture fixture;
-  fixture.rows[3].state = Menu_Framework_MenuItemState_Idle;
-  fixture.rows[32].state = Menu_Framework_MenuItemState_Idle;
+  fixture.rows[3].state = fw::RowState::kIdle;
+  fixture.rows[32].state = fw::RowState::kIdle;
   char description[] = "old description";
-  fixture.rows[kSelectedRow].subText = description;
+  fixture.rows[kSelectedRow].sub_text = description;
   inventory::BeginLiveDetailsTransition(kSelectedRow);
-  CHECK(fixture.rows[3].targetPosition0 == 320);
-  CHECK(fixture.rows[32].state == Menu_Framework_MenuItemState_Idle);
-  CHECK(fixture.rows[31].state == Menu_Framework_MenuItemState_SlideY);
-  CHECK(fixture.rows[31].targetPosition0 == 18);
-  CHECK(fixture.rows[kSelectedRow].state ==
-        Menu_Framework_MenuItemState_SlideX);
-  CHECK(fixture.rows[kSelectedRow].targetPosition0 == 155);
+  CHECK(fixture.rows[3].target0 == 320);
+  CHECK(fixture.rows[32].state == fw::RowState::kIdle);
+  CHECK(fixture.rows[31].state == fw::RowState::kSlideY);
+  CHECK(fixture.rows[31].target0 == 18);
+  CHECK(fixture.rows[kSelectedRow].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[kSelectedRow].target0 == 155);
   CHECK(fixture.rows[kSelectedRow].selected == 1);
-  CHECK(fixture.rows[kSelectedRow].subText == nullptr);
+  CHECK(fixture.rows[kSelectedRow].sub_text == nullptr);
 }
 
 TEST_CASE("F02571 live layout uses real transition and stat page helpers",
@@ -147,8 +145,8 @@ TEST_CASE("F02571 live layout uses real transition and stat page helpers",
   CHECK(Menu_Inventory_itemCategoryIconsEnabled == 0);
   CHECK(Menu_Inventory_statusCommandState == 0);
   CHECK(fixture.rows[31].w == 164);
-  CHECK(fixture.rows[31].targetPosition0 == 16);
-  CHECK(fixture.rows[kSelectedRow].targetPosition0 == 18);
+  CHECK(fixture.rows[31].target0 == 16);
+  CHECK(fixture.rows[kSelectedRow].target0 == 18);
   CHECK(VS::Menu::Framework::enabledStatPages == 7);
 }
 
@@ -173,12 +171,12 @@ TEST_CASE("F02573 live selection preserves the full cursor record and peers",
 TEST_CASE("F02574 live close integrates rows and retains the source exit mask",
           "[inventory-detail-helpers-live][F02574]") {
   LiveFixture fixture;
-  fixture.rows[31].state = Menu_Framework_MenuItemState_Idle;
+  fixture.rows[31].state = fw::RowState::kIdle;
   fixture.rows[31].w = 164;
   VS::Input::buttonsPressed = VS::Input::Triangle;
   inventory::ExitLiveDetailsView(1);
-  CHECK(fixture.rows[31].state == Menu_Framework_MenuItemState_Dismiss);
-  CHECK(fixture.rows[31].targetPosition0 == -164);
+  CHECK(fixture.rows[31].state == fw::RowState::kDismiss);
+  CHECK(fixture.rows[31].target0 == -164);
   CHECK(Menu_Inventory_selectedItemCategoryIconOnTop == 2);
   CHECK(Menu_Inventory_exitToBattle == static_cast<int>(VS::Input::Triangle));
   VS::Input::buttonsPressed = VS::Input::Circle;

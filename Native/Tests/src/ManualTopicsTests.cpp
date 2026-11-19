@@ -437,7 +437,7 @@ namespace {
 struct LiveTopicFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
-  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
   u_short saved_count = VS::Menu::Framework::subMenuRowCount;
@@ -449,7 +449,7 @@ struct LiveTopicFixture {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   struct {
-    std::array<Menu_Framework_MenuRow, 40> rows{};
+    std::array<VS::Menu::Framework::MenuRow, 40> rows{};
     std::array<std::byte, 0x124> scratch{};
   } workspace;
 

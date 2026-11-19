@@ -590,7 +590,7 @@ namespace {
 struct TeleportLiveFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
-  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
   int saved_restrictions = VS::Menu::Framework::actionRestrictions;
@@ -601,7 +601,7 @@ struct TeleportLiveFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Menu_Framework_MenuRow, 40> rows{};
+  std::array<VS::Menu::Framework::MenuRow, 40> rows{};
   Battle_Actor actor{};
   Battle_ActorStats stats{};
 
@@ -646,7 +646,7 @@ struct TeleportLiveFixture {
   TeleportLiveFixture& operator=(const TeleportLiveFixture&) = delete;
 
   void FinishRowAnimations() {
-    for (auto& row : rows) row.state = 1;
+    for (auto& row : rows) row.state = VS::Menu::Framework::RowState::kIdle;
   }
 };
 }  // namespace

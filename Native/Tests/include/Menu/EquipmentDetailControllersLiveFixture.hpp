@@ -28,7 +28,6 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/Inventory.h"
@@ -121,8 +120,7 @@ struct DrawnSprite {
 };
 
 struct LiveFixture {
-  ValueRestore<Menu_Framework_MenuRow*> saved_rows{
-      VS::Menu::Framework::menuItems};
+  ValueRestore<fw::MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
   ValueRestore<VS::Items::InventoryContents> saved_inventory{
       VS::Items::inventory};
   ValueRestore<VS::Items::InventoryIndices> saved_indices{
@@ -194,7 +192,7 @@ struct LiveFixture {
   ArrayRestore<std::uint8_t, sizeof VS::Render::variableFontGlyphWidths>
       saved_variable_widths{VS::Render::variableFontGlyphWidths};
 
-  std::array<Menu_Framework_MenuRow, fw::kRowCount> rows{};
+  std::array<fw::MenuRow, fw::kRowCount> rows{};
   std::array<char, fw::kStringBufferBytes> description{};
   std::array<u_short, fw::kItemHelpBytes / 2> help{};
   std::array<std::array<char, fw::kItemNameRowBytes>,
@@ -299,8 +297,8 @@ struct LiveFixture {
   }
   void IdleRows() {
     for (auto& row : rows) {
-      if (row.state != Menu_Framework_MenuItemState_Inactive) {
-        row.state = Menu_Framework_MenuItemState_Idle;
+      if (row.state != fw::RowState::kInactive) {
+        row.state = fw::RowState::kIdle;
       }
     }
   }

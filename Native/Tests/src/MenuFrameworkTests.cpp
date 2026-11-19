@@ -245,7 +245,6 @@ fw::SortStats SampleSortStats() {
 // MAINMENU.PRG C48.c:316).
 constexpr std::uint8_t kChallengeMenu = 15;
 constexpr std::uint8_t kMenuReturning = 0x7F;
-constexpr std::uint8_t kMenuClosed = 0x3F;
 constexpr std::int16_t kMenuDone = 2;
 
 // An event opened the results screen and its overlay is already loaded.
@@ -270,7 +269,7 @@ void CheckResultsReturned(const Fixture& f, bool retires_pages) {
 void CheckEventMenuClosed(const Fixture& f, bool retires_pages) {
   CHECK(f.host.submenus_run.size() == 1);
   CHECK(f.state.action_selection.menu_status == kMenuDone);
-  CHECK(f.state.control.current_menu == kMenuClosed);
+  CHECK(f.state.control.current_menu == fw::kMenuClosed);
   CHECK(f.host.retired_page_sets == (retires_pages ? 1 : 0));
 }
 
@@ -290,13 +289,13 @@ class LiveRows {
   LiveRows(LiveRows&&) = delete;
   LiveRows& operator=(LiveRows&&) = delete;
 
-  std::array<Menu_Framework_MenuRow, fw::kRowCount> rows{};
+  std::array<fw::MenuRow, fw::kRowCount> rows{};
 
  private:
-  Menu_Framework_MenuRow* saved_;
+  fw::MenuRow* saved_;
 };
 
-Menu_Framework_MenuRow* SetLiveSampleRow() {
+fw::MenuRow* SetLiveSampleRow() {
   std::array<char, 3> text{static_cast<char>(kGlyphA),
                            static_cast<char>(kGlyphB),
                            static_cast<char>(kTerminator)};
@@ -542,42 +541,41 @@ TEST_CASE("Menu framework pitch matrix turns about X",
 TEST_CASE("Menu framework live SetMenuItem fills the generated row",
           "[menu-framework][menu]") {
   LiveRows live;
-  const Menu_Framework_MenuRow* row = SetLiveSampleRow();
+  const fw::MenuRow* row = SetLiveSampleRow();
   CHECK(row == &live.rows[Index(kSampleRow)]);
-  CHECK(row->state == 1);
+  CHECK(row->state == fw::RowState::kIdle);
   CHECK(row->x == kRowX);
   CHECK(row->y == kRowY);
   CHECK(row->w == kRowWidth);
-  CHECK(row->backgroundWidth == kRowBackground);
-  CHECK(static_cast<std::uint8_t>(row->text[0]) == kGlyphA);
-  CHECK(static_cast<std::uint8_t>(row->text[2]) == kRowEnd);
+  CHECK(row->background_width == kRowBackground);
+  CHECK(row->text[0] == kGlyphA);
+  CHECK(row->text[2] == kRowEnd);
 }
 
 TEST_CASE("Menu framework live rows fly out and deactivate",
           "[menu-framework][menu]") {
   const LiveRows live;
-  const Menu_Framework_MenuRow* row = SetLiveSampleRow();
+  const fw::MenuRow* row = SetLiveSampleRow();
   CHECK(fw::LiveMenuItem(kSampleRow) == row);
   CHECK(fw::AreLiveMenuRowsIdle() == 1);
   fw::FlyOutLiveRowRight(kSampleRow);
-  CHECK(row->state == 2);
-  CHECK(row->targetPosition0 == kScreenWidth);
+  CHECK(row->state == fw::RowState::kSlideX);
+  CHECK(row->target0 == kScreenWidth);
   CHECK(fw::AreLiveMenuRowsIdle() == 0);
   fw::DeactivateLiveRow(kSampleRow);
-  CHECK(row->state == 0);
+  CHECK(row->state == fw::RowState::kInactive);
 }
 
 TEST_CASE("Menu framework live rows outside the table land in the discard row",
           "[menu-framework][menu]") {
   LiveRows live;
   // A row past the table, or no table at all, lands in the discard row.
-  Menu_Framework_MenuRow* const past_end =
+  fw::MenuRow* const past_end =
       fw::LiveMenuItem(static_cast<int>(fw::kRowCount));
   REQUIRE(past_end != nullptr);
-  CHECK(std::none_of(live.rows.begin(), live.rows.end(),
-                     [past_end](const Menu_Framework_MenuRow& entry) {
-                       return &entry == past_end;
-                     }));
+  CHECK(std::none_of(
+      live.rows.begin(), live.rows.end(),
+      [past_end](const fw::MenuRow& entry) { return &entry == past_end; }));
   VS::Menu::Framework::menuItems = nullptr;
   CHECK(fw::LiveMenuItem(0) != nullptr);
   CHECK(fw::AreLiveMenuRowsIdle() == 1);

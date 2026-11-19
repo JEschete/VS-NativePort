@@ -274,18 +274,18 @@ TEST_CASE(
   fixture.ActivateOtherRow();
   fixture.rows[kSelected].unselectable = samples::kControls;
   char borrowed_text[] = "borrowed";
-  fixture.rows[kSelected].subText = borrowed_text;
+  fixture.rows[kSelected].sub_text = borrowed_text;
   detail::BeginLiveDetailsTransition(kSelected);
-  CHECK(fixture.rows[3].targetPosition0 == 320);
-  CHECK(fixture.rows[kHeader].state == Menu_Framework_MenuItemState_SlideY);
-  CHECK(fixture.rows[kHeader].targetPosition0 == 18);
-  CHECK(fixture.rows[kSelected].targetPosition0 == 155);
+  CHECK(fixture.rows[3].target0 == 320);
+  CHECK(fixture.rows[kHeader].state == fw::RowState::kSlideY);
+  CHECK(fixture.rows[kHeader].target0 == 18);
+  CHECK(fixture.rows[kSelected].target0 == 155);
   CHECK(fixture.rows[kSelected].selected == 1);
   CHECK(fixture.rows[kSelected].unselectable == 0);
-  CHECK(fixture.rows[kSelected].subText == nullptr);
+  CHECK(fixture.rows[kSelected].sub_text == nullptr);
   detail::BeginLiveDetailsTransition(static_cast<int>(kHeader));
-  CHECK(fixture.rows[kHeader].state == Menu_Framework_MenuItemState_SlideX);
-  CHECK(fixture.rows[kHeader].targetPosition0 == 155);
+  CHECK(fixture.rows[kHeader].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[kHeader].target0 == 155);
 }
 
 TEST_CASE("F02947 live layout integrates native transition and stat helpers",
@@ -297,8 +297,8 @@ TEST_CASE("F02947 live layout integrates native transition and stat helpers",
   CHECK(Menu_Container_controlsPanelMode == 0);
   CHECK(Menu_Inventory_ashleyRenderState == 0);
   CHECK(fixture.rows[kHeader].w == 164);
-  CHECK(fixture.rows[kHeader].targetPosition0 == 16);
-  CHECK(fixture.rows[kSelected].targetPosition0 == 18);
+  CHECK(fixture.rows[kHeader].target0 == 16);
+  CHECK(fixture.rows[kSelected].target0 == 18);
   CHECK(VS::Menu::Framework::enabledStatPages == 3);
 }
 
@@ -307,8 +307,8 @@ TEST_CASE("F02947 live selected-header alias keeps continuation write order",
   LiveFixture fixture;
   detail::InitializeLiveDetailsLayout(static_cast<int>(kHeader),
                                       samples::kTypePage);
-  CHECK(fixture.rows[kHeader].state == Menu_Framework_MenuItemState_SlideY);
-  CHECK(fixture.rows[kHeader].targetPosition0 == 18);
+  CHECK(fixture.rows[kHeader].state == fw::RowState::kSlideY);
+  CHECK(fixture.rows[kHeader].target0 == 18);
   CHECK(VS::Menu::Framework::enabledStatPages == 4);
 }
 
@@ -367,7 +367,7 @@ TEST_CASE("F02950 real exit retains container phase and full triangle mask",
   fixture.rows[kHeader].w = samples::kHeaderWidth;
   VS::Input::buttonsPressed = VS::Input::Triangle;
   detail::ExitLiveDetailsView(1);
-  CHECK(fixture.rows[kHeader].targetPosition0 == -164);
+  CHECK(fixture.rows[kHeader].target0 == -164);
   CHECK(Menu_Container_detailsViewPhase == 2);
   CHECK(Menu_Container_detailsClosedWithTriangle ==
         static_cast<int>(VS::Input::Triangle));

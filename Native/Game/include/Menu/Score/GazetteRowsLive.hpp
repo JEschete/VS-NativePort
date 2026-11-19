@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
-struct Menu_Framework_MenuRow;
+namespace VS::Menu::Framework {
+struct MenuRow;
+}  // namespace VS::Menu::Framework
 
 // Binds the gazette rows (GazetteRows.hpp) to the frame's primitive buffer
 // and overlay ordering table (VS::Render::FrameScratchpad()), vs_main_frameBuf
@@ -21,7 +23,7 @@ struct ScrollableRowAnimation;
 struct TopMenuState;
 
 // MENU9.PRG (238.c).
-void RenderLiveScrollableRow(Menu_Framework_MenuRow* row);
+void RenderLiveScrollableRow(Framework::MenuRow* row);
 void RestoreLiveTopMenuCursor(int row_count, int absolute_row, char* text[]);
 int LiveSelectedTopMenuRow();
 int UpdateLiveTopMenu(int initialize);

@@ -182,7 +182,7 @@ TEST_CASE("F02616 single category carries the original hoisted row geometry",
                              row.target_x};
   const std::array expected{320, 18, 140, 8, 180};
   CHECK(placement == expected);
-  CHECK(row.state == 2);
+  CHECK(row.state == VS::Menu::Framework::RowState::kSlideX);
   CHECK(row.selected);
   CHECK(state.phase == (chain ? Phase::kChainOnly : Phase::kDefenseOnly));
 }

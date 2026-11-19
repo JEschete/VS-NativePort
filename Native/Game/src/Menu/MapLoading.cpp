@@ -18,7 +18,7 @@ constexpr std::int32_t kCenteredCursorRow = 4;
 constexpr std::int32_t kFirstListedScene = 1;
 // Row 10 at (320, 34), 0x8C wide with an 8-wide background.
 constexpr MenuRowPlacement kAreaNamePlacement{10, 320, 34, 0x8C, 8};
-constexpr std::uint8_t kAreaNameState = 2;
+constexpr auto kAreaNameState = Framework::RowState::kSlideX;
 constexpr std::int16_t kAreaNameTargetX = 0xB4;
 
 [[nodiscard]] std::uint8_t LowByte(std::int32_t value) {

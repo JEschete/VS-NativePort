@@ -31,12 +31,13 @@ struct InformationFixture {
   std::uint8_t saved_setting = VS::Input::settings.information;
   int saved_buttons = VS::Input::buttonsState;
   int* saved_rows = VS::Menu::Framework::rowTypeBuf;
-  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   std::array<unsigned char, 0x20010> memory{};
   std::array<u_long, 34> ordering{};
   std::array<char, 96> message{};
   // The row types live in the open menu's workspace, beside its rows.
-  std::array<Menu_Framework_MenuRow, VS::Menu::Framework::kRowCount> rows{};
+  std::array<VS::Menu::Framework::MenuRow, VS::Menu::Framework::kRowCount>
+      rows{};
   std::array<int, VS::Menu::Framework::kRowTypeCount> row_types{};
 
   InformationFixture() {

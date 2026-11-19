@@ -399,7 +399,8 @@ TEST_CASE("Options choice entry points share one choice state each",
 TEST_CASE("Options live binding returns to the battle through the menu state",
           "[menu-files][menu][menu-options]") {
   const auto saved_state = VS::Menu::Framework::menuState;
-  Menu_Framework_MenuRow* const saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* const saved_items =
+      VS::Menu::Framework::menuItems;
   VS::Menu::Framework::menuItems = nullptr;
   VS::Menu::Framework::menuState.currentMenu = 0;
   options::ResetLiveOptionsStatics();

@@ -139,7 +139,7 @@ VS::Items::ContainerData* Data(TransferStorage storage) {
   }
 }
 
-Menu_Framework_MenuRow& Row(std::int32_t row) {
+Framework::MenuRow& Row(std::int32_t row) {
   auto* const item = Framework::LiveMenuItem(row);
   if (item == nullptr) Refuse("menu row outside the current row workspace");
   return *item;
@@ -437,15 +437,15 @@ class LiveTransferWorld final : public TransferWorld {
     Row(row).selected = selected ? 1U : 0U;
   }
   void ClearRowOutsetIcon(std::int32_t row) override {
-    Row(row).outsetIcon = 0;
+    Row(row).outset_icon = 0;
   }
   std::int16_t RowX(std::int32_t row) override { return Row(row).x; }
   void SetRowX(std::int32_t row, std::int16_t x) override { Row(row).x = x; }
-  void SlideRow(std::int32_t row, std::uint8_t state,
+  void SlideRow(std::int32_t row, Framework::RowState state,
                 std::int16_t target) override {
     auto& item = Row(row);
     item.state = state;
-    item.targetPosition0 = target;
+    item.target0 = target;
   }
   void SetRowCounts(std::int32_t row, std::uint16_t count,
                     std::uint16_t max) override {

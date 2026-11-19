@@ -4,6 +4,7 @@
 #include <array>
 #include <bit>
 #include <cmath>
+#include <cstddef>
 #include <format>
 #include <ranges>
 #include <span>
@@ -49,7 +50,6 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
@@ -122,12 +122,12 @@ PlayerActorObservation InspectPlayerActor(const EncounterActorState& base) {
   return snapshot;
 }
 
-std::string InspectGameText(std::span<const char> bytes) {
+std::string InspectGameText(std::span<const std::byte> bytes) {
   constexpr std::string_view kLetters =
       "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   std::string result;
   for (std::size_t index = 0; index < bytes.size(); ++index) {
-    const auto value = static_cast<unsigned char>(bytes[index]);
+    const auto value = std::to_integer<unsigned char>(bytes[index]);
     if (value == VS::Core::TextCode::kTerminator) break;
     if (value >= VS::Core::TextCode::kChunkSize) {
       if (++index >= bytes.size()) break;
@@ -184,8 +184,8 @@ void InspectActionOptions(PlayerObservationState& state) {
         const int action = id + rank;
         const auto& definition = Battle_actionDefinitions[action];
         state.action_options.push_back(
-            {action, InspectGameText(definition.name), std::string(family),
-             menu_order, static_cast<int>(definition.type),
+            {action, InspectGameText(std::as_bytes(std::span(definition.name))),
+             std::string(family), menu_order, static_cast<int>(definition.type),
              static_cast<int>(definition.cost),
              VS::Battle::LiveActorActionRestrictionFlags(0, action),
              std::bit_cast<std::uint16_t>(definition.aiFlags), rank, ranks});
@@ -228,13 +228,13 @@ void InspectItemOptions(PlayerObservationState& state) {
     }
     const auto& definition = Battle_actionDefinitions[action];
     const auto& hit = definition.hits[0];
-    state.item_options.push_back({item.id, static_cast<int>(action), item.count,
-                                  InspectGameText(definition.name),
-                                  VS::Battle::LiveActorActionRestrictionFlags(
-                                      0, static_cast<int>(action)),
-                                  static_cast<int>(hit.effectId),
-                                  static_cast<int>(hit.statCalculatorId),
-                                  static_cast<int>(hit.statFactor)});
+    state.item_options.push_back(
+        {item.id, static_cast<int>(action), item.count,
+         InspectGameText(std::as_bytes(std::span(definition.name))),
+         VS::Battle::LiveActorActionRestrictionFlags(0,
+                                                     static_cast<int>(action)),
+         static_cast<int>(hit.effectId), static_cast<int>(hit.statCalculatorId),
+         static_cast<int>(hit.statFactor)});
   }
 }
 
@@ -308,8 +308,9 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
     for (int index = 0; index < kMainMenuEntries; ++index) {
       if ((VS::Input::settings.menu_flags & (1u << index)) == 0) continue;
       const auto& row = VS::Menu::Framework::menuItems[index];
-      result.rows.push_back({index, InspectGameText(row.text),
-                             row.unselectable != 0, row.selected != 0});
+      result.rows.push_back(
+          {index, InspectGameText(std::as_bytes(std::span(row.text))),
+           row.unselectable != 0, row.selected != 0});
       if (row.selected != 0) result.selected_row = index;
     }
   } else if (!result.loading && VS::Menu::Framework::itemsText != nullptr) {
@@ -321,10 +322,9 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
         VS::Menu::Framework::itemsText);
     for (unsigned index = 0; index < VS::Menu::Framework::subMenuRowCount;
          ++index) {
-      const auto* name = reinterpret_cast<const char*>(text[index].name.data());
       result.rows.push_back(
           {static_cast<int>(index),
-           InspectGameText(std::span(name, text[index].name.size())),
+           InspectGameText(std::as_bytes(std::span(text[index].name))),
            (text[index].flags & Menu_Framework_RowTypeFlag_Disabled) != 0,
            static_cast<int>(index) == result.selected_row});
       constexpr int kInventoryMenu = 4, kItemShortcut = 5, kInputReady = 17;

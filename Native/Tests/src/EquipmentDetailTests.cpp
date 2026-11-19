@@ -172,13 +172,13 @@ struct EquipmentFixture {
 
 struct RenameFrameFixture {
   EquipmentFixture frame{0};
-  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   decltype(std::to_array(
       VS::Menu::Rename::renderRenameMenuStrings)) saved_strings =
       std::to_array(VS::Menu::Rename::renderRenameMenuStrings);
   VS::Menu::Rename::State saved_state = VS::Menu::Rename::LiveRenameState();
   void* saved_table = VS::Render::legacyOrderingTables[0];
-  std::array<Menu_Framework_MenuRow, 40> rows{};
+  std::array<VS::Menu::Framework::MenuRow, 40> rows{};
 
   RenameFrameFixture() {
     VS::Menu::Framework::menuItems = rows.data();

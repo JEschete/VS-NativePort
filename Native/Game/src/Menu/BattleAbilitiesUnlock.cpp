@@ -71,7 +71,8 @@ int InitializeAbilityUnlock(AbilityUnlockState& state, UnlockProgress& progress,
 
 void SelectCategories(AbilityUnlockState& state, AbilityUnlockHost& host) {
   constexpr AbilityCategoryRow kCategoryRow{
-      AbilityKind::kChain, 320, 18, 140, 8, 180, 2, true};
+      AbilityKind::kChain,          320, 18, 140, 8, 180,
+      Framework::RowState::kSlideX, true};
   const bool chain = state.chain_count != 0;
   const bool defense = state.defense_count != 0;
   if (!chain && !defense) {

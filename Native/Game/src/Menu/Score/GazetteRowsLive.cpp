@@ -32,12 +32,6 @@
 
 namespace VS::Menu::Score {
 namespace {
-static_assert(sizeof(Framework::MenuRow) == sizeof(Menu_Framework_MenuRow));
-static_assert(offsetof(Framework::MenuRow, x) ==
-              offsetof(Menu_Framework_MenuRow, x));
-static_assert(offsetof(Framework::MenuRow, text) ==
-              offsetof(Menu_Framework_MenuRow, text));
-
 // The rows link before the overlay ordering table's third entry and the
 // arrow before its second (238.c:79, 107).
 constexpr std::size_t kRowOrderingEntry = 2;
@@ -76,7 +70,7 @@ void Refuse(std::string_view what) {
 
 class LiveScrollableRow final : public ScrollableRowHost {
  public:
-  LiveScrollableRow(Menu_Framework_MenuRow* row, u_long* before)
+  LiveScrollableRow(Framework::MenuRow* row, u_long* before)
       : row_(row), before_(before) {}
 
   int FrameBufferIndex() override { return VS::Render::frameBuf; }
@@ -123,7 +117,7 @@ class LiveScrollableRow final : public ScrollableRowHost {
   void Refuse(const char* reason) override { Score::Refuse(reason); }
 
  private:
-  Menu_Framework_MenuRow* row_;
+  Framework::MenuRow* row_;
   u_long* before_;
 };
 
@@ -198,16 +192,14 @@ class LiveGazetteMenu final : public GazetteMenuHost {
 
 // decomp: MENU9.PRG _renderScrollableMenuItem
 // (src/MENU/MENU9.PRG/238.c:54), 80102A7C
-void RenderLiveScrollableRow(Menu_Framework_MenuRow* row) {
+void RenderLiveScrollableRow(Framework::MenuRow* row) {
   u_long* before = RowOrderingEntry();
   if (row == nullptr || before == nullptr) {
     Refuse("scrollable row without a row or an ordering table");
     return;
   }
   LiveScrollableRow host(row, before);
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  RenderScrollableRow(host, live_animation,
-                      *reinterpret_cast<Framework::MenuRow*>(row));
+  RenderScrollableRow(host, live_animation, *row);
 }
 
 // decomp: MENU9.PRG _setRows (src/MENU/MENU9.PRG/238.c:196), 80102E10

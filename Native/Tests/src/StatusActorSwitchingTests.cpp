@@ -376,8 +376,9 @@ struct LiveSwitchScene {
     Menu_Status_delayScreenUpdate = saved_delay;
   }
 
-  std::array<Menu_Framework_MenuRow, VS::Menu::Framework::kRowCount> rows{};
-  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
+  std::array<VS::Menu::Framework::MenuRow, VS::Menu::Framework::kRowCount>
+      rows{};
+  VS::Menu::Framework::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int saved_step = Menu_Status_animationStep;
   int saved_first = Menu_Status_drawBackgroundFirst;
   int saved_fade = Menu_Status_fadeScreen;
@@ -430,7 +431,7 @@ TEST_CASE("Live vitals transition and switch keep the copied globals",
 TEST_CASE("Live actor switch names only an actor with a record",
           "[status-switching-live]") {
   LiveSwitchScene scene;
-  Menu_Framework_MenuRow& row = scene.rows[4];
+  VS::Menu::Framework::MenuRow& row = scene.rows[4];
   const LiveActorSlot named(1);
   const LiveActorSlot absent(2);
   Battle_actors[2] = nullptr;

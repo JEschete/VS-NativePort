@@ -191,7 +191,7 @@ TEST_CASE(
   fixture.Show(kMiscCategory, count);
   fixture.Settle();
   REQUIRE(fixture.rows[tests::kFirstListRow].state ==
-          Menu_Framework_MenuItemState_Idle);
+          VS::Menu::Framework::RowState::kIdle);
   fixture.Frame(VS::Input::Down);
   fixture.Frame();
   REQUIRE(fixture.Frame(VS::Input::Circle) == 1);

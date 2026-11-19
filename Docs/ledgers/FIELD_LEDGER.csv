@@ -525,19 +525,19 @@ T00093.001,T00093,vs_battle_limbStatus,1,limbStatusDamaged,0,,,1,,Damaged,LimbCo
 T00093.002,T00093,vs_battle_limbStatus,2,limbStatusWounded,0,,,2,,Wounded,LimbConditionLevel Wounded,med,declaration-only;source:5BF94.h:505
 T00093.003,T00093,vs_battle_limbStatus,3,limbStatusGood,0,,,3,,Good,LimbConditionLevel Good,med,declaration-only;source:5BF94.h:506
 T00093.004,T00093,vs_battle_limbStatus,4,limbStatusExcellent,0,,,4,,Excellent,LimbConditionLevel Excellent,med,declaration-only;source:5BF94.h:507
-T00094.000,T00094,vs_battle_menuItemScrollable,0,menuItem_scrollNone,0,,,0,,None,MenuItemScroll None,med,declaration-only;source:5BF94.h:28
-T00094.001,T00094,vs_battle_menuItemScrollable,1,menuItem_scrollUp,0,,,1,,Up,MenuItemScroll Up,med,declaration-only;source:5BF94.h:29
-T00094.002,T00094,vs_battle_menuItemScrollable,2,menuItem_scrollDown,0,,,2,,Down,MenuItemScroll Down,med,declaration-only;source:5BF94.h:30
-T00095.000,T00095,vs_battle_menuItemState,0,menuItemStateInactive,0,,,0,,Inactive,MenuItemState Inactive,med,declaration-only;source:5BF94.h:34
-T00095.001,T00095,vs_battle_menuItemState,1,menuItemStateIdle,0,,,1,,Idle,MenuItemState Idle,med,declaration-only;source:5BF94.h:35
-T00095.002,T00095,vs_battle_menuItemState,2,menuItemStateSlideX,0,,,2,,SlideX,MenuItemState SlideX,med,declaration-only;source:5BF94.h:36
-T00095.003,T00095,vs_battle_menuItemState,3,menuItemStateSlideY,0,,,3,,SlideY,MenuItemState SlideY,med,declaration-only;source:5BF94.h:37
-T00095.004,T00095,vs_battle_menuItemState,4,menuItemStateSlideXY,0,,,4,,SlideXY,MenuItemState SlideXY,med,declaration-only;source:5BF94.h:38
-T00095.005,T00095,vs_battle_menuItemState,5,menuItemStateDismiss,0,,,5,,Dismiss,MenuItemState Dismiss,med,declaration-only;source:5BF94.h:39
-T00096.000,T00096,vs_battle_menuStates,0,menuStateMainMenu,0,,,0,,MainMenu,MenuState MainMenu,med,declaration-only;source:5BF94.h:69
-T00096.001,T00096,vs_battle_menuStates,1,menuStateNoneClosing,0,,,31,,NoneClosing,MenuState NoneClosing,med,declaration-only;source:5BF94.h:70
-T00096.002,T00096,vs_battle_menuStates,2,menuStateNoneClosed,0,,,63,,NoneClosed,MenuState NoneClosed,med,declaration-only;source:5BF94.h:71
-T00096.003,T00096,vs_battle_menuStates,3,menuStateOpenedFromMainMenu,0,,,64,,OpenedFromMainMenu,MenuState OpenedFromMainMenu,med,declaration-only;source:5BF94.h:72
+T00094.000,T00094,vs_battle_menuItemScrollable,0,menuItem_scrollNone,0,,,0,,None,MenuItemScroll None,med,native:none; zero MenuRow::is_scrollable draws no arrow (#441);declaration-only;source:5BF94.h:28
+T00094.001,T00094,vs_battle_menuItemScrollable,1,menuItem_scrollUp,0,,,1,,kScrollUp,MenuItemScroll Up,med,native:Framework.hpp kScrollUp (#441);declaration-only;source:5BF94.h:29
+T00094.002,T00094,vs_battle_menuItemScrollable,2,menuItem_scrollDown,0,,,2,,kScrollDown,MenuItemScroll Down,med,native:Framework.hpp kScrollDown (#441);declaration-only;source:5BF94.h:30
+T00095.000,T00095,vs_battle_menuItemState,0,menuItemStateInactive,0,,,0,,kInactive,MenuItemState Inactive,med,native:Framework.hpp RowState::kInactive (#441);declaration-only;source:5BF94.h:34
+T00095.001,T00095,vs_battle_menuItemState,1,menuItemStateIdle,0,,,1,,kIdle,MenuItemState Idle,med,native:Framework.hpp RowState::kIdle (#441);declaration-only;source:5BF94.h:35
+T00095.002,T00095,vs_battle_menuItemState,2,menuItemStateSlideX,0,,,2,,kSlideX,MenuItemState SlideX,med,native:Framework.hpp RowState::kSlideX (#441);declaration-only;source:5BF94.h:36
+T00095.003,T00095,vs_battle_menuItemState,3,menuItemStateSlideY,0,,,3,,kSlideY,MenuItemState SlideY,med,native:Framework.hpp RowState::kSlideY (#441);declaration-only;source:5BF94.h:37
+T00095.004,T00095,vs_battle_menuItemState,4,menuItemStateSlideXY,0,,,4,,kSlideXy,MenuItemState SlideXY,med,native:Framework.hpp RowState::kSlideXy (#441);declaration-only;source:5BF94.h:38
+T00095.005,T00095,vs_battle_menuItemState,5,menuItemStateDismiss,0,,,5,,kDismiss,MenuItemState Dismiss,med,native:Framework.hpp RowState::kDismiss (#441);declaration-only;source:5BF94.h:39
+T00096.000,T00096,vs_battle_menuStates,0,menuStateMainMenu,0,,,0,,MainMenu,MenuState MainMenu,med,native:none; menu 0 is the main menu and needs no constant (#441);declaration-only;source:5BF94.h:69
+T00096.001,T00096,vs_battle_menuStates,1,menuStateNoneClosing,0,,,31,,kMenuClosing,MenuState NoneClosing,med,native:Framework.hpp kMenuClosing (#441);declaration-only;source:5BF94.h:70
+T00096.002,T00096,vs_battle_menuStates,2,menuStateNoneClosed,0,,,63,,kMenuClosed,MenuState NoneClosed,med,native:Framework.hpp kMenuClosed (#441);declaration-only;source:5BF94.h:71
+T00096.003,T00096,vs_battle_menuStates,3,menuStateOpenedFromMainMenu,0,,,64,,kOpenedFromMainMenu,MenuState OpenedFromMainMenu,med,native:Framework.hpp kOpenedFromMainMenu (#441);declaration-only;source:5BF94.h:72
 T00097.000,T00097,vs_battle_statuses,0,vsBattleStatusStrDown,0,,,1,,StrDown,StatusFlag StrDown,med,declaration-only;source:146C.h:486
 T00097.001,T00097,vs_battle_statuses,1,vsBattleStatusStrUp,0,,,2,,StrUp,StatusFlag StrUp,med,declaration-only;source:146C.h:487
 T00097.002,T00097,vs_battle_statuses,2,vsBattleStatusIntDown,0,,,4,,IntDown,StatusFlag IntDown,med,declaration-only;source:146C.h:488
@@ -5913,29 +5913,29 @@ T00656.004,T00656,vs_battle_menu9CursorMemory_t,4,recordTimePage,0,u_char,,,,rec
 T00656.005,T00656,vs_battle_menu9CursorMemory_t,5,recordTimeRow,0,u_char,,,,recordTimeRow,Named in the fork; see cited use,med,source:238.c:771
 T00656.006,T00656,vs_battle_menu9CursorMemory_t,6,gazettePage,0,u_char,,,,gazettePage,Named in the fork; see cited use,med,source:238.c:882
 T00656.007,T00656,vs_battle_menu9CursorMemory_t,7,gazetteRow,0,u_char,,,,gazetteRow,Named in the fork; see cited use,med,source:238.c:622
-T00657.000,T00657,vs_battle_menuItem_t,0,state,0,u_char,,,,state,Named in the fork; see cited use,med,source:5BF94.c:2669
+T00657.000,T00657,vs_battle_menuItem_t,0,state,0,u_char,,,,state,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::state is a RowState (#441);source:5BF94.c:2669
 T00657.001,T00657,vs_battle_menuItem_t,1,w,0,u_char,,,,w,Named in the fork; see cited use,med,source:5BF94.c:2670
-T00657.002,T00657,vs_battle_menuItem_t,2,backgroundWidth,0,u_char,,,,backgroundWidth,Named in the fork; see cited use,med,source:5BF94.c:2671
-T00657.003,T00657,vs_battle_menuItem_t,3,animationStep,0,u_char,,,,animationStep,Named in the fork; see cited use,med,source:5BF94.c:2851
-T00657.004,T00657,vs_battle_menuItem_t,4,gradientState,0,u_char,,,,gradientState,Named in the fork; see cited use,med,source:5BF94.c:2673
-T00657.005,T00657,vs_battle_menuItem_t,5,isScrollable,0,u_char,,,,isScrollable,Named in the fork; see cited use,med,source:58EC.c:174
+T00657.002,T00657,vs_battle_menuItem_t,2,backgroundWidth,0,u_char,,,,background_width,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::background_width (#441);source:5BF94.c:2671
+T00657.003,T00657,vs_battle_menuItem_t,3,animationStep,0,u_char,,,,animation_step,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::animation_step (#441);source:5BF94.c:2851
+T00657.004,T00657,vs_battle_menuItem_t,4,gradientState,0,u_char,,,,gradient_state,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::gradient_state (#441);source:5BF94.c:2673
+T00657.005,T00657,vs_battle_menuItem_t,5,isScrollable,0,u_char,,,,is_scrollable,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::is_scrollable (#441);source:58EC.c:174
 T00657.006,T00657,vs_battle_menuItem_t,6,selected,0,u_char,,,,selected,Named in the fork; see cited use,med,source:5BF94.c:2756
 T00657.007,T00657,vs_battle_menuItem_t,7,unselectable,0,u_char,,,,unselectable,Named in the fork; see cited use,med,source:5BF94.c:2756
-T00657.008,T00657,vs_battle_menuItem_t,8,buttonId,0,u_char,,,,buttonId,Named in the fork; see cited use,med,source:58EC.c:1687
-T00657.009,T00657,vs_battle_menuItem_t,9,rowIcon,0,u_char,,,,rowIcon,Named in the fork; see cited use,med,source:5BF94.c:2771
-T00657.010,T00657,vs_battle_menuItem_t,10,fontColor,0,u_char,,,,fontColor,Named in the fork; see cited use,med,source:5BF94.c:2760
-T00657.011,T00657,vs_battle_menuItem_t,11,invertGradient,0,u_char,,,,invertGradient,Named in the fork; see cited use,med,source:5BF94.c:2756
+T00657.008,T00657,vs_battle_menuItem_t,8,buttonId,0,u_char,,,,button_id,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::button_id (#441);source:58EC.c:1687
+T00657.009,T00657,vs_battle_menuItem_t,9,rowIcon,0,u_char,,,,row_icon,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::row_icon (#441);source:5BF94.c:2771
+T00657.010,T00657,vs_battle_menuItem_t,10,fontColor,0,u_char,,,,font_color,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::font_color (#441);source:5BF94.c:2760
+T00657.011,T00657,vs_battle_menuItem_t,11,invertGradient,0,u_char,,,,invert_gradient,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::invert_gradient (#441);source:5BF94.c:2756
 T00657.012,T00657,vs_battle_menuItem_t,12,material,0,u_char,,,,material,Named in the fork; see cited use,med,source:2D10.c:74
-T00657.013,T00657,vs_battle_menuItem_t,13,outsetIcon,0,u_char,,,,outsetIcon,Named in the fork; see cited use,med,source:58EC.c:937
-T00657.014,T00657,vs_battle_menuItem_t,14,itemPage,0,u_short,,,,itemPage,Named in the fork; see cited use,med,source:58EC.c:1656
+T00657.013,T00657,vs_battle_menuItem_t,13,outsetIcon,0,u_char,,,,outset_icon,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::outset_icon (#441);source:58EC.c:937
+T00657.014,T00657,vs_battle_menuItem_t,14,itemPage,0,u_short,,,,item_page,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::item_page (#441);source:58EC.c:1656
 T00657.015,T00657,vs_battle_menuItem_t,15,count,0,u_short,,,,count,Named in the fork; see cited use,med,source:58EC.c:935
 T00657.016,T00657,vs_battle_menuItem_t,16,max,0,u_short,,,,max,Named in the fork; see cited use,med,source:58EC.c:943
 T00657.017,T00657,vs_battle_menuItem_t,17,x,0,short,,,,x,Named in the fork; see cited use,med,source:5BF94.c:2676
 T00657.018,T00657,vs_battle_menuItem_t,18,y,0,short,,,,y,Named in the fork; see cited use,med,source:5BF94.c:2677
-T00657.019,T00657,vs_battle_menuItem_t,19,targetPosition0,0,short,,,,targetPosition0,Named in the fork; see cited use,med,source:2D10.c:70
-T00657.020,T00657,vs_battle_menuItem_t,20,targetPosition1,0,short,,,,targetPosition1,Named in the fork; see cited use,med,source:58EC.c:1571
-T00657.021,T00657,vs_battle_menuItem_t,21,text,0,char[32],,,,text,Named in the fork; see cited use,med,source:5BF94.c:2683
-T00657.022,T00657,vs_battle_menuItem_t,22,subText,0,char *,,,,subText,Named in the fork; see cited use,med,source:5BF94.c:2822
+T00657.019,T00657,vs_battle_menuItem_t,19,targetPosition0,0,short,,,,target0,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::target0 (#441);source:2D10.c:70
+T00657.020,T00657,vs_battle_menuItem_t,20,targetPosition1,0,short,,,,target1,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::target1 (#441);source:58EC.c:1571
+T00657.021,T00657,vs_battle_menuItem_t,21,text,0,char[32],,,,text,Named in the fork; see cited use,med,"native:Framework.hpp MenuRow::text is std::array<std::uint8_t, 32> of encoded glyphs (#441);source:5BF94.c:2683"
+T00657.022,T00657,vs_battle_menuItem_t,22,subText,0,char *,,,,sub_text,Named in the fork; see cited use,med,native:Framework.hpp MenuRow::sub_text (#441);source:5BF94.c:2822
 T00658.000,T00658,vs_battle_menuState_t,0,currentMenu,0,char,,,,currentMenu,Named in the fork; see cited use,med,source:5BF94.c:2975
 T00658.001,T00658,vs_battle_menuState_t,1,returnState,0,char,,,,returnState,Named in the fork; see cited use,med,source:5BF94.c:3526
 T00658.002,T00658,vs_battle_menuState_t,2,executeAbilityType,0,char,,,,executeAbilityType,Named in the fork; see cited use,med,source:5BF94.c:3528

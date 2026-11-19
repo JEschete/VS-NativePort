@@ -76,8 +76,8 @@ TEST_CASE("F02953 live weapon uses container records beyond inventory capacity",
   VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveWeaponDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
-  CHECK(fixture.rows[kContainerRow].subText == nullptr);
-  CHECK(fixture.rows[kHeader].itemPage == 2);
+  CHECK(fixture.rows[kContainerRow].sub_text == nullptr);
+  CHECK(fixture.rows[kHeader].item_page == 2);
 }
 
 TEST_CASE(
@@ -94,7 +94,7 @@ TEST_CASE(
   CHECK(detail::UpdateLiveBladeDetails(0) == 0);
   CHECK(VS::Menu::Framework::strIntAgi[0] ==
         equipment_detail_tests::kBladeStrength);
-  CHECK(fixture.rows[kHeader].itemPage == 2);
+  CHECK(fixture.rows[kHeader].item_page == 2);
 }
 
 TEST_CASE(
@@ -133,7 +133,7 @@ TEST_CASE("F02956 actual shield helpers support unoccupied container gem slots",
   VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveShieldDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
-  CHECK(fixture.rows[kHeader].itemPage == 2);
+  CHECK(fixture.rows[kHeader].item_page == 2);
   CHECK(VS::Menu::Framework::equipmentSubtype ==
         fw::equipment_subtype::kShield);
 }
@@ -148,7 +148,7 @@ TEST_CASE("F02957 actual armor paging reaches container record sixty four",
   VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveArmorDetails(0) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == kContainerPart + 1);
-  CHECK(fixture.rows[kHeader].itemPage == 2);
+  CHECK(fixture.rows[kHeader].item_page == 2);
 }
 
 TEST_CASE(
@@ -225,7 +225,7 @@ TEST_CASE("F02958 gem statistics preserve container reference one ninety two",
   VS::Input::buttonRepeat = input::R1;
   CHECK(detail::UpdateLiveGemDetails(0) == 0);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 5);
-  CHECK(fixture.rows[kHeader].itemPage == 2);
+  CHECK(fixture.rows[kHeader].item_page == 2);
 }
 
 TEST_CASE("F02958 live re-entry resolves the new owner before loading stats",
@@ -271,7 +271,7 @@ TEST_CASE("F02944 merged header does not require unused container text owners",
   VS::Menu::Framework::itemHelp = nullptr;
   fixture.ResetFrame();
   detail::DrawLiveCategoryIcons(0, 1);
-  CHECK(fixture.rows[kHeader].rowIcon == kFirstCategoryIcon);
+  CHECK(fixture.rows[kHeader].row_icon == kFirstCategoryIcon);
   CHECK(fixture.Sprites().size() == kCategoryCount - 1);
 }
 

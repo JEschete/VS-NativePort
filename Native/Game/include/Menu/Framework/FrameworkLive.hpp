@@ -7,8 +7,6 @@
 #include "Items/ItemRecords.hpp"
 #include "Legacy/Psx.h"
 
-struct Menu_Framework_MenuRow;
-
 // Binds the menu framework (Framework.hpp) to its variables
 // (FrameworkLiveState.hpp), the frame ordering tables, the disc queue, the text
 // boxes, the battle interface and the submenus, in the shapes the copied
@@ -27,9 +25,9 @@ struct RowText;
 
 // BATTLE.PRG (5BF94.c).
 int LoadLiveMenuOverlay(int packed_menu_state);
-Menu_Framework_MenuRow* LiveMenuItem(int row);
-Menu_Framework_MenuRow* SetLiveMenuItem(int row, int x, int y, int w,
-                                        int background_width, char* text);
+MenuRow* LiveMenuItem(int row);
+MenuRow* SetLiveMenuItem(int row, int x, int y, int w, int background_width,
+                         char* text);
 // SetLiveMenuItem for typed hosts: the row builder trusts its text for
 // kTrustedEncodedTextBytes, so it reads a terminator-padded copy of `text`.
 MenuRow& SetLiveMenuItemText(const RowPlacement& placement,
@@ -38,7 +36,7 @@ MenuRow& SetLiveMenuItemText(const RowPlacement& placement,
 MenuRow& LiveMenuRow(int row);
 [[nodiscard]] std::span<std::uint8_t> LiveMenuCursorMemory();
 int LiveGradientStopColor(u_int gradient, u_int color_index, int brightness);
-void DrawLiveMenuItem(Menu_Framework_MenuRow* row);
+void DrawLiveMenuItem(MenuRow* row);
 int UpdateLiveMainMenuSelection(int mode);
 void UpdateLiveMenuOverlay();
 void InitLiveGameInterface(void* interface_texture);
@@ -62,7 +60,7 @@ void CreateLiveActionRowsText(int sub_menu_id, std::span<const RowText> texts,
                               std::span<const std::int32_t> row_types);
 int LiveHighlightedActionRow();
 int LiveActionSelectionResult();
-Menu_Framework_MenuRow* CreateLiveActionRow(int row, int x);
+MenuRow* CreateLiveActionRow(int row, int x);
 void UpdateLiveActionMenu();
 void UpdateLiveInformationVisibility(int source_row, int action_menu_state);
 void SetLiveCommandLabel(int action);
@@ -95,13 +93,13 @@ void CreateLiveMenuRows(int row_count, int row_info, char* strings[],
 int CloseLiveRowsAndRememberCursor();
 int LiveHighlightedRow();
 int LiveSelectedRow();
-Menu_Framework_MenuRow* CreateLiveListRow(int row, int x);
+MenuRow* CreateLiveListRow(int row, int x);
 void UpdateLiveRowSelection();
 void DrawLiveBackground(int brightness);
-int DrawLiveFeatheredRowCharacter(u_int character, int x,
-                                  Menu_Framework_MenuRow* row, u_long* before);
+int DrawLiveFeatheredRowCharacter(u_int character, int x, MenuRow* row,
+                                  u_long* before);
 void DrawLiveTabNavigation(int mode);
-void DrawLiveScrollableRow(Menu_Framework_MenuRow* row);
+void DrawLiveScrollableRow(MenuRow* row);
 void UpdateAndDrawLiveRows();
 void UpdateLiveScreen();
 int LiveNextFreeActorAssetRequest();

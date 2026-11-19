@@ -412,14 +412,14 @@ TEST_CASE("RenderLiveScrollableRow links the row's packets and its arrow",
           "[gazette-rows-live]") {
   LivePacketsFixture fixture;
   score::ResetGazetteRowsLive();
-  Menu_Framework_MenuRow row{};
-  row.state = 1;
+  fw::MenuRow row{};
+  row.state = fw::RowState::kIdle;
   row.x = 60;
   row.y = 80;
   row.w = 100;
-  row.isScrollable = 1;
-  row.gradientState = 3;
-  row.text[0] = static_cast<char>(kEnd);
+  row.is_scrollable = 1;
+  row.gradient_state = 3;
+  row.text[0] = kEnd;
   const std::uint64_t refused = score::LiveGazetteRowsRefusals();
   score::RenderLiveScrollableRow(&row);
   const auto packets = fixture.PacketsBefore(2);
@@ -428,7 +428,7 @@ TEST_CASE("RenderLiveScrollableRow links the row's packets and its arrow",
   const auto arrow = fixture.PacketsBefore(1);
   REQUIRE(arrow.size() == 1);
   CHECK(arrow[0][4] == kArrowTexture);
-  CHECK(row.gradientState == 2);
+  CHECK(row.gradient_state == 2);
   CHECK(score::LiveScrollableRowAnimation() ==
         score::ScrollableRowAnimation{0, 0});
   CHECK(score::LiveGazetteRowsRefusals() == refused);
@@ -438,9 +438,9 @@ TEST_CASE("RenderLiveScrollableRow links the row's packets and its arrow",
 TEST_CASE("RenderLiveScrollableRow refuses a null row or ordering table",
           "[gazette-rows-live]") {
   LivePacketsFixture fixture;
-  Menu_Framework_MenuRow row{};
+  fw::MenuRow row{};
   row.w = 10;
-  row.text[0] = static_cast<char>(kEnd);
+  row.text[0] = kEnd;
   const std::uint64_t refused = score::LiveGazetteRowsRefusals();
   score::RenderLiveScrollableRow(nullptr);
   VS::Render::FrameScratchpad().overlay_ordering_table = nullptr;
@@ -453,7 +453,7 @@ TEST_CASE("RenderLiveScrollableRow refuses a null row or ordering table",
 // The menu rows, cursor memory, settings, gazette row and top menu strings,
 // with a game heap for the rows' text.
 struct LiveMenuFixture {
-  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
+  fw::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Score_CursorMemory saved_cursor = Battle_unusedMenu9CursorMemory;
@@ -462,7 +462,7 @@ struct LiveMenuFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 256> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Menu_Framework_MenuRow, 40> rows{};
+  std::array<fw::MenuRow, 40> rows{};
   std::array<std::array<char, 8>, 4> names{};
   std::array<char*, 8> text{};
 
@@ -514,7 +514,7 @@ TEST_CASE("RestoreLiveTopMenuCursor refuses missing text and bad counts",
   score::RestoreLiveTopMenuCursor(-1, 1, fixture.text.data());
   CHECK(score::LiveGazetteRowsRefusals() == refused + 2);
   CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 6);
-  CHECK(fixture.rows[10].state == 0);
+  CHECK(fixture.rows[10].state == fw::RowState::kInactive);
 }
 
 TEST_CASE("UpdateLiveTopMenu shows the choices and returns the chosen row",
@@ -529,7 +529,7 @@ TEST_CASE("UpdateLiveTopMenu shows the choices and returns the chosen row",
   CHECK(score::UpdateLiveTopMenu(0) == score::kTopMenuPending);
   fw::CloseLiveRowsAndRememberCursor();
   CHECK(score::UpdateLiveTopMenu(0) == 3);
-  CHECK(fixture.rows[13].state == static_cast<u_char>(fw::RowState::kSlideXy));
+  CHECK(fixture.rows[13].state == fw::RowState::kSlideXy);
   CHECK(score::LiveTopMenuState().selected == 3);
 }
 
@@ -540,37 +540,37 @@ TEST_CASE("LiveSelectedTopMenuRow hoists the remembered cursor row",
   CHECK(score::LiveSelectedTopMenuRow() == -1);
   fw::CloseLiveRowsAndRememberCursor();
   CHECK(score::LiveSelectedTopMenuRow() == 1);
-  CHECK(fixture.rows[11].state == static_cast<u_char>(fw::RowState::kSlideXy));
-  CHECK(fixture.rows[11].targetPosition0 == 180);
+  CHECK(fixture.rows[11].state == fw::RowState::kSlideXy);
+  CHECK(fixture.rows[11].target0 == 180);
 }
 
 TEST_CASE("ClearLiveMenuExceptRow8 flies out every row but row 8",
           "[gazette-rows-live]") {
   LiveMenuFixture fixture;
-  fixture.rows[7].state = 1;
-  fixture.rows[8].state = 1;
+  fixture.rows[7].state = fw::RowState::kIdle;
+  fixture.rows[8].state = fw::RowState::kIdle;
   score::ClearLiveMenuExceptRow8();
-  CHECK(fixture.rows[7].state == static_cast<u_char>(fw::RowState::kSlideX));
-  CHECK(fixture.rows[7].targetPosition0 == 320);
-  CHECK(fixture.rows[8].state == 1);
+  CHECK(fixture.rows[7].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[7].target0 == 320);
+  CHECK(fixture.rows[8].state == fw::RowState::kIdle);
 }
 
 TEST_CASE("ClearLiveMenuExceptRow8 flies out rows 0-31 but not action rows",
           "[gazette-rows-live]") {
   LiveMenuFixture fixture;
-  fixture.rows[0].state = 1;
-  fixture.rows[31].state = 1;
-  fixture.rows[fw::kActionRowBase].state = 1;
+  fixture.rows[0].state = fw::RowState::kIdle;
+  fixture.rows[31].state = fw::RowState::kIdle;
+  fixture.rows[fw::kActionRowBase].state = fw::RowState::kIdle;
   score::ClearLiveMenuExceptRow8();
-  CHECK(fixture.rows[0].state == static_cast<u_char>(fw::RowState::kSlideX));
-  CHECK(fixture.rows[31].state == static_cast<u_char>(fw::RowState::kSlideX));
-  CHECK(fixture.rows[fw::kActionRowBase].state == 1);
-  CHECK(fixture.rows[20].state == 0);
+  CHECK(fixture.rows[0].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[31].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[fw::kActionRowBase].state == fw::RowState::kIdle);
+  CHECK(fixture.rows[20].state == fw::RowState::kInactive);
 }
 
 TEST_CASE("PollLiveMenuReady only reads the rows", "[gazette-rows-live]") {
   LiveMenuFixture fixture;
-  fixture.rows[3].state = static_cast<u_char>(fw::RowState::kSlideX);
+  fixture.rows[3].state = fw::RowState::kSlideX;
   const auto before = fixture.rows;
   const std::uint64_t refused = score::LiveGazetteRowsRefusals();
   score::PollLiveMenuReady();

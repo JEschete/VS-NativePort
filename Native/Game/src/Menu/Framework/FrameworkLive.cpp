@@ -124,7 +124,7 @@ extern unsigned int
 // is 0.
 signed char VS::Menu::Framework::loadedSubMenu = 0;
 // decomp: vs_battle_menuItems (BATTLE/BATTLE.PRG 5BF94.c)
-Menu_Framework_MenuRow* VS::Menu::Framework::menuItems = nullptr;
+VS::Menu::Framework::MenuRow* VS::Menu::Framework::menuItems = nullptr;
 // decomp: D_800EB9C4 (BATTLE/BATTLE.PRG 5BF94.c)
 VS::Items::LootListNode* VS::Menu::Framework::lootLists = nullptr;
 // decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)
@@ -203,14 +203,6 @@ namespace VS::Menu::Framework {
 namespace {
 // The typed records view the live ones in place.
 static_assert(std::is_standard_layout_v<MenuRow>);
-static_assert(sizeof(MenuRow) == sizeof(Menu_Framework_MenuRow));
-static_assert(offsetof(MenuRow, item_page) ==
-              offsetof(Menu_Framework_MenuRow, itemPage));
-static_assert(offsetof(MenuRow, x) == offsetof(Menu_Framework_MenuRow, x));
-static_assert(offsetof(MenuRow, text) ==
-              offsetof(Menu_Framework_MenuRow, text));
-static_assert(offsetof(MenuRow, sub_text) ==
-              offsetof(Menu_Framework_MenuRow, subText));
 static_assert(std::is_standard_layout_v<ItemText>);
 static_assert(sizeof(TextHeader) == sizeof(Menu_Framework_TextHeader));
 static_assert(sizeof(Menu_Framework_MenuMemory) == kMenuMemoryBytes);
@@ -220,7 +212,7 @@ static_assert(sizeof(Content_battleMainMenuHelpText) ==
 // AcquireLiveOverlayWorkspace's owner tag for the menu table.
 constexpr int kMenuWorkspaceOwner = 6;
 // vs_battle_stringBuf and vs_battle_rowTypeBuf follow the forty rows.
-constexpr std::size_t kRowBytes = sizeof(Menu_Framework_MenuRow) * kRowCount;
+constexpr std::size_t kRowBytes = sizeof(MenuRow) * kRowCount;
 constexpr std::size_t kRowTypeBytes = kRowTypeCount * sizeof(int);
 constexpr std::size_t kStringsEnd = kRowBytes + kStringBufferBytes;
 constexpr std::size_t kWorkspaceBytes = kStringsEnd + kRowTypeBytes;
@@ -641,7 +633,7 @@ class LiveHost final : public Host {
     if (menuItems == nullptr) {
       return {};
     }
-    return {reinterpret_cast<MenuRow*>(menuItems), kRowCount};
+    return {menuItems, kRowCount};
   }
 
   std::span<std::uint8_t> Strings() override {
@@ -673,7 +665,7 @@ class LiveHost final : public Host {
       rowTypeBuf = nullptr;
       return false;
     }
-    auto* const rows = static_cast<Menu_Framework_MenuRow*>(block);
+    auto* const rows = static_cast<MenuRow*>(block);
     menuItems = rows;
     stringBuf = reinterpret_cast<char*>(rows + kRowCount);
     rowTypeBuf = reinterpret_cast<int*>(stringBuf + kStringBufferBytes);
@@ -1237,14 +1229,6 @@ class LiveCall {
   Context ctx_{.state = g_state, .host = host_, .tables = tables_};
 };
 
-[[nodiscard]] Menu_Framework_MenuRow* Legacy(MenuRow& row) {
-  return reinterpret_cast<Menu_Framework_MenuRow*>(&row);
-}
-
-[[nodiscard]] MenuRow* Typed(Menu_Framework_MenuRow* row) {
-  return reinterpret_cast<MenuRow*>(row);
-}
-
 void CopyRotation(const Core::Math::Mat3& rotation, MATRIX& matrix) {
   for (std::size_t row = 0; row < rotation.m.size(); ++row) {
     for (std::size_t column = 0; column < rotation.m[row].size(); ++column) {
@@ -1260,21 +1244,21 @@ int LoadLiveMenuOverlay(int packed_menu_state) {
   return LoadMenuOverlay(call.Ctx(), packed_menu_state);
 }
 
-Menu_Framework_MenuRow* LiveMenuItem(int row) {
+MenuRow* LiveMenuItem(int row) {
   LiveCall call;
-  return Legacy(MenuItem(call.Ctx(), row));
+  return &MenuItem(call.Ctx(), row);
 }
 
-Menu_Framework_MenuRow* SetLiveMenuItem(int row, int x, int y, int w,
-                                        int background_width, char* text) {
+MenuRow* SetLiveMenuItem(int row, int x, int y, int w, int background_width,
+                         char* text) {
   LiveCall call;
-  return Legacy(SetMenuItem(call.Ctx(),
-                            {.row = row,
-                             .x = x,
-                             .y = y,
-                             .w = w,
-                             .background_width = background_width},
-                            Trusted(text)));
+  return &SetMenuItem(call.Ctx(),
+                      {.row = row,
+                       .x = x,
+                       .y = y,
+                       .w = w,
+                       .background_width = background_width},
+                      Trusted(text));
 }
 
 MenuRow& SetLiveMenuItemText(const RowPlacement& placement,
@@ -1303,13 +1287,13 @@ int LiveGradientStopColor(u_int gradient, u_int color_index, int brightness) {
       GradientStopColor(call.Ctx(), gradient, color_index, brightness));
 }
 
-void DrawLiveMenuItem(Menu_Framework_MenuRow* row) {
+void DrawLiveMenuItem(MenuRow* row) {
   if (row == nullptr) {
     VS::Core::LogWarn("menu.framework", "drawing an absent menu row");
     return;
   }
   LiveCall call;
-  DrawMenuItem(call.Ctx(), *Typed(row));
+  DrawMenuItem(call.Ctx(), *row);
 }
 
 int UpdateLiveMainMenuSelection(int mode) {
@@ -1429,9 +1413,9 @@ int LiveActionSelectionResult() {
   return ActionSelectionResult(call.Ctx());
 }
 
-Menu_Framework_MenuRow* CreateLiveActionRow(int row, int x) {
+MenuRow* CreateLiveActionRow(int row, int x) {
   LiveCall call;
-  return Legacy(CreateActionRow(call.Ctx(), row, x));
+  return &CreateActionRow(call.Ctx(), row, x);
 }
 
 void UpdateLiveActionMenu() {
@@ -1598,9 +1582,9 @@ int LiveSelectedRow() {
   return GetSelectedRow(call.Ctx());
 }
 
-Menu_Framework_MenuRow* CreateLiveListRow(int row, int x) {
+MenuRow* CreateLiveListRow(int row, int x) {
   LiveCall call;
-  return Legacy(CreateListRow(call.Ctx(), row, x));
+  return &CreateListRow(call.Ctx(), row, x);
 }
 
 void UpdateLiveRowSelection() {
@@ -1613,14 +1597,14 @@ void DrawLiveBackground(int brightness) {
   DrawBackground(call.Ctx(), brightness);
 }
 
-int DrawLiveFeatheredRowCharacter(u_int character, int x,
-                                  Menu_Framework_MenuRow* row, u_long* before) {
+int DrawLiveFeatheredRowCharacter(u_int character, int x, MenuRow* row,
+                                  u_long* before) {
   if (row == nullptr) {
     VS::Core::LogWarn("menu.framework", "row character without a menu row");
     return x;
   }
   LiveCall call(before);
-  return DrawFeatheredRowCharacter(call.Ctx(), character, x, *Typed(row),
+  return DrawFeatheredRowCharacter(call.Ctx(), character, x, *row,
                                    kCallerLayer);
 }
 
@@ -1629,13 +1613,13 @@ void DrawLiveTabNavigation(int mode) {
   DrawTabNavigation(call.Ctx(), mode);
 }
 
-void DrawLiveScrollableRow(Menu_Framework_MenuRow* row) {
+void DrawLiveScrollableRow(MenuRow* row) {
   if (row == nullptr) {
     VS::Core::LogWarn("menu.framework", "drawing an absent scrollable row");
     return;
   }
   LiveCall call;
-  DrawScrollableRow(call.Ctx(), *Typed(row));
+  DrawScrollableRow(call.Ctx(), *row);
 }
 
 void UpdateAndDrawLiveRows() {

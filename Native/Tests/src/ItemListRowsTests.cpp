@@ -660,18 +660,18 @@ TEST_CASE("Inventory live rows refuse categories without an order table",
 
 TEST_CASE("Inventory live restore settles the live menu rows",
           "[inventory-rows-live][F02596]") {
-  std::array<Menu_Framework_MenuRow, framework::kRowCount> rows{};
+  std::array<VS::Menu::Framework::MenuRow, framework::kRowCount> rows{};
   auto* const saved_rows = VS::Menu::Framework::menuItems;
   const auto saved_list_row = VS::Menu::Framework::itemsListRow;
   const auto memory = framework::LiveMenuCursorMemory();
   const auto saved_cursor = memory[CursorIndex(kArmor)];
-  rows[kSlidingRow].state = 2;
-  rows[kSlidingRow].targetPosition0 = kTargetX;
+  rows[kSlidingRow].state = framework::RowState::kSlideX;
+  rows[kSlidingRow].target0 = kTargetX;
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::itemsListRow = 16;
   memory[CursorIndex(kArmor)] = kRememberedRow;
   inventory::LiveRestoreItemRows(kArmor);
-  CHECK(rows[kSlidingRow].state == 1);
+  CHECK(rows[kSlidingRow].state == framework::RowState::kIdle);
   CHECK(rows[kSlidingRow].x == kTargetX);
   CHECK(rows[inventory::kFirstItemListRow + kRememberedRow].selected == 1);
   VS::Menu::Framework::menuItems = nullptr;

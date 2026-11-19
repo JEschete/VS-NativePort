@@ -142,7 +142,7 @@ struct LiveWorld {
       VS::Input::stickPosBuf};
   ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_menu{
       VS::Menu::Framework::menuState};
-  ValueRestore<Menu_Framework_MenuRow*> saved_rows{
+  ValueRestore<VS::Menu::Framework::MenuRow*> saved_rows{
       VS::Menu::Framework::menuItems};
   ValueRestore<char> saved_hide{VS::Menu::Framework::hideMenu};
   ValueRestore<int> saved_fade{VS::Menu::Framework::backgroundFadeStep};
@@ -164,7 +164,7 @@ struct LiveWorld {
   std::vector<u_long> primitives =
       std::vector<u_long>(kPrimitiveWords + 2, kUnwritten);
   std::array<u_long, 2084> ordering{};
-  std::array<Menu_Framework_MenuRow, framework::kRowCount> rows{};
+  std::array<VS::Menu::Framework::MenuRow, framework::kRowCount> rows{};
   std::vector<std::uint8_t> minimap;
   Field_MpdEnvironment environment{};
   std::array<std::uint32_t, 0x180> sound_offsets{};

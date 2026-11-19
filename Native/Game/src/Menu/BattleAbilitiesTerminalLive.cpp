@@ -146,7 +146,7 @@ class LiveAssignmentHost final : public AssignmentHost {
   }
   std::optional<std::uint8_t> RowGradient(int row) override {
     const auto* item = Framework::LiveMenuItem(row);
-    return item != nullptr ? std::optional(item->gradientState) : std::nullopt;
+    return item != nullptr ? std::optional(item->gradient_state) : std::nullopt;
   }
   bool SelectRow(int row, bool selected) override {
     auto* item = Framework::LiveMenuItem(row);

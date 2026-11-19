@@ -7,6 +7,8 @@
 #include <span>
 #include <string_view>
 
+#include "Menu/Framework/Framework.hpp"
+
 namespace VS::Menu::BattleAbilities {  // NOLINT(readability-identifier-naming)
 inline constexpr std::size_t kUnlockableAbilityCount = 11;
 inline constexpr std::size_t kAbilityCapacity = 16;
@@ -84,7 +86,7 @@ struct AbilityCategoryRow {
   int width = 0;
   int background_width = 0;
   int target_x = 0;
-  std::uint8_t state = 0;
+  Framework::RowState state = Framework::RowState::kInactive;
   bool selected = false;
 };
 

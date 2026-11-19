@@ -1111,7 +1111,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
   decltype(VS::Input::buttonsPressed) saved_buttons = VS::Input::buttonsPressed;
   decltype(VS::Input::buttonRepeat) saved_repeat = VS::Input::buttonRepeat;
-  Menu_Framework_MenuRow* saved_menu_rows = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_menu_rows =
+      VS::Menu::Framework::menuItems;
   decltype(VS::Menu::Framework::itemNames) saved_names =
       VS::Menu::Framework::itemNames;
   decltype(Battle_stringContext) saved_string_context = Battle_stringContext;
@@ -1127,7 +1128,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   decltype(Menu_Loot_showLoot) saved_show = Menu_Loot_showLoot;
   decltype(Menu_Loot_previewedLoot) saved_preview = Menu_Loot_previewedLoot;
   decltype(Menu_Loot_lootLeftEdge) saved_edge = Menu_Loot_lootLeftEdge;
-  std::array<Menu_Framework_MenuRow, 40> menu_rows{};
+  std::array<VS::Menu::Framework::MenuRow, 40> menu_rows{};
   char item_names[512][24]{};
   std::vector<u_long> storage = std::vector<u_long>(0x20000 / 4 + 2);
   std::array<u_long, 32> ordering{};
@@ -1215,8 +1216,9 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   }
 
   void SettleRows() {
+    using VS::Menu::Framework::RowState;
     for (auto& row : menu_rows) {
-      if (row.state > 1) row.state = 1;
+      if (row.state > RowState::kIdle) row.state = RowState::kIdle;
     }
   }
 };

@@ -1417,13 +1417,13 @@ struct Snapshot {
   snapshot.inventory.insert(snapshot.inventory.end(), indices.begin(),
                             indices.end());
   snapshot.stats = Bytes(fixture.stats);
-  constexpr std::size_t kRowBytes = offsetof(Menu_Framework_MenuRow, text) +
-                                    sizeof(Menu_Framework_MenuRow{}.text);
-  for (const Menu_Framework_MenuRow& row : fixture.rows) {
+  constexpr std::size_t kRowBytes =
+      offsetof(fw::MenuRow, text) + sizeof(fw::MenuRow{}.text);
+  for (const fw::MenuRow& row : fixture.rows) {
     const auto bytes = Bytes(row);
     snapshot.rows.insert(snapshot.rows.end(), bytes.begin(),
                          bytes.begin() + kRowBytes);
-    snapshot.sub_texts.push_back(fixture.Classify(row.subText));
+    snapshot.sub_texts.push_back(fixture.Classify(row.sub_text));
   }
   snapshot.scalars = {Menu_Inventory_ashleyRenderState,
                       Menu_Inventory_itemCategoryIconsEnabled,

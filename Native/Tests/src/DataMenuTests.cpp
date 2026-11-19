@@ -286,15 +286,16 @@ TEST_CASE("Score list numbers retain every original digit and native link",
 TEST_CASE("Score scroll fades keep every packet in its native ordering chain",
           "[render][menu][score][scroll]") {
   ClockFixture fixture;
-  Menu_Framework_MenuRow row{};
-  row.text[0] = static_cast<char>(VS::Core::TextCode::kPrintString);
+  using VS::Menu::Framework::RowState;
+  VS::Menu::Framework::MenuRow row{};
+  row.text[0] = static_cast<std::uint8_t>(VS::Core::TextCode::kPrintString);
   row.x = 60;
   row.y = 80;
   row.w = 100;
-  row.backgroundWidth = 100;
-  row.state = GENERATE(0, 1);
-  row.isScrollable = GENERATE(1, 2);
-  row.gradientState = GENERATE(0, 8);
+  row.background_width = 100;
+  row.state = GENERATE(RowState::kInactive, RowState::kIdle);
+  row.is_scrollable = GENERATE(1, 2);
+  row.gradient_state = GENERATE(0, 8);
   VS::Menu::Score::RenderLiveScrollableRow(&row);
   const auto begin = reinterpret_cast<uintptr_t>(fixture.storage.data() + 1);
   const auto end = reinterpret_cast<uintptr_t>(
@@ -311,7 +312,8 @@ TEST_CASE("Score scroll fades keep every packet in its native ordering chain",
     packet = isendprim(packet) ? nullptr : nextPrim(packet);
   }
   CHECK(packet == nullptr);
-  CHECK(linked_packets == 24u + (row.isScrollable == 1) + (row.state == 1));
+  CHECK(linked_packets ==
+        24u + (row.is_scrollable == 1) + (row.state == RowState::kIdle));
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
 }

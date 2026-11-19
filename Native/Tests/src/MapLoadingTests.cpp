@@ -222,7 +222,7 @@ TEST_CASE("The area name row slides in with the given colour",
       row.placement ==
       map::MenuRowPlacement{
           .row = 10, .x = 320, .y = 34, .width = 0x8C, .background_width = 8});
-  CHECK(row.state == 2);
+  CHECK(row.state == VS::Menu::Framework::RowState::kSlideX);
   CHECK(row.target_x == 0xB4);
   CHECK(row.selected == 1);
   CHECK(row.font_color == 3);

@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <span>
 
+#include "Menu/Framework/Framework.hpp"
+
 // The area map's area list, background and scene-map loading (MENU5.PRG
 // 4D8.c:129-238, 448-520 and 979-1045): the visited-area chooser's rows,
 // cursor and polling, the area-name title row, the menu-ready poll, the
@@ -133,7 +135,7 @@ struct MenuRowPlacement {
 // The title row's fields _setMenuItemMapName sets after placing it.
 struct AreaNameRow {
   MenuRowPlacement placement;
-  std::uint8_t state = 0;
+  Framework::RowState state = Framework::RowState::kInactive;
   std::int16_t target_x = 0;
   std::uint8_t selected = 0;
   std::uint8_t font_color = 0;

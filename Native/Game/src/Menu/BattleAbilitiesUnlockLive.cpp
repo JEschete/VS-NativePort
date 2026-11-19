@@ -161,7 +161,7 @@ class LiveAbilityHost final : public AbilityUnlockHost {
       return false;
     }
     item->state = row.state;
-    item->targetPosition0 = static_cast<std::int16_t>(row.target_x);
+    item->target0 = static_cast<std::int16_t>(row.target_x);
     item->selected = row.selected ? 1 : 0;
     return true;
   }

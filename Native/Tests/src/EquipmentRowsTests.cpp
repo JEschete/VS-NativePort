@@ -839,7 +839,7 @@ struct LiveRowsFixture {
   Restore<char> saved_count{Menu_Inventory_menuRowCount};
   Restore<char> saved_first{Menu_Inventory_itemsFirstRow};
   Restore<char> saved_equipped{Menu_Inventory_equippedItem};
-  Restore<Menu_Framework_MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
+  Restore<fw::MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
   Restore<decltype(VS::Input::buttonsPressed)> saved_pressed{
       VS::Input::buttonsPressed};
   Restore<int> saved_repeat{VS::Input::buttonRepeat};
@@ -847,7 +847,7 @@ struct LiveRowsFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 256> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Menu_Framework_MenuRow, 40> rows{};
+  std::array<fw::MenuRow, 40> rows{};
   Strings first{1};
   Strings second{60};
   std::array<u_short*, 4> texts{};

@@ -13,6 +13,7 @@
 #include "Field/RoomSwitchesLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Map.h"
 #include "Menu/MapMarkers.hpp"
@@ -150,12 +151,12 @@ class LiveMapMarkerHost final : public MapMarkerHost {
     u_short* table = text.table == LabelTextTable::kDoorNames
                          ? Menu_Map_doors
                          : Menu_Map_connectingMaps;
-    Menu_Framework_MenuRow* row = Framework::SetLiveMenuItem(
+    Framework::MenuRow* row = Framework::SetLiveMenuItem(
         0, text.x, text.y, text.width, 0,
         reinterpret_cast<char*>(&table[text.text_offset]));
-    row->backgroundWidth = text.background_width;
+    row->background_width = text.background_width;
     Framework::DrawLiveMenuItem(row);
-    Framework::LiveMenuItem(0)->state = 0;
+    Framework::LiveMenuItem(0)->state = Framework::RowState::kInactive;
   }
 
   bool IsSigilDoorUnlocked(std::int32_t zone_id, std::int32_t map_id,

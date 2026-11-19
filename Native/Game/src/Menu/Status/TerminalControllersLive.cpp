@@ -165,7 +165,7 @@ void StoreView(const TerminalView& view) {
 }
 bool Workspace() {
   constexpr std::size_t kRowsBytes =
-      Framework::kRowCount * sizeof(Menu_Framework_MenuRow);
+      Framework::kRowCount * sizeof(Framework::MenuRow);
   constexpr std::size_t kWorkspaceBytes =
       kRowsBytes + Framework::kStringBufferBytes +
       Framework::kRowTypeCount * sizeof(int);

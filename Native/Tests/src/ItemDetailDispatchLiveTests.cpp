@@ -20,7 +20,7 @@ TEST_CASE("F02568 production renderer merges only the selected category icon",
   inv::DrawLiveItemCategoryIcons(2, 1);
   const auto sprites = fixture.Sprites();
   CHECK(sprites.size() == 7);
-  CHECK(fixture.rows[31].rowIcon == 24);
+  CHECK(fixture.rows[31].row_icon == 24);
   CHECK(fixture.rows[31].selected == 0);
 }
 
@@ -47,8 +47,8 @@ TEST_CASE("F02579 armor details use production stats and native row layout",
   CHECK(VS::Menu::Framework::currentStatusViewItem == 16);
   CHECK(VS::Menu::Framework::enabledStatPages == 7);
   CHECK(VS::Menu::Framework::strIntAgi[0] == -7);
-  CHECK(fixture.rows[31].targetPosition0 == 16);
-  CHECK(fixture.rows[20].targetPosition0 == 18);
+  CHECK(fixture.rows[31].target0 == 16);
+  CHECK(fixture.rows[20].target0 == 18);
 }
 
 TEST_CASE("F02579 accessory details keep their real subtype",
@@ -73,7 +73,7 @@ TEST_CASE("F02579 paging integrates the real armor formatter and cursor memory",
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[4]
             .position.page == 1);
-  CHECK(fixture.rows[31].itemPage == 2);
+  CHECK(fixture.rows[31].item_page == 2);
   CHECK(fixture.rows[20].selected == 1);
 }
 
@@ -103,7 +103,7 @@ TEST_CASE(
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[5]
             .position.page == 1);
-  CHECK(fixture.rows[31].itemPage == 2);
+  CHECK(fixture.rows[31].item_page == 2);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 5);
 }
 
@@ -112,7 +112,7 @@ TEST_CASE("F02581 packed list selection enters the real gem controller",
   DispatchLiveFixture fixture;
   fixture.AddGems();
   CHECK(inv::UpdateLiveItemDetails(kGemDispatchEntry) == 0);
-  CHECK(fixture.rows[31].itemPage == 1);
+  CHECK(fixture.rows[31].item_page == 1);
   CHECK(VS::Menu::Framework::selectedStatusViewElement == 9);
   CHECK(Menu_Inventory_exitToBattle == 0);
   fixture.IdleRows();
@@ -145,7 +145,7 @@ TEST_CASE(
   CHECK(inv::UpdateLiveGemDetails(0) == 0);
   CHECK(inv::UpdateLiveItemDetails(5) == 0);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
-  CHECK(fixture.rows[31].itemPage == 0);
+  CHECK(fixture.rows[31].item_page == 0);
 }
 
 TEST_CASE("F02581 normal close restores list commands and Ashley presentation",

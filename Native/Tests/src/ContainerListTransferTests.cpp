@@ -1193,7 +1193,8 @@ std::vector<ListFrame> RunItemList(Entry entry) {
   for (int frame = 0; frame < kListFrames; ++frame) {
     ListFrame record{entry(0), {}};
     for (const auto& row : fixture.rows) {
-      record.rows.push_back({row.state, row.x, row.y, row.selected});
+      record.rows.push_back(
+          {static_cast<int>(row.state), row.x, row.y, row.selected});
     }
     frames.push_back(record);
     fixture.Frame();
@@ -1213,7 +1214,7 @@ TEST_CASE("F02985 live item list replays after its MENUD reset",
   transfer::ResetLiveContainerTransferStatics();
   REQUIRE(actual == expected);
   REQUIRE(std::ranges::any_of(actual.back().rows, [](const auto& row) {
-    return row[0] != Menu_Framework_MenuItemState_Inactive;
+    return row[0] != static_cast<int>(VS::Menu::Framework::RowState::kInactive);
   }));
 }
 TEST_CASE("F02985 F02987 live entries refuse missing storage and steps",

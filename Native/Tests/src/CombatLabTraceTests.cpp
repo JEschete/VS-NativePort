@@ -41,7 +41,6 @@
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/MenuItems.h"
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
@@ -850,7 +849,7 @@ struct GameplayInspectionFixture {
     VS::Menu::Framework::menuItems = nullptr;
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuState.currentMenu =
-        Menu_Framework_MenuState_NoneClosed;
+        VS::Menu::Framework::kMenuClosed;
     Event_isMenuTransitionActive = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
@@ -1039,8 +1038,7 @@ TEST_CASE(
   VS::State::stateFlags.menu_f_submenu = 1;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   VS::State::stateFlags.menu_f_submenu = 0;
-  VS::Menu::Framework::menuState.currentMenu =
-      Menu_Framework_MenuState_NoneClosed;
+  VS::Menu::Framework::menuState.currentMenu = VS::Menu::Framework::kMenuClosed;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   VS::Menu::Framework::menuState.currentMenu = 15;
   VS::Boot::ResetGameplayInspection();
@@ -1558,7 +1556,7 @@ TEST_CASE("Navigation observes stacked support without mutating contact state",
 TEST_CASE("Earned ability menus are observed without changing combat mode",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
-  std::array<Menu_Framework_MenuRow, 10> rows{};
+  std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.currentMenu = 3;
   Battle_actionFlowMode = 14;
@@ -1639,7 +1637,7 @@ TEST_CASE("Consumable observations do not consume stock or grant a spell",
 TEST_CASE("Consumable menu rows retain native inventory identity and bounds",
           "[player][diagnostics][inspection]") {
   ItemInspectionFixture fixture;
-  std::array<Menu_Framework_MenuRow, 10> rows{};
+  std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   std::array<VS::Menu::Framework::ItemText, 1> text{};
   Field_controlMode = 5;
   VS::Menu::Framework::menuItems = rows.data();
@@ -1663,7 +1661,7 @@ TEST_CASE("Consumable menu rows retain native inventory identity and bounds",
 TEST_CASE("Loot input readiness is observed without claiming the drop",
           "[player][diagnostics][inspection]") {
   ItemInspectionFixture fixture;
-  std::array<Menu_Framework_MenuRow, 10> rows{};
+  std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.currentMenu = 12;
   Battle_actionFlowMode = 12;
@@ -1681,7 +1679,7 @@ TEST_CASE(
     "Event-owned loot is observed while native cutscene control remains active",
     "[player][diagnostics][event-reward]") {
   ItemInspectionFixture fixture;
-  std::array<Menu_Framework_MenuRow, 10> rows{};
+  std::array<VS::Menu::Framework::MenuRow, 10> rows{};
   VS::Menu::Framework::menuItems = rows.data();
   VS::Menu::Framework::menuState.currentMenu = 12;
   Field_controlMode = 3;

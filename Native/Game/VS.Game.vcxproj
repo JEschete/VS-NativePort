@@ -2467,7 +2467,6 @@
     <ClInclude Include="src\Menu\Framework\ItemRowsLiveHost.hpp" />
     <ClInclude Include="src\Menu\Framework\ItemRowsLiveState.hpp" />
     <ClInclude Include="src\Menu\Framework\ItemSorting.hpp" />
-    <ClInclude Include="src\Menu\Framework\MenuItems.h" />
     <ClInclude Include="src\Menu\Framework\MenuMemory.h" />
     <ClInclude Include="src\Menu\Framework\Menus.hpp" />
     <ClInclude Include="src\Menu\Framework\SortingKeysLive.hpp" />

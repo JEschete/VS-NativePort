@@ -4,7 +4,6 @@
 
 struct Content_DiscQueueSlot;
 struct Menu_Framework_MenuControlState;
-struct Menu_Framework_MenuRow;
 struct Menu_Framework_TextHeader;
 
 // decomp: vs_mainMenu_actionsMenuActions (src/MENU/MAINMENU.PRG/58EC.h:7)
@@ -107,33 +106,6 @@ struct Menu_Framework_TextHeader {
     char x;
 };
 static_assert(sizeof(Menu_Framework_TextHeader) == 0x10, "Menu_Framework_TextHeader must keep its PS1 layout");
-
-// decomp: vs_battle_menuItem_t (src/BATTLE/BATTLE.PRG/5BF94.h:66)
-struct Menu_Framework_MenuRow {
-    u_char state;
-    u_char w;
-    u_char backgroundWidth;
-    u_char animationStep;
-    u_char gradientState;
-    u_char isScrollable;
-    u_char selected;
-    u_char unselectable;
-    u_char buttonId;
-    u_char rowIcon;
-    u_char fontColor;
-    u_char invertGradient;
-    u_char material;
-    u_char outsetIcon;
-    u_short itemPage;
-    u_short count;
-    u_short max;
-    short x;
-    short y;
-    short targetPosition0;
-    short targetPosition1;
-    char text[32];
-    char* subText;
-};
 
 // decomp: vs_battle_menuState_t (src/BATTLE/BATTLE.PRG/5BF94.h:81)
 struct Menu_Framework_MenuControlState {

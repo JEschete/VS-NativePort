@@ -23,8 +23,8 @@ TEST_CASE("F02575 live initialization uses production weapon stats and layout",
   CHECK(VS::Menu::Framework::equipmentSubtype == 1);
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(VS::Menu::Framework::enabledStatPages == 7);
-  CHECK(fixture.rows[31].targetPosition0 == 16);
-  CHECK(fixture.rows[20].targetPosition0 == 18);
+  CHECK(fixture.rows[31].target0 == 16);
+  CHECK(fixture.rows[20].target0 == 18);
   CHECK(Menu_Inventory_ashleyYOffset == 5);
 }
 
@@ -35,12 +35,12 @@ TEST_CASE(
   fixture.AddWeapon();
   fixture.Open(inventory::UpdateLiveWeaponDetails);
   fixture.Wait(inventory::UpdateLiveWeaponDetails, kWeaponDetailRows);
-  CHECK(fixture.rows[11].state == Menu_Framework_MenuItemState_SlideX);
-  CHECK(fixture.rows[12].state == Menu_Framework_MenuItemState_SlideX);
+  CHECK(fixture.rows[11].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[12].state == fw::RowState::kSlideX);
   CHECK(fixture.rows[13].unselectable == 1);
   CHECK(fixture.rows[14].unselectable == 1);
-  CHECK(fixture.rows[15].state == Menu_Framework_MenuItemState_Inactive);
-  CHECK(fixture.rows[13].targetPosition0 == 169);
+  CHECK(fixture.rows[15].state == fw::RowState::kInactive);
+  CHECK(fixture.rows[13].target0 == 169);
 }
 
 TEST_CASE("F02576 live blade stats retain sign and class affinity-only pages",
@@ -68,7 +68,7 @@ TEST_CASE(
   CHECK(VS::Menu::Framework::currentStatusViewItem == 1);
   CHECK(VS::Menu::Framework::menuMemory.opaque3A.categoryCursors[1]
             .position.page == 1);
-  CHECK(fixture.rows[31].itemPage == 2);
+  CHECK(fixture.rows[31].item_page == 2);
   CHECK(fixture.rows[20].selected == 1);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 7);
 }
@@ -143,7 +143,7 @@ TEST_CASE("F02578 live shield initializes exactly three gem rows",
   CHECK(fixture.rows[11].unselectable == 1);
   CHECK(fixture.rows[12].unselectable == 1);
   CHECK(fixture.rows[13].unselectable == 1);
-  CHECK(fixture.rows[14].state == Menu_Framework_MenuItemState_Inactive);
+  CHECK(fixture.rows[14].state == fw::RowState::kInactive);
 }
 
 TEST_CASE("F02578 live shield waits for real row idle before accepting exit",

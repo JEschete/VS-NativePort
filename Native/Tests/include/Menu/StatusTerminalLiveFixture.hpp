@@ -61,7 +61,7 @@ inline constexpr std::size_t kOrderingWords = 0x2088 / sizeof(u_long);
 inline constexpr int kSourceModel = 1;
 inline constexpr int kSourceBattleSequence = 2;
 inline constexpr int kAssetPollLimit = 256;
-using Row = Menu_Framework_MenuRow;
+using Row = fw::MenuRow;
 inline constexpr auto kRowBytes = fw::kRowCount * sizeof(Row);
 inline constexpr auto kTypeBytes = fw::kRowTypeCount * sizeof(int);
 inline constexpr auto kDataBytes = fw::kStringBufferBytes + kTypeBytes;
@@ -252,8 +252,7 @@ struct Fixture {
       VS::Field::isFieldRenderingEnabled};
   ValueRestore<Menu_Framework_MenuControlState> saved_control{
       VS::Menu::Framework::menuState};
-  ValueRestore<Menu_Framework_MenuRow*> saved_rows{
-      VS::Menu::Framework::menuItems};
+  ValueRestore<fw::MenuRow*> saved_rows{VS::Menu::Framework::menuItems};
   ValueRestore<char*> saved_strings{VS::Menu::Framework::stringBuf};
   ValueRestore<int*> saved_types{VS::Menu::Framework::rowTypeBuf};
   ValueRestore<u_short*> saved_list_text{VS::Menu::Framework::itemsText};
@@ -323,8 +322,7 @@ struct Fixture {
       throw std::runtime_error("terminal Live fixture allocation failed");
     }
     std::memset(workspace, 0, kWorkspaceBytes);
-    VS::Menu::Framework::menuItems =
-        static_cast<Menu_Framework_MenuRow*>(workspace);
+    VS::Menu::Framework::menuItems = static_cast<fw::MenuRow*>(workspace);
     VS::Menu::Framework::stringBuf =
         reinterpret_cast<char*>(VS::Menu::Framework::menuItems + fw::kRowCount);
     VS::Menu::Framework::rowTypeBuf = reinterpret_cast<int*>(

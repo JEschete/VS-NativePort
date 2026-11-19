@@ -369,10 +369,10 @@ H0367,header,Native/Game/src/Menu/Framework/AshleyPreview.h,generated,yes,pragma
 H0368,header,Native/Game/src/Menu/Framework/DetailDispatchLiveSupport.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0369,header,Native/Game/src/Menu/Framework/DetailInputLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0370,header,Native/Game/src/Menu/Framework/EquipmentDetailsLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0371,header,Native/Game/src/Menu/Framework/Framework.h,generated,yes,pragma-once,0,0,0,0,0,0,16,0,0,remaining,
+H0371,header,Native/Game/src/Menu/Framework/Framework.h,generated,yes,pragma-once,0,0,0,0,0,0,15,0,0,remaining,
 H0372,header,Native/Game/src/Menu/Framework/FrameworkLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0373,header,Native/Game/src/Menu/Framework/ItemRowsLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0374,header,Native/Game/src/Menu/Framework/MenuItems.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
+H0374,header,Native/Game/src/Menu/Framework/MenuItems.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,retired,"deleted: vs_battle_menuItemState became MenuRow's RowState enum class, and vs_battle_menuItemScrollable and vs_battle_menuStates the kScroll* and kMenu* constants, in Menu/Framework/Framework.hpp; Framework.h's Menu_Framework_MenuRow went with it, so the native MenuRow is the one row record; TYPE T00094, T00095, T00096 and T00657 re-pointed (#441)"
 H0375,header,Native/Game/src/Menu/Framework/MenuMemory.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0376,header,Native/Game/src/Menu/Framework/MenuRows.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,"deleted: Menu_Framework_ItemText duplicated VS::Menu::Framework::ItemText in Menu/Framework/Framework.hpp, which now asserts the record's 0x80 layout; TYPE T00313 re-pointed (#441)"
 H0377,header,Native/Game/src/Menu/Framework/Menus.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,

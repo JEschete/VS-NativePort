@@ -79,10 +79,10 @@
 #include "Items/LootLiveState.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/MenuItems.h"
 #include "Menu/Results/Results.hpp"
 #include "Menu/Results/TimeAttack.hpp"
 #include "Render/Display.hpp"
@@ -786,7 +786,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
   constexpr int kFieldControl = 1;
   if (Field_controlMode != kFieldControl || Battle_actionFlowMode != 0 ||
       VS::Menu::Framework::menuState.currentMenu !=
-          Menu_Framework_MenuState_NoneClosed) {
+          VS::Menu::Framework::kMenuClosed) {
     return reject("RETURN TO IDLE FIELD BEFORE ADJUSTING ASHLEY");
   }
   auto* actor = Battle_actors[0];
@@ -875,7 +875,7 @@ EncounterState InspectGameplay() {
       VS::Field::LiveRoomRenderState().field_rendering_enabled;
   state.menu_state =
       static_cast<unsigned char>(VS::Menu::Framework::menuState.currentMenu);
-  if (state.menu_state != Menu_Framework_MenuState_NoneClosed &&
+  if (state.menu_state != VS::Menu::Framework::kMenuClosed &&
       VS::Menu::Framework::itemsText != nullptr) {
     state.menu_highlighted_row = VS::Menu::Framework::LiveHighlightedRow();
   }

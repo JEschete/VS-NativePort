@@ -164,12 +164,6 @@ template <typename Record>
   return *record;
 }
 
-// The menu rows are vs_battle_menuItems' records viewed in place
-// (FrameworkLive.cpp pins the layout).
-[[nodiscard]] Menu_Framework_MenuRow* LegacyRow(MenuRow* row) {
-  return reinterpret_cast<Menu_Framework_MenuRow*>(row);
-}
-
 [[nodiscard]] VS::Items::ContainerData* OpenContainer() {
   return Menu_Container_containerData == nullptr
              ? nullptr
@@ -415,18 +409,14 @@ std::span<const std::uint8_t> LiveItemRowsHost::TextBytes(TextRef text) {
   return {};
 }
 
-Menu_Framework_MenuRow* CreateLiveWeaponComponentRow(int row, int weapon_index,
-                                                     int slide) {
+MenuRow* CreateLiveWeaponComponentRow(int row, int weapon_index, int slide) {
   LiveItemRowsHost host;
-  return LegacyRow(
-      CreateWeaponComponentRow(host, row, weapon_index, (slide & 1) != 0));
+  return CreateWeaponComponentRow(host, row, weapon_index, (slide & 1) != 0);
 }
 
-Menu_Framework_MenuRow* CreateLiveShieldGemRow(int row, int shield_index,
-                                               int slide) {
+MenuRow* CreateLiveShieldGemRow(int row, int shield_index, int slide) {
   LiveItemRowsHost host;
-  return LegacyRow(
-      CreateShieldGemRow(host, row, shield_index, (slide & 1) != 0));
+  return CreateShieldGemRow(host, row, shield_index, (slide & 1) != 0);
 }
 
 void FormatLiveWeaponRow(VS::Items::WeaponLoadout* weapon, char* menu_text[],

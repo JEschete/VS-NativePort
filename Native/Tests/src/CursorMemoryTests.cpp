@@ -55,7 +55,7 @@ namespace {
 struct CursorFixture {
   VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
-  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
   int saved_selected = VS::Menu::Framework::selectedRow;
   int saved_animation = VS::Menu::Framework::mainMenuCursorAnimation;
@@ -70,7 +70,7 @@ struct CursorFixture {
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 768> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   struct {
-    std::array<Menu_Framework_MenuRow, 40> rows{};
+    std::array<VS::Menu::Framework::MenuRow, 40> rows{};
     std::array<std::byte, 0x124> scratch{};
   } workspace;
   std::array<char*, 40> strings{};
@@ -189,7 +189,9 @@ struct BreakArtMenuFixture {
   }
 
   void FinishRowAnimations() {
-    for (auto& row : rows.workspace.rows) row.state = 1;
+    for (auto& row : rows.workspace.rows) {
+      row.state = VS::Menu::Framework::RowState::kIdle;
+    }
   }
 
   void Open() {
@@ -404,7 +406,9 @@ struct WorkshopChoicesFixture {
   void Open(Selector select, int initial, int capacity) {
     REQUIRE(RunSetup([&](setup::Context& c) { return select(c, initial); }) ==
             0);
-    for (auto& row : setup.rows.workspace.rows) row.state = 1;
+    for (auto& row : setup.rows.workspace.rows) {
+      row.state = VS::Menu::Framework::RowState::kIdle;
+    }
     // InitializeHeap excludes the arena's final unit from the usable span.
     const auto slack =
         std::span(setup.rows.arena).last<VS::Core::Memory::kHeapUnitBytes>();
@@ -485,7 +489,9 @@ struct WorkshopRepairFixture {
   }
 
   int Tick() {
-    for (auto& row : setup.setup.rows.workspace.rows) row.state = 1;
+    for (auto& row : setup.setup.rows.workspace.rows) {
+      row.state = VS::Menu::Framework::RowState::kIdle;
+    }
     return RunSetup(
         [](setup::Context& c) { return setup::UpdateRepair(c, false); });
   }

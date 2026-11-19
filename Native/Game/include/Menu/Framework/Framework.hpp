@@ -84,6 +84,7 @@ inline constexpr std::uint32_t kClutColumnMask = 0x3F;
   return PackUv(u, v) | (PackClut(clut_x, clut_y) << kHalfwordShift);
 }
 
+// decomp: vs_battle_menuItemState (src/BATTLE/BATTLE.PRG/5BF94.h:33):
 // vs_battle_menuItem_t's state.
 enum class RowState : std::uint8_t {
   kInactive,
@@ -94,8 +95,20 @@ enum class RowState : std::uint8_t {
   kDismiss,
 };
 
-// vs_battle_menuItem_t (BATTLE.PRG 5BF94.h:66) in the record's layout, so
-// the live table is viewed in place (FrameworkLive.cpp pins the layout).
+// decomp: vs_battle_menuItemScrollable (src/BATTLE/BATTLE.PRG/5BF94.h:27):
+// the scroll arrows MenuRow::is_scrollable draws (zero for none).
+inline constexpr std::uint8_t kScrollUp = 1;
+inline constexpr std::uint8_t kScrollDown = 2;
+
+// decomp: vs_battle_menuStates (src/BATTLE/BATTLE.PRG/5BF94.h:68):
+// MenuControl::current_menu. The low five bits name the overlay, 0x1F closes
+// the menus, 0x3F is closed and 0x40 marks a screen the main menu opened.
+inline constexpr int kMenuClosing = 0x1F;
+inline constexpr int kMenuClosed = 0x3F;
+inline constexpr int kOpenedFromMainMenu = 0x40;
+
+// decomp: vs_battle_menuItem_t (src/BATTLE/BATTLE.PRG/5BF94.h:66): one row of
+// the forty-row menu table (menuItems in FrameworkLiveState.hpp).
 struct MenuRow {
   RowState state = RowState::kInactive;
   std::uint8_t w = 0;

@@ -8,6 +8,7 @@
 #include <string_view>
 
 #include "Items/ContainerIndexing.hpp"
+#include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 
 // The container screen's list transfer: the direction prompt, the item list
@@ -145,7 +146,7 @@ class TransferWorld {
   virtual void ClearRowOutsetIcon(std::int32_t row) = 0;
   [[nodiscard]] virtual std::int16_t RowX(std::int32_t row) = 0;
   virtual void SetRowX(std::int32_t row, std::int16_t x) = 0;
-  virtual void SlideRow(std::int32_t row, std::uint8_t state,
+  virtual void SlideRow(std::int32_t row, Framework::RowState state,
                         std::int16_t target) = 0;
   virtual void SetRowCounts(std::int32_t row, std::uint16_t count,
                             std::uint16_t max) = 0;

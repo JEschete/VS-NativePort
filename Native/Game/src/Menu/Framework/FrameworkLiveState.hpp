@@ -29,7 +29,7 @@ namespace VS::Menu::Framework {
 extern signed char loadedSubMenu;
 // decomp: vs_battle_menuItems (BATTLE/BATTLE.PRG 5BF94.c): the forty rows of
 // the workspace block, or null with no workspace.
-extern Menu_Framework_MenuRow* menuItems;
+extern MenuRow* menuItems;
 // decomp: D_800EB9C4 (BATTLE/BATTLE.PRG 5BF94.c)
 extern VS::Items::LootListNode* lootLists;
 // decomp: D_800EB9C8 (BATTLE/BATTLE.PRG 5BF94.c)

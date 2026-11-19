@@ -2,8 +2,6 @@
 #include "Items/ItemRecords.hpp"
 // Hand-maintained (tools/port/owned.csv).
 
-struct Menu_Framework_MenuRow;
-
 // Binds the item rows (ItemRows.hpp) to their texts (ItemRowsLiveState.hpp),
 // the inventory and container tables the menus show (vs_mainMenu_weapons ..
 // vs_mainMenu_gems), the battle string context, vs_battle_stringBuf, the menu
@@ -11,16 +9,15 @@ struct Menu_Framework_MenuRow;
 // or text array, a reference outside the bound table and a table that is
 // neither the inventory's nor the container's are refused and reported.
 namespace VS::Menu::Framework {
+struct MenuRow;
 struct TextRef;
 // Reuses the item formatters' resolver for caller-owned row buffers and names.
 [[nodiscard]] char* ResolveLiveItemRowText(TextRef text, void* buffer,
                                            char* weapon_name);
 // MAINMENU.PRG (2D10.c). The description buffer is
 // kRowDescriptionBufferBytes long.
-Menu_Framework_MenuRow* CreateLiveWeaponComponentRow(int row, int weapon_index,
-                                                     int slide);
-Menu_Framework_MenuRow* CreateLiveShieldGemRow(int row, int shield_index,
-                                               int slide);
+MenuRow* CreateLiveWeaponComponentRow(int row, int weapon_index, int slide);
+MenuRow* CreateLiveShieldGemRow(int row, int shield_index, int slide);
 void FormatLiveWeaponRow(VS::Items::WeaponLoadout* weapon, char* menu_text[],
                          int* row_type, void* buffer);
 void FormatLiveInventoryWeaponRow(VS::Items::InventoryWeapon* weapon,

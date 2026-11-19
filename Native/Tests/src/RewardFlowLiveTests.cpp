@@ -125,13 +125,13 @@ struct LiveMenuFixture : LiveFixture {
       VS::Menu::Framework::actionSelection;
   VS::Items::LootListNode* saved_lists = VS::Menu::Framework::lootLists;
   VS::Items::BattleLoot* saved_entry = VS::Menu::Framework::lootEntry;
-  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int saved_restrictions = VS::Menu::Framework::actionRestrictions;
   char saved_shortcut = VS::Menu::Framework::shortcutInvoked;
   char saved_opened = VS::Menu::Framework::openedWithoutMainMenu;
   char saved_art = VS::Menu::Framework::unlockedBreakArt;
   char saved_ability = VS::Menu::Framework::unlockedBattleAbility;
-  std::array<Menu_Framework_MenuRow, 40> rows{};
+  std::array<VS::Menu::Framework::MenuRow, 40> rows{};
 
   LiveMenuFixture() {
     VS::Menu::Framework::menuState = {};

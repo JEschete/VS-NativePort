@@ -243,8 +243,9 @@ struct LivePoliciesFixture {
   VS::Items::InventoryContents staged{};
   VS::Items::InventoryContents backup{};
   std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
-  std::array<Menu_Framework_MenuRow, 40> menu_rows{};
-  Menu_Framework_MenuRow* previous_menu_rows{VS::Menu::Framework::menuItems};
+  std::array<VS::Menu::Framework::MenuRow, 40> menu_rows{};
+  VS::Menu::Framework::MenuRow* previous_menu_rows{
+      VS::Menu::Framework::menuItems};
   VS::Items::InventoryContents* previous_inventory{Menu_Loot_inventory};
   VS::Items::InventoryContents* previous_backup{Menu_Loot_inventoryBackup};
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};

@@ -401,7 +401,7 @@ void LiveShowAreaName(char* map_name, char font_color) {
     return;
   }
   const AreaNameRow area = AreaNameRowOf(font_color);
-  Menu_Framework_MenuRow* row = Framework::SetLiveMenuItem(
+  Framework::MenuRow* row = Framework::SetLiveMenuItem(
       area.placement.row, area.placement.x, area.placement.y,
       area.placement.width, area.placement.background_width, map_name);
   if (row == nullptr) {
@@ -409,9 +409,9 @@ void LiveShowAreaName(char* map_name, char font_color) {
     return;
   }
   row->state = area.state;
-  row->targetPosition0 = area.target_x;
+  row->target0 = area.target_x;
   row->selected = area.selected;
-  row->fontColor = area.font_color;
+  row->font_color = area.font_color;
 }
 
 // decomp: MENU5.PRG _menuReady (4D8.c:204).

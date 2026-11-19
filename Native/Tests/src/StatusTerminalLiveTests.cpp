@@ -82,12 +82,11 @@ TEST_CASE(
     "[status-terminal][status-terminal-live]") {
   Fixture fixture;
   const auto refused = st::RefusedLiveTerminalControllerCount();
-  std::array<Menu_Framework_MenuRow, fw::kRowCount> forged{};
+  std::array<fw::MenuRow, fw::kRowCount> forged{};
   VS::Menu::Framework::menuItems = forged.data();
   CHECK(st::LiveUpdateEquipmentList(-1) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 1);
-  VS::Menu::Framework::menuItems =
-      static_cast<Menu_Framework_MenuRow*>(fixture.workspace);
+  VS::Menu::Framework::menuItems = static_cast<fw::MenuRow*>(fixture.workspace);
   ++VS::Menu::Framework::rowTypeBuf;
   CHECK(st::LiveUpdateEquipmentDetails(1) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused + 2);

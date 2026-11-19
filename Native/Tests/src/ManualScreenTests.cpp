@@ -888,7 +888,7 @@ constexpr int kInformationBox = 7;
 struct LiveManualFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 1024> arena{};
-  Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
+  fw::MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   int* saved_text = Menu_Manual_helpText;
   u_long* saved_assets = Menu_Manual_helpAssets;
   Content_DiscQueueSlot* saved_text_request = Menu_Manual_helpTextCdQueue;
@@ -906,7 +906,7 @@ struct LiveManualFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   std::array<Content_DiscQueueSlot, 32> saved_requests =
       std::to_array(Content_discRequestSlots);
-  std::array<Menu_Framework_MenuRow, 40> rows{};
+  std::array<fw::MenuRow, 40> rows{};
   int saved_hud_slide = Battle_hudSlideOffset;
   int saved_field_rendering = VS::Field::isFieldRenderingEnabled;
   int saved_fade_step = VS::Menu::Framework::backgroundFadeStep;
@@ -1068,12 +1068,11 @@ HelpPagesState CurrentHelpPages() {
 }
 
 // The row fields a menu row animation moves.
-bool SameRowMotion(const Menu_Framework_MenuRow& left,
-                   const Menu_Framework_MenuRow& right) {
+bool SameRowMotion(const fw::MenuRow& left, const fw::MenuRow& right) {
   return left.state == right.state &&
-         left.animationStep == right.animationStep && left.x == right.x &&
-         left.y == right.y && left.targetPosition0 == right.targetPosition0 &&
-         left.targetPosition1 == right.targetPosition1;
+         left.animation_step == right.animation_step && left.x == right.x &&
+         left.y == right.y && left.target0 == right.target0 &&
+         left.target1 == right.target1;
 }
 
 // Help text of `lines` two-glyph lines, laid out as _helpText (ManualTopics).
@@ -1101,30 +1100,30 @@ std::vector<std::uint8_t> HelpText(int lines) {
 TEST_CASE("F04159 LiveClearMenuExceptRow8 flies out every row but row 8",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  fixture.rows[7].state = 1;
-  fixture.rows[8].state = 1;
-  fixture.rows[31].state = 1;
+  fixture.rows[7].state = fw::RowState::kIdle;
+  fixture.rows[8].state = fw::RowState::kIdle;
+  fixture.rows[31].state = fw::RowState::kIdle;
   manual::LiveClearMenuExceptRow8();
-  CHECK(fixture.rows[7].state == static_cast<u_char>(fw::RowState::kSlideX));
-  CHECK(fixture.rows[31].state == static_cast<u_char>(fw::RowState::kSlideX));
-  CHECK(fixture.rows[8].state == 1);
+  CHECK(fixture.rows[7].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[31].state == fw::RowState::kSlideX);
+  CHECK(fixture.rows[8].state == fw::RowState::kIdle);
 }
 
 TEST_CASE("F04159 LiveClearMenuExceptRow8 keeps the action rows",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  fixture.rows[fw::kActionRowBase].state = 1;
+  fixture.rows[fw::kActionRowBase].state = fw::RowState::kIdle;
   const std::uint64_t refusals = manual::LiveManualScreenRefusalCount();
   manual::LiveClearMenuExceptRow8();
-  CHECK(fixture.rows[fw::kActionRowBase].state == 1);
-  CHECK(fixture.rows[20].state == 0);
+  CHECK(fixture.rows[fw::kActionRowBase].state == fw::RowState::kIdle);
+  CHECK(fixture.rows[20].state == fw::RowState::kInactive);
   CHECK(manual::LiveManualScreenRefusalCount() == refusals);
 }
 
 TEST_CASE("F04160 LivePollMenuReady only reads the rows",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  fixture.rows[3].state = static_cast<u_char>(fw::RowState::kSlideX);
+  fixture.rows[3].state = fw::RowState::kSlideX;
   const auto before = fixture.rows;
   const ScreenState screen = manual::LiveManualScreenState();
   manual::LivePollMenuReady();

@@ -2574,9 +2574,6 @@
     <ClInclude Include="src\Menu\Framework\ItemSorting.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="src\Menu\Framework\MenuItems.h">
-      <Filter>src\Menu\Framework</Filter>
-    </ClInclude>
     <ClInclude Include="src\Menu\Framework\MenuMemory.h">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>

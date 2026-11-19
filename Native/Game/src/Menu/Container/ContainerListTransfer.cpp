@@ -41,7 +41,7 @@ constexpr std::int32_t kCategoryTitleRow = 0;
 constexpr std::int32_t kCategoryHeaderRow = 0x1F;
 constexpr std::uint32_t kCategoryMask = 7;
 constexpr std::int32_t kRecordCategoryCount = 7;
-constexpr std::uint8_t kSlideToTarget = 2;
+constexpr auto kSlideToTarget = Framework::RowState::kSlideX;
 
 // func_80107490's step numbers (234.c:2393).
 enum ListStep : std::uint8_t {

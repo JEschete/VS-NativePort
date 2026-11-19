@@ -262,7 +262,7 @@ class Fixture {
   VS::Core::Memory::ScopedLiveGameHeap heap_{arena_};
 
  public:
-  std::array<Menu_Framework_MenuRow, fw::kRowCount> rows{};
+  std::array<fw::MenuRow, fw::kRowCount> rows{};
   std::vector<u_long> primitives =
       std::vector<u_long>(kPrimitiveWords + 2, kCanary);
   std::array<u_long, kOrderingWords> ordering{};

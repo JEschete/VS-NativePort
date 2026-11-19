@@ -313,8 +313,8 @@ int CheckMenuRowNativeLinks(int scrolling) {
   void* const saved_table = VS::Render::legacyOrderingTables[0];
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   const char saved_width = VS::Render::variableFontGlyphWidths[5];
-  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
-  Menu_Framework_MenuRow rows[40] = {0};
+  VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow rows[40] = {};
   // The Live menu links only into the current frame's ordering table, which
   // holds the overlay and scene tables as in the game loop.
   u_long frame_table[kFrameTableWords];
@@ -322,14 +322,14 @@ int CheckMenuRowNativeLinks(int scrolling) {
   u_long* const scene = frame_table + kOrderingWords;
   u_long expected_scene[kOrderingWords];
   u_long storage[kPacketWords];
-  Menu_Framework_MenuRow row = {0};
-  row.state = 1;
+  VS::Menu::Framework::MenuRow row = {};
+  row.state = VS::Menu::Framework::RowState::kIdle;
   row.x = 20;
   row.y = 30;
   row.w = 64;
   row.text[0] = 5;
-  row.text[1] = static_cast<char>(0xFF);
-  row.isScrollable = 1;
+  row.text[1] = 0xFF;
+  row.is_scrollable = 1;
   ClearOTagR(overlay, kOrderingWords);
   ClearOTagR(scene, kOrderingWords);
   memcpy(expected_scene, scene, sizeof expected_scene);
@@ -395,7 +395,7 @@ int CheckMenuWorkspaceReset(void) {
   };
   const unsigned char guard = 0xA5;
   const size_t workspace_bytes =
-      sizeof(Menu_Framework_MenuRow) * kRows + kScratchBytes;
+      sizeof(VS::Menu::Framework::MenuRow) * kRows + kScratchBytes;
   const size_t allocation_bytes =
       workspace_bytes + static_cast<size_t>(kGuardBytes) * 2;
   unsigned char* storage =
@@ -404,7 +404,7 @@ int CheckMenuWorkspaceReset(void) {
     return 0;
   }
   memset(storage, guard, allocation_bytes);
-  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   char* const saved_strings = VS::Menu::Framework::stringBuf;
   int* const saved_types = VS::Menu::Framework::rowTypeBuf;
   const u_short saved_flags = VS::Input::settings.menu_flags;
@@ -412,7 +412,7 @@ int CheckMenuWorkspaceReset(void) {
   const char saved_selection = VS::Menu::Framework::submenuStates[0];
   const int saved_cursor = VS::Menu::Framework::mainMenuCursorAnimation;
   VS::Menu::Framework::menuItems =
-      reinterpret_cast<Menu_Framework_MenuRow*>((storage + kGuardBytes));
+      reinterpret_cast<VS::Menu::Framework::MenuRow*>((storage + kGuardBytes));
   // The workspace layout the menu's allocation sets: the string buffer, then
   // the row types, after the rows.
   VS::Menu::Framework::stringBuf =
@@ -424,7 +424,7 @@ int CheckMenuWorkspaceReset(void) {
   VS::Menu::Framework::submenuStates[0] = 0;
 
   int passed = VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0 &&
-               VS::Menu::Framework::menuItems[kRows - 1].subText == nullptr;
+               VS::Menu::Framework::menuItems[kRows - 1].sub_text == nullptr;
   const unsigned char* tail = reinterpret_cast<const unsigned char*>(
       VS::Menu::Framework::menuItems + kRows);
   for (int index = 0; index < kScratchBytes; ++index) {
@@ -449,12 +449,12 @@ int CheckMenuReloadClosingDelay(void) {
   enum { kRows = 40, kVisits = 3, kClosingTicks = 5 };
   const Menu_Framework_MenuControlState saved_state =
       VS::Menu::Framework::menuState;
-  Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
+  VS::Menu::Framework::MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_int* saved_background = VS::Menu::Framework::menuBackgroundBuffer;
   const signed char saved_loaded = VS::Menu::Framework::loadedSubMenu;
   const char saved_shortcut = VS::Menu::Framework::shortcutInvoked;
   const char saved_without_main = VS::Menu::Framework::openedWithoutMainMenu;
-  Menu_Framework_MenuRow rows[kRows] = {0};
+  VS::Menu::Framework::MenuRow rows[kRows] = {};
   // The overlay read is a queue slot, as the menu's own reads are.
   Content_DiscQueueSlot* const request = &Content_discRequestSlots[31];
   const Content_DiscQueueSlot saved_slot = *request;

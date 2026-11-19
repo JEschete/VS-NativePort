@@ -652,12 +652,9 @@ void UpdateItemDetailsSelection(Context& ctx, int row, const RowText& text,
   MenuItem(ctx, kDetailsRow).item_page = static_cast<std::uint16_t>(page + 1);
 }
 namespace {
-// vs_battle_menuState_t's currentMenu (Menu_Framework_MenuState_*): the low
-// five bits name the overlay and 0x40 marks a screen the main menu opened.
-constexpr int kMenuClosing = 0x1F;
-constexpr int kMenuClosed = 0x3F;
+// vs_battle_menuState_t's currentMenu (kMenuClosing, kMenuClosed and
+// kOpenedFromMainMenu in Framework.hpp), and the masks over it.
 constexpr int kMenuReturning = 0x7F;
-constexpr int kOpenedFromMainMenu = 0x40;
 constexpr int kSubMenuMask = 0x1F;
 constexpr int kMenuMask = 0x3F;
 constexpr int kStateIndexMask = 0xF;
@@ -1511,9 +1508,6 @@ constexpr int kDiscardActions = 4;
 constexpr int kActionsWithoutMemory = 3;
 constexpr int kActionSlideX = -kMainMenuX;
 constexpr int kCursorRaise = 8;
-// vs_battle_menuItem_t's isScrollable (Menu_Framework_MenuItemScroll_*).
-constexpr std::uint8_t kScrollUp = 1;
-constexpr std::uint8_t kScrollDown = 2;
 // The list states after the rows are built: sliding in, then ready.
 constexpr std::uint8_t kListBuilt = 16;
 constexpr std::uint8_t kListReady = 17;
