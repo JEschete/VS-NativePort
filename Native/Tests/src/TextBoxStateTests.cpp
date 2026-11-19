@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxState.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/StateFlags.hpp"
@@ -360,20 +360,20 @@ TEST_CASE("F01410 picks, mirrors and centres the anchor per facing",
 
 namespace {
 struct LiveTextBoxFixture {
-  std::array<Menu_TextBoxState, m::kTextBoxCount> saved_boxes =
-      std::to_array(Menu_textBoxes);
-  Menu_Framework_TextBoxSelector saved_selector = Menu_textBoxSelector;
+  std::array<m::TextBoxState, m::kTextBoxCount> saved_boxes =
+      std::to_array(m::textBoxes);
+  m::TextBoxSelectorState saved_selector = m::textBoxSelector;
   decltype(VS::State::stateFlags.opaque_11) saved_default_choice =
       VS::State::stateFlags.opaque_11;
-  std::array<std::array<Menu_TextAnchorWord, 2>, m::kTextAnchorPresetCount>
+  std::array<std::array<std::uint32_t, 2>, m::kTextAnchorPresetCount>
       saved_anchors{};
 
   LiveTextBoxFixture() {
     for (std::size_t i = 0; i < saved_anchors.size(); ++i) {
-      std::ranges::copy(std::span(Menu_textBoxAnchors)[i],
+      std::ranges::copy(std::span(m::textBoxAnchors)[i],
                         saved_anchors[i].begin());
     }
-    Menu_textBoxSelector = {};
+    m::textBoxSelector = {};
     VS::State::stateFlags.opaque_11 = 0;
     for (std::size_t i = 0; i < m::kTextBoxCount; ++i) {
       m::TextBox box{.state = 0};
@@ -382,12 +382,12 @@ struct LiveTextBoxFixture {
     }
   }
   ~LiveTextBoxFixture() {
-    std::ranges::copy(saved_boxes, std::span(Menu_textBoxes).begin());
-    Menu_textBoxSelector = saved_selector;
+    std::ranges::copy(saved_boxes, std::span(m::textBoxes).begin());
+    m::textBoxSelector = saved_selector;
     VS::State::stateFlags.opaque_11 = saved_default_choice;
     for (std::size_t i = 0; i < saved_anchors.size(); ++i) {
       std::ranges::copy(saved_anchors[i],
-                        std::begin(std::span(Menu_textBoxAnchors)[i]));
+                        std::begin(std::span(m::textBoxAnchors)[i]));
     }
   }
   LiveTextBoxFixture(const LiveTextBoxFixture&) = delete;
@@ -426,10 +426,9 @@ TEST_CASE("Text box Live views round-trip every field",
                        .speaker_animation = -11};
   m::WriteLiveTextBox(3, box);
   CHECK(m::ReadLiveTextBox(3) == box);
-  CHECK(std::bit_cast<std::uint32_t>(Menu_textBoxes[3].flags) == 0xA5C3B2E1U);
-  CHECK(Menu_textBoxes[3].string ==  // NOLINT(build/include_what_you_use)
-        text);
-  CHECK(m::LiveTextBox(3) == &Menu_textBoxes[3]);
+  CHECK(std::bit_cast<std::uint32_t>(m::textBoxes[3].flags) == 0xA5C3B2E1U);
+  CHECK(m::textBoxes[3].text == text);
+  CHECK(m::LiveTextBox(3) == &m::textBoxes[3]);
   CHECK(m::LiveTextBox(8) == nullptr);
   CHECK(m::LiveTextBox(-1) == nullptr);
 }
@@ -439,14 +438,14 @@ TEST_CASE("Text box Live lifecycle opens, selects and dismisses the globals",
   const LiveTextBoxFixture fixture;
   m::InitLiveTextBox(0, 0x10, 0, 40, 10, 2, 0, 0);
   m::InitLiveTextBox(1, 0x10, 0, 20, 10, 2, 0, 0);
-  m::InitLiveInformationTextBox(Menu_InformationBoxHeader_Check);
-  CHECK(Menu_textBoxes[7].flags.frameShape == 3);
-  CHECK(Menu_textBoxes[0].openDuration == 20);
+  m::InitLiveInformationTextBox(m::InformationHeader::kCheck);
+  CHECK(m::textBoxes[7].flags.frame_shape == 3);
+  CHECK(m::textBoxes[0].open_duration == 20);
   CHECK(m::SelectLiveTextBoxChoice(0b11) == 0);
-  CHECK(Menu_textBoxSelector.count == 2);
-  CHECK(Menu_textBoxSelector.order[0] == 1);
+  CHECK(m::textBoxSelector.count == 2);
+  CHECK(m::textBoxSelector.order[0] == 1);
   CHECK(m::DismissLiveTextBox(0) == -1);
-  CHECK(Menu_textBoxes[0].state == -1);
+  CHECK(m::textBoxes[0].state == -1);
   CHECK(m::DismissAllLiveTextBoxes() == 0);
   CHECK(m::DismissLiveTextBox(9) == 0);
 }
@@ -456,16 +455,12 @@ TEST_CASE("Text box Live text and anchors refuse out-of-range indexes",
   const LiveTextBoxFixture fixture;
   char text[] = "page";
   CHECK(m::SetLiveTextBoxText(2, text) == 0);
-  CHECK(Menu_textBoxes[2].string ==  // NOLINT(build/include_what_you_use)
-        text);
+  CHECK(m::textBoxes[2].text == text);
   CHECK(m::SetLiveTextBoxText(2, nullptr) == -1);
   CHECK(m::SetLiveTextBoxText(8, text) == 0);
-  Menu_textBoxAnchors[15][1] =
-      std::bit_cast<Menu_TextAnchorWord>(m::TextAnchor{.x = 30}.Word());
-  const auto word = m::LiveTextBoxAnchor(15, 8, 0, 0);
-  CHECK(std::bit_cast<std::uint32_t>(word) ==
-        m::TextAnchor{.x = 25, .y = -2}.Word());
-  CHECK(std::bit_cast<std::uint32_t>(m::LiveTextBoxAnchor(16, 0, 0, 0)) == 0);
+  m::textBoxAnchors[15][1] = m::TextAnchor{.x = 30}.Word();
+  CHECK(m::LiveTextBoxAnchor(15, 8, 0, 0) == m::TextAnchor{.x = 25, .y = -2});
+  CHECK(m::LiveTextBoxAnchor(16, 0, 0, 0) == m::TextAnchor{});
   m::InitLiveTextBox(8, 0, 0, 0, 0, 0, 0, 0);
-  CHECK(Menu_textBoxes[7].state == 0);
+  CHECK(m::textBoxes[7].state == 0);
 }

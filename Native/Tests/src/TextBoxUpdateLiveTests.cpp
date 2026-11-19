@@ -33,8 +33,8 @@ constexpr u_long kTerminator = 0xFFFFFF;
 constexpr std::uint32_t kRandomSeed = 0x12345678;
 
 struct LiveUpdateFixture {
-  ArrayRestore<Menu_TextBoxState, menu::kTextBoxCount> saved_boxes{
-      Menu_textBoxes};
+  ArrayRestore<menu::TextBoxState, menu::kTextBoxCount> saved_boxes{
+      menu::textBoxes};
   ValueRestore<decltype(VS::Render::FrameScratchpad())> saved_frame{
       VS::Render::FrameScratchpad()};
   ValueRestore<void*> saved_ordering{VS::Render::legacyOrderingTables[0]};
@@ -43,12 +43,12 @@ struct LiveUpdateFixture {
   std::array<u_long, kFrameEntries> ordering{};
 
   explicit LiveUpdateFixture(std::uint8_t buffer = 0) {
-    std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
+    std::ranges::fill(menu::textBoxes, menu::TextBoxState{});
     std::ranges::fill(ordering, kTerminator);
     VS::Menu::textBoxBufferIndex = static_cast<char>(buffer);
-    Menu_activeTextBoxOrderingTable =
+    menu::activeTextBoxOrderingTable =
         VS::Menu::textBoxOrderingTables + buffer * menu::kTextBoxOrderingTags;
-    ClearOTag(Menu_activeTextBoxOrderingTable,
+    ClearOTag(menu::activeTextBoxOrderingTable,
               static_cast<int>(menu::kTextBoxOrderingTags));
     VS::Render::frameBuf = 0;
     VS::Render::legacyOrderingTables[0] = ordering.data();
@@ -59,11 +59,11 @@ struct LiveUpdateFixture {
     VS::Core::interfaceRandomState = kRandomSeed;
     Effects_screenEffectOverlay = nullptr;
     VS::Effects::screenEffectDefaults = {};
-    auto& box = Menu_textBoxes[0];
+    auto& box = menu::textBoxes[0];
     box.flags.kind = static_cast<unsigned>(menu::TextBoxKind::kHidden);
-    box.flags.openStyle = 2;
+    box.flags.open_style = 2;
     box.state = 2;
-    box.openDuration = 4;
+    box.open_duration = 4;
     box.x = 40;
     box.y = 60;
   }
@@ -75,19 +75,19 @@ TEST_CASE(
     "[text-box-update-live][F01392]") {
   const auto buffer = static_cast<std::uint8_t>(GENERATE(0, 1, 2));
   LiveUpdateFixture fixture(buffer);
-  auto* submitted = Menu_activeTextBoxOrderingTable;
+  auto* submitted = menu::activeTextBoxOrderingTable;
   const auto next = static_cast<std::uint8_t>((buffer + 1) % 3);
   auto expected_random = kRandomSeed;
   VS::Core::Random::NextInterfaceRandomBits(expected_random, 0);
   menu::UpdateLiveTextBoxes();
-  CHECK(Menu_textBoxes[0].state == 3);
-  CHECK(Menu_textBoxes[0].frameX == 40);
+  CHECK(menu::textBoxes[0].state == 3);
+  CHECK(menu::textBoxes[0].frame_x == 40);
   CHECK(fixture.ordering[kTextEntry] == LegacyGpu_Handle(submitted));
   CHECK(submitted[menu::kTextBoxOrderingTags - 1] == kTerminator);
   CHECK(static_cast<std::uint8_t>(VS::Menu::textBoxBufferIndex) == next);
-  CHECK(Menu_activeTextBoxOrderingTable ==
+  CHECK(menu::activeTextBoxOrderingTable ==
         VS::Menu::textBoxOrderingTables + next * menu::kTextBoxOrderingTags);
-  CHECK(Menu_activeTextBoxOrderingTable[menu::kTextBoxOrderingTags - 1] ==
+  CHECK(menu::activeTextBoxOrderingTable[menu::kTextBoxOrderingTags - 1] ==
         kTerminator);
   CHECK(VS::Core::interfaceRandomState == expected_random);
 }
@@ -104,10 +104,10 @@ TEST_CASE(
       VS::Menu::textBoxBufferIndex = 3;
       break;
     case 2:
-      Menu_activeTextBoxOrderingTable = fixture.ordering.data();
+      menu::activeTextBoxOrderingTable = fixture.ordering.data();
       break;
     default:
-      Menu_activeTextBoxOrderingTable = nullptr;
+      menu::activeTextBoxOrderingTable = nullptr;
       break;
   }
   const auto box = menu::ReadLiveTextBox(0);
@@ -121,12 +121,12 @@ TEST_CASE(
 TEST_CASE("Original text-box update module entry advances the production frame",
           "[scene-notification-integration][text-box-update-live][F01392]") {
   LiveUpdateFixture fixture;
-  auto* const submitted = Menu_activeTextBoxOrderingTable;
+  auto* const submitted = menu::activeTextBoxOrderingTable;
   auto* resolved = VS::Content::ResolveModuleAddress(
       VS::Content::ModuleSymbols(), "BATTLE/BATTLE.PRG", 0x800CB83C);
   REQUIRE(resolved == reinterpret_cast<void*>(&menu::UpdateLiveTextBoxes));
   reinterpret_cast<decltype(&menu::UpdateLiveTextBoxes)>(resolved)();
-  CHECK(Menu_textBoxes[0].state == 3);
+  CHECK(menu::textBoxes[0].state == 3);
   CHECK(VS::Menu::textBoxBufferIndex == 1);
   CHECK(fixture.ordering[kTextEntry] == LegacyGpu_Handle(submitted));
 }
@@ -135,19 +135,19 @@ namespace {
 template <typename Fixture>
 void CheckContainerFrameAfterRotation() {
   LiveUpdateFixture prior(2);
-  auto* const prior_ordering = Menu_activeTextBoxOrderingTable;
+  auto* const prior_ordering = menu::activeTextBoxOrderingTable;
   {
     Fixture fixture;
-    auto& box = Menu_textBoxes[0];
+    auto& box = menu::textBoxes[0];
     box = {};
     box.flags.kind = static_cast<unsigned>(menu::TextBoxKind::kHidden);
     box.state = 1;
-    box.openDuration = 4;
+    box.open_duration = 4;
     menu::UpdateLiveTextBoxes();
     CHECK(box.state == 2);
   }
   CHECK(VS::Menu::textBoxBufferIndex == 2);
-  CHECK(Menu_activeTextBoxOrderingTable == prior_ordering);
+  CHECK(menu::activeTextBoxOrderingTable == prior_ordering);
 }
 }  // namespace
 

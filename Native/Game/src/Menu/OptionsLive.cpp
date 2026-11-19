@@ -19,7 +19,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Options.hpp"
 #include "Menu/OptionsLiveState.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/StateFlags.hpp"
 
@@ -92,12 +92,10 @@ class LiveHost final : public Host {
     Framework::SetLiveCommandLabel(action);
   }
   void InitInformationTextBox(Framework::InformationHeader header) override {
-    VS::Menu::InitLiveInformationTextBox(
-        static_cast<enum Menu_InformationBoxHeader>(header));
+    VS::Menu::InitLiveInformationTextBox(header);
   }
   void SetInformationTextBoxState(int state) override {
-    Menu_textBoxes[kInformationTextBox].state =
-        static_cast<std::int16_t>(state);
+    textBoxes[kInformationTextBox].state = static_cast<std::int16_t>(state);
   }
   Settings LoadSettings() override {
     const std::uint8_t flags = FlagByte();

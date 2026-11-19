@@ -20,8 +20,8 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
+#include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBox.hpp"
 #include "Render/Frame.hpp"
 #include "Render/GameFont.hpp"
 #include "Render/Render.hpp"
@@ -250,10 +250,10 @@ class LiveHudOrchestrationWorld final : public HudOrchestrationWorld {
   }
   std::int32_t TickSpeed() override { return VS::State::tickSpeed; }
   bool LimbDisplayAllowed() override {
-    const auto& box = std::span(Menu_textBoxes)[kLimbCoveringTextBox];
+    const auto& box = std::span(VS::Menu::textBoxes)[kLimbCoveringTextBox];
     return !ReadLiveHudState().SuppressesLimbDisplay() &&
            (box.state == 0 ||
-            box.state != static_cast<std::uint8_t>(box.openDuration) + 1);
+            box.state != static_cast<std::uint8_t>(box.open_duration) + 1);
   }
   std::optional<HudElementGeometry> LimbGeometry(std::size_t layout) override {
     if (layout >= kHudLimbLayouts) return std::nullopt;

@@ -32,7 +32,7 @@
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetingState.h"
-#include "Battle/TextBoxes.h"
+#include "Battle/TextBoxes.hpp"
 #include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -82,7 +82,7 @@
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -741,12 +741,11 @@ class LiveHost final : public Host {
 
   void InitInformationBox(InformationHeader header) override {
     const CallOutScope scope;
-    VS::Menu::InitLiveInformationTextBox(
-        static_cast<Menu_InformationBoxHeader>(header));
+    VS::Menu::InitLiveInformationTextBox(header);
   }
 
   void SetInformationBoxState(std::uint8_t state) override {
-    Menu_textBoxes[kInformationBox].state = state;
+    textBoxes[kInformationBox].state = state;
   }
 
   void SetInformationText(std::span<const std::uint8_t> text) override {
@@ -763,7 +762,7 @@ class LiveHost final : public Host {
       Refuse("information message without text");
       return;
     }
-    Menu_textBoxes[kInformationBox].flags.speakerTexture = kInformationPortrait;
+    textBoxes[kInformationBox].flags.speaker_texture = kInformationPortrait;
     const CallOutScope scope;
     VS::Menu::SetLiveTextBoxText(kInformationBox, Mutable(text));
   }
@@ -1054,12 +1053,12 @@ class LiveHost final : public Host {
     Battle_hudBattleMode = 0;
     Battle_battleModeIndicatorStep = 0;
     Battle_statusIconCarousel.word = kStatusIconCarouselIdle;
-    Menu_sceneNotificationBuffer = nullptr;
+    sceneNotificationBuffer = nullptr;
     VS::Effects::ScreenDistortion::ResetLiveScreenOverlay();
     Battle_actionSelection = &actionSelection;
-    Menu_textBoxes[0] = Menu_TextBoxState{};
-    Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
-    ClearOTag(Menu_activeTextBoxOrderingTable, kTextBoxOrderingTags);
+    textBoxes[0] = TextBoxState{};
+    activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
+    ClearOTag(activeTextBoxOrderingTable, kTextBoxOrderingTags);
   }
 
   void SetBackgroundRaised(bool raised) override {

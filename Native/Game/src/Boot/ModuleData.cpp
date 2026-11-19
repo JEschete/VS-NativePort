@@ -29,7 +29,7 @@
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetingState.h"
-#include "Battle/TextBoxes.h"
+#include "Battle/TextBoxes.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/FixedPoint.hpp"
 #include "Core/RandomLive.hpp"
@@ -122,7 +122,7 @@
 #include "Menu/Container/ItemView.hpp"
 #include "Menu/FilesLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Magic.hpp"
 #include "Menu/Manual.hpp"
@@ -132,7 +132,7 @@
 #include "Menu/Score/Records.hpp"
 #include "Menu/Score/ScoreScreen.hpp"
 #include "Menu/Status/ActorStatus.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "ModelLoading.h"
 #include "Render/FramebufferEffects.hpp"
 #include "Render/Images.hpp"
@@ -700,11 +700,12 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      &Battle_defenseAbilityActionIds,
      sizeof Battle_defenseAbilityActionIds},  // G00208
                                               // vs_battle_defenseAbilityOffsets
-    {"BATTLE/BATTLE.PRG", 0x835DC, sizeof Battle_doorStrings,
-     &Battle_doorStrings, sizeof Battle_doorStrings},  // G00209 D_800EBDDC
-    {"BATTLE/BATTLE.PRG", 0x83758, sizeof Menu_kNotificationItemNames,
-     &Menu_kNotificationItemNames,
-     sizeof Menu_kNotificationItemNames},  // G00210 D_800EBF58
+    {"BATTLE/BATTLE.PRG", 0x835DC, sizeof VS::Battle::doorStrings,
+     &VS::Battle::doorStrings,
+     sizeof VS::Battle::doorStrings},  // G00209 D_800EBDDC
+    {"BATTLE/BATTLE.PRG", 0x83758, sizeof VS::Menu::kNotificationItemNames,
+     &VS::Menu::kNotificationItemNames,
+     sizeof VS::Menu::kNotificationItemNames},  // G00210 D_800EBF58
     {"BATTLE/BATTLE.PRG", 0x83A6C, sizeof VS::Core::interfaceRandomState,
      &VS::Core::interfaceRandomState,
      sizeof VS::Core::interfaceRandomState},  // G00213 _keystreamState
@@ -714,14 +715,16 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
      sizeof VS::Menu::Framework::
          cursorBrightnessAnimation},  // G00214
                                       // vs_battle_cursorBrightnessAnimation
-    {"BATTLE/BATTLE.PRG", 0x83A84, sizeof Menu_textBoxAnchors,
-     &Menu_textBoxAnchors, sizeof Menu_textBoxAnchors},  // G00216 D_800EC284
-    {"BATTLE/BATTLE.PRG", 0x83ACC, sizeof Menu_informationHeaderPositions,
-     &Menu_informationHeaderPositions,
-     sizeof Menu_informationHeaderPositions},  // G00217 D_800EC2CC
-    {"BATTLE/BATTLE.PRG", 0x83AD8, sizeof Menu_kInformationHeaderSpriteWords,
-     &Menu_kInformationHeaderSpriteWords,
-     sizeof Menu_kInformationHeaderSpriteWords},  // G00218 D_800EC2D8
+    {"BATTLE/BATTLE.PRG", 0x83A84, sizeof VS::Menu::textBoxAnchors,
+     &VS::Menu::textBoxAnchors,
+     sizeof VS::Menu::textBoxAnchors},  // G00216 D_800EC284
+    {"BATTLE/BATTLE.PRG", 0x83ACC, sizeof VS::Menu::informationHeaderPositions,
+     &VS::Menu::informationHeaderPositions,
+     sizeof VS::Menu::informationHeaderPositions},  // G00217 D_800EC2CC
+    {"BATTLE/BATTLE.PRG", 0x83AD8,
+     sizeof VS::Menu::kInformationHeaderSpriteWords,
+     &VS::Menu::kInformationHeaderSpriteWords,
+     sizeof VS::Menu::kInformationHeaderSpriteWords},  // G00218 D_800EC2D8
     {"BATTLE/BATTLE.PRG", 0x83AE4, sizeof Effects_effectBufferIndex,
      &Effects_effectBufferIndex,
      sizeof Effects_effectBufferIndex},  // G00219 D_800EC2E4

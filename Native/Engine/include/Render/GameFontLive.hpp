@@ -6,12 +6,14 @@
 #include "Legacy/Psx.h"
 #include "Render/GameFont.hpp"
 
-struct Menu_TextBoxState;
+namespace VS::Menu {
+struct TextBoxState;
+}  // namespace VS::Menu
 
 // Live binding for GameFont.hpp and TextBoxText.hpp: the font tables (module
 // data), the font style the menus and text boxes share, the current frame's
 // primitive buffer and ordering tables, the dialogue text boxes
-// (Menu_textBoxes), the first controller, the text sound and the speaker's
+// (textBoxes), the first controller, the text sound and the speaker's
 // texture animation (GameFontLive.cpp).
 namespace VS::Render {
 // BATTLE.PRG _fontTable, D_800F4CB8 and _fontBrightness: the style later
@@ -33,10 +35,11 @@ void SetLiveMenuFontStyle(int palette_offset);
 // The text box drawers. The box's text is trusted for
 // kTrustedEncodedTextBytes. The progressive and scaled drawers draw into the
 // box's layers of the active text box ordering table, so a box outside
-// Menu_textBoxes is refused and reported.
-void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box);
-void DrawLiveScaledTextBoxText(Menu_TextBoxState* box, int scale);
-void BlendLiveTextBoxIntoFramebuffer(Menu_TextBoxState* box, int glyph_alpha);
+// textBoxes is refused and reported.
+void DrawLiveProgressiveTextBoxText(VS::Menu::TextBoxState* box);
+void DrawLiveScaledTextBoxText(VS::Menu::TextBoxState* box, int scale);
+void BlendLiveTextBoxIntoFramebuffer(VS::Menu::TextBoxState* box,
+                                     int glyph_alpha);
 
 // Text box draws refused, or that referenced a missing string or overran,
 // since start-up.

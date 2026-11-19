@@ -203,8 +203,8 @@ TEST_CASE(
   const auto state = fixture.Observe();
   CheckRenderedRows(state);
   CHECK(state.information == live::Label(score::timeAttackDescriptions, 2));
-  CHECK(Menu_textBoxes[live::kInformationBox].flags.speakerTexture == 32);
-  CHECK(Menu_textBoxes[live::kInformationBox].speed != 0);
+  CHECK(VS::Menu::textBoxes[live::kInformationBox].flags.speaker_texture == 32);
+  CHECK(VS::Menu::textBoxes[live::kInformationBox].speed != 0);
   CheckRecordGlyphs(fixture);
   CheckHeadingGlyphs(fixture);
   CHECK(fixture.Cursor().position == fw::PackXy(182, 74));

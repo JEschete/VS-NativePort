@@ -233,9 +233,9 @@ TEST_CASE("Actual cold session drains the real pending or consumed MON owner",
   const bool loaded = GENERATE(false, true);
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
-      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
-      Menu_sceneNotificationTimed>
+      VS::Menu::textBoxSelector, Battle_stringContext,
+      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   live::PreviewFixture fixture;
   const auto owner = BeginMon(fixture, loaded);
@@ -282,9 +282,9 @@ TEST_CASE("Actual Gazette boundaries drain pending ZUD before its MON owner",
   const bool cold = GENERATE(false, true);
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
-      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
-      Menu_sceneNotificationTimed>
+      VS::Menu::textBoxSelector, Battle_stringContext,
+      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   live::PreviewFixture fixture;
   const auto owner = BeginMon(fixture, true);
@@ -319,9 +319,9 @@ TEST_CASE(
   const bool cold = GENERATE(false, true);
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
-      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
-      Menu_sceneNotificationTimed>
+      VS::Menu::textBoxSelector, Battle_stringContext,
+      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   live::PreviewFixture fixture;
   const auto owner = BeginMon(fixture, true);

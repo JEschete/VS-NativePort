@@ -264,7 +264,7 @@ struct LootFixture : TextLoadingFixture {
     loot::ResetLootTerminalSession();
     VS::Menu::Framework::lootLists = nullptr;
     VS::Menu::Framework::lootEntry = &chest;
-    std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
+    std::ranges::fill(VS::Menu::textBoxes, VS::Menu::TextBoxState{});
   }
   ~LootFixture() { loot::ResetLootTerminalSession(); }
   int Open() {

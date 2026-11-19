@@ -325,7 +325,7 @@ void CheckOverviewActor() {
   REQUIRE(Actors_actorRecords[1] != nullptr);
   CHECK(Actors_actorRecords[1]->animationId == 33);
   CHECK(Actors_actorRecords[1]->instance.weaponDrawn == 0);
-  CHECK(Menu_textBoxes[0].string != nullptr);
+  CHECK(VS::Menu::textBoxes[0].text != nullptr);
 }
 
 void InitializeOverviewForCheck() {
@@ -476,7 +476,7 @@ void ReturnListToOverview(live::PreviewFixture& fixture) {
   CHECK(score::monBinData == nullptr);
   CHECK(score::enemyDescriptions == nullptr);
   fixture.SettleOverview();
-  CHECK(Menu_textBoxes[0].string != nullptr);
+  CHECK(VS::Menu::textBoxes[0].text != nullptr);
 }
 
 TEST_CASE(

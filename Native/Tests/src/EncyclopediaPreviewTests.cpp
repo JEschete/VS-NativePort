@@ -34,7 +34,7 @@
 #include "Menu/Score/Encyclopedia.hpp"
 #include "Menu/Score/EncyclopediaPreview.hpp"
 #include "Menu/Score/EncyclopediaPreviewLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "ModelLoading.h"
 
 namespace {
@@ -848,9 +848,9 @@ TEST_CASE("Actual cold session drains the pending enemy preview owner",
           "[encyclopedia-preview][gazette-preview-lifecycle]") {
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
-      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
-      Menu_sceneNotificationTimed>
+      VS::Menu::textBoxSelector, Battle_stringContext,
+      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   LivePreviewFixture fixture;
   REQUIRE(score::LoadLiveEnemyPreview(7) == 1);

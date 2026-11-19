@@ -126,7 +126,7 @@
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingState.h"
-#include "Battle/TextBoxes.h"
+#include "Battle/TextBoxes.hpp"
 #include "Battle/ValueLabels.h"
 #include "Boot/GameLoop.hpp"
 #include "Boot/SessionLive.hpp"
@@ -269,7 +269,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Inventory/DetailsPoliciesLive.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/EquipmentMenusLive.hpp"
@@ -318,7 +318,7 @@
 #include "Menu/Status/DetailTransitionsLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
@@ -501,7 +501,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EB9CCu, 4u, (void*)&Battle_hudBattleMode, sizeof Battle_hudBattleMode, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EB9D0u, 4u, (void*)&Battle_statusIconCarousel, sizeof Battle_statusIconCarousel, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9D4u, 4u, (void*)&VS::Menu::Framework::menuBackgroundBuffer, sizeof VS::Menu::Framework::menuBackgroundBuffer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800EB9D8u, 4u, (void*)&Menu_sceneNotificationBuffer, sizeof Menu_sceneNotificationBuffer, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800EB9D8u, 4u, (void*)&VS::Menu::sceneNotificationBuffer, sizeof VS::Menu::sceneNotificationBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EBBB8u, 8u, (void*)&VS::Menu::Framework::gradientTopColors, sizeof VS::Menu::Framework::gradientTopColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBBC0u, 8u, (void*)&VS::Menu::Framework::gradientBottomColors, sizeof VS::Menu::Framework::gradientBottomColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBBC8u, 20u, (void*)&VS::Menu::Framework::rowAnimationSteps, sizeof VS::Menu::Framework::rowAnimationSteps, 1u, 1u},
@@ -541,9 +541,9 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EC258u, 4u, (void*)&Battle_puzzleTimerTextPointer, sizeof Battle_puzzleTimerTextPointer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EC26Cu, 4u, (void*)&VS::Core::interfaceRandomState, sizeof VS::Core::interfaceRandomState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC270u, 16u, (void*)&VS::Menu::Framework::cursorBrightnessAnimation, sizeof VS::Menu::Framework::cursorBrightnessAnimation, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC284u, 72u, (void*)&Menu_textBoxAnchors, sizeof Menu_textBoxAnchors, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC2CCu, 12u, (void*)&Menu_informationHeaderPositions, sizeof Menu_informationHeaderPositions, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC2D8u, 12u, (void*)&Menu_kInformationHeaderSpriteWords, sizeof Menu_kInformationHeaderSpriteWords, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC284u, 72u, (void*)&VS::Menu::textBoxAnchors, sizeof VS::Menu::textBoxAnchors, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC2CCu, 12u, (void*)&VS::Menu::informationHeaderPositions, sizeof VS::Menu::informationHeaderPositions, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800EC2D8u, 12u, (void*)&VS::Menu::kInformationHeaderSpriteWords, sizeof VS::Menu::kInformationHeaderSpriteWords, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2E4u, 4u, (void*)&Effects_effectBufferIndex, sizeof Effects_effectBufferIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2E8u, 32u, (void*)&Effects_trailAdditiveColors, sizeof Effects_trailAdditiveColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC308u, 28u, (void*)&Effects_trailColors, sizeof Effects_trailColors, 1u, 1u},
@@ -751,7 +751,7 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4CB4u, 4u, (void*)&Battle_targetColumnTopOffset, sizeof Battle_targetColumnTopOffset, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4CC0u, 4u, (void*)&VS::Menu::Framework::mainMenuCursorAnimation, sizeof VS::Menu::Framework::mainMenuCursorAnimation, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4CD0u, 4u, (void*)&VS::Menu::textBoxOrderingTables, sizeof VS::Menu::textBoxOrderingTables, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4E68u, 4u, (void*)&Menu_sceneNotificationTimer, sizeof Menu_sceneNotificationTimer, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4E68u, 4u, (void*)&VS::Menu::sceneNotificationTimer, sizeof VS::Menu::sceneNotificationTimer, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4E70u, 16u, (void*)&VS::Menu::Framework::submenuStates, sizeof VS::Menu::Framework::submenuStates, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4E84u, 4u, (void*)&VS::Menu::Framework::rowTypeBuf, sizeof VS::Menu::Framework::rowTypeBuf, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4E88u, 4u, (void*)&VS::Menu::Framework::unlockedBreakArt, sizeof VS::Menu::Framework::unlockedBreakArt, 0u, 0u},
@@ -759,12 +759,12 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4E90u, 4u, (void*)&Battle_lowerScreenUiState, sizeof Battle_lowerScreenUiState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4E98u, 8u, (void*)&VS::Menu::Framework::actionSelection, sizeof VS::Menu::Framework::actionSelection, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4EA0u, 4u, (void*)&VS::Menu::Framework::actionRestrictions, sizeof VS::Menu::Framework::actionRestrictions, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4EA8u, 13u, (void*)&Menu_textBoxSelector, sizeof Menu_textBoxSelector, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4EA8u, 13u, (void*)&VS::Menu::textBoxSelector, sizeof VS::Menu::textBoxSelector, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4ED8u, 16u, (void*)&VS::Effects::screenEffectDefaults, sizeof VS::Effects::screenEffectDefaults, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4EE8u, 242u, (void*)&VS::Menu::Framework::menuMemory, sizeof VS::Menu::Framework::menuMemory, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4FE0u, 384u, (void*)&Menu_textBoxes, sizeof Menu_textBoxes, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F4FE0u, 384u, (void*)&VS::Menu::textBoxes, sizeof VS::Menu::textBoxes, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5168u, 56u, (void*)&Battle_stringContext, sizeof Battle_stringContext, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F51B8u, 4u, (void*)&Menu_activeTextBoxOrderingTable, sizeof Menu_activeTextBoxOrderingTable, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800F51B8u, 4u, (void*)&VS::Menu::activeTextBoxOrderingTable, sizeof VS::Menu::activeTextBoxOrderingTable, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51C0u, 8u, (void*)&VS::Menu::Framework::menuState, sizeof VS::Menu::Framework::menuState, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5210u, 4u, (void*)&VS::Items::miscItemInvoked, sizeof VS::Items::miscItemInvoked, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5218u, 4u, (void*)&Effects_menuReloadSlot, sizeof Effects_menuReloadSlot, 0u, 0u},

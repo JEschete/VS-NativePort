@@ -24,7 +24,7 @@
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Map.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapMarkersLive.hpp"
@@ -410,12 +410,12 @@ class LiveCompassHost final : public CompassHost {
 class LiveControlsHost final : public ControlsHost {
  public:
   void ShiftTextBox(std::int32_t delta) override {
-    Menu_TextBoxState* box = LiveTextBox(0);
+    TextBoxState* box = LiveTextBox(0);
     if (box == nullptr) return;
     box->y =
         Core::Math::WrapSigned16(static_cast<std::uint32_t>(box->y + delta));
-    box->yIndent = Core::Math::WrapSigned16(
-        static_cast<std::uint32_t>(box->yIndent + delta));
+    box->y_indent = Core::Math::WrapSigned16(
+        static_cast<std::uint32_t>(box->y_indent + delta));
   }
 
   std::optional<bool> IsJammed() override {

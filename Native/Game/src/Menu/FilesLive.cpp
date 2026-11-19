@@ -35,9 +35,9 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/EncodedTextLive.hpp"
@@ -113,7 +113,7 @@ constexpr std::size_t kImmediatePacketWords = 16;
 constexpr int kCompactTextSlot = -5;
 // vs_battle_menuState.currentMenu's row width for the data menu's strings.
 constexpr std::size_t kMaxRowStrings = 8;
-// The information text box (Menu_textBoxes[7]).
+// The information text box (textBoxes[7]).
 constexpr std::size_t kInformationTextBox = 7;
 // The screen both buffers cover, and the title screen's 320x240 buffers
 // shown from line 8 for 224 lines.
@@ -550,12 +550,10 @@ class LiveHost : public LiveCardHost {
     return VS::Menu::Framework::backgroundFadeStep;
   }
   void InitInformationBox(Framework::InformationHeader header) override {
-    VS::Menu::InitLiveInformationTextBox(
-        static_cast<enum Menu_InformationBoxHeader>(header));
+    VS::Menu::InitLiveInformationTextBox(header);
   }
   void SetInformationBoxState(int state) override {
-    Menu_textBoxes[kInformationTextBox].state =
-        static_cast<std::int16_t>(state);
+    textBoxes[kInformationTextBox].state = static_cast<std::int16_t>(state);
   }
   void SetInformationMessage(std::uint16_t offset) override {
     if (char* message = TableMessage(textTable, offset, *this)) {

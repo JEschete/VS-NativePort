@@ -23,7 +23,7 @@
 #include "Core/Gte.h"
 #include "Effects/Runtime.h"
 #include "Field/CameraLiveState.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "ModelLoading.h"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -39,8 +39,8 @@ struct LiveFixture {
   decltype(Battle_Ai_roomAiState) saved_room = Battle_Ai_roomAiState;
   decltype(Effects_secondaryInstances) saved_trails =
       Effects_secondaryInstances;
-  decltype(Menu_sceneNotificationBuffer) saved_notification =
-      Menu_sceneNotificationBuffer;
+  decltype(VS::Menu::sceneNotificationBuffer) saved_notification =
+      VS::Menu::sceneNotificationBuffer;
   decltype(VS::Field::sphericalCamera) saved_camera =
       VS::Field::sphericalCamera;
   Content_ActorAssetRequest saved_request = Content_legacyActorAssetRequests[0];
@@ -63,7 +63,7 @@ struct LiveFixture {
     Battle_actionState = &state;
     Battle_Ai_roomAiState = &room;
     Effects_secondaryInstances = nullptr;
-    Menu_sceneNotificationBuffer = nullptr;
+    VS::Menu::sceneNotificationBuffer = nullptr;
   }
   LiveFixture(const LiveFixture&) = delete;
   LiveFixture& operator=(const LiveFixture&) = delete;
@@ -73,7 +73,7 @@ struct LiveFixture {
     Battle_actionState = saved_state;
     Battle_Ai_roomAiState = saved_room;
     Effects_secondaryInstances = saved_trails;
-    Menu_sceneNotificationBuffer = saved_notification;
+    VS::Menu::sceneNotificationBuffer = saved_notification;
     VS::Field::sphericalCamera = saved_camera;
     Content_legacyActorAssetRequests[0] = saved_request;
     Effects_primaryPhase = saved_effects[0];

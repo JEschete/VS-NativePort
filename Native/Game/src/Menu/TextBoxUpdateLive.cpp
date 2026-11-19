@@ -13,7 +13,7 @@
 #include "Core/RandomLive.hpp"
 #include "Effects/ScreenDistortion/ScreenOverlaysLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Menu/TextBoxUpdate.hpp"
@@ -52,7 +52,7 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
   }
   std::int32_t TickSpeed() const override { return VS::State::tickSpeed; }
   void BlendText(std::size_t index, std::int32_t scale) override {
-    Render::BlendLiveTextBoxIntoFramebuffer(&std::span(Menu_textBoxes)[index],
+    Render::BlendLiveTextBoxIntoFramebuffer(&std::span(textBoxes)[index],
                                             scale);
   }
   void DrawInformationBackdrop(std::size_t index) override {
@@ -62,25 +62,25 @@ class LiveUpdateHost final : public TextBoxUpdateHost {
     DrawLiveTextBoxFrame(static_cast<std::int32_t>(index));
   }
   void DrawProgressiveText(std::size_t index) override {
-    Render::DrawLiveProgressiveTextBoxText(&std::span(Menu_textBoxes)[index]);
+    Render::DrawLiveProgressiveTextBoxText(&std::span(textBoxes)[index]);
   }
   void DrawScaledText(std::size_t index, std::int32_t scale) override {
-    Render::DrawLiveScaledTextBoxText(&std::span(Menu_textBoxes)[index], scale);
+    Render::DrawLiveScaledTextBoxText(&std::span(textBoxes)[index], scale);
   }
   void SubmitOrdering() override {
-    AddPrims(destination_, Menu_activeTextBoxOrderingTable,
-             Menu_activeTextBoxOrderingTable + kTextBoxOrderingTags - 1);
+    AddPrims(destination_, activeTextBoxOrderingTable,
+             activeTextBoxOrderingTable + kTextBoxOrderingTags - 1);
   }
   std::uint8_t OrderingBufferIndex() const override {
     return static_cast<std::uint8_t>(textBoxBufferIndex);
   }
   void BeginOrderingBuffer(std::uint8_t index) override {
     textBoxBufferIndex = static_cast<char>(index);
-    Menu_activeTextBoxOrderingTable =
+    activeTextBoxOrderingTable =
         std::span(textBoxOrderingTables)
             .subspan(index * kTextBoxOrderingTags, kTextBoxOrderingTags)
             .data();
-    ClearOTag(Menu_activeTextBoxOrderingTable,
+    ClearOTag(activeTextBoxOrderingTable,
               static_cast<int>(kTextBoxOrderingTags));
   }
   bool TimerVisible() const override {
@@ -105,7 +105,7 @@ void UpdateLiveTextBoxes() {
       Render::LiveOrderingBase::kScene, kTextOrderingSlot);
   const auto buffer = static_cast<std::uint8_t>(textBoxBufferIndex);
   if (destination == nullptr || buffer >= kTextBoxOrderingBufferCount ||
-      Menu_activeTextBoxOrderingTable !=
+      activeTextBoxOrderingTable !=
           std::span(textBoxOrderingTables)
               .subspan(buffer * kTextBoxOrderingTags, kTextBoxOrderingTags)
               .data()) {

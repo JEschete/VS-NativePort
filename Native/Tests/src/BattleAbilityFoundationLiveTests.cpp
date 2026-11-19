@@ -198,7 +198,7 @@ TEST_CASE("MENU2 reload restores the file-backed Break Art timeout",
   menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
   REQUIRE(abilities::LiveUpdateBreakArtUnlock(1) == 0);
   CHECK(Battle_actionDefinitions[kArtAction].unlocked == 1);
-  Menu_textBoxes[7].flags.done = 1;
+  VS::Menu::textBoxes[7].flags.done = 1;
   REQUIRE(abilities::LiveUpdateBreakArtUnlock(0) == 0);
   CHECK(load.Complete() == 1);
   CHECK(abilities::LiveUpdateBreakArtUnlock(0) == 1);
@@ -212,7 +212,7 @@ TEST_CASE("MENU2 reload restores unlock counts and phase without progression",
   CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 1);
   CHECK(load.Complete() == 1);
   REQUIRE(abilities::LiveUpdateAbilityUnlock(0) == 0);
-  Menu_textBoxes[7].flags.done = 1;
+  VS::Menu::textBoxes[7].flags.done = 1;
   CHECK(abilities::LiveUpdateAbilityUnlock(0) == 1);
   CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 1);
 }

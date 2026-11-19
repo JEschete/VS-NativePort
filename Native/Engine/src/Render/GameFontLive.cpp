@@ -19,8 +19,8 @@
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
+#include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBox.hpp"
 #include "Render/Display.hpp"
 #include "Render/DisplayControl.hpp"
 #include "Render/EncodedText.hpp"
@@ -49,7 +49,7 @@ constexpr int kFramebufferWidth = 320;
 FontStyle font_style;
 std::uint64_t text_box_problems = 0;
 
-void ReportTextBox(const Menu_TextBoxState* box, const char* problem) {
+void ReportTextBox(const VS::Menu::TextBoxState* box, const char* problem) {
   ++text_box_problems;
   // The first and then every power-of-two report, so a per-frame problem
   // cannot flood the log.
@@ -59,66 +59,57 @@ void ReportTextBox(const Menu_TextBoxState* box, const char* problem) {
   }
 }
 
-// The box's layers: its index in Menu_textBoxes selects them (the original
+// The box's layers: its index in textBoxes selects them (the original
 // kept the index in D_800F4E80 while drawing the box).
-u_long* TextBoxLayers(const Menu_TextBoxState* box) {
-  const std::span boxes(Menu_textBoxes);
+u_long* TextBoxLayers(const VS::Menu::TextBoxState* box) {
+  const std::span boxes(VS::Menu::textBoxes);
   for (std::size_t index = 0; index < boxes.size(); ++index) {
     if (&boxes[index] == box) {
-      return Menu_activeTextBoxOrderingTable != nullptr
-                 ? Menu_activeTextBoxOrderingTable + (index * kTextBoxLayers)
+      return VS::Menu::activeTextBoxOrderingTable != nullptr
+                 ? VS::Menu::activeTextBoxOrderingTable +
+                       (index * kTextBoxLayers)
                  : nullptr;
     }
   }
   return nullptr;
 }
 
-// Menu_TextBoxState's encoded text field, whose name cpplint takes for
-// std::string.
-char* BoxText(const Menu_TextBoxState& box) {
-  return box.string;  // NOLINT(build/include_what_you_use)
-}
-
-void SetBoxText(Menu_TextBoxState& box, char* text) {
-  box.string = text;  // NOLINT(build/include_what_you_use)
-}
-
-TextBoxText ViewOf(const Menu_TextBoxState& box) {
+TextBoxText ViewOf(const VS::Menu::TextBoxState& box) {
   TextBoxText view;
-  view.text = encoded_text_live::TrustedText(BoxText(box));
+  view.text = encoded_text_live::TrustedText(box.text);
   view.kind = static_cast<std::uint8_t>(box.flags.kind);
-  view.arrow_frame = static_cast<std::uint8_t>(box.flags.arrowAnimFrame);
-  view.speaker_texture = static_cast<std::uint8_t>(box.flags.speakerTexture);
+  view.arrow_frame = static_cast<std::uint8_t>(box.flags.arrow_frame);
+  view.speaker_texture = static_cast<std::uint8_t>(box.flags.speaker_texture);
   view.done = box.flags.done != 0;
   view.speed = box.speed;
-  view.previous_chunks = box.prevChunksPrinted;
-  view.x_indent = box.xIndent;
-  view.y_indent = box.yIndent;
+  view.previous_chunks = box.previous_chunks;
+  view.x_indent = box.x_indent;
+  view.y_indent = box.y_indent;
   view.x = box.x;
   view.y = box.y;
-  view.frame_x = box.frameX;
-  view.frame_y = box.frameY;
+  view.frame_x = box.frame_x;
+  view.frame_y = box.frame_y;
   view.brightness = box.brightness;
-  view.chars_per_line = static_cast<std::int8_t>(box.charsPerLine);
-  view.line_count = static_cast<std::int8_t>(box.lineCount);
-  view.speaker_pause = box.opaque2C;
+  view.chars_per_line = box.chars_per_line;
+  view.line_count = box.line_count;
+  view.speaker_pause = box.speaker_pause;
   return view;
 }
 
-void StoreProgress(Menu_TextBoxState& box, const TextBoxText& view) {
-  box.flags.arrowAnimFrame = view.arrow_frame;
+void StoreProgress(VS::Menu::TextBoxState& box, const TextBoxText& view) {
+  box.flags.arrow_frame = view.arrow_frame;
   box.flags.done = view.done ? 1U : 0U;
   box.speed = view.speed;
-  box.prevChunksPrinted = view.previous_chunks;
-  box.opaque2C = view.speaker_pause;
+  box.previous_chunks = view.previous_chunks;
+  box.speaker_pause = view.speaker_pause;
 }
 
 // The next page starts in the box's own text or in a referenced string; a
 // printed integer holds no page break.
-char* PageStart(const Menu_TextBoxState& box, const TextPosition& page) {
+char* PageStart(const VS::Menu::TextBoxState& box, const TextPosition& page) {
   char* text = nullptr;
   if (page.source == kTextBoxString) {
-    text = BoxText(box);
+    text = box.text;
   } else if (page.source >= 0 && page.source < kPrintedIntegerText) {
     text = std::span(
         Battle_stringContext.strings)[static_cast<std::size_t>(page.source)];
@@ -206,7 +197,7 @@ void SetLiveMenuFontStyle(int palette_offset) {
   SetMenuFontStyle(font_style, static_cast<std::uint8_t>(palette_offset));
 }
 
-void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
+void DrawLiveProgressiveTextBoxText(VS::Menu::TextBoxState* box) {
   if (box == nullptr || box->speed == 0) {
     return;
   }
@@ -227,7 +218,7 @@ void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
   StoreProgress(*box, view);
   if (result.next_page) {
     if (char* const page = PageStart(*box, *result.next_page)) {
-      SetBoxText(*box, page);
+      box->text = page;
     } else {
       ReportTextBox(box, "broke its page inside a printed integer");
     }
@@ -246,7 +237,7 @@ void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
   }
 }
 
-void DrawLiveScaledTextBoxText(Menu_TextBoxState* box, int scale) {
+void DrawLiveScaledTextBoxText(VS::Menu::TextBoxState* box, int scale) {
   if (box == nullptr || box->speed == 0) {
     return;
   }
@@ -260,7 +251,8 @@ void DrawLiveScaledTextBoxText(Menu_TextBoxState* box, int scale) {
                         LiveVariableFontGlyphWidths(), target);
 }
 
-void BlendLiveTextBoxIntoFramebuffer(Menu_TextBoxState* box, int glyph_alpha) {
+void BlendLiveTextBoxIntoFramebuffer(VS::Menu::TextBoxState* box,
+                                     int glyph_alpha) {
   if (box == nullptr) {
     ReportTextBox(box, "is null");
     return;

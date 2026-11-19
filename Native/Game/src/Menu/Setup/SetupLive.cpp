@@ -42,11 +42,11 @@
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Setup/Combination.hpp"  // NOLINT(build/include): typed API
 #include "Menu/Setup/SetupScreen.hpp"  // NOLINT(build/include): typed API
 #include "Menu/Sounds.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
@@ -332,7 +332,7 @@ class LiveHost final : public Host {
 
   void InitInformationTextBox(int header) override {
     VS::Menu::InitLiveInformationTextBox(
-        static_cast<enum Menu_InformationBoxHeader>(header));
+        static_cast<InformationHeader>(header));
   }
   void InitializeInformationBox() override {
     Framework::InitializeLiveInformationBox();
@@ -341,7 +341,7 @@ class LiveHost final : public Host {
     Framework::DismissLiveInformationBox();
   }
   void CloseInformationTextBox() override {
-    Menu_textBoxes[kInformationTextBox].state = 0;
+    textBoxes[kInformationTextBox].state = 0;
   }
   void SetInformationMessage(std::span<const std::uint8_t> text) override {
     TrustedText copy{};

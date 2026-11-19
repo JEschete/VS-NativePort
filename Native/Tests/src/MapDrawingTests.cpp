@@ -17,7 +17,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Room.h"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Map.hpp"
 #include "Menu/MapDrawing.hpp"
 #include "Menu/MapDrawingLive.hpp"
@@ -860,7 +860,8 @@ class LiveMap {
     std::memset(VS::Render::compactGlyphLeftTrim, 0, sizeof(saved_trims_));
     std::memset(VS::Render::compactGlyphWidths, 0, sizeof(saved_widths_));
     std::memset(VS::Render::compactGlyphIndices, 0, sizeof(saved_indices_));
-    if (Menu_TextBoxState* box = VS::Menu::LiveTextBox(0); box != nullptr) {
+    if (VS::Menu::TextBoxState* box = VS::Menu::LiveTextBox(0);
+        box != nullptr) {
       saved_box_ = *box;
     }
     Core_Gte_Reset();
@@ -896,7 +897,8 @@ class LiveMap {
                 sizeof(saved_widths_));
     std::memcpy(VS::Render::compactGlyphIndices, saved_indices_.data(),
                 sizeof(saved_indices_));
-    if (Menu_TextBoxState* box = VS::Menu::LiveTextBox(0); box != nullptr) {
+    if (VS::Menu::TextBoxState* box = VS::Menu::LiveTextBox(0);
+        box != nullptr) {
       *box = saved_box_;
     }
     map::ResetMapDrawingLive();
@@ -972,7 +974,7 @@ class LiveMap {
   std::array<u_char, sizeof(VS::Render::compactGlyphLeftTrim)> saved_trims_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphWidths)> saved_widths_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphIndices)> saved_indices_{};
-  Menu_TextBoxState saved_box_{};
+  VS::Menu::TextBoxState saved_box_{};
 };
 
 // A one-room minimap scene whose room has a triangle, a quad, an outline, a
@@ -1418,17 +1420,17 @@ TEST_CASE("The live legend slides in 16 pixels a frame with text box 0",
   LiveMap frame;
   map::menuCommandsState = static_cast<std::int16_t>(GENERATE(0, 1, 5));
   VS::State::stateFlags.map_paling[0] = 0;
-  Menu_TextBoxState* box = VS::Menu::LiveTextBox(0);
+  VS::Menu::TextBoxState* box = VS::Menu::LiveTextBox(0);
   REQUIRE(box != nullptr);
   box->y = 0;
-  box->yIndent = 0;
+  box->y_indent = 0;
   map::uiAnimationState = 0;
   for (std::int32_t step = 0; step < 3; ++step) {
     frame.Reset();
     map::LiveDrawControls();
     CHECK(map::uiAnimationState == 1);
     CHECK(box->y == -8 * step);
-    CHECK(box->yIndent == -8 * step);
+    CHECK(box->y_indent == -8 * step);
     CHECK(frame.UsedWords() == 457);
     const auto chain = frame.Chain();
     REQUIRE(chain.size() == 76);
@@ -1467,7 +1469,7 @@ TEST_CASE("Resetting the live drawing restarts the legend's slide",
           "[map-drawing-live]") {
   LiveMap frame;
   map::triggerHideUi = 1;
-  Menu_TextBoxState* box = VS::Menu::LiveTextBox(0);
+  VS::Menu::TextBoxState* box = VS::Menu::LiveTextBox(0);
   REQUIRE(box != nullptr);
   box->y = 50;
   map::uiAnimationState = 1;

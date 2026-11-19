@@ -1,30 +1,37 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+// BATTLE.PRG's live text boxes, their selection and the scene notification
+// state.
+#include "Menu/TextBox.hpp"
+
+#include <cstdint>
+
 #include "Legacy/Psx.h"
-#include "Battle/TextBoxes.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
+#include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBoxState.hpp"
 
-// decomp: D_800EB9D8 (D_800EB9D8@BATTLE/BATTLE.PRG)
-int* Menu_sceneNotificationBuffer; /* data: contents loaded in Step 5 */
+namespace VS::Menu {
+// decomp: D_800EB9D8 (src/BATTLE/BATTLE.PRG/5BF94.c:364)
+std::int32_t* sceneNotificationBuffer;
 
-// decomp: D_800EBF58 (D_800EBF58@BATTLE/BATTLE.PRG)
-char Menu_kNotificationItemNames[65][12]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800EBF58 (src/BATTLE/BATTLE.PRG/5BF94.c:391); contents: module
+// image (ModuleData.cpp).
+NotificationItemName kNotificationItemNames[kNotificationItemNameRows];
 
-// decomp: D_800EC2D8 (D_800EC2D8@BATTLE/BATTLE.PRG)
-int Menu_kInformationHeaderSpriteWords[5477]; /* contents: module image (ModuleData.cpp) */
+// decomp: D_800EC2D8 (src/BATTLE/BATTLE.PRG/5BF94.c:396); contents: module
+// image (ModuleData.cpp).
+std::uint32_t kInformationHeaderSpriteWords[kInformationHeaderCount];
 
-// decomp: D_800F4E68 (D_800F4E68@BATTLE/BATTLE.PRG)
-char Menu_sceneNotificationTimer;
+// decomp: D_800F4E68 (src/BATTLE/BATTLE.PRG/5BF94.c:421)
+std::uint8_t sceneNotificationTimer;
 
-// decomp: D_800F4E69 (D_800F4E69@BATTLE/BATTLE.PRG)
-char Menu_sceneNotificationTimed;
+// decomp: D_800F4E69 (src/BATTLE/BATTLE.PRG/5BF94.c:422)
+std::uint8_t sceneNotificationTimed;
 
-// decomp: textBoxSelector (textBoxSelector@BATTLE/BATTLE.PRG)
-Menu_Framework_TextBoxSelector Menu_textBoxSelector;
+// decomp: textBoxSelector (src/BATTLE/BATTLE.PRG/5BF94.c:423)
+TextBoxSelectorState textBoxSelector;
 
-// decomp: vs_battle_textBoxes (vs_battle_textBoxes@BATTLE/BATTLE.PRG)
-Menu_TextBoxState Menu_textBoxes[8];
+// decomp: vs_battle_textBoxes (src/BATTLE/BATTLE.PRG/battleUi.h:304)
+TextBoxState textBoxes[kTextBoxCount];
 
-// decomp: D_800F51B8 (D_800F51B8@BATTLE/BATTLE.PRG)
-u_long* Menu_activeTextBoxOrderingTable;
-
+// decomp: D_800F51B8 (src/BATTLE/BATTLE.PRG/5BF94.c:426)
+u_long* activeTextBoxOrderingTable;
+}  // namespace VS::Menu

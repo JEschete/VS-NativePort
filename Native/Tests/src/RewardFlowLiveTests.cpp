@@ -35,7 +35,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
@@ -162,10 +162,10 @@ struct LiveDialogFixture : LiveMenuFixture {
   int saved_recovery = Battle_recoveryRewardMode;
   int saved_effects = Effects_effectBusyFlags;
   int saved_loot_opened = Battle_lootMenuOpened;
-  int* saved_notification = Menu_sceneNotificationBuffer;
-  Menu_TextBoxState saved_notice_box = Menu_textBoxes[7];
-  char saved_notice_timer = Menu_sceneNotificationTimer;
-  char saved_notice_timed = Menu_sceneNotificationTimed;
+  int* saved_notification = VS::Menu::sceneNotificationBuffer;
+  VS::Menu::TextBoxState saved_notice_box = VS::Menu::textBoxes[7];
+  std::uint8_t saved_notice_timer = VS::Menu::sceneNotificationTimer;
+  std::uint8_t saved_notice_timed = VS::Menu::sceneNotificationTimed;
   std::span<int> notice;
 
   LiveDialogFixture() {
@@ -177,7 +177,7 @@ struct LiveDialogFixture : LiveMenuFixture {
     Battle_recoveryRewardMode = 0;
     Effects_effectBusyFlags = 0;
     Battle_lootMenuOpened = 0;
-    Menu_sceneNotificationBuffer = nullptr;
+    VS::Menu::sceneNotificationBuffer = nullptr;
   }
   ~LiveDialogFixture() {
     if (!VS::Menu::CleanupLiveSceneNotificationOwnedState()) std::terminate();
@@ -188,10 +188,10 @@ struct LiveDialogFixture : LiveMenuFixture {
     Battle_recoveryRewardMode = saved_recovery;
     Effects_effectBusyFlags = saved_effects;
     Battle_lootMenuOpened = saved_loot_opened;
-    Menu_sceneNotificationBuffer = saved_notification;
-    Menu_textBoxes[7] = saved_notice_box;
-    Menu_sceneNotificationTimer = saved_notice_timer;
-    Menu_sceneNotificationTimed = saved_notice_timed;
+    VS::Menu::sceneNotificationBuffer = saved_notification;
+    VS::Menu::textBoxes[7] = saved_notice_box;
+    VS::Menu::sceneNotificationTimer = saved_notice_timer;
+    VS::Menu::sceneNotificationTimed = saved_notice_timed;
   }
 };
 
@@ -356,14 +356,14 @@ TEST_CASE("F00198 live notice blocks field restoration and ability recovery",
   VS::Menu::Framework::menuItems = nullptr;
   VS::Menu::Framework::menuState.control.current_menu = 0x7F;
   VS::Menu::Framework::actionSelection.menu_status = 1;
-  Menu_sceneNotificationBuffer = fixture.notice.data();
-  Menu_textBoxes[7].flags.done = 0;
+  VS::Menu::sceneNotificationBuffer = fixture.notice.data();
+  VS::Menu::textBoxes[7].flags.done = 0;
   Battle_actionState = nullptr;
   const auto refusals = VS::Menu::RefusedLiveSceneNotificationCount();
   b::UpdateLiveAbilityUnlockResults();
   CHECK(VS::Menu::RefusedLiveSceneNotificationCount() == refusals);
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
-  CHECK(Menu_sceneNotificationBuffer == fixture.notice.data());
+  CHECK(VS::Menu::sceneNotificationBuffer == fixture.notice.data());
   CHECK(VS::Field::isInteractionPaused == 77);
   CHECK(Battle_actionFlowMode == 99);
 }
@@ -377,7 +377,7 @@ TEST_CASE("F00198 live absent notice proceeds to actual older ability recovery",
   Field_isMinimapVisible = 0;
   b::UpdateLiveAbilityUnlockResults();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
-  CHECK(Menu_sceneNotificationBuffer == nullptr);
+  CHECK(VS::Menu::sceneNotificationBuffer == nullptr);
   CHECK(VS::Field::isInteractionPaused == 0);
   CHECK(Field_isMinimapVisible == 1);
   CHECK(Battle_actionFlowMode == 0);
@@ -389,14 +389,14 @@ TEST_CASE("F00198 live busy menu never advances the scene notice timer",
           "[reward-dialogs][reward-live][F00198]") {
   LiveDialogFixture fixture;
   VS::Menu::Framework::actionSelection.menu_status = 1;
-  Menu_sceneNotificationBuffer = fixture.notice.data();
-  Menu_textBoxes[7].flags.done = 1;
-  Menu_sceneNotificationTimed = 1;
-  Menu_sceneNotificationTimer = 12;
+  VS::Menu::sceneNotificationBuffer = fixture.notice.data();
+  VS::Menu::textBoxes[7].flags.done = 1;
+  VS::Menu::sceneNotificationTimed = 1;
+  VS::Menu::sceneNotificationTimer = 12;
   Battle_actionState = nullptr;
   b::UpdateLiveAbilityUnlockResults();
-  CHECK(Menu_sceneNotificationTimer == 12);
-  CHECK(Menu_sceneNotificationBuffer == fixture.notice.data());
+  CHECK(VS::Menu::sceneNotificationTimer == 12);
+  CHECK(VS::Menu::sceneNotificationBuffer == fixture.notice.data());
   CHECK(Battle_actionFlowMode == 99);
   CHECK(VS::Field::isInteractionPaused == 77);
 }
@@ -483,15 +483,15 @@ TEST_CASE("F00226 live busy menu preserves production notice timing",
           "[reward-dispatch][reward-live][F00226]") {
   LiveDialogFixture fixture;
   VS::Menu::Framework::actionSelection.menu_status = 1;
-  Menu_sceneNotificationBuffer = fixture.notice.data();
-  Menu_textBoxes[7].flags.done = 1;
-  Menu_sceneNotificationTimed = 1;
-  Menu_sceneNotificationTimer = 12;
+  VS::Menu::sceneNotificationBuffer = fixture.notice.data();
+  VS::Menu::textBoxes[7].flags.done = 1;
+  VS::Menu::sceneNotificationTimed = 1;
+  VS::Menu::sceneNotificationTimer = 12;
   Battle_actionState = nullptr;
   b::UpdateLiveRewardUnlockDialog();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 1);
-  CHECK(Menu_sceneNotificationTimer == 12);
-  CHECK(Menu_sceneNotificationBuffer == fixture.notice.data());
+  CHECK(VS::Menu::sceneNotificationTimer == 12);
+  CHECK(VS::Menu::sceneNotificationBuffer == fixture.notice.data());
   CHECK(Battle_actionFlowMode == 99);
   CHECK(VS::Field::isInteractionPaused == 77);
 }
@@ -511,7 +511,7 @@ TEST_CASE("F00226 live close ends reward pause then checks actual unlocks",
   PrepareClosedUnlock();
   b::UpdateLiveRewardUnlockDialog();
   CHECK(VS::Menu::Framework::actionSelection.menu_status == 2);
-  CHECK(Menu_sceneNotificationBuffer == nullptr);
+  CHECK(VS::Menu::sceneNotificationBuffer == nullptr);
   CHECK(Battle_actionFlowMode == 5);
   CHECK(VS::Field::isInteractionPaused == 0);
 }

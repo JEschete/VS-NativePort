@@ -10,7 +10,7 @@
 #include "Effects/ScreenEffects.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "State/Timers.hpp"
 
 namespace text_box_tests {
@@ -19,7 +19,7 @@ struct LiveUpdateRestore {
       u_long, std::size(VS::Menu::textBoxOrderingTables)>
       saved_tables{VS::Menu::textBoxOrderingTables};
   equipment_detail_tests::ValueRestore<u_long*> saved_active{
-      Menu_activeTextBoxOrderingTable};
+      VS::Menu::activeTextBoxOrderingTable};
   equipment_detail_tests::ValueRestore<char> saved_index{
       VS::Menu::textBoxBufferIndex};
   equipment_detail_tests::ValueRestore<decltype(VS::State::tickSpeed)>

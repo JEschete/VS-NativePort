@@ -31,7 +31,7 @@
 #include "Menu/Inventory/EquipmentRows.hpp"
 #include "Menu/Inventory/EquipmentRowsLive.hpp"
 #include "Menu/Inventory/Inventory.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 
 // Contracts of the equipment menus' choice list (MENU3.PRG 16C.c:39-336) and
 // preview model reload (68C4.c:12-127).
@@ -844,7 +844,7 @@ struct LiveRowsFixture {
   Restore<decltype(VS::Input::buttonsPressed)> saved_pressed{
       VS::Input::buttonsPressed};
   Restore<int> saved_repeat{VS::Input::buttonRepeat};
-  GlobalArrayRestore<Menu_textBoxes> saved_text_boxes;
+  GlobalArrayRestore<VS::Menu::textBoxes> saved_text_boxes;
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 256> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};

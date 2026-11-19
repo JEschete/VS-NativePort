@@ -84,7 +84,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxUpdateLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/Display.hpp"

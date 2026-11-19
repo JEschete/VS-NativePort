@@ -23,7 +23,7 @@
 #include "Menu/Framework/ItemRowsLiveHost.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -78,11 +78,10 @@ class LiveMenuDialogWorld final : public MenuDialogWorld,
     return Framework::AreLiveMenuRowsIdle();
   }
   void InitializeInformationBox() override {
-    VS::Menu::InitLiveInformationTextBox(
-        static_cast<Menu_InformationBoxHeader>(1));
+    VS::Menu::InitLiveInformationTextBox(InformationHeader::kCaution);
   }
   bool InformationDone() override {
-    return Menu_textBoxes[kInformationBox].flags.done != 0;
+    return textBoxes[kInformationBox].flags.done != 0;
   }
   std::span<const std::uint8_t> HelpText() override {
     Framework::LiveItemRowsHost texts;

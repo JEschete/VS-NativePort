@@ -68,7 +68,7 @@
 #include "Menu/BattleAbilitiesUnlockLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemList.hpp"
 #include "Menu/InventoryTerminalWorld.hpp"
@@ -77,7 +77,7 @@
 #include "Menu/Loot/LootStagingLive.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/Loot/Paging.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -1112,7 +1112,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
   decltype(VS::Menu::Framework::itemNames) saved_names =
       VS::Menu::Framework::itemNames;
   decltype(Battle_stringContext) saved_string_context = Battle_stringContext;
-  Menu_TextBoxState saved_box = Menu_textBoxes[7];
+  VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[7];
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
@@ -1145,8 +1145,9 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Menu::Loot::ResetLootTerminalModuleData();
     VS::Menu::Framework::menuItems = menu_rows.data();
     VS::Menu::Framework::itemNames = item_names;
-    Menu_textBoxes[7] = {};
-    VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
+    VS::Menu::textBoxes[7] = {};
+    VS::Menu::InitLiveInformationTextBox(
+        VS::Menu::InformationHeader::kInformation);
     sfx_offsets.fill(UINT32_MAX);
     VS::Input::settings.information = 0;
     VS::Menu::Loot::lootClaimed = 0;
@@ -1170,7 +1171,7 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
     VS::Menu::Framework::menuItems = saved_menu_rows;
     VS::Menu::Framework::itemNames = saved_names;
     Battle_stringContext = saved_string_context;
-    Menu_textBoxes[7] = saved_box;
+    VS::Menu::textBoxes[7] = saved_box;
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;

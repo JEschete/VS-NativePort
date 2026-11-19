@@ -18,8 +18,8 @@
 #include "Menu/BattleAbilitiesLiveState.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
+#include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/Progress.hpp"
 
@@ -55,9 +55,7 @@ char* MenuText(std::size_t offset) {
              : nullptr;
 }
 
-bool InformationDone() {
-  return Menu_textBoxes[kInformationBox].flags.done != 0;
-}
+bool InformationDone() { return textBoxes[kInformationBox].flags.done != 0; }
 
 bool ConfirmPressed() {
   return VS::Input::LowButtonByte(VS::Input::buttonsPressed) != 0;
@@ -110,7 +108,7 @@ class LiveBreakArtHost final : public BreakArtUnlockHost {
     BattleAbilities::Refuse(reason);
   }
   void InitializeInformationBox() override {
-    InitLiveInformationTextBox(Menu_InformationBoxHeader_Check);
+    InitLiveInformationTextBox(InformationHeader::kCheck);
   }
   void SetBreakArtMessage(int weapon, std::uint8_t action) override {
     Battle_stringContext.strings[0] =
@@ -214,7 +212,7 @@ class LiveAbilityHost final : public AbilityUnlockHost {
             : Text_Menu2_battleAbilitiesMenu_Offset_battleAbilityUnlock));
   }
   void InitializeInformationBox() override {
-    InitLiveInformationTextBox(Menu_InformationBoxHeader_Check);
+    InitLiveInformationTextBox(InformationHeader::kCheck);
   }
   bool InformationBoxDone() const override { return InformationDone(); }
   bool ConfirmPressed() const override {

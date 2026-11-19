@@ -22,7 +22,7 @@
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.hpp"
@@ -86,8 +86,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void OpenInformationBox() override {
-    VS::Menu::InitLiveInformationTextBox(
-        static_cast<Menu_InformationBoxHeader>(1));
+    VS::Menu::InitLiveInformationTextBox(InformationHeader::kCaution);
   }
 
   void ShowPrompt(ContainerPrompt prompt) override {

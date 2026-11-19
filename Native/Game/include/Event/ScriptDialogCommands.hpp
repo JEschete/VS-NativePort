@@ -32,7 +32,7 @@ inline constexpr std::size_t kSetDialogTransitionDurationLength = 2;
 inline constexpr std::size_t kSelectDialogChoiceLength = 2;
 inline constexpr std::size_t kSetDialogSpeakerLength = 4;
 
-// The text boxes a script can address (Menu_textBoxes) and the integers a
+// The text boxes a script can address (textBoxes) and the integers a
 // dialog string can print (vs_battle_stringContext_t integers).
 inline constexpr int kTextBoxCount = 8;
 inline constexpr int kDialogIntegerCount = 10;

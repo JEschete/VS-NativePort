@@ -49,7 +49,7 @@ struct LiveLimbFixture {
   ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
   ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
-  ValueRestore<Menu_StringContext> saved_context{Battle_stringContext};
+  ValueRestore<VS::Menu::StringContext> saved_context{Battle_stringContext};
   ArrayRestore<int16_t, fw::kEquipmentStatCount> saved_stats{
       VS::Menu::Framework::equipmentStats};
   ArrayRestore<int16_t, fw::kPrimaryStatCount> saved_primary{
@@ -60,8 +60,8 @@ struct LiveLimbFixture {
       VS::Menu::Framework::comparisonStatTotals};
   ArrayRestore<int16_t, fw::kComparisonStatCount> saved_accessory{
       VS::Menu::Framework::comparisonAccessoryStats};
-  ArrayRestore<Menu_TextBoxState, std::size(Menu_textBoxes)> saved_boxes{
-      Menu_textBoxes};
+  ArrayRestore<VS::Menu::TextBoxState, std::size(VS::Menu::textBoxes)>
+      saved_boxes{VS::Menu::textBoxes};
   ArrayRestore<std::uint16_t, std::size(status::statusStrings)>
       saved_status_text{status::statusStrings};
   ArrayRestore<u_short, std::size(Battle_statusStrings)> saved_battle_text{

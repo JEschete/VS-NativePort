@@ -24,7 +24,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Rename.hpp"
 #include "Menu/RenameLiveState.hpp"
 #include "Menu/Sounds.hpp"
@@ -143,9 +143,7 @@ class LiveHost final : public Host {
   }
   void ShowConfirmPrompt(std::span<const std::uint8_t> name,
                          std::span<const std::uint8_t> prompt) override {
-    VS::Menu::InitLiveInformationTextBox(
-        static_cast<enum Menu_InformationBoxHeader>(
-            Framework::InformationHeader::kCaution));
+    VS::Menu::InitLiveInformationTextBox(InformationHeader::kCaution);
     g_prompt_name.fill(Render::kTextTerminator);
     std::memcpy(g_prompt_name.data(), name.data(),
                 std::min(name.size(), kNameBytes));

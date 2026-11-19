@@ -158,9 +158,9 @@ TEST_CASE("Cold session restores both statistics cursors with foreign owners",
   const auto page = GENERATE(Page::kTitles, Page::kStatistics);
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
-      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
-      Menu_sceneNotificationTimed>
+      VS::Menu::textBoxSelector, Battle_stringContext,
+      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   Fixture fixture;
   const auto sequence = fixture.PrimeCursor(page);
@@ -171,7 +171,7 @@ TEST_CASE("Cold session restores both statistics cursors with foreign owners",
   REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
   CHECK(fixture.DrawCursor(page) == sequence[0]);
   before.Check();
-  CHECK(Menu_textBoxes[shared::kInformationBox].string == nullptr);
+  CHECK(VS::Menu::textBoxes[shared::kInformationBox].text == nullptr);
   CHECK(memory::LivePayloadCapacity(foreign).has_value());
   memory::FreeLiveFromLowEnd(foreign);
   CHECK(fixture.GuardsIntact());

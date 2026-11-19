@@ -297,7 +297,7 @@ class LiveHelpPagesHost final : public HelpPagesHost {
                           placement.center_y);
   }
   void HideTextBox(std::int32_t id) override {
-    Menu_TextBoxState* const box = Menu::LiveTextBox(id);
+    TextBoxState* const box = Menu::LiveTextBox(id);
     if (box == nullptr) {
       RefuseLive("Manual page text box is missing");
       return;

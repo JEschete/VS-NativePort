@@ -125,7 +125,7 @@ inline auto ControlOwners() {
                     BytesOf(VS::Menu::Framework::textHeaders),
                     BytesOf(VS::Menu::Framework::actionMenuState),
                     BytesOf(VS::Menu::Framework::displayActionCost),
-                    BytesOf(Menu_textBoxSelector),
+                    BytesOf(VS::Menu::textBoxSelector),
                     BytesOf(Battle_hudHidden),
                     BytesOf(Battle_hudSlideOffset),
                     BytesOf(VS::Field::isFieldRenderingEnabled),
@@ -321,7 +321,7 @@ class TerminalFixture
 
   static shared::EncodedText RankText() {
     const auto address =
-        reinterpret_cast<std::uintptr_t>(Menu_textBoxes[0].string);
+        reinterpret_cast<std::uintptr_t>(VS::Menu::textBoxes[0].text);
     const std::array<std::span<const std::byte>, 2> owners{
         std::as_bytes(std::span(score::rankText)),
         score::monBinData == nullptr ? std::span<const std::byte>{}

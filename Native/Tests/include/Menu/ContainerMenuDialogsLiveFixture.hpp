@@ -74,7 +74,7 @@ struct DialogLiveFixture : equipment::LiveFixture {
   equipment::ValueRestore<char> saved_animation{
       VS::Menu::Framework::itemsListRow};
   equipment::ValueRestore<u_long*> saved_text_ordering{
-      Menu_activeTextBoxOrderingTable};
+      VS::Menu::activeTextBoxOrderingTable};
   equipment::ValueRestore<char> saved_text_index{VS::Menu::textBoxBufferIndex};
   equipment::ArrayRestore<u_long, std::size(VS::Menu::textBoxOrderingTables)>
       saved_text_tables{VS::Menu::textBoxOrderingTables};
@@ -90,8 +90,8 @@ struct DialogLiveFixture : equipment::LiveFixture {
     std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
     VS::State::tickSpeed = 2;
     VS::Menu::textBoxBufferIndex = 0;
-    Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
-    ClearOTag(Menu_activeTextBoxOrderingTable, kTextOrderingTags);
+    VS::Menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
+    ClearOTag(VS::Menu::activeTextBoxOrderingTable, kTextOrderingTags);
     PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),
                   VS::Input::legacyPadResponseBytes[1].data());
     Buttons(0);

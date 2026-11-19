@@ -346,7 +346,7 @@ class Host {
   virtual void InitInformationTextBox(int header) = 0;
   virtual void InitializeInformationBox() = 0;
   virtual void DismissInformationBox() = 0;
-  // Menu_textBoxes[7].state = 0.
+  // textBoxes[7].state = 0.
   virtual void CloseInformationTextBox() = 0;
   virtual void SetInformationMessage(std::span<const std::uint8_t> text) = 0;
   virtual void UpdateInformationVisibility(int row, int state) = 0;

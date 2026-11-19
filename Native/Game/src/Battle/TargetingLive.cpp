@@ -51,7 +51,7 @@
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetVolume.h"
 #include "Battle/TargetingState.h"
-#include "Battle/TextBoxes.h"
+#include "Battle/TextBoxes.hpp"
 #include "Core/Log.hpp"
 #include "Field/Camera.h"
 #include "Field/CameraLive.hpp"
@@ -72,9 +72,9 @@
 #include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/FrameworkLive.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/Palette.hpp"
@@ -1114,19 +1114,20 @@ class LiveTargetSelectionHost final : public battle::TargetSelectionHost {
   }
 
   void InitInformationBox() override {
-    VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_None);
+    VS::Menu::InitLiveInformationTextBox(VS::Menu::InformationHeader::kNone);
   }
   void ShowNoTargetsMessage() override {
-    const int offset = Battle_doorStrings[0];
-    if (!InRange(Battle_doorStrings, offset)) {
+    const int offset = battle::doorStrings[0];
+    if (!InRange(battle::doorStrings, offset)) {
       VS::Core::LogError("battle.targeting", "no-targets text {} is unknown",
                          offset);
       return;
     }
-    Menu_textBoxes[kInformationTextBox].flags.frameShape = kNoTargetsFrameShape;
+    VS::Menu::textBoxes[kInformationTextBox].flags.frame_shape =
+        kNoTargetsFrameShape;
     VS::Menu::SetLiveTextBoxText(
         kInformationTextBox,
-        reinterpret_cast<char*>(&Battle_doorStrings[offset]));
+        reinterpret_cast<char*>(&battle::doorStrings[offset]));
   }
   void SetContextText(int slot, battle::TargetText text) override {
     if (!InRange(Battle_stringContext.strings, slot)) {

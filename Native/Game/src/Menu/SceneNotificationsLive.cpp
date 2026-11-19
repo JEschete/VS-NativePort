@@ -10,13 +10,13 @@
 
 #include "Battle/ActionTable.h"
 #include "Battle/TargetingState.h"
-#include "Battle/TextBoxes.h"
+#include "Battle/TextBoxes.hpp"
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Framework/Menus.hpp"
 #include "Menu/SceneNotifications.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/EncodedTextLive.hpp"
@@ -47,22 +47,22 @@ void Refuse(const char* reason) {
 }
 
 void Publish(const SceneNotificationState& state) {
-  Menu_sceneNotificationBuffer = reinterpret_cast<int*>(state.buffer.data());
-  Menu_sceneNotificationTimer = std::bit_cast<char>(state.timer);
-  Menu_sceneNotificationTimed = std::bit_cast<char>(state.timed);
+  sceneNotificationBuffer = reinterpret_cast<int*>(state.buffer.data());
+  sceneNotificationTimer = state.timer;
+  sceneNotificationTimed = state.timed;
 }
 
 bool Load(SceneNotificationState& state) {
-  state.timer = static_cast<std::uint8_t>(Menu_sceneNotificationTimer);
-  state.timed = static_cast<std::uint8_t>(Menu_sceneNotificationTimed);
-  if (Menu_sceneNotificationBuffer == nullptr) return true;
+  state.timer = sceneNotificationTimer;
+  state.timed = sceneNotificationTimed;
+  if (sceneNotificationBuffer == nullptr) return true;
   const auto capacity =
-      Core::Memory::LivePayloadCapacity(Menu_sceneNotificationBuffer);
+      Core::Memory::LivePayloadCapacity(sceneNotificationBuffer);
   if (!capacity || *capacity < kSceneNotificationBytes) {
     Refuse("the active buffer is not a complete game-heap allocation");
     return false;
   }
-  state.buffer = {reinterpret_cast<std::uint8_t*>(Menu_sceneNotificationBuffer),
+  state.buffer = {reinterpret_cast<std::uint8_t*>(sceneNotificationBuffer),
                   kSceneNotificationBytes};
   return true;
 }
@@ -97,16 +97,16 @@ class LiveHost final : public SceneNotificationHost {
       std::int32_t subject) const override {
     const auto row =
         (static_cast<std::int64_t>(subject) - kFirstNotificationItem) * 2;
-    if (row < 0 || row >= static_cast<std::int64_t>(
-                              std::size(Menu_kNotificationItemNames))) {
+    if (row < 0 ||
+        row >= static_cast<std::int64_t>(std::size(kNotificationItemNames))) {
       return std::nullopt;
     }
-    return Bytes(Menu_kNotificationItemNames[static_cast<std::size_t>(row)]);
+    return Bytes(kNotificationItemNames[static_cast<std::size_t>(row)]);
   }
   std::optional<SceneNotificationText> NotificationText(
       std::int32_t kind) const override {
     if (kind < 0 || kind >= kNotificationCount) return std::nullopt;
-    return TextAt(Battle_doorStrings, Battle_doorStrings[kind]);
+    return TextAt(VS::Battle::doorStrings, VS::Battle::doorStrings[kind]);
   }
   std::optional<SceneNotificationText> ActionText(
       std::uint8_t type) const override {

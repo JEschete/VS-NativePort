@@ -92,7 +92,7 @@ TEST_CASE(
   LiveFixture fixture;
   fixture.OpenQuantity(kMaximumQuantity);
   const auto& row = fixture.rows[container_dialog_live_tests::kQuantityRow];
-  REQUIRE(Menu_textBoxes[7].flags.done != 0);
+  REQUIRE(VS::Menu::textBoxes[7].flags.done != 0);
   REQUIRE(static_cast<std::uint8_t>(row.text[0]) == VS::Render::kTextSpacing);
   REQUIRE(static_cast<std::uint8_t>(row.text[1]) == 48);
   REQUIRE(static_cast<std::uint8_t>(row.text[2]) ==

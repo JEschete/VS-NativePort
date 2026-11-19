@@ -18,8 +18,8 @@
 #include "Battle/HudShortcutLiveFixture.hpp"
 #include "Content/ModuleData.hpp"
 #include "Menu/Framework/Menus.hpp"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
+#include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBox.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
@@ -164,7 +164,7 @@ class LiveState {
     for (auto& limb : actor.stats.limbs) {
       limb.hp = limb.maxHp = 100;
     }
-    auto boxes = std::span(Menu_textBoxes);
+    auto boxes = std::span(VS::Menu::textBoxes);
     boxes[7] = {};
   }
 
@@ -188,6 +188,6 @@ class LiveState {
   SavedValue<VS::State::tickSpeed> speed_;
   SavedArray<Battle_actorMarkers> markers_;
   SavedArray<Battle_puzzleTimerText> timer_text_;
-  SavedArray<Menu_textBoxes> boxes_;
+  SavedArray<VS::Menu::textBoxes> boxes_;
 };
 }  // namespace hud_orchestration_live_fixture

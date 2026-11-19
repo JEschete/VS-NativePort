@@ -1,7 +1,10 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
-#include "Battle/TextBoxes.h"
+// BATTLE.PRG's door and chest messages.
+#include "Battle/TextBoxes.hpp"
 
-// decomp: D_800EBDDC (D_800EBDDC@BATTLE/BATTLE.PRG)
-u_short Battle_doorStrings[190]; /* contents: module image (ModuleData.cpp) */
+#include <cstdint>
 
+namespace VS::Battle {
+// decomp: D_800EBDDC (src/BATTLE/BATTLE.PRG/5BF94.c:389); contents: module
+// image (ModuleData.cpp).
+std::uint16_t doorStrings[kDoorStringWords];
+}  // namespace VS::Battle

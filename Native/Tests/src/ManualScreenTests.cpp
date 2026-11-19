@@ -900,8 +900,9 @@ struct LiveManualFixture {
       VS::Menu::Framework::menuState;
   std::vector<u_long> storage = std::vector<u_long>(kPacketWords, 0xDEADBEEF);
   std::vector<u_long> ordering = std::vector<u_long>(kTableWords);
-  Menu_TextBoxState saved_box = *VS::Menu::LiveTextBox(manual::kPageTextBox);
-  Menu_TextBoxState saved_information_box =
+  VS::Menu::TextBoxState saved_box =
+      *VS::Menu::LiveTextBox(manual::kPageTextBox);
+  VS::Menu::TextBoxState saved_information_box =
       *VS::Menu::LiveTextBox(kInformationBox);
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
@@ -953,7 +954,7 @@ struct LiveManualFixture {
     manual::helpAssetsCdQueue = nullptr;
     Field_manualDisplayState = Field_ManualDisplayState{};
     // The page text box as the manual opens it (ManualTopicsTests).
-    VS::Menu::LiveTextBox(manual::kPageTextBox)->flags.speakerTexture = 32;
+    VS::Menu::LiveTextBox(manual::kPageTextBox)->flags.speaker_texture = 32;
     VS::Render::InitializeLiveTexturePages();
     manual::ResetLiveManualScreenStatics();
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));

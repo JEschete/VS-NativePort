@@ -13,8 +13,8 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
+#include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFrames.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.hpp"
@@ -50,9 +50,9 @@ class LiveInformationBoxWorld final : public InformationBoxWorld {
  public:
   explicit LiveInformationBoxWorld(std::size_t index)
       : index_(index),
-        backdrop_(Menu_activeTextBoxOrderingTable == nullptr
+        backdrop_(activeTextBoxOrderingTable == nullptr
                       ? nullptr
-                      : Menu_activeTextBoxOrderingTable +
+                      : activeTextBoxOrderingTable +
                             index * kBoxOrderingStride + 1),
         headers_(static_cast<u_long*>(
             VS::Render::FrameScratchpad().overlay_ordering_table)) {}
@@ -66,10 +66,9 @@ class LiveInformationBoxWorld final : public InformationBoxWorld {
     const Render::SpriteRequest request{
         Render::kDefaultSpriteDrawMode, Render::kDefaultSpriteBrightness,
         std::bit_cast<std::int32_t>(PackHalfwords(x, y)),
-        Menu_informationHeaderPositions[kind]};
+        informationHeaderPositions[kind]};
     auto packet = Render::BuildSpritePacket(request, headers_.ChainLink());
-    packet[Render::kSpriteTextureWord] =
-        static_cast<std::uint32_t>(Menu_kInformationHeaderSpriteWords[kind]);
+    packet[Render::kSpriteTextureWord] = kInformationHeaderSpriteWords[kind];
     return headers_.Emit(packet);
   }
 
@@ -139,15 +138,14 @@ FrameBytes CompatibilityStyleBytes(const void* pointer) {
 }
 
 void DrawFrame(int index) {
-  if (index < 0 ||
-      static_cast<std::size_t>(index) >= std::size(Menu_textBoxes) ||
-      Menu_activeTextBoxOrderingTable == nullptr) {
+  if (index < 0 || static_cast<std::size_t>(index) >= std::size(textBoxes) ||
+      activeTextBoxOrderingTable == nullptr) {
     RefuseFrame(index, -1);
     return;
   }
-  const auto& box = Menu_textBoxes[index];
+  const auto& box = textBoxes[index];
   const auto lease =
-      VS::Event::LeaseLiveTextBoxFrame(static_cast<int>(box.flags.frameShape));
+      VS::Event::LeaseLiveTextBoxFrame(static_cast<int>(box.flags.frame_shape));
   FrameBytes bytes;
   if (lease) {
     const auto view = lease->Bytes();
@@ -155,21 +153,21 @@ void DrawFrame(int index) {
       bytes = *view;
     }
   } else if (lease.error() == VS::Event::ScriptSourceError::kMissingOwner) {
-    const void* pointer = Event_textBoxFrameStyles[box.flags.frameShape];
+    const void* pointer = Event_textBoxFrameStyles[box.flags.frame_shape];
     if (pointer == nullptr) {
       return;
     }
     bytes = CompatibilityStyleBytes(pointer);
   }
   const VS::Menu::FrameRequest request{
-      box.frameX,
-      box.frameY,
-      box.frameWidth,
-      box.frameHeight,
+      box.frame_x,
+      box.frame_y,
+      box.frame_width,
+      box.frame_height,
       static_cast<std::uint8_t>(box.flags.alignment),
       box.brightness,
-      box.flags.framePart};
-  auto* ordering = Menu_activeTextBoxOrderingTable +
+      box.flags.frame_part};
+  auto* ordering = activeTextBoxOrderingTable +
                    static_cast<std::size_t>(index) * kBoxOrderingStride;
   VS::Render::LivePacketQueue foreground(ordering + 2);
   VS::Render::LivePacketQueue shadow(ordering + 1);
@@ -190,8 +188,7 @@ void DrawLiveInformationBoxHeader(std::int32_t y, std::uint32_t kind) {
 }
 
 void DrawLiveInformationBoxBackdrop(std::int32_t index) {
-  if (index < 0 ||
-      static_cast<std::size_t>(index) >= std::size(Menu_textBoxes)) {
+  if (index < 0 || static_cast<std::size_t>(index) >= std::size(textBoxes)) {
     RefuseFrame(index, -1);
     return;
   }

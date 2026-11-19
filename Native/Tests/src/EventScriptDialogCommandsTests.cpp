@@ -20,7 +20,7 @@
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Input/ControllerLiveState.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/StateFlags.hpp"
 #include "TestSupport/ScriptSources.hpp"
@@ -41,32 +41,32 @@ void CheckDialogString(const Bytes& table, std::size_t index,
 }
 
 struct LiveDialogFixture {
-  std::array<Menu_TextBoxState, event::kTextBoxCount> boxes{};
-  Menu_Framework_TextBoxSelector selector = Menu_textBoxSelector;
+  std::array<VS::Menu::TextBoxState, event::kTextBoxCount> boxes{};
+  VS::Menu::TextBoxSelectorState selector = VS::Menu::textBoxSelector;
   decltype(VS::State::stateFlags) audio_flags = VS::State::stateFlags;
   decltype(VS::Input::buttonsPressed) pressed = VS::Input::buttonsPressed;
   std::uint16_t* strings = Event_dialogStrings;
   std::array<std::uint16_t, 3> legacy{1, 0xE701, 0};
 
   LiveDialogFixture() {
-    std::ranges::copy(Menu_textBoxes, boxes.begin());
+    std::ranges::copy(VS::Menu::textBoxes, boxes.begin());
     event::ReleaseLiveScriptDialogText();
     event::ResetLiveScriptRuntime();
     Event_dialogStrings = legacy.data();
-    Menu_textBoxSelector = {};
+    VS::Menu::textBoxSelector = {};
     VS::Input::buttonsPressed = {};
     VS::State::stateFlags.opaque_11 = 1;
-    for (auto& box : Menu_textBoxes) {
+    for (auto& box : VS::Menu::textBoxes) {
       box = {};
-      box.flags.speakerTexture = event::kNoSpeakerTexture;
+      box.flags.speaker_texture = event::kNoSpeakerTexture;
       box.state = 1;
     }
   }
   ~LiveDialogFixture() {
     event::ReleaseLiveScriptDialogText();
     event::ResetLiveScriptRuntime();
-    std::ranges::copy(boxes, Menu_textBoxes);
-    Menu_textBoxSelector = selector;
+    std::ranges::copy(boxes, VS::Menu::textBoxes);
+    VS::Menu::textBoxSelector = selector;
     VS::State::stateFlags = audio_flags;
     VS::Input::buttonsPressed = pressed;
     Event_dialogStrings = strings;
@@ -86,7 +86,7 @@ void ShowNativeDialog(std::uint8_t box) {
 }
 
 void DismissNativeDialog(std::uint8_t box) {
-  Menu_textBoxes[box].state = 0;
+  VS::Menu::textBoxes[box].state = 0;
   std::array<std::uint8_t, 2> command{0x12, box};
   CHECK(VS::Event::ScriptDismissDialogBoxOpcode(command.data(), 0) == 0);
 }
@@ -95,8 +95,8 @@ std::weak_ptr<const Bytes> session_dialog_owner;
 int session_dialog_entries = 0;
 
 void PrepareSessionDialog() {
-  Menu_textBoxes[0].state = 1;
-  Menu_textBoxes[0].flags.speakerTexture = event::kNoSpeakerTexture;
+  VS::Menu::textBoxes[0].state = 1;
+  VS::Menu::textBoxes[0].flags.speaker_texture = event::kNoSpeakerTexture;
   BindDialogTable({1, 0, 0x24, 0xE7}, &session_dialog_owner);
   ShowNativeDialog(0);
   CHECK_FALSE(session_dialog_owner.expired());
@@ -104,7 +104,8 @@ void PrepareSessionDialog() {
 
 int EnterDialogSession() {
   if (++session_dialog_entries > 1) {
-    return session_dialog_owner.expired() && Menu_textBoxes[0].string == nullptr
+    return session_dialog_owner.expired() &&
+                   VS::Menu::textBoxes[0].text == nullptr
                ? 41
                : -1;
   }
@@ -245,14 +246,14 @@ TEST_CASE("Native dialog text survives VM reset until UI invalidation",
   std::weak_ptr<const Bytes> lifetime;
   BindDialogTable({1, 0, 0x24, 0xE7}, &lifetime);
   ShowNativeDialog(0);
-  REQUIRE(Menu_textBoxes[0].string != nullptr);
-  CHECK(static_cast<std::uint8_t>(Menu_textBoxes[0].string[0]) == 0x24);
+  REQUIRE(VS::Menu::textBoxes[0].text != nullptr);
+  CHECK(static_cast<std::uint8_t>(VS::Menu::textBoxes[0].text[0]) == 0x24);
   event::ResetLiveScriptRuntime();
   CHECK_FALSE(lifetime.expired());
-  CHECK(static_cast<std::uint8_t>(Menu_textBoxes[0].string[0]) == 0x24);
+  CHECK(static_cast<std::uint8_t>(VS::Menu::textBoxes[0].text[0]) == 0x24);
   event::ReleaseLiveScriptDialogText();
   CHECK(lifetime.expired());
-  CHECK(Menu_textBoxes[0].string == nullptr);
+  CHECK(VS::Menu::textBoxes[0].text == nullptr);
 }
 
 TEST_CASE("Actual title transfer clears native dialog pointers before owners",
@@ -264,7 +265,7 @@ TEST_CASE("Actual title transfer clears native dialog pointers before owners",
         41);
   CHECK(session_dialog_entries == 2);
   CHECK(session_dialog_owner.expired());
-  CHECK(Menu_textBoxes[0].string == nullptr);
+  CHECK(VS::Menu::textBoxes[0].text == nullptr);
 }
 
 TEST_CASE("Native dialog reinitialization releases the previous text owner",
@@ -279,8 +280,8 @@ TEST_CASE("Native dialog reinitialization releases the previous text owner",
       0x10, 0, 7, 0, 0, 0, 20, 2, 0, 0, 0};
   CHECK(VS::Event::ScriptInitDialogBoxOpcode(command.data(), 0) == 0);
   CHECK(lifetime.expired());
-  CHECK(Menu_textBoxes[0].string == nullptr);
-  CHECK(Menu_textBoxes[0].speed == 0);
+  CHECK(VS::Menu::textBoxes[0].text == nullptr);
+  CHECK(VS::Menu::textBoxes[0].speed == 0);
 }
 
 TEST_CASE("Native dialog ownership follows actual text box selection swaps",
@@ -290,20 +291,20 @@ TEST_CASE("Native dialog ownership follows actual text box selection swaps",
   std::weak_ptr<const Bytes> second;
   BindDialogTable({1, 0, 0x24, 0xE7}, &first);
   ShowNativeDialog(0);
-  const char* selected_text = Menu_textBoxes[0].string;
+  const char* selected_text = VS::Menu::textBoxes[0].text;
   BindDialogTable({1, 0, 0x25, 0xE7}, &second);
   ShowNativeDialog(1);
-  Menu_textBoxes[0].y = 0;
-  Menu_textBoxes[1].y = 100;
+  VS::Menu::textBoxes[0].y = 0;
+  VS::Menu::textBoxes[1].y = 100;
   CHECK(VS::Menu::SelectLiveTextBoxChoice(3) == 0);
-  CHECK(Menu_textBoxes[1].string == selected_text);
+  CHECK(VS::Menu::textBoxes[1].text == selected_text);
   event::ResetLiveScriptRuntime();
   CHECK_FALSE(first.expired());
   CHECK_FALSE(second.expired());
   DismissNativeDialog(0);
   CHECK(second.expired());
   CHECK_FALSE(first.expired());
-  CHECK(Menu_textBoxes[1].string == selected_text);
+  CHECK(VS::Menu::textBoxes[1].text == selected_text);
   DismissNativeDialog(1);
   CHECK(first.expired());
 }
@@ -314,10 +315,10 @@ TEST_CASE("Malformed native dialog leaves existing text and ownership intact",
   std::weak_ptr<const Bytes> lifetime;
   BindDialogTable({1, 0, 0x24, 0xE7}, &lifetime);
   ShowNativeDialog(0);
-  const char* text = Menu_textBoxes[0].string;
+  const char* text = VS::Menu::textBoxes[0].text;
   BindDialogTable({1, 0, 0xFA});
   ShowNativeDialog(0);
-  CHECK(Menu_textBoxes[0].string == text);
+  CHECK(VS::Menu::textBoxes[0].text == text);
   CHECK_FALSE(lifetime.expired());
   CHECK(static_cast<std::uint8_t>(text[0]) == 0x24);
 }
@@ -368,7 +369,7 @@ TEST_CASE("Native dialog repeated generations retain the same storage once",
       retained_count = owner.use_count();
     }
     CHECK(owner.use_count() == retained_count);
-    CHECK(static_cast<std::uint8_t>(Menu_textBoxes[0].string[0]) == 0x24);
+    CHECK(static_cast<std::uint8_t>(VS::Menu::textBoxes[0].text[0]) == 0x24);
   }
 }
 

@@ -10,6 +10,7 @@
 
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Framework/Prompts.hpp"
+#include "Menu/TextBoxState.hpp"
 #include "Render/GameFont.hpp"
 #include "Render/UiPackets.hpp"
 
@@ -400,8 +401,8 @@ enum class MenuSound : std::uint8_t {
   kOpen
 };
 
-// Menu_InformationBoxHeader.
-enum class InformationHeader : std::uint8_t { kCaution = 1, kInformation = 2 };
+// The information box headers (TextBoxState.hpp).
+using Menu::InformationHeader;
 
 // The two item lists: _itemsText and _sortItemsTextBuf.
 enum class ItemList : std::uint8_t { kRows, kActions };

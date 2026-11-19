@@ -29,7 +29,7 @@
 #include "Legacy/Psx.h"
 #include "Menu/SceneNotifications.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "State/Timers.hpp"
 #include "TestSupport/ScriptSources.hpp"
 
@@ -179,68 +179,71 @@ struct UiSessionFixture {
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, kArenaBytes> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
-  std::array<Menu_TextBoxState, 8> saved_boxes = std::to_array(Menu_textBoxes);
-  Menu_Framework_TextBoxSelector saved_selector = Menu_textBoxSelector;
-  Menu_StringContext saved_context = Battle_stringContext;
+  std::array<VS::Menu::TextBoxState, 8> saved_boxes =
+      std::to_array(VS::Menu::textBoxes);
+  VS::Menu::TextBoxSelectorState saved_selector = VS::Menu::textBoxSelector;
+  VS::Menu::StringContext saved_context = Battle_stringContext;
   std::array<char, 80> saved_waits =
       std::to_array(Event_isTextBoxAwaitingClose);
-  int* saved_notification = Menu_sceneNotificationBuffer;
-  char saved_timer = Menu_sceneNotificationTimer;
-  char saved_timed = Menu_sceneNotificationTimed;
+  int* saved_notification = VS::Menu::sceneNotificationBuffer;
+  std::uint8_t saved_timer = VS::Menu::sceneNotificationTimer;
+  std::uint8_t saved_timed = VS::Menu::sceneNotificationTimed;
 
-  UiSessionFixture() { Menu_sceneNotificationBuffer = nullptr; }
+  UiSessionFixture() { VS::Menu::sceneNotificationBuffer = nullptr; }
 
   ~UiSessionFixture() {
     if (!VS::Menu::CleanupLiveSceneNotificationOwnedState()) std::terminate();
-    std::copy(saved_boxes.begin(), saved_boxes.end(), Menu_textBoxes);
-    Menu_textBoxSelector = saved_selector;
+    std::copy(saved_boxes.begin(), saved_boxes.end(), VS::Menu::textBoxes);
+    VS::Menu::textBoxSelector = saved_selector;
     Battle_stringContext = saved_context;
     std::copy(saved_waits.begin(), saved_waits.end(),
               Event_isTextBoxAwaitingClose);
-    Menu_sceneNotificationBuffer = saved_notification;
-    Menu_sceneNotificationTimer = saved_timer;
-    Menu_sceneNotificationTimed = saved_timed;
+    VS::Menu::sceneNotificationBuffer = saved_notification;
+    VS::Menu::sceneNotificationTimer = saved_timer;
+    VS::Menu::sceneNotificationTimed = saved_timed;
   }
 };
 
 void BorrowSessionUiText() {
   static char text[] = {'A', 0};
-  REQUIRE(Menu_sceneNotificationBuffer == nullptr);
+  REQUIRE(VS::Menu::sceneNotificationBuffer == nullptr);
   auto* notification =
       static_cast<int*>(VS::Core::Memory::AllocateLiveFromHighEnd(
           VS::Menu::kSceneNotificationBytes));
   REQUIRE(notification != nullptr);
-  for (auto& box : Menu_textBoxes) {
+  for (auto& box : VS::Menu::textBoxes) {
     box.state = 4;
-    box.openDuration = 3;
-    box.string = text;
+    box.open_duration = 3;
+    box.text = text;
   }
-  Menu_textBoxSelector.count = 2;
-  Menu_textBoxSelector.selectedIndex = 1;
+  VS::Menu::textBoxSelector.count = 2;
+  VS::Menu::textBoxSelector.selected_index = 1;
   std::fill_n(Battle_stringContext.strings, 10, std::begin(text));
   std::fill_n(Event_isTextBoxAwaitingClose, 80, 1);
-  Menu_sceneNotificationBuffer = notification;
-  Menu_sceneNotificationTimer = 17;
-  Menu_sceneNotificationTimed = 1;
+  VS::Menu::sceneNotificationBuffer = notification;
+  VS::Menu::sceneNotificationTimer = 17;
+  VS::Menu::sceneNotificationTimed = 1;
 }
 
 bool SessionUiIsClear() {
-  return std::all_of(std::begin(Menu_textBoxes), std::end(Menu_textBoxes),
+  return std::all_of(std::begin(VS::Menu::textBoxes),
+                     std::end(VS::Menu::textBoxes),
                      [](const auto& box) {
                        // NOLINTNEXTLINE(build/include_what_you_use)
-                       const auto* text = box.string;
+                       const auto* text = box.text;
                        return box.state == 0 && text == nullptr;
                      }) &&
-         Menu_textBoxSelector.count == 0 &&
-         Menu_textBoxSelector.selectedIndex == 0 &&
+         VS::Menu::textBoxSelector.count == 0 &&
+         VS::Menu::textBoxSelector.selected_index == 0 &&
          std::all_of(std::begin(Battle_stringContext.strings),
                      std::end(Battle_stringContext.strings),
                      [](const auto* text) { return text == nullptr; }) &&
          std::all_of(std::begin(Event_isTextBoxAwaitingClose),
                      std::end(Event_isTextBoxAwaitingClose),
                      [](char wait) { return wait == 0; }) &&
-         Menu_sceneNotificationBuffer == nullptr &&
-         Menu_sceneNotificationTimer == 0 && Menu_sceneNotificationTimed == 0;
+         VS::Menu::sceneNotificationBuffer == nullptr &&
+         VS::Menu::sceneNotificationTimer == 0 &&
+         VS::Menu::sceneNotificationTimed == 0;
 }
 
 int CheckSessionUi() { return SessionUiIsClear() ? 41 : -1; }

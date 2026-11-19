@@ -50,7 +50,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/Progress.hpp"

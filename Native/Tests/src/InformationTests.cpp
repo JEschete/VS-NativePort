@@ -11,7 +11,7 @@
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
@@ -24,9 +24,9 @@ struct InformationFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  u_long* saved_ordering = Menu_activeTextBoxOrderingTable;
+  u_long* saved_ordering = VS::Menu::activeTextBoxOrderingTable;
   VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
-  Menu_TextBoxState saved_box = Menu_textBoxes[7];
+  VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[7];
   std::uint8_t saved_setting = VS::Input::settings.information;
   int saved_buttons = VS::Input::buttonsState;
   int* saved_rows = VS::Menu::Framework::rowTypeBuf;
@@ -47,21 +47,22 @@ struct InformationFixture {
     message[2] = 6;
     VS::Render::legacyPrimitiveBuffers[0] = memory.data() + 8;
     VS::Render::frameBuf = 0;
-    Menu_activeTextBoxOrderingTable = ordering.data();
+    VS::Menu::activeTextBoxOrderingTable = ordering.data();
     VS::Menu::Framework::menuItems = rows.data();
     VS::Menu::Framework::rowTypeBuf = row_types.data();
     VS::Input::buttonsState = 0;
-    Menu_textBoxes[7] = {};
-    VS::Menu::InitLiveInformationTextBox(Menu_InformationBoxHeader_Information);
+    VS::Menu::textBoxes[7] = {};
+    VS::Menu::InitLiveInformationTextBox(
+        VS::Menu::InformationHeader::kInformation);
     ResetPackets();
   }
 
   ~InformationFixture() {
-    Menu_textBoxes[7] = saved_box;
+    VS::Menu::textBoxes[7] = saved_box;
     VS::Render::FrameScratchpad() = saved_frame;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::frameBuf = saved_framebuffer;
-    Menu_activeTextBoxOrderingTable = saved_ordering;
+    VS::Menu::activeTextBoxOrderingTable = saved_ordering;
     VS::Render::LiveFontStyle() = saved_style;
     VS::Input::settings.information = saved_setting;
     VS::Input::buttonsState = saved_buttons;
@@ -81,7 +82,7 @@ TEST_CASE("Information messages preserve the original encoded instant prefix",
   InformationFixture fixture;
   VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
   const auto* encoded =
-      reinterpret_cast<const unsigned char*>(Menu_textBoxes[7].string);
+      reinterpret_cast<const unsigned char*>(VS::Menu::textBoxes[7].text);
   CHECK(encoded[0] == VS::Core::TextCode::kChunkSize);
   CHECK(encoded[1] == VS::Core::TextCode::kNoChunking);
   CHECK(std::memcmp(encoded + 2, fixture.message.data(),
@@ -101,18 +102,18 @@ TEST_CASE(
   for (int update = 0; update < updates; ++update) {
     VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
     fixture.ResetPackets();
-    VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
-    CHECK(Menu_textBoxes[7].flags.done);
-    CHECK(Menu_textBoxes[7].prevChunksPrinted == 3);
+    VS::Render::DrawLiveProgressiveTextBoxText(&VS::Menu::textBoxes[7]);
+    CHECK(VS::Menu::textBoxes[7].flags.done);
+    CHECK(VS::Menu::textBoxes[7].previous_chunks == 3);
     CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
           fixture.memory.data() + 8 + sizeof(u_long) * 3 * 6);
   }
   fixture.message[0] = static_cast<char>(VS::Core::TextCode::kTerminator);
   VS::Menu::Framework::SetLiveInformationMessage(fixture.message.data());
   fixture.ResetPackets();
-  VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
-  CHECK(Menu_textBoxes[7].flags.done);
-  CHECK(Menu_textBoxes[7].prevChunksPrinted == 0);
+  VS::Render::DrawLiveProgressiveTextBoxText(&VS::Menu::textBoxes[7]);
+  CHECK(VS::Menu::textBoxes[7].flags.done);
+  CHECK(VS::Menu::textBoxes[7].previous_chunks == 0);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.memory.data() + 8);
   CHECK(fixture.memory.front() == 0xA5);
@@ -123,17 +124,17 @@ TEST_CASE("Information control repair does not accelerate ordinary dialogue",
           "[render][text][information]") {
   InformationFixture fixture;
   // The text box drawers draw only the dialogue text boxes.
-  Menu_TextBoxState& dialogue = Menu_textBoxes[7];
+  VS::Menu::TextBoxState& dialogue = VS::Menu::textBoxes[7];
   dialogue = {};
   dialogue.flags.kind = 2;
-  dialogue.flags.speakerTexture = 32;
+  dialogue.flags.speaker_texture = 32;
   dialogue.brightness = 128;
   dialogue.speed = 1;
   // NOLINTNEXTLINE(build/include_what_you_use): C text member, not std::string.
-  dialogue.string = fixture.message.data();
+  dialogue.text = fixture.message.data();
   VS::Render::DrawLiveProgressiveTextBoxText(&dialogue);
   CHECK_FALSE(dialogue.flags.done);
-  CHECK(dialogue.prevChunksPrinted == 1);
+  CHECK(dialogue.previous_chunks == 1);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor ==
         fixture.memory.data() + 8 + 6 * sizeof(u_long));
 }
@@ -143,16 +144,16 @@ TEST_CASE("Information toggles hide normal help but retain required cautions",
   InformationFixture fixture;
   VS::Input::settings.information = 1;
   VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
-  CHECK(Menu_textBoxes[7].state == 11);
-  CHECK(Menu_textBoxes[7].flags.kind == 4);
+  CHECK(VS::Menu::textBoxes[7].state == 11);
+  CHECK(VS::Menu::textBoxes[7].flags.kind == 4);
   VS::Input::settings.information = 0;
   VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
-  CHECK(Menu_textBoxes[7].state == 0);
+  CHECK(VS::Menu::textBoxes[7].state == 0);
   fixture.row_types[0] = 1;
   VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
-  CHECK(Menu_textBoxes[7].state == 11);
+  CHECK(VS::Menu::textBoxes[7].state == 11);
   fixture.row_types[0] = 0;
   VS::Input::settings.information = 1;
   VS::Menu::Framework::UpdateLiveInformationVisibility(0, 16);
-  CHECK(Menu_textBoxes[7].state == 11);
+  CHECK(VS::Menu::textBoxes[7].state == 11);
 }

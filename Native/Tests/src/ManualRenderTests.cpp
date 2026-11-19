@@ -146,7 +146,7 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
   const int saved_scroll = VS::Menu::manual::scrollPosition;
   VS::Menu::manual::helpText = payload;
   VS::Menu::manual::scrollPosition = scroll;
-  VS::Menu::LiveTextBox(0)->flags.speakerTexture = 32;
+  VS::Menu::LiveTextBox(0)->flags.speaker_texture = 32;
   VS::Menu::manual::LiveCopyPageText();
   ReuseReturnedStack();
   std::string expected{static_cast<char>(VS::Core::TextCode::kChunkSize),
@@ -159,7 +159,7 @@ TEST_CASE("Manual page text remains alive until the textbox renders it",
     expected.push_back(static_cast<char>(VS::Core::TextCode::kNewline));
   }
   expected.back() = static_cast<char>(VS::Core::TextCode::kTerminator);
-  CHECK(std::string(VS::Menu::LiveTextBox(0)->string, expected.size()) ==
+  CHECK(std::string(VS::Menu::LiveTextBox(0)->text, expected.size()) ==
         expected);
   *VS::Menu::LiveTextBox(0) = saved_box;
   VS::Menu::manual::helpText = saved_help;

@@ -31,7 +31,7 @@
 #include "Field/Interactions.h"
 #include "Items/LootLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Render/Camera.hpp"
 #include "Render/CameraViewLive.hpp"
 

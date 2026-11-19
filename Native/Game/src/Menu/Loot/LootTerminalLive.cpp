@@ -43,7 +43,7 @@
 #include "Menu/Loot/LootTerminal.hpp"
 #include "Menu/Loot/Paging.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -321,7 +321,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     return Call(Framework::AreLiveMenuRowsIdle) != 0;
   }
   bool InformationDone() override {
-    return Menu_textBoxes[kInformationBox].flags.done != 0;
+    return textBoxes[kInformationBox].flags.done != 0;
   }
   std::span<const std::uint8_t> Text(LootTerminalText text,
                                      std::int32_t index) override {
@@ -386,8 +386,7 @@ class LiveTerminalHost final : public LootTerminalHost {
   void InitializeInformation(bool caution) override {
     Call([&] {
       if (caution) {
-        Menu::InitLiveInformationTextBox(
-            static_cast<Menu_InformationBoxHeader>(1));
+        Menu::InitLiveInformationTextBox(InformationHeader::kCaution);
       } else {
         Framework::InitializeLiveInformationBox();
       }

@@ -2290,7 +2290,7 @@
     <ClInclude Include="src\Battle\StatusEffects.h" />
     <ClInclude Include="src\Battle\TargetingState.h" />
     <ClInclude Include="src\Battle\TargetVolume.h" />
-    <ClInclude Include="src\Battle\TextBoxes.h" />
+    <ClInclude Include="src\Battle\TextBoxes.hpp" />
     <ClInclude Include="src\Battle\ValueLabels.h" />
     <ClInclude Include="src\Boot\GameLoop.hpp" />
     <ClInclude Include="src\Boot\OverlayReset.hpp" />
@@ -2380,7 +2380,6 @@
     <ClInclude Include="src\Ending\Results.hpp" />
     <ClInclude Include="src\Event\Actors.h" />
     <ClInclude Include="src\Event\Camera.hpp" />
-    <ClInclude Include="src\Event\Dialog.h" />
     <ClInclude Include="src\Event\Interpolation.h" />
     <ClInclude Include="src\Event\InterpolationCurveLive.hpp" />
     <ClInclude Include="src\Event\Playback.h" />
@@ -2460,7 +2459,7 @@
     <ClInclude Include="src\Menu\Framework\ItemSorting.hpp" />
     <ClInclude Include="src\Menu\Framework\Menus.hpp" />
     <ClInclude Include="src\Menu\Framework\SortingKeysLive.hpp" />
-    <ClInclude Include="src\Menu\Framework\TextBoxes.h" />
+    <ClInclude Include="src\Menu\Framework\TextBoxes.hpp" />
     <ClInclude Include="src\Menu\Inventory\Inventory.hpp" />
     <ClInclude Include="src\Menu\Inventory\ItemDetailLiveSupport.hpp" />
     <ClInclude Include="src\Menu\Inventory\ItemList.hpp" />
@@ -2479,7 +2478,7 @@
     <ClInclude Include="src\Menu\Score\ScoreScreen.hpp" />
     <ClInclude Include="src\Menu\Status\ActorStatus.hpp" />
     <ClInclude Include="src\Menu\Status\TerminalControllersLiveInternal.hpp" />
-    <ClInclude Include="src\Menu\TextBox.h" />
+    <ClInclude Include="src\Menu\TextBox.hpp" />
     <ClInclude Include="src\State\Ashley.hpp" />
     <ClInclude Include="src\State\Location.hpp" />
     <ClInclude Include="src\State\PlayTime.hpp" />

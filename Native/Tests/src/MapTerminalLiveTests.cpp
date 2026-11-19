@@ -148,8 +148,8 @@ struct LiveWorld {
   ValueRestore<decltype(VS::Field::isFieldRenderingEnabled)> saved_field{
       VS::Field::isFieldRenderingEnabled};
   RestorePages saved_pages;
-  ArrayRestore<Menu_TextBoxState, std::size(Menu_textBoxes)> saved_boxes{
-      Menu_textBoxes};
+  ArrayRestore<VS::Menu::TextBoxState, std::size(VS::Menu::textBoxes)>
+      saved_boxes{VS::Menu::textBoxes};
   ArrayRestore<Content_DiscQueueSlot, 32> saved_requests{
       Content_discRequestSlots};
   ValueRestore<Content_DiscRequestCounts> saved_counts{
@@ -197,7 +197,7 @@ struct LiveWorld {
     VS::Input::stickPosBuf.r_stick_y = 128;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
     std::ranges::fill(VS::State::stateFlags.map_paling, 0);
-    std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
+    std::ranges::fill(VS::Menu::textBoxes, VS::Menu::TextBoxState{});
     Core_Gte_Reset();
     Core_Gte_SetGeomScreen(256);
     Core_Gte_SetGeomOffset(160, 112);
@@ -1019,7 +1019,7 @@ TEST_CASE("Cold session drains the map before disc and UI invalidation",
           "[map-terminal-integration][map-terminal-boundary-prehook]"
           "[F04149][F04151]") {
   const game_clear_live_tests::SavedModuleData saved_module;
-  const game_clear_live_tests::SavedGlobals<Menu_textBoxSelector,
+  const game_clear_live_tests::SavedGlobals<VS::Menu::textBoxSelector,
                                             Event_isTextBoxAwaitingClose>
       saved_ui;
   LiveWorld world(true);
@@ -1172,7 +1172,7 @@ TEST_CASE(
 TEST_CASE("Original map caption survives module reset but not a cold session",
           "[map-terminal-integration][map-terminal-caption][F02689]") {
   const game_clear_live_tests::SavedModuleData saved_module;
-  const game_clear_live_tests::SavedGlobals<Menu_textBoxSelector,
+  const game_clear_live_tests::SavedGlobals<VS::Menu::textBoxSelector,
                                             Event_isTextBoxAwaitingClose>
       saved_ui;
   LiveWorld world(true);

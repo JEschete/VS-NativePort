@@ -181,9 +181,9 @@ TEST_CASE("Actual cold session resets the time cursor without replacing rows",
           "[gazette-times-integration][gazette-times-reload][F02831]") {
   const game_clear_live_tests::SavedModuleData saved_module;
   const game_clear_live_tests::SavedGlobals<
-      Menu_textBoxSelector, Battle_stringContext, Event_isTextBoxAwaitingClose,
-      Menu_sceneNotificationBuffer, Menu_sceneNotificationTimer,
-      Menu_sceneNotificationTimed>
+      VS::Menu::textBoxSelector, Battle_stringContext,
+      Event_isTextBoxAwaitingClose, VS::Menu::sceneNotificationBuffer,
+      VS::Menu::sceneNotificationTimer, VS::Menu::sceneNotificationTimed>
       saved_ui;
   Fixture fixture;
   const auto sequence = fixture.PrimeCursor();
@@ -197,7 +197,7 @@ TEST_CASE("Actual cold session resets the time cursor without replacing rows",
   REQUIRE(VS::Boot::RunLiveSessionLoop(entry, entry) == 0);
   CHECK(fixture.DrawCursor() == sequence[0]);
   CheckResidentState(before);
-  CHECK(Menu_textBoxes[live::kInformationBox].string == nullptr);
+  CHECK(VS::Menu::textBoxes[live::kInformationBox].text == nullptr);
   CHECK(memory::LivePayloadCapacity(foreign).has_value());
   memory::FreeLiveFromLowEnd(foreign);
   CHECK(fixture.GuardsIntact());

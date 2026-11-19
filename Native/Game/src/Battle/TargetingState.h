@@ -21,7 +21,7 @@ struct Battle_TargetPreview {
 };
 static_assert(sizeof(Battle_TargetPreview) == 0x18, "Battle_TargetPreview must keep its PS1 layout");
 
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 
 extern char Battle_categoryNeedsTargetSelection[96];
 extern u_char Battle_categoryIsAreaTarget[80];
@@ -43,4 +43,4 @@ extern u_char Battle_firstColumnEntryCount;
 extern u_char Battle_secondColumnGroupCount;
 extern u_char Battle_firstColumnGroupCount;
 extern u_char Battle_targetColumnTopOffset;
-extern Menu_StringContext Battle_stringContext;
+extern VS::Menu::StringContext Battle_stringContext;

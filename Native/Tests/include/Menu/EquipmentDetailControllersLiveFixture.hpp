@@ -28,11 +28,11 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Inventory/EquipmentDetailControllersLive.hpp"
 #include "Menu/Inventory/Inventory.hpp"
 #include "Menu/Inventory/ItemList.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Render/Display.hpp"
 #include "Render/EncodedText.hpp"
 #include "Render/Frame.hpp"
@@ -179,8 +179,8 @@ struct LiveFixture {
   ValueRestore<char*> saved_buffer{VS::Menu::Framework::stringBuf};
   ValueRestore<decltype(Battle_stringContext)> saved_arguments{
       Battle_stringContext};
-  ArrayRestore<Menu_TextBoxState, std::size(Menu_textBoxes)> saved_text_boxes{
-      Menu_textBoxes};
+  ArrayRestore<VS::Menu::TextBoxState, std::size(VS::Menu::textBoxes)>
+      saved_text_boxes{VS::Menu::textBoxes};
   ValueRestore<VS::Render::FrameScratch> saved_frame{
       VS::Render::FrameScratchpad()};
   ValueRestore<void*> saved_primitive{VS::Render::legacyPrimitiveBuffers[0]};

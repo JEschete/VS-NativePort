@@ -45,7 +45,7 @@
 #include "Menu/Inventory/ItemListRows.hpp"
 #include "Menu/Inventory/ItemListRowsLive.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -272,7 +272,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     return Call([] { return Framework::AreLiveMenuRowsIdle() != 0; });
   }
   bool InformationDone() override {
-    return Menu_textBoxes[kInformationBox].flags.done != 0;
+    return textBoxes[kInformationBox].flags.done != 0;
   }
   std::span<const std::uint8_t> Text(TerminalText text,
                                      std::int32_t index) override {
@@ -358,10 +358,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     Call([] { Framework::InitializeLiveInformationBox(); });
   }
   void InitializeDiscardInformation() override {
-    Call([] {
-      Menu::InitLiveInformationTextBox(
-          static_cast<Menu_InformationBoxHeader>(1));
-    });
+    Call([] { Menu::InitLiveInformationTextBox(InformationHeader::kCaution); });
   }
   void DismissInformation() override {
     Call([] { Framework::DismissLiveInformationBox(); });

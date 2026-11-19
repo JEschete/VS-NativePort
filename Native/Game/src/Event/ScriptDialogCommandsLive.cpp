@@ -13,7 +13,7 @@
 #include <string>
 
 #include "Battle/TargetingState.h"
-#include "Battle/TextBoxes.h"
+#include "Battle/TextBoxes.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Event/ScriptActorCommandsLive.hpp"
 #include "Event/ScriptActors.h"
@@ -22,8 +22,8 @@
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
+#include "Menu/Framework/TextBoxes.hpp"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.hpp"
@@ -31,7 +31,7 @@
 namespace {
 namespace event = VS::Event;
 
-static_assert(std::size(Menu_textBoxes) ==
+static_assert(std::size(VS::Menu::textBoxes) ==
               static_cast<std::size_t>(event::kTextBoxCount));
 static_assert(std::size(Event_isTextBoxAwaitingClose) >=
               static_cast<std::size_t>(event::kTextBoxCount));
@@ -57,22 +57,22 @@ bool RetainedDialogText(const char* text) noexcept {
   });
 }
 
-void ClearRetainedDialogText(Menu_TextBoxState& box) noexcept {
-  if (RetainedDialogText(box.string)) {
-    box.string = nullptr;
+void ClearRetainedDialogText(VS::Menu::TextBoxState& box) noexcept {
+  if (RetainedDialogText(box.text)) {
+    box.text = nullptr;
   }
 }
 
 void PruneDialogOwners() noexcept {
-  for (auto& box : Menu_textBoxes) {
+  for (auto& box : VS::Menu::textBoxes) {
     if (box.state == 0) {
       ClearRetainedDialogText(box);
     }
   }
   for (auto& owner : dialog_owners) {
     const bool borrowed =
-        std::ranges::any_of(Menu_textBoxes, [&owner](const auto& box) {
-          return ContainsDialogText(owner, box.string);
+        std::ranges::any_of(VS::Menu::textBoxes, [&owner](const auto& box) {
+          return ContainsDialogText(owner, box.text);
         });
     if (!borrowed) {
       owner = {};
@@ -123,8 +123,8 @@ const char* RefusalText(event::ScriptDialogRefusal refusal) {
 }
 
 // The core checks every box against kTextBoxCount before it reaches the host.
-Menu_TextBoxState& Box(int box) {
-  Menu_TextBoxState* state = VS::Menu::LiveTextBox(box);
+VS::Menu::TextBoxState& Box(int box) {
+  VS::Menu::TextBoxState* state = VS::Menu::LiveTextBox(box);
   Require(state != nullptr, "Script dialog text box is missing");
   return *state;
 }
@@ -156,37 +156,37 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
                               layout.center_x, layout.center_y);
   }
   [[nodiscard]] event::TextBoxFrame Frame(int box) const override {
-    const Menu_TextBoxState& state = Box(box);
+    const VS::Menu::TextBoxState& state = Box(box);
     return {.x = state.x,
             .y = state.y,
-            .chars_per_line = static_cast<std::uint8_t>(state.charsPerLine),
-            .line_count = static_cast<std::uint8_t>(state.lineCount)};
+            .chars_per_line = static_cast<std::uint8_t>(state.chars_per_line),
+            .line_count = static_cast<std::uint8_t>(state.line_count)};
   }
   void SetSpeakerTexture(int box, int texture) override {
-    Box(box).flags.speakerTexture =
+    Box(box).flags.speaker_texture =
         static_cast<unsigned>(texture) & event::kSpeakerTextureMask;
   }
   void SetSpeakerAnimation(int box, int animation) override {
-    Box(box).opaque2E = static_cast<std::int16_t>(animation);
+    Box(box).speaker_animation = static_cast<std::int16_t>(animation);
   }
   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): the box fields.
   void SetAnchorStyle(int box, int alignment, int frame_part) override {
-    Menu_TextBoxState& state = Box(box);
+    VS::Menu::TextBoxState& state = Box(box);
     state.flags.alignment = static_cast<unsigned>(alignment) & kAlignmentMask;
-    state.flags.framePart = static_cast<unsigned>(frame_part) & kFramePartMask;
+    state.flags.frame_part = static_cast<unsigned>(frame_part) & kFramePartMask;
   }
   void SetOpenDuration(int box, int ticks) override {
-    Box(box).openDuration = static_cast<char>(ticks);
+    Box(box).open_duration = static_cast<std::int8_t>(ticks);
   }
   [[nodiscard]] event::DialogAnchor TextBoxAnchor(int preset, int orientation,
                                                   int columns,
                                                   int lines) override {
-    const Menu_TextAnchorWord word =
+    const VS::Menu::TextAnchor anchor =
         VS::Menu::LiveTextBoxAnchor(preset, orientation, columns, lines);
-    return {.x = word.x,
-            .y = word.y,
-            .alignment = static_cast<int>(word.alignment),
-            .frame_part = static_cast<int>(word.opaque3Bit2)};
+    return {.x = anchor.x,
+            .y = anchor.y,
+            .alignment = anchor.alignment,
+            .frame_part = anchor.frame_part};
   }
 
   [[nodiscard]] bool AwaitingClose(int box) const override {
@@ -274,7 +274,7 @@ namespace VS::Event {
 void PruneLiveScriptDialogText() noexcept { PruneDialogOwners(); }
 
 void ReleaseLiveScriptDialogText() noexcept {
-  for (auto& box : Menu_textBoxes) {
+  for (auto& box : VS::Menu::textBoxes) {
     ClearRetainedDialogText(box);
   }
   std::ranges::fill(dialog_owners, ScriptDataLease{});

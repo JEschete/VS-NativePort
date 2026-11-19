@@ -1002,7 +1002,7 @@
     <ClCompile Include="src\Battle\TextBoxes.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\TextBoxes.h">
+    <ClInclude Include="src\Battle\TextBoxes.hpp">
       <Filter>src\Battle</Filter>
     </ClInclude>
     <ClInclude Include="src\Battle\ValueLabels.h">
@@ -1818,9 +1818,6 @@
     <ClCompile Include="src\Event\CutsceneLifecycleLive.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\Dialog.h">
-      <Filter>src\Event</Filter>
-    </ClInclude>
     <ClCompile Include="src\Event\EventCameraControl.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
@@ -2577,7 +2574,7 @@
     <ClCompile Include="src\Menu\Framework\TextBoxes.cpp">
       <Filter>src\Menu\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\Framework\TextBoxes.h">
+    <ClInclude Include="src\Menu\Framework\TextBoxes.hpp">
       <Filter>src\Menu\Framework</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\Inventory\DetailsPolicies.cpp">
@@ -3006,7 +3003,7 @@
     <ClCompile Include="src\Menu\TextBox.cpp">
       <Filter>src\Menu</Filter>
     </ClCompile>
-    <ClInclude Include="src\Menu\TextBox.h">
+    <ClInclude Include="src\Menu\TextBox.hpp">
       <Filter>src\Menu</Filter>
     </ClInclude>
     <ClCompile Include="src\Menu\TextBoxFrames.cpp">

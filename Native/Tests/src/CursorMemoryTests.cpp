@@ -46,7 +46,7 @@
 #include "Menu/Setup/Combination.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Setup/SetupScreen.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "State/Progress.hpp"
 #include "State/StateFlags.hpp"
 
@@ -441,7 +441,7 @@ struct WorkshopRepairFixture {
   WorkshopChoicesFixture setup;
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   int saved_repeat = VS::Input::buttonRepeat;
-  Menu_TextBoxState saved_box = Menu_textBoxes[7];
+  VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[7];
   Battle_Actor* saved_character = Battle_characterState;
   Battle_Actor* saved_actor = Battle_actors[0];
   Battle_Actor actor{};
@@ -483,7 +483,7 @@ struct WorkshopRepairFixture {
   ~WorkshopRepairFixture() {
     VS::Input::buttonsPressed = saved_pressed;
     VS::Input::buttonRepeat = saved_repeat;
-    Menu_textBoxes[7] = saved_box;
+    VS::Menu::textBoxes[7] = saved_box;
     Battle_characterState = saved_character;
     Battle_actors[0] = saved_actor;
   }

@@ -11,7 +11,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Legacy/Psx.h"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Render/Display.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
@@ -38,7 +38,7 @@ struct TextTransitionFixture {
   std::vector<u_short> saved_target =
       std::vector<u_short>(std::size_t{kWidth} * kHeight);
   std::vector<u_short> saved_atlas = std::vector<u_short>(std::size_t{63} * 12);
-  Menu_TextBoxState box{};
+  VS::Menu::TextBoxState box{};
 
   TextTransitionFixture() {
     StoreImage(&target, reinterpret_cast<u_long*>(saved_target.data()));
@@ -57,10 +57,10 @@ struct TextTransitionFixture {
     LoadImage(&target, reinterpret_cast<u_long*>(pixels.data()));
     VS::Render::frameBuf = 0;
     VS::Input::buttonsPressed = 0;
-    box.x = box.xIndent = target.x;
-    box.y = box.yIndent = target.y;
-    box.charsPerLine = 4;
-    box.lineCount = 2;
+    box.x = box.x_indent = target.x;
+    box.y = box.y_indent = target.y;
+    box.chars_per_line = 4;
+    box.line_count = 2;
     box.speed = 1;
   }
 
@@ -91,7 +91,7 @@ struct TextTransitionFixture {
   template <std::size_t Size>
   std::vector<u_short> Draw(std::array<u_char, Size>& text) {
     INFO(std::string("Encoded transition bytes: ") + std::to_string(Size));
-    box.string = reinterpret_cast<char*>(text.data());
+    box.text = reinterpret_cast<char*>(text.data());
     VS::Render::BlendLiveTextBoxIntoFramebuffer(&box, 0x10000);
     std::vector<u_short> pixels(std::size_t{kWidth} * kHeight);
     StoreImage(&target, reinterpret_cast<u_long*>(pixels.data()));

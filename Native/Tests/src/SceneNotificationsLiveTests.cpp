@@ -12,7 +12,7 @@
 
 #include "Battle/ActionTable.h"
 #include "Battle/Hud.h"
-#include "Battle/TextBoxes.h"
+#include "Battle/TextBoxes.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -48,29 +48,29 @@ constexpr std::size_t kFirstBox = 7;
 struct NotificationFixture : equipment_detail_tests::LiveFixture {
   std::vector<std::byte> arena = std::vector<std::byte>(0x20000);
   memory::ScopedLiveGameHeap heap{arena};
-  ValueRestore<int*> saved_buffer{Menu_sceneNotificationBuffer};
-  ValueRestore<char> saved_timer{Menu_sceneNotificationTimer};
-  ValueRestore<char> saved_timed{Menu_sceneNotificationTimed};
+  ValueRestore<int*> saved_buffer{menu::sceneNotificationBuffer};
+  ValueRestore<std::uint8_t> saved_timer{menu::sceneNotificationTimer};
+  ValueRestore<std::uint8_t> saved_timed{menu::sceneNotificationTimed};
   ValueRestore<Battle_ActionDefinition> saved_action{
       Battle_actionDefinitions[kAction]};
-  ArrayRestore<u_short, std::size(Battle_doorStrings)> saved_door{
-      Battle_doorStrings};
+  ArrayRestore<std::uint16_t, std::size(VS::Battle::doorStrings)> saved_door{
+      VS::Battle::doorStrings};
   ArrayRestore<std::uint16_t, std::size(VS::Menu::menuStrings)> saved_menu{
       VS::Menu::menuStrings};
-  ArrayRestore<char, std::size(Menu_kNotificationItemNames[0])> saved_item{
-      Menu_kNotificationItemNames[0]};
+  ArrayRestore<char, std::size(menu::kNotificationItemNames[0])> saved_item{
+      menu::kNotificationItemNames[0]};
   text_box_tests::LiveUpdateRestore saved_update;
 
   NotificationFixture() {
-    Menu_sceneNotificationBuffer = nullptr;
-    Menu_sceneNotificationTimer = 77;
-    Menu_sceneNotificationTimed = 0;
+    menu::sceneNotificationBuffer = nullptr;
+    menu::sceneNotificationTimer = 77;
+    menu::sceneNotificationTimed = 0;
     Battle_stringContext = {};
-    std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
-    std::ranges::fill(Battle_doorStrings, u_short{0});
+    std::ranges::fill(menu::textBoxes, menu::TextBoxState{});
+    std::ranges::fill(VS::Battle::doorStrings, std::uint16_t{0});
     std::ranges::fill(VS::Menu::menuStrings, std::uint16_t{0});
-    Battle_doorStrings[1] = kNotificationText;
-    SetTemplate(Battle_doorStrings, kNotificationText);
+    VS::Battle::doorStrings[1] = kNotificationText;
+    SetTemplate(VS::Battle::doorStrings, kNotificationText);
     VS::Menu::menuStrings[kActionTextIndex] = kActionText;
     SetTemplate(VS::Menu::menuStrings, kActionText);
     SetTemplate(VS::Menu::menuStrings, kSpellText);
@@ -80,12 +80,12 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
     action.name[0] = 5;
     action.name[1] = 6;
     action.name[2] = kEnd;
-    Menu_kNotificationItemNames[0][0] = 7;
-    Menu_kNotificationItemNames[0][1] = 8;
-    Menu_kNotificationItemNames[0][2] = kEnd;
+    menu::kNotificationItemNames[0][0] = 7;
+    menu::kNotificationItemNames[0][1] = 8;
+    menu::kNotificationItemNames[0][2] = kEnd;
     VS::Menu::textBoxBufferIndex = 0;
-    Menu_activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
-    ClearOTag(Menu_activeTextBoxOrderingTable,
+    menu::activeTextBoxOrderingTable = VS::Menu::textBoxOrderingTables;
+    ClearOTag(menu::activeTextBoxOrderingTable,
               static_cast<int>(menu::kTextBoxOrderingTags));
     VS::State::tickSpeed = 2;
     Battle_lowerScreenUiState = 0;
@@ -99,12 +99,13 @@ struct NotificationFixture : equipment_detail_tests::LiveFixture {
   }
   std::span<const std::uint8_t> Buffer() const {
     const auto capacity =
-        memory::LivePayloadCapacity(Menu_sceneNotificationBuffer);
+        memory::LivePayloadCapacity(menu::sceneNotificationBuffer);
     if (!capacity || *capacity < menu::kSceneNotificationBytes) {
       throw std::runtime_error("notification did not allocate its text");
     }
-    return {reinterpret_cast<const std::uint8_t*>(Menu_sceneNotificationBuffer),
-            menu::kSceneNotificationBytes};
+    return {
+        reinterpret_cast<const std::uint8_t*>(menu::sceneNotificationBuffer),
+        menu::kSceneNotificationBytes};
   }
 };
 }  // namespace
@@ -123,8 +124,8 @@ TEST_CASE("Live action and mastered notices format into a bounded heap owner",
   CHECK(box.flags.kind ==
         static_cast<std::uint8_t>(menu::TextBoxKind::kInformation));
   CHECK(box.flags.frame_shape == (kind == 11 ? 0 : 3));
-  CHECK(Menu_sceneNotificationTimer == 120);
-  CHECK(Menu_sceneNotificationTimed == 1);
+  CHECK(menu::sceneNotificationTimer == 120);
+  CHECK(menu::sceneNotificationTimed == 1);
   CHECK(menu::RefusedLiveSceneNotificationCount() == refusals);
 }
 
@@ -135,9 +136,9 @@ TEST_CASE("Live item notices do not index the smaller action table",
   const auto bytes = fixture.Buffer();
   const std::array<std::uint8_t, 4> expected{7, 8, 0xE7, 4};
   CHECK(std::ranges::equal(bytes.first(expected.size()), expected));
-  CHECK(Battle_stringContext.strings[0] == Menu_kNotificationItemNames[0]);
-  CHECK(Menu_sceneNotificationTimed == 0);
-  CHECK(Menu_sceneNotificationTimer == 77);
+  CHECK(Battle_stringContext.strings[0] == menu::kNotificationItemNames[0]);
+  CHECK(menu::sceneNotificationTimed == 0);
+  CHECK(menu::sceneNotificationTimer == 77);
 }
 
 TEST_CASE("Live notification rejects invalid and oversized text before opening",
@@ -155,16 +156,16 @@ TEST_CASE("Live notification rejects invalid and oversized text before opening",
     subject += 33;
   } else {
     constexpr std::size_t kLongTextWords = 60;
-    std::fill_n(Battle_doorStrings + kNotificationText, kLongTextWords,
+    std::fill_n(VS::Battle::doorStrings + kNotificationText, kLongTextWords,
                 u_short{0x0101});
-    Battle_doorStrings[kNotificationText + kLongTextWords] = 0x00E7;
+    VS::Battle::doorStrings[kNotificationText + kLongTextWords] = 0x00E7;
   }
   const auto box = menu::ReadLiveTextBox(kFirstBox);
   const auto refusals = menu::RefusedLiveSceneNotificationCount();
   menu::ShowLiveSceneNotification(kind, subject, 1);
-  CHECK(Menu_sceneNotificationBuffer == nullptr);
+  CHECK(menu::sceneNotificationBuffer == nullptr);
   CHECK(menu::ReadLiveTextBox(kFirstBox) == box);
-  CHECK(Menu_sceneNotificationTimer == 77);
+  CHECK(menu::sceneNotificationTimer == 77);
   CHECK(menu::RefusedLiveSceneNotificationCount() == refusals + 1);
 }
 
@@ -174,10 +175,10 @@ TEST_CASE("A busy notification retains its original allocation and text",
   menu::ShowLiveSceneNotification(11, kAction, 1);
   const auto bytes = fixture.Buffer();
   const std::vector<std::uint8_t> text(bytes.begin(), bytes.end());
-  auto* owner = Menu_sceneNotificationBuffer;
+  auto* owner = menu::sceneNotificationBuffer;
   const auto refusals = menu::RefusedLiveSceneNotificationCount();
   menu::ShowLiveSceneNotification(1, kFirstItem, 0);
-  CHECK(Menu_sceneNotificationBuffer == owner);
+  CHECK(menu::sceneNotificationBuffer == owner);
   CHECK(std::ranges::equal(fixture.Buffer(), text));
   CHECK(menu::RefusedLiveSceneNotificationCount() == refusals + 1);
 }
@@ -187,16 +188,16 @@ TEST_CASE("Live notification polling waits for the box then narrows its timer",
   NotificationFixture fixture;
   menu::ShowLiveSceneNotification(11, kAction, 1);
   CHECK(menu::IsLiveSceneNotificationPending() == 1);
-  CHECK(Menu_sceneNotificationTimer == 120);
+  CHECK(menu::sceneNotificationTimer == 120);
   auto box = menu::ReadLiveTextBox(kFirstBox);
   box.flags.done = true;
   menu::WriteLiveTextBox(kFirstBox, box);
   CHECK(menu::IsLiveSceneNotificationPending() == 1);
-  CHECK(Menu_sceneNotificationTimer == 118);
-  Menu_sceneNotificationTimer = 2;
+  CHECK(menu::sceneNotificationTimer == 118);
+  menu::sceneNotificationTimer = 2;
   CHECK(menu::IsLiveSceneNotificationPending() == 0);
-  CHECK(Menu_sceneNotificationTimer == 0);
-  CHECK(memory::LivePayloadCapacity(Menu_sceneNotificationBuffer).has_value());
+  CHECK(menu::sceneNotificationTimer == 0);
+  CHECK(memory::LivePayloadCapacity(menu::sceneNotificationBuffer).has_value());
 }
 
 TEST_CASE("Live untimed notification polls text completion without ticking",
@@ -208,7 +209,7 @@ TEST_CASE("Live untimed notification polls text completion without ticking",
   box.speed = menu::kTextBoxFinishedSpeed;
   menu::WriteLiveTextBox(kFirstBox, box);
   CHECK(menu::IsLiveSceneNotificationPending() == 0);
-  CHECK(Menu_sceneNotificationTimer == 77);
+  CHECK(menu::sceneNotificationTimer == 77);
 }
 
 TEST_CASE(
@@ -216,9 +217,9 @@ TEST_CASE(
     "[scene-notifications-live][F01381]") {
   NotificationFixture fixture;
   menu::ShowLiveSceneNotification(11, kAction, 1);
-  auto* owner = Menu_sceneNotificationBuffer;
+  auto* owner = menu::sceneNotificationBuffer;
   menu::ReleaseLiveSceneNotification();
-  CHECK(Menu_sceneNotificationBuffer == nullptr);
+  CHECK(menu::sceneNotificationBuffer == nullptr);
   CHECK_FALSE(memory::LivePayloadCapacity(owner).has_value());
   const auto closing = menu::ReadLiveTextBox(kFirstBox);
   CHECK(closing.state < 0);
@@ -227,8 +228,8 @@ TEST_CASE(
   menu::UpdateLiveTextBoxes();
   CHECK(menu::ReadLiveTextBox(kFirstBox).state < closing.state);
   CHECK(VS::Render::FrameScratchpad().primitive_cursor != cursor);
-  CHECK(Menu_sceneNotificationTimer == 120);
-  CHECK(Menu_sceneNotificationTimed == 1);
+  CHECK(menu::sceneNotificationTimer == 120);
+  CHECK(menu::sceneNotificationTimed == 1);
 }
 
 TEST_CASE("Live notification release preserves a foreign text borrow",
@@ -250,12 +251,12 @@ TEST_CASE("Live notification release preserves a foreign text borrow",
 TEST_CASE("Invalid live notification ownership never reports false completion",
           "[scene-notifications-live][F01380]") {
   NotificationFixture fixture;
-  ValueRestore<int*> restore{Menu_sceneNotificationBuffer};
+  ValueRestore<int*> restore{menu::sceneNotificationBuffer};
   std::array<int, menu::kSceneNotificationBytes / sizeof(int)> foreign{};
-  Menu_sceneNotificationBuffer = foreign.data();
+  menu::sceneNotificationBuffer = foreign.data();
   const auto refusals = menu::RefusedLiveSceneNotificationCount();
   CHECK(menu::IsLiveSceneNotificationPending() == 1);
-  CHECK(Menu_sceneNotificationBuffer == foreign.data());
+  CHECK(menu::sceneNotificationBuffer == foreign.data());
   CHECK(menu::RefusedLiveSceneNotificationCount() == refusals + 1);
 }
 
@@ -272,11 +273,11 @@ Entry NotificationModuleEntry(unsigned address, Entry expected) {
 }
 
 void CheckColdNotificationReleased(void* owner) {
-  CHECK(Menu_sceneNotificationBuffer == nullptr);
+  CHECK(menu::sceneNotificationBuffer == nullptr);
   CHECK_FALSE(memory::LivePayloadCapacity(owner).has_value());
   CHECK(menu::ReadLiveTextBox(kFirstBox).text == nullptr);
-  CHECK(Menu_sceneNotificationTimer == 0);
-  CHECK(Menu_sceneNotificationTimed == 0);
+  CHECK(menu::sceneNotificationTimer == 0);
+  CHECK(menu::sceneNotificationTimed == 0);
 }
 }  // namespace
 
@@ -285,13 +286,13 @@ TEST_CASE("Original notification module entries operate the real text owner",
   NotificationFixture fixture;
   NotificationModuleEntry(0x800CB2B8, &menu::ShowLiveSceneNotification)(
       11, kAction, 1);
-  auto* const owner = Menu_sceneNotificationBuffer;
+  auto* const owner = menu::sceneNotificationBuffer;
   REQUIRE(owner != nullptr);
   CHECK(fixture.Buffer()[0] == 0xF8);
   CHECK(NotificationModuleEntry(0x800CB45C,
                                 &menu::IsLiveSceneNotificationPending)() == 1);
   NotificationModuleEntry(0x800CB50C, &menu::ReleaseLiveSceneNotification)();
-  CHECK(Menu_sceneNotificationBuffer == nullptr);
+  CHECK(menu::sceneNotificationBuffer == nullptr);
   CHECK_FALSE(memory::LivePayloadCapacity(owner).has_value());
 }
 
@@ -300,13 +301,13 @@ TEST_CASE(
     "[scene-notification-integration][scene-notification-boundary]"
     "[F01381]") {
   const game_clear_live_tests::SavedModuleData saved_module;
-  const game_clear_live_tests::SavedGlobals<Menu_textBoxSelector,
+  const game_clear_live_tests::SavedGlobals<menu::textBoxSelector,
                                             Event_isTextBoxAwaitingClose>
       saved_ui;
   NotificationFixture fixture;
   const int timed = GENERATE(0, 1);
   menu::ShowLiveSceneNotification(11, kAction, timed);
-  auto* const owner = Menu_sceneNotificationBuffer;
+  auto* const owner = menu::sceneNotificationBuffer;
   auto* const foreign = memory::AllocateLiveFromLowEnd(32);
   REQUIRE(owner != nullptr);
   REQUIRE(foreign != nullptr);
@@ -329,13 +330,13 @@ TEST_CASE(
   other.text = foreign.data();
   menu::WriteLiveTextBox(6, other);
   VS::Boot::ResetLiveSessionHeap();
-  REQUIRE(Menu_sceneNotificationBuffer == nullptr);
+  REQUIRE(menu::sceneNotificationBuffer == nullptr);
   REQUIRE(menu::ReadLiveTextBox(kFirstBox).text == nullptr);
   CHECK(menu::ReadLiveTextBox(6) == other);
-  CHECK(Menu_sceneNotificationTimer == 120);
-  CHECK(Menu_sceneNotificationTimed == 1);
+  CHECK(menu::sceneNotificationTimer == 120);
+  CHECK(menu::sceneNotificationTimed == 1);
   menu::ShowLiveSceneNotification(11, kAction, 1);
-  CHECK(memory::LivePayloadCapacity(Menu_sceneNotificationBuffer).has_value());
+  CHECK(memory::LivePayloadCapacity(menu::sceneNotificationBuffer).has_value());
   CHECK(menu::IsLiveSceneNotificationPending() == 1);
 }
 
@@ -344,7 +345,7 @@ TEST_CASE(
     "[scene-notification-integration][scene-notification-boundary]"
     "[F01381]") {
   NotificationFixture fixture;
-  ValueRestore<int*> restore{Menu_sceneNotificationBuffer};
+  ValueRestore<int*> restore{menu::sceneNotificationBuffer};
   const bool undersized_heap = GENERATE(false, true);
   std::array<int, menu::kSceneNotificationBytes / sizeof(int)> foreign{};
   auto* const owner =
@@ -352,14 +353,14 @@ TEST_CASE(
           ? static_cast<int*>(memory::AllocateLiveFromHighEnd(sizeof(int)))
           : foreign.data();
   if (owner == nullptr) throw std::runtime_error("missing refusal-test owner");
-  Menu_sceneNotificationBuffer = owner;
+  menu::sceneNotificationBuffer = owner;
   const auto box = menu::ReadLiveTextBox(kFirstBox);
   const auto refusals = menu::RefusedLiveSceneNotificationCount();
   CHECK_FALSE(menu::CleanupLiveSceneNotificationOwnedState());
-  CHECK(Menu_sceneNotificationBuffer == owner);
+  CHECK(menu::sceneNotificationBuffer == owner);
   CHECK(menu::ReadLiveTextBox(kFirstBox) == box);
-  CHECK(Menu_sceneNotificationTimer == 77);
-  CHECK(Menu_sceneNotificationTimed == 0);
+  CHECK(menu::sceneNotificationTimer == 77);
+  CHECK(menu::sceneNotificationTimed == 0);
   CHECK(menu::RefusedLiveSceneNotificationCount() == refusals + 1);
   if (undersized_heap) {
     CHECK(memory::LivePayloadCapacity(owner).has_value());

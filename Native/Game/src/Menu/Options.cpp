@@ -46,7 +46,7 @@ constexpr std::int32_t kCurrentValueRowType = 4;
 constexpr int kChoiceTitleRow = 7;
 // The selection results: -1 cancels, -2 leaves for the battle.
 constexpr int kLeaveForBattle = -2;
-// The information text box (Menu_textBoxes[7]) shown over a disabled row.
+// The information text box (textBoxes[7]) shown over a disabled row.
 constexpr int kTextBoxShown = 0xB;
 constexpr int kTextBoxHidden = 0;
 constexpr int kVibrationTestPreset = 0;

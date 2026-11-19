@@ -516,10 +516,10 @@ T00091.001,T00091,testMemcardEvents_e,1,memcardInternalEventError,0,,,1,,Error,O
 T00091.002,T00091,testMemcardEvents_e,2,memcardInternalEventTimeout,0,,,2,,Timeout,Card did not respond,high,declaration-only;source:260.c:31
 T00091.003,T00091,testMemcardEvents_e,3,memcardInternalEventUnformatted,0,,,3,,Unformatted,New or unformatted card,high,declaration-only;source:260.c:32
 T00091.004,T00091,testMemcardEvents_e,4,memcardInternalEventNone,0,,,4,,None,No event signalled,high,source:260.c:178;source:260.c:33
-T00092.000,T00092,vs_battle_informationTextBoxHeader,0,informationTextBoxHeaderNone,0,,,0,,None,InformationBoxHeader None,med,declaration-only;source:5BF94.h:539
-T00092.001,T00092,vs_battle_informationTextBoxHeader,1,informationTextBoxHeaderCaution,0,,,1,,Caution,InformationBoxHeader Caution,med,declaration-only;source:5BF94.h:540
-T00092.002,T00092,vs_battle_informationTextBoxHeader,2,informationTextBoxHeaderInformation,0,,,2,,Information,InformationBoxHeader Information,med,declaration-only;source:5BF94.h:541
-T00092.003,T00092,vs_battle_informationTextBoxHeader,3,informationTextBoxHeaderCheck,0,,,3,,Check,InformationBoxHeader Check,med,declaration-only;source:5BF94.h:542
+T00092.000,T00092,vs_battle_informationTextBoxHeader,0,informationTextBoxHeaderNone,0,,,0,,kNone,InformationBoxHeader None,med,native:TextBoxState.hpp InformationHeader::kNone (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:189
+T00092.001,T00092,vs_battle_informationTextBoxHeader,1,informationTextBoxHeaderCaution,0,,,1,,kCaution,InformationBoxHeader Caution,med,native:TextBoxState.hpp InformationHeader::kCaution (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:190
+T00092.002,T00092,vs_battle_informationTextBoxHeader,2,informationTextBoxHeaderInformation,0,,,2,,kInformation,InformationBoxHeader Information,med,native:TextBoxState.hpp InformationHeader::kInformation (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:191
+T00092.003,T00092,vs_battle_informationTextBoxHeader,3,informationTextBoxHeaderCheck,0,,,3,,kCheck,InformationBoxHeader Check,med,native:TextBoxState.hpp InformationHeader::kCheck (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:192
 T00093.000,T00093,vs_battle_limbStatus,0,limbStatusCritical,0,,,0,,Critical,LimbConditionLevel Critical,med,declaration-only;source:5BF94.h:503
 T00093.001,T00093,vs_battle_limbStatus,1,limbStatusDamaged,0,,,1,,Damaged,LimbConditionLevel Damaged,med,declaration-only;source:5BF94.h:504
 T00093.002,T00093,vs_battle_limbStatus,2,limbStatusWounded,0,,,2,,Wounded,LimbConditionLevel Wounded,med,declaration-only;source:5BF94.h:505
@@ -3039,12 +3039,12 @@ T00340.000,T00340,_syd,0,combinationsOffset,0,u_long,,,typeRecipeTableOffset,com
 T00340.001,T00340,_syd,1,materialsOffset,0,u_long,,,materialRecipeTableOffset,materialsOffset,Named in the fork; see cited use,med,source:168.c:4954
 T00340.002,T00340,_syd,2,initDataOffset,0,u_long,,,baseStatTableOffset,initDataOffset,Named in the fork; see cited use,med,source:168.c:4955
 T00340.003,T00340,_syd,3,data,0,char[0],,,,reservedC,Not read by decompiled code,low,declaration-only;source:168.c:4919
-T00341.000,T00341,_textBoxSelector_t,0,order,0,u_char[8],,,,order,Named in the fork; see cited use,med,source:5BF94.c:1586
-T00341.001,T00341,_textBoxSelector_t,1,unk8,1,u_char,,,,reserved8,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\TextBoxes.h:23;declaration-only;source:5BF94.c:181
-T00341.002,T00341,_textBoxSelector_t,2,unk9,1,u_char,,,,reserved9,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\TextBoxes.h:24;declaration-only;source:5BF94.c:182
-T00341.003,T00341,_textBoxSelector_t,3,selectedIndex,0,u_char,,,,selectedIndex,Named in the fork; see cited use,med,source:5BF94.c:1596
-T00341.004,T00341,_textBoxSelector_t,4,count,0,u_char,,,,count,Named in the fork; see cited use,med,source:5BF94.c:1569
-T00341.005,T00341,_textBoxSelector_t,5,unkC,1,u_char,,,,reservedC,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Menu\Framework\TextBoxes.h:27;declaration-only;source:5BF94.c:185
+T00341.000,T00341,_textBoxSelector_t,0,order,0,u_char[8],,,,order,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxSelectorState::order (#441);source:BATTLE/BATTLE.PRG/5BF94.c:196
+T00341.001,T00341,_textBoxSelector_t,1,unk8,1,u_char,,,,reserved8,Not used by native code; kept for the original layout,med,native:Menu/Framework/TextBoxes.hpp TextBoxSelectorState::reserved8 (#441);declaration-only;source:BATTLE/BATTLE.PRG/5BF94.c:197
+T00341.002,T00341,_textBoxSelector_t,2,unk9,1,u_char,,,,reserved9,Not used by native code; kept for the original layout,med,native:Menu/Framework/TextBoxes.hpp TextBoxSelectorState::reserved9 (#441);declaration-only;source:BATTLE/BATTLE.PRG/5BF94.c:198
+T00341.003,T00341,_textBoxSelector_t,3,selectedIndex,0,u_char,,,,selected_index,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxSelectorState::selected_index (#441);source:BATTLE/BATTLE.PRG/5BF94.c:199
+T00341.004,T00341,_textBoxSelector_t,4,count,0,u_char,,,,count,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxSelectorState::count (#441);source:BATTLE/BATTLE.PRG/5BF94.c:200
+T00341.005,T00341,_textBoxSelector_t,5,unkC,1,u_char,,,,reserved_c,Not used by native code; kept for the original layout,med,native:Menu/Framework/TextBoxes.hpp TextBoxSelectorState::reserved_c (#441);declaration-only;source:BATTLE/BATTLE.PRG/5BF94.c:201
 T00342.000,T00342,_texture_t,0,x,0,char,,,,u,Named in the fork; see cited use,med,source:renderTextures.h:17
 T00342.001,T00342,_texture_t,1,y,0,char,,,,v,Named in the fork; see cited use,med,source:renderTextures.h:17
 T00342.002,T00342,_texture_t,2,w,0,char,,,,width,Named in the fork; see cited use,med,source:D4.c:1940
@@ -4294,10 +4294,10 @@ T00487.010,T00487,func_800C5798_t,10,unk14,1,u_char,,,,opaque14,Not used by nati
 T00487.011,T00487,func_800C5798_t,11,unk15,1,u_char,,,,opaque15,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:220;source:5BF94.c:1310
 T00487.012,T00487,func_800C5798_t,12,unk16,1,u_char,,,,opaque16,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:221;source:5BF94.c:1313
 T00487.013,T00487,func_800C5798_t,13,unk17,1,u_char,,,,opaque17,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\BattleTypes.h:222;source:5BF94.c:1306
-T00488.000,T00488,func_800CCE10_t,0,unk0_0,1,int,12,,x,x,Named in the fork; see cited use (same bits as T00619 x),med,source:5BF94.c:4551
-T00488.001,T00488,func_800CCE10_t,1,unk0_12,1,int,12,,y,y,Named in the fork; see cited use (same bits as T00619 y),med,source:5BF94.c:4552
-T00488.002,T00488,func_800CCE10_t,2,unk0_24,1,u_int,2,,orientation flags,alignment,Named in the fork; see cited use (same bits as T00619 alignment),med,source:5BF94.c:4553
-T00488.003,T00488,func_800CCE10_t,3,unk0_26,1,u_int,4,,,opaque3Bit2,"Used, but its meaning is not established",low,source:5BF94.c:4563
+T00488.000,T00488,func_800CCE10_t,0,unk0_0,1,int,12,,x,x,Named in the fork; see cited use (same bits as T00619 x),med,native:TextBoxState.hpp TextAnchor::x (#441);source:BATTLE/BATTLE.PRG/battleUi.h:12
+T00488.001,T00488,func_800CCE10_t,1,unk0_12,1,int,12,,y,y,Named in the fork; see cited use (same bits as T00619 y),med,native:TextBoxState.hpp TextAnchor::y (#441);source:BATTLE/BATTLE.PRG/battleUi.h:13
+T00488.002,T00488,func_800CCE10_t,2,unk0_24,1,u_int,2,,orientation flags,alignment,Named in the fork; see cited use (same bits as T00619 alignment),med,native:TextBoxState.hpp TextAnchor::alignment (#441);source:BATTLE/BATTLE.PRG/battleUi.h:14
+T00488.003,T00488,func_800CCE10_t,3,unk0_26,1,u_int,4,,,frame_part,"Used, but its meaning is not established",low,native:TextBoxState.hpp TextAnchor::frame_part (#441);source:BATTLE/BATTLE.PRG/battleUi.h:15
 T00489.000,T00489,func_800CE714_t2_2,0,unk0,1,int,,,,reserved0,Cleared when the instance is initialised; not otherwise read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Effects\EffectInstancesLive.cpp:72;source:5BF94.c:5092
 T00489.001,T00489,func_800CE714_t2_2,1,unk4,1,int,,,,reserved4,Cleared when the instance is initialised; not otherwise read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Effects\EffectInstancesLive.cpp:73;source:5BF94.c:5090
 T00489.002,T00489,func_800CE714_t2_2,2,unk8,1,int,,,,reserved8,Cleared when the instance is initialised; not otherwise read; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Effects\EffectInstancesLive.cpp:74;source:5BF94.c:5094
@@ -5603,14 +5603,14 @@ T00617.003,T00617,texMapOverlay_t,3,h,0,u_char,,,,height,Overlay height,high,sou
 T00618.000,T00618,textHeader_t,0,text,0,char[14],,,,text,Named in the fork; see cited use,med,"native:Framework.hpp TextHeader::text is std::array<std::uint8_t, 14> (#441);source:58EC.c:690"
 T00618.001,T00618,textHeader_t,1,disabled,0,char,,,,disabled,Named in the fork; see cited use,med,native:Framework.hpp TextHeader::disabled (#441);source:58EC.c:658
 T00618.002,T00618,textHeader_t,2,x,0,char,,,,x,Named in the fork; see cited use,med,native:Framework.hpp TextHeader::x (#441);source:58EC.c:659
-T00619.000,T00619,textOffset,0,x,0,int,12,,,x,Named in the fork; see cited use,med,source:4A0A8.c:756
-T00619.001,T00619,textOffset,1,y,0,int,12,,,y,Named in the fork; see cited use,med,source:4A0A8.c:757
-T00619.002,T00619,textOffset,2,alignment,0,u_int,2,,,alignment,Named in the fork; see cited use,med,source:4A0A8.c:832
-T00619.003,T00619,textOffset,3,flags,0,u_int,4,,,opaque3Bit2,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TextBoxes.h:13;source:4A0A8.c:833
-T00620.000,T00620,textPlacement,0,offset,0,textOffset,,,,anchorOffset,Packed anchor offset alignment and flags,med,source:4A0A8.c:754;use cited by sanity pass;source:4A0A8.c:192
-T00620.001,T00620,textPlacement,1,x,0,short,,,,screenX,Dialog anchor screen X,med,source:4A0A8.c:826;use cited by sanity pass;source:4A0A8.c:193
-T00620.002,T00620,textPlacement,2,y,0,short,,,,screenY,Dialog anchor screen Y,med,source:4A0A8.c:826;use cited by sanity pass;source:4A0A8.c:194
-T00620.003,T00620,textPlacement,3,distance,0,int,,,screen-clamp displacement magnitude,clampDistance,Displacement applied when clamping the dialog on screen,med,source:4A0A8.c:784;use cited by sanity pass;source:4A0A8.c:195
+T00619.000,T00619,textOffset,0,x,0,int,12,,,x,Named in the fork; see cited use,med,native:TextBoxState.hpp TextAnchor::x (#441);source:BATTLE/BATTLE.PRG/battleUi.h:12
+T00619.001,T00619,textOffset,1,y,0,int,12,,,y,Named in the fork; see cited use,med,native:TextBoxState.hpp TextAnchor::y (#441);source:BATTLE/BATTLE.PRG/battleUi.h:13
+T00619.002,T00619,textOffset,2,alignment,0,u_int,2,,,alignment,Named in the fork; see cited use,med,native:TextBoxState.hpp TextAnchor::alignment (#441);source:BATTLE/BATTLE.PRG/battleUi.h:14
+T00619.003,T00619,textOffset,3,flags,0,u_int,4,,,frame_part,Not used by native code; kept for the original layout,med,native:TextBoxState.hpp TextAnchor::frame_part (#441);source:BATTLE/BATTLE.PRG/battleUi.h:15
+T00620.000,T00620,textPlacement,0,offset,0,textOffset,,,,anchor,Packed anchor offset alignment and flags,med,native:ScriptDialogCommands.hpp DialogPlacement::anchor (#441);source:BATTLE/BATTLE.PRG/4DEA8.c:205;use cited by sanity pass
+T00620.001,T00620,textPlacement,1,x,0,short,,,,screen_x,Dialog anchor screen X,med,native:ScriptDialogCommands.hpp DialogPlacement::screen_x (#441);source:BATTLE/BATTLE.PRG/4DEA8.c:206;use cited by sanity pass
+T00620.002,T00620,textPlacement,2,y,0,short,,,,screen_y,Dialog anchor screen Y,med,native:ScriptDialogCommands.hpp DialogPlacement::screen_y (#441);source:BATTLE/BATTLE.PRG/4DEA8.c:207;use cited by sanity pass
+T00620.003,T00620,textPlacement,3,distance,0,int,,,screen-clamp displacement magnitude,clamp_distance,Displacement applied when clamping the dialog on screen,med,native:ScriptDialogCommands.hpp DialogPlacement::clamp_distance (#441);source:BATTLE/BATTLE.PRG/4DEA8.c:208;use cited by sanity pass
 T00621.000,T00621,trackingMotion,0,facing,0,unsigned short,,,,heading,Heading toward the arena centre (same bits as T00273 unk0); not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.h:820;source:7EE98.c:611
 T00621.001,T00621,trackingMotion,1,state,0,unsigned char,,,,phase,Orbit phase (same bits as T00273 unk2),med,declaration-only;source:7EE98.c:584
 T00621.002,T00621,trackingMotion,2,flag3,0,unsigned char,,,,distanceCached,Set once the distance is measured (same bits as T00273 unk3); not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\Ai\AiViews.h:821;source:7EE98.c:615
@@ -5982,46 +5982,46 @@ T00668.001,T00668,vs_battle_shieldIntermediate,1,gems,0,vs_battle_uiEquipment[3]
 T00668.002,T00668,vs_battle_shieldIntermediate,2,material,0,char,,,,material,Shield material,med,declaration-only;source:146C.h:777
 T00668.003,T00668,vs_battle_shieldIntermediate,3,dropRate,0,char,,,,drop_rate,Drop chance,med,declaration-only;source:146C.h:778
 T00668.004,T00668,vs_battle_shieldIntermediate,4,index,0,short,,,,index,Inventory index,med,declaration-only;source:146C.h:779
-T00669.000,T00669,vs_battle_stringContext_t,0,integers,0,int[10],,,,integers,Named in the fork; see cited use,med,source:4A0A8.c:921
-T00669.001,T00669,vs_battle_stringContext_t,1,strings,0,char *[10],,,,strings,Named in the fork; see cited use,med,source:5BF94.c:1265
+T00669.000,T00669,vs_battle_stringContext_t,0,integers,0,int[10],,,,integers,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp StringContext::integers (#441);source:BATTLE/BATTLE.PRG/battleUi.h:165
+T00669.001,T00669,vs_battle_stringContext_t,1,strings,0,char *[10],,,,strings,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp StringContext::strings (#441);source:BATTLE/BATTLE.PRG/battleUi.h:166
 T00670.000,T00670,vs_battle_texInfo_t,0,tpage,0,short,,,,texture_page,Texture page word,high,source:30DB0.c:1266
 T00670.001,T00670,vs_battle_texInfo_t,1,clut0,0,short,,,,palette,Default palette,high,source:30DB0.c:1338
 T00670.002,T00670,vs_battle_texInfo_t,2,clut1,0,short,,,,alternate_palette,Alternate palette,high,source:30DB0.c:1333
 T00670.003,T00670,vs_battle_texInfo_t,3,refCount,0,u_char,,,,reference_count,Number of users; zero frees the slot,high,source:30DB0.c:1214
-T00671.000,T00671,vs_battle_textBox,0,unk0,1,vs_battle_textBox_fields,,,,flags,"Kind, open style, alignment, frame and speaker bits (Battle::TextBoxFlags)",high,source:5BF94.c:4007
-T00671.001,T00671,vs_battle_textBox,1,unk4,1,short,,,,opaque4,"Used, but its meaning is not established",low,source:5BF94.c:1543
-T00671.002,T00671,vs_battle_textBox,2,unk6,1,short,,,,opaque6,"Used, but its meaning is not established",low,source:5BF94.c:4577
-T00671.003,T00671,vs_battle_textBox,3,string,0,char *,,,,string,Named in the fork; see cited use,med,source:5BF94.c:1541
-T00671.004,T00671,vs_battle_textBox,4,speed,0,u_short,,,,speed,Named in the fork; see cited use,med,source:5BF94.c:1542;source-review:5BF94.h:96-121 and 5BF94.c text-box producers/reset/renderers;retained-name:speed=existing text-advance budget with 1/0xFFFF control values and tick accumulation;not an anonymous stack/register name;preserve owning field identity and layout
-T00671.005,T00671,vs_battle_textBox,5,prevChunksPrinted,0,u_short,,,,prevChunksPrinted,Named in the fork; see cited use,med,source:5BF94.c:1544
-T00671.006,T00671,vs_battle_textBox,6,xIndent,0,short,,,,xIndent,Named in the fork; see cited use,med,source:5BF94.c:1744
-T00671.007,T00671,vs_battle_textBox,7,yIndent,0,short,,,,yIndent,Named in the fork; see cited use,med,source:5BF94.c:1745
-T00671.008,T00671,vs_battle_textBox,8,x,0,short,,,,x,Named in the fork; see cited use,med,source:4A0A8.c:685
-T00671.009,T00671,vs_battle_textBox,9,y,0,short,,,,y,Named in the fork; see cited use,med,source:4A0A8.c:687
-T00671.010,T00671,vs_battle_textBox,10,centerX,0,short,,,,centerX,Named in the fork; see cited use,med,source:5BF94.c:4002
-T00671.011,T00671,vs_battle_textBox,11,centerY,0,short,,,,centerY,Named in the fork; see cited use,med,source:5BF94.c:4003
-T00671.012,T00671,vs_battle_textBox,12,state,0,short,,,,state,Named in the fork; see cited use,med,source:5BF94.c:3942
-T00671.013,T00671,vs_battle_textBox,13,brightness,0,u_char,,,,brightness,Named in the fork; see cited use,med,source:5BF94.c:1736
-T00671.014,T00671,vs_battle_textBox,14,unk1F,1,u_char,,,,reserved1F,Not read by decompiled code,low,declaration-only;source:5BF94.h:110
-T00671.015,T00671,vs_battle_textBox,15,charsPerLine,0,char,,,,charsPerLine,Named in the fork; see cited use,med,source:4A0A8.c:686
-T00671.016,T00671,vs_battle_textBox,16,lineCount,0,char,,,,lineCount,Named in the fork; see cited use,med,source:4A0A8.c:687
-T00671.017,T00671,vs_battle_textBox,17,unk22,1,char,,,animation duration | transition duration,openDuration,Frames the box takes to open or close,med,source:4A0A8.c:943
-T00671.018,T00671,vs_battle_textBox,18,unk23,1,char,,,,reserved23,Not read by decompiled code,low,declaration-only;source:5BF94.h:114
-T00671.019,T00671,vs_battle_textBox,19,unk24,1,short,,,animated x,frameX,Scaled frame x while opening,med,source:5BF94.c:4002
-T00671.020,T00671,vs_battle_textBox,20,unk26,1,short,,,animated y,frameY,Scaled frame y while opening,med,source:5BF94.c:4003
-T00671.021,T00671,vs_battle_textBox,21,unk28,1,short,,,animated width,frameWidth,Scaled frame width,med,source:5BF94.c:4004
-T00671.022,T00671,vs_battle_textBox,22,unk2A,1,short,,,animated height,frameHeight,Scaled frame height,med,source:5BF94.c:4005
-T00671.023,T00671,vs_battle_textBox,23,unk2C,1,short,,,,opaque2C,"Used, but its meaning is not established",low,source:5BF94.c:1547
-T00671.024,T00671,vs_battle_textBox,24,unk2E,1,short,,,actor texture-animation selection,opaque2E,"Used, but its meaning is not established",low,source:4A0A8.c:694
-T00672.000,T00672,vs_battle_textBox_fields,0,unk0_0,1,u_int,4,,,kind,Box kind; 4 uses the alternate font table,med,source:5BF94.c:4007
-T00672.001,T00672,vs_battle_textBox_fields,1,unk0_4,1,u_int,2,,,openStyle,Opening style; selects the opening step count; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TextBoxes.h:20;source:5BF94.c:3977
-T00672.002,T00672,vs_battle_textBox_fields,2,unk0_6,1,u_int,2,,,alignment,Anchor alignment; flips the frame,med,source:4A0A8.c:832
-T00672.003,T00672,vs_battle_textBox_fields,3,unk0_8,1,u_int,4,,,frameShape,Frame shape index,med,source:5BF94.c:4720
-T00672.004,T00672,vs_battle_textBox_fields,4,unk0_12,1,u_int,4,,,framePart,Frame part selected from the shape,low,source:5BF94.c:4744
-T00672.005,T00672,vs_battle_textBox_fields,5,arrowAnimFrame,0,u_int,8,,,arrowAnimFrame,Continue-arrow animation frame,med,source:5BF94.c:1776
-T00672.006,T00672,vs_battle_textBox_fields,6,unk0_24,1,u_int,6,,,speakerTexture,Speaker portrait texture; bit 0x20 for none,med,source:4A0A8.c:831
-T00672.007,T00672,vs_battle_textBox_fields,7,done,0,u_int,1,,,done,Set when the text has finished,med,source:5BF94.c:1747
-T00672.008,T00672,vs_battle_textBox_fields,8,unk0_31,1,u_int,1,,,opaque3Bit7,Tested first each update; meaning not established; not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Battle\TextBoxes.h:27;source:5BF94.c:3952
+T00671.000,T00671,vs_battle_textBox,0,unk0,1,vs_battle_textBox_fields,,,,flags,"Kind, open style, alignment, frame and speaker bits (Battle::TextBoxFlags)",high,native:Menu/Framework/TextBoxes.hpp TextBoxState::flags (#441);source:BATTLE/BATTLE.PRG/battleUi.h:104
+T00671.001,T00671,vs_battle_textBox,1,unk4,1,short,,,,opaque4,"Used, but its meaning is not established",low,native:Menu/Framework/TextBoxes.hpp TextBoxState::opaque4 (#441);source:BATTLE/BATTLE.PRG/battleUi.h:105
+T00671.002,T00671,vs_battle_textBox,2,unk6,1,short,,,,opaque6,"Used, but its meaning is not established",low,native:Menu/Framework/TextBoxes.hpp TextBoxState::opaque6 (#441);source:BATTLE/BATTLE.PRG/battleUi.h:106
+T00671.003,T00671,vs_battle_textBox,3,string,0,char *,,,,text,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::text (#441);source:BATTLE/BATTLE.PRG/battleUi.h:107
+T00671.004,T00671,vs_battle_textBox,4,speed,0,u_short,,,,speed,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::speed (#441);source:BATTLE/BATTLE.PRG/battleUi.h:108;source-review:5BF94.h:96-121 and 5BF94.c text-box producers/reset/renderers;retained-name:speed=existing text-advance budget with 1/0xFFFF control values and tick accumulation;not an anonymous stack/register name;preserve owning field identity and layout
+T00671.005,T00671,vs_battle_textBox,5,prevChunksPrinted,0,u_short,,,,previous_chunks,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::previous_chunks (#441);source:BATTLE/BATTLE.PRG/battleUi.h:109
+T00671.006,T00671,vs_battle_textBox,6,xIndent,0,short,,,,x_indent,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::x_indent (#441);source:BATTLE/BATTLE.PRG/battleUi.h:110
+T00671.007,T00671,vs_battle_textBox,7,yIndent,0,short,,,,y_indent,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::y_indent (#441);source:BATTLE/BATTLE.PRG/battleUi.h:111
+T00671.008,T00671,vs_battle_textBox,8,x,0,short,,,,x,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::x (#441);source:BATTLE/BATTLE.PRG/battleUi.h:112
+T00671.009,T00671,vs_battle_textBox,9,y,0,short,,,,y,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::y (#441);source:BATTLE/BATTLE.PRG/battleUi.h:113
+T00671.010,T00671,vs_battle_textBox,10,centerX,0,short,,,,center_x,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::center_x (#441);source:BATTLE/BATTLE.PRG/battleUi.h:114
+T00671.011,T00671,vs_battle_textBox,11,centerY,0,short,,,,center_y,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::center_y (#441);source:BATTLE/BATTLE.PRG/battleUi.h:115
+T00671.012,T00671,vs_battle_textBox,12,state,0,short,,,,state,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::state (#441);source:BATTLE/BATTLE.PRG/battleUi.h:116
+T00671.013,T00671,vs_battle_textBox,13,brightness,0,u_char,,,,brightness,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::brightness (#441);source:BATTLE/BATTLE.PRG/battleUi.h:117
+T00671.014,T00671,vs_battle_textBox,14,unk1F,1,u_char,,,,reserved1f,Not read by decompiled code,low,native:Menu/Framework/TextBoxes.hpp TextBoxState::reserved1f (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:118
+T00671.015,T00671,vs_battle_textBox,15,charsPerLine,0,char,,,,chars_per_line,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::chars_per_line (#441);source:BATTLE/BATTLE.PRG/battleUi.h:119
+T00671.016,T00671,vs_battle_textBox,16,lineCount,0,char,,,,line_count,Named in the fork; see cited use,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::line_count (#441);source:BATTLE/BATTLE.PRG/battleUi.h:120
+T00671.017,T00671,vs_battle_textBox,17,unk22,1,char,,,animation duration | transition duration,open_duration,Frames the box takes to open or close,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::open_duration (#441);source:BATTLE/BATTLE.PRG/battleUi.h:121
+T00671.018,T00671,vs_battle_textBox,18,unk23,1,char,,,,reserved23,Not read by decompiled code,low,native:Menu/Framework/TextBoxes.hpp TextBoxState::reserved23 (#441);declaration-only;source:BATTLE/BATTLE.PRG/battleUi.h:122
+T00671.019,T00671,vs_battle_textBox,19,unk24,1,short,,,animated x,frame_x,Scaled frame x while opening,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::frame_x (#441);source:BATTLE/BATTLE.PRG/battleUi.h:123
+T00671.020,T00671,vs_battle_textBox,20,unk26,1,short,,,animated y,frame_y,Scaled frame y while opening,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::frame_y (#441);source:BATTLE/BATTLE.PRG/battleUi.h:124
+T00671.021,T00671,vs_battle_textBox,21,unk28,1,short,,,animated width,frame_width,Scaled frame width,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::frame_width (#441);source:BATTLE/BATTLE.PRG/battleUi.h:125
+T00671.022,T00671,vs_battle_textBox,22,unk2A,1,short,,,animated height,frame_height,Scaled frame height,med,native:Menu/Framework/TextBoxes.hpp TextBoxState::frame_height (#441);source:BATTLE/BATTLE.PRG/battleUi.h:126
+T00671.023,T00671,vs_battle_textBox,23,unk2C,1,short,,,,speaker_pause,"Used, but its meaning is not established",low,native:Menu/Framework/TextBoxes.hpp TextBoxState::speaker_pause (#441);source:BATTLE/BATTLE.PRG/battleUi.h:127
+T00671.024,T00671,vs_battle_textBox,24,unk2E,1,short,,,actor texture-animation selection,speaker_animation,"Used, but its meaning is not established",low,native:Menu/Framework/TextBoxes.hpp TextBoxState::speaker_animation (#441);source:BATTLE/BATTLE.PRG/battleUi.h:128
+T00672.000,T00672,vs_battle_textBox_fields,0,unk0_0,1,u_int,4,,,kind,Box kind; 4 uses the alternate font table,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::kind (#441);source:BATTLE/BATTLE.PRG/battleUi.h:92
+T00672.001,T00672,vs_battle_textBox_fields,1,unk0_4,1,u_int,2,,,open_style,Opening style; selects the opening step count; not used by native code; kept for the original layout,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::open_style (#441);source:BATTLE/BATTLE.PRG/battleUi.h:93
+T00672.002,T00672,vs_battle_textBox_fields,2,unk0_6,1,u_int,2,,,alignment,Anchor alignment; flips the frame,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::alignment (#441);source:BATTLE/BATTLE.PRG/battleUi.h:94
+T00672.003,T00672,vs_battle_textBox_fields,3,unk0_8,1,u_int,4,,,frame_shape,Frame shape index,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::frame_shape (#441);source:BATTLE/BATTLE.PRG/battleUi.h:95
+T00672.004,T00672,vs_battle_textBox_fields,4,unk0_12,1,u_int,4,,,frame_part,Frame part selected from the shape,low,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::frame_part (#441);source:BATTLE/BATTLE.PRG/battleUi.h:96
+T00672.005,T00672,vs_battle_textBox_fields,5,arrowAnimFrame,0,u_int,8,,,arrow_frame,Continue-arrow animation frame,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::arrow_frame (#441);source:BATTLE/BATTLE.PRG/battleUi.h:97
+T00672.006,T00672,vs_battle_textBox_fields,6,unk0_24,1,u_int,6,,,speaker_texture,Speaker portrait texture; bit 0x20 for none,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::speaker_texture (#441);source:BATTLE/BATTLE.PRG/battleUi.h:98
+T00672.007,T00672,vs_battle_textBox_fields,7,done,0,u_int,1,,,done,Set when the text has finished,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::done (#441);source:BATTLE/BATTLE.PRG/battleUi.h:99
+T00672.008,T00672,vs_battle_textBox_fields,8,unk0_31,1,u_int,1,,,frozen,Tested first each update; meaning not established; not used by native code; kept for the original layout,med,native:Menu/Framework/TextBoxes.hpp PackedTextBoxFlags::frozen (#441);source:BATTLE/BATTLE.PRG/battleUi.h:100
 T00673.000,T00673,vs_battle_uiAccessory,0,accessory,0,vs_battle_uiEquipment,,,,accessory,Accessory part stats,med,source:146C.c:1084;use cited by sanity pass;source:146C.h:414
 T00673.001,T00673,vs_battle_uiAccessory,1,currentStr,0,short,,,,current_strength,Strength contribution,med,source:146C.c:1086;use cited by sanity pass;source:146C.h:415;renamed from currentStr (#441)
 T00673.002,T00673,vs_battle_uiAccessory,2,currentInt,0,short,,,,current_intelligence,Intelligence contribution,med,source:146C.c:1087;use cited by sanity pass;source:146C.h:416;renamed from currentInt (#441)

@@ -29,7 +29,7 @@
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLive.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/Inventory/InventoryTerminalLive.hpp"
 #include "Menu/Inventory/ItemDetailLiveSupport.hpp"
 #include "Menu/Loot/LootPolicies.hpp"
@@ -59,7 +59,7 @@ constexpr std::size_t kActionTextBase = 4;
 constexpr int kDiscardSoundGroup = 0x7E;
 constexpr int kDiscardSound = 0x1C;
 // vs_mainMenu_initInformationTextBox(1).
-constexpr auto kCautionHeader = static_cast<enum Menu_InformationBoxHeader>(1);
+constexpr auto kCautionHeader = InformationHeader::kCaution;
 
 std::uint64_t g_refusals = 0;
 

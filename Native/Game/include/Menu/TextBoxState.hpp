@@ -11,7 +11,7 @@
 // 5BF94.c): the text-box consumer ABI. Eight boxes are drawn by
 // UpdateTextBoxes; these functions open, fill, select, anchor and
 // dismiss them without reaching global state (TextBoxStateLive.hpp binds
-// them to Menu_textBoxes and Menu_textBoxSelector).
+// them to textBoxes and textBoxSelector).
 namespace VS::Menu {
 inline constexpr std::size_t kTextBoxCount = 8;
 // The information box (kind 4) the menus share.
@@ -25,6 +25,15 @@ inline constexpr std::uint8_t kSelectedChoiceBrightness = 0x80;
 inline constexpr std::uint8_t kOtherChoiceBrightness = 0x40;
 // Anchor presets addressable by the script's 4-bit preset field.
 inline constexpr std::size_t kTextAnchorPresetCount = 16;
+
+// decomp: informationTextBoxHeader (src/BATTLE/BATTLE.PRG/battleUi.h:188):
+// the header an information box (kInformationTextBox) draws above its text.
+enum class InformationHeader : std::uint8_t {
+  kNone = 0,
+  kCaution = 1,
+  kInformation = 2,
+  kCheck = 3,
+};
 
 // The box kinds UpdateTextBoxes draws (5BF94.c:3936) and the two
 // aliases InitTextBox rewrites to a shaped frame.

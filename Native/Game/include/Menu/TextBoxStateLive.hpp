@@ -4,11 +4,11 @@
 #include <cstddef>
 
 #include "Legacy/Psx.h"
-#include "Menu/Framework/TextBoxes.h"
+#include "Menu/Framework/TextBoxes.hpp"
 #include "Menu/TextBoxState.hpp"
 
 namespace VS::Menu {
-// Fresh value views of Menu_textBoxes and Menu_textBoxSelector. Indexes past
+// Fresh value views of textBoxes and textBoxSelector. Indexes past
 // the eight boxes are refused by the callers below, never read.
 [[nodiscard]] TextBox ReadLiveTextBox(std::size_t index);
 void WriteLiveTextBox(std::size_t index, const TextBox& box);
@@ -22,13 +22,11 @@ void WriteLiveTextBoxSelector(const TextBoxSelector& selector);
 // them; a corrupt selector logs, restarts and returns 0.
 int SetLiveTextBoxText(int box_id, char* text);
 int SelectLiveTextBoxChoice(u_char box_mask);
-void InitLiveInformationTextBox(enum Menu_InformationBoxHeader header);
+void InitLiveInformationTextBox(InformationHeader header);
 int DismissAllLiveTextBoxes();
-Menu_TextBoxState* LiveTextBox(int id);
-Menu_TextAnchorWord LiveTextBoxAnchor(int anchor_preset_index,
-                                      int orientation_flags,
-                                      int text_column_count,
-                                      int text_line_count);
+TextBoxState* LiveTextBox(int id);
+TextAnchor LiveTextBoxAnchor(int anchor_preset_index, int orientation_flags,
+                             int text_column_count, int text_line_count);
 void InitLiveTextBox(int id, int flags, int x, int y, int chars_per_line,
                      int line_count, int center_x, int center_y);
 int DismissLiveTextBox(int id);

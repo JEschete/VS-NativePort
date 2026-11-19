@@ -493,14 +493,14 @@ struct LiveTopicFixture {
 struct LivePageFixture {
   int* saved_help_text = manual::helpText;
   int saved_scroll = manual::scrollPosition;
-  Menu_TextBoxState saved_box = *VS::Menu::LiveTextBox(0);
+  VS::Menu::TextBoxState saved_box = *VS::Menu::LiveTextBox(0);
   alignas(VS::Core::Memory::kHeapUnitBytes)
       std::array<std::byte, std::size_t{16} * 1024> arena{};
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
 
   LivePageFixture() {
     manual::scrollPosition = 0;
-    VS::Menu::LiveTextBox(0)->flags.speakerTexture = 32;
+    VS::Menu::LiveTextBox(0)->flags.speaker_texture = 32;
   }
   LivePageFixture(const LivePageFixture&) = delete;
   LivePageFixture& operator=(const LivePageFixture&) = delete;
@@ -521,7 +521,7 @@ struct LivePageFixture {
   }
 
   static std::vector<std::uint8_t> BoxText(std::size_t length) {
-    const char* text = VS::Menu::LiveTextBox(0)->string;
+    const char* text = VS::Menu::LiveTextBox(0)->text;
     if (text == nullptr) {
       return {};
     }
@@ -612,12 +612,12 @@ TEST_CASE("Live page text refuses help text outside the game heap",
   LivePageFixture fixture;
   std::vector<std::uint8_t> help = HelpText(Lines(23));
   manual::helpText = reinterpret_cast<int*>(help.data());
-  const char* before = VS::Menu::LiveTextBox(0)->string;
+  const char* before = VS::Menu::LiveTextBox(0)->text;
   const auto refusals = manual::LiveTopicRefusalCount();
   manual::LiveCopyPageText();
   CHECK(manual::LiveLastPageLineOffset() == 0);
   CHECK(manual::LiveTopicRefusalCount() == refusals + 2);
-  CHECK(VS::Menu::LiveTextBox(0)->string == before);
+  CHECK(VS::Menu::LiveTextBox(0)->text == before);
 }
 
 TEST_CASE("Live page text refuses a negative scroll position untouched",
@@ -626,9 +626,9 @@ TEST_CASE("Live page text refuses a negative scroll position untouched",
   fixture.Load(HelpText(Lines(23)));
   CHECK(manual::LiveLastPageLineOffset() == 20);
   manual::scrollPosition = -10;
-  const char* before = VS::Menu::LiveTextBox(0)->string;
+  const char* before = VS::Menu::LiveTextBox(0)->text;
   const auto refusals = manual::LiveTopicRefusalCount();
   manual::LiveCopyPageText();
   CHECK(manual::LiveTopicRefusalCount() == refusals + 1);
-  CHECK(VS::Menu::LiveTextBox(0)->string == before);
+  CHECK(VS::Menu::LiveTextBox(0)->text == before);
 }

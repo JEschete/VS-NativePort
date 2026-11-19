@@ -50,7 +50,7 @@
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Render/Display.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
@@ -114,14 +114,15 @@ class LiveSessionHost final : public SessionHost {
   void InvalidateSceneUi() override {
     CleanupMenuOwners();
     Event::ReleaseLiveScriptDialogText();
-    std::memset(Menu_textBoxes, 0, sizeof Menu_textBoxes);
-    std::memset(&Menu_textBoxSelector, 0, sizeof Menu_textBoxSelector);
+    std::memset(VS::Menu::textBoxes, 0, sizeof VS::Menu::textBoxes);
+    std::memset(&VS::Menu::textBoxSelector, 0,
+                sizeof VS::Menu::textBoxSelector);
     std::memset(&Battle_stringContext, 0, sizeof Battle_stringContext);
     std::memset(Event_isTextBoxAwaitingClose, 0,
                 sizeof Event_isTextBoxAwaitingClose);
-    Menu_sceneNotificationBuffer = nullptr;
-    Menu_sceneNotificationTimer = 0;
-    Menu_sceneNotificationTimed = 0;
+    VS::Menu::sceneNotificationBuffer = nullptr;
+    VS::Menu::sceneNotificationTimer = 0;
+    VS::Menu::sceneNotificationTimed = 0;
     Menu::BattleAbilities::ResetLiveAbilityTerminalColdState();
     Menu::Loot::ResetLootTerminalSession();
     Menu::Inventory::ResetInventoryTerminalSession();

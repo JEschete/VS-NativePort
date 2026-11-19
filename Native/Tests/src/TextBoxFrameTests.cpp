@@ -12,7 +12,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Event/ScriptVm.h"
 #include "Event/ScriptVmLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFrames.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Menu/TextBoxStateLive.hpp"
@@ -100,21 +100,21 @@ const Triangle kTriangle = {3, 0, 3, 1, 0, 0, 255, 0, 0, 255, 0, 1, 2, 255};
 class LiveFrameFixture {
  public:
   LiveFrameFixture()
-      : saved_box_(Menu_textBoxes[0]),
-        saved_table_(Menu_activeTextBoxOrderingTable),
+      : saved_box_(VS::Menu::textBoxes[0]),
+        saved_table_(VS::Menu::activeTextBoxOrderingTable),
         saved_frame_(VS::Render::FrameScratchpad()),
         slot_(VS::Render::frameBuf & 1),
         saved_buffer_(VS::Render::legacyPrimitiveBuffers[slot_]),
         storage_(kPrimitiveWords) {
     std::ranges::copy(Event_textBoxFrameStyles, saved_styles_.begin());
-    Menu_activeTextBoxOrderingTable = ordering_.data();
+    VS::Menu::activeTextBoxOrderingTable = ordering_.data();
     VS::Render::legacyPrimitiveBuffers[slot_] = storage_.data();
   }
 
   ~LiveFrameFixture() {
-    Menu_textBoxes[0] = saved_box_;
+    VS::Menu::textBoxes[0] = saved_box_;
     std::ranges::copy(saved_styles_, Event_textBoxFrameStyles);
-    Menu_activeTextBoxOrderingTable = saved_table_;
+    VS::Menu::activeTextBoxOrderingTable = saved_table_;
     VS::Render::FrameScratchpad() = saved_frame_;
     VS::Render::legacyPrimitiveBuffers[slot_] = saved_buffer_;
   }
@@ -133,15 +133,15 @@ class LiveFrameFixture {
   std::vector<std::vector<std::uint32_t>> DrawSource(
       const std::uint8_t* source, const VS::Menu::FrameRequest& request,
       unsigned style = 0, std::size_t capacity_words = kPrimitiveWords) {
-    Menu_textBoxes[0] = {};
-    auto& box = Menu_textBoxes[0];
-    box.flags.frameShape = style;
-    box.flags.framePart = static_cast<unsigned>(request.part);
+    VS::Menu::textBoxes[0] = {};
+    auto& box = VS::Menu::textBoxes[0];
+    box.flags.frame_shape = style;
+    box.flags.frame_part = static_cast<unsigned>(request.part);
     box.flags.alignment = request.alignment;
-    box.frameX = static_cast<std::int16_t>(request.x);
-    box.frameY = static_cast<std::int16_t>(request.y);
-    box.frameWidth = static_cast<std::int16_t>(request.width);
-    box.frameHeight = static_cast<std::int16_t>(request.height);
+    box.frame_x = static_cast<std::int16_t>(request.x);
+    box.frame_y = static_cast<std::int16_t>(request.y);
+    box.frame_width = static_cast<std::int16_t>(request.width);
+    box.frame_height = static_cast<std::int16_t>(request.height);
     box.brightness = request.brightness;
     Event_textBoxFrameStyles[style] = const_cast<std::uint8_t*>(source);
     const auto* start = BeginDraw(capacity_words);
@@ -189,9 +189,9 @@ class LiveFrameFixture {
   static constexpr std::size_t kArenaBytes = 4096;
   std::array<std::byte, kArenaBytes> arena_{};
   VS::Core::Memory::ScopedLiveGameHeap heap_{arena_};
-  Menu_TextBoxState saved_box_;
+  VS::Menu::TextBoxState saved_box_;
   std::array<unsigned char*, 16> saved_styles_{};
-  decltype(Menu_activeTextBoxOrderingTable) saved_table_;
+  decltype(VS::Menu::activeTextBoxOrderingTable) saved_table_;
   VS::Render::FrameScratch saved_frame_;
   int slot_;
   void* saved_buffer_;

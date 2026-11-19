@@ -191,7 +191,7 @@ H0189,header,Native/Game/src/Battle/Sphere.h,generated,yes,pragma-once,0,0,0,0,0
 H0190,header,Native/Game/src/Battle/StatusEffects.h,generated,yes,pragma-once,0,0,0,0,0,6,14,0,0,remaining,
 H0191,header,Native/Game/src/Battle/TargetVolume.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
 H0192,header,Native/Game/src/Battle/TargetingState.h,generated,yes,pragma-once,0,0,0,0,0,0,22,0,0,remaining,
-H0193,header,Native/Game/src/Battle/TextBoxes.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
+H0193,header,Native/Game/src/Battle/TextBoxes.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0194,header,Native/Game/src/Battle/ValueLabels.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
 H0195,header,Native/Game/src/Boot/GameLoop.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0196,header,Native/Game/src/Boot/GameplayInit.h,generated,yes,split,0,0,0,0,0,0,2,3,0,retired,deleted: G00245 G00257 are write-only (#347)
@@ -281,7 +281,7 @@ H0279,header,Native/Game/src/Ending/Credits/StaffRoll.hpp,generated,no,pragma-on
 H0280,header,Native/Game/src/Ending/Results.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0281,header,Native/Game/src/Event/Actors.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
 H0282,header,Native/Game/src/Event/Camera.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0283,header,Native/Game/src/Event/Dialog.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
+H0283,header,Native/Game/src/Event/Dialog.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: no file included it; Event_DialogPlacement duplicated VS::Event::DialogPlacement (ScriptDialogCommands.hpp); TYPE T00620 retired (#441)
 H0284,header,Native/Game/src/Event/Interpolation.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0285,header,Native/Game/src/Event/InterpolationCurveLive.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0286,header,Native/Game/src/Event/Playback.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
@@ -376,7 +376,7 @@ H0374,header,Native/Game/src/Menu/Framework/MenuItems.h,generated,yes,pragma-onc
 H0375,header,Native/Game/src/Menu/Framework/MenuMemory.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,"deleted: Menu_Framework_MenuMemory gave way to the native MenuMemory (Framework.hpp), whose uint8 fields restore the original's unsigned char reads and whose named members replace the opaque spans; the inventory and container cursor memories share CategoryCursorMemory with InventoryTerminal; TYPE T00261 re-pointed (#441)"
 H0376,header,Native/Game/src/Menu/Framework/MenuRows.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,"deleted: Menu_Framework_ItemText duplicated VS::Menu::Framework::ItemText in Menu/Framework/Framework.hpp, which now asserts the record's 0x80 layout; TYPE T00313 re-pointed (#441)"
 H0377,header,Native/Game/src/Menu/Framework/Menus.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0378,header,Native/Game/src/Menu/Framework/TextBoxes.h,generated,yes,pragma-once,0,0,0,0,0,0,7,0,0,remaining,
+H0378,header,Native/Game/src/Menu/Framework/TextBoxes.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0379,header,Native/Game/src/Menu/Inventory/Inventory.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0380,header,Native/Game/src/Menu/Inventory/ItemDetailLiveSupport.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0381,header,Native/Game/src/Menu/Inventory/ItemList.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
@@ -397,7 +397,7 @@ H0395,header,Native/Game/src/Menu/Score/Records.hpp,generated,no,pragma-once,0,0
 H0396,header,Native/Game/src/Menu/Score/ScoreScreen.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0397,header,Native/Game/src/Menu/Status/ActorStatus.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0398,header,Native/Game/src/Menu/Status/TerminalControllersLiveInternal.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0399,header,Native/Game/src/Menu/TextBox.h,generated,yes,pragma-once,0,0,0,0,0,0,8,0,0,remaining,
+H0399,header,Native/Game/src/Menu/TextBox.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0400,header,Native/Game/src/State/Ashley.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0401,header,Native/Game/src/State/Location.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0402,header,Native/Game/src/State/PlayTime.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,

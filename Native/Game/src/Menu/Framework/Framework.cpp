@@ -694,7 +694,7 @@ constexpr int kRestrictionStrings = 12;
 // The action restrictions: opened by an event, and the container save.
 constexpr std::int32_t kOpenedByEvent = 0x200;
 constexpr std::int32_t kContainerSave = 0x400;
-// Menu_textBoxes[7].state.
+// textBoxes[7].state.
 constexpr std::uint8_t kInformationBoxShown = 11;
 constexpr std::uint8_t kInformationBoxHidden = 0;
 constexpr int kFadeLimit = 16;

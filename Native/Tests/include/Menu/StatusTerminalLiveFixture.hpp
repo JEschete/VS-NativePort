@@ -262,7 +262,7 @@ struct Fixture {
   ValueRestore<u_short*> saved_menu12{VS::Menu::Framework::menu12Text};
   ValueRestore<VS::Menu::Framework::MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
-  ValueRestore<Menu_StringContext> saved_context{Battle_stringContext};
+  ValueRestore<VS::Menu::StringContext> saved_context{Battle_stringContext};
   ArrayRestore<char, VS::Menu::Framework::kSubmenuStateCount> saved_submenus{
       VS::Menu::Framework::submenuStates};
   ArrayRestore<Battle_Actor*, std::size(Battle_actors)> saved_actors{

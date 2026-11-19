@@ -507,10 +507,10 @@ class LiveGazetteHost final : public GazetteHost {
     if (box == nullptr) return !required;
     box->x = Core::Math::WrapSigned16(static_cast<std::uint32_t>(box->x + dx));
     box->y = Core::Math::WrapSigned16(static_cast<std::uint32_t>(box->y + dy));
-    box->xIndent =
-        Core::Math::WrapSigned16(static_cast<std::uint32_t>(box->xIndent + dx));
-    box->yIndent =
-        Core::Math::WrapSigned16(static_cast<std::uint32_t>(box->yIndent + dy));
+    box->x_indent = Core::Math::WrapSigned16(
+        static_cast<std::uint32_t>(box->x_indent + dx));
+    box->y_indent = Core::Math::WrapSigned16(
+        static_cast<std::uint32_t>(box->y_indent + dy));
     return true;
   }
   void DismissRankBox() override {

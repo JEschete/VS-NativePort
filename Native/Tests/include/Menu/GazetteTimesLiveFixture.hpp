@@ -25,7 +25,7 @@
 #include "Menu/Score/GazetteTimes.hpp"
 #include "Menu/Score/GazetteTimesLive.hpp"
 #include "Menu/Score/Records.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Render/Display.hpp"
 #include "Render/Frame.hpp"
 #include "Render/GameFontLive.hpp"
@@ -81,7 +81,7 @@ inline auto MutableOwners() {
                     BytesOf(VS::Menu::Framework::menuMemory),
                     BytesOf(VS::Menu::Framework::cursorColor),
                     BytesOf(VS::Menu::Framework::hideMenu),
-                    BytesOf(Menu_textBoxes),
+                    BytesOf(VS::Menu::textBoxes),
                     BytesOf(VS::Render::FrameScratchpad()),
                     BytesOf(VS::Render::legacyPrimitiveBuffers),
                     BytesOf(VS::Render::legacyOrderingTables),
@@ -272,7 +272,7 @@ class Fixture {
     VS::Menu::Framework::menuItems = rows.data();
     VS::Menu::Framework::cursorColor = 0;
     VS::Menu::Framework::hideMenu = 0;
-    Menu_textBoxes[kInformationBox] = {};
+    VS::Menu::textBoxes[kInformationBox] = {};
     Battle_unusedMenu9CursorMemory.gazette_page = 0;
     std::ranges::fill(score::gazetteRows, score::ListRow{});
     for (auto& trial : VS::State::scoreData.boss_time_trial_scores) {
@@ -435,7 +435,7 @@ class Fixture {
 
   [[nodiscard]] static EncodedText InformationText() {
     const auto* text = reinterpret_cast<const std::uint8_t*>(
-        Menu_textBoxes[kInformationBox].string);
+        VS::Menu::textBoxes[kInformationBox].text);
     if (text == nullptr) return {};
     return TerminatedText(
         std::span(text, fw::kInformationMessageBytes).subspan(2));

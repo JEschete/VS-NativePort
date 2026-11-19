@@ -1,7 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Legacy/Psx.h"
 #include "Battle/TargetingState.h"
-#include "Menu/Framework/TextBoxes.h"
+
+#include "Legacy/Psx.h"
+#include "Menu/Framework/TextBoxes.hpp"
 
 // decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
 char Battle_categoryNeedsTargetSelection[96]; /* contents: module image (ModuleData.cpp) */
@@ -64,5 +65,4 @@ u_char Battle_firstColumnGroupCount;
 u_char Battle_targetColumnTopOffset;
 
 // decomp: vs_battle_stringContext (vs_battle_stringContext@BATTLE/BATTLE.PRG)
-Menu_StringContext Battle_stringContext;
-
+VS::Menu::StringContext Battle_stringContext;

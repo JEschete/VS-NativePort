@@ -28,7 +28,7 @@
 #include "Menu/Status/ActorStatus.hpp"
 #include "Menu/Status/LimbControllersLive.hpp"
 #include "Menu/Status/TerminalControllersLive.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "Menu/TextBoxFramesLive.hpp"
 #include "Render/Display.hpp"
 #include "Render/EncodedTextLive.hpp"
@@ -46,7 +46,7 @@ static_assert(sizeof VS::Menu::textBoxOrderingTables == 102 * sizeof(u_long),
               "three textbox ordering buffers");
 
 int Tests_EncodedTextFormatting(void) {
-  const Menu_StringContext saved = Battle_stringContext;
+  const VS::Menu::StringContext saved = Battle_stringContext;
   char nested[] = {10, 0, VS::Core::TextCode::kPrintDecimal, 1,
                    VS::Core::TextCode::kTerminator};
   char format[] = {
@@ -135,15 +135,15 @@ int Tests_ScaledDialogueGlyphs(void) {
   const VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   const int saved_frame_index = VS::Render::frameBuf;
-  u_long* saved_ordering = Menu_activeTextBoxOrderingTable;
+  u_long* saved_ordering = VS::Menu::activeTextBoxOrderingTable;
   const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   const char saved_width = VS::Render::variableFontGlyphWidths[5];
   const char saved_space_width = VS::Render::variableFontGlyphWidths[0x8F];
-  const Menu_TextBoxState saved_box = Menu_textBoxes[2];
+  const VS::Menu::TextBoxState saved_box = VS::Menu::textBoxes[2];
   u_char* saved_shape = Event_textBoxFrameStyles[0];
   u_long ordering[34];
   ClearOTag(ordering, 34);
-  Menu_activeTextBoxOrderingTable = ordering;
+  VS::Menu::activeTextBoxOrderingTable = ordering;
   VS::Render::legacyPrimitiveBuffers[0] = memory + 8;
   VS::Render::frameBuf = 0;
   VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
@@ -173,17 +173,17 @@ int Tests_ScaledDialogueGlyphs(void) {
                                           target) == 23 << 16 &&
            VS::Render::FrameScratchpad().primitive_cursor == end;
   // The text box drawers draw only the dialogue text boxes.
-  Menu_TextBoxState& box = Menu_textBoxes[2];
+  VS::Menu::TextBoxState& box = VS::Menu::textBoxes[2];
   memset(&box, 0, sizeof box);
   char text[] = {5, static_cast<char>(0x8F), 5, static_cast<char>(0xE8),
                  5, static_cast<char>(0xE7)};
   box.flags.kind = 4;
-  box.string = text;
+  box.text = text;
   passed = passed && VS::Render::MeasureLiveEncodedTextLine(text) == 3;
   box.speed = 1;
   box.brightness = 128;
-  box.frameX = 10;
-  box.frameY = 20;
+  box.frame_x = 10;
+  box.frame_y = 20;
   VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   ClearOTag(ordering, 34);
   VS::Render::DrawLiveScaledTextBoxText(&box, 1 << 16);
@@ -194,18 +194,18 @@ int Tests_ScaledDialogueGlyphs(void) {
   VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   ClearOTag(ordering, 34);
   box.speed = 100;
-  box.opaque2C = 1;
+  box.speaker_pause = 1;
   VS::Render::DrawLiveProgressiveTextBoxText(&box);
-  passed = passed && box.flags.done && box.prevChunksPrinted == 4 &&
+  passed = passed && box.flags.done && box.previous_chunks == 4 &&
            VS::Render::FrameScratchpad().primitive_cursor ==
                memory + 8 + 3 * 6 * sizeof(u_long);
   unsigned shape[] = {0x01040004, 0x00FF0000, 0xFFFFFF00, 0x03020100};
-  memset(&Menu_textBoxes[2], 0, sizeof Menu_textBoxes[2]);
-  Menu_textBoxes[2].frameX = 10;
-  Menu_textBoxes[2].frameY = 20;
-  Menu_textBoxes[2].frameWidth = 64;
-  Menu_textBoxes[2].frameHeight = 64;
-  Menu_textBoxes[2].brightness = 128;
+  memset(&VS::Menu::textBoxes[2], 0, sizeof VS::Menu::textBoxes[2]);
+  VS::Menu::textBoxes[2].frame_x = 10;
+  VS::Menu::textBoxes[2].frame_y = 20;
+  VS::Menu::textBoxes[2].frame_width = 64;
+  VS::Menu::textBoxes[2].frame_height = 64;
+  VS::Menu::textBoxes[2].brightness = 128;
   VS::Render::FrameScratchpad().primitive_cursor = memory + 8;
   ClearOTag(ordering, 34);
   passed = DrawTrackedFrameFixture(2, shape, sizeof shape) && passed;
@@ -213,12 +213,12 @@ int Tests_ScaledDialogueGlyphs(void) {
            nextPrim(&ordering[9]) != nullptr &&
            nextPrim(&ordering[10]) != nullptr &&
            LegacyGpu_WalkList(ordering) > 34;
-  Menu_textBoxes[2] = saved_box;
+  VS::Menu::textBoxes[2] = saved_box;
   Event_textBoxFrameStyles[0] = saved_shape;
   VS::Render::FrameScratchpad() = saved_frame;
   VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
   VS::Render::frameBuf = saved_frame_index;
-  Menu_activeTextBoxOrderingTable = saved_ordering;
+  VS::Menu::activeTextBoxOrderingTable = saved_ordering;
   VS::Render::LiveFontStyle() = saved_style;
   VS::Render::variableFontGlyphWidths[5] = saved_width;
   VS::Render::variableFontGlyphWidths[0x8F] = saved_space_width;

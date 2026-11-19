@@ -14,7 +14,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Sounds.hpp"
-#include "Menu/TextBox.h"
+#include "Menu/TextBox.hpp"
 #include "State/StateFlags.hpp"
 
 namespace VS::Menu {
@@ -22,11 +22,11 @@ namespace {
 using LiveTextBoxes = std::array<TextBox, kTextBoxCount>;
 using LiveAnchorPresets = std::array<TextAnchorPreset, kTextAnchorPresetCount>;
 
-static_assert(std::size(Menu_textBoxes) == kTextBoxCount);
-static_assert(std::size(Menu_textBoxSelector.order) == kTextBoxCount);
+static_assert(std::size(textBoxes) == kTextBoxCount);
+static_assert(std::size(textBoxSelector.order) == kTextBoxCount);
 // The script's 4-bit preset reaches past D_800EC284's nine pairs into the
 // following module data, which the native table holds as the same bytes.
-static_assert(std::size(Menu_textBoxAnchors) >= kTextAnchorPresetCount);
+static_assert(std::size(textBoxAnchors) == kTextAnchorPresetCount);
 
 class LiveTextBoxHost final : public TextBoxHost {
  public:
@@ -59,11 +59,10 @@ void WriteLiveTextBoxes(const LiveTextBoxes& boxes) {
 LiveAnchorPresets ReadLiveAnchorPresets() {
   LiveAnchorPresets presets{};
   for (std::size_t i = 0; i < kTextAnchorPresetCount; ++i) {
-    const auto& pair = std::span(Menu_textBoxAnchors)[i];
+    const auto& pair = std::span(textBoxAnchors)[i];
     presets[i] = {
-        .primary = TextAnchor::FromWord(std::bit_cast<std::uint32_t>(pair[0])),
-        .secondary =
-            TextAnchor::FromWord(std::bit_cast<std::uint32_t>(pair[1])),
+        .primary = TextAnchor::FromWord(pair[0]),
+        .secondary = TextAnchor::FromWord(pair[1]),
     };
   }
   return presets;
@@ -71,81 +70,79 @@ LiveAnchorPresets ReadLiveAnchorPresets() {
 }  // namespace
 
 TextBox ReadLiveTextBox(std::size_t index) {
-  const Menu_TextBoxState& live = std::span(Menu_textBoxes)[index];
+  const TextBoxState& live = std::span(textBoxes)[index];
   return {
       .flags = TextBoxFlags::FromWord(std::bit_cast<std::uint32_t>(live.flags)),
       .opaque4 = live.opaque4,
       .opaque6 = live.opaque6,
-      .text = live.string,
+      .text = live.text,
       .speed = live.speed,
-      .previous_chunks = live.prevChunksPrinted,
-      .x_indent = live.xIndent,
-      .y_indent = live.yIndent,
+      .previous_chunks = live.previous_chunks,
+      .x_indent = live.x_indent,
+      .y_indent = live.y_indent,
       .x = live.x,
       .y = live.y,
-      .center_x = live.centerX,
-      .center_y = live.centerY,
+      .center_x = live.center_x,
+      .center_y = live.center_y,
       .state = live.state,
       .brightness = live.brightness,
-      .reserved1f = live.reserved1F,
-      .chars_per_line = static_cast<std::int8_t>(live.charsPerLine),
-      .line_count = static_cast<std::int8_t>(live.lineCount),
-      .open_duration = static_cast<std::int8_t>(live.openDuration),
-      .reserved23 = static_cast<std::int8_t>(live.reserved23),
-      .frame_x = live.frameX,
-      .frame_y = live.frameY,
-      .frame_width = live.frameWidth,
-      .frame_height = live.frameHeight,
-      .speaker_pause = live.opaque2C,
-      .speaker_animation = live.opaque2E,
+      .reserved1f = live.reserved1f,
+      .chars_per_line = live.chars_per_line,
+      .line_count = live.line_count,
+      .open_duration = live.open_duration,
+      .reserved23 = live.reserved23,
+      .frame_x = live.frame_x,
+      .frame_y = live.frame_y,
+      .frame_width = live.frame_width,
+      .frame_height = live.frame_height,
+      .speaker_pause = live.speaker_pause,
+      .speaker_animation = live.speaker_animation,
   };
 }
 
 void WriteLiveTextBox(std::size_t index, const TextBox& box) {
-  Menu_TextBoxState& live = std::span(Menu_textBoxes)[index];
-  live.flags = std::bit_cast<Battle_TextBoxFlags>(box.flags.Word());
+  TextBoxState& live = std::span(textBoxes)[index];
+  live.flags = std::bit_cast<PackedTextBoxFlags>(box.flags.Word());
   live.opaque4 = box.opaque4;
   live.opaque6 = box.opaque6;
   // The box only borrows the caller's (mutable, original-signature) string.
-  live.string =  // NOLINT(build/include_what_you_use)
-      const_cast<char*>(box.text);
+  live.text = const_cast<char*>(box.text);
   live.speed = box.speed;
-  live.prevChunksPrinted = box.previous_chunks;
-  live.xIndent = box.x_indent;
-  live.yIndent = box.y_indent;
+  live.previous_chunks = box.previous_chunks;
+  live.x_indent = box.x_indent;
+  live.y_indent = box.y_indent;
   live.x = box.x;
   live.y = box.y;
-  live.centerX = box.center_x;
-  live.centerY = box.center_y;
+  live.center_x = box.center_x;
+  live.center_y = box.center_y;
   live.state = box.state;
   live.brightness = box.brightness;
-  live.reserved1F = box.reserved1f;
-  live.charsPerLine = static_cast<char>(box.chars_per_line);
-  live.lineCount = static_cast<char>(box.line_count);
-  live.openDuration = static_cast<char>(box.open_duration);
-  live.reserved23 = static_cast<char>(box.reserved23);
-  live.frameX = box.frame_x;
-  live.frameY = box.frame_y;
-  live.frameWidth = box.frame_width;
-  live.frameHeight = box.frame_height;
-  live.opaque2C = box.speaker_pause;
-  live.opaque2E = box.speaker_animation;
+  live.reserved1f = box.reserved1f;
+  live.chars_per_line = box.chars_per_line;
+  live.line_count = box.line_count;
+  live.open_duration = box.open_duration;
+  live.reserved23 = box.reserved23;
+  live.frame_x = box.frame_x;
+  live.frame_y = box.frame_y;
+  live.frame_width = box.frame_width;
+  live.frame_height = box.frame_height;
+  live.speaker_pause = box.speaker_pause;
+  live.speaker_animation = box.speaker_animation;
 }
 
 TextBoxSelector ReadLiveTextBoxSelector() {
   TextBoxSelector selector{
-      .selected = Menu_textBoxSelector.selectedIndex,
-      .count = Menu_textBoxSelector.count,
+      .selected = textBoxSelector.selected_index,
+      .count = textBoxSelector.count,
   };
-  std::ranges::copy(Menu_textBoxSelector.order, selector.order.begin());
+  std::ranges::copy(textBoxSelector.order, selector.order.begin());
   return selector;
 }
 
 void WriteLiveTextBoxSelector(const TextBoxSelector& selector) {
-  std::ranges::copy(selector.order,
-                    std::span(Menu_textBoxSelector.order).begin());
-  Menu_textBoxSelector.selectedIndex = selector.selected;
-  Menu_textBoxSelector.count = selector.count;
+  std::ranges::copy(selector.order, std::span(textBoxSelector.order).begin());
+  textBoxSelector.selected_index = selector.selected;
+  textBoxSelector.count = selector.count;
 }
 
 // decomp: F01329 vs_battle_setTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:1536).
@@ -188,7 +185,7 @@ int SelectLiveTextBoxChoice(u_char box_mask) {
 
 // decomp: F01343 vs_battle_initInformationTextBox
 // (src/BATTLE/BATTLE.PRG/5BF94.c:2653).
-void InitLiveInformationTextBox(enum Menu_InformationBoxHeader header) {
+void InitLiveInformationTextBox(InformationHeader header) {
   TextBox box = ReadLiveTextBox(kInformationTextBox);
   InitTextBox(box, InformationTextBoxLayout(static_cast<std::int32_t>(header)));
   WriteLiveTextBox(kInformationTextBox, box);
@@ -204,17 +201,15 @@ int DismissAllLiveTextBoxes() {
 }
 
 // decomp: F01409 vs_battle_getTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4544).
-Menu_TextBoxState* LiveTextBox(int id) {
+TextBoxState* LiveTextBox(int id) {
   const auto index = LiveIndex(id, "TextBox");
   if (!index.has_value()) return nullptr;
-  return &std::span(Menu_textBoxes)[*index];
+  return &std::span(textBoxes)[*index];
 }
 
 // decomp: F01410 func_800CCE10 (src/BATTLE/BATTLE.PRG/5BF94.c:4546).
-Menu_TextAnchorWord LiveTextBoxAnchor(int anchor_preset_index,
-                                      int orientation_flags,
-                                      int text_column_count,
-                                      int text_line_count) {
+TextAnchor LiveTextBoxAnchor(int anchor_preset_index, int orientation_flags,
+                             int text_column_count, int text_line_count) {
   const LiveAnchorPresets presets = ReadLiveAnchorPresets();
   const auto anchor = TextBoxAnchor(presets, {.preset = anchor_preset_index,
                                               .orientation = orientation_flags,
@@ -223,9 +218,10 @@ Menu_TextAnchorWord LiveTextBoxAnchor(int anchor_preset_index,
   if (!anchor.has_value()) {
     VS::Core::Warnf("menu", "TextBoxAnchor refused preset %d (presets 0-15)",
                     anchor_preset_index);
-    return std::bit_cast<Menu_TextAnchorWord>(std::uint32_t{0});
+    return {};
   }
-  return std::bit_cast<Menu_TextAnchorWord>(anchor->Word());
+  // The original returns the packed word: 12-bit x and y.
+  return TextAnchor::FromWord(anchor->Word());
 }
 
 // decomp: F01411 vs_battle_initTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4567).
