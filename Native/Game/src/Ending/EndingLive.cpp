@@ -824,29 +824,9 @@ class LiveCreditsHost final : public LiveDisplay<Credits::StaffRollHost> {
 
 void LiveCreditsHost::PublishState() {
   VS::Ending::Credits::hasFinished = state_.has_finished ? 1 : 0;
-  VS::Ending::Credits::isBackgroundFading = state_.is_background_fading ? 1 : 0;
   VS::Ending::Credits::wasSkipRequested = state_.was_skip_requested ? 1 : 0;
-  VS::Ending::Credits::elapsedFrames = state_.elapsed_frames;
-  VS::Ending::Credits::scriptDelayFrames = state_.script_delay_frames;
-  const std::span<std::uint8_t> script(VS::Ending::Credits::scriptBytes);
-  VS::Ending::Credits::scriptCursor =
-      script.subspan(std::min(state_.script_cursor, script.size())).data();
-  VS::Ending::Credits::scrollSpeedFixed8 = state_.scroll_speed_fixed8;
-  VS::Ending::Credits::backgroundBrightness = state_.background_brightness;
-  VS::Ending::Credits::ripplePhaseAngle = state_.ripple.phase_angle;
-  VS::Ending::Credits::rippleScaleFrame = state_.ripple.scale_frame;
-  std::memcpy(VS::Ending::Credits::rippleDistanceGrid,
-              state_.ripple.distance_grid.data(),
-              sizeof VS::Ending::Credits::rippleDistanceGrid);
-  const Credits::IllustrationState& illustration = state_.illustration;
-  VS::Ending::Credits::illustrationBrightness = illustration.brightness;
-  VS::Ending::Credits::illustrationTexturePageX = illustration.texture_page_x;
-  VS::Ending::Credits::illustrationPaletteY = illustration.palette_y;
-  std::ranges::copy(illustration.hold_frames,
+  std::ranges::copy(state_.illustration.hold_frames,
                     std::begin(VS::Ending::Credits::illustrationHoldFrames));
-  VS::Ending::Credits::illustrationDecodePhase =
-      static_cast<std::uint8_t>(state_.decoder.phase);
-  VS::Ending::Credits::decodeBudgetStartTick = state_.decoder.budget_start_tick;
 }
 
 void LiveCreditsHost::BeginIllustrationRead(std::size_t resource) {

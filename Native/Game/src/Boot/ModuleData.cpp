@@ -514,7 +514,6 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"EFFECT/PLG301.BIN", 0x2D28, sizeof Effects_Plg301_closedRingColorFactors, &Effects_Plg301_closedRingColorFactors, sizeof Effects_Plg301_closedRingColorFactors}, // G00786 D_800FC528
     {"ENDING/ENDING.PRG", 0x5BFC, sizeof VS::Ending::Credits::scriptBytes, &VS::Ending::Credits::scriptBytes, sizeof VS::Ending::Credits::scriptBytes}, // G00787 D_8006E3FC
     {"ENDING/ENDING.PRG", 0x777C, sizeof VS::Ending::Credits::glyphWidths, &VS::Ending::Credits::glyphWidths, sizeof VS::Ending::Credits::glyphWidths}, // G00788 _glyphWidths
-    {"ENDING/ENDING.PRG", 0x72F2C, sizeof VS::Ending::Credits::illustrationDecodePhase, &VS::Ending::Credits::illustrationDecodePhase, sizeof VS::Ending::Credits::illustrationDecodePhase}, // G00801 D_800DB72C
     {"ENDING/ENDING.PRG", 0x72FB4, sizeof VS::Ending::Credits::illustrationHoldFrames, &VS::Ending::Credits::illustrationHoldFrames, sizeof VS::Ending::Credits::illustrationHoldFrames}, // G00803 _illustrationTimers
     {"ENDING/ENDING.PRG", 0x72FD4, sizeof VS::Ending::countableRoomBits, &VS::Ending::countableRoomBits, sizeof VS::Ending::countableRoomBits}, // G00804 _countableRooms
     {"ENDING/ENDING.PRG", 0x73014, sizeof VS::Ending::resultAtlasRegions, &VS::Ending::resultAtlasRegions, sizeof VS::Ending::resultAtlasRegions}, // G00805 _disMap

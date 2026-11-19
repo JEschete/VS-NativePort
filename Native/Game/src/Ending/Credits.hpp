@@ -41,16 +41,8 @@ static_assert(sizeof(TimHeader) == kTimHeaderBytes);
 extern std::uint8_t scriptBytes[kScriptBytes];
 // decomp: _glyphWidths (_glyphWidths@ENDING/ENDING.PRG)
 extern std::uint8_t glyphWidths[kGlyphWidthSpanBytes];
-// decomp: D_800DB72C (D_800DB72C@ENDING/ENDING.PRG)
-extern std::uint8_t illustrationDecodePhase;
 // decomp: D_800DB7B0 (D_800DB7B0@ENDING/ENDING.PRG)
 extern TimHeader* illustrationTimWorkspace;
-// decomp: D_800DBB6A (D_800DBB6A@ENDING/ENDING.PRG)
-extern std::int16_t illustrationTexturePageX;
-// decomp: D_800DBB6C (D_800DBB6C@ENDING/ENDING.PRG)
-extern std::uint16_t illustrationPaletteY;
-// decomp: D_800DC19A (D_800DC19A@ENDING/ENDING.PRG)
-extern std::int16_t decodeBudgetStartTick;
 // decomp: D_800DC1A8 (D_800DC1A8@ENDING/ENDING.PRG)
 extern void* illustrationResources[kIllustrationCount];
 // decomp: _illustLbas (_illustLbas@ENDING/ENDING.PRG)

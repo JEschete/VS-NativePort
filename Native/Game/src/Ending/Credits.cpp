@@ -8,20 +8,8 @@ std::uint8_t VS::Ending::Credits::scriptBytes[VS::Ending::Credits::kScriptBytes]
 // decomp: _glyphWidths (_glyphWidths@ENDING/ENDING.PRG)
 std::uint8_t VS::Ending::Credits::glyphWidths[VS::Ending::Credits::kGlyphWidthSpanBytes]; /* contents: module image (ModuleData.cpp) */
 
-// decomp: D_800DB72C (D_800DB72C@ENDING/ENDING.PRG)
-std::uint8_t VS::Ending::Credits::illustrationDecodePhase; /* contents: module image (ModuleData.cpp) */
-
 // decomp: D_800DB7B0 (D_800DB7B0@ENDING/ENDING.PRG)
 VS::Ending::Credits::TimHeader* VS::Ending::Credits::illustrationTimWorkspace;
-
-// decomp: D_800DBB6A (D_800DBB6A@ENDING/ENDING.PRG)
-std::int16_t VS::Ending::Credits::illustrationTexturePageX;
-
-// decomp: D_800DBB6C (D_800DBB6C@ENDING/ENDING.PRG)
-std::uint16_t VS::Ending::Credits::illustrationPaletteY;
-
-// decomp: D_800DC19A (D_800DC19A@ENDING/ENDING.PRG)
-std::int16_t VS::Ending::Credits::decodeBudgetStartTick;
 
 // decomp: D_800DC1A8 (D_800DC1A8@ENDING/ENDING.PRG)
 void* VS::Ending::Credits::illustrationResources[VS::Ending::Credits::kIllustrationCount];
