@@ -345,7 +345,7 @@ TEST_CASE(
   const auto saved_view = VS::Render::FrameScratchpad().view_matrix;
   auto package = GravityOriginPackage();
   REQUIRE(VS::Effects::BindLiveEffectPackage(package));
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   Effects_actionRequest.position = {1200, -384, 900, 0};
   SetTranslatedViewMatrix({-100, 200, 600});
   VS::Effects::LiveInitializeTransformStates(&instance);

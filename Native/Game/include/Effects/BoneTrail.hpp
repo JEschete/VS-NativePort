@@ -11,8 +11,6 @@
 #include "Effects/Templates/RingCore.hpp"
 #include "Effects/TrailPoint.hpp"
 
-struct Effects_EffectInstance;
-
 // Bone trails (BATTLE.PRG 5BF94.c:4898-5000 and 5666-5760; effect 54): a
 // ribbon behind one bone of an actor, usually its weapon. Every tick samples
 // the bone's base and tip into an eight-entry history; from the fourth sample
@@ -23,7 +21,9 @@ struct Effects_EffectInstance;
 // the frame's primitive buffer are reached through hosts (BoneTrailLive.hpp
 // binds them).
 namespace VS::Effects {
+struct LiveEffectInstance;
 struct LiveRendererSlot;
+
 inline constexpr std::size_t kTrailHistory = 8;
 inline constexpr std::size_t kTrailCorners = 4;
 // The life of a trail that only a fade or a stop ends, and of a fading one.
@@ -266,11 +266,11 @@ struct BoneTrailRequest {
 class BoneTrailChains {
  public:
   virtual ~BoneTrailChains() = default;
-  [[nodiscard]] virtual Effects_EffectInstance* FirstInstance() = 0;
-  [[nodiscard]] virtual Effects_EffectInstance* NextInstance(
-      Effects_EffectInstance& instance) = 0;
+  [[nodiscard]] virtual LiveEffectInstance* FirstInstance() = 0;
+  [[nodiscard]] virtual LiveEffectInstance* NextInstance(
+      LiveEffectInstance& instance) = 0;
   [[nodiscard]] virtual LiveRendererSlot* FirstRenderer(
-      Effects_EffectInstance& instance) = 0;
+      LiveEffectInstance& instance) = 0;
   [[nodiscard]] virtual LiveRendererSlot* NextRenderer(
       LiveRendererSlot& slot) = 0;
   // Whether the slot runs the bone trail renderer.

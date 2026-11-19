@@ -29,7 +29,8 @@ struct ImpactFixture {
   VS::Effects::LiveEffectPackage previous_secondary = Effects_secondaryPackage;
   VS::Effects::LiveActionEffectRequest previous_request =
       Effects_secondaryRequest;
-  Effects_EffectInstance* previous_instances = Effects_secondaryInstances;
+  VS::Effects::LiveEffectInstance* previous_instances =
+      Effects_secondaryInstances;
   decltype(VS::Effects::savedActionCamera) previous_camera =
       VS::Effects::savedActionCamera;
   decltype(VS::Effects::effectCamera) previous_effect_camera =

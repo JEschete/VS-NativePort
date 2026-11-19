@@ -107,14 +107,14 @@ class LiveGrid {
   memory::ScopedLiveGameHeap heap{arena};
   Definitions definitions{};
   VS::Effects::LiveEffectPackage package{};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   VS::Effects::LiveRendererSlot slot{};
   std::array<u_long, kPrimitiveWords> primitives{};
   std::array<u_long, kOrderingWords> ordering{};
 
  private:
   VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
-  Effects_EffectInstance* saved_instance_ = Effects_currentInstance;
+  VS::Effects::LiveEffectInstance* saved_instance_ = Effects_currentInstance;
   VS::Effects::LiveActionEffectRequest saved_request_ = Effects_actionRequest;
   int saved_frame_buf_ = VS::Render::frameBuf;
   int saved_near_clip_ = VS::Render::nearClip;

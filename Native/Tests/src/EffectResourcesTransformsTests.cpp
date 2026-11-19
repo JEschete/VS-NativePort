@@ -376,7 +376,7 @@ struct TrapTileProducerScope {
       VS::Effects::savedActionCamera;
   decltype(VS::Effects::effectCamera) saved_effect_camera =
       VS::Effects::effectCamera;
-  Effects_EffectInstance* saved_instances = Effects_secondaryInstances;
+  VS::Effects::LiveEffectInstance* saved_instances = Effects_secondaryInstances;
   int saved_busy = Effects_effectBusyFlags;
   decltype(std::to_array(Effects_tokenBitmaps)) saved_tokens =
       std::to_array(Effects_tokenBitmaps);
@@ -1891,11 +1891,11 @@ TEST_CASE("Loaded effect packages keep the resident package's blocks recorded",
   CHECK(Effects::LiveAnimationTable(Effects_secondaryPackage.animation_table)
             .size() == 4);
   // A melee hit's secondary script still reads its operand (#442).
-  Effects_EffectInstance hit{};
+  VS::Effects::LiveEffectInstance hit{};
   hit.script = Effects_secondaryPackage.programs;
-  hit.scriptOffset = kHitScriptOffset;
+  hit.script_offset = kHitScriptOffset;
   CHECK(Effects::LiveReadScriptByte(&hit) == kResidentMarker);
-  CHECK(hit.scriptOffset == kHitScriptOffset + 1);
+  CHECK(hit.script_offset == kHitScriptOffset + 1);
 
   // The oldest loads no record binds make room: the resident package and the
   // last seven loads fill the eight extents.
@@ -1912,9 +1912,9 @@ TEST_CASE("Live effect camera and transforms refuse a missing instance",
           "[effects][effects-resources-transforms]") {
   const Effects::EffectCameraState saved = Effects::LoadLiveEffectCameraState();
   Effects::LiveFocusCameraOnEffectTransform(nullptr, 0, 4);
-  static Effects_EffectInstance storage{};
+  static VS::Effects::LiveEffectInstance storage{};
   storage = {};
-  Effects_EffectInstance* const instance = &storage;
+  VS::Effects::LiveEffectInstance* const instance = &storage;
   Effects::LiveFocusCameraOnEffectTransform(instance, 16, 4);
   CHECK(Effects::LoadLiveEffectCameraState() == saved);
   Effects::LiveCaptureEffectCamera(nullptr);
@@ -2031,7 +2031,7 @@ TEST_CASE("Live effect script vertical offsets move the package's transforms",
   LivePackageScope scope;
   auto package = ScriptPackage(2, 1);
   REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
-  auto instance = std::make_unique<Effects_EffectInstance>();
+  auto instance = std::make_unique<VS::Effects::LiveEffectInstance>();
   for (auto& slot : instance->transforms) slot.position.vy = 9;
   instance->context.effect_id = 6;
   CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
@@ -2050,7 +2050,7 @@ TEST_CASE("Live effect script vertical offsets clamp counts past the slots",
   LivePackageScope scope;
   auto package = ScriptPackage(40, 1);
   REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
-  auto instance = std::make_unique<Effects_EffectInstance>();
+  auto instance = std::make_unique<VS::Effects::LiveEffectInstance>();
   instance->context.effect_id = 0x24;
   CHECK(Effects::LiveSetActionEffectVerticalOffset(instance.get()) == 1);
   CHECK(std::ranges::all_of(instance->transforms, [](const auto& slot) {
@@ -2066,10 +2066,10 @@ TEST_CASE("Live effect script colour curves set the operand's definition",
   // Definition 2 with red 45, green 51 and blue 38.
   std::array program{std::byte{0x42}, std::byte{0x3B}, std::byte{0x9B}};
   const VS::test_support::EffectProgramScope recorded{program};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   instance.script = reinterpret_cast<char*>(program.data());
   CHECK(Effects::LiveSetParticleColorCurvesFromScript(&instance) == 1);
-  CHECK(instance.scriptOffset == 3);
+  CHECK(instance.script_offset == 3);
   CHECK(CurvesOf(BoundDefinitions()[2]) == Rgb{45, 51, 38});
   CHECK(CurvesOf(BoundDefinitions()[1]) == Rgb{});
 }
@@ -2083,10 +2083,10 @@ TEST_CASE(
   REQUIRE(Effects::BindLiveEffectPackage(package).has_value());
   std::array program{std::byte{0x42}, std::byte{0x3B}, std::byte{0x9B}};
   const VS::test_support::EffectProgramScope recorded{program};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   instance.script = reinterpret_cast<char*>(program.data());
   CHECK(Effects::LiveSetParticleColorCurvesFromScript(&instance) == 2);
-  CHECK(instance.scriptOffset == 3);
+  CHECK(instance.script_offset == 3);
   CHECK(std::ranges::all_of(BoundDefinitions(), [](const auto& definition) {
     return CurvesOf(definition) == Rgb{};
   }));
@@ -2102,7 +2102,7 @@ TEST_CASE("Live effect script presets read the module's preset tables",
                     std::begin(VS::Effects::pairedParticleColorPresets[0][0]));
   std::ranges::copy(std::array<u_char, 4>{4, 5, 6, 0},
                     std::begin(VS::Effects::pairedParticleColorPresets[0][1]));
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   CHECK(Effects::LiveApplyPairedParticleColorPreset(&instance) == 1);
   CHECK(CurvesOf(BoundDefinitions()[0]) == Rgb{1, 2, 3});
   CHECK(CurvesOf(BoundDefinitions()[1]) == Rgb{4, 5, 6});

@@ -136,7 +136,7 @@ struct ChildTarget {
 };
 
 // A child effect track's frames to the next child, the next target and the
-// parent's children still running (Effects_EffectInstance.childCount, five
+// parent's children still running (LiveEffectInstance.child_count, five
 // bits).
 struct ChildTrackState {
   std::int16_t delay{};

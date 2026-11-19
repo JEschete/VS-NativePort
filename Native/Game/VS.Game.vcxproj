@@ -2269,6 +2269,7 @@
     <ClInclude Include="src\Effects\BoneTrailLiveState.hpp" />
     <ClInclude Include="src\Effects\CameraLiveState.hpp" />
     <ClInclude Include="src\Effects\EffectResourcesLiveState.hpp" />
+    <ClInclude Include="src\Effects\Instance.hpp" />
     <ClInclude Include="src\Effects\Package.hpp" />
     <ClInclude Include="src\Effects\Particles.hpp" />
     <ClInclude Include="src\Effects\Plugins\Plg044.hpp" />

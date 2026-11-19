@@ -49,8 +49,8 @@ class LiveEmission {
  public:
   Definitions definitions;
   VS::Effects::LiveEffectPackage package{};
-  std::unique_ptr<Effects_EffectInstance> instance =
-      std::make_unique<Effects_EffectInstance>();
+  std::unique_ptr<VS::Effects::LiveEffectInstance> instance =
+      std::make_unique<VS::Effects::LiveEffectInstance>();
   std::array<VS::Effects::LiveParticle, 4> particles{};
   alignas(effects::LiveCurveTable) std::array<std::uint8_t, 8> curves{
       1, 0, 6, 0, 1, 0, 64, 0};
@@ -124,7 +124,7 @@ class LiveEmission {
 
  private:
   VS::Effects::LiveEffectPackage* saved_package_ = Effects_package;
-  Effects_EffectInstance* saved_instance_ = Effects_currentInstance;
+  VS::Effects::LiveEffectInstance* saved_instance_ = Effects_currentInstance;
   VS::Effects::LiveParticle* saved_pool_ = VS::Effects::particlePool;
   VS::Effects::LiveParticle* saved_free_ = VS::Effects::freeParticles;
   int saved_capacity_ = VS::Effects::particleCapacity;
@@ -213,7 +213,7 @@ TEST_CASE("F01515 Live reads only current bound curves before allocating",
   SECTION("unrecorded current block") { effects::ForgetLivePackageExtents(); }
   fixture.Emit();
   CHECK(VS::Effects::usedParticleCount == 0);
-  CHECK(fixture.instance->particleCount == 0);
+  CHECK(fixture.instance->particle_count == 0);
   CHECK(Scratch().flags == 0x1234);
   CHECK(VS::Core::BiosRand().State() == 1);
 }
@@ -233,7 +233,7 @@ TEST_CASE("F01515 Live refuses inconsistent counts cycles and misaligned links",
   }
   fixture.Emit();
   CHECK(fixture.instance->particles == nullptr);
-  CHECK(fixture.instance->particleCount == 0);
+  CHECK(fixture.instance->particle_count == 0);
   CHECK(VS::Core::BiosRand().State() == 1);
 }
 
@@ -260,7 +260,7 @@ TEST_CASE(
     CHECK(fixture.particles[0].motion.velocity.vx == 0);
     CHECK(fixture.particles[0].motion.velocity.vz > 0);
   }
-  CHECK(fixture.instance->particleCount == 1);
+  CHECK(fixture.instance->particle_count == 1);
 }
 
 TEST_CASE("F01515 Live binds native pool scratch and texture paths",
@@ -289,12 +289,12 @@ TEST_CASE("F01515 Live bulk release returns the emitted list to its owner",
   LiveEmission fixture;
   std::ranges::fill(fixture.definitions.values[0].count_range, 9);
   fixture.Emit();
-  REQUIRE(fixture.instance->particleCount == 4);
+  REQUIRE(fixture.instance->particle_count == 4);
   effects::LiveReleaseAllEffectParticles(fixture.instance.get());
   // The existing bulk-release contract retains the head until owner
   // destruction.
   CHECK(VS::Effects::freeParticles == fixture.instance->particles);
-  CHECK(fixture.instance->particleCount == 0);
+  CHECK(fixture.instance->particle_count == 0);
   CHECK(VS::Effects::usedParticleCount == 0);
 }
 
@@ -311,7 +311,7 @@ TEST_CASE(
   source.SetActor(actor);
   fixture.Emit();
   CHECK(VS::Effects::usedParticleCount == 0);
-  CHECK(fixture.instance->particleCount == 0);
+  CHECK(fixture.instance->particle_count == 0);
   CHECK(VS::Core::BiosRand().State() == 1);
 }
 
@@ -324,7 +324,7 @@ TEST_CASE(
   effects::EmitLiveParticleEvent(fixture.instance.get(), 2, 0, 0, nullptr);
   fixture.definitions.values[0].transform_index = 16;
   fixture.Emit();
-  CHECK(fixture.instance->particleCount == 0);
+  CHECK(fixture.instance->particle_count == 0);
   CHECK(VS::Effects::usedParticleCount == 0);
 }
 

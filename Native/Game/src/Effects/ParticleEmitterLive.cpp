@@ -225,7 +225,7 @@ void StoreScratch(LiveParticleEmitterScratch& live,
   return &particlePool[handle.index];
 }
 
-[[nodiscard]] bool ValidPool(const Effects_EffectInstance& instance) {
+[[nodiscard]] bool ValidPool(const LiveEffectInstance& instance) {
   if (particleCapacity < 0 || usedParticleCount < 0 ||
       usedParticleCount > particleCapacity ||
       (instance.particles != nullptr && !Handle(instance.particles))) {
@@ -243,7 +243,7 @@ void StoreScratch(LiveParticleEmitterScratch& live,
 
 class LiveEmissionHost final : public ParticleEmissionHost {
  public:
-  explicit LiveEmissionHost(Effects_EffectInstance& instance)
+  explicit LiveEmissionHost(LiveEffectInstance& instance)
       : instance_(instance) {}
 
   [[nodiscard]] std::optional<ParticleEmissionHandle> Allocate() override {
@@ -332,7 +332,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
   }
 
  private:
-  Effects_EffectInstance& instance_;
+  LiveEffectInstance& instance_;
 };
 
 [[nodiscard]] bool BoundCurves(const ParticleEmissionDefinition& definition) {
@@ -355,7 +355,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
 }
 
 [[nodiscard]] std::optional<ParticleEmissionContext> Context(
-    const Effects_EffectInstance& instance,
+    const LiveEffectInstance& instance,
     const ParticleEmissionDefinition& definition) {
   const std::span transforms(instance.transforms);
   if (definition.transform >= transforms.size() ||
@@ -401,7 +401,7 @@ class LiveEmissionHost final : public ParticleEmissionHost {
 // decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6935-7502).
 // Preserves the existing event-call parameter order.
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-void EmitLiveParticleEvent(Effects_EffectInstance* instance, int event,
+void EmitLiveParticleEvent(LiveEffectInstance* instance, int event,
                            int transparency_override, int particle_variant,
                            const LiveParticle* parent) {
   if (instance == nullptr || Effects_package == nullptr ||

@@ -74,9 +74,9 @@ namespace math = Core::Math;
 using math::Vec2;
 using math::Vec3;
 
-using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
+using InstanceTransforms = decltype(LiveEffectInstance::transforms);
 using TextureTables = decltype(LiveEffectPackage::texture_tables);
-constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
+constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
 constexpr std::size_t kTextureTableCount = std::tuple_size_v<TextureTables>;
 // vectorRanges[] and pairRanges[] rows of a particle definition the trails
 // read (trails5.h:243-449, trails9.h:243-456).
@@ -347,7 +347,7 @@ template <std::size_t History>
 class LiveTrailHost final : public BasicTrailHost<History> {
  public:
   LiveTrailHost(const LiveParticleDefinition& definition,
-                Effects_EffectInstance& instance, const EmitterContext& context)
+                LiveEffectInstance& instance, const EmitterContext& context)
       : definition_(definition), instance_(instance), context_(context) {}
 
   [[nodiscard]] std::int32_t SampleCurve(std::uint8_t curve,
@@ -380,7 +380,7 @@ class LiveTrailHost final : public BasicTrailHost<History> {
   [[nodiscard]] bool TextureTableBound(std::size_t table) const;
 
   const LiveParticleDefinition& definition_;
-  Effects_EffectInstance& instance_;
+  LiveEffectInstance& instance_;
   EmitterContext context_;
 };
 
@@ -590,8 +590,7 @@ template <typename Trail>
 template <typename Trail>
 void RunStage(BasicTrailStage<LegacyTrail<Trail>::kHistory> stage,
               const LiveParticleDefinition& definition,
-              LiveParticleEmitterScratch& scratch,
-              Effects_EffectInstance& instance,
+              LiveParticleEmitterScratch& scratch, LiveEffectInstance& instance,
               const EmitterView<Trail>& view) {
   const std::optional<std::span<Trail>> trails = HeldTrails(view);
   if (stage == nullptr || !trails) {
@@ -623,15 +622,14 @@ const TrailNineStages& NineStages() {
 void RunLiveTrailStage(TrailStage stage,
                        const LiveParticleDefinition& definition,
                        LiveParticleEmitterScratch& scratch,
-                       Effects_EffectInstance& instance,
-                       LiveTrailState& state) {
+                       LiveEffectInstance& instance, LiveTrailState& state) {
   RunStage(stage, definition, scratch, instance, ViewOf(state));
 }
 
 void RunLiveTrailNineStage(TrailNineStage stage,
                            const LiveParticleDefinition& definition,
                            LiveParticleEmitterScratch& scratch,
-                           Effects_EffectInstance& instance,
+                           LiveEffectInstance& instance,
                            LiveTrailNineState& state) {
   RunStage(stage, definition, scratch, instance, ViewOf(state));
 }

@@ -40,9 +40,9 @@
 namespace VS::Effects {
 namespace {
 constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
-using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
+using InstanceTransforms = decltype(LiveEffectInstance::transforms);
 using PackageCurves = decltype(LiveEffectPackage::curves);
-constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
+constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
 constexpr std::size_t kCurveSlots = std::tuple_size_v<PackageCurves>;
 static_assert(kCurveSlots == kEffectCurveCapacity);
 static_assert(sizeof(LiveParticleDefinition) == kParticleDefinitionBytes);
@@ -217,7 +217,7 @@ SamplesOf<Emitter> Transparency(std::string_view overlay,
 template <typename Emitter>
 void GenerateOrigins(const LiveParticleDefinition& definition,
                      LiveParticleEmitterScratch& scratch,
-                     Effects_EffectInstance& instance, Emitter& state,
+                     LiveEffectInstance& instance, Emitter& state,
                      const OverlayOf<Emitter>& overlay) {
   if (definition.transform_index >= kTransformCount) {
     InvalidEmitter(overlay.name, "definition transform outside the instance");
@@ -320,7 +320,7 @@ class LiveTrailEmitterHost final : public TrailEmitterHost {
   LiveRendererSlot& slot_;
   const OverlayOf<Emitter>& overlay_;
   LiveParticleDefinition* definition_ = nullptr;
-  Effects_EffectInstance* instance_ = nullptr;
+  LiveEffectInstance* instance_ = nullptr;
 };
 
 template <typename Emitter>
@@ -495,7 +495,7 @@ int UpdateEmitter(LiveRendererSlot* slot, unsigned int command, int packed,
 // decomp: src/EFFECT/trails5.h:27 VS_TRAIL_ORIGIN_FUNCTION.
 void GenerateLiveTrailOrigins(const LiveParticleDefinition& definition,
                               LiveParticleEmitterScratch& scratch,
-                              Effects_EffectInstance& instance,
+                              LiveEffectInstance& instance,
                               LiveTrailState& state,
                               const LiveTrailOverlay& overlay) {
   GenerateOrigins(definition, scratch, instance, state, overlay);
@@ -510,7 +510,7 @@ int UpdateLiveTrailEmitter(LiveRendererSlot* slot, unsigned int command,
 // decomp: src/EFFECT/trails9.h:27 VS_TRAIL_ORIGIN_FUNCTION.
 void GenerateLiveTrailNineOrigins(const LiveParticleDefinition& definition,
                                   LiveParticleEmitterScratch& scratch,
-                                  Effects_EffectInstance& instance,
+                                  LiveEffectInstance& instance,
                                   LiveTrailNineState& state,
                                   const LiveTrailNineOverlay& overlay) {
   GenerateOrigins(definition, scratch, instance, state, overlay);
@@ -526,7 +526,7 @@ int UpdateLiveTrailNineEmitter(LiveRendererSlot* slot, unsigned int command,
 // decomp: PLG074 func_800FB414 (src/EFFECT/trails5.h:27).
 void GenerateLivePlg074TrailOrigins(const LiveParticleDefinition& definition,
                                     LiveParticleEmitterScratch& scratch,
-                                    Effects_EffectInstance& instance,
+                                    LiveEffectInstance& instance,
                                     LiveTrailState& state) {
   GenerateLiveTrailOrigins(
       definition, scratch, instance, state,

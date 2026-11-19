@@ -235,7 +235,7 @@ class LiveTimelinePackage {
     return static_cast<std::byte*>(payload_);
   }
 
-  Effects_EffectInstance instance{};
+  fx::LiveEffectInstance instance{};
 
  private:
   alignas(Memory::kHeapUnitBytes)
@@ -643,7 +643,7 @@ TEST_CASE("Live timeline tracks refuse missing records",
           "[timeline-playback]") {
   const PackageScope scope(nullptr);
   static fx::LiveEffectTimeline timeline;
-  static Effects_EffectInstance instance{};
+  static fx::LiveEffectInstance instance{};
   std::array<std::uint32_t, 2> keys{9, 0};
   fx::LiveTimelineTrack track = TrackOver(4, keys, 1);
 
@@ -669,7 +669,7 @@ TEST_CASE("Live timeline tracks refuse missing records",
 TEST_CASE("Live shake tracks count down even while the frame is held",
           "[timeline-playback]") {
   static fx::LiveEffectTimeline timeline;
-  static Effects_EffectInstance instance{};
+  static fx::LiveEffectInstance instance{};
   instance.context.timeline = &timeline;
   std::array<std::uint32_t, 4> keys{6, 0, 7, 0};
   fx::LiveTimelineTrack track = TrackOver(13, keys, 2);

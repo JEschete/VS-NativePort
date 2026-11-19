@@ -73,8 +73,8 @@ class ScriptedMachine final : public fx::ScriptMachine {
   std::size_t reads_ = 0;
 };
 
-Effects_EffectInstance* AsInstance(void* instance) {
-  return static_cast<Effects_EffectInstance*>(instance);
+fx::LiveEffectInstance* AsInstance(void* instance) {
+  return static_cast<fx::LiveEffectInstance*>(instance);
 }
 
 int YieldHandler(void* /*instance*/) { return 0; }
@@ -125,11 +125,11 @@ class HandlerTableScope {
   decltype(std::to_array(Effects_scriptOpcodeHandlers)) saved_;
 };
 
-Effects_EffectInstance InstanceAt(std::vector<std::byte>& program,
+fx::LiveEffectInstance InstanceAt(std::vector<std::byte>& program,
                                   std::uint16_t offset) {
-  Effects_EffectInstance instance{};
+  fx::LiveEffectInstance instance{};
   instance.script = reinterpret_cast<char*>(program.data());
-  instance.scriptOffset = offset;
+  instance.script_offset = offset;
   return instance;
 }
 
@@ -302,13 +302,13 @@ TEST_CASE("Live effect script runs dispatch the production handler table",
   auto instance = InstanceAt(program, 0);
 
   CHECK(fx::LiveRunEffectScript(&instance) == 1);
-  CHECK(instance.scriptOffset == 9);
+  CHECK(instance.script_offset == 9);
   CHECK(fx::LiveRunEffectScript(&instance) == 1);
-  CHECK(instance.scriptOffset == 10);
+  CHECK(instance.script_offset == 10);
   CHECK(fx::LiveRunEffectScript(&instance) == 1);
-  CHECK(instance.scriptOffset == 11);
+  CHECK(instance.script_offset == 11);
   CHECK(fx::LiveRunEffectScript(&instance) == 0);
-  CHECK(instance.scriptOffset == 12);
+  CHECK(instance.script_offset == 12);
 }
 
 TEST_CASE("Live effect script runs end on opcodes the table cannot run",
@@ -319,7 +319,7 @@ TEST_CASE("Live effect script runs end on opcodes the table cannot run",
   const VS::test_support::EffectProgramScope recorded{program};
   auto instance = InstanceAt(program, 0);
   CHECK(fx::LiveRunEffectScript(&instance) == 0);
-  CHECK(instance.scriptOffset == 2);
+  CHECK(instance.script_offset == 2);
 }
 
 TEST_CASE("Live effect script runs end on an unrecorded program",
@@ -328,9 +328,9 @@ TEST_CASE("Live effect script runs end on an unrecorded program",
   auto program = Program({kOpContinue, kOpJump, 0x01});
   auto instance = InstanceAt(program, 0);
   CHECK(fx::LiveRunEffectScript(&instance) == 0);
-  CHECK(instance.scriptOffset == 0);
+  CHECK(instance.script_offset == 0);
   CHECK(fx::LiveReadScriptByte(&instance) == 0);
-  CHECK(instance.scriptOffset == 0);
+  CHECK(instance.script_offset == 0);
 }
 
 TEST_CASE("Live effect script operands end where a truncated read was refused",
@@ -340,10 +340,10 @@ TEST_CASE("Live effect script operands end where a truncated read was refused",
   const VS::test_support::EffectProgramScope recorded{program};
   auto instance = InstanceAt(program, 0);
   CHECK(fx::LiveRunEffectScript(&instance) == 0);
-  CHECK(instance.scriptOffset == 2);
-  instance.scriptOffset = 2;
+  CHECK(instance.script_offset == 2);
+  instance.script_offset = 2;
   CHECK(fx::LiveReadScriptHalfword(&instance) == 0);
-  CHECK(instance.scriptOffset == 2);
+  CHECK(instance.script_offset == 2);
 }
 
 TEST_CASE("Live effect script reads refuse a forgotten program",
@@ -355,7 +355,7 @@ TEST_CASE("Live effect script reads refuse a forgotten program",
     CHECK(fx::LiveReadScriptByte(&instance) == kOpContinue);
   }
   CHECK(fx::LiveReadScriptByte(&instance) == 0);
-  CHECK(instance.scriptOffset == 1);
+  CHECK(instance.script_offset == 1);
 }
 
 TEST_CASE("Live effect script operands store the moved offset",
@@ -365,16 +365,16 @@ TEST_CASE("Live effect script operands store the moved offset",
   auto instance = InstanceAt(program, 0);
 
   CHECK(fx::LiveReadScriptHalfword(&instance) == 0x1234);
-  CHECK(instance.scriptOffset == 2);
+  CHECK(instance.script_offset == 2);
   CHECK(fx::LiveReadScriptByte(&instance) == 0x78);
-  CHECK(instance.scriptOffset == 3);
+  CHECK(instance.script_offset == 3);
 
-  instance.scriptOffset = 2;
+  instance.script_offset = 2;
   fx::LiveBranchEffectScriptIf(1, &instance);
-  CHECK(instance.scriptOffset == 0x5678);
-  instance.scriptOffset = 2;
+  CHECK(instance.script_offset == 0x5678);
+  instance.script_offset = 2;
   fx::LiveBranchEffectScriptIf(0, &instance);
-  CHECK(instance.scriptOffset == 4);
+  CHECK(instance.script_offset == 4);
 }
 
 TEST_CASE("Live effect script entries refuse a null instance",
@@ -522,21 +522,21 @@ TEST_CASE("Live effect script register opcodes update the instance",
   auto instance = InstanceAt(program, 0);
   CHECK(fx::LiveSetEffectScriptRegister(&instance) == 1);
   CHECK(std::bit_cast<std::uint8_t>(instance.registers[1]) == 0x34);
-  CHECK(instance.scriptOffset == 3);
+  CHECK(instance.script_offset == 3);
   CHECK(fx::LiveBranchIfEffectRegisterEqual(&instance) == 1);
-  CHECK(instance.scriptOffset == 0x20);
+  CHECK(instance.script_offset == 0x20);
 
   // The original compared the count as an unsigned byte.
   auto counted = Program({0x90, 0x40, 0x00});
   const VS::test_support::EffectProgramScope counted_scope{counted};
   auto particles = InstanceAt(counted, 0);
-  particles.particleCount = std::bit_cast<char>(std::uint8_t{0x90});
+  particles.particle_count = std::bit_cast<char>(std::uint8_t{0x90});
   CHECK(fx::LiveBranchIfParticleCountEqual(&particles) == 1);
-  CHECK(particles.scriptOffset == 0x40);
+  CHECK(particles.script_offset == 0x40);
 
-  particles.scriptOffset = 1;
+  particles.script_offset = 1;
   CHECK(fx::LiveBranchIfEffectRenderersFinished(&particles) == 1);
-  CHECK(particles.scriptOffset == 0x40);
+  CHECK(particles.script_offset == 0x40);
 }
 
 TEST_CASE("Live effect script opcodes follow the selector and action variant",
@@ -554,7 +554,7 @@ TEST_CASE("Live effect script opcodes follow the selector and action variant",
   CHECK(fx::LiveLoadActionVariantRegister(&instance) == 1);
   CHECK(instance.registers[3] == 30);
   CHECK(fx::LiveBranchIfActionVariantCleared(&instance) == 1);
-  CHECK(instance.scriptOffset == 3);
+  CHECK(instance.script_offset == 3);
 }
 
 TEST_CASE("Live effect script variant clears release the variant branch",
@@ -568,7 +568,7 @@ TEST_CASE("Live effect script variant clears release the variant branch",
   CHECK(fx::LiveClearScriptActionVariant(nullptr) == 1);
   CHECK(Effects_actionVariant == 0);
   CHECK(fx::LiveBranchIfActionVariantCleared(&instance) == 1);
-  CHECK(instance.scriptOffset == 0x1234);
+  CHECK(instance.script_offset == 0x1234);
 }
 
 TEST_CASE("Live effect script register opcodes end on refused operands",
@@ -578,11 +578,11 @@ TEST_CASE("Live effect script register opcodes end on refused operands",
   auto instance = InstanceAt(program, 0);
   instance.registers[1] = 9;
   CHECK(fx::LiveSetEffectScriptRegister(&instance) == 2);
-  CHECK(instance.scriptOffset == 3);
+  CHECK(instance.script_offset == 3);
   CHECK(fx::LiveSetEffectScriptRegister(&instance) == 2);
-  CHECK(instance.scriptOffset == 4);
+  CHECK(instance.script_offset == 4);
   CHECK(instance.registers[1] == 9);
-  instance.scriptOffset = 0;
+  instance.script_offset = 0;
   CHECK(fx::LiveBranchIfEffectRegisterEqual(&instance) == 2);
 }
 
@@ -749,16 +749,16 @@ TEST_CASE("Effect script invalid instructions report and yield",
 
 TEST_CASE("Live effect script child completions release the parent's child",
           "[effect-script]") {
-  Effects_EffectInstance parent{};
-  parent.childCount = 2;
-  Effects_EffectInstance child{};
+  fx::LiveEffectInstance parent{};
+  parent.child_count = 2;
+  fx::LiveEffectInstance child{};
   child.parent = &parent;
   CHECK(fx::LiveCompleteChildEffectScript(&child) == 1);
-  CHECK(parent.childCount == 1);
-  parent.childCount = 0;
+  CHECK(parent.child_count == 1);
+  parent.child_count = 0;
   parent.frame = 0x1234;
   CHECK(fx::LiveCompleteChildEffectScript(&child) == 1);
-  CHECK(parent.childCount == fx::kChildCountMask);
+  CHECK(parent.child_count == fx::kChildCountMask);
   CHECK(parent.frame == 0x1234);
   child.parent = nullptr;
   CHECK(fx::LiveCompleteChildEffectScript(&child) == 1);
@@ -766,7 +766,7 @@ TEST_CASE("Live effect script child completions release the parent's child",
 
 TEST_CASE("Live effect script signals skip sources that are not actor parts",
           "[effect-script]") {
-  Effects_EffectInstance instance{};
+  fx::LiveEffectInstance instance{};
   instance.context.source.type = 3;
   CHECK(fx::LiveSignalSourceActorFromScript(&instance) == 1);
   CHECK(fx::LiveReportInvalidEffectInstruction(nullptr) == 0);
@@ -955,7 +955,7 @@ TEST_CASE("Live effect script timeline branches read the instance timeline",
   timeline.active_tracks = 0;
   instance.context.timeline = &timeline;
   CHECK(fx::LiveBranchIfEffectTimelineFinished(&instance) == 1);
-  CHECK(instance.scriptOffset == 0xC5);
+  CHECK(instance.script_offset == 0xC5);
 }
 
 TEST_CASE("Live effect script timeline opcodes end without a timeline",
@@ -965,13 +965,13 @@ TEST_CASE("Live effect script timeline opcodes end without a timeline",
   auto instance = InstanceAt(program, 0);
   // The original read through the null timeline; the native ends.
   CHECK(fx::LiveBranchIfEffectTimelineFinished(&instance) == 2);
-  CHECK(instance.scriptOffset == 0);
-  instance.scriptOffset = 2;
+  CHECK(instance.script_offset == 0);
+  instance.script_offset = 2;
   CHECK(fx::LiveTickEffectTimelineFromScript(&instance) == 2);
-  CHECK(instance.scriptOffset == 4);
+  CHECK(instance.script_offset == 4);
   CHECK(fx::LiveFreeEffectScriptTimeline(&instance) == 1);
   CHECK(fx::LiveLoadEffectTimelineFromRegister(&instance) == 2);
-  CHECK(instance.scriptOffset == 5);
+  CHECK(instance.script_offset == 5);
 }
 
 TEST_CASE(
@@ -1074,7 +1074,7 @@ TEST_CASE("F01522 the Live attach ends on an unknown renderer",
   const VS::test_support::EffectProgramScope recorded{program};
   auto instance = InstanceAt(program, 0);
   CHECK(fx::LiveAttachScriptRenderer(&instance) == 2);
-  CHECK(instance.scriptOffset == 5);
+  CHECK(instance.script_offset == 5);
   CHECK(instance.context.renderer == nullptr);
 }
 

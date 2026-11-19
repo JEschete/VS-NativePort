@@ -20,7 +20,7 @@ namespace VS::Effects {
 namespace {
 using Core::Math::Vec3;
 using Particle = LiveParticle;
-using Instance = Effects_EffectInstance;
+using Instance = LiveEffectInstance;
 
 constexpr std::uint32_t kHalfwordBits = 16;
 constexpr std::uint32_t kHalfwordMask = 0xFFFF;

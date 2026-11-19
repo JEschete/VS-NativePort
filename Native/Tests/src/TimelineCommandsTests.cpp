@@ -162,7 +162,7 @@ TEST_CASE("Live timeline commands refuse a missing instance",
 
 TEST_CASE("Live reaction sound skips a non-actor emitter",
           "[timeline-commands]") {
-  static Effects_EffectInstance instance{};
+  static fx::LiveEffectInstance instance{};
   instance.context.emit_from.type = fx::kRoomPointEndpoint;
   const u_char last = Effects_lastReactionSoundVariant;
   fx::LivePlaySourceActorReactionSound(&instance, 4);
@@ -210,13 +210,13 @@ constexpr std::uint16_t Timing(std::uint16_t command, std::uint16_t frame) {
   return static_cast<std::uint16_t>((command << 9) | frame);
 }
 
-fx::LiveTransformSlot& MotionOf(Effects_EffectInstance& instance,
+fx::LiveTransformSlot& MotionOf(fx::LiveEffectInstance& instance,
                                 std::size_t slot) {
   return std::span(instance.transforms)[slot];
 }
 
-using InstanceBytes = std::array<std::byte, sizeof(Effects_EffectInstance)>;
-InstanceBytes BytesOf(const Effects_EffectInstance& instance) {
+using InstanceBytes = std::array<std::byte, sizeof(fx::LiveEffectInstance)>;
+InstanceBytes BytesOf(const fx::LiveEffectInstance& instance) {
   InstanceBytes bytes{};
   std::memcpy(bytes.data(), &instance, bytes.size());
   return bytes;
@@ -303,7 +303,7 @@ TEST_CASE("Live transform commands update the instance's own transforms",
           "[timeline-commands]") {
   // #388: the copied commands viewed the instance with the PS1 header size,
   // so they wrote the registers and the previous transform instead.
-  static Effects_EffectInstance instance{};
+  static fx::LiveEffectInstance instance{};
   std::ranges::fill(instance.registers, 0x5A);
   MotionOf(instance, 4).flags = 0x8003;
   fx::LiveResumeEffectTransformMotion(&instance, 0);
@@ -330,7 +330,7 @@ TEST_CASE("Live transform commands update the instance's own transforms",
 TEST_CASE("Live action-control track runs due keys on the instance",
           "[timeline-commands]") {
   static fx::LiveEffectTimeline timeline;
-  static Effects_EffectInstance instance{};
+  static fx::LiveEffectInstance instance{};
   alignas(std::uint32_t) static std::array<fx::ActionControlKey, 2> keys{{
       {.timing = Timing(6, 12), .operand0 = 0, .operand1 = 0},
       {.timing = Timing(5, 12), .operand0 = 4, .operand1 = 0},
@@ -354,7 +354,7 @@ TEST_CASE("Live action-control track runs due keys on the instance",
 TEST_CASE("Live action-control track refuses a missing or unread key",
           "[timeline-commands]") {
   static fx::LiveEffectTimeline timeline;
-  static Effects_EffectInstance instance{};
+  static fx::LiveEffectInstance instance{};
   alignas(std::uint32_t) static std::array<fx::ActionControlKey, 2> keys{{
       {.timing = Timing(6, 0), .operand0 = 0, .operand1 = 0},
       {.timing = Timing(6, 0), .operand0 = 0, .operand1 = 0},

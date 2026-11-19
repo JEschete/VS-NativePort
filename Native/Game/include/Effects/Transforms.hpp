@@ -22,7 +22,7 @@
 // actors, the camera and the GTE through a TransformHost; TransformsLive.hpp
 // binds them to the effect instance records.
 namespace VS::Effects {
-// Effects_EffectInstance.transforms (5BF94.h:490).
+// LiveEffectInstance.transforms (5BF94.h:490).
 inline constexpr std::size_t kEffectTransformSlots = 16;
 // Actor ids past the actor table name the camera, the camera offset towards
 // the eye and the action origin (5BF94.c:6213).

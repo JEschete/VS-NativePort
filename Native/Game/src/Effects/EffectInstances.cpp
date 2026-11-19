@@ -30,14 +30,14 @@ template <typename Record>
 
 // func_800CE83C and func_800CF55C (5BF94.c:5114, 5593): the two chains'
 // creation, which only the chain head differs in.
-[[nodiscard]] Effects_EffectInstance* CreateEffectInstance(
+[[nodiscard]] LiveEffectInstance* CreateEffectInstance(
     std::int32_t priority, EffectInstanceChain& chain) {
-  Effects_EffectInstance* instance = chain.StartInstance();
+  LiveEffectInstance* instance = chain.StartInstance();
   if (instance == nullptr) {
     return nullptr;
   }
-  Effects_EffectInstance* previous = nullptr;
-  Effects_EffectInstance* cursor = chain.First();
+  LiveEffectInstance* previous = nullptr;
+  LiveEffectInstance* cursor = chain.First();
   while (cursor != nullptr && priority >= chain.PriorityOf(*cursor)) {
     previous = cursor;
     cursor = chain.Next(*cursor);
@@ -85,19 +85,19 @@ void InitEffectInstance(const EffectSpawn& spawn, EffectInstanceStart& record) {
 }
 
 // decomp: BATTLE.PRG func_800CE83C (src/BATTLE/BATTLE.PRG/5BF94.c:5114)
-Effects_EffectInstance* CreatePrimaryEffectInstance(
+LiveEffectInstance* CreatePrimaryEffectInstance(
     std::int32_t priority, EffectInstanceChain& primaries) {
   return CreateEffectInstance(priority, primaries);
 }
 
 // decomp: BATTLE.PRG func_800CF55C (src/BATTLE/BATTLE.PRG/5BF94.c:5593)
-Effects_EffectInstance* CreateSecondaryEffectInstance(
+LiveEffectInstance* CreateSecondaryEffectInstance(
     std::int32_t priority, EffectInstanceChain& secondaries) {
   return CreateEffectInstance(priority, secondaries);
 }
 
 // decomp: BATTLE.PRG func_800CE8F4 (src/BATTLE/BATTLE.PRG/5BF94.c:5139)
-void DestroyPrimaryEffectInstance(Effects_EffectInstance& instance,
+void DestroyPrimaryEffectInstance(LiveEffectInstance& instance,
                                   EffectInstanceChain& primaries) {
   static_cast<void>(Unlink(primaries, instance));
   primaries.ReleaseParticles(instance);
@@ -113,7 +113,7 @@ void DestroyPrimaryEffectInstance(Effects_EffectInstance& instance,
 }
 
 // decomp: BATTLE.PRG func_800CF614 (src/BATTLE/BATTLE.PRG/5BF94.c:5617)
-void DestroySecondaryEffectInstance(Effects_EffectInstance& instance,
+void DestroySecondaryEffectInstance(LiveEffectInstance& instance,
                                     EffectInstanceChain& secondaries) {
   static_cast<void>(Unlink(secondaries, instance));
   secondaries.ReleaseParticles(instance);
@@ -145,7 +145,7 @@ bool DetachEffectRenderer(RendererChain& renderers, LiveRendererSlot& slot) {
 }
 
 // decomp: BATTLE.PRG func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
-void UpdateEffectRenderers(Effects_EffectInstance& instance,
+void UpdateEffectRenderers(LiveEffectInstance& instance,
                            EffectRendererUpdates& renderers) {
   LiveRendererSlot* slot = renderers.FirstRenderer(instance);
   while (slot != nullptr) {

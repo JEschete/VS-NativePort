@@ -387,7 +387,7 @@ TEST_CASE("Nine-sample live trail stages hold at most eight trails",
   const VS::test_support::ChannelWarnings warnings("effects");
   VS::Effects::LiveParticleDefinition definition{};
   VS::Effects::LiveParticleEmitterScratch scratch{};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   std::array<VS::Effects::LiveTrail9, 3> buffer{};
   VS::Effects::LiveTrailNineState state{};
   state.trails = buffer.data();

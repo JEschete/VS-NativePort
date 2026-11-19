@@ -13,7 +13,7 @@ int Tests_EffectTimelineTrackStride(void) {
   alignas(VS::Effects::LiveTimelineTrack)
       std::array<std::byte, VS::Effects::LiveEffectTimeline::Bytes(kTracks)>
           storage{};
-  Effects_EffectInstance effect{};
+  VS::Effects::LiveEffectInstance effect{};
   auto* timeline =
       reinterpret_cast<VS::Effects::LiveEffectTimeline*>(storage.data());
   const std::uint32_t first_key = 10;

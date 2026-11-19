@@ -23,11 +23,9 @@
 
 namespace VS::Effects {
 namespace {
-using Instance = Effects_EffectInstance;
+using Instance = LiveEffectInstance;
 using Slot = LiveRendererSlot;
 using Spawn = LiveEffectSpawnRequest;
-static_assert(std::extent_v<decltype(Instance::transforms)> ==
-              kEffectInstanceTransforms);
 
 std::uint64_t refused_calls = 0;
 
@@ -57,13 +55,13 @@ class LiveStart final : public EffectInstanceStart {
 
   void Begin(const EffectInstanceIdentity& identity) override {
     instance_->parent = spawn_->parent;
-    instance_->particleCount = 0;
+    instance_->particle_count = 0;
     instance_->priority = static_cast<char>(identity.priority);
-    instance_->scriptOffset = identity.script_offset;
+    instance_->script_offset = identity.script_offset;
     instance_->script = spawn_->script;
     std::ranges::fill(instance_->registers, char{0});
     instance_->token = identity.token;
-    instance_->childCount = 0;
+    instance_->child_count = 0;
     instance_->frame = 0;
     instance_->particles = nullptr;
   }
@@ -225,7 +223,7 @@ class LiveRendererUpdates final : public EffectRendererUpdates {
 }  // namespace
 
 void LiveInitEffectInstance(LiveEffectSpawnRequest* spawn_request,
-                            Effects_EffectInstance* instance) {
+                            LiveEffectInstance* instance) {
   if (instance == nullptr) {
     Refuse("init", "no effect instance");
     return;
@@ -235,19 +233,19 @@ void LiveInitEffectInstance(LiveEffectSpawnRequest* spawn_request,
   }
 }
 
-Effects_EffectInstance* LiveCreatePrimaryEffectInstance(
+LiveEffectInstance* LiveCreatePrimaryEffectInstance(
     LiveEffectSpawnRequest* spawn_request) {
   return CreateOn(Effects_primaryInstances, spawn_request,
                   &CreatePrimaryEffectInstance, "create primary");
 }
 
-Effects_EffectInstance* LiveCreateSecondaryEffectInstance(
+LiveEffectInstance* LiveCreateSecondaryEffectInstance(
     LiveEffectSpawnRequest* spawn_request) {
   return CreateOn(Effects_secondaryInstances, spawn_request,
                   &CreateSecondaryEffectInstance, "create secondary");
 }
 
-void LiveDestroyPrimaryEffectInstance(Effects_EffectInstance* instance) {
+void LiveDestroyPrimaryEffectInstance(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     Refuse("destroy primary", "no effect instance");
     return;
@@ -256,7 +254,7 @@ void LiveDestroyPrimaryEffectInstance(Effects_EffectInstance* instance) {
   DestroyPrimaryEffectInstance(*instance, chain);
 }
 
-void LiveDestroySecondaryEffectInstance(Effects_EffectInstance* instance) {
+void LiveDestroySecondaryEffectInstance(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     Refuse("destroy secondary", "no effect instance");
     return;
@@ -265,7 +263,7 @@ void LiveDestroySecondaryEffectInstance(Effects_EffectInstance* instance) {
   DestroySecondaryEffectInstance(*instance, chain);
 }
 
-void LiveSetSecondaryEffectPhase(int phase, Effects_EffectInstance* instance) {
+void LiveSetSecondaryEffectPhase(int phase, LiveEffectInstance* instance) {
   const std::optional<SecondaryEffectPhase> known =
       ToSecondaryEffectPhase(phase);
   if (instance == nullptr || !known) {
@@ -275,7 +273,7 @@ void LiveSetSecondaryEffectPhase(int phase, Effects_EffectInstance* instance) {
   SetSecondaryEffectPhase(instance->context.phase, *known);
 }
 
-LiveRendererSlot* LiveAttachEffectRenderer(Effects_EffectInstance* instance,
+LiveRendererSlot* LiveAttachEffectRenderer(LiveEffectInstance* instance,
                                            EffectRenderer renderer,
                                            int renderer_parameters) {
   if (instance == nullptr || renderer == nullptr) {
@@ -286,7 +284,7 @@ LiveRendererSlot* LiveAttachEffectRenderer(Effects_EffectInstance* instance,
   return AttachEffectRenderer(renderers, renderer, renderer_parameters);
 }
 
-void LiveDetachEffectRenderer(Effects_EffectInstance* instance,
+void LiveDetachEffectRenderer(LiveEffectInstance* instance,
                               LiveRendererSlot* slot) {
   if (instance == nullptr || slot == nullptr) {
     Refuse("detach renderer", "no effect instance or renderer slot");
@@ -307,7 +305,7 @@ bool LiveUpdateEffectRenderer(LiveRendererSlot& slot) {
                        0) != 0;
 }
 
-void LiveUpdateEffectRenderers(Effects_EffectInstance* instance) {
+void LiveUpdateEffectRenderers(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     Refuse("update renderers", "no effect instance");
     return;

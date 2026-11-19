@@ -23,7 +23,7 @@
 namespace {
 namespace fx = VS::Effects;
 namespace Memory = VS::Core::Memory;
-using Instance = Effects_EffectInstance;
+using Instance = fx::LiveEffectInstance;
 using Slot = fx::LiveRendererSlot;
 using Log = std::vector<std::string>;
 using Create = Instance* (*)(std::int32_t, fx::EffectInstanceChain&);
@@ -410,13 +410,13 @@ TEST_CASE("Live effect instances start from their spawn request",
   spawn.token = 0x6C;
   fx::LiveInitEffectInstance(&spawn, instance.get());
   const Instance& started = *instance;
-  CHECK((started.parent == &parent && started.particleCount == 0 &&
+  CHECK((started.parent == &parent && started.particle_count == 0 &&
          static_cast<std::uint8_t>(started.priority) == 0x81 &&
-         started.scriptOffset == 0x5678 && started.script == script.data()));
+         started.script_offset == 0x5678 && started.script == script.data()));
   CHECK(
       (std::ranges::all_of(started.registers, [](char r) { return r == 0; }) &&
-       started.token == 0x6C && started.busyBits == 5 &&
-       started.childCount == 0 && started.frame == 0 &&
+       started.token == 0x6C && started.busy_bits == 5 &&
+       started.child_count == 0 && started.frame == 0 &&
        started.particles == nullptr));
   CHECK(std::ranges::all_of(
       started.transforms,
@@ -455,7 +455,7 @@ TEST_CASE("Live effect instances join the primary chain by unsigned priority",
   CHECK(Priorities(Effects_primaryInstances) ==
         std::vector<int>{1, 5, 0x7F, 0x80});
   const Instance& first = *Effects_primaryInstances;
-  CHECK((first.busyBits == 0 && first.context.effect_id == 0 &&
+  CHECK((first.busy_bits == 0 && first.context.effect_id == 0 &&
          first.context.phase == 0));
   while (Effects_primaryInstances != nullptr) {
     fx::LiveDestroyPrimaryEffectInstance(Effects_primaryInstances);

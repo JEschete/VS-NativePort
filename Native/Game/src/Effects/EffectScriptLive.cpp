@@ -37,12 +37,11 @@
 
 static_assert(std::extent_v<decltype(Effects_scriptOpcodeHandlers)> ==
               VS::Effects::kEffectScriptOpcodes);
-static_assert(std::extent_v<decltype(Effects_EffectInstance::registers)> ==
-              VS::Effects::kScriptRegisters);
 static_assert(std::extent_v<decltype(Effects_actionVariantValues)> >=
               VS::Effects::kActionVariantValues);
-static_assert(std::extent_v<decltype(Effects_EffectInstance::transforms)> ==
-              VS::Effects::kEffectTransformSlots);
+static_assert(
+    std::tuple_size_v<decltype(VS::Effects::LiveEffectInstance::transforms)> ==
+    VS::Effects::kEffectTransformSlots);
 static_assert(std::extent_v<decltype(Effects_scriptRenderers)> ==
               VS::Effects::kScriptRenderers);
 
@@ -81,15 +80,15 @@ void ReportRefusal(const char* entry) {
   }
 }
 
-[[nodiscard]] ScriptCursor CursorOf(const Effects_EffectInstance& instance) {
+[[nodiscard]] ScriptCursor CursorOf(const LiveEffectInstance& instance) {
   return {.program = LiveEffectPrograms(instance.script),
-          .offset = instance.scriptOffset};
+          .offset = instance.script_offset};
 }
 
 // Stores the cursor's offset back, reporting where a read was refused.
-void Settle(Effects_EffectInstance& instance, const ScriptCursor& cursor,
+void Settle(LiveEffectInstance& instance, const ScriptCursor& cursor,
             bool refused) {
-  instance.scriptOffset = cursor.offset;
+  instance.script_offset = cursor.offset;
   if (refused && ShouldReport(refused_reads)) {
     VS::Core::LogWarn(
         "effects",
@@ -100,8 +99,8 @@ void Settle(Effects_EffectInstance& instance, const ScriptCursor& cursor,
 }
 
 template <typename Value, typename Read>
-[[nodiscard]] Value ReadOperand(Effects_EffectInstance* instance,
-                                const char* entry, Read read) {
+[[nodiscard]] Value ReadOperand(LiveEffectInstance* instance, const char* entry,
+                                Read read) {
   if (instance == nullptr) {
     ReportRefusal(entry);
     return 0;
@@ -113,7 +112,7 @@ template <typename Value, typename Read>
 }
 
 template <typename Step>
-[[nodiscard]] int RunStep(Effects_EffectInstance* instance, const char* entry,
+[[nodiscard]] int RunStep(LiveEffectInstance* instance, const char* entry,
                           Step step) {
   if (instance == nullptr) {
     ReportRefusal(entry);
@@ -182,7 +181,7 @@ void ReportOpcodeRefusal(const char* entry, ScriptRefusal refusal,
 // Runs an operand opcode over the instance's cursor; a refused operand,
 // register, definition or colour preset ends the instance.
 template <typename Opcode>
-[[nodiscard]] int RunOpcode(Effects_EffectInstance* instance, const char* entry,
+[[nodiscard]] int RunOpcode(LiveEffectInstance* instance, const char* entry,
                             Opcode opcode) {
   if (instance == nullptr) {
     ReportRefusal(entry);
@@ -196,8 +195,7 @@ template <typename Opcode>
   return HandlerResult(step.value_or(ScriptStep::kEnd));
 }
 
-[[nodiscard]] ScriptRegisters RegistersOf(
-    const Effects_EffectInstance& instance) {
+[[nodiscard]] ScriptRegisters RegistersOf(const LiveEffectInstance& instance) {
   ScriptRegisters registers{};
   std::ranges::transform(instance.registers, registers.begin(), [](char value) {
     return std::bit_cast<std::uint8_t>(value);
@@ -205,7 +203,7 @@ template <typename Opcode>
   return registers;
 }
 
-void StoreRegisters(Effects_EffectInstance& instance,
+void StoreRegisters(LiveEffectInstance& instance,
                     const ScriptRegisters& registers) {
   std::ranges::transform(
       registers, std::begin(instance.registers),
@@ -334,7 +332,7 @@ PresetTables() {
 // The instance's timeline, transforms, renderers, particles and children.
 class InstanceEffectHost final : public ScriptEffectHost {
  public:
-  explicit InstanceEffectHost(Effects_EffectInstance& instance)
+  explicit InstanceEffectHost(LiveEffectInstance& instance)
       : instance_(&instance) {}
 
   void LoadTimeline(std::uint8_t index) override {
@@ -381,13 +379,13 @@ class InstanceEffectHost final : public ScriptEffectHost {
   }
 
  private:
-  Effects_EffectInstance* instance_;
+  LiveEffectInstance* instance_;
 };
 
 // Runs an operand-free opcode over the instance's effect runtime.
 template <typename Step>
-[[nodiscard]] int RunHostStep(Effects_EffectInstance* instance,
-                              const char* entry, Step step) {
+[[nodiscard]] int RunHostStep(LiveEffectInstance* instance, const char* entry,
+                              Step step) {
   if (instance == nullptr) {
     ReportRefusal(entry);
     return HandlerResult(ScriptStep::kEnd);
@@ -399,7 +397,7 @@ template <typename Step>
 // The instance a frame's run reads and dispatches through the handler table.
 class InstanceMachine final : public ScriptMachine {
  public:
-  explicit InstanceMachine(Effects_EffectInstance* instance)
+  explicit InstanceMachine(LiveEffectInstance* instance)
       : instance_(instance) {}
 
   std::optional<std::uint8_t> NextOpcode() override {
@@ -417,7 +415,7 @@ class InstanceMachine final : public ScriptMachine {
             "effects",
             "effect script: opcode {:#x} at {:#x} has no handler ({} "
             "refusals)",
-            opcode, static_cast<std::uint16_t>(instance_->scriptOffset - 1),
+            opcode, static_cast<std::uint16_t>(instance_->script_offset - 1),
             refused_opcodes);
       }
       return std::nullopt;
@@ -426,12 +424,12 @@ class InstanceMachine final : public ScriptMachine {
   }
 
  private:
-  Effects_EffectInstance* instance_;
+  LiveEffectInstance* instance_;
 };
 }  // namespace
 
 // decomp: func_800D46DC (src/BATTLE/BATTLE.PRG/5BF94.c:7506)
-void LiveBranchEffectScriptIf(int condition, Effects_EffectInstance* instance) {
+void LiveBranchEffectScriptIf(int condition, LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("branch");
     return;
@@ -442,43 +440,43 @@ void LiveBranchEffectScriptIf(int condition, Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4720 (src/BATTLE/BATTLE.PRG/5BF94.c:7515)
-int LiveYieldEffectScriptAtOffset(Effects_EffectInstance* instance) {
+int LiveYieldEffectScriptAtOffset(LiveEffectInstance* instance) {
   return RunStep(instance, "yield",
                  [](ScriptCursor& cursor) { return YieldScriptAt(cursor); });
 }
 
 // decomp: func_800D474C (src/BATTLE/BATTLE.PRG/5BF94.c:7521)
-int LiveJumpEffectScript(Effects_EffectInstance* instance) {
+int LiveJumpEffectScript(LiveEffectInstance* instance) {
   return RunStep(instance, "jump",
                  [](ScriptCursor& cursor) { return JumpScript(cursor); });
 }
 
 // decomp: func_800D47C0 (src/BATTLE/BATTLE.PRG/5BF94.c:7538)
-int LiveEndEffectScript(Effects_EffectInstance* /*instance*/) {
+int LiveEndEffectScript(LiveEffectInstance* /*instance*/) {
   return HandlerResult(EndScript());
 }
 
 // decomp: func_800D4DA8 (src/BATTLE/BATTLE.PRG/5BF94.c:7711)
-int LiveContinueEffectScript(Effects_EffectInstance* /*instance*/) {
+int LiveContinueEffectScript(LiveEffectInstance* /*instance*/) {
   return HandlerResult(ContinueScript());
 }
 
 // decomp: func_800D5170 (src/BATTLE/BATTLE.PRG/5BF94.c:7804)
-std::uint8_t LiveReadScriptByte(Effects_EffectInstance* instance) {
+std::uint8_t LiveReadScriptByte(LiveEffectInstance* instance) {
   return ReadOperand<std::uint8_t>(
       instance, "read byte",
       [](ScriptCursor& cursor) { return ReadScriptByte(cursor); });
 }
 
 // decomp: func_800D5198 (src/BATTLE/BATTLE.PRG/5BF94.c:7806)
-std::uint16_t LiveReadScriptHalfword(Effects_EffectInstance* instance) {
+std::uint16_t LiveReadScriptHalfword(LiveEffectInstance* instance) {
   return ReadOperand<std::uint16_t>(
       instance, "read halfword",
       [](ScriptCursor& cursor) { return ReadScriptHalfword(cursor); });
 }
 
 // decomp: func_800D51D8 (src/BATTLE/BATTLE.PRG/5BF94.c:7813)
-int LiveRunEffectScript(Effects_EffectInstance* instance) {
+int LiveRunEffectScript(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("run");
     return 0;
@@ -488,49 +486,47 @@ int LiveRunEffectScript(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D47C8 (src/BATTLE/BATTLE.PRG/5BF94.c:7540)
-int LiveSetEffectScriptSelector(Effects_EffectInstance* instance) {
-  return RunOpcode(
-      instance, "set selector",
-      [](Effects_EffectInstance& /*effect*/, ScriptCursor& cursor) {
-        return SetScriptSelector(cursor, Effects_scriptSelector);
-      });
+int LiveSetEffectScriptSelector(LiveEffectInstance* instance) {
+  return RunOpcode(instance, "set selector",
+                   [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
+                     return SetScriptSelector(cursor, Effects_scriptSelector);
+                   });
 }
 
 // decomp: func_800D487C (src/BATTLE/BATTLE.PRG/5BF94.c:7563)
-int LiveBranchIfEffectRenderersFinished(Effects_EffectInstance* instance) {
+int LiveBranchIfEffectRenderersFinished(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if renderers finished",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      return BranchIfRenderersFinished(
                          effect.context.renderer != nullptr, cursor);
                    });
 }
 
 // decomp: func_800D48E4 (src/BATTLE/BATTLE.PRG/5BF94.c:7576)
-int LiveBranchIfActionVariantCleared(Effects_EffectInstance* instance) {
-  return RunOpcode(
-      instance, "branch if action variant cleared",
-      [](Effects_EffectInstance& /*effect*/, ScriptCursor& cursor) {
-        return BranchIfActionVariantCleared(Effects_actionVariant, cursor);
-      });
+int LiveBranchIfActionVariantCleared(LiveEffectInstance* instance) {
+  return RunOpcode(instance, "branch if action variant cleared",
+                   [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
+                     return BranchIfActionVariantCleared(Effects_actionVariant,
+                                                         cursor);
+                   });
 }
 
 // decomp: func_800D4AB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7625)
-int LiveLoadActionVariantRegister(Effects_EffectInstance* instance) {
-  return RunOpcode(
-      instance, "load action variant register",
-      [](Effects_EffectInstance& effect, ScriptCursor& /*cursor*/) {
-        auto registers = RegistersOf(effect);
-        const OpcodeStep step = LoadActionVariantRegister(
-            Effects_actionVariant, VariantValues(), registers);
-        StoreRegisters(effect, registers);
-        return step;
-      });
+int LiveLoadActionVariantRegister(LiveEffectInstance* instance) {
+  return RunOpcode(instance, "load action variant register",
+                   [](LiveEffectInstance& effect, ScriptCursor& /*cursor*/) {
+                     auto registers = RegistersOf(effect);
+                     const OpcodeStep step = LoadActionVariantRegister(
+                         Effects_actionVariant, VariantValues(), registers);
+                     StoreRegisters(effect, registers);
+                     return step;
+                   });
 }
 
 // decomp: func_800D4AEC (src/BATTLE/BATTLE.PRG/5BF94.c:7633)
-int LiveSetEffectScriptRegister(Effects_EffectInstance* instance) {
+int LiveSetEffectScriptRegister(LiveEffectInstance* instance) {
   return RunOpcode(instance, "set register",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      auto registers = RegistersOf(effect);
                      const OpcodeStep step =
                          SetScriptRegister(cursor, registers);
@@ -540,31 +536,31 @@ int LiveSetEffectScriptRegister(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4B34 (src/BATTLE/BATTLE.PRG/5BF94.c:7639)
-int LiveBranchIfEffectRegisterEqual(Effects_EffectInstance* instance) {
+int LiveBranchIfEffectRegisterEqual(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if register equal",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      return BranchIfScriptRegisterEqual(cursor,
                                                         RegistersOf(effect));
                    });
 }
 
 // decomp: func_800D4B90 (src/BATTLE/BATTLE.PRG/5BF94.c:7645)
-int LiveBranchIfParticleCountEqual(Effects_EffectInstance* instance) {
+int LiveBranchIfParticleCountEqual(LiveEffectInstance* instance) {
   return RunOpcode(instance, "branch if particle count equal",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      return BranchIfParticleCountEqual(
-                         std::bit_cast<std::uint8_t>(effect.particleCount),
+                         std::bit_cast<std::uint8_t>(effect.particle_count),
                          cursor);
                    });
 }
 
 // decomp: func_800D4D98 (src/BATTLE/BATTLE.PRG/5BF94.c:7705)
-int LiveClearScriptActionVariant(Effects_EffectInstance* /*instance*/) {
+int LiveClearScriptActionVariant(LiveEffectInstance* /*instance*/) {
   return HandlerResult(ClearActionVariant(Effects_actionVariant));
 }
 
 // decomp: func_800D49A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7602)
-int LiveSetActionEffectVerticalOffset(Effects_EffectInstance* instance) {
+int LiveSetActionEffectVerticalOffset(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("vertical offset");
     return HandlerResult(ScriptStep::kEnd);
@@ -585,7 +581,7 @@ int LiveSetActionEffectVerticalOffset(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4D64 (src/BATTLE/BATTLE.PRG/5BF94.c:7697)
-int LiveSignalSourceActorFromScript(Effects_EffectInstance* instance) {
+int LiveSignalSourceActorFromScript(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("signal source actor");
     return HandlerResult(ScriptStep::kEnd);
@@ -599,22 +595,21 @@ int LiveSignalSourceActorFromScript(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4F00 (src/BATTLE/BATTLE.PRG/5BF94.c:7749)
-int LiveSetParticleColorCurvesFromScript(Effects_EffectInstance* instance) {
-  return RunOpcode(
-      instance, "set particle colour curves",
-      [](Effects_EffectInstance& /*effect*/, ScriptCursor& cursor) {
-        return WithDefinitionCurves(
-            [&cursor](std::span<ParticleColorCurves> curves) {
-              return SetParticleColorCurves(cursor, curves);
-            });
-      });
+int LiveSetParticleColorCurvesFromScript(LiveEffectInstance* instance) {
+  return RunOpcode(instance, "set particle colour curves",
+                   [](LiveEffectInstance& /*effect*/, ScriptCursor& cursor) {
+                     return WithDefinitionCurves(
+                         [&cursor](std::span<ParticleColorCurves> curves) {
+                           return SetParticleColorCurves(cursor, curves);
+                         });
+                   });
 }
 
 // decomp: func_800D4FB4 (src/BATTLE/BATTLE.PRG/5BF94.c:7762)
-int LiveApplyPairedParticleColorPreset(Effects_EffectInstance* instance) {
+int LiveApplyPairedParticleColorPreset(LiveEffectInstance* instance) {
   return RunOpcode(
       instance, "apply paired colour preset",
-      [](Effects_EffectInstance& effect, ScriptCursor& /*cursor*/) {
+      [](LiveEffectInstance& effect, ScriptCursor& /*cursor*/) {
         const auto presets = PairedPresets();
         return WithDefinitionCurves(
             [&effect, &presets](std::span<ParticleColorCurves> curves) {
@@ -625,14 +620,14 @@ int LiveApplyPairedParticleColorPreset(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D5048 (src/BATTLE/BATTLE.PRG/5BF94.c:7776)
-int LiveCompleteChildEffectScript(Effects_EffectInstance* instance) {
+int LiveCompleteChildEffectScript(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("complete child");
     return HandlerResult(ScriptStep::kEnd);
   }
-  Effects_EffectInstance* parent = instance->parent;
+  LiveEffectInstance* parent = instance->parent;
   if (parent == nullptr) return HandlerResult(ContinueScript());
-  const auto children = static_cast<std::uint8_t>(parent->childCount);
+  const auto children = static_cast<std::uint8_t>(parent->child_count);
   if (children == 0 && ShouldReport(wrapped_children)) {
     VS::Core::LogWarn(
         "effects",
@@ -640,15 +635,15 @@ int LiveCompleteChildEffectScript(Effects_EffectInstance* instance) {
         "running children; the count wraps to {} ({} wraps)",
         kChildCountMask, wrapped_children);
   }
-  parent->childCount = CompleteChildScript(children).value_or(children);
+  parent->child_count = CompleteChildScript(children).value_or(children);
   return HandlerResult(ContinueScript());
 }
 
 // decomp: func_800D5088 (src/BATTLE/BATTLE.PRG/5BF94.c:7785)
-int LiveApplyParticleColorPresetTable(Effects_EffectInstance* instance) {
+int LiveApplyParticleColorPresetTable(LiveEffectInstance* instance) {
   return RunOpcode(
       instance, "apply colour preset table",
-      [](Effects_EffectInstance& effect, ScriptCursor& /*cursor*/) {
+      [](LiveEffectInstance& effect, ScriptCursor& /*cursor*/) {
         const auto tables = PresetTables();
         return WithDefinitionCurves(
             [&effect, &tables](std::span<ParticleColorCurves> curves) {
@@ -659,25 +654,25 @@ int LiveApplyParticleColorPresetTable(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D5150 (src/BATTLE/BATTLE.PRG/5BF94.c:7799)
-int LiveReportInvalidEffectInstruction(Effects_EffectInstance* /*instance*/) {
+int LiveReportInvalidEffectInstruction(LiveEffectInstance* /*instance*/) {
   const ScriptDiagnosticStep report = ReportInvalidInstruction();
   LiveReportEffectDiagnostic(static_cast<int>(report.diagnostic));
   return HandlerResult(report.step);
 }
 
 // decomp: func_800D48A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7569)
-int LiveLoadEffectTimelineImmediate(Effects_EffectInstance* instance) {
+int LiveLoadEffectTimelineImmediate(LiveEffectInstance* instance) {
   return RunOpcode(instance, "load timeline",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      InstanceEffectHost host{effect};
                      return LoadTimelineImmediate(cursor, host);
                    });
 }
 
 // decomp: func_800D4DB0 (src/BATTLE/BATTLE.PRG/5BF94.c:7713)
-int LiveLoadEffectTimelineFromRegister(Effects_EffectInstance* instance) {
+int LiveLoadEffectTimelineFromRegister(LiveEffectInstance* instance) {
   return RunOpcode(instance, "load register timeline",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      InstanceEffectHost host{effect};
                      const bool has_parent = effect.parent != nullptr;
                      return LoadRegisterTimeline(
@@ -688,9 +683,9 @@ int LiveLoadEffectTimelineFromRegister(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4E5C (src/BATTLE/BATTLE.PRG/5BF94.c:7728)
-int LiveTickEffectTimelineFromScript(Effects_EffectInstance* instance) {
+int LiveTickEffectTimelineFromScript(LiveEffectInstance* instance) {
   return RunOpcode(instance, "tick timeline",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      InstanceEffectHost host{effect};
                      return TickTimelineFromScript(
                          cursor, effect.context.timeline != nullptr, host);
@@ -698,10 +693,10 @@ int LiveTickEffectTimelineFromScript(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4E90 (src/BATTLE/BATTLE.PRG/5BF94.c:7734)
-int LiveBranchIfEffectTimelineFinished(Effects_EffectInstance* instance) {
+int LiveBranchIfEffectTimelineFinished(LiveEffectInstance* instance) {
   return RunOpcode(
       instance, "branch if timeline finished",
-      [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+      [](LiveEffectInstance& effect, ScriptCursor& cursor) {
         const LiveEffectTimeline* timeline = effect.context.timeline;
         const auto active_tracks = timeline == nullptr
                                        ? std::nullopt
@@ -711,54 +706,54 @@ int LiveBranchIfEffectTimelineFinished(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4EC0 (src/BATTLE/BATTLE.PRG/5BF94.c:7740)
-int LiveFreeEffectScriptTimeline(Effects_EffectInstance* instance) {
-  return RunHostStep(
-      instance, "free timeline",
-      [](Effects_EffectInstance& effect, ScriptEffectHost& host) {
-        return FreeScriptTimeline(effect.context.timeline != nullptr, host);
-      });
+int LiveFreeEffectScriptTimeline(LiveEffectInstance* instance) {
+  return RunHostStep(instance, "free timeline",
+                     [](LiveEffectInstance& effect, ScriptEffectHost& host) {
+                       return FreeScriptTimeline(
+                           effect.context.timeline != nullptr, host);
+                     });
 }
 
 // decomp: func_800D4984 (src/BATTLE/BATTLE.PRG/5BF94.c:7596)
-int LiveTickEffectTransforms(Effects_EffectInstance* instance) {
+int LiveTickEffectTransforms(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "tick transforms",
-      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+      [](LiveEffectInstance& /*effect*/, ScriptEffectHost& host) {
         return TickScriptTransforms(host);
       });
 }
 
 // decomp: func_800D4A94 (src/BATTLE/BATTLE.PRG/5BF94.c:7619)
-int LiveInitializeScriptEffectTransforms(Effects_EffectInstance* instance) {
+int LiveInitializeScriptEffectTransforms(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "initialize transforms",
-      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+      [](LiveEffectInstance& /*effect*/, ScriptEffectHost& host) {
         return InitializeScriptTransforms(host);
       });
 }
 
 // decomp: func_800D4D44 (src/BATTLE/BATTLE.PRG/5BF94.c:7691)
-int LiveRefreshScriptParticleEnvironment(Effects_EffectInstance* instance) {
+int LiveRefreshScriptParticleEnvironment(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "refresh particle environment",
-      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+      [](LiveEffectInstance& /*effect*/, ScriptEffectHost& host) {
         return RefreshParticleEnvironment(host);
       });
 }
 
 // decomp: func_800D4778 (src/BATTLE/BATTLE.PRG/5BF94.c:7527)
-int LiveSpawnEffectScript(Effects_EffectInstance* instance) {
+int LiveSpawnEffectScript(LiveEffectInstance* instance) {
   return RunOpcode(instance, "spawn script",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      InstanceEffectHost host{effect};
                      return SpawnChildScript(cursor, host);
                    });
 }
 
 // decomp: func_800D47F4 (src/BATTLE/BATTLE.PRG/5BF94.c:7546)
-int LiveAttachScriptRenderer(Effects_EffectInstance* instance) {
+int LiveAttachScriptRenderer(LiveEffectInstance* instance) {
   return RunOpcode(instance, "attach renderer",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      InstanceEffectHost host{effect};
                      return AttachScriptRenderer(
                          cursor, effect.context.parameter, host);
@@ -766,18 +761,18 @@ int LiveAttachScriptRenderer(Effects_EffectInstance* instance) {
 }
 
 // decomp: func_800D4910 (src/BATTLE/BATTLE.PRG/5BF94.c:7582)
-int LiveTickEffectRenderers(Effects_EffectInstance* instance) {
+int LiveTickEffectRenderers(LiveEffectInstance* instance) {
   return RunHostStep(
       instance, "tick renderers",
-      [](Effects_EffectInstance& /*effect*/, ScriptEffectHost& host) {
+      [](LiveEffectInstance& /*effect*/, ScriptEffectHost& host) {
         return TickScriptRenderers(host);
       });
 }
 
 // decomp: func_800D4BD0 (src/BATTLE/BATTLE.PRG/5BF94.c:7651)
-int LiveEmitParticlesFromScriptRegister(Effects_EffectInstance* instance) {
+int LiveEmitParticlesFromScriptRegister(LiveEffectInstance* instance) {
   return RunOpcode(instance, "emit register particles",
-                   [](Effects_EffectInstance& effect, ScriptCursor& cursor) {
+                   [](LiveEffectInstance& effect, ScriptCursor& cursor) {
                      InstanceEffectHost host{effect};
                      return EmitRegisterParticles(cursor, RegistersOf(effect),
                                                   host);

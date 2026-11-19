@@ -1119,6 +1119,9 @@
     <ClCompile Include="src\Effects\EffectScriptLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClInclude Include="src\Effects\Instance.hpp">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClInclude Include="src\Effects\Package.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>

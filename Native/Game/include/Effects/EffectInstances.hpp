@@ -5,14 +5,14 @@
 #include <cstdint>
 #include <optional>
 
-struct Effects_EffectInstance;
-
 // Effect instance lifecycle (BATTLE.PRG 5BF94.c:5074-5160, 5548, 5593-5665).
 // The primary and the secondary effects each run a chain of instances ordered
 // by priority; an instance's renderers form a chain of their own, newest
 // first. The records stay in the game heap: EffectInstancesLive.hpp edits
 // them through the chains below and keeps the original entry points.
 namespace VS::Effects {
+struct LiveEffectInstance;
+
 // LiveEffectInstanceTargets::phase of a secondary instance; the original
 // stored the bare number.
 enum class SecondaryEffectPhase : std::int16_t {
@@ -138,46 +138,46 @@ class RendererChain : public RecordChain<LiveRendererSlot> {
 
 // An effect chain (Effects_primaryInstances or Effects_secondaryInstances),
 // ordered by priority.
-class EffectInstanceChain : public RecordChain<Effects_EffectInstance> {
+class EffectInstanceChain : public RecordChain<LiveEffectInstance> {
  public:
-  // Effects_EffectInstance.priority, unsigned as the original read it.
+  // LiveEffectInstance.priority, unsigned as the original read it.
   [[nodiscard]] virtual std::uint8_t PriorityOf(
-      Effects_EffectInstance& instance) = 0;
+      LiveEffectInstance& instance) = 0;
   // A new instance started from the spawn (InitEffectInstance); null
   // (refused) when the heap has no room.
-  [[nodiscard]] virtual Effects_EffectInstance* StartInstance() = 0;
+  [[nodiscard]] virtual LiveEffectInstance* StartInstance() = 0;
   // Returns its particles to the pool (ReleaseAllEffectParticles).
-  virtual void ReleaseParticles(Effects_EffectInstance& instance) = 0;
+  virtual void ReleaseParticles(LiveEffectInstance& instance) = 0;
   // The instance's renderers.
   [[nodiscard]] virtual RendererChain& Renderers(
-      Effects_EffectInstance& instance) = 0;
+      LiveEffectInstance& instance) = 0;
   // Returns the instance's effect token to the pool.
-  virtual void ReleaseToken(Effects_EffectInstance& instance) = 0;
-  virtual void Free(Effects_EffectInstance& instance) = 0;
+  virtual void ReleaseToken(LiveEffectInstance& instance) = 0;
+  virtual void Free(LiveEffectInstance& instance) = 0;
 };
 
 // func_800CE83C (5BF94.c:5114): starts a primary instance and links it after
 // every instance of no greater priority. The spawn's full `priority` is
 // compared with the unsigned byte each instance keeps, as in the original. Null
 // (refused) when the heap has no room.
-[[nodiscard]] Effects_EffectInstance* CreatePrimaryEffectInstance(
+[[nodiscard]] LiveEffectInstance* CreatePrimaryEffectInstance(
     std::int32_t priority, EffectInstanceChain& primaries);
 
 // func_800CF55C (5BF94.c:5593): CreatePrimaryEffectInstance for the
 // secondary chain.
-[[nodiscard]] Effects_EffectInstance* CreateSecondaryEffectInstance(
+[[nodiscard]] LiveEffectInstance* CreateSecondaryEffectInstance(
     std::int32_t priority, EffectInstanceChain& secondaries);
 
 // func_800CE8F4 (5BF94.c:5139): unlinks the instance, releases its particles,
 // stops and detaches each renderer, newest first, and frees the instance. An
 // instance missing from the chain is still ended, as in the original.
-void DestroyPrimaryEffectInstance(Effects_EffectInstance& instance,
+void DestroyPrimaryEffectInstance(LiveEffectInstance& instance,
                                   EffectInstanceChain& primaries);
 
 // func_800CF614 (5BF94.c:5617): unlinks the instance, releases its particles
 // and token and frees it. Its renderers stay attached, as in the original;
 // the secondary update detaches each one as it finishes.
-void DestroySecondaryEffectInstance(Effects_EffectInstance& instance,
+void DestroySecondaryEffectInstance(LiveEffectInstance& instance,
                                     EffectInstanceChain& secondaries);
 
 // func_800CF694 (5BF94.c:5636): attaches a slot running `renderer` as the
@@ -198,13 +198,13 @@ class EffectRendererUpdates {
  public:
   virtual ~EffectRendererUpdates() = default;
   [[nodiscard]] virtual LiveRendererSlot* FirstRenderer(
-      Effects_EffectInstance& instance) = 0;
+      LiveEffectInstance& instance) = 0;
   [[nodiscard]] virtual LiveRendererSlot* NextRenderer(
       LiveRendererSlot& slot) = 0;
   // Sends the slot's renderer RendererCommand::kUpdate; false once it has
   // finished.
   [[nodiscard]] virtual bool UpdateRenderer(LiveRendererSlot& slot) = 0;
-  virtual void DetachRenderer(Effects_EffectInstance& instance,
+  virtual void DetachRenderer(LiveEffectInstance& instance,
                               LiveRendererSlot& slot) = 0;
 
  protected:
@@ -219,6 +219,6 @@ class EffectRendererUpdates {
 // (5BF94.c:5321): updates each renderer, newest first, and detaches each one
 // that has finished. The next slot is read before the update, as in the
 // original, so a renderer may detach itself.
-void UpdateEffectRenderers(Effects_EffectInstance& instance,
+void UpdateEffectRenderers(LiveEffectInstance& instance,
                            EffectRendererUpdates& renderers);
 }  // namespace VS::Effects

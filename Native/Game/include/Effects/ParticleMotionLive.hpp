@@ -1,8 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Effects_EffectInstance;
-
 // Live binding for particle motion and ageing (ParticleMotion.hpp): the
 // LiveParticle records of an effect instance's list, the emitter scratch,
 // the forces ParticlePoolLive.hpp loads and the GTE rotation the emitter set.
@@ -10,6 +8,7 @@ struct Effects_EffectInstance;
 // emitter and the particle renderers. A missing record is refused with a
 // diagnostic.
 namespace VS::Effects {
+struct LiveEffectInstance;
 struct LiveParticle;
 struct LiveParticleEmitterScratch;
 struct LiveParticleLinePacket;
@@ -22,7 +21,7 @@ void LiveSetParticleSpawnPosition(LiveParticleEmitterScratch* scratch,
                                   LiveParticle* particle);
 // func_800D4C18 (5BF94.c:7658): returns 1, as the original always did. A
 // particle is the parent of the events it emits.
-int LiveTickEffectParticles(Effects_EffectInstance* instance);
+int LiveTickEffectParticles(LiveEffectInstance* instance);
 // func_800D52A4 (5BF94.c:7830): an empty list is nothing to integrate.
 void LiveIntegrateParticleMotion(LiveParticle* first);
 }  // namespace VS::Effects

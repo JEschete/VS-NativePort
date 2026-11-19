@@ -27,7 +27,7 @@ struct ParticlePool {
   friend bool operator==(const ParticlePool&, const ParticlePool&) = default;
 };
 
-// An effect instance's particles (Effects_EffectInstance's particles and
+// An effect instance's particles (LiveEffectInstance's particles and
 // particleCount): the newest and the count, an unsigned byte as the original
 // read it.
 struct ParticleList {

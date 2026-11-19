@@ -8,7 +8,6 @@
 #include "Effects/PrimaryEffect.hpp"
 
 struct Content_DiscQueueSlot;
-struct Effects_EffectInstance;
 
 // The effect runtime's start-up and frame update and the primary effect's
 // action lifecycle (BATTLE.PRG 5BF94.c:5047-5070, 5170-5477). Each frame the
@@ -20,7 +19,9 @@ struct Effects_EffectInstance;
 // binds the hosts below to them, and each host read returns the current
 // record, as the original reread its globals after every call.
 namespace VS::Effects {
+struct LiveEffectInstance;
 struct LiveRendererSlot;
+
 // LiveActionEffectTarget.type of an endpoint on an actor's bone.
 inline constexpr std::uint16_t kActorBoneEndpoint = 4;
 
@@ -34,9 +35,9 @@ enum class ActivePackage : std::uint8_t { kSecondary = 0, kAction = 1 };
 struct EffectRuntimeRecords {
   PrimaryEffectState primary{};
   std::uint8_t primary_token{};
-  Effects_EffectInstance* primary_instances{};
-  Effects_EffectInstance* secondary_instances{};
-  Effects_EffectInstance* current_instance{};
+  LiveEffectInstance* primary_instances{};
+  LiveEffectInstance* secondary_instances{};
+  LiveEffectInstance* current_instance{};
   std::int32_t unused_primary_word{};
   std::int32_t first_curve_sample{};
   std::uint8_t action_variant{};
@@ -76,10 +77,10 @@ class EffectInstancePlayback {
  public:
   virtual ~EffectInstancePlayback() = default;
   // The instance after `instance` in its chain; null after the last.
-  [[nodiscard]] virtual Effects_EffectInstance* Next(
-      Effects_EffectInstance& instance) = 0;
+  [[nodiscard]] virtual LiveEffectInstance* Next(
+      LiveEffectInstance& instance) = 0;
   // Makes `instance` the one the script and particle code act on.
-  virtual void SetCurrent(Effects_EffectInstance& instance) = 0;
+  virtual void SetCurrent(LiveEffectInstance& instance) = 0;
   // Whether the current package has a curve block.
   [[nodiscard]] virtual bool HasCurves() = 0;
   // Samples every curve of the package at `frame`.
@@ -87,11 +88,9 @@ class EffectInstancePlayback {
   // Applies the package's gravity and drag to the particles.
   virtual void UpdateParticleForces() = 0;
   // Runs the instance's script for a frame; false once it has ended.
-  [[nodiscard]] virtual bool RunScript(Effects_EffectInstance& instance) = 0;
-  [[nodiscard]] virtual std::uint16_t Frame(
-      Effects_EffectInstance& instance) = 0;
-  virtual void SetFrame(Effects_EffectInstance& instance,
-                        std::uint16_t frame) = 0;
+  [[nodiscard]] virtual bool RunScript(LiveEffectInstance& instance) = 0;
+  [[nodiscard]] virtual std::uint16_t Frame(LiveEffectInstance& instance) = 0;
+  virtual void SetFrame(LiveEffectInstance& instance, std::uint16_t frame) = 0;
   virtual void ReleaseParticlePool() = 0;
   virtual void SelectPackage(ActivePackage package) = 0;
 
@@ -111,7 +110,7 @@ class PrimaryEffectRuntime : public EffectInstancePlayback {
   virtual void SetPrimary(const PrimaryEffectState& state) = 0;
   [[nodiscard]] virtual std::uint8_t PrimaryToken() = 0;
   virtual void SetPrimaryToken(std::uint8_t token) = 0;
-  [[nodiscard]] virtual Effects_EffectInstance* FirstPrimary() = 0;
+  [[nodiscard]] virtual LiveEffectInstance* FirstPrimary() = 0;
   [[nodiscard]] virtual Content_DiscQueueSlot* MenuReloadSlot() = 0;
   virtual void SetMenuReloadSlot(Content_DiscQueueSlot* slot) = 0;
 
@@ -145,7 +144,7 @@ class PrimaryEffectRuntime : public EffectInstancePlayback {
   // still counts as started, as in the original.
   [[nodiscard]] virtual bool SpawnTrack(std::int32_t script_offset,
                                         std::uint8_t token) = 0;
-  virtual void DestroyPrimary(Effects_EffectInstance& instance) = 0;
+  virtual void DestroyPrimary(LiveEffectInstance& instance) = 0;
 
   // The package's room sound bank and cutscene stream; each unbind clears
   // the package's reference.
@@ -169,8 +168,8 @@ class PrimaryEffectRuntime : public EffectInstancePlayback {
   virtual void CaptureEffectCamera() = 0;
 
   // The instance's timeline, which the clear frees from the heap's high end.
-  [[nodiscard]] virtual bool HasTimeline(Effects_EffectInstance& instance) = 0;
-  virtual void FreeTimeline(Effects_EffectInstance& instance) = 0;
+  [[nodiscard]] virtual bool HasTimeline(LiveEffectInstance& instance) = 0;
+  virtual void FreeTimeline(LiveEffectInstance& instance) = 0;
 };
 
 // func_800CE9B0 (5BF94.c:5170): advances the primary effect a frame. False
@@ -215,18 +214,16 @@ void ClearPrimaryEffects(PrimaryEffectRuntime& runtime);
 class SecondaryEffectRuntime : public EffectInstancePlayback,
                                public EffectRendererUpdates {
  public:
-  [[nodiscard]] virtual Effects_EffectInstance* FirstSecondary() = 0;
+  [[nodiscard]] virtual LiveEffectInstance* FirstSecondary() = 0;
   // LiveEffectInstanceTargets::phase, as stored.
-  [[nodiscard]] virtual std::int16_t PhaseOf(
-      Effects_EffectInstance& instance) = 0;
-  virtual void SetPhase(Effects_EffectInstance& instance,
+  [[nodiscard]] virtual std::int16_t PhaseOf(LiveEffectInstance& instance) = 0;
+  virtual void SetPhase(LiveEffectInstance& instance,
                         SecondaryEffectPhase phase) = 0;
   // Takes a particle pool for the instance.
   virtual void AcquireParticlePool() = 0;
   // The instance's three busy bits.
-  [[nodiscard]] virtual std::uint8_t BusyBits(
-      Effects_EffectInstance& instance) = 0;
-  virtual void DestroySecondary(Effects_EffectInstance& instance) = 0;
+  [[nodiscard]] virtual std::uint8_t BusyBits(LiveEffectInstance& instance) = 0;
+  virtual void DestroySecondary(LiveEffectInstance& instance) = 0;
 };
 
 // func_800CED60 (5BF94.c:5321): advances each secondary instance a frame and
@@ -319,14 +316,14 @@ class SecondaryEffectSpawner {
   [[nodiscard]] virtual std::uint16_t TargetType(std::size_t target) = 0;
   // A secondary instance with the request's source and the target as its
   // endpoints, running the package's script; null when it was refused.
-  [[nodiscard]] virtual Effects_EffectInstance* CreateSecondary(
+  [[nodiscard]] virtual LiveEffectInstance* CreateSecondary(
       const SecondarySpawn& spawn) = 0;
   // Stores the parameter and effect id in the instance and sets its busy
   // bits.
-  virtual void StartSecondary(Effects_EffectInstance& instance,
+  virtual void StartSecondary(LiveEffectInstance& instance,
                               std::int32_t parameter, std::uint16_t effect_id,
                               std::uint8_t busy_bits) = 0;
-  virtual void SetPhase(Effects_EffectInstance& instance,
+  virtual void SetPhase(LiveEffectInstance& instance,
                         SecondaryEffectPhase phase) = 0;
   virtual void SelectPackage(ActivePackage package) = 0;
   // Captures the camera into the saved action camera, then into the effect

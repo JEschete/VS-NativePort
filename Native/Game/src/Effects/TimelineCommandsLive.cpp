@@ -44,7 +44,7 @@ std::uint64_t refused_records = 0;
 
 // Reports a null instance; the first refusal and each power of two after it
 // are logged.
-[[nodiscard]] bool Refused(const Effects_EffectInstance* instance,
+[[nodiscard]] bool Refused(const LiveEffectInstance* instance,
                            std::string_view command) {
   if (instance != nullptr) return false;
   if (std::has_single_bit(++refused_instances)) {
@@ -67,7 +67,7 @@ void ReportMissing(std::string_view command, std::string_view missing) {
 
 // The transform's motion record, or null (refused) past the instance's
 // transforms.
-[[nodiscard]] LiveTransformSlot* MotionOf(Effects_EffectInstance& instance,
+[[nodiscard]] LiveTransformSlot* MotionOf(LiveEffectInstance& instance,
                                           std::uint8_t transform_index,
                                           std::string_view command) {
   const auto slot = TransformSlotOf(transform_index);
@@ -78,8 +78,7 @@ void ReportMissing(std::string_view command, std::string_view missing) {
   return &std::span(instance.transforms)[*slot];
 }
 
-[[nodiscard]] CommandEndpoints EndpointsOf(
-    const Effects_EffectInstance& instance) {
+[[nodiscard]] CommandEndpoints EndpointsOf(const LiveEffectInstance& instance) {
   const LiveEffectInstanceTargets& context = instance.context;
   return {.source = CommandEndpointOf(context.source),
           .emit_from = CommandEndpointOf(context.emit_from),
@@ -117,8 +116,7 @@ class LiveTimelineEffectHost final : public TimelineEffectHost {
 // Performs the commands on the instance whose track is ticking.
 class LiveActionControlHost final : public ActionControlHost {
  public:
-  LiveActionControlHost(Effects_EffectInstance& instance,
-                        LiveTimelineTrack& track)
+  LiveActionControlHost(LiveEffectInstance& instance, LiveTimelineTrack& track)
       : instance_(&instance), track_(&track) {}
 
   void Perform(const ActionControl& control) override;
@@ -127,7 +125,7 @@ class LiveActionControlHost final : public ActionControlHost {
   }
 
  private:
-  Effects_EffectInstance* instance_;
+  LiveEffectInstance* instance_;
   LiveTimelineTrack* track_;
 };
 
@@ -154,19 +152,19 @@ CommandEndpoint CommandEndpointOf(const LiveActionEffectTarget& endpoint) {
       .point = {.x = point.vx, .y = point.vy, .z = point.vz, .pad = point.pad}};
 }
 
-void LiveApplyTargetActionImpact(Effects_EffectInstance* instance) {
+void LiveApplyTargetActionImpact(LiveEffectInstance* instance) {
   if (Refused(instance, "target impact")) return;
   ApplyImpact(TargetActionImpact(EndpointsOf(*instance)),
               Battle::ApplyLiveActionTargetEffects);
 }
 
-void LiveApplySourceActionImpact(Effects_EffectInstance* instance) {
+void LiveApplySourceActionImpact(LiveEffectInstance* instance) {
   if (Refused(instance, "source impact")) return;
   ApplyImpact(SourceActionImpact(EndpointsOf(*instance)),
               Battle::ApplyLiveActionSourceEffects);
 }
 
-void LiveActivateTargetRoomTile(Effects_EffectInstance* instance) {
+void LiveActivateTargetRoomTile(LiveEffectInstance* instance) {
   if (Refused(instance, "room tile")) return;
   if (const auto tile = TargetRoomTile(EndpointsOf(*instance))) {
     SVECTOR point = PointOf(*tile);
@@ -174,14 +172,14 @@ void LiveActivateTargetRoomTile(Effects_EffectInstance* instance) {
   }
 }
 
-void LiveSignalSourceActorFromTimeline(Effects_EffectInstance* instance) {
+void LiveSignalSourceActorFromTimeline(LiveEffectInstance* instance) {
   if (Refused(instance, "signal source actor")) return;
   if (const auto actor = TimelineSourceActorToSignal(EndpointsOf(*instance))) {
     VS::Effects::LiveSignalActorEffectAnimation(*actor);
   }
 }
 
-void LiveSetSourceWeaponBrightness(Effects_EffectInstance* instance,
+void LiveSetSourceWeaponBrightness(LiveEffectInstance* instance,
                                    std::uint8_t brightness) {
   if (Refused(instance, "weapon brightness")) return;
   if (const auto override =
@@ -191,7 +189,7 @@ void LiveSetSourceWeaponBrightness(Effects_EffectInstance* instance,
   }
 }
 
-void LivePlaySourceActorReactionSound(Effects_EffectInstance* instance,
+void LivePlaySourceActorReactionSound(LiveEffectInstance* instance,
                                       std::uint8_t variant) {
   if (Refused(instance, "reaction sound")) return;
   const auto sound = SourceReactionSound(EndpointsOf(*instance), variant,
@@ -202,7 +200,7 @@ void LivePlaySourceActorReactionSound(Effects_EffectInstance* instance,
   Audio::LivePlayActorModelSoundVariant(sound->actor, sound->variant);
 }
 
-void LiveActivateTargetGimmick(Effects_EffectInstance* instance) {
+void LiveActivateTargetGimmick(LiveEffectInstance* instance) {
   if (Refused(instance, "room object")) return;
   if (const auto object = TargetGimmick(EndpointsOf(*instance))) {
     SVECTOR point = PointOf(*object);
@@ -210,14 +208,14 @@ void LiveActivateTargetGimmick(Effects_EffectInstance* instance) {
   }
 }
 
-void LivePrepareTargetDefenseTiming(Effects_EffectInstance* instance) {
+void LivePrepareTargetDefenseTiming(LiveEffectInstance* instance) {
   if (Refused(instance, "defense timing")) return;
   if (const auto actor = DefenseTimingTarget(EndpointsOf(*instance))) {
     Battle::LiveArmDefenseAbilityTimingWindow(*actor);
   }
 }
 
-void LiveSpawnTransformWeaponTrail(Effects_EffectInstance* instance,
+void LiveSpawnTransformWeaponTrail(LiveEffectInstance* instance,
                                    std::uint8_t transform_index,
                                    std::uint8_t packed_style) {
   if (Refused(instance, "weapon trail")) return;
@@ -233,7 +231,7 @@ void LiveFadeActionWeaponTrails() {
   FadeActionWeaponTrails(host);
 }
 
-void LiveResumeEffectTransformMotion(Effects_EffectInstance* instance,
+void LiveResumeEffectTransformMotion(LiveEffectInstance* instance,
                                      std::uint8_t transform_index) {
   if (Refused(instance, "resume transform")) return;
   if (auto* motion = MotionOf(*instance, transform_index, "resume transform")) {
@@ -241,7 +239,7 @@ void LiveResumeEffectTransformMotion(Effects_EffectInstance* instance,
   }
 }
 
-void LiveHoldEffectTimelineFrame(Effects_EffectInstance* instance) {
+void LiveHoldEffectTimelineFrame(LiveEffectInstance* instance) {
   if (Refused(instance, "hold frame")) return;
   LiveEffectTimeline* timeline = instance->context.timeline;
   if (timeline == nullptr) {
@@ -256,7 +254,7 @@ void LivePauseMovingRoomObjects() {
   PauseMovingRoomObjects(host);
 }
 
-void LiveInvalidateEffectTransformAttachments(Effects_EffectInstance* instance,
+void LiveInvalidateEffectTransformAttachments(LiveEffectInstance* instance,
                                               std::uint8_t transform_index) {
   if (Refused(instance, "invalidate transform")) return;
   if (auto* motion =
@@ -307,7 +305,7 @@ void LiveActionControlHost::Perform(const ActionControl& control) {
   }
 }
 
-int LiveTickActionControlTrack(Effects_EffectInstance* instance,
+int LiveTickActionControlTrack(LiveEffectInstance* instance,
                                LiveTimelineTrack* track) {
   if (Refused(instance, "action-control track")) return 0;
   if (track == nullptr || instance->context.timeline == nullptr) {

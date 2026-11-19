@@ -51,7 +51,7 @@ void SetPhase(PrimaryEffectRuntime& runtime, PrimaryEffectPhase phase) {
 }
 
 // The curve sampling and particle forces that open an instance's frame.
-void BeginInstanceFrame(Effects_EffectInstance& instance,
+void BeginInstanceFrame(LiveEffectInstance& instance,
                         EffectInstancePlayback& playback) {
   if (playback.HasCurves()) {
     playback.SampleCurves(playback.Frame(instance));
@@ -59,7 +59,7 @@ void BeginInstanceFrame(Effects_EffectInstance& instance,
   playback.UpdateParticleForces();
 }
 
-void AdvanceFrame(Effects_EffectInstance& instance,
+void AdvanceFrame(LiveEffectInstance& instance,
                   EffectInstancePlayback& playback) {
   playback.SetFrame(instance,
                     static_cast<std::uint16_t>(playback.Frame(instance) + 1U));
@@ -135,9 +135,9 @@ void ReleaseAction(PrimaryEffectRuntime& runtime) {
 
 // Phase kPlayingTracks (5BF94.c:5236).
 void PlayTracks(PrimaryEffectRuntime& runtime) {
-  Effects_EffectInstance* instance = runtime.FirstPrimary();
+  LiveEffectInstance* instance = runtime.FirstPrimary();
   while (instance != nullptr) {
-    Effects_EffectInstance* next = runtime.Next(*instance);
+    LiveEffectInstance* next = runtime.Next(*instance);
     runtime.SetCurrent(*instance);
     BeginInstanceFrame(*instance, runtime);
     if (runtime.RunScript(*instance)) {
@@ -173,7 +173,7 @@ void PlayTracks(PrimaryEffectRuntime& runtime) {
 }
 
 // One frame of a secondary instance; returns its busy bits.
-[[nodiscard]] std::uint8_t PlaySecondary(Effects_EffectInstance& instance,
+[[nodiscard]] std::uint8_t PlaySecondary(LiveEffectInstance& instance,
                                          SecondaryEffectRuntime& runtime) {
   const std::optional<SecondaryEffectPhase> phase =
       ToSecondaryEffectPhase(runtime.PhaseOf(instance));
@@ -256,10 +256,10 @@ bool UpdatePrimaryEffects(PrimaryEffectRuntime& runtime) {
 // decomp: func_800CED60 (src/BATTLE/BATTLE.PRG/5BF94.c:5321)
 std::uint8_t UpdateSecondaryEffects(SecondaryEffectRuntime& runtime) {
   std::uint8_t busy = 0;
-  Effects_EffectInstance* instance = runtime.FirstSecondary();
+  LiveEffectInstance* instance = runtime.FirstSecondary();
   while (instance != nullptr) {
     runtime.SetCurrent(*instance);
-    Effects_EffectInstance* next = runtime.Next(*instance);
+    LiveEffectInstance* next = runtime.Next(*instance);
     busy |= PlaySecondary(*instance, runtime);
     instance = next;
   }
@@ -323,10 +323,10 @@ std::uint8_t BeginActionEffect(const ActionEffectStart& start,
 
 // decomp: func_800CF1A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5462)
 void ClearPrimaryEffects(PrimaryEffectRuntime& runtime) {
-  Effects_EffectInstance* instance = runtime.FirstPrimary();
+  LiveEffectInstance* instance = runtime.FirstPrimary();
   runtime.StopVibration();
   while (instance != nullptr) {
-    Effects_EffectInstance* next = runtime.Next(*instance);
+    LiveEffectInstance* next = runtime.Next(*instance);
     if (runtime.HasTimeline(*instance)) {
       runtime.FreeTimeline(*instance);
     }
@@ -359,7 +359,7 @@ std::uint8_t SpawnSecondaryEffects(const SecondaryEffectRequest& request,
   const std::size_t targets =
       std::min<std::size_t>(request.target_count, kActionEffectTargets);
   for (std::size_t target = 0; target < targets; ++target) {
-    Effects_EffectInstance* instance = spawner.CreateSecondary(
+    LiveEffectInstance* instance = spawner.CreateSecondary(
         {.target = target,
          .toward_source = EmitsTowardSource(request.effect_id),
          .priority = spawner.TargetType(target),

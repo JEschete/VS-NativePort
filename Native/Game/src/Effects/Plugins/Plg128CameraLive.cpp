@@ -55,8 +55,8 @@ struct LiveCameraRecord {
 };
 static_assert(sizeof(LiveCameraRecord) == kStateBytes);
 
-using TransformSlots = decltype(Effects_EffectInstance::transforms);
-constexpr std::size_t kTransformCount = std::extent_v<TransformSlots>;
+using TransformSlots = decltype(LiveEffectInstance::transforms);
+constexpr std::size_t kTransformCount = std::tuple_size_v<TransformSlots>;
 // vectorRanges[] and pairRanges[] rows the camera reads.
 constexpr std::size_t kDirectionRange = 0;
 constexpr std::size_t kAttractionOffsetRange = 6;
@@ -181,7 +181,7 @@ void StoreScratch(LiveParticleEmitterScratch& live,
 
 class LiveCameraEffectHost final : public CameraEffectHost {
  public:
-  explicit LiveCameraEffectHost(Effects_EffectInstance* instance)
+  explicit LiveCameraEffectHost(LiveEffectInstance* instance)
       : instance_(instance) {}
 
   [[nodiscard]] std::optional<CameraDefinition> Definition(
@@ -270,7 +270,7 @@ class LiveCameraEffectHost final : public CameraEffectHost {
     return &instance_->transforms[index];
   }
 
-  Effects_EffectInstance* instance_ = nullptr;
+  LiveEffectInstance* instance_ = nullptr;
 };
 }  // namespace
 

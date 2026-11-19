@@ -3,8 +3,6 @@
 
 #include "Effects/EffectInstances.hpp"
 
-struct Effects_EffectInstance;
-
 // Live binding for the effect instance lifecycle (EffectInstances.hpp): the
 // chains are Effects_primaryInstances and Effects_secondaryInstances, an
 // instance's renderers its context.renderer, and the records live in the game
@@ -13,37 +11,38 @@ struct Effects_EffectInstance;
 // renderer or slot is refused with a diagnostic, as are a phase the runtime
 // never sets and the detach of a slot the instance does not hold.
 namespace VS::Effects {
-struct LiveRendererSlot;
+struct LiveEffectInstance;
 struct LiveEffectSpawnRequest;
+struct LiveRendererSlot;
 
 // func_800CE714 (5BF94.c:5074).
 void LiveInitEffectInstance(LiveEffectSpawnRequest* spawn_request,
-                            Effects_EffectInstance* instance);
+                            LiveEffectInstance* instance);
 // func_800CE83C (5BF94.c:5114) and func_800CF55C (5BF94.c:5593): a new
 // instance starts zeroed before its spawn is applied, where the original kept
 // the heap's bytes in its busy bits, effect id and phase. Null when refused
 // or the heap has no room.
-Effects_EffectInstance* LiveCreatePrimaryEffectInstance(
+LiveEffectInstance* LiveCreatePrimaryEffectInstance(
     LiveEffectSpawnRequest* spawn_request);
-Effects_EffectInstance* LiveCreateSecondaryEffectInstance(
+LiveEffectInstance* LiveCreateSecondaryEffectInstance(
     LiveEffectSpawnRequest* spawn_request);
 // func_800CE8F4 (5BF94.c:5139).
-void LiveDestroyPrimaryEffectInstance(Effects_EffectInstance* instance);
+void LiveDestroyPrimaryEffectInstance(LiveEffectInstance* instance);
 // func_800CF614 (5BF94.c:5617).
-void LiveDestroySecondaryEffectInstance(Effects_EffectInstance* instance);
+void LiveDestroySecondaryEffectInstance(LiveEffectInstance* instance);
 // func_800CF484 (5BF94.c:5548).
-void LiveSetSecondaryEffectPhase(int phase, Effects_EffectInstance* instance);
+void LiveSetSecondaryEffectPhase(int phase, LiveEffectInstance* instance);
 // func_800CF694 (5BF94.c:5636): null when refused or the heap has no room.
-LiveRendererSlot* LiveAttachEffectRenderer(Effects_EffectInstance* instance,
+LiveRendererSlot* LiveAttachEffectRenderer(LiveEffectInstance* instance,
                                            EffectRenderer renderer,
                                            int renderer_parameters);
 // func_800CF70C (5BF94.c:5647).
-void LiveDetachEffectRenderer(Effects_EffectInstance* instance,
+void LiveDetachEffectRenderer(LiveEffectInstance* instance,
                               LiveRendererSlot* slot);
 // Sends the slot's renderer RendererCommand::kUpdate; false once it has
 // finished. A slot without a renderer is refused and counts as finished.
 [[nodiscard]] bool LiveUpdateEffectRenderer(LiveRendererSlot& slot);
 // func_800D4910 (5BF94.c:7582): UpdateEffectRenderers over the instance's
 // renderers.
-void LiveUpdateEffectRenderers(Effects_EffectInstance* instance);
+void LiveUpdateEffectRenderers(LiveEffectInstance* instance);
 }  // namespace VS::Effects

@@ -72,9 +72,9 @@ namespace math = Core::Math;
 using math::Vec3;
 
 constexpr std::uintptr_t kEmitterScratchOffset = 0x1D0;
-using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
+using InstanceTransforms = decltype(LiveEffectInstance::transforms);
 using TextureTables = decltype(LiveEffectPackage::texture_tables);
-constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
+constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
 constexpr std::size_t kTextureTableCount = std::tuple_size_v<TextureTables>;
 constexpr std::uint32_t kOrderingHighMask = ~kRingLinkMask;
 constexpr std::size_t kWordBytes = 4;
@@ -243,7 +243,7 @@ class LiveSurfaceServices {
  private:
   std::string_view name_;
   const LiveParticleDefinition* definition_ = nullptr;
-  Effects_EffectInstance* instance_ = nullptr;
+  LiveEffectInstance* instance_ = nullptr;
 };
 
 std::optional<SurfaceDefinition> LiveSurfaceServices::CreateDefinition(

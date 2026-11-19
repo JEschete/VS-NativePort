@@ -4,12 +4,11 @@
 #include "Effects/Templates/TrailCore.hpp"
 #include "Effects/TrailEmitter.hpp"
 
-struct Effects_EffectInstance;
-
 namespace VS::Effects {
-struct LiveRendererSlot;
+struct LiveEffectInstance;
 struct LiveParticleDefinition;
 struct LiveParticleEmitterScratch;
+struct LiveRendererSlot;
 }  // namespace VS::Effects
 
 // Live bindings for the five- and nine-sample trail template instances
@@ -30,12 +29,12 @@ namespace VS::Effects::Templates {
 void RunLiveTrailStage(TrailStage stage,
                        const LiveParticleDefinition& definition,
                        LiveParticleEmitterScratch& scratch,
-                       Effects_EffectInstance& instance, LiveTrailState& state);
+                       LiveEffectInstance& instance, LiveTrailState& state);
 // RunLiveTrailStage over a nine-sample emitter (trails9.h).
 void RunLiveTrailNineStage(TrailNineStage stage,
                            const LiveParticleDefinition& definition,
                            LiveParticleEmitterScratch& scratch,
-                           Effects_EffectInstance& instance,
+                           LiveEffectInstance& instance,
                            LiveTrailNineState& state);
 
 int UpdateLivePlg057Trail(LiveRendererSlot* slot, unsigned int command,

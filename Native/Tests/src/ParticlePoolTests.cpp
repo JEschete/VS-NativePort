@@ -21,7 +21,7 @@ namespace {
 namespace fx = VS::Effects;
 namespace Memory = VS::Core::Memory;
 using Particle = VS::Effects::LiveParticle;
-using Instance = Effects_EffectInstance;
+using Instance = fx::LiveEffectInstance;
 
 constexpr std::size_t kRecords = 6;
 constexpr std::uint8_t kUnaged = 0xFF;
@@ -326,7 +326,7 @@ class SavedPool {
 // An instance's particles, as the typed list.
 [[nodiscard]] fx::ParticleList ListOf(const Instance& instance) {
   return {.first = instance.particles,
-          .count = std::bit_cast<std::uint8_t>(instance.particleCount)};
+          .count = std::bit_cast<std::uint8_t>(instance.particle_count)};
 }
 }  // namespace
 
@@ -383,12 +383,12 @@ TEST_CASE("Live particle list release reads counts above 127 unsigned",
   std::array<Particle, 1> particle{};
   auto instance = std::make_unique<Instance>();
   instance->particles = particle.data();
-  instance->particleCount = std::bit_cast<char>(std::uint8_t{0x90});
+  instance->particle_count = std::bit_cast<char>(std::uint8_t{0x90});
   VS::Effects::freeParticles = nullptr;
   VS::Effects::usedParticleCount = 0x90;
   fx::LiveReleaseAllEffectParticles(instance.get());
   CHECK(VS::Effects::usedParticleCount == 0);
-  CHECK(instance->particleCount == 0);
+  CHECK(instance->particle_count == 0);
   CHECK(VS::Effects::freeParticles == particle.data());
 }
 

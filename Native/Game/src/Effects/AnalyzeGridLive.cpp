@@ -36,8 +36,8 @@ namespace math = Core::Math;
 namespace grid = Templates;
 
 constexpr std::size_t kEmitterScratchOffset = 0x1D0;
-using InstanceTransforms = decltype(Effects_EffectInstance::transforms);
-constexpr std::size_t kTransformCount = std::extent_v<InstanceTransforms>;
+using InstanceTransforms = decltype(LiveEffectInstance::transforms);
+constexpr std::size_t kTransformCount = std::tuple_size_v<InstanceTransforms>;
 constexpr unsigned kHalfwordBits = 16;
 constexpr std::size_t kDirectionRange = 0;
 constexpr std::size_t kJitterRange = 1;
@@ -245,7 +245,7 @@ class LiveAnalyzeGridHost final : public AnalyzeGridHost {
 
   LiveRendererSlot& slot_;
   const LiveParticleDefinition* definition_ = nullptr;
-  const Effects_EffectInstance* instance_ = nullptr;
+  const LiveEffectInstance* instance_ = nullptr;
 };
 
 void LiveAnalyzeGridHost::PublishScratch(const grid::SurfaceScratch& values) {

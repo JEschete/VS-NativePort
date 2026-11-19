@@ -35,7 +35,7 @@ VECTOR particleGravity{};
 
 namespace {
 using Particle = LiveParticle;
-using Instance = Effects_EffectInstance;
+using Instance = LiveEffectInstance;
 
 constexpr std::uint8_t kUnagedParticle = 0xFF;
 
@@ -116,14 +116,14 @@ class LiveList {
   explicit LiveList(Instance& instance)
       : instance_(&instance),
         list_{.first = instance.particles,
-              .count = std::bit_cast<std::uint8_t>(instance.particleCount)} {}
+              .count = std::bit_cast<std::uint8_t>(instance.particle_count)} {}
   LiveList(const LiveList&) = delete;
   LiveList& operator=(const LiveList&) = delete;
   LiveList(LiveList&&) = delete;
   LiveList& operator=(LiveList&&) = delete;
   ~LiveList() {
     instance_->particles = list_.first;
-    instance_->particleCount = std::bit_cast<char>(list_.count);
+    instance_->particle_count = std::bit_cast<char>(list_.count);
   }
 
   [[nodiscard]] ParticleList& List() { return list_; }

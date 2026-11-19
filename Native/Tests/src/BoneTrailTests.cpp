@@ -179,7 +179,7 @@ int OtherRenderer(fx::LiveRendererSlot* /*slot*/, u_int /*command*/,
 // Secondary instances and slots in chain order: instance 0 runs slots 0 and
 // 1, instance 1 runs slot 2.
 struct TestChain {
-  std::array<Effects_EffectInstance, 2> instances{};
+  std::array<fx::LiveEffectInstance, 2> instances{};
   std::array<fx::LiveRendererSlot, 3> slots{};
   std::array<fx::BoneTrail, 3> trails{};
 
@@ -201,15 +201,15 @@ class TestChains final : public fx::BoneTrailChains {
   TestChain chain;
   std::vector<fx::LiveRendererSlot*> faded;
 
-  Effects_EffectInstance* FirstInstance() override {
+  fx::LiveEffectInstance* FirstInstance() override {
     return &chain.instances[0];
   }
-  Effects_EffectInstance* NextInstance(
-      Effects_EffectInstance& instance) override {
+  fx::LiveEffectInstance* NextInstance(
+      fx::LiveEffectInstance& instance) override {
     return instance.next;
   }
   fx::LiveRendererSlot* FirstRenderer(
-      Effects_EffectInstance& instance) override {
+      fx::LiveEffectInstance& instance) override {
     return instance.context.renderer;
   }
   fx::LiveRendererSlot* NextRenderer(fx::LiveRendererSlot& slot) override {
@@ -616,7 +616,7 @@ TEST_CASE("The live fade commands only the secondary bone trails",
           "[bone-trail][F01448][F00057][F01418]") {
   TestChain chain;
   chain.slots[1].renderer = &OtherRenderer;
-  Effects_EffectInstance* const saved = Effects_secondaryInstances;
+  fx::LiveEffectInstance* const saved = Effects_secondaryInstances;
   Effects_secondaryInstances = chain.instances.data();
   other_renderer_calls = 0;
   fx::LiveFadeBoneTrails();

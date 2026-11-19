@@ -537,7 +537,7 @@ TEST_CASE("Live trail stages run over the emitter's trail buffer",
           "[effects-trail-templates][effects]") {
   VS::Effects::LiveParticleDefinition definition{};
   VS::Effects::LiveParticleEmitterScratch scratch{};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   std::array<VS::Effects::LiveTrail, 3> buffer{};
   VS::Effects::LiveTrailState state{};
   state.trails = buffer.data();
@@ -553,7 +553,7 @@ TEST_CASE("Live trail stages skip a buffer that cannot hold its count",
   const LiveTrailScope scope;
   VS::Effects::LiveParticleDefinition definition{};
   VS::Effects::LiveParticleEmitterScratch scratch{};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   std::array<VS::Effects::LiveTrail, 1> buffer{};
   VS::Effects::LiveTrailState state{};
   state.trails = buffer.data();

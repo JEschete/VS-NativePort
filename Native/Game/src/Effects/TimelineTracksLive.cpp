@@ -73,7 +73,7 @@ struct ColourTrackState {
 };
 
 [[nodiscard]] std::optional<ColourTrackState> ColourTrackStateOf(
-    const Effects_EffectInstance* instance, const LiveTimelineTrack* track,
+    const LiveEffectInstance* instance, const LiveTimelineTrack* track,
     std::string_view call) {
   if (instance == nullptr || instance->context.timeline == nullptr) {
     RefuseTimelineCall(call, "no effect instance or timeline");
@@ -91,7 +91,7 @@ struct ColourTrackState {
 // Runs a colour track's tick on its current key: 1 while it runs, 0 once it
 // has no more keys or when refused.
 template <typename Tick>
-int RunColourTrack(Effects_EffectInstance* instance, LiveTimelineTrack* track,
+int RunColourTrack(LiveEffectInstance* instance, LiveTimelineTrack* track,
                    std::string_view call, Tick tick) {
   const auto state = ColourTrackStateOf(instance, track, call);
   if (!state) return 0;
@@ -144,7 +144,7 @@ int LiveAdvanceEffectTimelineKey(LiveTimelineTrack* track) {
   return 1;
 }
 
-int LiveTickSourceActorColorTrack(Effects_EffectInstance* instance,
+int LiveTickSourceActorColorTrack(LiveEffectInstance* instance,
                                   LiveTimelineTrack* track) {
   return RunColourTrack(
       instance, track, "source actor colour track",
@@ -155,7 +155,7 @@ int LiveTickSourceActorColorTrack(Effects_EffectInstance* instance,
       });
 }
 
-int LiveTickTargetActorColorTrack(Effects_EffectInstance* instance,
+int LiveTickTargetActorColorTrack(LiveEffectInstance* instance,
                                   LiveTimelineTrack* track,
                                   int apply_to_all_targets) {
   return RunColourTrack(
@@ -178,7 +178,7 @@ int LiveTickTargetActorColorTrack(Effects_EffectInstance* instance,
       });
 }
 
-int LiveTickOtherActorColorTrack(Effects_EffectInstance* instance,
+int LiveTickOtherActorColorTrack(LiveEffectInstance* instance,
                                  LiveTimelineTrack* track) {
   return RunColourTrack(
       instance, track, "other actor colour track",
@@ -193,13 +193,13 @@ int LiveTickOtherActorColorTrack(Effects_EffectInstance* instance,
       });
 }
 
-int LiveTickSceneColorTrack(Effects_EffectInstance* instance,
+int LiveTickSceneColorTrack(LiveEffectInstance* instance,
                             LiveTimelineTrack* track) {
   return RunColourTrack(instance, track, "scene colour track",
                         TickSceneColourTrack);
 }
 
-int LiveTickBackgroundColorTrack(Effects_EffectInstance* instance,
+int LiveTickBackgroundColorTrack(LiveEffectInstance* instance,
                                  LiveTimelineTrack* track) {
   return RunColourTrack(instance, track, "background colour track",
                         TickBackgroundColourTrack);

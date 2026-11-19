@@ -109,13 +109,13 @@ struct ParticleFixture {
   int saved_near = VS::Render::nearClip;
   int saved_projection = VS::Render::projectionDistance;
   VS::Effects::LiveEffectPackage* saved_package = Effects_package;
-  Effects_EffectInstance* saved_instance = Effects_currentInstance;
+  VS::Effects::LiveEffectInstance* saved_instance = Effects_currentInstance;
   VS::Effects::LiveParticle* saved_pool = VS::Effects::particlePool;
   int saved_capacity = VS::Effects::particleCapacity;
   int saved_used = VS::Effects::usedParticleCount;
   VS::Effects::LiveParticle* saved_free = VS::Effects::freeParticles;
   VS::Effects::LiveEffectPackage package{};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   VS::Effects::LiveParticle particle{};
   VS::Effects::LivePackageTexture texture{};
   VS::Effects::LivePackageTextureFrame info{.texture_count = 1,
@@ -188,7 +188,7 @@ struct ParticleFixture {
 
   void CheckEmissionPool(bool occupied) const {
     CHECK(VS::Effects::usedParticleCount == (occupied ? 1 : 0));
-    CHECK(instance.particleCount == (occupied ? 1 : 0));
+    CHECK(instance.particle_count == (occupied ? 1 : 0));
     CHECK(instance.particles == (occupied ? &particle : nullptr));
     CHECK(VS::Effects::freeParticles == (occupied ? nullptr : &particle));
     CHECK(particle.next == nullptr);
@@ -558,7 +558,7 @@ struct ChildEmissionFixture : EmissionFixture {
     VS::Effects::usedParticleCount = 1;
     VS::Effects::freeParticles = &nodes[1];
     instance.particles = &parent;
-    instance.particleCount = 1;
+    instance.particle_count = 1;
   }
 
   ~ChildEmissionFixture() {
@@ -584,7 +584,7 @@ struct ChildEmissionFixture : EmissionFixture {
 
   void CheckChildPopulation(ChildTrigger trigger) const {
     const bool retained = trigger == ChildTrigger::kTick;
-    CHECK(instance.particleCount == (retained ? 2 : 1));
+    CHECK(instance.particle_count == (retained ? 2 : 1));
     CHECK(VS::Effects::usedParticleCount == (retained ? 2 : 1));
     CHECK(VS::Effects::freeParticles == (retained ? nullptr : &nodes[0]));
   }
@@ -784,7 +784,7 @@ TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
   VS::Effects::usedParticleCount = full ? 1 : 0;
   VS::Effects::freeParticles = full ? nullptr : &fixture.particle;
   fixture.instance.particles = full ? &fixture.particle : nullptr;
-  fixture.instance.particleCount = full ? 1 : 0;
+  fixture.instance.particle_count = full ? 1 : 0;
   fixture.particle.next = nullptr;
   VS::Core::SeedBiosRand(1234);
   const bool emits = requested > 0 && !full;
@@ -865,14 +865,14 @@ TEST_CASE("Child effect tracks wait for the native outstanding child count",
   VS::Effects::LiveEffectTimeline timeline{};
   fixture.package.request = &request;
   fixture.instance.context.timeline = &timeline;
-  fixture.instance.childCount = 1;
+  fixture.instance.child_count = 1;
   track.keys = key.data();
   auto* saved_instances = Effects_primaryInstances;
   Effects_primaryInstances = nullptr;
 
   CHECK(VS::Effects::LiveTickChildEffectTrack(&fixture.instance, &track, 0) ==
         1);
-  CHECK(fixture.instance.childCount == 1);
+  CHECK(fixture.instance.child_count == 1);
   CHECK(track.key_parameter == 0);
   CHECK(Effects_primaryInstances == nullptr);
 
@@ -1071,7 +1071,7 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
   VS::Effects::LiveParticleDefinition definition{};
   std::ranges::fill(definition.pair_ranges[4], 12);
   VS::Effects::LiveParticleEmitterScratch scratch{};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   const auto samples = std::size(trail.spline_samples);
   for (int cycle = 0; cycle < 2; ++cycle) {
     state.curve_sample_distance = 0;
@@ -1098,7 +1098,7 @@ void CheckTrailReferencePath(State& state, Initialize initialize,
 template <VS::Effects::Templates::TrailStage Stage>
 void RunTrailStage(VS::Effects::LiveParticleDefinition* definition,
                    VS::Effects::LiveParticleEmitterScratch* scratch,
-                   Effects_EffectInstance* instance,
+                   VS::Effects::LiveEffectInstance* instance,
                    VS::Effects::LiveTrailState* state) {
   VS::Effects::Templates::RunLiveTrailStage(Stage, *definition, *scratch,
                                             *instance, *state);
@@ -1108,7 +1108,7 @@ void RunTrailStage(VS::Effects::LiveParticleDefinition* definition,
 template <VS::Effects::Templates::TrailNineStage Stage>
 void RunTrailNineStage(VS::Effects::LiveParticleDefinition* definition,
                        VS::Effects::LiveParticleEmitterScratch* scratch,
-                       Effects_EffectInstance* instance,
+                       VS::Effects::LiveEffectInstance* instance,
                        VS::Effects::LiveTrailNineState* state) {
   VS::Effects::Templates::RunLiveTrailNineStage(Stage, *definition, *scratch,
                                                 *instance, *state);

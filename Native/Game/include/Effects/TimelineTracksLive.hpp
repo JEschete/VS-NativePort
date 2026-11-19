@@ -1,8 +1,6 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-struct Effects_EffectInstance;
-
 // Live binding for the effect timeline keys and colour tracks
 // (TimelineTracks.hpp): each reads the track's current key and the instance's
 // timeline and endpoints, and performs the actor, curve or palette call. The
@@ -11,6 +9,7 @@ struct Effects_EffectInstance;
 // diagnostic; action targets and other actors past the request's sixteen are
 // not read.
 namespace VS::Effects {
+struct LiveEffectInstance;
 struct LiveTimelineTrack;
 
 // func_800D5700 (5BF94.c:7920): the particle key's timer and parameter.
@@ -23,19 +22,19 @@ int LiveAdvanceEffectTimelineKey(LiveTimelineTrack* track);
 // The colour tracks return 1 while the track runs and 0 once it has no more
 // keys, or (refused) without an instance, track, timeline or current key.
 // func_800D5F8C (5BF94.c:8128).
-int LiveTickSourceActorColorTrack(Effects_EffectInstance* instance,
+int LiveTickSourceActorColorTrack(LiveEffectInstance* instance,
                                   LiveTimelineTrack* track);
 // func_800D6048 (5BF94.c:8144).
-int LiveTickTargetActorColorTrack(Effects_EffectInstance* instance,
+int LiveTickTargetActorColorTrack(LiveEffectInstance* instance,
                                   LiveTimelineTrack* track,
                                   int apply_to_all_targets);
 // func_800D61AC (5BF94.c:8172).
-int LiveTickOtherActorColorTrack(Effects_EffectInstance* instance,
+int LiveTickOtherActorColorTrack(LiveEffectInstance* instance,
                                  LiveTimelineTrack* track);
 // func_800D6298 (5BF94.c:8189).
-int LiveTickSceneColorTrack(Effects_EffectInstance* instance,
+int LiveTickSceneColorTrack(LiveEffectInstance* instance,
                             LiveTimelineTrack* track);
 // func_800D6310 (5BF94.c:8201).
-int LiveTickBackgroundColorTrack(Effects_EffectInstance* instance,
+int LiveTickBackgroundColorTrack(LiveEffectInstance* instance,
                                  LiveTimelineTrack* track);
 }  // namespace VS::Effects

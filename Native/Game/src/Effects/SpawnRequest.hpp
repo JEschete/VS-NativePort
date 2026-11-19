@@ -8,11 +8,10 @@
 
 #include "Effects/ActionRequest.hpp"
 
-struct Effects_EffectInstance;
-
 namespace VS::Effects {
-struct LiveRendererSlot;
+struct LiveEffectInstance;
 struct LiveEffectTimeline;
+struct LiveRendererSlot;
 
 // decomp: D_800F53B8_t3 (src/BATTLE/BATTLE.PRG/battleEffect.h:325): what an
 // effect instance plays between, the timeline and renderers it runs, and the
@@ -44,7 +43,7 @@ struct LiveEffectSpawnRequest {
   std::int32_t priority;
   char* script;
   std::int32_t script_offset;
-  Effects_EffectInstance* parent;
+  LiveEffectInstance* parent;
   std::uint8_t token;
   std::uint8_t reserved21;
   std::uint8_t reserved22;

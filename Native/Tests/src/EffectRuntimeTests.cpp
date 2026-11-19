@@ -29,7 +29,7 @@ namespace fx = VS::Effects;
 using fx::PrimaryEffectPhase;
 using fx::PrimaryEffectState;
 using fx::SecondaryEffectPhase;
-using Instance = Effects_EffectInstance;
+using Instance = fx::LiveEffectInstance;
 using Slot = fx::LiveRendererSlot;
 using Log = std::vector<std::string>;
 
@@ -1077,9 +1077,9 @@ void CheckTowardSourceEndpoints(const Instance& instance) {
 void CheckStartedInstance(const Instance& instance, const char* script,
                           int token) {
   CHECK(instance.script == script);
-  CHECK(instance.scriptOffset == 69);
+  CHECK(instance.script_offset == 69);
   CHECK(instance.token == static_cast<unsigned>(token));
-  CHECK(instance.busyBits == 2);
+  CHECK(instance.busy_bits == 2);
   CHECK(instance.context.parameter == 0x1234);
   CHECK(instance.context.effect_id == 23);
   CHECK(instance.context.phase ==

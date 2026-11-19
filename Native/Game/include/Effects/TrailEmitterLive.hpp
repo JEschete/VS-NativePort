@@ -7,8 +7,8 @@
 #include "Effects/Templates/TrailCore.hpp"
 #include "Effects/TrailEmitter.hpp"
 
-struct Effects_EffectInstance;
 namespace VS::Effects {
+struct LiveEffectInstance;
 struct LiveRendererSlot;
 }  // namespace VS::Effects
 
@@ -45,7 +45,7 @@ using LiveTrailNineOverlay = BasicLiveTrailOverlay<Templates::TrailNineStages>;
 // each trail, advancing the overlay's emission cursor.
 void GenerateLiveTrailOrigins(const LiveParticleDefinition& definition,
                               LiveParticleEmitterScratch& scratch,
-                              Effects_EffectInstance& instance,
+                              LiveEffectInstance& instance,
                               LiveTrailState& state,
                               const LiveTrailOverlay& overlay);
 // trails5.h:677 VS_TRAIL_DISPATCH_FUNCTION: one lifecycle command for the
@@ -56,7 +56,7 @@ int UpdateLiveTrailEmitter(LiveRendererSlot* slot, unsigned int command,
 // trails9.h:27 VS_TRAIL_ORIGIN_FUNCTION over a nine-sample emitter.
 void GenerateLiveTrailNineOrigins(const LiveParticleDefinition& definition,
                                   LiveParticleEmitterScratch& scratch,
-                                  Effects_EffectInstance& instance,
+                                  LiveEffectInstance& instance,
                                   LiveTrailNineState& state,
                                   const LiveTrailNineOverlay& overlay);
 // trails9.h:685 VS_TRAIL_DISPATCH_FUNCTION: the lifecycle of a nine-sample
@@ -67,7 +67,7 @@ int UpdateLiveTrailNineEmitter(LiveRendererSlot* slot, unsigned int command,
 // PLG074 func_800FB414: places the first spline point of each trail.
 void GenerateLivePlg074TrailOrigins(const LiveParticleDefinition& definition,
                                     LiveParticleEmitterScratch& scratch,
-                                    Effects_EffectInstance& instance,
+                                    LiveEffectInstance& instance,
                                     LiveTrailState& state);
 // PLG074 func_800FCFEC: the renderer slot entry (EFFPURGE.BIN entry 89), with
 // PLG074's own cursor and PLG073's byte-identical stages.

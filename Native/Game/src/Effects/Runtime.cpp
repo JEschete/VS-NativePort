@@ -63,10 +63,10 @@ int Effects_curveSamples[211];
 int Effects_unusedPrimaryWord;
 
 // decomp: D_800F53B8 (D_800F53B8@BATTLE/BATTLE.PRG)
-Effects_EffectInstance* Effects_primaryInstances;
+VS::Effects::LiveEffectInstance* Effects_primaryInstances;
 
 // decomp: D_800F53BC (D_800F53BC@BATTLE/BATTLE.PRG)
-Effects_EffectInstance* Effects_currentInstance;
+VS::Effects::LiveEffectInstance* Effects_currentInstance;
 
 // decomp: D_800F53C0 (D_800F53C0@BATTLE/BATTLE.PRG)
 VS::Effects::LiveActionEffectRequest Effects_secondaryRequest;
@@ -78,7 +78,7 @@ char Effects_primaryLoaded;
 // retired (#445).
 
 // decomp: D_800F54B0 (D_800F54B0@BATTLE/BATTLE.PRG)
-Effects_EffectInstance* Effects_secondaryInstances;
+VS::Effects::LiveEffectInstance* Effects_secondaryInstances;
 
 // decomp: D_800F5610 (D_800F5610@BATTLE/BATTLE.PRG)
 int Effects_scriptSelector;

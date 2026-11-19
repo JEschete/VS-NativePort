@@ -49,7 +49,7 @@ namespace Math = VS::Core::Math;
 
 constexpr std::uint8_t kShapeCurveMask = 0x1F;
 constexpr int kTransformSlots = 16;
-static_assert(std::extent_v<decltype(Effects_EffectInstance::transforms)> ==
+static_assert(std::tuple_size_v<decltype(LiveEffectInstance::transforms)> ==
               kTransformSlots);
 
 std::uint64_t refused_calls = 0;
@@ -247,7 +247,7 @@ void LiveUpdateEffectCameraMotion() {
   StoreLiveEffectCameraState(state);
 }
 
-void LiveFocusCameraOnEffectTransform(Effects_EffectInstance* instance,
+void LiveFocusCameraOnEffectTransform(LiveEffectInstance* instance,
                                       std::uint8_t transform_index,
                                       std::uint8_t duration_frames) {
   if (instance == nullptr) {
@@ -268,7 +268,7 @@ void LiveFocusCameraOnEffectTransform(Effects_EffectInstance* instance,
   StoreLiveEffectCameraState(state);
 }
 
-void LiveRestoreActionEffectCamera(Effects_EffectInstance* /*instance*/,
+void LiveRestoreActionEffectCamera(LiveEffectInstance* /*instance*/,
                                    std::uint8_t duration_frames) {
   EffectCameraState state = LoadLiveEffectCameraState();
   RestoreActionEffectCamera(state, LiveEffectCameraHost(), duration_frames);

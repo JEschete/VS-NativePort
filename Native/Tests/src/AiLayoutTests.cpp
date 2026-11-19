@@ -91,13 +91,13 @@ TEST_CASE("Effect register instructions consume the index before the halfword",
                              static_cast<char>(value >> 8)};
   const VS::test_support::EffectProgramScope program{
       std::as_bytes(std::span{script})};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   instance.script = script.data();
   for (unsigned reg = 0; reg < 4; ++reg) {
     instance.registers[reg] = static_cast<char>(0x40 + reg);
   }
   REQUIRE(VS::Effects::LiveSetEffectScriptRegister(&instance) == 1);
-  CHECK(instance.scriptOffset == script.size());
+  CHECK(instance.script_offset == script.size());
   for (unsigned reg = 0; reg < 4; ++reg) {
     CHECK(static_cast<u_char>(instance.registers[reg]) ==
           (reg == index ? static_cast<u_char>(value) : 0x40 + reg));
@@ -114,10 +114,10 @@ TEST_CASE(
                              static_cast<char>(value >> 8), 0x34, 0x12};
   const VS::test_support::EffectProgramScope program{
       std::as_bytes(std::span{script})};
-  Effects_EffectInstance instance{};
+  VS::Effects::LiveEffectInstance instance{};
   instance.script = script.data();
   instance.registers[index] = static_cast<char>(equal ? value : value ^ 1U);
   REQUIRE(VS::Effects::LiveBranchIfEffectRegisterEqual(&instance) == 1);
-  CHECK(instance.scriptOffset ==
+  CHECK(instance.script_offset ==
         (equal && value <= 255U ? 0x1234 : script.size()));
 }

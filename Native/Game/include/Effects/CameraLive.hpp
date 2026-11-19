@@ -5,8 +5,6 @@
 
 #include "Effects/Camera.hpp"
 
-struct Effects_EffectInstance;
-
 // Live binding for the effect camera (Camera.hpp) over the copied effect
 // camera globals (CameraLiveState.hpp): each entry loads them into an
 // EffectCameraState, runs the typed core over the field camera, the
@@ -16,6 +14,8 @@ struct Effects_EffectInstance;
 // a transform index past the instance's sixteen are refused with a
 // diagnostic.
 namespace VS::Effects {
+struct LiveEffectInstance;
+
 // The PS1-layout effect camera record (CameraLiveState.hpp).
 struct LiveEffectCamera;
 
@@ -50,10 +50,10 @@ void LiveStartCameraShakeChannels(int channel_mask, int shape_curve,
 // func_800D2560 (5BF94.c:6737).
 void LiveUpdateEffectCameraMotion();
 // func_800D66FC (5BF94.c:8308).
-void LiveFocusCameraOnEffectTransform(Effects_EffectInstance* instance,
+void LiveFocusCameraOnEffectTransform(LiveEffectInstance* instance,
                                       std::uint8_t transform_index,
                                       std::uint8_t duration_frames);
 // func_800D67C4 (5BF94.c:8323).
-void LiveRestoreActionEffectCamera(Effects_EffectInstance* instance,
+void LiveRestoreActionEffectCamera(LiveEffectInstance* instance,
                                    std::uint8_t duration_frames);
 }  // namespace VS::Effects

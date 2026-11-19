@@ -32,8 +32,9 @@
 
 static_assert(sizeof(VS::Effects::LiveTransformDefinition) ==
               VS::Effects::kTransformDefinitionBytes);
-static_assert(std::extent_v<decltype(Effects_EffectInstance::transforms)> ==
-              VS::Effects::kEffectTransformSlots);
+static_assert(
+    std::tuple_size_v<decltype(VS::Effects::LiveEffectInstance::transforms)> ==
+    VS::Effects::kEffectTransformSlots);
 
 namespace VS::Effects {
 namespace {
@@ -65,7 +66,7 @@ void StorePoint(SVECTOR& record, TransformPoint point) {
   record.pad = point.pad;
 }
 
-[[nodiscard]] LiveTransformSlot& MotionOf(Effects_EffectInstance& instance,
+[[nodiscard]] LiveTransformSlot& MotionOf(LiveEffectInstance& instance,
                                           std::size_t index) {
   return std::span(instance.transforms)[index];
 }
@@ -192,16 +193,16 @@ void ReportRefusal(const char* entry, const char* reason) {
 }
 
 // The instance's first `count` transform records.
-[[nodiscard]] std::span<TransformState> LoadStates(
-    Effects_EffectInstance& instance, TransformStates& states,
-    std::size_t count) {
+[[nodiscard]] std::span<TransformState> LoadStates(LiveEffectInstance& instance,
+                                                   TransformStates& states,
+                                                   std::size_t count) {
   for (std::size_t i = 0; i < count; ++i) {
     states.at(i) = StateOf(MotionOf(instance, i));
   }
   return std::span<TransformState>(states).first(count);
 }
 
-void StoreStates(Effects_EffectInstance& instance,
+void StoreStates(LiveEffectInstance& instance,
                  std::span<const TransformState> states) {
   for (std::size_t i = 0; i < states.size(); ++i) {
     StoreState(MotionOf(instance, i), states[i]);
@@ -234,7 +235,7 @@ TransformHost& LiveTransformHost() {
 }
 
 // decomp: BATTLE.PRG func_800CFEF0 (src/BATTLE/BATTLE.PRG/5BF94.c:5940)
-void LiveInitializeTransformStates(Effects_EffectInstance* instance) {
+void LiveInitializeTransformStates(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("initialize", "no effect instance");
     return;
@@ -253,7 +254,7 @@ void LiveInitializeTransformStates(Effects_EffectInstance* instance) {
 }
 
 // decomp: BATTLE.PRG func_800D0D08 (src/BATTLE/BATTLE.PRG/5BF94.c:6227)
-void LiveUpdateEffectTransforms(Effects_EffectInstance* instance) {
+void LiveUpdateEffectTransforms(LiveEffectInstance* instance) {
   if (instance == nullptr) {
     ReportRefusal("update", "no effect instance");
     return;

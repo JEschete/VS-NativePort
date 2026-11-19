@@ -352,7 +352,7 @@ BoneTrailRequest MakeWeaponTrailRequest(std::int32_t actor,
 
 // decomp: BATTLE.PRG func_800CF830 (src/BATTLE/BATTLE.PRG/5BF94.c:5681).
 void FadeBoneTrails(BoneTrailChains& chains) {
-  for (Effects_EffectInstance* instance = chains.FirstInstance();
+  for (LiveEffectInstance* instance = chains.FirstInstance();
        instance != nullptr; instance = chains.NextInstance(*instance)) {
     for (LiveRendererSlot* slot = chains.FirstRenderer(*instance);
          slot != nullptr; slot = chains.NextRenderer(*slot)) {

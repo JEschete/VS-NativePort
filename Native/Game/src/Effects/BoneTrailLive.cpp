@@ -230,14 +230,13 @@ class LiveBoneTrailHost final : public BoneTrailHost {
 
 class LiveBoneTrailChains final : public BoneTrailChains {
  public:
-  Effects_EffectInstance* FirstInstance() override {
+  LiveEffectInstance* FirstInstance() override {
     return Effects_secondaryInstances;
   }
-  Effects_EffectInstance* NextInstance(
-      Effects_EffectInstance& instance) override {
+  LiveEffectInstance* NextInstance(LiveEffectInstance& instance) override {
     return instance.next;
   }
-  LiveRendererSlot* FirstRenderer(Effects_EffectInstance& instance) override {
+  LiveRendererSlot* FirstRenderer(LiveEffectInstance& instance) override {
     return instance.context.renderer;
   }
   LiveRendererSlot* NextRenderer(LiveRendererSlot& slot) override {

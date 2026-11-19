@@ -44,7 +44,7 @@ static_assert(std::extent_v<decltype(Effects_tokenBitmaps)> >=
 
 namespace VS::Effects {
 namespace {
-using Instance = Effects_EffectInstance;
+using Instance = LiveEffectInstance;
 using Slot = LiveRendererSlot;
 
 // The particles LiveAcquireParticlePool reserves for a secondary
@@ -276,7 +276,7 @@ class LiveSecondary final : public LivePlayback<SecondaryEffectRuntime> {
     LiveDetachEffectRenderer(&instance, &slot);
   }
   std::uint8_t BusyBits(Instance& instance) override {
-    return static_cast<std::uint8_t>(instance.busyBits);
+    return static_cast<std::uint8_t>(instance.busy_bits);
   }
   void DestroySecondary(Instance& instance) override {
     LiveDestroySecondaryEffectInstance(&instance);
@@ -323,7 +323,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
                       std::uint8_t busy_bits) override {
     instance.context.parameter = parameter;
     instance.context.effect_id = static_cast<std::int16_t>(effect_id);
-    instance.busyBits = busy_bits;
+    instance.busy_bits = busy_bits;
   }
   void SetPhase(Instance& instance, SecondaryEffectPhase phase) override {
     LiveSetSecondaryEffectPhase(std::to_underlying(phase), &instance);

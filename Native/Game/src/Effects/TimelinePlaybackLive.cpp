@@ -39,9 +39,9 @@
 namespace VS::Effects {
 namespace {
 using Request = LiveActionEffectRequest;
-using Instance = Effects_EffectInstance;
+using Instance = LiveEffectInstance;
 constexpr auto kActionTargets = std::tuple_size_v<decltype(Request::targets)>;
-constexpr auto kTransforms = std::extent_v<decltype(Instance::transforms)>;
+constexpr auto kTransforms = std::tuple_size_v<decltype(Instance::transforms)>;
 constexpr auto kRenderers = std::extent_v<decltype(Effects_effectRenderers)>;
 // Particle and sound keys are one word, renderer and shake keys two and
 // vibration keys one halfword.
@@ -63,7 +63,7 @@ constexpr std::size_t kChildTrackKeyBytes = 9;
 static_assert(sizeof(ChildTrackKey) == kChildTrackKeyBytes);
 static_assert(std::is_trivially_copyable_v<ChildTrackKey>);
 
-[[nodiscard]] LiveEffectTimeline* TimelineOf(Effects_EffectInstance* instance,
+[[nodiscard]] LiveEffectTimeline* TimelineOf(LiveEffectInstance* instance,
                                              std::string_view call) {
   if (instance == nullptr || instance->context.timeline == nullptr) {
     RefuseTimelineCall(call, "no effect instance or timeline");
@@ -96,9 +96,8 @@ int Finish(TrackStep step, LiveTimelineTrack* track) {
 
 class LivePlaybackHost final : public TimelinePlaybackHost {
  public:
-  LivePlaybackHost(Effects_EffectInstance& instance,
-                   LiveEffectTimeline& timeline, Request* request = nullptr,
-                   int child_script_offset = 0)
+  LivePlaybackHost(LiveEffectInstance& instance, LiveEffectTimeline& timeline,
+                   Request* request = nullptr, int child_script_offset = 0)
       : instance_(&instance),
         timeline_(&timeline),
         request_(request),
@@ -168,7 +167,7 @@ class LivePlaybackHost final : public TimelinePlaybackHost {
                   std::optional<std::uint8_t> actor) override;
 
  private:
-  Effects_EffectInstance* instance_;
+  LiveEffectInstance* instance_;
   LiveEffectTimeline* timeline_;
   Request* request_;
   int child_script_offset_;
@@ -190,7 +189,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
   spawn.script_offset = child_script_offset_;
   spawn.parent = instance_;
   spawn.token = static_cast<u_char>(instance_->token);
-  Effects_EffectInstance* child = LiveCreatePrimaryEffectInstance(&spawn);
+  LiveEffectInstance* child = LiveCreatePrimaryEffectInstance(&spawn);
   if (child == nullptr) {
     RefuseTimelineCall("child effect track", "no free effect instance");
     return false;
@@ -204,7 +203,7 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
 
 // Runs a track's tick on its current key of `units_per_key` units.
 template <typename Unit, typename Tick>
-int RunTrack(Effects_EffectInstance* instance, LiveTimelineTrack* track,
+int RunTrack(LiveEffectInstance* instance, LiveTimelineTrack* track,
              std::string_view call, std::size_t units_per_key, Tick tick) {
   LiveEffectTimeline* timeline = TimelineOf(instance, call);
   if (timeline == nullptr) return 0;
@@ -226,22 +225,21 @@ int RunTrack(Effects_EffectInstance* instance, LiveTimelineTrack* track,
               static_cast<std::uint8_t>(at.Actor().event_actor_slot)};
 }
 
-[[nodiscard]] ChildTrackState ChildStateOf(
-    const Effects_EffectInstance& instance, const LiveTimelineTrack& track) {
+[[nodiscard]] ChildTrackState ChildStateOf(const LiveEffectInstance& instance,
+                                           const LiveTimelineTrack& track) {
   const auto parameter = static_cast<std::uint32_t>(track.key_parameter);
   return {.delay = static_cast<std::int16_t>(parameter & kChildDelayMask),
           .index = static_cast<std::int16_t>(parameter >> kChildIndexShift),
-          .child_count = static_cast<std::uint8_t>(instance.childCount)};
+          .child_count = static_cast<std::uint8_t>(instance.child_count)};
 }
 
-void StoreChildState(const ChildTrackState& state,
-                     Effects_EffectInstance& instance,
+void StoreChildState(const ChildTrackState& state, LiveEffectInstance& instance,
                      LiveTimelineTrack& track) {
   track.key_parameter = static_cast<int>(
       static_cast<std::uint16_t>(state.delay) |
       (static_cast<std::uint32_t>(static_cast<std::uint16_t>(state.index))
        << kChildIndexShift));
-  instance.childCount = state.child_count;
+  instance.child_count = state.child_count;
 }
 
 class LiveTimelineLoadHost final : public TimelineLoadHost {
@@ -282,7 +280,7 @@ class LiveTimelineLoadHost final : public TimelineLoadHost {
   int timeline_index_;
 };
 
-int TickTrack(Effects_EffectInstance* instance, LiveTimelineTrack* track,
+int TickTrack(LiveEffectInstance* instance, LiveTimelineTrack* track,
               TimelineTrackKind kind, bool all_targets,
               int child_script_offset) {
   switch (kind) {
@@ -317,8 +315,8 @@ int TickTrack(Effects_EffectInstance* instance, LiveTimelineTrack* track,
 
 class LiveTimelineRunner final : public TimelineRunner {
  public:
-  LiveTimelineRunner(Effects_EffectInstance& instance,
-                     LiveEffectTimeline& timeline, int child_script_offset)
+  LiveTimelineRunner(LiveEffectInstance& instance, LiveEffectTimeline& timeline,
+                     int child_script_offset)
       : instance_(&instance),
         tracks_(timeline.Tracks()),
         flags_(&timeline.flags),
@@ -338,7 +336,7 @@ class LiveTimelineRunner final : public TimelineRunner {
   }
 
  private:
-  Effects_EffectInstance* instance_;
+  LiveEffectInstance* instance_;
   std::span<LiveTimelineTrack> tracks_;
   const std::uint8_t* flags_;
   int child_script_offset_;
@@ -346,8 +344,8 @@ class LiveTimelineRunner final : public TimelineRunner {
 }  // namespace
 
 // decomp: func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
-void LiveLoadEffectTimeline(Effects_EffectInstance* instance,
-                            int timeline_index, int /*unused*/) {
+void LiveLoadEffectTimeline(LiveEffectInstance* instance, int timeline_index,
+                            int /*unused*/) {
   if (instance == nullptr || Effects_package == nullptr) {
     RefuseTimelineCall("load", "no effect instance or package");
     return;
@@ -382,7 +380,7 @@ void LiveLoadEffectTimeline(Effects_EffectInstance* instance,
 }
 
 // decomp: func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:7950)
-int LiveTickParticleEmissionTrack(Effects_EffectInstance* instance,
+int LiveTickParticleEmissionTrack(LiveEffectInstance* instance,
                                   LiveTimelineTrack* track) {
   return RunTrack<std::uint32_t>(
       instance, track, "particle emission track", kOneWordKey,
@@ -399,7 +397,7 @@ int LiveTickParticleEmissionTrack(Effects_EffectInstance* instance,
 }
 
 // decomp: func_800D5904 (src/BATTLE/BATTLE.PRG/5BF94.c:7974)
-int LiveTickEffectSoundTrack(Effects_EffectInstance* instance,
+int LiveTickEffectSoundTrack(LiveEffectInstance* instance,
                              LiveTimelineTrack* track) {
   return RunTrack<std::uint32_t>(
       instance, track, "sound track", kOneWordKey,
@@ -414,7 +412,7 @@ int LiveTickEffectSoundTrack(Effects_EffectInstance* instance,
 }
 
 // decomp: func_800D5A98 (src/BATTLE/BATTLE.PRG/5BF94.c:8005)
-int LiveTickChildEffectTrack(Effects_EffectInstance* instance,
+int LiveTickChildEffectTrack(LiveEffectInstance* instance,
                              LiveTimelineTrack* track,
                              int child_script_offset) {
   constexpr std::string_view kCall = "child effect track";
@@ -438,7 +436,7 @@ int LiveTickChildEffectTrack(Effects_EffectInstance* instance,
 }
 
 // decomp: func_800D5D74 (src/BATTLE/BATTLE.PRG/5BF94.c:8069)
-int LiveTickEffectRendererTrack(Effects_EffectInstance* instance,
+int LiveTickEffectRendererTrack(LiveEffectInstance* instance,
                                 LiveTimelineTrack* track) {
   return RunTrack<std::uint32_t>(
       instance, track, "renderer track", kTwoWordKey,
@@ -452,7 +450,7 @@ int LiveTickEffectRendererTrack(Effects_EffectInstance* instance,
 }
 
 // decomp: func_800D5E00 (src/BATTLE/BATTLE.PRG/5BF94.c:8081)
-int LiveTickControllerVibrationTrack(Effects_EffectInstance* instance,
+int LiveTickControllerVibrationTrack(LiveEffectInstance* instance,
                                      LiveTimelineTrack* track) {
   const Request* request = RequestOf(kVibrationCall);
   if (request == nullptr) return 0;
@@ -473,7 +471,7 @@ int LiveTickControllerVibrationTrack(Effects_EffectInstance* instance,
 }
 
 // decomp: func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:8422)
-int LiveTickCameraShakeTrack(Effects_EffectInstance* instance,
+int LiveTickCameraShakeTrack(LiveEffectInstance* instance,
                              LiveTimelineTrack* track) {
   return RunTrack<std::uint32_t>(
       instance, track, "camera shake track", kTwoWordKey,
@@ -489,7 +487,7 @@ int LiveTickCameraShakeTrack(Effects_EffectInstance* instance,
 }
 
 // decomp: func_800D6AEC (src/BATTLE/BATTLE.PRG/5BF94.c:8442)
-void LiveTickEffectTimeline(Effects_EffectInstance* instance,
+void LiveTickEffectTimeline(LiveEffectInstance* instance,
                             int child_script_offset) {
   LiveEffectTimeline* timeline = TimelineOf(instance, "tick");
   if (timeline == nullptr) return;
