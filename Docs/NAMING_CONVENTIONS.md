@@ -303,7 +303,9 @@ Settle a row by editing its ledger row directly, then regenerate the queue. Each
   a meaning that already says what the item is in the original is kept, with the native finding appended.
 - `source:native:<path>:<line>`: the native line behind that class (the first writer or copier, else the
   declaration). Every `trace_queue.py` run recomputes the line from the index, so header edits do not leave it
-  stale, and lists recorded classes that native code no longer matches for review (#457).
+  stale, and lists recorded classes that native code no longer matches for review (#457). It also lists field rows
+  whose `final_name` matches the native member only when letter case is ignored: `final_name` gives the code's
+  exact spelling (#458).
 - `trace:<scenario>:<observation>`: a runtime result. `<scenario>` names the log
   `tools\naming\traces\<scenario>.md`, `<observation>` is a short kebab-case result
   (`trace:map009-door:read-on-open`). A trace that establishes the meaning raises the row to `med` or `high`.

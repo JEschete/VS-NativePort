@@ -15,7 +15,8 @@ unit, cached in build\\naming\\native_refs.json. The `note` column gives the nat
 writes, or only copies into members that are themselves never read): it records that meaning at `med` with a
 `native-refs:` note and a `source:native:` citation (Docs\\NAMING_CONVENTIONS.md §10.1). Rows that native code
 reads stay in the queue for tracing. See #347 and #445. Every run recomputes those citations' lines from the index
-and lists, for review, recorded findings whose native use has since changed (#457).
+and lists, for review, recorded findings whose native use has since changed (#457), and field rows whose
+`final_name` differs from the native member's spelling (#458).
 """
 from __future__ import annotations
 
@@ -343,6 +344,29 @@ def refresh(native: Native, fields: list[dict], types: list[dict], data: list[di
     return counts, review
 
 
+def spelling(native: Native, fields: list[dict], types: list[dict]) -> list[str]:
+    """Rows whose member the index finds only by the case-insensitive fallback of `Native.member`: the code spells it
+    neither as `final_name` nor as the original name, so `final_name` is wrong (#458)."""
+    type_by_id = {row["id"]: row for row in types}
+    by_type = collections.defaultdict(list)
+    for row in fields:
+        by_type[row["type_id"]].append(row)
+    records: dict[str, str | None] = {}
+    differ = []
+    for row in fields:
+        type_row = type_by_id.get(row["type_id"])
+        if not row["final_name"] or not type_row or type_row["copied"] == "retired":
+            continue
+        if row["type_id"] not in records:
+            names = {member["final_name"] for member in by_type[row["type_id"]]}
+            records[row["type_id"]] = native.record(type_row, names)
+        usr = native.member(records[row["type_id"]], row)
+        declared = native.decls[usr]["name"] if usr else None
+        if declared and declared not in (row["final_name"], row["name"]):
+            differ.append(f"{row['id']}: final_name {row['final_name']}, native {declared}")
+    return differ
+
+
 def queue(native: Native, labels: Labels, fields: list[dict], types: list[dict], data: list[dict]) -> list[list]:
     type_by_id = {row["id"]: row for row in types}
     by_type = collections.defaultdict(list)
@@ -408,6 +432,10 @@ def main() -> int:
     print(f"native citations: {refreshed['refreshed']} refreshed, {len(review)} to review")
     for line in review:
         print(f"  review {line}")
+    differ = spelling(native, fields, types)
+    print(f"member spelling: {len(differ)} final_name differ from the native member")
+    for line in differ:
+        print(f"  spelling {line}")
     if not UPSTREAM.is_dir():
         print(f"warning: {UPSTREAM} is missing; functions without a func_ address are listed without one")
     rows = queue(native, Labels(catalog), fields, types, data)

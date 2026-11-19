@@ -1,4 +1,5 @@
-"""Tests for the native-evidence classification, resolution and citation refresh in trace_queue.py (#445, #457)."""
+"""Tests for the native-evidence classification, resolution, citation refresh and spelling report in trace_queue.py
+(#445, #457, #458)."""
 from __future__ import annotations
 
 import sys
@@ -129,6 +130,16 @@ class RefreshTests(unittest.TestCase):
                                              data)
         self.assertEqual((dict(counts), review), ({}, []))
         self.assertEqual((fields[0]["notes"], data[0]["notes"]), (stale, stale))
+
+
+class SpellingTests(unittest.TestCase):
+    def test_members_found_only_by_letter_case_are_reported(self):
+        fields = [member_row("read"), dict(member_row("written"), final_name="Written", name="unk2"),
+                  dict(member_row("unused"), final_name="Unused")]
+        native = trace_queue.Native(index())
+        self.assertEqual(trace_queue.spelling(native, fields, [TYPE]),
+                         ["T00001.written: final_name Written, native written"])
+        self.assertEqual(trace_queue.spelling(native, fields, [dict(TYPE, copied="retired")]), [])
 
 
 if __name__ == "__main__":
