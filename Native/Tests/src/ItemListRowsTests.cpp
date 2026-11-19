@@ -11,9 +11,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -526,9 +526,9 @@ int FormattedMiscType(Items_InventoryMisc misc) {
 TEST_CASE("Inventory live parent links read the inventory and refuse strays",
           "[inventory-rows-live][F02593][F02594]") {
   const inventory::sorting_test::LiveFixture fixture;
-  Audio_Seq_unusedInventory.blades[0].assembledWeaponIndex = 2;
-  Audio_Seq_unusedInventory.gems[1].setItemIndex = kShieldThreeGem;
-  Audio_Seq_unusedInventory.blades[1].assembledWeaponIndex = 9;
+  VS::Items::inventory.blades[0].assembledWeaponIndex = 2;
+  VS::Items::inventory.gems[1].setItemIndex = kShieldThreeGem;
+  VS::Items::inventory.blades[1].assembledWeaponIndex = 9;
   CHECK(inventory::LiveParentWeaponIndex(kBlade, 0) == 2);
   CHECK(inventory::LiveParentWeaponIndex(kGem, 1) == 0);
   CHECK(inventory::LiveParentShieldIndex(kGem, 1) == 3);
@@ -578,11 +578,11 @@ TEST_CASE("Inventory live rows fill the caller heap block and misc actions",
           "[inventory-rows-live][F02595]") {
   RowsLiveFixture fixture;
   REQUIRE(fixture.block != nullptr);
-  auto& items = Audio_Seq_unusedInventory;
+  auto& items = VS::Items::inventory;
   items.misc[0] = {.id = kFirstMisc, .count = 1, .index = 0};
   items.misc[1] = {.id = kFirstMisc + 1, .count = 2, .index = 0};
-  Audio_Seq_unusedInventoryIndices.misc[0] = 2;
-  Audio_Seq_unusedInventoryIndices.misc[1] = 1;
+  VS::Items::inventoryIndices.misc[0] = 2;
+  VS::Items::inventoryIndices.misc[1] = 1;
   std::ranges::fill(Menu_Inventory_unusedMiscActions, char{0});
   REQUIRE(fixture.Build(kMisc) == 2);
   CHECK(fixture.Types()[0] == FormattedMiscType(items.misc[1]));
@@ -597,8 +597,8 @@ TEST_CASE("Inventory live loot rows leave the misc actions alone",
           "[inventory-rows-live][F02595]") {
   RowsLiveFixture fixture;
   REQUIRE(fixture.block != nullptr);
-  Audio_Seq_unusedInventory.misc[0] = {.id = 1, .count = 1, .index = 0};
-  Audio_Seq_unusedInventoryIndices.misc[0] = 1;
+  VS::Items::inventory.misc[0] = {.id = 1, .count = 1, .index = 0};
+  VS::Items::inventoryIndices.misc[0] = 1;
   std::ranges::fill(Menu_Inventory_unusedMiscActions, char{0x55});
   const auto before = inventory::ItemListRowsLiveRefusalCount();
   REQUIRE(fixture.Build(kMisc, true) == 1);
@@ -614,8 +614,8 @@ TEST_CASE(
     "[inventory-rows-live][F02595]") {
   RowsLiveFixture fixture;
   REQUIRE(fixture.block != nullptr);
-  auto& items = Audio_Seq_unusedInventory;
-  auto& order = Audio_Seq_unusedInventoryIndices;
+  auto& items = VS::Items::inventory;
+  auto& order = VS::Items::inventoryIndices;
   const auto refusals = inventory::ItemListRowsLiveRefusalCount();
   const auto damaged = VS::Core::Memory::DamagedLiveHeapGuardCount();
   for (std::size_t row = 0; row < std::size(order.misc); ++row) {
@@ -636,7 +636,7 @@ TEST_CASE(
 TEST_CASE("Inventory live rows refuse row buffers outside the live heap",
           "[inventory-rows-live][F02595]") {
   const RowsLiveFixture fixture;
-  Audio_Seq_unusedInventoryIndices.gems[0] = 1;
+  VS::Items::inventoryIndices.gems[0] = 1;
   const auto before = inventory::ItemListRowsLiveRefusalCount();
   std::array<char*, 2> texts{};
   std::array<int, 1> types{};

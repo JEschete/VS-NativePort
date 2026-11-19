@@ -27,7 +27,6 @@
 #include "Actors/RoomEnemyMemoryLive.hpp"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/Spawning.h"
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionAnimationsLive.hpp"
@@ -91,12 +90,10 @@ static_assert(std::size(Battle_ActorStats{}.statusTimers) == kStatusTimers);
 static_assert(std::size(Actors_usesSecondaryBodyModel) >
               std::numeric_limits<std::uint8_t>::max());
 static_assert(std::size(Items_weaponCategoryUpperIds) >= kWeaponCategoryBounds);
-static_assert(std::size(Audio_Seq_unusedInventory.weapons) ==
-              kInventoryWeapons);
-static_assert(std::size(Audio_Seq_unusedInventory.blades) == kInventoryBlades);
-static_assert(std::size(Audio_Seq_unusedInventory.shields) ==
-              kInventoryShields);
-static_assert(std::size(Audio_Seq_unusedInventory.armor) == kInventoryArmor);
+static_assert(std::size(VS::Items::inventory.weapons) == kInventoryWeapons);
+static_assert(std::size(VS::Items::inventory.blades) == kInventoryBlades);
+static_assert(std::size(VS::Items::inventory.shields) == kInventoryShields);
+static_assert(std::size(VS::Items::inventory.armor) == kInventoryArmor);
 static_assert(std::size(State_ashleySnapshot.stats.limbs) == kActorLimbs);
 static_assert(sizeof Field_MpdEnemySpawn{}.settings == kSpawnSettingsBytes);
 static_assert(std::size(Actors_RoomActorRecord{}.limbHp) == kActorLimbs);
@@ -852,7 +849,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   [[nodiscard]] AshleyInventory ReadAshleyInventory() const override {
-    const Items_Inventory& live = Audio_Seq_unusedInventory;
+    const Items_Inventory& live = VS::Items::inventory;
     AshleyInventory inventory;
     for (std::size_t i = 0; i < kInventoryWeapons; ++i) {
       inventory.weapons.at(i) = {.equipped = live.weapons[i].isEquipped != 0,
@@ -886,7 +883,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     }
     Items::LoadLiveInventoryWeaponStats(
         &stats->weapon, weapon && *weapon < kInventoryWeapons
-                            ? &Audio_Seq_unusedInventory.weapons[*weapon]
+                            ? &VS::Items::inventory.weapons[*weapon]
                             : nullptr);
     return RangeOf(stats->weapon.range);
   }
@@ -895,7 +892,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     if (Battle_ActorStats* stats = CharacterStats(); stats != nullptr) {
       Items::LoadLiveInventoryShieldStats(
           &stats->shield, shield && *shield < kInventoryShields
-                              ? &Audio_Seq_unusedInventory.shields[*shield]
+                              ? &VS::Items::inventory.shields[*shield]
                               : nullptr);
     }
   }
@@ -906,18 +903,17 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
     if (stats == nullptr || limb >= kActorLimbs) {
       return;
     }
-    Items::LoadLiveInventoryArmorStats(
-        &stats->limbs[limb].armor,
-        armor && *armor < kInventoryArmor
-            ? &Audio_Seq_unusedInventory.armor[*armor]
-            : nullptr);
+    Items::LoadLiveInventoryArmorStats(&stats->limbs[limb].armor,
+                                       armor && *armor < kInventoryArmor
+                                           ? &VS::Items::inventory.armor[*armor]
+                                           : nullptr);
   }
 
   void LoadAshleyAccessory(std::optional<std::size_t> armor) override {
     if (Battle_ActorStats* stats = CharacterStats(); stats != nullptr) {
       Items::LoadLiveInventoryAccessoryStats(
           &stats->accessory, armor && *armor < kInventoryArmor
-                                 ? &Audio_Seq_unusedInventory.armor[*armor]
+                                 ? &VS::Items::inventory.armor[*armor]
                                  : nullptr);
     }
   }

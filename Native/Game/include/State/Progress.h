@@ -59,3 +59,10 @@ static_assert(sizeof(State_ScoreData) == 0x114, "State_ScoreData must keep its P
 
 extern char State_learnedActionFlags[32];
 extern State_RoomVisitFlags State_roomVisitProgress;
+
+namespace VS::State {
+// decomp: vs_main_scoredata (main.h:496): the score screen's records.
+extern State_ScoreData scoreData;
+// decomp: vs_main_artsStatus (main.h:501): break-art progress.
+extern State_ArtsStatus artsStatus;
+}  // namespace VS::State

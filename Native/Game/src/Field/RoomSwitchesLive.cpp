@@ -6,7 +6,6 @@
 #include <span>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/CollisionMapLive.hpp"
@@ -409,7 +408,7 @@ bool MarkLiveSigilDoorUnlocked(std::uint32_t sigil_index) {
       {.zone_id = room->zone_id,
        .map_id = room->map_id,
        .sigil_index = sigil_index},
-      std::as_writable_bytes(std::span(Audio_Seq_unusedStateFlags.opaque186)));
+      std::as_writable_bytes(std::span(VS::State::stateFlags.opaque186)));
 }
 
 std::uint8_t LiveRoomSigilDoorUnlockByte(const SigilDoorRoomQuery& query) {
@@ -417,8 +416,7 @@ std::uint8_t LiveRoomSigilDoorUnlockByte(const SigilDoorRoomQuery& query) {
   const SigilDoorTables tables{
       std::span(Field_lockedDoorIndexRanges).first(kSigilRangeWords), pairs};
   return RoomSigilDoorUnlockByte(
-      tables, query,
-      std::as_bytes(std::span(Audio_Seq_unusedStateFlags.opaque186)));
+      tables, query, std::as_bytes(std::span(VS::State::stateFlags.opaque186)));
 }
 
 bool BeginLiveChestSwitch(ChestTarget target) {

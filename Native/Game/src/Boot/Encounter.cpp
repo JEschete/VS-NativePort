@@ -93,6 +93,7 @@
 #include "State/Location.h"
 #include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
+#include "State/StateFlags.h"
 #include "Title/TitleMenuLive.hpp"
 
 namespace VS::Game {
@@ -111,7 +112,7 @@ bool room_local_event_started = false;
 
 std::optional<EncounterRouletteState> InspectRoulette(int menu) {
   constexpr int kResultsMenu = 15;
-  if (menu != kResultsMenu || Audio_Seq_unusedStateFlags.menuFSubmenu != 0) {
+  if (menu != kResultsMenu || VS::State::stateFlags.menuFSubmenu != 0) {
     return std::nullopt;
   }
   return EncounterRouletteState{
@@ -145,8 +146,8 @@ int EnterOrFinishEncounter() {
   // VS::Title::Run follows _initGameData with _initEnvironment (TITLE.PRG
   // 22C.c:4463, VS::Title::InitializeSettings), whose state writes are
   // applied here without its publisher screens or audio setup.
-  Audio_Seq_unusedStateFlags.difficulty = 1;
-  Audio_Seq_unusedStateFlags.puzzleMode = 1;
+  VS::State::stateFlags.difficulty = 1;
+  VS::State::stateFlags.puzzleMode = 1;
   State_savedEntryDoor.destinationZoneId = configuration.zone;
   State_savedEntryDoor.destinationRoomId = configuration.room;
   State_savedEntryDoor.entryTileX = configuration.player.x;
@@ -184,7 +185,7 @@ int EnterOrFinishEncounter() {
     // restored wholesale. Room scripts test it as script flag 0, e.g. the
     // MAP029 entry's jumpFwdIfFlag 0 >= 1. Declared Lab fixture state, written
     // before any room loads; never changed during play.
-    Audio_Seq_unusedStateFlags.clearCount =
+    VS::State::stateFlags.clearCount =
         static_cast<char>(*configuration.clear_count);
     VS::Core::LogInfo("encounter", "declared clear count={}",
                       *configuration.clear_count);
@@ -338,14 +339,14 @@ void LearnAction(unsigned action) {
 unsigned EquippedBreakArt() {
   constexpr unsigned kWeaponFamilies = 9;
   constexpr unsigned kArtsPerWeapon = 4;
-  for (const auto& weapon : Audio_Seq_unusedInventory.weapons) {
+  for (const auto& weapon : VS::Items::inventory.weapons) {
     if (!weapon.isEquipped) continue;
     if (weapon.blade == 0 ||
-        weapon.blade > std::size(Audio_Seq_unusedInventory.blades)) {
+        weapon.blade > std::size(VS::Items::inventory.blades)) {
       throw std::runtime_error("encounter profile has no valid equipped blade");
     }
     const int category = static_cast<unsigned char>(
-        Audio_Seq_unusedInventory.blades[weapon.blade - 1].category);
+        VS::Items::inventory.blades[weapon.blade - 1].category);
     if (category < 1 || static_cast<unsigned>(category) > kWeaponFamilies) {
       throw std::runtime_error(
           "encounter profile has an invalid weapon family");
@@ -371,8 +372,8 @@ void StockEncounterItems(EncounterProfile profile) {
        478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489});
   constexpr std::size_t kHalf = kItems.size() / 2;
   constexpr char kStack = 10;
-  auto& items = Audio_Seq_unusedInventory.misc;
-  auto& indices = Audio_Seq_unusedInventoryIndices.misc;
+  auto& items = VS::Items::inventory.misc;
+  auto& indices = VS::Items::inventoryIndices.misc;
   static_assert(kItems.size() % 2 == 0 && kHalf <= std::size(items));
   std::ranges::fill(items, Items_InventoryMisc{});
   std::ranges::fill(indices, 0);
@@ -547,7 +548,7 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
   // Lab-only startup state. Original 5BF94.c:3618 enables Map/Score at 3.
   constexpr int kPostPrologueStage = 3;
   constexpr unsigned kPostPrologueMenus = 0x120;
-  Audio_Seq_unusedStateFlags.introState = kPostPrologueStage;
+  VS::State::stateFlags.introState = kPostPrologueStage;
   VS::Input::settings.menuFlags |= kPostPrologueMenus;
   if (profile == EncounterProfile::kAllItemsA ||
       profile == EncounterProfile::kAllItemsB) {
@@ -610,7 +611,7 @@ const char* EncounterWeaponId(EncounterWeapon weapon) {
 void InitializeEncounterPlayerWeapon(EncounterWeapon choice) {
   (void)EncounterWeaponId(choice);
   if (choice == EncounterWeapon::kDefault) return;
-  auto& inventory = Audio_Seq_unusedInventory;
+  auto& inventory = VS::Items::inventory;
   if (choice == EncounterWeapon::kBareHands) {
     for (auto& weapon : inventory.weapons) weapon.isEquipped = 0;
     return;
@@ -789,7 +790,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
   }
   auto* actor = Battle_actors[0];
   if (actor == nullptr || actor->stats == nullptr || actor->defeated ||
-      actor->stats->currentHp <= 0 || Audio_Seq_unusedStateFlags.gameOver) {
+      actor->stats->currentHp <= 0 || VS::State::stateFlags.gameOver) {
     return reject("ASHLEY IS NOT ALIVE AND READY");
   }
   EncounterAdjustmentResult result{InspectActor(0, *actor), {}};
@@ -819,9 +820,9 @@ void InspectLearnedActions(EncounterState& state) {
 }
 
 void InspectInventory(EncounterState& state) {
-  for (std::size_t slot = 0; slot < std::size(Audio_Seq_unusedInventory.misc);
+  for (std::size_t slot = 0; slot < std::size(VS::Items::inventory.misc);
        ++slot) {
-    const auto& item = Audio_Seq_unusedInventory.misc[slot];
+    const auto& item = VS::Items::inventory.misc[slot];
     if (item.id != 0) {
       state.items.push_back({static_cast<int>(slot), item.id, item.count});
     }
@@ -867,7 +868,7 @@ EncounterState InspectGameplay() {
   state.zone = VS::Field::zoneContext.zndId;
   state.room = VS::Field::zoneContext.mapId;
   state.control_mode = Field_controlMode;
-  state.game_over = Audio_Seq_unusedStateFlags.gameOver != 0;
+  state.game_over = VS::State::stateFlags.gameOver != 0;
   state.field_rendering_enabled =
       VS::Field::LiveRoomRenderState().field_rendering_enabled;
   state.menu_state =
@@ -879,7 +880,7 @@ EncounterState InspectGameplay() {
   state.roulette = InspectRoulette(state.menu_state);
   if (constexpr int kResultsMenu = 15; state.menu_state == kResultsMenu) {
     state.results_screen =
-        static_cast<unsigned char>(Audio_Seq_unusedStateFlags.menuFSubmenu);
+        static_cast<unsigned char>(VS::State::stateFlags.menuFSubmenu);
   }
   state.frame_buffer = VS::Render::frameBuf;
   state.transition = VS::Field::screenTransitionStep;

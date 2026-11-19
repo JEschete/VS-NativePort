@@ -9,7 +9,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
@@ -32,6 +31,7 @@
 #include "Menu/Sounds.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
+#include "State/StateFlags.h"
 
 namespace VS::Menu::Magic {
 namespace {
@@ -236,10 +236,10 @@ class LiveHost final : public MenuHost {
     return VS::Battle::LiveHasUnlockedSpellClass(static_cast<int>(school)) != 0;
   }
   std::uint8_t TeleportAvailability() override {
-    return static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.opaqueB5);
+    return static_cast<std::uint8_t>(VS::State::stateFlags.opaqueB5);
   }
   std::span<const std::uint8_t> SavePointStates() override {
-    return Bytes(Audio_Seq_unusedStateFlags.savePointStates);
+    return Bytes(VS::State::stateFlags.savePointStates);
   }
   bool AtSavePoint() override {
     return VS::Field::CurrentSavePointIdEntry() != 0;

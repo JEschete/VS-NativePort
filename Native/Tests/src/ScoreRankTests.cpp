@@ -8,7 +8,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/StatusEffects.h"
@@ -103,8 +102,8 @@ s::ProgressWorld SampleWorld() {
 class LiveGlobals {
  public:
   LiveGlobals()
-      : scoredata_(Audio_Seq_unusedScoredata),
-        flags_(Audio_Seq_unusedStateFlags),
+      : scoredata_(VS::State::scoreData),
+        flags_(VS::State::stateFlags),
         rooms_(State_roomVisitProgress),
         settings_(VS::Input::settings),
         cursor_(Battle_unusedMenu9CursorMemory),
@@ -115,15 +114,15 @@ class LiveGlobals {
     std::memcpy(actions_.data(), Battle_actionDefinitions,
                 sizeof Battle_actionDefinitions);
     std::memcpy(scratch_.data(), VS::Core::ScratchBase(), scratch_.size());
-    Audio_Seq_unusedScoredata = {};
-    Audio_Seq_unusedStateFlags = {};
+    VS::State::scoreData = {};
+    VS::State::stateFlags = {};
     State_roomVisitProgress = {};
     std::memset(Field_countableRoomMask, 0, sizeof Field_countableRoomMask);
     for (Battle_ActionDefinition& action : Battle_actionDefinitions) {
       action.unlocked = 0;
     }
     for (State_TrialScore(&boss)[3] :
-         Audio_Seq_unusedScoredata.bossTimeTrialScores) {
+         VS::State::scoreData.bossTimeTrialScores) {
       boss[0].time = s::kUnclearedTrialTime;
     }
   }
@@ -132,8 +131,8 @@ class LiveGlobals {
   LiveGlobals(LiveGlobals&&) = delete;
   LiveGlobals& operator=(LiveGlobals&&) = delete;
   ~LiveGlobals() {
-    Audio_Seq_unusedScoredata = scoredata_;
-    Audio_Seq_unusedStateFlags = flags_;
+    VS::State::scoreData = scoredata_;
+    VS::State::stateFlags = flags_;
     State_roomVisitProgress = rooms_;
     VS::Input::settings = settings_;
     Battle_unusedMenu9CursorMemory = cursor_;
@@ -246,18 +245,18 @@ std::uint32_t ResultsRankRow(std::uint32_t titles, std::uint32_t score) {
 }
 
 void SetLiveScoreInputs() {
-  Audio_Seq_unusedScoredata.titles = 0x00070000;
-  for (u_short& kills : Audio_Seq_unusedScoredata.enemyKills) {
+  VS::State::scoreData.titles = 0x00070000;
+  for (u_short& kills : VS::State::scoreData.enemyKills) {
     kills = 5000;
   }
-  Audio_Seq_unusedScoredata.bossTimeTrialScores[3][0].time = 0x123;
-  Audio_Seq_unusedScoredata.bossTimeTrialScores[4][0].round = 5;
-  Audio_Seq_unusedScoredata.maxChain = 30;
-  Audio_Seq_unusedScoredata.completionTimeMinutes = 299;
-  Audio_Seq_unusedScoredata.streakScore = 7;
-  Audio_Seq_unusedScoredata.miscScore = 11;
-  Audio_Seq_unusedStateFlags.asuraDefeated = 1;
-  Audio_Seq_unusedStateFlags.goldKeyObtained = static_cast<char>(0x80);
+  VS::State::scoreData.bossTimeTrialScores[3][0].time = 0x123;
+  VS::State::scoreData.bossTimeTrialScores[4][0].round = 5;
+  VS::State::scoreData.maxChain = 30;
+  VS::State::scoreData.completionTimeMinutes = 299;
+  VS::State::scoreData.streakScore = 7;
+  VS::State::scoreData.miscScore = 11;
+  VS::State::stateFlags.asuraDefeated = 1;
+  VS::State::stateFlags.goldKeyObtained = static_cast<char>(0x80);
 }
 
 // 5000 kills of each class (1600000), one cleared trial (20000), a 30 chain
@@ -274,8 +273,8 @@ void CheckProgressStatics() {
   CHECK(Menu_Score_menuState == 0);
   CHECK(Menu_Score_hideUi == 0);
   CHECK(State_roomVisitProgress.roomFlags[1] == 0xC00000);
-  CHECK(Audio_Seq_unusedScoredata.mapCompletion == 6);
-  CHECK(Audio_Seq_unusedScoredata.openedChestCount == 10);
+  CHECK(VS::State::scoreData.mapCompletion == 6);
+  CHECK(VS::State::scoreData.openedChestCount == 10);
 }
 
 void SetLiveProgressInputs() {
@@ -284,13 +283,13 @@ void SetLiveProgressInputs() {
   State_roomVisitProgress.roomFlags[1] = static_cast<int>(world.room_flags[1]);
   Field_countableRoomMask[0] = static_cast<int>(world.countable_room_masks[0]);
   Field_countableRoomMask[1] = -1;
-  Audio_Seq_unusedStateFlags.chestsOpened[0] = 1;
-  Audio_Seq_unusedStateFlags.chestsOpened[5] = static_cast<char>(0x80);
-  Audio_Seq_unusedStateFlags.chestsOpened[63] = 2;
-  Audio_Seq_unusedStateFlags.clearCount = 2;
-  Audio_Seq_unusedScoredata.completionTimeMinutes = 1000;
-  Audio_Seq_unusedScoredata.mapCompletion = 5;
-  Audio_Seq_unusedScoredata.openedChestCount = 10;
+  VS::State::stateFlags.chestsOpened[0] = 1;
+  VS::State::stateFlags.chestsOpened[5] = static_cast<char>(0x80);
+  VS::State::stateFlags.chestsOpened[63] = 2;
+  VS::State::stateFlags.clearCount = 2;
+  VS::State::scoreData.completionTimeMinutes = 1000;
+  VS::State::scoreData.mapCompletion = 5;
+  VS::State::scoreData.openedChestCount = 10;
   Menu_Score_menuState = 7;
   Menu_Score_hideUi = 1;
 }
@@ -428,8 +427,7 @@ TEST_CASE("F02833 F02835 F02832 live entries bind the score screen globals",
   Menu_Score_clearCount = 1;
   Menu_Score_characterRank = 0xFF;
   VS::Menu::Score::AwardLiveTitles();
-  CHECK(static_cast<std::uint32_t>(Audio_Seq_unusedScoredata.titles) ==
-        kLiveTitles);
+  CHECK(static_cast<std::uint32_t>(VS::State::scoreData.titles) == kLiveTitles);
   VS::Menu::Score::CalculateLiveScore();
   CHECK(Menu_Score_score == kLiveScore);
   VS::Menu::Score::DetermineLiveRiskbreakerRank();
@@ -440,7 +438,7 @@ TEST_CASE("F03061 F03060 live entries bind the results screen globals",
           "[score-rank-live][F03061][F03060]") {
   const LiveGlobals globals;
   SetLiveScoreInputs();
-  Audio_Seq_unusedScoredata.titles = static_cast<int>(kLiveTitles);
+  VS::State::scoreData.titles = static_cast<int>(kLiveTitles);
   Menu_Results_clearCount = 1;
   Menu_Results_rank = 99;
   VS::Menu::Results::CalculateLiveScore();

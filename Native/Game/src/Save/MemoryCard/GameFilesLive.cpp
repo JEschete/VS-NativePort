@@ -15,7 +15,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanksLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -116,7 +115,7 @@ constexpr bool LaysOut(SaveSection section, std::size_t offset,
 }
 static_assert(LaysOut(SaveSection::kStateFlags,
                       offsetof(Save_GameSaveImage, stateFlags),
-                      sizeof(Audio_Seq_unusedStateFlags)));
+                      sizeof(VS::State::stateFlags)));
 static_assert(LaysOut(SaveSection::kLearnedActions,
                       offsetof(Save_GameSaveImage, learnedActions),
                       sizeof(State_learnedActionFlags)));
@@ -131,16 +130,16 @@ static_assert(LaysOut(SaveSection::kAshleySnapshot,
                       sizeof(State_ashleySnapshot)));
 static_assert(LaysOut(SaveSection::kInventory,
                       offsetof(Save_GameSaveImage, inventory),
-                      sizeof(Audio_Seq_unusedInventory)));
+                      sizeof(VS::Items::inventory)));
 static_assert(LaysOut(SaveSection::kInventoryIndices,
                       offsetof(Save_GameSaveImage, inventoryIndices),
-                      sizeof(Audio_Seq_unusedInventoryIndices)));
+                      sizeof(VS::Items::inventoryIndices)));
 static_assert(LaysOut(SaveSection::kEntryDoor,
                       offsetof(Save_GameSaveImage, entryDoor),
                       sizeof(State_savedEntryDoor)));
 static_assert(LaysOut(SaveSection::kScoreData,
                       offsetof(Save_GameSaveImage, scoreData),
-                      sizeof(Audio_Seq_unusedScoredata)));
+                      sizeof(VS::State::scoreData)));
 static_assert(LaysOut(SaveSection::kRoomStateSlot,
                       offsetof(Save_GameSaveImage, roomStateSlot),
                       sizeof(State_currentRoomStateSlot)));
@@ -149,7 +148,7 @@ static_assert(LaysOut(SaveSection::kRecentRoomEnemyStates,
                       sizeof(State_recentRoomEnemyStates)));
 static_assert(LaysOut(SaveSection::kArtsStatus,
                       offsetof(Save_GameSaveImage, artsStatus),
-                      sizeof(Audio_Seq_unusedArtsStatus)));
+                      sizeof(VS::State::artsStatus)));
 
 template <typename T>
 std::span<std::byte> BytesOf(T& value) {
@@ -321,7 +320,7 @@ class LiveSaveState final : public SaveStateHost {
   std::span<std::byte> Section(SaveSection section) override {
     switch (section) {
       case SaveSection::kStateFlags:
-        return BytesOf(Audio_Seq_unusedStateFlags);
+        return BytesOf(VS::State::stateFlags);
       case SaveSection::kLearnedActions:
         return std::as_writable_bytes(std::span{State_learnedActionFlags});
       case SaveSection::kMapStatus:
@@ -331,19 +330,19 @@ class LiveSaveState final : public SaveStateHost {
       case SaveSection::kAshleySnapshot:
         return BytesOf(State_ashleySnapshot);
       case SaveSection::kInventory:
-        return BytesOf(Audio_Seq_unusedInventory);
+        return BytesOf(VS::Items::inventory);
       case SaveSection::kInventoryIndices:
-        return BytesOf(Audio_Seq_unusedInventoryIndices);
+        return BytesOf(VS::Items::inventoryIndices);
       case SaveSection::kEntryDoor:
         return BytesOf(State_savedEntryDoor);
       case SaveSection::kScoreData:
-        return BytesOf(Audio_Seq_unusedScoredata);
+        return BytesOf(VS::State::scoreData);
       case SaveSection::kRoomStateSlot:
         return BytesOf(State_currentRoomStateSlot);
       case SaveSection::kRecentRoomEnemyStates:
         return std::as_writable_bytes(std::span{State_recentRoomEnemyStates});
       case SaveSection::kArtsStatus:
-        return BytesOf(Audio_Seq_unusedArtsStatus);
+        return BytesOf(VS::State::artsStatus);
     }
     return {};
   }

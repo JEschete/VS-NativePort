@@ -140,7 +140,7 @@ inline constexpr int kListChoice = 0x21;
 inline constexpr int kListFirstChoice = 0x22;
 }  // namespace sfx
 
-// Audio_Seq_unusedMaterialModifiers' strength, intelligence and agility
+// VS::Items::materialModifiers' strength, intelligence and agility
 // bonuses of one material.
 struct MaterialBonus {
   std::int8_t strength = 0;

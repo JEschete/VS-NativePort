@@ -15,13 +15,13 @@
 #include <string_view>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -250,19 +250,19 @@ class LiveDescriptionHost final : public DescriptionHost {
  public:
   void BackupInventory() override {
     Core::Memory::CopyLiveHalfwordBlocks(Menu_Loot_inventoryBackup,
-                                         &Audio_Seq_unusedInventory,
+                                         &VS::Items::inventory,
                                          sizeof *Menu_Loot_inventoryBackup);
   }
   void LoadStagedInventory() override {
-    Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory,
+    Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
                                          Menu_Loot_inventory,
-                                         sizeof Audio_Seq_unusedInventory);
+                                         sizeof VS::Items::inventory);
   }
   std::span<const std::uint8_t> FormatDescription(items::ItemCategory category,
                                                   std::uint8_t index) override {
     std::array<char*, 2> text{};
     int row_type = 0;
-    auto& ashley = Audio_Seq_unusedInventory;
+    auto& ashley = VS::Items::inventory;
     switch (category) {
       case items::ItemCategory::kWeapon:
         Framework::FormatLiveInventoryWeaponRow(&ashley.weapons[index],
@@ -303,9 +303,9 @@ class LiveDescriptionHost final : public DescriptionHost {
     Framework::SetLiveInformationMessageText(message);
   }
   void RestoreInventory() override {
-    Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory,
+    Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
                                          Menu_Loot_inventoryBackup,
-                                         sizeof Audio_Seq_unusedInventory);
+                                         sizeof VS::Items::inventory);
   }
 
  private:

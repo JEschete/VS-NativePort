@@ -10,7 +10,6 @@
 #include <span>
 
 #include "Audio/MusicLive.hpp"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
@@ -53,7 +52,7 @@ constexpr std::int32_t kCountdownTickSpeed = 4;
 constexpr std::int32_t kNormalTickSpeed = 2;
 constexpr std::int32_t kResultsClosingPhase = 2;
 static_assert(std::size(Menu_Results_clutBuf) == kResultsClutWords);
-static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores) ==
+static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
               kTimeAttackCourses);
 
 struct LoadOwner {
@@ -160,7 +159,7 @@ void StoreState(const TimeAttackState& state) {
 }
 
 bool ValidCourse() {
-  if (Audio_Seq_unusedStateFlags.timeAttackBoss < kTimeAttackCourses) {
+  if (VS::State::stateFlags.timeAttackBoss < kTimeAttackCourses) {
     return true;
   }
   Refuse("course outside the resident score table");
@@ -276,13 +275,13 @@ class LiveLoad final : public TimeAttackLoadHost {
     for (std::size_t course = 0; course < records_.size(); ++course) {
       for (std::size_t rank = 0; rank < kTimeAttackRanks; ++rank) {
         const auto& record =
-            Audio_Seq_unusedScoredata.bossTimeTrialScores[course][rank];
+            VS::State::scoreData.bossTimeTrialScores[course][rank];
         records_.at(course).at(rank) = record.time |
                                        (record.round << kRoundShift) |
                                        (record.difficulty << kDifficultyShift);
       }
     }
-    const auto& flags = Audio_Seq_unusedStateFlags;
+    const auto& flags = VS::State::stateFlags;
     return TimeAttackRun{
         .course = flags.timeAttackBoss,
         .minutes = flags.timeAttackMins,
@@ -294,8 +293,7 @@ class LiveLoad final : public TimeAttackLoadHost {
   }
   void CommitRun(const TimeAttackRun& run) override {
     for (std::size_t rank = 0; rank < kTimeAttackRanks; ++rank) {
-      auto& record =
-          Audio_Seq_unusedScoredata.bossTimeTrialScores[run.course][rank];
+      auto& record = VS::State::scoreData.bossTimeTrialScores[run.course][rank];
       const auto word = run.records[run.course].at(rank);
       record.time = word & kTrialScoreTimeMask;
       record.round = (word >> kRoundShift) & kRoundMask;
@@ -594,16 +592,14 @@ int LiveUpdateTimeAttackStart() {
 int LiveInitializeResultsScreen() {
   LivePresentations host;
   return Return(InitializeResultsScreen(
-      static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.menuFSubmenu),
-      host));
+      static_cast<std::uint8_t>(VS::State::stateFlags.menuFSubmenu), host));
 }
 
 // decomp: _execMenu, MENUF.PRG/3B8.c:453 (0x801037A0).
 int LiveUpdateResultsPresentation() {
   LivePresentations host;
   return Return(UpdateResultsPresentation(
-      static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.menuFSubmenu),
-      host));
+      static_cast<std::uint8_t>(VS::State::stateFlags.menuFSubmenu), host));
 }
 
 // decomp: vs_menuF_exec, MENUF.PRG/3B8.c:23 (0x80102BB8).
@@ -613,7 +609,7 @@ int LiveUpdateResultsScreen(unsigned char* caller_state) {
                          ? std::span<std::uint8_t>{}
                          : std::span<std::uint8_t>(caller_state, 1);
   return Return(UpdateResultsScreen(
-      bytes, static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.menuFSubmenu),
+      bytes, static_cast<std::uint8_t>(VS::State::stateFlags.menuFSubmenu),
       host));
 }
 

@@ -15,7 +15,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/ActionCostsLive.hpp"
 #include "Battle/ActionTable.h"
@@ -27,6 +26,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
@@ -53,6 +53,7 @@
 #include "Render/Render.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+#include "State/StateFlags.h"
 
 namespace VS::Menu::Inventory {
 namespace {
@@ -149,7 +150,7 @@ std::size_t ContextIndex(ItemRowsContext context) {
   return context == ItemRowsContext::kItemMenu ? 0 : 1;
 }
 std::span<std::uint8_t> FixedOrder(Category category) {
-  auto& indices = Audio_Seq_unusedInventoryIndices;
+  auto& indices = VS::Items::inventoryIndices;
   const std::array<std::span<std::uint8_t>, 7> tables{
       indices.weapons, indices.blades, indices.grips, indices.shields,
       indices.armor,   indices.gems,   indices.misc};
@@ -484,7 +485,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     });
   }
   Items::InventoryContents Inventory() override {
-    return Items::Live::Typed(Audio_Seq_unusedInventory);
+    return Items::Live::Typed(VS::Items::inventory);
   }
   std::span<std::uint8_t> Order(Category category) override {
     if (shortcut_) return FixedOrder(category);
@@ -503,7 +504,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
     Refuse("inventory display order has no current owner");
   }
   void SetMiscCount(std::size_t slot, std::uint8_t count) override {
-    auto items = std::span(Audio_Seq_unusedInventory.misc);
+    auto items = std::span(VS::Items::inventory.misc);
     if (slot >= items.size()) Refuse("misc write outside the inventory");
     items[slot].count = static_cast<char>(count);
   }
@@ -559,7 +560,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
         [&] { return Battle::LiveActorActionRestrictionFlags(0, action); });
   }
   std::uint8_t IntroState() override {
-    return Audio_Seq_unusedStateFlags.introState;
+    return VS::State::stateFlags.introState;
   }
   bool EquipmentTarnished() override {
     if (Battle_characterState == nullptr ||

@@ -5,7 +5,7 @@
 
 struct Battle_Actor;
 
-// Bindings from the live score record (Audio_Seq_unusedScoredata, the
+// Bindings from the live score record (VS::State::scoreData, the
 // original vs_main_scoredata) and the battle actors to the typed kill
 // records (State/KillScore.hpp), in the original argument order for the
 // generated callers (tools/port/copy_fixups.py OWNED_CALL_BINDINGS).

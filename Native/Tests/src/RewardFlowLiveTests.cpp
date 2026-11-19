@@ -12,7 +12,6 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -39,6 +38,7 @@
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
 #include "Render/PaletteAnimationLive.hpp"
+#include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace {
@@ -62,8 +62,7 @@ struct LiveFixture {
   Battle_ActionState* saved_action = Battle_actionState;
   Battle_Actor* saved_character = Battle_characterState;
   Items_LootListNode* saved_loot = VS::Items::lootListHead;
-  decltype(Audio_Seq_unusedArtsStatus) saved_progress =
-      Audio_Seq_unusedArtsStatus;
+  decltype(VS::State::artsStatus) saved_progress = VS::State::artsStatus;
   u_short saved_requirement = Battle_battleAbilityPointRequirements[0];
   std::uint8_t saved_ab = VS::State::LiveScriptFlag(0xAB);
   std::uint8_t saved_b6 = VS::State::LiveScriptFlag(0xB6);
@@ -89,10 +88,10 @@ struct LiveFixture {
     actor.stats = &stats;
     actor.model = &model;
     actor.equippedWeaponCategory = 1;
-    Audio_Seq_unusedArtsStatus = {};
-    std::fill_n(Audio_Seq_unusedArtsStatus.artsLearned, 12, 4);
+    VS::State::artsStatus = {};
+    std::fill_n(VS::State::artsStatus.artsLearned, 12, 4);
     Battle_battleAbilityPointRequirements[0] = 1;
-    Audio_Seq_unusedArtsStatus.kills.totalKills = 1;
+    VS::State::artsStatus.kills.totalKills = 1;
     VS::State::SetLiveScriptFlag(0xAB, 0);
     VS::State::SetLiveScriptFlag(0xB6, 0);
   }
@@ -113,7 +112,7 @@ struct LiveFixture {
     Battle_actionState = saved_action;
     Battle_characterState = saved_character;
     VS::Items::lootListHead = saved_loot;
-    Audio_Seq_unusedArtsStatus = saved_progress;
+    VS::State::artsStatus = saved_progress;
     Battle_battleAbilityPointRequirements[0] = saved_requirement;
     VS::State::SetLiveScriptFlag(0xAB, saved_ab);
     VS::State::SetLiveScriptFlag(0xB6, saved_b6);
@@ -246,8 +245,8 @@ TEST_CASE("F04126 live pending acquisition bypasses action and actor stats",
   CHECK(Battle_actionFlowMode == 5);
   CHECK(Field_areMovingPlatformsPaused == 1);
   CHECK(VS::Field::isInteractionPaused == 77);
-  CHECK(Audio_Seq_unusedArtsStatus.kills.totalKills == 1);
-  CHECK(Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked == 0);
+  CHECK(VS::State::artsStatus.kills.totalKills == 1);
+  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 0);
 }
 
 TEST_CASE("F00220 live acquisition uses the actual pending and menu policies",
@@ -260,7 +259,7 @@ TEST_CASE("F00220 live acquisition uses the actual pending and menu policies",
   CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
   CHECK(VS::Menu::Framework::unlockedBreakArt == 0);
   CHECK(VS::Menu::Framework::unlockedBattleAbility == 1);
-  CHECK(Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked == 0);
+  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 0);
 }
 
 TEST_CASE("F00221 live loot uses the actual native list owner and menu",

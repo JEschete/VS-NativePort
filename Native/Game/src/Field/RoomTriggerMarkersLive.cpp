@@ -8,7 +8,6 @@
 #include <span>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/Collision.h"
 #include "Field/CollisionMapLive.hpp"
@@ -18,6 +17,7 @@
 #include "Field/TriggerMarkers.h"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
+#include "State/StateFlags.h"
 #include "State/Timers.hpp"
 
 namespace {
@@ -114,8 +114,8 @@ void DrawLiveRoomTriggerMarkers() {
         static_cast<std::uint8_t>(record.markerFade)});
   }
   const TriggerMarkerFrame frame{VS::State::tickSpeed,
-                                 Audio_Seq_unusedStateFlags.opaque20 != 0 ||
-                                     Audio_Seq_unusedStateFlags.opaque40 != 0,
+                                 VS::State::stateFlags.opaque20 != 0 ||
+                                     VS::State::stateFlags.opaque40 != 0,
                                  Field_roomAnimationTicks};
   TriggerMarkerAnimation animation{Field_triggerMarkerFrameTicks};
   LiveTriggerMarkerRenderer renderer;

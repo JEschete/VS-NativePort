@@ -15,7 +15,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
@@ -24,6 +23,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -317,7 +317,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     }
   }
   Items::InventoryContents AshleyInventory() override {
-    return Items::Live::Typed(Audio_Seq_unusedInventory);
+    return Items::Live::Typed(VS::Items::inventory);
   }
   Input::PadState Buttons() override {
     return {.pressed = VS::Input::buttonsPressed,
@@ -539,7 +539,7 @@ class LiveTerminalHost final : public LootTerminalHost {
     return Call([&] {
       constexpr int kWriteItem = 16;
       return Items::Inventory::CopyLiveItem(
-                 row.category | kWriteItem, &Audio_Seq_unusedInventory,
+                 row.category | kWriteItem, &VS::Items::inventory,
                  row.item_index, Menu_Loot_inventory) != 0;
     });
   }

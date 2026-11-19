@@ -13,7 +13,6 @@
 #include <string>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
@@ -117,18 +116,18 @@ class LiveHost final : public Host {
   }
   std::optional<int> ArtsLearned(int category) override {
     if (category < 0 || static_cast<std::size_t>(category) >=
-                            std::size(Audio_Seq_unusedArtsStatus.artsLearned)) {
+                            std::size(VS::State::artsStatus.artsLearned)) {
       return std::nullopt;
     }
-    return Audio_Seq_unusedArtsStatus.artsLearned[category];
+    return VS::State::artsStatus.artsLearned[category];
   }
   std::optional<int> CategoryKills(int category) override {
     if (category < 0 ||
         static_cast<std::size_t>(category) >=
-            std::size(Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills)) {
+            std::size(VS::State::artsStatus.kills.weaponCategoryKills)) {
       return std::nullopt;
     }
-    return Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[category];
+    return VS::State::artsStatus.kills.weaponCategoryKills[category];
   }
   std::optional<int> PointRequirement(int category, int art_index) override {
     if (category < 0 ||

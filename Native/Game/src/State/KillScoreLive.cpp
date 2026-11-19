@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <optional>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -34,7 +33,7 @@ constexpr unsigned kHostileActorKind = 4;
 }  // namespace
 
 KillScore LiveKillScore() noexcept {
-  const State_ScoreData& record = Audio_Seq_unusedScoredata;
+  const State_ScoreData& record = scoreData;
   KillScore score;
   for (std::size_t i = 0; i < kEnemyClassCount; ++i) {
     score.enemy_kills[i] = record.enemyKills[i];
@@ -56,7 +55,7 @@ KillScore LiveKillScore() noexcept {
 }
 
 void StoreLiveKillScore(const KillScore& score) noexcept {
-  State_ScoreData& record = Audio_Seq_unusedScoredata;
+  State_ScoreData& record = scoreData;
   for (std::size_t i = 0; i < kEnemyClassCount; ++i) {
     record.enemyKills[i] = score.enemy_kills[i];
   }
@@ -113,7 +112,5 @@ void UpdateLiveWeaponKillStreak(int /*unused*/) {
 
 // decomp: BATTLE.PRG func_80070F28 at 0x80071284 (`sb zero` to
 // vs_main_scoredata+0x10F, 0x8005FFAF).
-void ResetLiveWeaponKillStreak() noexcept {
-  Audio_Seq_unusedScoredata.weaponKillStreak = 0;
-}
+void ResetLiveWeaponKillStreak() noexcept { scoreData.weaponKillStreak = 0; }
 }  // namespace VS::State

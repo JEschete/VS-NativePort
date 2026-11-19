@@ -11,7 +11,7 @@ struct Field_MpdEnemySpawn;
 
 // Bindings from Battle_actors, the actor allocations, VS::Field::zoneContext,
 // the room enemy memory, Ashley's snapshot (State_ashleySnapshot) and the
-// inventory (Audio_Seq_unusedInventory) to the typed spawn rules
+// inventory (VS::Items::inventory) to the typed spawn rules
 // (ActorSpawning.cpp). Generated callers keep the original call shapes;
 // refusals are reported on the "actors" channel and return what the original
 // returned for an occupied slot (null or 0).

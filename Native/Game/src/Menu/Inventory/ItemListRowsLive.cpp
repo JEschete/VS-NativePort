@@ -7,11 +7,11 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -68,7 +68,7 @@ std::string_view Describe(ItemRowsRefusal refusal) {
 }
 
 std::span<const std::uint8_t> OrderTable(ItemCategory category) {
-  const auto& order = Audio_Seq_unusedInventoryIndices;
+  const auto& order = VS::Items::inventoryIndices;
   const std::array<std::span<const std::uint8_t>, kOrderedCategories> tables{
       order.weapons, order.blades, order.grips, order.shields,
       order.armor,   order.gems,   order.misc};
@@ -121,7 +121,7 @@ class LiveItemRowsWorld final : public ItemRowsWorld {
 
   void FormatRow(ItemCategory category, std::size_t slot,
                  std::size_t row) override {
-    auto& inventory = Audio_Seq_unusedInventory;
+    auto& inventory = VS::Items::inventory;
     // The core bounded every row by the caller's heap payloads.
     char** text = menu_text_ + (row * 2);
     int* type = row_types_ + row;
@@ -219,8 +219,8 @@ int BuildLiveRows(ItemRowsContext context, int item_category, char* menu_text[],
       .row_capacity = RowCapacity(menu_text, row_types, text_buf),
   };
   LiveItemRowsWorld world(menu_text, row_types, text_buf);
-  const auto rows = BuildItemRows(
-      input, Items::Live::Typed(Audio_Seq_unusedInventory), world);
+  const auto rows =
+      BuildItemRows(input, Items::Live::Typed(VS::Items::inventory), world);
   if (!rows) {
     Refuse(Describe(rows.error()));
     return 0;
@@ -232,7 +232,7 @@ int BuildLiveRows(ItemRowsContext context, int item_category, char* menu_text[],
 // decomp: MENU3.PRG _getParentWeaponIndex (items2.h:11), 80104EC0.
 int LiveParentWeaponIndex(int item_category, int index) {
   const auto parent = ParentWeaponIndex(
-      item_category, index, Items::Live::Typed(Audio_Seq_unusedInventory));
+      item_category, index, Items::Live::Typed(VS::Items::inventory));
   if (!parent || *parent > Items::kWeaponSlots) {
     Refuse(parent ? Describe(ItemRowsRefusal::kParentWeapon)
                   : Describe(ItemRowsRefusal::kSlot));
@@ -244,7 +244,7 @@ int LiveParentWeaponIndex(int item_category, int index) {
 // decomp: MENU3.PRG _getParentShieldIndex (items2.h:38), 80104F50.
 int LiveParentShieldIndex(int item_category, int item_index) {
   const auto parent = ParentShieldIndex(
-      item_category, item_index, Items::Live::Typed(Audio_Seq_unusedInventory));
+      item_category, item_index, Items::Live::Typed(VS::Items::inventory));
   if (!parent || *parent > Items::kShieldSlots) {
     Refuse(parent ? Describe(ItemRowsRefusal::kParentShield)
                   : Describe(ItemRowsRefusal::kSlot));

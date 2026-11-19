@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Boot/OverlayReset.h"
+#include "Items/Inventory.h"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/InventorySortingLiveFixture.hpp"
 #include "Menu/SortingKeysFixture.hpp"
@@ -37,8 +38,8 @@ using RecordBytes = std::array<std::byte, sizeof(Items_Inventory)>;
 TEST_CASE("F02583 checked Live uses real weapon stats and fixed byte orders",
           "[inventory-sorting-live][F02583]") {
   fixture::LiveFixture state;
-  auto& records = Audio_Seq_unusedInventory;
-  auto& order = Audio_Seq_unusedInventoryIndices.weapons;
+  auto& records = VS::Items::inventory;
+  auto& order = VS::Items::inventoryIndices.weapons;
   records.weapons[0].blade = 1;
   std::span(records.weapons).back().blade = items::kBladeSlots;
   records.blades[0].material = kLowMaterial;
@@ -60,8 +61,8 @@ TEST_CASE(
     "F02585 checked Live folds flagged inventory gems and signed attributes",
     "[inventory-sorting-live][F02585]") {
   fixture::LiveFixture state;
-  auto& records = Audio_Seq_unusedInventory;
-  auto& order = Audio_Seq_unusedInventoryIndices.shields;
+  auto& records = VS::Items::inventory;
+  auto& order = VS::Items::inventoryIndices.shields;
   records.shields[0].base.strength = kHigh;
   auto& last = std::span(records.shields).back();
   last.base.strength = kHigh;
@@ -80,8 +81,8 @@ TEST_CASE(
 TEST_CASE("F02587 checked Live keeps full unsigned misc counts and last slot",
           "[inventory-sorting-live][F02587]") {
   fixture::LiveFixture state;
-  auto& records = Audio_Seq_unusedInventory;
-  auto& order = Audio_Seq_unusedInventoryIndices.misc;
+  auto& records = VS::Items::inventory;
+  auto& order = VS::Items::inventoryIndices.misc;
   records.misc[0].id = 0;
   records.misc[0].count = 1;
   auto& last = std::span(records.misc).back();
@@ -104,7 +105,7 @@ TEST_CASE(
     "F02589 checked Live preserves absent fields and reads current records",
     "[inventory-sorting-live][F02589]") {
   fixture::LiveFixture state;
-  auto& blade = std::span(Audio_Seq_unusedInventory.blades).back();
+  auto& blade = std::span(VS::Items::inventory.blades).back();
   blade.id = kFullByte;
   blade.strength = kLow;
   blade.material = kWide;
@@ -128,7 +129,7 @@ TEST_CASE(
 TEST_CASE("F02589 Live uses real grip armor and gem readers without zeroing",
           "[inventory-sorting-live][F02589]") {
   fixture::LiveFixture state;
-  auto& records = Audio_Seq_unusedInventory;
+  auto& records = VS::Items::inventory;
   records.grips[0].strength = kLow;
   records.armor[0].strength = kHigh;
   std::span(records.gems).back().strength = kLow;
@@ -159,8 +160,8 @@ TEST_CASE(
     "F02590 Live preserves a known order alias across ordinary MENU3 reload",
     "[inventory-sorting-live][inventory-sorting-reload][F02590]") {
   fixture::LiveFixture state;
-  auto& records = Audio_Seq_unusedInventory;
-  auto& order = Audio_Seq_unusedInventoryIndices.misc;
+  auto& records = VS::Items::inventory;
+  auto& order = VS::Items::inventoryIndices.misc;
   records.gems[0].strength = kLow;
   std::span(records.gems).back().strength = kHigh;
   order[0] = 1;
@@ -187,12 +188,12 @@ TEST_CASE(
     "MAINMENU reload restores only inventory pointer routes not sorted bytes",
     "[inventory-sorting-live][inventory-sorting-reload][F02590]") {
   fixture::LiveFixture state;
-  auto& order = Audio_Seq_unusedInventoryIndices;
+  auto& order = VS::Items::inventoryIndices;
   order.misc[0] = items::kMiscSlots;
-  Audio_Seq_unusedInventory.misc[0].id = kWide;
+  VS::Items::inventory.misc[0].id = kWide;
   Menu_Inventory_inventoryIndices[kBlade] = order.misc;
   Boot_ResetMainMenuStatics();
   CHECK(Menu_Inventory_inventoryIndices[kBlade] == order.blades);
   CHECK(order.misc[0] == items::kMiscSlots);
-  CHECK(Audio_Seq_unusedInventory.misc[0].id == kWide);
+  CHECK(VS::Items::inventory.misc[0].id == kWide);
 }

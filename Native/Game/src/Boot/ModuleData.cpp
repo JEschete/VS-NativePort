@@ -582,7 +582,7 @@ const VS::Content::ModuleDataEntry VS::Content::kModuleData[] = {
     {"SLUS_010.40", 0x39950, sizeof VS::Render::legacyLoadingImageHeader, &VS::Render::legacyLoadingImageHeader, sizeof VS::Render::legacyLoadingImageHeader}, // G02006 _nowLoading_header
     {"SLUS_010.40", 0x39954, sizeof VS::Render::loadingScreenPixels, &VS::Render::loadingScreenPixels, sizeof VS::Render::loadingScreenPixels}, // G02005 _nowLoading_data
     {"SLUS_010.40", 0x3C1DC, sizeof Battle_actionDefinitions, &Battle_actionDefinitions, sizeof Battle_actionDefinitions}, // G01904 vs_main_actions
-    {"SLUS_010.40", 0x3F5DC, sizeof Audio_Seq_unusedMaterialModifiers, &Audio_Seq_unusedMaterialModifiers, sizeof Audio_Seq_unusedMaterialModifiers}, // G01905 vs_main_materialModifiers
+    {"SLUS_010.40", 0x3F5DC, sizeof VS::Items::materialModifiers, &VS::Items::materialModifiers, sizeof VS::Items::materialModifiers}, // G01905 vs_main_materialModifiers
     {"SLUS_010.40", 0x3F6CC, sizeof Battle_statusEffectParams, &Battle_statusEffectParams, sizeof Battle_statusEffectParams}, // G01906 vs_main_statusEffectParams
     {"SLUS_010.40", 0x3F8CC, sizeof Field_locationDestinations, &Field_locationDestinations, sizeof Field_locationDestinations}, // G01913 vs_main_locationZoneMapIds
     {"SLUS_010.40", 0x404CC, sizeof Field_zoneMusicIds, &Field_zoneMusicIds, sizeof Field_zoneMusicIds}, // G01914 D_8004FCCC

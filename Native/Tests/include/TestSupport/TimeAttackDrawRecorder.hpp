@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/ResultsDrawing.hpp"
@@ -118,8 +117,8 @@ struct LiveTimeAttackFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  u_char saved_course = Audio_Seq_unusedStateFlags.timeAttackBoss;
-  State_ScoreData saved_scores = Audio_Seq_unusedScoredata;
+  u_char saved_course = VS::State::stateFlags.timeAttackBoss;
+  State_ScoreData saved_scores = VS::State::scoreData;
   int saved_time = Menu_Results_timeTrialTime;
   int saved_new_slot = Menu_Results_newTimeSlot;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
@@ -132,8 +131,8 @@ struct LiveTimeAttackFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
-    Audio_Seq_unusedStateFlags.timeAttackBoss = saved_course;
-    Audio_Seq_unusedScoredata = saved_scores;
+    VS::State::stateFlags.timeAttackBoss = saved_course;
+    VS::State::scoreData = saved_scores;
     Menu_Results_timeTrialTime = saved_time;
     Menu_Results_newTimeSlot = saved_new_slot;
   }

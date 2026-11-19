@@ -10,7 +10,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
@@ -30,6 +29,7 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "State/SceneTimer.h"
+#include "State/StateFlags.h"
 #include "State/Timers.hpp"
 
 namespace VS::Battle {
@@ -371,10 +371,9 @@ void DrawLivePuzzleTimer(const State_SceneTimer* timer) {
                               .seconds = timer->seconds,
                               .minutes = timer->minutes,
                               .hours = timer->hours};
-  FormatPuzzleTimer(time,
-                    static_cast<std::uint8_t>(
-                        Audio_Seq_unusedStateFlags.puzzleTimerHundredths),
-                    std::span(Battle_puzzleTimerText));
+  const auto hundredths =
+      static_cast<std::uint8_t>(State::stateFlags.puzzleTimerHundredths);
+  FormatPuzzleTimer(time, hundredths, std::span(Battle_puzzleTimerText));
   VS::Core::Debugf("hud.timer",
                    "text=%s seconds=%d minutes=%d hours=%d frames=%d",
                    Battle_puzzleTimerText, timer->seconds, timer->minutes,

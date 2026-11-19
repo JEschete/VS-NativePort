@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <span>
 
-#include "Audio/Seq/Channel.h"
+#include "Items/Inventory.h"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Inventory/ItemList.h"
 
@@ -14,30 +14,30 @@ namespace VS::Menu::Inventory::sorting_test {
 inline constexpr auto kOrderTables = Items::kItemCategoryCount - 1;
 
 inline auto LiveOrders() {
-  auto& order = Audio_Seq_unusedInventoryIndices;
+  auto& order = VS::Items::inventoryIndices;
   return std::array<std::span<std::uint8_t>, kOrderTables>{
       order.weapons, order.blades, order.grips, order.shields,
       order.armor,   order.gems,   order.misc};
 }
 
 struct LiveFixture {
-  Items_Inventory saved_inventory = Audio_Seq_unusedInventory;
-  Items_InventoryIndices saved_indices = Audio_Seq_unusedInventoryIndices;
+  Items_Inventory saved_inventory = VS::Items::inventory;
+  Items_InventoryIndices saved_indices = VS::Items::inventoryIndices;
   std::array<std::uint8_t*, kOrderTables> saved_routes{};
 
   LiveFixture() {
     std::copy_n(Menu_Inventory_inventoryIndices, saved_routes.size(),
                 saved_routes.begin());
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
     const auto tables = LiveOrders();
     for (std::size_t row = 0; row < tables.size(); ++row) {
       Menu_Inventory_inventoryIndices[row] = tables[row].data();
     }
   }
   ~LiveFixture() {
-    Audio_Seq_unusedInventory = saved_inventory;
-    Audio_Seq_unusedInventoryIndices = saved_indices;
+    VS::Items::inventory = saved_inventory;
+    VS::Items::inventoryIndices = saved_indices;
     std::copy(saved_routes.begin(), saved_routes.end(),
               Menu_Inventory_inventoryIndices);
   }

@@ -24,7 +24,6 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
@@ -843,9 +842,9 @@ class LiveHost final : public Host {
   }
 
   StoryFlags Story() override {
-    return {.opaque_b5 = Byte(Audio_Seq_unusedStateFlags.opaqueB5),
-            .intro_state = Byte(Audio_Seq_unusedStateFlags.introState),
-            .game_over = Byte(Audio_Seq_unusedStateFlags.gameOver)};
+    return {.opaque_b5 = Byte(VS::State::stateFlags.opaqueB5),
+            .intro_state = Byte(VS::State::stateFlags.introState),
+            .game_over = Byte(VS::State::stateFlags.gameOver)};
   }
 
   bool HasUnlockedSpellClass(int spell_class) override {
@@ -1032,7 +1031,7 @@ class LiveHost final : public Host {
   }
 
   void BindInventoryViews() override {
-    Items_Inventory& inventory = Audio_Seq_unusedInventory;
+    Items_Inventory& inventory = VS::Items::inventory;
     VS::Menu::Framework::weapons = inventory.weapons;
     VS::Menu::Framework::blades = inventory.blades;
     VS::Menu::Framework::grips = inventory.grips;

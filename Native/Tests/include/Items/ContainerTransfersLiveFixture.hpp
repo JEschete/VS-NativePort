@@ -4,8 +4,8 @@
 #include <array>
 #include <memory>
 
-#include "Audio/Seq/Channel.h"
 #include "Items/ContainerTransfersLive.hpp"
+#include "Items/Inventory.h"
 #include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
@@ -20,7 +20,7 @@ struct LiveFixture {
   std::array<std::uint16_t, items::kItemCategoryCount> saved_capacities{};
   std::array<unsigned char*, items::kItemCategoryCount - 1> saved_indices{};
   items::InventoryContents saved_inventory =
-      items::Live::Typed(Audio_Seq_unusedInventory);
+      items::Live::Typed(VS::Items::inventory);
   std::uint16_t saved_count = Menu_Container_transferredMiscCount;
   Menu_Container_InventoryStorage* saved_storage =
       VS::Menu::Framework::unusedInventoryStorage;

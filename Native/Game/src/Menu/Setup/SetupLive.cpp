@@ -16,7 +16,6 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Content/ActorAssetsLive.hpp"
@@ -33,6 +32,7 @@
 #include "Items/Inventory.h"
 #include "Items/InventoryLive.hpp"
 #include "Items/ItemRecordsLive.hpp"
+#include "Items/Materials.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
@@ -180,14 +180,13 @@ constexpr std::array<RecipeFile, kRecipeKindCount> kRecipeFiles{{
     {.lba = VS_SHIELD_SYD_LBA, .size = VS_SHIELD_SYD_SIZE},
     {.lba = VS_ARMOR_SYD_LBA, .size = VS_ARMOR_SYD_SIZE},
 }};
-// Audio_Seq_unusedMaterialModifiers' strength, intelligence and agility
+// VS::Items::materialModifiers' strength, intelligence and agility
 // bytes of a material's record.
 constexpr std::size_t kStrengthModifier = 24;
 constexpr std::size_t kIntelligenceModifier = 26;
 constexpr std::size_t kAgilityModifier = 28;
-static_assert(std::size(Audio_Seq_unusedMaterialModifiers) == kMaterialCount);
-static_assert(std::size(Audio_Seq_unusedMaterialModifiers[0]) >
-              kAgilityModifier);
+static_assert(std::size(VS::Items::materialModifiers) == kMaterialCount);
+static_assert(std::size(VS::Items::materialModifiers[0]) > kAgilityModifier);
 // The information text box _repairMenu and the prompts close.
 constexpr std::size_t kInformationTextBox = 7;
 // _drawOk's "OK" goes 0xC bytes (three entries) before the scene table.
@@ -232,8 +231,8 @@ class LiveHost final : public Host {
 
   // Writes the inventory and its display order back.
   void Commit() {
-    Items::Live::Commit(Audio_Seq_unusedInventory, inventory_);
-    Items::Live::Commit(Audio_Seq_unusedInventoryIndices, indices_);
+    Items::Live::Commit(VS::Items::inventory, inventory_);
+    Items::Live::Commit(VS::Items::inventoryIndices, indices_);
   }
 
   void Refuse(std::string_view what) override {
@@ -470,37 +469,37 @@ class LiveHost final : public Host {
     Reload();
   }
   void EquipWeapon(std::size_t slot) override {
-    if (slot >= std::size(Audio_Seq_unusedInventory.weapons)) {
+    if (slot >= std::size(VS::Items::inventory.weapons)) {
       Refuse("equipped weapon outside the inventory");
       return;
     }
     Commit();
-    Items::EquipLiveAshleyWeapon(&Audio_Seq_unusedInventory.weapons[slot]);
+    Items::EquipLiveAshleyWeapon(&VS::Items::inventory.weapons[slot]);
     Reload();
   }
   void EquipShield(std::size_t slot) override {
-    if (slot >= std::size(Audio_Seq_unusedInventory.shields)) {
+    if (slot >= std::size(VS::Items::inventory.shields)) {
       Refuse("equipped shield outside the inventory");
       return;
     }
     Commit();
-    Items::EquipLiveAshleyShield(&Audio_Seq_unusedInventory.shields[slot]);
+    Items::EquipLiveAshleyShield(&VS::Items::inventory.shields[slot]);
     Reload();
   }
   void EquipArmor(int body_part, std::optional<std::size_t> slot) override {
-    if (slot && *slot >= std::size(Audio_Seq_unusedInventory.armor)) {
+    if (slot && *slot >= std::size(VS::Items::inventory.armor)) {
       Refuse("equipped armor outside the inventory");
       return;
     }
     Commit();
     Items::EquipLiveAshleyArmor(
-        body_part, slot ? &Audio_Seq_unusedInventory.armor[*slot] : nullptr);
+        body_part, slot ? &VS::Items::inventory.armor[*slot] : nullptr);
     Reload();
   }
   MaterialBonuses Materials() override {
     MaterialBonuses bonuses{};
     for (std::size_t material = 0; material < bonuses.size(); ++material) {
-      const auto& modifiers = Audio_Seq_unusedMaterialModifiers[material];
+      const auto& modifiers = VS::Items::materialModifiers[material];
       bonuses[material] = {
           .strength = static_cast<std::int8_t>(modifiers[kStrengthModifier]),
           .intelligence =
@@ -556,8 +555,8 @@ class LiveHost final : public Host {
 
  private:
   void Reload() {
-    inventory_ = Items::Live::Typed(Audio_Seq_unusedInventory);
-    indices_ = Items::Live::Typed(Audio_Seq_unusedInventoryIndices);
+    inventory_ = Items::Live::Typed(VS::Items::inventory);
+    indices_ = Items::Live::Typed(VS::Items::inventoryIndices);
   }
 
   Items::InventoryContents inventory_{};

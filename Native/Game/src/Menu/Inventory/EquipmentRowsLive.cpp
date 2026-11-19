@@ -18,7 +18,6 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
 #include "Actors/WeaponModel.h"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
@@ -177,8 +176,8 @@ class LiveRowsHost final : public EquipmentRowsHost {
   if (table == nullptr) {
     return {};
   }
-  if (table == Audio_Seq_unusedInventory.armor) {
-    return Audio_Seq_unusedInventory.armor;
+  if (table == VS::Items::inventory.armor) {
+    return VS::Items::inventory.armor;
   }
   if (Menu_Container_containerData != nullptr &&
       table == Menu_Container_containerData->items.armor) {

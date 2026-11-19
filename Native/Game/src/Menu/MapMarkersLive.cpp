@@ -9,7 +9,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
 #include "Field/RoomSwitchesLive.hpp"
 #include "Legacy/Psx.h"
@@ -67,7 +66,7 @@ void Refuse(std::string_view call, std::string_view reason) {
 // false when it lies outside the state flags.
 [[nodiscard]] bool DoorStateFlagOf(std::int32_t state_id, std::uint8_t& flag) {
   const std::span<const std::uint8_t> flags{
-      reinterpret_cast<const std::uint8_t*>(&Audio_Seq_unusedStateFlags),
+      reinterpret_cast<const std::uint8_t*>(&VS::State::stateFlags),
       sizeof(State_StateFlags)};
   const auto offset = static_cast<std::int64_t>(kDoorStateFlagsOffset) +
                       static_cast<std::int64_t>(state_id);

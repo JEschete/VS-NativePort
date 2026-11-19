@@ -12,7 +12,6 @@
 #include <string_view>
 #include <type_traits>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/TargetingState.h"
 #include "Content/DiscLayout.h"
@@ -186,8 +185,7 @@ class LiveHost final : public Host {
     if (weapon < 0 || weapon >= kWeaponSlots) {
       return std::nullopt;
     }
-    const Items_InventoryWeapon& source =
-        Audio_Seq_unusedInventory.weapons[weapon];
+    const Items_InventoryWeapon& source = VS::Items::inventory.weapons[weapon];
     Weapon loaded{.blade = source.blade, .equipped = source.isEquipped != 0};
     std::memcpy(loaded.name.data(), source.name, kNameBytes);
     return loaded;
@@ -196,7 +194,7 @@ class LiveHost final : public Host {
     if (blade < 0 || blade >= kBladeSlots) {
       return std::nullopt;
     }
-    return Audio_Seq_unusedInventory.blades[blade].id;
+    return VS::Items::inventory.blades[blade].id;
   }
   std::span<const std::uint8_t> ItemName(int item) override {
     if (VS::Menu::Framework::itemNames == nullptr || item < 0 ||
@@ -213,7 +211,7 @@ class LiveHost final : public Host {
       Refuse("renamed weapon lies outside the inventory");
       return;
     }
-    std::memcpy(Audio_Seq_unusedInventory.weapons[weapon].name, name.data(),
+    std::memcpy(VS::Items::inventory.weapons[weapon].name, name.data(),
                 std::min(name.size(), kNameBytes));
   }
   void EquipWeapon(int weapon) override {
@@ -221,7 +219,7 @@ class LiveHost final : public Host {
       Refuse("equipped weapon lies outside the inventory");
       return;
     }
-    Items::EquipLiveAshleyWeapon(&Audio_Seq_unusedInventory.weapons[weapon]);
+    Items::EquipLiveAshleyWeapon(&VS::Items::inventory.weapons[weapon]);
   }
 
  private:

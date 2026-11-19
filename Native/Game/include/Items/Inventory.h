@@ -204,3 +204,10 @@ struct Items_Container {
     Items_ContainerIndices indices;
 };
 static_assert(sizeof(Items_Container) == 0x4180, "Items_Container must keep its PS1 layout");
+
+namespace VS::Items {
+// decomp: vs_main_inventory (main.h:504): the player's carried items.
+extern Items_Inventory inventory;
+// decomp: vs_main_inventoryIndices (main.h:509): the menus' item order.
+extern Items_InventoryIndices inventoryIndices;
+}  // namespace VS::Items

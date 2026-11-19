@@ -53,12 +53,15 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
+#include "Items/Materials.h"
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.hpp"
+#include "State/Progress.h"
 #include "State/RoomMemory.h"
 #include "State/ScriptFlagsLive.hpp"
+#include "State/StateFlags.h"
 #include "State/Timers.hpp"
 
 namespace VS::Game::Save {
@@ -472,7 +475,7 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
     if (blade.id != 0 &&
         (!InCategory(blade.id, 1, bounds[kBladeEnd]) ||
          !valid_durability(blade) ||
-         blade.material >= std::size(Audio_Seq_unusedMaterialModifiers) ||
+         blade.material >= std::size(VS::Items::materialModifiers) ||
          static_cast<unsigned char>(blade.category) >=
              std::size(State_ArtsStatus{}.kills.weaponCategoryKills))) {
       return ItemError(scope, "blades",
@@ -494,7 +497,7 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
     return InCategory(armor.id, bounds[kGripEnd], bounds[kArmorAccessoryEnd]) &&
            valid_durability(armor) && armor.gemSlots >= 0 &&
            armor.gemSlots <= kEquipmentGems && armor.limb <= kAccessoryLimb &&
-           armor.material < std::size(Audio_Seq_unusedMaterialModifiers) &&
+           armor.material < std::size(VS::Items::materialModifiers) &&
            static_cast<unsigned char>(armor.category) < kArmorCategoryCount;
   };
   for (const auto& armor : items.armor) {
@@ -889,12 +892,12 @@ void CapturePersistent(Snapshot& state, bool packed_actions = false) {
                (kLearnedFirstBit >> (index % kLearnedBitsPerByte))) != 0
             : Battle_actionDefinitions[index].unlocked != 0;
   }
-  state.inventory = Audio_Seq_unusedInventory;
-  state.inventory_order = Audio_Seq_unusedInventoryIndices;
+  state.inventory = VS::Items::inventory;
+  state.inventory_order = VS::Items::inventoryIndices;
   state.settings = VS::Input::settings;
   state.visits = State_roomVisitProgress;
-  state.score = Audio_Seq_unusedScoredata;
-  state.arts = Audio_Seq_unusedArtsStatus;
+  state.score = VS::State::scoreData;
+  state.arts = VS::State::artsStatus;
   CopyCachesToSnapshot(state);
 }
 
@@ -915,12 +918,12 @@ void ApplyPersistent(const Snapshot& state) {
           static_cast<char>(value);
     }
   }
-  Audio_Seq_unusedInventory = state.inventory;
-  Audio_Seq_unusedInventoryIndices = state.inventory_order;
+  VS::Items::inventory = state.inventory;
+  VS::Items::inventoryIndices = state.inventory_order;
   VS::Input::settings = state.settings;
   State_roomVisitProgress = state.visits;
-  Audio_Seq_unusedScoredata = state.score;
-  Audio_Seq_unusedArtsStatus = state.arts;
+  VS::State::scoreData = state.score;
+  VS::State::artsStatus = state.arts;
   ApplyCaches(state);
 }
 
@@ -1382,7 +1385,7 @@ std::expected<Document, std::string> CaptureClearGame() {
   if (pending || Boot_isGameplayActive || !Boot_isClearSavePending ||
       State_savedEntryDoor.destinationZoneId != 1 ||
       State_savedEntryDoor.destinationRoomId != 0 ||
-      Audio_Seq_unusedStateFlags.clearCount <= 0) {
+      VS::State::stateFlags.clearCount <= 0) {
     return std::unexpected("no original ending clear-save inputs are pending");
   }
   Document document;

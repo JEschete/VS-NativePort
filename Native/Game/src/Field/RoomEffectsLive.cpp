@@ -8,7 +8,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Core/Log.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -19,6 +18,7 @@
 #include "Field/RoomEffects.hpp"
 #include "Field/RoomEffectsCore.hpp"
 #include "Legacy/Psx.h"
+#include "State/StateFlags.h"
 
 // The polygon bytes the typed room effects rewrite in place, as the legacy
 // views and renderer read them.
@@ -176,9 +176,7 @@ class LiveHost final : public RoomEffectHost {
   std::uint16_t FloorHeightCode(int world_x, int world_z) override {
     return static_cast<std::uint16_t>(LiveFloorHeightAt(world_x, world_z));
   }
-  bool FastForwarding() override {
-    return Audio_Seq_unusedStateFlags.opaqueA8 != 0;
-  }
+  bool FastForwarding() override { return VS::State::stateFlags.opaqueA8 != 0; }
   bool RunRoomEntryPoint(std::span<const std::byte> code) override {
     const std::uint32_t hash = Fnv1a(code);
     for (const EntryPointBinding& binding : kEntryPointBindings) {

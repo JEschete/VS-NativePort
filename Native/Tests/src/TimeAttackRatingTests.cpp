@@ -7,7 +7,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Menu/Results/ResultsDrawing.hpp"
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Menu/Results/TimeAttack.h"
@@ -448,7 +447,7 @@ void SetLiveScores(const Scores& scores) {
   for (std::size_t course = 0; course < scores.size(); ++course) {
     for (std::size_t rank = 0; rank < r::kTimeAttackRanks; ++rank) {
       const auto word = scores.at(course).at(rank);
-      auto& score = Audio_Seq_unusedScoredata.bossTimeTrialScores[course][rank];
+      auto& score = VS::State::scoreData.bossTimeTrialScores[course][rank];
       score.time = word & 0xFFFFFFU;
       score.round = (word >> 24) & 0x7FU;
       score.difficulty = word >> 31;
@@ -562,7 +561,7 @@ TEST_CASE("F03038 live leaderboard reads the course, scores and new rank",
   LiveTimeAttackFixture frame;
   const auto scores = CourseScores();
   SetLiveScores(scores);
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 3;
+  VS::State::stateFlags.timeAttackBoss = 3;
   Menu_Results_newTimeSlot = 2;
   r::LiveDrawLeaderboard(250, 100, 40);
   const auto live = frame.Frame();
@@ -575,7 +574,7 @@ TEST_CASE("F03038 live leaderboard reads the course, scores and new rank",
   Replay(host);
   CHECK(frame.Frame() == live);
   frame.Reset();
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 8;
+  VS::State::stateFlags.timeAttackBoss = 8;
   r::LiveDrawLeaderboard(250, 100, 40);
   CHECK(frame.Empty());
 }
@@ -585,7 +584,7 @@ TEST_CASE("F03039 live leaderboard entry refuses a rank outside the board",
   LiveTimeAttackFixture frame;
   const auto scores = CourseScores();
   SetLiveScores(scores);
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 6;
+  VS::State::stateFlags.timeAttackBoss = 6;
   Menu_Results_newTimeSlot = 1;
   r::LiveDrawLeaderboardEntry(250, 100, 1, 25);
   const auto live = frame.Frame();

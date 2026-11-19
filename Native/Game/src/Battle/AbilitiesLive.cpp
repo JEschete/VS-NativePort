@@ -18,7 +18,6 @@
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
@@ -169,26 +168,26 @@ class LiveAbilityHost final : public battle::AbilityHost {
   [[nodiscard]] int WeaponCategoryKills(int category) const override;
   [[nodiscard]] int BreakArtRequirement(int category, int tier) const override;
   [[nodiscard]] int BattleAbilitiesUnlocked() const override {
-    return Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked;
+    return VS::State::artsStatus.kills.battleAbilitiesUnlocked;
   }
   [[nodiscard]] int BattleAbilityRequirement(int index) const override;
   [[nodiscard]] int TotalKills() const override {
-    return Audio_Seq_unusedArtsStatus.kills.totalKills;
+    return VS::State::artsStatus.kills.totalKills;
   }
   void SetTotalKills(int kills) override {
-    Audio_Seq_unusedArtsStatus.kills.totalKills = static_cast<u_short>(kills);
+    VS::State::artsStatus.kills.totalKills = static_cast<u_short>(kills);
   }
   [[nodiscard]] int MaxChain() const override {
-    return Audio_Seq_unusedScoredata.maxChain;
+    return VS::State::scoreData.maxChain;
   }
   void SetMaxChain(int chain) override {
-    Audio_Seq_unusedScoredata.maxChain = static_cast<u_short>(chain);
+    VS::State::scoreData.maxChain = static_cast<u_short>(chain);
   }
   [[nodiscard]] int ChainStreak() const override {
-    return Audio_Seq_unusedScoredata.chainStreak;
+    return VS::State::scoreData.chainStreak;
   }
   void SetChainStreak(int streak) override {
-    Audio_Seq_unusedScoredata.chainStreak = static_cast<u_short>(streak);
+    VS::State::scoreData.chainStreak = static_cast<u_short>(streak);
   }
   [[nodiscard]] int ScriptFlag(int flag) const override {
     return VS::State::LiveScriptFlag(flag);
@@ -458,22 +457,21 @@ int LiveAbilityHost::EquippedWeaponCategory() const {
 }
 
 int LiveAbilityHost::ArtsLearned(int category) const {
-  if (!InRange(Audio_Seq_unusedArtsStatus.artsLearned, category)) {
+  if (!InRange(VS::State::artsStatus.artsLearned, category)) {
     VS::Core::LogWarn("battle.ability", "arts of category {} out of range",
                       category);
     return 0;
   }
-  return Audio_Seq_unusedArtsStatus.artsLearned[category];
+  return VS::State::artsStatus.artsLearned[category];
 }
 
 int LiveAbilityHost::WeaponCategoryKills(int category) const {
-  if (!InRange(Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills,
-               category)) {
+  if (!InRange(VS::State::artsStatus.kills.weaponCategoryKills, category)) {
     VS::Core::LogWarn("battle.ability", "kills of category {} out of range",
                       category);
     return 0;
   }
-  return Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[category];
+  return VS::State::artsStatus.kills.weaponCategoryKills[category];
 }
 
 int LiveAbilityHost::BreakArtRequirement(int category, int tier) const {

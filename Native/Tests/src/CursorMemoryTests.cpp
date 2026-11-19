@@ -14,7 +14,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
@@ -52,6 +51,7 @@
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Setup/SetupScreen.hpp"
 #include "Menu/TextBox.h"
+#include "State/Progress.h"
 #include "State/StateFlags.h"
 
 namespace {
@@ -115,7 +115,7 @@ struct PuzzleOptionsFixture {
   CursorFixture rows;
   std::array<u_short, 1070> saved_table =
       std::to_array(VS::Menu::Options::menuStrings);
-  char saved_disabled = Audio_Seq_unusedStateFlags.puzzleModeDisabled;
+  char saved_disabled = VS::State::stateFlags.puzzleModeDisabled;
 
   PuzzleOptionsFixture() {
     std::fill_n(VS::Menu::Options::menuStrings, saved_table.size(), 0xE7E7);
@@ -125,7 +125,7 @@ struct PuzzleOptionsFixture {
   ~PuzzleOptionsFixture() {
     std::copy(saved_table.begin(), saved_table.end(),
               VS::Menu::Options::menuStrings);
-    Audio_Seq_unusedStateFlags.puzzleModeDisabled = saved_disabled;
+    VS::State::stateFlags.puzzleModeDisabled = saved_disabled;
   }
 };
 
@@ -151,14 +151,14 @@ struct BreakArtMenuFixture {
   explicit BreakArtMenuFixture(int weapon_category)
       : category(weapon_category),
         first_action(Battle_ActionId_DaggerArtOne + (category - 1) * 4),
-        saved_arts(Audio_Seq_unusedArtsStatus.artsLearned[category % 10]) {
+        saved_arts(VS::State::artsStatus.artsLearned[category % 10]) {
     VS::Menu::break_arts::ResetLiveStatics();
     std::fill_n(Menu_BreakArts_strings, saved_strings.size(), 0xE7E7);
     std::fill_n(Menu_BreakArts_strings, 72, 96);
     Menu_BreakArts_strings[96] = 0;
     Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArts] = 0;
     Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArtsDesc] = 0;
-    Audio_Seq_unusedArtsStatus.artsLearned[category % 10] = 4;
+    VS::State::artsStatus.artsLearned[category % 10] = 4;
     Battle_characterState = Battle_actors[0] = &actor;
     actor.stats = &stats;
     actor.equippedWeaponCategory = static_cast<u_char>(category);
@@ -188,7 +188,7 @@ struct BreakArtMenuFixture {
     VS::Menu::Framework::shortcutInvoked = saved_shortcut;
     VS::Menu::Framework::actionRestrictions = saved_restrictions;
     VS::Menu::Framework::displayActionCost = saved_cost;
-    Audio_Seq_unusedArtsStatus.artsLearned[category % 10] = saved_arts;
+    VS::State::artsStatus.artsLearned[category % 10] = saved_arts;
   }
 
   void FinishRowAnimations() {
@@ -214,11 +214,10 @@ struct EquipmentGateFixture {
   CursorFixture rows;
   decltype(std::to_array(Menu_Inventory_menuText)) saved_strings =
       std::to_array(Menu_Inventory_menuText);
-  decltype(Audio_Seq_unusedStateFlags) saved_flags = Audio_Seq_unusedStateFlags;
-  decltype(Audio_Seq_unusedInventory) saved_inventory =
-      Audio_Seq_unusedInventory;
-  decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
-      Audio_Seq_unusedInventoryIndices;
+  decltype(VS::State::stateFlags) saved_flags = VS::State::stateFlags;
+  decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
+  decltype(VS::Items::inventoryIndices) saved_indices =
+      VS::Items::inventoryIndices;
   Battle_Actor* saved_character = Battle_characterState;
   decltype(VS::Menu::Framework::actionRestrictions) saved_restrictions =
       VS::Menu::Framework::actionRestrictions;
@@ -229,8 +228,8 @@ struct EquipmentGateFixture {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
     std::fill_n(Menu_Inventory_menuText, saved_strings.size(), 0xE7E7);
     std::fill_n(Menu_Inventory_menuText, 128, 128);
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
     actor.stats = &stats;
     Battle_characterState = &actor;
   }
@@ -239,9 +238,9 @@ struct EquipmentGateFixture {
     VS::Menu::Inventory::ResetInventoryTerminalSession();
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_Inventory_menuText);
-    Audio_Seq_unusedStateFlags = saved_flags;
-    Audio_Seq_unusedInventory = saved_inventory;
-    Audio_Seq_unusedInventoryIndices = saved_indices;
+    VS::State::stateFlags = saved_flags;
+    VS::Items::inventory = saved_inventory;
+    VS::Items::inventoryIndices = saved_indices;
     Battle_characterState = saved_character;
     VS::Menu::Framework::actionRestrictions = saved_restrictions;
   }
@@ -265,8 +264,7 @@ int RunSetup(const Call& call) {
 
 struct WorkshopGateFixture {
   CursorFixture rows;
-  decltype(Audio_Seq_unusedInventory) saved_inventory =
-      Audio_Seq_unusedInventory;
+  decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
   u_short* saved_text = VS::Menu::Framework::menu12Text;
   int* saved_types = VS::Menu::Framework::rowTypeBuf;
   Field_MpdEnvironment* saved_environment = Field_roomData.environment;
@@ -283,20 +281,19 @@ struct WorkshopGateFixture {
     VS::Menu::Framework::rowTypeBuf = rows.row_types.data();
     Field_roomData.environment = &environment;
     Field_roomData.header.environmentLength = sizeof environment;
-    Audio_Seq_unusedInventory = {};
+    VS::Items::inventory = {};
     environment.isWorkshop = static_cast<char>(workshop);
     VS::Input::settings.cursorMemory = static_cast<char>(cursor_memory);
     for (int index = 0; index < weapon_count; ++index) {
-      Audio_Seq_unusedInventory.weapons[index].index =
-          static_cast<char>(index + 1);
-      Audio_Seq_unusedInventory.weapons[index].blade =
+      VS::Items::inventory.weapons[index].index = static_cast<char>(index + 1);
+      VS::Items::inventory.weapons[index].blade =
           static_cast<u_char>(index + 1);
     }
   }
 
   ~WorkshopGateFixture() {
     setup::LiveSetupState() = saved_state;
-    Audio_Seq_unusedInventory = saved_inventory;
+    VS::Items::inventory = saved_inventory;
     VS::Menu::Framework::menu12Text = saved_text;
     VS::Menu::Framework::rowTypeBuf = saved_types;
     Field_roomData.environment = saved_environment;
@@ -317,8 +314,8 @@ struct WorkshopGateFixture {
 
 struct WorkshopChoicesFixture {
   WorkshopGateFixture setup{6, 0, false};
-  decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
-      Audio_Seq_unusedInventoryIndices;
+  decltype(VS::Items::inventoryIndices) saved_indices =
+      VS::Items::inventoryIndices;
   decltype(Battle_stringContext) saved_context = Battle_stringContext;
   decltype(VS::Menu::Framework::itemNames) saved_names =
       VS::Menu::Framework::itemNames;
@@ -343,9 +340,9 @@ struct WorkshopChoicesFixture {
     VS::Menu::Framework::itemHelp = help.data();
     VS::Menu::Framework::itemNames = names;
     VS::Menu::Framework::rowTypeBuf = types.data();
-    VS::Menu::Framework::shields = Audio_Seq_unusedInventory.shields;
+    VS::Menu::Framework::shields = VS::Items::inventory.shields;
     setup::LiveSetupState().combination.workshop = 6;
-    Audio_Seq_unusedInventoryIndices = {};
+    VS::Items::inventoryIndices = {};
     FillParts();
     FillProtection();
     for (int category = 1; category <= 5; ++category) {
@@ -354,7 +351,7 @@ struct WorkshopChoicesFixture {
   }
 
   ~WorkshopChoicesFixture() {
-    Audio_Seq_unusedInventoryIndices = saved_indices;
+    VS::Items::inventoryIndices = saved_indices;
     Battle_stringContext = saved_context;
     VS::Menu::Framework::itemNames = saved_names;
     VS::Menu::Framework::itemHelp = saved_help;
@@ -363,18 +360,18 @@ struct WorkshopChoicesFixture {
 
   void FillParts() {
     for (int index = 0; index < 16; ++index) {
-      auto& blade = Audio_Seq_unusedInventory.blades[index];
+      auto& blade = VS::Items::inventory.blades[index];
       blade.id = 1;
       blade.index = static_cast<char>(index + 1);
       blade.category = blade.damageType = 1;
       blade.material = 3;
-      auto& grip = Audio_Seq_unusedInventory.grips[index];
+      auto& grip = VS::Items::inventory.grips[index];
       grip.id = 97;
       grip.index = static_cast<u_short>(index + 1);
       grip.category = 1;
     }
     for (int index = 0; index < 48; ++index) {
-      auto& gem = Audio_Seq_unusedInventory.gems[index];
+      auto& gem = VS::Items::inventory.gems[index];
       gem.id = 261;
       gem.index = static_cast<int16_t>(index + 1);
     }
@@ -382,14 +379,14 @@ struct WorkshopChoicesFixture {
 
   void FillProtection() {
     for (int index = 0; index < 16; ++index) {
-      auto& armor = Audio_Seq_unusedInventory.armor[index];
+      auto& armor = VS::Items::inventory.armor[index];
       armor.id = 161;
       armor.index = static_cast<u_char>(index + 1);
       armor.category = 1;
       armor.material = 3;
       armor.maxDp = 1000;
       if (index < 8) {
-        auto& shield = Audio_Seq_unusedInventory.shields[index];
+        auto& shield = VS::Items::inventory.shields[index];
         shield.base.id = 132;
         shield.base.material = 3;
         shield.base.maxDp = 1000;
@@ -399,7 +396,7 @@ struct WorkshopChoicesFixture {
 
   std::array<std::byte, sizeof(Items_Inventory)> InventoryBytes() const {
     std::array<std::byte, sizeof(Items_Inventory)> bytes{};
-    std::memcpy(bytes.data(), &Audio_Seq_unusedInventory, bytes.size());
+    std::memcpy(bytes.data(), &VS::Items::inventory, bytes.size());
     return bytes;
   }
 
@@ -455,7 +452,7 @@ struct WorkshopRepairFixture {
 
   WorkshopRepairFixture(int missing_dp, int pp) {
     sfx_offsets.fill(UINT32_MAX);
-    auto& inventory = Audio_Seq_unusedInventory;
+    auto& inventory = VS::Items::inventory;
     inventory = {};
     auto initialize = [missing_dp, pp](auto& item, int id) {
       item.id = static_cast<decltype(item.id)>(id);
@@ -495,7 +492,7 @@ struct WorkshopRepairFixture {
   }
 
   void Equip() {
-    auto& inventory = Audio_Seq_unusedInventory;
+    auto& inventory = VS::Items::inventory;
     Battle_characterState = Battle_actors[0] = &actor;
     actor.stats = &stats;
     inventory.weapons[0].index = 1;
@@ -654,10 +651,9 @@ TEST_CASE("Workshop repair restores DP with original rounded PP cost",
   const int pp = GENERATE(0, 1, 50, 200);
   CAPTURE(missing, pp);
   WorkshopRepairFixture fixture(missing, pp);
-  const auto original = Audio_Seq_unusedInventory;
+  const auto original = VS::Items::inventory;
   fixture.Prompt(PADRdown);
-  CHECK(std::memcmp(&original, &Audio_Seq_unusedInventory, sizeof(original)) ==
-        0);
+  CHECK(std::memcmp(&original, &VS::Items::inventory, sizeof(original)) == 0);
   REQUIRE(fixture.Tick() == -1);
   auto expected = original;
   auto repaired = [missing, pp](auto& item) {
@@ -670,8 +666,7 @@ TEST_CASE("Workshop repair restores DP with original rounded PP cost",
   for (int repeat = 0; repeat < 2; ++repeat) {
     fixture.Prompt(PADRright);
     REQUIRE(fixture.Tick() == 0);
-    CHECK(std::memcmp(&expected, &Audio_Seq_unusedInventory,
-                      sizeof(expected)) == 0);
+    CHECK(std::memcmp(&expected, &VS::Items::inventory, sizeof(expected)) == 0);
     REQUIRE(fixture.Tick() == 0);
     REQUIRE(fixture.Tick() == -1);
   }
@@ -730,9 +725,9 @@ TEST_CASE("Workshop repair refreshes equipped runtime DP and PP",
   const std::array<int, 5> expected{10000, 10000, 10000, remaining_pp,
                                     remaining_pp};
   CHECK(actual == expected);
-  CHECK(Audio_Seq_unusedInventory.weapons[0].isEquipped == 1);
-  CHECK(Audio_Seq_unusedInventory.shields[0].isEquipped == 1);
-  CHECK(Audio_Seq_unusedInventory.armor[0].limb == 1);
+  CHECK(VS::Items::inventory.weapons[0].isEquipped == 1);
+  CHECK(VS::Items::inventory.shields[0].isEquipped == 1);
+  CHECK(VS::Items::inventory.armor[0].limb == 1);
 }
 
 TEST_CASE("Workshop blade recipes use ordered IDs materials and native stats",
@@ -874,7 +869,7 @@ TEST_CASE("Assembly and disassembly preserve parts and release gem ownership",
           "[menu][equipment][workshop][ownership][menu-setup]") {
   const int slots = GENERATE(0, 1, 2, 3);
   WorkshopChoicesFixture fixture;
-  auto& inventory = Audio_Seq_unusedInventory;
+  auto& inventory = VS::Items::inventory;
   inventory.weapons[2].index = 3;
   inventory.grips[0].gemSlots = static_cast<char>(slots);
   setup::LiveSetupState().combining_item = 2;
@@ -910,7 +905,7 @@ TEST_CASE("Shield disassembly releases only its attached gem ownership",
           "[menu][equipment][workshop][ownership][menu-setup]") {
   const int slots = GENERATE(0, 1, 2, 3);
   WorkshopChoicesFixture fixture;
-  auto& inventory = Audio_Seq_unusedInventory;
+  auto& inventory = VS::Items::inventory;
   inventory.shields[4].base.gemSlots = static_cast<char>(slots);
   for (int index = 0; index < slots; ++index) {
     inventory.shields[4].gems[index] = static_cast<u_char>(index + 1);
@@ -934,13 +929,13 @@ TEST_CASE("Workshop combination choices enforce original material masks",
   WorkshopChoicesFixture fixture;
   setup::LiveSetupState().combination.workshop =
       static_cast<std::uint8_t>(workshop);
-  for (auto& blade : Audio_Seq_unusedInventory.blades) {
+  for (auto& blade : VS::Items::inventory.blades) {
     blade.material = static_cast<u_short>(material);
   }
-  for (auto& shield : Audio_Seq_unusedInventory.shields) {
+  for (auto& shield : VS::Items::inventory.shields) {
     shield.base.material = static_cast<u_short>(material);
   }
-  for (auto& armor : Audio_Seq_unusedInventory.armor) {
+  for (auto& armor : VS::Items::inventory.armor) {
     armor.material = static_cast<u_short>(material);
   }
   constexpr std::array<WorkshopChoicesFixture::Selector, 3> kSelectors{
@@ -965,7 +960,7 @@ TEST_CASE("Combination choices exclude the other ingredient and accessories",
   auto& combination = setup::LiveSetupState().combination;
   combination.blade_ids = combination.shield_ids =
       combination.armor_ids = {1, 2};
-  Audio_Seq_unusedInventory.armor[15].category = 7;
+  VS::Items::inventory.armor[15].category = 7;
   const int capacity = category == 1 ? 6 : (category == 2 ? 13 : 14);
   constexpr std::array<WorkshopChoicesFixture::Selector, 3> kSelectors{
       setup::SelectCombinationBlade, setup::SelectCombinationShield,
@@ -1031,7 +1026,7 @@ TEST_CASE("Equipment management obeys progression tarnish and action gates",
   const bool tarnished = GENERATE(false, true);
   const int restrictions = GENERATE(0, 1, 2, 4, 7, 8, 0x80, 0x200);
   EquipmentGateFixture fixture;
-  Audio_Seq_unusedStateFlags.introState = static_cast<char>(intro);
+  VS::State::stateFlags.introState = static_cast<char>(intro);
   fixture.stats.statuses = tarnished ? 0x80000 : 0;
   VS::Menu::Framework::actionRestrictions = restrictions;
   REQUIRE(VS::Menu::Inventory::UpdateLiveItemList(1) == 0);
@@ -1098,7 +1093,7 @@ TEST_CASE("Options retain the real Puzzle Mode availability gate",
           "[menu][options][puzzle]") {
   const char disabled = GENERATE(char{0}, char{1});
   PuzzleOptionsFixture fixture;
-  Audio_Seq_unusedStateFlags.puzzleModeDisabled = disabled;
+  VS::State::stateFlags.puzzleModeDisabled = disabled;
   VS::Input::settings.cursorMemory = 0;
   std::uint8_t state = 4;
   CHECK(VS::Menu::Options::UpdateLiveOptions(state) == 0);

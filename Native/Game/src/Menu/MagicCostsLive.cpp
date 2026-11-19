@@ -12,7 +12,6 @@
 #include <string>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionCostsLive.hpp"
@@ -29,6 +28,7 @@
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
 #include "Menu/MagicCosts.hpp"
+#include "State/StateFlags.h"
 
 namespace VS::Menu::Magic {
 namespace {
@@ -101,8 +101,8 @@ class LiveHost final : public Host {
   const SavePointTable& SavePoints() override { return OriginalSavePoints(); }
   std::span<const std::uint8_t> SavePointStates() override {
     return {reinterpret_cast<const std::uint8_t*>(
-                Audio_Seq_unusedStateFlags.savePointStates),
-            std::size(Audio_Seq_unusedStateFlags.savePointStates)};
+                VS::State::stateFlags.savePointStates),
+            std::size(VS::State::stateFlags.savePointStates)};
   }
   std::optional<std::int16_t> CurrentMp() override {
     if (Battle_characterState == nullptr ||

@@ -13,7 +13,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Boot/SessionLive.hpp"
 #include "Event/ScriptDialogCommands.hpp"
 #include "Event/ScriptDialogCommandsLive.hpp"
@@ -23,6 +22,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
+#include "State/StateFlags.h"
 #include "TestSupport/ScriptSources.hpp"
 
 namespace {
@@ -43,7 +43,7 @@ void CheckDialogString(const Bytes& table, std::size_t index,
 struct LiveDialogFixture {
   std::array<Menu_TextBoxState, event::kTextBoxCount> boxes{};
   Menu_Framework_TextBoxSelector selector = Menu_textBoxSelector;
-  decltype(Audio_Seq_unusedStateFlags) audio_flags = Audio_Seq_unusedStateFlags;
+  decltype(VS::State::stateFlags) audio_flags = VS::State::stateFlags;
   decltype(VS::Input::buttonsPressed) pressed = VS::Input::buttonsPressed;
   std::uint16_t* strings = Event_dialogStrings;
   std::array<std::uint16_t, 3> legacy{1, 0xE701, 0};
@@ -55,7 +55,7 @@ struct LiveDialogFixture {
     Event_dialogStrings = legacy.data();
     Menu_textBoxSelector = {};
     VS::Input::buttonsPressed = {};
-    Audio_Seq_unusedStateFlags.opaque11 = 1;
+    VS::State::stateFlags.opaque11 = 1;
     for (auto& box : Menu_textBoxes) {
       box = {};
       box.flags.speakerTexture = event::kNoSpeakerTexture;
@@ -67,7 +67,7 @@ struct LiveDialogFixture {
     event::ResetLiveScriptRuntime();
     std::ranges::copy(boxes, Menu_textBoxes);
     Menu_textBoxSelector = selector;
-    Audio_Seq_unusedStateFlags = audio_flags;
+    VS::State::stateFlags = audio_flags;
     VS::Input::buttonsPressed = pressed;
     Event_dialogStrings = strings;
   }

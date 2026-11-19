@@ -22,7 +22,7 @@ struct Items_WeaponLoadout;
 struct Items_WeaponSpawnLoadout;
 
 // Bindings from the battle actor records, Ashley's battle actor and the
-// inventory (Audio_Seq_unusedInventory) to the typed equipment statistics,
+// inventory (VS::Items::inventory) to the typed equipment statistics,
 // growth, wear and recovery rules (EquipmentStats.hpp, EquipmentAffinity.hpp,
 // EquipmentWear.hpp, Recovery.hpp), in the shapes the copied callers use.
 // Each reports a refusal of the typed rule with a diagnostic; a null record,

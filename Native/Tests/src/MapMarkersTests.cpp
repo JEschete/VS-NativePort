@@ -7,7 +7,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Menu/Map.h"
 #include "Menu/MapMarkers.hpp"
 #include "Menu/MapMarkersLive.hpp"
@@ -302,7 +301,7 @@ TEST_CASE("A door state marker shows below flag 2 unless its sigil is open",
 struct LiveLabelState {
   LiveLabelState() {
     std::memcpy(labels.data(), Menu_Map_mapLabels, sizeof(labels));
-    std::memcpy(&flags, &Audio_Seq_unusedStateFlags, sizeof(flags));
+    std::memcpy(&flags, &VS::State::stateFlags, sizeof(flags));
   }
   LiveLabelState(const LiveLabelState&) = delete;
   LiveLabelState& operator=(const LiveLabelState&) = delete;
@@ -310,7 +309,7 @@ struct LiveLabelState {
   LiveLabelState& operator=(LiveLabelState&&) = delete;
   ~LiveLabelState() {
     std::memcpy(Menu_Map_mapLabels, labels.data(), sizeof(labels));
-    std::memcpy(&Audio_Seq_unusedStateFlags, &flags, sizeof(flags));
+    std::memcpy(&VS::State::stateFlags, &flags, sizeof(flags));
     Menu_Map_mapLabelCount = count;
     Menu_Map_mapLabelY = label_y;
   }
@@ -337,10 +336,10 @@ TEST_CASE("The live label queue refuses an append past its capacity",
 TEST_CASE("The live door state test reads its flag unsigned",
           "[map-markers][map-markers-live]") {
   const LiveLabelState state;
-  Audio_Seq_unusedStateFlags.opaque33F[3] = 1;
+  VS::State::stateFlags.opaque33F[3] = 1;
   CHECK(map::LiveShouldDrawDoorStateMarker(3, 0, 0) == 1);
   // The original's lbu reads 0x80 as 128, which hides the marker.
-  Audio_Seq_unusedStateFlags.opaque33F[3] = static_cast<char>(0x80);
+  VS::State::stateFlags.opaque33F[3] = static_cast<char>(0x80);
   CHECK(map::LiveShouldDrawDoorStateMarker(3, 0, 0) == 0);
 }
 

@@ -30,6 +30,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Field/RoomRenderingLiveState.hpp"
+#include "Items/Inventory.h"
 #include "Items/Loot.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -41,6 +42,7 @@
 #include "Menu/Loot/LootTerminal.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
+#include "State/StateFlags.h"
 
 namespace {
 namespace inventory = VS::Menu::Inventory;
@@ -100,8 +102,8 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
       Battle_characterState};
   ValueRestore<Battle_Actor*> saved_ashley{Battle_actors[kAshleyActor]};
   ValueRestore<int> saved_sound_group{Audio_nextSfxChannelGroup7E};
-  ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_flags{
-      Audio_Seq_unusedStateFlags};
+  ValueRestore<decltype(VS::State::stateFlags)> saved_flags{
+      VS::State::stateFlags};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{
       VS::Input::settings};
   ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
@@ -145,7 +147,7 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     Battle_actors[kAshleyActor] = &actor;
     actor.stats = &stats;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
-    Audio_Seq_unusedStateFlags.introState = 3;
+    VS::State::stateFlags.introState = 3;
     VS::Input::settings.cursorMemory = 0;
     VS::Menu::Framework::menuState = {};
     VS::Menu::Framework::actionSelection = {};
@@ -298,7 +300,7 @@ struct LootFixture : TextLoadingFixture {
     staged.misc[0] = {323, 2, 1};
     staged.misc[1] = {323, 3, 1};
     staged.blades[0].id = 17;
-    Audio_Seq_unusedInventory.misc[0] = {323, 80, 1};
+    VS::Items::inventory.misc[0] = {323, 80, 1};
     Menu_Loot_lootListCount = static_cast<u_char>(kConsolidationRows.size());
     for (std::size_t index = 0; index < kConsolidationRows.size(); ++index) {
       Menu_Loot_lootList[index] =

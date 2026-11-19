@@ -5,6 +5,7 @@
 #include <span>
 
 #include "Items/ContainerTransfersLiveFixture.hpp"
+#include "Items/Inventory.h"
 #include "Menu/Container/ContainerDetailControllersLive.hpp"
 #include "Menu/ItemDetailDispatchLiveFixture.hpp"
 
@@ -51,11 +52,11 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
   void AddContainerWeapon() {
     AddWeapon();
     auto& owner = containers.storage->container;
-    owner.items.blades[kContainerPart] = Audio_Seq_unusedInventory.blades[0];
-    owner.items.grips[kContainerPart] = Audio_Seq_unusedInventory.grips[0];
+    owner.items.blades[kContainerPart] = VS::Items::inventory.blades[0];
+    owner.items.grips[kContainerPart] = VS::Items::inventory.grips[0];
     owner.items.grips[kContainerPart].id = kFirstGripHelpId;
     owner.items.grips[kContainerPart].category = kGripCategory;
-    auto weapon = items::Live::Typed(Audio_Seq_unusedInventory.weapons[0]);
+    auto weapon = items::Live::Typed(VS::Items::inventory.weapons[0]);
     weapon.blade = kContainerPart + 1;
     weapon.grip = kContainerPart + 1;
     items::Live::Commit(owner.items.weapons[kContainerWeapon], weapon);
@@ -67,8 +68,8 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
     AddParts();
     auto& owner = containers.storage->container;
     owner.items.blades[kContainerPart] =
-        std::span(Audio_Seq_unusedInventory.blades).back();
-    owner.items.blades[0] = Audio_Seq_unusedInventory.blades[0];
+        std::span(VS::Items::inventory.blades).back();
+    owner.items.blades[0] = VS::Items::inventory.blades[0];
     owner.indices.blades[0] = kContainerPart + 1;
     owner.indices.blades[1] = 1;
   }
@@ -76,8 +77,8 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
     AddParts();
     auto& owner = containers.storage->container;
     owner.items.grips[kContainerPart] =
-        std::span(Audio_Seq_unusedInventory.grips).back();
-    owner.items.grips[0] = Audio_Seq_unusedInventory.grips[0];
+        std::span(VS::Items::inventory.grips).back();
+    owner.items.grips[0] = VS::Items::inventory.grips[0];
     owner.items.grips[kContainerPart].id = kFirstGripHelpId + 1;
     owner.items.grips[kContainerPart].category = kGripCategory;
     owner.items.grips[0].id = kFirstGripHelpId;
@@ -88,27 +89,26 @@ struct ContainerLiveFixture : item_detail_tests::DispatchLiveFixture {
   void AddContainerShield() {
     AddShield();
     auto& owner = containers.storage->container;
-    owner.items.shields[kContainerWeapon] =
-        Audio_Seq_unusedInventory.shields[0];
-    owner.items.shields[0] = Audio_Seq_unusedInventory.shields[0];
+    owner.items.shields[kContainerWeapon] = VS::Items::inventory.shields[0];
+    owner.items.shields[0] = VS::Items::inventory.shields[0];
     owner.indices.shields[0] = kContainerWeapon + 1;
     owner.indices.shields[1] = 1;
   }
   void AddContainerArmor() {
     AddArmor();
     auto& owner = containers.storage->container;
-    owner.items.armor[0] = Audio_Seq_unusedInventory.armor[0];
+    owner.items.armor[0] = VS::Items::inventory.armor[0];
     owner.items.armor[kContainerPart] =
-        std::span(Audio_Seq_unusedInventory.armor).back();
+        std::span(VS::Items::inventory.armor).back();
     owner.indices.armor[0] = 1;
     owner.indices.armor[1] = kContainerPart + 1;
   }
   void AddContainerGems() {
     AddGems();
     auto& owner = containers.storage->container;
-    owner.items.gems[0] = Audio_Seq_unusedInventory.gems[0];
+    owner.items.gems[0] = VS::Items::inventory.gems[0];
     owner.items.gems[kContainerGem] =
-        std::span(Audio_Seq_unusedInventory.gems).back();
+        std::span(VS::Items::inventory.gems).back();
     owner.indices.gems[0] = kContainerGem + 1;
     owner.indices.gems[1] = 1;
   }

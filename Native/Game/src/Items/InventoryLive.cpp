@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // Live binding for the inventory rules (Inventory.hpp): Ashley's inventory
-// (Audio_Seq_unusedInventory), its menu display order
-// (Audio_Seq_unusedInventoryIndices), her battle actor and the misc stack the
+// (VS::Items::inventory), its menu display order
+// (VS::Items::inventoryIndices), her battle actor and the misc stack the
 // item menu last invoked.
 #include "Items/InventoryLive.hpp"
 
@@ -12,15 +12,20 @@
 #include <span>
 #include <type_traits>
 
-#include "Audio/Seq/Channel.h"
 #include "Items/Categories.h"
 #include "Items/EquipmentStats.hpp"
+#include "Items/Inventory.h"
 #include "Items/Inventory.hpp"
 #include "Items/InventoryLiveState.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 
 unsigned char VS::Items::miscItemInvoked = 0;
+
+// decomp: vs_main_inventory (vs_main_inventory@SLUS_010.40)
+Items_Inventory VS::Items::inventory;
+// decomp: vs_main_inventoryIndices (vs_main_inventoryIndices@SLUS_010.40)
+Items_InventoryIndices VS::Items::inventoryIndices;
 
 static_assert(std::extent_v<decltype(Items_itemCategoryUpperIds)> ==
               VS::Items::kItemIdCategoryCount);
@@ -55,7 +60,7 @@ std::optional<ItemCategory> ToListedCategory(int category,
 }
 
 const Items_Inventory& OrAshleyInventory(const Items_Inventory* inventory) {
-  return inventory != nullptr ? *inventory : Audio_Seq_unusedInventory;
+  return inventory != nullptr ? *inventory : VS::Items::inventory;
 }
 }  // namespace
 
@@ -64,17 +69,17 @@ const Items_Inventory& OrAshleyInventory(const Items_Inventory* inventory) {
 int CountLiveInventoryItem(int id) {
   const std::span<const std::uint32_t, kItemIdCategoryCount> upper_ids(
       Items_itemCategoryUpperIds);
-  return InventoryItemCount(id, upper_ids, Typed(Audio_Seq_unusedInventory));
+  return InventoryItemCount(id, upper_ids, Typed(VS::Items::inventory));
 }
 
 // decomp: BATTLE.PRG vs_battle_decreaseMiscCount
 // (src/BATTLE/BATTLE.PRG/5BF94.c:4454)
 int ConsumeLiveMiscItem(int misc_id) {
-  auto inventory = Typed(Audio_Seq_unusedInventory);
+  auto inventory = Typed(VS::Items::inventory);
   std::uint8_t invoked_slot = miscItemInvoked;
   const bool consumed = ConsumeMiscItem(misc_id, invoked_slot, inventory);
   miscItemInvoked = invoked_slot;
-  Commit(Audio_Seq_unusedInventory, inventory);
+  Commit(VS::Items::inventory, inventory);
   return consumed ? 1 : 0;
 }
 }  // namespace VS::Items
@@ -89,10 +94,10 @@ void UnequipLiveWeapon() {
   auto ashley = Live::ToAshleyWeapon(*stats, actor);
   Live::LiveEquipStatusHost host(
       *stats, [&] { Live::CommitAshleyWeapon(*stats, actor, ashley); });
-  auto inventory = Typed(Audio_Seq_unusedInventory);
+  auto inventory = Typed(VS::Items::inventory);
   const auto status = UnequipWeapon(ashley, inventory, host);
   host.Finish();
-  Commit(Audio_Seq_unusedInventory, inventory);
+  Commit(VS::Items::inventory, inventory);
   WarnRefusal("UnequipWeapon", status);
 }
 
@@ -104,10 +109,10 @@ void UnequipLiveShield() {
   auto shield = Typed(stats->shield);
   Live::LiveEquipStatusHost host(*stats,
                                  [&] { Commit(stats->shield, shield); });
-  auto inventory = Typed(Audio_Seq_unusedInventory);
+  auto inventory = Typed(VS::Items::inventory);
   const auto status = UnequipShield(shield, inventory, host);
   host.Finish();
-  Commit(Audio_Seq_unusedInventory, inventory);
+  Commit(VS::Items::inventory, inventory);
   WarnRefusal("UnequipShield", status);
 }
 
@@ -116,9 +121,9 @@ void UnequipLiveShield() {
 void ClearLiveItemSlot(int category, int slot) {
   const auto typed_category = ToCategory(category, "ClearItemSlot");
   if (!typed_category) return;
-  auto inventory = Typed(Audio_Seq_unusedInventory);
+  auto inventory = Typed(VS::Items::inventory);
   const auto status = ClearItemSlot(*typed_category, slot, inventory);
-  Commit(Audio_Seq_unusedInventory, inventory);
+  Commit(VS::Items::inventory, inventory);
   WarnRefusal("ClearItemSlot", status);
 }
 
@@ -127,7 +132,7 @@ void ClearLiveItemSlot(int category, int slot) {
 int FindLiveDisplayPosition(int category, int slot) {
   const auto typed_category = ToListedCategory(category, "FindDisplayPosition");
   if (!typed_category) return 0;
-  auto indices = Typed(Audio_Seq_unusedInventoryIndices);
+  auto indices = Typed(VS::Items::inventoryIndices);
   return FindDisplayPosition(DisplayOrder(indices, *typed_category), slot);
 }
 
@@ -137,10 +142,10 @@ void RebuildLiveDisplayIndices(int category) {
   const auto typed_category =
       ToListedCategory(category, "RebuildDisplayIndices");
   if (!typed_category) return;
-  auto indices = Typed(Audio_Seq_unusedInventoryIndices);
+  auto indices = Typed(VS::Items::inventoryIndices);
   const auto status = RebuildDisplayIndices(*typed_category, indices,
-                                            Typed(Audio_Seq_unusedInventory));
-  Commit(Audio_Seq_unusedInventoryIndices, indices);
+                                            Typed(VS::Items::inventory));
+  Commit(VS::Items::inventoryIndices, indices);
   WarnRefusal("RebuildDisplayIndices", status);
 }
 
@@ -172,19 +177,19 @@ int CopyLiveItem(int flags, Items_Inventory* target, int source_index,
     WarnNullRecord("CopyItem");
     return 0;
   }
-  const bool target_is_ashley = target == &Audio_Seq_unusedInventory;
+  const bool target_is_ashley = target == &VS::Items::inventory;
   auto typed_target = Typed(*target);
   const auto typed_source =
       source == target ? std::nullopt : std::optional(Typed(*source));
   const auto ashley = target_is_ashley
                           ? std::nullopt
-                          : std::optional(Typed(Audio_Seq_unusedInventory));
-  auto indices = Typed(Audio_Seq_unusedInventoryIndices);
+                          : std::optional(Typed(VS::Items::inventory));
+  auto indices = Typed(VS::Items::inventoryIndices);
   const auto copy = CopyItem(flags, typed_target, source_index,
                              typed_source ? *typed_source : typed_target,
                              indices, ashley ? *ashley : typed_target);
   Commit(*target, typed_target);
-  Commit(Audio_Seq_unusedInventoryIndices, indices);
+  Commit(VS::Items::inventoryIndices, indices);
   WarnRefusal("CopyItem", copy.status);
   return copy.slot;
 }
@@ -203,9 +208,9 @@ void StoreLiveEquippedStats() {
   for (std::size_t limb = 0; limb < kLimbCount; ++limb) {
     loadouts.limb_armor[limb] = Typed(stats->limbs[limb].armor);
   }
-  auto inventory = Typed(Audio_Seq_unusedInventory);
+  auto inventory = Typed(VS::Items::inventory);
   const auto status = StoreEquippedStats(loadouts, inventory);
-  Commit(Audio_Seq_unusedInventory, inventory);
+  Commit(VS::Items::inventory, inventory);
   Commit(stats->weapon, loadouts.weapon);
   Commit(stats->shield, loadouts.shield);
   for (std::size_t limb = 0; limb < kLimbCount; ++limb) {

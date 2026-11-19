@@ -11,7 +11,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Content/ModuleData.hpp"
@@ -913,8 +912,8 @@ namespace {
 class LiveClearRecords {
  public:
   LiveClearRecords() {
-    Audio_Seq_unusedScoredata = {};
-    Audio_Seq_unusedStateFlags = {};
+    VS::State::scoreData = {};
+    VS::State::stateFlags = {};
     VS::State::playTime = {};
     State_roomVisitProgress = {};
     State_savedEntryDoor = {};
@@ -927,8 +926,8 @@ class LiveClearRecords {
   LiveClearRecords(LiveClearRecords&&) = delete;
   LiveClearRecords& operator=(LiveClearRecords&&) = delete;
   ~LiveClearRecords() {
-    Audio_Seq_unusedScoredata = score_;
-    Audio_Seq_unusedStateFlags = flags_;
+    VS::State::scoreData = score_;
+    VS::State::stateFlags = flags_;
     VS::State::playTime = play_time_;
     State_roomVisitProgress = rooms_;
     State_savedEntryDoor = door_;
@@ -938,8 +937,8 @@ class LiveClearRecords {
   }
 
  private:
-  State_ScoreData score_ = Audio_Seq_unusedScoredata;
-  State_StateFlags flags_ = Audio_Seq_unusedStateFlags;
+  State_ScoreData score_ = VS::State::scoreData;
+  State_StateFlags flags_ = VS::State::stateFlags;
   State_PlayTime play_time_ = VS::State::playTime;
   State_RoomVisitFlags rooms_ = State_roomVisitProgress;
   Field_MpdDoorRecord door_ = State_savedEntryDoor;
@@ -955,7 +954,7 @@ class LiveClearRecords {
 void CommitLiveClear() {
   VS::State::playTime.t.hours = 2;
   VS::State::playTime.t.minutes = 5;
-  State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+  State_StateFlags& flags = VS::State::stateFlags;
   flags.clearCount = 4;
   flags.difficulty = 1;
   flags.magicUsed = 1;
@@ -972,7 +971,7 @@ TEST_CASE("LiveCommitClearProgress records the clear in the game's score",
           "[ending][ending-results-credits]") {
   const LiveClearRecords records;
   CommitLiveClear();
-  const State_ScoreData& score = Audio_Seq_unusedScoredata;
+  const State_ScoreData& score = VS::State::scoreData;
   CHECK(score.completionTimeMinutes == 125);
   CHECK(score.clearCount == 4);
   // Under ten hours (1), Asura (9), never saved (16) and no battle abilities or
@@ -986,7 +985,7 @@ TEST_CASE("LiveCommitClearProgress resets the game's playthrough records",
           "[ending][ending-results-credits]") {
   const LiveClearRecords records;
   CommitLiveClear();
-  const State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+  const State_StateFlags& flags = VS::State::stateFlags;
   CHECK(flags.clearCount == 5);
   CHECK((flags.difficulty == 1 && flags.normalModeCleared == 1));
   CHECK((flags.magicUsed == 0 && flags.asuraDefeated == 0));

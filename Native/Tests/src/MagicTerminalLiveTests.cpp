@@ -26,6 +26,7 @@
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
+#include "State/StateFlags.h"
 
 namespace {
 namespace magic = VS::Menu::Magic;
@@ -62,8 +63,8 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
   ValueRestore<decltype(Battle_characterState)> saved_actor{
       Battle_characterState};
   ValueRestore<Battle_Actor*> saved_ashley{Battle_actors[0]};
-  ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_flags{
-      Audio_Seq_unusedStateFlags};
+  ValueRestore<decltype(VS::State::stateFlags)> saved_flags{
+      VS::State::stateFlags};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{
       VS::Input::settings};
   ValueRestore<decltype(VS::Menu::Framework::menuState)> saved_control{
@@ -107,7 +108,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     Battle_actors[0] = &actor;
     actor.stats = &stats;
     stats.currentMp = 500;
-    Audio_Seq_unusedStateFlags = {};
+    VS::State::stateFlags = {};
     VS::Input::settings.cursorMemory = 0;
     VS::Menu::Framework::menuState = {};
     VS::Menu::Framework::actionSelection = {};
@@ -176,7 +177,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     CHECK(item.name[0] == (school == 0 ? 1 : 2));
   }
   void LeaveTeleport() {
-    Audio_Seq_unusedStateFlags.savePointStates[kSavePoint] = 1;
+    VS::State::stateFlags.savePointStates[kSavePoint] = 1;
     REQUIRE(magic::UpdateTeleportMenuLive(1) == 0);
     IdleRows();
     REQUIRE(magic::UpdateTeleportMenuLive(0) == 0);
@@ -309,7 +310,7 @@ TEST_CASE("MENU0 completion and cold sessions also restore teleport ownership",
   CHECK(VS::Menu::Framework::subMenuRowCount == 1);
   CHECK(VS::Core::Memory::LivePayloadCapacity(VS::Menu::Framework::itemsText)
             .has_value());
-  CHECK(Audio_Seq_unusedStateFlags.savePointStates[kSavePoint] == 1);
+  CHECK(VS::State::stateFlags.savePointStates[kSavePoint] == 1);
 }
 
 TEST_CASE("Warlock rank drawing preserves native packet chains and glyph style",

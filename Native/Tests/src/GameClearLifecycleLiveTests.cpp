@@ -93,8 +93,8 @@ void QueueGameClearMusic() {
 void CheckCommittedScore() {
   CHECK(Battle_unusedSubmenuState == 0);
   CHECK(Menu_Results_buffReelIndex == 0);
-  CHECK(Audio_Seq_unusedScoredata.miscScore == 90100);
-  CHECK(Audio_Seq_unusedScoredata.healCount == 0);
+  CHECK(VS::State::scoreData.miscScore == 90100);
+  CHECK(VS::State::scoreData.healCount == 0);
 }
 
 void CheckPlayingMusic(const LiveFixture& fixture) {
@@ -229,7 +229,7 @@ TEST_CASE("Game-clear Live MENUF reload does not reset resident owners",
   LiveFixture fixture;
   Battle_unusedSubmenuState = 7;
   fixture.stats.strength = 77;
-  Audio_Seq_unusedScoredata.miscScore = 12345;
+  VS::State::scoreData.miscScore = 12345;
   Menu_Results_mapCompletion = 89;
   Menu_Results_rank = 15;
   Menu_Results_clearCount = 8;
@@ -237,7 +237,7 @@ TEST_CASE("Game-clear Live MENUF reload does not reset resident owners",
   results::ResetLiveGameClearModuleData();
   CHECK(Battle_unusedSubmenuState == 7);
   CHECK(fixture.stats.strength == 77);
-  CHECK(Audio_Seq_unusedScoredata.miscScore == 12345);
+  CHECK(VS::State::scoreData.miscScore == 12345);
   CHECK(Menu_Results_mapCompletion == 0);
   CHECK(Menu_Results_rank == 0);
   CHECK(Menu_Results_clearCount == 0);
@@ -446,8 +446,8 @@ TEST_CASE(
 TEST_CASE("Game-clear Live initialization commits the real resident score",
           "[game-clear-live][F03010]") {
   LiveFixture fixture;
-  Audio_Seq_unusedScoredata.miscScore = 100;
-  Audio_Seq_unusedScoredata.healCount = 100;
+  VS::State::scoreData.miscScore = 100;
+  VS::State::scoreData.healCount = 100;
   fixture.stats.totalStrength = 13;
   fixture.stats.totalIntelligence = 19;
   fixture.stats.totalAgility = 27;
@@ -512,13 +512,13 @@ TEST_CASE("Game-clear Live no-frame and invalid glyph calls preserve owners",
 TEST_CASE("Game-clear Live healing touches only its score and heal count",
           "[game-clear-live][F03064]") {
   LiveFixture fixture;
-  Audio_Seq_unusedScoredata.miscScore = 123;
-  Audio_Seq_unusedScoredata.healCount = 2;
-  Audio_Seq_unusedScoredata.streakScore = 99;
+  VS::State::scoreData.miscScore = 123;
+  VS::State::scoreData.healCount = 2;
+  VS::State::scoreData.streakScore = 99;
   results::LiveApplyHealingScoreBonus();
-  CHECK(Audio_Seq_unusedScoredata.miscScore == 99923);
-  CHECK(Audio_Seq_unusedScoredata.healCount == 0);
-  CHECK(Audio_Seq_unusedScoredata.streakScore == 99);
+  CHECK(VS::State::scoreData.miscScore == 99923);
+  CHECK(VS::State::scoreData.healCount == 0);
+  CHECK(VS::State::scoreData.streakScore == 99);
 }
 
 TEST_CASE("Game-clear fixture releases a pending production music request",

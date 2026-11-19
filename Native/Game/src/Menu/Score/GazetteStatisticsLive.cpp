@@ -8,7 +8,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
@@ -182,9 +181,9 @@ class LiveRecordHost final : public GazetteRecordHost {
 // decomp: _setTitleRows (src/MENU/MENU9.PRG/238.c:1722), 801056B8.
 void CreateLiveTitleRows() {
   auto rows = Rows();
-  if (!CreateTitleRows(
-          rows, static_cast<std::uint32_t>(Audio_Seq_unusedScoredata.titles),
-          TitleLabels())) {
+  if (!CreateTitleRows(rows,
+                       static_cast<std::uint32_t>(VS::State::scoreData.titles),
+                       TitleLabels())) {
     Refuse("title labels outside their tables or without an end");
     return;
   }
@@ -231,7 +230,7 @@ void RenderLiveStatistics(std::int32_t presentation_step) {
                   .clear_count = Menu_Score_clearCount,
                   .rank = {}},
       .best = ReadLiveScoreRecord(),
-      .best_clear_round = Audio_Seq_unusedScoredata.clearCount,
+      .best_clear_round = VS::State::scoreData.clearCount,
       .no_clear =
           Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneClear)};
   LiveRecordHost host;

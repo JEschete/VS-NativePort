@@ -7,7 +7,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
@@ -388,7 +387,7 @@ TEST_CASE("F03018 live heading flashes the results atlas heading entries",
 TEST_CASE("F03019 live course reads the time-attack course and refuses past it",
           "[timeattack-heading-live]") {
   LiveTimeAttackFixture frame;
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 4;
+  VS::State::stateFlags.timeAttackBoss = 4;
   r::LiveDrawCourseNumber(160, 92, 20);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());
@@ -400,7 +399,7 @@ TEST_CASE("F03019 live course reads the time-attack course and refuses past it",
   Replay(host);
   CHECK(frame.Frame() == live);
   frame.Reset();
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 200;
+  VS::State::stateFlags.timeAttackBoss = 200;
   r::LiveDrawCourseNumber(160, 92, 20);
   CHECK(frame.Empty());
 }
@@ -408,7 +407,7 @@ TEST_CASE("F03019 live course reads the time-attack course and refuses past it",
 TEST_CASE("F03020 live boss name reads the course and refuses past the atlas",
           "[timeattack-heading-live]") {
   LiveTimeAttackFixture frame;
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 6;
+  VS::State::stateFlags.timeAttackBoss = 6;
   r::LiveDrawBossName(160, 120, 40);
   const auto live = frame.Frame();
   REQUIRE(!frame.Empty());
@@ -419,7 +418,7 @@ TEST_CASE("F03020 live boss name reads the course and refuses past the atlas",
   Replay(host);
   CHECK(frame.Frame() == live);
   frame.Reset();
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 42;
+  VS::State::stateFlags.timeAttackBoss = 42;
   r::LiveDrawBossName(160, 120, 40);
   CHECK(frame.Empty());
 }
@@ -427,10 +426,10 @@ TEST_CASE("F03020 live boss name reads the course and refuses past the atlas",
 TEST_CASE("F03021 live best time reads the course's first-place score",
           "[timeattack-heading-live]") {
   LiveTimeAttackFixture frame;
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 2;
-  Audio_Seq_unusedScoredata.bossTimeTrialScores[2][0] = {
+  VS::State::stateFlags.timeAttackBoss = 2;
+  VS::State::scoreData.bossTimeTrialScores[2][0] = {
       .time = 0x010203, .round = 5, .difficulty = 1};
-  Audio_Seq_unusedScoredata.bossTimeTrialScores[2][1] = {
+  VS::State::scoreData.bossTimeTrialScores[2][1] = {
       .time = 0x040506, .round = 0, .difficulty = 0};
   r::LiveDrawBestTime(160, 156, 64);
   const auto live = frame.Frame();
@@ -445,7 +444,7 @@ TEST_CASE("F03021 live best time reads the course's first-place score",
   Replay(host);
   CHECK(frame.Frame() == live);
   frame.Reset();
-  Audio_Seq_unusedStateFlags.timeAttackBoss = 8;
+  VS::State::stateFlags.timeAttackBoss = 8;
   r::LiveDrawBestTime(160, 156, 64);
   CHECK(frame.Empty());
 }

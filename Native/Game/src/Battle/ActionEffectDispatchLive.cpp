@@ -7,7 +7,6 @@
 #include <iterator>
 #include <type_traits>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionEffectDispatch.hpp"
@@ -141,17 +140,17 @@ class LiveEffectWorld final : public ActionEffectWorld {
     return State::LiveScriptFlag(kWeaponArtProgressFlag);
   }
   std::uint8_t LearnedArts(std::uint8_t category) override {
-    return Audio_Seq_unusedArtsStatus.artsLearned[category];
+    return VS::State::artsStatus.artsLearned[category];
   }
   std::uint16_t WeaponKills(std::uint8_t category) override {
-    return Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[category];
+    return VS::State::artsStatus.kills.weaponCategoryKills[category];
   }
   std::uint16_t RequiredKills(std::uint8_t category,
                               std::uint8_t learned) override {
     return Battle_breakArtPointRequirements[category][learned];
   }
   void SetWeaponKills(std::uint8_t category, std::uint16_t kills) override {
-    Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[category] = kills;
+    VS::State::artsStatus.kills.weaponCategoryKills[category] = kills;
   }
 
  private:

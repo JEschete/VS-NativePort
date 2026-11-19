@@ -12,7 +12,6 @@
 #include <string_view>
 #include <utility>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
@@ -48,6 +47,7 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
+#include "State/StateFlags.h"
 
 namespace VS::Menu::map {
 namespace {
@@ -547,10 +547,9 @@ void LiveDrawFrame() {
     return;
   }
   LiveFrame host;
-  if (!DrawFrame(
-          host,
-          Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene] != 0,
-          Menu_Map_isPaling != 0)) {
+  if (!DrawFrame(host,
+                 VS::State::stateFlags.mapPaling[Menu_Map_currentScene] != 0,
+                 Menu_Map_isPaling != 0)) {
     Refuse("DrawFrame", "mask command has no frame capacity");
   }
 }
@@ -611,12 +610,11 @@ int LiveUpdateMapMenu() {
       files[index] = {Menu_Map_kSceneArmFiles[index].lba,
                       Menu_Map_kSceneArmFiles[index].size};
     }
-    const auto result =
-        UpdateMapMenu(host, state, input,
-                      {reinterpret_cast<const std::uint8_t*>(
-                           Audio_Seq_unusedStateFlags.mapPaling),
-                       kSceneCount},
-                      Menu_Map_sceneRowIdMap, files);
+    const auto result = UpdateMapMenu(
+        host, state, input,
+        {reinterpret_cast<const std::uint8_t*>(VS::State::stateFlags.mapPaling),
+         kSceneCount},
+        Menu_Map_sceneRowIdMap, files);
     StoreState(state);
     if (!result) Refuse("UpdateMapMenu", "scene, selection or owned resource");
     return result.value_or(0);

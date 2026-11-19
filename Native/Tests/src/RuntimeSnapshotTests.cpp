@@ -65,8 +65,10 @@
 #include "Save/RuntimeSnapshot.hpp"
 #include "State/Location.h"
 #include "State/PlayTime.hpp"
+#include "State/Progress.h"
 #include "State/RoomMemory.h"
 #include "State/ScriptFlagsLive.hpp"
+#include "State/StateFlags.h"
 #include "State/Timers.hpp"
 #include "Title/NewGame.h"
 
@@ -224,14 +226,13 @@ struct ContentFixture {
 
 struct RuntimeFixture {
   ContentFixture content;
-  decltype(Audio_Seq_unusedStateFlags) flags = Audio_Seq_unusedStateFlags;
-  decltype(Audio_Seq_unusedInventory) inventory = Audio_Seq_unusedInventory;
-  decltype(Audio_Seq_unusedInventoryIndices) order =
-      Audio_Seq_unusedInventoryIndices;
+  decltype(VS::State::stateFlags) flags = VS::State::stateFlags;
+  decltype(VS::Items::inventory) inventory = VS::Items::inventory;
+  decltype(VS::Items::inventoryIndices) order = VS::Items::inventoryIndices;
   decltype(VS::Input::settings) settings = VS::Input::settings;
   decltype(State_roomVisitProgress) visits = State_roomVisitProgress;
-  decltype(Audio_Seq_unusedArtsStatus) arts = Audio_Seq_unusedArtsStatus;
-  decltype(Audio_Seq_unusedScoredata) score = Audio_Seq_unusedScoredata;
+  decltype(VS::State::artsStatus) arts = VS::State::artsStatus;
+  decltype(VS::State::scoreData) score = VS::State::scoreData;
   decltype(State_ashleySnapshot) ashley = State_ashleySnapshot;
   decltype(State_savedEntryDoor) entry = State_savedEntryDoor;
   decltype(Field_snapshotDoorFlagSource) detached_scene =
@@ -341,8 +342,8 @@ struct RuntimeFixture {
       limb.types[3] = -29;
       limb.affinities[7] = -32768;
     }
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
     SetEquipment();
     SetProgress();
     SetWorld();
@@ -352,7 +353,7 @@ struct RuntimeFixture {
   }
 
   void SetProgress() {
-    Audio_Seq_unusedStateFlags = {};
+    VS::State::stateFlags = {};
     VS::State::SetLiveScriptFlag(0x43F, static_cast<char>(0xAB));
     VS::State::SetLiveScriptFlag(64, 99);
     VS::State::SetLiveScriptFlag(161, 17);
@@ -360,10 +361,10 @@ struct RuntimeFixture {
     VS::Input::settings.mappedChainAbilities[3] = static_cast<char>(255);
     State_roomVisitProgress = {};
     State_roomVisitProgress.roomFlags[3] = 0x10203040;
-    Audio_Seq_unusedArtsStatus = {};
-    Audio_Seq_unusedArtsStatus.kills.totalKills = 1234;
-    Audio_Seq_unusedScoredata = {};
-    Audio_Seq_unusedScoredata.bossTimeTrialScores[7][2].time = 0xABCDEF;
+    VS::State::artsStatus = {};
+    VS::State::artsStatus.kills.totalKills = 1234;
+    VS::State::scoreData = {};
+    VS::State::scoreData.bossTimeTrialScores[7][2].time = 0xABCDEF;
     std::fill_n(State_learnedActionFlags, learned.size(),
                 static_cast<char>(0xFF));
     for (auto& action : Battle_actionDefinitions) action.unlocked = 0;
@@ -460,7 +461,7 @@ struct RuntimeFixture {
   }
 
   void SetEquipment() {
-    auto& items = Audio_Seq_unusedInventory;
+    auto& items = VS::Items::inventory;
     auto& blade = items.blades[0];
     blade.id = 14;
     blade.index = 1;
@@ -507,7 +508,7 @@ struct RuntimeFixture {
     items.misc[0].id = 308;
     items.misc[0].count = 2;
     items.misc[0].index = 1;
-    auto& indices = Audio_Seq_unusedInventoryIndices;
+    auto& indices = VS::Items::inventoryIndices;
     indices.weapons[0] = indices.shields[0] = indices.blades[0] = 1;
     indices.grips[0] = indices.armor[0] = indices.gems[0] = indices.misc[0] = 1;
     indices.armor[1] = indices.gems[1] = 2;
@@ -599,13 +600,13 @@ struct RuntimeFixture {
   ~RuntimeFixture() {
     Save::CancelResume();
     Boot_isClearSavePending = clear_pending;
-    Audio_Seq_unusedStateFlags = flags;
-    Audio_Seq_unusedInventory = inventory;
-    Audio_Seq_unusedInventoryIndices = order;
+    VS::State::stateFlags = flags;
+    VS::Items::inventory = inventory;
+    VS::Items::inventoryIndices = order;
     VS::Input::settings = settings;
     State_roomVisitProgress = visits;
-    Audio_Seq_unusedArtsStatus = arts;
-    Audio_Seq_unusedScoredata = score;
+    VS::State::artsStatus = arts;
+    VS::State::scoreData = score;
     State_ashleySnapshot = ashley;
     State_savedEntryDoor = entry;
     Field_snapshotDoorFlagSource = detached_scene;
@@ -658,13 +659,13 @@ void Append(std::vector<std::uint8_t>& bytes, const T& value) {
 // Test-only fingerprints, never serialized as native save data.
 std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   std::vector<std::uint8_t> bytes;
-  Append(bytes, Audio_Seq_unusedStateFlags);
-  Append(bytes, Audio_Seq_unusedInventory);
-  Append(bytes, Audio_Seq_unusedInventoryIndices);
+  Append(bytes, VS::State::stateFlags);
+  Append(bytes, VS::Items::inventory);
+  Append(bytes, VS::Items::inventoryIndices);
   Append(bytes, VS::Input::settings);
   Append(bytes, State_roomVisitProgress);
-  Append(bytes, Audio_Seq_unusedArtsStatus);
-  Append(bytes, Audio_Seq_unusedScoredata);
+  Append(bytes, VS::State::artsStatus);
+  Append(bytes, VS::State::scoreData);
   Append(bytes, State_recentRoomEnemyStates);
   Append(bytes, State_currentRoomStateSlot);
   Append(bytes, State_learnedActionFlags);
@@ -931,7 +932,7 @@ void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   if (defect == 0) VS::Field::zoneContext.currentSceneId = 38;
   if (defect == 1) Boot_isGameplayActive = 0;
   if (defect == 2) fixture.player_stats.weapon.index = 9;
-  if (defect == 3) Audio_Seq_unusedInventory.weapons[0].grip = 255;
+  if (defect == 3) VS::Items::inventory.weapons[0].grip = 255;
   if (defect == 4) State_currentRoomStateSlot = 4;
   if (defect == 5) Field_roomData.environment = nullptr;
   if (defect == 6) fixture.player_model.instance.currentTileLayer = 2;
@@ -1116,8 +1117,8 @@ TEST_CASE(
 
 namespace {
 void ConsumeOrderedMiscItems() {
-  auto& items = Audio_Seq_unusedInventory.misc;
-  auto& order = Audio_Seq_unusedInventoryIndices.misc;
+  auto& items = VS::Items::inventory.misc;
+  auto& order = VS::Items::inventoryIndices.misc;
   items[9].id = 425;
   items[9].index = 10;
   items[9].count = 1;
@@ -1151,9 +1152,9 @@ void CheckConsumedMiscResume(const Save::Snapshot& state) {
   const auto decoded = Save::Decode(*encoded);
   REQUIRE(decoded.has_value());
   REQUIRE(Save::PrepareResume(*decoded).has_value());
-  CHECK(Audio_Seq_unusedInventoryIndices.misc[0] == 12);
-  CHECK(Audio_Seq_unusedInventoryIndices.misc[1] == 10);
-  CHECK(Audio_Seq_unusedInventory.misc[10].id == 0);
+  CHECK(VS::Items::inventoryIndices.misc[0] == 12);
+  CHECK(VS::Items::inventoryIndices.misc[1] == 10);
+  CHECK(VS::Items::inventory.misc[10].id == 0);
 }
 }  // namespace
 
@@ -1175,7 +1176,7 @@ TEST_CASE("Runtime capture projects consumed misc items out of display order",
 TEST_CASE("Runtime capture removes stale display rows in every category",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
-  auto& order = Audio_Seq_unusedInventoryIndices;
+  auto& order = VS::Items::inventoryIndices;
   const auto add_stale = [](auto& category) {
     category[std::size(category) - 1] = std::size(category);
   };
@@ -1195,7 +1196,7 @@ TEST_CASE("Runtime capture removes stale display rows in every category",
 TEST_CASE("Runtime capture does not repair corrupt display references",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
-  auto& order = Audio_Seq_unusedInventoryIndices.misc;
+  auto& order = VS::Items::inventoryIndices.misc;
   const auto defect = GENERATE(0, 1);
   order[0] = 64;
   order[1] = defect == 0 ? 65 : 64;
@@ -1688,8 +1689,8 @@ TEST_CASE("Original ending advances clear difficulty and saturates its count",
           "[save][runtime-snapshot][save-clear]") {
   RuntimeFixture fixture;
   const auto previous_clears = GENERATE(0, 1, 98, 99);
-  Audio_Seq_unusedStateFlags.clearCount = static_cast<char>(previous_clears);
-  Audio_Seq_unusedStateFlags.difficulty = previous_clears == 0 ? 0 : 1;
+  VS::State::stateFlags.clearCount = static_cast<char>(previous_clears);
+  VS::State::stateFlags.difficulty = previous_clears == 0 ? 0 : 1;
   const auto document = fixture.ClearGame();
   CHECK(document.state.script_flags[0] == std::min(previous_clears + 1, 99));
   CHECK(document.state.script_flags[1] == 1);

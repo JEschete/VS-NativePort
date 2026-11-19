@@ -4,8 +4,8 @@
 struct Items_Inventory;
 
 // Binds the inventory rules (Inventory.hpp) to Ashley's inventory
-// (Audio_Seq_unusedInventory), its menu display order
-// (Audio_Seq_unusedInventoryIndices) and her battle actor, in the shapes the
+// (VS::Items::inventory), its menu display order
+// (VS::Items::inventoryIndices) and her battle actor, in the shapes the
 // copied callers use. Categories are the menu categories 0-7; another is
 // refused and reported.
 namespace VS::Items {

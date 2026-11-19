@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Input/Pad.hpp"
+#include "Items/Inventory.h"
 #include "Menu/ContainerDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -169,7 +170,7 @@ TEST_CASE(
       selected.category = accessory ? kAccessoryCategory : kArmorCategory;
       selected.id = accessory ? kAccessoryId : kArmorId;
       owner.indices.armor[0] = reference;
-      for (auto& armor : Audio_Seq_unusedInventory.armor) {
+      for (auto& armor : VS::Items::inventory.armor) {
         armor.category = accessory ? kArmorCategory : kAccessoryCategory;
       }
       fixture.Open(detail::UpdateLiveArmorDetails);

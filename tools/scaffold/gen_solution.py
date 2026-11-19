@@ -327,6 +327,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Actors\ActorMovementLive.cpp",
                 r"src\Actors\AnimationControlLive.cpp",
                 r"src\State\ScriptFlagsLive.cpp",
+                r"src\State\StateFlags.cpp",
                 r"src\State\SceneTimerLive.cpp",
                 r"src\State\GameClockLive.cpp",
                 r"src\State\KillScoreLive.cpp",

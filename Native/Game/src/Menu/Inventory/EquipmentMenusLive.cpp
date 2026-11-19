@@ -12,7 +12,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Core/Log.hpp"
@@ -92,11 +91,11 @@ template <typename T, std::size_t N>
 [[nodiscard]] std::span<const u_char> IndexList(EquipmentTable table) {
   switch (table) {
     case EquipmentTable::kWeapons:
-      return Audio_Seq_unusedInventoryIndices.weapons;
+      return VS::Items::inventoryIndices.weapons;
     case EquipmentTable::kShields:
-      return Audio_Seq_unusedInventoryIndices.shields;
+      return VS::Items::inventoryIndices.shields;
     case EquipmentTable::kArmor:
-      return Audio_Seq_unusedInventoryIndices.armor;
+      return VS::Items::inventoryIndices.armor;
   }
   return {};
 }
@@ -120,43 +119,43 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
   }
   bool IsEquipped(EquipmentTable table, std::int32_t slot) override {
     if (table == EquipmentTable::kWeapons) {
-      const auto* weapon = Slot(Audio_Seq_unusedInventory.weapons, slot);
+      const auto* weapon = Slot(VS::Items::inventory.weapons, slot);
       return weapon != nullptr && weapon->isEquipped != 0;
     }
-    const auto* shield = Slot(Audio_Seq_unusedInventory.shields, slot);
+    const auto* shield = Slot(VS::Items::inventory.shields, slot);
     return table == EquipmentTable::kShields && shield != nullptr &&
            shield->isEquipped != 0;
   }
   void MarkEquipped(EquipmentTable table, std::int32_t slot) override {
     if (table == EquipmentTable::kWeapons) {
-      if (auto* weapon = Slot(Audio_Seq_unusedInventory.weapons, slot)) {
+      if (auto* weapon = Slot(VS::Items::inventory.weapons, slot)) {
         weapon->isEquipped = 1;
       }
     } else if (table == EquipmentTable::kShields) {
-      if (auto* shield = Slot(Audio_Seq_unusedInventory.shields, slot)) {
+      if (auto* shield = Slot(VS::Items::inventory.shields, slot)) {
         shield->isEquipped = 1;
       }
     }
   }
   std::uint8_t ArmorLimb(std::int32_t slot) override {
-    const auto* armor = Slot(Audio_Seq_unusedInventory.armor, slot);
+    const auto* armor = Slot(VS::Items::inventory.armor, slot);
     return armor != nullptr ? armor->limb : 0;
   }
   std::uint8_t ArmorCategory(std::int32_t slot) override {
-    const auto* armor = Slot(Audio_Seq_unusedInventory.armor, slot);
+    const auto* armor = Slot(VS::Items::inventory.armor, slot);
     return armor != nullptr ? static_cast<std::uint8_t>(armor->category) : 0;
   }
   void SetArmorLimb(std::int32_t slot, std::uint8_t limb) override {
-    if (auto* armor = Slot(Audio_Seq_unusedInventory.armor, slot)) {
+    if (auto* armor = Slot(VS::Items::inventory.armor, slot)) {
       armor->limb = limb;
     }
   }
   std::uint8_t WeaponBlade(std::int32_t slot) override {
-    const auto* weapon = Slot(Audio_Seq_unusedInventory.weapons, slot);
+    const auto* weapon = Slot(VS::Items::inventory.weapons, slot);
     return weapon != nullptr ? weapon->blade : 0;
   }
   BladeModel Blade(std::int32_t slot) override {
-    const auto* blade = Slot(Audio_Seq_unusedInventory.blades, slot);
+    const auto* blade = Slot(VS::Items::inventory.blades, slot);
     if (blade == nullptr) {
       return {};
     }
@@ -165,7 +164,7 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
             .material = static_cast<std::uint8_t>(blade->material)};
   }
   ShieldModel Shield(std::int32_t slot) override {
-    const auto* shield = Slot(Audio_Seq_unusedInventory.shields, slot);
+    const auto* shield = Slot(VS::Items::inventory.shields, slot);
     if (shield == nullptr) {
       return {};
     }
@@ -216,17 +215,17 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
     switch (table) {
       case EquipmentTable::kWeapons:
         Framework::FormatLiveInventoryWeaponRow(
-            Slot(Audio_Seq_unusedInventory.weapons, slot), texts.data(), &flags,
+            Slot(VS::Items::inventory.weapons, slot), texts.data(), &flags,
             buffer);
         break;
       case EquipmentTable::kShields:
         Framework::FormatLiveInventoryShieldRow(
-            Slot(Audio_Seq_unusedInventory.shields, slot), texts.data(), &flags,
+            Slot(VS::Items::inventory.shields, slot), texts.data(), &flags,
             buffer);
         break;
       case EquipmentTable::kArmor:
         Framework::FormatLiveInventoryArmorRow(
-            Slot(Audio_Seq_unusedInventory.armor, slot), texts.data(), &flags,
+            Slot(VS::Items::inventory.armor, slot), texts.data(), &flags,
             buffer);
         break;
     }
@@ -283,19 +282,19 @@ class LiveEquipmentMenusHost final : public EquipmentMenusHost {
   void UnequipWeapon() override { Items::Inventory::UnequipLiveWeapon(); }
   void UnequipShield() override { Items::Inventory::UnequipLiveShield(); }
   void EquipWeapon(std::int32_t slot) override {
-    Items::EquipLiveAshleyWeapon(Slot(Audio_Seq_unusedInventory.weapons, slot));
+    Items::EquipLiveAshleyWeapon(Slot(VS::Items::inventory.weapons, slot));
   }
   void EquipShield(std::int32_t slot) override {
-    Items::EquipLiveAshleyShield(Slot(Audio_Seq_unusedInventory.shields, slot));
+    Items::EquipLiveAshleyShield(Slot(VS::Items::inventory.shields, slot));
   }
   void EquipArmor(std::int32_t part,
                   std::optional<std::int32_t> slot) override {
     Items::EquipLiveAshleyArmor(
-        part, slot ? Slot(Audio_Seq_unusedInventory.armor, *slot) : nullptr);
+        part, slot ? Slot(VS::Items::inventory.armor, *slot) : nullptr);
   }
   void EquipAccessory(std::optional<std::int32_t> slot) override {
     Items::EquipLiveAshleyAccessory(
-        slot ? Slot(Audio_Seq_unusedInventory.armor, *slot) : nullptr);
+        slot ? Slot(VS::Items::inventory.armor, *slot) : nullptr);
   }
   bool ReloadModels(std::int32_t category, std::int32_t model_id,
                     std::int32_t material) override {

@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
@@ -65,12 +64,12 @@ class LiveCubePuzzleTextHost final : public CubePuzzleTextHost {
 
 // The flags' fields are plain char; the original loads them unsigned.
 CubePuzzleClock LivePuzzleClock() {
-  return {.minutes = static_cast<std::uint8_t>(
-              Audio_Seq_unusedStateFlags.puzzleTimerMins),
+  return {.minutes =
+              static_cast<std::uint8_t>(VS::State::stateFlags.puzzleTimerMins),
           .seconds = static_cast<std::uint8_t>(
-              Audio_Seq_unusedStateFlags.puzzleTimerSeconds),
+              VS::State::stateFlags.puzzleTimerSeconds),
           .hundredths = static_cast<std::uint8_t>(
-              Audio_Seq_unusedStateFlags.puzzleTimerHundredths)};
+              VS::State::stateFlags.puzzleTimerHundredths)};
 }
 }  // namespace
 

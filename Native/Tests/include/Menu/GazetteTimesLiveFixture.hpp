@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
 #include "Content/ModuleData.hpp"
 #include "Content/StringTables.h"
@@ -35,6 +34,7 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/Text/VariableFont.hpp"
 #include "Render/UiPrimitives.hpp"
+#include "State/Progress.h"
 
 namespace gazette_times_live_tests {
 namespace score = VS::Menu::Score;
@@ -75,7 +75,7 @@ inline auto TableOwners() {
 inline auto MutableOwners() {
   return std::array{BytesOf(Menu_Score_gazetteRows),
                     BytesOf(Menu_Score_clearCount),
-                    BytesOf(Audio_Seq_unusedScoredata),
+                    BytesOf(VS::State::scoreData),
                     BytesOf(Battle_unusedMenu9CursorMemory),
                     BytesOf(VS::Menu::Framework::menuItems),
                     BytesOf(VS::Menu::Framework::menuMemory),
@@ -275,7 +275,7 @@ class Fixture {
     Menu_textBoxes[kInformationBox] = {};
     Battle_unusedMenu9CursorMemory.gazettePage = 0;
     std::ranges::fill(Menu_Score_gazetteRows, Menu_Score_Row{});
-    for (auto& trial : Audio_Seq_unusedScoredata.bossTimeTrialScores) {
+    for (auto& trial : VS::State::scoreData.bossTimeTrialScores) {
       for (auto& record : trial) {
         record = {};
         record.time = kMissingTime;
@@ -311,7 +311,7 @@ class Fixture {
     if (trial >= score::kTimeTrialCount || place >= score::kTimeTrialPlaces) {
       throw std::runtime_error("Gazette Live score index outside its owner");
     }
-    auto& record = Audio_Seq_unusedScoredata.bossTimeTrialScores[trial][place];
+    auto& record = VS::State::scoreData.bossTimeTrialScores[trial][place];
     record.time = time & kLinkMask;
     record.round = static_cast<std::uint32_t>(round) & 127U;
     record.difficulty = hard ? 1U : 0U;

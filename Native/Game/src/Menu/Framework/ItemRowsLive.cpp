@@ -11,7 +11,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/TargetingState.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -324,7 +323,7 @@ std::optional<Items::WeaponLoadout> LiveItemRowsHost::InventoryWeaponLoadout(
   Items_InventoryWeapon legacy{};
   Items::Live::Commit(legacy, weapon);
   Items_WeaponLoadout loadout{};
-  if (VS::Menu::Framework::weapons == Audio_Seq_unusedInventory.weapons) {
+  if (VS::Menu::Framework::weapons == VS::Items::inventory.weapons) {
     Items::LoadLiveInventoryWeaponStats(&loadout, &legacy);
   } else if (Items_ContainerData* container = OpenContainer()) {
     VS::Menu::container::BuildLiveWeaponStats(&loadout, &legacy, container);
@@ -339,7 +338,7 @@ std::optional<Items::ShieldLoadout> LiveItemRowsHost::InventoryShieldLoadout(
   Items_InventoryShield legacy{};
   Items::Live::Commit(legacy, shield);
   Items_ShieldLoadout loadout{};
-  if (VS::Menu::Framework::shields == Audio_Seq_unusedInventory.shields) {
+  if (VS::Menu::Framework::shields == VS::Items::inventory.shields) {
     Items::LoadLiveInventoryShieldStats(&loadout, &legacy);
   } else if (Items_ContainerData* container = OpenContainer()) {
     VS::Menu::container::BuildLiveShieldStats(&loadout, &legacy, container);
@@ -351,37 +350,37 @@ std::optional<Items::ShieldLoadout> LiveItemRowsHost::InventoryShieldLoadout(
 
 std::optional<Items::InventoryWeapon> LiveItemRowsHost::Weapon(int reference) {
   return Referenced<Items_InventoryWeapon>(
-      VS::Menu::Framework::weapons, Audio_Seq_unusedInventory.weapons,
+      VS::Menu::Framework::weapons, VS::Items::inventory.weapons,
       ContainerTable(&Items_ContainerData::weapons), reference);
 }
 
 std::optional<Items::InventoryBlade> LiveItemRowsHost::Blade(int reference) {
   return Referenced<Items_InventoryBlade>(
-      VS::Menu::Framework::blades, Audio_Seq_unusedInventory.blades,
+      VS::Menu::Framework::blades, VS::Items::inventory.blades,
       ContainerTable(&Items_ContainerData::blades), reference);
 }
 
 std::optional<Items::InventoryGrip> LiveItemRowsHost::Grip(int reference) {
   return Referenced<Items_InventoryGrip>(
-      VS::Menu::Framework::grips, Audio_Seq_unusedInventory.grips,
+      VS::Menu::Framework::grips, VS::Items::inventory.grips,
       ContainerTable(&Items_ContainerData::grips), reference);
 }
 
 std::optional<Items::InventoryShield> LiveItemRowsHost::Shield(int reference) {
   return Referenced<Items_InventoryShield>(
-      VS::Menu::Framework::shields, Audio_Seq_unusedInventory.shields,
+      VS::Menu::Framework::shields, VS::Items::inventory.shields,
       ContainerTable(&Items_ContainerData::shields), reference);
 }
 
 std::optional<Items::InventoryArmor> LiveItemRowsHost::Armor(int reference) {
   return Referenced<Items_InventoryArmor>(
-      VS::Menu::Framework::armor, Audio_Seq_unusedInventory.armor,
+      VS::Menu::Framework::armor, VS::Items::inventory.armor,
       ContainerTable(&Items_ContainerData::armor), reference);
 }
 
 std::optional<Items::InventoryGem> LiveItemRowsHost::Gem(int reference) {
   return Referenced<Items_InventoryGem>(
-      VS::Menu::Framework::gems, Audio_Seq_unusedInventory.gems,
+      VS::Menu::Framework::gems, VS::Items::inventory.gems,
       ContainerTable(&Items_ContainerData::gems), reference);
 }
 

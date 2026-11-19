@@ -58,7 +58,7 @@ static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 static_assert(std::size(State_roomVisitProgress.roomFlags) ==
               Score::kRoomFlagWords);
 static_assert(std::size(Field_countableRoomMask) == Score::kRoomFlagWords);
-static_assert(std::size(Audio_Seq_unusedStateFlags.chestsOpened) ==
+static_assert(std::size(VS::State::stateFlags.chestsOpened) ==
               Score::kChestFlagCount);
 
 struct LoadOwner {
@@ -386,7 +386,7 @@ class LiveInit final : public GameClearInitHost {
     if (!stats.has_value()) return std::nullopt;
     GameClearWorld world;
     world.record = Score::ReadLiveScoreRecord();
-    world.heal_count = Audio_Seq_unusedScoredata.healCount;
+    world.heal_count = VS::State::scoreData.healCount;
     for (std::size_t index = 0; index < world.room_flags.size(); ++index) {
       world.room_flags.at(index) =
           static_cast<std::uint32_t>(State_roomVisitProgress.roomFlags[index]);
@@ -394,22 +394,21 @@ class LiveInit final : public GameClearInitHost {
           static_cast<std::uint32_t>(Field_countableRoomMask[index]);
     }
     for (std::size_t index = 0; index < world.chests_opened.size(); ++index) {
-      world.chests_opened.at(index) = static_cast<std::uint8_t>(
-          Audio_Seq_unusedStateFlags.chestsOpened[index]);
+      world.chests_opened.at(index) =
+          static_cast<std::uint8_t>(VS::State::stateFlags.chestsOpened[index]);
     }
     world.clear_count =
-        static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.clearCount);
+        static_cast<std::uint8_t>(VS::State::stateFlags.clearCount);
     world.strength = stats->total_strength;
     world.intelligence = stats->total_intelligence;
     world.agility = stats->total_agility;
     return world;
   }
   void WriteWorld(const GameClearWorld& world) override {
-    Audio_Seq_unusedScoredata.miscScore = world.record.misc_score;
-    Audio_Seq_unusedScoredata.healCount = world.heal_count;
-    Audio_Seq_unusedScoredata.mapCompletion = world.record.map_completion;
-    Audio_Seq_unusedScoredata.openedChestCount =
-        world.record.opened_chest_count;
+    VS::State::scoreData.miscScore = world.record.misc_score;
+    VS::State::scoreData.healCount = world.heal_count;
+    VS::State::scoreData.mapCompletion = world.record.map_completion;
+    VS::State::scoreData.openedChestCount = world.record.opened_chest_count;
     for (std::size_t index = 0; index < world.room_flags.size(); ++index) {
       State_roomVisitProgress.roomFlags[index] =
           std::bit_cast<std::int32_t>(world.room_flags.at(index));
@@ -607,11 +606,11 @@ void LiveDrawBonusReelTexture(int x, int y, int texture_index) {
 
 // decomp: _addHealBonus, src/MENU/MENUF.PRG/3B8.c:2865.
 void LiveApplyHealingScoreBonus() {
-  const auto healed = ApplyHealingScoreBonus(
-      {.misc_score = Audio_Seq_unusedScoredata.miscScore,
-       .heal_count = Audio_Seq_unusedScoredata.healCount});
-  Audio_Seq_unusedScoredata.miscScore = healed.misc_score;
-  Audio_Seq_unusedScoredata.healCount = healed.heal_count;
+  const auto healed =
+      ApplyHealingScoreBonus({.misc_score = VS::State::scoreData.miscScore,
+                              .heal_count = VS::State::scoreData.healCount});
+  VS::State::scoreData.miscScore = healed.misc_score;
+  VS::State::scoreData.healCount = healed.heal_count;
 }
 
 void ResetLiveGameClearModuleData() {

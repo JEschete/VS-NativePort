@@ -12,7 +12,6 @@
 #include <type_traits>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Feedback.h"
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudRenderingLiveFixture.hpp"
@@ -23,6 +22,7 @@
 #include "Menu/TextBox.h"
 #include "Render/Text/CompactFont.hpp"
 #include "State/SceneTimer.h"
+#include "State/StateFlags.h"
 #include "State/Timers.hpp"
 
 namespace hud_orchestration_live_fixture {
@@ -185,7 +185,7 @@ class LiveState {
   SavedValue<Battle_floatingLabelCount> label_count_;
   SavedValue<Battle_statusLabelStepTimer> label_step_;
   SavedValue<Battle_puzzleTimerTextPointer> timer_alias_;
-  SavedValue<Audio_Seq_unusedStateFlags> flags_;
+  SavedValue<VS::State::stateFlags> flags_;
   SavedValue<VS::State::tickSpeed> speed_;
   SavedArray<Battle_actorMarkers> markers_;
   SavedArray<Battle_puzzleTimerText> timer_text_;

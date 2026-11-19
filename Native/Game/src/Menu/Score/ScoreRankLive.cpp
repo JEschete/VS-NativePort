@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <iterator>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
 #include "Battle/StatusEffects.h"
@@ -28,13 +27,12 @@ namespace {
 static_assert(std::size(Battle_actionDefinitions) >= kTitleActionCount);
 static_assert(std::size(State_roomVisitProgress.roomFlags) == kRoomFlagWords);
 static_assert(std::size(Field_countableRoomMask) == kRoomFlagWords);
-static_assert(std::size(Audio_Seq_unusedStateFlags.chestsOpened) ==
-              kChestFlagCount);
-static_assert(std::size(Audio_Seq_unusedScoredata.enemyKills) ==
+static_assert(std::size(VS::State::stateFlags.chestsOpened) == kChestFlagCount);
+static_assert(std::size(VS::State::scoreData.enemyKills) ==
               kScoreEnemyClassCount);
-static_assert(std::size(Audio_Seq_unusedScoredata.weaponAttacks) ==
+static_assert(std::size(VS::State::scoreData.weaponAttacks) ==
               kScoreWeaponClassCount);
-static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores) ==
+static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
               kBossTrialCount);
 
 constexpr std::size_t kBestTrialRank = 0;
@@ -45,7 +43,7 @@ std::uint32_t BestTrialWord(std::size_t boss) {
   // The original reads each boss's rank 0 record as a word (lw, then masks the
   // 24-bit time).
   const State_TrialScore& score =
-      Audio_Seq_unusedScoredata.bossTimeTrialScores[boss][kBestTrialRank];
+      VS::State::scoreData.bossTimeTrialScores[boss][kBestTrialRank];
   return static_cast<std::uint32_t>(score.time) |
          (static_cast<std::uint32_t>(score.round) << kTrialRoundShift) |
          (static_cast<std::uint32_t>(score.difficulty)
@@ -86,10 +84,10 @@ ProgressWorld ReadLiveProgressWorld() {
   }
   for (std::size_t i = 0; i < kChestFlagCount; ++i) {
     world.chests_opened.at(i) =
-        static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.chestsOpened[i]);
+        static_cast<std::uint8_t>(VS::State::stateFlags.chestsOpened[i]);
   }
   world.clear_count =
-      static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.clearCount);
+      static_cast<std::uint8_t>(VS::State::stateFlags.clearCount);
   world.cursor_memory = IsSet(VS::Input::settings.cursorMemory);
   world.conditions = ReadLiveTitleConditions();
   world.record = ReadLiveScoreRecord();
@@ -98,7 +96,7 @@ ProgressWorld ReadLiveProgressWorld() {
 }  // namespace
 
 ScoreRecord ReadLiveScoreRecord() {
-  const State_ScoreData& data = Audio_Seq_unusedScoredata;
+  const State_ScoreData& data = VS::State::scoreData;
   ScoreRecord record;
   record.titles = static_cast<std::uint32_t>(data.titles);
   for (std::size_t i = 0; i < kScoreEnemyClassCount; ++i) {
@@ -120,7 +118,7 @@ ScoreRecord ReadLiveScoreRecord() {
 }
 
 TitleConditions ReadLiveTitleConditions() {
-  const State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+  const State_StateFlags& flags = VS::State::stateFlags;
   TitleConditions conditions;
   conditions.bosses_defeated = {IsSet(flags.damascusGolemDefeated),
                                 IsSet(flags.damascusCrabDefeated),
@@ -141,7 +139,7 @@ TitleConditions ReadLiveTitleConditions() {
 void AwardLiveTitles() {
   const std::uint32_t titles = AwardTitles(
       ReadLiveScoreRecord(), Menu_Score_clearCount, ReadLiveTitleConditions());
-  Audio_Seq_unusedScoredata.titles = static_cast<int>(titles);
+  VS::State::scoreData.titles = static_cast<int>(titles);
 }
 
 // decomp: MENU9.PRG _calculateScore (src/MENU/MENU9.PRG/238.c:2842).
@@ -153,7 +151,7 @@ void CalculateLiveScore() {
 // decomp: MENU9.PRG _determineCharacterRank (src/MENU/MENU9.PRG/238.c:2633).
 void DetermineLiveRiskbreakerRank() {
   const auto rank = DetermineRiskbreakerRank(
-      static_cast<std::uint32_t>(Audio_Seq_unusedScoredata.titles),
+      static_cast<std::uint32_t>(VS::State::scoreData.titles),
       static_cast<std::uint32_t>(Menu_Score_score));
   if (rank.has_value()) {
     Menu_Score_characterRank = *rank;
@@ -170,9 +168,9 @@ int CalculateLiveProgress() {
   Menu_Score_mapCompletion = progress.map_completion;
   Menu_Score_openedChestCount = progress.opened_chest_count;
   Menu_Score_clearCount = progress.clear_count;
-  Audio_Seq_unusedScoredata.mapCompletion = world.record.map_completion;
-  Audio_Seq_unusedScoredata.openedChestCount = world.record.opened_chest_count;
-  Audio_Seq_unusedScoredata.titles = static_cast<int>(world.record.titles);
+  VS::State::scoreData.mapCompletion = world.record.map_completion;
+  VS::State::scoreData.openedChestCount = world.record.opened_chest_count;
+  VS::State::scoreData.titles = static_cast<int>(world.record.titles);
   Menu_Score_score = progress.score;
   if (progress.rank.has_value()) {
     Menu_Score_characterRank = *progress.rank;

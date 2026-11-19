@@ -16,6 +16,7 @@
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/Score/GazetteStatisticsLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
+#include "State/Progress.h"
 
 namespace {
 namespace live = gazette_times_live_tests;
@@ -93,7 +94,7 @@ void CheckResidentState(const live::ObservableState& before) {
   CHECK(Battle_unusedMenu9CursorMemory.gazettePage == 0);
   CHECK(Battle_unusedMenu9CursorMemory.recordTimePage == 5);
   CHECK(Battle_unusedMenu9CursorMemory.recordTimeRow == 2);
-  CHECK(Audio_Seq_unusedScoredata.bossTimeTrialScores[0][0].time == 0x010203);
+  CHECK(VS::State::scoreData.bossTimeTrialScores[0][0].time == 0x010203);
   CHECK(Menu_Score_clearCount == 3);
   for (std::size_t i = 0; i < score::kTimeTrialCount; ++i) {
     CHECK(Fixture::Row(i).text == before.rows[i].text);
@@ -131,8 +132,8 @@ TEST_CASE("Production statistics caller supplies the remaining time text span",
   Fixture fixture;
   LoadStatisticsLabels();
   Menu_Score_clearCount = 1;
-  Audio_Seq_unusedScoredata.clearCount = 127;
-  Audio_Seq_unusedScoredata.completionTimeMinutes = 6000;
+  VS::State::scoreData.clearCount = 127;
+  VS::State::scoreData.completionTimeMinutes = 6000;
   Battle_unusedMenu9CursorMemory.recordTimePage = 0;
   Battle_unusedMenu9CursorMemory.recordTimeRow = 0;
   score::CreateLiveStatisticRows();
@@ -143,7 +144,7 @@ TEST_CASE("Production statistics caller supplies the remaining time text span",
   fixture.ResetFrame();
   score::RenderLiveStatistics(7);
   CHECK(fixture.Packets() == first);
-  Audio_Seq_unusedScoredata.completionTimeMinutes = 60;
+  VS::State::scoreData.completionTimeMinutes = 60;
   fixture.ResetFrame();
   score::RenderLiveStatistics(7);
   CHECK(fixture.Packets() != first);

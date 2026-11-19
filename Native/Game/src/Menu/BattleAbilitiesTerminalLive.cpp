@@ -5,7 +5,6 @@
 #include <bit>
 #include <iterator>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
@@ -271,10 +270,10 @@ class LivePointsHost final : public UnlockPointsHost {
     BattleAbilities::Refuse(reason);
   }
   int UnlockCount() const override {
-    return Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked;
+    return VS::State::artsStatus.kills.battleAbilitiesUnlocked;
   }
   std::uint16_t TotalKills() const override {
-    return Audio_Seq_unusedArtsStatus.kills.totalKills;
+    return VS::State::artsStatus.kills.totalKills;
   }
   std::optional<std::uint16_t> Requirement(int count) const override {
     if (count < 0 || static_cast<std::size_t>(count) >=

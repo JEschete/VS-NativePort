@@ -15,7 +15,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.hpp"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
@@ -626,9 +625,9 @@ class PresetLiveExit {
   static constexpr u_char kDestination = 9;
 
   PresetLiveExit() {
-    Audio_Seq_unusedStateFlags.opaqueC = kFlag;
-    Audio_Seq_unusedStateFlags.opaqueD = kFlag;
-    Audio_Seq_unusedStateFlags.opaqueE = kFlag;
+    VS::State::stateFlags.opaqueC = kFlag;
+    VS::State::stateFlags.opaqueD = kFlag;
+    VS::State::stateFlags.opaqueE = kFlag;
     State_savedEntryDoor.destinationZoneId = kDestination;
     State_savedEntryDoor.destinationRoomId = kDestination;
   }
@@ -637,12 +636,12 @@ class PresetLiveExit {
   PresetLiveExit(PresetLiveExit&&) = delete;
   PresetLiveExit& operator=(PresetLiveExit&&) = delete;
   ~PresetLiveExit() {
-    Audio_Seq_unusedStateFlags = flags_;
+    VS::State::stateFlags = flags_;
     State_savedEntryDoor = door_;
   }
 
  private:
-  State_StateFlags flags_ = Audio_Seq_unusedStateFlags;
+  State_StateFlags flags_ = VS::State::stateFlags;
   Field_MpdDoorRecord door_ = State_savedEntryDoor;
 };
 
@@ -1641,7 +1640,7 @@ TEST_CASE("Title continue screen runs the load menu's frames",
 TEST_CASE("Title live exit keeps the state for a loaded game",
           "[title][title-menu]") {
   const PresetLiveExit preset;
-  const State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+  const State_StateFlags& flags = VS::State::stateFlags;
   title::PrepareLiveExit(1);
   CHECK(flags.opaqueC == 0);
   CHECK(flags.opaqueD == 0);
@@ -1652,7 +1651,7 @@ TEST_CASE("Title live exit keeps the state for a loaded game",
 TEST_CASE("Title live exit writes the state flags and entry door",
           "[title][title-menu]") {
   const PresetLiveExit preset;
-  const State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+  const State_StateFlags& flags = VS::State::stateFlags;
   const Field_MpdDoorRecord& door = State_savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);
@@ -1665,7 +1664,7 @@ TEST_CASE("Title live exit writes the state flags and entry door",
 TEST_CASE("Title live exit sends a new game to its first room",
           "[title][title-menu]") {
   const PresetLiveExit preset;
-  const State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+  const State_StateFlags& flags = VS::State::stateFlags;
   const Field_MpdDoorRecord& door = State_savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);

@@ -2,7 +2,7 @@
 // Live binding for the equipment statistics, growth, wear and recovery rules
 // (EquipmentStats.hpp, EquipmentAffinity.hpp, EquipmentWear.hpp,
 // Recovery.hpp): the battle actor records, Ashley's battle actor and the
-// inventory (Audio_Seq_unusedInventory).
+// inventory (VS::Items::inventory).
 #include "Items/EquipmentLive.hpp"
 
 #include <array>
@@ -12,7 +12,6 @@
 #include <span>
 #include <utility>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Feedback.h"
 #include "Battle/FloatingLabelPlacementLive.hpp"
@@ -21,6 +20,7 @@
 #include "Items/EquipmentAffinity.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/EquipmentWear.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Items/Recovery.hpp"
@@ -181,7 +181,7 @@ void LoadLiveInventoryWeaponStats(Items_WeaponLoadout* target,
   const auto record = TypedOrNone(source);
   WarnRefusal("LoadInventoryWeaponStats",
               LoadInventoryWeaponStats(weapon, OrNull(record),
-                                       Typed(Audio_Seq_unusedInventory)));
+                                       Typed(VS::Items::inventory)));
   Commit(*target, weapon);
 }
 
@@ -196,7 +196,7 @@ void LoadLiveInventoryShieldStats(Items_ShieldLoadout* target,
   const auto record = TypedOrNone(source);
   WarnRefusal("LoadInventoryShieldStats",
               LoadInventoryShieldStats(shield, OrNull(record),
-                                       Typed(Audio_Seq_unusedInventory)));
+                                       Typed(VS::Items::inventory)));
   Commit(*target, shield);
 }
 
@@ -237,7 +237,7 @@ void EquipLiveAshleyWeapon(const Items_InventoryWeapon* weapon) {
       *stats, [&] { Live::CommitAshleyWeapon(*stats, actor, ashley); });
   const auto record = TypedOrNone(weapon);
   const auto status = EquipAshleyWeapon(ashley, OrNull(record),
-                                        Typed(Audio_Seq_unusedInventory), host);
+                                        Typed(VS::Items::inventory), host);
   host.Finish();
   WarnRefusal("EquipAshleyWeapon", status);
 }
@@ -250,7 +250,7 @@ void EquipLiveAshleyShield(const Items_InventoryShield* shield) {
   LiveEquipStatusHost host(*stats, [&] { Commit(stats->shield, loadout); });
   const auto record = TypedOrNone(shield);
   const auto status = EquipAshleyShield(loadout, OrNull(record),
-                                        Typed(Audio_Seq_unusedInventory), host);
+                                        Typed(VS::Items::inventory), host);
   host.Finish();
   WarnRefusal("EquipAshleyShield", status);
 }
@@ -351,9 +351,9 @@ void StoreLiveInventoryWeaponStats(Items_InventoryWeapon* target,
   }
   auto record = Typed(*target);
   auto weapon = Typed(*source);
-  auto inventory = Typed(Audio_Seq_unusedInventory);
+  auto inventory = Typed(VS::Items::inventory);
   const auto status = StoreInventoryWeaponStats(record, weapon, inventory);
-  Commit(Audio_Seq_unusedInventory, inventory);
+  Commit(VS::Items::inventory, inventory);
   Commit(*target, record);
   Commit(*source, weapon);
   WarnRefusal("StoreInventoryWeaponStats", status);

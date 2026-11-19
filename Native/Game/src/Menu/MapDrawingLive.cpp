@@ -12,7 +12,6 @@
 #include <string_view>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Gte.h"
 #include "Core/Log.hpp"
@@ -443,7 +442,7 @@ class LiveControlsHost final : public ControlsHost {
       Refuse(kCall, "scene outside the map paling flags");
       return std::nullopt;
     }
-    return Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene] != 0;
+    return VS::State::stateFlags.mapPaling[Menu_Map_currentScene] != 0;
   }
 
   void DrawButton(ControlButton button, std::int32_t x,

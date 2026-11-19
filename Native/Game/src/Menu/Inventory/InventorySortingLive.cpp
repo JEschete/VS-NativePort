@@ -7,8 +7,8 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/SortingKeysLive.hpp"
@@ -24,7 +24,7 @@ namespace {
 }
 
 auto OrderTables() {
-  auto& order = Audio_Seq_unusedInventoryIndices;
+  auto& order = VS::Items::inventoryIndices;
   return std::array<std::span<std::uint8_t>,
                     static_cast<std::size_t>(Items::ItemCategory::kManage)>{
       order.weapons, order.blades, order.grips, order.shields,
@@ -43,16 +43,15 @@ std::span<std::uint8_t> KnownOrder(std::uint8_t* pointer) {
 
 bool OverlapsInventory(const Items_EquipmentPartStats* target) {
   const auto output = reinterpret_cast<std::uintptr_t>(target);
-  const auto source =
-      reinterpret_cast<std::uintptr_t>(&Audio_Seq_unusedInventory);
+  const auto source = reinterpret_cast<std::uintptr_t>(&VS::Items::inventory);
   return output <= source ? source - output < sizeof(*target)
-                          : output - source < sizeof(Audio_Seq_unusedInventory);
+                          : output - source < sizeof(VS::Items::inventory);
 }
 
 class LiveSortingWorld final : public Framework::LiveSortingKeys<SortingWorld> {
  public:
   Items::InventoryContents CurrentInventory() override {
-    return Items::Live::Typed(Audio_Seq_unusedInventory);
+    return Items::Live::Typed(VS::Items::inventory);
   }
   std::span<std::uint8_t> FixedOrder(Items::ItemCategory category) override {
     return OrderTables()[static_cast<std::size_t>(category)];

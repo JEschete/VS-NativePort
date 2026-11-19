@@ -22,7 +22,6 @@
 #include <string_view>
 #include <utility>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Boot/GameLoop.h"
 #include "Core/Log.hpp"
@@ -40,6 +39,7 @@
 #include "Save/NativeMenu.hpp"
 #include "Save/NativeResume.hpp"
 #include "Save/RuntimeSnapshot.hpp"
+#include "State/StateFlags.h"
 #include "Title/SaveFiles.h"
 
 namespace VS::Game::Save {
@@ -377,7 +377,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
   }
   [[nodiscard]] bool SavePointEnabled() const override {
     return VS::Field::LiveCurrentSavePointId() != 0 &&
-           !Audio_Seq_unusedStateFlags.opaqueA7;
+           !VS::State::stateFlags.opaqueA7;
   }
   std::expected<void, std::string> WriteSelection(
       const file_menu::FileMenu& menu, VS::Save::WriteConsent consent) override;

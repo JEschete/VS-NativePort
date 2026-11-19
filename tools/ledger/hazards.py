@@ -198,7 +198,7 @@ NOT_A_DIVISION = re.compile(r"\b(?:float|double|path|filesystem)\b|\bfs::")
 NOT_A_MEMBER = r"(?![\w\[]|\s*->|\s*\.)"
 LITERAL_DIVISOR = re.compile(r"^(?:\d|sizeof\b|k[A-Z]|[A-Z][A-Z0-9_]+$)")
 INVENTORY_CAPACITIES = {"8", "16", "48", "64"}
-INVENTORY_MARK = re.compile(r"\bItems_Inventory\w*|\bItems_Container\w*|\bMenu_Inventory_\w+|\bAudio_Seq_unusedInventory\w*|\binventory\w*")
+INVENTORY_MARK = re.compile(r"\bItems_Inventory\w*|\bItems_Container\w*|\bMenu_Inventory_\w+|\binventory\w*")
 CAPACITY_LOOP = re.compile(r"\bfor\s*\([^;]*;[^;<]*<=?\s*(?P<size>\d+)\s*;")
 
 

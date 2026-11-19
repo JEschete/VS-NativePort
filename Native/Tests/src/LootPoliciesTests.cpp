@@ -8,7 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -249,7 +249,7 @@ struct LivePoliciesFixture {
   Items_Inventory* previous_backup{Menu_Loot_inventoryBackup};
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
   Items_BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
-  Items_Inventory previous_ashley{Audio_Seq_unusedInventory};
+  Items_Inventory previous_ashley{VS::Items::inventory};
   char previous_claimed{Menu_Loot_lootClaimed};
 
   LivePoliciesFixture() {
@@ -276,7 +276,7 @@ struct LivePoliciesFixture {
     Menu_Loot_lootList = previous_rows;
     Menu_Loot_lootListCount = 0;
     VS::Menu::Framework::lootEntry = previous_entry;
-    Audio_Seq_unusedInventory = previous_ashley;
+    VS::Items::inventory = previous_ashley;
     Menu_Loot_lootClaimed = previous_claimed;
   }
 
@@ -655,10 +655,10 @@ TEST_CASE("Live loot policies refuse missing lists and rows",
           "[loot-policies-live][F02856][F02860][F02861][F02863]") {
   LivePoliciesFixture fixture;
   fixture.staged.misc[0].id = 77;
-  Audio_Seq_unusedInventory = {};
+  VS::Items::inventory = {};
   live::ShowLootDescription(-1);
   live::ShowLootDescription(static_cast<int>(VS::Menu::Loot::kRowCapacity));
-  CHECK(Audio_Seq_unusedInventory.misc[0].id == 0);
+  CHECK(VS::Items::inventory.misc[0].id == 0);
   Menu_Loot_lootList = nullptr;
   live::RenderBagCapacities(0);
   live::RenderLootRows(0);

@@ -16,7 +16,6 @@
 #include <iterator>
 #include <span>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Audio/StreamLive.hpp"
 #include "Battle/Action.h"
@@ -462,7 +461,7 @@ class LiveFrameHost final : public LiveDisplay<DisplayHost> {};
 // ---- progress records
 
 ScoreRecord LoadScore() {
-  const State_ScoreData& source = Audio_Seq_unusedScoredata;
+  const State_ScoreData& source = VS::State::scoreData;
   ScoreRecord score{.titles = static_cast<std::uint32_t>(source.titles),
                     .max_chain = source.maxChain,
                     .clear_count = source.clearCount,
@@ -483,7 +482,7 @@ ScoreRecord LoadScore() {
 }
 
 PlaythroughFlags LoadFlags() {
-  const State_StateFlags& source = Audio_Seq_unusedStateFlags;
+  const State_StateFlags& source = VS::State::stateFlags;
   PlaythroughFlags flags{
       .clear_count = static_cast<std::uint8_t>(source.clearCount),
       .difficulty = static_cast<std::uint8_t>(source.difficulty),
@@ -532,13 +531,13 @@ ClearProgress LoadProgress() {
 // Stores the records a clear writes; ResetPlaythroughRecords has already
 // cleared the room visits and the later playthrough flags.
 void StoreProgress(const ClearProgress& progress) {
-  State_ScoreData& score = Audio_Seq_unusedScoredata;
+  State_ScoreData& score = VS::State::scoreData;
   score.titles = static_cast<int>(progress.score.titles);
   score.clearCount = progress.score.clear_count;
   score.completionTimeMinutes = progress.score.completion_time_minutes;
   score.mapCompletion = progress.score.map_completion;
   score.openedChestCount = progress.score.opened_chest_count;
-  State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+  State_StateFlags& flags = VS::State::stateFlags;
   flags.clearCount = static_cast<char>(progress.flags.clear_count);
   flags.difficulty = static_cast<char>(progress.flags.difficulty);
   flags.normalModeCleared =
@@ -552,7 +551,7 @@ class LiveProgressHost final : public ProgressHost {
   void ResetPlaythroughRecords() override {
     State_roomVisitProgress = {};
     const auto flags =
-        std::as_writable_bytes(std::span(&Audio_Seq_unusedStateFlags, 1));
+        std::as_writable_bytes(std::span(&VS::State::stateFlags, 1));
     std::ranges::fill(flags.subspan(kRetainedFlagBytes), std::byte{0});
   }
 };
@@ -655,9 +654,8 @@ class LiveResultsHost final : public LiveDisplay<ResultsHost> {
 
   void PublishState() override {
     StoreResultsState(state_);
-    Audio_Seq_unusedScoredata.mapCompletion = progress_.score.map_completion;
-    Audio_Seq_unusedScoredata.openedChestCount =
-        progress_.score.opened_chest_count;
+    VS::State::scoreData.mapCompletion = progress_.score.map_completion;
+    VS::State::scoreData.openedChestCount = progress_.score.opened_chest_count;
   }
 
   void Draw(const Render::RegionQuad& quad) override {

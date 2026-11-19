@@ -29,6 +29,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
+#include "State/Progress.h"
 
 namespace {
 namespace abilities = VS::Menu::BattleAbilities;
@@ -52,8 +53,8 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
   VS::Core::Memory::ScopedLiveGameHeap heap{arena};
   ValueRestore<decltype(Battle_characterState)> saved_actor{
       Battle_characterState};
-  ValueRestore<decltype(Audio_Seq_unusedArtsStatus)> saved_progress{
-      Audio_Seq_unusedArtsStatus};
+  ValueRestore<decltype(VS::State::artsStatus)> saved_progress{
+      VS::State::artsStatus};
   ValueRestore<decltype(VS::Input::settings)> saved_settings{
       VS::Input::settings};
   ArrayRestore<Battle_ActionDefinition, std::size(Battle_actionDefinitions)>
@@ -85,9 +86,9 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
     abilities::ResetLiveAbilityFoundationState();
     Battle_characterState = &actor;
     actor.equippedWeaponCategory = 1;
-    Audio_Seq_unusedArtsStatus = {};
-    Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[1] = 65535;
-    Audio_Seq_unusedArtsStatus.kills.totalKills = 65535;
+    VS::State::artsStatus = {};
+    VS::State::artsStatus.kills.weaponCategoryKills[1] = 65535;
+    VS::State::artsStatus.kills.totalKills = 65535;
     VS::Input::settings.cursorMemory = 0;
     VS::Menu::Framework::menuMemory = {};
     VS::Menu::Framework::itemsText = nullptr;
@@ -203,12 +204,12 @@ TEST_CASE("MENU2 reload restores unlock counts and phase without progression",
   LiveFoundationFixture fixture;
   menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
   REQUIRE(abilities::LiveUpdateAbilityUnlock(1) == 0);
-  CHECK(Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked == 1);
+  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 1);
   CHECK(load.Complete() == 1);
   REQUIRE(abilities::LiveUpdateAbilityUnlock(0) == 0);
   Menu_textBoxes[7].flags.done = 1;
   CHECK(abilities::LiveUpdateAbilityUnlock(0) == 1);
-  CHECK(Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked == 1);
+  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 1);
 }
 
 TEST_CASE(

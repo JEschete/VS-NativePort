@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Items/Inventory.h"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Inventory/ItemDetailDispatchLive.hpp"
 
@@ -24,22 +25,22 @@ struct DispatchLiveFixture : equipment_detail_tests::LiveFixture {
         .material = 1};
     armor.classes[0] = -3;
     armor.affinities[0] = 4;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.armor[0], armor);
+    VS::Items::Live::Commit(VS::Items::inventory.armor[0], armor);
     ++armor.id;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.armor[15], armor);
-    Audio_Seq_unusedInventoryIndices.armor[0] = 16;
-    Audio_Seq_unusedInventoryIndices.armor[1] = 1;
+    VS::Items::Live::Commit(VS::Items::inventory.armor[15], armor);
+    VS::Items::inventoryIndices.armor[0] = 16;
+    VS::Items::inventoryIndices.armor[1] = 1;
   }
   void AddGems() {
     VS::Items::InventoryGem gem{.id = 261, .strength = 5};
     gem.classes[0] = -4;
     gem.affinities[0] = 7;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.gems[0], gem);
+    VS::Items::Live::Commit(VS::Items::inventory.gems[0], gem);
     gem.id = 262;
     gem.strength = 9;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.gems[47], gem);
-    Audio_Seq_unusedInventoryIndices.gems[0] = 48;
-    Audio_Seq_unusedInventoryIndices.gems[1] = 1;
+    VS::Items::Live::Commit(VS::Items::inventory.gems[47], gem);
+    VS::Items::inventoryIndices.gems[0] = 48;
+    VS::Items::inventoryIndices.gems[1] = 1;
   }
 };
 }  // namespace item_detail_tests

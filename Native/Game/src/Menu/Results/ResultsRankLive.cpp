@@ -5,7 +5,6 @@
 
 #include <cstdint>
 
-#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Score/ScoreRank.hpp"
@@ -26,7 +25,7 @@ void CalculateLiveScore() {
 // the previous rank.
 void DetermineLiveRiskbreakerRank() {
   const auto rank = Score::RiskbreakerRankIndex(
-      static_cast<std::uint32_t>(Audio_Seq_unusedScoredata.titles),
+      static_cast<std::uint32_t>(VS::State::scoreData.titles),
       Menu_Results_score);
   if (rank.has_value()) {
     Menu_Results_rank = static_cast<std::int32_t>(*rank);

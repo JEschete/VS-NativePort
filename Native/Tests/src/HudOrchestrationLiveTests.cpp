@@ -10,6 +10,7 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudOrchestrationLiveFixture.hpp"
 #include "Render/Sprites.hpp"
+#include "State/StateFlags.h"
 
 namespace {
 namespace b = VS::Battle;
@@ -157,7 +158,7 @@ TEST_CASE(
   State_SceneTimer timer{};
   timer.minutes = 12;
   timer.seconds = 34;
-  Audio_Seq_unusedStateFlags.puzzleTimerHundredths = 56;
+  VS::State::stateFlags.puzzleTimerHundredths = 56;
   Battle_puzzleTimerTextPointer = nullptr;
   b::DrawLivePuzzleTimer(&timer);
   CHECK(std::string_view(Battle_puzzleTimerText) == "12:34:56");
@@ -181,11 +182,11 @@ TEST_CASE("F01384 Live saturation and repeat entry consume only timer values",
   f::LiveState fixture;
   State_SceneTimer timer{};
   timer.hours = -128;
-  Audio_Seq_unusedStateFlags.puzzleTimerHundredths = -1;
+  VS::State::stateFlags.puzzleTimerHundredths = -1;
   b::DrawLivePuzzleTimer(&timer);
   CHECK(std::string_view(Battle_puzzleTimerText) == "59:59:99");
   timer = {};
-  Audio_Seq_unusedStateFlags.puzzleTimerHundredths = 0;
+  VS::State::stateFlags.puzzleTimerHundredths = 0;
   b::DrawLivePuzzleTimer(&timer);
   CHECK(std::string_view(Battle_puzzleTimerText) == "00:00:00");
   CHECK(fixture.frame.UsedWords() == 84);

@@ -7,7 +7,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/CubePuzzleText.hpp"
@@ -353,7 +352,7 @@ struct LiveCubeTextFixture {
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
   std::int16_t saved_par = Menu_Results_puzzleParTime;
-  State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
+  State_StateFlags saved_flags = VS::State::stateFlags;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
   std::vector<u_long> ordering = std::vector<u_long>(kLiveOrderingWords, 0);
 
@@ -364,7 +363,7 @@ struct LiveCubeTextFixture {
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
     Menu_Results_puzzleParTime = saved_par;
-    Audio_Seq_unusedStateFlags = saved_flags;
+    VS::State::stateFlags = saved_flags;
   }
   LiveCubeTextFixture(const LiveCubeTextFixture&) = delete;
   LiveCubeTextFixture& operator=(const LiveCubeTextFixture&) = delete;
@@ -505,9 +504,9 @@ TEST_CASE("F03058 live rank draws the title and refuses one outside the atlas",
 TEST_CASE("F03059 live counting time reads the puzzle clock",
           "[cube-text-live]") {
   LiveCubeTextFixture frame;
-  Audio_Seq_unusedStateFlags.puzzleTimerMins = 1;
-  Audio_Seq_unusedStateFlags.puzzleTimerSeconds = 2;
-  Audio_Seq_unusedStateFlags.puzzleTimerHundredths = 50;
+  VS::State::stateFlags.puzzleTimerMins = 1;
+  VS::State::stateFlags.puzzleTimerSeconds = 2;
+  VS::State::stateFlags.puzzleTimerHundredths = 50;
   r::LiveDrawCountingCubePuzzleTime(88, 64, 40);
   const auto live = frame.Used();
   REQUIRE(!live.empty());

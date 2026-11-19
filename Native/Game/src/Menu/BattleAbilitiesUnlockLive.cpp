@@ -7,7 +7,6 @@
 #include <cstring>
 #include <iterator>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionTable.h"
 #include "Battle/TargetingState.h"
@@ -74,30 +73,30 @@ class LiveProgress final : public UnlockProgress {
                : -1;
   }
   int ArtsLearned(int category) const override {
-    return Audio_Seq_unusedArtsStatus.artsLearned[category];
+    return VS::State::artsStatus.artsLearned[category];
   }
   void SetArtsLearned(int category, int count) override {
-    Audio_Seq_unusedArtsStatus.artsLearned[category] =
+    VS::State::artsStatus.artsLearned[category] =
         static_cast<std::uint8_t>(count);
   }
   int WeaponCategoryKills(int category) const override {
-    return Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[category];
+    return VS::State::artsStatus.kills.weaponCategoryKills[category];
   }
   int BreakArtRequirement(int category, int tier) const override {
     return Battle_breakArtPointRequirements[category][tier];
   }
   int BattleAbilitiesUnlocked() const override {
-    return Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked;
+    return VS::State::artsStatus.kills.battleAbilitiesUnlocked;
   }
   void SetBattleAbilitiesUnlocked(int count) override {
-    Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked =
+    VS::State::artsStatus.kills.battleAbilitiesUnlocked =
         static_cast<std::uint16_t>(count);
   }
   int BattleAbilityRequirement(int tier) const override {
     return Battle_battleAbilityPointRequirements[tier];
   }
   int TotalKills() const override {
-    return Audio_Seq_unusedArtsStatus.kills.totalKills;
+    return VS::State::artsStatus.kills.totalKills;
   }
   bool ActionUnlocked(std::uint8_t action) const override {
     return Battle_actionDefinitions[action].unlocked != 0;

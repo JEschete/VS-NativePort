@@ -6,7 +6,6 @@
 #include <span>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/Gimmicks.h"
@@ -114,8 +113,8 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
 }  // namespace
 
 std::vector<RoomTriggerInfo> LiveActiveRoomTriggerInfo() {
-  if (Audio_Seq_unusedStateFlags.opaque20 != 0 ||
-      Audio_Seq_unusedStateFlags.opaque40 != 0) {
+  if (VS::State::stateFlags.opaque20 != 0 ||
+      VS::State::stateFlags.opaque40 != 0) {
     return {};
   }
   const auto records = TrapRecords();
@@ -147,8 +146,8 @@ std::optional<TrapTarget> FindLiveRoomTriggerAtTile(
                       record.floorLayer});
   }
   return FindRoomTriggerAtTile(values, tile,
-                               Audio_Seq_unusedStateFlags.opaque20 != 0 ||
-                                   Audio_Seq_unusedStateFlags.opaque40 != 0);
+                               VS::State::stateFlags.opaque20 != 0 ||
+                                   VS::State::stateFlags.opaque40 != 0);
 }
 
 bool SetLiveRoomTriggerEnabled(std::optional<TrapTarget> target,

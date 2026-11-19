@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <span>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
 #include "Content/StringTables.h"
@@ -148,10 +147,10 @@ class LiveContainerSave final : public ContainerSaveHost {
   void OpenContainerScreen() override {
     Menu_Container_InventoryStorage& storage = Storage();
     VS::Core::Memory::CopyLiveHalfwordBlocks(storage.savedInventory,
-                                             &Audio_Seq_unusedInventory,
+                                             &VS::Items::inventory,
                                              sizeof storage.savedInventory);
     VS::Core::Memory::CopyLiveHalfwordBlocks(
-        &storage.savedInventoryIndices, &Audio_Seq_unusedInventoryIndices,
+        &storage.savedInventoryIndices, &VS::Items::inventoryIndices,
         sizeof storage.savedInventoryIndices);
     VS::Core::Memory::CopyLiveHalfwordBlocks(&storage.storedContainer,
                                              VS::Game::Save::ContainerData(),
@@ -189,11 +188,11 @@ class LiveContainerSave final : public ContainerSaveHost {
     Menu_Container_InventoryStorage& storage = Storage();
     VS::Input::settings.containerEmpty =
         VS::Menu::Framework::unusedContainerEmptyBackup;
-    VS::Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory,
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
                                              storage.savedInventory,
                                              sizeof storage.savedInventory);
     VS::Core::Memory::CopyLiveHalfwordBlocks(
-        &Audio_Seq_unusedInventoryIndices, &storage.savedInventoryIndices,
+        &VS::Items::inventoryIndices, &storage.savedInventoryIndices,
         sizeof storage.savedInventoryIndices);
   }
 

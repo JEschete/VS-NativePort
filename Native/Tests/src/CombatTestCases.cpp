@@ -134,7 +134,7 @@ struct AbilityFixture {
                                                    Actors_actorRecords[1]};
   State_Settings saved_settings = VS::Input::settings;
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
-  decltype(Audio_Seq_unusedScoredata) saved_score = Audio_Seq_unusedScoredata;
+  decltype(VS::State::scoreData) saved_score = VS::State::scoreData;
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
   decltype(Battle_floatingLabelCount) saved_label_count =
       Battle_floatingLabelCount;
@@ -197,7 +197,7 @@ struct AbilityFixture {
     }
     VS::Input::settings = saved_settings;
     VS::Input::buttonsPressed = saved_pressed;
-    Audio_Seq_unusedScoredata = saved_score;
+    VS::State::scoreData = saved_score;
     Battle_floatingLabels = saved_labels;
     Battle_floatingLabelCount = saved_label_count;
     VS::State::tickSpeed = saved_tick_speed;
@@ -474,28 +474,28 @@ struct ArtResolutionFixture : AbilityEffectFixture {
 };
 
 struct LootInventoryFixture {
-  Items_Inventory saved_inventory = Audio_Seq_unusedInventory;
-  Items_InventoryIndices saved_indices = Audio_Seq_unusedInventoryIndices;
+  Items_Inventory saved_inventory = VS::Items::inventory;
+  Items_InventoryIndices saved_indices = VS::Items::inventoryIndices;
   std::uint8_t* saved_index_pointer = Menu_Inventory_inventoryIndices[6];
   Items_Inventory source{};
 
   LootInventoryFixture() {
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
-    Menu_Inventory_inventoryIndices[6] = Audio_Seq_unusedInventoryIndices.misc;
-    for (auto& item : Audio_Seq_unusedInventory.misc) {
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
+    Menu_Inventory_inventoryIndices[6] = VS::Items::inventoryIndices.misc;
+    for (auto& item : VS::Items::inventory.misc) {
       item.id = 324;
       item.count = 100;
     }
-    Audio_Seq_unusedInventory.misc[0].id = 323;
-    Audio_Seq_unusedInventory.misc[0].count = 99;
+    VS::Items::inventory.misc[0].id = 323;
+    VS::Items::inventory.misc[0].count = 99;
     source.misc[0].id = 323;
     source.misc[0].count = 2;
   }
 
   ~LootInventoryFixture() {
-    Audio_Seq_unusedInventory = saved_inventory;
-    Audio_Seq_unusedInventoryIndices = saved_indices;
+    VS::Items::inventory = saved_inventory;
+    VS::Items::inventoryIndices = saved_indices;
     Menu_Inventory_inventoryIndices[6] = saved_index_pointer;
   }
 
@@ -503,34 +503,34 @@ struct LootInventoryFixture {
     const int flags =
         static_cast<int>(Items_ItemCategory_Misc) |
         (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
-    return VS::Items::Inventory::CopyLiveItem(flags, &Audio_Seq_unusedInventory,
-                                              0, &source);
+    return VS::Items::Inventory::CopyLiveItem(flags, &VS::Items::inventory, 0,
+                                              &source);
   }
 
   static int Quantity(int id) {
     int quantity = 0;
-    for (const auto& item : Audio_Seq_unusedInventory.misc) {
+    for (const auto& item : VS::Items::inventory.misc) {
       if (item.id == id) quantity += item.count;
     }
     return quantity;
   }
 
   static void CheckUnchanged(
-      const decltype(std::to_array(Audio_Seq_unusedInventory.misc))& before) {
+      const decltype(std::to_array(VS::Items::inventory.misc))& before) {
     for (std::size_t slot = 0; slot < before.size(); ++slot) {
-      CHECK(Audio_Seq_unusedInventory.misc[slot].id == before[slot].id);
-      CHECK(Audio_Seq_unusedInventory.misc[slot].count == before[slot].count);
+      CHECK(VS::Items::inventory.misc[slot].id == before[slot].id);
+      CHECK(VS::Items::inventory.misc[slot].count == before[slot].count);
     }
   }
 
   void CheckQueryUnchanged(int expected) {
-    const auto before = std::to_array(Audio_Seq_unusedInventory.misc);
+    const auto before = std::to_array(VS::Items::inventory.misc);
     CHECK(Copy(false) == expected);
     CheckUnchanged(before);
   }
 
   void CheckWrite(int expected) {
-    const auto inventory_before = std::to_array(Audio_Seq_unusedInventory.misc);
+    const auto inventory_before = std::to_array(VS::Items::inventory.misc);
     const int before = Quantity(323);
     const int other = Quantity(324);
     const auto incoming = source.misc[0].count;
@@ -540,7 +540,7 @@ struct LootInventoryFixture {
     CHECK(Quantity(324) == other);
     CHECK(source.misc[0].id == 323);
     CHECK(source.misc[0].count == incoming);
-    for (const auto& item : Audio_Seq_unusedInventory.misc) {
+    for (const auto& item : VS::Items::inventory.misc) {
       CHECK(item.count >= 0);
       CHECK(item.count <= 100);
     }
@@ -603,7 +603,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   u_char saved_count = Menu_Loot_lootListCount;
   u_char saved_offset = Menu_Loot_lootListOffset;
   char saved_selection = Menu_Loot_selectedLoot;
-  char saved_difficulty = Audio_Seq_unusedStateFlags.difficulty;
+  char saved_difficulty = VS::State::stateFlags.difficulty;
   std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   Battle_Actor enemy{};
   Battle_ActorStats stats{};
@@ -614,7 +614,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     enemy.roomSpawnIndex = 1;
     enemy.stats = &stats;
     Battle_actors[1] = &enemy;
-    Audio_Seq_unusedInventory = {};
+    VS::Items::inventory = {};
     source = {};
     Menu_Loot_inventory = &source;
     VS::Menu::Framework::lootEntry = nullptr;
@@ -622,7 +622,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     Menu_Loot_lootListCount = 0;
     Menu_Loot_lootListOffset = 0;
     Menu_Loot_selectedLoot = 0;
-    Audio_Seq_unusedStateFlags.difficulty = 0;
+    VS::State::stateFlags.difficulty = 0;
   }
 
   ~EnemyLootFixture() {
@@ -635,7 +635,7 @@ struct EnemyLootFixture : LootInventoryFixture {
     Menu_Loot_lootListCount = saved_count;
     Menu_Loot_lootListOffset = saved_offset;
     Menu_Loot_selectedLoot = saved_selection;
-    Audio_Seq_unusedStateFlags.difficulty = saved_difficulty;
+    VS::State::stateFlags.difficulty = saved_difficulty;
   }
 
   void SetGuaranteed(int count) {
@@ -671,8 +671,7 @@ struct EnemyLootFixture : LootInventoryFixture {
       CHECK(row.opaque2 == 0);
       const int flags = static_cast<int>(row.itemCategory) |
                         static_cast<int>(Menu_Framework_CopyItemFlag_Write);
-      CHECK(VS::Items::Inventory::CopyLiveItem(flags,
-                                               &Audio_Seq_unusedInventory,
+      CHECK(VS::Items::Inventory::CopyLiveItem(flags, &VS::Items::inventory,
                                                row.itemIndex, &source) != 0);
     }
   }
@@ -951,7 +950,7 @@ void CheckClaimedGems(const Item& item, const Loadout& source, int parent) {
     CHECK((slot != 0) == (part.id != 0));
     CHECK(slot <= 48);
     if (slot > 0 && slot <= 48) {
-      const auto& gem = Audio_Seq_unusedInventory.gems[slot - 1];
+      const auto& gem = VS::Items::inventory.gems[slot - 1];
       CheckDropIdentity(gem, part);
       CheckDropAffinities(gem, part);
       CHECK(gem.gemEffects == part.gemEffects);
@@ -973,8 +972,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       seen.push_back(source.armor[row.itemIndex].id);
       if (claim) {
         CHECK(row.state == 1);
-        CHECK(VS::Items::Inventory::CopyLiveItem(0x14,
-                                                 &Audio_Seq_unusedInventory,
+        CHECK(VS::Items::Inventory::CopyLiveItem(0x14, &VS::Items::inventory,
                                                  row.itemIndex, &source) != 0);
       }
     }
@@ -987,7 +985,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     for (int index = 0; index < 8; ++index) {
       CHECK(rows[index].state == !first_claimed);
     }
-    Audio_Seq_unusedInventory = {};
+    VS::Items::inventory = {};
     VS::Menu::Loot::Live::RefreshClaimableRows();
   }
 
@@ -1058,7 +1056,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       const int flags = static_cast<int>(row.itemCategory) |
                         static_cast<int>(Menu_Framework_CopyItemFlag_Write);
       const int result = VS::Items::Inventory::CopyLiveItem(
-          flags, &Audio_Seq_unusedInventory, row.itemIndex, &source);
+          flags, &VS::Items::inventory, row.itemIndex, &source);
       CHECK(result ==
             (fits ? (index < 2 ? 1 : armor_count + claimed_armor + 1) : 0));
       if (index >= 2 && fits) ++claimed_armor;
@@ -1072,7 +1070,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     for (int index = 0; index < claimed_armor; ++index) {
       const auto& expected = index < 2 ? stats.limbs[index].armor.armor
                                        : stats.accessory.accessory;
-      const auto& armor = Audio_Seq_unusedInventory.armor[armor_count + index];
+      const auto& armor = VS::Items::inventory.armor[armor_count + index];
       CheckArmorDrop(armor, expected);
       CHECK(armor.index == armor_count + index + 1);
       CHECK(armor.limb == 0);
@@ -1080,7 +1078,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
   }
 
   void CheckWeaponParts() {
-    const auto& inventory = Audio_Seq_unusedInventory;
+    const auto& inventory = VS::Items::inventory;
     const auto& weapon = inventory.weapons[0];
     CHECK(weapon.index == 1);
     CHECK(weapon.blade == 1);
@@ -1096,13 +1094,13 @@ struct EquipmentStagingFixture : EnemyLootFixture {
   }
 
   void CheckShieldParts() {
-    const auto& shield = Audio_Seq_unusedInventory.shields[0];
+    const auto& shield = VS::Items::inventory.shields[0];
     CHECK(shield.index == 1);
     CHECK(shield.isEquipped == 0);
     CheckArmorDrop(shield.base, stats.shield.base);
     CheckClaimedGems(shield, stats.shield, 0x81);
-    CHECK(VS::Items::Inventory::CountLiveItems(
-              Items_ItemCategory_Gem, &Audio_Seq_unusedInventory) == 4);
+    CHECK(VS::Items::Inventory::CountLiveItems(Items_ItemCategory_Gem,
+                                               &VS::Items::inventory) == 4);
   }
 };
 
@@ -1226,10 +1224,10 @@ struct EquipmentLootFixture : LootInventoryFixture {
 
   EquipmentLootFixture(bool is_shield, int gem_count, EquipmentCapacity counts)
       : shield(is_shield), attached(gem_count), occupied(counts) {
-    Audio_Seq_unusedInventory = {};
+    VS::Items::inventory = {};
     source = {};
     PrepareSource();
-    FillTarget(Audio_Seq_unusedInventory, shield, occupied);
+    FillTarget(VS::Items::inventory, shield, occupied);
   }
 
   void PrepareSource() {
@@ -1307,8 +1305,8 @@ struct EquipmentLootFixture : LootInventoryFixture {
     const int flags =
         category |
         (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
-    return VS::Items::Inventory::CopyLiveItem(flags, &Audio_Seq_unusedInventory,
-                                              0, &source);
+    return VS::Items::Inventory::CopyLiveItem(flags, &VS::Items::inventory, 0,
+                                              &source);
   }
 
   Items_Inventory ExpectedInventory(const Items_Inventory& before) const {
@@ -1353,17 +1351,17 @@ struct EquipmentLootFixture : LootInventoryFixture {
   }
 
   void CheckTransfer() {
-    const auto before = Audio_Seq_unusedInventory;
+    const auto before = VS::Items::inventory;
     const auto source_before = source;
     const bool fits = occupied.parents < 8 && occupied.gems + attached <= 48 &&
                       (shield || (occupied.blades < 16 && occupied.grips < 16));
     const int result = fits ? occupied.parents + 1 : 0;
     CHECK(CopyEquipment(false) == result);
-    CheckInventory(Audio_Seq_unusedInventory, before);
+    CheckInventory(VS::Items::inventory, before);
     CheckInventory(source, source_before);
     CHECK(CopyEquipment(true) == result);
     CheckInventory(source, source_before);
-    CheckInventory(Audio_Seq_unusedInventory,
+    CheckInventory(VS::Items::inventory,
                    fits ? ExpectedInventory(before) : before);
   }
 };
@@ -1398,14 +1396,14 @@ struct LootPresentationFixture : EnemyLootFixture {
 };
 
 struct AbilityUnlockFixture : AbilityFixture {
-  State_ArtsStatus saved_progress = Audio_Seq_unusedArtsStatus;
+  State_ArtsStatus saved_progress = VS::State::artsStatus;
   decltype(std::to_array(Battle_battleAbilityPointRequirements)) saved_points =
       std::to_array(Battle_battleAbilityPointRequirements);
   decltype(kBreakArtThresholds)::value_type saved_art_points[10]{};
 
   AbilityUnlockFixture() {
-    Audio_Seq_unusedArtsStatus = {};
-    std::fill_n(Audio_Seq_unusedArtsStatus.artsLearned, 12, 4);
+    VS::State::artsStatus = {};
+    std::fill_n(VS::State::artsStatus.artsLearned, 12, 4);
     std::copy(kAbilityThresholds.begin(), kAbilityThresholds.end(),
               Battle_battleAbilityPointRequirements);
     for (unsigned category = 0; category < kBreakArtThresholds.size();
@@ -1419,7 +1417,7 @@ struct AbilityUnlockFixture : AbilityFixture {
   }
 
   ~AbilityUnlockFixture() {
-    Audio_Seq_unusedArtsStatus = saved_progress;
+    VS::State::artsStatus = saved_progress;
     std::copy(saved_points.begin(), saved_points.end(),
               Battle_battleAbilityPointRequirements);
     for (unsigned category = 0; category < kBreakArtThresholds.size();
@@ -1489,8 +1487,8 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
       : counter(category % 10) {
     actors[0].equippedWeaponCategory = static_cast<u_char>(category);
     VS::State::SetLiveScriptFlag(0x82, 10);
-    Audio_Seq_unusedArtsStatus.artsLearned[counter] = static_cast<u_char>(tier);
-    Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[counter] =
+    VS::State::artsStatus.artsLearned[counter] = static_cast<u_char>(tier);
+    VS::State::artsStatus.kills.weaponCategoryKills[counter] =
         static_cast<u_short>(kBreakArtThresholds[counter][tier] - 1);
     VS::Battle::InitializeLiveActionHit(&source);
     VS::Battle::InitializeLiveActionHit(&target);
@@ -1545,10 +1543,10 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         VS::State::SetLiveScriptFlag(0x82, 9);
         break;
       case KillGate::kFourArts:
-        Audio_Seq_unusedArtsStatus.artsLearned[counter] = 4;
+        VS::State::artsStatus.artsLearned[counter] = 4;
         break;
       case KillGate::kPendingThreshold:
-        ++Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[counter];
+        ++VS::State::artsStatus.kills.weaponCategoryKills[counter];
         break;
     }
   }
@@ -1560,13 +1558,13 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
 };
 
 void CheckAbilityProgress(const State_ArtsStatus& before) {
-  CHECK(std::to_array(Audio_Seq_unusedArtsStatus.artsLearned) ==
+  CHECK(std::to_array(VS::State::artsStatus.artsLearned) ==
         std::to_array(before.artsLearned));
-  CHECK(std::to_array(Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills) ==
+  CHECK(std::to_array(VS::State::artsStatus.kills.weaponCategoryKills) ==
         std::to_array(before.kills.weaponCategoryKills));
-  CHECK(Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked ==
+  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked ==
         before.kills.battleAbilitiesUnlocked);
-  CHECK(Audio_Seq_unusedArtsStatus.kills.totalKills == before.kills.totalKills);
+  CHECK(VS::State::artsStatus.kills.totalKills == before.kills.totalKills);
 }
 }  // namespace
 
@@ -1653,7 +1651,7 @@ TEST_CASE("Ability rewards use all original cumulative thresholds",
   AbilityUnlockFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   const int delta = GENERATE(-1, 0, 1);
-  auto& progress = Audio_Seq_unusedArtsStatus;
+  auto& progress = VS::State::artsStatus;
   progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
   progress.kills.totalKills =
       static_cast<u_short>(kAbilityThresholds[unlocked] + delta);
@@ -1666,7 +1664,7 @@ TEST_CASE("Successful lethal chain timing retains ability credit",
           "[combat][abilities][acquisition][chain-credit]") {
   ChainCreditFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
-  auto& progress = Audio_Seq_unusedArtsStatus;
+  auto& progress = VS::State::artsStatus;
   progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
   progress.kills.totalKills = kAbilityThresholds[unlocked] - 1;
   auto expected = progress;
@@ -1683,12 +1681,12 @@ TEST_CASE("Lethal chain credit preserves failure story and capacity gates",
   if (gate == 0) fixture.action.abilityInputSucceeded = 0;
   if (gate == 1) VS::State::SetLiveScriptFlag(0x82, 9);
   if (gate == 2) {
-    Audio_Seq_unusedArtsStatus.kills.totalKills = UINT16_MAX;
+    VS::State::artsStatus.kills.totalKills = UINT16_MAX;
   }
   if (gate == 3) {
-    Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked = 22;
+    VS::State::artsStatus.kills.battleAbilitiesUnlocked = 22;
   }
-  const auto before = Audio_Seq_unusedArtsStatus;
+  const auto before = VS::State::artsStatus;
   VS::Battle::LiveAdvanceBattleAbilitySequence();
   CheckAbilityProgress(before);
   fixture.CheckTerminated();
@@ -1699,7 +1697,7 @@ TEST_CASE("Pending ability rewards do not discard later chain credit",
   ChainCreditFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   const int extra = GENERATE(0, 1, 500);
-  auto& progress = Audio_Seq_unusedArtsStatus;
+  auto& progress = VS::State::artsStatus;
   progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
   progress.kills.totalKills =
       static_cast<u_short>(kAbilityThresholds[unlocked] + extra);
@@ -1714,8 +1712,8 @@ TEST_CASE("Pending chain credit alone does not trigger ability learning",
           "[combat][abilities][acquisition][chain-credit]") {
   ChainCreditFixture fixture;
   Battle_recoveryRewardMode = GENERATE(0, 1);
-  Audio_Seq_unusedArtsStatus.kills.totalKills = kAbilityThresholds[0];
-  const auto before = Audio_Seq_unusedArtsStatus;
+  VS::State::artsStatus.kills.totalKills = kAbilityThresholds[0];
+  const auto before = VS::State::artsStatus;
   REQUIRE(VS::Battle::LivePendingBattleAbilityUnlocks() == 1);
   VS::Battle::LiveBeginPendingAbilityReward();
   CHECK(Battle_actionFlowMode == 0);
@@ -1732,7 +1730,7 @@ TEST_CASE("Pending Break Arts take priority over ability rewards",
   const int unlocked = GENERATE(0, 21, 22);
   fixture.actors[0].equippedWeaponCategory =
       static_cast<u_char>(category + category_offset);
-  auto& progress = Audio_Seq_unusedArtsStatus;
+  auto& progress = VS::State::artsStatus;
   progress.artsLearned[category] = static_cast<u_char>(tier);
   progress.kills.weaponCategoryKills[category] =
       static_cast<u_short>(kBreakArtThresholds[category][tier] + delta);
@@ -1747,7 +1745,7 @@ TEST_CASE("Pending Break Arts take priority over ability rewards",
 TEST_CASE("Ability reward cap prevents further pending unlocks",
           "[combat][abilities][acquisition]") {
   AbilityUnlockFixture fixture;
-  auto& progress = Audio_Seq_unusedArtsStatus;
+  auto& progress = VS::State::artsStatus;
   progress.kills.battleAbilitiesUnlocked =
       static_cast<u_short>(GENERATE(22, 23, 65535));
   progress.kills.totalKills = 65535;
@@ -1760,7 +1758,7 @@ TEST_CASE("Ineligible ability reward menus leave progression unchanged",
           "[combat][abilities][acquisition]") {
   AbilityUnlockFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 23));
-  auto& progress = Audio_Seq_unusedArtsStatus;
+  auto& progress = VS::State::artsStatus;
   progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
   progress.kills.totalKills = static_cast<u_short>(
       unlocked == 22 ? 65535 : kAbilityThresholds[unlocked] - 1);
@@ -1776,7 +1774,7 @@ TEST_CASE("Qualifying lethal actions count once at every Break Art threshold",
   const int action_id = GENERATE(1, 22, 184);
   BreakArtKillFixture fixture(category, tier);
   fixture.action_id = action_id;
-  auto expected = Audio_Seq_unusedArtsStatus;
+  auto expected = VS::State::artsStatus;
   ++expected.kills.weaponCategoryKills[fixture.counter];
   fixture.Resolve();
   CHECK(fixture.actors[1].killCounted == 1);
@@ -1796,7 +1794,7 @@ TEST_CASE("Break Art kill points preserve original qualification and cap gates",
       KillGate::kPendingThreshold);
   BreakArtKillFixture fixture(category, 0);
   fixture.Reject(gate);
-  const auto before = Audio_Seq_unusedArtsStatus;
+  const auto before = VS::State::artsStatus;
   fixture.Resolve();
   CheckAbilityProgress(before);
   const bool counted =
@@ -1998,7 +1996,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
     fixture.action.abilityTimer = 100 + delta;
     constexpr int kStreak = 7;
-    Audio_Seq_unusedScoredata.chainStreak = kStreak;
+    VS::State::scoreData.chainStreak = kStreak;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     const bool success = delta > 0 && delta <= margin;
     const int result = delta <= -margin      ? 0
@@ -2013,7 +2011,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
                              success ? slot : 0);
     CHECK(fixture.action.abilityTimer == 102 + delta);
     // A successful defense extends the streak; a missed input ends it (#448).
-    CHECK(Audio_Seq_unusedScoredata.chainStreak ==
+    CHECK(VS::State::scoreData.chainStreak ==
           (success ? kStreak + (defense ? 1 : 0) : 0));
   }
 }
@@ -2081,10 +2079,10 @@ TEST_CASE("Successful defensive timing saturates rather than wraps its score",
   AbilityFixture fixture;
   fixture.Prepare(true);
   fixture.action.abilityTimer = 102;
-  Audio_Seq_unusedScoredata.chainStreak = before;
+  VS::State::scoreData.chainStreak = before;
   VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(2, 1);
-  CHECK(Audio_Seq_unusedScoredata.chainStreak == after);
+  CHECK(VS::State::scoreData.chainStreak == after);
 }
 
 TEST_CASE("Single-hit offensive abilities apply their original stat factors",
@@ -2395,14 +2393,14 @@ TEST_CASE("Rejected loot transfers leave partial misc stacks unchanged",
           "[combat][loot][inventory-capacity]") {
   LootInventoryFixture fixture;
   CHECK(fixture.Copy(false) == 0);
-  CHECK(static_cast<int>(Audio_Seq_unusedInventory.misc[0].count) == 99);
+  CHECK(static_cast<int>(VS::Items::inventory.misc[0].count) == 99);
   CHECK(fixture.Copy(true) == 0);
-  CHECK(static_cast<int>(Audio_Seq_unusedInventory.misc[0].count) == 99);
+  CHECK(static_cast<int>(VS::Items::inventory.misc[0].count) == 99);
   CHECK(fixture.source.misc[0].count == 2);
-  Audio_Seq_unusedInventory.misc[63] = {};
+  VS::Items::inventory.misc[63] = {};
   CHECK(fixture.Copy(true) == 64);
-  CHECK(Audio_Seq_unusedInventory.misc[0].count +
-            Audio_Seq_unusedInventory.misc[63].count ==
+  CHECK(VS::Items::inventory.misc[0].count +
+            VS::Items::inventory.misc[63].count ==
         101);
 }
 
@@ -2413,7 +2411,7 @@ TEST_CASE("Misc loot capacity queries and writes preserve stack limits",
   const int second = GENERATE(-1, 1, 99, 100);
   const int incoming = GENERATE(1, 2, 100);
   LootInventoryFixture fixture;
-  auto& inventory = Audio_Seq_unusedInventory;
+  auto& inventory = VS::Items::inventory;
   inventory.misc[0].count =
       static_cast<decltype(inventory.misc[0].count)>(first);
   if (second >= 0) {
@@ -2436,10 +2434,10 @@ TEST_CASE("Unmatched misc loot uses only available stock slots",
           "[combat][loot][inventory-capacity]") {
   const int occupied = GENERATE(0, 1, 63, 64);
   LootInventoryFixture fixture;
-  Audio_Seq_unusedInventory = {};
+  VS::Items::inventory = {};
   for (int slot = 0; slot < occupied; ++slot) {
-    Audio_Seq_unusedInventory.misc[slot].id = 324;
-    Audio_Seq_unusedInventory.misc[slot].count = 100;
+    VS::Items::inventory.misc[slot].id = 324;
+    VS::Items::inventory.misc[slot].count = 100;
   }
   const int expected = occupied < 64 ? occupied + 1 : 0;
   fixture.CheckQueryUnchanged(expected);
@@ -2619,7 +2617,7 @@ TEST_CASE("Loot staging filters difficulty and incomplete misc candidates",
   const bool has_id = GENERATE(false, true);
   const bool has_count = GENERATE(false, true);
   EnemyLootFixture fixture;
-  Audio_Seq_unusedStateFlags.difficulty = static_cast<char>(difficulty);
+  VS::State::stateFlags.difficulty = static_cast<char>(difficulty);
   Items_BattleLoot loot{};
   loot.misc[0].itemId = has_id ? 323 : 0;
   loot.misc[0].count = has_count ? 2 : 0;
@@ -2745,33 +2743,32 @@ TEST_CASE("Armor and accessory claims honor the original shared bag capacity",
   const int count = GENERATE(0, 15, 16);
   const int id = GENERATE(149, 237);
   LootInventoryFixture fixture;
-  Audio_Seq_unusedInventory = {};
+  VS::Items::inventory = {};
   fixture.source = {};
   auto part = EquipmentDropPart(static_cast<u_short>(id));
   VS::Items::WriteLiveInventoryArmorStats(&fixture.source.armor[0], &part);
   fixture.source.armor[0].index = 1;
   for (int index = 0; index < count; ++index) {
-    Audio_Seq_unusedInventory.armor[index].id = 150;
-    Audio_Seq_unusedInventory.armor[index].index =
-        static_cast<u_char>(index + 1);
+    VS::Items::inventory.armor[index].id = 150;
+    VS::Items::inventory.armor[index].index = static_cast<u_char>(index + 1);
   }
-  auto expected = Audio_Seq_unusedInventory;
+  auto expected = VS::Items::inventory;
   const auto source_before = fixture.source;
   CHECK(VS::Items::Inventory::CopyLiveItem(
-            Items_ItemCategory_Armor, &Audio_Seq_unusedInventory, 0,
+            Items_ItemCategory_Armor, &VS::Items::inventory, 0,
             &fixture.source) == (count < 16 ? count + 1 : 0));
-  EquipmentLootFixture::CheckInventory(Audio_Seq_unusedInventory, expected);
+  EquipmentLootFixture::CheckInventory(VS::Items::inventory, expected);
   CHECK(VS::Items::Inventory::CopyLiveItem(
             static_cast<int>(Items_ItemCategory_Armor) |
                 static_cast<int>(Menu_Framework_CopyItemFlag_Write),
-            &Audio_Seq_unusedInventory, 0,
+            &VS::Items::inventory, 0,
             &fixture.source) == (count < 16 ? count + 1 : 0));
   if (count < 16) {
     expected.armor[count] = fixture.source.armor[0];
     expected.armor[count].index = static_cast<u_char>(count + 1);
     expected.armor[count].limb = 0;
   }
-  EquipmentLootFixture::CheckInventory(Audio_Seq_unusedInventory, expected);
+  EquipmentLootFixture::CheckInventory(VS::Items::inventory, expected);
   EquipmentLootFixture::CheckInventory(fixture.source, source_before);
 }
 
@@ -2782,11 +2779,10 @@ TEST_CASE(
   const int flags = GENERATE(0, 1, 2, 3);
   const int armor_count = GENERATE(0, 15, 16);
   EquipmentStagingFixture fixture;
-  Audio_Seq_unusedStateFlags.difficulty = static_cast<char>(difficulty);
+  VS::State::stateFlags.difficulty = static_cast<char>(difficulty);
   for (int index = 0; index < armor_count; ++index) {
-    Audio_Seq_unusedInventory.armor[index].id = 150;
-    Audio_Seq_unusedInventory.armor[index].index =
-        static_cast<u_char>(index + 1);
+    VS::Items::inventory.armor[index].id = 150;
+    VS::Items::inventory.armor[index].index = static_cast<u_char>(index + 1);
   }
   fixture.Stage(flags);
   const bool allowed = (flags & (difficulty + 1)) != 0;
@@ -2980,7 +2976,7 @@ TEST_CASE("Loot menu take-all advances only after the current claims finish",
   }
   REQUIRE(Menu_Loot_lootListCount == 8);
   fixture.CheckClaims(16, 16);
-  Audio_Seq_unusedInventory = {};
+  VS::Items::inventory = {};
   VS::Menu::Loot::Live::RefreshClaimableRows();
   fixture.Step(PADRleft);
   int result = 0;

@@ -8,7 +8,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanksLive.hpp"
 #include "Core/Log.hpp"
 #include "Input/ControllerLive.hpp"
@@ -147,10 +146,10 @@ class LiveHost final : public Host {
     VS::Input::settings.vibrationOn = static_cast<char>(settings.vibration_on);
   }
   bool PuzzleModeDisabled() override {
-    return Audio_Seq_unusedStateFlags.puzzleModeDisabled != 0;
+    return VS::State::stateFlags.puzzleModeDisabled != 0;
   }
   void SetPuzzleMode(bool enabled) override {
-    Audio_Seq_unusedStateFlags.puzzleMode = enabled ? 1 : 0;
+    VS::State::stateFlags.puzzleMode = enabled ? 1 : 0;
   }
   void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
   void PlayVibrationPreset(int preset) override {

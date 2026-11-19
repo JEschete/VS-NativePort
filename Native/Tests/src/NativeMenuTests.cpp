@@ -31,6 +31,7 @@
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Items/Categories.h"
+#include "Items/Inventory.h"
 #include "Menu/Files.h"
 #include "Menu/FilesLiveState.hpp"
 #include "Save/FileMenuLive.hpp"
@@ -41,7 +42,9 @@
 #include "State/Ashley.h"
 #include "State/Location.h"
 #include "State/PlayTime.hpp"
+#include "State/Progress.h"
 #include "State/RoomMemory.h"
+#include "State/StateFlags.h"
 #include "Title/SaveFiles.h"
 
 namespace {
@@ -588,14 +591,13 @@ TEST_CASE("Native clear saves require staged original ending inputs",
 
 namespace {
 struct ClearInputsFixture {
-  decltype(Audio_Seq_unusedStateFlags) flags = Audio_Seq_unusedStateFlags;
-  decltype(Audio_Seq_unusedInventory) inventory = Audio_Seq_unusedInventory;
-  decltype(Audio_Seq_unusedInventoryIndices) order =
-      Audio_Seq_unusedInventoryIndices;
+  decltype(VS::State::stateFlags) flags = VS::State::stateFlags;
+  decltype(VS::Items::inventory) inventory = VS::Items::inventory;
+  decltype(VS::Items::inventoryIndices) order = VS::Items::inventoryIndices;
   State_AshleySnapshot ashley = State_ashleySnapshot;
   Field_MpdDoorRecord entry = State_savedEntryDoor;
   State_RoomVisitFlags visits = State_roomVisitProgress;
-  State_ScoreData score = Audio_Seq_unusedScoredata;
+  State_ScoreData score = VS::State::scoreData;
   decltype(VS::State::playTime) time = VS::State::playTime;
   decltype(std::to_array(State_recentRoomEnemyStates)) caches =
       std::to_array(State_recentRoomEnemyStates);
@@ -605,18 +607,18 @@ struct ClearInputsFixture {
   int clear_pending = Boot_isClearSavePending;
 
   ClearInputsFixture() {
-    Audio_Seq_unusedStateFlags = {};
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
-    Audio_Seq_unusedInventory.misc[0].id = 308;
-    Audio_Seq_unusedInventory.misc[0].count = 2;
-    Audio_Seq_unusedInventoryIndices.misc[0] = 1;
+    VS::State::stateFlags = {};
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
+    VS::Items::inventory.misc[0].id = 308;
+    VS::Items::inventory.misc[0].count = 2;
+    VS::Items::inventoryIndices.misc[0] = 1;
     State_ashleySnapshot.stats = MenuContentFixture::Document().state.ashley;
     State_savedEntryDoor = {};
     State_savedEntryDoor.entryTileX = 4;
     State_savedEntryDoor.entryTileZ = 2;
     State_roomVisitProgress = {};
-    Audio_Seq_unusedScoredata = {};
+    VS::State::scoreData = {};
     VS::State::playTime.all = 0;
     VS::State::playTime.t.hours = 1;
     State_currentRoomStateSlot = 0;
@@ -635,13 +637,13 @@ struct ClearInputsFixture {
   }
 
   ~ClearInputsFixture() {
-    Audio_Seq_unusedStateFlags = flags;
-    Audio_Seq_unusedInventory = inventory;
-    Audio_Seq_unusedInventoryIndices = order;
+    VS::State::stateFlags = flags;
+    VS::Items::inventory = inventory;
+    VS::Items::inventoryIndices = order;
     State_ashleySnapshot = ashley;
     State_savedEntryDoor = entry;
     State_roomVisitProgress = visits;
-    Audio_Seq_unusedScoredata = score;
+    VS::State::scoreData = score;
     VS::State::playTime = time;
     std::copy(caches.begin(), caches.end(), State_recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), State_learnedActionFlags);

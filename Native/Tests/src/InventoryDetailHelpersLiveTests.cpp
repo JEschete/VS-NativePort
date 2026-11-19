@@ -6,9 +6,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
+#include "Items/Inventory.h"
 #include "Menu/Framework/EquipmentDetailsLive.hpp"
 #include "Menu/Framework/EquipmentDetailsLiveState.hpp"
 #include "Menu/Framework/Framework.hpp"
@@ -27,7 +27,7 @@ constexpr int kSelectedRow = 20;
 struct LiveFixture {
   Menu_Framework_MenuRow* previous_rows = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuMemory previous_memory = VS::Menu::Framework::menuMemory;
-  Items_Inventory previous_inventory = Audio_Seq_unusedInventory;
+  Items_Inventory previous_inventory = VS::Items::inventory;
   int previous_held = VS::Input::buttonsState;
   int previous_repeat = VS::Input::buttonRepeat;
   decltype(VS::Input::buttonsPressed) previous_pressed =
@@ -50,7 +50,7 @@ struct LiveFixture {
       previous_orders[i] = Menu_Inventory_inventoryIndices[i];
     }
     VS::Menu::Framework::menuItems = rows.data();
-    Audio_Seq_unusedInventory = {};
+    VS::Items::inventory = {};
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
     VS::Input::buttonsPressed = 0;
@@ -65,7 +65,7 @@ struct LiveFixture {
   ~LiveFixture() {
     VS::Menu::Framework::menuItems = previous_rows;
     VS::Menu::Framework::menuMemory = previous_memory;
-    Audio_Seq_unusedInventory = previous_inventory;
+    VS::Items::inventory = previous_inventory;
     VS::Input::buttonsState = previous_held;
     VS::Input::buttonRepeat = previous_repeat;
     VS::Input::buttonsPressed = previous_pressed;
@@ -107,8 +107,8 @@ TEST_CASE("F02566 live panels need no row or actor owner",
 TEST_CASE("F02567 live paging uses the production inventory count lazily",
           "[inventory-detail-helpers-live][F02567]") {
   LiveFixture fixture;
-  Audio_Seq_unusedInventory.weapons[0].blade = 1;
-  Audio_Seq_unusedInventory.weapons[7].blade = 16;
+  VS::Items::inventory.weapons[0].blade = 1;
+  VS::Items::inventory.weapons[7].blade = 16;
   VS::Input::buttonRepeat = VS::Input::L1;
   CHECK(inventory::PollLiveDetailsPaging(0, 0) == 1);
   VS::Input::buttonRepeat = VS::Input::R1;

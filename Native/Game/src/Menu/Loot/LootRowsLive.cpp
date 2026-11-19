@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
+#include "Items/Inventory.h"
 #include "Items/Inventory.hpp"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
@@ -49,8 +49,8 @@ class AshleyClaimCheck final : public ClaimCheck {
  public:
   explicit AshleyClaimCheck(const char* operation)
       : operation_(operation),
-        ashley_(item_live::Typed(Audio_Seq_unusedInventory)),
-        indices_(item_live::Typed(Audio_Seq_unusedInventoryIndices)) {}
+        ashley_(item_live::Typed(VS::Items::inventory)),
+        indices_(item_live::Typed(VS::Items::inventoryIndices)) {}
 
   bool Fits(const LootRow& row,
             const items::InventoryContents& staged) override {
@@ -62,8 +62,8 @@ class AshleyClaimCheck final : public ClaimCheck {
 
   // A misc check rebuilds Ashley's display order, as the original copy did.
   void Commit() const {
-    item_live::Commit(Audio_Seq_unusedInventory, ashley_);
-    item_live::Commit(Audio_Seq_unusedInventoryIndices, indices_);
+    item_live::Commit(VS::Items::inventory, ashley_);
+    item_live::Commit(VS::Items::inventoryIndices, indices_);
   }
 
  private:
@@ -97,7 +97,7 @@ std::optional<LootStaging> Load(const char* operation) {
   };
   staging->batch = PagingState().batch;
   staging->difficulty =
-      static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.difficulty);
+      static_cast<std::uint8_t>(VS::State::stateFlags.difficulty);
   return staging;
 }
 
@@ -179,7 +179,7 @@ int CountContainedCategory(int counted_category, Menu_Loot_LootListItem* row) {
 int IsDropAllowed(int difficulty_flags) {
   return DropDifficultyMatch(
       difficulty_flags,
-      static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.difficulty));
+      static_cast<std::uint8_t>(VS::State::stateFlags.difficulty));
 }
 
 void StageDropRecord(Items_BattleLoot* record) {

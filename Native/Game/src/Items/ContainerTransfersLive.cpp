@@ -10,11 +10,11 @@
 #include <type_traits>
 #include <variant>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfers.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Container/ItemView.h"
@@ -81,8 +81,7 @@ class LiveBag final : public GadgetBagWorld {
   ContainerRecord ReadInventory(ItemCategory category,
                                 std::size_t index) override {
     return Live::VisitContainerTable(
-        Audio_Seq_unusedInventory, category,
-        [&](const auto& table) -> ContainerRecord {
+        inventory, category, [&](const auto& table) -> ContainerRecord {
           if (index >= std::size(table)) {
             Refuse("record index outside inventory category storage");
           }
@@ -91,18 +90,17 @@ class LiveBag final : public GadgetBagWorld {
   }
   void WriteInventory(ItemCategory category, std::size_t index,
                       const ContainerRecord& item) override {
-    Live::VisitContainerTable(
-        Audio_Seq_unusedInventory, category, [&](auto& table) {
-          if (index >= std::size(table)) {
-            Refuse("record index outside inventory category storage");
-          }
-          using Legacy = std::remove_reference_t<decltype(table[index])>;
-          const auto* record = std::get_if<Live::TypedRecordOf<Legacy>>(&item);
-          if (record == nullptr) {
-            Refuse("record type disagrees with inventory category");
-          }
-          Live::Commit(table[index], *record);
-        });
+    Live::VisitContainerTable(inventory, category, [&](auto& table) {
+      if (index >= std::size(table)) {
+        Refuse("record index outside inventory category storage");
+      }
+      using Legacy = std::remove_reference_t<decltype(table[index])>;
+      const auto* record = std::get_if<Live::TypedRecordOf<Legacy>>(&item);
+      if (record == nullptr) {
+        Refuse("record type disagrees with inventory category");
+      }
+      Live::Commit(table[index], *record);
+    });
   }
 
  private:

@@ -13,6 +13,7 @@
 
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/GazetteTerminalPreviewFixture.hpp"
+#include "State/Progress.h"
 
 namespace {
 namespace live = gazette_terminal_live_tests;
@@ -94,7 +95,7 @@ TEST_CASE(
   live::Fixture::UnlockAll();
   score::ShowLiveEnemyDescription();
   CHECK(shared::Fixture::InformationText() == live::Fixture::Description(0));
-  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, 0);
+  std::ranges::fill(VS::State::scoreData.enemyKillFlags, 0);
   score::InitializeLiveEnemyList();
   score::ShowLiveEnemyDescription();
   CHECK(shared::Fixture::InformationText() ==
@@ -162,9 +163,9 @@ TEST_CASE(
   live::Fixture fixture;
   fixture.BorrowMon();
   const auto refusals = score::LiveGazetteTerminalRefusals();
-  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, 0);
-  Audio_Seq_unusedScoredata.enemyKillFlags[0] = (1 << 2) | (1 << 6);
-  Audio_Seq_unusedScoredata.enemyKillFlags[4] = 1 << 8;
+  std::ranges::fill(VS::State::scoreData.enemyKillFlags, 0);
+  VS::State::scoreData.enemyKillFlags[0] = (1 << 2) | (1 << 6);
+  VS::State::scoreData.enemyKillFlags[4] = 1 << 8;
   const auto source = live::Fixture::MonBytes();
   std::vector<std::byte> before(source.begin(), source.end());
   score::InitializeLiveEnemyList();
@@ -484,7 +485,7 @@ TEST_CASE(
     "F02803]") {
   live::PreviewFixture fixture;
   fixture.LoadSourceActor();
-  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+  std::ranges::fill(VS::State::scoreData.enemyKillFlags, -1);
   const auto refusals = score::LiveGazetteTerminalRefusals();
   CheckMonEntry(fixture);
   SettleFirstEnemyList(fixture);
@@ -634,7 +635,7 @@ TEST_CASE(
   const bool reuse_request = GENERATE(false, true);
   live::PreviewFixture fixture;
   fixture.LoadSourceActor();
-  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+  std::ranges::fill(VS::State::scoreData.enemyKillFlags, -1);
   const auto refusals = score::LiveGazetteTerminalRefusals();
   CancellationProbe probe;
   ArmMonCancellation(fixture, probe);
@@ -738,7 +739,7 @@ TEST_CASE(
     {
       live::PreviewFixture fixture;
       fixture.LoadSourceActor();
-      std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+      std::ranges::fill(VS::State::scoreData.enemyKillFlags, -1);
       fixture.SelectPage(3);
       fixture.AdvanceTo(14);
       REQUIRE(fixture.TickGazette() == 0);
@@ -819,7 +820,7 @@ TEST_CASE(
     "F02803]") {
   live::PreviewFixture fixture;
   fixture.LoadSourceActor();
-  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+  std::ranges::fill(VS::State::scoreData.enemyKillFlags, -1);
   fixture.SettleOverview();
   const auto mon_image =
       live::shared::ReadImage(R"(Native\data\disc\SMALL\MON.BIN)");

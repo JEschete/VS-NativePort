@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <span>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/CubePuzzle.h"
@@ -87,14 +86,14 @@ class LiveClutTarget final : public ResultsClutTarget {
   }
 };
 
-std::uint8_t LiveCourse() { return Audio_Seq_unusedStateFlags.timeAttackBoss; }
+std::uint8_t LiveCourse() { return VS::State::stateFlags.timeAttackBoss; }
 
 // Each course's first-place trial score, packed as the original word.
 std::array<std::uint32_t, kTimeAttackCourses> LiveFirstPlaceScores() {
   std::array<std::uint32_t, kTimeAttackCourses> scores{};
   for (std::size_t course = 0; course < scores.size(); ++course) {
     const State_TrialScore& score =
-        Audio_Seq_unusedScoredata.bossTimeTrialScores[course][0];
+        VS::State::scoreData.bossTimeTrialScores[course][0];
     scores.at(course) =
         score.time |
         (static_cast<std::uint32_t>(score.round) << kTrialRoundShift) |

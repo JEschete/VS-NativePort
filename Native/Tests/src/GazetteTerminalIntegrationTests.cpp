@@ -16,6 +16,7 @@
 #include "Menu/GazetteTerminalLiveFixture.hpp"
 #include "Menu/GazetteTerminalPreviewFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
+#include "State/Progress.h"
 
 namespace {
 namespace live = gazette_terminal_live_tests;
@@ -54,7 +55,7 @@ struct MonOwner {
 
 MonOwner BeginMon(live::PreviewFixture& fixture, bool loaded) {
   fixture.LoadSourceActor();
-  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+  std::ranges::fill(VS::State::scoreData.enemyKillFlags, -1);
   fixture.SelectPage(3, false);
   fixture.AdvanceTo(static_cast<int>(score::GazettePhase::kWaitForEnemies),
                     false);
@@ -119,7 +120,7 @@ TEST_CASE("Gazette enemy module entries use real links descriptions and digits",
           "[F02805][F02817][F02818]") {
   live::Fixture fixture;
   fixture.BorrowMon();
-  std::ranges::fill(Audio_Seq_unusedScoredata.enemyKillFlags, -1);
+  std::ranges::fill(VS::State::scoreData.enemyKillFlags, -1);
   ModuleEntry(0x80105D8C, &score::InitializeLiveEnemyList)();
   fw::InitializeLiveInformationBox();
   Menu_Score_selectedEnemy = 0;

@@ -571,11 +571,11 @@ class LiveSections : public Host {
   }
 
   [[nodiscard]] int PendingEnteredDoor() const override {
-    return static_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.doorEntered);
+    return static_cast<std::uint8_t>(VS::State::stateFlags.doorEntered);
   }
 
   void ClearPendingEnteredDoor() override {
-    Audio_Seq_unusedStateFlags.doorEntered = 0;
+    VS::State::stateFlags.doorEntered = 0;
   }
 
   [[nodiscard]] int EnteredDoorId() const override {

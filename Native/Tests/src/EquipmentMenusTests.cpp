@@ -15,7 +15,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Hud.h"
 #include "Items/Inventory.h"
 #include "Menu/ContainerMenuDialogsLiveFixture.hpp"
@@ -1302,8 +1301,7 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
                                     .strength = 2,
                                     .material = 1,
                                     .limb = limb};
-    VS::Items::Live::Commit(std::span(Audio_Seq_unusedInventory.armor)[slot],
-                            armor);
+    VS::Items::Live::Commit(std::span(VS::Items::inventory.armor)[slot], armor);
   }
   // A shield, two arm armors (one worn on part 1) and two accessories (one
   // worn), besides the fixture's spare weapon.
@@ -1314,8 +1312,7 @@ struct MenusFixture : MenuGlobals, dialogs::EquippedFixture {
     AddArmor(5, 223, inv::kAccessoryLimb, 0);
     AddArmor(9, 224, inv::kAccessoryLimb, inv::kAccessoryLimb);
     const std::array<u_char, 4> armor{4, 1, 10, 6};
-    std::ranges::copy(armor,
-                      std::begin(Audio_Seq_unusedInventoryIndices.armor));
+    std::ranges::copy(armor, std::begin(VS::Items::inventoryIndices.armor));
   }
 
   [[nodiscard]] std::int64_t Classify(const char* text) const {
@@ -1415,8 +1412,8 @@ struct Snapshot {
 
 [[nodiscard]] Snapshot Take(MenusFixture& fixture) {
   Snapshot snapshot;
-  snapshot.inventory = Bytes(Audio_Seq_unusedInventory);
-  const auto indices = Bytes(Audio_Seq_unusedInventoryIndices);
+  snapshot.inventory = Bytes(VS::Items::inventory);
+  const auto indices = Bytes(VS::Items::inventoryIndices);
   snapshot.inventory.insert(snapshot.inventory.end(), indices.begin(),
                             indices.end());
   snapshot.stats = Bytes(fixture.stats);
@@ -1597,7 +1594,7 @@ TEST_CASE("Live weapon menu matches the frozen MENU3 digest",
   // A two-handed blade with a shield held: equipping drops the shield.
   const auto setup = [](MenusFixture& fixture) {
     fixture.AddEquipment();
-    Audio_Seq_unusedInventory.shields[0].isEquipped = 1;
+    VS::Items::inventory.shields[0].isEquipped = 1;
     VS::Menu::Framework::weaponHands[0] = 1;
   };
   const auto steps = [](Script& script) { BackThenChoose(script, 1); };
@@ -1703,7 +1700,7 @@ TEST_CASE("Live equipment menus refuse slots, parts and rows outside",
   fixture.AddEquipment();
   const std::uint64_t before = inv::LiveEquipmentMenusRefusalCount();
   const char pages = VS::Menu::Framework::enabledStatPages;
-  Audio_Seq_unusedInventoryIndices.armor[0] = 17;
+  VS::Items::inventoryIndices.armor[0] = 17;
   CHECK(inv::UpdateLiveArmorMenu(1) == 0);
   CHECK(inv::UpdateLiveAccessoryMenu(1) == 0);
   CHECK(inv::UpdateLiveArmorMenu(8) == 0);

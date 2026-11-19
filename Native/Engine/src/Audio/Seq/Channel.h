@@ -154,10 +154,6 @@ struct Audio_MusicConfig {
 };
 
 #include "Audio/Mixer/MixControl.h"
-#include "Items/Inventory.h"
-#include "Items/Weapons.h"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
 
 extern Audio_SeqChannel Audio_Seq_musicChannels[0x20];
 extern Audio_MusicConfig Audio_Seq_savedMusicConfig;
@@ -168,9 +164,3 @@ extern Audio_CommandParams Audio_Seq_pendingMusicData;
 extern u_int Audio_Seq_musicLoopsRemaining;
 extern Audio_MusicConfig* Audio_Seq_activeMusicConfig;
 extern Audio_SeqChannel Audio_Seq_savedMusicChannels[32];
-extern char Audio_Seq_unusedMaterialModifiers[8][30];
-extern State_ScoreData Audio_Seq_unusedScoredata;
-extern State_ArtsStatus Audio_Seq_unusedArtsStatus;
-extern Items_Inventory Audio_Seq_unusedInventory;
-extern State_StateFlags Audio_Seq_unusedStateFlags;
-extern Items_InventoryIndices Audio_Seq_unusedInventoryIndices;

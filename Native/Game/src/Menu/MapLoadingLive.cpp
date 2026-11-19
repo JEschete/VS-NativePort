@@ -10,7 +10,6 @@
 #include <string_view>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
@@ -38,6 +37,7 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Progress.h"
+#include "State/StateFlags.h"
 
 namespace VS::Menu::map {
 namespace {
@@ -48,7 +48,7 @@ constexpr std::size_t kMenuTextPerRow = 2;
 
 static_assert(sizeof(Content_DiscFile) == sizeof(DiscFileRange));
 static_assert(std::size(Menu_Map_sceneRowIdMap) == kSceneCount);
-static_assert(sizeof(Audio_Seq_unusedStateFlags.mapPaling) == kSceneCount);
+static_assert(sizeof(VS::State::stateFlags.mapPaling) == kSceneCount);
 
 std::uint64_t refused_calls = 0;
 
@@ -437,7 +437,7 @@ int LiveLoadSceneMap() {
   SceneMapView view = ViewOfGlobals();
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   auto* paling = reinterpret_cast<std::uint8_t*>(
-      static_cast<char*>(Audio_Seq_unusedStateFlags.mapPaling));
+      static_cast<char*>(VS::State::stateFlags.mapPaling));
   SceneMapProgress progress{
       .map_paling = {paling, static_cast<std::size_t>(kSceneCount)},
       .room_flags =

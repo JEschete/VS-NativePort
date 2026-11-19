@@ -15,7 +15,6 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/Location.h"
 #include "Actors/Movement.h"
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilitiesLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
@@ -43,6 +42,7 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.hpp"
+#include "Items/Inventory.h"
 #include "Items/Loot.h"
 #include "Items/LootLive.hpp"
 #include "Items/TreasureChests.h"
@@ -242,16 +242,16 @@ void InspectItemOptions(PlayerObservationState& state) {
 
 void InspectItemMenuRow(EncounterMenuRowState& row) {
   if (row.index < 0 || static_cast<std::size_t>(row.index) >=
-                           std::size(Audio_Seq_unusedInventoryIndices.misc)) {
+                           std::size(VS::Items::inventoryIndices.misc)) {
     throw std::runtime_error("item menu row exceeds inventory index storage");
   }
-  const auto slot = static_cast<unsigned char>(
-      Audio_Seq_unusedInventoryIndices.misc[row.index]);
-  if (slot == 0 || slot > std::size(Audio_Seq_unusedInventory.misc)) {
+  const auto slot =
+      static_cast<unsigned char>(VS::Items::inventoryIndices.misc[row.index]);
+  if (slot == 0 || slot > std::size(VS::Items::inventory.misc)) {
     throw std::runtime_error(
         "item menu row has an invalid native inventory index");
   }
-  const auto& item = Audio_Seq_unusedInventory.misc[slot - 1];
+  const auto& item = VS::Items::inventory.misc[slot - 1];
   row.item_id = item.id;
   row.item_count = static_cast<unsigned char>(item.count);
 }

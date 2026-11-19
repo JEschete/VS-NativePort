@@ -8,7 +8,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Encounter.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Boot/PlayerSettings.hpp"
@@ -23,6 +22,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.hpp"
+#include "State/StateFlags.h"
 
 namespace {
 using VS::Game::EncounterSetup;
@@ -77,7 +77,7 @@ void EditorPress(VS::combat_lab::Editor& editor, std::uint32_t button,
 
 struct DoorQueryFixture {
   Field_RoomRecord saved_room = Field_roomData;
-  char saved_random = Audio_Seq_unusedStateFlags.opaqueAC[7];
+  char saved_random = VS::State::stateFlags.opaqueAC[7];
   std::array<Field_MpdDoorRecord, 40> doors{};
 
   DoorQueryFixture() {
@@ -90,7 +90,7 @@ struct DoorQueryFixture {
     Field_roomData.doors = nullptr;
     VS::Field::TransitionLiveDoorsAtTile(0, 0, 0);
     Field_roomData = saved_room;
-    Audio_Seq_unusedStateFlags.opaqueAC[7] = saved_random;
+    VS::State::stateFlags.opaqueAC[7] = saved_random;
     VS::Core::SeedBiosRand(1);
   }
 
@@ -188,7 +188,7 @@ TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
   VS::Core::Rand15 expected(1234);
   SECTION("present room consumes one raw draw even without a match") {
     fixture.Check(31, 31, 0, std::span<const int>{});
-    CHECK(static_cast<unsigned char>(Audio_Seq_unusedStateFlags.opaqueAC[7]) ==
+    CHECK(static_cast<unsigned char>(VS::State::stateFlags.opaqueAC[7]) ==
           static_cast<unsigned char>(expected.Next()));
   }
   SECTION("absent room consumes no raw draw") {

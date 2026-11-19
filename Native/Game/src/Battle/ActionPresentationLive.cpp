@@ -14,7 +14,6 @@
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.h"
 #include "Actors/SkeletonLive.hpp"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
@@ -235,20 +234,18 @@ class LiveWorld final : public ActionPresentationWorld {
     return Battle_characterState->equippedWeaponCategory;
   }
   std::uint16_t WeaponAttacks(std::size_t category) override {
-    Require(category < std::size(Audio_Seq_unusedScoredata.weaponAttacks));
-    return Audio_Seq_unusedScoredata.weaponAttacks[category];
+    Require(category < std::size(VS::State::scoreData.weaponAttacks));
+    return VS::State::scoreData.weaponAttacks[category];
   }
   void SetWeaponAttacks(std::size_t category, std::uint16_t count) override {
-    Require(category < std::size(Audio_Seq_unusedScoredata.weaponAttacks));
-    Audio_Seq_unusedScoredata.weaponAttacks[category] = count;
+    Require(category < std::size(VS::State::scoreData.weaponAttacks));
+    VS::State::scoreData.weaponAttacks[category] = count;
   }
   int TargetDistance() override { return LiveActionTargetDistance(); }
   void ResetWeaponKillStreak() override { State::ResetLiveWeaponKillStreak(); }
-  std::uint16_t HealCount() override {
-    return Audio_Seq_unusedScoredata.healCount;
-  }
+  std::uint16_t HealCount() override { return VS::State::scoreData.healCount; }
   void SetHealCount(std::uint16_t count) override {
-    Audio_Seq_unusedScoredata.healCount = count;
+    VS::State::scoreData.healCount = count;
   }
   void RestoreIdle(int actor) override {
     Actors::RestoreLiveActorIdlePose(actor);

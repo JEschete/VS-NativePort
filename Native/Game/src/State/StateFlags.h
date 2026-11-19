@@ -133,3 +133,8 @@ struct State_StateFlags {
     char reserved400[64];
 };
 static_assert(sizeof(State_StateFlags) == 0x440, "State_StateFlags must keep its PS1 layout");
+
+namespace VS::State {
+// decomp: vs_main_stateFlags (main.h:508)
+extern State_StateFlags stateFlags;
+}  // namespace VS::State

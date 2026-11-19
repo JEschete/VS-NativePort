@@ -59,7 +59,7 @@ H0057,header,Native/Engine/src/Audio/Mixer/VoiceMixer.h,generated,yes,pragma-onc
 H0058,header,Native/Engine/src/Audio/Playback/SoundPlayback.h,generated,yes,pragma-once,0,0,0,0,0,0,4,0,0,remaining,
 H0059,header,Native/Engine/src/Audio/Samples/SampleBanks.h,generated,yes,pragma-once,0,0,0,0,0,1,8,0,0,remaining,
 H0060,header,Native/Engine/src/Audio/Seq/AkaoFormat.h,generated,yes,pragma-once,0,0,0,0,0,0,3,0,0,remaining,
-H0061,header,Native/Engine/src/Audio/Seq/Channel.h,generated,yes,pragma-once,0,0,0,0,0,1,17,0,0,remaining,
+H0061,header,Native/Engine/src/Audio/Seq/Channel.h,generated,yes,pragma-once,0,0,0,0,0,1,11,0,0,remaining,
 H0062,header,Native/Engine/src/Audio/Seq/Sequencer.h,generated,yes,pragma-once,0,0,0,0,0,1,15,0,0,remaining,
 H0063,header,Native/Engine/src/Audio/Sfx.h,generated,yes,pragma-once,0,0,0,0,0,0,7,0,0,remaining,
 H0064,header,Native/Engine/src/Audio/SoundBanks.h,generated,yes,pragma-once,0,0,0,0,0,0,5,0,0,remaining,

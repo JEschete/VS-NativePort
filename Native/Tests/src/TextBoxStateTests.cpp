@@ -9,10 +9,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxState.hpp"
 #include "Menu/TextBoxStateLive.hpp"
+#include "State/StateFlags.h"
 
 namespace {
 namespace m = VS::Menu;
@@ -363,8 +363,8 @@ struct LiveTextBoxFixture {
   std::array<Menu_TextBoxState, m::kTextBoxCount> saved_boxes =
       std::to_array(Menu_textBoxes);
   Menu_Framework_TextBoxSelector saved_selector = Menu_textBoxSelector;
-  decltype(Audio_Seq_unusedStateFlags.opaque11) saved_default_choice =
-      Audio_Seq_unusedStateFlags.opaque11;
+  decltype(VS::State::stateFlags.opaque11) saved_default_choice =
+      VS::State::stateFlags.opaque11;
   std::array<std::array<Menu_TextAnchorWord, 2>, m::kTextAnchorPresetCount>
       saved_anchors{};
 
@@ -374,7 +374,7 @@ struct LiveTextBoxFixture {
                         saved_anchors[i].begin());
     }
     Menu_textBoxSelector = {};
-    Audio_Seq_unusedStateFlags.opaque11 = 0;
+    VS::State::stateFlags.opaque11 = 0;
     for (std::size_t i = 0; i < m::kTextBoxCount; ++i) {
       m::TextBox box{.state = 0};
       box.flags.speaker_texture = m::kNoTextBoxSpeaker;
@@ -384,7 +384,7 @@ struct LiveTextBoxFixture {
   ~LiveTextBoxFixture() {
     std::ranges::copy(saved_boxes, std::span(Menu_textBoxes).begin());
     Menu_textBoxSelector = saved_selector;
-    Audio_Seq_unusedStateFlags.opaque11 = saved_default_choice;
+    VS::State::stateFlags.opaque11 = saved_default_choice;
     for (std::size_t i = 0; i < saved_anchors.size(); ++i) {
       std::ranges::copy(saved_anchors[i],
                         std::begin(std::span(Menu_textBoxAnchors)[i]));

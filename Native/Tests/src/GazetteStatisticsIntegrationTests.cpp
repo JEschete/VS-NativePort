@@ -15,6 +15,7 @@
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
+#include "State/Progress.h"
 
 namespace {
 namespace live = gazette_statistics_live_tests;
@@ -47,8 +48,8 @@ struct Fixture : live::StatisticsFixture {
   }
 
   std::array<shared::Sprite, 4> PrimeCursor(Page page) {
-    Audio_Seq_unusedScoredata.titles = -1;
-    Audio_Seq_unusedScoredata.completionTimeMinutes = 60;
+    VS::State::scoreData.titles = -1;
+    VS::State::scoreData.completionTimeMinutes = 60;
     Menu_Score_clearCount = 3;
     Menu_Score_mapCompletion = 180;
     Menu_Score_openedChestCount = 26;
@@ -79,8 +80,8 @@ struct ResidentState {
   void Check() const {
     CHECK(std::ranges::equal(shared::BytesOf(Battle_unusedMenu9CursorMemory),
                              cursor));
-    CHECK(Audio_Seq_unusedScoredata.titles == -1);
-    CHECK(Audio_Seq_unusedScoredata.completionTimeMinutes == 60);
+    CHECK(VS::State::scoreData.titles == -1);
+    CHECK(VS::State::scoreData.completionTimeMinutes == 60);
     CHECK(Menu_Score_clearCount == 3);
     CHECK(Menu_Score_mapCompletion == 180);
     CHECK(Menu_Score_openedChestCount == 26);
@@ -92,7 +93,7 @@ struct ResidentState {
   }
 };
 void CheckTitleModuleEntries(const Fixture& fixture) {
-  Audio_Seq_unusedScoredata.titles = -1;
+  VS::State::scoreData.titles = -1;
   ModuleEntry(0x801056B8, &score::CreateLiveTitleRows)();
   CHECK(Menu_Score_gazetteRows[31].rowIndex == 32);
   ModuleEntry(0x8010579C, &score::RenderLiveTitles)(8);

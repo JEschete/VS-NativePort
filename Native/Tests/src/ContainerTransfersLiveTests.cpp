@@ -3,6 +3,7 @@
 #include "Items/ContainerIndexing.hpp"
 #include "Items/ContainerTables.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
+#include "Items/Inventory.h"
 
 namespace {
 namespace items = VS::Items;
@@ -97,7 +98,7 @@ TEST_CASE(
     "rows",
     "[container-transfers-live][F02938]") {
   LiveFixture fixture;
-  Audio_Seq_unusedInventory.misc[63] = {65535, static_cast<char>(255), 91};
+  VS::Items::inventory.misc[63] = {65535, static_cast<char>(255), 91};
   fixture.order.misc[0] = 255;
   fixture.storage->gadgetBag.items.misc[255].id = 99;
   items::SnapshotLiveGadgetBag();
@@ -120,8 +121,8 @@ TEST_CASE("F02939 Live commits low token bytes without remapping item records",
   items::CommitLiveGadgetBag();
   CHECK(fixture.order.misc[0] == 0);
   CHECK(fixture.order.misc[1] == 1);
-  CHECK(Audio_Seq_unusedInventory.misc[0].id == 11);
-  CHECK(Audio_Seq_unusedInventory.misc[0].index == 91);
+  CHECK(VS::Items::inventory.misc[0].id == 11);
+  CHECK(VS::Items::inventory.misc[0].index == 91);
   CHECK(bag.items.misc[255].id == 15);
 }
 

@@ -9,7 +9,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Field/CameraLiveState.hpp"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -23,6 +22,7 @@
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
+#include "State/StateFlags.h"
 #include "State/Timers.hpp"
 
 extern unsigned int Content_battleTriggerMarkerBytes[29];
@@ -57,7 +57,7 @@ void EditGroup(MarkerDefinition& definition, Edit edit) {
 struct TriggerMarkerFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   Field_RoomRecord saved_room = Field_roomData;
-  State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
+  State_StateFlags saved_flags = VS::State::stateFlags;
   RECT saved_texture = Field_triggerMarkerTextureSource;
   RECT saved_palette = Field_triggerMarkerPaletteSource;
   int saved_tick_speed = VS::State::tickSpeed;
@@ -102,7 +102,7 @@ struct TriggerMarkerFixture {
     Field_roomData.floorTriggers = triggers.data();
     Field_roomData.header.floorTriggersLength = sizeof triggers;
     for (auto& trigger : triggers) trigger.kind = 3;
-    Audio_Seq_unusedStateFlags = {};
+    VS::State::stateFlags = {};
     VS::State::tickSpeed = 1;
     VS::Field::roomGeometryDrawMode = 0;
     Field_roomAnimationTicks = 0;
@@ -127,7 +127,7 @@ struct TriggerMarkerFixture {
     std::memcpy(Content_battleTriggerMarkerBytes, saved_definition.data(),
                 sizeof saved_definition);
     Field_roomData = saved_room;
-    Audio_Seq_unusedStateFlags = saved_flags;
+    VS::State::stateFlags = saved_flags;
     Field_triggerMarkerTextureSource = saved_texture;
     Field_triggerMarkerPaletteSource = saved_palette;
     VS::State::tickSpeed = saved_tick_speed;
@@ -301,8 +301,8 @@ TEST_CASE(
   trigger.activation = static_cast<char>(sample.active);
   trigger.markerFade = static_cast<char>(sample.initial);
   VS::State::tickSpeed = sample.ticks;
-  Audio_Seq_unusedStateFlags.opaque20 = static_cast<char>(sample.gate20);
-  Audio_Seq_unusedStateFlags.opaque40 = static_cast<char>(sample.gate40);
+  VS::State::stateFlags.opaque20 = static_cast<char>(sample.gate20);
+  VS::State::stateFlags.opaque40 = static_cast<char>(sample.gate40);
   VS::Field::DrawLiveRoomTriggerMarkers();
   CHECK(static_cast<unsigned char>(trigger.markerFade) == sample.expected);
   CHECK(Field_triggerMarkerFrameTicks == 0);

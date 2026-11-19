@@ -16,7 +16,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.hpp"
 #include "Field/ChestInteractionsLive.hpp"
 #include "Field/Doors.h"
@@ -147,7 +146,7 @@ struct RenderFixture {
                                      VS::Render::legacyPrimitiveBuffers[1]};
   int saved_framebuffer = VS::Render::frameBuf;
   u_short saved_ticks = Field_roomAnimationTicks;
-  State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
+  State_StateFlags saved_flags = VS::State::stateFlags;
   std::vector<u_long> packets =
       std::vector<u_long>(0x20000 / sizeof(u_long) + 1);
   std::array<u_long, 16> ordering{};
@@ -161,8 +160,7 @@ struct RenderFixture {
     VS::Render::FrameScratchpad().primitive_cursor = packets.data();
     VS::Render::FrameScratchpad().ordering_table = ordering.data();
     Field_roomAnimationTicks = 0;
-    std::memset(&Audio_Seq_unusedStateFlags, 0,
-                sizeof Audio_Seq_unusedStateFlags);
+    std::memset(&VS::State::stateFlags, 0, sizeof VS::State::stateFlags);
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
     packets.back() = 0xDEADBEEF;
   }
@@ -173,7 +171,7 @@ struct RenderFixture {
     VS::Render::legacyPrimitiveBuffers[1] = saved_buffers[1];
     VS::Render::frameBuf = saved_framebuffer;
     Field_roomAnimationTicks = saved_ticks;
-    Audio_Seq_unusedStateFlags = saved_flags;
+    VS::State::stateFlags = saved_flags;
     Core_Gte_Reset();
   }
 
@@ -456,23 +454,22 @@ TEST_CASE("Typed entrance live lookup keeps order upper layers and byte bounds",
 TEST_CASE("Reload door native store writes only its packed state byte",
           "[entrance-reload-live][field]") {
   SceneDoorFixture fixture;
-  const auto saved = Audio_Seq_unusedStateFlags;
+  const auto saved = VS::State::stateFlags;
   struct RestoreFlags {
-    decltype(Audio_Seq_unusedStateFlags) value;
-    ~RestoreFlags() { Audio_Seq_unusedStateFlags = value; }
+    decltype(VS::State::stateFlags) value;
+    ~RestoreFlags() { VS::State::stateFlags = value; }
   } restore{saved};
   auto expected = saved;
   Field_enteredDoorId = 254;
   expected.doorEntered = std::bit_cast<char>(std::uint8_t{255});
   VS::Field::StoreEntranceDoorForReloadEntry();
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
-  CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
+  CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
         std::bit_cast<FlagBytes>(expected));
   CHECK(Field_enteredDoorId == 254);
   Field_enteredDoorId = -1;
   VS::Field::StoreEntranceDoorForReloadEntry();
-  CHECK(std::bit_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.doorEntered) ==
-        0);
+  CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.doorEntered) == 0);
 }
 
 TEST_CASE("Entrance native entries retain original module addresses",
@@ -585,7 +582,7 @@ TEST_CASE(
   bytes[4] = 0;
   bytes[25] = door;
   Field_roomAnimationTicks = ticks;
-  Audio_Seq_unusedStateFlags.opaque33F[1] = gate;
+  VS::State::stateFlags.opaque33F[1] = gate;
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
                                       bytes.size() * sizeof(u_long));
   VS::Field::DrawLiveMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));

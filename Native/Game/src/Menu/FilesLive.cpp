@@ -15,7 +15,6 @@
 #include <type_traits>
 
 #include "Audio/MusicLive.hpp"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Boot/SessionLive.hpp"
@@ -527,9 +526,7 @@ class LiveCardHost : public LiveGpuHost {
     return {reinterpret_cast<std::uint8_t*>(&VS::Input::settings),
             sizeof VS::Input::settings};
   }
-  void ClearDoorEntered() override {
-    Audio_Seq_unusedStateFlags.doorEntered = 0;
-  }
+  void ClearDoorEntered() override { VS::State::stateFlags.doorEntered = 0; }
   std::uint32_t PlayTime() override { return VS::State::playTime.all; }
   void SetPlayTime(std::uint32_t time) override {
     VS::State::playTime.all = time;
@@ -628,17 +625,17 @@ class LiveHost : public LiveCardHost {
     VS::Menu::saveLocationId = static_cast<char>(id);
   }
   GameFlags Flags() override {
-    const State_StateFlags& flags = Audio_Seq_unusedStateFlags;
+    const State_StateFlags& flags = VS::State::stateFlags;
     return {.opaque_a7 = static_cast<std::uint8_t>(flags.opaqueA7),
             .intro_state = static_cast<std::uint8_t>(flags.introState),
             .clear_count = static_cast<std::uint8_t>(flags.clearCount),
             .difficulty = static_cast<std::uint8_t>(flags.difficulty)};
   }
   void SetGameOver(bool game_over) override {
-    Audio_Seq_unusedStateFlags.gameOver = game_over ? 1 : 0;
+    VS::State::stateFlags.gameOver = game_over ? 1 : 0;
   }
   void SetDifficulty(std::uint8_t difficulty) override {
-    Audio_Seq_unusedStateFlags.difficulty = static_cast<char>(difficulty);
+    VS::State::stateFlags.difficulty = static_cast<char>(difficulty);
   }
   std::uint8_t CursorMemory() override {
     return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);

@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <span>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Diagnostics.hpp"
 #include "Diagnostics/SceneTrace.hpp"
 #include "State/ScriptFlags.hpp"
@@ -14,7 +13,7 @@
 
 namespace VS::State {
 namespace {
-static_assert(sizeof Audio_Seq_unusedStateFlags == kScriptFlagCount);
+static_assert(sizeof stateFlags == kScriptFlagCount);
 
 class SceneTraceObserver final : public ScriptFlagObserver {
  public:
@@ -40,9 +39,8 @@ void WarnFlagRefused(const char* operation, int id) {
 }  // namespace
 
 ScriptFlags LiveScriptFlags() noexcept {
-  return ScriptFlags(
-      std::as_writable_bytes(std::span{&Audio_Seq_unusedStateFlags, 1}),
-      &SceneTrace());
+  return ScriptFlags(std::as_writable_bytes(std::span{&stateFlags, 1}),
+                     &SceneTrace());
 }
 
 std::uint8_t LiveScriptFlag(int id) {

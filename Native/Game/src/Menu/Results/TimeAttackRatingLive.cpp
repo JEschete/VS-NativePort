@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Results/Results.h"
@@ -28,9 +27,9 @@ namespace VS::Menu::Results {
 namespace {
 constexpr std::uint32_t kTrialRoundShift = 24;
 constexpr std::uint32_t kTrialDifficultyShift = 31;
-static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores) ==
+static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
               kTimeAttackCourses);
-static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores[0]) ==
+static_assert(std::size(VS::State::scoreData.bossTimeTrialScores[0]) ==
               kTimeAttackRanks);
 
 std::uint64_t refusals = 0;
@@ -86,7 +85,7 @@ class LiveResultsHost final : public TimeAttackResultsDrawHost {
   TimeAttackDrawHost& base_ = LiveTimeAttackDrawHost();
 };
 
-std::uint8_t LiveCourse() { return Audio_Seq_unusedStateFlags.timeAttackBoss; }
+std::uint8_t LiveCourse() { return VS::State::stateFlags.timeAttackBoss; }
 
 // Every course's trial scores, packed as the original words.
 std::array<TrialScoreRow, kTimeAttackCourses> LiveCourseScores() {
@@ -94,7 +93,7 @@ std::array<TrialScoreRow, kTimeAttackCourses> LiveCourseScores() {
   for (std::size_t course = 0; course < rows.size(); ++course) {
     for (std::size_t rank = 0; rank < kTimeAttackRanks; ++rank) {
       const State_TrialScore& score =
-          Audio_Seq_unusedScoredata.bossTimeTrialScores[course][rank];
+          VS::State::scoreData.bossTimeTrialScores[course][rank];
       rows.at(course).at(rank) =
           score.time |
           (static_cast<std::uint32_t>(score.round) << kTrialRoundShift) |

@@ -4,6 +4,7 @@
 #include <array>
 
 #include "Items/ContainerIndexing.hpp"
+#include "Items/Inventory.h"
 
 namespace container_transfers_tests {
 LiveFixture::LiveFixture() {
@@ -21,7 +22,7 @@ LiveFixture::LiveFixture() {
   VS::Menu::Framework::unusedInventoryStorage = storage.get();
   Menu_Container_containerData = &storage->container;
   Menu_Container_otherStorage = &storage->container;
-  items::Live::Commit(Audio_Seq_unusedInventory, items::InventoryContents{});
+  items::Live::Commit(VS::Items::inventory, items::InventoryContents{});
 }
 
 LiveFixture::~LiveFixture() {
@@ -29,7 +30,7 @@ LiveFixture::~LiveFixture() {
             Menu_Container_containerItemCapacities);
   std::copy(saved_indices.begin(), saved_indices.end(),
             Menu_Inventory_inventoryIndices);
-  items::Live::Commit(Audio_Seq_unusedInventory, saved_inventory);
+  items::Live::Commit(VS::Items::inventory, saved_inventory);
   Menu_Container_transferredMiscCount = saved_count;
   VS::Menu::Framework::unusedInventoryStorage = saved_storage;
   Menu_Container_containerData = saved_owner;

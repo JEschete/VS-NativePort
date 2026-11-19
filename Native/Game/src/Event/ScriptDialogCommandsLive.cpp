@@ -12,7 +12,6 @@
 #include <iterator>
 #include <string>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Core/Diagnostics.hpp"
@@ -230,7 +229,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     return VS::Menu::SetLiveTextBoxText(box, nullptr);
   }
   void SetTextBoxSelection(int selection) override {
-    Audio_Seq_unusedStateFlags.textBoxSelection = static_cast<char>(selection);
+    VS::State::stateFlags.textBoxSelection = static_cast<char>(selection);
   }
   [[nodiscard]] int DismissTextBox(int box) override {
     const int result = VS::Menu::DismissLiveTextBox(box);

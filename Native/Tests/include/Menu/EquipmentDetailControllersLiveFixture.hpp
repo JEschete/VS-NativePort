@@ -14,11 +14,11 @@
 #include <utility>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/TargetingState.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
@@ -123,9 +123,9 @@ struct DrawnSprite {
 struct LiveFixture {
   ValueRestore<Menu_Framework_MenuRow*> saved_rows{
       VS::Menu::Framework::menuItems};
-  ValueRestore<Items_Inventory> saved_inventory{Audio_Seq_unusedInventory};
+  ValueRestore<Items_Inventory> saved_inventory{VS::Items::inventory};
   ValueRestore<Items_InventoryIndices> saved_indices{
-      Audio_Seq_unusedInventoryIndices};
+      VS::Items::inventoryIndices};
   ValueRestore<Menu_Framework_MenuMemory> saved_memory{
       VS::Menu::Framework::menuMemory};
   ArrayRestore<u_char*, kIndexedCategories> saved_orders{
@@ -242,22 +242,22 @@ struct LiveFixture {
 
   void BindInventory() {
     VS::Menu::Framework::menuItems = rows.data();
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
-    VS::Menu::Framework::weapons = Audio_Seq_unusedInventory.weapons;
-    VS::Menu::Framework::blades = Audio_Seq_unusedInventory.blades;
-    VS::Menu::Framework::grips = Audio_Seq_unusedInventory.grips;
-    VS::Menu::Framework::shields = Audio_Seq_unusedInventory.shields;
-    VS::Menu::Framework::armor = Audio_Seq_unusedInventory.armor;
-    VS::Menu::Framework::gems = Audio_Seq_unusedInventory.gems;
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
+    VS::Menu::Framework::weapons = VS::Items::inventory.weapons;
+    VS::Menu::Framework::blades = VS::Items::inventory.blades;
+    VS::Menu::Framework::grips = VS::Items::inventory.grips;
+    VS::Menu::Framework::shields = VS::Items::inventory.shields;
+    VS::Menu::Framework::armor = VS::Items::inventory.armor;
+    VS::Menu::Framework::gems = VS::Items::inventory.gems;
     const std::array<u_char*, kIndexedCategories> orders{
-        Audio_Seq_unusedInventoryIndices.weapons,
-        Audio_Seq_unusedInventoryIndices.blades,
-        Audio_Seq_unusedInventoryIndices.grips,
-        Audio_Seq_unusedInventoryIndices.shields,
-        Audio_Seq_unusedInventoryIndices.armor,
-        Audio_Seq_unusedInventoryIndices.gems,
-        Audio_Seq_unusedInventoryIndices.misc};
+        VS::Items::inventoryIndices.weapons,
+        VS::Items::inventoryIndices.blades,
+        VS::Items::inventoryIndices.grips,
+        VS::Items::inventoryIndices.shields,
+        VS::Items::inventoryIndices.armor,
+        VS::Items::inventoryIndices.gems,
+        VS::Items::inventoryIndices.misc};
     std::copy(orders.begin(), orders.end(), Menu_Inventory_inventoryIndices);
     VS::Input::buttonsState = 0;
     VS::Input::buttonRepeat = 0;
@@ -324,31 +324,31 @@ struct LiveFixture {
                                     .material = 1};
     blade.classes[0] = kBladeClass;
     blade.affinities[0] = kBladeAffinity;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.blades[0], blade);
+    VS::Items::Live::Commit(VS::Items::inventory.blades[0], blade);
     blade.id = 2;
     blade.strength = kSecondBladeStrength;
     VS::Items::Live::Commit(
-        Audio_Seq_unusedInventory.blades[VS::Items::kBladeSlots - 1], blade);
+        VS::Items::inventory.blades[VS::Items::kBladeSlots - 1], blade);
     VS::Items::InventoryGrip grip{
         .id = 1, .gem_slots = 2, .strength = kGripStrength};
     grip.types[1] = -2;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.grips[0], grip);
+    VS::Items::Live::Commit(VS::Items::inventory.grips[0], grip);
     grip.id = 2;
     grip.gem_slots = VS::Items::kWeaponGemCount;
     VS::Items::Live::Commit(
-        Audio_Seq_unusedInventory.grips[VS::Items::kGripSlots - 1], grip);
-    Audio_Seq_unusedInventoryIndices.blades[0] = VS::Items::kBladeSlots;
-    Audio_Seq_unusedInventoryIndices.blades[1] = 1;
-    Audio_Seq_unusedInventoryIndices.grips[0] = 1;
-    Audio_Seq_unusedInventoryIndices.grips[1] = VS::Items::kGripSlots;
+        VS::Items::inventory.grips[VS::Items::kGripSlots - 1], grip);
+    VS::Items::inventoryIndices.blades[0] = VS::Items::kBladeSlots;
+    VS::Items::inventoryIndices.blades[1] = 1;
+    VS::Items::inventoryIndices.grips[0] = 1;
+    VS::Items::inventoryIndices.grips[1] = VS::Items::kGripSlots;
   }
   void AddWeapon() {
     AddParts();
     VS::Items::InventoryWeapon weapon{.blade = 1, .grip = 1};
     weapon.name.fill(static_cast<char>(VS::Render::kTextTerminator));
     weapon.name[0] = 1;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.weapons[0], weapon);
-    Audio_Seq_unusedInventoryIndices.weapons[0] = 1;
+    VS::Items::Live::Commit(VS::Items::inventory.weapons[0], weapon);
+    VS::Items::inventoryIndices.weapons[0] = 1;
   }
   void AddShield() {
     VS::Items::InventoryShield shield{};
@@ -358,8 +358,8 @@ struct LiveFixture {
     shield.base.max_dp = kMaxDp;
     shield.base.max_pp = kMaxPp;
     shield.base.gem_slots = VS::Items::kWeaponGemCount;
-    VS::Items::Live::Commit(Audio_Seq_unusedInventory.shields[0], shield);
-    Audio_Seq_unusedInventoryIndices.shields[0] = 1;
+    VS::Items::Live::Commit(VS::Items::inventory.shields[0], shield);
+    VS::Items::inventoryIndices.shields[0] = 1;
   }
   void Open(int (*entry)(int)) {
     (void)entry((kSelectedRow << fw::kByteShift) | 1);

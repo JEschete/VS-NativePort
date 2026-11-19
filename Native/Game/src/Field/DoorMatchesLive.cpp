@@ -6,7 +6,6 @@
 #include <span>
 #include <vector>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
 #include "Core/RandomLive.hpp"
 #include "Field/DoorMatches.hpp"
@@ -14,6 +13,7 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
+#include "State/StateFlags.h"
 
 namespace {
 constexpr int kDoorQueryRandomByteIndex = 7;
@@ -41,7 +41,7 @@ DoorMatchList* TransitionLiveDoorsAtTile(int x, int z, int layer) {
                        bytes);
     return nullptr;
   }
-  Audio_Seq_unusedStateFlags.opaqueAC[kDoorQueryRandomByteIndex] =
+  VS::State::stateFlags.opaqueAC[kDoorQueryRandomByteIndex] =
       static_cast<char>(VS::Core::NextBiosRand());
   const std::span records(Field_roomData.doors,
                           bytes / sizeof(Field_MpdDoorRecord));

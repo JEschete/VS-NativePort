@@ -7,12 +7,12 @@
 #include <optional>
 #include <span>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Input/Pad.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/DetailDispatchLiveSupport.hpp"
 #include "Menu/Framework/EquipmentDetails.hpp"
@@ -161,10 +161,8 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
   InventorySlot CurrentItem(DetailPage page) override {
     const std::span<const std::uint8_t> order =
         category_ == Category::kArmor
-            ? std::span<const std::uint8_t>{Audio_Seq_unusedInventoryIndices
-                                                .armor}
-            : std::span<const std::uint8_t>{
-                  Audio_Seq_unusedInventoryIndices.gems};
+            ? std::span<const std::uint8_t>{VS::Items::inventoryIndices.armor}
+            : std::span<const std::uint8_t>{VS::Items::inventoryIndices.gems};
     if (page.index < 0 ||
         static_cast<std::size_t>(page.index) >= order.size()) {
       Refuse("current item detail page outside its direct display order");
@@ -175,9 +173,9 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
     if (category_ == Category::kArmor) {
       if (slot.one_based != 0) {
         RequireBoundTable(VS::Menu::Framework::armor,
-                          Audio_Seq_unusedInventory.armor);
-        const auto armor = Items::Live::Typed(
-            Referenced(Audio_Seq_unusedInventory.armor, slot));
+                          VS::Items::inventory.armor);
+        const auto armor =
+            Items::Live::Typed(Referenced(VS::Items::inventory.armor, slot));
         if (armor.limb >= 1 && armor.limb <= Items::kLimbCount &&
             (Battle_characterState == nullptr ||
              Battle_characterState->stats == nullptr)) {
@@ -186,14 +184,13 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
       }
       Framework::SetLiveArmorStats(slot.one_based);
     } else {
-      RequireBoundTable(VS::Menu::Framework::gems,
-                        Audio_Seq_unusedInventory.gems);
-      (void)Referenced(Audio_Seq_unusedInventory.gems, slot);
+      RequireBoundTable(VS::Menu::Framework::gems, VS::Items::inventory.gems);
+      (void)Referenced(VS::Items::inventory.gems, slot);
       Framework::SetLiveGemStats(slot.one_based);
     }
   }
   bool ArmorShowsDp(InventorySlot slot) override {
-    return Items::Live::Typed(Referenced(Audio_Seq_unusedInventory.armor, slot))
+    return Items::Live::Typed(Referenced(VS::Items::inventory.armor, slot))
                .category != kAccessoryCategory;
   }
   void OpenDpBar() override {
@@ -220,7 +217,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
     const std::span<char> borrowed_buffer{
         buffer, buffer == nullptr ? 0 : Framework::kStringBufferBytes};
     if (category_ == Category::kArmor) {
-      auto& record = Referenced(Audio_Seq_unusedInventory.armor, slot);
+      auto& record = Referenced(VS::Items::inventory.armor, slot);
       const auto armor = Items::Live::Typed(record);
       if (armor.category == 0 || armor.category > kAccessoryCategory) {
         Refuse("used armor row category outside its help entries");
@@ -229,7 +226,7 @@ class LiveItemWorld final : public LiveDetailWorld<ItemDetailWorld> {
       Framework::FormatLiveInventoryArmorRow(&record, text.data(), &row_type,
                                              buffer);
     } else {
-      auto& record = Referenced(Audio_Seq_unusedInventory.gems, slot);
+      auto& record = Referenced(VS::Items::inventory.gems, slot);
       RequireRowText(true);
       Framework::FormatLiveGemRow(&record, text.data(), &row_type, buffer);
     }

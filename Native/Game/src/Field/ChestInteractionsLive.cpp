@@ -15,7 +15,6 @@
 #include "Actors/ActorStateLive.hpp"
 #include "Actors/AnimationControlLive.hpp"
 #include "Actors/Location.h"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -1244,7 +1243,7 @@ void VS::Field::ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position) {
 
 void VS::Field::StoreEntranceDoorForReloadEntry(void) {
   const auto encoded = VS::Field::EnteredDoorReloadByte(Field_enteredDoorId);
-  Audio_Seq_unusedStateFlags.doorEntered = std::bit_cast<char>(encoded);
+  VS::State::stateFlags.doorEntered = std::bit_cast<char>(encoded);
 }
 
 void VS::Field::SetEntranceDoorRecordEntry(

@@ -13,7 +13,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Content/CdDriveLive.hpp"
@@ -37,6 +36,7 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Render/DisplayControl.hpp"
 #include "Render/TexturePagesLive.hpp"
+#include "State/Progress.h"
 #include "State/StateFlags.h"
 
 namespace VS::Menu::Results {
@@ -272,12 +272,12 @@ void StoreRating(CubePuzzleRating rating) {
 
 // The flags' fields are plain char; the original loads them unsigned.
 [[nodiscard]] CubePuzzleClock LiveClock() {
-  return {.minutes = static_cast<std::uint8_t>(
-              Audio_Seq_unusedStateFlags.puzzleTimerMins),
+  return {.minutes =
+              static_cast<std::uint8_t>(VS::State::stateFlags.puzzleTimerMins),
           .seconds = static_cast<std::uint8_t>(
-              Audio_Seq_unusedStateFlags.puzzleTimerSeconds),
+              VS::State::stateFlags.puzzleTimerSeconds),
           .hundredths = static_cast<std::uint8_t>(
-              Audio_Seq_unusedStateFlags.puzzleTimerHundredths)};
+              VS::State::stateFlags.puzzleTimerHundredths)};
 }
 
 [[nodiscard]] bool LiveConfirmPressed() {
@@ -323,18 +323,18 @@ int LiveInitializeCubePuzzleResults() {
   CubePuzzleRating rating = LiveRating();
   CubePuzzleTimer timer{.clock = LiveClock(),
                         .show_maximum = static_cast<std::uint8_t>(
-                            Audio_Seq_unusedStateFlags.puzzleSetMaxTimer)};
+                            VS::State::stateFlags.puzzleSetMaxTimer)};
   const CubePuzzleLoad load =
       InitializeCubePuzzleResults(screen, rating, timer, LiveClut(), host);
   StoreScreen(screen);
   StoreRating(rating);
-  Audio_Seq_unusedStateFlags.puzzleTimerMins =
+  VS::State::stateFlags.puzzleTimerMins =
       static_cast<char>(timer.clock.minutes);
-  Audio_Seq_unusedStateFlags.puzzleTimerSeconds =
+  VS::State::stateFlags.puzzleTimerSeconds =
       static_cast<char>(timer.clock.seconds);
-  Audio_Seq_unusedStateFlags.puzzleTimerHundredths =
+  VS::State::stateFlags.puzzleTimerHundredths =
       static_cast<char>(timer.clock.hundredths);
-  Audio_Seq_unusedStateFlags.puzzleSetMaxTimer =
+  VS::State::stateFlags.puzzleSetMaxTimer =
       static_cast<char>(timer.show_maximum);
   return Finished(load);
 }
@@ -367,11 +367,11 @@ int LiveUpdateCubePuzzleStart() {
 int LiveUpdateCubePuzzleResults() {
   LiveCubePuzzleScreen host;
   CubePuzzleScreen screen = LiveScreen();
-  std::uint32_t score = Audio_Seq_unusedScoredata.miscScore;
+  std::uint32_t score = VS::State::scoreData.miscScore;
   const CubePuzzleScreenStep step = UpdateCubePuzzleResults(
       screen, LiveRating(), LiveClock(), LiveConfirmPressed(), score, host);
   StoreScreen(screen);
-  Audio_Seq_unusedScoredata.miscScore = score;
+  VS::State::scoreData.miscScore = score;
   if (step == CubePuzzleScreenStep::kFinishedRankOutsideTable) {
     // Issue #409: no points for a rank the table does not have.
     RefuseCall("results", "points for a rank outside the table");

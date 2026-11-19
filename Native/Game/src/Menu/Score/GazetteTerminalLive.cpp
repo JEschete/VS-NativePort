@@ -13,7 +13,6 @@
 
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Battle/Hud.h"
 #include "Battle/HudStateLive.hpp"
@@ -763,11 +762,11 @@ void DrawLiveEnemyNumber(int x, int y, int number, int dimmed) {
 void InitializeLiveEnemyList() {
   EnemyRows enemies;
   std::array<std::uint32_t, kEnemyDefeatFlagWords> flags{};
-  static_assert(std::size(Audio_Seq_unusedScoredata.enemyKillFlags) ==
+  static_assert(std::size(VS::State::scoreData.enemyKillFlags) ==
                 kEnemyDefeatFlagWords);
   for (std::size_t index = 0; index < flags.size(); ++index) {
-    flags[index] = static_cast<std::uint32_t>(
-        Audio_Seq_unusedScoredata.enemyKillFlags[index]);
+    flags[index] =
+        static_cast<std::uint32_t>(VS::State::scoreData.enemyKillFlags[index]);
   }
   if (!ReadEnemies(enemies) || !InitializeEnemyList(enemies, flags)) {
     Refuse("enemy list or defeat-bit range outside its payload");

@@ -15,6 +15,7 @@
 #include "Menu/Score/GazetteStatistics.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
+#include "State/Progress.h"
 
 namespace {
 namespace live = gazette_statistics_live_tests;
@@ -137,19 +138,18 @@ void Progress() {
   Menu_Score_clearCount = 3;
   Menu_Score_mapCompletion = 180;
   Menu_Score_openedChestCount = 26;
-  Audio_Seq_unusedScoredata.clearCount = 2;
-  Audio_Seq_unusedScoredata.completionTimeMinutes = 60;
-  Audio_Seq_unusedScoredata.mapCompletion = 361;
-  Audio_Seq_unusedScoredata.openedChestCount = 52;
-  Audio_Seq_unusedScoredata.maxChain = 65535;
+  VS::State::scoreData.clearCount = 2;
+  VS::State::scoreData.completionTimeMinutes = 60;
+  VS::State::scoreData.mapCompletion = 361;
+  VS::State::scoreData.openedChestCount = 52;
+  VS::State::scoreData.maxChain = 65535;
   for (std::size_t index = 0;
-       index < std::size(Audio_Seq_unusedScoredata.enemyKills); ++index) {
-    Audio_Seq_unusedScoredata.enemyKills[index] =
-        static_cast<u_short>(100 + index);
+       index < std::size(VS::State::scoreData.enemyKills); ++index) {
+    VS::State::scoreData.enemyKills[index] = static_cast<u_short>(100 + index);
   }
   for (std::size_t index = 0;
-       index < std::size(Audio_Seq_unusedScoredata.weaponAttacks); ++index) {
-    Audio_Seq_unusedScoredata.weaponAttacks[index] =
+       index < std::size(VS::State::scoreData.weaponAttacks); ++index) {
+    VS::State::scoreData.weaponAttacks[index] =
         static_cast<u_short>(1000 + index);
   }
 }
@@ -215,7 +215,7 @@ void CheckWeaponPage(live::StatisticsFixture& fixture, std::uint8_t page,
 TEST_CASE("F02814 Live title creation borrows original tables and bit 31",
           "[gazette-statistics][gazette-statistics-live][F02814]") {
   live::StatisticsFixture fixture;
-  Audio_Seq_unusedScoredata.titles = -2147483643;
+  VS::State::scoreData.titles = -2147483643;
   score::CreateLiveTitleRows();
   for (std::size_t index = 0; index < 32; ++index) {
     const auto& row = Menu_Score_gazetteRows[index];
@@ -243,7 +243,7 @@ TEST_CASE("F02814 Live title creation borrows original tables and bit 31",
 TEST_CASE("F02814 Live malformed chosen label leaves the actual rows intact",
           "[gazette-statistics][gazette-statistics-live][F02814]") {
   live::StatisticsFixture fixture;
-  Audio_Seq_unusedScoredata.titles = -1;
+  VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
   const auto before = std::to_array(Menu_Score_gazetteRows);
   const auto refused = score::LiveGazetteStatisticsRefusals();
@@ -259,7 +259,7 @@ TEST_CASE(
     "F02815 Live renders selected title text cursor and dimmed edge digits",
     "[gazette-statistics][gazette-statistics-live][F02815]") {
   live::StatisticsFixture fixture;
-  Audio_Seq_unusedScoredata.titles = -1;
+  VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
   Battle_unusedMenu9CursorMemory.titlePage = 24;
   Battle_unusedMenu9CursorMemory.titleRow = 7;
@@ -282,7 +282,7 @@ TEST_CASE(
 TEST_CASE("F02815 Live refuses an out-of-owner visible title before drawing",
           "[gazette-statistics][gazette-statistics-live][F02815]") {
   live::StatisticsFixture fixture;
-  Audio_Seq_unusedScoredata.titles = -1;
+  VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
   std::array<char, 2> outside{1, static_cast<char>(0xE7)};
   Menu_Score_gazetteRows[0].title = outside.data();
@@ -342,7 +342,7 @@ TEST_CASE(
     "F02824 Live statistics initialize their own rows and preserve titles",
     "[gazette-statistics][gazette-statistics-live][F02824]") {
   live::StatisticsFixture fixture;
-  Audio_Seq_unusedScoredata.titles = -1;
+  VS::State::scoreData.titles = -1;
   score::CreateLiveTitleRows();
   const auto before = std::to_array(Menu_Score_gazetteRows);
   score::CreateLiveStatisticRows();
@@ -456,7 +456,7 @@ TEST_CASE("Gazette statistics Live fixture restores all borrowed owners",
   {
     live::StatisticsFixture fixture;
     Progress();
-    Audio_Seq_unusedScoredata.titles = -1;
+    VS::State::scoreData.titles = -1;
     score::CreateLiveTitleRows();
     Battle_unusedMenu9CursorMemory.titlePage = 1;
     Battle_unusedMenu9CursorMemory.titleRow = 0;

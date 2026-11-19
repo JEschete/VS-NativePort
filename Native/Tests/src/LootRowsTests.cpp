@@ -10,8 +10,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.hpp"
+#include "Items/Inventory.h"
 #include "Items/ItemRecords.hpp"
 #include "Items/ItemRecordsLive.hpp"
 #include "Menu/Framework/FrameworkLiveState.hpp"
@@ -119,10 +119,10 @@ struct LiveRowsFixture {
   std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   Items_Inventory* previous_inventory{Menu_Loot_inventory};
   Menu_Loot_LootListItem* previous_rows{Menu_Loot_lootList};
-  Items_Inventory previous_ashley{Audio_Seq_unusedInventory};
-  Items_InventoryIndices previous_indices{Audio_Seq_unusedInventoryIndices};
+  Items_Inventory previous_ashley{VS::Items::inventory};
+  Items_InventoryIndices previous_indices{VS::Items::inventoryIndices};
   Items_BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
-  char previous_difficulty{Audio_Seq_unusedStateFlags.difficulty};
+  char previous_difficulty{VS::State::stateFlags.difficulty};
 
   LiveRowsFixture() {
     VS::Menu::Loot::Live::ResetPaging();
@@ -131,9 +131,9 @@ struct LiveRowsFixture {
     Menu_Loot_lootListCount = 0;
     Menu_Loot_lootListOffset = 0;
     Menu_Loot_selectedLoot = 0;
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
-    Audio_Seq_unusedStateFlags.difficulty = 0;
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
+    VS::State::stateFlags.difficulty = 0;
   }
 
   ~LiveRowsFixture() {
@@ -141,10 +141,10 @@ struct LiveRowsFixture {
     Menu_Loot_inventory = previous_inventory;
     Menu_Loot_lootList = previous_rows;
     Menu_Loot_lootListCount = 0;
-    Audio_Seq_unusedInventory = previous_ashley;
-    Audio_Seq_unusedInventoryIndices = previous_indices;
+    VS::Items::inventory = previous_ashley;
+    VS::Items::inventoryIndices = previous_indices;
     VS::Menu::Framework::lootEntry = previous_entry;
-    Audio_Seq_unusedStateFlags.difficulty = previous_difficulty;
+    VS::State::stateFlags.difficulty = previous_difficulty;
   }
 
   LiveRowsFixture(const LiveRowsFixture&) = delete;
@@ -422,7 +422,7 @@ TEST_CASE("Loot rows are bound at the original MENUB addresses",
 TEST_CASE("Live loot rows use the screen's rows, cursor and difficulty",
           "[loot-rows][F02854][F02855][F02857]") {
   LiveRowsFixture fixture;
-  Audio_Seq_unusedStateFlags.difficulty = 1;
+  VS::State::stateFlags.difficulty = 1;
   CHECK(live::IsDropAllowed(2) == 2);
   CHECK(live::IsDropAllowed(1) == 0);
 

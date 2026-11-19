@@ -12,7 +12,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
 #include "Event/ScriptVmLive.hpp"
@@ -23,6 +22,7 @@
 #include "Items/EquipmentLive.hpp"
 #include "Items/EquipmentStats.hpp"
 #include "Items/EquipmentWear.hpp"
+#include "Items/Inventory.h"
 #include "Items/Inventory.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/InventoryLiveState.hpp"
@@ -194,8 +194,8 @@ struct ItemsWarnings {
 // Ashley's inventory, its display order, her battle actor, the room's chests
 // and the item id categories, cleared for one test and then restored.
 struct LiveItemsState {
-  Items_Inventory saved_inventory = Audio_Seq_unusedInventory;
-  Items_InventoryIndices saved_indices = Audio_Seq_unusedInventoryIndices;
+  Items_Inventory saved_inventory = VS::Items::inventory;
+  Items_InventoryIndices saved_indices = VS::Items::inventoryIndices;
   unsigned char saved_invoked = VS::Items::miscItemInvoked;
   Field_RoomRecord saved_room = Field_roomData;
   Battle_Actor* saved_character = Battle_characterState;
@@ -208,8 +208,8 @@ struct LiveItemsState {
               std::end(Items_itemCategoryUpperIds), saved_upper_ids.begin());
     std::fill(std::begin(Items_itemCategoryUpperIds),
               std::end(Items_itemCategoryUpperIds), 0U);
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventoryIndices = {};
+    VS::Items::inventory = {};
+    VS::Items::inventoryIndices = {};
     VS::Items::miscItemInvoked = 0;
     Field_roomData = {};
     actor.stats = &stats;
@@ -220,8 +220,8 @@ struct LiveItemsState {
   LiveItemsState(LiveItemsState&&) = delete;
   LiveItemsState& operator=(LiveItemsState&&) = delete;
   ~LiveItemsState() {
-    Audio_Seq_unusedInventory = saved_inventory;
-    Audio_Seq_unusedInventoryIndices = saved_indices;
+    VS::Items::inventory = saved_inventory;
+    VS::Items::inventoryIndices = saved_indices;
     VS::Items::miscItemInvoked = saved_invoked;
     Field_roomData = saved_room;
     Battle_characterState = saved_character;
@@ -2556,7 +2556,7 @@ TEST_CASE("Ashley's live inventory counts item ids", "[items-slice][items]") {
   items::InventoryContents counted{};
   counted.blades[3].id = 7;
   counted.misc[1] = {55, 9, 0};
-  live::Commit(Audio_Seq_unusedInventory, counted);
+  live::Commit(VS::Items::inventory, counted);
   CHECK(items::CountLiveInventoryItem(7) == 1);
   CHECK(items::CountLiveInventoryItem(8) == 0);
   CHECK(items::CountLiveInventoryItem(55) == 9);
@@ -2577,22 +2577,22 @@ TEST_CASE("Ashley's live inventory counts item ids", "[items-slice][items]") {
 TEST_CASE("Ashley's live inventory consumes misc items from the invoked slot",
           "[items-slice][items]") {
   LiveItemsState state;
-  live::Commit(Audio_Seq_unusedInventory, MakeInventory());
+  live::Commit(VS::Items::inventory, MakeInventory());
   VS::Items::miscItemInvoked = 5;
   CHECK(items::ConsumeLiveMiscItem(0x150) == 1);
-  CHECK(live::Typed(Audio_Seq_unusedInventory).misc[0] ==
+  CHECK(live::Typed(VS::Items::inventory).misc[0] ==
         items::InventoryMisc{0x150, 6, 1});
   CHECK(VS::Items::miscItemInvoked == 5);
   // An id below the invoked items rescans from the first slot.
   CHECK(items::ConsumeLiveMiscItem(0x100) == 0);
   CHECK(VS::Items::miscItemInvoked == 0);
-  CHECK(live::Typed(Audio_Seq_unusedInventory).misc[0].count == 6);
+  CHECK(live::Typed(VS::Items::inventory).misc[0].count == 6);
 }
 
 TEST_CASE("Ashley's live inventory refuses categories outside its tables",
           "[items-slice][items]") {
   LiveItemsState state;
-  live::Commit(Audio_Seq_unusedInventory, MakeInventory());
+  live::Commit(VS::Items::inventory, MakeInventory());
   ItemsWarnings warnings;
   inv::ClearLiveItemSlot(8, 1);
   inv::ClearLiveItemSlot(-1, 1);
@@ -2604,7 +2604,7 @@ TEST_CASE("Ashley's live inventory refuses categories outside its tables",
   inv::RebuildLiveDisplayIndices(CategoryId(ItemCategory::kManage));
   inv::RebuildLiveDisplayIndices(8);
   CHECK(inv::CopyLiveItem(CopyFlags(ItemCategory::kBlade, true), nullptr, 0,
-                          &Audio_Seq_unusedInventory) == 0);
+                          &VS::Items::inventory) == 0);
   constexpr std::string_view kCategory =
       "item category outside the inventory tables";
   CHECK(warnings.messages == std::vector<std::string>{
@@ -2617,15 +2617,14 @@ TEST_CASE("Ashley's live inventory refuses categories outside its tables",
                                  Refused("RebuildDisplayIndices", kCategory),
                                  "CopyItem refused: null record",
                              });
-  CHECK(live::Typed(Audio_Seq_unusedInventory) == MakeInventory());
-  CHECK(live::Typed(Audio_Seq_unusedInventoryIndices) ==
-        items::InventoryIndices{});
+  CHECK(live::Typed(VS::Items::inventory) == MakeInventory());
+  CHECK(live::Typed(VS::Items::inventoryIndices) == items::InventoryIndices{});
 }
 
 TEST_CASE("Ashley's live inventory counts and finds slots in any inventory",
           "[items-slice][items]") {
   LiveItemsState state;
-  live::Commit(Audio_Seq_unusedInventory, MakeInventory());
+  live::Commit(VS::Items::inventory, MakeInventory());
   ItemsWarnings warnings;
 
   CHECK(inv::CountLiveItems(CategoryId(ItemCategory::kGem), nullptr) == 2);
@@ -2645,25 +2644,25 @@ TEST_CASE("Ashley's live inventory commits slot, display and copy changes",
           "[items-slice][items]") {
   LiveItemsState state;
   const auto inventory = MakeInventory();
-  live::Commit(Audio_Seq_unusedInventory, inventory);
+  live::Commit(VS::Items::inventory, inventory);
   ItemsWarnings warnings;
 
   inv::ClearLiveItemSlot(CategoryId(ItemCategory::kMisc), 1);
   auto expected = inventory;
   expected.misc[0] = Emptied<items::InventoryMisc>(1);
-  CHECK(live::Typed(Audio_Seq_unusedInventory) == expected);
+  CHECK(live::Typed(VS::Items::inventory) == expected);
 
   inv::RebuildLiveDisplayIndices(CategoryId(ItemCategory::kGem));
   auto indices = items::InventoryIndices{};
   indices.gems[0] = 3;
   indices.gems[1] = 5;
-  CHECK(live::Typed(Audio_Seq_unusedInventoryIndices) == indices);
+  CHECK(live::Typed(VS::Items::inventoryIndices) == indices);
   CHECK(inv::FindLiveDisplayPosition(CategoryId(ItemCategory::kGem), 4) == 2);
   CHECK(inv::FindLiveDisplayPosition(CategoryId(ItemCategory::kGem), 3) == 0);
 
   Items_Inventory other{};
   CHECK(inv::CopyLiveItem(CopyFlags(ItemCategory::kBlade, true, 5), &other, 0,
-                          &Audio_Seq_unusedInventory) == 1);
+                          &VS::Items::inventory) == 1);
   auto blade = Copied(inventory.blades[0], 1);
   blade.assembled_weapon_index = 5;
   CHECK(live::Typed(other).blades[0] == blade);
@@ -2673,21 +2672,21 @@ TEST_CASE("Ashley's live inventory commits slot, display and copy changes",
 TEST_CASE("A live misc copy into another inventory lists Ashley's stacks",
           "[items-slice][items]") {
   LiveItemsState state;
-  live::Commit(Audio_Seq_unusedInventory, MakeInventory());
+  live::Commit(VS::Items::inventory, MakeInventory());
   ItemsWarnings warnings;
   Items_Inventory other{};
   CHECK(inv::CopyLiveItem(CopyFlags(ItemCategory::kMisc, true), &other, 0,
-                          &Audio_Seq_unusedInventory) == 1);
+                          &VS::Items::inventory) == 1);
   CHECK(live::Typed(other).misc[0] == items::InventoryMisc{0x150, 7, 0});
-  CHECK(live::Typed(Audio_Seq_unusedInventoryIndices).misc[0] == 1);
-  CHECK(live::Typed(Audio_Seq_unusedInventory) == MakeInventory());
+  CHECK(live::Typed(VS::Items::inventoryIndices).misc[0] == 1);
+  CHECK(live::Typed(VS::Items::inventory) == MakeInventory());
   CHECK(warnings.messages.empty());
 }
 
 TEST_CASE("Ashley's live loadouts are refused without her battle actor",
           "[items-slice][items]") {
   LiveItemsState state;
-  live::Commit(Audio_Seq_unusedInventory, MakeInventory());
+  live::Commit(VS::Items::inventory, MakeInventory());
   Items_InventoryArmor record{};
   live::Commit(record, MakeInventoryArmor(0x21));
   ItemsWarnings warnings;
@@ -2707,14 +2706,14 @@ TEST_CASE("Ashley's live loadouts are refused without her battle actor",
                                  Refused("EquipAshleyArmor", kActor),
                                  Refused("EquipAshleyAccessory", kActor),
                              });
-  CHECK(live::Typed(Audio_Seq_unusedInventory) == MakeInventory());
+  CHECK(live::Typed(VS::Items::inventory) == MakeInventory());
 }
 
 TEST_CASE("Unequipping Ashley's live shield clears every equipped mark",
           "[items-slice][items]") {
   LiveItemsState state;
   auto inventory = MakeInventory();
-  live::Commit(Audio_Seq_unusedInventory, inventory);
+  live::Commit(VS::Items::inventory, inventory);
   items::ShieldLoadout shield{};
   shield.base.id = 4;
   live::Commit(state.stats.shield, shield);
@@ -2724,7 +2723,7 @@ TEST_CASE("Unequipping Ashley's live shield clears every equipped mark",
   ItemsWarnings warnings;
   inv::UnequipLiveShield();
   CHECK(live::Typed(state.stats.shield) == shield);
-  const auto unequipped = live::Typed(Audio_Seq_unusedInventory);
+  const auto unequipped = live::Typed(VS::Items::inventory);
   for (const auto& entry : unequipped.shields) CHECK(entry.is_equipped == 0);
   CHECK(unequipped.weapons == inventory.weapons);
   CHECK(warnings.messages.empty());

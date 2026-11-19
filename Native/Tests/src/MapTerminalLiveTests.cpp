@@ -59,6 +59,7 @@
 #include "Render/RoomDrawLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 #include "State/Progress.h"
+#include "State/StateFlags.h"
 
 namespace {
 namespace map = VS::Menu::map;
@@ -129,8 +130,8 @@ struct LiveWorld {
   ArrayRestore<void*, 2> saved_tables{VS::Render::legacyOrderingTables};
   ValueRestore<int> saved_framebuffer{VS::Render::frameBuf};
   ValueRestore<decltype(Field_roomData)> saved_room{Field_roomData};
-  ValueRestore<decltype(Audio_Seq_unusedStateFlags)> saved_progress{
-      Audio_Seq_unusedStateFlags};
+  ValueRestore<decltype(VS::State::stateFlags)> saved_progress{
+      VS::State::stateFlags};
   ValueRestore<decltype(State_roomVisitProgress)> saved_visits{
       State_roomVisitProgress};
   ValueRestore<decltype(VS::Input::buttonsPressed)> saved_pressed{
@@ -198,7 +199,7 @@ struct LiveWorld {
     VS::Input::stickPosBuf.r_stick_x = 128;
     VS::Input::stickPosBuf.r_stick_y = 128;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
-    std::ranges::fill(Audio_Seq_unusedStateFlags.mapPaling, 0);
+    std::ranges::fill(VS::State::stateFlags.mapPaling, 0);
     std::ranges::fill(Menu_textBoxes, Menu_TextBoxState{});
     Core_Gte_Reset();
     Core_Gte_SetGeomScreen(256);
@@ -399,7 +400,7 @@ void CheckPreservedData(
     const decltype(std::to_array(Menu_Map_mapNames))& names,
     const decltype(VS::Render::FrameScratchpad().camera)& camera) {
   CHECK(std::to_array(Menu_Map_mapNames) == names);
-  CHECK(Audio_Seq_unusedStateFlags.mapPaling[5] == 19);
+  CHECK(VS::State::stateFlags.mapPaling[5] == 19);
   CHECK(std::memcmp(&VS::Render::FrameScratchpad().camera, &camera,
                     sizeof(camera)) == 0);
 }
@@ -590,7 +591,7 @@ TEST_CASE(
     "[map-terminal][map-terminal-live][F02689]") {
   LiveWorld world(true);
   Menu_Map_currentScene = 1;
-  Audio_Seq_unusedStateFlags.mapPaling[1] = 1;
+  VS::State::stateFlags.mapPaling[1] = 1;
   VS::Menu::InitLiveTextBox(0, 0, 60, 224, 16, 1, 60, 224);
   map::LiveDrawFrame();
   const auto caption = map::LiveMapPalingText();
@@ -601,7 +602,7 @@ TEST_CASE(
         reinterpret_cast<const char*>(caption.data()));
   REQUIRE(map::ResetMapTerminalModuleData());
   CHECK(map::LiveMapPalingText().data() == caption.data());
-  CHECK(Audio_Seq_unusedStateFlags.mapPaling[1] == 1);
+  CHECK(VS::State::stateFlags.mapPaling[1] == 1);
   REQUIRE(map::ResetMapTerminalColdState());
   CHECK(VS::Menu::ReadLiveTextBox(0).text == nullptr);
 }
@@ -688,7 +689,7 @@ TEST_CASE(
   Menu_Map_mapLabelCount = 8;
   Menu_Map_mapLabels[0].x = 123;
   Menu_Map_compassBounds[0].x = 456;
-  Audio_Seq_unusedStateFlags.mapPaling[5] = 19;
+  VS::State::stateFlags.mapPaling[5] = 19;
   const auto field_camera = VS::Render::FrameScratchpad().camera;
   REQUIRE(map::ResetMapTerminalModuleData());
   CheckResetExports();
@@ -1001,7 +1002,7 @@ TEST_CASE("Only completed MENU5 drains map reads and restores its module state",
   Menu_Map_selectedMap = 27;
   Menu_Map_cameraDistance = 512;
   const auto names = std::to_array(Menu_Map_mapNames);
-  Audio_Seq_unusedStateFlags.mapPaling[5] = 19;
+  VS::State::stateFlags.mapPaling[5] = 19;
   const auto camera = VS::Render::FrameScratchpad().camera;
   const Content_DiscFile file =
       map_reload ? Content_DiscFile{VS_MENU5_PRG_LBA, VS_MENU5_PRG_SIZE}
@@ -1186,7 +1187,7 @@ TEST_CASE("Original map caption survives module reset but not a cold session",
       saved_ui;
   LiveWorld world(true);
   world.LoadScene(1);
-  Audio_Seq_unusedStateFlags.mapPaling[1] = 1;
+  VS::State::stateFlags.mapPaling[1] = 1;
   MapModuleEntry(0x801042B0, &map::LiveDrawFrame)();
   const auto caption = map::LiveMapPalingText();
   REQUIRE_FALSE(caption.empty());

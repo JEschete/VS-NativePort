@@ -8,7 +8,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -23,10 +22,12 @@
 #include "State/KillScore.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/PlayTime.hpp"
+#include "State/Progress.h"
 #include "State/SceneTimer.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
+#include "State/StateFlags.h"
 #include "State/Timers.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -94,7 +95,7 @@ class FakeTimerHost final : public state::SceneTimerHost {
 struct LiveTimerState {
   State_SceneTimer saved_timer = VS::State::sceneTimer;
   int saved_tick_speed = VS::State::tickSpeed;
-  State_StateFlags saved_flags = Audio_Seq_unusedStateFlags;
+  State_StateFlags saved_flags = VS::State::stateFlags;
   char saved_hud = Battle_lowerScreenUiState;
   unsigned saved_random = VS::Core::BiosRand().State();
   void* saved_triggers = Event_roomEventTriggers;
@@ -112,7 +113,7 @@ struct LiveTimerState {
   ~LiveTimerState() {
     VS::State::sceneTimer = saved_timer;
     VS::State::tickSpeed = saved_tick_speed;
-    Audio_Seq_unusedStateFlags = saved_flags;
+    VS::State::stateFlags = saved_flags;
     Battle_lowerScreenUiState = saved_hud;
     VS::Core::SeedBiosRand(saved_random);
     Event_roomEventTriggers = saved_triggers;
@@ -163,7 +164,7 @@ struct LiveTimerExpiry {
 // The score record and the battle action and player, restored after one
 // test.
 struct LiveScoreState {
-  State_ScoreData saved_score = Audio_Seq_unusedScoredata;
+  State_ScoreData saved_score = VS::State::scoreData;
   Battle_ActionState* saved_action = Battle_actionState;
   Battle_Actor* saved_player = Battle_characterState;
 
@@ -173,7 +174,7 @@ struct LiveScoreState {
   LiveScoreState(LiveScoreState&&) = delete;
   LiveScoreState& operator=(LiveScoreState&&) = delete;
   ~LiveScoreState() {
-    Audio_Seq_unusedScoredata = saved_score;
+    VS::State::scoreData = saved_score;
     Battle_actionState = saved_action;
     Battle_characterState = saved_player;
   }

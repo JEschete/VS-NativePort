@@ -13,7 +13,6 @@
 #include <span>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/XaMixLive.hpp"
@@ -28,6 +27,7 @@
 #include "Field/Mpd.h"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLive.hpp"
 #include "Menu/FilesLiveState.hpp"
@@ -92,9 +92,9 @@ static_assert(sizeof(Title_publisherLogo) == kPublisherLogoBytes);
 static_assert(sizeof(Title_developerLogo) == kDeveloperLogoBytes);
 static_assert(sizeof(Title_initialLearnedActionBits) ==
               sizeof(State_learnedActionFlags));
-static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores) ==
+static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
               kTrialBosses);
-static_assert(std::size(Audio_Seq_unusedScoredata.bossTimeTrialScores[0]) ==
+static_assert(std::size(VS::State::scoreData.bossTimeTrialScores[0]) ==
               kTrialRanks);
 
 void Warn(std::string_view what) { VS::Core::LogWarn(kChannel, "{}", what); }
@@ -401,8 +401,7 @@ class LiveHost final : public Host {
 
   void ResetSession() override { VS::Game::Save::ResetSession(); }
   void ClearStateFlags() override {
-    std::memset(&Audio_Seq_unusedStateFlags, 0,
-                sizeof Audio_Seq_unusedStateFlags);
+    std::memset(&VS::State::stateFlags, 0, sizeof VS::State::stateFlags);
   }
   void RestoreInitialLearnedActions() override {
     Core::Memory::CopyLiveAlignedWords(State_learnedActionFlags,
@@ -414,16 +413,16 @@ class LiveHost final : public Host {
                                        sizeof State_roomVisitProgress);
     Core::Memory::ZeroLiveAlignedWords(&VS::State::playTime,
                                        sizeof VS::State::playTime);
-    Core::Memory::ZeroLiveAlignedWords(&Audio_Seq_unusedScoredata,
-                                       sizeof Audio_Seq_unusedScoredata);
+    Core::Memory::ZeroLiveAlignedWords(&VS::State::scoreData,
+                                       sizeof VS::State::scoreData);
     State_currentRoomStateSlot = 0;
     Core::Memory::ZeroLiveAlignedWords(State_recentRoomEnemyStates,
                                        sizeof State_recentRoomEnemyStates);
-    Core::Memory::ZeroLiveAlignedWords(&Audio_Seq_unusedArtsStatus,
-                                       sizeof Audio_Seq_unusedArtsStatus);
+    Core::Memory::ZeroLiveAlignedWords(&VS::State::artsStatus,
+                                       sizeof VS::State::artsStatus);
   }
   void SetBossTimeTrialScores(const TimeTrialScore& score) override {
-    for (auto& boss : Audio_Seq_unusedScoredata.bossTimeTrialScores) {
+    for (auto& boss : VS::State::scoreData.bossTimeTrialScores) {
       for (State_TrialScore& rank : boss) {
         rank.time = static_cast<std::uint32_t>(score.time) & kTrialTimeMask;
         rank.round = score.round;
@@ -447,9 +446,9 @@ class LiveHost final : public Host {
                                        sizeof State_savedEntryDoor);
   }
   void RestoreNewGameInventory() override {
-    Core::Memory::CopyLiveAlignedWords(&Audio_Seq_unusedInventory,
+    Core::Memory::CopyLiveAlignedWords(&VS::Items::inventory,
                                        Title_newGameInventoryTemplate,
-                                       sizeof Audio_Seq_unusedInventory);
+                                       sizeof VS::Items::inventory);
   }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetEntryDoor(const EntryDoor& door) override {
@@ -459,20 +458,18 @@ class LiveHost final : public Host {
     State_savedEntryDoor.entryElevation = door.elevation;
   }
   void ClearInventoryIndices() override {
-    std::memset(&Audio_Seq_unusedInventoryIndices, 0,
-                sizeof Audio_Seq_unusedInventoryIndices);
+    std::memset(&VS::Items::inventoryIndices, 0,
+                sizeof VS::Items::inventoryIndices);
   }
   void SetGameModes(const GameModes& modes) override {
-    Audio_Seq_unusedStateFlags.difficulty = static_cast<char>(modes.difficulty);
-    Audio_Seq_unusedStateFlags.puzzleMode =
-        static_cast<char>(modes.puzzle_mode);
+    VS::State::stateFlags.difficulty = static_cast<char>(modes.difficulty);
+    VS::State::stateFlags.puzzleMode = static_cast<char>(modes.puzzle_mode);
   }
   void ApplyExit(const ExitPlan& plan) override {
-    Audio_Seq_unusedStateFlags.opaqueC = static_cast<char>(plan.state_flag_0c);
-    Audio_Seq_unusedStateFlags.opaqueD = static_cast<char>(plan.state_flag_0d);
+    VS::State::stateFlags.opaqueC = static_cast<char>(plan.state_flag_0c);
+    VS::State::stateFlags.opaqueD = static_cast<char>(plan.state_flag_0d);
     if (plan.state_flag_0e.has_value()) {
-      Audio_Seq_unusedStateFlags.opaqueE =
-          static_cast<char>(*plan.state_flag_0e);
+      VS::State::stateFlags.opaqueE = static_cast<char>(*plan.state_flag_0e);
     }
     if (plan.destination.has_value()) {
       State_savedEntryDoor.destinationZoneId = plan.destination->zone;

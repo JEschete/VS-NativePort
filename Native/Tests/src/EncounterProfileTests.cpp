@@ -13,7 +13,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
@@ -35,17 +34,17 @@
 #include "Menu/Setup/Assembly.hpp"
 #include "Menu/Setup/SetupLive.hpp"
 #include "State/Progress.h"
+#include "State/StateFlags.h"
 #include "Title/NewGame.h"
 
 namespace {
 struct ProfileFixture {
   decltype(VS::Input::settings) saved_settings = VS::Input::settings;
-  decltype(Audio_Seq_unusedStateFlags) saved_flags = Audio_Seq_unusedStateFlags;
-  decltype(Audio_Seq_unusedArtsStatus) saved_arts = Audio_Seq_unusedArtsStatus;
-  decltype(Audio_Seq_unusedInventory) saved_inventory =
-      Audio_Seq_unusedInventory;
-  decltype(Audio_Seq_unusedInventoryIndices) saved_indices =
-      Audio_Seq_unusedInventoryIndices;
+  decltype(VS::State::stateFlags) saved_flags = VS::State::stateFlags;
+  decltype(VS::State::artsStatus) saved_arts = VS::State::artsStatus;
+  decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
+  decltype(VS::Items::inventoryIndices) saved_indices =
+      VS::Items::inventoryIndices;
   decltype(std::to_array(State_learnedActionFlags)) saved_learned =
       std::to_array(State_learnedActionFlags);
   decltype(std::to_array(Battle_actionDefinitions)) saved_actions =
@@ -63,11 +62,11 @@ struct ProfileFixture {
   ProfileFixture() {
     VS::Input::settings = {};
     VS::Input::settings.menuFlags = 0x2D8;
-    Audio_Seq_unusedStateFlags.introState = 0;
-    Audio_Seq_unusedInventory = {};
-    Audio_Seq_unusedInventory.weapons[0].isEquipped = 1;
-    Audio_Seq_unusedInventory.weapons[0].blade = 1;
-    Audio_Seq_unusedInventory.blades[0].category = 3;
+    VS::State::stateFlags.introState = 0;
+    VS::Items::inventory = {};
+    VS::Items::inventory.weapons[0].isEquipped = 1;
+    VS::Items::inventory.weapons[0].blade = 1;
+    VS::Items::inventory.blades[0].category = 3;
     std::fill_n(State_learnedActionFlags, saved_learned.size(), 0);
     const std::array<char, 3> chain{22, 23, 24}, defense{40, 41, 42};
     std::copy(chain.begin(), chain.end(), Battle_chainAbilityActionIds);
@@ -80,10 +79,10 @@ struct ProfileFixture {
 
   ~ProfileFixture() {
     VS::Input::settings = saved_settings;
-    Audio_Seq_unusedStateFlags = saved_flags;
-    Audio_Seq_unusedArtsStatus = saved_arts;
-    Audio_Seq_unusedInventory = saved_inventory;
-    Audio_Seq_unusedInventoryIndices = saved_indices;
+    VS::State::stateFlags = saved_flags;
+    VS::State::artsStatus = saved_arts;
+    VS::Items::inventory = saved_inventory;
+    VS::Items::inventoryIndices = saved_indices;
     std::copy(saved_learned.begin(), saved_learned.end(),
               State_learnedActionFlags);
     std::copy(saved_actions.begin(), saved_actions.end(),
@@ -129,23 +128,23 @@ void CheckBaseAttributes(const Battle_ActorStats& stats) {
 }
 void CheckStockedSlots(std::set<int>& supplied) {
   for (std::size_t slot = 0; slot < 58; ++slot) {
-    const auto& item = Audio_Seq_unusedInventory.misc[slot];
+    const auto& item = VS::Items::inventory.misc[slot];
     CAPTURE(slot, item.id);
     CHECK(item.count == 10);
     CHECK(item.index == static_cast<int>(slot + 1));
-    CHECK(Audio_Seq_unusedInventoryIndices.misc[slot] == slot + 1);
+    CHECK(VS::Items::inventoryIndices.misc[slot] == slot + 1);
     CHECK(supplied.insert(item.id).second);
   }
 }
 
 void CheckUnusedSlots() {
   for (std::size_t slot = 58; slot < 64; ++slot) {
-    const auto& item = Audio_Seq_unusedInventory.misc[slot];
+    const auto& item = VS::Items::inventory.misc[slot];
     CAPTURE(slot);
     CHECK(item.id == 0);
     CHECK(item.count == 0);
     CHECK(item.index == 0);
-    CHECK(Audio_Seq_unusedInventoryIndices.misc[slot] == 0);
+    CHECK(VS::Items::inventoryIndices.misc[slot] == 0);
   }
 }
 std::set<unsigned> BindFullSpellClasses(
@@ -195,7 +194,7 @@ TEST_CASE("Prologue Lab profiles preserve normal starting restrictions",
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPrologue);
   CHECK(VS::Input::settings.menuFlags == 0x2D8);
-  CHECK(Audio_Seq_unusedStateFlags.introState == 0);
+  CHECK(VS::State::stateFlags.introState == 0);
   CHECK(std::all_of(std::begin(State_learnedActionFlags),
                     std::end(State_learnedActionFlags),
                     [](char value) { return value == 0; }));
@@ -207,7 +206,7 @@ TEST_CASE("Post-prologue Lab profiles enable original Setup and Score gates",
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPostPrologue);
   CHECK(VS::Input::settings.menuFlags == 0x3F8);
-  CHECK(Audio_Seq_unusedStateFlags.introState == 3);
+  CHECK(VS::State::stateFlags.introState == 3);
   CHECK(VS::Input::settings.mappedChainAbilities[0] == 0);
 }
 
@@ -260,22 +259,21 @@ TEST_CASE("All-spells profile preserves inventory equipment and resources",
           "[combat][profile][spells]") {
   ProfileFixture fixture;
   StatFixture actor;
-  const auto inventory = Audio_Seq_unusedInventory;
-  const auto indices = Audio_Seq_unusedInventoryIndices;
+  const auto inventory = VS::Items::inventory;
+  const auto indices = VS::Items::inventoryIndices;
   const auto stats = actor.stats;
   std::array<std::array<u_char, 18>, 4> classes{};
   BindFullSpellClasses(classes);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells);
-  CHECK(std::memcmp(&inventory, &Audio_Seq_unusedInventory, sizeof inventory) ==
+  CHECK(std::memcmp(&inventory, &VS::Items::inventory, sizeof inventory) == 0);
+  CHECK(std::memcmp(&indices, &VS::Items::inventoryIndices, sizeof indices) ==
         0);
-  CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
-                    sizeof indices) == 0);
   CHECK(std::memcmp(&stats, &actor.stats, sizeof stats) == 0);
   CHECK(VS::Input::settings.mappedChainAbilities[0] == 0);
   CHECK(VS::Input::settings.mappedDefenseAbilities[0] == 0);
   CHECK(VS::Input::settings.menuFlags == 0x3F8);
-  CHECK(Audio_Seq_unusedStateFlags.introState == 3);
+  CHECK(VS::State::stateFlags.introState == 3);
 }
 
 TEST_CASE("All-spells profile supports repeat entry and saved presets",
@@ -334,26 +332,25 @@ TEST_CASE("Ability profiles preserve resources and story progression",
   StatFixture actor;
   BindFullBattleAbilities();
   BindBreakArts();
-  Audio_Seq_unusedStateFlags.opaqueB5 = 1;
-  Audio_Seq_unusedStateFlags.magicUsed = 1;
-  Audio_Seq_unusedArtsStatus.artsLearned[0] = 2;
-  Audio_Seq_unusedArtsStatus.kills.totalKills = 321;
-  Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[0] = 7;
-  Audio_Seq_unusedArtsStatus.kills.battleAbilitiesUnlocked = 4;
-  auto expected_flags = Audio_Seq_unusedStateFlags;
+  VS::State::stateFlags.opaqueB5 = 1;
+  VS::State::stateFlags.magicUsed = 1;
+  VS::State::artsStatus.artsLearned[0] = 2;
+  VS::State::artsStatus.kills.totalKills = 321;
+  VS::State::artsStatus.kills.weaponCategoryKills[0] = 7;
+  VS::State::artsStatus.kills.battleAbilitiesUnlocked = 4;
+  auto expected_flags = VS::State::stateFlags;
   expected_flags.introState = 3;
-  const auto arts = Audio_Seq_unusedArtsStatus;
-  const auto inventory = Audio_Seq_unusedInventory;
-  const auto indices = Audio_Seq_unusedInventoryIndices;
+  const auto arts = VS::State::artsStatus;
+  const auto inventory = VS::Items::inventory;
+  const auto indices = VS::Items::inventoryIndices;
   const auto stats = actor.stats;
   VS::Game::InitializeEncounterPlayerProfile(profile);
-  CHECK(std::memcmp(&expected_flags, &Audio_Seq_unusedStateFlags,
+  CHECK(std::memcmp(&expected_flags, &VS::State::stateFlags,
                     sizeof expected_flags) == 0);
-  CHECK(std::memcmp(&arts, &Audio_Seq_unusedArtsStatus, sizeof arts) == 0);
-  CHECK(std::memcmp(&inventory, &Audio_Seq_unusedInventory, sizeof inventory) ==
+  CHECK(std::memcmp(&arts, &VS::State::artsStatus, sizeof arts) == 0);
+  CHECK(std::memcmp(&inventory, &VS::Items::inventory, sizeof inventory) == 0);
+  CHECK(std::memcmp(&indices, &VS::Items::inventoryIndices, sizeof indices) ==
         0);
-  CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
-                    sizeof indices) == 0);
   CHECK(std::memcmp(&stats, &actor.stats, sizeof stats) == 0);
   CHECK(VS::Input::settings.menuFlags == 0x3F8);
 }
@@ -436,18 +433,18 @@ TEST_CASE(
     "Two item profiles cover named misc items without expanding inventory",
     "[combat][profile][items]") {
   ProfileFixture fixture;
-  const auto equipment = Audio_Seq_unusedInventory;
+  const auto equipment = VS::Items::inventory;
   const auto learned = std::to_array(State_learnedActionFlags);
   std::set<int> supplied;
   for (const auto profile : {VS::Game::EncounterProfile::kAllItemsA,
                              VS::Game::EncounterProfile::kAllItemsB}) {
     VS::Game::InitializeEncounterPlayerProfile(profile);
-    CHECK(std::size(Audio_Seq_unusedInventory.misc) == 64);
-    CHECK(std::memcmp(&equipment, &Audio_Seq_unusedInventory,
+    CHECK(std::size(VS::Items::inventory.misc) == 64);
+    CHECK(std::memcmp(&equipment, &VS::Items::inventory,
                       offsetof(Items_Inventory, misc)) == 0);
     CHECK(std::to_array(State_learnedActionFlags) == learned);
     CHECK(VS::Input::settings.menuFlags == 0x3F8);
-    CHECK(Audio_Seq_unusedStateFlags.introState == 3);
+    CHECK(VS::State::stateFlags.introState == 3);
     CAPTURE(profile);
     CheckStockedSlots(supplied);
     CheckUnusedSlots();
@@ -469,14 +466,14 @@ TEST_CASE("Item profile initialization resets stacks and obsolete indices",
   for (const auto profile : {VS::Game::EncounterProfile::kAllItemsA,
                              VS::Game::EncounterProfile::kAllItemsB}) {
     VS::Game::InitializeEncounterPlayerProfile(profile);
-    const auto stock = Audio_Seq_unusedInventory;
-    const auto indices = Audio_Seq_unusedInventoryIndices;
-    Audio_Seq_unusedInventory.misc[0].count = 0;
-    Audio_Seq_unusedInventory.misc[63] = {323, 1, 64};
-    Audio_Seq_unusedInventoryIndices.misc[63] = 64;
+    const auto stock = VS::Items::inventory;
+    const auto indices = VS::Items::inventoryIndices;
+    VS::Items::inventory.misc[0].count = 0;
+    VS::Items::inventory.misc[63] = {323, 1, 64};
+    VS::Items::inventoryIndices.misc[63] = 64;
     VS::Game::InitializeEncounterPlayerProfile(profile);
-    CHECK(std::memcmp(&stock, &Audio_Seq_unusedInventory, sizeof(stock)) == 0);
-    CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
+    CHECK(std::memcmp(&stock, &VS::Items::inventory, sizeof(stock)) == 0);
+    CHECK(std::memcmp(&indices, &VS::Items::inventoryIndices,
                       sizeof(indices)) == 0);
     VS::Game::EncounterSetup setup;
     setup.profile = profile;
@@ -488,15 +485,14 @@ TEST_CASE("Item profile initialization resets stacks and obsolete indices",
 TEST_CASE("Lab precondition controls reject inactive sessions and bad commands",
           "[combat][profile][items]") {
   ProfileFixture fixture;
-  const auto inventory = Audio_Seq_unusedInventory;
+  const auto inventory = VS::Items::inventory;
   CHECK_FALSE(
       VS::Game::AdjustEncounterPlayer(VS::Game::EncounterAdjustment::kLowerHp));
   CHECK_FALSE(VS::Game::AdjustEncounterPlayer(
       VS::Game::EncounterAdjustment::kRestoreMp));
   CHECK_FALSE(
       VS::Game::AdjustEncounterPlayer(VS::Game::EncounterAdjustment::kCount));
-  CHECK(std::memcmp(&inventory, &Audio_Seq_unusedInventory,
-                    sizeof(inventory)) == 0);
+  CHECK(std::memcmp(&inventory, &VS::Items::inventory, sizeof(inventory)) == 0);
 }
 
 TEST_CASE("Lab movement ailment uses Numbness rather than the leg injury flag",
@@ -510,7 +506,7 @@ TEST_CASE("Lab movement ailment uses Numbness rather than the leg injury flag",
 TEST_CASE("Ashley startup overrides fill resources and set base attributes",
           "[combat][profile][items][stats]") {
   StatFixture fixture;
-  const auto inventory = Audio_Seq_unusedInventory;
+  const auto inventory = VS::Items::inventory;
   const auto learned = std::to_array(Battle_actionDefinitions);
   const VS::Game::EncounterStatOverrides overrides{999, 200, 120, 130, 140};
   VS::Game::InitializeEncounterPlayerStats(overrides);
@@ -520,8 +516,7 @@ TEST_CASE("Ashley startup overrides fill resources and set base attributes",
   CHECK(fixture.stats.maxMp == 200);
   CheckBaseAttributes(fixture.stats);
   CHECK(fixture.stats.risk == 7);
-  CHECK(std::memcmp(&inventory, &Audio_Seq_unusedInventory,
-                    sizeof(inventory)) == 0);
+  CHECK(std::memcmp(&inventory, &VS::Items::inventory, sizeof(inventory)) == 0);
   CHECK(std::memcmp(learned.data(), Battle_actionDefinitions,
                     sizeof(Battle_actionDefinitions)) == 0);
 }
@@ -680,14 +675,12 @@ TEST_CASE("Default and bare-hands setup preserve stock parts and inventory",
           "[combat][profile][weapon]") {
   using Weapon = VS::Game::EncounterWeapon;
   ProfileFixture fixture;
-  auto expected = Audio_Seq_unusedInventory;
+  auto expected = VS::Items::inventory;
   VS::Game::InitializeEncounterPlayerWeapon(Weapon::kDefault);
-  CHECK(std::memcmp(&expected, &Audio_Seq_unusedInventory, sizeof expected) ==
-        0);
+  CHECK(std::memcmp(&expected, &VS::Items::inventory, sizeof expected) == 0);
   for (auto& weapon : expected.weapons) weapon.isEquipped = 0;
   VS::Game::InitializeEncounterPlayerWeapon(Weapon::kBareHands);
-  CHECK(std::memcmp(&expected, &Audio_Seq_unusedInventory, sizeof expected) ==
-        0);
+  CHECK(std::memcmp(&expected, &VS::Items::inventory, sizeof expected) == 0);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPostMinotaur);
   CHECK(Battle_actionDefinitions[220].unlocked == 1);
@@ -738,7 +731,7 @@ void CheckWeaponStats(const Items_WeaponLoadout& actual,
 
 Items_Inventory CheckWeaponParts(const Items_Inventory& original,
                                  Items_InventoryWeapon& slot, int category) {
-  auto& inventory = Audio_Seq_unusedInventory;
+  auto& inventory = VS::Items::inventory;
   if (slot.blade == 0 || slot.blade > std::size(inventory.blades) ||
       slot.grip == 0 || slot.grip > std::size(inventory.grips)) {
     throw std::runtime_error(
@@ -787,11 +780,11 @@ TEST_CASE(
   OpenWeaponSourceData();
   ProfileFixture fixture;
   WeaponHeap heap;
-  auto& inventory = Audio_Seq_unusedInventory;
+  auto& inventory = VS::Items::inventory;
   std::memcpy(&inventory, Title_newGameInventoryTemplate, sizeof inventory);
   if (GENERATE(false, true)) inventory.shields[0].isEquipped = 1;
   const auto original = inventory;
-  const auto indices = Audio_Seq_unusedInventoryIndices;
+  const auto indices = VS::Items::inventoryIndices;
   for (int category = 1; category <= 9; ++category) {
     CAPTURE(category);
     const auto choice = static_cast<VS::Game::EncounterWeapon>(category);
@@ -803,8 +796,8 @@ TEST_CASE(
     REQUIRE(slot != std::end(inventory.weapons));
     const auto expected = CheckWeaponParts(original, *slot, category);
     CHECK(std::memcmp(&inventory, &expected, sizeof inventory) == 0);
-    CHECK(std::memcmp(&indices, &Audio_Seq_unusedInventoryIndices,
-                      sizeof indices) == 0);
+    CHECK(std::memcmp(&indices, &VS::Items::inventoryIndices, sizeof indices) ==
+          0);
     const auto source = VS::Game::ReadEncounterWeapon(choice);
     REQUIRE(source);
     Items_WeaponLoadout actual{};
@@ -823,7 +816,7 @@ TEST_CASE("Weapon setup rejects invalid stock links without mutating inventory",
           "[combat][profile][weapon][disc]") {
   OpenWeaponSourceData();
   ProfileFixture fixture;
-  auto& inventory = Audio_Seq_unusedInventory;
+  auto& inventory = VS::Items::inventory;
   inventory.weapons[0].grip = 1;
   SECTION("blade missing") { inventory.weapons[0].blade = 0; }
   SECTION("blade outside capacity") { inventory.weapons[0].blade = 17; }

@@ -5,7 +5,7 @@
 
 #include "State/ScriptFlags.hpp"
 
-// Bindings from the live flag record (Audio_Seq_unusedStateFlags, the
+// Bindings from the live flag record (VS::State::stateFlags, the
 // original vs_main_stateFlags) to ScriptFlags, in the original argument
 // order for the generated callers (tools/port/copy_fixups.py
 // OWNED_CALL_BINDINGS). The scene trace records each write; an id outside

@@ -21,7 +21,6 @@
 #include "Actors/Skeleton.h"
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/SkeletonLiveState.hpp"
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
@@ -68,6 +67,7 @@
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
+#include "State/StateFlags.h"
 
 TEST_CASE(
     "Gimmick sharing keeps first slot signed exclusion and three-bit identity",
@@ -1268,7 +1268,7 @@ struct UnlockEffectLiveFixture {
   decltype(Battle_characterState) saved_character = Battle_characterState;
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
   decltype(Battle_floatingLabelCount) saved_count = Battle_floatingLabelCount;
-  decltype(Audio_Seq_unusedStateFlags) saved_flags = Audio_Seq_unusedStateFlags;
+  decltype(VS::State::stateFlags) saved_flags = VS::State::stateFlags;
   VS::Core::Rand15 saved_rand = VS::Core::BiosRand();
   std::array<std::int32_t, VS::Core::Random::TableSize> saved_shuffle{};
   decltype(VS::Core::randomShuffleIndex) saved_index =
@@ -1287,8 +1287,7 @@ struct UnlockEffectLiveFixture {
     Battle_floatingLabelCount = 0;
     Field_roomData.containers = chests.data();
     Field_roomData.header.containersLength = sizeof chests;
-    std::memset(&Audio_Seq_unusedStateFlags, 0,
-                sizeof(Audio_Seq_unusedStateFlags));
+    std::memset(&VS::State::stateFlags, 0, sizeof(VS::State::stateFlags));
     room.locks[0].trigger.lockState.lock.state = 2;
     chests[0].lockLevel = 3;
   }
@@ -1296,7 +1295,7 @@ struct UnlockEffectLiveFixture {
     Battle_characterState = saved_character;
     Battle_floatingLabels = saved_labels;
     Battle_floatingLabelCount = saved_count;
-    Audio_Seq_unusedStateFlags = saved_flags;
+    VS::State::stateFlags = saved_flags;
     VS::Core::BiosRand() = saved_rand;
     std::ranges::copy(saved_shuffle, std::begin(VS::Core::randomShuffleTable));
     VS::Core::randomShuffleIndex = saved_index;
@@ -1305,7 +1304,7 @@ struct UnlockEffectLiveFixture {
 
 struct SigilDoorLiveFixture {
   decltype(Field_roomData) saved_room = Field_roomData;
-  decltype(Audio_Seq_unusedStateFlags) saved_flags = Audio_Seq_unusedStateFlags;
+  decltype(VS::State::stateFlags) saved_flags = VS::State::stateFlags;
   std::array<std::int16_t, std::size(Field_lockedDoorIndexRanges)>
       saved_ranges{};
   using Pairs =
@@ -1321,7 +1320,7 @@ struct SigilDoorLiveFixture {
                         saved_pairs[index].begin());
       std::ranges::fill(Field_lockedDoorRoomPairs[index], 0);
     }
-    std::ranges::fill(Audio_Seq_unusedStateFlags.opaque186, 0);
+    std::ranges::fill(VS::State::stateFlags.opaque186, 0);
     Field_lockedDoorIndexRanges[1] = 2;
     for (std::size_t index = 0; index < 2; ++index) {
       Field_lockedDoorRoomPairs[index][0] = 9;
@@ -1342,7 +1341,7 @@ struct SigilDoorLiveFixture {
       std::ranges::copy(saved_pairs[index],
                         std::begin(Field_lockedDoorRoomPairs[index]));
     }
-    Audio_Seq_unusedStateFlags = saved_flags;
+    VS::State::stateFlags = saved_flags;
     Field_roomData = saved_room;
   }
 };
@@ -3480,18 +3479,16 @@ TEST_CASE("Live door lookup refuses partial misaligned and absent records",
 TEST_CASE("Native sigil lookup and marking preserve unsigned first-pair state",
           "[sigil-door-live][field]") {
   SigilDoorLiveFixture fixture;
-  Audio_Seq_unusedStateFlags.opaque186[0] =
-      std::bit_cast<char>(std::uint8_t{128});
-  Audio_Seq_unusedStateFlags.opaque186[1] =
-      std::bit_cast<char>(std::uint8_t{254});
+  VS::State::stateFlags.opaque186[0] = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque186[1] = std::bit_cast<char>(std::uint8_t{254});
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 128);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(10, 1, 0) == 128);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
-  auto expected = Audio_Seq_unusedStateFlags;
+  auto expected = VS::State::stateFlags;
   expected.opaque186[0] = 1;
   VS::Field::MarkSigilDoorUnlockedEntry(0);
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
-  CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
+  CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
         std::bit_cast<FlagBytes>(expected));
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 1);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
@@ -3501,7 +3498,7 @@ TEST_CASE(
     "Native sigil marking refuses malformed ranges and missing room headers",
     "[sigil-door-live][field]") {
   SigilDoorLiveFixture fixture;
-  const auto expected = Audio_Seq_unusedStateFlags;
+  const auto expected = VS::State::stateFlags;
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
   for (const auto range : std::array{std::array<std::int16_t, 2>{-1, 1},
                                      std::array<std::int16_t, 2>{1, 0},
@@ -3510,7 +3507,7 @@ TEST_CASE(
     Field_lockedDoorIndexRanges[1] = range[1];
     VS::Field::MarkSigilDoorUnlockedEntry(0);
     CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 0);
-    CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
+    CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
           std::bit_cast<FlagBytes>(expected));
   }
   Field_lockedDoorIndexRanges[0] = 0;
@@ -3521,7 +3518,7 @@ TEST_CASE(
   CHECK_FALSE(VS::Field::MarkLiveSigilDoorUnlocked(0));
   VS::Field::MarkSigilDoorUnlockedEntry(-1);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, UINT32_MAX) == 0);
-  CHECK(std::bit_cast<FlagBytes>(Audio_Seq_unusedStateFlags) ==
+  CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
         std::bit_cast<FlagBytes>(expected));
 }
 
@@ -3530,12 +3527,10 @@ TEST_CASE("Live sigil groups stop at the eight original boundary words",
   SigilDoorLiveFixture fixture;
   Field_lockedDoorIndexRanges[7] = 0;
   Field_lockedDoorIndexRanges[8] = 2;
-  Audio_Seq_unusedStateFlags.opaque186[0] =
-      std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque186[0] = std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 7) == 0);
   CHECK_FALSE(VS::Field::MarkLiveSigilDoorUnlocked(7));
-  CHECK(std::bit_cast<std::uint8_t>(Audio_Seq_unusedStateFlags.opaque186[0]) ==
-        128);
+  CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.opaque186[0]) == 128);
 }
 
 TEST_CASE("Door table native entries retain original module addresses",
@@ -4098,12 +4093,12 @@ TEST_CASE(
     "[room-trigger-live][field]") {
   RoomTriggerLiveFixture fixture;
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
-  Audio_Seq_unusedStateFlags.opaque20 = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque20 = std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == nullptr);
   fixture.triggers[0].kind = 16;
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
   CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == nullptr);
-  Audio_Seq_unusedStateFlags.opaque20 = 0;
+  VS::State::stateFlags.opaque20 = 0;
   CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == &fixture.triggers[2]);
   CHECK(VS::Field::RoomTriggerAtTileEntry(65535, 0, 0) == nullptr);
 }
@@ -4180,12 +4175,12 @@ TEST_CASE("Active room triggers preserve both unsigned suppression flags",
   std::array<Field_MpdFloorTrigger, 1> triggers{};
   Field_roomData.floorTriggers = triggers.data();
   Field_roomData.header.floorTriggersLength = sizeof triggers;
-  Audio_Seq_unusedStateFlags.opaque20 = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque20 = std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().empty());
-  Audio_Seq_unusedStateFlags.opaque20 = 0;
-  Audio_Seq_unusedStateFlags.opaque40 = std::bit_cast<char>(std::uint8_t{255});
+  VS::State::stateFlags.opaque20 = 0;
+  VS::State::stateFlags.opaque40 = std::bit_cast<char>(std::uint8_t{255});
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().empty());
-  Audio_Seq_unusedStateFlags.opaque40 = 0;
+  VS::State::stateFlags.opaque40 = 0;
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().size() == 1);
 }
 
@@ -7152,8 +7147,8 @@ TEST_CASE("Native save point query returns unsigned activation bytes",
   Field_roomData.floorTriggers = room.triggers.data();
   Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
   room.triggers[0].kind = 16;
-  Audio_Seq_unusedStateFlags.opaque20 = 0;
-  Audio_Seq_unusedStateFlags.opaque40 = 0;
+  VS::State::stateFlags.opaque20 = 0;
+  VS::State::stateFlags.opaque40 = 0;
   room.triggers[0].activation = 1;
   REQUIRE(VS::Field::CurrentSavePointIdEntry() == 1);
   for (const auto value : {127, 128, 255}) {
@@ -7190,12 +7185,12 @@ TEST_CASE("Native save point query refuses missing and suppressed trigger data",
   Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
   room.triggers[0].kind = 16;
   room.triggers[0].activation = 7;
-  Audio_Seq_unusedStateFlags.opaque20 = 0;
-  Audio_Seq_unusedStateFlags.opaque40 = 0;
+  VS::State::stateFlags.opaque20 = 0;
+  VS::State::stateFlags.opaque40 = 0;
   REQUIRE(VS::Field::CurrentSavePointIdEntry() == 7);
   room.triggers[0].kind = 15;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
-  Audio_Seq_unusedStateFlags.opaque20 = 1;
+  VS::State::stateFlags.opaque20 = 1;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
   room.triggers[0].kind = 16;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 7);

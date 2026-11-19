@@ -12,7 +12,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/AbilityState.h"
 #include "Battle/Actor.h"
 #include "Core/Memory/HeapLive.hpp"
@@ -587,10 +586,10 @@ struct TeleportLiveFixture {
   Battle_ActorStats stats{};
 
   TeleportLiveFixture() {
-    std::copy_n(Audio_Seq_unusedStateFlags.savePointStates, 48,
+    std::copy_n(VS::State::stateFlags.savePointStates, 48,
                 saved_states.begin());
     std::copy_n(Menu_Magic_teleportationStrings, 1599, saved_strings.begin());
-    std::fill_n(Audio_Seq_unusedStateFlags.savePointStates, 48, char{0});
+    std::fill_n(VS::State::stateFlags.savePointStates, 48, char{0});
     std::fill_n(Menu_Magic_teleportationStrings, 1599, u_short{0});
     VS::Menu::Framework::menuItems = rows.data();
     VS::Menu::Framework::itemsText = nullptr;
@@ -610,7 +609,7 @@ struct TeleportLiveFixture {
       VS::Core::Memory::FreeLiveFromHighEnd(VS::Menu::Framework::itemsText);
     }
     std::copy(saved_states.begin(), saved_states.end(),
-              Audio_Seq_unusedStateFlags.savePointStates);
+              VS::State::stateFlags.savePointStates);
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_Magic_teleportationStrings);
     VS::Input::settings = saved_settings;
@@ -671,8 +670,8 @@ TEST_CASE("Magic TeleportMpCostLive refuses targets outside the table",
 TEST_CASE("Magic UpdateTeleportMenuLive packs the confirmed destination",
           "[magic-costs-live]") {
   TeleportLiveFixture fixture;
-  Audio_Seq_unusedStateFlags.savePointStates[3] = 1;
-  Audio_Seq_unusedStateFlags.savePointStates[10] = 2;
+  VS::State::stateFlags.savePointStates[3] = 1;
+  VS::State::stateFlags.savePointStates[10] = 2;
   VS::Input::settings.cursorMemory = 0;
   CHECK(magic::UpdateTeleportMenuLive(1) == 0);
   fixture.FinishRowAnimations();

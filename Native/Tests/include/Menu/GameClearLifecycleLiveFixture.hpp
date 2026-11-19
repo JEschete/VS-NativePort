@@ -48,6 +48,7 @@
 #include "Render/PageSpace.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "State/Progress.h"
+#include "State/StateFlags.h"
 #include "TestSupport/TimeAttackDrawRecorder.hpp"
 
 namespace game_clear_live_tests {
@@ -153,8 +154,8 @@ class Fixture {
       Audio_Mixer_commandParams, Audio_Mixer_voiceScheduler,
       Audio_Mixer_voiceOwners, Audio_SoundEffects_channels,
       Audio_Cutscene_streamState, Audio_Samples_musicSampleBankIds,
-      Audio_Seq_unusedScoredata, Audio_Seq_unusedStateFlags,
-      State_roomVisitProgress, Battle_characterState, Battle_unusedSubmenuState,
+      VS::State::scoreData, VS::State::stateFlags, State_roomVisitProgress,
+      Battle_characterState, Battle_unusedSubmenuState,
       VS::Input::buttonsPressed, Content_discRequestSlots,
       Content_discRequestCounts, Content_discDriveState,
       VS::Render::legacyDrawEnvironments, Menu_Results_screenTimer,
@@ -194,8 +195,8 @@ class Fixture {
     results::ResetLiveGameClearModuleData();
     Battle_unusedSubmenuState = 0;
     VS::Input::buttonsPressed = 0;
-    Audio_Seq_unusedScoredata = {};
-    Audio_Seq_unusedStateFlags = {};
+    VS::State::scoreData = {};
+    VS::State::stateFlags = {};
     State_roomVisitProgress = {};
     actor.stats = &stats;
     Battle_characterState = &actor;

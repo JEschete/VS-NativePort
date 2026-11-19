@@ -8,7 +8,6 @@
 #include <span>
 #include <stdexcept>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Log.hpp"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -107,7 +106,7 @@ class LiveMinimapRenderer final : public MinimapRenderer {
 
   bool IsDoorGateLocked(std::uint8_t gate) override {
     const auto* flags =
-        reinterpret_cast<const unsigned char*>(&Audio_Seq_unusedStateFlags);
+        reinterpret_cast<const unsigned char*>(&VS::State::stateFlags);
     return flags[kDoorStateBase + gate] == 0;
   }
 

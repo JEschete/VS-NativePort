@@ -14,6 +14,7 @@
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Render/UiPacketsLive.hpp"
+#include "State/Progress.h"
 
 namespace {
 namespace results = VS::Menu::Results;
@@ -47,7 +48,7 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
     REQUIRE(results::LiveUpdateGameClear() == 0);
     REQUIRE(results::InspectLiveGameClear().state_timer == 1);
     stats.strength = 77;
-    Audio_Seq_unusedScoredata.miscScore = 12345;
+    VS::State::scoreData.miscScore = 12345;
   }
 
   static void CheckControllerReset() {
@@ -87,7 +88,7 @@ struct ReloadFixture : game_clear_live_tests::Fixture {
     CHECK(Battle_unusedSubmenuState == 1);
     CHECK(Battle_characterState == &actor);
     CHECK(stats.strength == 77);
-    CHECK(Audio_Seq_unusedScoredata.miscScore == 12345);
+    CHECK(VS::State::scoreData.miscScore == 12345);
   }
 
   static void Reenter() {
@@ -162,13 +163,13 @@ TEST_CASE("Game-clear module entries use actual controller and score owners",
   Menu_Results_screenTimer = -1000;
   CHECK(ModuleEntry(0x8010384C, &results::LiveUpdateGameClear)() == 0);
   CHECK(results::InspectLiveGameClear().state_timer == 1);
-  Audio_Seq_unusedScoredata.miscScore = 123;
-  Audio_Seq_unusedScoredata.healCount = 2;
-  Audio_Seq_unusedScoredata.streakScore = 99;
+  VS::State::scoreData.miscScore = 123;
+  VS::State::scoreData.healCount = 2;
+  VS::State::scoreData.streakScore = 99;
   ModuleEntry(0x80108E48, &results::LiveApplyHealingScoreBonus)();
-  CHECK(Audio_Seq_unusedScoredata.miscScore == 99923);
-  CHECK(Audio_Seq_unusedScoredata.healCount == 0);
-  CHECK(Audio_Seq_unusedScoredata.streakScore == 99);
+  CHECK(VS::State::scoreData.miscScore == 99923);
+  CHECK(VS::State::scoreData.healCount == 0);
+  CHECK(VS::State::scoreData.streakScore == 99);
 }
 
 TEST_CASE("Game-clear module renderers submit real current-frame packets",

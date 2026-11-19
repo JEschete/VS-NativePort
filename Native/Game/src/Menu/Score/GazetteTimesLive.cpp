@@ -10,7 +10,6 @@
 #include <string>
 #include <string_view>
 
-#include "Audio/Seq/Channel.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Log.hpp"
@@ -90,7 +89,7 @@ TimeTrialScores Scores() {
   for (std::size_t trial = 0; trial < kTimeTrialCount; ++trial) {
     for (std::size_t place = 0; place < kTimeTrialPlaces; ++place) {
       const auto& original =
-          Audio_Seq_unusedScoredata.bossTimeTrialScores[trial][place];
+          VS::State::scoreData.bossTimeTrialScores[trial][place];
       TimeTrialRecord& record = scores[trial][place];
       if (original.time != kMissingPackedTime) {
         record.time = TimeTrialTime{

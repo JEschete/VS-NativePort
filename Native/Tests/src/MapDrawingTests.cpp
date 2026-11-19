@@ -12,7 +12,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Audio/Seq/Channel.h"
 #include "Core/Gte.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -849,8 +848,7 @@ class LiveMap {
       std::vector<u_long>(0x20000 / sizeof(u_long));
 
   LiveMap() {
-    std::memcpy(&saved_flags_, &Audio_Seq_unusedStateFlags,
-                sizeof(saved_flags_));
+    std::memcpy(&saved_flags_, &VS::State::stateFlags, sizeof(saved_flags_));
     std::memcpy(saved_bounds_.data(), Menu_Map_compassBounds,
                 sizeof(saved_bounds_));
     std::memcpy(saved_trims_.data(), VS::Render::compactGlyphLeftTrim,
@@ -889,8 +887,7 @@ class LiveMap {
   LiveMap(LiveMap&&) = delete;
   LiveMap& operator=(LiveMap&&) = delete;
   ~LiveMap() {
-    std::memcpy(&Audio_Seq_unusedStateFlags, &saved_flags_,
-                sizeof(saved_flags_));
+    std::memcpy(&VS::State::stateFlags, &saved_flags_, sizeof(saved_flags_));
     std::memcpy(Menu_Map_compassBounds, saved_bounds_.data(),
                 sizeof(saved_bounds_));
     std::memcpy(VS::Render::compactGlyphLeftTrim, saved_trims_.data(),
@@ -1420,7 +1417,7 @@ TEST_CASE("The live legend slides in 16 pixels a frame with text box 0",
           "[map-drawing-live]") {
   LiveMap frame;
   Menu_Map_menuCommandsState = static_cast<std::int16_t>(GENERATE(0, 1, 5));
-  Audio_Seq_unusedStateFlags.mapPaling[0] = 0;
+  VS::State::stateFlags.mapPaling[0] = 0;
   Menu_TextBoxState* box = VS::Menu::LiveTextBox(0);
   REQUIRE(box != nullptr);
   box->y = 0;
@@ -1456,11 +1453,11 @@ TEST_CASE("The live legend shows the jamming caption alone",
   LiveMap frame;
   Menu_Map_uiAnimationState = 3;
   Menu_Map_currentScene = 4;
-  Audio_Seq_unusedStateFlags.mapPaling[4] = 1;
+  VS::State::stateFlags.mapPaling[4] = 1;
   map::LiveDrawControls();
   const std::size_t jammed = frame.UsedWords();
   frame.Reset();
-  Audio_Seq_unusedStateFlags.mapPaling[4] = 0;
+  VS::State::stateFlags.mapPaling[4] = 0;
   map::LiveDrawControls();
   CHECK(jammed > 0);
   CHECK(jammed < frame.UsedWords());
