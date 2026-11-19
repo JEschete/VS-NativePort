@@ -16,7 +16,7 @@
 #include "Audio/SfxLive.hpp"
 #include "Audio/SoundBanksLive.hpp"
 #include "Audio/XaMixLive.hpp"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Boot/PlayerSettings.hpp"
 #include "Content/StringTables.h"
 #include "Core/Gte.h"
@@ -41,12 +41,12 @@
 #include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeMenu.hpp"
 #include "Save/NativeResume.hpp"
-#include "State/Ashley.h"
+#include "State/Ashley.hpp"
 #include "State/GameClockLive.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
-#include "State/RoomMemory.h"
+#include "State/RoomMemory.hpp"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
 #include "Title/Credits.hpp"
@@ -342,8 +342,8 @@ class LiveHost final : public Host {
 
   int VisitCount() override { return titleScreenVisitCount; }
   void SetVisitCount(int count) override { titleScreenVisitCount = count; }
-  bool ClearSavePending() override { return Boot_isClearSavePending != 0; }
-  void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }
+  bool ClearSavePending() override { return VS::Boot::isClearSavePending != 0; }
+  void ClearPendingClearSave() override { VS::Boot::isClearSavePending = 0; }
   void StageClearGame() override { VS::Game::Save::StageClearGame(); }
   int InitialTitleSelection() override {
     return VS::Game::Save::InitialTitleSelection();
@@ -402,9 +402,9 @@ class LiveHost final : public Host {
                                        sizeof VS::State::playTime);
     Core::Memory::ZeroLiveAlignedWords(&VS::State::scoreData,
                                        sizeof VS::State::scoreData);
-    State_currentRoomStateSlot = 0;
-    Core::Memory::ZeroLiveAlignedWords(State_recentRoomEnemyStates,
-                                       sizeof State_recentRoomEnemyStates);
+    VS::State::currentRoomStateSlot = 0;
+    Core::Memory::ZeroLiveAlignedWords(VS::State::recentRoomEnemyStates,
+                                       sizeof VS::State::recentRoomEnemyStates);
     Core::Memory::ZeroLiveAlignedWords(&VS::State::artsStatus,
                                        sizeof VS::State::artsStatus);
   }
@@ -418,19 +418,19 @@ class LiveHost final : public Host {
     }
   }
   void ClearAshleySnapshot(std::size_t bytes) override {
-    if (bytes > sizeof State_ashleySnapshot) {
+    if (bytes > sizeof VS::State::ashleySnapshot) {
       VS::Core::LogWarn(kChannel,
                         "Title snapshot clear of {} bytes exceeds the {}-byte "
                         "snapshot",
-                        bytes, sizeof State_ashleySnapshot);
+                        bytes, sizeof VS::State::ashleySnapshot);
       return;
     }
-    Core::Memory::ZeroLiveAlignedWords(&State_ashleySnapshot,
+    Core::Memory::ZeroLiveAlignedWords(&VS::State::ashleySnapshot,
                                        static_cast<std::int32_t>(bytes));
   }
   void ClearSavedEntryDoor() override {
-    Core::Memory::ZeroLiveAlignedWords(&State_savedEntryDoor,
-                                       sizeof State_savedEntryDoor);
+    Core::Memory::ZeroLiveAlignedWords(&VS::State::savedEntryDoor,
+                                       sizeof VS::State::savedEntryDoor);
   }
   void RestoreNewGameInventory() override {
     Core::Memory::CopyLiveAlignedWords(&VS::Items::inventory,
@@ -439,10 +439,10 @@ class LiveHost final : public Host {
   }
   void SetTickSpeed(int speed) override { VS::State::tickSpeed = speed; }
   void SetEntryDoor(const EntryDoor& door) override {
-    State_savedEntryDoor.entryTileX = door.tile_x;
-    State_savedEntryDoor.entryTileZ = door.tile_z;
-    State_savedEntryDoor.tileLocation.entryDirection = door.direction;
-    State_savedEntryDoor.entryElevation = door.elevation;
+    VS::State::savedEntryDoor.entryTileX = door.tile_x;
+    VS::State::savedEntryDoor.entryTileZ = door.tile_z;
+    VS::State::savedEntryDoor.tileLocation.entryDirection = door.direction;
+    VS::State::savedEntryDoor.entryElevation = door.elevation;
   }
   void ClearInventoryIndices() override {
     std::memset(&VS::Items::inventoryIndices, 0,
@@ -459,8 +459,8 @@ class LiveHost final : public Host {
       VS::State::stateFlags.opaqueE = static_cast<char>(*plan.state_flag_0e);
     }
     if (plan.destination.has_value()) {
-      State_savedEntryDoor.destinationZoneId = plan.destination->zone;
-      State_savedEntryDoor.destinationRoomId = plan.destination->room;
+      VS::State::savedEntryDoor.destinationZoneId = plan.destination->zone;
+      VS::State::savedEntryDoor.destinationRoomId = plan.destination->room;
     }
   }
 };

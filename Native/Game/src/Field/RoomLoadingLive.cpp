@@ -44,7 +44,7 @@
 #include "Battle/HudStateLive.hpp"
 #include "Battle/StatusEffects.h"
 #include "Battle/StatusLifecycleLive.hpp"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Core/Log.hpp"
@@ -505,7 +505,7 @@ class LiveFileReads : public Host {
   }
 
   [[nodiscard]] SceneTimerScope SceneTimerResetScope() const override {
-    switch (VS::State::sceneTimer.resetScope) {
+    switch (VS::State::sceneTimer.reset_scope) {
       case kRoomTimerScope:
         return SceneTimerScope::kRoom;
       case kZoneTimerScope:
@@ -892,7 +892,7 @@ class LiveZoneLoadHost final
   }
 
   [[nodiscard]] int GameEntryMode() const override {
-    return Boot_gameEntryMode;
+    return VS::Boot::gameEntryMode;
   }
 
   void ResetZoneScriptFlags(bool new_game) override {
@@ -1079,10 +1079,10 @@ class LiveRoomLoadHost final
   }
 
   [[nodiscard]] int GameEntryMode() const override {
-    return Boot_gameEntryMode;
+    return VS::Boot::gameEntryMode;
   }
 
-  void SetGameEntryMode(int mode) override { Boot_gameEntryMode = mode; }
+  void SetGameEntryMode(int mode) override { VS::Boot::gameEntryMode = mode; }
 
   void SnapActorsToSupport() override { SnapLiveRoomActorsToSupport(); }
 

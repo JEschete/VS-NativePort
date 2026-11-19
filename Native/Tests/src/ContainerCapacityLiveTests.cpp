@@ -11,7 +11,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Core/Log.hpp"
 #include "Items/ContainerGemCountsLive.hpp"
 #include "Items/ContainerIndexingLive.hpp"
@@ -372,7 +372,7 @@ TEST_CASE(
   storage.stagedTransfer.gems[live::kLastGem].id = 2;
   Menu_Container_browsingGadgetBag = 2;
   Menu_Container_containerItemCapacities[0] = 0;
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   CHECK(Menu_Container_containerData == &storage.container);
   CHECK(Menu_Container_otherStorage == &storage.gadgetBag);
   CHECK(VS::Menu::Framework::inventoryStorage == &storage);

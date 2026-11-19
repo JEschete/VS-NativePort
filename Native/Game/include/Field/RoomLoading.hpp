@@ -694,7 +694,7 @@ inline constexpr int kRaisedEntryCameraPitch = -128;
 inline constexpr int kNearEntryCameraDistance = 0x600;
 inline constexpr int kNearEntryCameraMode = 1;
 inline constexpr int kFarEntryCameraMode = 3;
-// The game entry modes FinishRoomLoad reads (Boot_gameEntryMode).
+// The game entry modes FinishRoomLoad reads (VS::Boot::gameEntryMode).
 inline constexpr int kNewGameEntryMode = 1;
 inline constexpr int kResumedNewGameEntryMode = 5;
 

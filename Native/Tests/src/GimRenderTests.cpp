@@ -9,7 +9,7 @@
 
 #include "Actors/Spawning.h"
 #include "Battle/TargetingState.h"
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/HeapLive.hpp"
@@ -459,7 +459,7 @@ int CheckMenuReloadClosingDelay(void) {
   Content_DiscQueueSlot* const request = &Content_discRequestSlots[31];
   const Content_DiscQueueSlot saved_slot = *request;
   int passed = 1;
-  Boot_ResetMainMenuStatics();
+  VS::Boot::ResetMainMenuStatics();
   VS::Menu::Framework::ResetLiveMainMenuStatics();
   VS::Menu::Framework::menuItems = rows;
   VS::Menu::Framework::menuBackgroundBuffer = nullptr;
@@ -481,7 +481,7 @@ int CheckMenuReloadClosingDelay(void) {
     }
   }
 
-  Boot_ResetMainMenuStatics();
+  VS::Boot::ResetMainMenuStatics();
   VS::Menu::Framework::ResetLiveMainMenuStatics();
   VS::Menu::Framework::menuState = saved_state;
   VS::Menu::Framework::menuItems = saved_items;

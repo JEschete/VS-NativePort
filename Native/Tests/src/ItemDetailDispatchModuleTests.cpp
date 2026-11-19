@@ -2,7 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Input/Pad.hpp"
 #include "Menu/ItemDetailDispatchLiveFixture.hpp"
@@ -52,7 +52,7 @@ TEST_CASE("F02579 real MENU3 reset retains armor return-stage BSS",
   fixture.Wait(inv::UpdateLiveArmorDetails);
   VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inv::UpdateLiveArmorDetails(0) == 0);
-  Boot_ResetMenu3Statics();
+  VS::Boot::ResetMenu3Statics();
   fixture.IdleRows();
   VS::Input::buttonsPressed = 0;
   CHECK(inv::UpdateLiveArmorDetails(0) == 1);
@@ -67,7 +67,7 @@ TEST_CASE("F02580 real MENUB reset retains gem return-stage until a new entry",
   fixture.Wait(inv::UpdateLiveGemDetails);
   VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inv::UpdateLiveGemDetails(0) == 0);
-  Boot_ResetMenubStatics();
+  VS::Boot::ResetMenubStatics();
   fixture.IdleRows();
   VS::Input::buttonsPressed = 0;
   CHECK(inv::UpdateLiveGemDetails(0) == 1);
@@ -84,7 +84,7 @@ TEST_CASE("F02581 real MENUB reset does not forget the active gem dispatcher",
   fixture.Wait(inv::UpdateLiveGemDetails);
   VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inv::UpdateLiveItemDetails(0) == 0);
-  Boot_ResetMenubStatics();
+  VS::Boot::ResetMenubStatics();
   fixture.IdleRows();
   VS::Input::buttonsPressed = 0;
   CHECK(inv::UpdateLiveItemDetails(0) == 1);

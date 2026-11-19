@@ -15,7 +15,7 @@
 
 #include "Audio/AudioDevice.hpp"
 #include "Battle/Encounter.hpp"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "CombatLab/Canvas.hpp"
 #include "CombatLab/Editor.hpp"
 #include "CombatLab/SceneCatalog.hpp"
@@ -737,17 +737,17 @@ class LiveSession {
     }
     if (scene_trial_->ExpectsAttractReturn()) {
       scene_trial_->ObserveAttractReturn(
-          Boot_gameEntryMode, VS::Ending::Credits::hasFinished != 0,
-          Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
+          VS::Boot::gameEntryMode, VS::Ending::Credits::hasFinished != 0,
+          VS::Boot::isClearSavePending != 0, ticks_ - script_start_tick_);
     } else if (scene_trial_->ExpectsGameOverReturn()) {
       scene_trial_->ObserveGameOverReturn(VS::Ending::Credits::hasFinished != 0,
-                                          Boot_isClearSavePending != 0,
+                                          VS::Boot::isClearSavePending != 0,
                                           ticks_ - script_start_tick_);
     } else {
       scene_trial_->ObserveEndingReturn(
           VS::Ending::Credits::hasFinished != 0,
           VS::Ending::Credits::wasSkipRequested != 0,
-          Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
+          VS::Boot::isClearSavePending != 0, ticks_ - script_start_tick_);
     }
     const auto result = scene_trial_->Result();
     trace_.Event("scene.terminal", result.at("terminal"), ticks_);

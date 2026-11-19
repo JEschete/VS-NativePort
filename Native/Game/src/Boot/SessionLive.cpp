@@ -17,7 +17,7 @@
 #include "Battle/Ai/RoomState.hpp"
 #include "Battle/EncounterHooks.hpp"
 #include "Battle/TargetingState.h"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/DiscReaderLive.hpp"
@@ -56,8 +56,9 @@
 #include "Render/ScreenOverlayLive.hpp"
 #include "Save/NativeResume.hpp"
 #include "Save/SnapshotLive.hpp"
-#include "State/Ashley.h"
+#include "State/Ashley.hpp"
 #include "State/GameClockLive.hpp"
+#include "State/PlayTime.hpp"
 #include "Title/TitleMenuLive.hpp"
 
 namespace VS::Boot {
@@ -235,16 +236,16 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Audio::Samples::LiveClearMusicBankIds();
   }
   void ShowLoadingScreen() override { VS::Render::ShowLiveLoadingScreen(); }
-  void SetGameEntryMode(int mode) override { Boot_gameEntryMode = mode; }
+  void SetGameEntryMode(int mode) override { VS::Boot::gameEntryMode = mode; }
   void SetGameplayActive(bool active) override {
-    Boot_isGameplayActive = active ? 1 : 0;
+    VS::Boot::isGameplayActive = active ? 1 : 0;
   }
   void CaptureAshleySnapshot() override {
     VS::Save::CaptureLiveAshleySnapshot();
   }
   void RunStaffRoll() override { VS::Ending::LiveRunStaffRoll(); }
   void SetClearSavePending(bool pending) override {
-    Boot_isClearSavePending = pending ? 1 : 0;
+    VS::Boot::isClearSavePending = pending ? 1 : 0;
   }
   void JumpToTitle() override { JumpToLiveTitle(); }
   void JumpToGameLoop() override { JumpToLiveGameLoop(); }
@@ -275,9 +276,9 @@ class LiveLifecycleHost final : public OverlayLoadHost,
     VS::Core::InitializeLiveRandomShuffleTable();
   }
   void StoreSoftResetEnabled(bool enabled) override {
-    Boot_isSoftResetEnabled = enabled ? 1 : 0;
+    VS::Boot::isSoftResetEnabled = enabled ? 1 : 0;
   }
-  void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }
+  void ClearPendingClearSave() override { VS::Boot::isClearSavePending = 0; }
 
   void ClearFramebuffer() override {
     RECT rect{.x = 0, .y = 0, .w = kVramWidth, .h = kVramHeight};
@@ -299,7 +300,7 @@ class LiveLifecycleHost final : public OverlayLoadHost,
   void ResetButtonHeldFrames() override {
     std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
   }
-  void ResetPlayTime() override { VS::State::StoreLivePlayTime({}); }
+  void ResetPlayTime() override { VS::State::playTime = {}; }
   void ClearAshleySnapshotPending() override {
     VS::Save::ClearLiveAshleySnapshotPending();
   }
@@ -309,7 +310,7 @@ LiveLifecycleHost live_lifecycle_host;
 
 int RunLoadedGame() {
   VS::Boot::ResetGameplayInspection();
-  Boot_isGameplayActive = 1;
+  VS::Boot::isGameplayActive = 1;
   RunGameplayLoopLive();
   VS::Boot::ResetGameplayInspection();
   SetDispMask(0);
@@ -329,8 +330,8 @@ class LiveTitleSessionHost final : public TitleSessionHost {
     VS::Core::Debugf("boot", "title module ready");
   }
   int RunTitle() override { return VS::Title::RunLive(); }
-  void SetGameEntryMode(int mode) override { Boot_gameEntryMode = mode; }
-  void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }
+  void SetGameEntryMode(int mode) override { VS::Boot::gameEntryMode = mode; }
+  void ClearPendingClearSave() override { VS::Boot::isClearSavePending = 0; }
   void ShowLoadingScreen() override { Render::ShowLiveLoadingScreen(); }
   void LoadBattleOverlays() override { LoadBattleOverlaysLive(); }
   int RunLoadedGame() override { return VS::Boot::RunLoadedGame(); }
@@ -400,7 +401,7 @@ void RunEndingAndReturnToTitleLive() {
 }
 
 void InitializePlatformServicesLive() {
-  live_soft_reset_state.enabled = Boot_isSoftResetEnabled != 0;
+  live_soft_reset_state.enabled = VS::Boot::isSoftResetEnabled != 0;
   InitializePlatformServices(live_soft_reset_state, live_lifecycle_host);
 }
 

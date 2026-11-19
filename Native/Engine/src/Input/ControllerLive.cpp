@@ -15,7 +15,7 @@
 #include <optional>
 #include <span>
 
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Input/Controller.hpp"
@@ -274,7 +274,7 @@ ControllerFrame PollLiveControllers() {
   };
   const ControllerFrameOptions options{
       .tick_speed = static_cast<std::uint32_t>(VS::State::tickSpeed),
-      .soft_reset_enabled = Boot_isSoftResetEnabled != 0,
+      .soft_reset_enabled = VS::Boot::isSoftResetEnabled != 0,
   };
   LibPadHost host;
   const ControllerFrame frame =

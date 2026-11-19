@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Input/Pad.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
@@ -96,7 +96,7 @@ TEST_CASE("Container detail helpers retain normal MENUD BSS across reload",
   Menu_Container_detailsViewPhase = samples::kOldPhase;
   Menu_Container_detailsClosedWithTriangle =
       static_cast<int>(VS::Input::Triangle);
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   CHECK(Menu_Container_categoryTitleVisible == 2);
   CHECK(Menu_Container_categoryIconsVisible == 2);
   CHECK(Menu_Container_controlsPanelMode == 2);
@@ -117,7 +117,7 @@ TEST_CASE("Ordinary MENUD reload retains detail owner and halfword orders",
   std::span(fixture.storage->container.indices.misc).back() =
       samples::kHalfwordToken;
   Menu_Container_containerItemCapacities[samples::kMiscCategory] = 0;
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   CHECK(Menu_Container_containerData == &fixture.storage->container);
   CHECK(Menu_Container_containerItemCapacities[6] == 256);
   CHECK(detail::SelectLiveDetailsItem(6, 255) == 65535);

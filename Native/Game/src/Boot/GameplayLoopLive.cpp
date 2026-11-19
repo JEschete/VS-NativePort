@@ -42,7 +42,7 @@
 #include "Battle/StatusHelpersLive.hpp"
 #include "Battle/TargetingLive.hpp"
 #include "Battle/TargetingState.h"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Boot/GameplayLoop.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
@@ -114,7 +114,7 @@ constexpr int kControllerSkippedFrame = -1;
 class LiveGameplayLoopHost final : public GameplayLoopHost {
  public:
   void InitializeGameplayOverlay() override {
-    InitializeGameplayOverlayLive(Boot_gameEntryMode);
+    InitializeGameplayOverlayLive(VS::Boot::gameEntryMode);
   }
   void FinishPendingZoneLoad() override {
     VS::Field::LiveFinishZoneLoad(
@@ -129,7 +129,7 @@ class LiveGameplayLoopHost final : public GameplayLoopHost {
   void ResetToTitle() override { ResetToTitleLive(); }
 
   [[nodiscard]] int GameEntryMode() const override {
-    return Boot_gameEntryMode;
+    return VS::Boot::gameEntryMode;
   }
   [[nodiscard]] FieldControlMode ControlMode() const override {
     return static_cast<FieldControlMode>(Field_controlMode);

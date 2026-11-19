@@ -16,7 +16,7 @@
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscLayout.h"
 #include "Content/ModuleData.hpp"
@@ -255,7 +255,7 @@ TEST_CASE("MENU2 reload restarts learned lists without releasing heap owners",
   auto* owner = Menu_BattleAbilities_abilityText;
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
   VS::Input::settings.mappedChainAbilities[0] = kAction;
-  Boot_ResetMenu2Statics();
+  VS::Boot::ResetMenu2Statics();
   CHECK(Menu_BattleAbilities_unlockedChainAbilities[0] == 0);
   CHECK(Menu_BattleAbilities_unlockedDefenseAbilities[0] == 0);
   CHECK(VS::Input::settings.mappedChainAbilities[0] == kAction);

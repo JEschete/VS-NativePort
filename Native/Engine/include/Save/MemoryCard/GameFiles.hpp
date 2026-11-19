@@ -97,7 +97,7 @@ inline constexpr std::size_t kSettingsCumulativeSavesOffset = 0x18;
 inline constexpr std::size_t kSettingsCurrentGameSavesOffset = 0x1A;
 inline constexpr std::size_t kSettingsGenerationOffset = 0x1C;
 
-// Byte offsets in the Ashley snapshot section (State_AshleySnapshot).
+// Byte offsets in the Ashley snapshot section (VS::State::AshleySnapshot).
 inline constexpr std::size_t kSnapshotHpOffset = 4;
 inline constexpr std::size_t kSnapshotMaxHpOffset = 6;
 inline constexpr std::size_t kSnapshotMpOffset = 8;
@@ -113,7 +113,7 @@ inline constexpr std::size_t kInventoryMiscBytes = 0x100;
 inline constexpr std::size_t kInventoryIndicesMiscOffset = 0x70;
 inline constexpr std::size_t kInventoryIndicesMiscBytes = 0x40;
 
-// The recent-room enemy states (State_RoomEnemyStates[4]).
+// The recent-room enemy states (VS::State::RoomEnemyStates[4]).
 inline constexpr std::size_t kRoomStateSlotCount = 4;
 inline constexpr std::size_t kRoomEnemyStatesBytes = 0x148;
 inline constexpr std::size_t kRoomEnemyNextSlotOffset = 4;
@@ -167,7 +167,8 @@ enum class SaveImageError : std::uint8_t {
   kBlockCountOutOfRange,
   kChecksumMismatch,
   kSignatureMismatch,
-  // The image names a recent-room slot outside State_recentRoomEnemyStates.
+  // The image names a recent-room slot outside
+  // VS::State::recentRoomEnemyStates.
   kRoomStateSlotOutOfRange,
   // A recent-room record's next actor slot is outside its eight slots.
   kRoomEnemySlotOutOfRange,

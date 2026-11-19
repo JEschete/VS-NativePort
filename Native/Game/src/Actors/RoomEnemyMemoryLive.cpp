@@ -19,8 +19,8 @@
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Damage.h"
-#include "State/RoomCache.h"
-#include "State/RoomMemory.h"
+#include "State/RoomCache.hpp"
+#include "State/RoomMemory.hpp"
 
 namespace VS::Actors {
 namespace {
@@ -28,10 +28,10 @@ namespace {
 // transition is running.
 constexpr std::uint32_t kFadingStateFlag = StateFlag::kActionAnimating;
 
-static_assert(std::size(State_recentRoomEnemyStates) == kRememberedRooms);
-static_assert(std::size(State_recentRoomEnemyStates[0].actorStates) ==
+static_assert(std::size(VS::State::recentRoomEnemyStates) == kRememberedRooms);
+static_assert(std::size(VS::State::recentRoomEnemyStates[0].actor_states) ==
               kRememberedEnemiesPerRoom);
-static_assert(sizeof State_recentRoomEnemyStates[0].actorStates[0] ==
+static_assert(sizeof VS::State::recentRoomEnemyStates[0].actor_states[0] ==
               sizeof(Actors_RoomActorRecord));
 static_assert(std::size(Actors_RoomActorRecord{}.limbHp) == kRememberedLimbs);
 static_assert(std::size(Battle_ActorStats{}.limbs) == kRememberedLimbs);
@@ -84,17 +84,18 @@ Actors_RoomActorRecord Encode(const RememberedEnemy& enemy) {
 
 RoomEnemyMemory LoadLiveRoomEnemyMemory() {
   RoomEnemyMemory memory;
-  memory.current_room = State_currentRoomStateSlot;
+  memory.current_room = VS::State::currentRoomStateSlot;
   for (std::size_t index = 0; index < memory.rooms.size(); ++index) {
-    const State_RoomEnemyStates& saved = State_recentRoomEnemyStates[index];
+    const VS::State::RoomEnemyStates& saved =
+        VS::State::recentRoomEnemyStates[index];
     RememberedRoom& room = memory.rooms[index];
-    room.recency = std::bit_cast<std::uint8_t>(saved.recency);
-    room.zone = std::bit_cast<std::uint8_t>(saved.zoneId);
-    room.map = saved.mapId;
-    room.next_slot = saved.nextSlot;
+    room.recency = saved.recency;
+    room.zone = saved.zone_id;
+    room.map = saved.map_id;
+    room.next_slot = saved.next_slot;
     for (std::size_t slot = 0; slot < room.enemies.size(); ++slot) {
       Actors_RoomActorRecord record{};
-      std::memcpy(&record, saved.actorStates[slot], sizeof record);
+      std::memcpy(&record, saved.actor_states[slot], sizeof record);
       room.enemies[slot] = Decode(record);
     }
   }
@@ -102,17 +103,17 @@ RoomEnemyMemory LoadLiveRoomEnemyMemory() {
 }
 
 void StoreLiveRoomEnemyMemory(const RoomEnemyMemory& memory) {
-  State_currentRoomStateSlot = memory.current_room;
+  VS::State::currentRoomStateSlot = memory.current_room;
   for (std::size_t index = 0; index < memory.rooms.size(); ++index) {
-    State_RoomEnemyStates& saved = State_recentRoomEnemyStates[index];
+    VS::State::RoomEnemyStates& saved = VS::State::recentRoomEnemyStates[index];
     const RememberedRoom& room = memory.rooms[index];
-    saved.recency = std::bit_cast<char>(room.recency);
-    saved.zoneId = std::bit_cast<char>(room.zone);
-    saved.mapId = room.map;
-    saved.nextSlot = room.next_slot;
+    saved.recency = room.recency;
+    saved.zone_id = room.zone;
+    saved.map_id = room.map;
+    saved.next_slot = room.next_slot;
     for (std::size_t slot = 0; slot < room.enemies.size(); ++slot) {
       const Actors_RoomActorRecord record = Encode(room.enemies[slot]);
-      std::memcpy(saved.actorStates[slot], &record, sizeof record);
+      std::memcpy(saved.actor_states[slot], &record, sizeof record);
     }
   }
 }

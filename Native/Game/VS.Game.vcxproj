@@ -2358,8 +2358,8 @@
     <ClInclude Include="src\Battle\TargetVolume.h" />
     <ClInclude Include="src\Battle\TextBoxes.h" />
     <ClInclude Include="src\Battle\ValueLabels.h" />
-    <ClInclude Include="src\Boot\GameLoop.h" />
-    <ClInclude Include="src\Boot\OverlayReset.h" />
+    <ClInclude Include="src\Boot\GameLoop.hpp" />
+    <ClInclude Include="src\Boot\OverlayReset.hpp" />
     <ClInclude Include="src\Boot\PlayerSettings.hpp" />
     <ClInclude Include="src\Effects\Camera.h" />
     <ClInclude Include="src\Effects\CameraLiveState.hpp" />
@@ -2560,12 +2560,11 @@
     <ClInclude Include="src\Menu\Status\ActorStatus.h" />
     <ClInclude Include="src\Menu\Status\TerminalControllersLiveInternal.hpp" />
     <ClInclude Include="src\Menu\TextBox.h" />
-    <ClInclude Include="src\State\Ashley.h" />
-    <ClInclude Include="src\State\Location.h" />
+    <ClInclude Include="src\State\Ashley.hpp" />
+    <ClInclude Include="src\State\Location.hpp" />
     <ClInclude Include="src\State\PlayTime.hpp" />
-    <ClInclude Include="src\State\RoomCache.h" />
-    <ClInclude Include="src\State\RoomMemory.h" />
-    <ClInclude Include="src\State\SceneTimer.h" />
+    <ClInclude Include="src\State\RoomCache.hpp" />
+    <ClInclude Include="src\State\RoomMemory.hpp" />
     <ClInclude Include="src\State\Settings.h" />
     <ClInclude Include="src\State\StateFlags.h" />
     <ClInclude Include="src\State\Timers.hpp" />
@@ -3134,7 +3133,6 @@
     <ClInclude Include="include\State\Clock.hpp" />
     <ClInclude Include="include\State\GameClock.hpp" />
     <ClInclude Include="include\State\GameClockLive.hpp" />
-    <ClInclude Include="include\State\GameTime.h" />
     <ClInclude Include="include\State\KillScore.hpp" />
     <ClInclude Include="include\State\KillScoreLive.hpp" />
     <ClInclude Include="include\State\Progress.h" />

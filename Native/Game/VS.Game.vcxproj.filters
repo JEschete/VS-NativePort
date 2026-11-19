@@ -1017,7 +1017,7 @@
     <ClCompile Include="src\Boot\GameLoop.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
-    <ClInclude Include="src\Boot\GameLoop.h">
+    <ClInclude Include="src\Boot\GameLoop.hpp">
       <Filter>src\Boot</Filter>
     </ClInclude>
     <ClCompile Include="src\Boot\GameplayLoop.cpp">
@@ -1038,7 +1038,7 @@
     <ClCompile Include="src\Boot\OverlayReset.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
-    <ClInclude Include="src\Boot\OverlayReset.h">
+    <ClInclude Include="src\Boot\OverlayReset.hpp">
       <Filter>src\Boot</Filter>
     </ClInclude>
     <ClCompile Include="src\Boot\PlayerSettings.cpp">
@@ -3117,7 +3117,7 @@
     <ClCompile Include="src\State\Ashley.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\Ashley.h">
+    <ClInclude Include="src\State\Ashley.hpp">
       <Filter>src\State</Filter>
     </ClInclude>
     <ClCompile Include="src\State\GameClock.cpp">
@@ -3135,7 +3135,7 @@
     <ClCompile Include="src\State\Location.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\Location.h">
+    <ClInclude Include="src\State\Location.hpp">
       <Filter>src\State</Filter>
     </ClInclude>
     <ClInclude Include="src\State\PlayTime.hpp">
@@ -3144,21 +3144,18 @@
     <ClCompile Include="src\State\Progress.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\RoomCache.h">
+    <ClInclude Include="src\State\RoomCache.hpp">
       <Filter>src\State</Filter>
     </ClInclude>
     <ClCompile Include="src\State\RoomMemory.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\RoomMemory.h">
+    <ClInclude Include="src\State\RoomMemory.hpp">
       <Filter>src\State</Filter>
     </ClInclude>
     <ClCompile Include="src\State\SceneTimer.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\SceneTimer.h">
-      <Filter>src\State</Filter>
-    </ClInclude>
     <ClCompile Include="src\State\SceneTimerLive.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
@@ -4894,9 +4891,6 @@
       <Filter>include\State</Filter>
     </ClInclude>
     <ClInclude Include="include\State\GameClockLive.hpp">
-      <Filter>include\State</Filter>
-    </ClInclude>
-    <ClInclude Include="include\State\GameTime.h">
       <Filter>include\State</Filter>
     </ClInclude>
     <ClInclude Include="include\State\KillScore.hpp">

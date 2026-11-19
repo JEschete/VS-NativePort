@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Items/ContainerIndexingLiveFixture.hpp"
 #include "Menu/Container/ContainerSortingLive.hpp"
@@ -65,7 +65,7 @@ TEST_CASE(
   owner.indices.gems[1] = kLast;
   owner.indices.gems[2] = kLast;
   sorting::SortLiveEquipment(kGem, kStrength);
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   CHECK(Menu_Container_containerData == &owner);
   CHECK(owner.indices.gems[0] == kLast);
   CHECK(owner.indices.gems[1] == kLast);

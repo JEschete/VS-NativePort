@@ -39,7 +39,7 @@
 #include "Battle/StatusQueueLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Battle/TargetVolume.h"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Boot/PlayerSettings.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
@@ -90,7 +90,7 @@
 #include "Render/Display.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/Progress.h"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
@@ -130,7 +130,7 @@ int pending_door_zone = 0;
 int pending_door_room = 0;
 
 int ResumeEncounter() {
-  Boot_isGameplayActive = 1;
+  VS::Boot::isGameplayActive = 1;
   VS::Boot::RunGameplayLoopLive();
   return 0;
 }
@@ -148,23 +148,23 @@ int EnterOrFinishEncounter() {
   // applied here without its publisher screens or audio setup.
   VS::State::stateFlags.difficulty = 1;
   VS::State::stateFlags.puzzleMode = 1;
-  State_savedEntryDoor.destinationZoneId = configuration.zone;
-  State_savedEntryDoor.destinationRoomId = configuration.room;
-  State_savedEntryDoor.entryTileX = configuration.player.x;
-  State_savedEntryDoor.entryTileZ = configuration.player.z;
-  State_savedEntryDoor.entryElevation = configuration.player.elevation;
-  State_savedEntryDoor.tileLocation.entryDirection =
+  VS::State::savedEntryDoor.destinationZoneId = configuration.zone;
+  VS::State::savedEntryDoor.destinationRoomId = configuration.room;
+  VS::State::savedEntryDoor.entryTileX = configuration.player.x;
+  VS::State::savedEntryDoor.entryTileZ = configuration.player.z;
+  VS::State::savedEntryDoor.entryElevation = configuration.player.elevation;
+  VS::State::savedEntryDoor.tileLocation.entryDirection =
       configuration.player.direction;
-  Boot_gameEntryMode = 0;
+  VS::Boot::gameEntryMode = 0;
   RestoreBootEventSelector();
   if (configuration.attract_demo) {
     // VS::Title::Run's idle timeout: _setTitleExitFlags (TITLE.PRG 22C.c:4741)
     // sets the demo flags and door; its cause becomes vs_battle_exec's entry
     // mode (SLUS main.c:8344), which returns to title (146C.c:7558).
     VS::Title::PrepareLiveExit(*configuration.attract_demo);
-    Boot_gameEntryMode = *configuration.attract_demo;
+    VS::Boot::gameEntryMode = *configuration.attract_demo;
   }
-  Boot_isClearSavePending = 0;
+  VS::Boot::isClearSavePending = 0;
   VS::Boot::LoadBattleOverlaysLive();
   InitializeEncounterPlayerWeapon(configuration.weapon);
   InitializeEncounterPlayerProfile(configuration.profile);
@@ -862,7 +862,7 @@ void InspectFloorTriggers(EncounterState& state) {
 
 EncounterState InspectGameplay() {
   EncounterState state;
-  state.ready = gameplay_inspection_ready && Boot_isGameplayActive != 0 &&
+  state.ready = gameplay_inspection_ready && VS::Boot::isGameplayActive != 0 &&
                 Field_controlMode != 0;
   if (!state.ready) return state;
   state.zone = VS::Field::zoneContext.zndId;
@@ -967,9 +967,10 @@ nlohmann::json InspectModels() {
 
 nlohmann::json InspectGameplayScene(const EncounterState& state) {
   const bool available = state.ready && gameplay_inspection_ready &&
-                         Boot_isGameplayActive != 0 && Field_controlMode != 0;
+                         VS::Boot::isGameplayActive != 0 &&
+                         Field_controlMode != 0;
   nlohmann::json scene{{"available", available},
-                       {"in_game", Boot_isGameplayActive != 0}};
+                       {"in_game", VS::Boot::isGameplayActive != 0}};
   // ENDING.PRG staff roll (Start skips it) and _renderCongratulationsScreen,
   // which holds until any pressed button once the credits have finished.
   scene["ending"] = {

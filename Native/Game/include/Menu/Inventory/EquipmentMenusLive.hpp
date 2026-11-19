@@ -31,7 +31,7 @@ int UpdateLiveEquipmentMenu(int initialize);
 // _dispatchEquipMenu's handler table bound to the Live slot menus, in the
 // original's order (armor, weapon, shield, accessory).
 [[nodiscard]] const EquipmentMenuHandlers& LiveEquipmentMenuHandlers();
-// MENU3.PRG reloads restore the menus' statics (Boot_ResetMenu3Statics).
+// MENU3.PRG reloads restore the menus' statics (VS::Boot::ResetMenu3Statics).
 void ResetEquipmentMenusLive();
 // Refusals logged since start-up.
 [[nodiscard]] std::uint64_t LiveEquipmentMenusRefusalCount();

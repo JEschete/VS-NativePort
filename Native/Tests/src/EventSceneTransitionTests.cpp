@@ -16,7 +16,7 @@
 #include "Event/ScriptStep.hpp"
 #include "Event/ScriptVm.h"
 #include "Field/DoorRecord.hpp"
-#include "State/RoomMemory.h"
+#include "State/RoomMemory.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -168,31 +168,31 @@ TEST_CASE("ScriptClearRoomActorCache refuses a short instruction",
 
 TEST_CASE("ScriptClearRoomActorCache opcode clears the live room records",
           "[event][scene-transition]") {
-  const auto saved = std::to_array(State_recentRoomEnemyStates);
-  const int saved_slot = State_currentRoomStateSlot;
+  const auto saved = std::to_array(VS::State::recentRoomEnemyStates);
+  const int saved_slot = VS::State::currentRoomStateSlot;
   constexpr unsigned char kRemembered = 0x5A;
-  for (State_RoomEnemyStates& record : State_recentRoomEnemyStates) {
-    record.mapId = 9;
-    record.zoneId = 12;
-    std::memset(record.actorStates, kRemembered, sizeof(record.actorStates));
+  for (VS::State::RoomEnemyStates& record : VS::State::recentRoomEnemyStates) {
+    record.map_id = 9;
+    record.zone_id = 12;
+    std::memset(record.actor_states, kRemembered, sizeof(record.actor_states));
   }
-  State_recentRoomEnemyStates[1].zoneId = 13;
-  State_recentRoomEnemyStates[2].mapId = 8;
-  State_currentRoomStateSlot = 0;
+  VS::State::recentRoomEnemyStates[1].zone_id = 13;
+  VS::State::recentRoomEnemyStates[2].map_id = 8;
+  VS::State::currentRoomStateSlot = 0;
   std::array<std::uint8_t, 3> bytes{0x53, 12, 9};
   CHECK(VS::Event::ScriptClearRoomActorCacheOpcode(bytes.data(), 0) == 0);
-  const auto first_byte = [](const State_RoomEnemyStates& record) {
+  const auto first_byte = [](const VS::State::RoomEnemyStates& record) {
     unsigned char value = 0;
-    std::memcpy(&value, record.actorStates, sizeof(value));
+    std::memcpy(&value, record.actor_states, sizeof(value));
     return value;
   };
-  CHECK(first_byte(State_recentRoomEnemyStates[0]) == 0);
-  CHECK(first_byte(State_recentRoomEnemyStates[1]) == kRemembered);
-  CHECK(first_byte(State_recentRoomEnemyStates[2]) == kRemembered);
-  CHECK(first_byte(State_recentRoomEnemyStates[3]) == 0);
-  CHECK(State_currentRoomStateSlot == 0);
-  std::copy(saved.begin(), saved.end(), State_recentRoomEnemyStates);
-  State_currentRoomStateSlot = saved_slot;
+  CHECK(first_byte(VS::State::recentRoomEnemyStates[0]) == 0);
+  CHECK(first_byte(VS::State::recentRoomEnemyStates[1]) == kRemembered);
+  CHECK(first_byte(VS::State::recentRoomEnemyStates[2]) == kRemembered);
+  CHECK(first_byte(VS::State::recentRoomEnemyStates[3]) == 0);
+  CHECK(VS::State::currentRoomStateSlot == 0);
+  std::copy(saved.begin(), saved.end(), VS::State::recentRoomEnemyStates);
+  VS::State::currentRoomStateSlot = saved_slot;
 }
 
 // --- F01104 func_800B92D0 ScriptSetHudVisible ---

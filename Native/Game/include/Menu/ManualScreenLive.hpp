@@ -28,7 +28,7 @@ int LiveInitHelpState();
 // decomp: MENUE.PRG _showMenu (494.c:245).
 int LiveUpdateHelpPages();
 
-// Call where MENUE.PRG loads (Boot_ResetMenueStatics): its reload zeroes
+// Call where MENUE.PRG loads (VS::Boot::ResetMenueStatics): its reload zeroes
 // vs_menuE_exec's statics.
 void ResetLiveManualScreenStatics();
 // The bound screen state, for the reset and tests.

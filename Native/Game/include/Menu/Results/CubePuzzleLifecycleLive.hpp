@@ -17,6 +17,6 @@ int LiveUpdateCubePuzzleStart();
 int LiveUpdateCubePuzzleResults();
 int LiveUpdateCubePuzzleQuit();
 // The IQ.DIS and ESC.DIS requests and buffers (the initializers' statics),
-// cleared when MENUF.PRG reloads (Boot_ResetMenufStatics).
+// cleared when MENUF.PRG reloads (VS::Boot::ResetMenufStatics).
 void ResetLiveCubePuzzleLifecycleStatics();
 }  // namespace VS::Menu::Results

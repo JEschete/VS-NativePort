@@ -233,7 +233,7 @@
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
 #include "Battle/ValueLabels.h"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Core/Legacy.hpp"
 #include "Core/Math/FixedPoint.hpp"
 #include "Core/Overlays.hpp"
@@ -341,12 +341,12 @@
 #include "Render/Text/VariableFont.hpp"
 #include "Render/Textures.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Ashley.h"
-#include "State/Location.h"
+#include "State/Ashley.hpp"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
-#include "State/RoomCache.h"
-#include "State/RoomMemory.h"
+#include "State/RoomCache.hpp"
+#include "State/RoomMemory.hpp"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
 #include "Title/TitleMenuLiveState.hpp"
@@ -940,14 +940,14 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x800501E0u, 640u, (void*)&Content_discRequestSlots, sizeof Content_discRequestSlots, 0u, 0u},
     {"SLUS_010.40", 0x80050460u, 4u, (void*)&Content_discRequestCounts, sizeof Content_discRequestCounts, 0u, 0u},
     {"SLUS_010.40", 0x80050468u, 8u, (void*)&VS::State::sceneTimer, sizeof VS::State::sceneTimer, 0u, 0u},
-    {"SLUS_010.40", 0x80050470u, 4u, (void*)&Boot_gameEntryMode, sizeof Boot_gameEntryMode, 1u, 1u},
-    {"SLUS_010.40", 0x80050474u, 4u, (void*)&Boot_titleReturnStackPointer, sizeof Boot_titleReturnStackPointer, 1u, 1u},
+    {"SLUS_010.40", 0x80050470u, 4u, (void*)&VS::Boot::gameEntryMode, sizeof VS::Boot::gameEntryMode, 1u, 1u},
+    {"SLUS_010.40", 0x80050474u, 4u, (void*)&VS::Boot::titleReturnStackPointer, sizeof VS::Boot::titleReturnStackPointer, 1u, 1u},
     {"SLUS_010.40", 0x80050478u, 22528u, (void*)&VS::Audio::menuSoundEffects, sizeof VS::Audio::menuSoundEffects, 1u, 1u},
     {"SLUS_010.40", 0x80055C80u, 8u, (void*)&VS::Render::legacyOrderingTables, sizeof VS::Render::legacyOrderingTables, 0u, 0u},
-    {"SLUS_010.40", 0x80055C88u, 4u, (void*)&Boot_isSoftResetEnabled, sizeof Boot_isSoftResetEnabled, 1u, 1u},
+    {"SLUS_010.40", 0x80055C88u, 4u, (void*)&VS::Boot::isSoftResetEnabled, sizeof VS::Boot::isSoftResetEnabled, 1u, 1u},
     {"SLUS_010.40", 0x80055D10u, 28u, (void*)&Content_discDriveState, sizeof Content_discDriveState, 0u, 0u},
     {"SLUS_010.40", 0x80055D2Cu, 11u, (void*)&Content_discControlResponseBytes, sizeof Content_discControlResponseBytes, 1u, 1u},
-    {"SLUS_010.40", 0x8005DFD0u, 4u, (void*)&Boot_battleReturnStackPointer, sizeof Boot_battleReturnStackPointer, 1u, 1u},
+    {"SLUS_010.40", 0x8005DFD0u, 4u, (void*)&VS::Boot::battleReturnStackPointer, sizeof VS::Boot::battleReturnStackPointer, 1u, 1u},
     {"SLUS_010.40", 0x8005DFF0u, 68u, (void*)&VS::Input::legacyPadResponseBytes, sizeof VS::Input::legacyPadResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005E038u, 136u, (void*)&VS::Audio::soundState, sizeof VS::Audio::soundState, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C0u, 8u, (void*)&VS::Render::legacyPrimitiveBuffers, sizeof VS::Render::legacyPrimitiveBuffers, 0u, 0u},
@@ -956,8 +956,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8005E188u, 40u, (void*)&VS::Render::legacyDisplayEnvironments, sizeof VS::Render::legacyDisplayEnvironments, 1u, 1u},
     {"SLUS_010.40", 0x8005E1D8u, 4u, (void*)&VS::Ending::Credits::xaResumeFrameCount, sizeof VS::Ending::Credits::xaResumeFrameCount, 1u, 1u},
     {"SLUS_010.40", 0x8005E210u, 4u, (void*)&VS::Render::frameBuf, sizeof VS::Render::frameBuf, 1u, 1u},
-    {"SLUS_010.40", 0x8005E214u, 4u, (void*)&Boot_isClearSavePending, sizeof Boot_isClearSavePending, 1u, 1u},
-    {"SLUS_010.40", 0x8005E240u, 4u, (void*)&Boot_isGameplayActive, sizeof Boot_isGameplayActive, 1u, 1u},
+    {"SLUS_010.40", 0x8005E214u, 4u, (void*)&VS::Boot::isClearSavePending, sizeof VS::Boot::isClearSavePending, 1u, 1u},
+    {"SLUS_010.40", 0x8005E240u, 4u, (void*)&VS::Boot::isGameplayActive, sizeof VS::Boot::isGameplayActive, 1u, 1u},
     {"SLUS_010.40", 0x8005E248u, 4u, (void*)&VS::Render::projectionDistance, sizeof VS::Render::projectionDistance, 1u, 1u},
     {"SLUS_010.40", 0x8005E24Cu, 4u, (void*)&VS::State::tickSpeed, sizeof VS::State::tickSpeed, 0u, 0u},
     {"SLUS_010.40", 0x8005FE70u, 4u, (void*)&VS::Audio::nextSfxChannelGroup1, sizeof VS::Audio::nextSfxChannelGroup1, 1u, 1u},
@@ -970,12 +970,12 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8005FFB8u, 32u, (void*)&State_learnedActionFlags, sizeof State_learnedActionFlags, 1u, 1u},
     {"SLUS_010.40", 0x8005FFD8u, 72u, (void*)&State_roomVisitProgress, sizeof State_roomVisitProgress, 1u, 1u},
     {"SLUS_010.40", 0x80060040u, 36u, (void*)&VS::State::artsStatus, sizeof VS::State::artsStatus, 0u, 0u},
-    {"SLUS_010.40", 0x80060064u, 4u, (void*)&State_currentRoomStateSlot, sizeof State_currentRoomStateSlot, 1u, 1u},
-    {"SLUS_010.40", 0x80060068u, 256u, (void*)&State_ashleySnapshot, sizeof State_ashleySnapshot, 1u, 1u},
+    {"SLUS_010.40", 0x80060064u, 4u, (void*)&VS::State::currentRoomStateSlot, sizeof VS::State::currentRoomStateSlot, 1u, 1u},
+    {"SLUS_010.40", 0x80060068u, 256u, (void*)&VS::State::ashleySnapshot, sizeof VS::State::ashleySnapshot, 1u, 1u},
     {"SLUS_010.40", 0x80060168u, 3840u, (void*)&VS::Items::inventory, sizeof VS::Items::inventory, 1u, 1u},
-    {"SLUS_010.40", 0x80061068u, 12u, (void*)&State_savedEntryDoor, sizeof State_savedEntryDoor, 1u, 1u},
+    {"SLUS_010.40", 0x80061068u, 12u, (void*)&VS::State::savedEntryDoor, sizeof VS::State::savedEntryDoor, 1u, 1u},
     {"SLUS_010.40", 0x80061074u, 4u, (void*)&VS::State::playTime, sizeof VS::State::playTime, 0u, 0u},
-    {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
+    {"SLUS_010.40", 0x80061078u, 1312u, (void*)&VS::State::recentRoomEnemyStates, sizeof VS::State::recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&VS::State::stateFlags, sizeof VS::State::stateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&VS::Items::inventoryIndices, sizeof VS::Items::inventoryIndices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x8009998Cu, 0u, (void*)&VS::Field::CreateGimmickInstanceEntry, 0u, 0u, 0u},

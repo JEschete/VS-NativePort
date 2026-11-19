@@ -192,7 +192,7 @@ TEST_CASE(
   fixture.OpenMiscSort();
   fixture.Frame(dialogs::UpdateLiveSortMenu, input::Down);
   fixture.Frame(dialogs::UpdateLiveSortMenu);
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   REQUIRE(fixture.Frame(dialogs::UpdateLiveSortMenu, input::Circle) == 2);
   REQUIRE(owner.indices.misc[0] == 256);
 }
@@ -246,7 +246,7 @@ TEST_CASE(
   fixture.OpenQuantity(kSmallStack);
   fixture.Frame(dialogs::UpdateLiveDiscardMenu, input::Up);
   fixture.Frame(dialogs::UpdateLiveDiscardMenu);
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   REQUIRE(fixture.Frame(dialogs::UpdateLiveDiscardMenu, input::Circle) == 0);
   REQUIRE(fixture.rows[34].text[4] == 1);
   REQUIRE(fixture.rows[34].text[6] == 0);

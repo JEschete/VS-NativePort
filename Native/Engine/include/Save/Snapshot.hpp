@@ -74,7 +74,7 @@ struct CameraPose {
   std::int32_t distance = 0;
 };
 
-// State_AshleyStatsSnapshot after its pending flag.
+// VS::State::AshleyStatsSnapshot after its pending flag.
 struct AshleySnapshot {
   AshleyCombatStats stats;
   CameraPose camera;
@@ -106,7 +106,7 @@ class SnapshotHost {
                                        TilePlacement placement,
                                        std::uint16_t flag_id);
 [[nodiscard]] LearnedActions PackLearnedActions(SnapshotHost& host);
-// Sets State_AshleySnapshot's pending flag in its bytes.
+// Sets VS::State::AshleySnapshot's pending flag in its bytes.
 void MarkAshleySnapshotValid(std::span<std::byte, kAshleySnapshotBytes> bytes);
 void CaptureAshleySnapshot(SnapshotHost& host);
 }  // namespace VS::Save

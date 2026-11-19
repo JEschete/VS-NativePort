@@ -9,7 +9,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
@@ -316,7 +316,7 @@ class LiveAssetFixture {
     VS::Title::saveMenuText = saved_title_text_;
     VS::Title::saveFileSummaries = saved_summaries_;
     VS::Title::cardDirectoryEntryBuffer = saved_directory_;
-    Boot_isSoftResetEnabled = saved_soft_reset_;
+    VS::Boot::isSoftResetEnabled = saved_soft_reset_;
     std::memcpy(Content_discRequestSlots, saved_slots_.data(),
                 sizeof Content_discRequestSlots);
     Content_discRequestCounts = saved_counts_;
@@ -334,7 +334,7 @@ class LiveAssetFixture {
   std::array<Content_DiscQueueSlot, 32> saved_slots_{};
   Content_DiscRequestCounts saved_counts_ = Content_discRequestCounts;
   Content_DiscDrive saved_drive_ = Content_discDriveState;
-  int saved_soft_reset_ = Boot_isSoftResetEnabled;
+  int saved_soft_reset_ = VS::Boot::isSoftResetEnabled;
   u_short* saved_menu_text_ = VS::Menu::Files::textTable;
   u_short* saved_title_text_ = VS::Title::saveMenuText;
   Save_CardFileInfoRecord* saved_summaries_ = VS::Title::saveFileSummaries;

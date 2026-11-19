@@ -8,40 +8,42 @@
 
 #include "Event/ScriptControlOpcodes.hpp"
 #include "Legacy/Psx.h"
-#include "State/RoomMemory.h"
+#include "State/RoomMemory.hpp"
 
 namespace {
 struct RoomActorCacheFixture {
-  decltype(std::to_array(State_recentRoomEnemyStates)) saved =
-      std::to_array(State_recentRoomEnemyStates);
-  int saved_slot = State_currentRoomStateSlot;
+  decltype(std::to_array(VS::State::recentRoomEnemyStates)) saved =
+      std::to_array(VS::State::recentRoomEnemyStates);
+  int saved_slot = VS::State::currentRoomStateSlot;
 
   RoomActorCacheFixture() {
-    constexpr std::array<decltype(State_recentRoomEnemyStates[0].mapId), 4>
+    constexpr std::array<decltype(VS::State::recentRoomEnemyStates[0].map_id),
+                         4>
         kRooms{7, 7, 8, 7};
-    constexpr std::array<decltype(State_recentRoomEnemyStates[0].zoneId), 4>
+    constexpr std::array<decltype(VS::State::recentRoomEnemyStates[0].zone_id),
+                         4>
         kZones{31, 32, 31, 31};
     for (std::size_t index = 0; index < kRooms.size(); ++index) {
-      auto& record = State_recentRoomEnemyStates[index];
-      record.mapId = kRooms[index];
-      record.zoneId = kZones[index];
-      std::memset(record.actorStates, 0x5A, sizeof(record.actorStates));
+      auto& record = VS::State::recentRoomEnemyStates[index];
+      record.map_id = kRooms[index];
+      record.zone_id = kZones[index];
+      std::memset(record.actor_states, 0x5A, sizeof(record.actor_states));
     }
-    State_currentRoomStateSlot = 1;
+    VS::State::currentRoomStateSlot = 1;
   }
 
   ~RoomActorCacheFixture() {
-    std::copy(saved.begin(), saved.end(), State_recentRoomEnemyStates);
-    State_currentRoomStateSlot = saved_slot;
+    std::copy(saved.begin(), saved.end(), VS::State::recentRoomEnemyStates);
+    VS::State::currentRoomStateSlot = saved_slot;
   }
 };
 
 void CheckRoomActorCache(std::size_t index, int room, int zone,
                          std::byte expected) {
-  const auto& record = State_recentRoomEnemyStates[index];
-  CHECK(record.mapId == room);
-  CHECK(record.zoneId == zone);
-  const auto bytes = std::as_bytes(std::span(record.actorStates));
+  const auto& record = VS::State::recentRoomEnemyStates[index];
+  CHECK(record.map_id == room);
+  CHECK(record.zone_id == zone);
+  const auto bytes = std::as_bytes(std::span(record.actor_states));
   CHECK(std::ranges::all_of(
       bytes, [expected](std::byte value) { return value == expected; }));
 }
@@ -92,7 +94,7 @@ TEST_CASE("Room cache opcode clears matching room and zone without loading",
   CheckRoomActorCache(1, 7, 32, std::byte{0x5A});
   CheckRoomActorCache(2, 8, 31, std::byte{0x5A});
   CheckRoomActorCache(3, 7, 31, std::byte{0});
-  CHECK(State_currentRoomStateSlot == 1);
+  CHECK(VS::State::currentRoomStateSlot == 1);
   CHECK(VS::Event::ScriptClearRoomActorCacheOpcode(command.data(), 0) == 0);
   command = {0, 255, 255};
   CHECK(VS::Event::ScriptClearRoomActorCacheOpcode(command.data(), 3) == 0);

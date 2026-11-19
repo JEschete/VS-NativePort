@@ -22,6 +22,6 @@ int LiveUpdateTransferDirection(int initialize_direction_menu);
 // decomp: vs_menuD_exec (src/MENU/MENUD.PRG/234.c:3130), 80108C6C.
 int LiveUpdateScreen(u_char* screen_step);
 // Restores the controllers' MENUD statics to their load-time values; a
-// MENUD.PRG reload (Boot_ResetMenudStatics) must call it.
+// MENUD.PRG reload (VS::Boot::ResetMenudStatics) must call it.
 void ResetLiveContainerTransferStatics();
 }  // namespace VS::Menu::container

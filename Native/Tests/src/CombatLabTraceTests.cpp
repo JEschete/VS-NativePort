@@ -24,7 +24,7 @@
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.hpp"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "CombatLab/Trace.hpp"
 #include "Core/RandomLive.hpp"
 #include "Diagnostics/PlayerObservation.hpp"
@@ -801,7 +801,7 @@ TEST_CASE("Detailed runs preserve previous evidence and report invalid output",
 
 namespace {
 struct GameplayInspectionFixture {
-  int saved_gameplay = Boot_isGameplayActive;
+  int saved_gameplay = VS::Boot::isGameplayActive;
   decltype(Field_controlMode) saved_control = Field_controlMode;
   decltype(Battle_actionState) saved_action = Battle_actionState;
   decltype(VS::Items::lootListHead) saved_loot = VS::Items::lootListHead;
@@ -839,7 +839,7 @@ struct GameplayInspectionFixture {
 
   GameplayInspectionFixture() {
     VS::Boot::ResetGameplayInspection();
-    Boot_isGameplayActive = 1;
+    VS::Boot::isGameplayActive = 1;
     Field_controlMode = 1;
     Battle_actionState = nullptr;
     VS::Items::lootListHead = nullptr;
@@ -867,7 +867,7 @@ struct GameplayInspectionFixture {
 
   ~GameplayInspectionFixture() {
     VS::Boot::ResetGameplayInspection();
-    Boot_isGameplayActive = saved_gameplay;
+    VS::Boot::isGameplayActive = saved_gameplay;
     Field_controlMode = saved_control;
     Battle_actionState = saved_action;
     VS::Items::lootListHead = saved_loot;
@@ -947,7 +947,7 @@ TEST_CASE("Normal-game inspection observes scene models only in a ready field",
   const auto loading = VS::Game::InspectGameplay();
   CHECK_FALSE(loading.ready);
   CHECK_FALSE(VS::Game::InspectGameplayScene(loading).contains("models"));
-  Boot_isGameplayActive = 0;
+  VS::Boot::isGameplayActive = 0;
   VS::Boot::EncounterPollStop();
   CHECK_FALSE(VS::Game::InspectGameplay().ready);
 }

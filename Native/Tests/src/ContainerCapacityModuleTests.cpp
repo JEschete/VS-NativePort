@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Items/ContainerGemCountsLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"

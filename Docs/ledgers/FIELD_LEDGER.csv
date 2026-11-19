@@ -1195,12 +1195,12 @@ T00203.001,T00203,D_80039BC8_t,1,SpuAddr,0,int,,,,spu_address,Next SPU transfer 
 T00203.002,T00203,D_80039BC8_t,2,SpuBytesRemaining,0,u_int,,,,spu_bytes_remaining,Sample bytes still to transfer,high,source:25AC.c:846
 T00203.003,T00203,D_80039BC8_t,3,InstrumentBytesRemaining,0,u_int,,,remainingInstrumentHeaderBytes,instrument_bytes_remaining,Instrument bytes still to copy,high,source:25AC.c:848
 T00204.000,T00204,D_80050468_t,0,unk0,1,char,,,timerMode,mode,0 stopped 1 counts up any other value counts down,high,source:146C.c:14508;source:146C.c:8513
-T00204.001,T00204,D_80050468_t,1,unk1,1,char,,,suspendedTimerMode,pausedMode,Mode saved while the timer is paused and restored on resume,high,source:146C.c:8553;source:146C.c:8557
-T00204.002,T00204,D_80050468_t,2,unk2,1,u_short,,,resetScope,resetScope,Resets on room load (0) zone load (1) or scene transition (2),high,source:146C.c:15313;source:146C.c:14844;source:146C.c:14768
-T00204.003,T00204,D_80050468_t,3,frames,0,signed char,,,,frames,Frames part of the timer,high,source:146C.c:14510
-T00204.004,T00204,D_80050468_t,4,seconds,0,signed char,,,,seconds,Seconds part of the timer,high,source:146C.c:14513
-T00204.005,T00204,D_80050468_t,5,minutes,0,signed char,,,,minutes,Minutes part of the timer,high,source:146C.c:14515
-T00204.006,T00204,D_80050468_t,6,hours,0,signed char,,,,hours,Hours part of the timer,high,source:146C.c:14532
+T00204.001,T00204,D_80050468_t,1,unk1,1,char,,,suspendedTimerMode,paused_mode,Mode saved while the timer is paused and restored on resume,high,source:146C.c:8553;source:146C.c:8557
+T00204.002,T00204,D_80050468_t,2,unk2,1,u_short,,,resetScope,reset_scope,Resets on room load (0) zone load (1) or scene transition (2),high,source:146C.c:15313;source:146C.c:14844;source:146C.c:14768
+T00204.003,T00204,D_80050468_t,3,frames,0,signed char,,,,frames,Frames part of the timer,high,"source:146C.c:14510;native:nested in SceneTimer::time (State::SceneTime), not a direct member"
+T00204.004,T00204,D_80050468_t,4,seconds,0,signed char,,,,seconds,Seconds part of the timer,high,"source:146C.c:14513;native:nested in SceneTimer::time (State::SceneTime), not a direct member"
+T00204.005,T00204,D_80050468_t,5,minutes,0,signed char,,,,minutes,Minutes part of the timer,high,"source:146C.c:14515;native:nested in SceneTimer::time (State::SceneTime), not a direct member"
+T00204.006,T00204,D_80050468_t,6,hours,0,signed char,,,,hours,Hours part of the timer,high,"source:146C.c:14532;native:nested in SceneTimer::time (State::SceneTime), not a direct member"
 T00205.000,T00205,D_8005DC6C_t,0,r,0,char,,,,red,Red component,high,source:main.c:10791
 T00205.001,T00205,D_8005DC6C_t,1,g,0,char,,,,green,Green component,high,source:main.c:10792
 T00205.002,T00205,D_8005DC6C_t,2,b,0,char,,,,blue,Blue component,high,source:main.c:10793
@@ -1210,35 +1210,35 @@ T00206.001,T00206,D_8005DC80_t,1,unk6,1,short[5],,,,blendParams,Shorts: [0..2] p
 T00206.002,T00206,D_8005DC80_t,2,unk10,1,int[6],,,colorValuesAndSteps,colorFixed,Current red green blue in 16.16 then the per-frame step of each,high,source:main.c:11012;source:main.c:11297
 T00206.003,T00206,D_8005DC80_t,3,unk28,1,D_8005DC6C_t,,,,baseColor,Base color that relative transitions are computed from,high,source:main.c:11051;source:main.c:11089
 T00207.000,T00207,D_80060068_t,0,unk0,1,D_80060068_t3,,,,stats,Ashley's statistics status and limb records,high,source:260.c:811
-T00207.001,T00207,D_80060068_t,1,unkDC,1,int[9],,,,reservedDC,Unread words completing the 256-byte snapshot; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\src\State\Ashley.h:45;declaration-only;source:main.h:235;source-review:#148 main.h:235 declares int unkDC[9] after the 0xDC-byte stats record, making the snapshot0x100. func_80042CB0 and Actors_RestoreAshleyRuntimeState access only stats; save packaging copies the whole snapshot. No tail-field reads or writes give these nine words a semantic payload. Preserve int[9] and the 0x100 assertion."
+T00207.001,T00207,D_80060068_t,1,unkDC,1,int[9],,,,reserved_dc,Unread words completing the 256-byte snapshot; not used by native code; kept for the original layout,med,"native-refs:none;source:native:Native\Game\src\State\Ashley.hpp:53;declaration-only;source:main.h:235;source-review:#148 main.h:235 declares int unkDC[9] after the 0xDC-byte stats record, making the snapshot0x100. func_80042CB0 and Actors_RestoreAshleyRuntimeState access only stats; save packaging copies the whole snapshot. No tail-field reads or writes give these nine words a semantic payload. Preserve int[9] and the 0x100 assertion."
 T00208.000,T00208,D_80060068_t2,0,hp,0,u_short,,,,hp,Limb hit points,high,source:BATTLE/INITBTL.PRG/18.c:337
-T00208.001,T00208,D_80060068_t2,1,maxHp,0,u_short,,,,maxHp,Limb maximum hit points,high,source:BATTLE/INITBTL.PRG/18.c:338
+T00208.001,T00208,D_80060068_t2,1,maxHp,0,u_short,,,,max_hp,Limb maximum hit points,high,source:BATTLE/INITBTL.PRG/18.c:338
 T00208.002,T00208,D_80060068_t2,2,types,0,u_short[4],,,,types,Saved limb type values,high,source:BATTLE/INITBTL.PRG/18.c:341
 T00208.003,T00208,D_80060068_t2,3,affinities,0,u_short[8],,,,affinities,Saved limb affinity values,high,source:BATTLE/INITBTL.PRG/18.c:345
-T00209.000,T00209,D_80060068_t3,0,unk0,1,int,,,restoreSnapshot,isPending,Nonzero while the snapshot still has to be restored; cleared by the restore,med,source:BATTLE/INITBTL.PRG/18.c:356
-T00209.001,T00209,D_80060068_t3,1,currentHP,0,short,,,,currentHp,Hit points,high,source:BATTLE/INITBTL.PRG/18.c:317
-T00209.002,T00209,D_80060068_t3,2,maxHP,0,short,,,,maxHp,Maximum hit points,high,source:BATTLE/INITBTL.PRG/18.c:318
-T00209.003,T00209,D_80060068_t3,3,currentMP,0,short,,,,currentMp,Magic points,high,source:BATTLE/INITBTL.PRG/18.c:319
-T00209.004,T00209,D_80060068_t3,4,maxMP,0,short,,,,maxMp,Maximum magic points,high,source:BATTLE/INITBTL.PRG/18.c:320
+T00209.000,T00209,D_80060068_t3,0,unk0,1,int,,,restoreSnapshot,is_pending,Nonzero while the snapshot still has to be restored; cleared by the restore,med,source:BATTLE/INITBTL.PRG/18.c:356
+T00209.001,T00209,D_80060068_t3,1,currentHP,0,short,,,,current_hp,Hit points,high,source:BATTLE/INITBTL.PRG/18.c:317
+T00209.002,T00209,D_80060068_t3,2,maxHP,0,short,,,,max_hp,Maximum hit points,high,source:BATTLE/INITBTL.PRG/18.c:318
+T00209.003,T00209,D_80060068_t3,3,currentMP,0,short,,,,current_mp,Magic points,high,source:BATTLE/INITBTL.PRG/18.c:319
+T00209.004,T00209,D_80060068_t3,4,maxMP,0,short,,,,max_mp,Maximum magic points,high,source:BATTLE/INITBTL.PRG/18.c:320
 T00209.005,T00209,D_80060068_t3,5,strength,0,short,,,,strength,Base strength,high,source:BATTLE/INITBTL.PRG/18.c:321
-T00209.006,T00209,D_80060068_t3,6,totalStrength,0,short,,,,totalStrength,Strength including equipment,high,source:BATTLE/INITBTL.PRG/18.c:322
+T00209.006,T00209,D_80060068_t3,6,totalStrength,0,short,,,,total_strength,Strength including equipment,high,source:BATTLE/INITBTL.PRG/18.c:322
 T00209.007,T00209,D_80060068_t3,7,intelligence,0,short,,,,intelligence,Base intelligence,high,source:BATTLE/INITBTL.PRG/18.c:323
-T00209.008,T00209,D_80060068_t3,8,totalIntelligence,0,short,,,,totalIntelligence,Intelligence including equipment,high,source:BATTLE/INITBTL.PRG/18.c:324
+T00209.008,T00209,D_80060068_t3,8,totalIntelligence,0,short,,,,total_intelligence,Intelligence including equipment,high,source:BATTLE/INITBTL.PRG/18.c:324
 T00209.009,T00209,D_80060068_t3,9,agility,0,short,,,,agility,Base agility,high,source:BATTLE/INITBTL.PRG/18.c:325
-T00209.010,T00209,D_80060068_t3,10,totalAgility,0,short,,,,totalAgility,Agility including equipment,high,source:BATTLE/INITBTL.PRG/18.c:326
+T00209.010,T00209,D_80060068_t3,10,totalAgility,0,short,,,,total_agility,Agility including equipment,high,source:BATTLE/INITBTL.PRG/18.c:326
 T00209.011,T00209,D_80060068_t3,11,risk,0,short,,,,risk,Risk,high,source:BATTLE/INITBTL.PRG/18.c:327
-T00209.012,T00209,D_80060068_t3,12,flags,0,u_short,,,,actorFlags,Actor flag word restored into the actor record at +0x954,low,source:BATTLE/INITBTL.PRG/18.c:328
+T00209.012,T00209,D_80060068_t3,12,flags,0,u_short,,,,action_recovery_timer,"Action recovery timer, restored into the actor's action recovery timer (vs_battle_actor2.unk954, T00631.037)",high,"source:BATTLE/INITBTL.PRG/18.c:328;source-review:#441 18.c:328 copies this word into vs_battle_actor2.unk954, which T00631.037 names actionRecoveryTimer (high); Save SnapshotLive stores stats.actionRecoveryTimer into it"
 T00209.013,T00209,D_80060068_t3,13,statuses,0,int,,,,statuses,Status bits re-inflicted on restore,high,source:BATTLE/INITBTL.PRG/18.c:330
-T00209.014,T00209,D_80060068_t3,14,statusTimers,0,char[8],,,,statusTimers,Remaining duration of each status,high,source:BATTLE/INITBTL.PRG/18.c:333
+T00209.014,T00209,D_80060068_t3,14,statusTimers,0,char[8],,,,status_timers,Remaining duration of each status,high,source:BATTLE/INITBTL.PRG/18.c:333
 T00209.015,T00209,D_80060068_t3,15,limbs,0,D_80060068_t2[6],,,,limbs,"Per-limb hit points, types and affinities",high,source:BATTLE/INITBTL.PRG/18.c:337
-T00209.016,T00209,D_80060068_t3,16,weaponDrawn,0,int,,,,weaponDrawn,Bit 0 set when the weapon was drawn,high,source:BATTLE/INITBTL.PRG/18.c:349
-T00209.017,T00209,D_80060068_t3,17,unk80,1,int,,,cameraPitchDelta,cameraPitch,Camera pitch delta restored on re-entry,high,source:BATTLE/INITBTL.PRG/18.c:357
-T00209.018,T00209,D_80060068_t3,18,unk84,1,int,,,cameraInitialDistance,cameraDistance,Camera initial distance restored on re-entry,high,source:BATTLE/INITBTL.PRG/18.c:358
+T00209.016,T00209,D_80060068_t3,16,weaponDrawn,0,int,,,,weapon_drawn,Bit 0 set when the weapon was drawn,high,source:BATTLE/INITBTL.PRG/18.c:349
+T00209.017,T00209,D_80060068_t3,17,unk80,1,int,,,cameraPitchDelta,camera_pitch,Camera pitch delta restored on re-entry,high,source:BATTLE/INITBTL.PRG/18.c:357
+T00209.018,T00209,D_80060068_t3,18,unk84,1,int,,,cameraInitialDistance,camera_distance,Camera initial distance restored on re-entry,high,source:BATTLE/INITBTL.PRG/18.c:358
 T00210.000,T00210,D_80061078_t,0,unk0,1,char,,,,recency,"4 for the current room, lower for older rooms, 0 when unused",high,source:146C.c:15233;source:146C.c:15229
-T00210.001,T00210,D_80061078_t,1,zndId,0,char,,,,zoneId,Zone of the remembered room,high,source:146C.c:794
-T00210.002,T00210,D_80061078_t,2,mapId,0,u_short,,,,mapId,Map of the remembered room,high,source:146C.c:794
-T00210.003,T00210,D_80061078_t,3,unk4,1,u_int,,,next replacement slot,nextSlot,Slot reused when no saved state matches; wraps at 8,high,source:146C.c:830
-T00210.004,T00210,D_80061078_t,4,unk8,1,char[8][40],,,saved actor states,actorStates,Eight 40-byte saved actor states; byte 0 is spawn index + 1,high,source:146C.c:806
+T00210.001,T00210,D_80061078_t,1,zndId,0,char,,,,zone_id,Zone of the remembered room,high,source:146C.c:794
+T00210.002,T00210,D_80061078_t,2,mapId,0,u_short,,,,map_id,Map of the remembered room,high,source:146C.c:794
+T00210.003,T00210,D_80061078_t,3,unk4,1,u_int,,,next replacement slot,next_slot,Slot reused when no saved state matches; wraps at 8,high,source:146C.c:830
+T00210.004,T00210,D_80061078_t,4,unk8,1,char[8][40],,,saved actor states,actor_states,Eight 40-byte saved actor states; byte 0 is spawn index + 1,high,source:146C.c:806
 T00211.000,T00211,D_800E8594_t,0,unk0,1,short,,,,positionX,Horizontal position plus 128,med,source:146C.c:17222;use cited by sanity pass;source:146C.c:187
 T00211.001,T00211,D_800E8594_t,1,unk2,1,short,,,,height,Ground height at the marker,med,source:146C.c:17224;use cited by sanity pass;source:146C.c:188
 T00211.002,T00211,D_800E8594_t,2,unk4,1,short,,,,positionZ,Depth position plus 128,med,source:146C.c:17223;use cited by sanity pass;source:146C.c:189
@@ -3092,7 +3092,7 @@ T00348.010,T00348,_zoneContext_t,10,musicId,0,int,,,,musicId,Zone music,med,sour
 T00348.011,T00348,_zoneContext_t,11,musicSlot,0,int,,,,musicSlot,Music slot,med,source:146C.c:14873;use cited by sanity pass;source:146C.h:703
 T00348.012,T00348,_zoneContext_t,12,unk30,1,int,,,,isMusicFadeEnabled,Fade music when the next zone uses another track,med,source:146C.c:14818;source:146C.c:14882
 T00348.013,T00348,_zoneContext_t,13,mapId,0,int,,,,mapId,Loaded room identifier,med,source:146C.c:8914;use cited by sanity pass;source:146C.h:705
-T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,reserved38,Cleared on zone load; no reader identified; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Boot\GameplayOverlayLive.cpp:118;source:146C.c:14883
+T00348.014,T00348,_zoneContext_t,14,unk38,1,int,,,,reserved38,Cleared on zone load; no reader identified; written but never read by native code; kept for the original layout,med,native-refs:write-only;source:native:Native\Game\src\Boot\GameplayOverlayLive.cpp:119;source:146C.c:14883
 T00348.015,T00348,_zoneContext_t,15,unk3C,1,short,,,,tileColumns,Collision map columns,high,source:146C.c:15331
 T00348.016,T00348,_zoneContext_t,16,unk3E,1,short,,,,tileRows,Collision map rows,high,source:146C.c:15332
 T00348.017,T00348,_zoneContext_t,17,bounds,0,_zoneContextBounds,,,,bounds,Map tile bounds,med,source:146C.c:2435;use cited by sanity pass;source:146C.h:709
@@ -6902,8 +6902,8 @@ T00812.000,T00812,targetMovementPoint,0,raw,0,unsigned int,,,,word,Whole word,me
 T00812.001,T00812,targetMovementPoint,1,b,0,unsigned char[4],,,,bytes,Bytes of the word,med,source:771A8.c:1988
 T00813.000,T00813,terrainMovementPoint,0,raw,0,unsigned int,,,,word,Whole word,med,source:771A8.c:1524
 T00813.001,T00813,terrainMovementPoint,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\771A8.c:1475:5),,,,tile,Tile bytes,med,source:771A8.c:1520
-T00814.000,T00814,vs_Gametime_t,0,t,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),,,,t,Named in the fork; see cited use,med,source:D4.c:1509
-T00814.001,T00814,vs_Gametime_t,1,all,0,u_int,,,,all,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:4165
+T00814.000,T00814,vs_Gametime_t,0,t,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\..\..\SLUS_010.40\main.h:166:5),,,,t,"The play time as frames, seconds, minutes and hours",med,replaced-by:State PlayTime (ClockTime) members;source:D4.c:1509
+T00814.001,T00814,vs_Gametime_t,1,all,0,u_int,,,,all,"The play time packed into one word, frames in the low byte",med,replaced-by:State PackPlayTime and UnpackPlayTime;source:MENU/MENU7.PRG/260.c:4165
 T00815.000,T00815,vs_battle_movementPosition,0,raw,0,unsigned int,,,,word,Whole word,med,source:6FC00.c:464
 T00815.001,T00815,vs_battle_movementPosition,1,p,0,struct (unnamed struct at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\6FC00.c:415:5),,,,tile,Tile bytes,med,source:6FC00.c:440
 T00816.000,T00816,vs_battle_movementPosition,0,raw,0,unsigned int,,,,word,Whole word,med,source:6FC00.c:464

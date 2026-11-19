@@ -42,8 +42,9 @@
 #include "Render/Render.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/SceneTimerLive.hpp"
+#include "State/Timers.hpp"
 
 namespace VS::Boot {
 namespace {
@@ -128,7 +129,7 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::Field::zoneContext.isMusicFadeEnabled =
         defaults.zone_music_fade_enabled ? 1 : 0;
     VS::Field::zoneContext.loadedZudIndexPlusOne = 0;
-    Field_pendingDestinationDoor = State_savedEntryDoor;
+    Field_pendingDestinationDoor = VS::State::savedEntryDoor;
     VS::Field::screenTransitionEffect = defaults.transition_effect;
     VS::Field::screenTransitionStep = defaults.transition_step;
     VS::Field::screenTransitionSpeed = defaults.transition_speed;
@@ -140,11 +141,10 @@ class LiveGameplayOverlayHost final : public GameplayOverlayHost {
     VS::State::SetLiveTickSpeed(defaults.tick_speed);
     VS::Render::SetLiveCameraProjectionDistance(defaults.projection_distance);
     VS::Render::SetLiveCameraNearClip(defaults.near_clip);
-    VS::State::SceneTimer timer = VS::State::LiveSceneTimer();
-    timer.mode = VS::State::kSceneTimerStopped;
-    timer.time = {};
-    VS::State::StoreLiveSceneTimer(timer);
-    VS::Field::zoneContext.currentSceneId = State_savedEntryDoor.requiredFlagId;
+    VS::State::sceneTimer.mode = VS::State::kSceneTimerStopped;
+    VS::State::sceneTimer.time = {};
+    VS::Field::zoneContext.currentSceneId =
+        VS::State::savedEntryDoor.requiredFlagId;
     VS::Field::cameraTransition = nullptr;
     VS::Field::LiveResetCameraToAshley();
     VS::Render::SetLiveCameraFarClip(defaults.far_clip, 1);

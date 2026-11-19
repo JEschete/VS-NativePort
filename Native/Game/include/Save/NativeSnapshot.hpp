@@ -12,9 +12,9 @@
 #include "Field/Mpd.h"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
-#include "State/Ashley.h"
+#include "State/Ashley.hpp"
 #include "State/Progress.h"
-#include "State/SceneTimer.h"
+#include "State/SceneTimer.hpp"
 #include "State/Settings.h"
 
 namespace VS::Game::Save {
@@ -86,7 +86,7 @@ struct Snapshot {
   std::array<std::uint8_t, kScriptFlagBytes> script_flags{};
   std::array<bool, kLearnedActionCount> learned_actions{};
   State_Settings settings{};
-  State_AshleyStatsSnapshot ashley{};
+  VS::State::AshleyStatsSnapshot ashley{};
   Items_Inventory inventory{};
   Items_InventoryIndices inventory_order{};
   Items_ContainerData storage{};
@@ -96,7 +96,7 @@ struct Snapshot {
   std::array<RoomCache, kCachedRooms> room_cache{};
   std::uint32_t room_cache_slot = 0;
   std::uint64_t play_ticks = 0;
-  State_SceneTimer scene_timer{};
+  VS::State::SceneTimer scene_timer{};
   RandomState random{};
   Location location{};
   OrbitCamera camera{};

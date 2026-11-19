@@ -32,7 +32,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
@@ -56,10 +56,10 @@
 #include "Items/Materials.h"
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
-#include "State/RoomMemory.h"
+#include "State/RoomMemory.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
@@ -128,7 +128,7 @@ Result ItemError(std::string_view scope, std::string_view category,
 
 struct PersistentInputs {
   Snapshot state;
-  State_AshleySnapshot ashley;
+  VS::State::AshleySnapshot ashley;
   Field_MpdDoorRecord entry;
   std::array<char, std::size(State_learnedActionFlags)> learned;
   decltype(Snapshot::learned_actions) unlocked;
@@ -348,10 +348,10 @@ Result ValidateLocation(const Location& location, const RoomContent& room) {
 Result ValidateOrbitCamera(const Snapshot& state) {
   const auto& camera = state.camera;
   const int zoom_mode =
-      state.ashley.cameraDistance == kNearCameraDistance ? 1 : kFarZoomMode;
+      state.ashley.camera_distance == kNearCameraDistance ? 1 : kFarZoomMode;
   if (camera.pitch < -kLastAngle || camera.pitch > kLastAngle ||
       VS::Core::Math::Cosine(camera.pitch) == 0 ||
-      camera.distance != state.ashley.cameraDistance ||
+      camera.distance != state.ashley.camera_distance ||
       camera.zoom_mode != zoom_mode || camera.rotation_step < 0 ||
       camera.rotation_step > kMaximumOrbitStep ||
       camera.zoom_velocity < -kMaximumZoomVelocity ||
@@ -410,10 +410,10 @@ void RestoreCamera(const Snapshot& state) {
   target.values = {state.location.camera_yaw, camera.pitch, camera.distance,
                    camera.mode};
   target.delta.yaw = 0;
-  target.delta.pitch = state.ashley.cameraPitch;
+  target.delta.pitch = state.ashley.camera_pitch;
   target.delta.distance = camera.rotation_step;
   target.delta.mode = camera.zoom_mode;
-  target.initialDistance = state.ashley.cameraDistance;
+  target.initialDistance = state.ashley.camera_distance;
   target.zoomVelocity = camera.zoom_velocity;
   target.speed = camera.tracking_speed;
   VS::Render::FrameScratchpad().camera.look_at =
@@ -820,25 +820,26 @@ Result ValidateRuntimeValues(const Snapshot& state) {
     return std::unexpected("invalid random shuffle state");
   }
   const auto& timer = state.scene_timer;
-  if (timer.frames < 0 || timer.frames >= kClockRadix || timer.seconds < 0 ||
-      timer.seconds >= kClockRadix || timer.minutes < 0 ||
-      timer.minutes >= kClockRadix || timer.hours < 0) {
+  if (timer.time.frames < 0 || timer.time.frames >= kClockRadix ||
+      timer.time.seconds < 0 || timer.time.seconds >= kClockRadix ||
+      timer.time.minutes < 0 || timer.time.minutes >= kClockRadix ||
+      timer.time.hours < 0) {
     return std::unexpected("invalid scene timer");
   }
   const auto& stats = state.ashley;
-  if (stats.cameraDistance != kNearCameraDistance &&
-      stats.cameraDistance != kFarCameraDistance) {
+  if (stats.camera_distance != kNearCameraDistance &&
+      stats.camera_distance != kFarCameraDistance) {
     return std::unexpected(
         "saved camera distance is not a field camera preset");
   }
-  if (stats.maxHp <= 0 || stats.currentHp <= 0 ||
-      stats.currentHp > stats.maxHp || stats.maxMp < 0 || stats.currentMp < 0 ||
-      stats.currentMp > stats.maxMp) {
+  if (stats.max_hp <= 0 || stats.current_hp <= 0 ||
+      stats.current_hp > stats.max_hp || stats.max_mp < 0 ||
+      stats.current_mp < 0 || stats.current_mp > stats.max_mp) {
     return std::unexpected("invalid Ashley HP/MP");
   }
   for (const auto& limb : stats.limbs) {
-    if (limb.hp > limb.maxHp ||
-        limb.maxHp >
+    if (limb.hp > limb.max_hp ||
+        limb.max_hp >
             static_cast<unsigned>(std::numeric_limits<std::int16_t>::max())) {
       return std::unexpected("invalid Ashley limb HP");
     }
@@ -848,32 +849,32 @@ Result ValidateRuntimeValues(const Snapshot& state) {
 
 void CopyCachesToSnapshot(Snapshot& target) {
   target.room_cache_slot =
-      static_cast<std::uint32_t>(State_currentRoomStateSlot);
+      static_cast<std::uint32_t>(VS::State::currentRoomStateSlot);
   for (std::size_t index = 0; index < target.room_cache.size(); ++index) {
-    const auto& source = State_recentRoomEnemyStates[index];
+    const auto& source = VS::State::recentRoomEnemyStates[index];
     auto& cache = target.room_cache[index];
-    cache.recency = static_cast<unsigned char>(source.recency);
-    cache.zone = static_cast<unsigned char>(source.zoneId);
-    cache.map = source.mapId;
-    cache.next_slot = source.nextSlot;
+    cache.recency = source.recency;
+    cache.zone = source.zone_id;
+    cache.map = source.map_id;
+    cache.next_slot = source.next_slot;
     for (std::size_t slot = 0; slot < cache.actors.size(); ++slot) {
-      std::memcpy(&cache.actors[slot], source.actorStates[slot],
+      std::memcpy(&cache.actors[slot], source.actor_states[slot],
                   sizeof(cache.actors[slot]));
     }
   }
 }
 
 void ApplyCaches(const Snapshot& source) {
-  State_currentRoomStateSlot = static_cast<int>(source.room_cache_slot);
+  VS::State::currentRoomStateSlot = static_cast<int>(source.room_cache_slot);
   for (std::size_t index = 0; index < source.room_cache.size(); ++index) {
     const auto& cache = source.room_cache[index];
-    auto& target = State_recentRoomEnemyStates[index];
-    target.recency = static_cast<char>(cache.recency);
-    target.zoneId = static_cast<char>(cache.zone);
-    target.mapId = cache.map;
-    target.nextSlot = cache.next_slot;
+    auto& target = VS::State::recentRoomEnemyStates[index];
+    target.recency = cache.recency;
+    target.zone_id = cache.zone;
+    target.map_id = cache.map;
+    target.next_slot = cache.next_slot;
     for (std::size_t slot = 0; slot < cache.actors.size(); ++slot) {
-      std::memcpy(target.actorStates[slot], &cache.actors[slot],
+      std::memcpy(target.actor_states[slot], &cache.actors[slot],
                   sizeof(cache.actors[slot]));
     }
   }
@@ -1059,29 +1060,29 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
 void CaptureAshley(Snapshot& state, const Battle_Actor& character) {
   const auto& source = *character.stats;
   auto& target = state.ashley;
-  target.isPending = 1;
-  target.currentHp = source.currentHp;
-  target.maxHp = source.maxHp;
-  target.currentMp = source.currentMp;
-  target.maxMp = source.maxMp;
+  target.is_pending = 1;
+  target.current_hp = source.currentHp;
+  target.max_hp = source.maxHp;
+  target.current_mp = source.currentMp;
+  target.max_mp = source.maxMp;
   target.strength = std::bit_cast<std::int16_t>(source.strength);
-  target.totalStrength = std::bit_cast<std::int16_t>(source.totalStrength);
+  target.total_strength = std::bit_cast<std::int16_t>(source.totalStrength);
   target.intelligence = std::bit_cast<std::int16_t>(source.intelligence);
-  target.totalIntelligence =
+  target.total_intelligence =
       std::bit_cast<std::int16_t>(source.totalIntelligence);
   target.agility = std::bit_cast<std::int16_t>(source.agility);
-  target.totalAgility = std::bit_cast<std::int16_t>(source.totalAgility);
+  target.total_agility = std::bit_cast<std::int16_t>(source.totalAgility);
   target.risk = std::bit_cast<std::int16_t>(source.risk);
-  target.actorFlags = source.actionRecoveryTimer;
+  target.action_recovery_timer = source.actionRecoveryTimer;
   target.statuses = source.statuses;
   for (std::size_t index = 0; index < std::size(source.statusTimers); ++index) {
-    target.statusTimers[index] = static_cast<char>(source.statusTimers[index]);
+    target.status_timers[index] = source.statusTimers[index];
   }
   for (std::size_t index = 0; index < std::size(source.limbs); ++index) {
     const auto& limb = source.limbs[index];
     auto& saved = target.limbs[index];
     saved.hp = static_cast<std::uint16_t>(limb.hp);
-    saved.maxHp = static_cast<std::uint16_t>(limb.maxHp);
+    saved.max_hp = static_cast<std::uint16_t>(limb.maxHp);
     for (std::size_t type = 0; type < std::size(limb.types); ++type) {
       saved.types[type] = static_cast<std::uint16_t>(limb.types[type]);
     }
@@ -1091,39 +1092,39 @@ void CaptureAshley(Snapshot& state, const Battle_Actor& character) {
           static_cast<std::uint16_t>(limb.affinities[affinity]);
     }
   }
-  target.weaponDrawn = character.weaponDrawn;
-  target.cameraPitch = VS::Field::sphericalCamera.delta.pitch;
-  target.cameraDistance = VS::Field::sphericalCamera.initialDistance;
+  target.weapon_drawn = character.weaponDrawn;
+  target.camera_pitch = VS::Field::sphericalCamera.delta.pitch;
+  target.camera_distance = VS::Field::sphericalCamera.initialDistance;
 }
 
-void RestoreAshleyValues(const State_AshleyStatsSnapshot& source,
+void RestoreAshleyValues(const VS::State::AshleyStatsSnapshot& source,
                          Battle_Actor& character) {
   // func_800F9AD8, INITBTL/18.c:310. Spawn has already built equipment and
   // status effects. Reassert saved scalars after room-entry status cleanup.
   auto& target = *character.stats;
-  target.currentHp = source.currentHp;
-  target.maxHp = source.maxHp;
-  target.currentMp = source.currentMp;
-  target.maxMp = source.maxMp;
+  target.currentHp = source.current_hp;
+  target.maxHp = source.max_hp;
+  target.currentMp = source.current_mp;
+  target.maxMp = source.max_mp;
   target.strength = static_cast<std::uint16_t>(source.strength);
-  target.totalStrength = static_cast<std::uint16_t>(source.totalStrength);
+  target.totalStrength = static_cast<std::uint16_t>(source.total_strength);
   target.intelligence = static_cast<std::uint16_t>(source.intelligence);
   target.totalIntelligence =
-      static_cast<std::uint16_t>(source.totalIntelligence);
+      static_cast<std::uint16_t>(source.total_intelligence);
   target.agility = static_cast<std::uint16_t>(source.agility);
-  target.totalAgility = static_cast<std::uint16_t>(source.totalAgility);
+  target.totalAgility = static_cast<std::uint16_t>(source.total_agility);
   target.risk = static_cast<std::uint16_t>(source.risk);
-  target.actionRecoveryTimer = source.actorFlags;
+  target.actionRecoveryTimer = source.action_recovery_timer;
   target.statuses = source.statuses;
-  for (std::size_t index = 0; index < std::size(source.statusTimers); ++index) {
-    target.statusTimers[index] =
-        static_cast<unsigned char>(source.statusTimers[index]);
+  for (std::size_t index = 0; index < std::size(source.status_timers);
+       ++index) {
+    target.statusTimers[index] = source.status_timers[index];
   }
   for (std::size_t index = 0; index < std::size(source.limbs); ++index) {
     auto& limb = target.limbs[index];
     const auto& saved = source.limbs[index];
     limb.hp = static_cast<std::int16_t>(saved.hp);
-    limb.maxHp = static_cast<std::int16_t>(saved.maxHp);
+    limb.maxHp = static_cast<std::int16_t>(saved.max_hp);
     for (std::size_t type = 0; type < std::size(saved.types); ++type) {
       limb.types[type] = std::bit_cast<std::int16_t>(saved.types[type]);
     }
@@ -1133,7 +1134,7 @@ void RestoreAshleyValues(const State_AshleyStatsSnapshot& source,
           std::bit_cast<std::int16_t>(saved.affinities[affinity]);
     }
   }
-  character.weaponDrawn = source.weaponDrawn;
+  character.weaponDrawn = source.weapon_drawn;
 }
 
 Result CaptureActors(Snapshot& state) {
@@ -1200,12 +1201,12 @@ Result CaptureActors(Snapshot& state) {
 }
 
 void ApplyClock(std::uint64_t ticks) {
-  VS::State::playTime.t.frames = static_cast<signed char>(ticks % kClockRadix);
+  VS::State::playTime.frames = static_cast<std::int8_t>(ticks % kClockRadix);
   ticks /= kClockRadix;
-  VS::State::playTime.t.seconds = static_cast<signed char>(ticks % kClockRadix);
+  VS::State::playTime.seconds = static_cast<std::int8_t>(ticks % kClockRadix);
   ticks /= kClockRadix;
-  VS::State::playTime.t.minutes = static_cast<signed char>(ticks % kClockRadix);
-  VS::State::playTime.t.hours = static_cast<signed char>(ticks / kClockRadix);
+  VS::State::playTime.minutes = static_cast<std::int8_t>(ticks % kClockRadix);
+  VS::State::playTime.hours = static_cast<std::int8_t>(ticks / kClockRadix);
 }
 
 Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
@@ -1382,20 +1383,20 @@ std::expected<void, std::string> ValidateContent(const Document& document) {
 }
 
 std::expected<Document, std::string> CaptureClearGame() {
-  if (pending || Boot_isGameplayActive || !Boot_isClearSavePending ||
-      State_savedEntryDoor.destinationZoneId != 1 ||
-      State_savedEntryDoor.destinationRoomId != 0 ||
+  if (pending || VS::Boot::isGameplayActive || !VS::Boot::isClearSavePending ||
+      VS::State::savedEntryDoor.destinationZoneId != 1 ||
+      VS::State::savedEntryDoor.destinationRoomId != 0 ||
       VS::State::stateFlags.clearCount <= 0) {
     return std::unexpected("no original ending clear-save inputs are pending");
   }
   Document document;
   document.generation = 1;
-  document.new_game_entry = State_savedEntryDoor;
+  document.new_game_entry = VS::State::savedEntryDoor;
   auto& state = document.state;
   CapturePersistent(state, true);
   // The battle overlay has gone away: TITLE copies the already captured
   // Ashley/learned-action values, not the current actor or action-table views.
-  state.ashley = State_ashleySnapshot.stats;
+  state.ashley = VS::State::ashleySnapshot.stats;
   // F03601 TITLE _packageGameSaveData, 22C.c:632-700; original MIPS
   // 800698dc/800698e8, 80069c34, 80069c94..80069cc0. Container clearing is
   // exactly 0x100 bytes (64 stacks), NOT the entire 256-stack container.
@@ -1416,7 +1417,8 @@ std::expected<Document, std::string> CaptureClearGame() {
 
 std::expected<Snapshot, std::string> Capture(
     const Items_ContainerData& storage) {
-  if (pending || !Boot_isGameplayActive || Battle_characterState == nullptr ||
+  if (pending || !VS::Boot::isGameplayActive ||
+      Battle_characterState == nullptr ||
       Battle_characterState != Battle_actors[0] ||
       Battle_characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
@@ -1475,7 +1477,7 @@ std::expected<Snapshot, std::string> Capture(
       actual.vz != orbit_position.vz) {
     return std::unexpected("current camera position is not the captured orbit");
   }
-  const auto& time = VS::State::playTime.t;
+  const auto& time = VS::State::playTime;
   if (time.hours < 0 || time.hours > kMaximumHours || time.minutes < 0 ||
       time.minutes >= kClockRadix || time.seconds < 0 ||
       time.seconds >= kClockRadix || time.frames < 0 ||
@@ -1525,8 +1527,8 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
         static_cast<std::uint16_t>(room->environment.sceneId);
   }
   CapturePersistent(staged.previous.state);
-  staged.previous.ashley = State_ashleySnapshot;
-  staged.previous.entry = State_savedEntryDoor;
+  staged.previous.ashley = VS::State::ashleySnapshot;
+  staged.previous.entry = VS::State::savedEntryDoor;
   std::copy_n(State_learnedActionFlags, staged.previous.learned.size(),
               staged.previous.learned.begin());
   staged.previous.unlocked = staged.previous.state.learned_actions;
@@ -1535,27 +1537,27 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
   // All fallible work, including owning the staging copy, precedes mutation.
   pending.emplace(std::move(staged));
   ApplyPersistent(pending->state);
-  State_ashleySnapshot.stats = pending->state.ashley;
-  State_ashleySnapshot.stats.isPending = 1;
+  VS::State::ashleySnapshot.stats = pending->state.ashley;
+  VS::State::ashleySnapshot.stats.is_pending = 1;
   if (document.new_game_entry) {
-    State_savedEntryDoor = *document.new_game_entry;
+    VS::State::savedEntryDoor = *document.new_game_entry;
     ApplyClock(0);
     SyncMonoOutput(pending->state.settings.monoSound == 1);
     return {};
   }
-  State_savedEntryDoor = {};
-  State_savedEntryDoor.destinationZoneId =
+  VS::State::savedEntryDoor = {};
+  VS::State::savedEntryDoor.destinationZoneId =
       static_cast<unsigned char>(pending->state.location.zone);
-  State_savedEntryDoor.destinationRoomId =
+  VS::State::savedEntryDoor.destinationRoomId =
       static_cast<unsigned char>(pending->state.location.room);
-  State_savedEntryDoor.requiredFlagId = pending->state.location.scene;
-  State_savedEntryDoor.tileLocation.entryDirection =
+  VS::State::savedEntryDoor.requiredFlagId = pending->state.location.scene;
+  VS::State::savedEntryDoor.tileLocation.entryDirection =
       pending->state.location.floor_layer;
-  State_savedEntryDoor.entryTileX =
+  VS::State::savedEntryDoor.entryTileX =
       static_cast<unsigned>(pending->state.location.position[0] / kTileUnits);
-  State_savedEntryDoor.entryTileZ =
+  VS::State::savedEntryDoor.entryTileZ =
       static_cast<unsigned>(pending->state.location.position[2] / kTileUnits);
-  State_savedEntryDoor.entryElevation =
+  VS::State::savedEntryDoor.entryElevation =
       static_cast<unsigned>(pending->state.location.facing / kQuarterTurn);
   SyncMonoOutput(pending->state.settings.monoSound == 1);
   return {};
@@ -1567,8 +1569,8 @@ void CancelResume() {
   if (!pending) return;
   const auto& previous = pending->previous;
   ApplyPersistent(previous.state);
-  State_ashleySnapshot = previous.ashley;
-  State_savedEntryDoor = previous.entry;
+  VS::State::ashleySnapshot = previous.ashley;
+  VS::State::savedEntryDoor = previous.entry;
   std::copy(previous.learned.begin(), previous.learned.end(),
             State_learnedActionFlags);
   for (std::size_t index = 0; index < previous.unlocked.size(); ++index) {
@@ -1591,7 +1593,7 @@ std::expected<void, std::string> FinishResume() {
   const auto audio = ValidateAudioConsumer();
   if (!audio) return audio;
   const auto& state = pending->state;
-  if (!Boot_isGameplayActive || Battle_characterState == nullptr ||
+  if (!VS::Boot::isGameplayActive || Battle_characterState == nullptr ||
       Battle_characterState != Battle_actors[0] ||
       Battle_characterState->stats == nullptr ||
       Actors_actorRecords[0] == nullptr || !Field_roomData.isLoaded ||
@@ -1602,7 +1604,7 @@ std::expected<void, std::string> FinishResume() {
       Field_roomData.environment->sceneId != state.location.scene ||
       VS::Field::zoneContext.mpdDiscRequest != nullptr ||
       VS::Field::zoneContext.zndDiscRequest != nullptr ||
-      State_ashleySnapshot.stats.isPending != 0) {
+      VS::State::ashleySnapshot.stats.is_pending != 0) {
     return std::unexpected("the staged resume room/Ashley spawn is not ready");
   }
   if (pending->new_game) {

@@ -2,7 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Items/ContainerIndexingLive.hpp"
 #include "Items/ContainerTransfersLiveFixture.hpp"
@@ -84,7 +84,7 @@ TEST_CASE(
   fixture.storage->itemsToTransfer[0] = 0x600;
   Menu_Container_transferredMiscCount = 91;
   Menu_Container_containerItemCapacities[6] = 0;
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   CHECK(VS::Menu::Framework::inventoryStorage == fixture.storage.get());
   CHECK(Menu_Container_otherStorage == &owner);
   CHECK(Menu_Container_containerData == &owner);

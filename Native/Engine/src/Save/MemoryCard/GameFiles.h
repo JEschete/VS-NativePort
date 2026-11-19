@@ -12,8 +12,8 @@ struct Save_SaveSlotBase;
 
 #include "Field/Mpd.h"
 #include "Items/Inventory.h"
-#include "State/Ashley.h"
-#include "State/GameTime.h"
+#include "State/Ashley.hpp"
+#include "State/GameClock.hpp"
 #include "State/Progress.h"
 #include "State/Settings.h"
 
@@ -75,7 +75,7 @@ static_assert(sizeof(Save_SaveSlotBase) == 0xC, "Save_SaveSlotBase must keep its
 
 // decomp: stats_t (src/MENU/MENU7.PRG/260.c:63)
 struct Save_SaveFileStats {
-    State_PlayTime gameTime;
+    VS::State::PlayTime gameTime;
     u_short cumulativeSaveCount;
     u_short currentGameSaveCount;
     u_short currentHP;
@@ -127,7 +127,7 @@ struct Save_GameSaveImage {
     char learnedActions[32];
     char mapStatus[0x48];
     State_Settings settings;
-    State_AshleySnapshot ashleySnapshot;
+    VS::State::AshleySnapshot ashleySnapshot;
     Items_Inventory inventory;
     Items_InventoryIndices inventoryIndices;
     Field_MpdDoorRecord entryDoor;

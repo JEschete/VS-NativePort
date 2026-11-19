@@ -432,9 +432,9 @@ class LiveCardHost : public LiveGpuHost {
     const Save_SaveFileStats& stats = record->summary.stats;
     return {
         .status = static_cast<std::uint32_t>(record->summary.base.slotState),
-        .hours = stats.gameTime.t.hours,
-        .minutes = stats.gameTime.t.minutes,
-        .seconds = stats.gameTime.t.seconds,
+        .hours = stats.gameTime.hours,
+        .minutes = stats.gameTime.minutes,
+        .seconds = stats.gameTime.seconds,
         .save_count = stats.cumulativeSaveCount,
         .current_hp = stats.currentHP,
         .max_hp = stats.maxHP,
@@ -502,9 +502,11 @@ class LiveCardHost : public LiveGpuHost {
             sizeof VS::Input::settings};
   }
   void ClearDoorEntered() override { VS::State::stateFlags.doorEntered = 0; }
-  std::uint32_t PlayTime() override { return VS::State::playTime.all; }
+  std::uint32_t PlayTime() override {
+    return VS::State::PackPlayTime(VS::State::playTime);
+  }
   void SetPlayTime(std::uint32_t time) override {
-    VS::State::playTime.all = time;
+    VS::State::playTime = VS::State::UnpackPlayTime(time);
   }
 
  private:

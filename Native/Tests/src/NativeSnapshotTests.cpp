@@ -33,18 +33,18 @@ void SetSettings(Save::Snapshot& state) {
 }
 
 void SetAshley(Save::Snapshot& state) {
-  state.ashley.currentHp = 250;
-  state.ashley.maxHp = 999;
-  state.ashley.currentMp = 20;
-  state.ashley.maxMp = 50;
+  state.ashley.current_hp = 250;
+  state.ashley.max_hp = 999;
+  state.ashley.current_mp = 20;
+  state.ashley.max_mp = 50;
   state.ashley.risk = 99;
   state.ashley.statuses = std::bit_cast<std::int32_t>(0x80000001u);
-  state.ashley.statusTimers[7] = static_cast<char>(255);
+  state.ashley.status_timers[7] = 255;
   state.ashley.limbs[5].hp = 120;
-  state.ashley.limbs[5].maxHp = 200;
+  state.ashley.limbs[5].max_hp = 200;
   state.ashley.limbs[5].affinities[7] = 65535;
-  state.ashley.cameraPitch = -384;
-  state.ashley.cameraDistance = 1536;
+  state.ashley.camera_pitch = -384;
+  state.ashley.camera_distance = 1536;
 }
 
 void SetEquipment(Save::Snapshot& state) {
@@ -105,8 +105,8 @@ void SetProgress(Save::Snapshot& state) {
   state.room_cache[3].actors[7].tileZ = 30;
   state.play_ticks = std::uint64_t{60} * 60 * 60;
   state.scene_timer.mode = 2;
-  state.scene_timer.frames = 59;
-  state.scene_timer.seconds = 29;
+  state.scene_timer.time.frames = 59;
+  state.scene_timer.time.seconds = 29;
 }
 
 void SetRandom(Save::Snapshot& state) {
@@ -274,6 +274,14 @@ TEST_CASE("Native save identifiers and glyph names have fixed wire shapes",
   CHECK(state.at("visits").at("areas") == Json::array({"area/63"}));
   CheckGlyphNames(state);
   CheckSourceBits(state);
+}
+
+// Upstream builds with -funsigned-char, so saves holding timers above 127
+// must still load.
+TEST_CASE("Native save status timers are unsigned bytes on the wire",
+          "[native-snapshot]") {
+  const auto document = EncodedSample();
+  CHECK(document.at("state").at("ashley").at("status_timers")[7] == 255);
 }
 
 TEST_CASE("Native save corruption and unsupported formats fail explicitly",
@@ -477,14 +485,14 @@ TEST_CASE("Native save parsing rejects duplicate keys deep JSON and truncation",
 TEST_CASE("Native save schema omits padding and transient load markers",
           "[native-snapshot]") {
   auto original = SampleDocument();
-  original.state.ashley.isPending = 1;
+  original.state.ashley.is_pending = 1;
   original.state.inventory.blades[15].reserved11 = 123;
   original.state.score.reserved10 = 0x12345678;
   const auto encoded = Save::Encode(original);
   REQUIRE(encoded.has_value());
   const auto decoded = Save::Decode(*encoded);
   REQUIRE(decoded.has_value());
-  CHECK(decoded->state.ashley.isPending == 0);
+  CHECK(decoded->state.ashley.is_pending == 0);
   CHECK(decoded->state.inventory.blades[15].reserved11 == 0);
   CHECK(decoded->state.score.reserved10 == 0);
 }
@@ -541,7 +549,7 @@ TEST_CASE("Native document comparison preserves canonical wire equality",
       ++current.state.location.position[0];
       break;
     case 6:
-      current.state.ashley.isPending = 1;
+      current.state.ashley.is_pending = 1;
       current.state.inventory.blades[15].reserved11 = 123;
       current.state.score.reserved10 = 0x12345678;
       break;

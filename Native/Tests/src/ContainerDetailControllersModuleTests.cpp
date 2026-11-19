@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Menu/ContainerDetailControllersLiveFixture.hpp"
 
@@ -66,7 +66,7 @@ TEST_CASE("Ordinary MENUD reload retains weapon controller BSS animation",
   fixture.Open(detail::UpdateLiveWeaponDetails);
   fixture.containers.storage->container.items.blades[kContainerPart].strength =
       kChangedStrength;
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveWeaponDetails(0) == 0);
   CHECK(VS::Menu::Framework::strIntAgi[0] == kWeaponStrength);
@@ -86,7 +86,7 @@ TEST_CASE(
   fixture.Open(detail::UpdateLiveGemDetails);
   fixture.containers.storage->container.items.gems[kContainerGem].strength =
       kChangedStrength;
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveGemDetails(0) == 0);
   CHECK(VS::Menu::Framework::strIntAgi[0] == 9);
@@ -105,7 +105,7 @@ TEST_CASE("F02957 ordinary reload preserves full-domain armor countdown",
   fixture.Open(detail::UpdateLiveArmorDetails);
   const auto strength = VS::Menu::Framework::strIntAgi[0];
   owner.items.armor[kContainerPart].strength = kChangedStrength;
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveArmorDetails(0) == 0);
   CHECK(VS::Menu::Framework::strIntAgi[0] == strength);
@@ -122,7 +122,7 @@ TEST_CASE("F02959 ordinary reload retains selected category and panel BSS",
   fixture.AddContainerGems();
   constexpr int kGemEntry = (((kContainerRow << fw::kByteShift) | 1) << 4) | 5;
   CHECK(detail::UpdateLiveItemDetails(kGemEntry) == 0);
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   fixture.IdleRows();
   CHECK(detail::UpdateLiveItemDetails(0) == 0);
   CHECK(VS::Menu::Framework::equipmentSubtype == fw::equipment_subtype::kGem);

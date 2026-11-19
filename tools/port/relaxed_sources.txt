@@ -1,5 +1,6 @@
 Native\Engine\src\Render\ModelWorkspace.cpp
 Native\Game\src\Battle\Ai\RoomState.cpp
+Native\Game\src\Boot\OverlayReset.cpp
 Native\Game\src\Boot\PlayerSettings.cpp
 Native\Tests\src\CombatTests.cpp
 Native\Tests\src\EffectTimelineTests.cpp

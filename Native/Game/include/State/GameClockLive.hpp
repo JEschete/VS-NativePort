@@ -1,16 +1,9 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
-#include "State/GameClock.hpp"
-
-// Binding from the live play time record (VS::State::playTime,
-// State/PlayTime.h) to the typed clock (State/GameClock.hpp), in the original
-// argument order for the generated callers (tools/port/copy_fixups.py
-// OWNED_CALL_BINDINGS).
+// Binding from the live play time (VS::State::playTime, State/PlayTime.hpp)
+// to the typed clock (State/GameClock.hpp).
 namespace VS::State {
-[[nodiscard]] PlayTime LivePlayTime() noexcept;
-void StoreLivePlayTime(const PlayTime& time) noexcept;
-
 // decomp: SLUS_010.40 vs_main_gametimeUpdate (main.c:8188). Waits for the
 // vertical sync (idling for any wait but 1), services the disc queue, then
 // advances the play time by the tick speed. Returns VSync's result.

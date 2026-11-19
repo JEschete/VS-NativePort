@@ -7,10 +7,10 @@
 
 struct Actors_RoomActorRecord;
 
-// Bindings from the saved room records (State_recentRoomEnemyStates and
-// State_currentRoomStateSlot, which the save files and the room loader also
-// read and write) to the typed room enemy memory (RoomEnemyMemory.cpp). Each
-// call reads the records, runs the typed operation and writes them back.
+// Bindings from the saved room records (VS::State::recentRoomEnemyStates and
+// VS::State::currentRoomStateSlot, which the save files and the room loader
+// also read and write) to the typed room enemy memory (RoomEnemyMemory.cpp).
+// Each call reads the records, runs the typed operation and writes them back.
 // Refusals are reported on the "actors" channel.
 namespace VS::Actors {
 // The saved room records as the typed memory, and back (the room load's

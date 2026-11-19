@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "Battle/Actor.h"
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/LegacyPad.hpp"

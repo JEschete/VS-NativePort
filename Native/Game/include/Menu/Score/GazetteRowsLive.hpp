@@ -28,8 +28,8 @@ int UpdateLiveTopMenu(int initialize);
 void ClearLiveMenuExceptRow8();
 void PollLiveMenuReady();
 
-// Call where MENU9.PRG loads (Boot_ResetMenu9Statics): its reload zeroes the
-// arrow animation and the top menu's step (238.c's statics are bss).
+// Call where MENU9.PRG loads (VS::Boot::ResetMenu9Statics): its reload zeroes
+// the arrow animation and the top menu's step (238.c's statics are bss).
 void ResetGazetteRowsLive();
 // The bound state, for the reset and tests.
 [[nodiscard]] ScrollableRowAnimation& LiveScrollableRowAnimation() noexcept;

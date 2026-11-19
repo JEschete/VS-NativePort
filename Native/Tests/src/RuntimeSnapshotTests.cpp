@@ -38,7 +38,7 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/RandomLive.hpp"
@@ -63,10 +63,10 @@
 #include "Render/Camera.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "Save/RuntimeSnapshot.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
-#include "State/RoomMemory.h"
+#include "State/RoomMemory.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
@@ -233,8 +233,8 @@ struct RuntimeFixture {
   decltype(State_roomVisitProgress) visits = State_roomVisitProgress;
   decltype(VS::State::artsStatus) arts = VS::State::artsStatus;
   decltype(VS::State::scoreData) score = VS::State::scoreData;
-  decltype(State_ashleySnapshot) ashley = State_ashleySnapshot;
-  decltype(State_savedEntryDoor) entry = State_savedEntryDoor;
+  decltype(VS::State::ashleySnapshot) ashley = VS::State::ashleySnapshot;
+  decltype(VS::State::savedEntryDoor) entry = VS::State::savedEntryDoor;
   decltype(Field_snapshotDoorFlagSource) detached_scene =
       Field_snapshotDoorFlagSource;
   decltype(VS::State::playTime) time = VS::State::playTime;
@@ -244,8 +244,8 @@ struct RuntimeFixture {
   decltype(VS::Field::sphericalCamera) camera = VS::Field::sphericalCamera;
   decltype(VS::Render::FrameScratchpad().camera) rendered_camera =
       VS::Render::FrameScratchpad().camera;
-  decltype(std::to_array(State_recentRoomEnemyStates)) caches =
-      std::to_array(State_recentRoomEnemyStates);
+  decltype(std::to_array(VS::State::recentRoomEnemyStates)) caches =
+      std::to_array(VS::State::recentRoomEnemyStates);
   decltype(std::to_array(State_learnedActionFlags)) learned =
       std::to_array(State_learnedActionFlags);
   decltype(std::to_array(Battle_actionDefinitions)) actions =
@@ -265,9 +265,9 @@ struct RuntimeFixture {
   int shuffle_index = VS::Core::randomShuffleIndex;
   int movement_random = Battle_Ai_savedMovementRandomState;
   unsigned frame_random = VS::Battle::Ai::LiveFrameContext().randomState;
-  int current_cache = State_currentRoomStateSlot;
-  int gameplay = Boot_isGameplayActive;
-  int clear_pending = Boot_isClearSavePending;
+  int current_cache = VS::State::currentRoomStateSlot;
+  int gameplay = VS::Boot::isGameplayActive;
+  int clear_pending = VS::Boot::isClearSavePending;
   int near_clip = VS::Render::nearClip;
   int projection = VS::Render::projectionDistance;
   int first_person = VS::Field::isFirstPersonViewEnabled;
@@ -426,12 +426,12 @@ struct RuntimeFixture {
   }
 
   void SetClocksAndCaches() {
-    VS::State::playTime.t = {59, 58, 57, 12};
+    VS::State::playTime = {59, 58, 57, 12};
     VS::State::sceneTimer = {};
     VS::State::sceneTimer.mode = 2;
-    VS::State::sceneTimer.resetScope = 2;
-    VS::State::sceneTimer.seconds = 17;
-    VS::State::sceneTimer.frames = 29;
+    VS::State::sceneTimer.reset_scope = 2;
+    VS::State::sceneTimer.time.seconds = 17;
+    VS::State::sceneTimer.time.frames = 29;
     VS::Core::SeedBiosRand(0x12345678);
     VS::Core::interfaceRandomState = 0x87654321;
     VS::Core::randomShuffleIndex = 96;
@@ -439,13 +439,13 @@ struct RuntimeFixture {
       VS::Core::randomShuffleTable[index] = static_cast<int>(index) * 337;
     }
     Battle_Ai_savedMovementRandomState = std::bit_cast<int>(0xFEDCBA98u);
-    State_currentRoomStateSlot = 0;
-    for (auto& cache : State_recentRoomEnemyStates) cache = {};
-    State_recentRoomEnemyStates[0].zoneId = 9;
-    State_recentRoomEnemyStates[0].mapId = 0;
-    State_recentRoomEnemyStates[0].recency = 4;
-    State_recentRoomEnemyStates[0].nextSlot = 7;
-    Boot_isGameplayActive = 1;
+    VS::State::currentRoomStateSlot = 0;
+    for (auto& cache : VS::State::recentRoomEnemyStates) cache = {};
+    VS::State::recentRoomEnemyStates[0].zone_id = 9;
+    VS::State::recentRoomEnemyStates[0].map_id = 0;
+    VS::State::recentRoomEnemyStates[0].recency = 4;
+    VS::State::recentRoomEnemyStates[0].next_slot = 7;
+    VS::Boot::isGameplayActive = 1;
   }
 
   void SetStorage() {
@@ -583,20 +583,20 @@ struct RuntimeFixture {
 
   Save::Document ClearGame() {
     const auto state = Capture();
-    State_ashleySnapshot.stats = state.ashley;
-    State_savedEntryDoor = {};
-    State_savedEntryDoor.entryTileX = 3;
-    State_savedEntryDoor.entryTileZ = 2;
-    State_savedEntryDoor.entryElevation = 1;
-    State_savedEntryDoor.tileLocation.entryDirection = 1;
-    State_savedEntryDoor.requiredFlagId = 37;
+    VS::State::ashleySnapshot.stats = state.ashley;
+    VS::State::savedEntryDoor = {};
+    VS::State::savedEntryDoor.entryTileX = 3;
+    VS::State::savedEntryDoor.entryTileZ = 2;
+    VS::State::savedEntryDoor.entryElevation = 1;
+    VS::State::savedEntryDoor.tileLocation.entryDirection = 1;
+    VS::State::savedEntryDoor.requiredFlagId = 37;
     VS::Input::settings.currentGameSaveCount = 7;
     VS::Input::settings.cumulativeSaveCount = 19;
     VS::Input::settings.menuFlags = 0xFFFF;
     VS::Input::settings.reserved0Bit0 = 8;
     VS::Ending::LiveCommitClearProgress();
-    Boot_isGameplayActive = 0;
-    Boot_isClearSavePending = 1;
+    VS::Boot::isGameplayActive = 0;
+    VS::Boot::isClearSavePending = 1;
     const auto document = Save::CaptureClearGame();
     INFO((document ? "" : document.error()));
     REQUIRE(document);
@@ -605,7 +605,7 @@ struct RuntimeFixture {
 
   ~RuntimeFixture() {
     Save::CancelResume();
-    Boot_isClearSavePending = clear_pending;
+    VS::Boot::isClearSavePending = clear_pending;
     VS::State::stateFlags = flags;
     VS::Items::inventory = inventory;
     VS::Items::inventoryIndices = order;
@@ -613,8 +613,8 @@ struct RuntimeFixture {
     State_roomVisitProgress = visits;
     VS::State::artsStatus = arts;
     VS::State::scoreData = score;
-    State_ashleySnapshot = ashley;
-    State_savedEntryDoor = entry;
+    VS::State::ashleySnapshot = ashley;
+    VS::State::savedEntryDoor = entry;
     Field_snapshotDoorFlagSource = detached_scene;
     VS::State::playTime = time;
     VS::State::sceneTimer = timer;
@@ -622,7 +622,7 @@ struct RuntimeFixture {
     Field_roomData = room;
     VS::Field::sphericalCamera = camera;
     VS::Render::FrameScratchpad().camera = rendered_camera;
-    std::copy(caches.begin(), caches.end(), State_recentRoomEnemyStates);
+    std::copy(caches.begin(), caches.end(), VS::State::recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
     std::copy(actions.begin(), actions.end(), Battle_actionDefinitions);
     std::copy(actors.begin(), actors.end(), Battle_actors);
@@ -636,8 +636,8 @@ struct RuntimeFixture {
     VS::Core::randomShuffleIndex = shuffle_index;
     Battle_Ai_savedMovementRandomState = movement_random;
     VS::Battle::Ai::LiveFrameContext().randomState = frame_random;
-    State_currentRoomStateSlot = current_cache;
-    Boot_isGameplayActive = gameplay;
+    VS::State::currentRoomStateSlot = current_cache;
+    VS::Boot::isGameplayActive = gameplay;
     VS::Render::nearClip = near_clip;
     VS::Render::projectionDistance = projection;
     VS::Field::isFirstPersonViewEnabled = first_person;
@@ -672,12 +672,12 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, State_roomVisitProgress);
   Append(bytes, VS::State::artsStatus);
   Append(bytes, VS::State::scoreData);
-  Append(bytes, State_recentRoomEnemyStates);
-  Append(bytes, State_currentRoomStateSlot);
+  Append(bytes, VS::State::recentRoomEnemyStates);
+  Append(bytes, VS::State::currentRoomStateSlot);
   Append(bytes, State_learnedActionFlags);
   Append(bytes, Battle_actionDefinitions);
-  Append(bytes, State_ashleySnapshot);
-  Append(bytes, State_savedEntryDoor);
+  Append(bytes, VS::State::ashleySnapshot);
+  Append(bytes, VS::State::savedEntryDoor);
   Append(bytes, VS::State::playTime);
   Append(bytes, VS::State::sceneTimer);
   Append(bytes, VS::Field::sphericalCamera);
@@ -718,9 +718,9 @@ void CheckCapturedLocation(const Save::Snapshot& state) {
 }
 
 void CheckCapturedStats(const Save::Snapshot& state) {
-  CHECK(state.ashley.currentHp == 123);
-  CHECK(state.ashley.totalStrength == 330);
-  CHECK(state.ashley.statusTimers[7] == static_cast<char>(255));
+  CHECK(state.ashley.current_hp == 123);
+  CHECK(state.ashley.total_strength == 330);
+  CHECK(state.ashley.status_timers[7] == 255);
   CHECK(state.ashley.limbs[5].types[3] == static_cast<std::uint16_t>(-29));
   CHECK(state.ashley.limbs[5].affinities[7] == 32768);
   CHECK(state.script_flags.back() == 0xAB);
@@ -936,10 +936,10 @@ void InvalidateLiveMotion(RuntimeFixture& fixture, int defect) {
 void InvalidateLiveFixture(RuntimeFixture& fixture, int defect) {
   InvalidateLiveMotion(fixture, defect);
   if (defect == 0) VS::Field::zoneContext.currentSceneId = 38;
-  if (defect == 1) Boot_isGameplayActive = 0;
+  if (defect == 1) VS::Boot::isGameplayActive = 0;
   if (defect == 2) fixture.player_stats.weapon.index = 9;
   if (defect == 3) VS::Items::inventory.weapons[0].grip = 255;
-  if (defect == 4) State_currentRoomStateSlot = 4;
+  if (defect == 4) VS::State::currentRoomStateSlot = 4;
   if (defect == 5) Field_roomData.environment = nullptr;
   if (defect == 6) fixture.player_model.instance.currentTileLayer = 2;
   if (defect == 7) fixture.player_model.instance.supportLayer = 2;
@@ -1010,11 +1010,11 @@ void InvalidateSnapshot(Save::Snapshot& state, int defect) {
 void CheckStagedInputs() {
   CHECK(Save::ResumePending());
   CHECK(static_cast<unsigned char>(VS::State::LiveScriptFlag(64)) == 177);
-  CHECK(State_savedEntryDoor.requiredFlagId == 37);
-  CHECK(State_savedEntryDoor.destinationZoneId == 9);
-  CHECK(State_savedEntryDoor.entryTileX == 1);
-  CHECK(State_savedEntryDoor.entryTileZ == 2);
-  CHECK(State_ashleySnapshot.stats.isPending == 1);
+  CHECK(VS::State::savedEntryDoor.requiredFlagId == 37);
+  CHECK(VS::State::savedEntryDoor.destinationZoneId == 9);
+  CHECK(VS::State::savedEntryDoor.entryTileX == 1);
+  CHECK(VS::State::savedEntryDoor.entryTileZ == 2);
+  CHECK(VS::State::ashleySnapshot.stats.is_pending == 1);
   CHECK(static_cast<unsigned char>(State_learnedActionFlags[12]) == 0x40);
   CHECK(State_learnedActionFlags[0] == 0);
 }
@@ -1288,7 +1288,7 @@ TEST_CASE(
   Save::CancelResume();
   CHECK(LiveFingerprint(fixture) == before);
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
-  State_ashleySnapshot.stats.isPending = 0;
+  VS::State::ashleySnapshot.stats.is_pending = 0;
   VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
   VS::Audio::Driver::controlLatches.mix_behavior |= 0x10;
   REQUIRE(Save::FinishResume().has_value());
@@ -1314,7 +1314,7 @@ TEST_CASE("Failed room-ready audio validation leaves cancellation safe",
   auto state = fixture.Capture();
   state.settings.monoSound = 1;
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
-  State_ashleySnapshot.stats.isPending = 0;
+  VS::State::ashleySnapshot.stats.is_pending = 0;
   VS::Audio::Mixer::kCommandHandlers[0x81] = nullptr;
   const auto before = LiveFingerprint(fixture);
   REQUIRE_FALSE(Save::FinishResume().has_value());
@@ -1352,11 +1352,11 @@ namespace {
 void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   // Exercise the finalization contract without running the original boot or
   // pretending these scalar fixture writes are controller acceptance tests.
-  State_ashleySnapshot.stats.isPending = 0;
+  VS::State::ashleySnapshot.stats.is_pending = 0;
   fixture.player_model.instance.position = {64, 0, 64, 0};
   fixture.player_stats.currentHp = 7;
   fixture.player_stats.statuses = 0;
-  VS::State::playTime.all = 0;
+  VS::State::playTime = {};
   VS::State::sceneTimer = {};
   VS::Field::sphericalCamera.values.yaw = 0;
   VS::Core::SeedBiosRand(1);
@@ -1366,7 +1366,7 @@ void SimulateRoomEntryWork(RuntimeFixture& fixture) {
   Battle_Ai_savedMovementRandomState = 1;
   VS::Battle::Ai::LiveFrameContext().randomState = 1;
   VS::State::SetLiveScriptFlag(64, 0);
-  State_recentRoomEnemyStates[0].nextSlot = 3;
+  VS::State::recentRoomEnemyStates[0].next_slot = 3;
 }
 
 void CheckRestoredPlayer(const RuntimeFixture& fixture) {
@@ -1383,12 +1383,12 @@ void CheckRestoredPlayer(const RuntimeFixture& fixture) {
 }
 
 void CheckRestoredClockCamera() {
-  CHECK(VS::State::playTime.t.hours == 12);
-  CHECK(VS::State::playTime.t.minutes == 57);
-  CHECK(VS::State::playTime.t.seconds == 58);
-  CHECK(VS::State::playTime.t.frames == 59);
-  CHECK(VS::State::sceneTimer.frames == 29);
-  CHECK(VS::State::sceneTimer.seconds == 17);
+  CHECK(VS::State::playTime.hours == 12);
+  CHECK(VS::State::playTime.minutes == 57);
+  CHECK(VS::State::playTime.seconds == 58);
+  CHECK(VS::State::playTime.frames == 59);
+  CHECK(VS::State::sceneTimer.time.frames == 29);
+  CHECK(VS::State::sceneTimer.time.seconds == 17);
   CHECK(VS::Field::sphericalCamera.values.yaw == 1027);
   CHECK(VS::Render::FrameScratchpad().camera.angles.vy == 1027);
   CHECK(VS::Field::sphericalCamera.initialDistance == 1536);
@@ -1407,9 +1407,9 @@ void CheckRestoredRandom(const Save::Snapshot& state) {
 
 void CheckRestoredCacheFlags() {
   CHECK(static_cast<unsigned char>(VS::State::LiveScriptFlag(64)) == 99);
-  CHECK(State_recentRoomEnemyStates[0].nextSlot == 0);
-  CHECK(static_cast<unsigned char>(State_recentRoomEnemyStates[3].zoneId) ==
-        12);
+  CHECK(VS::State::recentRoomEnemyStates[0].next_slot == 0);
+  CHECK(static_cast<unsigned char>(
+            VS::State::recentRoomEnemyStates[3].zone_id) == 12);
 }
 
 void CheckCompletedResumeStable(const RuntimeFixture& fixture,
@@ -1488,7 +1488,7 @@ void CheckCanceledStaticResume(const RuntimeFixture& fixture,
                                const Save::Document& document,
                                const std::vector<std::uint8_t>& before) {
   REQUIRE(Save::PrepareResume(document).has_value());
-  CHECK(State_savedEntryDoor.tileLocation.entryDirection ==
+  CHECK(VS::State::savedEntryDoor.tileLocation.entryDirection ==
         document.state.location.floor_layer);
   Save::CancelResume();
   CHECK(LiveFingerprint(fixture) == before);
@@ -1557,12 +1557,12 @@ TEST_CASE("Wrong room or unfinished spawn cannot partially finish a resume",
   const auto state = fixture.Capture();
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
   const auto defect = GENERATE(0, 1, 2, 3, 4);
-  State_ashleySnapshot.stats.isPending = 0;
-  if (defect == 0) State_ashleySnapshot.stats.isPending = 1;
+  VS::State::ashleySnapshot.stats.is_pending = 0;
+  if (defect == 0) VS::State::ashleySnapshot.stats.is_pending = 1;
   if (defect == 1) VS::Field::zoneContext.mapId = 1;
   if (defect == 2) VS::Field::zoneContext.currentSceneId = 38;
   if (defect == 3) Field_roomData.isLoaded = 0;
-  if (defect == 4) Boot_isGameplayActive = 0;
+  if (defect == 4) VS::Boot::isGameplayActive = 0;
   const auto before = LiveFingerprint(fixture);
   CHECK_FALSE(Save::FinishResume().has_value());
   CHECK(Save::ResumePending());
@@ -1584,8 +1584,8 @@ void CheckClearProgress(const Save::Document& document) {
 }
 
 void CheckClearCarryover(const Save::Document& document) {
-  CHECK(document.state.ashley.currentHp == 123);
-  CHECK(document.state.ashley.currentMp == 31);
+  CHECK(document.state.ashley.current_hp == 123);
+  CHECK(document.state.ashley.current_mp == 31);
   CHECK(document.state.inventory.misc[0].id == 0);
   CHECK(document.state.inventory_order.misc[0] == 0);
   CHECK(document.state.inventory.weapons[0].blade == 1);
@@ -1598,12 +1598,12 @@ void CheckClearCarryover(const Save::Document& document) {
 }
 
 void CheckResumeStaged() {
-  CHECK(State_savedEntryDoor.destinationZoneId == 1);
-  CHECK(State_savedEntryDoor.entryTileX == 3);
-  CHECK(State_savedEntryDoor.entryTileZ == 2);
-  CHECK(State_savedEntryDoor.tileLocation.entryDirection == 1);
-  CHECK(State_savedEntryDoor.requiredFlagId == 37);
-  CHECK(State_ashleySnapshot.stats.isPending == 1);
+  CHECK(VS::State::savedEntryDoor.destinationZoneId == 1);
+  CHECK(VS::State::savedEntryDoor.entryTileX == 3);
+  CHECK(VS::State::savedEntryDoor.entryTileZ == 2);
+  CHECK(VS::State::savedEntryDoor.tileLocation.entryDirection == 1);
+  CHECK(VS::State::savedEntryDoor.requiredFlagId == 37);
+  CHECK(VS::State::ashleySnapshot.stats.is_pending == 1);
 }
 }  // namespace
 
@@ -1650,7 +1650,7 @@ void CheckResumeRestoresAshley(RuntimeFixture& fixture) {
   VS::Actors::RestoreLiveAshleyRuntimeState();
   CHECK(fixture.player_stats.currentHp == 123);
   CHECK(fixture.player_stats.currentMp == 31);
-  CHECK(State_ashleySnapshot.stats.isPending == 0);
+  CHECK(VS::State::ashleySnapshot.stats.is_pending == 0);
   const auto staged = LiveFingerprint(fixture);
   CHECK_FALSE(
       Save::FinishResume());  // Old campaign room is not the start room.
@@ -1658,12 +1658,12 @@ void CheckResumeRestoresAshley(RuntimeFixture& fixture) {
 }
 
 void CheckResumeKeptLiveState(const RuntimeFixture& fixture) {
-  CHECK(VS::State::playTime.t.frames == 8);
+  CHECK(VS::State::playTime.frames == 8);
   CHECK(fixture.player_model.instance.position.vx == 77);
   CHECK(fixture.player_model.instance.position.vy == -88);
   CHECK(VS::Field::sphericalCamera.values.yaw == 333);
   CHECK(VS::Core::BiosRand().State() == 777);
-  CHECK(State_recentRoomEnemyStates[0].nextSlot == 5);
+  CHECK(VS::State::recentRoomEnemyStates[0].next_slot == 5);
 }
 }  // namespace
 
@@ -1678,10 +1678,10 @@ TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
   CheckResumeCancels(fixture, *decoded);
   REQUIRE(Save::PrepareResume(*decoded));
   CheckResumeRestoresAshley(fixture);
-  Boot_isGameplayActive = 1;
+  VS::Boot::isGameplayActive = 1;
   VS::Field::zoneContext.zndId = 1;
-  State_recentRoomEnemyStates[0].nextSlot = 5;
-  VS::State::playTime.t.frames = 8;
+  VS::State::recentRoomEnemyStates[0].next_slot = 5;
+  VS::State::playTime.frames = 8;
   fixture.player_model.instance.position = {77, -88, 99, 0};
   VS::Field::sphericalCamera.values.yaw = 333;
   VS::Core::SeedBiosRand(777);

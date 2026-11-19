@@ -47,7 +47,7 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/GameClockLive.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -504,13 +504,13 @@ PlaythroughFlags LoadFlags() {
 
 ClearProgress LoadProgress() {
   ClearProgress progress{
-      .play_time = {.hours = VS::State::playTime.t.hours,
-                    .minutes = VS::State::playTime.t.minutes},
+      .play_time = {.hours = VS::State::playTime.hours,
+                    .minutes = VS::State::playTime.minutes},
       .score = LoadScore(),
       .flags = LoadFlags(),
       .save_count = VS::Input::settings.currentGameSaveCount,
-      .entry_zone = State_savedEntryDoor.destinationZoneId,
-      .entry_room = State_savedEntryDoor.destinationRoomId};
+      .entry_zone = VS::State::savedEntryDoor.destinationZoneId,
+      .entry_room = VS::State::savedEntryDoor.destinationRoomId};
   static_assert(std::size(State_roomVisitProgress.roomFlags) == kRoomFlagWords);
   std::ranges::transform(
       State_roomVisitProgress.roomFlags, progress.visited_rooms.begin(),
@@ -538,8 +538,8 @@ void StoreProgress(const ClearProgress& progress) {
   flags.difficulty = static_cast<char>(progress.flags.difficulty);
   flags.normalModeCleared =
       static_cast<char>(progress.flags.normal_mode_cleared);
-  State_savedEntryDoor.destinationZoneId = progress.entry_zone;
-  State_savedEntryDoor.destinationRoomId = progress.entry_room;
+  VS::State::savedEntryDoor.destinationZoneId = progress.entry_zone;
+  VS::State::savedEntryDoor.destinationRoomId = progress.entry_room;
 }
 
 class LiveProgressHost final : public ProgressHost {

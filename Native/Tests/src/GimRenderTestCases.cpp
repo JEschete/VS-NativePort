@@ -111,7 +111,7 @@ struct PuzzleTimerFixture {
   char saved_seconds = VS::State::stateFlags.puzzleTimerSeconds;
   char saved_minutes = VS::State::stateFlags.puzzleTimerMins;
   char saved_hours = VS::State::stateFlags.puzzleSetMaxTimer;
-  State_SceneTimer saved_timer = VS::State::sceneTimer;
+  VS::State::SceneTimer saved_timer = VS::State::sceneTimer;
   int saved_packed_timer = Battle_puzzleTimer;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering_table = VS::Render::legacyOrderingTables[0];
@@ -148,7 +148,7 @@ struct PuzzleTimerFixture {
     VS::Render::frameBuf = saved_framebuffer;
   }
 
-  void DrawCounter(const State_SceneTimer& timer, int hundredths) {
+  void DrawCounter(const VS::State::SceneTimer& timer, int hundredths) {
     storage.fill(0);
     storage.front() = storage.back() = 0xC0FFEE00;
     ordering.fill(0xFFFFFF);
@@ -163,11 +163,11 @@ struct PuzzleTimerFixture {
   }
 
   void Draw(int packed_timer, int hundredths) {
-    State_SceneTimer timer{};
-    timer.frames = static_cast<signed char>(packed_timer & 0xFF);
-    timer.seconds = static_cast<signed char>((packed_timer >> 8) & 0xFF);
-    timer.minutes = static_cast<signed char>((packed_timer >> 16) & 0xFF);
-    timer.hours = static_cast<signed char>((packed_timer >> 24) & 0xFF);
+    VS::State::SceneTimer timer{};
+    timer.time.frames = static_cast<signed char>(packed_timer & 0xFF);
+    timer.time.seconds = static_cast<signed char>((packed_timer >> 8) & 0xFF);
+    timer.time.minutes = static_cast<signed char>((packed_timer >> 16) & 0xFF);
+    timer.time.hours = static_cast<signed char>((packed_timer >> 24) & 0xFF);
     DrawCounter(timer, hundredths);
   }
 
@@ -205,11 +205,18 @@ struct PuzzleTimerFixture {
     CheckGuards();
   }
 
-  void CheckClockState(int mode, int visible, int minutes, int seconds) const {
-    CHECK(VS::State::sceneTimer.mode == mode);
-    CHECK(Battle_lowerScreenUiState == visible);
-    CHECK(VS::State::sceneTimer.minutes == minutes);
-    CHECK(VS::State::sceneTimer.seconds == seconds);
+  struct ClockState {
+    int mode;
+    int visible;
+    int minutes;
+    int seconds;
+  };
+
+  void CheckClockState(const ClockState& expected) const {
+    CHECK(VS::State::sceneTimer.mode == expected.mode);
+    CHECK(Battle_lowerScreenUiState == expected.visible);
+    CHECK(VS::State::sceneTimer.time.minutes == expected.minutes);
+    CHECK(VS::State::sceneTimer.time.seconds == expected.seconds);
   }
 };
 }  // namespace
@@ -252,8 +259,8 @@ TEST_CASE("Puzzle HUD reads the authoritative clock without copying its alias",
           "[render][puzzle-timer][timer-binding]") {
   PuzzleTimerFixture fixture;
   VS::State::sceneTimer = {};
-  VS::State::sceneTimer.minutes = 12;
-  VS::State::sceneTimer.seconds = 34;
+  VS::State::sceneTimer.time.minutes = 12;
+  VS::State::sceneTimer.time.seconds = 34;
   Battle_puzzleTimer = 0;
   fixture.DrawCurrent(56);
   fixture.CheckRendering("12:34:56");
@@ -265,16 +272,19 @@ TEST_CASE("Scene timer pause and reset preserve HUD visibility and clock state",
   PuzzleTimerFixture fixture;
   VS::State::sceneTimer = {};
   VS::State::sceneTimer.mode = 1;
-  VS::State::sceneTimer.minutes = 1;
-  VS::State::sceneTimer.seconds = 2;
+  VS::State::sceneTimer.time.minutes = 1;
+  VS::State::sceneTimer.time.seconds = 2;
   VS::State::SetLiveSceneTimerPaused(1);
-  fixture.CheckClockState(0, 0, 1, 2);
+  fixture.CheckClockState(
+      {.mode = 0, .visible = 0, .minutes = 1, .seconds = 2});
   fixture.DrawCurrent(56);
   fixture.CheckRendering("01:02:56");
   VS::State::SetLiveSceneTimerPaused(0);
-  fixture.CheckClockState(1, 1, 1, 2);
+  fixture.CheckClockState(
+      {.mode = 1, .visible = 1, .minutes = 1, .seconds = 2});
   VS::State::ResetLiveSceneTimer();
-  fixture.CheckClockState(0, 0, 0, 0);
+  fixture.CheckClockState(
+      {.mode = 0, .visible = 0, .minutes = 0, .seconds = 0});
   fixture.DrawCurrent(0);
   fixture.CheckRendering("00:00:00");
 }

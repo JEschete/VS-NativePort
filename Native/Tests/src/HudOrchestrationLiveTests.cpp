@@ -155,9 +155,9 @@ TEST_CASE(
     "F01384 Live renders all eight original glyphs with their full widths",
     "[hud-orchestration-live][F01384]") {
   f::LiveState fixture;
-  State_SceneTimer timer{};
-  timer.minutes = 12;
-  timer.seconds = 34;
+  VS::State::SceneTimer timer{};
+  timer.time.minutes = 12;
+  timer.time.seconds = 34;
   VS::State::stateFlags.puzzleTimerHundredths = 56;
   Battle_puzzleTimerTextPointer = nullptr;
   b::DrawLivePuzzleTimer(&timer);
@@ -180,8 +180,8 @@ TEST_CASE(
 TEST_CASE("F01384 Live saturation and repeat entry consume only timer values",
           "[hud-orchestration-live][F01384]") {
   f::LiveState fixture;
-  State_SceneTimer timer{};
-  timer.hours = -128;
+  VS::State::SceneTimer timer{};
+  timer.time.hours = -128;
   VS::State::stateFlags.puzzleTimerHundredths = -1;
   b::DrawLivePuzzleTimer(&timer);
   CHECK(std::string_view(Battle_puzzleTimerText) == "59:59:99");

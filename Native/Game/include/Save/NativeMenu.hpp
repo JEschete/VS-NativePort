@@ -21,8 +21,8 @@ void DrawFileOverlay(bool title);
 // The selected file's container storage; aborts without a selection.
 Items_ContainerData* ContainerData();
 void ReleaseContainer();
-// TITLE calls only while Boot_isClearSavePending still identifies the ending.
-// Reset/return to title/shutdown release the owned staging copy.
+// TITLE calls only while VS::Boot::isClearSavePending still identifies the
+// ending. Reset/return to title/shutdown release the owned staging copy.
 void StageClearGame();
 
 }  // namespace VS::Game::Save

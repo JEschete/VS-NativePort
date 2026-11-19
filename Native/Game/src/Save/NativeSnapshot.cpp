@@ -248,33 +248,33 @@ void Fields(Items_InventoryIndices& r, V&& v) {
 }
 
 template <class V>
-void Fields(State_AshleyLimbSnapshot& r, V&& v) {
+void Fields(VS::State::AshleyLimbSnapshot& r, V&& v) {
   v("hp", r.hp);
-  v("maximum_hp", r.maxHp);
+  v("maximum_hp", r.max_hp);
   v("types", r.types);
   v("affinities", r.affinities);
 }
 
 template <class V>
-void Fields(State_AshleyStatsSnapshot& r, V&& v) {
-  v("hp", r.currentHp);
-  v("maximum_hp", r.maxHp);
-  v("mp", r.currentMp);
-  v("maximum_mp", r.maxMp);
+void Fields(VS::State::AshleyStatsSnapshot& r, V&& v) {
+  v("hp", r.current_hp);
+  v("maximum_hp", r.max_hp);
+  v("mp", r.current_mp);
+  v("maximum_mp", r.max_mp);
   v("strength", r.strength);
-  v("total_strength", r.totalStrength);
+  v("total_strength", r.total_strength);
   v("intelligence", r.intelligence);
-  v("total_intelligence", r.totalIntelligence);
+  v("total_intelligence", r.total_intelligence);
   v("agility", r.agility);
-  v("total_agility", r.totalAgility);
+  v("total_agility", r.total_agility);
   v("risk", r.risk);
-  v("recovery", r.actorFlags);
+  v("recovery", r.action_recovery_timer);
   v("statuses", r.statuses);
-  v("status_timers", r.statusTimers);
+  v("status_timers", r.status_timers);
   v("limbs", r.limbs);
-  v("weapon_drawn", r.weaponDrawn);
-  v("camera_pitch", r.cameraPitch);
-  v("camera_distance", r.cameraDistance);
+  v("weapon_drawn", r.weapon_drawn);
+  v("camera_pitch", r.camera_pitch);
+  v("camera_distance", r.camera_distance);
 }
 
 template <class V>
@@ -443,14 +443,14 @@ void Fields(RandomState& r, V&& v) {
 }
 
 template <class V>
-void Fields(State_SceneTimer& r, V&& v) {
+void Fields(VS::State::SceneTimer& r, V&& v) {
   v("mode", r.mode);
-  v("paused_mode", r.pausedMode);
-  v("reset_scope", r.resetScope);
-  v("frames", r.frames);
-  v("seconds", r.seconds);
-  v("minutes", r.minutes);
-  v("hours", r.hours);
+  v("paused_mode", r.paused_mode);
+  v("reset_scope", r.reset_scope);
+  v("frames", r.time.frames);
+  v("seconds", r.time.seconds);
+  v("minutes", r.time.minutes);
+  v("hours", r.time.hours);
 }
 
 template <class V>

@@ -169,7 +169,7 @@ TEST_CASE("F02985 controller allocates the full native row workspace",
   std::vector<std::byte> backing(tests::kHeapBytes + kOutsideBytes, kCanary);
   VS::Core::Memory::ScopedLiveGameHeap bounded{
       std::span(backing).first(tests::kHeapBytes)};
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   for (auto& item : fixture.containers.storage->container.items.misc) {
     item.id = data::kMiscId;
     item.count = 1;
@@ -234,7 +234,7 @@ TEST_CASE(
   storage.stagedTransfer.misc[0].id = data::kMiscId;
   storage.itemsToTransfer[0] = data::kMiscPendingToken;
   const auto* const owner = Menu_Container_containerData;
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   REQUIRE(VS::Menu::Framework::inventoryStorage == &storage);
   REQUIRE(Menu_Container_containerData == owner);
   REQUIRE(rows::FindLivePendingTransfer(kMiscCategory, 0) == 1);

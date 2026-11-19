@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Items/ContainerIndexingLiveFixture.hpp"
 
@@ -79,7 +79,7 @@ TEST_CASE(
   fixture.owner.items.misc[0].id = 65535;
   fixture.owner.indices.misc[0] = 256;
   CHECK(items::CountLiveContainerItems(6, &fixture.owner.items) == 0);
-  Boot_ResetMenudStatics();
+  VS::Boot::ResetMenudStatics();
   CHECK(items::CountLiveContainerItems(6, &fixture.owner.items) == 1);
   CHECK(items::FindLiveEmptyContainerSlot(6, &fixture.owner.items) == 1);
   CHECK(Menu_Container_transferredMiscCount == 91);

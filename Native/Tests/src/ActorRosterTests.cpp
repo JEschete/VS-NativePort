@@ -28,8 +28,8 @@
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Legacy/Psx.h"
-#include "State/RoomCache.h"
-#include "State/RoomMemory.h"
+#include "State/RoomCache.hpp"
+#include "State/RoomMemory.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
 namespace {
@@ -455,9 +455,9 @@ struct LiveRosterFixture {
       std::to_array(VS::Actors::weaponModels);
   decltype(std::to_array(Battle_actorMarkers)) saved_markers =
       std::to_array(Battle_actorMarkers);
-  decltype(std::to_array(State_recentRoomEnemyStates)) saved_rooms =
-      std::to_array(State_recentRoomEnemyStates);
-  int saved_room_slot = State_currentRoomStateSlot;
+  decltype(std::to_array(VS::State::recentRoomEnemyStates)) saved_rooms =
+      std::to_array(VS::State::recentRoomEnemyStates);
+  int saved_room_slot = VS::State::currentRoomStateSlot;
 
   LiveRosterFixture() {
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
@@ -465,9 +465,9 @@ struct LiveRosterFixture {
     std::fill_n(Battle_Ai_actorAiStates, saved_ai.size(), nullptr);
     std::fill_n(VS::Actors::weaponModels, saved_weapons.size(), nullptr);
     std::fill_n(Battle_actorMarkers, saved_markers.size(), 0);
-    std::fill_n(State_recentRoomEnemyStates, saved_rooms.size(),
-                State_RoomEnemyStates{});
-    State_currentRoomStateSlot = 0;
+    std::fill_n(VS::State::recentRoomEnemyStates, saved_rooms.size(),
+                VS::State::RoomEnemyStates{});
+    VS::State::currentRoomStateSlot = 0;
   }
   LiveRosterFixture(const LiveRosterFixture&) = delete;
   LiveRosterFixture& operator=(const LiveRosterFixture&) = delete;
@@ -479,22 +479,24 @@ struct LiveRosterFixture {
     std::ranges::copy(saved_ai, Battle_Ai_actorAiStates);
     std::ranges::copy(saved_weapons, VS::Actors::weaponModels);
     std::ranges::copy(saved_markers, Battle_actorMarkers);
-    std::ranges::copy(saved_rooms, State_recentRoomEnemyStates);
-    State_currentRoomStateSlot = saved_room_slot;
+    std::ranges::copy(saved_rooms, VS::State::recentRoomEnemyStates);
+    VS::State::currentRoomStateSlot = saved_room_slot;
   }
 };
 
-using RoomBytes = std::array<unsigned char, sizeof State_recentRoomEnemyStates>;
+constexpr std::size_t kRoomBytes = sizeof VS::State::recentRoomEnemyStates;
+using RoomBytes = std::array<unsigned char, kRoomBytes>;
 
 RoomBytes SavedRoomBytes() {
   RoomBytes bytes{};
-  std::memcpy(bytes.data(), State_recentRoomEnemyStates, bytes.size());
+  std::memcpy(bytes.data(), VS::State::recentRoomEnemyStates, bytes.size());
   return bytes;
 }
 
 Actors_RoomActorRecord SavedRecord(std::size_t room, std::size_t slot) {
   Actors_RoomActorRecord record{};
-  std::memcpy(&record, State_recentRoomEnemyStates[room].actorStates[slot],
+  std::memcpy(&record,
+              VS::State::recentRoomEnemyStates[room].actor_states[slot],
               sizeof record);
   return record;
 }
@@ -564,15 +566,16 @@ bool SameRecord(const Actors_RoomActorRecord& first,
 
 // Forgetting map 12 in zone 3 cleared saved room 1's enemies and kept its
 // recency and next slot; room 0 kept the pattern.
-void CheckLiveRoomForgotten(const State_RoomEnemyStates& before,
+void CheckLiveRoomForgotten(const VS::State::RoomEnemyStates& before,
                             const RoomBytes& pattern) {
-  CHECK(State_recentRoomEnemyStates[1].recency == before.recency);
-  CHECK(State_recentRoomEnemyStates[1].nextSlot == before.nextSlot);
+  CHECK(VS::State::recentRoomEnemyStates[1].recency == before.recency);
+  CHECK(VS::State::recentRoomEnemyStates[1].next_slot == before.next_slot);
   CHECK(std::ranges::all_of(
-      std::as_bytes(std::span(State_recentRoomEnemyStates[1].actorStates)),
+      std::as_bytes(
+          std::span(VS::State::recentRoomEnemyStates[1].actor_states)),
       [](std::byte value) { return value == std::byte{0}; }));
-  CHECK(std::memcmp(&State_recentRoomEnemyStates[0], pattern.data(),
-                    sizeof(State_RoomEnemyStates)) == 0);
+  CHECK(std::memcmp(&VS::State::recentRoomEnemyStates[0], pattern.data(),
+                    sizeof(VS::State::RoomEnemyStates)) == 0);
 }
 
 // Copying the remembered spawn 5 gives its saved record; spawn 4 has none.
@@ -602,38 +605,38 @@ TEST_CASE("The live room enemy memory round-trips the saved rooms",
   for (std::size_t index = 0; index < pattern.size(); ++index) {
     pattern[index] = static_cast<unsigned char>(index * 7 + 3);
   }
-  std::memcpy(State_recentRoomEnemyStates, pattern.data(), pattern.size());
-  State_currentRoomStateSlot = 2;
+  std::memcpy(VS::State::recentRoomEnemyStates, pattern.data(), pattern.size());
+  VS::State::currentRoomStateSlot = 2;
 
   ChannelWarnings warnings("actors");
   VS::Actors::ForgetLiveRoomEnemies(-1, -1);
   CHECK(SavedRoomBytes() == pattern);
-  CHECK(State_currentRoomStateSlot == 2);
+  CHECK(VS::State::currentRoomStateSlot == 2);
   CHECK(warnings.messages.empty());
 
-  State_recentRoomEnemyStates[1].zoneId = 3;
-  State_recentRoomEnemyStates[1].mapId = 12;
-  const State_RoomEnemyStates before = State_recentRoomEnemyStates[1];
+  VS::State::recentRoomEnemyStates[1].zone_id = 3;
+  VS::State::recentRoomEnemyStates[1].map_id = 12;
+  const VS::State::RoomEnemyStates before = VS::State::recentRoomEnemyStates[1];
   VS::Actors::ForgetLiveRoomEnemies(12, 3);
   CheckLiveRoomForgotten(before, pattern);
 
   VS::Actors::ClearLiveRoomEnemyMemory();
   CHECK(SavedRoomBytes() == RoomBytes{});
-  CHECK(State_currentRoomStateSlot == 0);
+  CHECK(VS::State::currentRoomStateSlot == 0);
 }
 
 TEST_CASE("Storing a live enemy remembers it in the current saved room",
           "[actors-room-memory]") {
   const LiveRosterFixture fixture;
   LiveEnemy enemy;
-  State_currentRoomStateSlot = 1;
-  State_recentRoomEnemyStates[1].zoneId = 3;
-  State_recentRoomEnemyStates[1].mapId = 12;
+  VS::State::currentRoomStateSlot = 1;
+  VS::State::recentRoomEnemyStates[1].zone_id = 3;
+  VS::State::recentRoomEnemyStates[1].map_id = 12;
   ChannelWarnings warnings("actors");
 
   VS::Actors::StoreLiveRoomActorState(3, 1);
   CHECK(SameRecord(SavedRecord(1, 0), StoredLiveEnemy()));
-  CHECK(State_recentRoomEnemyStates[1].nextSlot == 1);
+  CHECK(VS::State::recentRoomEnemyStates[1].next_slot == 1);
 
   // A fading enemy keeps 1 HP and reuses its record.
   enemy.record->instance.actionAnimationState = 2;
@@ -642,7 +645,7 @@ TEST_CASE("Storing a live enemy remembers it in the current saved room",
   faded.isHidden = 0;
   faded.currentHp = 1;
   CHECK(SameRecord(SavedRecord(1, 0), faded));
-  CHECK(State_recentRoomEnemyStates[1].nextSlot == 1);
+  CHECK(VS::State::recentRoomEnemyStates[1].next_slot == 1);
 
   CheckLiveRememberedCopy(faded);
   CheckLiveRememberedHidden();
@@ -667,16 +670,16 @@ TEST_CASE("Storing a live enemy refuses what the original indexed past",
   enemy.actor.stats = nullptr;
   VS::Actors::StoreLiveRoomActorState(3, 0);
   enemy.actor.stats = enemy.stats.get();
-  State_currentRoomStateSlot = 4;
+  VS::State::currentRoomStateSlot = 4;
   VS::Actors::StoreLiveRoomActorState(3, 0);
   CHECK_FALSE(VS::Actors::IsLiveRememberedRoom(0, 0));
   Actors_RoomActorRecord copy{};
   CHECK(VS::Actors::CopyLiveRememberedEnemy(5, &copy) == nullptr);
   CHECK(VS::Actors::CopyLiveRememberedEnemy(5, nullptr) == nullptr);
-  State_currentRoomStateSlot = 0;
-  State_recentRoomEnemyStates[0].nextSlot = 9;
+  VS::State::currentRoomStateSlot = 0;
+  VS::State::recentRoomEnemyStates[0].next_slot = 9;
   VS::Actors::StoreLiveRoomActorState(3, 0);
-  State_recentRoomEnemyStates[0].nextSlot = 0;
+  VS::State::recentRoomEnemyStates[0].next_slot = 0;
 
   CHECK(SavedRoomBytes() == empty);
   const std::string store = "StoreLiveRoomActorState";

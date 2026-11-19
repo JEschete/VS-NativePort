@@ -101,7 +101,7 @@ struct ClockFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_table = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  State_PlayTime saved_time = VS::State::playTime;
+  VS::State::PlayTime saved_time = VS::State::playTime;
   u_int saved_random = VS::Core::interfaceRandomState;
   std::array<u_char, 264> saved_trim{};
   std::array<u_char, 92> saved_widths{};
@@ -184,21 +184,24 @@ TEST_CASE("Data play time uses mutable digits and retains overflow formatting",
           "[render][menu][data][clock]") {
   ClockFixture fixture;
   const unsigned hours = GENERATE(0u, 12u, 99u, 100u);
-  VS::State::playTime.all = (hours << 24) | (34u << 16) | (56u << 8);
-  const auto saved = VS::State::playTime.all;
+  VS::State::playTime = {.frames = 0,
+                         .seconds = 56,
+                         .minutes = 34,
+                         .hours = static_cast<std::int8_t>(hours)};
+  const auto saved = VS::State::playTime;
   const auto expected =
       hours >= 100 ? "100:00:00:00" : std::format("{:02}:34:56:00", hours);
   files::Context context = LiveFiles();
   files::DrawPlayTime(context);
   CHECK(fixture.Clock() == expected);
-  CHECK(VS::State::playTime.all == saved);
+  CHECK(VS::State::playTime == saved);
   CHECK(fixture.storage.front() == 0xDEADBEEF);
   CHECK(fixture.storage.back() == 0xDEADBEEF);
   files::ResetLiveFilesStatics();
   fixture.ResetPackets();
   files::DrawPlayTime(context);
   CHECK(fixture.Clock() == expected);
-  CHECK(VS::State::playTime.all == saved);
+  CHECK(VS::State::playTime == saved);
 }
 
 TEST_CASE("Game Over fade links packets through native handles",

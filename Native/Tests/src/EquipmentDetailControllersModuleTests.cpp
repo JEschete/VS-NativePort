@@ -2,7 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Content/ModuleData.hpp"
 #include "Input/Pad.hpp"
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
@@ -58,7 +58,7 @@ TEST_CASE("F02576 MENU3 reload retains zero-initialized controller state",
   fixture.Wait(inventory::UpdateLiveBladeDetails);
   VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
-  Boot_ResetMenu3Statics();
+  VS::Boot::ResetMenu3Statics();
   fixture.IdleRows();
   VS::Input::buttonsPressed = 0;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 1);
@@ -74,7 +74,7 @@ TEST_CASE(
   fixture.Wait(inventory::UpdateLiveBladeDetails);
   VS::Input::buttonsPressed = VS::Input::Cross;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 0);
-  Boot_ResetMenubStatics();
+  VS::Boot::ResetMenubStatics();
   fixture.IdleRows();
   VS::Input::buttonsPressed = 0;
   CHECK(inventory::UpdateLiveBladeDetails(0) == 1);

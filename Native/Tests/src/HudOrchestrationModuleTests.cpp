@@ -36,7 +36,7 @@ static_assert(
 static_assert(std::is_same_v<decltype(&b::DrawLiveShortcutHud), void (*)()>);
 static_assert(std::is_same_v<decltype(&b::DrawLiveBattleHud), void (*)()>);
 static_assert(std::is_same_v<decltype(&b::DrawLivePuzzleTimer),
-                             void (*)(const State_SceneTimer*)>);
+                             void (*)(const VS::State::SceneTimer*)>);
 }  // namespace
 
 TEST_CASE("F00729 production module preserves the complete visibility command",
@@ -98,9 +98,9 @@ TEST_CASE("F01384 production module receives the authoritative typed timer",
   const auto draw = Entry(0x800CB56C, &b::DrawLivePuzzleTimer);
   if (draw == nullptr) return;
   f::LiveState fixture;
-  State_SceneTimer timer{};
-  timer.minutes = 12;
-  timer.seconds = 34;
+  VS::State::SceneTimer timer{};
+  timer.time.minutes = 12;
+  timer.time.seconds = 34;
   VS::State::stateFlags.puzzleTimerHundredths = 56;
   draw(&timer);
   CHECK(fixture.frame.UsedWords() == 42);

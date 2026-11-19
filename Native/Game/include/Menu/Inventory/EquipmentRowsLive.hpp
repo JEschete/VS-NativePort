@@ -32,7 +32,7 @@ int LiveIsTwoHandedWeapon(int category);
 // decomp: MENU3.PRG _populateDataSlot (68C4.c:100).
 void QueueLiveEquipmentModel(int wep_id, int material);
 // MENU3.PRG reloads restore _processEquipSubMenu's cursor static
-// (Boot_ResetMenu3Statics).
+// (VS::Boot::ResetMenu3Statics).
 void ResetEquipmentRowsLive();
 // Refusals logged since start-up.
 [[nodiscard]] std::uint64_t LiveEquipmentRowsRefusalCount();

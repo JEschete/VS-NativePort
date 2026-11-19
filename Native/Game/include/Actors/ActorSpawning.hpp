@@ -505,7 +505,7 @@ struct AshleyLimbSnapshot {
                          const AshleyLimbSnapshot&) = default;
 };
 
-// State_AshleyStatsSnapshot: Ashley's state carried between rooms.
+// VS::State::AshleyStatsSnapshot: Ashley's state carried between rooms.
 struct AshleySnapshot {
   bool pending = false;
   std::int16_t current_hp = 0;

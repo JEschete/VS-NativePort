@@ -35,12 +35,12 @@
 #include "Save/MemoryCard/GameFiles.hpp"
 #include "Save/MemoryCard/Resources.h"
 #include "Save/SnapshotLive.hpp"
-#include "State/Ashley.h"
-#include "State/Location.h"
+#include "State/Ashley.hpp"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
-#include "State/RoomCache.h"
-#include "State/RoomMemory.h"
+#include "State/RoomCache.hpp"
+#include "State/RoomMemory.hpp"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
 #include "Title/SaveCard.hpp"
@@ -90,10 +90,10 @@ static_assert(offsetof(State_Settings, saveFileGeneration) ==
               kSettingsGenerationOffset);
 static_assert(offsetof(State_StateFlags, puzzleMode) ==
               kStateFlagsPuzzleModeOffset);
-static_assert(sizeof(State_RoomEnemyStates) == kRoomEnemyStatesBytes);
-static_assert(offsetof(State_RoomEnemyStates, nextSlot) ==
+static_assert(sizeof(VS::State::RoomEnemyStates) == kRoomEnemyStatesBytes);
+static_assert(offsetof(VS::State::RoomEnemyStates, next_slot) ==
               kRoomEnemyNextSlotOffset);
-static_assert(std::extent_v<decltype(State_recentRoomEnemyStates)> ==
+static_assert(std::extent_v<decltype(VS::State::recentRoomEnemyStates)> ==
               kRoomStateSlotCount);
 static_assert(sizeof(Save_CardUiResources::fileIconPalettes) ==
               kFileIconCount * kIconPaletteBytes);
@@ -127,7 +127,7 @@ static_assert(LaysOut(SaveSection::kSettings,
                       sizeof(VS::Input::settings)));
 static_assert(LaysOut(SaveSection::kAshleySnapshot,
                       offsetof(Save_GameSaveImage, ashleySnapshot),
-                      sizeof(State_ashleySnapshot)));
+                      sizeof(VS::State::ashleySnapshot)));
 static_assert(LaysOut(SaveSection::kInventory,
                       offsetof(Save_GameSaveImage, inventory),
                       sizeof(VS::Items::inventory)));
@@ -136,16 +136,16 @@ static_assert(LaysOut(SaveSection::kInventoryIndices,
                       sizeof(VS::Items::inventoryIndices)));
 static_assert(LaysOut(SaveSection::kEntryDoor,
                       offsetof(Save_GameSaveImage, entryDoor),
-                      sizeof(State_savedEntryDoor)));
+                      sizeof(VS::State::savedEntryDoor)));
 static_assert(LaysOut(SaveSection::kScoreData,
                       offsetof(Save_GameSaveImage, scoreData),
                       sizeof(VS::State::scoreData)));
 static_assert(LaysOut(SaveSection::kRoomStateSlot,
                       offsetof(Save_GameSaveImage, roomStateSlot),
-                      sizeof(State_currentRoomStateSlot)));
+                      sizeof(VS::State::currentRoomStateSlot)));
 static_assert(LaysOut(SaveSection::kRecentRoomEnemyStates,
                       offsetof(Save_GameSaveImage, recentRoomEnemyStates),
-                      sizeof(State_recentRoomEnemyStates)));
+                      sizeof(VS::State::recentRoomEnemyStates)));
 static_assert(LaysOut(SaveSection::kArtsStatus,
                       offsetof(Save_GameSaveImage, artsStatus),
                       sizeof(VS::State::artsStatus)));
@@ -329,27 +329,30 @@ class LiveSaveState final : public SaveStateHost {
       case SaveSection::kSettings:
         return BytesOf(VS::Input::settings);
       case SaveSection::kAshleySnapshot:
-        return BytesOf(State_ashleySnapshot);
+        return BytesOf(VS::State::ashleySnapshot);
       case SaveSection::kInventory:
         return BytesOf(VS::Items::inventory);
       case SaveSection::kInventoryIndices:
         return BytesOf(VS::Items::inventoryIndices);
       case SaveSection::kEntryDoor:
-        return BytesOf(State_savedEntryDoor);
+        return BytesOf(VS::State::savedEntryDoor);
       case SaveSection::kScoreData:
         return BytesOf(VS::State::scoreData);
       case SaveSection::kRoomStateSlot:
-        return BytesOf(State_currentRoomStateSlot);
+        return BytesOf(VS::State::currentRoomStateSlot);
       case SaveSection::kRecentRoomEnemyStates:
-        return std::as_writable_bytes(std::span{State_recentRoomEnemyStates});
+        return std::as_writable_bytes(
+            std::span{VS::State::recentRoomEnemyStates});
       case SaveSection::kArtsStatus:
         return BytesOf(VS::State::artsStatus);
     }
     return {};
   }
-  std::uint32_t PlayTime() override { return VS::State::playTime.all; }
+  std::uint32_t PlayTime() override {
+    return VS::State::PackPlayTime(VS::State::playTime);
+  }
   void SetPlayTime(std::uint32_t play_time) override {
-    VS::State::playTime.all = play_time;
+    VS::State::playTime = VS::State::UnpackPlayTime(play_time);
   }
   void CaptureSnapshot() override { VS::Save::CaptureLiveAshleySnapshot(); }
   void SetMonoOutput(std::int32_t mono) override {

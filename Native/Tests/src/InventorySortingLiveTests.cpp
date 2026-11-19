@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Items/Inventory.h"
 #include "Menu/Inventory/InventorySortingLive.hpp"
 #include "Menu/InventorySortingLiveFixture.hpp"
@@ -169,12 +169,12 @@ TEST_CASE(
   order[2] = items::kGemSlots;
   Menu_Inventory_inventoryIndices[kGem] = order;
   sorting::SortLiveEquipment(kGem, kStrength);
-  Boot_ResetMenu3Statics();
+  VS::Boot::ResetMenu3Statics();
   CHECK(Menu_Inventory_inventoryIndices[kGem] == order);
   CHECK(order[0] == items::kGemSlots);
   CHECK(order[1] == items::kGemSlots);
   CHECK(order[2] == 1);
-  Boot_ResetMenubStatics();
+  VS::Boot::ResetMenubStatics();
   CHECK(Menu_Inventory_inventoryIndices[kGem] == order);
   CHECK(order[2] == 1);
   records.gems[0].strength = kHigh;
@@ -192,7 +192,7 @@ TEST_CASE(
   order.misc[0] = items::kMiscSlots;
   VS::Items::inventory.misc[0].id = kWide;
   Menu_Inventory_inventoryIndices[kBlade] = order.misc;
-  Boot_ResetMainMenuStatics();
+  VS::Boot::ResetMainMenuStatics();
   CHECK(Menu_Inventory_inventoryIndices[kBlade] == order.blades);
   CHECK(order.misc[0] == items::kMiscSlots);
   CHECK(VS::Items::inventory.misc[0].id == kWide);

@@ -30,7 +30,7 @@
 #include "Save/MemoryCard/Resources.h"
 #include "Save/Snapshot.hpp"
 #include "Save/SnapshotLive.hpp"
-#include "State/Ashley.h"
+#include "State/Ashley.hpp"
 #include "Title/SaveFiles.hpp"
 
 namespace Files = VS::Save::MemoryCard;
@@ -1749,12 +1749,12 @@ TEST_CASE("Marking the snapshot valid sets only its pending flag",
   CHECK(ValueAt<std::uint32_t>(bytes, 0) == 1);
   CHECK(AllEqual(std::span{bytes}.subspan(sizeof(std::uint32_t)),
                  std::byte{0xEE}));
-  Restore snapshot_global{State_ashleySnapshot};
-  State_ashleySnapshot.stats.isPending = 0;
-  State_ashleySnapshot.stats.currentHp = 77;
+  Restore snapshot_global{VS::State::ashleySnapshot};
+  VS::State::ashleySnapshot.stats.is_pending = 0;
+  VS::State::ashleySnapshot.stats.current_hp = 77;
   Save::MarkLiveAshleySnapshotValid();
-  CHECK(State_ashleySnapshot.stats.isPending == 1);
-  CHECK(State_ashleySnapshot.stats.currentHp == 77);
+  CHECK(VS::State::ashleySnapshot.stats.is_pending == 1);
+  CHECK(VS::State::ashleySnapshot.stats.current_hp == 77);
 }
 
 TEST_CASE("The live save check decodes the workspace's incoming image",

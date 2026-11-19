@@ -12,7 +12,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Content/ModuleData.hpp"
 #include "Input/Controller.hpp"
 #include "Input/ControllerLive.hpp"
@@ -198,7 +198,7 @@ struct LiveControllerGlobals {
   int held = VS::Input::buttonsState;
   State_Settings settings = VS::Input::settings;
   int tick_speed = VS::State::tickSpeed;
-  int soft_reset = Boot_isSoftResetEnabled;
+  int soft_reset = VS::Boot::isSoftResetEnabled;
 
   LiveControllerGlobals(const LiveControllerGlobals&) = delete;
   LiveControllerGlobals& operator=(const LiveControllerGlobals&) = delete;
@@ -220,14 +220,14 @@ struct LiveControllerGlobals {
     VS::Input::buttonsState = held;
     VS::Input::settings = settings;
     VS::State::tickSpeed = tick_speed;
-    Boot_isSoftResetEnabled = soft_reset;
+    VS::Boot::isSoftResetEnabled = soft_reset;
   }
 };
 
 // Runs live frames at normal speed from a cleared button history.
 void PrepareLiveControllers() {
   VS::State::tickSpeed = 1;
-  Boot_isSoftResetEnabled = 0;
+  VS::Boot::isSoftResetEnabled = 0;
   VS::Input::previousButtons = 0;
   std::ranges::fill(VS::Input::buttonHeldFrames, 0U);
   PadInitDirect(VS::Input::legacyPadResponseBytes[0].data(),

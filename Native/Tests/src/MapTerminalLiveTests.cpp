@@ -18,7 +18,7 @@
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
@@ -1194,7 +1194,7 @@ TEST_CASE("Original map caption survives module reset but not a cold session",
   const std::vector<std::uint8_t> original(caption.begin(), caption.end());
   auto* borrow = VS::Menu::ReadLiveTextBox(0).text;
   CHECK(borrow == reinterpret_cast<const char*>(caption.data()));
-  Boot_ResetMenu5Statics();
+  VS::Boot::ResetMenu5Statics();
   CHECK(VS::Menu::ReadLiveTextBox(0).text == borrow);
   CHECK(std::ranges::equal(caption, original));
   CHECK(VS::Boot::RunLiveSessionLoop([] { return 7; }, [] { return 9; }) == 7);

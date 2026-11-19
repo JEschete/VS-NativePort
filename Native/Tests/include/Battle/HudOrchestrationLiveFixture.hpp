@@ -21,7 +21,6 @@
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Text/CompactFont.hpp"
-#include "State/SceneTimer.h"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
 

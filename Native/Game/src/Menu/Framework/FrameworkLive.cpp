@@ -33,7 +33,7 @@
 #include "Battle/Sphere.h"
 #include "Battle/TargetingState.h"
 #include "Battle/TextBoxes.h"
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "Content/CdDriveLive.hpp"
@@ -458,16 +458,16 @@ void ResetLoadedSubmenu(int lba) {
       break_arts::ResetLiveStatics();
       break;
     case VS_MENU2_PRG_LBA:
-      Boot_ResetMenu2Statics();
+      VS::Boot::ResetMenu2Statics();
       break;
     case VS_MENU3_PRG_LBA:
-      Boot_ResetMenu3Statics();
+      VS::Boot::ResetMenu3Statics();
       break;
     case VS_MENU4_PRG_LBA:
-      Boot_ResetMenu4Statics();
+      VS::Boot::ResetMenu4Statics();
       break;
     case VS_MENU5_PRG_LBA:
-      Boot_ResetMenu5Statics();
+      VS::Boot::ResetMenu5Statics();
       break;
     case VS_MENU9_PRG_LBA:
       if (!Score::CleanupLiveEnemyPreviewOwnedState()) {
@@ -475,19 +475,19 @@ void ResetLoadedSubmenu(int lba) {
                            "enemy-preview cleanup refused before MENU9 reload");
         std::abort();
       }
-      Boot_ResetMenu9Statics();
+      VS::Boot::ResetMenu9Statics();
       break;
     case VS_MENUB_PRG_LBA:
-      Boot_ResetMenubStatics();
+      VS::Boot::ResetMenubStatics();
       break;
     case VS_MENUD_PRG_LBA:
-      Boot_ResetMenudStatics();
+      VS::Boot::ResetMenudStatics();
       break;
     case VS_MENUE_PRG_LBA:
-      Boot_ResetMenueStatics();
+      VS::Boot::ResetMenueStatics();
       break;
     case VS_MENUF_PRG_LBA:
-      Boot_ResetMenufStatics();
+      VS::Boot::ResetMenufStatics();
       break;
     case VS_MENU7_PRG_LBA:
     case VS_MENU8_PRG_LBA:
@@ -940,7 +940,7 @@ class LiveHost final : public Host {
   void ResetMainMenuOverlay() override {
     g_items = {};
     const CallOutScope scope;
-    Boot_ResetMainMenuStatics();
+    VS::Boot::ResetMainMenuStatics();
     ResetLiveItemRowsStatics();
     ResetLiveEquipmentDetailsStatics();
   }

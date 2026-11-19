@@ -15,7 +15,6 @@
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "Content/ModuleData.hpp"
-#include "State/SceneTimer.h"
 #include "State/Timers.hpp"
 
 namespace {

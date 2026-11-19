@@ -117,7 +117,7 @@ constexpr unsigned kGlyphDigitShift = 8;
 constexpr std::int32_t kDecimalBase = 10;
 constexpr std::int32_t kHundredHours = 100;
 constexpr std::uint16_t kHundredHoursGlyph = 0x5082;
-// State_PlayTime bytes: frames, seconds, minutes, hours.
+// VS::State::PlayTime bytes: frames, seconds, minutes, hours.
 constexpr unsigned kPlayTimeSecondsShift = 8;
 constexpr unsigned kPlayTimeMinutesShift = 16;
 constexpr unsigned kPlayTimeHoursShift = 24;

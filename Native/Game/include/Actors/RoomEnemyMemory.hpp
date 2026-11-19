@@ -9,7 +9,7 @@
 // 146C.c:783-882). Leaving a room records each enemy's vitals, limbs,
 // statuses, AI flags and placement under its room spawn index; returning to
 // the room restores them. RoomEnemyMemoryLive binds the saved room records
-// (State_recentRoomEnemyStates and State_currentRoomStateSlot).
+// (VS::State::recentRoomEnemyStates and VS::State::currentRoomStateSlot).
 namespace VS::Actors {
 inline constexpr std::size_t kRememberedRooms = 4;
 inline constexpr std::size_t kRememberedEnemiesPerRoom = 8;

@@ -19,7 +19,7 @@
 #include "Audio/SoundPlaybackLive.hpp"
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
-#include "Boot/OverlayReset.h"
+#include "Boot/OverlayReset.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/CdDriveLive.hpp"
 #include "Content/DataStore.hpp"
@@ -363,7 +363,7 @@ TEST_CASE("F02597 Live Manage uses independent MENU3 and MENUB text and flags",
   CHECK(fixture.FirstItem().name[0] == 1);
   CHECK(fixture.FirstItem().flags == 0);
   fixture.CloseList();
-  Boot_ResetMenubStatics();
+  VS::Boot::ResetMenubStatics();
   REQUIRE(Navigate(kLootModule, kLootNavigation, 1) == 0);
   REQUIRE(Navigate(kLootModule, kLootNavigation, 0) == 0);
   CHECK(fixture.FirstItem().name[0] == 2);
@@ -433,7 +433,7 @@ TEST_CASE("MENUB text loads its original module bytes again after a cold reset",
   CHECK(std::ranges::equal(inventory::LiveLootInventoryText(), expected));
   inventory::BindLiveLootInventoryText(
       VS::tests::inventory_terminal::LootText());
-  Boot_ResetMenubStatics();
+  VS::Boot::ResetMenubStatics();
   CHECK(std::ranges::equal(inventory::LiveLootInventoryText(),
                            VS::tests::inventory_terminal::LootText()));
   inventory::ResetInventoryTerminalSession();
@@ -473,9 +473,9 @@ TEST_CASE("F02636 only MENU3 reload clears the live exit countdown",
   std::uint8_t step = kContainerReturn;
   REQUIRE(inventory::UpdateLiveInventoryScreen(&step) == 0);
   REQUIRE(step == kInventoryCountdown);
-  Boot_ResetMenubStatics();
+  VS::Boot::ResetMenubStatics();
   CHECK(inventory::UpdateLiveInventoryScreen(&step) == 0);
-  Boot_ResetMenu3Statics();
+  VS::Boot::ResetMenu3Statics();
   CHECK(inventory::UpdateLiveInventoryScreen(&step) == 1);
   CHECK(VS::Menu::Framework::menuState.currentMenu == kBattleMenu);
 }

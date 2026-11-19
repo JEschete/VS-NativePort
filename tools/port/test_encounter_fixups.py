@@ -776,7 +776,7 @@ int func_800F9800(void) {
         self.assertLess(core.index("host.StageClearGame();"), core.index("host.ClearPendingClearSave();"))
         live = (root / r"Native\Game\src\Title\TitleMenuLive.cpp").read_text(encoding="utf-8")
         self.assertIn("void StageClearGame() override { VS::Game::Save::StageClearGame(); }", live)
-        self.assertIn("void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }", live)
+        self.assertIn("void ClearPendingClearSave() override { VS::Boot::isClearSavePending = 0; }", live)
 
     def test_owned_native_core_keeps_retained_c_binding_header(self):
         for identifier, c_name, core_name, core_header in (
@@ -3080,9 +3080,9 @@ int func_800F9800(void) {
             source.index('VS::Core::Debugf("hud.timer"'),
             source.index("DrawText(std::string_view(Battle_puzzleTimerText"),
         )
-        self.assertIn("const State_SceneTimer* timer", source)
+        self.assertIn("const State::SceneTimer* timer", source)
         for field in ("seconds", "minutes", "hours"):
-            self.assertIn(f"timer->{field}", source)
+            self.assertIn(f"time.{field}", source)
         self.assertNotIn("*(int*)sp10", source)
         self.assertNotIn("F01392", copy_fixups.FIXES)
         self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS["F01392"], "VS::Menu::UpdateLiveTextBoxes")

@@ -21,7 +21,7 @@
 #include "Audio/Seq/Channel.hpp"
 #include "Audio/SfxChannelGroups.hpp"
 #include "Audio/SoundPlaybackLive.hpp"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.hpp"
 #include "Core/Log.hpp"
@@ -39,11 +39,11 @@
 #include "Save/NativeFilePresentation.hpp"
 #include "Save/NativeMenu.hpp"
 #include "Save/RuntimeSnapshot.hpp"
-#include "State/Ashley.h"
-#include "State/Location.h"
+#include "State/Ashley.hpp"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
-#include "State/RoomMemory.h"
+#include "State/RoomMemory.hpp"
 #include "State/StateFlags.h"
 #include "Title/SaveFiles.hpp"
 
@@ -63,7 +63,7 @@ void CountSound(VS::Audio::CommandParams* parameters) {
 struct MenuFixture {
   fs::path root;
   State_Settings settings = VS::Input::settings;
-  int active = Boot_isGameplayActive;
+  int active = VS::Boot::isGameplayActive;
   decltype(VS::Input::buttonsPressed) pressed = VS::Input::buttonsPressed;
   int repeat = VS::Input::buttonRepeat;
   std::array<u_int, 12> sound_offsets{};
@@ -91,7 +91,7 @@ struct MenuFixture {
     fs::create_directories(root.parent_path());
     REQUIRE(fs::create_directory(root));
     Save::ConfigureDirectory(root);
-    Boot_isGameplayActive = 0;
+    VS::Boot::isGameplayActive = 0;
     VS::Input::buttonsPressed = 0;
     VS::Input::buttonRepeat = 0;
     sound_selectors.fill(0x8000);
@@ -104,7 +104,7 @@ struct MenuFixture {
     try {
       Save::ShutdownFileMenus();
       VS::Input::settings = settings;
-      Boot_isGameplayActive = active;
+      VS::Boot::isGameplayActive = active;
       VS::Input::buttonsPressed = pressed;
       VS::Input::buttonRepeat = repeat;
       VS::Audio::Mixer::kCommandHandlers[0x20] = sound_handler;
@@ -248,11 +248,11 @@ struct MenuContentFixture {
     auto& state = document.state;
     state.location.zone = 9;
     state.location.scene = 1;
-    state.ashley.currentHp = 250;
-    state.ashley.maxHp = 250;
-    state.ashley.currentMp = 50;
-    state.ashley.maxMp = 50;
-    state.ashley.cameraDistance = 1536;
+    state.ashley.current_hp = 250;
+    state.ashley.max_hp = 250;
+    state.ashley.current_mp = 50;
+    state.ashley.max_mp = 50;
+    state.ashley.camera_distance = 1536;
     state.camera.distance = 1536;
     state.camera.zoom_mode = 1;
     state.room_cache[0].recency = 1;
@@ -597,17 +597,17 @@ struct ClearInputsFixture {
   decltype(VS::State::stateFlags) flags = VS::State::stateFlags;
   decltype(VS::Items::inventory) inventory = VS::Items::inventory;
   decltype(VS::Items::inventoryIndices) order = VS::Items::inventoryIndices;
-  State_AshleySnapshot ashley = State_ashleySnapshot;
-  Field_MpdDoorRecord entry = State_savedEntryDoor;
+  VS::State::AshleySnapshot ashley = VS::State::ashleySnapshot;
+  Field_MpdDoorRecord entry = VS::State::savedEntryDoor;
   State_RoomVisitFlags visits = State_roomVisitProgress;
   State_ScoreData score = VS::State::scoreData;
   decltype(VS::State::playTime) time = VS::State::playTime;
-  decltype(std::to_array(State_recentRoomEnemyStates)) caches =
-      std::to_array(State_recentRoomEnemyStates);
+  decltype(std::to_array(VS::State::recentRoomEnemyStates)) caches =
+      std::to_array(VS::State::recentRoomEnemyStates);
   decltype(std::to_array(State_learnedActionFlags)) learned =
       std::to_array(State_learnedActionFlags);
-  int cache_slot = State_currentRoomStateSlot;
-  int clear_pending = Boot_isClearSavePending;
+  int cache_slot = VS::State::currentRoomStateSlot;
+  int clear_pending = VS::Boot::isClearSavePending;
 
   ClearInputsFixture() {
     VS::State::stateFlags = {};
@@ -616,17 +616,17 @@ struct ClearInputsFixture {
     VS::Items::inventory.misc[0].id = 308;
     VS::Items::inventory.misc[0].count = 2;
     VS::Items::inventoryIndices.misc[0] = 1;
-    State_ashleySnapshot.stats = MenuContentFixture::Document().state.ashley;
-    State_savedEntryDoor = {};
-    State_savedEntryDoor.entryTileX = 4;
-    State_savedEntryDoor.entryTileZ = 2;
+    VS::State::ashleySnapshot.stats =
+        MenuContentFixture::Document().state.ashley;
+    VS::State::savedEntryDoor = {};
+    VS::State::savedEntryDoor.entryTileX = 4;
+    VS::State::savedEntryDoor.entryTileZ = 2;
     State_roomVisitProgress = {};
     VS::State::scoreData = {};
-    VS::State::playTime.all = 0;
-    VS::State::playTime.t.hours = 1;
-    State_currentRoomStateSlot = 0;
-    std::fill_n(State_recentRoomEnemyStates, caches.size(),
-                State_RoomEnemyStates{});
+    VS::State::playTime = {.frames = 0, .seconds = 0, .minutes = 0, .hours = 1};
+    VS::State::currentRoomStateSlot = 0;
+    std::fill_n(VS::State::recentRoomEnemyStates, caches.size(),
+                VS::State::RoomEnemyStates{});
     std::fill_n(State_learnedActionFlags, learned.size(), 0);
     State_learnedActionFlags[0] = static_cast<char>(0x80);
     VS::Input::settings = {};
@@ -634,24 +634,24 @@ struct ClearInputsFixture {
     VS::Input::settings.cumulativeSaveCount = 19;
     VS::Input::settings.saveFileGeneration = 3;
     VS::Ending::LiveCommitClearProgress();
-    Boot_isClearSavePending = 1;
+    VS::Boot::isClearSavePending = 1;
     VS::Game::Save::StageClearGame();
-    Boot_isClearSavePending = 0;
+    VS::Boot::isClearSavePending = 0;
   }
 
   ~ClearInputsFixture() {
     VS::State::stateFlags = flags;
     VS::Items::inventory = inventory;
     VS::Items::inventoryIndices = order;
-    State_ashleySnapshot = ashley;
-    State_savedEntryDoor = entry;
+    VS::State::ashleySnapshot = ashley;
+    VS::State::savedEntryDoor = entry;
     State_roomVisitProgress = visits;
     VS::State::scoreData = score;
     VS::State::playTime = time;
-    std::copy(caches.begin(), caches.end(), State_recentRoomEnemyStates);
+    std::copy(caches.begin(), caches.end(), VS::State::recentRoomEnemyStates);
     std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
-    State_currentRoomStateSlot = cache_slot;
-    Boot_isClearSavePending = clear_pending;
+    VS::State::currentRoomStateSlot = cache_slot;
+    VS::Boot::isClearSavePending = clear_pending;
   }
 };
 
@@ -679,8 +679,8 @@ void CheckClearSaveProgress(const Save::Document& document) {
 }
 
 void CheckClearSaveCarryover(const Save::Document& document) {
-  CHECK(document.state.ashley.currentHp == 250);
-  CHECK(document.state.ashley.currentMp == 50);
+  CHECK(document.state.ashley.current_hp == 250);
+  CHECK(document.state.ashley.current_mp == 50);
   CHECK(document.state.inventory.misc[0].id == 0);
   CHECK(document.state.learned_actions[0]);
 }
@@ -986,7 +986,7 @@ TEST_CASE(
   REQUIRE(Screen().files[0].status == (recovered ? Save::FileStatus::kRecovered
                                                  : Save::FileStatus::kValid));
   ChooseYes(VS::Menu::UpdateLiveLoadMenu);
-  document.state.ashley.currentHp = 249;
+  document.state.ashley.current_hp = 249;
   content.Store(document);
   Press(0, VS::Menu::UpdateLiveLoadMenu);
   CHECK(Text(VS::Title::memoryCardMessage) == "File changed - select again");
@@ -998,7 +998,7 @@ TEST_CASE(
   REQUIRE(refreshed);
   CHECK(Screen().files[0].status == Save::FileStatus::kValid);
   if (refreshed) {
-    CHECK(refreshed->state.ashley.currentHp == 249);
+    CHECK(refreshed->state.ashley.current_hp == 249);
   }
 }
 

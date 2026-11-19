@@ -21,7 +21,7 @@
 #include "Menu/FilesLive.hpp"
 #include "Render/Display.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/StateFlags.h"
 #include "Title/SaveFiles.hpp"
 #include "Title/TitleMenu.hpp"
@@ -628,8 +628,8 @@ class PresetLiveExit {
     VS::State::stateFlags.opaqueC = kFlag;
     VS::State::stateFlags.opaqueD = kFlag;
     VS::State::stateFlags.opaqueE = kFlag;
-    State_savedEntryDoor.destinationZoneId = kDestination;
-    State_savedEntryDoor.destinationRoomId = kDestination;
+    VS::State::savedEntryDoor.destinationZoneId = kDestination;
+    VS::State::savedEntryDoor.destinationRoomId = kDestination;
   }
   PresetLiveExit(const PresetLiveExit&) = delete;
   PresetLiveExit& operator=(const PresetLiveExit&) = delete;
@@ -637,12 +637,12 @@ class PresetLiveExit {
   PresetLiveExit& operator=(PresetLiveExit&&) = delete;
   ~PresetLiveExit() {
     VS::State::stateFlags = flags_;
-    State_savedEntryDoor = door_;
+    VS::State::savedEntryDoor = door_;
   }
 
  private:
   State_StateFlags flags_ = VS::State::stateFlags;
-  Field_MpdDoorRecord door_ = State_savedEntryDoor;
+  Field_MpdDoorRecord door_ = VS::State::savedEntryDoor;
 };
 
 // Restores the settings, visits and display environments the live host
@@ -1646,14 +1646,15 @@ TEST_CASE("Title live exit keeps the state for a loaded game",
   CHECK(flags.opaqueC == 0);
   CHECK(flags.opaqueD == 0);
   CHECK(flags.opaqueE == PresetLiveExit::kFlag);
-  CHECK(State_savedEntryDoor.destinationZoneId == PresetLiveExit::kDestination);
+  CHECK(VS::State::savedEntryDoor.destinationZoneId ==
+        PresetLiveExit::kDestination);
 }
 
 TEST_CASE("Title live exit writes the state flags and entry door",
           "[title][title-menu]") {
   const PresetLiveExit preset;
   const State_StateFlags& flags = VS::State::stateFlags;
-  const Field_MpdDoorRecord& door = State_savedEntryDoor;
+  const Field_MpdDoorRecord& door = VS::State::savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);
   CHECK(flags.opaqueD == 1);
@@ -1666,7 +1667,7 @@ TEST_CASE("Title live exit sends a new game to its first room",
           "[title][title-menu]") {
   const PresetLiveExit preset;
   const State_StateFlags& flags = VS::State::stateFlags;
-  const Field_MpdDoorRecord& door = State_savedEntryDoor;
+  const Field_MpdDoorRecord& door = VS::State::savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);
   title::PrepareLiveExit(0);

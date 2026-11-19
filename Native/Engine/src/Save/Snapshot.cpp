@@ -11,7 +11,7 @@ namespace {
 
 constexpr unsigned kBitsPerByte = 8;
 constexpr std::uint32_t kByteMask = 0xFF;
-// State_AshleyStatsSnapshot.isPending, a little-endian int.
+// VS::State::AshleyStatsSnapshot.isPending, a little-endian int.
 constexpr std::size_t kPendingFlagBytes = 4;
 
 // A bit field of a Field_MpdDoorRecord halfword.

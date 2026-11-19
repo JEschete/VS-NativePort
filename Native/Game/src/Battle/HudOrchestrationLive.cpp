@@ -28,7 +28,6 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/SceneTimer.h"
 #include "State/StateFlags.h"
 #include "State/Timers.hpp"
 
@@ -365,19 +364,16 @@ void DrawLiveBattleHud() {
 }
 
 // decomp: F01384 _renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3844).
-void DrawLivePuzzleTimer(const State_SceneTimer* timer) {
+void DrawLivePuzzleTimer(const State::SceneTimer* timer) {
   if (timer == nullptr) Refuse("Puzzle HUD requires its scene timer");
-  const State::SceneTime time{.frames = timer->frames,
-                              .seconds = timer->seconds,
-                              .minutes = timer->minutes,
-                              .hours = timer->hours};
+  const State::SceneTime& time = timer->time;
   const auto hundredths =
       static_cast<std::uint8_t>(State::stateFlags.puzzleTimerHundredths);
   FormatPuzzleTimer(time, hundredths, std::span(Battle_puzzleTimerText));
   VS::Core::Debugf("hud.timer",
                    "text=%s seconds=%d minutes=%d hours=%d frames=%d",
-                   Battle_puzzleTimerText, timer->seconds, timer->minutes,
-                   timer->hours, timer->frames);
+                   Battle_puzzleTimerText, time.seconds, time.minutes,
+                   time.hours, time.frames);
   DrawText(std::string_view(Battle_puzzleTimerText, kTimerCharacters),
            kTimerPosition, kTimerLayer);
 }

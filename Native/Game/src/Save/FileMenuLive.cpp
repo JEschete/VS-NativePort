@@ -23,7 +23,7 @@
 #include <utility>
 
 #include "Audio/SfxLive.hpp"
-#include "Boot/GameLoop.h"
+#include "Boot/GameLoop.hpp"
 #include "Core/Log.hpp"
 #include "Core/Text/TextCode.hpp"
 #include "Field/ChestInteractionsLive.hpp"
@@ -373,7 +373,7 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
       const file_menu::FileMenu& menu) override;
 
   [[nodiscard]] bool GameplayActive() const override {
-    return Boot_isGameplayActive != 0;
+    return VS::Boot::isGameplayActive != 0;
   }
   [[nodiscard]] bool SavePointEnabled() const override {
     return VS::Field::LiveCurrentSavePointId() != 0 &&

@@ -25,19 +25,19 @@
 #include "Field/Mpd.h"
 #include "Legacy/Psx.h"
 #include "Save/Snapshot.hpp"
-#include "State/Ashley.h"
-#include "State/Location.h"
+#include "State/Ashley.hpp"
+#include "State/Location.hpp"
 #include "State/Progress.h"
 
 namespace VS::Save {
 namespace {
 // The door and snapshot records the core addresses as bytes.
 static_assert(sizeof(Field_MpdDoorRecord) == kEntryDoorBytes);
-static_assert(sizeof(State_savedEntryDoor) == kEntryDoorBytes);
-static_assert(sizeof(State_AshleySnapshot) == kAshleySnapshotBytes);
-static_assert(offsetof(State_AshleySnapshot, stats) == 0);
-static_assert(offsetof(State_AshleyStatsSnapshot, isPending) == 0);
-static_assert(sizeof(State_AshleyStatsSnapshot::isPending) ==
+static_assert(sizeof(VS::State::savedEntryDoor) == kEntryDoorBytes);
+static_assert(sizeof(VS::State::AshleySnapshot) == kAshleySnapshotBytes);
+static_assert(offsetof(VS::State::AshleySnapshot, stats) == 0);
+static_assert(offsetof(VS::State::AshleyStatsSnapshot, is_pending) == 0);
+static_assert(sizeof(VS::State::AshleyStatsSnapshot::is_pending) ==
               sizeof(std::int32_t));
 static_assert(std::extent_v<decltype(State_learnedActionFlags)> ==
               kLearnedActionBytes);
@@ -46,25 +46,26 @@ static_assert(std::extent_v<decltype(Battle_actionDefinitions)> ==
 // The statistics the capture copies field by field.
 static_assert(std::extent_v<decltype(Battle_ActorStats::limbs)> ==
               kSnapshotLimbCount);
-static_assert(std::extent_v<decltype(State_AshleyStatsSnapshot::limbs)> ==
+static_assert(std::extent_v<decltype(VS::State::AshleyStatsSnapshot::limbs)> ==
               kSnapshotLimbCount);
 static_assert(std::extent_v<decltype(Battle_ActorStats::statusTimers)> ==
               kSnapshotStatusTimerCount);
 static_assert(
-    std::extent_v<decltype(State_AshleyStatsSnapshot::statusTimers)> ==
+    std::extent_v<decltype(VS::State::AshleyStatsSnapshot::status_timers)> ==
     kSnapshotStatusTimerCount);
 static_assert(std::extent_v<decltype(Battle_LimbStats::types)> ==
               kSnapshotLimbTypeCount);
-static_assert(std::extent_v<decltype(State_AshleyLimbSnapshot::types)> ==
+static_assert(std::extent_v<decltype(VS::State::AshleyLimbSnapshot::types)> ==
               kSnapshotLimbTypeCount);
 static_assert(std::extent_v<decltype(Battle_LimbStats::affinities)> ==
               kSnapshotLimbAffinityCount);
-static_assert(std::extent_v<decltype(State_AshleyLimbSnapshot::affinities)> ==
-              kSnapshotLimbAffinityCount);
+static_assert(
+    std::extent_v<decltype(VS::State::AshleyLimbSnapshot::affinities)> ==
+    kSnapshotLimbAffinityCount);
 static_assert(sizeof(Battle_ActorStats::risk) == sizeof(std::uint16_t));
 static_assert(sizeof(Battle_ActorStats::actionRecoveryTimer) ==
               sizeof(std::uint16_t));
-static_assert(sizeof(State_AshleyStatsSnapshot::actorFlags) ==
+static_assert(sizeof(VS::State::AshleyStatsSnapshot::action_recovery_timer) ==
               sizeof(std::uint16_t));
 
 template <typename T>
@@ -108,9 +109,10 @@ AshleyCombatStats StatsOf(const Battle_Actor& actor,
   return copy;
 }
 
-void StoreLimb(const SnapshotLimb& limb, State_AshleyLimbSnapshot& stored) {
+void StoreLimb(const SnapshotLimb& limb,
+               VS::State::AshleyLimbSnapshot& stored) {
   stored.hp = limb.hp;
-  stored.maxHp = limb.max_hp;
+  stored.max_hp = limb.max_hp;
   std::ranges::copy(limb.types, std::begin(stored.types));
   std::ranges::copy(limb.affinities, std::begin(stored.affinities));
 }
@@ -154,7 +156,7 @@ class LiveSnapshotHost final : public SnapshotHost {
                       .distance = VS::Field::sphericalCamera.initialDistance};
   }
   void StoreEntryDoor(const EntryDoor& door) override {
-    std::ranges::copy(door, BytesOf(State_savedEntryDoor).begin());
+    std::ranges::copy(door, BytesOf(VS::State::savedEntryDoor).begin());
   }
   void StoreLearnedActions(const LearnedActions& learned) override {
     std::ranges::transform(
@@ -162,31 +164,31 @@ class LiveSnapshotHost final : public SnapshotHost {
         [](std::uint8_t bits) { return static_cast<char>(bits); });
   }
   void StoreSnapshot(const AshleySnapshot& snapshot) override {
-    State_AshleyStatsSnapshot& stored = State_ashleySnapshot.stats;
+    VS::State::AshleyStatsSnapshot& stored = VS::State::ashleySnapshot.stats;
     const AshleyCombatStats& stats = snapshot.stats;
-    stored.currentHp = stats.current_hp;
-    stored.maxHp = stats.max_hp;
-    stored.currentMp = stats.current_mp;
-    stored.maxMp = stats.max_mp;
+    stored.current_hp = stats.current_hp;
+    stored.max_hp = stats.max_hp;
+    stored.current_mp = stats.current_mp;
+    stored.max_mp = stats.max_mp;
     stored.strength = stats.strength;
-    stored.totalStrength = stats.total_strength;
+    stored.total_strength = stats.total_strength;
     stored.intelligence = stats.intelligence;
-    stored.totalIntelligence = stats.total_intelligence;
+    stored.total_intelligence = stats.total_intelligence;
     stored.agility = stats.agility;
-    stored.totalAgility = stats.total_agility;
+    stored.total_agility = stats.total_agility;
     stored.risk = stats.risk;
-    stored.actorFlags = stats.action_recovery_timer;
+    stored.action_recovery_timer = stats.action_recovery_timer;
     stored.statuses = stats.statuses;
     std::ranges::transform(
-        stats.status_timers, std::begin(stored.statusTimers),
-        [](std::int8_t timer) { return static_cast<char>(timer); });
+        stats.status_timers, std::begin(stored.status_timers),
+        [](std::int8_t timer) { return static_cast<std::uint8_t>(timer); });
     const std::span stored_limbs{stored.limbs};
     for (std::size_t limb = 0; limb < kSnapshotLimbCount; ++limb) {
       StoreLimb(snapshot.stats.limbs.at(limb), stored_limbs[limb]);
     }
-    stored.weaponDrawn = stats.weapon_drawn;
-    stored.cameraPitch = snapshot.camera.pitch;
-    stored.cameraDistance = snapshot.camera.distance;
+    stored.weapon_drawn = stats.weapon_drawn;
+    stored.camera_pitch = snapshot.camera.pitch;
+    stored.camera_distance = snapshot.camera.distance;
   }
   void StoreRoomActorState(std::int32_t actor) override {
     VS::Actors::StoreLiveRoomActorState(actor, 0);
@@ -198,11 +200,11 @@ class LiveSnapshotHost final : public SnapshotHost {
 }  // namespace
 
 void MarkLiveAshleySnapshotValid() {
-  MarkAshleySnapshotValid(BytesOf(State_ashleySnapshot));
+  MarkAshleySnapshotValid(BytesOf(VS::State::ashleySnapshot));
 }
 
 void ClearLiveAshleySnapshotPending() {
-  State_ashleySnapshot.stats.isPending = 0;
+  VS::State::ashleySnapshot.stats.is_pending = 0;
 }
 
 void CaptureLiveAshleySnapshot() {

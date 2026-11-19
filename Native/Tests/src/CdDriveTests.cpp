@@ -15,7 +15,7 @@
 #include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "DiscQueue.h"
-#include "State/GameClockLive.hpp"
+#include "State/PlayTime.hpp"
 
 namespace {
 namespace Content = VS::Content;
@@ -194,7 +194,7 @@ struct LiveDiscQueueFixture {
   std::array<Content_DiscQueueSlot, 32> saved_slots{};
   Content_DiscRequestCounts saved_counts = Content_discRequestCounts;
   Content_DiscDrive saved_drive = Content_discDriveState;
-  VS::State::PlayTime saved_play_time = VS::State::LivePlayTime();
+  VS::State::PlayTime saved_play_time = VS::State::playTime;
   decltype(Content_legacyDiscReadBuffer) saved_read_buffer =
       Content_legacyDiscReadBuffer;
 
@@ -211,7 +211,7 @@ struct LiveDiscQueueFixture {
                 sizeof Content_discRequestSlots);
     Content_discRequestCounts = saved_counts;
     Content_discDriveState = saved_drive;
-    VS::State::StoreLivePlayTime(saved_play_time);
+    VS::State::playTime = saved_play_time;
     Content_legacyDiscReadBuffer = saved_read_buffer;
   }
   LiveDiscQueueFixture(const LiveDiscQueueFixture&) = delete;

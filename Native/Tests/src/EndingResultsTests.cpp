@@ -19,7 +19,7 @@
 #include "Ending/Results.hpp"
 #include "Input/ControllerLiveState.hpp"
 #include "Render/TextureRegionDraw.hpp"
-#include "State/Location.h"
+#include "State/Location.hpp"
 #include "State/PlayTime.hpp"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -916,7 +916,7 @@ class LiveClearRecords {
     VS::State::stateFlags = {};
     VS::State::playTime = {};
     State_roomVisitProgress = {};
-    State_savedEntryDoor = {};
+    VS::State::savedEntryDoor = {};
     VS::Input::settings = {};
     std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
     std::ranges::fill(VS::Ending::countableRoomBits, 0);
@@ -930,7 +930,7 @@ class LiveClearRecords {
     VS::State::stateFlags = flags_;
     VS::State::playTime = play_time_;
     State_roomVisitProgress = rooms_;
-    State_savedEntryDoor = door_;
+    VS::State::savedEntryDoor = door_;
     VS::Input::settings = settings_;
     std::ranges::copy(actions_, std::begin(Battle_actionDefinitions));
     std::ranges::copy(countable_, std::begin(VS::Ending::countableRoomBits));
@@ -939,9 +939,9 @@ class LiveClearRecords {
  private:
   State_ScoreData score_ = VS::State::scoreData;
   State_StateFlags flags_ = VS::State::stateFlags;
-  State_PlayTime play_time_ = VS::State::playTime;
+  VS::State::PlayTime play_time_ = VS::State::playTime;
   State_RoomVisitFlags rooms_ = State_roomVisitProgress;
-  Field_MpdDoorRecord door_ = State_savedEntryDoor;
+  Field_MpdDoorRecord door_ = VS::State::savedEntryDoor;
   State_Settings settings_ = VS::Input::settings;
   decltype(std::to_array(Battle_actionDefinitions)) actions_ =
       std::to_array(Battle_actionDefinitions);
@@ -952,8 +952,8 @@ class LiveClearRecords {
 // A 2:05 clear on the second difficulty with magic used, Asura defeated, one
 // chest opened and two of four visited rooms countable.
 void CommitLiveClear() {
-  VS::State::playTime.t.hours = 2;
-  VS::State::playTime.t.minutes = 5;
+  VS::State::playTime.hours = 2;
+  VS::State::playTime.minutes = 5;
   State_StateFlags& flags = VS::State::stateFlags;
   flags.clearCount = 4;
   flags.difficulty = 1;
@@ -962,7 +962,7 @@ void CommitLiveClear() {
   flags.chestsOpened[0] = 1;
   State_roomVisitProgress.roomFlags[0] = 0xF;
   VS::Ending::countableRoomBits[0] = 0x3;
-  State_savedEntryDoor.destinationZoneId = 9;
+  VS::State::savedEntryDoor.destinationZoneId = 9;
   VS::Ending::LiveCommitClearProgress();
 }
 }  // namespace
@@ -991,8 +991,8 @@ TEST_CASE("LiveCommitClearProgress resets the game's playthrough records",
   CHECK((flags.magicUsed == 0 && flags.asuraDefeated == 0));
   CHECK(flags.chestsOpened[0] == 0);
   CHECK(State_roomVisitProgress.roomFlags[0] == 0);
-  CHECK(State_savedEntryDoor.destinationZoneId == 1);
-  CHECK(State_savedEntryDoor.destinationRoomId == 0);
+  CHECK(VS::State::savedEntryDoor.destinationZoneId == 1);
+  CHECK(VS::State::savedEntryDoor.destinationRoomId == 0);
 }
 
 TEST_CASE("Promoted clear results functions leave no module address bindings",

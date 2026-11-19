@@ -59,7 +59,7 @@
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Legacy/Psx.h"
-#include "State/Ashley.h"
+#include "State/Ashley.hpp"
 #include "State/GameClockLive.hpp"
 
 namespace VS::Actors {
@@ -94,7 +94,7 @@ static_assert(std::size(VS::Items::inventory.weapons) == kInventoryWeapons);
 static_assert(std::size(VS::Items::inventory.blades) == kInventoryBlades);
 static_assert(std::size(VS::Items::inventory.shields) == kInventoryShields);
 static_assert(std::size(VS::Items::inventory.armor) == kInventoryArmor);
-static_assert(std::size(State_ashleySnapshot.stats.limbs) == kActorLimbs);
+static_assert(std::size(VS::State::ashleySnapshot.stats.limbs) == kActorLimbs);
 static_assert(sizeof Field_MpdEnemySpawn{}.settings == kSpawnSettingsBytes);
 static_assert(std::size(Actors_RoomActorRecord{}.limbHp) == kActorLimbs);
 
@@ -740,32 +740,33 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
 
   // --- Ashley
   [[nodiscard]] AshleySnapshot ReadAshleySnapshot() const override {
-    const State_AshleyStatsSnapshot& saved = State_ashleySnapshot.stats;
-    AshleySnapshot snapshot{.pending = saved.isPending != 0,
-                            .current_hp = saved.currentHp,
-                            .max_hp = saved.maxHp,
-                            .current_mp = saved.currentMp,
-                            .max_mp = saved.maxMp,
+    const VS::State::AshleyStatsSnapshot& saved =
+        VS::State::ashleySnapshot.stats;
+    AshleySnapshot snapshot{.pending = saved.is_pending != 0,
+                            .current_hp = saved.current_hp,
+                            .max_hp = saved.max_hp,
+                            .current_mp = saved.current_mp,
+                            .max_mp = saved.max_mp,
                             .strength = saved.strength,
-                            .total_strength = saved.totalStrength,
+                            .total_strength = saved.total_strength,
                             .intelligence = saved.intelligence,
-                            .total_intelligence = saved.totalIntelligence,
+                            .total_intelligence = saved.total_intelligence,
                             .agility = saved.agility,
-                            .total_agility = saved.totalAgility,
+                            .total_agility = saved.total_agility,
                             .risk = saved.risk,
-                            .recovery_timer = saved.actorFlags,
+                            .recovery_timer = saved.action_recovery_timer,
                             .statuses = saved.statuses,
-                            .weapon_drawn = saved.weaponDrawn,
-                            .camera_pitch = saved.cameraPitch,
-                            .camera_distance = saved.cameraDistance};
+                            .weapon_drawn = saved.weapon_drawn,
+                            .camera_pitch = saved.camera_pitch,
+                            .camera_distance = saved.camera_distance};
     for (std::size_t i = 0; i < kStatusTimers; ++i) {
-      snapshot.status_timers.at(i) = Byte(saved.statusTimers[i]);
+      snapshot.status_timers.at(i) = saved.status_timers[i];
     }
     for (std::size_t limb = 0; limb < kActorLimbs; ++limb) {
-      const State_AshleyLimbSnapshot& source = saved.limbs[limb];
+      const VS::State::AshleyLimbSnapshot& source = saved.limbs[limb];
       AshleyLimbSnapshot& target = snapshot.limbs.at(limb);
       target.hp = source.hp;
-      target.max_hp = source.maxHp;
+      target.max_hp = source.max_hp;
       std::ranges::copy(source.types, target.types.begin());
       std::ranges::copy(source.affinities, target.affinities.begin());
     }
@@ -840,7 +841,7 @@ class LiveActorSpawnHost final : public ActorSpawnHost {
   }
 
   void ClearAshleySnapshotPending() override {
-    State_ashleySnapshot.stats.isPending = 0;
+    VS::State::ashleySnapshot.stats.is_pending = 0;
   }
 
   void RestoreCamera(std::int32_t pitch, std::int32_t distance) override {

@@ -476,10 +476,10 @@ void Stats(const Frontend& frontend, const Snapshot& state, int top) {
   if (clears != 0) {
     frontend.Sprite(AtRow(kClearIcon, top), kClearSprite);
   }
-  frontend.HpMp(AtRow(kHp, top), Menu_Files_StatType_HP, state.ashley.currentHp,
-                state.ashley.maxHp);
-  frontend.HpMp(AtRow(kMp, top), Menu_Files_StatType_MP, state.ashley.currentMp,
-                state.ashley.maxMp);
+  frontend.HpMp(AtRow(kHp, top), Menu_Files_StatType_HP,
+                state.ashley.current_hp, state.ashley.max_hp);
+  frontend.HpMp(AtRow(kMp, top), Menu_Files_StatType_MP,
+                state.ashley.current_mp, state.ashley.max_mp);
   const auto seconds =
       std::min(state.play_ticks / kClockRadix, kMaximumSeconds);
   const unsigned hours =
