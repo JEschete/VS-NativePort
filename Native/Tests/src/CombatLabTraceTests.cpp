@@ -50,7 +50,7 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Platform/App.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -819,8 +819,8 @@ struct GameplayInspectionFixture {
       VS::Menu::Framework::menuState;
   decltype(Event_isMenuTransitionActive) saved_event_menu =
       Event_isMenuTransitionActive;
-  decltype(VS::State::stateFlags.menuFSubmenu) saved_results_kind =
-      VS::State::stateFlags.menuFSubmenu;
+  decltype(VS::State::stateFlags.menu_f_submenu) saved_results_kind =
+      VS::State::stateFlags.menu_f_submenu;
   std::array<char, 16> saved_submenus =
       std::to_array(VS::Menu::Framework::submenuStates);
   int saved_results_state = Menu_Results_screenState;
@@ -879,7 +879,7 @@ struct GameplayInspectionFixture {
     VS::Menu::Framework::itemsText = saved_text;
     VS::Menu::Framework::menuState = saved_menu;
     Event_isMenuTransitionActive = saved_event_menu;
-    VS::State::stateFlags.menuFSubmenu = saved_results_kind;
+    VS::State::stateFlags.menu_f_submenu = saved_results_kind;
     std::copy(saved_submenus.begin(), saved_submenus.end(),
               VS::Menu::Framework::submenuStates);
     Menu_Results_screenState = saved_results_state;
@@ -1008,7 +1008,7 @@ TEST_CASE(
     "[diagnostics][inspection][roulette-trace]") {
   GameplayInspectionFixture fixture;
   VS::Menu::Framework::menuState.currentMenu = 15;
-  VS::State::stateFlags.menuFSubmenu = 0;
+  VS::State::stateFlags.menu_f_submenu = 0;
   VS::Menu::Framework::submenuStates[15] = 2;
   Menu_Results_screenState = 1;
   Menu_Results_screenTimer = 490;
@@ -1033,13 +1033,13 @@ TEST_CASE(
     "[diagnostics][inspection][roulette-trace]") {
   GameplayInspectionFixture fixture;
   VS::Menu::Framework::menuState.currentMenu = 15;
-  VS::State::stateFlags.menuFSubmenu = 0;
+  VS::State::stateFlags.menu_f_submenu = 0;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
   VS::Boot::EncounterPollStop();
   REQUIRE(VS::Game::InspectGameplay().roulette.has_value());
-  VS::State::stateFlags.menuFSubmenu = 1;
+  VS::State::stateFlags.menu_f_submenu = 1;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
-  VS::State::stateFlags.menuFSubmenu = 0;
+  VS::State::stateFlags.menu_f_submenu = 0;
   VS::Menu::Framework::menuState.currentMenu =
       Menu_Framework_MenuState_NoneClosed;
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
@@ -1101,9 +1101,9 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
     action->queue[0].targets[0].target.targetActor = 2;
     for (std::size_t slot = 0;
          slot < VS::Game::EncounterReactionTimingState::kSlots; ++slot) {
-      VS::Input::settings.mappedChainAbilities[slot] =
+      VS::Input::settings.mapped_chain_abilities[slot] =
           static_cast<char>(22 + slot);
-      VS::Input::settings.mappedDefenseAbilities[slot] =
+      VS::Input::settings.mapped_defense_abilities[slot] =
           static_cast<char>(40 + slot);
       for (const auto id : {22 + slot, 40 + slot}) {
         Battle_actionDefinitions[id].type = Battle_ActionType_Ability;
@@ -1277,7 +1277,7 @@ TEST_CASE("Gameplay inspection reads copied plain chars as unsigned bytes",
   VS::Menu::Framework::menuItems = rows.data();
   Field_controlMode = kMenuControl;
   VS::Menu::Framework::menuState.currentMenu = kResultsMenu;
-  VS::State::stateFlags.menuFSubmenu = static_cast<char>(200);
+  VS::State::stateFlags.menu_f_submenu = static_cast<char>(200);
   VS::Menu::Framework::menuMemory.cursorMemories[12] = static_cast<char>(200);
   VS::Menu::Framework::menuMemory.cursorMemories[13] = static_cast<char>(201);
   const auto state =

@@ -128,7 +128,7 @@ struct PlayerSettings {
                          const PlayerSettings&) = default;
 };
 
-// One boss time-trial record (State_TrialScore).
+// One boss time-trial record (VS::State::TrialScore).
 struct TimeTrialScore {
   std::int32_t time = 0;
   std::uint8_t round = 0;

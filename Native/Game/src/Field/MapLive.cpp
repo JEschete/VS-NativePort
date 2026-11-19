@@ -12,12 +12,12 @@
 #include "Field/Minimap.h"
 #include "Field/RoomStateLive.hpp"
 #include "Legacy/Psx.h"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace {
 using VS::Field::RoomVisitFlags;
 
-static_assert(sizeof(State_roomVisitProgress.roomFlags) ==
+static_assert(sizeof(VS::State::roomVisitProgress.room_flags) ==
               sizeof(RoomVisitFlags));
 static_assert(sizeof(Field_countableRoomMask) == sizeof(RoomVisitFlags));
 
@@ -54,7 +54,8 @@ void RestoreLiveSceneRoomVisits(void* scene, std::size_t size) {
     return;
   }
   LiveRoomLocationIndex locations;
-  const RoomVisitFlags flags = ToVisitFlags(State_roomVisitProgress.roomFlags);
+  const RoomVisitFlags flags =
+      ToVisitFlags(VS::State::roomVisitProgress.room_flags);
   if (!RestoreSceneRoomVisits({static_cast<std::byte*>(scene), size}, flags,
                               locations)) {
     VS::Core::LogError("field.map",
@@ -75,11 +76,11 @@ void BuildLiveMinimapRotation(MATRIX* rotation, int yaw_angle) {
 }
 
 int LiveMapCompletionPercent() {
-  RoomVisitFlags flags = ToVisitFlags(State_roomVisitProgress.roomFlags);
+  RoomVisitFlags flags = ToVisitFlags(VS::State::roomVisitProgress.room_flags);
   const std::int32_t percent =
       MapCompletionPercent(flags, ToVisitFlags(Field_countableRoomMask));
   std::ranges::transform(
-      flags, std::span(State_roomVisitProgress.roomFlags).begin(),
+      flags, std::span(VS::State::roomVisitProgress.room_flags).begin(),
       [](std::uint32_t word) { return static_cast<int>(word); });
   return percent;
 }

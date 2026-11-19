@@ -15,6 +15,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Menu/Framework/ActorPreviewLive.hpp"
 #include "Menu/Framework/ItemRows.hpp"
 #include "Menu/Framework/ItemRowsLiveState.hpp"
@@ -29,7 +30,6 @@
 #include "Render/Render.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Settings.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming): the catalog's component.
 namespace VS::Menu::Status::terminal_live {
@@ -97,7 +97,7 @@ TerminalFrame LoadFrame() {
       .selected_equipment = static_cast<std::uint8_t>(
           VS::Menu::Framework::menuMemory.selectedEquipment),
       .cursor_memory =
-          static_cast<std::uint8_t>(VS::Input::settings.cursorMemory),
+          static_cast<std::uint8_t>(VS::Input::settings.cursor_memory),
       .hud_hidden = static_cast<std::uint8_t>(Battle_hudStatusIconsHidden),
       .current_menu =
           static_cast<std::uint8_t>(VS::Menu::Framework::menuState.currentMenu),
@@ -128,7 +128,7 @@ void StoreFrame(const TerminalFrame& frame) {
       static_cast<char>(frame.enabled_pages);
   VS::Menu::Framework::menuMemory.selectedEquipment =
       static_cast<char>(frame.selected_equipment);
-  VS::Input::settings.cursorMemory = static_cast<char>(frame.cursor_memory);
+  VS::Input::settings.cursor_memory = static_cast<char>(frame.cursor_memory);
   Battle_hudStatusIconsHidden = static_cast<char>(frame.hud_hidden);
   VS::Menu::Framework::menuState.currentMenu =
       static_cast<char>(frame.current_menu);

@@ -65,10 +65,10 @@
 #include "Save/RuntimeSnapshot.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/RoomMemory.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 #include "Title/NewGame.hpp"
 
@@ -230,7 +230,7 @@ struct RuntimeFixture {
   decltype(VS::Items::inventory) inventory = VS::Items::inventory;
   decltype(VS::Items::inventoryIndices) order = VS::Items::inventoryIndices;
   decltype(VS::Input::settings) settings = VS::Input::settings;
-  decltype(State_roomVisitProgress) visits = State_roomVisitProgress;
+  decltype(VS::State::roomVisitProgress) visits = VS::State::roomVisitProgress;
   decltype(VS::State::artsStatus) arts = VS::State::artsStatus;
   decltype(VS::State::scoreData) score = VS::State::scoreData;
   decltype(VS::State::ashleySnapshot) ashley = VS::State::ashleySnapshot;
@@ -246,8 +246,8 @@ struct RuntimeFixture {
       VS::Render::FrameScratchpad().camera;
   decltype(std::to_array(VS::State::recentRoomEnemyStates)) caches =
       std::to_array(VS::State::recentRoomEnemyStates);
-  decltype(std::to_array(State_learnedActionFlags)) learned =
-      std::to_array(State_learnedActionFlags);
+  decltype(std::to_array(VS::State::learnedActionFlags)) learned =
+      std::to_array(VS::State::learnedActionFlags);
   decltype(std::to_array(Battle_actionDefinitions)) actions =
       std::to_array(Battle_actionDefinitions);
   decltype(std::to_array(Battle_actors)) actors = std::to_array(Battle_actors);
@@ -363,14 +363,14 @@ struct RuntimeFixture {
     VS::State::SetLiveScriptFlag(64, 99);
     VS::State::SetLiveScriptFlag(161, 17);
     VS::Input::settings = {};
-    VS::Input::settings.mappedChainAbilities[3] = static_cast<char>(255);
-    State_roomVisitProgress = {};
-    State_roomVisitProgress.roomFlags[3] = 0x10203040;
+    VS::Input::settings.mapped_chain_abilities[3] = static_cast<char>(255);
+    VS::State::roomVisitProgress = {};
+    VS::State::roomVisitProgress.room_flags[3] = 0x10203040;
     VS::State::artsStatus = {};
-    VS::State::artsStatus.kills.totalKills = 1234;
+    VS::State::artsStatus.kills.total_kills = 1234;
     VS::State::scoreData = {};
-    VS::State::scoreData.bossTimeTrialScores[7][2].time = 0xABCDEF;
-    std::fill_n(State_learnedActionFlags, learned.size(),
+    VS::State::scoreData.boss_time_trial_scores[7][2].time = 0xABCDEF;
+    std::fill_n(VS::State::learnedActionFlags, learned.size(),
                 static_cast<char>(0xFF));
     for (auto& action : Battle_actionDefinitions) action.unlocked = 0;
     for (const auto index : {0, 7, 8, 97, 255}) {
@@ -590,10 +590,10 @@ struct RuntimeFixture {
     VS::State::savedEntryDoor.entryElevation = 1;
     VS::State::savedEntryDoor.tileLocation.entryDirection = 1;
     VS::State::savedEntryDoor.requiredFlagId = 37;
-    VS::Input::settings.currentGameSaveCount = 7;
-    VS::Input::settings.cumulativeSaveCount = 19;
-    VS::Input::settings.menuFlags = 0xFFFF;
-    VS::Input::settings.reserved0Bit0 = 8;
+    VS::Input::settings.current_game_save_count = 7;
+    VS::Input::settings.cumulative_save_count = 19;
+    VS::Input::settings.menu_flags = 0xFFFF;
+    VS::Input::settings.mode_flags = 8;
     VS::Ending::LiveCommitClearProgress();
     VS::Boot::isGameplayActive = 0;
     VS::Boot::isClearSavePending = 1;
@@ -610,7 +610,7 @@ struct RuntimeFixture {
     VS::Items::inventory = inventory;
     VS::Items::inventoryIndices = order;
     VS::Input::settings = settings;
-    State_roomVisitProgress = visits;
+    VS::State::roomVisitProgress = visits;
     VS::State::artsStatus = arts;
     VS::State::scoreData = score;
     VS::State::ashleySnapshot = ashley;
@@ -623,7 +623,7 @@ struct RuntimeFixture {
     VS::Field::sphericalCamera = camera;
     VS::Render::FrameScratchpad().camera = rendered_camera;
     std::copy(caches.begin(), caches.end(), VS::State::recentRoomEnemyStates);
-    std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
+    std::copy(learned.begin(), learned.end(), VS::State::learnedActionFlags);
     std::copy(actions.begin(), actions.end(), Battle_actionDefinitions);
     std::copy(actors.begin(), actors.end(), Battle_actors);
     std::copy(models.begin(), models.end(), Actors_actorRecords);
@@ -669,12 +669,12 @@ std::vector<std::uint8_t> LiveFingerprint(const RuntimeFixture& fixture) {
   Append(bytes, VS::Items::inventory);
   Append(bytes, VS::Items::inventoryIndices);
   Append(bytes, VS::Input::settings);
-  Append(bytes, State_roomVisitProgress);
+  Append(bytes, VS::State::roomVisitProgress);
   Append(bytes, VS::State::artsStatus);
   Append(bytes, VS::State::scoreData);
   Append(bytes, VS::State::recentRoomEnemyStates);
   Append(bytes, VS::State::currentRoomStateSlot);
-  Append(bytes, State_learnedActionFlags);
+  Append(bytes, VS::State::learnedActionFlags);
   Append(bytes, Battle_actionDefinitions);
   Append(bytes, VS::State::ashleySnapshot);
   Append(bytes, VS::State::savedEntryDoor);
@@ -745,9 +745,9 @@ void CheckCapturedProgress(const Save::Snapshot& state) {
   CHECK(state.storage.misc[255].id == 511);
   CHECK(state.storage.weapons[31].gems[0] == 192);
   CHECK(state.storage.gems[191].id == 307);
-  CHECK(state.visits.roomFlags[3] == 0x10203040);
-  CHECK(state.arts.kills.totalKills == 1234);
-  CHECK(state.score.bossTimeTrialScores[7][2].time == 0xABCDEF);
+  CHECK(state.visits.room_flags[3] == 0x10203040);
+  CHECK(state.arts.kills.total_kills == 1234);
+  CHECK(state.score.boss_time_trial_scores[7][2].time == 0xABCDEF);
   CHECK(state.room_cache[0].next_slot == 0);
 }
 
@@ -1015,8 +1015,8 @@ void CheckStagedInputs() {
   CHECK(VS::State::savedEntryDoor.entryTileX == 1);
   CHECK(VS::State::savedEntryDoor.entryTileZ == 2);
   CHECK(VS::State::ashleySnapshot.stats.is_pending == 1);
-  CHECK(static_cast<unsigned char>(State_learnedActionFlags[12]) == 0x40);
-  CHECK(State_learnedActionFlags[0] == 0);
+  CHECK(static_cast<unsigned char>(VS::State::learnedActionFlags[12]) == 0x40);
+  CHECK(VS::State::learnedActionFlags[0] == 0);
 }
 }  // namespace
 
@@ -1261,10 +1261,10 @@ TEST_CASE("Only an actually paused field menu permits residual walking",
 
 namespace {
 void CheckAudioSettings(bool mono) {
-  CHECK((VS::Input::settings.monoSound == 1) == mono);
+  CHECK((VS::Input::settings.mono_sound == 1) == mono);
   CHECK(((VS::Audio::Driver::controlLatches.mix_behavior & 2) != 0) == mono);
   CHECK((VS::Audio::Driver::controlLatches.mix_behavior & 0x10) != 0);
-  CHECK(VS::Input::settings.slotState == 0xFEDCBA98u);
+  CHECK(VS::Input::settings.slot_state == 0xFEDCBA98u);
   CHECK(VS::Input::settings.key == 0xF00DCAFEu);
 }
 }  // namespace
@@ -1276,12 +1276,12 @@ TEST_CASE(
   RuntimeFixture fixture;
   auto state = fixture.Capture();
   const bool mono = GENERATE(false, true);
-  VS::Input::settings.monoSound = static_cast<char>(!mono);
+  VS::Input::settings.mono_sound = static_cast<char>(!mono);
   VS::Audio::LiveSetMonoOutput(mono ? 0 : 1);
   VS::Audio::Driver::controlLatches.mix_behavior |= 0x10;
   const auto before = LiveFingerprint(fixture);
-  state.settings.monoSound = static_cast<char>(mono);
-  state.settings.slotState = 0xFEDCBA98u;
+  state.settings.mono_sound = static_cast<char>(mono);
+  state.settings.slot_state = 0xFEDCBA98u;
   state.settings.key = 0xF00DCAFEu;
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
   CheckAudioSettings(mono);
@@ -1312,7 +1312,7 @@ TEST_CASE("Failed room-ready audio validation leaves cancellation safe",
           "[save][runtime-snapshot]") {
   RuntimeFixture fixture;
   auto state = fixture.Capture();
-  state.settings.monoSound = 1;
+  state.settings.mono_sound = 1;
   REQUIRE(Save::PrepareResume({1, 0, state}).has_value());
   VS::State::ashleySnapshot.stats.is_pending = 0;
   VS::Audio::Mixer::kCommandHandlers[0x81] = nullptr;
@@ -1322,7 +1322,7 @@ TEST_CASE("Failed room-ready audio validation leaves cancellation safe",
   Save::CancelResume();
   CHECK_FALSE(Save::ResumePending());
   CHECK((VS::Audio::Driver::controlLatches.mix_behavior & 2) == 0);
-  CHECK(VS::Input::settings.monoSound == 0);
+  CHECK(VS::Input::settings.mono_sound == 0);
 }
 
 TEST_CASE("Resume staging can be canceled repeatedly without leaking inputs",
@@ -1577,9 +1577,9 @@ void CheckClearProgress(const Save::Document& document) {
   CHECK(document.state.script_flags[0] == 1);
   CHECK(document.state.script_flags[1] == 1);
   CHECK(document.state.script_flags[64] == 0);
-  CHECK(document.state.settings.currentGameSaveCount == 0);
-  CHECK(document.state.settings.cumulativeSaveCount == 19);
-  CHECK(document.state.settings.menuFlags == 0xFFDF);
+  CHECK(document.state.settings.current_game_save_count == 0);
+  CHECK(document.state.settings.cumulative_save_count == 19);
+  CHECK(document.state.settings.menu_flags == 0xFFDF);
   CHECK(document.state.play_ticks == 0);
 }
 
@@ -1589,8 +1589,8 @@ void CheckClearCarryover(const Save::Document& document) {
   CHECK(document.state.inventory.misc[0].id == 0);
   CHECK(document.state.inventory_order.misc[0] == 0);
   CHECK(document.state.inventory.weapons[0].blade == 1);
-  CHECK(document.state.score.completionTimeMinutes == 12 * 60 + 57);
-  CHECK(document.state.arts.kills.totalKills == 1234);
+  CHECK(document.state.score.completion_time_minutes == 12 * 60 + 57);
+  CHECK(document.state.arts.kills.total_kills == 1234);
   CHECK(document.state.learned_actions[0]);
   // The packed original capture differs deliberately from the now-unavailable
   // overlay's action-table view.
@@ -1695,13 +1695,13 @@ TEST_CASE("Original ending advances clear difficulty and saturates its count",
           "[save][runtime-snapshot][save-clear]") {
   RuntimeFixture fixture;
   const auto previous_clears = GENERATE(0, 1, 98, 99);
-  VS::State::stateFlags.clearCount = static_cast<char>(previous_clears);
+  VS::State::stateFlags.clear_count = static_cast<char>(previous_clears);
   VS::State::stateFlags.difficulty = previous_clears == 0 ? 0 : 1;
   const auto document = fixture.ClearGame();
   CHECK(document.state.script_flags[0] == std::min(previous_clears + 1, 99));
   CHECK(document.state.script_flags[1] == 1);
   CHECK(document.state.script_flags[2] == (previous_clears == 0 ? 0 : 1));
-  CHECK(document.state.score.clearCount == previous_clears);
+  CHECK(document.state.score.clear_count == previous_clears);
 }
 
 TEST_CASE("Clear-game validation rejects unreset state and missing content",
@@ -1711,11 +1711,11 @@ TEST_CASE("Clear-game validation rejects unreset state and missing content",
   const auto defect = GENERATE(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
   if (defect == 0) document.state.script_flags[0] = 0;
   if (defect == 1) document.state.script_flags[64] = 1;
-  if (defect == 2) document.state.settings.currentGameSaveCount = 1;
+  if (defect == 2) document.state.settings.current_game_save_count = 1;
   if (defect == 3) document.state.play_ticks = 1;
   if (defect == 4) document.state.inventory.misc[0].id = 308;
   if (defect == 5) Engaged(document.new_game_entry).destinationZoneId = 9;
-  if (defect == 6) document.state.visits.roomFlags[0] = 1;
+  if (defect == 6) document.state.visits.room_flags[0] = 1;
   if (defect == 7) {
     REQUIRE(std::filesystem::remove(fixture.content.root / "disc" / "MAP" /
                                     "ZONE001.ZND"));

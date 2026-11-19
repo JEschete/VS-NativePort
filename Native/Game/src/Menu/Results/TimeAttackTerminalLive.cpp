@@ -33,9 +33,9 @@
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TimImage.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/SceneTimerLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Results {
 namespace {
@@ -52,7 +52,7 @@ constexpr std::int32_t kCountdownTickSpeed = 4;
 constexpr std::int32_t kNormalTickSpeed = 2;
 constexpr std::int32_t kResultsClosingPhase = 2;
 static_assert(std::size(Menu_Results_clutBuf) == kResultsClutWords);
-static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
+static_assert(std::size(VS::State::scoreData.boss_time_trial_scores) ==
               kTimeAttackCourses);
 
 struct LoadOwner {
@@ -159,7 +159,7 @@ void StoreState(const TimeAttackState& state) {
 }
 
 bool ValidCourse() {
-  if (VS::State::stateFlags.timeAttackBoss < kTimeAttackCourses) {
+  if (VS::State::stateFlags.time_attack_boss < kTimeAttackCourses) {
     return true;
   }
   Refuse("course outside the resident score table");
@@ -275,7 +275,7 @@ class LiveLoad final : public TimeAttackLoadHost {
     for (std::size_t course = 0; course < records_.size(); ++course) {
       for (std::size_t rank = 0; rank < kTimeAttackRanks; ++rank) {
         const auto& record =
-            VS::State::scoreData.bossTimeTrialScores[course][rank];
+            VS::State::scoreData.boss_time_trial_scores[course][rank];
         records_.at(course).at(rank) = record.time |
                                        (record.round << kRoundShift) |
                                        (record.difficulty << kDifficultyShift);
@@ -283,17 +283,18 @@ class LiveLoad final : public TimeAttackLoadHost {
     }
     const auto& flags = VS::State::stateFlags;
     return TimeAttackRun{
-        .course = flags.timeAttackBoss,
-        .minutes = flags.timeAttackMins,
-        .seconds = flags.timeAttackSecs,
-        .hundredths = flags.timeAttackHundredths,
-        .round = static_cast<std::uint8_t>(flags.clearCount),
+        .course = flags.time_attack_boss,
+        .minutes = flags.time_attack_minutes,
+        .seconds = flags.time_attack_seconds,
+        .hundredths = flags.time_attack_hundredths,
+        .round = static_cast<std::uint8_t>(flags.clear_count),
         .difficulty = static_cast<std::uint8_t>(flags.difficulty),
         .records = records_};
   }
   void CommitRun(const TimeAttackRun& run) override {
     for (std::size_t rank = 0; rank < kTimeAttackRanks; ++rank) {
-      auto& record = VS::State::scoreData.bossTimeTrialScores[run.course][rank];
+      auto& record =
+          VS::State::scoreData.boss_time_trial_scores[run.course][rank];
       const auto word = run.records[run.course].at(rank);
       record.time = word & kTrialScoreTimeMask;
       record.round = (word >> kRoundShift) & kRoundMask;
@@ -592,14 +593,14 @@ int LiveUpdateTimeAttackStart() {
 int LiveInitializeResultsScreen() {
   LivePresentations host;
   return Return(InitializeResultsScreen(
-      static_cast<std::uint8_t>(VS::State::stateFlags.menuFSubmenu), host));
+      static_cast<std::uint8_t>(VS::State::stateFlags.menu_f_submenu), host));
 }
 
 // decomp: _execMenu, MENUF.PRG/3B8.c:453 (0x801037A0).
 int LiveUpdateResultsPresentation() {
   LivePresentations host;
   return Return(UpdateResultsPresentation(
-      static_cast<std::uint8_t>(VS::State::stateFlags.menuFSubmenu), host));
+      static_cast<std::uint8_t>(VS::State::stateFlags.menu_f_submenu), host));
 }
 
 // decomp: vs_menuF_exec, MENUF.PRG/3B8.c:23 (0x80102BB8).
@@ -609,7 +610,7 @@ int LiveUpdateResultsScreen(unsigned char* caller_state) {
                          ? std::span<std::uint8_t>{}
                          : std::span<std::uint8_t>(caller_state, 1);
   return Return(UpdateResultsScreen(
-      bytes, static_cast<std::uint8_t>(VS::State::stateFlags.menuFSubmenu),
+      bytes, static_cast<std::uint8_t>(VS::State::stateFlags.menu_f_submenu),
       host));
 }
 

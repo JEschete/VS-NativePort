@@ -14,8 +14,8 @@ inline constexpr std::size_t kRoomVisitFlagWords = 16;
 inline constexpr std::int32_t kRoomLocationCount = 512;
 inline constexpr std::int32_t kCountableRoomTotal = 361;
 
-// One bit per location id (State_roomVisitProgress.roomFlags), or the mask of
-// the locations completion counts.
+// One bit per location id (VS::State::roomVisitProgress.room_flags), or the
+// mask of the locations completion counts.
 using RoomVisitFlags = std::array<std::uint32_t, kRoomVisitFlagWords>;
 
 // Stores the low byte of `visible` as the minimap's visibility byte and

@@ -15,7 +15,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/Sounds.hpp"
 #include "Menu/TextBox.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu {
 namespace {
@@ -167,7 +167,7 @@ int SelectLiveTextBoxChoice(u_char box_mask) {
   const TextBoxSelectionInput input{
       .pressed = static_cast<std::uint32_t>(VS::Input::buttonsPressed),
       .default_choice =
-          static_cast<std::uint8_t>(VS::State::stateFlags.opaque11),
+          static_cast<std::uint8_t>(VS::State::stateFlags.opaque_11),
   };
   const auto choice =
       SelectTextBoxChoice(boxes, selector, host, box_mask, input);

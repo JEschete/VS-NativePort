@@ -23,8 +23,8 @@
 #include "Render/Render.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace VS::test_support::time_attack {
 namespace results = VS::Menu::Results;
@@ -117,8 +117,8 @@ struct LiveTimeAttackFixture {
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
   void* saved_ordering = VS::Render::legacyOrderingTables[0];
   int saved_framebuffer = VS::Render::frameBuf;
-  u_char saved_course = VS::State::stateFlags.timeAttackBoss;
-  State_ScoreData saved_scores = VS::State::scoreData;
+  u_char saved_course = VS::State::stateFlags.time_attack_boss;
+  VS::State::ScoreData saved_scores = VS::State::scoreData;
   int saved_time = Menu_Results_timeTrialTime;
   int saved_new_slot = Menu_Results_newTimeSlot;
   std::vector<u_long> storage = std::vector<u_long>(kLivePrimitiveWords, 0);
@@ -131,7 +131,7 @@ struct LiveTimeAttackFixture {
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
     VS::Render::legacyOrderingTables[0] = saved_ordering;
     VS::Render::frameBuf = saved_framebuffer;
-    VS::State::stateFlags.timeAttackBoss = saved_course;
+    VS::State::stateFlags.time_attack_boss = saved_course;
     VS::State::scoreData = saved_scores;
     Menu_Results_timeTrialTime = saved_time;
     Menu_Results_newTimeSlot = saved_new_slot;

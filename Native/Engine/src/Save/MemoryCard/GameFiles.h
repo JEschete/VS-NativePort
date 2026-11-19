@@ -11,11 +11,11 @@ struct Save_SaveProtectedHeader;
 struct Save_SaveSlotBase;
 
 #include "Field/Mpd.h"
+#include "Input/Settings.hpp"
 #include "Items/Inventory.h"
 #include "State/Ashley.hpp"
 #include "State/GameClock.hpp"
-#include "State/Progress.h"
-#include "State/Settings.h"
+#include "State/Progress.hpp"
 
 // decomp: _findCurrentSave_e (src/MENU/MENU7.PRG/260.c:1561)
 enum Save_FindSaveResult {
@@ -126,15 +126,15 @@ struct Save_GameSaveImage {
     char stateFlags[0x440];
     char learnedActions[32];
     char mapStatus[0x48];
-    State_Settings settings;
+    VS::Input::Settings settings;
     VS::State::AshleySnapshot ashleySnapshot;
     Items_Inventory inventory;
     Items_InventoryIndices inventoryIndices;
     Field_MpdDoorRecord entryDoor;
-    State_ScoreData scoreData;
+    VS::State::ScoreData scoreData;
     int roomStateSlot;
     char recentRoomEnemyStates[0x520];
-    State_ArtsStatus artsStatus;
+    VS::State::ArtsStatus artsStatus;
     Items_ContainerData containerData;
     char reserved59E0[0x220];
 };

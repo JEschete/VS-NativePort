@@ -19,6 +19,7 @@
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -40,7 +41,6 @@
 #include "Render/Text/VariableFont.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Settings.h"
 
 static_assert(sizeof VS::Menu::textBoxOrderingTables == 102 * sizeof(u_long),
               "three textbox ordering buffers");
@@ -407,8 +407,8 @@ int CheckMenuWorkspaceReset(void) {
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   char* const saved_strings = VS::Menu::Framework::stringBuf;
   int* const saved_types = VS::Menu::Framework::rowTypeBuf;
-  const u_short saved_flags = VS::Input::settings.menuFlags;
-  const unsigned int saved_memory = VS::Input::settings.cursorMemory;
+  const u_short saved_flags = VS::Input::settings.menu_flags;
+  const unsigned int saved_memory = VS::Input::settings.cursor_memory;
   const char saved_selection = VS::Menu::Framework::submenuStates[0];
   const int saved_cursor = VS::Menu::Framework::mainMenuCursorAnimation;
   VS::Menu::Framework::menuItems =
@@ -419,8 +419,8 @@ int CheckMenuWorkspaceReset(void) {
       reinterpret_cast<char*>(VS::Menu::Framework::menuItems + kRows);
   VS::Menu::Framework::rowTypeBuf =
       reinterpret_cast<int*>(VS::Menu::Framework::stringBuf + kStringBytes);
-  VS::Input::settings.menuFlags = 1;
-  VS::Input::settings.cursorMemory = 0;
+  VS::Input::settings.menu_flags = 1;
+  VS::Input::settings.cursor_memory = 0;
   VS::Menu::Framework::submenuStates[0] = 0;
 
   int passed = VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0 &&
@@ -437,8 +437,8 @@ int CheckMenuWorkspaceReset(void) {
   VS::Menu::Framework::menuItems = saved_items;
   VS::Menu::Framework::stringBuf = saved_strings;
   VS::Menu::Framework::rowTypeBuf = saved_types;
-  VS::Input::settings.menuFlags = saved_flags;
-  VS::Input::settings.cursorMemory = saved_memory;
+  VS::Input::settings.menu_flags = saved_flags;
+  VS::Input::settings.cursor_memory = saved_memory;
   VS::Menu::Framework::submenuStates[0] = saved_selection;
   VS::Menu::Framework::mainMenuCursorAnimation = saved_cursor;
   free(storage);

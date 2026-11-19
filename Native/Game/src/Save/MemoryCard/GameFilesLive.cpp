@@ -26,6 +26,7 @@
 #include "Field/MapLive.hpp"
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "Menu/FilesLiveState.hpp"
@@ -38,11 +39,10 @@
 #include "State/Ashley.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/RoomCache.hpp"
 #include "State/RoomMemory.hpp"
-#include "State/Settings.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
 
@@ -82,13 +82,21 @@ static_assert(offsetof(Save_SaveProtectedHeader, summary) ==
 static_assert(sizeof(Save_SaveFileStats) == kStatsBytes);
 static_assert(offsetof(Save_SaveFileStats, mapCompletion) ==
               kStatsMapCompletionOffset);
-static_assert(sizeof(State_Settings) == kSettingsBytes);
-static_assert(offsetof(State_Settings, slotState) == kSettingsSlotStateOffset);
-static_assert(offsetof(State_Settings, monoSound) == kSettingsMonoSoundOffset);
-static_assert(offsetof(State_Settings, key) == kSettingsKeyOffset);
-static_assert(offsetof(State_Settings, saveFileGeneration) ==
+static_assert(sizeof(VS::Input::Settings) == kSettingsBytes);
+static_assert(offsetof(VS::Input::Settings, menu_flags) ==
+              kSettingsMenuFlagsOffset);
+static_assert(offsetof(VS::Input::Settings, slot_state) ==
+              kSettingsSlotStateOffset);
+static_assert(offsetof(VS::Input::Settings, mono_sound) ==
+              kSettingsMonoSoundOffset);
+static_assert(offsetof(VS::Input::Settings, key) == kSettingsKeyOffset);
+static_assert(offsetof(VS::Input::Settings, cumulative_save_count) ==
+              kSettingsCumulativeSavesOffset);
+static_assert(offsetof(VS::Input::Settings, current_game_save_count) ==
+              kSettingsCurrentGameSavesOffset);
+static_assert(offsetof(VS::Input::Settings, save_file_generation) ==
               kSettingsGenerationOffset);
-static_assert(offsetof(State_StateFlags, puzzleMode) ==
+static_assert(offsetof(VS::State::StateFlags, puzzle_mode) ==
               kStateFlagsPuzzleModeOffset);
 static_assert(sizeof(VS::State::RoomEnemyStates) == kRoomEnemyStatesBytes);
 static_assert(offsetof(VS::State::RoomEnemyStates, next_slot) ==
@@ -118,10 +126,10 @@ static_assert(LaysOut(SaveSection::kStateFlags,
                       sizeof(VS::State::stateFlags)));
 static_assert(LaysOut(SaveSection::kLearnedActions,
                       offsetof(Save_GameSaveImage, learnedActions),
-                      sizeof(State_learnedActionFlags)));
+                      sizeof(VS::State::learnedActionFlags)));
 static_assert(LaysOut(SaveSection::kMapStatus,
                       offsetof(Save_GameSaveImage, mapStatus),
-                      sizeof(State_roomVisitProgress)));
+                      sizeof(VS::State::roomVisitProgress)));
 static_assert(LaysOut(SaveSection::kSettings,
                       offsetof(Save_GameSaveImage, settings),
                       sizeof(VS::Input::settings)));
@@ -201,7 +209,7 @@ std::optional<SummaryTable> LiveSummaries() {
 
 std::span<const std::byte, kSettingsBytes> LiveSettings() {
   return std::as_bytes(
-      std::span<const State_Settings, 1>{&VS::Input::settings, 1});
+      std::span<const VS::Input::Settings, 1>{&VS::Input::settings, 1});
 }
 
 CardDirectoryEntry EntryOf(const DIRENTRY& entry) {
@@ -323,9 +331,9 @@ class LiveSaveState final : public SaveStateHost {
       case SaveSection::kStateFlags:
         return BytesOf(VS::State::stateFlags);
       case SaveSection::kLearnedActions:
-        return std::as_writable_bytes(std::span{State_learnedActionFlags});
+        return std::as_writable_bytes(std::span{VS::State::learnedActionFlags});
       case SaveSection::kMapStatus:
-        return BytesOf(State_roomVisitProgress);
+        return BytesOf(VS::State::roomVisitProgress);
       case SaveSection::kSettings:
         return BytesOf(VS::Input::settings);
       case SaveSection::kAshleySnapshot:

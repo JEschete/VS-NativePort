@@ -34,7 +34,7 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/Text/VariableFont.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace gazette_times_live_tests {
 namespace score = VS::Menu::Score;
@@ -275,7 +275,7 @@ class Fixture {
     Menu_textBoxes[kInformationBox] = {};
     Battle_unusedMenu9CursorMemory.gazettePage = 0;
     std::ranges::fill(Menu_Score_gazetteRows, Menu_Score_Row{});
-    for (auto& trial : VS::State::scoreData.bossTimeTrialScores) {
+    for (auto& trial : VS::State::scoreData.boss_time_trial_scores) {
       for (auto& record : trial) {
         record = {};
         record.time = kMissingTime;
@@ -311,7 +311,7 @@ class Fixture {
     if (trial >= score::kTimeTrialCount || place >= score::kTimeTrialPlaces) {
       throw std::runtime_error("Gazette Live score index outside its owner");
     }
-    auto& record = VS::State::scoreData.bossTimeTrialScores[trial][place];
+    auto& record = VS::State::scoreData.boss_time_trial_scores[trial][place];
     record.time = time & kLinkMask;
     record.round = static_cast<std::uint32_t>(round) & 127U;
     record.difficulty = hard ? 1U : 0U;

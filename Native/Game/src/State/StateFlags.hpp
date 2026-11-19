@@ -1,0 +1,157 @@
+#pragma once
+// The game's state flag bytes: clears and difficulty, the puzzle timer, the
+// time attack record, boss defeats, keys and sigils, save points and chests.
+// Event scripts address the whole block as byte flags (ScriptFlagsLive.cpp).
+#include <cstddef>
+#include <cstdint>
+
+namespace VS::State {
+inline constexpr std::size_t kStateFlagsReserved21Bytes = 31;
+inline constexpr std::size_t kStateFlagsReserved41Bytes = 95;
+inline constexpr std::size_t kStateFlagsOpaqueAcBytes = 9;
+inline constexpr std::size_t kStateFlagsReservedD2Bytes = 51;
+inline constexpr std::size_t kStateFlagsReserved106Bytes = 22;
+inline constexpr std::size_t kStateFlagsReserved11eBytes = 23;
+inline constexpr std::size_t kMapPalingEntries = 32;
+inline constexpr std::size_t kSavePointStates = 48;
+inline constexpr std::size_t kStateFlagsOpaque186Bytes = 48;
+inline constexpr std::size_t kStateFlagsReserved1b6Bytes = 393;
+inline constexpr std::size_t kStateFlagsOpaque33fBytes = 65;
+inline constexpr std::size_t kStateFlagsReserved3a0Bytes = 32;
+inline constexpr std::size_t kChestFlags = 64;
+inline constexpr std::size_t kStateFlagsReserved400Bytes = 64;
+inline constexpr std::size_t kStateFlagsBytes = 0x440;
+
+// decomp: vs_main_flags_t (src/SLUS_010.40/main.h:228)
+struct StateFlags {
+  /* 0x000 */ std::uint8_t clear_count;
+  /* 0x001 */ std::uint8_t difficulty;
+  /* 0x002 */ std::uint8_t normal_mode_cleared;
+  /* 0x003 */ std::uint8_t reserved_3;
+  /* 0x004 */ std::uint8_t reserved_4;
+  /* 0x005 */ std::uint8_t reserved_5;
+  /* 0x006 */ std::uint8_t reserved_6;
+  /* 0x007 */ std::uint8_t reserved_7;
+  /* 0x008 */ std::uint8_t reserved_8;
+  /* 0x009 */ std::uint8_t reserved_9;
+  /* 0x00A */ std::uint8_t reserved_a;
+  /* 0x00B */ std::uint8_t reserved_b;
+  /* 0x00C */ std::uint8_t opaque_c;
+  /* 0x00D */ std::uint8_t opaque_d;
+  /* 0x00E */ std::uint8_t opaque_e;
+  /* 0x00F */ std::uint8_t reserved_f;
+  /* 0x010 */ std::uint8_t text_box_selection;
+  /* 0x011 */ std::uint8_t opaque_11;
+  /* 0x012 */ std::uint8_t reserved_12;
+  /* 0x013 */ std::uint8_t reserved_13;
+  /* 0x014 */ std::uint8_t reserved_14;
+  /* 0x015 */ std::uint8_t reserved_15;
+  /* 0x016 */ std::uint8_t reserved_16;
+  /* 0x017 */ std::uint8_t reserved_17;
+  /* 0x018 */ std::uint8_t reserved_18;
+  /* 0x019 */ std::uint8_t reserved_19;
+  /* 0x01A */ std::uint8_t reserved_1a;
+  /* 0x01B */ std::uint8_t reserved_1b;
+  /* 0x01C */ std::uint8_t reserved_1c;
+  /* 0x01D */ std::uint8_t reserved_1d;
+  /* 0x01E */ std::uint8_t reserved_1e;
+  /* 0x01F */ std::uint8_t reserved_1f;
+  /* 0x020 */ std::uint8_t opaque_20;
+  /* 0x021 */ std::uint8_t reserved_21[kStateFlagsReserved21Bytes];
+  /* 0x040 */ std::uint8_t opaque_40;
+  /* 0x041 */ std::uint8_t reserved_41[kStateFlagsReserved41Bytes];
+  /* 0x0A0 */ std::uint8_t puzzle_timer_hundredths;
+  /* 0x0A1 */ std::uint8_t puzzle_timer_seconds;
+  /* 0x0A2 */ std::uint8_t puzzle_timer_minutes;
+  /* 0x0A3 */ std::uint8_t puzzle_set_max_timer;
+  /* 0x0A4 */ std::uint8_t game_over;
+  /* 0x0A5 */ std::uint8_t reserved_a5;
+  /* 0x0A6 */ std::uint8_t reserved_a6;
+  /* 0x0A7 */ std::uint8_t opaque_a7;
+  /* 0x0A8 */ std::uint8_t opaque_a8;
+  /* 0x0A9 */ std::uint8_t reserved_a9;
+  /* 0x0AA */ std::uint8_t reserved_aa;
+  /* 0x0AB */ std::uint8_t intro_state;
+  /* 0x0AC */ std::uint8_t opaque_ac[kStateFlagsOpaqueAcBytes];
+  /* 0x0B5 */ std::uint8_t opaque_b5;
+  /* 0x0B6 */ std::uint8_t menu_f_submenu;
+  /* 0x0B7 */ std::uint8_t magic_used;
+  /* 0x0B8 */ std::uint8_t battle_abilities_used;
+  /* 0x0B9 */ std::uint8_t break_arts_used;
+  /* 0x0BA */ std::uint8_t reserved_ba;
+  /* 0x0BB */ std::uint8_t reserved_bb;
+  /* 0x0BC */ std::uint8_t reserved_bc;
+  /* 0x0BD */ std::uint8_t reserved_bd;
+  /* 0x0BE */ std::uint8_t reserved_be;
+  /* 0x0BF */ std::uint8_t reserved_bf;
+  /* 0x0C0 */ std::uint8_t reserved_c0;
+  /* 0x0C1 */ std::uint8_t reserved_c1;
+  /* 0x0C2 */ std::uint8_t reserved_c2;
+  /* 0x0C3 */ std::uint8_t reserved_c3;
+  /* 0x0C4 */ std::uint8_t time_attack_boss;
+  /* 0x0C5 */ std::uint8_t time_attack_minutes;
+  /* 0x0C6 */ std::uint8_t time_attack_seconds;
+  /* 0x0C7 */ std::uint8_t time_attack_hundredths;
+  /* 0x0C8 */ std::uint8_t reserved_c8;
+  /* 0x0C9 */ std::uint8_t reserved_c9;
+  /* 0x0CA */ std::uint8_t reserved_ca;
+  /* 0x0CB */ std::uint8_t reserved_cb;
+  /* 0x0CC */ std::uint8_t damascus_golem_defeated;
+  /* 0x0CD */ std::uint8_t damascus_crab_defeated;
+  /* 0x0CE */ std::uint8_t ravana_defeated;
+  /* 0x0CF */ std::uint8_t dragon_zombie_defeated;
+  /* 0x0D0 */ std::uint8_t death_and_ogre_zombie_defeated;
+  /* 0x0D1 */ std::uint8_t asura_defeated;
+  /* 0x0D2 */ std::uint8_t reserved_d2[kStateFlagsReservedD2Bytes];
+  /* 0x105 */ std::uint8_t door_entered;
+  /* 0x106 */ std::uint8_t reserved_106[kStateFlagsReserved106Bytes];
+  /* 0x11C */ std::uint8_t puzzle_mode;
+  /* 0x11D */ std::uint8_t puzzle_mode_disabled;
+  /* 0x11E */ std::uint8_t reserved_11e[kStateFlagsReserved11eBytes];
+  /* 0x135 */ std::uint8_t map_paling[kMapPalingEntries];
+  /* 0x155 */ std::uint8_t reserved_155;
+  /* 0x156 */ std::uint8_t save_point_states[kSavePointStates];
+  /* 0x186 */ std::uint8_t opaque_186[kStateFlagsOpaque186Bytes];
+  /* 0x1B6 */ std::uint8_t reserved_1b6[kStateFlagsReserved1b6Bytes];
+  /* 0x33F */ std::uint8_t opaque_33f[kStateFlagsOpaque33fBytes];
+  /* 0x380 */ std::uint8_t bronze_key_obtained;
+  /* 0x381 */ std::uint8_t iron_key_obtained;
+  /* 0x382 */ std::uint8_t silver_key_obtained;
+  /* 0x383 */ std::uint8_t gold_key_obtained;
+  /* 0x384 */ std::uint8_t platinum_key_obtained;
+  /* 0x385 */ std::uint8_t steel_key_obtained;
+  /* 0x386 */ std::uint8_t crimson_key_obtained;
+  /* 0x387 */ std::uint8_t chest_key_obtained;
+  /* 0x388 */ std::uint8_t chamomile_sigil_used;
+  /* 0x389 */ std::uint8_t lily_sigil_used;
+  /* 0x38A */ std::uint8_t tearose_sigil_used;
+  /* 0x38B */ std::uint8_t clematis_sigil_used;
+  /* 0x38C */ std::uint8_t hyacinth_sigil_used;
+  /* 0x38D */ std::uint8_t fern_sigil_used;
+  /* 0x38E */ std::uint8_t aster_sigil_used;
+  /* 0x38F */ std::uint8_t eulelia_sigil_used;
+  /* 0x390 */ std::uint8_t melissa_sigil_used;
+  /* 0x391 */ std::uint8_t calla_sigil_used;
+  /* 0x392 */ std::uint8_t laurel_sigil_used;
+  /* 0x393 */ std::uint8_t acacia_sigil_used;
+  /* 0x394 */ std::uint8_t palm_sigil_used;
+  /* 0x395 */ std::uint8_t kalmia_sigil_used;
+  /* 0x396 */ std::uint8_t colombine_sigil_used;
+  /* 0x397 */ std::uint8_t anemone_sigil_used;
+  /* 0x398 */ std::uint8_t verbena_sigil_used;
+  /* 0x399 */ std::uint8_t schirra_sigil_used;
+  /* 0x39A */ std::uint8_t marigold_sigil_used;
+  /* 0x39B */ std::uint8_t azalea_sigil_used;
+  /* 0x39C */ std::uint8_t tigertail_sigil_used;
+  /* 0x39D */ std::uint8_t stock_sigil_used;
+  /* 0x39E */ std::uint8_t cattleya_sigil_used;
+  /* 0x39F */ std::uint8_t mandrake_sigil_used;
+  /* 0x3A0 */ std::uint8_t reserved_3a0[kStateFlagsReserved3a0Bytes];
+  /* 0x3C0 */ std::uint8_t chests_opened[kChestFlags];
+  /* 0x400 */ std::uint8_t reserved_400[kStateFlagsReserved400Bytes];
+};
+static_assert(sizeof(StateFlags) == kStateFlagsBytes);
+
+// decomp: vs_main_stateFlags (main.h:496)
+extern StateFlags stateFlags;
+}  // namespace VS::State

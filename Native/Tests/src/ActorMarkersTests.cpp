@@ -556,10 +556,10 @@ TEST_CASE("Live ability timing cue follows the display setting",
   LiveMarkerFixture fixture;
   Battle_abilityTimingCueFrames = 7;
   Battle_abilityTimingCuePosition = {.vx = 1, .vy = 2, .vz = 3, .pad = 99};
-  VS::Input::settings.abilityTimingDisplay = 0;
+  VS::Input::settings.ability_timing_display = 0;
   VS::Battle::LiveShowAbilityTimingCue(30);
   CHECK(Battle_abilityTimingCueFrames == 7);
-  VS::Input::settings.abilityTimingDisplay = 1;
+  VS::Input::settings.ability_timing_display = 1;
   const SVECTOR player = LiveAnchor(0);
   REQUIRE(player.vy >= 40);
   VS::Battle::LiveShowAbilityTimingCue(30);

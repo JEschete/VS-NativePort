@@ -13,7 +13,7 @@
 #include "Battle/Actor.h"
 #include "Core/Diagnostics.hpp"
 #include "State/KillScore.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::State {
 namespace {
@@ -33,44 +33,45 @@ constexpr unsigned kHostileActorKind = 4;
 }  // namespace
 
 KillScore LiveKillScore() noexcept {
-  const State_ScoreData& record = scoreData;
+  const VS::State::ScoreData& record = scoreData;
   KillScore score;
   for (std::size_t i = 0; i < kEnemyClassCount; ++i) {
-    score.enemy_kills[i] = record.enemyKills[i];
+    score.enemy_kills[i] = record.enemy_kills[i];
   }
   for (std::size_t i = 0; i < kEnemyKillFlagWords; ++i) {
     score.enemy_kill_flags[i] =
-        static_cast<std::uint32_t>(record.enemyKillFlags[i]);
+        static_cast<std::uint32_t>(record.enemy_kill_flags[i]);
   }
-  score.streak_score = record.streakScore;
+  score.streak_score = record.streak_score;
   score.kill_streak_enemy_class =
-      static_cast<std::uint8_t>(record.killStreakEnemyClass);
+      static_cast<std::uint8_t>(record.kill_streak_enemy_class);
   score.kill_streak_enemy_count =
-      static_cast<std::uint8_t>(record.killStreakEnemyCount);
+      static_cast<std::uint8_t>(record.kill_streak_enemy_count);
   score.weapon_kill_streak_blade_category =
-      static_cast<std::uint8_t>(record.weaponKillStreakBladeCategory);
-  score.weapon_kill_streak = static_cast<std::uint8_t>(record.weaponKillStreak);
-  score.chain_streak = record.chainStreak;
+      static_cast<std::uint8_t>(record.weapon_kill_streak_blade_category);
+  score.weapon_kill_streak =
+      static_cast<std::uint8_t>(record.weapon_kill_streak);
+  score.chain_streak = record.chain_streak;
   return score;
 }
 
 void StoreLiveKillScore(const KillScore& score) noexcept {
-  State_ScoreData& record = scoreData;
+  VS::State::ScoreData& record = scoreData;
   for (std::size_t i = 0; i < kEnemyClassCount; ++i) {
-    record.enemyKills[i] = score.enemy_kills[i];
+    record.enemy_kills[i] = score.enemy_kills[i];
   }
   for (std::size_t i = 0; i < kEnemyKillFlagWords; ++i) {
-    record.enemyKillFlags[i] = static_cast<int>(score.enemy_kill_flags[i]);
+    record.enemy_kill_flags[i] = static_cast<int>(score.enemy_kill_flags[i]);
   }
-  record.streakScore = score.streak_score;
-  record.killStreakEnemyClass =
+  record.streak_score = score.streak_score;
+  record.kill_streak_enemy_class =
       static_cast<char>(score.kill_streak_enemy_class);
-  record.killStreakEnemyCount =
+  record.kill_streak_enemy_count =
       static_cast<char>(score.kill_streak_enemy_count);
-  record.weaponKillStreakBladeCategory =
+  record.weapon_kill_streak_blade_category =
       static_cast<char>(score.weapon_kill_streak_blade_category);
-  record.weaponKillStreak = static_cast<char>(score.weapon_kill_streak);
-  record.chainStreak = score.chain_streak;
+  record.weapon_kill_streak = static_cast<char>(score.weapon_kill_streak);
+  record.chain_streak = score.chain_streak;
 }
 
 void RecordLiveEnemyKillScore(Battle_Actor* enemy) {
@@ -112,5 +113,5 @@ void UpdateLiveWeaponKillStreak(int /*unused*/) {
 
 // decomp: BATTLE.PRG func_80070F28 at 0x80071284 (`sb zero` to
 // vs_main_scoredata+0x10F, 0x8005FFAF).
-void ResetLiveWeaponKillStreak() noexcept { scoreData.weaponKillStreak = 0; }
+void ResetLiveWeaponKillStreak() noexcept { scoreData.weapon_kill_streak = 0; }
 }  // namespace VS::State

@@ -37,8 +37,8 @@
 #include "Menu/Score/GazetteTerminalLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/RoomDrawLive.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 namespace gazette_terminal_live_tests {
@@ -130,7 +130,7 @@ inline auto ControlOwners() {
                     BytesOf(Battle_hudSlideOffset),
                     BytesOf(VS::Field::isFieldRenderingEnabled),
                     BytesOf(VS::State::tickSpeed),
-                    BytesOf(State_roomVisitProgress),
+                    BytesOf(VS::State::roomVisitProgress),
                     BytesOf(Battle_actionDefinitions),
                     BytesOf(Content_discRequestSlots),
                     BytesOf(Content_discRequestCounts),
@@ -199,8 +199,8 @@ class TerminalFixture
     VS::Menu::Framework::actionRestrictions = 0;
     VS::Menu::Framework::backgroundFadeStep = 0;
     Menu_Score_characterRank = 0;
-    VS::Input::settings.cursorMemory = 1;
-    VS::State::stateFlags.introState = 3;
+    VS::Input::settings.cursor_memory = 1;
+    VS::State::stateFlags.intro_state = 3;
     sound_offsets_.fill(std::numeric_limits<std::uint32_t>::max());
     VS::State::tickSpeed = 4;
     Input();
@@ -339,7 +339,7 @@ class TerminalFixture
   }
 
   static void UnlockAll() {
-    std::ranges::fill(VS::State::scoreData.enemyKillFlags, -1);
+    std::ranges::fill(VS::State::scoreData.enemy_kill_flags, -1);
     score::InitializeLiveEnemyList();
   }
 };

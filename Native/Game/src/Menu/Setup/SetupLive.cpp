@@ -328,9 +328,9 @@ class LiveHost final : public Host {
     return {reinterpret_cast<std::uint8_t*>(VS::Menu::Framework::stringBuf),
             Framework::kStringBufferBytes};
   }
-  int CursorMemory() override { return VS::Input::settings.cursorMemory; }
+  int CursorMemory() override { return VS::Input::settings.cursor_memory; }
   void SetCursorMemory(int value) override {
-    VS::Input::settings.cursorMemory = static_cast<char>(value);
+    VS::Input::settings.cursor_memory = static_cast<char>(value);
   }
 
   void InitInformationTextBox(int header) override {

@@ -17,7 +17,7 @@
 #include "Field/TriggerMarkers.h"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -114,8 +114,8 @@ void DrawLiveRoomTriggerMarkers() {
         static_cast<std::uint8_t>(record.markerFade)});
   }
   const TriggerMarkerFrame frame{VS::State::tickSpeed,
-                                 VS::State::stateFlags.opaque20 != 0 ||
-                                     VS::State::stateFlags.opaque40 != 0,
+                                 VS::State::stateFlags.opaque_20 != 0 ||
+                                     VS::State::stateFlags.opaque_40 != 0,
                                  Field_roomAnimationTicks};
   TriggerMarkerAnimation animation{Field_triggerMarkerFrameTicks};
   LiveTriggerMarkerRenderer renderer;

@@ -18,7 +18,7 @@
 #include "Render/Frame.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Field {
 namespace {
@@ -26,7 +26,7 @@ namespace {
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
 constexpr std::size_t kGeometrySlot = 5;
 constexpr std::size_t kMarkerSlot = 4;
-constexpr std::size_t kDoorStateBase = offsetof(State_StateFlags, opaque33F);
+constexpr auto kDoorStateBase = offsetof(VS::State::StateFlags, opaque_33f);
 constexpr int kMinimapDepth = 256;
 constexpr int kDoorPulseMask = 0x20;
 constexpr int kMarkerClut = 0x37F8;
@@ -38,7 +38,7 @@ constexpr int kMinimapTextureX = 768;
 constexpr unsigned kScreenYShift = 16;
 static_assert(sizeof(Field_MapRoom) == kMapSceneRoomRecordBytes);
 static_assert(sizeof(Field_MapRoomName) == kMapSceneRoomNameBytes);
-static_assert(kDoorStateBase + UINT8_MAX < sizeof(State_StateFlags));
+static_assert(kDoorStateBase + UINT8_MAX < sizeof(VS::State::StateFlags));
 
 class Packets {
  public:

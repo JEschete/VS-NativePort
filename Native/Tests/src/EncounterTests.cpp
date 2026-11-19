@@ -22,7 +22,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Input/ControllerLiveState.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 using VS::Game::EncounterSetup;
@@ -77,7 +77,7 @@ void EditorPress(VS::combat_lab::Editor& editor, std::uint32_t button,
 
 struct DoorQueryFixture {
   Field_RoomRecord saved_room = Field_roomData;
-  char saved_random = VS::State::stateFlags.opaqueAC[7];
+  std::uint8_t saved_random = VS::State::stateFlags.opaque_ac[7];
   std::array<Field_MpdDoorRecord, 40> doors{};
 
   DoorQueryFixture() {
@@ -90,7 +90,7 @@ struct DoorQueryFixture {
     Field_roomData.doors = nullptr;
     VS::Field::TransitionLiveDoorsAtTile(0, 0, 0);
     Field_roomData = saved_room;
-    VS::State::stateFlags.opaqueAC[7] = saved_random;
+    VS::State::stateFlags.opaque_ac[7] = saved_random;
     VS::Core::SeedBiosRand(1);
   }
 
@@ -188,7 +188,7 @@ TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
   VS::Core::Rand15 expected(1234);
   SECTION("present room consumes one raw draw even without a match") {
     fixture.Check(31, 31, 0, std::span<const int>{});
-    CHECK(static_cast<unsigned char>(VS::State::stateFlags.opaqueAC[7]) ==
+    CHECK(static_cast<unsigned char>(VS::State::stateFlags.opaque_ac[7]) ==
           static_cast<unsigned char>(expected.Next()));
   }
   SECTION("absent room consumes no raw draw") {
@@ -503,15 +503,15 @@ TEST_CASE("Direct entry and title share usable player menu defaults",
           "[combat][encounter]") {
   const auto saved = VS::Input::settings;
   VS::Boot::InitializePlayerSettings();
-  CHECK(VS::Input::settings.menuFlags == 0x2D8);
+  CHECK(VS::Input::settings.menu_flags == 0x2D8);
   CHECK(VS::Input::settings.information == 1);
-  CHECK(VS::Input::settings.simpleMap == 3);
-  CHECK(VS::Input::settings.containerEmpty == 1);
-  CHECK(VS::Input::settings.abilityTimingDisplay == 1);
-  CHECK(VS::Input::settings.cursorMemory == 1);
-  VS::Input::settings.menuFlags = 0;
+  CHECK(VS::Input::settings.simple_map == 3);
+  CHECK(VS::Input::settings.container_empty == 1);
+  CHECK(VS::Input::settings.ability_timing_display == 1);
+  CHECK(VS::Input::settings.cursor_memory == 1);
+  VS::Input::settings.menu_flags = 0;
   VS::Boot::InitializePlayerSettings();
-  CHECK(VS::Input::settings.menuFlags == 0x2D8);
+  CHECK(VS::Input::settings.menu_flags == 0x2D8);
   VS::Input::settings = saved;
 }
 

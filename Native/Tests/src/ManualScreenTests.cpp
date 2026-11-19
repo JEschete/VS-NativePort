@@ -923,7 +923,7 @@ struct LiveManualFixture {
   int saved_topic_row = Menu_Manual_selectedRow;
   int saved_frame_index = VS::Render::frameBuf;
   ScreenState saved_screen = manual::LiveManualScreenState();
-  State_Settings saved_settings = VS::Input::settings;
+  VS::Input::Settings saved_settings = VS::Input::settings;
   DRAWENV saved_back_env = VS::Render::legacyDrawEnvironments[1];
   Content_DiscRequestCounts saved_request_counts = Content_discRequestCounts;
   Field_ManualDisplayState saved_display = Field_manualDisplayState;
@@ -1155,7 +1155,7 @@ TEST_CASE("F04161 LiveUpdateScreen fades in and arms the open delay",
 TEST_CASE("F04161 LiveUpdateScreen initializes the help and hides the HUD",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  VS::Input::settings.cursorMemory = 1;
+  VS::Input::settings.cursor_memory = 1;
   Menu_Manual_showMenuState = 5;
   Battle_hudHidden = 0;
   VS::Field::isFieldRenderingEnabled = 1;
@@ -1210,7 +1210,7 @@ TEST_CASE("F04161 LiveUpdateScreen waits for the fade to reach the game menu",
 TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  VS::Input::settings.cursorMemory = 0;
+  VS::Input::settings.cursor_memory = 0;
   Field_manualDisplayState.currentManual = 3;
   Field_manualDisplayState.scrollPositions[3] = 20;
   std::array<int, 2> text{};
@@ -1242,7 +1242,7 @@ TEST_CASE("F04162 LiveInitHelpState resets the statics and lends the pages",
 TEST_CASE("F04162 LiveInitHelpState keeps the display state with memory on",
           "[manual-screen-live]") {
   LiveManualFixture fixture;
-  VS::Input::settings.cursorMemory = 1;
+  VS::Input::settings.cursor_memory = 1;
   Field_manualDisplayState.currentManual = 3;
   Field_manualDisplayState.scrollPositions[3] = 20;
   CHECK(manual::LiveInitHelpState() == 1);

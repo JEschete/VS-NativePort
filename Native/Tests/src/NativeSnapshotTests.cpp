@@ -18,18 +18,18 @@ namespace Save = VS::Game::Save;
 using Json = nlohmann::json;
 
 void SetSettings(Save::Snapshot& state) {
-  state.settings.reserved0Bit0 = 8;
-  state.settings.containerEmpty = 1;
-  state.settings.abilityTimingDisplay = 1;
-  state.settings.armorStatChange = 1;
-  state.settings.simpleMap = 3;
-  state.settings.monoSound = 1;
-  state.settings.mappedChainAbilities[3] = static_cast<char>(255);
-  state.settings.slotState = 0xFEDCBA98u;
+  state.settings.mode_flags = 8;
+  state.settings.container_empty = 1;
+  state.settings.ability_timing_display = 1;
+  state.settings.armor_stat_change = 1;
+  state.settings.simple_map = 3;
+  state.settings.mono_sound = 1;
+  state.settings.mapped_chain_abilities[3] = static_cast<char>(255);
+  state.settings.slot_state = 0xFEDCBA98u;
   state.settings.key = 0xFFFFFFFFu;
-  state.settings.cumulativeSaveCount = 9999;
-  state.settings.currentGameSaveCount = 9998;
-  state.settings.saveFileGeneration = 0x80000000u;
+  state.settings.cumulative_save_count = 9999;
+  state.settings.current_game_save_count = 9998;
+  state.settings.save_file_generation = 0x80000000u;
 }
 
 void SetAshley(Save::Snapshot& state) {
@@ -87,14 +87,14 @@ void SetEquipment(Save::Snapshot& state) {
 void SetProgress(Save::Snapshot& state) {
   state.storage.misc[255].id = 383;
   state.storage.misc[255].count = static_cast<char>(255);
-  state.visits.roomFlags[15] = std::bit_cast<std::int32_t>(0x80000000u);
-  state.visits.areaFlags[1] = std::bit_cast<std::int32_t>(0x80000000u);
-  state.arts.artsLearned[11] = 255;
-  state.arts.kills.weaponCategoryKills[9] = 65535;
-  state.score.bossTimeTrialScores[7][2].time = 0xFFFFFF;
-  state.score.bossTimeTrialScores[7][2].round = 127;
-  state.score.bossTimeTrialScores[7][2].difficulty = 1;
-  state.score.enemyKillFlags[25] = std::bit_cast<std::int32_t>(0x80000000u);
+  state.visits.room_flags[15] = std::bit_cast<std::int32_t>(0x80000000u);
+  state.visits.area_flags[1] = std::bit_cast<std::int32_t>(0x80000000u);
+  state.arts.arts_learned[11] = 255;
+  state.arts.kills.weapon_category_kills[9] = 65535;
+  state.score.boss_time_trial_scores[7][2].time = 0xFFFFFF;
+  state.score.boss_time_trial_scores[7][2].round = 127;
+  state.score.boss_time_trial_scores[7][2].difficulty = 1;
+  state.score.enemy_kill_flags[25] = std::bit_cast<std::int32_t>(0x80000000u);
   state.room_cache_slot = 3;
   state.room_cache[3].zone = 9;
   state.room_cache[3].map = 20;
@@ -487,14 +487,14 @@ TEST_CASE("Native save schema omits padding and transient load markers",
   auto original = SampleDocument();
   original.state.ashley.is_pending = 1;
   original.state.inventory.blades[15].reserved11 = 123;
-  original.state.score.reserved10 = 0x12345678;
+  original.state.score.reserved_10 = 0x12345678;
   const auto encoded = Save::Encode(original);
   REQUIRE(encoded.has_value());
   const auto decoded = Save::Decode(*encoded);
   REQUIRE(decoded.has_value());
   CHECK(decoded->state.ashley.is_pending == 0);
   CHECK(decoded->state.inventory.blades[15].reserved11 == 0);
-  CHECK(decoded->state.score.reserved10 == 0);
+  CHECK(decoded->state.score.reserved_10 == 0);
 }
 
 TEST_CASE("Native save generation location and time domains are bounded",
@@ -551,7 +551,7 @@ TEST_CASE("Native document comparison preserves canonical wire equality",
     case 6:
       current.state.ashley.is_pending = 1;
       current.state.inventory.blades[15].reserved11 = 123;
-      current.state.score.reserved10 = 0x12345678;
+      current.state.score.reserved_10 = 0x12345678;
       break;
     default:
       FAIL("Unknown semantic comparison case");

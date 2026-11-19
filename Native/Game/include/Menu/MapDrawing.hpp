@@ -324,7 +324,7 @@ class ControlsHost {
 
   // Moves text box 0's y and y indent by `delta` when it exists.
   virtual void ShiftTextBox(std::int32_t delta) = 0;
-  // Whether the scene's map is jammed (mapPaling); none refuses the frame.
+  // Whether the scene's map is jammed (map_paling); none refuses the frame.
   [[nodiscard]] virtual std::optional<bool> IsJammed() = 0;
   virtual void DrawButton(ControlButton button, std::int32_t x,
                           std::int32_t y) = 0;

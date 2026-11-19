@@ -47,8 +47,8 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Render/PageSpace.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 #include "TestSupport/TimeAttackDrawRecorder.hpp"
 
 namespace game_clear_live_tests {
@@ -155,7 +155,7 @@ class Fixture {
       VS::Audio::Mixer::commandParams, VS::Audio::Mixer::voiceScheduler,
       VS::Audio::Mixer::voiceOwners, VS::Audio::SoundEffects::channels,
       VS::Audio::Cutscene::streamState, VS::Audio::Samples::musicSampleBankIds,
-      VS::State::scoreData, VS::State::stateFlags, State_roomVisitProgress,
+      VS::State::scoreData, VS::State::stateFlags, VS::State::roomVisitProgress,
       Battle_characterState, Battle_unusedSubmenuState,
       VS::Input::buttonsPressed, Content_discRequestSlots,
       Content_discRequestCounts, Content_discDriveState,
@@ -198,7 +198,7 @@ class Fixture {
     VS::Input::buttonsPressed = 0;
     VS::State::scoreData = {};
     VS::State::stateFlags = {};
-    State_roomVisitProgress = {};
+    VS::State::roomVisitProgress = {};
     actor.stats = &stats;
     Battle_characterState = &actor;
     InitializeMusic();

@@ -33,8 +33,8 @@
 #include "Legacy/Psx.h"
 #include "Menu/Setup/Assembly.hpp"
 #include "Menu/Setup/SetupLive.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 #include "Title/NewGame.hpp"
 
 namespace {
@@ -45,8 +45,8 @@ struct ProfileFixture {
   decltype(VS::Items::inventory) saved_inventory = VS::Items::inventory;
   decltype(VS::Items::inventoryIndices) saved_indices =
       VS::Items::inventoryIndices;
-  decltype(std::to_array(State_learnedActionFlags)) saved_learned =
-      std::to_array(State_learnedActionFlags);
+  decltype(std::to_array(VS::State::learnedActionFlags)) saved_learned =
+      std::to_array(VS::State::learnedActionFlags);
   decltype(std::to_array(Battle_actionDefinitions)) saved_actions =
       std::to_array(Battle_actionDefinitions);
   decltype(std::to_array(Battle_chainAbilityActionIds)) saved_chain =
@@ -61,13 +61,13 @@ struct ProfileFixture {
 
   ProfileFixture() {
     VS::Input::settings = {};
-    VS::Input::settings.menuFlags = 0x2D8;
-    VS::State::stateFlags.introState = 0;
+    VS::Input::settings.menu_flags = 0x2D8;
+    VS::State::stateFlags.intro_state = 0;
     VS::Items::inventory = {};
     VS::Items::inventory.weapons[0].isEquipped = 1;
     VS::Items::inventory.weapons[0].blade = 1;
     VS::Items::inventory.blades[0].category = 3;
-    std::fill_n(State_learnedActionFlags, saved_learned.size(), 0);
+    std::fill_n(VS::State::learnedActionFlags, saved_learned.size(), 0);
     const std::array<char, 3> chain{22, 23, 24}, defense{40, 41, 42};
     std::copy(chain.begin(), chain.end(), Battle_chainAbilityActionIds);
     std::copy(defense.begin(), defense.end(), Battle_defenseAbilityActionIds);
@@ -84,7 +84,7 @@ struct ProfileFixture {
     VS::Items::inventory = saved_inventory;
     VS::Items::inventoryIndices = saved_indices;
     std::copy(saved_learned.begin(), saved_learned.end(),
-              State_learnedActionFlags);
+              VS::State::learnedActionFlags);
     std::copy(saved_actions.begin(), saved_actions.end(),
               Battle_actionDefinitions);
     std::copy(saved_chain.begin(), saved_chain.end(),
@@ -193,10 +193,10 @@ TEST_CASE("Prologue Lab profiles preserve normal starting restrictions",
   ProfileFixture fixture;
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPrologue);
-  CHECK(VS::Input::settings.menuFlags == 0x2D8);
-  CHECK(VS::State::stateFlags.introState == 0);
-  CHECK(std::all_of(std::begin(State_learnedActionFlags),
-                    std::end(State_learnedActionFlags),
+  CHECK(VS::Input::settings.menu_flags == 0x2D8);
+  CHECK(VS::State::stateFlags.intro_state == 0);
+  CHECK(std::all_of(std::begin(VS::State::learnedActionFlags),
+                    std::end(VS::State::learnedActionFlags),
                     [](char value) { return value == 0; }));
 }
 
@@ -205,9 +205,9 @@ TEST_CASE("Post-prologue Lab profiles enable original Setup and Score gates",
   ProfileFixture fixture;
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kPostPrologue);
-  CHECK(VS::Input::settings.menuFlags == 0x3F8);
-  CHECK(VS::State::stateFlags.introState == 3);
-  CHECK(VS::Input::settings.mappedChainAbilities[0] == 0);
+  CHECK(VS::Input::settings.menu_flags == 0x3F8);
+  CHECK(VS::State::stateFlags.intro_state == 3);
+  CHECK(VS::Input::settings.mapped_chain_abilities[0] == 0);
 }
 
 TEST_CASE("Post-Minotaur Lab profiles grant only representative native actions",
@@ -221,8 +221,8 @@ TEST_CASE("Post-Minotaur Lab profiles grant only representative native actions",
   CHECK(Battle_actionDefinitions[97].unlocked == 1);
   CHECK(Battle_actionDefinitions[192].unlocked == 1);
   CHECK(Battle_actionDefinitions[193].unlocked == 0);
-  CHECK(VS::Input::settings.mappedChainAbilities[0] == 22);
-  CHECK(VS::Input::settings.mappedDefenseAbilities[2] == 42);
+  CHECK(VS::Input::settings.mapped_chain_abilities[0] == 22);
+  CHECK(VS::Input::settings.mapped_defense_abilities[2] == 42);
 }
 
 TEST_CASE("Encounter presets persist Ashley profiles and accept older presets",
@@ -270,10 +270,10 @@ TEST_CASE("All-spells profile preserves inventory equipment and resources",
   CHECK(std::memcmp(&indices, &VS::Items::inventoryIndices, sizeof indices) ==
         0);
   CHECK(std::memcmp(&stats, &actor.stats, sizeof stats) == 0);
-  CHECK(VS::Input::settings.mappedChainAbilities[0] == 0);
-  CHECK(VS::Input::settings.mappedDefenseAbilities[0] == 0);
-  CHECK(VS::Input::settings.menuFlags == 0x3F8);
-  CHECK(VS::State::stateFlags.introState == 3);
+  CHECK(VS::Input::settings.mapped_chain_abilities[0] == 0);
+  CHECK(VS::Input::settings.mapped_defense_abilities[0] == 0);
+  CHECK(VS::Input::settings.menu_flags == 0x3F8);
+  CHECK(VS::State::stateFlags.intro_state == 3);
 }
 
 TEST_CASE("All-spells profile supports repeat entry and saved presets",
@@ -283,10 +283,10 @@ TEST_CASE("All-spells profile supports repeat entry and saved presets",
   BindFullSpellClasses(classes);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells);
-  const auto learned = std::to_array(State_learnedActionFlags);
+  const auto learned = std::to_array(VS::State::learnedActionFlags);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllSpells);
-  CHECK(std::to_array(State_learnedActionFlags) == learned);
+  CHECK(std::to_array(VS::State::learnedActionFlags) == learned);
   VS::Game::EncounterSetup setup;
   setup.profile = VS::Game::EncounterProfile::kAllSpells;
   const auto json = VS::combat_lab::EncodeSetup(setup);
@@ -317,10 +317,10 @@ TEST_CASE("All-abilities profile grants the original 28 abilities only",
           expected.contains(action));
   }
   for (unsigned slot = 0; slot < 3; ++slot) {
-    CHECK(VS::Input::settings.mappedChainAbilities[slot] ==
-          Battle_chainAbilityActionIds[slot]);
-    CHECK(VS::Input::settings.mappedDefenseAbilities[slot] ==
-          Battle_defenseAbilityActionIds[slot]);
+    CHECK(VS::Input::settings.mapped_chain_abilities[slot] ==
+          static_cast<std::uint8_t>(Battle_chainAbilityActionIds[slot]));
+    CHECK(VS::Input::settings.mapped_defense_abilities[slot] ==
+          static_cast<std::uint8_t>(Battle_defenseAbilityActionIds[slot]));
   }
 }
 
@@ -332,14 +332,14 @@ TEST_CASE("Ability profiles preserve resources and story progression",
   StatFixture actor;
   BindFullBattleAbilities();
   BindBreakArts();
-  VS::State::stateFlags.opaqueB5 = 1;
-  VS::State::stateFlags.magicUsed = 1;
-  VS::State::artsStatus.artsLearned[0] = 2;
-  VS::State::artsStatus.kills.totalKills = 321;
-  VS::State::artsStatus.kills.weaponCategoryKills[0] = 7;
-  VS::State::artsStatus.kills.battleAbilitiesUnlocked = 4;
+  VS::State::stateFlags.opaque_b5 = 1;
+  VS::State::stateFlags.magic_used = 1;
+  VS::State::artsStatus.arts_learned[0] = 2;
+  VS::State::artsStatus.kills.total_kills = 321;
+  VS::State::artsStatus.kills.weapon_category_kills[0] = 7;
+  VS::State::artsStatus.kills.battle_abilities_unlocked = 4;
   auto expected_flags = VS::State::stateFlags;
-  expected_flags.introState = 3;
+  expected_flags.intro_state = 3;
   const auto arts = VS::State::artsStatus;
   const auto inventory = VS::Items::inventory;
   const auto indices = VS::Items::inventoryIndices;
@@ -352,7 +352,7 @@ TEST_CASE("Ability profiles preserve resources and story progression",
   CHECK(std::memcmp(&indices, &VS::Items::inventoryIndices, sizeof indices) ==
         0);
   CHECK(std::memcmp(&stats, &actor.stats, sizeof stats) == 0);
-  CHECK(VS::Input::settings.menuFlags == 0x3F8);
+  CHECK(VS::Input::settings.menu_flags == 0x3F8);
 }
 
 TEST_CASE("All-abilities profile supports repeat entry and saved presets",
@@ -361,10 +361,10 @@ TEST_CASE("All-abilities profile supports repeat entry and saved presets",
   BindFullBattleAbilities();
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllAbilities);
-  const auto learned = std::to_array(State_learnedActionFlags);
+  const auto learned = std::to_array(VS::State::learnedActionFlags);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllAbilities);
-  CHECK(std::to_array(State_learnedActionFlags) == learned);
+  CHECK(std::to_array(VS::State::learnedActionFlags) == learned);
   VS::Game::EncounterSetup setup;
   setup.profile = VS::Game::EncounterProfile::kAllAbilities;
   const auto json = VS::combat_lab::EncodeSetup(setup);
@@ -394,10 +394,10 @@ TEST_CASE("All-Break-Arts profile grants all forty original arts only",
     CHECK(Battle_actionDefinitions[action].unlocked ==
           (action >= 184 && action < 224));
   }
-  const auto learned = std::to_array(State_learnedActionFlags);
+  const auto learned = std::to_array(VS::State::learnedActionFlags);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllBreakArts);
-  CHECK(std::to_array(State_learnedActionFlags) == learned);
+  CHECK(std::to_array(VS::State::learnedActionFlags) == learned);
   VS::Game::EncounterSetup setup;
   setup.profile = VS::Game::EncounterProfile::kAllBreakArts;
   const auto json = VS::combat_lab::EncodeSetup(setup);
@@ -418,15 +418,15 @@ TEST_CASE("All-Break-Arts profile preserves existing ability mappings",
           "[combat][profile][break-arts]") {
   ProfileFixture fixture;
   BindBreakArts();
-  VS::Input::settings.mappedChainAbilities[0] = 22;
-  VS::Input::settings.mappedDefenseAbilities[0] = 40;
-  const auto chain = std::to_array(VS::Input::settings.mappedChainAbilities);
+  VS::Input::settings.mapped_chain_abilities[0] = 22;
+  VS::Input::settings.mapped_defense_abilities[0] = 40;
+  const auto chain = std::to_array(VS::Input::settings.mapped_chain_abilities);
   const auto defense =
-      std::to_array(VS::Input::settings.mappedDefenseAbilities);
+      std::to_array(VS::Input::settings.mapped_defense_abilities);
   VS::Game::InitializeEncounterPlayerProfile(
       VS::Game::EncounterProfile::kAllBreakArts);
-  CHECK(std::to_array(VS::Input::settings.mappedChainAbilities) == chain);
-  CHECK(std::to_array(VS::Input::settings.mappedDefenseAbilities) == defense);
+  CHECK(std::to_array(VS::Input::settings.mapped_chain_abilities) == chain);
+  CHECK(std::to_array(VS::Input::settings.mapped_defense_abilities) == defense);
 }
 
 TEST_CASE(
@@ -434,7 +434,7 @@ TEST_CASE(
     "[combat][profile][items]") {
   ProfileFixture fixture;
   const auto equipment = VS::Items::inventory;
-  const auto learned = std::to_array(State_learnedActionFlags);
+  const auto learned = std::to_array(VS::State::learnedActionFlags);
   std::set<int> supplied;
   for (const auto profile : {VS::Game::EncounterProfile::kAllItemsA,
                              VS::Game::EncounterProfile::kAllItemsB}) {
@@ -442,9 +442,9 @@ TEST_CASE(
     CHECK(std::size(VS::Items::inventory.misc) == 64);
     CHECK(std::memcmp(&equipment, &VS::Items::inventory,
                       offsetof(Items_Inventory, misc)) == 0);
-    CHECK(std::to_array(State_learnedActionFlags) == learned);
-    CHECK(VS::Input::settings.menuFlags == 0x3F8);
-    CHECK(VS::State::stateFlags.introState == 3);
+    CHECK(std::to_array(VS::State::learnedActionFlags) == learned);
+    CHECK(VS::Input::settings.menu_flags == 0x3F8);
+    CHECK(VS::State::stateFlags.intro_state == 3);
     CAPTURE(profile);
     CheckStockedSlots(supplied);
     CheckUnusedSlots();

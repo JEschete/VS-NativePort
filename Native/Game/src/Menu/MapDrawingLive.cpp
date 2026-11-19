@@ -37,13 +37,13 @@
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::map {
 namespace {
 constexpr std::size_t kWordBytes = 4;
 constexpr std::size_t kDataOffset = 4;
-// Menu_Map_kSceneArmFiles' entries and the state flags' mapPaling bytes.
+// Menu_Map_kSceneArmFiles' entries and the state flags' map_paling bytes.
 constexpr int kSceneArmFileCount = 32;
 constexpr int kMapPalingScenes = 32;
 // The ordering-table words the original links into.
@@ -80,7 +80,8 @@ static_assert(static_cast<int>(ControlButton::kR2) ==
               Menu_Framework_ButtonId_R2);
 static_assert(static_cast<int>(ControlButton::kCircle) ==
               Menu_Framework_ButtonId_Circle);
-static_assert(std::size(State_StateFlags{}.mapPaling) == kMapPalingScenes);
+static_assert(std::size(VS::State::StateFlags{}.map_paling) ==
+              kMapPalingScenes);
 
 std::uint64_t refused_calls = 0;
 int legend_offset = 0;
@@ -442,7 +443,7 @@ class LiveControlsHost final : public ControlsHost {
       Refuse(kCall, "scene outside the map paling flags");
       return std::nullopt;
     }
-    return VS::State::stateFlags.mapPaling[Menu_Map_currentScene] != 0;
+    return VS::State::stateFlags.map_paling[Menu_Map_currentScene] != 0;
   }
 
   void DrawButton(ControlButton button, std::int32_t x,

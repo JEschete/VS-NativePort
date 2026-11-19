@@ -105,7 +105,7 @@
 #include "State/GameClockLive.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 // decomp: _zoneContext (_zoneContext@BATTLE/BATTLE.PRG)
@@ -571,11 +571,11 @@ class LiveSections : public Host {
   }
 
   [[nodiscard]] int PendingEnteredDoor() const override {
-    return static_cast<std::uint8_t>(VS::State::stateFlags.doorEntered);
+    return static_cast<std::uint8_t>(VS::State::stateFlags.door_entered);
   }
 
   void ClearPendingEnteredDoor() override {
-    VS::State::stateFlags.doorEntered = 0;
+    VS::State::stateFlags.door_entered = 0;
   }
 
   [[nodiscard]] int EnteredDoorId() const override {

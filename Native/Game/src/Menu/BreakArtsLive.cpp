@@ -28,7 +28,7 @@
 #include "Menu/Framework/FrameworkLiveState.hpp"
 #include "Menu/Framework/Menus.h"
 #include "Render/GameFontLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Menu::break_arts {
 namespace {
@@ -116,18 +116,18 @@ class LiveHost final : public Host {
   }
   std::optional<int> ArtsLearned(int category) override {
     if (category < 0 || static_cast<std::size_t>(category) >=
-                            std::size(VS::State::artsStatus.artsLearned)) {
+                            std::size(VS::State::artsStatus.arts_learned)) {
       return std::nullopt;
     }
-    return VS::State::artsStatus.artsLearned[category];
+    return VS::State::artsStatus.arts_learned[category];
   }
   std::optional<int> CategoryKills(int category) override {
     if (category < 0 ||
         static_cast<std::size_t>(category) >=
-            std::size(VS::State::artsStatus.kills.weaponCategoryKills)) {
+            std::size(VS::State::artsStatus.kills.weapon_category_kills)) {
       return std::nullopt;
     }
-    return VS::State::artsStatus.kills.weaponCategoryKills[category];
+    return VS::State::artsStatus.kills.weapon_category_kills[category];
   }
   std::optional<int> PointRequirement(int category, int art_index) override {
     if (category < 0 ||
@@ -141,10 +141,10 @@ class LiveHost final : public Host {
   }
 
   std::uint8_t CursorMemory() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void SetCursorMemory(std::uint8_t value) override {
-    VS::Input::settings.cursorMemory = ToStorageChar(value);
+    VS::Input::settings.cursor_memory = ToStorageChar(value);
   }
   std::uint32_t ActionRestrictions() override {
     return static_cast<std::uint32_t>(VS::Menu::Framework::actionRestrictions);

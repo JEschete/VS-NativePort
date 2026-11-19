@@ -29,7 +29,7 @@
 #include "Menu/EquipmentDetailControllersLiveFixture.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace {
 namespace abilities = VS::Menu::BattleAbilities;
@@ -87,9 +87,9 @@ struct LiveFoundationFixture : equipment_detail_tests::LiveFixture {
     Battle_characterState = &actor;
     actor.equippedWeaponCategory = 1;
     VS::State::artsStatus = {};
-    VS::State::artsStatus.kills.weaponCategoryKills[1] = 65535;
-    VS::State::artsStatus.kills.totalKills = 65535;
-    VS::Input::settings.cursorMemory = 0;
+    VS::State::artsStatus.kills.weapon_category_kills[1] = 65535;
+    VS::State::artsStatus.kills.total_kills = 65535;
+    VS::Input::settings.cursor_memory = 0;
     VS::Menu::Framework::menuMemory = {};
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::rowTypeBuf = types.data();
@@ -204,12 +204,12 @@ TEST_CASE("MENU2 reload restores unlock counts and phase without progression",
   LiveFoundationFixture fixture;
   menu_overlay_tests::Load load(3, {VS_MENU2_PRG_LBA, VS_MENU2_PRG_SIZE});
   REQUIRE(abilities::LiveUpdateAbilityUnlock(1) == 0);
-  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 1);
+  CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 1);
   CHECK(load.Complete() == 1);
   REQUIRE(abilities::LiveUpdateAbilityUnlock(0) == 0);
   Menu_textBoxes[7].flags.done = 1;
   CHECK(abilities::LiveUpdateAbilityUnlock(0) == 1);
-  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 1);
+  CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 1);
 }
 
 TEST_CASE(
@@ -254,11 +254,11 @@ TEST_CASE("MENU2 reload restarts learned lists without releasing heap owners",
   REQUIRE(Menu_BattleAbilities_abilityCount == 1);
   auto* owner = Menu_BattleAbilities_abilityText;
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
-  VS::Input::settings.mappedChainAbilities[0] = kAction;
+  VS::Input::settings.mapped_chain_abilities[0] = kAction;
   VS::Boot::ResetMenu2Statics();
   CHECK(Menu_BattleAbilities_unlockedChainAbilities[0] == 0);
   CHECK(Menu_BattleAbilities_unlockedDefenseAbilities[0] == 0);
-  CHECK(VS::Input::settings.mappedChainAbilities[0] == kAction);
+  CHECK(VS::Input::settings.mapped_chain_abilities[0] == kAction);
   REQUIRE(VS::Core::Memory::LivePayloadCapacity(owner).has_value());
   VS::Core::Memory::FreeLiveFromHighEnd(owner);
   REQUIRE(fixture.OpenList(defense) == 0);

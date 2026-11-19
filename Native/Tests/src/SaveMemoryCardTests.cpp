@@ -1786,7 +1786,7 @@ TEST_CASE("Live packaging refuses a save without the save menu's icons",
   VS::Title::memoryCardUiResource = workspace.data();
   VS::Title::saveFileSummaries = records.data();
   Save_MemoryCard_uiResources = nullptr;
-  const State_Settings settings = VS::Input::settings;
+  const VS::Input::Settings settings = VS::Input::settings;
   Files::PackageLiveGameSave(1);
   Files::PackageLiveClearSave(1);
   CHECK(AllEqual(IncomingOf(workspace), std::byte{0x5A}));

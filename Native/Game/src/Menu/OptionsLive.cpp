@@ -12,6 +12,7 @@
 #include "Core/Log.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.hpp"
 #include "Menu/Framework/FrameworkLive.hpp"
@@ -20,31 +21,17 @@
 #include "Menu/OptionsLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
-#include "State/Settings.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 // decomp: _menuStrings (src/MENU/MENU8.PRG/88.c)
 u_short VS::Menu::Options::menuStrings[VS::Menu::Options::kMenuStringCount];
 
 namespace VS::Menu::Options {
 namespace {
-// vs_main_settings_t (main.h:163): the flag byte, then cursorMemory; the
-// one-byte settings follow slotState.
-constexpr std::size_t kSettingsBytes = 0x20;
-constexpr std::size_t kInformationOffset = 8;
-constexpr std::size_t kSimpleMapOffset = 9;
-constexpr std::size_t kMonoSoundOffset = 10;
-constexpr std::size_t kVibrationOnOffset = 11;
-static_assert(sizeof(State_Settings) == kSettingsBytes);
-static_assert(offsetof(State_Settings, cursorMemory) == 1);
-static_assert(offsetof(State_Settings, information) == kInformationOffset);
-static_assert(offsetof(State_Settings, simpleMap) == kSimpleMapOffset);
-static_assert(offsetof(State_Settings, monoSound) == kMonoSoundOffset);
-static_assert(offsetof(State_Settings, vibrationOn) == kVibrationOnOffset);
 static_assert(sizeof(menuStrings) ==
               kMenuStringHalfwords * sizeof(std::uint16_t));
 
-// The flag byte's bits (the bitfields above cursorMemory).
+// The bits of Settings' first byte: mode_flags bit 3 and the display flags.
 constexpr std::uint8_t kPuzzleModeOffBit = 0x08;
 constexpr std::uint8_t kAbilityTimingBit = 0x20;
 constexpr std::uint8_t kWeaponStatusBit = 0x40;
@@ -117,19 +104,15 @@ class LiveHost final : public Host {
   }
   Settings LoadSettings() override {
     const std::uint8_t flags = FlagByte();
-    return {
-        .puzzle_mode_off = (flags & kPuzzleModeOffBit) != 0,
-        .ability_timing = (flags & kAbilityTimingBit) != 0,
-        .weapon_status = (flags & kWeaponStatusBit) != 0,
-        .armor_status = (flags & kArmorStatusBit) != 0,
-        .cursor_memory =
-            static_cast<std::uint8_t>(VS::Input::settings.cursorMemory),
-        .information =
-            static_cast<std::uint8_t>(VS::Input::settings.information),
-        .simple_map = static_cast<std::uint8_t>(VS::Input::settings.simpleMap),
-        .mono_sound = static_cast<std::uint8_t>(VS::Input::settings.monoSound),
-        .vibration_on =
-            static_cast<std::uint8_t>(VS::Input::settings.vibrationOn)};
+    return {.puzzle_mode_off = (flags & kPuzzleModeOffBit) != 0,
+            .ability_timing = (flags & kAbilityTimingBit) != 0,
+            .weapon_status = (flags & kWeaponStatusBit) != 0,
+            .armor_status = (flags & kArmorStatusBit) != 0,
+            .cursor_memory = VS::Input::settings.cursor_memory,
+            .information = VS::Input::settings.information,
+            .simple_map = VS::Input::settings.simple_map,
+            .mono_sound = VS::Input::settings.mono_sound,
+            .vibration_on = VS::Input::settings.vibration_on};
   }
   void StoreSettings(const Settings& settings) override {
     std::uint8_t flags = FlagByte();
@@ -138,18 +121,17 @@ class LiveHost final : public Host {
     SetFlag(flags, kWeaponStatusBit, settings.weapon_status);
     SetFlag(flags, kArmorStatusBit, settings.armor_status);
     std::memcpy(&VS::Input::settings, &flags, sizeof flags);
-    VS::Input::settings.cursorMemory =
-        static_cast<char>(settings.cursor_memory);
-    VS::Input::settings.information = static_cast<char>(settings.information);
-    VS::Input::settings.simpleMap = static_cast<char>(settings.simple_map);
-    VS::Input::settings.monoSound = static_cast<char>(settings.mono_sound);
-    VS::Input::settings.vibrationOn = static_cast<char>(settings.vibration_on);
+    VS::Input::settings.cursor_memory = settings.cursor_memory;
+    VS::Input::settings.information = settings.information;
+    VS::Input::settings.simple_map = settings.simple_map;
+    VS::Input::settings.mono_sound = settings.mono_sound;
+    VS::Input::settings.vibration_on = settings.vibration_on;
   }
   bool PuzzleModeDisabled() override {
-    return VS::State::stateFlags.puzzleModeDisabled != 0;
+    return VS::State::stateFlags.puzzle_mode_disabled != 0;
   }
   void SetPuzzleMode(bool enabled) override {
-    VS::State::stateFlags.puzzleMode = enabled ? 1 : 0;
+    VS::State::stateFlags.puzzle_mode = enabled ? 1 : 0;
   }
   void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
   void PlayVibrationPreset(int preset) override {

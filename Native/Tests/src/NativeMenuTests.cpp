@@ -42,9 +42,9 @@
 #include "State/Ashley.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/RoomMemory.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "Title/SaveFiles.hpp"
 
 namespace {
@@ -62,7 +62,7 @@ void CountSound(VS::Audio::CommandParams* parameters) {
 
 struct MenuFixture {
   fs::path root;
-  State_Settings settings = VS::Input::settings;
+  VS::Input::Settings settings = VS::Input::settings;
   int active = VS::Boot::isGameplayActive;
   decltype(VS::Input::buttonsPressed) pressed = VS::Input::buttonsPressed;
   int repeat = VS::Input::buttonRepeat;
@@ -422,12 +422,12 @@ void CheckFirstTwoFiles(std::array<Save::FileStatus, 2> expected) {
 void CheckFailedSave(const MenuFixture& fixture) {
   REQUIRE(Text(VS::Menu::Files::memoryCardMessage) == "Save failed - see log");
   CHECK(fixture.sounds[8] == 0);
-  CHECK(VS::Input::settings.cumulativeSaveCount ==
-        fixture.settings.cumulativeSaveCount);
-  CHECK(VS::Input::settings.currentGameSaveCount ==
-        fixture.settings.currentGameSaveCount);
-  CHECK(VS::Input::settings.saveFileGeneration ==
-        fixture.settings.saveFileGeneration);
+  CHECK(VS::Input::settings.cumulative_save_count ==
+        fixture.settings.cumulative_save_count);
+  CHECK(VS::Input::settings.current_game_save_count ==
+        fixture.settings.current_game_save_count);
+  CHECK(VS::Input::settings.save_file_generation ==
+        fixture.settings.save_file_generation);
   CHECK_FALSE(fs::exists(fixture.root / "slot00.vssave"));
 }
 }  // namespace
@@ -479,10 +479,12 @@ TEST_CASE("Native Save cannot bypass production save-point eligibility",
   ConfirmSave();
   CHECK(Text(VS::Menu::Files::memoryCardMessage) == "Save failed - see log");
   CHECK(!fs::exists(fixture.root / "slot00.vssave"));
-  CHECK(VS::Input::settings.cumulativeSaveCount == before.cumulativeSaveCount);
-  CHECK(VS::Input::settings.currentGameSaveCount ==
-        before.currentGameSaveCount);
-  CHECK(VS::Input::settings.saveFileGeneration == before.saveFileGeneration);
+  CHECK(VS::Input::settings.cumulative_save_count ==
+        before.cumulative_save_count);
+  CHECK(VS::Input::settings.current_game_save_count ==
+        before.current_game_save_count);
+  CHECK(VS::Input::settings.save_file_generation ==
+        before.save_file_generation);
 }
 
 TEST_CASE("Native picker never replaces an invalid existing file",
@@ -522,7 +524,7 @@ TEST_CASE("Container selection owns typed storage beyond picker reentry",
   REQUIRE(VS::Game::Save::SelectContainer(0) == 1);
   auto* bank = VS::Game::Save::ContainerData();
   REQUIRE(bank != nullptr);
-  CHECK(VS::Input::settings.containerEmpty == 1);
+  CHECK(VS::Input::settings.container_empty == 1);
   bank->misc[255].id = 308;
   bank->misc[255].count = 2;
   REQUIRE(VS::Menu::UpdateLiveDataSaveMenu(2) == 0);
@@ -599,13 +601,13 @@ struct ClearInputsFixture {
   decltype(VS::Items::inventoryIndices) order = VS::Items::inventoryIndices;
   VS::State::AshleySnapshot ashley = VS::State::ashleySnapshot;
   Field_MpdDoorRecord entry = VS::State::savedEntryDoor;
-  State_RoomVisitFlags visits = State_roomVisitProgress;
-  State_ScoreData score = VS::State::scoreData;
+  VS::State::RoomVisitFlags visits = VS::State::roomVisitProgress;
+  VS::State::ScoreData score = VS::State::scoreData;
   decltype(VS::State::playTime) time = VS::State::playTime;
   decltype(std::to_array(VS::State::recentRoomEnemyStates)) caches =
       std::to_array(VS::State::recentRoomEnemyStates);
-  decltype(std::to_array(State_learnedActionFlags)) learned =
-      std::to_array(State_learnedActionFlags);
+  decltype(std::to_array(VS::State::learnedActionFlags)) learned =
+      std::to_array(VS::State::learnedActionFlags);
   int cache_slot = VS::State::currentRoomStateSlot;
   int clear_pending = VS::Boot::isClearSavePending;
 
@@ -621,18 +623,18 @@ struct ClearInputsFixture {
     VS::State::savedEntryDoor = {};
     VS::State::savedEntryDoor.entryTileX = 4;
     VS::State::savedEntryDoor.entryTileZ = 2;
-    State_roomVisitProgress = {};
+    VS::State::roomVisitProgress = {};
     VS::State::scoreData = {};
     VS::State::playTime = {.frames = 0, .seconds = 0, .minutes = 0, .hours = 1};
     VS::State::currentRoomStateSlot = 0;
     std::fill_n(VS::State::recentRoomEnemyStates, caches.size(),
                 VS::State::RoomEnemyStates{});
-    std::fill_n(State_learnedActionFlags, learned.size(), 0);
-    State_learnedActionFlags[0] = static_cast<char>(0x80);
+    std::fill_n(VS::State::learnedActionFlags, learned.size(), 0);
+    VS::State::learnedActionFlags[0] = static_cast<char>(0x80);
     VS::Input::settings = {};
-    VS::Input::settings.currentGameSaveCount = 7;
-    VS::Input::settings.cumulativeSaveCount = 19;
-    VS::Input::settings.saveFileGeneration = 3;
+    VS::Input::settings.current_game_save_count = 7;
+    VS::Input::settings.cumulative_save_count = 19;
+    VS::Input::settings.save_file_generation = 3;
     VS::Ending::LiveCommitClearProgress();
     VS::Boot::isClearSavePending = 1;
     VS::Game::Save::StageClearGame();
@@ -645,11 +647,11 @@ struct ClearInputsFixture {
     VS::Items::inventoryIndices = order;
     VS::State::ashleySnapshot = ashley;
     VS::State::savedEntryDoor = entry;
-    State_roomVisitProgress = visits;
+    VS::State::roomVisitProgress = visits;
     VS::State::scoreData = score;
     VS::State::playTime = time;
     std::copy(caches.begin(), caches.end(), VS::State::recentRoomEnemyStates);
-    std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
+    std::copy(learned.begin(), learned.end(), VS::State::learnedActionFlags);
     VS::State::currentRoomStateSlot = cache_slot;
     VS::Boot::isClearSavePending = clear_pending;
   }
@@ -672,9 +674,9 @@ void ExecuteClearSave() {
 namespace {
 void CheckClearSaveProgress(const Save::Document& document) {
   CHECK(document.generation == 1);
-  CHECK(document.state.settings.cumulativeSaveCount == 20);
-  CHECK(document.state.settings.currentGameSaveCount == 0);
-  CHECK(document.state.settings.saveFileGeneration == 4);
+  CHECK(document.state.settings.cumulative_save_count == 20);
+  CHECK(document.state.settings.current_game_save_count == 0);
+  CHECK(document.state.settings.save_file_generation == 4);
   CHECK(document.state.script_flags[0] == 1);
 }
 
@@ -686,8 +688,8 @@ void CheckClearSaveCarryover(const Save::Document& document) {
 }
 
 void CheckClearSaveSession() {
-  CHECK(VS::Input::settings.cumulativeSaveCount == 20);
-  CHECK(VS::Input::settings.currentGameSaveCount == 0);
+  CHECK(VS::Input::settings.cumulative_save_count == 20);
+  CHECK(VS::Input::settings.current_game_save_count == 0);
   CHECK(VS::Menu::Files::dataNotSaved == 1);
   CHECK(Text(Screen().summaries[0].room_name.data()) == "CLEAR GAME");
 }
@@ -754,9 +756,9 @@ void CheckReplacedRecoveredFile(const fs::path& root) {
 void CheckFailedClearSaveChangedNothing(const fs::path& path,
                                         const std::string& bytes) {
   CHECK(Text(VS::Title::memoryCardMessage) == "Save failed - see log");
-  CHECK(VS::Input::settings.cumulativeSaveCount == 19);
-  CHECK(VS::Input::settings.currentGameSaveCount == 7);
-  CHECK(VS::Input::settings.saveFileGeneration == 3);
+  CHECK(VS::Input::settings.cumulative_save_count == 19);
+  CHECK(VS::Input::settings.current_game_save_count == 7);
+  CHECK(VS::Input::settings.save_file_generation == 3);
   CHECK(FileBytes(path) == bytes);
 }
 }  // namespace
@@ -793,8 +795,8 @@ TEST_CASE("Clear-save consent rejects changed content and reset releases input",
   Tick(VS::Menu::UpdateLiveSaveMenu);
   CHECK(Text(VS::Title::memoryCardMessage) == "File changed - select again");
   CHECK(FileBytes(fixture.root / "slot00.vssave") == original);
-  CHECK(VS::Input::settings.cumulativeSaveCount == 19);
-  CHECK(VS::Input::settings.currentGameSaveCount == 7);
+  CHECK(VS::Input::settings.cumulative_save_count == 19);
+  CHECK(VS::Input::settings.current_game_save_count == 7);
   Save::ResetFileMenuSession();
   REQUIRE(VS::Menu::UpdateLiveSaveMenu(1) == 0);
   CHECK(Text(VS::Title::memoryCardMessage) == "No ending clear save available");
@@ -851,7 +853,7 @@ TEST_CASE("Clear-save failure leaves counters and original bytes unchanged",
   ChooseYes(VS::Menu::UpdateLiveSaveMenu);
   Press(0, VS::Menu::UpdateLiveSaveMenu);
   CHECK(Text(VS::Title::memoryCardMessage) == "Save complete");
-  CHECK(VS::Input::settings.cumulativeSaveCount == 20);
+  CHECK(VS::Input::settings.cumulative_save_count == 20);
 }
 
 TEST_CASE(

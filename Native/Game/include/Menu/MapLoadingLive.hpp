@@ -1,7 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 // Binds MapLoading.hpp to the generated map menu: the area chooser over
-// State_roomVisitProgress.areaFlags, Menu_Map_sceneRowIdMap,
+// VS::State::roomVisitProgress.area_flags, Menu_Map_sceneRowIdMap,
 // Menu_Map_currentMapRow, Menu_Map_mapNames and the framework's menu rows;
 // the background over its own disc request and image; and the ARM scene map
 // over Battle_unusedSceneBuffer, Menu_Map_sceneCdQueueSlot and the Menu_Map_

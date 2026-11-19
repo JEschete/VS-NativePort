@@ -53,7 +53,7 @@
 #include "Render/Render.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Inventory {
 namespace {
@@ -184,7 +184,7 @@ void ReadRuntime(TerminalRuntime& runtime) {
                  static_cast<std::uint16_t>(use.executeAbility.halves[1]),
                  VS::Items::miscItemInvoked};
   runtime.cursor_memory_enabled =
-      static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+      static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   runtime.freeze_tabs =
       static_cast<std::uint8_t>(Menu_Inventory_freezeTabArrows);
   runtime.restrictions = VS::Menu::Framework::actionRestrictions;
@@ -220,7 +220,7 @@ void WriteRuntime(const TerminalRuntime& runtime) {
   use.executeAbility.halves[0] = static_cast<std::int16_t>(runtime.use.action);
   use.executeAbility.halves[1] = static_cast<std::int16_t>(runtime.use.item);
   VS::Items::miscItemInvoked = runtime.use.slot;
-  VS::Input::settings.cursorMemory =
+  VS::Input::settings.cursor_memory =
       static_cast<char>(runtime.cursor_memory_enabled);
   Menu_Inventory_freezeTabArrows = static_cast<char>(runtime.freeze_tabs);
   VS::Menu::Framework::actionRestrictions = runtime.restrictions;
@@ -560,7 +560,7 @@ class LiveTerminalHost final : public InventoryTerminalHost,
         [&] { return Battle::LiveActorActionRestrictionFlags(0, action); });
   }
   std::uint8_t IntroState() override {
-    return VS::State::stateFlags.introState;
+    return VS::State::stateFlags.intro_state;
   }
   bool EquipmentTarnished() override {
     if (Battle_characterState == nullptr ||

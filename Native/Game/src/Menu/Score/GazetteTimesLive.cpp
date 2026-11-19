@@ -21,7 +21,7 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Menu::Score {
 namespace {
@@ -89,7 +89,7 @@ TimeTrialScores Scores() {
   for (std::size_t trial = 0; trial < kTimeTrialCount; ++trial) {
     for (std::size_t place = 0; place < kTimeTrialPlaces; ++place) {
       const auto& original =
-          VS::State::scoreData.bossTimeTrialScores[trial][place];
+          VS::State::scoreData.boss_time_trial_scores[trial][place];
       TimeTrialRecord& record = scores[trial][place];
       if (original.time != kMissingPackedTime) {
         record.time = TimeTrialTime{

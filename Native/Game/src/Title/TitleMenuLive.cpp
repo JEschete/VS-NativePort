@@ -45,9 +45,9 @@
 #include "State/GameClockLive.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/RoomMemory.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 #include "Title/Credits.hpp"
 #include "Title/NewGame.hpp"
@@ -67,20 +67,10 @@ constexpr int kHalfwordShift = 16;
 constexpr std::uint32_t kHalfwordMask = 0xFFFF;
 // The 16-word primitive buffer DrawPrim reads the packets from.
 constexpr std::size_t kPacketWords = 16;
-// _initGameData clears the 0x440 bytes of unused state flags.
-constexpr std::size_t kStateFlagsBytes = 0x440;
-// The bosses' time-trial records: eight bosses, three ranks each.
-constexpr std::size_t kTrialBosses = 8;
-constexpr std::size_t kTrialRanks = 3;
 constexpr std::uint32_t kTrialTimeMask = 0xFFFFFF;
 
-static_assert(sizeof(State_StateFlags) == kStateFlagsBytes);
 static_assert(sizeof(VS::Title::initialLearnedActionBits) ==
-              sizeof(State_learnedActionFlags));
-static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
-              kTrialBosses);
-static_assert(std::size(VS::State::scoreData.bossTimeTrialScores[0]) ==
-              kTrialRanks);
+              sizeof(VS::State::learnedActionFlags));
 
 void Warn(std::string_view what) { VS::Core::LogWarn(kChannel, "{}", what); }
 
@@ -180,13 +170,13 @@ class LiveHost final : public Host {
   }
   PlayerSettings Settings() override {
     return {
-        .mono_sound = static_cast<std::uint8_t>(VS::Input::settings.monoSound),
+        .mono_sound = static_cast<std::uint8_t>(VS::Input::settings.mono_sound),
         .vibration_on =
-            static_cast<std::uint8_t>(VS::Input::settings.vibrationOn)};
+            static_cast<std::uint8_t>(VS::Input::settings.vibration_on)};
   }
   void SetSettings(PlayerSettings settings) override {
-    VS::Input::settings.monoSound = static_cast<char>(settings.mono_sound);
-    VS::Input::settings.vibrationOn = static_cast<char>(settings.vibration_on);
+    VS::Input::settings.mono_sound = static_cast<char>(settings.mono_sound);
+    VS::Input::settings.vibration_on = static_cast<char>(settings.vibration_on);
   }
   void ResetPlayerSettings() override { VS::Boot::InitializePlayerSettings(); }
   void SetMonoOutput(int mono) override { Audio::LiveSetMonoOutput(mono); }
@@ -392,12 +382,12 @@ class LiveHost final : public Host {
   }
   void RestoreInitialLearnedActions() override {
     Core::Memory::CopyLiveAlignedWords(
-        State_learnedActionFlags, VS::Title::initialLearnedActionBits,
+        VS::State::learnedActionFlags, VS::Title::initialLearnedActionBits,
         sizeof VS::Title::initialLearnedActionBits);
   }
   void ClearProgressRecords() override {
-    Core::Memory::ZeroLiveAlignedWords(&State_roomVisitProgress,
-                                       sizeof State_roomVisitProgress);
+    Core::Memory::ZeroLiveAlignedWords(&VS::State::roomVisitProgress,
+                                       sizeof VS::State::roomVisitProgress);
     Core::Memory::ZeroLiveAlignedWords(&VS::State::playTime,
                                        sizeof VS::State::playTime);
     Core::Memory::ZeroLiveAlignedWords(&VS::State::scoreData,
@@ -409,8 +399,8 @@ class LiveHost final : public Host {
                                        sizeof VS::State::artsStatus);
   }
   void SetBossTimeTrialScores(const TimeTrialScore& score) override {
-    for (auto& boss : VS::State::scoreData.bossTimeTrialScores) {
-      for (State_TrialScore& rank : boss) {
+    for (auto& boss : VS::State::scoreData.boss_time_trial_scores) {
+      for (VS::State::TrialScore& rank : boss) {
         rank.time = static_cast<std::uint32_t>(score.time) & kTrialTimeMask;
         rank.round = score.round;
         rank.difficulty = score.difficulty;
@@ -450,13 +440,13 @@ class LiveHost final : public Host {
   }
   void SetGameModes(const GameModes& modes) override {
     VS::State::stateFlags.difficulty = static_cast<char>(modes.difficulty);
-    VS::State::stateFlags.puzzleMode = static_cast<char>(modes.puzzle_mode);
+    VS::State::stateFlags.puzzle_mode = static_cast<char>(modes.puzzle_mode);
   }
   void ApplyExit(const ExitPlan& plan) override {
-    VS::State::stateFlags.opaqueC = static_cast<char>(plan.state_flag_0c);
-    VS::State::stateFlags.opaqueD = static_cast<char>(plan.state_flag_0d);
+    VS::State::stateFlags.opaque_c = static_cast<char>(plan.state_flag_0c);
+    VS::State::stateFlags.opaque_d = static_cast<char>(plan.state_flag_0d);
     if (plan.state_flag_0e.has_value()) {
-      VS::State::stateFlags.opaqueE = static_cast<char>(*plan.state_flag_0e);
+      VS::State::stateFlags.opaque_e = static_cast<char>(*plan.state_flag_0e);
     }
     if (plan.destination.has_value()) {
       VS::State::savedEntryDoor.destinationZoneId = plan.destination->zone;

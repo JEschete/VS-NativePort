@@ -126,7 +126,7 @@ constexpr std::int32_t kRandomByteBits = 8;
 constexpr std::uint32_t kFallbackSlotState = 0x17385CA9;
 constexpr std::uint16_t kMaxSaveCount = 9999;
 constexpr std::uint8_t kClearSaveLocation = 0x30;
-// State_Settings.menuFlags bit 5 and reserved0Bit0 bit 3.
+// VS::Input::Settings.menu_flags bit 5 and mode_flags bit 3.
 constexpr std::uint32_t kClearedMenuFlags = 0xFFDF;
 constexpr unsigned kPuzzleModeSettingShift = 3;
 

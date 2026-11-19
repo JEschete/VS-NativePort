@@ -9,7 +9,7 @@
 #include "Input/Buttons.hpp"
 #include "Input/Controller.hpp"
 #include "Input/Controllers.hpp"
-#include "State/Settings.h"
+#include "Input/Settings.hpp"
 
 namespace VS::Input {
 // main.c:8854-8859 _buttonHeldFrameCount: one counter per button word bit.
@@ -25,5 +25,5 @@ extern int previousButtons;
 // shoulder byte.
 extern std::uint32_t buttonsPressed;
 extern int buttonsState;
-extern State_Settings settings;
+extern VS::Input::Settings settings;
 }  // namespace VS::Input

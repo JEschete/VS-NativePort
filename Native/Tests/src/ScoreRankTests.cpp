@@ -22,8 +22,8 @@
 #include "Menu/Score/ScoreRankLive.hpp"
 #include "Menu/Score/ScoreScreen.h"
 #include "Render/Render.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace s = VS::Menu::Score;
@@ -104,7 +104,7 @@ class LiveGlobals {
   LiveGlobals()
       : scoredata_(VS::State::scoreData),
         flags_(VS::State::stateFlags),
-        rooms_(State_roomVisitProgress),
+        rooms_(VS::State::roomVisitProgress),
         settings_(VS::Input::settings),
         cursor_(Battle_unusedMenu9CursorMemory),
         position_(Menu_Score_cameraPositionBackup),
@@ -116,13 +116,13 @@ class LiveGlobals {
     std::memcpy(scratch_.data(), VS::Core::ScratchBase(), scratch_.size());
     VS::State::scoreData = {};
     VS::State::stateFlags = {};
-    State_roomVisitProgress = {};
+    VS::State::roomVisitProgress = {};
     std::memset(Field_countableRoomMask, 0, sizeof Field_countableRoomMask);
     for (Battle_ActionDefinition& action : Battle_actionDefinitions) {
       action.unlocked = 0;
     }
-    for (State_TrialScore(&boss)[3] :
-         VS::State::scoreData.bossTimeTrialScores) {
+    for (VS::State::TrialScore(&boss)[3] :
+         VS::State::scoreData.boss_time_trial_scores) {
       boss[0].time = s::kUnclearedTrialTime;
     }
   }
@@ -133,7 +133,7 @@ class LiveGlobals {
   ~LiveGlobals() {
     VS::State::scoreData = scoredata_;
     VS::State::stateFlags = flags_;
-    State_roomVisitProgress = rooms_;
+    VS::State::roomVisitProgress = rooms_;
     VS::Input::settings = settings_;
     Battle_unusedMenu9CursorMemory = cursor_;
     Menu_Score_cameraPositionBackup = position_;
@@ -146,10 +146,10 @@ class LiveGlobals {
   }
 
  private:
-  State_ScoreData scoredata_;
-  State_StateFlags flags_;
-  State_RoomVisitFlags rooms_;
-  State_Settings settings_;
+  VS::State::ScoreData scoredata_;
+  VS::State::StateFlags flags_;
+  VS::State::RoomVisitFlags rooms_;
+  VS::Input::Settings settings_;
   Menu_Score_CursorMemory cursor_;
   VECTOR position_;
   VECTOR angles_;
@@ -246,17 +246,17 @@ std::uint32_t ResultsRankRow(std::uint32_t titles, std::uint32_t score) {
 
 void SetLiveScoreInputs() {
   VS::State::scoreData.titles = 0x00070000;
-  for (u_short& kills : VS::State::scoreData.enemyKills) {
+  for (u_short& kills : VS::State::scoreData.enemy_kills) {
     kills = 5000;
   }
-  VS::State::scoreData.bossTimeTrialScores[3][0].time = 0x123;
-  VS::State::scoreData.bossTimeTrialScores[4][0].round = 5;
-  VS::State::scoreData.maxChain = 30;
-  VS::State::scoreData.completionTimeMinutes = 299;
-  VS::State::scoreData.streakScore = 7;
-  VS::State::scoreData.miscScore = 11;
-  VS::State::stateFlags.asuraDefeated = 1;
-  VS::State::stateFlags.goldKeyObtained = static_cast<char>(0x80);
+  VS::State::scoreData.boss_time_trial_scores[3][0].time = 0x123;
+  VS::State::scoreData.boss_time_trial_scores[4][0].round = 5;
+  VS::State::scoreData.max_chain = 30;
+  VS::State::scoreData.completion_time_minutes = 299;
+  VS::State::scoreData.streak_score = 7;
+  VS::State::scoreData.misc_score = 11;
+  VS::State::stateFlags.asura_defeated = 1;
+  VS::State::stateFlags.gold_key_obtained = static_cast<char>(0x80);
 }
 
 // 5000 kills of each class (1600000), one cleared trial (20000), a 30 chain
@@ -272,24 +272,26 @@ void CheckProgressStatics() {
   CHECK(Menu_Score_clearCount == 2);
   CHECK(Menu_Score_menuState == 0);
   CHECK(Menu_Score_hideUi == 0);
-  CHECK(State_roomVisitProgress.roomFlags[1] == 0xC00000);
-  CHECK(VS::State::scoreData.mapCompletion == 6);
-  CHECK(VS::State::scoreData.openedChestCount == 10);
+  CHECK(VS::State::roomVisitProgress.room_flags[1] == 0xC00000);
+  CHECK(VS::State::scoreData.map_completion == 6);
+  CHECK(VS::State::scoreData.opened_chest_count == 10);
 }
 
 void SetLiveProgressInputs() {
   const s::ProgressWorld world = SampleWorld();
-  State_roomVisitProgress.roomFlags[0] = static_cast<int>(world.room_flags[0]);
-  State_roomVisitProgress.roomFlags[1] = static_cast<int>(world.room_flags[1]);
+  VS::State::roomVisitProgress.room_flags[0] =
+      static_cast<int>(world.room_flags[0]);
+  VS::State::roomVisitProgress.room_flags[1] =
+      static_cast<int>(world.room_flags[1]);
   Field_countableRoomMask[0] = static_cast<int>(world.countable_room_masks[0]);
   Field_countableRoomMask[1] = -1;
-  VS::State::stateFlags.chestsOpened[0] = 1;
-  VS::State::stateFlags.chestsOpened[5] = static_cast<char>(0x80);
-  VS::State::stateFlags.chestsOpened[63] = 2;
-  VS::State::stateFlags.clearCount = 2;
-  VS::State::scoreData.completionTimeMinutes = 1000;
-  VS::State::scoreData.mapCompletion = 5;
-  VS::State::scoreData.openedChestCount = 10;
+  VS::State::stateFlags.chests_opened[0] = 1;
+  VS::State::stateFlags.chests_opened[5] = static_cast<char>(0x80);
+  VS::State::stateFlags.chests_opened[63] = 2;
+  VS::State::stateFlags.clear_count = 2;
+  VS::State::scoreData.completion_time_minutes = 1000;
+  VS::State::scoreData.map_completion = 5;
+  VS::State::scoreData.opened_chest_count = 10;
   Menu_Score_menuState = 7;
   Menu_Score_hideUi = 1;
 }
@@ -451,7 +453,7 @@ TEST_CASE("F04157 live progress binds the room chest and score globals",
           "[score-rank-live][F04157]") {
   const LiveGlobals globals;
   SetLiveProgressInputs();
-  VS::Input::settings.cursorMemory = 0;
+  VS::Input::settings.cursor_memory = 0;
   std::memset(&Battle_unusedMenu9CursorMemory, 0xA5,
               sizeof Battle_unusedMenu9CursorMemory);
   auto* scratch =

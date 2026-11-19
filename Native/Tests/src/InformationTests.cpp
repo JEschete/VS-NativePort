@@ -6,6 +6,7 @@
 
 #include "Core/Text/TextCode.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Framework.hpp"
@@ -18,7 +19,6 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Settings.h"
 
 namespace {
 struct InformationFixture {
@@ -28,7 +28,7 @@ struct InformationFixture {
   u_long* saved_ordering = Menu_activeTextBoxOrderingTable;
   VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
-  char saved_setting = VS::Input::settings.information;
+  std::uint8_t saved_setting = VS::Input::settings.information;
   int saved_buttons = VS::Input::buttonsState;
   int* saved_rows = VS::Menu::Framework::rowTypeBuf;
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;

@@ -22,7 +22,7 @@
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 extern unsigned int Content_battleTriggerMarkerBytes[29];
@@ -57,7 +57,7 @@ void EditGroup(MarkerDefinition& definition, Edit edit) {
 struct TriggerMarkerFixture {
   VS::Render::FrameScratch saved_frame = VS::Render::FrameScratchpad();
   Field_RoomRecord saved_room = Field_roomData;
-  State_StateFlags saved_flags = VS::State::stateFlags;
+  VS::State::StateFlags saved_flags = VS::State::stateFlags;
   RECT saved_texture = Field_triggerMarkerTextureSource;
   RECT saved_palette = Field_triggerMarkerPaletteSource;
   int saved_tick_speed = VS::State::tickSpeed;
@@ -301,8 +301,8 @@ TEST_CASE(
   trigger.activation = static_cast<char>(sample.active);
   trigger.markerFade = static_cast<char>(sample.initial);
   VS::State::tickSpeed = sample.ticks;
-  VS::State::stateFlags.opaque20 = static_cast<char>(sample.gate20);
-  VS::State::stateFlags.opaque40 = static_cast<char>(sample.gate40);
+  VS::State::stateFlags.opaque_20 = static_cast<char>(sample.gate20);
+  VS::State::stateFlags.opaque_40 = static_cast<char>(sample.gate40);
   VS::Field::DrawLiveRoomTriggerMarkers();
   CHECK(static_cast<unsigned char>(trigger.markerFade) == sample.expected);
   CHECK(Field_triggerMarkerFrameTicks == 0);

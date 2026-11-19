@@ -645,6 +645,7 @@
     <ClInclude Include="include\Input\ControllerLiveState.hpp" />
     <ClInclude Include="include\Input\LegacyPad.hpp" />
     <ClInclude Include="include\Input\Pad.hpp" />
+    <ClInclude Include="include\Input\Settings.hpp" />
     <ClInclude Include="include\Movie\IntroPlayer.hpp" />
     <ClInclude Include="include\Movie\IntroPlayerLive.hpp" />
     <ClInclude Include="include\Movie\Movie.hpp" />

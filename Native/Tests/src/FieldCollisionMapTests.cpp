@@ -34,7 +34,7 @@
 #include "Field/TrapsLive.hpp"
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace {
 using VS::Field::CollisionCellRef;
@@ -823,15 +823,15 @@ TEST_CASE("The live map binding updates the minimap",
 
 TEST_CASE("The live map binding marks visits while counting completion",
           "[field-collision-map][field]") {
-  const SavedGlobal saved_progress(State_roomVisitProgress);
+  const SavedGlobal saved_progress(VS::State::roomVisitProgress);
   const SavedGlobal saved_countable(Field_countableRoomMask);
-  std::memset(&State_roomVisitProgress.roomFlags, 0,
-              sizeof State_roomVisitProgress.roomFlags);
+  std::memset(&VS::State::roomVisitProgress.room_flags, 0,
+              sizeof VS::State::roomVisitProgress.room_flags);
   std::memset(&Field_countableRoomMask, 0, sizeof Field_countableRoomMask);
   Field_countableRoomMask[1] = 0x400000;
-  State_roomVisitProgress.roomFlags[1] = 0x800000;
+  VS::State::roomVisitProgress.room_flags[1] = 0x800000;
   CHECK(VS::Field::LiveMapCompletionPercent() == 0);
-  CHECK(State_roomVisitProgress.roomFlags[1] == 0xC00000);
+  CHECK(VS::State::roomVisitProgress.room_flags[1] == 0xC00000);
   VS::Field::RestoreLiveSceneRoomVisits(nullptr, 0);
 }
 

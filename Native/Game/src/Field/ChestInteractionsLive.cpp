@@ -64,7 +64,7 @@
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -1243,7 +1243,7 @@ void VS::Field::ApplyUnlockEffectToRoomObjectEntry(SVECTOR* target_position) {
 
 void VS::Field::StoreEntranceDoorForReloadEntry(void) {
   const auto encoded = VS::Field::EnteredDoorReloadByte(Field_enteredDoorId);
-  VS::State::stateFlags.doorEntered = std::bit_cast<char>(encoded);
+  VS::State::stateFlags.door_entered = std::bit_cast<char>(encoded);
 }
 
 void VS::Field::SetEntranceDoorRecordEntry(

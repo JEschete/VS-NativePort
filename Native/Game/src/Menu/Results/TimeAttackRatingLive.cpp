@@ -20,16 +20,16 @@
 #include "Menu/Results/TimeAttackRating.hpp"
 #include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Results {
 namespace {
 constexpr std::uint32_t kTrialRoundShift = 24;
 constexpr std::uint32_t kTrialDifficultyShift = 31;
-static_assert(std::size(VS::State::scoreData.bossTimeTrialScores) ==
+static_assert(std::size(VS::State::scoreData.boss_time_trial_scores) ==
               kTimeAttackCourses);
-static_assert(std::size(VS::State::scoreData.bossTimeTrialScores[0]) ==
+static_assert(std::size(VS::State::scoreData.boss_time_trial_scores[0]) ==
               kTimeAttackRanks);
 
 std::uint64_t refusals = 0;
@@ -85,15 +85,15 @@ class LiveResultsHost final : public TimeAttackResultsDrawHost {
   TimeAttackDrawHost& base_ = LiveTimeAttackDrawHost();
 };
 
-std::uint8_t LiveCourse() { return VS::State::stateFlags.timeAttackBoss; }
+std::uint8_t LiveCourse() { return VS::State::stateFlags.time_attack_boss; }
 
 // Every course's trial scores, packed as the original words.
 std::array<TrialScoreRow, kTimeAttackCourses> LiveCourseScores() {
   std::array<TrialScoreRow, kTimeAttackCourses> rows{};
   for (std::size_t course = 0; course < rows.size(); ++course) {
     for (std::size_t rank = 0; rank < kTimeAttackRanks; ++rank) {
-      const State_TrialScore& score =
-          VS::State::scoreData.bossTimeTrialScores[course][rank];
+      const VS::State::TrialScore& score =
+          VS::State::scoreData.boss_time_trial_scores[course][rank];
       rows.at(course).at(rank) =
           score.time |
           (static_cast<std::uint32_t>(score.round) << kTrialRoundShift) |

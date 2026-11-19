@@ -29,7 +29,7 @@ inline constexpr std::int32_t kSnapshotRoomActorCount = 16;
 
 // A Field_MpdDoorRecord's bytes.
 using EntryDoor = std::array<std::byte, kEntryDoorBytes>;
-// State_learnedActionFlags: action 8n+k is bit 7-k of byte n.
+// VS::State::learnedActionFlags: action 8n+k is bit 7-k of byte n.
 using LearnedActions = std::array<std::uint8_t, kLearnedActionBytes>;
 
 // Actors_TileTarget: where Ashley stands.

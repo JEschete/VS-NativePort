@@ -344,10 +344,10 @@
 #include "State/Ashley.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/RoomCache.hpp"
 #include "State/RoomMemory.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 #include "Title/TitleMenuLiveState.hpp"
 
@@ -967,8 +967,8 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"SLUS_010.40", 0x8005FE80u, 4u, (void*)&VS::Audio::nextSfxChannelGroupFF000, sizeof VS::Audio::nextSfxChannelGroupFF000, 1u, 1u},
     {"SLUS_010.40", 0x8005FE84u, 4u, (void*)&VS::Audio::nextSfxChannelGroupF00000, sizeof VS::Audio::nextSfxChannelGroupF00000, 1u, 1u},
     {"SLUS_010.40", 0x8005FEA0u, 276u, (void*)&VS::State::scoreData, sizeof VS::State::scoreData, 1u, 1u},
-    {"SLUS_010.40", 0x8005FFB8u, 32u, (void*)&State_learnedActionFlags, sizeof State_learnedActionFlags, 1u, 1u},
-    {"SLUS_010.40", 0x8005FFD8u, 72u, (void*)&State_roomVisitProgress, sizeof State_roomVisitProgress, 1u, 1u},
+    {"SLUS_010.40", 0x8005FFB8u, 32u, (void*)&VS::State::learnedActionFlags, sizeof VS::State::learnedActionFlags, 1u, 1u},
+    {"SLUS_010.40", 0x8005FFD8u, 72u, (void*)&VS::State::roomVisitProgress, sizeof VS::State::roomVisitProgress, 1u, 1u},
     {"SLUS_010.40", 0x80060040u, 36u, (void*)&VS::State::artsStatus, sizeof VS::State::artsStatus, 0u, 0u},
     {"SLUS_010.40", 0x80060064u, 4u, (void*)&VS::State::currentRoomStateSlot, sizeof VS::State::currentRoomStateSlot, 1u, 1u},
     {"SLUS_010.40", 0x80060068u, 256u, (void*)&VS::State::ashleySnapshot, sizeof VS::State::ashleySnapshot, 1u, 1u},

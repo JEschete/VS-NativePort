@@ -14,8 +14,8 @@
 #include "Menu/Results/TimeAttackRating.hpp"
 #include "Menu/Results/TimeAttackRatingLive.hpp"
 #include "Render/TextureRegionDraw.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 #include "TestSupport/TimeAttackDrawRecorder.hpp"
 
 namespace {
@@ -447,7 +447,7 @@ void SetLiveScores(const Scores& scores) {
   for (std::size_t course = 0; course < scores.size(); ++course) {
     for (std::size_t rank = 0; rank < r::kTimeAttackRanks; ++rank) {
       const auto word = scores.at(course).at(rank);
-      auto& score = VS::State::scoreData.bossTimeTrialScores[course][rank];
+      auto& score = VS::State::scoreData.boss_time_trial_scores[course][rank];
       score.time = word & 0xFFFFFFU;
       score.round = (word >> 24) & 0x7FU;
       score.difficulty = word >> 31;
@@ -561,7 +561,7 @@ TEST_CASE("F03038 live leaderboard reads the course, scores and new rank",
   LiveTimeAttackFixture frame;
   const auto scores = CourseScores();
   SetLiveScores(scores);
-  VS::State::stateFlags.timeAttackBoss = 3;
+  VS::State::stateFlags.time_attack_boss = 3;
   Menu_Results_newTimeSlot = 2;
   r::LiveDrawLeaderboard(250, 100, 40);
   const auto live = frame.Frame();
@@ -574,7 +574,7 @@ TEST_CASE("F03038 live leaderboard reads the course, scores and new rank",
   Replay(host);
   CHECK(frame.Frame() == live);
   frame.Reset();
-  VS::State::stateFlags.timeAttackBoss = 8;
+  VS::State::stateFlags.time_attack_boss = 8;
   r::LiveDrawLeaderboard(250, 100, 40);
   CHECK(frame.Empty());
 }
@@ -584,7 +584,7 @@ TEST_CASE("F03039 live leaderboard entry refuses a rank outside the board",
   LiveTimeAttackFixture frame;
   const auto scores = CourseScores();
   SetLiveScores(scores);
-  VS::State::stateFlags.timeAttackBoss = 6;
+  VS::State::stateFlags.time_attack_boss = 6;
   Menu_Results_newTimeSlot = 1;
   r::LiveDrawLeaderboardEntry(250, 100, 1, 25);
   const auto live = frame.Frame();

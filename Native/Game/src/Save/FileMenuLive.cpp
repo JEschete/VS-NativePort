@@ -39,7 +39,7 @@
 #include "Save/NativeMenu.hpp"
 #include "Save/NativeResume.hpp"
 #include "Save/RuntimeSnapshot.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "Title/SaveFiles.hpp"
 
 namespace VS::Game::Save {
@@ -297,18 +297,18 @@ std::expected<Document, std::string> BuildDocument(
     document.state = std::move(*captured);
   }
   auto& settings = document.state.settings;
-  settings.containerEmpty = BankEmpty(*bank);
+  settings.container_empty = BankEmpty(*bank);
   const auto counters = file_menu::AdvanceSaveCounters(
-      {.generation = settings.saveFileGeneration,
-       .cumulative = settings.cumulativeSaveCount,
-       .current_game = settings.currentGameSaveCount},
+      {.generation = settings.save_file_generation,
+       .cumulative = settings.cumulative_save_count,
+       .current_game = settings.current_game_save_count},
       menu.clear_game);
   if (!counters) {
     return std::unexpected("Save generation has reached its limit");
   }
-  settings.saveFileGeneration = counters->generation;
-  settings.cumulativeSaveCount = counters->cumulative;
-  settings.currentGameSaveCount = counters->current_game;
+  settings.save_file_generation = counters->generation;
+  settings.cumulative_save_count = counters->cumulative;
+  settings.current_game_save_count = counters->current_game;
   const auto generation = file_menu::NextFileGeneration(
       selected.document ? selected.document->generation : 0);
   if (!generation) {
@@ -325,10 +325,11 @@ std::expected<Document, std::string> BuildDocument(
 
 void AdoptSettings(const Document& document) {
   const auto& settings = document.state.settings;
-  VS::Input::settings.cumulativeSaveCount = settings.cumulativeSaveCount;
-  VS::Input::settings.currentGameSaveCount = settings.currentGameSaveCount;
-  VS::Input::settings.saveFileGeneration = settings.saveFileGeneration;
-  VS::Input::settings.containerEmpty = settings.containerEmpty;
+  VS::Input::settings.cumulative_save_count = settings.cumulative_save_count;
+  VS::Input::settings.current_game_save_count =
+      settings.current_game_save_count;
+  VS::Input::settings.save_file_generation = settings.save_file_generation;
+  VS::Input::settings.container_empty = settings.container_empty;
 }
 
 class LiveFileMenuHost final : public file_menu::FileMenuHost {
@@ -377,13 +378,13 @@ class LiveFileMenuHost final : public file_menu::FileMenuHost {
   }
   [[nodiscard]] bool SavePointEnabled() const override {
     return VS::Field::LiveCurrentSavePointId() != 0 &&
-           !VS::State::stateFlags.opaqueA7;
+           !VS::State::stateFlags.opaque_a7;
   }
   std::expected<void, std::string> WriteSelection(
       const file_menu::FileMenu& menu, VS::Save::WriteConsent consent) override;
   void OpenEmptyContainer() override {
     staged_storage.emplace();
-    VS::Input::settings.containerEmpty = 1;
+    VS::Input::settings.container_empty = 1;
   }
   void OpenConfirmedContainer() override;
   std::expected<void, std::string> ResumeConfirmedSelection() override;
@@ -515,7 +516,7 @@ void LiveFileMenuHost::OpenConfirmedContainer() {
   const auto& document = ConfirmedDocument();
   const auto& current = ConfirmedFile();
   staged_storage = document.state.storage;
-  VS::Input::settings.containerEmpty = BankEmpty(*staged_storage);
+  VS::Input::settings.container_empty = BankEmpty(*staged_storage);
   VS::Core::LogInfo("save", "Opened native container in slot {} recovered {}",
                     current.slot, current.status == FileStatus::kRecovered);
 }

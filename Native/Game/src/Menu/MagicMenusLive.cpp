@@ -31,7 +31,7 @@
 #include "Menu/Sounds.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Magic {
 namespace {
@@ -120,10 +120,10 @@ class LiveHost final : public MenuHost {
   int SelectedRow() override { return Framework::LiveSelectedRow(); }
   int HighlightedRow() override { return Framework::LiveHighlightedRow(); }
   std::uint8_t CursorMemory() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void SetCursorMemory(std::uint8_t value) override {
-    VS::Input::settings.cursorMemory = StorageByte(value);
+    VS::Input::settings.cursor_memory = StorageByte(value);
   }
   bool CreateRows(int style, std::span<const SpellRow> rows) override {
     if (rows.size() > AvailableSpellList::kCapacity) {
@@ -236,10 +236,10 @@ class LiveHost final : public MenuHost {
     return VS::Battle::LiveHasUnlockedSpellClass(static_cast<int>(school)) != 0;
   }
   std::uint8_t TeleportAvailability() override {
-    return static_cast<std::uint8_t>(VS::State::stateFlags.opaqueB5);
+    return static_cast<std::uint8_t>(VS::State::stateFlags.opaque_b5);
   }
   std::span<const std::uint8_t> SavePointStates() override {
-    return Bytes(VS::State::stateFlags.savePointStates);
+    return Bytes(VS::State::stateFlags.save_point_states);
   }
   bool AtSavePoint() override {
     return VS::Field::CurrentSavePointIdEntry() != 0;

@@ -32,8 +32,8 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Render/DisplayControl.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace r = VS::Menu::Results;
@@ -506,8 +506,8 @@ struct LiveScreenFixture {
   u_int saved_reel = Menu_Results_buffReelSelection;
   std::int16_t saved_par = Menu_Results_puzzleParTime;
   std::int16_t saved_cap = Menu_Results_puzzleRankCap;
-  State_StateFlags saved_flags = VS::State::stateFlags;
-  u_int saved_misc = VS::State::scoreData.miscScore;
+  VS::State::StateFlags saved_flags = VS::State::stateFlags;
+  u_int saved_misc = VS::State::scoreData.misc_score;
   LiveClutFixture clut;
 
   LiveScreenFixture() { r::ResetLiveCubePuzzleLifecycleStatics(); }
@@ -523,7 +523,7 @@ struct LiveScreenFixture {
     Menu_Results_puzzleParTime = saved_par;
     Menu_Results_puzzleRankCap = saved_cap;
     VS::State::stateFlags = saved_flags;
-    VS::State::scoreData.miscScore = saved_misc;
+    VS::State::scoreData.misc_score = saved_misc;
   }
   LiveScreenFixture(const LiveScreenFixture&) = delete;
   LiveScreenFixture& operator=(const LiveScreenFixture&) = delete;
@@ -824,15 +824,15 @@ TEST_CASE("F03047 live results write the maximum clock to the state flags",
           "[cube-lifecycle-live]") {
   LiveScreenFixture fixture;
   Battle_unusedSubmenuState = 2;
-  VS::State::stateFlags.puzzleTimerMins = 1;
-  VS::State::stateFlags.puzzleTimerSeconds = 2;
-  VS::State::stateFlags.puzzleTimerHundredths = 3;
-  VS::State::stateFlags.puzzleSetMaxTimer = 1;
+  VS::State::stateFlags.puzzle_timer_minutes = 1;
+  VS::State::stateFlags.puzzle_timer_seconds = 2;
+  VS::State::stateFlags.puzzle_timer_hundredths = 3;
+  VS::State::stateFlags.puzzle_set_max_timer = 1;
   CHECK(r::LiveInitializeCubePuzzleResults() == 1);
-  CHECK(VS::State::stateFlags.puzzleTimerMins == 59);
-  CHECK(VS::State::stateFlags.puzzleTimerSeconds == 59);
-  CHECK(VS::State::stateFlags.puzzleTimerHundredths == 99);
-  CHECK(VS::State::stateFlags.puzzleSetMaxTimer == 0);
+  CHECK(VS::State::stateFlags.puzzle_timer_minutes == 59);
+  CHECK(VS::State::stateFlags.puzzle_timer_seconds == 59);
+  CHECK(VS::State::stateFlags.puzzle_timer_hundredths == 99);
+  CHECK(VS::State::stateFlags.puzzle_set_max_timer == 0);
   CHECK(Battle_unusedSubmenuState == 0);
 }
 
@@ -1101,7 +1101,7 @@ TEST_CASE("F03050 live results pulse clutBuf while the screen state is set",
   Menu_Results_screenState = 1;
   Menu_Results_screenTimer = 140;
   Menu_Results_elementAnimationState = 0x400;
-  VS::State::scoreData.miscScore = 3;
+  VS::State::scoreData.misc_score = 3;
   CHECK(r::LiveUpdateCubePuzzleResults() == 0);
   RecordClut target;
   r::PulseCubePuzzleClut(expected, 16, target);
@@ -1109,7 +1109,7 @@ TEST_CASE("F03050 live results pulse clutBuf while the screen state is set",
   CHECK(fixture.clut.Vram() == expected);
   CHECK(Menu_Results_elementAnimationState == 0x440);
   CHECK(Menu_Results_screenTimer == 140);
-  CHECK(VS::State::scoreData.miscScore == 3);
+  CHECK(VS::State::scoreData.misc_score == 3);
 }
 
 // ----- F03051 -----

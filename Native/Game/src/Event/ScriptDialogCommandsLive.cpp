@@ -26,7 +26,7 @@
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace event = VS::Event;
@@ -229,7 +229,7 @@ class LiveScriptDialogHost final : public event::ScriptDialogHost {
     return VS::Menu::SetLiveTextBoxText(box, nullptr);
   }
   void SetTextBoxSelection(int selection) override {
-    VS::State::stateFlags.textBoxSelection = static_cast<char>(selection);
+    VS::State::stateFlags.text_box_selection = static_cast<char>(selection);
   }
   [[nodiscard]] int DismissTextBox(int box) override {
     const int result = VS::Menu::DismissLiveTextBox(box);

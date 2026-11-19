@@ -21,7 +21,7 @@
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 static_assert(static_cast<std::size_t>(VS::Menu::Loot::kRowCapacity) ==
               VS::Menu::Loot::kLootRowCapacity);

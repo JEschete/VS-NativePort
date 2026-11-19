@@ -42,7 +42,7 @@
 #include "Menu/Loot/LootTerminal.hpp"
 #include "Menu/Loot/LootTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace inventory = VS::Menu::Inventory;
@@ -147,8 +147,8 @@ struct TerminalFixture : equipment_detail_tests::LiveFixture {
     Battle_actors[kAshleyActor] = &actor;
     actor.stats = &stats;
     sound_offsets.fill(std::numeric_limits<std::uint32_t>::max());
-    VS::State::stateFlags.introState = 3;
-    VS::Input::settings.cursorMemory = 0;
+    VS::State::stateFlags.intro_state = 3;
+    VS::Input::settings.cursor_memory = 0;
     VS::Menu::Framework::menuState = {};
     VS::Menu::Framework::actionSelection = {};
     VS::Menu::Framework::backgroundFadeStep = 0;

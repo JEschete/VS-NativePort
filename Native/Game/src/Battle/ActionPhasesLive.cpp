@@ -22,7 +22,7 @@
 #include "Field/Interactions.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Battle {

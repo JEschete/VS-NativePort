@@ -15,7 +15,7 @@
 #include "Menu/Score/GazetteStatistics.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace {
 namespace live = gazette_statistics_live_tests;
@@ -138,18 +138,18 @@ void Progress() {
   Menu_Score_clearCount = 3;
   Menu_Score_mapCompletion = 180;
   Menu_Score_openedChestCount = 26;
-  VS::State::scoreData.clearCount = 2;
-  VS::State::scoreData.completionTimeMinutes = 60;
-  VS::State::scoreData.mapCompletion = 361;
-  VS::State::scoreData.openedChestCount = 52;
-  VS::State::scoreData.maxChain = 65535;
+  VS::State::scoreData.clear_count = 2;
+  VS::State::scoreData.completion_time_minutes = 60;
+  VS::State::scoreData.map_completion = 361;
+  VS::State::scoreData.opened_chest_count = 52;
+  VS::State::scoreData.max_chain = 65535;
   for (std::size_t index = 0;
-       index < std::size(VS::State::scoreData.enemyKills); ++index) {
-    VS::State::scoreData.enemyKills[index] = static_cast<u_short>(100 + index);
+       index < std::size(VS::State::scoreData.enemy_kills); ++index) {
+    VS::State::scoreData.enemy_kills[index] = static_cast<u_short>(100 + index);
   }
   for (std::size_t index = 0;
-       index < std::size(VS::State::scoreData.weaponAttacks); ++index) {
-    VS::State::scoreData.weaponAttacks[index] =
+       index < std::size(VS::State::scoreData.weapon_attacks); ++index) {
+    VS::State::scoreData.weapon_attacks[index] =
         static_cast<u_short>(1000 + index);
   }
 }

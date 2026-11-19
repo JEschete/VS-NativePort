@@ -91,9 +91,9 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/Location.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "Title/TitleMenuLive.hpp"
 
 namespace VS::Game {
@@ -112,7 +112,7 @@ bool room_local_event_started = false;
 
 std::optional<EncounterRouletteState> InspectRoulette(int menu) {
   constexpr int kResultsMenu = 15;
-  if (menu != kResultsMenu || VS::State::stateFlags.menuFSubmenu != 0) {
+  if (menu != kResultsMenu || VS::State::stateFlags.menu_f_submenu != 0) {
     return std::nullopt;
   }
   return EncounterRouletteState{
@@ -147,7 +147,7 @@ int EnterOrFinishEncounter() {
   // 22C.c:4463, VS::Title::InitializeSettings), whose state writes are
   // applied here without its publisher screens or audio setup.
   VS::State::stateFlags.difficulty = 1;
-  VS::State::stateFlags.puzzleMode = 1;
+  VS::State::stateFlags.puzzle_mode = 1;
   VS::State::savedEntryDoor.destinationZoneId = configuration.zone;
   VS::State::savedEntryDoor.destinationRoomId = configuration.room;
   VS::State::savedEntryDoor.entryTileX = configuration.player.x;
@@ -185,7 +185,7 @@ int EnterOrFinishEncounter() {
     // restored wholesale. Room scripts test it as script flag 0, e.g. the
     // MAP029 entry's jumpFwdIfFlag 0 >= 1. Declared Lab fixture state, written
     // before any room loads; never changed during play.
-    VS::State::stateFlags.clearCount =
+    VS::State::stateFlags.clear_count =
         static_cast<char>(*configuration.clear_count);
     VS::Core::LogInfo("encounter", "declared clear count={}",
                       *configuration.clear_count);
@@ -330,9 +330,9 @@ void LearnAction(unsigned action) {
   }
   const unsigned index = action / kBitsPerByte;
   const auto bits = static_cast<std::uint8_t>(
-      static_cast<unsigned char>(State_learnedActionFlags[index]) |
+      static_cast<unsigned char>(VS::State::learnedActionFlags[index]) |
       (0x80u >> (action % kBitsPerByte)));
-  State_learnedActionFlags[index] = std::bit_cast<char>(bits);
+  VS::State::learnedActionFlags[index] = std::bit_cast<char>(bits);
   VS::Core::LogInfo("encounter.profile", "learned_action={}", action);
 }
 
@@ -474,8 +474,9 @@ void LearnProfileBattleAbilities(bool all_abilities) {
     LearnAction(chain);
     LearnAction(defense);
     if (slot < kMappedAbilities) {
-      VS::Input::settings.mappedChainAbilities[slot] = static_cast<char>(chain);
-      VS::Input::settings.mappedDefenseAbilities[slot] =
+      VS::Input::settings.mapped_chain_abilities[slot] =
+          static_cast<char>(chain);
+      VS::Input::settings.mapped_defense_abilities[slot] =
           static_cast<char>(defense);
     }
   }
@@ -548,8 +549,8 @@ void InitializeEncounterPlayerProfile(EncounterProfile profile) {
   // Lab-only startup state. Original 5BF94.c:3618 enables Map/Score at 3.
   constexpr int kPostPrologueStage = 3;
   constexpr unsigned kPostPrologueMenus = 0x120;
-  VS::State::stateFlags.introState = kPostPrologueStage;
-  VS::Input::settings.menuFlags |= kPostPrologueMenus;
+  VS::State::stateFlags.intro_state = kPostPrologueStage;
+  VS::Input::settings.menu_flags |= kPostPrologueMenus;
   if (profile == EncounterProfile::kAllItemsA ||
       profile == EncounterProfile::kAllItemsB) {
     StockEncounterItems(profile);
@@ -790,7 +791,7 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
   }
   auto* actor = Battle_actors[0];
   if (actor == nullptr || actor->stats == nullptr || actor->defeated ||
-      actor->stats->currentHp <= 0 || VS::State::stateFlags.gameOver) {
+      actor->stats->currentHp <= 0 || VS::State::stateFlags.game_over) {
     return reject("ASHLEY IS NOT ALIVE AND READY");
   }
   EncounterAdjustmentResult result{InspectActor(0, *actor), {}};
@@ -868,7 +869,7 @@ EncounterState InspectGameplay() {
   state.zone = VS::Field::zoneContext.zndId;
   state.room = VS::Field::zoneContext.mapId;
   state.control_mode = Field_controlMode;
-  state.game_over = VS::State::stateFlags.gameOver != 0;
+  state.game_over = VS::State::stateFlags.game_over != 0;
   state.field_rendering_enabled =
       VS::Field::LiveRoomRenderState().field_rendering_enabled;
   state.menu_state =
@@ -880,7 +881,7 @@ EncounterState InspectGameplay() {
   state.roulette = InspectRoulette(state.menu_state);
   if (constexpr int kResultsMenu = 15; state.menu_state == kResultsMenu) {
     state.results_screen =
-        static_cast<unsigned char>(VS::State::stateFlags.menuFSubmenu);
+        static_cast<unsigned char>(VS::State::stateFlags.menu_f_submenu);
   }
   state.frame_buffer = VS::Render::frameBuf;
   state.transition = VS::Field::screenTransitionStep;

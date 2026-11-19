@@ -89,13 +89,13 @@ struct VirtualGamepad {
 };
 
 struct ActuatorLease {
-  char saved_setting = VS::Input::settings.vibrationOn;
+  std::uint8_t saved_setting = VS::Input::settings.vibration_on;
   std::array<unsigned char, 34> response{};
   std::array<unsigned char, 2> levels{};
   std::array<unsigned char, 6> alignment{0, 1, 255, 255, 255, 255};
 
   ActuatorLease() {
-    VS::Input::settings.vibrationOn = 1;
+    VS::Input::settings.vibration_on = 1;
     PadInitDirect(response.data(), nullptr);
     VS::Input::PadState state;
     state.analog = true;
@@ -106,7 +106,7 @@ struct ActuatorLease {
 
   ~ActuatorLease() {
     PadInitDirect(nullptr, nullptr);
-    VS::Input::settings.vibrationOn = saved_setting;
+    VS::Input::settings.vibration_on = saved_setting;
   }
 };
 
@@ -258,10 +258,10 @@ TEST_CASE("Vibration Off and scripted input stop an active SDL effect",
   RumbleFixture fixture;
   fixture.Apply(1, 255);
   CheckLast(fixture.commands, 65535, 65535);
-  VS::Input::settings.vibrationOn = 0;
+  VS::Input::settings.vibration_on = 0;
   fixture.input.Update();
   CheckLast(fixture.commands, 0, 0);
-  VS::Input::settings.vibrationOn = 1;
+  VS::Input::settings.vibration_on = 1;
   fixture.input.Update();
   CheckLast(fixture.commands, 65535, 65535);
   fixture.input.SetDevicesEnabled(false);

@@ -20,8 +20,8 @@
 #include "Render/Sprites.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::map {
 namespace {
@@ -35,7 +35,8 @@ constexpr std::size_t kMarkerQuadSlotBytes = 28;
 constexpr std::size_t kLabelLineSlot = 8;
 
 static_assert(sizeof(Menu_Map_MapLabel) == sizeof(MapLabel));
-static_assert(offsetof(State_StateFlags, opaque33F) == kDoorStateFlagsOffset);
+static_assert(offsetof(VS::State::StateFlags, opaque_33f) ==
+              kDoorStateFlagsOffset);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 std::uint64_t refused_calls = 0;
@@ -67,7 +68,7 @@ void Refuse(std::string_view call, std::string_view reason) {
 [[nodiscard]] bool DoorStateFlagOf(std::int32_t state_id, std::uint8_t& flag) {
   const std::span<const std::uint8_t> flags{
       reinterpret_cast<const std::uint8_t*>(&VS::State::stateFlags),
-      sizeof(State_StateFlags)};
+      sizeof(VS::State::StateFlags)};
   const auto offset = static_cast<std::int64_t>(kDoorStateFlagsOffset) +
                       static_cast<std::int64_t>(state_id);
   if (offset < 0 || static_cast<std::uint64_t>(offset) >= flags.size()) {
@@ -225,9 +226,10 @@ void LiveAppendLabelLine(int x0, int y0, int x1, int y1) {
 // decomp: MENU5.PRG _renderConnectingMapName (4D8.c:2403).
 void LiveDrawConnectingAreaLabel(int x, int y, int map_id) {
   constexpr std::string_view kCall = "DrawConnectingAreaLabel";
-  std::array<std::uint32_t, std::size(State_roomVisitProgress.areaFlags)>
+  std::array<std::uint32_t, std::size(VS::State::roomVisitProgress.area_flags)>
       flags{};
-  std::memcpy(flags.data(), State_roomVisitProgress.areaFlags, sizeof(flags));
+  std::memcpy(flags.data(), VS::State::roomVisitProgress.area_flags,
+              sizeof(flags));
   LiveMapMarkerHost host(kCall);
   if (!DrawConnectingAreaLabel(host, Menu_Map_connectingMaps, flags,
                                Menu_Map_mapLabelY, x, y, map_id)) {

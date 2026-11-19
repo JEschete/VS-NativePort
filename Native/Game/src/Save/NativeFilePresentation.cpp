@@ -384,15 +384,15 @@ void Integer(Point position, unsigned value, unsigned divisor) {
       VS::Render::PackScreenWord(position.x, position.y), value, divisor);
 }
 
-unsigned MapPercent(const State_RoomVisitFlags& visits) {
+unsigned MapPercent(const VS::State::RoomVisitFlags& visits) {
   unsigned rooms = 0;
   // F00630 vs_battle_getMapCompletion, BATTLE/146C.c:17367. Mirror the
   // special room bit in a local value, not the live or saved visit flags.
   constexpr unsigned kMirrorWord = 1;
   constexpr unsigned kSourceRoom = 0x800000;
   constexpr unsigned kMirroredRoom = 0x400000;
-  for (std::size_t index = 0; index < std::size(visits.roomFlags); ++index) {
-    auto flags = static_cast<unsigned>(visits.roomFlags[index]);
+  for (std::size_t index = 0; index < std::size(visits.room_flags); ++index) {
+    auto flags = static_cast<unsigned>(visits.room_flags[index]);
     if (index == kMirrorWord && (flags & kSourceRoom)) flags |= kMirroredRoom;
     rooms += std::popcount(
         flags & static_cast<unsigned>(Field_countableRoomMask[index]));
@@ -463,10 +463,10 @@ void Stats(const Frontend& frontend, const Snapshot& state, int top) {
       Menu_Files_FileMenuUiId_Percent);
   frontend.Label(AtRow(kSave, top), Menu_Files_FileMenuUiId_Save);
   frontend.Label(AtRow(kSaveColon, top), Menu_Files_FileMenuUiId_Colon);
-  Integer(
-      AtRow(kSaveDigits, top),
-      std::min<unsigned>(state.settings.cumulativeSaveCount, kMaximumSaveCount),
-      kFourDigitDivisor);
+  Integer(AtRow(kSaveDigits, top),
+          std::min<unsigned>(state.settings.cumulative_save_count,
+                             kMaximumSaveCount),
+          kFourDigitDivisor);
   frontend.Label(AtRow(kClear, top), Menu_Files_FileMenuUiId_Clear);
   frontend.Label(AtRow(kClearColon, top), Menu_Files_FileMenuUiId_Colon);
   // TITLE 22C.c:700 uses the current clear count, not the fastest-run record.

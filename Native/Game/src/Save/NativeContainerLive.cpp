@@ -72,7 +72,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   void BeginSession() override {
     VS::Menu::PlayOpenSound();
     VS::Menu::Framework::containerEmptyBackup =
-        static_cast<char>(VS::Input::settings.containerEmpty);
+        static_cast<char>(VS::Input::settings.container_empty);
     VS::Menu::Framework::inventoryStorage =
         static_cast<Menu_Container_InventoryStorage*>(
             VS::Core::Memory::AllocateLiveFromHighEnd(
@@ -186,7 +186,7 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   void RestoreInventory() override {
     Menu_Container_InventoryStorage& storage = Storage();
-    VS::Input::settings.containerEmpty =
+    VS::Input::settings.container_empty =
         VS::Menu::Framework::containerEmptyBackup;
     VS::Core::Memory::CopyLiveHalfwordBlocks(&VS::Items::inventory,
                                              storage.savedInventory,

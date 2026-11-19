@@ -86,7 +86,7 @@ inline constexpr std::size_t kStatsMapCompletionOffset = 0xE;
 inline constexpr std::size_t kStatsMpOffset = 0x10;
 inline constexpr std::size_t kStatsMaxMpOffset = 0x12;
 
-// Byte offsets in the settings section (State_Settings).
+// Byte offsets in the settings section (VS::Input::Settings).
 inline constexpr std::size_t kSettingsBytes = 0x20;
 inline constexpr std::size_t kSettingsFlagsOffset = 0;
 inline constexpr std::size_t kSettingsMenuFlagsOffset = 2;
@@ -103,7 +103,7 @@ inline constexpr std::size_t kSnapshotMaxHpOffset = 6;
 inline constexpr std::size_t kSnapshotMpOffset = 8;
 inline constexpr std::size_t kSnapshotMaxMpOffset = 0xA;
 
-// Byte offsets in the state-flag section (State_StateFlags).
+// Byte offsets in the state-flag section (VS::State::StateFlags).
 inline constexpr std::size_t kStateFlagsClearCountOffset = 0;
 inline constexpr std::size_t kStateFlagsPuzzleModeOffset = 0x11C;
 

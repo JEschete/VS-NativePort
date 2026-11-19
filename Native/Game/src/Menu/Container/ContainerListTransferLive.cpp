@@ -217,13 +217,13 @@ class LiveTransferWorld final : public TransferWorld {
     *FlagByte(flag) = static_cast<char>(value);
   }
   std::uint8_t CursorMemorySetting() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void SetCursorMemorySetting(std::uint8_t value) override {
-    VS::Input::settings.cursorMemory = static_cast<char>(value);
+    VS::Input::settings.cursor_memory = static_cast<char>(value);
   }
   void SetContainerEmpty(bool empty) override {
-    VS::Input::settings.containerEmpty = empty ? 1U : 0U;
+    VS::Input::settings.container_empty = empty ? 1U : 0U;
   }
   void SetFreezeTabArrows(std::uint8_t value) override {
     Menu_Inventory_freezeTabArrows = static_cast<char>(value);

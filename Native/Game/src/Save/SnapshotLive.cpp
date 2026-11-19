@@ -27,7 +27,7 @@
 #include "Save/Snapshot.hpp"
 #include "State/Ashley.hpp"
 #include "State/Location.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Save {
 namespace {
@@ -39,7 +39,7 @@ static_assert(offsetof(VS::State::AshleySnapshot, stats) == 0);
 static_assert(offsetof(VS::State::AshleyStatsSnapshot, is_pending) == 0);
 static_assert(sizeof(VS::State::AshleyStatsSnapshot::is_pending) ==
               sizeof(std::int32_t));
-static_assert(std::extent_v<decltype(State_learnedActionFlags)> ==
+static_assert(std::extent_v<decltype(VS::State::learnedActionFlags)> ==
               kLearnedActionBytes);
 static_assert(std::extent_v<decltype(Battle_actionDefinitions)> ==
               kLearnedActionCount);
@@ -160,7 +160,7 @@ class LiveSnapshotHost final : public SnapshotHost {
   }
   void StoreLearnedActions(const LearnedActions& learned) override {
     std::ranges::transform(
-        learned, std::begin(State_learnedActionFlags),
+        learned, std::begin(VS::State::learnedActionFlags),
         [](std::uint8_t bits) { return static_cast<char>(bits); });
   }
   void StoreSnapshot(const AshleySnapshot& snapshot) override {

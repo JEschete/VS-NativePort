@@ -27,7 +27,7 @@
 #include "Items/LootLive.hpp"
 #include "Save/Snapshot.hpp"
 #include "State/KillScoreLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Battle {
 namespace {
@@ -158,15 +158,16 @@ class LiveDefeatWorld final : public ActorDefeatWorld {
 class LiveLearnedWorld final : public LearnedActionWorld {
  public:
   std::uint8_t LearnedByte(std::size_t index) const override {
-    Require(index < std::size(State_learnedActionFlags));
-    return static_cast<std::uint8_t>(State_learnedActionFlags[index]);
+    Require(index < std::size(VS::State::learnedActionFlags));
+    return static_cast<std::uint8_t>(VS::State::learnedActionFlags[index]);
   }
   void SetUnlocked(std::size_t index, bool unlocked) override {
     Require(index < std::size(Battle_actionDefinitions));
     Battle_actionDefinitions[index].unlocked = unlocked;
   }
 };
-static_assert(std::size(State_learnedActionFlags) == Save::kLearnedActionBytes);
+static_assert(std::size(VS::State::learnedActionFlags) ==
+              Save::kLearnedActionBytes);
 static_assert(std::size(Battle_actionDefinitions) == Save::kLearnedActionCount);
 static_assert(std::extent_v<decltype(Battle_ActionRequest::targets)> ==
               kActionTargetCapacity);

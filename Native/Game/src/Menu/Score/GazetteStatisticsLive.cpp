@@ -20,7 +20,7 @@
 #include "Render/EncodedTextLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Menu::Score {
 namespace {
@@ -230,7 +230,7 @@ void RenderLiveStatistics(std::int32_t presentation_step) {
                   .clear_count = Menu_Score_clearCount,
                   .rank = {}},
       .best = ReadLiveScoreRecord(),
-      .best_clear_round = VS::State::scoreData.clearCount,
+      .best_clear_round = VS::State::scoreData.clear_count,
       .no_clear =
           Label(Menu_Score_miscInfo, Text_Menu9_miscInfo_Index_noneClear)};
   LiveRecordHost host;

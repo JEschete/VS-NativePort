@@ -203,7 +203,7 @@ void LiveShowAbilityTimingCue(int cue_duration_frames) {
       .anchor = {.screen = {.x = position.vx, .y = position.vy},
                  .depth = position.vz},
       .frames = Battle_abilityTimingCueFrames};
-  ShowAbilityTimingCue(world, VS::Input::settings.abilityTimingDisplay != 0,
+  ShowAbilityTimingCue(world, VS::Input::settings.ability_timing_display != 0,
                        cue, cue_duration_frames);
   position.vx = cue.anchor.screen.x;
   position.vy = cue.anchor.screen.y;

@@ -49,8 +49,8 @@
 #include "State/GameClockLive.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace VS::Ending {
 namespace {
@@ -71,9 +71,7 @@ constexpr std::uint32_t kHalfwordMask = 0xFFFF;
 constexpr unsigned kHalfwordShift = 16;
 // The playthrough flags after the clear count, difficulty and normal-mode
 // clear's block are cleared by a clear.
-constexpr std::size_t kStateFlagsBytes = 0x440;
 constexpr std::size_t kRetainedFlagBytes = 0x10;
-static_assert(sizeof(State_StateFlags) == kStateFlagsBytes);
 
 constexpr std::array<Content_DiscFile, kResultsFileCount> kResultsFiles{{
     {VS_END_DIS_LBA, VS_END_DIS_SIZE},
@@ -457,47 +455,47 @@ class LiveFrameHost final : public LiveDisplay<DisplayHost> {};
 // ---- progress records
 
 ScoreRecord LoadScore() {
-  const State_ScoreData& source = VS::State::scoreData;
+  const VS::State::ScoreData& source = VS::State::scoreData;
   ScoreRecord score{.titles = static_cast<std::uint32_t>(source.titles),
-                    .max_chain = source.maxChain,
-                    .clear_count = source.clearCount,
-                    .completion_time_minutes = source.completionTimeMinutes,
-                    .map_completion = source.mapCompletion,
-                    .opened_chest_count = source.openedChestCount,
-                    .streak_score = source.streakScore,
-                    .misc_score = source.miscScore};
-  static_assert(std::size(source.enemyKills) == kEnemyClassCount);
-  static_assert(std::size(source.weaponAttacks) == kWeaponCategoryCount);
-  static_assert(std::size(source.bossTimeTrialScores) == kBossTrialCount);
-  std::ranges::copy(source.enemyKills, score.enemy_kills.begin());
-  std::ranges::copy(source.weaponAttacks, score.weapon_attacks.begin());
+                    .max_chain = source.max_chain,
+                    .clear_count = source.clear_count,
+                    .completion_time_minutes = source.completion_time_minutes,
+                    .map_completion = source.map_completion,
+                    .opened_chest_count = source.opened_chest_count,
+                    .streak_score = source.streak_score,
+                    .misc_score = source.misc_score};
+  static_assert(std::size(source.enemy_kills) == kEnemyClassCount);
+  static_assert(std::size(source.weapon_attacks) == kWeaponCategoryCount);
+  static_assert(std::size(source.boss_time_trial_scores) == kBossTrialCount);
+  std::ranges::copy(source.enemy_kills, score.enemy_kills.begin());
+  std::ranges::copy(source.weapon_attacks, score.weapon_attacks.begin());
   for (std::size_t boss = 0; boss < kBossTrialCount; ++boss) {
-    score.boss_trial_times[boss] = source.bossTimeTrialScores[boss][0].time;
+    score.boss_trial_times[boss] = source.boss_time_trial_scores[boss][0].time;
   }
   return score;
 }
 
 PlaythroughFlags LoadFlags() {
-  const State_StateFlags& source = VS::State::stateFlags;
+  const VS::State::StateFlags& source = VS::State::stateFlags;
   PlaythroughFlags flags{
-      .clear_count = static_cast<std::uint8_t>(source.clearCount),
+      .clear_count = static_cast<std::uint8_t>(source.clear_count),
       .difficulty = static_cast<std::uint8_t>(source.difficulty),
       .normal_mode_cleared =
-          static_cast<std::uint8_t>(source.normalModeCleared),
-      .magic_used = source.magicUsed != 0,
-      .battle_abilities_used = source.battleAbilitiesUsed != 0,
-      .break_arts_used = source.breakArtsUsed != 0,
-      .bosses_defeated = {source.damascusGolemDefeated != 0,
-                          source.damascusCrabDefeated != 0,
-                          source.ravanaDefeated != 0,
-                          source.dragonZombieDefeated != 0,
-                          source.deathAndOgreZombieDefeated != 0,
-                          source.asuraDefeated != 0},
-      .gold_key_obtained = source.goldKeyObtained != 0,
-      .chest_key_obtained = source.chestKeyObtained != 0};
-  static_assert(std::size(source.chestsOpened) == kChestCount);
+          static_cast<std::uint8_t>(source.normal_mode_cleared),
+      .magic_used = source.magic_used != 0,
+      .battle_abilities_used = source.battle_abilities_used != 0,
+      .break_arts_used = source.break_arts_used != 0,
+      .bosses_defeated = {source.damascus_golem_defeated != 0,
+                          source.damascus_crab_defeated != 0,
+                          source.ravana_defeated != 0,
+                          source.dragon_zombie_defeated != 0,
+                          source.death_and_ogre_zombie_defeated != 0,
+                          source.asura_defeated != 0},
+      .gold_key_obtained = source.gold_key_obtained != 0,
+      .chest_key_obtained = source.chest_key_obtained != 0};
+  static_assert(std::size(source.chests_opened) == kChestCount);
   std::ranges::transform(
-      source.chestsOpened, flags.chests_opened.begin(),
+      source.chests_opened, flags.chests_opened.begin(),
       [](char opened) { return static_cast<std::uint8_t>(opened); });
   return flags;
 }
@@ -508,12 +506,13 @@ ClearProgress LoadProgress() {
                     .minutes = VS::State::playTime.minutes},
       .score = LoadScore(),
       .flags = LoadFlags(),
-      .save_count = VS::Input::settings.currentGameSaveCount,
+      .save_count = VS::Input::settings.current_game_save_count,
       .entry_zone = VS::State::savedEntryDoor.destinationZoneId,
       .entry_room = VS::State::savedEntryDoor.destinationRoomId};
-  static_assert(std::size(State_roomVisitProgress.roomFlags) == kRoomFlagWords);
+  static_assert(std::size(VS::State::roomVisitProgress.room_flags) ==
+                kRoomFlagWords);
   std::ranges::transform(
-      State_roomVisitProgress.roomFlags, progress.visited_rooms.begin(),
+      VS::State::roomVisitProgress.room_flags, progress.visited_rooms.begin(),
       [](int bits) { return static_cast<std::uint32_t>(bits); });
   static_assert(std::size(Battle_actionDefinitions) == kActionCount);
   std::ranges::transform(Battle_actionDefinitions,
@@ -527,16 +526,16 @@ ClearProgress LoadProgress() {
 // Stores the records a clear writes; ResetPlaythroughRecords has already
 // cleared the room visits and the later playthrough flags.
 void StoreProgress(const ClearProgress& progress) {
-  State_ScoreData& score = VS::State::scoreData;
+  VS::State::ScoreData& score = VS::State::scoreData;
   score.titles = static_cast<int>(progress.score.titles);
-  score.clearCount = progress.score.clear_count;
-  score.completionTimeMinutes = progress.score.completion_time_minutes;
-  score.mapCompletion = progress.score.map_completion;
-  score.openedChestCount = progress.score.opened_chest_count;
-  State_StateFlags& flags = VS::State::stateFlags;
-  flags.clearCount = static_cast<char>(progress.flags.clear_count);
+  score.clear_count = progress.score.clear_count;
+  score.completion_time_minutes = progress.score.completion_time_minutes;
+  score.map_completion = progress.score.map_completion;
+  score.opened_chest_count = progress.score.opened_chest_count;
+  VS::State::StateFlags& flags = VS::State::stateFlags;
+  flags.clear_count = static_cast<char>(progress.flags.clear_count);
   flags.difficulty = static_cast<char>(progress.flags.difficulty);
-  flags.normalModeCleared =
+  flags.normal_mode_cleared =
       static_cast<char>(progress.flags.normal_mode_cleared);
   VS::State::savedEntryDoor.destinationZoneId = progress.entry_zone;
   VS::State::savedEntryDoor.destinationRoomId = progress.entry_room;
@@ -545,7 +544,7 @@ void StoreProgress(const ClearProgress& progress) {
 class LiveProgressHost final : public ProgressHost {
  public:
   void ResetPlaythroughRecords() override {
-    State_roomVisitProgress = {};
+    VS::State::roomVisitProgress = {};
     const auto flags =
         std::as_writable_bytes(std::span(&VS::State::stateFlags, 1));
     std::ranges::fill(flags.subspan(kRetainedFlagBytes), std::byte{0});
@@ -639,8 +638,9 @@ class LiveResultsHost final : public LiveDisplay<ResultsHost> {
 
   void PublishState() override {
     StoreResultsState(state_);
-    VS::State::scoreData.mapCompletion = progress_.score.map_completion;
-    VS::State::scoreData.openedChestCount = progress_.score.opened_chest_count;
+    VS::State::scoreData.map_completion = progress_.score.map_completion;
+    VS::State::scoreData.opened_chest_count =
+        progress_.score.opened_chest_count;
   }
 
   void Draw(const Render::RegionQuad& quad) override {

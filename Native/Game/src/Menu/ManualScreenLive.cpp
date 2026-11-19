@@ -170,7 +170,7 @@ class LiveHelpPagesHost final : public HelpPagesHost {
   void Publish() const { StoreHelpState(state_); }
 
   [[nodiscard]] std::uint8_t CursorMemorySetting() const override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void ClearDisplayState() override {
     Field_manualDisplayState = Field_ManualDisplayState{};

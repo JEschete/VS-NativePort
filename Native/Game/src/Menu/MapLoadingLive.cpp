@@ -36,8 +36,8 @@
 #include "Render/Render.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::map {
 namespace {
@@ -48,7 +48,7 @@ constexpr std::size_t kMenuTextPerRow = 2;
 
 static_assert(sizeof(Content_DiscFile) == sizeof(DiscFileRange));
 static_assert(std::size(Menu_Map_sceneRowIdMap) == kSceneCount);
-static_assert(sizeof(VS::State::stateFlags.mapPaling) == kSceneCount);
+static_assert(sizeof(VS::State::stateFlags.map_paling) == kSceneCount);
 
 std::uint64_t refused_calls = 0;
 
@@ -111,10 +111,10 @@ class LiveAreaMenu final : public AreaMenuHost {
         VS::Menu::Framework::menuMemory.cursorMemories[0]);
   }
   std::uint8_t CursorMemorySetting() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void SetCursorMemorySetting(std::uint8_t setting) override {
-    VS::Input::settings.cursorMemory = static_cast<char>(setting);
+    VS::Input::settings.cursor_memory = static_cast<char>(setting);
   }
   void ShowAreaRows(std::int32_t row_info,
                     std::span<const std::int32_t> row_types) override {
@@ -435,15 +435,14 @@ int LiveLoadSceneMap() {
   }
   LiveSceneMap host;
   SceneMapView view = ViewOfGlobals();
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-  auto* paling = reinterpret_cast<std::uint8_t*>(
-      static_cast<char*>(VS::State::stateFlags.mapPaling));
+  std::uint8_t* paling = VS::State::stateFlags.map_paling;
   SceneMapProgress progress{
       .map_paling = {paling, static_cast<std::size_t>(kSceneCount)},
-      .room_flags =
-          static_cast<std::uint32_t>(State_roomVisitProgress.roomFlags[1])};
+      .room_flags = static_cast<std::uint32_t>(
+          VS::State::roomVisitProgress.room_flags[1])};
   const SceneMapLoad result = LoadSceneMap(host, view, progress, SceneFiles());
-  State_roomVisitProgress.roomFlags[1] = static_cast<int>(progress.room_flags);
+  VS::State::roomVisitProgress.room_flags[1] =
+      static_cast<int>(progress.room_flags);
   StoreView(view);
   if (result == SceneMapLoad::kRefused) {
     Refuse("LoadSceneMap", "scene outside the ARM files");
@@ -455,19 +454,20 @@ int LiveLoadSceneMap() {
 int LiveUpdateAreaSelection(int initialize) {
   if (initialize != 0 || area_selection.step == 0) {
     for (std::int32_t scene = 1; scene < kSceneCount; ++scene) {
-      const bool visited =
-          (static_cast<std::uint32_t>(State_roomVisitProgress.areaFlags[0]) &
-           (1U << static_cast<unsigned>(scene))) != 0;
+      const bool visited = (static_cast<std::uint32_t>(
+                                VS::State::roomVisitProgress.area_flags[0]) &
+                            (1U << static_cast<unsigned>(scene))) != 0;
       if (visited && AreaNameOf(scene) == nullptr) {
         Refuse("UpdateAreaSelection", "area name outside the table");
         return kNoVisitedAreas;
       }
     }
   }
-  const AreaSelectionInput input{.visited_areas = static_cast<std::uint32_t>(
-                                     State_roomVisitProgress.areaFlags[0]),
-                                 .current_scene = Menu_Map_currentScene,
-                                 .current_scene_row = Menu_Map_currentSceneRow};
+  const AreaSelectionInput input{
+      .visited_areas = static_cast<std::uint32_t>(
+          VS::State::roomVisitProgress.area_flags[0]),
+      .current_scene = Menu_Map_currentScene,
+      .current_scene_row = Menu_Map_currentSceneRow};
   LiveAreaMenu host(nullptr);
   return UpdateAreaSelection(host, area_selection, input,
                              Menu_Map_sceneRowIdMap, Menu_Map_currentMapRow,

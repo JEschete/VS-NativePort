@@ -18,7 +18,7 @@
 #include "Menu/Results/ResultsDrawingLive.hpp"
 #include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Results {
 namespace {
@@ -64,12 +64,13 @@ class LiveCubePuzzleTextHost final : public CubePuzzleTextHost {
 
 // The flags' fields are plain char; the original loads them unsigned.
 CubePuzzleClock LivePuzzleClock() {
-  return {.minutes =
-              static_cast<std::uint8_t>(VS::State::stateFlags.puzzleTimerMins),
-          .seconds = static_cast<std::uint8_t>(
-              VS::State::stateFlags.puzzleTimerSeconds),
-          .hundredths = static_cast<std::uint8_t>(
-              VS::State::stateFlags.puzzleTimerHundredths)};
+  return {
+      .minutes =
+          static_cast<std::uint8_t>(VS::State::stateFlags.puzzle_timer_minutes),
+      .seconds =
+          static_cast<std::uint8_t>(VS::State::stateFlags.puzzle_timer_seconds),
+      .hundredths = static_cast<std::uint8_t>(
+          VS::State::stateFlags.puzzle_timer_hundredths)};
 }
 }  // namespace
 

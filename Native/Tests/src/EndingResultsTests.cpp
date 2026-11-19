@@ -21,8 +21,8 @@
 #include "Render/TextureRegionDraw.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 #include "TestSupport/EndingDisplayRecorder.hpp"
 
@@ -915,7 +915,7 @@ class LiveClearRecords {
     VS::State::scoreData = {};
     VS::State::stateFlags = {};
     VS::State::playTime = {};
-    State_roomVisitProgress = {};
+    VS::State::roomVisitProgress = {};
     VS::State::savedEntryDoor = {};
     VS::Input::settings = {};
     std::ranges::fill(Battle_actionDefinitions, Battle_ActionDefinition{});
@@ -929,7 +929,7 @@ class LiveClearRecords {
     VS::State::scoreData = score_;
     VS::State::stateFlags = flags_;
     VS::State::playTime = play_time_;
-    State_roomVisitProgress = rooms_;
+    VS::State::roomVisitProgress = rooms_;
     VS::State::savedEntryDoor = door_;
     VS::Input::settings = settings_;
     std::ranges::copy(actions_, std::begin(Battle_actionDefinitions));
@@ -937,12 +937,12 @@ class LiveClearRecords {
   }
 
  private:
-  State_ScoreData score_ = VS::State::scoreData;
-  State_StateFlags flags_ = VS::State::stateFlags;
+  VS::State::ScoreData score_ = VS::State::scoreData;
+  VS::State::StateFlags flags_ = VS::State::stateFlags;
   VS::State::PlayTime play_time_ = VS::State::playTime;
-  State_RoomVisitFlags rooms_ = State_roomVisitProgress;
+  VS::State::RoomVisitFlags rooms_ = VS::State::roomVisitProgress;
   Field_MpdDoorRecord door_ = VS::State::savedEntryDoor;
-  State_Settings settings_ = VS::Input::settings;
+  VS::Input::Settings settings_ = VS::Input::settings;
   decltype(std::to_array(Battle_actionDefinitions)) actions_ =
       std::to_array(Battle_actionDefinitions);
   decltype(std::to_array(VS::Ending::countableRoomBits)) countable_ =
@@ -954,13 +954,13 @@ class LiveClearRecords {
 void CommitLiveClear() {
   VS::State::playTime.hours = 2;
   VS::State::playTime.minutes = 5;
-  State_StateFlags& flags = VS::State::stateFlags;
-  flags.clearCount = 4;
+  VS::State::StateFlags& flags = VS::State::stateFlags;
+  flags.clear_count = 4;
   flags.difficulty = 1;
-  flags.magicUsed = 1;
-  flags.asuraDefeated = 1;
-  flags.chestsOpened[0] = 1;
-  State_roomVisitProgress.roomFlags[0] = 0xF;
+  flags.magic_used = 1;
+  flags.asura_defeated = 1;
+  flags.chests_opened[0] = 1;
+  VS::State::roomVisitProgress.room_flags[0] = 0xF;
   VS::Ending::countableRoomBits[0] = 0x3;
   VS::State::savedEntryDoor.destinationZoneId = 9;
   VS::Ending::LiveCommitClearProgress();
@@ -971,26 +971,26 @@ TEST_CASE("LiveCommitClearProgress records the clear in the game's score",
           "[ending][ending-results-credits]") {
   const LiveClearRecords records;
   CommitLiveClear();
-  const State_ScoreData& score = VS::State::scoreData;
-  CHECK(score.completionTimeMinutes == 125);
-  CHECK(score.clearCount == 4);
+  const VS::State::ScoreData& score = VS::State::scoreData;
+  CHECK(score.completion_time_minutes == 125);
+  CHECK(score.clear_count == 4);
   // Under ten hours (1), Asura (9), never saved (16) and no battle abilities or
   // break arts (18, 19); magic was used.
   CHECK(static_cast<std::uint32_t>(score.titles) == 0xD0202U);
-  CHECK(score.mapCompletion == 2);
-  CHECK(score.openedChestCount == 1);
+  CHECK(score.map_completion == 2);
+  CHECK(score.opened_chest_count == 1);
 }
 
 TEST_CASE("LiveCommitClearProgress resets the game's playthrough records",
           "[ending][ending-results-credits]") {
   const LiveClearRecords records;
   CommitLiveClear();
-  const State_StateFlags& flags = VS::State::stateFlags;
-  CHECK(flags.clearCount == 5);
-  CHECK((flags.difficulty == 1 && flags.normalModeCleared == 1));
-  CHECK((flags.magicUsed == 0 && flags.asuraDefeated == 0));
-  CHECK(flags.chestsOpened[0] == 0);
-  CHECK(State_roomVisitProgress.roomFlags[0] == 0);
+  const VS::State::StateFlags& flags = VS::State::stateFlags;
+  CHECK(flags.clear_count == 5);
+  CHECK((flags.difficulty == 1 && flags.normal_mode_cleared == 1));
+  CHECK((flags.magic_used == 0 && flags.asura_defeated == 0));
+  CHECK(flags.chests_opened[0] == 0);
+  CHECK(VS::State::roomVisitProgress.room_flags[0] == 0);
   CHECK(VS::State::savedEntryDoor.destinationZoneId == 1);
   CHECK(VS::State::savedEntryDoor.destinationRoomId == 0);
 }

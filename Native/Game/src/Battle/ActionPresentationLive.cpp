@@ -53,7 +53,7 @@
 #include "Menu/TextBox.h"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/KillScoreLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
 
@@ -161,9 +161,9 @@ class LiveWorld final : public ActionPresentationWorld {
     return static_cast<std::uint8_t>(State().chainAbilitySlot);
   }
   std::uint8_t MappedChain(std::size_t slot) override {
-    Require(slot < std::size(VS::Input::settings.mappedChainAbilities));
+    Require(slot < std::size(VS::Input::settings.mapped_chain_abilities));
     return static_cast<std::uint8_t>(
-        VS::Input::settings.mappedChainAbilities[slot]);
+        VS::Input::settings.mapped_chain_abilities[slot]);
   }
   bool HasPresentation(std::uint16_t action) override {
     return Definition(action).returnsToMenuOnCancel != 0;
@@ -234,18 +234,18 @@ class LiveWorld final : public ActionPresentationWorld {
     return Battle_characterState->equippedWeaponCategory;
   }
   std::uint16_t WeaponAttacks(std::size_t category) override {
-    Require(category < std::size(VS::State::scoreData.weaponAttacks));
-    return VS::State::scoreData.weaponAttacks[category];
+    Require(category < std::size(VS::State::scoreData.weapon_attacks));
+    return VS::State::scoreData.weapon_attacks[category];
   }
   void SetWeaponAttacks(std::size_t category, std::uint16_t count) override {
-    Require(category < std::size(VS::State::scoreData.weaponAttacks));
-    VS::State::scoreData.weaponAttacks[category] = count;
+    Require(category < std::size(VS::State::scoreData.weapon_attacks));
+    VS::State::scoreData.weapon_attacks[category] = count;
   }
   int TargetDistance() override { return LiveActionTargetDistance(); }
   void ResetWeaponKillStreak() override { State::ResetLiveWeaponKillStreak(); }
-  std::uint16_t HealCount() override { return VS::State::scoreData.healCount; }
+  std::uint16_t HealCount() override { return VS::State::scoreData.heal_count; }
   void SetHealCount(std::uint16_t count) override {
-    VS::State::scoreData.healCount = count;
+    VS::State::scoreData.heal_count = count;
   }
   void RestoreIdle(int actor) override {
     Actors::RestoreLiveActorIdlePose(actor);

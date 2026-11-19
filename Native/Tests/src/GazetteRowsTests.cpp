@@ -455,7 +455,7 @@ TEST_CASE("RenderLiveScrollableRow refuses a null row or ordering table",
 struct LiveMenuFixture {
   Menu_Framework_MenuRow* saved_rows = VS::Menu::Framework::menuItems;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
-  State_Settings saved_settings = VS::Input::settings;
+  VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Score_CursorMemory saved_cursor = Battle_unusedMenu9CursorMemory;
   std::array<u_short, std::size(Menu_Score_menuText)> saved_text{};
   score::TopMenuState saved_top_menu = score::LiveTopMenuState();
@@ -469,7 +469,7 @@ struct LiveMenuFixture {
   LiveMenuFixture() {
     std::copy_n(Menu_Score_menuText, saved_text.size(), saved_text.begin());
     VS::Menu::Framework::menuItems = rows.data();
-    VS::Input::settings.cursorMemory = 0;
+    VS::Input::settings.cursor_memory = 0;
     for (std::size_t i = 0; i < names.size(); ++i) {
       names[i][0] = static_cast<char>(10 + i);
       names[i][1] = static_cast<char>(0xE7);
@@ -500,7 +500,7 @@ TEST_CASE("RestoreLiveTopMenuCursor recalls the row and restores the setting",
   score::RestoreLiveTopMenuCursor(4, 2, fixture.text.data());
   CHECK(VS::Menu::Framework::menuMemory.cursorMemories[2] == 2);
   CHECK(VS::Menu::Framework::menuMemory.cursorMemories[3] == 0);
-  CHECK(VS::Input::settings.cursorMemory == 0);
+  CHECK(VS::Input::settings.cursor_memory == 0);
   CHECK(fw::LiveSelectedRow() == -1);
   CHECK(fw::LiveHighlightedRow() == 2);
 }

@@ -278,57 +278,57 @@ void Fields(VS::State::AshleyStatsSnapshot& r, V&& v) {
 }
 
 template <class V>
-void Fields(State_Settings& r, V&& v) {
-  Bits mode{static_cast<unsigned>(r.reserved0Bit0), kFourBitMask};
-  Bits container{static_cast<unsigned>(r.containerEmpty), 1};
-  Bits timing{static_cast<unsigned>(r.abilityTimingDisplay), 1};
-  Bits weapon{static_cast<unsigned>(r.weaponStatChange), 1};
-  Bits armor{static_cast<unsigned>(r.armorStatChange), 1};
+void Fields(VS::Input::Settings& r, V&& v) {
+  Bits mode{static_cast<unsigned>(r.mode_flags), kFourBitMask};
+  Bits container{static_cast<unsigned>(r.container_empty), 1};
+  Bits timing{static_cast<unsigned>(r.ability_timing_display), 1};
+  Bits weapon{static_cast<unsigned>(r.weapon_stat_change), 1};
+  Bits armor{static_cast<unsigned>(r.armor_stat_change), 1};
   v("mode_flags", mode);
   v("container_empty", container);
   v("ability_timing", timing);
   v("weapon_status", weapon);
   v("armor_status", armor);
-  r.reserved0Bit0 = static_cast<u_char>(mode.value);
-  r.containerEmpty = static_cast<u_char>(container.value);
-  r.abilityTimingDisplay = static_cast<u_char>(timing.value);
-  r.weaponStatChange = static_cast<u_char>(weapon.value);
-  r.armorStatChange = static_cast<u_char>(armor.value);
-  v("cursor_memory", r.cursorMemory);
-  v("menu_flags", r.menuFlags);
-  v("campaign_identity", r.slotState);
+  r.mode_flags = static_cast<u_char>(mode.value);
+  r.container_empty = static_cast<u_char>(container.value);
+  r.ability_timing_display = static_cast<u_char>(timing.value);
+  r.weapon_stat_change = static_cast<u_char>(weapon.value);
+  r.armor_stat_change = static_cast<u_char>(armor.value);
+  v("cursor_memory", r.cursor_memory);
+  v("menu_flags", r.menu_flags);
+  v("campaign_identity", r.slot_state);
   v("information", r.information);
-  v("simple_map", r.simpleMap);
-  v("mono_sound", r.monoSound);
-  v("vibration", r.vibrationOn);
-  v("chain_bindings", r.mappedChainAbilities);
-  v("defense_bindings", r.mappedDefenseAbilities);
+  v("simple_map", r.simple_map);
+  v("mono_sound", r.mono_sound);
+  v("vibration", r.vibration_on);
+  v("chain_bindings", r.mapped_chain_abilities);
+  v("defense_bindings", r.mapped_defense_abilities);
   v("source_save_key", r.key);
-  v("cumulative_saves", r.cumulativeSaveCount);
-  v("current_game_saves", r.currentGameSaveCount);
-  v("source_save_generation", r.saveFileGeneration);
+  v("cumulative_saves", r.cumulative_save_count);
+  v("current_game_saves", r.current_game_save_count);
+  v("source_save_generation", r.save_file_generation);
 }
 
 template <class V>
-void Fields(State_RoomVisitFlags& r, V&& v) {
-  auto rooms = WordIds("map", r.roomFlags);
-  auto areas = WordIds("area", r.areaFlags);
+void Fields(VS::State::RoomVisitFlags& r, V&& v) {
+  auto rooms = WordIds("map", r.room_flags);
+  auto areas = WordIds("area", r.area_flags);
   v("maps", rooms);
   v("areas", areas);
-  ApplyWordIds(rooms, r.roomFlags);
-  ApplyWordIds(areas, r.areaFlags);
+  ApplyWordIds(rooms, r.room_flags);
+  ApplyWordIds(areas, r.area_flags);
 }
 
 template <class V>
-void Fields(State_ArtsStatus& r, V&& v) {
-  v("learned", r.artsLearned);
-  v("weapon_kills", r.kills.weaponCategoryKills);
-  v("abilities_unlocked", r.kills.battleAbilitiesUnlocked);
-  v("total_kills", r.kills.totalKills);
+void Fields(VS::State::ArtsStatus& r, V&& v) {
+  v("learned", r.arts_learned);
+  v("weapon_kills", r.kills.weapon_category_kills);
+  v("abilities_unlocked", r.kills.battle_abilities_unlocked);
+  v("total_kills", r.kills.total_kills);
 }
 
 template <class V>
-void Fields(State_TrialScore& r, V&& v) {
+void Fields(VS::State::TrialScore& r, V&& v) {
   Bits time{r.time, kTwentyFourBitMask};
   Bits round{r.round, kSevenBitMask};
   Bits difficulty{r.difficulty, 1};
@@ -341,27 +341,27 @@ void Fields(State_TrialScore& r, V&& v) {
 }
 
 template <class V>
-void Fields(State_ScoreData& r, V&& v) {
+void Fields(VS::State::ScoreData& r, V&& v) {
   v("titles", r.titles);
-  v("class_kills", r.enemyKills);
-  v("weapon_attacks", r.weaponAttacks);
-  v("trials", r.bossTimeTrialScores);
-  v("maximum_chain", r.maxChain);
-  v("clear_count", r.clearCount);
-  v("completion_minutes", r.completionTimeMinutes);
-  v("map_completion", r.mapCompletion);
-  v("opened_chests", r.openedChestCount);
-  auto kills = WordIds("enemy", r.enemyKillFlags);
+  v("class_kills", r.enemy_kills);
+  v("weapon_attacks", r.weapon_attacks);
+  v("trials", r.boss_time_trial_scores);
+  v("maximum_chain", r.max_chain);
+  v("clear_count", r.clear_count);
+  v("completion_minutes", r.completion_time_minutes);
+  v("map_completion", r.map_completion);
+  v("opened_chests", r.opened_chest_count);
+  auto kills = WordIds("enemy", r.enemy_kill_flags);
   v("defeated_enemies", kills);
-  ApplyWordIds(kills, r.enemyKillFlags);
-  v("streak_score", r.streakScore);
-  v("misc_score", r.miscScore);
-  v("kill_streak_class", r.killStreakEnemyClass);
-  v("kill_streak_count", r.killStreakEnemyCount);
-  v("weapon_streak_category", r.weaponKillStreakBladeCategory);
-  v("weapon_streak_count", r.weaponKillStreak);
-  v("chain_streak", r.chainStreak);
-  v("heal_count", r.healCount);
+  ApplyWordIds(kills, r.enemy_kill_flags);
+  v("streak_score", r.streak_score);
+  v("misc_score", r.misc_score);
+  v("kill_streak_class", r.kill_streak_enemy_class);
+  v("kill_streak_count", r.kill_streak_enemy_count);
+  v("weapon_streak_category", r.weapon_kill_streak_blade_category);
+  v("weapon_streak_count", r.weapon_kill_streak);
+  v("chain_streak", r.chain_streak);
+  v("heal_count", r.heal_count);
 }
 
 template <class V>

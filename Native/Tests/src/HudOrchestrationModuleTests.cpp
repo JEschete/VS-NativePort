@@ -9,7 +9,7 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudOrchestrationLiveFixture.hpp"
 #include "Content/ModuleData.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -101,7 +101,7 @@ TEST_CASE("F01384 production module receives the authoritative typed timer",
   VS::State::SceneTimer timer{};
   timer.time.minutes = 12;
   timer.time.seconds = 34;
-  VS::State::stateFlags.puzzleTimerHundredths = 56;
+  VS::State::stateFlags.puzzle_timer_hundredths = 56;
   draw(&timer);
   CHECK(fixture.frame.UsedWords() == 42);
   CHECK(Battle_puzzleTimerText[0] == '1');

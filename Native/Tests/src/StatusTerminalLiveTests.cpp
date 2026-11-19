@@ -117,12 +117,12 @@ TEST_CASE("F02675 Live uses real transition rows and diagnoses missing actors",
 TEST_CASE("F02676 Live enters real list phase and resets before repeated entry",
           "[status-terminal][status-terminal-live][F02676]") {
   Fixture fixture;
-  VS::Input::settings.cursorMemory = static_cast<char>(0xA7);
+  VS::Input::settings.cursor_memory = static_cast<char>(0xA7);
   const auto refused = st::RefusedLiveTerminalControllerCount();
   REQUIRE(st::LiveUpdateEquipmentList(0) == 0);
   CHECK(st::RefusedLiveTerminalControllerCount() == refused);
   CHECK(st::LiveEquipmentListControllerState().phase == 1);
-  CHECK(static_cast<std::uint8_t>(VS::Input::settings.cursorMemory) == 0xA7);
+  CHECK(static_cast<std::uint8_t>(VS::Input::settings.cursor_memory) == 0xA7);
   Menu_Status_selectedStatRow = static_cast<char>(250);
   st::ResetLiveTerminalControllersModuleData();
   CHECK(st::LiveEquipmentListControllerState() == st::EquipmentListState{});

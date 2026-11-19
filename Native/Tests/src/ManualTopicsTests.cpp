@@ -435,7 +435,7 @@ TEST_CASE("Page text refuses lines that overflow the page buffer",
 
 namespace {
 struct LiveTopicFixture {
-  State_Settings saved_settings = VS::Input::settings;
+  VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
@@ -457,7 +457,7 @@ struct LiveTopicFixture {
     VS::Menu::Framework::menuItems = workspace.rows.data();
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuMemory = {};
-    VS::Input::settings.menuFlags = 0x3FF;
+    VS::Input::settings.menu_flags = 0x3FF;
     std::fill(std::begin(Menu_Manual_menuText), std::end(Menu_Manual_menuText),
               u_short{0});
     const std::vector<std::uint16_t> table = TopicTable();
@@ -538,8 +538,8 @@ TEST_CASE("Live topic menu lists the module's topic rows then polls",
   CHECK(Menu_Manual_topMenuState == 1);
   CHECK(VS::Menu::Framework::menuMemory.cursorMemories[4] == 5);
   CHECK(VS::Menu::Framework::menuMemory.cursorMemories[5] == 5);
-  CHECK(VS::Input::settings.cursorMemory ==
-        fixture.saved_settings.cursorMemory);
+  CHECK(VS::Input::settings.cursor_memory ==
+        fixture.saved_settings.cursor_memory);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   CHECK(manual::LiveUpdateTopicMenu(0) == -1);
   CHECK(Menu_Manual_topMenuState == 1);

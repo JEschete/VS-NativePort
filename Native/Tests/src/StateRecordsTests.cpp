@@ -22,12 +22,12 @@
 #include "State/KillScore.hpp"
 #include "State/KillScoreLive.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/SceneTimer.hpp"
 #include "State/SceneTimerLive.hpp"
 #include "State/ScriptFlags.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 #include "TestSupport/ChannelWarnings.hpp"
 
@@ -95,7 +95,7 @@ class FakeTimerHost final : public state::SceneTimerHost {
 struct LiveTimerState {
   VS::State::SceneTimer saved_timer = VS::State::sceneTimer;
   int saved_tick_speed = VS::State::tickSpeed;
-  State_StateFlags saved_flags = VS::State::stateFlags;
+  VS::State::StateFlags saved_flags = VS::State::stateFlags;
   char saved_hud = Battle_lowerScreenUiState;
   unsigned saved_random = VS::Core::BiosRand().State();
   void* saved_triggers = Event_roomEventTriggers;
@@ -164,7 +164,7 @@ struct LiveTimerExpiry {
 // The score record and the battle action and player, restored after one
 // test.
 struct LiveScoreState {
-  State_ScoreData saved_score = VS::State::scoreData;
+  VS::State::ScoreData saved_score = VS::State::scoreData;
   Battle_ActionState* saved_action = Battle_actionState;
   Battle_Actor* saved_player = Battle_characterState;
 

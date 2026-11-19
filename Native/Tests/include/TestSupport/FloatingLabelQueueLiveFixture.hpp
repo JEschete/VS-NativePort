@@ -106,7 +106,7 @@ class Producers {
     actor.boneMatrices[0].m[2][2] = 4096;
     VS::Actors::boneMatrixScratch = actor.boneMatrices[0];
     Actors_actorRecords[kActor] = &actor;
-    VS::Input::settings.weaponStatChange = 1;
+    VS::Input::settings.weapon_stat_change = 1;
   }
   ~Producers() {
     Actors_actorRecords[kActor] = saved_actor_;

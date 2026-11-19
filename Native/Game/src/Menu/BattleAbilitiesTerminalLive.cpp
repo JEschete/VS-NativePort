@@ -26,7 +26,7 @@
 #include "Render/GameFontLive.hpp"
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Menu::BattleAbilities {
 namespace {
@@ -97,12 +97,12 @@ class LiveAssignmentHost final : public AssignmentHost {
   std::span<std::uint8_t> Mappings(AbilityMenuType type) override {
     if (type == AbilityMenuType::kChain) {
       return {reinterpret_cast<std::uint8_t*>(
-                  VS::Input::settings.mappedChainAbilities),
+                  VS::Input::settings.mapped_chain_abilities),
               kAssignmentButtonCount};
     }
     if (type == AbilityMenuType::kDefense) {
       return {reinterpret_cast<std::uint8_t*>(
-                  VS::Input::settings.mappedDefenseAbilities),
+                  VS::Input::settings.mapped_defense_abilities),
               kAssignmentButtonCount};
     }
     return {};
@@ -270,10 +270,10 @@ class LivePointsHost final : public UnlockPointsHost {
     BattleAbilities::Refuse(reason);
   }
   int UnlockCount() const override {
-    return VS::State::artsStatus.kills.battleAbilitiesUnlocked;
+    return VS::State::artsStatus.kills.battle_abilities_unlocked;
   }
   std::uint16_t TotalKills() const override {
-    return VS::State::artsStatus.kills.totalKills;
+    return VS::State::artsStatus.kills.total_kills;
   }
   std::optional<std::uint16_t> Requirement(int count) const override {
     if (count < 0 || static_cast<std::size_t>(count) >=
@@ -348,11 +348,11 @@ class LiveScreenHost final : public AbilityScreenHost {
                      ? Text_Menu2_battleAbilities_Offset_defenseAbilitiesDesc
                      : Text_Menu2_battleAbilities_Offset_noDefenseAbilities)};
     std::array<int, kCategoryCount> types{0, defense_available ? 0 : 1};
-    const auto remembered = VS::Input::settings.cursorMemory;
-    if (force_cursor_memory) VS::Input::settings.cursorMemory = 1;
+    const auto remembered = VS::Input::settings.cursor_memory;
+    if (force_cursor_memory) VS::Input::settings.cursor_memory = 1;
     Framework::CreateLiveMenuRows(static_cast<int>(kCategoryCount),
                                   kCategoryRowInfo, text.data(), types.data());
-    VS::Input::settings.cursorMemory = remembered;
+    VS::Input::settings.cursor_memory = remembered;
   }
   int SelectedCategory() override { return Framework::LiveSelectedRow(); }
   int UpdateAbilityList(AbilityKind kind, bool initialize) override {

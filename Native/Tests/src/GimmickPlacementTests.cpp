@@ -67,7 +67,7 @@
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 TEST_CASE(
     "Gimmick sharing keeps first slot signed exclusion and three-bit identity",
@@ -1320,7 +1320,7 @@ struct SigilDoorLiveFixture {
                         saved_pairs[index].begin());
       std::ranges::fill(Field_lockedDoorRoomPairs[index], 0);
     }
-    std::ranges::fill(VS::State::stateFlags.opaque186, 0);
+    std::ranges::fill(VS::State::stateFlags.opaque_186, 0);
     Field_lockedDoorIndexRanges[1] = 2;
     for (std::size_t index = 0; index < 2; ++index) {
       Field_lockedDoorRoomPairs[index][0] = 9;
@@ -3479,13 +3479,13 @@ TEST_CASE("Live door lookup refuses partial misaligned and absent records",
 TEST_CASE("Native sigil lookup and marking preserve unsigned first-pair state",
           "[sigil-door-live][field]") {
   SigilDoorLiveFixture fixture;
-  VS::State::stateFlags.opaque186[0] = std::bit_cast<char>(std::uint8_t{128});
-  VS::State::stateFlags.opaque186[1] = std::bit_cast<char>(std::uint8_t{254});
+  VS::State::stateFlags.opaque_186[0] = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque_186[1] = std::bit_cast<char>(std::uint8_t{254});
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 0) == 128);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(10, 1, 0) == 128);
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(11, 2, 0) == 254);
   auto expected = VS::State::stateFlags;
-  expected.opaque186[0] = 1;
+  expected.opaque_186[0] = 1;
   VS::Field::MarkSigilDoorUnlockedEntry(0);
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
@@ -3527,10 +3527,11 @@ TEST_CASE("Live sigil groups stop at the eight original boundary words",
   SigilDoorLiveFixture fixture;
   Field_lockedDoorIndexRanges[7] = 0;
   Field_lockedDoorIndexRanges[8] = 2;
-  VS::State::stateFlags.opaque186[0] = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque_186[0] = std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::IsRoomSigilDoorUnlockedEntry(9, 247, 7) == 0);
   CHECK_FALSE(VS::Field::MarkLiveSigilDoorUnlocked(7));
-  CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.opaque186[0]) == 128);
+  CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.opaque_186[0]) ==
+        128);
 }
 
 TEST_CASE("Door table native entries retain original module addresses",
@@ -4093,12 +4094,12 @@ TEST_CASE(
     "[room-trigger-live][field]") {
   RoomTriggerLiveFixture fixture;
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
-  VS::State::stateFlags.opaque20 = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque_20 = std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == nullptr);
   fixture.triggers[0].kind = 16;
   CHECK(VS::Field::RoomTriggerAtTileEntry(0, 0, 0) == &fixture.triggers[0]);
   CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == nullptr);
-  VS::State::stateFlags.opaque20 = 0;
+  VS::State::stateFlags.opaque_20 = 0;
   CHECK(VS::Field::RoomTriggerAtTileEntry(-1, 0, 0) == &fixture.triggers[2]);
   CHECK(VS::Field::RoomTriggerAtTileEntry(65535, 0, 0) == nullptr);
 }
@@ -4175,12 +4176,12 @@ TEST_CASE("Active room triggers preserve both unsigned suppression flags",
   std::array<Field_MpdFloorTrigger, 1> triggers{};
   Field_roomData.floorTriggers = triggers.data();
   Field_roomData.header.floorTriggersLength = sizeof triggers;
-  VS::State::stateFlags.opaque20 = std::bit_cast<char>(std::uint8_t{128});
+  VS::State::stateFlags.opaque_20 = std::bit_cast<char>(std::uint8_t{128});
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().empty());
-  VS::State::stateFlags.opaque20 = 0;
-  VS::State::stateFlags.opaque40 = std::bit_cast<char>(std::uint8_t{255});
+  VS::State::stateFlags.opaque_20 = 0;
+  VS::State::stateFlags.opaque_40 = std::bit_cast<char>(std::uint8_t{255});
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().empty());
-  VS::State::stateFlags.opaque40 = 0;
+  VS::State::stateFlags.opaque_40 = 0;
   CHECK(VS::Field::LiveActiveRoomTriggerInfo().size() == 1);
 }
 
@@ -7147,8 +7148,8 @@ TEST_CASE("Native save point query returns unsigned activation bytes",
   Field_roomData.floorTriggers = room.triggers.data();
   Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
   room.triggers[0].kind = 16;
-  VS::State::stateFlags.opaque20 = 0;
-  VS::State::stateFlags.opaque40 = 0;
+  VS::State::stateFlags.opaque_20 = 0;
+  VS::State::stateFlags.opaque_40 = 0;
   room.triggers[0].activation = 1;
   REQUIRE(VS::Field::CurrentSavePointIdEntry() == 1);
   for (const auto value : {127, 128, 255}) {
@@ -7185,12 +7186,12 @@ TEST_CASE("Native save point query refuses missing and suppressed trigger data",
   Field_roomData.header.floorTriggersLength = sizeof(room.triggers);
   room.triggers[0].kind = 16;
   room.triggers[0].activation = 7;
-  VS::State::stateFlags.opaque20 = 0;
-  VS::State::stateFlags.opaque40 = 0;
+  VS::State::stateFlags.opaque_20 = 0;
+  VS::State::stateFlags.opaque_40 = 0;
   REQUIRE(VS::Field::CurrentSavePointIdEntry() == 7);
   room.triggers[0].kind = 15;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
-  VS::State::stateFlags.opaque20 = 1;
+  VS::State::stateFlags.opaque_20 = 1;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 0);
   room.triggers[0].kind = 16;
   CHECK(VS::Field::CurrentSavePointIdEntry() == 7);

@@ -30,7 +30,7 @@
 #include "Render/Render.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 std::span<const std::byte> SceneBytes(const void* data, size_t size) {
@@ -146,7 +146,7 @@ struct RenderFixture {
                                      VS::Render::legacyPrimitiveBuffers[1]};
   int saved_framebuffer = VS::Render::frameBuf;
   u_short saved_ticks = Field_roomAnimationTicks;
-  State_StateFlags saved_flags = VS::State::stateFlags;
+  VS::State::StateFlags saved_flags = VS::State::stateFlags;
   std::vector<u_long> packets =
       std::vector<u_long>(0x20000 / sizeof(u_long) + 1);
   std::array<u_long, 16> ordering{};
@@ -461,7 +461,7 @@ TEST_CASE("Reload door native store writes only its packed state byte",
   } restore{saved};
   auto expected = saved;
   Field_enteredDoorId = 254;
-  expected.doorEntered = std::bit_cast<char>(std::uint8_t{255});
+  expected.door_entered = std::bit_cast<char>(std::uint8_t{255});
   VS::Field::StoreEntranceDoorForReloadEntry();
   using FlagBytes = std::array<std::byte, sizeof(expected)>;
   CHECK(std::bit_cast<FlagBytes>(VS::State::stateFlags) ==
@@ -469,7 +469,7 @@ TEST_CASE("Reload door native store writes only its packed state byte",
   CHECK(Field_enteredDoorId == 254);
   Field_enteredDoorId = -1;
   VS::Field::StoreEntranceDoorForReloadEntry();
-  CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.doorEntered) == 0);
+  CHECK(std::bit_cast<std::uint8_t>(VS::State::stateFlags.door_entered) == 0);
 }
 
 TEST_CASE("Entrance native entries retain original module addresses",
@@ -582,7 +582,7 @@ TEST_CASE(
   bytes[4] = 0;
   bytes[25] = door;
   Field_roomAnimationTicks = ticks;
-  VS::State::stateFlags.opaque33F[1] = gate;
+  VS::State::stateFlags.opaque_33f[1] = gate;
   VS::Field::ResolveLiveSceneRoomData(bytes.data(),
                                       bytes.size() * sizeof(u_long));
   VS::Field::DrawLiveMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));

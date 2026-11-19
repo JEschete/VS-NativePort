@@ -20,7 +20,7 @@
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Content/ModuleData.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace {
 namespace b = VS::Battle;
@@ -31,14 +31,14 @@ struct LiveReset {
       std::to_array(Actors_actorRecords);
   decltype(std::to_array(Battle_actionDefinitions)) definitions =
       std::to_array(Battle_actionDefinitions);
-  decltype(std::to_array(State_learnedActionFlags)) learned =
-      std::to_array(State_learnedActionFlags);
+  decltype(std::to_array(VS::State::learnedActionFlags)) learned =
+      std::to_array(VS::State::learnedActionFlags);
   ~LiveReset() {
     Battle_actionState = state;
     std::ranges::copy(actors, std::begin(Battle_actors));
     std::ranges::copy(records, std::begin(Actors_actorRecords));
     std::ranges::copy(definitions, std::begin(Battle_actionDefinitions));
-    std::ranges::copy(learned, std::begin(State_learnedActionFlags));
+    std::ranges::copy(learned, std::begin(VS::State::learnedActionFlags));
   }
 };
 using Definition = Battle_ActionDefinition;
@@ -170,12 +170,12 @@ TEST_CASE("F01851 live changes only the unlock bit of every raw definition",
     Battle_actionDefinitions[index] =
         std::bit_cast<Battle_ActionDefinition>(raw);
   }
-  for (std::size_t byte = 0; byte < std::size(State_learnedActionFlags);
+  for (std::size_t byte = 0; byte < std::size(VS::State::learnedActionFlags);
        ++byte) {
     const auto bits = pattern == 0 ? 0x81 : pattern == 1 ? 0 : byte * 109 + 37;
-    State_learnedActionFlags[byte] = static_cast<char>(bits);
+    VS::State::learnedActionFlags[byte] = static_cast<char>(bits);
   }
-  const auto flags = std::to_array(State_learnedActionFlags);
+  const auto flags = std::to_array(VS::State::learnedActionFlags);
   const auto before = std::to_array(Battle_actionDefinitions);
   b::ApplyLiveLearnedActionUnlocks();
   for (std::size_t index = 0; index < before.size(); ++index) {
@@ -187,8 +187,8 @@ TEST_CASE("F01851 live changes only the unlock bit of every raw definition",
     CHECK(std::bit_cast<DefinitionBytes>(Battle_actionDefinitions[index]) ==
           expected);
   }
-  CHECK(std::to_array(State_learnedActionFlags) == flags);
-  std::ranges::fill(State_learnedActionFlags, 0);
+  CHECK(std::to_array(VS::State::learnedActionFlags) == flags);
+  std::ranges::fill(VS::State::learnedActionFlags, 0);
   b::ApplyLiveLearnedActionUnlocks();
   CHECK(Battle_actionDefinitions[0].unlocked == 0);
   CHECK(Battle_actionDefinitions[255].unlocked == 0);

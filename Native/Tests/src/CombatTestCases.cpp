@@ -55,6 +55,7 @@
 #include "Field/Interactions.h"
 #include "Input/Buttons.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Items/Equipment.h"
 #include "Items/EquipmentLive.hpp"
 #include "Items/Inventory.h"
@@ -88,10 +89,9 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/KillScoreLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/Settings.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 int Tests_CombatTargetResults(void);
@@ -132,7 +132,7 @@ struct AbilityFixture {
   std::array<Battle_Actor*, 2> saved_actors{Battle_actors[0], Battle_actors[1]};
   std::array<Actors_ActorRecord*, 2> saved_records{Actors_actorRecords[0],
                                                    Actors_actorRecords[1]};
-  State_Settings saved_settings = VS::Input::settings;
+  VS::Input::Settings saved_settings = VS::Input::settings;
   decltype(VS::Input::buttonsPressed) saved_pressed = VS::Input::buttonsPressed;
   decltype(VS::State::scoreData) saved_score = VS::State::scoreData;
   decltype(Battle_floatingLabels) saved_labels = Battle_floatingLabels;
@@ -173,9 +173,9 @@ struct AbilityFixture {
     Battle_actionDefinitions[141].type = Battle_ActionType_BreakArt;
     VS::Input::settings = {};
     for (int index = 0; index < 3; ++index) {
-      VS::Input::settings.mappedChainAbilities[index] =
+      VS::Input::settings.mapped_chain_abilities[index] =
           static_cast<char>(22 + index);
-      VS::Input::settings.mappedDefenseAbilities[index] =
+      VS::Input::settings.mapped_defense_abilities[index] =
           static_cast<char>(40 + index);
     }
     VS::Input::buttonsPressed = PADRright;
@@ -603,7 +603,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   u_char saved_count = Menu_Loot_lootListCount;
   u_char saved_offset = Menu_Loot_lootListOffset;
   char saved_selection = Menu_Loot_selectedLoot;
-  char saved_difficulty = VS::State::stateFlags.difficulty;
+  std::uint8_t saved_difficulty = VS::State::stateFlags.difficulty;
   std::array<Menu_Loot_LootListItem, VS::Menu::Loot::kRowCapacity> rows{};
   Battle_Actor enemy{};
   Battle_ActorStats stats{};
@@ -1105,7 +1105,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
 };
 
 struct LootPagingMenuFixture : EquipmentStagingFixture {
-  State_Settings saved_settings = VS::Input::settings;
+  VS::Input::Settings saved_settings = VS::Input::settings;
   decltype(VS::Input::buttonsPressed) saved_buttons = VS::Input::buttonsPressed;
   decltype(VS::Input::buttonRepeat) saved_repeat = VS::Input::buttonRepeat;
   Menu_Framework_MenuRow* saved_menu_rows = VS::Menu::Framework::menuItems;
@@ -1396,14 +1396,14 @@ struct LootPresentationFixture : EnemyLootFixture {
 };
 
 struct AbilityUnlockFixture : AbilityFixture {
-  State_ArtsStatus saved_progress = VS::State::artsStatus;
+  VS::State::ArtsStatus saved_progress = VS::State::artsStatus;
   decltype(std::to_array(Battle_battleAbilityPointRequirements)) saved_points =
       std::to_array(Battle_battleAbilityPointRequirements);
   decltype(kBreakArtThresholds)::value_type saved_art_points[10]{};
 
   AbilityUnlockFixture() {
     VS::State::artsStatus = {};
-    std::fill_n(VS::State::artsStatus.artsLearned, 12, 4);
+    std::fill_n(VS::State::artsStatus.arts_learned, 12, 4);
     std::copy(kAbilityThresholds.begin(), kAbilityThresholds.end(),
               Battle_battleAbilityPointRequirements);
     for (unsigned category = 0; category < kBreakArtThresholds.size();
@@ -1487,8 +1487,8 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
       : counter(category % 10) {
     actors[0].equippedWeaponCategory = static_cast<u_char>(category);
     VS::State::SetLiveScriptFlag(0x82, 10);
-    VS::State::artsStatus.artsLearned[counter] = static_cast<u_char>(tier);
-    VS::State::artsStatus.kills.weaponCategoryKills[counter] =
+    VS::State::artsStatus.arts_learned[counter] = static_cast<u_char>(tier);
+    VS::State::artsStatus.kills.weapon_category_kills[counter] =
         static_cast<u_short>(kBreakArtThresholds[counter][tier] - 1);
     VS::Battle::InitializeLiveActionHit(&source);
     VS::Battle::InitializeLiveActionHit(&target);
@@ -1543,10 +1543,10 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
         VS::State::SetLiveScriptFlag(0x82, 9);
         break;
       case KillGate::kFourArts:
-        VS::State::artsStatus.artsLearned[counter] = 4;
+        VS::State::artsStatus.arts_learned[counter] = 4;
         break;
       case KillGate::kPendingThreshold:
-        ++VS::State::artsStatus.kills.weaponCategoryKills[counter];
+        ++VS::State::artsStatus.kills.weapon_category_kills[counter];
         break;
     }
   }
@@ -1557,14 +1557,14 @@ struct BreakArtKillFixture : AbilityUnlockFixture {
   }
 };
 
-void CheckAbilityProgress(const State_ArtsStatus& before) {
-  CHECK(std::to_array(VS::State::artsStatus.artsLearned) ==
-        std::to_array(before.artsLearned));
-  CHECK(std::to_array(VS::State::artsStatus.kills.weaponCategoryKills) ==
-        std::to_array(before.kills.weaponCategoryKills));
-  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked ==
-        before.kills.battleAbilitiesUnlocked);
-  CHECK(VS::State::artsStatus.kills.totalKills == before.kills.totalKills);
+void CheckAbilityProgress(const VS::State::ArtsStatus& before) {
+  CHECK(std::to_array(VS::State::artsStatus.arts_learned) ==
+        std::to_array(before.arts_learned));
+  CHECK(std::to_array(VS::State::artsStatus.kills.weapon_category_kills) ==
+        std::to_array(before.kills.weapon_category_kills));
+  CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked ==
+        before.kills.battle_abilities_unlocked);
+  CHECK(VS::State::artsStatus.kills.total_kills == before.kills.total_kills);
 }
 }  // namespace
 
@@ -1652,8 +1652,8 @@ TEST_CASE("Ability rewards use all original cumulative thresholds",
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   const int delta = GENERATE(-1, 0, 1);
   auto& progress = VS::State::artsStatus;
-  progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
-  progress.kills.totalKills =
+  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.total_kills =
       static_cast<u_short>(kAbilityThresholds[unlocked] + delta);
   const auto before = progress;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == (delta >= 0 ? 1 : 0));
@@ -1665,10 +1665,10 @@ TEST_CASE("Successful lethal chain timing retains ability credit",
   ChainCreditFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   auto& progress = VS::State::artsStatus;
-  progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
-  progress.kills.totalKills = kAbilityThresholds[unlocked] - 1;
+  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.total_kills = kAbilityThresholds[unlocked] - 1;
   auto expected = progress;
-  ++expected.kills.totalKills;
+  ++expected.kills.total_kills;
   VS::Battle::LiveAdvanceBattleAbilitySequence();
   CheckAbilityProgress(expected);
   fixture.CheckTerminated();
@@ -1681,10 +1681,10 @@ TEST_CASE("Lethal chain credit preserves failure story and capacity gates",
   if (gate == 0) fixture.action.abilityInputSucceeded = 0;
   if (gate == 1) VS::State::SetLiveScriptFlag(0x82, 9);
   if (gate == 2) {
-    VS::State::artsStatus.kills.totalKills = UINT16_MAX;
+    VS::State::artsStatus.kills.total_kills = UINT16_MAX;
   }
   if (gate == 3) {
-    VS::State::artsStatus.kills.battleAbilitiesUnlocked = 22;
+    VS::State::artsStatus.kills.battle_abilities_unlocked = 22;
   }
   const auto before = VS::State::artsStatus;
   VS::Battle::LiveAdvanceBattleAbilitySequence();
@@ -1698,11 +1698,11 @@ TEST_CASE("Pending ability rewards do not discard later chain credit",
   const int unlocked = GENERATE(Catch::Generators::range(0, 22));
   const int extra = GENERATE(0, 1, 500);
   auto& progress = VS::State::artsStatus;
-  progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
-  progress.kills.totalKills =
+  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.total_kills =
       static_cast<u_short>(kAbilityThresholds[unlocked] + extra);
   auto expected = progress;
-  ++expected.kills.totalKills;
+  ++expected.kills.total_kills;
   VS::Battle::LiveAdvanceBattleAbilitySequence();
   CheckAbilityProgress(expected);
   fixture.CheckTerminated();
@@ -1712,7 +1712,7 @@ TEST_CASE("Pending chain credit alone does not trigger ability learning",
           "[combat][abilities][acquisition][chain-credit]") {
   ChainCreditFixture fixture;
   Battle_recoveryRewardMode = GENERATE(0, 1);
-  VS::State::artsStatus.kills.totalKills = kAbilityThresholds[0];
+  VS::State::artsStatus.kills.total_kills = kAbilityThresholds[0];
   const auto before = VS::State::artsStatus;
   REQUIRE(VS::Battle::LivePendingBattleAbilityUnlocks() == 1);
   VS::Battle::LiveBeginPendingAbilityReward();
@@ -1731,11 +1731,11 @@ TEST_CASE("Pending Break Arts take priority over ability rewards",
   fixture.actors[0].equippedWeaponCategory =
       static_cast<u_char>(category + category_offset);
   auto& progress = VS::State::artsStatus;
-  progress.artsLearned[category] = static_cast<u_char>(tier);
-  progress.kills.weaponCategoryKills[category] =
+  progress.arts_learned[category] = static_cast<u_char>(tier);
+  progress.kills.weapon_category_kills[category] =
       static_cast<u_short>(kBreakArtThresholds[category][tier] + delta);
-  progress.kills.totalKills = 65535;
-  progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
+  progress.kills.total_kills = 65535;
+  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
   const auto before = progress;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() ==
         (delta == 0 ? 0x10000 : (unlocked < 22 ? 1 : 0)));
@@ -1746,9 +1746,9 @@ TEST_CASE("Ability reward cap prevents further pending unlocks",
           "[combat][abilities][acquisition]") {
   AbilityUnlockFixture fixture;
   auto& progress = VS::State::artsStatus;
-  progress.kills.battleAbilitiesUnlocked =
+  progress.kills.battle_abilities_unlocked =
       static_cast<u_short>(GENERATE(22, 23, 65535));
-  progress.kills.totalKills = 65535;
+  progress.kills.total_kills = 65535;
   const auto before = progress;
   CHECK(VS::Battle::LivePendingBattleAbilityUnlocks() == 0);
   CheckAbilityProgress(before);
@@ -1759,8 +1759,8 @@ TEST_CASE("Ineligible ability reward menus leave progression unchanged",
   AbilityUnlockFixture fixture;
   const int unlocked = GENERATE(Catch::Generators::range(0, 23));
   auto& progress = VS::State::artsStatus;
-  progress.kills.battleAbilitiesUnlocked = static_cast<u_short>(unlocked);
-  progress.kills.totalKills = static_cast<u_short>(
+  progress.kills.battle_abilities_unlocked = static_cast<u_short>(unlocked);
+  progress.kills.total_kills = static_cast<u_short>(
       unlocked == 22 ? 65535 : kAbilityThresholds[unlocked] - 1);
   const auto before = progress;
   CHECK(VS::Menu::BattleAbilities::LiveUpdateAbilityUnlock(1) == 1);
@@ -1775,7 +1775,7 @@ TEST_CASE("Qualifying lethal actions count once at every Break Art threshold",
   BreakArtKillFixture fixture(category, tier);
   fixture.action_id = action_id;
   auto expected = VS::State::artsStatus;
-  ++expected.kills.weaponCategoryKills[fixture.counter];
+  ++expected.kills.weapon_category_kills[fixture.counter];
   fixture.Resolve();
   CHECK(fixture.actors[1].killCounted == 1);
   CheckAbilityProgress(expected);
@@ -1896,13 +1896,13 @@ TEST_CASE("Ability eligibility requires mapped input",
   REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(1) == 1);
 
   SECTION("no mapped offensive buttons") {
-    std::fill_n(VS::Input::settings.mappedChainAbilities, 3, 0);
+    std::fill_n(VS::Input::settings.mapped_chain_abilities, 3, 0);
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
   SECTION("no mapped defensive buttons") {
     fixture.Prepare(true);
     REQUIRE(VS::Battle::LiveCanTriggerBattleAbility(0) == 1);
-    std::fill_n(VS::Input::settings.mappedDefenseAbilities, 3, 0);
+    std::fill_n(VS::Input::settings.mapped_defense_abilities, 3, 0);
     CHECK(VS::Battle::LiveCanTriggerBattleAbility(0) == 0);
   }
 }
@@ -1996,7 +1996,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
     VS::State::SetLiveScriptFlag(1, static_cast<char>(difficulty));
     fixture.action.abilityTimer = 100 + delta;
     constexpr int kStreak = 7;
-    VS::State::scoreData.chainStreak = kStreak;
+    VS::State::scoreData.chain_streak = kStreak;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     const bool success = delta > 0 && delta <= margin;
     const int result = delta <= -margin      ? 0
@@ -2011,7 +2011,7 @@ TEST_CASE("Ability timing honors exact difficulty and chain-depth boundaries",
                              success ? slot : 0);
     CHECK(fixture.action.abilityTimer == 102 + delta);
     // A successful defense extends the streak; a missed input ends it (#448).
-    CHECK(VS::State::scoreData.chainStreak ==
+    CHECK(VS::State::scoreData.chain_streak ==
           (success ? kStreak + (defense ? 1 : 0) : 0));
   }
 }
@@ -2042,7 +2042,7 @@ TEST_CASE("Unmapped buttons and no input cannot start an ability",
   AbilityFixture fixture;
   fixture.action.abilityTimer = 102;
   SECTION("unmapped button") {
-    VS::Input::settings.mappedChainAbilities[0] = 0;
+    VS::Input::settings.mapped_chain_abilities[0] = 0;
     VS::Battle::LiveUpdateBattleAbilityTiming();
     CHECK(fixture.action.abilityInputAttempted == 0);
     CHECK(Battle_floatingLabelCount == 0);
@@ -2079,10 +2079,10 @@ TEST_CASE("Successful defensive timing saturates rather than wraps its score",
   AbilityFixture fixture;
   fixture.Prepare(true);
   fixture.action.abilityTimer = 102;
-  VS::State::scoreData.chainStreak = before;
+  VS::State::scoreData.chain_streak = before;
   VS::Battle::LiveUpdateBattleAbilityTiming();
   fixture.CheckInputResult(2, 1);
-  CHECK(VS::State::scoreData.chainStreak == after);
+  CHECK(VS::State::scoreData.chain_streak == after);
 }
 
 TEST_CASE("Single-hit offensive abilities apply their original stat factors",

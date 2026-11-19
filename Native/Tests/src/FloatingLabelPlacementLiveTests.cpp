@@ -162,7 +162,7 @@ class SavedState {
   std::int16_t suppressed_ = Battle_ashleyStatusLabelsSuppressed;
   u_short paused_ = VS::Field::areRoomUpdatesPaused;
   int tick_ = VS::State::tickSpeed;
-  State_Settings settings_ = VS::Input::settings;
+  VS::Input::Settings settings_ = VS::Input::settings;
 };
 
 using LabelDraw = void (*)(int, int, Battle_FloatingLabel*);
@@ -328,8 +328,8 @@ std::uint64_t EquipmentQueueDigest(EquipmentQueue queue, Commit commit) {
   Digest digest;
   for (const bool weapon : {false, true}) {
     for (const bool armor : {false, true}) {
-      VS::Input::settings.weaponStatChange = weapon ? 1 : 0;
-      VS::Input::settings.armorStatChange = armor ? 1 : 0;
+      VS::Input::settings.weapon_stat_change = weapon ? 1 : 0;
+      VS::Input::settings.armor_stat_change = armor ? 1 : 0;
       digest.Add(RunEquipment(frame, queue, commit));
     }
   }

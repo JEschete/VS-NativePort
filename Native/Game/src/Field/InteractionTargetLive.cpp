@@ -12,7 +12,7 @@
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Items/TreasureChests.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Field {
 namespace {
@@ -113,8 +113,8 @@ class LiveRoomTriggerActivationHost final : public TrapDisableHost {
 }  // namespace
 
 std::vector<RoomTriggerInfo> LiveActiveRoomTriggerInfo() {
-  if (VS::State::stateFlags.opaque20 != 0 ||
-      VS::State::stateFlags.opaque40 != 0) {
+  if (VS::State::stateFlags.opaque_20 != 0 ||
+      VS::State::stateFlags.opaque_40 != 0) {
     return {};
   }
   const auto records = TrapRecords();
@@ -146,8 +146,8 @@ std::optional<TrapTarget> FindLiveRoomTriggerAtTile(
                       record.floorLayer});
   }
   return FindRoomTriggerAtTile(values, tile,
-                               VS::State::stateFlags.opaque20 != 0 ||
-                                   VS::State::stateFlags.opaque40 != 0);
+                               VS::State::stateFlags.opaque_20 != 0 ||
+                                   VS::State::stateFlags.opaque_40 != 0);
 }
 
 bool SetLiveRoomTriggerEnabled(std::optional<TrapTarget> target,

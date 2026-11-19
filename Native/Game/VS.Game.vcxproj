@@ -2230,13 +2230,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\State\Progress.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\State\Progress.cpp" />
     <ClCompile Include="src\State\RoomMemory.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2565,8 +2559,7 @@
     <ClInclude Include="src\State\PlayTime.hpp" />
     <ClInclude Include="src\State\RoomCache.hpp" />
     <ClInclude Include="src\State\RoomMemory.hpp" />
-    <ClInclude Include="src\State\Settings.h" />
-    <ClInclude Include="src\State\StateFlags.h" />
+    <ClInclude Include="src\State\StateFlags.hpp" />
     <ClInclude Include="src\State\Timers.hpp" />
     <ClInclude Include="src\Title\Credits.hpp" />
     <ClInclude Include="src\Title\NewGame.hpp" />
@@ -3135,7 +3128,7 @@
     <ClInclude Include="include\State\GameClockLive.hpp" />
     <ClInclude Include="include\State\KillScore.hpp" />
     <ClInclude Include="include\State\KillScoreLive.hpp" />
-    <ClInclude Include="include\State\Progress.h" />
+    <ClInclude Include="include\State\Progress.hpp" />
     <ClInclude Include="include\State\SceneTimer.hpp" />
     <ClInclude Include="include\State\SceneTimerLive.hpp" />
     <ClInclude Include="include\State\ScriptFlags.hpp" />

@@ -22,7 +22,7 @@
 #include "Menu/Magic.h"
 #include "Menu/MagicCosts.hpp"
 #include "Menu/MagicCostsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace magic = VS::Menu::Magic;
@@ -568,7 +568,7 @@ TEST_CASE("Magic CreateHeader refuses a label outside the menu strings",
 
 namespace {
 struct TeleportLiveFixture {
-  State_Settings saved_settings = VS::Input::settings;
+  VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
@@ -586,17 +586,17 @@ struct TeleportLiveFixture {
   Battle_ActorStats stats{};
 
   TeleportLiveFixture() {
-    std::copy_n(VS::State::stateFlags.savePointStates, 48,
+    std::copy_n(VS::State::stateFlags.save_point_states, 48,
                 saved_states.begin());
     std::copy_n(Menu_Magic_teleportationStrings, 1599, saved_strings.begin());
-    std::fill_n(VS::State::stateFlags.savePointStates, 48, char{0});
+    std::fill_n(VS::State::stateFlags.save_point_states, 48, char{0});
     std::fill_n(Menu_Magic_teleportationStrings, 1599, u_short{0});
     VS::Menu::Framework::menuItems = rows.data();
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuMemory = {};
     VS::Menu::Framework::actionRestrictions = 0;
-    VS::Input::settings.menuFlags = 0x3FF;
-    VS::Input::settings.cursorMemory = 0;
+    VS::Input::settings.menu_flags = 0x3FF;
+    VS::Input::settings.cursor_memory = 0;
     Battle_characterState = &actor;
     actor.stats = &stats;
     stats.currentMp = 500;
@@ -609,7 +609,7 @@ struct TeleportLiveFixture {
       VS::Core::Memory::FreeLiveFromHighEnd(VS::Menu::Framework::itemsText);
     }
     std::copy(saved_states.begin(), saved_states.end(),
-              VS::State::stateFlags.savePointStates);
+              VS::State::stateFlags.save_point_states);
     std::copy(saved_strings.begin(), saved_strings.end(),
               Menu_Magic_teleportationStrings);
     VS::Input::settings = saved_settings;
@@ -670,13 +670,13 @@ TEST_CASE("Magic TeleportMpCostLive refuses targets outside the table",
 TEST_CASE("Magic UpdateTeleportMenuLive packs the confirmed destination",
           "[magic-costs-live]") {
   TeleportLiveFixture fixture;
-  VS::State::stateFlags.savePointStates[3] = 1;
-  VS::State::stateFlags.savePointStates[10] = 2;
-  VS::Input::settings.cursorMemory = 0;
+  VS::State::stateFlags.save_point_states[3] = 1;
+  VS::State::stateFlags.save_point_states[10] = 2;
+  VS::Input::settings.cursor_memory = 0;
   CHECK(magic::UpdateTeleportMenuLive(1) == 0);
   fixture.FinishRowAnimations();
   CHECK(magic::UpdateTeleportMenuLive(0) == 0);
-  CHECK(VS::Input::settings.cursorMemory == 0);
+  CHECK(VS::Input::settings.cursor_memory == 0);
 
   VS::Menu::Framework::selectedRow = 1;
   VS::Menu::Framework::CloseLiveRowsAndRememberCursor();

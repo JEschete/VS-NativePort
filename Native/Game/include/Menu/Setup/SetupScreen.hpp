@@ -338,7 +338,7 @@ class Host {
   // vs_battle_rowTypeBuf and vs_battle_stringBuf.
   [[nodiscard]] virtual std::span<std::int32_t> RowTypes() = 0;
   [[nodiscard]] virtual std::span<std::uint8_t> StringBuffer() = 0;
-  // VS::Input::settings.cursorMemory.
+  // VS::Input::settings.cursor_memory.
   [[nodiscard]] virtual int CursorMemory() = 0;
   virtual void SetCursorMemory(int value) = 0;
 

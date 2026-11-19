@@ -41,7 +41,7 @@ ActuatorState ReadActuators(int port) {
   }
   const Port& p = g_ports[port];
   if (!p.connected || !p.analog || !p.aligned || !p.actuators ||
-      p.actuator_count == 0 || VS::Input::settings.vibrationOn == 0) {
+      p.actuator_count == 0 || VS::Input::settings.vibration_on == 0) {
     return {};
   }
   // _padResetDefaults (main.c:8468) registers bytes subsequently mutated by

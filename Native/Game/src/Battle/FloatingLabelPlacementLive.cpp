@@ -348,8 +348,8 @@ int LiveQueueEquipmentStatChange(int equipment_kind, int stat_label_kind,
                                  int encoded_amount) {
   LiveLabelRecords queue;
   const EquipmentStatChangeSettings settings{
-      .weapon = VS::Input::settings.weaponStatChange != 0,
-      .armor = VS::Input::settings.armorStatChange != 0};
+      .weapon = VS::Input::settings.weapon_stat_change != 0,
+      .armor = VS::Input::settings.armor_stat_change != 0};
   const auto result = QueueEquipmentStatChange(
       equipment_kind, stat_label_kind,
       static_cast<std::uint32_t>(encoded_amount), settings, queue);

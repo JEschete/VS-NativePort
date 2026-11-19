@@ -9,7 +9,7 @@
 #include "Core/Diagnostics.hpp"
 #include "Diagnostics/SceneTrace.hpp"
 #include "State/ScriptFlags.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::State {
 namespace {

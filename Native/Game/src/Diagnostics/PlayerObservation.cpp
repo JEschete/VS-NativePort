@@ -308,7 +308,7 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
       VS::Menu::Framework::menuMemory.cursorMemories[kRankCountMemory]);
   if (result.selected_menu == 0) {
     for (int index = 0; index < kMainMenuEntries; ++index) {
-      if ((VS::Input::settings.menuFlags & (1u << index)) == 0) continue;
+      if ((VS::Input::settings.menu_flags & (1u << index)) == 0) continue;
       const auto& row = VS::Menu::Framework::menuItems[index];
       result.rows.push_back({index, InspectGameText(row.text),
                              row.unselectable != 0, row.selected != 0});
@@ -407,9 +407,9 @@ EncounterReactionTimingState InspectReactionTiming(
   snapshot.story_timing = VS::State::LiveScriptFlag(1) != 0;
   for (std::size_t slot = 0; slot < snapshot.chain_actions.size(); ++slot) {
     snapshot.chain_actions[slot] = static_cast<unsigned char>(
-        VS::Input::settings.mappedChainAbilities[slot]);
+        VS::Input::settings.mapped_chain_abilities[slot]);
     snapshot.defense_actions[slot] = static_cast<unsigned char>(
-        VS::Input::settings.mappedDefenseAbilities[slot]);
+        VS::Input::settings.mapped_defense_abilities[slot]);
   }
   constexpr unsigned kAbilityTimingPhase = 7, kQueueIndexMask = 3;
   if (Battle_actionState == nullptr) return snapshot;

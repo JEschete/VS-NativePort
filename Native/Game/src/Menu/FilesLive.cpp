@@ -27,6 +27,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/RoomRenderingLive.hpp"
 #include "Input/ControllerLiveState.hpp"
+#include "Input/Settings.hpp"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "Menu/Files.h"
@@ -56,8 +57,7 @@
 #include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeMenu.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Settings.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "Title/SaveCard.hpp"
 #include "Title/SaveFiles.hpp"
 
@@ -106,7 +106,7 @@ static_assert(offsetof(ContainerIndices, gems) ==
 static_assert(offsetof(ContainerIndices, misc) ==
               offsetof(Items_ContainerIndices, misc));
 
-static_assert(sizeof(State_Settings) == kSettingsBytes);
+static_assert(sizeof(VS::Input::Settings) == kSettingsBytes);
 static_assert(sizeof(containerStrings) ==
               kContainerStringHalfwords * sizeof(std::uint16_t));
 static_assert(VS_GAMEOVER_BIN_SIZE >=
@@ -501,7 +501,7 @@ class LiveCardHost : public LiveGpuHost {
     return {reinterpret_cast<std::uint8_t*>(&VS::Input::settings),
             sizeof VS::Input::settings};
   }
-  void ClearDoorEntered() override { VS::State::stateFlags.doorEntered = 0; }
+  void ClearDoorEntered() override { VS::State::stateFlags.door_entered = 0; }
   std::uint32_t PlayTime() override {
     return VS::State::PackPlayTime(VS::State::playTime);
   }
@@ -602,26 +602,26 @@ class LiveHost : public LiveCardHost {
     VS::Menu::saveLocationId = static_cast<char>(id);
   }
   GameFlags Flags() override {
-    const State_StateFlags& flags = VS::State::stateFlags;
-    return {.opaque_a7 = static_cast<std::uint8_t>(flags.opaqueA7),
-            .intro_state = static_cast<std::uint8_t>(flags.introState),
-            .clear_count = static_cast<std::uint8_t>(flags.clearCount),
+    const VS::State::StateFlags& flags = VS::State::stateFlags;
+    return {.opaque_a7 = static_cast<std::uint8_t>(flags.opaque_a7),
+            .intro_state = static_cast<std::uint8_t>(flags.intro_state),
+            .clear_count = static_cast<std::uint8_t>(flags.clear_count),
             .difficulty = static_cast<std::uint8_t>(flags.difficulty)};
   }
   void SetGameOver(bool game_over) override {
-    VS::State::stateFlags.gameOver = game_over ? 1 : 0;
+    VS::State::stateFlags.game_over = game_over ? 1 : 0;
   }
   void SetDifficulty(std::uint8_t difficulty) override {
     VS::State::stateFlags.difficulty = static_cast<char>(difficulty);
   }
   std::uint8_t CursorMemory() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void SetCursorMemory(std::uint8_t memory) override {
-    VS::Input::settings.cursorMemory = static_cast<char>(memory);
+    VS::Input::settings.cursor_memory = static_cast<char>(memory);
   }
   std::uint8_t MonoSound() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.monoSound);
+    return static_cast<std::uint8_t>(VS::Input::settings.mono_sound);
   }
 
   int UpdateDataSaveMenu(int init) override {

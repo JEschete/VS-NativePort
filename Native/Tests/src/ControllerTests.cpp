@@ -196,7 +196,7 @@ struct LiveControllerGlobals {
   int previous = VS::Input::previousButtons;
   std::uint32_t pressed = VS::Input::buttonsPressed;
   int held = VS::Input::buttonsState;
-  State_Settings settings = VS::Input::settings;
+  VS::Input::Settings settings = VS::Input::settings;
   int tick_speed = VS::State::tickSpeed;
   int soft_reset = VS::Boot::isSoftResetEnabled;
 

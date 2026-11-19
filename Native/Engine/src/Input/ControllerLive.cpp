@@ -37,7 +37,7 @@ int VS::Input::buttonRepeat = 0;
 int VS::Input::previousButtons = 0;
 std::uint32_t VS::Input::buttonsPressed = 0;
 int VS::Input::buttonsState = 0;
-State_Settings VS::Input::settings{};
+VS::Input::Settings VS::Input::settings{};
 
 namespace VS::Input {
 namespace {
@@ -83,8 +83,9 @@ static_assert(offsetof(StickPosition, r_stick_y) == kLegacyStickRightY);
 
 constexpr std::size_t kSettingsMonoSound = 10;
 constexpr std::size_t kSettingsVibrationOn = 11;
-static_assert(offsetof(State_Settings, monoSound) == kSettingsMonoSound);
-static_assert(offsetof(State_Settings, vibrationOn) == kSettingsVibrationOn);
+static_assert(offsetof(VS::Input::Settings, mono_sound) == kSettingsMonoSound);
+static_assert(offsetof(VS::Input::Settings, vibration_on) ==
+              kSettingsVibrationOn);
 
 // libpad port IDs: port index << 4.
 constexpr int kPortIdShift = 4;
@@ -269,8 +270,8 @@ ControllerFrame PollLiveControllers() {
   ControllerState state{
       .ports = LoadPorts(), .buttons = LoadButtons(), .sticks = {}};
   ControllerSettings settings{
-      .mono_sound = VS::Input::settings.monoSound != 0,
-      .vibration_on = VS::Input::settings.vibrationOn != 0,
+      .mono_sound = VS::Input::settings.mono_sound != 0,
+      .vibration_on = VS::Input::settings.vibration_on != 0,
   };
   const ControllerFrameOptions options{
       .tick_speed = static_cast<std::uint32_t>(VS::State::tickSpeed),
@@ -281,9 +282,9 @@ ControllerFrame PollLiveControllers() {
       UpdateControllers(state, settings, host, options);
   StoreControllerState(state);
   if (frame == ControllerFrame::kSoftReset) {
-    VS::Input::settings.monoSound =
+    VS::Input::settings.mono_sound =
         static_cast<char>(settings.mono_sound ? 1 : 0);
-    VS::Input::settings.vibrationOn =
+    VS::Input::settings.vibration_on =
         static_cast<char>(settings.vibration_on ? 1 : 0);
   }
   return frame;
@@ -419,7 +420,7 @@ void ResetLiveVibrationPatterns() {
 void UpdateLiveVibrationPatterns() {
   ControllerPortState first = LoadPort(ControllerPort::kFirst);
   const std::uint32_t outside = UpdateVibrationPatterns(
-      live_vibration, first, VS::Input::settings.vibrationOn != 0);
+      live_vibration, first, VS::Input::settings.vibration_on != 0);
   StorePort(ControllerPort::kFirst, first);
   if (outside != 0) {
     Refused("UpdateLiveVibrationPatterns", "pattern reads outside the pattern",

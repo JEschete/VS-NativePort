@@ -22,8 +22,8 @@
 #include "Render/DisplayControl.hpp"
 #include "Render/Images.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Results {
 namespace {
@@ -86,14 +86,14 @@ class LiveClutTarget final : public ResultsClutTarget {
   }
 };
 
-std::uint8_t LiveCourse() { return VS::State::stateFlags.timeAttackBoss; }
+std::uint8_t LiveCourse() { return VS::State::stateFlags.time_attack_boss; }
 
 // Each course's first-place trial score, packed as the original word.
 std::array<std::uint32_t, kTimeAttackCourses> LiveFirstPlaceScores() {
   std::array<std::uint32_t, kTimeAttackCourses> scores{};
   for (std::size_t course = 0; course < scores.size(); ++course) {
-    const State_TrialScore& score =
-        VS::State::scoreData.bossTimeTrialScores[course][0];
+    const VS::State::TrialScore& score =
+        VS::State::scoreData.boss_time_trial_scores[course][0];
     scores.at(course) =
         score.time |
         (static_cast<std::uint32_t>(score.round) << kTrialRoundShift) |

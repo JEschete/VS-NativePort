@@ -52,7 +52,7 @@
 #include "Menu/Framework/FrameworkLive.hpp"
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
 #include "State/Timers.hpp"
 
@@ -168,26 +168,26 @@ class LiveAbilityHost final : public battle::AbilityHost {
   [[nodiscard]] int WeaponCategoryKills(int category) const override;
   [[nodiscard]] int BreakArtRequirement(int category, int tier) const override;
   [[nodiscard]] int BattleAbilitiesUnlocked() const override {
-    return VS::State::artsStatus.kills.battleAbilitiesUnlocked;
+    return VS::State::artsStatus.kills.battle_abilities_unlocked;
   }
   [[nodiscard]] int BattleAbilityRequirement(int index) const override;
   [[nodiscard]] int TotalKills() const override {
-    return VS::State::artsStatus.kills.totalKills;
+    return VS::State::artsStatus.kills.total_kills;
   }
   void SetTotalKills(int kills) override {
-    VS::State::artsStatus.kills.totalKills = static_cast<u_short>(kills);
+    VS::State::artsStatus.kills.total_kills = static_cast<u_short>(kills);
   }
   [[nodiscard]] int MaxChain() const override {
-    return VS::State::scoreData.maxChain;
+    return VS::State::scoreData.max_chain;
   }
   void SetMaxChain(int chain) override {
-    VS::State::scoreData.maxChain = static_cast<u_short>(chain);
+    VS::State::scoreData.max_chain = static_cast<u_short>(chain);
   }
   [[nodiscard]] int ChainStreak() const override {
-    return VS::State::scoreData.chainStreak;
+    return VS::State::scoreData.chain_streak;
   }
   void SetChainStreak(int streak) override {
-    VS::State::scoreData.chainStreak = static_cast<u_short>(streak);
+    VS::State::scoreData.chain_streak = static_cast<u_short>(streak);
   }
   [[nodiscard]] int ScriptFlag(int flag) const override {
     return VS::State::LiveScriptFlag(flag);
@@ -345,8 +345,8 @@ void LiveAbilityHost::FocusSelectionOnActor(int actor) {
 
 int LiveAbilityHost::MappedAbility(AbilityKind kind, int index) const {
   const auto& mapped = kind == AbilityKind::kChain
-                           ? VS::Input::settings.mappedChainAbilities
-                           : VS::Input::settings.mappedDefenseAbilities;
+                           ? VS::Input::settings.mapped_chain_abilities
+                           : VS::Input::settings.mapped_defense_abilities;
   if (!InRange(mapped, index)) {
     VS::Core::LogWarn("battle.ability", "mapped ability index={} out of range",
                       index);
@@ -457,21 +457,21 @@ int LiveAbilityHost::EquippedWeaponCategory() const {
 }
 
 int LiveAbilityHost::ArtsLearned(int category) const {
-  if (!InRange(VS::State::artsStatus.artsLearned, category)) {
+  if (!InRange(VS::State::artsStatus.arts_learned, category)) {
     VS::Core::LogWarn("battle.ability", "arts of category {} out of range",
                       category);
     return 0;
   }
-  return VS::State::artsStatus.artsLearned[category];
+  return VS::State::artsStatus.arts_learned[category];
 }
 
 int LiveAbilityHost::WeaponCategoryKills(int category) const {
-  if (!InRange(VS::State::artsStatus.kills.weaponCategoryKills, category)) {
+  if (!InRange(VS::State::artsStatus.kills.weapon_category_kills, category)) {
     VS::Core::LogWarn("battle.ability", "kills of category {} out of range",
                       category);
     return 0;
   }
-  return VS::State::artsStatus.kills.weaponCategoryKills[category];
+  return VS::State::artsStatus.kills.weapon_category_kills[category];
 }
 
 int LiveAbilityHost::BreakArtRequirement(int category, int tier) const {

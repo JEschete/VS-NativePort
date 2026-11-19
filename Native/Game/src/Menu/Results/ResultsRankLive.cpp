@@ -9,7 +9,7 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Score/ScoreRank.hpp"
 #include "Menu/Score/ScoreRankLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Menu::Results {
 // decomp: MENUF.PRG _calculateScore (src/MENU/MENUF.PRG/3B8.c:2801). The int

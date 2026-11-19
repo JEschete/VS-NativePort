@@ -51,12 +51,12 @@
 #include "Menu/Setup/SetupLive.hpp"
 #include "Menu/Setup/SetupScreen.hpp"
 #include "Menu/TextBox.h"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace {
 struct CursorFixture {
-  State_Settings saved_settings = VS::Input::settings;
+  VS::Input::Settings saved_settings = VS::Input::settings;
   Menu_Framework_MenuMemory saved_memory = VS::Menu::Framework::menuMemory;
   Menu_Framework_MenuRow* saved_items = VS::Menu::Framework::menuItems;
   u_short* saved_text = VS::Menu::Framework::itemsText;
@@ -83,7 +83,7 @@ struct CursorFixture {
     VS::Menu::Framework::menuItems = workspace.rows.data();
     VS::Menu::Framework::itemsText = nullptr;
     VS::Menu::Framework::menuMemory = {};
-    VS::Input::settings.menuFlags = 0x3FF;
+    VS::Input::settings.menu_flags = 0x3FF;
   }
 
   ~CursorFixture() {
@@ -115,7 +115,7 @@ struct PuzzleOptionsFixture {
   CursorFixture rows;
   std::array<u_short, 1070> saved_table =
       std::to_array(VS::Menu::Options::menuStrings);
-  char saved_disabled = VS::State::stateFlags.puzzleModeDisabled;
+  std::uint8_t saved_disabled = VS::State::stateFlags.puzzle_mode_disabled;
 
   PuzzleOptionsFixture() {
     std::fill_n(VS::Menu::Options::menuStrings, saved_table.size(), 0xE7E7);
@@ -125,7 +125,7 @@ struct PuzzleOptionsFixture {
   ~PuzzleOptionsFixture() {
     std::copy(saved_table.begin(), saved_table.end(),
               VS::Menu::Options::menuStrings);
-    VS::State::stateFlags.puzzleModeDisabled = saved_disabled;
+    VS::State::stateFlags.puzzle_mode_disabled = saved_disabled;
   }
 };
 
@@ -151,14 +151,14 @@ struct BreakArtMenuFixture {
   explicit BreakArtMenuFixture(int weapon_category)
       : category(weapon_category),
         first_action(Battle_ActionId_DaggerArtOne + (category - 1) * 4),
-        saved_arts(VS::State::artsStatus.artsLearned[category % 10]) {
+        saved_arts(VS::State::artsStatus.arts_learned[category % 10]) {
     VS::Menu::break_arts::ResetLiveStatics();
     std::fill_n(Menu_BreakArts_strings, saved_strings.size(), 0xE7E7);
     std::fill_n(Menu_BreakArts_strings, 72, 96);
     Menu_BreakArts_strings[96] = 0;
     Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArts] = 0;
     Menu_BreakArts_strings[Text_Menu1_strings_Offset_viewArtsDesc] = 0;
-    VS::State::artsStatus.artsLearned[category % 10] = 4;
+    VS::State::artsStatus.arts_learned[category % 10] = 4;
     Battle_characterState = Battle_actors[0] = &actor;
     actor.stats = &stats;
     actor.equippedWeaponCategory = static_cast<u_char>(category);
@@ -188,7 +188,7 @@ struct BreakArtMenuFixture {
     VS::Menu::Framework::shortcutInvoked = saved_shortcut;
     VS::Menu::Framework::actionRestrictions = saved_restrictions;
     VS::Menu::Framework::displayActionCost = saved_cost;
-    VS::State::artsStatus.artsLearned[category % 10] = saved_arts;
+    VS::State::artsStatus.arts_learned[category % 10] = saved_arts;
   }
 
   void FinishRowAnimations() {
@@ -283,7 +283,7 @@ struct WorkshopGateFixture {
     Field_roomData.header.environmentLength = sizeof environment;
     VS::Items::inventory = {};
     environment.isWorkshop = static_cast<char>(workshop);
-    VS::Input::settings.cursorMemory = static_cast<char>(cursor_memory);
+    VS::Input::settings.cursor_memory = static_cast<char>(cursor_memory);
     for (int index = 0; index < weapon_count; ++index) {
       VS::Items::inventory.weapons[index].index = static_cast<char>(index + 1);
       VS::Items::inventory.weapons[index].blade =
@@ -1010,7 +1010,7 @@ TEST_CASE("Setup actions obey original workshop and weapon-capacity gates",
   REQUIRE(VS::Items::Inventory::CountLiveItems(0, nullptr) == weapon_count);
   const auto* rows = fixture.Open();
   REQUIRE(setup::LiveSetupState().combination.workshop == workshop);
-  CHECK(VS::Input::settings.cursorMemory == cursor_memory);
+  CHECK(VS::Input::settings.cursor_memory == cursor_memory);
   for (int row = 0; row < 6; ++row) {
     CAPTURE(row);
     const bool disabled = (row == 0 && (workshop == 0 || weapon_count == 8)) ||
@@ -1026,7 +1026,7 @@ TEST_CASE("Equipment management obeys progression tarnish and action gates",
   const bool tarnished = GENERATE(false, true);
   const int restrictions = GENERATE(0, 1, 2, 4, 7, 8, 0x80, 0x200);
   EquipmentGateFixture fixture;
-  VS::State::stateFlags.introState = static_cast<char>(intro);
+  VS::State::stateFlags.intro_state = static_cast<char>(intro);
   fixture.stats.statuses = tarnished ? 0x80000 : 0;
   VS::Menu::Framework::actionRestrictions = restrictions;
   REQUIRE(VS::Menu::Inventory::UpdateLiveItemList(1) == 0);
@@ -1043,25 +1043,25 @@ TEST_CASE("Equipment management obeys progression tarnish and action gates",
 
 TEST_CASE("Cursor Memory controls the actual root selection consumer",
           "[menu][options][cursor]") {
-  const char enabled = GENERATE(char{0}, char{1});
+  const std::uint8_t enabled = GENERATE(std::uint8_t{0}, std::uint8_t{1});
   const u_short flags = GENERATE(u_short{0x3FF}, u_short{0x3F8});
   CursorFixture fixture;
-  VS::Input::settings.cursorMemory = enabled;
-  VS::Input::settings.menuFlags = flags;
+  VS::Input::settings.cursor_memory = enabled;
+  VS::Input::settings.menu_flags = flags;
   for (int visit = 0; visit < 3; ++visit) {
     VS::Menu::Framework::submenuStates[0] = 7;
     CHECK(VS::Menu::Framework::UpdateLiveMainMenuSelection(2) == 0);
     CHECK(VS::Menu::Framework::submenuStates[0] ==
           (enabled ? 7 : (flags == 0x3F8 ? 3 : 0)));
-    CHECK(VS::Input::settings.cursorMemory == enabled);
+    CHECK(VS::Input::settings.cursor_memory == enabled);
   }
 }
 
 TEST_CASE("Cursor Memory restores shared row and scroll positions",
           "[menu][options][cursor]") {
-  const char enabled = GENERATE(char{0}, char{1});
+  const std::uint8_t enabled = GENERATE(std::uint8_t{0}, std::uint8_t{1});
   CursorFixture fixture;
-  VS::Input::settings.cursorMemory = enabled;
+  VS::Input::settings.cursor_memory = enabled;
   VS::Menu::Framework::menuMemory.cursorMemories[0] = 3;
   VS::Menu::Framework::menuMemory.cursorMemories[1] = 5;
   fixture.OpenRows(20);
@@ -1081,7 +1081,7 @@ TEST_CASE("Cursor Memory restores shared row and scroll positions",
 TEST_CASE("Cursor Memory clamps a remembered selection after rows shrink",
           "[menu][options][cursor]") {
   CursorFixture fixture;
-  VS::Input::settings.cursorMemory = 1;
+  VS::Input::settings.cursor_memory = 1;
   VS::Menu::Framework::menuMemory.cursorMemories[0] = 4;
   VS::Menu::Framework::menuMemory.cursorMemories[1] = 6;
   fixture.OpenRows(3);
@@ -1093,12 +1093,12 @@ TEST_CASE("Options retain the real Puzzle Mode availability gate",
           "[menu][options][puzzle]") {
   const char disabled = GENERATE(char{0}, char{1});
   PuzzleOptionsFixture fixture;
-  VS::State::stateFlags.puzzleModeDisabled = disabled;
-  VS::Input::settings.cursorMemory = 0;
+  VS::State::stateFlags.puzzle_mode_disabled = disabled;
+  VS::Input::settings.cursor_memory = 0;
   std::uint8_t state = 4;
   CHECK(VS::Menu::Options::UpdateLiveOptions(state) == 0);
   CHECK(state == 5);
-  CHECK(VS::Input::settings.cursorMemory == 0);
+  CHECK(VS::Input::settings.cursor_memory == 0);
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
       VS::Menu::Framework::itemsText);
@@ -1116,21 +1116,21 @@ TEST_CASE(
   const int flags = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   const char shortcut = static_cast<char>(flags & 1);
   const bool equipped = (flags & 2) != 0;
-  const char cursor_memory = static_cast<char>((flags >> 2) & 1);
+  const auto cursor_memory = static_cast<std::uint8_t>((flags >> 2) & 1);
   BreakArtMenuFixture fixture(category);
   VS::Menu::Framework::shortcutInvoked = shortcut;
   if (!equipped) {
     fixture.actor.equippedWeaponCategory =
         static_cast<u_char>(category % 10 + 1);
   }
-  VS::Input::settings.cursorMemory = cursor_memory;
+  VS::Input::settings.cursor_memory = cursor_memory;
   VS::Menu::Framework::menuMemory
       .cursorMemories[static_cast<std::size_t>(category + 11) * 2] = 3;
   fixture.Open();
   REQUIRE(VS::Menu::Framework::itemsText != nullptr);
   REQUIRE(VS::Menu::Framework::subMenuRowCount == (shortcut ? 4 : 5));
   REQUIRE(VS::Menu::Framework::LiveHighlightedRow() == (cursor_memory ? 3 : 0));
-  CHECK(VS::Input::settings.cursorMemory == cursor_memory);
+  CHECK(VS::Input::settings.cursor_memory == cursor_memory);
   const auto* rows = reinterpret_cast<const Menu_Framework_ItemText*>(
       VS::Menu::Framework::itemsText);
   for (int index = 0; index < 4; ++index) {

@@ -58,10 +58,10 @@
 #include "Render/UiPrimitives.hpp"
 #include "State/Location.hpp"
 #include "State/PlayTime.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/RoomMemory.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 namespace VS::Game::Save {
@@ -130,7 +130,7 @@ struct PersistentInputs {
   Snapshot state;
   VS::State::AshleySnapshot ashley;
   Field_MpdDoorRecord entry;
-  std::array<char, std::size(State_learnedActionFlags)> learned;
+  std::array<char, std::size(VS::State::learnedActionFlags)> learned;
   decltype(Snapshot::learned_actions) unlocked;
   std::uint32_t mix_behavior = 0;
   decltype(VS::State::playTime) play_time{};
@@ -477,7 +477,7 @@ Result ValidateItemIds(const Collection& items, const CategoryBounds& bounds,
          !valid_durability(blade) ||
          blade.material >= std::size(VS::Items::materialModifiers) ||
          static_cast<unsigned char>(blade.category) >=
-             std::size(State_ArtsStatus{}.kills.weaponCategoryKills))) {
+             std::size(VS::State::ArtsStatus{}.kills.weapon_category_kills))) {
       return ItemError(scope, "blades",
                        static_cast<std::size_t>(&blade - items.blades),
                        "invalid ID, category, material or DP/PP");
@@ -889,14 +889,14 @@ void CapturePersistent(Snapshot& state, bool packed_actions = false) {
     state.learned_actions[index] =
         packed_actions
             ? (static_cast<unsigned char>(
-                   State_learnedActionFlags[index / kLearnedBitsPerByte]) &
+                   VS::State::learnedActionFlags[index / kLearnedBitsPerByte]) &
                (kLearnedFirstBit >> (index % kLearnedBitsPerByte))) != 0
             : Battle_actionDefinitions[index].unlocked != 0;
   }
   state.inventory = VS::Items::inventory;
   state.inventory_order = VS::Items::inventoryIndices;
   state.settings = VS::Input::settings;
-  state.visits = State_roomVisitProgress;
+  state.visits = VS::State::roomVisitProgress;
   state.score = VS::State::scoreData;
   state.arts = VS::State::artsStatus;
   CopyCachesToSnapshot(state);
@@ -907,22 +907,23 @@ void ApplyPersistent(const Snapshot& state) {
     VS::State::SetLiveScriptFlag(static_cast<std::int16_t>(index),
                                  static_cast<char>(state.script_flags[index]));
   }
-  std::fill_n(State_learnedActionFlags, std::size(State_learnedActionFlags), 0);
+  std::fill_n(VS::State::learnedActionFlags,
+              std::size(VS::State::learnedActionFlags), 0);
   for (std::size_t index = 0; index < state.learned_actions.size(); ++index) {
     Battle_actionDefinitions[index].unlocked = state.learned_actions[index];
     if (state.learned_actions[index]) {
       const auto value =
           static_cast<unsigned char>(
-              State_learnedActionFlags[index / kLearnedBitsPerByte]) |
+              VS::State::learnedActionFlags[index / kLearnedBitsPerByte]) |
           (kLearnedFirstBit >> (index % kLearnedBitsPerByte));
-      State_learnedActionFlags[index / kLearnedBitsPerByte] =
+      VS::State::learnedActionFlags[index / kLearnedBitsPerByte] =
           static_cast<char>(value);
     }
   }
   VS::Items::inventory = state.inventory;
   VS::Items::inventoryIndices = state.inventory_order;
   VS::Input::settings = state.settings;
-  State_roomVisitProgress = state.visits;
+  VS::State::roomVisitProgress = state.visits;
   VS::State::scoreData = state.score;
   VS::State::artsStatus = state.arts;
   ApplyCaches(state);
@@ -1346,16 +1347,16 @@ std::expected<void, std::string> ValidateContent(const Document& document) {
   if (!document.new_game_entry) return ValidateContent(document.state);
   const auto& state = document.state;
   const auto& entry = *document.new_game_entry;
-  constexpr auto kPuzzleMode = offsetof(State_StateFlags, puzzleMode);
+  constexpr auto kPuzzleMode = offsetof(VS::State::StateFlags, puzzle_mode);
   constexpr auto kCampaignFlags = 0x10;
   constexpr auto kMaximumClears = 99;
   // ENDING resets 0x10..0x43f. TITLE sets only puzzleMode after that reset.
   if (state.script_flags[0] == 0 || state.script_flags[0] > kMaximumClears ||
       state.script_flags[1] != 1 || state.script_flags[2] > 1 ||
-      state.play_ticks != 0 || state.settings.currentGameSaveCount != 0 ||
-      (state.settings.menuFlags & kClearMenuFlag) != 0 ||
+      state.play_ticks != 0 || state.settings.current_game_save_count != 0 ||
+      (state.settings.menu_flags & kClearMenuFlag) != 0 ||
       state.script_flags[kPuzzleMode] !=
-          ((~(state.settings.reserved0Bit0 >> kPuzzleSettingShift)) & 1) ||
+          ((~(state.settings.mode_flags >> kPuzzleSettingShift)) & 1) ||
       entry.destinationZoneId != 1 || entry.destinationRoomId != 0 ||
       state.location.zone != 1 || state.location.room != 0) {
     return std::unexpected("invalid original clear-game restart state");
@@ -1373,9 +1374,9 @@ std::expected<void, std::string> ValidateContent(const Document& document) {
       std::ranges::any_of(
           std::span(state.storage.misc).first(kClearContainerResetStacks),
           has_misc) ||
-      std::ranges::any_of(state.visits.roomFlags,
+      std::ranges::any_of(state.visits.room_flags,
                           [](auto value) { return value != 0; }) ||
-      std::ranges::any_of(state.visits.areaFlags,
+      std::ranges::any_of(state.visits.area_flags,
                           [](auto value) { return value != 0; })) {
     return std::unexpected("clear game retains reset inventory or map visits");
   }
@@ -1386,7 +1387,7 @@ std::expected<Document, std::string> CaptureClearGame() {
   if (pending || VS::Boot::isGameplayActive || !VS::Boot::isClearSavePending ||
       VS::State::savedEntryDoor.destinationZoneId != 1 ||
       VS::State::savedEntryDoor.destinationRoomId != 0 ||
-      VS::State::stateFlags.clearCount <= 0) {
+      VS::State::stateFlags.clear_count <= 0) {
     return std::unexpected("no original ending clear-save inputs are pending");
   }
   Document document;
@@ -1400,11 +1401,11 @@ std::expected<Document, std::string> CaptureClearGame() {
   // F03601 TITLE _packageGameSaveData, 22C.c:632-700; original MIPS
   // 800698dc/800698e8, 80069c34, 80069c94..80069cc0. Container clearing is
   // exactly 0x100 bytes (64 stacks), NOT the entire 256-stack container.
-  state.settings.menuFlags &= static_cast<u_short>(~kClearMenuFlag);
-  state.settings.currentGameSaveCount = 0;
-  state.script_flags[offsetof(State_StateFlags, puzzleMode)] =
+  state.settings.menu_flags &= static_cast<u_short>(~kClearMenuFlag);
+  state.settings.current_game_save_count = 0;
+  state.script_flags[offsetof(VS::State::StateFlags, puzzle_mode)] =
       static_cast<std::uint8_t>(
-          (~(state.settings.reserved0Bit0 >> kPuzzleSettingShift)) & 1);
+          (~(state.settings.mode_flags >> kPuzzleSettingShift)) & 1);
   std::fill(std::begin(state.inventory.misc), std::end(state.inventory.misc),
             Items_InventoryMisc{});
   std::fill(std::begin(state.inventory_order.misc),
@@ -1529,7 +1530,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
   CapturePersistent(staged.previous.state);
   staged.previous.ashley = VS::State::ashleySnapshot;
   staged.previous.entry = VS::State::savedEntryDoor;
-  std::copy_n(State_learnedActionFlags, staged.previous.learned.size(),
+  std::copy_n(VS::State::learnedActionFlags, staged.previous.learned.size(),
               staged.previous.learned.begin());
   staged.previous.unlocked = staged.previous.state.learned_actions;
   staged.previous.mix_behavior = VS::Audio::Driver::controlLatches.mix_behavior;
@@ -1542,7 +1543,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
   if (document.new_game_entry) {
     VS::State::savedEntryDoor = *document.new_game_entry;
     ApplyClock(0);
-    SyncMonoOutput(pending->state.settings.monoSound == 1);
+    SyncMonoOutput(pending->state.settings.mono_sound == 1);
     return {};
   }
   VS::State::savedEntryDoor = {};
@@ -1559,7 +1560,7 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
       static_cast<unsigned>(pending->state.location.position[2] / kTileUnits);
   VS::State::savedEntryDoor.entryElevation =
       static_cast<unsigned>(pending->state.location.facing / kQuarterTurn);
-  SyncMonoOutput(pending->state.settings.monoSound == 1);
+  SyncMonoOutput(pending->state.settings.mono_sound == 1);
   return {};
 }
 
@@ -1572,7 +1573,7 @@ void CancelResume() {
   VS::State::ashleySnapshot = previous.ashley;
   VS::State::savedEntryDoor = previous.entry;
   std::copy(previous.learned.begin(), previous.learned.end(),
-            State_learnedActionFlags);
+            VS::State::learnedActionFlags);
   for (std::size_t index = 0; index < previous.unlocked.size(); ++index) {
     Battle_actionDefinitions[index].unlocked = previous.unlocked[index];
   }
@@ -1648,7 +1649,7 @@ std::expected<void, std::string> FinishResume() {
   ApplyClock(state.play_ticks);
   VS::State::sceneTimer = state.scene_timer;
   ApplyCaches(state);
-  SyncMonoOutput(state.settings.monoSound == 1);
+  SyncMonoOutput(state.settings.mono_sound == 1);
   VS::Core::SeedBiosRand(state.random.bios_state);
   VS::Core::interfaceRandomState = state.random.interface_state;
   std::copy(state.random.shuffle.begin(), state.random.shuffle.end(),

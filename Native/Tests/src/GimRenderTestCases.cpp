@@ -16,7 +16,7 @@
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "State/SceneTimerLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 int Tests_EncodedTextFormatting(void);
@@ -107,10 +107,10 @@ struct PuzzleTimerFixture {
       std::to_array(Battle_puzzleTimerText);
   char* saved_pointer = Battle_puzzleTimerTextPointer;
   char saved_visible = Battle_lowerScreenUiState;
-  char saved_hundredths = VS::State::stateFlags.puzzleTimerHundredths;
-  char saved_seconds = VS::State::stateFlags.puzzleTimerSeconds;
-  char saved_minutes = VS::State::stateFlags.puzzleTimerMins;
-  char saved_hours = VS::State::stateFlags.puzzleSetMaxTimer;
+  std::uint8_t saved_hundredths = VS::State::stateFlags.puzzle_timer_hundredths;
+  std::uint8_t saved_seconds = VS::State::stateFlags.puzzle_timer_seconds;
+  std::uint8_t saved_minutes = VS::State::stateFlags.puzzle_timer_minutes;
+  std::uint8_t saved_hours = VS::State::stateFlags.puzzle_set_max_timer;
   VS::State::SceneTimer saved_timer = VS::State::sceneTimer;
   int saved_packed_timer = Battle_puzzleTimer;
   void* saved_buffer = VS::Render::legacyPrimitiveBuffers[0];
@@ -137,10 +137,10 @@ struct PuzzleTimerFixture {
     std::copy(saved_text.begin(), saved_text.end(), Battle_puzzleTimerText);
     Battle_puzzleTimerTextPointer = saved_pointer;
     Battle_lowerScreenUiState = saved_visible;
-    VS::State::stateFlags.puzzleTimerHundredths = saved_hundredths;
-    VS::State::stateFlags.puzzleTimerSeconds = saved_seconds;
-    VS::State::stateFlags.puzzleTimerMins = saved_minutes;
-    VS::State::stateFlags.puzzleSetMaxTimer = saved_hours;
+    VS::State::stateFlags.puzzle_timer_hundredths = saved_hundredths;
+    VS::State::stateFlags.puzzle_timer_seconds = saved_seconds;
+    VS::State::stateFlags.puzzle_timer_minutes = saved_minutes;
+    VS::State::stateFlags.puzzle_set_max_timer = saved_hours;
     VS::State::sceneTimer = saved_timer;
     Battle_puzzleTimer = saved_packed_timer;
     VS::Render::legacyPrimitiveBuffers[0] = saved_buffer;
@@ -158,7 +158,8 @@ struct PuzzleTimerFixture {
     VS::Render::legacyOrderingTables[0] = ordering.data();
     VS::Render::FrameScratchpad().primitive_cursor = storage.data() + 1;
     VS::Render::FrameScratchpad().ordering_table = ordering.data() + 1;
-    VS::State::stateFlags.puzzleTimerHundredths = static_cast<char>(hundredths);
+    VS::State::stateFlags.puzzle_timer_hundredths =
+        static_cast<char>(hundredths);
     VS::Battle::DrawLivePuzzleTimer(&timer);
   }
 

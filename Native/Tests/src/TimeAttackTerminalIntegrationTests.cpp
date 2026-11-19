@@ -16,8 +16,8 @@
 #include "Menu/OverlayLoadFixture.hpp"
 #include "Menu/TimeAttackTerminalLiveFixture.hpp"
 #include "Render/Frame.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace results = VS::Menu::Results;
@@ -70,7 +70,7 @@ struct ReloadFixture : tests::Fixture {
     Menu_Results_newTimeSlot = 2;
     Menu_Results_timeTrialTime = 0x123456;
     Menu_Results_clutBuf[159] = 0x1234;
-    VS::State::scoreData.bossTimeTrialScores[7][2].time = 123456;
+    VS::State::scoreData.boss_time_trial_scores[7][2].time = 123456;
     stats.strength = 77;
   }
 
@@ -97,7 +97,7 @@ struct ReloadFixture : tests::Fixture {
     CHECK(Battle_unusedSubmenuState == 1);
     CHECK(Battle_characterState == &actor);
     CHECK(stats.strength == 77);
-    CHECK(VS::State::scoreData.bossTimeTrialScores[7][2].time == 123456);
+    CHECK(VS::State::scoreData.boss_time_trial_scores[7][2].time == 123456);
   }
 
   static void Reenter(Asset asset) {
@@ -145,10 +145,10 @@ void InitializeThroughModule(Asset asset, tests::Fixture& fixture) {
       asset == Asset::kResults
           ? ModuleEntry(0x8010310C, &results::LiveInitializeTimeAttackResults)
           : ModuleEntry(0x80103530, &results::LiveInitializeTimeAttackStart);
-  VS::State::stateFlags.timeAttackSecs = 30;
-  VS::State::stateFlags.timeAttackHundredths = 50;
-  VS::State::stateFlags.clearCount = 7;
-  auto& row = VS::State::scoreData.bossTimeTrialScores[0];
+  VS::State::stateFlags.time_attack_seconds = 30;
+  VS::State::stateFlags.time_attack_hundredths = 50;
+  VS::State::stateFlags.clear_count = 7;
+  auto& row = VS::State::scoreData.boss_time_trial_scores[0];
   for (auto& score : row) score.time = 0x3B3B63;
   REQUIRE(initialize() == 0);
   static_cast<void>(tests::InjectLoaded(asset));
@@ -199,20 +199,20 @@ TEST_CASE("Results module dispatch entries use real healing and caller bytes",
           "[time-attack-integration][time-attack-module]"
           "[F03008][F03009][F03014]") {
   tests::Fixture fixture;
-  VS::State::stateFlags.menuFSubmenu = 3;
-  VS::State::scoreData.miscScore = 50;
-  VS::State::scoreData.healCount = 2;
+  VS::State::stateFlags.menu_f_submenu = 3;
+  VS::State::scoreData.misc_score = 50;
+  VS::State::scoreData.heal_count = 2;
   CHECK(ModuleEntry(0x80102C54, &results::LiveInitializeResultsScreen)() == 1);
-  CHECK(VS::State::scoreData.miscScore == 99850);
-  CHECK(VS::State::scoreData.healCount == 0);
+  CHECK(VS::State::scoreData.misc_score == 99850);
+  CHECK(VS::State::scoreData.heal_count == 0);
   CHECK(ModuleEntry(0x801037A0, &results::LiveUpdateResultsPresentation)() ==
         1);
-  CHECK(VS::State::scoreData.miscScore == 99850);
+  CHECK(VS::State::scoreData.misc_score == 99850);
   std::array<unsigned char, 2> state{2, 0xAA};
   CHECK(ModuleEntry(0x80102BB8,
                     &results::LiveUpdateResultsScreen)(state.data()) == 1);
   CHECK(state == std::array<unsigned char, 2>{0, 0xAA});
-  CHECK(VS::State::scoreData.miscScore == 99850);
+  CHECK(VS::State::scoreData.misc_score == 99850);
 }
 
 TEST_CASE(
@@ -232,13 +232,13 @@ TEST_CASE(
   VS::Menu::Framework::actionRestrictions = 0x200;
   VS::Menu::Framework::submenuStates[15] = 2;
   VS::Menu::Framework::submenuStates[14] = static_cast<char>(0xAA);
-  VS::State::stateFlags.menuFSubmenu = 3;
-  VS::State::scoreData.miscScore = 99;
+  VS::State::stateFlags.menu_f_submenu = 3;
+  VS::State::scoreData.misc_score = 99;
   VS::Menu::Framework::UpdateLiveMainMenu(15);
   CHECK(VS::Menu::Framework::submenuStates[15] == 0);
   CHECK(static_cast<unsigned char>(VS::Menu::Framework::submenuStates[14]) ==
         0xAA);
-  CHECK(VS::State::scoreData.miscScore == 99);
+  CHECK(VS::State::scoreData.misc_score == 99);
 }
 
 TEST_CASE("Completed MENUF resets time-attack views without losing owners",

@@ -22,7 +22,7 @@
 #include "Render/Display.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
 #include "State/Location.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "Title/SaveFiles.hpp"
 #include "Title/TitleMenu.hpp"
 #include "Title/TitleMenuLive.hpp"
@@ -625,9 +625,9 @@ class PresetLiveExit {
   static constexpr u_char kDestination = 9;
 
   PresetLiveExit() {
-    VS::State::stateFlags.opaqueC = kFlag;
-    VS::State::stateFlags.opaqueD = kFlag;
-    VS::State::stateFlags.opaqueE = kFlag;
+    VS::State::stateFlags.opaque_c = kFlag;
+    VS::State::stateFlags.opaque_d = kFlag;
+    VS::State::stateFlags.opaque_e = kFlag;
     VS::State::savedEntryDoor.destinationZoneId = kDestination;
     VS::State::savedEntryDoor.destinationRoomId = kDestination;
   }
@@ -641,7 +641,7 @@ class PresetLiveExit {
   }
 
  private:
-  State_StateFlags flags_ = VS::State::stateFlags;
+  VS::State::StateFlags flags_ = VS::State::stateFlags;
   Field_MpdDoorRecord door_ = VS::State::savedEntryDoor;
 };
 
@@ -666,7 +666,7 @@ class LiveHostGuard {
   }
 
  private:
-  State_Settings settings_ = VS::Input::settings;
+  VS::Input::Settings settings_ = VS::Input::settings;
   int visits_ = VS::Title::titleScreenVisitCount;
   std::array<DRAWENV, 2> draw_{};
   std::array<DISPENV, 2> display_{};
@@ -1641,11 +1641,11 @@ TEST_CASE("Title continue screen runs the load menu's frames",
 TEST_CASE("Title live exit keeps the state for a loaded game",
           "[title][title-menu]") {
   const PresetLiveExit preset;
-  const State_StateFlags& flags = VS::State::stateFlags;
+  const VS::State::StateFlags& flags = VS::State::stateFlags;
   title::PrepareLiveExit(1);
-  CHECK(flags.opaqueC == 0);
-  CHECK(flags.opaqueD == 0);
-  CHECK(flags.opaqueE == PresetLiveExit::kFlag);
+  CHECK(flags.opaque_c == 0);
+  CHECK(flags.opaque_d == 0);
+  CHECK(flags.opaque_e == PresetLiveExit::kFlag);
   CHECK(VS::State::savedEntryDoor.destinationZoneId ==
         PresetLiveExit::kDestination);
 }
@@ -1653,12 +1653,12 @@ TEST_CASE("Title live exit keeps the state for a loaded game",
 TEST_CASE("Title live exit writes the state flags and entry door",
           "[title][title-menu]") {
   const PresetLiveExit preset;
-  const State_StateFlags& flags = VS::State::stateFlags;
+  const VS::State::StateFlags& flags = VS::State::stateFlags;
   const Field_MpdDoorRecord& door = VS::State::savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);
-  CHECK(flags.opaqueD == 1);
-  CHECK(flags.opaqueE == 1);
+  CHECK(flags.opaque_d == 1);
+  CHECK(flags.opaque_e == 1);
   CHECK(door.destinationZoneId == 2);
   CHECK(door.destinationRoomId == 1);
 }
@@ -1666,13 +1666,13 @@ TEST_CASE("Title live exit writes the state flags and entry door",
 TEST_CASE("Title live exit sends a new game to its first room",
           "[title][title-menu]") {
   const PresetLiveExit preset;
-  const State_StateFlags& flags = VS::State::stateFlags;
+  const VS::State::StateFlags& flags = VS::State::stateFlags;
   const Field_MpdDoorRecord& door = VS::State::savedEntryDoor;
   title::PrepareLiveExit(1);
   title::PrepareLiveExit(4);
   title::PrepareLiveExit(0);
-  CHECK(flags.opaqueD == 0);
-  CHECK(flags.opaqueE == 1);
+  CHECK(flags.opaque_d == 0);
+  CHECK(flags.opaque_e == 1);
   CHECK(door.destinationZoneId == 1);
   CHECK(door.destinationRoomId == 0);
 }
@@ -1682,8 +1682,8 @@ TEST_CASE("Title live host binds settings and visits", "[title][title-menu]") {
   title::Host& host = title::LiveTitleHost();
   CHECK(&title::LiveTitleHost() == &host);
   host.SetSettings({.mono_sound = 1, .vibration_on = 0});
-  CHECK(VS::Input::settings.monoSound == 1);
-  CHECK(VS::Input::settings.vibrationOn == 0);
+  CHECK(VS::Input::settings.mono_sound == 1);
+  CHECK(VS::Input::settings.vibration_on == 0);
   CHECK(host.Settings() ==
         title::PlayerSettings{.mono_sound = 1, .vibration_on = 0});
   host.SetVisitCount(5);

@@ -15,7 +15,7 @@
 #include "Menu/GameClearLifecycleLiveFixture.hpp"
 #include "Menu/GazetteStatisticsLiveFixture.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace {
 namespace live = gazette_statistics_live_tests;
@@ -49,7 +49,7 @@ struct Fixture : live::StatisticsFixture {
 
   std::array<shared::Sprite, 4> PrimeCursor(Page page) {
     VS::State::scoreData.titles = -1;
-    VS::State::scoreData.completionTimeMinutes = 60;
+    VS::State::scoreData.completion_time_minutes = 60;
     Menu_Score_clearCount = 3;
     Menu_Score_mapCompletion = 180;
     Menu_Score_openedChestCount = 26;
@@ -81,7 +81,7 @@ struct ResidentState {
     CHECK(std::ranges::equal(shared::BytesOf(Battle_unusedMenu9CursorMemory),
                              cursor));
     CHECK(VS::State::scoreData.titles == -1);
-    CHECK(VS::State::scoreData.completionTimeMinutes == 60);
+    CHECK(VS::State::scoreData.completion_time_minutes == 60);
     CHECK(Menu_Score_clearCount == 3);
     CHECK(Menu_Score_mapCompletion == 180);
     CHECK(Menu_Score_openedChestCount == 26);

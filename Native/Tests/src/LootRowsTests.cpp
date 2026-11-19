@@ -20,7 +20,7 @@
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.hpp"
 #include "State/ScriptFlagsLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace items = VS::Items;
@@ -122,7 +122,7 @@ struct LiveRowsFixture {
   Items_Inventory previous_ashley{VS::Items::inventory};
   Items_InventoryIndices previous_indices{VS::Items::inventoryIndices};
   Items_BattleLoot* previous_entry{VS::Menu::Framework::lootEntry};
-  char previous_difficulty{VS::State::stateFlags.difficulty};
+  std::uint8_t previous_difficulty{VS::State::stateFlags.difficulty};
 
   LiveRowsFixture() {
     VS::Menu::Loot::Live::ResetPaging();

@@ -38,8 +38,8 @@
 #include "Render/TimImage.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiTexturedQuads.hpp"
-#include "State/Progress.h"
-#include "State/StateFlags.h"
+#include "State/Progress.hpp"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Results {
 namespace {
@@ -55,10 +55,10 @@ constexpr std::size_t kHalfwordBytes = 2;
 constexpr std::size_t kPaletteClearBytes = 4;
 constexpr std::size_t kAreaCommandWords = 2;
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
-static_assert(std::size(State_roomVisitProgress.roomFlags) ==
+static_assert(std::size(VS::State::roomVisitProgress.room_flags) ==
               Score::kRoomFlagWords);
 static_assert(std::size(Field_countableRoomMask) == Score::kRoomFlagWords);
-static_assert(std::size(VS::State::stateFlags.chestsOpened) ==
+static_assert(std::size(VS::State::stateFlags.chests_opened) ==
               Score::kChestFlagCount);
 
 struct LoadOwner {
@@ -386,31 +386,31 @@ class LiveInit final : public GameClearInitHost {
     if (!stats.has_value()) return std::nullopt;
     GameClearWorld world;
     world.record = Score::ReadLiveScoreRecord();
-    world.heal_count = VS::State::scoreData.healCount;
+    world.heal_count = VS::State::scoreData.heal_count;
     for (std::size_t index = 0; index < world.room_flags.size(); ++index) {
-      world.room_flags.at(index) =
-          static_cast<std::uint32_t>(State_roomVisitProgress.roomFlags[index]);
+      world.room_flags.at(index) = static_cast<std::uint32_t>(
+          VS::State::roomVisitProgress.room_flags[index]);
       world.countable_room_masks.at(index) =
           static_cast<std::uint32_t>(Field_countableRoomMask[index]);
     }
     for (std::size_t index = 0; index < world.chests_opened.size(); ++index) {
       world.chests_opened.at(index) =
-          static_cast<std::uint8_t>(VS::State::stateFlags.chestsOpened[index]);
+          static_cast<std::uint8_t>(VS::State::stateFlags.chests_opened[index]);
     }
     world.clear_count =
-        static_cast<std::uint8_t>(VS::State::stateFlags.clearCount);
+        static_cast<std::uint8_t>(VS::State::stateFlags.clear_count);
     world.strength = stats->total_strength;
     world.intelligence = stats->total_intelligence;
     world.agility = stats->total_agility;
     return world;
   }
   void WriteWorld(const GameClearWorld& world) override {
-    VS::State::scoreData.miscScore = world.record.misc_score;
-    VS::State::scoreData.healCount = world.heal_count;
-    VS::State::scoreData.mapCompletion = world.record.map_completion;
-    VS::State::scoreData.openedChestCount = world.record.opened_chest_count;
+    VS::State::scoreData.misc_score = world.record.misc_score;
+    VS::State::scoreData.heal_count = world.heal_count;
+    VS::State::scoreData.map_completion = world.record.map_completion;
+    VS::State::scoreData.opened_chest_count = world.record.opened_chest_count;
     for (std::size_t index = 0; index < world.room_flags.size(); ++index) {
-      State_roomVisitProgress.roomFlags[index] =
+      VS::State::roomVisitProgress.room_flags[index] =
           std::bit_cast<std::int32_t>(world.room_flags.at(index));
     }
   }
@@ -607,10 +607,10 @@ void LiveDrawBonusReelTexture(int x, int y, int texture_index) {
 // decomp: _addHealBonus, src/MENU/MENUF.PRG/3B8.c:2865.
 void LiveApplyHealingScoreBonus() {
   const auto healed =
-      ApplyHealingScoreBonus({.misc_score = VS::State::scoreData.miscScore,
-                              .heal_count = VS::State::scoreData.healCount});
-  VS::State::scoreData.miscScore = healed.misc_score;
-  VS::State::scoreData.healCount = healed.heal_count;
+      ApplyHealingScoreBonus({.misc_score = VS::State::scoreData.misc_score,
+                              .heal_count = VS::State::scoreData.heal_count});
+  VS::State::scoreData.misc_score = healed.misc_score;
+  VS::State::scoreData.heal_count = healed.heal_count;
 }
 
 void ResetLiveGameClearModuleData() {

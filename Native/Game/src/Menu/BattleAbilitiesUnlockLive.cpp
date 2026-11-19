@@ -22,7 +22,7 @@
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Menu::BattleAbilities {
 namespace {
@@ -73,30 +73,30 @@ class LiveProgress final : public UnlockProgress {
                : -1;
   }
   int ArtsLearned(int category) const override {
-    return VS::State::artsStatus.artsLearned[category];
+    return VS::State::artsStatus.arts_learned[category];
   }
   void SetArtsLearned(int category, int count) override {
-    VS::State::artsStatus.artsLearned[category] =
+    VS::State::artsStatus.arts_learned[category] =
         static_cast<std::uint8_t>(count);
   }
   int WeaponCategoryKills(int category) const override {
-    return VS::State::artsStatus.kills.weaponCategoryKills[category];
+    return VS::State::artsStatus.kills.weapon_category_kills[category];
   }
   int BreakArtRequirement(int category, int tier) const override {
     return Battle_breakArtPointRequirements[category][tier];
   }
   int BattleAbilitiesUnlocked() const override {
-    return VS::State::artsStatus.kills.battleAbilitiesUnlocked;
+    return VS::State::artsStatus.kills.battle_abilities_unlocked;
   }
   void SetBattleAbilitiesUnlocked(int count) override {
-    VS::State::artsStatus.kills.battleAbilitiesUnlocked =
+    VS::State::artsStatus.kills.battle_abilities_unlocked =
         static_cast<std::uint16_t>(count);
   }
   int BattleAbilityRequirement(int tier) const override {
     return Battle_battleAbilityPointRequirements[tier];
   }
   int TotalKills() const override {
-    return VS::State::artsStatus.kills.totalKills;
+    return VS::State::artsStatus.kills.total_kills;
   }
   bool ActionUnlocked(std::uint8_t action) const override {
     return Battle_actionDefinitions[action].unlocked != 0;
@@ -172,11 +172,11 @@ class LiveAbilityHost final : public AbilityUnlockHost {
         MenuText(Text_Menu2_battleAbilitiesMenu_Offset_defenseAbilities),
         MenuText(Text_Menu2_battleAbilitiesMenu_Offset_select)};
     std::array<int, kAbilityCategoryCount> types{};
-    const auto saved_cursor = VS::Input::settings.cursorMemory;
-    VS::Input::settings.cursorMemory = 1;
+    const auto saved_cursor = VS::Input::settings.cursor_memory;
+    VS::Input::settings.cursor_memory = 1;
     Framework::CreateLiveMenuRows(kAbilityCategoryCount, kCategoryRowInfo,
                                   strings.data(), types.data());
-    VS::Input::settings.cursorMemory = saved_cursor;
+    VS::Input::settings.cursor_memory = saved_cursor;
   }
   bool ShowAbilityList(AbilityKind kind, std::span<const std::uint8_t> actions,
                        int visible_rows, bool force_cursor) override {
@@ -189,13 +189,13 @@ class LiveAbilityHost final : public AbilityUnlockHost {
       if (description == nullptr) return false;
       strings[index * kPointersPerRow + 1] = description;
     }
-    const auto saved_cursor = VS::Input::settings.cursorMemory;
-    if (force_cursor) VS::Input::settings.cursorMemory = 1;
+    const auto saved_cursor = VS::Input::settings.cursor_memory;
+    if (force_cursor) VS::Input::settings.cursor_memory = 1;
     const int row_info =
         kind == AbilityKind::kChain ? kChainRowInfo : kDefenseRowInfo;
     Framework::CreateLiveMenuRows(visible_rows, row_info, strings.data(),
                                   types.data());
-    VS::Input::settings.cursorMemory = saved_cursor;
+    VS::Input::settings.cursor_memory = saved_cursor;
     return true;
   }
   void ClearMenu() override {
@@ -256,7 +256,7 @@ class LiveRowsHost final : public AbilityRowsHost {
     return Menu_BattleAbilities_abilityText != nullptr;
   }
   bool CursorMemoryEnabled() const override {
-    return VS::Input::settings.cursorMemory != 0;
+    return VS::Input::settings.cursor_memory != 0;
   }
   AbilityCursor SavedCursor(AbilityMenuType type) const override {
     const auto index = static_cast<std::size_t>(type) * kPointersPerRow;

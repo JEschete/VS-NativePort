@@ -41,7 +41,7 @@ struct PlayTimeRecord {
   std::int8_t minutes = 0;
 };
 
-// The State_ScoreData fields the ending reads or writes.
+// The VS::State::ScoreData fields the ending reads or writes.
 struct ScoreRecord {
   std::uint32_t titles = 0;
   std::array<std::uint16_t, kEnemyClassCount> enemy_kills{};
@@ -57,7 +57,7 @@ struct ScoreRecord {
   std::uint32_t misc_score = 0;
 };
 
-// The State_StateFlags fields the ending reads or writes.
+// The VS::State::StateFlags fields the ending reads or writes.
 struct PlaythroughFlags {
   std::uint8_t clear_count = 0;
   std::uint8_t difficulty = 0;

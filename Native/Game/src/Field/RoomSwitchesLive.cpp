@@ -19,7 +19,7 @@
 #include "Field/RoomEffectsLive.hpp"
 #include "Field/RoomSwitches.hpp"
 #include "Items/TreasureChests.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 
@@ -408,7 +408,7 @@ bool MarkLiveSigilDoorUnlocked(std::uint32_t sigil_index) {
       {.zone_id = room->zone_id,
        .map_id = room->map_id,
        .sigil_index = sigil_index},
-      std::as_writable_bytes(std::span(VS::State::stateFlags.opaque186)));
+      std::as_writable_bytes(std::span(VS::State::stateFlags.opaque_186)));
 }
 
 std::uint8_t LiveRoomSigilDoorUnlockByte(const SigilDoorRoomQuery& query) {
@@ -416,7 +416,8 @@ std::uint8_t LiveRoomSigilDoorUnlockByte(const SigilDoorRoomQuery& query) {
   const SigilDoorTables tables{
       std::span(Field_lockedDoorIndexRanges).first(kSigilRangeWords), pairs};
   return RoomSigilDoorUnlockByte(
-      tables, query, std::as_bytes(std::span(VS::State::stateFlags.opaque186)));
+      tables, query,
+      std::as_bytes(std::span(VS::State::stateFlags.opaque_186)));
 }
 
 bool BeginLiveChestSwitch(ChestTarget target) {

@@ -6,12 +6,13 @@
 #include <cstdint>
 #include <optional>
 
+#include "State/Progress.hpp"
+
 // The kill records and streak score the score screen and titles read (decomp:
 // vs_main_scoredata, SLUS_010.40 main.h:202 vs_main_scoredata_t): kills per
 // enemy class, a flag per defeated enemy sub-type, and the streaks that
 // multiply each hostile kill's score.
 namespace VS::State {
-inline constexpr std::size_t kEnemyClassCount = 6;
 inline constexpr std::size_t kEnemyKillFlagWords = 8;
 inline constexpr unsigned kEnemyKillFlagCount = 256;
 inline constexpr std::uint16_t kMaxEnemyClassKills = 0xFFFF;

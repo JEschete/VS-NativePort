@@ -38,7 +38,7 @@
 #include "Menu/SceneNotificationsLive.hpp"
 #include "Menu/TextBox.h"
 #include "Render/PaletteAnimationLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace {
@@ -89,9 +89,9 @@ struct LiveFixture {
     actor.model = &model;
     actor.equippedWeaponCategory = 1;
     VS::State::artsStatus = {};
-    std::fill_n(VS::State::artsStatus.artsLearned, 12, 4);
+    std::fill_n(VS::State::artsStatus.arts_learned, 12, 4);
     Battle_battleAbilityPointRequirements[0] = 1;
-    VS::State::artsStatus.kills.totalKills = 1;
+    VS::State::artsStatus.kills.total_kills = 1;
     VS::State::SetLiveScriptFlag(0xAB, 0);
     VS::State::SetLiveScriptFlag(0xB6, 0);
   }
@@ -245,8 +245,8 @@ TEST_CASE("F04126 live pending acquisition bypasses action and actor stats",
   CHECK(Battle_actionFlowMode == 5);
   CHECK(Field_areMovingPlatformsPaused == 1);
   CHECK(VS::Field::isInteractionPaused == 77);
-  CHECK(VS::State::artsStatus.kills.totalKills == 1);
-  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 0);
+  CHECK(VS::State::artsStatus.kills.total_kills == 1);
+  CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 0);
 }
 
 TEST_CASE("F00220 live acquisition uses the actual pending and menu policies",
@@ -259,7 +259,7 @@ TEST_CASE("F00220 live acquisition uses the actual pending and menu policies",
   CHECK(VS::Menu::Framework::actionSelection.menuStatus == 1);
   CHECK(VS::Menu::Framework::unlockedBreakArt == 0);
   CHECK(VS::Menu::Framework::unlockedBattleAbility == 1);
-  CHECK(VS::State::artsStatus.kills.battleAbilitiesUnlocked == 0);
+  CHECK(VS::State::artsStatus.kills.battle_abilities_unlocked == 0);
 }
 
 TEST_CASE("F00221 live loot uses the actual native list owner and menu",

@@ -18,7 +18,7 @@
 #include "Battle/StatusQueueLive.hpp"
 #include "Core/Diagnostics.hpp"
 #include "Items/Loadout.h"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/ScriptFlagsLive.hpp"
 
 namespace VS::Battle {
@@ -140,17 +140,17 @@ class LiveEffectWorld final : public ActionEffectWorld {
     return State::LiveScriptFlag(kWeaponArtProgressFlag);
   }
   std::uint8_t LearnedArts(std::uint8_t category) override {
-    return VS::State::artsStatus.artsLearned[category];
+    return VS::State::artsStatus.arts_learned[category];
   }
   std::uint16_t WeaponKills(std::uint8_t category) override {
-    return VS::State::artsStatus.kills.weaponCategoryKills[category];
+    return VS::State::artsStatus.kills.weapon_category_kills[category];
   }
   std::uint16_t RequiredKills(std::uint8_t category,
                               std::uint8_t learned) override {
     return Battle_breakArtPointRequirements[category][learned];
   }
   void SetWeaponKills(std::uint8_t category, std::uint16_t kills) override {
-    VS::State::artsStatus.kills.weaponCategoryKills[category] = kills;
+    VS::State::artsStatus.kills.weapon_category_kills[category] = kills;
   }
 
  private:

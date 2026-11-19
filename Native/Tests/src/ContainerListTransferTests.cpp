@@ -1154,8 +1154,9 @@ TEST_CASE("F02986 live direction menu replays after its MENUD reset",
 TEST_CASE("F02986 live reset restores the first-entry direction reset",
           "[container-transfer-live][F02986]") {
   LiveFixture fixture;
-  live::equipment::ValueRestore<char> memory{VS::Input::settings.cursorMemory};
-  VS::Input::settings.cursorMemory = 0;
+  live::equipment::ValueRestore<std::uint8_t> memory{
+      VS::Input::settings.cursor_memory};
+  VS::Input::settings.cursor_memory = 0;
   transfer::ResetLiveContainerTransferStatics();
   VS::Menu::Framework::menuMemory.opaque9E = 2;
   REQUIRE(transfer::LiveUpdateTransferDirection(1) == 0);

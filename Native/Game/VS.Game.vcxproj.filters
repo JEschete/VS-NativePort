@@ -3165,13 +3165,10 @@
     <ClCompile Include="src\State\ScriptFlagsLive.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\Settings.h">
-      <Filter>src\State</Filter>
-    </ClInclude>
     <ClCompile Include="src\State\StateFlags.cpp">
       <Filter>src\State</Filter>
     </ClCompile>
-    <ClInclude Include="src\State\StateFlags.h">
+    <ClInclude Include="src\State\StateFlags.hpp">
       <Filter>src\State</Filter>
     </ClInclude>
     <ClInclude Include="src\State\Timers.hpp">
@@ -4899,7 +4896,7 @@
     <ClInclude Include="include\State\KillScoreLive.hpp">
       <Filter>include\State</Filter>
     </ClInclude>
-    <ClInclude Include="include\State\Progress.h">
+    <ClInclude Include="include\State\Progress.hpp">
       <Filter>include\State</Filter>
     </ClInclude>
     <ClInclude Include="include\State\SceneTimer.hpp">

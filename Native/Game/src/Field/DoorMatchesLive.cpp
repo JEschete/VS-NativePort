@@ -13,7 +13,7 @@
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 constexpr int kDoorQueryRandomByteIndex = 7;
@@ -41,7 +41,7 @@ DoorMatchList* TransitionLiveDoorsAtTile(int x, int z, int layer) {
                        bytes);
     return nullptr;
   }
-  VS::State::stateFlags.opaqueAC[kDoorQueryRandomByteIndex] =
+  VS::State::stateFlags.opaque_ac[kDoorQueryRandomByteIndex] =
       static_cast<char>(VS::Core::NextBiosRand());
   const std::span records(Field_roomData.doors,
                           bytes / sizeof(Field_MpdDoorRecord));

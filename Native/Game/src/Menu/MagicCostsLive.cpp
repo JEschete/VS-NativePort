@@ -28,7 +28,7 @@
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
 #include "Menu/MagicCosts.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Magic {
 namespace {
@@ -101,8 +101,8 @@ class LiveHost final : public Host {
   const SavePointTable& SavePoints() override { return OriginalSavePoints(); }
   std::span<const std::uint8_t> SavePointStates() override {
     return {reinterpret_cast<const std::uint8_t*>(
-                VS::State::stateFlags.savePointStates),
-            std::size(VS::State::stateFlags.savePointStates)};
+                VS::State::stateFlags.save_point_states),
+            std::size(VS::State::stateFlags.save_point_states)};
   }
   std::optional<std::int16_t> CurrentMp() override {
     if (Battle_characterState == nullptr ||
@@ -135,10 +135,10 @@ class LiveHost final : public Host {
         ToStorageChar(scroll);
   }
   std::uint8_t CursorMemorySetting() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void SetCursorMemorySetting(std::uint8_t value) override {
-    VS::Input::settings.cursorMemory = ToStorageChar(value);
+    VS::Input::settings.cursor_memory = ToStorageChar(value);
   }
   void CreateRows(int row_info, std::span<const TeleportRow> rows) override {
     if (rows.size() > kSavePointCount) {

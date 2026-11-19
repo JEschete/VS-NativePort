@@ -284,8 +284,8 @@ class LiveSceneHost final : public RoomSceneHost {
     LiveDrawRoomGeometry(Field_roomData.geometry);
   }
   MinimapSettings Minimap() override {
-    return MinimapSettings{.shown = (VS::Input::settings.simpleMap & 1) != 0,
-                           .framed = (VS::Input::settings.simpleMap & 2) != 0,
+    return MinimapSettings{.shown = (VS::Input::settings.simple_map & 1) != 0,
+                           .framed = (VS::Input::settings.simple_map & 2) != 0,
                            .has_scene = Field_roomData.minimapScene != nullptr};
   }
   bool MinimapVisible() override { return Field_isMinimapVisible != 0; }

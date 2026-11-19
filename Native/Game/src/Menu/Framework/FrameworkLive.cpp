@@ -113,7 +113,7 @@
 #include "Render/UiPacketsLive.hpp"
 #include "Render/UiPrimitives.hpp"
 #include "Save/NativeContainerLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace VS::Menu::Framework {
 namespace {
@@ -748,13 +748,13 @@ class LiveHost final : public Host {
   Buttons Input() override { return LiveButtons(); }
 
   Settings MenuSettings() override {
-    return {.cursor_memory = Byte(VS::Input::settings.cursorMemory),
-            .information = Byte(VS::Input::settings.information),
-            .menu_flags = VS::Input::settings.menuFlags};
+    return {.cursor_memory = VS::Input::settings.cursor_memory,
+            .information = VS::Input::settings.information,
+            .menu_flags = VS::Input::settings.menu_flags};
   }
 
   void SetMenuFlags(std::uint32_t flags) override {
-    VS::Input::settings.menuFlags = static_cast<std::uint16_t>(flags);
+    VS::Input::settings.menu_flags = static_cast<std::uint16_t>(flags);
   }
 
   void PlaySound(MenuSound sound) override {
@@ -842,9 +842,9 @@ class LiveHost final : public Host {
   }
 
   StoryFlags Story() override {
-    return {.opaque_b5 = Byte(VS::State::stateFlags.opaqueB5),
-            .intro_state = Byte(VS::State::stateFlags.introState),
-            .game_over = Byte(VS::State::stateFlags.gameOver)};
+    return {.opaque_b5 = VS::State::stateFlags.opaque_b5,
+            .intro_state = VS::State::stateFlags.intro_state,
+            .game_over = VS::State::stateFlags.game_over};
   }
 
   bool HasUnlockedSpellClass(int spell_class) override {

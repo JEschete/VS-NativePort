@@ -10,12 +10,12 @@
 
 #include "Actors/RoomActorCache.h"
 #include "Field/Mpd.h"
+#include "Input/Settings.hpp"
 #include "Items/Inventory.h"
 #include "Legacy/Psx.h"
 #include "State/Ashley.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/SceneTimer.hpp"
-#include "State/Settings.h"
 
 namespace VS::Game::Save {
 
@@ -85,14 +85,14 @@ struct RandomState {
 struct Snapshot {
   std::array<std::uint8_t, kScriptFlagBytes> script_flags{};
   std::array<bool, kLearnedActionCount> learned_actions{};
-  State_Settings settings{};
+  VS::Input::Settings settings{};
   VS::State::AshleyStatsSnapshot ashley{};
   Items_Inventory inventory{};
   Items_InventoryIndices inventory_order{};
   Items_ContainerData storage{};
-  State_RoomVisitFlags visits{};
-  State_ArtsStatus arts{};
-  State_ScoreData score{};
+  VS::State::RoomVisitFlags visits{};
+  VS::State::ArtsStatus arts{};
+  VS::State::ScoreData score{};
   std::array<RoomCache, kCachedRooms> room_cache{};
   std::uint32_t room_cache_slot = 0;
   std::uint64_t play_ticks = 0;

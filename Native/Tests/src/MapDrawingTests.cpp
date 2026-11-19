@@ -28,7 +28,7 @@
 #include "Render/RoomDrawLive.hpp"
 #include "Render/Text/CompactFont.hpp"
 #include "Render/UiPrimitives.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace map = VS::Menu::map;
 
@@ -967,7 +967,7 @@ class LiveMap {
   Restore<std::int16_t> door_{Field_enteredDoorId};
   Restore<Field_MapScene*> minimap_{Field_roomData.minimapScene};
   Restore<u_int> minimap_length_{Field_roomData.header.minimapSceneLength};
-  State_StateFlags saved_flags_{};
+  VS::State::StateFlags saved_flags_{};
   std::array<Menu_Map_CompassBound, 4> saved_bounds_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphLeftTrim)> saved_trims_{};
   std::array<u_char, sizeof(VS::Render::compactGlyphWidths)> saved_widths_{};
@@ -1417,7 +1417,7 @@ TEST_CASE("The live legend slides in 16 pixels a frame with text box 0",
           "[map-drawing-live]") {
   LiveMap frame;
   Menu_Map_menuCommandsState = static_cast<std::int16_t>(GENERATE(0, 1, 5));
-  VS::State::stateFlags.mapPaling[0] = 0;
+  VS::State::stateFlags.map_paling[0] = 0;
   Menu_TextBoxState* box = VS::Menu::LiveTextBox(0);
   REQUIRE(box != nullptr);
   box->y = 0;
@@ -1453,11 +1453,11 @@ TEST_CASE("The live legend shows the jamming caption alone",
   LiveMap frame;
   Menu_Map_uiAnimationState = 3;
   Menu_Map_currentScene = 4;
-  VS::State::stateFlags.mapPaling[4] = 1;
+  VS::State::stateFlags.map_paling[4] = 1;
   map::LiveDrawControls();
   const std::size_t jammed = frame.UsedWords();
   frame.Reset();
-  VS::State::stateFlags.mapPaling[4] = 0;
+  VS::State::stateFlags.map_paling[4] = 0;
   map::LiveDrawControls();
   CHECK(jammed > 0);
   CHECK(jammed < frame.UsedWords());

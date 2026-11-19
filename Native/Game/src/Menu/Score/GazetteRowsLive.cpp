@@ -165,10 +165,10 @@ class LiveGazetteMenu final : public GazetteMenuHost {
         VS::Menu::Framework::menuMemory.cursorMemories[kTopMenuCursorRow]);
   }
   std::uint8_t CursorMemorySetting() override {
-    return static_cast<std::uint8_t>(VS::Input::settings.cursorMemory);
+    return static_cast<std::uint8_t>(VS::Input::settings.cursor_memory);
   }
   void SetCursorMemorySetting(std::uint8_t setting) override {
-    VS::Input::settings.cursorMemory = static_cast<char>(setting);
+    VS::Input::settings.cursor_memory = static_cast<char>(setting);
   }
   void ShowRows(std::int32_t row_info,
                 std::span<const std::int32_t> row_types) override {

@@ -30,7 +30,7 @@
 #include "Field/Zone.h"
 #include "Legacy/Psx.h"
 #include "Menu/MapTerminalLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 // decomp: D_800F19A0 (D_800F19A0@BATTLE/BATTLE.PRG)
 int VS::Field::isRoomVisitPending;
@@ -46,23 +46,23 @@ constexpr std::size_t kPlacedLabelPositionBytes = 0x80;
 VisitedPlaces LoadVisitedPlaces() {
   VisitedPlaces visited;
   for (std::size_t word = 0; word < visited.rooms.size(); ++word) {
-    visited.rooms.at(word) =
-        static_cast<std::uint32_t>(State_roomVisitProgress.roomFlags[word]);
+    visited.rooms.at(word) = static_cast<std::uint32_t>(
+        VS::State::roomVisitProgress.room_flags[word]);
   }
   for (std::size_t word = 0; word < visited.areas.size(); ++word) {
-    visited.areas.at(word) =
-        static_cast<std::uint32_t>(State_roomVisitProgress.areaFlags[word]);
+    visited.areas.at(word) = static_cast<std::uint32_t>(
+        VS::State::roomVisitProgress.area_flags[word]);
   }
   return visited;
 }
 
 void StoreVisitedPlaces(const VisitedPlaces& visited) {
   for (std::size_t word = 0; word < visited.rooms.size(); ++word) {
-    State_roomVisitProgress.roomFlags[word] =
+    VS::State::roomVisitProgress.room_flags[word] =
         static_cast<int>(visited.rooms.at(word));
   }
   for (std::size_t word = 0; word < visited.areas.size(); ++word) {
-    State_roomVisitProgress.areaFlags[word] =
+    VS::State::roomVisitProgress.area_flags[word] =
         static_cast<int>(visited.areas.at(word));
   }
 }
@@ -77,9 +77,9 @@ void StoreRoomVisit(const RoomVisitState& state) {
   StoreVisitedPlaces(state.visited);
 }
 
-static_assert(sizeof(State_roomVisitProgress.roomFlags) ==
+static_assert(sizeof(VS::State::roomVisitProgress.room_flags) ==
               kVisitedRoomWords * sizeof(std::uint32_t));
-static_assert(sizeof(State_roomVisitProgress.areaFlags) ==
+static_assert(sizeof(VS::State::roomVisitProgress.area_flags) ==
               kVisitedAreaWords * sizeof(std::uint32_t));
 
 class LiveRoomVisitHost final : public RoomVisitHost {

@@ -22,7 +22,7 @@
 #include "Input/ControllerLiveState.hpp"
 #include "Menu/TextBox.h"
 #include "Menu/TextBoxStateLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "TestSupport/ScriptSources.hpp"
 
 namespace {
@@ -55,7 +55,7 @@ struct LiveDialogFixture {
     Event_dialogStrings = legacy.data();
     Menu_textBoxSelector = {};
     VS::Input::buttonsPressed = {};
-    VS::State::stateFlags.opaque11 = 1;
+    VS::State::stateFlags.opaque_11 = 1;
     for (auto& box : Menu_textBoxes) {
       box = {};
       box.flags.speakerTexture = event::kNoSpeakerTexture;

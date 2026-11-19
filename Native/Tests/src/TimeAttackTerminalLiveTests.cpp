@@ -25,9 +25,9 @@
 #include "Menu/TimeAttackTerminalLiveFixture.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 #include "State/SceneTimerLive.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 #include "State/Timers.hpp"
 
 namespace {
@@ -154,7 +154,7 @@ TEST_CASE(
     "[time-attack-terminal-live][F03011][reload]") {
   LiveFixture fixture;
   Battle_unusedSubmenuState = 2;
-  VS::State::scoreData.bossTimeTrialScores[7][2].time = 123456;
+  VS::State::scoreData.boss_time_trial_scores[7][2].time = 123456;
   Menu_Results_screenTimer = 97;
   Menu_Results_screenState = 2;
   Menu_Results_newTimeSlot = 3;
@@ -168,7 +168,7 @@ TEST_CASE(
   CHECK(Menu_Results_screenTimer == 97);
   CHECK(Menu_Results_screenState == 2);
   CHECK(Battle_unusedSubmenuState == 2);
-  CHECK(VS::State::scoreData.bossTimeTrialScores[7][2].time == 123456);
+  CHECK(VS::State::scoreData.boss_time_trial_scores[7][2].time == 123456);
 }
 
 TEST_CASE(
@@ -343,13 +343,13 @@ TEST_CASE("F03011 Live validates the course before freeing or writing records",
           "[time-attack-terminal-live][F03011]") {
   LiveFixture fixture;
   fixture.LoadThroughTextures(Asset::kResults);
-  VS::State::stateFlags.timeAttackBoss = 8;
-  VS::State::scoreData.bossTimeTrialScores[0][0].time = 99;
+  VS::State::stateFlags.time_attack_boss = 8;
+  VS::State::scoreData.boss_time_trial_scores[0][0].time = 99;
   Menu_Results_timeTrialTime = 1234;
   CHECK(r::LiveInitializeTimeAttackResults() == 0);
   CHECK(Battle_unusedSubmenuState == 2);
   CHECK(Menu_Results_timeTrialTime == 1234);
-  CHECK(VS::State::scoreData.bossTimeTrialScores[0][0].time == 99);
+  CHECK(VS::State::scoreData.boss_time_trial_scores[0][0].time == 99);
   CHECK(r::InspectLiveTimeAttackLoad(Asset::kResults).owns_buffer);
 }
 
@@ -360,11 +360,11 @@ TEST_CASE(
   fixture.LoadThroughTextures(Asset::kResults);
   fixture.CompleteMusicLoad();
   auto& flags = VS::State::stateFlags;
-  flags.timeAttackBoss = 7;
-  flags.timeAttackSecs = 30;
-  flags.clearCount = static_cast<char>(254);
+  flags.time_attack_boss = 7;
+  flags.time_attack_seconds = 30;
+  flags.clear_count = static_cast<char>(254);
   flags.difficulty = 3;
-  auto& row = VS::State::scoreData.bossTimeTrialScores[7];
+  auto& row = VS::State::scoreData.boss_time_trial_scores[7];
   row[0] = {.time = 0x1000, .round = 2, .difficulty = 0};
   row[1] = {.time = 0x1E00, .round = 7, .difficulty = 1};
   row[2] = {.time = 0x2000, .round = 9, .difficulty = 0};
@@ -436,7 +436,7 @@ TEST_CASE(
     "F03016 Live invalid drawing course cannot advance presentation state",
     "[time-attack-terminal-live][F03016]") {
   LiveFixture fixture;
-  VS::State::stateFlags.timeAttackBoss = 255;
+  VS::State::stateFlags.time_attack_boss = 255;
   Menu_Results_screenTimer = 191;
   Menu_Results_elementAnimationState = 4095;
   CHECK(r::LiveUpdateTimeAttackResults() == 0);
@@ -510,7 +510,7 @@ TEST_CASE("F03008 Live drives all three real start initializer stages",
           "[time-attack-terminal-live][F03008][F03009][F03012]") {
   LiveFixture fixture;
   std::array<unsigned char, 2> outer{0, 0xAA};
-  VS::State::stateFlags.menuFSubmenu = 1;
+  VS::State::stateFlags.menu_f_submenu = 1;
   CHECK(r::LiveUpdateResultsScreen(outer.data()) == 0);
   CHECK(outer.front() == 1);
   static_cast<void>(InjectLoaded(Asset::kStart));
@@ -549,29 +549,29 @@ TEST_CASE(
     "F03009 and F03014 Live score-only mode calls the delivered healing API",
     "[time-attack-terminal-live][F03009][F03014]") {
   LiveFixture fixture;
-  VS::State::stateFlags.menuFSubmenu = 3;
-  VS::State::scoreData.miscScore = 50;
-  VS::State::scoreData.healCount = 2;
+  VS::State::stateFlags.menu_f_submenu = 3;
+  VS::State::scoreData.misc_score = 50;
+  VS::State::scoreData.heal_count = 2;
   CHECK(r::LiveInitializeResultsScreen() == 1);
-  CHECK(VS::State::scoreData.miscScore == 99850);
-  CHECK(VS::State::scoreData.healCount == 0);
+  CHECK(VS::State::scoreData.misc_score == 99850);
+  CHECK(VS::State::scoreData.heal_count == 0);
   CHECK(r::LiveUpdateResultsPresentation() == 1);
-  CHECK(VS::State::scoreData.miscScore == 99850);
+  CHECK(VS::State::scoreData.misc_score == 99850);
 }
 
 TEST_CASE(
     "Results Live dispatch refuses null state and unknown unsigned selectors",
     "[time-attack-terminal-live][F03008][F03009][F03014]") {
   LiveFixture fixture;
-  VS::State::stateFlags.menuFSubmenu = static_cast<char>(255);
-  VS::State::scoreData.miscScore = 123;
+  VS::State::stateFlags.menu_f_submenu = static_cast<char>(255);
+  VS::State::scoreData.misc_score = 123;
   std::array<unsigned char, 1> outer{2};
   CHECK(r::LiveUpdateResultsScreen(nullptr) == 0);
   CHECK(r::LiveInitializeResultsScreen() == 0);
   CHECK(r::LiveUpdateResultsPresentation() == 0);
   CHECK(r::LiveUpdateResultsScreen(outer.data()) == 0);
   CHECK(outer.front() == 2);
-  CHECK(VS::State::scoreData.miscScore == 123);
+  CHECK(VS::State::scoreData.misc_score == 123);
 }
 
 TEST_CASE("Time-attack Live queue exhaustion cannot release unrelated requests",

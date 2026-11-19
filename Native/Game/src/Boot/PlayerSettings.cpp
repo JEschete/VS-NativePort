@@ -10,10 +10,10 @@
 void VS::Boot::InitializePlayerSettings(void) {
   enum { kInitialMenuFlags = 0x2D8, kInitialMapMode = 3 };
   memset(&VS::Input::settings, 0, sizeof VS::Input::settings);
-  VS::Input::settings.menuFlags = kInitialMenuFlags;
+  VS::Input::settings.menu_flags = kInitialMenuFlags;
   VS::Input::settings.information = 1;
-  VS::Input::settings.simpleMap = kInitialMapMode;
-  VS::Input::settings.containerEmpty = 1;
-  VS::Input::settings.abilityTimingDisplay = 1;
-  VS::Input::settings.cursorMemory = 1;
+  VS::Input::settings.simple_map = kInitialMapMode;
+  VS::Input::settings.container_empty = 1;
+  VS::Input::settings.ability_timing_display = 1;
+  VS::Input::settings.cursor_memory = 1;
 }

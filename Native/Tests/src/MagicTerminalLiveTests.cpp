@@ -26,7 +26,7 @@
 #include "Menu/MagicMenusLive.hpp"
 #include "Menu/MagicTerminalLive.hpp"
 #include "Menu/OverlayLoadFixture.hpp"
-#include "State/StateFlags.h"
+#include "State/StateFlags.hpp"
 
 namespace {
 namespace magic = VS::Menu::Magic;
@@ -109,7 +109,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     actor.stats = &stats;
     stats.currentMp = 500;
     VS::State::stateFlags = {};
-    VS::Input::settings.cursorMemory = 0;
+    VS::Input::settings.cursor_memory = 0;
     VS::Menu::Framework::menuState = {};
     VS::Menu::Framework::actionSelection = {};
     VS::Menu::Framework::shortcutInvoked = 0;
@@ -177,7 +177,7 @@ struct MagicLiveFixture : equipment_detail_tests::LiveFixture {
     CHECK(item.name[0] == (school == 0 ? 1 : 2));
   }
   void LeaveTeleport() {
-    VS::State::stateFlags.savePointStates[kSavePoint] = 1;
+    VS::State::stateFlags.save_point_states[kSavePoint] = 1;
     REQUIRE(magic::UpdateTeleportMenuLive(1) == 0);
     IdleRows();
     REQUIRE(magic::UpdateTeleportMenuLive(0) == 0);
@@ -258,7 +258,7 @@ TEST_CASE("Magic module entries create only populated restricted school rows",
   fixture.IdleRows();
   REQUIRE(entry(0) == 0);
   fixture.CheckSchoolRow(school, 1);
-  CHECK(VS::Input::settings.cursorMemory == 0);
+  CHECK(VS::Input::settings.cursor_memory == 0);
   CHECK(magic::RefusedMagicMenuCount() == refusals);
 }
 
@@ -310,7 +310,7 @@ TEST_CASE("MENU0 completion and cold sessions also restore teleport ownership",
   CHECK(VS::Menu::Framework::subMenuRowCount == 1);
   CHECK(VS::Core::Memory::LivePayloadCapacity(VS::Menu::Framework::itemsText)
             .has_value());
-  CHECK(VS::State::stateFlags.savePointStates[kSavePoint] == 1);
+  CHECK(VS::State::stateFlags.save_point_states[kSavePoint] == 1);
 }
 
 TEST_CASE("Warlock rank drawing preserves native packet chains and glyph style",

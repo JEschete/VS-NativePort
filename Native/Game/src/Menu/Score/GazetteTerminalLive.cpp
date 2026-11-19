@@ -48,7 +48,7 @@
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace VS::Menu::Score {
 namespace {
@@ -762,11 +762,11 @@ void DrawLiveEnemyNumber(int x, int y, int number, int dimmed) {
 void InitializeLiveEnemyList() {
   EnemyRows enemies;
   std::array<std::uint32_t, kEnemyDefeatFlagWords> flags{};
-  static_assert(std::size(VS::State::scoreData.enemyKillFlags) ==
+  static_assert(std::size(VS::State::scoreData.enemy_kill_flags) ==
                 kEnemyDefeatFlagWords);
   for (std::size_t index = 0; index < flags.size(); ++index) {
-    flags[index] =
-        static_cast<std::uint32_t>(VS::State::scoreData.enemyKillFlags[index]);
+    flags[index] = static_cast<std::uint32_t>(
+        VS::State::scoreData.enemy_kill_flags[index]);
   }
   if (!ReadEnemies(enemies) || !InitializeEnemyList(enemies, flags)) {
     Refuse("enemy list or defeat-bit range outside its payload");

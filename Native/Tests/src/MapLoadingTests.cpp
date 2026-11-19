@@ -17,7 +17,7 @@
 #include "Menu/Map.h"
 #include "Menu/MapLoading.hpp"
 #include "Menu/MapLoadingLive.hpp"
-#include "State/Progress.h"
+#include "State/Progress.hpp"
 
 namespace {
 namespace map = VS::Menu::map;
@@ -458,7 +458,7 @@ struct LiveLoadingState {
         scene_row(Menu_Map_currentSceneRow),
         room(Menu_Map_currentRoomIndex),
         map_row(Menu_Map_currentMapRow),
-        areas(State_roomVisitProgress.areaFlags[0]),
+        areas(VS::State::roomVisitProgress.area_flags[0]),
         rows(std::to_array(Menu_Map_sceneRowIdMap)) {}
   LiveLoadingState(const LiveLoadingState&) = delete;
   LiveLoadingState& operator=(const LiveLoadingState&) = delete;
@@ -471,7 +471,7 @@ struct LiveLoadingState {
     Menu_Map_currentSceneRow = scene_row;
     Menu_Map_currentRoomIndex = room;
     Menu_Map_currentMapRow = map_row;
-    State_roomVisitProgress.areaFlags[0] = areas;
+    VS::State::roomVisitProgress.area_flags[0] = areas;
     for (std::size_t row = 0; row < rows.size(); ++row) {
       Menu_Map_sceneRowIdMap[row] = rows[row];
     }
@@ -490,7 +490,7 @@ struct LiveLoadingState {
 TEST_CASE("The live chooser without visited areas lists nothing",
           "[map-loading-live]") {
   const LiveLoadingState saved;
-  State_roomVisitProgress.areaFlags[0] = 1;
+  VS::State::roomVisitProgress.area_flags[0] = 1;
   Menu_Map_sceneRowIdMap[0] = 17;
   Menu_Map_currentMapRow = -1;
   CHECK(map::LiveUpdateAreaSelection(1) == map::kNoVisitedAreas);
