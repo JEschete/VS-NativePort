@@ -709,6 +709,9 @@ void RegisterLoadedActor(ActorSpawnHost& host, SpawnedActor actor,
 }
 
 // decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6562)
+// The original allocated through func_80077240 and linked Ashley's list while
+// registering; the leader link is checked before AllocateActorWithEquipment
+// so a refused link allocates nothing.
 SpawnedActor CreateActorWithEquipment(ActorSpawnHost& host, int actor_id,
                                       int model_id, int blade_model,
                                       int blade_material, int shield_model,
@@ -722,9 +725,9 @@ SpawnedActor CreateActorWithEquipment(ActorSpawnHost& host, int actor_id,
   if (!LeaderLinkAllowed(host, *slot, flags, true)) {
     return SpawnedActor::kNone;
   }
-  const SpawnedActor actor =
-      AllocateEquipped(host, *slot, model_id, blade_model, blade_material,
-                       shield_model, shield_material, placement, flags);
+  const SpawnedActor actor = AllocateActorWithEquipment(
+      host, actor_id, model_id, blade_model, blade_material, shield_model,
+      shield_material, placement, flags);
   if (actor == SpawnedActor::kNone) {
     return SpawnedActor::kNone;
   }

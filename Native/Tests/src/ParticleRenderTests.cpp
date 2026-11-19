@@ -31,6 +31,7 @@
 #include "Effects/ParticleTextureAnimationLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Plugins/Plg045.hpp"
+#include "Effects/Plugins/Plg049.hpp"
 #include "Effects/Plugins/Plg053.hpp"
 #include "Effects/Plugins/Plg065.hpp"
 #include "Effects/Plugins/Plg073.hpp"
@@ -1116,6 +1117,11 @@ void RunTrailNineStage(VS::Effects::LiveParticleDefinition* definition,
   VS::Effects::Templates::RunLiveTrailNineStage(Stage, *definition, *scratch,
                                                 *instance, *state);
 }
+
+// A spline point's x, y and z, compared as one value.
+[[nodiscard]] std::array<int, 3> Coordinates(const SVECTOR& point) {
+  return {point.vx, point.vy, point.vz};
+}
 }  // namespace
 
 TEST_CASE(
@@ -1583,6 +1589,55 @@ TEST_CASE("PLG074 F01990 builds axial spline controls without moving endpoints",
   CHECK(fixture.trails[1].spline_points[1].vz == 0);
 }
 
+TEST_CASE("Nine-sample live trail targets aim held trails at their anchor",
+          "[effects][trails][trail-nine-stages]") {
+  const auto entry =
+      RunTrailNineStage<&VS::Effects::Templates::TrailNineTarget>;
+  const unsigned anchor = GENERATE(0u, 0x80u, 0xC0u);
+  Plg074Fixture fixture;
+  auto& definition = fixture.Definition();
+  std::ranges::copy(std::array<std::int16_t, 6>{10, 10, -20, -20, 30, 30},
+                    definition.vector_ranges[6].begin());
+  fixture.scratch.flags = anchor;
+  std::array<VS::Effects::LiveTrail9, 8> trails{};
+  VS::Effects::LiveTrailNineState state{};
+  state.trails = trails.data();
+  state.trail_count = 7;
+  entry(&definition, &fixture.scratch, &fixture.instance, &state);
+  const auto offset = anchor == 0x80   ? std::array{400, -500, 600}
+                      : anchor == 0xC0 ? std::array{700, -800, 900}
+                                       : std::array{0, 0, 0};
+  for (std::size_t index = 0; index < 7; ++index) {
+    const auto& points = trails.at(index).spline_points;
+    CHECK(Coordinates(points[3]) ==
+          std::array{offset[0] + 10, offset[1] - 20, offset[2] + 30});
+    CHECK(Coordinates(points[0]) == std::array{0, 0, 0});
+  }
+  CHECK(Coordinates(trails[7].spline_points[3]) == std::array{0, 0, 0});
+}
+
+TEST_CASE("Nine-sample live trail controls sit their shares along the spline",
+          "[effects][trails][trail-nine-stages]") {
+  const auto entry =
+      RunTrailNineStage<&VS::Effects::Templates::TrailNineControl>;
+  Plg074Fixture fixture;
+  std::array<VS::Effects::LiveTrail9, 2> trails{};
+  VS::Effects::LiveTrailNineState state{};
+  state.trails = trails.data();
+  state.trail_count = 1;
+  auto& points = trails[0].spline_points;
+  points[0] = {10, 20, 30, 0};
+  points[3] = {10, 20, 1054, 0};
+  std::ranges::copy(std::array<std::int16_t, 4>{64, 64, -64, -64},
+                    fixture.Definition().pair_ranges[2].begin());
+  entry(&fixture.Definition(), &fixture.scratch, &fixture.instance, &state);
+  CHECK(Coordinates(points[1]) == std::array{10, 20, 286});
+  CHECK(Coordinates(points[2]) == std::array{10, 20, 798});
+  CHECK(Coordinates(points[0]) == std::array{10, 20, 30});
+  CHECK(Coordinates(points[3]) == std::array{10, 20, 1054});
+  CHECK(Coordinates(trails[1].spline_points[1]) == std::array{0, 0, 0});
+}
+
 namespace {
 void CheckPlg074TrailInitialization(const VS::Effects::LiveTrail& trail,
                                     int steps) {
@@ -1921,6 +1976,52 @@ TEST_CASE("Nine-sample trail transparency reads only the package's curves",
                    "the package's 3 bound curves"));
   CHECK(log.Contains("transparency curve 63 is outside"));
   CHECK(VS::Core::Memory::GameHeap().Empty());
+}
+
+namespace {
+// A trail after its emitter's first tick: origin at the effect origin, target
+// 1024 along z, controls at their 64/256 shares between them, and 12 steps.
+void CheckFirstTickNineSampleTrail(const VS::Effects::LiveTrail9& trail) {
+  CHECK(Coordinates(trail.spline_points[0]) == std::array{0, 0, 0});
+  CHECK(Coordinates(trail.spline_points[1]) == std::array{0, 0, 256});
+  CHECK(Coordinates(trail.spline_points[2]) == std::array{0, 0, 768});
+  CHECK(Coordinates(trail.spline_points[3]) == std::array{0, 0, 1024});
+  CHECK(trail.step_count == 12);
+}
+}  // namespace
+
+// trails9.h:745-751: the first tick places each trail's origin, then its
+// target, then the controls between them, before the trail starts.
+TEST_CASE("Nine-sample emitters aim and spread their trails on the first tick",
+          "[effects][trail-emitter][trail-nine-stages]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  const std::int32_t saved_corner = VS::Effects::Plg049::trailEmissionCounter;
+  auto& definition = fixture.Definition();
+  definition.flags = 0;
+  definition.interval_range[0] = 3;
+  std::ranges::copy(std::array<std::int16_t, 6>{0, 0, 0, 0, 1024, 1024},
+                    definition.vector_ranges[6].begin());
+  std::ranges::copy(std::array<std::int16_t, 4>{64, 64, -64, -64},
+                    definition.pair_ranges[2].begin());
+  std::ranges::fill(definition.pair_ranges[4], 12);
+  Effects_RendererSlot slot{};
+  REQUIRE(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 1, 0) == 1);
+  auto* state =
+      static_cast<VS::Effects::LiveTrailNineState*>(slot.rendererState);
+  REQUIRE(state != nullptr);
+  REQUIRE(state->trail_count == 3);
+  CHECK(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 2, 0) == 1);
+  CHECK(state->initialized == 1);
+  for (const VS::Effects::LiveTrail9& trail :
+       std::span(state->trails, state->trail_count)) {
+    CheckFirstTickNineSampleTrail(trail);
+  }
+  CHECK(VS::Effects::Templates::UpdateLivePlg049TrailNine(&slot, 4, 0) == 0);
+  VS::Core::Memory::FreeLiveFromHighEnd(state);
+  CHECK(VS::Core::Memory::GameHeap().Empty());
+  VS::Effects::Plg049::trailEmissionCounter = saved_corner;
+  fixture.ResetPackets();
 }
 
 TEST_CASE("Trail emitters stop on a missing instance or transform",
