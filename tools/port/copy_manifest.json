@@ -107,8 +107,6 @@
 "Native\\Game\\src\\Battle\\HitChance.h": "f9c06c362d7aa36bc12b81b422b455eebe01c7cf811f1c35320dba6f929d4e8a",
 "Native\\Game\\src\\Battle\\Hud.cpp": "e76bcda6eeddd8846d99132d0d00e75152ff5468881f477ce9eba793112c8920",
 "Native\\Game\\src\\Battle\\Hud.h": "321ccf2b4d6c0c6884e10da9cb289f935d8ad4b8cee784f9a09853da50c9efea",
-"Native\\Game\\src\\Battle\\Legacy.cpp": "d43f79393a6401354bf74f18a93cbf26ac411339ab340ffd264dba87e5f4f2a8",
-"Native\\Game\\src\\Battle\\Legacy.h": "9413490a90f8563e4814ad09cd8abc65365d64b5b4fe6a7251d65ae85f662f9a",
 "Native\\Game\\src\\Battle\\Rewards.cpp": "ba4f07275212d253e809d0c50591fe4d178499e4219f2f7abd9cad20f7939ab2",
 "Native\\Game\\src\\Battle\\Rewards.h": "91c1fdbf7c75096ae799c4bf64566db7c88ca83ef2dd899c8a64575392d10d87",
 "Native\\Game\\src\\Battle\\Room.h": "ad250a77dd9e30b183090304b249b488a013ffd31f4f4e5a2bde894fa91c838f",

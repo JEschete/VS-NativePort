@@ -1082,7 +1082,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
       passed &= Battle_actors[slot] == nullptr &&
                 Actors_actorRecords[slot] == nullptr &&
                 Field_gimmickInstances[slot] == nullptr;
-      // The started effect's emitTo readers must leave defaults untouched.
+      // The started effect's emit_to readers must leave defaults untouched.
       SVECTOR bone = {11, 22, 33, 44};
       Actors_ActorLocation placement{};
       placement.packedTile.word = 55;

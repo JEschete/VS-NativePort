@@ -4,7 +4,6 @@
 #include "Effects/EffectInstances.hpp"
 
 struct Effects_EffectInstance;
-struct Effects_EffectSpawnRequest;
 struct Effects_RendererSlot;
 
 // Live binding for the effect instance lifecycle (EffectInstances.hpp): the
@@ -15,17 +14,19 @@ struct Effects_RendererSlot;
 // renderer or slot is refused with a diagnostic, as are a phase the runtime
 // never sets and the detach of a slot the instance does not hold.
 namespace VS::Effects {
+struct LiveEffectSpawnRequest;
+
 // func_800CE714 (5BF94.c:5074).
-void LiveInitEffectInstance(Effects_EffectSpawnRequest* spawn_request,
+void LiveInitEffectInstance(LiveEffectSpawnRequest* spawn_request,
                             Effects_EffectInstance* instance);
 // func_800CE83C (5BF94.c:5114) and func_800CF55C (5BF94.c:5593): a new
 // instance starts zeroed before its spawn is applied, where the original kept
 // the heap's bytes in its busy bits, effect id and phase. Null when refused
 // or the heap has no room.
 Effects_EffectInstance* LiveCreatePrimaryEffectInstance(
-    Effects_EffectSpawnRequest* spawn_request);
+    LiveEffectSpawnRequest* spawn_request);
 Effects_EffectInstance* LiveCreateSecondaryEffectInstance(
-    Effects_EffectSpawnRequest* spawn_request);
+    LiveEffectSpawnRequest* spawn_request);
 // func_800CE8F4 (5BF94.c:5139).
 void LiveDestroyPrimaryEffectInstance(Effects_EffectInstance* instance);
 // func_800CF614 (5BF94.c:5617).

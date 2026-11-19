@@ -216,7 +216,7 @@ class SecondaryEffectRuntime : public EffectInstancePlayback,
                                public EffectRendererUpdates {
  public:
   [[nodiscard]] virtual Effects_EffectInstance* FirstSecondary() = 0;
-  // Effects_EffectInstanceTargets.phase, as stored.
+  // LiveEffectInstanceTargets::phase, as stored.
   [[nodiscard]] virtual std::int16_t PhaseOf(
       Effects_EffectInstance& instance) = 0;
   virtual void SetPhase(Effects_EffectInstance& instance,

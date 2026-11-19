@@ -163,7 +163,7 @@ TEST_CASE("Live timeline commands refuse a missing instance",
 TEST_CASE("Live reaction sound skips a non-actor emitter",
           "[timeline-commands]") {
   static Effects_EffectInstance instance{};
-  instance.context.emitFrom.type = fx::kRoomPointEndpoint;
+  instance.context.emit_from.type = fx::kRoomPointEndpoint;
   const u_char last = Effects_lastReactionSoundVariant;
   fx::LivePlaySourceActorReactionSound(&instance, 4);
   CHECK(Effects_lastReactionSoundVariant == last);

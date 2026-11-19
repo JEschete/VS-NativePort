@@ -86,6 +86,6 @@ TEST_CASE("F00832 gated production prefix still creates actual impact effects",
   CHECK(Effects_secondaryRequest.effect_id == 0x26);
   CHECK(Effects_secondaryRequest.count == 1);
   REQUIRE(Effects_secondaryInstances != nullptr);
-  CHECK(Effects_secondaryInstances->context.effectId == 0x26);
+  CHECK(Effects_secondaryInstances->context.effect_id == 0x26);
 }
 }  // namespace

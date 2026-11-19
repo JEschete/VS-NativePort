@@ -205,7 +205,7 @@ void TraceParticle(const LiveParticle& node, SVECTOR point, Core_GteWord xy,
       {"instance", reinterpret_cast<std::uintptr_t>(Effects_currentInstance)},
       {"effect_id",
        Effects_currentInstance
-           ? nlohmann::json(Effects_currentInstance->context.effectId)
+           ? nlohmann::json(Effects_currentInstance->context.effect_id)
            : nlohmann::json(nullptr)},
       {"age", node.age},
       {"lifetime", node.lifetime},

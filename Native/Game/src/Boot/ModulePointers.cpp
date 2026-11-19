@@ -109,7 +109,6 @@
 #include "Battle/HudOrchestrationLive.hpp"
 #include "Battle/HudRenderingLive.hpp"
 #include "Battle/HudStateLive.hpp"
-#include "Battle/Legacy.h"
 #include "Battle/RewardFlowLive.hpp"
 #include "Battle/Rewards.h"
 #include "Battle/Sphere.h"
@@ -771,8 +770,6 @@ const VS::Content::ModuleSymbol VS::Content::kModuleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F5228u, 4u, (void*)&Effects_startedTrackCount, sizeof Effects_startedTrackCount, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F522Cu, 4u, (void*)&Effects_actionVariant, sizeof Effects_actionVariant, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5230u, 4u, (void*)&Effects_actionRequest, sizeof Effects_actionRequest, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5234u, 4u, (void*)&Battle_legacyUnusedTargetBlock, sizeof Battle_legacyUnusedTargetBlock, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5238u, 4u, (void*)&Battle_legacyUnreferencedByte, sizeof Battle_legacyUnreferencedByte, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5318u, 4u, (void*)&Effects_primaryToken, sizeof Effects_primaryToken, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F531Cu, 4u, (void*)&Effects_primaryPhase, sizeof Effects_primaryPhase, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5320u, 16u, (void*)&Effects_tokenBitmaps, sizeof Effects_tokenBitmaps, 1u, 1u},

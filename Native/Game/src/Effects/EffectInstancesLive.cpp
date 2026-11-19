@@ -19,12 +19,13 @@
 #include "Effects/Particles.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/SpawnRequest.hpp"
 
 namespace VS::Effects {
 namespace {
 using Instance = Effects_EffectInstance;
 using Slot = Effects_RendererSlot;
-using Spawn = Effects_EffectSpawnRequest;
+using Spawn = LiveEffectSpawnRequest;
 static_assert(std::extent_v<decltype(Instance::transforms)> ==
               kEffectInstanceTransforms);
 static_assert(std::is_same_v<Effects_EffectRenderer, EffectRenderer>);
@@ -42,8 +43,8 @@ void Refuse(std::string_view call, std::string_view reason) {
 // Whether the spawn request and its four endpoints are present.
 [[nodiscard]] bool Usable(const Spawn* spawn, std::string_view call) {
   if (spawn == nullptr || spawn->source == nullptr ||
-      spawn->emitFrom == nullptr || spawn->target == nullptr ||
-      spawn->emitTo == nullptr) {
+      spawn->emit_from == nullptr || spawn->target == nullptr ||
+      spawn->emit_to == nullptr) {
     Refuse(call, "no spawn request or endpoint");
     return false;
   }
@@ -84,11 +85,11 @@ class LiveStart final : public EffectInstanceStart {
     slot.target_bone = 0;
   }
   void TakeEndpoints() override {
-    Effects_EffectInstanceTargets& context = instance_->context;
+    LiveEffectInstanceTargets& context = instance_->context;
     context.source = *spawn_->source;
-    context.emitFrom = *spawn_->emitFrom;
+    context.emit_from = *spawn_->emit_from;
     context.target = *spawn_->target;
-    context.emitTo = *spawn_->emitTo;
+    context.emit_to = *spawn_->emit_to;
     context.timeline = nullptr;
     context.renderer = nullptr;
     context.parameter = 0;
@@ -101,7 +102,7 @@ class LiveStart final : public EffectInstanceStart {
 
 [[nodiscard]] EffectSpawn SpawnOf(const Spawn& spawn) {
   return {.priority = spawn.priority,
-          .script_offset = spawn.scriptOffset,
+          .script_offset = spawn.script_offset,
           .token = spawn.token};
 }
 
@@ -224,7 +225,7 @@ class LiveRendererUpdates final : public EffectRendererUpdates {
 };
 }  // namespace
 
-void LiveInitEffectInstance(Effects_EffectSpawnRequest* spawn_request,
+void LiveInitEffectInstance(LiveEffectSpawnRequest* spawn_request,
                             Effects_EffectInstance* instance) {
   if (instance == nullptr) {
     Refuse("init", "no effect instance");
@@ -236,13 +237,13 @@ void LiveInitEffectInstance(Effects_EffectSpawnRequest* spawn_request,
 }
 
 Effects_EffectInstance* LiveCreatePrimaryEffectInstance(
-    Effects_EffectSpawnRequest* spawn_request) {
+    LiveEffectSpawnRequest* spawn_request) {
   return CreateOn(Effects_primaryInstances, spawn_request,
                   &CreatePrimaryEffectInstance, "create primary");
 }
 
 Effects_EffectInstance* LiveCreateSecondaryEffectInstance(
-    Effects_EffectSpawnRequest* spawn_request) {
+    LiveEffectSpawnRequest* spawn_request) {
   return CreateOn(Effects_secondaryInstances, spawn_request,
                   &CreateSecondaryEffectInstance, "create secondary");
 }

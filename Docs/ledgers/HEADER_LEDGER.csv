@@ -183,7 +183,7 @@ H0181,header,Native/Game/src/Battle/Feedback.h,generated,yes,pragma-once,0,0,0,0
 H0182,header,Native/Game/src/Battle/Hit.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
 H0183,header,Native/Game/src/Battle/HitChance.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,remaining,
 H0184,header,Native/Game/src/Battle/Hud.h,generated,yes,pragma-once,0,0,0,0,0,0,34,0,0,remaining,
-H0185,header,Native/Game/src/Battle/Legacy.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0185,header,Native/Game/src/Battle/Legacy.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,deleted: its globals G00530 and G00531 were unread overlays of Effects_actionRequest's source endpoint (#441)
 H0186,header,Native/Game/src/Battle/Recovery.h,generated,yes,split,0,0,0,0,0,0,1,3,0,retired,deleted: G00517 is write-only (#347)
 H0187,header,Native/Game/src/Battle/Rewards.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
 H0188,header,Native/Game/src/Battle/Room.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
@@ -267,7 +267,7 @@ H0265,header,Native/Game/src/Effects/Plugins/Plg297.hpp,generated,no,pragma-once
 H0266,header,Native/Game/src/Effects/Plugins/Plg300.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0267,header,Native/Game/src/Effects/Plugins/Plg301.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0268,header,Native/Game/src/Effects/PurgeTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,0,37,0,0,remaining,
+H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,0,35,0,0,remaining,
 H0270,header,Native/Game/src/Effects/ScreenEffectState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0271,header,Native/Game/src/Effects/ScreenEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/ScreenEffectState.hpp (#441)
 H0272,header,Native/Game/src/Effects/Templates/TemplateState.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,retired,replaced by Native/Game/src/Effects/Templates/TemplateLiveState.hpp (#441)
@@ -639,7 +639,7 @@ S0202,source,Native/Game/src/Battle/Hud.cpp,generated,yes,,0,,,,,,,,,done,
 S0203,source,Native/Game/src/Battle/HudOrchestrationLive.cpp,owned,no,,0,,,,,,,,,done,
 S0204,source,Native/Game/src/Battle/HudRenderingLive.cpp,owned,no,,0,,,,,,,,,done,
 S0205,source,Native/Game/src/Battle/HudStateLive.cpp,owned,no,,0,,,,,,,,,done,
-S0206,source,Native/Game/src/Battle/Legacy.cpp,generated,yes,,0,,,,,,,,,done,
+S0206,source,Native/Game/src/Battle/Legacy.cpp,generated,yes,,0,,,,,,,,,retired,deleted: its globals G00530 and G00531 were unread overlays of Effects_actionRequest's source endpoint (#441)
 S0207,source,Native/Game/src/Battle/Recovery.cpp,generated,yes,,1,,,,,,,,,retired,deleted: G00517 is write-only (#347)
 S0208,source,Native/Game/src/Battle/RewardFlowLive.cpp,owned,no,,0,,,,,,,,,done,
 S0209,source,Native/Game/src/Battle/Rewards.cpp,generated,yes,,0,,,,,,,,,done,

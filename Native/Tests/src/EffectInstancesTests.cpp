@@ -18,6 +18,7 @@
 #include "Effects/EffectInstances.hpp"
 #include "Effects/EffectInstancesLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/SpawnRequest.hpp"
 
 namespace {
 namespace fx = VS::Effects;
@@ -211,12 +212,12 @@ class LiveInstances {
   LiveInstances(LiveInstances&&) = delete;
   LiveInstances& operator=(LiveInstances&&) = delete;
 
-  Effects_EffectSpawnRequest* Spawn(int priority, std::uint8_t token = 0) {
+  fx::LiveEffectSpawnRequest* Spawn(int priority, std::uint8_t token = 0) {
     spawn_ = {};
     spawn_.source = &endpoint_;
-    spawn_.emitFrom = &endpoint_;
+    spawn_.emit_from = &endpoint_;
     spawn_.target = &endpoint_;
-    spawn_.emitTo = &endpoint_;
+    spawn_.emit_to = &endpoint_;
     spawn_.priority = priority;
     spawn_.token = token;
     return &spawn_;
@@ -227,7 +228,7 @@ class LiveInstances {
       std::array<std::byte, Memory::kHeapUnitBytes * 2048> arena_{};
   Memory::ScopedLiveGameHeap heap_{arena_};
   VS::Effects::LiveActionEffectTarget endpoint_{};
-  Effects_EffectSpawnRequest spawn_{};
+  fx::LiveEffectSpawnRequest spawn_{};
   Instance* saved_primaries_;
   Instance* saved_secondaries_;
   int saved_tokens_;
@@ -397,14 +398,14 @@ TEST_CASE("Live effect instances start from their spawn request",
   }
   Instance parent{};
   std::array<char, 4> script{};
-  Effects_EffectSpawnRequest spawn{};
+  fx::LiveEffectSpawnRequest spawn{};
   spawn.source = &endpoints[0];
-  spawn.emitFrom = &endpoints[1];
+  spawn.emit_from = &endpoints[1];
   spawn.target = &endpoints[2];
-  spawn.emitTo = &endpoints[3];
+  spawn.emit_to = &endpoints[3];
   spawn.priority = 0x1281;
   spawn.script = script.data();
-  spawn.scriptOffset = 0x12345678;
+  spawn.script_offset = 0x12345678;
   spawn.parent = &parent;
   spawn.token = 0x6C;
   fx::LiveInitEffectInstance(&spawn, instance.get());
@@ -420,20 +421,20 @@ TEST_CASE("Live effect instances start from their spawn request",
   CHECK(std::ranges::all_of(
       started.transforms,
       [](const fx::LiveTransformSlot& slot) { return Cleared(slot, kKept); }));
-  const Effects_EffectInstanceTargets& context = started.context;
+  const fx::LiveEffectInstanceTargets& context = started.context;
   CHECK((SameBytes(context.source, endpoints[0]) &&
-         SameBytes(context.emitFrom, endpoints[1]) &&
+         SameBytes(context.emit_from, endpoints[1]) &&
          SameBytes(context.target, endpoints[2]) &&
-         SameBytes(context.emitTo, endpoints[3])));
+         SameBytes(context.emit_to, endpoints[3])));
   CHECK((context.timeline == nullptr && context.renderer == nullptr &&
-         context.parameter == 0 && context.effectId == -0x5A5B &&
+         context.parameter == 0 && context.effect_id == -0x5A5B &&
          context.phase == -0x5A5B));
 }
 
 TEST_CASE("Live effect instances refuse missing spawn data",
           "[effect-instances]") {
   LiveInstances live;
-  Effects_EffectSpawnRequest* spawn = live.Spawn(1);
+  fx::LiveEffectSpawnRequest* spawn = live.Spawn(1);
   spawn->target = nullptr;
   CHECK(fx::LiveCreatePrimaryEffectInstance(spawn) == nullptr);
   CHECK(fx::LiveCreateSecondaryEffectInstance(nullptr) == nullptr);
@@ -454,7 +455,7 @@ TEST_CASE("Live effect instances join the primary chain by unsigned priority",
   CHECK(Priorities(Effects_primaryInstances) ==
         std::vector<int>{1, 5, 0x7F, 0x80});
   const Instance& first = *Effects_primaryInstances;
-  CHECK((first.busyBits == 0 && first.context.effectId == 0 &&
+  CHECK((first.busyBits == 0 && first.context.effect_id == 0 &&
          first.context.phase == 0));
   while (Effects_primaryInstances != nullptr) {
     fx::LiveDestroyPrimaryEffectInstance(Effects_primaryInstances);

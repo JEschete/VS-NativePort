@@ -14,7 +14,7 @@ struct Effects_RendererSlot;
 // first. The records stay in the game heap: EffectInstancesLive.hpp edits
 // them through the chains below and keeps the original entry points.
 namespace VS::Effects {
-// Effects_EffectInstanceTargets.phase of a secondary instance; the original
+// LiveEffectInstanceTargets::phase of a secondary instance; the original
 // stored the bare number.
 enum class SecondaryEffectPhase : std::int16_t {
   kHeld = 2,      // the update leaves the instance as it is
@@ -31,7 +31,7 @@ enum class SecondaryEffectPhase : std::int16_t {
 void SetSecondaryEffectPhase(std::int16_t& context_phase,
                              SecondaryEffectPhase phase);
 
-// What InitEffectInstance reads of an Effects_EffectSpawnRequest besides its
+// What InitEffectInstance reads of a LiveEffectSpawnRequest besides its
 // parent, script and endpoints.
 struct EffectSpawn {
   std::int32_t priority{};
@@ -113,8 +113,7 @@ enum class RendererCommand : std::uint32_t {
 using EffectRenderer = int (*)(Effects_RendererSlot* slot, unsigned int command,
                                int parameters);
 
-// An instance's renderers, newest first (Effects_EffectInstanceTargets'
-// renderer).
+// An instance's renderers, newest first (LiveEffectInstanceTargets::renderer).
 class RendererChain : public RecordChain<Effects_RendererSlot> {
  public:
   // A slot running `renderer`, without renderer state; null (refused) when

@@ -873,12 +873,6 @@
     <ClCompile Include="src\Battle\HudStateLive.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClCompile Include="src\Battle\Legacy.cpp">
-      <Filter>src\Battle</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Battle\Legacy.h">
-      <Filter>src\Battle</Filter>
-    </ClInclude>
     <ClCompile Include="src\Battle\RewardFlow.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -1599,6 +1593,9 @@
     <ClCompile Include="src\Effects\SecondaryEffectRequestsLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
+    <ClInclude Include="src\Effects\SpawnRequest.hpp">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\Templates\ClosedRing.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>

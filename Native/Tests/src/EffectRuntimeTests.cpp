@@ -1069,8 +1069,8 @@ void CheckTowardSourceEndpoints(const Instance& instance) {
   const auto type = instance.context.target.type;
   CHECK((type == fx::kPositionEndpoint || type == 7));
   CHECK(instance.priority == type);
-  CHECK(instance.context.emitFrom.type == type);
-  CHECK(instance.context.emitTo.type == fx::kActorBoneEndpoint);
+  CHECK(instance.context.emit_from.type == type);
+  CHECK(instance.context.emit_to.type == fx::kActorBoneEndpoint);
   CHECK(instance.context.source.type == fx::kActorBoneEndpoint);
 }
 
@@ -1081,7 +1081,7 @@ void CheckStartedInstance(const Instance& instance, const char* script,
   CHECK(instance.token == static_cast<unsigned>(token));
   CHECK(instance.busyBits == 2);
   CHECK(instance.context.parameter == 0x1234);
-  CHECK(instance.context.effectId == 23);
+  CHECK(instance.context.effect_id == 23);
   CHECK(instance.context.phase ==
         std::to_underlying(SecondaryEffectPhase::kStarting));
 }

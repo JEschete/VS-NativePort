@@ -151,7 +151,7 @@ int LiveTickSourceActorColorTrack(Effects_EffectInstance* instance,
       [instance](const ColourKey& key, std::int16_t frame,
                  ColourTrackHost& host) {
         return TickSourceActorColourTrack(
-            key, frame, CommandEndpointOf(instance->context.emitFrom), host);
+            key, frame, CommandEndpointOf(instance->context.emit_from), host);
       });
 }
 
@@ -174,7 +174,7 @@ int LiveTickTargetActorColorTrack(Effects_EffectInstance* instance,
         }
         return TickTargetActorColourTrack(
             key, frame, action_targets,
-            CommandEndpointOf(instance->context.emitTo), all_targets, host);
+            CommandEndpointOf(instance->context.emit_to), all_targets, host);
       });
 }
 

@@ -27,6 +27,7 @@
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/SpawnRequest.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelinePlaybackLive.hpp"
 #include "Effects/Transforms.hpp"
@@ -357,15 +358,15 @@ class InstanceEffectHost final : public ScriptEffectHost {
   // child takes the instance's endpoints, priority and token, without a
   // parent.
   void SpawnScript(std::uint16_t script_offset) override {
-    Effects_EffectInstanceTargets& context = instance_->context;
-    Effects_EffectSpawnRequest spawn{};
+    LiveEffectInstanceTargets& context = instance_->context;
+    LiveEffectSpawnRequest spawn{};
     spawn.source = &context.source;
-    spawn.emitFrom = &context.emitFrom;
+    spawn.emit_from = &context.emit_from;
     spawn.target = &context.target;
-    spawn.emitTo = &context.emitTo;
+    spawn.emit_to = &context.emit_to;
     spawn.priority = static_cast<std::uint8_t>(instance_->priority);
     spawn.script = instance_->script;
-    spawn.scriptOffset = script_offset;
+    spawn.script_offset = script_offset;
     spawn.token = static_cast<u_char>(instance_->token);
     (void)LiveCreatePrimaryEffectInstance(&spawn);
   }
@@ -574,7 +575,7 @@ int LiveSetActionEffectVerticalOffset(Effects_EffectInstance* instance) {
       slots, heights.begin(),
       [](const LiveTransformSlot& slot) { return slot.position.vy; });
   const ScriptStep step = SetActionEffectVerticalOffset(
-      std::bit_cast<std::uint16_t>(instance->context.effectId),
+      std::bit_cast<std::uint16_t>(instance->context.effect_id),
       RegistersOf(*instance), std::span{heights}.first(slots.size()));
   for (auto&& [slot, height] : std::views::zip(slots, heights)) {
     slot.position.vy = height;

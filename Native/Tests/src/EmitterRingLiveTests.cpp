@@ -244,8 +244,8 @@ TEST_CASE(
   Effects_currentInstance = nullptr;
   auto& definition = fixture.definitions.values[0];
   std::ranges::fill(definition.pair_ranges[2], 10);
-  fixture.instance->context.emitFrom.position = {100, 0, 0, 0};
-  fixture.instance->context.emitTo.position = {0, 0, 200, 0};
+  fixture.instance->context.emit_from.position = {100, 0, 0, 0};
+  fixture.instance->context.emit_to.position = {0, 0, 200, 0};
   SECTION("source") {
     definition.flags = 0x44038;
     fixture.Emit();
@@ -303,7 +303,7 @@ TEST_CASE(
     "[F01515][emitter-rings-live][effects]") {
   LiveEmission fixture;
   fixture.definitions.values[0].flags = 0x44038;
-  auto& source = fixture.instance->context.emitFrom;
+  auto& source = fixture.instance->context.emit_from;
   source.type = 4;
   VS::Effects::LiveActorEndpoint actor = source.Actor();
   actor.actor = 255;

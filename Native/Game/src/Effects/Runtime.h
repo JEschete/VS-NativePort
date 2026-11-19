@@ -3,9 +3,7 @@
 #include "Legacy/Psx.h"
 
 struct Effects_EffectInstance;
-struct Effects_EffectInstanceTargets;
 struct Effects_EffectPackage;
-struct Effects_EffectSpawnRequest;
 struct Effects_RendererSlot;
 
 namespace VS::Effects {
@@ -20,20 +18,8 @@ struct LiveTimelineTable;
 }  // namespace VS::Effects
 
 #include "Effects/ActionRequest.hpp"
+#include "Effects/SpawnRequest.hpp"
 #include "Effects/TransformsLiveState.hpp"
-
-// decomp: D_800F53B8_t3 (src/BATTLE/BATTLE.PRG/5BF94.h:473)
-struct Effects_EffectInstanceTargets {
-    VS::Effects::LiveActionEffectTarget source;
-    VS::Effects::LiveActionEffectTarget emitFrom;
-    VS::Effects::LiveActionEffectTarget target;
-    VS::Effects::LiveActionEffectTarget emitTo;
-    VS::Effects::LiveEffectTimeline* timeline;
-    Effects_RendererSlot* renderer;
-    short effectId;
-    short phase;
-    int parameter;
-};
 
 // decomp: D_800F53B8_t (src/BATTLE/BATTLE.PRG/5BF94.h:490)
 struct Effects_EffectInstance {
@@ -50,24 +36,7 @@ struct Effects_EffectInstance {
     u_int frame : 16;
     VS::Effects::LiveParticle* particles;
     VS::Effects::LiveTransformSlot transforms[16];
-    Effects_EffectInstanceTargets context;
-};
-
-// decomp: D_800F53B8_t2 (src/BATTLE/BATTLE.PRG/5BF94.c:98)
-struct Effects_EffectSpawnRequest {
-    VS::Effects::LiveActionEffectTarget* source;
-    VS::Effects::LiveActionEffectTarget* emitFrom;
-    VS::Effects::LiveActionEffectTarget* target;
-    VS::Effects::LiveActionEffectTarget* emitTo;
-    int priority;
-    char* script;
-    int scriptOffset;
-    Effects_EffectInstance* parent;
-    u_char token;
-    u_char reserved21;
-    u_char reserved22;
-    u_char reserved23;
-    int reserved24;
+    VS::Effects::LiveEffectInstanceTargets context;
 };
 
 // decomp: D_800F569C_t (src/BATTLE/BATTLE.PRG/5BF94.h:373)

@@ -244,8 +244,8 @@ void LiveInitializeTransformStates(Effects_EffectInstance* instance) {
   TransformStates states{};
   const std::span<TransformState> loaded = LoadStates(*instance, states, count);
   const TransformEndpoints endpoints{
-      .emit_from = EndpointOf(instance->context.emitFrom),
-      .emit_to = EndpointOf(instance->context.emitTo)};
+      .emit_from = EndpointOf(instance->context.emit_from),
+      .emit_to = EndpointOf(instance->context.emit_to)};
   static_cast<void>(InitializeTransformStates(
       std::span<const TransformDefinition>(definitions).first(count), endpoints,
       loaded));

@@ -2106,28 +2106,28 @@ T00262.010,T00262,D_800F53B8_t,10,unk14_16,1,u_int,16,,elapsed script frame,fram
 T00262.011,T00262,D_800F53B8_t,11,unk18,1,func_800D2904_t *,,,particleList,particles,First particle the instance owns,high,source:5BF94.c:6870
 T00262.012,T00262,D_800F53B8_t,12,unk1C,1,func_800D0548_arg1[16],,,,transforms,Sixteen transform slots,high,source:5BF94.c:6984
 T00262.013,T00262,D_800F53B8_t,13,unkD1C,1,D_800F53B8_t3,,,,context,"Targets, timeline, renderer, effect id and phase",high,source:5BF94.c:5104
-T00263.000,T00263,D_800F53B8_t2,0,unk0,1,actionEffectTarget *,,,,source,Copied to the context source,high,source:5BF94.c:5104
-T00263.001,T00263,D_800F53B8_t2,1,unk4,1,actionEffectTarget *,,,,emitFrom,Copied to the context emitFrom slot,high,source:5BF94.c:5105
-T00263.002,T00263,D_800F53B8_t2,2,unk8,1,actionEffectTarget *,,,,target,Copied to the context target,high,source:5BF94.c:5106
-T00263.003,T00263,D_800F53B8_t2,3,unkC,1,actionEffectTarget *,,,,emitTo,Copied to the context emitTo slot,high,source:5BF94.c:5107
-T00263.004,T00263,D_800F53B8_t2,4,unk10,1,int,,,,priority,Instance priority,high,source:5BF94.c:5080
-T00263.005,T00263,D_800F53B8_t2,5,unk14,1,char *,,,,script,Script bytecode,high,source:5BF94.c:5082
-T00263.006,T00263,D_800F53B8_t2,6,unk18,1,int,,,,scriptOffset,Start offset in the script,high,source:5BF94.c:5081
-T00263.007,T00263,D_800F53B8_t2,7,unk1C,1,D_800F53B8_t *,,,,parent,"Parent instance, or null",high,source:5BF94.c:5078
-T00263.008,T00263,D_800F53B8_t2,8,unk20,1,u_char,,,,token,Effect token,high,source:5BF94.c:5084
-T00263.009,T00263,D_800F53B8_t2,9,unk21,1,u_char,,,,reserved21,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:67;declaration-only;source:5BF94.c:94
-T00263.010,T00263,D_800F53B8_t2,10,unk22,1,u_char,,,,reserved22,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:68;declaration-only;source:5BF94.c:95
-T00263.011,T00263,D_800F53B8_t2,11,unk23,1,u_char,,,,reserved23,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:69;declaration-only;source:5BF94.c:96
-T00263.012,T00263,D_800F53B8_t2,12,unk24,1,int,,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:70;declaration-only;source:5BF94.c:97
-T00264.000,T00264,D_800F53B8_t3,0,unk0,1,actionEffectTarget,,,,source,Effect source,med,source:5BF94.c:5104
-T00264.001,T00264,D_800F53B8_t3,1,unkC,1,actionEffectTarget,,,,emitFrom,"Where the effect starts: the source, or the target for reversed effects",low,source:5BF94.c:5105
-T00264.002,T00264,D_800F53B8_t3,2,unk18,1,actionEffectTarget,,,,target,Effect target; byte 2 also selects a color preset,low,source:5BF94.c:5106
-T00264.003,T00264,D_800F53B8_t3,3,unk24,1,actionEffectTarget,,,,emitTo,"Where the effect ends: the target, or the source for reversed effects",low,source:5BF94.c:5107
-T00264.004,T00264,D_800F53B8_t3,4,unk30,1,D_800F53B8_t4 *,,,,timeline,Effect timeline,med,source:5BF94.c:5470
-T00264.005,T00264,D_800F53B8_t3,5,unk34,1,func_800D4910_t *,,,renderer list,renderer,Renderer attached to the effect,med,source:5BF94.c:5158
-T00264.006,T00264,D_800F53B8_t3,6,unk38,1,short,,,,effectId,Effect id,high,source:5BF94.c:5518
-T00264.007,T00264,D_800F53B8_t3,7,unk3A,1,short,,,secondary phase,phase,Secondary effect phase,med,source:5BF94.c:5336
-T00264.008,T00264,D_800F53B8_t3,8,unk3C,1,int,,,,parameter,Spawn parameter; nonzero attaches a renderer,low,source:5BF94.c:5517
+T00263.000,T00263,D_800F53B8_t2,0,unk0,1,actionEffectTarget *,,,,source,Copied to the context source,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::source (#441);source:5BF94.c:5104
+T00263.001,T00263,D_800F53B8_t2,1,unk4,1,actionEffectTarget *,,,,emit_from,Copied to the context emit_from slot,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::emit_from (#441);source:5BF94.c:5105
+T00263.002,T00263,D_800F53B8_t2,2,unk8,1,actionEffectTarget *,,,,target,Copied to the context target,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::target (#441);source:5BF94.c:5106
+T00263.003,T00263,D_800F53B8_t2,3,unkC,1,actionEffectTarget *,,,,emit_to,Copied to the context emit_to slot,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::emit_to (#441);source:5BF94.c:5107
+T00263.004,T00263,D_800F53B8_t2,4,unk10,1,int,,,,priority,Instance priority,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::priority (#441);source:5BF94.c:5080
+T00263.005,T00263,D_800F53B8_t2,5,unk14,1,char *,,,,script,Script bytecode,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::script (#441);source:5BF94.c:5082
+T00263.006,T00263,D_800F53B8_t2,6,unk18,1,int,,,,script_offset,Start offset in the script,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::script_offset (#441);source:5BF94.c:5081
+T00263.007,T00263,D_800F53B8_t2,7,unk1C,1,D_800F53B8_t *,,,,parent,"Parent instance, or null",high,native:SpawnRequest.hpp LiveEffectSpawnRequest::parent (#441);source:5BF94.c:5078
+T00263.008,T00263,D_800F53B8_t2,8,unk20,1,u_char,,,,token,Effect token,high,native:SpawnRequest.hpp LiveEffectSpawnRequest::token (#441);source:5BF94.c:5084
+T00263.009,T00263,D_800F53B8_t2,9,unk21,1,u_char,,,,reserved21,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\SpawnRequest.hpp:49;native:SpawnRequest.hpp LiveEffectSpawnRequest::reserved21 (#441);declaration-only;source:5BF94.c:94
+T00263.010,T00263,D_800F53B8_t2,10,unk22,1,u_char,,,,reserved22,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\SpawnRequest.hpp:50;native:SpawnRequest.hpp LiveEffectSpawnRequest::reserved22 (#441);declaration-only;source:5BF94.c:95
+T00263.011,T00263,D_800F53B8_t2,11,unk23,1,u_char,,,,reserved23,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\SpawnRequest.hpp:51;native:SpawnRequest.hpp LiveEffectSpawnRequest::reserved23 (#441);declaration-only;source:5BF94.c:96
+T00263.012,T00263,D_800F53B8_t2,12,unk24,1,int,,,,reserved24,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\SpawnRequest.hpp:52;native:SpawnRequest.hpp LiveEffectSpawnRequest::reserved24 (#441);declaration-only;source:5BF94.c:97
+T00264.000,T00264,D_800F53B8_t3,0,unk0,1,actionEffectTarget,,,,source,Effect source,med,native:SpawnRequest.hpp LiveEffectInstanceTargets::source (#441);source:5BF94.c:5104
+T00264.001,T00264,D_800F53B8_t3,1,unkC,1,actionEffectTarget,,,,emit_from,"Where the effect starts: the source, or the target for reversed effects",low,native:SpawnRequest.hpp LiveEffectInstanceTargets::emit_from (#441);source:5BF94.c:5105
+T00264.002,T00264,D_800F53B8_t3,2,unk18,1,actionEffectTarget,,,,target,Effect target; byte 2 also selects a color preset,low,native:SpawnRequest.hpp LiveEffectInstanceTargets::target (#441);source:5BF94.c:5106
+T00264.003,T00264,D_800F53B8_t3,3,unk24,1,actionEffectTarget,,,,emit_to,"Where the effect ends: the target, or the source for reversed effects",low,native:SpawnRequest.hpp LiveEffectInstanceTargets::emit_to (#441);source:5BF94.c:5107
+T00264.004,T00264,D_800F53B8_t3,4,unk30,1,D_800F53B8_t4 *,,,,timeline,Effect timeline,med,native:SpawnRequest.hpp LiveEffectInstanceTargets::timeline (#441);source:5BF94.c:5470
+T00264.005,T00264,D_800F53B8_t3,5,unk34,1,func_800D4910_t *,,,renderer list,renderer,Renderer attached to the effect,med,native:SpawnRequest.hpp LiveEffectInstanceTargets::renderer (#441);source:5BF94.c:5158
+T00264.006,T00264,D_800F53B8_t3,6,unk38,1,short,,,,effect_id,Effect id,high,native:SpawnRequest.hpp LiveEffectInstanceTargets::effect_id (#441);source:5BF94.c:5518
+T00264.007,T00264,D_800F53B8_t3,7,unk3A,1,short,,,secondary phase,phase,Secondary effect phase,med,native:SpawnRequest.hpp LiveEffectInstanceTargets::phase (#441);source:5BF94.c:5336
+T00264.008,T00264,D_800F53B8_t3,8,unk3C,1,int,,,,parameter,Spawn parameter; nonzero attaches a renderer,low,native:SpawnRequest.hpp LiveEffectInstanceTargets::parameter (#441);source:5BF94.c:5517
 T00265.000,T00265,D_800F53B8_t4,0,unk0,1,char,,,trackCount,track_count,Number of tracks,high,native:Timeline.hpp LiveEffectTimeline::track_count (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:318;source:5BF94.c:7898
 T00265.001,T00265,D_800F53B8_t4,1,unk1,1,char,,,,flags,kTimelineFrameHeld (bit 0) holds the frame; kTimelineHasChildTracks (bit 1) is set when the timeline has child effect tracks,med,native:Timeline.hpp LiveEffectTimeline::flags (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:319;source:5BF94.c:8255
 T00265.002,T00265,D_800F53B8_t4,2,unk2,1,short,,,frame,frame,Current timeline frame,high,native:Timeline.hpp LiveEffectTimeline::frame (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:320;source:5BF94.c:7955
@@ -2160,8 +2160,8 @@ T00269.000,T00269,D_800F5638_t,0,unk0,1,int,,,,asset_count,Number of effect text
 T00269.001,T00269,D_800F5638_t,1,loadContexts,0,_loadFileContext[8],,,,files,"Disc location (lba, size) of each texture file",high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::files (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:20;sanity pass 2026-10-17
 T00269.002,T00269,D_800F5638_t,2,slots,0,u_short[8],,,,slots,Texture or CLUT slot each file is uploaded to,high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::slots (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:21;sanity pass 2026-10-17
 T00269.003,T00269,D_800F5638_t,3,isClut,0,u_short[8],,,,is_clut,Set when the file is a CLUT rather than texture pixels,high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::is_clut (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:22;sanity pass 2026-10-17
-T00270.000,T00270,D_800F569C_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:75;declaration-only;source:5BF94.h:354
-T00270.001,T00270,D_800F569C_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:76;declaration-only;source:5BF94.h:355
+T00270.000,T00270,D_800F569C_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:44;declaration-only;source:5BF94.h:354
+T00270.001,T00270,D_800F569C_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:45;declaration-only;source:5BF94.h:355
 T00270.002,T00270,D_800F569C_t,2,block5Data,0,pFileBlock5 *,,,,block5Data,Named in the fork; see cited use,med,source:5BF94.c:6955
 T00270.003,T00270,D_800F569C_t,3,curves,0,u_char *[32],,,,curves,Named in the fork; see cited use,med,source:5BF94.c:6320
 T00270.004,T00270,D_800F569C_t,4,curveBlock,0,pFileCurveBlock *,,,,curveBlock,Named in the fork; see cited use,med,source:5BF94.c:5244

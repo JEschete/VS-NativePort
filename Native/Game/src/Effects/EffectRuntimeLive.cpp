@@ -36,6 +36,7 @@
 #include "Effects/PrimaryEffect.hpp"
 #include "Effects/PrimaryEffectLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/SpawnRequest.hpp"
 #include "Input/ControllerLive.hpp"
 
 static_assert(std::extent_v<decltype(Effects_tokenBitmaps)> >=
@@ -176,14 +177,14 @@ class LivePrimary final : public LivePlayback<PrimaryEffectRuntime> {
     if (package == nullptr) {
       return false;
     }
-    Effects_EffectSpawnRequest spawn{};
+    LiveEffectSpawnRequest spawn{};
     spawn.source = &Effects_actionRequest.source;
-    spawn.emitFrom = &Effects_actionRequest.source;
+    spawn.emit_from = &Effects_actionRequest.source;
     spawn.target = std::data(Effects_actionRequest.targets);
-    spawn.emitTo = std::data(Effects_actionRequest.targets);
+    spawn.emit_to = std::data(Effects_actionRequest.targets);
     spawn.priority = 0;
     spawn.script = package->block8Data;
-    spawn.scriptOffset = script_offset;
+    spawn.script_offset = script_offset;
     spawn.parent = nullptr;
     spawn.token = token;
     LiveCreatePrimaryEffectInstance(&spawn);
@@ -301,14 +302,14 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
   }
   Instance* CreateSecondary(const SecondarySpawn& spawn) override {
     LiveActionEffectTarget& target = std::span(request_->targets)[spawn.target];
-    Effects_EffectSpawnRequest request{};
+    LiveEffectSpawnRequest request{};
     request.source = &request_->source;
-    request.emitFrom = spawn.toward_source ? &target : &request_->source;
+    request.emit_from = spawn.toward_source ? &target : &request_->source;
     request.target = &target;
-    request.emitTo = spawn.toward_source ? &request_->source : &target;
+    request.emit_to = spawn.toward_source ? &request_->source : &target;
     request.priority = spawn.priority;
     request.script = Effects_package->block8Data;
-    request.scriptOffset = spawn.script_offset;
+    request.script_offset = spawn.script_offset;
     request.parent = nullptr;
     request.token = spawn.token;
     Instance* instance = LiveCreateSecondaryEffectInstance(&request);
@@ -321,7 +322,7 @@ class LiveSecondarySpawner final : public SecondaryEffectSpawner {
                       std::uint16_t effect_id,
                       std::uint8_t busy_bits) override {
     instance.context.parameter = parameter;
-    instance.context.effectId = static_cast<std::int16_t>(effect_id);
+    instance.context.effect_id = static_cast<std::int16_t>(effect_id);
     instance.busyBits = busy_bits;
   }
   void SetPhase(Instance& instance, SecondaryEffectPhase phase) override {

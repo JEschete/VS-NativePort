@@ -387,8 +387,8 @@ class LiveEmissionHost final : public ParticleEmissionHost {
   const auto direction = definition.flags & kDirectionMask;
   if (direction == kTowardSource || direction == kTowardDestination) {
     context.aim_target =
-        Aim(direction == kTowardSource ? instance.context.emitFrom
-                                       : instance.context.emitTo);
+        Aim(direction == kTowardSource ? instance.context.emit_from
+                                       : instance.context.emit_to);
     if (!context.aim_target) {
       Refuse("aim endpoint has no current actor bone");
       return std::nullopt;

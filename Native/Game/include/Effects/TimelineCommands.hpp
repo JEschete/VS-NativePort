@@ -43,7 +43,7 @@ struct CommandEndpoint {
   EndpointPoint point{};
 };
 
-// The effect instance's endpoints (Effects_EffectInstanceTargets).
+// The effect instance's endpoints (LiveEffectInstanceTargets).
 struct CommandEndpoints {
   CommandEndpoint source{};
   CommandEndpoint emit_from{};

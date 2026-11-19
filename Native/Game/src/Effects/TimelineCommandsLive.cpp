@@ -23,6 +23,7 @@
 #include "Effects/CameraLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/SpawnRequest.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineTracksLive.hpp"
@@ -79,11 +80,11 @@ void ReportMissing(std::string_view command, std::string_view missing) {
 
 [[nodiscard]] CommandEndpoints EndpointsOf(
     const Effects_EffectInstance& instance) {
-  const Effects_EffectInstanceTargets& context = instance.context;
+  const LiveEffectInstanceTargets& context = instance.context;
   return {.source = CommandEndpointOf(context.source),
-          .emit_from = CommandEndpointOf(context.emitFrom),
+          .emit_from = CommandEndpointOf(context.emit_from),
           .target = CommandEndpointOf(context.target),
-          .emit_to = CommandEndpointOf(context.emitTo)};
+          .emit_to = CommandEndpointOf(context.emit_to)};
 }
 
 [[nodiscard]] SVECTOR PointOf(const EndpointPoint& point) {

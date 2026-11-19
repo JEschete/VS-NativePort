@@ -256,7 +256,7 @@ TEST_CASE("Live colour tracks read their current key on the instance",
           "[timeline-tracks]") {
   static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
-  instance.context.emitFrom.type = fx::kRoomPointEndpoint;
+  instance.context.emit_from.type = fx::kRoomPointEndpoint;
   instance.context.timeline = &timeline;
   auto keys = ColourKeys();
   fx::LiveTimelineTrack track = TrackOver(6, keys, 2);
@@ -277,7 +277,7 @@ TEST_CASE("Live colour tracks refuse missing records and extra targets",
           "[timeline-tracks]") {
   static fx::LiveEffectTimeline timeline;
   static Effects_EffectInstance instance{};
-  instance.context.emitTo.type = fx::kRoomPointEndpoint;
+  instance.context.emit_to.type = fx::kRoomPointEndpoint;
   auto keys = ColourKeys();
   fx::LiveTimelineTrack track = TrackOver(7, keys, 2);
   track.key_index = 0;

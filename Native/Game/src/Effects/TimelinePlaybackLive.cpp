@@ -27,6 +27,7 @@
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/Particles.hpp"
 #include "Effects/Runtime.h"
+#include "Effects/SpawnRequest.hpp"
 #include "Effects/Timeline.hpp"
 #include "Effects/TimelineCommands.hpp"
 #include "Effects/TimelineCommandsLive.hpp"
@@ -180,13 +181,13 @@ bool LivePlaybackHost::SpawnChild(std::size_t target,
     return false;
   }
   LiveActionEffectTarget& endpoint = std::span(request_->targets)[target];
-  Effects_EffectSpawnRequest spawn{};
+  LiveEffectSpawnRequest spawn{};
   spawn.source = &request_->source;
-  spawn.emitFrom = &request_->source;
+  spawn.emit_from = &request_->source;
   spawn.target = &endpoint;
-  spawn.emitTo = &endpoint;
+  spawn.emit_to = &endpoint;
   spawn.script = Effects_package->block8Data;
-  spawn.scriptOffset = child_script_offset_;
+  spawn.script_offset = child_script_offset_;
   spawn.parent = instance_;
   spawn.token = static_cast<u_char>(instance_->token);
   Effects_EffectInstance* child = LiveCreatePrimaryEffectInstance(&spawn);
