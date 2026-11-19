@@ -1566,7 +1566,7 @@ using Extent = Effects::EffectFileExtent;
 // Three effects: 0 has two FBTs and two plugin entries, 1 has no textures
 // and one entry, 2 has neither entries nor FBTs.
 struct PurgeTableFixture {
-  std::array<std::uint8_t, 3> uses{1, 0, 1};
+  std::array<std::uint8_t, 3> clut_rows{1, 0, 1};
   std::array<Extent, 3> cluts{Extent{10, 0x200}, Extent{11, 0x200},
                               Extent{12, 0x200}};
   std::array<std::uint8_t, 3> clut_slots{0, 1, 2};
@@ -1578,7 +1578,7 @@ struct PurgeTableFixture {
                                  Extent{32, 0x3000}};
   std::array<Extent, 2> plugins{Extent{40, 0x800}, Extent{41, 0x800}};
   std::array<std::uint16_t, 4> entries{0, 2, 3, 3};
-  Effects::EffectPurgeTables tables{.uses_textures = uses,
+  Effects::EffectPurgeTables tables{.clut_rows = clut_rows,
                                     .clut_files = cluts,
                                     .clut_slots = clut_slots,
                                     .texture_counts = counts,

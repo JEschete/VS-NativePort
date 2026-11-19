@@ -17,9 +17,9 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Scratch.hpp"
-#include "Effects/Camera.h"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLive.hpp"
+#include "Effects/CameraLiveState.hpp"
 #include "Effects/CurvesLive.hpp"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
@@ -45,8 +45,8 @@ struct LiveCameraRecord {
   std::uint8_t definition{};
   std::int16_t mode{};
   std::int32_t age{};
-  Effects_EffectCamera start_camera{};
-  Effects_EffectCamera end_camera{};
+  LiveEffectCamera start_camera{};
+  LiveEffectCamera end_camera{};
   VECTOR position{};
   VECTOR target{};
   MATRIX view{};

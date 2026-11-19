@@ -2133,33 +2133,33 @@ T00265.001,T00265,D_800F53B8_t4,1,unk1,1,char,,,,flags,Bit 0 holds the frame; bi
 T00265.002,T00265,D_800F53B8_t4,2,unk2,1,short,,,frame,frame,Current timeline frame,high,source:5BF94.c:7955
 T00265.003,T00265,D_800F53B8_t4,3,unk4,1,int,,,activeTrackMask,activeTracks,One bit per track still running; zero when the timeline is finished,high,source:5BF94.c:8449
 T00265.004,T00265,D_800F53B8_t4,4,unk8,1,func_800D5780_t[0],,,,tracks,Timeline tracks,high,source:5BF94.c:7903
-T00266.000,T00266,D_800F54B8_t,0,unk0,1,u_char,,,frame,phase,Curve phase; 0xFF when idle,med,source:5BF94.c:6483
-T00266.001,T00266,D_800F54B8_t,1,unk1_0,1,u_char,5,,envelopeId,shapeCurve,Segmented curve sampled at the phase,med,source:5BF94.c:6613
-T00266.002,T00266,D_800F54B8_t,2,unk1_5,1,u_char,1,,phaseStepUsesCurve,curveStep,Steps the phase by stepCurve,low,source:5BF94.c:6581
-T00266.003,T00266,D_800F54B8_t,3,unk1_6,1,u_char,1,,phaseJitterUsesCurve,randomStep,Steps the phase randomly within randomStepCurve,low,source:5BF94.c:6593
-T00266.004,T00266,D_800F54B8_t,4,unk1_7,1,u_char,1,,,reserved1Bit7,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Camera.h:14;declaration-only;source:5BF94.c:238
-T00266.005,T00266,D_800F54B8_t,5,unk2,1,u_char,,,phaseStep,stepCurve,"Phase step: a curve id sampled when flag bit 5 is set, else the constant step",med,source:5BF94.c:6582;sanity pass 2026-10-17
-T00266.006,T00266,D_800F54B8_t,6,unk3,1,u_char,,,phaseJitterRange,randomStepCurve,"Second step value: a curve id sampled when flag bit 6 is set, else a constant",med,source:5BF94.c:6594;sanity pass 2026-10-17
-T00266.007,T00266,D_800F54B8_t,7,unk4,1,u_char,,,amplitude,amplitude,Amplitude,med,source:5BF94.c:6614
-T00266.008,T00266,D_800F54B8_t,8,unk5,1,u_char,,,phase,angle,Angle (times 32) of the shake direction,med,source:5BF94.c:6620
-T00267.000,T00267,D_800F54D8_t,0,position,0,VECTOR,,,,position,Named in the fork; see cited use,med,source:5BF94.c:6518
-T00267.001,T00267,D_800F54D8_t,1,lookAt,0,VECTOR,,,,lookAt,Named in the fork; see cited use,med,source:5BF94.c:6519
-T00267.002,T00267,D_800F54D8_t,2,unk20,1,int,,,horizontalShake,shakeLateral,Shake offset along the camera's horizontal axis,med,source:5BF94.c:6535
-T00267.003,T00267,D_800F54D8_t,3,unk24,1,int,,,verticalShake,shakeVertical,Shake offset along the camera's vertical axis,med,source:5BF94.c:6541
-T00267.004,T00267,D_800F54D8_t,4,unk28,1,int,,,depthShake,shakeDepth,Shake offset along the camera's view axis,med,source:5BF94.c:6539
-T00267.005,T00267,D_800F54D8_t,5,unk2C,1,int,,,rollShake,shakeRoll,Shake roll offset (biased by 0x8000),med,source:5BF94.c:6554
-T00267.006,T00267,D_800F54D8_t,6,roll,0,int,,,,roll,Named in the fork; see cited use,med,source:5BF94.c:6520
-T00267.007,T00267,D_800F54D8_t,7,nearClip,0,int,,,,nearClip,Named in the fork; see cited use,med,source:5BF94.c:6521
-T00267.008,T00267,D_800F54D8_t,8,projectionDistance,0,int,,,,projectionDistance,Named in the fork; see cited use,med,source:5BF94.c:6522
-T00267.009,T00267,D_800F54D8_t,9,farClip,0,int,,,,farClip,Named in the fork; see cited use,med,source:5BF94.c:6523
+T00266.000,T00266,D_800F54B8_t,0,unk0,1,u_char,,,frame,phase,Curve phase; 0xFF when idle,med,native:CameraLiveState.hpp LiveCameraShakeChannel::phase (#441);source:BATTLE/BATTLE.PRG/5BF94.c:250
+T00266.001,T00266,D_800F54B8_t,1,unk1_0,1,u_char,5,,envelopeId,shape_curve,Segmented curve sampled at the phase,med,native:CameraLiveState.hpp LiveCameraShakeChannel::shape_curve (#441);source:BATTLE/BATTLE.PRG/5BF94.c:251
+T00266.002,T00266,D_800F54B8_t,2,unk1_5,1,u_char,1,,phaseStepUsesCurve,curve_step,Steps the phase by step_curve,low,native:CameraLiveState.hpp LiveCameraShakeChannel::curve_step (#441);source:BATTLE/BATTLE.PRG/5BF94.c:252
+T00266.003,T00266,D_800F54B8_t,3,unk1_6,1,u_char,1,,phaseJitterUsesCurve,random_step,Steps the phase randomly within random_step_curve,low,native:CameraLiveState.hpp LiveCameraShakeChannel::random_step (#441);source:BATTLE/BATTLE.PRG/5BF94.c:253
+T00266.004,T00266,D_800F54B8_t,4,unk1_7,1,u_char,1,,,reserved_bit7,Not used by native code; kept for the original layout,med,native:CameraLiveState.hpp LiveCameraShakeChannel::reserved_bit7 (#441);source:BATTLE/BATTLE.PRG/5BF94.c:254
+T00266.005,T00266,D_800F54B8_t,5,unk2,1,u_char,,,phaseStep,step_curve,"Phase step: a curve id sampled when flag bit 5 is set, else the constant step",med,native:CameraLiveState.hpp LiveCameraShakeChannel::step_curve (#441);source:BATTLE/BATTLE.PRG/5BF94.c:255;sanity pass 2026-10-17
+T00266.006,T00266,D_800F54B8_t,6,unk3,1,u_char,,,phaseJitterRange,random_step_curve,"Second step value: a curve id sampled when flag bit 6 is set, else a constant",med,native:CameraLiveState.hpp LiveCameraShakeChannel::random_step_curve (#441);source:BATTLE/BATTLE.PRG/5BF94.c:256;sanity pass 2026-10-17
+T00266.007,T00266,D_800F54B8_t,7,unk4,1,u_char,,,amplitude,amplitude,Amplitude,med,native:CameraLiveState.hpp LiveCameraShakeChannel::amplitude (#441);source:BATTLE/BATTLE.PRG/5BF94.c:257
+T00266.008,T00266,D_800F54B8_t,8,unk5,1,u_char,,,phase,angle,Angle (times 32) of the shake direction,med,native:CameraLiveState.hpp LiveCameraShakeChannel::angle (#441);source:BATTLE/BATTLE.PRG/5BF94.c:258
+T00267.000,T00267,D_800F54D8_t,0,position,0,VECTOR,,,,position,Camera position (12 fractional bits),med,native:CameraLiveState.hpp LiveEffectCamera::position (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:391
+T00267.001,T00267,D_800F54D8_t,1,lookAt,0,VECTOR,,,,look_at,Point the camera looks at (12 fractional bits),med,native:CameraLiveState.hpp LiveEffectCamera::look_at (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:392
+T00267.002,T00267,D_800F54D8_t,2,unk20,1,int,,,horizontalShake,shake_lateral,Shake offset along the camera's horizontal axis,med,native:CameraLiveState.hpp LiveEffectCamera::shake_lateral (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:393
+T00267.003,T00267,D_800F54D8_t,3,unk24,1,int,,,verticalShake,shake_vertical,Shake offset along the camera's vertical axis,med,native:CameraLiveState.hpp LiveEffectCamera::shake_vertical (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:394
+T00267.004,T00267,D_800F54D8_t,4,unk28,1,int,,,depthShake,shake_depth,Shake offset along the camera's view axis,med,native:CameraLiveState.hpp LiveEffectCamera::shake_depth (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:395
+T00267.005,T00267,D_800F54D8_t,5,unk2C,1,int,,,rollShake,shake_roll,Shake roll offset (biased by 0x8000),med,native:CameraLiveState.hpp LiveEffectCamera::shake_roll (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:396
+T00267.006,T00267,D_800F54D8_t,6,roll,0,int,,,,roll,"Camera roll, stored 0x8000 above the field camera's roll",med,native:CameraLiveState.hpp LiveEffectCamera::roll (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:397
+T00267.007,T00267,D_800F54D8_t,7,nearClip,0,int,,,,near_clip,Near clip; a camera motion interpolates it between its end poses,med,native:CameraLiveState.hpp LiveEffectCamera::near_clip (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:398
+T00267.008,T00267,D_800F54D8_t,8,projectionDistance,0,int,,,,projection_distance,Projection distance handed back to the field camera,med,native:CameraLiveState.hpp LiveEffectCamera::projection_distance (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:399
+T00267.009,T00267,D_800F54D8_t,9,farClip,0,int,,,,far_clip,Far clip; a camera motion interpolates it between its end poses,med,native:CameraLiveState.hpp LiveEffectCamera::far_clip (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:400
 T00268.000,T00268,D_800F5620_t,0,unk0,1,int,,,,x,Gravity x,high,source:5BF94.c:7836
 T00268.001,T00268,D_800F5620_t,1,unk4,1,int,,,,y,Gravity y,high,source:5BF94.c:7837
 T00268.002,T00268,D_800F5620_t,2,unk8,1,int,,,,z,Gravity z,high,source:5BF94.c:7838
 T00268.003,T00268,D_800F5620_t,3,unkC,1,int,,,,reservedC,Only copied into members native code never reads; kept for the original layout,med,native-refs:copy-only;source:native:Native\Game\src\Effects\ParticlePoolLive.cpp:220;declaration-only;source:5BF94.c:112
-T00269.000,T00269,D_800F5638_t,0,unk0,1,int,,,,assetCount,Number of effect texture files to load,high,source:6F014.c:730;source:6F014.c:659;sanity pass 2026-10-17
-T00269.001,T00269,D_800F5638_t,1,loadContexts,0,_loadFileContext[8],,,,loadContexts,"Disc location (lba, size) of each texture file",high,source:6F014.c:734;sanity pass 2026-10-17
-T00269.002,T00269,D_800F5638_t,2,slots,0,u_short[8],,,,slots,Texture or CLUT slot each file is uploaded to,high,source:6F014.c:736;sanity pass 2026-10-17
-T00269.003,T00269,D_800F5638_t,3,isClut,0,u_short[8],,,,isClut,Set when the file is a CLUT rather than texture pixels,high,source:6F014.c:737;sanity pass 2026-10-17
+T00269.000,T00269,D_800F5638_t,0,unk0,1,int,,,,asset_count,Number of effect texture files to load,high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::asset_count (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:19;sanity pass 2026-10-17
+T00269.001,T00269,D_800F5638_t,1,loadContexts,0,_loadFileContext[8],,,,files,"Disc location (lba, size) of each texture file",high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::files (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:20;sanity pass 2026-10-17
+T00269.002,T00269,D_800F5638_t,2,slots,0,u_short[8],,,,slots,Texture or CLUT slot each file is uploaded to,high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::slots (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:21;sanity pass 2026-10-17
+T00269.003,T00269,D_800F5638_t,3,isClut,0,u_short[8],,,,is_clut,Set when the file is a CLUT rather than texture pixels,high,native:EffectResourcesLiveState.hpp LiveTextureLoadList::is_clut (#441);source:BATTLE/BATTLE.PRG/6E4CCShared.h:22;sanity pass 2026-10-17
 T00270.000,T00270,D_800F569C_t,0,unk0,1,int,,,,reserved0,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:134;declaration-only;source:5BF94.h:354
 T00270.001,T00270,D_800F569C_t,1,unk4,1,int,,,,reserved4,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Effects\Runtime.h:135;declaration-only;source:5BF94.h:355
 T00270.002,T00270,D_800F569C_t,2,block5Data,0,pFileBlock5 *,,,,block5Data,Named in the fork; see cited use,med,source:5BF94.c:6955
@@ -2735,8 +2735,8 @@ T00314.005,T00314,_limbInit,5,actions,0,_actions[4],,,,actions,Actions the limb 
 T00314.006,T00314,_limbInit,6,unk20,1,_armorIntermediate,,,,armor,Armor worn on the limb,high,source:146C.c:6253
 T00314.007,T00314,_limbInit,7,dpSplash,0,char[6],,,,dpSplash,Damage-point splash values,high,source:146C.c:6269
 T00314.008,T00314,_limbInit,8,unk5A,1,char[2],,,,reserved5A,Not used by native code; kept for the original layout,med,native-refs:none;source:native:Native\Game\src\Actors\CharacterInit.h:30;declaration-only;source:146C.h:856
-T00315.000,T00315,_loadFileContext,0,lba,0,u_short,,,,lba,Named in the fork; see cited use,med,source:5BF94.c:5191
-T00315.001,T00315,_loadFileContext,1,size,0,u_short,,,,size,Named in the fork; see cited use,med,source:6F014.c:585
+T00315.000,T00315,_loadFileContext,0,lba,0,u_short,,,,lba,"First sector of the file, counted from E000.P's first sector",med,native:Effects/EffectResources.hpp EffectFileExtent::lba (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:7
+T00315.001,T00315,_loadFileContext,1,size,0,u_short,,,,size,Size of the file in bytes,med,native:Effects/EffectResources.hpp EffectFileExtent::size (#441);source:BATTLE/BATTLE.PRG/battleEffect.h:8
 T00316.000,T00316,_lootListItem,0,itemCategory,0,char,,,,category,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::category (#441);source:MENU/MENUB.PRG/260.c:265
 T00316.001,T00316,_lootListItem,1,itemIndex,0,u_char,,,zeroBasedWorkingInventoryIndex,item_index,Named in the fork; see cited use,med,native:LootRows.hpp LootRow::item_index (#441);source:MENU/MENUB.PRG/260.c:274
 T00316.002,T00316,_lootListItem,2,unk2,1,char,,,claimFlyoutAnimationStep,slide_step,Not used by native code; kept for the original layout,med,native:LootRows.hpp LootRow::slide_step (#441);native-refs:none;source:native:Native\Game\src\Menu\Loot\LootInventory.h:21;source:MENU/MENUB.PRG/260.c:545

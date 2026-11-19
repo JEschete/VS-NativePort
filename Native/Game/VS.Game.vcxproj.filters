@@ -1083,9 +1083,6 @@
     <ClCompile Include="src\Effects\Camera.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Camera.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\CameraLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1125,9 +1122,6 @@
     <ClCompile Include="src\Effects\EffectScriptLive.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\Loading.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClInclude Include="src\Effects\Package.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
@@ -1563,7 +1557,7 @@
     <ClCompile Include="src\Effects\PurgeTables.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\PurgeTables.h">
+    <ClInclude Include="src\Effects\PurgeTables.hpp">
       <Filter>src\Effects</Filter>
     </ClInclude>
     <ClCompile Include="src\Effects\Runtime.cpp">

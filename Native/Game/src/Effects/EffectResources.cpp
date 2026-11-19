@@ -627,15 +627,15 @@ EffectPurgeConfiguration ConfigureEffectResources(
   return configuration;
 }
 
-// decomp: EFFPURGE.BIN _configureFb (src/EFFECT/EFFPURGE.BIN/0.c:925)
+// decomp: EFFPURGE.BIN configureFb (src/EFFECT/EFFPURGE.BIN/0.c:944)
 PurgeTableRefusal ConfigureTextureLoads(EffectResourceState& state,
                                         const EffectPurgeTables& tables,
                                         std::int32_t effect_id) noexcept {
-  const auto uses = TableEntry(tables.uses_textures, effect_id);
+  const auto clut_rows = TableEntry(tables.clut_rows, effect_id);
   const auto count = TableEntry(tables.texture_counts, effect_id);
   const auto clut_file = TableEntry(tables.clut_files, effect_id);
   const auto clut_slot = TableEntry(tables.clut_slots, effect_id);
-  if (!uses || !count || !clut_file || !clut_slot) {
+  if (!clut_rows || !count || !clut_file || !clut_slot) {
     SetEffectTextureAssetCount(state, 0);
     return PurgeTableRefusal::kEffectId;
   }
@@ -651,8 +651,8 @@ PurgeTableRefusal ConfigureTextureLoads(EffectResourceState& state,
     SetEffectTextureAssetCount(state, 0);
     return PurgeTableRefusal::kTextureRange;
   }
-  SetEffectTextureAssetCount(
-      state, static_cast<std::int32_t>(texture_count) + (*uses != 0 ? 1 : 0));
+  SetEffectTextureAssetCount(state, static_cast<std::int32_t>(texture_count) +
+                                        (*clut_rows != 0 ? 1 : 0));
   ConfigureEffectTextureAsset(
       state, {.file = *clut_file, .slot = *clut_slot, .is_clut = true}, 0);
   for (std::size_t i = 0; i < texture_count; ++i) {
@@ -665,7 +665,7 @@ PurgeTableRefusal ConfigureTextureLoads(EffectResourceState& state,
   return PurgeTableRefusal::kNone;
 }
 
-// decomp: EFFPURGE.BIN _configurePlg (src/EFFECT/EFFPURGE.BIN/0.c:953)
+// decomp: EFFPURGE.BIN configurePlg (src/EFFECT/EFFPURGE.BIN/0.c:972)
 PurgeTableRefusal ConfigurePluginLoad(EffectResourceState& state,
                                       EffectRendererTable& renderers,
                                       const EffectPurgeTables& tables,

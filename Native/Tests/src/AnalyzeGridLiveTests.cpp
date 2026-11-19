@@ -16,7 +16,7 @@
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/Particles.h"
-#include "Effects/PurgeTables.h"
+#include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Render/Camera.hpp"
 #include "Render/Display.hpp"
@@ -372,7 +372,7 @@ TEST_CASE("Analyze plugin dispatch retains overlay lifecycle bindings",
   }};
   for (const auto& binding : kBindings) {
     CAPTURE(binding.index);
-    REQUIRE(Effects_effectEntryPoints[binding.index] == binding.entry);
-    CheckLiveLifecycle(Effects_effectEntryPoints[binding.index]);
+    REQUIRE(VS::Effects::effectEntryPoints[binding.index] == binding.entry);
+    CheckLiveLifecycle(VS::Effects::effectEntryPoints[binding.index]);
   }
 }

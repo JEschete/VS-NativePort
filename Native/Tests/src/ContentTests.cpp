@@ -85,7 +85,7 @@
 #include "Effects/Plugins/Plg297.hpp"
 #include "Effects/Plugins/Plg300.hpp"
 #include "Effects/Plugins/Plg301.hpp"
-#include "Effects/PurgeTables.h"
+#include "Effects/PurgeTables.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Effects/Transforms.hpp"
 #include "Field/MapProgress.h"
@@ -554,9 +554,9 @@ void CheckTrapPackageSourcePoints(const Content::DataStore& store,
   const auto* entry = store.Find(path);
   REQUIRE(entry != nullptr);
   REQUIRE(entry->size <= 65535);
-  CHECK(entry->lba == VS_E000_P_LBA + Effects_packageFiles[effect_id].lba);
+  CHECK(entry->lba == VS_E000_P_LBA + VS::Effects::packageFiles[effect_id].lba);
   CHECK(entry->SectorCount() * Content::DataStore::kDataSectorBytes ==
-        Effects_packageFiles[effect_id].size);
+        VS::Effects::packageFiles[effect_id].size);
   auto bytes = store.ReadAll(*entry);
   REQUIRE(bytes);
   TrapPackageAuditHost host;
@@ -614,8 +614,8 @@ TEST_CASE("Original room trap kinds have bounded source-package mappings",
     INFO("trap kind " << kind);
     REQUIRE(kind < kNonTrapFloorTriggerKind);
     const auto effect = static_cast<std::uint16_t>(kind + 6);
-    const auto* file =
-        store->FindBySector(VS_E000_P_LBA + Effects_packageFiles[effect].lba);
+    const auto* file = store->FindBySector(
+        VS_E000_P_LBA + VS::Effects::packageFiles[effect].lba);
     REQUIRE(file != nullptr);
     CheckTrapPackageSourcePoints(*store, effect, file->path);
   }

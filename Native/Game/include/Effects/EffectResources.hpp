@@ -63,7 +63,8 @@ struct EffectResourceContext {
   EffectPackageId secondary{};
 };
 
-// _loadFileContext (6E644.h:7): sectors past E000.P and bytes.
+// vs_LoadFileContext (BATTLE/BATTLE.PRG/battleEffect.h:6): sectors past
+// E000.P and bytes.
 struct EffectFileExtent {
   std::uint16_t lba{};
   std::uint16_t size{};
@@ -331,7 +332,9 @@ using EffectRendererTable = std::array<RendererEntry, kEffectRendererCapacity>;
 
 // The EFFPURGE.BIN purge tables (D_800FAE4C-D_800FB34C).
 struct EffectPurgeTables {
-  std::span<const std::uint8_t> uses_textures;
+  // Each effect's FBC CLUT row count; a nonzero count makes the FBC a
+  // texture asset.
+  std::span<const std::uint8_t> clut_rows;
   std::span<const EffectFileExtent> clut_files;
   std::span<const std::uint8_t> clut_slots;
   std::span<const std::uint8_t> texture_counts;

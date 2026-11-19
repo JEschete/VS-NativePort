@@ -197,10 +197,10 @@ H0195,header,Native/Game/src/Boot/GameLoop.hpp,generated,no,pragma-once,0,0,0,0,
 H0196,header,Native/Game/src/Boot/GameplayInit.h,generated,yes,split,0,0,0,0,0,0,2,3,0,retired,deleted: G00245 G00257 are write-only (#347)
 H0197,header,Native/Game/src/Boot/OverlayReset.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0198,header,Native/Game/src/Boot/PlayerSettings.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0199,header,Native/Game/src/Effects/Camera.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0199,header,Native/Game/src/Effects/Camera.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/CameraLiveState.hpp (#441)
 H0200,header,Native/Game/src/Effects/CameraLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0201,header,Native/Game/src/Effects/EffectResourcesLiveState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0202,header,Native/Game/src/Effects/Loading.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,
+H0202,header,Native/Game/src/Effects/Loading.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,retired,merged into Native/Game/src/Effects/EffectResourcesLiveState.hpp and Native/Game/include/Effects/EffectResources.hpp (#441)
 H0203,header,Native/Game/src/Effects/Package.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
 H0204,header,Native/Game/src/Effects/Particles.h,generated,yes,pragma-once,0,0,0,0,0,0,25,0,0,remaining,
 H0205,header,Native/Game/src/Effects/Plugins/Plg005.h,generated,yes,pragma-once,0,0,0,0,0,0,1,0,0,retired,deleted: no file included it; Effects_Plg005_AnalyzeGridQuad duplicated VS::Effects::Templates::GridState (Grid.hpp); TYPE T00292 retired (#441)
@@ -266,7 +266,7 @@ H0264,header,Native/Game/src/Effects/Plugins/Plg291.hpp,generated,no,pragma-once
 H0265,header,Native/Game/src/Effects/Plugins/Plg297.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0266,header,Native/Game/src/Effects/Plugins/Plg300.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0267,header,Native/Game/src/Effects/Plugins/Plg301.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
-H0268,header,Native/Game/src/Effects/PurgeTables.h,generated,yes,pragma-once,0,0,0,0,0,0,10,0,0,remaining,
+H0268,header,Native/Game/src/Effects/PurgeTables.hpp,generated,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0269,header,Native/Game/src/Effects/Runtime.h,generated,yes,pragma-once,0,0,0,0,0,2,52,0,0,remaining,
 H0270,header,Native/Game/src/Effects/ScreenEffectState.hpp,owned,no,pragma-once,0,0,0,0,0,0,0,0,0,done,
 H0271,header,Native/Game/src/Effects/ScreenEffects.h,generated,yes,pragma-once,0,0,0,0,0,0,2,0,0,remaining,

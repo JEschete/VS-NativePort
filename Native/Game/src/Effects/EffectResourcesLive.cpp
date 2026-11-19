@@ -25,12 +25,11 @@
 #include "Effects/CurvesLive.hpp"
 #include "Effects/EffectResources.hpp"
 #include "Effects/EffectResourcesLiveState.hpp"
-#include "Effects/Loading.h"
 #include "Effects/Package.h"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.h"
-#include "Effects/PurgeTables.h"
+#include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
@@ -39,7 +38,7 @@
 // decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
 int VS::Effects::textureLoadIndex;
 // decomp: D_800F5638 (D_800F5638@BATTLE/BATTLE.PRG)
-Effects_TextureLoadList VS::Effects::textureLoads;
+VS::Effects::LiveTextureLoadList VS::Effects::textureLoads;
 // decomp: vs_battle_pfileBuf (vs_battle_pfileBuf@BATTLE/BATTLE.PRG)
 void* VS::Effects::packageBuffer;
 // decomp: D_800F5680 (D_800F5680@BATTLE/BATTLE.PRG)
@@ -48,13 +47,13 @@ u_int VS::Effects::textureLoadState;
 int VS::Effects::purgeOverlayLoaded;
 // decomp: vs_battle_pFileLoadContext
 // (vs_battle_pFileLoadContext@BATTLE/BATTLE.PRG)
-Effects_FileLoadContext VS::Effects::packageFile;
+VS::Effects::EffectFileExtent VS::Effects::packageFile;
 // decomp: D_800F568C (D_800F568C@BATTLE/BATTLE.PRG)
 Content_DiscQueueSlot* VS::Effects::resourceReadSlot;
 // decomp: _plgLoadState (_plgLoadState@BATTLE/BATTLE.PRG)
 u_int VS::Effects::pluginLoadState;
 // decomp: _plgLoadContext (_plgLoadContext@BATTLE/BATTLE.PRG)
-Effects_FileLoadContext VS::Effects::pluginFile;
+VS::Effects::EffectFileExtent VS::Effects::pluginFile;
 // decomp: D_800F56A0 (D_800F56A0@BATTLE/BATTLE.PRG)
 u_long* VS::Effects::textureLoadBuffer;
 // decomp: _plgEntryPointCount (_plgEntryPointCount@BATTLE/BATTLE.PRG)
@@ -62,9 +61,6 @@ int VS::Effects::pluginEntryPointCount;
 // decomp: D_800F5874 (D_800F5874@BATTLE/BATTLE.PRG)
 int VS::Effects::loadedTextureSlots;
 
-static_assert(sizeof(Effects_FileLoadContext) == sizeof(std::uint32_t));
-static_assert(std::extent_v<decltype(Effects_TextureLoadList::loadContexts)> ==
-              VS::Effects::kTextureAssetCapacity);
 static_assert(std::extent_v<decltype(Effects_EffectPackage::curves)> ==
               VS::Effects::kEffectCurveCapacity);
 static_assert(std::size(Effects_effectRenderers) ==
@@ -77,21 +73,6 @@ static_assert(offsetof(Effects_PackageBlock9, timelineIds) ==
 namespace VS::Effects {
 namespace {
 namespace Memory = VS::Core::Memory;
-
-// EFFPURGE.BIN's tables (src/EFFECT/EFFPURGE.BIN/0.c); PurgeTables.h
-// declares most of them without bounds.
-// D_800FAE4C, _fbcFiles, _fbcSlots, _fbtCounts, _pFiles and
-// _effectEntryPointIndices: one entry per effect.
-constexpr std::size_t kEffectCount = 400;
-// _fbtFiles and _fbtSlots (the slot table has one trailing entry).
-constexpr std::size_t kTextureFileCount = 755;
-constexpr std::size_t kTextureSlotCount = 756;
-// _plgFiles: effects past it have no plugin.
-constexpr std::size_t kPluginFileCount = 302;
-// _effectEntryPoints: 343 entries, 314 of them set.
-constexpr std::size_t kEntryPointCount = 343;
-static_assert(std::extent_v<decltype(Effects_effectEntryPointIndices)> ==
-              kEffectCount);
 
 // The packages whose block views are kept: the action and secondary packages
 // and the ones tests bind.
@@ -345,33 +326,23 @@ template <typename T, typename Id>
           .capacity = Memory::LivePayloadCapacity(pointer).value_or(0)};
 }
 
-[[nodiscard]] EffectFileExtent ExtentOf(const Effects_FileLoadContext& file) {
-  return {.lba = file.lba, .size = file.size};
-}
-
-void StoreExtent(Effects_FileLoadContext& file, EffectFileExtent extent) {
-  file.lba = extent.lba;
-  file.size = extent.size;
-}
-
-[[nodiscard]] TextureLoadList TexturesOf(const Effects_TextureLoadList& list) {
-  TextureLoadList textures{.asset_count = list.assetCount};
+[[nodiscard]] TextureLoadList TexturesOf(const LiveTextureLoadList& list) {
+  TextureLoadList textures{.asset_count = list.asset_count};
   for (std::size_t i = 0; i < textures.assets.size(); ++i) {
-    textures.assets.at(i) = {.file = ExtentOf(list.loadContexts[i]),
+    textures.assets.at(i) = {.file = list.files[i],
                              .slot = list.slots[i],
-                             .is_clut = list.isClut[i] != 0};
+                             .is_clut = list.is_clut[i] != 0};
   }
   return textures;
 }
 
-void StoreTextures(Effects_TextureLoadList& list,
-                   const TextureLoadList& textures) {
-  list.assetCount = textures.asset_count;
+void StoreTextures(LiveTextureLoadList& list, const TextureLoadList& textures) {
+  list.asset_count = textures.asset_count;
   for (std::size_t i = 0; i < textures.assets.size(); ++i) {
     const TextureAsset& asset = textures.assets.at(i);
-    StoreExtent(list.loadContexts[i], asset.file);
+    list.files[i] = asset.file;
     list.slots[i] = asset.slot;
-    list.isClut[i] = asset.is_clut ? 1U : 0U;
+    list.is_clut[i] = asset.is_clut ? 1U : 0U;
   }
 }
 
@@ -516,7 +487,7 @@ class LiveParticleForceHost final : public ParticleForceHost {
 };
 
 [[nodiscard]] std::span<const Effects_EffectRenderer> EntryPoints() {
-  return {Effects_effectEntryPoints, kEntryPointCount};
+  return effectEntryPoints;
 }
 
 // EFFPURGE.BIN's entry points, called as updates.
@@ -581,14 +552,6 @@ void UpdateContext(ContextStep step) {
   StoreLiveEffectResourceContext(context);
 }
 
-template <std::size_t N>
-[[nodiscard]] std::span<const EffectFileExtent> CopyExtents(
-    const Effects_FileLoadContext* files,
-    std::array<EffectFileExtent, N>& out) {
-  std::transform(files, files + N, out.begin(), ExtentOf);
-  return out;
-}
-
 void ReportConfiguration(const EffectPurgeConfiguration& configuration,
                          int effect_id) {
   if (configuration.textures == PurgeTableRefusal::kNone &&
@@ -642,13 +605,13 @@ EffectResourceState LoadLiveEffectResourceState() {
       .package_buffer = BufferOf(packageBuffer),
       .texture_buffer = BufferOf(textureLoadBuffer),
       .purge_overlay_loaded = purgeOverlayLoaded != 0,
-      .package_file = ExtentOf(packageFile),
+      .package_file = packageFile,
       .texture_index = textureLoadIndex,
       .texture_state = static_cast<TextureLoadState>(textureLoadState),
       .textures = TexturesOf(textureLoads),
       .loaded_texture_pages = static_cast<std::uint32_t>(loadedTextureSlots),
       .plugin_state = static_cast<PluginLoadState>(pluginLoadState),
-      .plugin_file = ExtentOf(pluginFile),
+      .plugin_file = pluginFile,
       .plugin_entry_count = pluginEntryPointCount};
 }
 
@@ -657,13 +620,13 @@ void StoreLiveEffectResourceState(const EffectResourceState& state) {
   packageBuffer = PointerOf<void>(state.package_buffer.id);
   textureLoadBuffer = PointerOf<u_long>(state.texture_buffer.id);
   purgeOverlayLoaded = state.purge_overlay_loaded ? 1 : 0;
-  StoreExtent(packageFile, state.package_file);
+  packageFile = state.package_file;
   textureLoadIndex = state.texture_index;
   textureLoadState = static_cast<u_int>(state.texture_state);
   StoreTextures(textureLoads, state.textures);
   loadedTextureSlots = static_cast<int>(state.loaded_texture_pages);
   pluginLoadState = static_cast<u_int>(state.plugin_state);
-  StoreExtent(pluginFile, state.plugin_file);
+  pluginFile = state.plugin_file;
   pluginEntryPointCount = state.plugin_entry_count;
 }
 
@@ -680,19 +643,15 @@ void StoreLiveEffectResourceContext(const EffectResourceContext& context) {
 }
 
 EffectPurgeTables LiveEffectPurgeTables() {
-  static std::array<EffectFileExtent, kEffectCount> clut_files{};
-  static std::array<EffectFileExtent, kTextureFileCount> texture_files{};
-  static std::array<EffectFileExtent, kEffectCount> package_files{};
-  static std::array<EffectFileExtent, kPluginFileCount> plugin_files{};
-  return {.uses_textures = {Effects_effectUsesTextures, kEffectCount},
-          .clut_files = CopyExtents(Effects_fbcFiles, clut_files),
-          .clut_slots = {Effects_fbcSlots, kEffectCount},
-          .texture_counts = {Effects_fbtCounts, kEffectCount},
-          .texture_files = CopyExtents(Effects_fbtFiles, texture_files),
-          .texture_slots = {Effects_fbtSlots, kTextureSlotCount},
-          .package_files = CopyExtents(Effects_packageFiles, package_files),
-          .plugin_files = CopyExtents(Effects_pluginFiles, plugin_files),
-          .entry_point_indices = Effects_effectEntryPointIndices,
+  return {.clut_rows = fbcClutRows,
+          .clut_files = fbcFiles,
+          .clut_slots = fbcSlots,
+          .texture_counts = fbtCounts,
+          .texture_files = fbtFiles,
+          .texture_slots = fbtSlots,
+          .package_files = packageFiles,
+          .plugin_files = pluginFiles,
+          .entry_point_indices = effectEntryPointIndices,
           .entry_point_count = kEntryPointCount};
 }
 

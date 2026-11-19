@@ -49,7 +49,7 @@
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/EffectResourcesLive.hpp"
-#include "Effects/PurgeTables.h"
+#include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RingsLive.hpp"
 #include "Field/Interactions.h"
@@ -1640,16 +1640,18 @@ TEST_CASE("Blocked hit still plays the defense reaction on a real actor",
 
 TEST_CASE("Stat item effects bind plugin-local renderers, not EFFPURGE",
           "[combat][items][effects][item-plugin]") {
-  const auto count = Effects_effectEntryPointIndices
-      [std::size(Effects_effectEntryPointIndices) - 1];
+  const auto count = VS::Effects::effectEntryPointIndices
+      [std::size(VS::Effects::effectEntryPointIndices) - 1];
   for (unsigned slot = 0; slot < count; ++slot) {
     CAPTURE(slot);
-    CHECK(Effects_effectEntryPoints[slot] !=
+    CHECK(VS::Effects::effectEntryPoints[slot] !=
           &VS::Effects::LiveInvokeAllPluginUpdates);
   }
-  CHECK(Effects_effectEntryPoints[Effects_effectEntryPointIndices[198]] ==
+  CHECK(VS::Effects::effectEntryPoints
+            [VS::Effects::effectEntryPointIndices[198]] ==
         &VS::Effects::Templates::UpdateLivePlg198Ring);
-  CHECK(Effects_effectEntryPoints[Effects_effectEntryPointIndices[199]] ==
+  CHECK(VS::Effects::effectEntryPoints
+            [VS::Effects::effectEntryPointIndices[199]] ==
         &VS::Effects::Templates::UpdateLivePlg198Ring);
 }
 

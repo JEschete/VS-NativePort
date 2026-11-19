@@ -17,7 +17,7 @@
 #include "Effects/ParticleEmitterLive.hpp"
 #include "Effects/ParticlePoolLive.hpp"
 #include "Effects/Particles.h"
-#include "Effects/PurgeTables.h"
+#include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/RepeatingRingsLive.hpp"
 #include "Effects/Templates/TemplateState.h"
@@ -371,7 +371,7 @@ TEST_CASE("EFFPURGE dispatches all repeating ring lifecycles to their overlays",
       Binding{339, &rings::UpdateLivePlg300ForegroundRepeatingRing}};
   for (const auto& binding : kBindings) {
     DYNAMIC_SECTION("entry " << binding.entry) {
-      const auto callback = Effects_effectEntryPoints[binding.entry];
+      const auto callback = VS::Effects::effectEntryPoints[binding.entry];
       REQUIRE(callback == binding.callback);
       CheckLiveRing(callback);
     }

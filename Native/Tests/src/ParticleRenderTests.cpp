@@ -35,7 +35,7 @@
 #include "Effects/Plugins/Plg065.hpp"
 #include "Effects/Plugins/Plg073.hpp"
 #include "Effects/Plugins/Plg082.hpp"
-#include "Effects/PurgeTables.h"
+#include "Effects/PurgeTables.hpp"
 #include "Effects/Runtime.h"
 #include "Effects/Templates/ParticlesLive.hpp"
 #include "Effects/Templates/RingsLive.hpp"
@@ -811,7 +811,8 @@ TEST_CASE("Effect renderer slots retain eight independent native callbacks",
         static_cast<VS::Effects::PluginEntry>(index), index));
   }
   for (int index = 0; index < 8; ++index) {
-    CHECK(Effects_effectRenderers[index] == Effects_effectEntryPoints[index]);
+    CHECK(Effects_effectRenderers[index] ==
+          VS::Effects::effectEntryPoints[index]);
   }
   std::array<std::byte, sizeof(Effects_actionPackage)> package_after;
   std::memcpy(package_after.data(), &Effects_actionPackage,
@@ -820,9 +821,9 @@ TEST_CASE("Effect renderer slots retain eight independent native callbacks",
   std::copy(saved.begin(), saved.end(), Effects_effectRenderers);
 
   for (std::size_t effect = 0;
-       effect + 1 < std::size(Effects_effectEntryPointIndices); ++effect) {
-    const int count = Effects_effectEntryPointIndices[effect + 1] -
-                      Effects_effectEntryPointIndices[effect];
+       effect + 1 < std::size(VS::Effects::effectEntryPointIndices); ++effect) {
+    const int count = VS::Effects::effectEntryPointIndices[effect + 1] -
+                      VS::Effects::effectEntryPointIndices[effect];
     CHECK(count >= 0);
     CHECK(count <= 8);
   }
@@ -1470,7 +1471,7 @@ TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
           "[effects][plg074][f01986]") {
   const auto entry = Plg074Entry(
       0x800F98F8, &VS::Effects::Templates::UpdateLivePlg073TiledRing);
-  REQUIRE(Effects_effectEntryPoints[87] == entry);
+  REQUIRE(VS::Effects::effectEntryPoints[87] == entry);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
   DispatchHeap heap;
@@ -1492,7 +1493,7 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
           "[effects][plg074][f01987]") {
   const auto entry =
       Plg074Entry(0x800FA7F0, &VS::Effects::Templates::UpdateLivePlg073Ring);
-  REQUIRE(Effects_effectEntryPoints[88] == entry);
+  REQUIRE(VS::Effects::effectEntryPoints[88] == entry);
   const auto mode = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
@@ -1694,7 +1695,7 @@ TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
           "[effects][plg074][f01994]") {
   const Effects_EffectRenderer entry =
       &VS::Effects::UpdateLivePlg074TrailEmitter;
-  REQUIRE(Effects_effectEntryPoints[89] == entry);
+  REQUIRE(VS::Effects::effectEntryPoints[89] == entry);
   const std::int16_t count = GENERATE(0, 1, 16, 20);
   const bool cancel = GENERATE(false, true);
   Plg074Fixture fixture;
@@ -2071,7 +2072,7 @@ TEST_CASE("PLG074 F01995 draws five accelerating surface rows",
           "[effects][plg074][f01995]") {
   const auto entry = Plg074Entry(
       0x800FD534, &VS::Effects::Templates::UpdateLivePlg073RotatingSurface);
-  REQUIRE(Effects_effectEntryPoints[90] == entry);
+  REQUIRE(VS::Effects::effectEntryPoints[90] == entry);
   Plg074Fixture fixture;
   fixture.ConfigureRing();
   std::ranges::fill(fixture.Definition().vectorRanges[1], 0);
@@ -2099,7 +2100,7 @@ TEST_CASE(
   for (int cycle = 0; cycle < 3; ++cycle) {
     for (int index = 87; index <= 90; ++index) {
       auto* slot = VS::Effects::LiveAttachEffectRenderer(
-          &fixture.instance, Effects_effectEntryPoints[index], 2);
+          &fixture.instance, VS::Effects::effectEntryPoints[index], 2);
       REQUIRE(slot != nullptr);
       REQUIRE(slot->rendererState != nullptr);
     }

@@ -4,17 +4,45 @@
 // EffectResourcesLive.cpp defines it and mirrors it into the typed
 // EffectResourceState (Effects/EffectResources.hpp) around each call.
 
+#include <cstddef>
+#include <cstdint>
+
 #include "DiscQueue.h"
-#include "Effects/Loading.h"
+#include "Effects/EffectResources.hpp"
 #include "Legacy/Psx.h"
 
 namespace VS::Effects {
+// decomp: D_800F5638_t (src/BATTLE/BATTLE.PRG/6E4CCShared.h:18): the texture
+// load list in its PS1 layout, one array per field; TextureLoadList
+// (EffectResources.hpp) is its typed value.
+struct LiveTextureLoadList {
+  std::int32_t asset_count;
+  EffectFileExtent files[kTextureAssetCapacity];
+  std::uint16_t slots[kTextureAssetCapacity];
+  std::uint16_t is_clut[kTextureAssetCapacity];
+};
+
+namespace layout {
+// vs_LoadFileContext (src/BATTLE/BATTLE.PRG/battleEffect.h:6): the PS1 file
+// extent EffectFileExtent keeps.
+inline constexpr std::size_t kFileExtentBytes = 4;
+static_assert(sizeof(EffectFileExtent) == kFileExtentBytes);
+inline constexpr std::size_t kFileExtentSizeOffset = 2;
+static_assert(offsetof(EffectFileExtent, size) == kFileExtentSizeOffset);
+inline constexpr std::size_t kTextureLoadListBytes = 0x44;
+static_assert(sizeof(LiveTextureLoadList) == kTextureLoadListBytes);
+inline constexpr std::size_t kTextureLoadSlotsOffset = 0x24;
+static_assert(offsetof(LiveTextureLoadList, slots) == kTextureLoadSlotsOffset);
+inline constexpr std::size_t kTextureLoadClutOffset = 0x34;
+static_assert(offsetof(LiveTextureLoadList, is_clut) == kTextureLoadClutOffset);
+}  // namespace layout
+
 // decomp: D_800F5630 (BATTLE/BATTLE.PRG 6F014.c:612): the texture asset
 // being loaded.
 extern int textureLoadIndex;
-// decomp: D_800F5638 (BATTLE/BATTLE.PRG 6F014.c:56): the effect's CLUT and
-// texture page files.
-extern Effects_TextureLoadList textureLoads;
+// decomp: D_800F5638 (src/BATTLE/BATTLE.PRG/6E4CCShared.h:515): the
+// effect's CLUT and texture page files.
+extern LiveTextureLoadList textureLoads;
 // decomp: vs_battle_pfileBuf (BATTLE/BATTLE.PRG 0x800F567C): the loaded
 // package (high heap).
 extern void* packageBuffer;
@@ -24,17 +52,19 @@ extern u_int textureLoadState;
 // decomp: D_800F5684 (BATTLE/BATTLE.PRG 6F014.c:570): nonzero once the
 // purge overlay's workspace was acquired.
 extern int purgeOverlayLoaded;
-// decomp: vs_battle_pFileLoadContext (BATTLE/BATTLE.PRG 0x800F5688): the
-// package file, in sectors past E000.P.
-extern Effects_FileLoadContext packageFile;
+// decomp: vs_battle_pFileLoadContext
+// (src/BATTLE/BATTLE.PRG/battleEffect.h:421): the package file, in sectors
+// past E000.P.
+extern EffectFileExtent packageFile;
 // decomp: D_800F568C (BATTLE/BATTLE.PRG 6F014.c:549): the disc request in
 // flight, or null.
 extern Content_DiscQueueSlot* resourceReadSlot;
 // decomp: _plgLoadState (BATTLE/BATTLE.PRG 0x800F5690): the plugin load
 // state (0 idle, 1 acquire the overlay, 2 loading, 3 loaded).
 extern u_int pluginLoadState;
-// decomp: _plgLoadContext (BATTLE/BATTLE.PRG 0x800F5694): the plugin file.
-extern Effects_FileLoadContext pluginFile;
+// decomp: plgLoadContext (_plgLoadContext@
+// src/BATTLE/BATTLE.PRG/6E4CCShared.h:538): the plugin file.
+extern EffectFileExtent pluginFile;
 // decomp: D_800F56A0 (BATTLE/BATTLE.PRG 6F014.c:612): the texture staging
 // buffer (high heap).
 extern u_long* textureLoadBuffer;

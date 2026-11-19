@@ -10,7 +10,6 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/RandomLive.hpp"
-#include "Effects/Camera.h"
 #include "Effects/Camera.hpp"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Curves.hpp"
@@ -25,50 +24,26 @@
 #include "Render/Render.hpp"
 #include "Render/UiPrimitives.hpp"
 
-// decomp: D_800F54B8 (D_800F54B8@BATTLE/BATTLE.PRG)
-Effects_CameraShakeChannel
-    VS::Effects::cameraShakeChannels[VS::Effects::kCameraShakeChannelCount];
-// decomp: D_800F54D0 (D_800F54D0@BATTLE/BATTLE.PRG)
-std::int16_t VS::Effects::cameraMotionFrame;
-// decomp: D_800F54D8 (D_800F54D8@BATTLE/BATTLE.PRG)
-Effects_EffectCamera VS::Effects::effectCamera;
-// decomp: D_800F5518 (D_800F5518@BATTLE/BATTLE.PRG)
-char VS::Effects::enabledShakeChannels;
-// decomp: D_800F5520 (D_800F5520@BATTLE/BATTLE.PRG)
-Effects_EffectCamera
-    VS::Effects::cameraMotionEnds[VS::Effects::kCameraMotionEndCount];
-// decomp: D_800F55A0 (D_800F55A0@BATTLE/BATTLE.PRG)
-std::int16_t VS::Effects::cameraMotionDuration;
-// decomp: D_800F55A8 (D_800F55A8@BATTLE/BATTLE.PRG)
-Effects_EffectCamera VS::Effects::savedActionCamera;
-// decomp: D_800F55E8 (D_800F55E8@BATTLE/BATTLE.PRG)
-u_int VS::Effects::cameraTransitionMode;
-
-namespace {
-// The original's layouts (5BF94.c:6474 shake channels, 6681 effect camera).
-constexpr std::size_t kShakeChannelBytes = 6;
-constexpr std::size_t kShakeStepCurveAt = 2;
-constexpr std::size_t kShakeAngleAt = 5;
-constexpr std::size_t kEffectCameraBytes = 0x40;
-constexpr std::size_t kEffectCameraShakeAt = 0x20;
-constexpr std::size_t kEffectCameraRollAt = 0x30;
-constexpr std::size_t kEffectCameraFarClipAt = 0x3C;
-}  // namespace
-
-static_assert(sizeof(Effects_CameraShakeChannel) == kShakeChannelBytes);
-static_assert(offsetof(Effects_CameraShakeChannel, stepCurve) ==
-              kShakeStepCurveAt);
-static_assert(offsetof(Effects_CameraShakeChannel, angle) == kShakeAngleAt);
-static_assert(sizeof(Effects_EffectCamera) == kEffectCameraBytes);
-static_assert(offsetof(Effects_EffectCamera, shakeLateral) ==
-              kEffectCameraShakeAt);
-static_assert(offsetof(Effects_EffectCamera, roll) == kEffectCameraRollAt);
-static_assert(offsetof(Effects_EffectCamera, farClip) ==
-              kEffectCameraFarClipAt);
-static_assert(std::size(VS::Effects::cameraShakeChannels) ==
-              VS::Effects::kCameraShakeChannels);
-
 namespace VS::Effects {
+// decomp: D_800F54B8 (D_800F54B8@BATTLE/BATTLE.PRG)
+LiveCameraShakeChannel cameraShakeChannels[kCameraShakeChannelCount];
+// decomp: D_800F54D0 (D_800F54D0@BATTLE/BATTLE.PRG)
+std::int16_t cameraMotionFrame;
+// decomp: D_800F54D8 (D_800F54D8@BATTLE/BATTLE.PRG)
+LiveEffectCamera effectCamera;
+// decomp: D_800F5518 (D_800F5518@BATTLE/BATTLE.PRG)
+std::uint8_t enabledShakeChannels;
+// decomp: D_800F5520 (D_800F5520@BATTLE/BATTLE.PRG)
+LiveEffectCamera cameraMotionEnds[kCameraMotionEndCount];
+// decomp: D_800F55A0 (D_800F55A0@BATTLE/BATTLE.PRG)
+std::int16_t cameraMotionDuration;
+// decomp: D_800F55A8 (D_800F55A8@BATTLE/BATTLE.PRG)
+LiveEffectCamera savedActionCamera;
+// decomp: D_800F55E8 (D_800F55E8@BATTLE/BATTLE.PRG)
+std::uint32_t cameraTransitionMode;
+
+static_assert(std::size(cameraShakeChannels) == kCameraShakeChannels);
+
 namespace {
 namespace Math = VS::Core::Math;
 
@@ -87,54 +62,54 @@ std::uint64_t refused_calls = 0;
 
 }  // namespace
 
-EffectCameraPose LoadLiveEffectCameraPose(const Effects_EffectCamera& camera) {
+EffectCameraPose LoadLiveEffectCameraPose(const LiveEffectCamera& camera) {
   return {.position = Math::VectorOf(camera.position),
-          .look_at = Math::VectorOf(camera.lookAt),
-          .shake_lateral = camera.shakeLateral,
-          .shake_vertical = camera.shakeVertical,
-          .shake_depth = camera.shakeDepth,
-          .shake_roll = camera.shakeRoll,
+          .look_at = Math::VectorOf(camera.look_at),
+          .shake_lateral = camera.shake_lateral,
+          .shake_vertical = camera.shake_vertical,
+          .shake_depth = camera.shake_depth,
+          .shake_roll = camera.shake_roll,
           .roll = camera.roll,
-          .near_clip = camera.nearClip,
-          .projection_distance = camera.projectionDistance,
-          .far_clip = camera.farClip};
+          .near_clip = camera.near_clip,
+          .projection_distance = camera.projection_distance,
+          .far_clip = camera.far_clip};
 }
 
-void StoreLiveEffectCameraPose(Effects_EffectCamera& camera,
+void StoreLiveEffectCameraPose(LiveEffectCamera& camera,
                                const EffectCameraPose& pose) {
   Math::StoreVector(camera.position, pose.position);
-  Math::StoreVector(camera.lookAt, pose.look_at);
-  camera.shakeLateral = pose.shake_lateral;
-  camera.shakeVertical = pose.shake_vertical;
-  camera.shakeDepth = pose.shake_depth;
-  camera.shakeRoll = pose.shake_roll;
+  Math::StoreVector(camera.look_at, pose.look_at);
+  camera.shake_lateral = pose.shake_lateral;
+  camera.shake_vertical = pose.shake_vertical;
+  camera.shake_depth = pose.shake_depth;
+  camera.shake_roll = pose.shake_roll;
   camera.roll = pose.roll;
-  camera.nearClip = pose.near_clip;
-  camera.projectionDistance = pose.projection_distance;
-  camera.farClip = pose.far_clip;
+  camera.near_clip = pose.near_clip;
+  camera.projection_distance = pose.projection_distance;
+  camera.far_clip = pose.far_clip;
 }
 
 namespace {
 [[nodiscard]] CameraShakeChannel ChannelOf(
-    const Effects_CameraShakeChannel& channel) {
+    const LiveCameraShakeChannel& channel) {
   return {.phase = channel.phase,
-          .shape_curve = channel.shapeCurve,
-          .curve_step = channel.curveStep != 0,
-          .random_step = channel.randomStep != 0,
-          .step_curve = channel.stepCurve,
-          .random_step_curve = channel.randomStepCurve,
+          .shape_curve = channel.shape_curve,
+          .curve_step = channel.curve_step != 0,
+          .random_step = channel.random_step != 0,
+          .step_curve = channel.step_curve,
+          .random_step_curve = channel.random_step_curve,
           .amplitude = channel.amplitude,
           .angle = channel.angle};
 }
 
-void StoreChannel(Effects_CameraShakeChannel& channel,
+void StoreChannel(LiveCameraShakeChannel& channel,
                   const CameraShakeChannel& value) {
   channel.phase = value.phase;
-  channel.shapeCurve = value.shape_curve & kShapeCurveMask;
-  channel.curveStep = value.curve_step ? 1U : 0U;
-  channel.randomStep = value.random_step ? 1U : 0U;
-  channel.stepCurve = value.step_curve;
-  channel.randomStepCurve = value.random_step_curve;
+  channel.shape_curve = value.shape_curve & kShapeCurveMask;
+  channel.curve_step = value.curve_step ? 1U : 0U;
+  channel.random_step = value.random_step ? 1U : 0U;
+  channel.step_curve = value.step_curve;
+  channel.random_step_curve = value.random_step_curve;
   channel.amplitude = value.amplitude;
   channel.angle = value.angle;
 }
@@ -197,7 +172,7 @@ EffectCameraState LoadLiveEffectCameraState() {
   }
   state.motion_frame = cameraMotionFrame;
   state.camera = LoadLiveEffectCameraPose(effectCamera);
-  state.enabled_channels = static_cast<std::uint8_t>(enabledShakeChannels);
+  state.enabled_channels = enabledShakeChannels;
   for (std::size_t i = 0; i < state.motion_ends.size(); ++i) {
     state.motion_ends.at(i) = LoadLiveEffectCameraPose(cameraMotionEnds[i]);
   }
@@ -213,7 +188,7 @@ void StoreLiveEffectCameraState(const EffectCameraState& state) {
   }
   cameraMotionFrame = state.motion_frame;
   StoreLiveEffectCameraPose(effectCamera, state.camera);
-  enabledShakeChannels = static_cast<char>(state.enabled_channels);
+  enabledShakeChannels = state.enabled_channels;
   for (std::size_t i = 0; i < state.motion_ends.size(); ++i) {
     StoreLiveEffectCameraPose(cameraMotionEnds[i], state.motion_ends.at(i));
   }
@@ -233,7 +208,7 @@ void LiveResetEffectCameraMotion() {
   StoreLiveEffectCameraState(state);
 }
 
-void LiveCaptureEffectCamera(Effects_EffectCamera* camera) {
+void LiveCaptureEffectCamera(LiveEffectCamera* camera) {
   if (camera == nullptr) {
     ReportRefusal("capture", "no camera");
     return;

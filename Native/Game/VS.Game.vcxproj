@@ -2295,10 +2295,8 @@
     <ClInclude Include="src\Boot\GameLoop.hpp" />
     <ClInclude Include="src\Boot\OverlayReset.hpp" />
     <ClInclude Include="src\Boot\PlayerSettings.hpp" />
-    <ClInclude Include="src\Effects\Camera.h" />
     <ClInclude Include="src\Effects\CameraLiveState.hpp" />
     <ClInclude Include="src\Effects\EffectResourcesLiveState.hpp" />
-    <ClInclude Include="src\Effects\Loading.h" />
     <ClInclude Include="src\Effects\Package.h" />
     <ClInclude Include="src\Effects\Particles.h" />
     <ClInclude Include="src\Effects\Plugins\Plg044.hpp" />
@@ -2364,7 +2362,7 @@
     <ClInclude Include="src\Effects\Plugins\Plg300.hpp" />
     <ClInclude Include="src\Effects\Plugins\Plg301.hpp" />
     <ClInclude Include="src\Effects\Plugins\PluginData.hpp" />
-    <ClInclude Include="src\Effects\PurgeTables.h" />
+    <ClInclude Include="src\Effects\PurgeTables.hpp" />
     <ClInclude Include="src\Effects\Runtime.h" />
     <ClInclude Include="src\Effects\ScreenEffects.h" />
     <ClInclude Include="src\Effects\ScreenEffectState.hpp" />

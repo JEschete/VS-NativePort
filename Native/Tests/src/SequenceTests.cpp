@@ -40,7 +40,6 @@
 #include "Battle/TargetingDrawLive.hpp"
 #include "Content/ActorAssetsLive.hpp"
 #include "DiscQueue.h"
-#include "Effects/Camera.h"
 #include "Effects/CameraLiveState.hpp"
 #include "Effects/Runtime.h"
 #include "Event/ScriptActorOpcodes.hpp"
@@ -1023,8 +1022,8 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Actors_ActorRecord* saved_actor[kSlots];
   Field_GimmickInstance* saved_object[kSlots];
   const Effects_ActionEffectRequest saved_request = Effects_actionRequest;
-  const Effects_EffectCamera saved_camera = VS::Effects::effectCamera;
-  const Effects_EffectCamera saved_action_camera =
+  const VS::Effects::LiveEffectCamera saved_camera = VS::Effects::effectCamera;
+  const VS::Effects::LiveEffectCamera saved_action_camera =
       VS::Effects::savedActionCamera;
   Effects_EffectPackage* saved_package = Effects_package;
   const u_int saved_phase = Effects_primaryPhase;

@@ -16,7 +16,8 @@
 namespace VS::Effects {
 inline constexpr int kCameraShakeChannels = 4;
 
-// D_800F54D8_t (5BF94.h:386): a camera pose with its shake offsets.
+// D_800F54D8_t (src/BATTLE/BATTLE.PRG/battleEffect.h:390): a camera pose
+// with its shake offsets.
 struct EffectCameraPose {
   Core::Math::Vec3 position{};
   Core::Math::Vec3 look_at{};
@@ -33,9 +34,9 @@ struct EffectCameraPose {
                          const EffectCameraPose&) = default;
 };
 
-// D_800F54B8_t (5BF94.c:243): one shake channel. `shape_curve` names a
-// segmented curve (five bits); the step and random step are either curve ids
-// sampled at the phase or literal values.
+// D_800F54B8_t (src/BATTLE/BATTLE.PRG/5BF94.c:249): one shake channel.
+// `shape_curve` names a segmented curve (five bits); the step and random step
+// are either curve ids sampled at the phase or literal values.
 struct CameraShakeChannel {
   std::uint8_t phase{};
   std::uint8_t shape_curve{};
